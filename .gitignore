@@ -1,0 +1,22 @@
+# Python Cache & Environments
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+
+# macOS Metadata
+.DS_Store
+
+# Cloud Credentials
+credentials.json
+*.pem
+
+# Pipeline Artifacts
+*.pdf
+*.png
+document_jsons/
+
+# Junk
+*.old
+*.old.*
