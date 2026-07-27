@@ -1,0 +1,249 @@
+# [PRODUCTION]
+import os
+import sys
+import json
+import difflib
+import traceback
+import time
+import fitz  # PyMuPDF
+from google import genai
+from google.genai import types
+
+# =====================================================================
+# CONFIGURATION & TEST DEFAULTS
+# =====================================================================
+TEST_PDF = "test_page.pdf"
+PAGE_INDEX = 0
+
+BASE_TEXT = "דף ערכין ועיין לשום דא\"ר דמשמע"
+WITNESS_TEXT = "דף ערכין ועיין לשום דא\"ק דמשמע"
+
+# =====================================================================
+# PIPELINE FUNCTIONS
+# =====================================================================
+
+def extract_token_bounding_boxes(doc_ai_json, page_idx=0):
+    pages = doc_ai_json.get("pages", [])
+    if not pages or page_idx >= len(pages):
+        return []
+
+    page = pages[page_idx]
+    doc_text = doc_ai_json.get("text", "")
+    extracted_tokens = []
+
+    for token in page.get("tokens", []):
+        layout = token.get("layout", {})
+        text_anchor = layout.get("textAnchor", {})
+        segments = text_anchor.get("textSegments", [])
+
+        token_text = ""
+        for seg in segments:
+            start = int(seg.get("startIndex", 0))
+            end = int(seg.get("endIndex", 0))
+            token_text += doc_text[start:end]
+
+        vertices = layout.get("boundingPoly", {}).get("normalizedVertices", [])
+        if vertices:
+            xs = [v.get("x", 0.0) for v in vertices]
+            ys = [v.get("y", 0.0) for v in vertices]
+            bbox = {
+                "xmin": min(xs),
+                "ymin": min(ys),
+                "xmax": max(xs),
+                "ymax": max(ys)
+            }
+            extracted_tokens.append({
+                "text": token_text.strip(),
+                "bbox": bbox
+            })
+
+    return extracted_tokens
+
+
+def crop_pdf_bounding_box(pdf_path, page_num, bbox, padding=0.02):
+    doc = fitz.open(pdf_path)
+    page = doc.load_page(page_num)
+    rect_page = page.rect
+    width, height = rect_page.width, rect_page.height
+
+    xmin = max(0.0, bbox["xmin"] - padding) * width
+    ymin = max(0.0, bbox["ymin"] - padding) * height
+    xmax = min(1.0, bbox["xmax"] + padding) * width
+    ymax = min(1.0, bbox["ymax"] + padding) * height
+
+    crop_rect = fitz.Rect(xmin, ymin, xmax, ymax)
+    pix = page.get_pixmap(clip=crop_rect, dpi=300)
+    img_bytes = pix.tobytes("png")
+    doc.close()
+    return img_bytes
+
+
+def adjudicate_conflict_with_gemini(crop_bytes, option_a, option_b, full_context):
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        raise ValueError("GEMINI_API_KEY environment variable is missing.")
+
+    client = genai.Client(api_key=api_key)
+
+    prompt = f"""
+You are a structural textual verification engine analyzing a Hebrew character matrix.
+
+Surrounding Sentence Context: "{full_context}"
+
+Evaluate the target raster crop against candidate strings:
+Option A: "{option_a}"
+Option B: "{option_b}"
+
+CONSTRAINTS:
+1. Validate token syntax against standard rabbinic abbreviation schemas (e.g., rejecting structurally invalid or non-existent acronym tokens).
+2. Output "UNCERTAIN" if neither candidate maps deterministically to the pixel array or if semantic constraints are violated.
+
+Respond ONLY with JSON using this structure:
+{{
+  "selected_option": "A" or "B" or "UNCERTAIN",
+  "transcription_found": "exact text visible in image",
+  "confidence": 0.0 to 1.0,
+  "reasoning": "brief visual explanation"
+}}
+"""
+
+    max_retries = 4
+    for attempt in range(max_retries):
+        try:
+            response = client.models.generate_content(
+                model="gemini-3.5-flash",
+                contents=[
+                    types.Part.from_bytes(data=crop_bytes, mime_type="image/png"),
+                    prompt
+                ],
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json"
+                )
+            )
+            return response.text
+            
+        except Exception as e:
+            if "503" in str(e) or "429" in str(e):
+                if attempt < max_retries - 1:
+                    sleep_time = (2 ** attempt) * 2
+                    print(f"  -> API busy (503/429). Backing off for {sleep_time}s (Attempt {attempt + 1}/{max_retries})...")
+                    time.sleep(sleep_time)
+                else:
+                    print("  -> Max retries hit. API is completely saturated.")
+                    raise e
+            else:
+                raise e
+
+
+def align_text_to_tokens(base_words, tokens):
+    token_words = [t["text"] for t in tokens]
+    matcher = difflib.SequenceMatcher(None, base_words, token_words)
+    
+    index_map = {}
+    for tag, i1, i2, j1, j2 in matcher.get_opcodes():
+        if tag == "equal":
+            for k in range(i2 - i1):
+                index_map[i1 + k] = j1 + k
+        elif tag in ("replace", "delete"):
+            for k in range(i2 - i1):
+                index_map[i1 + k] = min(j1 + k, len(tokens) - 1)
+    return index_map
+
+
+def run_pipeline(pdf_path, page_idx, base_text, witness_text, doc_ai_json):
+    print("\n--- [STEP 1] Extracting Spatial Coordinates ---")
+    tokens = extract_token_bounding_boxes(doc_ai_json, page_idx)
+    print(f"Loaded {len(tokens)} spatial tokens from Document AI.")
+
+    base_words = base_text.split()
+    witness_words = witness_text.split()
+    
+    index_map = align_text_to_tokens(base_words, tokens)
+
+    print("\n--- [STEP 2] Diffing Text Streams ---")
+    matcher = difflib.SequenceMatcher(None, base_words, witness_words)
+    opcodes = matcher.get_opcodes()
+
+    conflicts_found = 0
+
+    for tag, i1, i2, j1, j2 in opcodes:
+        if tag in ("replace", "delete", "insert"):
+            conflicts_found += 1
+            base_segment = " ".join(base_words[i1:i2])
+            witness_segment = " ".join(witness_words[j1:j2])
+
+            print(f"\n[Conflict #{conflicts_found}] Tag: '{tag}'")
+            print(f"  Base Reading:    '{base_segment}'")
+            print(f"  Witness Reading: '{witness_segment}'")
+
+            target_bbox = {"xmin": 0.2, "ymin": 0.2, "xmax": 0.8, "ymax": 0.8}
+
+            lookup_idx = i1 if i1 < len(base_words) else max(0, i1 - 1)
+            token_idx = index_map.get(lookup_idx)
+            
+            if token_idx is not None and token_idx < len(tokens):
+                target_bbox = tokens[token_idx]["bbox"]
+                print(f"  Mapped Base index {lookup_idx} -> Token index {token_idx}")
+            else:
+                print("  WARNING: Spatial index map failed. Using fallback bbox.")
+
+            print(f"  Target BBox:     {target_bbox}")
+
+            print("  Cropping PDF region...")
+            crop_bytes = crop_pdf_bounding_box(pdf_path, page_idx, target_bbox)
+
+            print("  Submitting crop to Gemini for visual adjudication...")
+            full_context_str = " ".join(base_words)
+            decision = adjudicate_conflict_with_gemini(crop_bytes, base_segment, witness_segment, full_context_str)
+            print("  Adjudication Result:")
+            print(f"  {decision}")
+
+    if conflicts_found == 0:
+        print("No textual divergences found between base and witness texts.")
+
+
+# =====================================================================
+# DIAGNOSTIC RUNNER (MAIN ENTRY POINT)
+# =====================================================================
+
+if __name__ == "__main__":
+    print("=" * 60, flush=True)
+    print("ORCHESTRATOR DIAGNOSTIC RUNNER", flush=True)
+    print("=" * 60, flush=True)
+
+    json_path = "./document_jsons/test_page-0.json"
+
+    print(f"[1/5] Checking target PDF ('{TEST_PDF}')...", end=" ", flush=True)
+    if not os.path.exists(TEST_PDF):
+        print("FAILED!")
+        sys.exit(1)
+    print("FOUND.", flush=True)
+
+    print(f"[2/5] Checking spatial JSON ('{json_path}')...", end=" ", flush=True)
+    if not os.path.exists(json_path):
+        print("FAILED!")
+        sys.exit(1)
+    print("FOUND.", flush=True)
+
+    print("[3/5] Loading Document AI JSON...", end=" ", flush=True)
+    try:
+        with open(json_path, "r", encoding="utf-8") as f:
+            real_doc_ai_json = json.load(f)
+        print("SUCCESS.", flush=True)
+    except Exception as e:
+        print("FAILED!")
+        sys.exit(1)
+
+    print("[4/5] Checking text streams for conflicts...", flush=True)
+    if BASE_TEXT == WITNESS_TEXT:
+        sys.exit(0)
+
+    print("[5/5] Launching adjudication engine...", flush=True)
+    print("-" * 60, flush=True)
+    try:
+        run_pipeline(TEST_PDF, PAGE_INDEX, BASE_TEXT, WITNESS_TEXT, real_doc_ai_json)
+        print("-" * 60, flush=True)
+        print("ORCHESTRATOR COMPLETE.", flush=True)
+    except Exception as e:
+        traceback.print_exc()
+        sys.exit(1)
