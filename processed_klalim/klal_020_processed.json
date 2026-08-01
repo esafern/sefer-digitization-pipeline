@@ -1,0 +1,24 @@
+{
+  "klal_id": 20,
+  "klal_title": "כלל #20: כ איכא דמותיב מסיפא. מצינו דקאמר בפרקא קמא דבבא מציעא דף ט' א' וכתב ר' בצלאל",
+  "section": "Klalei HaGemara - Otiot (Aleph)",
+  "start_page": 20,
+  "printed_folio": "7",
+  "total_words": 45,
+  "questionable_words_flagged_count": 0,
+  "questionable_words": [],
+  "acronyms_expanded_count": 0,
+  "acronyms_expanded": [],
+  "sefaria_citations_found_count": 1,
+  "sefaria_citations": [
+    {
+      "raw_citation": "בבא מציעא דף נ\"ט ",
+      "tractate_hebrew": "בבא מציעא",
+      "tractate_english": "Bava Metzia",
+      "daf_hebrew": "נ\"ט",
+      "amud": "",
+      "sefaria_uri": "Yad Malachi link -> Sefaria: Bava Metzia.נ\"ט"
+    }
+  ],
+  "processed_text": "כ איכא דמותיב מסיפא. מצינו דקאמר בפרקא קמא דבבא מציעא דף ט' א' וכתב ר' בצלאל\nעל בבא מציעא דף נ\"ט ע\"ג בשם תוס' שאנץ דבקרקעות הים יש אבנים רחבות וחדודו'\nלאו דדלאי לך חספא מי משכחת מרגניתא תותה . פי' ר' בצלאל בשיטתו המקובצת"
+}

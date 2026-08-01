@@ -1,0 +1,31 @@
+{
+  "klal_id": 98,
+  "klal_title": "כלל #98: צח ברייתא דרך בעלי הגמרא לקצר בלשון הברייתות בהרבה מקומות ולשנות בלשון ובלבד",
+  "section": "Klalei HaGemara - Otiot (Bet)",
+  "start_page": 44,
+  "printed_folio": "31",
+  "total_words": 100,
+  "questionable_words_flagged_count": 0,
+  "questionable_words": [],
+  "acronyms_expanded_count": 1,
+  "acronyms_expanded": [
+    {
+      "index": 36,
+      "acronym": "ע\"א",
+      "expansion": "עמוד א",
+      "description": "Folio Side A"
+    }
+  ],
+  "sefaria_citations_found_count": 1,
+  "sefaria_citations": [
+    {
+      "raw_citation": "שבועות כ\"י ",
+      "tractate_hebrew": "שבועות",
+      "tractate_english": "Shevuot",
+      "daf_hebrew": "כ\"י",
+      "amud": "",
+      "sefaria_uri": "Yad Malachi link -> Sefaria: Shevuot.כ\"י"
+    }
+  ],
+  "processed_text": "צח ברייתא דרך בעלי הגמרא לקצר בלשון הברייתות בהרבה מקומות ולשנות בלשון ובלבד\nבמשניות מצינו כן עיין תוס' דעירובין ע\"ח ב' ד\"ה והתנן ובזבחים פ\"ב כ\"ד ב' ד\"ה והרי זריקה *)\nענינו וע\"ע שם דף ר\"ט ע\"א ובראשון לציון דף פ\"ה רע\"ר :\nדף ק\"ס ע\"ג שכתב דגם הש\"ס דרכו לשנות הלשון במימרות האמוראים ולהוסיף פירוש כדי לבאר\nובבכורות כ\"ז ב' וכ\"כ הרמב\"ן בחידושי שבועות כ\"י בפ' שבועת הפקדון ועיין בשיטה מקובצת על ב\"ט\nהוכחה ברורה דלא מחלקינן בהכי הר\"ב ראשון לציון דף נ\"ו ב' :\nדלא טיירי בנדון דאתי עלה תלמודא ולא דחי לה ש\"מ דתלמודא קים ליה מאיזו"
+}

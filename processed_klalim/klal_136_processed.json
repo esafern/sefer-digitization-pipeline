@@ -1,0 +1,39 @@
+{
+  "klal_id": 136,
+  "klal_title": "כלל #136: קלו דחיה למדתי עוד כלל מחודש בזה מדברי הלחם משנה ספ\"א מה' עבודת יום הכפורים",
+  "section": "Klalei HaGemara - Otiot (Dalet)",
+  "start_page": 49,
+  "printed_folio": "36",
+  "total_words": 57,
+  "questionable_words_flagged_count": 0,
+  "questionable_words": [],
+  "acronyms_expanded_count": 1,
+  "acronyms_expanded": [
+    {
+      "index": 54,
+      "acronym": "הרמב\"ם",
+      "expansion": "רבי משה בן מיימון",
+      "description": "Maimonides"
+    }
+  ],
+  "sefaria_citations_found_count": 2,
+  "sefaria_citations": [
+    {
+      "raw_citation": "תמיד כי ",
+      "tractate_hebrew": "תמיד",
+      "tractate_english": "Tamid",
+      "daf_hebrew": "כי",
+      "amud": "",
+      "sefaria_uri": "Yad Malachi link -> Sefaria: Tamid.כי"
+    },
+    {
+      "raw_citation": "שבת דלדעת ",
+      "tractate_hebrew": "שבת",
+      "tractate_english": "Shabbat",
+      "daf_hebrew": "דלדעת",
+      "amud": "",
+      "sefaria_uri": "Yad Malachi link -> Sefaria: Shabbat.דלדעת"
+    }
+  ],
+  "processed_text": "קלו דחיה למדתי עוד כלל מחודש בזה מדברי הלחם משנה ספ\"א מה' עבודת יום הכפורים\nדקושטא הוי כמו הדחיה שמרם על לכך תמיד כי חיים הם למוצאיהם לפסק הלכה:\nדכל דלא דחו לה בדרך דילמא אלא בלעולם אימא לך משמע דקושטא דמילתא הכי\nרחיה למדתי כלל מחודש בזה מדברי הכ\"מ רפ\"ד מה' שבת דלדעת הרמב\"ם אפשר לומר"
+}

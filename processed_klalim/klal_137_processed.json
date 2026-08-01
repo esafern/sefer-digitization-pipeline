@@ -1,0 +1,71 @@
+{
+  "klal_id": 137,
+  "klal_title": "כלל #137: דחיה בעלמא היא ויש לתמוה על הכ\"מ שהרי הוא בעצמו רמז לתשוב' הרשב\"א הלזו בסוף פ\"ב מה'",
+  "section": "Klalei HaGemara - Otiot (Dalet)",
+  "start_page": 49,
+  "printed_folio": "36",
+  "total_words": 139,
+  "questionable_words_flagged_count": 0,
+  "questionable_words": [],
+  "acronyms_expanded_count": 5,
+  "acronyms_expanded": [
+    {
+      "index": 29,
+      "acronym": "הרמב\"ם",
+      "expansion": "רבי משה בן מיימון",
+      "description": "Maimonides"
+    },
+    {
+      "index": 50,
+      "acronym": "ע\"א",
+      "expansion": "עמוד א",
+      "description": "Folio Side A"
+    },
+    {
+      "index": 61,
+      "acronym": "כנ\"הג",
+      "expansion": "כנסת הגדולה",
+      "description": "Knesset HaGedolah"
+    },
+    {
+      "index": 96,
+      "acronym": "ע\"ב",
+      "expansion": "עמוד ב",
+      "description": "Folio Side B"
+    },
+    {
+      "index": 136,
+      "acronym": "פ\"א",
+      "expansion": "פרק ראשון",
+      "description": "First Chapter"
+    }
+  ],
+  "sefaria_citations_found_count": 3,
+  "sefaria_citations": [
+    {
+      "raw_citation": "יומא ר\"פ ",
+      "tractate_hebrew": "יומא",
+      "tractate_english": "Yoma",
+      "daf_hebrew": "ר\"פ",
+      "amud": "",
+      "sefaria_uri": "Yad Malachi link -> Sefaria: Yoma.ר\"פ"
+    },
+    {
+      "raw_citation": "בכורות ע\"ש ",
+      "tractate_hebrew": "בכורות",
+      "tractate_english": "Bekhorot",
+      "daf_hebrew": "ע\"ש",
+      "amud": "",
+      "sefaria_uri": "Yad Malachi link -> Sefaria: Bekhorot.ע\"ש"
+    },
+    {
+      "raw_citation": "שבת דלעולם ",
+      "tractate_hebrew": "שבת",
+      "tractate_english": "Shabbat",
+      "daf_hebrew": "דלעולם",
+      "amud": "",
+      "sefaria_uri": "Yad Malachi link -> Sefaria: Shabbat.דלעולם"
+    }
+  ],
+  "processed_text": "קלז\nדחיה בעלמא היא ויש לתמוה על הכ\"מ שהרי הוא בעצמו רמז לתשוב' הרשב\"א הלזו בסוף פ\"ב מה'\nאיתיה ע\"ש . אמנם מצאתי בתשובה להרשב\"א סימן שי\"א שכתב לדעת הרמב\"ם דלעולם אימא לך\nהכי הוי ומשום כבודו הוא דקאמר ליה הכי יע\"ש :\nשוב מצאתי להר\"ן בפ\"ב דגיטין דף תקס\"ג ע\"א שכתב דאע\"ג דבלשון דילמא קאמר קושטא דמלתא\nעומד והביאו בשיירי כנ\"הג בכללים נפרדים כלל ל' וכן ראיתי להריטב\"א בחי ' יומא ר\"פ בא לו כ\"ג\nכל היכא דקאמר תלמודא שאני הכא ולא אמר דילמא פסיק הוא כלישנא דתלמודא אף ע\"פ שאינו\nעוד להכנ\"הג בי\"ד סי' ע\"ב הגהות הב\"י אות ו' שכתב בשם רש\"ל והר\"י מקרעמניץ ז\"ל דלדעת ר\"ת\nבכורות ע\"ש וכן מצאתי להר\"ב לחם משנה רפ\"ד מה' שבת דלעולם אימא לך מקרי דחיה ומצאתי\n1\nנערו'ל\"ו א' וביומא ל' ב'הביאו דבריו בעל ה\"ע בשער ב' פ\"א ומוהרי\"קא שם"
+}

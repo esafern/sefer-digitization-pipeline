@@ -1,0 +1,22 @@
+{
+  "klal_id": 95,
+  "klal_title": "כלל #95: צה בעיא דקאמר בה לדברי האומר וכו' מהו משמע דאין הלכה כמותו לא לדבריו הוא דקא",
+  "section": "Klalei HaGemara - Otiot (Bet)",
+  "start_page": 43,
+  "printed_folio": "30",
+  "total_words": 32,
+  "questionable_words_flagged_count": 0,
+  "questionable_words": [],
+  "acronyms_expanded_count": 1,
+  "acronyms_expanded": [
+    {
+      "index": 29,
+      "acronym": "הרמב\"ם",
+      "expansion": "רבי משה בן מיימון",
+      "description": "Maimonides"
+    }
+  ],
+  "sefaria_citations_found_count": 0,
+  "sefaria_citations": [],
+  "processed_text": "צה בעיא דקאמר בה לדברי האומר וכו' מהו משמע דאין הלכה כמותו לא לדבריו הוא דקא\nוכך או לא למדנו הב\"ח בח\"מ רסי ' ר\"ב לדקדק בשינוי הלשון לדעת הרמב\"ם וז\"ל שם"
+}

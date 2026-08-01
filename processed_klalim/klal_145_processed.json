@@ -1,0 +1,53 @@
+{
+  "klal_id": 145,
+  "klal_title": "כלל #145: קמה דורשין תחלות • פלוגתא דתנאי היא בריש סנהדרין ע\"ש וראיתי להר\"ן בחידושיו שם",
+  "section": "Klalei HaGemara - Otiot (Dalet)",
+  "start_page": 52,
+  "printed_folio": "39",
+  "total_words": 126,
+  "questionable_words_flagged_count": 0,
+  "questionable_words": [],
+  "acronyms_expanded_count": 2,
+  "acronyms_expanded": [
+    {
+      "index": 84,
+      "acronym": "הרמב\"ם",
+      "expansion": "רבי משה בן מיימון",
+      "description": "Maimonides"
+    },
+    {
+      "index": 120,
+      "acronym": "ע\"ב",
+      "expansion": "עמוד ב",
+      "description": "Folio Side B"
+    }
+  ],
+  "sefaria_citations_found_count": 3,
+  "sefaria_citations": [
+    {
+      "raw_citation": "סנהדרין ע\"ש ",
+      "tractate_hebrew": "סנהדרין",
+      "tractate_english": "Sanhedrin",
+      "daf_hebrew": "ע\"ש",
+      "amud": "",
+      "sefaria_uri": "Yad Malachi link -> Sefaria: Sanhedrin.ע\"ש"
+    },
+    {
+      "raw_citation": "ברכות\nולי ",
+      "tractate_hebrew": "ברכות",
+      "tractate_english": "Berakhot",
+      "daf_hebrew": "ולי",
+      "amud": "",
+      "sefaria_uri": "Yad Malachi link -> Sefaria: Berakhot.ולי"
+    },
+    {
+      "raw_citation": "בכורות מ\"ט ע\"ב",
+      "tractate_hebrew": "בכורות",
+      "tractate_english": "Bekhorot",
+      "daf_hebrew": "מ\"ט",
+      "amud": "ע\"ב",
+      "sefaria_uri": "Yad Malachi link -> Sefaria: Bekhorot.מ\"טע\"ב"
+    }
+  ],
+  "processed_text": "קמה דורשין תחלות • פלוגתא דתנאי היא בריש סנהדרין ע\"ש וראיתי להר\"ן בחידושיו שם\nבערוך ערך ספק:\nי\"ט ב' וגם מצינו לשון קפיצה בחיה דתרגום לנתר בהם על הארץ לקפצא בהון על ארעא ועיין\nאדלג שור ובצפניה א' כל הדולג על המפתן ובלשון חכמים מדלגין היינו על גבי ארונות ברכות\nולי הדיוט לא נהירא דמצינו שניהם גבי אדם מדלג על ההרים מקפץ על הגבעות וכן ובאלהי\nדקיפוץ שתי רגליו כאחד, אך הר\"ש כתב שם דדולג שייך בחיה ובאדם שייך לשון קופץ\nב' רגליו וקופץ הרמב\"ם והרא\"ש פרק ח' דאהלות מ\"ה וכן מצאתי בירושלמי פרק משילין\nסליקו כללי הדלת\nבס\"ד כללי ההא\nכלל מוסכם מכולהו אמוראי מדקאמר ואף על גב דקי\"ל כרב באיסורי\nכותיה דשמואל בדיני לגבי רב . בכורות מ\"ט ע\"ב וכפי הנראה שם הוא\nהלכתא"
+}

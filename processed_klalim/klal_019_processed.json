@@ -1,0 +1,59 @@
+{
+  "klal_id": 19,
+  "klal_title": "כלל #19: יט אסמכתא",
+  "section": "Klalei HaGemara - Otiot (Aleph)",
+  "start_page": 20,
+  "printed_folio": "7",
+  "total_words": 211,
+  "questionable_words_flagged_count": 0,
+  "questionable_words": [],
+  "acronyms_expanded_count": 3,
+  "acronyms_expanded": [
+    {
+      "index": 18,
+      "acronym": "ע\"א",
+      "expansion": "עמוד א",
+      "description": "Folio Side A"
+    },
+    {
+      "index": 59,
+      "acronym": "פ\"ג",
+      "expansion": "פרק שלישי",
+      "description": "Third Chapter"
+    },
+    {
+      "index": 110,
+      "acronym": "הרמב\"ם",
+      "expansion": "רבי משה בן מיימון",
+      "description": "Maimonides"
+    }
+  ],
+  "sefaria_citations_found_count": 3,
+  "sefaria_citations": [
+    {
+      "raw_citation": "בבא מציעא דף ק\"מ ",
+      "tractate_hebrew": "בבא מציעא",
+      "tractate_english": "Bava Metzia",
+      "daf_hebrew": "ק\"מ",
+      "amud": "",
+      "sefaria_uri": "Yad Malachi link -> Sefaria: Bava Metzia.ק\"מ"
+    },
+    {
+      "raw_citation": "יומא\nלכלל ",
+      "tractate_hebrew": "יומא",
+      "tractate_english": "Yoma",
+      "daf_hebrew": "לכלל",
+      "amud": "",
+      "sefaria_uri": "Yad Malachi link -> Sefaria: Yoma.לכלל"
+    },
+    {
+      "raw_citation": "עירובין כ\"ג ב",
+      "tractate_hebrew": "עירובין",
+      "tractate_english": "Eruvin",
+      "daf_hebrew": "כ\"ג",
+      "amud": "ב",
+      "sefaria_uri": "Yad Malachi link -> Sefaria: Eruvin.כ\"גב"
+    }
+  ],
+  "processed_text": "יט אסמכתא\nולי אני הדיוט צריך תלמוד בתו' דיומא דף ד' דיבור המתחיל נכנסו שכתבו דדרשה\nדף ק\"ג ע\"א •\nלר' בצלאל בשיטה מקובצת על בבא מציעא דף ק\"מ ע\"יד וכן כתב בעל קול הרמ\"ז על המשניות\nדרשה ולאו אסמכתא מדדריש נמי מקרא טעמא דר' יהודה דאמר בסיפא ששה ע\"ש . וכן מצאתי\nולדידי אפשר דלזה נתכוון הר\"ש בריש פ\"ג דכלאים במ\"ש ובהדיא מוכח בירושלמי דקרא עיקר\nוכן מצאתי להתוס' גופייהו בפרק מי שמת קמ\"ז א' דיבור חמתחיל מנין שכתבו דאשכחן גבי\nכל היד ט\"ז ב' דקאמר תלמודא מאי קראה שהיא אסמכתא כידוע • שקיל וטרי בהו הש\"ס ע\"ש\nילפי לסתם נזירות שלשים יום הגם דאסמכתא אינון כמו שכתב שם הרמב\"ם בפירושו וכן בפרק\nטובא התם וכן בפרקא קמא דנזיר ה' א' תלמודא שקיל וטרי על קראי דרב מתנא ובר פדא דמינייהו\nדכאשר עשה כיום הזה צוה ה' כו' אסמכתא היא ועינינו הרואות דשקיל וטרי בה תלמודא\nדרשא גמורה היא ושכן מוכח מהירושלמי :\nשוב ראיתי בספר מים חיים להפרי חדש דף כ\"ח ע\"ג שכתב דההיא דריש יומא\nלכלל יישוב •\nאסמכתא דשקיל וטרי עלה תלמודא יע\"ש ועיין עוד תוס' עירובין כ\"ג ב' ד\"ה פשטיה וכעת לא באתי\nלשמואל אלא לשון עניה פירוש איכא דמשיב מדסיפא :\nבשיטתו שם בשם תלמיד הר\"ף שכתב בשם ריבין דאין זה תיובתא שהרי סיוע הוא"
+}
