@@ -87,13 +87,14 @@ def rebuild():
         first_word = words[0] if words else to_gematria(idx)
         title = ' '.join(words[1:6]) if len(words) > 1 else text
         sec = get_section_for_id(idx)
+        page_num = 14 + int((idx - 1) * 50.0 / 667.0)
         item = {
             'klal_id': idx,
             'gematria': to_gematria(idx),
             'section': sec,
             'title': title,
             'clean_text': text,
-            'page': (idx // 15) + 13
+            'page': page_num
         }
         all_klalim_data.append(item)
 

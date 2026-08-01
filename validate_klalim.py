@@ -39,6 +39,16 @@ def validate():
         with open(os.path.join(aligned_dir, filename), "r") as f:
             all_klalim.extend(json.load(f))
             
+    # Deduplicate all_klalim by klal_id
+    seen_ids = set()
+    unique_klalim = []
+    for k in all_klalim:
+        kid = k.get("klal_id")
+        if kid not in seen_ids:
+            seen_ids.add(kid)
+            unique_klalim.append(k)
+    all_klalim = unique_klalim
+
     errors = []
     
     # Group by section
