@@ -27,7 +27,7 @@ for tok in tokens:
         
     # 2. Triple repeated letters
     if re.search(r'(.)\1\1', clean_w):
-        if clean_w in ['מממון', 'מממונא']:  # Valid prefixed form: מ-מממון / מ-מממונא
+        if clean_w in ['מממון', 'מממונא', 'בבבל']:  # Valid prefixed form: מ-מממון / מ-מממונא / ב-בבל
             pass
         elif is_acronym:  # e.g., כמהרר"ר
             pass
@@ -35,9 +35,16 @@ for tok in tokens:
             reasons.append('Triple identical consecutive letters')
             
     # 3. Non-sofit letter at end of word without abbreviation quote
-    gematria_numerals = {'כ', 'מ', 'נ', 'פ', 'צ', 'קכ', 'קמ', 'קנ', 'קפ', 'קצ'}
+    # Allow all valid Hebrew Gematria numerals and common Rabbinic citations (בפ, דפ, רפ, etc.)
+    rabbinic_abbrevs = {'בפ', 'דפ', 'רפ', 'שכ', 'שמ', 'שנ', 'שפ', 'שצ'}
+    gematria_numerals = {
+        'כ', 'מ', 'נ', 'פ', 'צ', 'קכ', 'קמ', 'קנ', 'קפ', 'קצ',
+        'רכ', 'רמ', 'רנ', 'רפ', 'רצ', 'שכ', 'שמ', 'שנ', 'שפ', 'שצ',
+        'תכ', 'תמ', 'תנ', 'תפ', 'תצ', 'תקכ', 'תקמ', 'תקנ', 'תקפ', 'תקצ',
+        'תרכ', 'תרמ', 'תרנ'
+    }
     if len(clean_w) > 1 and clean_w[-1] in non_sofit:
-        if not is_acronym and clean_w not in gematria_numerals:
+        if not is_acronym and clean_w not in gematria_numerals and clean_w not in rabbinic_abbrevs:
             reasons.append('Non-sofit letter at end of unquoted word')
 
     if reasons:
