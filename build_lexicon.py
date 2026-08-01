@@ -35,8 +35,9 @@ for tok in tokens:
             reasons.append('Triple identical consecutive letters')
             
     # 3. Non-sofit letter at end of word without abbreviation quote
+    gematria_numerals = {'כ', 'מ', 'נ', 'פ', 'צ', 'קכ', 'קמ', 'קנ', 'קפ', 'קצ'}
     if len(clean_w) > 1 and clean_w[-1] in non_sofit:
-        if not is_acronym:
+        if not is_acronym and clean_w not in gematria_numerals:
             reasons.append('Non-sofit letter at end of unquoted word')
 
     if reasons:
