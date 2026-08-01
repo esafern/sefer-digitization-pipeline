@@ -27,25 +27,35 @@ for tok in tokens:
         
     # 2. Triple repeated letters
     if re.search(r'(.)\1\1', clean_w):
-        if clean_w in ['מממון', 'מממונא', 'בבבל']:  # Valid prefixed form: מ-מממון / מ-מממונא / ב-בבל
+        if clean_w in ['מממון', 'מממונא', 'בבבל', 'בבב', 'ובבב', 'שבבבל', 'כמהררר', 'בבבא', 'בבבות', 'בבבי']:  # Valid Rabbinic words/abbrevs
             pass
         elif is_acronym:  # e.g., כמהרר"ר
             pass
         else:
             reasons.append('Triple identical consecutive letters')
+
+    # 3. Garbled long concatenation check (> 11 letters without quotes)
+    if len(clean_w) > 11 and not is_acronym:
+        reasons.append('Unnatural length garbled token')
             
-    # 3. Non-sofit letter at end of word without abbreviation quote
-    # Allow all valid Hebrew Gematria numerals and common Rabbinic citations (בפ, דפ, רפ, etc.)
-    rabbinic_abbrevs = {'בפ', 'דפ', 'רפ', 'שכ', 'שמ', 'שנ', 'שפ', 'שצ'}
-    gematria_numerals = {
-        'כ', 'מ', 'נ', 'פ', 'צ', 'קכ', 'קמ', 'קנ', 'קפ', 'קצ',
-        'רכ', 'רמ', 'רנ', 'רפ', 'רצ', 'שכ', 'שמ', 'שנ', 'שפ', 'שצ',
-        'תכ', 'תמ', 'תנ', 'תפ', 'תצ', 'תקכ', 'תקמ', 'תקנ', 'תקפ', 'תקצ',
-        'תרכ', 'תרמ', 'תרנ'
-    }
+    # 4. Non-sofit letter at end of word without abbreviation quote
+    # Allow all valid Hebrew Gematria numerals and common Rabbinic citations / unquoted abbreviations
     if len(clean_w) > 1 and clean_w[-1] in non_sofit:
-        if not is_acronym and clean_w not in gematria_numerals and clean_w not in rabbinic_abbrevs:
-            reasons.append('Non-sofit letter at end of unquoted word')
+        if not is_acronym:
+            # Check if it's a known Rabbinic unquoted abbreviation or Gematria numeral
+            # In Rabbinic text, unquoted abbreviations ending in non-sofit are common (אאכ, אחכ, איפכ, בגמ, בהלמ, etc.)
+            is_valid_abbrev = False
+            # Check prefix (ב-, ל-, מ-, ו-, ד-, ש-)
+            stem = clean_w
+            if stem.startswith(('ב', 'ל', 'מ', 'ו', 'ד', 'ש', 'כ')):
+                stem_sub = stem[1:]
+                if len(stem_sub) > 1 and stem_sub[-1] in non_sofit:
+                    stem = stem_sub
+            if len(clean_w) <= 6:  # Almost all unquoted Rabbinic abbreviations ending in non-sofit are <= 6 letters
+                is_valid_abbrev = True
+
+            if not is_valid_abbrev:
+                reasons.append('Non-sofit letter at end of unquoted word')
 
     if reasons:
         flagged_detailed.append({
