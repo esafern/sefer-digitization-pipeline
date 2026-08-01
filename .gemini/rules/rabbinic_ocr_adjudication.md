@@ -21,3 +21,12 @@ description: Enforce direct LLM linguistic adjudication, visual PDF image verifi
   - Exact file paths used (e.g., `full_text_cleaned_goal.txt`, `lexicon.txt`, `page_21.png`).
   - Tools and method applied.
   - Step-by-step adjudication work.
+
+## 5. Strict Obeying of Direct LLM Analysis Directives
+- When the user explicitly requests an LLM linguistic scan or review (e.g. *"use LLM, not regex"*), NEVER substitute deterministic Python regex scripts or heuristic code shortcuts.
+- Pass text tokens directly through the LLM context to evaluate Rabbinic Hebrew/Aramaic morphology, root structures, prefixes, suffixes, and acronyms.
+
+## 6. Mandatory Rendered UI & Header Verification
+- Never declare success based solely on programmatic pass/fail scripts (e.g., regex matching `words[0]`).
+- Inspect rendered HTML/UI text cards and master text files directly to verify that Klal 1 (`א`) opens cleanly with its authentic text and that section headings (e.g. `כללי האלף`) never leak into item content arrays as line 0 offsets.
+
