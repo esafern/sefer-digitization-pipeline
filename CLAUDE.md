@@ -74,17 +74,23 @@ in the canonical text files. Concretely:
   been worked on from both Claude Code and Gemini CLI, so check both when
   looking for standing directives.
 
-## Known loose ends (not yet cleaned up)
+## Open items
 
-- `orchestrator.py.orig`, `orchestrator.py.prev`, `orchestrator.py.rej`, and
-  `update.patch` are tracked at root — leftovers from an interrupted `patch`
-  application (`.rej` = patch reject file). They're stale and not read by any
-  code path; worth a deliberate cleanup commit rather than a silent delete.
-- The many pre-existing tracked one-off scripts at root (`fix_1_line_offset_and_rebuild.py`,
-  `fix_klal_74_stitching.py`, `build_full_pristine_667.py`, etc.) follow the
-  same disposable-patch pattern as what got moved into `archive/` — they
-  predate that cleanup and weren't touched, since reorganizing already-tracked
-  history is a bigger call than tidying untracked files.
+- **Rigorous (vision-confidence-scored) review currently covers Part 1 only**
+  (klal 1–222, the range with scan+bbox data). Parts 2 and 3 have no linked
+  scan images or word bounding boxes yet, so no vision-adjudicated confidence
+  scores exist for them — corrections there are unverified against the source
+  scan until that data is built out.
+- The review UI (`review.html`, renamed from `SEFARIA-BERLIN-DEMO.html`) is a
+  work in progress: 3-pane layout (scan-highlight left / full text middle /
+  abridged klal nav right), with per-word corrections + confidence surfaced
+  for human review.
+- The many pre-existing tracked one-off scripts at root
+  (`fix_1_line_offset_and_rebuild.py`, `fix_klal_74_stitching.py`,
+  `build_full_pristine_667.py`, etc.) follow the same disposable-patch pattern
+  as what got moved into `archive/` — they predate that cleanup and weren't
+  touched, since reorganizing already-tracked history is a bigger call than
+  tidying untracked files.
 
 ## Conventions observed
 
