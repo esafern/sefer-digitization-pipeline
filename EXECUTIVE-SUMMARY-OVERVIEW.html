@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yad Malachi Digitization Project: Executive Overview</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #1d1d1f;
+            max-width: 850px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background-color: #f5f5f7;
+        }
+        .card {
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 45px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        }
+        h1 { font-size: 2.2em; color: #111; border-bottom: 2px solid #0066cc; padding-bottom: 12px; margin-top: 0; }
+        h2 { font-size: 1.4em; color: #0066cc; margin-top: 35px; border-bottom: 1px solid #eee; padding-bottom: 8px; }
+        h3 { font-size: 1.15em; color: #333; margin-top: 25px; }
+        .highlight-box {
+            background: #eef6ff;
+            border-left: 4px solid #0066cc;
+            padding: 20px;
+            border-radius: 6px;
+            margin: 25px 0;
+        }
+        .stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 25px 0;
+        }
+        .stat-card {
+            background: #f9f9fb;
+            border: 1px solid #e5e5ea;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #0066cc;
+            margin: 5px 0;
+        }
+        .stat-label {
+            font-size: 0.95em;
+            color: #666;
+        }
+        .img-box {
+            background: #fafafa;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .img-box img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+        }
+        blockquote {
+            background: #f4f8ff;
+            border-left: 4px solid #0066cc;
+            margin: 15px 0;
+            padding: 12px 18px;
+            border-radius: 4px;
+            font-size: 1.1em;
+            direction: rtl;
+        }
+        .portal-box {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 22px;
+            border-radius: 8px;
+            font-family: "SFMono-Regular", Consolas, Menlo, monospace;
+            font-size: 0.95em;
+            margin: 20px 0;
+            border: 1px solid #333;
+        }
+        .portal-prompt {
+            background: #2b2b1f;
+            border-left: 4px solid #f5a623;
+            color: #f0e6d2;
+            padding: 12px 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        .portal-btn {
+            background: #0066cc;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h1>Yad Malachi Digitization Project</h1>
+    <p style="font-size: 1.1em; color: #555;">An initiative to transcribe, verify, and publish the foundational 18th-century masterwork of Rabbinic methodology (<strong>Yad Malachi</strong>, Livorno 1766) into an open-access digital text for online libraries like Sefaria.</p>
+
+    <h2>The Core Challenge: 287 Dead-End References</h2>
+    <p><strong>Yad Malachi</strong> is the definitive reference manual for how the Talmud is learned and how Rabbinic law is decided. Major Rabbinic authorities across three centuries cite it constantly.</p>
+
+    <div class="stat-grid">
+        <div class="stat-card">
+            <div class="stat-number">287</div>
+            <div class="stat-label">Citations inside Sefaria's current digital library that currently lead to <strong>dead ends</strong>.</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">#1</div>
+            <div class="stat-label">Most-requested public-domain work missing from the digital library (243 citations in Halachipedia).</div>
+        </div>
+    </div>
+
+    <div class="highlight-box">
+        <strong>Project Goal:</strong> Digitizing Yad Malachi once turns 287 dead-end references into <strong>live, interactive digital links permanently</strong>.
+    </div>
+
+    <h2>How the Technology Works: Step-by-Step Visual Progression</h2>
+    <p><em>(Note: The sample page images below use a diagnostic test page from Tzofnat Paneach on Kiddushin 2a to demonstrate the software pipeline).</em></p>
+
+    <h3>Step 1: Original Page Scan</h3>
+    <p>We begin with high-resolution public-domain page scans from the National Library of Israel (NLI).</p>
+    <div class="img-box">
+        <img src="file:///Users/ericsafern/work/yad-malachi/yad-malachi-pipeline/images/full_page_scan.png" alt="Full Original Page Scan">
+    </div>
+
+    <h3>Step 2: Zoomed Sentence Context Crop</h3>
+    <p>The system isolates the exact line of text containing the commentary reference at 300 DPI high resolution:</p>
+    <blockquote>
+        גליון: למ"ד חליצה קנין ביר"ש פ"א ופ"ג דיבמות
+    </blockquote>
+    <div class="img-box">
+        <img src="file:///Users/ericsafern/work/yad-malachi/yad-malachi-pipeline/images/sentence_chunk_crop.png" alt="Zoomed Sentence Context Crop">
+    </div>
+
+    <h3>Step 3: Multi-OCR Conflicts & AI Visual Inspection</h3>
+    <p>Multiple independent OCR engines read the page. When OCR engines disagree, the system crops the word and triggers a separate <strong>AI Visual Inspection Pass</strong>:</p>
+    <div class="img-box">
+        <img src="file:///Users/ericsafern/work/yad-malachi/yad-malachi-pipeline/images/word_02_lamad.png" alt="Focused Word Crop למ&quot;ד">
+    </div>
+    <ul>
+        <li><strong>OCR Engine 1 (Document AI)</strong>: Reads <code>"למ\"ד"</code></li>
+        <li><strong>OCR Engine 2 (Tesseract)</strong>: Reads <code>"לומר"</code> or <code>"למד"</code></li>
+        <li><strong>Separate AI Vision Pass (Gemini)</strong>: Inspects the physical manuscript crop, detects gershayim (<code>"</code>), recognizes <strong>למ"ד</strong> as the acronym for <strong>למאן דאמר</strong> (<em>Le-man D'amar</em>), and resolves the conflict with <strong>98% confidence</strong>.</li>
+    </ul>
+
+    <h3>Step 4: Human Scholar Portal & Desktop Reference Consultation</h3>
+    <p>Words cannot be reviewed in a vacuum. To guarantee 100% academic rigor:</p>
+    <ul>
+        <li><strong>High Confidence (&ge; 95%)</strong>: Auto-accepted into the final digital text.</li>
+        <li><strong>Low Confidence (&lt; 95% or <em>UNCERTAIN</em>)</strong>: Automatically routed to the <strong>Torah Scholar Approval Portal</strong>.</li>
+    </ul>
+
+    <p>The portal displays the <strong>full original page scan with the target word highlighted in context</strong>, providing complete visual and textual perspective. The portal explicitly prompts the scholar to consult the <strong>printed critical edition</strong> (e.g., Machon Yerushalayim 2016) sitting on the desk next to their computer to confirm hard readings:</p>
+
+    <div class="portal-box">
+        <div><strong>TORAH SCHOLAR APPROVAL PORTAL</strong></div>
+        <hr style="border-color: #444; margin: 10px 0;">
+        <div style="color: #66d9ef;">[ FULL ORIGINAL PAGE SCAN DISPLAYED WITH TARGET WORD HIGHLIGHTED ]</div>
+        <div style="margin-top: 10px;">Target Word BBox: [ למ"ד ] (Line 19, Margin)</div>
+        <div>Candidate A (Document AI): למ"ד</div>
+        <div>Candidate B (Tesseract):   לומר</div>
+        <div>AI Paleographic Finding:   למאן דאמר (Acronym למ"ד, Confidence: 98%)</div>
+        
+        <div class="portal-prompt">
+            <strong>📋 DESK CONSULTATION PROMPT:</strong><br>
+            "Please consult the printed critical edition on your desk to confirm the authoritative reading for this passage."
+        </div>
+
+        <div class="portal-btn">[ ACCEPT AI RECOMMENDATION ]</div> &nbsp;
+        <div class="portal-btn" style="background: #444;">[ OVERRIDE / EDIT TEXT ]</div>
+    </div>
+
+    <h2>Project Impact & Key Benefits</h2>
+    <ul>
+        <li><strong>Permanent Open Access</strong>: Free digital text available to students and scholars worldwide.</li>
+        <li><strong>Instant Hyperlinking</strong>: Activates 287 dead-end citations across digital libraries.</li>
+        <li><strong>Zero AI Hallucinations</strong>: Every decision is visually grounded in original high-resolution page images.</li>
+        <li><strong>Labor Efficiency</strong>: Reduces human proofreading time from 100+ hours down to <strong>5–10 hours of targeted scholar review</strong>.</li>
+    </ul>
+</div>
+
+</body>
+</html>

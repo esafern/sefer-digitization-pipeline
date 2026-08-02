@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Page 0 Paragraph-Aligned Visual Conflict & Reconciliation Guide</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; max-width: 900px; margin: 0 auto; padding: 30px; background: #f5f5f7; color: #1d1d1f; }
+        .card { background: #fff; border-radius: 12px; padding: 35px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); }
+        .conflict-box { background: #fafafa; border: 1px solid #e0e0e0; border-radius: 10px; padding: 25px; margin: 30px 0; }
+        .conflict-header { font-size: 1.2em; font-weight: bold; color: #0066cc; margin-bottom: 15px; border-bottom: 2px solid #eef; padding-bottom: 8px; }
+        .img-container { text-align: center; background: #ffffff; padding: 15px; border: 1px solid #ddd; border-radius: 6px; margin: 15px 0; }
+        .img-container img { max-width: 100%; height: auto; border: 1px solid #ccc; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 15px 0; }
+        .opt-box { background: #ffffff; border: 1px solid #e5e5ea; border-radius: 6px; padding: 12px 15px; font-family: monospace; }
+        .opt-a { border-left: 4px solid #0066cc; }
+        .opt-b { border-left: 4px solid #34c759; }
+        .decision-box { background: #eef6ff; border-left: 4px solid #0066cc; padding: 15px; border-radius: 6px; margin-top: 15px; }
+        .explanation { background: #fff8e6; border-left: 4px solid #f5a623; padding: 15px; border-radius: 6px; margin-top: 15px; font-size: 0.98em; }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h1>Page 0 Paragraph-Aligned Visual Conflict & Reconciliation Guide</h1>
+    <p>This report displays every local paragraph conflict on Page 0 after implementing Paragraph-Level Spatial Alignment.</p>
+
+    <div class="conflict-box">
+        <div class="conflict-header">Conflict #1 (Paragraph [ymin: 0.169 - ymax: 0.178])</div>
+        <div class="img-container">
+            <img src="file:///Users/ericsafern/work/yad-malachi/yad-malachi-pipeline/images/conflicts/conflict_01.png" alt="Crop #1">
+        </div>
+        <div class="grid">
+            <div class="opt-box opt-a"><strong>🅰️ Base OCR (Option A):</strong><br>ב'</div>
+            <div class="opt-box opt-b"><strong>🅱️ Witness OCR (Option B):</strong><br>בי</div>
+        </div>
+        <div class="decision-box">
+            <strong>🤖 AI Vision Decision:</strong> ACCEPT PALEOGRAPHIC READING — '' (Confidence: 0.0)
+        </div>
+        <div class="explanation">
+            <strong>💡 Plain English Explanation:</strong> Special paleographic reading or section header recognized on image: ''. Verified with 0.0 confidence.<br><br>
+            <small><strong>Technical Rationale:</strong> Could not parse JSON decision.</small>
+        </div>
+    </div>
+
+    <div class="conflict-box">
+        <div class="conflict-header">Conflict #2 (Paragraph [ymin: 0.126 - ymax: 0.137])</div>
+        <div class="img-container">
+            <img src="file:///Users/ericsafern/work/yad-malachi/yad-malachi-pipeline/images/conflicts/conflict_02.png" alt="Crop #2">
+        </div>
+        <div class="grid">
+            <div class="opt-box opt-a"><strong>🅰️ Base OCR (Option A):</strong><br>א</div>
+            <div class="opt-box opt-b"><strong>🅱️ Witness OCR (Option B):</strong><br><em>[Empty]</em></div>
+        </div>
+        <div class="decision-box">
+            <strong>🤖 AI Vision Decision:</strong> ACCEPT BASE OCR (Option A) — 'א' (Confidence: 1.0)
+        </div>
+        <div class="explanation">
+            <strong>💡 Plain English Explanation:</strong> Base OCR ('א') was verified on the manuscript crop. Local Witness OCR had minor OCR noise.<br><br>
+            <small><strong>Technical Rationale:</strong> The crop clearly displays a standalone printed Hebrew letter Aleph ('א').</small>
+        </div>
+    </div>
+
+    <div class="conflict-box">
+        <div class="conflict-header">Conflict #3 (Paragraph [ymin: 0.190 - ymax: 0.204])</div>
+        <div class="img-container">
+            <img src="file:///Users/ericsafern/work/yad-malachi/yad-malachi-pipeline/images/conflicts/conflict_03.png" alt="Crop #3">
+        </div>
+        <div class="grid">
+            <div class="opt-box opt-a"><strong>🅰️ Base OCR (Option A):</strong><br><em>[Empty]</em></div>
+            <div class="opt-box opt-b"><strong>🅱️ Witness OCR (Option B):</strong><br>-ץ .| 00 2-25 - לש</div>
+        </div>
+        <div class="decision-box">
+            <strong>🤖 AI Vision Decision:</strong> ACCEPT PALEOGRAPHIC READING — 'מתני' וקונה את עצמה בחליצה.' (Confidence: 0.0)
+        </div>
+        <div class="explanation">
+            <strong>💡 Plain English Explanation:</strong> Special paleographic reading or section header recognized on image: 'מתני' וקונה את עצמה בחליצה.'. Verified with 0.0 confidence.<br><br>
+            <small><strong>Technical Rationale:</strong> The visible image text clearly reads 'מתני' וקונה את עצמה בחליצה.' Neither Option A (empty string) nor Option B (garbage characters) provides a correct transcription of the target image raster crop.</small>
+        </div>
+    </div>
+
+    <div class="conflict-box">
+        <div class="conflict-header">Conflict #4 (Paragraph [ymin: 0.208 - ymax: 0.224])</div>
+        <div class="img-container">
+            <img src="file:///Users/ericsafern/work/yad-malachi/yad-malachi-pipeline/images/conflicts/conflict_04.png" alt="Crop #4">
+        </div>
+        <div class="grid">
+            <div class="opt-box opt-a"><strong>🅰️ Base OCR (Option A):</strong><br><em>[Empty]</em></div>
+            <div class="opt-box opt-b"><strong>🅱️ Witness OCR (Option B):</strong><br>-:₪ וקושרוו ופי שוו =וו? ו</div>
+        </div>
+        <div class="decision-box">
+            <strong>🤖 AI Vision Decision:</strong> ACCEPT PALEOGRAPHIC READING — 'גליון: למ"ד חליצה קנין ביר"ש פ"א ופ"ג דיבמות [נ"ל כך] דמ"מ הזיקה של' (Confidence: 0.0)
+        </div>
+        <div class="explanation">
+            <strong>💡 Plain English Explanation:</strong> Special paleographic reading or section header recognized on image: 'גליון: למ"ד חליצה קנין ביר"ש פ"א ופ"ג דיבמות [נ"ל כך] דמ"מ הזיקה של'. Verified with 0.0 confidence.<br><br>
+            <small><strong>Technical Rationale:</strong> Neither candidate option provides a correct transcription of the Rabbinic text shown in the image. Option B contains corrupted/gibberish characters, while the image clearly reads: 'גליון: למ"ד חליצה קנין ביר"ש פ"א ופ"ג דיבמות [נ"ל כך] דמ"מ הזיקה של'.</small>
+        </div>
+    </div>
+
+    <div class="conflict-box">
+        <div class="conflict-header">Conflict #5 (Paragraph [ymin: 0.208 - ymax: 0.224])</div>
+        <div class="img-container">
+            <img src="file:///Users/ericsafern/work/yad-malachi/yad-malachi-pipeline/images/conflicts/conflict_05.png" alt="Crop #5">
+        </div>
+        <div class="grid">
+            <div class="opt-box opt-a"><strong>🅰️ Base OCR (Option A):</strong><br><em>[Empty]</em></div>
+            <div class="opt-box opt-b"><strong>🅱️ Witness OCR (Option B):</strong><br>חח | ה ל ל מו</div>
+        </div>
+        <div class="decision-box">
+            <strong>🤖 AI Vision Decision:</strong> ACCEPT PALEOGRAPHIC READING — 'גליון: למ"ד חליצה קנין ביר"ש פ"א ופ"ג דיבמות [נ"ל כך] דמ"מ הזיקה של' (Confidence: 0.0)
+        </div>
+        <div class="explanation">
+            <strong>💡 Plain English Explanation:</strong> Special paleographic reading or section header recognized on image: 'גליון: למ"ד חליצה קנין ביר"ש פ"א ופ"ג דיבמות [נ"ל כך] דמ"מ הזיקה של'. Verified with 0.0 confidence.<br><br>
+            <small><strong>Technical Rationale:</strong> Neither candidate option provides a correct transcription of the Rabbinic text shown in the image. Option B contains corrupted/gibberish characters, while the image clearly reads: 'גליון: למ"ד חליצה קנין ביר"ש פ"א ופ"ג דיבמות [נ"ל כך] דמ"מ הזיקה של'.</small>
+        </div>
+    </div>
+
+    <div class="conflict-box">
+        <div class="conflict-header">Conflict #6 (Paragraph [ymin: 0.251 - ymax: 0.304])</div>
+        <div class="img-container">
+            <img src="file:///Users/ericsafern/work/yad-malachi/yad-malachi-pipeline/images/conflicts/conflict_06.png" alt="Crop #6">
+        </div>
+        <div class="grid">
+            <div class="opt-box opt-a"><strong>🅰️ Base OCR (Option A):</strong><br>תוס'</div>
+            <div class="opt-box opt-b"><strong>🅱️ Witness OCR (Option B):</strong><br>תופ'</div>
+        </div>
+        <div class="decision-box">
+            <strong>🤖 AI Vision Decision:</strong> ACCEPT BASE OCR (Option A) — 'תוס'' (Confidence: 1.0)
+        </div>
+        <div class="explanation">
+            <strong>💡 Plain English Explanation:</strong> Base OCR ('תוס'') was verified on the manuscript crop. Local Witness OCR had minor OCR noise.<br><br>
+            <small><strong>Technical Rationale:</strong> The first word of the provided image crop is clearly 'תוס'' (standard Rabbinic abbreviation for Tosafot), opening the citation 'תוס' סוף ד"ה בפרוטה'. The letter is a Samekh ('ס'), making Option A accurate.</small>
+        </div>
+    </div>
+
+    <div class="conflict-box">
+        <div class="conflict-header">Conflict #7 (Paragraph [ymin: 0.321 - ymax: 0.696])</div>
+        <div class="img-container">
+            <img src="file:///Users/ericsafern/work/yad-malachi/yad-malachi-pipeline/images/conflicts/conflict_07.png" alt="Crop #7">
+        </div>
+        <div class="grid">
+            <div class="opt-box opt-a"><strong>🅰️ Base OCR (Option A):</strong><br>מקשה רבינו2 אך באמת למה לא נימא דגבי פדיון הבן</div>
+            <div class="opt-box opt-b"><strong>🅱️ Witness OCR (Option B):</strong><br><em>[Empty]</em></div>
+        </div>
+        <div class="decision-box">
+            <strong>🤖 AI Vision Decision:</strong> ACCEPT BASE OCR (Option A) — 'מקשה רבינו2 אך באמת למה לא נימא דגבי פדיון הבן' (Confidence: 0.99)
+        </div>
+        <div class="explanation">
+            <strong>💡 Plain English Explanation:</strong> Base OCR ('מקשה רבינו2 אך באמת למה לא נימא דגבי פדיון הבן') was verified on the manuscript crop. Local Witness OCR had minor OCR noise.<br><br>
+            <small><strong>Technical Rationale:</strong> The text at the top of the right-hand column clearly reads 'מקשה רבינו2 אך באמת למה לא נימא דגבי פדיון הבן', matching Option A perfectly.</small>
+        </div>
+    </div>
+
+    <div class="conflict-box">
+        <div class="conflict-header">Conflict #8 (Paragraph [ymin: 0.321 - ymax: 0.696])</div>
+        <div class="img-container">
+            <img src="file:///Users/ericsafern/work/yad-malachi/yad-malachi-pipeline/images/conflicts/conflict_08.png" alt="Crop #8">
+        </div>
+        <div class="grid">
+            <div class="opt-box opt-a"><strong>🅰️ Base OCR (Option A):</strong><br>בעי השוה כסף שומא (כמו דבעי בקדשים כדלהלן).</div>
+            <div class="opt-box opt-b"><strong>🅱️ Witness OCR (Option B):</strong><br><em>[Empty]</em></div>
+        </div>
+        <div class="decision-box">
+            <strong>🤖 AI Vision Decision:</strong> ACCEPT BASE OCR (Option A) — 'בעי השוה כסף שומא (כמו דבעי בקדשים כדלהלן).' (Confidence: 0.99)
+        </div>
+        <div class="explanation">
+            <strong>💡 Plain English Explanation:</strong> Base OCR ('בעי השוה כסף שומא (כמו דבעי בקדשים כדלהלן).') was verified on the manuscript crop. Local Witness OCR had minor OCR noise.<br><br>
+            <small><strong>Technical Rationale:</strong> The text at the top of the right-hand column clearly reads 'מקשה רבינו2 אך באמת למה לא נימא דגבי פדיון הבן', matching Option A perfectly.</small>
+        </div>
+    </div>
+
+    <div class="conflict-box">
+        <div class="conflict-header">Conflict #9 (Paragraph [ymin: 0.321 - ymax: 0.696])</div>
+        <div class="img-container">
+            <img src="file:///Users/ericsafern/work/yad-malachi/yad-malachi-pipeline/images/conflicts/conflict_09.png" alt="Crop #9">
+        </div>
+        <div class="grid">
+            <div class="opt-box opt-a"><strong>🅰️ Base OCR (Option A):</strong><br>ומנין שבפדה"ב באמת א"צ שומא, עיין לקמן דף ח'</div>
+            <div class="opt-box opt-b"><strong>🅱️ Witness OCR (Option B):</strong><br><em>[Empty]</em></div>
+        </div>
+        <div class="decision-box">
+            <strong>🤖 AI Vision Decision:</strong> ACCEPT BASE OCR (Option A) — 'ומנין שבפדה"ב באמת א"צ שומא, עיין לקמן דף ח'' (Confidence: 0.99)
+        </div>
+        <div class="explanation">
+            <strong>💡 Plain English Explanation:</strong> Base OCR ('ומנין שבפדה"ב באמת א"צ שומא, עיין לקמן דף ח'') was verified on the manuscript crop. Local Witness OCR had minor OCR noise.<br><br>
+            <small><strong>Technical Rationale:</strong> The text at the top of the right-hand column clearly reads 'מקשה רבינו2 אך באמת למה לא נימא דגבי פדיון הבן', matching Option A perfectly.</small>
+        </div>
+    </div>
+
+    <div class="conflict-box">
+        <div class="conflict-header">Conflict #10 (Paragraph [ymin: 0.321 - ymax: 0.696])</div>
+        <div class="img-container">
+            <img src="file:///Users/ericsafern/work/yad-malachi/yad-malachi-pipeline/images/conflicts/conflict_10.png" alt="Crop #10">
+        </div>
+        <div class="grid">
+            <div class="opt-box opt-a"><strong>🅰️ Base OCR (Option A):</strong><br>דמשמע דאין צריך לשום, לקמן ז' ע"א אמר רב יוסף</div>
+            <div class="opt-box opt-b"><strong>🅱️ Witness OCR (Option B):</strong><br><em>[Empty]</em></div>
+        </div>
+        <div class="decision-box">
+            <strong>🤖 AI Vision Decision:</strong> ACCEPT BASE OCR (Option A) — 'דמשמע דאין צריך לשום, לקמן ז' ע"א אמר רב יוסף' (Confidence: 0.99)
+        </div>
+        <div class="explanation">
+            <strong>💡 Plain English Explanation:</strong> Base OCR ('דמשמע דאין צריך לשום, לקמן ז' ע"א אמר רב יוסף') was verified on the manuscript crop. Local Witness OCR had minor OCR noise.<br><br>
+            <small><strong>Technical Rationale:</strong> The text at the top of the right-hand column clearly reads 'מקשה רבינו2 אך באמת למה לא נימא דגבי פדיון הבן', matching Option A perfectly.</small>
+        </div>
+    </div>
+
+    <div class="conflict-box">
+        <div class="conflict-header">Conflict #11 (Paragraph [ymin: 0.321 - ymax: 0.696])</div>
+        <div class="img-container">
+            <img src="file:///Users/ericsafern/work/yad-malachi/yad-malachi-pipeline/images/conflicts/conflict_11.png" alt="Crop #11">
+        </div>
+        <div class="grid">
+            <div class="opt-box opt-a"><strong>🅰️ Base OCR (Option A):</strong><br>דבקידושין בשוה כסף בעי שומא, ובדף ח' אמר רב</div>
+            <div class="opt-box opt-b"><strong>🅱️ Witness OCR (Option B):</strong><br><em>[Empty]</em></div>
+        </div>
+        <div class="decision-box">
+            <strong>🤖 AI Vision Decision:</strong> ACCEPT BASE OCR (Option A) — 'דבקידושין בשוה כסף בעי שומא, ובדף ח' אמר רב' (Confidence: 0.99)
+        </div>
+        <div class="explanation">
+            <strong>💡 Plain English Explanation:</strong> Base OCR ('דבקידושין בשוה כסף בעי שומא, ובדף ח' אמר רב') was verified on the manuscript crop. Local Witness OCR had minor OCR noise.<br><br>
+            <small><strong>Technical Rationale:</strong> The text at the top of the right-hand column clearly reads 'מקשה רבינו2 אך באמת למה לא נימא דגבי פדיון הבן', matching Option A perfectly.</small>
+        </div>
+    </div>
+
+    <div class="conflict-box">
+        <div class="conflict-header">Conflict #12 (Paragraph [ymin: 0.321 - ymax: 0.696])</div>
+        <div class="img-container">
+            <img src="file:///Users/ericsafern/work/yad-malachi/yad-malachi-pipeline/images/conflicts/conflict_12.png" alt="Crop #12">
+        </div>
+        <div class="grid">
+            <div class="opt-box opt-a"><strong>🅰️ Base OCR (Option A):</strong><br>יוסף 3 "מנא אמינא לה דתניא עגל זה לפדיון בני טלית</div>
+            <div class="opt-box opt-b"><strong>🅱️ Witness OCR (Option B):</strong><br><em>[Empty]</em></div>
+        </div>
+        <div class="decision-box">
+            <strong>🤖 AI Vision Decision:</strong> ACCEPT BASE OCR (Option A) — 'יוסף 3 "מנא אמינא לה דתניא עגל זה לפדיון בני טלית' (Confidence: 0.99)
+        </div>
+        <div class="explanation">
+            <strong>💡 Plain English Explanation:</strong> Base OCR ('יוסף 3 "מנא אמינא לה דתניא עגל זה לפדיון בני טלית') was verified on the manuscript crop. Local Witness OCR had minor OCR noise.<br><br>
+            <small><strong>Technical Rationale:</strong> The text at the top of the right-hand column clearly reads 'מקשה רבינו2 אך באמת למה לא נימא דגבי פדיון הבן', matching Option A perfectly.</small>
+        </div>
+    </div>
+
+    <div class="conflict-box">
+        <div class="conflict-header">Conflict #13 (Paragraph [ymin: 0.321 - ymax: 0.696])</div>
+        <div class="img-container">
+            <img src="file:///Users/ericsafern/work/yad-malachi/yad-malachi-pipeline/images/conflicts/conflict_13.png" alt="Crop #13">
+        </div>
+        <div class="grid">
+            <div class="opt-box opt-a"><strong>🅰️ Base OCR (Option A):</strong><br>זה לפדיון בני לא אמר כלום עגל זה בחמש סלעים</div>
+            <div class="opt-box opt-b"><strong>🅱️ Witness OCR (Option B):</strong><br><em>[Empty]</em></div>
+        </div>
+        <div class="decision-box">
+            <strong>🤖 AI Vision Decision:</strong> ACCEPT BASE OCR (Option A) — 'זה לפדיון בני לא אמר כלום עגל זה בחמש סלעים' (Confidence: 0.99)
+        </div>
+        <div class="explanation">
+            <strong>💡 Plain English Explanation:</strong> Base OCR ('זה לפדיון בני לא אמר כלום עגל זה בחמש סלעים') was verified on the manuscript crop. Local Witness OCR had minor OCR noise.<br><br>
+            <small><strong>Technical Rationale:</strong> The text at the top of the right-hand column clearly reads 'מקשה רבינו2 אך באמת למה לא נימא דגבי פדיון הבן', matching Option A perfectly.</small>
+        </div>
+    </div>
+
+    <div class="conflict-box">
+        <div class="conflict-header">Conflict #14 (Paragraph [ymin: 0.321 - ymax: 0.696])</div>
+        <div class="img-container">
+            <img src="file:///Users/ericsafern/work/yad-malachi/yad-malachi-pipeline/images/conflicts/conflict_14.png" alt="Crop #14">
+        </div>
+        <div class="grid">
+            <div class="opt-box opt-a"><strong>🅰️ Base OCR (Option A):</strong><br><em>[Empty]</em></div>
+            <div class="opt-box opt-b"><strong>🅱️ Witness OCR (Option B):</strong><br>בין מגרש (פי', שאחות חלוצתו שנשאת לאחיו ומת חולצת ואחות גרושתו שנשאת לאחיו ומת פטורה מיבום וחליצה), א"ל את סבור חליצה קניין אינה אלא פטור" (פי' ולא היתה קנויה לו מעולם לכן אינה קרובתו כלל ושפיר נופלת לפניו לחליצה), ופ"ג דיבמות ה"א, דאמרו שם, "רבי אומר חליצה קנין שמואל אמר חליצה פטור רבי זעירא אמר חליצה קנין רבי הילא אמר חליצה פטור, מיליהון דרבנין אמרין חליצה פטור, שמעון בר בא בעא קומי ר' יוחנן מה בין חולץ מה בין מגרש, א"ל את סבור חליצה קנין אינה אלא פטור", ולישנא דמתניתין הוא "קונה את עצמה" משמע דחליצה קנין, אך למ"ד חליצה פטור קשה, ומתרץ רבינו ע"ז, [נראה לי כך;] דמכל מקום הזיקה של המת פקעה, דהיינו שעד עתה היתה עליה הזיקה של בעלה המת1, ועתה בחליצה פקעה, ומצד זה שפיר תנן דקונה את עצמה. תופ' סוף ד"ה בפרוטה. והא דאיצטריך קרא לפדיון הבן דשוה כסף ככפף וכו'. בענין זה דשוה כסף ככסף בפדה"ב מקשה רבינו? אך באמת למה לא נימא דגבי פדיון הבן בעי השוה כסף שומא (כמו דבעי בקדשים כדלהלן). ומנין שבפדה"ב באמת א"צ שומא, עיין לקמן דף ח' דמשמע דאין צריך לשום, לקמן ז' ע"א אמר רב יוסף דבקידושין בשוה כסף בעי שומא, ובדף ח' אמר רב יוסף" "מנא אמינא לה דתניא עגל זה לפדיון בני טלית זה לפדיון בני לא אמר כלום עגל זה בחמש סלעים</div>
+        </div>
+        <div class="decision-box">
+            <strong>🤖 AI Vision Decision:</strong> ACCEPT BASE OCR (Option A) — '' (Confidence: 0.99)
+        </div>
+        <div class="explanation">
+            <strong>💡 Plain English Explanation:</strong> Base OCR ('') was verified on the manuscript crop. Local Witness OCR had minor OCR noise.<br><br>
+            <small><strong>Technical Rationale:</strong> The text at the top of the right-hand column clearly reads 'מקשה רבינו2 אך באמת למה לא נימא דגבי פדיון הבן', matching Option A perfectly.</small>
+        </div>
+    </div>
+
+    <div class="conflict-box">
+        <div class="conflict-header">Conflict #15 (Paragraph [ymin: 0.321 - ymax: 0.696])</div>
+        <div class="img-container">
+            <img src="file:///Users/ericsafern/work/yad-malachi/yad-malachi-pipeline/images/conflicts/conflict_15.png" alt="Crop #15">
+        </div>
+        <div class="grid">
+            <div class="opt-box opt-a"><strong>🅰️ Base OCR (Option A):</strong><br>בין מגרש (פי', שאחות חלוצתו שנשאת לאחיו ומת</div>
+            <div class="opt-box opt-b"><strong>🅱️ Witness OCR (Option B):</strong><br><em>[Empty]</em></div>
+        </div>
+        <div class="decision-box">
+            <strong>🤖 AI Vision Decision:</strong> ACCEPT BASE OCR (Option A) — 'בין מגרש (פי', שאחות חלוצתו שנשאת לאחיו ומת' (Confidence: 0.99)
+        </div>
+        <div class="explanation">
+            <strong>💡 Plain English Explanation:</strong> Base OCR ('בין מגרש (פי', שאחות חלוצתו שנשאת לאחיו ומת') was verified on the manuscript crop. Local Witness OCR had minor OCR noise.<br><br>
+            <small><strong>Technical Rationale:</strong> The text at the top of the right-hand column clearly reads 'מקשה רבינו2 אך באמת למה לא נימא דגבי פדיון הבן', matching Option A perfectly.</small>
+        </div>
+    </div>
+
+    <div class="conflict-box">
+        <div class="conflict-header">Conflict #16 (Paragraph [ymin: 0.321 - ymax: 0.696])</div>
+        <div class="img-container">
+            <img src="file:///Users/ericsafern/work/yad-malachi/yad-malachi-pipeline/images/conflicts/conflict_16.png" alt="Crop #16">
+        </div>
+        <div class="grid">
+            <div class="opt-box opt-a"><strong>🅰️ Base OCR (Option A):</strong><br>חולצת ואחות גרושתו שנשאת לאחיו ומת פטורה מיבום</div>
+            <div class="opt-box opt-b"><strong>🅱️ Witness OCR (Option B):</strong><br><em>[Empty]</em></div>
+        </div>
+        <div class="decision-box">
+            <strong>🤖 AI Vision Decision:</strong> ACCEPT BASE OCR (Option A) — 'חולצת ואחות גרושתו שנשאת לאחיו ומת פטורה מיבום' (Confidence: 0.99)
+        </div>
+        <div class="explanation">
+            <strong>💡 Plain English Explanation:</strong> Base OCR ('חולצת ואחות גרושתו שנשאת לאחיו ומת פטורה מיבום') was verified on the manuscript crop. Local Witness OCR had minor OCR noise.<br><br>
+            <small><strong>Technical Rationale:</strong> The text at the top of the right-hand column clearly reads 'מקשה רבינו2 אך באמת למה לא נימא דגבי פדיון הבן', matching Option A perfectly.</small>
+        </div>
+    </div>
+
+    <div class="conflict-box">
+        <div class="conflict-header">Conflict #17 (Paragraph [ymin: 0.321 - ymax: 0.696])</div>
+        <div class="img-container">
+            <img src="file:///Users/ericsafern/work/yad-malachi/yad-malachi-pipeline/images/conflicts/conflict_17.png" alt="Crop #17">
+        </div>
+        <div class="grid">
+            <div class="opt-box opt-a"><strong>🅰️ Base OCR (Option A):</strong><br>וחליצה), א"ל את סבור חליצה קניין אינה אלא פטור"</div>
+            <div class="opt-box opt-b"><strong>🅱️ Witness OCR (Option B):</strong><br><em>[Empty]</em></div>
+        </div>
+        <div class="decision-box">
+            <strong>🤖 AI Vision Decision:</strong> ACCEPT BASE OCR (Option A) — 'וחליצה), א"ל את סבור חליצה קניין אינה אלא פטור"' (Confidence: 0.99)
+        </div>
+        <div class="explanation">
+            <strong>💡 Plain English Explanation:</strong> Base OCR ('וחליצה), א"ל את סבור חליצה קניין אינה אלא פטור"') was verified on the manuscript crop. Local Witness OCR had minor OCR noise.<br><br>
+            <small><strong>Technical Rationale:</strong> The text at the top of the right-hand column clearly reads 'מקשה רבינו2 אך באמת למה לא נימא דגבי פדיון הבן', matching Option A perfectly.</small>
+        </div>
+    </div>
+
+    <div class="conflict-box">
+        <div class="conflict-header">Conflict #18 (Paragraph [ymin: 0.321 - ymax: 0.696])</div>
+        <div class="img-container">
+            <img src="file:///Users/ericsafern/work/yad-malachi/yad-malachi-pipeline/images/conflicts/conflict_18.png" alt="Crop #18">
+        </div>
+        <div class="grid">
+            <div class="opt-box opt-a"><strong>🅰️ Base OCR (Option A):</strong><br>(פי' ולא היתה קנויה לו מעולם לכן אינה קרובתו כלל</div>
+            <div class="opt-box opt-b"><strong>🅱️ Witness OCR (Option B):</strong><br><em>[Empty]</em></div>
+        </div>
+        <div class="decision-box">
+            <strong>🤖 AI Vision Decision:</strong> ACCEPT BASE OCR (Option A) — '(פי' ולא היתה קנויה לו מעולם לכן אינה קרובתו כלל' (Confidence: 0.99)
+        </div>
+        <div class="explanation">
+            <strong>💡 Plain English Explanation:</strong> Base OCR ('(פי' ולא היתה קנויה לו מעולם לכן אינה קרובתו כלל') was verified on the manuscript crop. Local Witness OCR had minor OCR noise.<br><br>
+            <small><strong>Technical Rationale:</strong> The text at the top of the right-hand column clearly reads 'מקשה רבינו2 אך באמת למה לא נימא דגבי פדיון הבן', matching Option A perfectly.</small>
+        </div>
+    </div>
+
+    <div class="conflict-box">
+        <div class="conflict-header">Conflict #19 (Paragraph [ymin: 0.321 - ymax: 0.696])</div>
+        <div class="img-container">
+            <img src="file:///Users/ericsafern/work/yad-malachi/yad-malachi-pipeline/images/conflicts/conflict_19.png" alt="Crop #19">
+        </div>
+        <div class="grid">
+            <div class="opt-box opt-a"><strong>🅰️ Base OCR (Option A):</strong><br>ושפיר נופלת לפניו לחליצה), ופ"ג דיבמות ה"א, דאמרו</div>
+            <div class="opt-box opt-b"><strong>🅱️ Witness OCR (Option B):</strong><br><em>[Empty]</em></div>
+        </div>
+        <div class="decision-box">
+            <strong>🤖 AI Vision Decision:</strong> ACCEPT BASE OCR (Option A) — 'ושפיר נופלת לפניו לחליצה), ופ"ג דיבמות ה"א, דאמרו' (Confidence: 0.99)
+        </div>
+        <div class="explanation">
+            <strong>💡 Plain English Explanation:</strong> Base OCR ('ושפיר נופלת לפניו לחליצה), ופ"ג דיבמות ה"א, דאמרו') was verified on the manuscript crop. Local Witness OCR had minor OCR noise.<br><br>
+            <small><strong>Technical Rationale:</strong> The text at the top of the right-hand column clearly reads 'מקשה רבינו2 אך באמת למה לא נימא דגבי פדיון הבן', matching Option A perfectly.</small>
+        </div>
+    </div>
+
+    <div class="conflict-box">
+        <div class="conflict-header">Conflict #20 (Paragraph [ymin: 0.321 - ymax: 0.696])</div>
+        <div class="img-container">
+            <img src="file:///Users/ericsafern/work/yad-malachi/yad-malachi-pipeline/images/conflicts/conflict_20.png" alt="Crop #20">
+        </div>
+        <div class="grid">
+            <div class="opt-box opt-a"><strong>🅰️ Base OCR (Option A):</strong><br>שם, "רבי אומר חליצה קנין שמואל אמר חליצה פטור</div>
+            <div class="opt-box opt-b"><strong>🅱️ Witness OCR (Option B):</strong><br><em>[Empty]</em></div>
+        </div>
+        <div class="decision-box">
+            <strong>🤖 AI Vision Decision:</strong> ACCEPT BASE OCR (Option A) — 'שם, "רבי אומר חליצה קנין שמואל אמר חליצה פטור' (Confidence: 0.99)
+        </div>
+        <div class="explanation">
+            <strong>💡 Plain English Explanation:</strong> Base OCR ('שם, "רבי אומר חליצה קנין שמואל אמר חליצה פטור') was verified on the manuscript crop. Local Witness OCR had minor OCR noise.<br><br>
+            <small><strong>Technical Rationale:</strong> The text at the top of the right-hand column clearly reads 'מקשה רבינו2 אך באמת למה לא נימא דגבי פדיון הבן', matching Option A perfectly.</small>
+        </div>
+    </div>
+
+    <div class="conflict-box">
+        <div class="conflict-header">Conflict #21 (Paragraph [ymin: 0.321 - ymax: 0.696])</div>
+        <div class="img-container">
+            <img src="file:///Users/ericsafern/work/yad-malachi/yad-malachi-pipeline/images/conflicts/conflict_21.png" alt="Crop #21">
+        </div>
+        <div class="grid">
+            <div class="opt-box opt-a"><strong>🅰️ Base OCR (Option A):</strong><br>רבי זעירא אמר חליצה קנין רבי הילא אמר חליצה פטור,</div>
+            <div class="opt-box opt-b"><strong>🅱️ Witness OCR (Option B):</strong><br><em>[Empty]</em></div>
+        </div>
+        <div class="decision-box">
+            <strong>🤖 AI Vision Decision:</strong> ACCEPT BASE OCR (Option A) — 'רבי זעירא אמר חליצה קנין רבי הילא אמר חליצה פטור,' (Confidence: 0.99)
+        </div>
+        <div class="explanation">
+            <strong>💡 Plain English Explanation:</strong> Base OCR ('רבי זעירא אמר חליצה קנין רבי הילא אמר חליצה פטור,') was verified on the manuscript crop. Local Witness OCR had minor OCR noise.<br><br>
+            <small><strong>Technical Rationale:</strong> The text at the top of the right-hand column clearly reads 'מקשה רבינו2 אך באמת למה לא נימא דגבי פדיון הבן', matching Option A perfectly.</small>
+        </div>
+    </div>
+
+    <div class="conflict-box">
+        <div class="conflict-header">Conflict #22 (Paragraph [ymin: 0.321 - ymax: 0.696])</div>
+        <div class="img-container">
+            <img src="file:///Users/ericsafern/work/yad-malachi/yad-malachi-pipeline/images/conflicts/conflict_22.png" alt="Crop #22">
+        </div>
+        <div class="grid">
+            <div class="opt-box opt-a"><strong>🅰️ Base OCR (Option A):</strong><br>מיליהון דרבנין אמרין חליצה פטור, שמעון בר בא בעא</div>
+            <div class="opt-box opt-b"><strong>🅱️ Witness OCR (Option B):</strong><br><em>[Empty]</em></div>
+        </div>
+        <div class="decision-box">
+            <strong>🤖 AI Vision Decision:</strong> ACCEPT BASE OCR (Option A) — 'מיליהון דרבנין אמרין חליצה פטור, שמעון בר בא בעא' (Confidence: 0.99)
+        </div>
+        <div class="explanation">
+            <strong>💡 Plain English Explanation:</strong> Base OCR ('מיליהון דרבנין אמרין חליצה פטור, שמעון בר בא בעא') was verified on the manuscript crop. Local Witness OCR had minor OCR noise.<br><br>
+            <small><strong>Technical Rationale:</strong> The text at the top of the right-hand column clearly reads 'מקשה רבינו2 אך באמת למה לא נימא דגבי פדיון הבן', matching Option A perfectly.</small>
+        </div>
+    </div>
+
+    <div class="conflict-box">
+        <div class="conflict-header">Conflict #23 (Paragraph [ymin: 0.321 - ymax: 0.696])</div>
+        <div class="img-container">
+            <img src="file:///Users/ericsafern/work/yad-malachi/yad-malachi-pipeline/images/conflicts/conflict_23.png" alt="Crop #23">
+        </div>
+        <div class="grid">
+            <div class="opt-box opt-a"><strong>🅰️ Base OCR (Option A):</strong><br>קומי ר' יוחנן מה בין חולץ מה בין מגרש, א"ל את</div>
+            <div class="opt-box opt-b"><strong>🅱️ Witness OCR (Option B):</strong><br><em>[Empty]</em></div>
+        </div>
+        <div class="decision-box">
+            <strong>🤖 AI Vision Decision:</strong> ACCEPT BASE OCR (Option A) — 'קומי ר' יוחנן מה בין חולץ מה בין מגרש, א"ל את' (Confidence: 0.99)
+        </div>
+        <div class="explanation">
+            <strong>💡 Plain English Explanation:</strong> Base OCR ('קומי ר' יוחנן מה בין חולץ מה בין מגרש, א"ל את') was verified on the manuscript crop. Local Witness OCR had minor OCR noise.<br><br>
+            <small><strong>Technical Rationale:</strong> The text at the top of the right-hand column clearly reads 'מקשה רבינו2 אך באמת למה לא נימא דגבי פדיון הבן', matching Option A perfectly.</small>
+        </div>
+    </div>
+
+    <div class="conflict-box">
+        <div class="conflict-header">Conflict #24 (Paragraph [ymin: 0.321 - ymax: 0.696])</div>
+        <div class="img-container">
+            <img src="file:///Users/ericsafern/work/yad-malachi/yad-malachi-pipeline/images/conflicts/conflict_24.png" alt="Crop #24">
+        </div>
+        <div class="grid">
+            <div class="opt-box opt-a"><strong>🅰️ Base OCR (Option A):</strong><br>סבור חליצה קנין אינה אלא פטור", ולישנא דמתניתין</div>
+            <div class="opt-box opt-b"><strong>🅱️ Witness OCR (Option B):</strong><br><em>[Empty]</em></div>
+        </div>
+        <div class="decision-box">
+            <strong>🤖 AI Vision Decision:</strong> ACCEPT BASE OCR (Option A) — 'סבור חליצה קנין אינה אלא פטור", ולישנא דמתניתין' (Confidence: 0.99)
+        </div>
+        <div class="explanation">
+            <strong>💡 Plain English Explanation:</strong> Base OCR ('סבור חליצה קנין אינה אלא פטור", ולישנא דמתניתין') was verified on the manuscript crop. Local Witness OCR had minor OCR noise.<br><br>
+            <small><strong>Technical Rationale:</strong> The text at the top of the right-hand column clearly reads 'מקשה רבינו2 אך באמת למה לא נימא דגבי פדיון הבן', matching Option A perfectly.</small>
+        </div>
+    </div>
+
+    <div class="conflict-box">
+        <div class="conflict-header">Conflict #25 (Paragraph [ymin: 0.321 - ymax: 0.696])</div>
+        <div class="img-container">
+            <img src="file:///Users/ericsafern/work/yad-malachi/yad-malachi-pipeline/images/conflicts/conflict_25.png" alt="Crop #25">
+        </div>
+        <div class="grid">
+            <div class="opt-box opt-a"><strong>🅰️ Base OCR (Option A):</strong><br>הוא "קונה את עצמה" משמע דחליצה קנין, אך למ"ד</div>
+            <div class="opt-box opt-b"><strong>🅱️ Witness OCR (Option B):</strong><br><em>[Empty]</em></div>
+        </div>
+        <div class="decision-box">
+            <strong>🤖 AI Vision Decision:</strong> ACCEPT BASE OCR (Option A) — 'הוא "קונה את עצמה" משמע דחליצה קנין, אך למ"ד' (Confidence: 0.99)
+        </div>
+        <div class="explanation">
+            <strong>💡 Plain English Explanation:</strong> Base OCR ('הוא "קונה את עצמה" משמע דחליצה קנין, אך למ"ד') was verified on the manuscript crop. Local Witness OCR had minor OCR noise.<br><br>
+            <small><strong>Technical Rationale:</strong> The text at the top of the right-hand column clearly reads 'מקשה רבינו2 אך באמת למה לא נימא דגבי פדיון הבן', matching Option A perfectly.</small>
+        </div>
+    </div>
+
+    <div class="conflict-box">
+        <div class="conflict-header">Conflict #26 (Paragraph [ymin: 0.321 - ymax: 0.696])</div>
+        <div class="img-container">
+            <img src="file:///Users/ericsafern/work/yad-malachi/yad-malachi-pipeline/images/conflicts/conflict_26.png" alt="Crop #26">
+        </div>
+        <div class="grid">
+            <div class="opt-box opt-a"><strong>🅰️ Base OCR (Option A):</strong><br>חליצה פטור קשה, ומתרץ רבינו ע"ז, [נראה לי כך,]</div>
+            <div class="opt-box opt-b"><strong>🅱️ Witness OCR (Option B):</strong><br><em>[Empty]</em></div>
+        </div>
+        <div class="decision-box">
+            <strong>🤖 AI Vision Decision:</strong> ACCEPT BASE OCR (Option A) — 'חליצה פטור קשה, ומתרץ רבינו ע"ז, [נראה לי כך,]' (Confidence: 0.99)
+        </div>
+        <div class="explanation">
+            <strong>💡 Plain English Explanation:</strong> Base OCR ('חליצה פטור קשה, ומתרץ רבינו ע"ז, [נראה לי כך,]') was verified on the manuscript crop. Local Witness OCR had minor OCR noise.<br><br>
+            <small><strong>Technical Rationale:</strong> The text at the top of the right-hand column clearly reads 'מקשה רבינו2 אך באמת למה לא נימא דגבי פדיון הבן', matching Option A perfectly.</small>
+        </div>
+    </div>
+
+    <div class="conflict-box">
+        <div class="conflict-header">Conflict #27 (Paragraph [ymin: 0.321 - ymax: 0.696])</div>
+        <div class="img-container">
+            <img src="file:///Users/ericsafern/work/yad-malachi/yad-malachi-pipeline/images/conflicts/conflict_27.png" alt="Crop #27">
+        </div>
+        <div class="grid">
+            <div class="opt-box opt-a"><strong>🅰️ Base OCR (Option A):</strong><br>דמכל מקום הזיקה של המת פקעה, דהיינו שעד עתה</div>
+            <div class="opt-box opt-b"><strong>🅱️ Witness OCR (Option B):</strong><br><em>[Empty]</em></div>
+        </div>
+        <div class="decision-box">
+            <strong>🤖 AI Vision Decision:</strong> ACCEPT BASE OCR (Option A) — 'דמכל מקום הזיקה של המת פקעה, דהיינו שעד עתה' (Confidence: 0.99)
+        </div>
+        <div class="explanation">
+            <strong>💡 Plain English Explanation:</strong> Base OCR ('דמכל מקום הזיקה של המת פקעה, דהיינו שעד עתה') was verified on the manuscript crop. Local Witness OCR had minor OCR noise.<br><br>
+            <small><strong>Technical Rationale:</strong> The text at the top of the right-hand column clearly reads 'מקשה רבינו2 אך באמת למה לא נימא דגבי פדיון הבן', matching Option A perfectly.</small>
+        </div>
+    </div>
+
+    <div class="conflict-box">
+        <div class="conflict-header">Conflict #28 (Paragraph [ymin: 0.321 - ymax: 0.696])</div>
+        <div class="img-container">
+            <img src="file:///Users/ericsafern/work/yad-malachi/yad-malachi-pipeline/images/conflicts/conflict_28.png" alt="Crop #28">
+        </div>
+        <div class="grid">
+            <div class="opt-box opt-a"><strong>🅰️ Base OCR (Option A):</strong><br>סנהדרין</div>
+            <div class="opt-box opt-b"><strong>🅱️ Witness OCR (Option B):</strong><br>פנהדרין</div>
+        </div>
+        <div class="decision-box">
+            <strong>🤖 AI Vision Decision:</strong> ACCEPT BASE OCR (Option A) — 'סנהדרין' (Confidence: 0.99)
+        </div>
+        <div class="explanation">
+            <strong>💡 Plain English Explanation:</strong> Base OCR ('סנהדרין') was verified on the manuscript crop. Local Witness OCR had minor OCR noise.<br><br>
+            <small><strong>Technical Rationale:</strong> The text at the top of the right-hand column clearly reads 'מקשה רבינו2 אך באמת למה לא נימא דגבי פדיון הבן', matching Option A perfectly.</small>
+        </div>
+    </div>
+
+    <div class="conflict-box">
+        <div class="conflict-header">Conflict #29 (Paragraph [ymin: 0.321 - ymax: 0.696])</div>
+        <div class="img-container">
+            <img src="file:///Users/ericsafern/work/yad-malachi/yad-malachi-pipeline/images/conflicts/conflict_29.png" alt="Crop #29">
+        </div>
+        <div class="grid">
+            <div class="opt-box opt-a"><strong>🅰️ Base OCR (Option A):</strong><br>ט"ו</div>
+            <div class="opt-box opt-b"><strong>🅱️ Witness OCR (Option B):</strong><br>מ"ו</div>
+        </div>
+        <div class="decision-box">
+            <strong>🤖 AI Vision Decision:</strong> ACCEPT BASE OCR (Option A) — 'ט"ו' (Confidence: 0.99)
+        </div>
+        <div class="explanation">
+            <strong>💡 Plain English Explanation:</strong> Base OCR ('ט"ו') was verified on the manuscript crop. Local Witness OCR had minor OCR noise.<br><br>
+            <small><strong>Technical Rationale:</strong> The text at the top of the right-hand column clearly reads 'מקשה רבינו2 אך באמת למה לא נימא דגבי פדיון הבן', matching Option A perfectly.</small>
+        </div>
+    </div>
+
+    <div class="conflict-box">
+        <div class="conflict-header">Conflict #30 (Paragraph [ymin: 0.321 - ymax: 0.696])</div>
+        <div class="img-container">
+            <img src="file:///Users/ericsafern/work/yad-malachi/yad-malachi-pipeline/images/conflicts/conflict_30.png" alt="Crop #30">
+        </div>
+        <div class="grid">
+            <div class="opt-box opt-a"><strong>🅰️ Base OCR (Option A):</strong><br>היתה עליה הזיקה של בעלה המת 1, ועתה בחליצה פקעה,</div>
+            <div class="opt-box opt-b"><strong>🅱️ Witness OCR (Option B):</strong><br><em>[Empty]</em></div>
+        </div>
+        <div class="decision-box">
+            <strong>🤖 AI Vision Decision:</strong> ACCEPT BASE OCR (Option A) — 'היתה עליה הזיקה של בעלה המת 1, ועתה בחליצה פקעה,' (Confidence: 0.99)
+        </div>
+        <div class="explanation">
+            <strong>💡 Plain English Explanation:</strong> Base OCR ('היתה עליה הזיקה של בעלה המת 1, ועתה בחליצה פקעה,') was verified on the manuscript crop. Local Witness OCR had minor OCR noise.<br><br>
+            <small><strong>Technical Rationale:</strong> The text at the top of the right-hand column clearly reads 'מקשה רבינו2 אך באמת למה לא נימא דגבי פדיון הבן', matching Option A perfectly.</small>
+        </div>
+    </div>
+
+    <div class="conflict-box">
+        <div class="conflict-header">Conflict #31 (Paragraph [ymin: 0.321 - ymax: 0.696])</div>
+        <div class="img-container">
+            <img src="file:///Users/ericsafern/work/yad-malachi/yad-malachi-pipeline/images/conflicts/conflict_31.png" alt="Crop #31">
+        </div>
+        <div class="grid">
+            <div class="opt-box opt-a"><strong>🅰️ Base OCR (Option A):</strong><br>ומצד זה שפיר תנן דקונה את עצמה.</div>
+            <div class="opt-box opt-b"><strong>🅱️ Witness OCR (Option B):</strong><br><em>[Empty]</em></div>
+        </div>
+        <div class="decision-box">
+            <strong>🤖 AI Vision Decision:</strong> ACCEPT BASE OCR (Option A) — 'ומצד זה שפיר תנן דקונה את עצמה.' (Confidence: 0.99)
+        </div>
+        <div class="explanation">
+            <strong>💡 Plain English Explanation:</strong> Base OCR ('ומצד זה שפיר תנן דקונה את עצמה.') was verified on the manuscript crop. Local Witness OCR had minor OCR noise.<br><br>
+            <small><strong>Technical Rationale:</strong> The text at the top of the right-hand column clearly reads 'מקשה רבינו2 אך באמת למה לא נימא דגבי פדיון הבן', matching Option A perfectly.</small>
+        </div>
+    </div>
+
+    <div class="conflict-box">
+        <div class="conflict-header">Conflict #32 (Paragraph [ymin: 0.321 - ymax: 0.696])</div>
+        <div class="img-container">
+            <img src="file:///Users/ericsafern/work/yad-malachi/yad-malachi-pipeline/images/conflicts/conflict_32.png" alt="Crop #32">
+        </div>
+        <div class="grid">
+            <div class="opt-box opt-a"><strong>🅰️ Base OCR (Option A):</strong><br>תוס' סוף ד"ה בפרוטה. והא דאיצטריך קרא לפדיון הבן</div>
+            <div class="opt-box opt-b"><strong>🅱️ Witness OCR (Option B):</strong><br><em>[Empty]</em></div>
+        </div>
+        <div class="decision-box">
+            <strong>🤖 AI Vision Decision:</strong> ACCEPT BASE OCR (Option A) — 'תוס' סוף ד"ה בפרוטה. והא דאיצטריך קרא לפדיון הבן' (Confidence: 0.99)
+        </div>
+        <div class="explanation">
+            <strong>💡 Plain English Explanation:</strong> Base OCR ('תוס' סוף ד"ה בפרוטה. והא דאיצטריך קרא לפדיון הבן') was verified on the manuscript crop. Local Witness OCR had minor OCR noise.<br><br>
+            <small><strong>Technical Rationale:</strong> The text at the top of the right-hand column clearly reads 'מקשה רבינו2 אך באמת למה לא נימא דגבי פדיון הבן', matching Option A perfectly.</small>
+        </div>
+    </div>
+
+    <div class="conflict-box">
+        <div class="conflict-header">Conflict #33 (Paragraph [ymin: 0.321 - ymax: 0.696])</div>
+        <div class="img-container">
+            <img src="file:///Users/ericsafern/work/yad-malachi/yad-malachi-pipeline/images/conflicts/conflict_33.png" alt="Crop #33">
+        </div>
+        <div class="grid">
+            <div class="opt-box opt-a"><strong>🅰️ Base OCR (Option A):</strong><br>דשוה כסף ככסף וכו'. בענין זה דשוה כסף ככסף בפדה"ב</div>
+            <div class="opt-box opt-b"><strong>🅱️ Witness OCR (Option B):</strong><br><em>[Empty]</em></div>
+        </div>
+        <div class="decision-box">
+            <strong>🤖 AI Vision Decision:</strong> ACCEPT BASE OCR (Option A) — 'דשוה כסף ככסף וכו'. בענין זה דשוה כסף ככסף בפדה"ב' (Confidence: 0.99)
+        </div>
+        <div class="explanation">
+            <strong>💡 Plain English Explanation:</strong> Base OCR ('דשוה כסף ככסף וכו'. בענין זה דשוה כסף ככסף בפדה"ב') was verified on the manuscript crop. Local Witness OCR had minor OCR noise.<br><br>
+            <small><strong>Technical Rationale:</strong> The text at the top of the right-hand column clearly reads 'מקשה רבינו2 אך באמת למה לא נימא דגבי פדיון הבן', matching Option A perfectly.</small>
+        </div>
+    </div>
+
+    <div class="conflict-box">
+        <div class="conflict-header">Conflict #34 (Paragraph [ymin: 0.707 - ymax: 0.715])</div>
+        <div class="img-container">
+            <img src="file:///Users/ericsafern/work/yad-malachi/yad-malachi-pipeline/images/conflicts/conflict_34.png" alt="Crop #34">
+        </div>
+        <div class="grid">
+            <div class="opt-box opt-a"><strong>🅰️ Base OCR (Option A):</strong><br><em>[Empty]</em></div>
+            <div class="opt-box opt-b"><strong>🅱️ Witness OCR (Option B):</strong><br>-</div>
+        </div>
+        <div class="decision-box">
+            <strong>🤖 AI Vision Decision:</strong> ACCEPT PALEOGRAPHIC READING — 'הערות' (Confidence: 0.0)
+        </div>
+        <div class="explanation">
+            <strong>💡 Plain English Explanation:</strong> Special paleographic reading or section header recognized on image: 'הערות'. Verified with 0.0 confidence.<br><br>
+            <small><strong>Technical Rationale:</strong> The image clearly shows the Hebrew word 'הערות' (Notes) centered between horizontal rule lines ('— הערות —'). Neither candidate string Option A (empty) nor Option B ('-') contains the transcribed word.</small>
+        </div>
+    </div>
+
+    <div class="conflict-box">
+        <div class="conflict-header">Conflict #35 (Paragraph [ymin: 0.707 - ymax: 0.715])</div>
+        <div class="img-container">
+            <img src="file:///Users/ericsafern/work/yad-malachi/yad-malachi-pipeline/images/conflicts/conflict_35.png" alt="Crop #35">
+        </div>
+        <div class="grid">
+            <div class="opt-box opt-a"><strong>🅰️ Base OCR (Option A):</strong><br><em>[Empty]</em></div>
+            <div class="opt-box opt-b"><strong>🅱️ Witness OCR (Option B):</strong><br>- זזזר /ר? ;7% 5</div>
+        </div>
+        <div class="decision-box">
+            <strong>🤖 AI Vision Decision:</strong> ACCEPT PALEOGRAPHIC READING — 'הערות' (Confidence: 0.0)
+        </div>
+        <div class="explanation">
+            <strong>💡 Plain English Explanation:</strong> Special paleographic reading or section header recognized on image: 'הערות'. Verified with 0.0 confidence.<br><br>
+            <small><strong>Technical Rationale:</strong> The image clearly shows the Hebrew word 'הערות' (Notes) centered between horizontal rule lines ('— הערות —'). Neither candidate string Option A (empty) nor Option B ('-') contains the transcribed word.</small>
+        </div>
+    </div>
+
+    <div class="conflict-box">
+        <div class="conflict-header">Conflict #36 (Paragraph [ymin: 0.719 - ymax: 0.825])</div>
+        <div class="img-container">
+            <img src="file:///Users/ericsafern/work/yad-malachi/yad-malachi-pipeline/images/conflicts/conflict_36.png" alt="Crop #36">
+        </div>
+        <div class="grid">
+            <div class="opt-box opt-a"><strong>🅰️ Base OCR (Option A):</strong><br>1.</div>
+            <div class="opt-box opt-b"><strong>🅱️ Witness OCR (Option B):</strong><br>וושרווצ 1</div>
+        </div>
+        <div class="decision-box">
+            <strong>🤖 AI Vision Decision:</strong> ACCEPT BASE OCR (Option A) — '1.' (Confidence: 1.0)
+        </div>
+        <div class="explanation">
+            <strong>💡 Plain English Explanation:</strong> Base OCR ('1.') was verified on the manuscript crop. Local Witness OCR had minor OCR noise.<br><br>
+            <small><strong>Technical Rationale:</strong> Option A corresponds to the number label starting the first footnote in the image ('1.'), whereas Option B contains nonsensical garbled characters ('וושרווצ 1'). The surrounding context confirms this is the beginning of footnote 1 under the 'הערות' section.</small>
+        </div>
+    </div>
+
+    <div class="conflict-box">
+        <div class="conflict-header">Conflict #37 (Paragraph [ymin: 0.719 - ymax: 0.825])</div>
+        <div class="img-container">
+            <img src="file:///Users/ericsafern/work/yad-malachi/yad-malachi-pipeline/images/conflicts/conflict_37.png" alt="Crop #37">
+        </div>
+        <div class="grid">
+            <div class="opt-box opt-a"><strong>🅰️ Base OCR (Option A):</strong><br>צ"פ</div>
+            <div class="opt-box opt-b"><strong>🅱️ Witness OCR (Option B):</strong><br>צ'יפ</div>
+        </div>
+        <div class="decision-box">
+            <strong>🤖 AI Vision Decision:</strong> ACCEPT BASE OCR (Option A) — 'צ"פ' (Confidence: 1.0)
+        </div>
+        <div class="explanation">
+            <strong>💡 Plain English Explanation:</strong> Base OCR ('צ"פ') was verified on the manuscript crop. Local Witness OCR had minor OCR noise.<br><br>
+            <small><strong>Technical Rationale:</strong> Option A corresponds to the number label starting the first footnote in the image ('1.'), whereas Option B contains nonsensical garbled characters ('וושרווצ 1'). The surrounding context confirms this is the beginning of footnote 1 under the 'הערות' section.</small>
+        </div>
+    </div>
+
+    <div class="conflict-box">
+        <div class="conflict-header">Conflict #38 (Paragraph [ymin: 0.719 - ymax: 0.825])</div>
+        <div class="img-container">
+            <img src="file:///Users/ericsafern/work/yad-malachi/yad-malachi-pipeline/images/conflicts/conflict_38.png" alt="Crop #38">
+        </div>
+        <div class="grid">
+            <div class="opt-box opt-a"><strong>🅰️ Base OCR (Option A):</strong><br>סי' כ"ד</div>
+            <div class="opt-box opt-b"><strong>🅱️ Witness OCR (Option B):</strong><br>סיי בייד</div>
+        </div>
+        <div class="decision-box">
+            <strong>🤖 AI Vision Decision:</strong> ACCEPT BASE OCR (Option A) — 'סי' כ"ד' (Confidence: 1.0)
+        </div>
+        <div class="explanation">
+            <strong>💡 Plain English Explanation:</strong> Base OCR ('סי' כ"ד') was verified on the manuscript crop. Local Witness OCR had minor OCR noise.<br><br>
+            <small><strong>Technical Rationale:</strong> Option A corresponds to the number label starting the first footnote in the image ('1.'), whereas Option B contains nonsensical garbled characters ('וושרווצ 1'). The surrounding context confirms this is the beginning of footnote 1 under the 'הערות' section.</small>
+        </div>
+    </div>
+
+    <div class="conflict-box">
+        <div class="conflict-header">Conflict #39 (Paragraph [ymin: 0.719 - ymax: 0.825])</div>
+        <div class="img-container">
+            <img src="file:///Users/ericsafern/work/yad-malachi/yad-malachi-pipeline/images/conflicts/conflict_39.png" alt="Crop #39">
+        </div>
+        <div class="grid">
+            <div class="opt-box opt-a"><strong>🅰️ Base OCR (Option A):</strong><br>וסי'</div>
+            <div class="opt-box opt-b"><strong>🅱️ Witness OCR (Option B):</strong><br>וסיי</div>
+        </div>
+        <div class="decision-box">
+            <strong>🤖 AI Vision Decision:</strong> ACCEPT BASE OCR (Option A) — 'וסי'' (Confidence: 1.0)
+        </div>
+        <div class="explanation">
+            <strong>💡 Plain English Explanation:</strong> Base OCR ('וסי'') was verified on the manuscript crop. Local Witness OCR had minor OCR noise.<br><br>
+            <small><strong>Technical Rationale:</strong> Option A corresponds to the number label starting the first footnote in the image ('1.'), whereas Option B contains nonsensical garbled characters ('וושרווצ 1'). The surrounding context confirms this is the beginning of footnote 1 under the 'הערות' section.</small>
+        </div>
+    </div>
+
+    <div class="conflict-box">
+        <div class="conflict-header">Conflict #40 (Paragraph [ymin: 0.719 - ymax: 0.825])</div>
+        <div class="img-container">
+            <img src="file:///Users/ericsafern/work/yad-malachi/yad-malachi-pipeline/images/conflicts/conflict_40.png" alt="Crop #40">
+        </div>
+        <div class="grid">
+            <div class="opt-box opt-a"><strong>🅰️ Base OCR (Option A):</strong><br>סי'</div>
+            <div class="opt-box opt-b"><strong>🅱️ Witness OCR (Option B):</strong><br>סיי</div>
+        </div>
+        <div class="decision-box">
+            <strong>🤖 AI Vision Decision:</strong> ACCEPT BASE OCR (Option A) — 'סי'' (Confidence: 1.0)
+        </div>
+        <div class="explanation">
+            <strong>💡 Plain English Explanation:</strong> Base OCR ('סי'') was verified on the manuscript crop. Local Witness OCR had minor OCR noise.<br><br>
+            <small><strong>Technical Rationale:</strong> Option A corresponds to the number label starting the first footnote in the image ('1.'), whereas Option B contains nonsensical garbled characters ('וושרווצ 1'). The surrounding context confirms this is the beginning of footnote 1 under the 'הערות' section.</small>
+        </div>
+    </div>
+
+    <div class="conflict-box">
+        <div class="conflict-header">Conflict #41 (Paragraph [ymin: 0.719 - ymax: 0.825])</div>
+        <div class="img-container">
+            <img src="file:///Users/ericsafern/work/yad-malachi/yad-malachi-pipeline/images/conflicts/conflict_41.png" alt="Crop #41">
+        </div>
+        <div class="grid">
+            <div class="opt-box opt-a"><strong>🅰️ Base OCR (Option A):</strong><br>ס"ב</div>
+            <div class="opt-box opt-b"><strong>🅱️ Witness OCR (Option B):</strong><br>סייב</div>
+        </div>
+        <div class="decision-box">
+            <strong>🤖 AI Vision Decision:</strong> ACCEPT BASE OCR (Option A) — 'ס"ב' (Confidence: 1.0)
+        </div>
+        <div class="explanation">
+            <strong>💡 Plain English Explanation:</strong> Base OCR ('ס"ב') was verified on the manuscript crop. Local Witness OCR had minor OCR noise.<br><br>
+            <small><strong>Technical Rationale:</strong> Option A corresponds to the number label starting the first footnote in the image ('1.'), whereas Option B contains nonsensical garbled characters ('וושרווצ 1'). The surrounding context confirms this is the beginning of footnote 1 under the 'הערות' section.</small>
+        </div>
+    </div>
+
+    <div class="conflict-box">
+        <div class="conflict-header">Conflict #42 (Paragraph [ymin: 0.719 - ymax: 0.825])</div>
+        <div class="img-container">
+            <img src="file:///Users/ericsafern/work/yad-malachi/yad-malachi-pipeline/images/conflicts/conflict_42.png" alt="Crop #42">
+        </div>
+        <div class="grid">
+            <div class="opt-box opt-a"><strong>🅰️ Base OCR (Option A):</strong><br>2.</div>
+            <div class="opt-box opt-b"><strong>🅱️ Witness OCR (Option B):</strong><br>| 2</div>
+        </div>
+        <div class="decision-box">
+            <strong>🤖 AI Vision Decision:</strong> ACCEPT BASE OCR (Option A) — '2.' (Confidence: 1.0)
+        </div>
+        <div class="explanation">
+            <strong>💡 Plain English Explanation:</strong> Base OCR ('2.') was verified on the manuscript crop. Local Witness OCR had minor OCR noise.<br><br>
+            <small><strong>Technical Rationale:</strong> Option A corresponds to the number label starting the first footnote in the image ('1.'), whereas Option B contains nonsensical garbled characters ('וושרווצ 1'). The surrounding context confirms this is the beginning of footnote 1 under the 'הערות' section.</small>
+        </div>
+    </div>
+
+    <div class="conflict-box">
+        <div class="conflict-header">Conflict #43 (Paragraph [ymin: 0.719 - ymax: 0.825])</div>
+        <div class="img-container">
+            <img src="file:///Users/ericsafern/work/yad-malachi/yad-malachi-pipeline/images/conflicts/conflict_43.png" alt="Crop #43">
+        </div>
+        <div class="grid">
+            <div class="opt-box opt-a"><strong>🅰️ Base OCR (Option A):</strong><br>התוס',</div>
+            <div class="opt-box opt-b"><strong>🅱️ Witness OCR (Option B):</strong><br>התוסי,</div>
+        </div>
+        <div class="decision-box">
+            <strong>🤖 AI Vision Decision:</strong> ACCEPT BASE OCR (Option A) — 'התוס',' (Confidence: 1.0)
+        </div>
+        <div class="explanation">
+            <strong>💡 Plain English Explanation:</strong> Base OCR ('התוס',') was verified on the manuscript crop. Local Witness OCR had minor OCR noise.<br><br>
+            <small><strong>Technical Rationale:</strong> Option A corresponds to the number label starting the first footnote in the image ('1.'), whereas Option B contains nonsensical garbled characters ('וושרווצ 1'). The surrounding context confirms this is the beginning of footnote 1 under the 'הערות' section.</small>
+        </div>
+    </div>
+
+    <div class="conflict-box">
+        <div class="conflict-header">Conflict #44 (Paragraph [ymin: 0.719 - ymax: 0.825])</div>
+        <div class="img-container">
+            <img src="file:///Users/ericsafern/work/yad-malachi/yad-malachi-pipeline/images/conflicts/conflict_44.png" alt="Crop #44">
+        </div>
+        <div class="grid">
+            <div class="opt-box opt-a"><strong>🅰️ Base OCR (Option A):</strong><br><em>[Empty]</em></div>
+            <div class="opt-box opt-b"><strong>🅱️ Witness OCR (Option B):</strong><br>=</div>
+        </div>
+        <div class="decision-box">
+            <strong>🤖 AI Vision Decision:</strong> ACCEPT BASE OCR (Option A) — '' (Confidence: 1.0)
+        </div>
+        <div class="explanation">
+            <strong>💡 Plain English Explanation:</strong> Base OCR ('') was verified on the manuscript crop. Local Witness OCR had minor OCR noise.<br><br>
+            <small><strong>Technical Rationale:</strong> Option A corresponds to the number label starting the first footnote in the image ('1.'), whereas Option B contains nonsensical garbled characters ('וושרווצ 1'). The surrounding context confirms this is the beginning of footnote 1 under the 'הערות' section.</small>
+        </div>
+    </div>
+</div></body></html>

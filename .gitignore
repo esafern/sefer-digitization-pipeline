@@ -16,6 +16,13 @@ credentials.json
 *.pdf
 *.png
 document_jsons/
+document_jsons_berlin/
+docai_word_boxes/
+klalim_docai/
+llm_klal_starts/
+sefaria_export/
+vlm_extractions/
+scratch/
 
 # Junk
 *.old
