@@ -1,218 +1,224 @@
 # A case for digitizing Yad Malachi
 
-_A proposal to scan, OCR, and structure one foundational, public-domain work of
-Torah that is heavily relied upon but not yet available as clean digital text._
+_Scan, OCR, and structure one foundational public-domain work of Torah that is heavily
+relied upon but has no public digital text._
+
+> **Bottom line.** *Yad Malachi* is the **#1 public-domain work Sefaria lacks** — cited
+> **287 times inside Sefaria's own corpus** (every one a dead link) and **243 times** in
+> contemporary halacha. It is public domain, and **four editions in five scans are
+> already in hand** (three in clean square type). A first pass over the full work — all
+> 667 numbered *klalim* — is already OCR'd and structured via the lean single-edition
+> (Berlin) path. **Current step:** bringing image-grounded, confidence-scored AI
+> adjudication — proven on a pilot page — up to full-corpus scale, starting with Part 1
+> (*Klalei HaGemara*), the only range with scan-to-text alignment built so far.
 
 ## The work
 
-**Yad Malachi** (יד מלאכי), by **R. Malachi ben Jacob HaKohen of Livorno**
-(d. 1772), first printed Livorno 1766–7 (later Berlin 1857). It is a three-part
-masterwork of *methodology* — the rules by which the Talmud is learned and halacha
-is decided:
+**Yad Malachi** (יד מלאכי), by **R. Malachi ben Jacob HaKohen** of Livorno (1695–1772),
+first printed Livorno 1766–7. A three-part masterwork of *methodology* — the *grammar* of
+the tradition, reached for whenever a question of method arises:
 
-1. **Klalei HaTalmud** — an alphabetical index of the rules and technical terms of
-   the Talmud, with explanations.
-2. **Klalei HaPoskim** — the rules governing the codifiers (Rif, Rambam, Rosh, Tur,
-   Shulchan Aruch…).
-3. **Klalei HaDinim** — the principles of halachic decision-making and responsa.
+1. **Klalei HaGemara** — the rules and technical terms of the Talmud, alphabetical.
+2. **Klalei HaPoskim** — the rules governing the codifiers (Rif, Rambam, Rosh, Tur, Shulchan Aruch).
+3. **Klalei HaDinim** — the principles of halachic decision.
 
-It is, in short, the *grammar* of the tradition: not a text read once, but a
-reference reached for whenever a question of method arises.
+![Title page of the Berlin edition of Yad Malachi, naming the three parts Klalei HaGemara, Klalei HaPoskim, and Klalei HaDinim](images/yad-malachi-berlin-title.png)
+
+_Berlin edition title page — the three parts and the author._
 
 ## Why it matters
 
-Its standing is not a matter of opinion — and it is not a historical curiosity.
+Its standing is independent and measurable, not a matter of opinion.[^wiki]
 
-**Across the centuries.** The author was "quoted **frequently by major halakhic
-authorities of the 18th and 19th centuries**," and the Chida praised Yad Malachi
-effusively.[^wiki] That reliance is measurable inside the digital library today:
-**287 places in Sefaria's existing texts cite יד מלאכי**[^sefaria] — and every one
-is a **dead end**, because the work itself is not in the library. A reader who
-reaches "Yad Malachi, Klal …" inside a work Sefaria *does* have cannot follow the
-reference. The citing works span three centuries:[^sefaria]
+**287 dead ends inside Sefaria.** The corpus cites יד מלאכי in **287 places**[^sefaria] —
+each unfollowable, because the work isn't in the library. Who cites it, and what it shows:
 
 | Mentions | Citing work |
 |---:|---|
-| 118 | Ayin Zokher |
+| 118 | Ayin Zokher (Chida) |
 | 17 | Petach Einayim (Chida) |
 | 13 | Shem HaGedolim (Chida) |
+| 8 | Rosh David (Chida) |
 | 11 | Pardes Yosef |
 | 9 | Kaf HaChayim (d. 1939) |
-| 8 | Rosh David (Chida) |
-| — | + Mishnah Berurah / Biur Halacha, Torah Temimah, Minchat Chinukh, Even Ha'azel, and living responsa (Benei Banim) |
+| — | + Mishnah Berurah / Biur Halacha, Torah Temimah, Minchat Chinukh, Even Ha'azel, Benei Banim |
 
-**And in active use today.** Yad Malachi is a living reference, not a shelved
-classic:
+- **The Chida relies on it constantly** — ~156 of the 287, across four of his works. The
+  towering Sephardi authority of the era, the author's own contemporary, treats it as a
+  standing reference.
+- **And it doesn't stop with him** — ~130 more span the next two centuries (Pardes Yosef,
+  Kaf HaChaim d. 1939, Mishnah Berurah / Biur Halacha, Torah Temimah, Minchat Chinukh,
+  living responsa).
 
-- It is **continuously republished**: again in the late 20th century, a new Israeli
-  edition in 2001, a **Machon Yerushalayim critical edition in 2016** (freshly
-  typeset, cross-referencing parallel *Klalim* works), and a third volume in
-  2018.[^wiki] A work the contemporary Torah-publishing world keeps re-typesetting
-  is a work in active use — and the subject of modern scholarship.[^brown]
-- In a large **contemporary English-language halachic reference** (Halachipedia),
-  Yad Malachi is cited **243 times** — directly, by its numbered klalim.[^halachipedia]
-  That makes it the **single most-cited public-domain work that Sefaria
-  lacks**[^mostwanted] — present-day halachic writing reaching for it, hundreds of
-  times, right now.
-- Modern authorities cite it directly: Kaf HaChaim (d. 1939) and the contemporary
-  responsa Benei Banim appear among the 287 above.
+**Still in active use:**
+
+- **Republished and studied** — new editions in 2001, a Machon Yerushalayim critical
+  edition (2016), a third volume (2018)[^wiki]; and modern scholarship calls it *"one of
+  the most important halakhic rule books"* / *"one of the classic books of rules."*[^brown]
+- **243 citations in Halachipedia**[^halachipedia] — the **single most-cited public-domain
+  work Sefaria lacks.**[^mostwanted]
+- **Live debate, and the pain point in the wild** — on one Torah forum, Yad Malachi appears
+  in **~108 posts across ~71 discussions** (50 by a specific *klal*), and **6 are requests
+  for a *scan* of a klal**, because no clean digital text exists.[^forum]
+- **Central to R. Ovadia Yosef's school** — whose works are ~⅓ of every citation Sefaria
+  lacks, and whose method is built on the *klalei ha-hora'ah* that Yad Malachi codifies.[^ovadia]
 
 ## The gap this closes
 
-Yad Malachi is **public domain** — no rights, no license, no permission needed. Yet
-there is no **publicly available** clean digital text of it. So every one of those
-287 references is unlinkable, and anyone quoting the work must **hand-transcribe the
-Hebrew** from a scan. Digitizing it once turns 287 dead references into live links and ends the
-re-keying — permanently.
+Yad Malachi is **public domain**, yet has **no free, structured, linkable** text. What
+exists is paywalled or unstructured — Otzar HaChochma (searchable page-images,
+subscription) and the proprietary Machon Yerushalayim edition. So all 287 references stay
+dead, and anyone quoting the work must **hand-transcribe from a scan**. Digitizing it once
+ends that permanently.
 
-## Why it is an ideal candidate
+![Two real dead-end citations of Yad Malachi — a Halachipedia footnote and a Shem HaGedolim entry inside Sefaria — each failing to resolve because the work is not in the library](images/yad-malachi-broken-citation.png)
 
-- **Public domain** — free to reproduce.
-- **Cleanly structured** — its native form (numbered *klalim* within three parts)
-  maps directly onto a digital schema, so each reference becomes individually
-  linkable.
-- **Public-domain scans already exist** — no physical scanning needed; see the
-  witnesses below.
+_Two real dead ends: a Halachipedia footnote and the Chida's Shem HaGedolim (already in
+Sefaria) both cite Yad Malachi; the linker returns `linkFailed` — there is no text to
+point to._
+
+## An ideal candidate
+
+Public domain, cleanly structured (numbered *klalim* map straight onto a digital schema),
+and **already scanned** — no physical scanning needed.
 
 ### The witnesses in hand
 
-Every scan below was inspected page-by-page and identified from its title page. They
-resolve to **four distinct print editions across five independent scans** (the two
-Przemyśl 1877 files are one printing scanned twice), and each PDF already carries an
-embedded OCR text layer:
+Four print editions across five scans (the two Przemyśl 1877 files are one printing scanned
+twice), each inspected page-by-page. These are **page images**; some ship an embedded OCR
+layer, but it is **not good enough to use** (see *Process*) — the work is to OCR the images.
 
-| Edition | Press | Script | Scan in hand | Pages (scan) |
+| Edition | Press | Script | Scan in hand | Pages |
 |---|---|---|---|---|
-| **Livorno 1766–7** — *editio princeps*[^livorno] | (Livorno) | **Rashi** (body); square lemmas | HebrewBooks #32530 / #32532 / #32531 (3 part-files) | 348 / 54 / 55 |
+| **Livorno 1766–7** — *editio princeps*[^livorno] | (Livorno) | **Rashi** (body); square lemmas | HebrewBooks #32530 / #32532 / #32531 | 348 / 54 / 55 |
 | **Berlin ~1857/8**[^berlin] | Ephraim Herz | **Square** | Google Books | 337 |
 | **Przemyśl 1877**[^p1877] | M. A. Knoller | **Square** | HebrewBooks #14122 | 491 |
 | **Przemyśl 1877** (2nd scan)[^p1877] | " | **Square** | Google Books | 489 |
 | **Przemyśl 1888**[^p1888] | Żupnik, Knoller & Hamerschmidt | **Square** | Google Books | 373 |
 
-The three later editions each bind all three parts in one volume, and **all three
-are set in clean square Hebrew type, not Rashi** — which is exactly what
-general-purpose OCR reads best (see process). The same passage — the opening of
-*Klalei HaAleph*, on Rashi to Nedarim 19b — in the Berlin (square) and Livorno
-(Rashi) editions:
+The three later editions bind all three parts and are set in **clean square type, not
+Rashi** — what general OCR reads best. The same passage (opening of *Klalei HaAleph*),
+Berlin square vs. Livorno Rashi:
 
 ![Yad Malachi, opening of Klalei HaAleph: Berlin square type vs. Livorno Rashi type, the same passage side by side](images/yad-malachi-rashi-vs-square.png)
 
+![The opening page of Klalei HaGemara (Aleph section) in the Berlin edition of Yad Malachi, in clean square Hebrew type](images/yad-malachi-berlin-klal-aleph.png)
+
+_Berlin's *Klalei HaGemara* opening — the cleanest square images to OCR._
+
 ## Process — ensemble OCR with AI adjudication
 
-High accuracy on dense rabbinic Hebrew comes not from proofreading one OCR pass but
-from **consensus across many witnesses**. OCR engines make *uncorrelated* errors, so
-where several agree the reading is near-certain, and disagreements are automatically
-localized to specific words — turning "proofread everything" into "adjudicate the
-few conflicts."
+Accuracy on dense rabbinic Hebrew comes from **consensus across witnesses**, not
+proofreading one pass: OCR engines make uncorrelated errors, so where several agree the
+reading is near-certain and only disagreements need review.
 
-1. **Gather every public-domain witness.** Five scans of four editions are already in
-   hand — the Livorno 1766–7 first edition (Rashi) and three square-set reprints
-   (Berlin ~1857/8, Przemyśl 1877 in two scans, Przemyśl 1888); add any further early
-   printings from Otzar if convenient. Each edition is an independent witness to the
-   same PD text. (Modern critical editions are *not* scanned into the corpus — see the
-   copyright note.) Two caveats on independence: the two Przemyśl printings share a
-   press lineage (Żupnik/Knoller), so treat them as *near*-independent; the strongest
-   independent pairing is **Berlin** (square) against the **Livorno** first edition
-   (Rashi). The two scans of Przemyśl 1877 are the same *type* but differ in scan
-   noise, so they still help the vote.
-2. **Start from the OCR you already have, then add engines.** Every one of these PDFs
-   — both the Google Books and the HebrewBooks files — **already carries an embedded
-   OCR text layer** (verified: ~3,000 characters of extractable text per page). So
-   the ensemble does not start from zero: Google's OCR (on the Google Books scans) and
-   HebrewBooks' OCR are two *free, already-computed* witnesses on the square editions.
-   Extract those first, then add fresh passes to raise accuracy and de-correlate
-   errors. **Worked example:** [`data/ocr-samples/`](ocr-samples/) shows the same three
-   passages (the Aleph/Bet/Gimel section openings) as raw embedded OCR from all five
-   scans — a concrete look at how much they agree, and where they don't. It is a sharp
-   reminder that square type is *necessary but not sufficient*: the Berlin scan OCRs
-   cleanly, yet the (also square) Przemyśl Google scans come out badly letter-confused,
-   and the Rashi Livorno is unusable as-is — which is exactly why the steps below add
-   better engines rather than trusting the embedded layers:
-   - **Square editions (Berlin, Przemyśl) — the base text.** Run **Google Cloud
-     Vision / Document AI** and **Tesseract `heb`** (both strong on square Hebrew,
-     both weak on Rashi — which is why the square editions carry the load). These plus
-     the two embedded layers give **~4 passes per square edition**.
-   - **Livorno first edition (Rashi) — collation witness.** General engines fail on
-     Rashi, so read it with a Rashi-capable tool: **Jochre 3** (open-source, trained
-     for rabbinic/Rashi type) or a **Kraken/eScriptorium** model trained on this
-     typeface. It contributes variant readings, not the base.
-   - **Rabbinic-Hebrew post-correction on every pass.** Run outputs through
-     **Dicta**[^dicta] — a free Israeli non-profit built specifically for rabbinic
-     Hebrew: its OCR/**Maivin** tools expand abbreviations, restore
-     punctuation, and its rabbinic language model (**BEREL**) fixes context-obvious
-     OCR errors (e.g. a wrong letter inside a known talmudic phrase). Dicta is
-     web-based, so it runs on macOS in a browser; I found **no dedicated Mac desktop
-     app built on Dicta** — the closest "built-for-this" option is Dicta's own tools,
-     with **ABBYY FineReader** (desktop Mac/Windows, good general square OCR, no
-     rabbinic specialization) and **Transkribus** (trainable HTR platform) as
-     alternatives. Uncorrelated errors across these engines *and* editions make
-     agreement a strong signal.
-3. **Align and vote — per scan.** Align the engine outputs (word/character sequence
-   alignment, anchored on the numbered *klalim*) and take a per-token consensus.
-   Agreed tokens — the large majority — are accepted automatically; only conflicts
-   are flagged.
-4. **AI adjudication — image-grounded, selection-only.** For each flagged token,
-   give a multimodal model (Claude / GPT with vision) the candidate readings **plus
-   the cropped scan image** of that word, and have it *select* the correct reading —
-   never invent text. It must name the witness it relied on; anything not attested
-   by a scan is a flagged conjecture for a human, not a silent change. This is the
-   critical guardrail against the model "helpfully" emending the text to what it
-   expects.
-5. **Collate the editions.** With each printing reduced to a best-text, collate them
-   against each other. Genuine differences between printings (a typo or correction in
-   one) are recorded as variants — yielding a text potentially *more accurate than
-   any single historic printing*, with an apparatus. (This is a corrected reading of
-   the PD printings against each other — not a critical edition; the modern Machon
-   Yerushalayim edition is the scholarly critical text, and this does not aim to
-   supersede it.)
-6. **Expert review — only the flagged set.** A **domain expert — a Torah scholar
-   (Talmid Chacham) fluent in this genre**, not merely a Hebrew reader — resolves the
-   remaining conflicts against the scan (and may **consult** the modern critical
-   editions as a reference for hard readings — see note) and spot-checks the
-   auto-accepted text. The genre matters: dense abbreviations, talmudic shorthand, and
-   the *klalim*-cross-references are ambiguous to a non-specialist, so the reviewer's
-   fluency is what makes the flagged readings resolvable. Because they only ever touch
-   disagreements, this is a fraction of full proofreading.
-7. **Structure and ingest** into the three parts and their klalim; output text +
-   per-token confidence map + variant apparatus.
+1. **Gather witnesses.** Five scans / four editions in hand, each an independent witness.
+   The two Przemyśl printings share a press (Żupnik/Knoller) — *near*-independent; the
+   strongest pairing is Berlin (square) against the Livorno first edition (Rashi).
+2. **OCR the images — don't trust the embedded text.** The shipped OCR layers are unusable
+   ([`data/ocr-samples/`](ocr-samples/): Berlin cleanest but still errs, Przemyśl badly
+   letter-confused, Livorno unusable). Run **Google Cloud Vision / Document AI** +
+   **Tesseract `heb`** over the square editions' images (many passes to vote on); read the
+   Rashi Livorno with **Jochre 3** or a trained **Kraken/eScriptorium** model as a
+   collation witness; post-correct with **Dicta**[^dicta] (abbreviation expansion, the
+   BEREL rabbinic model). ABBYY FineReader / Transkribus are alternatives.
+3. **Align and vote.** Per-token consensus anchored on the numbered *klalim*; agreed tokens
+   auto-accepted, conflicts flagged.
+4. **AI adjudication — image-grounded, selection-only.** For each flagged token, give a
+   vision model the candidate readings **plus the cropped scan** and have it *select* —
+   never invent — naming the witness it used. Anything unattested is a flagged conjecture,
+   not a silent change. This is the guardrail against "helpful" emendation.
+5. **Collate the editions** into a variant apparatus — potentially more accurate than any
+   single historic printing. (Not a critical edition; it does not aim to supersede the
+   Machon Yerushalayim text.)
+6. **Expert review — flagged set only.** A Torah scholar (Talmid Chacham) fluent in the
+   genre resolves the conflicts against the scan and spot-checks the rest — a fraction of
+   full proofreading, since they touch only disagreements.
+7. **Structure and ingest** into the three parts → klalim; output text + confidence map +
+   apparatus.
 
-**Copyright note.** The *base text you reproduce* comes only from fully
-public-domain printings. You may **consult** modern critical editions (2001; Machon
-Yerushalayim 2016) to decide a hard reading — using a work to inform judgment is not
-infringement — but you may not reproduce their annotations, cross-references, or
-apparatus, or OCR them into the corpus; source the actual reading from a PD printing.
-(General principle, not legal advice; have counsel bless the workflow before
-publication.)
+**Copyright.** Reproduce base text only from public-domain printings; you may *consult* a
+modern critical edition for a hard reading, but not reproduce its apparatus. (General
+principle, not legal advice.)
+
+## Current state
+
+A first pass over the full work — all three parts, 667 numbered *klalim* — has already
+been run via the **lean single-edition path**: extraction and cross-validation from the
+Berlin square-type scan (PDF text layer vs. Document AI), with iterative LLM-driven
+linguistic/lexicon cleanup passes. That text is chunked, structured, and sitting in the
+repo today.
+
+What's *not* yet done is step 4's **image-grounded, selection-only AI adjudication** at
+corpus scale. It has been proven on a single pilot page (18 corrections, confidence
+0.3–0.98, paleographic rationale recorded per word) but not run across the full corpus.
+Most corrections currently in the text came from **text-only LLM linguistic review** —
+plausible given context, but not yet verified against the actual scan pixels, which is a
+gap against this project's own fidelity bar (every correction should be traceable to a
+real disagreement resolved by looking at the scan, not inferred). Scan-to-text alignment
+(the word bounding boxes the crop-and-verify step needs) exists today only for **Part 1**
+(*Klalei HaGemara*, klal 1–222); Parts 2–3 need the same alignment built before they can
+reach equivalent rigor. A human-review interface (crop + candidate readings + confidence,
+alongside the full running text) is in development to make that final adjudication pass
+tractable for a reviewer.
 
 ## Cost
 
-The ensemble front-loads a little engineering and collapses the human cost — which
-is the expensive part of any digitization.
+~340–460 pages (the square editions bind all three parts in ~340; the Livorno set is 348 +
+54 + 55).
 
-The work is **~457 pages** (the verified Livorno set: 348 + 54 + 55), OCR'd across
-a couple of witnesses.
+- **One-time harness** (OCR-ensemble + alignment + adjudication): ~40–80 dev hrs,
+  **reusable** for every other PD work — the real cost of the *first* text.
+- **Compute** (multi-engine OCR of the images + AI adjudication): low hundreds of dollars.
+- **Expert review** (flagged set, by a Talmid Chacham): ~5–10 hrs (~$150–350), versus
+  ~25–45 to proofread every page.
 
-- **One-time harness** (OCR-ensemble + alignment + adjudication): developer time,
-  ~40–80 hrs, and **reusable** for every other public-domain work — so it amortizes
-  far beyond this one text.
-- **Compute** (multi-engine OCR + AI adjudication over ~460 pages across the
-  editions — and two OCR passes per square edition already exist free as embedded
-  text layers): modest — low hundreds of dollars in OCR/API credits at most.
-- **Expert review** — only the flagged conflict set, and by a Torah scholar (Talmid
-  Chacham), not a general proofreader. If the ensemble auto-accepts ~90% of tokens,
-  the reviewer handles the rest in perhaps **~5–10 hours (~$150–350)**, versus ~25–45
-  hours to proofread all 457 pages single-pass.
+**Net:** the first work = harness + a few hundred dollars; each work after = a few hundred
+dollars, because the harness is reused. Output can beat any single historic printing. (The
+lean single-edition path skips the harness.) _Cost figures are estimates; page counts from
+the source catalogs; editions identified from the title pages transcribed in the footnotes._
 
-Net: after the reusable harness exists, the **marginal cost per work is a few hundred
-dollars**, and the output is *more* accurate than a single proofread pass —
-potentially better than any of the historic printings. For that, a foundational work
-of Torah
-— cited 287 times inside the very library that currently lacks it, and 243 times in
-contemporary halachic writing — goes permanently online.
+## Preparing the text for Sefaria
 
-_Cost figures are estimates; page counts are from the source catalogs and from the
-scan page-counts. Every scan was inspected page-by-page; edition identifications are
-from the title pages transcribed in the footnotes below._
+The last mile keeps two things separate — **the text** and **the links**:
+
+- **Text.** OCR the **Berlin edition images** (cleanest square; source from NLI, which also
+  sidesteps Google's terms). Licensing is clean — a PD edition, and mechanical OCR of PD
+  text carries no new copyright.[^ocrpd] **Keep the prose faithful:** don't expand
+  abbreviations (that's a read-time Dicta layer); *do* proof against the image, strip cruft
+  (running headers, page numbers, stamps), restore two-column reading order, and **segment
+  into the schema** (parts → klalim → one segment per klal, e.g. *Yad Malachi, Klalei
+  HaGemara, Aleph 1*).
+- **Links.** Don't hand-insert them — Sefaria's **Auto-Linker** builds them from parseable
+  citations (title spelled out + numeric ref).[^linker] So the useful "normalization" is on
+  the *citation references*, not the prose. Design the schema's addressing to **match how
+  the 287 sources cite it**, or the inbound links won't auto-resolve — and those **287
+  references light up automatically** once the work exists.
+- **Link-readiness QA.** Before ingest, run the text through the linker as a *test* (don't
+  apply links): it flags each unresolved citation, and this project pairs each with a
+  **verified candidate normalization** for the reviewer — worked example in
+  [`data/link-readiness-demo.md`](link-readiness-demo.md) (7 flagged; 5 got verified
+  candidates, e.g. *Rashi on Nedarim 19b*).
+
+**Two paths.** *Lean:* OCR just the Berlin edition, proof, structure — a solid version up
+fast (Sefaria is a wiki, refine later). *Full ensemble:* the higher-accuracy upgrade,
+reusable for the next work.
+
+## The ask
+
+Digitize Yad Malachi and place it in Sefaria — the top freely-digitizable work it lacks.
+
+1. **Bring the proven pilot to full-corpus scale.** Extend image-grounded, confidence-scored
+   adjudication from the one-page proof of concept across Part 1 (*Klalei HaGemara*), where
+   scan-to-text alignment already exists, using the human-review interface now in
+   development.
+2. **Extend scan alignment to Parts 2–3** so the same rigor is possible there, then repeat
+   the adjudication pass.
+3. **Coordinate ingest** with Sefaria (**hello@sefaria.org**), attaching each printing as
+   its own version.
+
+287 dead references become live links, the re-keying ends, and the reusable harness lowers
+the cost of every public-domain work after this one.
 
 ## Notes
 
@@ -230,8 +236,40 @@ from the title pages transcribed in the footnotes below._
     English-language halachic reference): **243** direct citations of Yad Malachi by
     its numbered klalim, in the full 640-page corpus (`data/CORPUS-COMPARISON.md`).
 
-[^brown]: Benjamin Brown, *"Some Say This, Some Say That": … Interpretation Rules in
-    Yad Malachi* — modern academic scholarship on the work.
+[^brown]: Benjamin Brown (Hebrew University of Jerusalem), *"'Some say this, some say
+    that': Pragmatics and discourse markers in Yad Malachi's interpretation rules,"*
+    **JLL 3 (2014): 1–19**, DOI 10.14762/jll.2014.001. An independent, non-halachic
+    (linguistics) study that calls Yad Malachi "one of the most important halakhic rule
+    books" and "one of the classic books of rules … known for its clear and organized
+    writing style," and takes it as the representative text for analyzing how halacha
+    decides between opinions. It also fixes the bibliography: R. Malachi HaCohen
+    Montefoscoli (1695–1772) of Livorno, *Yad Malachi*, 3 vols., Livorno: Moshe Attias
+    Press, 1766–1767.
+
+[^forum]: tora-forum.co.il, thread *"האומנם הכלל הוא שב'יש ויש' שבשולחן ערוך ההלכה כיש
+    בתרא?"* ("is the rule really that a *yesh … ve-yesh* in the Shulchan Aruch follows
+    the latter opinion?"). The opening post anchors on Yad Malachi — attaching its
+    Klalei HaPoskim page — and brings Edut BiYehosef (R. Yosef Samun), R. Shmuel ibn
+    Elbaz, and R. Avraham Pinto; a reply cites the Mishnah Berurah (Hilchot Shabbat and
+    Eruvin). A contemporary lay/lamdanut forum, cited here as evidence of live usage,
+    not as a halakhic authority; read by reference per the site's robots policy. The
+    forum-wide figures are from an exact-phrase search of tora-forum.co.il for *"יד
+    מלאכי"* (108 posts / 71 threads; 50 citing a specific klal; 6 requesting a scan) —
+    counts only; no forum text is reproduced here, per the site's `ai-train=no` signal.
+    Phrase-search figures may include the occasional non-sefer occurrence of the words
+    *יד מלאכי*; sampled results were all genuine citations of the work.
+
+[^ovadia]: R. Ovadia Yosef's methodology is documented as systematically applying the
+    *klalei ha-hora'ah* — the rules of pesak governing the Rif/Rambam/Rosh and the
+    Mechaber (e.g. webyeshiva.org, "Rabbi Ovadia Yosef's Halakhic Methodology";
+    Nishmat; R. Chaim Jachter, Kol Torah) — which is Yad Malachi's exact domain. The
+    demand figures are this project's Halachipedia analysis (`CORPUS-COMPARISON.md`);
+    the same-footnote co-citations (Yad Malachi with Taharat HaBayit and Yabia Omer)
+    are from the Halachipedia corpus (`pipeline/hp_cache`). **Caveat:** a direct
+    citation count from *within* R. Ovadia's own works could not be machine-verified —
+    they are not in a free, searchable digital corpus — so this is a qualitative
+    observation grounded in his documented method and in contemporary co-citation, not
+    a counted statistic.
 
 [^mostwanted]: Per this project's citation analysis of the full 640-page Halachipedia
     corpus (`data/SEFARIA-MOST-WANTED.md`, `data/CORPUS-COMPARISON.md`): among the
