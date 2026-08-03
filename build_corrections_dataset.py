@@ -2,15 +2,21 @@
 # stream in one global diff (far more robust than per-klal window search against
 # repeated rabbinic phraseology), then attribute small, high-confidence word-level
 # diffs back to their klal for vision-crop verification (see orchestrator.py).
+#
+# Klal -> page attribution comes from header_anchored_alignment.py's output
+# (part1_header_anchored_alignment.json), NOT aligned_klalim - that mapping was
+# discredited (see CLAUDE.md Open Items: "stop trusting artifacts"; it was built
+# from a flawed process and produced false-positive alignments that don't survive
+# cross-checking against each page's own printed section header). Only klalim
+# marked `trusted` there get a page attribution here; untrusted/placeholder
+# klalim have no reliable crop to verify against and are skipped, not guessed at.
 import json
 import os
-import re
-import glob
 import difflib
 
 REPO = os.path.dirname(os.path.abspath(__file__))
 DOCAI_DIR = os.path.join(REPO, "docai_word_boxes")
-ALIGNED_DIR = os.path.join(REPO, "aligned_klalim")
+ALIGNMENT_PATH = os.path.join(REPO, "part1_header_anchored_alignment.json")
 DEMO_DATASET = os.path.join(REPO, "klalim_demo_dataset.json")
 PART1_MAX_KLAL = 222
 
@@ -32,15 +38,24 @@ def union_bbox(tokens):
     }
 
 
-def main():
+def load_trusted_klal_pages():
+    """Group klal_ids by matched_page, trusted entries only, klal_id order
+    preserved within each page (matches print order)."""
+    alignment = json.load(open(ALIGNMENT_PATH, encoding="utf-8"))
     klal_pages = {}
-    for f in sorted(glob.glob(os.path.join(ALIGNED_DIR, "page_*.json"))):
-        page_id = int(re.search(r"page_(\d+)", f).group(1))
-        ids = [k["klal_id"] for k in json.load(open(f)) if 1 <= k["klal_id"] <= PART1_MAX_KLAL]
-        if ids:
-            # de-dupe while preserving order
-            seen = set()
-            klal_pages[page_id] = [i for i in ids if not (i in seen or seen.add(i))]
+    untrusted_ids = []
+    for r in sorted(alignment, key=lambda r: r["klal_id"]):
+        if not (1 <= r["klal_id"] <= PART1_MAX_KLAL):
+            continue
+        if not r["trusted"]:
+            untrusted_ids.append(r["klal_id"])
+            continue
+        klal_pages.setdefault(r["matched_page"], []).append(r["klal_id"])
+    return klal_pages, untrusted_ids
+
+
+def main():
+    klal_pages, untrusted_ids = load_trusted_klal_pages()
 
     final_by_id = {k["klal_id"]: k for k in json.load(open(DEMO_DATASET))}
 
@@ -116,6 +131,7 @@ def main():
             "total_candidates": len(corrections),
             "klalim_covered": len(set(c["klal_id"] for c in corrections)),
             "skipped_no_docai_page_klalim": sorted(skipped_no_docai_page),
+            "untrusted_klalim_excluded": sorted(untrusted_ids),
         },
     }
     out_path = os.path.join(REPO, "corrections_candidates_part1.json")
@@ -125,6 +141,7 @@ def main():
     print(f"Total candidate corrections: {len(corrections)}")
     print(f"Klalim covered: {out['meta']['klalim_covered']} / {PART1_MAX_KLAL}")
     print(f"Klalim skipped (no DocAI page data): {len(skipped_no_docai_page)}")
+    print(f"Klalim excluded as untrusted by header-anchored alignment: {len(untrusted_ids)} -> {untrusted_ids}")
 
 
 if __name__ == "__main__":

@@ -1,150 +1,194 @@
 {
-  "1": [
-    {
-      "word_index": 245,
-      "opcode": "replace",
-      "docai_reading": "דנראח",
-      "final_text": "דנראה",
-      "page": 14,
-      "bbox": {
-        "x1": 0.70712072,
-        "y1": 0.4941414,
-        "x2": 0.75665635,
-        "y2": 0.51151514
-      },
-      "vision_selected": "A",
-      "vision_transcription": "דנראח",
-      "confidence": 0.95,
-      "reasoning": "The raster crop visually shows the word spelled with a final 'ח' (het) instead of 'ה' (hei), reading 'דנראח' (a common print typographical variant/error for 'דנראה'). The final letter shares the exact closed top-left junction as the 'ח' in 'מוכח' on the line below it.",
-      "flag": "current_text_may_be_wrong"
-    },
-    {
-      "word_index": 333,
-      "opcode": "replace",
-      "docai_reading": "עור",
-      "final_text": "עוד",
-      "page": 14,
-      "bbox": {
-        "x1": 0.76284832,
-        "y1": 0.56969696,
-        "x2": 0.78885448,
-        "y2": 0.58626264
-      },
-      "vision_selected": "A",
-      "vision_transcription": "עור",
-      "confidence": 0.95,
-      "reasoning": "The glyph in the crop clearly shows a rounded upper-right corner characteristic of a Resh ('ר') rather than the square corner with a rightward projection of a Dalet ('ד'). Although the surrounding text logically implies 'עוד' ('and he wrote further'), the actual printed text in this visual raster crop is an original print error reading 'עור'.",
-      "flag": "current_text_may_be_wrong"
-    },
-    {
-      "word_index": 468,
-      "opcode": "replace",
-      "docai_reading": "ומרקמהד",
-      "final_text": "ומדקמהדר",
-      "page": 14,
-      "bbox": {
-        "x1": 0.53126937,
-        "y1": 0.67555553,
-        "x2": 0.60000002,
-        "y2": 0.69252527
-      },
-      "vision_selected": "B",
-      "vision_transcription": "ומדקמהדר",
-      "confidence": 0.98,
-      "reasoning": "The visual evidence in line 2 clearly shows the word 'ומדקמהדר' (and from the fact that he returns/replies), a standard Talmudic Aramaic term (ו-מ-ד-ק-מ-ה-ד-ר). Paleographically, the third letter is a 'ד' with a distinct right shoulder (not 'ר'), and the final letter is a 'ר'.",
-      "flag": "current_text_confirmed"
-    }
-  ],
-  "2": [
+  "15": [
     {
       "word_index": 0,
       "opcode": "insert",
       "docai_reading": null,
-      "final_text": "ב",
-      "page": 14,
+      "final_text": "טו",
+      "page": 19,
       "bbox": null,
       "vision_selected": null,
       "vision_transcription": null,
       "confidence": null,
       "reasoning": "no bbox (insertion) - not vision-cropped",
       "flag": "unverified_insertion"
-    },
-    {
-      "word_index": 30,
-      "opcode": "replace",
-      "docai_reading": "בססחים",
-      "final_text": "בפסחים",
-      "page": 14,
-      "bbox": {
-        "x1": 0.16284829,
-        "y1": 0.75070709,
-        "x2": 0.2241486,
-        "y2": 0.76606059
-      },
-      "vision_selected": "B",
-      "vision_transcription": "בפסחים",
-      "confidence": 0.98,
-      "reasoning": "The crop clearly shows the word 'בפסחים' (in tractate Pesachim). Paleographically, after the prefix letter 'ב', the letter 'פ' is visible with its characteristic inner tongue/opening, followed by 'ס', 'ח', 'י', and final 'ם'. Option A ('בססחים') is an OCR error reading the 'פ' as a 'ס'. Furthermore, the context 'ורש\"י כתב בפסחים כ\"ד' confirms the tractate reference.",
-      "flag": "current_text_confirmed"
     }
   ],
-  "17": [
+  "19": [
     {
-      "word_index": 200,
-      "opcode": "delete",
-      "docai_reading": "בסי ' כ '",
-      "final_text": null,
-      "page": 15,
+      "word_index": 7,
+      "opcode": "insert",
+      "docai_reading": null,
+      "final_text": "[.]",
+      "page": 20,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "no bbox (insertion) - not vision-cropped",
+      "flag": "unverified_insertion"
+    }
+  ],
+  "20": [
+    {
+      "word_index": 43,
+      "opcode": "insert",
+      "docai_reading": null,
+      "final_text": "כא",
+      "page": 20,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "no bbox (insertion) - not vision-cropped",
+      "flag": "unverified_insertion"
+    }
+  ],
+  "21": [
+    {
+      "word_index": 51,
+      "opcode": "replace",
+      "docai_reading": "עורו",
+      "final_text": "עודו",
+      "page": 20,
       "bbox": {
-        "x1": 0.45370939,
-        "y1": 0.33047736,
-        "x2": 0.50582463,
-        "y2": 0.34679723
+        "x1": 0.85981309,
+        "y1": 0.81004018,
+        "x2": 0.88971961,
+        "y2": 0.82650602
       },
       "vision_selected": "A",
-      "vision_transcription": "בסי' כ'",
+      "vision_transcription": "עורו",
       "confidence": 0.98,
-      "reasoning": "The visible characters in the middle line of the crop clearly read 'בסי' כ'' (an abbreviation for 'בסימן כ''), matching Option A precisely.",
+      "reasoning": "The image clearly shows the word עורו (four distinct letters: ayin, vav, resh, vav) followed by a space and the letter kof. Paleographically, the third letter features a smooth rounded shoulder characteristic of a resh (ר), rather than a dalet (ד). Contextually regarding Leviathan (Job 41), 'עורו קשה' ('his skin/hide is tough') is the intended semantic meaning in this commentary.",
+      "flag": "current_text_may_be_wrong"
+    }
+  ],
+  "22": [
+    {
+      "word_index": 49,
+      "opcode": "replace",
+      "docai_reading": "סיי כייה",
+      "final_text": "סי' כ\"ה",
+      "page": 20,
+      "bbox": {
+        "x1": 0.82741433,
+        "y1": 0.88393575,
+        "x2": 0.89096576,
+        "y2": 0.90080321
+      },
+      "vision_selected": "ERROR",
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Expecting ',' delimiter: line 3 column 33 (char 60)",
+      "flag": "error"
+    }
+  ],
+  "25": [
+    {
+      "word_index": 142,
+      "opcode": "replace",
+      "docai_reading": "דב\"ט וכין",
+      "final_text": "דב\"ב ובין",
+      "page": 22,
+      "bbox": {
+        "x1": 0.74643523,
+        "y1": 0.44009683,
+        "x2": 0.82083076,
+        "y2": 0.4578459
+      },
+      "vision_selected": "A",
+      "vision_transcription": "א דב\"מ וכין",
+      "confidence": 0.85,
+      "reasoning": "The visual crop clearly displays the characters 'א דב\"מ וכין' (or 'דב\"ט וכין' as parsed by raw OCR). The second word clearly features a rounded 'כ' (kaf) and a final 'ן' (nun) extending below the baseline, matching 'וכין' in Option A rather than 'ובין' in Option B.",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 407,
+      "opcode": "replace",
+      "docai_reading": "מיירו",
+      "final_text": "מיירי",
+      "page": 22,
+      "bbox": {
+        "x1": 0.31866089,
+        "y1": 0.63775718,
+        "x2": 0.35771853,
+        "y2": 0.65590966
+      },
+      "vision_selected": "A",
+      "vision_transcription": "מיירו",
+      "confidence": 0.95,
+      "reasoning": "Paleographically, the final character of the word extends fully down to the baseline, matching the structure and height of a vav (ו) rather than the suspended, short stroke of a yod (י) as seen in the preceding two letters 'יי'. The raster visually displays the print typo 'מיירו' (Option A).",
+      "flag": "current_text_may_be_wrong"
+    }
+  ],
+  "31": [
+    {
+      "word_index": 28,
+      "opcode": "delete",
+      "docai_reading": "Digitized by Google",
+      "final_text": null,
+      "page": 25,
+      "bbox": {
+        "x1": 0.52450979,
+        "y1": 0.95875865,
+        "x2": 0.72855395,
+        "y2": 0.98244184
+      },
+      "vision_selected": "A",
+      "vision_transcription": "Digitized by Google",
+      "confidence": 1.0,
+      "reasoning": "The image clearly contains the English watermark text 'Digitized by Google', which directly corresponds to Option A.",
       "flag": "possible_omission"
     }
   ],
-  "23": [
+  "36": [
     {
-      "word_index": 504,
-      "opcode": "insert",
-      "docai_reading": null,
-      "final_text": "דקאמר ליה בפ'",
-      "page": 15,
-      "bbox": null,
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "no bbox (insertion) - not vision-cropped",
-      "flag": "unverified_insertion"
+      "word_index": 4,
+      "opcode": "replace",
+      "docai_reading": "השית",
+      "final_text": "הש\"ס",
+      "page": 26,
+      "bbox": {
+        "x1": 0.67579341,
+        "y1": 0.67778224,
+        "x2": 0.71748602,
+        "y2": 0.69546002
+      },
+      "vision_selected": "A",
+      "vision_transcription": "השית'",
+      "confidence": 1.0,
+      "reasoning": "The raster clear shows the letters ה (He), ש (Shin), י (Yod), and ת (Tav) followed by an abbreviation apostrophe (geresh), spelling 'השית''. This visually matches Option A ('השית') rather than Option B ('הש\"ס'), where a Samekh would have a closed rounded shape.",
+      "flag": "current_text_may_be_wrong"
     }
   ],
-  "30": [
+  "41": [
     {
-      "word_index": 18,
-      "opcode": "insert",
-      "docai_reading": null,
-      "final_text": "הזיד במעילה",
-      "page": 16,
-      "bbox": null,
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "no bbox (insertion) - not vision-cropped",
-      "flag": "unverified_insertion"
+      "word_index": 293,
+      "opcode": "replace",
+      "docai_reading": "המך",
+      "final_text": "המחבר",
+      "page": 28,
+      "bbox": {
+        "x1": 0.16552582,
+        "y1": 0.7280032,
+        "x2": 0.19912881,
+        "y2": 0.74487746
+      },
+      "vision_selected": "A",
+      "vision_transcription": "המך",
+      "confidence": 0.98,
+      "reasoning": "The crop clearly shows the three Hebrew letters ה, מ, and ך (final kaf with its characteristic long descending tail) on the second line. Option B ('המחבר') contains five letters which do not match the visual evidence in the manuscript crop.",
+      "flag": "current_text_may_be_wrong"
     }
   ],
-  "44": [
+  "45": [
     {
-      "word_index": 213,
+      "word_index": 5,
       "opcode": "insert",
       "docai_reading": null,
-      "final_text": "משיירי כנ\"הג",
-      "page": 17,
+      "final_text": "[.]",
+      "page": 30,
       "bbox": null,
       "vision_selected": null,
       "vision_transcription": null,
@@ -153,11 +197,46 @@
       "flag": "unverified_insertion"
     },
     {
-      "word_index": 324,
+      "word_index": 29,
       "opcode": "insert",
       "docai_reading": null,
-      "final_text": "לתוס '",
-      "page": 17,
+      "final_text": "מו",
+      "page": 30,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "no bbox (insertion) - not vision-cropped",
+      "flag": "unverified_insertion"
+    }
+  ],
+  "60": [
+    {
+      "word_index": 20,
+      "opcode": "replace",
+      "docai_reading": "שרוא",
+      "final_text": "שהוא",
+      "page": 33,
+      "bbox": {
+        "x1": 0.68908083,
+        "y1": 0.15206812,
+        "x2": 0.7291795,
+        "y2": 0.16788322
+      },
+      "vision_selected": "A",
+      "vision_transcription": "שרוא",
+      "confidence": 0.95,
+      "reasoning": "Paleographically, the word in the image clearly shows the letters ש-ר-ו-א, where a resh (ר) appears in place of a hei (ה) due to a common print error in historical Hebrew typesetting. Although the context grammatically calls for 'שהוא', the image literally reads 'שרוא'.",
+      "flag": "current_text_may_be_wrong"
+    }
+  ],
+  "68": [
+    {
+      "word_index": 7,
+      "opcode": "insert",
+      "docai_reading": null,
+      "final_text": "[.]",
+      "page": 34,
       "bbox": null,
       "vision_selected": null,
       "vision_transcription": null,
@@ -168,11 +247,11 @@
   ],
   "75": [
     {
-      "word_index": 246,
+      "word_index": 17,
       "opcode": "insert",
       "docai_reading": null,
-      "final_text": "מיתות ס\"ח א",
-      "page": 19,
+      "final_text": "[.]",
+      "page": 36,
       "bbox": null,
       "vision_selected": null,
       "vision_transcription": null,
@@ -181,48 +260,301 @@
       "flag": "unverified_insertion"
     }
   ],
-  "82": [
+  "83": [
     {
-      "word_index": 49,
+      "word_index": 3,
       "opcode": "insert",
       "docai_reading": null,
-      "final_text": "ע\"ג ועיין מקוה ישרא",
-      "page": 20,
+      "final_text": "[.]",
+      "page": 38,
       "bbox": null,
       "vision_selected": null,
       "vision_transcription": null,
       "confidence": null,
       "reasoning": "no bbox (insertion) - not vision-cropped",
       "flag": "unverified_insertion"
+    }
+  ],
+  "85": [
+    {
+      "word_index": 90,
+      "opcode": "delete",
+      "docai_reading": "'",
+      "final_text": null,
+      "page": 39,
+      "bbox": {
+        "x1": 0.41292307,
+        "y1": 0.16747968,
+        "x2": 0.41723076,
+        "y2": 0.18414634
+      },
+      "vision_selected": "UNCERTAIN",
+      "vision_transcription": "ה' ל",
+      "confidence": 0.95,
+      "reasoning": "The raster crop clearly shows multiple legible Hebrew characters across lines, including 'ה' ל' and 'בידינו'. Neither Option A (which only captured a single quote mark) nor Option B ('None') accurately or completely represents the visible text in the image.",
+      "flag": "ambiguous"
+    },
+    {
+      "word_index": 96,
+      "opcode": "delete",
+      "docai_reading": "פו",
+      "final_text": null,
+      "page": 39,
+      "bbox": {
+        "x1": 0.83323079,
+        "y1": 0.20325203,
+        "x2": 0.85353845,
+        "y2": 0.21138212
+      },
+      "vision_selected": "A",
+      "vision_transcription": "פו",
+      "confidence": 0.95,
+      "reasoning": "The raster crop clearly shows two Hebrew characters: a 'פ' (Pe) followed by a 'ו' (Vav). Option A ('פו') correctly captures the visual text present in the image.",
+      "flag": "possible_omission"
+    }
+  ],
+  "86": [
+    {
+      "word_index": 73,
+      "opcode": "delete",
+      "docai_reading": "'",
+      "final_text": null,
+      "page": 39,
+      "bbox": {
+        "x1": 0.2,
+        "y1": 0.2609756,
+        "x2": 0.20430769,
+        "y2": 0.27439025
+      },
+      "vision_selected": "UNCERTAIN",
+      "vision_transcription": "בחדרו\nקדי' ה\nא וכלו",
+      "confidence": 0.0,
+      "reasoning": "Neither candidate option accurately represents the visible text in the image. Option A is merely a single apostrophe/quote mark ( OCR artifact), and Option B is 'None'. Since neither option maps deterministically to the pixel array, UNCERTAIN is returned.",
+      "flag": "ambiguous"
+    },
+    {
+      "word_index": 107,
+      "opcode": "delete",
+      "docai_reading": "'",
+      "final_text": null,
+      "page": 39,
+      "bbox": {
+        "x1": 0.76430768,
+        "y1": 0.30365855,
+        "x2": 0.76923078,
+        "y2": 0.31991869
+      },
+      "vision_selected": "UNCERTAIN",
+      "vision_transcription": "אחרינא",
+      "confidence": 0.0,
+      "reasoning": "The image crop clearly displays multiple lines of Hebrew text including 'אחרינא' and acronyms/abbreviations from the context ('...אחרינא...', '...ע\"כ ה...'). Neither Option A (\"'\") nor Option B (\"None\") accurately captures or maps to the visible multi-line text in the raster crop.",
+      "flag": "ambiguous"
+    },
+    {
+      "word_index": 159,
+      "opcode": "replace",
+      "docai_reading": "ש\"ב",
+      "final_text": "ש\"כ",
+      "page": 39,
+      "bbox": {
+        "x1": 0.57599998,
+        "y1": 0.35162601,
+        "x2": 0.60615385,
+        "y2": 0.36544716
+      },
+      "vision_selected": "A",
+      "vision_transcription": "ש\"ב",
+      "confidence": 0.98,
+      "reasoning": "The paleographic features of the second letter in the acronym clearly show a straight vertical right stroke, a sharp right-bottom corner, and a flat horizontal base, which is characteristic of a Bet (ב) rather than a rounded Kaf (כ). Thus, 'ש\"ב' (Option A) is the correct reading.",
+      "flag": "current_text_may_be_wrong"
     }
   ],
   "87": [
     {
-      "word_index": 100,
+      "word_index": 13,
+      "opcode": "insert",
+      "docai_reading": null,
+      "final_text": "[.]",
+      "page": 39,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "no bbox (insertion) - not vision-cropped",
+      "flag": "unverified_insertion"
+    },
+    {
+      "word_index": 21,
       "opcode": "replace",
-      "docai_reading": "ל\"ז",
-      "final_text": "כ\"ז",
-      "page": 20,
+      "docai_reading": "הדחייה",
+      "final_text": "הדחיה",
+      "page": 39,
       "bbox": {
-        "x1": 0.46666667,
-        "y1": 0.19196787,
-        "x2": 0.49158877,
-        "y2": 0.20883535
+        "x1": 0.39015386,
+        "y1": 0.39552847,
+        "x2": 0.44,
+        "y2": 0.41138211
+      },
+      "vision_selected": "B",
+      "vision_transcription": "הדחיה",
+      "confidence": 0.95,
+      "reasoning": "In the middle line of the crop, the word following 'או' clearly consists of five letters: Hei, Dalet, Het, a single Yod, and Hei ('הדחיה'). There is only one Yod visible between the Het and the final Hei.",
+      "flag": "current_text_confirmed"
+    },
+    {
+      "word_index": 162,
+      "opcode": "replace",
+      "docai_reading": "מקובצרת",
+      "final_text": "מקובצת",
+      "page": 39,
+      "bbox": {
+        "x1": 0.14707692,
+        "y1": 0.51544714,
+        "x2": 0.21476923,
+        "y2": 0.53130084
       },
       "vision_selected": "A",
-      "vision_transcription": "ל\"ז",
-      "confidence": 0.98,
-      "reasoning": "Paleographically, the character preceding the gershayim and 'ז' features a distinct vertical ascender extending well above the x-height/headline into the line above. This upper neck is uniquely characteristic of the Hebrew letter Lamed ('ל'), whereas Kaf ('כ') remains strictly within the standard line height. Thus, Option A (\"ל\"ז\") is unequivocally the correct reading.",
+      "vision_transcription": "מקובצרת",
+      "confidence": 0.95,
+      "reasoning": "The raster image clearly shows an extra vertical stroke/letter (resh/descender) between the 'צ' and the 'ת', forming the textual string 'מקובצרת' rather than 'מקובצת'.",
       "flag": "current_text_may_be_wrong"
     }
   ],
-  "102": [
+  "88": [
     {
-      "word_index": 18,
+      "word_index": 201,
+      "opcode": "replace",
+      "docai_reading": "בעניי",
+      "final_text": "בעניותי",
+      "page": 39,
+      "bbox": {
+        "x1": 0.59015387,
+        "y1": 0.80284554,
+        "x2": 0.6283077,
+        "y2": 0.8203252
+      },
+      "vision_selected": "A",
+      "vision_transcription": "בעניי",
+      "confidence": 0.98,
+      "reasoning": "The visible characters in the middle line clearly spell out 'בעניי' (bet, ayin, nun, yod, yod), corresponding to the common Rabbinic phrase 'הייתי סבור למימר בעניי'. There are no letters 'ו', 'ת', or final 'י' for Option B ('בעניותי').",
+      "flag": "current_text_may_be_wrong"
+    }
+  ],
+  "89": [
+    {
+      "word_index": 12,
       "opcode": "insert",
       "docai_reading": null,
-      "final_text": "פר\"ח א\"ח ריש סי",
-      "page": 21,
+      "final_text": "[.]",
+      "page": 41,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "no bbox (insertion) - not vision-cropped",
+      "flag": "unverified_insertion"
+    }
+  ],
+  "91": [
+    {
+      "word_index": 400,
+      "opcode": "replace",
+      "docai_reading": "איבא",
+      "final_text": "איכא",
+      "page": 41,
+      "bbox": {
+        "x1": 0.67201978,
+        "y1": 0.49372214,
+        "x2": 0.71093267,
+        "y2": 0.50992304
+      },
+      "vision_selected": "B",
+      "vision_transcription": "איכא",
+      "confidence": 0.98,
+      "reasoning": "The visible text in the third line of the image clearly reads 'איכא' following 'עי' (completing 'בעי'). Contextually, the phrase 'בעי איכא דמאן דלא קי\"ל כותיה' requires the Aramaic word 'איכא' ('there is'). Paleographically, the third letter is a 'kaf' (כ) with its characteristic rounded top corner, which Option A (DocAI) misread as a 'bet' (ב).",
+      "flag": "current_text_confirmed"
+    },
+    {
+      "word_index": 683,
+      "opcode": "replace",
+      "docai_reading": "כווותייהו",
+      "final_text": "כוותייהו",
+      "page": 41,
+      "bbox": {
+        "x1": 0.79617047,
+        "y1": 0.7347104,
+        "x2": 0.85978997,
+        "y2": 0.7521264
+      },
+      "vision_selected": "B",
+      "vision_transcription": "כוותייהו",
+      "confidence": 0.98,
+      "reasoning": "The word visible in the third line is clearly 'כוותייהו' (k'vothaihu), containing two vavs ('וו') following the initial khaf ('כ'). Option A erroneously adds a third vav due to OCR segmentation artifact.",
+      "flag": "current_text_confirmed"
+    }
+  ],
+  "95": [
+    {
+      "word_index": 18,
+      "opcode": "replace",
+      "docai_reading": "לדערת",
+      "final_text": "לדעת",
+      "page": 42,
+      "bbox": {
+        "x1": 0.65506524,
+        "y1": 0.72595572,
+        "x2": 0.70602858,
+        "y2": 0.743662
+      },
+      "vision_selected": "B",
+      "vision_transcription": "לדעת",
+      "confidence": 0.99,
+      "reasoning": "The crop clearly shows the word 'לדעת' (lamed, dalet, ayin, tav). Option A adds an extra 'ר' (resh) which is a common OCR hallucination when splitting the ayin character. The surrounding context 'לדעת הרמב\"ם' confirms the standard Rabbinic phrase.",
+      "flag": "current_text_confirmed"
+    }
+  ],
+  "103": [
+    {
+      "word_index": 79,
+      "opcode": "replace",
+      "docai_reading": "דב\"ד",
+      "final_text": "דב\"ר",
+      "page": 44,
+      "bbox": {
+        "x1": 0.25015557,
+        "y1": 0.57412618,
+        "x2": 0.28873679,
+        "y2": 0.59100038
+      },
+      "vision_selected": "B",
+      "vision_transcription": "דב\"ר",
+      "confidence": 0.98,
+      "reasoning": "The visible text on the line shows the abbreviation 'דב\"ר'. The final letter features a rounded upper-right corner without a rear protrusion, distinguishing it clearly as a Resh ('ר') rather than a Dalet ('ד'). Contextually, 'שמעתתא דב\"ר' refers to Rabbinic discussions ('דבית רבי' / 'דבי רבי'), which perfectly fits the adjudicated text in Option B.",
+      "flag": "current_text_confirmed"
+    }
+  ],
+  "105": [
+    {
+      "word_index": 11,
+      "opcode": "insert",
+      "docai_reading": null,
+      "final_text": "[.]",
+      "page": 44,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "no bbox (insertion) - not vision-cropped",
+      "flag": "unverified_insertion"
+    }
+  ],
+  "108": [
+    {
+      "word_index": 2,
+      "opcode": "insert",
+      "docai_reading": null,
+      "final_text": "[.]",
+      "page": 45,
       "bbox": null,
       "vision_selected": null,
       "vision_transcription": null,
@@ -233,117 +565,1087 @@
   ],
   "114": [
     {
-      "word_index": 64,
-      "opcode": "delete",
-      "docai_reading": "פרק איזהו נשך",
-      "final_text": null,
-      "page": 22,
+      "word_index": 120,
+      "opcode": "replace",
+      "docai_reading": "ברותא",
+      "final_text": "בדותא",
+      "page": 45,
       "bbox": {
-        "x1": 0.13825171,
-        "y1": 0.39411053,
-        "x2": 0.9014259,
-        "y2": 0.4271884
+        "x1": 0.8121137,
+        "y1": 0.75394577,
+        "x2": 0.86217552,
+        "y2": 0.77094293
+      },
+      "vision_selected": "B",
+      "vision_transcription": "בדותא",
+      "confidence": 0.95,
+      "reasoning": "The crop shows the word בדותא (line 2) spelled with a distinct square dalet (ד) possessing the characteristic right-angle roof corner, preceding 'בד...' (abbreviation for בדלית). Line 3 shows the variant ברותא with a rounded resh (ר) before 'וכ...' (וכרבי/וכולו). Option B correctly reflects the text's primary reading with dalet as discussed in the Rabbinic context ('בדותא היא בדלית').",
+      "flag": "current_text_confirmed"
+    },
+    {
+      "word_index": 155,
+      "opcode": "replace",
+      "docai_reading": "אטת",
+      "final_text": "אמת",
+      "page": 45,
+      "bbox": {
+        "x1": 0.44066748,
+        "y1": 0.78794008,
+        "x2": 0.48454884,
+        "y2": 0.80129504
       },
       "vision_selected": "A",
-      "vision_transcription": "פרק איזהו נשך",
-      "confidence": 0.98,
-      "reasoning": "The string 'פרק' appears at the end of the second visible line and 'איזהו נשך' begins the third line of the provided image crop, matching candidate Option A.",
-      "flag": "possible_omission"
+      "vision_transcription": "אטת",
+      "confidence": 0.95,
+      "reasoning": "The visual crop clearly shows the letters aleph, tet, and tav ('אטת') on the second line. The middle character has a curved base rising on the left, which is paleographically a 'ט' (tet) rather than a 'מ' (mem).",
+      "flag": "current_text_may_be_wrong"
     }
   ],
-  "139": [
+  "120": [
     {
-      "word_index": 21,
-      "opcode": "delete",
-      "docai_reading": "ד\"ה תפילין",
-      "final_text": null,
-      "page": 24,
+      "word_index": 8,
+      "opcode": "replace",
+      "docai_reading": "בקירושין",
+      "final_text": "בקידושין",
+      "page": 46,
       "bbox": {
-        "x1": 0.39776951,
-        "y1": 0.16390796,
-        "x2": 0.48636928,
-        "y2": 0.18126766
+        "x1": 0.45618397,
+        "y1": 0.41126761,
+        "x2": 0.52454942,
+        "y2": 0.43018109
       },
-      "vision_selected": "A",
-      "vision_transcription": "ד\"ה תפילין",
-      "confidence": 0.98,
-      "reasoning": "The center line of the crop clearly displays the Hebrew text 'ד\"ה תפילין' ('ד\"ה' abbreviation for דיבור המתחיל followed by 'תפילין'). This matches Option A perfectly.",
-      "flag": "possible_omission"
+      "vision_selected": "B",
+      "vision_transcription": "בקידושין",
+      "confidence": 0.99,
+      "reasoning": "The image clearly shows the word 'בקידושין' (In Kiddushin, referring to Tractate Kiddushin). Paleographically, the letter following the first yod features the distinctive right-angled upper corner of a dalet (ד) rather than the rounded corner of a resh (ר). Contextually, 'בקידושין' is a standard Talmudic citation.",
+      "flag": "current_text_confirmed"
     }
   ],
-  "171": [
+  "128": [
     {
-      "word_index": 91,
-      "opcode": "delete",
-      "docai_reading": "מצינו",
-      "final_text": null,
-      "page": 26,
-      "bbox": {
-        "x1": 0.39141256,
-        "y1": 0.21052632,
-        "x2": 0.43310517,
-        "y2": 0.22860587
-      },
-      "vision_selected": "A",
-      "vision_transcription": "מצינו",
-      "confidence": 1.0,
-      "reasoning": "The Hebrew word 'מצינו' is clearly legible in the middle line of the cropped image.",
-      "flag": "possible_omission"
-    }
-  ],
-  "173": [
-    {
-      "word_index": 53,
-      "opcode": "delete",
-      "docai_reading": "ובשער יוסף דף מ",
-      "final_text": null,
-      "page": 26,
-      "bbox": {
-        "x1": 0.16552582,
-        "y1": 0.61912417,
-        "x2": 0.30740511,
-        "y2": 0.63559663
-      },
-      "vision_selected": "A",
-      "vision_transcription": "ובשער יוסף דף מ'",
-      "confidence": 0.98,
-      "reasoning": "The central line in the image clearly contains the text 'ובשער יוסף דף מ'', matching Option A directly.",
-      "flag": "possible_omission"
-    }
-  ],
-  "201": [
-    {
-      "word_index": 50,
-      "opcode": "delete",
-      "docai_reading": "סי",
-      "final_text": null,
-      "page": 28,
-      "bbox": {
-        "x1": 0.82202864,
-        "y1": 0.34833267,
-        "x2": 0.83883011,
-        "y2": 0.36440337
-      },
-      "vision_selected": "A",
-      "vision_transcription": "סי'",
-      "confidence": 0.98,
-      "reasoning": "The middle of the third line clearly displays the letters Samekh and Yod with a geresh (סי'), representing a standard Rabbinic abbreviation (for סימן). Thus, Option A ('סי') is accurate.",
-      "flag": "possible_omission"
-    }
-  ],
-  "215": [
-    {
-      "word_index": 1652,
+      "word_index": 0,
       "opcode": "insert",
       "docai_reading": null,
-      "final_text": "מינייהו כללא",
-      "page": 30,
+      "final_text": "קכח",
+      "page": 47,
       "bbox": null,
       "vision_selected": null,
       "vision_transcription": null,
       "confidence": null,
       "reasoning": "no bbox (insertion) - not vision-cropped",
       "flag": "unverified_insertion"
+    }
+  ],
+  "131": [
+    {
+      "word_index": 0,
+      "opcode": "insert",
+      "docai_reading": null,
+      "final_text": "קלא",
+      "page": 48,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "no bbox (insertion) - not vision-cropped",
+      "flag": "unverified_insertion"
+    }
+  ],
+  "132": [
+    {
+      "word_index": 19,
+      "opcode": "replace",
+      "docai_reading": "לדתרות",
+      "final_text": "להתרות",
+      "page": 49,
+      "bbox": {
+        "x1": 0.59231722,
+        "y1": 0.13484053,
+        "x2": 0.65737301,
+        "y2": 0.14937425
+      },
+      "vision_selected": "B",
+      "vision_transcription": "להתרות",
+      "confidence": 0.98,
+      "reasoning": "The visible word in the second line of the crop is 'להתרות' (meaning 'to warn'), which forms a standard halakhic phrase 'מוזהרים להתרות בו' (warned/commanded to give him forewarning). Option A ('לדתרות') is a raw OCR misreading of the letter 'ה' (he) as 'ד' (dalet).",
+      "flag": "current_text_confirmed"
+    }
+  ],
+  "144": [
+    {
+      "word_index": 143,
+      "opcode": "replace",
+      "docai_reading": "הרואה",
+      "final_text": "הדואה",
+      "page": 50,
+      "bbox": {
+        "x1": 0.24735861,
+        "y1": 0.56539237,
+        "x2": 0.29583591,
+        "y2": 0.58148891
+      },
+      "vision_selected": "A",
+      "vision_transcription": "הרואה",
+      "confidence": 0.99,
+      "reasoning": "The image clearly reads 'הרואה' (referring to Perek HaRo'eh, Berakhot Chapter 9). The second letter is a rounded resh (ר) rather than a dalet (ד).",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 330,
+      "opcode": "replace",
+      "docai_reading": "נלע\"ר",
+      "final_text": "נלע\"ד",
+      "page": 50,
+      "bbox": {
+        "x1": 0.60472345,
+        "y1": 0.73199195,
+        "x2": 0.6482287,
+        "y2": 0.74929577
+      },
+      "vision_selected": "A",
+      "vision_transcription": "נלע\"ר",
+      "confidence": 0.95,
+      "reasoning": "Paleographic inspection of the character following the gershayim (\") shows a smooth, rounded upper-right bend characteristic of the letter Resh ('ר'), lacking the sharp right-angled shoulder present in the adjacent Dalet ('ד') letters in the surrounding text.",
+      "flag": "current_text_may_be_wrong"
+    }
+  ],
+  "147": [
+    {
+      "word_index": 6,
+      "opcode": "insert",
+      "docai_reading": null,
+      "final_text": "[.]",
+      "page": 52,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "no bbox (insertion) - not vision-cropped",
+      "flag": "unverified_insertion"
+    }
+  ],
+  "157": [
+    {
+      "word_index": 5,
+      "opcode": "insert",
+      "docai_reading": null,
+      "final_text": "[.]",
+      "page": 57,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "no bbox (insertion) - not vision-cropped",
+      "flag": "unverified_insertion"
+    }
+  ],
+  "160": [
+    {
+      "word_index": 47,
+      "opcode": "replace",
+      "docai_reading": "והרל\"ם",
+      "final_text": "והרמב\"ם",
+      "page": 57,
+      "bbox": {
+        "x1": 0.53670573,
+        "y1": 0.76966751,
+        "x2": 0.58729178,
+        "y2": 0.78669912
+      },
+      "vision_selected": "ERROR",
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Expecting ',' delimiter: line 3 column 32 (char 59)",
+      "flag": "error"
+    }
+  ],
+  "162": [
+    {
+      "word_index": 276,
+      "opcode": "replace",
+      "docai_reading": "וכדכתיכנא",
+      "final_text": "וכדכתיבנא",
+      "page": 59,
+      "bbox": {
+        "x1": 0.41455892,
+        "y1": 0.36253041,
+        "x2": 0.49537322,
+        "y2": 0.37834549
+      },
+      "vision_selected": "B",
+      "vision_transcription": "וכדכתיבנא",
+      "confidence": 1.0,
+      "reasoning": "The target word is the standard Aramaic Rabbinic term 'וכדכתיבנא' (meaning 'and as we wrote', from the root כ-ת-ב). Raw OCR incorrectly misread the letter 'ב' (bet) as 'כ' (kaf) due to visual similarity in the printed font (producing 'וכדכתיכנא').",
+      "flag": "current_text_confirmed"
+    }
+  ],
+  "164": [
+    {
+      "word_index": 0,
+      "opcode": "replace",
+      "docai_reading": "קסג",
+      "final_text": "קסד",
+      "page": 59,
+      "bbox": {
+        "x1": 0.83281922,
+        "y1": 0.57420927,
+        "x2": 0.86613202,
+        "y2": 0.59164637
+      },
+      "vision_selected": "A",
+      "vision_transcription": "קסג",
+      "confidence": 0.98,
+      "reasoning": "The raster crop clearly displays the Hebrew letters ק (qof), ס (samekh), and ג (gimel). The third letter exhibits the characteristic left-extending foot of a gimel (identical to the gimel in 'נגד' on the line above), rather than the square right-angled corner of a dalet. Thus, the visual evidence definitively supports 'קסג' (Option A).",
+      "flag": "current_text_may_be_wrong"
+    }
+  ],
+  "168": [
+    {
+      "word_index": 16,
+      "opcode": "delete",
+      "docai_reading": "'",
+      "final_text": null,
+      "page": 62,
+      "bbox": {
+        "x1": 0.7348203063011169,
+        "y1": 0.2252725064754486,
+        "x2": 0.7385377883911133,
+        "y2": 0.24222850799560547
+      },
+      "vision_selected": "UNCERTAIN",
+      "vision_transcription": "כבתר\nמה' ה\nר' יוח",
+      "confidence": 0.95,
+      "reasoning": "The raster crop clearly displays multiple partial lines of Hebrew text ('כבתר', 'מה' ה', 'ר' יוח'), corresponding to 'כבתראי', 'מה' הרי\"ף', and 'ר' יוחנן' in the surrounding context. Neither Option A (a single apostrophe/gershayim) nor Option B ('None') accurately represents the visible manuscript text.",
+      "flag": "ambiguous"
+    },
+    {
+      "word_index": 27,
+      "opcode": "delete",
+      "docai_reading": "'",
+      "final_text": null,
+      "page": 62,
+      "bbox": {
+        "x1": 0.2503097951412201,
+        "y1": 0.2252725064754486,
+        "x2": 0.2558859884738922,
+        "y2": 0.24222850799560547
+      },
+      "vision_selected": "UNCERTAIN",
+      "vision_transcription": "י קמאי\nשבפ' ד\nיה לגבי",
+      "confidence": 0.0,
+      "reasoning": "The raster crop contains multiple lines of Hebrew text including 'קמאי', 'בפ'', and 'לגבי'. Neither candidate Option A (\"'\") nor Option B (\"None\") represents a valid or complete transcription of the visible text.",
+      "flag": "ambiguous"
+    },
+    {
+      "word_index": 34,
+      "opcode": "delete",
+      "docai_reading": "'",
+      "final_text": null,
+      "page": 62,
+      "bbox": {
+        "x1": 0.7410160899162292,
+        "y1": 0.2406136393547058,
+        "x2": 0.7472118735313416,
+        "y2": 0.25756964087486267
+      },
+      "vision_selected": "UNCERTAIN",
+      "vision_transcription": "מה'\nר' יוח\nצדין",
+      "confidence": 0.0,
+      "reasoning": "The crop contains multiple lines of legible text including words from the context like 'מה'' (or 'מה' הרי\"ף'), 'ר' יוח[נן]', and 'צדין'. Neither Option A (\"'\") nor Option B (\"None\") represents a valid or complete transcription of the visible crop text.",
+      "flag": "ambiguous"
+    },
+    {
+      "word_index": 89,
+      "opcode": "delete",
+      "docai_reading": "'",
+      "final_text": null,
+      "page": 62,
+      "bbox": {
+        "x1": 0.7496902346611023,
+        "y1": 0.2842147648334503,
+        "x2": 0.7546468377113342,
+        "y2": 0.30278563499450684
+      },
+      "vision_selected": "UNCERTAIN",
+      "vision_transcription": "ן\nם כפ\nבפ' ב\nי\"א א",
+      "confidence": 0.95,
+      "reasoning": "The raster crop contains multiple lines of legible Rabbinic Hebrew text (including words/abbreviations like 'בפ'' and 'י\"א א'). Option A captures only a single apostrophe (OCR artifact), while Option B ('None') provides no transcription. Neither candidate correctly maps to the visible image text, requiring an UNCERTAIN selection.",
+      "flag": "ambiguous"
+    },
+    {
+      "word_index": 118,
+      "opcode": "replace",
+      "docai_reading": "לכותבם",
+      "final_text": "לכותכם",
+      "page": 62,
+      "bbox": {
+        "x1": 0.22862453758716583,
+        "y1": 0.2991521954536438,
+        "x2": 0.2874844968318939,
+        "y2": 0.3169156312942505
+      },
+      "vision_selected": "B",
+      "vision_transcription": "לכותכם",
+      "confidence": 0.95,
+      "reasoning": "Looking at the visual features of the middle word in line 3, the character preceding the final mem (ם) has rounded corners at both the top-right and bottom-right, matching the letter kaf (כ) rather than the right-angled/base-extended bet (ב) seen elsewhere in the snippet (e.g. in 'דביצה' on line 4). Thus, 'לכותכם' is the correct transcription.",
+      "flag": "current_text_confirmed"
+    },
+    {
+      "word_index": 134,
+      "opcode": "delete",
+      "docai_reading": "'",
+      "final_text": null,
+      "page": 62,
+      "bbox": {
+        "x1": 0.2112763375043869,
+        "y1": 0.31530076265335083,
+        "x2": 0.21685254573822021,
+        "y2": 0.33346790075302124
+      },
+      "vision_selected": "UNCERTAIN",
+      "vision_transcription": "ש א\nם ועיין\nבפ' ר\nהלכה",
+      "confidence": 0.95,
+      "reasoning": "The crop contains multiple visible lines of Hebrew text ('ש א', 'ם ועיין', 'בפ' ר', 'הלכה'). Option A provides only a single apostrophe/geresh ('''), and Option B is 'None'. Neither candidate correctly transcribes the visible text array, so UNCERTAIN is selected as required by constraint 4.",
+      "flag": "ambiguous"
+    },
+    {
+      "word_index": 242,
+      "opcode": "replace",
+      "docai_reading": "בכ\"ט",
+      "final_text": "בכ\"מ",
+      "page": 62,
+      "bbox": {
+        "x1": 0.8624535202980042,
+        "y1": 0.4222850203514099,
+        "x2": 0.9014869928359985,
+        "y2": 0.43843358755111694
+      },
+      "vision_selected": "B",
+      "vision_transcription": "בכ\"מ",
+      "confidence": 0.95,
+      "reasoning": "The image shows the standard Rabbinic acronym בכ\"מ (בכל מקום). Paleographically, the letter following the gershayim (\") has the characteristic enclosed square frame of a Mem (מ), consistent with the Mem seen in 'שמ' on the line above, rather than a Tet (ט). Option B correctly reflects both the visual glyph and the expected context.",
+      "flag": "current_text_confirmed"
+    },
+    {
+      "word_index": 253,
+      "opcode": "replace",
+      "docai_reading": "ס\"ו",
+      "final_text": "פ\"ו",
+      "page": 62,
+      "bbox": {
+        "x1": 0.5167286396026611,
+        "y1": 0.4222850203514099,
+        "x2": 0.5390334725379944,
+        "y2": 0.43843358755111694
+      },
+      "vision_selected": "B",
+      "vision_transcription": "פ\"ו",
+      "confidence": 0.95,
+      "reasoning": "The crop clearly shows the letter 'פ' (with its characteristic sharp top-right corner, rounded left side, and inner protrusion), followed by gershayim and 'ו', forming 'פ\"ו' (commonly abbreviating a chapter/page/section number such as פרק ו' or page 86).",
+      "flag": "current_text_confirmed"
+    },
+    {
+      "word_index": 255,
+      "opcode": "delete",
+      "docai_reading": "'",
+      "final_text": null,
+      "page": 62,
+      "bbox": {
+        "x1": 0.4869888424873352,
+        "y1": 0.4222850203514099,
+        "x2": 0.4938042163848877,
+        "y2": 0.43843358755111694
+      },
+      "vision_selected": "UNCERTAIN",
+      "vision_transcription": "מה'\nמה' נ",
+      "confidence": 0.9,
+      "reasoning": "The crop clearly displays multiple lines of Hebrew text including 'מה'' and 'מה' נ' (from the Rabbinic context 'מה' הרי\"ף' / 'נגד'). Neither Option A (a single geresh/apostrophe) nor Option B ('None') accurately captures the legible text present in the image.",
+      "flag": "ambiguous"
+    },
+    {
+      "word_index": 454,
+      "opcode": "delete",
+      "docai_reading": "'",
+      "final_text": null,
+      "page": 62,
+      "bbox": {
+        "x1": 0.8178438544273376,
+        "y1": 0.6184900999069214,
+        "x2": 0.8209417462348938,
+        "y2": 0.6346386671066284
+      },
+      "vision_selected": "UNCERTAIN",
+      "vision_transcription": "ריי דכ / ד' עי / ריי דכר",
+      "confidence": 0.0,
+      "reasoning": "The image crop contains several lines of distinct Hebrew text (such as 'ריי דכ', 'ד' עי', 'ריי דכר'), which matches neither Option A (a single quote `'`) nor Option B (`None`). Therefore, neither candidate deterministically represents the visible text.",
+      "flag": "ambiguous"
+    },
+    {
+      "word_index": 498,
+      "opcode": "delete",
+      "docai_reading": "'",
+      "final_text": null,
+      "page": 62,
+      "bbox": {
+        "x1": 0.47893431782722473,
+        "y1": 0.649979829788208,
+        "x2": 0.48265179991722107,
+        "y2": 0.6665320992469788
+      },
+      "vision_selected": "UNCERTAIN",
+      "vision_transcription": "ק' ב",
+      "confidence": 0.95,
+      "reasoning": "The raster crop contains multiple visible lines of Hebrew text (including 'וא גבי', 'ק' ב', etc.). Neither Option A (which only captures a single quote mark `'`) nor Option B ('None') accurately transcribes the visible text in the image.",
+      "flag": "ambiguous"
+    }
+  ],
+  "171": [
+    {
+      "word_index": 62,
+      "opcode": "delete",
+      "docai_reading": "'",
+      "final_text": null,
+      "page": 64,
+      "bbox": {
+        "x1": 0.2895061671733856,
+        "y1": 0.31847649812698364,
+        "x2": 0.29691359400749207,
+        "y2": 0.3358995020389557
+      },
+      "vision_selected": "UNCERTAIN",
+      "vision_transcription": "הלכה\nעור' בז\nבת נ\"ד",
+      "confidence": 0.0,
+      "reasoning": "The provided candidates ('\"'\"' and 'None') do not represent the multi-line Hebrew text visible in the crop, which contains portions of words such as 'הלכה', 'עור' בז', and 'בת נ\"ד'. Per instructions, UNCERTAIN is selected when neither candidate maps deterministically to the image.",
+      "flag": "ambiguous"
+    }
+  ],
+  "174": [
+    {
+      "word_index": 24,
+      "opcode": "delete",
+      "docai_reading": "'",
+      "final_text": null,
+      "page": 64,
+      "bbox": {
+        "x1": 0.5537037253379822,
+        "y1": 0.6081847548484802,
+        "x2": 0.5567901134490967,
+        "y2": 0.6247974038124084
+      },
+      "vision_selected": "UNCERTAIN",
+      "vision_transcription": "ל לא\nא' ד\nרק עד",
+      "confidence": 0.0,
+      "reasoning": "Neither candidate option accurately represents the visible text fragment in the crop, which contains multi-line text including 'ל לא', 'א' ד', and '[פ]רק עד' matching context like 'פרק עד'.",
+      "flag": "ambiguous"
+    },
+    {
+      "word_index": 29,
+      "opcode": "delete",
+      "docai_reading": "'",
+      "final_text": null,
+      "page": 64,
+      "bbox": {
+        "x1": 0.3660493791103363,
+        "y1": 0.6081847548484802,
+        "x2": 0.37160494923591614,
+        "y2": 0.6247974038124084
+      },
+      "vision_selected": "UNCERTAIN",
+      "vision_transcription": "סמ' ז\"ל\nבפ' ה\nתבו ע",
+      "confidence": 0.9,
+      "reasoning": "The crop contains several multi-character words across multiple lines (including Rabbinic abbreviations like ז\"ל and בפ'), whereas Option A is only a single geresh/apostrophe and Option B is 'None'. Neither option provides a accurate representation of the text in the raster crop.",
+      "flag": "ambiguous"
+    },
+    {
+      "word_index": 31,
+      "opcode": "delete",
+      "docai_reading": "'",
+      "final_text": null,
+      "page": 64,
+      "bbox": {
+        "x1": 0.2907407283782959,
+        "y1": 0.6081847548484802,
+        "x2": 0.2956790030002594,
+        "y2": 0.6247974038124084
+      },
+      "vision_selected": "UNCERTAIN",
+      "vision_transcription": "אין / לי ב / ן בש",
+      "confidence": 0.0,
+      "reasoning": "The image crop contains multiple lines of legible Hebrew text (including 'אין', 'לי', and 'בש'). Option A incorrectly transcribes only a single geresh/apostrophe, and Option B is 'None'. Neither option accurately reflects the text visible in the image.",
+      "flag": "ambiguous"
+    },
+    {
+      "word_index": 35,
+      "opcode": "delete",
+      "docai_reading": "'",
+      "final_text": null,
+      "page": 64,
+      "bbox": {
+        "x1": 0.13333334028720856,
+        "y1": 0.6085899472236633,
+        "x2": 0.14506173133850098,
+        "y2": 0.6252025961875916
+      },
+      "vision_selected": "UNCERTAIN",
+      "vision_transcription": "ד\"ה",
+      "confidence": 0.0,
+      "reasoning": "The raster crop clearly displays multiple lines of Hebrew text including 'ד\"ה' and 'דרב', which does not match Option A (a single apostrophe/quote) or Option B ('None'). Therefore, neither candidate maps deterministically to the pixel array.",
+      "flag": "ambiguous"
+    },
+    {
+      "word_index": 77,
+      "opcode": "delete",
+      "docai_reading": "'",
+      "final_text": null,
+      "page": 64,
+      "bbox": {
+        "x1": 0.825308620929718,
+        "y1": 0.6539708375930786,
+        "x2": 0.8296296000480652,
+        "y2": 0.6709886789321899
+      },
+      "vision_selected": "UNCERTAIN",
+      "vision_transcription": "וכן מ\nמה' מ",
+      "confidence": 0.0,
+      "reasoning": "The raster crop contains multiple lines of legible Hebrew text (including 'וכן מ' and 'מה' מ'), but neither candidate Option A (\"'\") nor Option B (\"None\") represents the visible text array.",
+      "flag": "ambiguous"
+    }
+  ],
+  "175": [
+    {
+      "word_index": 30,
+      "opcode": "delete",
+      "docai_reading": "'",
+      "final_text": null,
+      "page": 64,
+      "bbox": {
+        "x1": 0.32283949851989746,
+        "y1": 0.7487844228744507,
+        "x2": 0.32777777314186096,
+        "y2": 0.7625607848167419
+      },
+      "vision_selected": "UNCERTAIN",
+      "vision_transcription": "איתא\nבה' ק\nמאח",
+      "confidence": 0.95,
+      "reasoning": "The raster crop contains multiple legible Hebrew lines corresponding to 'איתא', 'בה' ק', and 'מאח' from the provided Talmudic commentary context ('איתא בהדיא', 'בה' קצובות', 'מאחריני'). Neither Option A (\"'\") nor Option B (\"None\") accurately transcribes the visible text, necessitating an UNCERTAIN selection.",
+      "flag": "ambiguous"
+    },
+    {
+      "word_index": 171,
+      "opcode": "delete",
+      "docai_reading": "'",
+      "final_text": null,
+      "page": 64,
+      "bbox": {
+        "x1": 0.42901235818862915,
+        "y1": 0.8824959397315979,
+        "x2": 0.4333333373069763,
+        "y2": 0.8991085886955261
+      },
+      "vision_selected": "UNCERTAIN",
+      "vision_transcription": "רא קמ / בי רי",
+      "confidence": 0.0,
+      "reasoning": "The raster crop contains multiple visible letters across three lines (including parts of words like 'רא קמ' and 'בי רי'), which does not deterministically correspond to either Option A (a single geresh/quote) or Option B ('None').",
+      "flag": "ambiguous"
+    }
+  ],
+  "176": [
+    {
+      "word_index": 26,
+      "opcode": "delete",
+      "docai_reading": "'",
+      "final_text": null,
+      "page": 65,
+      "bbox": {
+        "x1": 0.3343634009361267,
+        "y1": 0.10522055625915527,
+        "x2": 0.3393077850341797,
+        "y2": 0.12181302905082703
+      },
+      "vision_selected": "UNCERTAIN",
+      "vision_transcription": "אי כן",
+      "confidence": 0.9,
+      "reasoning": "The crop clearly displays Hebrew text starting with 'אי כן' on the top line, which does not match candidate Option A (''') nor Option B ('None'). Thus, 'UNCERTAIN' is selected per instructions.",
+      "flag": "ambiguous"
+    },
+    {
+      "word_index": 622,
+      "opcode": "delete",
+      "docai_reading": "'",
+      "final_text": null,
+      "page": 65,
+      "bbox": {
+        "x1": 0.4313967823982239,
+        "y1": 0.6305139660835266,
+        "x2": 0.43572312593460083,
+        "y2": 0.6483204960823059
+      },
+      "vision_selected": "UNCERTAIN",
+      "vision_transcription": "הלכ\nה ב' ו\nכל ז",
+      "confidence": 0.9,
+      "reasoning": "The provided image crop contains multiple lines of Hebrew text (including fragments like 'הלכ', 'ה ב' ו', 'כל ז'). Neither Candidate A (a single apostrophe \"'\") nor Candidate B (\"None\") accurately or deterministically transcribes the full content of the image crop.",
+      "flag": "ambiguous"
+    },
+    {
+      "word_index": 646,
+      "opcode": "delete",
+      "docai_reading": "'",
+      "final_text": null,
+      "page": 65,
+      "bbox": {
+        "x1": 0.141532763838768,
+        "y1": 0.6454876661300659,
+        "x2": 0.14462299644947052,
+        "y2": 0.6616754531860352
+      },
+      "vision_selected": "UNCERTAIN",
+      "vision_transcription": "ים וילד\nמי ר\nיהם פ",
+      "confidence": 0.0,
+      "reasoning": "The raster crop contains multiple lines of legible Hebrew text (including 'ים וילד', 'מי ר', 'יהם פ'), which matches neither Option A (\"'\") nor Option B (\"None\"). Therefore, neither option deterministically maps to the pixel array.",
+      "flag": "ambiguous"
+    },
+    {
+      "word_index": 666,
+      "opcode": "delete",
+      "docai_reading": "'",
+      "final_text": null,
+      "page": 65,
+      "bbox": {
+        "x1": 0.7144622802734375,
+        "y1": 0.6754350662231445,
+        "x2": 0.7206427454948425,
+        "y2": 0.6936463117599487
+      },
+      "vision_selected": "UNCERTAIN",
+      "vision_transcription": "בית ח\nדפ' ה\nדשפ",
+      "confidence": 0.0,
+      "reasoning": "The image crop contains multiple visible lines of Hebrew text (including 'בית ח', 'דפ' ה', 'דשפ'), whereas Option A is only a single quotation mark (''') and Option B is 'None'. Neither option accurately transcribes the visible text array.",
+      "flag": "ambiguous"
+    }
+  ],
+  "177": [
+    {
+      "word_index": 24,
+      "opcode": "delete",
+      "docai_reading": "'",
+      "final_text": null,
+      "page": 65,
+      "bbox": {
+        "x1": 0.44190359115600586,
+        "y1": 0.7357345223426819,
+        "x2": 0.44746601581573486,
+        "y2": 0.753136396408081
+      },
+      "vision_selected": "UNCERTAIN",
+      "vision_transcription": "כוותיה",
+      "confidence": 0.0,
+      "reasoning": "The raster crop contains multiple lines of Hebrew text, including the clearly legible word 'כוותיה' on the second line and 'היינו כ' on the fourth line. Neither Option A (\"'\") nor Option B (\"None\") accurately transcribes the visible text in the image.",
+      "flag": "ambiguous"
+    }
+  ],
+  "178": [
+    {
+      "word_index": 40,
+      "opcode": "delete",
+      "docai_reading": "'",
+      "final_text": null,
+      "page": 66,
+      "bbox": {
+        "x1": 0.49072930216789246,
+        "y1": 0.49575069546699524,
+        "x2": 0.49629172682762146,
+        "y2": 0.5135572552680969
+      },
+      "vision_selected": "UNCERTAIN",
+      "vision_transcription": "לתו ה\n' א' ד\"\nקט\"ו ב'",
+      "confidence": 0.0,
+      "reasoning": "Neither candidate option ('\n' or 'None') accurately transcribes the multi-line Rabbinic text visible in the image crop, which contains text fragments such as 'לתו ה', '' א' ד\"', and 'קט\"ו ב''.",
+      "flag": "ambiguous"
+    }
+  ],
+  "179": [
+    {
+      "word_index": 2,
+      "opcode": "insert",
+      "docai_reading": null,
+      "final_text": "[.]",
+      "page": 66,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "no bbox (insertion) - not vision-cropped",
+      "flag": "unverified_insertion"
+    }
+  ],
+  "181": [
+    {
+      "word_index": 104,
+      "opcode": "delete",
+      "docai_reading": "'",
+      "final_text": null,
+      "page": 67,
+      "bbox": {
+        "x1": 0.5731030106544495,
+        "y1": 0.5754258036613464,
+        "x2": 0.5768044590950012,
+        "y2": 0.5904298424720764
+      },
+      "vision_selected": "UNCERTAIN",
+      "vision_transcription": "שם ותנ\nהא ק\nפי ר'\nליקוקטי",
+      "confidence": 0.0,
+      "reasoning": "The image crop contains multiple lines of legible Hebrew text (including 'הא ק', 'פי ר'', 'ליקוקטי'), neither of which corresponds to Option A (\"'\") or Option B (\"None\"). Per instruction 4, UNCERTAIN is selected.",
+      "flag": "ambiguous"
+    },
+    {
+      "word_index": 132,
+      "opcode": "delete",
+      "docai_reading": ".",
+      "final_text": null,
+      "page": 67,
+      "bbox": {
+        "x1": 0.5879086852073669,
+        "y1": 0.6050283908843994,
+        "x2": 0.5928439497947693,
+        "y2": 0.6244931221008301
+      },
+      "vision_selected": "A",
+      "vision_transcription": ".",
+      "confidence": 0.95,
+      "reasoning": "The image clearly shows a distinct punctuation mark (period/dot) between words in the middle line ('ני . ד'), matching the bracketed position [.] in the contextual manuscript excerpt and Option A.",
+      "flag": "possible_omission"
+    }
+  ],
+  "183": [
+    {
+      "word_index": 70,
+      "opcode": "delete",
+      "docai_reading": "'",
+      "final_text": null,
+      "page": 67,
+      "bbox": {
+        "x1": 0.6101171970367432,
+        "y1": 0.757096529006958,
+        "x2": 0.6144355535507202,
+        "y2": 0.7737226486206055
+      },
+      "vision_selected": "UNCERTAIN",
+      "vision_transcription": "דנקטו",
+      "confidence": 0.0,
+      "reasoning": "The image crop contains multiple lines of legible Hebrew text including the word 'דנקטו' and parts of surrounding words like 'ב' ד', whereas Candidate A is merely a single quotation mark/apostrophe and Candidate B is 'None'. Neither candidate accurately transcribes the visible text in the raster crop.",
+      "flag": "ambiguous"
+    },
+    {
+      "word_index": 90,
+      "opcode": "replace",
+      "docai_reading": "בסס\"ק",
+      "final_text": "בספ\"ק",
+      "page": 67,
+      "bbox": {
+        "x1": 0.3565700054168701,
+        "y1": 0.772506058216095,
+        "x2": 0.4046884775161743,
+        "y2": 0.7899432182312012
+      },
+      "vision_selected": "B",
+      "vision_transcription": "בספ\"ק",
+      "confidence": 0.95,
+      "reasoning": "The text features the standard Rabbinic acronym בספ\"ק (בסוף פרק קמא). Raw OCR (Option A) misread the letter 'פ' as 'ס' due to ink fill/bleed typical of traditional Rabbinic typography, whereas Rabbinic contextual and acronym analysis unambiguously confirms בספ\"ק.",
+      "flag": "current_text_confirmed"
+    }
+  ],
+  "188": [
+    {
+      "word_index": 31,
+      "opcode": "replace",
+      "docai_reading": "צ\"ר",
+      "final_text": "צ\"ד",
+      "page": 68,
+      "bbox": {
+        "x1": 0.15389369428157806,
+        "y1": 0.7373533248901367,
+        "x2": 0.18108776211738586,
+        "y2": 0.7539457678794861
+      },
+      "vision_selected": "B",
+      "vision_transcription": "צ\"ד :",
+      "confidence": 0.98,
+      "reasoning": "The visual structure of the letter following 'צ\"' shows a distinct flat horizontal roof with a sharp right-angled corner, matching the 'Dalet' (ד) seen in 'הגדול' on the top line rather than a rounded 'Resh' (ר). Furthermore, in Rabbinic citation context ('שו\"ת זקן אהרן ססי' צ\"ד'), 'צ\"ד' correctly represents section/siman 94.",
+      "flag": "current_text_confirmed"
+    }
+  ],
+  "189": [
+    {
+      "word_index": 79,
+      "opcode": "replace",
+      "docai_reading": "איססיקא",
+      "final_text": "איפסיקא",
+      "page": 68,
+      "bbox": {
+        "x1": 0.7935723066329956,
+        "y1": 0.8284095525741577,
+        "x2": 0.8603214025497437,
+        "y2": 0.8458114266395569
+      },
+      "vision_selected": "B",
+      "vision_transcription": "איפסיקא",
+      "confidence": 0.98,
+      "reasoning": "The crop clearly displays the word 'איפסיקא' (Aramaic Talmudic term for 'it was ruled / decided'). Paleographically, the third letter after the yod is a distinct 'pe' (פ) showing the top roof, left side downstroke, and inner tooth, followed by a rounded 'samekh' (ס), not two consecutive 'samekh's as suggested in Option A.",
+      "flag": "current_text_confirmed"
+    }
+  ],
+  "192": [
+    {
+      "word_index": 24,
+      "opcode": "delete",
+      "docai_reading": "'",
+      "final_text": null,
+      "page": 69,
+      "bbox": {
+        "x1": 0.35181760787963867,
+        "y1": 0.6071428656578064,
+        "x2": 0.35674676299095154,
+        "y2": 0.6245941519737244
+      },
+      "vision_selected": "UNCERTAIN",
+      "vision_transcription": "לתא ד\nא' דר\nל מינ",
+      "confidence": 0.0,
+      "reasoning": "The crop contains multiple lines of legible Hebrew text ('לתא ד', 'א' דר', 'ל מינ' from the context 'מילתא ד...', 'כ\"ג א' דרב...', 'דלעיל מיניה'). Neither Option A (\"'\") nor Option B (\"None\") represents a correct or complete transcription of the image.",
+      "flag": "ambiguous"
+    }
+  ],
+  "196": [
+    {
+      "word_index": 53,
+      "opcode": "delete",
+      "docai_reading": "'",
+      "final_text": null,
+      "page": 70,
+      "bbox": {
+        "x1": 0.8778673410415649,
+        "y1": 0.7894312143325806,
+        "x2": 0.883446991443634,
+        "y2": 0.8067769408226013
+      },
+      "vision_selected": "UNCERTAIN",
+      "vision_transcription": "דר\"ה\nבפ' אי\nאבין, א",
+      "confidence": 0.95,
+      "reasoning": "The crop image contains multiple lines of legible Rabbinic text ('דר\"ה', 'בפ' אי', 'אבין, א'). Neither Option A (a single apostrophe) nor Option B ('None') accurately transcribes the visible image array, so UNCERTAIN is required.",
+      "flag": "ambiguous"
+    },
+    {
+      "word_index": 137,
+      "opcode": "delete",
+      "docai_reading": "'",
+      "final_text": null,
+      "page": 70,
+      "bbox": {
+        "x1": 0.46621203422546387,
+        "y1": 0.8483259081840515,
+        "x2": 0.46993181109428406,
+        "y2": 0.866881787776947
+      },
+      "vision_selected": "UNCERTAIN",
+      "vision_transcription": "י' הרי\nונו' ה\nתו במר",
+      "confidence": 0.0,
+      "reasoning": "The raster crop contains multiple visible lines of Hebrew text including words such as 'הרי' and 'ונו''. Neither Option A (a single apostrophe \"'\") nor Option B (\"None\") accurately represents the multi-word manuscript text visible in the image crop.",
+      "flag": "ambiguous"
+    }
+  ],
+  "202": [
+    {
+      "word_index": 35,
+      "opcode": "delete",
+      "docai_reading": "'",
+      "final_text": null,
+      "page": 73,
+      "bbox": {
+        "x1": 0.6942557096481323,
+        "y1": 0.24493926763534546,
+        "x2": 0.7004323601722717,
+        "y2": 0.2619433104991913
+      },
+      "vision_selected": "UNCERTAIN",
+      "vision_transcription": "א' דא\nז\"ל",
+      "confidence": 0.0,
+      "reasoning": "Neither Option A (\"'\") nor Option B (\"None\") accurately transcribes the visible Hebrew text in the crop, which contains multiple lines including \"א' דא\" and \"ז\"ל\" (part of the context \"בשורש א' דאינה...\"). Therefore, UNCERTAIN is selected.",
+      "flag": "ambiguous"
+    },
+    {
+      "word_index": 43,
+      "opcode": "delete",
+      "docai_reading": "'",
+      "final_text": null,
+      "page": 73,
+      "bbox": {
+        "x1": 0.28721433877944946,
+        "y1": 0.24493926763534546,
+        "x2": 0.2915380001068115,
+        "y2": 0.2619433104991913
+      },
+      "vision_selected": "UNCERTAIN",
+      "vision_transcription": "א ורמ\nג' וי\nרמיזא",
+      "confidence": 0.9,
+      "reasoning": "The raster crop contains multiple lines of Rabbinic text from the context (including fragments like 'ג' וי' and 'רמיזא'). Neither Option A (\"'\") nor Option B (\"None\") accurately transcribes the visible text array.",
+      "flag": "ambiguous"
+    }
+  ],
+  "204": [
+    {
+      "word_index": 63,
+      "opcode": "delete",
+      "docai_reading": "'",
+      "final_text": null,
+      "page": 73,
+      "bbox": {
+        "x1": 0.0975911021232605,
+        "y1": 0.3963562846183777,
+        "x2": 0.1037677600979805,
+        "y2": 0.41174089908599854
+      },
+      "vision_selected": "UNCERTAIN",
+      "vision_transcription": "רב\nר'",
+      "confidence": 0.5,
+      "reasoning": "The crop clearly contains the text 'רב' on the upper line and 'ר'' (reysh with geresh) on the lower line. Option A (''') captures only a single character, while Option B ('None') treats it as missing. Since neither candidate option provides a complete transcription of the visible text in the crop, 'UNCERTAIN' is selected per instructions.",
+      "flag": "ambiguous"
+    }
+  ],
+  "214": [
+    {
+      "word_index": 52,
+      "opcode": "delete",
+      "docai_reading": "'",
+      "final_text": null,
+      "page": 74,
+      "bbox": {
+        "x1": 0.6621286869049072,
+        "y1": 0.4702790081501007,
+        "x2": 0.6676980257034302,
+        "y2": 0.48645371198654175
+      },
+      "vision_selected": "UNCERTAIN",
+      "vision_transcription": "יג דקא\nר' א\nדרבי",
+      "confidence": 0.9,
+      "reasoning": "The crop contains several clearly visible multi-line fragments from the context passage (e.g., 'יג דקא', 'ר' א', 'דרבי'). Neither Option A (\"'\") nor Option B (\"None\") provides an accurate transcription of the image content.",
+      "flag": "ambiguous"
+    }
+  ],
+  "215": [
+    {
+      "word_index": 14,
+      "opcode": "delete",
+      "docai_reading": "'",
+      "final_text": null,
+      "page": 74,
+      "bbox": {
+        "x1": 0.2599009871482849,
+        "y1": 0.5944197177886963,
+        "x2": 0.26361384987831116,
+        "y2": 0.6081682443618774
+      },
+      "vision_selected": "UNCERTAIN",
+      "vision_transcription": "בס' \n כ\"ש",
+      "confidence": 0.9,
+      "reasoning": "The raster crop contains multi-line Hebrew text clearly visible as 'בס'' on the first line and 'כ\"ש' on the second line (matching 'בס' באר שבע' and 'כ\"ש' from the context). Option A captures only a single apostrophe/geresh, while Option B reads 'None'. Since neither option accurately represents the visible words in the crop, the result is UNCERTAIN.",
+      "flag": "ambiguous"
+    }
+  ],
+  "218": [
+    {
+      "word_index": 58,
+      "opcode": "delete",
+      "docai_reading": "'",
+      "final_text": null,
+      "page": 76,
+      "bbox": {
+        "x1": 0.5475308895111084,
+        "y1": 0.5919772982597351,
+        "x2": 0.5518518686294556,
+        "y2": 0.6098055243492126
+      },
+      "vision_selected": "A",
+      "vision_transcription": "'",
+      "confidence": 0.95,
+      "reasoning": "The crop clearly displays Rabbinic text including line 3 'תו' חצ', where the abbreviation geresh/apostrophe (') is explicitly present following the letters 'תו' (abbreviation for 'תוספות'). Option A correctly identifies this abbreviation mark visible in the image.",
+      "flag": "possible_omission"
+    },
+    {
+      "word_index": 63,
+      "opcode": "replace",
+      "docai_reading": "שגם",
+      "final_text": "שגס",
+      "page": 76,
+      "bbox": {
+        "x1": 0.1845678985118866,
+        "y1": 0.5919772982597351,
+        "x2": 0.2191358059644699,
+        "y2": 0.6098055243492126
+      },
+      "vision_selected": "A",
+      "vision_transcription": "שגם",
+      "confidence": 1.0,
+      "reasoning": "The image clearly shows the word 'שגם' (meaning 'that also'), composed of Shin, Gimel, and a final Mem (ם). Option B contains a typographical error with Samekh ('ס'), which does not fit the letterform or the semantic context ('ושאפשר שגם רש\"י סובר כן').",
+      "flag": "current_text_may_be_wrong"
+    }
+  ],
+  "219": [
+    {
+      "word_index": 1,
+      "opcode": "replace",
+      "docai_reading": "האי",
+      "final_text": "האו",
+      "page": 76,
+      "bbox": {
+        "x1": 0.7814815044403076,
+        "y1": 0.6219611167907715,
+        "x2": 0.835185170173645,
+        "y2": 0.6389789581298828
+      },
+      "vision_selected": "A",
+      "vision_transcription": "האי",
+      "confidence": 0.98,
+      "reasoning": "The visible word clearly shows the letters ה, א, and a short upper stroke representing י, forming 'האי'. Contextually, 'האי תנא דבי ר' ישמעאל' ('this Tanna of the school of R. Ishmael') is a standard Aramaic Talmudic phrase, whereas 'האו' is a transcription error.",
+      "flag": "current_text_may_be_wrong"
+    }
+  ],
+  "221": [
+    {
+      "word_index": 58,
+      "opcode": "delete",
+      "docai_reading": "'",
+      "final_text": null,
+      "page": 76,
+      "bbox": {
+        "x1": 0.5524691343307495,
+        "y1": 0.8358995318412781,
+        "x2": 0.5561728477478027,
+        "y2": 0.8537276983261108
+      },
+      "vision_selected": "A",
+      "vision_transcription": "'",
+      "confidence": 0.95,
+      "reasoning": "The raster crop contains multiple lines of Hebrew text including 'בואר', 'מקו' כי', and 'דלא'. The abbreviation mark (geresh `'`) is clearly visible attached to 'מקו'' in the third line, matching Option A.",
+      "flag": "possible_omission"
+    }
+  ],
+  "222": [
+    {
+      "word_index": 4,
+      "opcode": "delete",
+      "docai_reading": "'",
+      "final_text": null,
+      "page": 76,
+      "bbox": {
+        "x1": 0.6913580298423767,
+        "y1": 0.867098867893219,
+        "x2": 0.6962962746620178,
+        "y2": 0.8845219016075134
+      },
+      "vision_selected": "UNCERTAIN",
+      "vision_transcription": "כלל\nכר' פ\nהדרינ",
+      "confidence": 0.95,
+      "reasoning": "The image crop contains multiple lines of legible Hebrew text corresponding to the context ('כלל', 'כר' פ', 'הדרינ...'). Neither candidate Option A (\"'\") nor Option B (\"None\") accurately transcribes this textual segment.",
+      "flag": "ambiguous"
     }
   ]
 }

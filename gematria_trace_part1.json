@@ -1,0 +1,1892 @@
+[
+  {
+    "klal_id": 1,
+    "page": 14,
+    "expected_gematria": "א",
+    "stored_gematria": "א",
+    "content_match_ratio": 0.375,
+    "status": "marker_found_content_mismatch",
+    "marker_position": 0
+  },
+  {
+    "klal_id": 2,
+    "page": 14,
+    "expected_gematria": "ב",
+    "stored_gematria": "ב",
+    "content_match_ratio": 0.875,
+    "marker_position": 542,
+    "status": "ok"
+  },
+  {
+    "klal_id": 3,
+    "page": 15,
+    "expected_gematria": "ג",
+    "stored_gematria": "ג",
+    "content_match_ratio": 0.0,
+    "status": "marker_found_content_mismatch",
+    "marker_position": 176
+  },
+  {
+    "klal_id": 4,
+    "page": 15,
+    "expected_gematria": "ד",
+    "stored_gematria": "ד",
+    "content_match_ratio": 0.0,
+    "status": "marker_found_content_mismatch",
+    "marker_position": 880
+  },
+  {
+    "klal_id": 5,
+    "page": 16,
+    "expected_gematria": "ה",
+    "stored_gematria": "ה",
+    "content_match_ratio": 1.0,
+    "marker_position": 457,
+    "status": "ok"
+  },
+  {
+    "klal_id": 6,
+    "page": 17,
+    "expected_gematria": "ו",
+    "stored_gematria": "ו",
+    "content_match_ratio": 0.75,
+    "marker_position": 69,
+    "status": "ok"
+  },
+  {
+    "klal_id": 7,
+    "page": 17,
+    "expected_gematria": "ז",
+    "stored_gematria": "ז",
+    "content_match_ratio": 1.0,
+    "marker_position": 278,
+    "status": "ok"
+  },
+  {
+    "klal_id": 8,
+    "page": 18,
+    "expected_gematria": "ח",
+    "stored_gematria": "ח",
+    "content_match_ratio": 0.875,
+    "marker_position": 159,
+    "status": "ok"
+  },
+  {
+    "klal_id": 9,
+    "page": 18,
+    "expected_gematria": "ט",
+    "stored_gematria": "ט",
+    "content_match_ratio": 0.875,
+    "marker_position": 409,
+    "status": "ok"
+  },
+  {
+    "klal_id": 10,
+    "page": 18,
+    "expected_gematria": "י",
+    "stored_gematria": "י",
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window"
+  },
+  {
+    "klal_id": 11,
+    "page": 18,
+    "expected_gematria": "יא",
+    "stored_gematria": "יא",
+    "content_match_ratio": 0.875,
+    "marker_position": 564,
+    "status": "ok"
+  },
+  {
+    "klal_id": 12,
+    "page": 18,
+    "expected_gematria": "יב",
+    "stored_gematria": "יב",
+    "content_match_ratio": 1.0,
+    "marker_position": 669,
+    "status": "ok"
+  },
+  {
+    "klal_id": 13,
+    "page": 19,
+    "expected_gematria": "יג",
+    "stored_gematria": "יג",
+    "content_match_ratio": 0.875,
+    "marker_position": 140,
+    "status": "ok"
+  },
+  {
+    "klal_id": 14,
+    "page": 19,
+    "expected_gematria": "יד",
+    "stored_gematria": "יד",
+    "content_match_ratio": 1.0,
+    "marker_position": 441,
+    "status": "ok"
+  },
+  {
+    "klal_id": 15,
+    "page": 19,
+    "expected_gematria": "טו",
+    "stored_gematria": "טו",
+    "content_match_ratio": 0.875,
+    "marker_position": 707,
+    "status": "ok"
+  },
+  {
+    "klal_id": 16,
+    "page": 19,
+    "expected_gematria": "טז",
+    "stored_gematria": "טז",
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window"
+  },
+  {
+    "klal_id": 17,
+    "page": 20,
+    "expected_gematria": "יז",
+    "stored_gematria": "יז",
+    "content_match_ratio": 0.875,
+    "marker_position": 29,
+    "status": "ok"
+  },
+  {
+    "klal_id": 18,
+    "page": 20,
+    "expected_gematria": "יח",
+    "stored_gematria": "יח",
+    "content_match_ratio": 0.0,
+    "status": "marker_found_content_mismatch",
+    "marker_position": 351
+  },
+  {
+    "klal_id": 19,
+    "page": 20,
+    "expected_gematria": "יט",
+    "stored_gematria": "יט",
+    "content_match_ratio": 1.0,
+    "marker_position": 439,
+    "status": "ok"
+  },
+  {
+    "klal_id": 20,
+    "page": 20,
+    "expected_gematria": "כ",
+    "stored_gematria": "כ",
+    "content_match_ratio": 0.875,
+    "marker_position": 671,
+    "status": "ok"
+  },
+  {
+    "klal_id": 21,
+    "page": 20,
+    "expected_gematria": "כא",
+    "stored_gematria": "כא",
+    "content_match_ratio": 1.0,
+    "marker_position": 714,
+    "status": "ok"
+  },
+  {
+    "klal_id": 22,
+    "page": 20,
+    "expected_gematria": "כב",
+    "stored_gematria": "כב",
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window"
+  },
+  {
+    "klal_id": 23,
+    "page": 21,
+    "expected_gematria": "כג",
+    "stored_gematria": "כג",
+    "content_match_ratio": 1.0,
+    "marker_position": 5,
+    "status": "ok"
+  },
+  {
+    "klal_id": 24,
+    "page": 21,
+    "expected_gematria": "כד",
+    "stored_gematria": "כד",
+    "content_match_ratio": 0.875,
+    "marker_position": 827,
+    "status": "ok"
+  },
+  {
+    "klal_id": 25,
+    "page": 22,
+    "expected_gematria": "כה",
+    "stored_gematria": "כה",
+    "content_match_ratio": 1.0,
+    "marker_position": 259,
+    "status": "ok"
+  },
+  {
+    "klal_id": 26,
+    "page": 23,
+    "expected_gematria": "כו",
+    "stored_gematria": "כו",
+    "content_match_ratio": 1.0,
+    "marker_position": 223,
+    "status": "ok"
+  },
+  {
+    "klal_id": 27,
+    "page": 23,
+    "expected_gematria": "כז",
+    "stored_gematria": "כז",
+    "content_match_ratio": 1.0,
+    "marker_position": 248,
+    "status": "ok"
+  },
+  {
+    "klal_id": 28,
+    "page": 23,
+    "expected_gematria": "כח",
+    "stored_gematria": "כח",
+    "content_match_ratio": 0.875,
+    "marker_position": 297,
+    "status": "ok"
+  },
+  {
+    "klal_id": 29,
+    "page": 23,
+    "expected_gematria": "כט",
+    "stored_gematria": "כט",
+    "content_match_ratio": 0.875,
+    "marker_position": 345,
+    "status": "ok"
+  },
+  {
+    "klal_id": 30,
+    "page": 23,
+    "expected_gematria": "ל",
+    "stored_gematria": "ל",
+    "content_match_ratio": 0.875,
+    "marker_position": 769,
+    "status": "ok"
+  },
+  {
+    "klal_id": 31,
+    "page": 25,
+    "expected_gematria": "לא",
+    "stored_gematria": "לא",
+    "content_match_ratio": 0.875,
+    "marker_position": 920,
+    "status": "ok"
+  },
+  {
+    "klal_id": 32,
+    "page": 26,
+    "expected_gematria": "לב",
+    "stored_gematria": "לב",
+    "content_match_ratio": 0.875,
+    "marker_position": 183,
+    "status": "ok"
+  },
+  {
+    "klal_id": 33,
+    "page": 26,
+    "expected_gematria": "לג",
+    "stored_gematria": "לג",
+    "content_match_ratio": 0.875,
+    "marker_position": 221,
+    "status": "ok"
+  },
+  {
+    "klal_id": 34,
+    "page": 26,
+    "expected_gematria": "לד",
+    "stored_gematria": "לד",
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window"
+  },
+  {
+    "klal_id": 35,
+    "page": 26,
+    "expected_gematria": "לה",
+    "stored_gematria": "לה",
+    "content_match_ratio": 0.875,
+    "marker_position": 476,
+    "status": "ok"
+  },
+  {
+    "klal_id": 36,
+    "page": 26,
+    "expected_gematria": "לו",
+    "stored_gematria": "לו",
+    "content_match_ratio": 0.75,
+    "marker_position": 593,
+    "status": "ok"
+  },
+  {
+    "klal_id": 37,
+    "page": 26,
+    "expected_gematria": "לז",
+    "stored_gematria": "לז",
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window"
+  },
+  {
+    "klal_id": 38,
+    "page": 27,
+    "expected_gematria": "לח",
+    "stored_gematria": "לח",
+    "content_match_ratio": 0.875,
+    "marker_position": 283,
+    "status": "ok"
+  },
+  {
+    "klal_id": 39,
+    "page": 27,
+    "expected_gematria": "לט",
+    "stored_gematria": "לט",
+    "content_match_ratio": 1.0,
+    "marker_position": 662,
+    "status": "ok"
+  },
+  {
+    "klal_id": 40,
+    "page": 28,
+    "expected_gematria": "מ",
+    "stored_gematria": "מ",
+    "content_match_ratio": 1.0,
+    "marker_position": 441,
+    "status": "ok"
+  },
+  {
+    "klal_id": 41,
+    "page": 28,
+    "expected_gematria": "מא",
+    "stored_gematria": "מא",
+    "content_match_ratio": 0.875,
+    "marker_position": 488,
+    "status": "ok"
+  },
+  {
+    "klal_id": 42,
+    "page": 29,
+    "expected_gematria": "מב",
+    "stored_gematria": "מב",
+    "content_match_ratio": 0.875,
+    "marker_position": 343,
+    "status": "ok"
+  },
+  {
+    "klal_id": 43,
+    "page": 29,
+    "expected_gematria": "מג",
+    "stored_gematria": "מג",
+    "content_match_ratio": 0.875,
+    "marker_position": 397,
+    "status": "ok"
+  },
+  {
+    "klal_id": 44,
+    "page": 29,
+    "expected_gematria": "מד",
+    "stored_gematria": "מד",
+    "content_match_ratio": 0.875,
+    "marker_position": 511,
+    "status": "ok"
+  },
+  {
+    "klal_id": 45,
+    "page": 30,
+    "expected_gematria": "מה",
+    "stored_gematria": "מה",
+    "content_match_ratio": 0.875,
+    "marker_position": 155,
+    "status": "ok"
+  },
+  {
+    "klal_id": 46,
+    "page": 30,
+    "expected_gematria": "מו",
+    "stored_gematria": "מו",
+    "content_match_ratio": 0.875,
+    "marker_position": 183,
+    "status": "ok"
+  },
+  {
+    "klal_id": 47,
+    "page": 30,
+    "expected_gematria": "מז",
+    "stored_gematria": "מז",
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window"
+  },
+  {
+    "klal_id": 48,
+    "page": 30,
+    "expected_gematria": "מח",
+    "stored_gematria": "מח",
+    "content_match_ratio": 0.75,
+    "marker_position": 246,
+    "status": "ok"
+  },
+  {
+    "klal_id": 49,
+    "page": 30,
+    "expected_gematria": "מט",
+    "stored_gematria": "מט",
+    "content_match_ratio": 0.875,
+    "marker_position": 367,
+    "status": "ok"
+  },
+  {
+    "klal_id": 50,
+    "page": 30,
+    "expected_gematria": "נ",
+    "stored_gematria": "נ",
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window"
+  },
+  {
+    "klal_id": 51,
+    "page": 30,
+    "expected_gematria": "נא",
+    "stored_gematria": "נא",
+    "content_match_ratio": 0.875,
+    "marker_position": 512,
+    "status": "ok"
+  },
+  {
+    "klal_id": 52,
+    "page": 30,
+    "expected_gematria": "נב",
+    "stored_gematria": "נב",
+    "content_match_ratio": 1.0,
+    "marker_position": 670,
+    "status": "ok"
+  },
+  {
+    "klal_id": 53,
+    "page": 30,
+    "expected_gematria": "נג",
+    "stored_gematria": "נג",
+    "content_match_ratio": 1.0,
+    "marker_position": 744,
+    "status": "ok"
+  },
+  {
+    "klal_id": 54,
+    "page": 31,
+    "expected_gematria": "נד",
+    "stored_gematria": "נד",
+    "content_match_ratio": 1.0,
+    "marker_position": 389,
+    "status": "ok"
+  },
+  {
+    "klal_id": 55,
+    "page": 32,
+    "expected_gematria": "נה",
+    "stored_gematria": "נה",
+    "content_match_ratio": 0.875,
+    "marker_position": 470,
+    "status": "ok"
+  },
+  {
+    "klal_id": 56,
+    "page": 32,
+    "expected_gematria": "נו",
+    "stored_gematria": "נו",
+    "content_match_ratio": 0.75,
+    "marker_position": 592,
+    "status": "ok"
+  },
+  {
+    "klal_id": 57,
+    "page": 32,
+    "expected_gematria": "נז",
+    "stored_gematria": "נז",
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window"
+  },
+  {
+    "klal_id": 58,
+    "page": 32,
+    "expected_gematria": "נח",
+    "stored_gematria": "נח",
+    "content_match_ratio": 0.875,
+    "marker_position": 746,
+    "status": "ok"
+  },
+  {
+    "klal_id": 59,
+    "page": 32,
+    "expected_gematria": "נט",
+    "stored_gematria": "נט",
+    "content_match_ratio": 0.75,
+    "marker_position": 765,
+    "status": "ok"
+  },
+  {
+    "klal_id": 60,
+    "page": 33,
+    "expected_gematria": "ס",
+    "stored_gematria": "ס",
+    "content_match_ratio": 0.875,
+    "marker_position": 50,
+    "status": "ok"
+  },
+  {
+    "klal_id": 61,
+    "page": 33,
+    "expected_gematria": "סא",
+    "stored_gematria": "סא",
+    "content_match_ratio": 1.0,
+    "marker_position": 156,
+    "status": "ok"
+  },
+  {
+    "klal_id": 62,
+    "page": 33,
+    "expected_gematria": "סב",
+    "stored_gematria": "סב",
+    "content_match_ratio": 0.875,
+    "marker_position": 394,
+    "status": "ok"
+  },
+  {
+    "klal_id": 63,
+    "page": 33,
+    "expected_gematria": "סג",
+    "stored_gematria": "סג",
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window"
+  },
+  {
+    "klal_id": 64,
+    "page": 33,
+    "expected_gematria": "סד",
+    "stored_gematria": "סד",
+    "content_match_ratio": 0.875,
+    "marker_position": 655,
+    "status": "ok"
+  },
+  {
+    "klal_id": 65,
+    "page": 34,
+    "expected_gematria": "סה",
+    "stored_gematria": "סה",
+    "content_match_ratio": 0.875,
+    "marker_position": 5,
+    "status": "ok"
+  },
+  {
+    "klal_id": 66,
+    "page": 34,
+    "expected_gematria": "סו",
+    "stored_gematria": "סו",
+    "content_match_ratio": 1.0,
+    "marker_position": 81,
+    "status": "ok"
+  },
+  {
+    "klal_id": 67,
+    "page": 34,
+    "expected_gematria": "סז",
+    "stored_gematria": "סז",
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window"
+  },
+  {
+    "klal_id": 68,
+    "page": 34,
+    "expected_gematria": "סח",
+    "stored_gematria": "סח",
+    "content_match_ratio": 1.0,
+    "marker_position": 383,
+    "status": "ok"
+  },
+  {
+    "klal_id": 69,
+    "page": 34,
+    "expected_gematria": "סט",
+    "stored_gematria": "סט",
+    "content_match_ratio": 0.875,
+    "marker_position": 485,
+    "status": "ok"
+  },
+  {
+    "klal_id": 70,
+    "page": 35,
+    "expected_gematria": "ע",
+    "stored_gematria": "ע",
+    "content_match_ratio": 1.0,
+    "marker_position": 41,
+    "status": "ok"
+  },
+  {
+    "klal_id": 71,
+    "page": 35,
+    "expected_gematria": "עא",
+    "stored_gematria": "עא",
+    "content_match_ratio": 0.875,
+    "marker_position": 171,
+    "status": "ok"
+  },
+  {
+    "klal_id": 72,
+    "page": 35,
+    "expected_gematria": "עב",
+    "stored_gematria": "עב",
+    "content_match_ratio": 0.875,
+    "marker_position": 236,
+    "status": "ok"
+  },
+  {
+    "klal_id": 73,
+    "page": 35,
+    "expected_gematria": "עג",
+    "stored_gematria": "עג",
+    "content_match_ratio": 0.875,
+    "marker_position": 329,
+    "status": "ok"
+  },
+  {
+    "klal_id": 74,
+    "page": 35,
+    "expected_gematria": "עד",
+    "stored_gematria": "עד",
+    "content_match_ratio": 0.875,
+    "marker_position": 480,
+    "status": "ok"
+  },
+  {
+    "klal_id": 75,
+    "page": 36,
+    "expected_gematria": "עה",
+    "stored_gematria": "עה",
+    "content_match_ratio": 0.875,
+    "marker_position": 720,
+    "status": "ok"
+  },
+  {
+    "klal_id": 76,
+    "page": 38,
+    "expected_gematria": "עו",
+    "stored_gematria": "עו",
+    "content_match_ratio": 0.75,
+    "marker_position": 67,
+    "status": "ok"
+  },
+  {
+    "klal_id": 77,
+    "page": 38,
+    "expected_gematria": "עז",
+    "stored_gematria": "עז",
+    "content_match_ratio": 1.0,
+    "marker_position": 92,
+    "status": "ok"
+  },
+  {
+    "klal_id": 78,
+    "page": 38,
+    "expected_gematria": "עח",
+    "stored_gematria": "עח",
+    "content_match_ratio": 1.0,
+    "marker_position": 188,
+    "status": "ok"
+  },
+  {
+    "klal_id": 79,
+    "page": 38,
+    "expected_gematria": "עט",
+    "stored_gematria": "עט",
+    "content_match_ratio": 1.0,
+    "marker_position": 243,
+    "status": "ok"
+  },
+  {
+    "klal_id": 80,
+    "page": 38,
+    "expected_gematria": "פ",
+    "stored_gematria": "פ",
+    "content_match_ratio": 0.75,
+    "marker_position": 312,
+    "status": "ok"
+  },
+  {
+    "klal_id": 81,
+    "page": 38,
+    "expected_gematria": "פא",
+    "stored_gematria": "פא",
+    "content_match_ratio": 0.875,
+    "marker_position": 381,
+    "status": "ok"
+  },
+  {
+    "klal_id": 82,
+    "page": 38,
+    "expected_gematria": "פב",
+    "stored_gematria": "פב",
+    "content_match_ratio": 1.0,
+    "marker_position": 470,
+    "status": "ok"
+  },
+  {
+    "klal_id": 83,
+    "page": 38,
+    "expected_gematria": "פג",
+    "stored_gematria": "פג",
+    "content_match_ratio": 0.875,
+    "marker_position": 523,
+    "status": "ok"
+  },
+  {
+    "klal_id": 84,
+    "page": 38,
+    "expected_gematria": "פד",
+    "stored_gematria": "פד",
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window"
+  },
+  {
+    "klal_id": 85,
+    "page": 39,
+    "expected_gematria": "פה",
+    "stored_gematria": "פה",
+    "content_match_ratio": 1.0,
+    "marker_position": 6,
+    "status": "ok"
+  },
+  {
+    "klal_id": 86,
+    "page": 39,
+    "expected_gematria": "פו",
+    "stored_gematria": "פו",
+    "content_match_ratio": 0.375,
+    "status": "marker_found_content_mismatch",
+    "marker_position": 105
+  },
+  {
+    "klal_id": 87,
+    "page": 39,
+    "expected_gematria": "פז",
+    "stored_gematria": "פז",
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window"
+  },
+  {
+    "klal_id": 88,
+    "page": 39,
+    "expected_gematria": "פח",
+    "stored_gematria": "פח",
+    "content_match_ratio": 0.75,
+    "marker_position": 583,
+    "status": "ok"
+  },
+  {
+    "klal_id": 89,
+    "page": 41,
+    "expected_gematria": "פט",
+    "stored_gematria": "פט",
+    "content_match_ratio": 1.0,
+    "marker_position": 5,
+    "status": "ok"
+  },
+  {
+    "klal_id": 90,
+    "page": 41,
+    "expected_gematria": "צ",
+    "stored_gematria": "צ",
+    "content_match_ratio": 0.875,
+    "marker_position": 61,
+    "status": "ok"
+  },
+  {
+    "klal_id": 91,
+    "page": 41,
+    "expected_gematria": "צא",
+    "stored_gematria": "צא",
+    "content_match_ratio": 0.875,
+    "marker_position": 88,
+    "status": "ok"
+  },
+  {
+    "klal_id": 92,
+    "page": 41,
+    "expected_gematria": "צב",
+    "stored_gematria": "צב",
+    "content_match_ratio": 0.25,
+    "status": "marker_found_content_mismatch",
+    "marker_position": 904
+  },
+  {
+    "klal_id": 93,
+    "page": 41,
+    "expected_gematria": "צג",
+    "stored_gematria": "צג",
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window"
+  },
+  {
+    "klal_id": 94,
+    "page": 42,
+    "expected_gematria": "צד",
+    "stored_gematria": "צד",
+    "content_match_ratio": 0.125,
+    "status": "marker_found_content_mismatch",
+    "marker_position": 729
+  },
+  {
+    "klal_id": 95,
+    "page": 42,
+    "expected_gematria": "צה",
+    "stored_gematria": "צה",
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window"
+  },
+  {
+    "klal_id": 96,
+    "page": 43,
+    "expected_gematria": "צו",
+    "stored_gematria": "צו",
+    "content_match_ratio": 0.0,
+    "status": "marker_found_content_mismatch",
+    "marker_position": 576
+  },
+  {
+    "klal_id": 97,
+    "page": 43,
+    "expected_gematria": "צז",
+    "stored_gematria": "צז",
+    "content_match_ratio": 0.0,
+    "status": "marker_found_content_mismatch",
+    "marker_position": 699
+  },
+  {
+    "klal_id": 98,
+    "page": 43,
+    "expected_gematria": "צח",
+    "stored_gematria": "צח",
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window"
+  },
+  {
+    "klal_id": 99,
+    "page": 44,
+    "expected_gematria": "צט",
+    "stored_gematria": "צט",
+    "content_match_ratio": 0.125,
+    "status": "marker_found_content_mismatch",
+    "marker_position": 342
+  },
+  {
+    "klal_id": 100,
+    "page": 44,
+    "expected_gematria": "ק",
+    "stored_gematria": "ק",
+    "content_match_ratio": 0.0,
+    "status": "marker_found_content_mismatch",
+    "marker_position": 384
+  },
+  {
+    "klal_id": 101,
+    "page": 44,
+    "expected_gematria": "קא",
+    "stored_gematria": "קא",
+    "content_match_ratio": 0.75,
+    "marker_position": 423,
+    "status": "ok"
+  },
+  {
+    "klal_id": 102,
+    "page": 44,
+    "expected_gematria": "קב",
+    "stored_gematria": "קב",
+    "content_match_ratio": 0.875,
+    "marker_position": 449,
+    "status": "ok"
+  },
+  {
+    "klal_id": 103,
+    "page": 44,
+    "expected_gematria": "קג",
+    "stored_gematria": "קג",
+    "content_match_ratio": 0.625,
+    "marker_position": 571,
+    "status": "ok"
+  },
+  {
+    "klal_id": 104,
+    "page": 44,
+    "expected_gematria": "קד",
+    "stored_gematria": "קד",
+    "content_match_ratio": 0.75,
+    "marker_position": 692,
+    "status": "ok"
+  },
+  {
+    "klal_id": 105,
+    "page": 44,
+    "expected_gematria": "קה",
+    "stored_gematria": "קה",
+    "content_match_ratio": 0.0,
+    "status": "marker_found_content_mismatch",
+    "marker_position": 726
+  },
+  {
+    "klal_id": 106,
+    "page": 44,
+    "expected_gematria": "קו",
+    "stored_gematria": "קו",
+    "content_match_ratio": 0.0,
+    "status": "marker_found_content_mismatch",
+    "marker_position": 750
+  },
+  {
+    "klal_id": 107,
+    "page": 44,
+    "expected_gematria": "קז",
+    "stored_gematria": "קז",
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window"
+  },
+  {
+    "klal_id": 108,
+    "page": 45,
+    "expected_gematria": "קח",
+    "stored_gematria": "קח",
+    "content_match_ratio": 0.125,
+    "status": "marker_found_content_mismatch",
+    "marker_position": 95
+  },
+  {
+    "klal_id": 109,
+    "page": 45,
+    "expected_gematria": "קט",
+    "stored_gematria": "קט",
+    "content_match_ratio": 0.75,
+    "marker_position": 164,
+    "status": "ok"
+  },
+  {
+    "klal_id": 110,
+    "page": 45,
+    "expected_gematria": "קי",
+    "stored_gematria": "קי",
+    "content_match_ratio": 0.0,
+    "status": "marker_found_content_mismatch",
+    "marker_position": 201
+  },
+  {
+    "klal_id": 111,
+    "page": 45,
+    "expected_gematria": "קיא",
+    "stored_gematria": "קיא",
+    "content_match_ratio": 0.0,
+    "status": "marker_found_content_mismatch",
+    "marker_position": 309
+  },
+  {
+    "klal_id": 112,
+    "page": 45,
+    "expected_gematria": "קיב",
+    "stored_gematria": "קיב",
+    "content_match_ratio": 0.0,
+    "status": "marker_found_content_mismatch",
+    "marker_position": 345
+  },
+  {
+    "klal_id": 113,
+    "page": 45,
+    "expected_gematria": "קיג",
+    "stored_gematria": "קיג",
+    "content_match_ratio": 0.125,
+    "status": "marker_found_content_mismatch",
+    "marker_position": 564
+  },
+  {
+    "klal_id": 114,
+    "page": 45,
+    "expected_gematria": "קיד",
+    "stored_gematria": "קיד",
+    "content_match_ratio": 0.125,
+    "status": "marker_found_content_mismatch",
+    "marker_position": 722
+  },
+  {
+    "klal_id": 115,
+    "page": 45,
+    "expected_gematria": "קיה",
+    "stored_gematria": "קטו",
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window"
+  },
+  {
+    "klal_id": 116,
+    "page": 46,
+    "expected_gematria": "קיו",
+    "stored_gematria": "קטז",
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window"
+  },
+  {
+    "klal_id": 117,
+    "page": 46,
+    "expected_gematria": "קיז",
+    "stored_gematria": "קיז",
+    "content_match_ratio": 0.0,
+    "status": "marker_found_content_mismatch",
+    "marker_position": 246
+  },
+  {
+    "klal_id": 118,
+    "page": 46,
+    "expected_gematria": "קיח",
+    "stored_gematria": "קיח",
+    "content_match_ratio": 0.0,
+    "status": "marker_found_content_mismatch",
+    "marker_position": 297
+  },
+  {
+    "klal_id": 119,
+    "page": 46,
+    "expected_gematria": "קיט",
+    "stored_gematria": "קיט",
+    "content_match_ratio": 0.0,
+    "status": "marker_found_content_mismatch",
+    "marker_position": 341
+  },
+  {
+    "klal_id": 120,
+    "page": 46,
+    "expected_gematria": "קכ",
+    "stored_gematria": "קכ",
+    "content_match_ratio": 0.0,
+    "status": "marker_found_content_mismatch",
+    "marker_position": 383
+  },
+  {
+    "klal_id": 121,
+    "page": 46,
+    "expected_gematria": "קכא",
+    "stored_gematria": "קכא",
+    "content_match_ratio": 0.0,
+    "status": "marker_found_content_mismatch",
+    "marker_position": 515
+  },
+  {
+    "klal_id": 122,
+    "page": 46,
+    "expected_gematria": "קכב",
+    "stored_gematria": "קכב",
+    "content_match_ratio": 0.0,
+    "status": "marker_found_content_mismatch",
+    "marker_position": 586
+  },
+  {
+    "klal_id": 123,
+    "page": 46,
+    "expected_gematria": "קכג",
+    "stored_gematria": "קכג",
+    "content_match_ratio": 0.875,
+    "marker_position": 741,
+    "status": "ok"
+  },
+  {
+    "klal_id": 124,
+    "page": 46,
+    "expected_gematria": "קכד",
+    "stored_gematria": "קכד",
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window"
+  },
+  {
+    "klal_id": 125,
+    "page": 47,
+    "expected_gematria": "קכה",
+    "stored_gematria": "קכה",
+    "content_match_ratio": 0.0,
+    "status": "marker_found_content_mismatch",
+    "marker_position": 110
+  },
+  {
+    "klal_id": 126,
+    "page": 47,
+    "expected_gematria": "קכו",
+    "stored_gematria": "קכו",
+    "content_match_ratio": 0.25,
+    "status": "marker_found_content_mismatch",
+    "marker_position": 212
+  },
+  {
+    "klal_id": 127,
+    "page": 47,
+    "expected_gematria": "קכז",
+    "stored_gematria": "קכז",
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window"
+  },
+  {
+    "klal_id": 128,
+    "page": 47,
+    "expected_gematria": "קכח",
+    "stored_gematria": "קכח",
+    "content_match_ratio": 0.0,
+    "status": "marker_found_content_mismatch",
+    "marker_position": 331
+  },
+  {
+    "klal_id": 129,
+    "page": 47,
+    "expected_gematria": "קכט",
+    "stored_gematria": "קכט",
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window"
+  },
+  {
+    "klal_id": 130,
+    "page": 48,
+    "expected_gematria": "קל",
+    "stored_gematria": "קל",
+    "content_match_ratio": 0.125,
+    "status": "marker_found_content_mismatch",
+    "marker_position": 891
+  },
+  {
+    "klal_id": 131,
+    "page": 48,
+    "expected_gematria": "קלא",
+    "stored_gematria": "קלא",
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window"
+  },
+  {
+    "klal_id": 132,
+    "page": 49,
+    "expected_gematria": "קלב",
+    "stored_gematria": "קלב",
+    "content_match_ratio": 0.0,
+    "status": "marker_found_content_mismatch",
+    "marker_position": 129
+  },
+  {
+    "klal_id": 133,
+    "page": 49,
+    "expected_gematria": "קלג",
+    "stored_gematria": "קלג",
+    "content_match_ratio": 0.375,
+    "status": "marker_found_content_mismatch",
+    "marker_position": 185
+  },
+  {
+    "klal_id": 134,
+    "page": 49,
+    "expected_gematria": "קלד",
+    "stored_gematria": "קלד",
+    "content_match_ratio": 0.0,
+    "status": "marker_found_content_mismatch",
+    "marker_position": 227
+  },
+  {
+    "klal_id": 135,
+    "page": 49,
+    "expected_gematria": "קלה",
+    "stored_gematria": "קלה",
+    "content_match_ratio": 0.0,
+    "status": "marker_found_content_mismatch",
+    "marker_position": 298
+  },
+  {
+    "klal_id": 136,
+    "page": 49,
+    "expected_gematria": "קלו",
+    "stored_gematria": "קלו",
+    "content_match_ratio": 0.0,
+    "status": "marker_found_content_mismatch",
+    "marker_position": 355
+  },
+  {
+    "klal_id": 137,
+    "page": 49,
+    "expected_gematria": "קלז",
+    "stored_gematria": "קלז",
+    "content_match_ratio": 0.75,
+    "marker_position": 400,
+    "status": "ok"
+  },
+  {
+    "klal_id": 138,
+    "page": 49,
+    "expected_gematria": "קלח",
+    "stored_gematria": "קלח",
+    "content_match_ratio": 0.0,
+    "status": "marker_found_content_mismatch",
+    "marker_position": 560
+  },
+  {
+    "klal_id": 139,
+    "page": 49,
+    "expected_gematria": "קלט",
+    "stored_gematria": "קלט",
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window"
+  },
+  {
+    "klal_id": 140,
+    "page": 50,
+    "expected_gematria": "קמ",
+    "stored_gematria": "קמ",
+    "content_match_ratio": 0.5,
+    "status": "marker_found_content_mismatch",
+    "marker_position": 78
+  },
+  {
+    "klal_id": 141,
+    "page": 50,
+    "expected_gematria": "קמא",
+    "stored_gematria": "קמא",
+    "content_match_ratio": 0.0,
+    "status": "marker_found_content_mismatch",
+    "marker_position": 300
+  },
+  {
+    "klal_id": 142,
+    "page": 50,
+    "expected_gematria": "קמב",
+    "stored_gematria": "קמב",
+    "content_match_ratio": 0.125,
+    "status": "marker_found_content_mismatch",
+    "marker_position": 363
+  },
+  {
+    "klal_id": 143,
+    "page": 50,
+    "expected_gematria": "קמג",
+    "stored_gematria": "קמג",
+    "content_match_ratio": 0.125,
+    "status": "marker_found_content_mismatch",
+    "marker_position": 390
+  },
+  {
+    "klal_id": 144,
+    "page": 50,
+    "expected_gematria": "קמד",
+    "stored_gematria": "קמד",
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window"
+  },
+  {
+    "klal_id": 145,
+    "page": 51,
+    "expected_gematria": "קמה",
+    "stored_gematria": "קמה",
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window"
+  },
+  {
+    "klal_id": 146,
+    "page": 52,
+    "expected_gematria": "קמו",
+    "stored_gematria": "קמו",
+    "content_match_ratio": 0.0,
+    "status": "marker_found_content_mismatch",
+    "marker_position": 702
+  },
+  {
+    "klal_id": 147,
+    "page": 52,
+    "expected_gematria": "קמז",
+    "stored_gematria": "קמז",
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window"
+  },
+  {
+    "klal_id": 148,
+    "page": 53,
+    "expected_gematria": "קמח",
+    "stored_gematria": "קמח",
+    "content_match_ratio": 0.125,
+    "status": "marker_found_content_mismatch",
+    "marker_position": 593
+  },
+  {
+    "klal_id": 149,
+    "page": 53,
+    "expected_gematria": "קמט",
+    "stored_gematria": "קמט",
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window"
+  },
+  {
+    "klal_id": 150,
+    "page": 54,
+    "expected_gematria": "קנ",
+    "stored_gematria": "קנ",
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window"
+  },
+  {
+    "klal_id": 151,
+    "page": 54,
+    "expected_gematria": "קנא",
+    "stored_gematria": "קנא",
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window"
+  },
+  {
+    "klal_id": 152,
+    "page": 55,
+    "expected_gematria": "קנב",
+    "stored_gematria": "קנב",
+    "content_match_ratio": 0.125,
+    "status": "marker_found_content_mismatch",
+    "marker_position": 713
+  },
+  {
+    "klal_id": 153,
+    "page": 55,
+    "expected_gematria": "קנג",
+    "stored_gematria": "קנג",
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window"
+  },
+  {
+    "klal_id": 154,
+    "page": 56,
+    "expected_gematria": "קנד",
+    "stored_gematria": "קנד",
+    "content_match_ratio": 0.25,
+    "status": "marker_found_content_mismatch",
+    "marker_position": 264
+  },
+  {
+    "klal_id": 155,
+    "page": 56,
+    "expected_gematria": "קנה",
+    "stored_gematria": "קנה",
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window"
+  },
+  {
+    "klal_id": 156,
+    "page": 57,
+    "expected_gematria": "קנו",
+    "stored_gematria": "קנו",
+    "content_match_ratio": 0.0,
+    "status": "marker_found_content_mismatch",
+    "marker_position": 327
+  },
+  {
+    "klal_id": 157,
+    "page": 57,
+    "expected_gematria": "קנז",
+    "stored_gematria": "קנז",
+    "content_match_ratio": 0.5,
+    "status": "marker_found_content_mismatch",
+    "marker_position": 360
+  },
+  {
+    "klal_id": 158,
+    "page": 57,
+    "expected_gematria": "קנח",
+    "stored_gematria": "קנח",
+    "content_match_ratio": 0.625,
+    "marker_position": 477,
+    "status": "ok"
+  },
+  {
+    "klal_id": 159,
+    "page": 57,
+    "expected_gematria": "קנט",
+    "stored_gematria": "קנט",
+    "content_match_ratio": 0.625,
+    "marker_position": 662,
+    "status": "ok"
+  },
+  {
+    "klal_id": 160,
+    "page": 57,
+    "expected_gematria": "קס",
+    "stored_gematria": "קס",
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window"
+  },
+  {
+    "klal_id": 161,
+    "page": 59,
+    "expected_gematria": "קסא",
+    "stored_gematria": "קסא",
+    "content_match_ratio": 0.25,
+    "status": "marker_found_content_mismatch",
+    "marker_position": 47
+  },
+  {
+    "klal_id": 162,
+    "page": 59,
+    "expected_gematria": "קסב",
+    "stored_gematria": "קסב",
+    "content_match_ratio": 0.25,
+    "status": "marker_found_content_mismatch",
+    "marker_position": 367
+  },
+  {
+    "klal_id": 163,
+    "page": 59,
+    "expected_gematria": "קסג",
+    "stored_gematria": "קסג",
+    "content_match_ratio": 0.125,
+    "status": "marker_found_content_mismatch",
+    "marker_position": 558
+  },
+  {
+    "klal_id": 164,
+    "page": 59,
+    "expected_gematria": "קסד",
+    "stored_gematria": "קסד",
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window"
+  },
+  {
+    "klal_id": 165,
+    "page": 60,
+    "expected_gematria": "קסה",
+    "stored_gematria": "קסה",
+    "content_match_ratio": 0.125,
+    "status": "marker_found_content_mismatch",
+    "marker_position": 334
+  },
+  {
+    "klal_id": 166,
+    "page": 60,
+    "expected_gematria": "קסו",
+    "stored_gematria": "קסו",
+    "content_match_ratio": 0.75,
+    "marker_position": 429,
+    "status": "ok"
+  },
+  {
+    "klal_id": 167,
+    "page": 60,
+    "expected_gematria": "קסז",
+    "stored_gematria": "קסז",
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window"
+  },
+  {
+    "klal_id": 168,
+    "page": 62,
+    "expected_gematria": "קסח",
+    "stored_gematria": "קסח",
+    "content_match_ratio": 1.0,
+    "marker_position": 140,
+    "status": "ok"
+  },
+  {
+    "klal_id": 169,
+    "page": 62,
+    "expected_gematria": "קסט",
+    "stored_gematria": "קסט",
+    "content_match_ratio": 0.875,
+    "marker_position": 739,
+    "status": "ok"
+  },
+  {
+    "klal_id": 170,
+    "page": 64,
+    "expected_gematria": "קע",
+    "stored_gematria": "קע",
+    "content_match_ratio": 0.875,
+    "marker_position": 139,
+    "status": "ok"
+  },
+  {
+    "klal_id": 171,
+    "page": 64,
+    "expected_gematria": "קעא",
+    "stored_gematria": "קעא",
+    "content_match_ratio": 0.875,
+    "marker_position": 201,
+    "status": "ok"
+  },
+  {
+    "klal_id": 172,
+    "page": 64,
+    "expected_gematria": "קעב",
+    "stored_gematria": "קעב",
+    "content_match_ratio": 0.5,
+    "status": "marker_found_content_mismatch",
+    "marker_position": 329
+  },
+  {
+    "klal_id": 173,
+    "page": 64,
+    "expected_gematria": "קעג",
+    "stored_gematria": "קעג",
+    "content_match_ratio": 0.75,
+    "marker_position": 483,
+    "status": "ok"
+  },
+  {
+    "klal_id": 174,
+    "page": 64,
+    "expected_gematria": "קעד",
+    "stored_gematria": "קעד",
+    "content_match_ratio": 0.875,
+    "marker_position": 539,
+    "status": "ok"
+  },
+  {
+    "klal_id": 175,
+    "page": 64,
+    "expected_gematria": "קעה",
+    "stored_gematria": "קעה",
+    "content_match_ratio": 0.75,
+    "marker_position": 701,
+    "status": "ok"
+  },
+  {
+    "klal_id": 176,
+    "page": 65,
+    "expected_gematria": "קעו",
+    "stored_gematria": "קעו",
+    "content_match_ratio": 0.875,
+    "marker_position": 6,
+    "status": "ok"
+  },
+  {
+    "klal_id": 177,
+    "page": 65,
+    "expected_gematria": "קעז",
+    "stored_gematria": "קעז",
+    "content_match_ratio": 0.875,
+    "marker_position": 753,
+    "status": "ok"
+  },
+  {
+    "klal_id": 178,
+    "page": 66,
+    "expected_gematria": "קעח",
+    "stored_gematria": "קעח",
+    "content_match_ratio": 0.875,
+    "marker_position": 419,
+    "status": "ok"
+  },
+  {
+    "klal_id": 179,
+    "page": 66,
+    "expected_gematria": "קעט",
+    "stored_gematria": "קעט",
+    "content_match_ratio": 1.0,
+    "marker_position": 833,
+    "status": "ok"
+  },
+  {
+    "klal_id": 181,
+    "page": 67,
+    "expected_gematria": "קפא",
+    "stored_gematria": "קפא",
+    "content_match_ratio": 1.0,
+    "marker_position": 445,
+    "status": "ok"
+  },
+  {
+    "klal_id": 183,
+    "page": 67,
+    "expected_gematria": "קפג",
+    "stored_gematria": "קפג",
+    "content_match_ratio": 0.75,
+    "marker_position": 680,
+    "status": "ok"
+  },
+  {
+    "klal_id": 184,
+    "page": 68,
+    "expected_gematria": "קפד",
+    "stored_gematria": "קפד",
+    "content_match_ratio": 1.0,
+    "marker_position": 179,
+    "status": "ok"
+  },
+  {
+    "klal_id": 185,
+    "page": 68,
+    "expected_gematria": "קפה",
+    "stored_gematria": "קפה",
+    "content_match_ratio": 0.875,
+    "marker_position": 240,
+    "status": "ok"
+  },
+  {
+    "klal_id": 186,
+    "page": 68,
+    "expected_gematria": "קפו",
+    "stored_gematria": "קפו",
+    "content_match_ratio": 0.25,
+    "status": "marker_found_content_mismatch",
+    "marker_position": 316
+  },
+  {
+    "klal_id": 188,
+    "page": 68,
+    "expected_gematria": "קפח",
+    "stored_gematria": "קפח",
+    "content_match_ratio": 0.875,
+    "marker_position": 680,
+    "status": "ok"
+  },
+  {
+    "klal_id": 189,
+    "page": 68,
+    "expected_gematria": "קפט",
+    "stored_gematria": "קפט",
+    "content_match_ratio": 0.875,
+    "marker_position": 714,
+    "status": "ok"
+  },
+  {
+    "klal_id": 191,
+    "page": 69,
+    "expected_gematria": "קצא",
+    "stored_gematria": "קצא",
+    "content_match_ratio": 0.875,
+    "marker_position": 425,
+    "status": "ok"
+  },
+  {
+    "klal_id": 192,
+    "page": 69,
+    "expected_gematria": "קצב",
+    "stored_gematria": "קצב",
+    "content_match_ratio": 1.0,
+    "marker_position": 574,
+    "status": "ok"
+  },
+  {
+    "klal_id": 193,
+    "page": 69,
+    "expected_gematria": "קצג",
+    "stored_gematria": "קצג",
+    "content_match_ratio": 0.875,
+    "marker_position": 648,
+    "status": "ok"
+  },
+  {
+    "klal_id": 195,
+    "page": 70,
+    "expected_gematria": "קצה",
+    "stored_gematria": "קצה",
+    "content_match_ratio": 0.75,
+    "marker_position": 595,
+    "status": "ok"
+  },
+  {
+    "klal_id": 196,
+    "page": 70,
+    "expected_gematria": "קצו",
+    "stored_gematria": "קצו",
+    "content_match_ratio": 0.875,
+    "marker_position": 641,
+    "status": "ok"
+  },
+  {
+    "klal_id": 198,
+    "page": 70,
+    "expected_gematria": "קצח",
+    "stored_gematria": "קצח",
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window"
+  },
+  {
+    "klal_id": 199,
+    "page": 72,
+    "expected_gematria": "קצט",
+    "stored_gematria": "קצט",
+    "content_match_ratio": 0.875,
+    "marker_position": 540,
+    "status": "ok"
+  },
+  {
+    "klal_id": 200,
+    "page": 72,
+    "expected_gematria": "ר",
+    "stored_gematria": "ר",
+    "content_match_ratio": 1.0,
+    "marker_position": 593,
+    "status": "ok"
+  },
+  {
+    "klal_id": 201,
+    "page": 73,
+    "expected_gematria": "רא",
+    "stored_gematria": "רא",
+    "content_match_ratio": 0.75,
+    "marker_position": 95,
+    "status": "ok"
+  },
+  {
+    "klal_id": 202,
+    "page": 73,
+    "expected_gematria": "רב",
+    "stored_gematria": "רב",
+    "content_match_ratio": 0.875,
+    "marker_position": 148,
+    "status": "ok"
+  },
+  {
+    "klal_id": 203,
+    "page": 73,
+    "expected_gematria": "רג",
+    "stored_gematria": "רג",
+    "content_match_ratio": 1.0,
+    "marker_position": 243,
+    "status": "ok"
+  },
+  {
+    "klal_id": 204,
+    "page": 73,
+    "expected_gematria": "רד",
+    "stored_gematria": "רד",
+    "content_match_ratio": 0.75,
+    "marker_position": 284,
+    "status": "ok"
+  },
+  {
+    "klal_id": 205,
+    "page": 73,
+    "expected_gematria": "רה",
+    "stored_gematria": "רה",
+    "content_match_ratio": 0.875,
+    "marker_position": 362,
+    "status": "ok"
+  },
+  {
+    "klal_id": 206,
+    "page": 73,
+    "expected_gematria": "רו",
+    "stored_gematria": "רו",
+    "content_match_ratio": 0.75,
+    "marker_position": 404,
+    "status": "ok"
+  },
+  {
+    "klal_id": 207,
+    "page": 73,
+    "expected_gematria": "רז",
+    "stored_gematria": "רז",
+    "content_match_ratio": 0.875,
+    "marker_position": 604,
+    "status": "ok"
+  },
+  {
+    "klal_id": 208,
+    "page": 73,
+    "expected_gematria": "רח",
+    "stored_gematria": "רח",
+    "content_match_ratio": 0.875,
+    "marker_position": 656,
+    "status": "ok"
+  },
+  {
+    "klal_id": 209,
+    "page": 73,
+    "expected_gematria": "רט",
+    "stored_gematria": "רט",
+    "content_match_ratio": 0.875,
+    "marker_position": 739,
+    "status": "ok"
+  },
+  {
+    "klal_id": 210,
+    "page": 73,
+    "expected_gematria": "רי",
+    "stored_gematria": "רי",
+    "content_match_ratio": 0.625,
+    "marker_position": 771,
+    "status": "ok"
+  },
+  {
+    "klal_id": 211,
+    "page": 74,
+    "expected_gematria": "ריא",
+    "stored_gematria": "ריא",
+    "content_match_ratio": 0.875,
+    "marker_position": 81,
+    "status": "ok"
+  },
+  {
+    "klal_id": 212,
+    "page": 74,
+    "expected_gematria": "ריב",
+    "stored_gematria": "ריב",
+    "content_match_ratio": 0.875,
+    "marker_position": 162,
+    "status": "ok"
+  },
+  {
+    "klal_id": 213,
+    "page": 74,
+    "expected_gematria": "ריג",
+    "stored_gematria": "ריג",
+    "content_match_ratio": 0.75,
+    "marker_position": 252,
+    "status": "ok"
+  },
+  {
+    "klal_id": 214,
+    "page": 74,
+    "expected_gematria": "ריד",
+    "stored_gematria": "ריד",
+    "content_match_ratio": 0.875,
+    "marker_position": 308,
+    "status": "ok"
+  },
+  {
+    "klal_id": 215,
+    "page": 74,
+    "expected_gematria": "ריה",
+    "stored_gematria": "רטו",
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window"
+  },
+  {
+    "klal_id": 218,
+    "page": 76,
+    "expected_gematria": "ריח",
+    "stored_gematria": "ריח",
+    "content_match_ratio": 1.0,
+    "marker_position": 525,
+    "status": "ok"
+  },
+  {
+    "klal_id": 219,
+    "page": 76,
+    "expected_gematria": "ריט",
+    "stored_gematria": "ריט",
+    "content_match_ratio": 0.75,
+    "marker_position": 598,
+    "status": "ok"
+  },
+  {
+    "klal_id": 220,
+    "page": 76,
+    "expected_gematria": "רכ",
+    "stored_gematria": "רכ",
+    "content_match_ratio": 0.625,
+    "marker_position": 707,
+    "status": "ok"
+  },
+  {
+    "klal_id": 221,
+    "page": 76,
+    "expected_gematria": "רכא",
+    "stored_gematria": "רכא",
+    "content_match_ratio": 0.875,
+    "marker_position": 755,
+    "status": "ok"
+  },
+  {
+    "klal_id": 222,
+    "page": 76,
+    "expected_gematria": "רכב",
+    "stored_gematria": "רכב",
+    "content_match_ratio": 0.75,
+    "marker_position": 837,
+    "status": "ok"
+  }
+]

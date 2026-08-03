@@ -4,6 +4,13 @@
 #         the original DocAI OCR reading + vision-verified confidence.
 # Right: abridged klal list for navigation.
 # All three panes stay in sync as you scroll or click.
+#
+# Page attribution comes from header_anchored_alignment.py's output
+# (part1_header_anchored_alignment.json), NOT aligned_klalim - see CLAUDE.md
+# Open Items / Lessons learned: that mapping was discredited (found to be
+# wrong via first-principles re-verification against each page's own printed
+# section header). Only `trusted` klalim get a page shown; the rest have no
+# reliable scan location to point at.
 import json
 import os
 
@@ -25,19 +32,14 @@ def main():
     klalim = [k for k in demo if k["klal_id"] <= PART1_MAX_KLAL]
     klalim.sort(key=lambda k: k["klal_id"])
 
-    aligned_page_of = {}
-    for fn in sorted(os.listdir(os.path.join(REPO, "aligned_klalim"))):
-        if not fn.endswith(".json"):
-            continue
-        page_id = int(fn.split("_")[1].split(".")[0])
-        for k in json.load(open(os.path.join(REPO, "aligned_klalim", fn))):
-            if k["klal_id"] <= PART1_MAX_KLAL:
-                aligned_page_of.setdefault(k["klal_id"], page_id)
+    alignment = {r["klal_id"]: r for r in json.load(open(os.path.join(REPO, "part1_header_anchored_alignment.json")))}
+    trusted_page_of = {kid: r["matched_page"] for kid, r in alignment.items() if r["trusted"]}
 
     corrections = json.load(open(os.path.join(REPO, "corrections_part1.json")))
 
     for k in klalim:
-        k["page"] = aligned_page_of.get(k["klal_id"])
+        k["page"] = trusted_page_of.get(k["klal_id"])
+        k["page_trusted"] = k["klal_id"] in trusted_page_of
         k["corrections"] = corrections.get(str(k["klal_id"]), [])
 
     pages_with_corrections = sorted(set(

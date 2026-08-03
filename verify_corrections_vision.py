@@ -5,6 +5,7 @@
 # set from build_corrections_dataset.py instead of a full page scan.
 import json
 import os
+import sys
 import time
 import hashlib
 import sqlite3
@@ -136,7 +137,9 @@ def main():
         raise SystemExit("GEMINI_API_KEY not set")
     client = genai.Client(api_key=api_key)
 
-    candidates = json.load(open(CANDIDATES_PATH))["corrections"]
+    candidates_path = sys.argv[1] if len(sys.argv) > 1 else CANDIDATES_PATH
+    out_path = sys.argv[2] if len(sys.argv) > 2 else OUT_PATH
+    candidates = json.load(open(candidates_path))["corrections"]
     final_by_id = {k["klal_id"]: k for k in json.load(open(DEMO_DATASET))}
     doc = fitz.open(PDF_PATH)
 
@@ -170,9 +173,9 @@ def main():
         })
 
     doc.close()
-    with open(OUT_PATH, "w", encoding="utf-8") as f:
+    with open(out_path, "w", encoding="utf-8") as f:
         json.dump(results, f, ensure_ascii=False, indent=2)
-    print(f"\nWrote {len(results)} results to {OUT_PATH}")
+    print(f"\nWrote {len(results)} results to {out_path}")
 
 
 if __name__ == "__main__":
