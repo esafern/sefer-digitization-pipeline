@@ -1,0 +1,244 @@
+{
+  "corrections": [
+    {
+      "klal_id": 1,
+      "page": 14,
+      "opcode": "replace",
+      "word_index_in_final_text": 245,
+      "original_word": "דנראח",
+      "corrected_word": "דנראה",
+      "bbox": {
+        "x1": 0.70712072,
+        "y1": 0.4941414,
+        "x2": 0.75665635,
+        "y2": 0.51151514
+      }
+    },
+    {
+      "klal_id": 1,
+      "page": 14,
+      "opcode": "replace",
+      "word_index_in_final_text": 333,
+      "original_word": "עור",
+      "corrected_word": "עוד",
+      "bbox": {
+        "x1": 0.76284832,
+        "y1": 0.56969696,
+        "x2": 0.78885448,
+        "y2": 0.58626264
+      }
+    },
+    {
+      "klal_id": 1,
+      "page": 14,
+      "opcode": "replace",
+      "word_index_in_final_text": 468,
+      "original_word": "ומרקמהד",
+      "corrected_word": "ומדקמהדר",
+      "bbox": {
+        "x1": 0.53126937,
+        "y1": 0.67555553,
+        "x2": 0.60000002,
+        "y2": 0.69252527
+      }
+    },
+    {
+      "klal_id": 2,
+      "page": 14,
+      "opcode": "insert",
+      "word_index_in_final_text": 0,
+      "original_word": null,
+      "corrected_word": "ב",
+      "bbox": null
+    },
+    {
+      "klal_id": 2,
+      "page": 14,
+      "opcode": "replace",
+      "word_index_in_final_text": 30,
+      "original_word": "בססחים",
+      "corrected_word": "בפסחים",
+      "bbox": {
+        "x1": 0.16284829,
+        "y1": 0.75070709,
+        "x2": 0.2241486,
+        "y2": 0.76606059
+      }
+    },
+    {
+      "klal_id": 17,
+      "page": 15,
+      "opcode": "delete",
+      "word_index_in_final_text": 200,
+      "original_word": "בסי ' כ '",
+      "corrected_word": null,
+      "bbox": {
+        "x1": 0.45370939,
+        "y1": 0.33047736,
+        "x2": 0.50582463,
+        "y2": 0.34679723
+      }
+    },
+    {
+      "klal_id": 23,
+      "page": 15,
+      "opcode": "insert",
+      "word_index_in_final_text": 504,
+      "original_word": null,
+      "corrected_word": "דקאמר ליה בפ'",
+      "bbox": null
+    },
+    {
+      "klal_id": 30,
+      "page": 16,
+      "opcode": "insert",
+      "word_index_in_final_text": 18,
+      "original_word": null,
+      "corrected_word": "הזיד במעילה",
+      "bbox": null
+    },
+    {
+      "klal_id": 44,
+      "page": 17,
+      "opcode": "insert",
+      "word_index_in_final_text": 213,
+      "original_word": null,
+      "corrected_word": "משיירי כנ\"הג",
+      "bbox": null
+    },
+    {
+      "klal_id": 44,
+      "page": 17,
+      "opcode": "insert",
+      "word_index_in_final_text": 324,
+      "original_word": null,
+      "corrected_word": "לתוס '",
+      "bbox": null
+    },
+    {
+      "klal_id": 75,
+      "page": 19,
+      "opcode": "insert",
+      "word_index_in_final_text": 246,
+      "original_word": null,
+      "corrected_word": "מיתות ס\"ח א",
+      "bbox": null
+    },
+    {
+      "klal_id": 82,
+      "page": 20,
+      "opcode": "insert",
+      "word_index_in_final_text": 49,
+      "original_word": null,
+      "corrected_word": "ע\"ג ועיין מקוה ישרא",
+      "bbox": null
+    },
+    {
+      "klal_id": 87,
+      "page": 20,
+      "opcode": "replace",
+      "word_index_in_final_text": 100,
+      "original_word": "ל\"ז",
+      "corrected_word": "כ\"ז",
+      "bbox": {
+        "x1": 0.46666667,
+        "y1": 0.19196787,
+        "x2": 0.49158877,
+        "y2": 0.20883535
+      }
+    },
+    {
+      "klal_id": 102,
+      "page": 21,
+      "opcode": "insert",
+      "word_index_in_final_text": 18,
+      "original_word": null,
+      "corrected_word": "פר\"ח א\"ח ריש סי",
+      "bbox": null
+    },
+    {
+      "klal_id": 114,
+      "page": 22,
+      "opcode": "delete",
+      "word_index_in_final_text": 64,
+      "original_word": "פרק איזהו נשך",
+      "corrected_word": null,
+      "bbox": {
+        "x1": 0.13825171,
+        "y1": 0.39411053,
+        "x2": 0.9014259,
+        "y2": 0.4271884
+      }
+    },
+    {
+      "klal_id": 139,
+      "page": 24,
+      "opcode": "delete",
+      "word_index_in_final_text": 21,
+      "original_word": "ד\"ה תפילין",
+      "corrected_word": null,
+      "bbox": {
+        "x1": 0.39776951,
+        "y1": 0.16390796,
+        "x2": 0.48636928,
+        "y2": 0.18126766
+      }
+    },
+    {
+      "klal_id": 171,
+      "page": 26,
+      "opcode": "delete",
+      "word_index_in_final_text": 91,
+      "original_word": "מצינו",
+      "corrected_word": null,
+      "bbox": {
+        "x1": 0.39141256,
+        "y1": 0.21052632,
+        "x2": 0.43310517,
+        "y2": 0.22860587
+      }
+    },
+    {
+      "klal_id": 173,
+      "page": 26,
+      "opcode": "delete",
+      "word_index_in_final_text": 53,
+      "original_word": "ובשער יוסף דף מ",
+      "corrected_word": null,
+      "bbox": {
+        "x1": 0.16552582,
+        "y1": 0.61912417,
+        "x2": 0.30740511,
+        "y2": 0.63559663
+      }
+    },
+    {
+      "klal_id": 201,
+      "page": 28,
+      "opcode": "delete",
+      "word_index_in_final_text": 50,
+      "original_word": "סי",
+      "corrected_word": null,
+      "bbox": {
+        "x1": 0.82202864,
+        "y1": 0.34833267,
+        "x2": 0.83883011,
+        "y2": 0.36440337
+      }
+    },
+    {
+      "klal_id": 215,
+      "page": 30,
+      "opcode": "insert",
+      "word_index_in_final_text": 1652,
+      "original_word": null,
+      "corrected_word": "מינייהו כללא",
+      "bbox": null
+    }
+  ],
+  "meta": {
+    "total_candidates": 20,
+    "klalim_covered": 16,
+    "skipped_no_docai_page_klalim": []
+  }
+}

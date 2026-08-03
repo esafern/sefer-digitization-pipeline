@@ -1,0 +1,308 @@
+[
+  {
+    "klal_id": 1,
+    "page": 14,
+    "opcode": "replace",
+    "word_index_in_final_text": 245,
+    "original_word": "דנראח",
+    "corrected_word": "דנראה",
+    "bbox": {
+      "x1": 0.70712072,
+      "y1": 0.4941414,
+      "x2": 0.75665635,
+      "y2": 0.51151514
+    },
+    "vision_selected": "A",
+    "vision_transcription": "דנראח",
+    "vision_confidence": 0.95,
+    "vision_reasoning": "The raster crop visually shows the word spelled with a final 'ח' (het) instead of 'ה' (hei), reading 'דנראח' (a common print typographical variant/error for 'דנראה'). The final letter shares the exact closed top-left junction as the 'ח' in 'מוכח' on the line below it."
+  },
+  {
+    "klal_id": 1,
+    "page": 14,
+    "opcode": "replace",
+    "word_index_in_final_text": 333,
+    "original_word": "עור",
+    "corrected_word": "עוד",
+    "bbox": {
+      "x1": 0.76284832,
+      "y1": 0.56969696,
+      "x2": 0.78885448,
+      "y2": 0.58626264
+    },
+    "vision_selected": "A",
+    "vision_transcription": "עור",
+    "vision_confidence": 0.95,
+    "vision_reasoning": "The glyph in the crop clearly shows a rounded upper-right corner characteristic of a Resh ('ר') rather than the square corner with a rightward projection of a Dalet ('ד'). Although the surrounding text logically implies 'עוד' ('and he wrote further'), the actual printed text in this visual raster crop is an original print error reading 'עור'."
+  },
+  {
+    "klal_id": 1,
+    "page": 14,
+    "opcode": "replace",
+    "word_index_in_final_text": 468,
+    "original_word": "ומרקמהד",
+    "corrected_word": "ומדקמהדר",
+    "bbox": {
+      "x1": 0.53126937,
+      "y1": 0.67555553,
+      "x2": 0.60000002,
+      "y2": 0.69252527
+    },
+    "vision_selected": "B",
+    "vision_transcription": "ומדקמהדר",
+    "vision_confidence": 0.98,
+    "vision_reasoning": "The visual evidence in line 2 clearly shows the word 'ומדקמהדר' (and from the fact that he returns/replies), a standard Talmudic Aramaic term (ו-מ-ד-ק-מ-ה-ד-ר). Paleographically, the third letter is a 'ד' with a distinct right shoulder (not 'ר'), and the final letter is a 'ר'."
+  },
+  {
+    "klal_id": 2,
+    "page": 14,
+    "opcode": "insert",
+    "word_index_in_final_text": 0,
+    "original_word": null,
+    "corrected_word": "ב",
+    "bbox": null,
+    "vision_confidence": null,
+    "vision_reasoning": "no bbox (insertion) - not vision-cropped",
+    "vision_selected": null
+  },
+  {
+    "klal_id": 2,
+    "page": 14,
+    "opcode": "replace",
+    "word_index_in_final_text": 30,
+    "original_word": "בססחים",
+    "corrected_word": "בפסחים",
+    "bbox": {
+      "x1": 0.16284829,
+      "y1": 0.75070709,
+      "x2": 0.2241486,
+      "y2": 0.76606059
+    },
+    "vision_selected": "B",
+    "vision_transcription": "בפסחים",
+    "vision_confidence": 0.98,
+    "vision_reasoning": "The crop clearly shows the word 'בפסחים' (in tractate Pesachim). Paleographically, after the prefix letter 'ב', the letter 'פ' is visible with its characteristic inner tongue/opening, followed by 'ס', 'ח', 'י', and final 'ם'. Option A ('בססחים') is an OCR error reading the 'פ' as a 'ס'. Furthermore, the context 'ורש\"י כתב בפסחים כ\"ד' confirms the tractate reference."
+  },
+  {
+    "klal_id": 17,
+    "page": 15,
+    "opcode": "delete",
+    "word_index_in_final_text": 200,
+    "original_word": "בסי ' כ '",
+    "corrected_word": null,
+    "bbox": {
+      "x1": 0.45370939,
+      "y1": 0.33047736,
+      "x2": 0.50582463,
+      "y2": 0.34679723
+    },
+    "vision_selected": "A",
+    "vision_transcription": "בסי' כ'",
+    "vision_confidence": 0.98,
+    "vision_reasoning": "The visible characters in the middle line of the crop clearly read 'בסי' כ'' (an abbreviation for 'בסימן כ''), matching Option A precisely."
+  },
+  {
+    "klal_id": 23,
+    "page": 15,
+    "opcode": "insert",
+    "word_index_in_final_text": 504,
+    "original_word": null,
+    "corrected_word": "דקאמר ליה בפ'",
+    "bbox": null,
+    "vision_confidence": null,
+    "vision_reasoning": "no bbox (insertion) - not vision-cropped",
+    "vision_selected": null
+  },
+  {
+    "klal_id": 30,
+    "page": 16,
+    "opcode": "insert",
+    "word_index_in_final_text": 18,
+    "original_word": null,
+    "corrected_word": "הזיד במעילה",
+    "bbox": null,
+    "vision_confidence": null,
+    "vision_reasoning": "no bbox (insertion) - not vision-cropped",
+    "vision_selected": null
+  },
+  {
+    "klal_id": 44,
+    "page": 17,
+    "opcode": "insert",
+    "word_index_in_final_text": 213,
+    "original_word": null,
+    "corrected_word": "משיירי כנ\"הג",
+    "bbox": null,
+    "vision_confidence": null,
+    "vision_reasoning": "no bbox (insertion) - not vision-cropped",
+    "vision_selected": null
+  },
+  {
+    "klal_id": 44,
+    "page": 17,
+    "opcode": "insert",
+    "word_index_in_final_text": 324,
+    "original_word": null,
+    "corrected_word": "לתוס '",
+    "bbox": null,
+    "vision_confidence": null,
+    "vision_reasoning": "no bbox (insertion) - not vision-cropped",
+    "vision_selected": null
+  },
+  {
+    "klal_id": 75,
+    "page": 19,
+    "opcode": "insert",
+    "word_index_in_final_text": 246,
+    "original_word": null,
+    "corrected_word": "מיתות ס\"ח א",
+    "bbox": null,
+    "vision_confidence": null,
+    "vision_reasoning": "no bbox (insertion) - not vision-cropped",
+    "vision_selected": null
+  },
+  {
+    "klal_id": 82,
+    "page": 20,
+    "opcode": "insert",
+    "word_index_in_final_text": 49,
+    "original_word": null,
+    "corrected_word": "ע\"ג ועיין מקוה ישרא",
+    "bbox": null,
+    "vision_confidence": null,
+    "vision_reasoning": "no bbox (insertion) - not vision-cropped",
+    "vision_selected": null
+  },
+  {
+    "klal_id": 87,
+    "page": 20,
+    "opcode": "replace",
+    "word_index_in_final_text": 100,
+    "original_word": "ל\"ז",
+    "corrected_word": "כ\"ז",
+    "bbox": {
+      "x1": 0.46666667,
+      "y1": 0.19196787,
+      "x2": 0.49158877,
+      "y2": 0.20883535
+    },
+    "vision_selected": "A",
+    "vision_transcription": "ל\"ז",
+    "vision_confidence": 0.98,
+    "vision_reasoning": "Paleographically, the character preceding the gershayim and 'ז' features a distinct vertical ascender extending well above the x-height/headline into the line above. This upper neck is uniquely characteristic of the Hebrew letter Lamed ('ל'), whereas Kaf ('כ') remains strictly within the standard line height. Thus, Option A (\"ל\"ז\") is unequivocally the correct reading."
+  },
+  {
+    "klal_id": 102,
+    "page": 21,
+    "opcode": "insert",
+    "word_index_in_final_text": 18,
+    "original_word": null,
+    "corrected_word": "פר\"ח א\"ח ריש סי",
+    "bbox": null,
+    "vision_confidence": null,
+    "vision_reasoning": "no bbox (insertion) - not vision-cropped",
+    "vision_selected": null
+  },
+  {
+    "klal_id": 114,
+    "page": 22,
+    "opcode": "delete",
+    "word_index_in_final_text": 64,
+    "original_word": "פרק איזהו נשך",
+    "corrected_word": null,
+    "bbox": {
+      "x1": 0.13825171,
+      "y1": 0.39411053,
+      "x2": 0.9014259,
+      "y2": 0.4271884
+    },
+    "vision_selected": "A",
+    "vision_transcription": "פרק איזהו נשך",
+    "vision_confidence": 0.98,
+    "vision_reasoning": "The string 'פרק' appears at the end of the second visible line and 'איזהו נשך' begins the third line of the provided image crop, matching candidate Option A."
+  },
+  {
+    "klal_id": 139,
+    "page": 24,
+    "opcode": "delete",
+    "word_index_in_final_text": 21,
+    "original_word": "ד\"ה תפילין",
+    "corrected_word": null,
+    "bbox": {
+      "x1": 0.39776951,
+      "y1": 0.16390796,
+      "x2": 0.48636928,
+      "y2": 0.18126766
+    },
+    "vision_selected": "A",
+    "vision_transcription": "ד\"ה תפילין",
+    "vision_confidence": 0.98,
+    "vision_reasoning": "The center line of the crop clearly displays the Hebrew text 'ד\"ה תפילין' ('ד\"ה' abbreviation for דיבור המתחיל followed by 'תפילין'). This matches Option A perfectly."
+  },
+  {
+    "klal_id": 171,
+    "page": 26,
+    "opcode": "delete",
+    "word_index_in_final_text": 91,
+    "original_word": "מצינו",
+    "corrected_word": null,
+    "bbox": {
+      "x1": 0.39141256,
+      "y1": 0.21052632,
+      "x2": 0.43310517,
+      "y2": 0.22860587
+    },
+    "vision_selected": "A",
+    "vision_transcription": "מצינו",
+    "vision_confidence": 1.0,
+    "vision_reasoning": "The Hebrew word 'מצינו' is clearly legible in the middle line of the cropped image."
+  },
+  {
+    "klal_id": 173,
+    "page": 26,
+    "opcode": "delete",
+    "word_index_in_final_text": 53,
+    "original_word": "ובשער יוסף דף מ",
+    "corrected_word": null,
+    "bbox": {
+      "x1": 0.16552582,
+      "y1": 0.61912417,
+      "x2": 0.30740511,
+      "y2": 0.63559663
+    },
+    "vision_selected": "A",
+    "vision_transcription": "ובשער יוסף דף מ'",
+    "vision_confidence": 0.98,
+    "vision_reasoning": "The central line in the image clearly contains the text 'ובשער יוסף דף מ'', matching Option A directly."
+  },
+  {
+    "klal_id": 201,
+    "page": 28,
+    "opcode": "delete",
+    "word_index_in_final_text": 50,
+    "original_word": "סי",
+    "corrected_word": null,
+    "bbox": {
+      "x1": 0.82202864,
+      "y1": 0.34833267,
+      "x2": 0.83883011,
+      "y2": 0.36440337
+    },
+    "vision_selected": "A",
+    "vision_transcription": "סי'",
+    "vision_confidence": 0.98,
+    "vision_reasoning": "The middle of the third line clearly displays the letters Samekh and Yod with a geresh (סי'), representing a standard Rabbinic abbreviation (for סימן). Thus, Option A ('סי') is accurate."
+  },
+  {
+    "klal_id": 215,
+    "page": 30,
+    "opcode": "insert",
+    "word_index_in_final_text": 1652,
+    "original_word": null,
+    "corrected_word": "מינייהו כללא",
+    "bbox": null,
+    "vision_confidence": null,
+    "vision_reasoning": "no bbox (insertion) - not vision-cropped",
+    "vision_selected": null
+  }
+]
