@@ -14,13 +14,18 @@ from verify_semantic_sanity import init_cache, adjudicate
 REPO = os.path.dirname(os.path.abspath(__file__))
 TITLE_VERIFICATION_PATH = os.path.join(REPO, "title_verification_part1.json")
 PART1_PATH = os.path.join(REPO, "part1.json")
-AGREEMENT_THRESHOLD = 0.7
+# 0.7 is too narrow - klal 82 (a real בשר/בשל OCR error) scored 0.8 and was
+# wrongly waved off as "resolved" before this check ran on it. A single
+# wrong word in an otherwise-matching title can still clear 0.7-0.8 on a
+# word-list ratio, so widen the net rather than trust the threshold alone.
+AGREEMENT_THRESHOLD = 0.9
 
 
-def load_title_flags():
-    if not os.path.exists(TITLE_VERIFICATION_PATH):
+def load_title_flags(path=None):
+    path = path or TITLE_VERIFICATION_PATH
+    if not os.path.exists(path):
         return []
-    results = json.load(open(TITLE_VERIFICATION_PATH, encoding="utf-8"))
+    results = json.load(open(path, encoding="utf-8"))
     return [r for r in results if r.get("agreement_ratio") is not None and r["agreement_ratio"] < AGREEMENT_THRESHOLD]
 
 
@@ -34,6 +39,7 @@ def load_corrections_flags(path):
 def main():
     corrections_path = sys.argv[1] if len(sys.argv) > 1 else None
     out_path = sys.argv[2] if len(sys.argv) > 2 else os.path.join(REPO, "semantic_sanity_results.json")
+    title_verification_path = sys.argv[3] if len(sys.argv) > 3 else None
 
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
@@ -44,7 +50,7 @@ def main():
     klalim = {k["klal_id"]: k for k in json.load(open(PART1_PATH, encoding="utf-8"))}
     results = []
 
-    title_flags = load_title_flags()
+    title_flags = load_title_flags(title_verification_path)
     print(f"Title-verification low-agreement items to check: {len(title_flags)}")
     for r in title_flags:
         kid = r["klal_id"]

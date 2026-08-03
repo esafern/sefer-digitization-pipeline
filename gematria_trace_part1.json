@@ -307,7 +307,7 @@
     "expected_gematria": "לה",
     "stored_gematria": "לה",
     "content_match_ratio": 0.875,
-    "marker_position": 476,
+    "marker_position": 475,
     "status": "ok"
   },
   {
@@ -316,7 +316,7 @@
     "expected_gematria": "לו",
     "stored_gematria": "לו",
     "content_match_ratio": 0.75,
-    "marker_position": 593,
+    "marker_position": 592,
     "status": "ok"
   },
   {
@@ -666,7 +666,7 @@
   },
   {
     "klal_id": 76,
-    "page": 38,
+    "page": 37,
     "expected_gematria": "עו",
     "stored_gematria": "עו",
     "content_match_ratio": 0.75,
@@ -675,7 +675,7 @@
   },
   {
     "klal_id": 77,
-    "page": 38,
+    "page": 37,
     "expected_gematria": "עז",
     "stored_gematria": "עז",
     "content_match_ratio": 1.0,
@@ -684,7 +684,7 @@
   },
   {
     "klal_id": 78,
-    "page": 38,
+    "page": 37,
     "expected_gematria": "עח",
     "stored_gematria": "עח",
     "content_match_ratio": 1.0,
@@ -693,7 +693,7 @@
   },
   {
     "klal_id": 79,
-    "page": 38,
+    "page": 37,
     "expected_gematria": "עט",
     "stored_gematria": "עט",
     "content_match_ratio": 1.0,
@@ -702,7 +702,7 @@
   },
   {
     "klal_id": 80,
-    "page": 38,
+    "page": 37,
     "expected_gematria": "פ",
     "stored_gematria": "פ",
     "content_match_ratio": 0.75,
@@ -711,7 +711,7 @@
   },
   {
     "klal_id": 81,
-    "page": 38,
+    "page": 37,
     "expected_gematria": "פא",
     "stored_gematria": "פא",
     "content_match_ratio": 0.875,
@@ -720,7 +720,7 @@
   },
   {
     "klal_id": 82,
-    "page": 38,
+    "page": 37,
     "expected_gematria": "פב",
     "stored_gematria": "פב",
     "content_match_ratio": 1.0,
@@ -729,16 +729,16 @@
   },
   {
     "klal_id": 83,
-    "page": 38,
+    "page": 37,
     "expected_gematria": "פג",
     "stored_gematria": "פג",
-    "content_match_ratio": 0.875,
+    "content_match_ratio": 0.75,
     "marker_position": 523,
     "status": "ok"
   },
   {
     "klal_id": 84,
-    "page": 38,
+    "page": 37,
     "expected_gematria": "פד",
     "stored_gematria": "פד",
     "content_match_ratio": null,
@@ -1858,7 +1858,7 @@
     "page": 76,
     "expected_gematria": "ריט",
     "stored_gematria": "ריט",
-    "content_match_ratio": 0.75,
+    "content_match_ratio": 0.875,
     "marker_position": 598,
     "status": "ok"
   },

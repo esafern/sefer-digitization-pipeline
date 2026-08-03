@@ -228,7 +228,7 @@
     "trusted": true,
     "search_stage": 0,
     "jump_tokens": 34,
-    "lexicon_hit_rate": 1.0
+    "lexicon_hit_rate": 0.985
   },
   {
     "klal_id": 22,
@@ -370,7 +370,7 @@
     "match_ratio": 0.375,
     "trusted": false,
     "search_stage": null,
-    "jump_tokens": 145,
+    "jump_tokens": 144,
     "lexicon_hit_rate": 1.0
   },
   {
@@ -381,7 +381,7 @@
     "match_ratio": 0.75,
     "trusted": true,
     "search_stage": 0,
-    "jump_tokens": 247,
+    "jump_tokens": 246,
     "lexicon_hit_rate": 1.0
   },
   {
@@ -711,7 +711,7 @@
     "match_ratio": 0.75,
     "trusted": true,
     "search_stage": 0,
-    "jump_tokens": 191,
+    "jump_tokens": 192,
     "lexicon_hit_rate": 1.0
   },
   {
@@ -722,7 +722,7 @@
     "match_ratio": 0.75,
     "trusted": true,
     "search_stage": 0,
-    "jump_tokens": 68,
+    "jump_tokens": 67,
     "lexicon_hit_rate": 1.0
   },
   {
@@ -827,18 +827,18 @@
   {
     "klal_id": 76,
     "expected_section": "האלף",
-    "matched_page": 38,
+    "matched_page": 37,
     "matched_page_header": "האלף",
     "match_ratio": 0.75,
     "trusted": true,
-    "search_stage": 1,
-    "jump_tokens": 1420,
+    "search_stage": 0,
+    "jump_tokens": 363,
     "lexicon_hit_rate": 1.0
   },
   {
     "klal_id": 77,
     "expected_section": "האלף",
-    "matched_page": 38,
+    "matched_page": 37,
     "matched_page_header": "האלף",
     "match_ratio": 0.75,
     "trusted": true,
@@ -849,7 +849,7 @@
   {
     "klal_id": 78,
     "expected_section": "האלף",
-    "matched_page": 38,
+    "matched_page": 37,
     "matched_page_header": "האלף",
     "match_ratio": 0.75,
     "trusted": true,
@@ -860,7 +860,7 @@
   {
     "klal_id": 79,
     "expected_section": "האלף",
-    "matched_page": 38,
+    "matched_page": 37,
     "matched_page_header": "האלף",
     "match_ratio": 0.75,
     "trusted": true,
@@ -871,7 +871,7 @@
   {
     "klal_id": 80,
     "expected_section": "האלף",
-    "matched_page": 38,
+    "matched_page": 37,
     "matched_page_header": "האלף",
     "match_ratio": 0.75,
     "trusted": true,
@@ -882,7 +882,7 @@
   {
     "klal_id": 81,
     "expected_section": "הבית",
-    "matched_page": 38,
+    "matched_page": 37,
     "matched_page_header": "האלף",
     "match_ratio": 0.75,
     "trusted": true,
@@ -893,7 +893,7 @@
   {
     "klal_id": 82,
     "expected_section": "הבית",
-    "matched_page": 38,
+    "matched_page": 37,
     "matched_page_header": "האלף",
     "match_ratio": 0.75,
     "trusted": true,
@@ -904,23 +904,23 @@
   {
     "klal_id": 83,
     "expected_section": "הבית",
-    "matched_page": 38,
+    "matched_page": 37,
     "matched_page_header": "האלף",
     "match_ratio": 0.75,
     "trusted": true,
     "search_stage": 0,
-    "jump_tokens": 45,
+    "jump_tokens": 47,
     "lexicon_hit_rate": 1.0
   },
   {
     "klal_id": 84,
     "expected_section": "הבית",
-    "matched_page": 38,
+    "matched_page": 37,
     "matched_page_header": "האלף",
     "match_ratio": 0.75,
     "trusted": true,
     "search_stage": 0,
-    "jump_tokens": 56,
+    "jump_tokens": 54,
     "lexicon_hit_rate": 0.982
   },
   {
@@ -930,8 +930,8 @@
     "matched_page_header": "הבית",
     "match_ratio": 0.75,
     "trusted": true,
-    "search_stage": 0,
-    "jump_tokens": 59,
+    "search_stage": 1,
+    "jump_tokens": 1116,
     "lexicon_hit_rate": 1.0
   },
   {
@@ -2405,7 +2405,7 @@
     "match_ratio": 0.75,
     "trusted": true,
     "search_stage": 0,
-    "jump_tokens": 67,
+    "jump_tokens": 66,
     "lexicon_hit_rate": 1.0
   },
   {
@@ -2416,7 +2416,7 @@
     "match_ratio": 0.75,
     "trusted": true,
     "search_stage": 0,
-    "jump_tokens": 100,
+    "jump_tokens": 101,
     "lexicon_hit_rate": 1.0
   },
   {
