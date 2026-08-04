@@ -338,15 +338,23 @@ independently from the vision check already on file
     sentence, not the isolated pixel read) applies to all 40, and 18 of the
     other 35 turned out to have the same problem.
 
-**New finding surfaced during this re-review, not yet fixed**: klal 87 (in
-the same narrative cluster) has `ורב אשי שכדור התלמוד הוא דקאמר`. `שכדור`
-is not a word; Rav Ashi is traditionally described as the sage who
-*compiled/arranged* the Talmud (`שסידר התלמוד`), a well-known epithet — and
-`שסידר` was in fact docai's own raw reading for this word
-(`scratch/verify_1to91.log`), but it was never carried into the semantic
-tie-break batch or applied. `clean_text` still reads `שכדור` as of this
-write-up. Needs the same crop-plus-context treatment as the rest of this
-pass.
+**Klal 87 `שכדור`/`שסידר` — investigated 2026-08-05, fixed.** Same narrative
+cluster: `ורב אשי שכדור/שסידר התלמוד הוא דקאמר`. First write-up of this item
+mischaracterized the record — corrected here. The actual vision-adjudication
+result (`scratch/corrections_verified_1to91.json`, klal 87 word-index 250)
+had vision *reject* docai's raw `שסידר` reading in favor of `שכדור`
+("clearly shows... כ (kaf)... forming שכדור"), which is why it was correctly
+excluded from the semantic tie-break batch (that batch only covered cases
+where vision sided *with* the docai reading — see above). But `שכדור` isn't
+a word, while `שסידר` is exactly the well-known epithet for Rav Ashi as
+compiler of the Talmud — contextually a strong candidate for another wrong
+vision call, so it got the same crop-plus-context treatment as everything
+else in this pass. A fresh, higher-zoom crop
+(`scratch/klal87_shakadur_ultrazoom.png`) settled it directly: the second
+letter is unambiguously a closed loop (ס, samech), not the open-sided כ
+(kaf) the original vision pass reported — i.e. vision misread this specific
+letter. Fixed to `שסידר` in `part1.json` and `klalim_demo_dataset.json`,
+confirmed by both the corrected pixel read and the historical epithet match.
 
 Separately, klal 34's long-open "low text-similarity flag, never
 investigated" item and klal 67's "marker not found on page 34" item were
@@ -371,8 +379,10 @@ grammatical sentence) is a separate, necessary check and should be run
 *before* applying any crop-confirmed fix, not treated as optional once the
 pixels "look" like they favor one reading.
 
-Committed 2026-08-04 along with this write-up (initial pass), then corrected
-the same day after re-review (18 reverts + 1 new finding logged).
+Committed 2026-08-04 along with this write-up (initial pass), corrected the
+same day after re-review (18 reverts + 1 new finding logged), then the klal
+87 `שסידר` fix landed 2026-08-05 once that finding was itself run through
+the same crop-plus-context check.
 
 ## Stale files archived
 
