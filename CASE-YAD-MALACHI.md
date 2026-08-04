@@ -156,9 +156,11 @@ underlying cache holds 86 live decisions, confidence at or above 0.9 in roughly 
 quarters of them — the model returns an honest low-confidence "uncertain" rather than a
 fabricated guess when a crop is genuinely too ambiguous to call. The method has also caught
 a defect a text-only pass would have missed entirely: klal 83's stored text carried a
-duplicated phrase with klal 82's own closing citation scrambled into its middle — a
-cross-klal-boundary transposition, confirmed by re-reading the raw token coordinates on the
-physical page, not inferred from context. Worked examples — scan crops, bounding boxes,
+duplicated opening word with klal 82's own closing citation misplaced into the middle of
+it — traced to Document AI detecting one decoratively-set word as two separate tokens and
+extracting both ahead of a citation line that sits physically above them on the page,
+confirmed directly against the raw token coordinates, not inferred from context. Worked
+examples — scan crops, bounding boxes,
 and the underlying JSON — are in [`VERIFIED-AGAINST-THE-INK.html`](VERIFIED-AGAINST-THE-INK.html).
 Most corrections currently in the text came from **text-only LLM linguistic review** —
 plausible given context, but not yet verified against the actual scan pixels, which is a

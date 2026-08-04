@@ -97,10 +97,20 @@ just appended to — correct superseded claims) whenever a finding changes.
   genuine cross-klal-boundary text scramble, not just a word error: the
   stored text had a nonsensical duplicated `בשל בשל` with klal 82's closing
   citation (`דף ס"א ב' וש"ות זקן אהרן סי' קפ"ג`) misplaced into its middle.
-  Root cause: DocAI extracted the correct words but in the wrong line order
-  for that one spot (confirmed via raw token y-coordinates, not inferred) —
-  true reading order is klal 82 ending with the citation, then klal 83
-  opening `בשל תורה הלך אחר המחמיר...` (the deliberate counterpart to klal
+  Root cause, re-confirmed 2026-08-04 by reading `docai_word_boxes/page_37.json`'s
+  raw token array directly (not just re-asserting the earlier summary): klal
+  82's own extraction stops mid-word (`ישרא`, never reaching `ישראל` or the
+  citation after it). Klal 83's decoratively-set opening word got detected by
+  Document AI as **two separate tokens** (`בשו` at y=0.7772, then `בשל` at
+  y=0.7676 — same word, two boxes, two slightly different OCR reads), and
+  **both were extracted before the citation line** (`דף ס"א ב'...קפ"ג` at
+  y=0.7608) even though the citation's smaller y-value means it sits
+  physically *above* both of them on the page. Whatever assembles the running
+  text per klal just walks the token array in extraction order, so it
+  faithfully reproduced the inversion: doubled opening word, then a citation
+  that belongs to the klal above, then the real sentence. True reading order
+  is klal 82 ending with the citation, then klal 83 opening
+  `בשל תורה הלך אחר המחמיר...` (the deliberate counterpart to klal
   82's `בשל סופרים הלך אחר המקיל` — Biblical law → strict, rabbinic law →
   lenient). Fixed: 82 now ends with the citation restored; 83 now reads `בשל
   תורה הלך אחר המחמיר ובשל סופרים הלך אחר המקיל...` with the duplicate and
