@@ -246,3 +246,35 @@ resolving those items or explicitly caveating them.
 were moved to `archive/data/` — confirmed via cheap text diff (not vision) to
 be stale, superseded snapshots with zero unique content versus current
 `part1/2/3.json`, not additional sources of truth.
+
+## `images/pdf_pages/` rendered-page cache — confirmed mismatch, scope unknown
+
+Found while building `VERIFIED-AGAINST-THE-INK.html` (a real-evidence showcase
+doc): `images/pdf_pages/page_37.png` does **not** show page 37 — it shows an
+unrelated page (printed page "12", a *Rabbi Yochanan* sugya). The actual
+klal 82/83 content that belongs at `page_37.png` (printed page "יג"/13) is
+instead sitting at `images/pdf_pages/page_38.png` — confirmed by directly
+re-rendering both pages from `berlin_square.pdf` with PyMuPDF and reading
+them. This is likely related to (but not identical in shape to) the earlier
+`docai_word_boxes/page_37.json`↔`page_38.json` swap bug — same two pages,
+different underlying cache, not yet fixed here. **`review.html` and
+`build_review_html.py` load scan images from this exact
+`images/pdf_pages/page_${page}.png` path**, so this is not just a cosmetic
+issue in a demo doc — the live review UI may be showing reviewers the wrong
+page image for page 37 (and possibly others; only pages 37 (bad), 38 (holds
+37's content), and 76 (confirmed correct) have been spot-checked so far — the
+other ~80 files in that directory are unverified). Per Lessons Learned #3/#4:
+this cache is gitignored and regenerable, but "gitignored cache" is not the
+same as "trustworthy" — re-render from `berlin_square.pdf` directly (as done
+for the showcase doc) rather than trusting this directory until it's
+re-verified or regenerated.
+
+## `adjudication_cache.db` — 7 of 86 `cache` rows have unparseable `decision_json`
+
+Found in the same pass: `SELECT decision_json FROM cache` has 86 rows, but 7
+fail `json.loads` outright (malformed JSON, not just a low-confidence/
+UNCERTAIN result — those parse fine and are a separate, expected outcome).
+Of the 79 that do parse, confidence is ≥0.9 in 59 (median 0.95); 19 are
+legitimate 0.0 "UNCERTAIN" verdicts, not errors. The 7 unparseable rows
+haven't been individually inspected — unknown whether they represent a
+prompt/parsing bug worth fixing or just a handful of dead cache entries.

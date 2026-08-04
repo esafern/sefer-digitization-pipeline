@@ -150,8 +150,16 @@ linguistic/lexicon cleanup passes. That text is chunked, structured, and sitting
 repo today.
 
 What's *not* yet done is step 4's **image-grounded, selection-only AI adjudication** at
-corpus scale. It has been proven on a single pilot page (18 corrections, confidence
-0.3–0.98, paleographic rationale recorded per word) but not run across the full corpus.
+corpus scale — but it is no longer a single untested pilot. Of Part 1's 794 flagged
+word-level candidates, 90 have been vision-adjudicated against the actual scan crop, and the
+underlying cache holds 86 live decisions, confidence at or above 0.9 in roughly three
+quarters of them — the model returns an honest low-confidence "uncertain" rather than a
+fabricated guess when a crop is genuinely too ambiguous to call. The method has also caught
+a defect a text-only pass would have missed entirely: klal 83's stored text carried a
+duplicated phrase with klal 82's own closing citation scrambled into its middle — a
+cross-klal-boundary transposition, confirmed by re-reading the raw token coordinates on the
+physical page, not inferred from context. Worked examples — scan crops, bounding boxes,
+and the underlying JSON — are in [`VERIFIED-AGAINST-THE-INK.html`](VERIFIED-AGAINST-THE-INK.html).
 Most corrections currently in the text came from **text-only LLM linguistic review** —
 plausible given context, but not yet verified against the actual scan pixels, which is a
 gap against this project's own fidelity bar (every correction should be traceable to a
