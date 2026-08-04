@@ -226,29 +226,98 @@ klal 82/83 above for why "scored 0.8" still needed a manual look).
 
 **Known-real remaining problems in klal 1–91**, none explained by either root
 cause found so far:
-- **Klal 34**: low text-similarity flag from `header_anchored_alignment.py`,
-  never investigated.
+- **Klal 34 — fixed 2026-08-04** (see dated section below): was a real
+  missing-clause error, not just a low-similarity false alarm. No longer
+  open.
 - **Klal 66**: title-crop still pulls wrong content even though klal 66's own
   marker/content is independently confirmed correctly positioned on page 34
   — a narrower, still-unexplained tool-precision issue.
-- **Klal 67**: its own gematria marker (`סז`) cannot be found anywhere on
-  page 34 at all — may be misattributed to the wrong page entirely.
+- **Klal 67 — resolved 2026-08-04** (see dated section below): the marker
+  *is* on page 34 (`scratch/klal67_marker_zoom2.png` shows `סז` clearly) —
+  the earlier "not found" result was a tool/search-precision miss, not a
+  real misattribution. No text change needed.
 - **Klal 21, 39, 75, 79**: semantic-sanity pass favored an alternative
   reading for each, none yet checked against the scan (see the systematic
   semantic-sanity item above for specifics). Don't treat as confirmed either
   way.
-- Word-level correction verification for 1–91 is still only a thin scattered
-  sample, same as the rest of the corpus (only 90 of 794 candidates
-  corpus-wide have been vision-verified).
+- Word-level correction verification for 1–91 is no longer a thin sample —
+  see the 2026-08-04 dated section below, which crop-verified 40 additional
+  candidates. Corpus-wide (parts 1–3, all 794 candidates), coverage is still
+  thin.
 
 **Honest bottom line for "is klal 1–91 presentable": closer, but not fully
 clean.** The severe, multi-klal cascading failures are gone. Klal 50, 65, 21
-(the corrections-level fix), 82, 83, 218, 219 are now fixed and
-scan-confirmed. What remains is a short, specific, named list (klal 34, 66,
-67, plus the unverified 21/39/75/79 title candidates above) plus the general
-thin word-level-verification coverage everyone else has too — not a vague
-"probably fine." Do not present this range as fully verified without either
-resolving those items or explicitly caveating them.
+(the corrections-level fix), 82, 83, 218, 219, 34 are now fixed and
+scan-confirmed; klal 67's marker mystery and klal 3's disagreement are both
+resolved (reviewed, no fix needed in either case). What remains is a short,
+specific, named list (klal 66, plus the unverified 21/39/75/79 title
+candidates above) plus the general thin word-level-verification coverage the
+rest of the corpus (parts 2–3, and the untouched 90–222 range of part 1)
+still has — not a vague "probably fine." Do not present this range as fully
+verified without either resolving those items or explicitly caveating them.
+
+## Klal 1–91 correction-candidate semantic/vision disagreement pass — 2026-08-04
+
+Of the 794 `corrections_candidates_part1.json` candidates, 61 are
+"replace"-type items in the klal 1–91 range where a docai-raw reading
+(candidate A) differs from the current stored text (candidate B). Each was
+run through `verify_semantic_sanity.py` (`scratch/semantic_check_reversions_1to91.json`),
+independently from the vision check already on file
+(`scratch/corrections_verified_1to91.json`) — two independent signals, per
+`CLAUDE.md` Lessons Learned #9.
+
+- **21 of 61**: vision and semantic agreed (both favored A, or both favored
+  B). Applied/kept per that agreement without further work needed.
+- **40 of 61**: vision and semantic disagreed — vision consistently favored
+  the docai-raw reading (A), semantic consistently favored the current text
+  (B) as the more standard-looking word. Per Lessons Learned #9, disagreement
+  alone is not a resolution either way — each of these 40 was individually
+  tie-broken with a fresh high-zoom crop of the exact word from the source
+  scan (all saved under `scratch/klal<N>_*.png`), not decided by trusting
+  either automated signal.
+  - **35 of 40**: crop confirmed the docai/vision reading (A) is what's
+    actually printed on the page (the "standard-looking" semantic favorite
+    was not actually there) — applied to `part1.json` and
+    `klalim_demo_dataset.json`. Klal IDs: 1 (×2), 7, 8, 14, 25 (×2), 36, 41
+    (×9 within one klal), 42, 43, 44, 54, 60, 61, 74, 86 (×3), 87 (×8), 88, 91.
+  - **4 of 40**: crop confirmed the current text (B) is correct and the
+    docai/vision reading was itself an OCR misread — left unchanged. Klal
+    IDs: 16, 24, 38, 84. (Spot-verified directly during this session:
+    `scratch/klal16_word_ultrazoom.png` clearly shows `וכתבו` not `וכתכו`;
+    `scratch/klal24_ultrazoom.png` shows `בגמ'` not `בגט`;
+    `scratch/klal38_כתכתי_zoom.png` shows `כתבתי` not `כתכתי`;
+    `scratch/klal84_marker_zoom.png` shows `פד` not `פר`.)
+  - **1 of 40 — klal 3, resolved 2026-08-04, kept as current text**:
+    `מלמר`(docai)/`מלמד`(current) disagreement. Initial isolated-letterform
+    crop comparison (target letter vs. `גמר`/`מחבריה`'s ר and `שנדפס`'s ד,
+    same page) leaned toward the docai reading (`מלמר`) — but re-examined at
+    the sentence level rather than the single-letter level, that read doesn't
+    hold up: `אין למדין למד מלמד` is a recognized halachic-methodology
+    technical term (exactly the genre of rule this book catalogs), and it
+    recurs a second time in this same klal's body text
+    (`שיכול לומר עליו אין למדין למד מלמד`, docai word-index 132, ~7 lines
+    above the title occurrence) — docai flagged *both* independent
+    occurrences as `מלמר`. Two separate physical type-pieces reading
+    ambiguously the same way points to a typeface-level ד/ר legibility issue
+    in this font (the same confusion pattern drives most of the other 39
+    disagreements in this batch) rather than to two coincidental print
+    defects landing on the one technical term where a defect would be least
+    expected. Semantic confidence for `מלמד` was 1.0, the ceiling for this
+    batch. **Kept as `מלמד` — no change applied**, unlike the other 35. This
+    is a considered exception to "trust the literal pixel reading," not an
+    unresolved default.
+
+Separately, klal 34's long-open "low text-similarity flag, never
+investigated" item and klal 67's "marker not found on page 34" item were
+both investigated this session (extensive `scratch/klal34_*.png` and
+`scratch/klal67_*.png` crops) — see the corrected bullets above. Klal 34 had
+a genuinely missing clause restored to `clean_text`
+(`היינו לדון לגמרי דבר שלא נתברר לו שכן הוא האמת אבל דבר שיודעין בו שכן הוא
+האמת אך לא נתברר לנו סמך מן הכתוב`) plus a title correction (`אין דנין` →
+`אין דן אדם`, `אם כן` → `א"כ`). Klal 67 needed no text fix — the marker was
+on the page all along.
+
+Committed 2026-08-04 along with this write-up.
 
 ## Stale files archived
 
