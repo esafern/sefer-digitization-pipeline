@@ -247,7 +247,7 @@ were moved to `archive/data/` — confirmed via cheap text diff (not vision) to
 be stale, superseded snapshots with zero unique content versus current
 `part1/2/3.json`, not additional sources of truth.
 
-## `images/pdf_pages/` rendered-page cache — confirmed mismatch, scope unknown
+## `images/pdf_pages/` rendered-page cache — mismatch found, scope now fully checked, NOT yet fixed
 
 Found while building `VERIFIED-AGAINST-THE-INK.html` (a real-evidence showcase
 doc): `images/pdf_pages/page_37.png` does **not** show page 37 — it shows an
@@ -260,14 +260,33 @@ them. This is likely related to (but not identical in shape to) the earlier
 different underlying cache, not yet fixed here. **`review.html` and
 `build_review_html.py` load scan images from this exact
 `images/pdf_pages/page_${page}.png` path**, so this is not just a cosmetic
-issue in a demo doc — the live review UI may be showing reviewers the wrong
-page image for page 37 (and possibly others; only pages 37 (bad), 38 (holds
-37's content), and 76 (confirmed correct) have been spot-checked so far — the
-other ~80 files in that directory are unverified). Per Lessons Learned #3/#4:
-this cache is gitignored and regenerable, but "gitignored cache" is not the
-same as "trustworthy" — re-render from `berlin_square.pdf` directly (as done
-for the showcase doc) rather than trusting this directory until it's
-re-verified or regenerated.
+issue in a demo doc — the live review UI shows reviewers the wrong page image
+for page 37/38.
+
+**Full-coverage scope check run 2026-08-04** (all 80 cached pages, `page_14`–
+`page_93`, not a sample — per `CLAUDE.md` Lessons Learned #1): re-rendered
+every page fresh from `berlin_square.pdf` at matching DPI, downsampled to a
+grayscale thumbnail, and diffed against the cached PNG. Rendering is fully
+deterministic — all 78 non-swapped pages come back at exactly 0.00 mean pixel
+diff, zero noise — so the check has no ambiguous middle ground to worry about.
+**Result: 37 and 38 are the only mismatched pair in the entire cache.** The
+same script's nearby-index search independently re-derived the swap direction
+(page_37.png's content pixel-matches real PDF page 38, and vice versa,
+0.00 diff) without being told the answer in advance, cross-confirming the
+original manual finding. Script: `check_pdf_pages_cache.py` (currently in
+scratch, not committed).
+
+**Fixed 2026-08-04**: `page_37.png` and `page_38.png` re-rendered directly
+from `berlin_square.pdf` (same ~150 DPI as the rest of the cache) and
+overwritten in place. Confirms the swap was clean, not corruption: the old
+(wrong) `page_37.png`'s pixel dimensions (872×1332) exactly matched the
+correct render of page 38, and vice versa (864×1336 for page 37) — one more
+independent signal the two files had simply been saved under each other's
+names. Re-ran the full 80-page check after the fix: all 80 pages, including
+37/38, now come back at 0.00 diff against a fresh render. Pre-fix files
+backed up to scratch before being overwritten. Per Lessons Learned #3/#4,
+re-verify after any future regeneration of this directory rather than
+assuming this fix persists automatically.
 
 ## `adjudication_cache.db` — 7 of 86 `cache` rows have unparseable `decision_json`
 
