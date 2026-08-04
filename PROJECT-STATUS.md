@@ -498,3 +498,80 @@ doesn't appear in `docai_word_boxes` at a *sane* position on its claimed
 page) before assuming it's rare — per `CLAUDE.md` Lessons Learned #1, a
 two-for-two hit rate on the one page checked so far is not evidence of
 rarity, only of not having looked elsewhere yet.
+
+## All 222 Part-1 titles reviewed — structure confirmed, 2 fixes, 2026-08-05
+
+Prompted by the klal 57–59 review: the user identified that Yad Malachi's
+klalim are **structurally alphabetical**, something not previously
+documented here. Confirmed mechanically against `part1.json`'s `section`
+field: Part 1 is five clean, non-overlapping ranges, one per first letter of
+the title, in strict Hebrew-alphabet order —
+
+| Klal range | Section | Letter |
+|---|---|---|
+| 1–80 | כללי האלף | א |
+| 81–122 | כללי הבית | ב |
+| 123–128 | כללי הגימל | ג |
+| 129–147 | כללי הדלת | ד |
+| 148–222 | כללי ההא | ה |
+
+(Parts 2–3 presumably continue ו–ת for the remaining 445 klalim — not
+checked, no vision/scan infrastructure exists for them yet, see Open Items.)
+
+**This is section-level grouping only, not a full dictionary sort within
+each section.** E.g. klal 6 (`אדם חשוב שאני`) follows klal 5 (`איתמר`) even
+though ד sorts before י — a true dictionary sort would reverse that. What
+actually governs order within a section is thematic/keyword clustering: the
+book runs consecutive (or near-consecutive) klalim sharing an opening word
+or restating the same principle across several angles/exceptions before
+moving on (`איידי` ×5 at klal 7–11; `אין למדין/למדים מן הכללות` ×3 at
+22–24; `הלכה כרבא לגבי אביי` ×5 at 157–161; `השוה הכתוב אשה לאיש...` ×4 at
+207–209+211; etc.). Mechanically verified this is real authorial structure,
+not accidental duplication: every repeated-title cluster checked (12
+clusters, 34 klalim) has a **fully distinct `clean_text` body** in every
+member — zero exact-duplicate bodies found.
+
+**Mechanical first-letter-vs-section check, all 222 titles**: 16 mismatches,
+all 16 already accounted for by pre-existing documented issues (8 are the
+klal 92–165 structural-shift symptom already logged — 102–106, 108, 119,
+210; 8 are the known `(no text available)` placeholder klalim — 180, 182,
+187, 190, 194, 197, 216, 217). No new mismatches.
+
+**Full read-through of all 222 titles for Talmudic-phrase plausibility.**
+Most independently correspond to well-attested Talmudic/halachic-methodology
+language — several directly cross-checked against known sources: klal 65/67
+against Mishnah Eduyot 1:5 (already logged), klal 21 against the "lifting
+the shard to find the pearl" idiom (Bava Batra-family), klal 63
+`איבעית אימא ואיבעית אימא`, klal 101 `בית דין מתנין לעקור דבר מן התורה`,
+klal 154's `יע"ל קג"ם` mnemonic (the six Abaye-over-Rava exceptions), klal
+165/166 on Rav Ashi/Mar bar Rav Ashi (consistent with the klal 87 `שסידר`
+finding above), klal 121 `בית הלל אומרים`, klal 207–209+211
+`השוה הכתוב אשה לאיש לכל עונשין שבתורה`. Two real problems found and fixed,
+both scan-confirmed:
+
+- **Klal 219 — `title` field was stale, out of sync with `clean_text`.** An
+  earlier session (see the klal 65/21/218/219 entry above) fixed `האו`→`האי`
+  in this klal's `clean_text`, but the `title` field was never regenerated
+  from it and still read the old `האו`. Separately, both the title and
+  `clean_text` had `ר' ישמעץ` for the *first* of two `תנא דבי ר' ישמעאל`
+  references in the same sentence — checked both occurrences side by side
+  at matching zoom (`scratch/klal219_first_yishmael.png` /
+  `..._second_yishmael.png`): both end in the same אל (alef-lamed) shape,
+  no ץ (tzadi) anywhere on the page. Fixed: title now
+  `האי תנא דבי ר' ישמעאל מפיק מאידך תנא דבי ר' ישמעאל`, `clean_text`'s
+  `ישמעץ` corrected to `ישמעאל`.
+- **Checked and confirmed correct, not an error**: klal 195's
+  `הלכה כרב מונא ברוב הירושלמי` — suspected `מונא` might be a corruption of
+  the more commonly-known Yerushalmi Amora `רב מנא`, but a direct crop
+  (`scratch/klal195_muna_check.png`) confirms the vav is genuinely printed;
+  `מונא` is what the page says. Not changed.
+
+**Not independently verified in this pass** (would need dedicated source
+lookups beyond what's checkable from the scan alone): the precise identity/
+attestation of less-common terms like `בחירתא` (klal 107, 177 — used
+consistently by the author both times, plausibly a real named text this
+author cites, not chased further) and a few specific-sage citations (klal
+203's `ראב"י`, klal 176's `ר' שמעון שזורי`) — these read as plausible
+genre-consistent content and were not flagged, but "plausible" here means
+"not contradicted by anything checked," not "traced to a citable Talmudic
+locus."
