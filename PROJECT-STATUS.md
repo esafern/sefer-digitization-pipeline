@@ -441,3 +441,60 @@ Of the 79 that do parse, confidence is ≥0.9 in 59 (median 0.95); 19 are
 legitimate 0.0 "UNCERTAIN" verdicts, not errors. The 7 unparseable rows
 haven't been individually inspected — unknown whether they represent a
 prompt/parsing bug worth fixing or just a handful of dead cache entries.
+
+## Klal 57–59 title + body review — 2026-08-05
+
+Requested spot-review of klal 57/58/59's titles. All three titles are
+correct as stored and directly scan-confirmed (page 32):
+`אין הלכה כשיטה` (57), `אין הלכה בשיטה` (58, with ב — see the pre-existing
+"Klal 58 checked and NOT changed" note above, re-confirmed here), `אין הלכה
+כשיטה` (59, again with כ). The three consecutive near-duplicate titles are
+real, not a corpus artifact — this is a deliberate triplet of klalim
+elaborating variations on one principle, a structure this book uses
+elsewhere too.
+
+Checking the body text of 57 and 59 against the same page surfaced a bug
+class not seen before in this project: **phantom tokens** — docai inserting
+words into the extraction that don't exist anywhere on the physical page,
+as opposed to the misread-an-existing-letter errors (ד/ר etc.) that account
+for every other finding so far. Confirmed and fixed, each independently
+verified by re-rendering the exact page region and reading it directly
+(not inferred from any prior extraction):
+
+- **Klal 57**: `...כחד מינייהו או נו אין דלא אזלא...` — `נו אין` does not
+  exist on the page at all; line 1 ends `...מינייהו או` and line 2 begins
+  directly with `דלא אזלא`, confirmed via `docai_word_boxes/page_32.json`'s
+  own token y2-coordinates (the "נו"/"אין" tokens were phantom insertions at
+  the start of line 2) and a direct crop of that exact line boundary.
+  Removed `נו אין `.
+- **Klal 57**: `...דוכתא כחד טיניידו או דאזלא...` — `טיניידו` is not a word;
+  the klal uses the parallel construction `כחד מינייהו או X` twice in one
+  sentence, and the first instance (a few words earlier) correctly reads
+  `מינייהו`. Scan-confirmed the second instance also reads `מינייהו` — the
+  stored `טיניידו` was a docai misread (this one *is* a same-token-type
+  misread, not a phantom insertion). Fixed to `מינייהו`.
+- **Klal 59**: `...ע"כ לא קאמר ר רבי פלוני וע"כ...` — the standalone `ר`
+  before `רבי` is a phantom token; the page reads `לא קאמר רבי פלוני וע"כ`
+  with nothing between `קאמר` and `רבי`. Removed the phantom `ר`.
+- **Klal 59**: trailing `... ולי הדיוט נלע"ד 3 *` — `3 *` is a printer's
+  gathering-signature mark printed in a distinct Latin-numeral typeface
+  below the text block (page furniture, not content — confirmed by direct
+  crop, `scratch/klal59_bottom_signature2.png`), not part of the klal's
+  text. Removed from `clean_text`.
+- **Checked and left as-is**: klal 59's `לא קאמר ר"ס וכו'` (second
+  occurrence of the "placeholder name" rhetorical pattern, first occurrence
+  a few lines earlier is `ר"פ`) — independently confirmed by both docai's
+  raw OCR and a direct crop to genuinely read `ר"ס`, not `ר"פ`. The klal
+  deliberately uses two different placeholder abbreviations in its two
+  parallel examples; this is not an error.
+
+**Open implication, not yet acted on**: phantom-token insertion is a
+different failure mode than anything catalogued so far in this document (all
+prior findings were misreads of real ink, or page/file swaps — never
+content invented from nothing). Page 32 alone had two independent instances
+of it. This may be worth a targeted, cheap mechanical check across the rest
+of the corpus (e.g. flagging any word/short-phrase in `clean_text` that
+doesn't appear in `docai_word_boxes` at a *sane* position on its claimed
+page) before assuming it's rare — per `CLAUDE.md` Lessons Learned #1, a
+two-for-two hit rate on the one page checked so far is not evidence of
+rarity, only of not having looked elsewhere yet.
