@@ -275,18 +275,48 @@ independently from the vision check already on file
   tie-broken with a fresh high-zoom crop of the exact word from the source
   scan (all saved under `scratch/klal<N>_*.png`), not decided by trusting
   either automated signal.
-  - **35 of 40**: crop confirmed the docai/vision reading (A) is what's
-    actually printed on the page (the "standard-looking" semantic favorite
-    was not actually there) — applied to `part1.json` and
-    `klalim_demo_dataset.json`. Klal IDs: 1 (×2), 7, 8, 14, 25 (×2), 36, 41
-    (×9 within one klal), 42, 43, 44, 54, 60, 61, 74, 86 (×3), 87 (×8), 88, 91.
-  - **4 of 40**: crop confirmed the current text (B) is correct and the
-    docai/vision reading was itself an OCR misread — left unchanged. Klal
-    IDs: 16, 24, 38, 84. (Spot-verified directly during this session:
-    `scratch/klal16_word_ultrazoom.png` clearly shows `וכתבו` not `וכתכו`;
-    `scratch/klal24_ultrazoom.png` shows `בגמ'` not `בגט`;
-    `scratch/klal38_כתכתי_zoom.png` shows `כתבתי` not `כתכתי`;
-    `scratch/klal84_marker_zoom.png` shows `פד` not `פר`.)
+  - **Initial pass (same day) got this wrong: all 35 were applied on the
+    strength of the crop tie-break alone**, i.e. purely on which letterform
+    the pixels seemed to show, without checking whether the resulting
+    sentence actually made sense. That is exactly the mistake Lessons
+    Learned #2/#9 warn against — a "passing" pixel read is not a checked
+    result, and a single signal (even a manually-verified one) isn't
+    sufficient when it's cheap to also check the sentence. **Corrected the
+    same day** by re-reading every one of the 35 in full sentence context
+    (recognizable technical terms, standard citation abbreviations, named
+    Amoraim, real tractate/perek names, grammatical fit) instead of trusting
+    the isolated letterform:
+    - **17 of 35 held up** under sentence-level review and were left as
+      applied. These aren't just "the crop looked right" — each matches
+      something independently checkable: a real perek name (`העור והרוטב`
+      in Chullin), a verbatim Mishnah quote (`רואה אני את דברי אדמון`,
+      Ketubot 13), a named Amora (`רבא`), a standard Aramaic idiom
+      (`לאו אורחיה`), or — for the klal 87 cluster — a coherent Aramaic
+      anecdote that only reads as a connected narrative once corrected
+      (the pre-session text had `שרמינו בתרומה`, which is nonsense; the
+      corrected text has `שהניחו בתימה`, "[what Tosafot] left in
+      puzzlement," a standard construction). Full klal-by-klal list of the
+      17 lives in session notes, not reproduced here in full.
+    - **18 of 35 were wrong and have been reverted** back to the pre-session
+      text: the applied reading replaced a real, sensible word with either a
+      non-word or a broken standard phrase. Examples: `דנראה` (standard "it
+      appears from") was changed to the non-word `דנראח`; `הש"ס` (standard
+      abbreviation for the Talmud) was changed to the non-word `השית`;
+      `וז"ל` (standard citation formula "and this is his wording") was
+      changed to `ח"ל`; `חטאת` (part of the real perek name `דם חטאת` in
+      Zevachim) was changed to `הטאת`; `והכ"מ` (Kesef Mishneh, a standard
+      commentary paired with Maggid Mishneh in the same sentence) was
+      changed to the unrecognized `והכ"ט`. Full revert list: klal 1, 14, 22,
+      25 (×2), 36, 41 (×6), 42, 43, 44, 54, 60, 61, 62, 74, 86 (×4), 87 (×4),
+      88, 91 — see `PROJECT-STATUS.md` git history for the complete
+      before/after pairs (recovered via `git show` against the erroneous
+      commit).
+    - **A further 6 of the 35** were spelling/abbreviation variants where
+      both readings are attested Hebrew forms (`חודשי`/`חדושי`,
+      `תינוקת`/`תנוקת`, `ט"ז`/`ט"ו`, `ע"ש`/`יע"ש`, `ש"כ`/`ש"ב`) or a citation
+      detail not resolvable by sentence-sense alone (a daf number). No
+      positive evidence supported the change in any of these, so they were
+      reverted too, as unproven rather than left as an unverified change.
   - **1 of 40 — klal 3, resolved 2026-08-04, kept as current text**:
     `מלמר`(docai)/`מלמד`(current) disagreement. Initial isolated-letterform
     crop comparison (target letter vs. `גמר`/`מחבריה`'s ר and `שנדפס`'s ד,
@@ -303,9 +333,20 @@ independently from the vision check already on file
     disagreements in this batch) rather than to two coincidental print
     defects landing on the one technical term where a defect would be least
     expected. Semantic confidence for `מלמד` was 1.0, the ceiling for this
-    batch. **Kept as `מלמד` — no change applied**, unlike the other 35. This
-    is a considered exception to "trust the literal pixel reading," not an
-    unresolved default.
+    batch. **Kept as `מלמד` — no change applied**. This klal 3 case is what
+    prompted the full re-review above: the same reasoning (trust the
+    sentence, not the isolated pixel read) applies to all 40, and 18 of the
+    other 35 turned out to have the same problem.
+
+**New finding surfaced during this re-review, not yet fixed**: klal 87 (in
+the same narrative cluster) has `ורב אשי שכדור התלמוד הוא דקאמר`. `שכדור`
+is not a word; Rav Ashi is traditionally described as the sage who
+*compiled/arranged* the Talmud (`שסידר התלמוד`), a well-known epithet — and
+`שסידר` was in fact docai's own raw reading for this word
+(`scratch/verify_1to91.log`), but it was never carried into the semantic
+tie-break batch or applied. `clean_text` still reads `שכדור` as of this
+write-up. Needs the same crop-plus-context treatment as the rest of this
+pass.
 
 Separately, klal 34's long-open "low text-similarity flag, never
 investigated" item and klal 67's "marker not found on page 34" item were
@@ -314,10 +355,24 @@ both investigated this session (extensive `scratch/klal34_*.png` and
 a genuinely missing clause restored to `clean_text`
 (`היינו לדון לגמרי דבר שלא נתברר לו שכן הוא האמת אבל דבר שיודעין בו שכן הוא
 האמת אך לא נתברר לנו סמך מן הכתוב`) plus a title correction (`אין דנין` →
-`אין דן אדם`, `אם כן` → `א"כ`). Klal 67 needed no text fix — the marker was
-on the page all along.
+`אין דן אדם`, `אם כן` → `א"כ`) — both independently re-confirmed by a fresh
+scan crop specifically because the word order and the parenthetical
+citation initially looked suspicious on a first sentence-level read; the
+scan settled it in favor of the applied text as originally written. Klal 67
+needed no text fix — the marker was on the page all along.
 
-Committed 2026-08-04 along with this write-up.
+**Methodological note for future passes**: a manually-verified crop
+resolves *what letterform is on the page* — it does not by itself resolve
+*whether that's the intended reading*, because this typeface has a
+pervasive ד/ר (and similar) legibility problem that a single crop of an
+isolated letter can't diagnose. Sentence-level context (does this produce a
+real word, a standard citation abbreviation, a matching named source, a
+grammatical sentence) is a separate, necessary check and should be run
+*before* applying any crop-confirmed fix, not treated as optional once the
+pixels "look" like they favor one reading.
+
+Committed 2026-08-04 along with this write-up (initial pass), then corrected
+the same day after re-review (18 reverts + 1 new finding logged).
 
 ## Stale files archived
 
