@@ -1439,6 +1439,64 @@ the same anchor-on-both-ends confidence the rest of this batch had.
 **klal 129 (and by extension wherever it truly ends, plus 130 onward) is
 the next open item**, not yet attempted beyond this scoping.
 
+**Update: klal 129 fixed; klal 128 turns out to be far more truncated
+than what was just applied for it - not yet fixed, exact scope known.**
+
+Klal 129's real marker (`קכט`) was never found by any prior automated
+pass (old trace: `marker_not_found_in_window`) simply because it's much
+farther from klal 128's marker than any search window used - it sits on
+**page 48, token 843**, not anywhere on page 47. Found by direct search
+once the possibility of a wide gap was suspected. Its content matches
+what was already sitting in the old klal-130 slot almost exactly (one
+marker-glyph fix, `דחקיכן`->`דחקינן`, same נ/כ misread pattern as
+elsewhere). Fixed the same verified way as klal 112-127.
+
+**Finding klal 129's marker exposes a bigger problem: klal 128 (applied
+in the previous commit) is itself badly truncated**, and not for the
+reason initially assumed. Its real span runs from its own marker
+(page47:331) all the way to klal 129's marker (page48:843) - roughly
+**1314 tokens**. What was actually applied for klal 128 (sourced from the
+old klal-129 slot) only covers page47:331-806 (~476 words) - it stops
+exactly at the page 47/48 boundary, missing **~838 words of real
+continuation** that apparently no prior extraction pass ever captured at
+all (not mislabeled elsewhere under a different klal_id - genuinely never
+extracted, the same "content absent from the corpus entirely" pattern
+first found for klal 92).
+
+**Deliberately not applying that missing continuation tonight.** Read the
+full fresh docai text for page48 tokens 5-842 (the missing portion) end
+to end. Unlike every other fix tonight, there is no prior stored version
+to diff against here - it's raw, never-before-processed docai OCR with no
+independent cross-check available yet. On a plain read-through it already
+shows more than the usual scattered ד/ר confusions (`בחר טעמא` for
+`בחד טעמא`, several times) - at least three separate mangled forms that
+are almost certainly the Amora `שמואל` (`לשמוא`, `לשמוץ`, `לשמון`), each
+different, in a passage that is explicitly about a `רב ושמואל`
+(Rav/Shmuel) dispute. Applying 838 words of this with only a
+plausibility read, no crop-verification, would be a real drop in rigor
+compared to every other fix tonight (each individually crop-confirmed) -
+exactly the kind of shortcut the user explicitly asked not to take when
+this overnight session was scoped. `validate_klal_span_coverage.py` does
+**not** currently flag this - it relies on `gematria_trace_part1.json`'s
+recorded marker positions, which don't yet know about the true page-48
+marker for klal 129, so it computes no expected span at all for klal 128
+right now. This is a real blind spot in that validator worth remembering:
+it can't catch a truncation whose far boundary was never discovered by
+any pass.
+
+**Open item, precisely scoped for whoever picks this up next**: klal
+128's `clean_text` needs its missing tail appended
+(`docai_word_boxes/page_48.json` tokens 5 through 842, skipping the
+4-token running header at the very start of page 48), then that
+~838-word addition needs the same word-level scrutiny (diff against
+nothing, so read-through plus targeted crops on anything that isn't a
+real word) as every other fix in this document before being trusted -
+not a mechanical concatenation.
+
+klal 130 onward not yet attempted. `validate_klal_span_coverage.py`
+re-run clean otherwise (no new false flags); `klal_id` 129 no longer
+shows the section mismatch it had at the top of tonight's session.
+
 Also updated `gematria_trace_part1.json`'s entries for klal 95-98 to
 record the now-confirmed marker positions (same `note`-field convention
 used for the klal 3 fix). **Self-caught bug while doing this**: setting
