@@ -870,3 +870,35 @@ per-klal manual scan verification used for every other fix this session,
 just at the scale of ~65 klalim instead of a handful. Not yet decided which;
 flagging for the user rather than picking one and running with it, since
 this materially changes the effort estimate for closing this open item.
+User chose: build a better automated marker-vs-citation filter first
+(see next section), not full manual verification of all ~65.
+
+## Vision-verification rebuild completed — 2026-08-05, but surfaced a billing blocker
+
+The full `rebuild_all.sh` run (started ~09:27, background) finished cleanly
+end to end: `corrections_verified_part1.json` (770 results),
+`corrections_part1.json` (770 items / 174 klalim, flags: 104
+`current_text_may_be_wrong`, 142 `current_text_confirmed`, 60
+`possible_omission`, 150 `unverified_insertion`, 275 `ambiguous`, 39
+`error`), `klal_page_regions.json` (208 regions), `review.html` all
+regenerated and committed together with `adjudication_cache.db`.
+
+**Real blocker surfaced, not just a technical detail**: the run logged
+**173 occurrences** of `RESOURCE_EXHAUSTED` — Gemini's own error text is
+`"Your prepayment credits are depleted. Please go to AI Studio ... to
+manage your project and billing."` This is not a transient rate limit; it's
+the account's prepaid balance running low/out. Every occurrence this run
+happened to succeed on retry (via `adjudicate()`'s model-fallback/retry
+loop), so nothing failed outright *this time*, but **this can block all
+future Gemini-dependent work in this project** — including the
+marker-vs-citation filter work for the klal 92–165 structural fix, which
+the user just chose specifically to reduce reliance on further Gemini
+calls. **Needs the user's attention on the billing/AI-Studio side** — not
+something fixable from this codebase.
+
+Separately, **39 of 770 results have unparseable `decision_json`**
+(`"Expecting ',' delimiter..."` JSON errors, e.g. klal 22, 86, 87, 103,
+126) even after `sanitize_json()`'s existing escape-stripping — a larger
+recurrence of the smaller "7 of 86" instance already logged above. Not yet
+individually inspected; unknown whether a prompt tweak would fix it or if
+it's an inherent occasional model-output quirk to just retry past.
