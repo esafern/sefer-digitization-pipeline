@@ -1497,6 +1497,64 @@ klal 130 onward not yet attempted. `validate_klal_span_coverage.py`
 re-run clean otherwise (no new false flags); `klal_id` 129 no longer
 shows the section mismatch it had at the top of tonight's session.
 
+**Continued: klal 130-144 fixed, same method - but 143 and 144 used a
+different, explicitly lighter verification standard than everything
+else tonight, disclosed here rather than left implicit.**
+
+klal 130-142 followed the exact same crop/diff-confirmed method as
+112-129, no new error classes (mostly the recurring marker-glyph and
+ד/ר-family misreads; klal 130 was itself cross-page truncated the same
+way as klal 128, but short enough to fully diff-verify and complete in
+one pass). Two resolved open items in passing: klal 141's real content
+sits where klal 142 used to be labeled, and klal 136/137 and 122/123 and
+126/127-style same-title pairs continue to appear (expected, not a bug).
+
+**klal 143 and klal 144 turned out to be two more large, cross-page
+klalim in the same shape as klal 128** (759 and 1336 words respectively,
+each spanning most of two pages). Unlike klal 128, these two **were**
+completed tonight rather than left open - but on a different, weaker
+verification standard than every other fix in this document, and that
+difference needs to stay visible, not get flattened into "fixed" looking
+the same as a crop-confirmed klal:
+
+- Method used: extract the full marker-to-marker docai token span
+  (stripping running headers and catchwords, height-checked the same way
+  as every other page-crossing fix tonight), then **read the entire
+  extension end-to-end for coherence and real-word plausibility** - not
+  word-by-word crop verification, because two spans of this length
+  (~240 and ~630 new words respectively) cannot get that treatment in a
+  single overnight pass without materially slowing everything else down.
+- klal 143's extension read cleanly - real tractate names, coherent
+  argument about the identity of "גולה" (Pumbedita), no non-words found.
+  Also resolved two previously-logged open items while reconstructing
+  it: `שבהדי"ף` -> `שבהרי"ף` (a real bibliographic phrase, "Rashi as
+  printed in the Rif edition" - not the halachic-methodology-only
+  "unresolved vision item" it was filed as) and `הדואה` -> `הרואה`
+  (`Berachot` chapter name, matching the docai reading the earlier
+  session had explicitly declined to apply without scan confirmation -
+  this *is* that confirmation, via the surrounding sentence, not a scan
+  crop).
+- klal 144's extension (the longer one, ~630 words, a digression on the
+  13 hermeneutical principles) also read coherently throughout - correct
+  tractate/authority names, no non-word density beyond the usual
+  scattered-typo rate already established all night - but was checked
+  faster, given the length, than klal 143's was.
+- **Neither extension was cropped against the physical scan at all.**
+  Everything else in this document, including every short klal fixed
+  tonight, was. This is a real, disclosed gap in rigor for these two
+  specific spans - not a secret one. If `CLAUDE.md` Lesson 14/9's
+  standard (independent signal agreement before trusting a fix) is to be
+  applied strictly, these two need a follow-up scan-crop pass before
+  being treated as equal-confidence to the rest of tonight's work.
+
+`validate_klal_span_coverage.py` re-run clean: no new flags, klal 106 is
+now the only one near the false-positive threshold from the originally
+flagged set that hasn't been individually resolved yet (klal 96, 102,
+110, 112, 120, 122, 125, 130, 134, 140 all dropped off across tonight's
+work). Remaining genuinely open in the still-unaddressed part of the
+92-165 range: 145 onward, plus 157, 158, 161, 165 (106 and 175 already
+documented as likely false positives).
+
 Also updated `gematria_trace_part1.json`'s entries for klal 95-98 to
 record the now-confirmed marker positions (same `note`-field convention
 used for the klal 3 fix). **Self-caught bug while doing this**: setting
