@@ -1357,6 +1357,88 @@ in an earlier session. Roughly 45-50 klalim remain in the originally-scoped
 92-165 range (~65 total minus what's now fixed). Not committed yet - see
 next steps.
 
+**Continued overnight, 2026-08-06: klal 112-128 fixed (17 more klalim),
+same off-by-one method, each individually scan-confirmed** (klal 128's
+long body given a lighter check - opening/section confirmed via crop,
+not verified word-by-word against docai given its length - flagging this
+explicitly as a lower-confidence item, not silently treating it the same
+as the others).
+
+Process note: a slot-targeting mistake was made and caught early (klal 34
+0.375 correction wave). when reconstructing klal 112/113, the fix for
+klal 113's real content was first written into the klal_id=114 JSON record
+instead of the klal_id=113 record - caught immediately by re-reading the
+file state before proceeding further, not left for a later pass to find.
+Switched to a small Python helper (`apply_fix`/`apply_fix2` in a scratch
+script) that requires asserting the *old* title of the record being
+overwritten before it will write, specifically to catch this class of
+mistake going forward - manual Edit-tool text matching on long, similar
+klal bodies was the proximate cause.
+
+New findings in this stretch:
+- **The true Beit/Gimel and Gimel/Dalet section boundaries are one klal
+  earlier than documented in the "All 222 Part-1 titles reviewed" table
+  above**: really 121/122 and 127/128, not 122/123 and 128/129 - the
+  `סליקו כללי X בס"ד כללי Y` section-transition text (kept inline per the
+  klal 80 precedent) had itself been shifted one klal forward along with
+  everything else. Fixed the `section` field for klal 122-128 accordingly.
+  The table above is now stale for this specific boundary and should be
+  read with that correction in mind (not yet rewritten in place, to avoid
+  re-editing a table mid-investigation - do so once the full 92-165 range
+  is closed).
+- **Klal 118 had a real omission, not a misread**: the maxim `ב"ד מכין
+  ועונשין שלא מן הדין` (Sanhedrin 46a - "Beit Din may strike/punish even
+  not strictly by the law") was missing its opening `ב"ד` entirely from
+  stored text (not even docai's usual `ב"ך` misread was present - the
+  word was just absent). Restored.
+- **Klal 126 resolves one of the three previously-flagged "unresolved
+  vision-favors-docai" items** (see "Root cause found and fixed for the
+  15 unparseable JSON entries" above): `ופדוייו`/`חדש` are confirmed
+  correct as stored, not docai's `ופרויין`/`חרש` - this klal is quoting
+  Tosafot Arachin 18b s.v. `ופדוייו מבן חדש ומעלה` (a real halachic
+  phrase from Bamidbar 18:16 about redeeming firstborns) almost verbatim,
+  and `חדש` there means "month," not "new." Two of the three
+  (klal 144, 160) are still open.
+- **Two more instances of the קטז/קטן-style marker misread** (a docai OCR
+  confusion between ז and ן on the marker glyph itself, not a print
+  defect - see the klal 107 קז/קו precedent): klal 116, and klal 127
+  (whose letterform was genuinely ambiguous even at 35x crop zoom -
+  resolved by sequential-numbering necessity, i.e. 126 and 128 already
+  independently confirmed, rather than a clean pixel read. Disclosed as a
+  judgment call, not a certain read.).
+- Klal 122/123 and klal 126/127 are each genuine same-title klal pairs
+  (`גדול כבוד הבריות...` and `גזירה שוה...` respectively) with distinct
+  bodies - consistent with the already-documented repeated-title-cluster
+  convention, not a new corruption.
+
+`validate_klal_span_coverage.py` and `validate_title_alphabetical_order.py`
+both re-run clean after klal 112-128: no new flags introduced anywhere in
+Part 1; klal 96, 102, 110, 112, 120, 122, 125 all dropped off the
+span-coverage flagged list. Remaining flagged in the still-open range:
+134, 137, 140, 157, 158, 161, 165 (106 and 175 are the already-documented
+false positives). Committed in two batches (klal 112-118, klal 119-128).
+
+**Next boundary: klal 129 - attempted, deliberately stopped short of
+applying anything, flagging as harder than the rest of this stretch.**
+Klal 129's real content (currently sitting, per the established pattern,
+in slot 130) is unusually long (476 words in the current slot-130 text)
+and its stored form appears to end mid-thought (`...דלא ניחא ליה לאוקומי`,
+"he's not comfortable establishing..." - not a natural stopping point),
+suggesting either it's genuinely this long and continues further, or it's
+independently truncated (the cross-page-truncation bug class, not yet
+ruled out here). `לאוקומי` recurs 4 times on page 47 alone (tokens 391,
+632, 652, 806 of 811 total), meaning the real end-of-klal boundary can't
+be found by simple text search the way the shorter klalim in this stretch
+were - and no pass, old or new, has ever located klal129's own real
+marker (`marker_not_found_in_window` in the original trace, still
+unresolved). This is a different, harder problem than klal 112-128 (each
+of which had an actual found marker anchoring both ends) - given the
+priority on not corrupting text over raw coverage, stopping here rather
+than reconstructing a long, cross-page span on a first attempt without
+the same anchor-on-both-ends confidence the rest of this batch had.
+**klal 129 (and by extension wherever it truly ends, plus 130 onward) is
+the next open item**, not yet attempted beyond this scoping.
+
 Also updated `gematria_trace_part1.json`'s entries for klal 95-98 to
 record the now-confirmed marker positions (same `note`-field convention
 used for the klal 3 fix). **Self-caught bug while doing this**: setting
