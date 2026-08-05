@@ -648,10 +648,10 @@
       "x2": 0.8909657597541809,
       "y2": 0.9008032083511353
     },
-    "vision_selected": "ERROR",
-    "vision_transcription": null,
-    "vision_confidence": null,
-    "vision_reasoning": "Expecting ',' delimiter: line 3 column 33 (char 60)"
+    "vision_selected": "B",
+    "vision_transcription": "סי' כ\"ה",
+    "vision_confidence": 0.95,
+    "vision_reasoning": "The crop displays the standard Rabbinic abbreviation for 'Siman 25' ('סי' כ\"ה'). DocAI raw OCR (Option A) misinterprets the geresh and gershayim punctuation marks as yods ('י' / 'יי'). Contextual analysis of Rabbinic Responsa citations ('שו\"ת מהר\"ר צבי סי' כ\"ה') confirms Option B as the correct text."
   },
   {
     "klal_id": 22,
@@ -2556,10 +2556,10 @@
       "x2": 0.6024615168571472,
       "y2": 0.319918692111969
     },
-    "vision_selected": "ERROR",
-    "vision_transcription": null,
-    "vision_confidence": null,
-    "vision_reasoning": "Expecting ',' delimiter: line 5 column 127 (char 233)"
+    "vision_selected": "UNCERTAIN",
+    "vision_transcription": "ומעינן\\nר ב' מי\\nמורא",
+    "vision_confidence": 0.0,
+    "vision_reasoning": "The crop contains multiple lines of Hebrew text including 'ומעינן', 'ר ב' מי', and 'מורא'. Neither Option A (\"'\") nor Option B (\"None\") accurately transcribes the visible text in the raster crop."
   },
   {
     "klal_id": 86,
@@ -2910,10 +2910,10 @@
       "x2": 0.6178461313247681,
       "y2": 0.48577237129211426
     },
-    "vision_selected": "ERROR",
-    "vision_transcription": null,
-    "vision_confidence": null,
-    "vision_reasoning": "Expecting ',' delimiter: line 5 column 55 (char 137)"
+    "vision_selected": "B",
+    "vision_transcription": "פ\\\"ד",
+    "vision_confidence": 0.95,
+    "vision_reasoning": "The character following the quotes ('\"') displays a distinct right-angled top corner with a slight rightward serif overhang, characteristic of the Hebrew letter Dalet ('ד'), clearly distinguishing it from Resh ('ר'). Therefore, Option B (\\\"פ\\\"ד\\\") is the correct reading."
   },
   {
     "klal_id": 87,
@@ -3600,10 +3600,10 @@
       "x2": 0.5706285238265991,
       "y2": 0.6355966329574585
     },
-    "vision_selected": "ERROR",
-    "vision_transcription": null,
-    "vision_confidence": null,
-    "vision_reasoning": "Expecting ',' delimiter: line 5 column 426 (char 509)"
+    "vision_selected": "B",
+    "vision_transcription": "אליהו",
+    "vision_confidence": 0.95,
+    "vision_reasoning": null
   },
   {
     "klal_id": 104,
@@ -4122,10 +4122,10 @@
       "x2": 0.691167414188385,
       "y2": 0.24706359207630157
     },
-    "vision_selected": "ERROR",
-    "vision_transcription": null,
-    "vision_confidence": null,
-    "vision_reasoning": "Expecting ',' delimiter: line 5 column 285 (char 369)"
+    "vision_selected": "A",
+    "vision_transcription": "ופרויין",
+    "vision_confidence": 0.9,
+    "vision_reasoning": null
   },
   {
     "klal_id": 126,
@@ -4458,10 +4458,10 @@
       "x2": 0.30267247557640076,
       "y2": 0.4917505085468292
     },
-    "vision_selected": "ERROR",
-    "vision_transcription": null,
-    "vision_confidence": null,
-    "vision_reasoning": "Expecting ',' delimiter: line 3 column 33 (char 60)"
+    "vision_selected": "A",
+    "vision_transcription": "שבהרי\"ף",
+    "vision_confidence": 0.98,
+    "vision_reasoning": "The image clearly shows the word 'שבהרי\"ף' (referring to the Rif, Rabbi Yitzchak Alfasi, with the prefix ש-ב-ה-). Paleographically, the letter following the 'ה' has a rounded top-right corner characteristic of a 'ר' (resh) in this typeface, rather than a squared corner with an overhang for a 'ד' (dalet). Semantically and contextually, 'שבהרי\"ף' (that is in the Rif) is the correct standard Rabbinic citation format."
   },
   {
     "klal_id": 144,
@@ -5358,10 +5358,10 @@
       "x2": 0.5872917771339417,
       "y2": 0.786699116230011
     },
-    "vision_selected": "ERROR",
-    "vision_transcription": null,
-    "vision_confidence": null,
-    "vision_reasoning": "Expecting ',' delimiter: line 3 column 32 (char 59)"
+    "vision_selected": "A",
+    "vision_transcription": "והרל\"ם",
+    "vision_confidence": 0.95,
+    "vision_reasoning": "The raster crop clearly displays a printed textual error reading 'והרל\\\"ם'. Paleographically, the letter following the 'resh' ('ר') has a tall vertical ascender extending well above the x-height line, characteristic of a 'lamed' ('ל'), directly followed by gershayim and a final 'mem' ('ם'). While the surrounding Rabbinic context clearly intends 'והרמב\\\"ם' (referring to Maimonides alongside the Rif and Rosh), the physical print in the crop visually reads 'והרל\\\"ם' matching Option A."
   },
   {
     "klal_id": 160,
@@ -6162,10 +6162,10 @@
       "x2": 0.7763320803642273,
       "y2": 0.43843358755111694
     },
-    "vision_selected": "ERROR",
-    "vision_transcription": null,
-    "vision_confidence": null,
-    "vision_reasoning": "Expecting ',' delimiter: line 5 column 127 (char 237)"
+    "vision_selected": "UNCERTAIN",
+    "vision_transcription": "דתי מה'\\nמה' הרי\\nנו לרי",
+    "vision_confidence": 0.95,
+    "vision_reasoning": "The raster crop contains multiple legible lines of text corresponding to the context ('[למ]דתי מה' / מה' הרי[\"ף] / [זכי]נו לרי[חו]'). Neither Option A (\"'\") nor Option B (\"None\") accurately transcribes the visible text, making UNCERTAIN the required response."
   },
   {
     "klal_id": 168,
@@ -6216,10 +6216,10 @@
       "x2": 0.2819083034992218,
       "y2": 0.43843358755111694
     },
-    "vision_selected": "ERROR",
-    "vision_transcription": null,
-    "vision_confidence": null,
-    "vision_reasoning": "Expecting ',' delimiter: line 5 column 161 (char 265)"
+    "vision_selected": "UNCERTAIN",
+    "vision_transcription": "באביי\\nר' יו\\nהיה ל",
+    "vision_confidence": 0.9,
+    "vision_reasoning": "The raster crop contains multiple visible Hebrew words/fragments across several lines (including 'באביי', 'ר' יו', 'היה ל'). Neither Option A (\"'\") nor Option B (\"None\") accurately transcribes the visible text."
   },
   {
     "klal_id": 168,
@@ -6504,10 +6504,10 @@
       "x2": 0.8915737271308899,
       "y2": 0.696003258228302
     },
-    "vision_selected": "ERROR",
-    "vision_transcription": null,
-    "vision_confidence": null,
-    "vision_reasoning": "Expecting ',' delimiter: line 5 column 130 (char 234)"
+    "vision_selected": "UNCERTAIN",
+    "vision_transcription": "סברי\\nר' יוח\\nדמצי",
+    "vision_confidence": 0.95,
+    "vision_reasoning": "The crop image contains multiple lines of Hebrew text including 'סברי', 'ר' יוח', and 'דמצי'. Neither Option A (\"'\") nor Option B (\"None\") correctly reflects the visible text in the image."
   },
   {
     "klal_id": 168,
@@ -6852,10 +6852,10 @@
       "x2": 0.18703703582286835,
       "y2": 0.23095624148845673
     },
-    "vision_selected": "ERROR",
-    "vision_transcription": null,
-    "vision_confidence": null,
-    "vision_reasoning": "Expecting ',' delimiter: line 5 column 206 (char 302)"
+    "vision_selected": "UNCERTAIN",
+    "vision_transcription": "ר' י\\nו כרא",
+    "vision_confidence": 0.9,
+    "vision_reasoning": "The image crop contains legible Hebrew text across multiple lines, including fragments from the context such as 'ר' י' (from 'ר' יוחנן') and 'ו כרא' (from 'או כראב\\\"י'). Neither Option A (\"'\") nor Option B (\"None\") accurately transcribes the visible text array, so UNCERTAIN is returned per the prompt instructions."
   },
   {
     "klal_id": 170,
@@ -6924,10 +6924,10 @@
       "x2": 0.40925925970077515,
       "y2": 0.3209076225757599
     },
-    "vision_selected": "ERROR",
-    "vision_transcription": null,
-    "vision_confidence": null,
-    "vision_reasoning": "Expecting ',' delimiter: line 5 column 146 (char 250)"
+    "vision_selected": "UNCERTAIN",
+    "vision_transcription": "בהק\\nא' ד\\nלוני וכ",
+    "vision_confidence": 0.95,
+    "vision_reasoning": "The provided image crop contains multiple lines of Hebrew Rabbinic text (including 'בהק', 'א\\' ד', 'לוני וכ'). Neither Option A (\"'\") nor Option B (\"None\") accurately transcribes the visible text in the raster crop, requiring an UNCERTAIN selection."
   },
   {
     "klal_id": 171,
@@ -9060,10 +9060,10 @@
       "x2": 0.5302842855453491,
       "y2": 0.709834098815918
     },
-    "vision_selected": "ERROR",
-    "vision_transcription": null,
-    "vision_confidence": null,
-    "vision_reasoning": "Expecting ',' delimiter: line 5 column 130 (char 237)"
+    "vision_selected": "UNCERTAIN",
+    "vision_transcription": "בחלב\\nלעיל\\nאמי\\nיתברך",
+    "vision_confidence": 0.0,
+    "vision_reasoning": "The image crop contains multiple visible lines of Hebrew text (e.g., בחלב, לעיל, אמי, יתברך). Neither Option A (\"'\") nor Option B (\"None\") accurately transcribes the visible pixel array, requiring an UNCERTAIN result per instructions."
   },
   {
     "klal_id": 178,
@@ -10392,10 +10392,10 @@
       "x2": 0.2717190384864807,
       "y2": 0.548701286315918
     },
-    "vision_selected": "ERROR",
-    "vision_transcription": null,
-    "vision_confidence": null,
-    "vision_reasoning": "Expecting ',' delimiter: line 5 column 132 (char 238)"
+    "vision_selected": "UNCERTAIN",
+    "vision_transcription": "יתיבנא\\nבפ' ח\\nעין א",
+    "vision_confidence": 0.95,
+    "vision_reasoning": "The image clearly shows multiple lines of Hebrew text including 'יתיבנא', 'בפ' ח', and 'עין א'. Neither Option A (\"'\") nor Option B (\"None\") accurately transcribes the visible text."
   },
   {
     "klal_id": 191,
@@ -12360,10 +12360,10 @@
       "x2": 0.5297029614448547,
       "y2": 0.6854023337364197
     },
-    "vision_selected": "ERROR",
-    "vision_transcription": null,
-    "vision_confidence": null,
-    "vision_reasoning": "Expecting ',' delimiter: line 5 column 178 (char 283)"
+    "vision_selected": "UNCERTAIN",
+    "vision_transcription": "פשוט \\n. ב' \\n:מכ\\\"ש",
+    "vision_confidence": 0.0,
+    "vision_reasoning": "The crop contains multiple visible lines of Rabbinic text, including words such as 'פשוט', 'ב'', and the acronym 'מכ\\\"ש' (מכל שכן). Neither candidate string A (\"'\") nor B (\"None\") accurately transcribes the text visible in the crop."
   },
   {
     "klal_id": 215,

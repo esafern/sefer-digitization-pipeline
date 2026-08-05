@@ -117,19 +117,24 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
     flex: 1;
     position: relative;
     overflow: auto;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
+    /* NOT display:flex + justify-content:center - that centers via the flex
+       algorithm, which only creates scrollable space on one side of the
+       overflow. Once the page is zoomed past the viewport, half the image
+       becomes permanently unreachable by scroll. margin:auto on the child
+       gives the same centered-when-small look but full scroll range in
+       every direction once it's larger than the viewport. */
     padding: 16px 0;
+    cursor: grab;
   }
+  #scan-viewer.panning { cursor: grabbing; }
   #page-container {
     position: relative;
-    display: inline-block;
+    display: table;
+    margin: 0 auto;
     box-shadow: 0 4px 20px rgba(0,0,0,0.15);
     background: white;
-    flex-shrink: 0;
   }
-  #page-img { display: block; width: 480px; height: auto; }
+  #page-img { display: block; width: 480px; height: auto; -webkit-user-drag: none; user-select: none; }
   #hl-container { position: absolute; inset: 0; overflow: hidden; }
   .hl-box {
     position: absolute;
@@ -466,15 +471,44 @@ const klalIndicator = document.getElementById('klal-indicator');
 const scanViewer = document.getElementById('scan-viewer');
 
 let zoomLevel = 1;
-function applyZoom() {
+function applyZoom(anchorRatioX, anchorRatioY) {
+  // Preserve whatever point in the image was centered in the viewport
+  // before the zoom change - otherwise every +/- click recenters on the
+  // image's middle and the user loses whatever region they'd panned to.
+  const rX = anchorRatioX != null ? anchorRatioX
+    : (scanViewer.scrollLeft + scanViewer.clientWidth / 2) / (pageImg.offsetWidth || 1);
+  const rY = anchorRatioY != null ? anchorRatioY
+    : (scanViewer.scrollTop + scanViewer.clientHeight / 2) / (pageImg.offsetHeight || 1);
+
   const fitWidth = scanViewer.clientWidth - 32;
   pageImg.style.width = Math.round(fitWidth * zoomLevel) + 'px';
   document.getElementById('zoom-level').textContent = Math.round(zoomLevel * 100) + '%';
+
+  requestAnimationFrame(() => {
+    scanViewer.scrollLeft = rX * pageImg.offsetWidth - scanViewer.clientWidth / 2;
+    scanViewer.scrollTop = rY * pageImg.offsetHeight - scanViewer.clientHeight / 2;
+  });
 }
 document.getElementById('zoom-in').onclick = () => { zoomLevel = Math.min(3, zoomLevel + 0.25); applyZoom(); };
 document.getElementById('zoom-out').onclick = () => { zoomLevel = Math.max(0.3, zoomLevel - 0.25); applyZoom(); };
-pageImg.addEventListener('load', applyZoom);
-applyZoom();
+pageImg.addEventListener('load', () => applyZoom(0.5, 0));
+applyZoom(0.5, 0);
+
+// ---------- click-and-drag panning ----------
+let panning = false, panStartX = 0, panStartY = 0, panScrollLeft = 0, panScrollTop = 0;
+scanViewer.addEventListener('mousedown', (e) => {
+  panning = true;
+  scanViewer.classList.add('panning');
+  panStartX = e.clientX; panStartY = e.clientY;
+  panScrollLeft = scanViewer.scrollLeft; panScrollTop = scanViewer.scrollTop;
+  e.preventDefault();
+});
+window.addEventListener('mousemove', (e) => {
+  if (!panning) return;
+  scanViewer.scrollLeft = panScrollLeft - (e.clientX - panStartX);
+  scanViewer.scrollTop = panScrollTop - (e.clientY - panStartY);
+});
+window.addEventListener('mouseup', () => { panning = false; scanViewer.classList.remove('panning'); });
 
 function showPage(page, focusKlalId) {
   if (page !== currentPage) {

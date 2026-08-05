@@ -22,6 +22,37 @@ def sanitize_json(text):
     # strip a backslash unless it precedes a valid JSON escape character.
     return re.sub(r'\\(?!["\\/bfnrtu])', '', text)
 
+
+def extract_json_fields(text):
+    # Fallback for a DIFFERENT failure mode than sanitize_json handles: the
+    # response content itself is Hebrew text containing gershayim ("), and
+    # Gemini sometimes emits that quote mark literally unescaped inside a
+    # JSON string value (e.g. "transcription_found": "סי' כ"ה" - note the
+    # unescaped " before ה) even in response_mime_type=application/json
+    # mode. That's not a fixable single-character bug like the backslash
+    # case; strict json.loads can't recover the intended string boundary.
+    # The 4 fields are always emitted in the same fixed order per the
+    # prompt, so extract each by matching up to the next known field key
+    # (or the closing brace for the last one) instead of relying on the
+    # embedded value having no stray quotes.
+    def field(name, next_pattern):
+        m = re.search(rf'"{name}"\s*:\s*"(.*?)"\s*,?\s*{next_pattern}', text, re.S)
+        return m.group(1) if m else None
+
+    selected = re.search(r'"selected_option"\s*:\s*"(A|B|UNCERTAIN)"', text)
+    transcription = field("transcription_found", r'(?="confidence")')
+    confidence = re.search(r'"confidence"\s*:\s*([\d.]+)', text)
+    reasoning = field("reasoning", r'\}\s*$')
+
+    if not (selected and confidence):
+        return None
+    return {
+        "selected_option": selected.group(1),
+        "transcription_found": transcription,
+        "confidence": float(confidence.group(1)),
+        "reasoning": reasoning,
+    }
+
 REPO = os.path.dirname(os.path.abspath(__file__))
 PDF_PATH = os.path.join(REPO, "berlin_square.pdf")
 CANDIDATES_PATH = os.path.join(REPO, "corrections_candidates_part1.json")
@@ -187,7 +218,12 @@ def main():
             try:
                 decision = json.loads(decision_text)
             except json.JSONDecodeError:
-                decision = json.loads(sanitize_json(decision_text))
+                try:
+                    decision = json.loads(sanitize_json(decision_text))
+                except json.JSONDecodeError:
+                    decision = extract_json_fields(decision_text)
+                    if decision is None:
+                        raise
         except Exception as e:
             print(f"  !! failed: {e}")
             decision = {"selected_option": "ERROR", "transcription_found": None, "confidence": None, "reasoning": str(e)}

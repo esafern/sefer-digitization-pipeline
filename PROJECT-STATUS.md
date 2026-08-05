@@ -234,31 +234,33 @@ cause found so far:
 - **Klal 34 — fixed 2026-08-04** (see dated section below): was a real
   missing-clause error, not just a low-similarity false alarm. No longer
   open.
-- **Klal 66**: title-crop still pulls wrong content even though klal 66's own
-  marker/content is independently confirmed correctly positioned on page 34
-  — a narrower, still-unexplained tool-precision issue.
+- **Klal 66 — resolved 2026-08-05** (see dated section below): checked
+  directly against the scan with precise y-coordinate token filtering;
+  current text matches the print exactly. No longer open - the "wrong
+  content" flag was itself a false alarm.
 - **Klal 67 — resolved 2026-08-04** (see dated section below): the marker
   *is* on page 34 (`scratch/klal67_marker_zoom2.png` shows `סז` clearly) —
   the earlier "not found" result was a tool/search-precision miss, not a
   real misattribution. No text change needed.
-- **Klal 21, 39, 75, 79**: semantic-sanity pass favored an alternative
-  reading for each, none yet checked against the scan (see the systematic
-  semantic-sanity item above for specifics). Don't treat as confirmed either
-  way.
+- **Klal 21, 39, 75, 79 — resolved 2026-08-05** (see dated section below):
+  all four checked directly against the scan; current text confirmed
+  correct in every case, including klal 79 where the flag's specific
+  concerns (`או`/`אי`, a supposedly-missing `וכו'`) were both already wrong
+  or already resolved. No longer open.
 - Word-level correction verification for 1–91 is no longer a thin sample —
   see the 2026-08-04 dated section below, which crop-verified 40 additional
   candidates. Corpus-wide (parts 1–3, all 794 candidates), coverage is still
   thin.
 
-**Honest bottom line for "is klal 1–91 presentable": closer, but not fully
-clean.** The severe, multi-klal cascading failures are gone. Klal 50, 65, 21
-(the corrections-level fix), 82, 83, 218, 219, 34 are now fixed and
-scan-confirmed; klal 67's marker mystery and klal 3's disagreement are both
-resolved (reviewed, no fix needed in either case). What remains is a short,
-specific, named list (klal 66, plus the unverified 21/39/75/79 title
-candidates above) plus the general thin word-level-verification coverage the
-rest of the corpus (parts 2–3, and the untouched 90–222 range of part 1)
-still has — not a vague "probably fine." Do not present this range as fully
+**Honest bottom line for "is klal 1–91 presentable": closer, and the named
+list is now clear.** The severe, multi-klal cascading failures are gone.
+Klal 50, 65, 21 (the corrections-level fix), 82, 83, 218, 219, 34 are now
+fixed and scan-confirmed; klal 67's marker mystery, klal 3's disagreement,
+klal 66, and klal 21/39/75/79 (title-level) are all resolved (reviewed, no
+fix needed in any of them). What remains is the general thin
+word-level-verification coverage the rest of the corpus (parts 2–3, and the
+untouched 90–222 range of part 1) still has, not a named list of specific
+unresolved klalim in 1–91 anymore. Do not present this range as fully
 verified without either resolving those items or explicitly caveating them.
 
 ## Klal 1–91 correction-candidate semantic/vision disagreement pass — 2026-08-04
@@ -1043,3 +1045,81 @@ marker) is not yet located. This is the immediate next step.
 Regenerated `review.html` after this fix (`rebuild_all.sh`) so the 3
 klalim's corrected text and titles are visible there, not just in
 `part1.json`.
+
+## Klal 21, 39, 66, 75, 79 — all checked against the scan, all confirmed correct, 2026-08-05
+
+Closing out these long-open, never-verified flags (requested ahead of
+showing `review.html` to someone, to rule out glaring errors in the early
+klalim). All five checked by isolating the exact print line via precise
+y-coordinate token filtering (not array-index slicing, which turned out to
+interleave two adjacent lines for klal 39/75 - see the klal 66 note below
+for why this matters) and reading the reconstructed RTL sequence directly:
+
+- **Klal 21** (`תותה` vs semantic-suggested `תותיה`): scan shows
+  unambiguously `תותה`, 4 letters, no yod. Current text correct.
+- **Klal 39** (flagged as a possible "vision favors shortest span"
+  truncation): the full stored title matches the scan's line exactly,
+  including the closing period. Current text correct.
+- **Klal 66** (previously flagged: "title-crop pulls wrong content even
+  though the marker is correctly positioned"). **First-pass visual read of
+  this one was wrong** - misread `אין ביטול ממש...` as the start of the
+  Eduyot 1:5 quote (`אין ב"ד יכול לבטל...`) already confirmed for the
+  neighboring klal 65/67, almost certainly pattern-matching bias from
+  having just seen that exact phrase twice. Caught by cross-checking
+  against `docai_word_boxes` tokens filtered to the marker's exact
+  y-coordinate range (not trusting my own read, and not trusting raw
+  array-index order either) - the real line is `סו אין ביטול ממש אבל
+  להוסיף על תקנתם לאו ביטול מקרי...`, matching current `clean_text` exactly.
+  Current text correct; the original "wrong content" flag was itself likely
+  a similar false alarm from whatever tool raised it.
+- **Klal 75** (long title, unverified): matches the scan's line exactly.
+  Current text correct.
+- **Klal 79** (`או`→`אי` and a supposedly-missing `וכו'`): scan confirms
+  `או` (not `אי`) and confirms `וכו'` **is already present** in the current
+  stored text, right after the judged title boundary. Both parts of the
+  original flag were already resolved or incorrect. Current text correct.
+
+No changes applied - all five were already right. This closes out every
+remaining item in the old "Klal 21, 39, 75, 79" / "Klal 66" open items.
+
+## Root cause found and fixed for the 15 unparseable JSON `decision_json` entries — 2026-08-05
+
+Root cause identified by capturing and inspecting a real failing response
+directly (klal 22): Gemini emits a **literal, unescaped `"` character
+inside a JSON string value** whenever that value contains Hebrew gershayim
+punctuation (e.g. `"transcription_found": "סי' כ"ה"` - the `"` before `ה`
+prematurely closes the JSON string from the parser's point of view). This
+happens even with `response_mime_type="application/json"` set. It's a
+**different bug than what `sanitize_json()` already handles** (that one
+fixes invalid backslash-escapes; this one is an outright unescaped quote
+mid-string, which isn't recoverable by any single-character substitution -
+the string's true end can't be inferred from the malformed text alone).
+
+**Fixed** with a fallback parser, `extract_json_fields()` in
+`verify_corrections_vision.py`: since the model always emits the same 4
+fields in the same fixed order per the prompt, each field is extracted by
+matching up to the *next known field key* (or the closing brace for the
+last field) instead of relying on correctly-paired quotes. Tried in order:
+strict `json.loads` → `sanitize_json` → `extract_json_fields`; only raises
+if all three fail.
+
+**All 15 previously-unparseable entries now resolve successfully** (klal
+22, 86, 87, 103, 126, 144, 160, 168 ×3, 170, 171, 178, 191, 215) - several
+correctly resolve to `UNCERTAIN` (a legitimate outcome per the adjudication
+schema, not a failure), the rest resolve to a concrete `A`/`B` selection.
+Notably these all hit the *existing* cache rather than needing a fresh API
+call: `cache_decision()` is called with the raw response text as soon as
+the API call itself succeeds, before the caller attempts to parse it - so
+the malformed-but-real text was already cached from the original failed
+run, and the new fallback parser could recover it without spending any more
+Gemini credits. `corrections_verified_part1.json` / `corrections_part1.json`
+/ `review.html` regenerated; the `error` flag no longer appears anywhere in
+the flag distribution.
+
+**Not yet acted on**: 3 of the 15 resolved to vision favoring the docai
+reading over currently-stored text (klal 126 `ופרויין`/`ופדוייו`, klal 144
+`שבהרי"ף`/`שבהדי"ף`, klal 160 `והרל"ם`/`והרמב"ם`). Per this session's own
+established lesson (the klal 1-91 disagreement-batch mistake earlier), a
+single vision signal favoring the OCR reading is not sufficient on its own
+- these need the same sentence-context check as everything else before
+being trusted, not applied on the strength of this one result.
