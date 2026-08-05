@@ -990,3 +990,56 @@ transcription, and this is klal 1 of ~65 in the range. Given the content
 density observed just in this one klal, full manual verification of the
 whole range is a substantially larger effort than a few turns - continuing,
 but flagging the realistic scale now rather than after the fact.
+
+## Klal 92-165 root cause identified: a clean off-by-one content shift, not scattered corruption — 2026-08-05
+
+Continuing the manual verification, the true shape of the bug became clear:
+**this is a contiguous off-by-one shift** (`clean_text` currently stored
+under `klal_id N` is really klal `N-1`'s real content), not random scatter.
+Confirmed directly by reading the real markers on the page: klal 92's real
+marker (`צב`, page 41) is followed by content currently stored under
+`klal_id 93`; klal 93's real marker (`צג`, page 42) precedes content
+currently under `klal_id 94`; klal 94's real marker (`צד`, page 42)
+precedes content currently under `klal_id 95`; klal 95's real marker (`צה`,
+page 43) precedes content currently under `klal_id 96`. Four independent
+confirmations of the same shift-by-one pattern.
+
+**This also reframes the earlier "marker/citation collision" finding for
+klal 99** (see "Automated marker-vs-citation filter attempt" above): that
+wasn't a coincidental citation number after all. The `צט` token really is
+klal 99's real marker; the automated check flagged it as a mismatch only
+because it was comparing against klal 99's *currently stored* (shifted,
+wrong) content instead of the correct one. The filter-search dead end and
+the shift are very likely the same underlying bug, not two separate issues.
+
+**Fixed and applied, scan-confirmed**: klal 92, 93, 94 (`part1.json` +
+`klalim_demo_dataset.json`). Each klal's real content was extracted as the
+exact docai token span between its own confirmed marker and the next
+klal's, not hand-retyped - the OCR words themselves are generally reliable
+(confirmed throughout this session); what was wrong was which klal_id they
+were filed under. Two bugs caught and fixed *during* this extraction, not
+after:
+- A page-crossing span naively included the next page's running header
+  (`יד מלאכי כללי הבית טו`) as body text - fixed by stripping the fixed
+  5-token header run whenever a span crosses into a new page.
+- Klal 92's span initially included a duplicate word fragment: page 41's
+  scan captured a partial glimpse of its own last line (`רי`, cut off) that
+  page 42 then captures again, completely and correctly (`ר' ירמיה`) -
+  confirmed by direct high-zoom crop of page 41's very last line. Removed
+  the partial duplicate.
+- Klal 92 needed a judged title/explanation boundary (no natural print
+  punctuation at that point, marked `[.]` per the established convention);
+  klal 93 and 94 both had a natural period in the print at the right spot,
+  no judgment call needed.
+
+**Klal 95 is now the new boundary and is known-wrong** (still holds the
+stale content that used to belong to klal 94, now duplicated with the
+just-fixed klal 94) - this is expected, not a new bug: fixing N always
+"un-covers" N+1 as the next thing needing the same treatment in a
+contiguous shift. Klal 95's real marker position is already found (`צה`,
+page 43, confirmed by direct crop) - its end boundary (klal 96's real
+marker) is not yet located. This is the immediate next step.
+
+Regenerated `review.html` after this fix (`rebuild_all.sh`) so the 3
+klalim's corrected text and titles are visible there, not just in
+`part1.json`.

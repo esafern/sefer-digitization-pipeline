@@ -2559,66 +2559,6 @@
       }
     },
     {
-      "klal_id": 93,
-      "page": 41,
-      "opcode": "insert",
-      "word_index_in_final_text": 13,
-      "original_word": null,
-      "corrected_word": "[.]",
-      "bbox": null
-    },
-    {
-      "klal_id": 93,
-      "page": 41,
-      "opcode": "delete",
-      "word_index_in_final_text": 33,
-      "original_word": "Digitized by Google",
-      "corrected_word": null,
-      "bbox": {
-        "x1": 0.5311920642852783,
-        "y1": 0.9590927362442017,
-        "x2": 0.7387276291847229,
-        "y2": 0.9821790456771851
-      }
-    },
-    {
-      "klal_id": 94,
-      "page": 42,
-      "opcode": "replace",
-      "word_index_in_final_text": 45,
-      "original_word": "יכום",
-      "corrected_word": "יבום",
-      "bbox": {
-        "x1": 0.18210068345069885,
-        "y1": 0.5754527449607849,
-        "x2": 0.2150404006242752,
-        "y2": 0.5927565097808838
-      }
-    },
-    {
-      "klal_id": 95,
-      "page": 42,
-      "opcode": "insert",
-      "word_index_in_final_text": 0,
-      "original_word": null,
-      "corrected_word": "צה",
-      "bbox": null
-    },
-    {
-      "klal_id": 95,
-      "page": 42,
-      "opcode": "replace",
-      "word_index_in_final_text": 18,
-      "original_word": "לדערת",
-      "corrected_word": "לדעת",
-      "bbox": {
-        "x1": 0.6550652384757996,
-        "y1": 0.7259557247161865,
-        "x2": 0.7060285806655884,
-        "y2": 0.7436619997024536
-      }
-    },
-    {
       "klal_id": 96,
       "page": 43,
       "opcode": "insert",
@@ -10032,8 +9972,8 @@
     }
   ],
   "meta": {
-    "total_candidates": 770,
-    "klalim_covered": 174,
+    "total_candidates": 765,
+    "klalim_covered": 172,
     "skipped_no_docai_page_klalim": [],
     "untrusted_klalim_excluded": [
       34,
