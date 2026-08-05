@@ -650,6 +650,20 @@
       "bbox": null
     },
     {
+      "klal_id": 33,
+      "page": 26,
+      "opcode": "delete",
+      "word_index_in_final_text": 148,
+      "original_word": "'",
+      "corrected_word": null,
+      "bbox": {
+        "x1": 0.5289359092712402,
+        "y1": 0.44154277443885803,
+        "x2": 0.5326695442199707,
+        "y2": 0.45399758219718933
+      }
+    },
+    {
       "klal_id": 35,
       "page": 26,
       "opcode": "delete",
@@ -9467,8 +9481,8 @@
     }
   ],
   "meta": {
-    "total_candidates": 725,
-    "klalim_covered": 162,
+    "total_candidates": 726,
+    "klalim_covered": 163,
     "skipped_no_docai_page_klalim": [],
     "untrusted_klalim_excluded": [
       34,

@@ -246,3 +246,32 @@ fixed — the rule still applies to the next incident.
     in parallel by hand "to save time." Parallel hand-edits agree until the
     day someone forgets one of the two places — the failure is silent, not
     loud, so you won't notice until something downstream looks stale.
+14. **Judging word ORDER in a cropped RTL image is a distinct failure mode
+    from misreading a letter, and needs its own safeguard.** A tight crop
+    around a disputed word pair can clip the anchor word that establishes
+    which side is "first," and reading right-to-left off a clipped image
+    silently inverts the answer — confirmed 2026-08-05, klal 34's title
+    (`אין דן אדם...` vs. the correct `אין אדם דן...`): a narrow crop was
+    read as confirming the wrong order, and re-cropping the *same way* after
+    being directly contradicted reproduced the same risk. Any crop meant to
+    establish order (not just letter identity) must keep an unambiguous
+    anchor (a bold opening word, a klal marker) fully inside the frame with
+    visible margin — never crop so tight that a word touches the edge. When
+    your reading and another source directly disagree, don't re-run the same
+    method closer — cross-check with a differently-sourced signal (raw token
+    x-coordinates, a fresh independently-prompted model read) per lesson 9,
+    the same way the klal-1 `ומדקמהד` case was ultimately resolved.
+15. **A comparison pipeline that requires aligning two OCR sources produces
+    silence, not a low score, exactly where the source OCR is too garbled to
+    align — and silence is not evidence of correctness there.** Confirmed
+    2026-08-05: every Part-1 klal with a low/untrusted alignment
+    `match_ratio` in `part1_header_anchored_alignment.json` (34, 92, 129,
+    172, 180, 182, 187, 190, 194, 197, 210, 216, 217) has **zero** entries in
+    `corrections_part1.json` — not a low-confidence flag, no candidate was
+    ever generated, because `build_corrections_dataset.py` can't align
+    unrecognizable docai tokens to stored text in the first place. This is a
+    different blind spot than lesson 1 (coverage gap) — the tool nominally
+    ran, but structurally cannot produce output on the cases that need
+    checking most. Treat a low/untrusted alignment `match_ratio` as its own
+    mandatory-manual-review flag, independent of whatever the
+    corrections/vision pipeline shows for that klal.

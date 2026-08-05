@@ -846,6 +846,24 @@
     "vision_selected": null
   },
   {
+    "klal_id": 33,
+    "page": 26,
+    "opcode": "delete",
+    "word_index_in_final_text": 148,
+    "original_word": "'",
+    "corrected_word": null,
+    "bbox": {
+      "x1": 0.5289359092712402,
+      "y1": 0.44154277443885803,
+      "x2": 0.5326695442199707,
+      "y2": 0.45399758219718933
+    },
+    "vision_selected": "UNCERTAIN",
+    "vision_transcription": "שיבין",
+    "vision_confidence": 0.95,
+    "vision_reasoning": "The crop clearly contains Hebrew text, prominently featuring the word 'שיבין' on the first line (matching 'משיבין' in the sentence context), followed by subsequent lines of text. Neither candidate Option A (\"'\") nor Option B (\"None\") accurately represents the visible raster contents."
+  },
+  {
     "klal_id": 35,
     "page": 26,
     "opcode": "delete",

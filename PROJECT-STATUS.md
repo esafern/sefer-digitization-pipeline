@@ -745,6 +745,137 @@ confirmed in a rendered page, only verified by reading the generated HTML/JS.
 - Still owed: an actual visual confirmation once the Chrome extension issue
   clears, per `CLAUDE.md`'s UI-verification convention.
 
+## Klal 33/34 spot-check (user-requested review of klal 1–112) — 2026-08-05
+
+**Klal 34 title — user was right, words were swapped, fixed.** Title was
+stored as `אין דן אדם גזירה שוה מעצמו אלא א"כ קבלה מרבו` (verb before
+subject). First crop attempt at the actual print (`berlin_square.pdf` page
+26) was misread as confirming this order — **that misread was wrong**: a
+narrower crop clipped the right edge and caused `אדם` (the boxy
+dalet+final-mem shape) to be misattributed as coming after `דן` rather than
+before it. A wider, unclipped crop including the bold `אין` anchor resolved
+it unambiguously: the real order is `אין` `אדם` `דן` `גזירה` `שוה`
+`מעצמו`... — i.e. `אין אדם דן גזירה שוה מעצמו אלא א"כ קבלה מרבו`, matching
+both the user's read and the well-known Pesachim 66a phrasing this klal is
+quoting. Fixed in `part1.json` (title + `clean_text` opening). Another
+instance of the standing project lesson (klal 66, klal 1's `ומדקמהד` case):
+a single close-in crop of a disputed word/phrase is not reliable on its own
+when it clips the frame — verify with a wider, anchor-inclusive crop before
+concluding. New standing lesson from this: see `CLAUDE.md` Lessons 14/15.
+
+**Root cause of the swap, traced via `git show`**: not a fresh error. Before
+2026-08-04 (`e93788d`, the klal 1-91 vision/semantic disagreement pass), the
+title read `אין דנין גזירה שוה מעצמו אלא אם כן קבלה מרבו` — missing `אדם`
+entirely. That commit correctly identified `אדם` was missing and added it
+back, but placed it after `דן` instead of before — introducing the
+wrong-order text that stood for a full day. Two independent sessions
+(2026-08-04 and 2026-08-05) both misjudged the same word pair's order,
+consistent with a real visual difficulty in this print's typesetting
+(`אדם` sits as a cramped box shape immediately after the enlarged bold
+`אין`), not two unrelated slips.
+
+**Why this was invisible to every automated check — a new, systemic finding,
+not specific to klal 34.** `corrections_part1.json` has **zero** entries for
+klal 34, not a low-confidence one — checked why: `part1_header_anchored_alignment.json`'s
+`match_ratio` for klal 34 is 0.375 (untrusted). Checked every low-`match_ratio`
+Part-1 klal against `corrections_part1.json` and found a complete,
+100% correlation: **every klal with `match_ratio` below ~0.65 (34, 92, 129,
+172, 180, 182, 187, 190, 194, 197, 210, 216, 217 — 13 klalim) has exactly
+zero correction candidates.** `build_corrections_dataset.py` can't align
+docai's garbled tokens to stored text at these positions, so it produces no
+comparison at all, not a low score — meaning "no flags" for these 13 is not
+evidence of correctness, it's evidence the check never ran. Of these 13:
+the 8 placeholder klalim and klal 186 (corrupted) were already known; 34 and
+92 are now manually verified/fixed; **129, 172, 210 remain open, unchecked,
+and are exactly as invisible to the pipeline right now as 34 was** — see
+`CLAUDE.md` Lesson 15. Next step for this open item: manually check 129,
+172, 210 the same way (wide-anchor-crop protocol per Lesson 14), not assume
+their silence in `corrections_part1.json` means they're fine.
+
+**Update, same day: 129, 172, 210 checked.**
+
+**Klal 129 — not independently fixed; folded into the open 92–165
+shift-zone item.** `part1_header_anchored_alignment.json` shows a real
+section-header mismatch for 129 (`expected_section: הדלת`,
+`matched_page_header: הגימל`), consistent with the same off-by-one shift
+already being worked sequentially from klal 92 (currently resolved through
+111). Did not attempt a standalone fix — that reconstruction is inherently
+sequential (each klal's true content depends on the previous klal's
+boundary being correctly resolved first), so fixing 129 in isolation before
+112–128 are resolved would be unreliable. Will be picked up when the
+shift-zone work reaches it.
+
+**Klal 172 — real, confirmed defect, fixed.** Title was stored as
+`הלכה כר"ע מחבירו` (incomplete) and `clean_text` read `...מחבירו [.] ולא
+:דהחולקים...`, with a spurious editorial `[.]` mark and a stray colon.
+Direct crop of the scan (`berlin_square.pdf` page 64, marker `קעב`) shows
+the print continues `כר"ע מחבירו ולא מחבירין • היינו היכא דהחולקים...` —
+a whole clause (`מחבירין • היינו היכא`) was missing from the stored text,
+and the print already has a natural `•` boundary at the right spot (the
+`[.]` editorial insertion was never needed here). Fixed title to
+`הלכה כר"ע מחבירו ולא מחבירין`, restored the missing clause, removed the
+spurious `[.]`/stray colon. Also fixed stale `page` (was 26, confirmed 64).
+
+**Klal 210 — real, confirmed defects, fixed (4 separate issues, same
+klal).** Extensively checked against `berlin_square.pdf` pages 73–74 (marker
+`רי`) with pixel-measured, wide-anchor crops throughout, given the day's
+earlier misreads:
+1. Title/opening word: stored `דקו` → confirmed `הי` (`"which of them"`, an
+   idiom echoed twice later in the same klal — `הי מתרווייהו`, `הי מנייהו
+   דאחריתי`). `דקו` isn't a real word here.
+2. `וכלומר הי החשה נשנית` → `וכלומר הי מתרווייהו נשנית` — `החשה` was wrong,
+   confirmed via crop and matching docai.
+3. Page-crossing running-header contamination: stored had
+   `אפשר דהלכה $8 יך מלאכי כללי ההא לא דהלכה` — `$8 יך מלאכי כללי ההא` is
+   the page-74 running header plus a garbled artifact that was never
+   stripped when this klal's span crossed the page 73→74 boundary. Fixed to
+   `אפשר דהלכה : לא דהלכה` — the `:` is genuinely printed at the bottom of
+   page 73 (crop-confirmed), the header/artifact is not.
+4. `למידע אי בתרייתא הוא אם לא` → `למידע אי כתרייתא הוא אם לא` — confirmed
+   by crop the letter is כ (open top-right), not ב (closed box). Note: a
+   *different*, earlier occurrence in the same klal (`שהוזכרה באחרונה
+   בתרייתא היא`) was separately crop-checked and confirmed already correct
+   as `בתרייתא` (closed ב) — same two letters, two different words in two
+   different grammatical roles, not the same error repeated. Also fixed
+   stale `page` (was 29, confirmed 73).
+
+All three investigated with the wide-anchor-crop protocol from `CLAUDE.md`
+Lesson 14, given how many single-crop misreads happened earlier this
+session. This closes the "129/172/210 unchecked" item — the low-`match_ratio`
+blind spot (Lesson 15) itself remains a standing risk for any future
+untrusted-alignment klal, not just these three.
+
+**Klal 33 was genuinely truncated — fixed.** Stored `clean_text` stopped at
+`...לכן בכי האי גוונא`; the scan (same page 26) continues directly with
+`אין משיבין לאחר מעשה עד כאן דבריו • ועיין ספר אש דת דף ע' ע"ב וג' :` —
+confirmed via `docai_word_boxes/page_26.json` tokens 355–373 and a direct
+crop. This is the same failure class as the "MAJOR: cross-page klal
+truncation" bug documented above, except same-page (not a page-boundary
+case) — meaning that bug class isn't confined to cross-page klalim either;
+`validate_klal_span_coverage.py` should have flagged this by ratio but
+apparently didn't (not re-checked why in this pass). Fixed in `part1.json`;
+`klalim_demo_dataset.json` needs `build_klalim_demo_dataset.py` re-run.
+
+**Also found and fixed in passing**: `part1.json`'s `page` field for klal 33
+and 34 was stale (`16`, alongside klal 28–37 as a block — all uniformly
+`16`, which cannot be right since these are 10 different klalim). Both
+verified directly against the scan to actually be page **26**; corrected
+for 33/34 only. The other klalim in that 28–37 block are very likely also
+misattributed (same stale block value) but were not individually checked in
+this pass — do not assume they're fixed.
+
+**Review of klal 1–112 was requested but not otherwise completed this
+pass** — only 33/34 were checked (the two the user flagged) before this
+finding was logged; per "close open items before new ones," the remaining
+klal 1–112 title/text review and the still-open klal 92–165 shift-zone
+work (currently at klal 112) both remain open.
+
+`rebuild_all.sh` (full, not `--skip-vision`) re-run after the klal 33 fix:
+726 items / 163 klalim (97 `current_text_may_be_wrong`, 131
+`current_text_confirmed`, 137 `unverified_insertion`, 301 `ambiguous`, 60
+`possible_omission`), zero `error` flags. All comparisons were cache hits —
+zero new Gemini calls, zero cost.
+
 ## Vision-adjudication cache and script robustness fixes — 2026-08-05
 
 Found while trying to regenerate `corrections_part1.json` after the day's
