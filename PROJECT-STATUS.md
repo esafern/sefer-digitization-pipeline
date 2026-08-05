@@ -902,3 +902,44 @@ Separately, **39 of 770 results have unparseable `decision_json`**
 recurrence of the smaller "7 of 86" instance already logged above. Not yet
 individually inspected; unknown whether a prompt tweak would fix it or if
 it's an inherent occasional model-output quirk to just retry past.
+
+## Automated marker-vs-citation filter attempt — tried, did not work, 2026-08-05
+
+Per the user's chosen approach (build a better automated filter before
+manual verification), tried two mechanical signals to distinguish klal 99's
+false-positive `צט` marker (a coincidental citation number, see above) from
+a real klal-opening marker, using all 13 confirmed `ok`-status markers in
+the 90–168 range as the comparison set:
+
+- **Preceding-context punctuation** (real markers should follow a genuine
+  klal-ending colon, not a mid-citation one): doesn't discriminate. Every
+  single confirmed-real marker checked is *also* preceded by a citation
+  ending in a colon (e.g. klal 104 is preceded by `דף ע"ד ע"ד :`, the same
+  shape as klal 99's false positive's `דף פ"ה רע"ד :`). Klalim routinely
+  end by citing a source, so "preceded by a citation+colon" is normal for
+  real boundaries too, not a discriminator.
+- **Token height of the word after the marker** (hypothesis: real klal
+  openings use enlarged/bold typography): doesn't discriminate either. The
+  false positive's next-word height (0.01888) falls squarely inside the
+  confirmed-real range (0.01499–0.02064, mean 0.01844) — not an outlier in
+  either direction.
+
+**Checked whether there's a second, real occurrence of `צט` on the same
+page that a "nearest match" search might have missed: there isn't.** `צט`
+appears exactly once on page 44, and it's the citation. This changes the
+diagnosis: it's not that the search picked the wrong one of several
+candidates — there is no other candidate. Klal 99's real marker is either
+on a different page than currently attributed, or doesn't exist as a
+separate token at all (consistent with a merge/shift earlier in the
+sequence propagating forward, not a one-off local error).
+
+**Conclusion: a cheap mechanical filter for this specific failure mode was
+not found.** Both signals tried are exhausted; no obvious third one is
+apparent from this one example. This needs either (a) a smarter
+content-level check (does the resulting text plausibly complete as a real
+klal title vs. continue a citation — inherently a semantic judgment, not
+positional/typographic) or (b) the manual per-klal scan verification path
+this filter was meant to reduce. Given the Gemini billing blocker logged
+above, (a) via LLM semantic check may itself be constrained right now.
+Flagging back to the user rather than silently falling back to a slower
+path without saying why the fast path didn't pan out.
