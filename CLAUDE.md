@@ -13,6 +13,25 @@ this work today).
 > the other. Do not report on, fix, or make claims about corpus quality
 > without having read it first.
 
+> **Close open items before proposing new ones.** If `PROJECT-STATUS.md`'s
+> Open Items section lists unresolved blockers, do not end a turn by offering
+> to expand scope ("want me to also check X," "should I dig into Y next") —
+> propose a plan to close the existing open items first, or ask which to
+> prioritize. Finish what's already known-broken before suggesting where else
+> to look.
+
+> **Log every finding to `PROJECT-STATUS.md` yourself, immediately, without
+> being asked.** Finding a bug and only mentioning it in chat is not done —
+> if the user has to go back through the conversation to recover something
+> you found so it isn't lost, that is a dropped ball, and recovering dropped
+> balls is not the user's job. The moment you confirm a real issue (a bug, a
+> gap, a wrong claim in the file, a script fix, a new script, a job left
+> running), write it into `PROJECT-STATUS.md` before moving to the next
+> thing — not batched at the end of a long turn, not only when directly
+> asked to "update the status file." This applies to your own tooling/script
+> fixes too (cache bugs, dead models, UI fixes), not just corpus-content
+> findings.
+
 ## Pipeline shape
 
 ## Success criteria (in priority order)
@@ -60,11 +79,60 @@ in the canonical text files. Concretely:
    verify a correction, per the `.gemini/rules/robust_ocr_processing.md` rule
    file's UI-verification requirement.
 
+## Single source of truth for corpus text — read before editing any text file
+
+**`part1.json` / `part2.json` / `part3.json` are the only hand-edited source
+of truth for klal text.** Every other JSON/HTML artifact that shows or uses
+klal text is *derived* from them and must be regenerated, never hand-edited
+in parallel:
+
+- `klalim_demo_dataset.json` = `part1.json` + `part2.json` + `part3.json`
+  concatenated, nothing else. Regenerate with `build_klalim_demo_dataset.py`.
+  (Before 2026-08-05 this was hand-maintained in parallel with the part
+  files on every fix — exactly the kind of two-copies-of-the-truth setup
+  that silently drifts. Don't reintroduce that.)
+- `corrections_candidates_part1.json` → `corrections_verified_part1.json` →
+  `corrections_part1.json` → `review.html`'s flag overlay is a pipeline, each
+  stage derived from the one before it and from `klalim_demo_dataset.json`.
+- `klal_page_regions.json` (per-klal scan bounding box, independent of
+  whether the klal has any flagged correction) also derives from the same
+  docai-token alignment.
+
+**After any edit to a `part*.json` file, run `./rebuild_all.sh`** — this
+regenerates every derived file listed above, ending in a fresh
+`review.html`. Don't hand-run individual stages and try to remember which
+ones are now stale; that's exactly how `review.html` went out of sync for an
+entire session's worth of corrections in August 2026 (see PROJECT-STATUS.md).
+The vision-verification stage (the only one that costs API calls) is safe to
+re-run every time — see the next section.
+
+`./rebuild_all.sh --skip-vision` skips only the Gemini re-verification step,
+for fast iteration when you don't need fresh flag classifications yet.
+
+### The vision-adjudication cache must be keyed on the full comparison, not just the crop
+
+`adjudication_cache.db` caches Gemini's decision for "does this crop show
+reading A or reading B" so repeat runs don't re-spend API calls. **The cache
+key must include which two readings were being compared (crop_hash + word_a
++ word_b), not the crop image alone.** A crop-hash-only cache is a real bug,
+not a hardening opportunity: the same bbox gets re-cropped across sessions to
+answer different comparisons as `clean_text` changes (a fix, then later a
+revert), and a crop-only cache silently returns a stale decision for the
+*current* comparison — confirmed 2026-08-05, see PROJECT-STATUS.md: this
+collapsed 217 real word-pair decisions onto 140 unique crops, meaning 77 had
+already been silently overwritten by an unrelated comparison before anyone
+noticed. `verify_corrections_vision.py`'s `corrections_cache` table does this
+correctly; if you add another vision-caching script, key it the same way.
+
 ## Directory layout
 
-- `orchestrator.py`, `chunker.py` — the only two files marked as live pipeline
-  code; everything else at root is either an established data artifact (see
-  above) or a historical one-off script.
+- `orchestrator.py`, `chunker.py` — the two OCR/VLM-extraction pipeline
+  scripts. `build_klalim_demo_dataset.py`, `build_corrections_dataset.py`,
+  `verify_corrections_vision.py`, `assemble_corrections_dataset.py`,
+  `build_klal_page_regions.py`, `build_review_html.py`, and `rebuild_all.sh`
+  are the review-artifact pipeline (see "Single source of truth" above) —
+  everything else at root is either an established data artifact or a
+  historical one-off script.
 - `archive/scripts/`, `archive/data/` — one-time, already-applied patch/find/
   debug scripts (hardcoded to specific klal numbers or line indices) and their
   throwaway text/JSON dumps, moved out of the root in Aug 2026 for
@@ -164,3 +232,17 @@ fixed — the rule still applies to the next incident.
     problem.** If a broader/structural check flagged something upstream,
     don't stop investigating just because the first specific instance you
     looked at resolved cleanly.
+12. **A cache key must cover everything that changes the correct answer, not
+    just the expensive part.** Keying a decision cache on the crop image
+    alone (not also the two readings being compared) meant a stale decision
+    from an earlier comparison got silently reused for a different, current
+    comparison on the same crop — see "Single source of truth" above. If a
+    cache can be asked two different questions about the same cached object,
+    the cache key must include which question was asked.
+13. **A hand-maintained "derived" file is not actually derived — it's a
+    second copy of the truth that happens to usually agree.** Any file whose
+    content is fully computable from another file (e.g. a concatenation, a
+    join, a filter) should be built by a script and regenerated, never edited
+    in parallel by hand "to save time." Parallel hand-edits agree until the
+    day someone forgets one of the two places — the failure is silent, not
+    loud, so you won't notice until something downstream looks stale.

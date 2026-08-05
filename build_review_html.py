@@ -37,10 +37,14 @@ def main():
 
     corrections = json.load(open(os.path.join(REPO, "corrections_part1.json")))
 
+    regions_path = os.path.join(REPO, "klal_page_regions.json")
+    regions = json.load(open(regions_path, encoding="utf-8")) if os.path.exists(regions_path) else {}
+
     for k in klalim:
         k["page"] = trusted_page_of.get(k["klal_id"])
         k["page_trusted"] = k["klal_id"] in trusted_page_of
         k["corrections"] = corrections.get(str(k["klal_id"]), [])
+        k["region"] = regions.get(str(k["klal_id"]), {}).get("bbox")
 
     pages_with_corrections = sorted(set(
         c["page"] for entries in corrections.values() for c in entries if c.get("page")
@@ -135,6 +139,33 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
     transition: opacity .15s ease;
   }
   .hl-box.dim { opacity: 0.35; }
+  .hl-current-klal {
+    position: absolute;
+    border-radius: 4px;
+    border: 3px solid #d69e2e;
+    background: rgba(236, 201, 75, 0.18);
+    pointer-events: none;
+    transition: top .15s ease, left .15s ease, width .15s ease, height .15s ease, opacity .15s ease;
+  }
+  .page-nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 5;
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(26, 54, 93, 0.85);
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .page-nav-btn:hover { background: #1a365d; }
+  .page-nav-btn:disabled { opacity: 0.3; cursor: default; }
+  .page-nav-btn:disabled:hover { background: rgba(26, 54, 93, 0.85); }
+  #page-nav-prev { right: 10px; }
+  #page-nav-next { left: 10px; }
 
   /* ---------- MIDDLE: running text ---------- */
   #text-pane {
@@ -291,6 +322,8 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
       </span>
     </div>
     <div id="scan-viewer">
+      <button id="page-nav-prev" class="page-nav-btn" title="Previous page">&#8250;</button>
+      <button id="page-nav-next" class="page-nav-btn" title="Next page">&#8249;</button>
       <div id="page-container">
         <img id="page-img" src="">
         <div id="hl-container"></div>
@@ -449,7 +482,23 @@ function showPage(page, focusKlalId) {
     pageImg.src = `images/pdf_pages/page_${page}.png`;
     pageIndicator.textContent = 'Page ' + page;
   }
+  updatePageNavButtons();
   hlContainer.innerHTML = '';
+
+  // "You are here": the current klal's own text region, independent of
+  // whether it has any flagged corrections (most klalim don't).
+  const focusKlal = byId[focusKlalId];
+  if (focusKlal && focusKlal.region) {
+    const r = focusKlal.region;
+    const box = document.createElement('div');
+    box.className = 'hl-current-klal';
+    box.style.left = (r.x1 * 100) + '%';
+    box.style.top = (r.y1 * 100) + '%';
+    box.style.width = ((r.x2 - r.x1) * 100) + '%';
+    box.style.height = ((r.y2 - r.y1) * 100) + '%';
+    hlContainer.appendChild(box);
+  }
+
   KLALIM.filter(k => k.page === page).forEach(k => {
     k.corrections.forEach(c => {
       if (!c.bbox) return;
@@ -472,6 +521,31 @@ function highlightOnScan(corr) {
   if (!corr.page) return;
   showPage(corr.page, corr.klal_id);
 }
+
+// ---------- page-to-page nav (left pane) ----------
+const pagesWithKlalim = Array.from(new Set(KLALIM.filter(k => k.page).map(k => k.page))).sort((a, b) => a - b);
+const firstKlalOfPage = {};
+KLALIM.forEach(k => {
+  if (k.page && !(k.page in firstKlalOfPage)) firstKlalOfPage[k.page] = k.klal_id;
+});
+const prevBtn = document.getElementById('page-nav-prev');
+const nextBtn = document.getElementById('page-nav-next');
+
+function updatePageNavButtons() {
+  const idx = pagesWithKlalim.indexOf(currentPage);
+  prevBtn.disabled = idx <= 0;
+  nextBtn.disabled = idx === -1 || idx >= pagesWithKlalim.length - 1;
+}
+function goToPageOffset(offset) {
+  const idx = pagesWithKlalim.indexOf(currentPage);
+  if (idx === -1) return;
+  const targetPage = pagesWithKlalim[idx + offset];
+  if (targetPage == null) return;
+  const targetKlal = firstKlalOfPage[targetPage];
+  if (targetKlal != null) jumpTo(targetKlal);
+}
+prevBtn.onclick = () => goToPageOffset(-1);
+nextBtn.onclick = () => goToPageOffset(1);
 
 // ---------- nav / sync ----------
 let suppressObserver = false;
