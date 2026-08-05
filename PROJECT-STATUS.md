@@ -943,3 +943,50 @@ this filter was meant to reduce. Given the Gemini billing blocker logged
 above, (a) via LLM semantic check may itself be constrained right now.
 Flagging back to the user rather than silently falling back to a slower
 path without saying why the fast path didn't pan out.
+
+## Gemini credits restored, gap-fill verified clean — 2026-08-05
+
+User added Gemini credits after the billing blocker above. Verified no
+damage before re-running: all 24 `RESOURCE_EXHAUSTED` failures (klal 215,
+218, 219, 220) were cleanly flagged `error` in `corrections_part1.json`, not
+silently masquerading as real decisions, and `cache_decision()` is only
+called on a successful response so none of the 24 were cached as errors
+either — confirmed nothing needed to be undone, only completed. Re-ran
+`verify_corrections_vision.py`: all 24 resolved (0 `RESOURCE_EXHAUSTED`
+remaining). 15 `error` entries remain, but these are the separate,
+already-logged JSON-parse-failure issue, not credit-related. Re-ran
+`assemble_corrections_dataset.py` + `build_review_html.py` to propagate:
+`corrections_part1.json` now 770 items / 174 klalim (109
+`current_text_may_be_wrong`, 143 `current_text_confirmed`, 63
+`possible_omission`, 150 `unverified_insertion`, 290 `ambiguous`, 15
+`error`).
+
+## Klal 92 structural fix — real content confirmed missing, transcription in progress, 2026-08-05
+
+Manual per-klal scan verification (chosen after the automated filter dead
+end above) started at the beginning of the 92–165 range. **Klal 92 is
+confirmed a duplication bug, not a shift**: its currently-stored
+`clean_text` is word-for-word klal 90's real content immediately followed
+by klal 91's real content (with klal 91's own `צא` marker embedded
+mid-text) — and klal 90/91 *also* separately, correctly hold this exact
+same content under their own `klal_id`s. So klal 92's real content isn't
+mislabeled elsewhere, it's simply **absent from the corpus entirely**.
+
+Confirmed directly from the scan (page 41, the same exact-match position
+`gematria_trace_part1.json` already had, y=0.8546): klal 92's real opening
+is `צב בעיא מצינו דבעי בגמרא במילתא דלא נסקי מינה אף מידי בזמן התלמוד מפני
+שהוא דבר שכבר עבר ואפי'ה קבעי לה משום דרוש שכל וקבל שכר וזה בס"פ א' חולין
+י"ז בעי ר'...` — this is klal 92's *entire* real title/opening (confirmed
+by reading to the bottom of page 41, where the page ends — nothing else
+follows on that page). The klal continues onto page 42 with a long,
+citation-dense halachic discussion (`רבי ירמיה איכרי בשר נחירה...`,
+concerning פסח מצרים and korbanot) with no bold/enlarged new-klal-opening
+visible for a full page of text - klal 92 is long, this isn't a quick
+transcription.
+
+**Not yet complete**: only the opening ~40 words are transcribed and
+confirmed; the full klal 92 body (continuing across page 42) still needs
+transcription, and this is klal 1 of ~65 in the range. Given the content
+density observed just in this one klal, full manual verification of the
+whole range is a substantially larger effort than a few turns - continuing,
+but flagging the realistic scale now rather than after the fact.

@@ -12468,10 +12468,10 @@
       "x2": 0.8452970385551453,
       "y2": 0.7893247008323669
     },
-    "vision_selected": "ERROR",
-    "vision_transcription": null,
-    "vision_confidence": null,
-    "vision_reasoning": "All models failed: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at https://ai.google.dev/gemini-api/docs/billing#prepay. ', 'status': 'RESOURCE_EXHAUSTED'}}"
+    "vision_selected": "A",
+    "vision_transcription": "ברמה",
+    "vision_confidence": 0.98,
+    "vision_reasoning": "The visible text in the middle line clearly shows the four-letter word ברמה (Bet, Resh, Mem, Heh). The second letter lacks the left vertical leg of a Heh (ה), possessing only a smooth upper-right curved shoulder and single right leg characteristic of a Resh (ר), ruling out בהמה."
   },
   {
     "klal_id": 215,
@@ -12486,10 +12486,10 @@
       "x2": 0.7178217768669128,
       "y2": 0.8362312912940979
     },
-    "vision_selected": "ERROR",
-    "vision_transcription": null,
-    "vision_confidence": null,
-    "vision_reasoning": "All models failed: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at https://ai.google.dev/gemini-api/docs/billing#prepay. ', 'status': 'RESOURCE_EXHAUSTED'}}"
+    "vision_selected": "A",
+    "vision_transcription": "וכר",
+    "vision_confidence": 0.95,
+    "vision_reasoning": "The middle line of the raster crop clearly shows the letter sequence vav, kaf, and resh ('וכר'). The third character possesses a horizontal top roof and right vertical leg characteristic of a resh ('ר'), rather than a high floating gershayim or yod/vav as required for 'וכו''. While 'וכו'' is the likely intended Rabbinic abbreviation contextually, the actual printed text in the image physically reads 'וכר'."
   },
   {
     "klal_id": 215,
@@ -12504,10 +12504,10 @@
       "x2": 0.5123762488365173,
       "y2": 0.8362312912940979
     },
-    "vision_selected": "ERROR",
-    "vision_transcription": null,
-    "vision_confidence": null,
-    "vision_reasoning": "All models failed: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at https://ai.google.dev/gemini-api/docs/billing#prepay. ', 'status': 'RESOURCE_EXHAUSTED'}}"
+    "vision_selected": "UNCERTAIN",
+    "vision_transcription": "לא\nא'\nהואיל",
+    "vision_confidence": 0.0,
+    "vision_reasoning": "The image segment contains several visible words across lines, including 'לא', 'א'', and 'הואיל'. Neither Option A (a single apostrophe) nor Option B ('None') accurately transcribes the text present in the raster crop."
   },
   {
     "klal_id": 215,
@@ -12522,10 +12522,10 @@
       "x2": 0.9108911156654358,
       "y2": 0.8511928915977478
     },
-    "vision_selected": "ERROR",
-    "vision_transcription": null,
-    "vision_confidence": null,
-    "vision_reasoning": "All models failed: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at https://ai.google.dev/gemini-api/docs/billing#prepay. ', 'status': 'RESOURCE_EXHAUSTED'}}"
+    "vision_selected": "A",
+    "vision_transcription": "-",
+    "vision_confidence": 0.95,
+    "vision_reasoning": "The image clearly contains a visible horizontal dash/hyphen symbol (-) next to the Hebrew characters, which corresponds directly to Option A."
   },
   {
     "klal_id": 215,
@@ -12540,10 +12540,10 @@
       "x2": 0.46844059228897095,
       "y2": 0.8823291659355164
     },
-    "vision_selected": "ERROR",
-    "vision_transcription": null,
-    "vision_confidence": null,
-    "vision_reasoning": "All models failed: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at https://ai.google.dev/gemini-api/docs/billing#prepay. ', 'status': 'RESOURCE_EXHAUSTED'}}"
+    "vision_selected": "UNCERTAIN",
+    "vision_transcription": "ע\"כ וכ\nב' ד\nהני",
+    "vision_confidence": 0.9,
+    "vision_reasoning": "The crop image contains multiple visible Hebrew words/lines (including 'ע\"כ וכ', 'ב' ד', and 'הני'). Neither Option A (\"'\") nor Option B (\"None\") accurately captures the visible text in the image."
   },
   {
     "klal_id": 215,
@@ -12558,10 +12558,10 @@
       "x2": 0.3397277295589447,
       "y2": 0.8823291659355164
     },
-    "vision_selected": "ERROR",
-    "vision_transcription": null,
-    "vision_confidence": null,
-    "vision_reasoning": "All models failed: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at https://ai.google.dev/gemini-api/docs/billing#prepay. ', 'status': 'RESOURCE_EXHAUSTED'}}"
+    "vision_selected": "UNCERTAIN",
+    "vision_transcription": "תוס' ד\nבס' ד\nהכח",
+    "vision_confidence": 0.0,
+    "vision_reasoning": "The crop contains multiple visible lines of Rabbinic text (including 'תוס' ד', 'בס' ד', and parts of 'הכח'). Neither candidate Option A (\"'\") nor Option B (\"None\") represents an accurate transcription of the visible text in the image."
   },
   {
     "klal_id": 215,
@@ -12576,10 +12576,10 @@
       "x2": 0.19121287763118744,
       "y2": 0.8823291659355164
     },
-    "vision_selected": "ERROR",
-    "vision_transcription": null,
-    "vision_confidence": null,
-    "vision_reasoning": "All models failed: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at https://ai.google.dev/gemini-api/docs/billing#prepay. ', 'status': 'RESOURCE_EXHAUSTED'}}"
+    "vision_selected": "UNCERTAIN",
+    "vision_transcription": "לישו\nב' ס\nדם א",
+    "vision_confidence": 0.0,
+    "vision_reasoning": "The crop contains several visible Hebrew words and acronym fragments across lines (including 'לישו', 'ב' ס', and 'דם א'). Neither Option A (a single apostrophe/quote mark) nor Option B ('None') accurately transcribes the visible text in the image, so UNCERTAIN is selected per constraint 4."
   },
   {
     "klal_id": 218,
@@ -12594,10 +12594,10 @@
       "x2": 0.2925925850868225,
       "y2": 0.5931928753852844
     },
-    "vision_selected": "ERROR",
-    "vision_transcription": null,
-    "vision_confidence": null,
-    "vision_reasoning": "All models failed: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at https://ai.google.dev/gemini-api/docs/billing#prepay. ', 'status': 'RESOURCE_EXHAUSTED'}}"
+    "vision_selected": "B",
+    "vision_transcription": "בש\"מ",
+    "vision_confidence": 1.0,
+    "vision_reasoning": "The text reads 'ר' בצלאל בש\"מ' where 'בש\"מ' is the standard Rabbinic acronym for 'בשיטה מקובצת' (authored by Rabbi Bezalel Ashkenazi). Paleographically, the glyph after the gershayim is a square mem (מ/ם) with sharp corners, not a rounded samekh (ס)."
   },
   {
     "klal_id": 218,
@@ -12612,10 +12612,10 @@
       "x2": 0.7623456716537476,
       "y2": 0.6098055243492126
     },
-    "vision_selected": "ERROR",
-    "vision_transcription": null,
-    "vision_confidence": null,
-    "vision_reasoning": "All models failed: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at https://ai.google.dev/gemini-api/docs/billing#prepay. ', 'status': 'RESOURCE_EXHAUSTED'}}"
+    "vision_selected": "UNCERTAIN",
+    "vision_transcription": "\"ש אף / נ' א'",
+    "vision_confidence": 0.9,
+    "vision_reasoning": "The image clearly contains multiple lines of Rabbinic text, including '\"ש אף' from 'ג\"ש אף' on the second line and 'נ' א'' from 'דף נ' א'' on the third line. Neither Option A (a single apostrophe) nor Option B ('None') accurately captures the visible text."
   },
   {
     "klal_id": 218,
@@ -12630,10 +12630,10 @@
       "x2": 0.7388888597488403,
       "y2": 0.6098055243492126
     },
-    "vision_selected": "ERROR",
-    "vision_transcription": null,
-    "vision_confidence": null,
-    "vision_reasoning": "All models failed: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at https://ai.google.dev/gemini-api/docs/billing#prepay. ', 'status': 'RESOURCE_EXHAUSTED'}}"
+    "vision_selected": "UNCERTAIN",
+    "vision_transcription": "אף ע\"ג\nא' וצ'",
+    "vision_confidence": 0.95,
+    "vision_reasoning": "The image crop contains multiple lines of text, clearly displaying the Rabbinic acronyms 'אף ע\"ג' on the upper line and 'א' וצ'' on the lower line, beneath a fragment of 'לאוק...'. Neither Option A (a single quote character) nor Option B ('None') accurately transcribes the visible text, making UNCERTAIN the appropriate choice."
   },
   {
     "klal_id": 218,
@@ -12648,10 +12648,10 @@
       "x2": 0.6796296238899231,
       "y2": 0.6098055243492126
     },
-    "vision_selected": "ERROR",
-    "vision_transcription": null,
-    "vision_confidence": null,
-    "vision_reasoning": "All models failed: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at https://ai.google.dev/gemini-api/docs/billing#prepay. ', 'status': 'RESOURCE_EXHAUSTED'}}"
+    "vision_selected": "UNCERTAIN",
+    "vision_transcription": "דאיכ\nג' וצ",
+    "vision_confidence": 0.95,
+    "vision_reasoning": "The image clearly displays multiple characters across several lines, including 'דאיכ' on the top visible full line and 'ג' וצ' on the line below. Neither candidate Option A (which only captures a single quote `'`) nor Option B (`None`) correctly represents the text in the crop."
   },
   {
     "klal_id": 218,
@@ -12666,10 +12666,10 @@
       "x2": 0.6209876537322998,
       "y2": 0.6098055243492126
     },
-    "vision_selected": "ERROR",
-    "vision_transcription": null,
-    "vision_confidence": null,
-    "vision_reasoning": "All models failed: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at https://ai.google.dev/gemini-api/docs/billing#prepay. ', 'status': 'RESOURCE_EXHAUSTED'}}"
+    "vision_selected": "UNCERTAIN",
+    "vision_transcription": "פירכא\nא' ב",
+    "vision_confidence": 0.95,
+    "vision_reasoning": "The crop image clearly displays the Hebrew words 'פירכא' on the upper full line and 'א' ב' (or 'אי ב') on the line below it. Neither Option A (which only contains a single apostrophe/quote mark) nor Option B ('None') accurately reflects the visible text."
   },
   {
     "klal_id": 218,
@@ -12684,10 +12684,10 @@
       "x2": 0.5518518686294556,
       "y2": 0.6098055243492126
     },
-    "vision_selected": "ERROR",
-    "vision_transcription": null,
-    "vision_confidence": null,
-    "vision_reasoning": "All models failed: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at https://ai.google.dev/gemini-api/docs/billing#prepay. ', 'status': 'RESOURCE_EXHAUSTED'}}"
+    "vision_selected": "UNCERTAIN",
+    "vision_transcription": "אינה כ\nתו' חצ\nסוב",
+    "vision_confidence": 0.0,
+    "vision_reasoning": "The image crop contains multiple lines of legible text including 'אינה כ', 'תו' חצ', and 'סוב'. Neither Candidate A (a single apostrophe \"'\") nor Candidate B (\"None\") accurately transcribes the visible Hebrew text in this image segment."
   },
   {
     "klal_id": 219,
@@ -12702,10 +12702,10 @@
       "x2": 0.43518519401550293,
       "y2": 0.6389789581298828
     },
-    "vision_selected": "ERROR",
-    "vision_transcription": null,
-    "vision_confidence": null,
-    "vision_reasoning": "All models failed: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at https://ai.google.dev/gemini-api/docs/billing#prepay. ', 'status': 'RESOURCE_EXHAUSTED'}}"
+    "vision_selected": "UNCERTAIN",
+    "vision_transcription": "ר' יש / מוצא",
+    "vision_confidence": 0.9,
+    "vision_reasoning": "Neither candidate correctly represents the text visible in the image. The image clearly displays multiple legible Hebrew word fragments, including 'ר' יש' and 'מוצא', making both single character OCR (Option A) and 'None' (Option B) inaccurate."
   },
   {
     "klal_id": 219,
@@ -12720,10 +12720,10 @@
       "x2": 0.6228395104408264,
       "y2": 0.6547812223434448
     },
-    "vision_selected": "ERROR",
-    "vision_transcription": null,
-    "vision_confidence": null,
-    "vision_reasoning": "All models failed: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at https://ai.google.dev/gemini-api/docs/billing#prepay. ', 'status': 'RESOURCE_EXHAUSTED'}}"
+    "vision_selected": "UNCERTAIN",
+    "vision_transcription": "א' ופ\nמצאתי",
+    "vision_confidence": 0.95,
+    "vision_reasoning": "The image crop contains multiple visible lines of Hebrew text including 'א' ופ' and 'מצאתי' (corresponding to 'ז\"ך א' ופירש\"י... ומצאתי' in the context). Option A only contains a single geresh \"'\" and Option B is \"None\". Since neither candidate accurately represents the multi-line visible text, UNCERTAIN is selected."
   },
   {
     "klal_id": 219,
@@ -12738,10 +12738,10 @@
       "x2": 0.854938268661499,
       "y2": 0.6701782941818237
     },
-    "vision_selected": "ERROR",
-    "vision_transcription": null,
-    "vision_confidence": null,
-    "vision_reasoning": "All models failed: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at https://ai.google.dev/gemini-api/docs/billing#prepay. ', 'status': 'RESOURCE_EXHAUSTED'}}"
+    "vision_selected": "A",
+    "vision_transcription": "עור",
+    "vision_confidence": 0.95,
+    "vision_reasoning": "The raster crop clearly shows the letters ע (ayin), ו (vav), and ר (resh), where the third letter features a smooth rounded upper-right corner without the corner projection characteristic of a dalet (ד). Thus, Option A ('עור') accurately transcribes the exact visual pixels present in this print, despite it being a textual/printing error for 'עוד' in context."
   },
   {
     "klal_id": 219,
@@ -12756,10 +12756,10 @@
       "x2": 0.3234567940235138,
       "y2": 0.6701782941818237
     },
-    "vision_selected": "ERROR",
-    "vision_transcription": null,
-    "vision_confidence": null,
-    "vision_reasoning": "All models failed: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at https://ai.google.dev/gemini-api/docs/billing#prepay. ', 'status': 'RESOURCE_EXHAUSTED'}}"
+    "vision_selected": "UNCERTAIN",
+    "vision_transcription": "ות אי\nא' ש\nני תר",
+    "vision_confidence": 0.0,
+    "vision_reasoning": "The raster crop contains multiple fragments of lines of Hebrew text including 'ות אי', 'א' ש', and 'ני תר'. Neither Option A (a single apostrophe/gershayim `'`) nor Option B ('None') accurately captures the full textual content visible in the image crop."
   },
   {
     "klal_id": 219,
@@ -12774,10 +12774,10 @@
       "x2": 0.16851851344108582,
       "y2": 0.6701782941818237
     },
-    "vision_selected": "ERROR",
-    "vision_transcription": null,
-    "vision_confidence": null,
-    "vision_reasoning": "All models failed: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at https://ai.google.dev/gemini-api/docs/billing#prepay. ', 'status': 'RESOURCE_EXHAUSTED'}}"
+    "vision_selected": "UNCERTAIN",
+    "vision_transcription": "עליו\nמרי' כן\nא דרבי",
+    "vision_confidence": 0.0,
+    "vision_reasoning": "The image crop contains several partial lines of Hebrew text including 'עליו', 'מרי' כן', and 'דרבי'. Neither Option A (a single apostrophe/geresh) nor Option B ('None') accurately transcribes the visible text array, so UNCERTAIN is selected per guidelines."
   },
   {
     "klal_id": 219,
@@ -12792,10 +12792,10 @@
       "x2": 0.6574074029922485,
       "y2": 0.6973257660865784
     },
-    "vision_selected": "ERROR",
-    "vision_transcription": null,
-    "vision_confidence": null,
-    "vision_reasoning": "All models failed: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at https://ai.google.dev/gemini-api/docs/billing#prepay. ', 'status': 'RESOURCE_EXHAUSTED'}}"
+    "vision_selected": "A",
+    "vision_transcription": "בי\"ד",
+    "vision_confidence": 0.98,
+    "vision_reasoning": "The letter following the gershayim is clearly a dalet ('ד'), featuring a flat top bar and vertical leg ending at the standard baseline, rather than a final kaf ('ך') which would descend below the line. Contextually, 'בי\"ד' is the standard Rabbinic acronym for 'ב-יורה דעה' ('ביורה דעה'), referencing the section of the Shulchan Aruch ('בית הלל בי\"ד רסי' פ\"ד')."
   },
   {
     "klal_id": 219,
@@ -12810,10 +12810,10 @@
       "x2": 0.5938271880149841,
       "y2": 0.6973257660865784
     },
-    "vision_selected": "ERROR",
-    "vision_transcription": null,
-    "vision_confidence": null,
-    "vision_reasoning": "All models failed: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at https://ai.google.dev/gemini-api/docs/billing#prepay. ', 'status': 'RESOURCE_EXHAUSTED'}}"
+    "vision_selected": "UNCERTAIN",
+    "vision_transcription": "רמי\nרסי' פ\nדוקא",
+    "vision_confidence": 0.95,
+    "vision_reasoning": "The image crop contains distinct Hebrew text across multiple lines, including 'רמי' and 'דוקא'. Neither Option A (a single quote/geresh) nor Option B ('None') provides an accurate transcription of the image."
   },
   {
     "klal_id": 219,
@@ -12828,10 +12828,10 @@
       "x2": 0.45864197611808777,
       "y2": 0.7159643173217773
     },
-    "vision_selected": "ERROR",
-    "vision_transcription": null,
-    "vision_confidence": null,
-    "vision_reasoning": "All models failed: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at https://ai.google.dev/gemini-api/docs/billing#prepay. ', 'status': 'RESOURCE_EXHAUSTED'}}"
+    "vision_selected": "A",
+    "vision_transcription": "'",
+    "vision_confidence": 0.95,
+    "vision_reasoning": "The crop displays Rabbinic abbreviation text containing a clear geresh/apostrophe (') following the letters 'במ' ('במ' אי'). Option A accurately captures this apostrophe character present in the abbreviation."
   },
   {
     "klal_id": 219,
@@ -12846,10 +12846,10 @@
       "x2": 0.29506173729896545,
       "y2": 0.7159643173217773
     },
-    "vision_selected": "ERROR",
-    "vision_transcription": null,
-    "vision_confidence": null,
-    "vision_reasoning": "All models failed: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at https://ai.google.dev/gemini-api/docs/billing#prepay. ', 'status': 'RESOURCE_EXHAUSTED'}}"
+    "vision_selected": "UNCERTAIN",
+    "vision_transcription": "לא הי\nא' ו",
+    "vision_confidence": 0.95,
+    "vision_reasoning": "The crop contains multiple Hebrew words across lines ('לא הי' and 'א' ו'), whereas Option A provides only a single quote mark (geresh) and Option B is 'None'. Since neither option accurately transcribes the visible text array, UNCERTAIN is selected."
   },
   {
     "klal_id": 220,
@@ -12864,10 +12864,10 @@
       "x2": 0.5703703761100769,
       "y2": 0.7301458716392517
     },
-    "vision_selected": "ERROR",
-    "vision_transcription": null,
-    "vision_confidence": null,
-    "vision_reasoning": "All models failed: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at https://ai.google.dev/gemini-api/docs/billing#prepay. ', 'status': 'RESOURCE_EXHAUSTED'}}"
+    "vision_selected": "A",
+    "vision_transcription": "ס\"ח ונכון הוא :",
+    "vision_confidence": 0.98,
+    "vision_reasoning": "The second line of the crop clearly displays 'ס\"ח ונכון הוא :' in standard Hebrew rabbinic typography, matching Option A exactly."
   },
   {
     "klal_id": 220,
@@ -12882,10 +12882,10 @@
       "x2": 0.5771604776382446,
       "y2": 0.747163712978363
     },
-    "vision_selected": "ERROR",
-    "vision_transcription": null,
-    "vision_confidence": null,
-    "vision_reasoning": "All models failed: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at https://ai.google.dev/gemini-api/docs/billing#prepay. ', 'status': 'RESOURCE_EXHAUSTED'}}"
+    "vision_selected": "A",
+    "vision_transcription": "שייך אלא בדבר",
+    "vision_confidence": 1.0,
+    "vision_reasoning": "Option A matches the visible image line perfectly (שייך אלא בדבר), whereas Option B consists of severe OCR garble/hallucination."
   },
   {
     "klal_id": 220,
