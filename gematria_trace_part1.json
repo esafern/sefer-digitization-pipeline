@@ -22,9 +22,10 @@
     "page": 15,
     "expected_gematria": "ג",
     "stored_gematria": "ג",
-    "content_match_ratio": 0.0,
-    "status": "marker_found_content_mismatch",
-    "marker_position": 176
+    "content_match_ratio": 1.0,
+    "status": "ok",
+    "marker_position": 480,
+    "note": "Manually corrected 2026-08-05: original exact-match search found token 176 ('ג' inside the citation 'בפרק ג''), a false-positive collision, not the real marker. Real marker is token 480 (the 'ג' sitting in the print's right-margin gap after the bold opening word 'אין'), confirmed by direct scan crop. Token 480 sorts before tokens 481-486 (an earlier footnote line) in docai's raw array order despite appearing physically later - a marker-out-of-reading-order anomaly, same class as the klal 82/83 bug."
   },
   {
     "klal_id": 4,
