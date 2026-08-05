@@ -787,3 +787,86 @@ whole derived-artifact pipeline (`klalim_demo_dataset.json` →
 → `klal_page_regions.json` → `review.html`) in one command. Full rationale
 and the standing rule ("never hand-edit a derived file in parallel") are in
 `CLAUDE.md`'s "Single source of truth" section, not duplicated here.
+
+## Structural re-chunking (klal 92–165) — Step 1–2 in progress, 2026-08-05
+
+Working the plan agreed with the user (structural issues fixed before any
+further breadth expansion): Step 1 confirmed the affected range sits on
+**pages 41–60** (via `part1_header_anchored_alignment.json`; klal 92 and 129
+are themselves marked untrusted for page attribution — worth resolving as
+part of this pass, not separately). Page 58 has no trusted klal match in
+this range, not yet explained.
+
+Step 2 (re-deriving true klal boundaries via exact-match marker anchoring):
+`scratch/reconstruct_92_165_boundaries.py` reuses `gematria_trace_part1.json`'s
+existing exact-match positions (both its `ok` and
+`marker_found_content_mismatch` statuses carry a real, usable token
+position — only `marker_not_found_in_window` lacks one) and adds a bounded
+fuzzy search *between two already-confirmed neighbors* for the klalim that
+had none.
+
+- **57 of 79 klalim in the klal 90–168 window already have a confirmed
+  token position** (from the existing exact-match trace).
+- **22 had no exact match.** A bounded fuzzy search (similarity ≥0.75,
+  restricted to the token window between confirmed neighbors — a much
+  tighter constraint than the original whole-page search) resolved a
+  further few (klal 116, 124, 129, 145, 151); **18 remain genuinely
+  unresolved**: klal 93, 95, 98, 107, 115, 127, 131, 139, 144, 147, 149,
+  150, 153, 155, 160, 164, 167 (plus one more — see
+  `scratch/resolved_92_165_positions.json` for the exact current list).
+  This is treated as real signal, not a weak search: it means these 18
+  markers are print/OCR-hard enough that even a relaxed, tightly-bounded
+  fuzzy match can't find them, consistent with `CLAUDE.md`'s standing
+  caution that `trace_gematria_sequence.py`-style marker search has a real
+  blind spot in this corpus. **First bug found and fixed in this same
+  script**: an earlier version of the bounded search included the
+  neighbor's own token in its search window, causing several klalim to
+  "resolve" to the exact same position as their neighbor (i.e. matching a
+  token against itself) — fixed by starting the window strictly after the
+  previous neighbor's position, not at it.
+
+**Not yet done**: (a) reconstructing `clean_text` for the 57+ klalim with
+confirmed boundaries on both sides (next step - safe, mechanical once a
+span's start and end are both known), (b) locating the 18 still-missing
+markers by direct scan crop (the same manual-verification method used for
+every other fix this session, not automation), (c) verifying a sample of
+reconstructed spans against the actual scan before trusting any of this
+wholesale, per Lessons Learned #2. This is a multi-step, multi-turn effort
+by design, not something to rush to "done" - see `CLAUDE.md`'s "close open
+items before new ones" rule for why this is being worked as its own item
+rather than left half-finished while starting something else.
+
+### Mechanical reconstruction is NOT safe to mass-apply — real cause found, 2026-08-05
+
+Spot-checked 3 of the 39 mechanically-reconstructed spans against both the
+old stored text and the actual scan before trusting any of them (per the
+plan's own Step 4). Klal 99 (page 44, exact-match position 342) failed the
+check in an informative way: the scan genuinely shows `צט`(99) immediately
+followed by `ברייתא דמייתי לה הש"ס למפרך` — but that text is currently
+stored under **klal 100**, not 99. Directly preceding the `צט` token is
+`דף פ"ה רע"ד :` — a page/column citation — meaning this specific `צט` is
+very likely a **coincidental citation number** ("column 99" of some cited
+work), not klal 99's real klal-opening marker, sitting embedded inside a
+citation rather than starting a new klal.
+
+**This means the marker/citation collision blind spot is not confined to
+klal 1–90 as previously documented** (`CLAUDE.md` / this file's earlier
+notes on `trace_gematria_sequence.py`) — confirmed recurring at klal 99,
+inside the 92–165 zone this whole pass is trying to fix. Exact-match token
+search alone cannot distinguish a real klal-opening marker from a
+coincidentally-equal citation number; it needs an additional signal (e.g.
+whether the marker sits at a genuine paragraph/line start following
+sentence-final punctuation, not mid-citation) before a position can be
+trusted.
+
+**Consequence: none of the 39 mechanically-reconstructed spans in
+`scratch/reconstructed_92_165.json` have been applied, and none should be
+without individual verification.** The mechanical pass was useful for
+narrowing down candidate positions fast, but per Lessons Learned #2/#6 a
+"position found" result here is not a "position correct" result. Continuing
+this work requires either (a) a stronger automated filter for real-marker-
+vs-citation before trusting any exact-match position, or (b) the same
+per-klal manual scan verification used for every other fix this session,
+just at the scale of ~65 klalim instead of a handful. Not yet decided which;
+flagging for the user rather than picking one and running with it, since
+this materially changes the effort estimate for closing this open item.
