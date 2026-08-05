@@ -24,6 +24,7 @@ FLAG_LABELS = {
     "unverified_insertion": ("Unverified addition", "#a0aec0"),
     "ambiguous": ("Ambiguous", "#dd6b20"),
     "error": ("Check failed", "#718096"),
+    "human_corrected_vision_override": ("Human-corrected (overrides vision)", "#3182ce"),
 }
 
 
@@ -446,7 +447,14 @@ function attachTooltip(el, corr, isGap) {
     const docaiTxt = isGap
       ? `Scan appears to show: "${hebrewBit}" — not present in current text`
       : `Original OCR reading: "${hebrewBit}"`;
-    tooltip.innerHTML = `<span class="t-flag">${label}</span><span class="t-docai">${docaiTxt}</span><span class="t-conf">${confTxt}${corr.reasoning ? ' — ' + corr.reasoning : ''}</span>`;
+    // A human_correction_note means a person overrode the vision model's own
+    // decision after the fact - show that explanation instead of the vision
+    // model's (now-superseded) confidence/reasoning, which would otherwise
+    // contradict the word actually displayed in the text pane.
+    const bodyTxt = corr.human_correction_note
+      ? `<span class="t-conf">${corr.human_correction_note}</span>`
+      : `<span class="t-conf">${confTxt}${corr.reasoning ? ' — ' + corr.reasoning : ''}</span>`;
+    tooltip.innerHTML = `<span class="t-flag">${label}</span><span class="t-docai">${docaiTxt}</span>${bodyTxt}`;
     tooltip.style.display = 'block';
     positionTooltip(e);
   });

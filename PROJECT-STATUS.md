@@ -575,9 +575,10 @@ both scan-confirmed:
 
 **Not independently verified in this pass** (would need dedicated source
 lookups beyond what's checkable from the scan alone): the precise identity/
-attestation of less-common terms like `בחירתא` (klal 107, 177 — used
-consistently by the author both times, plausibly a real named text this
-author cites, not chased further) and a few specific-sage citations (klal
+attestation of less-common terms like `בחירתא` (**klal 106, not 107 as
+originally written here** — corrected 2026-08-05 once the 92-165 shift fix
+reached this range and moved this content to its real klal_id; klal 177 is
+separate and still unchecked) and a few specific-sage citations (klal
 203's `ראב"י`, klal 176's `ר' שמעון שזורי`) — these read as plausible
 genre-consistent content and were not flagged, but "plausible" here means
 "not contradicted by anything checked," not "traced to a citable Talmudic
@@ -1046,6 +1047,196 @@ Regenerated `review.html` after this fix (`rebuild_all.sh`) so the 3
 klalim's corrected text and titles are visible there, not just in
 `part1.json`.
 
+**Continued 2026-08-05: klal 95, 96, 97 fixed, same method, each
+scan-confirmed.** Klal 95's real content (`gematria_trace_part1.json`
+correctly located `צה` at page 43 token 534 once searched directly - the
+prior "marker_not_found_in_window" was a window-size limitation of the
+original search pass, not a real absence) was, per the established
+off-by-one pattern, sitting mislabeled under klal 96 (with its own leading
+marker glyph altered from `צה` to `צו` to match its wrong container - an
+additional, subtler corruption on top of the shift itself: someone/some
+process had edited the marker character to agree with the ID it was filed
+under, backwards from how it should work). Moved to klal 95 (marker
+corrected back to `צה`); this uncovered klal 96 as the next stale
+boundary, whose real content (marker `צו`, confirmed) was sitting
+mislabeled under klal 97 (same marker-glyph corruption, `צו`->`צז`); fixed,
+which uncovered klal 97 as the next stale boundary. **Klal 97 turned out to
+also be cross-page** (page 43->44) **and independently truncated** at the
+page boundary - a 15th, previously-unscoped instance of the "MAJOR:
+cross-page klal truncation" bug from earlier in this document (not caught
+by that pass because klal 97/98's markers weren't yet resolved at the
+time that scope check ran). Reconstructed properly: page 43's tail
+included its own catchword (`היא`, confirmed by height 0.0089 vs the
+0.017 body-text norm and off-margin positioning - a duplicate preview of
+page 44's real first word, correctly stripped) and page 44's header
+included an unusual 5th token (`טז`, the printed folio number, positioned
+separately from the 4-word `יד מלאכי כללי הבית` running header) that the
+existing `strip_head_header` heuristic (built for single-*character*
+extra markers) would not have caught automatically - stripped manually
+after a direct crop confirmed it's page furniture, not body text. Klal 97
+final: 427 words (was 184, mislabeled under klal 98 and independently
+truncated at the same page boundary).
+
+Each of the three (95/96/97) marker positions and the klal-97 page
+boundary were confirmed by direct high-res crop against
+`berlin_square.pdf` before being applied, not trusted from token-text
+matching alone - `scratch/klal95_boundary.png`, `klal96_marker.png`,
+`klal97_marker.png`, `klal98_marker.png` (staged, not yet committed).
+
+**Klal 98 is now the new known-wrong boundary** (still holds klal 97's
+old, truncated, mislabeled content) - next step in this ongoing,
+multi-turn effort. `validate_klal_span_coverage.py` re-run clean after
+each step: klal 96 dropped off the flagged list once fixed (95/97 aren't
+independently checkable by that script yet since their far-end markers
+weren't in `gematria_trace_part1.json` before this session). Full
+`rebuild_all.sh` re-run after 95/96/97: `corrections_part1.json` now 738
+items / 167 klalim, zero `error` flags.
+
+**Continued further the same session: klal 98, 99, 100, 101, 102, 103,
+104 fixed, same off-by-one method, each scan-confirmed.** Same cascading
+pattern throughout - each fix uncovers the next stale boundary. Klal 105
+is now the current known-wrong boundary. Two new OCR-error patterns
+surfaced and fixed while reconstructing this stretch, both confirmed by
+direct crop, not applied from token text alone:
+
+- **A second docai duplicate-token instance, same class as klal 82/83**:
+  page 44 tokens 385 (`ביו`) and 386 (`בית`) have near-identical bounding
+  boxes (x1 0.841 vs 0.826, same y) - the same glyphs read twice with
+  different results. Crop confirms only one word (`בית`) is printed.
+  `ביו` dropped when reconstructing klal 100.
+- **A recurring `ב"ד`->`ב"ר`/`ב"ך` misread**, four separate instances
+  across klal 101-104 (each its own physical glyph, each individually
+  cropped and confirmed to read `ב"ד`, not the docai-reported letter):
+  klal 101/102 both misread as `ב"ך`, klal 103/104 both misread as `ב"ר`.
+  Given the fixed idiom this book uses throughout this cluster (`ב"ד
+  מתנין לעקור דבר מן התורה` - "Beit Din institutes uprooting a Torah law"),
+  a citation to a nonexistent `ב"ך`/`ב"ר` abbreviation would be
+  semantically impossible here regardless of the letterform question -
+  same "trust the sentence" principle as the klal 3 `מלמד`/`מלמר` case
+  earlier in this document. Also fixed a bare dropped-lamed OCR miss in
+  the same idiom's own fixed phrase, `בשב ואל תעשה` (klal 101 had `בשב
+  וא תעשה`, `וא` not a word) and in `לא אמרינן אלא היכא` (klal 102 had
+  `אמרינן אא היכא`, `אא` not a word) - both crop-checked, both genuinely
+  ambiguous/compressed ligatures on the page rather than confidently
+  legible, resolved by the same "this is a fixed idiom, printed correctly
+  elsewhere in the same paragraph" reasoning rather than by re-guessing
+  the pixels a second time.
+- **Caught before it could ship**: my first attempt at klal 101/102 both
+  omitted a `[.]` editorial mark that the pre-existing reference (the
+  same content previously mislabeled under 102/103) already carried -
+  found by re-diffing my output against that reference text before moving
+  on, not left for a later validator pass to catch. A reminder that the
+  `[.]`-loss failure mode from the earlier truncation-fix regression (see
+  above) is a standing risk of *any* from-raw-tokens reconstruction, not
+  a one-time event - check for it explicitly every time, don't assume a
+  single fix closes the risk.
+- Also confirmed (and deliberately did NOT carry over): the current,
+  about-to-be-overwritten klal 105 entry had a stray duplicate `קה`
+  appended after its closing `:` - not present in the fresh token
+  extraction, so not reproduced in the klal 104 fix. Left uninvestigated
+  (klal 105 itself is being rebuilt from scratch next, not patched), but
+  worth remembering this data had at least one more small defect beyond
+  the shift itself.
+
+`gematria_trace_part1.json`'s `marker_position`/`page` for 99-105 turned
+out to already be correct before this session (the tracer had genuinely
+found the right token, it was only the *stored content* comparison that
+failed, since that content was the wrong klal's) - no trace-file edit
+needed for this batch, unlike klal 95 which needed both position and page
+corrected.
+
+`rebuild_all.sh` re-run clean after 98-104: `corrections_part1.json` now
+734 items / 167 klalim (97 `current_text_may_be_wrong`, 131
+`current_text_confirmed`, 145 `unverified_insertion`, 300 `ambiguous`, 61
+`possible_omission`), zero `error` flags.
+
+**Continued further: klal 105, 106, 107 fixed - and a new marker-misread
+pattern found that explains why klal 107's marker was never located by
+any earlier pass.** Klal 105's title needed independent judgment (new
+content, not a duplicate carried under a later wrong ID this time) -
+`ב"ד שלאחריהם אמרו קי"ל כוותייהו משום דבתראי נינהו` (a later Beit Din's
+ruling is followed since it is the latter authority), another instance of
+the same `ב"ד`->`ב"ך` misread already found in 101/102, confirmed by crop
+here too (5th instance of this specific misread, all individually
+cropped). Klal 106 (`בחירתא`) fixed the same way.
+
+**Klal 107's real marker was never a "not found" case - it was a
+misread.** `קז` had been OCR'd as `קו` (ז read as ו), so every exact-text
+search for `קז` correctly came up empty, and no automated pass before now
+had reason to suspect the token existed under a different reading. Found
+by working the shift chain forward: klal 106's real end boundary had to
+be *somewhere* on page 44/45, and page 45's very first post-header token
+(bold, enlarged, same line as `בל תוסיף...`) read `קו` per docai - a
+second `קו` marker directly contradicts klal 106 already having one, so
+it had to be a misread of something. Direct crop comparison against the
+already-confirmed `קו` marker for klal 106 (same page range, same font)
+shows a visibly different bottom-stroke shape - consistent with `ז`, not
+`ו`. Confirms **the marker-vs-citation collision documented earlier in
+this file is not the only way a real marker can evade exact-text search -
+a straightforward letter misread on the marker glyph itself is a second,
+distinct failure mode**, worth remembering for any of the remaining
+unresolved klalim in this range (93, 95 [done], 98 [done], 107 [done],
+115, 127, 131, 139, 144, 147, 149, 150, 153, 155, 160, 164, 167 - the
+original 18-item "genuinely unresolved" list from the earlier
+reconstruction attempt). Title judged as `בל תוסיף` (a terse,
+recognizable halachic-category name, consistent with this book's other
+short titles like klal 5's single-word `איתמר`).
+
+**Supersedes a claim made earlier in this document**: the "All 222 Part-1
+titles reviewed" section's closing note names `בחירתא (klal 107, 177...)`
+as an unverified term - that was true of the *pre-fix* data, where this
+content sat mislabeled under klal 107 (per the same off-by-one shift).
+`בחירתא` is klal 106's title now, not 107's; klal 177 is unaffected and
+not yet checked either way.
+
+**Klal 108 is now the current known-wrong boundary.** `rebuild_all.sh`
+re-run clean after 105-107: `corrections_part1.json` now 731 items / 167
+klalim (97 `current_text_may_be_wrong`, 131 `current_text_confirmed`, 143
+`unverified_insertion`, 300 `ambiguous`, 60 `possible_omission`), zero
+`error` flags.
+
+**Continued further, same session: klal 108, 109, 110, 111 fixed, same
+method, each scan-confirmed.** No new error classes in this stretch -
+straightforward continuations of the off-by-one shift, each verified by
+crop before applying (one near-miss: an initial crop of klal 111's marker
+was cut off at the bottom edge and looked like `היא` instead of `קיא` -
+re-cropped wider before concluding anything, per Lessons Learned #6, and
+the wider crop confirms `קיא` with its qof descender intact - not a
+misread, just a bad first crop). **Klal 112 is now the current
+known-wrong boundary** - it was already independently flagged by
+`validate_klal_span_coverage.py` before this session started (klal 112
+was in the original 15-item flagged list), so this next step should
+close a validator finding directly, not just a manually-noticed one.
+
+`gematria_trace_part1.json` updated for 108-111 (status `ok`,
+`content_match_ratio` 1.0 - positions were already correct, only content
+needed fixing). Full `rebuild_all.sh` re-run clean: `corrections_part1.json`
+now 725 items / 162 klalim (97 `current_text_may_be_wrong`, 131
+`current_text_confirmed`, 137 `unverified_insertion`, 300 `ambiguous`, 60
+`possible_omission`), zero `error` flags. `validate_klal_span_coverage.py`:
+13 klalim still flagged - the same known 92-165-zone set minus 110
+(fixed, dropped off) plus klal 106 newly appears at the threshold (0.85,
+cross-page 44->45) - within normal same/cross-page variance already
+established (mean ~1.08-1.11), not investigated further as a likely false
+positive akin to klal 175, given time budget for this session.
+
+**Session summary for this shift-zone work**: klal 95-111 (17 klalim)
+fixed and scan-confirmed this session, continuing from the klal 92-94 fix
+in an earlier session. Roughly 45-50 klalim remain in the originally-scoped
+92-165 range (~65 total minus what's now fixed). Not committed yet - see
+next steps.
+
+Also updated `gematria_trace_part1.json`'s entries for klal 95-98 to
+record the now-confirmed marker positions (same `note`-field convention
+used for the klal 3 fix). **Self-caught bug while doing this**: setting
+klal 95's `marker_position` to 534 without also updating its stale `page`
+field (still 42, but the real marker is on page 43) made
+`validate_klal_span_coverage.py` compute a nonsensical negative span for
+klal 94 (`page 42->42, expected~-195 tok`) - a reminder that
+`marker_position` is only meaningful together with `page` in this file;
+an update to one without the other silently produces a wrong number
+rather than an error. Fixed before moving on; re-ran the validator clean.
+
 ## Klal 21, 39, 66, 75, 79 — all checked against the scan, all confirmed correct, 2026-08-05
 
 Closing out these long-open, never-verified flags (requested ahead of
@@ -1123,3 +1314,391 @@ established lesson (the klal 1-91 disagreement-batch mistake earlier), a
 single vision signal favoring the OCR reading is not sufficient on its own
 - these need the same sentence-context check as everything else before
 being trusted, not applied on the strength of this one result.
+
+## Klal 1's second flagged word — vision's 0.98-confidence pick was wrong; my own first fix was ALSO wrong; corrected twice, 2026-08-05
+
+User flagged klal 1's second disputed word (page 14, docai `ומרקמהד` vs
+stored `ומדקמהדר`, vision selected B at confidence 0.98, flag
+`current_text_confirmed`) as looking like a wrong call, and supplied a
+second physical scan of the book (`ספר_יד_מלאכי (1).pdf`, untracked, not in
+the repo) to cross-check against.
+
+**First pass (wrong, self-corrected below)**: my own repeated eyeball
+re-crops of `berlin_square.pdf` were inconclusive across several attempts,
+then I convinced myself I saw a 9th glyph (an aleph) between `ק` and `מ`
+that neither candidate accounted for, and "confirmed" it against a crop of
+the new scan. Fixed to `ומדקאמהדר`. **This was wrong.** The user directly
+disputed it ("I see ומדקמהד׳"). Rather than re-litigate by eye again (my own
+eyeball reads had already flip-flopped multiple times in this same
+investigation - not a reliable independent signal on its own), I ran a
+**fresh, unbiased Gemini call**: cropped the same berlin token, and
+explicitly prompted it to transcribe letter-by-letter *without* anchoring
+on any of the three prior candidates (docai's, my aleph fix, or the user's).
+Result: `ו,מ,ד,ק,מ,ה,ד` - **no aleph**, confidence 0.9, matching the user
+exactly. A same-style neutral re-read of the new scan's crop came back
+garbled/implausible (`ונרקאגהדי`) - almost certainly a bad crop or genuine
+print-quality issue on that copy - and was correctly not relied on over the
+clean berlin result.
+
+The token stream itself resolves the remaining ambiguity: `docai_word_boxes/
+page_14.json` already has a **separate geresh token (473)** positioned
+immediately after this word (472) and before `לידע` (474) - distinct from
+`וכו'`'s own geresh (token 471). That's consistent with `מהד` being an
+abbreviation for `מהדר` marked by that adjacent geresh, exactly as the user
+transcribed it: `ומדקמהד'`.
+
+**Root cause of the *original* 0.98-confidence vision error**: never a
+choice between a right answer and a wrong one - both docai's `ומרקמהד` and
+the previously-stored `ומדקמהדר` get the letters between `ק` and the
+ending wrong in different ways, and the adjudicator, forced to pick between
+two flawed options, confidently picked the closer one. A high confidence
+score on a **forced choice between two wrong answers is still wrong** -
+Lesson #2 in `CLAUDE.md`.
+
+**Root cause of *my own* follow-on error**: repeated close zooming on a
+degraded 18th-century scan invites the reader to complete an ambiguous
+blob into whatever letter shape is being looked for - the same failure
+mode already logged for klal 66 this session. Escalating to a fresh,
+neutrally-prompted model read (instead of re-trying my own eyes a fifth
+time, or defending the first fix) is what actually resolved it, and it
+took a direct user challenge to trigger that escalation rather than my own
+judgment. **New standing lesson candidate**: when my own repeated
+close-reading of a crop has already produced inconsistent results, treat
+further close-reading by eye as unreliable and get an independent read
+(fresh model call with no prior-candidate anchoring, or a second source)
+rather than a sixth attempt at the same method.
+
+**Fixed (final)**: `part1.json` / `klalim_demo_dataset.json` clean_text
+now read `ומדקמהד` (reverted the incorrect aleph, and dropped the
+originally-stored word-final `ר` that the fresh read also does not
+support), rendered with the pipeline's existing adjacent geresh token as
+`ומדקמהד'`. `corrections_part1.json` / `corrections_verified_part1.json`
+updated in place (flag `human_corrected_vision_override`, note explains
+both the original vision error and my own interim wrong fix, not just the
+final answer) rather than left showing either stale verdict; `review.html`
+regenerated.
+
+**Open methodological gap this surfaces**: the vision-adjudication pipeline
+as built has no way to catch a letter that's missing from *both* the docai
+reading and the current text - it only ever arbitrates between two given
+strings, never independently reads the crop against nothing. The 770
+flagged corrections in `review.html` are cases where docai and
+current-text *already disagreed*; an unknown number of *agreeing* words
+elsewhere in Part 1 could have the same both-wrong blind spot and would
+currently show zero flags. Not yet scoped or fixed - flagging here so it
+doesn't get dropped.
+
+## `review.html` tooltip bug: hand-patching a correction's `final_text` without its `reasoning`/`confidence` leaves the hover text contradicting the displayed word — found and fixed, 2026-08-05
+
+User spotted it directly on the just-regenerated `review.html`: the klal 1
+word-468 fix above updated `final_text` in `corrections_part1.json` /
+`corrections_verified_part1.json` (correct, matches what's now shown
+underlined in the middle pane) but left `reasoning` and `confidence`
+untouched at their **original, now-superseded** values (0.98 confidence,
+reasoning arguing *for* the word ending in `ר` - the reading that was just
+proven wrong). `build_review_html.py`'s tooltip renders `reasoning`/
+`confidence` verbatim from the correction record with no separate path for
+"a human overrode this after the fact" - so hovering the corrected word
+showed the AI's old case for the *wrong* reading, directly contradicting
+the word on screen. A real pipeline gap, not a one-off typo: any future
+hand-patch of `final_text`/`corrected_word` without also touching
+`reasoning`/`confidence` will reproduce this.
+
+**Fixed three ways**, not just patched around this one instance:
+1. `human_corrected_vision_override` (the flag already introduced for this
+   case) is now a real, labeled entry in `build_review_html.py`'s
+   `FLAG_LABELS` ("Human-corrected (overrides vision)", distinct blue) -
+   it was previously falling through to the generic grey "Flagged" label,
+   itself a smaller version of the same lost-information problem.
+2. The tooltip JS (`attachTooltip`) now checks for `corr.human_correction_note`
+   first and shows that in place of the vision model's `confidence`/
+   `reasoning` when present, instead of ignoring it entirely (it was being
+   written into the JSON all along but never surfaced in the UI).
+3. `corrections_part1.json` / `corrections_verified_part1.json`'s klal-1/
+   word-468 record itself had `confidence`/`reasoning` nulled out (defense
+   in depth - correct even for any consumer that doesn't go through
+   `build_review_html.py`'s new note-preferring logic).
+
+`review.html` regenerated; spot-checked the generated HTML directly for
+both the new flag label and the note text to confirm the fix took, and
+confirmed the stale "distinct right shoulder" phrase still found by a
+broad grep belongs to an unrelated klal 6 correction (coincidental reuse of
+similar phrasing by Gemini for a different dalet-vs-resh judgment), not a
+leftover bug.
+
+**Checked**: whether any *other* correction records in `corrections_part1.json`
+have `human_correction_note` set alongside a non-null `confidence`/
+`reasoning` (the same incomplete-patch pattern) - none do. This one instance
+was the only hand-patch made so far this session.
+
+## MAJOR: cross-page klal truncation — real content silently dropped for ~15-26 klalim, distinct from the 92-165 shift bug, 2026-08-05
+
+User spotted it directly by reading `review.html`: **klal 2's stored text
+ends mid-sentence at the exact page-14/15 boundary** ("...כמו שהאריך בזה
+הרמב"ן בהשגותיו" then stops - `בהשגותיו` is followed in the real print by
+`לספר המצות בשרש השני דף כ"א א'...`, a real, specific citation, not a
+klal-ending thought), while **klal 3 starts correctly** on page 15 - meaning
+a whole block of real halachic content between them was never captured
+anywhere, not even under the wrong klal_id (unlike the 92-165 shift bug,
+where misplaced content is at least still present, just mislabeled).
+
+**Confirmed directly against `docai_word_boxes`**: klal 2's real marker is
+page 14 position 542; klal 3's real marker is page 15 position 176
+(`gematria_trace_part1.json`). The true span is page 14's remaining ~213
+tokens *plus* page 15's first ~176 tokens (minus running header/footnote
+furniture) - roughly 380+ words. Stored `clean_text` has only 209 words:
+**the entire page-15 portion is missing**, not shortened - `clean_text`
+simply stops at the last page-14 token before the page break.
+
+**Scope check** (`scratch/scope_pagecrossing_truncation.py`): computed real
+expected word count (via marker-to-marker token span, cross-page aware) vs
+stored word count for every Part-1 klal with two confirmed marker
+positions on either end.
+- **Same-page klalim (n=116): mean stored/expected ratio 1.11** - roughly
+  matches expectation (slightly over due to editorial `[.]` marks etc.),
+  i.e. same-page klalim are NOT systematically truncated.
+- **Cross-page klalim (n=26): mean ratio 0.70**, and **15 of the 26 (58%)
+  fall below 0.85** - some catastrophically: klal 4 (page 15→16) stored at
+  **ratio 0.07** - 93% of its real content missing. Full flagged list:
+  klal 2, 4, 7, 12, 24, 25, 31, 39, 41, 44, 53, 54, 59, 75, 175. (26 total
+  cross-page klalim exist in Part 1; the other 11 are near/above the 0.85
+  threshold and need individual confirmation, not assumed clean.)
+
+**This is a different bug from the 92-165 off-by-one shift**, confirmed by
+checking whether the shift-zone klalim independently already fixed this
+session (92, 93, 94 - note 93 and 95 are themselves cross-page, spanning
+41→42 and 42→43) show the same truncation pattern: **they don't**, because
+they were rebuilt this session via direct marker-to-marker token-span
+extraction (the same method that would fix this bug), not inherited from
+whatever originally built `clean_text`. The truncation bug pre-dates this
+session and traces to the original chunking pipeline: `git log --follow
+part1.json` shows the earliest commit is "Re-chunk all JSON datasets...
+with cleaned text from `full_text_cleaned_goal.txt`" (2026-08-01) - that
+source file no longer exists in the working tree (not gitignored-present,
+not reconstructible), so the exact original bug in that one-time rechunk
+can't be forensically re-examined; what's certain is its *symptom*
+(page-crossing spans silently truncated at the page boundary) is
+corpus-wide and reproducible via the marker-span check above, independent
+of which historical script caused it.
+
+**Answering the user's three questions directly**:
+1. **How was this missed**: every correction-detection stage built this
+   project (`build_corrections_dataset.py`, the vision pass, the
+   alphabetical-order check, the title review) compares docai's reading
+   against stored `clean_text` *word-by-word at matching positions* - none
+   of them ever checks whether the stored text's total *length* between
+   two confirmed klal markers plausibly accounts for the real token span.
+   A klal that's missing its back half entirely produces zero per-word
+   mismatches for the words that *are* present - there was nothing to flag
+   as a "correction candidate," because omission-of-a-whole-tail isn't a
+   disagreement between two readings, it's stored text that's just too
+   short, and length was never checked against the source.
+2. **How far it extends**: at minimum 15 confirmed klalim, up to 26
+   needing individual confirmation (any cross-page klal is now suspect,
+   not just the ones over threshold) - Part 1 only; Parts 2-3 have no
+   scan/token infrastructure at all yet (per earlier open items) so this
+   check can't even run there, meaning the true corpus-wide scope is
+   currently unknown and likely larger.
+3. **How to fix it**: the mechanical piece is already built and proven -
+   `scratch/reconstruct_92_165_cleantext.py`'s same-page span-extraction
+   logic (used to correctly rebuild klal 92/93/94 this session) needs to be
+   **extended to stitch across a page boundary** (concatenate page N's
+   tail tokens + page N+1's head tokens, stripping the running header and
+   catchword/footnote furniture from the page-N+1 side - the same
+   furniture-stripping already learned from the klal 92 fix) and then run
+   for every flagged cross-page klal, each one spot-verified against the
+   actual scan crop before being trusted (per Lesson #2 - a good ratio
+   isn't a checked result, and per this same investigation's own klal-4
+   example, a *bad* ratio is a strong true-positive signal but still
+   deserves the scan check before writing).
+
+**Not yet done**: the cross-page stitching extension itself, and the
+per-klal scan verification + fix for all 15-26 affected klalim. This is a
+large effort (comparable in scope to the still-open 92-165 zone) and is
+now arguably the **higher-priority** open item of the two, since content
+is outright missing here rather than mislabeled-but-present. Flagging the
+priority question rather than silently picking an order.
+
+User chose: fix truncation first. Done - see next entry.
+
+## Klal 3 false-truncation-flag resolved; found klal 2 still truncated; found a real regression in the earlier cross-page-truncation fix — 2026-08-05
+
+Investigating the klal 3 span-coverage flag (page 15->15, expected~704 tok,
+stored 411 words, ratio 0.58) directly against the scan:
+
+**Klal 3 itself needed no text change.** `gematria_trace_part1.json` had
+anchored klal 3's marker on token 176 of page 15 - part of the citation
+`בפרק ג' מה' עבודה זרה הלכה ג'` (Rambam, Hilchot Avodah Zarah ch. 3, law
+3), a coincidental gematria-value collision, same failure class as the
+klal 99 "marker-vs-citation" finding earlier in this document. The real
+marker is token 480 - visually confirmed against `berlin_square.pdf`
+(`ג` sitting in the print's right-margin gap immediately after the bold
+opening word `אין`, the normal typesetting convention for this book).
+Token 480 sorts *before* tokens 481-486 (a small-font footnote line, `הרמב"ם
+מ"ש בפי' ד"ס:`) in docai's raw array order despite that footnote line
+being physically earlier on the page - a marker-out-of-reading-order
+anomaly, the same class of bug as the klal 82/83 extraction-order
+inversion documented above. Klal 3's stored `clean_text` already began
+correctly at this real marker (`ג אין למדין למד מלמד בקדשים...`) - it
+predates the automated marker-tracer pipeline and was already right.
+`gematria_trace_part1.json`'s klal-3 entry corrected in place
+(`marker_position` 176->480, `status` `marker_found_content_mismatch`->`ok`,
+plus a `note` field explaining the correction - the first per-item `note`
+in this file).
+
+**Klal 2 was still truncated.** The tokens between the false marker (176)
+and the real one (480) - ~300 words, a dense halachic discussion about
+whether the `אא"ע` hermeneutic device carries full derivation-strength for
+`מלקות` liability, citing Rambam, Tosafot Bava Metzia, and three later
+respondsa/commentaries by name - are real klal-2 content that the earlier
+cross-page-truncation fix (see "Cross-page truncation FIXED" above) never
+captured, because that fix's reconstruction used `gematria_trace_part1.json`'s
+(wrong) marker position for klal 3 as klal 2's endpoint. Fixed: klal 2's
+`clean_text` extended with this span (skipping token 480 itself, which
+belongs to klal 3) - 379 -> 689 words.
+
+**Bigger finding: the earlier cross-page-truncation fix regressed 8 of its
+own 14 fixed klalim, silently undoing prior hand-verified corrections.**
+Diffing every one of the 14 truncation-fixed klalim (`part1.json`, the
+uncommitted working-tree version vs. the last commit) against every
+individually-documented fix that predates that session found:
+
+- **7 klalim lost their editorial `[.]` title/explanation-boundary mark**:
+  klal 12, 24, 25, 31, 53, 54, 75. All seven had `[.]` in the pre-truncation
+  text and none had it after. Root cause: the truncation-fix reconstructed
+  `clean_text` directly from raw docai tokens (marker-to-marker span) for
+  all 14 klalim, and `[.]` is a pure editorial insertion with no token in
+  the scan - a from-scratch token rebuild has no way to know it belongs
+  there. Re-inserted at the same position in all 7 (verified by matching
+  the surrounding ~25 characters on each side against the pre-truncation
+  text before re-inserting, not by guessing a position).
+- **Klal 59's phantom-token fix was undone**: the standalone `ר` before
+  `רבי` (see "Klal 57-59 title + body review" above - confirmed by direct
+  crop to not exist on the page) was back in the reconstructed text,
+  because klal 59 was both a phantom-token-fixed klal *and* one of the 14
+  cross-page-truncation targets, and the truncation fix ran later,
+  rebuilding from raw tokens without the phantom already stripped.
+  Re-removed.
+- **Checked and NOT a regression**: klal 59's new tail, `...מהלכות מתנות
+  עניים הלכה ב' *) :` - the `*)` looked like it could be leftover page
+  furniture, but a tight crop
+  (`scratch/klal59_star_zoom.png` staged this session, not yet committed)
+  confirms it's printed inline, same footnote-reference-marker convention
+  already established for klal 6 (`הרמה*)`, confirmed genuine there too).
+  Left as-is.
+- **Checked and NOT regressed**: klal 2 and klal 4's earlier mid-sentence
+  footnote-numeral fixes (`בהשגותיו 1 לסי'`->`בהשגותיו לסי'`,
+  `יגעתי 1 ולא`->`יגעתי ולא`) and klal 25/44/53's trailing-signature
+  fixes both survived intact - the former because the reconstruction's
+  furniture-handling doesn't touch that span, the latter because the
+  extended text moved well past the old (now-superseded) truncated tail
+  where those artifacts used to sit.
+
+**This is a new instance of an already-known failure class, worth stating
+plainly: a later mechanical rebuild of a `clean_text` span, even when
+correctly sourced from real tokens, silently discards any hand-verified,
+non-tokenizable correction (editorial marks, phantom-token removals) that
+had already been applied to that same span.** Any future span
+reconstruction (including the still-open klal 95+ shift-zone work) must
+diff its own output against the pre-reconstruction text for exactly this
+class of loss - matching words differing only by an inserted `[.]` or a
+single phantom token - before trusting a word-count ratio alone as "fixed."
+
+**Applied and rebuilt**: `part1.json` (klal 2, 3-trace note, 7x `[.]`
+reinsertion, klal 59 phantom removal) -> `klalim_demo_dataset.json`
+(rebuilt via script) -> full `rebuild_all.sh` (not `--skip-vision`) ->
+`corrections_part1.json` (742 items / 169 klalim, flags: 99
+`current_text_may_be_wrong`, 135 `current_text_confirmed`, 148
+`unverified_insertion`, 299 `ambiguous`, 61 `possible_omission` - zero
+`error`, all comparisons resolved cleanly) -> `klal_page_regions.json` ->
+`review.html`. `validate_klal_span_coverage.py` re-run clean: klal 3 no
+longer flagged; the 15 remaining flags are the already-tracked 92-165
+shift-zone klalim (13) plus the already-explained klal 165/175 false
+positives - no new unexplained flags.
+
+## Cross-page truncation FIXED for all 14 real instances; klal 175 confirmed a false positive; new standing validator added, 2026-08-05
+
+Reconstructed each of the 14 confirmed-truncated klalim's `clean_text` as
+the real docai token span from its own marker to the next klal's marker,
+concatenating across the page boundary. This required understanding the
+actual page-furniture pattern first (scratch/reconstruct_crosspage_v4.py
+has the working logic): every page transition in this print run has a
+literal "Digitized by Google" (Google Books scan watermark) sitting in the
+docai token stream itself, adjacent to a footnote-digit and/or the
+printer's catchword (a preview-duplicate of the next page's first real
+word) - in **varying order** page to page (sometimes catchword-before-
+watermark, sometimes after), so a fixed-offset strip does not work; the
+script anchors on the literal "Digitized"/"by"/"Google" tokens and strips
+outward from there, plus the running header (`<page-num> יד/יר/יך מלאכי
+כללי <section>`, with an optional extra 1-2 char footnote-marker token
+sometimes following it) on the next page's side.
+
+**Two real bugs in my own reconstruction were caught by visual spot-
+checking against the scan before trusting any of it (per Lesson #2/#9),
+not by the mechanical pass alone**:
+1. A catchword immediately followed by its own separate geresh token
+   (docai tokenizes e.g. `מדליקין` and the `'` after it separately) broke
+   the fuzzy duplicate-match, since it compared the lone geresh against the
+   next page's real word instead of the whole word+geresh unit - caught by
+   directly reading page 21's bottom margin (klal 24) and page 28's (klal
+   41), both of which visually show the catchword as a distinct, smaller,
+   separately-positioned line, confirming the real page-N content is
+   shorter than my first mechanical pass assumed.
+2. The reverse error: I then over-corrected and assumed 3 more klalim
+   (44, 54, 59) had NO catchword based on a same-size-font visual read -
+   this was wrong too. What actually settles it is **horizontal position,
+   not font size**: every confirmed catchword (2, 7, 24, 25, 41, 53) sits
+   centered on its own line, ~0.57-0.60 indented from the page's right
+   margin (measured via docai bbox x2 against the page's max x2) -
+   completely different from a normal RTL paragraph's last line, which
+   stays right-aligned to the same margin as every other line. Checking
+   this quantitatively for 44/54/59 showed **identical** indentation to
+   the confirmed cases - font-size comparison by eye was the wrong signal
+   and led me to nearly leave 3 real fixes unapplied. Reverted the
+   over-correction; kept the original catchword-stripping decisions.
+
+**klal 175 is a confirmed false positive**, not a 16th truncation: its
+"cross-page continuation" position (page 65) turned out to be klal 176's
+own marker position exactly (position 6, immediately after page 65's
+header) - meaning klal 175 has essentially zero real content on page 65 at
+all; the borderline 0.84 ratio that flagged it originally was just
+conservative rounding, not a real gap. No fix needed or applied.
+
+**Applied**: klal 2 (209->379 words), 4 (36->502), 7 (555->708), 12
+(215->349), 24 (110->361), 25 (683->899), 31 (29->206), 39 (264->703), 41
+(462->799), 44 (375->524), 53 (83->466), 54 (556->1019), 59 (108->153), 75
+(302->363) - all in `part1.json`. Regenerated `klalim_demo_dataset.json`
+via its build script (not hand-edited in parallel this time, per the
+single-source-of-truth rule) and ran the full `rebuild_all.sh` pipeline
+(not `--skip-vision` - the candidate set changed shape enough, 770->734
+items, that skipping risked merging against a stale/mismatched verified
+set). All 734 vision comparisons were cache hits - zero new API calls,
+zero cost, because the reconstructed text was built directly from the same
+docai tokens the vision pass already compares against.
+
+**New standing validator added**: `validate_klal_span_coverage.py`
+(promoted from the one-off `scratch/scope_pagecrossing_truncation.py`,
+per explicit user request to not leave this as a scratch check) - computes
+real expected word count from marker-to-marker docai token span (same-page
+and cross-page) vs. stored word count for every Part-1 klal, flags any
+ratio below 0.85. This is the permanent version of the check that found
+this whole bug class; run it after any future text edit the way
+`lexicon.txt` validation already runs after cleanup passes.
+
+**Confirms the fix worked**: cross-page mean ratio 0.70 -> 0.96 after the
+fix (same-page klalim unaffected throughout, mean 1.11, confirming this
+really was a page-crossing-specific bug).
+
+**New finding surfaced by the generalized validator**: running
+`validate_klal_span_coverage.py` post-fix flagged 16 klalim below
+threshold - 13 of these are already-tracked klal 92-165 shift-zone klalim
+(96, 102, 110, 112, 120, 122, 125, 134, 137, 140, 157, 158, 161, 165 -
+consistent with that separate, already-open bug), klal 175 is the
+already-documented conservative-rounding false positive (see above, no fix
+needed), and **klal 3 was new - investigated and resolved 2026-08-05, see
+the dated section below.** It was not a real truncation: the marker
+tracer had anchored on the wrong "ג" token (a citation collision), which
+in turn had also mis-set the endpoint used to reconstruct **klal 2**,
+still truncated by ~300 words even after the earlier cross-page-truncation
+fix. See below for the fix and for a second, more serious bug the
+investigation surfaced in that earlier fix's own output.
