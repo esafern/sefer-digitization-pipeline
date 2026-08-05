@@ -1555,6 +1555,56 @@ work). Remaining genuinely open in the still-unaddressed part of the
 92-165 range: 145 onward, plus 157, 158, 161, 165 (106 and 175 already
 documented as likely false positives).
 
+**Continued overnight (autonomous, user-authorized): klal 145-166
+fixed.** Same method throughout - klal 146, 148, 150, 152, 154, 159, 163
+were additional large cross-page klalim (each 280-1300+ words) completed
+on the disclosed lighter standard from the 143/144 precedent above
+(full-text coherence read, not word-by-word crop-verified); klal 145,
+147, 149, 151, 153, 155-158, 160-162, 164-166 were fully diff-verified
+against the pre-existing (mislabeled) stored text with no new error
+classes beyond the already-catalogued marker-glyph and ד/ר-family
+misreads. This closed out **every remaining item on the original
+validator flag list**: klal 157, 158, 161, 165 (from the pre-session
+scan) are now all resolved along with klal 106 remaining a documented
+false positive and klal 175 likewise. The Dalet/Heh section boundary
+correction (klal 146/147, not 147/148) is also now applied.
+
+**Major new finding: the off-by-one shift bug extends past the
+originally-scoped klal 92-165 range, into at least klal 166-167, and the
+simple "+1 shift" pattern that held for every single klal from 92 through
+166 breaks down at 167.** Discovered while fixing klal 166: its stored
+form (before tonight) still held **two klalim's content concatenated**
+(klal 165's already-shifted tail, not yet cleared by any prior pass, plus
+klal 166's own real content appended directly after it with no
+separation) - a corruption shape not seen anywhere else in this range.
+Fixed klal 166 to hold only its own real content (confirmed via a clean
+diff against the old klal-167 slot, 382 words, exact match apart from
+the marker). **But klal 167's real content does not match the old
+klal-168 slot** the way the pattern held for every prior klal in this
+range: page 61 (where klal 167's content should begin, per its neighbor's
+confirmed end boundary) opens with `טסי מרב חסדא` - `טסי` is almost
+certainly a marker misread (sequential-numbering context strongly
+suggests קסז) but the *content* that follows doesn't correspond to
+klal-168's stored text at all. This means either (a) the shift's simple
+"+1, one slot" model stops applying exactly here and something more
+complex happens to the mapping from this point forward, or (b) there is
+an additional undiscovered klal or merge/split in this immediate
+vicinity that the last ~75 klalim of straightforward +1-shift fixing
+didn't have. **Deliberately not guessing at a new pattern this late in
+a long, already-extensive session** - this needs to be picked up fresh,
+starting from directly investigating page 61's true content structure
+(what klal is `טסי מרב חסדא...` actually the continuation of, and where
+does klal 167's real content actually live), not assumed to follow the
+same one-slot-shift rule that worked for 92-166.
+
+**Status as of this finding**: klal 92-166 confirmed fixed and
+scan/diff-verified (with the disclosed lighter-verification exception
+for the ~8 large cross-page klalim named above). Klal 167 onward is the
+new frontier - open, actively being investigated, not yet resolved.
+klal 128's separately-flagged missing ~838-word tail (see above) also
+remains open. Both are more valuable next steps than starting on
+unrelated corpus areas, per the standing "close open items first" rule.
+
 Also updated `gematria_trace_part1.json`'s entries for klal 95-98 to
 record the now-confirmed marker positions (same `note`-field convention
 used for the klal 3 fix). **Self-caught bug while doing this**: setting
