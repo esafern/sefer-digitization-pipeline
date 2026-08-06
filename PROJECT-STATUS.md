@@ -1730,6 +1730,59 @@ a real word). No longer an open item.
 Both rebuilt via the full derived-artifact pipeline; `validate_klal_span_coverage.py`
 re-run clean, no new flags.
 
+## MAJOR, NEW FINDING 2026-08-06: the same page-header contamination bug found in Part 1 tonight is systemic in Parts 2 and 3 - 74 klalim affected, never caught by anything
+
+Requested corpus-wide review prompted checking whether the page-header
+leak just fixed in Part 1 (running header text `יר/יך מלאכי כללי X`
+leaking mid-sentence into `clean_text`, see the retraction section below)
+was isolated to Part 1. It is not. Searching all three part files for the
+literal string `מלאכי כללי`:
+
+- **part1.json: 0** (clean, after tonight's fixes)
+- **part2.json: 54 occurrences across 39 klalim**
+- **part3.json: 42 occurrences across 35 klalim**
+
+**74 of 445 Part 2-3 klalim (17%) have at least one instance of literal
+page-header text embedded in their stored `clean_text`.** Full list:
+
+Part 2 (39): 227, 230, 234, 238, 243, 249, 254, 256, 257, 265, 276, 279,
+283, 288, 289, 293, 296, 301, 302, 307, 325, 346, 349, 351, 354, 356,
+364, 368, 373, 378, 379, 394, 400, 409, 410, 411, 415, 423, 428.
+
+Part 3 (35): 448, 449, 455, 458, 466, 472, 478, 493, 505, 518, 530, 536,
+548, 556, 559, 560, 568, 571, 576, 581, 585, 586, 589, 594, 596, 600,
+615, 629, 634, 645, 658, 661, 662, 663, 664.
+
+**This was never caught by anything** because Parts 2-3 have no linked
+scan images or docai word-boxes (see the long-standing Open Items note),
+so none of the automated checks built for Part 1 tonight or previously
+(`build_corrections_dataset.py`, the vision pipeline, `validate_klal_span_coverage.py`)
+run against them at all. This is a pure text-pattern search, not a
+scan-verified fix - the header phrase itself (`יר`/`יך` + `מלאכי כללי` +
+a section-letter word) is unambiguous furniture, identical in shape to
+the confirmed Part 1 cases, so removing the literal header phrase is
+safe. But several instances also show an accompanying artifact right at
+the seam - a stray signature number (`*9`, `*20`, etc.), a duplicated
+word repeated across the page break (the same catchword-duplication
+pattern fixed in Part 1), or a garbled fragment - and **those cannot be
+resolved with the same confidence without a scan to check against**,
+which Parts 2-3 do not have. Fixing the unambiguous header text now;
+flagging the accompanying seam artifacts as a follow-up that needs either
+scan infrastructure for Parts 2-3 (a large, separate undertaking already
+on record as an open item) or a lower-confidence mechanical guess,
+explicitly labeled as such.
+
+**This also means the Part 1 header-contamination sweep done earlier
+this project (and again tonight) was never representative of the whole
+corpus** - it only ever looked where scan/docai data existed to look.
+Per `CLAUDE.md` Lessons Learned #1, finding this defect at a 17% rate in
+the *unaudited* two-thirds of the corpus, after already finding and
+fixing dozens of instances in the *audited* third, is exactly the
+"haven't looked yet, not evidence of rarity" pattern - worth treating as
+a strong prior that Parts 2-3 have other Part-1-style defects
+(truncation, shift-style mislabeling, phantom tokens) at a similar or
+higher rate, entirely unaudited, not as a one-off.
+
 ## RETRACTED AND CORRECTED, 2026-08-06: the "8 placeholder klalim are numbering gaps" finding above was wrong for 3 of them - real content was hiding merged inside a neighboring "trusted" klal
 
 The finding below (originally titled "Major finding: the 8 'no text
