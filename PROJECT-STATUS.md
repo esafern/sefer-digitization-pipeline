@@ -18,12 +18,21 @@ just appended to — correct superseded claims) whenever a finding changes.
   work in progress: 3-pane layout (scan-highlight left / full text middle /
   abridged klal nav right), with per-word corrections + confidence surfaced
   for human review.
-- The many pre-existing tracked one-off scripts at root
-  (`fix_1_line_offset_and_rebuild.py`, `fix_klal_74_stitching.py`,
-  `build_full_pristine_667.py`, etc.) follow the same disposable-patch pattern
-  as what got moved into `archive/` — they predate that cleanup and weren't
-  touched, since reorganizing already-tracked history is a bigger call than
-  tidying untracked files.
+- **RESOLVED 2026-08-06**: the many pre-existing tracked one-off scripts at
+  root noted below as not-yet-cleaned-up have now been moved. Root cleanup
+  done: 37 one-off scripts (`fix_1_line_offset_and_rebuild.py`,
+  `fix_klal_74_stitching.py`, `build_full_pristine_667.py`, etc.) →
+  `archive/scripts/`, their throwaway JSON outputs + a stray `.hocr` →
+  `archive/data/`, 19 superseded planning/report docs (predating
+  `review.html` as the live verification tool) → new `archive/docs/`, and
+  13 gitignored `*.old` backups deleted outright. Root now holds only the
+  13 scripts actually in active use (`rebuild_all.sh`'s 6 stages,
+  `orchestrator.py`, `chunker.py`, `build_vlm_demo.py`, and 3 standalone
+  validators). Verified by re-running the full rebuild + all validators
+  after the move — one dependency mistake caught in the process:
+  `gematria_trace_part1.json` was briefly archived as throwaway trace data
+  but is a live input to `validate_klal_span_coverage.py`; restored to
+  root immediately when the validator failed.
 - **The abridged `title` field must be judged, not algorithmically derived.**
   The source print doesn't reliably punctuate where a title ends and
   explanatory text begins (e.g. klal 5's title is the single word `איתמר` —
@@ -50,15 +59,18 @@ just appended to — correct superseded claims) whenever a finding changes.
   correction of an earlier same-night finding that wrongly called all 8
   numbering gaps; the user caught the error). All three are now split out,
   scan-confirmed, and titled.
-- **Klal 167, 187, 190, 197, 216, 217 are confirmed genuine numbering
-  gaps** - all six directly verified by visual inspection of the physical
-  scan page at the exact boundary (not just token adjacency, which is
-  what produced the wrong 180/182/194 conclusion). Klal 85/86 is a
-  separate, already-resolved matter (checked 2026-08-06; it is NOT
-  currently a merge issue - an earlier note in this document citing it
-  as an open parallel was stale). Do not assign scan-transcription work
-  for these six — what's needed is a documented editorial decision about
-  how to handle a genuine numbering gap, not more searching.
+- **CLOSED 2026-08-06: Klal 167, 187, 190, 197, 216, 217 are confirmed
+  genuine numbering gaps** - all six directly verified by visual inspection
+  of the physical scan page at the exact boundary (not just token
+  adjacency, which is what produced the wrong 180/182/194 conclusion).
+  Klal 85/86 is a separate, already-resolved matter (checked 2026-08-06;
+  it is NOT currently a merge issue - an earlier note in this document
+  citing it as an open parallel was stale). **User decision (2026-08-06):
+  keep the explicit placeholder** — each of the six stays in the klal_id
+  sequence with `clean_text`/`title` set to `"(no text available)"`,
+  citable at its correct number rather than omitted from the sequence.
+  This is already how all six are represented in `part1.json` as of
+  tonight's fixes — no further data change needed. No longer open.
 - **Klal 186 — fixed 2026-08-06** (see dated section below): the garbled
   opening was a corruption of `הלכה כדברי המקיל באבל`, confirmed by
   direct crop of the real page (68, not the stale stored `27`). No
