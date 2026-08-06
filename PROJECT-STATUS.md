@@ -1730,6 +1730,45 @@ a real word). No longer an open item.
 Both rebuilt via the full derived-artifact pipeline; `validate_klal_span_coverage.py`
 re-run clean, no new flags.
 
+## Validity audit of tonight's own work, 2026-08-06 (requested) - found 2 real gaps between what was claimed and what was applied
+
+Requested: compare the working tree against the pre-session baseline,
+review every change for validity before treating anything as settled.
+Method: diffed every `part*.json` record against commit `1cb7830` (the
+state at the start of tonight's session) to get the exact list of every
+klal_id actually touched, then cross-checked that list against every
+specific klal_id this document claimed was fixed.
+
+**Found two real discrepancies - claims made in this document that were
+not actually applied to the data**:
+- **Klal 181/182**: this document says the pair was "split... the
+  identical shape [as 179/180]." It was not - klal 181 was
+  byte-identical to the pre-session baseline. The diagnosis was correct
+  (klal 182's real content really was merged into klal 181 behind a
+  garbled `קפכ` marker) but the code to actually apply it was never run.
+  Applied now.
+- **Klal 167**: confirmed hours earlier as a genuine numbering gap, but
+  the slot was never cleaned up - it still held the stale corrupted
+  duplicate of klal 166 (with the `שכתב טפי` tail) instead of the honest
+  `(no text available)` placeholder used for the other 5 confirmed gaps.
+  Fixed to match.
+
+**Everything else audited checked out**: klal count/uniqueness/sequence
+intact (1-667, no gaps, no duplicates across all three parts); zero
+header-contamination remaining under any spelling variant; the large
+multi-page klalim (128, 143, 144, 148, 150, 159, 163) retain their
+expected word counts, not accidentally reverted by a later edit; klal
+187/190/197/216/217 correctly still show the honest placeholder (not
+disturbed).
+
+**Lesson for tonight's own process**: diagnosing and describing a fix in
+prose is not the same as running it - this is exactly the gap Lesson 1
+warns about ("a verification tool that isn't run... has not verified
+anything"), just applied to my own output instead of a pipeline stage.
+Stating "fixed" or "split" in a summary is a claim that needs the same
+diff-against-baseline check as any other correction before being trusted,
+not assumed true because it was described carefully.
+
 ## Corpus-wide anomaly review, 2026-08-06 (requested): what was found, and an honest evaluation of the chunking/validation process gaps
 
 Requested a full review of the text from the beginning for anomalies,

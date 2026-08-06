@@ -319,3 +319,15 @@ fixed — the rule still applies to the next incident.
     check routinely (after any batch of edits, not just when asked) -
     per Lesson 8, it catches a different class of error than
     vision/semantic review and costs almost nothing to run.
+19. **Diagnosing a fix and describing it in writing is not the same as
+    applying it — verify every "fixed"/"split"/"applied" claim against a
+    diff of the actual data, not against how carefully it was written
+    up.** Confirmed 2026-08-06: this document stated klal 181/182 had
+    been "split, the identical shape as 179/180" — the diagnosis was
+    correct but the code to apply it was never run, and the file sat
+    byte-identical to its pre-fix state for the rest of the session
+    despite being narrated as done. Found only because a later request
+    to diff the whole session against its starting commit surfaced it.
+    This is Lesson 1 ("a check that isn't run has not verified
+    anything") applied to one's own output: a prose claim of "fixed" is
+    itself unverified until checked against a real before/after diff.
