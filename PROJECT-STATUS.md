@@ -45,8 +45,14 @@ just appended to — correct superseded claims) whenever a finding changes.
   667, and a review pass before treating inserted marks as final).
 - **8 Part-1 klalim have no real text at all**, just a placeholder
   (`"קפ כלל 180"` etc.): klal **180, 182, 187, 190, 194, 197, 216, 217**.
-  These need their actual content extracted/OCR'd from the scan — currently
-  titled `(no text available)` as an honest placeholder, not fabricated.
+  Still titled `(no text available)` as an honest placeholder. **Update
+  2026-08-06: this is very likely NOT missing transcription work** — see
+  the dated finding below. 6 of 8 are confirmed or strongly-implied
+  genuine numbering gaps in the print (zero token space exists between
+  the trusted neighboring klalim on either side); 194 and 197 remain
+  unverified either way. Do not assign scan-transcription work for these
+  without first reading that section — the original framing here was an
+  unverified assumption.
 - **Klal 186 — fixed 2026-08-06** (see dated section below): the garbled
   opening was a corruption of `הלכה כדברי המקיל באבל`, confirmed by
   direct crop of the real page (68, not the stale stored `27`). No
@@ -1717,6 +1723,75 @@ a real word). No longer an open item.
 
 Both rebuilt via the full derived-artifact pipeline; `validate_klal_span_coverage.py`
 re-run clean, no new flags.
+
+## Major finding: the 8 "no text available" placeholder klalim are very likely the same numbering-gap phenomenon as klal 167, not missing transcriptions
+
+Started investigating klal 180 (one of the 8 klalim with placeholder
+text: 180, 182, 187, 190, 194, 197, 216, 217) expecting to need the same
+kind of scan-transcription work as klal 92's real content. Instead found
+something structurally identical to the klal 167 discovery above.
+
+**Method**: for each candidate, found the two *trusted*, already-correctly-placed
+neighboring klalim's real markers via `docai_word_boxes`, then checked
+whether the neighbor immediately *before* the gap already extends its
+own stored `clean_text` all the way up to the very last token before the
+neighbor immediately *after* the gap's marker - i.e., is there any token
+space at all, anywhere, for the missing klal to occupy.
+
+**Confirmed with zero token gap (the "before" klal's stored text ends on
+the exact token immediately preceding the "after" klal's marker) for
+four of the eight, each independently checked**:
+- **klal 180**: klal 179 (page 66→67, already trusted) ends exactly at
+  the token before klal 181's marker (`קפא`, page 67 token 445) - no gap.
+- **klal 182**: klal 181 ends exactly at the token before klal 183's
+  marker (`קפג`, page 67 token 680) - no gap.
+- **klal 187**: klal 186 (just fixed above) ends exactly at the token
+  before klal 188's marker (`קפח`, page 68 token 680) - no gap.
+- **klal 190**: klal 189 ends exactly at the token before klal 191's
+  marker (`קצא`, page 69 token 425) - no gap.
+
+**Strongly implied (same adjacency pattern, not independently
+double-checked to the same standard) for a fifth**:
+- **klal 216 and 217 together**: klal 215's stored text (1655 words,
+  itself a large multi-page klal) ends with `...לא ילפינן מינייהו כללא`,
+  which is found in `docai_word_boxes/page_76.json` at tokens 522-523,
+  **immediately** followed by klal 218's marker (`ריח`) at token 525 -
+  two tokens of margin, not two whole klalim's worth of content. This
+  covers *both* 216 and 217 with one check since they're adjacent to
+  each other in the gap.
+
+**Not yet individually re-verified to the same standard**: klal 194 and
+197. A first attempt to trace klal 193's real end (to bound the search
+for 194) didn't cleanly resolve - the phrase expected at its tail
+wasn't found at the position expected, suggesting klal 193 may itself
+be longer or shaped differently than assumed, and confirming this
+specific pair needs its own dedicated check rather than being assumed
+correct from the pattern alone. Flagging the honest state: 6 of 8 are
+either confirmed or strongly implied gaps; 2 of 8 remain genuinely open
+questions, not yet resolved either way.
+
+**What this means, if the pattern holds for all 8 (not yet certain)**:
+the original framing of this open item in `CLAUDE.md`
+("These need their actual content extracted/OCR'd from the scan") was
+based on an unverified assumption. The evidence gathered tonight points
+instead to these being genuine gaps in the author's/printer's klal
+numbering sequence - the same structural phenomenon as the klal 167 gap
+and the long-standing klal 85/86 merge question, not eight separate
+instances of lost transcription work. **This does not mean nothing needs
+doing** - a genuine numbering gap in a 667-klal reference work still
+needs a documented, deliberate editorial decision (e.g., "klal 180 does
+not exist in the source; the numbering has a gap here, consistent with
+Sefaria's citation convention for X" or similar), not silent deletion of
+the `klal_id` and not fabricated text. But it reframes the task from
+"go find the missing content" (which the evidence says isn't there) to
+"confirm the remaining 2, then make and document the numbering-gap
+decision for all of them together with klal 167 and klal 85/86" - one
+coherent structural question, not eight-plus-one separate open items.
+
+**Deliberately not acting further on this tonight** - this is exactly
+the kind of finding that needs the user's scoping input (per the klal
+85/86 precedent) before proceeding, not a unilateral decision to delete,
+merge, or relabel eight `klal_id`s in the corpus.
 
 Also updated `gematria_trace_part1.json`'s entries for klal 95-98 to
 record the now-confirmed marker positions (same `note`-field convention
