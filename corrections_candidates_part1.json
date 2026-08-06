@@ -3028,7 +3028,21 @@
       }
     },
     {
-      "klal_id": 166,
+      "klal_id": 167,
+      "page": 60,
+      "opcode": "replace",
+      "word_index_in_final_text": 0,
+      "original_word": "קסו",
+      "corrected_word": "קסז",
+      "bbox": {
+        "x1": 0.8647642731666565,
+        "y1": 0.5747682452201843,
+        "x2": 0.8926799297332764,
+        "y2": 0.5937122106552124
+      }
+    },
+    {
+      "klal_id": 167,
       "page": 60,
       "opcode": "insert",
       "word_index_in_final_text": 3,
@@ -3037,7 +3051,7 @@
       "bbox": null
     },
     {
-      "klal_id": 166,
+      "klal_id": 167,
       "page": 60,
       "opcode": "insert",
       "word_index_in_final_text": 211,
@@ -8625,7 +8639,7 @@
     }
   ],
   "meta": {
-    "total_candidates": 652,
+    "total_candidates": 653,
     "klalim_covered": 151,
     "skipped_no_docai_page_klalim": [],
     "untrusted_klalim_excluded": [

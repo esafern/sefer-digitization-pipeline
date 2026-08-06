@@ -1458,7 +1458,8 @@
     "stored_gematria": "קסה",
     "content_match_ratio": 0.125,
     "status": "marker_found_content_mismatch",
-    "marker_position": 334
+    "marker_position": 334,
+    "note": "2026-08-06: clean_text was truncated to its own real content (marker_position 334 unchanged) - it previously also held klal 166's real content, merged in undivided; the stale content_match_ratio/status above predate that split."
   },
   {
     "klal_id": 166,
@@ -1467,7 +1468,8 @@
     "stored_gematria": "קסו",
     "content_match_ratio": 0.75,
     "marker_position": 429,
-    "status": "ok"
+    "status": "ok",
+    "note": "2026-08-06: real content split out from klal 165's stored text (was merged in, undivided) into its own klal_id 166 record. marker_position 429 was already correct before this fix - only the stored content location was wrong."
   },
   {
     "klal_id": 167,
@@ -1475,7 +1477,9 @@
     "expected_gematria": "קסז",
     "stored_gematria": "קסז",
     "content_match_ratio": null,
-    "status": "marker_not_found_in_window"
+    "status": "marker_found_content_mismatch",
+    "marker_position": 503,
+    "note": "2026-08-06: 'marker_not_found_in_window' was wrong - the marker exists at page 60 token 503, docai read it as 'קסו' (colliding with klal 166's own marker text) instead of 'קסז' - confirmed by direct crop comparison of the two 'קסו'-labeled tokens' last letter, visibly different shapes (vav vs zayin). Content previously classified as a numbering gap; real content extends from here across page 61 and into page 62 up to klal 168's marker (token 140)."
   },
   {
     "klal_id": 168,

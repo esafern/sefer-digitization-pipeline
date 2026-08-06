@@ -20,7 +20,9 @@ klal-by-klal review misses) into standing, always-run checks:
   corpus): klal_id sequence is exactly 1–667 with no gaps/dupes;
   `klalim_demo_dataset.json` exactly equals part1+part2+part3 concatenated
   (the Lesson 13 drift check); the `(no text available)` placeholder set is
-  exactly {167, 187, 190, 197, 216, 217}; zero page-header-contamination
+  exactly {187, 190, 197, 216, 217} (originally included 167 too; see the
+  "Klal 167 resolved" section below - it was retracted the same night as a
+  marker-misread, not a real gap); zero page-header-contamination
   matches (all spelling variants); zero debug-print leaks (the klal
   152/154 `"283\n"` bug class); title/clean_text never empty.
 - **Baseline (no-NEW-violations)**, because these checks have real,
@@ -57,6 +59,118 @@ claim to, not just pass vacuously on already-clean data.
 
 `pytest` added to the venv and pinned in new `requirements-dev.txt` (no
 requirements file of any kind existed before this).
+
+## Klal 167 resolved — it was never a numbering gap, 2026-08-06
+
+**Retraction of the 2026-08-06 "confirmed genuine numbering gap" verdict
+for klal 167** (see the RETRACTED-AND-CORRECTED and "Update: klal 167's
+marker genuinely does not exist" sections above). User pushed back: קסו
+(166) and קסז (167) are easy to mix up in this print. Direct investigation
+confirmed this exactly - it's the same marker-misread failure mode already
+seen for klal 107 (ז read as ו), not a print gap, compounded by a second,
+independent bug: klal 166's real content had been merged into klal 165's
+stored text.
+
+**True structure, confirmed by direct crop and full-token re-derivation**:
+page 60 has two separate tokens both OCR'd as `קסו` at token 429 and token
+503. Token 429 is genuinely `קסו` (klal 166's real marker - confirmed by
+letterform, clean vertical vav). Token 503 is `קסז` (klal 167's real
+marker) misread as `קסו` - confirmed by directly cropping and comparing
+the last letter of both tokens at matching zoom: token 429's is an
+unambiguous vav (clean vertical stroke, small rightward flag at top);
+token 503's is visibly different (more bulk at the top, a small foot at
+bottom-left) - consistent with zayin, not vav. Because docai's raw text
+for token 503 matched the already-existing marker text (`קסו`) rather than
+introducing a new distinct string, no prior "find the marker" text search
+(including the one that produced the "genuine gap" verdict) ever
+considered it as a *candidate* for klal 167 at all - it read as a
+duplicate of klal 166's marker, not a new one.
+
+Separately: klal 165's stored `clean_text` (page 60) contained klal 166's
+real content merged in, undivided, after its own real ending - the same
+"content hiding inside a trusted neighbor" pattern as klal 180/182/194
+(Lesson 16), just not caught by that pass because 165/166 were never
+flagged as candidates for it (both looked like ordinary, already-fixed
+klalim from the 92-165 shift-zone work).
+
+**Fixed, all three re-derived directly from `docai_word_boxes` tokens
+(not hand-retyped) and cross-checked against the pre-existing stored text
+where it already existed**:
+- **Klal 165**: truncated to its own real content only (tokens 334-428,
+  page 60) - exact match against the pre-existing stored text up to the
+  split point, confirming the split boundary is clean.
+- **Klal 166** (new record, was previously absent from the corpus
+  entirely under its own klal_id): real content is tokens 429-502, page
+  60 - the content that had been merged into klal 165. Title judged as
+  `הלכה כמר בר רב אשי בכוליה תלמודא בר ממיפך שבועה ואודיתא` (the opening
+  clause up to the natural `•` boundary, same convention as klal 165's own
+  title).
+- **Klal 167**: no longer a placeholder. Content = the pre-existing
+  klal-166 slot's already-cleaned text (marker glyph corrected קסו->קסז)
+  + the previously-uncaptured continuation across page 61 (977 tokens)
+  and into page 62 up to klal 168's already-confirmed real marker (token
+  140) - the span the earlier session found had "no marker anywhere" and
+  wrongly concluded was empty. This is a third, independent bug on top of
+  the marker misread: **that whole ~1450-token span was never extracted
+  into the corpus under any klal_id before tonight** - not mislabeled
+  elsewhere, genuinely absent, the same "content never captured at all"
+  pattern as klal 92 and klal 128's missing tail.
+- Title kept as `הלכה כבתראי` (already-judged, still accurate for the
+  extended content - the whole span is one continuous discussion of the
+  same maxim). `page` corrected 26 (stale) -> 60. Klal 168's stale `page`
+  field (26) also corrected -> 62 (its own real marker was already
+  correctly positioned; only this field was wrong).
+
+**Verification standard, disclosed explicitly per this project's own
+convention for large cross-page spans (klal 128/143/144 precedent)**:
+klal 165/166's split and the two crop-checked word fixes below were
+individually scan-confirmed; the bulk of the ~1450-word page 61/62
+extension was verified by full-text coherence read-through (real
+tractate/authority names throughout - Rif, Rambam, Rosh, Tosafot, Ran,
+Rashba, Maggid Mishneh - ending in a natural closing formula), **not**
+word-by-word crop-checked, matching the disclosed lighter standard used
+for the other large cross-page klalim this session. Two things found and
+crop-confirmed during the read-through:
+- `טסי` (docai) -> `טפי` (real print) at the very first word of the page
+  61 continuation - confirmed by direct crop; matches the already-noted
+  catchword preview at the bottom of page 60, and grammatically necessary
+  (`טפי` = "more/further", `טסי` isn't a word).
+- `תלמור` -> `תלמוד` - confirmed by direct crop, the same well-established
+  ד/ר confusion family documented throughout this corpus; `תלמוד` also
+  appears correctly spelled elsewhere in this same klal.
+- **Two duplicate-token artifacts caught by the new pytest suite**, not by
+  the read-through: `הרי"ף הרי"ף` and `דף דף`, each a docai near-identical-
+  bbox double-detection of a single printed word (same bug class as klal
+  82/83's `בשל בשל`) - confirmed by direct crop that only one instance of
+  each is actually printed, then the spurious duplicate token dropped.
+  This is the regression suite added earlier tonight working exactly as
+  intended: `test_no_new_duplicate_consecutive_words` failed on the first
+  `rebuild_all.sh` run after this fix, which is what surfaced both.
+- **Left as raw, unverified docai text, disclosed rather than guessed**:
+  `מקטי` (×2, context suggests `מקמי` = "prior to") and `טי` in
+  `בפ' טי שהוציאוהו` (context suggests `מי`, the perek name). A direct
+  crop of the first `מקטי` instance was inconclusive - two close-reading
+  attempts on the same token produced different letter identifications
+  (ambiguous ט/מ shapes in this specific print), which per this project's
+  own standing lesson means further eyeballing is unreliable and the
+  right move is to leave it unresolved rather than force a guess. Also
+  left as-is: two stray `-` hyphen artifacts and `רעדיות` (likely
+  `דעדיות`/Mishnah Eduyot) - plausible but not verified.
+
+`gematria_trace_part1.json` updated for klal 165/166/167 with `note`
+fields explaining the correction (same convention as the klal 3/95
+fixes), including klal 167's marker_position (503) which was previously
+`marker_not_found_in_window`.
+
+Full `rebuild_all.sh --skip-vision` re-run clean after the fix (including
+the fixed duplicate-word baseline entry, relabeled 166->167 for the
+already-documented genuine `קי"ל קי"ל` repetition). `validate_klal_span_
+coverage.py` and `validate_title_alphabetical_order.py` both unaffected
+(same flagged sets as before - klal 166/167 don't appear in either).
+
+CONFIRMED_NUMBERING_GAPS in `tests/test_corpus_invariants.py` updated to
+drop 167 - the remaining 5 (187, 190, 197, 216, 217) are unaffected by
+this finding and still stand as directly-confirmed genuine gaps.
 
 ## Open items
 

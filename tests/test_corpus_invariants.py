@@ -46,12 +46,17 @@ PART_FILES = ["part1.json", "part2.json", "part3.json"]
 
 NO_TEXT_TITLE = "(no text available)"
 
-# The 6 klal_ids confirmed by direct visual page inspection to be genuine
+# The 5 klal_ids confirmed by direct visual page inspection to be genuine
 # numbering gaps in the original print (not corpus bugs) - user decision
 # 2026-08-06: keep them in the klal_id sequence with this exact placeholder
 # rather than omit them. See PROJECT-STATUS.md "CLOSED 2026-08-06: Klal
 # 167, 187, 190, 197, 216, 217 are confirmed genuine numbering gaps".
-CONFIRMED_NUMBERING_GAPS = {167, 187, 190, 197, 216, 217}
+# klal 167 was REMOVED from this set 2026-08-06 (later the same day) - it
+# was never a gap, it was a marker misread (קסז OCR'd as קסו, colliding
+# with klal 166's own marker) compounded by klal 166's real content having
+# been separately merged into klal 165's stored text. See "Klal 167
+# resolved" section.
+CONFIRMED_NUMBERING_GAPS = {187, 190, 197, 216, 217}
 
 # Page-header/watermark running text that leaks mid-sentence into
 # clean_text when a klal's span crosses a page boundary. Confirmed fixed
@@ -97,7 +102,7 @@ DUPLICATE_WORD_BASELINE = {
     (29, "לא"), (29, "שור"), (29, "צדה"), (41, "אלא"), (54, "הן"),
     (68, "הניזקין"), (86, "הוא"), (94, "על"), (103, "עד"), (112, "פסקא"),
     (135, "ואידך"), (143, "צדק"), (144, "עשה"), (158, "ולית"),
-    (166, "קיל"), (176, "בר"), (215, "המלך"), (230, "לא"), (235, "הוה"),
+    (167, "קיל"), (176, "בר"), (215, "המלך"), (230, "לא"), (235, "הוה"),
     (245, "בר"), (249, "מכוה"), (256, "הן"), (256, "קלי"), (264, "דמי"),
     (279, "לא"), (293, "דלא"), (299, "כן"), (349, "שוות"), (371, "עשה"),
     (410, "ראשון"), (410, "הוא"), (445, "מנלן"), (445, "הוא"),
