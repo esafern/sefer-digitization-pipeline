@@ -1790,6 +1790,26 @@
       "flag": "unverified_insertion"
     }
   ],
+  "69": [
+    {
+      "word_index": 242,
+      "opcode": "delete",
+      "docai_reading": "4",
+      "final_text": null,
+      "page": 34,
+      "bbox": {
+        "x1": 0.13113735616207123,
+        "y1": 0.7102615833282471,
+        "x2": 0.1491609662771225,
+        "y2": 0.7287726402282715
+      },
+      "vision_selected": "UNCERTAIN",
+      "vision_transcription": "מיניה\nגון ז\nעליו",
+      "confidence": 0.95,
+      "reasoning": "The raster crop contains multiple lines of Hebrew text (including 'מיניה', 'גון ז', and 'עליו'). Neither candidate Option A ('4', a numeric OCR artifact) nor Option B ('None') accurately transcribes the visible Hebrew characters.",
+      "flag": "ambiguous"
+    }
+  ],
   "71": [
     {
       "word_index": 0,
@@ -4214,6 +4234,34 @@
       "flag": "current_text_confirmed"
     }
   ],
+  "166": [
+    {
+      "word_index": 3,
+      "opcode": "insert",
+      "docai_reading": null,
+      "final_text": "[.]",
+      "page": 60,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "no bbox (insertion) - not vision-cropped",
+      "flag": "unverified_insertion"
+    },
+    {
+      "word_index": 211,
+      "opcode": "insert",
+      "docai_reading": null,
+      "final_text": "שכתב",
+      "page": 60,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "no bbox (insertion) - not vision-cropped",
+      "flag": "unverified_insertion"
+    }
+  ],
   "168": [
     {
       "word_index": 6,
@@ -5466,24 +5514,6 @@
       "confidence": 0.0,
       "reasoning": "The raster crop contains multiple visible letters across three lines from the text (including parts of 'ור' זירא' and 'מזה הטעם'), which does not match Option A (a single quote/apostrophe) nor Option B ('None'). Thus, neither candidate correctly represents the image.",
       "flag": "ambiguous"
-    },
-    {
-      "word_index": 193,
-      "opcode": "replace",
-      "docai_reading": "אמוראים",
-      "final_text": "אמוראי7ם",
-      "page": 62,
-      "bbox": {
-        "x1": 0.3636927008628845,
-        "y1": 0.8768671751022339,
-        "x2": 0.4312267601490021,
-        "y2": 0.8926120400428772
-      },
-      "vision_selected": "A",
-      "vision_transcription": "אמוראים",
-      "confidence": 1.0,
-      "reasoning": "The image clearly shows the word 'אמוראים' (Amoraim). Option B contains an erroneous digit '7' inserted into the text.",
-      "flag": "current_text_may_be_wrong"
     }
   ],
   "170": [
@@ -8170,186 +8200,6 @@
       "vision_transcription": "על\nיכא ד\nמ' או\nנה כ",
       "confidence": 0.0,
       "reasoning": "The image crop contains multiple lines of Hebrew text fragment (including 'על', 'יכא ד', 'מ' או', 'נה כ'). Option A is merely a single quotation mark/geresh, and Option B is 'None'. Neither option accurately reflects the actual text visible in the image.",
-      "flag": "ambiguous"
-    },
-    {
-      "word_index": 132,
-      "opcode": "delete",
-      "docai_reading": ".",
-      "final_text": null,
-      "page": 67,
-      "bbox": {
-        "x1": 0.5879086852073669,
-        "y1": 0.6050283908843994,
-        "x2": 0.5928439497947693,
-        "y2": 0.6244931221008301
-      },
-      "vision_selected": "A",
-      "vision_transcription": ".",
-      "confidence": 0.95,
-      "reasoning": "The image crop clearly displays a central punctuation mark (dot/period '.') located between the surrounding text fragments ('ני' on the right and 'ד' on the left), matching the bracketed insertion point [.] in the contextual sentence.",
-      "flag": "possible_omission"
-    },
-    {
-      "word_index": 133,
-      "opcode": "delete",
-      "docai_reading": "'",
-      "final_text": null,
-      "page": 67,
-      "bbox": {
-        "x1": 0.5188155174255371,
-        "y1": 0.6050283908843994,
-        "x2": 0.5256015062332153,
-        "y2": 0.6244931221008301
-      },
-      "vision_selected": "UNCERTAIN",
-      "vision_transcription": "דף\nמרי\nמטין",
-      "confidence": 0.0,
-      "reasoning": "The image crop contains a vertical slice of multiple lines of Hebrew text including fragments such as 'דף', 'מרי', and 'מטין'. Neither Option A (a single apostrophe) nor Option B ('None') matches the actual text visible in the crop.",
-      "flag": "ambiguous"
-    },
-    {
-      "word_index": 134,
-      "opcode": "delete",
-      "docai_reading": "'",
-      "final_text": null,
-      "page": 67,
-      "bbox": {
-        "x1": 0.4787168502807617,
-        "y1": 0.6050283908843994,
-        "x2": 0.4922887086868286,
-        "y2": 0.6244931221008301
-      },
-      "vision_selected": "UNCERTAIN",
-      "vision_transcription": "מ\"ב ע\"\nכמו' מי\nאחמרו",
-      "confidence": 0.95,
-      "reasoning": "The raster crop contains multiple lines of Rabbinic Hebrew text including 'מ\"ב ע\"', 'כמו' מי', and 'אחמרו'. Neither Option A (a single punctuation mark \"'\") nor Option B (\"None\") represents the transcription visible in the image.",
-      "flag": "ambiguous"
-    },
-    {
-      "word_index": 138,
-      "opcode": "delete",
-      "docai_reading": "'",
-      "final_text": null,
-      "page": 67,
-      "bbox": {
-        "x1": 0.3300431966781616,
-        "y1": 0.6050283908843994,
-        "x2": 0.3362122178077698,
-        "y2": 0.6244931221008301
-      },
-      "vision_selected": "UNCERTAIN",
-      "vision_transcription": "ואחרי\nהוא ד\nו ב' ר\nחנינא",
-      "confidence": 0.95,
-      "reasoning": "The image crop contains multiple visible lines of Hebrew Rabbinic text, including 'ואחרי', 'הוא ד', 'ו ב' ר', and 'חנינא'. Neither Option A (a single quote mark) nor Option B ('None') accurately represents the text in the crop.",
-      "flag": "ambiguous"
-    },
-    {
-      "word_index": 139,
-      "opcode": "delete",
-      "docai_reading": "'",
-      "final_text": null,
-      "page": 67,
-      "bbox": {
-        "x1": 0.30475014448165894,
-        "y1": 0.6050283908843994,
-        "x2": 0.3096853792667389,
-        "y2": 0.6244931221008301
-      },
-      "vision_selected": "B",
-      "vision_transcription": "None",
-      "confidence": 0.9,
-      "reasoning": "The provided image crop is a narrow vertical slice intersecting multiple lines of Rabbinic Hebrew text (showing fragments such as 'השיו', 'ר' א', 'נא א') rather than isolating a single distinct word or character token. Therefore, Option B ('None') correctly reflects that this unaligned fragment does not correspond to a standalone target text unit.",
-      "flag": "ambiguous"
-    },
-    {
-      "word_index": 144,
-      "opcode": "delete",
-      "docai_reading": "'",
-      "final_text": null,
-      "page": 67,
-      "bbox": {
-        "x1": 0.7063540816307068,
-        "y1": 0.6253041625022888,
-        "x2": 0.7112893462181091,
-        "y2": 0.6366585493087769
-      },
-      "vision_selected": "UNCERTAIN",
-      "vision_transcription": "כפלים\nור' חי\nחכמה",
-      "confidence": 0.0,
-      "reasoning": "The raster crop contains multiple lines of Rabbinic text (including words like 'כפלים', 'ור' חי', 'חכמה'). Neither Option A (\"'\") nor Option B (\"None\") accurately transcribes the visible text, so UNCERTAIN is returned as per the instructions.",
-      "flag": "ambiguous"
-    },
-    {
-      "word_index": 151,
-      "opcode": "delete",
-      "docai_reading": "'",
-      "final_text": null,
-      "page": 67,
-      "bbox": {
-        "x1": 0.42504626512527466,
-        "y1": 0.6253041625022888,
-        "x2": 0.4305984079837799,
-        "y2": 0.6366585493087769
-      },
-      "vision_selected": "UNCERTAIN",
-      "vision_transcription": "מיהו ציא\nור' יו\nמי דא",
-      "confidence": 0.0,
-      "reasoning": "The image clearly contains three lines of Hebrew text (top line: 'מיהו ציא...', middle line: 'ור' יו...', bottom line: 'מי דא...'). Neither Candidate A (\"'\") nor Candidate B (\"None\") correctly transcribes the visible manuscript text.",
-      "flag": "ambiguous"
-    },
-    {
-      "word_index": 160,
-      "opcode": "delete",
-      "docai_reading": "'",
-      "final_text": null,
-      "page": 67,
-      "bbox": {
-        "x1": 0.7896360158920288,
-        "y1": 0.6366585493087769,
-        "x2": 0.7933374643325806,
-        "y2": 0.6536901593208313
-      },
-      "vision_selected": "UNCERTAIN",
-      "vision_transcription": "וז\"ל\nבסמ' תו\nנחכמה",
-      "confidence": 0.0,
-      "reasoning": "The raster crop contains multiple legible Hebrew letters across several lines (including 'וז\"ל', 'בסמ' תו', and 'נחכמה'). Neither Option A (\"'\") nor Option B (\"None\") represents a correct or complete transcription of the visible text in the image.",
-      "flag": "ambiguous"
-    },
-    {
-      "word_index": 178,
-      "opcode": "replace",
-      "docai_reading": "וכמנין",
-      "final_text": "ובמנין",
-      "page": 67,
-      "bbox": {
-        "x1": 0.7156076431274414,
-        "y1": 0.6520681381225586,
-        "x2": 0.7606415748596191,
-        "y2": 0.668694257736206
-      },
-      "vision_selected": "A",
-      "vision_transcription": "וכמנין",
-      "confidence": 0.95,
-      "reasoning": "The visible text in the middle line shows 'וכמנין'. The second letter after the initial 'ו' (vav) has the rounded top-right and bottom-right contours characteristic of a 'כ' (kaf) rather than a 'ב' (bet) with its right-angle base protrusion (which can be seen in 'מרב' on the line below).",
-      "flag": "current_text_may_be_wrong"
-    },
-    {
-      "word_index": 182,
-      "opcode": "delete",
-      "docai_reading": "'",
-      "final_text": null,
-      "page": 67,
-      "bbox": {
-        "x1": 0.5903763175010681,
-        "y1": 0.6520681381225586,
-        "x2": 0.5934607982635498,
-        "y2": 0.668694257736206
-      },
-      "vision_selected": "UNCERTAIN",
-      "vision_transcription": "ג ונרא\n...וסמ' פ'\n...הא דר",
-      "confidence": 0.0,
-      "reasoning": "The image crop contains multiple visible Hebrew words/lines (including 'ג ונרא', 'וסמ' פ'', 'הא דר') from the text context ('הכנ\"הג ונראה...', 'אות פ''). Neither Option A (which only captures a single quote/geresh) nor Option B ('None') accurately transcribes the visible text array.",
       "flag": "ambiguous"
     }
   ],

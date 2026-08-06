@@ -1252,6 +1252,20 @@
       "bbox": null
     },
     {
+      "klal_id": 69,
+      "page": 34,
+      "opcode": "delete",
+      "word_index_in_final_text": 242,
+      "original_word": "4",
+      "corrected_word": null,
+      "bbox": {
+        "x1": 0.13113735616207123,
+        "y1": 0.7102615833282471,
+        "x2": 0.1491609662771225,
+        "y2": 0.7287726402282715
+      }
+    },
+    {
       "klal_id": 71,
       "page": 35,
       "opcode": "insert",
@@ -3014,6 +3028,24 @@
       }
     },
     {
+      "klal_id": 166,
+      "page": 60,
+      "opcode": "insert",
+      "word_index_in_final_text": 3,
+      "original_word": null,
+      "corrected_word": "[.]",
+      "bbox": null
+    },
+    {
+      "klal_id": 166,
+      "page": 60,
+      "opcode": "insert",
+      "word_index_in_final_text": 211,
+      "original_word": null,
+      "corrected_word": "שכתב",
+      "bbox": null
+    },
+    {
       "klal_id": 168,
       "page": 62,
       "opcode": "insert",
@@ -3980,20 +4012,6 @@
         "x1": 0.5049566030502319,
         "y1": 0.8768671751022339,
         "x2": 0.5111523866653442,
-        "y2": 0.8926120400428772
-      }
-    },
-    {
-      "klal_id": 169,
-      "page": 62,
-      "opcode": "replace",
-      "word_index_in_final_text": 193,
-      "original_word": "אמוראים",
-      "corrected_word": "אמוראי7ם",
-      "bbox": {
-        "x1": 0.3636927008628845,
-        "y1": 0.8768671751022339,
-        "x2": 0.4312267601490021,
         "y2": 0.8926120400428772
       }
     },
@@ -6066,146 +6084,6 @@
         "y1": 0.5916463732719421,
         "x2": 0.7421345114707947,
         "y2": 0.6086780428886414
-      }
-    },
-    {
-      "klal_id": 181,
-      "page": 67,
-      "opcode": "delete",
-      "word_index_in_final_text": 132,
-      "original_word": ".",
-      "corrected_word": null,
-      "bbox": {
-        "x1": 0.5879086852073669,
-        "y1": 0.6050283908843994,
-        "x2": 0.5928439497947693,
-        "y2": 0.6244931221008301
-      }
-    },
-    {
-      "klal_id": 181,
-      "page": 67,
-      "opcode": "delete",
-      "word_index_in_final_text": 133,
-      "original_word": "'",
-      "corrected_word": null,
-      "bbox": {
-        "x1": 0.5188155174255371,
-        "y1": 0.6050283908843994,
-        "x2": 0.5256015062332153,
-        "y2": 0.6244931221008301
-      }
-    },
-    {
-      "klal_id": 181,
-      "page": 67,
-      "opcode": "delete",
-      "word_index_in_final_text": 134,
-      "original_word": "'",
-      "corrected_word": null,
-      "bbox": {
-        "x1": 0.4787168502807617,
-        "y1": 0.6050283908843994,
-        "x2": 0.4922887086868286,
-        "y2": 0.6244931221008301
-      }
-    },
-    {
-      "klal_id": 181,
-      "page": 67,
-      "opcode": "delete",
-      "word_index_in_final_text": 138,
-      "original_word": "'",
-      "corrected_word": null,
-      "bbox": {
-        "x1": 0.3300431966781616,
-        "y1": 0.6050283908843994,
-        "x2": 0.3362122178077698,
-        "y2": 0.6244931221008301
-      }
-    },
-    {
-      "klal_id": 181,
-      "page": 67,
-      "opcode": "delete",
-      "word_index_in_final_text": 139,
-      "original_word": "'",
-      "corrected_word": null,
-      "bbox": {
-        "x1": 0.30475014448165894,
-        "y1": 0.6050283908843994,
-        "x2": 0.3096853792667389,
-        "y2": 0.6244931221008301
-      }
-    },
-    {
-      "klal_id": 181,
-      "page": 67,
-      "opcode": "delete",
-      "word_index_in_final_text": 144,
-      "original_word": "'",
-      "corrected_word": null,
-      "bbox": {
-        "x1": 0.7063540816307068,
-        "y1": 0.6253041625022888,
-        "x2": 0.7112893462181091,
-        "y2": 0.6366585493087769
-      }
-    },
-    {
-      "klal_id": 181,
-      "page": 67,
-      "opcode": "delete",
-      "word_index_in_final_text": 151,
-      "original_word": "'",
-      "corrected_word": null,
-      "bbox": {
-        "x1": 0.42504626512527466,
-        "y1": 0.6253041625022888,
-        "x2": 0.4305984079837799,
-        "y2": 0.6366585493087769
-      }
-    },
-    {
-      "klal_id": 181,
-      "page": 67,
-      "opcode": "delete",
-      "word_index_in_final_text": 160,
-      "original_word": "'",
-      "corrected_word": null,
-      "bbox": {
-        "x1": 0.7896360158920288,
-        "y1": 0.6366585493087769,
-        "x2": 0.7933374643325806,
-        "y2": 0.6536901593208313
-      }
-    },
-    {
-      "klal_id": 181,
-      "page": 67,
-      "opcode": "replace",
-      "word_index_in_final_text": 178,
-      "original_word": "וכמנין",
-      "corrected_word": "ובמנין",
-      "bbox": {
-        "x1": 0.7156076431274414,
-        "y1": 0.6520681381225586,
-        "x2": 0.7606415748596191,
-        "y2": 0.668694257736206
-      }
-    },
-    {
-      "klal_id": 181,
-      "page": 67,
-      "opcode": "delete",
-      "word_index_in_final_text": 182,
-      "original_word": "'",
-      "corrected_word": null,
-      "bbox": {
-        "x1": 0.5903763175010681,
-        "y1": 0.6520681381225586,
-        "x2": 0.5934607982635498,
-        "y2": 0.668694257736206
       }
     },
     {
@@ -8747,8 +8625,8 @@
     }
   ],
   "meta": {
-    "total_candidates": 660,
-    "klalim_covered": 149,
+    "total_candidates": 652,
+    "klalim_covered": 151,
     "skipped_no_docai_page_klalim": [],
     "untrusted_klalim_excluded": [
       34,
