@@ -1730,6 +1730,109 @@ a real word). No longer an open item.
 Both rebuilt via the full derived-artifact pipeline; `validate_klal_span_coverage.py`
 re-run clean, no new flags.
 
+## Corpus-wide anomaly review, 2026-08-06 (requested): what was found, and an honest evaluation of the chunking/validation process gaps
+
+Requested a full review of the text from the beginning for anomalies,
+plus an evaluation of gaps in the chunking and validation processes.
+Findings below; process evaluation at the end of this section.
+
+**Findings, roughly in order of severity**:
+
+1. **Page-header contamination is systemic in Parts 2-3** (74 klalim,
+   17%) - see the dated section immediately below this one for the full
+   writeup. Fixed the unambiguous part (the header text itself, plus
+   exact word-duplicates at the seam); left short non-duplicate
+   fragments in place, undecided, because Parts 2-3 have no scan to
+   verify them against.
+2. **Missed spelling variants of the same header bug**: the initial fix
+   only matched the literal spelling `מלאכי כללי`. Broader regex sweeps
+   (`מ[לר]אכי כ[לר][לר]י`) found the identical contamination under two
+   more OCR-variant spellings (`מראכי`, `כרלי`, `כררי`) in **23 more
+   klalim across all three parts** - including **klal 198 in Part 1**,
+   which had been reported clean. Fixed all 23 the same way.
+3. **Self-inflicted bug**: klal 152 and 154 (fixed earlier tonight) had
+   a literal `"283\n"` / `"797\n"` prefix - a debug `print(len(...))`
+   line accidentally captured into the stored text when I built the
+   string. Checked every other large klal fixed the same way tonight;
+   isolated to these two. Fixed.
+4. **A genuine duplication error from tonight's own klal 128 fix**:
+   `לאוקומי לאוקומי בחד תנא` had the word twice. My own earlier
+   height-based catchword check (page 47/48 boundary) said the trailing
+   word was normal body text, not a catchword - a direct render of the
+   actual page proved that check wrong: the word sits alone on its own
+   short centered line, the standard catchword position. Fixed by
+   removing the duplicate. **This means the height-only catchword
+   heuristic used repeatedly tonight is not fully reliable on its own**
+   - see process evaluation below.
+5. **Two isolated stray-digit artifacts** in klal 69 (`כגון 4 אהים`) and
+   klal 169 (`אמוראי7ם`) - removed as unambiguous OCR noise (Part 2's
+   equivalent artifacts, e.g. klal 234's `תלת *9 לא`, klal 458's `דרב
+   *20`, etc., were left untouched - same fidelity-first reasoning as
+   above, no scan to check them against).
+6. **A corpus-wide duplicate-consecutive-word sweep mostly returned
+   false positives, and that itself is a finding**: this book's subject
+   matter includes Torah-verse word repetition as a hermeneutic
+   principle - e.g. klal 29 literally discusses `שור שור שור שבעה
+   פעמים` (the word "shor" appearing seven times in one verse, each
+   repetition deriving a distinct law), klal 619's `פלוני ופלוני
+   ופלוני` (a real placeholder-name formula), klal 158's `ולית ולית`
+   and klal 166's `קי"ל קי"ל` (confirmed via docai y-coordinates to sit
+   on the *same printed line*, i.e. genuinely printed twice, not a
+   page-break artifact). Only klal 128 (above) turned out to be a real
+   error among the ones checked. **Not exhaustively checked for Parts
+   2-3** (no docai y-coordinates to distinguish "same line, genuine"
+   from "different page, suspect" there) - flagging the residual list
+   from that sweep as unresolved for Parts 2-3, not silently cleared.
+
+**Process evaluation - where the chunking and validation approach has
+real, now-demonstrated gaps**:
+
+- **The "trusted" alignment flag validates boundaries, not interiors**
+  (Lesson 16, added earlier tonight after the placeholder-klalim
+  mistake). Nothing in the pipeline ever reads a "trusted" klal's full
+  text looking for a second marker hiding inside it - `build_corrections_dataset.py`
+  and `validate_klal_span_coverage.py` both operate on marker-to-marker
+  spans and stop as soon as the span checks out.
+- **No automated check exists for page-header/watermark contamination
+  at all.** Every instance found tonight (in both Part 1 and Parts 2-3)
+  was found by a manual `grep`-style text search for the literal header
+  string, run because a person asked for it - not by any part of the
+  standing pipeline. A cheap, permanent version of this check (search
+  `clean_text` for the running-header pattern, corpus-wide, after every
+  edit) does not exist and should.
+- **The height-based catchword heuristic (`token height < ~80% of body
+  norm`) is a real signal but not a sufficient one on its own** - it
+  correctly caught many catchwords tonight, but missed at least one
+  (klal 128's page 47/48 boundary) where the printed catchword was
+  apparently closer to normal height than the heuristic's threshold
+  assumed. The direct-visual-page-render check (Lesson 14) caught what
+  the heuristic missed. Height should be a first-pass filter, not the
+  final word, on any page-crossing reconstruction.
+- **Parts 2-3 have zero automated verification of any kind** - not
+  vision-adjudicated, not docai-cross-checked, not even covered by the
+  cheap mechanical checks (`validate_klal_span_coverage.py`,
+  `validate_title_alphabetical_order.py`) that exist for Part 1, because
+  those checks depend on `docai_word_boxes` data that doesn't exist for
+  Parts 2-3. Given tonight found the *same* defect classes there as in
+  Part 1 (header contamination at a *higher* rate, stray digits, likely
+  more), the two-thirds of the corpus with the least scrutiny is also
+  the two-thirds most likely to still have undiscovered problems - not
+  a hypothetical, a pattern with direct evidence behind it now.
+- **A full-corpus text-pattern sweep (grep for a literal string, a
+  regex, a duplicate-word scan) is cheap and caught real defects that
+  months of klal-by-klal manual review had not** - consistent with
+  `CLAUDE.md` Lesson 8 ("a cheap, mechanical, no-LLM check can catch
+  what expensive checks miss entirely"), but this project has not been
+  running such sweeps as a matter of course. It should: after any batch
+  of edits, not just when asked.
+
+**Not done tonight, flagged rather than attempted**: a scan-based
+verification pass for the residual Parts 2-3 anomalies (short header-seam
+fragments, footnote-digit artifacts, unresolved duplicate-word hits)
+would require building the same scan/docai infrastructure Part 1 has -
+a large, separate undertaking already on record as an open item, not
+something to start unilaterally mid-review.
+
 ## MAJOR, NEW FINDING 2026-08-06: the same page-header contamination bug found in Part 1 tonight is systemic in Parts 2 and 3 - 74 klalim affected, never caught by anything
 
 Requested corpus-wide review prompted checking whether the page-header

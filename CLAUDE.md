@@ -294,3 +294,28 @@ fixed — the rule still applies to the next incident.
     it caught the three wrong conclusions and confirmed the six real
     gaps at equal confidence, where token-position inference gave a
     50/50 record.
+17. **A token-height threshold for detecting catchwords is a useful
+    first-pass filter, not a sufficient check on its own.** Confirmed
+    2026-08-06: the height-based catchword check (used repeatedly the
+    night of the klal 92-165 shift-zone work) correctly flagged most
+    catchwords, but wrongly cleared one as normal body text (klal 128's
+    page 47/48 boundary), producing a real duplicated word in the stored
+    text (`לאוקומי לאוקומי`) that stood until a corpus-wide
+    duplicate-word sweep caught it. A direct render of the actual page
+    showed the word sitting alone on its own short centered line - the
+    standard catchword position - contradicting the height measurement.
+    On any page-crossing reconstruction, treat a borderline or
+    unexpected height reading as a reason to render and look, not as
+    settled by the number alone.
+18. **A cheap, corpus-wide text-pattern sweep (grep a literal string, a
+    regex, a duplicate-word scan) can find in minutes what extensive
+    klal-by-klal manual review missed for an entire project's history.**
+    Confirmed 2026-08-06: a plain string search for the page-running-header
+    text found contamination in 74 Part 2-3 klalim (17%) and one missed
+    Part 1 instance, none of which any prior manual pass or automated
+    check had caught, because no such sweep had ever been run as a
+    matter of course - only individual klalim got checked, one at a
+    time, when something else drew attention to them. Run this class of
+    check routinely (after any batch of edits, not just when asked) -
+    per Lesson 8, it catches a different class of error than
+    vision/semantic review and costs almost nothing to run.
