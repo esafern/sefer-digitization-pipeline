@@ -993,6 +993,18 @@ whether the marker sits at a genuine paragraph/line start following
 sentence-final punctuation, not mid-citation) before a position can be
 trusted.
 
+**Klal 128's missing tail fixed** (2026-08-06, later the same overnight
+session): appended the ~838-word missing continuation
+(`docai_word_boxes/page_48.json` tokens 5-842) using the same disclosed
+lighter-verification standard as the other large cross-page klalim
+(full read-through for coherence). Found and fixed ~15 non-word docai
+misreads on that read-through (the established ד/ר/ה confusion family,
+three separately-mangled forms of `שמואל`, one duplicated `עם עם`). One
+word (`שר סוגיין`) deliberately left as the raw, uncorrected docai
+reading rather than replaced with an unconfirmed guess - flagged, not
+silently resolved either way. Klal 128 is now 1313 words total and no
+longer an open item.
+
 **Consequence: none of the 39 mechanically-reconstructed spans in
 `scratch/reconstructed_92_165.json` have been applied, and none should be
 without individual verification.** The mechanical pass was useful for
