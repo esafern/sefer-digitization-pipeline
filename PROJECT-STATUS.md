@@ -1605,6 +1605,70 @@ klal 128's separately-flagged missing ~838-word tail (see above) also
 remains open. Both are more valuable next steps than starting on
 unrelated corpus areas, per the standing "close open items first" rule.
 
+**Update: klal 167's marker genuinely does not exist anywhere in the
+print - this is a structural question, not a transcription fix, and
+needs a scoping decision like the klal 85/86 merge issue, not a
+mechanical continuation.**
+
+Investigated directly rather than guessed at. First, found and fixed a
+real bug in my own klal 166 fix: I had copied the old klal-167 slot's
+text verbatim, which had the word `שכתב` wrongly appended at the very
+end (together with the catchword `טפי`) instead of its correct
+mid-sentence position. Direct crop of `berlin_square.pdf` page 60's
+bottom line confirmed `שכתב` belongs between `...ליבמות דף קי"ט סע"א`
+and `וקי"ל כרב נחמן...` - docai had indexed it out of reading order, the
+same failure class as the klal 82/83 and klal 3 extraction-order
+inversions already documented. Also confirmed by crop that `טפי` alone
+(not `שכתב טפי`) is the real catchword, and that it correctly matches
+page 61's genuine first word. Fixed klal 166 accordingly.
+
+**With that fixed, went looking for klal 167's marker (קסז) properly -
+exhaustive text search (every token on page 61, all 977 of them) found
+no exact or plausible-misread candidate, unlike every other
+"marker not found" case tonight (95, 107, 116, 127 etc.), which all
+turned out to be real markers hiding behind an OCR misread. Escalated to
+directly rendering and reading page 61 top-to-bottom by eye (three
+crops, full page) rather than trusting text search alone, per the
+standing lesson about escalating to direct visual verification when a
+signal comes back clean/absent. Result: page 61 has no bold/enlarged
+klal-opening marker anywhere on it - every line is uniform body-text
+size from the header to the Google watermark. Page 62 also opens by
+continuing the same discussion (no marker) until klal 168's own
+already-confirmed marker (קסח, page 62 token 140, `status: ok` in the
+original trace - already correct before tonight, never part of this
+bug). ​So the entire span from klal 166's real marker (page 60 token
+503) to klal 168's real marker (page 62 token 140) - well over 1500
+tokens, spanning three pages - contains exactly two klal markers where
+the numbering implies there should be three.**
+
+This is not the same failure mode as everything else fixed tonight
+(a real marker hidden by an OCR misread, or content mislabeled under
+the wrong klal_id but present somewhere). There is no candidate
+anywhere for klal 167 to be findable by turning up. Two honest
+possibilities, neither confirmable without a scoping call:
+1. The print itself never marked a distinct klal 167 - i.e. the
+   original author/typesetter's numbering has a gap here (167 was
+   skipped, intentionally or by print error), the same shape as the
+   klal 85/86 merge issue already on record (there, `PROJECT-STATUS.md`
+   explicitly deferred it as "a klal-boundary problem... not a text
+   correction; fixing it means splitting the klal," not something to
+   patch by inserting text).
+2. There is unaccounted content somewhere in this ~1500-token span that
+   a first read missed - i.e. the discussion genuinely does contain two
+   klalim's worth of material but the second one's opening doesn't use
+   the normal bold-marker convention for some reason not yet identified.
+
+**Not resolved tonight - deliberately.** Continuing past klal 166 by
+inventing a boundary, or by assuming (2) without further evidence, would
+be exactly the kind of guess this project's standing lessons warn
+against. This needs the same explicit user scoping decision the klal
+85/86 case got, not a unilateral pick. `klal 167` (and by extension
+whatever `klal_id` numbering follows from here) is the new open item,
+separate from and likely related to the still-open klal 85/86 merge
+question - both may turn out to be the same underlying phenomenon
+(an author-numbering gap this book has more than once) worth
+investigating together rather than as two unrelated one-offs.
+
 Also updated `gematria_trace_part1.json`'s entries for klal 95-98 to
 record the now-confirmed marker positions (same `note`-field convention
 used for the klal 3 fix). **Self-caught bug while doing this**: setting
