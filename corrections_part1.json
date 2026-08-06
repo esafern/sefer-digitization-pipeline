@@ -3369,7 +3369,7 @@
       "flag": "current_text_confirmed"
     }
   ],
-  "113": [
+  "112": [
     {
       "word_index": 49,
       "opcode": "replace",
@@ -3389,43 +3389,7 @@
       "flag": "current_text_confirmed"
     }
   ],
-  "114": [
-    {
-      "word_index": 22,
-      "opcode": "replace",
-      "docai_reading": "ברותא",
-      "final_text": "בדותא",
-      "page": 45,
-      "bbox": {
-        "x1": 0.44375771284103394,
-        "y1": 0.664103627204895,
-        "x2": 0.4919653832912445,
-        "y2": 0.6806960701942444
-      },
-      "vision_selected": "A",
-      "vision_transcription": "ברותא",
-      "confidence": 0.98,
-      "reasoning": "The second letter of the word in the center line is paleographically a Resh (ר) with a smooth rounded shoulder, rather than a Dalet (ד) with a sharp corner or overhang. This directly matches Option A ('ברותא') and aligns perfectly with the textual discussion in context: 'ואינו כן אלא בדותא בריש' (it is not with a Dalet, but rather [written/read] with a Resh).",
-      "flag": "current_text_may_be_wrong"
-    },
-    {
-      "word_index": 120,
-      "opcode": "replace",
-      "docai_reading": "ברותא",
-      "final_text": "בדותא",
-      "page": 45,
-      "bbox": {
-        "x1": 0.8121137022972107,
-        "y1": 0.7539457678794861,
-        "x2": 0.8621755242347717,
-        "y2": 0.7709429264068604
-      },
-      "vision_selected": "B",
-      "vision_transcription": "בדותא",
-      "confidence": 0.95,
-      "reasoning": "The crop shows the word בדותא (line 2) spelled with a distinct square dalet (ד) possessing the characteristic right-angle roof corner, preceding 'בד...' (abbreviation for בדלית). Line 3 shows the variant ברותא with a rounded resh (ר) before 'וכ...' (וכרבי/וכולו). Option B correctly reflects the text's primary reading with dalet as discussed in the Rabbinic context ('בדותא היא בדלית').",
-      "flag": "current_text_confirmed"
-    },
+  "113": [
     {
       "word_index": 155,
       "opcode": "replace",
@@ -3445,20 +3409,7 @@
       "flag": "current_text_may_be_wrong"
     }
   ],
-  "115": [
-    {
-      "word_index": 0,
-      "opcode": "insert",
-      "docai_reading": null,
-      "final_text": "קטו",
-      "page": 45,
-      "bbox": null,
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "no bbox (insertion) - not vision-cropped",
-      "flag": "unverified_insertion"
-    },
+  "114": [
     {
       "word_index": 4,
       "opcode": "insert",
@@ -3473,20 +3424,22 @@
       "flag": "unverified_insertion"
     }
   ],
-  "117": [
+  "115": [
     {
       "word_index": 0,
       "opcode": "insert",
       "docai_reading": null,
-      "final_text": "קיז",
-      "page": 46,
+      "final_text": "קטו",
+      "page": 45,
       "bbox": null,
       "vision_selected": null,
       "vision_transcription": null,
       "confidence": null,
       "reasoning": "no bbox (insertion) - not vision-cropped",
       "flag": "unverified_insertion"
-    },
+    }
+  ],
+  "116": [
     {
       "word_index": 61,
       "opcode": "replace",
@@ -3508,33 +3461,25 @@
   ],
   "118": [
     {
-      "word_index": 0,
-      "opcode": "insert",
-      "docai_reading": null,
-      "final_text": "קיח",
+      "word_index": 1,
+      "opcode": "replace",
+      "docai_reading": "ב\"ך",
+      "final_text": "ב\"ד",
       "page": 46,
-      "bbox": null,
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "no bbox (insertion) - not vision-cropped",
-      "flag": "unverified_insertion"
+      "bbox": {
+        "x1": 0.8060907125473022,
+        "y1": 0.3653923571109772,
+        "x2": 0.8527035713195801,
+        "y2": 0.3847082555294037
+      },
+      "vision_selected": "B",
+      "vision_transcription": "ב\"ד",
+      "confidence": 0.98,
+      "reasoning": "The image shows the abbreviation ב\"ד (Beit Din). Visually, the letters are Bet (ב) on the right, Gershayim (\"), and Dalet (ד) on the left, which does not extend below the baseline like a final Kaf (ך) would. Contextually, this matches the famous Talmudic dictum 'ב\"ד מכין ועונשין שלא מן הדין' (Sanhedrin 46a).",
+      "flag": "current_text_confirmed"
     }
   ],
-  "120": [
-    {
-      "word_index": 0,
-      "opcode": "insert",
-      "docai_reading": null,
-      "final_text": "קכ",
-      "page": 46,
-      "bbox": null,
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "no bbox (insertion) - not vision-cropped",
-      "flag": "unverified_insertion"
-    },
+  "119": [
     {
       "word_index": 8,
       "opcode": "replace",
@@ -3556,34 +3501,6 @@
   ],
   "121": [
     {
-      "word_index": 0,
-      "opcode": "insert",
-      "docai_reading": null,
-      "final_text": "קכא",
-      "page": 46,
-      "bbox": null,
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "no bbox (insertion) - not vision-cropped",
-      "flag": "unverified_insertion"
-    }
-  ],
-  "122": [
-    {
-      "word_index": 0,
-      "opcode": "insert",
-      "docai_reading": null,
-      "final_text": "קכב",
-      "page": 46,
-      "bbox": null,
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "no bbox (insertion) - not vision-cropped",
-      "flag": "unverified_insertion"
-    },
-    {
       "word_index": 7,
       "opcode": "insert",
       "docai_reading": null,
@@ -3597,68 +3514,81 @@
       "flag": "unverified_insertion"
     },
     {
-      "word_index": 48,
-      "opcode": "replace",
-      "docai_reading": "כפריע",
-      "final_text": "בפריע",
+      "word_index": 62,
+      "opcode": "delete",
+      "docai_reading": "1",
+      "final_text": null,
       "page": 46,
       "bbox": {
-        "x1": 0.7184586524963379,
-        "y1": 0.6245473027229309,
-        "x2": 0.765692949295044,
-        "y2": 0.6426559090614319
+        "x1": 0.7159726619720459,
+        "y1": 0.6458752751350403,
+        "x2": 0.7197017073631287,
+        "y2": 0.6486921310424805
       },
-      "vision_selected": "A",
-      "vision_transcription": "כפריע",
+      "vision_selected": "UNCERTAIN",
+      "vision_transcription": "יע לא ,",
+      "confidence": 0.9,
+      "reasoning": "The image shows Hebrew characters: the tail end of '[פ]ריע' (or 'יע') followed by 'לא' on the top line, and a comma ',' underneath. Neither Candidate A ('1') nor Candidate B ('None') matches the visible text.",
+      "flag": "ambiguous"
+    }
+  ],
+  "122": [
+    {
+      "word_index": 36,
+      "opcode": "delete",
+      "docai_reading": "'",
+      "final_text": null,
+      "page": 46,
+      "bbox": {
+        "x1": 0.5313859581947327,
+        "y1": 0.7625754475593567,
+        "x2": 0.5363579988479614,
+        "y2": 0.7778671979904175
+      },
+      "vision_selected": "UNCERTAIN",
+      "vision_transcription": "לרשות\nלפ' ה\nנן נדח",
       "confidence": 0.95,
-      "reasoning": "Paleographic inspection of the first letter of the target word in line 3 shows a rounded right stroke and lack of the sharp bottom-right heel characteristic of a 'bet' (ב). Comparing it directly with the 'kaf' (כ) in 'שכן' on the line above confirms it is a 'kaf' (כ), making the reading 'כפריע'.",
-      "flag": "current_text_may_be_wrong"
-    }
-  ],
-  "123": [
-    {
-      "word_index": 0,
-      "opcode": "insert",
-      "docai_reading": null,
-      "final_text": "קכג",
-      "page": 46,
-      "bbox": null,
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "no bbox (insertion) - not vision-cropped",
-      "flag": "unverified_insertion"
-    }
-  ],
-  "124": [
-    {
-      "word_index": 0,
-      "opcode": "insert",
-      "docai_reading": null,
-      "final_text": "קכד",
-      "page": 46,
-      "bbox": null,
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "no bbox (insertion) - not vision-cropped",
-      "flag": "unverified_insertion"
-    }
-  ],
-  "126": [
-    {
-      "word_index": 0,
-      "opcode": "insert",
-      "docai_reading": null,
-      "final_text": "קכו",
-      "page": 47,
-      "bbox": null,
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "no bbox (insertion) - not vision-cropped",
-      "flag": "unverified_insertion"
+      "reasoning": "The crop contains multiple lines of legible text ('לרשות', 'לפ' ה', and '[דרב]נן נדח[ה]'). Neither Option A (\"'\") nor Option B (\"None\") accurately captures the visible raster text.",
+      "flag": "ambiguous"
     },
+    {
+      "word_index": 62,
+      "opcode": "delete",
+      "docai_reading": "'",
+      "final_text": null,
+      "page": 46,
+      "bbox": {
+        "x1": 0.15537601709365845,
+        "y1": 0.7782695889472961,
+        "x2": 0.1622125506401062,
+        "y2": 0.7939637899398804
+      },
+      "vision_selected": "UNCERTAIN",
+      "vision_transcription": "ים סי'\nדפ' מי\nז זרע",
+      "confidence": 0.0,
+      "reasoning": "The image crop contains multiple lines of Hebrew words ('ים סי'', 'דפ' מי', 'ז זרע'). Neither Option A (a single apostrophe) nor Option B ('None') accurately transcribes the visible text.",
+      "flag": "ambiguous"
+    },
+    {
+      "word_index": 121,
+      "opcode": "delete",
+      "docai_reading": "'",
+      "final_text": null,
+      "page": 46,
+      "bbox": {
+        "x1": 0.6227470636367798,
+        "y1": 0.8378269672393799,
+        "x2": 0.6314480900764465,
+        "y2": 0.8571428656578064
+      },
+      "vision_selected": "UNCERTAIN",
+      "vision_transcription": "דפ' מי",
+      "confidence": 0.9,
+      "reasoning": "The crop contains multiple lines of Hebrew text including 'דפ' מי' (abbreviation for 'דפרק מי [שמתו]'). Neither Option A (a single apostrophe) nor Option B ('None') accurately transcribes the text, so UNCERTAIN is selected.",
+      "flag": "ambiguous"
+    }
+  ],
+  "125": [
     {
       "word_index": 35,
       "opcode": "replace",
@@ -3699,87 +3629,248 @@
   "127": [
     {
       "word_index": 0,
-      "opcode": "insert",
-      "docai_reading": null,
+      "opcode": "replace",
+      "docai_reading": "קכן",
       "final_text": "קכז",
       "page": 47,
-      "bbox": null,
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "no bbox (insertion) - not vision-cropped",
-      "flag": "unverified_insertion"
+      "bbox": {
+        "x1": 0.830142080783844,
+        "y1": 0.38072094321250916,
+        "x2": 0.8591723442077637,
+        "y2": 0.3985419273376465
+      },
+      "vision_selected": "B",
+      "vision_transcription": "קכז",
+      "confidence": 0.98,
+      "reasoning": "The image clearly shows three letters: 'ק' (Kof), 'כ' (Kaf), and 'ז' (Zayin). The leftmost letter does not descend below the baseline (unlike the 'ק' which clearly descends), ruling out final Nun ('ן') and confirming it as 'ז'. Moreover, in the context of numbered methodology rules starting with 'ג' ('גזירה שוה'), rule number 127 is written as 'קכז'.",
+      "flag": "current_text_confirmed"
     }
   ],
   "128": [
     {
-      "word_index": 0,
-      "opcode": "insert",
-      "docai_reading": null,
-      "final_text": "קכח",
+      "word_index": 1,
+      "opcode": "replace",
+      "docai_reading": "דחקיכן",
+      "final_text": "דחקינן",
       "page": 47,
-      "bbox": null,
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "no bbox (insertion) - not vision-cropped",
-      "flag": "unverified_insertion"
-    }
-  ],
-  "131": [
+      "bbox": {
+        "x1": 0.7294626235961914,
+        "y1": 0.5026326179504395,
+        "x2": 0.8004941344261169,
+        "y2": 0.5232887864112854
+      },
+      "vision_selected": "B",
+      "vision_transcription": "דחקינן",
+      "confidence": 0.99,
+      "reasoning": "The visible printed text reads דחקינן. The fifth letter is a standard nun (נ) rather than a kaf (כ), followed by a final nun (ן). This is confirmed contextually by the standard Talmudic phrase 'דחקינן ומוקמינן'.",
+      "flag": "current_text_confirmed"
+    },
     {
-      "word_index": 0,
-      "opcode": "insert",
-      "docai_reading": null,
-      "final_text": "קלא",
-      "page": 48,
-      "bbox": null,
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "no bbox (insertion) - not vision-cropped",
-      "flag": "unverified_insertion"
+      "word_index": 7,
+      "opcode": "replace",
+      "docai_reading": "דחר",
+      "final_text": "דחד",
+      "page": 47,
+      "bbox": {
+        "x1": 0.3866584300994873,
+        "y1": 0.5026326179504395,
+        "x2": 0.415071040391922,
+        "y2": 0.5232887864112854
+      },
+      "vision_selected": "B",
+      "vision_transcription": "דחד",
+      "confidence": 0.98,
+      "reasoning": "The visible text in the center line reads 'דחד'. Paleographically, the final letter shows a right-angled corner with a slight rightward projection/overhang characteristic of a dalet ('ד') rather than a rounded resh ('ר'). Contextually, the phrase 'דחד תנא' ('of one Tanna') is standard Rabbinic Aramaic, making 'דחד' the correct reading.",
+      "flag": "current_text_confirmed"
+    },
+    {
+      "word_index": 31,
+      "opcode": "replace",
+      "docai_reading": "בחר",
+      "final_text": "בחד",
+      "page": 47,
+      "bbox": {
+        "x1": 0.8319950699806213,
+        "y1": 0.5313892364501953,
+        "x2": 0.8616430163383484,
+        "y2": 0.549615204334259
+      },
+      "vision_selected": "B",
+      "vision_transcription": "בחד",
+      "confidence": 0.98,
+      "reasoning": "The image shows the word 'בחד' followed by the beginning of 'ט' ('טעמא'). The third letter has a distinct right corner characteristic of a dalet ('ד'), matching the Talmudic phrase 'בחד טעמא' ('in one rationale') from the surrounding context, whereas Option A ('בחר') is a standard OCR misreading of dalet as resh.",
+      "flag": "current_text_confirmed"
+    },
+    {
+      "word_index": 62,
+      "opcode": "replace",
+      "docai_reading": "בחך",
+      "final_text": "בחד",
+      "page": 47,
+      "bbox": {
+        "x1": 0.31006795167922974,
+        "y1": 0.5475901365280151,
+        "x2": 0.34095120429992676,
+        "y2": 0.563791036605835
+      },
+      "vision_selected": "B",
+      "vision_transcription": "בחד",
+      "confidence": 0.99,
+      "reasoning": "The visible text clearly shows the word 'בחד' (followed by 'ט' from 'טעמא'). In the Talmudic/Rabbinic context ('בחד טעמא' - 'with one rationale'), the letter 'ד' (dalet) forms part of the word 'בחד' ('one'). Option A ('בחך') is a contextually invalid OCR misreading of the dalet as a kaf sofit.",
+      "flag": "current_text_confirmed"
+    },
+    {
+      "word_index": 74,
+      "opcode": "replace",
+      "docai_reading": "בחר",
+      "final_text": "בחד",
+      "page": 47,
+      "bbox": {
+        "x1": 0.5262507796287537,
+        "y1": 0.5617659091949463,
+        "x2": 0.5571340322494507,
+        "y2": 0.5783718228340149
+      },
+      "vision_selected": "B",
+      "vision_transcription": "בחד",
+      "confidence": 0.98,
+      "reasoning": "The visible text matches the standard Talmudic phrase 'בחד טעמא' ('with one rationale'). Paleographically, the third letter exhibits a clear squared corner/overhang characteristic of a dalet (ד), distinguishing it from a resh (ר).",
+      "flag": "current_text_confirmed"
+    },
+    {
+      "word_index": 242,
+      "opcode": "replace",
+      "docai_reading": "שכתכו",
+      "final_text": "שכתבו",
+      "page": 47,
+      "bbox": {
+        "x1": 0.39715874195098877,
+        "y1": 0.6978533864021301,
+        "x2": 0.44780728220939636,
+        "y2": 0.7152693271636963
+      },
+      "vision_selected": "B",
+      "vision_transcription": "שכתבו",
+      "confidence": 0.98,
+      "reasoning": "The visual crop clearly shows the letters Shin-Kaf-Tav-Bet-Vav (שכתבו). The penultimate letter has a distinct base stroke extending slightly past the right vertical stem, confirming it is a Bet (ב) rather than a Kaf (כ). Semantically, 'שכתבו' ('as they wrote') is standard Hebrew in rabbinic commentary context.",
+      "flag": "current_text_confirmed"
+    },
+    {
+      "word_index": 300,
+      "opcode": "replace",
+      "docai_reading": "דטהדרו",
+      "final_text": "דמהדרו",
+      "page": 47,
+      "bbox": {
+        "x1": 0.28227299451828003,
+        "y1": 0.7436208724975586,
+        "x2": 0.3360098898410797,
+        "y2": 0.7598217725753784
+      },
+      "vision_selected": "A",
+      "vision_transcription": "דטהדרו",
+      "confidence": 0.95,
+      "reasoning": "The second letter in the target word clearly features a high top-left stroke extending above the main x-height with an inner downward stroke, which is characteristic of the letter Tet (ט) in square Rabbinic typeface, matching Option A ('דטהדרו').",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 443,
+      "opcode": "replace",
+      "docai_reading": "מרקמתמה",
+      "final_text": "מדקמתמה",
+      "page": 47,
+      "bbox": {
+        "x1": 0.5713403224945068,
+        "y1": 0.8639125227928162,
+        "x2": 0.6454601883888245,
+        "y2": 0.8809234499931335
+      },
+      "vision_selected": "B",
+      "vision_transcription": "מדקמתמה",
+      "confidence": 0.98,
+      "reasoning": "The visible text reads 'מדקמתמה' (from 'מ-ד-קא-מתמה', meaning 'from the fact that he wondered/was astonished'), which is a standard Rabbinic/Aramaic expression. Option A ('מרקמתמה') is a clear OCR misreading of the letter dalet (ד) as resh (ר).",
+      "flag": "current_text_confirmed"
     }
   ],
   "132": [
     {
-      "word_index": 3,
-      "opcode": "delete",
-      "docai_reading": "ע\"א : קלא דיעבר",
-      "final_text": null,
-      "page": 49,
-      "bbox": {
-        "x1": 0.16294918954372406,
-        "y1": 0.10415825247764587,
-        "x2": 0.8636927008628845,
-        "y2": 0.13928139209747314
-      },
-      "vision_selected": "A",
-      "vision_transcription": "ע\"א : קלא דיעבר",
-      "confidence": 0.85,
-      "reasoning": "Option A correctly captures the transition between line 2 ('ע\"א :') and the heading of line 3 ('קלא דיעבד' / OCR 'דיעבר').",
-      "flag": "possible_omission"
-    },
-    {
-      "word_index": 19,
+      "word_index": 1,
       "opcode": "replace",
-      "docai_reading": "לדתרות",
-      "final_text": "להתרות",
+      "docai_reading": "דיעבר",
+      "final_text": "דיעבד",
       "page": 49,
       "bbox": {
-        "x1": 0.5923172235488892,
-        "y1": 0.13484053313732147,
-        "x2": 0.6573730111122131,
-        "y2": 0.14937424659729004
+        "x1": 0.7354398965835571,
+        "y1": 0.21033507585525513,
+        "x2": 0.8060718774795532,
+        "y2": 0.23132821917533875
       },
       "vision_selected": "B",
-      "vision_transcription": "להתרות",
-      "confidence": 0.98,
-      "reasoning": "The visible word in the second line of the crop is 'להתרות' (meaning 'to warn'), which forms a standard halakhic phrase 'מוזהרים להתרות בו' (warned/commanded to give him forewarning). Option A ('לדתרות') is a raw OCR misreading of the letter 'ה' (he) as 'ד' (dalet).",
+      "vision_transcription": "דיעבד",
+      "confidence": 0.95,
+      "reasoning": "The contextual Rabbinic phrase is the standard Halakhic term 'דיעבד' (post-facto, as opposed to לכתחילה), which fits the surrounding sentence 'דיעבד חשיב כל דבר...'. The final letter is a Dalet (ד), characteristic of 'דיעבד'.",
       "flag": "current_text_confirmed"
     }
   ],
-  "136": [
+  "133": [
+    {
+      "word_index": 1,
+      "opcode": "replace",
+      "docai_reading": "דיעבך",
+      "final_text": "דיעבד",
+      "page": 49,
+      "bbox": {
+        "x1": 0.7385377883911133,
+        "y1": 0.2704885005950928,
+        "x2": 0.8097893595695496,
+        "y2": 0.28986677527427673
+      },
+      "vision_selected": "B",
+      "vision_transcription": "דיעבד",
+      "confidence": 0.98,
+      "reasoning": "The image clearly shows the standard Rabbinic word 'דיעבד' (ex post facto). The final letter has a sharp right-angled roof and does not descend below the baseline, unequivocally identifying it as a Dalet ('ד') rather than a Chaf Sofit ('ך').",
+      "flag": "current_text_confirmed"
+    }
+  ],
+  "134": [
+    {
+      "word_index": 1,
+      "opcode": "replace",
+      "docai_reading": "רחיה",
+      "final_text": "דחיה",
+      "page": 49,
+      "bbox": {
+        "x1": 0.7478314638137817,
+        "y1": 0.3165118992328644,
+        "x2": 0.8048326969146729,
+        "y2": 0.3346790373325348
+      },
+      "vision_selected": "B",
+      "vision_transcription": "דחיה",
+      "confidence": 0.95,
+      "reasoning": "The target word is 'דחיה', which forms the key term in the entry heading (meaning 'rejection/push-off') matching the surrounding context 'אורחיה דגמרא לדחויי' ('it is the way of the Gemara to reject [proofs]'). Semantically, 'רחיה' is not a valid Rabbinic term in this context. The raw OCR misread the initial Dalet (ד) as a Resh (ר) due to slight rounding of the top-right corner in the print scan.",
+      "flag": "current_text_confirmed"
+    }
+  ],
+  "135": [
+    {
+      "word_index": 1,
+      "opcode": "replace",
+      "docai_reading": "רחיה",
+      "final_text": "דחיה",
+      "page": 49,
+      "bbox": {
+        "x1": 0.7447335720062256,
+        "y1": 0.39241015911102295,
+        "x2": 0.8023543953895569,
+        "y2": 0.41057729721069336
+      },
+      "vision_selected": "B",
+      "vision_transcription": "דחיה",
+      "confidence": 0.95,
+      "reasoning": "The target word is the standard Rabbinic/Talmudic term 'דחיה' (refutation/rejection), forming the phrase 'קלה דחיה לא מקרי'. The initial letter is a Dalet ('ד'), which DocAI raw OCR misidentified as Resh ('ר') due to the font's subtle top-right corner.",
+      "flag": "current_text_confirmed"
+    },
     {
       "word_index": 10,
       "opcode": "insert",
@@ -3794,20 +3885,7 @@
       "flag": "unverified_insertion"
     }
   ],
-  "138": [
-    {
-      "word_index": 0,
-      "opcode": "insert",
-      "docai_reading": null,
-      "final_text": "קלח",
-      "page": 49,
-      "bbox": null,
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "no bbox (insertion) - not vision-cropped",
-      "flag": "unverified_insertion"
-    },
+  "137": [
     {
       "word_index": 2,
       "opcode": "insert",
@@ -3840,20 +3918,7 @@
       "flag": "current_text_confirmed"
     }
   ],
-  "139": [
-    {
-      "word_index": 0,
-      "opcode": "insert",
-      "docai_reading": null,
-      "final_text": "קלט",
-      "page": 49,
-      "bbox": null,
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "no bbox (insertion) - not vision-cropped",
-      "flag": "unverified_insertion"
-    },
+  "138": [
     {
       "word_index": 6,
       "opcode": "insert",
@@ -3884,29 +3949,11 @@
       "confidence": 0.98,
       "reasoning": "The crop clearly displays the Hebrew word 'הביאו' (meaning 'they cited/brought'), where the second letter is a distinct Bet (ב) with a base corner, not a rounded Kaf (כ). This matches the surrounding Rabbinic context perfectly: 'וביומא ל' ב' הביאו דבריו' ('And in Yoma 30b they cited his words').",
       "flag": "current_text_confirmed"
-    },
-    {
-      "word_index": 239,
-      "opcode": "replace",
-      "docai_reading": "דעת",
-      "final_text": "דער",
-      "page": 49,
-      "bbox": {
-        "x1": 0.627013623714447,
-        "y1": 0.8461849093437195,
-        "x2": 0.6685253977775574,
-        "y2": 0.8635445833206177
-      },
-      "vision_selected": "A",
-      "vision_transcription": "דעת",
-      "confidence": 0.99,
-      "reasoning": "Paleographically, the final letter of the word clearly features the left leg/foot characteristic of a Tav (ת), not a Resh (ר). Contextually, the sentence 'משמע שזו היא דעת הערוך' ('implies that this is the view of the Aruch') deterministically requires the word 'דעת' (opinion/view).",
-      "flag": "current_text_may_be_wrong"
     }
   ],
   "140": [
     {
-      "word_index": 8,
+      "word_index": 11,
       "opcode": "insert",
       "docai_reading": null,
       "final_text": "[.]",
@@ -3921,65 +3968,6 @@
   ],
   "141": [
     {
-      "word_index": 0,
-      "opcode": "insert",
-      "docai_reading": null,
-      "final_text": "קמא",
-      "page": 50,
-      "bbox": null,
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "no bbox (insertion) - not vision-cropped",
-      "flag": "unverified_insertion"
-    },
-    {
-      "word_index": 11,
-      "opcode": "insert",
-      "docai_reading": null,
-      "final_text": "[.]",
-      "page": 50,
-      "bbox": null,
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "no bbox (insertion) - not vision-cropped",
-      "flag": "unverified_insertion"
-    },
-    {
-      "word_index": 95,
-      "opcode": "replace",
-      "docai_reading": "הפוסקי",
-      "final_text": "הפוסקים",
-      "page": 50,
-      "bbox": {
-        "x1": 0.6326910853385925,
-        "y1": 0.24547283351421356,
-        "x2": 0.6836544275283813,
-        "y2": 0.2619718313217163
-      },
-      "vision_selected": "A",
-      "vision_transcription": "הפוסקי'",
-      "confidence": 0.95,
-      "reasoning": "The image shows the word 'הפוסקי'' abbreviated with a geresh after the yod, rather than spelled out in full with a final mem ('הפוסקים'). Therefore, Option A ('הפוסקי') accurately reflects the visible letters in the manuscript crop without expanding the abbreviation.",
-      "flag": "current_text_may_be_wrong"
-    }
-  ],
-  "142": [
-    {
-      "word_index": 0,
-      "opcode": "insert",
-      "docai_reading": null,
-      "final_text": "קמב",
-      "page": 50,
-      "bbox": null,
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "no bbox (insertion) - not vision-cropped",
-      "flag": "unverified_insertion"
-    },
-    {
       "word_index": 6,
       "opcode": "insert",
       "docai_reading": null,
@@ -3993,20 +3981,7 @@
       "flag": "unverified_insertion"
     }
   ],
-  "143": [
-    {
-      "word_index": 0,
-      "opcode": "insert",
-      "docai_reading": null,
-      "final_text": "קמג",
-      "page": 50,
-      "bbox": null,
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "no bbox (insertion) - not vision-cropped",
-      "flag": "unverified_insertion"
-    },
+  "142": [
     {
       "word_index": 4,
       "opcode": "insert",
@@ -4021,74 +3996,7 @@
       "flag": "unverified_insertion"
     }
   ],
-  "144": [
-    {
-      "word_index": 0,
-      "opcode": "insert",
-      "docai_reading": null,
-      "final_text": "קמד",
-      "page": 50,
-      "bbox": null,
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "no bbox (insertion) - not vision-cropped",
-      "flag": "unverified_insertion"
-    },
-    {
-      "word_index": 32,
-      "opcode": "replace",
-      "docai_reading": "שבהרי\"ף",
-      "final_text": "שבהדי\"ף",
-      "page": 50,
-      "bbox": {
-        "x1": 0.23306401073932648,
-        "y1": 0.47444668412208557,
-        "x2": 0.30267247557640076,
-        "y2": 0.4917505085468292
-      },
-      "vision_selected": "A",
-      "vision_transcription": "שבהרי\"ף",
-      "confidence": 0.98,
-      "reasoning": "The image clearly shows the word 'שבהרי\"ף' (referring to the Rif, Rabbi Yitzchak Alfasi, with the prefix ש-ב-ה-). Paleographically, the letter following the 'ה' has a rounded top-right corner characteristic of a 'ר' (resh) in this typeface, rather than a squared corner with an overhang for a 'ד' (dalet). Semantically and contextually, 'שבהרי\"ף' (that is in the Rif) is the correct standard Rabbinic citation format.",
-      "flag": "current_text_may_be_wrong"
-    },
-    {
-      "word_index": 100,
-      "opcode": "replace",
-      "docai_reading": "שבהרי\"ף",
-      "final_text": "שבהדי\"ף",
-      "page": 50,
-      "bbox": {
-        "x1": 0.7091361284255981,
-        "y1": 0.5356136560440063,
-        "x2": 0.7781230807304382,
-        "y2": 0.5525150895118713
-      },
-      "vision_selected": "A",
-      "vision_transcription": "שבהרי\"ף",
-      "confidence": 0.98,
-      "reasoning": "The visual crop clearly shows the letter Resh (ר) with a rounded right corner rather than a Dalet (ד) which has a sharp corner protrusion. Contextually, 'רש\"י שבהרי\"ף' is a standard rabbinic reference to Rashi's commentary printed alongside the Rif (Rabbi Isaac Alfasi).",
-      "flag": "current_text_may_be_wrong"
-    },
-    {
-      "word_index": 143,
-      "opcode": "replace",
-      "docai_reading": "הרואה",
-      "final_text": "הדואה",
-      "page": 50,
-      "bbox": {
-        "x1": 0.24735860526561737,
-        "y1": 0.5653923749923706,
-        "x2": 0.2958359122276306,
-        "y2": 0.5814889073371887
-      },
-      "vision_selected": "A",
-      "vision_transcription": "הרואה",
-      "confidence": 0.99,
-      "reasoning": "The image clearly reads 'הרואה' (referring to Perek HaRo'eh, Berakhot Chapter 9). The second letter is a rounded resh (ר) rather than a dalet (ד).",
-      "flag": "current_text_may_be_wrong"
-    },
+  "143": [
     {
       "word_index": 203,
       "opcode": "replace",
@@ -4144,76 +4052,7 @@
       "flag": "current_text_may_be_wrong"
     }
   ],
-  "145": [
-    {
-      "word_index": 157,
-      "opcode": "replace",
-      "docai_reading": "אהרדי",
-      "final_text": "אהדדי",
-      "page": 51,
-      "bbox": {
-        "x1": 0.7447335720062256,
-        "y1": 0.42793703079223633,
-        "x2": 0.7899628281593323,
-        "y2": 0.44408559799194336
-      },
-      "vision_selected": "A",
-      "vision_transcription": "אהרדי",
-      "confidence": 0.95,
-      "reasoning": "The visible printed text in the crop displays 'אהרדי' (a typographical print error for 'אהדדי'). Paleographically, the third letter features a rounded top-right shoulder characteristic of a Resh ('ר'), whereas the fourth letter shows the sharp right-angled corner of a Dalet ('ד'). Therefore, Option A accurately represents the literal raster string.",
-      "flag": "current_text_may_be_wrong"
-    },
-    {
-      "word_index": 191,
-      "opcode": "replace",
-      "docai_reading": "מהכמי",
-      "final_text": "מחכמי",
-      "page": 51,
-      "bbox": {
-        "x1": 0.7515489459037781,
-        "y1": 0.45902299880981445,
-        "x2": 0.8004956841468811,
-        "y2": 0.4751715660095215
-      },
-      "vision_selected": "A",
-      "vision_transcription": "מהכמי",
-      "confidence": 0.95,
-      "reasoning": "The image crop clearly shows the word 'מהכמי' written with a 'ה' (He) as the second letter, featuring the characteristic gap at the top-left between the roof and the left vertical leg. While semantically 'מחכמי' (with a Chet) would be the standard spelling for 'from the sages of', the printed text visually displays 'מהכמי' (Option A), likely a historical typographic error in the source printing.",
-      "flag": "current_text_may_be_wrong"
-    },
-    {
-      "word_index": 546,
-      "opcode": "replace",
-      "docai_reading": "מחזהרת",
-      "final_text": "מחוזרת",
-      "page": 51,
-      "bbox": {
-        "x1": 0.47149938344955444,
-        "y1": 0.7605974674224854,
-        "x2": 0.5254027247428894,
-        "y2": 0.7771497964859009
-      },
-      "vision_selected": "A",
-      "vision_transcription": "מחזהרת",
-      "confidence": 0.85,
-      "reasoning": "The visible text on the third line shows the sequence מ-ח-ז-ה-ר-ת. The third/fourth character clear features the characteristic top-left gap of a ה, matching Option A ('מחזהרת') over Option B ('מחוזרת'), which lacks the ה.",
-      "flag": "current_text_may_be_wrong"
-    }
-  ],
-  "147": [
-    {
-      "word_index": 0,
-      "opcode": "insert",
-      "docai_reading": null,
-      "final_text": "קמז",
-      "page": 52,
-      "bbox": null,
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "no bbox (insertion) - not vision-cropped",
-      "flag": "unverified_insertion"
-    },
+  "146": [
     {
       "word_index": 6,
       "opcode": "insert",
@@ -4226,306 +4065,9 @@
       "confidence": null,
       "reasoning": "no bbox (insertion) - not vision-cropped",
       "flag": "unverified_insertion"
-    },
-    {
-      "word_index": 18,
-      "opcode": "delete",
-      "docai_reading": "Digitized by Google",
-      "final_text": null,
-      "page": 52,
-      "bbox": {
-        "x1": 0.539130449295044,
-        "y1": 0.9589206576347351,
-        "x2": 0.7490683197975159,
-        "y2": 0.9822794795036316
-      },
-      "vision_selected": "B",
-      "vision_transcription": "Digitized by Google",
-      "confidence": 1.0,
-      "reasoning": "The raster crop contains the standard English watermark 'Digitized by Google' introduced during modern library scanning, rather than any Rabbinic or Hebrew manuscript text. Therefore, the correct adjudicated manuscript text for this region is 'None' (Option B).",
-      "flag": "ambiguous"
-    }
-  ],
-  "148": [
-    {
-      "word_index": 49,
-      "opcode": "replace",
-      "docai_reading": "דך",
-      "final_text": "הך",
-      "page": 53,
-      "bbox": {
-        "x1": 0.41191068291664124,
-        "y1": 0.3027005195617676,
-        "x2": 0.43238213658332825,
-        "y2": 0.3196291923522949
-      },
-      "vision_selected": "B",
-      "vision_transcription": "הך",
-      "confidence": 0.98,
-      "reasoning": "The image clearly displays the word 'הך' (Heh followed by Final Kaf), which matches Option B. This perfectly aligns with the Rabbinic Aramaic phrase 'הך כללא' ('that rule') present in the surrounding context.",
-      "flag": "current_text_confirmed"
-    },
-    {
-      "word_index": 93,
-      "opcode": "replace",
-      "docai_reading": "דאים",
-      "final_text": "דאלים",
-      "page": 53,
-      "bbox": {
-        "x1": 0.09801489114761353,
-        "y1": 0.332527220249176,
-        "x2": 0.13647642731666565,
-        "y2": 0.34703749418258667
-      },
-      "vision_selected": "B",
-      "vision_transcription": "דאלים",
-      "confidence": 0.98,
-      "reasoning": "The context refers to the Talmudic legal rule of 'כל דאלים [גבר]' discussed in Gittin 60b regarding water rights of 'בני נהרא'. Paleographically, the text shows ד (dalet), א (aleph), followed by a ל (lamed) whose characteristic tall upper ascender is clearly visible extending upwards between lines 2 and 3, followed by י (yod) and a final ם (mem-sofit). Option B correctly preserves the complete letter sequence.",
-      "flag": "current_text_confirmed"
-    },
-    {
-      "word_index": 126,
-      "opcode": "replace",
-      "docai_reading": "דשמוא",
-      "final_text": "דשמואל",
-      "page": 53,
-      "bbox": {
-        "x1": 0.09801489114761353,
-        "y1": 0.3619508147239685,
-        "x2": 0.15198510885238647,
-        "y2": 0.38089480996131897
-      },
-      "vision_selected": "B",
-      "vision_transcription": "דשמואל",
-      "confidence": 1.0,
-      "reasoning": "The crop clearly shows the word דשמואל on the middle line, including the final letter ל (lamed) on the far left with its characteristic tall ascender stroke. This matches the context 'הלכתא כותיה דשמואל'.",
-      "flag": "current_text_confirmed"
-    },
-    {
-      "word_index": 185,
-      "opcode": "replace",
-      "docai_reading": "דאים",
-      "final_text": "דאלים",
-      "page": 53,
-      "bbox": {
-        "x1": 0.4336228370666504,
-        "y1": 0.42321643233299255,
-        "x2": 0.47084367275238037,
-        "y2": 0.4397420287132263
-      },
-      "vision_selected": "B",
-      "vision_transcription": "דאלים",
-      "confidence": 0.95,
-      "reasoning": "The visible word in the image clearly shows the tall vertical ascender of the letter lamed ('ל') between the dalet ('ד') and final mem ('ם'), forming 'דאלים', followed by the letter 'ג' (the start of the well-known Rabbinic legal phrase 'דאלים גבר'). This matches Option B.",
-      "flag": "current_text_confirmed"
-    },
-    {
-      "word_index": 286,
-      "opcode": "replace",
-      "docai_reading": "כשמול",
-      "final_text": "כשמואל",
-      "page": 53,
-      "bbox": {
-        "x1": 0.5217121839523315,
-        "y1": 0.5139057040214539,
-        "x2": 0.5725806355476379,
-        "y2": 0.5304312705993652
-      },
-      "vision_selected": "B",
-      "vision_transcription": "כשמואל",
-      "confidence": 1.0,
-      "reasoning": "The image shows the word 'כשמואל' featuring a classic Rabbinic print 'אל' ligature at the end of the word. DocAI (Option A) misread the ligature as a single 'ל' ('כשמול'), whereas Option B accurately reflects the intended text and semantic context from the famous Talmudic rule 'הלכה כרב באיסורי וכשמואל בדיני'.",
-      "flag": "current_text_confirmed"
-    },
-    {
-      "word_index": 330,
-      "opcode": "replace",
-      "docai_reading": "דסמיך",
-      "final_text": "דסמך",
-      "page": 53,
-      "bbox": {
-        "x1": 0.6954094171524048,
-        "y1": 0.5574365258216858,
-        "x2": 0.7450371980667114,
-        "y2": 0.5763804912567139
-      },
-      "vision_selected": "A",
-      "vision_transcription": "דסמיך",
-      "confidence": 0.98,
-      "reasoning": "The crop clearly displays the word דסמיך in standard square Hebrew font. Following the mem (מ), a distinct yod (י) is present before the final kaf (ך), confirming Option A ('דסמיך') over Option B ('דסמך').",
-      "flag": "current_text_may_be_wrong"
-    },
-    {
-      "word_index": 340,
-      "opcode": "delete",
-      "docai_reading": "הפו",
-      "final_text": null,
-      "page": 53,
-      "bbox": {
-        "x1": 0.22394540905952454,
-        "y1": 0.5574365258216858,
-        "x2": 0.25,
-        "y2": 0.5763804912567139
-      },
-      "vision_selected": "A",
-      "vision_transcription": "הפו",
-      "confidence": 0.95,
-      "reasoning": "The string 'הפו' is clearly legible in the middle line of the crop as the beginning of the word 'הפוסק' ('...ל הפוסק...'). Therefore, Option A correctly transcribes this visible reading.",
-      "flag": "possible_omission"
-    },
-    {
-      "word_index": 376,
-      "opcode": "replace",
-      "docai_reading": "דשמוא",
-      "final_text": "דשמואל",
-      "page": 53,
-      "bbox": {
-        "x1": 0.8089330196380615,
-        "y1": 0.6041918396949768,
-        "x2": 0.8591811656951904,
-        "y2": 0.6199113130569458
-      },
-      "vision_selected": "B",
-      "vision_transcription": "דשמואל",
-      "confidence": 0.98,
-      "reasoning": "The crop displays the word 'דשמואל' following 'הלכתא כ[וותיה]' as part of the standard Talmudic rule 'הלכתא כוותיה דשמואל'. The distinctive tall ascender of the letter Lamed (ל) is clearly visible extending upward above the word, confirming 'דשמואל' (Option B) rather than an incomplete OCR truncation ('דשמוא').",
-      "flag": "current_text_confirmed"
-    },
-    {
-      "word_index": 383,
-      "opcode": "replace",
-      "docai_reading": "תמירתו",
-      "final_text": "תמיהתו",
-      "page": 53,
-      "bbox": {
-        "x1": 0.4590570628643036,
-        "y1": 0.6041918396949768,
-        "x2": 0.5130273103713989,
-        "y2": 0.6199113130569458
-      },
-      "vision_selected": "A",
-      "vision_transcription": "תמירתו",
-      "confidence": 0.95,
-      "reasoning": "Paleographic analysis of the character between 'י' and 'ת' shows a single right leg with a curved upper right corner ('ר') and no left leg, which contrasts clearly with the surrounding examples of 'ה' visible on the same line. Thus, the glyph is a 'ר', making 'תמירתו' (Option A) the correct transcription.",
-      "flag": "current_text_may_be_wrong"
-    },
-    {
-      "word_index": 429,
-      "opcode": "replace",
-      "docai_reading": "הלבתא",
-      "final_text": "הלכתא",
-      "page": 53,
-      "bbox": {
-        "x1": 0.6575682163238525,
-        "y1": 0.6489318609237671,
-        "x2": 0.709057092666626,
-        "y2": 0.6658605337142944
-      },
-      "vision_selected": "B",
-      "vision_transcription": "הלכתא",
-      "confidence": 0.95,
-      "reasoning": "The visible text in the middle line reads 'הלכתא' (Aramaic for 'the halakha'). DocAI raw OCR (Option A) misread the letter kaf ('כ') as a bet ('ב') due to ink heavying/bleed around the ascender of the lamed above it. The semantic context of the Rabbinic sentence ('הכא הלכתא כוותיה...') clearly confirms 'הלכתא'.",
-      "flag": "current_text_confirmed"
-    }
-  ],
-  "149": [
-    {
-      "word_index": 0,
-      "opcode": "insert",
-      "docai_reading": null,
-      "final_text": "קמט",
-      "page": 53,
-      "bbox": null,
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "no bbox (insertion) - not vision-cropped",
-      "flag": "unverified_insertion"
     }
   ],
   "150": [
-    {
-      "word_index": 10,
-      "opcode": "insert",
-      "docai_reading": null,
-      "final_text": "[.]",
-      "page": 54,
-      "bbox": null,
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "no bbox (insertion) - not vision-cropped",
-      "flag": "unverified_insertion"
-    },
-    {
-      "word_index": 140,
-      "opcode": "replace",
-      "docai_reading": "דשמוא",
-      "final_text": "דשמואל",
-      "page": 54,
-      "bbox": {
-        "x1": 0.17329192161560059,
-        "y1": 0.5404752492904663,
-        "x2": 0.22732919454574585,
-        "y2": 0.5569875240325928
-      },
-      "vision_selected": "A",
-      "vision_transcription": "דשמוא",
-      "confidence": 0.95,
-      "reasoning": "The visible printed text reads 'דשמוא' with an abbreviation dot above the aleph (short for דשמואל). There is no letter 'ל' (which would display a prominent tall ascender, as seen in 'הלכתא' on the line below).",
-      "flag": "current_text_may_be_wrong"
-    },
-    {
-      "word_index": 158,
-      "opcode": "replace",
-      "docai_reading": "כשמוא",
-      "final_text": "כשמואל",
-      "page": 54,
-      "bbox": {
-        "x1": 0.1372670829296112,
-        "y1": 0.5553765892982483,
-        "x2": 0.19192546606063843,
-        "y2": 0.5714861154556274
-      },
-      "vision_selected": "B",
-      "vision_transcription": "כשמואל",
-      "confidence": 0.95,
-      "reasoning": "The sentence context refers to the Amoraic sage Samuel ('כשמואל'). Paleographically, line 2 shows 'א' followed by 'כשמואל', where the final 'ל' (lamed) is clearly present on the left margin, making Option B the correct and complete transcription.",
-      "flag": "current_text_confirmed"
-    },
-    {
-      "word_index": 181,
-      "opcode": "replace",
-      "docai_reading": "כשמוא",
-      "final_text": "כשמואל",
-      "page": 54,
-      "bbox": {
-        "x1": 0.7024844884872437,
-        "y1": 0.5851792097091675,
-        "x2": 0.7540372610092163,
-        "y2": 0.6028997302055359
-      },
-      "vision_selected": "B",
-      "vision_transcription": "כשמואל",
-      "confidence": 1.0,
-      "reasoning": "The full word 'כשמואל' is visible in the middle of the second line, including the distinct tall ascender of the final letter Lamed ('ל'). Contextually and paleographically, Option B ('כשמואל') is the accurate transcription.",
-      "flag": "current_text_confirmed"
-    }
-  ],
-  "151": [
-    {
-      "word_index": 0,
-      "opcode": "insert",
-      "docai_reading": null,
-      "final_text": "קנא",
-      "page": 54,
-      "bbox": null,
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "no bbox (insertion) - not vision-cropped",
-      "flag": "unverified_insertion"
-    },
     {
       "word_index": 17,
       "opcode": "insert",
@@ -4540,260 +4082,7 @@
       "flag": "unverified_insertion"
     }
   ],
-  "152": [
-    {
-      "word_index": 10,
-      "opcode": "replace",
-      "docai_reading": "אמרה",
-      "final_text": "אמר",
-      "page": 55,
-      "bbox": {
-        "x1": 0.3337453603744507,
-        "y1": 0.6033994555473328,
-        "x2": 0.3776266872882843,
-        "y2": 0.6212059855461121
-      },
-      "vision_selected": "A",
-      "vision_transcription": "אמרה",
-      "confidence": 0.98,
-      "reasoning": "The raster crop clearly shows four letters comprising the word 'אמרה' (aleph, mem, resh, hei) following 'אי' and preceding 'ר'. Option A accurately reflects the paleographic evidence in the image.",
-      "flag": "current_text_may_be_wrong"
-    },
-    {
-      "word_index": 18,
-      "opcode": "replace",
-      "docai_reading": "אמרה",
-      "final_text": "אמר",
-      "page": 55,
-      "bbox": {
-        "x1": 0.6007416844367981,
-        "y1": 0.6191825270652771,
-        "x2": 0.6433869004249573,
-        "y2": 0.6361796855926514
-      },
-      "vision_selected": "A",
-      "vision_transcription": "אמרה",
-      "confidence": 0.98,
-      "reasoning": "In the second line of the crop, the word clearly features four letters: Aleph (א), Mem (מ), Resh (ר), and Heh (ה), spelling 'אמרה'. The final letter 'ה' is distinct with its top roof line, right leg, and detached left leg, matching the paleography of the 'ה' in 'בזה' on the line below.",
-      "flag": "current_text_may_be_wrong"
-    },
-    {
-      "word_index": 50,
-      "opcode": "replace",
-      "docai_reading": "דיבמורת",
-      "final_text": "דיבמות",
-      "page": 55,
-      "bbox": {
-        "x1": 0.7948083877563477,
-        "y1": 0.6487252116203308,
-        "x2": 0.8584672212600708,
-        "y2": 0.665317714214325
-      },
-      "vision_selected": "B",
-      "vision_transcription": "דיבמות",
-      "confidence": 0.98,
-      "reasoning": "The visible word in the second line clearly reads 'דיבמות' (referring to Talmudic Tractate Yevamot, 'בפרק ב' דיבמות'), composed of dalet, yod, bet, mem, vav, and tav. Option A ('דיבמורת') includes a hallucinated resh ('ר') resulting from an OCR misreading of the vav-tav ligature/junction.",
-      "flag": "current_text_confirmed"
-    },
-    {
-      "word_index": 67,
-      "opcode": "replace",
-      "docai_reading": "דשמוא",
-      "final_text": "דשמואל",
-      "page": 55,
-      "bbox": {
-        "x1": 0.7484548687934875,
-        "y1": 0.6649129986763,
-        "x2": 0.7978986501693726,
-        "y2": 0.6811007857322693
-      },
-      "vision_selected": "B",
-      "vision_transcription": "דשמואל",
-      "confidence": 1.0,
-      "reasoning": "The crop clearly displays the full word 'דשמואל', including the characteristic tall ascender of the letter Lamed ('ל') at the end. The context 'דאיתמר משמיה דשמואל' confirms this reading over the truncated OCR reading in Option A.",
-      "flag": "current_text_confirmed"
-    },
-    {
-      "word_index": 71,
-      "opcode": "replace",
-      "docai_reading": "ואיבא",
-      "final_text": "ואיכא",
-      "page": 55,
-      "bbox": {
-        "x1": 0.501236081123352,
-        "y1": 0.6649129986763,
-        "x2": 0.5451174378395081,
-        "y2": 0.6811007857322693
-      },
-      "vision_selected": "B",
-      "vision_transcription": "ואיכא",
-      "confidence": 0.98,
-      "reasoning": "Contextually, the standard Aramaic term in Talmudic discourse here is 'ואיכא' ('and there is' / 'and some say'). Paleographically, the penultimate letter shows the rounded bottom-right curve typical of a kaf ('כ') in this font, distinguishing it from bet ('ב'). Thus, Option B is correct.",
-      "flag": "current_text_confirmed"
-    },
-    {
-      "word_index": 97,
-      "opcode": "replace",
-      "docai_reading": "רמכריע",
-      "final_text": "המכריע",
-      "page": 55,
-      "bbox": {
-        "x1": 0.3312731683254242,
-        "y1": 0.6815054416656494,
-        "x2": 0.38689741492271423,
-        "y2": 0.6968838572502136
-      },
-      "vision_selected": "A",
-      "vision_transcription": "רמכריע",
-      "confidence": 0.95,
-      "reasoning": "Paleographic inspection of the second line shows the first letter of the word is a single-stem character ('ר'/'ד') lacking a left leg entirely. By contrast, the letter 'ה' in 'הריש' (line 1) clearly features a distinct left leg. Consequently, the visual evidence in the image corresponds to Option A ('רמכריע'), whereas Option B ('המכריע') is a corrected contextual reading not present in the raster image.",
-      "flag": "current_text_may_be_wrong"
-    }
-  ],
-  "153": [
-    {
-      "word_index": 0,
-      "opcode": "insert",
-      "docai_reading": null,
-      "final_text": "קנג",
-      "page": 55,
-      "bbox": null,
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "no bbox (insertion) - not vision-cropped",
-      "flag": "unverified_insertion"
-    },
-    {
-      "word_index": 62,
-      "opcode": "replace",
-      "docai_reading": "שכרתבו",
-      "final_text": "שכתבו",
-      "page": 55,
-      "bbox": {
-        "x1": 0.3368355929851532,
-        "y1": 0.755969226360321,
-        "x2": 0.39740419387817383,
-        "y2": 0.7729663848876953
-      },
-      "vision_selected": "B",
-      "vision_transcription": "שכתבו",
-      "confidence": 0.98,
-      "reasoning": "The crop clearly shows the word 'שכתבו' (shin, kaf, tav, bet, vav). There is no 'resh' inserted between 'kaf' and 'tav' as suggested in Option A.",
-      "flag": "current_text_confirmed"
-    }
-  ],
-  "155": [
-    {
-      "word_index": 0,
-      "opcode": "insert",
-      "docai_reading": null,
-      "final_text": "קנה",
-      "page": 56,
-      "bbox": null,
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "no bbox (insertion) - not vision-cropped",
-      "flag": "unverified_insertion"
-    },
-    {
-      "word_index": 7,
-      "opcode": "insert",
-      "docai_reading": null,
-      "final_text": "[.]",
-      "page": 56,
-      "bbox": null,
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "no bbox (insertion) - not vision-cropped",
-      "flag": "unverified_insertion"
-    },
-    {
-      "word_index": 198,
-      "opcode": "replace",
-      "docai_reading": "דמשכשתא",
-      "final_text": "דמשכחתא",
-      "page": 56,
-      "bbox": {
-        "x1": 0.14063473045825958,
-        "y1": 0.49578145146369934,
-        "x2": 0.22277535498142242,
-        "y2": 0.5130574703216553
-      },
-      "vision_selected": "B",
-      "vision_transcription": "הו דמשכחתא",
-      "confidence": 0.99,
-      "reasoning": "The image clearly shows the standard Aramaic word 'דמשכחתא' (meaning 'that is found'). Paleographically, the letter following the 'כ' is a 'ח' (het) with two vertical legs and a straight top bar, not a 'ש' (shin). Option A is a typical OCR misreading of 'ח' as 'ש'.",
-      "flag": "current_text_confirmed"
-    },
-    {
-      "word_index": 210,
-      "opcode": "replace",
-      "docai_reading": "עור",
-      "final_text": "עוד",
-      "page": 56,
-      "bbox": {
-        "x1": 0.4499066472053528,
-        "y1": 0.5110486149787903,
-        "x2": 0.4772868752479553,
-        "y2": 0.5279228687286377
-      },
-      "vision_selected": "A",
-      "vision_transcription": "עור",
-      "confidence": 0.95,
-      "reasoning": "Paleographically, the third letter of the middle word in the third line displays a smoothly rounded top-right corner characteristic of a Resh (ר) rather than the sharp right-angled corner with a overhang characteristic of a Dalet (ד). Thus, the visual reading in the crop is clearly 'עור'.",
-      "flag": "current_text_may_be_wrong"
-    },
-    {
-      "word_index": 567,
-      "opcode": "replace",
-      "docai_reading": "שיהבאתי",
-      "final_text": "שהבאתי",
-      "page": 56,
-      "bbox": {
-        "x1": 0.3609209656715393,
-        "y1": 0.8296504616737366,
-        "x2": 0.42190417647361755,
-        "y2": 0.8477300405502319
-      },
-      "vision_selected": "A",
-      "vision_transcription": "שיהבאתי",
-      "confidence": 0.98,
-      "reasoning": "The raster image clearly shows a 'י' (yod) inserted between the initial 'ש' (shin) and 'ה' (heh), forming 'שיהבאתי' in standard plene (כתיב מלא) printing style, matching Option A exactly.",
-      "flag": "current_text_may_be_wrong"
-    }
-  ],
   "156": [
-    {
-      "word_index": 7,
-      "opcode": "insert",
-      "docai_reading": null,
-      "final_text": "[.]",
-      "page": 57,
-      "bbox": null,
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "no bbox (insertion) - not vision-cropped",
-      "flag": "unverified_insertion"
-    }
-  ],
-  "157": [
-    {
-      "word_index": 0,
-      "opcode": "insert",
-      "docai_reading": null,
-      "final_text": "קנז",
-      "page": 57,
-      "bbox": null,
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "no bbox (insertion) - not vision-cropped",
-      "flag": "unverified_insertion"
-    },
     {
       "word_index": 5,
       "opcode": "insert",
@@ -4826,20 +4115,7 @@
       "flag": "current_text_confirmed"
     }
   ],
-  "158": [
-    {
-      "word_index": 0,
-      "opcode": "insert",
-      "docai_reading": null,
-      "final_text": "קנח",
-      "page": 57,
-      "bbox": null,
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "no bbox (insertion) - not vision-cropped",
-      "flag": "unverified_insertion"
-    },
+  "157": [
     {
       "word_index": 5,
       "opcode": "insert",
@@ -4872,20 +4148,7 @@
       "flag": "current_text_confirmed"
     }
   ],
-  "159": [
-    {
-      "word_index": 0,
-      "opcode": "insert",
-      "docai_reading": null,
-      "final_text": "קנט",
-      "page": 57,
-      "bbox": null,
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "no bbox (insertion) - not vision-cropped",
-      "flag": "unverified_insertion"
-    },
+  "158": [
     {
       "word_index": 5,
       "opcode": "insert",
@@ -4918,156 +4181,7 @@
       "flag": "current_text_confirmed"
     }
   ],
-  "160": [
-    {
-      "word_index": 0,
-      "opcode": "insert",
-      "docai_reading": null,
-      "final_text": "קס",
-      "page": 57,
-      "bbox": null,
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "no bbox (insertion) - not vision-cropped",
-      "flag": "unverified_insertion"
-    },
-    {
-      "word_index": 5,
-      "opcode": "insert",
-      "docai_reading": null,
-      "final_text": "[.]",
-      "page": 57,
-      "bbox": null,
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "no bbox (insertion) - not vision-cropped",
-      "flag": "unverified_insertion"
-    },
-    {
-      "word_index": 15,
-      "opcode": "replace",
-      "docai_reading": "איבא",
-      "final_text": "איכא",
-      "page": 57,
-      "bbox": {
-        "x1": 0.6748920679092407,
-        "y1": 0.7392538785934448,
-        "x2": 0.7236273884773254,
-        "y2": 0.7558799386024475
-      },
-      "vision_selected": "B",
-      "vision_transcription": "איכא",
-      "confidence": 0.98,
-      "reasoning": "The transcribed word in line 2 is 'איכא' ('there is' in Rabbinic Aramaic, matching the contextual phrase 'איכא דאחרינא' / 'איכא דנפשייהו'). Paleographically, the third letter displays the rounded right spine of a Kaf ('כ') rather than the square base corner of a Bet ('ב').",
-      "flag": "current_text_confirmed"
-    },
-    {
-      "word_index": 29,
-      "opcode": "replace",
-      "docai_reading": "היכאת",
-      "final_text": "היכא",
-      "page": 57,
-      "bbox": {
-        "x1": 0.7180752754211426,
-        "y1": 0.7550689578056335,
-        "x2": 0.7643430233001709,
-        "y2": 0.7712895274162292
-      },
-      "vision_selected": "B",
-      "vision_transcription": "היכא",
-      "confidence": 0.98,
-      "reasoning": "The center word is clearly legible as 'היכא' (hei, yod, kaf, aleph), matching Option B and the standard Talmudic phrase 'בין היכא ד... / דאף היכא ד...'. Option A incorrectly appends an extraneous letter from adjacent cropped text.",
-      "flag": "current_text_confirmed"
-    },
-    {
-      "word_index": 47,
-      "opcode": "replace",
-      "docai_reading": "והרל\"ם",
-      "final_text": "והרמב\"ם",
-      "page": 57,
-      "bbox": {
-        "x1": 0.536705732345581,
-        "y1": 0.7696675062179565,
-        "x2": 0.5872917771339417,
-        "y2": 0.786699116230011
-      },
-      "vision_selected": "A",
-      "vision_transcription": "והרל\"ם",
-      "confidence": 0.95,
-      "reasoning": "The raster crop clearly displays a printed textual error reading 'והרל\\\"ם'. Paleographically, the letter following the 'resh' ('ר') has a tall vertical ascender extending well above the x-height line, characteristic of a 'lamed' ('ל'), directly followed by gershayim and a final 'mem' ('ם'). While the surrounding Rabbinic context clearly intends 'והרמב\\\"ם' (referring to Maimonides alongside the Rif and Rosh), the physical print in the crop visually reads 'והרל\\\"ם' matching Option A.",
-      "flag": "current_text_may_be_wrong"
-    },
-    {
-      "word_index": 87,
-      "opcode": "replace",
-      "docai_reading": "איבא",
-      "final_text": "איכא",
-      "page": 57,
-      "bbox": {
-        "x1": 0.26341763138771057,
-        "y1": 0.8004866242408752,
-        "x2": 0.30289945006370544,
-        "y2": 0.8175182342529297
-      },
-      "vision_selected": "A",
-      "vision_transcription": "איבא",
-      "confidence": 0.95,
-      "reasoning": "Paleographically, the third letter in the word on the third line features a sharp, 90-degree bottom-right corner and a flat horizontal base, which uniquely identifies it as a Bet ('ב') rather than a rounded Khaf ('כ') as seen in 'הלכות' below. Thus, the visual text in the image is literally 'איבא'.",
-      "flag": "current_text_may_be_wrong"
-    },
-    {
-      "word_index": 111,
-      "opcode": "replace",
-      "docai_reading": "להלק\"ט",
-      "final_text": "לחלק\"ט",
-      "page": 57,
-      "bbox": {
-        "x1": 0.8013572096824646,
-        "y1": 0.830900251865387,
-        "x2": 0.8593460917472839,
-        "y2": 0.8475263714790344
-      },
-      "vision_selected": "A",
-      "vision_transcription": "להלק\"ט",
-      "confidence": 0.98,
-      "reasoning": "The second character clearly shows a distinct gap between the left vertical stem and the upper horizontal bar, identifying it unambiguously as a Heh (ה) rather than a Chet (ח). Thus, Option A ('להלק\"ט') is the accurate paleographic transcription.",
-      "flag": "current_text_may_be_wrong"
-    },
-    {
-      "word_index": 162,
-      "opcode": "replace",
-      "docai_reading": "ליבא דנפשיידו",
-      "final_text": "אליבא דנפשייהו",
-      "page": 57,
-      "bbox": {
-        "x1": 0.7452189922332764,
-        "y1": 0.8751013875007629,
-        "x2": 0.8599629998207092,
-        "y2": 0.8929440379142761
-      },
-      "vision_selected": "B",
-      "vision_transcription": "אליבא דנפשייהו",
-      "confidence": 0.95,
-      "reasoning": "The visual evidence in the third line shows the standard Aramaic Talmudic phrase 'אליבא דנפשייהו' (according to his own position/view), matching the surrounding context ('איכא דנפשייהו'). Option A contains a clear OCR misreading of the letter 'ה' as 'ד' near the end ('דנפשיידו' instead of 'דנפשייהו').",
-      "flag": "current_text_confirmed"
-    }
-  ],
-  "162": [
-    {
-      "word_index": 0,
-      "opcode": "insert",
-      "docai_reading": null,
-      "final_text": "קסב",
-      "page": 59,
-      "bbox": null,
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "no bbox (insertion) - not vision-cropped",
-      "flag": "unverified_insertion"
-    },
+  "161": [
     {
       "word_index": 5,
       "opcode": "insert",
@@ -5098,120 +4212,6 @@
       "confidence": 1.0,
       "reasoning": "The target word is the standard Aramaic Rabbinic term 'וכדכתיבנא' (meaning 'and as we wrote', from the root כ-ת-ב). Raw OCR incorrectly misread the letter 'ב' (bet) as 'כ' (kaf) due to visual similarity in the printed font (producing 'וכדכתיכנא').",
       "flag": "current_text_confirmed"
-    }
-  ],
-  "163": [
-    {
-      "word_index": 0,
-      "opcode": "insert",
-      "docai_reading": null,
-      "final_text": "קסג",
-      "page": 59,
-      "bbox": null,
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "no bbox (insertion) - not vision-cropped",
-      "flag": "unverified_insertion"
-    }
-  ],
-  "164": [
-    {
-      "word_index": 0,
-      "opcode": "replace",
-      "docai_reading": "קסג",
-      "final_text": "קסד",
-      "page": 59,
-      "bbox": {
-        "x1": 0.8328192234039307,
-        "y1": 0.5742092728614807,
-        "x2": 0.8661320209503174,
-        "y2": 0.5916463732719421
-      },
-      "vision_selected": "A",
-      "vision_transcription": "קסג",
-      "confidence": 0.98,
-      "reasoning": "The raster crop clearly displays the Hebrew letters ק (qof), ס (samekh), and ג (gimel). The third letter exhibits the characteristic left-extending foot of a gimel (identical to the gimel in 'נגד' on the line above), rather than the square right-angled corner of a dalet. Thus, the visual evidence definitively supports 'קסג' (Option A).",
-      "flag": "current_text_may_be_wrong"
-    },
-    {
-      "word_index": 5,
-      "opcode": "insert",
-      "docai_reading": null,
-      "final_text": "[.]",
-      "page": 59,
-      "bbox": null,
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "no bbox (insertion) - not vision-cropped",
-      "flag": "unverified_insertion"
-    },
-    {
-      "word_index": 140,
-      "opcode": "replace",
-      "docai_reading": "דוה",
-      "final_text": "הוה",
-      "page": 59,
-      "bbox": {
-        "x1": 0.7353485226631165,
-        "y1": 0.6938361525535583,
-        "x2": 0.7600246667861938,
-        "y2": 0.7100567817687988
-      },
-      "vision_selected": "B",
-      "vision_transcription": "הוה",
-      "confidence": 0.98,
-      "reasoning": "The visible text on line 3 clearly shows 'מי הוה' (from the common Talmudic phrase). The first letter of the target word has a clear top bar, right post, and a distinct separated left leg, which is the defining character form for 'ה' rather than 'ד'. Therefore, Option B ('הוה') is correct.",
-      "flag": "current_text_confirmed"
-    }
-  ],
-  "165": [
-    {
-      "word_index": 42,
-      "opcode": "replace",
-      "docai_reading": "בתלמורא",
-      "final_text": "בתלמודא",
-      "page": 60,
-      "bbox": {
-        "x1": 0.1854838728904724,
-        "y1": 0.3780733644962311,
-        "x2": 0.2549627721309662,
-        "y2": 0.39419588446617126
-      },
-      "vision_selected": "B",
-      "vision_transcription": "בתלמודא",
-      "confidence": 0.95,
-      "reasoning": "The contextual Rabbinic/Aramaic term is 'בתלמודא' ('in the Talmud'), part of the standard text 'קבע ההוא עובדא דכפייה בתלמודא' (Pilpula Charifta on Bava Kamma). Paleographically, the letter preceding the alef is a Dalet ('ד'), which raw OCR (Option A) misidentified as a Resh ('ר') due to slight print ink smoothing at the upper-right corner.",
-      "flag": "current_text_confirmed"
-    }
-  ],
-  "167": [
-    {
-      "word_index": 0,
-      "opcode": "insert",
-      "docai_reading": null,
-      "final_text": "קסז",
-      "page": 60,
-      "bbox": null,
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "no bbox (insertion) - not vision-cropped",
-      "flag": "unverified_insertion"
-    },
-    {
-      "word_index": 3,
-      "opcode": "insert",
-      "docai_reading": null,
-      "final_text": "[.]",
-      "page": 60,
-      "bbox": null,
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "no bbox (insertion) - not vision-cropped",
-      "flag": "unverified_insertion"
     }
   ],
   "168": [
