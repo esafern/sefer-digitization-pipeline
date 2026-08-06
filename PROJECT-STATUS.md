@@ -172,6 +172,121 @@ CONFIRMED_NUMBERING_GAPS in `tests/test_corpus_invariants.py` updated to
 drop 167 - the remaining 5 (187, 190, 197, 216, 217) are unaffected by
 this finding and still stand as directly-confirmed genuine gaps.
 
+## Klal 185-190, 196-197, 215-217 resolved — none of the remaining 5 "confirmed gaps" were real, 2026-08-06
+
+Requested: check the other 5 klalim (187, 190, 197, 216, 217) the same way
+klal 167 was just resolved. User directly caught the first one by re-reading
+the rendered page image themselves ("what you have for 186 is actually
+187... 186 text is missing"), which reframed the whole approach: instead of
+trusting the earlier "confirmed gap" verdicts, build a general check for
+**orphaned tokens** (real docai content never captured under any klal_id)
+and **double-assigned tokens** (the same real content captured under more
+than one klal_id).
+
+**New standing script: `check_klal_token_orphans.py`** (Part 1 only, same
+`docai_word_boxes`/`gematria_trace_part1.json` dependency as the other
+Part-1-only validators). For every klal boundary with a known real marker
+position, it checks whether the klal's own stored `clean_text` actually
+opens with the real docai text at that position - catching a same-length
+*swap* (wrong content of about the right size attached to the wrong
+klal_id), which `validate_klal_span_coverage.py`'s aggregate word-count
+ratio cannot catch. Two designs were tried and rejected before landing on
+word-sequence alignment (see the script's own docstring for the full
+reasoning): a character-blob `SequenceMatcher` ratio scored the klal
+186/187 swap at 0.68 (comfortably "matching") purely because both openings
+share a 4-word template (`קפו הלכה כדברי המקיל`); a strict per-position
+word check went the other way and false-flagged ~30% of the whole corpus,
+because a single stripped `[.]` editorial mark or unstripped furniture
+token permanently shifts every position after it. `difflib.SequenceMatcher`
+over **word sequences** (not characters, not strict position) tolerates
+small insertions/deletions while still correctly penalizing genuinely wrong
+content. Run clean against the corrected corpus: 177 spans checked, 0
+opening mismatches, 0 double-assignments.
+
+**All 5 resolved - each was a marker-misread-plus-merge, the exact same
+compound bug shape as klal 166/167, just varying which letter got
+misread**:
+
+- **Klal 185/186/187**: klal_id 186 held klal 187's real content verbatim
+  (its own genuine קפז marker misread as קפו by docai, colliding with klal
+  186's own real קפו marker sitting 24 tokens earlier on the same page).
+  klal 186's own real content - a short, distinct 24-word span between
+  klal 185's real end and klal 187's real marker - was orphaned, never
+  stored under any klal_id at all. Confirmed by direct crop: both
+  "קפו"-reading tokens are genuinely ו-shaped (ruled out a ד/ר or ז/ו-style
+  misread for THIS specific pair - the collision here is a real print
+  duplicate value, not an OCR letter confusion). Split: klal 186 now holds
+  its own real (short) content, klal 187 now holds what was mislabeled
+  under 186 (marker corrected to קפז).
+- **Klal 189/190**: klal_id 189 held klal 190's real content merged in
+  undivided (Lesson 16 pattern) behind a **correctly-read** קץ marker that
+  no prior automated search ever found, because the search only tried the
+  standard-form spelling קצ - קץ is the word-final-letter form of the same
+  letter (ק"ץ, both = 190), standard Hebrew orthography, never
+  cross-checked as an alternate spelling. Confirmed by direct crop: bold
+  קץ marker immediately followed by bold הלכה, the standard convention.
+  Split at the word boundary in the pre-existing (already-cleaned) stored
+  text.
+- **Klal 196/197**: klal_id 196 held klal 197's real content merged in
+  undivided behind a קצז marker misread as קצו (ז->ו, the same specific
+  confusion already confirmed for klal 166/167 - now a 2-for-2 pattern for
+  this exact letter substitution). Confirmed by direct crop and by reading
+  the full ~450-word span for a natural closing colon before the misread
+  marker. Real klal 197 crosses the page 70->71 boundary; furniture (page
+  70's catchword+watermark, page 71's running header) stripped using the
+  same method established for every other cross-page reconstruction this
+  project.
+- **Klal 215/216/217**: klal_id 215 held **two** klalim's content merged
+  in - not just one - the most severe instance of this bug pattern found
+  yet (1645 words, three klalim's worth, under one klal_id). klal 216's
+  real marker רטז was misread רטן (ז misread as final-nun ן - **a new
+  letter-confusion pair for this project**, not previously catalogued;
+  confirmed by direct crop, the marker's last stroke has ז's characteristic
+  shape, not ן's). klal 217's real marker ריז was misread ריו (ז->ו, same
+  family as 166/167 and 196/197). Both markers sit behind clean klal-ending
+  colons, confirmed by direct crop and by reading the ~1600-word combined
+  span end to end. Real 216 crosses the page 74->75 boundary, real 217
+  crosses page 75->76; both required careful furniture-stripping (page 76
+  additionally had a stray out-of-position `1` token before its real
+  4-word header, plus a separately-positioned printed folio number `לב`,
+  a token-count anomaly like the one already documented for klal 97's page
+  44 header). Split by locating the two marker words in the pre-existing
+  stored text (not rebuilt from raw tokens - an earlier attempt to rebuild
+  klal 215 directly from `docai_word_boxes` introduced a spurious `חזה`
+  vs `וזה` word difference against the already-hand-corrected stored
+  text, which the split-in-place approach avoided).
+
+**Separately found and fixed, same investigation: klal 3/4 duplication.**
+While calibrating the orphan-scanner, its double-assignment pass flagged
+klal 4's opening chunk as also appearing under klal 3. klal 3's real,
+already-correct final sentence (`ד ואפ"ה חשיב ליה שם בזבחים למד מלמד
+והניח הדבר בתימה וגדולה היא אלי וצ"ע :`) had ALSO been prepended to klal
+4's stored text - confirmed by direct crop with bounding-box annotation:
+the small `ד` at the very end of klal 3's real last line and the bold `ד`
+that's klal 4's genuine marker are two *different* tokens sitting on
+different lines, and something (most likely the original cross-page-
+truncation reconstruction, which used the small `ד` as an anchor) grabbed
+the wrong one. Fixed by trimming the duplicated prefix from klal 4's
+stored text; klal 3 needed no change.
+
+**New letter-confusion pairs catalogued tonight, worth remembering for
+any future unresolved-marker investigation**: ז misread as ה is NOT what
+happened for 185/186 (ruled out by direct crop - that was a genuine
+duplicate value, not a misread); ז misread as final-nun ן (new, klal 216);
+alternate-valid-gematria-spelling blind spots for both 190 (קץ vs קצ) and
+215 (רטו vs ריה) - a distinct failure mode from a letter misread, since
+the text is read *correctly* but the search tool never tried the
+alternate valid spelling.
+
+Full pipeline (`rebuild_all.sh --skip-vision`) re-run clean after all
+fixes; `validate_klal_span_coverage.py` and `validate_title_alphabetical_
+order.py` both re-run clean (same baselines as before - none of tonight's
+fixes introduced a new flag); `gematria_trace_part1.json` updated with
+proper entries and `note` fields for every klal touched, matching the
+established convention. `tests/test_corpus_invariants.py`'s
+`CONFIRMED_NUMBERING_GAPS` set is now **empty** - every klal originally
+flagged as a genuine numbering gap turned out not to be one.
+
 ## Open items
 
 - **Rigorous (vision-confidence-scored) review currently covers Part 1 only**

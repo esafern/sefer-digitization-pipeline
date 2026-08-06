@@ -139,13 +139,21 @@ correctly; if you add another vision-caching script, key it the same way.
   `verify_corrections_vision.py`, `assemble_corrections_dataset.py`,
   `build_klal_page_regions.py`, `build_review_html.py`, and `rebuild_all.sh`
   are the review-artifact pipeline (see "Single source of truth" above).
-  `build_vlm_demo.py`, `validate_klal_span_coverage.py`,
-  `validate_title_alphabetical_order.py`, and
-  `validate_title_section_letter.py` are the other active root scripts (demo
-  generation and standalone post-fix validators, run manually, not part of
-  `rebuild_all.sh`). As of 2026-08-06 these are the *only* scripts left at
-  root — everything else that was there (one-off extraction/fix/lexicon
-  scripts) has been moved to `archive/scripts/`.
+  `rebuild_all.sh`'s step 7/7 runs `tests/test_corpus_invariants.py`
+  (pytest) as a hard gate — see "Standing regression test suite" in
+  PROJECT-STATUS.md for what it checks and why (`requirements-dev.txt`
+  pins the pytest version). `build_vlm_demo.py`,
+  `validate_klal_span_coverage.py`, `validate_title_alphabetical_order.py`,
+  `validate_title_section_letter.py`, and `check_klal_token_orphans.py`
+  (added 2026-08-06 — checks every Part-1 klal boundary for orphaned
+  tokens never captured under any klal_id, or the same tokens captured
+  under two; see PROJECT-STATUS.md "Klal 185-190, 196-197, 215-217
+  resolved") are the other active root scripts (demo generation and
+  standalone post-fix validators, run manually, not part of
+  `rebuild_all.sh`). Root also now has a `tests/` directory (the pytest
+  suite above) and `requirements-dev.txt` — everything else that was at
+  root as of 2026-08-06's cleanup (one-off extraction/fix/lexicon scripts)
+  has been moved to `archive/scripts/`.
 - `archive/scripts/`, `archive/data/`, `archive/docs/` — one-time,
   already-applied patch/find/debug scripts (hardcoded to specific klal
   numbers or line indices), their throwaway text/JSON dumps, and superseded

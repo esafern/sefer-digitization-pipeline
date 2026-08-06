@@ -1630,9 +1630,20 @@
     "page": 68,
     "expected_gematria": "קפו",
     "stored_gematria": "קפו",
-    "content_match_ratio": 0.25,
-    "status": "marker_found_content_mismatch",
-    "marker_position": 316
+    "content_match_ratio": null,
+    "status": "ok",
+    "marker_position": 316,
+    "note": "2026-08-06: klal_id 186 previously held klal 187's real content (marker קפז misread as קפו). Real 186 is the short span 316-339, its own real content, split out."
+  },
+  {
+    "klal_id": 187,
+    "page": 68,
+    "marker_position": 340,
+    "expected_gematria": "קפז",
+    "stored_gematria": "קפז",
+    "status": "ok",
+    "content_match_ratio": null,
+    "note": "2026-08-06: never in this trace before (was a placeholder). Real marker found - the content already stored under klal_id 186 was actually this klal's, with its own קפז marker misread as קפו (collides with klal 186's own genuine קפו 24 tokens earlier). Confirmed by direct crop: the two 'קפו'-reading tokens have visibly different last-letter shapes."
   },
   {
     "klal_id": 188,
@@ -1648,9 +1659,20 @@
     "page": 68,
     "expected_gematria": "קפט",
     "stored_gematria": "קפט",
-    "content_match_ratio": 0.875,
+    "content_match_ratio": null,
     "marker_position": 714,
-    "status": "ok"
+    "status": "ok",
+    "note": "2026-08-06: klal_id 189 previously held klal 190's real content merged in undivided (Lesson 16 pattern), behind a genuinely-read קץ marker that prior marker search never found because it only searched the standard-form spelling קצ, not the word-final-letter form קץ (both spell 190)."
+  },
+  {
+    "klal_id": 190,
+    "page": 68,
+    "marker_position": null,
+    "expected_gematria": "קץ",
+    "stored_gematria": "קץ",
+    "status": "ok",
+    "content_match_ratio": null,
+    "note": "2026-08-06: never in this trace before (was a placeholder, 'marker_not_found_in_window'). Real marker is the word-final-letter spelling קץ (=190, same value as קצ), sitting inside what was klal 189's stored text. marker_position not re-derived as a raw token index (this klal was split by string, not by token-span reconstruction) - if this field is needed later, locate 'קץ' as a genuine title-context word in page 68's tokens, not by exact-string search for 'קצ' alone."
   },
   {
     "klal_id": 191,
@@ -1693,9 +1715,20 @@
     "page": 70,
     "expected_gematria": "קצו",
     "stored_gematria": "קצו",
-    "content_match_ratio": 0.875,
+    "content_match_ratio": null,
     "marker_position": 641,
-    "status": "ok"
+    "status": "ok",
+    "note": "2026-08-06: klal_id 196 previously held klal 197's real content merged in undivided (same Lesson 16 pattern as 186/187 and 189/190), behind a קצז marker misread as קצו (ז->ו, same confusion family as klal 166/167)."
+  },
+  {
+    "klal_id": 197,
+    "page": 70,
+    "marker_position": 737,
+    "expected_gematria": "קצז",
+    "stored_gematria": "קצז",
+    "status": "ok",
+    "content_match_ratio": null,
+    "note": "2026-08-06: never in this trace before (was a placeholder). Real marker found at page 70 token 737, misread קצו by docai (ז->ו) - confirmed by sentence-boundary context (clean ':' before it, coherent new content after) and cross-page span read-through."
   },
   {
     "klal_id": 198,
@@ -1852,10 +1885,32 @@
   {
     "klal_id": 215,
     "page": 74,
-    "expected_gematria": "ריה",
+    "expected_gematria": "רטו",
     "stored_gematria": "רטו",
     "content_match_ratio": null,
-    "status": "marker_not_found_in_window"
+    "status": "ok",
+    "marker_position": 487,
+    "note": "2026-08-06: expected_gematria here should really allow either valid 215 spelling (ריה or רטו) - prior marker search apparently only tried ריה, missing the רטו spelling actually used in print (same class of blind spot as klal 190's קץ/קצ). klal_id 215 also held BOTH klal 216 and klal 217's real content merged in undivided until tonight (a double merge, not just single-neighbor)."
+  },
+  {
+    "klal_id": 216,
+    "page": 74,
+    "marker_position": 637,
+    "expected_gematria": "רטז",
+    "stored_gematria": "רטז",
+    "status": "ok",
+    "content_match_ratio": null,
+    "note": "2026-08-06: never in this trace before (was a placeholder). Real marker found at page 74 token 637, misread רטן by docai (ז misread as final-nun ן - a new letter-confusion pair for this project, confirmed by direct crop). Content was merged into klal 215's stored text."
+  },
+  {
+    "klal_id": 217,
+    "page": 75,
+    "marker_position": 416,
+    "expected_gematria": "ריז",
+    "stored_gematria": "ריז",
+    "status": "ok",
+    "content_match_ratio": null,
+    "note": "2026-08-06: never in this trace before (was a placeholder). Real marker found at page 75 token 416, misread ריו by docai (ז->ו, same confusion family as klal 166/167 and 196/197). Content was merged into klal 215's stored text, spanning across the page 74->75 boundary."
   },
   {
     "klal_id": 218,

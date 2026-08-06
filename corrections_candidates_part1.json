@@ -82,8 +82,17 @@
     {
       "klal_id": 4,
       "page": 15,
+      "opcode": "insert",
+      "word_index_in_final_text": 0,
+      "original_word": null,
+      "corrected_word": "ד",
+      "bbox": null
+    },
+    {
+      "klal_id": 4,
+      "page": 15,
       "opcode": "delete",
-      "word_index_in_final_text": 50,
+      "word_index_in_final_text": 35,
       "original_word": "1",
       "corrected_word": null,
       "bbox": {
@@ -7071,241 +7080,17 @@
       }
     },
     {
-      "klal_id": 196,
-      "page": 70,
-      "opcode": "delete",
-      "word_index_in_final_text": 36,
-      "original_word": "'",
-      "corrected_word": null,
-      "bbox": {
-        "x1": 0.7985121011734009,
-        "y1": 0.7736990451812744,
-        "x2": 0.80409175157547,
-        "y2": 0.7918515801429749
-      }
-    },
-    {
-      "klal_id": 196,
-      "page": 70,
-      "opcode": "delete",
-      "word_index_in_final_text": 53,
-      "original_word": "'",
-      "corrected_word": null,
-      "bbox": {
-        "x1": 0.8778673410415649,
-        "y1": 0.7894312143325806,
-        "x2": 0.883446991443634,
-        "y2": 0.8067769408226013
-      }
-    },
-    {
-      "klal_id": 196,
-      "page": 70,
-      "opcode": "delete",
-      "word_index_in_final_text": 63,
-      "original_word": "'",
-      "corrected_word": null,
-      "bbox": {
-        "x1": 0.551146924495697,
-        "y1": 0.7890278100967407,
-        "x2": 0.5604463815689087,
-        "y2": 0.8063735365867615
-      }
-    },
-    {
-      "klal_id": 196,
-      "page": 70,
-      "opcode": "delete",
-      "word_index_in_final_text": 75,
-      "original_word": "'",
-      "corrected_word": null,
-      "bbox": {
-        "x1": 0.8071915507316589,
-        "y1": 0.803953230381012,
-        "x2": 0.8133912086486816,
-        "y2": 0.8221057057380676
-      }
-    },
-    {
-      "klal_id": 196,
-      "page": 70,
-      "opcode": "delete",
-      "word_index_in_final_text": 78,
-      "original_word": "'",
-      "corrected_word": null,
-      "bbox": {
-        "x1": 0.6763794422149658,
-        "y1": 0.803953230381012,
-        "x2": 0.6813391447067261,
-        "y2": 0.8221057057380676
-      }
-    },
-    {
-      "klal_id": 196,
-      "page": 70,
-      "opcode": "delete",
-      "word_index_in_final_text": 81,
-      "original_word": "'",
-      "corrected_word": null,
-      "bbox": {
-        "x1": 0.574085533618927,
-        "y1": 0.803953230381012,
-        "x2": 0.5790452361106873,
-        "y2": 0.8221057057380676
-      }
-    },
-    {
-      "klal_id": 196,
-      "page": 70,
-      "opcode": "delete",
-      "word_index_in_final_text": 99,
-      "original_word": "'",
-      "corrected_word": null,
-      "bbox": {
-        "x1": 0.5647861361503601,
-        "y1": 0.8188785910606384,
-        "x2": 0.5697458386421204,
-        "y2": 0.8370310664176941
-      }
-    },
-    {
-      "klal_id": 196,
-      "page": 70,
-      "opcode": "delete",
-      "word_index_in_final_text": 117,
-      "original_word": "'",
-      "corrected_word": null,
-      "bbox": {
-        "x1": 0.4786112904548645,
-        "y1": 0.8338039517402649,
-        "x2": 0.4879107177257538,
-        "y2": 0.8515530228614807
-      }
-    },
-    {
-      "klal_id": 196,
+      "klal_id": 198,
       "page": 70,
       "opcode": "replace",
-      "word_index_in_final_text": 124,
-      "original_word": "לא",
-      "corrected_word": "אא",
+      "word_index_in_final_text": 0,
+      "original_word": "קצו",
+      "corrected_word": "קצח",
       "bbox": {
-        "x1": 0.17234966158866882,
-        "y1": 0.8338039517402649,
-        "x2": 0.19838809967041016,
-        "y2": 0.8515530228614807
-      }
-    },
-    {
-      "klal_id": 196,
-      "page": 70,
-      "opcode": "delete",
-      "word_index_in_final_text": 136,
-      "original_word": "'",
-      "corrected_word": null,
-      "bbox": {
-        "x1": 0.5288282632827759,
-        "y1": 0.8487293124198914,
-        "x2": 0.5331680178642273,
-        "y2": 0.8672851920127869
-      }
-    },
-    {
-      "klal_id": 196,
-      "page": 70,
-      "opcode": "delete",
-      "word_index_in_final_text": 137,
-      "original_word": "'",
-      "corrected_word": null,
-      "bbox": {
-        "x1": 0.46621203422546387,
-        "y1": 0.8483259081840515,
-        "x2": 0.46993181109428406,
-        "y2": 0.866881787776947
-      }
-    },
-    {
-      "klal_id": 196,
-      "page": 70,
-      "opcode": "delete",
-      "word_index_in_final_text": 139,
-      "original_word": "'",
-      "corrected_word": null,
-      "bbox": {
-        "x1": 0.3725976347923279,
-        "y1": 0.8483259081840515,
-        "x2": 0.37755733728408813,
-        "y2": 0.866881787776947
-      }
-    },
-    {
-      "klal_id": 196,
-      "page": 70,
-      "opcode": "replace",
-      "word_index_in_final_text": 154,
-      "original_word": "אטרי",
-      "corrected_word": "אמרי",
-      "bbox": {
-        "x1": 0.5096094012260437,
-        "y1": 0.8640580773353577,
-        "x2": 0.5492870211601257,
-        "y2": 0.8805969953536987
-      }
-    },
-    {
-      "klal_id": 196,
-      "page": 70,
-      "opcode": "delete",
-      "word_index_in_final_text": 158,
-      "original_word": "'",
-      "corrected_word": null,
-      "bbox": {
-        "x1": 0.43893367052078247,
-        "y1": 0.8640580773353577,
-        "x2": 0.44265344738960266,
-        "y2": 0.8805969953536987
-      }
-    },
-    {
-      "klal_id": 196,
-      "page": 70,
-      "opcode": "delete",
-      "word_index_in_final_text": 163,
-      "original_word": "'",
-      "corrected_word": null,
-      "bbox": {
-        "x1": 0.26472410559654236,
-        "y1": 0.8640580773353577,
-        "x2": 0.2696838080883026,
-        "y2": 0.8805969953536987
-      }
-    },
-    {
-      "klal_id": 196,
-      "page": 70,
-      "opcode": "delete",
-      "word_index_in_final_text": 180,
-      "original_word": "'",
-      "corrected_word": null,
-      "bbox": {
-        "x1": 0.33725976943969727,
-        "y1": 0.8785800933837891,
-        "x2": 0.3434593975543976,
-        "y2": 0.8987494707107544
-      }
-    },
-    {
-      "klal_id": 196,
-      "page": 70,
-      "opcode": "replace",
-      "word_index_in_final_text": 181,
-      "original_word": "ונשמרת",
-      "corrected_word": "ורנעשמרת",
-      "bbox": {
-        "x1": 0.22566646337509155,
-        "y1": 0.8781766891479492,
-        "x2": 0.2851828932762146,
-        "y2": 0.8983461260795593
+        "x1": 0.8722876906394958,
+        "y1": 0.7434449195861816,
+        "x2": 0.9026658535003662,
+        "y2": 0.762404203414917
       }
     },
     {
@@ -8204,146 +7989,6 @@
       }
     },
     {
-      "klal_id": 215,
-      "page": 74,
-      "opcode": "delete",
-      "word_index_in_final_text": 171,
-      "original_word": "'",
-      "corrected_word": null,
-      "bbox": {
-        "x1": 0.16336633265018463,
-        "y1": 0.7416093945503235,
-        "x2": 0.1689356416463852,
-        "y2": 0.7598059177398682
-      }
-    },
-    {
-      "klal_id": 215,
-      "page": 74,
-      "opcode": "delete",
-      "word_index_in_final_text": 175,
-      "original_word": "'",
-      "corrected_word": null,
-      "bbox": {
-        "x1": 0.8118811845779419,
-        "y1": 0.7569753527641296,
-        "x2": 0.8186880946159363,
-        "y2": 0.7763849496841431
-      }
-    },
-    {
-      "klal_id": 215,
-      "page": 74,
-      "opcode": "replace",
-      "word_index_in_final_text": 182,
-      "original_word": "אא",
-      "corrected_word": "לא",
-      "bbox": {
-        "x1": 0.4350247383117676,
-        "y1": 0.7569753527641296,
-        "x2": 0.45853960514068604,
-        "y2": 0.7763849496841431
-      }
-    },
-    {
-      "klal_id": 215,
-      "page": 74,
-      "opcode": "replace",
-      "word_index_in_final_text": 189,
-      "original_word": "ברמה",
-      "corrected_word": "בהמה",
-      "bbox": {
-        "x1": 0.8007425665855408,
-        "y1": 0.772745668888092,
-        "x2": 0.8452970385551453,
-        "y2": 0.7893247008323669
-      }
-    },
-    {
-      "klal_id": 215,
-      "page": 74,
-      "opcode": "replace",
-      "word_index_in_final_text": 243,
-      "original_word": "וכר",
-      "corrected_word": "וכו'",
-      "bbox": {
-        "x1": 0.6930692791938782,
-        "y1": 0.8180347681045532,
-        "x2": 0.7178217768669128,
-        "y2": 0.8362312912940979
-      }
-    },
-    {
-      "klal_id": 215,
-      "page": 74,
-      "opcode": "delete",
-      "word_index_in_final_text": 249,
-      "original_word": "'",
-      "corrected_word": null,
-      "bbox": {
-        "x1": 0.5080445408821106,
-        "y1": 0.8180347681045532,
-        "x2": 0.5123762488365173,
-        "y2": 0.8362312912940979
-      }
-    },
-    {
-      "klal_id": 215,
-      "page": 74,
-      "opcode": "delete",
-      "word_index_in_final_text": 256,
-      "original_word": "-",
-      "corrected_word": null,
-      "bbox": {
-        "x1": 0.9034653306007385,
-        "y1": 0.8329963684082031,
-        "x2": 0.9108911156654358,
-        "y2": 0.8511928915977478
-      }
-    },
-    {
-      "klal_id": 215,
-      "page": 74,
-      "opcode": "delete",
-      "word_index_in_final_text": 297,
-      "original_word": "'",
-      "corrected_word": null,
-      "bbox": {
-        "x1": 0.4653465449810028,
-        "y1": 0.8645370006561279,
-        "x2": 0.46844059228897095,
-        "y2": 0.8823291659355164
-      }
-    },
-    {
-      "klal_id": 215,
-      "page": 74,
-      "opcode": "delete",
-      "word_index_in_final_text": 300,
-      "original_word": "'",
-      "corrected_word": null,
-      "bbox": {
-        "x1": 0.33477723598480225,
-        "y1": 0.8645370006561279,
-        "x2": 0.3397277295589447,
-        "y2": 0.8823291659355164
-      }
-    },
-    {
-      "klal_id": 215,
-      "page": 74,
-      "opcode": "delete",
-      "word_index_in_final_text": 304,
-      "original_word": "'",
-      "corrected_word": null,
-      "bbox": {
-        "x1": 0.1862623691558838,
-        "y1": 0.8645370006561279,
-        "x2": 0.19121287763118744,
-        "y2": 0.8823291659355164
-      }
-    },
-    {
       "klal_id": 218,
       "page": 76,
       "opcode": "replace",
@@ -8639,7 +8284,7 @@
     }
   ],
   "meta": {
-    "total_candidates": 653,
+    "total_candidates": 628,
     "klalim_covered": 151,
     "skipped_no_docai_page_klalim": [],
     "untrusted_klalim_excluded": [
