@@ -275,3 +275,22 @@ fixed — the rule still applies to the next incident.
     checking most. Treat a low/untrusted alignment `match_ratio` as its own
     mandatory-manual-review flag, independent of whatever the
     corrections/vision pipeline shows for that klal.
+16. **Checking only the boundary between two "trusted" neighbors cannot
+    detect content merged inside one of them.** Confirmed 2026-08-06: a
+    check of whether klal N's "trusted" stored text already reached the
+    token immediately before klal N+2's marker found "zero gap" for
+    klal 180, 182, and 194 and concluded no room existed for them — wrong
+    in all three cases. Each was really sitting, whole, inside its
+    "trusted" neighbor's own `clean_text`, appended after that neighbor's
+    real ending, behind a garbled second marker the boundary check never
+    looked for because it never read the neighbor's *full* text, only its
+    edges. A "trusted" flag on a klal says its *boundaries* were
+    validated, not that its *interior* was searched for a second klal
+    hiding inside it. Before concluding a klal_id has no content anywhere,
+    read the full stored text of both neighbors for an embedded second
+    marker and topic shift — do not infer absence from edge-adjacency
+    alone. The direct-visual-page-render check (Lesson 14) is the
+    reliable method here too: rendering the physical boundary and reading
+    it caught the three wrong conclusions and confirmed the six real
+    gaps at equal confidence, where token-position inference gave a
+    50/50 record.

@@ -5178,18 +5178,6 @@
     "vision_reasoning": "The image clearly shows the word 'אמוראים' (Amoraim). Option B contains an erroneous digit '7' inserted into the text."
   },
   {
-    "klal_id": 169,
-    "page": 62,
-    "opcode": "insert",
-    "word_index_in_final_text": 199,
-    "original_word": null,
-    "corrected_word": "יך מלאכי כללי ההא",
-    "bbox": null,
-    "vision_confidence": null,
-    "vision_reasoning": "no bbox (insertion) - not vision-cropped",
-    "vision_selected": null
-  },
-  {
     "klal_id": 170,
     "page": 64,
     "opcode": "delete",
@@ -7680,6 +7668,24 @@
     "vision_reasoning": "The raster crop contains three visible lines of Hebrew text ('אה', 'נת הטו', and 'ח' ע\"י'). Neither Option A (\"'\") nor Option B (\"None\") accurately transcribes the visible characters, so UNCERTAIN is selected."
   },
   {
+    "klal_id": 179,
+    "page": 66,
+    "opcode": "delete",
+    "word_index_in_final_text": 66,
+    "original_word": "Digitized by Google",
+    "corrected_word": null,
+    "bbox": {
+      "x1": 0.533374547958374,
+      "y1": 0.9591258764266968,
+      "x2": 0.7422744035720825,
+      "y2": 0.9825981259346008
+    },
+    "vision_selected": "A",
+    "vision_transcription": "Digitized by Google",
+    "vision_confidence": 1.0,
+    "vision_reasoning": "The image clearly contains the English watermark text 'Digitized by Google', matching Option A perfectly."
+  },
+  {
     "klal_id": 181,
     "page": 67,
     "opcode": "insert",
@@ -9138,24 +9144,6 @@
     "vision_reasoning": "Neither candidate option (''' or 'None') accurately reflects the visible Hebrew text in the crop, which displays multiple letters across lines including 'פ\"ב' and 'כמוה' ש'."
   },
   {
-    "klal_id": 193,
-    "page": 69,
-    "opcode": "delete",
-    "word_index_in_final_text": 246,
-    "original_word": "Digitized by Google",
-    "corrected_word": null,
-    "bbox": {
-      "x1": 0.5329636335372925,
-      "y1": 0.958198070526123,
-      "x2": 0.7436845302581787,
-      "y2": 0.982548713684082
-    },
-    "vision_selected": "A",
-    "vision_transcription": "Digitized by Google",
-    "vision_confidence": 1.0,
-    "vision_reasoning": "The image clearly contains the English watermark 'Digitized by Google', matching Option A perfectly, with no Hebrew manuscript text present in this specific crop."
-  },
-  {
     "klal_id": 195,
     "page": 70,
     "opcode": "replace",
@@ -9586,18 +9574,6 @@
     "vision_transcription": "ונשמרת",
     "vision_confidence": 0.99,
     "vision_reasoning": "The word on the third line of the manuscript crop clearly reads 'ונשמרת' (vav-nun-shin-mem-resh-tav). Option B includes spurious extra characters ('ורנעשמרת'), whereas Option A matches the clear paleographic reading precisely."
-  },
-  {
-    "klal_id": 196,
-    "page": 70,
-    "opcode": "insert",
-    "word_index_in_final_text": 184,
-    "original_word": null,
-    "corrected_word": "יך מלאכי כללי ההא",
-    "bbox": null,
-    "vision_confidence": null,
-    "vision_reasoning": "no bbox (insertion) - not vision-cropped",
-    "vision_selected": null
   },
   {
     "klal_id": 199,

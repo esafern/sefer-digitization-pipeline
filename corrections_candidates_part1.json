@@ -3998,15 +3998,6 @@
       }
     },
     {
-      "klal_id": 169,
-      "page": 62,
-      "opcode": "insert",
-      "word_index_in_final_text": 199,
-      "original_word": null,
-      "corrected_word": "יך מלאכי כללי ההא",
-      "bbox": null
-    },
-    {
       "klal_id": 170,
       "page": 64,
       "opcode": "delete",
@@ -5943,6 +5934,20 @@
       }
     },
     {
+      "klal_id": 179,
+      "page": 66,
+      "opcode": "delete",
+      "word_index_in_final_text": 66,
+      "original_word": "Digitized by Google",
+      "corrected_word": null,
+      "bbox": {
+        "x1": 0.533374547958374,
+        "y1": 0.9591258764266968,
+        "x2": 0.7422744035720825,
+        "y2": 0.9825981259346008
+      }
+    },
+    {
       "klal_id": 181,
       "page": 67,
       "opcode": "insert",
@@ -7076,20 +7081,6 @@
       }
     },
     {
-      "klal_id": 193,
-      "page": 69,
-      "opcode": "delete",
-      "word_index_in_final_text": 246,
-      "original_word": "Digitized by Google",
-      "corrected_word": null,
-      "bbox": {
-        "x1": 0.5329636335372925,
-        "y1": 0.958198070526123,
-        "x2": 0.7436845302581787,
-        "y2": 0.982548713684082
-      }
-    },
-    {
       "klal_id": 195,
       "page": 70,
       "opcode": "replace",
@@ -7424,15 +7415,6 @@
         "x2": 0.2851828932762146,
         "y2": 0.8983461260795593
       }
-    },
-    {
-      "klal_id": 196,
-      "page": 70,
-      "opcode": "insert",
-      "word_index_in_final_text": 184,
-      "original_word": null,
-      "corrected_word": "יך מלאכי כללי ההא",
-      "bbox": null
     },
     {
       "klal_id": 199,
@@ -8765,7 +8747,7 @@
     }
   ],
   "meta": {
-    "total_candidates": 662,
+    "total_candidates": 660,
     "klalim_covered": 149,
     "skipped_no_docai_page_klalim": [],
     "untrusted_klalim_excluded": [
