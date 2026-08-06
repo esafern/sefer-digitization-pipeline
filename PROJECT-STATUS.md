@@ -47,10 +47,10 @@ just appended to — correct superseded claims) whenever a finding changes.
   (`"קפ כלל 180"` etc.): klal **180, 182, 187, 190, 194, 197, 216, 217**.
   These need their actual content extracted/OCR'd from the scan — currently
   titled `(no text available)` as an honest placeholder, not fabricated.
-- **Klal 186's `clean_text` is corrupted** (`לשבצא"בחלס":ב א:ע"ג` — not real
-  words, likely an OCR garble) beyond the "1 word title" workaround applied
-  here (`title` = `הלכה`, the only safely-identifiable word). Needs a real
-  fix against the scan, not just a title-side patch.
+- **Klal 186 — fixed 2026-08-06** (see dated section below): the garbled
+  opening was a corruption of `הלכה כדברי המקיל באבל`, confirmed by
+  direct crop of the real page (68, not the stale stored `27`). No
+  longer open.
 - Fixed in passing: klal 92's `clean_text` had a duplicated OCR fragment
   (`"המק המקובל"` → `"המקובל"`), corrected across all base files.
 - **The book's front matter (title page, haskama, hakdama) is real, substantial
@@ -1680,6 +1680,43 @@ separate from and likely related to the still-open klal 85/86 merge
 question - both may turn out to be the same underlying phenomenon
 (an author-numbering gap this book has more than once) worth
 investigating together rather than as two unrelated one-offs.
+
+## Klal 128's missing tail and klal 186's corruption both fixed, 2026-08-06
+
+With klal 167 correctly left as a blocked, user-facing open item rather
+than guessed past, continued with other already-scoped work instead of
+inventing new investigations, per the standing "close open items first"
+rule.
+
+**Klal 128** (flagged earlier tonight, see above): appended the missing
+~838-word tail (`docai_word_boxes/page_48.json` tokens 5-842) on the
+same disclosed lighter-verification standard as the other large
+cross-page klalim (full read-through for coherence, not word-by-word
+crop-check). Found and fixed ~15 non-word docai misreads on that
+read-through - the established ד/ר/ה confusion family, three separately
+mangled forms of `שמואל` (`לשמוא`, `ולשמוץ`, `ולשמון`), one duplicated
+`עם עם`. One word (`שר סוגיין`) deliberately left as the raw,
+unconfirmed docai reading rather than replaced with a guess. Klal 128 is
+now 1313 words and closed.
+
+**Klal 186** (long-documented as "corrupted, needs a real fix" in
+`CLAUDE.md`'s Open Items): the garbled `לשבצא"בחלס":ב א:ע"ג` is a
+corruption of the real title/opening. Confirmed by direct crop of
+`berlin_square.pdf` page 68 (the real page - stored `page: 27` was stale,
+the same pattern as many other klalim fixed tonight): the print clearly
+reads `קפו הלכה כדברי המקיל באבל : אע"ג...`. The recovered title,
+`הלכה כדברי המקיל באבל` ("the law follows the lenient view in mourning
+matters"), also matches this exact phrase recurring several times later
+in the klal's own body - strong independent confirmation it's right, not
+just a plausible-looking guess. Diffing the rest of the klal against
+fresh docai also found and fixed two more real word errors downstream in
+the same klal: `ארך`->`אהך` (a standard construction, "regarding this
+[rule]") and `רכוואתא`->`רבוואתא` ("the great sages/authorities" - a
+term already seen elsewhere in this corpus; neither original reading is
+a real word). No longer an open item.
+
+Both rebuilt via the full derived-artifact pipeline; `validate_klal_span_coverage.py`
+re-run clean, no new flags.
 
 Also updated `gematria_trace_part1.json`'s entries for klal 95-98 to
 record the now-confirmed marker positions (same `note`-field convention
