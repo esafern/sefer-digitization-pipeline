@@ -73,11 +73,19 @@ in the canonical text files. Concretely:
    (one per Yad Malachi section), `processed_klalim/` (per-klal JSON, 813
    tracked files), and `lexicon.txt` (~19k unique validated Rabbinic Hebrew
    words used as a spell-check dictionary during cleanup passes).
-4. **Demos/reports** — `SEFARIA-VLM-DEMO.html`, `SEFARIA-BERLIN-DEMO.html`, and
-   the `*-VISUAL-REPORT.html` / `*-OVERVIEW.html` files at root are rendered
-   inspection demos, not pipeline code — open them in a browser to visually
-   verify a correction, per the `.gemini/rules/robust_ocr_processing.md` rule
-   file's UI-verification requirement.
+4. **Demos/reports** — `review.html` (built by `build_review_html.py`, step 6
+   of `rebuild_all.sh`) is the live, current UI-verification artifact — open
+   it in a browser to visually verify a correction, per the
+   `.gemini/rules/robust_ocr_processing.md` rule file's UI-verification
+   requirement. `SEFARIA-VLM-DEMO.html` (built by `build_vlm_demo.py`) and
+   `VERIFIED-AGAINST-THE-INK.html` (an evidence showcase tied to
+   `CASE-YAD-MALACHI.md`) are the other two live demo/report artifacts at
+   root. As of 2026-08-06, one-off `*-VISUAL-REPORT.html` / `*-OVERVIEW.html`
+   /  similar report docs from earlier in the project (dated through early
+   August, superseded once `review.html` became the live verification tool)
+   were moved to `archive/docs/` — see "Directory layout" below. Don't assume
+   a `*-REPORT.html` or `*-OVERVIEW.html` name at root is current; check
+   whether a script in the active pipeline still generates it.
 
 ## Single source of truth for corpus text — read before editing any text file
 
@@ -130,14 +138,22 @@ correctly; if you add another vision-caching script, key it the same way.
   scripts. `build_klalim_demo_dataset.py`, `build_corrections_dataset.py`,
   `verify_corrections_vision.py`, `assemble_corrections_dataset.py`,
   `build_klal_page_regions.py`, `build_review_html.py`, and `rebuild_all.sh`
-  are the review-artifact pipeline (see "Single source of truth" above) —
-  everything else at root is either an established data artifact or a
-  historical one-off script.
-- `archive/scripts/`, `archive/data/` — one-time, already-applied patch/find/
-  debug scripts (hardcoded to specific klal numbers or line indices) and their
-  throwaway text/JSON dumps, moved out of the root in Aug 2026 for
-  discoverability. Safe to reference for *how* a past fix was done, not meant
-  to be rerun as-is.
+  are the review-artifact pipeline (see "Single source of truth" above).
+  `build_vlm_demo.py`, `validate_klal_span_coverage.py`,
+  `validate_title_alphabetical_order.py`, and
+  `validate_title_section_letter.py` are the other active root scripts (demo
+  generation and standalone post-fix validators, run manually, not part of
+  `rebuild_all.sh`). As of 2026-08-06 these are the *only* scripts left at
+  root — everything else that was there (one-off extraction/fix/lexicon
+  scripts) has been moved to `archive/scripts/`.
+- `archive/scripts/`, `archive/data/`, `archive/docs/` — one-time,
+  already-applied patch/find/debug scripts (hardcoded to specific klal
+  numbers or line indices), their throwaway text/JSON dumps, and superseded
+  planning/report docs (dated Jul–early Aug 2026, before `review.html` became
+  the live verification artifact), moved out of the root for discoverability
+  (`scripts`/`data` in Aug 2026, `docs` added 2026-08-06). Safe to reference
+  for *how* a past fix was done or what was investigated, not meant to be
+  rerun/treated as current.
 - `aligned_klalim/`, `klalim_batches/`, `processed_klalim/` — tracked,
   versioned pipeline output at various stages.
 - `docai_word_boxes/`, `document_jsons_berlin/`, `klalim_docai/`,
