@@ -6,6 +6,58 @@ the pipeline — what's fixed, what's still broken, and what was investigated
 and why. It will go stale faster than `CLAUDE.md` and should be updated (not
 just appended to — correct superseded claims) whenever a finding changes.
 
+## Standing regression test suite added — 2026-08-06
+
+Requested: review status and consider building a test suite to improve
+process. New `tests/test_corpus_invariants.py` (pytest, added to
+`rebuild_all.sh` as step 7/7, gated by `set -euo pipefail` so a failing
+test fails the whole rebuild) converts several of the manual sweeps this
+document's "process evaluation" sections kept re-discovering by hand
+(Lessons 8/18: a cheap corpus-wide text-pattern sweep catches what
+klal-by-klal review misses) into standing, always-run checks:
+
+- **Zero-tolerance** (no known legitimate exception anywhere in the
+  corpus): klal_id sequence is exactly 1–667 with no gaps/dupes;
+  `klalim_demo_dataset.json` exactly equals part1+part2+part3 concatenated
+  (the Lesson 13 drift check); the `(no text available)` placeholder set is
+  exactly {167, 187, 190, 197, 216, 217}; zero page-header-contamination
+  matches (all spelling variants); zero debug-print leaks (the klal
+  152/154 `"283\n"` bug class); title/clean_text never empty.
+- **Baseline (no-NEW-violations)**, because these checks have real,
+  currently-documented false positives that aren't corpus bugs: duplicate-
+  consecutive-word (Torah-verse repetition like klal 29's `שור שור שור` is
+  genuine content, not a bug — the sweep's own false-positive rate was
+  itself a finding, see the 2026-08-06 corpus-wide-anomaly section above),
+  title-alphabetical-order (klal 101–104's deliberate elliptical-title
+  convention, Parts 2–3's un-judged `"כלל <N>"` placeholders), and
+  `validate_klal_span_coverage.py`'s ratio flag (klal 175's known
+  conservative-rounding false positive, klal 106 at the threshold, klal
+  179/181/193 now legitimately shorter post-180/182/194-split). Each
+  baseline is a hard-coded set/count with inline citations to the exact
+  section of this document that explains why it's not a bug; a NEW entry
+  beyond the baseline fails the test and needs the same scan-verification
+  standard as every other fix in this document before either being
+  corrected or added to the baseline.
+
+Span-coverage check requires the gitignored `gematria_trace_part1.json` +
+`docai_word_boxes/` cache and `pytest.skip()`s if absent (e.g. a fresh
+clone) rather than failing — consistent with those being regenerable
+caches, not source-of-truth files.
+
+**Verified working, not just written**: ran the full suite (10 tests, all
+pass, 0.14s, no API calls) against current data; ran the full
+`rebuild_all.sh --skip-vision` end-to-end with the new step 7/7 wired in
+(confirmed idempotent — no diffs in `corrections_part1.json` /
+`klal_page_regions.json` / `review.html`); smoke-tested all three
+zero-tolerance detectors (header-contamination regex, debug-digit-leak
+regex, duplicate-word baseline-diff) against synthetic bad input matching
+the three real historical bugs (header leak, klal 152/154 debug leak,
+klal 128's `לאוקומי לאוקומי`) to confirm they actually catch what they
+claim to, not just pass vacuously on already-clean data.
+
+`pytest` added to the venv and pinned in new `requirements-dev.txt` (no
+requirements file of any kind existed before this).
+
 ## Open items
 
 - **Rigorous (vision-confidence-scored) review currently covers Part 1 only**
