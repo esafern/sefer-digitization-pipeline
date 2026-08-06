@@ -1903,6 +1903,30 @@ single vision signal favoring the OCR reading is not sufficient on its own
 - these need the same sentence-context check as everything else before
 being trusted, not applied on the strength of this one result.
 
+**All three resolved, 2026-08-06** (note: the klal_ids named above are
+the *pre-shift-zone-fix* numbering from when this was written; the
+content in question now lives one klal_id lower after the klal 92-165
+shift fix - klal 126's item is now at klal 125, klal 144's at klal 143,
+klal 160's at klal 159):
+- **klal 125 `ופרויין`/`ופדוייו`**: resolved while reconstructing this
+  klal during the shift-zone fix - `ופדוייו` (stored) is confirmed
+  correct by sentence context (`תוס' ערכין ח"י ב' ד"ה ופדוייו מבן חדש
+  ומעלה`, a Tosafot citation on Bamidbar 18:16's redemption-of-firstborn
+  verse; `חדש` there means "month," matching the verse almost verbatim).
+- **klal 143 `שבהרי"ף`/`שבהדי"ף`**: resolved the same way - `שבהרי"ף`
+  ("as printed in the Rif edition," a standard bibliographic phrase) is
+  correct; `שבהדי"ף` isn't a real abbreviation.
+- **klal 159 `והרל"ם`/`והרמב"ם`**: checked by direct crop
+  (`berlin_square.pdf` page 57) rather than sentence-context alone, since
+  both readings are plausible authority-abbreviations in isolation - the
+  print unambiguously shows a ל (lamed, tall ascender), confirming
+  `והרל"ם` as stored and correct. The vision call favoring `והרמב"ם` here
+  was wrong.
+
+No corrections needed for any of the three - all three already-stored
+readings were correct; the vision-favors-docai signal was wrong in all
+three cases. Closes this open item.
+
 ## Klal 1's second flagged word — vision's 0.98-confidence pick was wrong; my own first fix was ALSO wrong; corrected twice, 2026-08-05
 
 User flagged klal 1's second disputed word (page 14, docai `ומרקמהד` vs
