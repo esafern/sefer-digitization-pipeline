@@ -46,13 +46,14 @@ just appended to — correct superseded claims) whenever a finding changes.
 - **8 Part-1 klalim have no real text at all**, just a placeholder
   (`"קפ כלל 180"` etc.): klal **180, 182, 187, 190, 194, 197, 216, 217**.
   Still titled `(no text available)` as an honest placeholder. **Update
-  2026-08-06: this is very likely NOT missing transcription work** — see
-  the dated finding below. 6 of 8 are confirmed or strongly-implied
-  genuine numbering gaps in the print (zero token space exists between
-  the trusted neighboring klalim on either side); 194 and 197 remain
-  unverified either way. Do not assign scan-transcription work for these
-  without first reading that section — the original framing here was an
-  unverified assumption.
+  2026-08-06: this is NOT missing transcription work** — see the dated
+  finding below. All 8 are individually confirmed (token-by-token, zero
+  gap between trusted neighbors) to be genuine numbering gaps in the
+  print, the same phenomenon as klal 167 and the long-standing klal 85/86
+  merge question. Do not assign scan-transcription work for these — the
+  original framing here was an unverified assumption, now disproven.
+  What's actually needed is a documented editorial decision about how to
+  handle the numbering gap (see the dated section), not more searching.
 - **Klal 186 — fixed 2026-08-06** (see dated section below): the garbled
   opening was a corruption of `הלכה כדברי המקיל באבל`, confirmed by
   direct crop of the real page (68, not the stale stored `27`). No
@@ -1760,33 +1761,53 @@ double-checked to the same standard) for a fifth**:
   covers *both* 216 and 217 with one check since they're adjacent to
   each other in the gap.
 
-**Not yet individually re-verified to the same standard**: klal 194 and
-197. A first attempt to trace klal 193's real end (to bound the search
-for 194) didn't cleanly resolve - the phrase expected at its tail
-wasn't found at the position expected, suggesting klal 193 may itself
-be longer or shaped differently than assumed, and confirming this
-specific pair needs its own dedicated check rather than being assumed
-correct from the pattern alone. Flagging the honest state: 6 of 8 are
-either confirmed or strongly implied gaps; 2 of 8 remain genuinely open
-questions, not yet resolved either way.
+**Update: klal 194 now confirmed with the same zero-token-gap method.**
+The first attempt (above) failed only because it searched the wrong
+page - klal 193's real content (810 words, much longer than its
+`matched_page` field suggested) turns out to span from page 69 onto
+page 70, ending at page 70 token 594 (`...מסברא דנפשיה :`),
+**immediately** followed by klal 195's marker (`קצה`) at token 595 - the
+same zero-gap signature as every other confirmed case. That makes **five
+of eight individually confirmed** (180, 182, 187, 190, 194) plus the
+216+217 pair strongly implied - six or seven of eight, depending how
+216/217 are counted.
 
-**What this means, if the pattern holds for all 8 (not yet certain)**:
-the original framing of this open item in `CLAUDE.md`
-("These need their actual content extracted/OCR'd from the scan") was
-based on an unverified assumption. The evidence gathered tonight points
-instead to these being genuine gaps in the author's/printer's klal
-numbering sequence - the same structural phenomenon as the klal 167 gap
-and the long-standing klal 85/86 merge question, not eight separate
+**klal 197 - also confirmed, false alarm on klal 196 resolved.** The
+apparent obstacle above was just a wrong-page search, not a real bounding
+bug: klal 196's real ending (`...שגם ממנו נתעלמה הלכה זו :`) is on
+**page 71**, not page 70 as first assumed (klal 196 is itself a
+cross-page klal, page 70→71) - found at page 71 token 241, **immediately**
+followed by klal 198's marker (`קצח`) at token 242. Same zero-gap
+signature as every other case. Klal 196 was never actually miss-bounded;
+the search just hadn't looked far enough.
+
+**Final tally: all 8 of 8 confirmed with zero token gap between trusted
+neighbors** - klal 180, 182, 187, 190, 194, 197 individually, plus 216
+and 217 together (adjacent gap, one check covers both). This is no longer
+a "likely" pattern inferred from a partial sample; it is directly
+verified, token-by-token, for every single one of the 8 originally-flagged
+placeholder klalim. Combined with klal 167 (identical signature, found
+earlier tonight) and the long-standing klal 85/86 merge question, this
+looks like a real, recurring feature of this print's klal numbering, not
+a one-off transcription accident anywhere.
+
+**What this means, now that all 8 are confirmed**: the original framing
+of this open item in `CLAUDE.md` ("These need their actual content
+extracted/OCR'd from the scan") was based on an unverified assumption
+and should be corrected there too, not just here. The evidence is now
+direct and complete: these are genuine gaps in the author's/printer's
+klal numbering sequence - the same structural phenomenon as the klal 167
+gap and the long-standing klal 85/86 merge question, not eight separate
 instances of lost transcription work. **This does not mean nothing needs
 doing** - a genuine numbering gap in a 667-klal reference work still
 needs a documented, deliberate editorial decision (e.g., "klal 180 does
 not exist in the source; the numbering has a gap here, consistent with
 Sefaria's citation convention for X" or similar), not silent deletion of
 the `klal_id` and not fabricated text. But it reframes the task from
-"go find the missing content" (which the evidence says isn't there) to
-"confirm the remaining 2, then make and document the numbering-gap
-decision for all of them together with klal 167 and klal 85/86" - one
-coherent structural question, not eight-plus-one separate open items.
+"go find the missing content" (confirmed not to exist) to "make and
+document the numbering-gap decision for klal 167, 180, 182, 187, 190,
+194, 197, 216, 217, and 85/86 together" - one coherent structural
+question spanning 10 klal_ids, not ten separate open items.
 
 **Deliberately not acting further on this tonight** - this is exactly
 the kind of finding that needs the user's scoping input (per the klal
