@@ -1,5 +1,69 @@
 # Project Status — Open Items & Investigation Log
 
+## Klal 144 scan-crop pass — two real fixes found, one left disclosed-ambiguous, 2026-08-07
+
+Same treatment as klal 143 above, applied to klal 144's 1336-word
+cross-page extension (the other disclosed-rigor-gap klal, previously only
+coherence-read-through checked). Lexicon-scoped triage found 117
+not-in-lexicon words — far more than klal 143's 28, consistent with this
+klal's unusual register (a philosophical digression on the 13 hermeneutical
+principles and Oral/Written Torah transmission, not citation-heavy halachic
+prose). Shortlisted 6 that looked like real anomalies rather than ordinary
+rare-vocabulary lexicon gaps, cropped all 6 from `berlin_square.pdf` page
+52 (docai tokens), cross-checked against same-page/same-klal reference
+letters:
+
+- **`דעורת`→`דעות` — confirmed and fixed.** A 2000dpi crop shows exactly
+  4 letters (ד-ע-ו-ת), no ר anywhere — the stored/docai `ר` doesn't exist
+  on the page at all. `לכמה דעורת ומחלוקתם של חכמים` (nonsense) →
+  `לכמה דעות ומחלוקתם של חכמים` ("into many opinions, and their
+  disagreement..." — grammatical and coherent).
+- **`לגטרי`→`לגמרי` — confirmed and fixed.** Docai misread מ as ט. Crop
+  of the disputed letter compared directly against this same klal's own
+  correctly-spelled `לגמרי` 33 tokens later on the same page: both show
+  the same closed-loop mem shape, not the open-hook shape ט takes
+  elsewhere on this page. `לאפוקי מה שהוא מדרבנן לגטרי` (nonsense) →
+  `...לגטרי` → `...לגמרי` ("to exclude entirely that which is Rabbinic"
+  — standard, common word, fits the sentence).
+- **`מהלוקת` (word_index 910) — checked, NOT changed.** Direct crop
+  compared against this same klal's own `מחלוקת` (correctly spelled,
+  same page) shows the second letter has heh's open left-side gap, not
+  het's closed top bar — the print genuinely reads `מהלוקת`, not
+  `מחלוקת`, at this specific spot. A real print irregularity (this exact
+  word is spelled correctly twice elsewhere on the same page), preserved
+  as printed per the fidelity rule, not silently normalized.
+- **`ומאו` (word_index 1078) — checked, NOT changed.** Suspected this
+  might be `ולאו` (ל/מ confusion), but the crop's second letter has no
+  tall ascender (compared directly against `אלא`'s ל one line above in
+  the same crop) — confirms מ, matching stored/docai exactly. Left as
+  printed even though its exact grammatical role in context isn't fully
+  clear — per this project's own standing rule, transcription fidelity
+  doesn't require the reviewer to fully parse 18th-century Aramaic syntax,
+  only to confirm what's actually printed.
+- **`ביטמא` (word_index 725) — checked, NOT changed.** Crop matches
+  stored/docai exactly, no letter-shape ambiguity found.
+- **`בכתיכת` (word_index 858) — left disclosed-ambiguous, NOT changed.**
+  Suspected `בכתיבת` (`כתב יד` / "in manuscript" is a standard idiom;
+  `בכתיכת` isn't a word). Cropped at 2000dpi and cross-checked against
+  both an unambiguous ב reference and an unambiguous כ reference (the
+  word `כתב` elsewhere on this page, where letter identity is certain
+  from context) — the disputed letter's shape didn't cleanly match either
+  reference confidently enough to call. Per Lesson 6 (every check has a
+  blind spot; don't force a guess when genuinely undecided), left as
+  currently stored, disclosed rather than silently resolved either way.
+
+`part1.json` updated (2 fixes, unique-string replace, count=1 verified
+before writing), `gematria_trace_part1.json`'s klal 144 note updated.
+`./rebuild_all.sh --skip-vision` re-run clean, 10/10 pytest.
+
+**Both klal 143 and klal 144's disclosed cross-page-extension rigor gap
+are now closed to the same "targeted crop-check of flagged candidates"
+standard** — not full word-by-word verification of all 2095 combined
+words, which was never the bar set for this pass (see klal 143's own
+scope disclosure above); the remaining un-cropped words in both klalim
+are unremarkable running prose with no lexicon/coherence flag against
+them.
+
 ## Klal 34 investigation — the last untrusted klal in Part 1, resolved, 2026-08-07
 
 Klal 34's *content* was already fixed and crop-confirmed back on 2026-08-05

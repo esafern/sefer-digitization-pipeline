@@ -1325,7 +1325,7 @@
     "content_match_ratio": null,
     "status": "ok",
     "marker_position": 243,
-    "note": "2026-08-07: marker position found by wider/alternate-spelling search (was marker_not_found_in_window); content confirmed already correct (docai raw at this position matches stored clean_text) and marker glyph confirmed by direct crop."
+    "note": "2026-08-07: marker position found by wider/alternate-spelling search (was marker_not_found_in_window); content confirmed already correct (docai raw at this position matches stored clean_text) and marker glyph confirmed by direct crop. | 2026-08-07: scan-crop pass on lexicon-flagged candidates in this klal's cross-page extension - דעורת->דעות (spurious ר, not printed at all) and לגטרי->לגמרי (ט/מ confusion, cross-checked against this klal's own separately-occurring לגמרי) confirmed and fixed. מהלוקת and ומאו confirmed correct as printed (real print forms, not transcription errors - left as-is per fidelity). בכתיכת/בכתיבת left disclosed as genuinely ambiguous at the letter level (ב/כ) even after crop comparison against same-page references."
   },
   {
     "klal_id": 145,
