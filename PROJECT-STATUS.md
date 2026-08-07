@@ -764,14 +764,49 @@ flagged as a genuine numbering gap turned out not to be one.
   spot-checked and pushed back on a result already reported as "resolved"
   (0.8 agreement)** — see `CLAUDE.md` Lessons Learned on why a passing score
   isn't the same as verified.
-- Two more candidates from the same batch that fixed klal 65/21/218/219 were
-  deliberately NOT applied: klal 144 (`הדואה`→`הרואה`, high confidence) sits
-  in a spot the gematria trace couldn't confirm either way, and klal 85's
-  flagged "missing `פו`" is not a word-level fix at all — the model's own
-  reasoning shows `פו` marks the start of klal **86**, meaning klal 85 and 86
-  are currently merged into one entry. That's a klal-boundary problem
-  (success criterion #2), not a text correction; fixing it means splitting
-  the klal, not inserting a word. Left for the structural pass below.
+- **RESOLVED, both halves — checked 2026-08-07, this bullet was stale and
+  had never been corrected against later work that already closed it
+  (the "update it, not just append" rule this document sets for itself).**
+  Original text, retained for the record: "Two more candidates from the
+  same batch that fixed klal 65/21/218/219 were deliberately NOT applied:
+  klal 144 (`הדואה`→`הרואה`, high confidence) sits in a spot the gematria
+  trace couldn't confirm either way, and klal 85's flagged 'missing `פו`'
+  is not a word-level fix at all — the model's own reasoning shows `פו`
+  marks the start of klal **86**, meaning klal 85 and 86 are currently
+  merged into one entry. That's a klal-boundary problem (success criterion
+  #2), not a text correction; fixing it means splitting the klal, not
+  inserting a word. Left for the structural pass below."
+  - **Klal 144's `הדואה`→`הרואה`**: the flagged word never belonged to
+    what's now canonical klal_id 144 at all — it was mislabeled under a
+    stale/legacy local numbering. The content actually landed in current
+    klal_id 143 (`דיוני גולה הוא קרנא`, 759 words) during the later klal
+    130-144 cross-page reconstruction (see "klal 143 and klal 144 turned
+    out to be two more large, cross-page klalim" above), which explicitly
+    resolved this exact fix via sentence-context confirmation (`בפ'
+    הרואה נ"ח ב'` — the Berachot chapter name) and also fixed a second,
+    related item in the same klal (`שבהדי"ף`→`שבהרי"ף`). Directly
+    re-verified now: current `part1.json` klal 143 contains `הרואה` and
+    `שבהרי"ף`, not the old misreadings — the fix is applied and correct.
+    Canonical klal_id 144 (`דרשות אין לנו לעשות מעצמנו`, 1336 words) is
+    unrelated content and never had this issue.
+  - **Klal 85/86 merge concern**: confirmed NOT a merge. Current
+    `part1.json` has klal 85 and 86 as distinct, complete entries, each
+    opening with its own real gematria marker (`פה`, `פו`) as the literal
+    first word of `clean_text` and ending in a natural closing colon.
+    `check_klal_token_orphans.py` re-run clean (196/196 spans, 0 orphans,
+    0 double-assignments) — this boundary is included and passes. Matches
+    the already-existing "Klal 85/86 is a separate, already-resolved
+    matter" note elsewhere in this document; this bullet was the one place
+    that note was never propagated to.
+  - **Genuinely still open, disclosed rather than silently dropped**: klal
+    143 and klal 144's long cross-page extensions (759 and 1336 words,
+    the reconstruction that resolved the `הדואה`/`שבהדי"ף` items above)
+    were verified only by full-text coherence read-through, never
+    individually crop-checked against the physical scan — a disclosed,
+    lower-rigor standard than the rest of this document (see "Neither
+    extension was cropped against the physical scan at all" above). A
+    scan-crop follow-up pass on these two specific klalim is the one real
+    piece of unfinished work this investigation surfaces.
 - **Systematic semantic-sanity pass run against all 52 klal-1–91 title flags**
   scoring below 0.9 agreement (widened from 0.7 — see `CLAUDE.md` Lessons
   Learned item 2), not just a sample: `semantic_sanity_titles_1to91.json`.
