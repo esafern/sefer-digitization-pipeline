@@ -687,6 +687,99 @@
       }
     },
     {
+      "klal_id": 34,
+      "page": 26,
+      "opcode": "delete",
+      "word_index_in_final_text": 47,
+      "original_word": "(",
+      "corrected_word": null,
+      "bbox": {
+        "x1": 0.27442440390586853,
+        "y1": 0.48131778836250305,
+        "x2": 0.27940261363983154,
+        "y2": 0.498593807220459
+      }
+    },
+    {
+      "klal_id": 34,
+      "page": 26,
+      "opcode": "replace",
+      "word_index_in_final_text": 48,
+      "original_word": "פגשתיהן",
+      "corrected_word": "פגשתיהו",
+      "bbox": {
+        "x1": 0.13192284107208252,
+        "y1": 0.48131778836250305,
+        "x2": 0.19850653409957886,
+        "y2": 0.4989955723285675
+      }
+    },
+    {
+      "klal_id": 34,
+      "page": 26,
+      "opcode": "delete",
+      "word_index_in_final_text": 50,
+      "original_word": "'",
+      "corrected_word": null,
+      "bbox": {
+        "x1": 0.8674548864364624,
+        "y1": 0.4973885118961334,
+        "x2": 0.8730553984642029,
+        "y2": 0.5134592056274414
+      }
+    },
+    {
+      "klal_id": 34,
+      "page": 26,
+      "opcode": "delete",
+      "word_index_in_final_text": 51,
+      "original_word": "'",
+      "corrected_word": null,
+      "bbox": {
+        "x1": 0.8394523859024048,
+        "y1": 0.4973885118961334,
+        "x2": 0.8456751704216003,
+        "y2": 0.5134592056274414
+      }
+    },
+    {
+      "klal_id": 34,
+      "page": 26,
+      "opcode": "delete",
+      "word_index_in_final_text": 55,
+      "original_word": ")",
+      "corrected_word": null,
+      "bbox": {
+        "x1": 0.6054760217666626,
+        "y1": 0.4973885118961334,
+        "x2": 0.6110765337944031,
+        "y2": 0.5134592056274414
+      }
+    },
+    {
+      "klal_id": 34,
+      "page": 26,
+      "opcode": "replace",
+      "word_index_in_final_text": 72,
+      "original_word": "דוא",
+      "corrected_word": "הוא",
+      "bbox": {
+        "x1": 0.4281269311904907,
+        "y1": 0.5126556754112244,
+        "x2": 0.4548848867416382,
+        "y2": 0.5295299291610718
+      }
+    },
+    {
+      "klal_id": 35,
+      "page": 26,
+      "opcode": "insert",
+      "word_index_in_final_text": 0,
+      "original_word": null,
+      "corrected_word": "לה",
+      "bbox": null
+    },
+    {
       "klal_id": 35,
       "page": 26,
       "opcode": "delete",
@@ -10130,11 +10223,9 @@
     }
   ],
   "meta": {
-    "total_candidates": 762,
-    "klalim_covered": 170,
+    "total_candidates": 769,
+    "klalim_covered": 171,
     "skipped_no_docai_page_klalim": [],
-    "untrusted_klalim_excluded": [
-      34
-    ]
+    "untrusted_klalim_excluded": []
   }
 }

@@ -1,5 +1,70 @@
 # Project Status — Open Items & Investigation Log
 
+## Klal 34 investigation — the last untrusted klal in Part 1, resolved, 2026-08-07
+
+Klal 34's *content* was already fixed and crop-confirmed back on 2026-08-05
+(title word-order, missing clause), but it remained the sole klal (of 222)
+that `part1_header_anchored_alignment.json` couldn't trust
+(`match_ratio: 0.5`, `matched_page: 51` — a spurious match on an unrelated
+page, `trusted: false`), meaning it had **zero** correction candidates and
+had never gone through the correction-candidate/vision pipeline at all
+(the exact Lesson 15 blind spot). Root cause traced, not just re-described:
+
+**The marker itself was misread by docai.** `gematria_trace_part1.json`
+had klal 34 as `marker_not_found_in_window` because the automated search
+was looking for `לד` (34) — but page 26 token 374 (bounded correctly
+between klal 33's marker at token 221 and klal 35's at token 475) reads
+`לו` (36) in docai's raw OCR, a ד→ו marker misread (the same family as
+klal 167/196-197's ז→ו). Confirmed by direct 1500dpi crop of
+`berlin_square.pdf` page 26: unambiguous `לד` (dalet's squared corner),
+not a vav. Fixed `gematria_trace_part1.json`'s klal 34 entry: `status: ok`,
+`marker_position: 374`.
+
+**Why the alignment tool still couldn't auto-trust it even at the right
+position**: tested directly — the 8-word fuzzy query from `clean_text`
+scores only 0.375 against docai's own window at the crop-confirmed correct
+start, well under `ACCEPT_RATIO` (0.7). Docai's OCR is independently
+garbled on several *other* words in this same span too (`מישורון` for
+`אדם דן`, `אלאס`/`איל` for `אלא`/`א"כ`, etc.) — not a search/cursor bug,
+a genuinely bad OCR patch. Added a documented `MANUAL_OVERRIDES` mechanism
+to `archive/scripts/header_anchored_alignment.py` (klal_id → crop-verified
+(page, token_index), with inline citation) rather than lowering
+`ACCEPT_RATIO` globally, which would reintroduce the false-positive risk
+the header-anchoring was built to prevent. Re-ran: **222/222 klalim now
+trusted** (up from 221/222), diffed old vs new output first per Lesson 3 —
+zero regressions among the other 221 (only klal 34's `trusted`/`matched_page`
+changed; small `lexicon_hit_rate`/`jump_tokens` drift elsewhere is just
+`lexicon.txt` having grown since the alignment file was last generated,
+unrelated to this fix). Also fixed an unrelated pre-existing crash in the
+script's own reporting code (`search_stage` int comparison breaking on the
+new `"manual_override"` string value).
+
+**Regenerated the pipeline** (`rebuild_all.sh --skip-vision`): klal 34 now
+generates 6 correction candidates (previously 0) — `Klalim excluded as
+untrusted: 0 -> []`. Crop-checked all 6 directly (not deferred to a vision
+pass — direct crop is this project's highest-confidence signal):
+- 4 are parenthesis/geresh punctuation-tokenization diffs (docai splits `(`
+  `'` `'` `)` as separate tokens; stored `clean_text` already has the same
+  punctuation inline) — diff-alignment noise, not a content issue; the
+  parens are genuinely on the page and genuinely in stored text.
+- `דוא`→`הוא`: docai's raw OCR misread, already correctly adjudicated in
+  stored text (`הוא` is the only grammatical reading; `דוא` isn't a word).
+- `פגשתיהן`→`פגשתיהו` (docai vs. stored): **crop-confirmed stored text is
+  correct.** Direct 2000dpi crop of `(דרשתיהו פגשתיהו בפ' ב' דברכות...)`
+  shows both words ending in ו, not docai's ן — `דרשתיהו`/`פגשתיהו`
+  ("I expounded it, I encountered it" — 1st-person-past + 3rd-person-object
+  suffix, a real grammatical construction, matching this author's habit
+  elsewhere of narrating his own research trail before a citation).
+
+**No `part1.json` text change was needed** — every candidate this fix
+surfaced was already correct as stored. This closes klal 34 as an open
+item: content confirmed (2026-08-05), now also structurally trusted and
+pipeline-visible (2026-08-07), all new candidates it exposed reviewed.
+Not run: a formal Gemini vision-verification pass on these 6 candidates —
+direct crop-confirmation already exceeds that standard, so it wasn't
+spent; can be added later if the corpus-wide vision-verification pass is
+ever rerun anyway. `./rebuild_all.sh --skip-vision` clean, 10/10 pytest.
+
 ## Klal 143 scan-crop pass — one real fix found (`דמרך`→`דמהיך`), 2026-08-07
 
 Picked up the disclosed rigor gap from the klal 144/85-86 closure above:
@@ -961,6 +1026,13 @@ corrected. **Klal 34 is the sole klal with no reliable page source at
 all** (neither trace nor alignment trust it - the same already-documented
 Lesson 14 word-order case) - left untouched, not guessed. `rebuild_all.sh`
 re-run clean, 10/10 pytest. No longer open.
+
+**Superseded later the same day — see "Klal 34 investigation" above.**
+Klal 34's marker was found (page 26, token 374; docai had misread the
+marker glyph itself) and both `gematria_trace_part1.json` and
+`part1_header_anchored_alignment.json` now trust it. Its `page` field is
+no longer an exception - already correctly `26` in `part1.json` from the
+crop-confirmed 2026-08-05 work, now backed by a trusted source too.
 
 ## Klal 123 span-coverage false positive - verified and added to the test baseline, 2026-08-07
 

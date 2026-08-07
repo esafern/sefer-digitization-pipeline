@@ -300,7 +300,9 @@
     "expected_gematria": "לד",
     "stored_gematria": "לד",
     "content_match_ratio": null,
-    "status": "marker_not_found_in_window"
+    "status": "ok",
+    "marker_position": 374,
+    "note": "2026-08-07: marker_not_found_in_window resolved - docai raw OCR misread the marker itself (לד/34 -> לו/36, ד/ו confusion, same family as klal 167/196-197's ז/ו misreads elsewhere in this corpus). Confirmed by direct high-DPI crop of berlin_square.pdf page 26 token 374: unambiguous לד (dalet's squared corner, not vav's simple stroke). Content itself was already fixed and crop-confirmed 2026-08-05 (title word-order, missing clause); this closes the remaining marker-position/alignment gap. part1_header_anchored_alignment.json's klal 34 entry updated via a documented MANUAL_OVERRIDES entry in header_anchored_alignment.py (the fuzzy query-match ratio is 0.375 even anchored at the correct position, since docai's OCR is independently garbled on several nearby words too - not fixable by better anchoring alone). Now 222/222 trusted, up from 221/222."
   },
   {
     "klal_id": 35,

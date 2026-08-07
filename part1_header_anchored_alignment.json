@@ -129,7 +129,7 @@
     "trusted": true,
     "search_stage": 0,
     "jump_tokens": 97,
-    "lexicon_hit_rate": 0.963
+    "lexicon_hit_rate": 0.966
   },
   {
     "klal_id": 13,
@@ -365,12 +365,12 @@
   {
     "klal_id": 34,
     "expected_section": "האלף",
-    "matched_page": 51,
-    "matched_page_header": "הדלת",
-    "match_ratio": 0.5,
-    "trusted": false,
-    "search_stage": null,
-    "jump_tokens": 22800,
+    "matched_page": 26,
+    "matched_page_header": "האלף",
+    "match_ratio": 1.0,
+    "trusted": true,
+    "search_stage": "manual_override",
+    "jump_tokens": 146,
     "lexicon_hit_rate": 1.0
   },
   {
@@ -381,7 +381,7 @@
     "match_ratio": 0.75,
     "trusted": true,
     "search_stage": 0,
-    "jump_tokens": 246,
+    "jump_tokens": 92,
     "lexicon_hit_rate": 1.0
   },
   {
@@ -392,8 +392,8 @@
     "match_ratio": 0.75,
     "trusted": true,
     "search_stage": 0,
-    "jump_tokens": 110,
-    "lexicon_hit_rate": 1.0
+    "jump_tokens": 109,
+    "lexicon_hit_rate": 0.99
   },
   {
     "klal_id": 37,
@@ -403,7 +403,7 @@
     "match_ratio": 0.75,
     "trusted": true,
     "search_stage": 0,
-    "jump_tokens": 102,
+    "jump_tokens": 103,
     "lexicon_hit_rate": 1.0
   },
   {
@@ -448,7 +448,7 @@
     "trusted": true,
     "search_stage": 0,
     "jump_tokens": 39,
-    "lexicon_hit_rate": 0.951
+    "lexicon_hit_rate": 0.953
   },
   {
     "klal_id": 42,
@@ -1614,7 +1614,7 @@
     "trusted": true,
     "search_stage": 0,
     "jump_tokens": 114,
-    "lexicon_hit_rate": 1.0
+    "lexicon_hit_rate": 0.998
   },
   {
     "klal_id": 148,
@@ -1746,7 +1746,7 @@
     "trusted": true,
     "search_stage": 0,
     "jump_tokens": 177,
-    "lexicon_hit_rate": 0.957
+    "lexicon_hit_rate": 0.958
   },
   {
     "klal_id": 160,
@@ -1790,7 +1790,7 @@
     "trusted": true,
     "search_stage": 0,
     "jump_tokens": 182,
-    "lexicon_hit_rate": 0.97
+    "lexicon_hit_rate": 0.972
   },
   {
     "klal_id": 164,
@@ -1955,7 +1955,7 @@
     "trusted": true,
     "search_stage": 1,
     "jump_tokens": 623,
-    "lexicon_hit_rate": 1.0
+    "lexicon_hit_rate": 0.997
   },
   {
     "klal_id": 179,
