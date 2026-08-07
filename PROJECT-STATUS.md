@@ -1,5 +1,56 @@
 # Project Status — Open Items & Investigation Log
 
+## Punctuation-token diff bug fixed — 61% of Part 1's correction candidates were noise, 2026-08-07
+
+User reported review.html bugs (stray period in hover tooltips, underline
+inconsistency, no clear "which candidate was chosen" indicator, "overall
+ugly") and asked for a candidate-override mechanism with backend version
+tracking, plus a klal-level flag-for-revisit with a note field - before
+running a full Part 1 vision-validation pass. Investigating the stray-
+period report before touching any UI code surfaced a much bigger issue.
+
+**Root cause (not a display bug): `build_corrections_dataset.py` diffs
+DocAI OCR tokens against `clean_text` words via `difflib.SequenceMatcher`
+over `clean_word()`-normalized streams. `clean_word()` strips punctuation
+but doesn't drop punctuation-only tokens - a bare `.` or `'` becomes `""`
+and stays in the stream at its index, so it generates a real-looking diff
+opcode against nothing.** Confirmed blast radius: **464 of 762 (61%) of
+Part 1's correction candidates had a punctuation-only `docai_reading`/
+`final_text` field** - 400 of 435 `delete`-opcode candidates (92%) were
+this, plus 64 `insert`-opcode candidates where the "inserted word" was the
+literal editorial `[.]` marker. `build_klal_page_regions.py` has the
+identical latent bug at lower severity (can misattribute a token's region
+box near punctuation, since an empty-string docai token can spuriously
+`equal`-align against an empty-string clean_text word).
+
+**Fixed both scripts**: filter tokens/words where `clean_word(...) == ""`
+out of both diff streams before they reach `SequenceMatcher`.
+`word_index_in_final_text` deliberately keeps indexing into the
+**unfiltered** `clean_text.split()` (skipped punctuation words leave gaps,
+never get renumbered) - downstream code (assembly, the review UI, the
+planned `apply_reviewer_decisions.py`) all locates a word by that index.
+
+Regenerated `corrections_candidates_part1.json`: **762 → 320 candidates**
+(140/222 klalim now have any candidate at all, down from 170 - the
+klalim that dropped to zero had *only* punctuation-noise candidates, not
+real disagreements). Spot-checked: 0/320 survivors have an empty
+`clean_word()` on either side. `corrections_verified_part1.json`/
+`corrections_part1.json` still show the stale 762-entry state until the
+next full (non-`--skip-vision`) `rebuild_all.sh` run - `verify_corrections_
+vision.py` rebuilds fresh from `corrections_candidates_part1.json` each
+run (not an incremental append), so this resolves automatically once that
+run happens; not forced early since it costs Gemini API calls.
+
+This was the direct root cause of the reported "stray period" tooltip bug
+(hovering a `possible_omission` flag showed `Scan appears to show: "."`),
+and explains a large fraction of why the dashboard felt noisy/hard to
+trust - the majority of what looked like flagged disagreements were
+meaningless. Dashboard rearchitecture (new local review server, replacing
+the single-file `review.html`, with a real candidate-override mechanism
+and an append-only decision audit trail) and the full Part 1
+vision-validation pass are in progress as follow-up work - see subsequent
+entries.
+
 ## Closed the two loose ends on `validate_part1_corpus_integrity.py`, 2026-08-07
 
 User asked directly: "did we finish innovating validation checks?" Answer

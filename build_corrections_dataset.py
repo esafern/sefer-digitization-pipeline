@@ -68,11 +68,24 @@ def main():
             skipped_no_docai_page.update(klal_ids)
             continue
 
-        docai_tokens = json.load(open(docai_path))
+        # clean_word() strips punctuation but doesn't drop punctuation-only
+        # tokens (they become "" and stay in the stream) - filter those out
+        # entirely before the diff, otherwise a bare "." or "'" generates a
+        # spurious opcode that looks like a real word-level disagreement.
+        # Confirmed 2026-08-07: this was the root cause of 464/762 (61%) of
+        # Part 1's correction candidates having a punctuation-only
+        # docai_reading/final_text field (PROJECT-STATUS.md "Punctuation-
+        # token diff bug fixed").
+        docai_tokens = [t for t in json.load(open(docai_path)) if clean_word(t["text"])]
         docai_clean = [clean_word(t["text"]) for t in docai_tokens]
 
         # Build one concatenated "page final text" word stream, remembering which
         # klal + in-klal word-index each concatenated position came from.
+        # word_index_in_klal deliberately stays the word's position in the
+        # UNFILTERED words_raw/clean_text.split() - downstream code (assembly,
+        # the review UI, apply_reviewer_decisions.py) all locates a word by
+        # that index, so skipped punctuation words must leave gaps, not get
+        # renumbered.
         page_words_raw = []
         page_words_clean = []
         page_word_origin = []  # (klal_id, word_index_in_klal)
@@ -82,8 +95,11 @@ def main():
                 continue
             words_raw = k["clean_text"].split()
             for idx, w in enumerate(words_raw):
+                cw = clean_word(w)
+                if not cw:
+                    continue
                 page_words_raw.append(w)
-                page_words_clean.append(clean_word(w))
+                page_words_clean.append(cw)
                 page_word_origin.append((klal_id, idx))
 
         sm = difflib.SequenceMatcher(None, docai_clean, page_words_clean, autojunk=False)

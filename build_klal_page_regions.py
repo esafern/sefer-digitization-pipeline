@@ -45,7 +45,13 @@ def main():
         docai_path = os.path.join(DOCAI_DIR, f"page_{page_id}.json")
         if not os.path.exists(docai_path):
             continue
-        docai_tokens = json.load(open(docai_path, encoding="utf-8"))
+        # Drop punctuation-only tokens before the diff - clean_word() reduces
+        # them to "" but doesn't remove them, which can spuriously align an
+        # empty-string docai token against an empty-string clean_text word
+        # near punctuation and misattribute that token's bbox to the wrong
+        # klal. Same fix as build_corrections_dataset.py (2026-08-07,
+        # PROJECT-STATUS.md "Punctuation-token diff bug fixed").
+        docai_tokens = [t for t in json.load(open(docai_path, encoding="utf-8")) if clean_word(t["text"])]
         docai_clean = [clean_word(t["text"]) for t in docai_tokens]
 
         page_words_clean = []
@@ -55,7 +61,10 @@ def main():
             if not k:
                 continue
             for idx, w in enumerate(k["clean_text"].split()):
-                page_words_clean.append(clean_word(w))
+                cw = clean_word(w)
+                if not cw:
+                    continue
+                page_words_clean.append(cw)
                 page_word_origin.append(klal_id)
 
         sm = difflib.SequenceMatcher(None, docai_clean, page_words_clean, autojunk=False)
