@@ -15,7 +15,12 @@
 #     -> verify_corrections_vision.py  -> corrections_verified_part1.json   (Gemini calls, cached)
 #     -> assemble_corrections_dataset.py -> corrections_part1.json
 #     -> build_klal_page_regions.py    -> klal_page_regions.json
-#     -> pytest tests/                 -> pass/fail gate (regression suite)
+#     -> pytest tests/test_corpus_invariants.py -> pass/fail gate (regression suite)
+#
+# tests/test_review_server.py is deliberately NOT part of this gate - it
+# needs a live server subprocess + a real browser (Playwright), unlike the
+# fast no-API/no-network corpus-data checks above. Run it on demand:
+#   ./venv/bin/python -m pytest tests/test_review_server.py -v
 #
 # review.html/build_review_html.py were retired 2026-08-07 in favor of
 # review_server.py + review_frontend/ (a live local server, not a
@@ -69,6 +74,6 @@ echo "== 5/6 build_klal_page_regions.py =="
 ./venv/bin/python build_klal_page_regions.py
 
 echo "== 6/6 tests/ (corpus regression suite) =="
-./venv/bin/python -m pytest tests/ -q
+./venv/bin/python -m pytest tests/test_corpus_invariants.py -q
 
 echo "== done =="

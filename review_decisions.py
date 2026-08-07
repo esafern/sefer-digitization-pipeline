@@ -43,7 +43,10 @@ import uuid
 from datetime import datetime, timezone
 
 REPO = os.path.dirname(os.path.abspath(__file__))
-DECISIONS_PATH = os.path.join(REPO, "review_decisions.jsonl")
+# Overridable via env var so tests/test_review_server.py can point a live
+# review_server.py subprocess at a throwaway file instead of the real,
+# git-tracked decisions log.
+DECISIONS_PATH = os.environ.get("REVIEW_DECISIONS_PATH") or os.path.join(REPO, "review_decisions.jsonl")
 
 VALID_DECISION_TYPES = {"candidate_choice", "klal_flag", "apply_event"}
 
