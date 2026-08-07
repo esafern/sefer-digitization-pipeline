@@ -1,5 +1,62 @@
 # Project Status — Open Items & Investigation Log
 
+## Klal 143 scan-crop pass — one real fix found (`דמרך`→`דמהיך`), 2026-08-07
+
+Picked up the disclosed rigor gap from the klal 144/85-86 closure above:
+klal 143's 759-word cross-page extension had only ever been coherence-
+read-through checked, never crop-checked against the physical scan.
+Full word-by-word cropping of 759 words isn't practical in one pass, so
+used the same triage approach as the rest of this document: ran
+`validate_part1_corpus_integrity.py`'s lexicon-coverage check scoped to
+just this klal to shortlist suspicious tokens (28 not-in-lexicon words,
+mostly `פומבדיתא`/Pumbedita and its prefixed forms — expected, a place
+name), then prioritized the 3 that looked like real anomalies rather than
+ordinary proper-noun lexicon gaps: an internal spelling inconsistency
+(`שמואל` spelled correctly at word_index ~598, then `שמول` at 747, same
+person's name), a second internal inconsistency (`ופומבדיתא` spelled
+correctly 7 times, `ופומכדיתא` once at word_index 711), and one word with
+no obvious reading at all (`דמרך`, word_index 593).
+
+Cropped all three directly from `berlin_square.pdf` page 51 at up to
+2000dpi (docai token bboxes: 77, 196, 231), cross-checked against
+same-page reference letters per Lesson 6/9 (not trusted on shape alone):
+
+- **`דמרך`→`דמהיך` — confirmed and fixed.** The crop clearly shows 5
+  letters (ד-מ-ה-י-ך), not the stored 4 (ד-מ-ר-ך): docai's raw OCR (and
+  the stored text, which inherited it) misread ה as ר and dropped the
+  י entirely. Confirmed by direct comparison against this page's own
+  `הרבה`/`הואיל` (ה — two-legged shape with a gap on the left) and `בר`
+  (ר — single stroke, no left leg): the target's middle letter matches
+  the ה reference, not the ר reference. This is the same structural
+  blind spot as Lesson 15/16 — docai's raw text and the stored text
+  agreed with each other (both wrong), so no correction-candidate was
+  ever generated for it; only a direct crop against reference letters
+  caught it. Applied to `part1.json` (unique-string replace, verified
+  count=1 before writing) and `gematria_trace_part1.json`'s klal 143
+  note. `./rebuild_all.sh --skip-vision` re-run clean, 10/10 pytest.
+- **`שמول` (word_index 747) — checked, NOT changed.** Crop unambiguously
+  shows ל (matches this page's own `לכל` ל-shape: tall ascender curling
+  at top), not א+geresh. The print itself really does spell the name
+  two different ways in the same klal (`שמואל` earlier, `שמول` here) —
+  per success criterion #1 (fidelity over "improving" the text), an
+  internal print inconsistency is preserved as printed, not silently
+  normalized to match the other occurrence.
+- **`ופומכדיתא` (word_index 711) — checked, NOT changed.** Crop shows a
+  rounder, open-hook letterform matching כ, distinguishable from this
+  same word's own correctly-spelled `ופומבדיתא` occurrence elsewhere on
+  the same page (a squarer, closed ב shape) side by side. Same
+  conclusion as `שמول` — a real print-level inconsistency, not a
+  transcription error, left as printed.
+
+**Scope disclosed explicitly**: this checked the 3 most-suspicious of 759
+words (the lexicon-flagged, semantically-anomalous ones), not every word
+in klal 143's extension. This raises confidence but does not make klal
+143 fully crop-verified word-by-word the way short klalim elsewhere in
+this document are — a residual, smaller version of the same disclosed gap
+remains for the ~756 uncropped words, most of which are unremarkable
+running prose with no lexicon/coherence flag against them. Klal 144 (1336
+words, same disclosed gap, not yet touched) is still open.
+
 ## New standing check `validate_part1_corpus_integrity.py` added; found and fixed a real derived-file drift while verifying the session's work — 2026-08-07
 
 Requested: check the working tree matches this document's narrated 2026-08-07

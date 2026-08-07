@@ -1313,7 +1313,7 @@
     "content_match_ratio": 0.125,
     "status": "ok",
     "marker_position": 390,
-    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
+    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches). | 2026-08-07: scan-crop pass on 3 lexicon-flagged candidates in this klal's cross-page extension - דמרך->דמהיך confirmed and fixed (ה/ר confusion + dropped י, cross-checked against same-page ה/ר reference letters); שמول and ופומכדיתא confirmed correct as printed (real print inconsistencies vs. the same words spelled differently elsewhere in this klal, not transcription errors - left as-is per fidelity)."
   },
   {
     "klal_id": 144,
