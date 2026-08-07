@@ -144,11 +144,16 @@ correctly; if you add another vision-caching script, key it the same way.
   PROJECT-STATUS.md for what it checks and why (`requirements-dev.txt`
   pins the pytest version). `build_vlm_demo.py`,
   `validate_klal_span_coverage.py`, `validate_title_alphabetical_order.py`,
-  `validate_title_section_letter.py`, and `check_klal_token_orphans.py`
+  `validate_title_section_letter.py`, `check_klal_token_orphans.py`
   (added 2026-08-06 — checks every Part-1 klal boundary for orphaned
   tokens never captured under any klal_id, or the same tokens captured
   under two; see PROJECT-STATUS.md "Klal 185-190, 196-197, 215-217
-  resolved") are the other active root scripts (demo generation and
+  resolved"), and `validate_part1_corpus_integrity.py` (added 2026-08-07 —
+  5 independent no-LLM/no-scan sweeps over `part1.json` alone: gematria
+  self-consistency, character/encoding sanity, duplicated-phrase detection,
+  self-reference directionality, full-corpus lexicon coverage; see
+  PROJECT-STATUS.md for its first-run results and known false-positive
+  categories) are the other active root scripts (demo generation and
   standalone post-fix validators, run manually, not part of
   `rebuild_all.sh`). Root also now has a `tests/` directory (the pytest
   suite above) and `requirements-dev.txt` — everything else that was at

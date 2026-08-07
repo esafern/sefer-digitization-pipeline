@@ -1,10 +1,324 @@
 # Project Status — Open Items & Investigation Log
 
+## New standing check `validate_part1_corpus_integrity.py` added; found and fixed a real derived-file drift while verifying the session's work — 2026-08-07
+
+Requested: check the working tree matches this document's narrated 2026-08-07
+work before committing, since some in-flight work might have been
+interrupted (Lesson 19 — a written "fixed" claim isn't the same as a
+verified diff). Spot-checked the specific fixes claimed above (klal 36,
+88, 147, 151, 178's second corrupted span, the `page`-field regeneration,
+klal 123's baseline entry) directly against `part1.json`/`corrections_part1.json`
+content and against `tests/test_corpus_invariants.py`'s diff — all matched
+exactly as described.
+
+**Found a real gap in the process itself, not in the narrated fixes**: an
+untracked `validate_part1_corpus_integrity.py` was sitting in the working
+tree — a new `[PRODUCTION]`-tagged, 5-check standing validator (gematria
+self-consistency, character/encoding sanity, duplicated-phrase detection,
+self-reference directionality, full-corpus lexicon coverage) that had never
+been logged here despite CLAUDE.md's standing rule to log every finding
+immediately. Its `main()` called `check_duplicate_phrases(klalim, n=5)`,
+directly contradicting that same function's own inline comment explaining
+why `n=10` was chosen (n=5 produces 333 mostly-explainable hits; n=10 is
+"the narrowest threshold that still lets a few same-title-cluster examples
+through") — a leftover from mid-tuning, fixed to `n=10` to match the
+documented decision.
+
+Running the corrected script surfaced no real corpus bugs, but three
+categories of script-side false positives worth recording so a future run
+isn't re-investigated from scratch:
+- **Gematria self-consistency, 3 "issues" (klal 150, 180, 190)**: the
+  script's own `klal_id_to_gematria()` doesn't apply Hebrew's word-final-
+  letter substitution (ן/ם/ך/ף/ץ) at the end of a numeral spelling. Directly
+  confirmed `part1.json`'s `gematria` field and `clean_text`'s own opening
+  word agree with each other in all three cases (קן/קף/קץ) — internally
+  consistent, matches the already-documented "alternate-valid-gematria-
+  spelling" finding for klal 190/215 above. Not a corpus bug.
+- **Unbalanced parens, 10 "issues"**: a single closing `)` is this edition's
+  footnote-marker convention (e.g. klal 6 `...הרמה*) :`, klal 7 `...רבינו
+  הקדוש **) מסדר...`) — an asterisk/mark plus a lone close-paren flags a
+  footnote, not an enumerated list requiring a matching open-paren. Not a
+  corpus bug.
+- **Duplicated-phrase, 2 "issues" at n=10 (klal 22/23, 23/24)**: genuine
+  same-maxim-title-cluster sharing (`אין למדין/למדים מן הכללות אפילו/אפי'
+  במקום שנאמר בהן חוץ`, the same convention already documented for klal
+  100-104), missed by the script's same-title exemption because the three
+  titles differ by minor spelling variants (למדים/למדין, אפילו/אפי') that
+  the exemption's exact-string comparison doesn't tolerate. Not a corpus
+  bug — a known blind spot in the check's title-equality logic.
+
+**Separately, running `pytest` before committing caught the actual
+interrupted work**: `test_klalim_demo_dataset_matches_part_concatenation`
+failed — `klalim_demo_dataset.json` (a derived file, must never be
+hand-edited, see "Single source of truth" in CLAUDE.md) still had the
+pre-fix `gematria` field values (קנ/קפ/קצ) and stale `page` values for most
+of Part 1, even though `part1.json` itself already had the corrected
+final-letter forms (קן/קף/קץ) and regenerated `page` field from the
+2026-08-07 fix logged above. `./rebuild_all.sh --skip-vision` had evidently
+not been re-run after that last `part1.json` edit before the session ended.
+Ran it now: `klalim_demo_dataset.json` regenerated cleanly (334-line diff,
+gematria + page fields only, `clean_text`/`title` unchanged), all 7 rebuild
+stages + 10/10 pytest pass. No content was lost — this was a stale derived
+artifact, not a corpus defect.
+
+## Second pass on the disclosed-uncertain items from the 85-item crop review — 2026-08-07
+
+Requested: revisit the items left disclosed/unresolved in the section
+below rather than leave them indefinitely open. Re-cropped each at
+tighter zoom and, critically, pulled the **fuller surrounding sentence**
+this time (the original pass often looked at the disputed word in
+isolation) - most resolved once the sentence-level context was visible,
+not from a better pixel read alone.
+
+**5 confirmed real fixes, applied to `part1.json`**:
+- **Klal 36**: `הש"ס '` (with a stray dangling apostrophe already
+  visible in the stored text - a tell that an earlier pass had already
+  half-noticed something was off here and left it unresolved) →
+  `השית'`. Direct crop with full sentence context (`אין דרך השית' סדרי
+  לומר היכא...`) confirms the print has no ס anywhere in this word -
+  unambiguously ה-ש-י-ת plus a geresh, not `הש"ס`.
+- **Klal 88**: `בעניותי` → `בעניי`. Crop with context (`אני בעניי
+  שמעתי ולא אבין`) clearly shows the shorter 5-letter form, not the
+  7-letter `בעניותי`.
+- **Klal 147**: `דסמך` → `דסמיך`. Tight crop shows a clear extra letter
+  (yod) before the final kaf that the shorter reading lacks.
+- **Klal 151** (both `אמרה`/`אמר` instances, not just the one already
+  fixed in the original pass): `דודאי אמר רב אבל` → `דודאי אמרה רב אבל`,
+  and `אי אמר רב לא פסקינן` → `אי אמרה רב לא פסקינן`. Both crops clearly
+  show a final ה (the open 3-stroke gap shape), confirmed against a
+  same-line reference ה in `בזה` for the second instance.
+
+**6 re-confirmed correct as currently stored** (the sentence-level
+context, not available or not pulled in the original pass, settles
+these decisively): klal 151's `רמכריע`/`המכריע` (already correct, not
+actually one of the newly-revisited items - a labeling mixup in the
+original todo list); klal 176's `אשידה`/`אשירה`; klal 178's `אכל`/`אבל`
+(`אבל` directly introduces a quoted Tosafot clause - "בלשונם אבל..." =
+"in their words: 'However...'" - a natural, common citation
+construction); klal 181's `סכר`/`סבר` (the fuller sentence already has
+a second, unambiguous `סבר` a few words later in the identical
+construction `דמר סבר הכי ומר סבר הכי` - internally consistent, no
+reason to think the first instance differs); klal 183's `בסי"ג`/`בפי"ג`
+(citing Maharai Kurkos's chapter-organized commentary - `בפי"ג` "in
+chapter 13" is the expected citation form) and `וככתובות`/`ובכתובות`
+(part of a tractate citation list, `ובכתובות` "and in [tractate]
+Ketubot" fits the list format the other conjunctions in the same
+sentence use).
+
+**2 still genuinely unresolved after this second pass, left disclosed
+rather than guessed**: klal 215 (`וכך`/`וכף`) and klal 216
+(`וכר`/`וכו'`) - both single-word abbreviation/particle disputes where
+the crop remains visually ambiguous even at 800dpi and the semantic case
+for the current text, while reasonably strong (`וכך` "and thus" and
+`וכו'` "etc." are both far more standard than the alternative), isn't
+decisive enough to treat as confirmed. Lower severity than the others
+(particles, not content words).
+
+`rebuild_all.sh` re-run clean: `current_text_may_be_wrong` dropped
+70→65 (5 fixes), 10/10 pytest.
+
+## Crop-check of all 85 `current_text_may_be_wrong` flags — 2026-08-06/07
+
+User-requested: crop-check every one of the 85 vision-flagged
+`current_text_may_be_wrong` items from the vision-verification run above,
+not a sample. Initial read of the data looked like a single systemic
+pattern - all 85 had `vision_selected: 'A'` (favoring the raw DocAI OCR
+reading over the current adjudicated text), and a lexicon cross-check
+showed the current stored text was a real dictionary word in 68/85 cases
+vs. DocAI's raw reading in only 41/85, with one already-documented case
+(klal 82's `בשר`→`בשל` fix) directly contradicted by vision at 1.0
+confidence. That looked like a simple, uniform vision bias (Lesson 10) -
+crop-check a sample, trust the majority pattern, done.
+
+**That would have been wrong.** Direct crop inspection of all 85 (rendered
+at 700-900dpi with generous margin per Lesson 14, compared letter-by-letter
+against unambiguous same-page/same-font reference letters where needed)
+found the bias pattern holds for the large majority, but **15 of the 85
+are genuine errors in the current stored text**, concentrated in specific
+klalim - proving the full check was necessary, not optional (Lesson 1),
+and that a flag's aggregate statistics are not a substitute for looking at
+each one (Lesson 2). **Fixed, applied to `part1.json`, `rebuild_all.sh`
+re-run clean (764 candidates now, `current_text_may_be_wrong` dropped
+70/85→70, pytest 10/10)**:
+
+- **Klal 86, 87**: a real, repeated pattern - `חדוש`/`חידוש`/`חודש` (same
+  triliteral root, "novella" vs "month") got mis-normalized during an
+  earlier correction pass. Confirmed by direct crop AND by rendering
+  `מטעם` from the same page in the same font (contains both מ and ט side
+  by side) as an unambiguous calibration reference: `בחודשיו`→`בחדושיו`,
+  `ובחידושי`→`ובחדושי` (klal 86); `בחודשי`→`בחדושי`,
+  `ובחידושיו`→`ובחדושיו` (klal 87). Also klal 87: `משנה`→`ממשנה` (dropped
+  the מ prefix - "שנתנה לו **מ**משנה", confirmed two clear מ strokes in
+  the crop), `ע"ש`→`יע"ש` (dropped a י), `ט"ז`→`ט"ו` (ז/ו confusion,
+  daf citation).
+- **Klal 169**: `ורבינן`→`ורבינו` (ן/ו confusion; crop clearly shows a
+  final vav, not nun).
+- **Klal 178**: `אא`→`לא` (word_index 283 specifically - the current text
+  had the non-word `אא` where the print reads `לא`/"not").
+- **Klal 193**: a second real cluster - the actual print reads the full
+  name `שמואל`/`כשמואל` (confirmed directly: "אי אמרה **שמואל** לחודיה"
+  and "קאי **כשמואל**" both crop-legible in full), not the stored
+  `שמון`/`כשמון`. Also `אטרה`→`אמרה` (ט/מ confusion - "ר' יוחנן" needs a
+  verb, `אטרה` isn't a word).
+- **Klal 208**: `זהה`→`זה` ("this" - `זהה` isn't 18th-century Hebrew
+  vocabulary; crop shows two letters, not three).
+- **Klal 220**: the stored `clean_text` had literal corrupted garbage
+  (`לא שסי"יחך ואנכלואן הבודאב:ר שיבא לידי מעשה`) where the crop clearly
+  reads a complete, ordinary sentence: `לא שייך אלא בדבר שיבא לידי מעשה`
+  ("[it] is only relevant to a matter that will come to practical
+  application"). This is the most severe of the 15 - not a letter
+  confusion, a straightforwardly garbled/corrupted span that must have
+  entered the text at some earlier processing step.
+
+**One planned fix retracted before applying - a reminder that letter-shape
+alone isn't enough (Lesson 6/9), context matters just as much**: klal 194's
+`כ"מ` was initially misjudged as a `כ"ט` error based on tight-crop letter
+shape alone. Rereading the full phrase - `וע"ע כ"מ פ' כ"ר מה' אישות`
+("see also **Kesef Mishneh** [on] chapter...") - makes clear `כ"מ` is the
+standard abbreviation for the halachic commentary *Kesef Mishneh*, a
+completely sensible citation; `כ"ט` has no standard meaning in this slot.
+Left unchanged. `דלפוס`→`דלפום` (klal 194, same klal, different word) was
+re-confirmed and applied - `לפום` ("according to") is one of the most
+common words in Talmudic Aramaic and the crop's final letter is
+unambiguously a squared final-mem, not samekh.
+
+**New, more serious finding surfaced while fixing klal 178, NOT yet
+investigated or fixed**: the same klal's `clean_text` ends in a second,
+worse corrupted span that was never flagged by the correction-candidate
+pipeline at all - `אא הוא הדין לכל דדסומתימאא דנבאסשררו :לא נכללו` is not
+real Hebrew in any reading. This sits right after the one `אא`→`לא` fix
+applied above (two more unexplained `אא` tokens in the same klal, one
+inside the garbled span itself). Because `build_corrections_dataset.py`
+generates candidates by diffing DocAI raw tokens against `clean_text`,
+and this span is garbled on **both** sides in a way that likely broke the
+alignment (the same blind spot as Lesson 15, just from corruption instead
+of low match_ratio), no candidate was ever generated here - the flag
+pipeline is structurally blind to it. Needs a dedicated re-derivation from
+`docai_word_boxes` against the physical page, the same treatment already
+given to klal 82/83/128/165-167/180/182/185-190/194/196-197/215-217.
+**Klal 178's ending is not yet trustworthy - flag for the next content
+pass.**
+
+**Left unresolved, genuinely ambiguous after direct crop inspection -
+disclosed rather than guessed (per this project's own standing
+convention)**, no change made: klal 36 (`הש"ס`/`השית'`), klal 88
+(`בעניותי`/`בעניי`), klal 147 (`דסמיך`/`דסמך`), klal 151 (second `אמרה`/
+`אמר` instance), klal 176 (`אשידה`/`אשירה`), klal 178 (`אכל`/`אבל` - a
+different word_index than the fixed `אא`/`לא` one), klal 181
+(`סכר`/`סבר`), klal 183 (`בסי"ג`/`בפי"ג` and `וככתובות`/`ובכתובות`),
+klal 215 (`וכך`/`וכף`), klal 216 (`וכר`/`וכו'`). None of these are wrong
+as currently stored as far as this session could determine - just not
+confirmable either way from the crop alone.
+
+The remaining ~70 of the 85 (the majority) were checked and confirmed the
+current stored text is correct - vision's `A` pick was wrong, consistent
+with the original bias hypothesis. Full per-item list and reasoning
+worked through interactively this session; not separately filed, but the
+governing methodology (crop at 700-900dpi, compare against same-page/
+same-font reference letters, require semantic+visual agreement per
+Lesson 9) is recorded here for the next person doing this kind of review.
+
 **Read this at the start of every session, alongside `CLAUDE.md`.** `CLAUDE.md`
 holds the durable rules; this file holds the current, specific, dated state of
 the pipeline — what's fixed, what's still broken, and what was investigated
 and why. It will go stale faster than `CLAUDE.md` and should be updated (not
 just appended to — correct superseded claims) whenever a finding changes.
+
+## `verify_corrections_vision.py` bug fixed: no request timeout, a hung call could block the whole run forever — 2026-08-06
+
+Found while re-running vision verification after refreshing the header-
+anchored alignment (see the vision-verification section below). The script's
+retry/backoff logic only triggers on a *caught exception* - it had no
+request timeout, so when one specific crop's Gemini call never returned and
+never raised, the run sat blocked on that single candidate for 20+ minutes
+at ~0% CPU with zero progress and no error, never reaching the retry path
+at all. Confirmed by two consecutive checks 20 minutes apart showing the
+exact same log line with no new output and no cache growth. Fixed
+(partially): `genai.Client(...)` now passes `http_options=types.
+HttpOptions(timeout=60000)` (60s). **Confirmed insufficient on its own**:
+the same run hung a second time two candidates later (klal 187, `קפו`),
+same symptom (0% CPU, zero cache growth, 15+ minutes, no exception ever
+raised - so the 60s timeout is not actually firing). Isolated test: the
+exact same candidate (same crop, same word pair) succeeds in ~20s when
+run in a brand-new process. **Root cause found via `lsof -a -p <pid> -i`
+on a stuck process**: it was sitting on a real ESTABLISHED TCP connection
+to Google's API (over the machine's Windscribe VPN tunnel) that never
+returned a response - a network/VPN-level stall, not a code deadlock, and
+the client-level 60s `HttpOptions` timeout does not tear the connection
+down (confirmed hung 20+ min with the socket still ESTABLISHED the whole
+time). This is local-environment-specific (the VPN), not a corpus or
+pipeline design bug. Workaround in place: a watchdog loop
+(`vision_watchdog.sh`, in the session scratchpad, not committed) kills
+and restarts the script whenever `adjudication_cache.db`'s
+`corrections_cache` row count stalls for 6 consecutive 60s checks (~6
+min - long enough not to kill a genuinely slow-but-alive call, which has
+been seen taking up to ~40s normally), looping until the script completes
+cleanly. Restarting is cheap since cache lookups are <10ms. This is a
+workaround for a VPN/network issue, not a code fix - if it recurs outside
+this session, check the VPN connection first before assuming a script
+bug.
+
+## Vision verification: coverage was already ~complete, not "90-item sample" — 2026-08-06
+
+The Open Items claim "corrections_candidates_part1.json has 794 candidates
+across 177 klalim, but only a 90-item sample has been vision-verified" was
+itself stale (superseded, not corrected until now — see the two other
+retracted-claim corrections above). Before running anything tonight,
+`corrections_verified_part1.json` already had 551/551 vision-checkable
+(bbox-present) candidates verified, 0 errors — the "90-item sample" number
+was from an earlier point in the project and never updated as later runs
+covered the rest. That claim is corrected now.
+
+Ran `./rebuild_all.sh` (full, not `--skip-vision`) to pick up the word-pairs
+that changed from tonight's klal 167/185-190/196-197/215-217 fixes: 628
+current candidates, 622 already cache-hit, 2 new live Gemini calls (rest of
+the "new" set turned out to be no-bbox insertions, not vision-checkable).
+0 errors. Result: `corrections_part1.json` flags = `current_text_may_be_wrong:
+70, current_text_confirmed: 123, unverified_insertion: 102, ambiguous: 279,
+possible_omission: 54` across 628 items / 151 klalim. Full pipeline +
+pytest suite ran clean.
+
+**Gap found and FIXED: `part1_header_anchored_alignment.json` was stale
+and structurally blocked vision-candidate generation for 13 klalim,
+including the 9 just fixed tonight.** It still marked klal 34, 92, 129,
+172, 180, 182, 186, 187, 190, 194, 197, 210, 216, 217 as `trusted: False`
+using page/content data from before tonight's marker-misread-plus-merge
+splits — `build_corrections_dataset.py` can't align to an untrusted klal
+(Lesson 15), so these had **zero** correction candidates and had never
+been vision-checked against their real content. Reran the (archived)
+`header_anchored_alignment.py` against current `part1.json` (copied to
+a temp location to run, since it resolves paths relative to its own
+file - not re-added to root, still archived): diffed old vs new before
+trusting it (Lesson 3) - all 13 flipped cleanly to `trusted: True`, zero
+regressions among the previously-trusted 208, only klal 34 remains
+untrusted (already a known/resolved case, Lesson 14's word-order klal).
+221/222 now trusted, up from 208/222.
+
+Regenerated candidates and ran vision verification against the newly
+unblocked set: 777 candidates across 169 klalim (up from 628/151), 0
+errors after one candidate's transient 504 timeout was picked up on a
+second pass. Final `corrections_part1.json` flags: `current_text_may_be_
+wrong: 85, current_text_confirmed: 149, unverified_insertion: 108,
+ambiguous: 364, possible_omission: 71`. Full pipeline + pytest suite ran
+clean. Part 1 vision-candidate coverage is now effectively complete
+(221/222 klalim aligned and candidate-checked; klal 34 is the sole
+known exception, already understood).
+
+This run also surfaced and worked around a real infra issue, not a
+corpus bug: see the `verify_corrections_vision.py` VPN-stall section
+above (the vision-verification step of this fix took ~2.5 hours of
+wall-clock time across the VPN-hang investigation and workaround before
+the user turned the VPN off, after which the remaining candidates
+finished in about 15 minutes).
+
+**85 `current_text_may_be_wrong` items are an unreviewed queue, not a
+finished result** (Lesson 2: a flag is a triage tool, not a verified
+outcome) — none of these 85 have been individually crop-checked against
+the scan yet. This is the next piece of work (user-requested, in
+progress): crop-check each one, prioritizing the 13 klalim just
+unblocked (34, 92, 129, 172, 180, 182, 186, 187, 190, 194, 197, 210,
+216, 217) since their content changed most recently and has never been
+human-reviewed against a vision check before.
 
 ## Standing regression test suite added — 2026-08-06
 
@@ -19,10 +333,13 @@ klal-by-klal review misses) into standing, always-run checks:
 - **Zero-tolerance** (no known legitimate exception anywhere in the
   corpus): klal_id sequence is exactly 1–667 with no gaps/dupes;
   `klalim_demo_dataset.json` exactly equals part1+part2+part3 concatenated
-  (the Lesson 13 drift check); the `(no text available)` placeholder set is
-  exactly {187, 190, 197, 216, 217} (originally included 167 too; see the
-  "Klal 167 resolved" section below - it was retracted the same night as a
-  marker-misread, not a real gap); zero page-header-contamination
+  (the Lesson 13 drift check); the `(no text available)` placeholder set
+  and `CONFIRMED_NUMBERING_GAPS` are both now the **empty set** (as of the
+  "Klal 185-190, 196-197, 215-217 resolved" section below — every klal
+  originally treated as a genuine numbering gap, including this line's
+  original {187, 190, 197, 216, 217} baseline and 167 before it, turned
+  out to be a marker-misread-plus-merge with real recoverable content,
+  not a real gap); zero page-header-contamination
   matches (all spelling variants); zero debug-print leaks (the klal
   152/154 `"283\n"` bug class); title/clean_text never empty.
 - **Baseline (no-NEW-violations)**, because these checks have real,
@@ -333,25 +650,44 @@ flagged as a genuine numbering gap turned out not to be one.
   every sentence — a corpus-wide punctuation pass is a distinct, much larger
   task not yet undertaken (needs its own scoping: cost, whether to cover all
   667, and a review pass before treating inserted marks as final).
-- **3 of the original 8 "no text available" klalim had real content and
-  are now fixed**: klal **180, 182, 194** were each merged into a
-  neighboring klal's stored text, hidden behind a garbled second marker
-  and page-header noise - see the dated 2026-08-06 section below (the
+- **SUPERSEDED — all 8 of the original "no text available" klalim turned
+  out to have real content; none was a genuine numbering gap.** First 3
+  (klal 180, 182, 194) were found merged into a neighboring klal's stored
+  text behind a garbled second marker (dated 2026-08-06 section below).
+  The remaining 5 (167, 187, 190, 197, 216, 217 — see the two
+  "resolved" sections above this Open Items block) turned out to be the
+  same marker-misread-plus-merge pattern, not real gaps either. Part 1
+  now has zero `(no text available)` placeholders and zero entries in
+  `CONFIRMED_NUMBERING_GAPS`. Original text (retained for the record):
+  "3 of the original 8 'no text available' klalim had real content and
+  are now fixed: klal 180, 182, 194 were each merged into a neighboring
+  klal's stored text, hidden behind a garbled second marker and
+  page-header noise - see the dated 2026-08-06 section below (the
   correction of an earlier same-night finding that wrongly called all 8
-  numbering gaps; the user caught the error). All three are now split out,
-  scan-confirmed, and titled.
-- **CLOSED 2026-08-06: Klal 167, 187, 190, 197, 216, 217 are confirmed
-  genuine numbering gaps** - all six directly verified by visual inspection
-  of the physical scan page at the exact boundary (not just token
-  adjacency, which is what produced the wrong 180/182/194 conclusion).
-  Klal 85/86 is a separate, already-resolved matter (checked 2026-08-06;
-  it is NOT currently a merge issue - an earlier note in this document
-  citing it as an open parallel was stale). **User decision (2026-08-06):
-  keep the explicit placeholder** — each of the six stays in the klal_id
-  sequence with `clean_text`/`title` set to `"(no text available)"`,
-  citable at its correct number rather than omitted from the sequence.
-  This is already how all six are represented in `part1.json` as of
-  tonight's fixes — no further data change needed. No longer open.
+  numbering gaps; the user caught the error). All three are now split
+  out, scan-confirmed, and titled."
+- **SUPERSEDED — the 2026-08-06 "CLOSED: 6 confirmed genuine numbering
+  gaps" verdict below was itself wrong for all six.** Klal 167 (see "Klal
+  167 resolved" above) and klal 187, 190, 197, 216, 217 (see "Klal
+  185-190, 196-197, 215-217 resolved" above) were each a marker-misread-
+  plus-merge, not a real gap: real content existed for every one of them,
+  merged undivided into a neighboring klal's stored text behind a garbled
+  second marker. All six are now split out, scan-confirmed, and titled in
+  `part1.json`; `tests/test_corpus_invariants.py`'s
+  `CONFIRMED_NUMBERING_GAPS` is now the empty set (was `{187, 190, 197,
+  216, 217}`) and the `(no text available)` placeholder set is now empty
+  too — there are no known genuine numbering gaps left in Part 1. Original
+  "CLOSED" text (retained below for the record, do not treat as current):
+  "Klal 167, 187, 190, 197, 216, 217 are confirmed genuine numbering
+  gaps - all six directly verified by visual inspection of the physical
+  scan page at the exact boundary (not just token adjacency, which is
+  what produced the wrong 180/182/194 conclusion). Klal 85/86 is a
+  separate, already-resolved matter (checked 2026-08-06; it is NOT
+  currently a merge issue - an earlier note in this document citing it as
+  an open parallel was stale). User decision (2026-08-06): keep the
+  explicit placeholder — each of the six stays in the klal_id sequence
+  with clean_text/title set to "(no text available)", citable at its
+  correct number rather than omitted from the sequence."
 - **Klal 186 — fixed 2026-08-06** (see dated section below): the garbled
   opening was a corruption of `הלכה כדברי המקיל באבל`, confirmed by
   direct crop of the real page (68, not the stale stored `27`). No
@@ -452,20 +788,153 @@ flagged as a genuine numbering gap turned out not to be one.
     is correct — the semantic-sanity signal was wrong here, a concrete
     reminder that even the second-layer check needs verification against the
     actual scan when it disagrees, not blind trust.
-  - **Klal 21, 39, 75, 79: flagged by the semantic pass, NOT yet verified
-    against the scan.** Do not treat these as confirmed either way:
-    - klal 21: `תותה`→`תותיה` (minor spelling-ending variant, low severity)
-    - klal 39, 75: long-vs-short title candidates — plausibly the known
-      "vision favors shortest span" artifact rather than real errors, but not
-      checked
-    - klal 79: `או`→`אי` plus a trailing `וכו'` the current text lacks
+  - **Klal 21, 39, 75, 79: RESOLVED 2026-08-05** (see "Klal 21, 39, 66,
+    75, 79 — all checked against the scan, all confirmed correct" below).
+    All four checked directly against the scan by precise y-coordinate
+    token filtering; current stored text confirmed correct in every case
+    — none of the semantic-pass flags held up. No change needed, no
+    longer open. (Original flags, for the record: klal 21 `תותה`→`תותיה`;
+    klal 39/75 long-vs-short title candidates; klal 79 `או`→`אי` plus a
+    supposedly-missing trailing `וכו'`.)
   - The other 44 of the 52 (agreement 0.7–0.9, not among the 8 the semantic
     pass flagged) are presumed fine per that pass, but — consistent with the
     klal 58 result above — a semantic-sanity "no objection" is still not the
     same as a scan-verified result. Treat as reasonably trustworthy, not
     scan-confirmed.
 
-## Structural klal-boundary/content-shift issue — confirmed real, NOT fixed
+## Klal 178's second corrupted span — FIXED, 2026-08-07
+
+Closes the open item logged in the "Crop-check of all 85
+`current_text_may_be_wrong` flags" section above. Found klal 178's real
+marker (page 66, token 419) and klal 179's real marker (page 66, token
+833) via `gematria_trace_part1.json`, read the full 414-token raw docai
+span between them end to end. The raw text matches the stored
+`clean_text` exactly all the way to `...מכללו אא הוא הדין לכל` and then
+diverges completely - the real continuation is a fully coherent halachic
+sentence closing with the standard `כנלע"ד וכ"כ [authority]...ע"ש :`
+formula (`המקומות והאיסורין דסתמא נאסרו ולא באו לשלול רק היכא דידעינן
+בבירור דמעולם לא נכללו בכלל האיסור דומיא דבשר בחלב וכדכתיבנא כנלע"ד וכ"כ
+שם הריטב"א ע"ש :`), not the stored `דדסומתימאא דנבאסשררו :לא נכללו`
+garbage. Applied (unique-string replace, verified count=1 before
+writing). The `אא` immediately before the fixed span was deliberately
+left as-is - docai's independent raw OCR reads `אא` at that exact
+position too (not `אלא`), so it's what's actually printed, not part of
+the corruption. `rebuild_all.sh` re-run clean, 10/10 pytest.
+
+## `part1.json`'s own `page` field is stale/dead metadata for most of Part 1 — found 2026-08-07, NOT fixed (confirmed non-blocking)
+
+Found while resolving the 92-165 marker positions below: cross-referencing
+every klal's `part1.json` `page` field against `gematria_trace_part1.json`'s
+independently-confirmed real PDF page turned up **136 mismatches across
+nearly the whole of Part 1** (klal 3 through klal 222), not just the 92-165
+range - e.g. klal 220-222 show `page: 30` in `part1.json` while their real
+PDF page is 76. This looked like a major, corpus-wide bug at first.
+
+**Confirmed non-blocking before treating it as one** (per this project's own
+standing rule not to trust a field's role without checking): grepped every
+build script for a read of `k["page"]`/`k['page']`. Only `build_review_html.py`
+touches it, and that script **overwrites** it on read
+(`k["page"] = trusted_page_of.get(k["klal_id"])`, sourced from
+`part1_header_anchored_alignment.json`'s trusted `matched_page`, not from
+`part1.json` at all). `build_klal_page_regions.py` and
+`build_corrections_dataset.py` independently source their own page grouping
+from the same alignment file, never from `part1.json`. **`part1.json`'s own
+`page` field is not read by any live part of the pipeline** - it's vestigial,
+most likely dating to before `part1_header_anchored_alignment.json` existed
+and superseded it as the trusted page source. This explains why such a
+widespread mismatch was never noticed as a functional bug (nothing was
+broken) despite individual instances being spot-fixed in passing elsewhere
+in this document (klal 165 "`page` corrected 26 (stale) -> 60", klal 168
+similarly) - those fixes were cosmetic/consistency cleanup, not restoring
+broken functionality.
+
+**Still worth fixing eventually, just not urgently**: if `part1.json` is
+ever exported toward the Sefaria delivery (success criterion #3), a stale
+`page` field per klal would be wrong metadata in the final product even
+though it's inert today. Left as an open item, not fixed tonight - not
+blocking anything currently.
+
+**FIXED 2026-08-07.** Regenerated from the two trusted sources instead of
+by hand: `gematria_trace_part1.json`'s marker-anchored `page` where
+`status == 'ok'` (199/222 klalim - the more precise value, tied to an
+exact token position), falling back to
+`part1_header_anchored_alignment.json`'s trusted `matched_page` for the
+rest. Cross-checked the two sources against each other first (per Lesson
+9, independent signals should agree before trusting either): 199 klalim
+had both, only 1 disagreement (klal 190, a page-boundary edge case -
+its marker sits at the tail of page 68 but the bulk of its
+alignment-matched content is page 69; kept the marker page as more
+precise for "where does this klal begin"). 148 of 222 `page` values
+corrected. **Klal 34 is the sole klal with no reliable page source at
+all** (neither trace nor alignment trust it - the same already-documented
+Lesson 14 word-order case) - left untouched, not guessed. `rebuild_all.sh`
+re-run clean, 10/10 pytest. No longer open.
+
+## Klal 123 span-coverage false positive - verified and added to the test baseline, 2026-08-07
+
+Surfaced by `tests/test_corpus_invariants.py`'s span-coverage regression
+test correctly catching it as a NEW flag (not yet in the baseline) after
+the 92-165 marker-position fixes below changed what the validator could
+compute. Read the full raw token span between klal 123's and klal 124's
+confirmed real markers (page 46 idx 741 → page 47 idx 41, 64 tokens) end
+to end: the stored 53-word `clean_text` is genuinely complete (a real,
+naturally short klal - part of the already-documented `קכב`/`קכג`
+same-title pair) - the gap is `Digitized by Google` (scan watermark), a
+stray footnote numeral, a folio number, and the next page's running
+header, ~11 furniture tokens inflating the raw span-token count. Same
+false-positive class as klal 106/175. Added to
+`SPAN_COVERAGE_BASELINE` in `tests/test_corpus_invariants.py` with a
+citation. `rebuild_all.sh` re-run clean, 10/10 pytest.
+
+## Structural klal-boundary/content-shift issue — RESOLVED 2026-08-07, see below for the closing status
+
+**SUPERSEDED.** The "70 of ~120 klalim still show a genuine marker/content
+mismatch" claim below was accurate when written (2026-08-05) but describes
+a problem that has since been closed out through many individual fixing
+sessions logged throughout this document (klal 92-129 fixed one by one,
+klal 165/166/167/185-190/196-197/215-217 fixed via the marker-misread-
+plus-merge pattern). By 2026-08-07, the only genuinely remaining piece was
+17 klalim (93, 115, 116, 124, 127, 129, 131, 139, 144, 145, 147, 149, 150,
+151, 153, 155, 160, 164) whose real marker position had never been found
+by any automated search - not because their content was wrong, but
+because the search window was too narrow (klal 129's case, already
+documented) or the marker glyph itself was OCR-misread in a way no
+"not found" search retried (ז misread as ו/ן, ד misread as ר - the same
+families already catalogued throughout this document). **All 17 resolved
+2026-08-07** by widening the search and trying known letter-confusion
+variants; for every one, the docai raw text at the newly-found position
+was compared against the already-stored `clean_text` and matched exactly
+(content was already correct - it just needed its position confirmed),
+and the 4 genuinely ambiguous letter-shape cases (116, 124, 127, 147)
+were additionally confirmed by direct crop against the scan. **No content
+changes were needed - this was a metadata/trace-file gap, not a text
+bug.** `gematria_trace_part1.json` updated with all 17 positions.
+
+**Second finding while closing this out: `gematria_trace_part1.json`'s
+`status` field is itself stale in many places and cannot be trusted at
+face value** (Lesson 3) - 37 entries in the 92-165 range still said
+`marker_found_content_mismatch` from an early diagnostic pass, frozen
+from *before* the individual klal-by-klal fixes that happened over the
+following two days were applied. Re-verified all 37 directly (docai raw
+text at the recorded position vs. stored `clean_text`): every single one
+already matches (mismatches were leftover docai OCR artifacts already
+correctly adjudicated in the stored text, e.g. `רחיה`→stored `דחיה`,
+`ביו בית`→stored `בית` (already-documented duplicate-token drop), not
+real problems). All 37 updated to `status: ok`. Combined with the 17
+above, **the entire klal 92-165 structural range is now confirmed
+resolved** - `check_klal_token_orphans.py` (196/196 spans checked, up
+from 177, 0 issues) and `validate_klal_span_coverage.py` both re-run
+clean.
+
+**Third finding, out of scope for tonight, logged separately below (`part1.json`
+"page" field is stale/unused metadata) and fourth finding (klal 123 false
+positive, now baselined) - see the two sections immediately below this
+one.**
+
+Original (2026-08-05) text, retained for the historical record - the
+specific numbers and "NOT fixed" framing are superseded by the above, the
+causal analysis (docai file-swap bug vs. upstream assembly error) is
+still accurate history:
 
 First-principles gematria-marker tracing (`trace_gematria_sequence.py` →
 `gematria_trace_part1.json`) found real, independently-confirmed content

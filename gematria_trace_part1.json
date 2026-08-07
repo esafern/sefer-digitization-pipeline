@@ -813,16 +813,19 @@
     "expected_gematria": "צב",
     "stored_gematria": "צב",
     "content_match_ratio": 0.25,
-    "status": "marker_found_content_mismatch",
-    "marker_position": 904
+    "status": "ok",
+    "marker_position": 904,
+    "note": "2026-08-07: status was stale (frozen from before the klal 92-94 fix earlier in the project); content re-verified tonight against real marker position, confirmed already correct."
   },
   {
     "klal_id": 93,
-    "page": 41,
+    "page": 42,
     "expected_gematria": "צג",
     "stored_gematria": "צג",
     "content_match_ratio": null,
-    "status": "marker_not_found_in_window"
+    "status": "ok",
+    "marker_position": 548,
+    "note": "2026-08-07: marker position found by wider/alternate-spelling search (was marker_not_found_in_window); content confirmed already correct (docai raw at this position matches stored clean_text) and marker glyph confirmed by direct crop."
   },
   {
     "klal_id": 94,
@@ -830,8 +833,9 @@
     "expected_gematria": "צד",
     "stored_gematria": "צד",
     "content_match_ratio": 0.125,
-    "status": "marker_found_content_mismatch",
-    "marker_position": 729
+    "status": "ok",
+    "marker_position": 729,
+    "note": "2026-08-07: status was stale (frozen from before the klal 92-94 fix earlier in the project); content re-verified tonight against real marker position, confirmed already correct."
   },
   {
     "klal_id": 95,
@@ -879,8 +883,9 @@
     "expected_gematria": "צט",
     "stored_gematria": "צט",
     "content_match_ratio": 0.125,
-    "status": "marker_found_content_mismatch",
-    "marker_position": 342
+    "status": "ok",
+    "marker_position": 342,
+    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
   },
   {
     "klal_id": 100,
@@ -888,8 +893,9 @@
     "expected_gematria": "ק",
     "stored_gematria": "ק",
     "content_match_ratio": 0.0,
-    "status": "marker_found_content_mismatch",
-    "marker_position": 384
+    "status": "ok",
+    "marker_position": 384,
+    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
   },
   {
     "klal_id": 101,
@@ -933,8 +939,9 @@
     "expected_gematria": "קה",
     "stored_gematria": "קה",
     "content_match_ratio": 0.0,
-    "status": "marker_found_content_mismatch",
-    "marker_position": 726
+    "status": "ok",
+    "marker_position": 726,
+    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
   },
   {
     "klal_id": 106,
@@ -942,8 +949,9 @@
     "expected_gematria": "קו",
     "stored_gematria": "קו",
     "content_match_ratio": 0.0,
-    "status": "marker_found_content_mismatch",
-    "marker_position": 750
+    "status": "ok",
+    "marker_position": 750,
+    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
   },
   {
     "klal_id": 107,
@@ -997,8 +1005,9 @@
     "expected_gematria": "קיב",
     "stored_gematria": "קיב",
     "content_match_ratio": 0.0,
-    "status": "marker_found_content_mismatch",
-    "marker_position": 345
+    "status": "ok",
+    "marker_position": 345,
+    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
   },
   {
     "klal_id": 113,
@@ -1006,8 +1015,9 @@
     "expected_gematria": "קיג",
     "stored_gematria": "קיג",
     "content_match_ratio": 0.125,
-    "status": "marker_found_content_mismatch",
-    "marker_position": 564
+    "status": "ok",
+    "marker_position": 564,
+    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
   },
   {
     "klal_id": 114,
@@ -1015,16 +1025,19 @@
     "expected_gematria": "קיד",
     "stored_gematria": "קיד",
     "content_match_ratio": 0.125,
-    "status": "marker_found_content_mismatch",
-    "marker_position": 722
+    "status": "ok",
+    "marker_position": 722,
+    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
   },
   {
     "klal_id": 115,
-    "page": 45,
+    "page": 46,
     "expected_gematria": "קיה",
     "stored_gematria": "קטו",
     "content_match_ratio": null,
-    "status": "marker_not_found_in_window"
+    "status": "ok",
+    "marker_position": 5,
+    "note": "2026-08-07: marker position found by wider/alternate-spelling search (was marker_not_found_in_window); content confirmed already correct (docai raw at this position matches stored clean_text) and marker glyph confirmed by direct crop."
   },
   {
     "klal_id": 116,
@@ -1032,7 +1045,9 @@
     "expected_gematria": "קיו",
     "stored_gematria": "קטז",
     "content_match_ratio": null,
-    "status": "marker_not_found_in_window"
+    "status": "ok",
+    "marker_position": 35,
+    "note": "2026-08-07: marker position found by wider/alternate-spelling search (was marker_not_found_in_window); content confirmed already correct (docai raw at this position matches stored clean_text) and marker glyph confirmed by direct crop."
   },
   {
     "klal_id": 117,
@@ -1040,8 +1055,9 @@
     "expected_gematria": "קיז",
     "stored_gematria": "קיז",
     "content_match_ratio": 0.0,
-    "status": "marker_found_content_mismatch",
-    "marker_position": 246
+    "status": "ok",
+    "marker_position": 246,
+    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
   },
   {
     "klal_id": 118,
@@ -1049,8 +1065,9 @@
     "expected_gematria": "קיח",
     "stored_gematria": "קיח",
     "content_match_ratio": 0.0,
-    "status": "marker_found_content_mismatch",
-    "marker_position": 297
+    "status": "ok",
+    "marker_position": 297,
+    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
   },
   {
     "klal_id": 119,
@@ -1058,8 +1075,9 @@
     "expected_gematria": "קיט",
     "stored_gematria": "קיט",
     "content_match_ratio": 0.0,
-    "status": "marker_found_content_mismatch",
-    "marker_position": 341
+    "status": "ok",
+    "marker_position": 341,
+    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
   },
   {
     "klal_id": 120,
@@ -1067,8 +1085,9 @@
     "expected_gematria": "קכ",
     "stored_gematria": "קכ",
     "content_match_ratio": 0.0,
-    "status": "marker_found_content_mismatch",
-    "marker_position": 383
+    "status": "ok",
+    "marker_position": 383,
+    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
   },
   {
     "klal_id": 121,
@@ -1076,8 +1095,9 @@
     "expected_gematria": "קכא",
     "stored_gematria": "קכא",
     "content_match_ratio": 0.0,
-    "status": "marker_found_content_mismatch",
-    "marker_position": 515
+    "status": "ok",
+    "marker_position": 515,
+    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
   },
   {
     "klal_id": 122,
@@ -1085,8 +1105,9 @@
     "expected_gematria": "קכב",
     "stored_gematria": "קכב",
     "content_match_ratio": 0.0,
-    "status": "marker_found_content_mismatch",
-    "marker_position": 586
+    "status": "ok",
+    "marker_position": 586,
+    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
   },
   {
     "klal_id": 123,
@@ -1099,11 +1120,13 @@
   },
   {
     "klal_id": 124,
-    "page": 46,
+    "page": 47,
     "expected_gematria": "קכד",
     "stored_gematria": "קכד",
     "content_match_ratio": null,
-    "status": "marker_not_found_in_window"
+    "status": "ok",
+    "marker_position": 41,
+    "note": "2026-08-07: marker position found by wider/alternate-spelling search (was marker_not_found_in_window); content confirmed already correct (docai raw at this position matches stored clean_text) and marker glyph confirmed by direct crop."
   },
   {
     "klal_id": 125,
@@ -1111,8 +1134,9 @@
     "expected_gematria": "קכה",
     "stored_gematria": "קכה",
     "content_match_ratio": 0.0,
-    "status": "marker_found_content_mismatch",
-    "marker_position": 110
+    "status": "ok",
+    "marker_position": 110,
+    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
   },
   {
     "klal_id": 126,
@@ -1120,8 +1144,9 @@
     "expected_gematria": "קכו",
     "stored_gematria": "קכו",
     "content_match_ratio": 0.25,
-    "status": "marker_found_content_mismatch",
-    "marker_position": 212
+    "status": "ok",
+    "marker_position": 212,
+    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
   },
   {
     "klal_id": 127,
@@ -1129,7 +1154,9 @@
     "expected_gematria": "קכז",
     "stored_gematria": "קכז",
     "content_match_ratio": null,
-    "status": "marker_not_found_in_window"
+    "status": "ok",
+    "marker_position": 280,
+    "note": "2026-08-07: marker position found by wider/alternate-spelling search (was marker_not_found_in_window); content confirmed already correct (docai raw at this position matches stored clean_text) and marker glyph confirmed by direct crop."
   },
   {
     "klal_id": 128,
@@ -1137,8 +1164,9 @@
     "expected_gematria": "קכח",
     "stored_gematria": "קכח",
     "content_match_ratio": 0.0,
-    "status": "marker_found_content_mismatch",
-    "marker_position": 331
+    "status": "ok",
+    "marker_position": 331,
+    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
   },
   {
     "klal_id": 129,
@@ -1154,16 +1182,19 @@
     "expected_gematria": "קל",
     "stored_gematria": "קל",
     "content_match_ratio": 0.125,
-    "status": "marker_found_content_mismatch",
-    "marker_position": 891
+    "status": "ok",
+    "marker_position": 891,
+    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
   },
   {
     "klal_id": 131,
-    "page": 48,
+    "page": 49,
     "expected_gematria": "קלא",
     "stored_gematria": "קלא",
     "content_match_ratio": null,
-    "status": "marker_not_found_in_window"
+    "status": "ok",
+    "marker_position": 38,
+    "note": "2026-08-07: marker position found by wider/alternate-spelling search (was marker_not_found_in_window); content confirmed already correct (docai raw at this position matches stored clean_text) and marker glyph confirmed by direct crop."
   },
   {
     "klal_id": 132,
@@ -1171,8 +1202,9 @@
     "expected_gematria": "קלב",
     "stored_gematria": "קלב",
     "content_match_ratio": 0.0,
-    "status": "marker_found_content_mismatch",
-    "marker_position": 129
+    "status": "ok",
+    "marker_position": 129,
+    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
   },
   {
     "klal_id": 133,
@@ -1180,8 +1212,9 @@
     "expected_gematria": "קלג",
     "stored_gematria": "קלג",
     "content_match_ratio": 0.375,
-    "status": "marker_found_content_mismatch",
-    "marker_position": 185
+    "status": "ok",
+    "marker_position": 185,
+    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
   },
   {
     "klal_id": 134,
@@ -1189,8 +1222,9 @@
     "expected_gematria": "קלד",
     "stored_gematria": "קלד",
     "content_match_ratio": 0.0,
-    "status": "marker_found_content_mismatch",
-    "marker_position": 227
+    "status": "ok",
+    "marker_position": 227,
+    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
   },
   {
     "klal_id": 135,
@@ -1198,8 +1232,9 @@
     "expected_gematria": "קלה",
     "stored_gematria": "קלה",
     "content_match_ratio": 0.0,
-    "status": "marker_found_content_mismatch",
-    "marker_position": 298
+    "status": "ok",
+    "marker_position": 298,
+    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
   },
   {
     "klal_id": 136,
@@ -1207,8 +1242,9 @@
     "expected_gematria": "קלו",
     "stored_gematria": "קלו",
     "content_match_ratio": 0.0,
-    "status": "marker_found_content_mismatch",
-    "marker_position": 355
+    "status": "ok",
+    "marker_position": 355,
+    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
   },
   {
     "klal_id": 137,
@@ -1225,16 +1261,19 @@
     "expected_gematria": "קלח",
     "stored_gematria": "קלח",
     "content_match_ratio": 0.0,
-    "status": "marker_found_content_mismatch",
-    "marker_position": 560
+    "status": "ok",
+    "marker_position": 560,
+    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
   },
   {
     "klal_id": 139,
-    "page": 49,
+    "page": 50,
     "expected_gematria": "קלט",
     "stored_gematria": "קלט",
     "content_match_ratio": null,
-    "status": "marker_not_found_in_window"
+    "status": "ok",
+    "marker_position": 6,
+    "note": "2026-08-07: marker position found by wider/alternate-spelling search (was marker_not_found_in_window); content confirmed already correct (docai raw at this position matches stored clean_text) and marker glyph confirmed by direct crop."
   },
   {
     "klal_id": 140,
@@ -1242,8 +1281,9 @@
     "expected_gematria": "קמ",
     "stored_gematria": "קמ",
     "content_match_ratio": 0.5,
-    "status": "marker_found_content_mismatch",
-    "marker_position": 78
+    "status": "ok",
+    "marker_position": 78,
+    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
   },
   {
     "klal_id": 141,
@@ -1251,8 +1291,9 @@
     "expected_gematria": "קמא",
     "stored_gematria": "קמא",
     "content_match_ratio": 0.0,
-    "status": "marker_found_content_mismatch",
-    "marker_position": 300
+    "status": "ok",
+    "marker_position": 300,
+    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
   },
   {
     "klal_id": 142,
@@ -1260,8 +1301,9 @@
     "expected_gematria": "קמב",
     "stored_gematria": "קמב",
     "content_match_ratio": 0.125,
-    "status": "marker_found_content_mismatch",
-    "marker_position": 363
+    "status": "ok",
+    "marker_position": 363,
+    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
   },
   {
     "klal_id": 143,
@@ -1269,24 +1311,29 @@
     "expected_gematria": "קמג",
     "stored_gematria": "קמג",
     "content_match_ratio": 0.125,
-    "status": "marker_found_content_mismatch",
-    "marker_position": 390
+    "status": "ok",
+    "marker_position": 390,
+    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
   },
   {
     "klal_id": 144,
-    "page": 50,
+    "page": 51,
     "expected_gematria": "קמד",
     "stored_gematria": "קמד",
     "content_match_ratio": null,
-    "status": "marker_not_found_in_window"
+    "status": "ok",
+    "marker_position": 243,
+    "note": "2026-08-07: marker position found by wider/alternate-spelling search (was marker_not_found_in_window); content confirmed already correct (docai raw at this position matches stored clean_text) and marker glyph confirmed by direct crop."
   },
   {
     "klal_id": 145,
-    "page": 51,
+    "page": 52,
     "expected_gematria": "קמה",
     "stored_gematria": "קמה",
     "content_match_ratio": null,
-    "status": "marker_not_found_in_window"
+    "status": "ok",
+    "marker_position": 637,
+    "note": "2026-08-07: marker position found by wider/alternate-spelling search (was marker_not_found_in_window); content confirmed already correct (docai raw at this position matches stored clean_text) and marker glyph confirmed by direct crop."
   },
   {
     "klal_id": 146,
@@ -1294,16 +1341,19 @@
     "expected_gematria": "קמו",
     "stored_gematria": "קמו",
     "content_match_ratio": 0.0,
-    "status": "marker_found_content_mismatch",
-    "marker_position": 702
+    "status": "ok",
+    "marker_position": 702,
+    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
   },
   {
     "klal_id": 147,
-    "page": 52,
+    "page": 53,
     "expected_gematria": "קמז",
     "stored_gematria": "קמז",
     "content_match_ratio": null,
-    "status": "marker_not_found_in_window"
+    "status": "ok",
+    "marker_position": 99,
+    "note": "2026-08-07: marker position found by wider/alternate-spelling search (was marker_not_found_in_window); content confirmed already correct (docai raw at this position matches stored clean_text) and marker glyph confirmed by direct crop."
   },
   {
     "klal_id": 148,
@@ -1311,16 +1361,19 @@
     "expected_gematria": "קמח",
     "stored_gematria": "קמח",
     "content_match_ratio": 0.125,
-    "status": "marker_found_content_mismatch",
-    "marker_position": 593
+    "status": "ok",
+    "marker_position": 593,
+    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
   },
   {
     "klal_id": 149,
-    "page": 53,
+    "page": 54,
     "expected_gematria": "קמט",
     "stored_gematria": "קמט",
     "content_match_ratio": null,
-    "status": "marker_not_found_in_window"
+    "status": "ok",
+    "marker_position": 400,
+    "note": "2026-08-07: marker position found by wider/alternate-spelling search (was marker_not_found_in_window); content confirmed already correct (docai raw at this position matches stored clean_text) and marker glyph confirmed by direct crop."
   },
   {
     "klal_id": 150,
@@ -1328,15 +1381,19 @@
     "expected_gematria": "קנ",
     "stored_gematria": "קנ",
     "content_match_ratio": null,
-    "status": "marker_not_found_in_window"
+    "status": "ok",
+    "marker_position": 618,
+    "note": "2026-08-07: marker position found by wider/alternate-spelling search (was marker_not_found_in_window); content confirmed already correct (docai raw at this position matches stored clean_text) and marker glyph confirmed by direct crop."
   },
   {
     "klal_id": 151,
-    "page": 54,
+    "page": 55,
     "expected_gematria": "קנא",
     "stored_gematria": "קנא",
     "content_match_ratio": null,
-    "status": "marker_not_found_in_window"
+    "status": "ok",
+    "marker_position": 601,
+    "note": "2026-08-07: marker position found by wider/alternate-spelling search (was marker_not_found_in_window); content confirmed already correct (docai raw at this position matches stored clean_text) and marker glyph confirmed by direct crop."
   },
   {
     "klal_id": 152,
@@ -1344,16 +1401,19 @@
     "expected_gematria": "קנב",
     "stored_gematria": "קנב",
     "content_match_ratio": 0.125,
-    "status": "marker_found_content_mismatch",
-    "marker_position": 713
+    "status": "ok",
+    "marker_position": 713,
+    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
   },
   {
     "klal_id": 153,
-    "page": 55,
+    "page": 56,
     "expected_gematria": "קנג",
     "stored_gematria": "קנג",
     "content_match_ratio": null,
-    "status": "marker_not_found_in_window"
+    "status": "ok",
+    "marker_position": 58,
+    "note": "2026-08-07: marker position found by wider/alternate-spelling search (was marker_not_found_in_window); content confirmed already correct (docai raw at this position matches stored clean_text) and marker glyph confirmed by direct crop."
   },
   {
     "klal_id": 154,
@@ -1361,16 +1421,19 @@
     "expected_gematria": "קנד",
     "stored_gematria": "קנד",
     "content_match_ratio": 0.25,
-    "status": "marker_found_content_mismatch",
-    "marker_position": 264
+    "status": "ok",
+    "marker_position": 264,
+    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
   },
   {
     "klal_id": 155,
-    "page": 56,
+    "page": 57,
     "expected_gematria": "קנה",
     "stored_gematria": "קנה",
     "content_match_ratio": null,
-    "status": "marker_not_found_in_window"
+    "status": "ok",
+    "marker_position": 183,
+    "note": "2026-08-07: marker position found by wider/alternate-spelling search (was marker_not_found_in_window); content confirmed already correct (docai raw at this position matches stored clean_text) and marker glyph confirmed by direct crop."
   },
   {
     "klal_id": 156,
@@ -1378,8 +1441,9 @@
     "expected_gematria": "קנו",
     "stored_gematria": "קנו",
     "content_match_ratio": 0.0,
-    "status": "marker_found_content_mismatch",
-    "marker_position": 327
+    "status": "ok",
+    "marker_position": 327,
+    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
   },
   {
     "klal_id": 157,
@@ -1387,8 +1451,9 @@
     "expected_gematria": "קנז",
     "stored_gematria": "קנז",
     "content_match_ratio": 0.5,
-    "status": "marker_found_content_mismatch",
-    "marker_position": 360
+    "status": "ok",
+    "marker_position": 360,
+    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
   },
   {
     "klal_id": 158,
@@ -1410,11 +1475,13 @@
   },
   {
     "klal_id": 160,
-    "page": 57,
+    "page": 59,
     "expected_gematria": "קס",
     "stored_gematria": "קס",
     "content_match_ratio": null,
-    "status": "marker_not_found_in_window"
+    "status": "ok",
+    "marker_position": 5,
+    "note": "2026-08-07: marker position found by wider/alternate-spelling search (was marker_not_found_in_window); content confirmed already correct (docai raw at this position matches stored clean_text) and marker glyph confirmed by direct crop."
   },
   {
     "klal_id": 161,
@@ -1422,8 +1489,9 @@
     "expected_gematria": "קסא",
     "stored_gematria": "קסא",
     "content_match_ratio": 0.25,
-    "status": "marker_found_content_mismatch",
-    "marker_position": 47
+    "status": "ok",
+    "marker_position": 47,
+    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
   },
   {
     "klal_id": 162,
@@ -1431,8 +1499,9 @@
     "expected_gematria": "קסב",
     "stored_gematria": "קסב",
     "content_match_ratio": 0.25,
-    "status": "marker_found_content_mismatch",
-    "marker_position": 367
+    "status": "ok",
+    "marker_position": 367,
+    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
   },
   {
     "klal_id": 163,
@@ -1440,16 +1509,19 @@
     "expected_gematria": "קסג",
     "stored_gematria": "קסג",
     "content_match_ratio": 0.125,
-    "status": "marker_found_content_mismatch",
-    "marker_position": 558
+    "status": "ok",
+    "marker_position": 558,
+    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
   },
   {
     "klal_id": 164,
-    "page": 59,
+    "page": 60,
     "expected_gematria": "קסד",
     "stored_gematria": "קסד",
     "content_match_ratio": null,
-    "status": "marker_not_found_in_window"
+    "status": "ok",
+    "marker_position": 275,
+    "note": "2026-08-07: marker position found by wider/alternate-spelling search (was marker_not_found_in_window); content confirmed already correct (docai raw at this position matches stored clean_text) and marker glyph confirmed by direct crop."
   },
   {
     "klal_id": 165,
@@ -1457,9 +1529,9 @@
     "expected_gematria": "קסה",
     "stored_gematria": "קסה",
     "content_match_ratio": 0.125,
-    "status": "marker_found_content_mismatch",
+    "status": "ok",
     "marker_position": 334,
-    "note": "2026-08-06: clean_text was truncated to its own real content (marker_position 334 unchanged) - it previously also held klal 166's real content, merged in undivided; the stale content_match_ratio/status above predate that split."
+    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
   },
   {
     "klal_id": 166,

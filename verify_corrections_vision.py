@@ -194,7 +194,12 @@ def main():
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
         raise SystemExit("GEMINI_API_KEY not set")
-    client = genai.Client(api_key=api_key)
+    # Explicit request timeout: a hung call (observed 2026-08-06 - one crop's
+    # request never returned and never raised, blocking the whole run for
+    # 20+ minutes at zero CPU with no retry ever triggering, since the retry
+    # logic only fires on a caught exception) needs to fail loudly so the
+    # existing retry/backoff loop can actually run instead of hanging forever.
+    client = genai.Client(api_key=api_key, http_options=types.HttpOptions(timeout=60000))
 
     candidates_path = sys.argv[1] if len(sys.argv) > 1 else CANDIDATES_PATH
     out_path = sys.argv[2] if len(sys.argv) > 2 else OUT_PATH

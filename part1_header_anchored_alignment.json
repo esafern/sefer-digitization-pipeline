@@ -8,7 +8,7 @@
     "trusted": true,
     "search_stage": 0,
     "jump_tokens": 401,
-    "lexicon_hit_rate": 1.0
+    "lexicon_hit_rate": 0.998
   },
   {
     "klal_id": 2,
@@ -19,7 +19,7 @@
     "trusted": true,
     "search_stage": 1,
     "jump_tokens": 528,
-    "lexicon_hit_rate": 0.995
+    "lexicon_hit_rate": 0.918
   },
   {
     "klal_id": 3,
@@ -41,7 +41,7 @@
     "trusted": true,
     "search_stage": 0,
     "jump_tokens": 402,
-    "lexicon_hit_rate": 0.969
+    "lexicon_hit_rate": 0.924
   },
   {
     "klal_id": 5,
@@ -52,7 +52,7 @@
     "trusted": true,
     "search_stage": 0,
     "jump_tokens": 487,
-    "lexicon_hit_rate": 0.998
+    "lexicon_hit_rate": 1.0
   },
   {
     "klal_id": 6,
@@ -74,7 +74,7 @@
     "trusted": true,
     "search_stage": 0,
     "jump_tokens": 199,
-    "lexicon_hit_rate": 1.0
+    "lexicon_hit_rate": 0.988
   },
   {
     "klal_id": 8,
@@ -85,7 +85,7 @@
     "trusted": true,
     "search_stage": 1,
     "jump_tokens": 710,
-    "lexicon_hit_rate": 1.0
+    "lexicon_hit_rate": 0.996
   },
   {
     "klal_id": 9,
@@ -129,7 +129,7 @@
     "trusted": true,
     "search_stage": 0,
     "jump_tokens": 97,
-    "lexicon_hit_rate": 1.0
+    "lexicon_hit_rate": 0.963
   },
   {
     "klal_id": 13,
@@ -261,7 +261,7 @@
     "trusted": true,
     "search_stage": 0,
     "jump_tokens": 145,
-    "lexicon_hit_rate": 1.0
+    "lexicon_hit_rate": 0.885
   },
   {
     "klal_id": 25,
@@ -272,7 +272,7 @@
     "trusted": true,
     "search_stage": 1,
     "jump_tokens": 1032,
-    "lexicon_hit_rate": 0.998
+    "lexicon_hit_rate": 0.983
   },
   {
     "klal_id": 26,
@@ -338,7 +338,7 @@
     "trusted": true,
     "search_stage": 2,
     "jump_tokens": 2013,
-    "lexicon_hit_rate": 1.0
+    "lexicon_hit_rate": 0.938
   },
   {
     "klal_id": 32,
@@ -365,12 +365,12 @@
   {
     "klal_id": 34,
     "expected_section": "האלף",
-    "matched_page": 26,
-    "matched_page_header": "האלף",
-    "match_ratio": 0.375,
+    "matched_page": 51,
+    "matched_page_header": "הדלת",
+    "match_ratio": 0.5,
     "trusted": false,
     "search_stage": null,
-    "jump_tokens": 144,
+    "jump_tokens": 22800,
     "lexicon_hit_rate": 1.0
   },
   {
@@ -426,7 +426,7 @@
     "trusted": true,
     "search_stage": 0,
     "jump_tokens": 371,
-    "lexicon_hit_rate": 1.0
+    "lexicon_hit_rate": 0.974
   },
   {
     "klal_id": 40,
@@ -448,7 +448,7 @@
     "trusted": true,
     "search_stage": 0,
     "jump_tokens": 39,
-    "lexicon_hit_rate": 1.0
+    "lexicon_hit_rate": 0.951
   },
   {
     "klal_id": 42,
@@ -481,7 +481,7 @@
     "trusted": true,
     "search_stage": 0,
     "jump_tokens": 106,
-    "lexicon_hit_rate": 1.0
+    "lexicon_hit_rate": 0.988
   },
   {
     "klal_id": 45,
@@ -546,7 +546,7 @@
     "match_ratio": 0.75,
     "trusted": true,
     "search_stage": 0,
-    "jump_tokens": 45,
+    "jump_tokens": 46,
     "lexicon_hit_rate": 1.0
   },
   {
@@ -557,7 +557,7 @@
     "match_ratio": 0.75,
     "trusted": true,
     "search_stage": 0,
-    "jump_tokens": 84,
+    "jump_tokens": 83,
     "lexicon_hit_rate": 1.0
   },
   {
@@ -580,7 +580,7 @@
     "trusted": true,
     "search_stage": 0,
     "jump_tokens": 66,
-    "lexicon_hit_rate": 0.987
+    "lexicon_hit_rate": 0.941
   },
   {
     "klal_id": 54,
@@ -591,7 +591,7 @@
     "trusted": true,
     "search_stage": 0,
     "jump_tokens": 468,
-    "lexicon_hit_rate": 1.0
+    "lexicon_hit_rate": 0.972
   },
   {
     "klal_id": 55,
@@ -646,7 +646,7 @@
     "trusted": true,
     "search_stage": 0,
     "jump_tokens": 11,
-    "lexicon_hit_rate": 0.99
+    "lexicon_hit_rate": 0.986
   },
   {
     "klal_id": 60,
@@ -756,7 +756,7 @@
     "trusted": true,
     "search_stage": 0,
     "jump_tokens": 94,
-    "lexicon_hit_rate": 0.998
+    "lexicon_hit_rate": 1.0
   },
   {
     "klal_id": 70,
@@ -822,7 +822,7 @@
     "trusted": true,
     "search_stage": 1,
     "jump_tokens": 1178,
-    "lexicon_hit_rate": 1.0
+    "lexicon_hit_rate": 0.994
   },
   {
     "klal_id": 76,
@@ -898,7 +898,7 @@
     "match_ratio": 0.75,
     "trusted": true,
     "search_stage": 0,
-    "jump_tokens": 80,
+    "jump_tokens": 81,
     "lexicon_hit_rate": 1.0
   },
   {
@@ -909,7 +909,7 @@
     "match_ratio": 0.75,
     "trusted": true,
     "search_stage": 0,
-    "jump_tokens": 47,
+    "jump_tokens": 58,
     "lexicon_hit_rate": 1.0
   },
   {
@@ -920,8 +920,8 @@
     "match_ratio": 0.75,
     "trusted": true,
     "search_stage": 0,
-    "jump_tokens": 54,
-    "lexicon_hit_rate": 0.982
+    "jump_tokens": 42,
+    "lexicon_hit_rate": 1.0
   },
   {
     "klal_id": 85,
@@ -954,7 +954,7 @@
     "trusted": true,
     "search_stage": 0,
     "jump_tokens": 190,
-    "lexicon_hit_rate": 1.0
+    "lexicon_hit_rate": 0.996
   },
   {
     "klal_id": 88,
@@ -1005,22 +1005,22 @@
     "expected_section": "הבית",
     "matched_page": 41,
     "matched_page_header": "הבית",
-    "match_ratio": 0.375,
-    "trusted": false,
-    "search_stage": null,
-    "jump_tokens": 806,
-    "lexicon_hit_rate": 1.0
+    "match_ratio": 0.75,
+    "trusted": true,
+    "search_stage": 1,
+    "jump_tokens": 808,
+    "lexicon_hit_rate": 0.89
   },
   {
     "klal_id": 93,
     "expected_section": "הבית",
-    "matched_page": 41,
+    "matched_page": 42,
     "matched_page_header": "הבית",
     "match_ratio": 0.75,
     "trusted": true,
     "search_stage": 1,
-    "jump_tokens": 809,
-    "lexicon_hit_rate": 1.0
+    "jump_tokens": 576,
+    "lexicon_hit_rate": 0.994
   },
   {
     "klal_id": 94,
@@ -1029,23 +1029,12 @@
     "matched_page_header": "הבית",
     "match_ratio": 0.75,
     "trusted": true,
-    "search_stage": 1,
-    "jump_tokens": 576,
-    "lexicon_hit_rate": 1.0
+    "search_stage": 0,
+    "jump_tokens": 173,
+    "lexicon_hit_rate": 0.971
   },
   {
     "klal_id": 95,
-    "expected_section": "הבית",
-    "matched_page": 42,
-    "matched_page_header": "הבית",
-    "match_ratio": 0.75,
-    "trusted": true,
-    "search_stage": 0,
-    "jump_tokens": 173,
-    "lexicon_hit_rate": 1.0
-  },
-  {
-    "klal_id": 96,
     "expected_section": "הבית",
     "matched_page": 43,
     "matched_page_header": "הבית",
@@ -1056,7 +1045,7 @@
     "lexicon_hit_rate": 1.0
   },
   {
-    "klal_id": 97,
+    "klal_id": 96,
     "expected_section": "הבית",
     "matched_page": 43,
     "matched_page_header": "הבית",
@@ -1067,7 +1056,7 @@
     "lexicon_hit_rate": 1.0
   },
   {
-    "klal_id": 98,
+    "klal_id": 97,
     "expected_section": "הבית",
     "matched_page": 43,
     "matched_page_header": "הבית",
@@ -1075,10 +1064,10 @@
     "trusted": true,
     "search_stage": 0,
     "jump_tokens": 115,
-    "lexicon_hit_rate": 1.0
+    "lexicon_hit_rate": 0.959
   },
   {
-    "klal_id": 99,
+    "klal_id": 98,
     "expected_section": "הבית",
     "matched_page": 44,
     "matched_page_header": "הבית",
@@ -1089,7 +1078,7 @@
     "lexicon_hit_rate": 1.0
   },
   {
-    "klal_id": 100,
+    "klal_id": 99,
     "expected_section": "הבית",
     "matched_page": 44,
     "matched_page_header": "הבית",
@@ -1100,7 +1089,7 @@
     "lexicon_hit_rate": 1.0
   },
   {
-    "klal_id": 101,
+    "klal_id": 100,
     "expected_section": "הבית",
     "matched_page": 44,
     "matched_page_header": "הבית",
@@ -1111,7 +1100,7 @@
     "lexicon_hit_rate": 1.0
   },
   {
-    "klal_id": 102,
+    "klal_id": 101,
     "expected_section": "הבית",
     "matched_page": 44,
     "matched_page_header": "הבית",
@@ -1122,7 +1111,7 @@
     "lexicon_hit_rate": 1.0
   },
   {
-    "klal_id": 103,
+    "klal_id": 102,
     "expected_section": "הבית",
     "matched_page": 44,
     "matched_page_header": "הבית",
@@ -1130,7 +1119,18 @@
     "trusted": true,
     "search_stage": 0,
     "jump_tokens": 18,
-    "lexicon_hit_rate": 1.0
+    "lexicon_hit_rate": 0.983
+  },
+  {
+    "klal_id": 103,
+    "expected_section": "הבית",
+    "matched_page": 44,
+    "matched_page_header": "הבית",
+    "match_ratio": 0.75,
+    "trusted": true,
+    "search_stage": 0,
+    "jump_tokens": 83,
+    "lexicon_hit_rate": 0.991
   },
   {
     "klal_id": 104,
@@ -1140,7 +1140,7 @@
     "match_ratio": 0.75,
     "trusted": true,
     "search_stage": 0,
-    "jump_tokens": 114,
+    "jump_tokens": 144,
     "lexicon_hit_rate": 1.0
   },
   {
@@ -1151,7 +1151,7 @@
     "match_ratio": 0.75,
     "trusted": true,
     "search_stage": 0,
-    "jump_tokens": 113,
+    "jump_tokens": 27,
     "lexicon_hit_rate": 1.0
   },
   {
@@ -1162,18 +1162,18 @@
     "match_ratio": 0.75,
     "trusted": true,
     "search_stage": 0,
-    "jump_tokens": 27,
-    "lexicon_hit_rate": 1.0
+    "jump_tokens": 15,
+    "lexicon_hit_rate": 0.975
   },
   {
     "klal_id": 107,
     "expected_section": "הבית",
-    "matched_page": 44,
+    "matched_page": 45,
     "matched_page_header": "הבית",
     "match_ratio": 0.75,
     "trusted": true,
     "search_stage": 0,
-    "jump_tokens": 15,
+    "jump_tokens": 51,
     "lexicon_hit_rate": 1.0
   },
   {
@@ -1184,7 +1184,7 @@
     "match_ratio": 0.75,
     "trusted": true,
     "search_stage": 0,
-    "jump_tokens": 51,
+    "jump_tokens": 81,
     "lexicon_hit_rate": 1.0
   },
   {
@@ -1195,7 +1195,7 @@
     "match_ratio": 0.75,
     "trusted": true,
     "search_stage": 0,
-    "jump_tokens": 81,
+    "jump_tokens": 61,
     "lexicon_hit_rate": 1.0
   },
   {
@@ -1206,7 +1206,7 @@
     "match_ratio": 0.75,
     "trusted": true,
     "search_stage": 0,
-    "jump_tokens": 61,
+    "jump_tokens": 30,
     "lexicon_hit_rate": 1.0
   },
   {
@@ -1217,7 +1217,7 @@
     "match_ratio": 0.75,
     "trusted": true,
     "search_stage": 0,
-    "jump_tokens": 30,
+    "jump_tokens": 99,
     "lexicon_hit_rate": 1.0
   },
   {
@@ -1228,7 +1228,7 @@
     "match_ratio": 0.75,
     "trusted": true,
     "search_stage": 0,
-    "jump_tokens": 100,
+    "jump_tokens": 29,
     "lexicon_hit_rate": 1.0
   },
   {
@@ -1239,7 +1239,7 @@
     "match_ratio": 0.75,
     "trusted": true,
     "search_stage": 0,
-    "jump_tokens": 28,
+    "jump_tokens": 211,
     "lexicon_hit_rate": 1.0
   },
   {
@@ -1250,22 +1250,11 @@
     "match_ratio": 0.75,
     "trusted": true,
     "search_stage": 0,
-    "jump_tokens": 212,
+    "jump_tokens": 149,
     "lexicon_hit_rate": 1.0
   },
   {
     "klal_id": 115,
-    "expected_section": "הבית",
-    "matched_page": 45,
-    "matched_page_header": "הבית",
-    "match_ratio": 0.75,
-    "trusted": true,
-    "search_stage": 0,
-    "jump_tokens": 148,
-    "lexicon_hit_rate": 1.0
-  },
-  {
-    "klal_id": 116,
     "expected_section": "הבית",
     "matched_page": 46,
     "matched_page_header": "הבית",
@@ -1276,6 +1265,17 @@
     "lexicon_hit_rate": 1.0
   },
   {
+    "klal_id": 116,
+    "expected_section": "הבית",
+    "matched_page": 46,
+    "matched_page_header": "הבית",
+    "match_ratio": 0.75,
+    "trusted": true,
+    "search_stage": 0,
+    "jump_tokens": 23,
+    "lexicon_hit_rate": 1.0
+  },
+  {
     "klal_id": 117,
     "expected_section": "הבית",
     "matched_page": 46,
@@ -1283,7 +1283,7 @@
     "match_ratio": 0.75,
     "trusted": true,
     "search_stage": 0,
-    "jump_tokens": 22,
+    "jump_tokens": 201,
     "lexicon_hit_rate": 1.0
   },
   {
@@ -1294,7 +1294,7 @@
     "match_ratio": 0.75,
     "trusted": true,
     "search_stage": 0,
-    "jump_tokens": 202,
+    "jump_tokens": 44,
     "lexicon_hit_rate": 1.0
   },
   {
@@ -1305,7 +1305,7 @@
     "match_ratio": 0.75,
     "trusted": true,
     "search_stage": 0,
-    "jump_tokens": 45,
+    "jump_tokens": 36,
     "lexicon_hit_rate": 1.0
   },
   {
@@ -1316,7 +1316,7 @@
     "match_ratio": 0.75,
     "trusted": true,
     "search_stage": 0,
-    "jump_tokens": 35,
+    "jump_tokens": 34,
     "lexicon_hit_rate": 1.0
   },
   {
@@ -1327,22 +1327,11 @@
     "match_ratio": 0.75,
     "trusted": true,
     "search_stage": 0,
-    "jump_tokens": 34,
-    "lexicon_hit_rate": 1.0
+    "jump_tokens": 123,
+    "lexicon_hit_rate": 0.985
   },
   {
     "klal_id": 122,
-    "expected_section": "הבית",
-    "matched_page": 46,
-    "matched_page_header": "הבית",
-    "match_ratio": 0.75,
-    "trusted": true,
-    "search_stage": 0,
-    "jump_tokens": 123,
-    "lexicon_hit_rate": 0.986
-  },
-  {
-    "klal_id": 123,
     "expected_section": "הגימל",
     "matched_page": 46,
     "matched_page_header": "הבית",
@@ -1353,7 +1342,7 @@
     "lexicon_hit_rate": 1.0
   },
   {
-    "klal_id": 124,
+    "klal_id": 123,
     "expected_section": "הגימל",
     "matched_page": 46,
     "matched_page_header": "הבית",
@@ -1361,43 +1350,21 @@
     "trusted": true,
     "search_stage": 0,
     "jump_tokens": 147,
-    "lexicon_hit_rate": 0.889
+    "lexicon_hit_rate": 0.94
+  },
+  {
+    "klal_id": 124,
+    "expected_section": "הגימל",
+    "matched_page": 47,
+    "matched_page_header": "הגימל",
+    "match_ratio": 0.75,
+    "trusted": true,
+    "search_stage": 0,
+    "jump_tokens": 58,
+    "lexicon_hit_rate": 1.0
   },
   {
     "klal_id": 125,
-    "expected_section": "הגימל",
-    "matched_page": 47,
-    "matched_page_header": "הגימל",
-    "match_ratio": 0.75,
-    "trusted": true,
-    "search_stage": 0,
-    "jump_tokens": 57,
-    "lexicon_hit_rate": 1.0
-  },
-  {
-    "klal_id": 126,
-    "expected_section": "הגימל",
-    "matched_page": 47,
-    "matched_page_header": "הגימל",
-    "match_ratio": 0.75,
-    "trusted": true,
-    "search_stage": 0,
-    "jump_tokens": 61,
-    "lexicon_hit_rate": 1.0
-  },
-  {
-    "klal_id": 127,
-    "expected_section": "הגימל",
-    "matched_page": 47,
-    "matched_page_header": "הגימל",
-    "match_ratio": 0.75,
-    "trusted": true,
-    "search_stage": 0,
-    "jump_tokens": 94,
-    "lexicon_hit_rate": 1.0
-  },
-  {
-    "klal_id": 128,
     "expected_section": "הגימל",
     "matched_page": 47,
     "matched_page_header": "הגימל",
@@ -1408,15 +1375,48 @@
     "lexicon_hit_rate": 1.0
   },
   {
-    "klal_id": 129,
+    "klal_id": 126,
+    "expected_section": "הגימל",
+    "matched_page": 47,
+    "matched_page_header": "הגימל",
+    "match_ratio": 0.75,
+    "trusted": true,
+    "search_stage": 0,
+    "jump_tokens": 94,
+    "lexicon_hit_rate": 1.0
+  },
+  {
+    "klal_id": 127,
+    "expected_section": "הגימל",
+    "matched_page": 47,
+    "matched_page_header": "הגימל",
+    "match_ratio": 0.75,
+    "trusted": true,
+    "search_stage": 0,
+    "jump_tokens": 61,
+    "lexicon_hit_rate": 1.0
+  },
+  {
+    "klal_id": 128,
     "expected_section": "הדלת",
     "matched_page": 47,
     "matched_page_header": "הגימל",
-    "match_ratio": 0.625,
-    "trusted": false,
-    "search_stage": null,
+    "match_ratio": 0.75,
+    "trusted": true,
+    "search_stage": 0,
     "jump_tokens": 42,
-    "lexicon_hit_rate": 0.998
+    "lexicon_hit_rate": 0.965
+  },
+  {
+    "klal_id": 129,
+    "expected_section": "הדלת",
+    "matched_page": 48,
+    "matched_page_header": "הדלת",
+    "match_ratio": 0.75,
+    "trusted": true,
+    "search_stage": 1,
+    "jump_tokens": 1315,
+    "lexicon_hit_rate": 1.0
   },
   {
     "klal_id": 130,
@@ -1425,23 +1425,12 @@
     "matched_page_header": "הדלת",
     "match_ratio": 0.75,
     "trusted": true,
-    "search_stage": 1,
-    "jump_tokens": 1366,
-    "lexicon_hit_rate": 1.0
+    "search_stage": 0,
+    "jump_tokens": 40,
+    "lexicon_hit_rate": 0.984
   },
   {
     "klal_id": 131,
-    "expected_section": "הדלת",
-    "matched_page": 48,
-    "matched_page_header": "הדלת",
-    "match_ratio": 0.75,
-    "trusted": true,
-    "search_stage": 0,
-    "jump_tokens": 40,
-    "lexicon_hit_rate": 0.969
-  },
-  {
-    "klal_id": 132,
     "expected_section": "הדלת",
     "matched_page": 49,
     "matched_page_header": "הדלת",
@@ -1452,7 +1441,7 @@
     "lexicon_hit_rate": 1.0
   },
   {
-    "klal_id": 133,
+    "klal_id": 132,
     "expected_section": "הדלת",
     "matched_page": 49,
     "matched_page_header": "הדלת",
@@ -1463,7 +1452,7 @@
     "lexicon_hit_rate": 1.0
   },
   {
-    "klal_id": 134,
+    "klal_id": 133,
     "expected_section": "הדלת",
     "matched_page": 49,
     "matched_page_header": "הדלת",
@@ -1474,6 +1463,17 @@
     "lexicon_hit_rate": 1.0
   },
   {
+    "klal_id": 134,
+    "expected_section": "הדלת",
+    "matched_page": 49,
+    "matched_page_header": "הדלת",
+    "match_ratio": 0.75,
+    "trusted": true,
+    "search_stage": 0,
+    "jump_tokens": 37,
+    "lexicon_hit_rate": 1.0
+  },
+  {
     "klal_id": 135,
     "expected_section": "הדלת",
     "matched_page": 49,
@@ -1481,7 +1481,7 @@
     "match_ratio": 0.75,
     "trusted": true,
     "search_stage": 0,
-    "jump_tokens": 36,
+    "jump_tokens": 60,
     "lexicon_hit_rate": 1.0
   },
   {
@@ -1492,7 +1492,7 @@
     "match_ratio": 0.75,
     "trusted": true,
     "search_stage": 0,
-    "jump_tokens": 61,
+    "jump_tokens": 49,
     "lexicon_hit_rate": 1.0
   },
   {
@@ -1503,7 +1503,7 @@
     "match_ratio": 0.75,
     "trusted": true,
     "search_stage": 0,
-    "jump_tokens": 49,
+    "jump_tokens": 36,
     "lexicon_hit_rate": 1.0
   },
   {
@@ -1514,22 +1514,11 @@
     "match_ratio": 0.75,
     "trusted": true,
     "search_stage": 0,
-    "jump_tokens": 36,
-    "lexicon_hit_rate": 1.0
-  },
-  {
-    "klal_id": 139,
-    "expected_section": "הדלת",
-    "matched_page": 49,
-    "matched_page_header": "הדלת",
-    "match_ratio": 0.75,
-    "trusted": true,
-    "search_stage": 0,
     "jump_tokens": 152,
     "lexicon_hit_rate": 1.0
   },
   {
-    "klal_id": 140,
+    "klal_id": 139,
     "expected_section": "הדלת",
     "matched_page": 50,
     "matched_page_header": "הדלת",
@@ -1540,7 +1529,7 @@
     "lexicon_hit_rate": 1.0
   },
   {
-    "klal_id": 141,
+    "klal_id": 140,
     "expected_section": "הדלת",
     "matched_page": 50,
     "matched_page_header": "הדלת",
@@ -1551,7 +1540,7 @@
     "lexicon_hit_rate": 1.0
   },
   {
-    "klal_id": 142,
+    "klal_id": 141,
     "expected_section": "הדלת",
     "matched_page": 50,
     "matched_page_header": "הדלת",
@@ -1562,7 +1551,7 @@
     "lexicon_hit_rate": 1.0
   },
   {
-    "klal_id": 143,
+    "klal_id": 142,
     "expected_section": "הדלת",
     "matched_page": 50,
     "matched_page_header": "הדלת",
@@ -1573,7 +1562,7 @@
     "lexicon_hit_rate": 1.0
   },
   {
-    "klal_id": 144,
+    "klal_id": 143,
     "expected_section": "הדלת",
     "matched_page": 50,
     "matched_page_header": "הדלת",
@@ -1581,17 +1570,28 @@
     "trusted": true,
     "search_stage": 0,
     "jump_tokens": 18,
-    "lexicon_hit_rate": 0.998
+    "lexicon_hit_rate": 0.959
   },
   {
-    "klal_id": 145,
+    "klal_id": 144,
     "expected_section": "הדלת",
     "matched_page": 51,
     "matched_page_header": "הדלת",
     "match_ratio": 0.75,
     "trusted": true,
     "search_stage": 1,
-    "jump_tokens": 761,
+    "jump_tokens": 760,
+    "lexicon_hit_rate": 0.908
+  },
+  {
+    "klal_id": 145,
+    "expected_section": "הדלת",
+    "matched_page": 52,
+    "matched_page_header": "הדלת",
+    "match_ratio": 0.75,
+    "trusted": true,
+    "search_stage": 1,
+    "jump_tokens": 1337,
     "lexicon_hit_rate": 1.0
   },
   {
@@ -1601,19 +1601,19 @@
     "matched_page_header": "הדלת",
     "match_ratio": 0.75,
     "trusted": true,
-    "search_stage": 1,
-    "jump_tokens": 1336,
-    "lexicon_hit_rate": 1.0
+    "search_stage": 0,
+    "jump_tokens": 56,
+    "lexicon_hit_rate": 0.767
   },
   {
     "klal_id": 147,
-    "expected_section": "הדלת",
-    "matched_page": 52,
+    "expected_section": "ההא",
+    "matched_page": 53,
     "matched_page_header": "הדלת",
     "match_ratio": 0.75,
     "trusted": true,
     "search_stage": 0,
-    "jump_tokens": 57,
+    "jump_tokens": 114,
     "lexicon_hit_rate": 1.0
   },
   {
@@ -1624,18 +1624,18 @@
     "match_ratio": 0.75,
     "trusted": true,
     "search_stage": 0,
-    "jump_tokens": 112,
-    "lexicon_hit_rate": 1.0
+    "jump_tokens": 485,
+    "lexicon_hit_rate": 0.969
   },
   {
     "klal_id": 149,
     "expected_section": "ההא",
-    "matched_page": 53,
-    "matched_page_header": "הדלת",
+    "matched_page": 54,
+    "matched_page_header": "ההא",
     "match_ratio": 0.75,
     "trusted": true,
-    "search_stage": 0,
-    "jump_tokens": 487,
+    "search_stage": 1,
+    "jump_tokens": 594,
     "lexicon_hit_rate": 1.0
   },
   {
@@ -1645,23 +1645,12 @@
     "matched_page_header": "ההא",
     "match_ratio": 0.75,
     "trusted": true,
-    "search_stage": 1,
-    "jump_tokens": 593,
-    "lexicon_hit_rate": 1.0
+    "search_stage": 0,
+    "jump_tokens": 210,
+    "lexicon_hit_rate": 0.971
   },
   {
     "klal_id": 151,
-    "expected_section": "ההא",
-    "matched_page": 54,
-    "matched_page_header": "ההא",
-    "match_ratio": 0.75,
-    "trusted": true,
-    "search_stage": 0,
-    "jump_tokens": 210,
-    "lexicon_hit_rate": 0.996
-  },
-  {
-    "klal_id": 152,
     "expected_section": "ההא",
     "matched_page": 55,
     "matched_page_header": "ההא",
@@ -1672,7 +1661,7 @@
     "lexicon_hit_rate": 1.0
   },
   {
-    "klal_id": 153,
+    "klal_id": 152,
     "expected_section": "ההא",
     "matched_page": 55,
     "matched_page_header": "ההא",
@@ -1680,10 +1669,10 @@
     "trusted": true,
     "search_stage": 0,
     "jump_tokens": 105,
-    "lexicon_hit_rate": 1.0
+    "lexicon_hit_rate": 0.988
   },
   {
-    "klal_id": 154,
+    "klal_id": 153,
     "expected_section": "ההא",
     "matched_page": 56,
     "matched_page_header": "ההא",
@@ -1694,7 +1683,7 @@
     "lexicon_hit_rate": 1.0
   },
   {
-    "klal_id": 155,
+    "klal_id": 154,
     "expected_section": "ההא",
     "matched_page": 56,
     "matched_page_header": "ההא",
@@ -1702,10 +1691,10 @@
     "trusted": true,
     "search_stage": 0,
     "jump_tokens": 198,
-    "lexicon_hit_rate": 0.998
+    "lexicon_hit_rate": 0.992
   },
   {
-    "klal_id": 156,
+    "klal_id": 155,
     "expected_section": "ההא",
     "matched_page": 57,
     "matched_page_header": "ההא",
@@ -1716,7 +1705,7 @@
     "lexicon_hit_rate": 1.0
   },
   {
-    "klal_id": 157,
+    "klal_id": 156,
     "expected_section": "ההא",
     "matched_page": 57,
     "matched_page_header": "ההא",
@@ -1727,7 +1716,7 @@
     "lexicon_hit_rate": 1.0
   },
   {
-    "klal_id": 158,
+    "klal_id": 157,
     "expected_section": "ההא",
     "matched_page": 57,
     "matched_page_header": "ההא",
@@ -1738,7 +1727,7 @@
     "lexicon_hit_rate": 1.0
   },
   {
-    "klal_id": 159,
+    "klal_id": 158,
     "expected_section": "ההא",
     "matched_page": 57,
     "matched_page_header": "ההא",
@@ -1749,7 +1738,7 @@
     "lexicon_hit_rate": 1.0
   },
   {
-    "klal_id": 160,
+    "klal_id": 159,
     "expected_section": "ההא",
     "matched_page": 57,
     "matched_page_header": "ההא",
@@ -1757,10 +1746,10 @@
     "trusted": true,
     "search_stage": 0,
     "jump_tokens": 177,
-    "lexicon_hit_rate": 1.0
+    "lexicon_hit_rate": 0.957
   },
   {
-    "klal_id": 161,
+    "klal_id": 160,
     "expected_section": "ההא",
     "matched_page": 59,
     "matched_page_header": "ההא",
@@ -1771,7 +1760,7 @@
     "lexicon_hit_rate": 1.0
   },
   {
-    "klal_id": 162,
+    "klal_id": 161,
     "expected_section": "ההא",
     "matched_page": 59,
     "matched_page_header": "ההא",
@@ -1782,7 +1771,7 @@
     "lexicon_hit_rate": 1.0
   },
   {
-    "klal_id": 163,
+    "klal_id": 162,
     "expected_section": "ההא",
     "matched_page": 59,
     "matched_page_header": "ההא",
@@ -1793,7 +1782,7 @@
     "lexicon_hit_rate": 1.0
   },
   {
-    "klal_id": 164,
+    "klal_id": 163,
     "expected_section": "ההא",
     "matched_page": 59,
     "matched_page_header": "ההא",
@@ -1801,10 +1790,10 @@
     "trusted": true,
     "search_stage": 0,
     "jump_tokens": 182,
-    "lexicon_hit_rate": 0.997
+    "lexicon_hit_rate": 0.97
   },
   {
-    "klal_id": 165,
+    "klal_id": 164,
     "expected_section": "ההא",
     "matched_page": 60,
     "matched_page_header": "ההא",
@@ -1812,10 +1801,10 @@
     "trusted": true,
     "search_stage": 1,
     "jump_tokens": 644,
-    "lexicon_hit_rate": 0.982
+    "lexicon_hit_rate": 1.0
   },
   {
-    "klal_id": 166,
+    "klal_id": 165,
     "expected_section": "ההא",
     "matched_page": 60,
     "matched_page_header": "ההא",
@@ -1826,6 +1815,17 @@
     "lexicon_hit_rate": 1.0
   },
   {
+    "klal_id": 166,
+    "expected_section": "ההא",
+    "matched_page": 60,
+    "matched_page_header": "ההא",
+    "match_ratio": 0.75,
+    "trusted": true,
+    "search_stage": 0,
+    "jump_tokens": 88,
+    "lexicon_hit_rate": 1.0
+  },
+  {
     "klal_id": 167,
     "expected_section": "ההא",
     "matched_page": 60,
@@ -1833,8 +1833,8 @@
     "match_ratio": 0.75,
     "trusted": true,
     "search_stage": 0,
-    "jump_tokens": 161,
-    "lexicon_hit_rate": 0.997
+    "jump_tokens": 66,
+    "lexicon_hit_rate": 0.972
   },
   {
     "klal_id": 168,
@@ -1856,7 +1856,7 @@
     "trusted": true,
     "search_stage": 1,
     "jump_tokens": 592,
-    "lexicon_hit_rate": 0.999
+    "lexicon_hit_rate": 1.0
   },
   {
     "klal_id": 170,
@@ -1885,10 +1885,10 @@
     "expected_section": "ההא",
     "matched_page": 64,
     "matched_page_header": "ההא",
-    "match_ratio": 0.625,
-    "trusted": false,
-    "search_stage": null,
-    "jump_tokens": 118,
+    "match_ratio": 0.75,
+    "trusted": true,
+    "search_stage": 0,
+    "jump_tokens": 119,
     "lexicon_hit_rate": 1.0
   },
   {
@@ -1899,7 +1899,7 @@
     "match_ratio": 0.75,
     "trusted": true,
     "search_stage": 0,
-    "jump_tokens": 275,
+    "jump_tokens": 148,
     "lexicon_hit_rate": 1.0
   },
   {
@@ -1922,7 +1922,7 @@
     "trusted": true,
     "search_stage": 0,
     "jump_tokens": 155,
-    "lexicon_hit_rate": 0.994
+    "lexicon_hit_rate": 1.0
   },
   {
     "klal_id": 176,
@@ -1973,11 +1973,11 @@
     "expected_section": "ההא",
     "matched_page": 67,
     "matched_page_header": "ההא",
-    "match_ratio": 0.333,
-    "trusted": false,
-    "search_stage": null,
-    "jump_tokens": 268,
-    "lexicon_hit_rate": 0.667
+    "match_ratio": 0.75,
+    "trusted": true,
+    "search_stage": 0,
+    "jump_tokens": 387,
+    "lexicon_hit_rate": 1.0
   },
   {
     "klal_id": 181,
@@ -1986,8 +1986,8 @@
     "matched_page_header": "ההא",
     "match_ratio": 0.75,
     "trusted": true,
-    "search_stage": 1,
-    "jump_tokens": 511,
+    "search_stage": 0,
+    "jump_tokens": 116,
     "lexicon_hit_rate": 1.0
   },
   {
@@ -1995,11 +1995,11 @@
     "expected_section": "ההא",
     "matched_page": 67,
     "matched_page_header": "ההא",
-    "match_ratio": 0.333,
-    "trusted": false,
-    "search_stage": null,
-    "jump_tokens": 49,
-    "lexicon_hit_rate": 0.667
+    "match_ratio": 0.75,
+    "trusted": true,
+    "search_stage": 0,
+    "jump_tokens": 126,
+    "lexicon_hit_rate": 1.0
   },
   {
     "klal_id": 183,
@@ -2009,7 +2009,7 @@
     "match_ratio": 0.75,
     "trusted": true,
     "search_stage": 0,
-    "jump_tokens": 228,
+    "jump_tokens": 94,
     "lexicon_hit_rate": 1.0
   },
   {
@@ -2039,22 +2039,22 @@
     "expected_section": "ההא",
     "matched_page": 68,
     "matched_page_header": "ההא",
-    "match_ratio": 0.625,
-    "trusted": false,
-    "search_stage": null,
-    "jump_tokens": 97,
-    "lexicon_hit_rate": 1.0
+    "match_ratio": 0.75,
+    "trusted": true,
+    "search_stage": 0,
+    "jump_tokens": 70,
+    "lexicon_hit_rate": 0.95
   },
   {
     "klal_id": 187,
     "expected_section": "ההא",
     "matched_page": 68,
     "matched_page_header": "ההא",
-    "match_ratio": 0.333,
-    "trusted": false,
-    "search_stage": null,
-    "jump_tokens": 353,
-    "lexicon_hit_rate": 0.667
+    "match_ratio": 0.75,
+    "trusted": true,
+    "search_stage": 0,
+    "jump_tokens": 16,
+    "lexicon_hit_rate": 1.0
   },
   {
     "klal_id": 188,
@@ -2064,7 +2064,7 @@
     "match_ratio": 0.75,
     "trusted": true,
     "search_stage": 0,
-    "jump_tokens": 433,
+    "jump_tokens": 331,
     "lexicon_hit_rate": 1.0
   },
   {
@@ -2083,11 +2083,11 @@
     "expected_section": "ההא",
     "matched_page": 69,
     "matched_page_header": "ההא",
-    "match_ratio": 0.333,
-    "trusted": false,
-    "search_stage": null,
-    "jump_tokens": 881,
-    "lexicon_hit_rate": 0.667
+    "match_ratio": 0.75,
+    "trusted": true,
+    "search_stage": 1,
+    "jump_tokens": 520,
+    "lexicon_hit_rate": 1.0
   },
   {
     "klal_id": 191,
@@ -2096,8 +2096,8 @@
     "matched_page_header": "ההא",
     "match_ratio": 0.75,
     "trusted": true,
-    "search_stage": 1,
-    "jump_tokens": 567,
+    "search_stage": 0,
+    "jump_tokens": 39,
     "lexicon_hit_rate": 1.0
   },
   {
@@ -2125,13 +2125,13 @@
   {
     "klal_id": 194,
     "expected_section": "ההא",
-    "matched_page": 69,
+    "matched_page": 70,
     "matched_page_header": "ההא",
-    "match_ratio": 0.333,
-    "trusted": false,
-    "search_stage": null,
-    "jump_tokens": 83,
-    "lexicon_hit_rate": 0.667
+    "match_ratio": 0.75,
+    "trusted": true,
+    "search_stage": 0,
+    "jump_tokens": 259,
+    "lexicon_hit_rate": 1.0
   },
   {
     "klal_id": 195,
@@ -2141,7 +2141,7 @@
     "match_ratio": 0.75,
     "trusted": true,
     "search_stage": 1,
-    "jump_tokens": 849,
+    "jump_tokens": 582,
     "lexicon_hit_rate": 1.0
   },
   {
@@ -2153,18 +2153,18 @@
     "trusted": true,
     "search_stage": 0,
     "jump_tokens": 36,
-    "lexicon_hit_rate": 1.0
+    "lexicon_hit_rate": 0.846
   },
   {
     "klal_id": 197,
     "expected_section": "ההא",
-    "matched_page": 71,
+    "matched_page": 70,
     "matched_page_header": "ההא",
-    "match_ratio": 0.333,
-    "trusted": false,
-    "search_stage": null,
-    "jump_tokens": 853,
-    "lexicon_hit_rate": 0.667
+    "match_ratio": 0.75,
+    "trusted": true,
+    "search_stage": 0,
+    "jump_tokens": 89,
+    "lexicon_hit_rate": 0.995
   },
   {
     "klal_id": 198,
@@ -2174,7 +2174,7 @@
     "match_ratio": 0.75,
     "trusted": true,
     "search_stage": 0,
-    "jump_tokens": 89,
+    "jump_tokens": 81,
     "lexicon_hit_rate": 1.0
   },
   {
@@ -2184,8 +2184,8 @@
     "matched_page_header": "ההא",
     "match_ratio": 0.75,
     "trusted": true,
-    "search_stage": 2,
-    "jump_tokens": 1577,
+    "search_stage": 1,
+    "jump_tokens": 1488,
     "lexicon_hit_rate": 1.0
   },
   {
@@ -2197,7 +2197,7 @@
     "trusted": true,
     "search_stage": 0,
     "jump_tokens": 44,
-    "lexicon_hit_rate": 0.997
+    "lexicon_hit_rate": 1.0
   },
   {
     "klal_id": 201,
@@ -2303,11 +2303,11 @@
     "expected_section": "ההא",
     "matched_page": 73,
     "matched_page_header": "ההא",
-    "match_ratio": 0.625,
-    "trusted": false,
-    "search_stage": null,
+    "match_ratio": 0.75,
+    "trusted": true,
+    "search_stage": 0,
     "jump_tokens": 25,
-    "lexicon_hit_rate": 0.993
+    "lexicon_hit_rate": 1.0
   },
   {
     "klal_id": 211,
@@ -2317,7 +2317,7 @@
     "match_ratio": 0.75,
     "trusted": true,
     "search_stage": 0,
-    "jump_tokens": 180,
+    "jump_tokens": 147,
     "lexicon_hit_rate": 1.0
   },
   {
@@ -2367,24 +2367,24 @@
   {
     "klal_id": 216,
     "expected_section": "ההא",
-    "matched_page": 75,
+    "matched_page": 74,
     "matched_page_header": "ההא",
-    "match_ratio": 0.333,
-    "trusted": false,
-    "search_stage": null,
-    "jump_tokens": 610,
-    "lexicon_hit_rate": 0.667
+    "match_ratio": 0.75,
+    "trusted": true,
+    "search_stage": 0,
+    "jump_tokens": 143,
+    "lexicon_hit_rate": 1.0
   },
   {
     "klal_id": 217,
     "expected_section": "ההא",
     "matched_page": 75,
     "matched_page_header": "ההא",
-    "match_ratio": 0.333,
-    "trusted": false,
-    "search_stage": null,
-    "jump_tokens": 610,
-    "lexicon_hit_rate": 0.667
+    "match_ratio": 0.75,
+    "trusted": true,
+    "search_stage": 1,
+    "jump_tokens": 599,
+    "lexicon_hit_rate": 1.0
   },
   {
     "klal_id": 218,
@@ -2393,8 +2393,8 @@
     "matched_page_header": "ההא",
     "match_ratio": 0.75,
     "trusted": true,
-    "search_stage": 2,
-    "jump_tokens": 1764,
+    "search_stage": 1,
+    "jump_tokens": 1006,
     "lexicon_hit_rate": 1.0
   },
   {
@@ -2405,7 +2405,7 @@
     "match_ratio": 0.75,
     "trusted": true,
     "search_stage": 0,
-    "jump_tokens": 66,
+    "jump_tokens": 67,
     "lexicon_hit_rate": 1.0
   },
   {
@@ -2416,7 +2416,7 @@
     "match_ratio": 0.75,
     "trusted": true,
     "search_stage": 0,
-    "jump_tokens": 101,
+    "jump_tokens": 100,
     "lexicon_hit_rate": 1.0
   },
   {

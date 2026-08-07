@@ -148,7 +148,7 @@ PLACEHOLDER_TITLE_COUNT_MAX = 115
 
 # validate_klal_span_coverage.py flags any Part-1 klal whose stored word
 # count falls below 85% of its real marker-to-marker token span. Current
-# baseline (5): klal 175 is an already-documented conservative-rounding
+# baseline (6): klal 175 is an already-documented conservative-rounding
 # false positive (PROJECT-STATUS.md "klal 175 is a confirmed false
 # positive"); klal 106 sits right at the 0.85 threshold and was reasoned
 # about but not individually resolved (PROJECT-STATUS.md "klal 106 newly
@@ -156,11 +156,17 @@ PLACEHOLDER_TITLE_COUNT_MAX = 115
 # positive... given time budget"); klal 179/181/193 are the three klalim
 # whose merged content was just split out 2026-08-06 (180/182/194) - the
 # *neighbor* klal (179/181/193) now legitimately looks short by this ratio
-# because its former (wrongly merged) length no longer belongs to it. None
-# of these five are corpus bugs as currently understood; a genuinely new
-# entry here is the same failure mode as the original klal-2/klal-4
-# cross-page truncation bug this validator was built to catch.
-SPAN_COVERAGE_BASELINE = {106, 175, 179, 181, 193}
+# because its former (wrongly merged) length no longer belongs to it;
+# klal 123 was individually verified 2026-08-07 (full raw token span
+# read end to end) and is genuinely complete - the flag is caused by
+# ~11 page-furniture tokens (a footnote numeral, "Digitized by Google"
+# watermark, folio number, and the next page's running header) inflating
+# the raw marker-to-marker span count, the same false-positive class as
+# klal 106/175. None of these six are corpus bugs as currently
+# understood; a genuinely new entry here is the same failure mode as the
+# original klal-2/klal-4 cross-page truncation bug this validator was
+# built to catch.
+SPAN_COVERAGE_BASELINE = {106, 123, 175, 179, 181, 193}
 
 
 def _load_klalim(path):
