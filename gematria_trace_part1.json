@@ -32,9 +32,10 @@
     "page": 15,
     "expected_gematria": "ד",
     "stored_gematria": "ד",
-    "content_match_ratio": 0.0,
-    "status": "marker_found_content_mismatch",
-    "marker_position": 880
+    "content_match_ratio": 1.0,
+    "status": "ok",
+    "marker_position": 880,
+    "note": "2026-08-07: marker_found_content_mismatch was a false artifact, not a real problem - re-investigated while fixing a review-dashboard region-box bug. Marker position 880 IS correct (confirmed by direct crop: a lone ד sitting in the right-margin gap next to the bold אין opening word, same convention as klal 3's own marker). But token 880 sits OUT OF READING ORDER in docai's raw array - by Y-coordinate it's on klal 4's own first line (y1=0.881), yet it's array-indexed in the middle of klal 3's trailing tokens (y1=0.844-0.859), the same anomaly class already documented for klal 3's own marker. Any check that reads content forward from marker_position in ARRAY order (not Y-order) hits klal 3's leftover tokens (881-895) before reaching klal 4's real continuation at token 896 ('אין הלכה כרשב\"ג בטריפות...', which matches stored clean_text exactly) - that's what produced content_match_ratio 0.0, not a real content problem. Content confirmed correct; only the naive array-order-based check was wrong."
   },
   {
     "klal_id": 5,

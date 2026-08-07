@@ -97,7 +97,13 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
 .hl-box {
   position: absolute;
   border-radius: 3px;
-  border: 2px solid;
+  /* box-shadow instead of border: a border sits ON the box's own edge
+     (exactly the token's bbox, per Lesson from 2026-08-07 review-dashboard
+     feedback) and covers a couple pixels of the actual letter strokes
+     right at that boundary on tight-fitting boxes. A non-inset box-shadow
+     draws OUTSIDE the box entirely, so it outlines the region without
+     ever overlapping the scan image underneath it. */
+  box-shadow: 0 0 0 2px var(--hl-color, currentColor);
   cursor: pointer;
   transition: opacity .15s ease;
 }
@@ -105,7 +111,7 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
 .hl-current-klal {
   position: absolute;
   border-radius: 4px;
-  border: 3px solid var(--pending);
+  box-shadow: 0 0 0 3px var(--pending);
   background: rgba(214, 158, 46, 0.14);
   pointer-events: none;
   transition: top .15s ease, left .15s ease, width .15s ease, height .15s ease, opacity .15s ease;
@@ -272,10 +278,14 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
 .nav-item .ntitle { flex: 1; min-width: 0; color: var(--ink-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .nav-item .nflag { color: var(--pending); font-size: 12px; flex-shrink: 0; }
 .nav-item .ncount {
-  background: var(--danger); color: white; border-radius: 10px;
-  font-size: 10px; font-family: 'Inter', sans-serif; padding: 1px 6px; display: none; flex-shrink: 0;
+  color: white; border-radius: 10px;
+  font-size: 10px; font-family: 'Inter', sans-serif; padding: 1px 6px; flex-shrink: 0;
 }
-.nav-item.has-flags .ncount { display: inline-block; }
+/* Two distinct badges, not one undifferentiated count: red = still open
+   (needs a decision), green = already decided - so the queue length and
+   the actual remaining work are visually different at a glance. */
+.nav-item .ncount-open { background: var(--danger); }
+.nav-item .ncount-decided { background: #38a169; }
 
 /* ---------- tooltip (quick hover info) ---------- */
 #tooltip {

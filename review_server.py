@@ -110,16 +110,24 @@ def api_klalim():
     alignment = _load_alignment()
     corrections = _load_corrections()
     flagged = set(rd.flagged_klalim())
+    decided = rd.all_current("candidate_choice")  # {(klal_id, word_index): record}
     out = []
     for k in klalim:
         kid = k["klal_id"]
+        entries = corrections.get(str(kid), [])
+        decided_count = sum(1 for c in entries if (kid, c["word_index"]) in decided)
         out.append({
             "klal_id": kid,
             "title": k.get("title", ""),
             "section": k.get("section", ""),
             "page": _trusted_page(alignment, kid),
             "page_trusted": kid in alignment and bool(alignment[kid].get("trusted")),
-            "correction_count": len(corrections.get(str(kid), [])),
+            "correction_count": len(entries),
+            # split so the nav badge can distinguish "still needs a look"
+            # from "already decided" instead of one undifferentiated count
+            # (2026-08-07, PROJECT-STATUS.md "review dashboard feedback").
+            "decided_count": decided_count,
+            "open_count": len(entries) - decided_count,
             "needs_revisit": kid in flagged,
             # lets the frontend size an unmounted placeholder block
             # proportionally instead of a fixed guess, so lazy-loading a
@@ -138,7 +146,7 @@ def api_klal(klal_id):
     corrections = _load_corrections().get(str(klal_id), [])
     corrections = [_merge_decision(c, klal_id) for c in corrections]
     regions = _load_regions()
-    region = regions.get(str(klal_id), {}).get("bbox")
+    region_entry = regions.get(str(klal_id), {})
     flag_state = rd.current_for(klal_id, decision_type="klal_flag")
     return {
         "klal_id": k["klal_id"],
@@ -148,7 +156,12 @@ def api_klal(klal_id):
         "clean_text": k.get("clean_text", ""),
         "page": _trusted_page(alignment, klal_id),
         "page_trusted": klal_id in alignment and bool(alignment[klal_id].get("trusted")),
-        "region": region,
+        "region": region_entry.get("bbox"),
+        # klal's content continues onto one or more later pages (e.g. klal 4:
+        # starts on page 15's last line, most of its text is on page 16) -
+        # a per-page bbox for each, so the scan-pane highlight can follow
+        # the klal when the reviewer manually flips pages.
+        "continuations": region_entry.get("continuations", []),
         "corrections": corrections,
         "needs_revisit": bool(flag_state and flag_state.get("needs_revisit")),
         "flag_note": flag_state.get("note") if flag_state else None,

@@ -25,7 +25,6 @@ async function init() {
   buildLegend();
   buildNav();
   buildPlaceholders();
-  buildFirstKlalOfPage();
   setupObserver();
   setupFilter();
   setupZoomPan();
@@ -48,6 +47,17 @@ function buildLegend() {
 }
 
 // ---------- nav pane ----------
+function navItemInnerHtml(k) {
+  const flagIcon = k.needs_revisit ? '<span class="nflag">&#9873;</span>' : '';
+  // Two badges, not one undifferentiated count: red = still needs a
+  // decision, green = already decided (a reviewer wants to know at a
+  // glance how much of a klal's queue is actually done, not just how many
+  // words were ever flagged).
+  const openBadge = k.open_count ? `<span class="ncount ncount-open">${k.open_count}</span>` : '';
+  const decidedBadge = k.decided_count ? `<span class="ncount ncount-decided">${k.decided_count}</span>` : '';
+  return `<span class="nid">${k.klal_id}</span><span class="ntitle" title="${(k.title || '').replace(/"/g, '&quot;')}">${k.title || ''}</span>${flagIcon}${openBadge}${decidedBadge}`;
+}
+
 function buildNav() {
   navList.innerHTML = '';
   KLALIM.forEach(k => {
@@ -56,8 +66,7 @@ function buildNav() {
     item.id = 'nav-' + k.klal_id;
     item.dataset.klalId = k.klal_id;
     item.onclick = () => jumpTo(k.klal_id);
-    const flagIcon = k.needs_revisit ? '<span class="nflag">&#9873;</span>' : '';
-    item.innerHTML = `<span class="nid">${k.klal_id}</span><span class="ntitle" title="${(k.title || '').replace(/"/g, '&quot;')}">${k.title || ''}</span>${flagIcon}<span class="ncount">${k.correction_count}</span>`;
+    item.innerHTML = navItemInnerHtml(k);
     navList.appendChild(item);
   });
 }
@@ -76,8 +85,7 @@ function refreshNavItem(klalId) {
   const k = klalById[klalId];
   const item = document.getElementById('nav-' + klalId);
   if (!k || !item) return;
-  const flagIcon = k.needs_revisit ? '<span class="nflag">&#9873;</span>' : '';
-  item.innerHTML = `<span class="nid">${k.klal_id}</span><span class="ntitle" title="${(k.title || '').replace(/"/g, '&quot;')}">${k.title || ''}</span>${flagIcon}<span class="ncount">${k.correction_count}</span>`;
+  item.innerHTML = navItemInnerHtml(k);
 }
 
 // ---------- middle pane: placeholders + lazy mount ----------
@@ -242,6 +250,9 @@ function setupPanels() {
   document.getElementById('candidate-panel-close').onclick = closePanels;
   document.getElementById('klal-flag-panel-close').onclick = closePanels;
   backdrop.onclick = closePanels;
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closePanels();
+  });
 }
 function closePanels() {
   backdrop.classList.remove('open');
@@ -389,9 +400,17 @@ async function saveCandidateDecision(klalId, corr) {
   // correction entry and re-render this klal's word span.
   const k = mountedKlal[klalId];
   const entry = k.corrections.find(c => c.word_index === corr.word_index);
+  const wasAlreadyDecided = !!(entry && entry.current_decision);
   if (entry) entry.current_decision = record;
   const block = document.getElementById('klal-block-' + klalId);
   if (block) renderKlalBody(block, k);
+
+  // Keep the nav-pane's open/decided badge counts live too.
+  if (!wasAlreadyDecided && klalById[klalId]) {
+    klalById[klalId].open_count = Math.max(0, (klalById[klalId].open_count || 0) - 1);
+    klalById[klalId].decided_count = (klalById[klalId].decided_count || 0) + 1;
+    refreshNavItem(klalId);
+  }
 
   const status = document.getElementById('save-status');
   status.classList.add('show');
@@ -480,6 +499,7 @@ async function openKlalFlagPanel(klalId) {
 
 // ---------- scan pane ----------
 let currentPage = null;
+let scanFocusKlalId = null; // which klal's region/continuation to highlight, independent of which page is shown
 const pageImg = document.getElementById('page-img');
 const hlContainer = document.getElementById('hl-container');
 const pageIndicator = document.getElementById('page-indicator');
@@ -530,12 +550,24 @@ async function showPage(page, focusKlalId) {
     pageImg.src = `/images/pdf_pages/page_${page}.png`;
     pageIndicator.textContent = 'Page ' + page;
   }
+  scanFocusKlalId = focusKlalId;
   updatePageNavButtons();
   hlContainer.innerHTML = '';
 
-  const focusKlal = mountedKlal[focusKlalId];
-  if (focusKlal && focusKlal.region) {
-    const r = focusKlal.region;
+  const focusKlal = mountedKlal[focusKlalId] || (await fetchKlal(focusKlalId).catch(() => null));
+  // A klal's highlight region can be on its own starting page (`region`)
+  // or, if it continues past a page boundary, on a later page it also
+  // touches (`continuations`) - e.g. klal 4 starts on the last line of
+  // page 15 but most of it is on page 16. Use whichever matches the page
+  // actually being shown, so manually flipping pages (see
+  // goToPageOffset) still highlights the right region instead of showing
+  // nothing once you've moved off the klal's start page.
+  let r = null;
+  if (focusKlal) {
+    if (focusKlal.page === page) r = focusKlal.region;
+    else r = (focusKlal.continuations || []).find(c => c.page === page)?.bbox;
+  }
+  if (r) {
     const box = document.createElement('div');
     box.className = 'hl-current-klal';
     box.style.left = (r.x1 * 100) + '%';
@@ -551,7 +583,7 @@ async function showPage(page, focusKlalId) {
     const box = document.createElement('div');
     box.className = 'hl-box' + (c.klal_id === focusKlalId ? '' : ' dim');
     const [, color] = FLAGS[c.flag] || [null, '#a0aec0'];
-    box.style.borderColor = color;
+    box.style.setProperty('--hl-color', color);
     box.style.background = color + '33';
     box.style.left = (c.bbox.x1 * 100) + '%';
     box.style.top = (c.bbox.y1 * 100) + '%';
@@ -563,10 +595,6 @@ async function showPage(page, focusKlalId) {
 }
 
 const pagesWithKlalim = () => Array.from(new Set(KLALIM.filter(k => k.page).map(k => k.page))).sort((a, b) => a - b);
-const firstKlalOfPage = {};
-function buildFirstKlalOfPage() {
-  KLALIM.forEach(k => { if (k.page && !(k.page in firstKlalOfPage)) firstKlalOfPage[k.page] = k.klal_id; });
-}
 
 function updatePageNavButtons() {
   const pages = pagesWithKlalim();
@@ -575,13 +603,19 @@ function updatePageNavButtons() {
   document.getElementById('page-nav-next').disabled = idx === -1 || idx >= pages.length - 1;
 }
 function goToPageOffset(offset) {
+  // Deliberately does NOT jump the middle text pane to a different klal -
+  // this only flips which scan image is shown, so a reviewer can manually
+  // browse to the next/previous physical page for context (e.g. to see
+  // the rest of a klal that continues past a page boundary) while staying
+  // put in the text they're reading. showPage() itself still tries to
+  // highlight scanFocusKlalId's region on whatever page this lands on,
+  // via its `continuations` list if the klal touches this page too.
   const pages = pagesWithKlalim();
   const idx = pages.indexOf(currentPage);
   if (idx === -1) return;
   const targetPage = pages[idx + offset];
   if (targetPage == null) return;
-  const targetKlal = firstKlalOfPage[targetPage];
-  if (targetKlal != null) jumpTo(targetKlal);
+  showPage(targetPage, scanFocusKlalId);
 }
 
 // ---------- nav / scroll sync ----------
