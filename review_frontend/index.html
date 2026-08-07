@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Yad Malachi — Correction Review</title>
+<link rel="stylesheet" href="/app.css">
+</head>
+<body>
+
+  <div id="nav-pane">
+    <div id="nav-header">
+      <h1>Yad Malachi</h1>
+      <p>Klalei HaGemara — Part 1 — Correction review</p>
+    </div>
+    <div id="nav-filter">
+      <label><input type="checkbox" id="filter-flagged"> Flagged for revisit only</label>
+    </div>
+    <div id="nav-list"></div>
+    <div id="legend"></div>
+  </div>
+
+  <div id="text-pane">
+    <div id="text-header">
+      <span>Full text — <span class="hint hint-solid">solid underline</span> = disputed reading, <span class="hint hint-dotted">dotted</span> = confirmed, <span class="hint hint-pending">●</span> = you've recorded a decision. Click a marked word for details.</span>
+    </div>
+    <div id="text-scroll"></div>
+  </div>
+
+  <div id="scan-pane">
+    <div id="scan-header">
+      <span><span id="page-indicator">Page —</span> <span id="klal-indicator"></span></span>
+      <span id="zoom-controls">
+        <button id="zoom-out" title="Zoom out">−</button>
+        <span id="zoom-level">100%</span>
+        <button id="zoom-in" title="Zoom in">+</button>
+      </span>
+    </div>
+    <div id="scan-viewer">
+      <button id="page-nav-prev" class="page-nav-btn" title="Previous page">&#8250;</button>
+      <button id="page-nav-next" class="page-nav-btn" title="Next page">&#8249;</button>
+      <div id="page-container">
+        <img id="page-img" src="">
+        <div id="hl-container"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tooltip"></div>
+
+  <div id="overlay-backdrop"></div>
+
+  <div id="candidate-panel" class="side-panel">
+    <div class="panel-head">
+      <span class="panel-title">Word decision</span>
+      <button class="panel-close" id="candidate-panel-close">&times;</button>
+    </div>
+    <div class="panel-body" id="candidate-panel-body"></div>
+  </div>
+
+  <div id="klal-flag-panel" class="side-panel">
+    <div class="panel-head">
+      <span class="panel-title">Flag klal for revisit</span>
+      <button class="panel-close" id="klal-flag-panel-close">&times;</button>
+    </div>
+    <div class="panel-body" id="klal-flag-panel-body"></div>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>

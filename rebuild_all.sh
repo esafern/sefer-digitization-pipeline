@@ -3,8 +3,10 @@
 # part1.json / part2.json / part3.json (the only hand-edited source of truth
 # for corpus text). Run this after ANY edit to a part*.json file - a fix that
 # only touches part1.json and stops there is not "done," it's half-applied;
-# review.html and klalim_demo_dataset.json will silently keep showing the old
-# text until this runs.
+# klalim_demo_dataset.json will silently keep showing the old text until
+# this runs, and so will the review server's live views (review_server.py
+# reads its source files fresh per request, so it never needs restarting -
+# but it still needs THIS to have run for those files to be current).
 #
 # Pipeline, each stage's output feeding the next:
 #   part1/2/3.json
@@ -13,8 +15,12 @@
 #     -> verify_corrections_vision.py  -> corrections_verified_part1.json   (Gemini calls, cached)
 #     -> assemble_corrections_dataset.py -> corrections_part1.json
 #     -> build_klal_page_regions.py    -> klal_page_regions.json
-#     -> build_review_html.py          -> review.html
 #     -> pytest tests/                 -> pass/fail gate (regression suite)
+#
+# review.html/build_review_html.py were retired 2026-08-07 in favor of
+# review_server.py + review_frontend/ (a live local server, not a
+# regenerated static file) - see PROJECT-STATUS.md "Review dashboard
+# rearchitecture". Run it with `python3 review_server.py`.
 #
 # The vision-verification step is the only one that costs API calls, and it's
 # cached in adjudication_cache.db's corrections_cache table, keyed on
@@ -43,29 +49,26 @@ for arg in "$@"; do
   esac
 done
 
-echo "== 1/7 build_klalim_demo_dataset.py =="
+echo "== 1/6 build_klalim_demo_dataset.py =="
 ./venv/bin/python build_klalim_demo_dataset.py
 
-echo "== 2/7 build_corrections_dataset.py =="
+echo "== 2/6 build_corrections_dataset.py =="
 ./venv/bin/python build_corrections_dataset.py
 
 if [ "$SKIP_VISION" = "1" ]; then
-  echo "== 3/7 verify_corrections_vision.py SKIPPED (--skip-vision) =="
+  echo "== 3/6 verify_corrections_vision.py SKIPPED (--skip-vision) =="
 else
-  echo "== 3/7 verify_corrections_vision.py (may call the Gemini API for new/changed word pairs) =="
+  echo "== 3/6 verify_corrections_vision.py (may call the Gemini API for new/changed word pairs) =="
   ./venv/bin/python verify_corrections_vision.py
 fi
 
-echo "== 4/7 assemble_corrections_dataset.py =="
+echo "== 4/6 assemble_corrections_dataset.py =="
 ./venv/bin/python assemble_corrections_dataset.py
 
-echo "== 5/7 build_klal_page_regions.py =="
+echo "== 5/6 build_klal_page_regions.py =="
 ./venv/bin/python build_klal_page_regions.py
 
-echo "== 6/7 build_review_html.py =="
-./venv/bin/python build_review_html.py
-
-echo "== 7/7 tests/ (corpus regression suite) =="
+echo "== 6/6 tests/ (corpus regression suite) =="
 ./venv/bin/python -m pytest tests/ -q
 
 echo "== done =="

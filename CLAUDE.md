@@ -73,18 +73,28 @@ in the canonical text files. Concretely:
    (one per Yad Malachi section), `processed_klalim/` (per-klal JSON, 813
    tracked files), and `lexicon.txt` (~19k unique validated Rabbinic Hebrew
    words used as a spell-check dictionary during cleanup passes).
-4. **Demos/reports** — `review.html` (built by `build_review_html.py`, step 6
-   of `rebuild_all.sh`) is the live, current UI-verification artifact — open
-   it in a browser to visually verify a correction, per the
+4. **Demos/reports** — `review_server.py` + `review_frontend/` (a live local
+   server, run with `python3 review_server.py` then open
+   `http://127.0.0.1:8420/`) is the live, current human-review tool — use it
+   to visually verify a correction, per the
    `.gemini/rules/robust_ocr_processing.md` rule file's UI-verification
-   requirement. `SEFARIA-VLM-DEMO.html` (built by `build_vlm_demo.py`) and
+   requirement, and to record a candidate-override or klal-flag decision
+   (see "Human review decisions" below). It replaced the old
+   `build_review_html.py` → `review.html` (a single ~963KB generated file
+   with all of Part 1 inlined into one `<script>` tag) 2026-08-07 - that
+   approach was retired for both a real data-pipeline bug it was surfacing
+   (see PROJECT-STATUS.md "Punctuation-token diff bug fixed") and its own
+   performance/architecture problems; `build_review_html.py` is now archived
+   at `archive/scripts/build_review_html.py`, not part of the live pipeline.
+   `SEFARIA-VLM-DEMO.html` (built by `build_vlm_demo.py`) and
    `VERIFIED-AGAINST-THE-INK.html` (an evidence showcase tied to
    `CASE-YAD-MALACHI.md`) are the other two live demo/report artifacts at
    root. As of 2026-08-06, one-off `*-VISUAL-REPORT.html` / `*-OVERVIEW.html`
    /  similar report docs from earlier in the project (dated through early
-   August, superseded once `review.html` became the live verification tool)
-   were moved to `archive/docs/` — see "Directory layout" below. Don't assume
-   a `*-REPORT.html` or `*-OVERVIEW.html` name at root is current; check
+   August, superseded once `review.html` became the live verification tool,
+   itself since superseded by `review_server.py`) were moved to
+   `archive/docs/` — see "Directory layout" below. Don't assume a
+   `*-REPORT.html` or `*-OVERVIEW.html` name at root is current; check
    whether a script in the active pipeline still generates it.
 
 ## Single source of truth for corpus text — read before editing any text file
@@ -100,22 +110,43 @@ in parallel:
   files on every fix — exactly the kind of two-copies-of-the-truth setup
   that silently drifts. Don't reintroduce that.)
 - `corrections_candidates_part1.json` → `corrections_verified_part1.json` →
-  `corrections_part1.json` → `review.html`'s flag overlay is a pipeline, each
-  stage derived from the one before it and from `klalim_demo_dataset.json`.
+  `corrections_part1.json` → `review_server.py`'s flag overlay is a
+  pipeline, each stage derived from the one before it and from
+  `klalim_demo_dataset.json`.
 - `klal_page_regions.json` (per-klal scan bounding box, independent of
   whether the klal has any flagged correction) also derives from the same
   docai-token alignment.
 
 **After any edit to a `part*.json` file, run `./rebuild_all.sh`** — this
-regenerates every derived file listed above, ending in a fresh
-`review.html`. Don't hand-run individual stages and try to remember which
-ones are now stale; that's exactly how `review.html` went out of sync for an
-entire session's worth of corrections in August 2026 (see PROJECT-STATUS.md).
-The vision-verification stage (the only one that costs API calls) is safe to
-re-run every time — see the next section.
+regenerates every derived file listed above. `review_server.py` reads its
+source files fresh off disk on every request (no embedded/cached data, no
+restart needed), but it still needs those files to actually be current —
+running the rebuild is what keeps them that way. Don't hand-run individual
+stages and try to remember which ones are now stale; that's exactly how the
+old `review.html` went out of sync for an entire session's worth of
+corrections in August 2026 (see PROJECT-STATUS.md). The vision-verification
+stage (the only one that costs API calls) is safe to re-run every time —
+see the next section.
 
 `./rebuild_all.sh --skip-vision` skips only the Gemini re-verification step,
 for fast iteration when you don't need fresh flag classifications yet.
+
+## Human review decisions — a separate, protected layer from the rebuild pipeline
+
+`review_server.py` lets a reviewer override which candidate reading is
+correct for a flagged word, or flag an entire klal for revisiting with a
+note. Every such decision is appended (never overwritten or deleted) to
+`review_decisions.jsonl` via `review_decisions.py` - this file is
+**deliberately tracked in git and outside the corpus-build pipeline**, so
+no `rebuild_all.sh` run can ever clobber a human decision (see
+PROJECT-STATUS.md for why this matters: the one prior attempt at a human-
+override mechanism was dead code that a pipeline rebuild silently
+destroyed). A decision recorded in the UI does **not** touch `part1.json`
+by itself — `apply_reviewer_decisions.py` is the separate, manually-run
+script that promotes accepted decisions into the corpus text, with its own
+drift detection and one-insert/delete-per-klal-per-run safety limit (see
+its module docstring). Recording a decision and applying it to the corpus
+are always two distinct, deliberate steps.
 
 ### The vision-adjudication cache must be keyed on the full comparison, not just the crop
 
@@ -137,9 +168,13 @@ correctly; if you add another vision-caching script, key it the same way.
 - `orchestrator.py`, `chunker.py` — the two OCR/VLM-extraction pipeline
   scripts. `build_klalim_demo_dataset.py`, `build_corrections_dataset.py`,
   `verify_corrections_vision.py`, `assemble_corrections_dataset.py`,
-  `build_klal_page_regions.py`, `build_review_html.py`, and `rebuild_all.sh`
-  are the review-artifact pipeline (see "Single source of truth" above).
-  `rebuild_all.sh`'s step 7/7 runs `tests/test_corpus_invariants.py`
+  `build_klal_page_regions.py`, and `rebuild_all.sh` are the
+  correction-data pipeline (see "Single source of truth" above).
+  `review_server.py`, `review_frontend/`, `review_decisions.py`, and
+  `apply_reviewer_decisions.py` (added 2026-08-07, see "Human review
+  decisions" above) are the live review tool - not part of
+  `rebuild_all.sh`, run separately with `python3 review_server.py`.
+  `rebuild_all.sh`'s step 6/6 runs `tests/test_corpus_invariants.py`
   (pytest) as a hard gate — see "Standing regression test suite" in
   PROJECT-STATUS.md for what it checks and why (`requirements-dev.txt`
   pins the pytest version). `build_vlm_demo.py`,
@@ -160,7 +195,7 @@ correctly; if you add another vision-caching script, key it the same way.
   first 3 checks (zero known false positives as of 2026-08-07, after fixing
   3 bugs in the script itself — see PROJECT-STATUS.md) are wired into
   `tests/test_corpus_invariants.py` as additional zero-tolerance gates in
-  `rebuild_all.sh`'s step 7/7, since it needs only tracked files (no
+  `rebuild_all.sh`'s step 6/6, since it needs only tracked files (no
   gitignored cache) and runs in under a second. Its checks 4
   (self-reference directionality) and 5 (lexicon coverage) are deliberately
   NOT gated — the script's own docstrings mark them not-viable/informational,

@@ -1,5 +1,99 @@
 # Project Status — Open Items & Investigation Log
 
+## Review dashboard rearchitecture — review.html replaced with a live local server, 2026-08-07
+
+Closes out the dashboard-fix half of the "do a full validation run on
+Part 1, but first fix the review dashboard" request (see "Punctuation-
+token diff bug fixed" above for the data-pipeline half of the same
+request). `review.html`/`build_review_html.py` are retired -
+`build_review_html.py` moved to `archive/scripts/`, `review.html` deleted.
+`rebuild_all.sh` no longer has a review-artifact-generation step (5 stages
++ pytest gate, was 6+pytest).
+
+**New tool: `review_server.py` + `review_frontend/`.** A local Python
+stdlib (`http.server.ThreadingHTTPServer`, no new runtime dependency) JSON
+API + static frontend, replacing the old single ~963KB generated HTML file
+that inlined all 222 Part-1 klalim's text and all 762 corrections into one
+`<script>` tag and built every klal's DOM + listeners synchronously on
+load - the likely cause both of that page's sluggishness and of the
+Chrome extension never once successfully loading/interacting with it this
+session (confirmed not worth further debugging; a different verification
+approach was needed, see below). Run with `python3 review_server.py`,
+open `http://127.0.0.1:8420/`. The server reads `corrections_part1.json` /
+`klalim_demo_dataset.json` / `part1_header_anchored_alignment.json` /
+`klal_page_regions.json` fresh off disk on every request - no in-memory
+cache, so it never needs restarting after `./rebuild_all.sh` runs.
+
+**New capability: candidate override with a real, protected audit trail.**
+The old `human_corrected_vision_override` flag / `human_correction_note`
+field visible in `review.html`'s code turned out to be dead code - nothing
+ever wrote either field, and the one real manual override attempt (klal
+1/word 468, 2026-08-05) was silently destroyed by the next pipeline
+rebuild (confirmed via git history: the string was never committed).
+New `review_decisions.py` + `review_decisions.jsonl` (append-only,
+**tracked in git**, deliberately outside the corpus-build pipeline so no
+rebuild can ever touch it) fixes this structurally: every override or
+klal-flag decision is a new JSON line, never rewritten or deleted, so
+"current" state is always derivable and full history is always
+revisitable. The frontend's word-detail panel shows every known reading
+(DocAI/vision/current-stored) with the active one marked inline (not
+hidden behind hover-only), a free-text custom option, a note field, and a
+history toggle. Recording a decision does **not** touch `part1.json` -
+`apply_reviewer_decisions.py` is a separate, manually-run script that
+promotes accepted decisions into the corpus, with drift detection
+(compares the decision's `candidate_snapshot` against the live
+`corrections_part1.json` entry before touching anything) and an explicit
+one-word-count-changing-decision-per-klal-per-run limit (insert/delete
+opcodes change word count, which would invalidate other pending decisions'
+`word_index` in the same klal until a rebuild regenerates fresh indices).
+Verified end-to-end against real data (then reverted, since these were
+mechanical tests, not reviewed corrections): all three opcode types
+(replace, insert-removal, delete-insertion) applied correctly, drift
+detection correctly skipped a fabricated stale decision, `part1.json`
+stayed untouched by every decision recorded through the UI alone.
+
+**New capability: per-klal flag-for-revisit with a note**, same
+`review_decisions.jsonl` mechanism, surfaced as a badge in the nav pane
+and a "flagged for revisit only" filter checkbox.
+
+**Root cause of the reported UI bugs, fixed at the source, not papered
+over**: see "Punctuation-token diff bug fixed" above for the stray-period
+root cause (61% of candidates were punctuation-only diff noise). The
+underline-inconsistency complaint is addressed by giving
+`current_text_confirmed` words a distinct dotted/subtle underline versus a
+solid underline for genuinely disputed flags, plus a small dot badge on
+any word with a recorded decision. General visual pass: real
+header/toolbar, consistent spacing scale, refined color palette, a proper
+side-panel UI for word/klal decisions instead of a hover-only tooltip.
+
+**Verification**: no working headless-browser tool existed in this
+project's `venv/` and the Chrome extension could not load this page all
+session - installed Playwright (`pip install playwright && playwright
+install chromium`, dev-only, added to `requirements-dev.txt`) as a
+self-contained alternative that doesn't depend on the extension.
+Confirmed via real screenshots + scripted interaction (not just code
+review): nav pane populates from `/api/klalim`, klal blocks lazy-mount
+via `IntersectionObserver` as they scroll into view (confirmed further
+down the document, not just the first screen), the candidate panel opens
+on click with the correct 3 candidate options and the crop-reasoning text,
+selecting a candidate + note + Save persists and immediately re-renders
+the word with a decision badge, the klal-flag panel and nav filter both
+work, zero JS console errors throughout. A formal `tests/test_review_
+server.py` (automated, not just this manual pass) and the full Part 1
+vision-validation run are the next two open items.
+
+**Known minor gap, disclosed rather than silently accepted**: for
+`unverified_insertion` (insert-opcode) candidates, the panel offers an
+explicit "Remove this text" option (recorded as an empty custom answer)
+since DocAI-side readings don't exist for that opcode by construction: no
+equivalent explicit "reject this insertion, don't add anything"
+affordance exists for `possible_omission` (delete-opcode) candidates -
+but inaction already covers that case correctly, since
+`apply_reviewer_decisions.py` only acts on klal/word pairs that actually
+have a recorded decision; simply not recording one is already "leave as
+is." Not a functional gap, just not obvious from the UI alone - worth a
+future polish pass if it causes confusion in practice.
+
 ## Punctuation-token diff bug fixed — 61% of Part 1's correction candidates were noise, 2026-08-07
 
 User reported review.html bugs (stray period in hover tooltips, underline
@@ -904,10 +998,15 @@ flagged as a genuine numbering gap turned out not to be one.
   Parts 2 and 3 have no linked scan images or word bounding boxes yet, so no
   vision-adjudicated confidence scores exist for them at all — corrections
   there are unverified against the source scan until that data is built out.
-- The review UI (`review.html`, renamed from `SEFARIA-BERLIN-DEMO.html`) is a
+- **SUPERSEDED 2026-08-07** — the review UI is no longer `review.html`
+  (a generated static file); it's `review_server.py` + `review_frontend/`,
+  a live local server with the same 3-pane layout plus a candidate-override
+  mechanism and per-klal revisit flagging - see "Review dashboard
+  rearchitecture" below. Original text, retained for the record: "The
+  review UI (`review.html`, renamed from `SEFARIA-BERLIN-DEMO.html`) is a
   work in progress: 3-pane layout (scan-highlight left / full text middle /
   abridged klal nav right), with per-word corrections + confidence surfaced
-  for human review.
+  for human review."
 - **RESOLVED 2026-08-06**: the many pre-existing tracked one-off scripts at
   root noted below as not-yet-cleaned-up have now been moved. Root cleanup
   done: 37 one-off scripts (`fix_1_line_offset_and_rebuild.py`,
