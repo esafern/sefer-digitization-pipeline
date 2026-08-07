@@ -1,5 +1,54 @@
 # Project Status — Open Items & Investigation Log
 
+## Full Part 1 validation run — clean, but 80-item unreviewed queue is the new open item, 2026-08-07
+
+Closes the "run a full validation on Part 1" request (dashboard fixes and
+the punctuation-token data-pipeline fix, both prerequisites, are logged in
+the two sections above). Ran, in order:
+
+1. All 5 cheap standalone validators (no API cost) against the current
+   corpus: `validate_klal_span_coverage.py` (6 flags, exactly the existing
+   `SPAN_COVERAGE_BASELINE` {106,123,175,179,181,193}, nothing new),
+   `validate_title_alphabetical_order.py` (Parts 2-3 placeholder-title
+   violations only, within the existing baseline max),
+   `validate_title_section_letter.py` (self-reports superseded, points to
+   the alphabetical-order check), `check_klal_token_orphans.py` (1 flag:
+   klal 34, already explained - this is the already-investigated garbled-
+   docai-OCR case from earlier today, the stored text is the crop-
+   confirmed-correct version and docai's raw text at that position is
+   independently known to be badly garbled, not a new orphan),
+   `validate_part1_corpus_integrity.py` (0/0/0 on its 3 gated checks,
+   matching the standing pytest suite). No new findings.
+2. `./rebuild_all.sh` (full, not `--skip-vision`) - the actual Gemini
+   vision-verification pass, now against the cleaned-up 320-candidate set
+   (was 762 before the punctuation-token fix). Ran clean: 0 errors, ~30
+   live Gemini calls (rest cache hits), 13/13 pytest. Final flags:
+   `current_text_may_be_wrong: 80, current_text_confirmed: 167,
+   unverified_insertion: 42, ambiguous: 11, possible_omission: 20` (320
+   total, 140 klalim) - down from `ambiguous: 364` and `possible_omission:
+   72` before the punctuation fix (expected - most of that noise is gone),
+   but `current_text_may_be_wrong` went UP (65→80), because real
+   disagreement candidates that were previously diluted/buried among the
+   punctuation noise are now cleanly counted on their own.
+
+**The 80 `current_text_may_be_wrong` flags are an unreviewed queue, not a
+checked result (Lesson 2) - and a 2-item spot check already found two of
+them are known false positives, not new findings**: klal 82 word_index 1
+(`בשר`/`בשל`) and klal 151 word_index 97 (`רמכריע`/`המכריע`) both flagged
+again despite being individually crop-confirmed correct as currently
+stored in earlier sessions (see "Klal 82, 83 fixed" and the klal 151 note
+in "Second pass on the disclosed-uncertain items" above) - this is the
+same "vision favors raw OCR over correctly-adjudicated text" bias
+documented at length in the 2026-08-06/07 "Crop-check of all 85
+`current_text_may_be_wrong` flags" section, recurring on the same words.
+That investigation found the bias pattern held for the large majority but
+was wrong to fully trust (15/85 were genuine errors) - the same standard
+applies here: **do not batch-trust or batch-dismiss these 80; they need
+the same per-item crop-check treatment**, prioritizing ones NOT already
+individually cleared in a past session. Not attempted in this session -
+this is the next open item for a dedicated pass, the same shape of work
+as the 85-item queue that took a full session before.
+
 ## Review dashboard rearchitecture — review.html replaced with a live local server, 2026-08-07
 
 Closes out the dashboard-fix half of the "do a full validation run on
