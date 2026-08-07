@@ -144,18 +144,27 @@ correctly; if you add another vision-caching script, key it the same way.
   PROJECT-STATUS.md for what it checks and why (`requirements-dev.txt`
   pins the pytest version). `build_vlm_demo.py`,
   `validate_klal_span_coverage.py`, `validate_title_alphabetical_order.py`,
-  `validate_title_section_letter.py`, `check_klal_token_orphans.py`
+  `validate_title_section_letter.py`, and `check_klal_token_orphans.py`
   (added 2026-08-06 — checks every Part-1 klal boundary for orphaned
   tokens never captured under any klal_id, or the same tokens captured
   under two; see PROJECT-STATUS.md "Klal 185-190, 196-197, 215-217
-  resolved"), and `validate_part1_corpus_integrity.py` (added 2026-08-07 —
-  5 independent no-LLM/no-scan sweeps over `part1.json` alone: gematria
-  self-consistency, character/encoding sanity, duplicated-phrase detection,
-  self-reference directionality, full-corpus lexicon coverage; see
-  PROJECT-STATUS.md for its first-run results and known false-positive
-  categories) are the other active root scripts (demo generation and
+  resolved") are the other active root scripts (demo generation and
   standalone post-fix validators, run manually, not part of
-  `rebuild_all.sh`). Root also now has a `tests/` directory (the pytest
+  `rebuild_all.sh` — each needs the gitignored `docai_word_boxes`/scan-derived
+  caches, so they can't run on a fresh clone).
+  `validate_part1_corpus_integrity.py` (added 2026-08-07 — 5 independent
+  no-LLM sweeps over `part1.json` alone: gematria self-consistency,
+  character/encoding sanity, duplicated-phrase detection, self-reference
+  directionality, full-corpus lexicon coverage) is also runnable standalone
+  for its full output, but unlike the scan-dependent validators above, its
+  first 3 checks (zero known false positives as of 2026-08-07, after fixing
+  3 bugs in the script itself — see PROJECT-STATUS.md) are wired into
+  `tests/test_corpus_invariants.py` as additional zero-tolerance gates in
+  `rebuild_all.sh`'s step 7/7, since it needs only tracked files (no
+  gitignored cache) and runs in under a second. Its checks 4
+  (self-reference directionality) and 5 (lexicon coverage) are deliberately
+  NOT gated — the script's own docstrings mark them not-viable/informational,
+  not zero-tolerance. Root also now has a `tests/` directory (the pytest
   suite above) and `requirements-dev.txt` — everything else that was at
   root as of 2026-08-06's cleanup (one-off extraction/fix/lexicon scripts)
   has been moved to `archive/scripts/`.

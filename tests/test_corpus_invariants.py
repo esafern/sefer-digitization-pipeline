@@ -268,6 +268,43 @@ def test_title_and_clean_text_are_never_empty(all_klalim):
     assert not empty_text, f"klal(im) with empty clean_text: {empty_text}"
 
 
+# validate_part1_corpus_integrity.py is Part-1-only (its own gematria/
+# lexicon logic isn't validated against Parts 2-3's conventions), no
+# gitignored/regenerable-cache dependency (only part1.json + lexicon.txt,
+# both tracked), and fast (<1s, no API calls) - unlike
+# validate_klal_span_coverage.py above, it needs no skip-if-absent guard.
+# These three checks were confirmed zero-tolerance-clean against the full
+# corpus 2026-08-07 after fixing 3 false-positive sources in the script
+# itself (final-letter gematria spelling, footnote-marker parens, a too-
+# strict same-title-cluster exemption) - see PROJECT-STATUS.md "New
+# standing check validate_part1_corpus_integrity.py added" and "did we
+# finish innovating validation checks?". Checks 4 (self-reference
+# directionality) and 5 (lexicon coverage) are deliberately NOT gated here
+# - the script's own docstrings mark them not-viable/informational-only,
+# not zero-tolerance.
+@pytest.fixture(scope="session")
+def part1_integrity_validator():
+    return _import_from_path(
+        "validate_part1_corpus_integrity",
+        os.path.join(REPO, "validate_part1_corpus_integrity.py"),
+    )
+
+
+def test_part1_gematria_self_consistency(part_klalim, part1_integrity_validator):
+    issues = part1_integrity_validator.check_gematria_self_consistency(part_klalim["part1.json"])
+    assert not issues, f"Part-1 gematria self-consistency issue(s): {issues}"
+
+
+def test_part1_character_sanity(part_klalim, part1_integrity_validator):
+    issues = part1_integrity_validator.check_character_sanity(part_klalim["part1.json"])
+    assert not issues, f"Part-1 character/encoding sanity issue(s): {issues}"
+
+
+def test_part1_no_new_duplicated_phrases(part_klalim, part1_integrity_validator):
+    issues = part1_integrity_validator.check_duplicate_phrases(part_klalim["part1.json"], n=10)
+    assert not issues, f"Part-1 unexplained duplicated 10+-word phrase(s): {issues}"
+
+
 # --- Baseline (no-NEW-violations) checks ---
 
 def test_no_new_duplicate_consecutive_words(all_klalim):

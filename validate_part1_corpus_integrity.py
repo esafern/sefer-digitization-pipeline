@@ -51,6 +51,7 @@
 # is not evidence for or against another. None of these replace vision
 # verification or direct scan crop-checks - they're a triage layer, same
 # caveat as every other automated check in this pipeline (Lesson 2).
+import difflib
 import json
 import os
 import re
@@ -68,10 +69,26 @@ GEMATRIA_VALUES = {
 }
 
 
+# Only נ/פ/צ (not כ/מ) traditionally take their final form at the end of a
+# *multi-letter* Hebrew numeral in this kind of typesetting (e.g. 150 is
+# printed קן not קנ, 190 is קץ not קצ) - but a lone single-letter numeral
+# (20 = כ, 40 = מ, 50 = נ, 80 = פ, 90 = צ) stays in regular form, and כ/מ
+# never finalize even in a multi-letter numeral (120 = קכ not קך, 140 = קמ
+# not קם, 220 = רכ not רך). Confirmed against part1.json's own
+# already-crop-verified gematria field for every case in both directions
+# (2026-08-07, PROJECT-STATUS.md "New standing check
+# validate_part1_corpus_integrity.py added") - an earlier version of this
+# function applied the substitution unconditionally to any of the 5
+# final-letter-eligible letters, which was right for 150/180/190 but wrong
+# for 20/40/50/80/90/120/140/220.
+FINAL_FORMS = {"נ": "ן", "פ": "ף", "צ": "ץ"}
+
+
 def klal_id_to_gematria(n):
     """Standard Hebrew numeral spelling, with the תשע"ו-style 15/16
     exception (ט"ו/ט"ז instead of י"ה/י"ו, which would spell divine
-    names) - same convention `part1.json`'s own `gematria` field uses."""
+    names) - same convention `part1.json`'s own `gematria` field uses.
+    See FINAL_FORMS above for the word-final-letter substitution rule."""
     hundreds = [(400, "ת"), (300, "ש"), (200, "ר"), (100, "ק")]
     tens = [(90, "צ"), (80, "פ"), (70, "ע"), (60, "ס"), (50, "נ"), (40, "מ"),
             (30, "ל"), (20, "כ"), (10, "י")]
@@ -97,6 +114,8 @@ def klal_id_to_gematria(n):
             if rem >= val:
                 letters.append(ch)
                 rem -= val
+    if len(letters) > 1 and letters[-1] in FINAL_FORMS:
+        letters[-1] = FINAL_FORMS[letters[-1]]
     return "".join(letters)
 
 
@@ -134,6 +153,16 @@ def check_gematria_self_consistency(klalim):
 
 LATIN_RE = re.compile(r"[A-Za-z]")
 ARABIC_DIGIT_RE = re.compile(r"\d")
+# This edition marks footnotes with a lone `*)`/`**)` (asterisk(s)) or `")`
+# (a straight double-quote/gershayim-like mark) - optional space, then a
+# close-paren that has no matching `(` at all - a footnote-reference
+# symbol, not a bracket pair. Confirmed by direct crop 2026-08-07
+# (PROJECT-STATUS.md "New standing check validate_part1_corpus_integrity.py
+# added"): klal 6/7/51/53/71/74/106's "unbalanced parens" were all one of
+# these two variants of the same convention, not corpus bugs. Excluded
+# from the close-paren count below so only a genuine bracket-pairing
+# mismatch is flagged.
+FOOTNOTE_MARKER_RE = re.compile(r'(\*+|")\s*\)')
 
 
 def check_character_sanity(klalim):
@@ -147,9 +176,12 @@ def check_character_sanity(klalim):
         digits = ARABIC_DIGIT_RE.findall(text)
         if digits:
             issues.append(f"klal {kid}: {len(digits)} bare Arabic digit(s): {''.join(digits)!r}")
-        for open_ch, close_ch, name in [("(", ")", "parens"), ("[", "]", "brackets")]:
-            if text.count(open_ch) != text.count(close_ch):
-                issues.append(f"klal {kid}: unbalanced {name} ({text.count(open_ch)} open vs {text.count(close_ch)} close)")
+        open_count = text.count("(")
+        close_count = text.count(")") - len(FOOTNOTE_MARKER_RE.findall(text))
+        if open_count != close_count:
+            issues.append(f"klal {kid}: unbalanced parens ({open_count} open vs {close_count} close, footnote markers excluded)")
+        if text.count("[") != text.count("]"):
+            issues.append(f"klal {kid}: unbalanced brackets ({text.count('[')} open vs {text.count(']')} close)")
     if not issues:
         print(f"  {len(klalim)}/{len(klalim)} klalim clean.")
     else:
@@ -161,6 +193,18 @@ def check_character_sanity(klalim):
 
 def ngrams(words, n):
     return [tuple(words[i:i + n]) for i in range(len(words) - n + 1)]
+
+
+TITLE_SIMILARITY_THRESHOLD = 0.8  # tolerates minor orthographic variants
+# (e.g. klal 22/23/24's למדים/למדין, אפילו/אפי') within the same
+# same-title-cluster convention; below this, titles are treated as
+# genuinely different. Confirmed 2026-08-07 (PROJECT-STATUS.md) klal
+# 22/23/24 needed this - an exact-string title comparison missed them and
+# reported a false "unexplained" duplicate-phrase hit.
+def _same_title_cluster(title_a, title_b):
+    if title_a == title_b:
+        return True
+    return difflib.SequenceMatcher(None, title_a, title_b).ratio() >= TITLE_SIMILARITY_THRESHOLD
 
 
 def check_duplicate_phrases(klalim, n=10):
@@ -193,7 +237,7 @@ def check_duplicate_phrases(klalim, n=10):
         shared = grams_a & grams_b
         if not shared:
             continue
-        same_title = by_id[kid_a]["title"] == by_id[kid_b]["title"]
+        same_title = _same_title_cluster(by_id[kid_a]["title"], by_id[kid_b]["title"])
         for g in shared:
             entry = f"klal {kid_a}/{kid_b}: identical {n}-word phrase: {' '.join(g)!r}"
             if same_title:

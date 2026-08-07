@@ -1,5 +1,60 @@
 # Project Status — Open Items & Investigation Log
 
+## Closed the two loose ends on `validate_part1_corpus_integrity.py`, 2026-08-07
+
+User asked directly: "did we finish innovating validation checks?" Answer
+at the time was no — two loose ends from the script's addition earlier
+today: its 3 known false-positive categories were only documented in prose
+here, not fixed or baselined in the script itself (so every future run
+would re-report them and someone would have to re-derive they're not
+bugs), and the script wasn't wired into the standing pytest gate, so
+nothing would catch a genuinely new violation automatically. Both closed:
+
+**Fixed all 3 false-positive sources at the source, rather than adding a
+baseline exception list** (unlike `SPAN_COVERAGE_BASELINE` etc., these
+were bugs in the check's own logic, not corpus content requiring an
+exception):
+- `klal_id_to_gematria()`'s word-final-letter handling was wrong in both
+  directions. Investigated properly this time (not just patched to stop
+  complaining): only נ/פ/צ (not כ/מ) take their final form at the end of
+  a *multi-letter* numeral in this typesetting (150=קן, 180=קף, 190=קץ),
+  while a lone single-letter numeral (20=כ, 40=מ, 50=נ, 80=פ, 90=צ) and
+  compounds ending in כ/מ (120=קכ, 140=קמ, 220=רכ) stay in regular form.
+  Confirmed against `part1.json`'s own already-crop-verified gematria
+  field in both directions before landing on this rule - an earlier,
+  simpler attempt (finalize any of the 5 eligible letters unconditionally)
+  produced 8 new false positives (20/40/50/80/90/120/140/220) that hadn't
+  existed before, caught immediately by re-running, not shipped.
+- Character-sanity's paren-balance check now excludes this edition's two
+  footnote-marker conventions (`*)`/`**)` and `")`  — asterisk(s) or a
+  straight quote directly before a lone close-paren with no matching
+  open) from the close-paren count, confirmed against klal 6/7/51/53/71/
+  74/106's actual crops.
+- Duplicate-phrase's same-title exemption now uses fuzzy title similarity
+  (`difflib` ratio ≥ 0.8) instead of exact string equality, catching
+  klal 22/23/24's same-maxim-cluster titles that differ only by minor
+  orthographic variants (למדים/למדין, אפילו/אפי').
+
+All 3 now run zero-tolerance clean (222/222) against the current corpus.
+
+**Wired those 3 checks into `tests/test_corpus_invariants.py`** as new
+zero-tolerance tests (`test_part1_gematria_self_consistency`,
+`test_part1_character_sanity`, `test_part1_no_new_duplicated_phrases`),
+now part of `rebuild_all.sh` step 7/7's hard gate — 13/13 pytest, up from
+10/10. Unlike the other standalone validators (which need the gitignored
+`docai_word_boxes` cache and so can't run on a fresh clone, hence
+deliberately excluded from the standing suite), this script only touches
+tracked files (`part1.json`, `lexicon.txt`) and runs in under a second, so
+it has no reason to stay manual-only. Checks 4 (self-reference
+directionality) and 5 (lexicon coverage) are deliberately NOT gated - the
+script's own docstrings already mark them not-viable/informational, not
+zero-tolerance, and gating an informational check would just make the
+suite permanently noisy or force treating "not yet in lexicon.txt" as a
+failure, which it isn't.
+
+`./rebuild_all.sh --skip-vision` re-run clean throughout. `CLAUDE.md`'s
+directory-layout section updated to describe the new gate.
+
 ## Klal 144 scan-crop pass — two real fixes found, one left disclosed-ambiguous, 2026-08-07
 
 Same treatment as klal 143 above, applied to klal 144's 1336-word
