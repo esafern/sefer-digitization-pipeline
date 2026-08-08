@@ -394,16 +394,26 @@ async function saveCandidateDecision(klalId, corr) {
     body: JSON.stringify({ klal_id: klalId, word_index: corr.word_index, chosen_source: chosenSource, chosen_text: text, note }),
   });
   if (!res.ok) { alert('Save failed: ' + (await res.text())); return; }
-  const record = await res.json();
 
-  // Reflect immediately without a full reload: patch the in-memory
-  // correction entry and re-render this klal's word span.
-  const k = mountedKlal[klalId];
-  const entry = k.corrections.find(c => c.word_index === corr.word_index);
-  const wasAlreadyDecided = !!(entry && entry.current_decision);
-  if (entry) entry.current_decision = record;
+  // Re-fetch this klal fresh from the server instead of patching the
+  // cached copy in place - a save is also the moment to pick up any
+  // flag/text drift that happened server-side since this klal was first
+  // mounted (e.g. a corpus rebuild that ran while this tab stayed open,
+  // which otherwise leaves the text pane showing stale flag colors
+  // indefinitely - see PROJECT-STATUS.md "stale client cache after a
+  // live rebuild", 2026-08-09).
+  const stale = mountedKlal[klalId];
+  const wasAlreadyDecided = !!(stale && stale.corrections.find(c => c.word_index === corr.word_index)?.current_decision);
+  delete mountedKlal[klalId];
+  delete fetchInFlight[klalId];
+  const k = await fetchKlal(klalId);
   const block = document.getElementById('klal-block-' + klalId);
   if (block) renderKlalBody(block, k);
+
+  // Also refresh the scan pane's highlighted boxes the same way, if it's
+  // currently on screen - otherwise a save only fixes the text pane and
+  // the scan pane keeps showing whatever it last fetched.
+  if (currentPage != null) await showPage(currentPage, klalId);
 
   // Keep the nav-pane's open/decided badge counts live too.
   if (!wasAlreadyDecided && klalById[klalId]) {

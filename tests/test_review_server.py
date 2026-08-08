@@ -114,13 +114,32 @@ def test_klal_lazy_mounts_with_real_content(server, page):
     assert len(block.inner_text()) > 20
 
 
+def _find_disputed_klal():
+    # Which klal actually has a `current_text_may_be_wrong` candidate isn't
+    # fixed - it shrinks over time as corrections get crop-checked and
+    # applied (see PROJECT-STATUS.md), so a hardcoded klal_id or a bare
+    # ".flag-word.disputed".first (which only searches whatever happens to
+    # be lazy-mounted within the initial viewport) is brittle. Look the
+    # current one up directly instead.
+    with open(os.path.join(REPO, "corrections_part1.json"), encoding="utf-8") as f:
+        data = json.load(f)
+    for kid in sorted(data.keys(), key=int):
+        if any(c.get("flag") == "current_text_may_be_wrong" for c in data[kid]):
+            return int(kid)
+    return None
+
+
 def test_candidate_override_flow_persists_and_does_not_touch_part1json(server, page):
     before_hash = _file_sha256(PART1_PATH)
+    klal_id = _find_disputed_klal()
+    assert klal_id is not None, "no current_text_may_be_wrong candidate exists to test against"
 
     page.goto(server + "/", wait_until="networkidle", timeout=15000)
-    page.wait_for_timeout(800)
+    page.wait_for_timeout(500)
+    page.click(f"#nav-{klal_id}")
+    page.wait_for_timeout(500)
 
-    disputed = page.locator(".flag-word.disputed").first
+    disputed = page.locator(f"#klal-block-{klal_id} .flag-word.disputed").first
     disputed.click()
     page.wait_for_selector("#candidate-panel.open", timeout=5000)
 
@@ -138,10 +157,14 @@ def test_candidate_override_flow_persists_and_does_not_touch_part1json(server, p
     assert page.locator(".flag-word.has-decision").count() >= 1
 
     # reload from scratch and confirm the decision persisted server-side,
-    # not just in the page's in-memory state
+    # not just in the page's in-memory state - navigate back to the same
+    # klal explicitly rather than assuming it's within whatever lazily
+    # mounts in the initial viewport after a fresh load.
     page.goto(server + "/", wait_until="networkidle", timeout=15000)
-    page.wait_for_timeout(800)
-    assert page.locator(".flag-word.has-decision").count() >= 1
+    page.wait_for_timeout(500)
+    page.click(f"#nav-{klal_id}")
+    page.wait_for_timeout(500)
+    assert page.locator(f"#klal-block-{klal_id} .flag-word.has-decision").count() >= 1
 
     after_hash = _file_sha256(PART1_PATH)
     assert before_hash == after_hash, "a recorded decision must never touch part1.json directly"

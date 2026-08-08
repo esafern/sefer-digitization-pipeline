@@ -1,6 +1,64 @@
 # Project Status — Open Items & Investigation Log
 
-## 80-item `current_text_may_be_wrong` crop-check — in progress, 38/80 done, 2026-08-08/09
+## Review dashboard: stale client cache after a live rebuild, fixed 2026-08-09
+
+User report: after the full vision-verification rebuild above ran (which
+reclassified many `current_text_may_be_wrong` flags to
+`current_text_confirmed`), the review dashboard's two panes disagreed
+with each other and with the server about which words were still
+disputed - some showed confirmed (green) on one side and still-disputed
+(red) on the other for the same word, inconsistently across different
+klalim.
+
+**Root cause**: the scan pane (`showPage()`) re-fetches `/api/page/<n>`
+fresh from the server on every navigation, so it always reflects current
+server state. The text pane (`renderKlalBody()`) only fetches a klal
+once, the first time it's lazy-mounted, and caches the result in
+`mountedKlal[klalId]` for the rest of the browser tab's lifetime -
+`saveCandidateDecision()` only patched the `current_decision` field onto
+that stale cached copy, never the flag/text itself. With a browser tab
+left open across a live `./rebuild_all.sh` run, whichever pane (or
+klal) happened to load *before* vs *after* the rebuild would show
+different, contradictory data indefinitely, with no way to resync short
+of a full page reload.
+
+**First diagnosed as "decisions not saving" - it wasn't.** Initial
+report ("previous decisions no longer seen") led to checking
+`review_decisions.jsonl`, which genuinely didn't exist yet - confirmed
+the `POST /api/decisions/candidate` endpoint itself works correctly
+(a direct curl call wrote a record fine), so the persistence layer was
+never broken. The likely explanation for the first failed save attempt
+was a stale cached `app.js` (no cache-busting query string on the
+`<script>` tag) - a hard refresh was the immediate fix, and the user's
+retry after that did successfully persist a real decision (klal 3,
+word 175, choosing "current stored text").
+
+**Fix applied to `review_frontend/app.js`'s `saveCandidateDecision()`**:
+instead of patching the decision field onto the stale cached klal
+object, delete the klal from `mountedKlal`/`fetchInFlight` and re-fetch
+it fresh from the server before re-rendering the text-pane block - a
+decision save is now also the moment any concurrent flag/text drift
+gets picked up. Also now explicitly re-runs `showPage()` for the
+current page after a save, so the scan pane's highlighted boxes recolor
+immediately too instead of waiting for the next manual page navigation.
+This doesn't fully solve staleness for a tab left open indefinitely
+without ever saving anything, but it means any *reviewing* action
+self-heals the pane it touches.
+
+**`tests/test_review_server.py` was also broken by this same underlying
+cause** (unrelated to the JS fix itself - confirmed by reproducing the
+identical failure against the pre-fix `app.js` via `git stash`): its
+`current_text_may_be_wrong` end-to-end test hardcoded
+`.flag-word.disputed` as "whatever's mounted in the initial viewport",
+which broke once this session's crop-check work reduced the disputed
+count enough that no disputed word remained within the first-mounted
+klalim. Fixed to look up a klal that actually has a
+`current_text_may_be_wrong` candidate via `corrections_part1.json`
+directly, and to navigate to it explicitly (both before recording the
+decision and after the reload-and-verify step) instead of relying on
+initial-viewport luck. 5/5 passing again.
+
+## 80-item `current_text_may_be_wrong` crop-check — complete, 80/80, 2026-08-08/09
 
 Picked up the open item logged in "Full Part 1 validation run" above: the
 80 `current_text_may_be_wrong` flags from the fresh vision-verification
@@ -75,12 +133,126 @@ word_index 97 (`רמכריע`/`המכריע`).
 
 `./rebuild_all.sh --skip-vision` re-run clean after this batch (candidate
 count dropped from 320 to 300 as fixed words stopped generating diff
-candidates against DocAI's raw reading), 13/13 pytest. **Not yet re-run
-with fresh vision verification** - deliberately deferred until the full
-80-item queue is done, to avoid spending Gemini API calls multiple times
-on a still-moving target. **42 items remain for a follow-up session**
-(klal 149 was the last one covered; continue from klal 168 onward in
-klal_id order).
+candidates against DocAI's raw reading), 13/13 pytest.
+
+### Second session, 2026-08-09: remaining 42 items (klal 168 onward), queue closed
+
+Continued from klal 168 in klal_id order through klal 219 (the last item
+in the 80-item queue), same methodology, crops at 2000-5000dpi (higher
+resolution available than the first session's 700-900dpi).
+
+**14 real fixes confirmed and applied to `part1.json`**:
+- klal 174 `סס"ד`→`ספ"ד` (inner-tongue/hook visible on the middle letter,
+  matching Pe not a second Samekh).
+- klal 175 `ע"ד`→`ע"ר` (smooth single curved stroke, no square corner -
+  kept the literal print over the "expected" Yerushalmi citation form
+  ע"ד, per this project's fidelity-over-normalization rule) and
+  `מ"ה`→`מיה` (the middle mark is a thick mid-height comma matching a
+  yod, not the thin high diagonal stroke of gershayim seen elsewhere on
+  the same page; first letter matches a same-page `מדלא` reference's מ).
+- klal 176 `והכ"מ`→`והכ"ם`, `שכתכו`→`שכתבו`, `בכ"מ`→`בכ"ם` (three
+  final-letter/ב-כ confusions, all directly crop-confirmed).
+- klal 183 `דיה`→`ד"ה` (matches a clean same-page `ד"ה` reference exactly
+  - the mark sits merged into the ד's top stroke in the same position;
+  "דיה" isn't a word here, "ד"ה" - dibbur hamatchil - is standard).
+- klal 189 `הטקיל`→`המקיל` (clear מ, and "המקיל" - the halachic rule of
+  following the lenient opinion - is the standard phrase; `הטקיל` isn't a
+  word) and `כתכו`→`כתבו` (same ב-foot pattern as klal 176).
+- klal 200 `רממקו'`→`דממקו'` (sharp squared ד corner).
+- klal 210 `ובפ`→`ובס'` (plain closed loop, no inner tongue - Samekh not
+  Pe).
+- klal 214 `ישמעא`→`ישמע` (crop unambiguous: word ends cleanly at ע with
+  white space before the next word begins - kept the literal print even
+  though "ישמעאל", Rabbi Yishmael, would be the more expected name-
+  citation reading in this attribution-formula sentence).
+- klal 215 `וכף`→`וכך` (previously left disclosed at ~800dpi in the first
+  85-item pass; at up to 5000dpi now available the final letter is
+  unambiguous - simple straight downstroke with a top hook, no inward
+  curl - resolving the earlier ambiguity).
+- klal 219 `עור`... no, `בי"ך`→`בי"ד` (sharp squared corner, and "בי"ד" -
+  Yoreh Deah - is the standard citation the surrounding sentence already
+  names, "בית הלל בי"ד רסי' פ"ד").
+
+**One fix applied then reverted after a corpus-consistency check
+overrode the visual read - kept as an explicit example of Lesson 6/9**:
+klal 189 word_index 96, `שהקשו`→`שרקשו`. Direct crop comparison against a
+clean same-page ה reference (in `האיש`) showed the target letter lacked
+ה's detached/gapped left leg, so the fix was applied to match the
+literal visual read. Before moving on, a corpus-wide check found
+`שהקשו` (matching the standard "that they raised the difficulty" Tosafot
+formula) already appears correctly, with the same ה, in klal 25 and klal
+171 - and `שרקשו` appears nowhere else in the entire corpus. That 2-0
+internal-consistency signal outweighs a single ambiguous letter-shape
+read (this font's ה sometimes prints with a very faint left leg); the
+fix was reverted back to `שהקשו`.
+
+**27 further items checked and confirmed correct as currently
+stored** (either the visual read directly disagreed with vision's flag,
+or a corpus-wide word-frequency check settled a genuinely close
+letter-shape call in the stored text's favor - both are Lesson 6/9 in
+action):
+- Direct visual disagreement with vision's flag: klal 84 word 0
+  (`פד` - this klal's own gematria marker, squared ד confirmed), klal 168
+  word 507 (`כשמוץ`), klal 169 word 78 (`מזה`), klal 171 word 88
+  (`ובב"ק` - two clear ב's, sharp corners+feet), klal 178 word 182
+  (`במה` - sharp ב corner), klal 181 word 58 (`מסור` - the disputed mark
+  is a low, detached printer's mid-dot/hyphen, not a connected yod;
+  "מסור בידנו" is the standard construction), klal 182 word 0 (`קפב` -
+  this klal's own gematria marker: קפב=182 exactly, קפכ=200 would be
+  wrong for klal 182 - numeral constraint is decisive independent of the
+  visual read), klal 182 word 51 (`ובמנין` - matches a same-line `מרב`
+  ב reference), klal 187 word 0 (`קפז` - own gematria marker, קפז=187
+  exactly), klal 194 word 191 (`כ"ר` - smooth ר stroke, matches this
+  exact phrase "וע"ע כ"מ פ' כ"ר מה' אישות" already documented correct in
+  the first 85-item pass), klal 200 word 96 (`דוהפדה` - matches the
+  word's own leading ד shape), klal 200 word 111 (`החירות` - clear
+  detached ה leg), klal 215 word 73 (`מצד` - direct side-by-side
+  comparison against same-page ד/ר references favored ד over the initial
+  impression, plus "מצד עצמו" is the standard idiom), klal 216 word 37
+  (`לא` - crop shows a lamed's tall ascender clearly, directly
+  contradicting vision's own stated reasoning), klal 219 word 32 (`עוד` -
+  sharp squared ד corner).
+- Settled by corpus-wide frequency check after a genuinely close/
+  ambiguous letter shape: klal 194 word 189 (`כ"מ` - Kesef Mishneh,
+  already retracted as a planned fix in the first 85-item pass), klal
+  194 word 395 (`כתרווייהן` - corpus uses the double-vav+double-yod
+  spelling 20+ times, zero triple-vav instances), klal 200 words 153 and
+  240 (`מהקש`/`דהקש` - this klal alone uses הקש/היקש/מהקש/דהקש 14 times,
+  zero ר-substitutions anywhere), klal 215 word 64 (`מבעייא` - corpus
+  has 15 מבעיא/מיבעיא instances, zero טבעיא, this is the same מ/ט font
+  ambiguity already documented for klal 113), klal 216 word 44 (`בהמה` -
+  17 corpus instances vs 0 for `ברמה`; "בכור בהמה" is the standard
+  halachic category), klal 216 word 98 (`וכו'` - already correctly
+  stored; the "fix" attempt hit an assertion mismatch that caught the
+  error before any bad edit landed - `final_text` in the candidate
+  record was already the current text, not `docai_reading`).
+- Reused from the already-documented 2026-08-06/07 85-item pass without
+  re-cropping (identical word pairs, already confirmed correct there):
+  klal 176 word 557 (`אשידה`/`אשירה`), klal 178 word 324 (`אכל`/`אבל`),
+  klal 181 word 20 (`סכר`/`סבר`), klal 183 words 35 and 189
+  (`בסי"ג`/`בפי"ג`, `וככתובות`/`ובכתובות`).
+
+`./rebuild_all.sh --skip-vision` re-run clean after this second batch
+(candidate count 320→286 across two batches combined), 13/13 pytest.
+
+**Full (non-skip) `./rebuild_all.sh` vision-verification re-run
+completed against the now-corrected text**: `current_text_may_be_wrong`
+dropped 80→45. Almost every one of the 286 candidates was an
+`adjudication_cache.db` cache hit (only one live Gemini call, for a
+word pair not previously seen) - confirms the crop_hash+word_a+word_b
+cache key (see CLAUDE.md "vision-adjudication cache" section) is
+working as designed: stale decisions were not silently reused for the
+now-different text. **Verified the remaining 45 flags are exactly the
+already-individually-crop-checked-and-confirmed-correct set from this
+session's two passes** (klal 3, 16, 74, 82, 84, 87, 101, 103, 104, 113,
+116, 125, 136, 143, 144x3, 151, 168, 169, 171, 176, 178x2, 181x2, 182x2,
+183x2, 187, 189, 194x3, 200x4, 215x2, 216x3, 219 - 45 items) - none of
+the 15 net word-level fixes applied this session reappear in the list,
+confirming they resolved their flags cleanly. 13/13 pytest. **This
+closes the 80-item `current_text_may_be_wrong` queue entirely** - every
+flag from the original vision-verification run has now been either
+fixed or individually confirmed correct by direct crop inspection, not
+batch-trusted.
 
 ## Review dashboard feedback pass — region-box bug, cross-page viewing, UI polish, new catchword check, 2026-08-07/08
 
