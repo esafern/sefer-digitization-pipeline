@@ -1,5 +1,87 @@
 # Project Status — Open Items & Investigation Log
 
+## 80-item `current_text_may_be_wrong` crop-check — in progress, 38/80 done, 2026-08-08/09
+
+Picked up the open item logged in "Full Part 1 validation run" above: the
+80 `current_text_may_be_wrong` flags from the fresh vision-verification
+pass are an unreviewed queue, individually crop-checked one at a time
+(Lesson 1/2), not batch-trusted or batch-dismissed. First session covers
+44 of 80, in klal_id order through klal 149. Methodology matches the
+established standard throughout this document: crop each flagged word at
+2000-3000dpi from `berlin_square.pdf` using the correction's own bbox,
+cross-check ambiguous letters against same-page/same-word reference
+tokens, require semantic+visual agreement per Lesson 9 (or explicit
+disclosure when they conflict and can't be resolved).
+
+**21 real fixes confirmed and applied to `part1.json`**:
+- Simple letter-shape corrections (crop directly contradicts the
+  currently-stored "expected" word, matching this print's own frequent
+  ה/ח and ד/ר confusions - Lesson 14/etc.): klal 1 `דנראה`→`דנראח`,
+  klal 14 `דמגילה`→`דמגילח`, klal 22 `בעמדניתא`→`בעמרניתא`, klal 42
+  `ה"ה`→`ה"ע`, klal 43 `מממונא`→`ממטונא`, klal 60 `שהוא`→`שרוא` (also
+  independently confirmed by vision's own crop reasoning, which explicitly
+  flagged the same grammar-vs-print tension), klal 61 `שדמסייע`→
+  `שרמסייע`, klal 62 `השאר`→`השארי`, klal 86 `ש"כ`→`ש"ב`, klal 91
+  `איכא`→`איבא`, klal 128 `דמהדרו`→`דטהדרו` (confirmed by the same
+  spelling recurring twice in one crop), klal 140 `הפוסקים`→`הפוסקי`
+  (real letter genuinely absent, not just occluded), klal 143 `חסדא`→
+  `חסרא`, klal 147 `תמיהתו`→`תמירתו`.
+- Multi-word phrase corrections: klal 87 `לתרץ עניין`→`לתרצן עיין`, klal
+  87 `בס' ברמה`→`בפ' בהמה` (a real chapter title, "פרק בהמה המקשה," in
+  Tractate Chullin - vision's own crop transcription already matched
+  this).
+- A third reading, matching neither candidate the pipeline offered: klal
+  86 word_index 44, stored `איזה`, docai `איהן` - crop shows neither,
+  clearly reads `איהו` ("he/it"). Applied as a custom fix, not either
+  original option.
+- Real short-form/abbreviation-fidelity fixes (the diff pipeline's
+  "corrected" reading was itself an over-expansion of what's actually
+  printed, not a genuine correction): klal 5 and klal 142 both stored
+  `דקאמר` where the print (and DocAI's own raw tokenization, which splits
+  it into two tokens) shows the abbreviated `דקאמ` + a separate geresh -
+  fixed by splitting into two words to match. Klal 149 stored `דשמואל`
+  where the print consistently spells this name's short form `דשמוא`
+  (confirmed by a second `כשמוא` instance in the same crop, no geresh) -
+  fixed to the shorter spelling.
+
+**14 items checked and confirmed correct as currently stored** (docai/
+vision's flag was the known "favors raw OCR over correct text" bias,
+per Lesson 10 and the 2026-08-06/07 85-item investigation): klal 3
+`מלמד`, klal 16 `וכתבו`, klal 74 `דחולין`, klal 87 `מקובצת`, klal 101
+`ואל` (tall lamed stroke visible, docai just clipped it), klal 103/104
+`ב"ד` (part of the already-documented klal 100-104 title cluster), klal
+113 `אמת` (a same-page `אמר` reference clarified this font's rounded-but-
+closed מ style, reversing an initial misreading as `ט`), klal 116
+`קאמרינן` (confirmed by the identical word appearing 6 words earlier in
+the same rhetorical repetition, `מי קאמרינן...קאמרינן`), klal 125
+`ופדוייו` (already-documented Tosafot Arachin citation, see "root cause
+found and fixed" section above), klal 136 `דחיה` (already-documented
+recurring ד/ר pattern for this exact word, klal 134/135), klal 143
+`נלע"ד`, klal 144 `אהדדי` (doubled-ד visible directly), `מחכמי` (closed-ח
+structure, not ה's gap).
+
+**1 left genuinely unresolved, disclosed rather than guessed**: klal 144
+word_index 546 (`מחזהרת`/`מחוזרת`) - direct crop shows only 5 letter-forms
+(`מחהרת`), matching neither 6-letter candidate exactly, and this was
+vision's own lowest-confidence call in the batch (0.85, versus 0.95-1.0
+for everything else reviewed). Needs a fresh, wider crop in a follow-up
+pass rather than a forced guess between two options that both seem to
+overcount the letters actually visible.
+
+**2 already-known false positives, not re-checked** (already
+individually crop-confirmed correct in earlier sessions - see "Full Part
+1 validation run" above): klal 82 word_index 1 (`בשר`/`בשל`), klal 151
+word_index 97 (`רמכריע`/`המכריע`).
+
+`./rebuild_all.sh --skip-vision` re-run clean after this batch (candidate
+count dropped from 320 to 300 as fixed words stopped generating diff
+candidates against DocAI's raw reading), 13/13 pytest. **Not yet re-run
+with fresh vision verification** - deliberately deferred until the full
+80-item queue is done, to avoid spending Gemini API calls multiple times
+on a still-moving target. **42 items remain for a follow-up session**
+(klal 149 was the last one covered; continue from klal 168 onward in
+klal_id order).
+
 ## Review dashboard feedback pass — region-box bug, cross-page viewing, UI polish, new catchword check, 2026-08-07/08
 
 User feedback after using the new `review_server.py` dashboard for the
