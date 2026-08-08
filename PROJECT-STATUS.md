@@ -1,5 +1,98 @@
 # Project Status — Open Items & Investigation Log
 
+## Review dashboard feedback pass — region-box bug, cross-page viewing, UI polish, new catchword check, 2026-08-07/08
+
+User feedback after using the new `review_server.py` dashboard for the
+first time surfaced one real data bug, one genuine structural UI gap, and
+several smaller UX issues - all fixed, plus a new standing check the user
+suggested. Investigated and fixed in order:
+
+**Klal 3's scan-pane highlight box was grossly oversized (spanning most of
+the page).** Root cause traced to `build_klal_page_regions.py`'s old
+content-diff heuristic (no marker anchor) getting confused at the klal
+3/4 boundary. Direct investigation found klal 4's own gematria marker
+(the small `ד` in the right-margin gap beside its bold opening word
+`אין`) sits **out of reading order** in DocAI's raw token array - by
+Y-coordinate it's on klal 4's own first line, but array-indexed in the
+middle of klal 3's trailing tokens - the same anomaly class already
+documented for klal 3's own marker (2026-08-05 note in `gematria_trace_
+part1.json`). This directly explains why `gematria_trace_part1.json`
+flagged klal 4 as `marker_found_content_mismatch` (ratio 0.0): any check
+that reads content forward from the marker position in array order hits
+klal 3's leftover tokens before reaching klal 4's real continuation.
+**Confirmed by direct crop** the marker position (880) itself is correct;
+only the array-order-based content check was wrong. Fixed the trace entry
+(`status: ok`, documented note) and rewrote `build_klal_page_regions.py`
+to band tokens by **Y-coordinate** between two klals' marker positions
+(falling back to the old heuristic only where marker data is missing) -
+sidesteps the out-of-order-array problem entirely, since it doesn't care
+what order DocAI's array lists tokens in. One implementation bug caught
+and fixed before shipping: comparing raw `y1` instead of token *centers*
+excluded the bold opening word from its own klal's band, since a bold,
+taller glyph's box starts higher than a small marker glyph beside it on
+the identical line.
+
+**Klal 4 turned out to be a genuine cross-page klal** (starts on page
+15's last line, most of its ~487 words are on page 16) - not just klal 4;
+extending the marker-anchored fix corpus-wide found this is common (klal
+2, klal 5, and others also continue onto a following page). The old data
+model stored one bbox per klal on its single "start" page, so the scan
+pane had no way to highlight a klal's content once you'd scrolled past
+its opening line. Added a `continuations` list to `klal_page_regions.
+json` (one bbox per additional page a klal's content touches, up to the
+next klal's marker) and wired it through `/api/klal/<id>` and the
+frontend's `showPage()`, so the highlight now follows a klal across a
+page boundary. Separately, decoupled the scan pane's prev/next-page
+buttons from jumping the text pane to a different klal - they now only
+flip which scan image is shown, so a reviewer can manually browse to an
+adjacent page for context without losing their place in the text they're
+reading.
+
+**"Second correction has confused hover text" (klal 4, word_index 35,
+`docai_reading: '1'`) - investigated, not a UI bug, not a catchword
+either.** User hypothesized this might be a printer's catchword (a
+repeated word at a page's bottom edge, giving readers a head start
+turning the page) misread as content. Directly cropped the token's exact
+bbox: it's an isolated ink speck/scan artifact sitting alone in blank
+margin space, well below the real text (which already correctly contains
+`סי' צ"ד` a few words earlier in the same sentence) and above the
+"Digitized by Google" watermark - not a catchword, not real content of
+any kind, just noise DocAI tokenized as the digit "1". Confirmed
+independently by the new check below (page 15->16 shows no match).
+
+**New standing check, suggested by the user: `validate_catchword_
+continuity.py`.** This print sometimes repeats a page's last real word as
+a small preview at the bottom, to help readers turning the page (a
+traditional printer's catchword) - checks whether the last real
+(non-furniture) token on page N equals the first real token of page N+1,
+skipping running headers and a klal's gematria marker if the boundary
+lands exactly on a new klal ("ignoring any klal gematria header," per the
+user's own framing). **Deliberately not zero-tolerance** - not every page
+break has a catchword (most are mid-paragraph), and catchword OCR is
+often worse than body text, so "no match" isn't informative on its own.
+First run: 21/69 checked boundaries matched (confirmed catchwords or
+coincidental repeats), correctly including a NO MATCH for the klal-4 "1"
+boundary above - independent confirmation it isn't a catchword artifact,
+matching the direct-crop finding. Kept as a standalone triage tool
+(not gated into pytest), same rationale as `validate_part1_corpus_
+integrity.py`'s informational checks.
+
+**Smaller UI fixes**: Esc now closes the candidate/klal-flag decision
+panels (previously only the X button or backdrop click worked). The
+nav-pane's correction-count badge was a single undifferentiated red
+number - split into a red "still open" count and a green "already
+decided" count, both live-updating the moment a decision is saved, so a
+reviewer can see queue progress at a glance instead of just total flag
+count. Scan-pane highlight boxes (`.hl-box`/`.hl-current-klal`) switched
+from `border` to a non-inset `box-shadow` - a border sits exactly on a
+token's own bbox edge and was covering a couple pixels of actual letter
+strokes on tight-fitting boxes; box-shadow draws entirely outside the box
+so it outlines a region without ever overlapping the scan image beneath
+it.
+
+`./rebuild_all.sh --skip-vision` and `tests/test_review_server.py` (5/5)
+both re-run clean after all of the above.
+
 ## Full Part 1 validation run — clean, but 80-item unreviewed queue is the new open item, 2026-08-07
 
 Closes the "run a full validation on Part 1" request (dashboard fixes and
