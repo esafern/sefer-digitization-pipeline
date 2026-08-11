@@ -1,0 +1,6291 @@
+{
+  "meta": {
+    "stats": {
+      "24": {
+        "klal_id": 30,
+        "docai_words": 880,
+        "tesseract_words": 885,
+        "agreement": 0.761,
+        "flagged": 159
+      },
+      "37": {
+        "klal_id": 75,
+        "docai_words": 931,
+        "tesseract_words": 931,
+        "agreement": 0.856,
+        "flagged": 118
+      },
+      "40": {
+        "klal_id": 88,
+        "docai_words": 862,
+        "tesseract_words": 863,
+        "agreement": 0.781,
+        "flagged": 140
+      }
+    },
+    "by_tier": {
+      "D": 217,
+      "B": 102,
+      "C": 94,
+      "A": 4
+    },
+    "total": 417
+  },
+  "queue": [
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "דמנחות",
+      "tesseract_reading": "י ו דמנחורז",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.8252788186073303,
+        "y1": 0.08841340243816376,
+        "x2": 0.8921933174133301,
+        "y2": 0.1049656867980957
+      },
+      "docai_token_index": 4
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "למותר",
+      "tesseract_reading": "למורזר",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.5012391805648804,
+        "y1": 0.08881711959838867,
+        "x2": 0.5594795346260071,
+        "y2": 0.10536939650774002
+      },
+      "docai_token_index": 12
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "וכו",
+      "tesseract_reading": "וכזי",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.8122676610946655,
+        "y1": 0.10294711589813232,
+        "x2": 0.8314746022224426,
+        "y2": 0.11869196593761444
+      },
+      "docai_token_index": 22
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "חטאת הוו",
+      "tesseract_reading": "חטארז חוו",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.4863692820072174,
+        "y1": 0.10335082560777664,
+        "x2": 0.5706319808959961,
+        "y2": 0.11909568309783936
+      },
+      "docai_token_index": 29
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "כל",
+      "tesseract_reading": "כלל",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.4089219272136688,
+        "y1": 0.10335082560777664,
+        "x2": 0.43990087509155273,
+        "y2": 0.11909568309783936
+      },
+      "docai_token_index": 32
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "וזו",
+      "tesseract_reading": "חו",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.2366790622472763,
+        "y1": 0.10375454276800156,
+        "x2": 0.25216853618621826,
+        "y2": 0.11949939280748367
+      },
+      "docai_token_index": 36
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "שיטת התוס",
+      "tesseract_reading": "שיטרז התוסי",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.13568773865699768,
+        "y1": 0.10375454276800156,
+        "x2": 0.8921933174133301,
+        "y2": 0.13726282119750977
+      },
+      "docai_token_index": 38
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "ד\"ה ואידך",
+      "tesseract_reading": "דיה ואירך",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.5043370723724365,
+        "y1": 0.11949939280748367,
+        "x2": 0.5824039578437805,
+        "y2": 0.13766653835773468
+      },
+      "docai_token_index": 46
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "חז\"ל",
+      "tesseract_reading": "הלל",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.40706318616867065,
+        "y1": 0.11949939280748367,
+        "x2": 0.4498141407966614,
+        "y2": 0.1380702406167984
+      },
+      "docai_token_index": 49
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "מקו",
+      "tesseract_reading": "מק",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.2893432378768921,
+        "y1": 0.11990310996770859,
+        "x2": 0.31660470366477966,
+        "y2": 0.1380702406167984
+      },
+      "docai_token_index": 52
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "נמי",
+      "tesseract_reading": "גמי",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.20631970465183258,
+        "y1": 0.11990310996770859,
+        "x2": 0.231102854013443,
+        "y2": 0.1380702406167984
+      },
+      "docai_token_index": 54
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "דמסדרין",
+      "tesseract_reading": "דמסררין",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.8283767104148865,
+        "y1": 0.13161082565784454,
+        "x2": 0.8903345465660095,
+        "y2": 0.15179653465747833
+      },
+      "docai_token_index": 56
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "כלומר",
+      "tesseract_reading": "כלומה",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.6158612370491028,
+        "y1": 0.13241824507713318,
+        "x2": 0.6623296141624451,
+        "y2": 0.15220023691654205
+      },
+      "docai_token_index": 60
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "ממנו",
+      "tesseract_reading": "מטנו",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.5247831344604492,
+        "y1": 0.13241824507713318,
+        "x2": 0.5638166069984436,
+        "y2": 0.15220023691654205
+      },
+      "docai_token_index": 62
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "דאית",
+      "tesseract_reading": "דאירץ",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.3847583532333374,
+        "y1": 0.1328219622373581,
+        "x2": 0.43370509147644043,
+        "y2": 0.15260395407676697
+      },
+      "docai_token_index": 65
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "בדבריהם",
+      "tesseract_reading": "ברבריהם",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.231102854013443,
+        "y1": 0.133225679397583,
+        "x2": 0.29801735281944275,
+        "y2": 0.15300767123699188
+      },
+      "docai_token_index": 68
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "תמיד",
+      "tesseract_reading": "תמיר",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.13568773865699768,
+        "y1": 0.133225679397583,
+        "x2": 0.17534077167510986,
+        "y2": 0.1534113883972168
+      },
+      "docai_token_index": 70
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "ס\"ד",
+      "tesseract_reading": "סר",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.8116480708122253,
+        "y1": 0.14897052943706512,
+        "x2": 0.8426269888877869,
+        "y2": 0.16511909663677216
+      },
+      "docai_token_index": 72
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "ד\"ה",
+      "tesseract_reading": "ה",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.754027247428894,
+        "y1": 0.14897052943706512,
+        "x2": 0.7843866348266602,
+        "y2": 0.16552281379699707
+      },
+      "docai_token_index": 74
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "בסנהדרין",
+      "tesseract_reading": "בסנהררין",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.602850079536438,
+        "y1": 0.14937424659729004,
+        "x2": 0.6734820604324341,
+        "y2": 0.16552281379699707
+      },
+      "docai_token_index": 77
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "כ\"ו",
+      "tesseract_reading": "כז",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.3779430091381073,
+        "y1": 0.14977796375751495,
+        "x2": 0.4027261435985565,
+        "y2": 0.16592653095722198
+      },
+      "docai_token_index": 84
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "וביבמות",
+      "tesseract_reading": "וביבמורז",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.20941759645938873,
+        "y1": 0.15018166601657867,
+        "x2": 0.27881041169166565,
+        "y2": 0.1663302332162857
+      },
+      "docai_token_index": 88
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "ד\"ה",
+      "tesseract_reading": "דייה",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.13320942223072052,
+        "y1": 0.15018166601657867,
+        "x2": 0.16356877982616425,
+        "y2": 0.16673395037651062
+      },
+      "docai_token_index": 90
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "ופ\"ו",
+      "tesseract_reading": "ופיו",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.7868649363517761,
+        "y1": 0.1635042428970337,
+        "x2": 0.8141263723373413,
+        "y2": 0.18046022951602936
+      },
+      "docai_token_index": 93
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "ד\"ה",
+      "tesseract_reading": "דיה",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.7286245226860046,
+        "y1": 0.1635042428970337,
+        "x2": 0.7558860182762146,
+        "y2": 0.18046022951602936
+      },
+      "docai_token_index": 95
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "ד\"ה",
+      "tesseract_reading": "ה",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.4560099244117737,
+        "y1": 0.1639079600572586,
+        "x2": 0.4863692820072174,
+        "y2": 0.18086394667625427
+      },
+      "docai_token_index": 101
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "ר\"פ",
+      "tesseract_reading": "ריפ",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.29739776253700256,
+        "y1": 0.16431166231632233,
+        "x2": 0.3252788186073303,
+        "y2": 0.1812676638364792
+      },
+      "docai_token_index": 104
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "ס'ב",
+      "tesseract_reading": "סיב",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.16171003878116608,
+        "y1": 0.16431166231632233,
+        "x2": 0.18773233890533447,
+        "y2": 0.1812676638364792
+      },
+      "docai_token_index": 107
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "א",
+      "tesseract_reading": "אי",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.7930607199668884,
+        "y1": 0.18046022951602936,
+        "x2": 0.805452287197113,
+        "y2": 0.19862736761569977
+      },
+      "docai_token_index": 111
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "שפי",
+      "tesseract_reading": "שפו",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.5737298727035522,
+        "y1": 0.18086394667625427,
+        "x2": 0.602850079536438,
+        "y2": 0.19903108477592468
+      },
+      "docai_token_index": 116
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "למחצה",
+      "tesseract_reading": "קמחצרק",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.33705079555511475,
+        "y1": 0.1812676638364792,
+        "x2": 0.40148699283599854,
+        "y2": 0.1994348019361496
+      },
+      "docai_token_index": 121
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "כדקאמינא",
+      "tesseract_reading": "כדקאמונות",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.1350681483745575,
+        "y1": 0.1812676638364792,
+        "x2": 0.22180916368961334,
+        "y2": 0.1998385190963745
+      },
+      "docai_token_index": 124
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "ומדברי",
+      "tesseract_reading": "ומרברי",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.3463444709777832,
+        "y1": 0.19580137729644775,
+        "x2": 0.3965303599834442,
+        "y2": 0.21154622733592987
+      },
+      "docai_token_index": 138
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "מהא",
+      "tesseract_reading": "מהאי",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.20136307179927826,
+        "y1": 0.19580137729644775,
+        "x2": 0.2366790622472763,
+        "y2": 0.21154622733592987
+      },
+      "docai_token_index": 141
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "שכתב",
+      "tesseract_reading": "שכרב",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.8364312052726746,
+        "y1": 0.21275736391544342,
+        "x2": 0.8915737271308899,
+        "y2": 0.22648364305496216
+      },
+      "docai_token_index": 144
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "שבועות",
+      "tesseract_reading": "שבועורז",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.6313506960868835,
+        "y1": 0.21316108107566833,
+        "x2": 0.694547712802887,
+        "y2": 0.22688736021518707
+      },
+      "docai_token_index": 147
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "הרא\"ם ה",
+      "tesseract_reading": "הרא ים הי",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.39962825179100037,
+        "y1": 0.21316108107566833,
+        "x2": 0.4727385342121124,
+        "y2": 0.227291077375412
+      },
+      "docai_token_index": 152
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "דבריו בעל",
+      "tesseract_reading": "דברין בעלל",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.1350681483745575,
+        "y1": 0.21356479823589325,
+        "x2": 0.8928129076957703,
+        "y2": 0.2402099370956421
+      },
+      "docai_token_index": 158
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "וכ\"כ",
+      "tesseract_reading": "וכ כ",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.6034696698188782,
+        "y1": 0.22446507215499878,
+        "x2": 0.638166069984436,
+        "y2": 0.24101735651493073
+      },
+      "docai_token_index": 165
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "מגילת",
+      "tesseract_reading": "מגילרז",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.5030978918075562,
+        "y1": 0.22446507215499878,
+        "x2": 0.5607187151908875,
+        "y2": 0.24101735651493073
+      },
+      "docai_token_index": 167
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "הסמ\"ג",
+      "tesseract_reading": "הסמיג",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.3791821599006653,
+        "y1": 0.2248687893152237,
+        "x2": 0.4306071996688843,
+        "y2": 0.24142107367515564
+      },
+      "docai_token_index": 170
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "כ\"ו",
+      "tesseract_reading": "כ",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.3060718774795532,
+        "y1": 0.2248687893152237,
+        "x2": 0.3320941627025604,
+        "y2": 0.24182479083538055
+      },
+      "docai_token_index": 172
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "בית",
+      "tesseract_reading": "בירז",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.6716232895851135,
+        "y1": 0.2406136393547058,
+        "x2": 0.7081784605979919,
+        "y2": 0.25756964087486267
+      },
+      "docai_token_index": 179
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "סי",
+      "tesseract_reading": "פיי",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.6251549124717712,
+        "y1": 0.24101735651493073,
+        "x2": 0.6418834924697876,
+        "y2": 0.2579733431339264
+      },
+      "docai_token_index": 181
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "בהליכות",
+      "tesseract_reading": "בהליכורז",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.31846344470977783,
+        "y1": 0.24142107367515564,
+        "x2": 0.3903345763683319,
+        "y2": 0.2583770751953125
+      },
+      "docai_token_index": 186
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "כלל רס\"יז הן",
+      "tesseract_reading": "כללל רסז ה",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.13320942223072052,
+        "y1": 0.24142107367515564,
+        "x2": 0.267657995223999,
+        "y2": 0.2587807774543762
+      },
+      "docai_token_index": 188
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "שהרב",
+      "tesseract_reading": "שחרב",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.807930588722229,
+        "y1": 0.2555510699748993,
+        "x2": 0.8513011336326599,
+        "y2": 0.2716996371746063
+      },
+      "docai_token_index": 192
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "סע\"כ",
+      "tesseract_reading": "סע",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.5681536793708801,
+        "y1": 0.2555510699748993,
+        "x2": 0.6040892004966736,
+        "y2": 0.2716996371746063
+      },
+      "docai_token_index": 198
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "וז\"ל",
+      "tesseract_reading": "חל",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.48265179991722107,
+        "y1": 0.255954772233963,
+        "x2": 0.5111523866653442,
+        "y2": 0.27210333943367004
+      },
+      "docai_token_index": 200
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "שוה",
+      "tesseract_reading": "שור",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.3023543953895569,
+        "y1": 0.255954772233963,
+        "x2": 0.34386616945266724,
+        "y2": 0.27210333943367004
+      },
+      "docai_token_index": 203
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "וזה",
+      "tesseract_reading": "וזרה",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.6741015911102295,
+        "y1": 0.2704885005950928,
+        "x2": 0.7057000994682312,
+        "y2": 0.2882519066333771
+      },
+      "docai_token_index": 211
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "אחד",
+      "tesseract_reading": "אחר",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.5278810262680054,
+        "y1": 0.2704885005950928,
+        "x2": 0.5600991249084473,
+        "y2": 0.2882519066333771
+      },
+      "docai_token_index": 215
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "מה",
+      "tesseract_reading": "מרז",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.3773234188556671,
+        "y1": 0.2708922028541565,
+        "x2": 0.410780668258667,
+        "y2": 0.2886556386947632
+      },
+      "docai_token_index": 218
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "וג\"ש",
+      "tesseract_reading": "וגיש",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.8581165075302124,
+        "y1": 0.28582963347435,
+        "x2": 0.8921933174133301,
+        "y2": 0.3039967715740204
+      },
+      "docai_token_index": 225
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "מבואר",
+      "tesseract_reading": "מכוצפר",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.6753407716751099,
+        "y1": 0.28582963347435,
+        "x2": 0.7329615950584412,
+        "y2": 0.3039967715740204
+      },
+      "docai_token_index": 228
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "חבירו",
+      "tesseract_reading": "חכירו",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.8228005170822144,
+        "y1": 0.30036333203315735,
+        "x2": 0.8649318218231201,
+        "y2": 0.31853047013282776
+      },
+      "docai_token_index": 241
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "מחבירו עכ\"ל",
+      "tesseract_reading": "מחכירו עכיל",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.6623296141624451,
+        "y1": 0.30036333203315735,
+        "x2": 0.7589839100837708,
+        "y2": 0.31853047013282776
+      },
+      "docai_token_index": 243
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "ה\"ע בש\"ד פ\"ב",
+      "tesseract_reading": "היע בשר פיב",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.41387856006622314,
+        "y1": 0.30076706409454346,
+        "x2": 0.5223048329353333,
+        "y2": 0.31893420219421387
+      },
+      "docai_token_index": 248
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "ג\"ש",
+      "tesseract_reading": "גיש",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.8630731105804443,
+        "y1": 0.31570449471473694,
+        "x2": 0.8915737271308899,
+        "y2": 0.3326604664325714
+      },
+      "docai_token_index": 257
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "פי ילמוד",
+      "tesseract_reading": "פיי ילמור",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.7249070405960083,
+        "y1": 0.31610819697380066,
+        "x2": 0.797397792339325,
+        "y2": 0.3330641984939575
+      },
+      "docai_token_index": 259
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "היקש",
+      "tesseract_reading": "חיקש",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.13197025656700134,
+        "y1": 0.3169156312942505,
+        "x2": 0.17472119629383087,
+        "y2": 0.33427533507347107
+      },
+      "docai_token_index": 274
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "סידיליו",
+      "tesseract_reading": "סידילין",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.3587360680103302,
+        "y1": 0.3322567641735077,
+        "x2": 0.41263940930366516,
+        "y2": 0.34921276569366455
+      },
+      "docai_token_index": 284
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "ולדידי",
+      "tesseract_reading": "ולרירי",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.8469640612602234,
+        "y1": 0.3475978970527649,
+        "x2": 0.8921933174133301,
+        "y2": 0.3629390299320221
+      },
+      "docai_token_index": 289
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "ואביון",
+      "tesseract_reading": "ואכיון",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.7651796936988831,
+        "y1": 0.348001629114151,
+        "x2": 0.8085501790046692,
+        "y2": 0.3633427619934082
+      },
+      "docai_token_index": 291
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "בש\"ס גם",
+      "tesseract_reading": "בשם גכש",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.43246591091156006,
+        "y1": 0.348001629114151,
+        "x2": 0.5154894590377808,
+        "y2": 0.3633427619934082
+      },
+      "docai_token_index": 298
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "שרש\"י",
+      "tesseract_reading": "שרשיי",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.8011152148246765,
+        "y1": 0.3625353276729584,
+        "x2": 0.8519206643104553,
+        "y2": 0.37989503145217896
+      },
+      "docai_token_index": 307
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "זה",
+      "tesseract_reading": "זרק",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.5731102824211121,
+        "y1": 0.3625353276729584,
+        "x2": 0.5985130071640015,
+        "y2": 0.37989503145217896
+      },
+      "docai_token_index": 312
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "וז\"ל ור\"ע",
+      "tesseract_reading": "חל ור",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.3636927008628845,
+        "y1": 0.3625353276729584,
+        "x2": 0.4299876093864441,
+        "y2": 0.37989503145217896
+      },
+      "docai_token_index": 316
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "דלא",
+      "tesseract_reading": "רלא",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.5334572196006775,
+        "y1": 0.3778764605522156,
+        "x2": 0.5656753182411194,
+        "y2": 0.3964473009109497
+      },
+      "docai_token_index": 331
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "ר\"ע",
+      "tesseract_reading": "ריע",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.45848822593688965,
+        "y1": 0.3778764605522156,
+        "x2": 0.48451054096221924,
+        "y2": 0.3964473009109497
+      },
+      "docai_token_index": 333
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "למחצה",
+      "tesseract_reading": "למחצרק",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.13568773865699768,
+        "y1": 0.3778764605522156,
+        "x2": 0.20074349641799927,
+        "y2": 0.3968510329723358
+      },
+      "docai_token_index": 339
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "המובהק",
+      "tesseract_reading": "המובחק",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.4739776849746704,
+        "y1": 0.39281389117240906,
+        "x2": 0.5291202068328857,
+        "y2": 0.4097698926925659
+      },
+      "docai_token_index": 348
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "דשדא",
+      "tesseract_reading": "דשרא",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.2496902048587799,
+        "y1": 0.39281389117240906,
+        "x2": 0.2949194610118866,
+        "y2": 0.4097698926925659
+      },
+      "docai_token_index": 354
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "הוא",
+      "tesseract_reading": "הזת",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.1344485729932785,
+        "y1": 0.39281389117240906,
+        "x2": 0.1722428798675537,
+        "y2": 0.41017359495162964
+      },
+      "docai_token_index": 357
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "ותפס",
+      "tesseract_reading": "ותפם",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.516109049320221,
+        "y1": 0.40815502405166626,
+        "x2": 0.553903341293335,
+        "y2": 0.42551472783088684
+      },
+      "docai_token_index": 365
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "מיני",
+      "tesseract_reading": "מינר",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.13692688941955566,
+        "y1": 0.40815502405166626,
+        "x2": 0.16790582239627838,
+        "y2": 0.42591845989227295
+      },
+      "docai_token_index": 373
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "שנמצאו בש\"ס",
+      "tesseract_reading": "שנמצאובשם",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.7236679196357727,
+        "y1": 0.42349615693092346,
+        "x2": 0.832713782787323,
+        "y2": 0.4404521584510803
+      },
+      "docai_token_index": 375
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "ידן",
+      "tesseract_reading": "ידו",
+      "opcode": "replace",
+      "tier": "A",
+      "bbox": {
+        "x1": 0.6084262728691101,
+        "y1": 0.42349615693092346,
+        "x2": 0.6282528042793274,
+        "y2": 0.4404521584510803
+      },
+      "docai_token_index": 379
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "הרמב\"ן",
+      "tesseract_reading": "הרמבין",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.8382899761199951,
+        "y1": 0.43843358755111694,
+        "x2": 0.8921933174133301,
+        "y2": 0.4557932913303375
+      },
+      "docai_token_index": 390
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "ז\"ל",
+      "tesseract_reading": "זיל",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.5793060660362244,
+        "y1": 0.4533710181713104,
+        "x2": 0.6022304892539978,
+        "y2": 0.470730721950531
+      },
+      "docai_token_index": 416
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "לתנא",
+      "tesseract_reading": "לתנצת",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.3847583532333374,
+        "y1": 0.4533710181713104,
+        "x2": 0.43246591091156006,
+        "y2": 0.470730721950531
+      },
+      "docai_token_index": 420
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "דאמרינן",
+      "tesseract_reading": "ראמרינן",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.1344485729932785,
+        "y1": 0.4533710181713104,
+        "x2": 0.1982651799917221,
+        "y2": 0.4711344242095947
+      },
+      "docai_token_index": 425
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "אטומאת",
+      "tesseract_reading": "אטוטאת",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.7893432378768921,
+        "y1": 0.48405328392982483,
+        "x2": 0.8531598448753357,
+        "y2": 0.5014129877090454
+      },
+      "docai_token_index": 444
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "דאי הוקשו",
+      "tesseract_reading": "ראי הוקשן",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.13568773865699768,
+        "y1": 0.48445701599121094,
+        "x2": 0.21499380469322205,
+        "y2": 0.5022204518318176
+      },
+      "docai_token_index": 457
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "היקש",
+      "tesseract_reading": "הוקש",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.8228005170822144,
+        "y1": 0.4981832802295685,
+        "x2": 0.8630731105804443,
+        "y2": 0.5155429840087891
+      },
+      "docai_token_index": 460
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "הוקשו עכ\"ד",
+      "tesseract_reading": "הוקשן עכר",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.5625774264335632,
+        "y1": 0.4985870122909546,
+        "x2": 0.6505576372146606,
+        "y2": 0.5155429840087891
+      },
+      "docai_token_index": 464
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "דלדידיה",
+      "tesseract_reading": "דלרידיה",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.40086740255355835,
+        "y1": 0.4985870122909546,
+        "x2": 0.462205708026886,
+        "y2": 0.5155429840087891
+      },
+      "docai_token_index": 468
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "ר\"ל דלית",
+      "tesseract_reading": "ריל דלות",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.8228005170822144,
+        "y1": 0.5135244131088257,
+        "x2": 0.8915737271308899,
+        "y2": 0.5308841466903687
+      },
+      "docai_token_index": 475
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "המלמד",
+      "tesseract_reading": "המלמר",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.5885997414588928,
+        "y1": 0.5135244131088257,
+        "x2": 0.6412639617919922,
+        "y2": 0.5308841466903687
+      },
+      "docai_token_index": 481
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "אלא",
+      "tesseract_reading": "אלצ",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.4553903341293335,
+        "y1": 0.5135244131088257,
+        "x2": 0.4950433671474457,
+        "y2": 0.5308841466903687
+      },
+      "docai_token_index": 484
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "וכדעת",
+      "tesseract_reading": "וכרעת",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.2366790622472763,
+        "y1": 0.5135244131088257,
+        "x2": 0.2831474542617798,
+        "y2": 0.5308841466903687
+      },
+      "docai_token_index": 488
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "והתוס",
+      "tesseract_reading": "והתוסי",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.13878563046455383,
+        "y1": 0.5135244131088257,
+        "x2": 0.179677814245224,
+        "y2": 0.5308841466903687
+      },
+      "docai_token_index": 490
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "דאשכחן",
+      "tesseract_reading": "ראשכחן",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.46406444907188416,
+        "y1": 0.5288655757904053,
+        "x2": 0.5266419053077698,
+        "y2": 0.5462252497673035
+      },
+      "docai_token_index": 497
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "עביד",
+      "tesseract_reading": "עכיר",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.21003717184066772,
+        "y1": 0.5288655757904053,
+        "x2": 0.24783147871494293,
+        "y2": 0.5462252497673035
+      },
+      "docai_token_index": 502
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "ג\"ש",
+      "tesseract_reading": "גיש",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.8630731105804443,
+        "y1": 0.5438029766082764,
+        "x2": 0.8921933174133301,
+        "y2": 0.5611627101898193
+      },
+      "docai_token_index": 505
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "דלכל",
+      "tesseract_reading": "רלכל",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.8543990254402161,
+        "y1": 0.559144139289856,
+        "x2": 0.8921933174133301,
+        "y2": 0.5765038132667542
+      },
+      "docai_token_index": 524
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "שתמצא",
+      "tesseract_reading": "שתמצות",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.1344485729932785,
+        "y1": 0.559144139289856,
+        "x2": 0.2044609636068344,
+        "y2": 0.5769075751304626
+      },
+      "docai_token_index": 539
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "מלאכה",
+      "tesseract_reading": "מלצפכה",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.1338289976119995,
+        "y1": 0.575292706489563,
+        "x2": 0.1982651799917221,
+        "y2": 0.5922486782073975
+      },
+      "docai_token_index": 557
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "מלאכה",
+      "tesseract_reading": "מלצפכה",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.6195786595344543,
+        "y1": 0.5890190005302429,
+        "x2": 0.6821561455726624,
+        "y2": 0.6063786745071411
+      },
+      "docai_token_index": 563
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "בפרק קמא דקידושין",
+      "tesseract_reading": "בסרק קמצ דקירושין",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.3531598448753357,
+        "y1": 0.5890190005302429,
+        "x2": 0.5192069411277771,
+        "y2": 0.6063786745071411
+      },
+      "docai_token_index": 567
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "שדה אחוזה וכו",
+      "tesseract_reading": "שרה אחזה זכו",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.1350681483745575,
+        "y1": 0.5890190005302429,
+        "x2": 0.8928129076957703,
+        "y2": 0.621316134929657
+      },
+      "docai_token_index": 574
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "ל\"ד",
+      "tesseract_reading": "לר",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.7416356801986694,
+        "y1": 0.6043601036071777,
+        "x2": 0.7688971757888794,
+        "y2": 0.621316134929657
+      },
+      "docai_token_index": 579
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "ע\"ד ב וכבכורות",
+      "tesseract_reading": "ער בי ובככורות",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.3333333432674408,
+        "y1": 0.6043601036071777,
+        "x2": 0.4566294848918915,
+        "y2": 0.621316134929657
+      },
+      "docai_token_index": 587
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "ובר\"ה ל\"ד א",
+      "tesseract_reading": "וכריה לר אי",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.13816604018211365,
+        "y1": 0.6043601036071777,
+        "x2": 0.2372986376285553,
+        "y2": 0.621316134929657
+      },
+      "docai_token_index": 593
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "רבות בגמרא",
+      "tesseract_reading": "רכות בגטרא",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.7490706443786621,
+        "y1": 0.6197012662887573,
+        "x2": 0.8401486873626709,
+        "y2": 0.6370609402656555
+      },
+      "docai_token_index": 597
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "וזה",
+      "tesseract_reading": "זה",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.5130111575126648,
+        "y1": 0.6197012662887573,
+        "x2": 0.5346964001655579,
+        "y2": 0.6370609402656555
+      },
+      "docai_token_index": 603
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "ז\"ל",
+      "tesseract_reading": "זיל",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.21003717184066772,
+        "y1": 0.6197012662887573,
+        "x2": 0.23482032120227814,
+        "y2": 0.6370609402656555
+      },
+      "docai_token_index": 608
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "שכתב",
+      "tesseract_reading": "שכתכ",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.6902106404304504,
+        "y1": 0.6350423693656921,
+        "x2": 0.7354398965835571,
+        "y2": 0.6515946984291077
+      },
+      "docai_token_index": 614
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "דלאו",
+      "tesseract_reading": "דלצתו",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.23420074582099915,
+        "y1": 0.6350423693656921,
+        "x2": 0.2806691527366638,
+        "y2": 0.6515946984291077
+      },
+      "docai_token_index": 625
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "דעבד",
+      "tesseract_reading": "דעכר",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.8550186157226562,
+        "y1": 0.649979829788208,
+        "x2": 0.8934324383735657,
+        "y2": 0.666128396987915
+      },
+      "docai_token_index": 628
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "אלא לגופו",
+      "tesseract_reading": "אלאלגופו",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.6790582537651062,
+        "y1": 0.649979829788208,
+        "x2": 0.7589839100837708,
+        "y2": 0.666128396987915
+      },
+      "docai_token_index": 631
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "שיהא",
+      "tesseract_reading": "שיהש",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.5613383054733276,
+        "y1": 0.649979829788208,
+        "x2": 0.6115241646766663,
+        "y2": 0.666128396987915
+      },
+      "docai_token_index": 635
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "השולח",
+      "tesseract_reading": "השולחז",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.13568773865699768,
+        "y1": 0.649979829788208,
+        "x2": 0.18773233890533447,
+        "y2": 0.666128396987915
+      },
+      "docai_token_index": 645
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "דמאחר",
+      "tesseract_reading": "רמאחר",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.36183395981788635,
+        "y1": 0.6645135283470154,
+        "x2": 0.41449815034866333,
+        "y2": 0.6818732619285583
+      },
+      "docai_token_index": 658
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "אמאי",
+      "tesseract_reading": "אמופי",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.8438661694526672,
+        "y1": 0.6794509291648865,
+        "x2": 0.8940520286560059,
+        "y2": 0.6972143650054932
+      },
+      "docai_token_index": 664
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "לאו עבד",
+      "tesseract_reading": "לצפו עבר",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.13692688941955566,
+        "y1": 0.6794509291648865,
+        "x2": 0.21561338007450104,
+        "y2": 0.6976180672645569
+      },
+      "docai_token_index": 679
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "אלא",
+      "tesseract_reading": "אלצש",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.7490706443786621,
+        "y1": 0.6947920918464661,
+        "x2": 0.7905824184417725,
+        "y2": 0.7125555276870728
+      },
+      "docai_token_index": 683
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "הוא",
+      "tesseract_reading": "הוצפ",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.654275119304657,
+        "y1": 0.6947920918464661,
+        "x2": 0.6895910501480103,
+        "y2": 0.7125555276870728
+      },
+      "docai_token_index": 686
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "הוא",
+      "tesseract_reading": "הוצתו",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.8587360382080078,
+        "y1": 0.7093257904052734,
+        "x2": 0.8928129076957703,
+        "y2": 0.7274929285049438
+      },
+      "docai_token_index": 698
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "גטרינן",
+      "tesseract_reading": "גסרינן",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.6790582537651062,
+        "y1": 0.7093257904052734,
+        "x2": 0.7280049324035645,
+        "y2": 0.7274929285049438
+      },
+      "docai_token_index": 701
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "שיהא",
+      "tesseract_reading": "שיהצת",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.5173482298851013,
+        "y1": 0.7093257904052734,
+        "x2": 0.5687732100486755,
+        "y2": 0.7274929285049438
+      },
+      "docai_token_index": 705
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "הג\"ה",
+      "tesseract_reading": "הנה",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.7763320803642273,
+        "y1": 0.7577714920043945,
+        "x2": 0.8128872513771057,
+        "y2": 0.7706903219223022
+      },
+      "docai_token_index": 716
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "ז\"ל",
+      "tesseract_reading": "ול",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.5570012331008911,
+        "y1": 0.7577714920043945,
+        "x2": 0.5768277645111084,
+        "y2": 0.7706903219223022
+      },
+      "docai_token_index": 722
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "אב\"ר",
+      "tesseract_reading": "אכר",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.4752168655395508,
+        "y1": 0.7577714920043945,
+        "x2": 0.5068153738975525,
+        "y2": 0.7706903219223022
+      },
+      "docai_token_index": 724
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "בערלין",
+      "tesseract_reading": "בעולין",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.38723668456077576,
+        "y1": 0.7577714920043945,
+        "x2": 0.42688971757888794,
+        "y2": 0.7706903219223022
+      },
+      "docai_token_index": 726
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "וז\"ל",
+      "tesseract_reading": "וול",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.320322185754776,
+        "y1": 0.7577714920043945,
+        "x2": 0.34386616945266724,
+        "y2": 0.7706903219223022
+      },
+      "docai_token_index": 728
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "זה",
+      "tesseract_reading": "וה",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.15923172235488892,
+        "y1": 0.7577714920043945,
+        "x2": 0.1734820306301117,
+        "y2": 0.7686717510223389
+      },
+      "docai_token_index": 732
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "גזירה",
+      "tesseract_reading": "גוירה",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.7205700278282166,
+        "y1": 0.7731126546859741,
+        "x2": 0.7521685361862183,
+        "y2": 0.7868388891220093
+      },
+      "docai_token_index": 738
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "למחצה",
+      "tesseract_reading": "למחעה",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.6375464797019958,
+        "y1": 0.7731126546859741,
+        "x2": 0.6802973747253418,
+        "y2": 0.7868388891220093
+      },
+      "docai_token_index": 740
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "שכתב קרבן",
+      "tesseract_reading": "שכחכ קרכן",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.49814125895500183,
+        "y1": 0.7731126546859741,
+        "x2": 0.5724906921386719,
+        "y2": 0.7868388891220093
+      },
+      "docai_token_index": 743
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "דהיינו",
+      "tesseract_reading": "דהייט",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.42007434368133545,
+        "y1": 0.7731126546859741,
+        "x2": 0.4547707438468933,
+        "y2": 0.7868388891220093
+      },
+      "docai_token_index": 746
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "זה",
+      "tesseract_reading": "וה",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.34324657917022705,
+        "y1": 0.7731126546859741,
+        "x2": 0.35687732696533203,
+        "y2": 0.7868388891220093
+      },
+      "docai_token_index": 748
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "והוא ז\"ל ס\"ל",
+      "tesseract_reading": "והואא ול ל",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.21065674722194672,
+        "y1": 0.7731126546859741,
+        "x2": 0.30359354615211487,
+        "y2": 0.7868388891220093
+      },
+      "docai_token_index": 750
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "הנמצאים",
+      "tesseract_reading": "הנמעאים",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.6592317223548889,
+        "y1": 0.7880500555038452,
+        "x2": 0.7137546539306641,
+        "y2": 0.8009688854217529
+      },
+      "docai_token_index": 760
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "מזה וזה",
+      "tesseract_reading": "מוה ווה",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.4225526750087738,
+        "y1": 0.7880500555038452,
+        "x2": 0.4758364260196686,
+        "y2": 0.8009688854217529
+      },
+      "docai_token_index": 766
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "הביא בתשובה",
+      "tesseract_reading": "הכיא בחשוכה",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.2614622116088867,
+        "y1": 0.7880500555038452,
+        "x2": 0.3537794351577759,
+        "y2": 0.8009688854217529
+      },
+      "docai_token_index": 770
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "תמה",
+      "tesseract_reading": "חמה",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.13568773865699768,
+        "y1": 0.7880500555038452,
+        "x2": 0.16480793058872223,
+        "y2": 0.8013726472854614
+      },
+      "docai_token_index": 774
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "גדולת",
+      "tesseract_reading": "גדולה",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.8345724940299988,
+        "y1": 0.8021800518035889,
+        "x2": 0.8717471957206726,
+        "y2": 0.8155026435852051
+      },
+      "docai_token_index": 776
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "שהי",
+      "tesseract_reading": "שה",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.7038413882255554,
+        "y1": 0.8025837540626526,
+        "x2": 0.729863703250885,
+        "y2": 0.8159063458442688
+      },
+      "docai_token_index": 779
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "תורה",
+      "tesseract_reading": "חורה",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.5662949085235596,
+        "y1": 0.8025837540626526,
+        "x2": 0.5966542959213257,
+        "y2": 0.8159063458442688
+      },
+      "docai_token_index": 783
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "ממנו בב\"ב",
+      "tesseract_reading": "מסנו בכב",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.4293680191040039,
+        "y1": 0.8025837540626526,
+        "x2": 0.4993804097175598,
+        "y2": 0.8159063458442688
+      },
+      "docai_token_index": 785
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "קרבן",
+      "tesseract_reading": "קוכן",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.1728624552488327,
+        "y1": 0.8025837540626526,
+        "x2": 0.20384138822555542,
+        "y2": 0.8159063458442688
+      },
+      "docai_token_index": 793
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "לאקשוי",
+      "tesseract_reading": "לאקשו",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.7255266308784485,
+        "y1": 0.81711745262146,
+        "x2": 0.772614598274231,
+        "y2": 0.8308437466621399
+      },
+      "docai_token_index": 799
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "דלית",
+      "tesseract_reading": "דליח",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.6387856006622314,
+        "y1": 0.81711745262146,
+        "x2": 0.6660470962524414,
+        "y2": 0.8308437466621399
+      },
+      "docai_token_index": 801
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "דדלמא",
+      "tesseract_reading": "דרלמא",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.49628251791000366,
+        "y1": 0.8175212144851685,
+        "x2": 0.537794291973114,
+        "y2": 0.8312474489212036
+      },
+      "docai_token_index": 805
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "כתב",
+      "tesseract_reading": "כחכ",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.35749688744544983,
+        "y1": 0.8175212144851685,
+        "x2": 0.3841387927532196,
+        "y2": 0.8312474489212036
+      },
+      "docai_token_index": 809
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "ז\"ל",
+      "tesseract_reading": "ל",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.26456010341644287,
+        "y1": 0.8175212144851685,
+        "x2": 0.282527893781662,
+        "y2": 0.8312474489212036
+      },
+      "docai_token_index": 811
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "בד\"ה",
+      "tesseract_reading": "כדה",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.1920693963766098,
+        "y1": 0.8175212144851685,
+        "x2": 0.2236679047346115,
+        "y2": 0.8312474489212036
+      },
+      "docai_token_index": 813
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "זה וזה",
+      "tesseract_reading": "ות ווה",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.13816604018211365,
+        "y1": 0.8175212144851685,
+        "x2": 0.894671618938446,
+        "y2": 0.8465886116027832
+      },
+      "docai_token_index": 815
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "ולבניו",
+      "tesseract_reading": "ולבגיו",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.43990087509155273,
+        "y1": 0.833266019821167,
+        "x2": 0.4745972752571106,
+        "y2": 0.8469923138618469
+      },
+      "docai_token_index": 827
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "פי הרא\"ש ז\"ל",
+      "tesseract_reading": "פ הואש ל",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.14002478122711182,
+        "y1": 0.833266019821167,
+        "x2": 0.894671618938446,
+        "y2": 0.8619297742843628
+      },
+      "docai_token_index": 835
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "ומה",
+      "tesseract_reading": "ומ",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.6251549124717712,
+        "y1": 0.8486071825027466,
+        "x2": 0.6480793356895447,
+        "y2": 0.8619297742843628
+      },
+      "docai_token_index": 842
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "בזה",
+      "tesseract_reading": "בוה",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.5049566030502319,
+        "y1": 0.8486071825027466,
+        "x2": 0.5272614359855652,
+        "y2": 0.8619297742843628
+      },
+      "docai_token_index": 846
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "בנזיר",
+      "tesseract_reading": "כנזיר",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.319083034992218,
+        "y1": 0.8486071825027466,
+        "x2": 0.3506815433502197,
+        "y2": 0.8619297742843628
+      },
+      "docai_token_index": 851
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "בתוס ד\"ה",
+      "tesseract_reading": "בחופ ה",
+      "opcode": "replace",
+      "tier": "A",
+      "bbox": {
+        "x1": 0.21003717184066772,
+        "y1": 0.8486071825027466,
+        "x2": 0.27819082140922546,
+        "y2": 0.8619297742843628
+      },
+      "docai_token_index": 853
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "גרסינן",
+      "tesseract_reading": "גרסונן",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.13692688941955566,
+        "y1": 0.8486071825027466,
+        "x2": 0.17657992243766785,
+        "y2": 0.8623334765434265
+      },
+      "docai_token_index": 856
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "מצאתי",
+      "tesseract_reading": "י מצאחי",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.7280049324035645,
+        "y1": 0.863140881061554,
+        "x2": 0.7670384049415588,
+        "y2": 0.8772708773612976
+      },
+      "docai_token_index": 860
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "זלמן ני",
+      "tesseract_reading": "ולמן גי",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.2434944212436676,
+        "y1": 0.863140881061554,
+        "x2": 0.28562578558921814,
+        "y2": 0.8772708773612976
+      },
+      "docai_token_index": 871
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": "ז\"ל",
+      "tesseract_reading": "ל",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.8767038583755493,
+        "y1": 0.8788857460021973,
+        "x2": 0.8940520286560059,
+        "y2": 0.8914008736610413
+      },
+      "docai_token_index": 875
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "נינהו",
+      "tesseract_reading": "נינדחו",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.40852904319763184,
+        "y1": 0.09105625003576279,
+        "x2": 0.45735475420951843,
+        "y2": 0.10845811665058136
+      },
+      "docai_token_index": 13
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "יצדק",
+      "tesseract_reading": "יצרק",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.3257107436656952,
+        "y1": 0.09105625003576279,
+        "x2": 0.36279356479644775,
+        "y2": 0.10845811665058136
+      },
+      "docai_token_index": 15
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "דמשום",
+      "tesseract_reading": "רמשום",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.3726823329925537,
+        "y1": 0.10683933645486832,
+        "x2": 0.4245982766151428,
+        "y2": 0.1250505894422531
+      },
+      "docai_token_index": 30
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "ז\"ל",
+      "tesseract_reading": "זיל",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.7163164615631104,
+        "y1": 0.12140833586454391,
+        "x2": 0.7391842007637024,
+        "y2": 0.1388102024793625
+      },
+      "docai_token_index": 38
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "וכל",
+      "tesseract_reading": "וככ",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.3504326343536377,
+        "y1": 0.12140833586454391,
+        "x2": 0.3856613039970398,
+        "y2": 0.1388102024793625
+      },
+      "docai_token_index": 45
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "בשם ר\"פ",
+      "tesseract_reading": null,
+      "opcode": "delete",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.11001235991716385,
+        "y1": 0.12140833586454391,
+        "x2": 0.8658838272094727,
+        "y2": 0.1537838876247406
+      },
+      "docai_token_index": 50
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "תלמידו",
+      "tesseract_reading": "תלמירו",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.7045735716819763,
+        "y1": 0.13678672909736633,
+        "x2": 0.7577255964279175,
+        "y2": 0.1537838876247406
+      },
+      "docai_token_index": 54
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "ס",
+      "tesseract_reading": "ם",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.7583436369895935,
+        "y1": 0.15176041424274445,
+        "x2": 0.7688504457473755,
+        "y2": 0.1683528870344162
+      },
+      "docai_token_index": 69
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "בדף",
+      "tesseract_reading": "ברף",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.6606922149658203,
+        "y1": 0.15176041424274445,
+        "x2": 0.6915945410728455,
+        "y2": 0.1683528870344162
+      },
+      "docai_token_index": 71
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "ע\"ב",
+      "tesseract_reading": "עיב",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.5815821886062622,
+        "y1": 0.15176041424274445,
+        "x2": 0.6087762713432312,
+        "y2": 0.1683528870344162
+      },
+      "docai_token_index": 73
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "לאפא",
+      "tesseract_reading": "לפש",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.4239802360534668,
+        "y1": 0.15176041424274445,
+        "x2": 0.47651422023773193,
+        "y2": 0.1683528870344162
+      },
+      "docai_token_index": 76
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "בפרק",
+      "tesseract_reading": "כפרק",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.7404202818870544,
+        "y1": 0.16794820129871368,
+        "x2": 0.7812113761901855,
+        "y2": 0.18454067409038544
+      },
+      "docai_token_index": 86
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "קי\"ד",
+      "tesseract_reading": "קיר",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.6229913234710693,
+        "y1": 0.16794820129871368,
+        "x2": 0.6551297903060913,
+        "y2": 0.18454067409038544
+      },
+      "docai_token_index": 89
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "יהודה",
+      "tesseract_reading": "יהורה",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.38133499026298523,
+        "y1": 0.16794820129871368,
+        "x2": 0.41965389251708984,
+        "y2": 0.18454067409038544
+      },
+      "docai_token_index": 96
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "את",
+      "tesseract_reading": "ארז",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.7014833092689514,
+        "y1": 0.18170781433582306,
+        "x2": 0.7348578572273254,
+        "y2": 0.19870497286319733
+      },
+      "docai_token_index": 107
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "וכו",
+      "tesseract_reading": "וכן",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.6372064352035522,
+        "y1": 0.18170781433582306,
+        "x2": 0.6588380932807922,
+        "y2": 0.19870497286319733
+      },
+      "docai_token_index": 109
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "יהודה",
+      "tesseract_reading": "יהורה",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.40420272946357727,
+        "y1": 0.18170781433582306,
+        "x2": 0.44375771284103394,
+        "y2": 0.19870497286319733
+      },
+      "docai_token_index": 114
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "וכו",
+      "tesseract_reading": "וכוי",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.2861557602882385,
+        "y1": 0.18170781433582306,
+        "x2": 0.30778738856315613,
+        "y2": 0.19870497286319733
+      },
+      "docai_token_index": 117
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "הא",
+      "tesseract_reading": "הש",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.14462299644947052,
+        "y1": 0.18170781433582306,
+        "x2": 0.17614339292049408,
+        "y2": 0.19870497286319733
+      },
+      "docai_token_index": 121
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "מבואר",
+      "tesseract_reading": "מכואר",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.8189122080802917,
+        "y1": 0.19708620011806488,
+        "x2": 0.8665018677711487,
+        "y2": 0.21448805928230286
+      },
+      "docai_token_index": 123
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "וקבל",
+      "tesseract_reading": "וקבלל",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.6069221496582031,
+        "y1": 0.19708620011806488,
+        "x2": 0.6520395278930664,
+        "y2": 0.21448805928230286
+      },
+      "docai_token_index": 127
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "יהודה",
+      "tesseract_reading": "יהורה",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.4616810977458954,
+        "y1": 0.19708620011806488,
+        "x2": 0.500618040561676,
+        "y2": 0.21448805928230286
+      },
+      "docai_token_index": 131
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "תלמודא",
+      "tesseract_reading": "תלטודא",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.8071693181991577,
+        "y1": 0.2120599001646042,
+        "x2": 0.8652657866477966,
+        "y2": 0.22905705869197845
+      },
+      "docai_token_index": 141
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "רפ\"ו",
+      "tesseract_reading": "רפיו",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.5,
+        "y1": 0.2120599001646042,
+        "x2": 0.532756507396698,
+        "y2": 0.22905705869197845
+      },
+      "docai_token_index": 147
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "ע\"ד",
+      "tesseract_reading": "עיר",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.36217552423477173,
+        "y1": 0.2120599001646042,
+        "x2": 0.3887515366077423,
+        "y2": 0.22905705869197845
+      },
+      "docai_token_index": 151
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "אבהו",
+      "tesseract_reading": "אכהו",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.22991347312927246,
+        "y1": 0.2120599001646042,
+        "x2": 0.2657601833343506,
+        "y2": 0.22905705869197845
+      },
+      "docai_token_index": 154
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "בר",
+      "tesseract_reading": "כר",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.6087762713432312,
+        "y1": 0.24241198599338531,
+        "x2": 0.6285537481307983,
+        "y2": 0.25819507241249084
+      },
+      "docai_token_index": 182
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "יבא",
+      "tesseract_reading": "יכא",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.38751545548439026,
+        "y1": 0.24241198599338531,
+        "x2": 0.41409146785736084,
+        "y2": 0.25819507241249084
+      },
+      "docai_token_index": 188
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "היכא דידעינן",
+      "tesseract_reading": "היכצפ דירעינן",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.22373300790786743,
+        "y1": 0.2573856711387634,
+        "x2": 0.3368355929851532,
+        "y2": 0.2743828296661377
+      },
+      "docai_token_index": 206
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "ועל הסתם",
+      "tesseract_reading": "ועד הפתם",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.45241037011146545,
+        "y1": 0.27235937118530273,
+        "x2": 0.5370827913284302,
+        "y2": 0.2901659309864044
+      },
+      "docai_token_index": 216
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "פ\"ד",
+      "tesseract_reading": "פר",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.6297898888587952,
+        "y1": 0.29138001799583435,
+        "x2": 0.6563658714294434,
+        "y2": 0.3051396310329437
+      },
+      "docai_token_index": 229
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "ופ\"ק",
+      "tesseract_reading": "ופיק",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.4734239876270294,
+        "y1": 0.29138001799583435,
+        "x2": 0.506798505783081,
+        "y2": 0.3051396310329437
+      },
+      "docai_token_index": 233
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "שכתבו",
+      "tesseract_reading": "שכתכו",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.3281829357147217,
+        "y1": 0.29138001799583435,
+        "x2": 0.37886279821395874,
+        "y2": 0.3051396310329437
+      },
+      "docai_token_index": 237
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "לר\"ש",
+      "tesseract_reading": "לריש",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.13720642030239105,
+        "y1": 0.3031161427497864,
+        "x2": 0.17861557006835938,
+        "y2": 0.31970861554145813
+      },
+      "docai_token_index": 261
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "יהוצדק",
+      "tesseract_reading": "יהוצרק",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.8145859241485596,
+        "y1": 0.3184945285320282,
+        "x2": 0.8640296459197998,
+        "y2": 0.33508700132369995
+      },
+      "docai_token_index": 263
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "דלא",
+      "tesseract_reading": "רלא",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.5871446132659912,
+        "y1": 0.3184945285320282,
+        "x2": 0.6186650395393372,
+        "y2": 0.33508700132369995
+      },
+      "docai_token_index": 269
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "דייקי",
+      "tesseract_reading": "דווקי",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.5179233551025391,
+        "y1": 0.3184945285320282,
+        "x2": 0.5531520247459412,
+        "y2": 0.33508700132369995
+      },
+      "docai_token_index": 271
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "ס",
+      "tesseract_reading": "סי",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.8541409373283386,
+        "y1": 0.3342776298522949,
+        "x2": 0.8665018677711487,
+        "y2": 0.34925132989883423
+      },
+      "docai_token_index": 281
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "רשב\"י",
+      "tesseract_reading": "רשביי",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.2824474573135376,
+        "y1": 0.3480372428894043,
+        "x2": 0.3281829357147217,
+        "y2": 0.36462971568107605
+      },
+      "docai_token_index": 314
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "ע\"ש",
+      "tesseract_reading": "עיש",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.6291717886924744,
+        "y1": 0.3634156286716461,
+        "x2": 0.6600741744041443,
+        "y2": 0.3804127871990204
+      },
+      "docai_token_index": 324
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "ואמר",
+      "tesseract_reading": "ואטר",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.20580963790416718,
+        "y1": 0.3634156286716461,
+        "x2": 0.24536465108394623,
+        "y2": 0.3804127871990204
+      },
+      "docai_token_index": 333
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "חסדא",
+      "tesseract_reading": "חסדות",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.10939431190490723,
+        "y1": 0.3634156286716461,
+        "x2": 0.16378244757652283,
+        "y2": 0.3804127871990204
+      },
+      "docai_token_index": 335
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "עוד",
+      "tesseract_reading": "עור",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.517305314540863,
+        "y1": 0.3808174729347229,
+        "x2": 0.5420271754264832,
+        "y2": 0.39700525999069214
+      },
+      "docai_token_index": 343
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "ט\"ז",
+      "tesseract_reading": "טו",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.4023485779762268,
+        "y1": 0.3808174729347229,
+        "x2": 0.4270704686641693,
+        "y2": 0.39700525999069214
+      },
+      "docai_token_index": 346
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "ע\"ש",
+      "tesseract_reading": "עיש",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.3423980176448822,
+        "y1": 0.3808174729347229,
+        "x2": 0.37391841411590576,
+        "y2": 0.39700525999069214
+      },
+      "docai_token_index": 348
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "דהגם דהוא",
+      "tesseract_reading": "ההגם רהוות",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.11063040792942047,
+        "y1": 0.3808174729347229,
+        "x2": 0.20148330926895142,
+        "y2": 0.39740994572639465
+      },
+      "docai_token_index": 352
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "ועוד",
+      "tesseract_reading": "ועור",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.1817058026790619,
+        "y1": 0.39295831322669983,
+        "x2": 0.2119901180267334,
+        "y2": 0.410360187292099
+      },
+      "docai_token_index": 368
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "א",
+      "tesseract_reading": "אי",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.8535228967666626,
+        "y1": 0.40874141454696655,
+        "x2": 0.8652657866477966,
+        "y2": 0.4245244860649109
+      },
+      "docai_token_index": 371
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "דאיתא",
+      "tesseract_reading": "ראיתא",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.7262051701545715,
+        "y1": 0.40874141454696655,
+        "x2": 0.7744128704071045,
+        "y2": 0.4245244860649109
+      },
+      "docai_token_index": 374
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "בר",
+      "tesseract_reading": "כר",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.46909764409065247,
+        "y1": 0.40874141454696655,
+        "x2": 0.49011126160621643,
+        "y2": 0.4245244860649109
+      },
+      "docai_token_index": 381
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "חד",
+      "tesseract_reading": "חר",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.3232385516166687,
+        "y1": 0.40874141454696655,
+        "x2": 0.3448702096939087,
+        "y2": 0.4245244860649109
+      },
+      "docai_token_index": 385
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "ז\"ל",
+      "tesseract_reading": "זילל",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.1087762638926506,
+        "y1": 0.40874141454696655,
+        "x2": 0.1464771330356598,
+        "y2": 0.4249291718006134
+      },
+      "docai_token_index": 390
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "אבא",
+      "tesseract_reading": "אבצש",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.5426452159881592,
+        "y1": 0.42614325881004333,
+        "x2": 0.5865265727043152,
+        "y2": 0.4403075575828552
+      },
+      "docai_token_index": 398
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "הדר ס\"ז",
+      "tesseract_reading": "הר םז",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.30593323707580566,
+        "y1": 0.42614325881004333,
+        "x2": 0.37082818150520325,
+        "y2": 0.4403075575828552
+      },
+      "docai_token_index": 403
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "דאיתא",
+      "tesseract_reading": "דאיהא",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.21693448722362518,
+        "y1": 0.42614325881004333,
+        "x2": 0.2657601833343506,
+        "y2": 0.4403075575828552
+      },
+      "docai_token_index": 406
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "דנקט",
+      "tesseract_reading": "הנקט",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.10754017531871796,
+        "y1": 0.43828409910202026,
+        "x2": 0.15080346167087555,
+        "y2": 0.454876571893692
+      },
+      "docai_token_index": 425
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "חד",
+      "tesseract_reading": "חר",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.6934487223625183,
+        "y1": 0.4540671706199646,
+        "x2": 0.7144622802734375,
+        "y2": 0.47065964341163635
+      },
+      "docai_token_index": 429
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "מינייהו",
+      "tesseract_reading": "מינייחו",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.6025958061218262,
+        "y1": 0.4540671706199646,
+        "x2": 0.6545117497444153,
+        "y2": 0.47065964341163635
+      },
+      "docai_token_index": 431
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "עוד",
+      "tesseract_reading": "עור",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.3504326343536377,
+        "y1": 0.4540671706199646,
+        "x2": 0.3745364546775818,
+        "y2": 0.47065964341163635
+      },
+      "docai_token_index": 437
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "יהודה",
+      "tesseract_reading": "יהורה",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.7941903471946716,
+        "y1": 0.4726831316947937,
+        "x2": 0.8325092792510986,
+        "y2": 0.4832051694393158
+      },
+      "docai_token_index": 445
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "פפא",
+      "tesseract_reading": "ספא",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.3430160582065582,
+        "y1": 0.4726831316947937,
+        "x2": 0.3770086467266083,
+        "y2": 0.4832051694393158
+      },
+      "docai_token_index": 456
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "לא",
+      "tesseract_reading": "אא",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.30840542912483215,
+        "y1": 0.4840145707130432,
+        "x2": 0.3294190466403961,
+        "y2": 0.4977741837501526
+      },
+      "docai_token_index": 475
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "דההיא",
+      "tesseract_reading": "הההטת",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.11001235991716385,
+        "y1": 0.4840145707130432,
+        "x2": 0.16625463962554932,
+        "y2": 0.4977741837501526
+      },
+      "docai_token_index": 478
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "וכו",
+      "tesseract_reading": "וכן",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.7873918414115906,
+        "y1": 0.4985835552215576,
+        "x2": 0.8077874183654785,
+        "y2": 0.5155807137489319
+      },
+      "docai_token_index": 480
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "בפירוש",
+      "tesseract_reading": "כפירוש",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.6291717886924744,
+        "y1": 0.4985835552215576,
+        "x2": 0.6860321164131165,
+        "y2": 0.5155807137489319
+      },
+      "docai_token_index": 483
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "דאף",
+      "tesseract_reading": "ראף",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.2793572247028351,
+        "y1": 0.4985835552215576,
+        "x2": 0.31149566173553467,
+        "y2": 0.5155807137489319
+      },
+      "docai_token_index": 490
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "תלמודא",
+      "tesseract_reading": "תלמורא",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.15698392689228058,
+        "y1": 0.4985835552215576,
+        "x2": 0.21693448722362518,
+        "y2": 0.5155807137489319
+      },
+      "docai_token_index": 492
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "איתמר לא",
+      "tesseract_reading": "איהמר א",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.7867738008499146,
+        "y1": 0.5293403267860413,
+        "x2": 0.8658838272094727,
+        "y2": 0.5467422008514404
+      },
+      "docai_token_index": 510
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "איברא",
+      "tesseract_reading": "איברצש",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.6446229815483093,
+        "y1": 0.5293403267860413,
+        "x2": 0.7021013498306274,
+        "y2": 0.5467422008514404
+      },
+      "docai_token_index": 513
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "ר\"ש",
+      "tesseract_reading": "ריש",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.48269468545913696,
+        "y1": 0.5293403267860413,
+        "x2": 0.5123609304428101,
+        "y2": 0.5467422008514404
+      },
+      "docai_token_index": 516
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "ע\"ט",
+      "tesseract_reading": "עיש",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.10815822333097458,
+        "y1": 0.5293403267860413,
+        "x2": 0.14029666781425476,
+        "y2": 0.5467422008514404
+      },
+      "docai_token_index": 524
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "וז\"ל",
+      "tesseract_reading": "וזיל",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.7855377197265625,
+        "y1": 0.5443140268325806,
+        "x2": 0.8139678835868835,
+        "y2": 0.5596924424171448
+      },
+      "docai_token_index": 526
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "היכא",
+      "tesseract_reading": "הוכא",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.7144622802734375,
+        "y1": 0.5443140268325806,
+        "x2": 0.7521631717681885,
+        "y2": 0.5596924424171448
+      },
+      "docai_token_index": 528
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "בדבר",
+      "tesseract_reading": "ברבר",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.4017305374145508,
+        "y1": 0.5443140268325806,
+        "x2": 0.4431396722793579,
+        "y2": 0.5596924424171448
+      },
+      "docai_token_index": 535
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "חכם",
+      "tesseract_reading": "חם",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.21878862380981445,
+        "y1": 0.5443140268325806,
+        "x2": 0.25092706084251404,
+        "y2": 0.5596924424171448
+      },
+      "docai_token_index": 539
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "ע\"כ",
+      "tesseract_reading": "עיכ",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.47836834192276,
+        "y1": 0.5596924424171448,
+        "x2": 0.505562424659729,
+        "y2": 0.5762848854064941
+      },
+      "docai_token_index": 551
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "אחריו הר\"ב מעדני",
+      "tesseract_reading": "אחרין הריב מערני",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.15636588633060455,
+        "y1": 0.5596924424171448,
+        "x2": 0.3046971559524536,
+        "y2": 0.5762848854064941
+      },
+      "docai_token_index": 555
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "זירא",
+      "tesseract_reading": "זירוש",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.5506798624992371,
+        "y1": 0.5746661424636841,
+        "x2": 0.5927070379257202,
+        "y2": 0.5916633009910583
+      },
+      "docai_token_index": 565
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "בזמנו",
+      "tesseract_reading": "כזמנו",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.44128555059432983,
+        "y1": 0.5746661424636841,
+        "x2": 0.48269468545913696,
+        "y2": 0.5916633009910583
+      },
+      "docai_token_index": 568
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "משכו",
+      "tesseract_reading": "משטו",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.5754017233848572,
+        "y1": 0.5892351269721985,
+        "x2": 0.6192830801010132,
+        "y2": 0.6062322854995728
+      },
+      "docai_token_index": 581
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "ולפק\"ד איכא",
+      "tesseract_reading": "ולפקר איכצש",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.21569839119911194,
+        "y1": 0.5892351269721985,
+        "x2": 0.3281829357147217,
+        "y2": 0.6062322854995728
+      },
+      "docai_token_index": 587
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "מובהק",
+      "tesseract_reading": "מובחק",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.11186650395393372,
+        "y1": 0.6042088270187378,
+        "x2": 0.1600741595029831,
+        "y2": 0.6212059855461121
+      },
+      "docai_token_index": 609
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "בפ",
+      "tesseract_reading": "בפי",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.8442521691322327,
+        "y1": 0.6341562271118164,
+        "x2": 0.8665018677711487,
+        "y2": 0.6491299271583557
+      },
+      "docai_token_index": 627
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "ע\"ה",
+      "tesseract_reading": "עיה",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.7546353340148926,
+        "y1": 0.6341562271118164,
+        "x2": 0.7818294167518616,
+        "y2": 0.6491299271583557
+      },
+      "docai_token_index": 629
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "אעזר",
+      "tesseract_reading": "עזר",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.6013597249984741,
+        "y1": 0.6341562271118164,
+        "x2": 0.6384425163269043,
+        "y2": 0.6491299271583557
+      },
+      "docai_token_index": 633
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "אע\"ג",
+      "tesseract_reading": "אעיג",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.4542645215988159,
+        "y1": 0.6341562271118164,
+        "x2": 0.49011126160621643,
+        "y2": 0.6491299271583557
+      },
+      "docai_token_index": 636
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "כדאיתא",
+      "tesseract_reading": "כראיתא",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.29419034719467163,
+        "y1": 0.6341562271118164,
+        "x2": 0.35414090752601624,
+        "y2": 0.6491299271583557
+      },
+      "docai_token_index": 639
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "פ\"ז",
+      "tesseract_reading": "פיז",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.13658837974071503,
+        "y1": 0.6341562271118164,
+        "x2": 0.16192831099033356,
+        "y2": 0.6491299271583557
+      },
+      "docai_token_index": 642
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "ב",
+      "tesseract_reading": "כ",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.31396785378456116,
+        "y1": 0.6499392986297607,
+        "x2": 0.3238566219806671,
+        "y2": 0.6665317416191101
+      },
+      "docai_token_index": 657
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "חייא",
+      "tesseract_reading": "חיוצת",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.11186650395393372,
+        "y1": 0.6499392986297607,
+        "x2": 0.15636588633060455,
+        "y2": 0.6665317416191101
+      },
+      "docai_token_index": 661
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "של",
+      "tesseract_reading": "שכ",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.6934487223625183,
+        "y1": 0.6645082831382751,
+        "x2": 0.7280593514442444,
+        "y2": 0.6794819831848145
+      },
+      "docai_token_index": 665
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "ישמעא",
+      "tesseract_reading": "ישמע",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.6118664741516113,
+        "y1": 0.6645082831382751,
+        "x2": 0.6625463366508484,
+        "y2": 0.6794819831848145
+      },
+      "docai_token_index": 667
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "אמר",
+      "tesseract_reading": "אטר",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.6817058324813843,
+        "y1": 0.7102387547492981,
+        "x2": 0.7163164615631104,
+        "y2": 0.7264265418052673
+      },
+      "docai_token_index": 717
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "דתלמיד",
+      "tesseract_reading": "דתלמיר",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.5815821886062622,
+        "y1": 0.7102387547492981,
+        "x2": 0.6390605568885803,
+        "y2": 0.7264265418052673
+      },
+      "docai_token_index": 719
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "ומצינו עוד",
+      "tesseract_reading": "ומציגו עור",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.3182941973209381,
+        "y1": 0.7102387547492981,
+        "x2": 0.3961681127548218,
+        "y2": 0.7264265418052673
+      },
+      "docai_token_index": 724
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "דמציעא",
+      "tesseract_reading": "מציעא",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.2088998705148697,
+        "y1": 0.7102387547492981,
+        "x2": 0.266378253698349,
+        "y2": 0.7264265418052673
+      },
+      "docai_token_index": 727
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "קל\"ז",
+      "tesseract_reading": "קליז",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.8318912386894226,
+        "y1": 0.7260218262672424,
+        "x2": 0.8652657866477966,
+        "y2": 0.7418049573898315
+      },
+      "docai_token_index": 731
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "א",
+      "tesseract_reading": "אי",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.8547589778900146,
+        "y1": 0.7442331314086914,
+        "x2": 0.8658838272094727,
+        "y2": 0.7555645704269409
+      },
+      "docai_token_index": 752
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "אע\"ג",
+      "tesseract_reading": "אעיג",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.516687273979187,
+        "y1": 0.7442331314086914,
+        "x2": 0.5525339841842651,
+        "y2": 0.7555645704269409
+      },
+      "docai_token_index": 761
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "דביצה י\"ג ב",
+      "tesseract_reading": "רביצה ייג בי",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.11433868855237961,
+        "y1": 0.7579927444458008,
+        "x2": 0.21631644666194916,
+        "y2": 0.7721570134162903
+      },
+      "docai_token_index": 788
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "ובס",
+      "tesseract_reading": "ובפ",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.5933250784873962,
+        "y1": 0.7709429264068604,
+        "x2": 0.6205191612243652,
+        "y2": 0.7871307134628296
+      },
+      "docai_token_index": 797
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "דאע\"ג",
+      "tesseract_reading": "דאעיג",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.1983930766582489,
+        "y1": 0.7709429264068604,
+        "x2": 0.244746595621109,
+        "y2": 0.7871307134628296
+      },
+      "docai_token_index": 806
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "חד וחד",
+      "tesseract_reading": "חר וחר",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.11186650395393372,
+        "y1": 0.7709429264068604,
+        "x2": 0.8677379488945007,
+        "y2": 0.8029137849807739
+      },
+      "docai_token_index": 808
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "דקאמר",
+      "tesseract_reading": "דקצתמר",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.5686032176017761,
+        "y1": 0.7855119109153748,
+        "x2": 0.6297898888587952,
+        "y2": 0.8029137849807739
+      },
+      "docai_token_index": 814
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "יהודה",
+      "tesseract_reading": "יהורה",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.46847960352897644,
+        "y1": 0.800890326499939,
+        "x2": 0.5074165463447571,
+        "y2": 0.8178874850273132
+      },
+      "docai_token_index": 835
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "וכו ובתר",
+      "tesseract_reading": "וכן וכתר",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.33807170391082764,
+        "y1": 0.800890326499939,
+        "x2": 0.40605685114860535,
+        "y2": 0.8178874850273132
+      },
+      "docai_token_index": 837
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "פנים",
+      "tesseract_reading": "סנים",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.11001235991716385,
+        "y1": 0.800890326499939,
+        "x2": 0.14833126962184906,
+        "y2": 0.8178874850273132
+      },
+      "docai_token_index": 844
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "וכו",
+      "tesseract_reading": "וכן",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.42274412512779236,
+        "y1": 0.8158640265464783,
+        "x2": 0.44375771284103394,
+        "y2": 0.8340752720832825
+      },
+      "docai_token_index": 854
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "מ\"ד",
+      "tesseract_reading": "מיד",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.19468480348587036,
+        "y1": 0.8158640265464783,
+        "x2": 0.2231149524450302,
+        "y2": 0.8340752720832825
+      },
+      "docai_token_index": 859
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "איתא",
+      "tesseract_reading": "אותצס",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.1112484559416771,
+        "y1": 0.8158640265464783,
+        "x2": 0.16131025552749634,
+        "y2": 0.8340752720832825
+      },
+      "docai_token_index": 861
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "מיניה",
+      "tesseract_reading": "טיניה",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.44746601581573486,
+        "y1": 0.8312423825263977,
+        "x2": 0.489493191242218,
+        "y2": 0.8486442565917969
+      },
+      "docai_token_index": 871
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "דר",
+      "tesseract_reading": "דרי",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.1168108806014061,
+        "y1": 0.8312423825263977,
+        "x2": 0.13473424315452576,
+        "y2": 0.8486442565917969
+      },
+      "docai_token_index": 878
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "צדוק",
+      "tesseract_reading": "צרוק",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.7490729093551636,
+        "y1": 0.846216082572937,
+        "x2": 0.7849196791648865,
+        "y2": 0.8640226721763611
+      },
+      "docai_token_index": 881
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "נתברר",
+      "tesseract_reading": "נתכרר",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.533374547958374,
+        "y1": 0.846216082572937,
+        "x2": 0.5815821886062622,
+        "y2": 0.8640226721763611
+      },
+      "docai_token_index": 885
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "ביואין זה",
+      "tesseract_reading": "בוזזאין זר",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.6705809831619263,
+        "y1": 0.8615944981575012,
+        "x2": 0.7533992528915405,
+        "y2": 0.8777822852134705
+      },
+      "docai_token_index": 898
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "ירדתי",
+      "tesseract_reading": "יררתי",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.3201483190059662,
+        "y1": 0.8615944981575012,
+        "x2": 0.36032137274742126,
+        "y2": 0.8777822852134705
+      },
+      "docai_token_index": 907
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "דקאמר",
+      "tesseract_reading": "רקאמר",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.6662546396255493,
+        "y1": 0.8761634826660156,
+        "x2": 0.7187886238098145,
+        "y2": 0.8943747282028198
+      },
+      "docai_token_index": 915
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
+      "docai_reading": "דמדקאמר",
+      "tesseract_reading": "דמרקאמר",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.23300370573997498,
+        "y1": 0.8959935307502747,
+        "x2": 0.30593323707580566,
+        "y2": 0.9085390567779541
+      },
+      "docai_token_index": 930
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "יך מלאכי",
+      "tesseract_reading": "ור מלאכו",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.5350279211997986,
+        "y1": 0.05082694813609123,
+        "x2": 0.641661524772644,
+        "y2": 0.07018959522247314
+      },
+      "docai_token_index": 0
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "יך בפ\"ק דשבת",
+      "tesseract_reading": "וד בפיק דשברץ",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.12957222759723663,
+        "y1": 0.05808793753385544,
+        "x2": 0.8964661955833435,
+        "y2": 0.10125050693750381
+      },
+      "docai_token_index": 4
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "ד\"ה",
+      "tesseract_reading": "דיה",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.7098574042320251,
+        "y1": 0.08390480279922485,
+        "x2": 0.7365158200263977,
+        "y2": 0.10125050693750381
+      },
+      "docai_token_index": 9
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "נותנין",
+      "tesseract_reading": "נותני",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.6298822164535522,
+        "y1": 0.08390480279922485,
+        "x2": 0.6732795834541321,
+        "y2": 0.10125050693750381
+      },
+      "docai_token_index": 11
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "דרשב\"א",
+      "tesseract_reading": "דרשביא",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.25666460394859314,
+        "y1": 0.08390480279922485,
+        "x2": 0.3186608850955963,
+        "y2": 0.10125050693750381
+      },
+      "docai_token_index": 20
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "דזבחים",
+      "tesseract_reading": "דזכחים",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.8431494235992432,
+        "y1": 0.10004033893346786,
+        "x2": 0.894606351852417,
+        "y2": 0.11456232517957687
+      },
+      "docai_token_index": 23
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "והכי",
+      "tesseract_reading": "רהכי",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.7495350241661072,
+        "y1": 0.10004033893346786,
+        "x2": 0.7830130457878113,
+        "y2": 0.11456232517957687
+      },
+      "docai_token_index": 26
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "ברבי",
+      "tesseract_reading": "ברכי",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.4624922573566437,
+        "y1": 0.10004033893346786,
+        "x2": 0.49907004833221436,
+        "y2": 0.11456232517957687
+      },
+      "docai_token_index": 33
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "ורשב\"א כולהו סבירא להו",
+      "tesseract_reading": "ורשכא כולהן סבירצת להן",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.13143211603164673,
+        "y1": 0.10004033893346786,
+        "x2": 0.8964661955833435,
+        "y2": 0.13231141865253448
+      },
+      "docai_token_index": 37
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "חזה עובד",
+      "tesseract_reading": "חה עובר",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.7222566604614258,
+        "y1": 0.11496571451425552,
+        "x2": 0.7861128449440002,
+        "y2": 0.13231141865253448
+      },
+      "docai_token_index": 43
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "כרשב\"א",
+      "tesseract_reading": "כרשכא",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.25108492374420166,
+        "y1": 0.11496571451425552,
+        "x2": 0.3143211305141449,
+        "y2": 0.13231141865253448
+      },
+      "docai_token_index": 54
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "דאית",
+      "tesseract_reading": "ראית",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.13329200446605682,
+        "y1": 0.11496571451425552,
+        "x2": 0.17296962440013885,
+        "y2": 0.13271480798721313
+      },
+      "docai_token_index": 56
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "והרא\"ש",
+      "tesseract_reading": "והרצפש",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.38809671998023987,
+        "y1": 0.13069786131381989,
+        "x2": 0.45381277799606323,
+        "y2": 0.1476401835680008
+      },
+      "docai_token_index": 67
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "כלל",
+      "tesseract_reading": "כללל",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.24736516177654266,
+        "y1": 0.13069786131381989,
+        "x2": 0.2907625436782837,
+        "y2": 0.1476401835680008
+      },
+      "docai_token_index": 70
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "דרשב\"א",
+      "tesseract_reading": "ררשבא",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.1345319300889969,
+        "y1": 0.13069786131381989,
+        "x2": 0.19528828561306,
+        "y2": 0.14804357290267944
+      },
+      "docai_token_index": 72
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "כסתם",
+      "tesseract_reading": "כפתם",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.5108493566513062,
+        "y1": 0.1468334048986435,
+        "x2": 0.5548667311668396,
+        "y2": 0.16256554424762726
+      },
+      "docai_token_index": 81
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "תוס ר\"פ",
+      "tesseract_reading": "חוס ריפ",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.22814631462097168,
+        "y1": 0.1468334048986435,
+        "x2": 0.29386237263679504,
+        "y2": 0.16256554424762726
+      },
+      "docai_token_index": 86
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "ד\"ה",
+      "tesseract_reading": "דיה",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.8133912086486816,
+        "y1": 0.1605486124753952,
+        "x2": 0.8388096690177917,
+        "y2": 0.17749091982841492
+      },
+      "docai_token_index": 92
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "תנא",
+      "tesseract_reading": "תנצת",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.628022313117981,
+        "y1": 0.1605486124753952,
+        "x2": 0.6664600372314453,
+        "y2": 0.17749091982841492
+      },
+      "docai_token_index": 96
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "אא",
+      "tesseract_reading": "א",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.5158090591430664,
+        "y1": 0.16095200181007385,
+        "x2": 0.5387476682662964,
+        "y2": 0.17789430916309357
+      },
+      "docai_token_index": 99
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "הוציאו",
+      "tesseract_reading": "הוציצתו",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.4159950315952301,
+        "y1": 0.16095200181007385,
+        "x2": 0.47179168462753296,
+        "y2": 0.17789430916309357
+      },
+      "docai_token_index": 101
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "דלא",
+      "tesseract_reading": "רלא",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.7873527407646179,
+        "y1": 0.17628075182437897,
+        "x2": 0.8195908069610596,
+        "y2": 0.19322307407855988
+      },
+      "docai_token_index": 108
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "ע\"ש",
+      "tesseract_reading": "עיש",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.684438943862915,
+        "y1": 0.17668414115905762,
+        "x2": 0.7160570621490479,
+        "y2": 0.19362646341323853
+      },
+      "docai_token_index": 110
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "בדעתי",
+      "tesseract_reading": "ברעתי",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.47923123836517334,
+        "y1": 0.17668414115905762,
+        "x2": 0.5251085162162781,
+        "y2": 0.19362646341323853
+      },
+      "docai_token_index": 115
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "נפל",
+      "tesseract_reading": "נסל",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.3013019263744354,
+        "y1": 0.17668414115905762,
+        "x2": 0.3415994942188263,
+        "y2": 0.19362646341323853
+      },
+      "docai_token_index": 119
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "הבה\"ג",
+      "tesseract_reading": "הבהיג",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.19466832280158997,
+        "y1": 0.17668414115905762,
+        "x2": 0.23992560803890228,
+        "y2": 0.19362646341323853
+      },
+      "docai_token_index": 121
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "ובדמוציא",
+      "tesseract_reading": "ובהמוציא",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.6466212272644043,
+        "y1": 0.19120612740516663,
+        "x2": 0.7141971588134766,
+        "y2": 0.20814844965934753
+      },
+      "docai_token_index": 127
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "רתם",
+      "tesseract_reading": "התם",
+      "opcode": "replace",
+      "tier": "A",
+      "bbox": {
+        "x1": 0.13577185571193695,
+        "y1": 0.19160951673984528,
+        "x2": 0.1680099219083786,
+        "y2": 0.20895522832870483
+      },
+      "docai_token_index": 139
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "ע\"כ",
+      "tesseract_reading": "עיכ",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.254184752702713,
+        "y1": 0.20734167098999023,
+        "x2": 0.2833229899406433,
+        "y2": 0.2246873676776886
+      },
+      "docai_token_index": 156
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "הרי\"ף",
+      "tesseract_reading": "הריץף",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.13391196727752686,
+        "y1": 0.20734167098999023,
+        "x2": 0.1779293268918991,
+        "y2": 0.22509075701236725
+      },
+      "docai_token_index": 158
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "הרמב\"ם ז\"ל",
+      "tesseract_reading": "הרמכם זכ",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.6354618668556213,
+        "y1": 0.2230738252401352,
+        "x2": 0.7358958721160889,
+        "y2": 0.23799918591976166
+      },
+      "docai_token_index": 163
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "מה",
+      "tesseract_reading": "מהי",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.5492870211601257,
+        "y1": 0.2230738252401352,
+        "x2": 0.5716056823730469,
+        "y2": 0.23799918591976166
+      },
+      "docai_token_index": 166
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "יע\"ש אבל",
+      "tesseract_reading": "יעיש אככל",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.3242405354976654,
+        "y1": 0.2230738252401352,
+        "x2": 0.41537508368492126,
+        "y2": 0.23799918591976166
+      },
+      "docai_token_index": 170
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "אצטדק",
+      "tesseract_reading": "אצטרק",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.13391196727752686,
+        "y1": 0.2230738252401352,
+        "x2": 0.19032858312129974,
+        "y2": 0.2384025752544403
+      },
+      "docai_token_index": 175
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "להר\"ן ז\"ל",
+      "tesseract_reading": "להרין זיל",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.704277753829956,
+        "y1": 0.23799918591976166,
+        "x2": 0.7885926961898804,
+        "y2": 0.2553448975086212
+      },
+      "docai_token_index": 178
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "שפ\"ו א ולהרמב\"ן ז\"ל",
+      "tesseract_reading": "שפיו אי ולהרמבין זיל",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.3713577091693878,
+        "y1": 0.23799918591976166,
+        "x2": 0.5437073707580566,
+        "y2": 0.2553448975086212
+      },
+      "docai_token_index": 184
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "שהביאו",
+      "tesseract_reading": "שהביפסו",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.17668940126895905,
+        "y1": 0.23799918591976166,
+        "x2": 0.24178549647331238,
+        "y2": 0.2553448975086212
+      },
+      "docai_token_index": 190
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "בה\"ג הנ\"ל",
+      "tesseract_reading": "בהיג הניל",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.8245505094528198,
+        "y1": 0.25332796573638916,
+        "x2": 0.9001860022544861,
+        "y2": 0.2706736624240875
+      },
+      "docai_token_index": 192
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "בצלמם וגם המגיה",
+      "tesseract_reading": "כצלמם גם המניה",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.6081835031509399,
+        "y1": 0.25332796573638916,
+        "x2": 0.7520148754119873,
+        "y2": 0.2706736624240875
+      },
+      "docai_token_index": 195
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "הוא",
+      "tesseract_reading": "הוצת",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.1345319300889969,
+        "y1": 0.26865673065185547,
+        "x2": 0.17110973596572876,
+        "y2": 0.28600242733955383
+      },
+      "docai_token_index": 223
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "הוא",
+      "tesseract_reading": "חוא",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.6584004759788513,
+        "y1": 0.2839854657649994,
+        "x2": 0.684438943862915,
+        "y2": 0.300121009349823
+      },
+      "docai_token_index": 229
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "בס",
+      "tesseract_reading": "בפ",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.453192800283432,
+        "y1": 0.2839854657649994,
+        "x2": 0.4748915135860443,
+        "y2": 0.300121009349823
+      },
+      "docai_token_index": 233
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "כ\"ו",
+      "tesseract_reading": "כין",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.3106013536453247,
+        "y1": 0.2839854657649994,
+        "x2": 0.3335399925708771,
+        "y2": 0.300121009349823
+      },
+      "docai_token_index": 236
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "דבש\"ס",
+      "tesseract_reading": "דבשם",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.7985121011734009,
+        "y1": 0.31343284249305725,
+        "x2": 0.8493490219116211,
+        "y2": 0.33118191361427307
+      },
+      "docai_token_index": 257
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "כלל וליכא",
+      "tesseract_reading": "כללל וליכצש",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.4066956043243408,
+        "y1": 0.31343284249305725,
+        "x2": 0.5071295499801636,
+        "y2": 0.33118191361427307
+      },
+      "docai_token_index": 265
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "דהלכה",
+      "tesseract_reading": "הלכה",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.21016739308834076,
+        "y1": 0.31343284249305725,
+        "x2": 0.2597644031047821,
+        "y2": 0.33118191361427307
+      },
+      "docai_token_index": 270
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "ואפ\"ה",
+      "tesseract_reading": "ואפיה",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.8536887764930725,
+        "y1": 0.3299717605113983,
+        "x2": 0.897706151008606,
+        "y2": 0.3469140827655792
+      },
+      "docai_token_index": 272
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "הר\"ן",
+      "tesseract_reading": "הרין",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.8158710598945618,
+        "y1": 0.3457038998603821,
+        "x2": 0.846869170665741,
+        "y2": 0.36143606901168823
+      },
+      "docai_token_index": 288
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "בה\"ג וכו",
+      "tesseract_reading": "בהיג וכן",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.5957842469215393,
+        "y1": 0.3457038998603821,
+        "x2": 0.6577805280685425,
+        "y2": 0.36143606901168823
+      },
+      "docai_token_index": 293
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "איתא",
+      "tesseract_reading": "אותצת",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.49659019708633423,
+        "y1": 0.3457038998603821,
+        "x2": 0.5455672740936279,
+        "y2": 0.36143606901168823
+      },
+      "docai_token_index": 296
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "שמצאתי להרא\"ש ז\"ל",
+      "tesseract_reading": "שמצצתתי להראיש זיכל",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.13701178133487701,
+        "y1": 0.3457038998603821,
+        "x2": 0.9001860022544861,
+        "y2": 0.37757161259651184
+      },
+      "docai_token_index": 302
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "פ\"ק דע\"ז",
+      "tesseract_reading": "פיק דעי",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.7451952695846558,
+        "y1": 0.36062929034233093,
+        "x2": 0.8152511119842529,
+        "y2": 0.37757161259651184
+      },
+      "docai_token_index": 306
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "בתלמוד",
+      "tesseract_reading": "בתלמור",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.2641041576862335,
+        "y1": 0.36062929034233093,
+        "x2": 0.3217606842517853,
+        "y2": 0.37757161259651184
+      },
+      "docai_token_index": 317
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "כר\"ש",
+      "tesseract_reading": "כריש",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.13763174414634705,
+        "y1": 0.36062929034233093,
+        "x2": 0.18226906657218933,
+        "y2": 0.37757161259651184
+      },
+      "docai_token_index": 319
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "הרמב\"ם ז\"ל",
+      "tesseract_reading": "הרמכים זיל",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.22566646337509155,
+        "y1": 0.3755546510219574,
+        "x2": 0.3143211305141449,
+        "y2": 0.39290037751197815
+      },
+      "docai_token_index": 334
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "מהי",
+      "tesseract_reading": "מתי",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.1425914466381073,
+        "y1": 0.3755546510219574,
+        "x2": 0.16676999628543854,
+        "y2": 0.3933037519454956
+      },
+      "docai_token_index": 337
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "בי\"ד",
+      "tesseract_reading": "ביר",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.42095473408699036,
+        "y1": 0.39128682017326355,
+        "x2": 0.453192800283432,
+        "y2": 0.40903589129447937
+      },
+      "docai_token_index": 347
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "סעיף",
+      "tesseract_reading": "סעוף",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.2988220751285553,
+        "y1": 0.39128682017326355,
+        "x2": 0.3378797173500061,
+        "y2": 0.40903589129447937
+      },
+      "docai_token_index": 350
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "יע\"ש איברא",
+      "tesseract_reading": "ועיש איכרות",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.14011159539222717,
+        "y1": 0.39128682017326355,
+        "x2": 0.2616243064403534,
+        "y2": 0.4094392955303192
+      },
+      "docai_token_index": 352
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "להרז\"ה",
+      "tesseract_reading": "להרזיה",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.7836329936981201,
+        "y1": 0.40621218085289,
+        "x2": 0.8369497656822205,
+        "y2": 0.4227510988712311
+      },
+      "docai_token_index": 355
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "שכתב",
+      "tesseract_reading": "שכתכ",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.6441413760185242,
+        "y1": 0.40621218085289,
+        "x2": 0.690638542175293,
+        "y2": 0.4227510988712311
+      },
+      "docai_token_index": 358
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "כרשב\"א ז\"ל",
+      "tesseract_reading": "כרשכא זיל",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.3223806619644165,
+        "y1": 0.40621218085289,
+        "x2": 0.42281463742256165,
+        "y2": 0.4227510988712311
+      },
+      "docai_token_index": 364
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "ידעינן מאי",
+      "tesseract_reading": "ודעינן מצתר",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.1407315582036972,
+        "y1": 0.40621218085289,
+        "x2": 0.23372597992420197,
+        "y2": 0.4231545031070709
+      },
+      "docai_token_index": 368
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "כוותיה",
+      "tesseract_reading": "כזתיה",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.7606943845748901,
+        "y1": 0.4215409457683563,
+        "x2": 0.8078115582466125,
+        "y2": 0.43767648935317993
+      },
+      "docai_token_index": 372
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "פליגי",
+      "tesseract_reading": "סליגי",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.6329820156097412,
+        "y1": 0.4215409457683563,
+        "x2": 0.6726596355438232,
+        "y2": 0.43767648935317993
+      },
+      "docai_token_index": 375
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "עכ\"ד וכ\"כ",
+      "tesseract_reading": "עכר וכ",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.21822690963745117,
+        "y1": 0.4215409457683563,
+        "x2": 0.296962171792984,
+        "y2": 0.43767648935317993
+      },
+      "docai_token_index": 383
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "ד\"ה",
+      "tesseract_reading": "דיה",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.8760074377059937,
+        "y1": 0.4372730851173401,
+        "x2": 0.9014258980751038,
+        "y2": 0.4534086287021637
+      },
+      "docai_token_index": 387
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "ת\"ק ורשב\"א",
+      "tesseract_reading": "חק ורשכא",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.6311221122741699,
+        "y1": 0.4372730851173401,
+        "x2": 0.7228766083717346,
+        "y2": 0.4534086287021637
+      },
+      "docai_token_index": 391
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "הר\"א",
+      "tesseract_reading": "הריא",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.30378177762031555,
+        "y1": 0.4372730851173401,
+        "x2": 0.34283941984176636,
+        "y2": 0.4534086287021637
+      },
+      "docai_token_index": 399
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "והתוספות",
+      "tesseract_reading": "והתוספורז",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.7172969579696655,
+        "y1": 0.45219847559928894,
+        "x2": 0.7935523986816406,
+        "y2": 0.46873739361763
+      },
+      "docai_token_index": 405
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "כרבים",
+      "tesseract_reading": "כרכים",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.5337879657745361,
+        "y1": 0.46752724051475525,
+        "x2": 0.582145094871521,
+        "y2": 0.48527631163597107
+      },
+      "docai_token_index": 426
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "הזכירו",
+      "tesseract_reading": "הזכיר",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.22504650056362152,
+        "y1": 0.46752724051475525,
+        "x2": 0.27278363704681396,
+        "y2": 0.48527631163597107
+      },
+      "docai_token_index": 433
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "בה\"ג שדבריו",
+      "tesseract_reading": "בהיג שרבריו",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.6782392859458923,
+        "y1": 0.48204922676086426,
+        "x2": 0.7755734920501709,
+        "y2": 0.49576443433761597
+      },
+      "docai_token_index": 439
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "כדרכם",
+      "tesseract_reading": "כררכם",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.5294482111930847,
+        "y1": 0.483259379863739,
+        "x2": 0.5815250873565674,
+        "y2": 0.5002017021179199
+      },
+      "docai_token_index": 443
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "ז\"ל",
+      "tesseract_reading": "זי",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.13825170695781708,
+        "y1": 0.483259379863739,
+        "x2": 0.17730936408042908,
+        "y2": 0.5002017021179199
+      },
+      "docai_token_index": 451
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "דע\"ז כ\"א",
+      "tesseract_reading": "דעיז כיא",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.7358958721160889,
+        "y1": 0.497781366109848,
+        "x2": 0.8034718036651611,
+        "y2": 0.5151270627975464
+      },
+      "docai_token_index": 454
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "ד\"ה אריסא אינהו גוסיידו",
+      "tesseract_reading": "דיה אריס אינרו גופיירו",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.5089894533157349,
+        "y1": 0.497781366109848,
+        "x2": 0.7055176496505737,
+        "y2": 0.5151270627975464
+      },
+      "docai_token_index": 457
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "כללא",
+      "tesseract_reading": "כללצת",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.32362058758735657,
+        "y1": 0.497781366109848,
+        "x2": 0.37569746375083923,
+        "y2": 0.5151270627975464
+      },
+      "docai_token_index": 464
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "דשבת",
+      "tesseract_reading": "דשכת",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.644761323928833,
+        "y1": 0.5135135054588318,
+        "x2": 0.690638542175293,
+        "y2": 0.5300524234771729
+      },
+      "docai_token_index": 473
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "ד\"ה",
+      "tesseract_reading": "דיה",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.5579665303230286,
+        "y1": 0.5135135054588318,
+        "x2": 0.5846249461174011,
+        "y2": 0.5300524234771729
+      },
+      "docai_token_index": 476
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "הרמב\"ן ז\"ל",
+      "tesseract_reading": "הרמכין זיל",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.3025418519973755,
+        "y1": 0.5135135054588318,
+        "x2": 0.39181649684906006,
+        "y2": 0.5300524234771729
+      },
+      "docai_token_index": 481
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "לבעל",
+      "tesseract_reading": "לכעל",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.8617482781410217,
+        "y1": 0.5280355215072632,
+        "x2": 0.9001860022544861,
+        "y2": 0.5441710352897644
+      },
+      "docai_token_index": 486
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "שכתב",
+      "tesseract_reading": "שכתכ",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.7048977017402649,
+        "y1": 0.5280355215072632,
+        "x2": 0.7507749795913696,
+        "y2": 0.5441710352897644
+      },
+      "docai_token_index": 489
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "גדול",
+      "tesseract_reading": "גחול",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.6168630123138428,
+        "y1": 0.5280355215072632,
+        "x2": 0.6503409743309021,
+        "y2": 0.5441710352897644
+      },
+      "docai_token_index": 491
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "כרשב\"א",
+      "tesseract_reading": "כרשכא",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.3242405354976654,
+        "y1": 0.5280355215072632,
+        "x2": 0.3868567943572998,
+        "y2": 0.5441710352897644
+      },
+      "docai_token_index": 496
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "אלא",
+      "tesseract_reading": "אלו",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.8611283302307129,
+        "y1": 0.5433642864227295,
+        "x2": 0.903285801410675,
+        "y2": 0.5603065490722656
+      },
+      "docai_token_index": 501
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "המתיבות שכתבו",
+      "tesseract_reading": "המתיבורץ שכתכו",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.14321140944957733,
+        "y1": 0.5433642864227295,
+        "x2": 0.9045257568359375,
+        "y2": 0.5760387182235718
+      },
+      "docai_token_index": 515
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "היא בידם",
+      "tesseract_reading": "היצ בירם",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.5567265748977661,
+        "y1": 0.558692991733551,
+        "x2": 0.6360818147659302,
+        "y2": 0.5760387182235718
+      },
+      "docai_token_index": 521
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "בת\"ה",
+      "tesseract_reading": "כתה",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.2833229899406433,
+        "y1": 0.558692991733551,
+        "x2": 0.32114073634147644,
+        "y2": 0.5760387182235718
+      },
+      "docai_token_index": 528
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "כ\"ו",
+      "tesseract_reading": "סיו",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.1797892153263092,
+        "y1": 0.558692991733551,
+        "x2": 0.20396776497364044,
+        "y2": 0.5760387182235718
+      },
+      "docai_token_index": 531
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "ע\"ש",
+      "tesseract_reading": "עיש",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.8735275864601135,
+        "y1": 0.5736184120178223,
+        "x2": 0.9051457047462463,
+        "y2": 0.5901573300361633
+      },
+      "docai_token_index": 533
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "היא נקבל",
+      "tesseract_reading": "הית נקכל",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.6893986463546753,
+        "y1": 0.5736184120178223,
+        "x2": 0.7718536853790283,
+        "y2": 0.5901573300361633
+      },
+      "docai_token_index": 536
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "ואבתרייהו דבה\"ג",
+      "tesseract_reading": "ואבתרייהן דבה",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.448853075504303,
+        "y1": 0.5740217566490173,
+        "x2": 0.5722256898880005,
+        "y2": 0.5905607342720032
+      },
+      "docai_token_index": 540
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "וחרמב\"ם",
+      "tesseract_reading": "וחרמכם",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.25852447748184204,
+        "y1": 0.5740217566490173,
+        "x2": 0.32300060987472534,
+        "y2": 0.5905607342720032
+      },
+      "docai_token_index": 544
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "ובעלי",
+      "tesseract_reading": "ובעלר",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.14135152101516724,
+        "y1": 0.5740217566490173,
+        "x2": 0.1816491037607193,
+        "y2": 0.5909640789031982
+      },
+      "docai_token_index": 546
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "וכוותיידו",
+      "tesseract_reading": "וכוותייהו",
+      "opcode": "replace",
+      "tier": "A",
+      "bbox": {
+        "x1": 0.5666459798812866,
+        "y1": 0.5893505215644836,
+        "x2": 0.6261624097824097,
+        "y2": 0.6062928438186646
+      },
+      "docai_token_index": 552
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "הוא",
+      "tesseract_reading": "הוצת",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.26472410559654236,
+        "y1": 0.5893505215644836,
+        "x2": 0.3013019263744354,
+        "y2": 0.6062928438186646
+      },
+      "docai_token_index": 557
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "ע\"ז שרמז",
+      "tesseract_reading": "עיז שרמד",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.14321140944957733,
+        "y1": 0.5893505215644836,
+        "x2": 0.2188468724489212,
+        "y2": 0.6066962480545044
+      },
+      "docai_token_index": 559
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "שהוא כלפני אידיהן",
+      "tesseract_reading": "שהוטת בלפני איריהן",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.7079975008964539,
+        "y1": 0.6042759418487549,
+        "x2": 0.8642281293869019,
+        "y2": 0.6204114556312561
+      },
+      "docai_token_index": 562
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "מצאתי",
+      "tesseract_reading": "מצצשתי",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.5381277203559875,
+        "y1": 0.60467928647995,
+        "x2": 0.5982640981674194,
+        "y2": 0.620814859867096
+      },
+      "docai_token_index": 568
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "כ\"י",
+      "tesseract_reading": "כיי",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.46001240611076355,
+        "y1": 0.60467928647995,
+        "x2": 0.48171108961105347,
+        "y2": 0.620814859867096
+      },
+      "docai_token_index": 570
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "דהכוונה",
+      "tesseract_reading": "דהכוונרק",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.14383137226104736,
+        "y1": 0.60467928647995,
+        "x2": 0.21140731871128082,
+        "y2": 0.621218204498291
+      },
+      "docai_token_index": 576
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "על",
+      "tesseract_reading": "עלל",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.8388096690177917,
+        "y1": 0.6192013025283813,
+        "x2": 0.8704277873039246,
+        "y2": 0.6353368163108826
+      },
+      "docai_token_index": 578
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "תניא",
+      "tesseract_reading": "חניא",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.4823310673236847,
+        "y1": 0.6196047067642212,
+        "x2": 0.5189088582992554,
+        "y2": 0.6353368163108826
+      },
+      "docai_token_index": 586
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "אומר",
+      "tesseract_reading": "אוטר",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.3787972629070282,
+        "y1": 0.6196047067642212,
+        "x2": 0.41661500930786133,
+        "y2": 0.6353368163108826
+      },
+      "docai_token_index": 588
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "שדה למתי",
+      "tesseract_reading": "שרה לכזרזי",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.1425914466381073,
+        "y1": 0.6196047067642212,
+        "x2": 0.2424054592847824,
+        "y2": 0.6357402205467224
+      },
+      "docai_token_index": 592
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "בגמרא",
+      "tesseract_reading": "בגמרו",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.2777433395385742,
+        "y1": 0.6349334120750427,
+        "x2": 0.33849969506263733,
+        "y2": 0.6518757343292236
+      },
+      "docai_token_index": 606
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "נכרי מאי",
+      "tesseract_reading": "נכרו מצתי",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.1444513350725174,
+        "y1": 0.6349334120750427,
+        "x2": 0.2225666493177414,
+        "y2": 0.6522791385650635
+      },
+      "docai_token_index": 608
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "עביד",
+      "tesseract_reading": "עביר",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.6435213685035706,
+        "y1": 0.6510689854621887,
+        "x2": 0.6794792413711548,
+        "y2": 0.6643807888031006
+      },
+      "docai_token_index": 614
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "לרשב\"א לית",
+      "tesseract_reading": "לרשכא לירץ",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.14321140944957733,
+        "y1": 0.6510689854621887,
+        "x2": 0.2554246783256531,
+        "y2": 0.6647841930389404
+      },
+      "docai_token_index": 623
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "ציית וכו",
+      "tesseract_reading": "ציירז וכך",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.1853688806295395,
+        "y1": 0.6643807888031006,
+        "x2": 0.2634841799736023,
+        "y2": 0.6805163621902466
+      },
+      "docai_token_index": 640
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "ולדידי",
+      "tesseract_reading": "ולדירי",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.8629882335662842,
+        "y1": 0.6797095537185669,
+        "x2": 0.9088654518127441,
+        "y2": 0.696248471736908
+      },
+      "docai_token_index": 643
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "ואביון",
+      "tesseract_reading": "ואכיון",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.78115314245224,
+        "y1": 0.6797095537185669,
+        "x2": 0.8233106136322021,
+        "y2": 0.696248471736908
+      },
+      "docai_token_index": 645
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "היא",
+      "tesseract_reading": "הוא",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.332300066947937,
+        "y1": 0.6801129579544067,
+        "x2": 0.3589584529399872,
+        "y2": 0.6966518759727478
+      },
+      "docai_token_index": 655
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "דהרי\"ף",
+      "tesseract_reading": "דהריזף",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.14321140944957733,
+        "y1": 0.6801129579544067,
+        "x2": 0.1971481740474701,
+        "y2": 0.6970552802085876
+      },
+      "docai_token_index": 659
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "אלא",
+      "tesseract_reading": "אלצש",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.6949782967567444,
+        "y1": 0.6938281655311584,
+        "x2": 0.7352758646011353,
+        "y2": 0.7107704877853394
+      },
+      "docai_token_index": 663
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "זאת",
+      "tesseract_reading": "זארחן",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.5926844477653503,
+        "y1": 0.6938281655311584,
+        "x2": 0.6311221122741699,
+        "y2": 0.7107704877853394
+      },
+      "docai_token_index": 666
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "מטעמא",
+      "tesseract_reading": "מטעמת",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.5387476682662964,
+        "y1": 0.7099636793136597,
+        "x2": 0.6032238006591797,
+        "y2": 0.7269060015678406
+      },
+      "docai_token_index": 680
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "התוס",
+      "tesseract_reading": "התום",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.18102914094924927,
+        "y1": 0.7099636793136597,
+        "x2": 0.2188468724489212,
+        "y2": 0.7269060015678406
+      },
+      "docai_token_index": 687
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "ד\"ה אריסא והרמב\"ם",
+      "tesseract_reading": "דיה אריסות והרמבים",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.7427154183387756,
+        "y1": 0.7260992527008057,
+        "x2": 0.9051457047462463,
+        "y2": 0.7422347664833069
+      },
+      "docai_token_index": 689
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "ט\"ו",
+      "tesseract_reading": "טיו",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.5003100037574768,
+        "y1": 0.7265025973320007,
+        "x2": 0.5232486128807068,
+        "y2": 0.7426381707191467
+      },
+      "docai_token_index": 697
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "ז\"ל",
+      "tesseract_reading": "זלל",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.36391815543174744,
+        "y1": 0.7265025973320007,
+        "x2": 0.39925605058670044,
+        "y2": 0.7426381707191467
+      },
+      "docai_token_index": 699
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "רמ\"ג",
+      "tesseract_reading": "רמייג",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.23124612867832184,
+        "y1": 0.7265025973320007,
+        "x2": 0.2690638601779938,
+        "y2": 0.7426381707191467
+      },
+      "docai_token_index": 702
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "הרב המגיה",
+      "tesseract_reading": "הרכ המניה",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.6367018222808838,
+        "y1": 0.7382009029388428,
+        "x2": 0.718536913394928,
+        "y2": 0.7567567825317383
+      },
+      "docai_token_index": 709
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "והבה\"ג",
+      "tesseract_reading": "והבהיג",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.22628642618656158,
+        "y1": 0.7390076518058777,
+        "x2": 0.2752634882926941,
+        "y2": 0.7575635313987732
+      },
+      "docai_token_index": 718
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "והרמב\"ם ודעמייהו",
+      "tesseract_reading": "והרמכם ורעמייהו",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.23744575679302216,
+        "y1": 0.7551432251930237,
+        "x2": 0.36825791001319885,
+        "y2": 0.7736990451812744
+      },
+      "docai_token_index": 734
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "כדבריו",
+      "tesseract_reading": "כדכריו",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.4767513871192932,
+        "y1": 0.7696651816368103,
+        "x2": 0.528208315372467,
+        "y2": 0.787817656993866
+      },
+      "docai_token_index": 745
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "כרשב\"א",
+      "tesseract_reading": "כרשביא",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.22690638899803162,
+        "y1": 0.7700685858726501,
+        "x2": 0.28952261805534363,
+        "y2": 0.7882210612297058
+      },
+      "docai_token_index": 751
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "סוף",
+      "tesseract_reading": "פוף",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.1971481740474701,
+        "y1": 0.7866075038909912,
+        "x2": 0.22504650056362152,
+        "y2": 0.804356575012207
+      },
+      "docai_token_index": 767
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "איתא",
+      "tesseract_reading": "אית",
+      "opcode": "replace",
+      "tier": "C",
+      "bbox": {
+        "x1": 0.7929324507713318,
+        "y1": 0.8011294603347778,
+        "x2": 0.8419094681739807,
+        "y2": 0.8192819952964783
+      },
+      "docai_token_index": 771
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "ישרץ",
+      "tesseract_reading": "ישר",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.644761323928833,
+        "y1": 0.8015328645706177,
+        "x2": 0.6850588917732239,
+        "y2": 0.8196853399276733
+      },
+      "docai_token_index": 774
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "בתוך",
+      "tesseract_reading": "כתוך",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.24550527334213257,
+        "y1": 0.8019362688064575,
+        "x2": 0.28208306431770325,
+        "y2": 0.8200887441635132
+      },
+      "docai_token_index": 783
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "ובין",
+      "tesseract_reading": "וכין",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.7929324507713318,
+        "y1": 0.8305768370628357,
+        "x2": 0.8189708590507507,
+        "y2": 0.8499394655227661
+      },
+      "docai_token_index": 806
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "מותר",
+      "tesseract_reading": "מורזר",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.707377552986145,
+        "y1": 0.8305768370628357,
+        "x2": 0.7588344812393188,
+        "y2": 0.8499394655227661
+      },
+      "docai_token_index": 808
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "אילא",
+      "tesseract_reading": "אילצת",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.23310601711273193,
+        "y1": 0.8313836455345154,
+        "x2": 0.2814631164073944,
+        "y2": 0.8507462739944458
+      },
+      "docai_token_index": 819
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "שמעון",
+      "tesseract_reading": "שטעון",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.6367018222808838,
+        "y1": 0.8471157550811768,
+        "x2": 0.6831989884376526,
+        "y2": 0.8648648858070374
+      },
+      "docai_token_index": 827
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "בשבת",
+      "tesseract_reading": "כשבת",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.3930564224720001,
+        "y1": 0.8471157550811768,
+        "x2": 0.4395536184310913,
+        "y2": 0.8648648858070374
+      },
+      "docai_token_index": 833
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "דאומנין",
+      "tesseract_reading": "ראומנין",
+      "opcode": "replace",
+      "tier": "B",
+      "bbox": {
+        "x1": 0.5753254890441895,
+        "y1": 0.8616377711296082,
+        "x2": 0.6317421197891235,
+        "y2": 0.879386842250824
+      },
+      "docai_token_index": 846
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "דאמרו",
+      "tesseract_reading": "ראמרו",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.32548046112060547,
+        "y1": 0.8616377711296082,
+        "x2": 0.37197768688201904,
+        "y2": 0.879386842250824
+      },
+      "docai_token_index": 851
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": "זולת",
+      "tesseract_reading": "זולרז",
+      "opcode": "replace",
+      "tier": "D",
+      "bbox": {
+        "x1": 0.5201488137245178,
+        "y1": 0.8781766891479492,
+        "x2": 0.56230628490448,
+        "y2": 0.8947156071662903
+      },
+      "docai_token_index": 857
+    }
+  ]
+}

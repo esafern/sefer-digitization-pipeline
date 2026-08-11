@@ -107,6 +107,13 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
   cursor: pointer;
   transition: opacity .15s ease;
 }
+/* --hl-color is set per-box in app.js from the same tri-state (open/
+   machine/human) as the text pane's underlines and the nav legend - color
+   alone carries the state here. No dotted variant for the machine-resolved
+   state: a dotted *border* would sit back on the box's own edge, exactly
+   the letter-stroke-covering problem box-shadow was introduced to avoid
+   (see comment above), so the scan pane deliberately doesn't reproduce the
+   text pane's solid/dotted distinction. */
 .hl-box.dim { opacity: 0.35; }
 .hl-current-klal {
   position: absolute;
@@ -153,10 +160,11 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
   font-size: 12px;
   line-height: 1.6;
 }
-.hint { font-weight: 500; }
-.hint-solid, .hint-dotted { border-bottom: 2px solid rgba(255,255,255,0.85); padding-bottom: 1px; }
-.hint-dotted { border-bottom-style: dotted; }
-.hint-pending { color: var(--pending); font-weight: 700; }
+.hint { font-weight: 500; border-bottom: 2px solid; padding-bottom: 1px; }
+.hint-open { border-bottom-color: #feb2b2; }
+.hint-machine { border-bottom-style: dotted; border-bottom-color: #faf089; }
+.hint-human { border-bottom-color: #9ae6b4; }
+.hint-punct { border-bottom: none; color: #90cdf4; font-weight: 900; }
 
 #text-scroll {
   flex: 1;
@@ -206,17 +214,14 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
   padding: 0 1px;
   position: relative;
 }
-.flag-word.disputed { border-bottom: 3px solid; }
-.flag-word.confirmed { border-bottom: 2px dotted; opacity: 0.92; }
-.flag-word.has-decision::after {
-  content: '';
-  position: absolute;
-  top: -6px; right: -2px;
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: var(--pending);
-  box-shadow: 0 0 0 1.5px white;
-}
+/* Tri-state review coloring, shared with the scan pane and nav legend
+   (see wordState() in app.js): red = nobody has resolved this dispute
+   yet, yellow dotted = the vision pass confirmed the current text without
+   a human, green = a human recorded a decision (always wins, even over a
+   machine "confirmed" verdict). */
+.flag-word.state-open { border-bottom: 3px solid var(--danger); }
+.flag-word.state-machine { border-bottom: 2px dotted var(--pending); opacity: 0.92; }
+.flag-word.state-human { border-bottom: 3px solid #38a169; }
 .flag-word:hover { background: rgba(43,108,176,0.08); }
 .flag-gap {
   display: inline-block;
@@ -229,6 +234,22 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
   opacity: 0.85;
 }
 .flag-gap:hover { opacity: 1; transform: scaleY(1.15); }
+.punct-marker {
+  display: inline-block;
+  cursor: pointer;
+  font-weight: 900;
+  font-size: 18px;
+  line-height: 1;
+  margin: 0 2px;
+  padding: 0 2px;
+  border-radius: 3px;
+  vertical-align: middle;
+}
+.punct-marker.punct-pending { color: #3182ce; }
+.punct-marker.punct-pending:hover { background: rgba(49,130,206,0.14); }
+.punct-marker.punct-accepted { color: #38a169; }
+.punct-marker.punct-rejected { color: var(--ink-faint); opacity: 0.5; }
+.punct-marker.punct-rejected:hover { opacity: 0.85; }
 .editorial-mark {
   color: var(--accent);
   font-weight: bold;
@@ -286,6 +307,11 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
    the actual remaining work are visually different at a glance. */
 .nav-item .ncount-open { background: var(--danger); }
 .nav-item .ncount-decided { background: #38a169; }
+/* Punctuation review queue badges - same open/decided shape as
+   corrections above, but blue-toned so the two queues read as visually
+   distinct at a glance. */
+.nav-item .ncount-punct-open { background: #3182ce; }
+.nav-item .ncount-punct-decided { background: #718096; }
 
 /* ---------- tooltip (quick hover info) ---------- */
 #tooltip {

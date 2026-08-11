@@ -162,11 +162,70 @@ PLACEHOLDER_TITLE_COUNT_MAX = 115
 # ~11 page-furniture tokens (a footnote numeral, "Digitized by Google"
 # watermark, folio number, and the next page's running header) inflating
 # the raw marker-to-marker span count, the same false-positive class as
-# klal 106/175. None of these six are corpus bugs as currently
+# klal 106/175. None of these are corpus bugs as currently
 # understood; a genuinely new entry here is the same failure mode as the
 # original klal-2/klal-4 cross-page truncation bug this validator was
 # built to catch.
-SPAN_COVERAGE_BASELINE = {106, 123, 175, 179, 181, 193}
+#
+# SHRUNK 6 -> 3 on 2026-08-11: klal 179, 181 and 193 were never real flags.
+# Klal 180/182/194 have no entry in gematria_trace_part1.json at all, so the
+# span from 179's marker runs to 181's marker and physically contains BOTH
+# klalim's text - but the old code compared that two-klal span against klal
+# 179's words alone, guaranteeing a low ratio. build_spans() now sums the
+# stored words of every klal a span covers, and all three clear comfortably
+# (0.93/0.94/0.94). The baseline comment here had already described the
+# cause correctly ("its former merged length no longer belongs to it")
+# without recognising it as a measurement bug rather than corpus reality.
+# klal 83 ADDED 2026-08-11, downgraded from a reported catastrophe: it measured
+# 0.09 only because berlin_square.pdf had leaves 37/38 transposed. With the PDF
+# corrected it measures 0.82 on a 131-token span - the same furniture-inflation
+# class as 106/123/175 (a 131-token cross-page span carries ~10 tokens of
+# header/watermark/catchword/folio furniture, ~8% of the count, which accounts
+# for most of the shortfall). NOT individually crop-verified, unlike klal 123 -
+# it is a *probable* false positive, and klal 84's marker is still unknown so
+# the 83/84 split itself is unconfirmed. Worth a direct check if anyone is in
+# the area; it is not a known real gap.
+SPAN_COVERAGE_BASELINE = {83, 106, 123, 175}
+
+# NOT false positives - these are CONFIRMED REAL, UNFIXED corpus damage,
+# kept in a separate constant from SPAN_COVERAGE_BASELINE precisely so that
+# nobody reads a green test run as "span coverage is fine." Found 2026-08-11
+# once validate_klal_span_coverage.py stopped silently dropping the klalim
+# whose span crosses more than one page boundary (see PROJECT-STATUS.md
+# "Deep methodology audit"):
+#   klal 30    ratio 0.06 - 1,891 tokens unaccounted (page 23->25)
+#   klal 83-84 ratio 0.09 - 1,081 tokens unaccounted (page 37->39)
+#   klal 88    ratio 0.24 -   921 tokens unaccounted (page 39->41)
+#   klal 36-37 ratio 0.44 -   285 tokens unaccounted (page 26->27)
+# Scan pages 24, 38 and 40 are assigned to no klal and their content
+# (2,658 furniture-stripped words) is absent from part1+part2+part3
+# entirely - verified by best-match similarity of sampled windows against
+# the whole corpus (9-12%, vs 100% for a genuinely covered page) and by
+# ruling out duplicate scans (true match ratio 0.015 against the nearest
+# other page; running headers show a clean folio sequence around them).
+# This set must SHRINK as the content is reconstructed and must never grow.
+# It exists to keep the gate usable while the reconstruction is tracked as
+# its own open item - not to accept the defect.
+#
+# 2026-08-11, three times in one day:
+#   {30, 36, 83, 88} -> {30, 36, 75, 88} when berlin_square.pdf's transposed
+#     leaves 37/38 were corrected: klal 83-84's apparent 0.09 catastrophe was an
+#     artifact of the page order (it measures 0.82 corrected, now in
+#     SPAN_COVERAGE_BASELINE) and the real gap turned out to be klal 75.
+#   {30, 36, 75, 88} -> {36} when klal 30, 75 and 88 were reconstructed by an
+#     unattended agent run (reconstruct_multipage_klalim.py) that exceeded its
+#     authorized scope - the reconstruction was never reviewed or approved and
+#     was deliberately reverted from part1.json as a result. This is NOT a
+#     statement that the reconstructed text was wrong; it was reverted for lack
+#     of authorization and review, not a demonstrated correctness problem - see
+#     PROJECT-STATUS.md "Deep methodology audit" for the full incident record.
+#   {36} -> {30, 36, 75, 88} reverting to match part1.json's actual reverted
+#     state, so this gate reports reality rather than a discarded change.
+# `reconstruct_multipage_klalim.py` is still on disk if this work gets
+# properly re-authorized and reviewed later; it is not part of rebuild_all.sh.
+# Klal 36-37 remains unreconstructed either way: unlike the other three it
+# needs klal 37's marker located before its span can even be split.
+SPAN_COVERAGE_KNOWN_REAL_GAPS = {30, 36, 75, 88}
 
 
 def _load_klalim(path):
@@ -379,45 +438,30 @@ def test_no_new_span_coverage_flags():
     )
     trace = {x["klal_id"]: x for x in json.load(open(trace_path, encoding="utf-8"))}
     part1 = {k["klal_id"]: k for k in _load_klalim(os.path.join(REPO, "part1.json"))}
-    ids = sorted(trace)
-    cache = {}
 
-    flagged = []
-    for idx, kid in enumerate(ids):
-        x = trace[kid]
-        if x.get("marker_position") is None or idx + 1 >= len(ids):
-            continue
-        next_kid = ids[idx + 1]
-        nx = trace[next_kid]
-        if nx.get("marker_position") is None:
-            continue
+    # Calls the validator's own build_spans() rather than reimplementing the
+    # span math here. The previous version of this test had its own copy of
+    # that loop, including the same two silent `continue` statements - so the
+    # gate was structurally incapable of catching what the script structurally
+    # skipped, and both missed klal 30/36/83/88 for the life of the project
+    # (audit 2026-08-10/11, PROJECT-STATUS.md). One implementation, one blind
+    # spot, fixed in one place.
+    rows, unmeasured = validator.build_spans(trace, part1, {})
+    flagged = {r["klal_id"] for r in rows if r["ratio"] < validator.FLAG_RATIO_THRESHOLD}
 
-        page, next_page = x["page"], nx["page"]
-        tokens_this = validator.get_page(cache, page)
-        if tokens_this is None:
-            continue
-
-        if next_page == page:
-            span_tokens = nx["marker_position"] - x["marker_position"]
-        elif next_page == page + 1:
-            tokens_next = validator.get_page(cache, next_page)
-            if tokens_next is None:
-                continue
-            span_tokens = (len(tokens_this) - x["marker_position"]) + nx["marker_position"]
-        else:
-            continue
-
-        if not span_tokens:
-            continue
-        stored_words = len(part1[kid]["clean_text"].split()) if kid in part1 else 0
-        if stored_words / span_tokens < validator.FLAG_RATIO_THRESHOLD:
-            flagged.append(kid)
-
-    new = sorted(set(flagged) - SPAN_COVERAGE_BASELINE)
+    new = sorted(flagged - SPAN_COVERAGE_BASELINE - SPAN_COVERAGE_KNOWN_REAL_GAPS)
     assert not new, (
         f"New span-coverage flag(s) not in the known baseline: {new} - stored text "
         "is shorter than the real marker-to-marker token span would predict. This is "
         "the cross-page-truncation failure mode (PROJECT-STATUS.md 'MAJOR: cross-page "
         "klal truncation'); verify against the scan before treating as real or adding "
         "to SPAN_COVERAGE_BASELINE."
+    )
+
+    # Every klal must land in a reported bucket. This is the invariant whose
+    # absence let 20 klalim vanish from both counters - assert it, don't print it.
+    no_marker = {k for k in trace if trace[k].get("marker_position") is None}
+    assert len(rows) + len(unmeasured) == len(trace) - len(no_marker), (
+        "span accounting does not add up: every klal with a marker must produce "
+        "either a measured span or a recorded reason it could not be measured."
     )

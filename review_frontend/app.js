@@ -13,6 +13,23 @@ const navList = document.getElementById('nav-list');
 const legend = document.getElementById('legend');
 const tooltip = document.getElementById('tooltip');
 
+// Every flagged word/gap reduces to exactly one of three review states,
+// shown identically across the nav legend, the text pane, and the scan
+// pane: a human decision always wins (even overriding a machine
+// "confirmed" verdict), otherwise a `current_text_confirmed` flag means
+// the vision pass resolved it without a human, otherwise it's still an
+// open dispute nobody has looked at.
+const STATE_META = {
+  open:    { label: 'Open disputed reading',     color: '#e53e3e' },
+  machine: { label: 'Machine-resolved dispute',  color: '#d69e2e' },
+  human:   { label: 'Human-resolved dispute',    color: '#38a169' },
+};
+function wordState(corr) {
+  if (corr.current_decision) return 'human';
+  if (corr.flag === 'current_text_confirmed') return 'machine';
+  return 'open';
+}
+
 async function init() {
   const [flags, klalim] = await Promise.all([
     fetch('/api/flags').then(r => r.json()),
@@ -36,14 +53,15 @@ async function init() {
 
 function buildLegend() {
   legend.innerHTML = '';
-  Object.entries(FLAGS).forEach(([key, [label, color]]) => {
+  Object.entries(STATE_META).forEach(([state, { label, color }]) => {
     const span = document.createElement('span');
-    span.innerHTML = `<i style="background:${color}"></i>${label}`;
+    const shape = state === 'machine' ? 'border-radius:2px;border:1.5px dotted ' + color + ';background:transparent;' : 'background:' + color + ';';
+    span.innerHTML = `<i style="${shape}"></i>${label}`;
     legend.appendChild(span);
   });
-  const pendingSpan = document.createElement('span');
-  pendingSpan.innerHTML = `<i style="background:#d69e2e;border-radius:50%"></i>You've recorded a decision`;
-  legend.appendChild(pendingSpan);
+  const punctSpan = document.createElement('span');
+  punctSpan.innerHTML = `<i style="background:#3182ce;border-radius:50%"></i>Proposed punctuation (pending review)`;
+  legend.appendChild(punctSpan);
 }
 
 // ---------- nav pane ----------
@@ -55,7 +73,12 @@ function navItemInnerHtml(k) {
   // words were ever flagged).
   const openBadge = k.open_count ? `<span class="ncount ncount-open">${k.open_count}</span>` : '';
   const decidedBadge = k.decided_count ? `<span class="ncount ncount-decided">${k.decided_count}</span>` : '';
-  return `<span class="nid">${k.klal_id}</span><span class="ntitle" title="${(k.title || '').replace(/"/g, '&quot;')}">${k.title || ''}</span>${flagIcon}${openBadge}${decidedBadge}`;
+  // Punctuation review queue, same open/decided pattern as corrections but
+  // visually distinct (dot badge, punct- prefix) so the two queues don't
+  // get confused at a glance.
+  const punctOpenBadge = k.punctuation_open_count ? `<span class="ncount ncount-punct-open">${k.punctuation_open_count}·</span>` : '';
+  const punctDecidedBadge = k.punctuation_decided_count ? `<span class="ncount ncount-punct-decided">${k.punctuation_decided_count}·</span>` : '';
+  return `<span class="nid">${k.klal_id}</span><span class="ntitle" title="${(k.title || '').replace(/"/g, '&quot;')}">${k.title || ''}</span>${flagIcon}${openBadge}${decidedBadge}${punctOpenBadge}${punctDecidedBadge}`;
 }
 
 function buildNav() {
@@ -168,8 +191,11 @@ function renderKlalBody(block, k) {
       gapsBefore[c.word_index].push(c);
     }
   });
+  const punctByIndex = {};
+  (k.punctuation || []).forEach(p => { punctByIndex[p.before_word_index] = p; });
 
   words.forEach((w, i) => {
+    if (punctByIndex[i]) body.appendChild(makePunctuationMarker(k.klal_id, punctByIndex[i]));
     if (gapsBefore[i]) gapsBefore[i].forEach(c => body.appendChild(makeGapMarker(k.klal_id, c)));
     if (w === '[.]') {
       const mark = document.createElement('span');
@@ -183,10 +209,7 @@ function renderKlalBody(block, k) {
     const corr = byIndex[i];
     if (corr) {
       const span = document.createElement('span');
-      const [, color] = FLAGS[corr.flag] || [null, '#a0aec0'];
-      const isConfirmed = corr.flag === 'current_text_confirmed';
-      span.className = 'flag-word ' + (isConfirmed ? 'confirmed' : 'disputed') + (corr.current_decision ? ' has-decision' : '');
-      span.style.borderBottomColor = color;
+      span.className = 'flag-word state-' + wordState(corr);
       span.textContent = w;
       attachWordHandlers(span, k.klal_id, corr);
       body.appendChild(span);
@@ -197,11 +220,24 @@ function renderKlalBody(block, k) {
   });
 }
 
+// ---------- proposed punctuation markers ----------
+function makePunctuationMarker(klalId, p) {
+  const span = document.createElement('span');
+  const decision = p.current_decision; // {accepted, note} | null
+  const state = !decision ? 'pending' : (decision.accepted ? 'accepted' : 'rejected');
+  span.className = 'punct-marker punct-' + state;
+  span.textContent = '·'; // middle dot
+  span.title = state === 'pending'
+    ? 'Proposed punctuation - click to review'
+    : (state === 'accepted' ? 'Accepted - will become "[.]"' : 'Rejected - click to reconsider');
+  span.onclick = () => openPunctuationPanel(klalId, p);
+  return span;
+}
+
 function makeGapMarker(klalId, corr) {
   const span = document.createElement('span');
   span.className = 'flag-gap';
-  const [, color] = FLAGS[corr.flag] || [null, '#a0aec0'];
-  span.style.background = color;
+  span.style.background = STATE_META[wordState(corr)].color;
   attachWordHandlers(span, klalId, corr, true);
   return span;
 }
@@ -245,10 +281,13 @@ const candidatePanel = document.getElementById('candidate-panel');
 const candidatePanelBody = document.getElementById('candidate-panel-body');
 const klalFlagPanel = document.getElementById('klal-flag-panel');
 const klalFlagPanelBody = document.getElementById('klal-flag-panel-body');
+const punctuationPanel = document.getElementById('punctuation-panel');
+const punctuationPanelBody = document.getElementById('punctuation-panel-body');
 
 function setupPanels() {
   document.getElementById('candidate-panel-close').onclick = closePanels;
   document.getElementById('klal-flag-panel-close').onclick = closePanels;
+  document.getElementById('punctuation-panel-close').onclick = closePanels;
   backdrop.onclick = closePanels;
   window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') closePanels();
@@ -258,6 +297,7 @@ function closePanels() {
   backdrop.classList.remove('open');
   candidatePanel.classList.remove('open');
   klalFlagPanel.classList.remove('open');
+  punctuationPanel.classList.remove('open');
 }
 function openPanel(panel) {
   closePanels();
@@ -507,6 +547,91 @@ async function openKlalFlagPanel(klalId) {
   };
 }
 
+// ---------- proposed-punctuation review panel ----------
+async function openPunctuationPanel(klalId, p) {
+  openPanel(punctuationPanel);
+  punctuationPanelBody.innerHTML = '<p>Loading…</p>';
+
+  const k = mountedKlal[klalId] || await fetchKlal(klalId);
+  const words = (k.clean_text || '').split(' ');
+  const idx = p.before_word_index;
+  const ctxStart = Math.max(0, idx - 10);
+  const ctxEnd = Math.min(words.length, idx + 10);
+  const ctxWords = words.slice(ctxStart, ctxEnd).map((w, i) =>
+    (ctxStart + i === idx) ? `<b>[.]</b> ${w}` : w
+  ).join(' ');
+
+  const decision = p.current_decision;
+  const activeChoice = decision ? (decision.accepted ? 'accept' : 'reject') : null;
+
+  punctuationPanelBody.innerHTML = `
+    <div class="panel-section">
+      <div class="panel-label">Proposed break (klal ${klalId})</div>
+      <div class="panel-word-context">${ctxWords}</div>
+      ${p.reasoning ? `<div style="font-size:12px;color:var(--ink-faint);margin-top:-8px;">${p.reasoning}</div>` : ''}
+    </div>
+    <div class="panel-section">
+      <div class="panel-label">Decision</div>
+      <div class="candidate-option${activeChoice === 'accept' ? ' active' : ''}" data-choice="accept" id="punct-accept-option">
+        <input type="radio" name="punct-choice" ${activeChoice === 'accept' ? 'checked' : ''}>
+        <div class="co-body"><div class="co-label">Accept</div><div class="co-text">Insert "[.]" here</div></div>
+      </div>
+      <div class="candidate-option${activeChoice === 'reject' ? ' active' : ''}" data-choice="reject" id="punct-reject-option">
+        <input type="radio" name="punct-choice" ${activeChoice === 'reject' ? 'checked' : ''}>
+        <div class="co-body"><div class="co-label">Reject</div><div class="co-text">Leave the text as-is here</div></div>
+      </div>
+    </div>
+    <div class="panel-section">
+      <div class="panel-label">Note (optional)</div>
+      <textarea id="punct-decision-note" rows="3" placeholder="Why? e.g. &quot;not a real clause break&quot;">${decision && decision.note ? decision.note : ''}</textarea>
+    </div>
+    <div class="panel-section">
+      <button class="panel-btn" id="save-punct-decision-btn">Save decision</button>
+      <span class="save-status" id="punct-save-status">Saved ✓</span>
+    </div>
+  `;
+
+  const markChoice = (choice) => {
+    document.getElementById('punct-accept-option').classList.toggle('active', choice === 'accept');
+    document.getElementById('punct-reject-option').classList.toggle('active', choice === 'reject');
+    document.getElementById('punct-accept-option').querySelector('input').checked = choice === 'accept';
+    document.getElementById('punct-reject-option').querySelector('input').checked = choice === 'reject';
+  };
+  document.getElementById('punct-accept-option').onclick = () => markChoice('accept');
+  document.getElementById('punct-reject-option').onclick = () => markChoice('reject');
+
+  document.getElementById('save-punct-decision-btn').onclick = async () => {
+    const activeEl = document.querySelector('#punct-accept-option.active, #punct-reject-option.active');
+    if (!activeEl) { alert('Choose Accept or Reject first.'); return; }
+    const accepted = activeEl.dataset.choice === 'accept';
+    const note = document.getElementById('punct-decision-note').value.trim();
+
+    const res = await fetch('/api/decisions/punctuation', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ klal_id: klalId, before_word_index: idx, accepted, note }),
+    });
+    if (!res.ok) { alert('Save failed: ' + (await res.text())); return; }
+
+    const wasAlreadyDecided = !!decision;
+    delete mountedKlal[klalId];
+    delete fetchInFlight[klalId];
+    const freshK = await fetchKlal(klalId);
+    const block = document.getElementById('klal-block-' + klalId);
+    if (block) renderKlalBody(block, freshK);
+
+    if (!wasAlreadyDecided && klalById[klalId]) {
+      klalById[klalId].punctuation_open_count = Math.max(0, (klalById[klalId].punctuation_open_count || 0) - 1);
+      klalById[klalId].punctuation_decided_count = (klalById[klalId].punctuation_decided_count || 0) + 1;
+      refreshNavItem(klalId);
+    }
+
+    const status = document.getElementById('punct-save-status');
+    status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  };
+}
+
 // ---------- scan pane ----------
 let currentPage = null;
 let scanFocusKlalId = null; // which klal's region/continuation to highlight, independent of which page is shown
@@ -591,8 +716,9 @@ async function showPage(page, focusKlalId) {
   pageCorrections.forEach(c => {
     if (!c.bbox) return;
     const box = document.createElement('div');
-    box.className = 'hl-box' + (c.klal_id === focusKlalId ? '' : ' dim');
-    const [, color] = FLAGS[c.flag] || [null, '#a0aec0'];
+    const state = wordState(c);
+    box.className = 'hl-box hl-state-' + state + (c.klal_id === focusKlalId ? '' : ' dim');
+    const color = STATE_META[state].color;
     box.style.setProperty('--hl-color', color);
     box.style.background = color + '33';
     box.style.left = (c.bbox.x1 * 100) + '%';

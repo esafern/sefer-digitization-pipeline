@@ -118,8 +118,8 @@ def _find_disputed_klal():
     # Which klal actually has a `current_text_may_be_wrong` candidate isn't
     # fixed - it shrinks over time as corrections get crop-checked and
     # applied (see PROJECT-STATUS.md), so a hardcoded klal_id or a bare
-    # ".flag-word.disputed".first (which only searches whatever happens to
-    # be lazy-mounted within the initial viewport) is brittle. Look the
+    # ".flag-word.state-open".first (which only searches whatever happens
+    # to be lazy-mounted within the initial viewport) is brittle. Look the
     # current one up directly instead.
     with open(os.path.join(REPO, "corrections_part1.json"), encoding="utf-8") as f:
         data = json.load(f)
@@ -139,7 +139,7 @@ def test_candidate_override_flow_persists_and_does_not_touch_part1json(server, p
     page.click(f"#nav-{klal_id}")
     page.wait_for_timeout(500)
 
-    disputed = page.locator(f"#klal-block-{klal_id} .flag-word.disputed").first
+    disputed = page.locator(f"#klal-block-{klal_id} .flag-word.state-open").first
     disputed.click()
     page.wait_for_selector("#candidate-panel.open", timeout=5000)
 
@@ -152,9 +152,11 @@ def test_candidate_override_flow_persists_and_does_not_touch_part1json(server, p
     page.click("#save-decision-btn")
     page.wait_for_selector("#save-status.show", timeout=5000)
 
-    # the word span should now carry the pending-decision badge class
+    # a recorded decision always wins the tri-state, so the word span
+    # should now show the human-resolved (green) state regardless of what
+    # it was before
     page.click("#candidate-panel-close")
-    assert page.locator(".flag-word.has-decision").count() >= 1
+    assert page.locator(".flag-word.state-human").count() >= 1
 
     # reload from scratch and confirm the decision persisted server-side,
     # not just in the page's in-memory state - navigate back to the same
@@ -164,7 +166,7 @@ def test_candidate_override_flow_persists_and_does_not_touch_part1json(server, p
     page.wait_for_timeout(500)
     page.click(f"#nav-{klal_id}")
     page.wait_for_timeout(500)
-    assert page.locator(f"#klal-block-{klal_id} .flag-word.has-decision").count() >= 1
+    assert page.locator(f"#klal-block-{klal_id} .flag-word.state-human").count() >= 1
 
     after_hash = _file_sha256(PART1_PATH)
     assert before_hash == after_hash, "a recorded decision must never touch part1.json directly"

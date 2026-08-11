@@ -17,16 +17,20 @@
 #                       row's applied_decision_id
 #   ts                  ISO8601 UTC timestamp, set at append time
 #   decision_type       "candidate_choice" | "klal_flag" | "apply_event"
+#                       | "punctuation_choice"
 #   klal_id             int
-#   word_index          int for candidate_choice/apply_event, null for
-#                       klal_flag
+#   word_index          int for candidate_choice/apply_event/
+#                       punctuation_choice, null for klal_flag
 #   chosen_source       "docai_reading"|"final_text"|"vision_transcription"
-#                       |"custom"|null - which candidate was picked
-#                       (candidate_choice only)
-#   chosen_text         the literal chosen string (candidate_choice only)
-#   candidate_snapshot  full corrections_part1.json entry at decision time,
+#                       |"custom"|null for candidate_choice; "accept"|
+#                       "reject" for punctuation_choice
+#   chosen_text         the literal chosen string (candidate_choice); "[.]"
+#                       or null (punctuation_choice, accept/reject)
+#   candidate_snapshot  full corrections_part1.json entry at decision time
+#                       (candidate_choice) or the proposed insertion's
+#                       {before_word_index, reasoning} (punctuation_choice),
 #                       so a later apply step can detect drift even after
-#                       that file gets regenerated (candidate_choice only)
+#                       that file gets regenerated
 #   needs_revisit       bool (klal_flag only)
 #   note                free-text, any decision_type
 #   reviewer            who made the decision (default "local")
@@ -48,7 +52,7 @@ REPO = os.path.dirname(os.path.abspath(__file__))
 # git-tracked decisions log.
 DECISIONS_PATH = os.environ.get("REVIEW_DECISIONS_PATH") or os.path.join(REPO, "review_decisions.jsonl")
 
-VALID_DECISION_TYPES = {"candidate_choice", "klal_flag", "apply_event"}
+VALID_DECISION_TYPES = {"candidate_choice", "klal_flag", "apply_event", "punctuation_choice"}
 
 
 def _now_iso():
@@ -136,6 +140,27 @@ def flagged_klalim(path=DECISIONS_PATH):
     """klal_ids whose current klal_flag decision has needs_revisit=True."""
     current = all_current("klal_flag", path)
     return sorted(kid for (kid, _), r in current.items() if r.get("needs_revisit"))
+
+
+def applied_decision_ids(path=DECISIONS_PATH):
+    """ids of decisions already promoted into the corpus, i.e. every
+    `applied_decision_id` referenced by an apply_event row.
+
+    Both apply scripts write an apply_event for each decision they promote,
+    but until 2026-08-11 neither of them ever READ those rows back - so a
+    second run re-applied everything. For `replace`/`insert` opcodes that was
+    masked, because those paths re-verify the live text still matches the
+    snapshot and bail when it doesn't; the `delete` path (which inserts a word
+    rather than replacing one) had no such check and duplicated its insertion
+    on every run, and the punctuation apply script duplicated all of its
+    insertions. See PROJECT-STATUS.md "Deep methodology audit". This is the
+    general fix: an applied decision is identified by id, not inferred from
+    whether the text happens to still look un-applied."""
+    return {
+        r["applied_decision_id"]
+        for r in _read_all(path)
+        if r["decision_type"] == "apply_event" and r.get("applied_decision_id")
+    }
 
 
 def find_by_id(decision_id, path=DECISIONS_PATH):

@@ -13,12 +13,37 @@ this work today).
 > the other. Do not report on, fix, or make claims about corpus quality
 > without having read it first.
 
+> **Start the review dashboard (`python3 review_server.py`, backgrounded) at
+> the start of every session, every time, no exceptions** — check
+> `lsof -i :8420` first and skip only if it's already running. It's the live
+> human-review tool (see "Pipeline shape" below); the user works in it
+> throughout a session and shouldn't have to ask for it each time.
+
 > **Close open items before proposing new ones.** If `PROJECT-STATUS.md`'s
 > Open Items section lists unresolved blockers, do not end a turn by offering
 > to expand scope ("want me to also check X," "should I dig into Y next") —
 > propose a plan to close the existing open items first, or ask which to
 > prioritize. Finish what's already known-broken before suggesting where else
 > to look.
+
+> **Parts 2-3 are out of scope until Part 1 is clean AND an outside
+> professional has independently confirmed the produced text is clean —
+> not just this pipeline's own self-assessment.** User directive,
+> 2026-08-10, restated explicitly to not be revisited until then: do not
+> propose, scope, or start Parts 2-3 work — including "just the easy
+> mechanical parts" — before both conditions hold. Rationale, in the
+> user's own words: "if part 1 is bad the rest won't magically be
+> better." This is not merely caution — see PROJECT-STATUS.md
+> 2026-08-10 "methodology audit" for a concrete, already-confirmed reason
+> the assumption "fix it once on Part 1, it generalizes" doesn't hold:
+> the page-furniture contamination bug hit Part 1 at ~1 instance but hit
+> Parts 2-3 at 74/445 klalim (~17%) — same bug class, same detection
+> method, a much higher rate nobody has explained. Parts 2-3's own scan
+> data can and does fail differently and worse than Part 1's; a clean
+> Part 1 pipeline is not evidence Parts 2-3 will come out clean by the
+> same process, let alone without its own scan-linkage/vision-
+> verification infrastructure ever having been built or run there at
+> all.
 
 > **Log every finding to `PROJECT-STATUS.md` yourself, immediately, without
 > being asked.** Finding a bug and only mentioning it in chat is not done —
@@ -54,15 +79,23 @@ these three before anything else (speed, script cleanliness, cost).
 
 ## Pipeline shape
 
-Source scans (`berlin_square.pdf`, Sefaria VLM output, DocAI OCR) get extracted,
+Source scans (`berlin_square_corrected.pdf`, Sefaria VLM output, DocAI OCR) get
+extracted,
 cross-validated between OCR engines, and adjudicated word-by-word before landing
 in the canonical text files. Concretely:
 
-1. **Extraction** — `chunker.py` pulls raw text per page from the PDF (handles
+1. **Extraction** — DocAI/VLM extraction through the (gitignored)
+   `docai_word_boxes/`, `document_jsons_berlin/`, `vlm_extractions/` caches is
+   the live path. (`chunker.py`, which pulled raw text per page from the PDF, handles
    the reversed-Hebrew-line quirk of these 19th-century scans via
    `unreverse_line`). DocAI/VLM extraction happens through the (gitignored)
    `docai_word_boxes/`, `document_jsons_berlin/`, `vlm_extractions/` caches.
-2. **Adjudication** — `orchestrator.py` is the live, `[PRODUCTION]`-tagged
+2. **Adjudication** — `verify_corrections_vision.py` is the live vision
+   adjudicator (run by `rebuild_all.sh`). NOTE: `orchestrator.py` was ARCHIVED
+   2026-08-11 after an audit confirmed it was dead (not in `rebuild_all.sh`,
+   imported only by already-archived code, entry points pointing at
+   `test_page.pdf`) and carried 4 real bugs including the crop-hash-only cache
+   this file used to claim was fixed project-wide. Formerly described as
    cross-validator: crops each token's bounding box from the PDF, sends it to
    Gemini (`google.genai`) for a vision-based OCR/VLM disagreement call, and
    caches every decision in `adjudication_cache.db` (sqlite, keyed by crop
@@ -165,7 +198,7 @@ correctly; if you add another vision-caching script, key it the same way.
 
 ## Directory layout
 
-- `orchestrator.py`, `chunker.py` — the two OCR/VLM-extraction pipeline
+- (`orchestrator.py` and `chunker.py` were the two OCR/VLM-extraction pipeline
   scripts. `build_klalim_demo_dataset.py`, `build_corrections_dataset.py`,
   `verify_corrections_vision.py`, `assemble_corrections_dataset.py`,
   `build_klal_page_regions.py`, and `rebuild_all.sh` are the
@@ -174,6 +207,20 @@ correctly; if you add another vision-caching script, key it the same way.
   `apply_reviewer_decisions.py` (added 2026-08-07, see "Human review
   decisions" above) are the live review tool - not part of
   `rebuild_all.sh`, run separately with `python3 review_server.py`.
+  `propose_punctuation_part1.py` and `apply_punctuation_decisions.py`
+  (added 2026-08-10, Part 1 only — see PROJECT-STATUS.md) are a parallel
+  candidate→review→apply pipeline for the corpus-wide punctuation pass:
+  the propose script drafts `[.]`-marked sentence/clause-break insertions
+  per klal via Gemini into `punctuation_candidates_part1.json` (its own
+  sqlite cache, `punctuation_cache.db`, keyed on klal_id + clean_text so a
+  later corpus edit invalidates stale proposals); `review_server.py`
+  surfaces every proposal as a clickable blue `·` marker in the text pane
+  for accept/reject via the same `review_decisions.jsonl` audit trail
+  (`punctuation_choice` decision type); `apply_punctuation_decisions.py`
+  promotes accepted decisions into `part1.json`, mirroring
+  `apply_reviewer_decisions.py`'s drift-detection/never-silently-mutate
+  pattern. Like the correction-candidate scripts, not part of
+  `rebuild_all.sh` — run manually.
   `rebuild_all.sh`'s step 6/6 runs `tests/test_corpus_invariants.py`
   (pytest) as a hard gate — see "Standing regression test suite" in
   PROJECT-STATUS.md for what it checks and why (`requirements-dev.txt`
@@ -214,10 +261,18 @@ correctly; if you add another vision-caching script, key it the same way.
 - `aligned_klalim/`, `klalim_batches/`, `processed_klalim/` — tracked,
   versioned pipeline output at various stages.
 - `docai_word_boxes/`, `document_jsons_berlin/`, `klalim_docai/`,
-  `llm_klal_starts/`, `sefaria_export/`, `vlm_extractions/`, `scratch/` —
+  `llm_klal_starts/`, `sefaria_export/`, `vlm_extractions/`, `scratch/` (see
+  the WARNING below) —
   gitignored regenerable caches/intermediates. Don't assume these exist on a
   fresh clone; they're rebuilt by re-running the extraction scripts against
   the source scans.
+  **WARNING about `scratch/`:** it is gitignored but was NOT purely
+  regenerable. Until 2026-08-11 it held 19 one-off scripts encoding
+  non-reproducible logic, four of which PROJECT-STATUS.md cites as the method
+  or evidence for corpus changes already applied. Those have been moved to the
+  tracked `archive/scripts/`. What remains in `scratch/` (PNG crops, JSON
+  dumps, a cache backup) genuinely is disposable — but never assume that of a
+  `.py` file found there again; move it to `archive/scripts/` instead.
 - `.gemini/rules/` — Gemini CLI's equivalent of this file; this project has
   been worked on from both Claude Code and Gemini CLI, so check both when
   looking for standing directives.

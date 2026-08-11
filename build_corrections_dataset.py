@@ -25,6 +25,23 @@ def clean_word(w):
     return "".join(c for c in w if c.isalnum())
 
 
+# The Google Books scan watermark ("Digitized by Google") sits at the bottom of
+# many pages and is correctly absent from clean_text, exactly like the running
+# header filtered below - it is page furniture, never corpus content. Same set
+# used by check_klal_token_orphans.py / validate_klal_span_coverage.py's
+# furniture stripping. Until 2026-08-11 these tokens produced no candidates only
+# by accident: sitting at the very end of a page's word stream, they tripped the
+# `j1 >= len(page_word_origin)` bail-out and were dropped unattributed. Once
+# delete-opcode attribution was fixed they surfaced as 10 spurious
+# "possible omission" candidates, so they now get filtered explicitly, at the
+# same point punctuation-only tokens are - by design, not by side effect.
+WATERMARK_WORDS = {"digitized", "by", "google"}
+
+
+def is_watermark(tok_text):
+    return clean_word(tok_text).lower() in WATERMARK_WORDS
+
+
 def sim(a, b):
     return difflib.SequenceMatcher(None, a, b).ratio()
 
@@ -61,6 +78,7 @@ def main():
 
     corrections = []
     skipped_no_docai_page = set()
+    unattributable_deletes = []
 
     for page_id, klal_ids in sorted(klal_pages.items()):
         docai_path = os.path.join(DOCAI_DIR, f"page_{page_id}.json")
@@ -76,7 +94,8 @@ def main():
         # Part 1's correction candidates having a punctuation-only
         # docai_reading/final_text field (PROJECT-STATUS.md "Punctuation-
         # token diff bug fixed").
-        docai_tokens = [t for t in json.load(open(docai_path)) if clean_word(t["text"])]
+        docai_tokens = [t for t in json.load(open(docai_path))
+                        if clean_word(t["text"]) and not is_watermark(t["text"])]
         docai_clean = [clean_word(t["text"]) for t in docai_tokens]
 
         # Build one concatenated "page final text" word stream, remembering which
@@ -127,9 +146,43 @@ def main():
                 if sim(orig_word, corrected_word) < 0.5:
                     continue  # too dissimilar to be a genuine OCR misread
 
-            klal_id, word_idx = page_word_origin[j1] if j1 < len(page_word_origin) else (None, None)
-            if klal_id is None:
-                continue
+            # Attribution. For `replace`/`insert` the diff span j1:j2 is real
+            # stored text, so page_word_origin[j1] is the right owner.
+            #
+            # For `delete` (docai saw words the stored text doesn't have)
+            # j1 == j2, so page_word_origin[j1] is the word AFTER the gap. At a
+            # klal boundary that word belongs to the NEXT klal, while the missing
+            # text physically trails the END of the previous one - a klal's own
+            # gematria marker opens it, so anything before that marker is still
+            # the previous klal's. Filing it under the next klal at word_index 0
+            # meant an accepted decision would insert the missing words BEFORE
+            # that klal's marker, corrupting two klalim at once. Confirmed
+            # 2026-08-11 on 4 of 30 live delete candidates (PROJECT-STATUS.md
+            # "Deep methodology audit"): e.g. `ס"ח ונכון הוא` was filed under
+            # klal 220 word 0 although klal 219 ends mid-citation (`...סימן`
+            # with no number) exactly where it is missing.
+            if tag == "delete":
+                if j1 == 0:
+                    # Missing text precedes the first klal on this page, so it
+                    # trails a klal on the PREVIOUS page, which isn't in this
+                    # page's word stream. Not attributable here - skip rather
+                    # than guess (it would otherwise be filed under this page's
+                    # first klal at word_index 0, the same bug).
+                    unattributable_deletes.append((page_id, orig_word))
+                    continue
+                prev_klal_id = page_word_origin[j1 - 1][0]
+                at_boundary = (j1 >= len(page_word_origin)
+                               or page_word_origin[j1][0] != prev_klal_id)
+                if at_boundary:
+                    # Trails the end of prev_klal_id: append position.
+                    klal_id = prev_klal_id
+                    word_idx = len(final_by_id[klal_id]["clean_text"].split())
+                else:
+                    klal_id, word_idx = page_word_origin[j1]
+            else:
+                if j1 >= len(page_word_origin):
+                    continue
+                klal_id, word_idx = page_word_origin[j1]
 
             corrections.append({
                 "klal_id": klal_id,
@@ -147,6 +200,7 @@ def main():
             "total_candidates": len(corrections),
             "klalim_covered": len(set(c["klal_id"] for c in corrections)),
             "skipped_no_docai_page_klalim": sorted(skipped_no_docai_page),
+            "unattributable_deletes": [{"page": p, "docai_reading": w} for p, w in unattributable_deletes],
             "untrusted_klalim_excluded": sorted(untrusted_ids),
         },
     }
@@ -157,6 +211,8 @@ def main():
     print(f"Total candidate corrections: {len(corrections)}")
     print(f"Klalim covered: {out['meta']['klalim_covered']} / {PART1_MAX_KLAL}")
     print(f"Klalim skipped (no DocAI page data): {len(skipped_no_docai_page)}")
+    print(f"Delete candidates not attributable to a klal on their own page "
+          f"(missing text precedes the page's first klal): {len(unattributable_deletes)}")
     print(f"Klalim excluded as untrusted by header-anchored alignment: {len(untrusted_ids)} -> {untrusted_ids}")
 
 

@@ -14,6 +14,13 @@ credentials.json
 
 # Pipeline Artifacts
 *.pdf
+# ...except the two source scans. Tracked deliberately (this repo is local):
+# the page-order correction lives ONLY in the corrected PDF and the gitignored
+# token/image caches, so without these a clone gets corrected metadata pointing
+# at an uncorrected scan - worse than either state alone. See PROJECT-STATUS.md
+# "What is NOT recoverable from git".
+!berlin_square_corrected.pdf
+!berlin_square_original_transposed.pdf
 *.png
 document_jsons/
 document_jsons_berlin/

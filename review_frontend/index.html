@@ -22,7 +22,7 @@
 
   <div id="text-pane">
     <div id="text-header">
-      <span>Full text — <span class="hint hint-solid">solid underline</span> = disputed reading, <span class="hint hint-dotted">dotted</span> = confirmed, <span class="hint hint-pending">●</span> = you've recorded a decision. Click a marked word for details.</span>
+      <span>— <span class="hint hint-open">red underline</span>: open disputed reading, <span class="hint hint-machine">yellow dotted</span>: machine-resolved dispute, <span class="hint hint-human">green underline</span>: human-resolved dispute, <span class="hint hint-punct">blue ·</span>: proposed punctuation (click to accept/reject); hover over word for details; click to decide</span>
     </div>
     <div id="text-scroll"></div>
   </div>
@@ -64,6 +64,14 @@
       <button class="panel-close" id="klal-flag-panel-close">&times;</button>
     </div>
     <div class="panel-body" id="klal-flag-panel-body"></div>
+  </div>
+
+  <div id="punctuation-panel" class="side-panel">
+    <div class="panel-head">
+      <span class="panel-title">Proposed punctuation</span>
+      <button class="panel-close" id="punctuation-panel-close">&times;</button>
+    </div>
+    <div class="panel-body" id="punctuation-panel-body"></div>
   </div>
 
   <script src="/app.js"></script>

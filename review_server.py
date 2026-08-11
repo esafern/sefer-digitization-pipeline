@@ -85,6 +85,10 @@ def _load_regions():
     return _load_json("klal_page_regions.json", {})
 
 
+def _load_punctuation_candidates():
+    return _load_json("punctuation_candidates_part1.json", {})
+
+
 def _trusted_page(alignment, klal_id):
     r = alignment.get(klal_id, {})
     return r.get("matched_page") if r.get("trusted") else None
@@ -109,13 +113,19 @@ def api_klalim():
     klalim_by_id, klalim = _load_klalim()
     alignment = _load_alignment()
     corrections = _load_corrections()
+    punct_candidates = _load_punctuation_candidates()
     flagged = set(rd.flagged_klalim())
     decided = rd.all_current("candidate_choice")  # {(klal_id, word_index): record}
+    punct_decided = rd.all_current("punctuation_choice")
     out = []
     for k in klalim:
         kid = k["klal_id"]
         entries = corrections.get(str(kid), [])
         decided_count = sum(1 for c in entries if (kid, c["word_index"]) in decided)
+        punct_entries = punct_candidates.get(str(kid), [])
+        punct_decided_count = sum(
+            1 for p in punct_entries if (kid, p["before_word_index"]) in punct_decided
+        )
         out.append({
             "klal_id": kid,
             "title": k.get("title", ""),
@@ -128,6 +138,9 @@ def api_klalim():
             # (2026-08-07, PROJECT-STATUS.md "review dashboard feedback").
             "decided_count": decided_count,
             "open_count": len(entries) - decided_count,
+            "punctuation_count": len(punct_entries),
+            "punctuation_decided_count": punct_decided_count,
+            "punctuation_open_count": len(punct_entries) - punct_decided_count,
             "needs_revisit": kid in flagged,
             # lets the frontend size an unmounted placeholder block
             # proportionally instead of a fixed guess, so lazy-loading a
@@ -148,6 +161,21 @@ def api_klal(klal_id):
     regions = _load_regions()
     region_entry = regions.get(str(klal_id), {})
     flag_state = rd.current_for(klal_id, decision_type="klal_flag")
+
+    punct_candidates = _load_punctuation_candidates().get(str(klal_id), [])
+    punctuation = []
+    for p in punct_candidates:
+        idx = p["before_word_index"]
+        decision = rd.current_for(klal_id, idx, "punctuation_choice")
+        punctuation.append({
+            "before_word_index": idx,
+            "reasoning": p.get("reasoning", ""),
+            "current_decision": (
+                {"accepted": decision["chosen_source"] == "accept", "note": decision.get("note")}
+                if decision else None
+            ),
+        })
+
     return {
         "klal_id": k["klal_id"],
         "title": k.get("title", ""),
@@ -163,6 +191,7 @@ def api_klal(klal_id):
         # the klal when the reviewer manually flips pages.
         "continuations": region_entry.get("continuations", []),
         "corrections": corrections,
+        "punctuation": punctuation,
         "needs_revisit": bool(flag_state and flag_state.get("needs_revisit")),
         "flag_note": flag_state.get("note") if flag_state else None,
     }
@@ -211,6 +240,24 @@ def api_post_candidate_decision(body):
         word_index=word_index,
         chosen_source=body.get("chosen_source"),
         chosen_text=body.get("chosen_text"),
+        candidate_snapshot=snapshot,
+        note=body.get("note"),
+    )
+    return record
+
+
+def api_post_punctuation_decision(body):
+    klal_id = int(body["klal_id"])
+    word_index = int(body["before_word_index"])
+    accepted = bool(body["accepted"])
+    candidates = _load_punctuation_candidates().get(str(klal_id), [])
+    snapshot = next((p for p in candidates if p["before_word_index"] == word_index), None)
+    record = rd.append_decision(
+        "punctuation_choice",
+        klal_id=klal_id,
+        word_index=word_index,
+        chosen_source="accept" if accepted else "reject",
+        chosen_text="[.]" if accepted else None,
         candidate_snapshot=snapshot,
         note=body.get("note"),
     )
@@ -314,6 +361,8 @@ class Handler(BaseHTTPRequestHandler):
 
             if path == "/api/decisions/candidate":
                 return self._send_json(api_post_candidate_decision(body), status=201)
+            if path == "/api/decisions/punctuation":
+                return self._send_json(api_post_punctuation_decision(body), status=201)
             if path == "/api/decisions/klal_flag":
                 return self._send_json(api_post_klal_flag(body), status=201)
             return self._send_error_json(404, "unknown endpoint")

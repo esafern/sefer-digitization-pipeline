@@ -1,0 +1,452 @@
+{
+  "1": [
+    {
+      "before_word_index": 97,
+      "reasoning": "Marks the end of Rashi's quoted text and the beginning of the author's inference ('דנראה דשינה').",
+      "word_before": "אחריה",
+      "word_after": "דנראה"
+    },
+    {
+      "before_word_index": 170,
+      "reasoning": "Starts a new sentence drawing a conclusion ('הא למדת') after the quotation.",
+      "word_before": "ע\"כ",
+      "word_after": "הא"
+    },
+    {
+      "before_word_index": 188,
+      "reasoning": "Starts a concluding sentence summarizing Rashi's opinion ('זו היא דעת').",
+      "word_before": "האמוראים",
+      "word_after": "זו"
+    },
+    {
+      "before_word_index": 193,
+      "reasoning": "Introduces a subsequent authority who followed Rashi ('ואחריו נמשך').",
+      "word_before": "ז\"ל",
+      "word_after": "ואחריו"
+    },
+    {
+      "before_word_index": 240,
+      "reasoning": "Separates the primary citation from a new cross-reference note ('ועיין').",
+      "word_before": "נזירות",
+      "word_after": "ועיין"
+    },
+    {
+      "before_word_index": 263,
+      "reasoning": "Separates the author's rejection ('וליתא') into its own clause.",
+      "word_before": "לדבריו",
+      "word_after": "וליתא"
+    },
+    {
+      "before_word_index": 278,
+      "reasoning": "Introduces Ran's second alternative explanation ('א\"נ').",
+      "word_before": "לפרוקי",
+      "word_after": "א\"נ"
+    },
+    {
+      "before_word_index": 300,
+      "reasoning": "Starts a new sentence explaining why Rashba actually agrees with Rashi ('ואף על גב').",
+      "word_before": "לתרוויהו",
+      "word_after": "ואף"
+    },
+    {
+      "before_word_index": 362,
+      "reasoning": "Starts a new sentence within the quotation presenting the questioner's difficulty ('ויש לתמוה').",
+      "word_before": "'",
+      "word_after": "ויש"
+    },
+    {
+      "before_word_index": 395,
+      "reasoning": "Starts a new sentence presenting Rashba's answer ('והרשב\"א השיבו').",
+      "word_before": "'",
+      "word_after": "והרשב\"א"
+    },
+    {
+      "before_word_index": 414,
+      "reasoning": "Returns to the author's main point after the long digressive quote ('לענינינו').",
+      "word_before": "ע\"כ",
+      "word_after": "לענינינו"
+    },
+    {
+      "before_word_index": 428,
+      "reasoning": "Starts a new supporting sentence citing another passage ('וכן נראה').",
+      "word_before": "רש\"י",
+      "word_after": "וכן"
+    },
+    {
+      "before_word_index": 450,
+      "reasoning": "Inserts punctuation before the concluding directive ('ודו\"ק').",
+      "word_before": "ע\"ב",
+      "word_after": "ודו\"ק"
+    },
+    {
+      "before_word_index": 451,
+      "reasoning": "Starts a new sentence presenting the author's own humble opinion ('ולעד\"ן').",
+      "word_before": "ודו\"ק",
+      "word_after": "ולעד\"ן"
+    },
+    {
+      "before_word_index": 468,
+      "reasoning": "Starts the analytical conclusion derived from the Talmudic discussion ('ומדקמהד'').",
+      "word_before": "'",
+      "word_after": "ומדקמהד"
+    },
+    {
+      "before_word_index": 503,
+      "reasoning": "Starts a new sentence bringing a parallel view from Tosafot ('וקרוב לזה').",
+      "word_before": "לי",
+      "word_after": "וקרוב"
+    },
+    {
+      "before_word_index": 520,
+      "reasoning": "Marks the end of the cited passage ('ע\"ש').",
+      "word_before": "פליגי",
+      "word_after": "ע\"ש"
+    },
+    {
+      "before_word_index": 521,
+      "reasoning": "Starts a concluding cross-reference list ('ועיין עוד').",
+      "word_before": "ע\"ש",
+      "word_after": "ועיין"
+    }
+  ],
+  "2": [
+    {
+      "before_word_index": 35,
+      "reasoning": "Beginning of quoted quote from Rashi after introductory phrase 'בזה הלשון'.",
+      "word_before": "הלשון",
+      "word_after": "זו"
+    },
+    {
+      "before_word_index": 82,
+      "reasoning": "Major clause transition introducing the consequence ('והוי יותר מהקיש').",
+      "word_before": "מינה",
+      "word_after": "והוי"
+    },
+    {
+      "before_word_index": 116,
+      "reasoning": "New sentence beginning with 'ומ\"מ' introducing an objection/source.",
+      "word_before": "יתור",
+      "word_after": "ומ\"מ"
+    },
+    {
+      "before_word_index": 135,
+      "reasoning": "Clause boundary marking the Talmudic question ('קפריך הש\"ס').",
+      "word_before": "מאא\"ע",
+      "word_after": "קפריך"
+    },
+    {
+      "before_word_index": 146,
+      "reasoning": "New sentence directing the reader to additional sources ('וע\"ע').",
+      "word_before": "ע\"ש",
+      "word_after": "וע\"ע"
+    },
+    {
+      "before_word_index": 156,
+      "reasoning": "Clause boundary introducing another locus in Talmud ('ובפרק').",
+      "word_before": "בנקבו",
+      "word_after": "ובפרק"
+    },
+    {
+      "before_word_index": 165,
+      "reasoning": "Clause boundary introducing a third locus in Talmud ('ושם בש\"ס').",
+      "word_before": "אבל",
+      "word_after": "ושם"
+    },
+    {
+      "before_word_index": 170,
+      "reasoning": "Major transition concluding from the proofs ('ומעתה').",
+      "word_before": "'",
+      "word_after": "ומעתה"
+    },
+    {
+      "before_word_index": 175,
+      "reasoning": "Clause boundary asserting the clear conclusion ('ומלתא ברירא היא').",
+      "word_before": "בעי",
+      "word_after": "ומלתא"
+    },
+    {
+      "before_word_index": 192,
+      "reasoning": "Beginning of conditional breakdown according to Rashi ('אי לרש\"י ז\"ל').",
+      "word_before": "'",
+      "word_after": "אי"
+    },
+    {
+      "before_word_index": 244,
+      "reasoning": "Clause boundary introducing the conclusion of the cited passage ('וסיים').",
+      "word_before": "סוגיות",
+      "word_after": "וסיים"
+    },
+    {
+      "before_word_index": 273,
+      "reasoning": "Clause boundary starting a specific legal case ('וכן בטבול יום').",
+      "word_before": "'",
+      "word_after": "וכן"
+    },
+    {
+      "before_word_index": 288,
+      "reasoning": "Clause boundary detailing Maimonides' enumeration ('והרב מנה אותו').",
+      "word_before": "בג\"ש",
+      "word_after": "והרב"
+    },
+    {
+      "before_word_index": 292,
+      "reasoning": "Sentence boundary explaining the Talmudic origin ('והוא מן הש\"ס').",
+      "word_before": "ע\"כ",
+      "word_after": "והוא"
+    },
+    {
+      "before_word_index": 300,
+      "reasoning": "New sentence where the author adds his own additional proof ('והריני מוסיף').",
+      "word_before": "ע\"ש",
+      "word_after": "והריני"
+    },
+    {
+      "before_word_index": 330,
+      "reasoning": "Clause boundary noting the codification by Maimonides ('ופסקו הרמב\"ם').",
+      "word_before": "לשקר",
+      "word_after": "ופסקו"
+    },
+    {
+      "before_word_index": 335,
+      "reasoning": "New sentence referencing Maharik ('ועיין מוהר\"י קולון').",
+      "word_before": "שבועות",
+      "word_after": "ועיין"
+    },
+    {
+      "before_word_index": 340,
+      "reasoning": "New sentence introducing another severity level case ('ואף סקילה אשכחן').",
+      "word_before": "קל\"ד",
+      "word_after": "ואף"
+    },
+    {
+      "before_word_index": 361,
+      "reasoning": "Clause boundary noting Maimonides' ruling ('ופסקו הרמב\"ם').",
+      "word_before": "לנשכב",
+      "word_after": "ופסקו"
+    },
+    {
+      "before_word_index": 366,
+      "reasoning": "Clause boundary introducing another case in the same chapter ('ושם ע\"א א'').",
+      "word_before": "א\"ב",
+      "word_after": "ושם"
+    },
+    {
+      "before_word_index": 375,
+      "reasoning": "Clause boundary noting Maimonides' ruling on idolatry ('וכן פסק הרמב\"ם').",
+      "word_before": "באא\"ע",
+      "word_after": "וכן"
+    },
+    {
+      "before_word_index": 389,
+      "reasoning": "New sentence introducing further references ('וע\"ע בפ\"ב').",
+      "word_before": "ע\"ש",
+      "word_after": "וע\"ע"
+    },
+    {
+      "before_word_index": 440,
+      "reasoning": "Clause boundary adding a further objection ('אף גם זאת').",
+      "word_before": "שהוכחתי",
+      "word_after": "אף"
+    },
+    {
+      "before_word_index": 454,
+      "reasoning": "Beginning of Tosafot quotation ('וז\"ל').",
+      "word_before": "וז\"ל",
+      "word_after": "וא\"ת"
+    },
+    {
+      "before_word_index": 462,
+      "reasoning": "Clause boundary introducing Tosafot's answer ('וי\"ל').",
+      "word_before": "לאוין",
+      "word_after": "וי\"ל"
+    },
+    {
+      "before_word_index": 471,
+      "reasoning": "Clause boundary contrasting with the second resolution ('אבל כי מוקמינן').",
+      "word_before": "לעשה",
+      "word_after": "אבל"
+    },
+    {
+      "before_word_index": 481,
+      "reasoning": "Sentence boundary concluding Tosafot quote and returning to author's analysis ('ולי המך').",
+      "word_before": "עכ\"ד",
+      "word_after": "ולי"
+    },
+    {
+      "before_word_index": 493,
+      "reasoning": "Clause boundary introducing another responsa text ('וראיתי').",
+      "word_before": "מאש",
+      "word_after": "וראיתי"
+    },
+    {
+      "before_word_index": 511,
+      "reasoning": "New sentence referencing Mishneh LaMelech ('וע\"ע מ\"ל').",
+      "word_before": "יע\"ש",
+      "word_after": "וע\"ע"
+    },
+    {
+      "before_word_index": 527,
+      "reasoning": "Clause boundary presenting the author's own stronger counter-argument ('ולדידי').",
+      "word_before": "מידי",
+      "word_after": "ולדידי"
+    },
+    {
+      "before_word_index": 541,
+      "reasoning": "New sentence introducing another reference from Nechpah BaKesef ('וראיתי תו').",
+      "word_before": "כאמור",
+      "word_after": "וראיתי"
+    },
+    {
+      "before_word_index": 568,
+      "reasoning": "Major clause transition rejecting previous answers ('ומכל אלו').",
+      "word_before": "בזה",
+      "word_after": "ומכל"
+    },
+    {
+      "before_word_index": 577,
+      "reasoning": "New sentence introducing Responsa Zera Avraham ('ומצאתי עוד').",
+      "word_before": "לפק\"ד",
+      "word_after": "ומצאתי"
+    },
+    {
+      "before_word_index": 590,
+      "reasoning": "Beginning of citation from Zera Avraham ('וז\"ל').",
+      "word_before": "שכתב",
+      "word_after": "וז\"ל"
+    },
+    {
+      "before_word_index": 637,
+      "reasoning": "Clause boundary introducing author's discovery in Bnei Yehudah ('וראיתי חזות קשה').",
+      "word_before": "זצוק\"ל",
+      "word_after": "וראיתי"
+    },
+    {
+      "before_word_index": 658,
+      "reasoning": "Clause boundary contrasting divine vs rabbinic status ('אלא מדבריהם').",
+      "word_before": "'",
+      "word_after": "אלא"
+    },
+    {
+      "before_word_index": 665,
+      "reasoning": "New sentence describing direct discussion/debate ('פה אל פה').",
+      "word_before": "הדין",
+      "word_after": "פה"
+    },
+    {
+      "before_word_index": 679,
+      "reasoning": "New sentence referring reader to general codification rules ('ועיין בכללי').",
+      "word_before": "מענה",
+      "word_after": "ועיין"
+    }
+  ],
+  "3": [
+    {
+      "before_word_index": 12,
+      "reasoning": "Introduces a contrasting clause with 'אבל', separating the general rule of 'היקש' from 'וי\"ו מוסיף'.",
+      "word_before": "בהיקש",
+      "word_after": "אבל"
+    },
+    {
+      "before_word_index": 56,
+      "reasoning": "Starts a new sentence expressing the author's difficulty ('ויש לתמוה') with the Ra'am's ruling.",
+      "word_before": "העוף",
+      "word_after": "ויש"
+    },
+    {
+      "before_word_index": 66,
+      "reasoning": "Introduces the textual proof ('דהא') from tractate Shevuot to challenge the Ra'am.",
+      "word_before": "הוא",
+      "word_after": "דהא"
+    },
+    {
+      "before_word_index": 95,
+      "reasoning": "Introduces the quotation from the Gemara ('דהכי איתא התם') to support the objection.",
+      "word_before": "ומלמד",
+      "word_after": "דהכי"
+    },
+    {
+      "before_word_index": 98,
+      "reasoning": "Starts the actual Rabbinic quote ('אמר רבי חמא בר חנינא') after the introductory formula.",
+      "word_before": "התם",
+      "word_after": "א\"ר"
+    },
+    {
+      "before_word_index": 118,
+      "reasoning": "Starts the hypothetical Talmudic assumption ('קסלקא דעתך') which is a new step in the argument.",
+      "word_before": "ראשון",
+      "word_after": "קס\"ד"
+    },
+    {
+      "before_word_index": 124,
+      "reasoning": "Introduces the Talmudic objection ('והאמר רבי יוחנן') to the previous assumption.",
+      "word_before": "גמר",
+      "word_after": "והאמ\"ר"
+    },
+    {
+      "before_word_index": 139,
+      "reasoning": "Starts the Talmudic resolution ('הא לא קשיא') to the objection.",
+      "word_before": "מלמד",
+      "word_after": "הא"
+    },
+    {
+      "before_word_index": 146,
+      "reasoning": "Resumes the author's own analysis of the Gemara ('הא לקמן להדיא') after the quote concludes.",
+      "word_before": "ע\"כ",
+      "word_after": "הא"
+    },
+    {
+      "before_word_index": 177,
+      "reasoning": "Starts the author's own conclusion ('ולי הדיוט צ\"ע') on this Talmudic passage.",
+      "word_before": "בקדשים",
+      "word_after": "ולי"
+    },
+    {
+      "before_word_index": 227,
+      "reasoning": "Starts a contrasting sentence ('משא\"כ') comparing different types of vav conjunctions.",
+      "word_before": "אתא",
+      "word_after": "משא\"כ"
+    },
+    {
+      "before_word_index": 276,
+      "reasoning": "Starts a new sentence with a proof ('והרי מצינו') from tractate Pesachim.",
+      "word_before": "לוי\"ו",
+      "word_after": "והרי"
+    },
+    {
+      "before_word_index": 304,
+      "reasoning": "Introduces the deduction ('הרי דאף') derived from the Pesachim proof.",
+      "word_before": "שם",
+      "word_after": "הרי"
+    },
+    {
+      "before_word_index": 348,
+      "reasoning": "Starts a new independent argument ('ובלאו הכי') against the Ra'am's premise.",
+      "word_before": "לימוד",
+      "word_after": "ובלאו"
+    },
+    {
+      "before_word_index": 361,
+      "reasoning": "Introduces the textual proof ('דהא בפ\"ה דזבחים') for the 'ובלאו הכי' argument.",
+      "word_before": "בהדיא",
+      "word_after": "דהא"
+    },
+    {
+      "before_word_index": 380,
+      "reasoning": "Introduces the specific case of the sin-offering ('דגבי חטאת') to illustrate the proof.",
+      "word_before": "בהדיא",
+      "word_after": "דגבי"
+    },
+    {
+      "before_word_index": 403,
+      "reasoning": "Starts a new sentence describing the conclusion of the Eliyahu Raba ('והניח הדבר בתימה').",
+      "word_before": "מלמד",
+      "word_after": "והניח"
+    },
+    {
+      "before_word_index": 406,
+      "reasoning": "Starts the final concluding remark of the author ('וגדולה היא אלי וצ\"ע').",
+      "word_before": "בתימה",
+      "word_after": "וגדולה"
+    }
+  ]
+}

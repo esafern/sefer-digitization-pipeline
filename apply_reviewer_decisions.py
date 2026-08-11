@@ -93,11 +93,23 @@ def apply_insert_removal(clean_text, word_index, final_text):
 
 def apply_delete_insertion(clean_text, word_index, chosen_text):
     """'delete'-opcode decision: insert the word(s) docai saw that
-    clean_text is missing, before word_index."""
+    clean_text is missing, before word_index.
+
+    Unlike apply_replace/apply_insert_removal, this one has no span to
+    verify against - it adds text rather than transforming existing text -
+    so it needs its own already-applied guard, or a re-run silently inserts
+    the same word again (reproduced 2026-08-11: three runs produced
+    `יגעתי 1 1 1 ולא`, each reporting success). The apply_event check in
+    main() is the primary defence; this is the second, independent signal
+    (CLAUDE.md Lesson 9), and it also covers a decisions log that was
+    truncated or replayed from a different machine."""
     words = clean_text.split()
     if word_index > len(words) or not chosen_text:
         return None
-    words[word_index:word_index] = chosen_text.split()
+    span = chosen_text.split()
+    if words[word_index:word_index + len(span)] == span:
+        return None  # already present at exactly this position - do not duplicate
+    words[word_index:word_index] = span
     return " ".join(words)
 
 
@@ -110,13 +122,19 @@ def main():
     corrections = load_current_corrections()
     part1 = load_part1()
     by_klal = {k["klal_id"]: k for k in part1}
+    already_applied = rd.applied_decision_ids()
 
     applied = []
     skipped_drift = []
+    skipped_already_applied = []
     word_count_changed_klalim = set()
     n_replace = n_insert_delete = n_noop = 0
 
     for (klal_id, word_index), decision in sorted(decisions.items()):
+        # Already promoted into part1.json by an earlier run - never re-apply.
+        if decision["id"] in already_applied:
+            skipped_already_applied.append((klal_id, word_index))
+            continue
         live_list = corrections.get(str(klal_id), [])
         live_entry = next((c for c in live_list if c["word_index"] == word_index), None)
         snapshot = decision.get("candidate_snapshot")
@@ -189,6 +207,12 @@ def main():
           f"{n_noop} confirmed-no-op)")
     for kid, widx, kind in applied:
         print(f"  klal {kid} word {widx}: {kind}")
+
+    if skipped_already_applied:
+        print(f"\n{len(skipped_already_applied)} decision(s) skipped - already promoted into "
+              f"part1.json by an earlier run (apply_event on record), no action needed:")
+        for kid, widx in skipped_already_applied:
+            print(f"  klal {kid} word {widx}")
 
     if skipped_drift:
         print(f"\n{len(skipped_drift)} decision(s) skipped - candidate data has drifted since "

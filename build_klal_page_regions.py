@@ -217,7 +217,18 @@ def main():
     markers = load_markers()
     final_by_id = {k["klal_id"]: k for k in json.load(open(DEMO_DATASET, encoding="utf-8"))}
 
-    pages_needed = set(klal_pages) | {p for p, _ in markers.values()}
+    # Every page in the covered range, not just pages that have a klal marker
+    # on them. A page that is ENTIRELY one klal's continuation (no marker of its
+    # own) would otherwise never be loaded, so it could never appear in that
+    # klal's `continuations` list and the reviewer could not see it on the scan
+    # pane at all. Found 2026-08-11 on klal 75, whose text runs page 36 -> 37
+    # with the whole of page 37 inside it: the continuation silently listed only
+    # page 38. The same hole applies to pages 24 and 40 (klal 30 and klal 88's
+    # middle pages) - i.e. precisely the pages needed to verify the outstanding
+    # cross-page reconstruction work. Loading the full range is cheap (~82 small
+    # JSON files) and removes the whole class.
+    anchor_pages = set(klal_pages) | {p for p, _ in markers.values()}
+    pages_needed = set(range(min(anchor_pages), max(anchor_pages) + 1)) if anchor_pages else set()
     docai_by_page = {}
     for page_id in pages_needed:
         docai_path = os.path.join(DOCAI_DIR, f"page_{page_id}.json")

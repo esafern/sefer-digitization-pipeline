@@ -54,7 +54,7 @@ def extract_json_fields(text):
     }
 
 REPO = os.path.dirname(os.path.abspath(__file__))
-PDF_PATH = os.path.join(REPO, "berlin_square.pdf")
+PDF_PATH = os.path.join(REPO, "berlin_square_corrected.pdf")
 CANDIDATES_PATH = os.path.join(REPO, "corrections_candidates_part1.json")
 OUT_PATH = os.path.join(REPO, "corrections_verified_part1.json")
 CACHE_DB = os.path.join(REPO, "adjudication_cache.db")
@@ -78,10 +78,22 @@ def init_cache():
     # "database is locked" errors under the default journal mode, each one
     # discarding an already-successful API response and forcing a re-call.
     conn.execute("PRAGMA journal_mode=WAL")
+    # context_hash added 2026-08-10 (PROJECT-STATUS.md "sends the wrong
+    # surrounding sentence context"): the cache key used to be just
+    # (crop_hash, word_a, word_b), but the prompt the model actually saw also
+    # includes `context` - once context was fixed to be a real local window
+    # instead of a fixed head-of-klal slice, a key that doesn't cover context
+    # would keep silently returning the OLD wrong-context decision forever,
+    # the exact cache-key-must-cover-everything-that-changes-the-answer bug
+    # this project already fixed once for adjudication_cache.db (see
+    # CLAUDE.md "Single source of truth" / Lesson 12). Old rows under the
+    # pre-fix 3-column schema are incompatible and were dropped, not
+    # migrated - this is a fully regenerable cache, not source data.
     conn.execute(
         "CREATE TABLE IF NOT EXISTS corrections_cache ("
         "crop_hash TEXT NOT NULL, word_a TEXT NOT NULL, word_b TEXT NOT NULL, "
-        "decision_json TEXT, PRIMARY KEY (crop_hash, word_a, word_b))"
+        "context_hash TEXT NOT NULL, "
+        "decision_json TEXT, PRIMARY KEY (crop_hash, word_a, word_b, context_hash))"
     )
     conn.commit()
     conn.close()
@@ -92,23 +104,25 @@ _NONE_SENTINEL = "\x00NONE\x00"  # word_a/word_b is NOT NULL; opcode delete/inse
                                   # nothing) - coerce rather than relax the schema.
 
 
-def get_cached_decision(crop_bytes, word_a, word_b):
+def get_cached_decision(crop_bytes, word_a, word_b, context):
     crop_hash = hashlib.sha256(crop_bytes).hexdigest()
+    context_hash = hashlib.sha256(context.encode("utf-8")).hexdigest()
     conn = sqlite3.connect(CACHE_DB, timeout=10.0)
     row = conn.execute(
-        "SELECT decision_json FROM corrections_cache WHERE crop_hash = ? AND word_a = ? AND word_b = ?",
-        (crop_hash, word_a or _NONE_SENTINEL, word_b or _NONE_SENTINEL),
+        "SELECT decision_json FROM corrections_cache WHERE crop_hash = ? AND word_a = ? AND word_b = ? AND context_hash = ?",
+        (crop_hash, word_a or _NONE_SENTINEL, word_b or _NONE_SENTINEL, context_hash),
     ).fetchone()
     conn.close()
     return row[0] if row else None
 
 
-def cache_decision(crop_bytes, word_a, word_b, decision_json):
+def cache_decision(crop_bytes, word_a, word_b, context, decision_json):
     crop_hash = hashlib.sha256(crop_bytes).hexdigest()
+    context_hash = hashlib.sha256(context.encode("utf-8")).hexdigest()
     conn = sqlite3.connect(CACHE_DB, timeout=10.0)
     conn.execute(
-        "INSERT OR REPLACE INTO corrections_cache (crop_hash, word_a, word_b, decision_json) VALUES (?, ?, ?, ?)",
-        (crop_hash, word_a or _NONE_SENTINEL, word_b or _NONE_SENTINEL, decision_json),
+        "INSERT OR REPLACE INTO corrections_cache (crop_hash, word_a, word_b, context_hash, decision_json) VALUES (?, ?, ?, ?, ?)",
+        (crop_hash, word_a or _NONE_SENTINEL, word_b or _NONE_SENTINEL, context_hash, decision_json),
     )
     conn.commit()
     conn.close()
@@ -130,7 +144,7 @@ def crop_pdf_bounding_box(doc, page_num_1indexed, bbox, padding=0.02):
 
 
 def adjudicate(client, crop_bytes, option_a, option_b, full_context):
-    cached = get_cached_decision(crop_bytes, option_a, option_b)
+    cached = get_cached_decision(crop_bytes, option_a, option_b, full_context)
     if cached:
         print("  -> cache hit")
         return cached
@@ -177,7 +191,7 @@ Respond ONLY with JSON using this structure:
                     config=types.GenerateContentConfig(response_mime_type="application/json"),
                 )
                 print(f"  -> live call to {model_name} ok")
-                cache_decision(crop_bytes, option_a, option_b, response.text)
+                cache_decision(crop_bytes, option_a, option_b, full_context, response.text)
                 return response.text
             except Exception as e:
                 last_err = e
@@ -214,7 +228,23 @@ def main():
             continue
 
         k = final_by_id.get(c["klal_id"], {})
-        context = k.get("clean_text", "")[:400]
+        # Local window AROUND the actual word, not a fixed head-of-klal slice.
+        # Bug found 2026-08-10 (PROJECT-STATUS.md "sends the wrong surrounding
+        # sentence context"): this used to be clean_text[:400] unconditionally,
+        # so any word past ~65 words into a klal got the klal's OPENING lines
+        # as "surrounding sentence context" - unrelated to the real sentence
+        # around it. 112 of 244 (45.9%) of then-vision-checked words were
+        # affected. word_index_in_final_text is the word's position in the
+        # unfiltered clean_text.split(" ") array (see build_corrections_
+        # dataset.py's page_word_origin comment) - use it directly.
+        words = k.get("clean_text", "").split(" ")
+        wi = c.get("word_index_in_final_text")
+        if isinstance(wi, int) and 0 <= wi < len(words):
+            ctx_start = max(0, wi - 35)
+            ctx_end = min(len(words), wi + 36)
+            context = " ".join(words[ctx_start:ctx_end])
+        else:
+            context = k.get("clean_text", "")[:400]
 
         try:
             crop_bytes = crop_pdf_bounding_box(doc, c["page"], c["bbox"])

@@ -57,6 +57,95 @@ def get_page(cache, page):
     return cache[page]
 
 
+def build_spans(trace, part1, cache):
+    """Measure every klal span that CAN be measured, and record every one that
+    can't with its reason. Returns (rows, unmeasured).
+
+    This function is the single implementation of the span math - imported and
+    called by tests/test_corpus_invariants.py rather than reimplemented there.
+    That duplication is exactly how the blind spot below survived a
+    zero-tolerance pytest gate (audit 2026-08-10/11, PROJECT-STATUS.md): the
+    test had its own copy of the same `continue` statements, so the gate was
+    structurally incapable of catching what the script structurally skipped.
+
+    Three cases used to `continue` silently, dropping 20 of 222 klalim from
+    BOTH the "checked" and "skipped" counts the script printed (185 + 14 = 199,
+    not 222, and nothing said so):
+
+    1. The next klal has no marker. Fixed by pairing with the next klal that
+       DOES have one and comparing against the summed stored words of every
+       klal the span covers - a span that spans klalim N..M must be compared
+       against N..M's combined text, not N's alone, or the ratio is
+       meaninglessly low by construction.
+    2. The span crosses more than one page boundary. Fixed by summing the
+       intermediate pages' token counts. This case alone hid klal 30
+       (ratio 0.06), klal 83-84 (0.09) and klal 88 (0.24) - the largest
+       real shortfalls in Part 1, and the same cross-page-truncation failure
+       mode this validator was built for.
+    3. Page token data missing / no following marker at all. Still not
+       measurable, but now REPORTED rather than dropped.
+    """
+    ids = sorted(trace)
+    marker_ids = [k for k in ids if trace[k].get("marker_position") is not None]
+    rows, unmeasured = [], []
+
+    for pos, kid in enumerate(marker_ids):
+        x = trace[kid]
+        if pos + 1 >= len(marker_ids):
+            unmeasured.append((kid, "last klal with a known marker - no following marker to bound its span"))
+            continue
+        next_kid = marker_ids[pos + 1]
+        nx = trace[next_kid]
+        page, next_page = x["page"], nx["page"]
+
+        tokens_this = get_page(cache, page)
+        if tokens_this is None:
+            unmeasured.append((kid, f"page {page} token data missing"))
+            continue
+
+        if next_page == page:
+            span_tokens = nx["marker_position"] - x["marker_position"]
+        elif next_page > page:
+            tokens_next = get_page(cache, next_page)
+            if tokens_next is None:
+                unmeasured.append((kid, f"page {next_page} token data missing"))
+                continue
+            span_tokens = (len(tokens_this) - x["marker_position"]) + nx["marker_position"]
+            missing_mid = []
+            for mid in range(page + 1, next_page):
+                mid_tokens = get_page(cache, mid)
+                if mid_tokens is None:
+                    missing_mid.append(mid)
+                else:
+                    span_tokens += len(mid_tokens)
+            if missing_mid:
+                unmeasured.append((kid, f"intermediate page(s) {missing_mid} token data missing"))
+                continue
+        else:
+            unmeasured.append((kid, f"next klal {next_kid} maps to an EARLIER page "
+                                    f"({next_page} < {page}) - alignment inconsistency, not a span"))
+            continue
+
+        if not span_tokens:
+            unmeasured.append((kid, f"zero-length span to klal {next_kid} (identical marker positions)"))
+            continue
+
+        covered = [k for k in range(kid, next_kid) if k in part1]
+        stored_words = sum(len(part1[k]["clean_text"].split()) for k in covered)
+        rows.append({
+            "klal_id": kid,
+            "covered_klal_ids": covered,
+            "next_klal_id": next_kid,
+            "page": page,
+            "next_page": next_page,
+            "crosses_page": next_page != page,
+            "expected_tokens": span_tokens,
+            "stored_words": stored_words,
+            "ratio": stored_words / span_tokens,
+        })
+    return rows, unmeasured
+
+
 def main():
     trace_path = os.path.join(REPO, "gematria_trace_part1.json")
     part1_path = os.path.join(REPO, "part1.json")
@@ -65,71 +154,60 @@ def main():
 
     trace = {x["klal_id"]: x for x in json.load(open(trace_path, encoding="utf-8"))}
     part1 = {k["klal_id"]: k for k in json.load(open(part1_path, encoding="utf-8"))}
-    ids = sorted(trace)
     cache = {}
 
-    rows = []
-    skipped_no_marker = []
-    for idx, kid in enumerate(ids):
-        x = trace[kid]
-        if x.get("marker_position") is None:
-            skipped_no_marker.append(kid)
-            continue
-        if idx + 1 >= len(ids):
-            continue
-        next_kid = ids[idx + 1]
-        nx = trace[next_kid]
-        if nx.get("marker_position") is None:
-            continue
-
-        page, next_page = x["page"], nx["page"]
-        tokens_this = get_page(cache, page)
-        if tokens_this is None:
-            continue
-
-        if next_page == page:
-            span_tokens = nx["marker_position"] - x["marker_position"]
-            crosses_page = False
-        elif next_page == page + 1:
-            tokens_next = get_page(cache, next_page)
-            if tokens_next is None:
-                continue
-            span_tokens = (len(tokens_this) - x["marker_position"]) + nx["marker_position"]
-            crosses_page = True
-        else:
-            continue  # spans more than one page boundary - not handled here
-
-        stored_words = len(part1[kid]["clean_text"].split()) if kid in part1 else 0
-        ratio = stored_words / span_tokens if span_tokens else None
-        rows.append({
-            "klal_id": kid, "page": page, "next_page": next_page,
-            "crosses_page": crosses_page, "expected_tokens": span_tokens,
-            "stored_words": stored_words, "ratio": ratio,
-        })
+    rows, unmeasured = build_spans(trace, part1, cache)
 
     same_page = [r for r in rows if not r["crosses_page"]]
     cross_page = [r for r in rows if r["crosses_page"]]
-    flagged = [r for r in rows if r["ratio"] is not None and r["ratio"] < FLAG_RATIO_THRESHOLD]
+    flagged = [r for r in rows if r["ratio"] < FLAG_RATIO_THRESHOLD]
+
+    no_marker = sorted(k for k in trace if trace[k].get("marker_position") is None)
+    not_in_trace = sorted(k for k in part1 if k not in trace)
 
     def mean_ratio(rs):
-        vals = [r["ratio"] for r in rs if r["ratio"] is not None]
+        vals = [r["ratio"] for r in rs]
         return sum(vals) / len(vals) if vals else None
 
-    print(f"Checked {len(rows)} klalim ({len(same_page)} same-page, {len(cross_page)} cross-page); "
-          f"{len(skipped_no_marker)} skipped (no exact-match marker position).")
-    sp_mean, cp_mean = mean_ratio(same_page), mean_ratio(cross_page)
-    print(f"Same-page mean ratio: {sp_mean:.2f}" if sp_mean else "Same-page: n/a")
-    print(f"Cross-page mean ratio: {cp_mean:.2f}" if cp_mean else "Cross-page: n/a")
-    print()
+    # Full accounting - every Part-1 klal lands in exactly one bucket below, and
+    # the totals are asserted to add up. Before 2026-08-11 this printed
+    # "Checked 185... 14 skipped" against 222 real klalim and said nothing about
+    # the other 23 (PROJECT-STATUS.md, deep methodology audit).
+    measured_ids = {k for r in rows for k in r["covered_klal_ids"]}
+    print(f"Part 1: {len(part1)} klalim, {len(trace)} with a trace entry.")
+    print(f"  {len(rows)} measurable spans ({len(same_page)} same-page, {len(cross_page)} cross-page), "
+          f"covering {len(measured_ids)} klalim.")
+    print(f"  {len(unmeasured)} span(s) NOT measurable (reported below, never silently dropped).")
+    print(f"  {len(no_marker)} klal(im) with no exact-match marker position: {no_marker}")
+    if not_in_trace:
+        print(f"  {len(not_in_trace)} klal(im) absent from gematria_trace_part1.json entirely: {not_in_trace}")
 
+    accounted = len(rows) + len(unmeasured)
+    marker_count = len(trace) - len(no_marker)
+    if accounted != marker_count:
+        print(f"  !! ACCOUNTING ERROR: {accounted} spans accounted for, {marker_count} klalim have markers.")
+
+    sp_mean, cp_mean = mean_ratio(same_page), mean_ratio(cross_page)
+    print(f"\nSame-page mean ratio:  {sp_mean:.2f}" if sp_mean else "\nSame-page: n/a")
+    print(f"Cross-page mean ratio: {cp_mean:.2f}" if cp_mean else "Cross-page: n/a")
+
+    if unmeasured:
+        print(f"\n{len(unmeasured)} span(s) that could not be measured:")
+        for kid, reason in unmeasured:
+            print(f"  klal {kid}: {reason}")
+
+    print()
     if flagged:
-        print(f"{len(flagged)} klalim below {FLAG_RATIO_THRESHOLD} ratio (stored word count vs. real token span):")
+        print(f"{len(flagged)} span(s) below {FLAG_RATIO_THRESHOLD} ratio (stored word count vs. real token span):")
         for r in sorted(flagged, key=lambda r: r["ratio"]):
-            print(f"  klal {r['klal_id']}: page {r['page']}->{r['next_page']}, "
+            covered = r["covered_klal_ids"]
+            label = f"klal {r['klal_id']}" if len(covered) <= 1 else \
+                    f"klal {covered[0]}-{covered[-1]} ({len(covered)} klalim, combined)"
+            print(f"  {label}: page {r['page']}->{r['next_page']}, "
                   f"expected~{r['expected_tokens']} tok, stored {r['stored_words']} words, "
                   f"ratio {r['ratio']:.2f}")
     else:
-        print(f"No klalim below {FLAG_RATIO_THRESHOLD} ratio. Clean.")
+        print(f"No spans below {FLAG_RATIO_THRESHOLD} ratio. Clean.")
 
 
 if __name__ == "__main__":
