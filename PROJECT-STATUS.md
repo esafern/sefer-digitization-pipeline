@@ -1,5 +1,112 @@
 # Project Status — Open Items & Investigation Log
 
+## ►► SESSION HANDOFF — read this first, 2026-08-11
+
+### State on disk right now (verified, not remembered)
+
+- **Branch `master`, HEAD `86c83ef`, working tree clean, 13/13 invariants pass.**
+- **The corpus is UNCHANGED by this session** except one stray `כ` removed from
+  klal 144. `part1.json` klal 30/75/88 are still 130/364/298 words - **the
+  multi-page reconstruction is NOT applied.** That is deliberate; see below.
+- Commits this session: `9ecd352` (audit fixes + PDF leaf repair + archiving),
+  `c9c6ec8` (VLM demo closed), `ec18918` (vlm_extractions closed),
+  `86c83ef` (harness UI + witness server wiring).
+- Branch `pipeline-audit-fixes-and-page-order-repair` (`5a86ef6`) holds the
+  audit fixes with a fuller commit message but is **not an ancestor of
+  master**. Master is a content superset - verified file-by-file. The branch is
+  redundant except as documentation; delete or keep as you prefer.
+- `berlin_square_corrected.pdf` and `berlin_square_original_transposed.pdf` are
+  both tracked now. Repo is ~238 MB.
+
+### What is genuinely finished
+
+8 correctness bugs fixed and each re-tested against its original reproduction;
+the transposed PDF leaves 37/38 repaired and every page-indexed artifact
+realigned; dead code archived after confirming it dead; `scratch/`'s 19
+non-regenerable scripts rescued into tracked `archive/scripts/`; the VLM-demo
+and vlm_extractions open items closed (the latter was my own broken check, not
+a data problem). Details in the sections below.
+
+### NEXT STEPS, in order
+
+**1. Finish the witness-queue frontend wiring** (server half is done and inert).
+Two concrete pieces, both in `review_frontend/`:
+   - `app.js` `showPage()`: items from `/api/page/<n>` now carry
+     `kind: "correction" | "witness"`. Branch on it - witness items need their
+     own box class and a click handler opening the (already-present, currently
+     unreachable) `#witness-panel`, posting to `POST /api/decisions/witness`
+     with `{klal_id, docai_token_index, chosen_source, chosen_text, note}`.
+     `chosen_source` convention: `docai_reading | tesseract_reading | custom |
+     unreadable`. Mirror `openCandidatePanel`/`saveCandidateDecision`.
+   - **`pagesWithKlalim()` cannot reach pages 24, 37, 40.** They are
+     continuation-only (no klal marker), so the page-stepper skips exactly the
+     pages the queue is about. `GET /api/witness` exists for this and returns
+     `{pages:[{page,klal_id,total,decided}], by_tier, total}` - merge those
+     pages into the navigable set.
+
+**2. Human works tier C in the harness** (94 items). Both readings are real
+Hebrew words, so the lexicon cannot separate them - each needs the ink. This is
+the substantive remaining review and is why step 1 exists. Queue is
+`reconstruction_witness_queue.json`; every row carries a DocAI bbox so the scan
+pane can highlight it.
+
+**3. Sample tiers B (102) and D (217) before trusting them.** They are
+*presumed* Tesseract noise on the strength of a 12-row sample plus the fact
+that 49% of tier B carries gershayim (abbreviations a word lexicon must miss).
+That is an inference, not a checked result - tier A already proved a tier label
+can be wrong (item 2 below).
+
+**4. Apply the reconstruction, but only after 2-3.** Command is
+`./venv/bin/python reconstruct_multipage_klalim.py --apply` (dry-run by
+default; re-read the printed junctions first), then `./rebuild_all.sh`, then
+narrow `SPAN_COVERAGE_KNOWN_REAL_GAPS` from `{30, 36, 75, 88}` to `{36}`. It
+restores ~3,800 words across klal 30/75/88 and preserves 100% of existing
+words. **Do not apply it before the tier work**: the text passes every gate by
+construction (it was built from the tokens the gates count), so it would land
+looking verified when it is not.
+   Carry forward these four tier-A adjudications, already crop-checked:
+   - `וכוותיידו` → **`וכוותייהו`** - confirmed DocAI misread, apply it.
+   - `ידן`/`ידו` - the scan shows **`ידך`** (`הראנו ידך הנפלאה`); *both*
+     engines wrong. Needs a human call.
+   - `רתם`/`התם` - the print genuinely shows **ר**. DocAI is faithful; `התם` is
+     the expected phrase. A broken-type/source anomaly - flag, do NOT silently
+     "correct" (success criterion #1).
+   - `בתוס ד"ה` - tier-A false positive; but the scan reads `כתוס'` with a kaf
+     where DocAI has a bet. Separate small check.
+
+**5. klal 36-37 - the last real span gap** (ratio 0.44, ~285 words). Unlike the
+other three this is a *boundary* problem, not a splice: klal 37's marker was
+misread so the span cannot be split. Its stored opening localises to two
+candidate positions (docai page 26 token 704, page 27 token 52) - crop both and
+disambiguate, same method as klal 92-165.
+
+**6. Small and optional:** `validate_part1_corpus_integrity.py` check-3's
+docstring claims an intra-klal duplicate-phrase scan the code does not perform
+(harmless - the 3 hits it would find are genuine author repetition). Either fix
+the docstring or add the scan.
+
+### Standing cautions for whoever picks this up
+
+- **Verification coverage for the reconstructed pages is thin and cannot be
+  fixed by a better diff.** `build_corrections_dataset.py` compares DocAI
+  against stored text, and the reconstructed text *is* DocAI - measured at 1
+  candidate per 3,800 words. Tesseract is the independent witness. VLM exists
+  for page 40 only; pages 24 and 37 have none.
+- **Three times this session a check produced confident near-silence because of
+  how it was written, not what it measured** (the span validator's `continue`s,
+  the test's duplicated loop, and my own `SequenceMatcher` missing
+  `autojunk=False`). When a sweep reports "clean" or "no match anywhere",
+  suspect the sweep first.
+- **The page-order fix is not fully carried by git.** The corrected PDF now is,
+  but `docai_word_boxes/` and `images/pdf_pages/` are gitignored, so a rebuild
+  of those caches from the scan must redo the leaf 37/38 swap. Procedure is in
+  "What is NOT recoverable from git" below.
+- The punctuation pipeline is **dormant, not deleted** - all data, endpoints and
+  `apply_punctuation_decisions.py` are intact; only the UI affordances were
+  removed. Restore by re-adding the marker call in `renderKlalBody`.
+
+
+
 ## Repo reorganisation: dead code archived, scratch scripts rescued, both PDFs now tracked — 2026-08-11
 
 **Both source scans are now IN git** (this repo is local, so the ~229 MB is
