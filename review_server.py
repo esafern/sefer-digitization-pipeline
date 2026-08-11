@@ -38,9 +38,9 @@ IMAGES_DIR = os.path.join(REPO, "images", "pdf_pages")
 PART1_MAX_KLAL = 222
 
 FLAG_LABELS = {
-    "current_text_may_be_wrong": ["May be wrong", "#e53e3e"],
+    "current_text_may_be_wrong": ["Disputed", "#e53e3e"],
     "possible_omission": ["Possibly missing", "#805ad5"],
-    "current_text_confirmed": ["Confirmed", "#38a169"],
+    "current_text_confirmed": ["Machine-Resolved", "#38a169"],
     "unverified_insertion": ["Unverified addition", "#a0aec0"],
     "ambiguous": ["Ambiguous", "#dd6b20"],
     "error": ["Check failed", "#718096"],
@@ -135,6 +135,15 @@ def api_klalim():
         kid = k["klal_id"]
         entries = corrections.get(str(kid), [])
         decided_count = sum(1 for c in entries if (kid, c["word_index"]) in decided)
+        # Tri-state split for the legend's corpus-wide counts: a human
+        # decision always wins (see wordState() in app.js), otherwise
+        # 'current_text_confirmed' means the vision pass resolved it,
+        # otherwise it's still an open dispute nobody has looked at.
+        machine_resolved_count = sum(
+            1 for c in entries
+            if (kid, c["word_index"]) not in decided and c.get("flag") == "current_text_confirmed"
+        )
+        machine_disputed_count = len(entries) - decided_count - machine_resolved_count
         punct_entries = punct_candidates.get(str(kid), [])
         punct_decided_count = sum(
             1 for p in punct_entries if (kid, p["before_word_index"]) in punct_decided
@@ -151,6 +160,8 @@ def api_klalim():
             # (2026-08-07, PROJECT-STATUS.md "review dashboard feedback").
             "decided_count": decided_count,
             "open_count": len(entries) - decided_count,
+            "machine_disputed_count": machine_disputed_count,
+            "machine_resolved_count": machine_resolved_count,
             "punctuation_count": len(punct_entries),
             "punctuation_decided_count": punct_decided_count,
             "punctuation_open_count": len(punct_entries) - punct_decided_count,
@@ -326,6 +337,52 @@ def api_post_witness_decision(body):
     )
 
 
+WITNESS_CONTEXT_WINDOW = 12  # docai tokens shown on each side of a witness item
+# Must match verify_reconstruction_witness.py's HEB/norm() exactly:
+# `docai_token_index` in reconstruction_witness_queue.json is an index into
+# THAT script's `dtoks` list (raw page tokens filtered to `norm(text)`
+# truthy - i.e. digits and pure punctuation dropped), not the raw per-page
+# array. Bug found 2026-08-12: an earlier version of this function indexed
+# the raw array directly, which happened to look plausible but silently
+# pointed 1 token early on page 37 (raw index 13 "דתנא" instead of the real
+# target, raw index 14 "נינהו") - confirmed by cross-checking against
+# verify_reconstruction_witness.py's own source. Any fix must re-derive the
+# same filtered sequence, not guess an offset.
+WITNESS_HEB = "אבגדהוזחטיכלמנסעפצקרשתךםןףץ"
+
+
+def _witness_norm(s):
+    return "".join(c for c in s if c in WITNESS_HEB)
+
+
+def api_witness_context(page, token_index):
+    """Docai tokens surrounding a witness item, for the review panel - see
+    WITNESS_HEB comment above for why this can't just slice the raw page
+    array. Added 2026-08-12 per direct user feedback while reviewing klal
+    30's witness queue: a bare image crop with no surrounding text is hard
+    to place in context ("it is hard to review the image in a vacuum... use
+    the text you have - it is better than nothing"). Deliberately the raw
+    OCR token stream for the page, NOT the not-yet-applied reconstruction
+    draft from reconstruct_multipage_klalim.py (that text only exists
+    in-memory inside that script's dry run and isn't cached anywhere -
+    integrating it would mean re-deriving which klal/segment a given
+    (page, token_index) falls into, a bigger job). This is simpler, always
+    available for any witness item, and the frontend presents it plainly as
+    raw OCR context, not a vetted reading - it can still include furniture
+    words (header vocabulary normalizes to non-empty Hebrew text too, so it
+    isn't filtered out here any more than it was in the original script) and
+    either engine's own misreads."""
+    tokens = _load_json(f"docai_word_boxes/page_{page}.json")
+    if not tokens:
+        return {"words": [], "target_index": None}
+    dtoks = [t for t in tokens if _witness_norm(t["text"])]
+    if token_index >= len(dtoks):
+        return {"words": [], "target_index": None}
+    lo = max(0, token_index - WITNESS_CONTEXT_WINDOW)
+    hi = min(len(dtoks), token_index + WITNESS_CONTEXT_WINDOW + 1)
+    return {"words": [t["text"] for t in dtoks[lo:hi]], "target_index": token_index - lo}
+
+
 def api_post_klal_flag(body):
     klal_id = int(body["klal_id"])
     record = rd.append_decision(
@@ -343,6 +400,7 @@ ROUTE_KLAL = re.compile(r"^/api/klal/(\d+)$")
 ROUTE_KLAL_FLAG = re.compile(r"^/api/klal/(\d+)/flag$")
 ROUTE_DECISIONS = re.compile(r"^/api/decisions/(\d+)/(\d+)$")
 ROUTE_PAGE = re.compile(r"^/api/page/(\d+)$")
+ROUTE_WITNESS_CONTEXT = re.compile(r"^/api/witness/context/(\d+)/(\d+)$")
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -408,6 +466,9 @@ class Handler(BaseHTTPRequestHandler):
             m = ROUTE_PAGE.match(path)
             if m:
                 return self._send_json(api_page(int(m.group(1))))
+            m = ROUTE_WITNESS_CONTEXT.match(path)
+            if m:
+                return self._send_json(api_witness_context(int(m.group(1)), int(m.group(2))))
             if path.startswith("/images/pdf_pages/"):
                 return self._serve_static(IMAGES_DIR, path[len("/images/pdf_pages"):])
             if path.startswith("/api/"):

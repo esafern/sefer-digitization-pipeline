@@ -115,6 +115,21 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
    (see comment above), so the scan pane deliberately doesn't reproduce the
    text pane's solid/dotted distinction. */
 .hl-box.dim { opacity: 0.35; }
+/* Witness-queue boxes (independent Tesseract-vs-DocAI disagreements on the
+   reconstructed continuation pages) use a distinct purple, not the tri-state
+   red/yellow/green - a witness item isn't machine-resolved or human-decided
+   in the corrections sense, it's a raw two-source disagreement waiting for
+   a first human read. Dashed while open, solid + muted once decided. */
+.hl-box-witness {
+  box-shadow: none;
+  border: 2px dashed #805ad5;
+  background: rgba(128, 90, 213, 0.16);
+}
+.hl-box-witness.decided {
+  border-style: solid;
+  border-color: #718096;
+  background: rgba(113, 128, 150, 0.14);
+}
 .hl-current-klal {
   position: absolute;
   border-radius: 4px;
@@ -152,45 +167,6 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
   background: var(--paper);
   min-width: 0;
 }
-/* Moved 2026-08-11 from the top of the middle pane into the bottom of the nav
-   pane: as a full-width bar it took a line of vertical space away from the text
-   being reviewed on every screen, and it is reference material, not content. */
-/* Moved 2026-08-11 out of the top of the middle pane: as a full-width bar it
-   took a line of vertical space away from the text on every screen, and it is
-   reference material, not content. Pinned to the viewport's bottom-left corner
-   (the layout is RTL, so the left column is the scan pane) where it overlays
-   dead space rather than displacing any pane. dir:ltr because the legend text
-   is English. */
-#text-header {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  z-index: 40;
-  direction: ltr;
-  text-align: left;
-  padding: 8px 12px;
-  background: var(--accent);
-  color: white;
-  font-family: 'Inter', sans-serif;
-  font-size: 10.5px;
-  line-height: 1.8;
-  border-top-right-radius: 6px;
-  box-shadow: 0 -1px 6px rgba(0,0,0,0.18);
-  opacity: 0.93;
-}
-#text-header:hover { opacity: 1; }
-#text-header .th-foot {
-  display: block;
-  margin-top: 5px;
-  opacity: 0.75;
-  font-size: 10px;
-}
-.hint { font-weight: 500; border-bottom: 2px solid; padding-bottom: 1px; }
-.hint-open { border-bottom-color: #feb2b2; }
-.hint-machine { border-bottom-style: dotted; border-bottom-color: #faf089; }
-.hint-human { border-bottom-color: #9ae6b4; }
-.hint-punct { border-bottom: none; color: #90cdf4; font-weight: 900; }
-
 #text-scroll {
   flex: 1;
   overflow-y: auto;
@@ -291,13 +267,6 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
   display: flex;
   flex-direction: column;
 }
-#nav-header {
-  padding: var(--sp-4);
-  background: var(--accent-dark);
-  color: white;
-}
-#nav-header h1 { margin: 0; font-size: 18px; font-weight: 700; }
-#nav-header p { margin: 4px 0 0; font-size: 11px; opacity: .78; font-family: 'Inter', sans-serif; }
 #nav-filter {
   padding: var(--sp-2) var(--sp-4);
   border-bottom: 1px solid var(--line);
@@ -306,7 +275,10 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
   color: var(--ink-soft);
 }
 #nav-filter label { display: flex; align-items: center; gap: 6px; cursor: pointer; }
-#nav-list { flex: 1; overflow-y: auto; padding: 6px; }
+/* Bottom padding reserves room so the fixed #legend box (pinned over this
+   pane's own bottom-right corner) never hides the last few nav rows behind
+   it - scrolling reveals them above the box instead. */
+#nav-list { flex: 1; overflow-y: auto; padding: 6px; padding-bottom: 160px; }
 .nav-item {
   padding: var(--sp-2) var(--sp-3);
   border-radius: 6px;
@@ -362,20 +334,37 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
 #tooltip .t-conf { color: #a0aec0; font-size: 11px; display: block; }
 #tooltip .t-hint { color: #63b3ed; font-size: 10.5px; display: block; margin-top: 4px; }
 
-/* ---------- legend ---------- */
+/* ---------- legend ----------
+   Pinned to the viewport's bottom-right corner (the layout is RTL, so the
+   right column is the nav pane - see #nav-pane above) where it overlays
+   that pane's own bottom rather than the scan pane on the left. Doubles as
+   the corpus-wide tri-state count readout (built in app.js buildLegend()),
+   so the nav pane's per-klal badges and this box always use the same
+   red/yellow/green vocabulary. dir:ltr because the legend text is English. */
 #legend {
-  padding: var(--sp-3) var(--sp-4);
-  font-size: 11px;
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  z-index: 40;
+  width: 380px;
+  direction: ltr;
+  text-align: left;
+  padding: 14px 18px;
+  background: var(--accent);
+  color: white;
   font-family: 'Inter', sans-serif;
-  color: var(--ink-soft);
-  background: var(--wash);
-  border-top: 1px solid var(--line);
+  font-size: 12.5px;
   display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 6px;
+  border-top-left-radius: 6px;
+  box-shadow: 0 -1px 6px rgba(0,0,0,0.18);
+  opacity: 0.95;
 }
-#legend span { display: inline-flex; align-items: center; gap: 5px; }
-#legend i { width: 9px; height: 9px; border-radius: 2px; display: inline-block; }
+#legend:hover { opacity: 1; }
+#legend .legend-row { display: flex; align-items: center; gap: 8px; }
+#legend i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; flex-shrink: 0; }
+#legend .legend-count { margin-left: auto; font-weight: 700; font-variant-numeric: tabular-nums; }
 
 /* ---------- side panels (candidate override / klal flag) ---------- */
 #overlay-backdrop {

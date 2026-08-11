@@ -1,9 +1,19 @@
 # [PRODUCTION] Standing check: for every Part-1 klal boundary with a known
 # real marker position (gematria_trace_part1.json), does the klal's OWN
 # stored clean_text actually open with the real docai text at that
-# position - and does every token in the real marker-to-marker span end up
-# assigned to exactly one klal's clean_text, not zero (orphaned) or two+
-# (double-assigned)?
+# position, does any real content anywhere in the span go completely
+# uncaptured, and does the same real-span content end up double-assigned to
+# two+ klal_ids?
+#
+# CORRECTION 2026-08-11 (see PROJECT-STATUS.md "klal 5 cross-page
+# truncation"): this docstring used to claim Pass 1/2 already covered "every
+# token in the span," which was never true - both were windowed to a span's
+# OPENING (OPEN_WINDOW=50 / CHUNK_WORDS=15) and neither ever looked at a
+# span's middle or end. Verified empirically: ran this script against the
+# pre-fix corpus (klal 5's stored text was missing 65 real words at the very
+# END of its span) and it reported nothing for klal 5 at all, in either
+# pass - confirming this exact blind spot. Pass 3 below is the fix: a
+# full-sequence alignment, not a windowed one.
 #
 # Built 2026-08-06 after the klal 186/187 swap: klal_id 186 in part1.json
 # held klal 187's real content verbatim (its stored clean_text opened with
@@ -40,6 +50,7 @@ REPO = os.path.dirname(os.path.abspath(__file__))
 DOCAI_DIR = os.path.join(REPO, "docai_word_boxes")
 OPEN_WINDOW = 50  # words compared for the "does it open correctly" check
 CHUNK_WORDS = 15  # length of a substring chunk used for the double-assignment scan
+GAP_MIN_WORDS = 8  # min length of an unmatched real-token run to report as a likely gap (Pass 3)
 
 # Page furniture that appears in raw docai tokens but never in clean_text:
 # the printed folio number + running header ("<num> יד/יר/יך מלאכי כללי X"),
@@ -151,6 +162,7 @@ def main():
     # what's inside the gap - see the per-mismatch owner lookup below for that.
     mismatches = []
     spans = {}  # kid -> real_tokens (for pass 2)
+    adjacent_spans = {}  # kid -> real_tokens, ONLY where next_kid == kid+1 (for pass 3 - see below)
     for idx, kid in enumerate(ids):
         if idx + 1 >= len(ids):
             continue
@@ -158,6 +170,8 @@ def main():
         real_tokens = real_span_tokens(cache, trace[kid], trace[next_kid])
         if real_tokens is None or kid not in part1:
             continue
+        if next_kid == kid + 1:
+            adjacent_spans[kid] = real_tokens
         spans[kid] = real_tokens
         sim = word_seq_similarity(real_tokens, part1[kid]["clean_text"].split())
         if sim < 0.5:
@@ -197,6 +211,43 @@ def main():
     if double_hits:
         for kid, owners in double_hits:
             print(f"  klal {kid}'s real opening chunk appears under klal_id(s): {owners}")
+    else:
+        print("  None found.")
+
+    # --- Pass 3: full-span gap scan - does ANY contiguous run of real span
+    # tokens (not just the opening) have no counterpart anywhere in the
+    # klal's stored clean_text? Full-sequence alignment (autojunk=False -
+    # see PROJECT-STATUS.md standing caution on this exact SequenceMatcher
+    # default causing false "no match" results elsewhere), not windowed to
+    # the opening like Pass 1/2 - this is what actually catches a truncated
+    # TAIL like klal 5's, which both passes above are structurally blind to.
+    #
+    # Deliberately uses adjacent_spans, NOT spans: `spans[kid]`'s real range
+    # extends to the NEXT AVAILABLE trace entry (see Pass 1's own comment
+    # above), which silently aggregates a skipped markerless klal's content
+    # into kid's own span whenever one sits in between. Comparing that
+    # aggregate against kid's OWN clean_text alone then reports the
+    # in-between klal's entire rightful content as a "gap" - a real false
+    # positive, confirmed empirically 2026-08-11: before this filter, this
+    # pass reported 20+ klalim with gaps of 30-600 words, and every single
+    # large one lined up exactly with a skipped markerless klal (9, 15, 21,
+    # 36, 46, 49, 56, 62, 66, 83, 86, 128, 179, 181, 189, 193, 197). Only
+    # kid/next_kid pairs that are truly adjacent (no skip) give an
+    # unambiguous single-klal span to check. ---
+    print(f"\n--- Full-span gap scan (real content missing anywhere in the span, not just the opening) ---")
+    gap_hits = []
+    for kid, real_tokens in adjacent_spans.items():
+        stored_words = part1[kid]["clean_text"].split()
+        rw = [normalize(w) for w in real_tokens]
+        sw = [normalize(w) for w in stored_words]
+        sm = difflib.SequenceMatcher(None, rw, sw, autojunk=False)
+        for tag, i1, i2, _j1, _j2 in sm.get_opcodes():
+            if tag in ("delete", "replace") and (i2 - i1) >= GAP_MIN_WORDS:
+                gap_hits.append((kid, real_tokens[i1:i2]))
+    if gap_hits:
+        for kid, missing in gap_hits:
+            preview = " ".join(missing[:GAP_MIN_WORDS * 3])
+            print(f"  klal {kid}: {len(missing)} real word(s) with no counterpart in stored text: {preview}...")
     else:
         print("  None found.")
 

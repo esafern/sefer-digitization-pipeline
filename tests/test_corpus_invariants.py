@@ -104,7 +104,16 @@ LEADING_DIGIT_RE = re.compile(r"^\d")
 # investigated, not silently added.
 DUPLICATE_WORD_BASELINE = {
     (1, "תניא"), (2, "לשוא"), (3, "ואם"), (8, "דאיידי"), (16, "עב"),
-    (29, "לא"), (29, "שור"), (29, "צדה"), (41, "אלא"), (54, "הן"),
+    (29, "לא"), (29, "שור"), (29, "צדה"),
+    # (30, "לה"): NOT an artifact - visually confirmed against page 24's
+    # scan 2026-08-12 ("...דרבנן נמי לה לה מאשה גמרי..."), and the phrase
+    # recurs 4 separate times across klal 30's newly-recovered text
+    # (reconstruct_multipage_klalim.py --apply). This is the halachic
+    # technical term for the gezeirah shavah derived from the shared word
+    # "לה" (Hebrew maidservant law) - the exact topic of klal 30's title
+    # ("אין גזרה שוה למחצה"). See PROJECT-STATUS.md.
+    (30, "לה"),
+    (41, "אלא"), (54, "הן"),
     (68, "הניזקין"), (86, "הוא"), (94, "על"), (103, "עד"), (112, "פסקא"),
     (135, "ואידך"), (143, "צדק"), (144, "עשה"), (158, "ולית"),
     (167, "קיל"), (176, "בר"), (217, "המלך"), (230, "לא"), (235, "הוה"),
@@ -221,11 +230,20 @@ SPAN_COVERAGE_BASELINE = {83, 106, 123, 175}
 #     PROJECT-STATUS.md "Deep methodology audit" for the full incident record.
 #   {36} -> {30, 36, 75, 88} reverting to match part1.json's actual reverted
 #     state, so this gate reports reality rather than a discarded change.
-# `reconstruct_multipage_klalim.py` is still on disk if this work gets
-# properly re-authorized and reviewed later; it is not part of rebuild_all.sh.
-# Klal 36-37 remains unreconstructed either way: unlike the other three it
-# needs klal 37's marker located before its span can even be split.
-SPAN_COVERAGE_KNOWN_REAL_GAPS = {30, 36, 75, 88}
+#   {30, 36, 75, 88} -> {36} again, 2026-08-12: re-applied
+#     `reconstruct_multipage_klalim.py --apply`, this time under EXPLICIT
+#     direct user authorization in-conversation ("just go with docai -
+#     tesseract is terrible here... flag questionable words as usual") -
+#     the exact governance gap (unauthorized/unreviewed) that caused the
+#     2026-08-11 revert, not a correctness concern. `./rebuild_all.sh` run
+#     afterward (full, not --skip-vision) so the new content gets flagged
+#     through the normal vision-adjudication pipeline like the rest of the
+#     corpus, per that same instruction. See PROJECT-STATUS.md.
+# `reconstruct_multipage_klalim.py` is still on disk; it is not part of
+# rebuild_all.sh (a deliberate one-off, run manually, not on every rebuild).
+# Klal 36-37 remains unreconstructed: unlike the other three it needs klal
+# 37's marker located before its span can even be split.
+SPAN_COVERAGE_KNOWN_REAL_GAPS = {36}
 
 
 def _load_klalim(path):

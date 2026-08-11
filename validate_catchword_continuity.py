@@ -7,7 +7,9 @@
 # free, cheap structural invariant to check corpus-wide - the last real
 # (non-furniture) token on page N should equal the first real token of
 # page N+1 (skipping page N+1's own running header, and skipping a klal's
-# gematria marker if the boundary happens to land exactly on a new klal).
+# gematria marker if the boundary happens to land exactly on a new klal -
+# an exact check against gematria_trace_part1.json's real marker positions,
+# not a word-shape guess; see load_marker_positions()).
 #
 # This is explicitly NOT a zero-tolerance check. Not every page boundary
 # has a catchword (mid-paragraph boundaries usually don't - only a
@@ -40,14 +42,34 @@ def clean_word(w):
     return "".join(c for c in w if c.isalnum())
 
 
-def looks_like_gematria_marker(tok_text):
-    """A klal marker is a short token made entirely of Hebrew letters used
-    as numerals - not a rigorous check (a short real word would also
-    match), just enough to skip an actual marker sitting right at a page's
-    first real token, per the user's own framing: 'ignoring any klal
-    gematria header.'"""
-    w = clean_word(tok_text)
-    return 1 <= len(w) <= 4 and all(c in GEMATRIA_LETTERS for c in w)
+SECTION_WORDS = {"האלף", "הבית", "הגימל", "הדלת", "ההא"}
+
+
+def load_marker_positions():
+    """page -> set of token indices that are a REAL klal's own marker
+    position, per gematria_trace_part1.json. Replaces an earlier shape-based
+    guess ('a short token made entirely of Hebrew letters') that silently
+    ate real opening words - bug found and fixed 2026-08-11 (PROJECT-STATUS.md
+    'klal 5 cross-page truncation'): `looks_like_gematria_marker` matched any
+    1-4 letter all-Hebrew word, which is most short Hebrew words, not just
+    markers, and the guard meant to limit it to one leading token (`not out`)
+    kept re-firing across MULTIPLE leading words as long as none had been
+    accepted yet. On page 17 it ate both `אי` and `נמי` - real opening words -
+    before finally accepting `ועיקר`, so page 16's genuine catchword (`אי`,
+    confirmed via klal 5's fix) never got compared against page 17's real
+    opening at all, and this boundary was misclassified as 'no match'.
+    Cross-referencing the independently-verified marker position is exact:
+    only skip a token when some klal is actually known to start right there."""
+    path = os.path.join(REPO, "gematria_trace_part1.json")
+    if not os.path.exists(path):
+        return {}
+    trace = json.load(open(path, encoding="utf-8"))
+    out = {}
+    for e in trace:
+        page, pos = e.get("page"), e.get("marker_position")
+        if page is not None and pos is not None:
+            out.setdefault(page, set()).add(pos)
+    return out
 
 
 def is_furniture(tok_text):
@@ -76,21 +98,26 @@ def last_real_tokens(tokens, n=3):
     return list(reversed(out))
 
 
-def first_real_tokens(tokens, n=4, skip_header_words=6):
+def first_real_tokens(tokens, n=4, skip_header_words=6, marker_positions=None):
     """Skip the page's own running header (a handful of tokens at the very
-    top - 'יד/יר/יך מלאכי כללי <section>' or similar), then optionally one
-    klal gematria marker, then return the next n real tokens."""
+    top - 'יד/יר/יך מלאכי כללי <section>' or similar), then a klal marker
+    ONLY if this exact token index is a real, independently-verified marker
+    position for this page (see load_marker_positions()), then return the
+    next n real tokens."""
+    marker_positions = marker_positions or set()
     out = []
     skipped_header = 0
-    for t in tokens:
+    for idx, t in enumerate(tokens):
         w = t["text"].strip()
         if not w:
             continue
-        if skipped_header < skip_header_words and (is_furniture(w) or clean_word(w) in HEADER_WORDS):
+        if skipped_header < skip_header_words and (
+            is_furniture(w) or clean_word(w) in HEADER_WORDS or clean_word(w) in SECTION_WORDS
+        ):
             skipped_header += 1
             continue
-        if not out and looks_like_gematria_marker(w):
-            continue  # the "ignoring any klal gematria header" case
+        if not out and idx in marker_positions:
+            continue  # a real klal genuinely starts here - not body text
         out.append(w)
         if len(out) >= n:
             break
@@ -105,6 +132,7 @@ def load_page(page_num):
 
 
 def main():
+    marker_positions = load_marker_positions()
     matches, no_matches, skipped = [], [], []
     for page_num in range(FIRST_REAL_PAGE, LAST_PAGE):
         this_page = load_page(page_num)
@@ -114,7 +142,7 @@ def main():
             continue
 
         ending = last_real_tokens(this_page, n=3)
-        opening = first_real_tokens(next_page, n=4)
+        opening = first_real_tokens(next_page, n=4, marker_positions=marker_positions.get(page_num + 1))
         if not ending or not opening:
             skipped.append(page_num)
             continue

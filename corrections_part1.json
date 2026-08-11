@@ -126,24 +126,6 @@
       "confidence": 0.98,
       "reasoning": "The visual token clearly shows the word 'דאיפליגו' in square Hebrew print font. Paleographically, the letter after 'י' has the characteristic inner loop of a 'פ' (peh), which OCR engines frequently mistake for a 'ס' (samekh) resulting in 'דאיסליגו'. Contextually, 'דאיפליגו' (where they disagreed) is the standard Aramaic Talmudic word used in the phrase 'דבכל מקום דאיפליגו ר' יונתן ור' יאשיה'.",
       "flag": "current_text_confirmed"
-    },
-    {
-      "word_index": 522,
-      "opcode": "delete",
-      "docai_reading": "אי 1",
-      "final_text": null,
-      "page": 16,
-      "bbox": {
-        "x1": 0.24861538410186768,
-        "y1": 0.9134146571159363,
-        "x2": 0.3550769090652466,
-        "y2": 0.9264227747917175
-      },
-      "vision_selected": "A",
-      "vision_transcription": "1* אי",
-      "confidence": 0.95,
-      "reasoning": "The crop clearly shows the text 'אי' on the left and '1*' (or '1') on the right below the line containing 'ראשונים והוזכרו'. Option A correctly identifies these printed characters.",
-      "flag": "possible_omission"
     }
   ],
   "6": [
@@ -633,21 +615,6 @@
       "confidence": 0.98,
       "reasoning": "The image clearly shows the word 'כתב'. The middle letter has the distinct left leg of a Tav (ת) rather than a simple curved arc of a Resh (ר). Furthermore, in Rabbinic textual context ('שם כתב כן'), 'כתב' ('wrote') is the standard textual verb.",
       "flag": "current_text_confirmed"
-    }
-  ],
-  "30": [
-    {
-      "word_index": 0,
-      "opcode": "insert",
-      "docai_reading": null,
-      "final_text": "ל",
-      "page": 23,
-      "bbox": null,
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "no bbox (insertion) - not vision-cropped",
-      "flag": "unverified_insertion"
     }
   ],
   "32": [

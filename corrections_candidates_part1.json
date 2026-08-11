@@ -94,20 +94,6 @@
       }
     },
     {
-      "klal_id": 5,
-      "page": 16,
-      "opcode": "delete",
-      "word_index_in_final_text": 522,
-      "original_word": "אי 1",
-      "corrected_word": null,
-      "bbox": {
-        "x1": 0.24861538410186768,
-        "y1": 0.9134146571159363,
-        "x2": 0.3550769090652466,
-        "y2": 0.9264227747917175
-      }
-    },
-    {
       "klal_id": 6,
       "page": 17,
       "opcode": "replace",
@@ -447,15 +433,6 @@
         "x2": 0.3125382363796234,
         "y2": 0.48834356665611267
       }
-    },
-    {
-      "klal_id": 30,
-      "page": 23,
-      "opcode": "insert",
-      "word_index_in_final_text": 0,
-      "original_word": null,
-      "corrected_word": "ל",
-      "bbox": null
     },
     {
       "klal_id": 32,
@@ -3787,8 +3764,8 @@
     }
   ],
   "meta": {
-    "total_candidates": 285,
-    "klalim_covered": 129,
+    "total_candidates": 283,
+    "klalim_covered": 128,
     "skipped_no_docai_page_klalim": [],
     "unattributable_deletes": [],
     "untrusted_klalim_excluded": []

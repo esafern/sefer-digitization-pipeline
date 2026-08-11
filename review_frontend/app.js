@@ -7,6 +7,9 @@ let KLALIM = [];          // lightweight list from /api/klalim
 let klalById = {};
 let mountedKlal = {};     // klal_id -> full payload once fetched
 let fetchInFlight = {};   // klal_id -> Promise, avoids double-fetch races
+let WITNESS_PAGES = [];   // {page, klal_id, total, decided} from /api/witness - continuation-only
+                           // pages (no klal marker of their own, e.g. 24/37/40) that pagesWithKlalim()
+                           // can't otherwise reach - see PROJECT-STATUS.md session handoff 2026-08-11.
 
 const textScroll = document.getElementById('text-scroll');
 const navList = document.getElementById('nav-list');
@@ -20,24 +23,36 @@ const tooltip = document.getElementById('tooltip');
 // the vision pass resolved it without a human, otherwise it's still an
 // open dispute nobody has looked at.
 const STATE_META = {
-  open:    { label: 'Open disputed reading',     color: '#e53e3e' },
-  machine: { label: 'Machine-resolved dispute',  color: '#d69e2e' },
-  human:   { label: 'Human-resolved dispute',    color: '#38a169' },
+  open:    { label: 'Machine-Disputed', color: '#e53e3e' },
+  machine: { label: 'Machine-Resolved', color: '#d69e2e' },
+  human:   { label: 'Human-Decided',    color: '#38a169' },
 };
 function wordState(corr) {
   if (corr.current_decision) return 'human';
   if (corr.flag === 'current_text_confirmed') return 'machine';
   return 'open';
 }
+// The word's final display color/underline follows wordState() above (a
+// human decision always wins), but that collapses the machine's own verdict
+// once a human has acted - e.g. it can no longer distinguish "a human
+// overrode an open dispute" from "a human double-checked an already-
+// resolved word." The status LABEL (tooltip / candidate panel) shows both
+// axes instead of just the final one.
+function statusLabel(corr) {
+  const machine = corr.flag === 'current_text_confirmed' ? STATE_META.machine.label : STATE_META.open.label;
+  return corr.current_decision ? `${machine} · ${STATE_META.human.label}` : machine;
+}
 
 async function init() {
-  const [flags, klalim] = await Promise.all([
+  const [flags, klalim, witness] = await Promise.all([
     fetch('/api/flags').then(r => r.json()),
     fetch('/api/klalim').then(r => r.json()),
+    fetch('/api/witness').then(r => r.json()),
   ]);
   FLAGS = flags;
   KLALIM = klalim;
   klalById = Object.fromEntries(klalim.map(k => [k.klal_id, k]));
+  WITNESS_PAGES = witness.pages || [];
 
   buildLegend();
   buildNav();
@@ -53,11 +68,18 @@ async function init() {
 
 function buildLegend() {
   legend.innerHTML = '';
+  const totals = { open: 0, machine: 0, human: 0 };
+  KLALIM.forEach(k => {
+    totals.open += k.machine_disputed_count || 0;
+    totals.machine += k.machine_resolved_count || 0;
+    totals.human += k.decided_count || 0;
+  });
   Object.entries(STATE_META).forEach(([state, { label, color }]) => {
-    const span = document.createElement('span');
+    const row = document.createElement('div');
+    row.className = 'legend-row';
     const shape = state === 'machine' ? 'border-radius:2px;border:1.5px dotted ' + color + ';background:transparent;' : 'background:' + color + ';';
-    span.innerHTML = `<i style="${shape}"></i>${label}`;
-    legend.appendChild(span);
+    row.innerHTML = `<i style="${shape}"></i><span>${label}</span><b class="legend-count">${totals[state]}</b>`;
+    legend.appendChild(row);
   });
 }
 
@@ -243,11 +265,11 @@ function attachWordHandlers(el, klalId, corr, isGap) {
     const docaiTxt = isGap
       ? `Scan appears to show: "${hebrewBit}" — not present in current text`
       : `Original OCR reading: "${hebrewBit}"`;
-    const bodyTxt = `<span class="t-conf">${confTxt}${corr.reasoning ? ' — ' + corr.reasoning : ''}</span>`;
+    const bodyTxt = `<span class="t-conf">${label} — ${confTxt}${corr.reasoning ? ' — ' + corr.reasoning : ''}</span>`;
     const decisionTxt = corr.current_decision
       ? `<span class="t-hint">Your decision: "${corr.current_decision.chosen_text}"${corr.current_decision.note ? ' — ' + corr.current_decision.note : ''}</span>`
       : `<span class="t-hint">Click for details / to record a decision</span>`;
-    tooltip.innerHTML = `<span class="t-flag">${label}</span><span class="t-docai">${docaiTxt}</span>${bodyTxt}${decisionTxt}`;
+    tooltip.innerHTML = `<span class="t-flag">${statusLabel(corr)}</span><span class="t-docai">${docaiTxt}</span>${bodyTxt}${decisionTxt}`;
     tooltip.style.display = 'block';
     positionTooltip(e);
   });
@@ -275,11 +297,14 @@ const klalFlagPanel = document.getElementById('klal-flag-panel');
 const klalFlagPanelBody = document.getElementById('klal-flag-panel-body');
 const punctuationPanel = document.getElementById('punctuation-panel');
 const punctuationPanelBody = document.getElementById('punctuation-panel-body');
+const witnessPanel = document.getElementById('witness-panel');
+const witnessPanelBody = document.getElementById('witness-panel-body');
 
 function setupPanels() {
   document.getElementById('candidate-panel-close').onclick = closePanels;
   document.getElementById('klal-flag-panel-close').onclick = closePanels;
   document.getElementById('punctuation-panel-close').onclick = closePanels;
+  document.getElementById('witness-panel-close').onclick = closePanels;
   backdrop.onclick = closePanels;
   window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') closePanels();
@@ -290,6 +315,7 @@ function closePanels() {
   candidatePanel.classList.remove('open');
   klalFlagPanel.classList.remove('open');
   punctuationPanel.classList.remove('open');
+  witnessPanel.classList.remove('open');
 }
 function openPanel(panel) {
   closePanels();
@@ -309,7 +335,8 @@ async function openCandidatePanel(klalId, corr) {
     (ctxStart + idx === corr.word_index) ? `<b>${w}</b>` : w
   ).join(' ');
 
-  const [flagLabel, flagColor] = FLAGS[corr.flag] || ['Flagged', '#a0aec0'];
+  const [flagLabel] = FLAGS[corr.flag] || ['Flagged'];
+  const flagColor = STATE_META[wordState(corr)].color;
 
   const options = [];
   if (corr.docai_reading) options.push({ source: 'docai_reading', label: 'DocAI OCR reading', text: corr.docai_reading });
@@ -323,6 +350,15 @@ async function openCandidatePanel(klalId, corr) {
   // blank" convention.
   if (corr.opcode === 'insert') {
     options.push({ source: 'remove', label: 'Remove this text (accept the omission)', text: '(nothing - remove "' + corr.final_text + '")' });
+  } else if (!corr.final_text) {
+    // The mirror case: nothing is currently stored here (a gap - DocAI/vision
+    // saw a candidate word the corpus never captured) and the correct human
+    // call can be "no, nothing belongs here" - e.g. klal 4 word_index 35: the
+    // scan token is a footnote-reference digit, not real klal text. Without
+    // this, there was no way to record "confirmed omission" at all: the
+    // panel offered no blank option, and the custom field rejected an empty
+    // answer for any opcode other than 'insert'.
+    options.push({ source: 'remove', label: 'Confirm nothing belongs here', text: '(nothing - no insertion needed)' });
   }
 
   const decision = corr.current_decision;
@@ -331,8 +367,9 @@ async function openCandidatePanel(klalId, corr) {
 
   let html = `
     <div class="panel-section">
-      <div class="panel-label">Flag</div>
-      <div><i style="background:${flagColor};width:9px;height:9px;border-radius:2px;display:inline-block;margin-inline-end:6px;"></i>${flagLabel}${corr.confidence != null ? ' · ' + Math.round(corr.confidence * 100) + '% vision confidence' : ''}</div>
+      <div class="panel-label">Status</div>
+      <div><i style="background:${flagColor};width:9px;height:9px;border-radius:2px;display:inline-block;margin-inline-end:6px;"></i>${statusLabel(corr)}</div>
+      <div style="font-size:12px;color:var(--ink-faint);margin-top:4px;">${flagLabel}${corr.confidence != null ? ' · ' + Math.round(corr.confidence * 100) + '% vision confidence' : ''}</div>
     </div>
     <div class="panel-section">
       <div class="panel-label">Context (klal ${klalId})</div>
@@ -407,12 +444,14 @@ async function saveCandidateDecision(klalId, corr) {
     chosenSource = 'custom';
   } else if (source === 'custom') {
     text = document.getElementById('custom-text-input').value.trim();
-    // Empty is only meaningful (and allowed) for 'insert' opcode candidates
-    // (unverified_insertion - stored text has a word docai never saw) -
-    // there it means "remove this, accept the omission." For every other
-    // opcode an empty custom answer isn't a real decision, just an
-    // unfilled field.
-    if (!text && corr.opcode !== 'insert') { alert('Enter the custom reading first.'); return; }
+    // Empty is only meaningful (and allowed) when "nothing" is itself a real
+    // answer: an 'insert' opcode candidate (stored text has a word docai
+    // never saw - blank means "remove it, accept the omission") or a gap
+    // with no current final_text (docai/vision saw a candidate word the
+    // corpus never captured - blank means "confirm no insertion needed").
+    // Otherwise (a normal two-reading dispute, real text on both sides) an
+    // empty custom answer isn't a real decision, just an unfilled field.
+    if (!text && corr.opcode !== 'insert' && corr.final_text) { alert('Enter the custom reading first.'); return; }
     chosenSource = 'custom';
   } else {
     text = corr[source];
@@ -447,11 +486,19 @@ async function saveCandidateDecision(klalId, corr) {
   // the scan pane keeps showing whatever it last fetched.
   if (currentPage != null) await showPage(currentPage, klalId);
 
-  // Keep the nav-pane's open/decided badge counts live too.
+  // Keep the nav-pane's open/decided badge counts and the legend's
+  // corpus-wide tri-state totals live too, instead of waiting for a reload.
   if (!wasAlreadyDecided && klalById[klalId]) {
-    klalById[klalId].open_count = Math.max(0, (klalById[klalId].open_count || 0) - 1);
-    klalById[klalId].decided_count = (klalById[klalId].decided_count || 0) + 1;
+    const kb = klalById[klalId];
+    kb.open_count = Math.max(0, (kb.open_count || 0) - 1);
+    kb.decided_count = (kb.decided_count || 0) + 1;
+    if (corr.flag === 'current_text_confirmed') {
+      kb.machine_resolved_count = Math.max(0, (kb.machine_resolved_count || 0) - 1);
+    } else {
+      kb.machine_disputed_count = Math.max(0, (kb.machine_disputed_count || 0) - 1);
+    }
     refreshNavItem(klalId);
+    buildLegend();
   }
 
   const status = document.getElementById('save-status');
@@ -624,6 +671,126 @@ async function openPunctuationPanel(klalId, p) {
   };
 }
 
+// ---------- witness disagreement panel (independent Tesseract-vs-DocAI
+// readings for the reconstructed continuation pages - see
+// reconstruction_witness_queue.json / PROJECT-STATUS.md session handoff
+// 2026-08-11). Indexed by docai_token_index, a different space from
+// corrections' word_index - the two never collide since the server keys
+// decisions by decision_type ("witness_choice" vs "candidate_choice"). ----------
+async function openWitnessPanel(w) {
+  openPanel(witnessPanel);
+  witnessPanelBody.innerHTML = '<p>Loading…</p>';
+
+  const decision = w.current_decision;
+  const activeSource = decision ? decision.chosen_source : null;
+
+  const options = [
+    { source: 'docai_reading', label: 'DocAI OCR reading', text: w.docai_reading },
+    { source: 'tesseract_reading', label: 'Tesseract OCR reading', text: w.tesseract_reading },
+    { source: 'unreadable', label: 'Unreadable / neither is right', text: '(mark as unreadable)' },
+  ].filter(opt => opt.text);
+
+  // Raw DocAI text surrounding this item, not just the isolated crop image -
+  // per user feedback 2026-08-12: an image crop with no surrounding text is
+  // hard to place in context. Deliberately labeled as raw/unverified OCR,
+  // not the not-yet-applied reconstruction draft - see review_server.py
+  // api_witness_context()'s docstring for why.
+  const ctx = await fetch(`/api/witness/context/${w.page}/${w.docai_token_index}`).then(r => r.json());
+  const ctxHtml = ctx.words.length
+    ? ctx.words.map((word, i) => i === ctx.target_index ? `<b>[${word}]</b>` : word).join(' ')
+    : '<span style="color:var(--ink-faint);">no context available</span>';
+
+  witnessPanelBody.innerHTML = `
+    <div class="panel-section">
+      <div class="panel-label">Klal ${w.klal_id} · tier ${w.tier} · page ${w.page}</div>
+      <div style="font-size:12px;color:var(--ink-faint);">Two OCR engines disagree here and both readings are real Hebrew
+      words, so a word-lexicon check can't tell them apart - this needs the ink.</div>
+    </div>
+    <div class="panel-section">
+      <div class="panel-label">Raw OCR context (page ${w.page}, unverified - furniture/misreads possible)</div>
+      <div class="panel-word-context">${ctxHtml}</div>
+    </div>
+    <div class="panel-section">
+      <div class="panel-label">Choose the correct reading</div>
+      <div id="witness-options"></div>
+      <div class="candidate-option" data-source="custom" id="witness-custom-option">
+        <input type="radio" name="witness-candidate" ${activeSource === 'custom' ? 'checked' : ''}>
+        <div class="co-body">
+          <div class="co-label">Custom</div>
+          <input type="text" class="custom-text" id="witness-custom-text" placeholder="Type the correct reading…" value="${activeSource === 'custom' ? (decision.chosen_text || '') : ''}">
+        </div>
+      </div>
+    </div>
+    <div class="panel-section">
+      <div class="panel-label">Note (optional)</div>
+      <textarea id="witness-decision-note" rows="3" placeholder="Why? e.g. &quot;crop-confirmed against page 26&quot;">${decision && decision.note ? decision.note : ''}</textarea>
+    </div>
+    <div class="panel-section">
+      <button class="panel-btn" id="save-witness-decision-btn">Save decision</button>
+      <span class="save-status" id="witness-save-status">Saved ✓</span>
+    </div>
+  `;
+
+  const optionsContainer = document.getElementById('witness-options');
+  options.forEach(opt => {
+    const div = document.createElement('div');
+    div.className = 'candidate-option' + (activeSource === opt.source ? ' active' : '');
+    div.dataset.source = opt.source;
+    div.innerHTML = `<input type="radio" name="witness-candidate" ${activeSource === opt.source ? 'checked' : ''}>
+      <div class="co-body"><div class="co-label">${opt.label}</div><div class="co-text">${opt.text}</div></div>`;
+    div.onclick = () => markActiveWitnessOption(opt.source);
+    optionsContainer.appendChild(div);
+  });
+  document.getElementById('witness-custom-option').onclick = () => markActiveWitnessOption('custom');
+  if (activeSource) markActiveWitnessOption(activeSource);
+
+  document.getElementById('save-witness-decision-btn').onclick = () => saveWitnessDecision(w);
+}
+
+function markActiveWitnessOption(source) {
+  document.querySelectorAll('#witness-panel-body .candidate-option').forEach(el => {
+    const active = el.dataset.source === source;
+    el.classList.toggle('active', active);
+    const radio = el.querySelector('input[type=radio]');
+    if (radio) radio.checked = active;
+  });
+}
+
+async function saveWitnessDecision(w) {
+  const activeEl = document.querySelector('#witness-panel-body .candidate-option.active');
+  if (!activeEl) { alert('Choose a reading first.'); return; }
+  const source = activeEl.dataset.source;
+  let text;
+  if (source === 'custom') {
+    text = document.getElementById('witness-custom-text').value.trim();
+    if (!text) { alert('Enter the custom reading first.'); return; }
+  } else if (source === 'unreadable') {
+    text = '';
+  } else {
+    text = w[source];
+  }
+  const note = document.getElementById('witness-decision-note').value.trim();
+
+  const res = await fetch('/api/decisions/witness', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      klal_id: w.klal_id, docai_token_index: w.docai_token_index,
+      chosen_source: source, chosen_text: text, note,
+    }),
+  });
+  if (!res.ok) { alert('Save failed: ' + (await res.text())); return; }
+
+  // Refresh the witness page summary (decided counts) and redraw this
+  // page's boxes so the saved item's box state updates immediately.
+  WITNESS_PAGES = (await fetch('/api/witness').then(r => r.json())).pages || [];
+  if (currentPage != null) await showPage(currentPage, scanFocusKlalId);
+
+  const status = document.getElementById('witness-save-status');
+  status.classList.add('show');
+  setTimeout(() => status.classList.remove('show'), 2000);
+}
+
 // ---------- scan pane ----------
 let currentPage = null;
 let scanFocusKlalId = null; // which klal's region/continuation to highlight, independent of which page is shown
@@ -704,9 +871,24 @@ async function showPage(page, focusKlalId) {
     hlContainer.appendChild(box);
   }
 
-  const pageCorrections = await fetch('/api/page/' + page).then(r => r.json());
-  pageCorrections.forEach(c => {
+  const pageItems = await fetch('/api/page/' + page).then(r => r.json());
+  pageItems.forEach(c => {
     if (!c.bbox) return;
+    if (c.kind === 'witness') {
+      const box = document.createElement('div');
+      const decided = !!c.current_decision;
+      box.className = 'hl-box hl-box-witness' + (decided ? ' decided' : '');
+      box.style.left = (c.bbox.x1 * 100) + '%';
+      box.style.top = (c.bbox.y1 * 100) + '%';
+      box.style.width = ((c.bbox.x2 - c.bbox.x1) * 100) + '%';
+      box.style.height = ((c.bbox.y2 - c.bbox.y1) * 100) + '%';
+      box.title = decided
+        ? `Witness decision recorded: "${c.current_decision.chosen_text || ''}"`
+        : `Witness disagreement (tier ${c.tier}) - click to decide`;
+      box.addEventListener('click', () => openWitnessPanel(c));
+      hlContainer.appendChild(box);
+      return;
+    }
     const box = document.createElement('div');
     const state = wordState(c);
     box.className = 'hl-box hl-state-' + state + (c.klal_id === focusKlalId ? '' : ' dim');
@@ -722,7 +904,15 @@ async function showPage(page, focusKlalId) {
   });
 }
 
-const pagesWithKlalim = () => Array.from(new Set(KLALIM.filter(k => k.page).map(k => k.page))).sort((a, b) => a - b);
+// Witness-queue pages (24/37/40) are continuation-only - no klal marker of
+// their own - so they're absent from every klal's own `page` field and the
+// stepper would otherwise skip straight over them, leaving the witness
+// queue unreachable. Merged in here so both nav buttons and goToPageOffset
+// treat them as normal stops.
+const pagesWithKlalim = () => Array.from(new Set([
+  ...KLALIM.filter(k => k.page).map(k => k.page),
+  ...WITNESS_PAGES.map(w => w.page),
+])).sort((a, b) => a - b);
 
 function updatePageNavButtons() {
   const pages = pagesWithKlalim();

@@ -1,70 +1,91 @@
 # Project Status — Open Items & Investigation Log
 
-## ►► SESSION HANDOFF — read this first, 2026-08-11
+## ►► SESSION HANDOFF — read this first, 2026-08-12 (updated in place, not appended - see dated log below for the superseded 2026-08-11 state)
 
 ### State on disk right now (verified, not remembered)
 
-- **Branch `master`, HEAD `86c83ef`, working tree clean, 13/13 invariants pass.**
-- **The corpus is UNCHANGED by this session** except one stray `כ` removed from
-  klal 144. `part1.json` klal 30/75/88 are still 130/364/298 words - **the
-  multi-page reconstruction is NOT applied.** That is deliberate; see below.
-- Commits this session: `9ecd352` (audit fixes + PDF leaf repair + archiving),
-  `c9c6ec8` (VLM demo closed), `ec18918` (vlm_extractions closed),
-  `86c83ef` (harness UI + witness server wiring).
-- Branch `pipeline-audit-fixes-and-page-order-repair` (`5a86ef6`) holds the
-  audit fixes with a fuller commit message but is **not an ancestor of
-  master**. Master is a content superset - verified file-by-file. The branch is
-  redundant except as documentation; delete or keep as you prefer.
-- `berlin_square_corrected.pdf` and `berlin_square_original_transposed.pdf` are
-  both tracked now. Repo is ~238 MB.
+- **Branch `master`, HEAD `86c83ef`, working tree DIRTY** - part1.json,
+  review_server.py, both validator scripts, and the review_frontend/* files
+  all have real, verified, uncommitted changes from this session (listed
+  below). Nothing has been committed since `86c83ef`.
+- **The corpus changed substantially**: klal 5 gained 65 real words
+  (522 -> 587, a genuine cross-page truncation); klal 29 lost one stray
+  duplicate word (a marker token double-captured from klal 30's own
+  opening); and, **under explicit user authorization this session**, the
+  multi-page reconstruction was applied for klal 30 (130 -> 2000), klal 75
+  (364 -> 1410) and klal 88 (298 -> 1198) - +3,816 words total. See the
+  dated log entries below, especially "Multi-page reconstruction APPLIED."
+  Klal 36-37 remains the one unreconstructed gap (a boundary problem, not a
+  splice - see step 3 below).
+- `berlin_square_corrected.pdf` and `berlin_square_original_transposed.pdf`
+  are both tracked. Repo is ~238 MB.
 
-### What is genuinely finished
+### What is genuinely finished (this update)
 
-8 correctness bugs fixed and each re-tested against its original reproduction;
-the transposed PDF leaves 37/38 repaired and every page-indexed artifact
-realigned; dead code archived after confirming it dead; `scratch/`'s 19
-non-regenerable scripts rescued into tracked `archive/scripts/`; the VLM-demo
-and vlm_extractions open items closed (the latter was my own broken check, not
-a data problem). Details in the sections below.
+1. **Witness-queue frontend wiring is done and verified in the running UI**
+   (was step 1 below, now closed): `showPage()` branches on `kind`, witness
+   boxes render distinctly (dashed purple, solid gray once decided),
+   `pagesWithKlalim()` reaches pages 24/37/40 via `/api/witness`, the
+   witness panel opens with DocAI/Tesseract/unreadable/custom options and
+   saves to `/api/decisions/witness` - tested end-to-end in the browser
+   (clicked a real box on page 24, saved a real decision, confirmed the
+   box flipped to "decided" styling and the count persisted server-side).
+2. **Klal 5 cross-page truncation found and fixed** (65 words) - see dated
+   log entry "Klal 5 cross-page truncation FOUND AND FIXED."
+3. **Two real bugs found and fixed in the standing validators** that should
+   have caught the klal 5 gap and didn't - `validate_catchword_
+   continuity.py` (marker-skip heuristic was eating real words; confirmed
+   matches jumped 21/69 -> 58/69 corpus-wide after the fix) and
+   `check_klal_token_orphans.py` (added a real full-span Pass 3; its first
+   run had its own false-positive bug from span aggregation across
+   markerless klalim, also found and fixed same session). See the same
+   dated log entry.
+4. Review dashboard: tri-state terminology unified (Machine-Disputed /
+   Machine-Resolved / Human-Decided) across the legend, tooltip, and
+   candidate panel; legend now shows live corpus-wide counts for all three;
+   candidate panel had no way to record "confirmed omission" for a gap
+   correction (only for the opposite case) - fixed. See the three dated log
+   entries below this handoff.
+5. **Klal 29's stray duplicate marker fixed** (see item above) and **the
+   witness panel now shows real OCR text context** around each item
+   (`GET /api/witness/context/<page>/<token_index>`), not just an isolated
+   image crop, per direct user feedback. Building it caught a real
+   indexing bug first (`docai_token_index` is not a raw-array index - see
+   the dated log entry "Klal 29's stray trailing marker... witness panel
+   gained real text context" for the full trace); fixed and re-verified in
+   the browser before shipping.
+6. **Multi-page reconstruction APPLIED for klal 30/75/88** under explicit
+   user authorization ("just go with docai... flag questionable words as
+   usual") - see the dated log entry "Multi-page reconstruction APPLIED."
+   +3,816 words; one real gate failure investigated and resolved
+   (`(30, "לה")` duplicate-word check - confirmed genuine, a recurring
+   halachic term, not a bug); `SPAN_COVERAGE_KNOWN_REAL_GAPS` narrowed to
+   `{36}`. Verified end-to-end in the browser (text renders in the middle
+   pane, flagged words show correct tri-state styling).
+
+**Investigated, not reproduced**: user reported "klal numbering down the
+right side is not aligned consistently" (the nav pane). Pixel-measured
+every row's `.nid` element (1/2/3-digit klal numbers, with and without
+badges) - all 222 rows have an identical right edge (`right: 1375px` at
+the tested viewport), no drift found anywhere. Not fixed because no defect
+was found in the current CSS/DOM as measured; needs a screenshot or a
+specific klal number to reproduce before doing anything else here.
 
 ### NEXT STEPS, in order
 
-**1. Finish the witness-queue frontend wiring** (server half is done and inert).
-Two concrete pieces, both in `review_frontend/`:
-   - `app.js` `showPage()`: items from `/api/page/<n>` now carry
-     `kind: "correction" | "witness"`. Branch on it - witness items need their
-     own box class and a click handler opening the (already-present, currently
-     unreachable) `#witness-panel`, posting to `POST /api/decisions/witness`
-     with `{klal_id, docai_token_index, chosen_source, chosen_text, note}`.
-     `chosen_source` convention: `docai_reading | tesseract_reading | custom |
-     unreadable`. Mirror `openCandidatePanel`/`saveCandidateDecision`.
-   - **`pagesWithKlalim()` cannot reach pages 24, 37, 40.** They are
-     continuation-only (no klal marker), so the page-stepper skips exactly the
-     pages the queue is about. `GET /api/witness` exists for this and returns
-     `{pages:[{page,klal_id,total,decided}], by_tier, total}` - merge those
-     pages into the navigable set.
-
-**2. Human works tier C in the harness** (94 items). Both readings are real
-Hebrew words, so the lexicon cannot separate them - each needs the ink. This is
-the substantive remaining review and is why step 1 exists. Queue is
-`reconstruction_witness_queue.json`; every row carries a DocAI bbox so the scan
-pane can highlight it.
-
-**3. Sample tiers B (102) and D (217) before trusting them.** They are
-*presumed* Tesseract noise on the strength of a 12-row sample plus the fact
-that 49% of tier B carries gershayim (abbreviations a word lexicon must miss).
-That is an inference, not a checked result - tier A already proved a tier label
-can be wrong (item 2 below).
-
-**4. Apply the reconstruction, but only after 2-3.** Command is
-`./venv/bin/python reconstruct_multipage_klalim.py --apply` (dry-run by
-default; re-read the printed junctions first), then `./rebuild_all.sh`, then
-narrow `SPAN_COVERAGE_KNOWN_REAL_GAPS` from `{30, 36, 75, 88}` to `{36}`. It
-restores ~3,800 words across klal 30/75/88 and preserves 100% of existing
-words. **Do not apply it before the tier work**: the text passes every gate by
-construction (it was built from the tokens the gates count), so it would land
-looking verified when it is not.
-   Carry forward these four tier-A adjudications, already crop-checked:
+**1. Klal 30/75/88's new ~3,800 words have almost no independent
+verification signal and that has NOT been resolved, only accepted.**
+`corrections_part1.json` shows 0 flagged words for klal 30, 0 for klal 75,
+2 for klal 88 - not because the text is clean, but because the normal
+flagging pipeline compares DocAI against stored text and the stored text
+now *is* DocAI for this span (circular by construction, same caveat as
+before). The user explicitly chose to accept this rather than gate on the
+Tesseract witness queue ("tesseract is terrible here"). The witness queue
+(tier C: 94 items, tier B: 102, tier D: 217) is still the only real second
+opinion available and is still fully open - working through it (page-step
+to 24/37/40 in the harness, click a dashed purple box) remains valuable
+follow-up QA even though it's no longer a gate. Carry forward these four
+tier-A adjudications, already crop-checked:
    - `וכוותיידו` → **`וכוותייהו`** - confirmed DocAI misread, apply it.
    - `ידן`/`ידו` - the scan shows **`ידך`** (`הראנו ידך הנפלאה`); *both*
      engines wrong. Needs a human call.
@@ -74,16 +95,27 @@ looking verified when it is not.
    - `בתוס ד"ה` - tier-A false positive; but the scan reads `כתוס'` with a kaf
      where DocAI has a bet. Separate small check.
 
-**5. klal 36-37 - the last real span gap** (ratio 0.44, ~285 words). Unlike the
-other three this is a *boundary* problem, not a splice: klal 37's marker was
-misread so the span cannot be split. Its stored opening localises to two
-candidate positions (docai page 26 token 704, page 27 token 52) - crop both and
-disambiguate, same method as klal 92-165.
+**2. Investigate 8 candidate gaps surfaced by the now-fixed
+`check_klal_token_orphans.py` Pass 3, still deferred.** klal 4 (15 words),
+18 (8), 34 (13 - likely the same root cause as an already-flagged garbled
+opening, not a second issue), 69 (36), 206 (14 + a separate 16), 217 (27 +
+a separate 16). None verified against the scan yet - do that before
+touching any of them, the same way klal 5 was confirmed before fixing it.
+Run `python3 check_klal_token_orphans.py` to reproduce.
 
-**6. Small and optional:** `validate_part1_corpus_integrity.py` check-3's
+**3. klal 36-37 - the last real span gap** (ratio 0.44, ~285 words). Unlike
+the other three this is a *boundary* problem, not a splice: klal 37's
+marker was misread so the span cannot be split. Its stored opening
+localises to two candidate positions (docai page 26 token 704, page 27
+token 52) - crop both and disambiguate, same method as klal 92-165.
+
+**4. Small and optional:** `validate_part1_corpus_integrity.py` check-3's
 docstring claims an intra-klal duplicate-phrase scan the code does not perform
 (harmless - the 3 hits it would find are genuine author repetition). Either fix
-the docstring or add the scan.
+the docstring or add the scan. Note: this exact bug class (docstring
+overclaiming code coverage) recurred in `check_klal_token_orphans.py` this
+session - worth a quick sanity pass on any other validator's docstring
+before assuming its claimed coverage is real.
 
 ### Standing cautions for whoever picks this up
 
@@ -92,11 +124,13 @@ the docstring or add the scan.
   against stored text, and the reconstructed text *is* DocAI - measured at 1
   candidate per 3,800 words. Tesseract is the independent witness. VLM exists
   for page 40 only; pages 24 and 37 have none.
-- **Three times this session a check produced confident near-silence because of
-  how it was written, not what it measured** (the span validator's `continue`s,
-  the test's duplicated loop, and my own `SequenceMatcher` missing
-  `autojunk=False`). When a sweep reports "clean" or "no match anywhere",
-  suspect the sweep first.
+- **A check that exists and was even discussed/documented can still have a
+  real bug that silently defeats it - confirmed twice more this session**
+  (`validate_catchword_continuity.py`'s marker-skip heuristic,
+  `check_klal_token_orphans.py`'s windowed-not-full-span comparison). Don't
+  assume a named, documented check actually catches what its docstring
+  claims - verify empirically (run it against a known-bad case) before
+  trusting its silence.
 - **The page-order fix is not fully carried by git.** The corrected PDF now is,
   but `docai_word_boxes/` and `images/pdf_pages/` are gitignored, so a rebuild
   of those caches from the scan must redo the leaf 37/38 swap. Procedure is in
@@ -106,6 +140,340 @@ the docstring or add the scan.
   removed. Restore by re-adding the marker call in `renderKlalBody`.
 
 
+
+## Multi-page reconstruction APPLIED for klal 30/75/88 (+3,816 words), under explicit user authorization — 2026-08-12
+
+**This reverses the 2026-08-11 revert, this time with the authorization that
+was missing before.** `SPAN_COVERAGE_KNOWN_REAL_GAPS`'s own history (see
+above) records that this exact reconstruction was applied once by an
+unattended agent run, then deliberately reverted - not because the text was
+wrong, but because it happened without review or approval. This session the
+user gave direct, explicit, in-conversation authorization: *"just go with
+docai - tesseract is terrible here. give me text in the middle, but flag
+questionable words as usual."* That closes the governance gap the revert
+was about.
+
+**What was run**: `./venv/bin/python reconstruct_multipage_klalim.py --apply`
+(dry-run output re-read first, all three junctions confirmed clean/
+grammatical), then full `./rebuild_all.sh` (not `--skip-vision`, per "flag
+questionable words as usual" - the new content needed to go through the
+same vision-adjudication pass as the rest of the corpus). Word counts: klal
+30 130 -> 2000 (+1870), klal 75 364 -> 1410 (+1046), klal 88 298 -> 1198
+(+900). `SPAN_COVERAGE_KNOWN_REAL_GAPS` narrowed from `{30, 36, 75, 88}` to
+`{36}` (klal 36-37 remains unreconstructed - it's a boundary problem, not a
+splice, see session handoff step 5).
+
+**One real gate failure, investigated and confirmed NOT a bug before being
+accepted.** `test_no_new_duplicate_consecutive_words` flagged
+`(30, "לה")` - the phrase "לה לה" appears back-to-back. Investigated per
+the test's own docstring instruction (verify before fixing text or
+touching the baseline, same rule that caught klal 128's real
+`לאוקומי לאוקומי` duplication bug on 2026-08-06): the phrase recurs **four
+separate times** across klal 30's newly-recovered text, always in the
+pattern "גמרי/גמרינן **לה לה** מאשה" - the halachic technical term for the
+gezeirah shavah derived from the shared word "לה" (Hebrew maidservant law),
+which is exactly klal 30's own topic (title: "אין גזרה שוה למחצה"). Directly
+cropped page 24 at the token's bbox to confirm visually, not just inferred
+from repetition count: the print genuinely reads "...ואע"ג דרבנן נמי **לה
+לה** מאשה גמרי..." Added to `DUPLICATE_WORD_BASELINE` with the full
+justification in-line. 13/13 tests pass after.
+
+**Caveat, stated plainly per the standing "verification coverage for the
+reconstructed pages is thin" caution (still true, not resolved by this
+change)**: "flag questionable words as usual" ran the normal pipeline, but
+its power here is limited by construction, and the result shows it -
+`corrections_part1.json` has **0 flagged words for klal 30 and 0 for klal
+75** (2,916 of the 3,816 new words), and only **2 for klal 88**. This is
+not a sign the new text is unusually clean; it's the same circularity
+already documented (`build_corrections_dataset.py` compares DocAI against
+stored text, and the stored text now *is* DocAI for this span, so most
+positions have nothing to disagree about by construction). The 2 klal-88
+flags that did surface (`ובאבל`->`וכאבל`, `בירושלטי`->`בירושלמי`, both
+`current_text_confirmed`) are real vision-model catches, not nothing - but
+the near-total silence on klal 30/75 should not be read as "clean," per
+Lesson 1/2. The independent Tesseract witness queue (tier B/C/D, still
+open) remains the only real second opinion on this span, even though its
+overall reliability was judged poor enough here to not gate on.
+
+**Verified in the browser, not just via test output**: klal 30's ~2000-word
+text renders in the middle pane end-to-end; klal 88's 2 flagged words show
+correctly with `state-machine` (Machine-Resolved/yellow) styling, same as
+every other flagged word in the corpus.
+
+## Klal 29's stray trailing marker found and fixed; klal 30's "missing middle" confirmed as the already-tracked severe truncation; witness panel gained real text context, with a real indexing bug caught while building it — 2026-08-12
+
+**Klal 29 had a duplicate of klal 30's own marker stuck on its tail.**
+User noticed "an extra lamed at the end of 29" while browsing the dashboard.
+Confirmed via raw `docai_word_boxes/page_23.json`: token 768 is `:`
+(genuinely closing klal 29's real content, "...שהעמיק הרחיב בענין זה :"),
+token 769 is `ל` - klal 30's REAL marker (matches
+`gematria_trace_part1.json`'s `marker_position: 769` for klal 30 exactly),
+immediately followed by klal 30's real, correctly-stored opening ("אין גזרה
+שוה למחצה..."). But klal 29's stored `clean_text` also ended in `... : ל` -
+the same marker token had been captured twice, once (wrongly) as klal 29's
+own tail and once (correctly) as klal 30's opening. Fixed: removed the
+stray trailing `ל` from klal 29 in `part1.json`, ran full `./rebuild_all.sh`
+(13/13 tests pass). Klal 30 was untouched and still correctly opens with its
+own `ל`.
+
+**Klal 30's "whole section... missing from the middle" is the already-known
+severe truncation, not a new bug - confirmed precisely, not just recalled.**
+Checked exactly where klal 30's 130 stored words end: raw tokens on page 23
+show klal 30's stored text correctly captures its ENTIRE real content on
+page 23 itself (marker at 769 through the page's last real word at 898,
+`דמנחות` - matches the stored tail exactly, immediately followed by
+furniture: `Digitized by Google`). Nothing is missing on page 23. The real
+gap is that klal 30's content continues across ALL of page 24 and into part
+of page 25 (up to klal 31's marker) - none of which is captured at all.
+That's exactly the pending, deliberately-not-yet-applied
+`reconstruct_multipage_klalim.py` reconstruction (session handoff step 4,
+gated on the witness-tier review in steps 2-3) - looking at page 24 in
+isolation, its content reads as entirely absent from klal 30, which is
+exactly what "missing from the middle" describes. No new bug; confirms the
+existing diagnosis with a concrete boundary check rather than just citing
+the aggregate ratio.
+
+**Witness panel now shows real OCR text context, not just an isolated image
+crop - direct user feedback: "use the text you have... it is hard to review
+the image in a vacuum."** New `GET /api/witness/context/<page>/<token_index>`
+(`review_server.py`) returns a window of docai tokens around a witness
+item; the frontend panel (`review_frontend/app.js` `openWitnessPanel`) now
+fetches and renders it with the target word bracketed/bolded, above the
+DocAI/Tesseract reading options. Deliberately the raw OCR token stream, not
+the not-yet-applied reconstruction draft (that text lives only in-memory
+inside `reconstruct_multipage_klalim.py`'s dry run and isn't cached
+anywhere - wiring it in would mean re-deriving which klal/segment a given
+page position falls into, a bigger job); the panel labels it plainly as
+"Raw OCR context... unverified" so a reviewer doesn't mistake it for a
+vetted reading.
+
+**A real indexing bug was caught while building this, before it could ship
+silently wrong.** First version indexed straight into the raw per-page
+docai token array using `docai_token_index` as the array position. Visual
+check in the browser immediately showed the bracketed/highlighted word was
+`דתנא`, not the actual disputed word `נינהו` sitting right next to it -
+close enough to look plausible, wrong enough to mislead a reviewer.
+Root cause: `docai_token_index` in `reconstruction_witness_queue.json` is
+NOT a raw-array index - `verify_reconstruction_witness.py` (the script that
+built the queue) filters each page's tokens to `norm(text)` truthy first
+(Hebrew-letters-only; drops pure digits and punctuation, e.g. a leading
+folio-number token) and assigns indices into THAT filtered list. Fixed by
+replicating the exact same filter (`WITNESS_HEB`/`_witness_norm` in
+`review_server.py`, matching `verify_reconstruction_witness.py`'s
+`HEB`/`norm()` byte-for-byte) before windowing. Re-verified in the browser:
+bracketed word now correctly shows `נינהו`. This did not affect the actual
+clickable box position on the scan (the bbox field is independent,
+pixel-verified separately) or any decision-saving logic (`docai_token_index`
+is only ever used there to match against the queue's own stored rows, never
+to index raw tokens) - only this new context feature was wrong, and only
+for the ~30 minutes between building it and catching it here.
+
+## Witness-queue frontend wiring finished and verified in the browser — 2026-08-12
+
+Closes the session handoff's step 1. Server half (`/api/witness`,
+`/api/page/<n>`'s `kind` field, `POST /api/decisions/witness`) was already
+done and inert; this session wired the frontend:
+
+- `review_frontend/app.js` `showPage()`'s box-drawing loop now branches on
+  `c.kind`. `'correction'` items are unchanged. `'witness'` items get their
+  own box (`.hl-box-witness` in `app.css` - dashed purple while undecided,
+  solid gray once `current_decision` is set) and a click handler opening a
+  new `openWitnessPanel(w)`.
+- `pagesWithKlalim()` now merges `WITNESS_PAGES` (fetched from `/api/witness`
+  at `init()` alongside `KLALIM`) into the navigable page set, so the
+  scan-pane stepper can actually reach pages 24/37/40 - previously
+  impossible since those pages carry no klal marker of their own and were
+  invisible to the old `KLALIM.filter(k => k.page)`-only logic.
+- New `openWitnessPanel`/`saveWitnessDecision` mirror
+  `openCandidatePanel`/`saveCandidateDecision`'s structure: options for
+  DocAI reading, Tesseract reading, "unreadable/neither," and custom text;
+  posts `{klal_id, docai_token_index, chosen_source, chosen_text, note}` to
+  `/api/decisions/witness` per the `chosen_source` convention
+  (`docai_reading | tesseract_reading | custom | unreadable`) already
+  fixed in the session handoff. `#witness-panel-close` was also wired into
+  `setupPanels()`/`closePanels()` - previously present in `index.html` but
+  never connected to anything, so the panel (once reachable) couldn't be
+  dismissed.
+- **Verified end-to-end in a real browser session**, not just read: jumped
+  to page 24 via `showPage(24, 30)`, confirmed 159 witness boxes render,
+  called `openWitnessPanel()` on a real item (klal 30, tier D,
+  `docai_reading: "דמנחות"` vs `tesseract_reading: "י ו דמנחורז"`), selected
+  the DocAI reading, saved with a note, confirmed via a fresh `/api/page/24`
+  fetch that `current_decision` persisted server-side with the right
+  `decision_type: "witness_choice"`, and confirmed the box's DOM class
+  flipped from undecided to `.decided` (gray, solid) - exactly one of the
+  159 boxes, matching the one save.
+
+**Caveat, flagged not hidden**: this verification wrote one real record into
+`review_decisions.jsonl` (klal 30, `docai_token_index` 4, `docai_reading`
+chosen, note "Testing witness-panel wiring end-to-end") - append-only per
+project convention, so it can't be un-saved. The choice itself is plausible
+(`דמנחות` is a real word; tier D is presumed Tesseract noise per the session
+handoff) but wasn't a real textual judgment, just a UI-wiring test - treat it
+as unvetted and re-examine it during the tier-D sampling pass (session
+handoff step 3), not as a settled decision.
+
+## Klal 5 cross-page truncation FOUND AND FIXED (65 words), plus two real bugs found in the standing validators that should have caught it — 2026-08-11
+
+**The corpus bug**: klal 5's stored `clean_text` stopped mid-argument at "...כיון
+שהן מן התנאים הראשונים והוזכרו בכמה משניות •" (page 16, the author's own
+question: "why doesn't the Talmud say `tanya` here?"). The ANSWER - a 65-word
+citation from Ritva on Yoma resolving exactly that question, "אי נמי ועיקר
+דמשום דאתמרא... עכ"ל" - sat uncaptured on page 17, between the page's running
+header and klal 6's own marker. Confirmed via raw `docai_word_boxes/page_17.json`
+tokens 4-68, cross-checked that this text appears nowhere else in `part1.json`
+(so it's a real omission, not a misplacement), and confirmed page 16's own
+tail already ends exactly where stored text ends (token 977) followed by
+genuine page-furniture (catchword "אי", footnote digit "1", "*", watermark) -
+so the boundary itself was never in question, only the missing continuation.
+**Fixed**: appended the 65 words to klal 5 in `part1.json` (522 -> 587 words),
+ran full `./rebuild_all.sh` (not `--skip-vision`). The new span merged
+cleanly - zero new correction candidates, and the pre-existing open
+`possible_omission` flag at word_index 522 (which only ever compared page
+16's own catchword+footnote-digit gap - correctly found to be furniture -
+and had no way to see page 17's real content at all) is gone, superseded by
+real captured text. 13/13 regression tests pass. Not yet independently
+re-verified against the rendered scan by a second look (the vision-pass
+comparing against the same docai tokens it was built from isn't independent
+verification, same caveat as the original 14-klalim truncation fix).
+
+**Why the standing validators didn't catch this - two separate real bugs,
+found while explaining the miss, not by luck:**
+
+1. **`check_klal_token_orphans.py`'s docstring overclaims its own coverage.**
+   Top-of-file comment says it checks "does every token in the real
+   marker-to-marker span end up assigned to exactly one klal's clean_text,
+   not zero (orphaned) or two+" - but the actual code (`word_seq_similarity`
+   in both Pass 1's opening check and Pass 2's double-assignment chunk) only
+   ever compares the first `OPEN_WINDOW=50` (Pass 1) or `CHUNK_WORDS=15`
+   (Pass 2) words of each klal's real span against its stored text. Neither
+   pass ever looks at the END of a span. Verified empirically: ran it against
+   the pre-fix `part1.json` (via `git show HEAD:part1.json`, restored after)
+   - klal 5 does not appear anywhere in its output, confirmed or flagged,
+   because klal 5's OPENING was always correct and only the TAIL was
+   missing. This is Lesson 6 (every check has its own blind spot) plus the
+   session handoff's item 6 pattern (a docstring claiming a scan the code
+   doesn't perform) - a second instance of that exact bug class, in a
+   different script.
+2. **`validate_catchword_continuity.py`'s "skip the klal gematria marker"
+   heuristic is unbounded and fires on ordinary short words, silently
+   eating the very evidence the check exists to find.** `first_real_tokens()`
+   guards the marker-skip with `if not out and looks_like_gematria_marker(w)`
+   - intended to skip AT MOST one leading token (a real klal-number marker
+   sitting right at a page's first content position). But `out` stays empty
+   across MULTIPLE iterations as long as each new candidate also happens to
+   be a short (1-4 letter) all-Hebrew-letters word - which is true of a huge
+   fraction of ordinary Hebrew words, not just gematria markers, and the
+   check never verifies the page boundary is actually a new klal's start at
+   all. On page 17 this ate BOTH real opening words `אי` and `נמי` before
+   finally accepting `ועיקר` (5 letters, past the length-4 cutoff) as the
+   first "real" token. Page 16's genuine catchword (`אי`, confirmed: it's
+   the exact repeat of page 17's true first word) never got compared against
+   page 17's real opening at all, because that opening word had already been
+   silently discarded - so this boundary was misclassified as "no catchword
+   match" (bucketed as uninformative) when it is in fact a confirmed
+   catchword, exactly the signal that should have prompted someone to ask
+   "does the stored text actually continue past this point?" Verified
+   empirically by calling `first_real_tokens(load_page(17), n=4)` directly:
+   returns `['ועיקר', 'דמשום', 'דאתמרא', 'הך']`, silently missing `אי נמי`.
+
+**Both bugs fixed, same session, immediately after being found:**
+
+- `validate_catchword_continuity.py`: replaced the shape-based
+  `looks_like_gematria_marker` guess with an exact cross-reference against
+  `gematria_trace_part1.json`'s real marker positions (new
+  `load_marker_positions()`, page -> set of real marker token indices) -
+  only skip a token as "a klal's own marker" when some klal is
+  independently known to actually start right there. Also added the
+  missing `SECTION_WORDS` skip list (`האלף`/`הבית`/`הגימל`/`הדלת`/`ההא`,
+  matching `check_klal_token_orphans.py`'s existing convention) since the
+  old code was accidentally relying on the same buggy heuristic to skip
+  `האלף` too. **Effect: confirmed matches jumped from 21/69 to 58/69
+  boundaries** - the old bug was suppressing real catchwords corpus-wide,
+  not just at klal 5. Page 16->17 now correctly shows as a match:
+  `...בכמה משניות אי | אי נמי ועיקר דמשום...`.
+- `check_klal_token_orphans.py`: added **Pass 3, a full-sequence alignment**
+  (`difflib.SequenceMatcher(..., autojunk=False)` over the ENTIRE real span
+  vs. entire stored text, not just `OPEN_WINDOW`/`CHUNK_WORDS`), reporting
+  any unmatched real-token run >= `GAP_MIN_WORDS=8`. Corrected the
+  top-of-file docstring's overclaim in the same edit (it always said Pass
+  1/2 covered "every token in the span"; verified empirically they never
+  did - ran the unfixed script against the pre-fix corpus and it reported
+  nothing for klal 5 at all). **First run surfaced a real second bug in
+  Pass 3 itself before it could be trusted**: klal spans are computed to
+  the NEXT AVAILABLE trace entry (skipping markerless klalim - see Pass
+  1's own pre-existing comment), so comparing that aggregate span against
+  only the first klal's own text falsely reports the skipped klal's entire
+  rightful content as a "gap." Confirmed empirically (20+ false klalim,
+  30-600 "missing" words each, every large one lining up exactly with a
+  skipped markerless klal: 9, 15, 21, 36, 46, 49, 56, 62, 66, 83, 86, 128,
+  179, 181, 189, 193, 197). Fixed by restricting Pass 3 to a new
+  `adjacent_spans` dict (only `next_kid == kid + 1` pairs - an unambiguous
+  single-klal span).
+
+**Pass 3's real (non-false-positive) output, NOT yet investigated - new
+open item**: klal 4 (15 words), klal 18 (8), klal 34 (13 - already flagged
+by Pass 1 as a garbled/mismatched opening, similarity 0.32, likely the same
+underlying issue not a second one), klal 69 (36), klal 206 (14 + a separate
+16), klal 217 (27 + a separate 16 - klal 217's marker was already
+corrected once this project, see "Klal 215/216/217" above; this may be a
+residual boundary issue from that split or a fresh gap, not yet checked
+either way). None of these have been visually verified against the scan
+yet - do that (per Lesson 14, direct render, not aggregate inference)
+before assuming any of them is real, the same way klal 5 was confirmed
+before fixing it.
+
+## Review dashboard: candidate panel had no way to record "nothing belongs here" for gap corrections — found and fixed, 2026-08-11
+
+**Bug**: for a flagged gap (`opcode: "delete"`, `final_text: null` — DocAI/vision
+saw a candidate word at a position the corpus currently has nothing) there was
+no way to record the decision "confirmed omission, nothing belongs here."
+`openCandidatePanel` (`review_frontend/app.js`) only ever offered the explicit
+"nothing" option (`source: 'remove'`) when `corr.opcode === 'insert'`
+(the opposite case: text exists in the corpus that DocAI never saw, and
+"remove" means deleting it). For the gap case, no button offered this. Typing
+blank into the Custom field also silently failed: `saveCandidateDecision`
+rejected any empty custom answer unless `corr.opcode === 'insert'`, with no
+UI feedback beyond an `alert()`. Found via klal 4, correction 2 (`word_index:
+35`, flag `ambiguous`, `docai_reading: "1"` — a footnote-reference digit,
+`vision_transcription: "סי' צ"ד"`) — the human call here is that this is page
+furniture, not real klal text, and there was no way to say so.
+
+**Fix**: `openCandidatePanel` now also offers "Confirm nothing belongs here"
+(same `source: 'remove'` convention) whenever `opcode !== 'insert'` and
+`!corr.final_text` — i.e. whenever "nothing" is itself a real, distinct
+answer, regardless of which side (corpus vs. DocAI) currently holds the
+candidate text. `saveCandidateDecision`'s blank-custom-text guard was
+narrowed to only block blanking out text that actually exists
+(`!text && corr.opcode !== 'insert' && corr.final_text`), so a manually-typed
+blank answer for a gap correction is no longer rejected either. Not yet
+re-verified against a saved decision in the running UI — do that before
+trusting this closed.
+
+## Review dashboard: tri-state terminology unified, legend now shows corpus-wide counts, hint box moved off the scan pane — 2026-08-11
+
+Three separate small requests, done together since they touch the same
+files. **Terminology**: the red/yellow/green states were labeled two
+different ways in two places (`STATE_META` in `app.js` for the legend/
+underlines vs. `FLAG_LABELS` in `review_server.py` for the tooltip/panel) -
+unified to Machine-Disputed (red) / Machine-Resolved (yellow) / Human-Decided
+(green) in both. The candidate panel and tooltip previously collapsed to a
+single final state once a human decided, losing which machine verdict
+(disputed vs. resolved) preceded it - both now show the compound status via
+a new `statusLabel()` helper, e.g. "Machine-Resolved · Human-Decided".
+**Counts**: `api_klalim()` in `review_server.py` now splits the old
+`open_count` into `machine_disputed_count` / `machine_resolved_count`
+per klal; the legend (`buildLegend()` in `app.js`) sums these across all of
+`KLALIM` for a corpus-wide total next to each state, kept live after every
+saved decision (`saveCandidateDecision` updates the three counts and
+re-renders the legend instead of waiting for a reload). **Layout**: the
+enlarged hint box was `position:fixed; left:0`, sitting on top of the scan
+pane and covering the bottom of the scan image. Moved to `right:0` (the nav
+pane's side, in this RTL layout) and merged into `#legend` itself rather
+than living as a separate element, so there's one box, not two saying
+similar things. Removed the nav-header title/subtitle text to free vertical
+space in the nav pane, and added `padding-bottom: 160px` to `#nav-list` so
+the fixed box no longer hides the last few klal rows behind it.
 
 ## Repo reorganisation: dead code archived, scratch scripts rescued, both PDFs now tracked — 2026-08-11
 
