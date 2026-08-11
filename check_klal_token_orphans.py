@@ -52,6 +52,27 @@ OPEN_WINDOW = 50  # words compared for the "does it open correctly" check
 CHUNK_WORDS = 15  # length of a substring chunk used for the double-assignment scan
 GAP_MIN_WORDS = 8  # min length of an unmatched real-token run to report as a likely gap (Pass 3)
 
+# Pass 3 known false positives, investigated 2026-08-12 (PROJECT-STATUS.md):
+#   klal 4  - the flagged span is klal 3's OWN trailing content (already
+#     correctly stored under klal 3), sitting out of Y-reading-order in
+#     docai's raw array right after klal 4's marker token - the same
+#     array-order-vs-Y-order anomaly already documented in
+#     gematria_trace_part1.json's klal-4 entry. Pass 3 computes "real span"
+#     by array-order slicing, which has no way to know this.
+#   klal 18 - same anomaly class: the flagged span is already correctly
+#     stored under klal 17's tail (a citation-collision "יח" mid-sentence,
+#     not a real marker skip); klal 18's true marker sits beside its own
+#     bold opening word "אמוראים", confirmed by y-coordinate proximity.
+#   klal 34 - NOT a missing-content case at all: docai's raw OCR is itself
+#     heavily garbled at this klal's opening (already documented - marker
+#     misread ל ו/ד, several nearby words independently garbled). The
+#     stored text is the already crop-verified CORRECT reading, which
+#     naturally diverges from Pass 3's raw-token comparison.
+# Real, confirmed genuine gaps found via this same pass (klal 69, 206, 217)
+# were fixed directly in part1.json rather than allowlisted here - see
+# PROJECT-STATUS.md "Full-span gap scan" fixes, 2026-08-12.
+PASS3_KNOWN_FALSE_POSITIVES = {4, 18, 34}
+
 # Page furniture that appears in raw docai tokens but never in clean_text:
 # the printed folio number + running header ("<num> יד/יר/יך מלאכי כללי X"),
 # the Google Books scan watermark, and printer's catchwords/signature digits
@@ -235,7 +256,7 @@ def main():
     # kid/next_kid pairs that are truly adjacent (no skip) give an
     # unambiguous single-klal span to check. ---
     print(f"\n--- Full-span gap scan (real content missing anywhere in the span, not just the opening) ---")
-    gap_hits = []
+    gap_hits, known_fp_hits = [], []
     for kid, real_tokens in adjacent_spans.items():
         stored_words = part1[kid]["clean_text"].split()
         rw = [normalize(w) for w in real_tokens]
@@ -243,13 +264,17 @@ def main():
         sm = difflib.SequenceMatcher(None, rw, sw, autojunk=False)
         for tag, i1, i2, _j1, _j2 in sm.get_opcodes():
             if tag in ("delete", "replace") and (i2 - i1) >= GAP_MIN_WORDS:
-                gap_hits.append((kid, real_tokens[i1:i2]))
+                (known_fp_hits if kid in PASS3_KNOWN_FALSE_POSITIVES else gap_hits).append(
+                    (kid, real_tokens[i1:i2]))
     if gap_hits:
         for kid, missing in gap_hits:
             preview = " ".join(missing[:GAP_MIN_WORDS * 3])
             print(f"  klal {kid}: {len(missing)} real word(s) with no counterpart in stored text: {preview}...")
     else:
         print("  None found.")
+    if known_fp_hits:
+        print(f"  ({len(known_fp_hits)} known false positive(s) suppressed - "
+              f"klal {sorted({k for k, _ in known_fp_hits})}, see PASS3_KNOWN_FALSE_POSITIVES)")
 
 
 if __name__ == "__main__":

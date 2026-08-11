@@ -207,6 +207,41 @@ def _same_title_cluster(title_a, title_b):
     return difflib.SequenceMatcher(None, title_a, title_b).ratio() >= TITLE_SIMILARITY_THRESHOLD
 
 
+def check_intra_klal_duplicate_phrases(klalim, n=10):
+    # Added 2026-08-12 (PROJECT-STATUS.md): the module docstring's check-3
+    # description ("within each klal AND across each adjacent klal pair")
+    # was never actually implemented for the "within each klal" half -
+    # check_duplicate_phrases() below only ever compared ADJACENT klal
+    # pairs. Same docstring-overclaim bug class as check_klal_token_
+    # orphans.py's Pass 1/2 this same session. This is the missing half:
+    # does the same n-gram (n>=10, same threshold as the adjacent-pair
+    # check for consistency) appear twice at NON-OVERLAPPING positions
+    # within a single klal's own clean_text? (Immediately-consecutive
+    # duplication - a repeated single/short run - is already covered by
+    # tests/test_corpus_invariants.py's duplicate-consecutive-word check;
+    # this catches a longer phrase repeated non-adjacently within the same
+    # klal, which that check cannot see.)
+    print(f"\n=== 3b. Duplicated {n}+-word phrases WITHIN the same klal (non-adjacent) ===")
+    issues = []
+    for k in klalim:
+        words = k["clean_text"].split()
+        grams = ngrams(words, n)
+        seen = {}
+        for pos, g in enumerate(grams):
+            if g in seen and pos - seen[g] >= n:  # non-overlapping occurrence
+                issues.append(f"klal {k['klal_id']}: identical {n}-word phrase repeats at word "
+                               f"{seen[g]} and {pos}: {' '.join(g)!r}")
+            seen.setdefault(g, pos)
+    if not issues:
+        print(f"  0 duplicated {n}+-word phrase(s) found within any single klal.")
+    else:
+        print(f"  {len(issues)} hit(s) (verify each against the scan before treating as a bug - "
+              f"this book restates halachic maxims verbatim as a matter of style):")
+        for i in issues:
+            print("   ", i)
+    return issues
+
+
 def check_duplicate_phrases(klalim, n=10):
     # n=10 chosen empirically: at n=5 this produced 333 hits, almost all
     # explainable as this book's genre (a halachic-maxim INDEX, not prose) -
@@ -351,14 +386,16 @@ def main():
 
     r1 = check_gematria_self_consistency(klalim)
     r2 = check_character_sanity(klalim)
-    r3 = check_duplicate_phrases(klalim, n=10)
+    r3a = check_intra_klal_duplicate_phrases(klalim, n=10)
+    r3b = check_duplicate_phrases(klalim, n=10)
     r4 = check_self_reference_directionality(klalim)
     r5 = check_full_lexicon_coverage(klalim)
 
     print("\n=== Summary ===")
     print(f"  1. Gematria self-consistency: {len(r1)} issue(s)")
     print(f"  2. Character sanity:          {len(r2)} issue(s)")
-    print(f"  3. Duplicated phrases:        {len(r3)} issue(s)")
+    print(f"  3. Duplicated phrases:        {len(r3a) + len(r3b)} issue(s) "
+          f"({len(r3a)} within-klal, {len(r3b)} adjacent-pair)")
     print(f"  4. Self-reference direction:  {len(r4)} issue(s)")
     print(f"  5. Not-in-lexicon words:      {len(r5)} distinct word(s) (informational, not necessarily errors - see hapax count above)")
 

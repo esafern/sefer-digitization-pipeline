@@ -8,15 +8,17 @@
   review_server.py, both validator scripts, and the review_frontend/* files
   all have real, verified, uncommitted changes from this session (listed
   below). Nothing has been committed since `86c83ef`.
-- **The corpus changed substantially**: klal 5 gained 65 real words
-  (522 -> 587, a genuine cross-page truncation); klal 29 lost one stray
-  duplicate word (a marker token double-captured from klal 30's own
-  opening); and, **under explicit user authorization this session**, the
-  multi-page reconstruction was applied for klal 30 (130 -> 2000), klal 75
-  (364 -> 1410) and klal 88 (298 -> 1198) - +3,816 words total. See the
-  dated log entries below, especially "Multi-page reconstruction APPLIED."
-  Klal 36-37 remains the one unreconstructed gap (a boundary problem, not a
-  splice - see step 3 below).
+- **The corpus changed substantially, and every previously-tracked gap is
+  now closed.** Klal 5 gained 65 real words (522 -> 587); klal 29 lost one
+  stray duplicate word; klal 30/75/88 got the multi-page reconstruction
+  applied under explicit user authorization (+3,816 words); klal 37 (+278
+  words) and klal 69 (+35) had genuine cross-page truncations fixed; klal
+  206 and 217 had genuine mid-text corruption (garbled tokens standing in
+  for real content) fixed alongside their own tail truncations; klal
+  36-37's boundary was resolved by locating klal 37's actual (DocAI-
+  misread) marker. `SPAN_COVERAGE_KNOWN_REAL_GAPS` is now empty. See the
+  dated log entries below, especially "All open corpus-content bugs
+  closed" and "Multi-page reconstruction APPLIED."
 - `berlin_square_corrected.pdf` and `berlin_square_original_transposed.pdf`
   are both tracked. Repo is ~238 MB.
 
@@ -59,9 +61,21 @@
    usual") - see the dated log entry "Multi-page reconstruction APPLIED."
    +3,816 words; one real gate failure investigated and resolved
    (`(30, "לה")` duplicate-word check - confirmed genuine, a recurring
-   halachic term, not a bug); `SPAN_COVERAGE_KNOWN_REAL_GAPS` narrowed to
-   `{36}`. Verified end-to-end in the browser (text renders in the middle
-   pane, flagged words show correct tri-state styling).
+   halachic term, not a bug). Verified end-to-end in the browser (text
+   renders in the middle pane, flagged words show correct tri-state
+   styling).
+7. **All remaining open corpus-content bugs closed same session** - see
+   the dated log entry "All open corpus-content bugs closed." Klal 4/18/34
+   confirmed false positives (allowlisted in `check_klal_token_orphans.py`);
+   klal 69 (+35 words) and klal 206/217 (garbled-token corruption + tail
+   truncation) fixed; klal 36-37's actual boundary located and klal 37's
+   279-word tail truncation fixed (one near-miss - a page-boundary
+   catchword duplication that reproduced the exact bug class already
+   documented for klal 69 - caught by the test suite itself, not missed);
+   `validate_part1_corpus_integrity.py`'s check-3 docstring overclaim
+   fixed with a real implementation and a new baselined pytest gate.
+   `SPAN_COVERAGE_KNOWN_REAL_GAPS` is now empty. 14/14 pytest invariants
+   pass.
 
 **Investigated, not reproduced**: user reported "klal numbering down the
 right side is not aligned consistently" (the nav pane). Pixel-measured
@@ -73,19 +87,25 @@ specific klal number to reproduce before doing anything else here.
 
 ### NEXT STEPS, in order
 
-**1. Klal 30/75/88's new ~3,800 words have almost no independent
+Every previously-tracked corpus-content bug is now closed - klal 37/69/206
+truncations and corruptions fixed, klal 36-37's marker located, klal 4/18/34
+confirmed false positives, the duplicate-phrase docstring overclaim fixed.
+`SPAN_COVERAGE_KNOWN_REAL_GAPS` is empty and `check_klal_token_orphans.py`
+reports zero real gaps. What's left is verification depth, not known bugs:
+
+**1. Klal 30/75/88's ~3,800 reconstructed words have almost no independent
 verification signal and that has NOT been resolved, only accepted.**
 `corrections_part1.json` shows 0 flagged words for klal 30, 0 for klal 75,
 2 for klal 88 - not because the text is clean, but because the normal
 flagging pipeline compares DocAI against stored text and the stored text
-now *is* DocAI for this span (circular by construction, same caveat as
-before). The user explicitly chose to accept this rather than gate on the
-Tesseract witness queue ("tesseract is terrible here"). The witness queue
-(tier C: 94 items, tier B: 102, tier D: 217) is still the only real second
-opinion available and is still fully open - working through it (page-step
-to 24/37/40 in the harness, click a dashed purple box) remains valuable
-follow-up QA even though it's no longer a gate. Carry forward these four
-tier-A adjudications, already crop-checked:
+now *is* DocAI for this span (circular by construction). The user
+explicitly chose to accept this rather than gate on the Tesseract witness
+queue ("tesseract is terrible here"). The witness queue (tier C: 94 items,
+tier B: 102, tier D: 217) is still the only real second opinion available
+and is still fully open - working through it (page-step to 24/37/40 in the
+harness, click a dashed purple box) remains valuable follow-up QA even
+though it's no longer a gate. Carry forward these four tier-A
+adjudications, already crop-checked:
    - `וכוותיידו` → **`וכוותייהו`** - confirmed DocAI misread, apply it.
    - `ידן`/`ידו` - the scan shows **`ידך`** (`הראנו ידך הנפלאה`); *both*
      engines wrong. Needs a human call.
@@ -95,27 +115,17 @@ tier-A adjudications, already crop-checked:
    - `בתוס ד"ה` - tier-A false positive; but the scan reads `כתוס'` with a kaf
      where DocAI has a bet. Separate small check.
 
-**2. Investigate 8 candidate gaps surfaced by the now-fixed
-`check_klal_token_orphans.py` Pass 3, still deferred.** klal 4 (15 words),
-18 (8), 34 (13 - likely the same root cause as an already-flagged garbled
-opening, not a second issue), 69 (36), 206 (14 + a separate 16), 217 (27 +
-a separate 16). None verified against the scan yet - do that before
-touching any of them, the same way klal 5 was confirmed before fixing it.
-Run `python3 check_klal_token_orphans.py` to reproduce.
+**2. Nav-numbering report still unreproduced.** User reported "klal
+numbering down the right side is not aligned consistently"; pixel-measured
+every row and found no defect (see above). Needs a screenshot or a specific
+klal number to make progress.
 
-**3. klal 36-37 - the last real span gap** (ratio 0.44, ~285 words). Unlike
-the other three this is a *boundary* problem, not a splice: klal 37's
-marker was misread so the span cannot be split. Its stored opening
-localises to two candidate positions (docai page 26 token 704, page 27
-token 52) - crop both and disambiguate, same method as klal 92-165.
-
-**4. Small and optional:** `validate_part1_corpus_integrity.py` check-3's
-docstring claims an intra-klal duplicate-phrase scan the code does not perform
-(harmless - the 3 hits it would find are genuine author repetition). Either fix
-the docstring or add the scan. Note: this exact bug class (docstring
-overclaiming code coverage) recurred in `check_klal_token_orphans.py` this
-session - worth a quick sanity pass on any other validator's docstring
-before assuming its claimed coverage is real.
+**3. General standing caution, not a specific open bug**: two independent
+docstring-overclaim bugs turned up this session in different validator
+scripts (`check_klal_token_orphans.py`, `validate_part1_corpus_
+integrity.py`). Worth a quick sanity pass on any OTHER validator's
+docstring before trusting its claimed coverage at face value - see Lesson
+19-adjacent pattern, "a check that exists can still not do what it says."
 
 ### Standing cautions for whoever picks this up
 
@@ -140,6 +150,112 @@ before assuming its claimed coverage is real.
   removed. Restore by re-adding the marker call in `renderKlalBody`.
 
 
+
+## All open corpus-content bugs closed: klal 4/18/34 false positives explained, klal 37/69/206 truncations fixed, klal 36-37's marker located and the last real span gap resolved, docstring overclaim fixed — 2026-08-12
+
+Closed every item from the session handoff's "NEXT STEPS" except the
+verification-coverage caveat (which isn't fixable, only worked through -
+see "Multi-page reconstruction APPLIED" below) and the nav-numbering report
+(couldn't reproduce). `SPAN_COVERAGE_KNOWN_REAL_GAPS` is now empty.
+
+**Klal 4, 18, 34 - investigated `check_klal_token_orphans.py` Pass 3's
+remaining candidates, confirmed all three are false positives, not bugs,
+and added them to a new `PASS3_KNOWN_FALSE_POSITIVES` allowlist so future
+runs don't need re-investigation:**
+- **Klal 4**: the flagged span (`ואפ"ה חשיב ליה שם בזבחים...`) is klal 3's
+  OWN trailing content, already correctly stored under klal 3 - confirmed
+  by direct string search. It sits out of Y-reading-order in docai's raw
+  array right after klal 4's marker token, the exact anomaly
+  `gematria_trace_part1.json`'s own klal-4 note already documents. Pass 3
+  computes "real span" by array-order slicing and has no way to know this.
+- **Klal 18**: same anomaly class. Klal 17's stored text already ends
+  `...הנזכר לעיל יח בסתם ולא שת לבו שהם דחויים מעיקרא :` - the "יח" here
+  is incidental text (not a real marker), and the flagged span is already
+  correctly captured there. Confirmed via raw token y-coordinates: klal
+  18's TRUE marker (position 351, status was already
+  `marker_found_content_mismatch`) sits beside `אמוראים` (y1=0.418, klal
+  18's real bold opening word) not beside `בסתם` (y1=0.403, one line
+  earlier, genuinely part of klal 17's own continuing sentence).
+- **Klal 34**: not a missing-content case at all. DocAI's raw OCR is
+  itself heavily garbled at this klal's opening - already documented
+  (marker misread לד/לו, several nearby words independently garbled,
+  "not fixable by better anchoring alone"). The stored text is the
+  already crop-verified CORRECT reading (from a 2026-08-05 fix), which
+  naturally diverges from Pass 3's raw-token comparison since raw DocAI
+  is wrong here, not the corpus.
+
+**Klal 69 - genuine cross-page truncation (35 words), same class as klal
+5.** Page 34 ends with a catchword duplicate of page 35's real first word
+(`ואע"ג`); stored text stopped exactly at that catchword, missing all of
+page 35's real continuation (`דספר הזוהר לא קמיירי רק בכתיבת השם הקדוש
+שם ההויה...עד...ע"כ :`). Crop-confirmed against page 35 before fixing.
+Appended (skipping the already-present catchword word to avoid a
+duplicate - see the klal 37 near-miss below for what happens when this
+step is skipped).
+
+**Klal 206 - genuine mid-text corruption, not a gap**, found while
+investigating Pass 3's report: two garbled tokens (`השרוידוקא`, `:לו`)
+sitting where ~16 real words should be (`לדבריו מההיא דר"פ אלו עוברין
+מ"ג א' דעלה דקתני במתני' הרי אלו`), PLUS the klal's tail was separately
+truncated by another ~16 words after that. Both confirmed by direct crop
+of page 73 (the real text reads coherently; the stored corruption does
+not parse as Hebrew at all) and fixed together - replaced the garbled
+tokens with the real reading and appended the missing tail.
+
+**Klal 217 - same mid-text-corruption-plus-tail-truncation pattern**:
+stored text had a garbled token (`עא"גדקב`) standing in for ~44 real
+words (`לפרקים דבכמה דוכתי אשכחן בגמרא...ובע"ז`), crossing the page
+75->76 boundary. Crop-confirmed at both ends (the passage's start and
+where it rejoins already-correct stored text) before fixing.
+
+**Klal 36-37 - the last remaining real span gap (ratio 0.44), resolved by
+locating klal 37's actual marker, not just splicing.** Unlike the other
+fixes this was a boundary problem: `gematria_trace_part1.json` had no
+marker position for klal 37 at all (`marker_not_found_in_window`) because
+DocAI misread its marker ז as ו (the same letter-confusion family as klal
+166/167, 196/197, 216 - now confirmed for klal 37 too). Two candidate
+positions existed (page 26 token 704, page 27 token 52, both matching the
+common formulaic opening `אם איתא לדרבי X`); resolved by checking which
+one's continuation matched klal 37's ALREADY-stored opening text - page 26
+token 704 matched exactly, confirming klal 37's real marker sits at token
+703 (misread `לו`) and klal 36's real span is fully captured once bounded
+there (only trivial tokenization-noise diffs remained, no real gap). Klal
+37 itself was then found genuinely truncated by 279 words at the tail
+(crop-confirmed at both the page-26 truncation point and the page-27
+resumption point matching klal 38's marker) - fixed.
+**One real near-miss self-caught by the test suite**: my first attempt at
+this splice reproduced the exact bug class documented for klal 37 already
+(page-boundary catchword duplication) - appended text starting with the
+catchword-duplicated `לישנא` on top of the already-present one, producing
+a literal `לישנא לישנא` that `test_no_new_duplicate_consecutive_words`
+correctly caught as a new, unexplained duplicate-consecutive-word pair.
+Investigated per that test's own required procedure (not silently
+baselined): confirmed via raw tokens that page 26's last real word
+`לישנא` is a catchword duplicate of page 27's genuine first word, exactly
+like the klal-69 fix - removed the extra word rather than baselining it.
+
+**`validate_part1_corpus_integrity.py`'s check-3 docstring overclaim
+fixed** (the "small and optional" item from the session handoff, same bug
+class as `check_klal_token_orphans.py`'s this session): the module
+docstring always claimed duplicate-phrase detection "within each klal AND
+across each adjacent klal pair," but only the adjacent-pair half was ever
+implemented. Added the missing `check_intra_klal_duplicate_phrases()`
+(same n=10 threshold). Found exactly the 3 genuine hits the session
+handoff predicted (klal 65, 189, 198 - each a halachic maxim restated
+verbatim later in the same klal's own body text, e.g. klal 65's rule
+restated immediately before the author's own gloss on it; crop-checked
+one to confirm). Gated in `tests/test_corpus_invariants.py` with a new
+`INTRA_KLAL_DUPLICATE_PHRASE_BASELINE`, same pattern as
+`DUPLICATE_WORD_BASELINE`.
+
+**Full verification, not just "tests pass"**: `check_klal_token_orphans.py`
+Pass 3 now reports zero real gaps (3 known false positives suppressed with
+citations); `validate_klal_span_coverage.py` now shows only the 4
+already-documented false-positive klalim (83-84, 106, 123, 175), klal 36-37
+no longer among them; `validate_part1_corpus_integrity.py` shows 0/0/0
+issues on checks 1/2/4 and exactly the expected 7 (3 distinct, baselined)
+hits on check 3. 14/14 pytest invariants pass (up from 13 - the new
+intra-klal duplicate-phrase test).
 
 ## Multi-page reconstruction APPLIED for klal 30/75/88 (+3,816 words), under explicit user authorization — 2026-08-12
 

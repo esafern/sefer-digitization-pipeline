@@ -241,9 +241,17 @@ SPAN_COVERAGE_BASELINE = {83, 106, 123, 175}
 #     corpus, per that same instruction. See PROJECT-STATUS.md.
 # `reconstruct_multipage_klalim.py` is still on disk; it is not part of
 # rebuild_all.sh (a deliberate one-off, run manually, not on every rebuild).
-# Klal 36-37 remains unreconstructed: unlike the other three it needs klal
-# 37's marker located before its span can even be split.
-SPAN_COVERAGE_KNOWN_REAL_GAPS = {36}
+#   {36} -> {} 2026-08-12: klal 36-37 fixed too. Located klal 37's real
+#     marker directly (page 26 token 703, docai misread לז as לו - the
+#     familiar ז/ו confusion pattern) by finding which of the two candidate
+#     positions actually opened with klal 37's already-correctly-stored
+#     text; confirmed klal 36's span was already fully captured once
+#     correctly bounded, then found and fixed a genuine 279-word tail
+#     truncation in klal 37 (crop-verified at both boundaries) - the actual
+#     content behind the ~285-word gap this set used to track.
+# Empty for now - every previously-tracked real gap has a confirmed fix.
+# Keep this mechanism (not delete it) for the next one that turns up.
+SPAN_COVERAGE_KNOWN_REAL_GAPS = set()
 
 
 def _load_klalim(path):
@@ -380,6 +388,26 @@ def test_part1_character_sanity(part_klalim, part1_integrity_validator):
 def test_part1_no_new_duplicated_phrases(part_klalim, part1_integrity_validator):
     issues = part1_integrity_validator.check_duplicate_phrases(part_klalim["part1.json"], n=10)
     assert not issues, f"Part-1 unexplained duplicated 10+-word phrase(s): {issues}"
+
+
+# check_intra_klal_duplicate_phrases (added 2026-08-12, closing the docstring
+# overclaim the module always had - see validate_part1_corpus_integrity.py)
+# has 3 known-genuine hits, each producing several overlapping n-gram window
+# reports: klal 65 (a rule restated verbatim before the author's own gloss -
+# "ב"ד יכול לבטל דברי ב"ד חבירו אא"כ גדול ממנו בחכמה ובמנין" - visually
+# confirmed as the klal's own title restated in its body, a common
+# rhetorical device in this book, not corruption), klal 189, klal 198.
+INTRA_KLAL_DUPLICATE_PHRASE_BASELINE = {65, 189, 198}
+
+
+def test_part1_no_new_intra_klal_duplicated_phrases(part_klalim, part1_integrity_validator):
+    issues = part1_integrity_validator.check_intra_klal_duplicate_phrases(part_klalim["part1.json"], n=10)
+    new_klalim = sorted({int(i.split()[1].rstrip(":")) for i in issues} - INTRA_KLAL_DUPLICATE_PHRASE_BASELINE)
+    assert not new_klalim, (
+        f"New klal(im) with an unexplained duplicated 10+-word phrase within their own text: "
+        f"{new_klalim}. Verify against the source before either fixing the text or adding to "
+        f"INTRA_KLAL_DUPLICATE_PHRASE_BASELINE."
+    )
 
 
 # --- Baseline (no-NEW-violations) checks ---
