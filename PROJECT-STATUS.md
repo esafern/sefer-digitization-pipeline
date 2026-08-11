@@ -237,13 +237,37 @@ nothing to compare against).
   matching docai page 40 exactly) - a true second reading for klal 88's restored
   text, at no cost.
 
-**Caveat, not yet resolved:** `vlm_extractions/`'s page numbering does not map
-cleanly onto `docai_word_boxes/`. `page_39`/`page_40`/`page_41` line up exactly,
-but `page_38.json` holds klal 75, whose marker is on docai page 36. It was also
-NOT included in the 37/38 leaf-swap correction (only `docai_word_boxes/` and
-`images/pdf_pages/` were), so it may now be stale on top of whatever the
-original offset is. Reconcile that numbering before trusting any VLM page as a
-witness - do not assume `vlm_extractions/page_N` means docai page N.
+**RESOLVED 2026-08-11 - and the caveat above was MY OWN measurement bug, not a
+data problem.** The earlier claim that `vlm_extractions/`'s numbering "does not
+map cleanly onto `docai_word_boxes/`" was produced by a `difflib.SequenceMatcher`
+call missing `autojunk=False`. On character sequences over 200 elements autojunk
+marks frequently-occurring characters as junk - which, for Hebrew text, is
+nearly every letter - so `find_longest_match` returned 2-11 character "matches"
+for every page pair, including pages that are in fact identical. Re-run with
+`autojunk=False`, **every one of the 12 extractions aligns with its own docai
+page** (`page_14`->14 at 120/120, `page_16`->16 at 120/120, `page_20`->20 at
+120/120, `page_40`->40 at 120/120, and so on). There is no offset and nothing to
+reconcile. This is the third time this session that a check produced confident
+near-silence because of how it was written rather than what it measured -
+exactly the class the audit was about, and worth noting that it caught me too.
+
+Two real (smaller) findings did come out of it:
+
+- **The 37/38 leaf swap did not break `vlm_extractions/`; it FIXED it.**
+  `page_38.json`'s content is leaf B's, and before the swap leaf B was numbered
+  37 - so that file was misaligned with docai all along and is now correct.
+- **`vlm_extractions/page_38.json` is a degenerate extraction** and should not
+  be trusted: 10,628 raw bytes of which almost all is trailing whitespace, one
+  klal record holding 95 characters, and its `klal_id` is 75 while the text it
+  contains (`אינו אלא מן המתמיהין`) actually belongs to **klal 76**. A
+  truncated/mislabelled VLM output, not a usable witness.
+
+**Bearing on the reconstruction:** VLM coverage exists for only 12 pages
+(14-20, 38-42), so of the three pages needing verification only **page 40 (klal
+88) has a usable VLM witness** (3,367 Hebrew characters, aligning with docai
+page 40 at 120/120). **Pages 24 (klal 30) and 37 (klal 75) have no VLM coverage
+at all** - for those two, Tesseract is the only independent reading available
+short of a fresh VLM pass.
 
 ### Witness pass RUN 2026-08-11 — `verify_reconstruction_witness.py`, and it found a real OCR error
 
