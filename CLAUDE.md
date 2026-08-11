@@ -119,10 +119,21 @@ in the canonical text files. Concretely:
    (see PROJECT-STATUS.md "Punctuation-token diff bug fixed") and its own
    performance/architecture problems; `build_review_html.py` is now archived
    at `archive/scripts/build_review_html.py`, not part of the live pipeline.
-   `SEFARIA-VLM-DEMO.html` (built by `build_vlm_demo.py`) and
    `VERIFIED-AGAINST-THE-INK.html` (an evidence showcase tied to
-   `CASE-YAD-MALACHI.md`) are the other two live demo/report artifacts at
-   root. As of 2026-08-06, one-off `*-VISUAL-REPORT.html` / `*-OVERVIEW.html`
+   `CASE-YAD-MALACHI.md`, which links it) is now the ONLY live demo/report
+   artifact at root. It is a curated evidence document — 13 embedded scan
+   crops with commentary, ~443 Hebrew characters total — NOT a rendering of
+   the corpus, so it does not go stale when klal text changes. It has no
+   generator script; it is hand-made and cannot be regenerated.
+   `SEFARIA-VLM-DEMO.html` and its generator `build_vlm_demo.py` were
+   ARCHIVED 2026-08-11 (`archive/docs/`, `archive/scripts/`): the demo was
+   built from the discredited `aligned_klalim/`, showed text differing from
+   `part1.json` in 145 of 222 Part-1 klalim, and rendered 14 fabricated
+   placeholder bounding boxes across all 667 klalim under a "Precise
+   Geometric Bounds" heading. Nothing linked it. It needs no replacement:
+   `review_server.py` supersedes it internally (real per-klal boxes from
+   `klal_page_regions.json`, live data, plus candidates and decisions), and
+   `VERIFIED-AGAINST-THE-INK.html` already fills the outward-facing role. As of 2026-08-06, one-off `*-VISUAL-REPORT.html` / `*-OVERVIEW.html`
    /  similar report docs from earlier in the project (dated through early
    August, superseded once `review.html` became the live verification tool,
    itself since superseded by `review_server.py`) were moved to

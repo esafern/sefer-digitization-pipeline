@@ -40,8 +40,16 @@ for real imports, `rebuild_all.sh` membership, and live callers):
   `archive/docs/`. The generator reads the discredited `aligned_klalim/` and the
   HTML showed 65% stale text with fabricated bounding boxes under a "Precise
   Geometric Bounds" heading. Archiving stops a knowingly-wrong artifact sitting
-  at root looking current. **If an outward-facing demo is still wanted it must
-  be rewritten against `part*.json` + `klal_page_regions.json`** - noted as open.
+  at root looking current. **CLOSED, no replacement needed** (checked
+  2026-08-11, correcting an earlier note in this document that called for a
+  rewrite): nothing ever linked it - `CASE-YAD-MALACHI.md` links
+  `VERIFIED-AGAINST-THE-INK.html`, not this. `review_server.py` supersedes it
+  internally with real per-klal boxes and live data, and
+  `VERIFIED-AGAINST-THE-INK.html` fills the outward-facing role. That file was
+  checked for the same staleness bug and does NOT have it: it holds only ~443
+  Hebrew characters and 13 embedded scan crops - a curated evidence document,
+  not a corpus rendering, so klal-text edits cannot make it drift. It has no
+  generator and is hand-made, so it cannot be regenerated if lost.
 - `validate_title_section_letter.py` → `archive/scripts/`. Already hard-failed
   as superseded.
 
