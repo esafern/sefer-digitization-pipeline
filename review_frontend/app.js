@@ -59,9 +59,6 @@ function buildLegend() {
     span.innerHTML = `<i style="${shape}"></i>${label}`;
     legend.appendChild(span);
   });
-  const punctSpan = document.createElement('span');
-  punctSpan.innerHTML = `<i style="background:#3182ce;border-radius:50%"></i>Proposed punctuation (pending review)`;
-  legend.appendChild(punctSpan);
 }
 
 // ---------- nav pane ----------
@@ -74,11 +71,9 @@ function navItemInnerHtml(k) {
   const openBadge = k.open_count ? `<span class="ncount ncount-open">${k.open_count}</span>` : '';
   const decidedBadge = k.decided_count ? `<span class="ncount ncount-decided">${k.decided_count}</span>` : '';
   // Punctuation review queue, same open/decided pattern as corrections but
-  // visually distinct (dot badge, punct- prefix) so the two queues don't
+  // (proposed-punctuation badges/markers were removed from the UI 2026-08-11;
   // get confused at a glance.
-  const punctOpenBadge = k.punctuation_open_count ? `<span class="ncount ncount-punct-open">${k.punctuation_open_count}·</span>` : '';
-  const punctDecidedBadge = k.punctuation_decided_count ? `<span class="ncount ncount-punct-decided">${k.punctuation_decided_count}·</span>` : '';
-  return `<span class="nid">${k.klal_id}</span><span class="ntitle" title="${(k.title || '').replace(/"/g, '&quot;')}">${k.title || ''}</span>${flagIcon}${openBadge}${decidedBadge}${punctOpenBadge}${punctDecidedBadge}`;
+  return `<span class="nid">${k.klal_id}</span><span class="ntitle" title="${(k.title || '').replace(/"/g, '&quot;')}">${k.title || ''}</span>${flagIcon}${openBadge}${decidedBadge}`;
 }
 
 function buildNav() {
@@ -191,11 +186,8 @@ function renderKlalBody(block, k) {
       gapsBefore[c.word_index].push(c);
     }
   });
-  const punctByIndex = {};
-  (k.punctuation || []).forEach(p => { punctByIndex[p.before_word_index] = p; });
 
   words.forEach((w, i) => {
-    if (punctByIndex[i]) body.appendChild(makePunctuationMarker(k.klal_id, punctByIndex[i]));
     if (gapsBefore[i]) gapsBefore[i].forEach(c => body.appendChild(makeGapMarker(k.klal_id, c)));
     if (w === '[.]') {
       const mark = document.createElement('span');

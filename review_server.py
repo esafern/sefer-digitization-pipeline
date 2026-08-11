@@ -89,6 +89,19 @@ def _load_punctuation_candidates():
     return _load_json("punctuation_candidates_part1.json", {})
 
 
+def _load_witness_queue():
+    """Independent-witness (Tesseract vs DocAI) disagreements for the
+    reconstructed continuation pages - see verify_reconstruction_witness.py.
+
+    These are anchored on the SCAN (page + bbox), not on a corpus word index,
+    which is deliberate: it means they can be reviewed by reading the ink even
+    though the reconstructed text is NOT in part1.json yet. Reviewing and
+    committing text to the corpus stay separate steps, the same way recording a
+    candidate decision is separate from apply_reviewer_decisions.py."""
+    q = _load_json("reconstruction_witness_queue.json", {})
+    return q.get("queue", []) if isinstance(q, dict) else []
+
+
 def _trusted_page(alignment, klal_id):
     r = alignment.get(klal_id, {})
     return r.get("matched_page") if r.get("trusted") else None
@@ -225,7 +238,20 @@ def api_page(page_num):
                 continue
             entry = _merge_decision(c, kid)
             entry["klal_id"] = kid
+            entry["kind"] = "correction"
             out.append(entry)
+
+    # Witness disagreements for this page. Keyed by docai_token_index, a
+    # different index space from corrections' word_index - safe because
+    # current_for() filters on decision_type, so the two never collide.
+    for w in _load_witness_queue():
+        if w.get("page") != page_num or not w.get("bbox"):
+            continue
+        entry = dict(w)
+        entry["kind"] = "witness"
+        entry["current_decision"] = rd.current_for(
+            w["klal_id"], w["docai_token_index"], "witness_choice")
+        out.append(entry)
     return out
 
 
@@ -262,6 +288,42 @@ def api_post_punctuation_decision(body):
         note=body.get("note"),
     )
     return record
+
+
+def api_witness_summary():
+    """Pages carrying witness items + tier counts. Needed because these are
+    CONTINUATION-ONLY pages (no klal marker of their own), so they are absent
+    from the nav's klal->page map and the scan pane's page-stepper would skip
+    straight over them - the reviewer could not reach the very pages the queue
+    is about."""
+    q = _load_witness_queue()
+    decided = rd.all_current("witness_choice")
+    pages, tiers = {}, {}
+    for w in q:
+        pg = w.get("page")
+        d = (w["klal_id"], w["docai_token_index"]) in decided
+        e = pages.setdefault(pg, {"page": pg, "klal_id": w.get("klal_id"), "total": 0, "decided": 0})
+        e["total"] += 1
+        e["decided"] += 1 if d else 0
+        tiers[w.get("tier")] = tiers.get(w.get("tier"), 0) + 1
+    return {"pages": [pages[k] for k in sorted(pages)], "by_tier": tiers, "total": len(q)}
+
+
+def api_post_witness_decision(body):
+    klal_id = int(body["klal_id"])
+    token_index = int(body["docai_token_index"])
+    queue = _load_witness_queue()
+    snapshot = next((w for w in queue
+                     if w["klal_id"] == klal_id and w["docai_token_index"] == token_index), None)
+    return rd.append_decision(
+        "witness_choice",
+        klal_id=klal_id,
+        word_index=token_index,
+        chosen_source=body.get("chosen_source"),   # docai_reading | tesseract_reading | custom | unreadable
+        chosen_text=body.get("chosen_text"),
+        candidate_snapshot=snapshot,
+        note=body.get("note"),
+    )
 
 
 def api_post_klal_flag(body):
@@ -327,6 +389,8 @@ class Handler(BaseHTTPRequestHandler):
         try:
             if path == "/api/flags":
                 return self._send_json(api_flags())
+            if path == "/api/witness":
+                return self._send_json(api_witness_summary())
             if path == "/api/klalim":
                 return self._send_json(api_klalim())
             m = ROUTE_KLAL_FLAG.match(path)
@@ -363,6 +427,8 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send_json(api_post_candidate_decision(body), status=201)
             if path == "/api/decisions/punctuation":
                 return self._send_json(api_post_punctuation_decision(body), status=201)
+            if path == "/api/decisions/witness":
+                return self._send_json(api_post_witness_decision(body), status=201)
             if path == "/api/decisions/klal_flag":
                 return self._send_json(api_post_klal_flag(body), status=201)
             return self._send_error_json(404, "unknown endpoint")

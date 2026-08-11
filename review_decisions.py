@@ -17,7 +17,11 @@
 #                       row's applied_decision_id
 #   ts                  ISO8601 UTC timestamp, set at append time
 #   decision_type       "candidate_choice" | "klal_flag" | "apply_event"
-#                       | "punctuation_choice"
+#                       | "punctuation_choice" | "witness_choice"
+#                       witness_choice: an independent-witness (Tesseract vs
+#                       DocAI) disagreement on a reconstructed page, keyed by
+#                       docai_token_index rather than a corpus word index,
+#                       because the text it concerns is not in part1.json yet.
 #   klal_id             int
 #   word_index          int for candidate_choice/apply_event/
 #                       punctuation_choice, null for klal_flag
@@ -52,7 +56,8 @@ REPO = os.path.dirname(os.path.abspath(__file__))
 # git-tracked decisions log.
 DECISIONS_PATH = os.environ.get("REVIEW_DECISIONS_PATH") or os.path.join(REPO, "review_decisions.jsonl")
 
-VALID_DECISION_TYPES = {"candidate_choice", "klal_flag", "apply_event", "punctuation_choice"}
+VALID_DECISION_TYPES = {"candidate_choice", "klal_flag", "apply_event", "punctuation_choice",
+                        "witness_choice"}
 
 
 def _now_iso():
