@@ -126,6 +126,16 @@ specific instances) - a script's claimed coverage is not evidence of its
 actual coverage. Worth a sanity pass on any OTHER validator's docstring
 before trusting it at face value.
 
+**7. Finding 11 FIXED 2026-08-12.** Klal 152 and 154's `clean_text` both
+carried a trailing `\n` left over from the 2026-08-06 debug-print bug (a
+stray `print(len(...))` whose newline leaked into the string) - the only
+2 of 222 Part-1 klalim with any trailing whitespace at all (confirmed by
+scanning every klal for `clean_text != clean_text.rstrip()`; every other
+klal ends cleanly on `:`). `test_no_debug_artifact_leaks` only regexes
+the *start* of `clean_text`, so this survived undetected. Stripped both
+(2-line diff, no other content touched), `./rebuild_all.sh --skip-vision`
+clean, 14/14.
+
 **No other known open items beyond the above.** Full detail, evidence,
 and the complete dated history behind every claim above is in
 `PROJECT-STATUS-HISTORY.md`.
