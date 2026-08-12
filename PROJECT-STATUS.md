@@ -80,15 +80,33 @@ against the live API for all 10 affected klalim
 candidate at `word_index == word_count`, all now covered by the same
 check. `tests/test_review_server.py` (5/5) still passes.
 
-**3. The other 10 confirmed bugs from the same audit (numbered 3-12 in
-`PROJECT-STATUS-HISTORY.md`) are lower-severity - witness-tier
+**3. Finding 5 FIXED 2026-08-12.** `check_klal_token_orphans.py`'s
+`real_span_tokens` hard-stopped at a 1-page gap and returned `None` for
+anything wider, and the caller `continue`d past that `None` with no
+accounting - so this check silently never ran on 7 klal-boundary pairs,
+including klal 30->31, 75->76, 88->89 (all real 2-page gaps: one full
+intervening page consumed entirely by a multi-page reconstruction, no
+klal marker of its own). Those three are exactly the klalim the session
+handoff already flags as having "almost no independent verification."
+Generalized `real_span_tokens` to walk any number of intervening pages
+instead of special-casing one; added explicit skip accounting with an
+assertion that checked+skipped always equals the total pair count (same
+fix shape as round 1's `validate_klal_span_coverage.py` finding).
+Result: **"Checked 204" (was 197), 0 skipped, and Pass 3's full-span gap
+scan now runs on klal 30/75/88 for the first time and reports no gaps** -
+not fully independent of DocAI (the reconstruction's own source), but a
+genuine assembly-correctness check (wrong token order/dropped/duplicated
+content would still be caught) that had simply never executed before.
+
+**4. The remaining 9 confirmed bugs from the same audit (numbered 3, 4,
+6-12 in `PROJECT-STATUS-HISTORY.md`) are lower-severity - witness-tier
 mis-triage, a structural blind spot for DocAI omissions, stale nav
 badges after a witness save, delete-opcode vision prompts asking the
 model to choose against the literal string "None," and others - read
 that entry in full before picking the next piece of work; don't
 triage from this summary alone.**
 
-**4. Klal 30/75/88's four tier-A witness adjudications were carried
+**5. Klal 30/75/88's four tier-A witness adjudications were carried
 forward and closed 2026-08-12**: `וכוותיידו`→`וכוותייהו` (klal 88) and
 `בתוס ' ד"ה`→`כתוס ' ד"ה` (klal 30) are **APPLIED** to `part1.json`,
 rebuild clean. `ידן`/`ידו` (klal 30 - scan actually shows `ידך`) and
@@ -101,7 +119,7 @@ tier D: 217) is still open and still the only real second opinion on the
 its own tier triage is now known to be wrong for 16.1% of items - read
 that finding before trusting a tier label at face value.
 
-**5. General standing caution, not a specific open bug**: docstring/
+**6. General standing caution, not a specific open bug**: docstring/
 comment overclaims have now turned up multiple times this session across
 different validator scripts (see `PROJECT-STATUS-HISTORY.md` for the
 specific instances) - a script's claimed coverage is not evidence of its

@@ -133,23 +133,40 @@ def get_page(cache, page):
 
 def real_span_tokens(cache, x, nx):
     """Real docai token span from klal x's marker to klal nx's marker,
-    same-page or single-page-crossing (mirroring validate_klal_span_
-    coverage.py's own span logic), with page furniture stripped so it's
-    comparable to clean_text."""
+    across any number of intervening pages, with page furniture stripped so
+    it's comparable to clean_text.
+
+    FIXED 2026-08-12 (PROJECT-STATUS.md finding 5, second audit round): this
+    used to hard-stop at `next_page == page + 1` and return None for any
+    wider gap, with the caller silently `continue`-ing past the None with no
+    accounting - so this check simply never ran on klal 30->31, 75->76,
+    88->89, 159->160, 167->168, 169->170, 197->199, all real 2-page gaps
+    (one full intervening page with no klal marker of its own). Those
+    include exactly the three multi-page reconstructions (klal 30/75/88)
+    with the least other independent verification in the corpus - the
+    highest-value place for this check to actually run. Generalized to walk
+    every intervening page rather than special-casing one extra page, so a
+    3+ page gap (none currently exist, but nothing here assumes otherwise)
+    is handled the same way instead of hitting the same wall again."""
     page, next_page = x["page"], nx["page"]
     tokens_this = get_page(cache, page)
     if tokens_this is None:
         return None
+    if next_page < page:
+        return None  # not expected to occur; guard rather than misbehave
     if next_page == page:
         words = [t["text"] for t in tokens_this[x["marker_position"]:nx["marker_position"]]]
-    elif next_page == page + 1:
+    else:
+        words = [t["text"] for t in tokens_this[x["marker_position"]:]]
+        for mid_page in range(page + 1, next_page):
+            tokens_mid = get_page(cache, mid_page)
+            if tokens_mid is None:
+                return None
+            words += [t["text"] for t in tokens_mid]
         tokens_next = get_page(cache, next_page)
         if tokens_next is None:
             return None
-        words = [t["text"] for t in tokens_this[x["marker_position"]:]] + \
-                [t["text"] for t in tokens_next[:nx["marker_position"]]]
-    else:
-        return None  # spans more than one page boundary - not handled here
+        words += [t["text"] for t in tokens_next[:nx["marker_position"]]]
     return strip_furniture(words)
 
 
@@ -184,12 +201,23 @@ def main():
     mismatches = []
     spans = {}  # kid -> real_tokens (for pass 2)
     adjacent_spans = {}  # kid -> real_tokens, ONLY where next_kid == kid+1 (for pass 3 - see below)
+    # FIXED 2026-08-12 (PROJECT-STATUS.md finding 5): both `continue`s below
+    # used to drop a pair with no record of having done so - the printed
+    # "Checked N" count silently didn't sum to len(ids)-1, the same shape as
+    # validate_klal_span_coverage.py's silent-drop bug (round 1 of this
+    # audit). Now every pair lands in exactly one bucket - spans (checked)
+    # or skipped (with a reason) - and main() asserts they sum correctly.
+    skipped = []  # (kid, next_kid, reason)
     for idx, kid in enumerate(ids):
         if idx + 1 >= len(ids):
             continue
         next_kid = ids[idx + 1]
         real_tokens = real_span_tokens(cache, trace[kid], trace[next_kid])
-        if real_tokens is None or kid not in part1:
+        if kid not in part1:
+            skipped.append((kid, next_kid, "klal_id not in part1.json"))
+            continue
+        if real_tokens is None:
+            skipped.append((kid, next_kid, "docai page data unavailable for this span"))
             continue
         if next_kid == kid + 1:
             adjacent_spans[kid] = real_tokens
@@ -198,7 +226,15 @@ def main():
         if sim < 0.5:
             mismatches.append((kid, next_kid, sim))
 
+    total_pairs = max(len(ids) - 1, 0)
+    assert len(spans) + len(skipped) == total_pairs, (
+        f"!! ACCOUNTING ERROR: {len(spans)} checked + {len(skipped)} skipped "
+        f"!= {total_pairs} total pairs - a pair fell through uncounted.")
     print(f"Checked {len(spans)} klal spans with known real positions on both ends.")
+    if skipped:
+        print(f"Skipped {len(skipped)} pair(s) (not silently dropped - see reason):")
+        for kid, next_kid, reason in skipped:
+            print(f"  klal {kid} -> {next_kid}: {reason}")
     print(f"\n{len(mismatches)} klal(im) whose stored clean_text does NOT open with its own real "
           f"marker-position text (word-sequence similarity < 0.5):")
     for kid, next_kid, sim in mismatches:
