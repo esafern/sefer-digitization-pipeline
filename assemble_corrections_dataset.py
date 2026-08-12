@@ -15,10 +15,17 @@ def classify(c):
     conf = c.get("vision_confidence")
 
     if op == "replace":
+        # FIXED 2026-08-13 (PROJECT-STATUS.md finding 8): 'delete' below
+        # gates on confidence >= 0.7 before trusting a selection; this
+        # branch used to trust A/B at any confidence, including a
+        # low-confidence guess - asymmetric for no principled reason.
+        # Currently inert (all 214 live replace candidates score >= 0.7),
+        # but a future low-confidence replace would otherwise sail through
+        # as if it were a confident machine resolution.
         if sel == "A":
-            return "current_text_may_be_wrong"
+            return "current_text_may_be_wrong" if conf and conf >= 0.7 else "ambiguous"
         if sel == "B":
-            return "current_text_confirmed"
+            return "current_text_confirmed" if conf and conf >= 0.7 else "ambiguous"
         if sel == "UNCERTAIN":
             return "ambiguous"
         return "error"

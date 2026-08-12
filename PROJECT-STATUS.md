@@ -191,6 +191,33 @@ the actual UI panel; `klalById[30]` updated in-place from
 155, 155` with no reload, and a fresh `/api/klalim` fetch immediately
 after returned the identical numbers - client and server agree.
 
+**11. Finding 8 FIXED 2026-08-13.** `assemble_corrections_dataset.py`'s
+`classify()` gated `delete`-opcode candidates on confidence >= 0.7 before
+trusting a vision selection, but applied no confidence gate at all to
+`replace`-opcode candidates - asymmetric for no principled reason.
+Confirmed inert on live data first (0 of the 214 live replace candidates
+have an A/B selection below 0.7), then added the matching gate: a
+low-confidence A/B now falls to `ambiguous` instead of being trusted as a
+resolved answer, same as `delete` already does. Re-ran
+`assemble_corrections_dataset.py`: `corrections_part1.json` is
+byte-identical, confirming zero live-data impact as predicted. 14/14.
+
+**12. Remaining open findings from the second audit round, not yet
+fixed**: 3 (witness-tier triage wrong on 16.1% of the queue - needs
+per-word not per-segment lexicon lookup), 4 (the witness pass structurally
+drops every DocAI-omission case, `insert` opcodes), 10
+(`strip_tail_furniture` in `reconstruct_multipage_klalim.py` discards
+everything after the "Digitized" watermark token with only a printed
+note - harmless today, page 25's tail proves it can silently drop a real
+word), 12 (20/222 klal region highlight boxes have no end boundary -
+display-only, not corpus-content). See `PROJECT-STATUS-HISTORY.md`'s
+"Second source-audit round" entry for full detail on each before picking
+one up. Also still open: the "unverified risks" list in that same entry
+(never-invalidated `apply_event`, page-less witness decision keys,
+`propose_punctuation_part1.py`'s prompt-blind cache key, the blanket
+`PASS3_KNOWN_FALSE_POSITIVES` allowlist, `app.js` never refetching
+`/api/klalim`, the folio-vs-marker heuristic that ate klal 89's `פט`).
+
 **No other known open items beyond the above.** Full detail, evidence,
 and the complete dated history behind every claim above is in
 `PROJECT-STATUS-HISTORY.md`.
