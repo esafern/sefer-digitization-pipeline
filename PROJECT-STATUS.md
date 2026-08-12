@@ -66,13 +66,19 @@ nothing belongs here", `chosen_text=''`) still gets misreported as
 rather than recorded as its own no-op - cosmetic (over-cautious label,
 not data loss) but worth a follow-up.
 
-**2. 10 of 29 delete-opcode candidates (9 of them `possible_omission`,
-the highest-value class) never render in the review dashboard's text
-pane** - they're filed at `word_index == len(words)` and the renderer's
-loop never reaches that index. A reviewer working the text pane normally
-will never see klal 84/106/114/138/164/171/175/193/211/219's delete
-candidates at all; they're only reachable via the scan pane. Full
-evidence in `PROJECT-STATUS-HISTORY.md`, finding ★2.
+**2. ★2 FIXED 2026-08-12.** `review_frontend/app.js`'s `renderKlalBody`
+only rendered a delete-opcode gap marker for `i < words.length` (the
+`forEach` loop's range); added one extra check after the loop for
+`gapsBefore[words.length]`, rendering it at the end of the body - the
+same position it would have taken at `i == words.length`. Verified two
+ways: (a) in the browser via the live dashboard, klal 219's previously
+invisible candidate (`ס"ח ונכון הוא`, 98% vision confidence,
+`possible_omission`) now renders as a clickable red marker at the end of
+the text and opens the normal decision panel; (b) programmatically
+against the live API for all 10 affected klalim
+(84/106/114/138/164/171/175/193/211/219) - each has exactly one delete
+candidate at `word_index == word_count`, all now covered by the same
+check. `tests/test_review_server.py` (5/5) still passes.
 
 **3. The other 10 confirmed bugs from the same audit (numbered 3-12 in
 `PROJECT-STATUS-HISTORY.md`) are lower-severity - witness-tier

@@ -232,6 +232,13 @@ function renderKlalBody(block, k) {
     }
     body.appendChild(document.createTextNode(' '));
   });
+  // A delete-opcode candidate can be filed at word_index == words.length
+  // (missing text trails the klal's very last word, e.g. a boundary case
+  // at a klal seam) - the forEach above only ever visits i < words.length,
+  // so that gap was silently never rendered. Render it after the loop,
+  // in the same "before word i" position it would have taken at i ==
+  // words.length, i.e. at the end of the body.
+  if (gapsBefore[words.length]) gapsBefore[words.length].forEach(c => body.appendChild(makeGapMarker(k.klal_id, c)));
 }
 
 // ---------- proposed punctuation markers ----------
