@@ -956,7 +956,21 @@ function jumpTo(klalId) {
 function setActiveKlal(klalId) {
   document.querySelectorAll('.nav-item.active').forEach(el => el.classList.remove('active'));
   const navEl = document.getElementById('nav-' + klalId);
-  if (navEl) navEl.classList.add('active');
+  if (navEl) {
+    navEl.classList.add('active');
+    // Scrolling the middle text pane only toggled this class before - the
+    // nav pane's own scroll position never followed, so the highlighted
+    // row silently scrolled out of view as you read through the corpus.
+    // 'nearest' is a no-op when the row is already visible (e.g. right
+    // after a click in jumpTo()), so this only moves the nav pane when it
+    // actually needs to. behavior:'auto' (not 'smooth') deliberately -
+    // this fires continuously as a background reaction to text-pane
+    // scrolling, and confirmed via testing that 'smooth' can silently
+    // never complete (rAF-driven smooth-scroll gets throttled when the
+    // tab isn't in the foreground), leaving the nav pane stuck instead of
+    // just less animated.
+    navEl.scrollIntoView({ block: 'nearest', behavior: 'auto' });
+  }
   const k = klalById[klalId];
   if (k) {
     klalIndicator.textContent = 'כלל ' + klalId;

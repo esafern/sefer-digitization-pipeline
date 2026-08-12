@@ -147,6 +147,40 @@ integrity.py`). Worth a quick sanity pass on any OTHER validator's
 docstring before trusting its claimed coverage at face value - see Lesson
 19-adjacent pattern, "a check that exists can still not do what it says."
 
+## Nav pane didn't follow the middle pane while scrolling — found and fixed, 2026-08-12
+
+**Bug**: user reported "right pane doesn't scroll down when middle is
+scrolled." Confirmed by reading the code, not guessing: `setActiveKlal()`
+(`review_frontend/app.js`) is called on every scroll-driven active-klal
+change (`updateActiveFromScroll()`, wired to `#text-scroll`'s scroll
+listener) and correctly toggles the `.active` CSS class on the matching
+nav-pane row - but it never scrolled the nav pane's own container
+(`#nav-list`) to bring that row into view. Scrolling deep into the corpus
+(e.g. to klal 150) left the highlighted nav row far outside the visible
+nav-list area with no visible feedback at all.
+
+**Fix**: added `navEl.scrollIntoView({ block: 'nearest', behavior: 'auto' })`
+inside `setActiveKlal()`, right after the class toggle - `'nearest'` makes
+it a no-op when the row is already visible (e.g. immediately after a
+manual click in `jumpTo()`, which already scrolled there), so it only
+moves the nav pane when it's actually out of sync.
+
+**Real second bug found while verifying the fix, before it shipped**:
+first attempt used `behavior: 'smooth'` (matching `jumpTo()`'s existing
+style for its own scroll). Testing in the browser showed it silently
+never completed - `navList.scrollTop` stayed at 0 indefinitely - while the
+identical call with `behavior: 'auto'` moved it instantly. Root cause:
+`requestAnimationFrame`-driven smooth-scroll physics get throttled when a
+tab isn't in the foreground, and this call fires continuously as a
+background reaction to text-pane scrolling (unlike `jumpTo()`'s one-time,
+always-foregrounded, user-click-triggered scroll) - so smooth behavior
+could leave the nav pane stuck rather than just less animated. Switched to
+`'auto'` for reliability. Verified end-to-end: scrolled the text pane to
+klal 150, confirmed via `getBoundingClientRect()` that the corresponding
+nav row became visible (`navList.scrollTop` moved from 0 to 4208) and
+confirmed visually with a screenshot (nav pane showing the klal 128-147
+neighborhood while the text/scan panes show klal 150, not stuck at 1-20).
+
 ### Standing cautions for whoever picks this up
 
 - **Verification coverage for the reconstructed pages is thin and cannot be
