@@ -4,10 +4,12 @@
 
 ### State on disk right now (verified, not remembered)
 
-- **Branch `master`, HEAD `86c83ef`, working tree DIRTY** - part1.json,
-  review_server.py, both validator scripts, and the review_frontend/* files
-  all have real, verified, uncommitted changes from this session (listed
-  below). Nothing has been committed since `86c83ef`.
+- **Branch `master`, HEAD `6c89f54`, working tree CLEAN.** Four commits
+  this session on top of `86c83ef`: `b54076e` (witness-queue UI, klal 5/29
+  fixes, two validator bugs, reconstruction applied for klal 30/75/88),
+  `f606c54` (klal 37/69/206/217 fixes, klal 36-37 boundary resolved,
+  klal 4/18/34 false positives), `9c39772` (nav number alignment),
+  `6c89f54` (nav pane scroll-sync).
 - **The corpus changed substantially, and every previously-tracked gap is
   now closed.** Klal 5 gained 65 real words (522 -> 587); klal 29 lost one
   stray duplicate word; klal 30/75/88 got the multi-page reconstruction
@@ -77,13 +79,21 @@
    `SPAN_COVERAGE_KNOWN_REAL_GAPS` is now empty. 14/14 pytest invariants
    pass.
 
-8. **Nav-numbering alignment bug FOUND AND FIXED** - see item 2 in NEXT
-   STEPS below for the full trace. User pinpointed it precisely ("11 21
-   31 41 are to the right... i think monospace"); root cause was Inter's
-   unequal digit widths (`1` narrower than other digits), invisible to my
-   earlier right-edge-only pixel check. Fixed with `font-variant-numeric:
-   tabular-nums`; re-measured every 2-digit klal number 10-99 as
-   pixel-identical after the fix.
+8. **Nav-numbering alignment bug FOUND AND FIXED.** User pinpointed it
+   precisely ("11 21 31 41 are to the right... i think monospace"); root
+   cause was Inter's unequal digit widths (`1` narrower than other
+   digits), invisible to my earlier right-edge-only pixel check. Fixed
+   with `font-variant-numeric: tabular-nums`; re-measured every 2-digit
+   klal number 10-99 as pixel-identical after the fix. See dated log
+   entry (search "monospace").
+9. **Nav pane not following the middle pane while scrolling, FOUND AND
+   FIXED** - `setActiveKlal()` toggled the active row's CSS class but
+   never scrolled the nav pane's own container to show it.
+   `scrollIntoView({block:'nearest'})` added; also caught and fixed a
+   second real bug while verifying - `behavior:'smooth'` silently never
+   completes for this continuous background-scroll-sync call (rAF
+   throttling when unfocused), switched to `'auto'`. See dated log entry
+   "Nav pane didn't follow the middle pane while scrolling."
 
 ### NEXT STEPS, in order
 
@@ -115,32 +125,7 @@ adjudications, already crop-checked:
    - `בתוס ד"ה` - tier-A false positive; but the scan reads `כתוס'` with a kaf
      where DocAI has a bet. Separate small check.
 
-**2. Nav-numbering bug FOUND AND FIXED, 2026-08-12** (closing item 2 above -
-the user pinpointed it precisely: "I see 11 21 31 41 are all to the right
-of the other nums. i think monospace"). Root cause confirmed by measuring
-rendered text width, not guessed: Inter's digit glyphs aren't equal-width
-(`font-variant-numeric` was never set), and the digit `1` is narrower than
-`0`/`2`-`9` - measured `"11"` at 11px rendered width vs `"10"`/`"12"` at
-14px. Since `.nid` is right-aligned in a fixed box, a narrower string's
-LEFT edge sits further right than its neighbors', which is exactly what
-"to the right of the other nums" describes for any number containing a
-`1` digit (11, 21, 31, 41, but also 12, 13, 19... - the user's four
-examples were the most visually obvious, not the only affected numbers).
-Fixed with `font-variant-numeric: tabular-nums` on `.nav-item .nid`
-(`review_frontend/app.css`) - the user's own diagnosis ("monospace") was
-correct in spirit; tabular-nums is the standard way to get that within a
-proportional font rather than switching fonts. Verified precisely: every
-2-digit klal number from 10-99 now renders at an identical 17px width and
-identical left position (1358px) - re-measured 10/11/12/13/20/21/22/30/
-31/32/40/41/42 after the fix, all identical. Confirmed visually too
-(screenshot of klal 9-18 shows a clean aligned column). My earlier
-"investigated, not reproduced" note above undersold the search - the
-original pixel check only compared each number's RIGHT edge (which was
-always consistent, since text-align was already correct), never compared
-rendered WIDTH between different digit combinations, which is where the
-actual defect was.
-
-**3. General standing caution, not a specific open bug**: two independent
+**2. General standing caution, not a specific open bug**: two independent
 docstring-overclaim bugs turned up this session in different validator
 scripts (`check_klal_token_orphans.py`, `validate_part1_corpus_
 integrity.py`). Worth a quick sanity pass on any OTHER validator's
