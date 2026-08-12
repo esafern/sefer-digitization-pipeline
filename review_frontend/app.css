@@ -292,7 +292,13 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
 }
 .nav-item:hover { background: var(--accent-wash); }
 .nav-item.active { background: #bee3f8; }
-.nav-item .nid { color: var(--accent); font-weight: 700; min-width: 32px; font-family: 'Inter', sans-serif; }
+/* tabular-nums: Inter's default digit widths aren't equal (e.g. "1" is
+   narrower than "0"/"2"-"9"), so right-aligned numbers like 11/21/31/41
+   sat visibly closer to the right edge than neighbors like 10/12/20/22 -
+   confirmed by measuring rendered text width (11px for "11" vs 14px for
+   "10"/"12"). Forcing fixed-width digits makes every klal number occupy
+   the same width regardless of which digits it contains. */
+.nav-item .nid { color: var(--accent); font-weight: 700; min-width: 32px; font-family: 'Inter', sans-serif; font-variant-numeric: tabular-nums; }
 .nav-item .ntitle { flex: 1; min-width: 0; color: var(--ink-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .nav-item .nflag { color: var(--pending); font-size: 12px; flex-shrink: 0; }
 .nav-item .ncount {
