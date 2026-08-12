@@ -1,121 +1,62 @@
 # Project Status — Open Items & Investigation Log
 
-## ►► SESSION HANDOFF — read this first, 2026-08-12 (updated in place, not appended - see dated log below for the superseded 2026-08-11 state)
+## ►► SESSION HANDOFF — read this first, 2026-08-12 (fully rewritten for a clean handoff before context clear; supersedes all earlier revisions of this section - see dated log below for the full incremental history)
 
 ### State on disk right now (verified, not remembered)
 
-- **Branch `master`, HEAD `6c89f54`, working tree CLEAN.** Four commits
-  this session on top of `86c83ef`: `b54076e` (witness-queue UI, klal 5/29
-  fixes, two validator bugs, reconstruction applied for klal 30/75/88),
-  `f606c54` (klal 37/69/206/217 fixes, klal 36-37 boundary resolved,
-  klal 4/18/34 false positives), `9c39772` (nav number alignment),
-  `6c89f54` (nav pane scroll-sync).
-- **The corpus changed substantially, and every previously-tracked gap is
-  now closed.** Klal 5 gained 65 real words (522 -> 587); klal 29 lost one
-  stray duplicate word; klal 30/75/88 got the multi-page reconstruction
-  applied under explicit user authorization (+3,816 words); klal 37 (+278
-  words) and klal 69 (+35) had genuine cross-page truncations fixed; klal
-  206 and 217 had genuine mid-text corruption (garbled tokens standing in
-  for real content) fixed alongside their own tail truncations; klal
-  36-37's boundary was resolved by locating klal 37's actual (DocAI-
-  misread) marker. `SPAN_COVERAGE_KNOWN_REAL_GAPS` is now empty. See the
-  dated log entries below, especially "All open corpus-content bugs
-  closed" and "Multi-page reconstruction APPLIED."
+- **Branch `master`, HEAD `6a321e2`, working tree CLEAN.** Six commits this
+  session on top of `86c83ef`, in order: `b54076e` (witness-queue frontend
+  wiring, klal 5/29 fixes, two validator bugs fixed, multi-page
+  reconstruction applied for klal 30/75/88), `f606c54` (klal 37/69/206/217
+  fixes, klal 36-37 boundary resolved, klal 4/18/34 confirmed false
+  positives, a third validator docstring bug fixed), `9c39772` (nav-pane
+  number alignment), `6c89f54` (nav-pane scroll-sync), `2ad100f`
+  (handoff-doc cleanup, no code change), `c7403f5` (witness items folded
+  into the tri-state system), `6a321e2` (one human review decision
+  recorded via the dashboard).
+- **Review dashboard is running** (`python3 review_server.py`, currently
+  PID varies by session - check `lsof -i :8420` first per CLAUDE.md).
+  **The user has been actively reviewing in it during this session** -
+  real decisions for klal 6/57/103/104/105 landed in
+  `review_decisions.jsonl` outside anything this session automated;
+  expect more by the time this is read.
+- **Every previously-tracked corpus-content gap is closed.**
+  `SPAN_COVERAGE_KNOWN_REAL_GAPS` is empty; `check_klal_token_orphans.py`
+  reports zero real gaps (3 confirmed false positives allowlisted: klal 4,
+  18, 34). Fixed this session: klal 5 (+65 words), klal 29 (-1 stray
+  duplicate marker), klal 30/75/88 (+3,816 words, multi-page reconstruction
+  applied under explicit user authorization), klal 37 (+278), klal 69
+  (+35), klal 206 and 217 (garbled mid-text corruption replaced with real
+  content, plus their own tail truncations fixed). 14/14 pytest invariants
+  pass. See dated log entries "Multi-page reconstruction APPLIED" and "All
+  open corpus-content bugs closed" for full traces.
+- **Review-dashboard UI is in a good, internally consistent state**: the
+  witness queue (tier B/C/D independent-witness disagreements on the
+  reconstructed pages) is fully wired end-to-end and its items now use the
+  exact same Machine-Disputed/Machine-Resolved/Human-Decided tri-state
+  color/counting system as ordinary corrections (no separate category);
+  the nav pane's klal numbers are pixel-aligned (tabular digit widths) and
+  its scroll position now follows the middle text pane. See the several
+  dated log entries below titled with "found and fixed"/"FOUND AND FIXED"
+  for each specific bug and how it was verified.
 - `berlin_square_corrected.pdf` and `berlin_square_original_transposed.pdf`
   are both tracked. Repo is ~238 MB.
 
-### What is genuinely finished (this update)
-
-1. **Witness-queue frontend wiring is done and verified in the running UI**
-   (was step 1 below, now closed): `showPage()` branches on `kind`, witness
-   boxes render distinctly (dashed purple, solid gray once decided),
-   `pagesWithKlalim()` reaches pages 24/37/40 via `/api/witness`, the
-   witness panel opens with DocAI/Tesseract/unreadable/custom options and
-   saves to `/api/decisions/witness` - tested end-to-end in the browser
-   (clicked a real box on page 24, saved a real decision, confirmed the
-   box flipped to "decided" styling and the count persisted server-side).
-2. **Klal 5 cross-page truncation found and fixed** (65 words) - see dated
-   log entry "Klal 5 cross-page truncation FOUND AND FIXED."
-3. **Two real bugs found and fixed in the standing validators** that should
-   have caught the klal 5 gap and didn't - `validate_catchword_
-   continuity.py` (marker-skip heuristic was eating real words; confirmed
-   matches jumped 21/69 -> 58/69 corpus-wide after the fix) and
-   `check_klal_token_orphans.py` (added a real full-span Pass 3; its first
-   run had its own false-positive bug from span aggregation across
-   markerless klalim, also found and fixed same session). See the same
-   dated log entry.
-4. Review dashboard: tri-state terminology unified (Machine-Disputed /
-   Machine-Resolved / Human-Decided) across the legend, tooltip, and
-   candidate panel; legend now shows live corpus-wide counts for all three;
-   candidate panel had no way to record "confirmed omission" for a gap
-   correction (only for the opposite case) - fixed. See the three dated log
-   entries below this handoff.
-5. **Klal 29's stray duplicate marker fixed** (see item above) and **the
-   witness panel now shows real OCR text context** around each item
-   (`GET /api/witness/context/<page>/<token_index>`), not just an isolated
-   image crop, per direct user feedback. Building it caught a real
-   indexing bug first (`docai_token_index` is not a raw-array index - see
-   the dated log entry "Klal 29's stray trailing marker... witness panel
-   gained real text context" for the full trace); fixed and re-verified in
-   the browser before shipping.
-6. **Multi-page reconstruction APPLIED for klal 30/75/88** under explicit
-   user authorization ("just go with docai... flag questionable words as
-   usual") - see the dated log entry "Multi-page reconstruction APPLIED."
-   +3,816 words; one real gate failure investigated and resolved
-   (`(30, "לה")` duplicate-word check - confirmed genuine, a recurring
-   halachic term, not a bug). Verified end-to-end in the browser (text
-   renders in the middle pane, flagged words show correct tri-state
-   styling).
-7. **All remaining open corpus-content bugs closed same session** - see
-   the dated log entry "All open corpus-content bugs closed." Klal 4/18/34
-   confirmed false positives (allowlisted in `check_klal_token_orphans.py`);
-   klal 69 (+35 words) and klal 206/217 (garbled-token corruption + tail
-   truncation) fixed; klal 36-37's actual boundary located and klal 37's
-   279-word tail truncation fixed (one near-miss - a page-boundary
-   catchword duplication that reproduced the exact bug class already
-   documented for klal 69 - caught by the test suite itself, not missed);
-   `validate_part1_corpus_integrity.py`'s check-3 docstring overclaim
-   fixed with a real implementation and a new baselined pytest gate.
-   `SPAN_COVERAGE_KNOWN_REAL_GAPS` is now empty. 14/14 pytest invariants
-   pass.
-
-8. **Nav-numbering alignment bug FOUND AND FIXED.** User pinpointed it
-   precisely ("11 21 31 41 are to the right... i think monospace"); root
-   cause was Inter's unequal digit widths (`1` narrower than other
-   digits), invisible to my earlier right-edge-only pixel check. Fixed
-   with `font-variant-numeric: tabular-nums`; re-measured every 2-digit
-   klal number 10-99 as pixel-identical after the fix. See dated log
-   entry (search "monospace").
-9. **Nav pane not following the middle pane while scrolling, FOUND AND
-   FIXED** - `setActiveKlal()` toggled the active row's CSS class but
-   never scrolled the nav pane's own container to show it.
-   `scrollIntoView({block:'nearest'})` added; also caught and fixed a
-   second real bug while verifying - `behavior:'smooth'` silently never
-   completes for this continuous background-scroll-sync call (rAF
-   throttling when unfocused), switched to `'auto'`. See dated log entry
-   "Nav pane didn't follow the middle pane while scrolling."
-
 ### NEXT STEPS, in order
 
-Every previously-tracked corpus-content bug is now closed - klal 37/69/206
-truncations and corruptions fixed, klal 36-37's marker located, klal 4/18/34
-confirmed false positives, the duplicate-phrase docstring overclaim fixed.
-`SPAN_COVERAGE_KNOWN_REAL_GAPS` is empty and `check_klal_token_orphans.py`
-reports zero real gaps. What's left is verification depth, not known bugs:
-
 **1. Klal 30/75/88's ~3,800 reconstructed words have almost no independent
-verification signal and that has NOT been resolved, only accepted.**
-`corrections_part1.json` shows 0 flagged words for klal 30, 0 for klal 75,
-2 for klal 88 - not because the text is clean, but because the normal
-flagging pipeline compares DocAI against stored text and the stored text
-now *is* DocAI for this span (circular by construction). The user
-explicitly chose to accept this rather than gate on the Tesseract witness
-queue ("tesseract is terrible here"). The witness queue (tier C: 94 items,
-tier B: 102, tier D: 217) is still the only real second opinion available
-and is still fully open - working through it (page-step to 24/37/40 in the
-harness, click a dashed purple box) remains valuable follow-up QA even
-though it's no longer a gate. Carry forward these four tier-A
-adjudications, already crop-checked:
+verification signal, and that is a known, accepted limitation, not
+something left to fix.** `corrections_part1.json` shows 0 flagged words
+for klal 30, 0 for klal 75, 2 for klal 88 - not because the text is clean,
+but because the normal flagging pipeline compares DocAI against stored
+text and the stored text now *is* DocAI for this span (circular by
+construction). The user explicitly chose to accept this rather than gate
+on the Tesseract witness queue ("tesseract is terrible here"). The witness
+queue (tier C: 94 items, tier B: 102, tier D: 217) is still the only real
+second opinion available and is still fully open - working through it
+(page-step to 24/37/40 in the harness, click a red box) remains the
+highest-value follow-up QA even though it's no longer a gate. Carry
+forward these four tier-A adjudications, already crop-checked:
    - `וכוותיידו` → **`וכוותייהו`** - confirmed DocAI misread, apply it.
    - `ידן`/`ידו` - the scan shows **`ידך`** (`הראנו ידך הנפלאה`); *both*
      engines wrong. Needs a human call.
@@ -128,9 +69,14 @@ adjudications, already crop-checked:
 **2. General standing caution, not a specific open bug**: two independent
 docstring-overclaim bugs turned up this session in different validator
 scripts (`check_klal_token_orphans.py`, `validate_part1_corpus_
-integrity.py`). Worth a quick sanity pass on any OTHER validator's
-docstring before trusting its claimed coverage at face value - see Lesson
-19-adjacent pattern, "a check that exists can still not do what it says."
+integrity.py` - both now fixed). Worth a quick sanity pass on any OTHER
+validator's docstring before trusting its claimed coverage at face value -
+see Lesson 19-adjacent pattern, "a check that exists can still not do what
+it says."
+
+**3. No other known open items.** Read the dated log entries below (all
+2026-08-12, several 2026-08-11) for full detail on anything referenced
+above before starting new work.
 
 ## Nav pane didn't follow the middle pane while scrolling — found and fixed, 2026-08-12
 
