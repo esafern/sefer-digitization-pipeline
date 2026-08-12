@@ -115,21 +115,6 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
    (see comment above), so the scan pane deliberately doesn't reproduce the
    text pane's solid/dotted distinction. */
 .hl-box.dim { opacity: 0.35; }
-/* Witness-queue boxes (independent Tesseract-vs-DocAI disagreements on the
-   reconstructed continuation pages) use a distinct purple, not the tri-state
-   red/yellow/green - a witness item isn't machine-resolved or human-decided
-   in the corrections sense, it's a raw two-source disagreement waiting for
-   a first human read. Dashed while open, solid + muted once decided. */
-.hl-box-witness {
-  box-shadow: none;
-  border: 2px dashed #805ad5;
-  background: rgba(128, 90, 213, 0.16);
-}
-.hl-box-witness.decided {
-  border-style: solid;
-  border-color: #718096;
-  background: rgba(113, 128, 150, 0.14);
-}
 .hl-current-klal {
   position: absolute;
   border-radius: 4px;

@@ -130,11 +130,26 @@ def api_klalim():
     flagged = set(rd.flagged_klalim())
     decided = rd.all_current("candidate_choice")  # {(klal_id, word_index): record}
     punct_decided = rd.all_current("punctuation_choice")
+
+    # Witness items fold into the SAME tri-state counts as corrections
+    # (2026-08-12, user request: "put the witness flags in as
+    # machine-disputed same as the others") - an undecided witness item is
+    # exactly as much an open dispute as an undecided correction is, it
+    # just came from a different comparison (DocAI vs Tesseract instead of
+    # DocAI vs stored text). There is no "machine-resolved" state for a
+    # witness item - nothing auto-resolves it, so it is either open
+    # (machine-disputed) or human-decided, never machine-resolved.
+    witness_queue = _load_witness_queue()
+    witness_by_klal = {}
+    for w in witness_queue:
+        witness_by_klal.setdefault(w["klal_id"], []).append(w)
+    witness_decided = rd.all_current("witness_choice")
+
     out = []
     for k in klalim:
         kid = k["klal_id"]
         entries = corrections.get(str(kid), [])
-        decided_count = sum(1 for c in entries if (kid, c["word_index"]) in decided)
+        corr_decided_count = sum(1 for c in entries if (kid, c["word_index"]) in decided)
         # Tri-state split for the legend's corpus-wide counts: a human
         # decision always wins (see wordState() in app.js), otherwise
         # 'current_text_confirmed' means the vision pass resolved it,
@@ -143,7 +158,18 @@ def api_klalim():
             1 for c in entries
             if (kid, c["word_index"]) not in decided and c.get("flag") == "current_text_confirmed"
         )
-        machine_disputed_count = len(entries) - decided_count - machine_resolved_count
+        corr_machine_disputed_count = len(entries) - corr_decided_count - machine_resolved_count
+
+        w_entries = witness_by_klal.get(kid, [])
+        w_decided_count = sum(
+            1 for w in w_entries if (kid, w["docai_token_index"]) in witness_decided
+        )
+        w_machine_disputed_count = len(w_entries) - w_decided_count
+
+        total_count = len(entries) + len(w_entries)
+        decided_count = corr_decided_count + w_decided_count
+        machine_disputed_count = corr_machine_disputed_count + w_machine_disputed_count
+
         punct_entries = punct_candidates.get(str(kid), [])
         punct_decided_count = sum(
             1 for p in punct_entries if (kid, p["before_word_index"]) in punct_decided
@@ -154,12 +180,12 @@ def api_klalim():
             "section": k.get("section", ""),
             "page": _trusted_page(alignment, kid),
             "page_trusted": kid in alignment and bool(alignment[kid].get("trusted")),
-            "correction_count": len(entries),
+            "correction_count": total_count,
             # split so the nav badge can distinguish "still needs a look"
             # from "already decided" instead of one undifferentiated count
             # (2026-08-07, PROJECT-STATUS.md "review dashboard feedback").
             "decided_count": decided_count,
-            "open_count": len(entries) - decided_count,
+            "open_count": total_count - decided_count,
             "machine_disputed_count": machine_disputed_count,
             "machine_resolved_count": machine_resolved_count,
             "punctuation_count": len(punct_entries),

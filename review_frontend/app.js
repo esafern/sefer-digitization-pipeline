@@ -875,16 +875,24 @@ async function showPage(page, focusKlalId) {
   pageItems.forEach(c => {
     if (!c.bbox) return;
     if (c.kind === 'witness') {
+      // Same tri-state treatment as every other flagged word (2026-08-12,
+      // user request: "put the witness flags in as machine-disputed same
+      // as the others") - no separate purple category. A witness item has
+      // no machine-resolved state (nothing auto-resolves it): it's either
+      // an open dispute or a human decision.
       const box = document.createElement('div');
-      const decided = !!c.current_decision;
-      box.className = 'hl-box hl-box-witness' + (decided ? ' decided' : '');
+      const state = c.current_decision ? 'human' : 'open';
+      box.className = 'hl-box hl-state-' + state + (c.klal_id === focusKlalId ? '' : ' dim');
+      const color = STATE_META[state].color;
+      box.style.setProperty('--hl-color', color);
+      box.style.background = color + '33';
       box.style.left = (c.bbox.x1 * 100) + '%';
       box.style.top = (c.bbox.y1 * 100) + '%';
       box.style.width = ((c.bbox.x2 - c.bbox.x1) * 100) + '%';
       box.style.height = ((c.bbox.y2 - c.bbox.y1) * 100) + '%';
-      box.title = decided
-        ? `Witness decision recorded: "${c.current_decision.chosen_text || ''}"`
-        : `Witness disagreement (tier ${c.tier}) - click to decide`;
+      box.title = c.current_decision
+        ? `${STATE_META.human.label}: "${c.current_decision.chosen_text || ''}"`
+        : `${STATE_META.open.label} (tier ${c.tier}) - click to decide`;
       box.addEventListener('click', () => openWitnessPanel(c));
       hlContainer.appendChild(box);
       return;

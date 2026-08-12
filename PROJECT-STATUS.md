@@ -166,6 +166,39 @@ nav row became visible (`navList.scrollTop` moved from 0 to 4208) and
 confirmed visually with a screenshot (nav pane showing the klal 128-147
 neighborhood while the text/scan panes show klal 150, not stuck at 1-20).
 
+## Witness items folded into the same tri-state system as corrections — 2026-08-12
+
+Direct user request: "put the witness flags in as machine-disputed same as
+the others." Witness disagreements (Tesseract-vs-DocAI on the reconstructed
+continuation pages) previously rendered as a separate purple category
+(dashed while open, solid gray once decided) with their own counts,
+disconnected from the red/yellow/green Machine-Disputed/Machine-Resolved/
+Human-Decided system every other flagged word uses.
+
+- `review_frontend/app.js` `showPage()`'s witness box branch now computes
+  `state = c.current_decision ? 'human' : 'open'` and renders with the
+  same `STATE_META` color/class as corrections - no separate witness
+  color. There is no machine-resolved state for a witness item (nothing
+  auto-resolves it); it is only ever open or human-decided.
+- `review_frontend/app.css`: removed `.hl-box-witness`/`.hl-box-witness.
+  decided` entirely - no longer needed.
+- `review_server.py` `api_klalim()`: witness items (loaded from
+  `reconstruction_witness_queue.json`, matched against `witness_choice`
+  decisions) now fold into the SAME `machine_disputed_count`/
+  `decided_count`/`open_count`/`correction_count` totals as corrections,
+  per klal - so the nav-pane badges and the legend's corpus-wide counts
+  include them automatically, not just the scan-pane boxes.
+
+**Verified, not just deployed**: restarted the server, confirmed via the
+API that klal 30/75/88's counts now include their witness items (klal 30:
+`correction_count` 3 -> 159, `machine_disputed_count` includes 156 open
+witness items); confirmed visually in the browser that page 24's ~159
+witness boxes now render solid red (undecided) or green (decided) with no
+purple anywhere; confirmed the legend's totals jumped accordingly
+(Machine-Disputed 105 -> 515, Human-Decided 7 -> 16, reflecting the ~410
+newly-folded-in open witness items and the small number of witness
+decisions already recorded this session).
+
 ### Standing cautions for whoever picks this up
 
 - **Verification coverage for the reconstructed pages is thin and cannot be
