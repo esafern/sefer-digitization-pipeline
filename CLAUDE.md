@@ -33,7 +33,7 @@ this work today).
 > propose, scope, or start Parts 2-3 work — including "just the easy
 > mechanical parts" — before both conditions hold. Rationale, in the
 > user's own words: "if part 1 is bad the rest won't magically be
-> better." This is not merely caution — see PROJECT-STATUS.md
+> better." This is not merely caution — see PROJECT-STATUS-HISTORY.md
 > 2026-08-10 "methodology audit" for a concrete, already-confirmed reason
 > the assumption "fix it once on Part 1, it generalizes" doesn't hold:
 > the page-furniture contamination bug hit Part 1 at ~1 instance but hit
