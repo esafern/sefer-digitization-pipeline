@@ -55,16 +55,23 @@ on the Tesseract witness queue ("tesseract is terrible here"). The witness
 queue (tier C: 94 items, tier B: 102, tier D: 217) is still the only real
 second opinion available and is still fully open - working through it
 (page-step to 24/37/40 in the harness, click a red box) remains the
-highest-value follow-up QA even though it's no longer a gate. Carry
-forward these four tier-A adjudications, already crop-checked:
-   - `וכוותיידו` → **`וכוותייהו`** - confirmed DocAI misread, apply it.
-   - `ידן`/`ידו` - the scan shows **`ידך`** (`הראנו ידך הנפלאה`); *both*
-     engines wrong. Needs a human call.
-   - `רתם`/`התם` - the print genuinely shows **ר**. DocAI is faithful; `התם` is
-     the expected phrase. A broken-type/source anomaly - flag, do NOT silently
-     "correct" (success criterion #1).
-   - `בתוס ד"ה` - tier-A false positive; but the scan reads `כתוס'` with a kaf
-     where DocAI has a bet. Separate small check.
+highest-value follow-up QA even though it's no longer a gate.
+
+**The four tier-A adjudications above were carried forward 2026-08-12:**
+   - `וכוותיידו` → **`וכוותייהו`** (klal 88) - **APPLIED** to `part1.json`,
+     confirmed DocAI misread, rebuild clean (14/14 pytest).
+   - `בתוס ' ד"ה` → **`כתוס ' ד"ה`** (klal 30) - **APPLIED** to `part1.json`,
+     confirmed ב/כ misread, rebuild clean.
+   - `ידן`/`ידו` (klal 30) - the scan shows **`ידך`** (`הראנו ידך הנפלאה`);
+     *both* engines wrong. **NOT applied to corpus text** - recorded as a
+     `klal_flag` decision (id `5220cb956175`) in `review_decisions.jsonl`
+     with `needs_revisit=true` so it surfaces in the dashboard; needs a
+     human call before any text change (success criterion #1).
+   - `רתם`/`התם` (klal 88) - the print genuinely shows **ר**. DocAI is
+     faithful; `התם` is the expected phrase. A broken-type/source anomaly.
+     **NOT corrected** - recorded as a `klal_flag` decision (id
+     `f15d365a9168`) for editorial awareness only, per success criterion #1
+     ("do NOT silently correct").
 
 **2. General standing caution, not a specific open bug**: two independent
 docstring-overclaim bugs turned up this session in different validator
