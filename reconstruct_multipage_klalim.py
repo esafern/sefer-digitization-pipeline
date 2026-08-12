@@ -189,6 +189,26 @@ def main():
             middle.extend(t["text"] for t in body)
             notes.append(f"page {mp}: +{len(body)} tok  {note}")
 
+        # IDEMPOTENCY GUARD, added 2026-08-12 (PROJECT-STATUS.md finding 9):
+        # `stored` is re-read from part1.json fresh every run, with no
+        # applied-decision/snapshot check like apply_reviewer_decisions.py or
+        # apply_punctuation_decisions.py have - so a second --apply on an
+        # already-reconstructed klal re-spliced the same middle-page content
+        # in a second time (confirmed: klal 30/75/88 dry-run against the
+        # current, already-applied corpus reported +956/+1047/+901 words on
+        # top of what's already there). If the middle page's own signature
+        # text is already present in the stored text, this klal has already
+        # been reconstructed - skip it rather than splice again.
+        middle_sig = " ".join(middle[:12]) if middle else None
+        already_applied = bool(middle_sig) and middle_sig in " ".join(stored)
+        if already_applied:
+            report.append({
+                "klal_id": kid, "already_applied": True,
+                "path": f"{start_page} -> {mids} -> {end_page}",
+                "old": len(stored), "new": len(stored), "notes": notes,
+            })
+            continue
+
         # Where does the stored text end its FIRST-page contribution? For klal
         # 30/88 that is simply its end. For klal 75 the stored text already
         # contains the final page's contribution appended directly onto the
@@ -236,6 +256,11 @@ def main():
         })
 
     for r in report:
+        if r.get("already_applied"):
+            print(f"\n=== klal {r['klal_id']}  pages {r['path']}   ALREADY APPLIED - skipped ===")
+            print(f"    the middle page's own text is already present in the stored {r['old']} words; "
+                  f"re-splicing would duplicate it. No change.")
+            continue
         print(f"\n=== klal {r['klal_id']}  pages {r['path']}   {r['old']} -> {r['new']} words "
               f"(+{r['new']-r['old']}) ===")
         for n in r["notes"]:
@@ -247,11 +272,15 @@ def main():
         print(f"    junction 1: {r['j1']}")
         print(f"    junction 2: {r['j2']}")
 
+    applicable = [r for r in report if not r.get("already_applied")]
     if args.apply:
-        for r in report:
+        for r in applicable:
             by_id[r["klal_id"]]["clean_text"] = r["text"]
-        json.dump(part1, open(PART1_PATH, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
-        print(f"\nAPPLIED to {PART1_PATH}. Run ./rebuild_all.sh next.")
+        if applicable:
+            json.dump(part1, open(PART1_PATH, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
+            print(f"\nAPPLIED to {PART1_PATH} ({len(applicable)} klal(im)). Run ./rebuild_all.sh next.")
+        else:
+            print("\nNothing to apply - every requested klal was already reconstructed.")
     else:
         print("\n[DRY RUN] nothing written. Re-run with --apply once the junctions above read correctly.")
 
