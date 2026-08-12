@@ -149,7 +149,16 @@ def main():
             skipped_drift.append((klal_id, word_index))
             continue
 
-        if opcode == "replace" and decision["chosen_text"] == snapshot.get("final_text"):
+        if opcode in ("replace", "insert") and decision["chosen_text"] == snapshot.get("final_text"):
+            # Reviewer confirmed the currently-stored text is correct - for
+            # 'replace' that means "don't change this word"; for 'insert' it
+            # means "don't remove this word" (final_text IS the extra span
+            # apply_insert_removal would otherwise delete). Without this
+            # check, every 'insert'-opcode "keep current text" decision fell
+            # through to apply_insert_removal unconditionally and silently
+            # deleted text the reviewer voted to keep - confirmed against
+            # two real pending decisions (klal 4 word 0 'ד', klal 57 word 0
+            # 'נז אין'), see PROJECT-STATUS.md finding ★1.
             n_noop += 1
             applied.append((klal_id, word_index, "confirmed-no-op"))
             if not args.dry_run:

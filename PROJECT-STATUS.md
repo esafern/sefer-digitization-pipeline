@@ -46,20 +46,25 @@ should only ever hold the current handoff.
 
 ### NEXT STEPS, in order
 
-**1. URGENT, before anyone runs `apply_reviewer_decisions.py` for real:
-it will currently DELETE text a reviewer voted to KEEP.** `apply_insert_
-removal` (line 183) is called with the snapshot's `final_text` and never
-consults `decision["chosen_text"]` - the `replace` path has a no-op guard
-for "chosen equals current text," the `insert` path has none. **Two such
-decisions are already pending right now**: klal 4 word 0 (`chosen_text:
-'ד'`) and klal 57 word 0 (`chosen_text: 'נז אין'`) - `--dry-run` reports
-both as ordinary inserts; running for real would strip klal 4's opening
-marker and klal 57's gematria marker + first word. `review_frontend/
-app.js:343` is what offers "keep current text" as a choice for
-insert-opcode candidates in the first place, so this is reachable through
-normal dashboard use, not an edge case. **Do not run `apply_reviewer_
-decisions.py` without `--dry-run` until this is fixed.** Full evidence in
-`PROJECT-STATUS-HISTORY.md`, finding ★1.
+**1. ★1 FIXED 2026-08-12.** `apply_reviewer_decisions.py`'s no-op guard
+(previously `replace`-only: skip applying when `decision["chosen_text"]
+== snapshot["final_text"]`) now also covers `insert`-opcode decisions,
+which share the same "chosen text equals what's already stored" no-op
+semantics - `insert`'s `final_text` is the extra span
+`apply_insert_removal` would otherwise unconditionally delete. Re-ran
+`--dry-run` against the live decisions log: the two previously-dangerous
+pending decisions (klal 4 word 0, klal 57 word 0 - both "keep current
+text") now report `confirmed-no-op` instead of `insert`; all 12 currently
+pending `candidate_choice` decisions resolve as no-ops (0 replace, 0
+insert/delete) - i.e. running the script for real right now would change
+nothing in `part1.json`, only log confirmations. Not yet run for real
+(that's a separate deliberate step, per CLAUDE.md's "recording a decision
+and applying it to the corpus are always two distinct steps") - safe to
+when wanted. Related, NOT fixed: `delete`-opcode's mirror case ("confirm
+nothing belongs here", `chosen_text=''`) still gets misreported as
+"skipped - drift" by `apply_delete_insertion`'s `not chosen_text` guard,
+rather than recorded as its own no-op - cosmetic (over-cautious label,
+not data loss) but worth a follow-up.
 
 **2. 10 of 29 delete-opcode candidates (9 of them `possible_omission`,
 the highest-value class) never render in the review dashboard's text
