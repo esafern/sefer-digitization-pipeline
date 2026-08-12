@@ -793,6 +793,25 @@ async function saveWitnessDecision(w) {
   WITNESS_PAGES = (await fetch('/api/witness').then(r => r.json())).pages || [];
   if (currentPage != null) await showPage(currentPage, scanFocusKlalId);
 
+  // Keep the nav-pane badge and legend live too, same as
+  // saveCandidateDecision does - witness items fold into the same
+  // server-side tri-state counters (api_klalim), but this save path never
+  // updated the client's cached copy of them, so the nav badge and legend
+  // stayed stale until a full reload (2026-08-12, PROJECT-STATUS.md
+  // finding 6). Witness items have no machine-resolved state (see
+  // api_klalim's own comment: nothing auto-resolves a witness item) - a
+  // decision always moves open/machine-disputed -> decided, never touches
+  // machine_resolved_count.
+  const wasAlreadyDecided = !!w.current_decision;
+  if (!wasAlreadyDecided && klalById[w.klal_id]) {
+    const kb = klalById[w.klal_id];
+    kb.open_count = Math.max(0, (kb.open_count || 0) - 1);
+    kb.decided_count = (kb.decided_count || 0) + 1;
+    kb.machine_disputed_count = Math.max(0, (kb.machine_disputed_count || 0) - 1);
+    refreshNavItem(w.klal_id);
+    buildLegend();
+  }
+
   const status = document.getElementById('witness-save-status');
   status.classList.add('show');
   setTimeout(() => status.classList.remove('show'), 2000);

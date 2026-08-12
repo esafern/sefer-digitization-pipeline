@@ -173,6 +173,24 @@ own signature text is already present in the stored text; if so, report
 dry-run against the live corpus now correctly reports all three klalim
 as already-applied instead of proposing to re-add ~1,000 words each.
 
+**10. Finding 6 FIXED 2026-08-13.** `saveWitnessDecision` (`review_
+frontend/app.js`) never updated the client's cached `klalById` counters
+or called `refreshNavItem`/`buildLegend` the way `saveCandidateDecision`
+does - so after recording a witness decision, the nav badge and legend
+kept showing the pre-decision counts until a full page reload, even
+though `api_klalim` (the server) already folds witness items into the
+same `open_count`/`decided_count`/`machine_disputed_count` totals
+(2026-08-12 tri-state fold). Added the matching client-side update:
+witness items have no machine-resolved state (nothing auto-resolves
+one - see `api_klalim`'s own comment), so a decision only ever moves
+open/machine-disputed -> decided, never touches
+`machine_resolved_count`. Verified live in the browser: recorded a real
+witness decision for klal 30 (tier D, docai token 22, page 24) through
+the actual UI panel; `klalById[30]` updated in-place from
+`decided_count 3, open_count 156, machine_disputed_count 156` to `4,
+155, 155` with no reload, and a fresh `/api/klalim` fetch immediately
+after returned the identical numbers - client and server agree.
+
 **No other known open items beyond the above.** Full detail, evidence,
 and the complete dated history behind every claim above is in
 `PROJECT-STATUS-HISTORY.md`.
