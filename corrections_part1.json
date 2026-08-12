@@ -101,10 +101,10 @@
         "x2": 0.6885346174240112,
         "y2": 0.9147287011146545
       },
-      "vision_selected": "UNCERTAIN",
-      "vision_transcription": "סי' צ\"ד",
+      "vision_selected": "B",
+      "vision_transcription": "",
       "confidence": 0.95,
-      "reasoning": "The crop clearly contains the Hebrew text 'סי' צ\"ד' (abbreviation for סימן צ\"ד), matching the surrounding context 'בעל חוות יאיר סי ' צ\"ד בכלליו'. Neither Option A ('1') nor Option B ('None') accurately transcribes this text.",
+      "reasoning": "The crop shows text from the line ('סי' צ\"') above a stray punctuation mark or comma, which DocAI misread as the digit '1'. The context ('בעל חוות יאיר סי' צ\"ד בכלליו') confirms that no digit '1' belongs at this position in the text stream, making Option B the correct choice.",
       "flag": "ambiguous"
     }
   ],
@@ -699,7 +699,7 @@
       "vision_selected": "A",
       "vision_transcription": "שמות",
       "confidence": 0.98,
-      "reasoning": "The middle line of the crop clearly displays the word 'שמות' (Shin-Mem-Vav-Tav), preceded by a dot separator, matching Option A and the contextual phrase 'בספר שמות בארץ'.",
+      "reasoning": "The word 'שמות' is clearly legible in the center line of the raster crop, matching Option A and the contextual sentence 'בספר שמות'.",
       "flag": "possible_omission"
     },
     {
@@ -932,7 +932,7 @@
       "vision_selected": "A",
       "vision_transcription": "עונשין",
       "confidence": 0.98,
-      "reasoning": "The second line of the crop clearly displays the word 'עונשין' (Ayin-Vav-Nun-Shin-Yod-Nun Sofit), matching Option A and fitting the surrounding Rabbinic phrase 'אין עונשין מן הדין'.",
+      "reasoning": "The crop clearly displays the Hebrew word 'עונשין' in standard rabbinic print, matching the context 'אין עונשין מן הדין'.",
       "flag": "possible_omission"
     },
     {
@@ -1006,7 +1006,7 @@
       "vision_selected": "A",
       "vision_transcription": "נו אין",
       "confidence": 0.95,
-      "reasoning": "The visible text prominently features the section marker 'נו' followed by 'אין' in square block Hebrew script, matching Option A.",
+      "reasoning": "The raster clearly shows the Hebrew text 'נו' followed by 'אין' reading right-to-left. Option A correctly captures the visible characters in the crop.",
       "flag": "possible_omission"
     },
     {
@@ -1044,7 +1044,7 @@
       "vision_selected": "A",
       "vision_transcription": "ר",
       "confidence": 0.95,
-      "reasoning": "The crop contains multiple lines from the Rabbinic text context ('[ש]יטה לפ[י]', '[ק]אמר ר[בי/פ]', '[ס]ור/ור לא'). On the second line, following the word 'אמר', the letter 'ר' (abbreviation for רבי or ר') is clearly visible before the image margin cuts off.",
+      "reasoning": "The raster crop clearly shows the letter resh ('ר') following 'אמר' in the second visible line, corresponding to 'קאמר ר'' / 'קאמר רבי' in the Rabbinic textual context.",
       "flag": "possible_omission"
     }
   ],
@@ -1257,9 +1257,9 @@
         "y2": 0.7287726402282715
       },
       "vision_selected": "UNCERTAIN",
-      "vision_transcription": "מיניה\nגון א\nעליו",
+      "vision_transcription": "מיניה / גון א / עליו",
       "confidence": 0.95,
-      "reasoning": "The raster crop contains Hebrew text across multiple lines, including 'מיניה', 'גון א', and 'עליו'. Neither Option A (the ASCII digit '4', an OCR misreading of the Hebrew letter Aleph) nor Option B ('None') accurately represents the Hebrew text in the crop.",
+      "reasoning": "The raster crop contains clear Hebrew text across multiple lines matching the context ('מיניה', 'גון א', 'עליו'). Option A ('4') is a digit OCR artifact for the letter Aleph ('א'), and Option B ('nothing') is incorrect as text is present. Therefore, neither candidate option is accurate.",
       "flag": "ambiguous"
     }
   ],
@@ -1415,11 +1415,11 @@
         "x2": 0.48134326934814453,
         "y2": 0.788500189781189
       },
-      "vision_selected": "UNCERTAIN",
-      "vision_transcription": "ם הלך / ם יוצא",
-      "confidence": 0.9,
-      "reasoning": "The raster crop contains multiple clearly legible Hebrew words matching the context ('ם הלך' from 'סופרים הלך' and 'ם יוצא' from 'שמהם יוצאה'). Option A ('ה') captures only a single letter, while Option B ('None') incorrectly asserts an absence of text. Since neither candidate option accurately reflects the multi-word snippet visible in the crop, UNCERTAIN is the correct selection according to the rules.",
-      "flag": "ambiguous"
+      "vision_selected": "A",
+      "vision_transcription": "ה",
+      "confidence": 0.95,
+      "reasoning": "The Hebrew letter 'ה' is clearly visible in the manuscript raster crop as part of the word 'הלך' in line 3. Therefore, Option A accurately reflects the presence of this letter in the source image.",
+      "flag": "possible_omission"
     }
   ],
   "84": [
@@ -1456,7 +1456,7 @@
       "vision_selected": "A",
       "vision_transcription": "4 בעיא",
       "confidence": 0.95,
-      "reasoning": "The image clearly contains the Hebrew word 'בעיא' alongside the digit '4', matching Option A.",
+      "reasoning": "The image clearly shows the Hebrew word 'בעיא' alongside the numeral '4'. Option A captures the text present in the crop, whereas Option B incorrectly omits it.",
       "flag": "possible_omission"
     }
   ],
@@ -1511,8 +1511,8 @@
       },
       "vision_selected": "A",
       "vision_transcription": "פו",
-      "confidence": 0.95,
-      "reasoning": "The image crop clearly displays two distinct Hebrew characters: 'פ' (Pe) on the right and 'ו' (Vav) on the left, forming the text 'פו'.",
+      "confidence": 0.98,
+      "reasoning": "The image clearly displays the two Hebrew characters 'פ' (Pei) followed by 'ו' (Vav) reading right-to-left ('פו'), matching Option A.",
       "flag": "possible_omission"
     }
   ],
@@ -1747,9 +1747,9 @@
         "y2": 0.16362899541854858
       },
       "vision_selected": "A",
-      "vision_transcription": "המק",
+      "vision_transcription": "תיקו מצי\nים המקוב\nלה • ש\"ו",
       "confidence": 0.95,
-      "reasoning": "The crop clearly shows the Hebrew letters 'המק' as part of the word 'המקוב[ל]' on the second line.",
+      "reasoning": "The second line clearly contains the Hebrew letters 'המק' as part of the word 'המקובל' (or 'המקובים'), matching the provided surrounding Rabbinic context ('המקובל אצלינו'). Option A correctly identifies this textual fragment within the image.",
       "flag": "possible_omission"
     }
   ],
@@ -1897,7 +1897,7 @@
       "vision_selected": "UNCERTAIN",
       "vision_transcription": "בית",
       "confidence": 0.95,
-      "reasoning": "The image clearly displays the word 'בית' (Bet-Yod-Tav), matching the context 'בית דין'. Option A ('ביו') is an OCR misreading of the final letter Tav as Vav, and Option B is 'None'. Since neither option accurately provides the correct transcription 'בית', UNCERTAIN is selected.",
+      "reasoning": "The raster crop clearly displays the Hebrew word 'בית' (Bet-Yud-Tav), matching the surrounding context 'בית דין מתנין לעקור דבר מן התורה'. Option A ('ביו') contains an OCR error misreading the final Tav as a Vav, and Option B incorrectly suggests no text is present. Since neither option correctly transcribes the visible word, the evaluation is UNCERTAIN.",
       "flag": "ambiguous"
     }
   ],
@@ -2052,8 +2052,8 @@
       },
       "vision_selected": "A",
       "vision_transcription": "בל",
-      "confidence": 1.0,
-      "reasoning": "The crop clearly displays the Hebrew letters bet (ב) and lamed (ל) reading right-to-left as 'בל', which exactly matches Option A.",
+      "confidence": 0.98,
+      "reasoning": "The image clearly contains the two Hebrew characters bet (ב) and lamed (ל) forming the word 'בל', which directly matches Option A.",
       "flag": "possible_omission"
     }
   ],
@@ -2112,8 +2112,8 @@
       },
       "vision_selected": "A",
       "vision_transcription": "בתר",
-      "confidence": 1.0,
-      "reasoning": "The raster crop clearly and unambiguously shows the Hebrew word 'בתר' (Bet-Tav-Resh) written from right to left.",
+      "confidence": 0.98,
+      "reasoning": "The image clearly displays the three-letter Hebrew word 'בתר' (Bet, Tav, Resh) in a clear Sephardic/Ashkenazic cursive/semi-cursive hand. Option A accurately matches the visual pixels.",
       "flag": "possible_omission"
     }
   ],
@@ -2209,9 +2209,9 @@
         "y2": 0.6486921310424805
       },
       "vision_selected": "UNCERTAIN",
-      "vision_transcription": "ריע , לא",
+      "vision_transcription": "יע, לא",
       "confidence": 0.9,
-      "reasoning": "The image clearly shows the end of the word 'כפריע' (letters 'ריע'), followed by a comma ',' and the word 'לא' from the phrase 'כפריע, לא ידעתי פתרונו'. Neither Option A ('1') nor Option B ('None') accurately transcribes this Hebrew text.",
+      "reasoning": "The image clearly contains Hebrew characters (part of 'יע' on the right, 'לא' on the left, and a comma below). Neither Option A ('1') nor Option B ('nothing') correctly transcribes the visible text in this crop.",
       "flag": "ambiguous"
     }
   ],
@@ -2592,8 +2592,8 @@
       },
       "vision_selected": "A",
       "vision_transcription": "כן:\nדיעכר",
-      "confidence": 0.95,
-      "reasoning": "The crop clearly displays the Hebrew/Aramaic word 'דיעכר' on the second line below 'כן:'. Option A accurately transcribed 'דיעכר'.",
+      "confidence": 0.98,
+      "reasoning": "The image crop clearly displays two lines of Hebrew text: the top line contains 'כן:' and the second line contains 'דיעכר'. Option A correctly transcribes the main word 'דיעכר'.",
       "flag": "possible_omission"
     }
   ],
@@ -2794,11 +2794,11 @@
         "x2": 0.25,
         "y2": 0.5763804912567139
       },
-      "vision_selected": "UNCERTAIN",
-      "vision_transcription": "הפוסק",
+      "vision_selected": "A",
+      "vision_transcription": "הפו",
       "confidence": 0.85,
-      "reasoning": "The center of the crop visible in line 3 clearly shows the Hebrew word 'הפוסק' (part of 'כל הפוסקים' from the surrounding Talmudic context). Option A ('הפו') is a truncated OCR reading that omits the letters ס and ק, while Option B is 'None'. Since neither candidate accurately matches the full visible text 'הפוסק', UNCERTAIN is selected.",
-      "flag": "ambiguous"
+      "reasoning": "The image crop clearly contains visible Hebrew text corresponding to the surrounding passage context (including lines containing 'כשמואל', 'דפסקינן', 'הפוסקים', and 'לתלמוד'). Option A correctly identifies letters from 'הפוסקים' visible in the center-left portion of the third line ('הפו'), rejecting Option B's assertion that no text is present.",
+      "flag": "possible_omission"
     },
     {
       "word_index": 376,
@@ -3062,8 +3062,8 @@
       },
       "vision_selected": "UNCERTAIN",
       "vision_transcription": "דכפייה\n: א\nוכו' . א",
-      "confidence": 0.9,
-      "reasoning": "The crop contains clear Hebrew text across multiple lines ('דכפייה', followed by a colon and the letter 'א', and 'וכו' . א'). Neither Option A (a Devanagari digit '४' resulting from an OCR artifact) nor Option B ('None') accurately transcribes the Hebrew text in the image.",
+      "confidence": 0.0,
+      "reasoning": "The image crop contains clear Hebrew text including 'דכפייה' on the top line and 'וכו' . א' on the bottom line. Option A ('४') is a completely hallucinated/corrupted OCR character, and Option B assumes no text is present. Since neither candidate correctly represents the visible Hebrew text in the crop, UNCERTAIN is selected per constraint 4.",
       "flag": "ambiguous"
     }
   ],
@@ -3370,7 +3370,7 @@
       "vision_selected": "A",
       "vision_transcription": "והכי הלכתא",
       "confidence": 0.98,
-      "reasoning": "The visible printed line in the center of the crop clearly shows the words 'והכי הלכתא' in standard Hebrew rabbinic typography, matching Option A.",
+      "reasoning": "The text 'והכי הלכתא' is clearly visible in the central line of the raster crop, matching Option A.",
       "flag": "possible_omission"
     }
   ],
@@ -3426,9 +3426,9 @@
         "y2": 0.3934359848499298
       },
       "vision_selected": "A",
-      "vision_transcription": "דוכתי דבגמרא :",
-      "confidence": 1.0,
-      "reasoning": "The center line of the crop clearly displays the Hebrew words 'דוכתי דבגמרא' followed by a colon (:), matching Option A perfectly.",
+      "vision_transcription": "דוכתי דבגמרא",
+      "confidence": 0.99,
+      "reasoning": "The prominent middle line of the crop clearly reads 'דוכתי דבגמרא' followed by a colon. Option A matches the rendered Rabbinic text precisely.",
       "flag": "possible_omission"
     }
   ],
@@ -3524,7 +3524,7 @@
       "vision_selected": "A",
       "vision_transcription": "הלכה 7*",
       "confidence": 0.95,
-      "reasoning": "The image clearly shows the word 'הלכה' followed below/adjacent by '7*' (or 'ז*'). Option A captures 'הלכה 7', which accurately represents the main readable text in the image crop.",
+      "reasoning": "The image crop clearly displays the Hebrew word 'הלכה' in the middle-left alongside the numeral/marker '7*' below it on the right. Option A accurately reflects the text visible in the raster image.",
       "flag": "possible_omission"
     }
   ],
@@ -3615,8 +3615,8 @@
       },
       "vision_selected": "UNCERTAIN",
       "vision_transcription": "זה",
-      "confidence": 0.9,
-      "reasoning": "The visible text in the prominent third line contains the word 'זה' (part of the ubiquitous Rabbinic expression 'כל זה צ\"ע'). Option A ('זר') is an OCR misreading of 'זה' (confusing the letter heh with resh), while Option B is 'None'. Since neither candidate accurately reflects the image, UNCERTAIN is returned.",
+      "confidence": 0.95,
+      "reasoning": "The visible text in the middle line of the crop clearly reads \"זה\" within the standard Rabbinic phrase \"כל זה צ\"ע\" (all this requires further study). Option A (\"זר\") is a raw OCR misreading of the letter 'ה' as 'ר', and Option B incorrectly asserts no text is present. Since neither candidate string provides the correct reading (\"זה\"), UNCERTAIN is selected.",
       "flag": "ambiguous"
     },
     {
@@ -3725,8 +3725,8 @@
       },
       "vision_selected": "A",
       "vision_transcription": "הרמ\"ז על",
-      "confidence": 0.95,
-      "reasoning": "The visible text on the third line clearly reads 'הרמ\"ז על' (referring to Rabbi Moses Zacuto / Haramaz), matching Option A.",
+      "confidence": 0.98,
+      "reasoning": "The visible text in the center line of the crop clearly displays 'הרמ\"ז על' in standard Rabbinic Hebrew block font, with 'אליו' legible on the line below it.",
       "flag": "possible_omission"
     }
   ],
@@ -3876,7 +3876,7 @@
       "vision_selected": "UNCERTAIN",
       "vision_transcription": "השמר",
       "confidence": 0.95,
-      "reasoning": "The image clearly shows the word 'השמר' (Hei, Shin, Mem, Resh), which fits the Rabbinic context ('השמר דעשה עשה'). Option A ('השמו') incorrectly reads the final Resh (ר) as a Vav (ו). Since neither option gives the correct reading 'השמר', UNCERTAIN is selected.",
+      "reasoning": "The image clearly shows the Hebrew word 'השמר' (Hey-Shin-Mem-Resh), matching the surrounding context 'השמר דעשה עשה'. Option A incorrectly transcribes the final Resh as a Vav ('השמו'), and Option B asserts that no text is present. Since neither candidate accurately represents the image, UNCERTAIN is selected.",
       "flag": "ambiguous"
     }
   ],
@@ -4212,9 +4212,9 @@
         "y2": 0.8741400241851807
       },
       "vision_selected": "UNCERTAIN",
-      "vision_transcription": "כרשב\"א\nקריעה",
-      "confidence": 0.0,
-      "reasoning": "Neither candidate option accurately transcribes the visible text in the crop. The crop clearly displays multiple lines including 'כרשב\"א' and 'קריעה', whereas Option A ('יעה') is an incomplete fragment from DocAI raw OCR, and Option B is 'None'.",
+      "vision_transcription": "קריעה",
+      "confidence": 0.95,
+      "reasoning": "The line clearly shows the word 'קריעה' (followed by 'לו' from 'קריעה לחוד'). Option A ('יעה') is a partial OCR truncation of 'קריעה', while Option B asserts no text belongs at this position. Since neither option provides the correct complete text ('קריעה'), UNCERTAIN is selected.",
       "flag": "ambiguous"
     }
   ],
@@ -4343,8 +4343,8 @@
       },
       "vision_selected": "A",
       "vision_transcription": "הלכה",
-      "confidence": 0.99,
-      "reasoning": "The image clearly displays the word 'הלכה' (Halakha) in Hebrew script, matching Option A exactly.",
+      "confidence": 1.0,
+      "reasoning": "The raster crop clearly shows the complete Hebrew word 'הלכה' in clear print script, matching Option A and the surrounding context ('הלכה כרב באיסורי').",
       "flag": "possible_omission"
     }
   ],
@@ -4382,7 +4382,7 @@
       "vision_selected": "A",
       "vision_transcription": "מתני' ד",
       "confidence": 0.95,
-      "reasoning": "The image clearly shows the word 'מתני'' followed by a geresh and 'ד' on the third line, matching the context 'מתני ' דנתן'. Option A correctly identifies 'מתני'.",
+      "reasoning": "The crop clearly contains the word 'מתני'' on the central line, matching the context 'על מתני ' דנתן'. Therefore, Option A accurately identifies text visible in the image.",
       "flag": "possible_omission"
     },
     {
@@ -4826,8 +4826,8 @@
       },
       "vision_selected": "A",
       "vision_transcription": "פ\"א דף קע\"א ע\"ד",
-      "confidence": 0.95,
-      "reasoning": "The crop clearly displays line 2 containing the textual string 'פ\"א דף קע\"א ע\"ד', flanked by 'א' on the right and 'ו' on the left. Option A correctly captures this standard Rabbinic citation format (פרק א' דף קע\"א עמוד ד').",
+      "confidence": 0.98,
+      "reasoning": "The middle line of the provided image clearly displays the Rabbinic citation reading 'פ\"א דף קע\"א ע\"ד', matching Option A.",
       "flag": "possible_omission"
     },
     {
@@ -4845,7 +4845,7 @@
       "vision_selected": "A",
       "vision_transcription": "בשם התוספות :",
       "confidence": 0.98,
-      "reasoning": "The middle line of the crop clearly displays the Hebrew text 'בשם התוספות' followed by a colon. Option A accurately matches this visible text.",
+      "reasoning": "The middle line of the image clearly displays the Rabbinic phrase 'בשם התוספות :' in standard square font, matching Option A.",
       "flag": "possible_omission"
     }
   ],
@@ -5143,9 +5143,9 @@
         "y2": 0.7301458716392517
       },
       "vision_selected": "A",
-      "vision_transcription": "ס\"ח ונכון הוא :",
+      "vision_transcription": "ס\"ח ונכון הוא",
       "confidence": 0.98,
-      "reasoning": "The line in the image crop clearly reads 'ס\"ח ונכון הוא :' matching Option A precisely.",
+      "reasoning": "The image clearly displays the line 'ס\"ח ונכון הוא :' which matches Option A perfectly.",
       "flag": "possible_omission"
     }
   ]

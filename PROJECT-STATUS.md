@@ -136,6 +136,43 @@ the *start* of `clean_text`, so this survived undetected. Stripped both
 (2-line diff, no other content touched), `./rebuild_all.sh --skip-vision`
 clean, 14/14.
 
+**8. Finding 7 FIXED 2026-08-12.** Every delete-opcode vision call embedded
+the literal Python `None` as "Option B" in the prompt (`corrected_word` is
+`None` by construction for a delete candidate - there's no current corpus
+text to compare against), asking the model to choose between a real
+transcription and the four-letter string "None" - an unanswerable
+question it correctly kept resolving to `UNCERTAIN` regardless of what
+the crop showed (klal 4's stored reasoning literally said *"Neither
+Option A ('1') nor Option B ('None')..."*). Reframed Option B's
+description for delete candidates to what it actually means ("confirm no
+text belongs here") without changing the JSON response schema, so no
+downstream consumer needed updating. Cache invalidation required first:
+the cache key (`crop_hash, word_a, word_b, context_hash`) doesn't cover
+prompt wording, so the 41 existing delete-opcode cache rows (keyed on
+`word_b == NONE_SENTINEL`) would have silently kept serving the
+old-prompt answers forever - deleted them before re-running (Lesson 12
+shape, same as this project's past cache-key incidents). Re-ran vision
+verification for all 29 live delete candidates: `ambiguous` dropped
+10->8, `possible_omission` rose 19->21 - 2 candidates that were
+previously unanswerable now correctly confirmed, including klal 219 word
+97 (`ס"ח ונכון הוא`, the same candidate ★2 made visible in the text pane -
+now also correctly flagged `possible_omission` at 0.98 confidence rather
+than `ambiguous`). `rebuild_all.sh` (full, not `--skip-vision`) clean,
+14/14 corpus + 5/5 review-server tests.
+
+**9. Finding 9 FIXED 2026-08-12.** `reconstruct_multipage_klalim.py
+--apply` had no idempotency guard - `stored` is re-read from
+`part1.json` fresh every run with no applied-decision/snapshot check
+(unlike `apply_reviewer_decisions.py`/`apply_punctuation_decisions.py`,
+which both have one). Confirmed: dry-run against the current,
+already-reconstructed corpus proposed re-splicing klal 30/75/88's middle
+pages in a second time (+956/+1047/+901 words on top of what's already
+there). Added a guard: before splicing, check whether the middle page's
+own signature text is already present in the stored text; if so, report
+"ALREADY APPLIED - skipped" and leave that klal untouched. Verified: a
+dry-run against the live corpus now correctly reports all three klalim
+as already-applied instead of proposing to re-add ~1,000 words each.
+
 **No other known open items beyond the above.** Full detail, evidence,
 and the complete dated history behind every claim above is in
 `PROJECT-STATUS-HISTORY.md`.

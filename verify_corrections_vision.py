@@ -149,6 +149,23 @@ def adjudicate(client, crop_bytes, option_a, option_b, full_context):
         print("  -> cache hit")
         return cached
 
+    # A delete-opcode candidate has option_b is None: the corpus has NO
+    # text at all at this position, and DocAI independently proposed
+    # option_a as text that belongs there. The old prompt embedded the
+    # literal Python `None` as if it were a second reading to compare
+    # against the pixels ('Option B (current adjudicated text): "None"'),
+    # an unanswerable question the model correctly (from its own
+    # perspective) resolved to UNCERTAIN regardless of what the crop
+    # actually showed - confirmed 2026-08-12: 10 of 29 delete candidates
+    # came back UNCERTAIN this way, including klal 4's stored reasoning
+    # literally saying "Neither Option A ('1') nor Option B ('None')..."
+    # (PROJECT-STATUS.md finding 7). Describe what B actually means for a
+    # delete-opcode candidate instead: "confirm nothing belongs here."
+    option_b_desc = (
+        f'"{option_b}"' if option_b is not None
+        else "(nothing - confirm no text belongs at this position; the corpus currently has none here)"
+    )
+
     prompt = f"""
 You are an expert Talmudic and Rabbinic textual verification engine analyzing a Hebrew manuscript raster crop.
 
@@ -156,7 +173,7 @@ Surrounding Talmudic/Rabbinic Sentence Context: "{full_context}"
 
 Evaluate the target raster crop against candidate strings:
 Option A (DocAI raw OCR reading): "{option_a}"
-Option B (current adjudicated text): "{option_b}"
+Option B (current adjudicated text): {option_b_desc}
 
 CONSTRAINTS:
 1. Perform Rabbinic acronym and semantic analysis using the surrounding sentence context.
