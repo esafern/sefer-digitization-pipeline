@@ -228,7 +228,13 @@ function renderKlalBody(block, k) {
       // the dedicated manual panel rather than openCandidatePanel, which is
       // built around vision-generated options this kind of entry doesn't have.
       const span = document.createElement('span');
-      span.className = 'flag-word state-human';
+      // chosen_text=='' means marked for deletion (2026-08-13) - the word
+      // is still physically present in clean_text (recording a decision
+      // and applying it to the corpus are always separate steps, same as
+      // every other decision type here), so still shown, struck through
+      // to signal "pending removal" rather than "pending replacement".
+      const pendingDelete = corr.current_decision.chosen_text === '';
+      span.className = 'flag-word state-human' + (pendingDelete ? ' pending-delete' : '');
       span.textContent = w;
       span.onclick = () => openManualCorrectionPanel(k.klal_id, i, w, corr);
       body.appendChild(span);
@@ -623,6 +629,46 @@ async function openKlalFlagPanel(klalId) {
 // two-step decide-then-apply-reviewer-decisions.py separation as every
 // other decision type; see apply_manual_correction() there for how it
 // reaches part1.json. ----------
+async function saveManualDecision(klalId, wordIndex, word, chosenText, note, wasAlreadyDecided) {
+  const res = await fetch('/api/decisions/manual', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ klal_id: klalId, word_index: wordIndex, original_word: word, chosen_text: chosenText, note }),
+  });
+  if (!res.ok) { alert('Save failed: ' + (await res.text())); return null; }
+
+  delete mountedKlal[klalId];
+  delete fetchInFlight[klalId];
+  const freshK = await fetchKlal(klalId);
+  const block = document.getElementById('klal-block-' + klalId);
+  if (block) renderKlalBody(block, freshK);
+  if (currentPage != null) await showPage(currentPage, scanFocusKlalId);
+
+  // A manual correction (replace OR delete) is born already-decided - it
+  // never passed through an "open" phase to move out of, unlike a machine
+  // candidate or witness item, so this is purely additive on first save
+  // (+1 total, +1 decided, open/machine_* untouched); editing/deleting an
+  // already-decided one changes no counts. Mirrors api_klalim()'s
+  // server-side accounting exactly so client and server never disagree
+  // (finding-6 pattern). Note: this counts REVIEW decisions, not corpus
+  // word count - a deletion not yet applied to part1.json hasn't changed
+  // the klal's actual word count yet, only that this word now has a
+  // decision recorded against it.
+  if (!wasAlreadyDecided && klalById[klalId]) {
+    const kb = klalById[klalId];
+    kb.correction_count = (kb.correction_count || 0) + 1;
+    kb.decided_count = (kb.decided_count || 0) + 1;
+    refreshNavItem(klalId);
+    buildLegend();
+  }
+  // Return the fresh synthetic 'manual' entry so the caller can re-render
+  // the panel itself against the just-saved state (not just the text
+  // pane) - without this, a successful delete left the "Click again to
+  // confirm delete" button text sitting there as if nothing had happened,
+  // and a second click would silently record a redundant decision.
+  return freshK.corrections.find(c => c.word_index === wordIndex && c.opcode === 'manual') || null;
+}
+
 async function openManualCorrectionPanel(klalId, wordIndex, word, existing) {
   openPanel(manualPanel);
   manualPanelBody.innerHTML = '<p>Loading…</p>';
@@ -635,7 +681,8 @@ async function openManualCorrectionPanel(klalId, wordIndex, word, existing) {
     (ctxStart + idx === wordIndex) ? `<b>[${w}]</b>` : w
   ).join(' ');
 
-  const currentText = existing ? existing.current_decision.chosen_text : '';
+  const markedForDeletion = existing && existing.current_decision.chosen_text === '';
+  const currentText = existing && !markedForDeletion ? existing.current_decision.chosen_text : '';
   const currentNote = existing && existing.current_decision.note ? existing.current_decision.note : '';
 
   manualPanelBody.innerHTML = `
@@ -643,6 +690,13 @@ async function openManualCorrectionPanel(klalId, wordIndex, word, existing) {
       <div class="panel-label">Klal ${klalId}, word ${wordIndex}</div>
       <div class="panel-word-context">${ctxWords}</div>
     </div>
+    ${markedForDeletion ? `
+    <div class="panel-section">
+      <div class="panel-label">Marked for deletion</div>
+      <div style="font-size:12px;color:var(--ink-faint);">Not yet removed from the corpus - recording
+      a decision and applying it to part1.json are always separate steps. Save a replacement below to
+      change your mind, or use Delete again to reconfirm.</div>
+    </div>` : ''}
     <div class="panel-section">
       <div class="panel-label">${existing ? 'Correction on record' : 'Propose a correction'}</div>
       <input type="text" class="custom-text" id="manual-correction-text"
@@ -654,7 +708,7 @@ async function openManualCorrectionPanel(klalId, wordIndex, word, existing) {
     </div>
     <div class="panel-section">
       <button class="panel-btn" id="save-manual-correction-btn">Save</button>
-      <span class="save-status" id="manual-correction-save-status">Saved ✓</span>
+      <button class="panel-btn secondary" id="delete-manual-word-btn">Delete this word</button>
     </div>
     ${existing ? `
     <div class="panel-section">
@@ -663,42 +717,44 @@ async function openManualCorrectionPanel(klalId, wordIndex, word, existing) {
     </div>` : ''}
   `;
 
+  // No separate "Saved" flash here (unlike every other panel in this
+  // app) - both actions below re-open this same panel against the fresh
+  // post-save state on success, and that refreshed content (the new
+  // "Correction on record" text, or "Marked for deletion") IS the
+  // confirmation; a flash immediately clobbered by that re-render would
+  // never actually be seen.
   document.getElementById('save-manual-correction-btn').onclick = async () => {
     const text = document.getElementById('manual-correction-text').value.trim();
-    if (!text) { alert('Enter the corrected reading first.'); return; }
+    if (!text) { alert('Enter the corrected reading first (or use Delete this word instead).'); return; }
     const note = document.getElementById('manual-correction-note').value.trim();
+    const freshCorr = await saveManualDecision(klalId, wordIndex, word, text, note, !!existing);
+    if (freshCorr) openManualCorrectionPanel(klalId, wordIndex, word, freshCorr);
+  };
 
-    const res = await fetch('/api/decisions/manual', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ klal_id: klalId, word_index: wordIndex, original_word: word, chosen_text: text, note }),
-    });
-    if (!res.ok) { alert('Save failed: ' + (await res.text())); return; }
-
-    delete mountedKlal[klalId];
-    delete fetchInFlight[klalId];
-    const freshK = await fetchKlal(klalId);
-    const block = document.getElementById('klal-block-' + klalId);
-    if (block) renderKlalBody(block, freshK);
-    if (currentPage != null) await showPage(currentPage, scanFocusKlalId);
-
-    // A manual correction is born already-decided - it never passed
-    // through an "open" phase to move out of, unlike a machine candidate
-    // or witness item, so this is purely additive on first save (+1 total,
-    // +1 decided, open/machine_* untouched); editing an existing one
-    // changes no counts. Mirrors api_klalim()'s server-side accounting
-    // exactly so client and server never disagree (finding-6 pattern).
-    if (!existing && klalById[klalId]) {
-      const kb = klalById[klalId];
-      kb.correction_count = (kb.correction_count || 0) + 1;
-      kb.decided_count = (kb.decided_count || 0) + 1;
-      refreshNavItem(klalId);
-      buildLegend();
+  // Arm-then-confirm in the panel itself rather than a native confirm()
+  // dialog - consistent with the rest of this app (no other action here
+  // uses a browser-native dialog) and avoids the well-known problem of
+  // native dialogs blocking further automated/scripted interaction with
+  // the page entirely once triggered.
+  let deleteArmed = false;
+  const deleteBtn = document.getElementById('delete-manual-word-btn');
+  deleteBtn.onclick = async () => {
+    if (!deleteArmed) {
+      deleteArmed = true;
+      deleteBtn.textContent = 'Click again to confirm delete';
+      deleteBtn.classList.add('armed');
+      setTimeout(() => {
+        if (!deleteArmed) return;  // already resolved (clicked through or panel reused)
+        deleteArmed = false;
+        deleteBtn.textContent = 'Delete this word';
+        deleteBtn.classList.remove('armed');
+      }, 4000);
+      return;
     }
-
-    const status = document.getElementById('manual-correction-save-status');
-    status.classList.add('show');
-    setTimeout(() => status.classList.remove('show'), 2000);
+    deleteArmed = false;
+    const note = document.getElementById('manual-correction-note').value.trim();
+    const freshCorr = await saveManualDecision(klalId, wordIndex, word, '', note, !!existing);
+    if (freshCorr) openManualCorrectionPanel(klalId, wordIndex, word, freshCorr);
   };
 
   if (existing) {

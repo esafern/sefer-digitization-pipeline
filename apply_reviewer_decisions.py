@@ -35,8 +35,10 @@
 #     same way as 'replace', but drift-check against the word actually
 #     seen at word_index when the decision was made (there's no
 #     corrections_part1.json entry behind these) instead of a candidate
-#     snapshot. Same-position only, so - unlike insert/delete - they don't
-#     need the one-per-klal-per-run limit.
+#     snapshot. chosen_text=='' means DELETE the word instead - that
+#     changes word count for the klal, so it shares the insert/delete
+#     one-per-klal-per-run limit below; an ordinary replace (non-empty
+#     chosen_text) doesn't need it, same position in, same position out.
 #   - Every applied decision gets its own apply_event row in the same
 #     decisions log, so "decided" and "applied" stay two distinct,
 #     separately-auditable events - including a no-op "confirmed current
@@ -106,6 +108,21 @@ def apply_manual_correction(clean_text, word_index, original_word, chosen_text):
     if word_index >= len(words) or words[word_index] != original_word:
         return None  # live drift beyond what the snapshot check caught
     words[word_index] = chosen_text
+    return " ".join(words)
+
+
+def apply_manual_deletion(clean_text, word_index, original_word):
+    """'manual_correction' decision with chosen_text=='' (2026-08-13: "need
+    ability to delete selected word, not just change it") - remove the
+    word entirely rather than replace it. Unlike apply_manual_correction,
+    this changes word COUNT for the whole klal, so it shares the same
+    word_count_changed_klalim per-klal-per-run guard as the insert/delete
+    opcodes below - see their comment for why. Same space-only split as
+    apply_manual_correction, for the same reason."""
+    words = clean_text.split(' ')
+    if word_index >= len(words) or words[word_index] != original_word:
+        return None
+    del words[word_index]
     return " ".join(words)
 
 
@@ -239,10 +256,14 @@ def main():
             rd.append_decision("apply_event", klal_id=klal_id, word_index=word_index,
                                 applied_decision_id=decision["id"])
 
-    # manual_correction decisions: always a same-position replace with no
-    # word-count change (see apply_manual_correction docstring), so unlike
-    # insert/delete these need no per-klal-per-run limit - all can apply in
-    # one pass even if several land in the same klal.
+    # manual_correction decisions: chosen_text=='' means delete (2026-08-13,
+    # "need ability to delete selected word, not just change it") - that
+    # changes word count for the whole klal, so it shares the
+    # word_count_changed_klalim guard with the insert/delete opcodes above
+    # (same set, checked across both loops - a manual deletion and a
+    # machine insert/delete in the same klal in the same run correctly
+    # block each other). A same-position replace (non-empty chosen_text)
+    # needs no such limit.
     for (klal_id, word_index), decision in sorted(manual_decisions.items()):
         if decision["id"] in already_applied:
             skipped_already_applied.append((klal_id, word_index))
@@ -252,13 +273,28 @@ def main():
             skipped_drift.append((klal_id, word_index))
             continue
         original_word = decision.get("candidate_snapshot", {}).get("original_word")
-        new_text = apply_manual_correction(klal["clean_text"], word_index, original_word, decision["chosen_text"])
+        chosen_text = decision["chosen_text"]
+
+        if chosen_text == "":
+            if klal_id in word_count_changed_klalim:
+                print(f"  SKIP klal {klal_id} word {word_index}: another word-count-changing "
+                      f"decision already applied for this klal this run - run ./rebuild_all.sh, "
+                      f"then this script again, to pick up the next one.")
+                continue
+            new_text = apply_manual_deletion(klal["clean_text"], word_index, original_word)
+            kind = "manual-delete"
+        else:
+            new_text = apply_manual_correction(klal["clean_text"], word_index, original_word, chosen_text)
+            kind = "manual"
+
         if new_text is None:
             skipped_drift.append((klal_id, word_index))
             continue
         klal["clean_text"] = new_text
+        if chosen_text == "":
+            word_count_changed_klalim.add(klal_id)
         n_manual += 1
-        applied.append((klal_id, word_index, "manual"))
+        applied.append((klal_id, word_index, kind))
         if not args.dry_run:
             rd.append_decision("apply_event", klal_id=klal_id, word_index=word_index,
                                 applied_decision_id=decision["id"])

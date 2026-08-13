@@ -51,6 +51,32 @@ current handoff, re-written (not just appended to) as state changes.
   3, `למד`->`למד-TEST` (id `7cb1a6ac7bc1`) - self-labeled in its own note
   as a feature test, not a real edit; safe to disregard or delete via the
   same panel.
+- **Extended, 2026-08-13, same day**: the panel above can now DELETE a
+  word too, not just replace it (direct follow-up request). `chosen_text
+  == ""` (explicitly empty, not missing) means delete;
+  `apply_manual_deletion` in `apply_reviewer_decisions.py` removes the
+  word entirely, sharing the insert/delete opcodes' one-word-count-change-
+  per-klal-per-run guard since deletion shifts every later index in that
+  klal (an ordinary replace doesn't need this - same position in, same
+  position out). Confirm-to-delete is an in-panel arm/click-again pattern,
+  not a native `confirm()` dialog (those block further page interaction
+  once triggered and are inconsistent with the rest of this app). A word
+  marked for deletion still renders (recording a decision and applying it
+  are always separate steps here) with a strikethrough
+  (`.pending-delete`). Found and fixed one real bug while verifying this:
+  the panel didn't refresh its own state after a successful save, so a
+  completed delete left a stale "click again to confirm" button behind -
+  fixed by having both Save and Delete re-open the panel against the
+  fresh post-save state, which doubles as the save confirmation (no
+  separate flash needed). Verified end-to-end incl. the per-klal-per-run
+  guard against real data (`apply_reviewer_decisions.py --dry-run`
+  correctly applied one manual-delete per klal and skipped a second one in
+  the same klal with the expected message). All 19 tests still pass.
+  Three more test decisions on record from this verification, all on klal
+  3, all self-labeled as tests in their own notes, safe to disregard:
+  word 7 delete (id `0022073fb6de`, raw-endpoint debug check), word 10
+  delete (id `5b34465c4b41`, first full arm/confirm verification), word
+  22 delete (id `3a0e19aa9bfc`, panel-refresh-fix verification).
 - **Every previously-tracked corpus-content gap is closed** (klal 5, 29,
   30/75/88, 37, 69, 206, 217 - see `PROJECT-STATUS-HISTORY.md` "All open
   corpus-content bugs closed" and "Multi-page reconstruction APPLIED").

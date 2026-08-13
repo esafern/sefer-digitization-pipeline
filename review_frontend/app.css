@@ -208,6 +208,7 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
 .flag-word.state-open { border-bottom: 3px solid var(--danger); }
 .flag-word.state-machine { border-bottom: 2px dotted var(--pending); opacity: 0.92; }
 .flag-word.state-human { border-bottom: 3px solid #38a169; }
+.flag-word.pending-delete { text-decoration: line-through; text-decoration-color: var(--danger); opacity: 0.7; }
 .flag-word:hover { background: rgba(43,108,176,0.08); }
 /* Every word is clickable now (2026-08-13, "flag any word and replace
    it"), not just machine-flagged ones - but a permanent visual mark on
@@ -475,6 +476,7 @@ textarea.custom-text, input.custom-text {
 .panel-btn:disabled { opacity: 0.5; cursor: default; }
 .panel-btn.secondary { background: transparent; color: var(--accent); border: 1.5px solid var(--accent); }
 .panel-btn.secondary:hover { background: var(--accent-wash); }
+.panel-btn.secondary.armed { color: var(--danger); border-color: var(--danger); background: rgba(229,62,62,0.08); }
 
 .history-toggle {
   font-size: 12px; color: var(--accent); cursor: pointer; text-decoration: underline;

@@ -478,18 +478,27 @@ def api_post_manual_correction(body):
     word actually seen at word_index at flagging time, since there's no
     corrections_part1.json entry to snapshot instead - apply_reviewer_
     decisions.py's manual-correction pass drift-checks against this
-    directly against the live part1.json text."""
+    directly against the live part1.json text.
+
+    chosen_text == "" (explicitly, not missing) means DELETE the word
+    entirely (2026-08-13, "need ability to delete selected word, not just
+    change it") - apply_manual_deletion there handles that case, sharing
+    the insert/delete word-count-change guard since removing a word
+    shifts every later index in the klal. A missing chosen_text field
+    (None) is still rejected - that's a client bug, not an intentional
+    empty replacement."""
     klal_id = int(body["klal_id"])
     word_index = int(body["word_index"])
     chosen_text = body.get("chosen_text")
-    if not chosen_text or not chosen_text.strip():
-        raise ValueError("chosen_text is required")
+    if chosen_text is None:
+        raise ValueError("chosen_text is required (pass '' explicitly to delete)")
+    chosen_text = chosen_text.strip()
     record = rd.append_decision(
         "manual_correction",
         klal_id=klal_id,
         word_index=word_index,
-        chosen_source="custom",
-        chosen_text=chosen_text.strip(),
+        chosen_source="custom" if chosen_text else "delete",
+        chosen_text=chosen_text,
         candidate_snapshot={"word_index": word_index, "original_word": body.get("original_word")},
         note=body.get("note"),
     )
