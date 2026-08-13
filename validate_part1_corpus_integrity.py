@@ -140,7 +140,15 @@ def check_gematria_self_consistency(klalim):
         if stored_gem != expected_gem:
             issues.append(f"klal {kid}: gematria field is {stored_gem!r}, expected {expected_gem!r} for klal_id {kid}")
         opening_word = text.split()[0] if text.split() else ""
-        if opening_word != stored_gem:
+        # klal 166's print genuinely attaches its own closing geresh directly
+        # to the gematria numeral ("קסו'"), unlike every other Part-1 klal
+        # (confirmed 2026-08-13 when the corpus-wide stray-space-before-
+        # geresh fix - see PROJECT-STATUS.md - correctly merged it: checked
+        # all 222 klalim, 166 is the only one whose opening now differs from
+        # `gematria` by a trailing geresh). The `gematria` field itself never
+        # carries the geresh, so tolerate opening_word == stored_gem + "'"
+        # as well as an exact match.
+        if opening_word != stored_gem and opening_word != stored_gem + "'":
             issues.append(f"klal {kid}: clean_text opens with {opening_word!r}, but gematria field says {stored_gem!r}")
     if not issues:
         print(f"  {len(klalim)}/{len(klalim)} klalim: klal_id, gematria field, and clean_text opening all agree.")

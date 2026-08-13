@@ -194,7 +194,24 @@ PLACEHOLDER_TITLE_COUNT_MAX = 115
 # it is a *probable* false positive, and klal 84's marker is still unknown so
 # the 83/84 split itself is unconfirmed. Worth a direct check if anyone is in
 # the area; it is not a known real gap.
-SPAN_COVERAGE_BASELINE = {83, 106, 123, 175}
+# klal 15, 130, 195 ADDED 2026-08-13: NOT truncation, a ratio-threshold
+# artifact of a corpus-wide accuracy fix. A DocAI tokenization bug put a
+# stray space between an abbreviated word and its own closing geresh
+# throughout Part 1 (e.g. stored "התוס '" where the print is "התוס'") -
+# fixed corpus-wide (2,548 instances, 201 klalim; see PROJECT-STATUS.md
+# "stray space before abbreviation geresh"), verified letter-for-letter
+# identical before/after (stripping every non-Hebrew-letter character
+# from clean_text produced byte-identical results for all 222 klalim -
+# the fix only ever merges two whitespace-separated tokens into one,
+# never touches a real letter). That merge necessarily lowers word count
+# by 1 per instance, and these three klalim's ratios were already within
+# a hair of FLAG_RATIO_THRESHOLD (0.85) before the fix - klal 15+16's
+# combined span 0.869->0.830 (16 alone lost 9 stray-space instances),
+# klal 130 0.853->0.840 (1 instance), klal 195 0.870->0.848 (1 instance).
+# Recomputing each span's ratio against the PRE-fix word counts confirms
+# all three clear 0.85 - this is the ratio threshold reacting to a real
+# accuracy improvement, not new missing content.
+SPAN_COVERAGE_BASELINE = {15, 83, 106, 123, 130, 175, 195}
 
 # NOT false positives - these are CONFIRMED REAL, UNFIXED corpus damage,
 # kept in a separate constant from SPAN_COVERAGE_BASELINE precisely so that
