@@ -138,9 +138,21 @@ def api_klalim():
     # 0 to machine_disputed/machine_resolved - matching exactly what the
     # frontend's own incremental counter patch does on save (see app.js
     # openManualCorrectionPanel), so client and server never disagree.
+    # Drift check, added 2026-08-14 (same incident/reasoning as api_klal()'s
+    # - see PROJECT-STATUS.md): only count a manual_correction decision if
+    # its word still matches what it was decided against; otherwise a
+    # stale decision from before a reindexing edit inflates this klal's
+    # count for a word it no longer actually describes.
     manual_decided = rd.all_current("manual_correction")  # {(klal_id, word_index): record}
     manual_count_by_klal = {}
-    for (kid, _wi) in manual_decided:
+    for (kid, wi), rec in manual_decided.items():
+        k = klalim_by_id.get(kid)
+        if not k:
+            continue
+        words = (k.get("clean_text") or "").split(" ")
+        original_word = rec.get("candidate_snapshot", {}).get("original_word")
+        if wi >= len(words) or words[wi] != original_word:
+            continue
         manual_count_by_klal[kid] = manual_count_by_klal.get(kid, 0) + 1
 
     # Witness items fold into the SAME tri-state counts as corrections
@@ -232,8 +244,26 @@ def api_klal(klal_id):
     # wordState() in app.js always renders it Human-Decided - correct,
     # since a manual correction IS the decision, there's no separate
     # machine-disputed phase for it to have come from.
+    #
+    # DRIFT CHECK, added 2026-08-14 (found live during the 2026-08-13
+    # geresh-spacing reindex incident - see PROJECT-STATUS.md): unlike
+    # candidate_choice/punctuation_choice above and below, which only ever
+    # look up a decision for a word_index that ALREADY has a live
+    # candidate/punctuation entry (so a stale decision at an abandoned
+    # position simply never surfaces), this loop used to render EVERY
+    # recorded manual_correction decision unconditionally. After any edit
+    # that shifts word positions in this klal, an old decision's
+    # word_index can land on a completely different, unrelated word - the
+    # dashboard would show that word as "Human-Decided" with someone
+    # else's chosen_text attached to it. Skip (don't render) a decision
+    # whose original_word no longer matches what's actually at that
+    # position now; only a still-valid decision renders.
+    words = (k.get("clean_text") or "").split(" ")
     for (kid, word_index), rec in rd.all_current("manual_correction").items():
         if kid != klal_id:
+            continue
+        original_word = rec.get("candidate_snapshot", {}).get("original_word")
+        if word_index >= len(words) or words[word_index] != original_word:
             continue
         corrections.append({
             "word_index": word_index,

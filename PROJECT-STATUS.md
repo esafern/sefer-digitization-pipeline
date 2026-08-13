@@ -84,9 +84,71 @@ current handoff, re-written (not just appended to) as state changes.
   14/14 passing; `tests/test_review_server.py` (5 more, browser/
   Playwright-based, NOT part of the automated gate) is 5/5.
 
+- **RESOLVED 2026-08-14 - reindexing incident from the geresh-spacing
+  fix above.** `./rebuild_all.sh --skip-vision` after that corpus-wide
+  fix left the dashboard showing corrections/notes pointing at the wrong
+  word (user-reported: "corrected text points to the wrong word... note
+  is correct but does not match the highlighted text... green box not
+  seen for the first correction"). **Root cause 1**: `--skip-vision`
+  skips `verify_corrections_vision.py`, so `corrections_verified_
+  part1.json` kept its PRE-fix `word_index_in_final_text`/`corrected_word`
+  while `corrections_candidates_part1.json` (which DID regenerate) already
+  had the correct POST-fix values - confirmed on klal 1: candidates file
+  said word 437/`ומדקמהד'`, the stale verified file still said word
+  468/`ומדקמהד`. Fixed by running the FULL rebuild (live vision
+  re-verification, not `--skip-vision`) - see the geresh-spacing commit.
+  **Lesson: `--skip-vision` is only safe for a fix that doesn't change any
+  klal's WORD COUNT** - it silently keeps old candidate positions/content
+  for anything that does, and nothing currently detects or warns about
+  this.
+  **Root cause 2, found while verifying the fix**: the full rebuild
+  correctly realigned MACHINE candidates, but every EXISTING HUMAN
+  DECISION recorded before the reindex was keyed by its OLD word_index -
+  10 real decisions (7 `candidate_choice`, 1 `manual_correction`, 1
+  `punctuation_choice`, plus one of my own re-filings that itself had an
+  off-by-one) were silently orphaned, no longer attached to the candidate
+  they were actually about. Recovered all 10 by re-filing each at its
+  correct new position (verified byte-for-byte, not guessed): `bbox`
+  (pixel-based, never changes) for the 7 `candidate_choice` decisions;
+  unique word-content search for the 1 `manual_correction`; the
+  candidate's own stored `word_before`/`word_after` anchor for the
+  punctuation one. `punctuation_candidates_part1.json` itself (67 of 74
+  entries) needed the same relocation - 7 were anchored to a `word_before`
+  of a bare `"'"`, i.e. the exact floating-apostrophe artifact just fixed,
+  and were dropped rather than guessed at (can be regenerated fresh by
+  `propose_punctuation_part1.py` if wanted; its own cache already
+  invalidates on this clean_text change).
+  **Root cause 3, a real independent bug found via the same verification**:
+  unlike `candidate_choice`/`punctuation_choice` (which only ever look up
+  a decision for a position that already has a live candidate, so a stale
+  decision at an abandoned position just never surfaces), `api_klal()`'s
+  `manual_correction` handling rendered EVERY recorded decision
+  unconditionally, with no check that the word still matched. Fixed in
+  `review_server.py` (both `api_klal()` and `api_klalim()`'s count) to
+  skip a decision whose `original_word` no longer matches the live text -
+  this bug existed independent of this specific incident and would
+  recur on any future edit that shifts a manual-corrected word's position.
+  **Verified end-to-end after all fixes**: every live `candidate_choice`/
+  `manual_correction`/`punctuation_choice` decision cross-checked against
+  current `part1.json`/`corrections_part1.json`/`punctuation_candidates_
+  part1.json` content (0 mismatches), confirmed visually in the browser -
+  klal 1's scan-pane box renders green (`hl-state-human`) again, text pane
+  correctly underlines the decided word. 19/19 tests pass.
+
 ### NEXT STEPS, in order
 
-**1. Two witness adjudications still need a genuine human call before
+**1. Hardening worth doing, not yet done**: `assemble_corrections_
+dataset.py` has no cross-check that a verified candidate's `corrected_
+word` still matches the CURRENT `part1.json` content at its `word_index_
+in_final_text` before serving it - the reindexing incident above only
+surfaced because a human happened to notice and report it, not because
+anything detected the staleness. Same drift-detection shape as
+`apply_reviewer_decisions.py`'s `snapshot_matches()` would catch this
+class of bug automatically on any future edit that changes word
+positions, instead of relying on remembering to always run the full
+(non-`--skip-vision`) rebuild.
+
+**2. Two witness adjudications still need a genuine human call before
 any text edit** (carried forward from the prior session, both recorded
 as `klal_flag` decisions in `review_decisions.jsonl`, not text edits) -
 **now resolvable directly through the new manual-correction feature
@@ -107,7 +169,7 @@ above**, no script/hand-edit needed:
      counter, not a real read of the crop) - flagged via `klal_flag` id
      `f39158d3ba5a`, still needs an actual look.
 
-**2. The broader witness queue (tier B/C/D, ~411 items across klal
+**3. The broader witness queue (tier B/C/D, ~411 items across klal
 30/75/88) is still fully open** and is the only real second opinion on
 the ~3,800 words reconstructed for those three klalim. Its tier labels
 are now trustworthy (finding 3's per-word lexicon fix) and it now
@@ -116,7 +178,7 @@ includes DocAI-omission cases it structurally couldn't show before
 dashboard, click a box) remains the highest-value follow-up QA, though
 it is not a gate on anything.
 
-**3. Unverified risks flagged by the second audit round, not confirmed
+**4. Unverified risks flagged by the second audit round, not confirmed
 bugs, worth someone's attention** (full reasoning in
 `PROJECT-STATUS-HISTORY.md`'s audit entry): an `apply_event` is never
 invalidated when its underlying decision is later reverted outside the
@@ -133,7 +195,7 @@ folio-numeral heuristic ate klal 89's real marker `פט` once (caught by
 an existing guard that run, but the rule can't reliably tell a folio
 numeral from a klal marker).
 
-**4. General standing caution, not a specific open bug**: docstring/
+**5. General standing caution, not a specific open bug**: docstring/
 comment overclaims turned up repeatedly across both audit rounds this
 session, in different validator scripts - a script's claimed coverage is
 not evidence of its actual coverage. Worth a sanity pass on any OTHER
