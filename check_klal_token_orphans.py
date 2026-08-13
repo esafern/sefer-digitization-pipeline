@@ -253,7 +253,14 @@ def main():
                   f"likely orphaned, not just misassigned)")
 
     # --- Pass 2: double-assignment scan - does the same real-span content chunk
-    # appear (near-verbatim) inside more than one klal's stored clean_text? ---
+    # appear (near-verbatim) inside more than one klal's stored clean_text?
+    # KNOWN BLIND SPOT (2026-08-10, second audit round, not yet fixed): the
+    # exact-normalized-substring match this relies on measured 43 of 197
+    # spans (21.8%) matching NOTHING at all, including their own correct
+    # owner - structurally blind exactly where docai is garbled (the same
+    # shape as Lesson 15). "None found" below means "no double-assignment
+    # detected in the spans this technique could match," not "verified
+    # clean" - do not read a clean run here as full coverage. ---
     print(f"\n--- Double-assignment scan (same real content appearing under 2+ klal_ids) ---")
     all_text_norm = {kid: normalize(k["clean_text"]) for kid, k in part1.items()}
     double_hits = []

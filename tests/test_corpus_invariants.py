@@ -460,7 +460,7 @@ def test_no_new_alphabetical_title_order_violations(all_klalim):
         "validate_title_alphabetical_order",
         os.path.join(REPO, "validate_title_alphabetical_order.py"),
     )
-    violations = validator.find_violations(all_klalim)
+    violations, _skipped_bad_first_char = validator.find_violations(all_klalim)
     assert len(violations) <= ALPHABETICAL_ORDER_VIOLATION_BASELINE_MAX, (
         f"{len(violations)} title-alphabetical-order violations, more than the "
         f"documented baseline of {ALPHABETICAL_ORDER_VIOLATION_BASELINE_MAX} "

@@ -74,18 +74,27 @@ def find_violations(klalim):
       being penalized for fragmentation.
     """
     seq = []
+    skipped_bad_first_char = []
     for k in klalim:
         title = (k.get("title") or "").strip()
         if not title or title == NO_TEXT_TITLE:
             continue
         c = title[0]
         if c not in RANK:
-            continue  # not a Hebrew letter (shouldn't happen for a real title)
+            # FIXED 2026-08-14: this comment used to say "shouldn't happen
+            # for a real title" and silently `continue`d - it does happen
+            # (klal 353's title opens with a stray "'." OCR/encoding
+            # artifact before the real text), and a klal skipped here is
+            # invisible to this entire check: neither validated as correct
+            # nor flagged as wrong, just absent. Report it instead of
+            # assuming the case away.
+            skipped_bad_first_char.append((k["klal_id"], title[:20]))
+            continue
         seq.append((k["klal_id"], c))
 
     n = len(seq)
     if n == 0:
-        return {}
+        return {}, skipped_bad_first_char
     L = len(ALPHABET)
 
     # dp[r] = best match-count achievable for the prefix processed so far,
@@ -123,7 +132,7 @@ def find_violations(klalim):
                 "actual_letter": c,
                 "expected_letter": ALPHABET[r],
             })
-    return by_klal
+    return by_klal, skipped_bad_first_char
 
 
 def main():
@@ -136,7 +145,15 @@ def main():
     path = os.path.join(REPO, "klalim_demo_dataset.json")
     klalim = load_klalim(path)
     klalim = sorted(klalim, key=lambda k: k["klal_id"])
-    by_klal = find_violations(klalim)
+    by_klal, skipped_bad_first_char = find_violations(klalim)
+
+    if skipped_bad_first_char:
+        print(f"{len(skipped_bad_first_char)} klal(im) NOT checked - title doesn't start with a "
+              f"recognized Hebrew letter, invisible to this check entirely (neither validated nor "
+              f"flagged):")
+        for kid, title_preview in skipped_bad_first_char:
+            print(f"  klal {kid}: title starts {title_preview!r}")
+        print()
 
     if by_klal:
         print(f"{len(by_klal)} klal(im) flagged:")
@@ -145,7 +162,7 @@ def main():
             print(f"  klal {kid}: title starts {r['actual_letter']!r}, "
                   f"expected {r['expected_letter']!r} to keep the sequence non-decreasing")
     else:
-        print("Clean - 0 flagged items.")
+        print("Clean - 0 flagged items (besides the skipped klal(im) reported above, if any).")
 
 
 if __name__ == "__main__":

@@ -33,7 +33,18 @@ DOCAI_DIR = os.path.join(REPO, "docai_word_boxes")
 FIRST_REAL_PAGE = 13  # pages 1-12 are byte-identical duplicates of 13-24, see CLAUDE.md
 LAST_PAGE = 82
 
-HEADER_WORDS = {"יד", "מלאכי", "יר", "יך", "כללי", "כללי-", "כלל"}
+# FIXED 2026-08-14: "כלל" (a common standalone Hebrew word - "rule",
+# "principle") used to be in this set too, alongside "כללי" (the actual
+# header token, "rules of..."). That meant any genuine catchword or page-
+# opening word that happened to just be the bare word "כלל" would be
+# silently treated as furniture and skipped, in both last_real_tokens()
+# and first_real_tokens() - the exact false-negative shape this file's own
+# docstring says is fine ("no match" is uninformative here), but it's
+# still a real accuracy gap, not a disclosed limitation. Confirmed 0 of
+# 70 Part-1 pages are currently affected either way (no page boundary's
+# real last/first token is the bare word "כלל"), so removing it is a
+# true no-op today and only matters for future data.
+HEADER_WORDS = {"יד", "מלאכי", "יר", "יך", "כללי", "כללי-"}
 FURNITURE_RE = re.compile(r"^(Digitized|by|Google)$", re.IGNORECASE)
 GEMATRIA_LETTERS = set("אבגדהוזחטיכלמנסעפצקרשתךםןףץ")
 
