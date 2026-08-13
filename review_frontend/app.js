@@ -368,9 +368,23 @@ async function openCandidatePanel(klalId, corr) {
   const words = (k.clean_text || '').split(' ');
   const ctxStart = Math.max(0, corr.word_index - 6);
   const ctxEnd = Math.min(words.length, corr.word_index + 7);
-  const ctxWords = words.slice(ctxStart, ctxEnd).map((w, idx) =>
-    (ctxStart + idx === corr.word_index) ? `<b>${w}</b>` : w
-  ).join(' ');
+  // FIXED 2026-08-14 (same bug class as the witness panel's context
+  // highlight, found via user report): a 'replace'/'insert' candidate can
+  // span multiple words (build_corrections_dataset.py allows up to
+  // MAX_SPAN=4), but this used to bold only the single word AT
+  // corr.word_index - the rest of a multi-word disagreement (e.g.
+  // final_text "בספר שמות", 2 words) rendered as plain, unhighlighted
+  // text. Bold the whole span, using final_text's own word count
+  // ('delete'/'manual' are always effectively 1 - word_index there is an
+  // insertion anchor point, not a real current-text span).
+  const corrSpanLen = (corr.opcode === 'replace' || corr.opcode === 'insert') && corr.final_text
+    ? corr.final_text.split(' ').length : 1;
+  const corrSpanEnd = Math.min(words.length, corr.word_index + corrSpanLen);
+  const ctxWords = [
+    words.slice(ctxStart, corr.word_index).join(' '),
+    `<b>${words.slice(corr.word_index, corrSpanEnd).join(' ')}</b>`,
+    words.slice(corrSpanEnd, ctxEnd).join(' '),
+  ].filter(Boolean).join(' ');
 
   const [flagLabel] = FLAGS[corr.flag] || ['Flagged'];
   const flagColor = STATE_META[wordState(corr)].color;
@@ -887,9 +901,26 @@ async function openWitnessPanel(w) {
   // not the not-yet-applied reconstruction draft - see review_server.py
   // api_witness_context()'s docstring for why.
   const ctx = await fetch(`/api/witness/context/${w.page}/${w.docai_token_index}`).then(r => r.json());
-  const ctxHtml = ctx.words.length
-    ? ctx.words.map((word, i) => i === ctx.target_index ? `<b>[${word}]</b>` : word).join(' ')
-    : '<span style="color:var(--ink-faint);">no context available</span>';
+  // FIXED 2026-08-14 (user report: clicked a witness box on the scan pane,
+  // saw "...וזו היא [שיטת] התוס ג"כ..." - only the FIRST word of a
+  // multi-word disagreement was bracketed, even though docai_reading was
+  // the full two-word span "שיטת התוס"). This used to bracket exactly one
+  // word at ctx.target_index regardless of how many words the actual
+  // disagreement spans (opcode/MAX_SPAN in verify_reconstruction_
+  // witness.py allow up to 4) - bracket the whole span instead, using the
+  // word count already available in docai_reading.
+  let ctxHtml;
+  if (ctx.words.length) {
+    const spanLen = w.docai_reading ? w.docai_reading.split(' ').length : 1;
+    const ti = ctx.target_index;
+    const tEnd = Math.min(ctx.words.length, ti + spanLen);
+    const before = ctx.words.slice(0, ti).join(' ');
+    const target = ctx.words.slice(ti, tEnd).join(' ');
+    const after = ctx.words.slice(tEnd).join(' ');
+    ctxHtml = [before, `<b>[${target}]</b>`, after].filter(Boolean).join(' ');
+  } else {
+    ctxHtml = '<span style="color:var(--ink-faint);">no context available</span>';
+  }
 
   witnessPanelBody.innerHTML = `
     <div class="panel-section">
