@@ -17,6 +17,78 @@ current file references, or when grepping for how a past finding was
 resolved. Same append-at-top convention as before: newest entries go right
 after this header, not at the bottom.
 
+## Witness bbox line-wrap click-steal bug, klal 30/22 flag closed — 2026-08-14
+
+Continuation of the multi-word highlight fix from the entry below (same
+day, later). User confirmed the bracket fix worked (klal 30 page 24:
+"[שיטת התוס]" now brackets both words), but reported a second, deeper
+bug in the same report: clicking `וכו`'s box on the scan pane (page 24,
+third green box) opened `שיטת התוס`'s panel instead of `וכו`'s own.
+
+**Root cause, confirmed via direct bbox inspection**: `verify_
+reconstruction_witness.py`'s bbox computation (`box = dtoks[i1:i2]` then
+naive `min`/`max` across x1/y1/x2/y2 of every token in that span) doesn't
+account for a multi-word span crossing a line-wrap. `שיטת התוס` (docai_
+token_index 38) has its two words on different physical lines, so the
+union bbox stretched to x: 0.136-0.892 (75.6% of page width), and its
+y-range (0.104-0.137) fully covered `וכו`'s (token 22) legitimate, much
+smaller box (x: 0.812-0.831, y: 0.103-0.119) - `וכו`'s entire box sat
+geometrically inside `שיטת התוס`'s. Since witness boxes render as
+absolutely-positioned overlay divs appended in ascending token-index
+order (`review_frontend/app.js`'s `showPage()`), and later-appended
+elements paint on top and receive pointer events first for overlapping
+regions, `שיטת התוס`'s much larger box (appended after `וכו`'s, since
+token 38 > token 22) silently intercepted clicks meant for `וכו`.
+
+Corpus-wide check: 11 of 419 witness items had a bbox spanning >50% of
+page width from this bug.
+
+**Fix**: anchor the bbox to only the tokens on the SAME LINE as the
+span's first (anchor) token, using that token's own height as the
+same-line tolerance (`abs(token_y_center - anchor_y_center) < anchor_
+height * 0.6`) rather than a fixed pixel value, since page scale/DPI can
+vary. Same-line multi-word spans are unaffected (every token in them
+passes the check); cross-line spans collapse to just the anchor's line,
+consistent with `docai_token_index` already anchoring there.
+
+**Verified**: re-ran `verify_reconstruction_witness.py` (no Gemini calls
+- this script doesn't use vision) and confirmed all 11 oversized items
+corrected, 0 unintended changes elsewhere. `שיטת התוס`'s bbox is now
+x: 0.136-0.191 (5.5% of page width), zero overlap with `וכו`'s box.
+`reconstruction_witness_queue.json` regenerated. 14/14 corpus-invariant
+tests still pass.
+
+**Side effect on the in-progress vision-verification pass**: the
+`verify_witness_vision.py` full 419-item background run (started earlier
+this session against the OLD, bbox-buggy queue) was killed before
+regenerating the queue. Confirmed safe: that script only calls `json.
+dump` once, after its full loop completes, so nothing had been written
+back to `reconstruction_witness_queue.json` yet - the only real progress
+was in its sqlite cache (`witness_vision_cache.db`, keyed on crop_hash +
+word_a + word_b + context_hash), which had 133 entries at kill time.
+Restarted against the corrected queue; items whose bbox didn't change
+(same-line spans, the vast majority) reuse their cached decision via the
+same crop_hash, so only the 11 corrected items need fresh Gemini calls.
+Left running detached (`nohup`+`disown`) - not tied to this session's
+lifetime, survives a context clear. As of last check: 162/419 cached,
+0/419 written into the queue file yet (won't appear until the full loop
+finishes) - **check `sqlite3 witness_vision_cache.db "SELECT COUNT(*)
+FROM witness_cache;"` (target 419) or `ps aux | grep verify_witness_
+vision` to see current progress; once it reaches 419 and the process
+exits, `reconstruction_witness_queue.json` will have `vision_selected`/
+`vision_transcription`/`vision_confidence`/`vision_reasoning` on every
+item and should be committed.**
+
+**Also closed**: the klal 30/docai_token_index 22 flag (`klal_flag` id
+`f39158d3ba5a`, "recorded accidentally while testing a UI fix, needs a
+real look") - user directly reviewed the page 24 crop for token 22 and
+confirmed `וכו` (the existing witness_choice decision's answer, id
+`de6e18ef94ae`) is correct. Recorded a superseding `klal_flag` (id
+`3a143d105212`, `needs_revisit: false`) rather than deleting the old one,
+per the append-only convention - the old entry's concern (was this a
+genuine judgment or an accidental click?) is now moot since a genuine
+judgment was made afterward and agrees with it.
+
 ## Manual-correction feature, geresh-spacing corpus fix, reindexing incident + recovery, multi-word highlight fix, validator review — 2026-08-13/14
 
 Full detail for everything summarized in `PROJECT-STATUS.md`'s condensed
