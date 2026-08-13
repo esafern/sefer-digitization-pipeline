@@ -221,14 +221,34 @@ function renderKlalBody(block, k) {
       return;
     }
     const corr = byIndex[i];
-    if (corr) {
+    if (corr && corr.opcode === 'manual') {
+      // Reviewer-flagged word (2026-08-13, no machine candidate behind it -
+      // see openManualCorrectionPanel) - always Human-Decided (there's no
+      // machine-disputed phase for these to have come from), routed through
+      // the dedicated manual panel rather than openCandidatePanel, which is
+      // built around vision-generated options this kind of entry doesn't have.
+      const span = document.createElement('span');
+      span.className = 'flag-word state-human';
+      span.textContent = w;
+      span.onclick = () => openManualCorrectionPanel(k.klal_id, i, w, corr);
+      body.appendChild(span);
+    } else if (corr) {
       const span = document.createElement('span');
       span.className = 'flag-word state-' + wordState(corr);
       span.textContent = w;
       attachWordHandlers(span, k.klal_id, corr);
       body.appendChild(span);
     } else {
-      body.appendChild(document.createTextNode(w));
+      // Plain, not-yet-flagged word - clickable too (2026-08-13, "add
+      // feature for reviewer to flag any word and replace it"), not just
+      // ones the machine pipeline already flagged. No persistent styling
+      // (a hover-only affordance, see .plain-word:hover in app.css) so the
+      // vast majority of never-touched text doesn't look visually "flagged".
+      const span = document.createElement('span');
+      span.className = 'plain-word';
+      span.textContent = w;
+      span.onclick = () => openManualCorrectionPanel(k.klal_id, i, w, null);
+      body.appendChild(span);
     }
     body.appendChild(document.createTextNode(' '));
   });
@@ -306,12 +326,15 @@ const punctuationPanel = document.getElementById('punctuation-panel');
 const punctuationPanelBody = document.getElementById('punctuation-panel-body');
 const witnessPanel = document.getElementById('witness-panel');
 const witnessPanelBody = document.getElementById('witness-panel-body');
+const manualPanel = document.getElementById('manual-panel');
+const manualPanelBody = document.getElementById('manual-panel-body');
 
 function setupPanels() {
   document.getElementById('candidate-panel-close').onclick = closePanels;
   document.getElementById('klal-flag-panel-close').onclick = closePanels;
   document.getElementById('punctuation-panel-close').onclick = closePanels;
   document.getElementById('witness-panel-close').onclick = closePanels;
+  document.getElementById('manual-panel-close').onclick = closePanels;
   backdrop.onclick = closePanels;
   window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') closePanels();
@@ -323,6 +346,7 @@ function closePanels() {
   klalFlagPanel.classList.remove('open');
   punctuationPanel.classList.remove('open');
   witnessPanel.classList.remove('open');
+  manualPanel.classList.remove('open');
 }
 function openPanel(panel) {
   closePanels();
@@ -591,6 +615,110 @@ async function openKlalFlagPanel(klalId) {
     list.style.display = 'block';
     toggle.textContent = 'Hide history';
   };
+}
+
+// ---------- manual word correction (2026-08-13: "add feature for reviewer
+// to flag any word and replace it" - not just words the machine pipeline
+// already flagged). Reuses the same append-only decisions log and the same
+// two-step decide-then-apply-reviewer-decisions.py separation as every
+// other decision type; see apply_manual_correction() there for how it
+// reaches part1.json. ----------
+async function openManualCorrectionPanel(klalId, wordIndex, word, existing) {
+  openPanel(manualPanel);
+  manualPanelBody.innerHTML = '<p>Loading…</p>';
+
+  const k = mountedKlal[klalId] || await fetchKlal(klalId);
+  const words = (k.clean_text || '').split(' ');
+  const ctxStart = Math.max(0, wordIndex - 8);
+  const ctxEnd = Math.min(words.length, wordIndex + 9);
+  const ctxWords = words.slice(ctxStart, ctxEnd).map((w, idx) =>
+    (ctxStart + idx === wordIndex) ? `<b>[${w}]</b>` : w
+  ).join(' ');
+
+  const currentText = existing ? existing.current_decision.chosen_text : '';
+  const currentNote = existing && existing.current_decision.note ? existing.current_decision.note : '';
+
+  manualPanelBody.innerHTML = `
+    <div class="panel-section">
+      <div class="panel-label">Klal ${klalId}, word ${wordIndex}</div>
+      <div class="panel-word-context">${ctxWords}</div>
+    </div>
+    <div class="panel-section">
+      <div class="panel-label">${existing ? 'Correction on record' : 'Propose a correction'}</div>
+      <input type="text" class="custom-text" id="manual-correction-text"
+             placeholder="Correct reading…" value="${currentText.replace(/"/g, '&quot;')}">
+    </div>
+    <div class="panel-section">
+      <div class="panel-label">Note (optional)</div>
+      <textarea id="manual-correction-note" rows="3" placeholder="Why? e.g. &quot;scan confirms X, not Y&quot;">${currentNote}</textarea>
+    </div>
+    <div class="panel-section">
+      <button class="panel-btn" id="save-manual-correction-btn">Save</button>
+      <span class="save-status" id="manual-correction-save-status">Saved ✓</span>
+    </div>
+    ${existing ? `
+    <div class="panel-section">
+      <span class="history-toggle" id="manual-correction-history-toggle">Show decision history</span>
+      <div class="history-list" id="manual-correction-history-list" style="display:none;"></div>
+    </div>` : ''}
+  `;
+
+  document.getElementById('save-manual-correction-btn').onclick = async () => {
+    const text = document.getElementById('manual-correction-text').value.trim();
+    if (!text) { alert('Enter the corrected reading first.'); return; }
+    const note = document.getElementById('manual-correction-note').value.trim();
+
+    const res = await fetch('/api/decisions/manual', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ klal_id: klalId, word_index: wordIndex, original_word: word, chosen_text: text, note }),
+    });
+    if (!res.ok) { alert('Save failed: ' + (await res.text())); return; }
+
+    delete mountedKlal[klalId];
+    delete fetchInFlight[klalId];
+    const freshK = await fetchKlal(klalId);
+    const block = document.getElementById('klal-block-' + klalId);
+    if (block) renderKlalBody(block, freshK);
+    if (currentPage != null) await showPage(currentPage, scanFocusKlalId);
+
+    // A manual correction is born already-decided - it never passed
+    // through an "open" phase to move out of, unlike a machine candidate
+    // or witness item, so this is purely additive on first save (+1 total,
+    // +1 decided, open/machine_* untouched); editing an existing one
+    // changes no counts. Mirrors api_klalim()'s server-side accounting
+    // exactly so client and server never disagree (finding-6 pattern).
+    if (!existing && klalById[klalId]) {
+      const kb = klalById[klalId];
+      kb.correction_count = (kb.correction_count || 0) + 1;
+      kb.decided_count = (kb.decided_count || 0) + 1;
+      refreshNavItem(klalId);
+      buildLegend();
+    }
+
+    const status = document.getElementById('manual-correction-save-status');
+    status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  };
+
+  if (existing) {
+    document.getElementById('manual-correction-history-toggle').onclick = async () => {
+      const list = document.getElementById('manual-correction-history-list');
+      const toggle = document.getElementById('manual-correction-history-toggle');
+      if (list.style.display === 'block') { list.style.display = 'none'; toggle.textContent = 'Show decision history'; return; }
+      const history = await fetch(`/api/decisions/${klalId}/${wordIndex}`).then(r => r.json());
+      list.innerHTML = history.length
+        ? history.slice().reverse().map(h => `
+            <div class="history-item">
+              <div class="h-ts">${new Date(h.ts).toLocaleString()}</div>
+              <div class="h-text">${h.chosen_text || ''}</div>
+              ${h.note ? `<div class="h-note">${h.note}</div>` : ''}
+            </div>`).join('')
+        : '<p style="color:var(--ink-faint);font-size:12px;">No decisions recorded yet.</p>';
+      list.style.display = 'block';
+      toggle.textContent = 'Hide decision history';
+    };
+  }
 }
 
 // ---------- proposed-punctuation review panel ----------

@@ -31,7 +31,26 @@ current handoff, re-written (not just appended to) as state changes.
   `0e7aa84` (finding 12) `16cffc0` (finding 10) `9a0a3e9` (findings 3+4).
   Full fix-by-fix evidence is in `PROJECT-STATUS-HISTORY.md`.
 - **Review dashboard is running** (`python3 review_server.py` - check
-  `lsof -i :8420` first per CLAUDE.md).
+  `lsof -i :8420` first per CLAUDE.md; **was restarted 2026-08-13** to
+  pick up the feature below - server code isn't hot-reloaded like the
+  data files are, remember to restart after backend changes).
+- **New feature, 2026-08-13**: reviewers can now flag/replace ANY word in
+  a klal's text, not just ones the machine pipeline already flagged
+  (direct user request). Click any plain word -> "Flag / correct word"
+  panel -> type the correction -> Save. New `manual_correction` decision
+  type in `review_decisions.jsonl` (own snapshot: `{word_index,
+  original_word}`, no `corrections_part1.json` entry involved); new
+  `POST /api/decisions/manual` endpoint; `apply_reviewer_decisions.py`
+  gained a same-shape apply pass (`apply_manual_correction`, same-position
+  replace only, no word-count change, drift-checked against the live
+  corpus text directly). Verified end-to-end in the browser: panel opens
+  with correct context, save updates the nav badge/legend live AND
+  matches a fresh `/api/klalim` fetch exactly, reopening shows the
+  decision pre-filled with working history. All 19 tests still pass. One
+  real test decision from this verification is on record - klal 3, word
+  3, `למד`->`למד-TEST` (id `7cb1a6ac7bc1`) - self-labeled in its own note
+  as a feature test, not a real edit; safe to disregard or delete via the
+  same panel.
 - **Every previously-tracked corpus-content gap is closed** (klal 5, 29,
   30/75/88, 37, 69, 206, 217 - see `PROJECT-STATUS-HISTORY.md` "All open
   corpus-content bugs closed" and "Multi-page reconstruction APPLIED").
@@ -43,9 +62,17 @@ current handoff, re-written (not just appended to) as state changes.
 
 **1. Two witness adjudications still need a genuine human call before
 any text edit** (carried forward from the prior session, both recorded
-as `klal_flag` decisions in `review_decisions.jsonl`, not text edits):
+as `klal_flag` decisions in `review_decisions.jsonl`, not text edits) -
+**now resolvable directly through the new manual-correction feature
+above**, no script/hand-edit needed:
    - Klal 30 - `ידן`/`ידו` (DocAI/Tesseract) vs what the scan actually
-     shows, `ידך` - *both* engines are wrong here. (id `5220cb956175`)
+     shows, `ידך` - *both* engines are wrong here. User has independently
+     stated the correct reading is `ידו` (matching Tesseract), possibly as
+     part of a longer phrase `את ידו הנפלאה` - neither DocAI nor Tesseract
+     captured an `את` at this position, and whether to insert it too is
+     still an open question for the user to resolve, ideally via the new
+     panel directly on klal 30 word ~48 in the dashboard. (klal_flag id
+     `5220cb956175`)
    - Klal 88 - `רתם`/`התם` - the print genuinely shows `ר`; this is a
      source-text/broken-type anomaly, not an OCR error - editorial
      awareness only, do NOT silently correct. (id `f15d365a9168`)

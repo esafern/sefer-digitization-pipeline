@@ -209,6 +209,13 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
 .flag-word.state-machine { border-bottom: 2px dotted var(--pending); opacity: 0.92; }
 .flag-word.state-human { border-bottom: 3px solid #38a169; }
 .flag-word:hover { background: rgba(43,108,176,0.08); }
+/* Every word is clickable now (2026-08-13, "flag any word and replace
+   it"), not just machine-flagged ones - but a permanent visual mark on
+   every single word in the corpus would bury the tri-state coloring above
+   in noise, so this is deliberately hover-only: no border, no color,
+   until the reviewer's cursor is actually on it. */
+.plain-word { cursor: pointer; border-radius: 2px; padding: 0 1px; }
+.plain-word:hover { background: rgba(43,108,176,0.08); }
 .flag-gap {
   display: inline-block;
   width: 9px;

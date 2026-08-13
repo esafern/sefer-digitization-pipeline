@@ -131,6 +131,18 @@ def api_klalim():
     decided = rd.all_current("candidate_choice")  # {(klal_id, word_index): record}
     punct_decided = rd.all_current("punctuation_choice")
 
+    # Manual corrections (2026-08-13, "flag any word and replace it") are
+    # born already-decided - there's no machine-detected "open" phase to
+    # move out of, unlike candidate_choice/witness_choice. Each one adds
+    # exactly 1 to BOTH total_count and decided_count below, contributing
+    # 0 to machine_disputed/machine_resolved - matching exactly what the
+    # frontend's own incremental counter patch does on save (see app.js
+    # openManualCorrectionPanel), so client and server never disagree.
+    manual_decided = rd.all_current("manual_correction")  # {(klal_id, word_index): record}
+    manual_count_by_klal = {}
+    for (kid, _wi) in manual_decided:
+        manual_count_by_klal[kid] = manual_count_by_klal.get(kid, 0) + 1
+
     # Witness items fold into the SAME tri-state counts as corrections
     # (2026-08-12, user request: "put the witness flags in as
     # machine-disputed same as the others") - an undecided witness item is
@@ -166,8 +178,9 @@ def api_klalim():
         )
         w_machine_disputed_count = len(w_entries) - w_decided_count
 
-        total_count = len(entries) + len(w_entries)
-        decided_count = corr_decided_count + w_decided_count
+        manual_count = manual_count_by_klal.get(kid, 0)
+        total_count = len(entries) + len(w_entries) + manual_count
+        decided_count = corr_decided_count + w_decided_count + manual_count
         machine_disputed_count = corr_machine_disputed_count + w_machine_disputed_count
 
         punct_entries = punct_candidates.get(str(kid), [])
@@ -208,6 +221,34 @@ def api_klal(klal_id):
     alignment = _load_alignment()
     corrections = _load_corrections().get(str(klal_id), [])
     corrections = [_merge_decision(c, klal_id) for c in corrections]
+    # Manual corrections (2026-08-13) as SYNTHETIC entries in the same
+    # `corrections` list the frontend already knows how to render - they
+    # carry no corrections_part1.json entry of their own (there was never a
+    # machine-detected candidate here), so build one shaped like a
+    # 'replace' opcode with docai_reading=null and final_text=the word the
+    # reviewer originally saw, and attach `current_decision` directly
+    # (skipping _merge_decision, which looks up 'candidate_choice' - the
+    # wrong decision_type for this). current_decision is always set, so
+    # wordState() in app.js always renders it Human-Decided - correct,
+    # since a manual correction IS the decision, there's no separate
+    # machine-disputed phase for it to have come from.
+    for (kid, word_index), rec in rd.all_current("manual_correction").items():
+        if kid != klal_id:
+            continue
+        corrections.append({
+            "word_index": word_index,
+            "opcode": "manual",
+            "docai_reading": None,
+            "final_text": rec.get("candidate_snapshot", {}).get("original_word"),
+            "page": None,
+            "bbox": None,
+            "vision_selected": None,
+            "vision_transcription": None,
+            "confidence": None,
+            "reasoning": None,
+            "flag": "manual_correction",
+            "current_decision": rec,
+        })
     regions = _load_regions()
     region_entry = regions.get(str(klal_id), {})
     flag_state = rd.current_for(klal_id, decision_type="klal_flag")
@@ -258,7 +299,18 @@ def api_klal_flag(klal_id):
 
 
 def api_decision_history(klal_id, word_index):
-    return rd.history_for(klal_id, word_index, "candidate_choice")
+    # Two decision types can share a (klal_id, word_index) key -
+    # candidate_choice (machine-flagged) and manual_correction
+    # (2026-08-13, reviewer-flagged) - merge both so the frontend's one
+    # generic history panel works for either without needing to know which
+    # kind of word it's looking at. In practice a given word_index only
+    # ever has one or the other (a manual flag is only offered on a word
+    # with no machine candidate - see review_frontend/app.js's
+    # renderKlalBody), but merging costs nothing and doesn't assume that.
+    history = rd.history_for(klal_id, word_index, "candidate_choice") + \
+        rd.history_for(klal_id, word_index, "manual_correction")
+    history.sort(key=lambda r: r["ts"])
+    return history
 
 
 def api_page(page_num):
@@ -420,6 +472,30 @@ def api_post_klal_flag(body):
     return record
 
 
+def api_post_manual_correction(body):
+    """A reviewer flagging/replacing ANY word, not just one the machine
+    pipeline already flagged (2026-08-13). candidate_snapshot captures the
+    word actually seen at word_index at flagging time, since there's no
+    corrections_part1.json entry to snapshot instead - apply_reviewer_
+    decisions.py's manual-correction pass drift-checks against this
+    directly against the live part1.json text."""
+    klal_id = int(body["klal_id"])
+    word_index = int(body["word_index"])
+    chosen_text = body.get("chosen_text")
+    if not chosen_text or not chosen_text.strip():
+        raise ValueError("chosen_text is required")
+    record = rd.append_decision(
+        "manual_correction",
+        klal_id=klal_id,
+        word_index=word_index,
+        chosen_source="custom",
+        chosen_text=chosen_text.strip(),
+        candidate_snapshot={"word_index": word_index, "original_word": body.get("original_word")},
+        note=body.get("note"),
+    )
+    return record
+
+
 # ---------- HTTP plumbing ----------
 
 ROUTE_KLAL = re.compile(r"^/api/klal/(\d+)$")
@@ -518,6 +594,8 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send_json(api_post_witness_decision(body), status=201)
             if path == "/api/decisions/klal_flag":
                 return self._send_json(api_post_klal_flag(body), status=201)
+            if path == "/api/decisions/manual":
+                return self._send_json(api_post_manual_correction(body), status=201)
             return self._send_error_json(404, "unknown endpoint")
         except (KeyError, ValueError, TypeError) as e:
             return self._send_error_json(400, f"bad request: {e}")

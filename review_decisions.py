@@ -18,23 +18,45 @@
 #   ts                  ISO8601 UTC timestamp, set at append time
 #   decision_type       "candidate_choice" | "klal_flag" | "apply_event"
 #                       | "punctuation_choice" | "witness_choice"
+#                       | "manual_correction"
 #                       witness_choice: an independent-witness (Tesseract vs
 #                       DocAI) disagreement on a reconstructed page, keyed by
 #                       docai_token_index rather than a corpus word index,
 #                       because the text it concerns is not in part1.json yet.
+#                       manual_correction: a reviewer-initiated flag/replace
+#                       on ANY word, not just one the machine pipeline
+#                       already flagged - added 2026-08-13 per direct user
+#                       request ("add feature for reviewer to flag any word
+#                       and replace it"). Unlike candidate_choice, there is
+#                       no corrections_part1.json entry behind it; the
+#                       decision itself is the only record of what was
+#                       proposed, at what index, against what original word.
 #   klal_id             int
 #   word_index          int for candidate_choice/apply_event/
-#                       punctuation_choice, null for klal_flag
+#                       punctuation_choice/manual_correction, null for
+#                       klal_flag. For manual_correction this is an index
+#                       into clean_text.split(' ') (space-only split,
+#                       matching review_frontend/app.js's own convention -
+#                       NOT clean_text.split() with no argument, which most
+#                       of the corpus-build pipeline uses instead; see
+#                       CLAUDE.md/PROJECT-STATUS.md on this project's
+#                       standing word-index-scheme risk).
 #   chosen_source       "docai_reading"|"final_text"|"vision_transcription"
 #                       |"custom"|null for candidate_choice; "accept"|
-#                       "reject" for punctuation_choice
+#                       "reject" for punctuation_choice; always "custom" for
+#                       manual_correction (it's always free-typed)
 #   chosen_text         the literal chosen string (candidate_choice); "[.]"
-#                       or null (punctuation_choice, accept/reject)
+#                       or null (punctuation_choice, accept/reject); the
+#                       proposed replacement text (manual_correction)
 #   candidate_snapshot  full corrections_part1.json entry at decision time
 #                       (candidate_choice) or the proposed insertion's
-#                       {before_word_index, reasoning} (punctuation_choice),
-#                       so a later apply step can detect drift even after
-#                       that file gets regenerated
+#                       {before_word_index, reasoning} (punctuation_choice)
+#                       or {word_index, original_word} (manual_correction -
+#                       the word actually seen at that index when flagged,
+#                       for drift detection since there's no corrections_
+#                       part1.json entry to check against instead), so a
+#                       later apply step can detect drift even after that
+#                       file gets regenerated
 #   needs_revisit       bool (klal_flag only)
 #   note                free-text, any decision_type
 #   reviewer            who made the decision (default "local")
@@ -57,7 +79,7 @@ REPO = os.path.dirname(os.path.abspath(__file__))
 DECISIONS_PATH = os.environ.get("REVIEW_DECISIONS_PATH") or os.path.join(REPO, "review_decisions.jsonl")
 
 VALID_DECISION_TYPES = {"candidate_choice", "klal_flag", "apply_event", "punctuation_choice",
-                        "witness_choice"}
+                        "witness_choice", "manual_correction"}
 
 
 def _now_iso():

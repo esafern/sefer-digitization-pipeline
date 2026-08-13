@@ -30,6 +30,13 @@
 #     ONE such decision is applied per klal per run; a clear instruction is
 #     printed to re-run rebuild_all.sh before re-running this script for
 #     another one in the same klal.
+#   - 'manual_correction' decisions (2026-08-13: a reviewer flagging/
+#     replacing ANY word, not just a machine-detected candidate) apply the
+#     same way as 'replace', but drift-check against the word actually
+#     seen at word_index when the decision was made (there's no
+#     corrections_part1.json entry behind these) instead of a candidate
+#     snapshot. Same-position only, so - unlike insert/delete - they don't
+#     need the one-per-klal-per-run limit.
 #   - Every applied decision gets its own apply_event row in the same
 #     decisions log, so "decided" and "applied" stay two distinct,
 #     separately-auditable events - including a no-op "confirmed current
@@ -79,6 +86,29 @@ def apply_replace(clean_text, word_index, final_text, chosen_text):
     return " ".join(words)
 
 
+def apply_manual_correction(clean_text, word_index, original_word, chosen_text):
+    """'manual_correction' decision (2026-08-13): a reviewer flagged and
+    replaced a word the machine pipeline never generated a candidate for,
+    so there is no corrections_part1.json entry to drift-check against -
+    only the word actually seen at word_index when the decision was made
+    (candidate_snapshot["original_word"]). Same-position replace only (no
+    word-count change), so unlike insert/delete this needs no per-klal-
+    per-run limit.
+
+    Deliberately clean_text.split(' ') - SPACE-ONLY, not clean_text.split()
+    - because review_frontend/app.js computes word_index the same way
+    (`(k.clean_text || '').split(' ')`) and this decision's word_index came
+    from that exact click. Using the whitespace-collapsing .split() that
+    the rest of this file uses for machine candidates would silently
+    misalign on any klal where the two schemes disagree (documented open
+    risk, see PROJECT-STATUS.md)."""
+    words = clean_text.split(' ')
+    if word_index >= len(words) or words[word_index] != original_word:
+        return None  # live drift beyond what the snapshot check caught
+    words[word_index] = chosen_text
+    return " ".join(words)
+
+
 def apply_insert_removal(clean_text, word_index, final_text):
     """'insert'-opcode decision: remove the span clean_text has that docai
     doesn't (chosen_text=='' by convention means "accept the omission")."""
@@ -119,6 +149,7 @@ def main():
     args = parser.parse_args()
 
     decisions = rd.all_current("candidate_choice")
+    manual_decisions = rd.all_current("manual_correction")
     corrections = load_current_corrections()
     part1 = load_part1()
     by_klal = {k["klal_id"]: k for k in part1}
@@ -128,7 +159,7 @@ def main():
     skipped_drift = []
     skipped_already_applied = []
     word_count_changed_klalim = set()
-    n_replace = n_insert_delete = n_noop = 0
+    n_replace = n_insert_delete = n_noop = n_manual = 0
 
     for (klal_id, word_index), decision in sorted(decisions.items()):
         # Already promoted into part1.json by an earlier run - never re-apply.
@@ -208,12 +239,36 @@ def main():
             rd.append_decision("apply_event", klal_id=klal_id, word_index=word_index,
                                 applied_decision_id=decision["id"])
 
-    if not args.dry_run and (n_replace or n_insert_delete):
+    # manual_correction decisions: always a same-position replace with no
+    # word-count change (see apply_manual_correction docstring), so unlike
+    # insert/delete these need no per-klal-per-run limit - all can apply in
+    # one pass even if several land in the same klal.
+    for (klal_id, word_index), decision in sorted(manual_decisions.items()):
+        if decision["id"] in already_applied:
+            skipped_already_applied.append((klal_id, word_index))
+            continue
+        klal = by_klal.get(klal_id)
+        if klal is None:
+            skipped_drift.append((klal_id, word_index))
+            continue
+        original_word = decision.get("candidate_snapshot", {}).get("original_word")
+        new_text = apply_manual_correction(klal["clean_text"], word_index, original_word, decision["chosen_text"])
+        if new_text is None:
+            skipped_drift.append((klal_id, word_index))
+            continue
+        klal["clean_text"] = new_text
+        n_manual += 1
+        applied.append((klal_id, word_index, "manual"))
+        if not args.dry_run:
+            rd.append_decision("apply_event", klal_id=klal_id, word_index=word_index,
+                                applied_decision_id=decision["id"])
+
+    if not args.dry_run and (n_replace or n_insert_delete or n_manual):
         save_part1(part1)
 
     tag = "[DRY RUN] " if args.dry_run else ""
     print(f"\n{tag}Applied: {len(applied)} ({n_replace} replace, {n_insert_delete} insert/delete, "
-          f"{n_noop} confirmed-no-op)")
+          f"{n_manual} manual, {n_noop} confirmed-no-op)")
     for kid, widx, kind in applied:
         print(f"  klal {kid} word {widx}: {kind}")
 
@@ -230,7 +285,7 @@ def main():
         for kid, widx in skipped_drift:
             print(f"  klal {kid} word {widx}")
 
-    if n_replace or n_insert_delete:
+    if n_replace or n_insert_delete or n_manual:
         print("\nNEXT STEPS:")
         print("  1. Review the diff: git diff part1.json")
         print("  2. Run ./rebuild_all.sh to regenerate derived files and fresh word indices.")
