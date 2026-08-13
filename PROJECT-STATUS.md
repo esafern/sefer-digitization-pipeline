@@ -202,18 +202,39 @@ resolved answer, same as `delete` already does. Re-ran
 `assemble_corrections_dataset.py`: `corrections_part1.json` is
 byte-identical, confirming zero live-data impact as predicted. 14/14.
 
-**12. Remaining open findings from the second audit round, not yet
-fixed**: 3 (witness-tier triage wrong on 16.1% of the queue - needs
-per-word not per-segment lexicon lookup), 4 (the witness pass structurally
-drops every DocAI-omission case, `insert` opcodes), 10
-(`strip_tail_furniture` in `reconstruct_multipage_klalim.py` discards
-everything after the "Digitized" watermark token with only a printed
-note - harmless today, page 25's tail proves it can silently drop a real
-word), 12 (20/222 klal region highlight boxes have no end boundary -
-display-only, not corpus-content). See `PROJECT-STATUS-HISTORY.md`'s
-"Second source-audit round" entry for full detail on each before picking
-one up. Also still open: the "unverified risks" list in that same entry
-(never-invalidated `apply_event`, page-less witness decision keys,
+**12. Finding 12 FIXED 2026-08-13.** `build_klal_page_regions.py`'s
+end-boundary lookup only ever checked `all_klal_ids[idx+1]` (the next
+klal in an unrelated "trusted-page" list) and required it to have a
+`status=='ok'` marker - so a same-page neighbor whose marker had merely a
+lesser-but-still-usable status (`marker_found_content_mismatch`, which
+per this project's own established convention in
+`check_klal_token_orphans.py` still carries a real position) was
+invisible to it, and the box silently extended to the physical bottom of
+the page instead. Confirmed the exact mechanism on klal 17/18 (both page
+20: klal 17 'ok', klal 18 `marker_found_content_mismatch` at the SAME
+marker_position that would have bounded it) and the compounding case
+klal 46/47/48 (page 30: 47 has no usable marker at all, so the old code
+stopped there instead of continuing to 48). Added a real forward search
+(`load_end_boundary_positions()` + `bisect`) over every klal with any
+usable position, independent of the trusted-page filter. Verified against
+real data: 11 klalim with grossly oversized boxes shrank dramatically
+(klal 17: 0.866 of page height -> 0.303; klal 46: 0.73 -> 0.073; klal 85:
+0.891 -> 0.108; median is 0.123), same key set (no region dropped), no
+suspiciously-tiny new boxes, and confirmed visually in the browser - klal
+17's highlight now tightly wraps its own paragraph instead of swallowing
+klal 18 and beyond. 14/14 + 5/5 review-server tests.
+
+**Remaining open findings from the second audit round, not yet fixed**: 3
+(witness-tier triage wrong on 16.1% of the queue - needs per-word not
+per-segment lexicon lookup), 4 (the witness pass structurally drops every
+DocAI-omission case, `insert` opcodes), 10 (`strip_tail_furniture` in
+`reconstruct_multipage_klalim.py` discards everything after the
+"Digitized" watermark token with only a printed note - harmless today,
+page 25's tail proves it can silently drop a real word). See
+`PROJECT-STATUS-HISTORY.md`'s "Second source-audit round" entry for full
+detail on each before picking one up. Also still open: the
+"unverified risks" list in that same entry (never-invalidated
+`apply_event`, page-less witness decision keys,
 `propose_punctuation_part1.py`'s prompt-blind cache key, the blanket
 `PASS3_KNOWN_FALSE_POSITIVES` allowlist, `app.js` never refetching
 `/api/klalim`, the folio-vs-marker heuristic that ate klal 89's `פט`).

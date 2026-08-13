@@ -28,6 +28,7 @@
 #      klal->page source) - a coarser, non-marker-anchored fallback, "good
 #      enough for a region box, not a per-word claim" per the original
 #      design.
+import bisect
 import json
 import os
 import difflib
@@ -70,6 +71,37 @@ def load_markers():
     }
 
 
+def load_end_boundary_positions():
+    """klal_id -> (page, marker_position) for EVERY klal with any usable
+    marker position, independent of load_markers()'s stricter 'ok'-only
+    filter and of load_trusted_klal_pages()'s unrelated 'trusted' concept -
+    used only to find where the NEXT klal's content actually starts, for
+    capping a region's end boundary.
+
+    FIXED 2026-08-13 (PROJECT-STATUS.md finding 12): marker_anchored_
+    regions() used to look only at all_klal_ids[idx+1] - the next TRUSTED
+    klal_id in the page-alignment sense - and require it to have an 'ok'
+    marker, so a same-page neighbor whose marker merely has a lesser
+    status (e.g. 'marker_found_content_mismatch', which - per this
+    project's own established convention, see check_klal_token_orphans.py
+    - still carries a real, usable position) was invisible to it. Confirmed
+    the exact mechanism on klal 17 (page 20, 'ok', marker 29): klal 18 sits
+    on the SAME page at marker 351 but is 'marker_found_content_mismatch',
+    so klal 17's box got no end boundary at all and extended to the
+    physical bottom of the page (0.866 of page height, 833 tokens, vs a
+    0.123 median) - correctly swallowing content that belongs to klal 18.
+    Also fixes the compounding case (klal 46/47/48 on page 30): when the
+    IMMEDIATE next klal (47) has NO usable position of any kind, the old
+    code stopped there instead of continuing the search to klal 48, which
+    does have one on the same page."""
+    trace = json.load(open(TRACE_PATH, encoding="utf-8"))
+    return {
+        e["klal_id"]: (e["page"], e["marker_position"])
+        for e in trace
+        if e.get("status") in ("ok", "marker_found_content_mismatch") and e.get("marker_position") is not None
+    }
+
+
 def union_bbox(tokens):
     return {
         "x1": min(t["x1"] for t in tokens),
@@ -79,12 +111,13 @@ def union_bbox(tokens):
     }
 
 
-def marker_anchored_regions(klal_pages, markers, docai_by_page):
-    """For every klal whose own marker AND the immediately-following klal's
-    marker are both known, band by Y-coordinate between the two - see
-    module docstring for why Y-banding, not array-index slicing."""
+def marker_anchored_regions(klal_pages, markers, end_boundary_positions, docai_by_page):
+    """For every klal whose own marker AND the next available marker are
+    both known, band by Y-coordinate between the two - see module
+    docstring for why Y-banding, not array-index slicing."""
     regions = {}
     all_klal_ids = sorted({kid for ids in klal_pages.values() for kid in ids})
+    end_boundary_ids = sorted(end_boundary_positions)
     for idx, klal_id in enumerate(all_klal_ids):
         if klal_id not in markers:
             continue
@@ -99,12 +132,16 @@ def marker_anchored_regions(klal_pages, markers, docai_by_page):
 
         start_center = center_y(marker_tok)
 
-        # end boundary: the next klal_id's marker, wherever it is.
+        # End boundary: the NEXT klal_id with any usable marker position
+        # (see load_end_boundary_positions - not just the immediately
+        # next id in all_klal_ids, and not restricted to 'ok' status),
+        # wherever it is. bisect finds the first candidate id strictly
+        # greater than this klal - end_boundary_ids is small (<=222) so a
+        # linear-cost bisect per klal is negligible.
         next_page, next_marker_idx = None, None
-        if idx + 1 < len(all_klal_ids):
-            next_id = all_klal_ids[idx + 1]
-            if next_id in markers:
-                next_page, next_marker_idx = markers[next_id]
+        pos = bisect.bisect_right(end_boundary_ids, klal_id)
+        if pos < len(end_boundary_ids):
+            next_page, next_marker_idx = end_boundary_positions[end_boundary_ids[pos]]
 
         end_center = None
         if next_page == page:
@@ -215,6 +252,7 @@ def heuristic_regions(klal_pages, docai_by_page, final_by_id, already_done):
 def main():
     klal_pages = load_trusted_klal_pages()
     markers = load_markers()
+    end_boundary_positions = load_end_boundary_positions()
     final_by_id = {k["klal_id"]: k for k in json.load(open(DEMO_DATASET, encoding="utf-8"))}
 
     # Every page in the covered range, not just pages that have a klal marker
@@ -244,7 +282,7 @@ def main():
         raw = json.load(open(docai_path, encoding="utf-8"))
         docai_by_page[page_id] = raw  # unfiltered - marker_position indexes into this
 
-    regions = marker_anchored_regions(klal_pages, markers, docai_by_page)
+    regions = marker_anchored_regions(klal_pages, markers, end_boundary_positions, docai_by_page)
     regions.update(heuristic_regions(klal_pages, docai_by_page, final_by_id, already_done=set(regions)))
 
     with open(OUT_PATH, "w", encoding="utf-8") as f:
