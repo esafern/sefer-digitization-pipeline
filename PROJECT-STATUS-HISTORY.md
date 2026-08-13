@@ -17,6 +17,233 @@ current file references, or when grepping for how a past finding was
 resolved. Same append-at-top convention as before: newest entries go right
 after this header, not at the bottom.
 
+## Second source-audit round — all 12 confirmed bugs fixed, verified against real data, and committed, 2026-08-12/13
+
+Full fix/verification trail for every bug in the "Second source-audit
+round" entry immediately below this one (findings numbered there 1-12,
+plus the two ★-marked live corpus-damage risks). Moved here from
+`PROJECT-STATUS.md`'s NEXT STEPS once all 12 were closed, per this file's
+own purpose (`PROJECT-STATUS.md` holds only the current handoff; detailed
+fix evidence lives here). One commit per fix on `master`, in order:
+`99c20d9` (★1), `c664044` (★2), `87faa24` (finding 5), `96f5505` (finding
+11), `03765a2` (finding 7), `69da3be` (finding 9), `fa20715` (finding 6),
+`33fb95f` (finding 8), `0e7aa84` (finding 12), `16cffc0` (finding 10),
+`9a0a3e9` (findings 3 and 4).
+
+**★1.** `apply_reviewer_decisions.py`'s no-op guard (previously
+`replace`-only: skip applying when `decision["chosen_text"] ==
+snapshot["final_text"]`) now also covers `insert`-opcode decisions, which
+share the same "chosen text equals what's already stored" no-op semantics
+- `insert`'s `final_text` is the extra span `apply_insert_removal` would
+otherwise unconditionally delete. Re-ran `--dry-run` against the live
+decisions log: the two previously-dangerous pending decisions (klal 4
+word 0, klal 57 word 0 - both "keep current text") now report
+`confirmed-no-op` instead of `insert`; all 12 currently pending
+`candidate_choice` decisions resolve as no-ops (0 replace, 0
+insert/delete) - i.e. running the script for real right now would change
+nothing in `part1.json`, only log confirmations. Related, still open (not
+data loss, just a mislabel): `delete`-opcode's mirror case ("confirm
+nothing belongs here", `chosen_text=''`) still gets misreported as
+"skipped - drift" by `apply_delete_insertion`'s `not chosen_text` guard,
+rather than recorded as its own no-op.
+
+**★2.** `review_frontend/app.js`'s `renderKlalBody` only rendered a
+delete-opcode gap marker for `i < words.length` (the `forEach` loop's
+range); added one extra check after the loop for
+`gapsBefore[words.length]`, rendering it at the end of the body - the
+same position it would have taken at `i == words.length`. Verified two
+ways: (a) in the browser via the live dashboard, klal 219's previously
+invisible candidate (`ס"ח ונכון הוא`, 98% vision confidence,
+`possible_omission`) now renders as a clickable red marker at the end of
+the text and opens the normal decision panel; (b) programmatically
+against the live API for all 10 affected klalim
+(84/106/114/138/164/171/175/193/211/219) - each has exactly one delete
+candidate at `word_index == word_count`, all now covered by the same
+check. `tests/test_review_server.py` (5/5) still passes.
+
+**Finding 5.** `check_klal_token_orphans.py`'s `real_span_tokens`
+hard-stopped at a 1-page gap and returned `None` for anything wider, and
+the caller `continue`d past that `None` with no accounting - so this
+check silently never ran on 7 klal-boundary pairs, including klal 30->31,
+75->76, 88->89 (all real 2-page gaps: one full intervening page consumed
+entirely by a multi-page reconstruction, no klal marker of its own).
+Those three are exactly the klalim already flagged as having "almost no
+independent verification." Generalized `real_span_tokens` to walk any
+number of intervening pages instead of special-casing one; added explicit
+skip accounting with an assertion that checked+skipped always equals the
+total pair count (same fix shape as round 1's `validate_klal_span_
+coverage.py` finding). Result: "Checked 204" (was 197), 0 skipped, and
+Pass 3's full-span gap scan now runs on klal 30/75/88 for the first time
+and reports no gaps - not fully independent of DocAI (the
+reconstruction's own source), but a genuine assembly-correctness check
+(wrong token order/dropped/duplicated content would still be caught) that
+had simply never executed before.
+
+**Finding 11.** Klal 152 and 154's `clean_text` both carried a trailing
+`\n` left over from the 2026-08-06 debug-print bug (a stray
+`print(len(...))` whose newline leaked into the string) - the only 2 of
+222 Part-1 klalim with any trailing whitespace at all (confirmed by
+scanning every klal for `clean_text != clean_text.rstrip()`; every other
+klal ends cleanly on `:`). `test_no_debug_artifact_leaks` only regexes
+the *start* of `clean_text`, so this survived undetected. Stripped both
+(2-line diff, no other content touched), `./rebuild_all.sh --skip-vision`
+clean, 14/14.
+
+**Finding 7.** Every delete-opcode vision call embedded the literal
+Python `None` as "Option B" in the prompt (`corrected_word` is `None` by
+construction for a delete candidate - there's no current corpus text to
+compare against), asking the model to choose between a real transcription
+and the four-letter string "None" - an unanswerable question it correctly
+kept resolving to `UNCERTAIN` regardless of what the crop showed (klal
+4's stored reasoning literally said "Neither Option A ('1') nor Option B
+('None')..."). Reframed Option B's description for delete candidates to
+what it actually means ("confirm no text belongs here") without changing
+the JSON response schema, so no downstream consumer needed updating.
+Cache invalidation required first: the cache key (`crop_hash, word_a,
+word_b, context_hash`) doesn't cover prompt wording, so the 41 existing
+delete-opcode cache rows (keyed on `word_b == NONE_SENTINEL`) would have
+silently kept serving the old-prompt answers forever - deleted them
+before re-running (Lesson 12 shape, same as this project's past
+cache-key incidents). Re-ran vision verification for all 29 live delete
+candidates: `ambiguous` dropped 10->8, `possible_omission` rose 19->21 -
+2 candidates that were previously unanswerable now correctly confirmed,
+including klal 219 word 97 (`ס"ח ונכון הוא`, the same candidate ★2 made
+visible in the text pane - now also correctly flagged `possible_omission`
+at 0.98 confidence rather than `ambiguous`). `rebuild_all.sh` (full, not
+`--skip-vision`) clean, 14/14 corpus + 5/5 review-server tests.
+
+**Finding 9.** `reconstruct_multipage_klalim.py --apply` had no
+idempotency guard - `stored` is re-read from `part1.json` fresh every run
+with no applied-decision/snapshot check (unlike `apply_reviewer_
+decisions.py`/`apply_punctuation_decisions.py`, which both have one).
+Confirmed: dry-run against the current, already-reconstructed corpus
+proposed re-splicing klal 30/75/88's middle pages in a second time
+(+956/+1047/+901 words on top of what's already there). Added a guard:
+before splicing, check whether the middle page's own signature text is
+already present in the stored text; if so, report "ALREADY APPLIED -
+skipped" and leave that klal untouched. Verified: a dry-run against the
+live corpus now correctly reports all three klalim as already-applied
+instead of proposing to re-add ~1,000 words each.
+
+**Finding 6.** `saveWitnessDecision` (`review_frontend/app.js`) never
+updated the client's cached `klalById` counters or called
+`refreshNavItem`/`buildLegend` the way `saveCandidateDecision` does - so
+after recording a witness decision, the nav badge and legend kept showing
+the pre-decision counts until a full page reload, even though
+`api_klalim` (the server) already folds witness items into the same
+`open_count`/`decided_count`/`machine_disputed_count` totals (2026-08-12
+tri-state fold). Added the matching client-side update: witness items
+have no machine-resolved state (nothing auto-resolves one - see
+`api_klalim`'s own comment), so a decision only ever moves
+open/machine-disputed -> decided, never touches `machine_resolved_count`.
+Verified live in the browser: recorded a real witness decision for klal
+30 (tier D, docai token 22, page 24) through the actual UI panel;
+`klalById[30]` updated in-place from `decided_count 3, open_count 156,
+machine_disputed_count 156` to `4, 155, 155` with no reload, and a fresh
+`/api/klalim` fetch immediately after returned the identical numbers -
+client and server agree. **Side effect of this verification**: it
+recorded a real `witness_choice` decision (klal 30, docai_token_index 22,
+"DocAI reading" for `וכו` vs `וכזי`) that was never actually checked
+against the scan crop - just clicked to test the counter mechanism. Since
+`review_decisions.jsonl` is append-only by design, this can't be erased;
+a `klal_flag` decision (id `f39158d3ba5a`) was added on klal 30 flagging
+that specific item as needing a genuine human look.
+
+**Finding 8.** `assemble_corrections_dataset.py`'s `classify()` gated
+`delete`-opcode candidates on confidence >= 0.7 before trusting a vision
+selection, but applied no confidence gate at all to `replace`-opcode
+candidates - asymmetric for no principled reason. Confirmed inert on live
+data first (0 of the 214 live replace candidates have an A/B selection
+below 0.7), then added the matching gate: a low-confidence A/B now falls
+to `ambiguous` instead of being trusted as a resolved answer, same as
+`delete` already does. Re-ran `assemble_corrections_dataset.py`:
+`corrections_part1.json` is byte-identical, confirming zero live-data
+impact as predicted.
+
+**Finding 12.** `build_klal_page_regions.py`'s end-boundary lookup only
+ever checked `all_klal_ids[idx+1]` (the next klal in an unrelated
+"trusted-page" list) and required it to have a `status=='ok'` marker - so
+a same-page neighbor whose marker had merely a lesser-but-still-usable
+status (`marker_found_content_mismatch`, which per this project's own
+established convention in `check_klal_token_orphans.py` still carries a
+real position) was invisible to it, and the box silently extended to the
+physical bottom of the page instead. Confirmed the exact mechanism on
+klal 17/18 (both page 20: klal 17 'ok', klal 18
+`marker_found_content_mismatch` at the SAME marker_position that would
+have bounded it) and the compounding case klal 46/47/48 (page 30: 47 has
+no usable marker at all, so the old code stopped there instead of
+continuing to 48). Added a real forward search
+(`load_end_boundary_positions()` + `bisect`) over every klal with any
+usable position, independent of the trusted-page filter. Verified against
+real data: 11 klalim with grossly oversized boxes shrank dramatically
+(klal 17: 0.866 of page height -> 0.303; klal 46: 0.73 -> 0.073; klal 85:
+0.891 -> 0.108; median is 0.123), same key set (no region dropped), no
+suspiciously-tiny new boxes, and confirmed visually in the browser - klal
+17's highlight now tightly wraps its own paragraph instead of swallowing
+klal 18 and beyond.
+
+**Finding 10.** `strip_tail_furniture` (`reconstruct_multipage_
+klalim.py`) used to drop `tokens[idx+3:]` (everything after the 3-token
+"Digitized by Google" watermark) outright, reporting it only in a printed
+note - a silent content-loss bug. Confirmed real: page 25's tail is
+`...Digitized by Google אנושית` - `אנושית` is a genuine body word, not
+furniture. But a scan-artifact token can also sit right there (page 37's
+lone `:`, the same colon-after-header artifact already documented for
+page 24's own header) - fixed to strip only a leading run of pure
+punctuation immediately after the watermark, then keep any real content
+that follows. Verified byte-for-byte against all three pages this script
+currently processes: page 24/40 have no trailing tokens (unaffected),
+page 37's trailing `:` is still correctly dropped (identical output to
+before the fix). True no-op on the current corpus; only changes behavior
+for a future page shaped like 25.
+
+**Findings 3 and 4** (`verify_reconstruction_witness.py`):
+- **Finding 3**: `tier()` and `is_furniture()` normed a whole (possibly
+  multi-word) segment as ONE string before checking it against the
+  lexicon/furniture list, so a real 2-word segment like `בתוס ד"ה` normed
+  to the concatenated `בתוסדה` - never a real word regardless of whether
+  its individual words are - while its counterpart could coincidentally
+  concatenate into something that IS a real word (`בחופ ה` -> `בחופה`),
+  driving a false tier-A verdict. Fixed both to check every word in a
+  segment individually. Re-ran against the live queue: `בתוס ד"ה`/`בחופ ה`
+  (klal 30, docai_token_index 853) - the exact item behind this session's
+  already-applied klal 30 `בתוס`->`כתוס` corpus edit - now correctly
+  tiers D instead of A. That reclassification doesn't put the applied fix
+  in question: the actual correction came from a direct 900 DPI
+  crop-check of the ink, not from the tier label, which was only ever a
+  work-priority signal. Net tier shift: A 4->8, B 102->36, C 94->96, D
+  217->279.
+- **Finding 4**: the witness pass structurally could not report a DocAI
+  *omission* - `if not d_seg: continue` dropped every `insert`-opcode
+  disagreement (DocAI has nothing at a position where Tesseract found
+  real text), exactly the failure mode this tool exists to catch.
+  Confirmed: the live queue was 416 replace + 1 delete + 0 insert. Fixed
+  to include these, anchoring the crop on the nearest real DocAI token
+  (an insert has none of its own to bound a bbox with) since
+  `docai_reading: null` is already a case the review-panel frontend
+  handles. Re-run surfaced exactly 3 new items (klal 30/75/88, one per
+  page, 4 Tesseract words total), all correctly tier A.
+- Also added the same silent-drop accounting fix used repeatedly this
+  session: oversize alignment spans and furniture segments are now
+  counted (`skipped_oversize_span`, `skipped_furniture` in `stats`)
+  instead of vanishing with no record.
+- Cross-checked all 5 existing `witness_choice` decisions on record
+  (including klal 30 idx 22, the accidental test-side-effect decision
+  from finding 6's verification above) against both the old and new
+  queue by `(klal_id, docai_token_index)` - all 5 resolve to the
+  identical `docai_reading`/`tesseract_reading` in both, confirming the
+  fix doesn't disturb any already-recorded human decision.
+
+**Also fixed the file split's own carried-forward items, 2026-08-12**
+(commit `be25d12`, before the audit round above): of the four tier-A
+witness adjudications carried forward from the prior session's handoff,
+`וכוותיידו`->`וכוותייהו` (klal 88) and `בתוס ' ד"ה`->`כתוס ' ד"ה` (klal
+30) were APPLIED to `part1.json`; `ידן`/`ידו` (klal 30 - scan actually
+shows `ידך`) and `רתם`/`התם` (klal 88 - source-text anomaly, DocAI is
+faithful, do NOT correct) were NOT text edits, recorded instead as
+`klal_flag` decisions (ids `5220cb956175`, `f15d365a9168`) pending a
+human call - still open, see current `PROJECT-STATUS.md`.
+
 ## Second source-audit round — 12 confirmed bugs, NONE FIXED YET, 2026-08-12
 
 Full read-through of every live root script + `review_frontend/` (the
