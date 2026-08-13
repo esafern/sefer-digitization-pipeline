@@ -13,7 +13,7 @@ issue was resolved. **New dated entries with detailed fix/verification
 prose go there, not here** — this file should only ever hold a compact
 current handoff, re-written (not just appended to) as state changes.
 
-## ►► SESSION HANDOFF — read this first, 2026-08-13
+## ►► SESSION HANDOFF — read this first, 2026-08-14
 
 ### State on disk right now (verified, not remembered)
 
@@ -168,10 +168,12 @@ above**, no script/hand-edit needed:
    - Klal 88 - `רתם`/`התם` - the print genuinely shows `ר`; this is a
      source-text/broken-type anomaly, not an OCR error - editorial
      awareness only, do NOT silently correct. (id `f15d365a9168`)
-   - Also klal 30, docai_token_index 22: a witness decision was recorded
-     accidentally while browser-testing a UI fix (clicked to test a
-     counter, not a real read of the crop) - flagged via `klal_flag` id
-     `f39158d3ba5a`, still needs an actual look.
+   - **RESOLVED 2026-08-14**: klal 30, docai_token_index 22 (`וכו` vs
+     `וכזי`) - user directly reviewed the scan crop and confirmed `וכו`
+     is correct, closing the accidental-recording concern (`klal_flag` id
+     `f39158d3ba5a`) with a genuine confirmation (`klal_flag` id
+     `3a143d105212`, `needs_revisit: false`). The existing witness_choice
+     decision (id `de6e18ef94ae`) already had the right answer.
 
 **3. The broader witness queue (tier B/C/D, ~411 items across klal
 30/75/88) is still fully open** and is the only real second opinion on
@@ -204,6 +206,45 @@ comment overclaims turned up repeatedly across both audit rounds this
 session, in different validator scripts - a script's claimed coverage is
 not evidence of its actual coverage. Worth a sanity pass on any OTHER
 validator's docstring before trusting it at face value.
+
+**2026-08-14 — manual-correction/witness highlight bugs fixed on top of the
+above.** Multi-word disagreements (a candidate or witness span covering
+more than one word) used to bracket only the FIRST word in both
+`openWitnessPanel` and `openCandidatePanel` (`review_frontend/app.js`) -
+fixed to bracket the full span using the reading's own word count. User
+directly confirmed the fix working (klal 30 page 24: "[שיטת התוס]" now
+brackets both words correctly) - but this surfaced a second, deeper bug:
+clicking `וכו`'s box on the scan pane (page 24) opened `שיטת התוס`'s panel
+instead. **Root cause, confirmed via direct bbox inspection**:
+`verify_reconstruction_witness.py`'s bbox computation did a naive
+min/max union across ALL tokens in a multi-word span, including cases
+where the words sit on different physical lines - `שיטת התוס`'s bbox
+unioned to 75.6% of page width and vertically overlapped `וכו`'s
+legitimate, much smaller box, so the larger absolutely-positioned overlay
+div (added later in DOM order, painted on top) intercepted the click. 11
+of 419 witness items had a bbox >50% of page width from this bug. Fixed
+by anchoring the bbox to only the tokens on the SAME LINE as the span's
+first (anchor) token, using that token's own height as the same-line
+tolerance - same-line multi-word spans are unaffected, cross-line spans
+now collapse to just the anchor's line. Verified: all 11 oversized items
+corrected, nothing else changed, `שיטת התוס`'s bbox now 5.5% of page
+width with zero overlap with `וכו`'s box. `reconstruction_witness_queue.json`
+regenerated (no Gemini calls needed - this script doesn't use vision).
+The in-progress `verify_witness_vision.py` background pass (419-item full
+run, started with the OLD buggy bboxes) was killed before it reached its
+one-shot end-of-run write (confirmed via `json.dump` only happening after
+the full loop, so nothing was lost) and restarted against the corrected
+queue; its sqlite cache (`witness_vision_cache.db`, keyed on crop_hash so
+unaffected items reuse old work) had 134 entries as of restart. **Not yet
+verified complete** - was still running detached (nohup+disown) at last
+check; check `sqlite3 witness_vision_cache.db "SELECT COUNT(*) FROM
+witness_cache;"` (target 419) or `ps aux | grep verify_witness_vision`
+next session. `verify_witness_vision.py` itself is a new file this
+session (not yet committed): vision-adjudicates each witness item
+(Gemini, same crop-and-ask pattern as `verify_corrections_vision.py`),
+writes `vision_selected`/`vision_transcription`/`vision_confidence`/
+`vision_reasoning` back into the queue - triage layer only, does NOT
+record `witness_choice` decisions itself.
 
 **No other known open items beyond the above.** Full detail, evidence,
 and the complete dated history behind every claim above is in

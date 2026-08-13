@@ -17,6 +17,211 @@ current file references, or when grepping for how a past finding was
 resolved. Same append-at-top convention as before: newest entries go right
 after this header, not at the bottom.
 
+## Manual-correction feature, geresh-spacing corpus fix, reindexing incident + recovery, multi-word highlight fix, validator review — 2026-08-13/14
+
+Full detail for everything summarized in `PROJECT-STATUS.md`'s condensed
+handoff as of 2026-08-14. Moved here once the handoff grew past a
+compact single-session summary, per this file's own purpose.
+
+**1. New feature: flag/replace ANY word, not just machine-flagged ones**
+(2026-08-13, direct user request). Click any plain word in the text pane
+-> "Flag / correct word" panel -> type the correction -> Save. New
+`manual_correction` decision type in `review_decisions.jsonl` (snapshot:
+`{word_index, original_word}`, no `corrections_part1.json` entry
+involved); new `POST /api/decisions/manual` endpoint; `apply_reviewer_
+decisions.py` gained `apply_manual_correction` (same-position replace,
+drift-checked against the live corpus text directly, since there's no
+machine candidate to check against instead). Verified end-to-end in the
+browser: panel opens with correct context, save updates the nav badge/
+legend live and matches a fresh `/api/klalim` fetch exactly, reopening
+shows the decision pre-filled with working history.
+
+**2. Extended same day: DELETE a word too**, not just replace it (direct
+follow-up request). `chosen_text == ""` (explicitly empty, not missing)
+means delete; `apply_manual_deletion` removes the word entirely, sharing
+the insert/delete opcodes' one-word-count-change-per-klal-per-run guard
+since deletion shifts every later index in that klal. Confirm-to-delete
+is an in-panel arm/click-again pattern, not a native `confirm()` dialog
+(those block further page interaction once triggered and are
+inconsistent with the rest of this app - no other action here uses a
+browser-native dialog). A word marked for deletion still renders (record
+-> apply is always two separate steps here) with a strikethrough
+(`.pending-delete`). Found and fixed a real bug while verifying this: the
+panel didn't refresh its own displayed state after a successful save, so
+a completed delete left a stale "click again to confirm" button behind -
+fixed by having both Save and Delete re-open the panel against the fresh
+post-save state, which now doubles as the save confirmation. Verified
+end-to-end incl. the per-klal-per-run guard against real data
+(`apply_reviewer_decisions.py --dry-run` correctly applied one
+manual-delete per klal and skipped a second one in the same klal with the
+expected message).
+
+**2026-08-14, user request**: 4 self-labeled test decisions this
+verification work left on klal 3 (word 3 replace, word 7/10/22 deletes)
+were directly removed from `review_decisions.jsonl` - a deliberate,
+explicit exception to this file's normal append-only/never-delete rule,
+made only because these were confirmed test garbage with zero real
+editorial content and never applied to `part1.json`. Left two other
+klal-3 entries alone (word 3, chosen_text matching the real word, no
+note) - the user's own real action re-confirming the correct word after
+seeing the test garbage, not something created during testing. Verified:
+0 strikethrough words remain in klal 3 afterward.
+
+**3. Corpus-wide fix: stray space before abbreviation geresh** (2026-08-
+13/14, user-reported systemic issue: "the closing apostrophe... is the
+printer's mark to abbreviate the word... there should be no intervening
+space"). Confirmed real and pervasive: 2,548 instances across 201 of 222
+Part-1 klalim (e.g. stored "התוס '" where the print is "התוס'") - a
+DocAI tokenization artifact (the geresh glyph extracted as its own
+token, then joined back with a space), not part of the author's text.
+Fixed with a verified regex pass
+(`archive/scripts/fix_geresh_space_before_apostrophe_2026-08-13.py`):
+stripping every non-Hebrew-letter character from `clean_text` produced
+byte-identical results before/after for all 222 klalim, proving the fix
+only ever touches whitespace, never a real letter. Deliberately did NOT
+touch a distinct, separately-confirmed pattern: a DOUBLED apostrophe
+("' '", 45 instances, overwhelmingly shaped "בפ' 'X") that the fix's
+Hebrew-letter-anchored regex naturally excludes (45 before, 45 after) -
+cause not determined, separate open item.
+
+The word-count reduction exposed two real gate false positives, both
+fixed: `validate_part1_corpus_integrity.py`'s gematria self-consistency
+check now tolerates klal 166's genuinely-attached closing geresh (the
+one klal in Part 1 where this differs from the `gematria` field, out of
+222 checked); three klalim (15, 130, 195) crossed `validate_klal_span_
+coverage.py`'s 0.85 ratio threshold purely because their word count
+became more accurate (fewer artifact tokens) - verified by recomputing
+each span's ratio against pre-fix word counts, all three clear 0.85,
+added to `SPAN_COVERAGE_BASELINE` with the full trace.
+
+**4. Reindexing incident and recovery** (2026-08-14). `./rebuild_all.sh
+--skip-vision` after the geresh-spacing fix left the dashboard showing
+corrections/notes pointing at the wrong word (user-reported: "corrected
+text points to the wrong word... note is correct but does not match the
+highlighted text... green box not seen for the first correction").
+
+*Root cause 1*: `--skip-vision` skips `verify_corrections_vision.py`, so
+`corrections_verified_part1.json` kept its PRE-fix `word_index_in_
+final_text`/`corrected_word` while `corrections_candidates_part1.json`
+(which DID regenerate) already had the correct POST-fix values -
+confirmed on klal 1: candidates file said word 437/`ומדקמהד'`, the stale
+verified file still said word 468/`ומדקמהד`. Fixed by running the FULL
+rebuild (live vision re-verification). **Lesson: `--skip-vision` is only
+safe for a fix that doesn't change any klal's WORD COUNT** - it silently
+keeps old candidate positions/content for anything that does, and
+nothing currently detects or warns about this (see open hardening item
+in the current handoff).
+
+*Root cause 2, found while verifying the fix*: the full rebuild correctly
+realigned MACHINE candidates, but every EXISTING HUMAN DECISION recorded
+before the reindex was keyed by its OLD word_index - 10 real decisions
+(7 `candidate_choice`, 1 `manual_correction`, 1 `punctuation_choice`,
+plus one of the recovery re-filings that itself had an off-by-one) were
+silently orphaned, no longer attached to the candidate they were
+actually about. Recovered all 10 by re-filing each at its correct new
+position, verified rather than guessed: `bbox` (pixel-based, never
+changes) for the 7 `candidate_choice` decisions; unique word-content
+search for the 1 `manual_correction`; the candidate's own stored
+`word_before`/`word_after` anchor for the punctuation one.
+`punctuation_candidates_part1.json` itself (67 of 74 entries) needed the
+same relocation - 7 were anchored to a `word_before` of a bare `"'"`,
+the exact floating-apostrophe artifact just fixed, and were dropped
+rather than guessed at (regenerable fresh via `propose_punctuation_
+part1.py`, whose own cache already invalidates on this `clean_text`
+change).
+
+*Root cause 3, a real independent bug found via the same verification*:
+unlike `candidate_choice`/`punctuation_choice` (which only ever look up
+a decision for a position that already has a live candidate, so a stale
+decision at an abandoned position just never surfaces), `api_klal()`'s
+`manual_correction` handling rendered EVERY recorded decision
+unconditionally, with no check that the word still matched. Fixed in
+`review_server.py` (both `api_klal()` and `api_klalim()`'s count) to skip
+a decision whose `original_word` no longer matches the live text - this
+bug existed independent of this specific incident and would recur on any
+future edit that shifts a manually-corrected word's position.
+
+Verified end-to-end after all fixes: every live decision cross-checked
+against current corpus/candidate content (0 mismatches), confirmed
+visually in the browser - klal 1's scan-pane box renders green again,
+text pane correctly underlines the decided word.
+
+**5. Multi-word disagreement highlighting fix** (2026-08-14, user
+report: clicked a witness box on klal 30's scan pane, saw "...וזו היא
+[שיטת] התוס ג"כ..." - only the FIRST word of a two-word disagreement
+(`docai_reading` "שיטת התוס" vs tesseract "שיטרז התוסי") was bracketed,
+even though both words are part of the actual disagreement). Root cause:
+the context-highlight code in both the witness panel and the candidate
+panel bracketed exactly one word at the target index/word_index
+regardless of how many words the real span covers
+(`verify_reconstruction_witness.py` allows spans up to `MAX_SPAN=4`;
+`build_corrections_dataset.py`'s replace/insert candidates can span
+multiple words too, e.g. `final_text` "בספר שמות"). Fixed both
+(`openWitnessPanel` using `docai_reading`'s own word count;
+`openCandidatePanel` using `final_text`'s word count for replace/insert -
+delete/manual stay single-word, since `word_index` there is an insertion
+anchor point, not a real span in the current text). The punctuation panel
+was checked and is correctly unaffected - it marks a single insertion
+point, not a span. Verified live: klal 30's שיטת/התוס item now correctly
+shows "[שיטת התוס]"; klal 35's בספר/שמות candidate now shows the full
+phrase bolded.
+
+While investigating this, discovered the user had independently resolved
+the klal 30 `ידן`/`ידו` witness item themselves via the dashboard
+(choosing `ידו`, matching Tesseract) - the open item from the prior
+session's handoff.
+
+**6. Validator claim-coverage review** (2026-08-14, user request:
+"review all validators for claim coverage"). Systematic pass over all 5
+active validator scripts checking whether each one's claimed coverage
+matches what it actually checks. Two real, previously-undetected issues
+found and fixed:
+- `validate_catchword_continuity.py`'s `HEADER_WORDS` included the bare
+  word "כלל" alongside "כללי" (the actual header token) - any genuine
+  catchword or page-opening word that happened to just be "כלל" would be
+  silently treated as furniture. Confirmed 0 of 70 Part-1 page
+  boundaries are currently affected either way (true no-op today, only
+  matters for future data).
+- `validate_title_alphabetical_order.py` silently skipped any klal whose
+  title doesn't start with a recognized Hebrew letter, with a comment
+  claiming this "shouldn't happen for a real title" - it does: klal
+  353's title opens with a stray OCR/encoding artifact, making that klal
+  invisible to the entire check. Fixed to report what it skips instead
+  of silently dropping it (does NOT touch the Part-2 title itself, out
+  of scope per the standing gate - this only makes an existing gap
+  visible). `find_violations()`'s return signature changed
+  (`(violations, skipped)` instead of just `violations`) - updated its
+  one caller in `tests/test_corpus_invariants.py` accordingly.
+
+`validate_klal_span_coverage.py` and `validate_part1_corpus_integrity.py`
+(checks 2-5) were read in full and found accurate. `check_klal_token_
+orphans.py`'s top-level coverage claim was re-verified as currently true
+(204/204 boundaries, 0 skipped); added an inline disclosure for Pass 2's
+already-known-but-previously-undocumented-inline blind spot (21.8% of
+spans can't be matched by its exact-substring technique).
+
+**7. Witness-queue vision-verification pass, started 2026-08-14, IN
+PROGRESS as of this entry** (user request, item 3 from the handoff: work
+through the broader klal 30/75/88 witness queue). New script
+`verify_witness_vision.py`, modeled directly on `verify_corrections_
+vision.py`: crops each of the queue's 419 items' bbox from the scan,
+sends it to Gemini alongside surrounding raw-OCR context (same ±12-token
+window `api_witness_context()` already uses), and records a real
+confidence score + reasoning - a TRIAGE layer only, same relationship to
+`witness_choice` decisions that `corrections_part1.json`'s vision flags
+already have to `candidate_choice` decisions; does not record decisions
+itself. Handles the insert-opcode (`docai_reading is None`) case with
+the same reframing as finding 7 earlier this session, rather than
+asking the model to choose against a literal "None". Verified on two
+test items before the full run: a replace-opcode item (correctly
+selected DocAI's "שיטת התוס" at 0.98 confidence) and an insert-opcode
+item (correctly confirmed Tesseract's "י" at 0.9 confidence, matching a
+real character DocAI missed entirely). Cached in
+`witness_vision_cache.db` (same 4-column crop_hash/word_a/word_b/
+context_hash key shape as `adjudication_cache.db`, Lesson 12). New cache,
+so the first full run is 419 live calls, no possible cache hits - check
+whether it completed and what it found before trusting its output.
+
 ## Second source-audit round — all 12 confirmed bugs fixed, verified against real data, and committed, 2026-08-12/13
 
 Full fix/verification trail for every bug in the "Second source-audit

@@ -166,6 +166,26 @@ def main():
                     box = [dtoks[i1]]
                 elif i1 > 0:
                     box = [dtoks[i1 - 1]]
+            # FIXED 2026-08-14: a multi-token span can cross a line-wrap
+            # (a 2-word disagreement where the words sit on different
+            # physical lines of the page). A naive min/max union across
+            # ALL tokens in that case produces a bbox spanning nearly the
+            # full page width - confirmed on klal 30's "שיטת התוס" item
+            # (page 24, docai_token_index 38): unioned to 75.6% of page
+            # width, vertically overlapping and fully covering "וכו"'s
+            # legitimate, much smaller box underneath it on the scan
+            # pane, so clicking "וכו" opened "שיטת התוס"'s panel instead.
+            # Anchor the bbox on the SAME LINE as the first (anchor)
+            # token only, using that token's own height as the
+            # same-line tolerance rather than a fixed pixel value, since
+            # page scale/DPI can vary. Same-line multi-word spans are
+            # unaffected (every token passes); cross-line spans collapse
+            # to just the anchor's line, matching docai_token_index.
+            anchor_h = box[0]["y2"] - box[0]["y1"]
+            anchor_yc = (box[0]["y1"] + box[0]["y2"]) / 2
+            same_line = [t for t in box
+                         if abs(((t["y1"] + t["y2"]) / 2) - anchor_yc) < anchor_h * 0.6]
+            box = same_line or box[:1]
             queue.append({
                 "klal_id": klal_id,
                 "page": page,
