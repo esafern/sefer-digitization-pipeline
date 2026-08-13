@@ -46,11 +46,7 @@ current handoff, re-written (not just appended to) as state changes.
   corpus text directly). Verified end-to-end in the browser: panel opens
   with correct context, save updates the nav badge/legend live AND
   matches a fresh `/api/klalim` fetch exactly, reopening shows the
-  decision pre-filled with working history. All 19 tests still pass. One
-  real test decision from this verification is on record - klal 3, word
-  3, `למד`->`למד-TEST` (id `7cb1a6ac7bc1`) - self-labeled in its own note
-  as a feature test, not a real edit; safe to disregard or delete via the
-  same panel.
+  decision pre-filled with working history. All 19 tests still pass.
 - **Extended, 2026-08-13, same day**: the panel above can now DELETE a
   word too, not just replace it (direct follow-up request). `chosen_text
   == ""` (explicitly empty, not missing) means delete;
@@ -72,11 +68,19 @@ current handoff, re-written (not just appended to) as state changes.
   guard against real data (`apply_reviewer_decisions.py --dry-run`
   correctly applied one manual-delete per klal and skipped a second one in
   the same klal with the expected message). All 19 tests still pass.
-  Three more test decisions on record from this verification, all on klal
-  3, all self-labeled as tests in their own notes, safe to disregard:
-  word 7 delete (id `0022073fb6de`, raw-endpoint debug check), word 10
-  delete (id `5b34465c4b41`, first full arm/confirm verification), word
-  22 delete (id `3a0e19aa9bfc`, panel-refresh-fix verification).
+  **2026-08-14, user request**: the 4 test decisions this verification
+  work left on klal 3 (word 3 `למד`->`למד-TEST` id `7cb1a6ac7bc1`; word 7/
+  10/22 deletes, ids `0022073fb6de`/`5b34465c4b41`/`3a0e19aa9bfc`) were
+  directly removed from `review_decisions.jsonl` - a deliberate,
+  explicit exception to this file's normal append-only/never-delete rule
+  (see CLAUDE.md), made only because these were self-identified test
+  garbage with zero real editorial content, never applied to `part1.json`,
+  and the user explicitly asked for them to go. Left two other klal-3
+  entries alone (`ee438748e37f`/`b57f13bc2a7d`, word 3, chosen_text=`למד`,
+  no note) - those are the user's own real action re-confirming the
+  correct word after seeing the test garbage, not something I created.
+  Verified: 0 strikethrough words remain in klal 3, its 4 remaining
+  Human-Decided words are all legitimate. 19/19 tests still pass.
 - **Every previously-tracked corpus-content gap is closed** (klal 5, 29,
   30/75/88, 37, 69, 206, 217 - see `PROJECT-STATUS-HISTORY.md` "All open
   corpus-content bugs closed" and "Multi-page reconstruction APPLIED").
