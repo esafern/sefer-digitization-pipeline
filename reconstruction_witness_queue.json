@@ -6,30 +6,36 @@
         "docai_words": 880,
         "tesseract_words": 885,
         "agreement": 0.761,
-        "flagged": 159
+        "flagged": 160,
+        "skipped_oversize_span": 2,
+        "skipped_furniture": 3
       },
       "37": {
         "klal_id": 75,
         "docai_words": 931,
         "tesseract_words": 931,
         "agreement": 0.856,
-        "flagged": 118
+        "flagged": 119,
+        "skipped_oversize_span": 0,
+        "skipped_furniture": 1
       },
       "40": {
         "klal_id": 88,
         "docai_words": 862,
         "tesseract_words": 863,
         "agreement": 0.781,
-        "flagged": 140
+        "flagged": 140,
+        "skipped_oversize_span": 0,
+        "skipped_furniture": 1
       }
     },
     "by_tier": {
-      "D": 217,
-      "B": 102,
-      "C": 94,
-      "A": 4
+      "D": 279,
+      "C": 96,
+      "B": 36,
+      "A": 8
     },
-    "total": 417
+    "total": 419
   },
   "queue": [
     {
@@ -83,7 +89,7 @@
       "docai_reading": "חטאת הוו",
       "tesseract_reading": "חטארז חוו",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.4863692820072174,
         "y1": 0.10335082560777664,
@@ -128,7 +134,7 @@
       "docai_reading": "שיטת התוס",
       "tesseract_reading": "שיטרז התוסי",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.13568773865699768,
         "y1": 0.10375454276800156,
@@ -143,7 +149,7 @@
       "docai_reading": "ד\"ה ואידך",
       "tesseract_reading": "דיה ואירך",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.5043370723724365,
         "y1": 0.11949939280748367,
@@ -578,7 +584,7 @@
       "docai_reading": "הרא\"ם ה",
       "tesseract_reading": "הרא ים הי",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.39962825179100037,
         "y1": 0.21316108107566833,
@@ -593,7 +599,7 @@
       "docai_reading": "דבריו בעל",
       "tesseract_reading": "דברין בעלל",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.1350681483745575,
         "y1": 0.21356479823589325,
@@ -878,7 +884,7 @@
       "docai_reading": "מחבירו עכ\"ל",
       "tesseract_reading": "מחכירו עכיל",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.6623296141624451,
         "y1": 0.30036333203315735,
@@ -893,7 +899,7 @@
       "docai_reading": "ה\"ע בש\"ד פ\"ב",
       "tesseract_reading": "היע בשר פיב",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.41387856006622314,
         "y1": 0.30076706409454346,
@@ -923,7 +929,7 @@
       "docai_reading": "פי ילמוד",
       "tesseract_reading": "פיי ילמור",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.7249070405960083,
         "y1": 0.31610819697380066,
@@ -998,7 +1004,7 @@
       "docai_reading": "בש\"ס גם",
       "tesseract_reading": "בשם גכש",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.43246591091156006,
         "y1": 0.348001629114151,
@@ -1006,6 +1012,21 @@
         "y2": 0.3633427619934082
       },
       "docai_token_index": 298
+    },
+    {
+      "klal_id": 30,
+      "page": 24,
+      "docai_reading": null,
+      "tesseract_reading": "י",
+      "opcode": "insert",
+      "tier": "A",
+      "bbox": {
+        "x1": 0.1666666716337204,
+        "y1": 0.34880903363227844,
+        "x2": 0.19454771280288696,
+        "y2": 0.3625353276729584
+      },
+      "docai_token_index": 304
     },
     {
       "klal_id": 30,
@@ -1043,7 +1064,7 @@
       "docai_reading": "וז\"ל ור\"ע",
       "tesseract_reading": "חל ור",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "C",
       "bbox": {
         "x1": 0.3636927008628845,
         "y1": 0.3625353276729584,
@@ -1283,7 +1304,7 @@
       "docai_reading": "דאי הוקשו",
       "tesseract_reading": "ראי הוקשן",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.13568773865699768,
         "y1": 0.48445701599121094,
@@ -1313,7 +1334,7 @@
       "docai_reading": "הוקשו עכ\"ד",
       "tesseract_reading": "הוקשן עכר",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.5625774264335632,
         "y1": 0.4985870122909546,
@@ -1343,7 +1364,7 @@
       "docai_reading": "ר\"ל דלית",
       "tesseract_reading": "ריל דלות",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.8228005170822144,
         "y1": 0.5135244131088257,
@@ -1523,7 +1544,7 @@
       "docai_reading": "בפרק קמא דקידושין",
       "tesseract_reading": "בסרק קמצ דקירושין",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.3531598448753357,
         "y1": 0.5890190005302429,
@@ -1538,7 +1559,7 @@
       "docai_reading": "שדה אחוזה וכו",
       "tesseract_reading": "שרה אחזה זכו",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "A",
       "bbox": {
         "x1": 0.1350681483745575,
         "y1": 0.5890190005302429,
@@ -1598,7 +1619,7 @@
       "docai_reading": "רבות בגמרא",
       "tesseract_reading": "רכות בגטרא",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.7490706443786621,
         "y1": 0.6197012662887573,
@@ -1688,7 +1709,7 @@
       "docai_reading": "אלא לגופו",
       "tesseract_reading": "אלאלגופו",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.6790582537651062,
         "y1": 0.649979829788208,
@@ -1763,7 +1784,7 @@
       "docai_reading": "לאו עבד",
       "tesseract_reading": "לצפו עבר",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.13692688941955566,
         "y1": 0.6794509291648865,
@@ -1973,7 +1994,7 @@
       "docai_reading": "שכתב קרבן",
       "tesseract_reading": "שכחכ קרכן",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.49814125895500183,
         "y1": 0.7731126546859741,
@@ -2018,7 +2039,7 @@
       "docai_reading": "והוא ז\"ל ס\"ל",
       "tesseract_reading": "והואא ול ל",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.21065674722194672,
         "y1": 0.7731126546859741,
@@ -2048,7 +2069,7 @@
       "docai_reading": "מזה וזה",
       "tesseract_reading": "מוה ווה",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.4225526750087738,
         "y1": 0.7880500555038452,
@@ -2063,7 +2084,7 @@
       "docai_reading": "הביא בתשובה",
       "tesseract_reading": "הכיא בחשוכה",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.2614622116088867,
         "y1": 0.7880500555038452,
@@ -2138,7 +2159,7 @@
       "docai_reading": "ממנו בב\"ב",
       "tesseract_reading": "מסנו בכב",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.4293680191040039,
         "y1": 0.8025837540626526,
@@ -2258,7 +2279,7 @@
       "docai_reading": "זה וזה",
       "tesseract_reading": "ות ווה",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.13816604018211365,
         "y1": 0.8175212144851685,
@@ -2288,7 +2309,7 @@
       "docai_reading": "פי הרא\"ש ז\"ל",
       "tesseract_reading": "פ הואש ל",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.14002478122711182,
         "y1": 0.833266019821167,
@@ -2348,7 +2369,7 @@
       "docai_reading": "בתוס ד\"ה",
       "tesseract_reading": "בחופ ה",
       "opcode": "replace",
-      "tier": "A",
+      "tier": "D",
       "bbox": {
         "x1": 0.21003717184066772,
         "y1": 0.8486071825027466,
@@ -2495,10 +2516,25 @@
     {
       "klal_id": 75,
       "page": 37,
+      "docai_reading": null,
+      "tesseract_reading": "רם בשם",
+      "opcode": "insert",
+      "tier": "A",
+      "bbox": {
+        "x1": 0.15822002291679382,
+        "y1": 0.12140833586454391,
+        "x2": 0.18665018677711487,
+        "y2": 0.1388102024793625
+      },
+      "docai_token_index": 49
+    },
+    {
+      "klal_id": 75,
+      "page": 37,
       "docai_reading": "בשם ר\"פ",
       "tesseract_reading": null,
       "opcode": "delete",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.11001235991716385,
         "y1": 0.12140833586454391,
@@ -2843,7 +2879,7 @@
       "docai_reading": "היכא דידעינן",
       "tesseract_reading": "היכצפ דירעינן",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.22373300790786743,
         "y1": 0.2573856711387634,
@@ -2858,7 +2894,7 @@
       "docai_reading": "ועל הסתם",
       "tesseract_reading": "ועד הפתם",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.45241037011146545,
         "y1": 0.27235937118530273,
@@ -3098,7 +3134,7 @@
       "docai_reading": "דהגם דהוא",
       "tesseract_reading": "ההגם רהוות",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.11063040792942047,
         "y1": 0.3808174729347229,
@@ -3218,7 +3254,7 @@
       "docai_reading": "הדר ס\"ז",
       "tesseract_reading": "הר םז",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.30593323707580566,
         "y1": 0.42614325881004333,
@@ -3428,7 +3464,7 @@
       "docai_reading": "איתמר לא",
       "tesseract_reading": "איהמר א",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.7867738008499146,
         "y1": 0.5293403267860413,
@@ -3563,7 +3599,7 @@
       "docai_reading": "אחריו הר\"ב מעדני",
       "tesseract_reading": "אחרין הריב מערני",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.15636588633060455,
         "y1": 0.5596924424171448,
@@ -3623,7 +3659,7 @@
       "docai_reading": "ולפק\"ד איכא",
       "tesseract_reading": "ולפקר איכצש",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.21569839119911194,
         "y1": 0.5892351269721985,
@@ -3833,7 +3869,7 @@
       "docai_reading": "ומצינו עוד",
       "tesseract_reading": "ומציגו עור",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.3182941973209381,
         "y1": 0.7102387547492981,
@@ -3908,7 +3944,7 @@
       "docai_reading": "דביצה י\"ג ב",
       "tesseract_reading": "רביצה ייג בי",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.11433868855237961,
         "y1": 0.7579927444458008,
@@ -3953,7 +3989,7 @@
       "docai_reading": "חד וחד",
       "tesseract_reading": "חר וחר",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.11186650395393372,
         "y1": 0.7709429264068604,
@@ -3998,7 +4034,7 @@
       "docai_reading": "וכו ובתר",
       "tesseract_reading": "וכן וכתר",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.33807170391082764,
         "y1": 0.800890326499939,
@@ -4190,25 +4226,10 @@
     {
       "klal_id": 88,
       "page": 40,
-      "docai_reading": "יך מלאכי",
-      "tesseract_reading": "ור מלאכו",
-      "opcode": "replace",
-      "tier": "B",
-      "bbox": {
-        "x1": 0.5350279211997986,
-        "y1": 0.05082694813609123,
-        "x2": 0.641661524772644,
-        "y2": 0.07018959522247314
-      },
-      "docai_token_index": 0
-    },
-    {
-      "klal_id": 88,
-      "page": 40,
       "docai_reading": "יך בפ\"ק דשבת",
       "tesseract_reading": "וד בפיק דשברץ",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.12957222759723663,
         "y1": 0.05808793753385544,
@@ -4328,7 +4349,7 @@
       "docai_reading": "חזה עובד",
       "tesseract_reading": "חה עובר",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "A",
       "bbox": {
         "x1": 0.7222566604614258,
         "y1": 0.11496571451425552,
@@ -4433,7 +4454,7 @@
       "docai_reading": "תוס ר\"פ",
       "tesseract_reading": "חוס ריפ",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.22814631462097168,
         "y1": 0.1468334048986435,
@@ -4643,7 +4664,7 @@
       "docai_reading": "הרמב\"ם ז\"ל",
       "tesseract_reading": "הרמכם זכ",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.6354618668556213,
         "y1": 0.2230738252401352,
@@ -4673,7 +4694,7 @@
       "docai_reading": "יע\"ש אבל",
       "tesseract_reading": "יעיש אככל",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.3242405354976654,
         "y1": 0.2230738252401352,
@@ -4703,7 +4724,7 @@
       "docai_reading": "להר\"ן ז\"ל",
       "tesseract_reading": "להרין זיל",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.704277753829956,
         "y1": 0.23799918591976166,
@@ -4718,7 +4739,7 @@
       "docai_reading": "שפ\"ו א ולהרמב\"ן ז\"ל",
       "tesseract_reading": "שפיו אי ולהרמבין זיל",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.3713577091693878,
         "y1": 0.23799918591976166,
@@ -4748,7 +4769,7 @@
       "docai_reading": "בה\"ג הנ\"ל",
       "tesseract_reading": "בהיג הניל",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.8245505094528198,
         "y1": 0.25332796573638916,
@@ -4853,7 +4874,7 @@
       "docai_reading": "כלל וליכא",
       "tesseract_reading": "כללל וליכצש",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.4066956043243408,
         "y1": 0.31343284249305725,
@@ -4913,7 +4934,7 @@
       "docai_reading": "בה\"ג וכו",
       "tesseract_reading": "בהיג וכן",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.5957842469215393,
         "y1": 0.3457038998603821,
@@ -4943,7 +4964,7 @@
       "docai_reading": "שמצאתי להרא\"ש ז\"ל",
       "tesseract_reading": "שמצצתתי להראיש זיכל",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.13701178133487701,
         "y1": 0.3457038998603821,
@@ -4958,7 +4979,7 @@
       "docai_reading": "פ\"ק דע\"ז",
       "tesseract_reading": "פיק דעי",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.7451952695846558,
         "y1": 0.36062929034233093,
@@ -5003,7 +5024,7 @@
       "docai_reading": "הרמב\"ם ז\"ל",
       "tesseract_reading": "הרמכים זיל",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.22566646337509155,
         "y1": 0.3755546510219574,
@@ -5063,7 +5084,7 @@
       "docai_reading": "יע\"ש איברא",
       "tesseract_reading": "ועיש איכרות",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.14011159539222717,
         "y1": 0.39128682017326355,
@@ -5108,7 +5129,7 @@
       "docai_reading": "כרשב\"א ז\"ל",
       "tesseract_reading": "כרשכא זיל",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.3223806619644165,
         "y1": 0.40621218085289,
@@ -5123,7 +5144,7 @@
       "docai_reading": "ידעינן מאי",
       "tesseract_reading": "ודעינן מצתר",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.1407315582036972,
         "y1": 0.40621218085289,
@@ -5168,7 +5189,7 @@
       "docai_reading": "עכ\"ד וכ\"כ",
       "tesseract_reading": "עכר וכ",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "C",
       "bbox": {
         "x1": 0.21822690963745117,
         "y1": 0.4215409457683563,
@@ -5273,7 +5294,7 @@
       "docai_reading": "בה\"ג שדבריו",
       "tesseract_reading": "בהיג שרבריו",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.6782392859458923,
         "y1": 0.48204922676086426,
@@ -5318,7 +5339,7 @@
       "docai_reading": "דע\"ז כ\"א",
       "tesseract_reading": "דעיז כיא",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.7358958721160889,
         "y1": 0.497781366109848,
@@ -5393,7 +5414,7 @@
       "docai_reading": "הרמב\"ן ז\"ל",
       "tesseract_reading": "הרמכין זיל",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.3025418519973755,
         "y1": 0.5135135054588318,
@@ -5498,7 +5519,7 @@
       "docai_reading": "היא בידם",
       "tesseract_reading": "היצ בירם",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.5567265748977661,
         "y1": 0.558692991733551,
@@ -5558,7 +5579,7 @@
       "docai_reading": "היא נקבל",
       "tesseract_reading": "הית נקכל",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.6893986463546753,
         "y1": 0.5736184120178223,
@@ -5648,7 +5669,7 @@
       "docai_reading": "ע\"ז שרמז",
       "tesseract_reading": "עיז שרמד",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.14321140944957733,
         "y1": 0.5893505215644836,
@@ -5798,7 +5819,7 @@
       "docai_reading": "נכרי מאי",
       "tesseract_reading": "נכרו מצתי",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.1444513350725174,
         "y1": 0.6349334120750427,
@@ -5843,7 +5864,7 @@
       "docai_reading": "ציית וכו",
       "tesseract_reading": "ציירז וכך",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.1853688806295395,
         "y1": 0.6643807888031006,
@@ -5978,7 +5999,7 @@
       "docai_reading": "ד\"ה אריסא והרמב\"ם",
       "tesseract_reading": "דיה אריסות והרמבים",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.7427154183387756,
         "y1": 0.7260992527008057,
@@ -6038,7 +6059,7 @@
       "docai_reading": "הרב המגיה",
       "tesseract_reading": "הרכ המניה",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.6367018222808838,
         "y1": 0.7382009029388428,
@@ -6068,7 +6089,7 @@
       "docai_reading": "והרמב\"ם ודעמייהו",
       "tesseract_reading": "והרמכם ורעמייהו",
       "opcode": "replace",
-      "tier": "B",
+      "tier": "D",
       "bbox": {
         "x1": 0.23744575679302216,
         "y1": 0.7551432251930237,
@@ -6286,6 +6307,21 @@
         "y2": 0.8947156071662903
       },
       "docai_token_index": 857
+    },
+    {
+      "klal_id": 88,
+      "page": 40,
+      "docai_reading": null,
+      "tesseract_reading": "ג",
+      "opcode": "insert",
+      "tier": "A",
+      "bbox": {
+        "x1": 0.26844388246536255,
+        "y1": 0.8967325687408447,
+        "x2": 0.30998140573501587,
+        "y2": 0.9068172574043274
+      },
+      "docai_token_index": 861
     }
   ]
 }

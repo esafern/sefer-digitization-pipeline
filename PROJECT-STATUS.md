@@ -240,18 +240,55 @@ before the fix) - confirmed via direct `strip_tail_furniture` calls, not
 just inference. True no-op on the current corpus; only changes behavior
 for a future page shaped like 25. 14/14.
 
-**Remaining open findings from the second audit round, not yet fixed**: 3
-(witness-tier triage wrong on 16.1% of the queue - needs per-word not
-per-segment lexicon lookup), 4 (the witness pass structurally drops every
-DocAI-omission case, `insert` opcodes). See
-`PROJECT-STATUS-HISTORY.md`'s "Second source-audit round" entry for full
-detail on each before picking one up. Also still open: the
-"unverified risks" list in that same entry (never-invalidated
-`apply_event`, page-less witness decision keys,
-`propose_punctuation_part1.py`'s prompt-blind cache key, the blanket
-`PASS3_KNOWN_FALSE_POSITIVES` allowlist, `app.js` never refetching
-`/api/klalim`, the folio-vs-marker heuristic that ate klal 89's `פט`).
+**14. Findings 3 and 4 FIXED 2026-08-13** (`verify_reconstruction_
+witness.py`) - the last two confirmed bugs from the second audit round.
+
+- **Finding 3**: `tier()` and `is_furniture()` normed a whole
+  (possibly multi-word) segment as ONE string before checking it against
+  the lexicon/furniture list, so a real 2-word segment like `בתוס ד"ה`
+  normed to the concatenated `בתוסדה` - never a real word regardless of
+  whether its individual words are - while its counterpart could
+  coincidentally concatenate into something that IS a real word
+  (`בחופ ה` -> `בחופה`), driving a false tier-A verdict. Fixed both to
+  check every word in a segment individually (a segment is only "in
+  lexicon"/"furniture" if ALL its words are). Re-ran against the live
+  queue: `בתוס ד"ה`/`בחופ ה` (klal 30, docai_token_index 853) - the exact
+  item behind this session's already-applied klal 30 `בתוס`->`כתוס`
+  corpus edit - now correctly tiers D instead of A. That reclassification
+  doesn't put the applied fix in question: the actual correction came
+  from a direct 900 DPI crop-check of the ink, not from the tier label,
+  which was only ever a work-priority signal. Net tier shift: A 4->8, B
+  102->36, C 94->96, D 217->279 (partly finding 4's 3 new items, partly
+  1 furniture item correctly dropping out - see below).
+- **Finding 4**: the witness pass structurally could not report a DocAI
+  *omission* - `if not d_seg: continue` dropped every `insert`-opcode
+  disagreement (DocAI has nothing at a position where Tesseract found
+  real text), exactly the failure mode this tool exists to catch.
+  Confirmed: the live queue was 416 replace + 1 delete + **0** insert.
+  Fixed to include these, anchoring the crop on the nearest real DocAI
+  token (an insert has none of its own to bound a bbox with) since
+  `docai_reading: null` is already a case the review-panel frontend
+  handles (`app.js`'s option list already filters out a falsy
+  `docai_reading` - built for exactly this, just never exercised).
+  Re-run surfaced exactly 3 new items (klal 30/75/88, one per page, 4
+  Tesseract words total), all correctly tier A.
+- Also added the same silent-drop accounting fix used repeatedly this
+  session: oversize alignment spans and furniture segments are now
+  counted (`skipped_oversize_span`, `skipped_furniture` in `stats`)
+  instead of vanishing with no record.
+- **Verification**: cross-checked all 5 existing `witness_choice`
+  decisions on record (including klal 30 idx 22, the accidental
+  test-side-effect decision from finding 6's verification) against both
+  the old and new queue by `(klal_id, docai_token_index)` - all 5 resolve
+  to the identical `docai_reading`/`tesseract_reading` in both, confirming
+  the fix doesn't disturb any already-recorded human decision. 14/14 +
+  5/5 tests.
 
 **No other known open items beyond the above.** Full detail, evidence,
 and the complete dated history behind every claim above is in
-`PROJECT-STATUS-HISTORY.md`.
+`PROJECT-STATUS-HISTORY.md`. The "unverified risks" list from the second
+audit round (never-invalidated `apply_event`, page-less witness decision
+keys, `propose_punctuation_part1.py`'s prompt-blind cache key, the
+blanket `PASS3_KNOWN_FALSE_POSITIVES` allowlist, `app.js` never
+refetching `/api/klalim`, the folio-vs-marker heuristic that ate klal
+89's `פט`) is still open - flagged as unverified, not confirmed bugs.
