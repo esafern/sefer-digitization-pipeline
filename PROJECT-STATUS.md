@@ -224,13 +224,26 @@ suspiciously-tiny new boxes, and confirmed visually in the browser - klal
 17's highlight now tightly wraps its own paragraph instead of swallowing
 klal 18 and beyond. 14/14 + 5/5 review-server tests.
 
+**13. Finding 10 FIXED 2026-08-13.** `strip_tail_furniture` (`reconstruct_
+multipage_klalim.py`) used to drop `tokens[idx+3:]` (everything after the
+3-token "Digitized by Google" watermark) outright, reporting it only in a
+printed note - a silent content-loss bug. Confirmed real: page 25's tail
+is `...Digitized by Google אנושית` - `אנושית` is a genuine body word, not
+furniture. But a scan-artifact token can also sit right there (page 37's
+lone `:`, the same colon-after-header artifact already documented for
+page 24's own header) - fixed to strip only a leading run of pure
+punctuation immediately after the watermark, then keep any real content
+that follows. Verified byte-for-byte against all three pages this script
+currently processes: page 24/40 have no trailing tokens (unaffected),
+page 37's trailing `:` is still correctly dropped (identical output to
+before the fix) - confirmed via direct `strip_tail_furniture` calls, not
+just inference. True no-op on the current corpus; only changes behavior
+for a future page shaped like 25. 14/14.
+
 **Remaining open findings from the second audit round, not yet fixed**: 3
 (witness-tier triage wrong on 16.1% of the queue - needs per-word not
 per-segment lexicon lookup), 4 (the witness pass structurally drops every
-DocAI-omission case, `insert` opcodes), 10 (`strip_tail_furniture` in
-`reconstruct_multipage_klalim.py` discards everything after the
-"Digitized" watermark token with only a printed note - harmless today,
-page 25's tail proves it can silently drop a real word). See
+DocAI-omission case, `insert` opcodes). See
 `PROJECT-STATUS-HISTORY.md`'s "Second source-audit round" entry for full
 detail on each before picking one up. Also still open: the
 "unverified risks" list in that same entry (never-invalidated

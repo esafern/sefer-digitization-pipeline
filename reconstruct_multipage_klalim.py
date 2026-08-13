@@ -107,10 +107,30 @@ def strip_tail_furniture(tokens, next_first_word):
     notes = []
     idx = next((i for i, t in enumerate(tokens) if t["text"] == "Digitized"), None)
     if idx is not None:
-        trailing = [t["text"] for t in tokens[idx + 3:]]
-        tokens = tokens[:idx]
+        # FIXED 2026-08-13 (PROJECT-STATUS.md finding 10): this used to drop
+        # tokens[idx+3:] outright (assuming only furniture ever follows the
+        # 3-token "Digitized by Google" watermark), reporting them in a note
+        # but never keeping them - a silent content-loss bug. Confirmed real:
+        # page 25's tail is '...Digitized by Google אנושית', a real body
+        # word. But a scan-artifact token can ALSO sit right there (page
+        # 37's lone ':', the same colon-after-header artifact already
+        # documented for page 24's own header) - only strip a leading run of
+        # PURE PUNCTUATION immediately after the watermark, then keep
+        # whatever real content remains so it isn't silently lost. This is a
+        # true no-op for every page this script currently processes (24: no
+        # trailing tokens, 37: trailing is exactly one punctuation token
+        # ':' and gets stripped here same as before, 40: no trailing
+        # tokens) - the fix only changes behavior for a page shaped like 25.
+        trailing = tokens[idx + 3:]
+        dropped_punct = []
+        while trailing and not clean_word(trailing[0]["text"]):
+            dropped_punct.append(trailing[0]["text"])
+            trailing = trailing[1:]
+        tokens = tokens[:idx] + trailing
         if trailing:
-            notes.append(f"dropped_after_watermark:{trailing}")
+            notes.append(f"kept_after_watermark:{[t['text'] for t in trailing]}")
+        if dropped_punct:
+            notes.append(f"dropped_punct_after_watermark:{dropped_punct}")
     else:
         notes.append("NO_WATERMARK_FOUND")
     changed = True
