@@ -130,6 +130,72 @@ denominator read as right. Now counted from the two result dicts.
   scratch/ warning CLAUDE.md itself documents), so the pointer named a
   gitignored path where the file no longer is.
 
+**7. `validate_catchword_continuity.py` - `HEADER_WORDS` matched through
+`clean_word()`, so the citation `י"ד` collapsed onto the running header's
+bare `יד` and was eaten as page furniture.** Identical shape to the bare
+`כלל` entry removed from this same set 2026-08-14 - but unlike that one,
+which was verified inert (0 of 70 pages affected), this one is live: 43
+tokens across the scan (39 `י"ד`, 2 `י"ר`, 2 `י"ך` - Yoreh De'ah / siman
+numbers / their OCR variants) are currently classified as furniture, and one
+of them changes a reported page boundary. Page 45 really ends
+`...גנת ורדים כלל א' סימן י"ד : בתר` and was reported as `א סימן בתר` -
+the siman number silently dropped and an unrelated earlier token pulled in
+to fill the 3-token window. Fixed with `is_header_word()`: a running-header
+token is always a bare word, so a token containing a gershayim/geresh is an
+abbreviation and never the header. Applied at both call sites
+(`is_furniture` and `first_real_tokens`, which duplicated the same
+`clean_word(w) in HEADER_WORDS` test). Full script output diffed
+before/after: exactly one line changes, the page 45 ending; the 58-match /
+11-no-match classification is untouched (this boundary's real catchword
+`בתר` matched either way - the misreading was in the displayed evidence, not
+the verdict).
+
+**8. `validate_catchword_continuity.py` - `FIRST_REAL_PAGE = 13`'s stated
+justification was invented on both counts.** The comment read "pages 1-12
+are byte-identical duplicates of 13-24, see CLAUDE.md". Checked all 12
+pairs against `docai_word_boxes/`: **every one differs**, and CLAUDE.md
+contains no such statement (grepped). Pages 1-12 are the scan's front matter
+- Google's digitization notice (p1), library shelfmark stamps (p3), the
+publisher's preface and the author's own introduction (p11-12). The
+constant's VALUE is right; only its reason was fabricated. Corrected in
+place. Flagging the shape as much as the instance: a wrong-but-plausible
+justification on a magic number is unfalsifiable by reading, and this one
+survived every prior review of this file.
+
+**9. `audit_applied_decisions.py` - `check_manual_correction` and
+`check_punctuation_choice` bounds-checked only the upper end
+(`word_index >= len(words)`), while `check_candidate_choice`'s docstring
+claimed the explicit bounds check was "defense-in-depth matching the other
+two checkers".** It wasn't - they had half of it. A negative `word_index`
+indexes backwards from the end in Python rather than raising, so a decision
+recorded at a negative index would be compared against the klal's LAST word
+and could report a confident `ok`; the same Python-forgiving-indexing class
+as the empty-`chosen_text` slicing bug fixed in this file earlier the same
+day. Added `word_index < 0 or` to both and corrected the docstring's claim.
+Unit-verified both now return MISMATCH at index -1 and are unchanged
+in-range; re-ran against the live corpus with identical results to the
+documented run (18 checked, 15 ok, 2 unverifiable, 1 known MISMATCH - klal 1
+word 97's documented 2026-08-10 hand-revert).
+
+**10. REFACTOR - `review_server.py` re-parsed the entire
+`review_decisions.jsonl` once PER correction entry.** `_merge_decision()`
+called `rd.current_for()`, and every `current_for`/`history_for` call runs
+`_read_all()`, which reads and JSON-parses the whole append-only log. A klal
+with 11 candidates therefore cost 11 full parses of the log on every single
+`/api/klal` request, and `/api/page` did the same per correction on the
+page - cost growing with the decision log forever, on a log that is expected
+to grow by thousands of lines as the 419-item witness queue and the
+punctuation pass get worked through. Changed to build one
+`all_current("candidate_choice")` map per request and pass it in; identical
+semantics (both resolve a key to the last matching line in file order).
+Measured: `/api/klal/168` 13 -> 3 full log parses, `/api/page/21` 5 -> 1.
+Verified by snapshotting EVERY endpoint's payload before and after - all 222
+`api_klal`, all 222 `api_klal_flag`, all 56 `api_page`, `api_klalim`,
+`api_flags`, `api_witness_summary`, and all 285 `api_decision_history`
+responses - and byte-comparing the two dumps: identical. The
+punctuation-choice loop in the same function was left alone deliberately
+(out of scope per the user's directive), not overlooked.
+
 **Confirmed stale in CLAUDE.md itself** (pre-existing, flagged by the user
 before this pass, re-verified here): its directory-layout prose lists
 `chunker.py` and `validate_title_section_letter.py` as active root scripts -

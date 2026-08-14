@@ -30,7 +30,14 @@ import re
 
 REPO = os.path.dirname(os.path.abspath(__file__))
 DOCAI_DIR = os.path.join(REPO, "docai_word_boxes")
-FIRST_REAL_PAGE = 13  # pages 1-12 are byte-identical duplicates of 13-24, see CLAUDE.md
+# CORRECTED 2026-08-14: this used to say "pages 1-12 are byte-identical
+# duplicates of 13-24, see CLAUDE.md" - both halves false. Checked all 12
+# pairs: every one differs, and CLAUDE.md says nothing of the sort. Pages
+# 1-12 are the scan's FRONT MATTER (Google's digitization notice, library
+# stamps/shelfmarks, the publisher's preface and the author's own
+# introduction) - no running header, no klal markers, no catchwords to
+# check. The value 13 was right; only its stated reason was invented.
+FIRST_REAL_PAGE = 13
 LAST_PAGE = 82
 
 # FIXED 2026-08-14: "כלל" (a common standalone Hebrew word - "rule",
@@ -46,11 +53,26 @@ LAST_PAGE = 82
 # true no-op today and only matters for future data.
 HEADER_WORDS = {"יד", "מלאכי", "יר", "יך", "כללי", "כללי-"}
 FURNITURE_RE = re.compile(r"^(Digitized|by|Google)$", re.IGNORECASE)
+# Matching HEADER_WORDS through clean_word() (which strips punctuation) makes
+# the abbreviation י"ד collapse onto the header's bare יד - and י"ד is a very
+# common citation in this book (Yoreh De'ah, or a siman number), not page
+# furniture. Same false-furniture shape as the bare כלל entry removed
+# 2026-08-14, but unlike that one this is NOT inert: 43 tokens across the scan
+# (39 י"ד, 2 י"ר, 2 י"ך) are currently eaten, and one of them changes a
+# reported page boundary - page 45 really ends `...סימן י"ד : בתר` but was
+# reported as `א סימן בתר`, silently dropping the siman number and pulling in
+# an unrelated earlier token. A running-header word is always a bare word;
+# a gershayim/geresh inside the token means it is an abbreviation instead.
+ABBREV_MARKS = "\"'׳״"
 GEMATRIA_LETTERS = set("אבגדהוזחטיכלמנסעפצקרשתךםןףץ")
 
 
 def clean_word(w):
     return "".join(c for c in w if c.isalnum())
+
+
+def is_header_word(w):
+    return clean_word(w) in HEADER_WORDS and not any(c in ABBREV_MARKS for c in w)
 
 
 SECTION_WORDS = {"האלף", "הבית", "הגימל", "הדלת", "ההא"}
@@ -89,7 +111,7 @@ def is_furniture(tok_text):
         return True
     if FURNITURE_RE.match(w):
         return True
-    if clean_word(w) in HEADER_WORDS:
+    if is_header_word(w):
         return True
     if w.isdigit():
         return True
@@ -123,7 +145,7 @@ def first_real_tokens(tokens, n=4, skip_header_words=6, marker_positions=None):
         if not w:
             continue
         if skipped_header < skip_header_words and (
-            is_furniture(w) or clean_word(w) in HEADER_WORDS or clean_word(w) in SECTION_WORDS
+            is_furniture(w) or is_header_word(w) or clean_word(w) in SECTION_WORDS
         ):
             skipped_header += 1
             continue
