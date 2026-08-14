@@ -252,6 +252,23 @@ existing test files. Same scope rules - witness/punctuation excluded.
   label does NOT fail the end-to-end API test, correctly - no klal
   currently serves that flag, which is exactly why the unit-level
   "every flag classify() CAN emit is labelled" test exists alongside it.
+- **Deliberately NOT covered - stated so nobody reads 85 green tests as
+  "the pipeline is tested"**: (a) `build_corrections_dataset.py`'s
+  difflib alignment and `build_klal_page_regions.py`'s marker-anchored
+  Y-banding - the two places where a wrong answer is a wrong CROP shown
+  to a reviewer, and neither has any ground truth a synthetic fixture
+  could assert against without inventing one (that's what
+  `validate_klal_span_coverage.py` + direct crop inspection are for);
+  (b) the heuristic regions' real-data geometry beyond structural
+  soundness - "does this box actually contain this klal's ink" is a
+  vision question, and an overlap check would false-positive on
+  legitimately overlapping same-page line boxes; (c) anything that would
+  spend an API call (`adjudicate`'s retry/fallback chain is exercised
+  only through its cache); (d) witness/punctuation code, out of scope by
+  standing directive; (e) `review_frontend/app.js`'s rendering beyond the
+  paths the 11 browser tests touch. Coverage here is deep on the
+  decision/apply/flag layer and on parsing/caching, and shallow-to-absent
+  on alignment geometry.
 
 ### `verify_witness_vision.py`'s 419-item pass finished 2026-08-14
 

@@ -713,11 +713,22 @@ def test_running_header_words_are_only_matched_as_bare_words():
 
 # --- verify_corrections_vision: response parsing + cache-key coverage --------
 
-fitz = pytest.importorskip("fitz", reason="PyMuPDF not installed (pipeline dependency)")
-pytest.importorskip("google.genai", reason="google-genai not installed (pipeline dependency)")
-import verify_corrections_vision as vcv  # noqa: E402
+VISION_IMPORT_ERROR = None
+try:
+    import verify_corrections_vision as vcv  # noqa: E402
+except ImportError as exc:  # PyMuPDF / google-genai are pipeline deps, not test deps
+    vcv = None
+    VISION_IMPORT_ERROR = str(exc)
+
+# Skips only these tests, not the whole module - everything above needs
+# nothing beyond the standard library, and losing all of it because one
+# optional import is missing would be the "quietly narrowed coverage" this
+# project's Lesson 1 is about.
+requires_vision_deps = pytest.mark.skipif(
+    vcv is None, reason=f"verify_corrections_vision.py not importable: {VISION_IMPORT_ERROR}")
 
 
+@requires_vision_deps
 def test_unescape_json_fragment_restores_escaped_quotes_without_touching_raw_ones():
     """A single Gemini response routinely mixes both escaping states: some
     Hebrew gershayim emitted raw (the reason lenient parsing exists) and
@@ -730,6 +741,7 @@ def test_unescape_json_fragment_restores_escaped_quotes_without_touching_raw_one
     assert vcv.unescape_json_fragment(r"line\nbreak") == "line\nbreak"
 
 
+@requires_vision_deps
 def test_extract_json_fields_recovers_a_response_with_unescaped_gershayim():
     text = '''{
       "selected_option": "A",
@@ -746,11 +758,13 @@ def test_extract_json_fields_recovers_a_response_with_unescaped_gershayim():
     assert "\\" not in parsed["reasoning"], "a literal backslash must never survive into stored review data"
 
 
+@requires_vision_deps
 def test_extract_json_fields_accepts_a_quoted_confidence_number():
     text = '{"selected_option": "B", "transcription_found": "אלף", "confidence": "0.95", "reasoning": "x"}'
     assert vcv.extract_json_fields(text)["confidence"] == 0.95
 
 
+@requires_vision_deps
 def test_extract_json_fields_returns_none_rather_than_a_partial_decision():
     assert vcv.extract_json_fields('{"transcription_found": "אלף", "confidence": 0.9}') is None
     assert vcv.extract_json_fields('{"selected_option": "A", "reasoning": "no confidence here"}') is None
@@ -764,6 +778,7 @@ def vision_cache(tmp_path, monkeypatch):
     return vcv.CACHE_DB
 
 
+@requires_vision_deps
 def test_vision_cache_key_covers_every_input_that_changes_the_right_answer(vision_cache):
     """CLAUDE.md Lesson 12, the bug this project has now hit three times in
     this one cache (crop-only 2026-08-05, no context 2026-08-10, no prompt
@@ -780,6 +795,7 @@ def test_vision_cache_key_covers_every_input_that_changes_the_right_answer(visio
     assert vcv.get_cached_decision(crop, word_a, word_b, "context two") is None, "context not in the key"
 
 
+@requires_vision_deps
 def test_vision_cache_key_covers_the_prompt_template(vision_cache, monkeypatch):
     """Editing PROMPT_TEMPLATE must invalidate prior answers. It silently did
     not until 2026-08-14: the 2026-08-12 prompt fix only landed because an
@@ -801,6 +817,7 @@ def test_vision_cache_key_covers_the_prompt_template(vision_cache, monkeypatch):
     )
 
 
+@requires_vision_deps
 def test_vision_cache_stores_a_null_side_rather_than_failing_the_not_null_schema(vision_cache):
     """delete/insert-opcode candidates legitimately have one side as None
     ("X" vs nothing) - coerced to a sentinel, not stored as SQL NULL, which
@@ -810,6 +827,7 @@ def test_vision_cache_stores_a_null_side_rather_than_failing_the_not_null_schema
     assert vcv.get_cached_decision(b"PNG", "אלף", "בית", "ctx") is None
 
 
+@requires_vision_deps
 def test_vision_cache_migration_is_lossless_and_idempotent(tmp_path, monkeypatch):
     """The prompt_hash migration back-fills rather than dropping (419 real
     answers, 0 API calls). A regression that dropped them instead would cost
