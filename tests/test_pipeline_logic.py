@@ -232,6 +232,121 @@ def test_snapshot_matches_compares_every_field_that_identifies_a_candidate():
     assert ard.snapshot_matches(live, None) is False
 
 
+# --- apply_reviewer_decisions.main(): the per-run safety model ---------------
+# The individual mutators above are pure; main() is where the guards live
+# (never re-apply, never exceed one word-count change per klal per run, never
+# treat "keep the current text" as an edit). Exercised end to end against
+# throwaway copies of part1.json / corrections / the decisions log - nothing
+# here touches a tracked file.
+
+@pytest.fixture
+def apply_harness(tmp_path, monkeypatch, decisions_path):
+    """Point apply_reviewer_decisions at synthetic data. rd's module-level
+    functions are rebound to the temp log (binding the originals first, since
+    the replacements share their names)."""
+    part1_path = tmp_path / "part1.json"
+
+    def setup(klalim, corrections):
+        part1_path.write_text(json.dumps(klalim, ensure_ascii=False), encoding="utf-8")
+        monkeypatch.setattr(ard, "PART1_PATH", str(part1_path))
+        monkeypatch.setattr(ard, "load_current_corrections", lambda: corrections)
+        for name in ("all_current", "applied_decision_ids", "append_decision", "history_for"):
+            real = getattr(rd, name)
+            monkeypatch.setattr(ard.rd, name,
+                                lambda *a, _f=real, **kw: _f(*a, **{**kw, "path": decisions_path}))
+        monkeypatch.setattr(sys, "argv", ["apply_reviewer_decisions.py"])
+
+    def run():
+        ard.main()
+        return {k["klal_id"]: k["clean_text"]
+                for k in json.loads(part1_path.read_text(encoding="utf-8"))}
+
+    setup.run = run
+    return setup
+
+
+def _correction(word_index, opcode, docai, final):
+    return {"word_index": word_index, "opcode": opcode, "docai_reading": docai,
+            "final_text": final, "flag": "ambiguous"}
+
+
+def test_confirming_the_current_text_of_an_insert_candidate_deletes_nothing(apply_harness, decisions_path):
+    """PROJECT-STATUS.md finding ★1: an 'insert'-opcode candidate's
+    final_text IS the span apply_insert_removal would delete, so a reviewer
+    voting "keep this text" fell through to the removal path and silently
+    deleted exactly what they voted to keep."""
+    entry = _correction(1, "insert", None, "בית")
+    apply_harness([{"klal_id": 1, "clean_text": "אלף בית גימל"}], {"1": [entry]})
+    rd.append_decision("candidate_choice", klal_id=1, word_index=1, chosen_source="final_text",
+                       chosen_text="בית", candidate_snapshot=entry, path=decisions_path)
+
+    assert apply_harness.run()[1] == "אלף בית גימל"
+    events = [r for r in rd.history_for(1, 1, "apply_event", path=decisions_path)]
+    assert len(events) == 1 and "no change" in (events[0]["note"] or ""), (
+        "a confirmed-no-op is still a reviewed decision and must be recorded as applied"
+    )
+
+
+def test_only_one_word_count_changing_decision_is_applied_per_klal_per_run(apply_harness, decisions_path):
+    """Every insert/delete shifts every later word_index in the same klal, so
+    a second one in the same run would be applied against indices the first
+    one just invalidated."""
+    first = _correction(1, "delete", "חדש", None)
+    second = _correction(3, "delete", "נוסף", None)
+    apply_harness([{"klal_id": 1, "clean_text": "אלף בית גימל"}], {"1": [first, second]})
+    for entry in (first, second):
+        rd.append_decision("candidate_choice", klal_id=1, word_index=entry["word_index"],
+                           chosen_source="docai_reading", chosen_text=entry["docai_reading"],
+                           candidate_snapshot=entry, path=decisions_path)
+
+    text = apply_harness.run()[1]
+    assert text.split().count("חדש") + text.split().count("נוסף") == 1, (
+        f"exactly one of the two insertions may land in a single run, got {text!r}"
+    )
+
+
+def test_a_decision_already_marked_applied_is_never_applied_twice(apply_harness, decisions_path):
+    entry = _correction(1, "delete", "חדש", None)
+    apply_harness([{"klal_id": 1, "clean_text": "אלף בית גימל"}], {"1": [entry]})
+    decision = rd.append_decision("candidate_choice", klal_id=1, word_index=1,
+                                  chosen_source="docai_reading", chosen_text="חדש",
+                                  candidate_snapshot=entry, path=decisions_path)
+    rd.append_decision("apply_event", klal_id=1, word_index=1,
+                       applied_decision_id=decision["id"], path=decisions_path)
+
+    assert apply_harness.run()[1] == "אלף בית גימל", (
+        "an apply_event on record means this decision is already in the corpus - re-applying it "
+        "is how `יגעתי 1 1 1 ולא` happened (PROJECT-STATUS.md 2026-08-11)"
+    )
+
+
+def test_a_decision_whose_candidate_has_drifted_is_skipped_not_guessed_at(apply_harness, decisions_path):
+    live = _correction(1, "replace", "בות", "בית")
+    stale_snapshot = _correction(1, "replace", "בות", "דלת")  # candidate moved since the decision
+    apply_harness([{"klal_id": 1, "clean_text": "אלף בית גימל"}], {"1": [live]})
+    rd.append_decision("candidate_choice", klal_id=1, word_index=1, chosen_source="docai_reading",
+                       chosen_text="בות", candidate_snapshot=stale_snapshot, path=decisions_path)
+
+    assert apply_harness.run()[1] == "אלף בית גימל"
+    assert rd.history_for(1, 1, "apply_event", path=decisions_path) == [], (
+        "a skipped decision must not be recorded as applied"
+    )
+
+
+def test_a_clean_replace_decision_is_applied_and_recorded(apply_harness, decisions_path):
+    """The positive control for the three refusals above - without it, a
+    mutation that made main() skip EVERYTHING would still pass them all."""
+    entry = _correction(1, "replace", "בות", "בית")
+    apply_harness([{"klal_id": 1, "clean_text": "אלף בית גימל"}], {"1": [entry]})
+    decision = rd.append_decision("candidate_choice", klal_id=1, word_index=1,
+                                  chosen_source="docai_reading", chosen_text="בות",
+                                  candidate_snapshot=entry, path=decisions_path)
+
+    assert apply_harness.run()[1] == "אלף בות גימל"
+    events = rd.history_for(1, 1, "apply_event", path=decisions_path)
+    assert [e["applied_decision_id"] for e in events] == [decision["id"]]
+
+
 # --- review_decisions: the append-only human-decision audit trail ------------
 
 @pytest.fixture

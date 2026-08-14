@@ -48,7 +48,6 @@ import importlib.util
 import json
 import os
 import re
-import sys
 
 import pytest
 
@@ -484,9 +483,7 @@ def test_every_served_flag_has_a_dashboard_label(corrections):
     against every flag classify() CAN emit; this checks the ones actually on
     disk right now, which also covers a flag introduced by hand-editing.
     """
-    sys.path.insert(0, REPO)
-    import review_server  # noqa: PLC0415 - deliberately imported inside the test, see fixture note
-
+    review_server = _import_from_path("review_server", os.path.join(REPO, "review_server.py"))
     served = {c.get("flag") for entries in corrections.values() for c in entries}
     unlabelled = sorted(f for f in served if f not in review_server.FLAG_LABELS)
     assert not unlabelled, (
@@ -590,9 +587,7 @@ def test_review_decisions_log_is_intact_and_internally_consistent(decision_recor
     nothing means the "already applied, never re-apply" guard is pointing at
     a decision that no longer exists.
     """
-    sys.path.insert(0, REPO)
-    import review_decisions  # noqa: PLC0415
-
+    review_decisions = _import_from_path("review_decisions", os.path.join(REPO, "review_decisions.py"))
     records, malformed = [], []
     for lineno, line in decision_records:
         try:
@@ -746,7 +741,7 @@ def test_placeholder_titles_do_not_increase(all_klalim):
     )
 
 
-def test_no_new_span_coverage_flags():
+def test_no_new_span_coverage_flags(part1_by_id):
     """Wraps validate_klal_span_coverage.py's own logic. Requires the
     gitignored docai_word_boxes/ cache and gematria_trace_part1.json -
     both regenerable from the source scan per CLAUDE.md's directory-layout
@@ -764,7 +759,6 @@ def test_no_new_span_coverage_flags():
         os.path.join(REPO, "validate_klal_span_coverage.py"),
     )
     trace = {x["klal_id"]: x for x in json.load(open(trace_path, encoding="utf-8"))}
-    part1 = {k["klal_id"]: k for k in _load_klalim(os.path.join(REPO, "part1.json"))}
 
     # Calls the validator's own build_spans() rather than reimplementing the
     # span math here. The previous version of this test had its own copy of
@@ -773,7 +767,7 @@ def test_no_new_span_coverage_flags():
     # skipped, and both missed klal 30/36/83/88 for the life of the project
     # (audit 2026-08-10/11, PROJECT-STATUS.md). One implementation, one blind
     # spot, fixed in one place.
-    rows, unmeasured = validator.build_spans(trace, part1, {})
+    rows, unmeasured = validator.build_spans(trace, part1_by_id, {})
     flagged = {r["klal_id"] for r in rows if r["ratio"] < validator.FLAG_RATIO_THRESHOLD}
 
     new = sorted(flagged - SPAN_COVERAGE_BASELINE - SPAN_COVERAGE_KNOWN_REAL_GAPS)

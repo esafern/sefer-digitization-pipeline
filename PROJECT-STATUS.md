@@ -64,11 +64,12 @@ current handoff, re-written (not just appended to) as state changes.
 - **Every previously-tracked corpus-content gap is closed** (klal 5, 29,
   30/75/88, 37, 69, 206, 217; the second source-audit round's 12 confirmed
   bugs; the reindexing incident's 3 root causes - all fixed, verified
-  against real data, and committed). `rebuild_all.sh`'s pytest gate
-  (`tests/test_corpus_invariants.py`) is 14/14 passing;
-  `tests/test_review_server.py` (5 more, Playwright, not part of the
-  automated gate) is 5/5. Full evidence for all of the above is in
-  `PROJECT-STATUS-HISTORY.md`.
+  against real data, and committed). `rebuild_all.sh`'s pytest gate is
+  now two files - `tests/test_corpus_invariants.py` (21) +
+  `tests/test_pipeline_logic.py` (53, new 2026-08-14) - 74/74 passing;
+  `tests/test_review_server.py` (11 more, Playwright, deliberately not
+  part of the automated gate) is 11/11. Full evidence for all of the
+  above is in `PROJECT-STATUS-HISTORY.md`.
 - **This session's work (2026-08-13/14), all committed, full detail in
   `PROJECT-STATUS-HISTORY.md`'s two newest entries**:
   1. New reviewer feature: flag/replace/delete ANY word in a klal's text,
@@ -131,7 +132,18 @@ fixed 16 bugs but added only ONE test): systematically build regression
 coverage for main-pipeline logic that had none, and clean up the two
 existing test files. Same scope rules - witness/punctuation excluded.
 
-- **NEW `tests/test_pipeline_logic.py` (37 tests), wired into
+- **`apply_reviewer_decisions.main()`'s per-run safety model covered end to
+  end** (5 tests, against throwaway copies of part1.json/corrections/the
+  decisions log - nothing tracked is touched): a "keep the current text"
+  vote on an INSERT candidate deletes nothing (finding ★1, where it
+  silently deleted exactly what the reviewer voted to keep) and is still
+  recorded as a reviewed no-op; at most one word-count-changing decision
+  lands per klal per run; a decision with an `apply_event` on record is
+  never applied twice (the `יגעתי 1 1 1 ולא` bug); a drifted candidate is
+  skipped AND not recorded as applied; plus a positive control (a clean
+  replace really does land), without which a mutation making `main()`
+  refuse everything would pass all four refusal tests.
+- **NEW `tests/test_pipeline_logic.py` (53 tests), wired into
   `rebuild_all.sh`'s step 6/6 gate alongside the corpus suite.** Pure
   unit tests, hermetic (no network, no API key, no scan cache, no writes
   to any tracked file - temp dirs only, via `review_decisions.py`'s own
@@ -212,7 +224,7 @@ existing test files. Same scope rules - witness/punctuation excluded.
   (assertions unchanged), and the new nav test flags its own klal via the
   API instead of depending on an earlier test having flagged one.
 - **Every new test verified to actually FAIL when its invariant is
-  violated**, not just to pass: 18 source mutations (drift check
+  violated**, not just to pass: 23 source mutations (drift check
   neutered, confidence gate removed, label deleted, re-apply guard
   removed, negative-index bounds check removed, supersession logic
   loosened, JSON-unescape removed, prompt_hash dropped from the cache
@@ -222,7 +234,10 @@ existing test files. Same scope rules - witness/punctuation excluded.
   footnote-marker lookbehind removed, the same-title exemption widened to
   everything, intra-klal duplicate detection disabled, the
   unrankable-title report silenced, the header-word abbreviation guard
-  removed) and 15 data mutations (stale flag, unknown flag, out-of-range
+  removed, the confirmed-no-op branch narrowed back to replace-only,
+  the one-word-count-change-per-run guard removed, the already-applied
+  guard removed, the snapshot drift check removed, main()'s decision loop
+  emptied) and 15 data mutations (stale flag, unknown flag, out-of-range
   index, broken opcode shape, inverted bbox, missing/malformed/mis-paged/
   zero-token region, duplicate id, bad decision_type, dangling
   apply_event, string klal_id, out-of-order records, truncated line) and
@@ -230,7 +245,7 @@ existing test files. Same scope rules - witness/punctuation excluded.
   removed, the post-rebuild `setActiveKlal` restore removed, the
   `applyFlaggedFilter` re-apply removed, `api_klal`'s manual-correction
   drift check disabled, the missing-`chosen_text` rejection removed, a
-  served flag's label deleted) - all 40 produced a red test, and every
+  served flag's label deleted) - all 45 produced a red test, and every
   mutated tracked file was restored and sha256-verified byte-identical
   afterwards. One mutation initially came back green and is recorded
   rather than quietly re-rolled: deleting the brand-new `"unverified"`
