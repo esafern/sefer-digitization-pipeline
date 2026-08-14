@@ -3,9 +3,27 @@
     "klal_id": 1,
     "page": 14,
     "opcode": "replace",
+    "word_index_in_final_text": 85,
+    "original_word": "לכן",
+    "corrected_word": "לכו",
+    "bbox": {
+      "x1": 0.30030959844589233,
+      "y1": 0.36000001430511475,
+      "x2": 0.3269349932670593,
+      "y2": 0.3733333349227905
+    },
+    "vision_selected": "B",
+    "vision_transcription": "לכו",
+    "vision_confidence": 0.98,
+    "vision_reasoning": "The context cites Rashi's commentary ('הואיל ויש משנה בידכם לכו אחריה'), where 'לכו' (go / follow) is grammatically and contextually correct. Paleographically, the character following the kaf ('כ') is a vav ('ו') that terminates at the baseline, rather than extending below it as a final nun ('ן') would."
+  },
+  {
+    "klal_id": 1,
+    "page": 14,
+    "opcode": "replace",
     "word_index_in_final_text": 437,
     "original_word": "ומרקמהד",
-    "corrected_word": "ומדקמהד'",
+    "corrected_word": "ומדקמהדר",
     "bbox": {
       "x1": 0.531269371509552,
       "y1": 0.6755555272102356,
@@ -13,9 +31,9 @@
       "y2": 0.6925252676010132
     },
     "vision_selected": "B",
-    "vision_transcription": "ומדקמהד'",
+    "vision_transcription": "ומדקמהדר",
     "vision_confidence": 0.98,
-    "vision_reasoning": "The crop clearly shows 'ומדקמהד'' (Aramaic abbreviation for ומדקמהדר - 'and from the fact that he responds/inquires'). The third letter is a clear dalet (ד) with a square corner rather than a resh (ר), and the word ends with an abbreviation apostrophe (geresh), perfectly matching Option B."
+    "vision_reasoning": "The crop clearly shows the standard Rabbinic Hebrew word 'ומדקמהדר' (u-mi-de-kamehadar). The letters 'ו-מ-ד-ק-מ-ה-ד-ר' are legible, including the clear 'dalet' (ד) rather than 'resh' after the 'mem', matching Option B and the contextual textual flow 'ומדקמהדר לידע'."
   },
   {
     "klal_id": 3,

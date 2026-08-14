@@ -123,17 +123,33 @@ cases before trusting the 0-drift result on real data (Lesson 2 - a
 "nothing found" result needs the check itself proven to fire, not just
 taken on faith).
 
-**2. One witness adjudication still needs a genuine human call before
-any text edit**, resolvable directly through the manual-correction
-feature (klal 30 word ~48 in the dashboard):
-   - Klal 30 - `ידן`/`ידו` (DocAI/Tesseract) vs what the scan actually
-     shows, `ידך` - *both* engines are wrong here. User has independently
-     stated the correct reading is `ידו`, possibly as part of a longer
-     phrase `את ידו הנפלאה` - whether to insert `את` too is still open.
-     (klal_flag id `5220cb956175`)
-   - Klal 88 - `רתם`/`התם` - the print genuinely shows `ר`; source-text/
-     broken-type anomaly, not an OCR error - editorial awareness only,
-     do NOT silently correct. (id `f15d365a9168`)
+**2. DONE 2026-08-14 - klal 30/88 witness items closed.**
+   - Klal 30, `part1.json` word_index 501 (space-split scheme): `ידן` →
+     `ידו`, applied via the manual-correction feature (`manual_correction`
+     id `177240ab78c5`, applied via `apply_reviewer_decisions.py`, verified
+     in `git diff part1.json`: `...ושם הראנו ידו הנפלאה ובקיאותו...`).
+     **LOWER CONFIDENCE than a normal vision-confirmed correction** - no
+     engine or crop directly confirmed `ידו`: DocAI read `ידן`, Tesseract
+     read `ידו`, and a direct 900 DPI crop read closer to `ידך` than
+     either. This rests on user editorial judgment of what reads naturally
+     in context, not a pixel-level confirmation. Did NOT insert `את` before
+     `ידו` (`את ידו הנפלאה` vs the applied `ידו הנפלאה`) - that phrasing
+     question is still open and deliberately untouched. klal_flag
+     `5220cb956175` closed via `fb26188404a5`.
+   - Klal 88 - `רתם`/`התם`: no text change. The 900 DPI crop unambiguously
+     shows `ר` (high confidence, unlike klal 30) - current text is
+     faithful to the print; a source-text/broken-type anomaly, not an OCR
+     error, so per fidelity criterion #1 it stays uncorrected. Closed as
+     editorial-awareness-only. klal_flag `f15d365a9168` closed via
+     `9ee397027685`.
+   - Applying klal 30's decision surfaced 3 OTHER already-recorded-but-
+     never-applied decisions left over from the 2026-08-13 reindexing
+     recovery (`apply_reviewer_decisions.py` applies everything pending in
+     one pass, no per-decision selection) - klal 1 word 437 (`ומדקמהד'`→
+     `ומדקמהדר`), klal 1 word 85 (`לכן`→`לכו`), klal 3 word 3 (no-op,
+     chosen text already matched). User confirmed applying all of it
+     together. `./rebuild_all.sh` re-run after, 14/14 tests pass, 0 drift
+     flagged by the new drift check (item 1) on the freshly-applied text.
 
 **3. The broader witness queue (tier B/C/D, ~411 items across klal
 30/75/88) is still fully open for human review** and is the only real

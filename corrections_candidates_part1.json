@@ -4,9 +4,23 @@
       "klal_id": 1,
       "page": 14,
       "opcode": "replace",
+      "word_index_in_final_text": 85,
+      "original_word": "לכן",
+      "corrected_word": "לכו",
+      "bbox": {
+        "x1": 0.30030959844589233,
+        "y1": 0.36000001430511475,
+        "x2": 0.3269349932670593,
+        "y2": 0.3733333349227905
+      }
+    },
+    {
+      "klal_id": 1,
+      "page": 14,
+      "opcode": "replace",
       "word_index_in_final_text": 437,
       "original_word": "ומרקמהד",
-      "corrected_word": "ומדקמהד'",
+      "corrected_word": "ומדקמהדר",
       "bbox": {
         "x1": 0.531269371509552,
         "y1": 0.6755555272102356,
@@ -3764,7 +3778,7 @@
     }
   ],
   "meta": {
-    "total_candidates": 283,
+    "total_candidates": 284,
     "klalim_covered": 128,
     "skipped_no_docai_page_klalim": [],
     "unattributable_deletes": [],
