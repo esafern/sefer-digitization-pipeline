@@ -62,6 +62,30 @@ current handoff, re-written (not just appended to) as state changes.
      `כלל`; `validate_title_alphabetical_order.py` silently skipped
      titles with a non-Hebrew first character instead of reporting them
      - klal 353, Part 2, is the one current instance).
+  9. **Full-pipeline revalidation & refactor pass** (user directive:
+     "revalidate and refactor entire process - not just recently changed
+     scripts", witness/punctuation deliberately excluded). Read every
+     `rebuild_all.sh` stage, all 5 validators, the pytest gate, the
+     decision/apply layer and `review_server.py` + `review_frontend/`'s
+     candidate plumbing against their own claims and against real data.
+     **16 findings, all fixed and individually verified** - full detail in
+     `PROJECT-STATUS-HISTORY.md`'s newest entry. The one that matters most:
+     `verify_corrections_vision.py`'s cache key did not cover the PROMPT
+     TEMPLATE, so the 2026-08-12 prompt fix only landed by luck (an
+     unrelated schema change had dropped every row two days earlier) and
+     the same edit today would have been a silent no-op. Closed with a
+     `prompt_hash` key component and a lossless back-filling migration -
+     419 cached answers kept, 0 API calls spent. Also: a JSON-unescape gap
+     in this file's lenient response parser (same class as the witness
+     script's, which PROJECT-STATUS.md had flagged here as un-audited);
+     a corpus-wide whitespace invariant now gating the two coexisting
+     word-index schemes; `check_klal_token_orphans.py`'s
+     `best_match_owner` ignoring its `self_kid` argument; a
+     `HEADER_WORDS` false-furniture hit eating the citation `י"ד` on 43
+     tokens; and several docstrings/comments claiming coverage, constants
+     or file locations that do not exist. Every change verified by a full
+     `./rebuild_all.sh` (with vision) producing byte-identical derived
+     JSON, 15/15 corpus tests, 5/5 Playwright browser tests.
 
 ### `verify_witness_vision.py`'s 419-item pass finished 2026-08-14
 
@@ -240,11 +264,15 @@ investigated and closed 2026-08-14, 2 still open:**
      pre-fix baseline for klal 30/75/88 (all 3 already reconstructed, so a
      true no-op today), with the protection mechanism itself separately
      unit-verified to actually block consuming a known marker position.
-   - **STILL OPEN, not investigated this session**: witness decisions
-     keyed `(klal_id, docai_token_index)` with no page component (risk 2,
-     safe only because `PAGE_TO_KLAL` is currently 1:1);
+   - **STILL OPEN, not investigated**: witness decisions keyed
+     `(klal_id, docai_token_index)` with no page component (risk 2, safe
+     only because `PAGE_TO_KLAL` is currently 1:1);
      `propose_punctuation_part1.py`'s cache key doesn't cover the prompt
-     text or model (risk 3, dormant pipeline, no live effect).
+     text or model (risk 3, dormant pipeline, no live effect). **Risk 3's
+     sibling in the LIVE pipeline was found and closed 2026-08-14** -
+     `verify_corrections_vision.py` had the identical gap and it was not
+     dormant; see item 9 above. Risk 3 itself is unchanged, but it should
+     no longer be read as "the only place this pattern exists."
    - **CODE-REVIEWED 2026-08-14 (Opus 5, high thoroughness, via
      subagent).** Reviewed everything committed this session so far
      (5 commits) - found 10 concrete issues, several of them real bugs
