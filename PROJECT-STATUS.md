@@ -163,19 +163,88 @@ narrower option (surfacing just the 37 items where vision disagreed with
 DocAI or found neither reading correct) - not started, no scope decided
 yet beyond "later."
 
-**4. Unverified risks flagged by the second audit round, not confirmed
-bugs** (full reasoning in `PROJECT-STATUS-HISTORY.md`'s audit entry): an
-`apply_event` is never invalidated when its underlying decision is later
-reverted outside the normal flow; witness decisions are keyed `(klal_id,
-docai_token_index)` with no page component (safe only because
-`PAGE_TO_KLAL` is currently 1:1); `propose_punctuation_part1.py`'s cache
-key doesn't cover the prompt text or model; `PASS3_KNOWN_FALSE_POSITIVES`
-suppresses ALL Pass-3 hits for klal 4/18/34, not just the investigated
-spans; `review_frontend/app.js` fetches `/api/klalim` once at init and
-never refetches, so nav badges/legend go stale after a rebuild elsewhere
-until a manual reload; `strip_head_header`'s folio-numeral heuristic ate
-klal 89's real marker `פט` once (caught by an existing guard, but the
-rule can't reliably tell a folio numeral from a klal marker).
+**4. Unverified risks flagged by the second audit round - 4 of 6
+investigated and closed 2026-08-14, 2 still open:**
+
+   - **DONE - apply_event staleness (risk 1).** Built `audit_applied_decisions.py`
+     (new, standalone, read-only): for every decision the log claims was
+     applied (has an `apply_event`), verifies the live `part1.json` still
+     actually reflects it. The concrete precedent this closes: klal 1 word
+     97's punctuation decision was accepted, applied, then hand-reverted
+     outside the normal apply-script flow (2026-08-10, documented in
+     `review_decisions.jsonl` ids `784b22672ac0`/`4759be432a2c`/
+     `4e6b53d98d36`) - the `apply_event` for the original accept is still
+     on record and nothing ever re-checked whether it's still true.
+     `applied_decision_ids()`'s own docstring says this design choice is
+     deliberate ("identified by id, not inferred from whether the text
+     happens to still look un-applied"), which is sound ONLY as long as
+     nothing bypasses the apply scripts - this audit is the missing check
+     on that assumption. Ran against the current corpus: 17 applied
+     decisions checked, 15 confirmed still correctly reflected, 2
+     word-count-changing ones reported as not position-verifiable post-hoc
+     (stated as a real limitation in the script's own docstring, not
+     silently treated as passing), 0 mismatches. Unit-verified the checker
+     itself catches synthetic reverted-replace/manual/punctuation cases
+     before trusting the 0-mismatch result on real data.
+   - **DONE - PASS3_KNOWN_FALSE_POSITIVES over-suppression (risk 4).**
+     `check_klal_token_orphans.py`'s allowlist was a bare `{4, 18, 34}`
+     klal_id set, suppressing EVERY Pass-3 gap hit for those klalim, not
+     just the one specific span investigated 2026-08-12. Re-ran Pass 3
+     against the current corpus: confirmed each of the 3 klalim still
+     produces exactly the one investigated hit (no second, uninvestigated
+     gap was hiding there right now) - but the mechanism couldn't have
+     told us that before this fix. Changed the allowlist to
+     `{(klal_id, normalized_span_text)}` so only the exact investigated
+     span is suppressed; any different gap in these klalim now surfaces
+     normally. Verified: same script output before/after (no regression),
+     and a synthetic different-span check confirms it's no longer
+     suppressed.
+   - **DONE - stale nav/legend after external changes (risk 5).**
+     `review_frontend/app.js` fetched `/api/klalim`/`/api/flags` once at
+     init and never refetched, so a decision from another tab or a
+     `rebuild_all.sh` run elsewhere (exactly what this session's own
+     drift-check/PASS3 fixes did) left nav badges and legend totals wrong
+     until a manual reload. Added `setupNavRefreshOnReturn()`: refetches
+     both endpoints and rebuilds nav+legend on `visibilitychange` ->
+     `'visible'` (the natural moment a user returns to an already-open
+     tab), not on a poll. Also extracted `applyFlaggedFilter()` so the
+     "flagged only" filter state survives a nav rebuild instead of
+     silently resetting. Verified live in a real browser tab (not just
+     read the code): instrumented `fetch` and confirmed exactly one
+     `/api/flags` + `/api/klalim` refetch fires per simulated
+     visibility-return, `KLALIM` becomes a fresh object, nav/legend
+     re-render, no console errors.
+   - **DONE - strip_head_header folio-numeral/marker ambiguity (risk 6).**
+     The heuristic has no LOCAL way to tell a folio numeral from a real
+     klal marker (both are 1-2 Hebrew letters in the same position) - it
+     already ate klal 89's real marker `פט` once, caught only because ONE
+     of its three call sites happened to have a separate downstream guard
+     (`hstart >= nx["marker_position"]`); the other two had none. Added
+     `build_marker_index()` (ground truth from `gematria_trace_part1.json`)
+     and a `protected` param to `strip_head_header` so it refuses to
+     consume a token position known to be a real marker, applied at the
+     content-inclusion call sites (`page_body` for middle-page splicing,
+     the tail-part-building calls). **Deliberately NOT applied** to the two
+     `first_real_word` calls used for catchword-matching
+     (`end_first_any`/`nxt_word`) - tried first, and it broke a real,
+     verified case: page 40's actual printed catchword is `בעיא` (klal
+     89's SECOND token), because this print's catchword convention
+     reproduces the next page's first WORD OF RUNNING TEXT, skipping past
+     a bare klal-number marker like `פט` rather than catching the marker
+     itself. Protecting the marker in that lookup made it return `פט`
+     instead, which no longer matched the real catchword and left it
+     un-stripped (901 -> 902 words, a regression caught by re-running the
+     script's own dry-run output and diffing against a `git stash`
+     baseline before trusting the fix, not assumed correct from reading
+     the code). Final version's dry-run output is byte-identical to the
+     pre-fix baseline for klal 30/75/88 (all 3 already reconstructed, so a
+     true no-op today), with the protection mechanism itself separately
+     unit-verified to actually block consuming a known marker position.
+   - **STILL OPEN, not investigated this session**: witness decisions
+     keyed `(klal_id, docai_token_index)` with no page component (risk 2,
+     safe only because `PAGE_TO_KLAL` is currently 1:1);
+     `propose_punctuation_part1.py`'s cache key doesn't cover the prompt
+     text or model (risk 3, dormant pipeline, no live effect).
 
 **5. General standing caution**: docstring/comment overclaims turned up
 repeatedly across both audit rounds this session, in different validator

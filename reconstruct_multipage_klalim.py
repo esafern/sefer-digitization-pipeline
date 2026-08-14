@@ -66,10 +66,42 @@ HEADER_VOCAB = {"יד", "יר", "יך", "מלאכי", "כללי",
 HEADER_SCAN_LIMIT = 10
 
 
-def strip_head_header(tokens):
+def build_marker_index(trace):
+    """page -> set of token indices that are a REAL klal marker on that
+    page, per gematria_trace_part1.json. Ground truth strip_head_header
+    can check itself against, instead of guessing harder.
+
+    FIXED 2026-08-14 (PROJECT-STATUS.md audit item 6): strip_head_header's
+    "1-2 Hebrew letters right after the section name is the folio numeral"
+    rule has no local way to distinguish a folio numeral from a real klal
+    marker - both are short Hebrew letter sequences in the same position.
+    It already ate klal 89's real marker `פט` once; that specific instance
+    was only caught because main()'s end-of-klal splice happens to check
+    `hstart >= nx["marker_position"]` afterward (see that guard's comment
+    below) - but strip_head_header has THREE call sites (page_body,
+    first_real_word, and that one), and the other two had no such check at
+    all, so the same misread there would have silently eaten real content
+    with nothing to catch it. Rather than add three separate ad hoc guards,
+    strip_head_header itself now refuses to consume a token position known
+    to be a genuine marker anywhere in the trace, closing all call sites at
+    once instead of only the one that happened to get checked already."""
+    by_page = {}
+    for x in trace.values():
+        pos = x.get("marker_position")
+        if pos is not None:
+            by_page.setdefault(x["page"], set()).add(pos)
+    return by_page
+
+
+def strip_head_header(tokens, protected=None):
     """Drop the running header ('<folio> יד מלאכי כללי <section> <folio>') from
     a page's start, anchored on the book word and then consuming header
-    vocabulary, folio numerals and punctuation until real body text begins."""
+    vocabulary, folio numerals and punctuation until real body text begins.
+
+    `protected`: token indices on THIS page (from build_marker_index) that
+    are a real klal marker and must never be consumed, even if they'd
+    otherwise look like a plausible folio numeral - see build_marker_index's
+    docstring."""
     idx = next((i for i, t in enumerate(tokens[:8]) if BOOK_WORD in t["text"]), None)
     if idx is None:
         return 0, "NO_HEADER_FOUND"
@@ -80,6 +112,8 @@ def strip_head_header(tokens):
     saw_section = False
     took_folio = False
     while i < min(len(tokens), idx + HEADER_SCAN_LIMIT):
+        if protected and i in protected:
+            break
         w = tokens[i]["text"].strip()
         cw = clean_word(w)
         is_vocab = cw in HEADER_VOCAB
@@ -149,17 +183,17 @@ def strip_tail_furniture(tokens, next_first_word):
     return tokens, ";".join(notes) if notes else "clean"
 
 
-def page_body(cache, page, next_first_word):
+def page_body(cache, page, next_first_word, marker_index=None):
     """A page that lies wholly inside one klal: strip header AND tail furniture."""
     toks = get_page(cache, page)
-    start, hnote = strip_head_header(toks)
+    start, hnote = strip_head_header(toks, protected=(marker_index or {}).get(page))
     body, tnote = strip_tail_furniture(toks[start:], next_first_word)
     return body, f"head[{hnote}] tail[{tnote}]"
 
 
-def first_real_word(cache, page, upto=None):
+def first_real_word(cache, page, upto=None, marker_index=None):
     toks = get_page(cache, page)
-    start, _ = strip_head_header(toks)
+    start, _ = strip_head_header(toks, protected=(marker_index or {}).get(page))
     seq = toks[start:upto] if upto is not None else toks[start:]
     for t in seq:
         if clean_word(t["text"]):
@@ -177,6 +211,7 @@ def main():
     part1 = json.load(open(PART1_PATH, encoding="utf-8"))
     by_id = {k["klal_id"]: k for k in part1}
     marker_ids = sorted(k for k in trace if trace[k].get("marker_position") is not None)
+    marker_index = build_marker_index(trace)
     cache = {}
     report = []
 
@@ -195,17 +230,36 @@ def main():
         #    even when the end page contributes nothing to THIS klal (klal 88:
         #    klal 89's marker sits at token 5, so the end page adds no words,
         #    but page 40's catchword `בעיא` is still furniture and must go).
+        #    Deliberately UNPROTECTED (no marker_index): this is a catchword-
+        #    matching lookup, not a content-inclusion boundary, and the two
+        #    have opposite needs here. Confirmed 2026-08-14 while fixing
+        #    audit item 6 (build_marker_index's docstring): page 40's real
+        #    printed catchword is `בעיא`, klal 89's SECOND token - the
+        #    printer's convention in this volume reproduces the next page's
+        #    first WORD OF RUNNING TEXT, skipping past a bare klal-number
+        #    marker like `פט` rather than catching the marker itself.
+        #    Passing marker_index here (tried first) made first_real_word
+        #    correctly return the now-protected `פט`, which then failed to
+        #    match the real catchword `בעיא` and left it un-stripped in
+        #    klal 88's reconstructed tail (901 -> 902 words, a regression
+        #    caught by re-running this script's own dry-run output before
+        #    trusting the fix). Protection still applies to end_first_owned
+        #    right below (upto=marker_position already caps it there, so
+        #    it's a content-boundary question, not a catchword one) and to
+        #    page_body() for actual middle-page splicing.
         #  - end_first_owned: the first word this klal actually takes from the
         #    end page, used to locate a seam in already-stored text.
         end_first_any = first_real_word(cache, end_page)
-        end_first_owned = first_real_word(cache, end_page, upto=nx["marker_position"])
+        end_first_owned = first_real_word(cache, end_page, upto=nx["marker_position"], marker_index=marker_index)
 
         # Build the middle: every wholly-interior page, in order. Each one's
-        # catchword points at the NEXT page in the chain.
+        # catchword points at the NEXT page in the chain. nxt_word is a
+        # catchword-matching lookup like end_first_any above - deliberately
+        # unprotected for the same reason.
         middle, notes = [], []
         for i, mp in enumerate(mids):
             nxt_word = first_real_word(cache, mids[i + 1]) if i + 1 < len(mids) else end_first_any
-            body, note = page_body(cache, mp, nxt_word)
+            body, note = page_body(cache, mp, nxt_word, marker_index=marker_index)
             middle.extend(t["text"] for t in body)
             notes.append(f"page {mp}: +{len(body)} tok  {note}")
 
@@ -238,7 +292,7 @@ def main():
         seam = len(stored)
         if end_first_owned:
             etoks = get_page(cache, end_page)
-            ehstart, _ = strip_head_header(etoks)
+            ehstart, _ = strip_head_header(etoks, protected=marker_index.get(end_page))
             live = " ".join(t["text"] for t in etoks[ehstart:nx["marker_position"]])
             for i in range(len(stored) - 1, 0, -1):
                 if clean_word(stored[i]) == clean_word(end_first_owned):
@@ -260,7 +314,7 @@ def main():
         # If the stored text had no final-page part (klal 30/88), add it now.
         if seam == len(stored):
             toks = get_page(cache, end_page)
-            hstart, _ = strip_head_header(toks)
+            hstart, _ = strip_head_header(toks, protected=marker_index.get(end_page))
             tail_part = [t["text"] for t in toks[hstart:nx["marker_position"]]]
             if hstart >= nx["marker_position"]:
                 tail_part = []  # next klal's marker is inside the header: this klal takes nothing here

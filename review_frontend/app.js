@@ -61,9 +61,43 @@ async function init() {
   setupFilter();
   setupZoomPan();
   setupPanels();
+  setupNavRefreshOnReturn();
 
   lastActiveKlalId = KLALIM[0].klal_id;
   setActiveKlal(lastActiveKlalId);
+}
+
+// FIXED 2026-08-14 (PROJECT-STATUS.md audit item 5): KLALIM/klalById were
+// fetched once at init and only ever patched in-memory by THIS tab's own
+// saves (see saveCandidateDecision's open_count/decided_count arithmetic
+// above) - a decision recorded from another browser tab, or a
+// rebuild_all.sh run that reclassified flags corpus-wide (exactly what
+// this session's own drift-check/PASS3-allowlist fixes did), left this
+// tab's nav badges and legend totals silently wrong until a manual reload,
+// with nothing to prompt the reload. The per-klal text/scan panes already
+// self-heal on next save (the "stale client cache after a live rebuild"
+// fix, 2026-08-09) - only the corpus-wide nav/legend aggregate lacked an
+// equivalent. Refetch on visibility-return rather than polling: it's the
+// natural moment a user who tabbed away (to run a rebuild, to look at
+// something else) comes back, costs nothing while the tab is actually
+// idle in the background, and needs no server changes.
+function setupNavRefreshOnReturn() {
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') refreshKlalimList();
+  });
+}
+
+async function refreshKlalimList() {
+  const [flags, klalim] = await Promise.all([
+    fetch('/api/flags').then(r => r.json()),
+    fetch('/api/klalim').then(r => r.json()),
+  ]);
+  FLAGS = flags;
+  KLALIM = klalim;
+  klalById = Object.fromEntries(klalim.map(k => [k.klal_id, k]));
+  buildLegend();
+  buildNav();
+  applyFlaggedFilter(); // buildNav() rebuilds nav-items from scratch, unfiltered - reapply
 }
 
 function buildLegend() {
@@ -111,14 +145,16 @@ function buildNav() {
   });
 }
 
-function setupFilter() {
-  document.getElementById('filter-flagged').addEventListener('change', (e) => {
-    const only = e.target.checked;
-    document.querySelectorAll('.nav-item').forEach(el => {
-      const kid = parseInt(el.dataset.klalId);
-      el.style.display = (!only || klalById[kid].needs_revisit) ? '' : 'none';
-    });
+function applyFlaggedFilter() {
+  const only = document.getElementById('filter-flagged').checked;
+  document.querySelectorAll('.nav-item').forEach(el => {
+    const kid = parseInt(el.dataset.klalId);
+    el.style.display = (!only || klalById[kid].needs_revisit) ? '' : 'none';
   });
+}
+
+function setupFilter() {
+  document.getElementById('filter-flagged').addEventListener('change', applyFlaggedFilter);
 }
 
 function refreshNavItem(klalId) {

@@ -71,8 +71,7 @@ GAP_MIN_WORDS = 8  # min length of an unmatched real-token run to report as a li
 # Real, confirmed genuine gaps found via this same pass (klal 69, 206, 217)
 # were fixed directly in part1.json rather than allowlisted here - see
 # PROJECT-STATUS.md "Full-span gap scan" fixes, 2026-08-12.
-PASS3_KNOWN_FALSE_POSITIVES = {4, 18, 34}
-
+#
 # Page furniture that appears in raw docai tokens but never in clean_text:
 # the printed folio number + running header ("<num> יד/יר/יך מלאכי כללי X"),
 # the Google Books scan watermark, and printer's catchwords/signature digits
@@ -87,6 +86,34 @@ SECTION_WORDS = {"האלף", "הבית", "הגימל", "הדלת", "ההא"}
 
 def normalize(text):
     return re.sub(r"[^א-ת]", "", text)
+
+
+# FIXED 2026-08-14 (PROJECT-STATUS.md audit item 4): this used to be a bare
+# {4, 18, 34} klal_id set, which suppresses EVERY Pass-3 hit for those
+# klal_ids, not just the one specific span actually investigated above (see
+# the investigation notes that used to sit here, now in git history/
+# PROJECT-STATUS-HISTORY.md). A genuinely new, different gap appearing
+# later in klal 4/18/34 (a future docai/part1.json edit, a trace-data fix)
+# would be silently swallowed without ever surfacing, since nothing checked
+# it was the SAME gap that was cleared. Re-ran Pass 3 against the current
+# corpus (2026-08-14): confirmed each of the 3 klalim still produces
+# exactly one hit, matching the spans below - no second, uninvestigated gap
+# is being hidden right now. But the mechanism itself couldn't have told us
+# that; now it can. Keyed on (klal_id, normalized span text) instead of
+# klal_id alone, so only the exact investigated span is suppressed -
+# anything else in these klalim surfaces as a normal, real hit.
+#   klal 4  - klal 3's own trailing content, out of Y-reading-order in
+#     docai's raw array right after klal 4's marker token.
+#   klal 18 - klal 17's own tail (a citation-collision "יח" mid-sentence,
+#     not a real marker skip).
+#   klal 34 - docai's raw OCR is itself heavily garbled at this klal's
+#     opening; the stored text is the already crop-verified correct
+#     reading, which naturally diverges from Pass 3's raw-token comparison.
+PASS3_KNOWN_FALSE_POSITIVES = {
+    (4, normalize("ואפ\"ה חשיב ליה שם בזבחים למד מלמד והניח הדבר בתימה וגדולה היא אלי וצ\"ע :")),
+    (18, normalize("בסתם ולא שת לבו שהם דחויים מעיקרא :")),
+    (34, normalize("אין מישורון גזירה אמות מעצמו אלאס איל קבלה מרבוא האמלדון למכתברר שלא מבסין")),
+}
 
 
 def strip_furniture(words):
@@ -307,8 +334,10 @@ def main():
         sm = difflib.SequenceMatcher(None, rw, sw, autojunk=False)
         for tag, i1, i2, _j1, _j2 in sm.get_opcodes():
             if tag in ("delete", "replace") and (i2 - i1) >= GAP_MIN_WORDS:
-                (known_fp_hits if kid in PASS3_KNOWN_FALSE_POSITIVES else gap_hits).append(
-                    (kid, real_tokens[i1:i2]))
+                missing = real_tokens[i1:i2]
+                signature = (kid, normalize("".join(missing)))
+                (known_fp_hits if signature in PASS3_KNOWN_FALSE_POSITIVES else gap_hits).append(
+                    (kid, missing))
     if gap_hits:
         for kid, missing in gap_hits:
             preview = " ".join(missing[:GAP_MIN_WORDS * 3])
