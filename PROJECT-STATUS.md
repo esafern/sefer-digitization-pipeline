@@ -125,7 +125,16 @@ current handoff, re-written (not just appended to) as state changes.
      `./rebuild_all.sh` (with vision) producing byte-identical derived
      JSON, 15/15 corpus tests, 5/5 Playwright browser tests.
 
-### IN PROGRESS - test-coverage expansion + test-suite refactor (worktree `agent-a8a04e346269f3067`), 2026-08-14
+### DONE, AWAITING MERGE - test-coverage expansion + test-suite refactor (worktree `agent-a8a04e346269f3067`, 5 commits), 2026-08-14
+
+**Merge note**: `review_server.py` changed (one new `FLAG_LABELS` entry), so
+the live dashboard needs a restart after merging - Python constants there do
+not hot-reload the way the data files do. No corpus, derived-data, cache or
+decision-log file was touched: `git diff` against the worktree base shows
+only `CLAUDE.md`, `PROJECT-STATUS.md`, `check_klal_token_orphans.py`,
+`rebuild_all.sh`, `review_server.py` and the three test files. A full
+`./rebuild_all.sh --skip-vision` was run with the new two-file gate: 74/74
+pass and all five derived JSON files are sha256-identical to before.
 
 Separate, complementary follow-up to the revalidation pass above (which
 fixed 16 bugs but added only ONE test): systematically build regression
