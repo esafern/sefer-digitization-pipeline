@@ -87,17 +87,55 @@ function setupNavRefreshOnReturn() {
   });
 }
 
+// Dedupes concurrent callers (a visibility-triggered refresh landing at
+// the same moment as a save's own refreshKlalimList() call) onto a single
+// in-flight fetch, added 2026-08-14 (code review, session audit item 5,
+// minor hardening alongside finding 7): without this, two callers each
+// fire their own full /api/flags + /api/klalim + /api/witness round trip
+// for no benefit - not a correctness bug (whichever resolves last still
+// wins with fresh truth, same as before), just wasted requests.
+let klalimRefreshInFlight = null;
+
 async function refreshKlalimList() {
-  const [flags, klalim] = await Promise.all([
-    fetch('/api/flags').then(r => r.json()),
-    fetch('/api/klalim').then(r => r.json()),
-  ]);
-  FLAGS = flags;
-  KLALIM = klalim;
-  klalById = Object.fromEntries(klalim.map(k => [k.klal_id, k]));
-  buildLegend();
-  buildNav();
-  applyFlaggedFilter(); // buildNav() rebuilds nav-items from scratch, unfiltered - reapply
+  if (klalimRefreshInFlight) return klalimRefreshInFlight;
+  klalimRefreshInFlight = (async () => {
+    try {
+      // Also refetches /api/witness (added 2026-08-14, code review minor
+      // finding): init() fetches it but the original visibility-refresh
+      // fix didn't, leaving WITNESS_PAGES stale by the same mechanism the
+      // fix was closing for everything else.
+      const [flags, klalim, witness] = await Promise.all([
+        fetch('/api/flags').then(r => r.json()),
+        fetch('/api/klalim').then(r => r.json()),
+        fetch('/api/witness').then(r => r.json()),
+      ]);
+      FLAGS = flags;
+      KLALIM = klalim;
+      klalById = Object.fromEntries(klalim.map(k => [k.klal_id, k]));
+      WITNESS_PAGES = witness.pages || [];
+      buildLegend();
+      buildNav();
+      applyFlaggedFilter(); // buildNav() rebuilds nav-items from scratch, unfiltered - reapply
+      // FIXED 2026-08-14 (code review, session audit item 5, finding 8):
+      // buildNav()'s full innerHTML rebuild also wipes the '.active' class
+      // setActiveKlal put on the current nav row - a reviewer scrolled deep
+      // into the corpus who tabs away and back lost their highlighted
+      // position with no visible indication of where they were.
+      // scrollIntoView inside setActiveKlal is a no-op when the row is
+      // already visible, so this doesn't cause an unwanted scroll jump on
+      // an ordinary refresh.
+      if (lastActiveKlalId != null) setActiveKlal(lastActiveKlalId);
+    } catch (e) {
+      // Added 2026-08-14 (code review minor finding): an unhandled
+      // rejection here (e.g. the server restarting mid-request, as this
+      // session's own review_server.py restart did) previously surfaced
+      // only as a silent console error with no indication of what failed.
+      console.error('refreshKlalimList failed (nav/legend may be stale until the next refresh):', e);
+    } finally {
+      klalimRefreshInFlight = null;
+    }
+  })();
+  return klalimRefreshInFlight;
 }
 
 function buildLegend() {
@@ -155,13 +193,6 @@ function applyFlaggedFilter() {
 
 function setupFilter() {
   document.getElementById('filter-flagged').addEventListener('change', applyFlaggedFilter);
-}
-
-function refreshNavItem(klalId) {
-  const k = klalById[klalId];
-  const item = document.getElementById('nav-' + klalId);
-  if (!k || !item) return;
-  item.innerHTML = navItemInnerHtml(k);
 }
 
 // ---------- middle pane: placeholders + lazy mount ----------
@@ -560,8 +591,6 @@ async function saveCandidateDecision(klalId, corr) {
   // which otherwise leaves the text pane showing stale flag colors
   // indefinitely - see PROJECT-STATUS.md "stale client cache after a
   // live rebuild", 2026-08-09).
-  const stale = mountedKlal[klalId];
-  const wasAlreadyDecided = !!(stale && stale.corrections.find(c => c.word_index === corr.word_index)?.current_decision);
   delete mountedKlal[klalId];
   delete fetchInFlight[klalId];
   const k = await fetchKlal(klalId);
@@ -574,19 +603,21 @@ async function saveCandidateDecision(klalId, corr) {
   if (currentPage != null) await showPage(currentPage, klalId);
 
   // Keep the nav-pane's open/decided badge counts and the legend's
-  // corpus-wide tri-state totals live too, instead of waiting for a reload.
-  if (!wasAlreadyDecided && klalById[klalId]) {
-    const kb = klalById[klalId];
-    kb.open_count = Math.max(0, (kb.open_count || 0) - 1);
-    kb.decided_count = (kb.decided_count || 0) + 1;
-    if (corr.flag === 'current_text_confirmed') {
-      kb.machine_resolved_count = Math.max(0, (kb.machine_resolved_count || 0) - 1);
-    } else {
-      kb.machine_disputed_count = Math.max(0, (kb.machine_disputed_count || 0) - 1);
-    }
-    refreshNavItem(klalId);
-    buildLegend();
-  }
+  // corpus-wide tri-state totals live too, instead of waiting for a
+  // reload. FIXED 2026-08-14 (code review, session audit item 5): this
+  // used to patch klalById[klalId]'s counts in place with +1/-1
+  // arithmetic. That races against setupNavRefreshOnReturn's own
+  // visibility-triggered refreshKlalimList(): if that refetch resolves
+  // in the window after this save's POST lands server-side but before
+  // this arithmetic ran, the arithmetic then applied its delta ON TOP OF
+  // already-current counts, double-counting the change. Calling
+  // refreshKlalimList() here instead - the same function the visibility
+  // refresh uses - means there is only ONE way klalById's counts are
+  // ever written: a full re-fetch of server truth. Two fresh re-fetches
+  // can still race with each other, but whichever resolves last simply
+  // overwrites with its own correct snapshot - nothing ever compounds a
+  // delta onto a value it doesn't know is already stale.
+  await refreshKlalimList();
 
   const status = document.getElementById('save-status');
   status.classList.add('show');
@@ -647,8 +678,14 @@ async function openKlalFlagPanel(klalId) {
       body: JSON.stringify({ klal_id: klalId, needs_revisit: needsRevisit, note }),
     });
     if (!res.ok) { alert('Save failed: ' + (await res.text())); return; }
-    klalById[klalId].needs_revisit = needsRevisit;
-    refreshNavItem(klalId);
+    // FIXED 2026-08-14 (code review, session audit item 5): direct
+    // assignment here raced against setupNavRefreshOnReturn's
+    // refreshKlalimList() the same way the count arithmetic elsewhere
+    // did - a refetch in flight before this POST landed could resolve
+    // afterward and overwrite this assignment with the stale value.
+    // refreshKlalimList() re-fetches server truth (which already
+    // reflects this save, since it POSTed first) instead.
+    await refreshKlalimList();
     const block = document.getElementById('klal-block-' + klalId);
     const btn = block && block.querySelector('.klal-flag-btn');
     if (btn) { btn.classList.toggle('active', needsRevisit); btn.textContent = needsRevisit ? '⚑ flagged' : '⚑ flag'; }
@@ -679,7 +716,7 @@ async function openKlalFlagPanel(klalId) {
 // two-step decide-then-apply-reviewer-decisions.py separation as every
 // other decision type; see apply_manual_correction() there for how it
 // reaches part1.json. ----------
-async function saveManualDecision(klalId, wordIndex, word, chosenText, note, wasAlreadyDecided) {
+async function saveManualDecision(klalId, wordIndex, word, chosenText, note) {
   const res = await fetch('/api/decisions/manual', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -694,23 +731,17 @@ async function saveManualDecision(klalId, wordIndex, word, chosenText, note, was
   if (block) renderKlalBody(block, freshK);
   if (currentPage != null) await showPage(currentPage, scanFocusKlalId);
 
-  // A manual correction (replace OR delete) is born already-decided - it
-  // never passed through an "open" phase to move out of, unlike a machine
-  // candidate or witness item, so this is purely additive on first save
-  // (+1 total, +1 decided, open/machine_* untouched); editing/deleting an
-  // already-decided one changes no counts. Mirrors api_klalim()'s
-  // server-side accounting exactly so client and server never disagree
-  // (finding-6 pattern). Note: this counts REVIEW decisions, not corpus
-  // word count - a deletion not yet applied to part1.json hasn't changed
-  // the klal's actual word count yet, only that this word now has a
-  // decision recorded against it.
-  if (!wasAlreadyDecided && klalById[klalId]) {
-    const kb = klalById[klalId];
-    kb.correction_count = (kb.correction_count || 0) + 1;
-    kb.decided_count = (kb.decided_count || 0) + 1;
-    refreshNavItem(klalId);
-    buildLegend();
-  }
+  // FIXED 2026-08-14 (code review, session audit item 5): this used to
+  // patch klalById[klalId]'s correction_count/decided_count in place,
+  // guarded by a wasAlreadyDecided flag the caller passed in - the same
+  // race as saveCandidateDecision above (a concurrent visibility-
+  // triggered refreshKlalimList() could resolve between this POST and
+  // the arithmetic, causing a double-count). Delegating to
+  // refreshKlalimList() removes the need for the guard entirely: editing
+  // an already-decided word or deciding a fresh one both just re-fetch
+  // the server's own count, which is correct either way - the
+  // wasAlreadyDecided parameter is gone accordingly, see call sites.
+  await refreshKlalimList();
   // Return the fresh synthetic 'manual' entry so the caller can re-render
   // the panel itself against the just-saved state (not just the text
   // pane) - without this, a successful delete left the "Click again to
@@ -777,7 +808,7 @@ async function openManualCorrectionPanel(klalId, wordIndex, word, existing) {
     const text = document.getElementById('manual-correction-text').value.trim();
     if (!text) { alert('Enter the corrected reading first (or use Delete this word instead).'); return; }
     const note = document.getElementById('manual-correction-note').value.trim();
-    const freshCorr = await saveManualDecision(klalId, wordIndex, word, text, note, !!existing);
+    const freshCorr = await saveManualDecision(klalId, wordIndex, word, text, note);
     if (freshCorr) openManualCorrectionPanel(klalId, wordIndex, word, freshCorr);
   };
 
@@ -803,7 +834,7 @@ async function openManualCorrectionPanel(klalId, wordIndex, word, existing) {
     }
     deleteArmed = false;
     const note = document.getElementById('manual-correction-note').value.trim();
-    const freshCorr = await saveManualDecision(klalId, wordIndex, word, '', note, !!existing);
+    const freshCorr = await saveManualDecision(klalId, wordIndex, word, '', note);
     if (freshCorr) openManualCorrectionPanel(klalId, wordIndex, word, freshCorr);
   };
 
@@ -893,18 +924,16 @@ async function openPunctuationPanel(klalId, p) {
     });
     if (!res.ok) { alert('Save failed: ' + (await res.text())); return; }
 
-    const wasAlreadyDecided = !!decision;
     delete mountedKlal[klalId];
     delete fetchInFlight[klalId];
     const freshK = await fetchKlal(klalId);
     const block = document.getElementById('klal-block-' + klalId);
     if (block) renderKlalBody(block, freshK);
 
-    if (!wasAlreadyDecided && klalById[klalId]) {
-      klalById[klalId].punctuation_open_count = Math.max(0, (klalById[klalId].punctuation_open_count || 0) - 1);
-      klalById[klalId].punctuation_decided_count = (klalById[klalId].punctuation_decided_count || 0) + 1;
-      refreshNavItem(klalId);
-    }
+    // FIXED 2026-08-14 (code review, session audit item 5): same race as
+    // saveCandidateDecision's badge arithmetic above - refreshKlalimList()
+    // replaces the in-place +1/-1 patch.
+    await refreshKlalimList();
 
     const status = document.getElementById('punct-save-status');
     status.classList.add('show');
@@ -1049,19 +1078,11 @@ async function saveWitnessDecision(w) {
   // server-side tri-state counters (api_klalim), but this save path never
   // updated the client's cached copy of them, so the nav badge and legend
   // stayed stale until a full reload (2026-08-12, PROJECT-STATUS.md
-  // finding 6). Witness items have no machine-resolved state (see
-  // api_klalim's own comment: nothing auto-resolves a witness item) - a
-  // decision always moves open/machine-disputed -> decided, never touches
-  // machine_resolved_count.
-  const wasAlreadyDecided = !!w.current_decision;
-  if (!wasAlreadyDecided && klalById[w.klal_id]) {
-    const kb = klalById[w.klal_id];
-    kb.open_count = Math.max(0, (kb.open_count || 0) - 1);
-    kb.decided_count = (kb.decided_count || 0) + 1;
-    kb.machine_disputed_count = Math.max(0, (kb.machine_disputed_count || 0) - 1);
-    refreshNavItem(w.klal_id);
-    buildLegend();
-  }
+  // finding 6). FIXED 2026-08-14 (code review, session audit item 5):
+  // that fix itself used the same in-place +1/-1 arithmetic pattern that
+  // races against setupNavRefreshOnReturn's refreshKlalimList() elsewhere
+  // in this file - replaced with the same refreshKlalimList() call.
+  await refreshKlalimList();
 
   const status = document.getElementById('witness-save-status');
   status.classList.add('show');

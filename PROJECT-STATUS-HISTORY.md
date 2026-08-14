@@ -17,6 +17,190 @@ current file references, or when grepping for how a past finding was
 resolved. Same append-at-top convention as before: newest entries go right
 after this header, not at the bottom.
 
+## Full-session code review (Opus 5, high thoroughness) — 10 findings, all fixed — 2026-08-14
+
+User requested a full correctness review, via subagent, of everything
+committed this session (5 commits, diff range `5f77247..HEAD`: the
+witness-vision-pass completion, the drift check, the klal 30/88 closure,
+and the audit-item 1/4/5/6 investigation). Launched an Opus 5 subagent
+with a per-file, specific-failure-scenario prompt (not a generic "review
+the diff" ask) covering all 6 changed/new files. It found 10 concrete
+issues, several of them real bugs in code written earlier the same
+session - independently re-verified everything it flagged before fixing
+(unit tests, live browser tests, dry-run diffs against baselines) rather
+than trusting the report at face value. All 10 fixed; user chose "fix
+everything now" over a narrower scope.
+
+**1. `verify_witness_vision.py` - `parse_decision_lenient` didn't
+JSON-unescape its regex captures; 3 already-committed queue entries were
+corrupted.** The lenient parser (added earlier this session to recover
+Gemini responses with unescaped gershayim) returned captured regex
+groups verbatim. A single response can mix BOTH escaping states - some
+gershayim left raw (`"`, the reason lenient parsing is needed at all)
+and others correctly escaped by the model (`\"`) in the same response.
+Returning groups verbatim meant a correctly-escaped `\"` (backslash +
+quote, two literal characters) was never converted back to a single `"`.
+Confirmed in the already-committed `reconstruction_witness_queue.json`:
+klal 30 tok 750/835 and klal 75 tok 555's `vision_reasoning` fields had
+literal `ז\"ל`/`הרא\"ש` instead of `ז"ל`/`הרא"ש`. Fixed with
+`unescape_json_fragment()` (standard JSON escape-sequence table applied
+via regex to each captured group - a raw `"` has no backslash to match
+so it's untouched and stays correct; a `\"` becomes `"`) and re-repaired
+the 3 corrupted entries by re-parsing their already-cached raw Gemini
+responses with the fixed parser (zero new API calls). Verified: 0 items
+with a literal backslash remain anywhere in the queue.
+
+**2. Same file - two related parser gaps, both silent.** A quoted
+`"confidence": "0.95"` (vs. bare `0.95`) matched no field in the
+original regex and silently produced `confidence: null` instead of
+erroring - now accepts an optional surrounding quote.
+`"transcription_found": null` (a legitimate model answer for a
+genuinely illegible crop) previously failed the required-quoted-string
+regex and made the WHOLE decision raise, discarding an otherwise-usable
+`selected_option`/`confidence`/`reasoning` - now accepted as a third
+valid shape alongside a quoted string. Also removed a false docstring
+claim (a `vision_tier` field that nothing ever wrote - confirmed via
+grep against the completed 419/419 run).
+
+**3. `assemble_corrections_dataset.py` - `"stale_candidate"` flag (added
+earlier this session's drift check) had no dashboard label.**
+`review_server.py`'s `FLAG_LABELS` dict had no entry for it, so
+`review_frontend/app.js`'s `FLAGS[corr.flag] || ['Flagged']` fallback
+rendered it identically to the generic "unrecognized flag" case -
+exactly when a reviewer most needs to know NOT to trust a candidate's
+position. 0 candidates are currently drifted, so this had never
+rendered before being caught in review. Added `"stale_candidate": ["Stale
+- re-verify against scan", "#e53e3e"]`. Required a `review_server.py`
+restart to take effect (server-side Python constants don't hot-reload
+the way data files do) - confirmed live via `/api/flags` after restart,
+19/19 tests still pass post-restart.
+
+**4. `reconstruct_multipage_klalim.py` - the marker-protection fix
+itself (this session's audit item 6) had a real latent gap on the
+UNPROTECTED side.** The fix deliberately left two `first_real_word()`
+catchword-matching lookups unprotected (protecting them broke a real
+catchword match, discovered and fixed earlier this session). Code review
+found: on pages where the header ALREADY has its own genuine folio
+numeral before the real klal marker (`took_folio` already satisfied),
+the folio-numeral heuristic does NOT also eat the marker - so even
+UNPROTECTED, `first_real_word()` returned the bare marker itself for
+catchword-matching purposes on 4 of 9 marker-in-header-window pages (34,
+46, 50, 65), not just the 5 where the heuristic accidentally got it
+right (21, 39, 41, 45, 59). Confirmed concretely on page 34: the real
+printed catchword on page 33 is `אין`; unprotected lookup returned klal
+65's marker `סה` instead. This is a duplicate-word-splice risk of
+exactly the `לאוקומי לאוקומי` shape (Lesson 17). Fixed with a THIRD,
+deliberate behavior - `first_real_word(..., skip_marker=marker_index)`:
+run `strip_head_header` unprotected (preserving the folio heuristic's
+normal behavior, which is right on 5/9 pages) and then explicitly step
+past a landed-on token that's independently known to be a real marker,
+making catchword-matching correct BY DESIGN on all 9 pages rather than
+accidentally correct on 5 and silently wrong on 4. Verified: unit-tested
+`first_real_word` with `skip_marker` directly against all 9 pages (all
+5 previously-correct pages still correct, all 4 previously-wrong pages
+now correct, cross-checked 3 of the 4 against their preceding page's
+actual printed catchword token); the script's dry-run output for the
+currently-processed klal 30/75/88 remains byte-identical to the
+pre-session baseline (none of their pages are among the 9 affected, so
+this was a pure latent-bug fix with zero behavior change today). Also
+noted, not fixed (out of scope, pre-existing, unrelated to this fix):
+page 49's real catchword `דיעכר` and page 50's real first word `דיעבד`
+have a `difflib` ratio of exactly 0.6, one hair under
+`strip_tail_furniture`'s `> 0.6` threshold - a separate, latent
+OCR-variance issue on a klal boundary this script doesn't currently
+process.
+
+**5. `review_frontend/app.js` - the visibility-refresh fix (this
+session's audit item 5) introduced a real race of its own.** All 4 save
+functions (candidate, manual, punctuation, witness) patched
+`klalById[klalId]`'s badge counts with +1/-1 arithmetic AFTER their own
+POST landed and other awaits resolved - if `setupNavRefreshOnReturn`'s
+`refreshKlalimList()` resolved in that window (server counts already
+reflecting the new decision), the arithmetic then applied its delta ON
+TOP of already-current counts, double-counting. The `klal_flag` save
+had the same exposure via a direct (non-arithmetic) field assignment.
+Fixed categorically rather than patching each site: replaced every
+`klalById` mutation in all 5 save paths with a call to the SAME
+`refreshKlalimList()` the visibility-refresh already uses. This
+eliminates the race by construction - there is now exactly ONE way
+`klalById`'s counts are ever written (a full re-fetch of server truth),
+and whichever of two concurrent re-fetches resolves last simply
+overwrites with its own correct snapshot; nothing ever compounds a delta
+onto a value it doesn't know is stale. Also fixed, found during the same
+pass: `buildNav()`'s full `innerHTML` rebuild (now happening on every
+save too, not just visibility-return) wipes the `.active` nav-row
+highlight with nothing restoring it - added a `setActiveKlal
+(lastActiveKlalId)` call after every `refreshKlalimList()`
+(`scrollIntoView` inside it is a no-op when already visible, so no
+unwanted scroll jump). Removed `refreshNavItem()` and the
+`wasAlreadyDecided` plumbing through `saveManualDecision()`'s signature
+and both call sites - both dead once nothing does incremental arithmetic
+anymore. Also hardened `refreshKlalimList()` itself: dedupes concurrent
+callers onto one in-flight fetch (a visibility-return landing at the
+same moment as a save's own call previously fired two full round trips
+for no benefit), wrapped in try/catch so a failed fetch (server restart
+mid-request) logs instead of an unhandled rejection, and now also
+refetches `/api/witness` (previously only `init()` did, leaving
+`WITNESS_PAGES` stale by the same mechanism the fix was closing
+everywhere else). Verified live in a real browser tab, not just read:
+instrumented `fetch` and confirmed a real click-through klal-flag
+save correctly updates `klalById` and the nav badge and survives a nav
+rebuild with the highlight intact; confirmed two concurrent
+`refreshKlalimList()` calls produce exactly one round of `/api/flags`
++`/api/klalim`+`/api/witness` requests (not two); confirmed a simulated
+`fetch` failure is caught, logged, and clears the in-flight guard for a
+later retry, with no unhandled rejection. 19/19 tests still pass.
+
+**6. `audit_applied_decisions.py` (new this session) - the script
+skipped the exact precedent case its own docstring names as the
+motivation, and still reported "0 mismatches."** The original version
+iterated `all_current(decision_type)` (latest decision per key) and only
+checked a decision if it was BOTH the latest at its key AND itself
+applied. klal 1 word 97's accept (`784b22672ac0`) was applied, then
+superseded-at-key by a reject (`4e6b53d98d36`) that was never itself
+applied (a deliberate test-revert, per its own note) - the old logic
+checked neither, so the "0 mismatches" the first version reported was
+not evidence that precedent was fine; the script structurally could not
+see it. Fixed: now iterates every id in `applied_decision_ids()`
+directly (via `find_by_id`), and only skips a decision if a STRICTLY
+LATER decision at the same key has ALSO been applied
+(`is_superseded_by_later_applied`, using `history_for()` to walk the
+full chain, not just latest-vs-self) - that case is normal, expected
+supersession (a legitimate later apply changed the text, not a bug); a
+later decision that was never itself applied does NOT suppress the
+check. Also fixed a related bug in `check_candidate_choice`: an empty
+`chosen_text` (a reviewer's "remove this word" answer) had no bounds
+check, and Python's forgiving out-of-range slicing (`words[i:i+n]`
+returns `[]`, no `IndexError`) meant `[] == []` silently reported "ok"
+having verified nothing, for ANY out-of-range word_index. Routed
+empty-`chosen_text` to `unverifiable_word_count_change` (matching
+`check_manual_correction`'s existing handling of the same case) and
+added an explicit bounds check as defense-in-depth, matching the other
+two checkers. Verified: unit-tested both fixes against synthetic cases
+(supersession chains of 2 and 3 decisions; empty-text at an in-range and
+a wildly out-of-range index) before trusting the result on real data.
+Re-ran against the current corpus: now checks **18** applied decisions
+(up from 17) and correctly flags klal 1 word 97 as a live MISMATCH -
+`part1.json` word_index 97 is `•`, not `[.]`. This is NOT a new corpus
+problem: the reject decision's own note already documents this as a
+deliberate 2026-08-10 test-revert, not a genuine editorial question -
+the audit tool is now correctly surfacing exactly the class of drift it
+was built to catch, on the one case that was known to exist. No
+corpus/decision-log action needed; this is the tool working as intended.
+
+**Net effect**: 7 files touched (`verify_witness_vision.py`,
+`assemble_corrections_dataset.py` via `review_server.py`'s
+`FLAG_LABELS`, `reconstruct_multipage_klalim.py`,
+`review_frontend/app.js`, `audit_applied_decisions.py`,
+`reconstruction_witness_queue.json` data repair,
+`review_decisions.jsonl` from live browser-test klal-flag toggle/revert
+- see its own note there), all independently re-verified (unit tests,
+live browser tests via Chrome automation, dry-run diffs against
+pre-fix baselines, re-running the fixed scripts against real data)
+before being considered done, not just fixed-and-trusted. 19/19 tests
+(`tests/test_corpus_invariants.py` + `tests/test_review_server.py`)
+pass.
+
 ## Witness bbox line-wrap click-steal bug, klal 30/22 flag closed — 2026-08-14
 
 Continuation of the multi-word highlight fix from the entry below (same

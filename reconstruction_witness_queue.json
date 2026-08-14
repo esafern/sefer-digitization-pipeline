@@ -2582,7 +2582,7 @@
       "vision_selected": "A",
       "vision_transcription": "והוא ז\"ל ס\"ל",
       "vision_confidence": 0.98,
-      "vision_reasoning": "The second line clearly shows the words 'והוא ז\\\"ל ס\\\"ל' ('and he, may his memory be for a blessing, holds'). The standard Rabbinic acronyms ז\\\"ל (זכרו לברכה) and ס\\\"ל (סביר ליה) are clearly printed with gershayim (quotation marks)."
+      "vision_reasoning": "The second line clearly shows the words 'והוא ז\"ל ס\"ל' ('and he, may his memory be for a blessing, holds'). The standard Rabbinic acronyms ז\"ל (זכרו לברכה) and ס\"ל (סביר ליה) are clearly printed with gershayim (quotation marks)."
     },
     {
       "klal_id": 30,
@@ -2924,7 +2924,7 @@
       "vision_selected": "A",
       "vision_transcription": "פי' הרא\"ש ז\"ל",
       "vision_confidence": 0.95,
-      "vision_reasoning": "The visible text segment on the center line shows 'פי'' (abbreviation for פירוש), followed by the standard rabbinic citation of the Rosh ('הרא\\\"ש ז\\\"ל'). Option A correctly transcribes this standard acronym and phrase, whereas Option B contains obvious OCR misreads ('הואש ל')."
+      "vision_reasoning": "The visible text segment on the center line shows 'פי'' (abbreviation for פירוש), followed by the standard rabbinic citation of the Rosh ('הרא\"ש ז\"ל'). Option A correctly transcribes this standard acronym and phrase, whereas Option B contains obvious OCR misreads ('הואש ל')."
     },
     {
       "klal_id": 30,
@@ -4558,7 +4558,7 @@
       "vision_selected": "A",
       "vision_transcription": "אחריו הר\"ב מעדני",
       "vision_confidence": 0.98,
-      "vision_reasoning": "The visible text clearly reads 'אחריו הר\\\"ב מעדני'. The Rabbinic context refers to 'הר\\\"ב מעדני' (referring to the commentary 'Ma'adanei Melech' on the Rosh by R' Yom-Tov Lipmann Heller, often referenced alongside 'Lechem Chamudot'). Paleographically, the third word contains a distinct dalet (ד) rather than a resh (ר), and the middle word features gershayim (הר\\\"ב) rather than a yod."
+      "vision_reasoning": "The visible text clearly reads 'אחריו הר\"ב מעדני'. The Rabbinic context refers to 'הר\"ב מעדני' (referring to the commentary 'Ma'adanei Melech' on the Rosh by R' Yom-Tov Lipmann Heller, often referenced alongside 'Lechem Chamudot'). Paleographically, the third word contains a distinct dalet (ד) rather than a resh (ר), and the middle word features gershayim (הר\"ב) rather than a yod."
     },
     {
       "klal_id": 75,

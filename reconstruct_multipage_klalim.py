@@ -191,9 +191,32 @@ def page_body(cache, page, next_first_word, marker_index=None):
     return body, f"head[{hnote}] tail[{tnote}]"
 
 
-def first_real_word(cache, page, upto=None, marker_index=None):
+def first_real_word(cache, page, upto=None, marker_index=None, skip_marker=None):
+    """`marker_index` (content-boundary lookups, e.g. end_first_owned):
+    strip_head_header STOPS before a known marker - same protect/stop
+    behavior as page_body's own use of marker_index.
+
+    `skip_marker` (catchword-matching lookups, e.g. end_first_any/nxt_word):
+    a DIFFERENT, deliberately opposite behavior. FIXED 2026-08-14
+    (PROJECT-STATUS.md audit item 6, finding 6): the earlier fix left these
+    two lookups unprotected, relying on strip_head_header's folio-numeral
+    heuristic to accidentally eat the marker and land on the true next
+    printed word (verified correct that way on 5 of 9 marker-in-header-
+    window pages: 21, 39, 41, 45, 59). But on pages where the header
+    ALREADY has its own genuine folio numeral before the marker
+    (`took_folio` already satisfied there), the heuristic does NOT also
+    eat the marker, and unprotected lookup returned the bare marker
+    itself - confirmed wrong on page 34: page 33's real printed catchword
+    is `אין`, but the unprotected lookup returned klal 65's marker `סה`,
+    not `אין` (same on pages 46/50/65). Running strip_head_header
+    UNPROTECTED (so the folio heuristic's normal behavior is preserved)
+    and then explicitly stepping past a landed-on known marker makes
+    catchword-matching correct BY DESIGN on all 9 pages, not accidentally
+    correct on 5 of them and silently wrong on the other 4."""
     toks = get_page(cache, page)
     start, _ = strip_head_header(toks, protected=(marker_index or {}).get(page))
+    if skip_marker and start in skip_marker.get(page, ()):
+        start += 1
     seq = toks[start:upto] if upto is not None else toks[start:]
     for t in seq:
         if clean_word(t["text"]):
@@ -230,35 +253,41 @@ def main():
         #    even when the end page contributes nothing to THIS klal (klal 88:
         #    klal 89's marker sits at token 5, so the end page adds no words,
         #    but page 40's catchword `בעיא` is still furniture and must go).
-        #    Deliberately UNPROTECTED (no marker_index): this is a catchword-
-        #    matching lookup, not a content-inclusion boundary, and the two
-        #    have opposite needs here. Confirmed 2026-08-14 while fixing
-        #    audit item 6 (build_marker_index's docstring): page 40's real
-        #    printed catchword is `בעיא`, klal 89's SECOND token - the
-        #    printer's convention in this volume reproduces the next page's
-        #    first WORD OF RUNNING TEXT, skipping past a bare klal-number
-        #    marker like `פט` rather than catching the marker itself.
-        #    Passing marker_index here (tried first) made first_real_word
-        #    correctly return the now-protected `פט`, which then failed to
-        #    match the real catchword `בעיא` and left it un-stripped in
-        #    klal 88's reconstructed tail (901 -> 902 words, a regression
-        #    caught by re-running this script's own dry-run output before
-        #    trusting the fix). Protection still applies to end_first_owned
-        #    right below (upto=marker_position already caps it there, so
-        #    it's a content-boundary question, not a catchword one) and to
-        #    page_body() for actual middle-page splicing.
+        #    Uses skip_marker (not marker_index): a catchword-matching lookup,
+        #    not a content-inclusion boundary - the two need opposite
+        #    behavior. Confirmed 2026-08-14 while fixing audit item 6
+        #    (see first_real_word's docstring for the full history): page
+        #    40's real printed catchword is `בעיא`, klal 89's SECOND token -
+        #    this print's convention reproduces the next page's first WORD
+        #    OF RUNNING TEXT, skipping past a bare klal-number marker like
+        #    `פט` rather than catching the marker itself. Passing
+        #    marker_index (protect/stop) here first made first_real_word
+        #    return `פט` itself, which didn't match `בעיא` (901 -> 902
+        #    words, a regression caught via dry-run diff). Leaving it fully
+        #    unprotected instead (tried second) was ALSO wrong: on pages
+        #    where the header already has its own genuine folio numeral,
+        #    the folio heuristic doesn't eat the marker either, so
+        #    unprotected first_real_word(34) returned klal 65's marker
+        #    `סה` instead of the real catchword `אין` - caught in code
+        #    review, not by the dry-run baseline (no klal this script
+        #    currently processes touches page 34, so that regression was
+        #    latent, not visible in any diff). skip_marker is the third,
+        #    correct version: run the heuristic normally, then deliberately
+        #    step past a token known to be a real marker either way.
         #  - end_first_owned: the first word this klal actually takes from the
-        #    end page, used to locate a seam in already-stored text.
-        end_first_any = first_real_word(cache, end_page)
+        #    end page, used to locate a seam in already-stored text -
+        #    content-boundary, keeps marker_index (protect/stop).
+        end_first_any = first_real_word(cache, end_page, skip_marker=marker_index)
         end_first_owned = first_real_word(cache, end_page, upto=nx["marker_position"], marker_index=marker_index)
 
         # Build the middle: every wholly-interior page, in order. Each one's
         # catchword points at the NEXT page in the chain. nxt_word is a
-        # catchword-matching lookup like end_first_any above - deliberately
-        # unprotected for the same reason.
+        # catchword-matching lookup like end_first_any above - same
+        # skip_marker treatment, for the same reason.
         middle, notes = [], []
         for i, mp in enumerate(mids):
-            nxt_word = first_real_word(cache, mids[i + 1]) if i + 1 < len(mids) else end_first_any
+            nxt_word = (first_real_word(cache, mids[i + 1], skip_marker=marker_index)
+                        if i + 1 < len(mids) else end_first_any)
             body, note = page_body(cache, mp, nxt_word, marker_index=marker_index)
             middle.extend(t["text"] for t in body)
             notes.append(f"page {mp}: +{len(body)} tok  {note}")

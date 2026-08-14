@@ -44,6 +44,17 @@ FLAG_LABELS = {
     "unverified_insertion": ["Unverified addition", "#a0aec0"],
     "ambiguous": ["Ambiguous", "#dd6b20"],
     "error": ["Check failed", "#718096"],
+    # ADDED 2026-08-14: assemble_corrections_dataset.py's drift check
+    # (see PROJECT-STATUS.md) forces this flag when a candidate's
+    # word_index/corrected_word no longer matches live part1.json. Without
+    # an entry here, review_frontend/app.js's `FLAGS[corr.flag] || ['Flagged']`
+    # fallback rendered it as the same generic "Flagged" label as any
+    # unrecognized flag - indistinguishable from a real bug in the flag
+    # name itself, silent exactly when a reviewer most needs to know NOT
+    # to trust this candidate's position. 0 candidates are currently
+    # drifted, so this had never rendered - caught in code review before
+    # it ever did.
+    "stale_candidate": ["Stale - re-verify against scan", "#e53e3e"],
 }
 
 MIME_TYPES = {

@@ -245,6 +245,30 @@ investigated and closed 2026-08-14, 2 still open:**
      safe only because `PAGE_TO_KLAL` is currently 1:1);
      `propose_punctuation_part1.py`'s cache key doesn't cover the prompt
      text or model (risk 3, dormant pipeline, no live effect).
+   - **CODE-REVIEWED 2026-08-14 (Opus 5, high thoroughness, via
+     subagent).** Reviewed everything committed this session so far
+     (5 commits) - found 10 concrete issues, several of them real bugs
+     in the fixes above written the same session, including one that had
+     already corrupted committed data (3 witness-queue entries with
+     literal backslash artifacts from `parse_decision_lenient`'s missing
+     JSON-unescape step). All 10 fixed and independently re-verified
+     (unit tests, live browser tests, dry-run diffs against baselines) -
+     full detail in `PROJECT-STATUS-HISTORY.md`'s newest entry. Notably:
+     `audit_applied_decisions.py` (item 1 above) originally skipped its
+     own motivating precedent case (klal 1 word 97) due to a latest-
+     per-key iteration bug - fixed, and it now correctly flags that case
+     as a live MISMATCH (already understood/expected, a documented
+     2026-08-10 test-revert, not a new corpus problem - no action
+     needed). The marker-protection fix (item 4 above) had a real latent
+     gap on 4 of 9 affected pages, on the unprotected side - fixed with
+     a third `skip_marker` behavior; still a no-op for the currently-
+     processed klal 30/75/88 (byte-identical dry-run output), but no
+     longer silently wrong if this script is ever pointed at a klal
+     spanning those pages. The visibility-refresh fix (item 5 pattern)
+     had introduced its own race in the badge-count arithmetic - fixed
+     by having every save path re-derive counts from a fresh
+     `refreshKlalimList()` call instead of patching in place, which
+     closes the race by construction rather than by careful ordering.
 
 **5. General standing caution**: docstring/comment overclaims turned up
 repeatedly across both audit rounds this session, in different validator

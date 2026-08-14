@@ -19,21 +19,39 @@
 # that stopped being true, and nothing in the pipeline ever re-checks it.
 # This script is that re-check - it changes nothing, only reports.
 #
-# Only checks the LATEST decision per (klal_id, word_index, decision_type)
-# key, and only when THAT decision itself has an apply_event (a "pending,
-# not yet applied" latest decision - e.g. a reject with nothing to apply,
-# or a genuinely queued-but-unrun decision - is not a claim about the
-# corpus and is correctly not checked here).
+# Checks EVERY id in applied_decision_ids(), not just the latest decision
+# per (klal_id, word_index, decision_type) key. FIXED 2026-08-14 (code
+# review found this the same day the script was written): the first
+# version iterated all_current(decision_type) and only checked a decision
+# if IT was the latest at its key AND had an apply_event - which meant an
+# OLDER applied decision superseded by a NEWER, never-applied one (a
+# reject, or a decision still pending) was silently skipped entirely. That
+# is EXACTLY the klal 1 word 97 precedent this script's docstring names as
+# its motivation: the accept (784b22672ac0) was applied, then super-
+# seded-at-key by a reject (4e6b53d98d36) that was itself never applied -
+# the old logic checked neither, so the "0 mismatches" the first version
+# reported on real data was not evidence that precedent was fine; the
+# script structurally could not see it. Now resolves every applied id via
+# find_by_id and checks it UNLESS a STRICTLY LATER decision at the same
+# key has ALSO been applied (is_superseded_by_later_applied) - that case
+# is a normal, expected supersession (a legitimate later apply changed the
+# text away from the older claim, not a bug), so checking the older one
+# there would always "mismatch" for the ordinary reason a newer value
+# overwrote it. A later decision that was never itself applied does NOT
+# suppress the check - the older applied decision's claim is still
+# standing and gets verified, which is what correctly catches the klal 1
+# word 97 case now (part1.json has no [.] there; the accept's apply_event
+# claim no longer holds).
 #
 # LIMITATION, stated rather than papered over: word-count-changing
-# decisions (insert/delete opcodes, a manual deletion, an accepted
-# punctuation mark) shift every later word_index in the same klal for every
-# OTHER decision applied after them. Verifying one such decision's position
-# in isolation, long after the fact, can't distinguish "silently reverted"
-# from "correctly applied, then shifted by a later legitimate edit" -
-# doing so would produce false positives, not real findings. Those are
-# reported separately as unverifiable-by-position, not silently treated as
-# passing.
+# decisions (insert/delete opcodes, an empty-chosen_text replace/manual
+# deletion, an accepted punctuation mark) shift every later word_index in
+# the same klal for every OTHER decision applied after them. Verifying one
+# such decision's position in isolation, long after the fact, can't
+# distinguish "silently reverted" from "correctly applied, then shifted by
+# a later legitimate edit" - doing so would produce false positives, not
+# real findings. Those are reported separately as unverifiable-by-position,
+# not silently treated as passing.
 import json
 import os
 
@@ -49,18 +67,28 @@ def load_part1():
 
 
 def check_candidate_choice(decision, klal):
+    """FIXED 2026-08-14 (code review, finding 10): an empty chosen_text
+    (the reviewer's "remove this word" answer, recorded as chosen_source
+    "custom" with text "") used to fall through to the normal position
+    check with expected=[] and no bounds check - words[word_index:...] on
+    an out-of-range index returns [] in Python (no IndexError), so it
+    silently compared [] == [] and reported "ok" having verified nothing.
+    An empty chosen_text is a word-count change like insert/delete, not a
+    same-position replace - route it to unverifiable_word_count_change
+    like check_manual_correction already does for the same case. The
+    explicit bounds check below is defense-in-depth matching the other two
+    checkers, not just reliant on this routing to avoid the slicing trap."""
     snapshot = decision.get("candidate_snapshot") or {}
     opcode = snapshot.get("opcode")
-    word_index = decision["word_index"]
-    if opcode != "replace":
+    chosen = decision["chosen_text"]
+    if opcode != "replace" or not chosen:
         return "unverifiable_word_count_change"
     words = klal["clean_text"].split()
-    final_text = snapshot.get("final_text")
-    span_len = len(final_text.split()) if final_text else 1
-    chosen = decision["chosen_text"]
-    expected = chosen.split() if chosen else []
-    n = len(expected) if expected else span_len
-    live = words[word_index:word_index + n]
+    word_index = decision["word_index"]
+    expected = chosen.split()
+    if word_index < 0 or word_index >= len(words):
+        return f"MISMATCH: word_index {word_index} out of range (klal now has {len(words)} words)"
+    live = words[word_index:word_index + len(expected)]
     if live == expected:
         return "ok"
     return f"MISMATCH: expected {expected!r} at word_index {word_index}, found {live!r}"
@@ -100,37 +128,69 @@ CHECKERS = {
 }
 
 
+def is_superseded_by_later_applied(decision, already_applied):
+    """True if some decision recorded AFTER `decision` at the same
+    (klal_id, word_index, decision_type) key has itself been applied -
+    meaning the live corpus has legitimately moved past `decision`'s claim
+    via a normal, later apply step, not an out-of-band revert. Checking a
+    legitimately-superseded decision's claim against live text would
+    always "mismatch" for the ordinary, expected reason that a newer
+    value overwrote it - not the bug this script exists to catch. A later
+    decision that was never itself applied does NOT count: the older
+    applied decision's claim is still the standing one and must be
+    checked (this is the klal 1 word 97 case - see module docstring)."""
+    history = rd.history_for(decision["klal_id"], decision["word_index"], decision["decision_type"])
+    seen_self = False
+    for r in history:
+        if r["id"] == decision["id"]:
+            seen_self = True
+            continue
+        if seen_self and r["id"] in already_applied:
+            return True
+    return False
+
+
 def main():
     part1 = load_part1()
     already_applied = rd.applied_decision_ids()
 
-    n_ok = n_mismatch = n_unverifiable = n_missing_klal = 0
+    n_ok = n_mismatch = n_unverifiable = n_missing_klal = n_superseded = 0
     mismatches = []
 
-    for decision_type, checker in CHECKERS.items():
-        current = rd.all_current(decision_type)
-        for (klal_id, word_index), decision in sorted(current.items()):
-            if decision["id"] not in already_applied:
-                continue  # latest decision at this key was never applied - nothing to verify
-            klal = part1.get(klal_id)
-            if klal is None:
-                n_missing_klal += 1
-                mismatches.append(f"klal {klal_id} word {word_index} ({decision_type}): "
-                                   f"klal_id not found in part1.json at all")
-                continue
-            result = checker(decision, klal)
-            if result == "ok":
-                n_ok += 1
-            elif result == "unverifiable_word_count_change":
-                n_unverifiable += 1
-            else:
-                n_mismatch += 1
-                mismatches.append(f"klal {klal_id} word {word_index} ({decision_type}, "
-                                   f"decision {decision['id']}): {result}")
+    for decision_id in sorted(already_applied):
+        decision = rd.find_by_id(decision_id)
+        if decision is None:
+            continue  # defensive: an apply_event referencing an id not in the log at all
+        decision_type = decision["decision_type"]
+        checker = CHECKERS.get(decision_type)
+        if checker is None:
+            continue  # not one of the 3 checkable decision types
+        klal_id, word_index = decision["klal_id"], decision["word_index"]
 
-    print(f"Checked {n_ok + n_mismatch + n_unverifiable + n_missing_klal} applied decisions "
-          f"across candidate_choice/manual_correction/punctuation_choice:")
+        if is_superseded_by_later_applied(decision, already_applied):
+            n_superseded += 1
+            continue
+
+        klal = part1.get(klal_id)
+        if klal is None:
+            n_missing_klal += 1
+            mismatches.append(f"klal {klal_id} word {word_index} ({decision_type}): "
+                               f"klal_id not found in part1.json at all")
+            continue
+        result = checker(decision, klal)
+        if result == "ok":
+            n_ok += 1
+        elif result == "unverifiable_word_count_change":
+            n_unverifiable += 1
+        else:
+            n_mismatch += 1
+            mismatches.append(f"klal {klal_id} word {word_index} ({decision_type}, "
+                               f"decision {decision_id}): {result}")
+
+    total = n_ok + n_mismatch + n_unverifiable + n_missing_klal + n_superseded
+    print(f"Checked {total} applied decisions across candidate_choice/manual_correction/punctuation_choice:")
     print(f"  {n_ok} confirmed still reflected in part1.json")
+    print(f"  {n_superseded} superseded by a later, also-applied decision at the same key (expected, not checked)")
     print(f"  {n_unverifiable} word-count-changing, not position-verifiable post-hoc (see docstring)")
     print(f"  {n_mismatch + n_missing_klal} MISMATCH - applied decision no longer reflected in the corpus")
     if mismatches:

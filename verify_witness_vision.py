@@ -12,9 +12,12 @@
 # candidate_choice decisions.
 #
 # Output: reconstruction_witness_queue.json gains vision_selected/
-# vision_transcription/vision_confidence/vision_reasoning per item, plus a
-# vision_tier ("A"/"B"/"UNCERTAIN") the dashboard can use as an additional,
-# independent triage signal alongside the existing lexicon-based tier.
+# vision_transcription/vision_confidence/vision_reasoning per item - an
+# additional, independent triage signal alongside the existing lexicon-based
+# tier. (CORRECTED 2026-08-14: this used to also claim a vision_tier field;
+# nothing ever wrote one - confirmed by grep against a completed 419/419
+# run. Removed the false claim rather than adding the field just to match
+# stale documentation - CLAUDE.md Lesson "General standing caution.")
 #
 # Usage: python3 verify_witness_vision.py [--page 24 37 40]
 import argparse
@@ -102,6 +105,29 @@ def sanitize_json(text):
     return re.sub(r'\\(?!["\\/bfnrtu])', "", text)
 
 
+_JSON_ESCAPES = {'"': '"', "\\": "\\", "/": "/", "b": "\b", "f": "\f", "n": "\n", "r": "\r", "t": "\t"}
+
+
+def unescape_json_fragment(s):
+    """Undo JSON string escape sequences (\\" -> ", \\n -> newline, etc.) in a
+    raw regex-captured substring that was extracted WITHOUT going through
+    json.loads. FIXED 2026-08-14: parse_decision_lenient used to return
+    captured groups verbatim, which is wrong whenever the SAME response
+    escaped some gershayim occurrences correctly (as '\\"') and left others
+    raw (as '"') - the raw ones are why we're in this fallback at all, but
+    the correctly-escaped ones need unescaping same as strict json.loads
+    would do, and returning them verbatim left literal backslashes baked
+    into the data. Confirmed real: klal 30 tok 750/835 and klal 75 tok 555's
+    already-recovered `reasoning` fields had '\\"' (backslash+quote, two
+    literal characters) where the correct text has a single '"' - e.g.
+    'הרא\\"ש' instead of 'הרא"ש'. A raw unescaped '"' has no backslash to
+    match, so it's untouched and stays correct; a properly-escaped '\\"'
+    becomes '"'. Unrecognized backslash sequences drop the backslash,
+    matching sanitize_json's existing behavior; \\uXXXX is not handled -
+    no observed case needs it and it's unlikely in Hebrew source text."""
+    return re.sub(r"\\(.)", lambda m: _JSON_ESCAPES.get(m.group(1), m.group(1)), s, flags=re.DOTALL)
+
+
 def parse_decision_lenient(text):
     """Field-by-field recovery for responses that are unparseable as strict
     JSON because a string value contains a literal, unescaped double-quote -
@@ -110,23 +136,34 @@ def parse_decision_lenient(text):
     handle that: the model emits {"transcription_found": "ז"ל", ...} where
     the quote mark that's PART of the Hebrew text terminates the JSON string
     early, corrupting everything after it. selected_option is a closed
-    vocabulary (A/B/NEITHER/UNCERTAIN) and confidence is a bare number, so
-    neither can contain a stray quote; only transcription_found/reasoning
-    need the lenient extraction. Raises ValueError if the expected shape
-    isn't found at all (a genuinely different failure, not this bug)."""
+    vocabulary (A/B/NEITHER/UNCERTAIN) so it can't contain a stray quote;
+    only transcription_found/reasoning need the lenient extraction (and the
+    unescape pass above). Raises ValueError if the expected shape isn't
+    found at all (a genuinely different failure, not this bug).
+
+    confidence and transcription_found are read leniently too (FIXED
+    2026-08-14): confidence accepts an optionally-quoted number (a bare
+    `0.95` previously required - a model that quotes it, e.g. `"0.95"`,
+    silently produced `confidence: None` instead of erroring, which is
+    worse than raising since it looks like a scored-but-uncertain item
+    rather than a parse failure). transcription_found accepts a JSON
+    `null` as well as a quoted string - a genuinely illegible crop is a
+    normal, valid model answer, and treating it as ERROR discarded an
+    otherwise-usable selected_option/confidence/reasoning for no reason."""
     opt = re.search(r'"selected_option"\s*:\s*"([^"]*)"', text)
-    conf = re.search(r'"confidence"\s*:\s*([0-9.]+)', text)
-    transcription = re.search(
+    conf = re.search(r'"confidence"\s*:\s*"?([0-9.]+)"?', text)
+    transcription_str = re.search(
         r'"transcription_found"\s*:\s*"(.*?)"\s*,\s*\n?\s*"confidence"', text, re.DOTALL
     )
+    transcription_null = re.search(r'"transcription_found"\s*:\s*null\s*,\s*\n?\s*"confidence"', text)
     reasoning = re.search(r'"reasoning"\s*:\s*"(.*)"\s*\n?}\s*$', text, re.DOTALL)
-    if not (opt and transcription and reasoning):
+    if not (opt and (transcription_str or transcription_null) and reasoning):
         raise ValueError("lenient JSON recovery: expected fields not found")
     return {
         "selected_option": opt.group(1),
-        "transcription_found": transcription.group(1),
+        "transcription_found": unescape_json_fragment(transcription_str.group(1)) if transcription_str else None,
         "confidence": float(conf.group(1)) if conf else None,
-        "reasoning": reasoning.group(1),
+        "reasoning": unescape_json_fragment(reasoning.group(1)),
     }
 
 
