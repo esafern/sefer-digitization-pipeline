@@ -266,9 +266,19 @@ need the same checking as any other claim.
     `rebuild_all.sh` — run manually. Secondary to the main correction
     pipeline (user directive 2026-08-14).
   - **pytest gate** — `rebuild_all.sh`'s step 6/6 runs
-    `tests/test_corpus_invariants.py` as a hard gate; see "Standing
-    regression test suite" in PROJECT-STATUS.md for what it checks and
-    why (`requirements-dev.txt` pins the pytest version).
+    `tests/test_corpus_invariants.py` AND `tests/test_pipeline_logic.py`
+    (added 2026-08-14) as a hard gate; see "Standing regression test
+    suite" in PROJECT-STATUS.md for what they check and why
+    (`requirements-dev.txt` pins the pytest version). The two are
+    deliberately split by what they test, not by speed: the first checks
+    the DATA a pipeline run produced (the corpus + the derived files the
+    dashboard serves), the second the pure decision LOGIC that produces
+    it, on synthetic inputs. The split exists because several correctness
+    paths — candidate drift detection, the apply-script's re-apply guard,
+    the vision cache key — are inert on today's real data and therefore
+    invisible to any amount of corpus checking, while each of them was
+    added after a real incident. `tests/test_review_server.py` (Playwright,
+    live server) stays outside the gate and is run manually.
   - **Standalone validators, run manually** (CORRECTED list, see note
     above — `validate_klal_span_coverage.py`, `validate_catchword_
     continuity.py`, `validate_title_alphabetical_order.py`, and

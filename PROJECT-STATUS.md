@@ -115,11 +115,12 @@ current handoff, re-written (not just appended to) as state changes.
 - **Every previously-tracked corpus-content gap is closed** (klal 5, 29,
   30/75/88, 37, 69, 206, 217; the second source-audit round's 12 confirmed
   bugs; the reindexing incident's 3 root causes - all fixed, verified
-  against real data, and committed). `rebuild_all.sh`'s pytest gate
-  (`tests/test_corpus_invariants.py`) is 14/14 passing;
-  `tests/test_review_server.py` (5 more, Playwright, not part of the
-  automated gate) is 5/5. Full evidence for all of the above is in
-  `PROJECT-STATUS-HISTORY.md`.
+  against real data, and committed). `rebuild_all.sh`'s pytest gate is
+  now two files - `tests/test_corpus_invariants.py` (21) +
+  `tests/test_pipeline_logic.py` (53, new 2026-08-14) - 74/74 passing;
+  `tests/test_review_server.py` (11 more, Playwright, deliberately not
+  part of the automated gate) is 11/11. Full evidence for all of the
+  above is in `PROJECT-STATUS-HISTORY.md`.
 - **This session's work (2026-08-13/14), all committed, full detail in
   `PROJECT-STATUS-HISTORY.md`'s two newest entries**:
   1. New reviewer feature: flag/replace/delete ANY word in a klal's text,
@@ -174,6 +175,162 @@ current handoff, re-written (not just appended to) as state changes.
      or file locations that do not exist. Every change verified by a full
      `./rebuild_all.sh` (with vision) producing byte-identical derived
      JSON, 15/15 corpus tests, 5/5 Playwright browser tests.
+
+### DONE, AWAITING MERGE - test-coverage expansion + test-suite refactor (worktree `agent-a8a04e346269f3067`, 5 commits), 2026-08-14
+
+**Merge note**: `review_server.py` changed (one new `FLAG_LABELS` entry), so
+the live dashboard needs a restart after merging - Python constants there do
+not hot-reload the way the data files do. No corpus, derived-data, cache or
+decision-log file was touched: `git diff` against the worktree base shows
+only `CLAUDE.md`, `PROJECT-STATUS.md`, `check_klal_token_orphans.py`,
+`rebuild_all.sh`, `review_server.py` and the three test files. A full
+`./rebuild_all.sh --skip-vision` was run with the new two-file gate: 74/74
+pass and all five derived JSON files are sha256-identical to before.
+
+Separate, complementary follow-up to the revalidation pass above (which
+fixed 16 bugs but added only ONE test): systematically build regression
+coverage for main-pipeline logic that had none, and clean up the two
+existing test files. Same scope rules - witness/punctuation excluded.
+
+- **`apply_reviewer_decisions.main()`'s per-run safety model covered end to
+  end** (5 tests, against throwaway copies of part1.json/corrections/the
+  decisions log - nothing tracked is touched): a "keep the current text"
+  vote on an INSERT candidate deletes nothing (finding ★1, where it
+  silently deleted exactly what the reviewer voted to keep) and is still
+  recorded as a reviewed no-op; at most one word-count-changing decision
+  lands per klal per run; a decision with an `apply_event` on record is
+  never applied twice (the `יגעתי 1 1 1 ולא` bug); a drifted candidate is
+  skipped AND not recorded as applied; plus a positive control (a clean
+  replace really does land), without which a mutation making `main()`
+  refuse everything would pass all four refusal tests.
+- **NEW `tests/test_pipeline_logic.py` (53 tests), wired into
+  `rebuild_all.sh`'s step 6/6 gate alongside the corpus suite.** Pure
+  unit tests, hermetic (no network, no API key, no scan cache, no writes
+  to any tracked file - temp dirs only, via `review_decisions.py`'s own
+  `path=` parameter). It covers logic that is INERT on today's real data
+  and therefore invisible to any corpus-level check: `assemble_
+  corrections_dataset.py`'s `check_drift`/`live_word_span` (0 candidates
+  currently drift) and `classify`'s confidence gating; every
+  `apply_reviewer_decisions.py` mutator, including the re-apply guard that
+  produced `יגעתי 1 1 1 ולא` in 2026-08-11; `review_decisions.py`'s
+  append-only/latest-per-key contract; `audit_applied_decisions.py`'s 3
+  checkers and `is_superseded_by_later_applied` (the klal 1 word 97
+  precedent, as a permanent test rather than a one-off check);
+  `verify_corrections_vision.py`'s `extract_json_fields`/
+  `unescape_json_fragment` and the FULL cache key - every component
+  (crop, word_a, word_b, context, prompt_hash) asserted to actually
+  discriminate, plus the migration's losslessness/idempotence;
+  `build_klal_page_regions.py`'s heuristic fallback path (internal
+  consistency only - it has no ground truth to assert against, see below).
+- **6 new zero-tolerance tests in `tests/test_corpus_invariants.py`**
+  (15 -> 21), all on the review layer's derived files, all confirmed
+  clean against the current corpus: no `stale_candidate` flag is being
+  served; every served flag has a `FLAG_LABELS` entry; every candidate's
+  `word_index` points inside its own klal (delete's append position
+  allowed); each opcode's field shape (`replace`/`insert`/`delete` null
+  patterns + normalised bbox); every trusted klal has exactly one
+  well-formed scan region agreeing with its aligned page, continuations
+  strictly increasing; `review_decisions.jsonl` is intact (parseable,
+  unique ids, valid decision_types, apply_event refs resolve, int
+  klal_ids, word_index null iff klal_flag, chronological order).
+- **REAL FINDING, fixed: `classify()`'s `"unverified"` fallback flag had
+  no `FLAG_LABELS` entry** - the identical gap as `"stale_candidate"`
+  (found in code review a few hours earlier), found this time by the new
+  test rather than by a human reading the code. Unreachable today
+  (`build_corrections_dataset.py` only emits difflib's three opcodes),
+  but the fallback exists for the unexpected case, which is exactly when
+  rendering it as an anonymous "Flagged" would be worst. Added
+  `"unverified": ["Unclassified (unexpected opcode)", "#718096"]`.
+  **Needs a `review_server.py` restart to take effect once merged** -
+  server-side Python constants don't hot-reload the way data files do.
+- **Standalone-validator coverage added (second batch, same file):**
+  `check_klal_token_orphans.py`'s Pass-3 allowlist (the exact investigated
+  span still suppressed; a DIFFERENT span in klal 4/18/34 NOT suppressed;
+  the allowlist structurally proven to be span-keyed, not klal_id-keyed;
+  every stored span proven already-normalised, since an unnormalised one
+  could never match and the suppression would be silently dead) and
+  `best_match_owner`'s self-exclusion; `validate_part1_corpus_integrity.py`'s
+  three GATED checks proven able to FIRE (a wrong gematria field, a wrong
+  opening word, Latin/digit/bracket damage, a real duplicated phrase) as
+  well as to stay quiet on their documented exemptions (klal 166's geresh,
+  the two footnote-marker conventions, the same-title cluster) - per Lesson
+  2, a gate that cannot fail is indistinguishable from one that passes, and
+  all three of these had false-positive sources removed from them in the
+  past, any of which could have been over-corrected into blindness;
+  `validate_title_alphabetical_order.py`'s unrankable-first-character
+  reporting and its contiguity detection; `validate_catchword_continuity.py`'s
+  `is_header_word` (the `י"ד`-eaten-as-furniture fix from earlier today).
+- **One small enabling refactor**: `check_klal_token_orphans.py`'s Pass-3
+  suppression rule extracted from an inline expression in `main()`'s loop
+  into `is_known_pass3_false_positive(klal_id, missing_words)`. Behaviour
+  verified unchanged by diffing the full script output before/after against
+  a `git stash`ed baseline (byte-identical, including the "3 known false
+  positive(s) suppressed" line).
+- **`tests/test_review_server.py`: 5 -> 11 tests, plus a refactor.** New
+  API-level tests (no browser): a `manual_correction` whose snapshotted
+  `original_word` no longer matches the live text at that index is NOT
+  rendered by `/api/klal` (the drift check added earlier today - the only
+  decision type that used to render unconditionally), a missing
+  `chosen_text` is rejected 400 while `""` legitimately means delete, and
+  every flag `/api/klal` actually serves has an `/api/flags` label
+  end-to-end. New Playwright tests for `refreshKlalimList()` (written
+  earlier today, verified then only by ad-hoc browser automation): three
+  concurrent refreshes fire exactly one round of `/api/flags`+`/api/klalim`
+  +`/api/witness`; a failed refresh is caught, logged, and leaves the
+  in-flight guard cleared so the next one works; the active nav row AND the
+  flagged-only filter both survive `buildNav()`'s full innerHTML rebuild.
+  Refactor: `_get_json`/`_post_json`/`_open_dashboard` helpers replace the
+  goto+wait+click+urllib boilerplate repeated across the existing tests
+  (assertions unchanged), and the new nav test flags its own klal via the
+  API instead of depending on an earlier test having flagged one.
+- **Every new test verified to actually FAIL when its invariant is
+  violated**, not just to pass: 23 source mutations (drift check
+  neutered, confidence gate removed, label deleted, re-apply guard
+  removed, negative-index bounds check removed, supersession logic
+  loosened, JSON-unescape removed, prompt_hash dropped from the cache
+  lookup, `already_done` ignored, append mode changed to write, the
+  Pass-3 allowlist reverted to klal_id-only, `best_match_owner`'s
+  self-exclusion removed, the gematria field comparison disabled, the
+  footnote-marker lookbehind removed, the same-title exemption widened to
+  everything, intra-klal duplicate detection disabled, the
+  unrankable-title report silenced, the header-word abbreviation guard
+  removed, the confirmed-no-op branch narrowed back to replace-only,
+  the one-word-count-change-per-run guard removed, the already-applied
+  guard removed, the snapshot drift check removed, main()'s decision loop
+  emptied) and 15 data mutations (stale flag, unknown flag, out-of-range
+  index, broken opcode shape, inverted bbox, missing/malformed/mis-paged/
+  zero-token region, duplicate id, bad decision_type, dangling
+  apply_event, string klal_id, out-of-order records, truncated line) and
+  7 review-layer mutations (refresh dedup guard removed, its try/catch
+  removed, the post-rebuild `setActiveKlal` restore removed, the
+  `applyFlaggedFilter` re-apply removed, `api_klal`'s manual-correction
+  drift check disabled, the missing-`chosen_text` rejection removed, a
+  served flag's label deleted, twice - once for an unreachable flag and
+  once for a served one). 46 mutations run, 45 red. The one that came
+  back GREEN is recorded rather than quietly re-rolled: deleting the
+  brand-new `"unverified"` label does not fail the end-to-end API test,
+  correctly - no klal currently serves that flag, which is exactly why
+  the unit-level "every flag classify() CAN emit is labelled" test
+  exists alongside it (re-run against `"current_text_confirmed"`, a flag
+  that IS served, it goes red). Every mutated tracked file was restored
+  and sha256-verified byte-identical afterwards.
+- **Deliberately NOT covered - stated so nobody reads 85 green tests as
+  "the pipeline is tested"**: (a) `build_corrections_dataset.py`'s
+  difflib alignment and `build_klal_page_regions.py`'s marker-anchored
+  Y-banding - the two places where a wrong answer is a wrong CROP shown
+  to a reviewer, and neither has any ground truth a synthetic fixture
+  could assert against without inventing one (that's what
+  `validate_klal_span_coverage.py` + direct crop inspection are for);
+  (b) the heuristic regions' real-data geometry beyond structural
+  soundness - "does this box actually contain this klal's ink" is a
+  vision question, and an overlap check would false-positive on
+  legitimately overlapping same-page line boxes; (c) anything that would
+  spend an API call (`adjudicate`'s retry/fallback chain is exercised
+  only through its cache); (d) witness/punctuation code, out of scope by
+  standing directive; (e) `review_frontend/app.js`'s rendering beyond the
+  paths the 11 browser tests touch. Coverage here is deep on the
+  decision/apply/flag layer and on parsing/caching, and shallow-to-absent
+  on alignment geometry.
 
 ### `verify_witness_vision.py`'s 419-item pass finished 2026-08-14
 

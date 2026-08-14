@@ -15,7 +15,12 @@
 #     -> verify_corrections_vision.py  -> corrections_verified_part1.json   (Gemini calls, cached)
 #     -> assemble_corrections_dataset.py -> corrections_part1.json
 #     -> build_klal_page_regions.py    -> klal_page_regions.json
-#     -> pytest tests/test_corpus_invariants.py -> pass/fail gate (regression suite)
+#     -> pytest tests/test_corpus_invariants.py + tests/test_pipeline_logic.py
+#        -> pass/fail gate (regression suites: the derived DATA, and the
+#           pure decision LOGIC that produced it - the second added
+#           2026-08-14 because several correctness paths, e.g. candidate
+#           drift detection and the vision cache key, are inert on current
+#           data and cannot be exercised by checking the corpus alone)
 #
 # tests/test_review_server.py is deliberately NOT part of this gate - it
 # needs a live server subprocess + a real browser (Playwright), unlike the
@@ -81,7 +86,7 @@ echo "== 4/6 assemble_corrections_dataset.py =="
 echo "== 5/6 build_klal_page_regions.py =="
 ./venv/bin/python build_klal_page_regions.py
 
-echo "== 6/6 tests/ (corpus regression suite) =="
-./venv/bin/python -m pytest tests/test_corpus_invariants.py -q
+echo "== 6/6 tests/ (corpus + pipeline-logic regression suites) =="
+./venv/bin/python -m pytest tests/test_corpus_invariants.py tests/test_pipeline_logic.py -q
 
 echo "== done =="
