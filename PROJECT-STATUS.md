@@ -124,6 +124,66 @@ current handoff, re-written (not just appended to) as state changes.
      `./rebuild_all.sh` (with vision) producing byte-identical derived
      JSON, 15/15 corpus tests, 5/5 Playwright browser tests.
 
+### IN PROGRESS - test-coverage expansion + test-suite refactor (worktree `agent-a8a04e346269f3067`), 2026-08-14
+
+Separate, complementary follow-up to the revalidation pass above (which
+fixed 16 bugs but added only ONE test): systematically build regression
+coverage for main-pipeline logic that had none, and clean up the two
+existing test files. Same scope rules - witness/punctuation excluded.
+
+- **NEW `tests/test_pipeline_logic.py` (37 tests), wired into
+  `rebuild_all.sh`'s step 6/6 gate alongside the corpus suite.** Pure
+  unit tests, hermetic (no network, no API key, no scan cache, no writes
+  to any tracked file - temp dirs only, via `review_decisions.py`'s own
+  `path=` parameter). It covers logic that is INERT on today's real data
+  and therefore invisible to any corpus-level check: `assemble_
+  corrections_dataset.py`'s `check_drift`/`live_word_span` (0 candidates
+  currently drift) and `classify`'s confidence gating; every
+  `apply_reviewer_decisions.py` mutator, including the re-apply guard that
+  produced `יגעתי 1 1 1 ולא` in 2026-08-11; `review_decisions.py`'s
+  append-only/latest-per-key contract; `audit_applied_decisions.py`'s 3
+  checkers and `is_superseded_by_later_applied` (the klal 1 word 97
+  precedent, as a permanent test rather than a one-off check);
+  `verify_corrections_vision.py`'s `extract_json_fields`/
+  `unescape_json_fragment` and the FULL cache key - every component
+  (crop, word_a, word_b, context, prompt_hash) asserted to actually
+  discriminate, plus the migration's losslessness/idempotence;
+  `build_klal_page_regions.py`'s heuristic fallback path (internal
+  consistency only - it has no ground truth to assert against, see below).
+- **6 new zero-tolerance tests in `tests/test_corpus_invariants.py`**
+  (15 -> 21), all on the review layer's derived files, all confirmed
+  clean against the current corpus: no `stale_candidate` flag is being
+  served; every served flag has a `FLAG_LABELS` entry; every candidate's
+  `word_index` points inside its own klal (delete's append position
+  allowed); each opcode's field shape (`replace`/`insert`/`delete` null
+  patterns + normalised bbox); every trusted klal has exactly one
+  well-formed scan region agreeing with its aligned page, continuations
+  strictly increasing; `review_decisions.jsonl` is intact (parseable,
+  unique ids, valid decision_types, apply_event refs resolve, int
+  klal_ids, word_index null iff klal_flag, chronological order).
+- **REAL FINDING, fixed: `classify()`'s `"unverified"` fallback flag had
+  no `FLAG_LABELS` entry** - the identical gap as `"stale_candidate"`
+  (found in code review a few hours earlier), found this time by the new
+  test rather than by a human reading the code. Unreachable today
+  (`build_corrections_dataset.py` only emits difflib's three opcodes),
+  but the fallback exists for the unexpected case, which is exactly when
+  rendering it as an anonymous "Flagged" would be worst. Added
+  `"unverified": ["Unclassified (unexpected opcode)", "#718096"]`.
+  **Needs a `review_server.py` restart to take effect once merged** -
+  server-side Python constants don't hot-reload the way data files do.
+- **Every new test verified to actually FAIL when its invariant is
+  violated**, not just to pass: 10 source mutations (drift check
+  neutered, confidence gate removed, label deleted, re-apply guard
+  removed, negative-index bounds check removed, supersession logic
+  loosened, JSON-unescape removed, prompt_hash dropped from the cache
+  lookup, `already_done` ignored, append mode changed to write) and 15
+  data mutations (stale flag, unknown flag, out-of-range index, broken
+  opcode shape, inverted bbox, missing/malformed/mis-paged/zero-token
+  region, duplicate id, bad decision_type, dangling apply_event, string
+  klal_id, out-of-order records, truncated line) - all 25 produced a red
+  test, and every mutated tracked file was restored and sha256-verified
+  byte-identical afterwards.
+
 ### `verify_witness_vision.py`'s 419-item pass finished 2026-08-14
 
 All 419 witness-queue items (klal 30/75/88) now carry `vision_selected`/

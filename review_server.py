@@ -55,6 +55,15 @@ FLAG_LABELS = {
     # drifted, so this had never rendered - caught in code review before
     # it ever did.
     "stale_candidate": ["Stale - re-verify against scan", "#e53e3e"],
+    # ADDED 2026-08-14 (found by tests/test_pipeline_logic.py's
+    # exercise-classify()-over-its-whole-input-grid label check, the same
+    # gap as "stale_candidate" above one step earlier): classify() ends in
+    # a `return "unverified"` fallback for any opcode that isn't
+    # replace/insert/delete. Unreachable today - build_corrections_dataset.py
+    # only ever emits difflib's three opcodes - but the fallback exists
+    # precisely for the unexpected case, which is exactly when rendering it
+    # as an anonymous "Flagged" would be worst.
+    "unverified": ["Unclassified (unexpected opcode)", "#718096"],
 }
 
 MIME_TYPES = {

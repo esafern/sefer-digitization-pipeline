@@ -30,14 +30,25 @@ real regression - investigate before ever updating the baseline to match.
 
 Checks that ARE zero-tolerance (no baseline): structural invariants (klal
 count/sequence, derived-file drift, page-header contamination, debug-print
-leaks, the no-text-available placeholder set, non-empty title/clean_text).
-These have no known legitimate exception anywhere in the corpus, per the
-PROJECT-STATUS.md section cited in each test.
+leaks, the no-text-available placeholder set, non-empty title/clean_text,
+clean_text whitespace, and - added 2026-08-14 - the shape of the two derived
+files the review dashboard serves to a human reviewer
+(corrections_part1.json, klal_page_regions.json) plus the integrity of the
+append-only decision log). These have no known legitimate exception anywhere
+in the corpus, per the PROJECT-STATUS.md section cited in each test.
+
+Scope note: this suite checks the DATA a pipeline run produced.
+tests/test_pipeline_logic.py (added 2026-08-14, same gate) checks the LOGIC
+that produces it, on synthetic inputs - the two are complementary, because
+several correctness paths (candidate drift detection, the re-apply guard,
+the vision cache key) are currently inert on real data and cannot be
+exercised by any amount of looking at the corpus.
 """
 import importlib.util
 import json
 import os
 import re
+import sys
 
 import pytest
 
@@ -296,6 +307,44 @@ def all_klalim(part_klalim):
     return sorted(combined, key=lambda k: k["klal_id"])
 
 
+@pytest.fixture(scope="session")
+def part1_by_id(part_klalim):
+    return {k["klal_id"]: k for k in part_klalim["part1.json"]}
+
+
+@pytest.fixture(scope="session")
+def corrections():
+    """corrections_part1.json - the per-klal flag overlay review_server.py
+    serves to the reviewer. Tracked in git (not a gitignored cache), so it is
+    always present and always expected to be current with part1.json: this
+    suite is rebuild_all.sh's LAST step, after the stage that regenerates it.
+    """
+    return json.load(open(os.path.join(REPO, "corrections_part1.json"), encoding="utf-8"))
+
+
+@pytest.fixture(scope="session")
+def regions():
+    return json.load(open(os.path.join(REPO, "klal_page_regions.json"), encoding="utf-8"))
+
+
+@pytest.fixture(scope="session")
+def alignment():
+    align = json.load(open(os.path.join(REPO, "part1_header_anchored_alignment.json"), encoding="utf-8"))
+    return {r["klal_id"]: r for r in align}
+
+
+@pytest.fixture(scope="session")
+def decision_records():
+    """review_decisions.jsonl, read as raw records. Read-only, always - this
+    file is the append-only human-decision audit trail, deliberately outside
+    the corpus-build pipeline so no rebuild can clobber it (CLAUDE.md "Human
+    review decisions"). A test must never write to it.
+    """
+    path = os.path.join(REPO, "review_decisions.jsonl")
+    with open(path, encoding="utf-8") as f:
+        return [(i, line) for i, line in enumerate(f, 1) if line.strip()]
+
+
 # --- Zero-tolerance structural invariants ---
 
 def test_klal_id_sequence_is_complete_unique_and_ordered(all_klalim):
@@ -398,6 +447,191 @@ def test_title_and_clean_text_are_never_empty(all_klalim):
     empty_text = [k["klal_id"] for k in all_klalim if not k.get("clean_text", "").strip()]
     assert not empty_titles, f"klal(im) with an empty title field: {empty_titles}"
     assert not empty_text, f"klal(im) with empty clean_text: {empty_text}"
+
+
+# --- Review-layer derived files: what the dashboard actually serves ---------
+# Added 2026-08-14. Everything above checks the corpus text; these check the
+# three files a human reviewer's decisions are made against and recorded in.
+# A defect here does not corrupt the text directly - it shows the reviewer the
+# wrong word, the wrong scan region, or the wrong flag, which is how a wrong
+# decision gets made in the first place (PROJECT-STATUS.md's 2026-08-13
+# reindexing incident: 10 human decisions orphaned onto positions that no
+# longer meant what they said).
+
+def test_no_stale_candidate_flags_are_being_served(corrections):
+    """assemble_corrections_dataset.py's drift check force-flags any
+    candidate whose word_index/corrected_word no longer matches live
+    part1.json. Since this suite is rebuild_all.sh's last step, every
+    candidate has just been regenerated against the current corpus - a
+    stale flag surviving to here means a stage of the rebuild did not
+    actually re-derive from part1.json (the `--skip-vision` staleness path).
+    """
+    stale = sorted(
+        (int(kid), c["word_index"]) for kid, entries in corrections.items()
+        for c in entries if c.get("flag") == "stale_candidate"
+    )
+    assert not stale, (
+        f"{len(stale)} candidate(s) are flagged 'stale_candidate' - (klal_id, word_index): {stale}. "
+        "Their recorded position no longer matches part1.json, so the reviewer would be shown a "
+        "verdict about a different word. Re-run ./rebuild_all.sh (without --skip-vision)."
+    )
+
+
+def test_every_served_flag_has_a_dashboard_label(corrections):
+    """review_frontend/app.js falls back to a bare 'Flagged' for any flag
+    review_server.FLAG_LABELS doesn't know, which is indistinguishable from a
+    typo'd flag name. tests/test_pipeline_logic.py checks the same property
+    against every flag classify() CAN emit; this checks the ones actually on
+    disk right now, which also covers a flag introduced by hand-editing.
+    """
+    sys.path.insert(0, REPO)
+    import review_server  # noqa: PLC0415 - deliberately imported inside the test, see fixture note
+
+    served = {c.get("flag") for entries in corrections.values() for c in entries}
+    unlabelled = sorted(f for f in served if f not in review_server.FLAG_LABELS)
+    assert not unlabelled, (
+        f"flag value(s) {unlabelled} appear in corrections_part1.json with no "
+        "review_server.FLAG_LABELS entry - the dashboard renders them as an unnamed, "
+        "uncoloured 'Flagged' word."
+    )
+
+
+def test_correction_word_index_points_inside_its_own_klal(corrections, part1_by_id):
+    """A candidate's word_index indexes clean_text.split(). Out of range means
+    the reviewer is shown a flag attached to nothing, and an accepted decision
+    would apply at a position that does not exist. Only a 'delete' candidate
+    (proposing to INSERT missing text) may legitimately sit one past the last
+    word - that is its append position.
+    """
+    offenders = []
+    for kid, entries in corrections.items():
+        klal = part1_by_id.get(int(kid))
+        if klal is None:
+            offenders.append((kid, None, "klal_id not in part1.json"))
+            continue
+        n_words = len(klal["clean_text"].split())
+        for c in entries:
+            wi = c["word_index"]
+            max_allowed = n_words if c["opcode"] == "delete" else n_words - 1
+            if wi < 0 or wi > max_allowed:
+                offenders.append((int(kid), wi,
+                                  f"{c['opcode']} outside 0..{max_allowed} (klal has {n_words} words)"))
+    assert not offenders, f"correction candidate(s) pointing outside their klal: {offenders}"
+
+
+def test_correction_entries_have_the_field_shape_their_opcode_implies(corrections):
+    """The three opcodes mean different things to the review UI, and it reads
+    the fields directly: 'replace' offers both readings, 'insert' offers
+    removal (docai_reading is null by construction - it saw nothing),
+    'delete' offers insertion (final_text is null - the corpus has nothing
+    there). A mismatched pair renders an empty or nonsensical option for a
+    reviewer to pick, so it is a data defect even though nothing crashes.
+    """
+    offenders = []
+    for kid, entries in corrections.items():
+        for c in entries:
+            op, docai, final = c["opcode"], c["docai_reading"], c["final_text"]
+            if op == "replace" and (docai is None or final is None):
+                offenders.append((int(kid), c["word_index"], "replace with a null reading"))
+            elif op == "insert" and (docai is not None or final is None):
+                offenders.append((int(kid), c["word_index"], "insert must have docai_reading=null, final_text set"))
+            elif op == "delete" and (docai is None or final is not None):
+                offenders.append((int(kid), c["word_index"], "delete must have final_text=null, docai_reading set"))
+            elif op not in ("replace", "insert", "delete", "manual"):
+                offenders.append((int(kid), c["word_index"], f"unknown opcode {op!r}"))
+            bbox = c.get("bbox")
+            if bbox is not None and not (0 <= bbox["x1"] < bbox["x2"] <= 1 and 0 <= bbox["y1"] < bbox["y2"] <= 1):
+                offenders.append((int(kid), c["word_index"], f"bbox not a normalised rectangle: {bbox}"))
+    assert not offenders, f"correction entries with an inconsistent shape: {offenders}"
+
+
+def test_every_trusted_klal_has_exactly_one_well_formed_scan_region(regions, alignment, part1_by_id):
+    """klal_page_regions.json drives the "you are here" highlight on the scan
+    pane for every klal, including the majority with no flagged correction.
+    A missing region means the reviewer gets no highlight at all; a malformed
+    or fabricated one means they are pointed at the wrong ink - the defect
+    that got SEFARIA-VLM-DEMO.html archived (14 placeholder bounding boxes
+    served under a "Precise Geometric Bounds" heading, CLAUDE.md).
+    """
+    trusted = {kid for kid, r in alignment.items()
+               if r.get("trusted") and kid in part1_by_id}
+    have = {int(k) for k in regions}
+    assert not (trusted - have), f"trusted Part-1 klal(im) with no scan region: {sorted(trusted - have)}"
+    assert not (have - trusted), (
+        f"scan region(s) for klalim that are not trusted Part-1 klalim: {sorted(have - trusted)}"
+    )
+
+    offenders = []
+    for kid, region in regions.items():
+        boxes = [(region["page"], region["bbox"])] + \
+            [(c["page"], c["bbox"]) for c in region.get("continuations", [])]
+        for page, b in boxes:
+            if not (0 <= b["x1"] < b["x2"] <= 1 and 0 <= b["y1"] < b["y2"] <= 1):
+                offenders.append((int(kid), page, f"not a normalised rectangle: {b}"))
+        if region.get("token_count", 0) < 1:
+            offenders.append((int(kid), region["page"], "region covers zero tokens"))
+        if region["page"] != alignment[int(kid)].get("matched_page"):
+            offenders.append((int(kid), region["page"],
+                              f"region page disagrees with the klal's aligned page "
+                              f"{alignment[int(kid)].get('matched_page')}"))
+        cont_pages = [c["page"] for c in region.get("continuations", [])]
+        if cont_pages != sorted(set(cont_pages)) or any(p <= region["page"] for p in cont_pages):
+            offenders.append((int(kid), region["page"],
+                              f"continuation pages {cont_pages} are not strictly increasing after it"))
+    assert not offenders, f"malformed scan region(s): {offenders}"
+
+
+def test_review_decisions_log_is_intact_and_internally_consistent(decision_records):
+    """The one file in this project a rebuild can never regenerate: every
+    human judgement ever recorded, append-only, tracked in git. A truncated
+    write, a hand-edit, or a decision_type typo silently drops a reviewer's
+    decision out of every lookup (all_current/history_for filter on exactly
+    these fields), and an apply_event whose applied_decision_id resolves to
+    nothing means the "already applied, never re-apply" guard is pointing at
+    a decision that no longer exists.
+    """
+    sys.path.insert(0, REPO)
+    import review_decisions  # noqa: PLC0415
+
+    records, malformed = [], []
+    for lineno, line in decision_records:
+        try:
+            records.append((lineno, json.loads(line)))
+        except json.JSONDecodeError as e:
+            malformed.append((lineno, str(e)))
+    assert not malformed, f"unparseable line(s) in review_decisions.jsonl: {malformed}"
+
+    problems = []
+    seen_ids = {}
+    for lineno, r in records:
+        if r["id"] in seen_ids:
+            problems.append(f"line {lineno}: duplicate id {r['id']} (also line {seen_ids[r['id']]})")
+        seen_ids[r["id"]] = lineno
+        if r["decision_type"] not in review_decisions.VALID_DECISION_TYPES:
+            problems.append(f"line {lineno}: unknown decision_type {r['decision_type']!r}")
+        if not isinstance(r["klal_id"], int):
+            problems.append(f"line {lineno}: klal_id {r['klal_id']!r} is not an int - it would match "
+                            "no lookup, since every query compares klal_id by value")
+        # klal_flag is klal-level by design; every other type is about one
+        # specific word/token and is looked up by (klal_id, word_index).
+        if (r.get("word_index") is None) != (r["decision_type"] == "klal_flag"):
+            problems.append(f"line {lineno}: {r['decision_type']} with word_index={r.get('word_index')!r}")
+
+    ids = set(seen_ids)
+    for lineno, r in records:
+        if r["decision_type"] == "apply_event":
+            ref = r.get("applied_decision_id")
+            if not ref or ref not in ids:
+                problems.append(f"line {lineno}: apply_event references decision id {ref!r}, "
+                                "which is not in the log")
+
+    timestamps = [r["ts"] for _, r in records]
+    if timestamps != sorted(timestamps):
+        problems.append("records are not in chronological order - 'current' state is defined as the "
+                        "LAST matching line in file order, so an out-of-order append silently "
+                        "resolves the wrong decision as current")
+
+    assert not problems, "review_decisions.jsonl integrity problem(s):\n  " + "\n  ".join(problems)
 
 
 # validate_part1_corpus_integrity.py is Part-1-only (its own gematria/
