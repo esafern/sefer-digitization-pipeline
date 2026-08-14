@@ -106,36 +106,91 @@ current handoff, re-written (not just appended to) as state changes.
   was made - correctly, per Lesson 9 (semantic signal alone is not
   sufficient) and Success Criterion #1 (never correct without checking
   the actual scan).
-  **Direct scan-crop verification of ONE instance (klal 199, word_index
-  38, page 72) COMPLICATES the initial framing**: at 600 DPI, full-line-
-  width crop, the printed page unambiguously shows two adjacent alefs
-  with NO lamed between them - `אא`, not `אלא` - at that exact position
-  (`דהשמר אינו אא לא תעשה` as printed). The current transcription is
-  therefore faithful to the ink at this instance, and matches DocAI's own
-  raw token read (`docai_word_boxes/page_72.json` index 579 is `'אא'`,
-  not an extraction/pipeline error at that stage either). This is the
-  SAME shape as the klal 88 `רתם`/`התם` precedent (a genuine source-
-  text/printer anomaly, not an OCR or digitization error) - if it
-  generalizes, the right disposition is editorial-awareness flagging,
-  NOT a corpus edit, per Success Criterion #1's "no paraphrase, no
-  silent normalization, no improving the text."
-  **But this is ONE instance out of ~86 - it does NOT establish that
-  every instance in the pattern is print-faithful.** A corpus-wide
-  pattern this large (dropping the exact same letter, in the exact same
-  way, across dozens of klalim) is also exactly the shape a genuine
-  scan/OCR/line-segmentation bug would produce (per CLAUDE.md's own
-  precedent: the page-furniture contamination bug and the geresh-spacing
-  bug were BOTH found this way - one instance looking individually
-  plausible, the full pattern only visible in aggregate). The honest
-  state right now: root cause UNESTABLISHED, could be a mix of
-  print-level and scan-level causes across different instances. **Next
-  step, not yet done**: scan-verify a larger sample across the ~86
-  instances (not just the one already checked) before drawing ANY
-  corpus-wide conclusion or taking ANY corpus-wide action - this is
-  large enough in scale that it needs a scope decision, not a unilateral
-  fix in either direction (don't bulk-correct on the word-frequency
-  signal alone; don't dismiss it as "just like klal 88" on one
-  data point either).
+  **ROOT CAUSE FOUND AND CONFIRMED AGAINST THE INK, 2026-08-14 (second
+  pass, 23 scan-verified instances). It is a genuine EXTRACTION BUG, not
+  a print anomaly: this Livorno print sets the letter pair `אל` as the
+  single ALEF-LAMED LIGATURE glyph `ﭏ` (U+FB4F), and DocAI reads that one
+  glyph as a bare `א`, silently dropping the lamed component.** Every
+  affected word form is exactly a word where a `ל` immediately follows an
+  `א` - `אלא`→`אא`, `אליבא`→`איבא`, `אלעזר`→`אעזר`, `שמואל`→`שמוא`,
+  `אלהים`→`אהים`, `ישראל`→`ישרא`, `אלפא`→`אפא`, `אלעאי`→`אעאי` - which is
+  the mechanism's fingerprint, not a coincidence.
+  Evidence, three independent signals agreeing (Lesson 9):
+  (a) **Pixels.** 600-1800 DPI crops of 23 instances across 22 klalim and
+  21 different pages (31-76): in every one, the disputed `א` carries a
+  tall hooked lamed ascender, while plain alefs on the SAME LINE
+  (`ביתא`, `ורבא`, `תנא`, `בתירא`, `הביא`, `יצא`) have no ascender at
+  all. Negative control passed: klal 44's `א"א` (a real abbreviation,
+  `אשת איש`) shows two plain alefs with a gershayim and NO ascender on
+  either - so this is a real discrimination, not "ascenders seen
+  everywhere."
+  (b) **Cross-engine.** On page 40 (klal 88) the VLM extraction reads the
+  same glyph as a bare `לא` - keeping the lamed, dropping the alef -
+  where DocAI read `אא`. Two engines splitting one composite glyph in
+  complementary directions is the signature of an unmapped ligature. The
+  same VLM page also reads `ר' אלעזר` in full where the print uses
+  separate sorts, so the ligature is used INCONSISTENTLY by the
+  compositor (normal for hand-set type), which is why the corrupt and
+  correct spellings coexist in the corpus.
+  (c) **Semantics.** Every reconstructed reading is the contextually
+  correct word (`אינו אלא לא תעשה`, `קודם אלפא ביתא`, `בארץ ישראל`).
+  **This OVERTURNS the earlier same-day read of klal 199 word_index 38**,
+  which this file previously recorded as "two adjacent alefs with NO
+  lamed - transcription faithful to the ink." Re-cropped at 1800 DPI with
+  the following word `לא` (which carries a standalone lamed) inside the
+  same frame as an anchor control: the token's first glyph has an
+  ascender identical in shape to that standalone lamed, and the alef of
+  the preceding `אינו` has none. The ink reads `אלא`. The earlier read
+  counted two glyphs and missed that the first glyph carries two letters.
+  It is therefore **NOT** the klal 88 `רתם`/`התם` class, and the
+  editorial-awareness-only disposition proposed on the basis of that one
+  instance does not apply.
+  **Result: 23 of 23 scan-verified instances are extraction bugs; 0
+  print-faithful; 0 ambiguous.** No corpus edit made - 23 `klal_flag`
+  decisions recorded in `review_decisions.jsonl`
+  (`reviewer: "ai-scan-crop-verification"`, verified live on the
+  dashboard via `/api/klal/199/flag`), each naming the word, word_index,
+  docai page/token, and the confirmed read, flagged as needing a
+  `manual_correction` decision from a human.
+  **SCOPE, revised (the earlier "~86" was both under- and over-counted).**
+  5 of the 45 `אא` tokens are the genuine abbreviation `א"א` and are NOT
+  part of the pattern. Against that, the pattern is much wider than the
+  8 word-forms originally listed: a mechanical sweep for "inserting `ל`
+  immediately after an `א` yields an attested corpus word" finds **117
+  occurrences of 22 confirmed-corrupt forms across 48 Part-1 klalim**
+  (adds `איביה` 5, `איעזר` 4, `אמא` 4, `ישמעא` 4, `איבייהו` 3, `אגאזי` 3,
+  `ושמוא` 3, `דשמוא` 2, `בצלא` 2, `איה` 2, `האה` 2, `אה`, `האף`,
+  `וכאה`). A further ~620 occurrences are forms that are ALSO legitimate
+  words (`א` 395, `או` 117, `אי` 91, `איהו` 11, `וא` 5) - `או` could be
+  `אלו`, `אי` could be `אלי` - and cannot be separated mechanically;
+  those need per-occurrence context/scan review and are the real unknown
+  in the scope. **Needs a scope decision before any bulk action.**
+  **SECONDARY FINDING, logged separately below**: every one of these
+  corrupt forms is present in `lexicon.txt`, so lexicon validation
+  structurally cannot catch this class of error.
+  **NOT YET DONE**: no fix to the extraction stage itself. The durable
+  repair is to make the DocAI-ingest path map the ligature codepoint (and
+  the glyph DocAI substitutes for it) to `אל`; nothing in the pipeline
+  does this today, and `docai_word_boxes/` contains zero `ﭏ` characters,
+  so the loss happens inside DocAI, before this repo sees the text.
+  Parts 2-3 are almost certainly affected the same way but are out of
+  scope per the standing directive.
+
+### `lexicon.txt` cannot catch the ligature corruption - it contains it
+
+Found 2026-08-14 while scoping the above. `אא`, `אעזר`, `שמוא`, `אהים`,
+`איבא`, `ישרא`, `אפא`, `אעאי`, `ישמעא`, `אמא`, `אגאזי`, `ושמוא`,
+`דשמוא`, `איעזר`, `איביה`, `בצלא` are ALL present in `lexicon.txt` as
+"validated Rabbinic Hebrew words." The lexicon was built from this
+corpus's own output, so it absorbed the corruption and now certifies it.
+This is exactly CLAUDE.md Lesson 3 ("never trust a derived/aggregate
+artifact as ground truth") with a concrete cost: CLAUDE.md's "Conventions
+observed" bar - "every cleanup pass targets zero flagged items in
+`lexicon.txt` validation" - was being met while 117+ corrupted words sat
+in Part 1, because the dictionary the check validates against was
+downstream of the bug. Any lexicon-based validation result predating this
+finding should be read as no evidence either way on this class of error.
+A lexicon re-derivation from an independent source is the fix; not done.
 - **Every previously-tracked corpus-content gap is closed** (klal 5, 29,
   30/75/88, 37, 69, 206, 217; the second source-audit round's 12 confirmed
   bugs; the reindexing incident's 3 root causes - all fixed, verified
