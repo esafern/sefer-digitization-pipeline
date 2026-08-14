@@ -33,8 +33,12 @@ import apply_reviewer_decisions as ard  # noqa: E402
 import assemble_corrections_dataset as acd  # noqa: E402
 import audit_applied_decisions as aad  # noqa: E402
 import build_klal_page_regions as bkpr  # noqa: E402
+import check_klal_token_orphans as ckto  # noqa: E402
 import review_decisions as rd  # noqa: E402
 import review_server as rs  # noqa: E402
+import validate_catchword_continuity as vcc  # noqa: E402
+import validate_part1_corpus_integrity as vpci  # noqa: E402
+import validate_title_alphabetical_order as vtao  # noqa: E402
 
 
 # --- assemble_corrections_dataset: candidate drift detection -----------------
@@ -426,6 +430,170 @@ def test_heuristic_regions_bbox_always_encloses_every_token_it_counted():
         b = region["bbox"]
         assert b["x1"] < b["x2"] and b["y1"] < b["y2"], f"klal {klal_id} has a degenerate bbox: {b}"
         assert region["token_count"] >= 1
+
+
+# --- check_klal_token_orphans: the Pass-3 false-positive allowlist ----------
+# Changed 2026-08-14 from a bare {4, 18, 34} klal_id set, which suppressed
+# EVERY Pass-3 gap in those klalim, to a (klal_id, normalised span) key. The
+# whole point is that a NEW, different gap in the same klal still surfaces -
+# a property no amount of running the script against today's data can
+# demonstrate, since today's data has exactly the 3 cleared gaps and nothing
+# else.
+
+KNOWN_KLAL_4_GAP = 'ואפ"ה חשיב ליה שם בזבחים למד מלמד והניח הדבר בתימה וגדולה היא אלי וצ"ע :'
+
+
+def test_the_exact_investigated_span_is_still_suppressed():
+    assert ckto.is_known_pass3_false_positive(4, KNOWN_KLAL_4_GAP.split()) is True
+    # Tokenisation/punctuation differences must not matter - the key is the
+    # normalised Hebrew letters, and Pass 3 feeds it raw OCR tokens.
+    assert ckto.is_known_pass3_false_positive(4, KNOWN_KLAL_4_GAP.replace(" ", "").split()) is True
+
+
+def test_a_different_gap_in_an_allowlisted_klal_is_not_suppressed():
+    """The regression this guards: reverting to a klal_id-only allowlist
+    would silently swallow a genuinely new missing-content finding in klal
+    4/18/34 - the same klalim whose spans were cleared for unrelated
+    reasons (out-of-reading-order tokens, a citation collision, garbled
+    source OCR)."""
+    assert ckto.is_known_pass3_false_positive(4, "טקסט חדש לגמרי שלא נבדק מעולם".split()) is False
+    assert ckto.is_known_pass3_false_positive(18, KNOWN_KLAL_4_GAP.split()) is False, (
+        "a cleared span must be cleared for its OWN klal only"
+    )
+
+
+def test_the_allowlist_is_keyed_on_spans_not_bare_klal_ids():
+    for entry in ckto.PASS3_KNOWN_FALSE_POSITIVES:
+        assert isinstance(entry, tuple) and len(entry) == 2, (
+            f"PASS3_KNOWN_FALSE_POSITIVES entry {entry!r} is not a (klal_id, normalised_span) pair - "
+            "a bare klal_id would suppress every future gap in that klal, the exact over-suppression "
+            "fixed 2026-08-14"
+        )
+        klal_id, span = entry
+        assert isinstance(klal_id, int) and isinstance(span, str) and span, entry
+        assert span == ckto.normalize(span), (
+            f"the span for klal {klal_id} is not stored normalised, so it can never match the "
+            "normalised span Pass 3 computes - the suppression would be silently dead"
+        )
+
+
+def test_best_match_owner_never_answers_with_the_klal_under_investigation():
+    """Fixed 2026-08-14: `self_kid` was accepted and ignored, so klal 34's
+    missing text was reported as most likely belonging to... klal 34."""
+    part1 = {
+        34: {"clean_text": "אלף בית גימל דלת הא"},
+        36: {"clean_text": "אלף בית גימל דלת וו"},
+    }
+    kid, similarity = ckto.best_match_owner("אלף בית גימל דלת הא".split(), part1, self_kid=34)
+    assert kid == 36 and similarity > 0
+
+
+# --- Standalone validators: proof that each check can actually fire ---------
+# Three of these are zero-tolerance gates in tests/test_corpus_invariants.py,
+# where they currently pass on the whole corpus. CLAUDE.md Lesson 2: a
+# passing score is not a checked result - a gate that CANNOT fail is
+# indistinguishable from one that passes, and each of these checks has
+# already had false-positive sources removed from it, any of which could have
+# been over-corrected into blindness.
+
+def test_gematria_check_catches_a_wrong_field_and_a_wrong_opening():
+    ok = [{"klal_id": 1, "gematria": "א", "clean_text": "א ראשית הדברים"}]
+    assert vpci.check_gematria_self_consistency(ok) == []
+    wrong_field = [{"klal_id": 1, "gematria": "ב", "clean_text": "א ראשית הדברים"}]
+    assert len(vpci.check_gematria_self_consistency(wrong_field)) == 2
+    wrong_opening = [{"klal_id": 1, "gematria": "א", "clean_text": "ראשית הדברים"}]
+    assert len(vpci.check_gematria_self_consistency(wrong_opening)) == 1
+    # klal 166's print attaches its own closing geresh to the numeral.
+    geresh = [{"klal_id": 166, "gematria": "קסו", "clean_text": "קסו' ראשית הדברים"}]
+    assert vpci.check_gematria_self_consistency(geresh) == []
+
+
+def test_character_sanity_catches_latin_digits_and_unbalanced_brackets():
+    def issues(text):
+        return vpci.check_character_sanity([{"klal_id": 1, "clean_text": text}])
+
+    assert issues("אלף בית גימל") == []
+    assert issues("אלף Google בית") != []
+    assert issues("אלף 283 בית") != []
+    assert issues("אלף (בית גימל") != []
+    assert issues("אלף [בית גימל") != []
+    # The two footnote-marker conventions this print uses are not brackets.
+    assert issues("אלף *) בית") == []
+    assert issues('אלף ") בית') == []
+
+
+def test_character_sanity_does_not_mistake_a_hebrew_abbreviation_for_a_footnote_marker():
+    """FOOTNOTE_MARKER_RE's `"` alternative got a lookbehind 2026-08-14: an
+    abbreviation's gershayim landing directly before a close paren was
+    subtracted as if it were a footnote marker, which can either manufacture
+    a false "unbalanced parens" failure or cancel a real one - in a gate
+    that is zero-tolerance."""
+    balanced = vpci.check_character_sanity([{"klal_id": 1, "clean_text": 'אלף (עיין ז") בית'}])
+    assert balanced == [], f"a real close paren after a gershayim must still count: {balanced}"
+    unbalanced = vpci.check_character_sanity([{"klal_id": 1, "clean_text": 'אלף עיין ז") בית'}])
+    assert unbalanced != [], "an unmatched close paren after a gershayim must still be reported"
+
+
+def test_duplicate_phrase_checks_fire_and_respect_the_same_title_convention():
+    phrase = " ".join(f"מלה{i}" for i in range(12))
+    different_titles = [
+        {"klal_id": 1, "title": "כותרת ראשונה", "clean_text": f"פתיחה {phrase} סיום"},
+        {"klal_id": 2, "title": "נושא אחר לגמרי", "clean_text": f"פתיחה {phrase} סיום"},
+    ]
+    assert vpci.check_duplicate_phrases(different_titles, n=10) != []
+    same_title = [dict(k, title="כותרת זהה") for k in different_titles]
+    assert vpci.check_duplicate_phrases(same_title, n=10) == [], (
+        "adjacent klalim restating the same maxim under the same title is this book's documented "
+        "convention, not a corpus bug"
+    )
+    within_one = [{"klal_id": 1, "title": "כותרת", "clean_text": f"{phrase} מפריד {phrase}"}]
+    assert vpci.check_intra_klal_duplicate_phrases(within_one, n=10) != []
+    assert vpci.check_intra_klal_duplicate_phrases(
+        [{"klal_id": 1, "title": "כותרת", "clean_text": phrase}], n=10) == []
+
+
+def test_title_order_check_reports_an_unrankable_first_character_instead_of_skipping_it():
+    """Fixed 2026-08-14: a title whose first character isn't a Hebrew letter
+    used to be silently dropped - neither validated nor flagged, invisible to
+    the whole check (klal 353 is the live instance)."""
+    klalim = [
+        {"klal_id": 1, "title": "אלף פותח"},
+        {"klal_id": 2, "title": "'. בית פותח"},
+        {"klal_id": 3, "title": "בית פותח"},
+    ]
+    violations, skipped = vtao.find_violations(klalim)
+    assert [kid for kid, _ in skipped] == [2]
+    assert violations == {}
+
+
+def test_title_order_check_catches_a_letter_run_that_breaks_and_resumes():
+    ordered = [{"klal_id": i, "title": t} for i, t in enumerate(
+        ["אלף", "אלף", "בית", "בית", "גימל", "גימל"], start=1)]
+    assert vtao.find_violations(ordered)[0] == {}
+    # One stray Bet-titled klal stranded inside the Alef run. Deliberately
+    # shaped so overriding it is the ONLY maximal assignment: with a single
+    # klal on each side of the break, two different klalim tie for "the odd
+    # one out" and either answer is equally correct.
+    stranded = [{"klal_id": i, "title": t} for i, t in enumerate(
+        ["אלף", "אלף", "אלף", "בית", "אלף", "אלף", "בית", "בית", "בית"], start=1)]
+    assert set(vtao.find_violations(stranded)[0]) == {4}, (
+        "a klal whose letter reappears after its run closed is the signature of a broken klal "
+        "boundary - the whole reason this check is contiguity-based"
+    )
+
+
+def test_running_header_words_are_only_matched_as_bare_words():
+    """Fixed 2026-08-14: HEADER_WORDS matched through clean_word(), so the
+    citation י"ד (Yoreh De'ah / a siman number) collapsed onto the running
+    header's bare יד and was eaten as page furniture - 43 tokens across the
+    scan, one of which changed a reported page boundary."""
+    assert vcc.is_header_word("יד") is True
+    assert vcc.is_header_word("מלאכי") is True
+    assert vcc.is_header_word('י"ד') is False
+    assert vcc.is_header_word("י'ד") is False
+    assert vcc.is_header_word("כלל") is False, (
+        "the bare word כלל ('rule') is real text, not the header token כללי"
+    )
 
 
 # --- verify_corrections_vision: response parsing + cache-key coverage --------

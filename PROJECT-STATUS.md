@@ -171,18 +171,46 @@ existing test files. Same scope rules - witness/punctuation excluded.
   `"unverified": ["Unclassified (unexpected opcode)", "#718096"]`.
   **Needs a `review_server.py` restart to take effect once merged** -
   server-side Python constants don't hot-reload the way data files do.
+- **Standalone-validator coverage added (second batch, same file):**
+  `check_klal_token_orphans.py`'s Pass-3 allowlist (the exact investigated
+  span still suppressed; a DIFFERENT span in klal 4/18/34 NOT suppressed;
+  the allowlist structurally proven to be span-keyed, not klal_id-keyed;
+  every stored span proven already-normalised, since an unnormalised one
+  could never match and the suppression would be silently dead) and
+  `best_match_owner`'s self-exclusion; `validate_part1_corpus_integrity.py`'s
+  three GATED checks proven able to FIRE (a wrong gematria field, a wrong
+  opening word, Latin/digit/bracket damage, a real duplicated phrase) as
+  well as to stay quiet on their documented exemptions (klal 166's geresh,
+  the two footnote-marker conventions, the same-title cluster) - per Lesson
+  2, a gate that cannot fail is indistinguishable from one that passes, and
+  all three of these had false-positive sources removed from them in the
+  past, any of which could have been over-corrected into blindness;
+  `validate_title_alphabetical_order.py`'s unrankable-first-character
+  reporting and its contiguity detection; `validate_catchword_continuity.py`'s
+  `is_header_word` (the `י"ד`-eaten-as-furniture fix from earlier today).
+- **One small enabling refactor**: `check_klal_token_orphans.py`'s Pass-3
+  suppression rule extracted from an inline expression in `main()`'s loop
+  into `is_known_pass3_false_positive(klal_id, missing_words)`. Behaviour
+  verified unchanged by diffing the full script output before/after against
+  a `git stash`ed baseline (byte-identical, including the "3 known false
+  positive(s) suppressed" line).
 - **Every new test verified to actually FAIL when its invariant is
-  violated**, not just to pass: 10 source mutations (drift check
+  violated**, not just to pass: 18 source mutations (drift check
   neutered, confidence gate removed, label deleted, re-apply guard
   removed, negative-index bounds check removed, supersession logic
   loosened, JSON-unescape removed, prompt_hash dropped from the cache
-  lookup, `already_done` ignored, append mode changed to write) and 15
-  data mutations (stale flag, unknown flag, out-of-range index, broken
-  opcode shape, inverted bbox, missing/malformed/mis-paged/zero-token
-  region, duplicate id, bad decision_type, dangling apply_event, string
-  klal_id, out-of-order records, truncated line) - all 25 produced a red
-  test, and every mutated tracked file was restored and sha256-verified
-  byte-identical afterwards.
+  lookup, `already_done` ignored, append mode changed to write, the
+  Pass-3 allowlist reverted to klal_id-only, `best_match_owner`'s
+  self-exclusion removed, the gematria field comparison disabled, the
+  footnote-marker lookbehind removed, the same-title exemption widened to
+  everything, intra-klal duplicate detection disabled, the
+  unrankable-title report silenced, the header-word abbreviation guard
+  removed) and 15 data mutations (stale flag, unknown flag, out-of-range
+  index, broken opcode shape, inverted bbox, missing/malformed/mis-paged/
+  zero-token region, duplicate id, bad decision_type, dangling
+  apply_event, string klal_id, out-of-order records, truncated line) -
+  all 33 produced a red test, and every mutated tracked file was restored
+  and sha256-verified byte-identical afterwards.
 
 ### `verify_witness_vision.py`'s 419-item pass finished 2026-08-14
 

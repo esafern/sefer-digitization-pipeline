@@ -116,6 +116,16 @@ PASS3_KNOWN_FALSE_POSITIVES = {
 }
 
 
+def is_known_pass3_false_positive(klal_id, missing_words):
+    """Is this exact gap the one already investigated and cleared for this
+    klal? Extracted from main()'s Pass-3 loop 2026-08-14 so the suppression
+    rule itself is directly testable (tests/test_pipeline_logic.py) - the
+    whole point of the (klal_id, span) key is that a DIFFERENT gap in the
+    same klal must still surface, and nothing could check that while the
+    rule lived inline in a loop over real scan data."""
+    return (klal_id, normalize("".join(missing_words))) in PASS3_KNOWN_FALSE_POSITIVES
+
+
 def strip_furniture(words):
     return [w for w in words if w not in FURNITURE_WORDS and w not in SECTION_WORDS
             and not re.fullmatch(r"\d+", w)]
@@ -354,8 +364,7 @@ def main():
         for tag, i1, i2, _j1, _j2 in sm.get_opcodes():
             if tag in ("delete", "replace") and (i2 - i1) >= GAP_MIN_WORDS:
                 missing = real_tokens[i1:i2]
-                signature = (kid, normalize("".join(missing)))
-                (known_fp_hits if signature in PASS3_KNOWN_FALSE_POSITIVES else gap_hits).append(
+                (known_fp_hits if is_known_pass3_false_positive(kid, missing) else gap_hits).append(
                     (kid, missing))
     if gap_hits:
         for kid, missing in gap_hits:
