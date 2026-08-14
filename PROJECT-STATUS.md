@@ -63,22 +63,42 @@ current handoff, re-written (not just appended to) as state changes.
      titles with a non-Hebrew first character instead of reporting them
      - klal 353, Part 2, is the one current instance).
 
-### IN PROGRESS - not yet done, check on this first next session
+### `verify_witness_vision.py`'s 419-item pass finished 2026-08-14
 
-**`verify_witness_vision.py`'s full 419-item vision-adjudication pass
-over the witness queue is running detached** (`nohup`+`disown`, survives
-independent of any session) - started fresh against the bbox-corrected
-queue. Check progress with `sqlite3 witness_vision_cache.db "SELECT
-COUNT(*) FROM witness_cache;"` (target 419) or `ps aux | grep
-verify_witness_vision`. It writes `vision_selected`/`vision_
-transcription`/`vision_confidence`/`vision_reasoning` into
-`reconstruction_witness_queue.json` in ONE write at the very end of its
-loop, not incrementally - so the queue file will show nothing until it's
-fully done. Once it finishes: review the results, commit `reconstruction_
-witness_queue.json` and `witness_vision_cache.db`, and report what it
-found. This is a TRIAGE layer only (per its own design) - it does not
-record `witness_choice` decisions itself, so it doesn't close item #2
-below on its own.
+All 419 witness-queue items (klal 30/75/88) now carry `vision_selected`/
+`vision_transcription`/`vision_confidence`/`vision_reasoning` in
+`reconstruction_witness_queue.json`: 382 sided with DocAI ("A"), 16 with
+Tesseract ("B"), 21 "NEITHER" (model transcribed a third reading), 0
+errors. Confidence was 0.90-1.00 across the board (mean 0.979) - per
+Lesson 2, treat that uniformly-high band as a triage prior, not a
+certificate; it hasn't been checked against a held-out sample of known-
+wrong cases.
+
+**Bug found and fixed in the same pass**: 5/419 items (klal 30 tok 84,
+284, 750, 835; klal 75 tok 555) came back from Gemini as `ERROR` because
+`sanitize_json`'s repair regex only fixes bad backslash escapes, not a
+literal unescaped `"` *inside* a JSON string value - which happens
+routinely here because Hebrew gershayim/geresh punctuation inside a
+transcribed abbreviation (e.g. `ז"ל`, `הרא"ש`, `כ"ו`) IS a literal `"`
+character, and the model didn't escape it despite `response_mime_type=
+"application/json"`. Fixed by adding `parse_decision_lenient()` to
+`verify_witness_vision.py` (field-by-field regex extraction, used as a
+third fallback after `json.loads` and `sanitize_json` both fail) and
+wired into the parse chain. All 5 raw responses were already sitting in
+`witness_vision_cache.db` (cache_put runs before parsing) as valid,
+high-confidence "A" decisions - recovered by re-parsing the cached text
+with the fixed parser, at zero additional API cost. Verified: all 419
+items now have a non-null `vision_selected` and `vision_confidence`,
+file re-validated as parseable JSON. Any future re-run of this script (or
+`verify_corrections_vision.py`'s similarly-shaped parser, not yet
+audited for the same gap) should hit this fallback automatically if the
+same failure recurs.
+
+**Not yet done**: commit `reconstruction_witness_queue.json`,
+`witness_vision_cache.db`, and `verify_witness_vision.py` together. This
+is still a TRIAGE layer only (per its own design) - it does not record
+`witness_choice` decisions itself, so it doesn't close item #2 below on
+its own; a human still needs to work through the dashboard.
 
 ### NEXT STEPS, in order
 

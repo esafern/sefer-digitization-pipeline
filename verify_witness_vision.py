@@ -102,6 +102,34 @@ def sanitize_json(text):
     return re.sub(r'\\(?!["\\/bfnrtu])', "", text)
 
 
+def parse_decision_lenient(text):
+    """Field-by-field recovery for responses that are unparseable as strict
+    JSON because a string value contains a literal, unescaped double-quote -
+    e.g. Hebrew gershayim inside transcription_found/reasoning such as
+    ז"ל or הרא"ש. json.loads (and sanitize_json's backslash fix) can't
+    handle that: the model emits {"transcription_found": "ז"ל", ...} where
+    the quote mark that's PART of the Hebrew text terminates the JSON string
+    early, corrupting everything after it. selected_option is a closed
+    vocabulary (A/B/NEITHER/UNCERTAIN) and confidence is a bare number, so
+    neither can contain a stray quote; only transcription_found/reasoning
+    need the lenient extraction. Raises ValueError if the expected shape
+    isn't found at all (a genuinely different failure, not this bug)."""
+    opt = re.search(r'"selected_option"\s*:\s*"([^"]*)"', text)
+    conf = re.search(r'"confidence"\s*:\s*([0-9.]+)', text)
+    transcription = re.search(
+        r'"transcription_found"\s*:\s*"(.*?)"\s*,\s*\n?\s*"confidence"', text, re.DOTALL
+    )
+    reasoning = re.search(r'"reasoning"\s*:\s*"(.*)"\s*\n?}\s*$', text, re.DOTALL)
+    if not (opt and transcription and reasoning):
+        raise ValueError("lenient JSON recovery: expected fields not found")
+    return {
+        "selected_option": opt.group(1),
+        "transcription_found": transcription.group(1),
+        "confidence": float(conf.group(1)) if conf else None,
+        "reasoning": reasoning.group(1),
+    }
+
+
 _dtoks_cache = {}
 
 
@@ -217,7 +245,10 @@ def main():
             try:
                 decision = json.loads(decision_text)
             except json.JSONDecodeError:
-                decision = json.loads(sanitize_json(decision_text))
+                try:
+                    decision = json.loads(sanitize_json(decision_text))
+                except json.JSONDecodeError:
+                    decision = parse_decision_lenient(decision_text)
         except Exception as e:
             print(f"  !! failed: {e}")
             decision = {"selected_option": "ERROR", "transcription_found": None, "confidence": None, "reasoning": str(e)}
