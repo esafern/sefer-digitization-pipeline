@@ -57,8 +57,6 @@ this work today).
 > fixes too (cache bugs, dead models, UI fixes), not just corpus-content
 > findings.
 
-## Pipeline shape
-
 ## Success criteria (in priority order)
 
 1. **Absolute fidelity to the author's words.** The transcript must match the
@@ -86,10 +84,13 @@ in the canonical text files. Concretely:
 
 1. **Extraction** — DocAI/VLM extraction through the (gitignored)
    `docai_word_boxes/`, `document_jsons_berlin/`, `vlm_extractions/` caches is
-   the live path. (`chunker.py`, which pulled raw text per page from the PDF, handles
-   the reversed-Hebrew-line quirk of these 19th-century scans via
-   `unreverse_line`). DocAI/VLM extraction happens through the (gitignored)
-   `docai_word_boxes/`, `document_jsons_berlin/`, `vlm_extractions/` caches.
+   the live path. `chunker.py` — the earlier script that pulled raw text
+   per page from the PDF and handled the reversed-Hebrew-line quirk of
+   these 19th-century scans via `unreverse_line` — has been superseded by
+   this and is archived at `archive/scripts/chunker.py` (CORRECTED
+   2026-08-14: this section used to describe it as part of the live
+   path; it is not — see "Directory layout" below for other file-existence
+   claims in this document that had gone stale the same way).
 2. **Adjudication** — `verify_corrections_vision.py` is the live vision
    adjudicator (run by `rebuild_all.sh`). NOTE: `orchestrator.py` was ARCHIVED
    2026-08-11 after an audit confirmed it was dead (not in `rebuild_all.sh`,
@@ -133,8 +134,10 @@ in the canonical text files. Concretely:
    Geometric Bounds" heading. Nothing linked it. It needs no replacement:
    `review_server.py` supersedes it internally (real per-klal boxes from
    `klal_page_regions.json`, live data, plus candidates and decisions), and
-   `VERIFIED-AGAINST-THE-INK.html` already fills the outward-facing role. As of 2026-08-06, one-off `*-VISUAL-REPORT.html` / `*-OVERVIEW.html`
-   /  similar report docs from earlier in the project (dated through early
+   `VERIFIED-AGAINST-THE-INK.html` already fills the outward-facing role.
+
+   As of 2026-08-06, one-off `*-VISUAL-REPORT.html` / `*-OVERVIEW.html` /
+   similar report docs from earlier in the project (dated through early
    August, superseded once `review.html` became the live verification tool,
    itself since superseded by `review_server.py`) were moved to
    `archive/docs/` — see "Directory layout" below. Don't assume a
@@ -192,6 +195,16 @@ drift detection and one-insert/delete-per-klal-per-run safety limit (see
 its module docstring). Recording a decision and applying it to the corpus
 are always two distinct, deliberate steps.
 
+`audit_applied_decisions.py` (added 2026-08-14) is a read-only,
+standalone check on that boundary from the other direction: for every
+decision the log claims was applied (has an `apply_event`), does
+`part1.json` still actually reflect it? `apply_reviewer_decisions.py`'s
+own "don't re-apply" guard trusts the log permanently once a decision is
+marked applied — sound only as long as nothing mutates `part1.json`
+outside the normal apply-script flow. This script is the missing
+re-check on that assumption; it changes nothing, only reports. Not part
+of `rebuild_all.sh`, run manually.
+
 ### The vision-adjudication cache must be keyed on the full comparison, not just the crop
 
 `adjudication_cache.db` caches Gemini's decision for "does this crop show
@@ -209,58 +222,81 @@ correctly; if you add another vision-caching script, key it the same way.
 
 ## Directory layout
 
-- (`orchestrator.py` and `chunker.py` were the two OCR/VLM-extraction pipeline
-  scripts. `build_klalim_demo_dataset.py`, `build_corrections_dataset.py`,
-  `verify_corrections_vision.py`, `assemble_corrections_dataset.py`,
-  `build_klal_page_regions.py`, and `rebuild_all.sh` are the
-  correction-data pipeline (see "Single source of truth" above).
-  `review_server.py`, `review_frontend/`, `review_decisions.py`, and
-  `apply_reviewer_decisions.py` (added 2026-08-07, see "Human review
-  decisions" above) are the live review tool - not part of
-  `rebuild_all.sh`, run separately with `python3 review_server.py`.
-  `propose_punctuation_part1.py` and `apply_punctuation_decisions.py`
-  (added 2026-08-10, Part 1 only — see PROJECT-STATUS.md) are a parallel
-  candidate→review→apply pipeline for the corpus-wide punctuation pass:
-  the propose script drafts `[.]`-marked sentence/clause-break insertions
-  per klal via Gemini into `punctuation_candidates_part1.json` (its own
-  sqlite cache, `punctuation_cache.db`, keyed on klal_id + clean_text so a
-  later corpus edit invalidates stale proposals); `review_server.py`
-  surfaces every proposal as a clickable blue `·` marker in the text pane
-  for accept/reject via the same `review_decisions.jsonl` audit trail
-  (`punctuation_choice` decision type); `apply_punctuation_decisions.py`
-  promotes accepted decisions into `part1.json`, mirroring
-  `apply_reviewer_decisions.py`'s drift-detection/never-silently-mutate
-  pattern. Like the correction-candidate scripts, not part of
-  `rebuild_all.sh` — run manually.
-  `rebuild_all.sh`'s step 6/6 runs `tests/test_corpus_invariants.py`
-  (pytest) as a hard gate — see "Standing regression test suite" in
-  PROJECT-STATUS.md for what it checks and why (`requirements-dev.txt`
-  pins the pytest version). `build_vlm_demo.py`,
-  `validate_klal_span_coverage.py`, `validate_title_alphabetical_order.py`,
-  `validate_title_section_letter.py`, and `check_klal_token_orphans.py`
-  (added 2026-08-06 — checks every Part-1 klal boundary for orphaned
-  tokens never captured under any klal_id, or the same tokens captured
-  under two; see PROJECT-STATUS.md "Klal 185-190, 196-197, 215-217
-  resolved") are the other active root scripts (demo generation and
-  standalone post-fix validators, run manually, not part of
-  `rebuild_all.sh` — each needs the gitignored `docai_word_boxes`/scan-derived
-  caches, so they can't run on a fresh clone).
-  `validate_part1_corpus_integrity.py` (added 2026-08-07 — 5 independent
-  no-LLM sweeps over `part1.json` alone: gematria self-consistency,
-  character/encoding sanity, duplicated-phrase detection, self-reference
-  directionality, full-corpus lexicon coverage) is also runnable standalone
-  for its full output, but unlike the scan-dependent validators above, its
-  first 3 checks (zero known false positives as of 2026-08-07, after fixing
-  3 bugs in the script itself — see PROJECT-STATUS.md) are wired into
-  `tests/test_corpus_invariants.py` as additional zero-tolerance gates in
-  `rebuild_all.sh`'s step 6/6, since it needs only tracked files (no
-  gitignored cache) and runs in under a second. Its checks 4
-  (self-reference directionality) and 5 (lexicon coverage) are deliberately
-  NOT gated — the script's own docstrings mark them not-viable/informational,
-  not zero-tolerance. Root also now has a `tests/` directory (the pytest
-  suite above) and `requirements-dev.txt` — everything else that was at
-  root as of 2026-08-06's cleanup (one-off extraction/fix/lexicon scripts)
-  has been moved to `archive/scripts/`.
+**REFACTORED/CORRECTED 2026-08-14** — this section used to be one long
+run-on bullet, and had drifted from reality in three places nobody had
+caught: `build_vlm_demo.py` was listed here as an "active root script"
+while a different paragraph in this same file (above) already said it
+was archived; `validate_title_section_letter.py` was listed as active
+but is archived too (`archive/scripts/`); `validate_catchword_continuity.py`
+is live at root but was missing from this list entirely. Restructured
+into sub-bullets and re-verified against an actual `ls *.py` at root, not
+against the previous version of this file — the lesson (see Lessons
+learned, applied here to CLAUDE.md itself, not just a script docstring):
+this document's own file-existence claims are not automatically true and
+need the same checking as any other claim.
+
+- Root scripts, by role:
+  - **Correction-data pipeline** (see "Single source of truth" above) —
+    `build_klalim_demo_dataset.py`, `build_corrections_dataset.py`,
+    `verify_corrections_vision.py`, `assemble_corrections_dataset.py`,
+    `build_klal_page_regions.py`, run in that order by `rebuild_all.sh`.
+    `orchestrator.py` and `chunker.py`, the two earlier OCR/VLM-extraction
+    scripts this pipeline superseded, are both archived
+    (`archive/scripts/`) — see "Pipeline shape" above for why.
+  - **Live review tool** — `review_server.py`, `review_frontend/`,
+    `review_decisions.py`, `apply_reviewer_decisions.py` (added
+    2026-08-07, see "Human review decisions" above), and
+    `audit_applied_decisions.py` (added 2026-08-14, see the same section)
+    — not part of `rebuild_all.sh`, run separately with
+    `python3 review_server.py`.
+  - **Punctuation pass, Part 1 only** — `propose_punctuation_part1.py`
+    and `apply_punctuation_decisions.py` (added 2026-08-10, see
+    PROJECT-STATUS.md) are a parallel candidate→review→apply pipeline
+    for corpus-wide punctuation: the propose script drafts `[.]`-marked
+    sentence/clause-break insertions per klal via Gemini into
+    `punctuation_candidates_part1.json` (its own sqlite cache,
+    `punctuation_cache.db`, keyed on klal_id + clean_text so a later
+    corpus edit invalidates stale proposals); `review_server.py` surfaces
+    every proposal as a clickable blue `·` marker in the text pane for
+    accept/reject via the same `review_decisions.jsonl` audit trail
+    (`punctuation_choice` decision type); `apply_punctuation_decisions.py`
+    promotes accepted decisions into `part1.json`, mirroring
+    `apply_reviewer_decisions.py`'s drift-detection/never-silently-mutate
+    pattern. Like the correction-candidate scripts, not part of
+    `rebuild_all.sh` — run manually. Secondary to the main correction
+    pipeline (user directive 2026-08-14).
+  - **pytest gate** — `rebuild_all.sh`'s step 6/6 runs
+    `tests/test_corpus_invariants.py` as a hard gate; see "Standing
+    regression test suite" in PROJECT-STATUS.md for what it checks and
+    why (`requirements-dev.txt` pins the pytest version).
+  - **Standalone validators, run manually** (CORRECTED list, see note
+    above — `validate_klal_span_coverage.py`, `validate_catchword_
+    continuity.py`, `validate_title_alphabetical_order.py`, and
+    `check_klal_token_orphans.py` (added 2026-08-06 — checks every
+    Part-1 klal boundary for orphaned tokens never captured under any
+    klal_id, or the same tokens captured under two; see
+    PROJECT-STATUS.md "Klal 185-190, 196-197, 215-217 resolved") - not
+    part of `rebuild_all.sh`, each needs the gitignored
+    `docai_word_boxes`/scan-derived caches, so none of them can run on a
+    fresh clone.
+  - **`validate_part1_corpus_integrity.py`** (added 2026-08-07 — 5
+    independent no-LLM sweeps over `part1.json` alone: gematria
+    self-consistency, character/encoding sanity, duplicated-phrase
+    detection, self-reference directionality, full-corpus lexicon
+    coverage) is also runnable standalone for its full output, but
+    unlike the scan-dependent validators above, its first 3 checks (zero
+    known false positives as of 2026-08-07, after fixing 3 bugs in the
+    script itself — see PROJECT-STATUS.md) are wired into
+    `tests/test_corpus_invariants.py` as additional zero-tolerance gates
+    in `rebuild_all.sh`'s step 6/6, since it needs only tracked files
+    (no gitignored cache) and runs in under a second. Its checks 4
+    (self-reference directionality) and 5 (lexicon coverage) are
+    deliberately NOT gated — the script's own docstrings mark them
+    not-viable/informational, not zero-tolerance.
+  - Root also has a `tests/` directory (the pytest suite above) and
+    `requirements-dev.txt` — everything else that was at root as of
+    2026-08-06's cleanup (one-off extraction/fix/lexicon scripts) has
+    been moved to `archive/scripts/`.
 - `archive/scripts/`, `archive/data/`, `archive/docs/` — one-time,
   already-applied patch/find/debug scripts (hardcoded to specific klal
   numbers or line indices), their throwaway text/JSON dumps, and superseded
