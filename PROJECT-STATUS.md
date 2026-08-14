@@ -17,13 +17,13 @@ current handoff, re-written (not just appended to) as state changes.
 
 ### State on disk right now (verified, not remembered)
 
-- **Branch `master`, HEAD `b472db4`.** Working tree is clean except
-  `witness_vision_cache.db`, which a detached background process (see
-  "In progress" below) is actively writing to - leave it alone, it'll be
-  committed once that process finishes.
-- **Review dashboard is running** (`python3 review_server.py`, port 8420)
-  and does NOT need a restart - nothing in this session's work touched
-  server code past what was already live.
+- **Branch `master`, HEAD `268b30c`.** Working tree is clean.
+- **Review dashboard is running** (`python3 review_server.py`, port 8420,
+  PID logged to `/tmp/review_server.log`) on the CURRENT code - it was
+  restarted once this session (2026-08-14) to pick up a `FLAG_LABELS`
+  change, since server-side Python constants don't hot-reload like the
+  data files do. No restart needed going forward unless server code
+  changes again.
 - **Every previously-tracked corpus-content gap is closed** (klal 5, 29,
   30/75/88, 37, 69, 206, 217; the second source-audit round's 12 confirmed
   bugs; the reindexing incident's 3 root causes - all fixed, verified
