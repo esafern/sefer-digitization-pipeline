@@ -16,8 +16,15 @@
 #      of typo a hand-fix could introduce and nothing else would catch,
 #      since it requires no scan lookup at all.
 #   2. Character/encoding sanity: stray Latin letters, unbalanced
-#      gershayim/geresh or bracket/paren counts, bare Arabic digits outside
-#      known citation contexts. Catches leftover OCR/scan artifacts (a
+#      bracket/paren counts, and ANY bare Arabic digit (corrected 2026-08-14:
+#      this used to say "outside known citation contexts" and to claim a
+#      gershayim/geresh balance check - neither exists in the code. There is
+#      no citation-context exemption; every digit is flagged, which is
+#      currently correct because Part 1 contains exactly zero digits, and it
+#      is a zero-tolerance gate in tests/test_corpus_invariants.py. If a
+#      legitimate digit ever appears, add the exemption then - do not read
+#      this description as evidence one is already there). Catches leftover
+#      OCR/scan artifacts (a
 #      stray "P" from page furniture, an unstripped "Google" fragment, a
 #      truncated bracket) that the existing page-header-contamination regex
 #      is scoped too narrowly to catch (it only matches the specific known
@@ -170,7 +177,16 @@ ARABIC_DIGIT_RE = re.compile(r"\d")
 # these two variants of the same convention, not corpus bugs. Excluded
 # from the close-paren count below so only a genuine bracket-pairing
 # mismatch is flagged.
-FOOTNOTE_MARKER_RE = re.compile(r'(\*+|")\s*\)')
+#
+# The `"` alternative carries a lookbehind (added 2026-08-14): without it,
+# any Hebrew abbreviation whose gershayim landed immediately before a close
+# paren would be subtracted as if it were a footnote marker, either
+# manufacturing a false "unbalanced parens" report or cancelling a real one -
+# in a check that IS a zero-tolerance gate in tests/test_corpus_invariants.py.
+# All 5 current quote-form markers stand alone (a space before the `"`), and
+# the corpus has 0 occurrences of a Hebrew letter directly before `")`, so
+# this is a verified no-op today and only bounds future data.
+FOOTNOTE_MARKER_RE = re.compile(r'(\*+|(?<![א-ת])")\s*\)')
 
 
 def check_character_sanity(klalim):

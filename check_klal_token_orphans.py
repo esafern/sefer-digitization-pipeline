@@ -200,9 +200,21 @@ def real_span_tokens(cache, x, nx):
 def best_match_owner(real_words, part1, self_kid):
     """Which klal_id (if any) does this klal's real opening text actually
     appear to belong to, using the same word-sequence check against every
-    other klal's stored opening?"""
+    other klal's stored opening?
+
+    FIXED 2026-08-14: `self_kid` was accepted and never used, so the scan
+    included the klal we already know mismatches - making the answer able to
+    come back as the klal itself, which says nothing. Live on the only
+    current mismatch: klal 34 reported "not found at the start of any klal's
+    stored clean_text (best guess klal_id 34)", i.e. it named the very klal
+    under investigation as the best candidate owner of its own missing text.
+    Excluding self is what the docstring always described and is the only
+    reading that answers the question being asked (is this text sitting
+    under a DIFFERENT klal_id?)."""
     best_kid, best_sim = None, 0.0
     for other_kid, k in part1.items():
+        if other_kid == self_kid:
+            continue
         sim = word_seq_similarity(real_words, k["clean_text"].split())
         if sim > best_sim:
             best_kid, best_sim = other_kid, sim
@@ -218,10 +230,17 @@ def main():
 
     # --- Pass 1: opening-content check per klal ---
     # Deliberately pairs with the NEXT AVAILABLE trace entry, not literally
-    # kid+1 - klalim with no known marker position (the 5 still-open
-    # "no text available" placeholders: 187, 190, 197, 216, 217) get skipped
-    # over, which means the computed "real span" for the klal just before a
-    # gap silently extends across it. That's fine for THIS check (it still
+    # kid+1 - klalim with no known marker position get skipped over, which
+    # means the computed "real span" for the klal just before a gap silently
+    # extends across it. (CORRECTED 2026-08-14: this used to name "the 5
+    # still-open 'no text available' placeholders: 187, 190, 197, 216, 217".
+    # Both halves are stale - there are no "(no text available)" placeholders
+    # left at all, tests/test_corpus_invariants.py's CONFIRMED_NUMBERING_GAPS
+    # is now empty, and the klalim actually lacking a marker_position are a
+    # different, larger set of 14: 10, 16, 22, 37, 47, 50, 57, 63, 67, 84,
+    # 87, 129, 190, 198. Deliberately not re-listing them inline - the list
+    # is data that moves; read it off gematria_trace_part1.json.) That's fine
+    # for THIS check (it still
     # correctly captures kid's own real opening tokens, which is all the
     # word-position comparison needs) but means it does NOT by itself locate
     # what's inside the gap - see the per-mismatch owner lookup below for that.

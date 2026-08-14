@@ -22,6 +22,12 @@ DOCAI_DIR = os.path.join(REPO, "docai_word_boxes")
 ALIGNMENT_PATH = os.path.join(REPO, "part1_header_anchored_alignment.json")
 DEMO_DATASET = os.path.join(REPO, "klalim_demo_dataset.json")
 PART1_MAX_KLAL = 222
+# Longest diff span, in words, still treated as a real per-word correction
+# rather than alignment drift. Named 2026-08-14: it was a bare literal `4`
+# repeated on both sides of the opcode test, and review_frontend/app.js's
+# multi-word-highlight code already cited it by an invented name ("MAX_SPAN=4")
+# that did not exist anywhere.
+MAX_DIFF_SPAN_WORDS = 4
 
 
 def clean_word(w):
@@ -130,7 +136,7 @@ def main():
                 continue
             # Only trust small, local diffs - large spans are alignment drift, not
             # real per-word corrections.
-            if (i2 - i1) > 4 or (j2 - j1) > 4:
+            if (i2 - i1) > MAX_DIFF_SPAN_WORDS or (j2 - j1) > MAX_DIFF_SPAN_WORDS:
                 continue
 
             orig_tokens = docai_tokens[i1:i2]

@@ -86,10 +86,41 @@ OUT_PATH = os.path.join(REPO, "corrections_verified_part1.json")
 CACHE_DB = os.path.join(REPO, "adjudication_cache.db")
 DEMO_DATASET = os.path.join(REPO, "klalim_demo_dataset.json")
 
+# Hoisted out of adjudicate() 2026-08-14 so it can be hashed into the cache
+# key - see init_cache(). The per-candidate values are substituted in at call
+# time; everything else here is the fixed "question" every cached answer was
+# an answer to. Editing ANY character below (a constraint, the JSON shape, the
+# option wording) changes PROMPT_HASH and correctly invalidates prior answers.
+PROMPT_TEMPLATE = """
+You are an expert Talmudic and Rabbinic textual verification engine analyzing a Hebrew manuscript raster crop.
+
+Surrounding Talmudic/Rabbinic Sentence Context: "{full_context}"
+
+Evaluate the target raster crop against candidate strings:
+Option A (DocAI raw OCR reading): "{option_a}"
+Option B (current adjudicated text): {option_b_desc}
+
+CONSTRAINTS:
+1. Perform Rabbinic acronym and semantic analysis using the surrounding sentence context.
+2. Recognize standard Rabbinic acronyms and abbreviations.
+3. Do NOT mistake Rabbinic acronyms for the literal spelled-out Hebrew letter name when context indicates an abbreviation.
+4. Output "UNCERTAIN" if neither candidate maps deterministically to the pixel array.
+
+Respond ONLY with JSON using this structure:
+{{
+  "selected_option": "A" or "B" or "UNCERTAIN",
+  "transcription_found": "exact text visible in image",
+  "confidence": 0.0 to 1.0,
+  "reasoning": "contextual Rabbinic paleographic explanation"
+}}
+"""
+PROMPT_HASH = hashlib.sha256(PROMPT_TEMPLATE.encode("utf-8")).hexdigest()[:16]
+
 
 # Uses its own table (not the `cache` table the archived orchestrator.py wrote,
-# which still sits in this same .db file) and keys on the full
-# (crop_hash, word_a, word_b) triple, not crop_hash alone. A bare crop_hash key
+# which still sits in this same .db file) and keys on everything that can
+# change the right answer: (crop_hash, word_a, word_b, context_hash,
+# prompt_hash) - see init_cache for the last two. A bare crop_hash key
 # is wrong here: the same crop gets re-cropped across sessions to answer
 # different A/B comparisons as `clean_text` changes (fixes, reverts), and a
 # crop_hash-only cache silently returns a decision for the *wrong* word pair -
@@ -116,14 +147,72 @@ def init_cache():
     # CLAUDE.md "Single source of truth" / Lesson 12). Old rows under the
     # pre-fix 3-column schema are incompatible and were dropped, not
     # migrated - this is a fully regenerable cache, not source data.
+    # prompt_hash added 2026-08-14, closing the last uncovered part of "the
+    # question": (crop, word_a, word_b, context) are the per-candidate inputs,
+    # but the PROMPT TEMPLATE around them is just as much part of what was
+    # asked, and editing it silently kept serving answers to the old question
+    # forever. Not hypothetical - the template WAS edited 2026-08-12
+    # (option_b_desc, so a delete-opcode candidate stops being asked to compare
+    # the pixels against the literal string "None"), and that fix only took
+    # effect because the unrelated context_hash schema change had already
+    # dropped every row two days earlier. The same edit made today would have
+    # been a silent no-op. PROJECT-STATUS.md tracks this exact gap as an open
+    # risk for propose_punctuation_part1.py; it was live here too, in the
+    # pipeline that actually runs.
+    #
+    # Deliberately NOT keyed on the model: models_to_try is a FALLBACK chain,
+    # so the same question can legitimately be answered by either model
+    # depending on which was reachable that minute. Keying on it would evict
+    # good answers whenever the primary model came back up. The model that
+    # answered is recorded in a non-key column instead, for provenance.
     conn.execute(
         "CREATE TABLE IF NOT EXISTS corrections_cache ("
         "crop_hash TEXT NOT NULL, word_a TEXT NOT NULL, word_b TEXT NOT NULL, "
-        "context_hash TEXT NOT NULL, "
-        "decision_json TEXT, PRIMARY KEY (crop_hash, word_a, word_b, context_hash))"
+        "context_hash TEXT NOT NULL, prompt_hash TEXT NOT NULL, model TEXT, "
+        "decision_json TEXT, PRIMARY KEY (crop_hash, word_a, word_b, context_hash, prompt_hash))"
     )
+    _migrate_add_prompt_hash(conn)
     conn.commit()
     conn.close()
+
+
+def _migrate_add_prompt_hash(conn):
+    """Rebuild a pre-2026-08-14 4-column corrections_cache into the 5-column
+    keyed schema, back-filling the CURRENT prompt hash rather than dropping
+    every row (which is what the 2026-08-10 context_hash change did, at the
+    cost of a full re-run of every candidate against the API).
+
+    Back-filling asserts the surviving rows were produced under today's
+    template. Checked before doing it: all 29 live delete-opcode candidates
+    come back A or UNCERTAIN with reasoning that discusses the actual pixels,
+    and none carries the pre-2026-08-12 "Neither Option A nor Option B
+    ('None')" signature that the template edit was made to remove. Even if a
+    row somehow predated it, back-filling is strictly no worse than the
+    status quo - the unmigrated code served those rows with no prompt
+    protection at all - and it makes every FUTURE template edit invalidate
+    correctly, which is the point.
+    """
+    cols = {r[1] for r in conn.execute("PRAGMA table_info(corrections_cache)")}
+    if "prompt_hash" in cols:
+        return
+    conn.execute("ALTER TABLE corrections_cache RENAME TO corrections_cache_pre_prompt_hash")
+    conn.execute(
+        "CREATE TABLE corrections_cache ("
+        "crop_hash TEXT NOT NULL, word_a TEXT NOT NULL, word_b TEXT NOT NULL, "
+        "context_hash TEXT NOT NULL, prompt_hash TEXT NOT NULL, model TEXT, "
+        "decision_json TEXT, PRIMARY KEY (crop_hash, word_a, word_b, context_hash, prompt_hash))"
+    )
+    conn.execute(
+        "INSERT INTO corrections_cache "
+        "(crop_hash, word_a, word_b, context_hash, prompt_hash, model, decision_json) "
+        "SELECT crop_hash, word_a, word_b, context_hash, ?, NULL, decision_json "
+        "FROM corrections_cache_pre_prompt_hash",
+        (PROMPT_HASH,),
+    )
+    n = conn.execute("SELECT COUNT(*) FROM corrections_cache").fetchone()[0]
+    print(f"  cache migrated to prompt-hash-keyed schema: {n} row(s) carried over "
+          f"under prompt_hash {PROMPT_HASH} (old table kept as "
+          f"corrections_cache_pre_prompt_hash)")
 
 
 _NONE_SENTINEL = "\x00NONE\x00"  # word_a/word_b is NOT NULL; opcode delete/insert
@@ -136,20 +225,24 @@ def get_cached_decision(crop_bytes, word_a, word_b, context):
     context_hash = hashlib.sha256(context.encode("utf-8")).hexdigest()
     conn = sqlite3.connect(CACHE_DB, timeout=10.0)
     row = conn.execute(
-        "SELECT decision_json FROM corrections_cache WHERE crop_hash = ? AND word_a = ? AND word_b = ? AND context_hash = ?",
-        (crop_hash, word_a or _NONE_SENTINEL, word_b or _NONE_SENTINEL, context_hash),
+        "SELECT decision_json FROM corrections_cache WHERE crop_hash = ? AND word_a = ? "
+        "AND word_b = ? AND context_hash = ? AND prompt_hash = ?",
+        (crop_hash, word_a or _NONE_SENTINEL, word_b or _NONE_SENTINEL, context_hash, PROMPT_HASH),
     ).fetchone()
     conn.close()
     return row[0] if row else None
 
 
-def cache_decision(crop_bytes, word_a, word_b, context, decision_json):
+def cache_decision(crop_bytes, word_a, word_b, context, decision_json, model=None):
     crop_hash = hashlib.sha256(crop_bytes).hexdigest()
     context_hash = hashlib.sha256(context.encode("utf-8")).hexdigest()
     conn = sqlite3.connect(CACHE_DB, timeout=10.0)
     conn.execute(
-        "INSERT OR REPLACE INTO corrections_cache (crop_hash, word_a, word_b, context_hash, decision_json) VALUES (?, ?, ?, ?, ?)",
-        (crop_hash, word_a or _NONE_SENTINEL, word_b or _NONE_SENTINEL, context_hash, decision_json),
+        "INSERT OR REPLACE INTO corrections_cache "
+        "(crop_hash, word_a, word_b, context_hash, prompt_hash, model, decision_json) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?)",
+        (crop_hash, word_a or _NONE_SENTINEL, word_b or _NONE_SENTINEL, context_hash,
+         PROMPT_HASH, model, decision_json),
     )
     conn.commit()
     conn.close()
@@ -193,29 +286,8 @@ def adjudicate(client, crop_bytes, option_a, option_b, full_context):
         else "(nothing - confirm no text belongs at this position; the corpus currently has none here)"
     )
 
-    prompt = f"""
-You are an expert Talmudic and Rabbinic textual verification engine analyzing a Hebrew manuscript raster crop.
-
-Surrounding Talmudic/Rabbinic Sentence Context: "{full_context}"
-
-Evaluate the target raster crop against candidate strings:
-Option A (DocAI raw OCR reading): "{option_a}"
-Option B (current adjudicated text): {option_b_desc}
-
-CONSTRAINTS:
-1. Perform Rabbinic acronym and semantic analysis using the surrounding sentence context.
-2. Recognize standard Rabbinic acronyms and abbreviations.
-3. Do NOT mistake Rabbinic acronyms for the literal spelled-out Hebrew letter name when context indicates an abbreviation.
-4. Output "UNCERTAIN" if neither candidate maps deterministically to the pixel array.
-
-Respond ONLY with JSON using this structure:
-{{
-  "selected_option": "A" or "B" or "UNCERTAIN",
-  "transcription_found": "exact text visible in image",
-  "confidence": 0.0 to 1.0,
-  "reasoning": "contextual Rabbinic paleographic explanation"
-}}
-"""
+    prompt = PROMPT_TEMPLATE.format(
+        full_context=full_context, option_a=option_a, option_b_desc=option_b_desc)
 
     # gemini-2.5-flash removed 2026-08-05: permanently 404s ("no longer
     # available to new users"), not transient - it was silently eating a
@@ -235,7 +307,8 @@ Respond ONLY with JSON using this structure:
                     config=types.GenerateContentConfig(response_mime_type="application/json"),
                 )
                 print(f"  -> live call to {model_name} ok")
-                cache_decision(crop_bytes, option_a, option_b, full_context, response.text)
+                cache_decision(crop_bytes, option_a, option_b, full_context, response.text,
+                                model=model_name)
                 return response.text
             except Exception as e:
                 last_err = e
