@@ -194,6 +194,23 @@ existing test files. Same scope rules - witness/punctuation excluded.
   verified unchanged by diffing the full script output before/after against
   a `git stash`ed baseline (byte-identical, including the "3 known false
   positive(s) suppressed" line).
+- **`tests/test_review_server.py`: 5 -> 11 tests, plus a refactor.** New
+  API-level tests (no browser): a `manual_correction` whose snapshotted
+  `original_word` no longer matches the live text at that index is NOT
+  rendered by `/api/klal` (the drift check added earlier today - the only
+  decision type that used to render unconditionally), a missing
+  `chosen_text` is rejected 400 while `""` legitimately means delete, and
+  every flag `/api/klal` actually serves has an `/api/flags` label
+  end-to-end. New Playwright tests for `refreshKlalimList()` (written
+  earlier today, verified then only by ad-hoc browser automation): three
+  concurrent refreshes fire exactly one round of `/api/flags`+`/api/klalim`
+  +`/api/witness`; a failed refresh is caught, logged, and leaves the
+  in-flight guard cleared so the next one works; the active nav row AND the
+  flagged-only filter both survive `buildNav()`'s full innerHTML rebuild.
+  Refactor: `_get_json`/`_post_json`/`_open_dashboard` helpers replace the
+  goto+wait+click+urllib boilerplate repeated across the existing tests
+  (assertions unchanged), and the new nav test flags its own klal via the
+  API instead of depending on an earlier test having flagged one.
 - **Every new test verified to actually FAIL when its invariant is
   violated**, not just to pass: 18 source mutations (drift check
   neutered, confidence gate removed, label deleted, re-apply guard
@@ -208,9 +225,18 @@ existing test files. Same scope rules - witness/punctuation excluded.
   removed) and 15 data mutations (stale flag, unknown flag, out-of-range
   index, broken opcode shape, inverted bbox, missing/malformed/mis-paged/
   zero-token region, duplicate id, bad decision_type, dangling
-  apply_event, string klal_id, out-of-order records, truncated line) -
-  all 33 produced a red test, and every mutated tracked file was restored
-  and sha256-verified byte-identical afterwards.
+  apply_event, string klal_id, out-of-order records, truncated line) and
+  7 review-layer mutations (refresh dedup guard removed, its try/catch
+  removed, the post-rebuild `setActiveKlal` restore removed, the
+  `applyFlaggedFilter` re-apply removed, `api_klal`'s manual-correction
+  drift check disabled, the missing-`chosen_text` rejection removed, a
+  served flag's label deleted) - all 40 produced a red test, and every
+  mutated tracked file was restored and sha256-verified byte-identical
+  afterwards. One mutation initially came back green and is recorded
+  rather than quietly re-rolled: deleting the brand-new `"unverified"`
+  label does NOT fail the end-to-end API test, correctly - no klal
+  currently serves that flag, which is exactly why the unit-level
+  "every flag classify() CAN emit is labelled" test exists alongside it.
 
 ### `verify_witness_vision.py`'s 419-item pass finished 2026-08-14
 

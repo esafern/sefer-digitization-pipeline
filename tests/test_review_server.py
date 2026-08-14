@@ -19,6 +19,8 @@ import subprocess
 import sys
 import tempfile
 import time
+import urllib.error
+import urllib.request
 
 import pytest
 
@@ -41,7 +43,6 @@ def _file_sha256(path):
 
 
 def _wait_for_server(url, timeout=10):
-    import urllib.request
     deadline = time.time() + timeout
     while time.time() < deadline:
         try:
@@ -50,6 +51,36 @@ def _wait_for_server(url, timeout=10):
         except Exception:
             time.sleep(0.2)
     return False
+
+
+def _get_json(server, path):
+    with urllib.request.urlopen(server + path) as resp:
+        return json.loads(resp.read())
+
+
+def _post_json(server, path, body):
+    """Returns (status, payload). A 4xx/5xx is returned like any other
+    response rather than raised - several tests assert on the rejection."""
+    req = urllib.request.Request(
+        server + path, data=json.dumps(body).encode("utf-8"),
+        headers={"Content-Type": "application/json"}, method="POST")
+    try:
+        with urllib.request.urlopen(req) as resp:
+            return resp.status, json.loads(resp.read())
+    except urllib.error.HTTPError as e:
+        return e.code, json.loads(e.read())
+
+
+def _open_dashboard(page, server, klal_id=None):
+    """Load the dashboard and, optionally, navigate to a specific klal.
+    Navigating explicitly (rather than trusting that a klal happens to be
+    inside the initial viewport) matters: klal blocks mount lazily, so a
+    bare `.first` selector only ever searches what loaded on screen."""
+    page.goto(server + "/", wait_until="networkidle", timeout=15000)
+    page.wait_for_timeout(500)
+    if klal_id is not None:
+        page.click(f"#nav-{klal_id}")
+        page.wait_for_timeout(500)
 
 
 @pytest.fixture(scope="module")
@@ -98,16 +129,15 @@ def page(browser):
 
 
 def test_nav_populates_and_no_console_errors(server, page):
-    page.goto(server + "/", wait_until="networkidle", timeout=15000)
-    page.wait_for_timeout(500)
+    _open_dashboard(page, server)
     nav_items = page.locator(".nav-item")
     assert nav_items.count() == 222
     assert page.test_errors == []
 
 
 def test_klal_lazy_mounts_with_real_content(server, page):
-    page.goto(server + "/", wait_until="networkidle", timeout=15000)
-    page.wait_for_timeout(800)
+    _open_dashboard(page, server)
+    page.wait_for_timeout(300)
     block = page.locator("#klal-block-1")
     assert block.get_attribute("data-mounted") == "true"
     assert "טרם" not in block.inner_text()  # placeholder text ("…") is gone
@@ -134,10 +164,7 @@ def test_candidate_override_flow_persists_and_does_not_touch_part1json(server, p
     klal_id = _find_disputed_klal()
     assert klal_id is not None, "no current_text_may_be_wrong candidate exists to test against"
 
-    page.goto(server + "/", wait_until="networkidle", timeout=15000)
-    page.wait_for_timeout(500)
-    page.click(f"#nav-{klal_id}")
-    page.wait_for_timeout(500)
+    _open_dashboard(page, server, klal_id)
 
     disputed = page.locator(f"#klal-block-{klal_id} .flag-word.state-open").first
     disputed.click()
@@ -159,13 +186,8 @@ def test_candidate_override_flow_persists_and_does_not_touch_part1json(server, p
     assert page.locator(".flag-word.state-human").count() >= 1
 
     # reload from scratch and confirm the decision persisted server-side,
-    # not just in the page's in-memory state - navigate back to the same
-    # klal explicitly rather than assuming it's within whatever lazily
-    # mounts in the initial viewport after a fresh load.
-    page.goto(server + "/", wait_until="networkidle", timeout=15000)
-    page.wait_for_timeout(500)
-    page.click(f"#nav-{klal_id}")
-    page.wait_for_timeout(500)
+    # not just in the page's in-memory state.
+    _open_dashboard(page, server, klal_id)
     assert page.locator(f"#klal-block-{klal_id} .flag-word.state-human").count() >= 1
 
     after_hash = _file_sha256(PART1_PATH)
@@ -173,9 +195,7 @@ def test_candidate_override_flow_persists_and_does_not_touch_part1json(server, p
 
 
 def test_klal_flag_panel_saves_and_shows_in_nav(server, page):
-    page.goto(server + "/", wait_until="networkidle", timeout=15000)
-    page.wait_for_timeout(500)
-
+    _open_dashboard(page, server)
     page.locator(".klal-flag-btn").first.click()
     page.wait_for_selector("#klal-flag-panel.open", timeout=5000)
     page.check("#needs-revisit-checkbox")
@@ -192,11 +212,153 @@ def test_klal_flag_panel_saves_and_shows_in_nav(server, page):
 
 
 def test_decisions_api_reflects_saved_state(server):
-    import urllib.request
-    with urllib.request.urlopen(server + "/api/klal/1/flag") as resp:
-        data = json.loads(resp.read())
+    data = _get_json(server, "/api/klal/1/flag")
     # written by test_klal_flag_panel_saves_and_shows_in_nav, which runs
     # earlier in this module (pytest runs test functions in file order by
     # default within a module-scoped server fixture)
     assert data["needs_revisit"] is True
     assert data["note"] == "e2e klal flag note"
+
+
+# --- API-level behaviour (no browser needed) --------------------------------
+
+def test_a_manual_correction_whose_word_has_moved_is_not_rendered(server):
+    """Drift check added 2026-08-14. Unlike candidate/punctuation decisions -
+    which can only surface where a live candidate entry exists at that index -
+    every recorded manual_correction used to render unconditionally. After an
+    edit that shifts word positions, an old decision's word_index lands on an
+    unrelated word, and the dashboard would show THAT word as Human-Decided
+    with someone else's chosen text attached (PROJECT-STATUS.md's 2026-08-13
+    reindexing incident, in miniature).
+    """
+    klal = _get_json(server, "/api/klal/1")
+    real_word = klal["clean_text"].split(" ")[4]
+
+    status, _ = _post_json(server, "/api/decisions/manual", {
+        "klal_id": 1, "word_index": 4, "original_word": "לא-המילה-הזאת",
+        "chosen_text": "תחליף", "note": "drifted decision",
+    })
+    assert status == 201, "the server records the decision either way - rendering is what's gated"
+    entries = [c for c in _get_json(server, "/api/klal/1")["corrections"] if c["opcode"] == "manual"]
+    assert not [c for c in entries if c["word_index"] == 4], (
+        "a manual correction whose snapshotted original_word no longer matches the live text at "
+        "that index must not be rendered"
+    )
+
+    _post_json(server, "/api/decisions/manual", {
+        "klal_id": 1, "word_index": 4, "original_word": real_word,
+        "chosen_text": "תחליף", "note": "current decision",
+    })
+    entries = [c for c in _get_json(server, "/api/klal/1")["corrections"] if c["opcode"] == "manual"]
+    assert [c for c in entries if c["word_index"] == 4], (
+        "a manual correction that still matches the live word must be rendered"
+    )
+
+
+def test_manual_correction_requires_an_explicit_chosen_text(server):
+    """chosen_text == "" means DELETE this word; a MISSING chosen_text is a
+    client bug and must be rejected rather than silently recorded as one or
+    the other."""
+    status, payload = _post_json(server, "/api/decisions/manual", {
+        "klal_id": 1, "word_index": 0, "original_word": "x",
+    })
+    assert status == 400 and "chosen_text" in payload["error"]
+
+
+def test_every_flag_the_api_serves_has_a_label(server):
+    """The same property tests/test_pipeline_logic.py checks against
+    review_server.FLAG_LABELS directly, asserted here end-to-end: through the
+    real /api/flags the frontend consumes, against the real
+    /api/klal payloads it renders."""
+    labels = _get_json(server, "/api/flags")
+    served = set()
+    for klal_id in (1, 4, 30, 88, 168, 222):
+        served |= {c["flag"] for c in _get_json(server, f"/api/klal/{klal_id}")["corrections"]}
+    # 'manual_correction' is deliberately not in FLAG_LABELS: manual entries
+    # have their own render path in app.js (renderKlalBody's opcode === 'manual'
+    # branch) and never look a flag up.
+    unlabelled = sorted(f for f in served if f not in labels and f != "manual_correction")
+    assert not unlabelled, f"flag(s) served by /api/klal with no /api/flags label: {unlabelled}"
+
+
+# --- nav refresh: dedup, error handling, highlight restore ------------------
+# Added 2026-08-14. The refresh path itself was written the same day (audit
+# item 5 + its code-review follow-ups) and verified only by ad-hoc browser
+# automation in that session - nothing repeatable covered it.
+
+def test_concurrent_nav_refreshes_share_one_round_of_requests(server, page):
+    _open_dashboard(page, server)
+    counts = page.evaluate("""async () => {
+      const seen = [];
+      const realFetch = window.fetch;
+      window.fetch = (...args) => { seen.push(String(args[0])); return realFetch(...args); };
+      try {
+        await Promise.all([refreshKlalimList(), refreshKlalimList(), refreshKlalimList()]);
+      } finally {
+        window.fetch = realFetch;
+      }
+      return ['/api/flags', '/api/klalim', '/api/witness']
+        .map(u => seen.filter(s => s.endsWith(u)).length);
+    }""")
+    assert counts == [1, 1, 1], (
+        f"three concurrent refreshes fired {counts} requests for /api/flags, /api/klalim, "
+        "/api/witness - they must dedupe onto one in-flight fetch"
+    )
+    assert page.test_errors == []
+
+
+def test_a_failed_nav_refresh_is_caught_and_leaves_the_next_one_working(server, page):
+    _open_dashboard(page, server)
+    recovered = page.evaluate("""async () => {
+      const realFetch = window.fetch;
+      window.fetch = () => Promise.reject(new Error('simulated server restart'));
+      try {
+        await refreshKlalimList();
+      } finally {
+        window.fetch = realFetch;
+      }
+      // The in-flight guard must have been cleared in `finally`, or every
+      // later refresh returns the same rejected promise forever.
+      await refreshKlalimList();
+      return KLALIM.length;
+    }""")
+    assert recovered == 222
+    assert page.test_errors == [], (
+        "a failed refresh must be caught and logged, not surface as an unhandled rejection"
+    )
+
+
+def test_nav_highlight_and_flagged_filter_survive_a_nav_rebuild(server, page):
+    """refreshKlalimList() rebuilds the nav via innerHTML, which wipes both
+    the '.active' highlight and the flagged-only filter's applied display
+    state. Both are restored explicitly (setActiveKlal + applyFlaggedFilter);
+    without that, a reviewer scrolled deep into the corpus loses their place
+    the moment any save or tab-return triggers a refresh.
+    """
+    # Flag the klal this test navigates to, so it stays visible under the
+    # filter and the test doesn't depend on what an earlier test happened to
+    # flag first.
+    _post_json(server, "/api/decisions/klal_flag",
+               {"klal_id": 150, "needs_revisit": True, "note": "nav rebuild test"})
+    _open_dashboard(page, server, klal_id=150)
+    # jumpTo() smooth-scrolls, and the scroll observer keeps updating the
+    # active row until it settles - read whichever row is active once it has,
+    # rather than assuming it is still the one that was clicked.
+    page.wait_for_timeout(1500)
+    active_before = page.evaluate("document.querySelector('.nav-item.active')?.id")
+    assert active_before is not None
+
+    page.check("#filter-flagged")
+    page.wait_for_timeout(200)
+    flagged_before = page.locator(".nav-item:visible").count()
+    assert flagged_before >= 1
+
+    page.evaluate("refreshKlalimList()")
+    page.wait_for_timeout(500)
+
+    assert page.evaluate("document.querySelector('.nav-item.active')?.id") == active_before, (
+        "the active nav row must survive a rebuild"
+    )
+    assert page.locator(".nav-item:visible").count() == flagged_before, (
+        "the flagged-only filter must still be applied after a rebuild"
+    )
