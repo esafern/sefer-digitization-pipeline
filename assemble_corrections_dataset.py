@@ -7,6 +7,43 @@ import os
 REPO = os.path.dirname(os.path.abspath(__file__))
 IN_PATH = os.path.join(REPO, "corrections_verified_part1.json")
 OUT_PATH = os.path.join(REPO, "corrections_part1.json")
+PART1_PATH = os.path.join(REPO, "part1.json")
+
+
+def live_word_span(words, word_index, expected_text):
+    """Same span logic as apply_reviewer_decisions.py's apply_replace(): a
+    multi-word corrected_word occupies word_index..word_index+n in the
+    whitespace-split clean_text. Returns the live span, or None if
+    word_index is out of range."""
+    span_len = len(expected_text.split()) if expected_text else 1
+    if word_index < 0 or word_index + span_len > len(words):
+        return None
+    return words[word_index:word_index + span_len]
+
+
+def check_drift(c, klal_words):
+    """A candidate was generated against a snapshot of part1.json at build
+    time. If part1.json has since changed at this position (another fix,
+    a punctuation pass, a reindexing bug - see PROJECT-STATUS.md's
+    reindexing incident) the candidate's word_index/corrected_word can go
+    stale while corrections_verified_part1.json still serves the old
+    values as if current. Only 'replace' and 'insert' have a non-null
+    corrected_word to check against live text; 'delete' proposes a word
+    that by definition isn't in final_text, so there's nothing at
+    word_index to compare it to - only bounds-check it."""
+    op = c["opcode"]
+    idx = c["word_index_in_final_text"]
+    if klal_words is None:
+        return True  # klal_id not in current part1.json at all
+    if op in ("replace", "insert"):
+        expected = c["corrected_word"]
+        live = live_word_span(klal_words, idx, expected)
+        if live is None:
+            return True
+        return " ".join(live) != (expected or "")
+    if op == "delete":
+        return idx < 0 or idx > len(klal_words)
+    return False
 
 
 def classify(c):
@@ -42,8 +79,13 @@ def classify(c):
 
 def main():
     verified = json.load(open(IN_PATH))
+    part1 = json.load(open(PART1_PATH, encoding="utf-8"))
+    words_by_klal = {k["klal_id"]: k["clean_text"].split() for k in part1}
+
     by_klal = {}
+    n_drifted = 0
     for c in verified:
+        drifted = check_drift(c, words_by_klal.get(c["klal_id"]))
         entry = {
             "word_index": c["word_index_in_final_text"],
             "opcode": c["opcode"],
@@ -55,8 +97,19 @@ def main():
             "vision_transcription": c.get("vision_transcription"),
             "confidence": c.get("vision_confidence"),
             "reasoning": c.get("vision_reasoning"),
-            "flag": classify(c),
+            # A drifted candidate's flag is forced to "stale_candidate"
+            # rather than whatever classify() would say - a confident
+            # "current_text_confirmed" is actively misleading once the
+            # candidate no longer points at the text it was verified
+            # against (see PROJECT-STATUS.md's reindexing incident, the
+            # exact failure this closes). review_frontend/app.js treats
+            # any flag other than "current_text_confirmed" as its default
+            # "open" state, so this is safe to introduce without a
+            # frontend change.
+            "flag": "stale_candidate" if drifted else classify(c),
         }
+        if drifted:
+            n_drifted += 1
         by_klal.setdefault(str(c["klal_id"]), []).append(entry)
 
     with open(OUT_PATH, "w", encoding="utf-8") as f:
@@ -68,6 +121,9 @@ def main():
             flags[e["flag"]] = flags.get(e["flag"], 0) + 1
     print(f"Wrote {OUT_PATH}: {sum(len(v) for v in by_klal.values())} items across {len(by_klal)} klalim")
     print("By flag:", flags)
+    if n_drifted:
+        print(f"WARNING: {n_drifted} candidate(s) drifted from live part1.json content - "
+              f"flagged 'stale_candidate', not served as their computed classification.")
 
 
 if __name__ == "__main__":

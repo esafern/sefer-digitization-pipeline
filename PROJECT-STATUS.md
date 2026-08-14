@@ -102,12 +102,26 @@ its own; a human still needs to work through the dashboard.
 
 ### NEXT STEPS, in order
 
-**1. Hardening worth doing, not yet done**: `assemble_corrections_
-dataset.py` has no cross-check that a verified candidate's `corrected_
-word` still matches the CURRENT `part1.json` content before serving it -
-the reindexing incident above only surfaced because a human noticed and
-reported it. Same drift-detection shape as `apply_reviewer_decisions.py`'s
-`snapshot_matches()` would catch this class of bug automatically.
+**1. DONE 2026-08-14 - drift check added to `assemble_corrections_
+dataset.py`.** It now loads `part1.json` fresh on every run and cross-
+checks each verified candidate's `corrected_word`/`word_index_in_
+final_text` against the LIVE clean_text at that klal_id before serving
+it - same shape as `apply_reviewer_decisions.py`'s `snapshot_matches()`.
+`replace`/`insert` candidates are checked by exact span match (handles
+multi-word spans, same span logic as `apply_replace()`); `delete`
+candidates (whose `corrected_word` is null by definition) get a bounds
+check only. A drifted candidate is force-flagged `"stale_candidate"`
+instead of whatever `classify()` would otherwise compute - `review_
+frontend/app.js` treats any flag other than `"current_text_confirmed"`
+as its default "open" state, so this required no frontend change. Ran
+against current live data: 0 drift detected (expected - the reindexing
+incident was already fully recovered), output byte-identical to the
+pre-change run, confirming the new check is a pure addition, not a
+behavior change on clean data. Unit-verified the detector itself fires
+correctly on synthetic replace/insert/delete drift and out-of-bounds
+cases before trusting the 0-drift result on real data (Lesson 2 - a
+"nothing found" result needs the check itself proven to fire, not just
+taken on faith).
 
 **2. One witness adjudication still needs a genuine human call before
 any text edit**, resolvable directly through the manual-correction
