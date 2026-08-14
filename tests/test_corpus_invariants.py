@@ -363,6 +363,36 @@ def test_no_debug_artifact_leaks(all_klalim):
     )
 
 
+def test_clean_text_whitespace_is_single_spaces_only(all_klalim):
+    """Two different word-index schemes coexist in this pipeline and are
+    only safe while they agree. Machine candidates index into
+    `clean_text.split()` (build_corrections_dataset.py's page_word_origin,
+    assemble_corrections_dataset.py, apply_reviewer_decisions.py's
+    apply_replace); human decisions index into `clean_text.split(' ')` -
+    deliberately, because review_frontend/app.js computes the clicked
+    word's index that way (see apply_reviewer_decisions.py's
+    apply_manual_correction docstring, which calls the divergence a
+    documented open risk). A single double space, leading/trailing space,
+    tab or newline anywhere in clean_text silently shifts one scheme
+    against the other from that point on, so a reviewer's recorded
+    word_index would point at a different word than the machine candidate
+    at the same index - the shape of the 2026-08-13 reindexing incident.
+    Zero tolerance: the corpus has no legitimate reason to carry any
+    whitespace but single spaces, and every apply/propose script writes
+    text back with " ".join(...).
+    """
+    offenders = []
+    for k in all_klalim:
+        t = k["clean_text"]
+        if t.split(" ") != t.split():
+            offenders.append(k["klal_id"])
+    assert not offenders, (
+        f"clean_text contains double/leading/trailing/non-space whitespace for klal(im) "
+        f"{offenders}. This desynchronises the machine (.split()) and human (.split(' ')) "
+        "word-index schemes against each other - normalise the text before proceeding."
+    )
+
+
 def test_title_and_clean_text_are_never_empty(all_klalim):
     empty_titles = [k["klal_id"] for k in all_klalim if not k.get("title", "").strip()]
     empty_text = [k["klal_id"] for k in all_klalim if not k.get("clean_text", "").strip()]

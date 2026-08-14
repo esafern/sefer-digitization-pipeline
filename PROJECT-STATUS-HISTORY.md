@@ -17,6 +17,322 @@ current file references, or when grepping for how a past finding was
 resolved. Same append-at-top convention as before: newest entries go right
 after this header, not at the bottom.
 
+## Full-pipeline revalidation & refactor pass (main process, not just recently-changed files) — 2026-08-14
+
+User directive: "revalidate and refactor entire process - not just recently
+changed scripts. do not focus on witness and punctuation - those are secondary
+to main process." Scope: the 5 `rebuild_all.sh` stages, `rebuild_all.sh`
+itself, the 5 standalone validators, `tests/test_corpus_invariants.py`,
+`review_decisions.py` / `apply_reviewer_decisions.py` /
+`audit_applied_decisions.py`, and `review_server.py` +
+`review_frontend/`'s candidate/manual-correction plumbing. Explicitly
+excluded per that directive: `verify_reconstruction_witness.py`,
+`verify_witness_vision.py`, `reconstruct_multipage_klalim.py`,
+`propose_punctuation_part1.py`, `apply_punctuation_decisions.py`, and the
+witness/punctuation-specific branches of `review_frontend/app.js`.
+
+Method note: run in an isolated git worktree, which does NOT contain the
+gitignored scan caches (`docai_word_boxes/`, `document_jsons_berlin/`,
+`vlm_extractions/`) or `venv/`. Those were symlinked in from the main
+checkout so `./rebuild_all.sh` could actually be run before and after every
+change - a read-only reuse of the real caches. Every "output unchanged"
+claim below is `git status` on the derived JSON after a full rebuild
+(byte-identical, not "looks the same"), per Lesson 19.
+
+**1. `verify_corrections_vision.py` - `extract_json_fields` didn't
+JSON-unescape its regex captures (same bug class as
+`verify_witness_vision.py`'s, which PROJECT-STATUS.md explicitly listed as
+"not yet audited" here).** The lenient parser is reached when a response
+contains a raw unescaped `"` (Hebrew gershayim) that strict `json.loads` and
+`sanitize_json` both choke on. A single response routinely mixes both
+escaping states - some gershayim raw, others correctly escaped as `\"` - and
+returning the capture verbatim bakes a literal backslash into the data.
+Confirmed empirically, not inferred: replaying all 419 rows of
+`adjudication_cache.db`'s `corrections_cache` through the parse chain shows
+411 parse strictly, 3 via `sanitize_json`, and 5 via `extract_json_fields` -
+and all 5 of those carry a `\"` artifact in `reasoning` (e.g. `כ\"ה` for
+`כ"ה`). Those 5 rows are stale cache entries (different `context_hash` than
+the live candidates that share their word pair), so **no current committed
+data is affected** - the live outputs contain zero literal backslashes -
+but the next response that needs this path would corrupt real review data.
+Fixed by adding `unescape_json_fragment()` (same table/semantics as the
+witness script's) and applying it in `field()`. Also made `confidence`
+accept an optionally-quoted number: a model emitting `"confidence": "0.95"`
+previously fell through to `return None` and was recorded as a hard ERROR,
+discarding an otherwise-complete decision over its JSON type. Unit-verified
+on a synthetic mixed-escaping response AND on all 5 real cache rows (both
+assert no backslash survives) before trusting it.
+
+**2. `verify_corrections_vision.py` used a DIFFERENT word-splitting scheme
+than the candidate generator whose indices it consumes.** It built the
+Gemini context window with `clean_text.split(" ")` (space-only) while
+`build_corrections_dataset.py` assigns `word_index_in_final_text` from
+`clean_text.split()` (whitespace-collapsing), and its own comment
+mis-cited the generator as using `split(" ")`. The space-only scheme is
+the *human-decision* path's deliberate convention
+(`apply_reviewer_decisions.py`'s `apply_manual_correction`, matching
+`review_frontend/app.js`'s click handler) - a different indexing scheme
+that happens to coincide today. Verified against real data: 0 of 222
+Part-1 klalim currently have any double/leading/trailing/non-space
+whitespace, so the two schemes agree exactly and the fix is a no-op on
+current data (rebuild output byte-identical). Changed to `.split()` to
+match the generator, and closed the "happens to agree" gap for real by
+adding a zero-tolerance invariant test (below) rather than leaving it as
+a documented-but-unenforced risk.
+
+**3. `tests/test_corpus_invariants.py` - new zero-tolerance test
+`test_clean_text_whitespace_is_single_spaces_only`.** Asserts
+`clean_text.split(" ") == clean_text.split()` for all 667 klalim, i.e. no
+double space, no leading/trailing space, no tab/newline. This is the
+invariant that makes the two coexisting word-index schemes (machine
+candidates vs. human decisions) safe; without it, one stray double space
+silently misaligns a reviewer's recorded `word_index` against the machine
+candidate at the same position, which is precisely the shape of the
+2026-08-13 reindexing incident. Verified the test actually fires (it fails
+on a deliberately double-spaced copy of part1.json), not just that it
+passes.
+
+**4. `build_klal_page_regions.py` - a comment claimed punctuation filtering
+happened at page-load time and was "shared by both strategies"; the line
+directly below it did the opposite** (`docai_by_page[page_id] = raw  #
+unfiltered`). The CODE is right - marker indices from
+`gematria_trace_part1.json` index into the unfiltered array, so filtering at
+load would shift every one of them, and `heuristic_regions()` filters
+locally instead. Only the comment was wrong. Rewritten to state what the
+code does and why. Same "General standing caution" pattern PROJECT-STATUS.md
+already flags for validator docstrings, now confirmed inside a
+`rebuild_all.sh` stage.
+
+**5. `build_klal_page_regions.py` - the "N marker-anchored / M heuristic
+fallback" summary was derived from `kid in markers`, not from which strategy
+produced the region.** Having a marker is not the same as the
+marker-anchored path succeeding: it bails on a missing page, an
+out-of-range marker index, or an empty Y-band, and such a klal then falls
+through to `heuristic_regions()` while still being "in markers", where it
+would be miscounted as anchored. Measured directly: today 0 klalim take that
+path (200/22 is correct as printed), which is exactly why the wrong
+denominator read as right. Now counted from the two result dicts.
+
+**6. Stale cross-references in live pipeline docstrings (all corrected):**
+- `build_corrections_dataset.py` pointed at `orchestrator.py` for the
+  vision-crop step (archived 2026-08-11 as dead) and at "CLAUDE.md Open
+  Items: 'stop trusting artifacts'" - a phrase that exists in **none** of
+  CLAUDE.md, PROJECT-STATUS.md, or PROJECT-STATUS-HISTORY.md (grepped).
+  Repointed at `verify_corrections_vision.py` and CLAUDE.md Lesson 3, and
+  noted `header_anchored_alignment.py` now lives in `archive/scripts/`.
+- `verify_corrections_vision.py` described itself as mirroring
+  `orchestrator.py`'s adjudicator (x2, including the cache-table comment).
+- `assemble_corrections_dataset.py` said its output feeds `review.html`
+  (retired 2026-08-07 for `review_server.py`).
+- `validate_klal_span_coverage.py` cited
+  `scratch/reconstruct_crosspage_v4.py` for its furniture-stripping
+  evidence; that file was moved to `archive/scripts/` 2026-08-11 (the
+  scratch/ warning CLAUDE.md itself documents), so the pointer named a
+  gitignored path where the file no longer is.
+
+**7. `validate_catchword_continuity.py` - `HEADER_WORDS` matched through
+`clean_word()`, so the citation `י"ד` collapsed onto the running header's
+bare `יד` and was eaten as page furniture.** Identical shape to the bare
+`כלל` entry removed from this same set 2026-08-14 - but unlike that one,
+which was verified inert (0 of 70 pages affected), this one is live: 43
+tokens across the scan (39 `י"ד`, 2 `י"ר`, 2 `י"ך` - Yoreh De'ah / siman
+numbers / their OCR variants) are currently classified as furniture, and one
+of them changes a reported page boundary. Page 45 really ends
+`...גנת ורדים כלל א' סימן י"ד : בתר` and was reported as `א סימן בתר` -
+the siman number silently dropped and an unrelated earlier token pulled in
+to fill the 3-token window. Fixed with `is_header_word()`: a running-header
+token is always a bare word, so a token containing a gershayim/geresh is an
+abbreviation and never the header. Applied at both call sites
+(`is_furniture` and `first_real_tokens`, which duplicated the same
+`clean_word(w) in HEADER_WORDS` test). Full script output diffed
+before/after: exactly one line changes, the page 45 ending; the 58-match /
+11-no-match classification is untouched (this boundary's real catchword
+`בתר` matched either way - the misreading was in the displayed evidence, not
+the verdict).
+
+**8. `validate_catchword_continuity.py` - `FIRST_REAL_PAGE = 13`'s stated
+justification was invented on both counts.** The comment read "pages 1-12
+are byte-identical duplicates of 13-24, see CLAUDE.md". Checked all 12
+pairs against `docai_word_boxes/`: **every one differs**, and CLAUDE.md
+contains no such statement (grepped). Pages 1-12 are the scan's front matter
+- Google's digitization notice (p1), library shelfmark stamps (p3), the
+publisher's preface and the author's own introduction (p11-12). The
+constant's VALUE is right; only its reason was fabricated. Corrected in
+place. Flagging the shape as much as the instance: a wrong-but-plausible
+justification on a magic number is unfalsifiable by reading, and this one
+survived every prior review of this file.
+
+**9. `audit_applied_decisions.py` - `check_manual_correction` and
+`check_punctuation_choice` bounds-checked only the upper end
+(`word_index >= len(words)`), while `check_candidate_choice`'s docstring
+claimed the explicit bounds check was "defense-in-depth matching the other
+two checkers".** It wasn't - they had half of it. A negative `word_index`
+indexes backwards from the end in Python rather than raising, so a decision
+recorded at a negative index would be compared against the klal's LAST word
+and could report a confident `ok`; the same Python-forgiving-indexing class
+as the empty-`chosen_text` slicing bug fixed in this file earlier the same
+day. Added `word_index < 0 or` to both and corrected the docstring's claim.
+Unit-verified both now return MISMATCH at index -1 and are unchanged
+in-range; re-ran against the live corpus with identical results to the
+documented run (18 checked, 15 ok, 2 unverifiable, 1 known MISMATCH - klal 1
+word 97's documented 2026-08-10 hand-revert).
+
+**10. REFACTOR - `review_server.py` re-parsed the entire
+`review_decisions.jsonl` once PER correction entry.** `_merge_decision()`
+called `rd.current_for()`, and every `current_for`/`history_for` call runs
+`_read_all()`, which reads and JSON-parses the whole append-only log. A klal
+with 11 candidates therefore cost 11 full parses of the log on every single
+`/api/klal` request, and `/api/page` did the same per correction on the
+page - cost growing with the decision log forever, on a log that is expected
+to grow by thousands of lines as the 419-item witness queue and the
+punctuation pass get worked through. Changed to build one
+`all_current("candidate_choice")` map per request and pass it in; identical
+semantics (both resolve a key to the last matching line in file order).
+Measured: `/api/klal/168` 13 -> 3 full log parses, `/api/page/21` 5 -> 1.
+Verified by snapshotting EVERY endpoint's payload before and after - all 222
+`api_klal`, all 222 `api_klal_flag`, all 56 `api_page`, `api_klalim`,
+`api_flags`, `api_witness_summary`, and all 285 `api_decision_history`
+responses - and byte-comparing the two dumps: identical. The
+punctuation-choice loop in the same function was left alone deliberately
+(out of scope per the user's directive), not overlooked.
+
+**11. THE BIGGEST ONE - `verify_corrections_vision.py`'s cache key did not
+cover the PROMPT TEMPLATE (Lesson 12, third instance in this same cache).**
+The key was `(crop_hash, word_a, word_b, context_hash)`. Those are the
+per-candidate inputs; the prompt wrapped around them is equally part of "the
+question," and editing it kept serving answers to the old question forever.
+Not hypothetical, and not a new risk introduced by anything recent: **the
+template WAS edited 2026-08-12** (the `option_b_desc` fix, so a delete-opcode
+candidate stops being asked to compare pixels against the literal string
+`"None"` - PROJECT-STATUS.md finding 7), and that fix only took effect
+because the unrelated `context_hash` schema change two days earlier had
+already dropped every cached row. The identical edit made today would have
+been a silent no-op with the reviewer seeing no change and no warning.
+PROJECT-STATUS.md tracked this exact gap as open risk 3 for
+`propose_punctuation_part1.py` ("cache key doesn't cover the prompt text or
+model", noted as dormant/no live effect) - it was live here, in the stage
+`rebuild_all.sh` actually runs, and nobody had checked.
+
+Fixed by hoisting the prompt into a module-level `PROMPT_TEMPLATE`,
+deriving `PROMPT_HASH` from it, and adding `prompt_hash` to the primary key.
+Deliberately did NOT key on the model: `models_to_try` is a fallback chain,
+so the same question can legitimately be answered by either model depending
+on which was reachable - keying on it would evict good answers whenever the
+primary model recovered. The answering model is recorded in a new non-key
+`model` column for provenance instead.
+
+Migration chosen to cost nothing rather than to be maximally pure: the
+2026-08-10 `context_hash` change dropped all rows and forced a full re-run;
+this one rebuilds the table and back-fills the CURRENT prompt hash, keeping
+all 419 answers and spending 0 API calls. That back-fill asserts the
+surviving rows were produced under today's template - checked first: all 29
+live delete-opcode candidates come back A or UNCERTAIN with reasoning about
+actual pixels, none carrying the pre-2026-08-12 "Neither Option A nor Option
+B ('None')" signature. And even a mislabelled row is strictly no worse than
+before, where those rows were served with no prompt protection at all. The
+pre-migration table is kept as `corrections_cache_pre_prompt_hash`.
+
+Verification (all four, not just the last):
+  - Rendered prompt is byte-identical to the pre-refactor inline f-string -
+    compared against the actual old source recovered from git, not retyped.
+  - Migration lossless: same 419 keys, 0 decision_json changed, all carrying
+    the current hash, old table preserved with all 419 rows.
+  - Idempotent: a second `init_cache()` re-migrates nothing.
+  - The new key component actually discriminates: a lookup under a different
+    `prompt_hash` returns None (a cache key addition that silently matched
+    everything would be worse than no fix).
+  - Full `./rebuild_all.sh` (WITH vision): 244 cache hits, **0 live API
+    calls**, 0 errors, every derived JSON byte-identical, 15/15 pytest.
+
+**12. REFACTOR - `MAX_DIFF_SPAN_WORDS` named in `build_corrections_dataset.py`.**
+The 4-word ceiling that separates "a real per-word correction" from
+"alignment drift" was a bare literal `4` repeated on both sides of one
+condition, and `review_frontend/app.js`'s multi-word-highlight comment cited
+it as `MAX_SPAN=4` - a constant that existed nowhere. Named the constant and
+corrected the citation, rather than leaving a comment pointing at a fiction.
+
+**13. `review_frontend/app.js` - `navItemInnerHtml` carried a
+half-rewritten comment** left by commit 86c83ef (2026-08-11, removing the
+punctuation affordances): three unfinished clauses describing a badge that
+isn't rendered. Rewritten to state what is actually true - that the
+punctuation UI is deliberately dormant-but-reversible, and `/api/klalim`
+still serves the counts for when it returns.
+
+**14. `check_klal_token_orphans.py` - `best_match_owner()` accepted a
+`self_kid` argument and never used it**, so its "which klal_id does this
+text really belong to?" scan included the klal already known to mismatch.
+Live on the only current hit: klal 34 reported "not found at the start of
+any klal's stored clean_text (**best guess klal_id 34**, only 0.32
+similarity)" - naming the klal under investigation as the best candidate
+owner of its own missing text, which answers nothing. Docstring always said
+"every OTHER klal". Fixed; the same run now reports "best guess klal_id 36,
+only 0.09" - the verdict ("likely orphaned") is unchanged, but the evidence
+behind it is now real and much stronger.
+
+**15. `check_klal_token_orphans.py` - Pass 1's comment named a stale,
+wrong set of skipped klalim.** It said markerless klalim are "the 5
+still-open '(no text available)' placeholders: 187, 190, 197, 216, 217".
+There are no `(no text available)` placeholders left at all
+(`CONFIRMED_NUMBERING_GAPS` is empty), and the klalim actually lacking a
+`marker_position` are a different, larger set of 14: 10, 16, 22, 37, 47, 50,
+57, 63, 67, 84, 87, 129, 190, 198. Corrected, and deliberately without
+re-listing a set that will move again - the file is the source.
+
+**16. `validate_part1_corpus_integrity.py` - two corrections.** (a) The
+module docstring said check 2 verifies "unbalanced gershayim/geresh" counts
+and flags "bare Arabic digits outside known citation contexts". Neither is
+in the code: there is no gershayim balance check, and every digit is flagged
+with no citation exemption. That matters because check 2 IS a zero-tolerance
+gate - the next person to hit it would look for an exemption that doesn't
+exist. (b) `FOOTNOTE_MARKER_RE`'s `"` alternative had no lookbehind, so a
+Hebrew abbreviation whose gershayim landed directly before a close paren
+would be subtracted as a footnote marker, either manufacturing a false
+"unbalanced parens" failure or cancelling a real one. Verified as a no-op
+today (all 5 current quote-form markers stand alone; 0 occurrences of a
+Hebrew letter directly before `")`), full validator output diffed identical
+before/after.
+
+**Deliberately examined and NOT changed** (recorded so the next pass doesn't
+re-derive them):
+  - `validate_catchword_continuity.py`'s `first_real_tokens` stops consulting
+    `is_furniture` once its 6-token header budget is spent, so furniture past
+    that point is returned as body text. Measured: it happens on 2 of 69
+    boundaries and is inert both times (page 24's leaked token is a bare
+    geresh, which normalises to `""` and can never match; page 67's `י"ד` is
+    a real citation the fix above now classifies correctly anyway). Changing
+    the budget logic would move reported boundaries with no ground truth to
+    check against.
+  - The punctuation review UI being unreachable is NOT a bug: commit 86c83ef
+    removed the affordances deliberately on user feedback and says so
+    explicitly ("dormant rather than removed - reversible by restoring the
+    marker call in renderKlalBody"). Checked git history before treating dead
+    code as a defect. **But CLAUDE.md is stale about it** - see below.
+  - `audit_applied_decisions.py` re-reads the whole decisions log per applied
+    decision (`find_by_id` + `history_for`, ~36 full parses today). Left as
+    is: it is a rarely-run standalone read-only audit, and fixing it properly
+    means changing `review_decisions.py`'s public API, which every other
+    caller shares. The same pattern in `review_server.py` (finding 10) was
+    fixed because that one runs per HTTP request.
+
+**Confirmed stale in CLAUDE.md itself** (pre-existing, flagged by the user
+before this pass, re-verified here): its directory-layout prose lists
+`chunker.py` and `validate_title_section_letter.py` as active root scripts -
+both are in `archive/scripts/` - and describes `build_vlm_demo.py` as
+archived in one paragraph and active in another. Lesson 19's "a written
+claim is unverified until diffed against reality" applies to CLAUDE.md, not
+only to script docstrings and PROJECT-STATUS.md.
+
+**One more CLAUDE.md staleness found in this pass**: the directory-layout
+section states that "`review_server.py` surfaces every [punctuation]
+proposal as a clickable blue `·` marker in the text pane for accept/reject".
+That has been false since 2026-08-11 (commit 86c83ef removed the markers,
+the nav badges and the legend swatch on user feedback). `makePunctuationMarker`
+and `openPunctuationPanel` are still in `app.js` but nothing calls either -
+the panel is unreachable. This is a deliberate dormancy, not a bug, and it
+was left untouched as out of scope; the point is that CLAUDE.md describes a
+review affordance a reader would go looking for and not find, in the middle
+of describing the punctuation workflow as a live pipeline.
+
 ## Full-session code review (Opus 5, high thoroughness) — 10 findings, all fixed — 2026-08-14
 
 User requested a full correctness review, via subagent, of everything

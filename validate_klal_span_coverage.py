@@ -19,7 +19,9 @@
 # All 15 were fixed 2026-08-05 by reconstructing clean_text as the real
 # marker-to-marker docai token span, stripping running-header/catchword/
 # footnote-digit/Google-Books-watermark furniture (see
-# scratch/reconstruct_crosspage_v4.py for the furniture-stripping logic and
+# archive/scripts/reconstruct_crosspage_v4.py - moved out of the gitignored
+# scratch/ 2026-08-11, per CLAUDE.md's warning that scratch/ held
+# non-reproducible one-offs - for the furniture-stripping logic and
 # the visual/positional verification that validated it - true catchwords sit
 # centered on their own line, ~0.57-0.60 indented from the page's right
 # margin, regardless of font-size, which turned out to be a more reliable

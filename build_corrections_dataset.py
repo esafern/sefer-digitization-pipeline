@@ -1,12 +1,15 @@
 # [PRODUCTION] Part 1: align each page's full final text to its DocAI raw-OCR token
 # stream in one global diff (far more robust than per-klal window search against
 # repeated rabbinic phraseology), then attribute small, high-confidence word-level
-# diffs back to their klal for vision-crop verification (see orchestrator.py).
+# diffs back to their klal for vision-crop verification (see
+# verify_corrections_vision.py, the next rebuild_all.sh stage - the older
+# orchestrator.py this used to point at was archived 2026-08-11 as dead).
 #
-# Klal -> page attribution comes from header_anchored_alignment.py's output
-# (part1_header_anchored_alignment.json), NOT aligned_klalim - that mapping was
-# discredited (see CLAUDE.md Open Items: "stop trusting artifacts"; it was built
-# from a flawed process and produced false-positive alignments that don't survive
+# Klal -> page attribution comes from part1_header_anchored_alignment.json
+# (produced by archive/scripts/header_anchored_alignment.py, a one-time run),
+# NOT aligned_klalim - that mapping was discredited (CLAUDE.md Lesson 3, "never
+# trust a derived/aggregate artifact as ground truth"; it was built from a flawed
+# process and produced false-positive alignments that don't survive
 # cross-checking against each page's own printed section header). Only klalim
 # marked `trusted` there get a page attribution here; untrusted/placeholder
 # klalim have no reliable crop to verify against and are skipped, not guessed at.
@@ -19,6 +22,12 @@ DOCAI_DIR = os.path.join(REPO, "docai_word_boxes")
 ALIGNMENT_PATH = os.path.join(REPO, "part1_header_anchored_alignment.json")
 DEMO_DATASET = os.path.join(REPO, "klalim_demo_dataset.json")
 PART1_MAX_KLAL = 222
+# Longest diff span, in words, still treated as a real per-word correction
+# rather than alignment drift. Named 2026-08-14: it was a bare literal `4`
+# repeated on both sides of the opcode test, and review_frontend/app.js's
+# multi-word-highlight code already cited it by an invented name ("MAX_SPAN=4")
+# that did not exist anywhere.
+MAX_DIFF_SPAN_WORDS = 4
 
 
 def clean_word(w):
@@ -127,7 +136,7 @@ def main():
                 continue
             # Only trust small, local diffs - large spans are alignment drift, not
             # real per-word corrections.
-            if (i2 - i1) > 4 or (j2 - j1) > 4:
+            if (i2 - i1) > MAX_DIFF_SPAN_WORDS or (j2 - j1) > MAX_DIFF_SPAN_WORDS:
                 continue
 
             orig_tokens = docai_tokens[i1:i2]

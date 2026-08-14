@@ -1,6 +1,8 @@
 # [PRODUCTION] Combine the vision-verified Part-1 correction candidates into the
-# per-klal dataset review.html consumes: one entry per flagged word, with a
-# human-readable flag classifying what the vision check implies.
+# per-klal dataset the review dashboard consumes (review_server.py's /api/klal
+# flag overlay - the static review.html this used to name was retired
+# 2026-08-07): one entry per flagged word, with a human-readable flag
+# classifying what the vision check implies.
 import json
 import os
 

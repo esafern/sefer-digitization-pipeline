@@ -76,8 +76,11 @@ def check_candidate_choice(decision, klal):
     An empty chosen_text is a word-count change like insert/delete, not a
     same-position replace - route it to unverifiable_word_count_change
     like check_manual_correction already does for the same case. The
-    explicit bounds check below is defense-in-depth matching the other two
-    checkers, not just reliant on this routing to avoid the slicing trap."""
+    explicit bounds check below is defense-in-depth, not just reliant on
+    this routing to avoid the slicing trap. (Both other checkers had only
+    the upper half of that bounds check until 2026-08-14, despite this
+    docstring already claiming parity with them - a negative index silently
+    reads backwards from the end in Python rather than raising.)"""
     snapshot = decision.get("candidate_snapshot") or {}
     opcode = snapshot.get("opcode")
     chosen = decision["chosen_text"]
@@ -100,7 +103,13 @@ def check_manual_correction(decision, klal):
     words = klal["clean_text"].split(" ")
     word_index = decision["word_index"]
     chosen = decision["chosen_text"]
-    if word_index >= len(words):
+    # `word_index < 0` matters as much as the upper bound: Python indexes
+    # backwards from the end rather than raising, so a negative index would
+    # silently compare against the klal's LAST word and could report a
+    # confident "ok". check_candidate_choice's docstring already claimed
+    # this bounds check was "matching the other two checkers" - it wasn't;
+    # both this and check_punctuation_choice only had the upper half.
+    if word_index < 0 or word_index >= len(words):
         return f"MISMATCH: word_index {word_index} out of range (klal now has {len(words)} words)"
     live = words[word_index]
     if live == chosen:
@@ -113,7 +122,7 @@ def check_punctuation_choice(decision, klal):
         return "unverifiable_word_count_change"  # reject never inserts anything to verify
     words = klal["clean_text"].split(" ")
     word_index = decision["word_index"]
-    if word_index >= len(words):
+    if word_index < 0 or word_index >= len(words):
         return f"MISMATCH: word_index {word_index} out of range (klal now has {len(words)} words)"
     live = words[word_index]
     if live == "[.]":

@@ -20,23 +20,20 @@ def load_klalim(path):
 
 
 def main():
-    combined = []
-    for part in PARTS:
-        combined.extend(load_klalim(os.path.join(REPO, part)))
-
+    by_part = {part: load_klalim(os.path.join(REPO, part)) for part in PARTS}
+    combined = [k for part in PARTS for k in by_part[part]]
     combined.sort(key=lambda k: k["klal_id"])
 
     seen = set()
-    dupes = [k["klal_id"] for k in combined if k["klal_id"] in seen or seen.add(k["klal_id"])]
+    dupes = sorted({k["klal_id"] for k in combined if k["klal_id"] in seen or seen.add(k["klal_id"])})
     if dupes:
         raise SystemExit(f"Duplicate klal_id across parts: {dupes}")
 
     with open(OUT_PATH, "w", encoding="utf-8") as f:
         json.dump(combined, f, ensure_ascii=False, indent=2)
 
-    print(f"Wrote {OUT_PATH}: {len(combined)} klalim (part1={len(load_klalim(os.path.join(REPO, 'part1.json')))}, "
-          f"part2={len(load_klalim(os.path.join(REPO, 'part2.json')))}, "
-          f"part3={len(load_klalim(os.path.join(REPO, 'part3.json')))})")
+    counts = ", ".join(f"{part.removesuffix('.json')}={len(by_part[part])}" for part in PARTS)
+    print(f"Wrote {OUT_PATH}: {len(combined)} klalim ({counts})")
 
 
 if __name__ == "__main__":

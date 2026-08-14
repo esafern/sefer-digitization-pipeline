@@ -164,9 +164,13 @@ function navItemInnerHtml(k) {
   // words were ever flagged).
   const openBadge = k.open_count ? `<span class="ncount ncount-open">${k.open_count}</span>` : '';
   const decidedBadge = k.decided_count ? `<span class="ncount ncount-decided">${k.decided_count}</span>` : '';
-  // Punctuation review queue, same open/decided pattern as corrections but
-  // (proposed-punctuation badges/markers were removed from the UI 2026-08-11;
-  // get confused at a glance.
+  // No punctuation badge here on purpose: the proposed-punctuation
+  // affordances (legend swatch, nav badges, inline blue-dot markers) were
+  // removed from the UI 2026-08-11 on user feedback, leaving that feature
+  // dormant-but-reversible rather than deleted. /api/klalim still serves
+  // punctuation_count/punctuation_open_count for whenever it returns.
+  // (That commit left this comment half-rewritten - three unfinished
+  // clauses that described a badge which isn't there - until 2026-08-14.)
   return `<span class="nid">${k.klal_id}</span><span class="ntitle" title="${(k.title || '').replace(/"/g, '&quot;')}">${k.title || ''}</span>${flagIcon}${openBadge}${decidedBadge}`;
 }
 
@@ -438,7 +442,9 @@ async function openCandidatePanel(klalId, corr) {
   // FIXED 2026-08-14 (same bug class as the witness panel's context
   // highlight, found via user report): a 'replace'/'insert' candidate can
   // span multiple words (build_corrections_dataset.py allows up to
-  // MAX_SPAN=4), but this used to bold only the single word AT
+  // MAX_DIFF_SPAN_WORDS, currently 4 - the constant was unnamed and this
+  // comment cited a name that didn't exist until 2026-08-14), but this
+  // used to bold only the single word AT
   // corr.word_index - the rest of a multi-word disagreement (e.g.
   // final_text "בספר שמות", 2 words) rendered as plain, unhighlighted
   // text. Bold the whole span, using final_text's own word count

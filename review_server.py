@@ -118,12 +118,20 @@ def _trusted_page(alignment, klal_id):
     return r.get("matched_page") if r.get("trusted") else None
 
 
-def _merge_decision(entry, klal_id):
+def _merge_decision(entry, klal_id, decided):
     """Overlay the current human decision (if any) on top of a raw
     corrections_part1.json entry - never mutates the source data, this is
-    a display-time merge only."""
+    a display-time merge only.
+
+    `decided` is one all_current("candidate_choice") map, built once by the
+    caller. This used to call rd.current_for() per entry, and every such
+    call re-reads and re-parses the WHOLE review_decisions.jsonl - so a
+    klal with 11 candidates cost 11 full parses of the append-only log on
+    every single /api/klal request, growing with the log forever. Same
+    semantics either way (current_for and all_current both resolve a key to
+    the last matching line in file order), just resolved once."""
     entry = dict(entry)
-    entry["current_decision"] = rd.current_for(klal_id, entry["word_index"], "candidate_choice")
+    entry["current_decision"] = decided.get((klal_id, entry["word_index"]))
     return entry
 
 
@@ -243,7 +251,8 @@ def api_klal(klal_id):
         return None
     alignment = _load_alignment()
     corrections = _load_corrections().get(str(klal_id), [])
-    corrections = [_merge_decision(c, klal_id) for c in corrections]
+    decided = rd.all_current("candidate_choice")
+    corrections = [_merge_decision(c, klal_id, decided) for c in corrections]
     # Manual corrections (2026-08-13) as SYNTHETIC entries in the same
     # `corrections` list the frontend already knows how to render - they
     # carry no corrections_part1.json entry of their own (there was never a
@@ -358,6 +367,7 @@ def api_page(page_num):
     _, klalim = _load_klalim()
     alignment = _load_alignment()
     corrections = _load_corrections()
+    decided = rd.all_current("candidate_choice")
     out = []
     for k in klalim:
         kid = k["klal_id"]
@@ -366,7 +376,7 @@ def api_page(page_num):
         for c in corrections.get(str(kid), []):
             if not c.get("bbox"):
                 continue
-            entry = _merge_decision(c, kid)
+            entry = _merge_decision(c, kid, decided)
             entry["klal_id"] = kid
             entry["kind"] = "correction"
             out.append(entry)

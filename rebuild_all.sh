@@ -29,17 +29,21 @@
 #
 # The vision-verification step is the only one that costs API calls, and it's
 # cached in adjudication_cache.db's corrections_cache table, keyed on
-# (crop_hash, word_a, word_b, context_hash) - not crop_hash alone (that was a
-# real bug, see PROJECT-STATUS.md 2026-08-05: it silently reused decisions
-# from unrelated word comparisons that happened to share a crop) and not just
-# (crop_hash, word_a, word_b) either (a second real bug, found and fixed
-# 2026-08-10: the surrounding-sentence-context text sent to the model is also
-# part of "the question," and wasn't covered by the key - see PROJECT-STATUS.md
-# "sends the wrong surrounding sentence context"). With the fixed key, only
-# candidates whose word pair AND context actually changed trigger a fresh API
-# call; everything else is a legitimate cache hit. That means it's safe and
-# cheap to run this in full every time - you do not need to remember which
-# stage is "dirty."
+# (crop_hash, word_a, word_b, context_hash, prompt_hash). Every one of those
+# beyond crop_hash was added after a real bug, not as hardening:
+#   - crop_hash alone (fixed 2026-08-05) silently reused decisions from
+#     unrelated word comparisons that happened to share a crop.
+#   - no context_hash (fixed 2026-08-10) ignored that the surrounding-sentence
+#     context sent to the model is part of "the question" - see
+#     PROJECT-STATUS.md "sends the wrong surrounding sentence context".
+#   - no prompt_hash (fixed 2026-08-14) ignored that the PROMPT TEMPLATE is
+#     too. The template was edited 2026-08-12 and that fix only landed because
+#     the context_hash change had already dropped every row; the same edit
+#     today would have been a silent no-op.
+# With the full key, only candidates whose word pair, context OR prompt
+# actually changed trigger a fresh API call; everything else is a legitimate
+# cache hit. That means it's safe and cheap to run this in full every time -
+# you do not need to remember which stage is "dirty."
 #
 # Usage: ./rebuild_all.sh [--skip-vision]
 #   --skip-vision   skip the Gemini re-verification step (fast, free) and
