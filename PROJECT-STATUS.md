@@ -17,14 +17,38 @@ current handoff, re-written (not just appended to) as state changes.
 
 ### State on disk right now (verified, not remembered)
 
-- **Branch `master`, HEAD `85624f7`.** Working tree is clean. No open
+- **Branch `master`, HEAD `b30eae5`.** Working tree is clean. No open
   worktrees (`git worktree list` shows only the main checkout).
 - **Review dashboard is running** (`python3 review_server.py`, port 8420,
   PID logged to `/tmp/review_server.log`) on the CURRENT code - restarted
-  twice this session (2026-08-14): once for a `FLAG_LABELS` change, once
-  after merging the full-pipeline revalidation below (`review_server.py`
-  changed again, `_merge_decision` performance fix). No restart needed
-  going forward unless server code changes again.
+  three times this session (2026-08-14): a `FLAG_LABELS` change, the
+  full-pipeline-revalidation merge (`_merge_decision` performance fix),
+  and the test-suite-expansion merge (another new `FLAG_LABELS` entry,
+  `"unverified"`). No restart needed going forward unless server code
+  changes again.
+- **DONE - test-suite expansion/refactor, merged 2026-08-14 (`b30eae5`).**
+  Another Opus 5 subagent, same isolated-worktree pattern, built out
+  regression coverage for main-pipeline decision logic that had none
+  (test count 20 -> 85: 21 corpus invariants + new `tests/
+  test_pipeline_logic.py`'s 53 hermetic unit tests, both gated in
+  `rebuild_all.sh`; 11 Playwright tests, up from 5). Found and fixed a
+  real gap while writing tests: `classify()`'s `"unverified"` fallback
+  flag had no `FLAG_LABELS` entry - same class as `stale_candidate`
+  found by code review a few hours earlier, this time caught by a test
+  instead. Independently re-verified before merging: full suite re-run
+  in the main repo (74 pytest + 11 Playwright, all passing); the
+  `check_klal_token_orphans.py` refactor confirmed byte-identical output
+  (redone in-place after an initial `/tmp`-path-resolution false alarm -
+  same mistake and same fix as the previous merge); mutation testing
+  spot-checked directly (broke `check_drift`'s klal-missing branch,
+  confirmed exactly the relevant new test went red, restored byte-
+  identical); full `./rebuild_all.sh` clean post-merge, zero data drift.
+- **IN PROGRESS - scan-verification of the dropped-ל pattern** (see
+  below), an Opus 5 subagent working directly on the live repo (not a
+  worktree - it only appends `klal_flag` decisions to
+  `review_decisions.jsonl`), not yet complete as of this handoff -
+  **check status/completion before starting anything else that touches
+  `review_decisions.jsonl` or the dropped-ל klalim.**
 - **CLAUDE.md corrected 2026-08-14**: it had drifted from reality the
   same way script docstrings have in the past (Lesson 19's pattern, now
   confirmed in the durable-rules file itself, not just a script) -
