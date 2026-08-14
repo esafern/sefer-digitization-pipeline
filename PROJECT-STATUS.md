@@ -154,10 +154,14 @@ taken on faith).
 **3. The broader witness queue (tier B/C/D, ~411 items across klal
 30/75/88) is still fully open for human review** and is the only real
 second opinion on the ~3,800 words reconstructed for those three klalim.
-The in-progress vision pass (see above) will add a machine second
-opinion once it finishes, but doesn't substitute for working through it
-in the dashboard (page-step to 24/37/40, click a box) - highest-value
-follow-up QA, though not a gate on anything.
+The vision pass (now finished, see above) gives a machine second opinion
+per item, but per its own design doesn't substitute for working through
+it in the dashboard (page-step to 24/37/40, click a box) - highest-value
+follow-up QA, though not a gate on anything. **User explicitly deferred
+this 2026-08-14** ("leave that as a future step") after being offered a
+narrower option (surfacing just the 37 items where vision disagreed with
+DocAI or found neither reading correct) - not started, no scope decided
+yet beyond "later."
 
 **4. Unverified risks flagged by the second audit round, not confirmed
 bugs** (full reasoning in `PROJECT-STATUS-HISTORY.md`'s audit entry): an
