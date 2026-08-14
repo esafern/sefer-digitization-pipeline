@@ -245,13 +245,15 @@ existing test files. Same scope rules - witness/punctuation excluded.
   removed, the post-rebuild `setActiveKlal` restore removed, the
   `applyFlaggedFilter` re-apply removed, `api_klal`'s manual-correction
   drift check disabled, the missing-`chosen_text` rejection removed, a
-  served flag's label deleted) - all 45 produced a red test, and every
-  mutated tracked file was restored and sha256-verified byte-identical
-  afterwards. One mutation initially came back green and is recorded
-  rather than quietly re-rolled: deleting the brand-new `"unverified"`
-  label does NOT fail the end-to-end API test, correctly - no klal
-  currently serves that flag, which is exactly why the unit-level
-  "every flag classify() CAN emit is labelled" test exists alongside it.
+  served flag's label deleted, twice - once for an unreachable flag and
+  once for a served one). 46 mutations run, 45 red. The one that came
+  back GREEN is recorded rather than quietly re-rolled: deleting the
+  brand-new `"unverified"` label does not fail the end-to-end API test,
+  correctly - no klal currently serves that flag, which is exactly why
+  the unit-level "every flag classify() CAN emit is labelled" test
+  exists alongside it (re-run against `"current_text_confirmed"`, a flag
+  that IS served, it goes red). Every mutated tracked file was restored
+  and sha256-verified byte-identical afterwards.
 - **Deliberately NOT covered - stated so nobody reads 85 green tests as
   "the pipeline is tested"**: (a) `build_corrections_dataset.py`'s
   difflib alignment and `build_klal_page_regions.py`'s marker-anchored
