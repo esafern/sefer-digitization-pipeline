@@ -272,24 +272,33 @@ def main():
         docai_path = os.path.join(DOCAI_DIR, f"page_{page_id}.json")
         if not os.path.exists(docai_path):
             continue
-        # Drop punctuation-only tokens - clean_word() reduces them to "" but
-        # doesn't remove them, which can spuriously misattribute a bbox near
-        # punctuation (2026-08-07, PROJECT-STATUS.md "Punctuation-token diff
-        # bug fixed"). Marker indices in gematria_trace were computed against
-        # the ORIGINAL (unfiltered) docai_word_boxes array, so this filtering
-        # must happen consistently for both strategies below - recomputing
-        # it once here, shared.
-        raw = json.load(open(docai_path, encoding="utf-8"))
-        docai_by_page[page_id] = raw  # unfiltered - marker_position indexes into this
+        # Deliberately UNFILTERED. Punctuation-only tokens must be dropped
+        # before a content diff (2026-08-07, PROJECT-STATUS.md
+        # "Punctuation-token diff bug fixed") but must NOT be dropped here:
+        # gematria_trace's marker_position indexes into the original
+        # docai_word_boxes array, so filtering at load time would shift every
+        # marker index off by the number of punctuation tokens before it.
+        # heuristic_regions() therefore filters locally instead (it never uses
+        # marker indices); marker_anchored_regions() needs the array as-is.
+        # An earlier version of this comment claimed the filtering happened
+        # here, "shared" by both strategies - it never did, and the line
+        # directly below it said the opposite.
+        docai_by_page[page_id] = json.load(open(docai_path, encoding="utf-8"))
 
-    regions = marker_anchored_regions(klal_pages, markers, end_boundary_positions, docai_by_page)
-    regions.update(heuristic_regions(klal_pages, docai_by_page, final_by_id, already_done=set(regions)))
+    anchored = marker_anchored_regions(klal_pages, markers, end_boundary_positions, docai_by_page)
+    heuristic = heuristic_regions(klal_pages, docai_by_page, final_by_id, already_done=set(anchored))
+    regions = {**anchored, **heuristic}
 
     with open(OUT_PATH, "w", encoding="utf-8") as f:
         json.dump(regions, f, ensure_ascii=False, indent=2)
-    n_anchored = sum(1 for kid in regions if kid in markers)
+    # Counted from which strategy actually produced each region, not from
+    # `kid in markers` - having a marker is not the same as the marker-anchored
+    # path succeeding (it bails on a missing page, an out-of-range marker index,
+    # or an empty Y-band, and such a klal then falls through to the heuristic
+    # while still being "in markers"). No such klal exists today, which is
+    # exactly why the wrong count read as right.
     print(f"Wrote {OUT_PATH}: {len(regions)} klal regions across {len(klal_pages)} pages "
-          f"({n_anchored} marker-anchored, {len(regions) - n_anchored} heuristic fallback)")
+          f"({len(anchored)} marker-anchored, {len(heuristic)} heuristic fallback)")
 
 
 if __name__ == "__main__":

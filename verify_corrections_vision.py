@@ -1,8 +1,11 @@
 # [PRODUCTION] Crop each Part-1 correction candidate from the Berlin scan and ask
 # Gemini (vision) to select between the DocAI raw reading and the final adjudicated
-# text, recording a real confidence score + paleographic rationale. Mirrors
-# orchestrator.py's adjudicate_conflict_with_gemini, scoped to the small candidate
-# set from build_corrections_dataset.py instead of a full page scan.
+# text, recording a real confidence score + paleographic rationale. Scoped to the
+# small candidate set from build_corrections_dataset.py instead of a full page
+# scan. (It was originally written to mirror orchestrator.py's
+# adjudicate_conflict_with_gemini; orchestrator.py was archived 2026-08-11 as
+# dead code carrying 4 real bugs, so this is now the only live vision
+# adjudicator - do not treat it as a copy of anything.)
 import json
 import os
 import sys
@@ -23,6 +26,25 @@ def sanitize_json(text):
     return re.sub(r'\\(?!["\\/bfnrtu])', '', text)
 
 
+_JSON_ESCAPES = {'"': '"', "\\": "\\", "/": "/", "b": "\b", "f": "\f",
+                 "n": "\n", "r": "\r", "t": "\t"}
+
+
+def unescape_json_fragment(s):
+    # A response only reaches extract_json_fields because SOME gershayim in it
+    # were emitted raw; the same response routinely escapes OTHER occurrences
+    # correctly as \", and a regex capture returns both verbatim. Returning the
+    # group as-is therefore bakes a literal backslash into the data wherever the
+    # model got it right - e.g. 'כ\"ה' where the text is 'כ"ה'. Confirmed
+    # 2026-08-14 against adjudication_cache.db: all 5 rows that need this
+    # fallback carry that artifact in `reasoning`. Same bug and same fix as
+    # verify_witness_vision.py's parse_decision_lenient (fixed 2026-08-14;
+    # PROJECT-STATUS.md flagged this file's parser as "not yet audited for the
+    # same gap"). A raw unescaped " has no backslash to match and is left
+    # alone; \uXXXX is not handled, as in the witness script.
+    return re.sub(r"\\(.)", lambda m: _JSON_ESCAPES.get(m.group(1), m.group(1)), s, flags=re.DOTALL)
+
+
 def extract_json_fields(text):
     # Fallback for a DIFFERENT failure mode than sanitize_json handles: the
     # response content itself is Hebrew text containing gershayim ("), and
@@ -37,11 +59,15 @@ def extract_json_fields(text):
     # embedded value having no stray quotes.
     def field(name, next_pattern):
         m = re.search(rf'"{name}"\s*:\s*"(.*?)"\s*,?\s*{next_pattern}', text, re.S)
-        return m.group(1) if m else None
+        return unescape_json_fragment(m.group(1)) if m else None
 
     selected = re.search(r'"selected_option"\s*:\s*"(A|B|UNCERTAIN)"', text)
     transcription = field("transcription_found", r'(?="confidence")')
-    confidence = re.search(r'"confidence"\s*:\s*([\d.]+)', text)
+    # Optional quotes around the number: a model that emits "confidence": "0.95"
+    # used to fall through to `return None` and be recorded as a hard ERROR,
+    # discarding an otherwise-complete decision over its JSON type alone. Same
+    # leniency verify_witness_vision.py's parse_decision_lenient got 2026-08-14.
+    confidence = re.search(r'"confidence"\s*:\s*"?([\d.]+)"?', text)
     reasoning = field("reasoning", r'\}\s*$')
 
     if not (selected and confidence):
@@ -61,7 +87,8 @@ CACHE_DB = os.path.join(REPO, "adjudication_cache.db")
 DEMO_DATASET = os.path.join(REPO, "klalim_demo_dataset.json")
 
 
-# Uses its own table (not orchestrator.py's `cache`) and keys on the full
+# Uses its own table (not the `cache` table the archived orchestrator.py wrote,
+# which still sits in this same .db file) and keys on the full
 # (crop_hash, word_a, word_b) triple, not crop_hash alone. A bare crop_hash key
 # is wrong here: the same crop gets re-cropped across sessions to answer
 # different A/B comparisons as `clean_text` changes (fixes, reverts), and a
@@ -252,9 +279,15 @@ def main():
         # as "surrounding sentence context" - unrelated to the real sentence
         # around it. 112 of 244 (45.9%) of then-vision-checked words were
         # affected. word_index_in_final_text is the word's position in the
-        # unfiltered clean_text.split(" ") array (see build_corrections_
-        # dataset.py's page_word_origin comment) - use it directly.
-        words = k.get("clean_text", "").split(" ")
+        # unfiltered clean_text.split() array (see build_corrections_dataset.py's
+        # page_word_origin comment) - use it directly. The split MUST match that
+        # generator's: this used to say .split(" "), the space-only scheme the
+        # human-decision path deliberately uses (apply_reviewer_decisions.py's
+        # apply_manual_correction), which is a different indexing scheme.
+        # Harmless only while no klal contains double/leading/non-space
+        # whitespace; tests/test_corpus_invariants.py now gates that, rather
+        # than leaving the two schemes silently agreeing by luck.
+        words = k.get("clean_text", "").split()
         wi = c.get("word_index_in_final_text")
         if isinstance(wi, int) and 0 <= wi < len(words):
             ctx_start = max(0, wi - 35)

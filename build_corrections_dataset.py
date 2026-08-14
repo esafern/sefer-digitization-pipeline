@@ -1,12 +1,15 @@
 # [PRODUCTION] Part 1: align each page's full final text to its DocAI raw-OCR token
 # stream in one global diff (far more robust than per-klal window search against
 # repeated rabbinic phraseology), then attribute small, high-confidence word-level
-# diffs back to their klal for vision-crop verification (see orchestrator.py).
+# diffs back to their klal for vision-crop verification (see
+# verify_corrections_vision.py, the next rebuild_all.sh stage - the older
+# orchestrator.py this used to point at was archived 2026-08-11 as dead).
 #
-# Klal -> page attribution comes from header_anchored_alignment.py's output
-# (part1_header_anchored_alignment.json), NOT aligned_klalim - that mapping was
-# discredited (see CLAUDE.md Open Items: "stop trusting artifacts"; it was built
-# from a flawed process and produced false-positive alignments that don't survive
+# Klal -> page attribution comes from part1_header_anchored_alignment.json
+# (produced by archive/scripts/header_anchored_alignment.py, a one-time run),
+# NOT aligned_klalim - that mapping was discredited (CLAUDE.md Lesson 3, "never
+# trust a derived/aggregate artifact as ground truth"; it was built from a flawed
+# process and produced false-positive alignments that don't survive
 # cross-checking against each page's own printed section header). Only klalim
 # marked `trusted` there get a page attribution here; untrusted/placeholder
 # klalim have no reliable crop to verify against and are skipped, not guessed at.

@@ -17,6 +17,127 @@ current file references, or when grepping for how a past finding was
 resolved. Same append-at-top convention as before: newest entries go right
 after this header, not at the bottom.
 
+## Full-pipeline revalidation & refactor pass (main process, not just recently-changed files) — 2026-08-14
+
+User directive: "revalidate and refactor entire process - not just recently
+changed scripts. do not focus on witness and punctuation - those are secondary
+to main process." Scope: the 5 `rebuild_all.sh` stages, `rebuild_all.sh`
+itself, the 5 standalone validators, `tests/test_corpus_invariants.py`,
+`review_decisions.py` / `apply_reviewer_decisions.py` /
+`audit_applied_decisions.py`, and `review_server.py` +
+`review_frontend/`'s candidate/manual-correction plumbing. Explicitly
+excluded per that directive: `verify_reconstruction_witness.py`,
+`verify_witness_vision.py`, `reconstruct_multipage_klalim.py`,
+`propose_punctuation_part1.py`, `apply_punctuation_decisions.py`, and the
+witness/punctuation-specific branches of `review_frontend/app.js`.
+
+Method note: run in an isolated git worktree, which does NOT contain the
+gitignored scan caches (`docai_word_boxes/`, `document_jsons_berlin/`,
+`vlm_extractions/`) or `venv/`. Those were symlinked in from the main
+checkout so `./rebuild_all.sh` could actually be run before and after every
+change - a read-only reuse of the real caches. Every "output unchanged"
+claim below is `git status` on the derived JSON after a full rebuild
+(byte-identical, not "looks the same"), per Lesson 19.
+
+**1. `verify_corrections_vision.py` - `extract_json_fields` didn't
+JSON-unescape its regex captures (same bug class as
+`verify_witness_vision.py`'s, which PROJECT-STATUS.md explicitly listed as
+"not yet audited" here).** The lenient parser is reached when a response
+contains a raw unescaped `"` (Hebrew gershayim) that strict `json.loads` and
+`sanitize_json` both choke on. A single response routinely mixes both
+escaping states - some gershayim raw, others correctly escaped as `\"` - and
+returning the capture verbatim bakes a literal backslash into the data.
+Confirmed empirically, not inferred: replaying all 419 rows of
+`adjudication_cache.db`'s `corrections_cache` through the parse chain shows
+411 parse strictly, 3 via `sanitize_json`, and 5 via `extract_json_fields` -
+and all 5 of those carry a `\"` artifact in `reasoning` (e.g. `כ\"ה` for
+`כ"ה`). Those 5 rows are stale cache entries (different `context_hash` than
+the live candidates that share their word pair), so **no current committed
+data is affected** - the live outputs contain zero literal backslashes -
+but the next response that needs this path would corrupt real review data.
+Fixed by adding `unescape_json_fragment()` (same table/semantics as the
+witness script's) and applying it in `field()`. Also made `confidence`
+accept an optionally-quoted number: a model emitting `"confidence": "0.95"`
+previously fell through to `return None` and was recorded as a hard ERROR,
+discarding an otherwise-complete decision over its JSON type. Unit-verified
+on a synthetic mixed-escaping response AND on all 5 real cache rows (both
+assert no backslash survives) before trusting it.
+
+**2. `verify_corrections_vision.py` used a DIFFERENT word-splitting scheme
+than the candidate generator whose indices it consumes.** It built the
+Gemini context window with `clean_text.split(" ")` (space-only) while
+`build_corrections_dataset.py` assigns `word_index_in_final_text` from
+`clean_text.split()` (whitespace-collapsing), and its own comment
+mis-cited the generator as using `split(" ")`. The space-only scheme is
+the *human-decision* path's deliberate convention
+(`apply_reviewer_decisions.py`'s `apply_manual_correction`, matching
+`review_frontend/app.js`'s click handler) - a different indexing scheme
+that happens to coincide today. Verified against real data: 0 of 222
+Part-1 klalim currently have any double/leading/trailing/non-space
+whitespace, so the two schemes agree exactly and the fix is a no-op on
+current data (rebuild output byte-identical). Changed to `.split()` to
+match the generator, and closed the "happens to agree" gap for real by
+adding a zero-tolerance invariant test (below) rather than leaving it as
+a documented-but-unenforced risk.
+
+**3. `tests/test_corpus_invariants.py` - new zero-tolerance test
+`test_clean_text_whitespace_is_single_spaces_only`.** Asserts
+`clean_text.split(" ") == clean_text.split()` for all 667 klalim, i.e. no
+double space, no leading/trailing space, no tab/newline. This is the
+invariant that makes the two coexisting word-index schemes (machine
+candidates vs. human decisions) safe; without it, one stray double space
+silently misaligns a reviewer's recorded `word_index` against the machine
+candidate at the same position, which is precisely the shape of the
+2026-08-13 reindexing incident. Verified the test actually fires (it fails
+on a deliberately double-spaced copy of part1.json), not just that it
+passes.
+
+**4. `build_klal_page_regions.py` - a comment claimed punctuation filtering
+happened at page-load time and was "shared by both strategies"; the line
+directly below it did the opposite** (`docai_by_page[page_id] = raw  #
+unfiltered`). The CODE is right - marker indices from
+`gematria_trace_part1.json` index into the unfiltered array, so filtering at
+load would shift every one of them, and `heuristic_regions()` filters
+locally instead. Only the comment was wrong. Rewritten to state what the
+code does and why. Same "General standing caution" pattern PROJECT-STATUS.md
+already flags for validator docstrings, now confirmed inside a
+`rebuild_all.sh` stage.
+
+**5. `build_klal_page_regions.py` - the "N marker-anchored / M heuristic
+fallback" summary was derived from `kid in markers`, not from which strategy
+produced the region.** Having a marker is not the same as the
+marker-anchored path succeeding: it bails on a missing page, an
+out-of-range marker index, or an empty Y-band, and such a klal then falls
+through to `heuristic_regions()` while still being "in markers", where it
+would be miscounted as anchored. Measured directly: today 0 klalim take that
+path (200/22 is correct as printed), which is exactly why the wrong
+denominator read as right. Now counted from the two result dicts.
+
+**6. Stale cross-references in live pipeline docstrings (all corrected):**
+- `build_corrections_dataset.py` pointed at `orchestrator.py` for the
+  vision-crop step (archived 2026-08-11 as dead) and at "CLAUDE.md Open
+  Items: 'stop trusting artifacts'" - a phrase that exists in **none** of
+  CLAUDE.md, PROJECT-STATUS.md, or PROJECT-STATUS-HISTORY.md (grepped).
+  Repointed at `verify_corrections_vision.py` and CLAUDE.md Lesson 3, and
+  noted `header_anchored_alignment.py` now lives in `archive/scripts/`.
+- `verify_corrections_vision.py` described itself as mirroring
+  `orchestrator.py`'s adjudicator (x2, including the cache-table comment).
+- `assemble_corrections_dataset.py` said its output feeds `review.html`
+  (retired 2026-08-07 for `review_server.py`).
+- `validate_klal_span_coverage.py` cited
+  `scratch/reconstruct_crosspage_v4.py` for its furniture-stripping
+  evidence; that file was moved to `archive/scripts/` 2026-08-11 (the
+  scratch/ warning CLAUDE.md itself documents), so the pointer named a
+  gitignored path where the file no longer is.
+
+**Confirmed stale in CLAUDE.md itself** (pre-existing, flagged by the user
+before this pass, re-verified here): its directory-layout prose lists
+`chunker.py` and `validate_title_section_letter.py` as active root scripts -
+both are in `archive/scripts/` - and describes `build_vlm_demo.py` as
+archived in one paragraph and active in another. Lesson 19's "a written
+claim is unverified until diffed against reality" applies to CLAUDE.md, not
+only to script docstrings and PROJECT-STATUS.md.
+
 ## Full-session code review (Opus 5, high thoroughness) — 10 findings, all fixed — 2026-08-14
 
 User requested a full correctness review, via subagent, of everything
