@@ -61,6 +61,57 @@ current handoff, re-written (not just appended to) as state changes.
   `./rebuild_all.sh` (with vision) run clean post-merge: all cache hits,
   0 live API calls, 15/15 pytest, 5/5 Playwright, zero data drift.
   Worktree and its branch deleted after merging.
+- **NEW, IMPORTANT, NOT YET RESOLVED - possible systematic dropped-ל
+  pattern found 2026-08-14 by a semantic-plausibility spot-check** (an
+  Opus 5 subagent read a random ~20% sample of Part 1 by word count -
+  10,858 of 52,609 words, 59 of 222 klalim, seed 20260814 - for sentences
+  that read as scan-corruption-shaped gibberish in context, calibrated
+  hard against flagging normal terse/citation-heavy Talmudic style).
+  Headline finding, independently confirmed by direct corpus word-count
+  (not just trusted from the agent's report): `אא` appears **45** times
+  in `part1.json` against `אלא` appearing 237 times - and multiple other
+  words show the same shape (`איבא` 12 vs `אליבא` 21, `שמוא` 7 vs
+  `שמואל` 45, `אעזר` 9 vs `אלעזר` 10, `אהים` 7 vs `אלהים` 3, etc.) - ~86
+  mechanically-countable instances across ~29+ klalim, all missing
+  specifically the letter ל (the one Hebrew letter with a tall ascender -
+  a plausible but UNCONFIRMED mechanism hypothesis, not a finding). 33
+  `klal_flag` decisions recorded in `review_decisions.jsonl`
+  (`reviewer: "ai-semantic-spotcheck"`, `needs_revisit: true`) - confirmed
+  landed correctly (grep count matches, sample entry read back clean,
+  live on the running dashboard via `/api/klal/92`). No `part1.json` edit
+  was made - correctly, per Lesson 9 (semantic signal alone is not
+  sufficient) and Success Criterion #1 (never correct without checking
+  the actual scan).
+  **Direct scan-crop verification of ONE instance (klal 199, word_index
+  38, page 72) COMPLICATES the initial framing**: at 600 DPI, full-line-
+  width crop, the printed page unambiguously shows two adjacent alefs
+  with NO lamed between them - `אא`, not `אלא` - at that exact position
+  (`דהשמר אינו אא לא תעשה` as printed). The current transcription is
+  therefore faithful to the ink at this instance, and matches DocAI's own
+  raw token read (`docai_word_boxes/page_72.json` index 579 is `'אא'`,
+  not an extraction/pipeline error at that stage either). This is the
+  SAME shape as the klal 88 `רתם`/`התם` precedent (a genuine source-
+  text/printer anomaly, not an OCR or digitization error) - if it
+  generalizes, the right disposition is editorial-awareness flagging,
+  NOT a corpus edit, per Success Criterion #1's "no paraphrase, no
+  silent normalization, no improving the text."
+  **But this is ONE instance out of ~86 - it does NOT establish that
+  every instance in the pattern is print-faithful.** A corpus-wide
+  pattern this large (dropping the exact same letter, in the exact same
+  way, across dozens of klalim) is also exactly the shape a genuine
+  scan/OCR/line-segmentation bug would produce (per CLAUDE.md's own
+  precedent: the page-furniture contamination bug and the geresh-spacing
+  bug were BOTH found this way - one instance looking individually
+  plausible, the full pattern only visible in aggregate). The honest
+  state right now: root cause UNESTABLISHED, could be a mix of
+  print-level and scan-level causes across different instances. **Next
+  step, not yet done**: scan-verify a larger sample across the ~86
+  instances (not just the one already checked) before drawing ANY
+  corpus-wide conclusion or taking ANY corpus-wide action - this is
+  large enough in scale that it needs a scope decision, not a unilateral
+  fix in either direction (don't bulk-correct on the word-frequency
+  signal alone; don't dismiss it as "just like klal 88" on one
+  data point either).
 - **Every previously-tracked corpus-content gap is closed** (klal 5, 29,
   30/75/88, 37, 69, 206, 217; the second source-audit round's 12 confirmed
   bugs; the reindexing incident's 3 root causes - all fixed, verified
