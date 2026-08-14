@@ -17,13 +17,51 @@ current handoff, re-written (not just appended to) as state changes.
 
 ### State on disk right now (verified, not remembered)
 
-- **Branch `master`, HEAD `268b30c`.** Working tree is clean.
+- **Branch `master`, HEAD `c460eea`.** Working tree is clean.
 - **Review dashboard is running** (`python3 review_server.py`, port 8420,
   PID logged to `/tmp/review_server.log`) on the CURRENT code - it was
   restarted once this session (2026-08-14) to pick up a `FLAG_LABELS`
   change, since server-side Python constants don't hot-reload like the
   data files do. No restart needed going forward unless server code
   changes again.
+- **CLAUDE.md corrected 2026-08-14**: it had drifted from reality the
+  same way script docstrings have in the past (Lesson 19's pattern, now
+  confirmed in the durable-rules file itself, not just a script) -
+  `chunker.py` was described as live but is archived; `build_vlm_demo.py`
+  was listed as an "active root script" in one paragraph while a
+  different paragraph in the SAME file already said it was archived (an
+  internal contradiction); `validate_title_section_letter.py` was listed
+  as active but is archived too; `validate_catchword_continuity.py` is
+  live but was missing from the list entirely. All verified against an
+  actual `ls`/`archive/` check before correcting, not assumed. Also
+  restructured "Directory layout" (was one long run-on bullet) into
+  role-grouped sub-bullets, fixed a duplicated heading and a repeated
+  sentence, and added `audit_applied_decisions.py` (new today) which
+  wasn't documented there yet. Full diff in commit `c460eea`.
+- **IN PROGRESS - background agent, not yet complete.** Per explicit
+  user request, an Opus 5 subagent is running in an ISOLATED git worktree
+  (not the main working directory - the live dashboard and this branch
+  are untouched by it) doing a full revalidation-and-refactor pass over
+  the MAIN pipeline (extraction/candidate-generation -> adjudication ->
+  assembly -> validators -> review/apply layer) - deliberately EXCLUDING
+  the witness (`verify_reconstruction_witness.py`, `verify_witness_
+  vision.py`, `reconstruct_multipage_klalim.py`) and punctuation
+  (`propose_punctuation_part1.py`, `apply_punctuation_decisions.py`)
+  scripts, per the user's explicit "those are secondary" instruction.
+  It was instructed to read CLAUDE.md/PROJECT-STATUS.md first, verify
+  docstring claims against real data and this project's own lessons-
+  learned failure patterns, fix confirmed bugs with real verification
+  (tests + `rebuild_all.sh` + before/after diffs, not just read-and-
+  trust), refactor for reuse/simplification without silently changing
+  behavior, and log findings to `PROJECT-STATUS.md` as it goes - but its
+  own commits are on its isolated branch, not this one. **Next session:
+  check whether it has completed** (a completion notification would have
+  fired in the session that launched it; if this file is being read
+  fresh after a context clear, that notification may not have been seen
+  yet) - if done, review its worktree diff before merging anything into
+  `master`; if still running or the worktree was never merged, that is
+  itself the next thing to resolve, not a reason to start an overlapping
+  task on the same files.
 - **Every previously-tracked corpus-content gap is closed** (klal 5, 29,
   30/75/88, 37, 69, 206, 217; the second source-audit round's 12 confirmed
   bugs; the reindexing incident's 3 root causes - all fixed, verified
