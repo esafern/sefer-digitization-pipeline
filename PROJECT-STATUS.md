@@ -752,11 +752,14 @@ file re-validated as parseable JSON. Any future re-run of this script (or
 audited for the same gap) should hit this fallback automatically if the
 same failure recurs.
 
-**Not yet done**: commit `reconstruction_witness_queue.json`,
-`witness_vision_cache.db`, and `verify_witness_vision.py` together. This
-is still a TRIAGE layer only (per its own design) - it does not record
-`witness_choice` decisions itself, so it doesn't close item #2 below on
-its own; a human still needs to work through the dashboard.
+**DONE**: `reconstruction_witness_queue.json`, `witness_vision_cache.db`,
+and `verify_witness_vision.py` committed together (`145337d`) - this line
+previously said "not yet done" and was stale; corrected 2026-08-16 after
+`git status`/`git log -- <files>` showed the working tree already clean
+and the commit already on master. This is still a TRIAGE layer only (per
+its own design) - it does not record `witness_choice` decisions itself,
+so it doesn't close item #2 below on its own; a human still needs to work
+through the dashboard.
 
 ### NEXT STEPS, in order
 
