@@ -154,20 +154,68 @@ current handoff, re-written (not just appended to) as state changes.
   `manual_correction` decision from a human.
   **SCOPE, revised (the earlier "~86" was both under- and over-counted).**
   5 of the 45 `אא` tokens are the genuine abbreviation `א"א` and are NOT
-  part of the pattern. Against that, the pattern is much wider than the
-  8 word-forms originally listed: a mechanical sweep for "inserting `ל`
-  immediately after an `א` yields an attested corpus word" finds **117
-  occurrences of 22 confirmed-corrupt forms across 48 Part-1 klalim**
+  part of the pattern. Against that, the pattern is wider than the 8
+  word-forms originally listed: a mechanical sweep for "inserting `ל`
+  immediately after an `א` yields an attested corpus word" found 117
+  occurrences of 22 confirmed-corrupt forms across 48 Part-1 klalim
   (adds `איביה` 5, `איעזר` 4, `אמא` 4, `ישמעא` 4, `איבייהו` 3, `אגאזי` 3,
-  `ושמוא` 3, `דשמוא` 2, `בצלא` 2, `איה` 2, `האה` 2, `אה`, `האף`,
-  `וכאה`). A further ~620 occurrences are forms that are ALSO legitimate
-  words (`א` 395, `או` 117, `אי` 91, `איהו` 11, `וא` 5) - `או` could be
-  `אלו`, `אי` could be `אלי` - and cannot be separated mechanically;
-  those need per-occurrence context/scan review and are the real unknown
-  in the scope. **Needs a scope decision before any bulk action.**
-  **SECONDARY FINDING, logged separately below**: every one of these
-  corrupt forms is present in `lexicon.txt`, so lexicon validation
-  structurally cannot catch this class of error.
+  `ושמוא` 3, `דשמוא` 2, `בצלא` 2, `איה` 2, `האה` 2, `אה`, `האף`, `וכאה`);
+  a follow-up systematic PREFIX sweep (the exact-match scan above only
+  checked bare forms, missing a `ל`/`ו`/`ב` prefix stuck to the front)
+  found **5 more genuine instances** of the identical mechanism:
+  `בשאה`→`בשאלה` (klal 103, a halachic term - vow annulment via
+  she'ela), `ואהים`→`ואלהים` (×2, klal 69), `והאף`→`והאלף` (klal 138),
+  `לאפא`→`לאלפא` (klal 75, same "אלפא ביתא" phrase already confirmed
+  elsewhere) - and correctly REJECTED one coincidental false match from
+  that same sweep (`מאה`, klal 92, is just the ordinary word "hundred,"
+  at home in a list of "thousand, hundred, one," not a corrupted form).
+  **Total 122 occurrences across 50 klalim.**
+  **APPLIED 2026-08-15.** Per direct user instruction ("1 and 2 apply...
+  of course flag for human review"), all 122 were recorded as
+  `manual_correction` decisions (`reviewer: "ai-dropped-lamed-
+  correction"`, each note distinguishing whether that specific instance
+  was individually scan-verified (23 of them) or applied on the strength
+  of the confirmed mechanism plus its own fingerprint match (the other
+  99) - a human should still spot-check the unscan-verified ones) and
+  promoted into `part1.json` via `apply_reviewer_decisions.py`. Verified
+  before committing: all 122/122 read back correctly at their recorded
+  positions (0 mismatches); `git diff --stat part1.json` shows exactly
+  50 changed lines, matching the 50 distinct klalim touched; two full
+  `./rebuild_all.sh` runs (with vision) completed clean. One real test
+  failure surfaced and was resolved, not silenced: fixing klal 217's
+  word 571 (`אליבא`, itself one of the 23 scan-verified instances) made
+  it byte-identical to the klal's OTHER, already-correct occurrence of
+  the same 10-word Tosafot quotation - `tests/test_corpus_invariants.py`
+  correctly flagged this as a new intra-klal duplicate phrase; confirmed
+  genuine (the author explicitly re-cites the same Tosafot a second
+  time, `גם הלום ראיתי מה שכתב הרב הנזכר שם בשם התוספות`) and added to
+  `INTRA_KLAL_DUPLICATE_PHRASE_BASELINE` with the evidence inline, same
+  as the 3 already-baselined genuine repeats (klal 65/189/198). Final
+  state: 74/74 pytest + 11/11 Playwright passing.
+  **The ~620-instance "ambiguous, needs scope decision" estimate was
+  ALSO wrong** - it counted every gershayim-stripped match, so ~386 of
+  the reported 395 `א` instances were actually `א'` (the citation
+  numeral "1"), unrelated to this pattern entirely. The real ambiguous
+  set is **228** (`או` 117, `אי` 89, `איהו` 11, `א` 9, `וא` 2), and per
+  user instruction ("group 3 review yourself and report") all 228 were
+  read in context 2026-08-15 (the small groups individually, the two
+  large groups via structural filtering + random-sample validation - see
+  full method and results in `PROJECT-STATUS-HISTORY.md`). Result: `אי`
+  (89) is essentially clean (standard Talmudic "if," no genuine
+  candidates found). **8 genuine candidates identified, NOT YET APPLIED
+  - awaiting a decision**: klal 158/168 (`או`→`אלו`, "these" not "or");
+  klal 69 (×2)/198 (`א`→`אל`, divine-name context and a biblical
+  quotation, `אל תאמר בלבבך`); klal 169/176 (`וא`→`ואל`, the same
+  phrase - `כי אל דעות ה'`, 1 Sam. 2:3 - appearing independently
+  corrupted the same way in two different klalim); klal 200 (`איהו`→
+  `אליהו`, a book title, lower confidence on the exact attribution than
+  the others). None of these 8 are individually scan-verified.
+  **SECONDARY FINDING**: every corrupt form (of the 122, before
+  correction) was present in `lexicon.txt`, so lexicon validation
+  structurally could not have caught this class of error - CLAUDE.md's
+  "zero flagged items in lexicon validation" bar was being met the whole
+  time. A lexicon re-derivation from an independent source (not this
+  corpus's own output) would close this gap; not done.
   **NOT YET DONE**: no fix to the extraction stage itself. The durable
   repair is to make the DocAI-ingest path map the ligature codepoint (and
   the glyph DocAI substitutes for it) to `אל`; nothing in the pipeline

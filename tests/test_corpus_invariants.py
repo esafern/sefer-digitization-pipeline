@@ -668,12 +668,23 @@ def test_part1_no_new_duplicated_phrases(part_klalim, part1_integrity_validator)
 
 # check_intra_klal_duplicate_phrases (added 2026-08-12, closing the docstring
 # overclaim the module always had - see validate_part1_corpus_integrity.py)
-# has 3 known-genuine hits, each producing several overlapping n-gram window
+# has 4 known-genuine hits, each producing several overlapping n-gram window
 # reports: klal 65 (a rule restated verbatim before the author's own gloss -
 # "ב"ד יכול לבטל דברי ב"ד חבירו אא"כ גדול ממנו בחכמה ובמנין" - visually
 # confirmed as the klal's own title restated in its body, a common
 # rhetorical device in this book, not corruption), klal 189, klal 198.
-INTRA_KLAL_DUPLICATE_PHRASE_BASELINE = {65, 189, 198}
+# klal 217 added 2026-08-15: surfaced only AFTER the dropped-lamed ligature
+# fix (word 571's אליבא, individually scan-verified against the ink) made
+# it byte-identical to the klal's OTHER, already-correct occurrence of the
+# same 10-word Tosafot quotation at word 647 - before the fix the two
+# differed (one read the corrupted איבא) so the exact-match duplicate
+# check never caught this true positive. Confirmed genuine, not a bug:
+# the second occurrence is explicitly introduced as a second citation of
+# the same source ("גם הלום ראיתי מה שכתב הרב הנזכר שם בשם התוספות" -
+# "I also now saw what the aforementioned rabbi wrote there in the name
+# of Tosafot"), i.e. the author deliberately quotes the same Tosafot text
+# twice while discussing two different rabbis who each cite it.
+INTRA_KLAL_DUPLICATE_PHRASE_BASELINE = {65, 189, 198, 217}
 
 
 def test_part1_no_new_intra_klal_duplicated_phrases(part_klalim, part1_integrity_validator):
