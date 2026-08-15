@@ -126,9 +126,40 @@ def _load_witness_queue():
     which is deliberate: it means they can be reviewed by reading the ink even
     though the reconstructed text is NOT in part1.json yet. Reviewing and
     committing text to the corpus stay separate steps, the same way recording a
-    candidate decision is separate from apply_reviewer_decisions.py."""
+    candidate decision is separate from apply_reviewer_decisions.py.
+
+    Every read/write site below (api_klal's decided-count, api_witness_summary,
+    api_witness_context, api_post_witness_decision's snapshot lookup) matches
+    items by (klal_id, docai_token_index) alone - NOT page, even though
+    docai_token_index is page-relative (an index into that page's own filtered
+    token list, per verify_reconstruction_witness.py). That is only safe
+    because PAGE_TO_KLAL there currently maps each of its 3 pages to a
+    DIFFERENT klal_id (24->30, 37->75, 40->88) - investigated 2026-08-16 as
+    the standing "risk 2" open item. If a klal_id ever needed a second
+    witness-processed page (e.g. klal 30 spanning two reconstructed pages),
+    that page's items would silently collide with the first page's under the
+    same (klal_id, token_index) key - `next(...)` lookups would return
+    whichever item happens to come first, and a decision recorded against one
+    page's word could get attributed to a different page's word entirely, with
+    no error. Asserting it here, not fixing the matching logic itself: no
+    current data triggers it (checked below), and a real fix (adding page to
+    every match site + the decision key + the frontend's request payload) is a
+    bigger, currently-unmotivated change - this turns a hypothetical future
+    silent misattribution into an immediate loud failure instead."""
     q = _load_json("reconstruction_witness_queue.json", {})
-    return q.get("queue", []) if isinstance(q, dict) else []
+    items = q.get("queue", []) if isinstance(q, dict) else []
+    seen = {}
+    for w in items:
+        key = (w["klal_id"], w["docai_token_index"])
+        if key in seen and seen[key] != w.get("page"):
+            raise RuntimeError(
+                f"witness queue: (klal_id, docai_token_index) {key} appears on "
+                f"both page {seen[key]} and page {w.get('page')} - the "
+                f"page-less matching used throughout this file can no longer "
+                f"tell these apart. See this function's docstring."
+            )
+        seen[key] = w.get("page")
+    return items
 
 
 def _trusted_page(alignment, klal_id):

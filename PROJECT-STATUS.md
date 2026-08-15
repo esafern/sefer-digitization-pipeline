@@ -901,15 +901,37 @@ investigated and closed 2026-08-14, 2 still open:**
      pre-fix baseline for klal 30/75/88 (all 3 already reconstructed, so a
      true no-op today), with the protection mechanism itself separately
      unit-verified to actually block consuming a known marker position.
-   - **STILL OPEN, not investigated**: witness decisions keyed
-     `(klal_id, docai_token_index)` with no page component (risk 2, safe
-     only because `PAGE_TO_KLAL` is currently 1:1);
-     `propose_punctuation_part1.py`'s cache key doesn't cover the prompt
-     text or model (risk 3, dormant pipeline, no live effect). **Risk 3's
-     sibling in the LIVE pipeline was found and closed 2026-08-14** -
-     `verify_corrections_vision.py` had the identical gap and it was not
-     dormant; see item 9 above. Risk 3 itself is unchanged, but it should
-     no longer be read as "the only place this pattern exists."
+   - **DONE 2026-08-16 - risk 2 investigated and guarded (not fully
+     closed).** Confirmed the exact mechanism: every witness match/lookup
+     site in `review_server.py` (`api_klal`'s decided-count,
+     `api_witness_summary`, `api_witness_context`,
+     `api_post_witness_decision`'s snapshot lookup) keys on `(klal_id,
+     docai_token_index)` alone, and `docai_token_index` is PAGE-RELATIVE
+     (an index into that page's own filtered token list, per
+     `verify_reconstruction_witness.py`) - so the key is only unique
+     today because `PAGE_TO_KLAL = {24: 30, 37: 75, 40: 88}` happens to
+     map each page to a DIFFERENT klal_id. Nothing enforced that. Checked
+     current data: no collision exists (`_load_witness_queue()` now
+     asserts this on every load). Fix applied: `_load_witness_queue()` in
+     `review_server.py` raises immediately if the same
+     `(klal_id, docai_token_index)` pair is ever seen on two different
+     pages, turning a hypothetical silent misattribution (a human's
+     witness decision on one page's word landing on a different page's
+     word) into a loud failure at load time. **Not the full fix** - the
+     matching logic itself still doesn't use `page`; that would need
+     changes at every match site plus the frontend's request payload, and
+     nothing currently motivates it (no klal is planned to get a second
+     witness-processed page). Verified: `_load_witness_queue()` loads
+     clean (419 items, 0 collisions), 77/77 pytest, live server restarted
+     and `/api/witness` + the dashboard both confirmed working
+     post-change, no data file touched.
+   - **STILL OPEN, not investigated**: `propose_punctuation_part1.py`'s
+     cache key doesn't cover the prompt text or model (risk 3, dormant
+     pipeline, no live effect). **Risk 3's sibling in the LIVE pipeline
+     was found and closed 2026-08-14** - `verify_corrections_vision.py`
+     had the identical gap and it was not dormant; see item 9 above. Risk
+     3 itself is unchanged, but it should no longer be read as "the only
+     place this pattern exists."
    - **CODE-REVIEWED 2026-08-14 (Opus 5, high thoroughness, via
      subagent).** Reviewed everything committed this session so far
      (5 commits) - found 10 concrete issues, several of them real bugs
