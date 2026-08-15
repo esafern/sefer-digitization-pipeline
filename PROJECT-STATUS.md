@@ -1083,6 +1083,74 @@ see the dropped-lamed entry) to have hundreds of unfixed instances of
 this same bug - logged per CLAUDE.md's rule, explicitly NOT scoped or
 proposed as work, per the standing Parts-2-3 gate.
 
+### DONE 2026-08-16 - abbreviation-expansion candidate list built
+
+User added two reference JPGs (Machon Yerushalayim's critical edition of
+klal 1-2 - gitignored, `*.jpg` added to `.gitignore`, purely for reference,
+never a scan/correction source per Success Criterion #1) and noted that
+edition expands abbreviations and adds punctuation - punctuation being the
+riskier of the two (a genuine ambiguous-break judgment call, no ink marks
+it), abbreviation expansion easier (the abbreviated form is already
+correctly transcribed; what it stands for is established Rabbinic
+convention, not a per-instance reading of the ink).
+
+- **`extract_abbreviation_forms.py`** (new, standalone, read-only): the
+  canonical list. Convention confirmed and reused, not invented -
+  `detect_ligature_corruption.py`'s existing `QUOTE_CHARS`/`has_gershayim`
+  definition (a token counts if it CONTAINS a gershayim/geresh character
+  anywhere, not strictly if it ends in one - a multi-letter acronym's mark
+  sits before its LAST letter, e.g. `רש"י`, not truly final). **1577 unique
+  abbreviation-marked forms, 9613 occurrences** in Part 1 (52,609 words
+  total). Heavily Zipfian: 848 forms (54%) occur exactly once; the top 20
+  forms alone cover a third of all occurrences.
+- **`propose_abbreviation_expansions.py`** (new, standalone, read-only):
+  candidate expansions via a hand-built ~160-root dictionary of standard
+  Rabbinic/Talmudic abbreviations (Rishonim/Acharonim name-acronyms,
+  formulaic phrases, Shulchan Arukh section names, etc.) - built from
+  established convention, deliberately NOT fitted to what this corpus
+  happens to contain (same reasoning as lexicon.txt's independence problem,
+  Lesson 3). Prefix-stripping (ו/ב/ה/מ/כ/ל/ש/ד, up to 2 stacked levels,
+  e.g. `ל`+`ה`+root for "to the Rosh") resolves compound forms against the
+  same root dictionary. Genuinely ambiguous forms under standard
+  convention (same orthographic form, multiple standard meanings - e.g.
+  `מ"מ` = "מכל מקום" OR "מגיד משנה"; `ע"א` = "עמוד א" OR "עובד אלילים") are
+  listed with BOTH options, never silently picked. A separate `numeral`
+  category (bare single-letter-plus-geresh forms, e.g. `ב'`) is excluded
+  from word-expansion entirely - these are citation/folio numbers, not
+  abbreviated words (the same confusion the "~386 of 395 `א'`" finding
+  hit earlier this project - avoided here on purpose, see the Berlin/
+  Livorno documentation-correction entry above). An `artifact` category
+  catches tokens that are ONLY a geresh/gershayim character with nothing
+  else (2 forms, 50 occurrences) - flagged as a likely stray-punctuation/
+  missing-space DATA issue, not something to expand.
+  **Coverage: 54.5% of occurrences RESOLVED (455 forms, of which 80 forms/
+  792 occurrences are flagged AMBIGUOUS with both options listed), 22.1%
+  NUMERAL (excluded from expansion), 0.5% ARTIFACT, 22.9% UNRESOLVED - not
+  guessed at, listed by frequency for the dictionary to grow later.**
+- **Real bug found and fixed while building this**: the first version of
+  `resolve()` only stripped ONE prefix level, so stacked prefixes (e.g.
+  `להרא"ש` = ל + ה + `רא"ש`) failed to resolve even though the bare root
+  was already in the dictionary - `הרא"ש` (76 occurrences) resolved fine
+  single-level, but `להרא"ש` (15 occurrences) didn't, until caught by
+  testing the resolver directly rather than trusting the aggregate
+  coverage number. Fixed to try 2 stacked prefix levels.
+- **A print-specific orthography detail, found by checking rather than
+  assuming**: guessed `כנה"ג` (gershayim before the last letter, the
+  "standard" position) for Knesset HaGedolah; the corpus's actual form is
+  `כנ"הג` (gershayim one position earlier) in all 7 of its prefixed/bare
+  occurrences - checked directly against the real tokens before trusting
+  the guess, corrected before merging.
+- **NOT a correction pipeline** - both scripts are read-only, nothing here
+  writes `part1.json`, no decision was recorded. This is the propose-only
+  half of the pattern `propose_punctuation_part1.py` already established
+  for punctuation (candidates -> human review -> a separate apply step);
+  building the review/apply stages for abbreviations was not requested and
+  is not started. Verified: `--json` output is 1577 entries (every form
+  accounted for, none dropped); `tests/test_corpus_invariants.py` +
+  `tests/test_pipeline_logic.py` still 77/77 (purely additive, no shared
+  code touched); nothing in `part1.json`/`lexicon.txt`/any derived file
+  changed.
+
 **No other known open items beyond the above.** Full detail, evidence,
 and the complete dated history behind every claim above is in
 `PROJECT-STATUS-HISTORY.md`.
