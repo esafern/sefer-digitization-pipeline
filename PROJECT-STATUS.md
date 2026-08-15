@@ -21,6 +21,28 @@ current handoff, re-written (not just appended to) as state changes.
 > home for this rule (so it survives this file's own "re-written, not
 > appended" handoff churn) - noted here too for immediate visibility.
 
+> **CLAUDE.md's "Pipeline shape" section was itself factually wrong in
+> three ways, corrected 2026-08-15 after the user directly pushed back
+> on an incorrect explanation and asked for it to be verified against
+> the actual scan/code**: (1) the source PDF (`berlin_square_
+> corrected.pdf`) is a Berlin SECOND printing, not the Livorno original -
+> confirmed by reading the actual title page (`נדפס ראשונה בליוורנו...
+> ועתה נדפס פעם שנית`, colophon `ברלין`); (2) the live automated
+> comparison (`build_corrections_dataset.py`) is DocAI-vs-CURRENTLY-
+> STORED-part1.json-text, not DocAI-vs-VLM as the doc implied - VLM
+> extraction is sparse (~12 pages) and used only as a manual, opportunistic
+> cross-check, and its own klal-numbering doesn't align with the corpus's
+> (confirmed: VLM's "klal 2" and part1.json's current klal 2 are unrelated
+> text); (3) a genuinely second physical scan does exist
+> (`ספר_יד_מלאכי (1).pdf`, untracked) but was used exactly once,
+> 2026-08-05, not routinely. Full corrected explanation now in CLAUDE.md's
+> "Pipeline shape" section - read that, not this bullet, for the durable
+> version. This is exactly Lesson 19's failure shape (a confident prose
+> explanation that was never checked against the primary source) applied
+> to documentation the assistant itself wrote, not a script's docstring -
+> the same discipline this file demands of corpus claims applies to
+> architecture claims too.
+
 ### State on disk right now (verified, not remembered)
 
 - **Branch `master`, HEAD `22aa2c4`.** Working tree is clean. No open

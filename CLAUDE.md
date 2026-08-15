@@ -4,7 +4,10 @@ Digitization pipeline for **Yad Malachi** (R. Malachi ben Jacob HaKohen, Livorno
 1766–7), a foundational halachic-methodology reference with 667 *klalim* across
 three parts. Goal: a clean, structured digital text for Sefaria — see
 `CASE-YAD-MALACHI.md` for the full rationale (287 dead Sefaria citations point to
-this work today).
+this work today). Livorno 1766-7 is the work's ORIGINAL printing - the
+actual scan this pipeline OCRs (`berlin_square_corrected.pdf`) is a
+later Berlin second edition, see "Pipeline shape" below for the verified
+detail; don't conflate the two.
 
 > **Read `PROJECT-STATUS.md` at the start of every session, every time, no
 > exceptions.** This file (`CLAUDE.md`) holds durable rules and architecture.
@@ -75,8 +78,11 @@ this work today).
 
 1. **Absolute fidelity to the author's words.** The transcript must match the
    source scans exactly — no paraphrase, no silent normalization, no
-   "improving" the text. Every correction must be traceable to a real OCR/VLM
-   disagreement resolved by looking at the actual scan, not inferred.
+   "improving" the text. Every correction must be traceable to a real
+   disagreement (routinely DocAI-vs-stored-text; VLM and the untracked
+   second physical scan are secondary cross-check signals used manually,
+   not systematic legs of the automated pipeline - see "Pipeline shape")
+   resolved by looking at the actual scan, not inferred.
 2. **Accurate klal chunking.** Each of the 667 klalim must be correctly formed
    and delimited as its own unit, matching Sefaria's structural conventions —
    wrong boundaries (a klal split, merged, or mis-numbered) are as serious a
@@ -91,16 +97,68 @@ these three before anything else (speed, script cleanliness, cost).
 
 ## Pipeline shape
 
-Source scans (`berlin_square_corrected.pdf`, Sefaria VLM output, DocAI OCR) get
-extracted,
-cross-validated between OCR engines, and adjudicated word-by-word before landing
-in the canonical text files. Concretely:
+**CORRECTED 2026-08-15 — verified against the actual scan and code, not
+assumed.** The work's ORIGINAL printing is Livorno, 1766-7 (confirmed:
+the front-matter approbation on the scan is explicitly dated ליוורנו
+[Livorno]/התקכ"ז, i.e. Hebrew year 5527 = 1766-7 CE), but the source
+PDF this pipeline actually OCRs — `berlin_square_corrected.pdf` — is a
+LATER, SECOND printing, in Berlin, per its own title page (`נדפס ראשונה
+בליוורנו... ועתה נדפס פעם שנית` — "first printed in Livorno... now
+printed a second time," colophon `ברלין`, editor אפרים הערץ of Silesia,
+"with several additions and corrections"). Square Hebrew typeface
+throughout (not Rashi script) - matches the filename. Exact Berlin
+printing date not yet established (out of scope to chase further right
+now). Two PDFs are tracked in git specifically for this ONE scan (both
+negated out of the otherwise-blanket `*.pdf` gitignore rule):
+`berlin_square_corrected.pdf` (the live, working copy, page order fixed)
+and `berlin_square_original_transposed.pdf` (the untouched original,
+kept only so the page-order fix has a diffable reference - not a
+second, independent scan of a different physical copy). A genuinely
+SECOND physical scan (a different copy of the printed book) does exist
+— `ספר_יד_מלאכי (1).pdf` — but it is untracked, not part of the routine
+pipeline, and was used exactly once (2026-08-05, klal 1's second
+disputed word) as a manual independent cross-check the user supplied;
+see PROJECT-STATUS-HISTORY.md's "Klal 1's second flagged word" entry.
+
+The LIVE, AUTOMATED comparison in today's pipeline
+(`build_corrections_dataset.py`) is **DocAI's raw OCR tokens vs.
+whatever is CURRENTLY STORED in `part1.json`** (via `klalim_demo_
+dataset.json`) — not DocAI vs VLM as this section used to imply. VLM
+extraction (`vlm_extractions/`, only ~12 sparse page files, not a
+full-corpus pass) is a secondary, opportunistic cross-check signal used
+manually during specific investigations (e.g. the 2026-08-14/15
+dropped-lamed ligature investigation), not a systematic leg of the
+automated candidate-generation pipeline - and its own klal-numbering
+does NOT reliably align with the corpus's final numbering (confirmed:
+VLM's stored "klal 2" and part1.json's current klal 2 are unrelated
+text, almost certainly a klal-chunking/numbering mismatch on VLM's
+side, not a content disagreement worth comparing word-by-word).
+
+Where did the CURRENTLY STORED text in `part1.json` originally come
+from, if it's not one of the two things being compared today? Traced
+through git history: the repo's first commit (`2a5d43e`) contains only
+extraction/adjudication scripts (`chunker.py`, `orchestrator.py`,
+`consensus.py`, `adjudicate_vision.py`, `extract_hocr.py`,
+`extract_json.py`, `batch_ocr.py` - all archived now) plus one sample
+page's OCR output, no corpus text yet. Those scripts, run against the
+Berlin scan, produced `full_text_cleaned_goal.txt`, which went through
+many further "OCR fix"/"LLM cross-validation" passes (see early commit
+history), and was THEN chunked into `part1.json`/`part2.json`/
+`part3.json` for the first time (commit `73c428c`). Only from that
+point does the architecture described below take over: DocAI's fresh
+reading gets diffed against whatever's currently stored, disagreements
+go to vision-crop adjudication, then human review, then get applied.
+The exact internal logic of that original chunker/orchestrator/
+consensus-era extraction pass has not been re-traced in detail - it
+predates this file's documented architecture and would need its own
+investigation if it ever matters (e.g. auditing a specific very-old
+piece of text back to its origin).
 
 1. **Extraction** — DocAI/VLM extraction through the (gitignored)
    `docai_word_boxes/`, `document_jsons_berlin/`, `vlm_extractions/` caches is
    the live path. `chunker.py` — the earlier script that pulled raw text
    per page from the PDF and handled the reversed-Hebrew-line quirk of
-   these 19th-century scans via `unreverse_line` — has been superseded by
+   this print's scans via `unreverse_line` — has been superseded by
    this and is archived at `archive/scripts/chunker.py` (CORRECTED
    2026-08-14: this section used to describe it as part of the live
    path; it is not — see "Directory layout" below for other file-existence
