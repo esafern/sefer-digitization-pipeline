@@ -13,7 +13,28 @@ issue was resolved. **New dated entries with detailed fix/verification
 prose go there, not here** — this file should only ever hold a compact
 current handoff, re-written (not just appended to) as state changes.
 
-## ►► SESSION HANDOFF — read this first, 2026-08-14
+## ►► SESSION HANDOFF — read this first, 2026-08-16
+
+> **This session's work (2026-08-16), in order - full detail lower in this
+> file, dated entries under each heading**: (1) merged and independently
+> re-verified the hard-wired-value audit (`154cb8d`); (2) closed 3 items
+> from the prior handoff's open-items list - klal 200's `אליהו` attribution
+> confirmed already scan-verified (a stale "worth a second look" claim,
+> corrected), the witness `(klal_id, docai_token_index)` collision risk
+> investigated and guarded (not fully closed - see "risk 2" below), and an
+> independent lexicon cross-check built (Shulchan Arukh + Talmud Bavli via
+> Sefaria's public export) which surfaced a real new corruption shape (5
+> instances, 4 klalim, flagged not corrected); (3) built then REBUILT an
+> abbreviation-expansion candidate list after the user caught the first
+> version's core assumption error (it would have proposed expanding `רש"י`
+> into a full name) - see "abbreviation-expansion candidate list built,
+> then REBUILT" below for the real, evidence-based pattern; (4) this
+> close-out sweep itself found and fixed 2 stale status claims (a merged
+> worktree still marked "AWAITING MERGE," a 2-day-stale HEAD hash) and
+> flagged one dangling branch for a future session's judgment call, not
+> resolved. **No corpus text was changed this session** - every finding
+> above is either a code fix, a documentation correction, or a flagged
+> candidate awaiting human/scan review, never a direct `part1.json` edit.
 
 > **Terminology, user directive 2026-08-15, applies to all future
 > sessions**: an issue with the DATA is a "data issue," not a "bug." An
@@ -186,16 +207,33 @@ worktree removed.
 
 ### State on disk right now (verified, not remembered)
 
-- **Branch `master`, HEAD `22aa2c4`.** Working tree is clean. No open
-  worktrees (`git worktree list` shows only the main checkout).
-- **Review dashboard is running** (`python3 review_server.py`, port 8420,
-  PID logged to `/tmp/review_server.log`) on the CURRENT code - restarted
-  three times this session (2026-08-14): a `FLAG_LABELS` change, the
-  full-pipeline-revalidation merge (`_merge_decision` performance fix),
-  and the test-suite-expansion merge (another new `FLAG_LABELS` entry,
-  `"unverified"`). No restart needed going forward - part1.json/decision
-  edits since then don't require one (`review_server.py` reads fresh off
-  disk every request).
+- **CORRECTED 2026-08-16** - the HEAD hash and dashboard-restart history
+  below were from 2026-08-14 and had gone stale (Lesson 19's own pattern,
+  caught during this session's close-out sweep rather than left for the
+  next session to discover). Current, re-verified facts as of the end of
+  this session:
+- **Branch `master`, HEAD `a749719`.** Working tree clean, 77/77 pytest
+  (`tests/test_corpus_invariants.py` + `tests/test_pipeline_logic.py`)
+  passing. `git worktree list` shows only the main checkout - no leftover
+  worktrees from this session's merges.
+- **One pre-existing, unrelated dangling branch found during this sweep,
+  NOT investigated further or touched**: `pipeline-audit-fixes-and-page-
+  order-repair`, tip `5a86ef6` (2026-08-11, "fix 8 correctness bugs,
+  repair transposed PDF leaves 37/38"), not an ancestor of `master`. Its
+  diff against its own merge-base is large (~10.7k lines across 32 files)
+  but every file it touches (`propose_punctuation_part1.py`,
+  `reconstruct_multipage_klalim.py`, `verify_reconstruction_witness.py`,
+  etc.) already exists and is live on `master` today via separate later
+  commits, so this is very likely early/superseded work, not orphaned
+  unmerged fixes - but this was NOT confirmed line-by-line, only inferred
+  from file presence. Flagging for a future session to either confirm
+  superseded and delete, or investigate further - not deleted here since
+  that wasn't asked for and the superseded-vs-orphaned question isn't
+  fully closed.
+- **Review dashboard is running** (`python3 review_server.py`, PID 54339,
+  port 8420) on the CURRENT code - restarted once this session (2026-08-16,
+  for the witness-collision-guard fix in `_load_witness_queue()`). No
+  restart needed going forward for anything committed after that restart.
 - **DONE - dropped-lamed ligature pattern: root cause found, ALL 130
   corrections applied (`c7426d9`, `4b30c69`, plus the group-3 batch
   below).** Root cause: this print sets א+ל as a single ligature glyph
