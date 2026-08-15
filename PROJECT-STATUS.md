@@ -292,6 +292,85 @@ worktree removed.
   **Not started, not scoped, not proposed** per the standing gate -
   logged here only because CLAUDE.md requires logging confirmed findings
   immediately, not because it's next.
+
+### DONE 2026-08-16 - independent lexicon cross-check built (closes the "no independent source available" gap above)
+
+Per user request ("do #3"). `lexicon.txt` was built from this project's own
+OCR output (see below), so nothing it validates against is truly
+independent. Built a genuinely independent Rabbinic Hebrew/Aramaic reference
+corpus and a read-only cross-check against it - not a lexicon rebuild, a new
+signal.
+
+- **`fetch_sefaria_reference_corpus.py`** (new, standalone): downloads
+  Shulchan Arukh (all 4 chelekim) + Talmud Bavli (37 tractates), Hebrew,
+  from Sefaria's public GCS export bucket (`Sefaria-Export` on GitHub -
+  no API key, one merged JSON per book). Same halachic-code/Talmudic-
+  citation register as Yad Malachi. Output: `sefaria_reference_corpus/raw/`
+  (41 files, ~45MB), gitignored like this project's other scan-derived
+  caches. Idempotent - skips files already present.
+- **`validate_lexicon_independent.py`** (new, standalone, read-only):
+  builds a word-frequency table from the 41 files (2,473,227 words,
+  113,955 unique forms - a real independent sample, not a toy) and
+  produces two reports, neither of which writes anything:
+  1. **Sanity-checks the 2026-08-15 lexicon purge.** 17/24 of the
+     dropped-lamed corrupt forms have ZERO independent attestation
+     (supports the purge). **7/24 DO have nonzero independent
+     attestation** as real words somewhere in this 2.47M-word corpus -
+     `אא` (28x, vs `אלא` at 19,144x - 684x more common), `אה` (8x vs
+     `אלה` 182x), `איה` (48x vs `אליה` 53x), `אמא` (15x vs `אלמא` 586x),
+     `אפא` (2x vs `אלפא` 33x), `האף` (11x vs `האלף` 13x), `והאף` (1x vs
+     `והאלף` 1x). This does NOT overturn the purge - the overwhelming
+     frequency skew toward the corrected form still holds, and Part 1's
+     own instances of `אמא`/`אפא` were separately, individually
+     re-read in context on 2026-08-15 before the purge (see above) - but
+     it is new evidence that wasn't available when the "0 ambiguous"
+     framing was written, logged here per Lesson 2.
+  2. **6,056/19,015 lexicon.txt words (31.8%) have zero independent
+     attestation.** Explicitly NOT a purge list - the script's own
+     docstring says so and the report is capped/labelled as
+     for-individual-reading. Confirmed by spot-check: most of the sample
+     are legitimate (medieval/early-modern rabbinic names Yad Malachi
+     cites that predate or postdate the Talmud/Shulchan Aruch corpus,
+     e.g. `אבודרהם`/Abudarham, `אבולעפיא`/Abulafia - real historical
+     figures with no reason to appear in the reference corpus).
+- **REAL NEW FINDING while spot-checking report 2**: the independent
+  check surfaced a corruption SHAPE the two prior dropped-lamed passes
+  structurally could not catch. `detect_ligature_corruption.py`'s method
+  only checks "does inserting ל after an א within THIS token produce a
+  real word" - it cannot catch a corrupted `אלא`->`אא` that ALSO lost its
+  following space and fused with the next word into one token. Checked
+  every lexicon.txt word starting with `אא` (len>2) for actual presence
+  in `part1.json` (16 found); 11 are the genuine abbreviation `אא"כ`/
+  `אא"ע` (gershayim-marked acronyms, correctly excluded by gershayim
+  guards elsewhere but this ad-hoc check didn't have one, caught by
+  reading the list rather than trusting the count). **5 real candidates,
+  4 distinct klalim, none scan-verified**: klal 130 word 11 and klal 168
+  word 11, both `אאמוראי` (candidate split `אלא`+`אמוראי`, "but/rather
+  the amoraim..."); klal 150 word 167 `אאיזה` (`אלא`+`איזה`, "but
+  which"); klal 168 word 162 `אאביי` (`אלא`+`אביי`, "but Abaye [said]");
+  klal 177 word 318 `אאידך` (`אלא`+`אידך`, "but the other"). All five
+  candidate splits are ordinary, natural Talmudic phrasing, and all have
+  zero independent attestation as single words while both halves of each
+  split are common independently. **Not corrected** - per Success
+  Criterion #1, a different corruption shape than the already-confirmed
+  131 instances needs its own verification (Lesson 9: two independent
+  signals should agree, and this is only one so far - a frequency
+  argument, not a scan read). Recorded as 4 `klal_flag` decisions
+  (`reviewer: "ai-lexicon-crosscheck"`, `needs_revisit: true`, ids
+  `815a2579b395`/`92a97742f8b3`/`0a15fcf0df69`/`4826eb63b40e`) - confirmed
+  live on the dashboard (`/api/klal/130/flag` etc.) before logging this.
+  **NOT YET DONE**: scan-verify these 5 instances; consider whether
+  `detect_ligature_corruption.py` should gain a second pass for this
+  compound-token shape (would need a word-frequency-based split search,
+  not just single-token insertion - a real design question, not done
+  here).
+- Verified: `fetch_sefaria_reference_corpus.py` re-run confirms 41/41
+  idempotent (no re-download); `validate_lexicon_independent.py` re-run
+  produces byte-identical report output; live dashboard confirmed
+  serving all 4 new flags correctly; nothing in `part1.json`/
+  `lexicon.txt`/any derived pipeline file was touched by this work - it
+  is purely additive (two new scripts + one gitignored cache dir + 4
+  decision-log entries).
   Full `./rebuild_all.sh` clean, 75/75 pytest + 11/11 Playwright (86
   total) passing.
 - **DONE - test-suite expansion/refactor, merged 2026-08-14 (`b30eae5`).**
@@ -992,10 +1071,11 @@ DocAI's own recognition, before this repo sees the text) - built
 permanent zero-tolerance regression test instead, and found + applied
 one more real instance (klal 92) the two prior passes had missed.
 `lexicon.txt` was purged of the 24 confirmed-corrupt forms (not a full
-re-derivation - no independent external source is available). klal
-200's `אליהו` attribution - flagged above as the lowest-confidence of
-the 8 group-3 corrections - is now scan-verified and resolved, see the
-item 6 update above; no longer an open item.
+re-derivation at the time - an independent external source is now
+available, see the 2026-08-16 entry above). klal 200's `אליהו`
+attribution - flagged above as the lowest-confidence of the 8 group-3
+corrections - is now scan-verified and resolved, see the item 6 update
+above; no longer an open item.
 
 **Still open, smaller**: nothing else identified. Parts 2-3 are
 confirmed (2026-08-15, incidentally, while scoping the lexicon purge -

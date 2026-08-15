@@ -1,0 +1,144 @@
+#!/usr/bin/env python3
+# [STANDALONE] Cross-checks lexicon.txt against a genuinely INDEPENDENT
+# Rabbinic Hebrew/Aramaic word-frequency table (Shulchan Arukh + Talmud
+# Bavli, ~2.47M words, via fetch_sefaria_reference_corpus.py) - not a fix,
+# a read-only cross-check.
+#
+# WHY THIS EXISTS: lexicon.txt was built from THIS corpus's own OCR output
+# (archive/scripts/build_lexicon.py), so it absorbed and then "validated"
+# the alef-lamed ligature corruption - see PROJECT-STATUS.md
+# "`lexicon.txt` cannot catch the ligature corruption - it contains it".
+# Every check this project runs against lexicon.txt is therefore only as
+# independent as lexicon.txt itself, which is not independent at all. This
+# script is the first check in the pipeline that compares against a source
+# with NO editorial/data lineage connection to this project.
+#
+# TWO REPORTS, both informational - neither writes anything:
+#
+# 1. Sanity-check the 2026-08-15 lexicon.txt purge: for each of the 24
+#    confirmed dropped-lamed corrupt forms (DROPPED_LAMED_CORRUPT_FORMS,
+#    tests/test_corpus_invariants.py), how often does it appear in the
+#    independent corpus, versus its corrected form? A large skew toward
+#    the corrected form supports the purge; a corrupt form with real
+#    independent attestation doesn't overturn the purge (Part 1's specific
+#    instances were separately scan/context-verified) but IS new evidence
+#    worth recording - CLAUDE.md Lesson 2, a "0 ambiguous" claim deserves
+#    re-examination against a signal that wasn't available when it was made.
+#
+# 2. lexicon.txt words with ZERO occurrences anywhere in the independent
+#    corpus: NOT a purge list. lexicon.txt legitimately contains Yad-
+#    Malachi-specific proper nouns, unique word-forms, and words this
+#    2.47M-word sample simply didn't happen to use - a random sample this
+#    doesn't fully cover is normal for the long tail of any lexicon
+#    (Lesson 1: coverage of a check is not the same as its absence of
+#    output). This report exists to be READ, one candidate at a time,
+#    the same way the 24 forms above were - not auto-applied.
+#
+# Usage: python3 fetch_sefaria_reference_corpus.py   (once, ~45MB download)
+#        python3 validate_lexicon_independent.py
+import glob
+import json
+import os
+import re
+from collections import Counter
+
+REPO = os.path.dirname(os.path.abspath(__file__))
+RAW_DIR = os.path.join(REPO, "sefaria_reference_corpus", "raw")
+FREQ_CACHE = os.path.join(REPO, "sefaria_reference_corpus", "word_freq.json")
+LEXICON_PATH = os.path.join(REPO, "lexicon.txt")
+
+HEB = "אבגדהוזחטיכלמנסעפצקרשתךםןףץ"
+HEB_SET = set(HEB)
+NIQQUD_RE = re.compile(r"[֑-ׇ]")  # cantillation + vowel points
+TAG_RE = re.compile(r"<[^>]+>")
+
+# Same 24 forms as tests/test_corpus_invariants.py::DROPPED_LAMED_CORRUPT_FORMS
+# (kept as an independent literal, not imported, so this script has no
+# dependency on the test file and still runs standalone).
+CORRUPT_TO_CORRECT = {
+    "אא": "אלא", "אגאזי": "אלגאזי", "אה": "אלה", "אהים": "אלהים",
+    "איבא": "אליבא", "איביה": "אליביה", "איבייהו": "אליבייהו", "איה": "אליה",
+    "איעזר": "אליעזר", "אמא": "אלמא", "אעאי": "אלעאי", "אעזר": "אלעזר",
+    "אפא": "אלפא", "בצלא": "בצלאל", "דשמוא": "דשמואל", "האה": "האלה",
+    "האף": "האלף", "ואהים": "ואלהים", "והאף": "והאלף", "וכאה": "וכאלה",
+    "ושמוא": "ושמואל", "ישמעא": "ישמעאל", "ישרא": "ישראל", "שמוא": "שמואל",
+}
+
+
+def flatten_strings(node, out):
+    if isinstance(node, str):
+        out.append(node)
+    elif isinstance(node, list):
+        for x in node:
+            flatten_strings(x, out)
+
+
+def clean_words(raw_html_string):
+    no_tags = TAG_RE.sub(" ", raw_html_string)
+    no_niqqud = NIQQUD_RE.sub("", no_tags)
+    words = []
+    for tok in no_niqqud.split():
+        w = "".join(c for c in tok if c in HEB_SET)
+        if w:
+            words.append(w)
+    return words
+
+
+def build_or_load_frequency_table():
+    if os.path.exists(FREQ_CACHE):
+        return Counter(json.load(open(FREQ_CACHE, encoding="utf-8")))
+    paths = sorted(glob.glob(os.path.join(RAW_DIR, "*.json")))
+    if not paths:
+        raise SystemExit(
+            f"No files in {RAW_DIR} - run fetch_sefaria_reference_corpus.py first."
+        )
+    counts = Counter()
+    for path in paths:
+        d = json.load(open(path, encoding="utf-8"))
+        strings = []
+        flatten_strings(d.get("text", []), strings)
+        for s in strings:
+            counts.update(clean_words(s))
+    json.dump(counts, open(FREQ_CACHE, "w", encoding="utf-8"), ensure_ascii=False)
+    return counts
+
+
+def load_lexicon():
+    return sorted(set(w.strip() for w in open(LEXICON_PATH, encoding="utf-8") if w.strip()))
+
+
+def main():
+    freq = build_or_load_frequency_table()
+    print(f"Independent corpus: {sum(freq.values())} words, {len(freq)} unique forms "
+          f"(Shulchan Arukh + Talmud Bavli, via Sefaria's public export).\n")
+
+    print("--- Report 1: the 24 dropped-lamed corrupt forms vs. their corrected reading ---")
+    attested = []
+    for corrupt, correct in CORRUPT_TO_CORRECT.items():
+        fc, fr = freq.get(corrupt, 0), freq.get(correct, 0)
+        if fc > 0:
+            attested.append((corrupt, fc, correct, fr))
+    print(f"{len(attested)}/{len(CORRUPT_TO_CORRECT)} corrupt forms have nonzero independent "
+          f"attestation (i.e. are real words somewhere in this corpus, not purely artifacts):")
+    for corrupt, fc, correct, fr in sorted(attested, key=lambda x: -x[1]):
+        ratio = f"{fr / fc:.0f}x" if fc else "inf"
+        print(f"  {corrupt!r}: {fc} occurrence(s) vs {correct!r}: {fr} ({ratio} more common) "
+              f"- does NOT overturn the purge (Part 1's specific instances were individually "
+              f"scan/context-verified), but was not known when the purge was made")
+    zero = [c for c in CORRUPT_TO_CORRECT if freq.get(c, 0) == 0]
+    print(f"{len(zero)}/{len(CORRUPT_TO_CORRECT)} corrupt forms have ZERO independent "
+          f"attestation (supports the purge): {', '.join(sorted(zero))}\n")
+
+    print("--- Report 2: lexicon.txt words with zero independent attestation ---")
+    lexicon = load_lexicon()
+    unattested = [w for w in lexicon if freq.get(w, 0) == 0]
+    print(f"{len(unattested)}/{len(lexicon)} lexicon.txt words ({len(unattested)/len(lexicon):.1%}) "
+          f"do not appear anywhere in the independent corpus.")
+    print("NOT a purge list - read individually before acting on any entry (see module "
+          "docstring). First 40 shown for a quick look:")
+    for w in unattested[:40]:
+        print(f"  {w}")
+
+
+if __name__ == "__main__":
+    main()

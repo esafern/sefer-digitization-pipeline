@@ -30,6 +30,7 @@ llm_klal_starts/
 sefaria_export/
 vlm_extractions/
 scratch/
+sefaria_reference_corpus/
 
 # Junk
 *.old

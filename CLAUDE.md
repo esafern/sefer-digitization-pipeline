@@ -361,6 +361,24 @@ need the same checking as any other claim.
     part of `rebuild_all.sh`, each needs the gitignored
     `docai_word_boxes`/scan-derived caches, so none of them can run on a
     fresh clone.
+  - **`detect_ligature_corruption.py`** (added 2026-08-15 — re-runnable
+    detector for the alef-lamed ligature extraction bug, see
+    PROJECT-STATUS.md) needs only `part*.json`, so it CAN run on a fresh
+    clone unlike the scan-dependent validators above — but is still not
+    wired into `rebuild_all.sh` (its output needs human/context review
+    before any correction, not zero-tolerance gating).
+  - **`fetch_sefaria_reference_corpus.py`** / **`validate_lexicon_
+    independent.py`** (added 2026-08-16 — downloads Shulchan Arukh +
+    Talmud Bavli from Sefaria's public export as a genuinely independent
+    Rabbinic Hebrew/Aramaic reference corpus, since `lexicon.txt` is
+    derived from this project's own OCR and so cannot independently
+    validate itself; see PROJECT-STATUS.md). Output cached in the
+    gitignored `sefaria_reference_corpus/` — not `sefaria_export/`,
+    which is this project's own OUTPUT for Sefaria (a different,
+    pre-existing, differently-purposed gitignored directory; don't
+    conflate the two). Needs network access on first run only (cached
+    after); not wired into `rebuild_all.sh` for the same reason as
+    `detect_ligature_corruption.py` above.
   - **`validate_part1_corpus_integrity.py`** (added 2026-08-07 — 5
     independent no-LLM sweeps over `part1.json` alone: gematria
     self-consistency, character/encoding sanity, duplicated-phrase
