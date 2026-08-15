@@ -950,6 +950,17 @@ individually scan-verified, unlike the 122. 8/8 verified correct
 post-apply, third `rebuild_all.sh` run clean (74/74 pytest, 11/11
 Playwright, no new test surprises). Full context/reasoning for each in
 `PROJECT-STATUS-HISTORY.md`'s dropped-lamed entry.
+**RESOLVED 2026-08-15/16, found in `review_decisions.jsonl`**: a
+separate `candidate_choice` decision (`b58eb7b2b475`, `reviewer:
+"local"`, i.e. a human working the normal flagged-correction dashboard,
+not the AI passes above) independently scan-verified this exact word
+via Gemini vision at 0.98 confidence - "a prominent ascender for the
+letter Lamed... between the Aleph and Yod" - and directly resolved the
+attribution doubt: the surrounding text reads `כמוהר"ר אליהו`, i.e. the
+scan itself names the referent "Eliyahu," which settles the "is this
+really Eliyahu Rabbah/Zuta" concern the AI note raised. No longer just
+"applied on judgment" - now individually scan-verified like the other
+23. Nothing left open here.
 
 **DONE 2026-08-15** (see the dropped-lamed entry near the top of this
 file's handoff for full detail): a true DocAI-ingest-level fix turned
@@ -960,8 +971,9 @@ permanent zero-tolerance regression test instead, and found + applied
 one more real instance (klal 92) the two prior passes had missed.
 `lexicon.txt` was purged of the 24 confirmed-corrupt forms (not a full
 re-derivation - no independent external source is available). klal
-200's `אליהו` attribution is still worth a second look even though it's
-applied - not urgent, nobody's acting on it wrongly by leaving it.
+200's `אליהו` attribution - flagged above as the lowest-confidence of
+the 8 group-3 corrections - is now scan-verified and resolved, see the
+item 6 update above; no longer an open item.
 
 **Still open, smaller**: nothing else identified. Parts 2-3 are
 confirmed (2026-08-15, incidentally, while scoping the lexicon purge -
