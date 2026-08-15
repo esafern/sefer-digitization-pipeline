@@ -982,6 +982,20 @@
       "klal_id": 69,
       "page": 34,
       "opcode": "replace",
+      "word_index_in_final_text": 113,
+      "original_word": "א",
+      "corrected_word": "אל",
+      "bbox": {
+        "x1": 0.4083281457424164,
+        "y1": 0.6197183132171631,
+        "x2": 0.4207582473754883,
+        "y2": 0.6370221376419067
+      }
+    },
+    {
+      "klal_id": 69,
+      "page": 34,
+      "opcode": "replace",
       "word_index_in_final_text": 151,
       "original_word": "אמא",
       "corrected_word": "אלמא",
@@ -996,13 +1010,13 @@
       "klal_id": 69,
       "page": 34,
       "opcode": "replace",
-      "word_index_in_final_text": 189,
-      "original_word": "ואהים",
-      "corrected_word": "ואלהים",
+      "word_index_in_final_text": 188,
+      "original_word": "א ואהים",
+      "corrected_word": "אל ואלהים",
       "bbox": {
         "x1": 0.18707270920276642,
         "y1": 0.6800804734230042,
-        "x2": 0.22747047245502472,
+        "x2": 0.24798011779785156,
         "y2": 0.6973842978477478
       }
     },
@@ -2793,6 +2807,20 @@
       }
     },
     {
+      "klal_id": 158,
+      "page": 57,
+      "opcode": "replace",
+      "word_index_in_final_text": 176,
+      "original_word": "או",
+      "corrected_word": "אלו",
+      "bbox": {
+        "x1": 0.49907463788986206,
+        "y1": 0.7092457413673401,
+        "x2": 0.5144972205162048,
+        "y2": 0.7234387397766113
+      }
+    },
+    {
       "klal_id": 159,
       "page": 57,
       "opcode": "replace",
@@ -3051,6 +3079,20 @@
         "y1": 0.4368187189102173,
         "x2": 0.7719950675964355,
         "y2": 0.4533710181713104
+      }
+    },
+    {
+      "klal_id": 168,
+      "page": 62,
+      "opcode": "replace",
+      "word_index_in_final_text": 359,
+      "original_word": "או",
+      "corrected_word": "אלו",
+      "bbox": {
+        "x1": 0.3828996419906616,
+        "y1": 0.5280581116676331,
+        "x2": 0.40086740255355835,
+        "y2": 0.5446104407310486
       }
     },
     {
@@ -3429,6 +3471,20 @@
         "y1": 0.5702145099639893,
         "x2": 0.39802226424217224,
         "y2": 0.5880210399627686
+      }
+    },
+    {
+      "klal_id": 176,
+      "page": 65,
+      "opcode": "replace",
+      "word_index_in_final_text": 628,
+      "original_word": "וא",
+      "corrected_word": "ואל",
+      "bbox": {
+        "x1": 0.6236094236373901,
+        "y1": 0.6454876661300659,
+        "x2": 0.6378244757652283,
+        "y2": 0.6616754531860352
       }
     },
     {
@@ -4163,6 +4219,20 @@
       "klal_id": 200,
       "page": 72,
       "opcode": "replace",
+      "word_index_in_final_text": 58,
+      "original_word": "איהו",
+      "corrected_word": "אליהו",
+      "bbox": {
+        "x1": 0.19192546606063843,
+        "y1": 0.6935158967971802,
+        "x2": 0.22422359883785248,
+        "y2": 0.7076117396354675
+      }
+    },
+    {
+      "klal_id": 200,
+      "page": 72,
+      "opcode": "replace",
       "word_index_in_final_text": 95,
       "original_word": "דוהפרה",
       "corrected_word": "דוהפדה",
@@ -4716,7 +4786,7 @@
     }
   ],
   "meta": {
-    "total_candidates": 351,
+    "total_candidates": 356,
     "klalim_covered": 138,
     "skipped_no_docai_page_klalim": [],
     "unattributable_deletes": [],

@@ -139,9 +139,20 @@ Results:
   corrupted the same way independently in two places reinforces it
   rather than looking like a coincidence.
 
-**8 genuine candidates total, NOT applied - awaiting a decision**, per
+**8 genuine candidates total.** Initially logged but not applied, per
 the user's instruction to review and report group 3 rather than apply
-it. None are individually scan-verified.
+it directly. **Applied later the same day (2026-08-15)** on user
+go-ahead, via the same `manual_correction` -> `apply_reviewer_
+decisions.py` pipeline as the 122, each flagged with a note explicitly
+distinguishing it from those 122 (contextual-reading judgment from the
+group-3 review, not a deterministic dictionary lookup, and not
+individually scan-verified). 8/8 read back correct at their recorded
+positions; `git diff` showed exactly 7 changed `part1.json` lines (klal
+69 took 2 of the 8 corrections, so 51 distinct klalim touched overall
+across both batches, not 58). A third `rebuild_all.sh` run completed
+clean with no new test surprises. klal 200's `אליהו` attribution
+remains the lowest-confidence of the 8 and is worth a second look
+despite being applied.
 
 ## Full-pipeline revalidation & refactor pass (main process, not just recently-changed files) — 2026-08-14
 

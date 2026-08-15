@@ -1275,6 +1275,24 @@
     "klal_id": 69,
     "page": 34,
     "opcode": "replace",
+    "word_index_in_final_text": 113,
+    "original_word": "א",
+    "corrected_word": "אל",
+    "bbox": {
+      "x1": 0.4083281457424164,
+      "y1": 0.6197183132171631,
+      "x2": 0.4207582473754883,
+      "y2": 0.6370221376419067
+    },
+    "vision_selected": "A",
+    "vision_transcription": "א'",
+    "vision_confidence": 0.95,
+    "vision_reasoning": "The manuscript image clearly shows a single letter Aleph ('א') with an abbreviation mark/geresh above it, rather than a fully spelled-out 'אל' (Aleph-Lamed). Option A accurately reflects the paleographic reality of the crop."
+  },
+  {
+    "klal_id": 69,
+    "page": 34,
+    "opcode": "replace",
     "word_index_in_final_text": 151,
     "original_word": "אמא",
     "corrected_word": "אלמא",
@@ -1293,19 +1311,19 @@
     "klal_id": 69,
     "page": 34,
     "opcode": "replace",
-    "word_index_in_final_text": 189,
-    "original_word": "ואהים",
-    "corrected_word": "ואלהים",
+    "word_index_in_final_text": 188,
+    "original_word": "א ואהים",
+    "corrected_word": "אל ואלהים",
     "bbox": {
       "x1": 0.18707270920276642,
       "y1": 0.6800804734230042,
-      "x2": 0.22747047245502472,
+      "x2": 0.24798011779785156,
       "y2": 0.6973842978477478
     },
-    "vision_selected": "A",
-    "vision_transcription": "ואהים",
+    "vision_selected": "B",
+    "vision_transcription": "א' ואלהים",
     "vision_confidence": 0.95,
-    "vision_reasoning": "In the raster crop on the second line, the text clearly reads 'ואהים' (vav, aleph, heh, yod, final mem) without the letter lamed ('ל'), which is a typographical error in the source printing for 'ואלהים'."
+    "vision_reasoning": "Option B represents the correct adjudicated Rabbinic text ('אל ואלהים'). The image displays the abbreviation א' standing for the Divine Name 'אל', followed by 'ואלהים' (clearly showing the tall ascender of the lamed). Option A is a flawed raw OCR output that misreads 'ואלהים' as 'ואהים' and fails to account for Rabbinic abbreviation conventions."
   },
   {
     "klal_id": 69,
@@ -3602,8 +3620,26 @@
     },
     "vision_selected": "B",
     "vision_transcription": "אלא",
-    "vision_confidence": 0.9,
-    "vision_reasoning": "The sentence context from Rabbinic literature reads 'שהכ\"הג לא הזכיר אלא להרמ\"ע'. In line 3 of the crop, the text shows the abbreviated/compact form representing 'אלא' (adjudicated text Option B) following 'הזכיר' ('ר') and before 'להרמ\"ע' ('ל'). Option B correctly reflects the intended semantic reading of the text."
+    "vision_confidence": 0.98,
+    "vision_reasoning": "The crop clearly displays the word 'אלא' on the third line following the final resh of 'הזכיר'. The central letter features the characteristic tall ascender of a lamed ('ל') positioned between two alephs ('א'), perfectly matching the context 'לא הזכיר אלא להרמ\"ע'."
+  },
+  {
+    "klal_id": 158,
+    "page": 57,
+    "opcode": "replace",
+    "word_index_in_final_text": 176,
+    "original_word": "או",
+    "corrected_word": "אלו",
+    "bbox": {
+      "x1": 0.49907463788986206,
+      "y1": 0.7092457413673401,
+      "x2": 0.5144972205162048,
+      "y2": 0.7234387397766113
+    },
+    "vision_selected": "A",
+    "vision_transcription": "או",
+    "vision_confidence": 0.95,
+    "vision_reasoning": "The raster crop clearly shows the word 'או' consisting of an Aleph (א) followed directly by a Vav (ו), without the tall ascender stroke of a Lamed (ל) that would be required for 'אלו' (Option B). Thus, the visual reading is 'או', likely a scribal variant or shorthand for 'אלו' in this context."
   },
   {
     "klal_id": 159,
@@ -3945,6 +3981,24 @@
     "klal_id": 168,
     "page": 62,
     "opcode": "replace",
+    "word_index_in_final_text": 359,
+    "original_word": "או",
+    "corrected_word": "אלו",
+    "bbox": {
+      "x1": 0.3828996419906616,
+      "y1": 0.5280581116676331,
+      "x2": 0.40086740255355835,
+      "y2": 0.5446104407310486
+    },
+    "vision_selected": "B",
+    "vision_transcription": "אלו",
+    "vision_confidence": 0.98,
+    "vision_reasoning": "The context is a well-known passage from the Rosh (Sanhedrin, Perek 1 / Dinei Mamonot §6): 'והכריעו בין אלו הסברות'. Paleographically, the third line shows the final nun of 'בין', followed by 'אלו' where the distinct ascender (neck) of the letter lamed (ל) is clearly visible, which raw OCR (Option A) misidentified as 'או'."
+  },
+  {
+    "klal_id": 168,
+    "page": 62,
+    "opcode": "replace",
     "word_index_in_final_text": 386,
     "original_word": "סע\"ר",
     "corrected_word": "סע\"ד",
@@ -3957,7 +4011,7 @@
     "vision_selected": "B",
     "vision_transcription": "סע\"ד",
     "vision_confidence": 0.95,
-    "vision_reasoning": "Paleographically, the character following the double quote (Gershayim) features a flat top stroke with a clear right-angled corner protruding slightly to the right, which is the defining characteristic of a Dalet (ד) rather than a rounded Resh (ר). Contextually, 'סע\"ד' is a standard Rabbinic citation abbreviation standing for 'סעיף ד'' (paragraph/section 4) following 'דף ס\"ו'."
+    "vision_reasoning": "The character following the Gershayim (\") has a square top-right corner with a distinct right overhang characteristic of a Dalet ('ד'), unlike a rounded Resh ('ר'). Contextually, in 'דף ס\"ו סע\"ד', 'סע\"ד' represents 'סעיף ד'' (paragraph/section 4), fitting standard Rabbinic citation notation."
   },
   {
     "klal_id": 168,
@@ -4426,6 +4480,24 @@
     "vision_transcription": "אשידה",
     "vision_confidence": 0.98,
     "vision_reasoning": "The context refers to 'אשידה לרב פפא' (referencing the Talmudic discussion in Menachot/Gittin regarding a 'שידה' - chest). Paleographically, the letter before the final hei has a clear right-angle corner characteristic of a dalet ('ד'), distinguishing it from a rounded resh ('ר'). Thus, 'אשידה' (Option B) is the correct transcription."
+  },
+  {
+    "klal_id": 176,
+    "page": 65,
+    "opcode": "replace",
+    "word_index_in_final_text": 628,
+    "original_word": "וא",
+    "corrected_word": "ואל",
+    "bbox": {
+      "x1": 0.6236094236373901,
+      "y1": 0.6454876661300659,
+      "x2": 0.6378244757652283,
+      "y2": 0.6616754531860352
+    },
+    "vision_selected": "A",
+    "vision_transcription": "וא",
+    "vision_confidence": 0.95,
+    "vision_reasoning": "In line 3 of the image, following the final 'ל' of 'גדול', the text clearly reads 'ו' followed by 'א' and then immediately the letter 'ד' of 'דעות'. The letter 'ל' of 'ואל' is omitted/abbreviated in this printing, making 'וא' the accurate visual reading of the candidate raster segment."
   },
   {
     "klal_id": 177,
@@ -5360,8 +5432,26 @@
     },
     "vision_selected": "B",
     "vision_transcription": "עדיף",
+    "vision_confidence": 0.95,
+    "vision_reasoning": "The contextual Rabbinic phrase is 'הקש עדיף' ('Hekesh is preferable'), a standard Talmudic/halakhic terminology comparing hermeneutical principles. The letter after the 'ע' is a 'ד' (dalet), though ink bleeding in old prints can cause OCR engines to misread it as 'ר' ('עריף', which is non-sensical in this context). Option B correctly reflects the adjudicated Rabbinic text."
+  },
+  {
+    "klal_id": 200,
+    "page": 72,
+    "opcode": "replace",
+    "word_index_in_final_text": 58,
+    "original_word": "איהו",
+    "corrected_word": "אליהו",
+    "bbox": {
+      "x1": 0.19192546606063843,
+      "y1": 0.6935158967971802,
+      "x2": 0.22422359883785248,
+      "y2": 0.7076117396354675
+    },
+    "vision_selected": "B",
+    "vision_transcription": "אליהו",
     "vision_confidence": 0.98,
-    "vision_reasoning": "Contextually and semantically, the Talmudic/Rabbinic discussion concerns whether 'הקש עדיף' (analogy is preferred) versus 'ג\"ש עדיפא'. Line 3 clearly reads '[ה]קש עדיף ומ[דוכתי]' in the context of 'נרא' דהקש עדיף'. OCR misread the Dalet (ד) as a Resh (ר) in Option A ('עריף'), which is a common OCR artifact, whereas 'עדיף' is the correct rabbinic term and textual reading."
+    "vision_reasoning": "The image clearly shows the word 'אליהו' with a prominent ascender for the letter Lamed (ל) extending into the line space above, between the Aleph (א) and Yod (י). Raw OCR (Option A) failed to parse the Lamed ascender, misreading it as 'איהו'. Contextually and paleographically, the text refers to Rabbi Elijah (אליהו) Mizrahi / Afandari as confirmed in the surrounding textual context ('כמוהר\"ר אליהו')."
   },
   {
     "klal_id": 200,

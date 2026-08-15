@@ -27,23 +27,32 @@ current handoff, re-written (not just appended to) as state changes.
   `"unverified"`). No restart needed going forward - part1.json/decision
   edits since then don't require one (`review_server.py` reads fresh off
   disk every request).
-- **DONE - dropped-lamed ligature pattern: root cause found, 122
-  corrections applied, group-3 review complete (`c7426d9`, `4b30c69`).**
-  Root cause: this print sets א+ל as a single ligature glyph (U+FB4F)
-  that DocAI reads as a bare א, silently dropping the lamed - confirmed
-  by three independent signals on 23 scan-verified instances (0
-  print-faithful, 0 ambiguous). 122 total corrections (117 mechanical +
-  5 found by a prefix-sweep the original scan missed) applied to
-  `part1.json` across 50 klalim via the normal decision/apply pipeline,
-  per direct user instruction. A genuinely new test failure surfaced
-  and was resolved on its merits (klal 217's own deliberate re-citation
-  of the same Tosafot passage, now correctly self-matching after the
-  fix - added to the duplicate-phrase baseline with evidence, not
-  silenced). Separately, the earlier "~620 ambiguous, needs a scope
-  decision" estimate was itself inflated (mostly the unrelated citation
-  numeral `א'`) - the real set is 228, individually reviewed 2026-08-15,
-  **8 genuine candidates found and logged but NOT applied** (awaiting a
-  decision - see item below). Full detail in
+- **DONE - dropped-lamed ligature pattern: root cause found, ALL 130
+  corrections applied (`c7426d9`, `4b30c69`, plus the group-3 batch
+  below).** Root cause: this print sets א+ל as a single ligature glyph
+  (U+FB4F) that DocAI reads as a bare א, silently dropping the lamed -
+  confirmed by three independent signals on 23 scan-verified instances
+  (0 print-faithful, 0 ambiguous). 122 corrections (117 mechanical + 5
+  found by a prefix-sweep the original scan missed) applied first across
+  50 klalim; a genuinely new test failure surfaced along the way and was
+  resolved on its merits, not silenced (klal 217's own deliberate
+  re-citation of the same Tosafot passage, now correctly self-matching
+  after the fix - added to the duplicate-phrase baseline with evidence).
+  Separately, the earlier "~620 ambiguous, needs a scope decision"
+  estimate was itself inflated (mostly the unrelated citation numeral
+  `א'`) - the real set is 228, individually reviewed 2026-08-15, giving
+  **8 more genuine candidates**. **2026-08-15, later the same day: all 8
+  applied too**, per user go-ahead, same decision/apply pipeline, each
+  flagged with an honest confidence note distinguishing them from the
+  122 (contextual-reading judgment, not a deterministic dictionary
+  lookup or individual scan check - klal 200's `אליהו` attribution is
+  the lowest-confidence of the 8, worth a second look). 8/8 verified
+  correct at their recorded positions post-apply; `git diff` shows
+  exactly 7 changed part1.json lines (klal 69 took 2 of the 8
+  corrections). Third `rebuild_all.sh` run clean, no new test
+  surprises this time. **Total: 130 corrections across 51 distinct
+  klalim, 0 known remaining candidates from either review pass.** Full
+  detail in
   `PROJECT-STATUS-HISTORY.md`'s newest entry. 74/74 pytest + 11/11
   Playwright passing.
 - **DONE - test-suite expansion/refactor, merged 2026-08-14 (`b30eae5`).**
@@ -689,20 +698,25 @@ repeatedly across both audit rounds this session, in different validator
 scripts - a script's claimed coverage is not evidence of its actual
 coverage.
 
-**6. OPEN - 8 genuine dropped-lamed candidates from the group-3
-ambiguous-word review, not yet applied, need a decision.** klal 158
+**6. DONE 2026-08-15 - the 8 group-3 candidates applied.** Per user
+go-ahead, all 8 recorded and promoted the same way as the 122: klal 158
 `או`→`אלו`; klal 168 `או`→`אלו`; klal 69 `א`→`אל` (×2); klal 198
 `א`→`אל`; klal 169 `וא`→`ואל`; klal 176 `וא`→`ואל`; klal 200 `איהו`→
 `אליהו` (lowest confidence of the 8 - attribution context is slightly
-off, worth a second look before applying). None individually scan-
-verified, unlike the 122 already applied. Full context/reasoning for
-each in `PROJECT-STATUS-HISTORY.md`'s dropped-lamed entry. Also open,
-smaller: the ligature-mapping fix belongs in the DocAI-ingest path
-itself (not done - the loss happens before this repo ever sees the
-text, so every future extraction will reproduce the same class of bug
-until that's fixed); a lexicon re-derivation from an independent source
-(the current `lexicon.txt` was built from this corpus's own output and
-certifies the very corruption it should have caught).
+off, worth a second look regardless of being applied). None
+individually scan-verified, unlike the 122. 8/8 verified correct
+post-apply, third `rebuild_all.sh` run clean (74/74 pytest, 11/11
+Playwright, no new test surprises). Full context/reasoning for each in
+`PROJECT-STATUS-HISTORY.md`'s dropped-lamed entry.
+
+**Still open, smaller**: the ligature-mapping fix belongs in the
+DocAI-ingest path itself (not done - the loss happens before this repo
+ever sees the text, so every future extraction will reproduce the same
+class of bug until that's fixed); a lexicon re-derivation from an
+independent source (the current `lexicon.txt` was built from this
+corpus's own output and certifies the very corruption it should have
+caught); klal 200's `אליהו` attribution is worth a second look even
+though it's now applied.
 
 **No other known open items beyond the above.** Full detail, evidence,
 and the complete dated history behind every claim above is in
