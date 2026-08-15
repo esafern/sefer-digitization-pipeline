@@ -17,7 +17,7 @@ current handoff, re-written (not just appended to) as state changes.
 
 ### State on disk right now (verified, not remembered)
 
-- **Branch `master`, HEAD `289ccd6`.** Working tree is clean. No open
+- **Branch `master`, HEAD `22aa2c4`.** Working tree is clean. No open
   worktrees (`git worktree list` shows only the main checkout).
 - **Review dashboard is running** (`python3 review_server.py`, port 8420,
   PID logged to `/tmp/review_server.log`) on the CURRENT code - restarted
