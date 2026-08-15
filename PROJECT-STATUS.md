@@ -17,15 +17,35 @@ current handoff, re-written (not just appended to) as state changes.
 
 ### State on disk right now (verified, not remembered)
 
-- **Branch `master`, HEAD `b30eae5`.** Working tree is clean. No open
+- **Branch `master`, HEAD `4b30c69`.** Working tree is clean. No open
   worktrees (`git worktree list` shows only the main checkout).
 - **Review dashboard is running** (`python3 review_server.py`, port 8420,
   PID logged to `/tmp/review_server.log`) on the CURRENT code - restarted
   three times this session (2026-08-14): a `FLAG_LABELS` change, the
   full-pipeline-revalidation merge (`_merge_decision` performance fix),
   and the test-suite-expansion merge (another new `FLAG_LABELS` entry,
-  `"unverified"`). No restart needed going forward unless server code
-  changes again.
+  `"unverified"`). No restart needed going forward - part1.json/decision
+  edits since then don't require one (`review_server.py` reads fresh off
+  disk every request).
+- **DONE - dropped-lamed ligature pattern: root cause found, 122
+  corrections applied, group-3 review complete (`c7426d9`, `4b30c69`).**
+  Root cause: this print sets א+ל as a single ligature glyph (U+FB4F)
+  that DocAI reads as a bare א, silently dropping the lamed - confirmed
+  by three independent signals on 23 scan-verified instances (0
+  print-faithful, 0 ambiguous). 122 total corrections (117 mechanical +
+  5 found by a prefix-sweep the original scan missed) applied to
+  `part1.json` across 50 klalim via the normal decision/apply pipeline,
+  per direct user instruction. A genuinely new test failure surfaced
+  and was resolved on its merits (klal 217's own deliberate re-citation
+  of the same Tosafot passage, now correctly self-matching after the
+  fix - added to the duplicate-phrase baseline with evidence, not
+  silenced). Separately, the earlier "~620 ambiguous, needs a scope
+  decision" estimate was itself inflated (mostly the unrelated citation
+  numeral `א'`) - the real set is 228, individually reviewed 2026-08-15,
+  **8 genuine candidates found and logged but NOT applied** (awaiting a
+  decision - see item below). Full detail in
+  `PROJECT-STATUS-HISTORY.md`'s newest entry. 74/74 pytest + 11/11
+  Playwright passing.
 - **DONE - test-suite expansion/refactor, merged 2026-08-14 (`b30eae5`).**
   Another Opus 5 subagent, same isolated-worktree pattern, built out
   regression coverage for main-pipeline decision logic that had none
@@ -43,12 +63,6 @@ current handoff, re-written (not just appended to) as state changes.
   spot-checked directly (broke `check_drift`'s klal-missing branch,
   confirmed exactly the relevant new test went red, restored byte-
   identical); full `./rebuild_all.sh` clean post-merge, zero data drift.
-- **IN PROGRESS - scan-verification of the dropped-ל pattern** (see
-  below), an Opus 5 subagent working directly on the live repo (not a
-  worktree - it only appends `klal_flag` decisions to
-  `review_decisions.jsonl`), not yet complete as of this handoff -
-  **check status/completion before starting anything else that touches
-  `review_decisions.jsonl` or the dropped-ל klalim.**
 - **CLAUDE.md corrected 2026-08-14**: it had drifted from reality the
   same way script docstrings have in the past (Lesson 19's pattern, now
   confirmed in the durable-rules file itself, not just a script) -
@@ -674,6 +688,21 @@ investigated and closed 2026-08-14, 2 still open:**
 repeatedly across both audit rounds this session, in different validator
 scripts - a script's claimed coverage is not evidence of its actual
 coverage.
+
+**6. OPEN - 8 genuine dropped-lamed candidates from the group-3
+ambiguous-word review, not yet applied, need a decision.** klal 158
+`או`→`אלו`; klal 168 `או`→`אלו`; klal 69 `א`→`אל` (×2); klal 198
+`א`→`אל`; klal 169 `וא`→`ואל`; klal 176 `וא`→`ואל`; klal 200 `איהו`→
+`אליהו` (lowest confidence of the 8 - attribution context is slightly
+off, worth a second look before applying). None individually scan-
+verified, unlike the 122 already applied. Full context/reasoning for
+each in `PROJECT-STATUS-HISTORY.md`'s dropped-lamed entry. Also open,
+smaller: the ligature-mapping fix belongs in the DocAI-ingest path
+itself (not done - the loss happens before this repo ever sees the
+text, so every future extraction will reproduce the same class of bug
+until that's fixed); a lexicon re-derivation from an independent source
+(the current `lexicon.txt` was built from this corpus's own output and
+certifies the very corruption it should have caught).
 
 **No other known open items beyond the above.** Full detail, evidence,
 and the complete dated history behind every claim above is in

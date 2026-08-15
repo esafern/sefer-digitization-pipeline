@@ -17,6 +17,132 @@ current file references, or when grepping for how a past finding was
 resolved. Same append-at-top convention as before: newest entries go right
 after this header, not at the bottom.
 
+## Dropped-lamed pattern: root cause, corpus fix, and the group-3 ambiguous-word review — 2026-08-14/15
+
+Full method and results behind `PROJECT-STATUS.md`'s compact summary of
+this finding - see that file's handoff for the short version and the
+final applied/not-applied counts.
+
+### Root cause (2026-08-14)
+
+A semantic-plausibility spot-check (random ~20% sample of Part 1)
+surfaced a recurring shape: several Hebrew words missing the letter ל
+compared to their correct spellings (`אא` vs `אלא`, `איבא` vs `אליבא`,
+etc.). The user asked for a scan-verification pass on a larger sample
+before drawing any conclusion. That pass (23 instances, 8 word-forms,
+22 klalim, 21 pages, 600-1800 DPI crops) found the root cause: this
+Livorno print sets the letter pair אל as a single ligature glyph
+(Unicode U+FB4F), and DocAI reads that glyph as a bare א, silently
+dropping the lamed. Three independent signals confirmed it (pixel-level
+ascender comparison with a negative control against a real `א"א`
+abbreviation; cross-engine complementary splitting - VLM reads the same
+glyph as bare `לא` on one page; semantic correctness of every
+reconstruction) - full evidence already in `PROJECT-STATUS.md`. This
+overturned an earlier same-day scan read of klal 199 that had concluded
+the opposite (print-faithful, no bug) - independently re-verified by a
+second person (the orchestrating session, not the investigating agent)
+at 2400 DPI before accepting the correction.
+
+### Scope-building (2026-08-14/15)
+
+The original 8 word-forms only cover an exact bare-string match. Two
+follow-up sweeps widened the confirmed-corrupt set:
+- A "does inserting ל after an א yield an attested, high-frequency
+  corpus word" sweep over all Part 1, excluding gershayim-bearing
+  tokens (a real trap: `א"ה` is the standard abbreviation for Even
+  HaEzer, not a corrupted `אלה` - caught by checking one early result
+  by hand before trusting the mechanical count) - found 22 confirmed-
+  corrupt forms, 117 occurrences, 48 klalim.
+- A systematic Hebrew-prefix sweep (ו/ה/ב/כ/ל/מ/ש/ד and 2-letter
+  combinations, applied to all forms) over the SAME 22 base forms found
+  5 more genuine instances the exact-match scan structurally couldn't
+  see (a prefix glued to the front breaks a bare-string match): `בשאה`
+  (klal 103) → `בשאלה` ("she'ela," the halachic term for vow
+  annulment via a sage - not a stretch, it's the exact technical term
+  the sentence needed), `ואהים` (klal 69, ×2) → `ואלהים`, `והאף`
+  (klal 138) → `והאלף` (a discussion of aleph/ayin letter
+  interchangeability - "the aleph is interchangeable with the ayin,"
+  not "the *hey* is interchangeable"), `לאפא` (klal 75) → `לאלפא`
+  (same "אלפא ביתא" phrase already confirmed bare-form elsewhere). The
+  same sweep also produced one coincidental false match, `מאה` (klal
+  92) - checked in context ("חסר חד אלפא או חסר מאה או חסר חד," a
+  numerical list: thousand/hundred/one) and correctly left alone; it is
+  the ordinary word "hundred," not a corrupted `אה`-anything.
+  Total: 122 confirmed occurrences, 50 klalim.
+
+### Applied (2026-08-15)
+
+Per direct user instruction, all 122 were recorded as `manual_
+correction` decisions and promoted into `part1.json` via the normal
+`apply_reviewer_decisions.py` pipeline (never a direct hand-edit) - see
+`PROJECT-STATUS.md` and the commit itself for full verification detail
+(122/122 read back correct, exactly 50 changed lines, two clean
+`rebuild_all.sh` runs, a genuinely new intra-klal-duplicate-phrase test
+failure investigated and resolved on its merits rather than silenced -
+klal 217's own second, deliberate re-citation of the same Tosafot
+passage, now correctly matching itself byte-for-byte after the fix).
+
+### The "~620 ambiguous" estimate was itself wrong, and the group-3 review (2026-08-15)
+
+The original scope note counted every gershayim-STRIPPED match, which
+silently absorbed `א'` (aleph + geresh, the ordinary citation numeral
+"1," used ~386 times in Part 1 alone - e.g. "דף נ"ט א'" = "page 59a")
+into the "395 occurrences of `א`" figure. Excluding gershayim-bearing
+tokens properly, the real ambiguous set is 228, not ~620: `או` 117,
+`אי` 89, `איהו` 11, `א` 9, `וא` 2.
+
+Method: the three small groups (`איהו`, `א`, `וא` - 22 total) were read
+individually, every one, in context. The two large groups were handled
+with structural filtering (looking for grammatical positions where
+`אלו`/`אלי` would fit but `או`/`אי` wouldn't - e.g. `או` preceded by
+`כל`/immediately followed by a definite plural noun, favoring "these X"
+over "or"; `אי` preceded by a verb that would take an indirect object,
+favoring "to me" over "if") plus random-sample spot-reading (12 of each
+group) to validate the filter wasn't missing a large hidden class.
+
+Results:
+- **`אי` (89): essentially clean.** Zero structural hits; 12/12 random
+  sample confirmed standard Talmudic dialectical "if" (`אי תניא תניא`
+  - the klal 1 refrain; `אי משום ד...`; `אי לאו`). No genuine
+  candidates found.
+- **`או` (117): 2 candidates.** 12/12 random sample legitimate ("X או
+  Y" disjunction, or a citation reference like `ד"ה או` - a Tosafot
+  entry whose own opening word happens to be "or"). Two structural
+  hits: klal 158 `כל [או] הדעות` → `כל אלו הדעות` ("all these
+  opinions"); klal 168 `בין [או] הסברות` → `בין אלו הסברות` ("between
+  these opinions").
+- **`איהו` (11): 1 candidate.** 10/11 are the ordinary Aramaic idiom
+  `איהו גופיה` ("he himself"), extremely common in this corpus's
+  Talmudic argumentation - legitimate. klal 200's `ספר [איהו] רבא
+  וזוטא` doesn't parse as a book title; `אליהו רבא וזוטא` (Eliyahu
+  Rabbah/Zuta, real, well-known halachic works) fits the shape exactly.
+  Flagged with lower confidence than the others - the attribution
+  context (the author named just before it is Eliyahu Alfandari, not
+  the actual author of Eliyahu Rabbah/Zuta) is worth a second look
+  before treating it as certain.
+- **`א` (9): 3 candidates.** 6/9 legitimate: klal 1's OWN opening
+  gematria marker (not a mid-sentence word at all - the very first
+  token in Part 1, a instructive example of why this group can't be
+  sorted by string-matching alone), page-side citation markers ("59a,"
+  "107a," "130a," "47a" - a bare א after a page number is the standard
+  Talmudic page-side convention), and a literal alphabet listing (`א ב
+  ג ד ה ו`). 3 genuine: klal 69 (×2, `שם א ואהים` in a passage
+  explicitly discussing divine names - "the name Aleph and Ahim" isn't
+  a thing, "the name El and Elohim" is exactly the two divine names the
+  passage needed, and the second half of this exact phrase was
+  independently caught by the prefix sweep above as `ואהים`→`ואלהים`);
+  klal 198's `[א] תאמר בלבבך` → `אל תאמר בלבבך`, the biblical phrase
+  "do not say in your heart" (Deuteronomy 8:17, 9:4).
+- **`וא` (2): both candidates.** Identical phrase `וא דעות ה'` in two
+  different klalim (169, 176) - `ואל דעות ה'` ("for the LORD is a God
+  of knowledge," 1 Samuel 2:3) fits exactly, and the same phrase being
+  corrupted the same way independently in two places reinforces it
+  rather than looking like a coincidence.
+
+**8 genuine candidates total, NOT applied - awaiting a decision**, per
+the user's instruction to review and report group 3 rather than apply
+it. None are individually scan-verified.
+
 ## Full-pipeline revalidation & refactor pass (main process, not just recently-changed files) — 2026-08-14
 
 User directive: "revalidate and refactor entire process - not just recently
