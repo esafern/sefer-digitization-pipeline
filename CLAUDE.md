@@ -57,6 +57,20 @@ this work today).
 > fixes too (cache bugs, dead models, UI fixes), not just corpus-content
 > findings.
 
+> **Terminology, standing as of 2026-08-15: an issue with the DATA is a
+> "data issue," not a "bug." An issue with the CODE is a "bug."** These
+> are two different failure classes with two different remedies — a data
+> issue (e.g. the dropped-lamed ligature corruption, page-furniture
+> contamination, a mis-transcribed word) gets fixed through the
+> human-review decision pipeline against the actual scan, never a direct
+> hand-edit; a bug (e.g. a cache key missing a component, a test scoped
+> to the wrong fixture, a script's docstring overclaiming its own
+> coverage) gets fixed by changing code. Calling a data issue a "bug"
+> blurs which remedy applies and risks someone reaching for a code fix
+> (or a blind find-replace across the corpus) for something that needs
+> scan verification instead. Use the precise term in findings, commit
+> messages, and `PROJECT-STATUS.md` entries going forward.
+
 ## Success criteria (in priority order)
 
 1. **Absolute fidelity to the author's words.** The transcript must match the

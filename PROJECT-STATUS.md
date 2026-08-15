@@ -15,6 +15,12 @@ current handoff, re-written (not just appended to) as state changes.
 
 ## ►► SESSION HANDOFF — read this first, 2026-08-14
 
+> **Terminology, user directive 2026-08-15, applies to all future
+> sessions**: an issue with the DATA is a "data issue," not a "bug." An
+> issue with the CODE is a "bug." Added to CLAUDE.md as the durable
+> home for this rule (so it survives this file's own "re-written, not
+> appended" handoff churn) - noted here too for immediate visibility.
+
 ### State on disk right now (verified, not remembered)
 
 - **Branch `master`, HEAD `22aa2c4`.** Working tree is clean. No open
