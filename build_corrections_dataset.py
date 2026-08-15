@@ -21,6 +21,19 @@ REPO = os.path.dirname(os.path.abspath(__file__))
 DOCAI_DIR = os.path.join(REPO, "docai_word_boxes")
 ALIGNMENT_PATH = os.path.join(REPO, "part1_header_anchored_alignment.json")
 DEMO_DATASET = os.path.join(REPO, "klalim_demo_dataset.json")
+# Highest klal_id belonging to Part 1 - i.e. max(klal_id) in part1.json, which
+# is data, not a chosen number. DOCUMENTED 2026-08-15: this same literal is
+# written out independently in build_klal_page_regions.py and review_server.py
+# with no comment in any of the three, and nothing tied it back to the corpus.
+# If Part 1 ever gains or loses a klal (a split/merge - Success Criterion #2's
+# own failure mode) and only one copy is updated, each script fails silently
+# and differently: this one drops the klal from candidate generation AND from
+# the "Klalim covered: N / 222" denominator it prints, build_klal_page_regions
+# gives it no scan region, review_server stops serving it to the dashboard
+# entirely. tests/test_corpus_invariants.py::
+# test_part1_max_klal_constants_agree_with_the_corpus now asserts all three
+# equal max(klal_id) in part1.json, so a drifted copy fails the rebuild gate
+# instead of quietly narrowing coverage.
 PART1_MAX_KLAL = 222
 # Longest diff span, in words, still treated as a real per-word correction
 # rather than alignment drift. Named 2026-08-14: it was a bare literal `4`
@@ -28,6 +41,16 @@ PART1_MAX_KLAL = 222
 # multi-word-highlight code already cited it by an invented name ("MAX_SPAN=4")
 # that did not exist anywhere.
 MAX_DIFF_SPAN_WORDS = 4
+# Minimum character-level SequenceMatcher ratio between the DocAI reading and
+# the stored text before a same-word-count 'replace' opcode is believed to be
+# one word misread as another rather than two unrelated words the global diff
+# happened to line up. Named 2026-08-15 (it was a bare literal 0.5 with only
+# "too dissimilar to be a genuine OCR misread" next to it). The value is a
+# triage cut-off with no derivation on record - it has never been calibrated
+# against a labelled set, and per CLAUDE.md Lesson 15 the candidates it drops
+# are silent, not reported, so lowering it would surface more candidates
+# rather than fewer. Do not treat "no candidate here" as "checked and clean".
+MIN_REPLACE_SIMILARITY = 0.5
 
 
 def clean_word(w):
@@ -36,9 +59,27 @@ def clean_word(w):
 
 # The Google Books scan watermark ("Digitized by Google") sits at the bottom of
 # many pages and is correctly absent from clean_text, exactly like the running
-# header filtered below - it is page furniture, never corpus content. Same set
-# used by check_klal_token_orphans.py / validate_klal_span_coverage.py's
-# furniture stripping. Until 2026-08-11 these tokens produced no candidates only
+# header filtered below - it is page furniture, never corpus content.
+#
+# CORRECTED 2026-08-15: this comment used to claim this was the "same set used
+# by check_klal_token_orphans.py / validate_klal_span_coverage.py's furniture
+# stripping". Both halves were false, and the second is the more misleading -
+# validate_klal_span_coverage.py does no furniture stripping AT ALL (it counts
+# raw tokens; its docstring only describes the archived reconstruct script's
+# stripping), which is precisely why known-complete klalim like 106/123/175
+# sit in that validator's flagged baseline: ~8-11 furniture tokens inflate
+# their expected span. The sets are also genuinely different, not shared:
+# this one is 3 lowercase watermark words matched through clean_word().lower();
+# check_klal_token_orphans.FURNITURE_WORDS additionally carries the running
+# header (יד/יר/יך/מלאכי/כללי) and matches the raw token exactly, case- and
+# punctuation-sensitively; validate_catchword_continuity uses a third form
+# again (HEADER_WORDS + a case-insensitive FURNITURE_RE + is_header_word's
+# gershayim guard). Three near-duplicate definitions of "page furniture" is a
+# real drift risk, deliberately NOT unified 2026-08-15: their matching rules
+# differ, so a single shared set would silently change what each script
+# strips. Documented here rather than papered over - see PROJECT-STATUS.md.
+#
+# Until 2026-08-11 these tokens produced no candidates only
 # by accident: sitting at the very end of a page's word stream, they tripped the
 # `j1 >= len(page_word_origin)` bail-out and were dropped unattributed. Once
 # delete-opcode attribution was fixed they surfaced as 10 spurious
@@ -152,7 +193,7 @@ def main():
             if tag == "replace" and orig_word and corrected_word:
                 if (i2 - i1) != (j2 - j1):
                     continue  # word-count mismatch on a replace -> likely drift
-                if sim(orig_word, corrected_word) < 0.5:
+                if sim(orig_word, corrected_word) < MIN_REPLACE_SIMILARITY:
                     continue  # too dissimilar to be a genuine OCR misread
 
             # Attribution. For `replace`/`insert` the diff span j1:j2 is real

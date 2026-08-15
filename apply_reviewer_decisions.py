@@ -78,11 +78,24 @@ def snapshot_matches(snapshot, live_entry):
     return all(snapshot.get(k) == live_entry.get(k) for k in keys)
 
 
+# Every mutator below rejects a negative word_index explicitly. Python does
+# not raise on one: `words[-1]` reads the LAST word and `words[-1:-1] = span`
+# inserts before it, so a negative index that happens to satisfy the drift
+# check would edit a real word at a position the decision never meant. Added
+# 2026-08-15 (hard-wired-value audit) - the identical half-a-bounds-check gap
+# was found and fixed in audit_applied_decisions.py's three checkers
+# 2026-08-14 (PROJECT-STATUS.md finding 9) and guarded in
+# assemble_corrections_dataset.check_drift, but the scripts that actually
+# WRITE part1.json still only checked the upper end. No live decision has a
+# negative word_index (both producers - build_corrections_dataset.py and the
+# dashboard's click handler - are structurally non-negative), so this is
+# defence-in-depth on the one code path that mutates the corpus, not a fix for
+# an observed corruption.
 def apply_replace(clean_text, word_index, final_text, chosen_text):
     words = clean_text.split()
     span = final_text.split() if final_text else []
     n = len(span) or 1
-    if words[word_index:word_index + n] != span:
+    if word_index < 0 or words[word_index:word_index + n] != span:
         return None  # live drift beyond what the snapshot check caught
     words[word_index:word_index + n] = chosen_text.split()
     return " ".join(words)
@@ -105,7 +118,7 @@ def apply_manual_correction(clean_text, word_index, original_word, chosen_text):
     misalign on any klal where the two schemes disagree (documented open
     risk, see PROJECT-STATUS.md)."""
     words = clean_text.split(' ')
-    if word_index >= len(words) or words[word_index] != original_word:
+    if word_index < 0 or word_index >= len(words) or words[word_index] != original_word:
         return None  # live drift beyond what the snapshot check caught
     words[word_index] = chosen_text
     return " ".join(words)
@@ -120,7 +133,7 @@ def apply_manual_deletion(clean_text, word_index, original_word):
     opcodes below - see their comment for why. Same space-only split as
     apply_manual_correction, for the same reason."""
     words = clean_text.split(' ')
-    if word_index >= len(words) or words[word_index] != original_word:
+    if word_index < 0 or word_index >= len(words) or words[word_index] != original_word:
         return None
     del words[word_index]
     return " ".join(words)
@@ -132,7 +145,7 @@ def apply_insert_removal(clean_text, word_index, final_text):
     words = clean_text.split()
     span = final_text.split() if final_text else []
     n = len(span)
-    if n == 0 or words[word_index:word_index + n] != span:
+    if n == 0 or word_index < 0 or words[word_index:word_index + n] != span:
         return None
     del words[word_index:word_index + n]
     return " ".join(words)
@@ -151,7 +164,7 @@ def apply_delete_insertion(clean_text, word_index, chosen_text):
     (CLAUDE.md Lesson 9), and it also covers a decisions log that was
     truncated or replayed from a different machine."""
     words = clean_text.split()
-    if word_index > len(words) or not chosen_text:
+    if word_index < 0 or word_index > len(words) or not chosen_text:
         return None
     span = chosen_text.split()
     if words[word_index:word_index + len(span)] == span:

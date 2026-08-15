@@ -43,6 +43,147 @@ current handoff, re-written (not just appended to) as state changes.
 > the same discipline this file demands of corpus claims applies to
 > architecture claims too.
 
+### DONE 2026-08-15 - hard-wired-value audit of the MAIN pipeline (merged from worktree `agent-acfcf39ded375a897`)
+
+Per user request: audit the main pipeline's 20 in-scope files for hardcoded
+values, magic numbers and special-cased logic that make the code fragile in
+ways that aren't clearly intentional. Witness/punctuation excluded, as
+standing. All findings below are **bugs (code), not data issues** - no
+`part*.json` file was touched, and the full rebuild confirms all five derived
+JSON files byte-identical.
+
+**Fixed (each verified: 77/77 pytest incl. 2 new tests, 11/11 Playwright,
+full `./rebuild_all.sh` WITH vision = 316 cache hits / 0 live API calls / 0
+data drift, and all 7 standalone validators' stdout byte-identical to a
+pre-change baseline):**
+
+1. **`PART1_MAX_KLAL = 222` was written out independently in three live files**
+   (`build_corrections_dataset.py`, `build_klal_page_regions.py`,
+   `review_server.py`) with no comment in any of them and nothing tying it to
+   the corpus. It is data - `max(klal_id)` in `part1.json` - not a chosen
+   number, and every failure mode of a drifted copy is silent: the klal simply
+   stops getting correction candidates, stops getting a scan region, or stops
+   being served to the dashboard. Documented the derivation at all three sites
+   and added a zero-tolerance gate,
+   `test_part1_max_klal_constants_agree_with_the_corpus`, asserting all three
+   equal `part1.json`'s own max klal_id AND that Part 1 is a contiguous 1..N
+   block (without which `klal_id <= PART1_MAX_KLAL` is filtering on the wrong
+   property). Deliberately NOT derived at runtime in `review_server.py` - that
+   would add a 512KB read to every HTTP request. Mutation-verified (set one
+   copy to 221 -> red, restored -> green).
+2. **`assemble_corrections_dataset.py`'s vision-confidence gate `0.7` was a
+   bare literal written three times inside `classify()`.** The place it was
+   once MISSING is the already-fixed 2026-08-13 finding 8 (the `replace`
+   branch trusting any confidence at all) - i.e. this exact triplication has
+   already produced one real bug. Named `MIN_VISION_CONFIDENCE`.
+3. **`build_corrections_dataset.py`'s `sim(...) < 0.5` replace-similarity
+   cut-off** was unnamed with no derivation. Named `MIN_REPLACE_SIMILARITY`
+   and documented as an uncalibrated triage cut-off whose rejects are silent
+   (Lesson 15: "no candidate here" is not "checked and clean").
+4. **`check_klal_token_orphans.py`'s 0.5 similarity threshold appeared three
+   times, one of which was inside the printed message** `"word-sequence
+   similarity < 0.5"` - so changing the threshold would have left the script
+   reporting a number it no longer used. Named `MISMATCH_SIMILARITY` and
+   interpolated into the message.
+5. **`verify_corrections_vision.py`: unnamed `35`/`36`/`400` context-window
+   numbers and `padding=0.02`/`dpi=300` crop geometry.** The 35-vs-36
+   asymmetry (an exclusive slice end) reads like an off-by-one inviting a
+   "fix"; all five feed `context_hash`/`crop_hash`, so any change silently
+   costs a full re-run against the paid API. Named `CONTEXT_WINDOW_WORDS`,
+   `FALLBACK_CONTEXT_CHARS`, `CROP_PADDING`, `CROP_DPI`, values unchanged
+   (proven by the 0-API-call rebuild).
+6. **`validate_catchword_continuity.py`'s `LAST_PAGE = 82` had no comment and
+   no derivation** - one line under the constant whose invented justification
+   this project already had to correct (`FIRST_REAL_PAGE`, 2026-08-14). A scan
+   that gained pages would silently never have its later boundaries checked
+   while the script still printed a confident "Checked N page boundaries"
+   (Lesson 1). Now derived from `docai_word_boxes/` (max `page_N.json` = 82
+   today, output byte-identical), with the literal kept only as the
+   no-cache fallback.
+7. **`validate_part1_corpus_integrity.py`: bare `ref_val > 667` and
+   `m.start() - 25`** inline in check 4. Named `TOTAL_KLALIM` (cross-
+   referenced to the 1..667 corpus invariant) and
+   `SELF_REF_DIRECTION_WINDOW_CHARS`. Low impact - check 4 is documented
+   NOT VIABLE and is not gated - but free to fix.
+8. **`apply_reviewer_decisions.py`'s five corpus mutators bounds-checked only
+   the UPPER end of `word_index`.** Exactly the half-a-bounds-check gap fixed
+   in `audit_applied_decisions.py`'s three checkers 2026-08-14 (finding 9) and
+   guarded in `check_drift` - but never in the code that actually WRITES
+   `part1.json`. Python doesn't raise on a negative index: `words[-1]` is the
+   last word and `words[-1:-1] = span` inserts before it, so
+   `apply_manual_correction`/`apply_manual_deletion`/`apply_delete_insertion`
+   would have edited, deleted or inserted at the klal's LAST word for a
+   decision recorded at index -1. Added `word_index < 0` to all five, plus
+   `test_every_mutator_refuses_a_negative_word_index`. **Not reachable from
+   today's producers** (both are structurally non-negative) - defence-in-depth,
+   not a fix for observed corruption. The test's first draft passed for the
+   wrong reason (a -1 against a 1-word span is refused by the span check
+   anyway); caught by mutation testing and rewritten with indices that
+   genuinely discriminate, then re-verified one guard at a time (4 mutations,
+   4 red, restored green).
+9. **A comment in `build_corrections_dataset.py` claimed `WATERMARK_WORDS` was
+   the "same set used by check_klal_token_orphans.py /
+   validate_klal_span_coverage.py's furniture stripping". Both halves are
+   false** - the same class as the `MAX_SPAN=4` citation of a nonexistent
+   constant fixed 2026-08-14. `validate_klal_span_coverage.py` does no
+   furniture stripping AT ALL (which is precisely why known-complete klalim
+   106/123/175 sit in its flagged baseline - furniture inflates their expected
+   span), and the three definitions that do exist differ materially:
+   lowercased+punctuation-stripped here, raw case-sensitive exact match in
+   `check_klal_token_orphans.FURNITURE_WORDS`, a third form again in
+   `validate_catchword_continuity` (`HEADER_WORDS` + case-insensitive
+   `FURNITURE_RE` + the gershayim guard). Comment corrected to state what is
+   actually true.
+
+**Found, deliberately NOT changed (reported rather than guessed at):**
+
+- **Three near-duplicate definitions of "page furniture" across
+  `build_corrections_dataset.py`, `check_klal_token_orphans.py` and
+  `validate_catchword_continuity.py`** (finding 9 above), plus `SECTION_WORDS`
+  defined identically in two of them. A real drift risk, but their MATCHING
+  RULES differ, so a single shared set would silently change what each script
+  strips - a behaviour change with no ground truth to check it against.
+  Documented in place instead. Whoever unifies these must re-verify each
+  script's output, not just the set membership.
+- `build_klal_page_regions.py`'s `tol = 0.004` Y-banding tolerance: a magic
+  number, but a local variable with a real derivation comment (the klal 3/4
+  0.007-apart example) and no cross-file copy. Changing it moves every region
+  box with no ground truth to check against.
+- `verify_corrections_vision.py`'s `max_retries = 3` / `(2 ** attempt) * 2`
+  backoff / `timeout=60000`: ordinary transport-layer tuning, each already
+  carrying its own incident comment.
+- `review_frontend/app.js`'s UI numbers (panel context windows ±6/±8/±10,
+  tooltip offsets, 2000ms flashes, zoom steps, the 55-chars-per-line
+  placeholder estimate): display-only, a wrong value is visible immediately
+  rather than silent.
+
+**Explicitly NOT flagged as findings** (they are the correct, hard-won
+design this project already documents): `PASS3_KNOWN_FALSE_POSITIVES`
+(span-keyed, per-entry evidence), `INTRA_KLAL_DUPLICATE_PHRASE_BASELINE`,
+`DROPPED_LAMED_CORRUPT_FORMS`, `DUPLICATE_WORD_BASELINE`,
+`SPAN_COVERAGE_BASELINE`, `AMBIGUOUS_WITH_LAMED_INSERTED`,
+`FLAG_LABELS`, `FIRST_REAL_PAGE = 13` (justification corrected 2026-08-14),
+`FLAG_RATIO_THRESHOLD = 0.85` and `TITLE_SIMILARITY_THRESHOLD = 0.8` (both
+already named with their derivation), `n=10` in the duplicate-phrase checks
+(empirically derived, reasoning recorded), and `list(range(1, 668))` in the
+klal-sequence test (the invariant itself, not an incidental constant).
+
+**No data issues found.** Nothing in `part1.json`/`part2.json`/`part3.json`
+was read as suspect during this pass, and no corpus file was touched.
+
+Independently re-verified 2026-08-16 before merge (not just the agent's own
+report trusted): read the full diff against master, ran `77/77 pytest` in the
+worktree with the real (gitignored) `docai_word_boxes`/`document_jsons_berlin`/
+`vlm_extractions` caches symlinked in (a first run without them produced a
+false-looking regression - 0 candidates, 0 regions - purely because those
+caches don't exist in a fresh worktree per CLAUDE.md, not a real defect), ran
+`./rebuild_all.sh` with vision live (confirmed 0 API calls, all cache hits),
+and diffed all 7 derived files (`klalim_demo_dataset.json`,
+`corrections_verified_part1.json`, `corrections_part1.json`,
+`klal_page_regions.json`, `part1.json`, `part2.json`, `part3.json`) against
+master's current versions by sha256 - all byte-identical. Merged to master,
+worktree removed.
+
 ### State on disk right now (verified, not remembered)
 
 - **Branch `master`, HEAD `22aa2c4`.** Working tree is clean. No open

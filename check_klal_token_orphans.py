@@ -51,6 +51,16 @@ DOCAI_DIR = os.path.join(REPO, "docai_word_boxes")
 OPEN_WINDOW = 50  # words compared for the "does it open correctly" check
 CHUNK_WORDS = 15  # length of a substring chunk used for the double-assignment scan
 GAP_MIN_WORDS = 8  # min length of an unmatched real-token run to report as a likely gap (Pass 3)
+# word_seq_similarity() cut-off, used in both directions: below it, a klal's
+# stored text is reported as NOT opening with its own real marker-position
+# text; above it, another klal is reported as the real owner of that text.
+# Named 2026-08-15 - it was the bare literal 0.5 in three places, one of which
+# was the printed message "word-sequence similarity < 0.5", so changing the
+# threshold would have left the script reporting a number it no longer used.
+# No derivation on record: it is a triage cut-off, not a calibrated one (the
+# only live mismatch, klal 34, scores 0.32 against itself and 0.09 against its
+# best other candidate, so nothing currently sits near the boundary).
+MISMATCH_SIMILARITY = 0.5
 
 # Pass 3 known false positives, investigated 2026-08-12 (PROJECT-STATUS.md):
 #   klal 4  - the flagged span is klal 3's OWN trailing content (already
@@ -279,7 +289,7 @@ def main():
             adjacent_spans[kid] = real_tokens
         spans[kid] = real_tokens
         sim = word_seq_similarity(real_tokens, part1[kid]["clean_text"].split())
-        if sim < 0.5:
+        if sim < MISMATCH_SIMILARITY:
             mismatches.append((kid, next_kid, sim))
 
     total_pairs = max(len(ids) - 1, 0)
@@ -292,7 +302,7 @@ def main():
         for kid, next_kid, reason in skipped:
             print(f"  klal {kid} -> {next_kid}: {reason}")
     print(f"\n{len(mismatches)} klal(im) whose stored clean_text does NOT open with its own real "
-          f"marker-position text (word-sequence similarity < 0.5):")
+          f"marker-position text (word-sequence similarity < {MISMATCH_SIMILARITY}):")
     for kid, next_kid, sim in mismatches:
         real_open_preview = " ".join(spans[kid][:OPEN_WINDOW])
         print(f"  klal {kid} (real span ends at klal {next_kid}'s marker): "
@@ -301,7 +311,7 @@ def main():
         print(f"    stored clean_text   : {' '.join(part1[kid]['clean_text'].split()[:OPEN_WINDOW])}")
 
         owner, owner_sim = best_match_owner(spans[kid], part1, kid)
-        if owner_sim > 0.5:
+        if owner_sim > MISMATCH_SIMILARITY:
             print(f"    -> its real opening text is currently stored under klal_id {owner} (similarity {owner_sim:.2f})")
         else:
             print(f"    -> its real opening text was NOT found at the start of any klal's "

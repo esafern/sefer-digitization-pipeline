@@ -11,6 +11,17 @@ IN_PATH = os.path.join(REPO, "corrections_verified_part1.json")
 OUT_PATH = os.path.join(REPO, "corrections_part1.json")
 PART1_PATH = os.path.join(REPO, "part1.json")
 
+# Minimum vision confidence before classify() treats Gemini's A/B selection as
+# a machine resolution rather than "ambiguous, a human still has to look".
+# Named 2026-08-15: it was the bare literal 0.7 written out three separate
+# times inside classify(), and the one place it was MISSING (the 'replace'
+# branch, which trusted any confidence at all) is exactly the asymmetry bug
+# fixed 2026-08-13, PROJECT-STATUS.md finding 8. Three independent copies of a
+# threshold is how one of them gets updated and the others don't.
+# Per CLAUDE.md Lesson 2 this is a triage threshold, not a certificate: a
+# candidate scoring above it has been prioritised, not proven correct.
+MIN_VISION_CONFIDENCE = 0.7
+
 
 def live_word_span(words, word_index, expected_text):
     """Same span logic as apply_reviewer_decisions.py's apply_replace(): a
@@ -55,21 +66,21 @@ def classify(c):
 
     if op == "replace":
         # FIXED 2026-08-13 (PROJECT-STATUS.md finding 8): 'delete' below
-        # gates on confidence >= 0.7 before trusting a selection; this
+        # gates on MIN_VISION_CONFIDENCE before trusting a selection; this
         # branch used to trust A/B at any confidence, including a
         # low-confidence guess - asymmetric for no principled reason.
         # Currently inert (all 214 live replace candidates score >= 0.7),
         # but a future low-confidence replace would otherwise sail through
         # as if it were a confident machine resolution.
         if sel == "A":
-            return "current_text_may_be_wrong" if conf and conf >= 0.7 else "ambiguous"
+            return "current_text_may_be_wrong" if conf and conf >= MIN_VISION_CONFIDENCE else "ambiguous"
         if sel == "B":
-            return "current_text_confirmed" if conf and conf >= 0.7 else "ambiguous"
+            return "current_text_confirmed" if conf and conf >= MIN_VISION_CONFIDENCE else "ambiguous"
         if sel == "UNCERTAIN":
             return "ambiguous"
         return "error"
     if op == "delete":
-        if sel == "A" and conf and conf >= 0.7:
+        if sel == "A" and conf and conf >= MIN_VISION_CONFIDENCE:
             return "possible_omission"
         if sel == "ERROR":
             return "error"

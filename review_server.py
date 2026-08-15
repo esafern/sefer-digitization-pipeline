@@ -35,6 +35,15 @@ import review_decisions as rd
 REPO = os.path.dirname(os.path.abspath(__file__))
 FRONTEND_DIR = os.path.join(REPO, "review_frontend")
 IMAGES_DIR = os.path.join(REPO, "images", "pdf_pages")
+# max(klal_id) in part1.json - this dashboard is Part-1 only, and _load_klalim
+# filters klalim_demo_dataset.json (all 667) down with it. Same literal,
+# independently written, in build_corrections_dataset.py and
+# build_klal_page_regions.py; deliberately NOT derived at request time (that
+# would mean reading part1.json on every single HTTP request on top of the
+# demo dataset this server already re-reads per request, by design). The drift
+# risk of three copies is covered instead by
+# tests/test_corpus_invariants.py::test_part1_max_klal_constants_agree_with_
+# the_corpus, which asserts all three equal max(klal_id) in part1.json.
 PART1_MAX_KLAL = 222
 
 FLAG_LABELS = {
