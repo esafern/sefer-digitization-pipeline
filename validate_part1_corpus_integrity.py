@@ -317,6 +317,19 @@ def check_duplicate_phrases(klalim, n=10):
 ABOVE_WORDS = ["לעיל", "למעלה", "לעילא"]
 BELOW_WORDS = ["לקמן", "להלן"]
 SELF_REF_RE = re.compile(r"כלל\s+([א-ת\"'׳]+)")
+# Highest klal number that could be a self-reference into THIS book: Yad
+# Malachi has 667 klalim across its three parts (the same total
+# tests/test_corpus_invariants.py asserts as a zero-tolerance invariant -
+# klal_ids must be exactly 1..667). A gematria value above it is some other
+# number that happens to follow the word כלל, not a reference here. Named
+# 2026-08-15; it was a bare `ref_val > 667` inline in the loop.
+TOTAL_KLALIM = 667
+# Characters of preceding text scanned for a לעיל/לקמן direction word. Also
+# named 2026-08-15 (a bare `m.start() - 25`); no derivation on record - it is
+# roughly "the few words before the citation", and check 4 as a whole is
+# documented below as NOT VIABLE for this corpus, so nothing depends on it
+# being tuned correctly.
+SELF_REF_DIRECTION_WINDOW_CHARS = 25
 
 
 def check_self_reference_directionality(klalim):
@@ -346,9 +359,9 @@ def check_self_reference_directionality(klalim):
         for m in SELF_REF_RE.finditer(text):
             num_str = m.group(1).replace('"', "").replace("'", "").replace("׳", "")
             ref_val = gematria_to_value(num_str)
-            if ref_val == 0 or ref_val > 667:
+            if ref_val == 0 or ref_val > TOTAL_KLALIM:
                 continue  # not a real klal-number token (e.g. a name that happens to follow "כלל")
-            window_start = max(0, m.start() - 25)
+            window_start = max(0, m.start() - SELF_REF_DIRECTION_WINDOW_CHARS)
             window = text[window_start:m.start()]
             direction = None
             if any(w in window for w in ABOVE_WORDS):

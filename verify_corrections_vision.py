@@ -86,6 +86,28 @@ OUT_PATH = os.path.join(REPO, "corrections_verified_part1.json")
 CACHE_DB = os.path.join(REPO, "adjudication_cache.db")
 DEMO_DATASET = os.path.join(REPO, "klalim_demo_dataset.json")
 
+# Words of surrounding text sent to the model on EACH side of the disputed
+# word, and the character-count fallback used only when word_index_in_final_
+# text is missing/out of range (the pre-2026-08-10 behaviour, kept for that
+# case alone - see the comment in main() for why a fixed head-of-klal slice
+# was wrong as a general strategy). Named 2026-08-15: these were the bare
+# literals 35 / 36 / 400, and the 35-vs-36 asymmetry (an exclusive slice end)
+# reads like an off-by-one waiting to be "fixed" by the next person.
+# Changing either value changes the prompt's context and therefore
+# context_hash, which correctly invalidates every cached answer - i.e. a full
+# re-run against the paid API. Do not adjust casually.
+CONTEXT_WINDOW_WORDS = 35
+FALLBACK_CONTEXT_CHARS = 400
+
+# Crop geometry for the image the model adjudicates from. Named 2026-08-15;
+# same cache warning as above and then some - both feed crop_hash, so any
+# change re-crops every candidate and discards all 419 cached decisions.
+# CROP_PADDING is a fraction of page width/height added around the token's own
+# bbox; per CLAUDE.md Lesson 14 a crop that clips its own anchor word can
+# silently invert a reading, so this margin is load-bearing, not cosmetic.
+CROP_PADDING = 0.02
+CROP_DPI = 300
+
 # Hoisted out of adjudicate() 2026-08-14 so it can be hashed into the cache
 # key - see init_cache(). The per-candidate values are substituted in at call
 # time; everything else here is the fixed "question" every cached answer was
@@ -248,7 +270,7 @@ def cache_decision(crop_bytes, word_a, word_b, context, decision_json, model=Non
     conn.close()
 
 
-def crop_pdf_bounding_box(doc, page_num_1indexed, bbox, padding=0.02):
+def crop_pdf_bounding_box(doc, page_num_1indexed, bbox, padding=CROP_PADDING):
     page = doc.load_page(page_num_1indexed - 1)
     rect_page = page.rect
     width, height = rect_page.width, rect_page.height
@@ -259,7 +281,7 @@ def crop_pdf_bounding_box(doc, page_num_1indexed, bbox, padding=0.02):
     ymax = min(1.0, bbox["y2"] + padding) * height
 
     crop_rect = fitz.Rect(xmin, ymin, xmax, ymax)
-    pix = page.get_pixmap(clip=crop_rect, dpi=300)
+    pix = page.get_pixmap(clip=crop_rect, dpi=CROP_DPI)
     return pix.tobytes("png")
 
 
@@ -363,11 +385,11 @@ def main():
         words = k.get("clean_text", "").split()
         wi = c.get("word_index_in_final_text")
         if isinstance(wi, int) and 0 <= wi < len(words):
-            ctx_start = max(0, wi - 35)
-            ctx_end = min(len(words), wi + 36)
+            ctx_start = max(0, wi - CONTEXT_WINDOW_WORDS)
+            ctx_end = min(len(words), wi + CONTEXT_WINDOW_WORDS + 1)  # +1: exclusive end
             context = " ".join(words[ctx_start:ctx_end])
         else:
-            context = k.get("clean_text", "")[:400]
+            context = k.get("clean_text", "")[:FALLBACK_CONTEXT_CHARS]
 
         try:
             crop_bytes = crop_pdf_bounding_box(doc, c["page"], c["bbox"])

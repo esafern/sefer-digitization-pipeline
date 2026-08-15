@@ -490,6 +490,40 @@ def test_part1_no_dropped_lamed_ligature_corruption(part_klalim):
     )
 
 
+def test_part1_max_klal_constants_agree_with_the_corpus(part_klalim):
+    """PART1_MAX_KLAL = 222 is written out independently in three live files
+    (build_corrections_dataset.py, build_klal_page_regions.py,
+    review_server.py) with no shared definition - it is max(klal_id) in
+    part1.json, i.e. data, not a chosen number. Added 2026-08-15 during the
+    hard-wired-value audit: nothing tied any of the three back to the corpus,
+    and if Part 1's klal count ever moves (a split/merge, Success Criterion
+    #2's own failure mode) and only some copies are updated, every failure is
+    silent - a klal simply stops getting candidates, stops getting a scan
+    region, or stops being served to the dashboard, with no error anywhere.
+    Zero tolerance: derive-or-assert, not "usually agrees" (CLAUDE.md
+    Lesson 13's argument, applied to a constant rather than a file).
+    """
+    part1_max = max(k["klal_id"] for k in part_klalim["part1.json"])
+    modules = {
+        "build_corrections_dataset.py": None,
+        "build_klal_page_regions.py": None,
+        "review_server.py": None,
+    }
+    for name in modules:
+        mod = _import_from_path(name.removesuffix(".py"), os.path.join(REPO, name))
+        modules[name] = mod.PART1_MAX_KLAL
+    disagreeing = {n: v for n, v in modules.items() if v != part1_max}
+    assert not disagreeing, (
+        f"PART1_MAX_KLAL disagrees with part1.json's own max klal_id ({part1_max}): "
+        f"{disagreeing}. Update every copy together, or the pipeline silently covers "
+        "different klalim in different stages."
+    )
+    # part1.json must also be a contiguous 1..N block, or "max klal_id" is not
+    # the same thing as "the Part-1 range" and every `klal_id <= PART1_MAX_KLAL`
+    # test in the pipeline is filtering on the wrong property.
+    assert sorted(k["klal_id"] for k in part_klalim["part1.json"]) == list(range(1, part1_max + 1))
+
+
 def test_title_and_clean_text_are_never_empty(all_klalim):
     empty_titles = [k["klal_id"] for k in all_klalim if not k.get("title", "").strip()]
     empty_text = [k["klal_id"] for k in all_klalim if not k.get("clean_text", "").strip()]

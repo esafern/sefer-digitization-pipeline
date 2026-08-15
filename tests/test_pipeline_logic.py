@@ -217,6 +217,38 @@ def test_apply_manual_correction_and_deletion_drift_check_the_original_word():
     assert ard.apply_manual_deletion(text, 1, "דלת") is None
 
 
+def test_every_mutator_refuses_a_negative_word_index():
+    """Added 2026-08-15 (hard-wired-value audit). Python does not raise on a
+    negative index - `words[-1]` is the LAST word and `words[-1:-1] = span`
+    inserts before it - so without an explicit check a decision recorded at a
+    negative index edits a real word at a position it never meant, in the one
+    place that writes part1.json. The same half-a-bounds-check gap was fixed
+    in audit_applied_decisions.py's checkers 2026-08-14 and guarded in
+    check_drift, but the mutators still had only the upper end. Not reachable
+    from today's producers (both are structurally non-negative); this is
+    defence-in-depth on the corpus-mutating path.
+    """
+    text = "אלף בית גימל"
+    # Each index below is chosen so the call would SUCCEED without the guard -
+    # a -1 against a 1-word span is refused by the span check anyway, and a
+    # test that passes for that reason would prove nothing (verified by
+    # mutation: dropping the guards leaves such a test green).
+    #   -3 wraps onto word 0 for the two span-based mutators: an edit at a
+    #      position the decision never named, and one every drift checker in
+    #      this project already classifies as MISMATCH.
+    #   -1 is worse for the other three - it edits/deletes/inserts at the
+    #      klal's LAST word while the recorded index says something else.
+    assert ard.apply_replace(text, -3, "אלף", "דלת") is None
+    assert ard.apply_insert_removal(text, -3, "אלף") is None
+    assert ard.apply_manual_correction(text, -1, "גימל", "דלת") is None
+    assert ard.apply_manual_deletion(text, -1, "גימל") is None
+    assert ard.apply_delete_insertion(text, -1, "דלת") is None
+    # Positive control: the same calls at the real index still work, so a
+    # mutation making every mutator refuse everything cannot pass this test.
+    assert ard.apply_replace(text, 2, "גימל", "דלת") == "אלף בית דלת"
+    assert ard.apply_delete_insertion(text, 2, "דלת") == "אלף בית דלת גימל"
+
+
 def test_snapshot_matches_compares_every_field_that_identifies_a_candidate():
     live = {"opcode": "replace", "docai_reading": "אלף", "final_text": "בית",
             "word_index": 3, "flag": "current_text_may_be_wrong"}

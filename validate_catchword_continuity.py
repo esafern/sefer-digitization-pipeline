@@ -38,7 +38,29 @@ DOCAI_DIR = os.path.join(REPO, "docai_word_boxes")
 # introduction) - no running header, no klal markers, no catchwords to
 # check. The value 13 was right; only its stated reason was invented.
 FIRST_REAL_PAGE = 13
-LAST_PAGE = 82
+# Last scan page to consider. DERIVED 2026-08-15 from docai_word_boxes/ rather
+# than hard-coded: it was a bare `LAST_PAGE = 82` with no comment and no stated
+# derivation, sitting one line under a constant whose invented justification
+# this project already had to correct (see FIRST_REAL_PAGE above). 82 happens
+# to be right today - docai_word_boxes/ holds exactly page_1..page_82 - but the
+# failure mode of a stale literal here is silent, not loud: a scan that gained
+# pages would simply never have its later boundaries checked, and the script
+# would still print a confident "Checked N page boundaries" (CLAUDE.md
+# Lesson 1 - quietly narrowed coverage reported as if complete). The literal
+# stays only as the fallback for a fresh clone with no docai cache, where the
+# loop just skips every missing page anyway.
+FALLBACK_LAST_PAGE = 82
+
+
+def _discover_last_page():
+    if not os.path.isdir(DOCAI_DIR):
+        return FALLBACK_LAST_PAGE
+    pages = [int(m.group(1)) for m in
+             (re.fullmatch(r"page_(\d+)\.json", f) for f in os.listdir(DOCAI_DIR)) if m]
+    return max(pages) if pages else FALLBACK_LAST_PAGE
+
+
+LAST_PAGE = _discover_last_page()
 
 # FIXED 2026-08-14: "כלל" (a common standalone Hebrew word - "rule",
 # "principle") used to be in this set too, alongside "כללי" (the actual

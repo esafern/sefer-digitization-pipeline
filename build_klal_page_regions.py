@@ -39,6 +39,11 @@ ALIGNMENT_PATH = os.path.join(REPO, "part1_header_anchored_alignment.json")
 TRACE_PATH = os.path.join(REPO, "gematria_trace_part1.json")
 DEMO_DATASET = os.path.join(REPO, "klalim_demo_dataset.json")
 OUT_PATH = os.path.join(REPO, "klal_page_regions.json")
+# max(klal_id) in part1.json. Same literal, independently written, in
+# build_corrections_dataset.py and review_server.py - see the longer note at
+# build_corrections_dataset.py's copy for what each one silently does wrong if
+# they ever disagree. All three are asserted equal to the corpus by
+# tests/test_corpus_invariants.py.
 PART1_MAX_KLAL = 222
 
 
