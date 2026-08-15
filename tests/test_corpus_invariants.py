@@ -441,6 +441,55 @@ def test_clean_text_whitespace_is_single_spaces_only(all_klalim):
     )
 
 
+# Added 2026-08-15 (dropped-lamed ligature bug - see PROJECT-STATUS.md and
+# PROJECT-STATUS-HISTORY.md for the full investigation). This print sets the
+# letter pair א+ל as a single ligature glyph (Unicode U+FB4F); DocAI reads
+# that glyph as a bare א, silently dropping the lamed. 130 real instances
+# were found and fixed in Part 1 across two review passes. Every one of
+# these 24 corrupt forms was confirmed to have ZERO legitimate standalone
+# use anywhere in Part 1's ~52,600 words (every occurrence found was this
+# exact bug, none were coincidentally a real independent word) - see the
+# PROJECT-STATUS-HISTORY.md entry for the individual verification of each
+# form, including the three (אמא, בצלא, אפא) that have a plausible
+# unrelated meaning in general Hebrew/Aramaic and were checked with extra
+# care before being included here. Zero tolerance: these are not
+# borderline or stylistic - none of them are real Rabbinic Hebrew words in
+# this text.
+DROPPED_LAMED_CORRUPT_FORMS = {
+    "אא", "אגאזי", "אה", "אהים", "איבא", "איביה", "איבייהו", "איה", "איעזר",
+    "אמא", "אעאי", "אעזר", "אפא", "בצלא", "דשמוא", "האה", "האף", "ואהים",
+    "והאף", "וכאה", "ושמוא", "ישמעא", "ישרא", "שמוא",
+}
+
+
+def test_part1_no_dropped_lamed_ligature_corruption(part_klalim):
+    """Regression guard for the alef-lamed ligature extraction bug - see
+    DROPPED_LAMED_CORRUPT_FORMS above. Matches whole space-split tokens
+    only (not substrings), same scheme the actual fix used, so a real word
+    that happens to CONTAIN one of these forms as a substring is not a
+    false positive - only an exact standalone occurrence is a hit.
+
+    PART 1 ONLY - deliberately NOT run against `all_klalim` (all 3
+    parts). Confirmed 2026-08-15 while building this test: Parts 2-3
+    contain hundreds of unfixed instances of this exact corruption (e.g.
+    `אא` alone: 74 in Part 2, 35 in Part 3, vs Part 1's 40 real
+    corruptions before the fix) - CLAUDE.md's standing directive keeps
+    Parts 2-3 out of scope until Part 1 is independently confirmed clean,
+    so this test must not fail on their still-uncorrected text. A
+    Parts-2-3 version of this check is future work for whenever that gate
+    lifts, not something to smuggle in via a corpus-wide fixture now."""
+    offenders = []
+    for k in part_klalim["part1.json"]:
+        for i, w in enumerate(k["clean_text"].split(" ")):
+            if w in DROPPED_LAMED_CORRUPT_FORMS:
+                offenders.append((k["klal_id"], i, w))
+    assert not offenders, (
+        f"Dropped-lamed ligature corruption reappeared in Part 1: {offenders}. This exact class "
+        f"of bug was found and fixed 2026-08-14/15 (see PROJECT-STATUS-HISTORY.md) - re-verify "
+        f"against the scan before correcting, don't assume the same fix applies blindly."
+    )
+
+
 def test_title_and_clean_text_are_never_empty(all_klalim):
     empty_titles = [k["klal_id"] for k in all_klalim if not k.get("title", "").strip()]
     empty_text = [k["klal_id"] for k in all_klalim if not k.get("clean_text", "").strip()]

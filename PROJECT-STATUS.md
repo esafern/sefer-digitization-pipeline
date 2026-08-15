@@ -55,6 +55,76 @@ current handoff, re-written (not just appended to) as state changes.
   detail in
   `PROJECT-STATUS-HISTORY.md`'s newest entry. 74/74 pytest + 11/11
   Playwright passing.
+- **DONE 2026-08-15 - dropped-lamed items 1 & 2: detection script +
+  regression test, and a targeted `lexicon.txt` purge.** Per user
+  request ("do 1 and 2" from the open-items list above).
+  **Item 1**: a true ingest-level fix ("map the ligature codepoint")
+  turned out to be impossible - `docai_word_boxes/` contains zero U+FB4F
+  characters anywhere, so DocAI's own recognition already collapses the
+  ligature to a bare א before this repo ever sees the text; there is
+  nothing to map. Built instead: `detect_ligature_corruption.py` (new,
+  standalone, read-only), a generalized, re-runnable version of the
+  investigation's methodology (exact + full Hebrew-prefix sweep,
+  frequency-based candidate scoring, gershayim exclusion, a separate
+  "ambiguous with a common standalone word" bucket for the group-3-style
+  short forms that need context review rather than blind trust) -
+  usable on any `part*.json` file, though running it against Parts 2-3
+  is explicitly NOT the same as scoping Parts 2-3 correction work (see
+  finding below). Also added `test_part1_no_dropped_lamed_ligature_
+  corruption` to `tests/test_corpus_invariants.py`'s zero-tolerance gate
+  - a permanent regression guard against the 22 known-corrupt forms
+  reappearing in Part 1. **Caught a real scoping bug in its own first
+  draft**: the test initially used the `all_klalim` fixture (all 3
+  parts) and immediately failed with hundreds of hits in Parts 2-3's own
+  text - correctly rescoped to `part_klalim["part1.json"]` before
+  merging; verified both that it now passes on the real corpus and that
+  it still fires on a deliberate mutation (injected `אא` into klal 1,
+  confirmed red, restored byte-identical).
+  **The new detection script immediately found one real, previously-
+  missed instance**: klal 92 word 444, `לאופי`→`לאלופי` - missed by the
+  original mechanical sweep (its base-form list didn't include `אופי`)
+  and by the 23-instance scan-verification pass (different curated
+  list). High confidence, not scan-verified: the identical phrase
+  `לאלופי דורות משעה` appears CORRECTLY three more times in the same
+  klal. Applied via the same decision/apply pipeline. **Corrected total:
+  131 corrections across 51 klalim.**
+  **Item 2**: no independent external Hebrew/Rabbinic dictionary is
+  integrated into this pipeline, so a full re-derivation wasn't
+  possible - did a targeted purge instead. Read `archive/scripts/
+  build_lexicon.py` (the original, one-time build script) first: it only
+  ran shape-based heuristics (repeated letters, sofit placement, length)
+  against the corpus's OWN text, with zero semantic/dictionary grounding
+  - confirming exactly why it "validated" `אא` and friends as legitimate
+  words. Removed the 24 confirmed-corrupt base forms from `lexicon.txt`
+  (19039 -> 19015 words), after checking each had ZERO remaining
+  legitimate use anywhere in Part 1's ~52,600 words post-fix (a complete-
+  accounting argument, not guesswork) - including extra care on the 3
+  forms with a plausible unrelated meaning in general Hebrew/Aramaic
+  (`אמא` "mother"/"there", `בצלא` "in the shadow of", `אפא` possibly
+  "father") by individually re-reading all 4 of `אמא`'s Part-1 contexts
+  before including it (all 4 were unambiguously `אלמא`, the standard
+  Talmudic "hence/it follows," e.g. `אלמא קסבר`/`אלמא ס"ל` - standard
+  formulaic Talmudic phrasing, not "mother"). File re-verified sorted,
+  deduplicated, no empty lines after the edit.
+  **Finding, NOT scoping Parts 2-3 work**: checking whether the 24 forms
+  were safe to remove (would removal affect a legitimate Parts 2-3 use?)
+  required checking their occurrence counts in `part2.json`/`part3.json`
+  too - this is a pure lookup, not editorial work, but it surfaced a
+  significant fact worth logging per CLAUDE.md's "log immediately" rule:
+  **Parts 2-3 have hundreds of unfixed instances of this exact bug**
+  (e.g. `אא` alone: 74 in Part 2, 35 in Part 3, vs Part 1's 40 real
+  corruptions before today's fix; `איבא`: 70 in Part 2). This is the
+  SAME shape as the already-documented page-furniture-contamination
+  precedent (rare in Part 1, disproportionately common in Parts 2-3,
+  cause unexplained) - independent evidence for the standing directive's
+  own reasoning ("if part 1 is bad the rest won't magically be better"
+  cuts both ways: a clean Part 1 is not evidence Parts 2-3 will be
+  clean, and this is now a second confirmed case of exactly that).
+  **Not started, not scoped, not proposed** per the standing gate -
+  logged here only because CLAUDE.md requires logging confirmed findings
+  immediately, not because it's next.
+  Full `./rebuild_all.sh` clean, 75/75 pytest + 11/11 Playwright (86
+  total) passing.
 - **DONE - test-suite expansion/refactor, merged 2026-08-14 (`b30eae5`).**
   Another Opus 5 subagent, same isolated-worktree pattern, built out
   regression coverage for main-pipeline decision logic that had none
@@ -709,14 +779,23 @@ post-apply, third `rebuild_all.sh` run clean (74/74 pytest, 11/11
 Playwright, no new test surprises). Full context/reasoning for each in
 `PROJECT-STATUS-HISTORY.md`'s dropped-lamed entry.
 
-**Still open, smaller**: the ligature-mapping fix belongs in the
-DocAI-ingest path itself (not done - the loss happens before this repo
-ever sees the text, so every future extraction will reproduce the same
-class of bug until that's fixed); a lexicon re-derivation from an
-independent source (the current `lexicon.txt` was built from this
-corpus's own output and certifies the very corruption it should have
-caught); klal 200's `אליהו` attribution is worth a second look even
-though it's now applied.
+**DONE 2026-08-15** (see the dropped-lamed entry near the top of this
+file's handoff for full detail): a true DocAI-ingest-level fix turned
+out to be impossible (the ligature information is already lost inside
+DocAI's own recognition, before this repo sees the text) - built
+`detect_ligature_corruption.py` (a re-runnable detection script) and a
+permanent zero-tolerance regression test instead, and found + applied
+one more real instance (klal 92) the two prior passes had missed.
+`lexicon.txt` was purged of the 24 confirmed-corrupt forms (not a full
+re-derivation - no independent external source is available). klal
+200's `אליהו` attribution is still worth a second look even though it's
+applied - not urgent, nobody's acting on it wrongly by leaving it.
+
+**Still open, smaller**: nothing else identified. Parts 2-3 are
+confirmed (2026-08-15, incidentally, while scoping the lexicon purge -
+see the dropped-lamed entry) to have hundreds of unfixed instances of
+this same bug - logged per CLAUDE.md's rule, explicitly NOT scoped or
+proposed as work, per the standing Parts-2-3 gate.
 
 **No other known open items beyond the above.** Full detail, evidence,
 and the complete dated history behind every claim above is in

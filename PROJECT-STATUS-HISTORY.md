@@ -17,6 +17,101 @@ current file references, or when grepping for how a past finding was
 resolved. Same append-at-top convention as before: newest entries go right
 after this header, not at the bottom.
 
+## Dropped-lamed pattern, part 3: detection script, regression test, lexicon purge, one more real instance — 2026-08-15
+
+Addendum to the entry below - see that one for the root cause and the
+first 130 corrections. This entry covers the two follow-up open items
+("do 1 and 2" - detection/prevention, and the lexicon cleanup).
+
+**Why "map the ligature codepoint in the ingest path" isn't a real
+fix**: checked `docai_word_boxes/` directly for U+FB4F (the ligature
+codepoint) - zero occurrences across all 82 page files. DocAI's own
+recognition model already resolves the ligature to a bare א before
+writing its output; there is no codepoint in this repo's data to map.
+The lamed is lost at OCR time, not at ingest time. A genuine fix would
+mean getting DocAI (or another OCR engine) to preserve the glyph
+distinction in the first place - not achievable from this codebase
+without live experimentation against the DocAI API.
+
+**`detect_ligature_corruption.py`** (new): generalizes the investigation's
+method - for every word containing א, try inserting ל after each one;
+if exactly one insertion yields a real, meaningfully-more-frequent word
+elsewhere in the same file, it's a candidate. Splits output into
+high-confidence (the corrected form isn't also a common standalone
+word) and ambiguous (it is - e.g. אל, אלו, אלי, אליהו, ואל - these need
+the same context-reading review the 2026-08-15 group-3 pass did, not
+blind trust). Gershayim-bearing tokens excluded throughout, same reason
+as before. Takes a `part*.json` path argument; defaults to part1.json.
+
+Running it against part1.json surfaced one real, previously-missed
+instance: klal 92 word 444, `לאופי` → `לאלופי`. Neither prior pass
+caught it - the original mechanical sweep's hardcoded base-form list
+didn't include `אופי`, and the 23-instance scan-verification pass
+worked from a different, separately-curated position list. Confidence:
+high but not scan-verified - the identical phrase `לאלופי דורות משעה`
+appears correctly three more times in the same klal (word_index 265,
+312, and a near-variant 489), and the flagged instance reads `לא שייך
+לא [לאופי] דורות משעה`, missing exactly the ל the other three have.
+Applied via the normal decision/apply pipeline. Running the script
+again afterward: 0 high-confidence candidates remain in Part 1; the 6
+remaining "ambiguous" hits are exactly the `א` instances the group-3
+review already read and correctly left alone (klal 1's own opening
+marker, page-side citation markers, a letter list) - consistent, not a
+new gap.
+
+**Regression test** (`tests/test_corpus_invariants.py`,
+`test_part1_no_dropped_lamed_ligature_corruption`): zero-tolerance,
+checks the 24 confirmed-corrupt base forms never reappear as exact
+space-split tokens in Part 1. Caught a real bug in its own first draft:
+written against the `all_klalim` fixture (all 3 parts combined), it
+immediately failed with hundreds of hits - all in Parts 2-3, not Part
+1. Rescoped to `part_klalim["part1.json"]` before merging (matching the
+existing `test_part1_*` naming/scoping convention used elsewhere in the
+same file), re-verified it now passes on the real corpus, and confirmed
+it still fires correctly on a deliberate mutation (temporarily injected
+`אא` into klal 1's text, confirmed red, restored byte-identical before
+moving on).
+
+**`lexicon.txt` purge**: read the original (archived) `build_lexicon.py`
+first to understand what "validated" actually meant - it turned out to
+be purely shape-based (repeated-letter runs, sofit-letter placement,
+token length), checked only against the corpus's own text, with zero
+semantic or dictionary grounding at all. That's the exact, concrete
+reason `אא` and friends passed as "legitimate Rabbinic Hebrew words":
+nothing in the build process ever asked whether they meant anything.
+Removed the 24 confirmed-corrupt base forms (19039 → 19015 entries).
+Three of the 24 (`אמא`, `בצלא`, `אפא`) have a plausible unrelated
+meaning in general Hebrew/Aramaic and got extra scrutiny before
+inclusion - `אמא` in particular ("mother"/Aramaic "there") was checked
+by re-reading all 4 of its Part-1 occurrences individually; all 4 were
+unambiguously the Talmudic connector `אלמא` ("hence/it follows" - e.g.
+`אלמא קסבר`, `אלמא ס"ל`, standard formulaic phrasing), not "mother," so
+it was included. The underlying justification for removing all 24 with
+confidence: after the fix, zero occurrences of any of the 24 forms
+remain anywhere in Part 1's ~52,600 words - a complete-accounting
+argument (if any of them had a legitimate independent use anywhere in
+this author's ~50k-word sample, an unfixed instance would still be
+sitting in the text, since only the specific corrupt positions were
+touched) rather than a guess about general Hebrew usage. This is
+narrower than "re-derive from an independent source" (no such source -
+an external Hebrew/Rabbinic dictionary - is integrated into this
+pipeline, so a full re-derivation wasn't attempted), logged as such
+rather than overclaimed.
+
+**Parts 2-3 finding** (incidental, not scoped work): verifying the
+lexicon purge was safe required checking whether the 24 forms also
+occur in `part2.json`/`part3.json` - a read-only lookup, not editorial
+work, but the numbers are worth recording: `אא` appears 74 times in
+Part 2 and 35 in Part 3 (vs. Part 1's 40 real corruptions before the
+fix); `איבא` 70 times in Part 2; `דשמוא` 20 times in Part 2. This
+confirms PROJECT-STATUS.md's standing suspicion ("Parts 2-3 are almost
+certainly affected the same way") and matches the shape of the
+already-documented page-furniture-contamination precedent (rare in
+Part 1, disproportionately common in Parts 2-3) closely enough to be
+real corroboration of that pattern, not a coincidence. Per the standing
+directive, this is logged only - not scoped, proposed, or started as
+Parts 2-3 work.
+
 ## Dropped-lamed pattern: root cause, corpus fix, and the group-3 ambiguous-word review — 2026-08-14/15
 
 Full method and results behind `PROJECT-STATUS.md`'s compact summary of
