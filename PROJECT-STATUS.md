@@ -15,6 +15,36 @@ current handoff, re-written (not just appended to) as state changes.
 
 ## ►► SESSION HANDOFF — read this first, 2026-08-16
 
+### DONE 2026-08-16 — 19 previously reported-but-not-flagged findings, now flagged
+
+Per direct user request ("are the other findings flagged for human review? / yes and
+any other findings not flagged") - a check across today's session for anything written
+up in this file as a finding but never recorded as a `klal_flag` decision. Found two
+such groups, both already documented above/below in this file, neither previously
+flagged:
+
+- **5 of the round-2 semantic sample's 7 next-klal gematria-marker mismatches** (klal
+  15, 21, 36, 46, 64 - 49 and 62 were already flagged, being inside that round's actual
+  sample). These 5 were found by a corpus-wide MECHANICAL check, not individually read -
+  flagged with that caveat explicit in each note, and with klal 21/64 additionally
+  marked lower-confidence per this file's own assessment ("probably an ordinary
+  sentence-final word after a colon, not a marker").
+- **All 13 of the "lexicon-invisible" corruption candidates** found incidentally while
+  reading context during today's lexicon-gap triage (`review_lexicon_gaps.py`),
+  explicitly excluded from that pass's 43 systematic flags. Every one of these 13
+  klalim already carried an earlier flag for a DIFFERENT word from the systematic
+  pass - since the dashboard shows only the latest decision per klal, the incidental
+  finding was invisible to a reviewer working from the dashboard alone until this. Word
+  index for each looked up fresh against `part1.json` (not assumed from the prose) -
+  `klal 159` needed both of its two matching occurrences named, since the original
+  note didn't specify which one.
+
+19 new `klal_flag` decisions (`reviewer: "ai-followup-unflagged-findings"`,
+`needs_revisit: true`), all textual evidence only, none scan-verified, no `part1.json`
+edit. Verified: `review_decisions.jsonl` grew 474 -> 493 (append-only, all 19 well-formed,
+spot-confirmed live via `/api/klal/15/flag` and others), `part1.json`/`part2.json`/
+`part3.json` sha256 unchanged, 108/108 pytest.
+
 ### DONE 2026-08-16 — CASE-YAD-MALACHI.md/VERIFIED-AGAINST-THE-INK.html refresh, root reorg, and file hygiene, all closed out
 
 Full detail in the commits themselves (`9d4ea1d` reorg, `a324b72` klalim/ archive,
