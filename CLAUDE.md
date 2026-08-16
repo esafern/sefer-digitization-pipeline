@@ -379,20 +379,60 @@ need the same checking as any other claim.
     conflate the two). Needs network access on first run only (cached
     after); not wired into `rebuild_all.sh` for the same reason as
     `detect_ligature_corruption.py` above.
-  - **`validate_part1_corpus_integrity.py`** (added 2026-08-07 — 5
+  - **`validate_part1_corpus_integrity.py`** (added 2026-08-07 — 6
     independent no-LLM sweeps over `part1.json` alone: gematria
-    self-consistency, character/encoding sanity, duplicated-phrase
-    detection, self-reference directionality, full-corpus lexicon
-    coverage) is also runnable standalone for its full output, but
-    unlike the scan-dependent validators above, its first 3 checks (zero
-    known false positives as of 2026-08-07, after fixing 3 bugs in the
-    script itself — see PROJECT-STATUS.md) are wired into
-    `tests/test_corpus_invariants.py` as additional zero-tolerance gates
-    in `rebuild_all.sh`'s step 6/6, since it needs only tracked files
-    (no gitignored cache) and runs in under a second. Its checks 4
-    (self-reference directionality) and 5 (lexicon coverage) are
-    deliberately NOT gated — the script's own docstrings mark them
-    not-viable/informational, not zero-tolerance.
+    self-consistency, character/encoding sanity, a general foreign-
+    character repertoire check added 2026-08-16 (see PROJECT-STATUS.md —
+    the narrower Latin/Arabic/bracket check above missed a Greek `Π`
+    homoglyph of its own named example), duplicated-phrase detection,
+    self-reference directionality, full-corpus lexicon coverage) is also
+    runnable standalone for its full output, but unlike the scan-dependent
+    validators above, its checks 1-2b (zero known false positives as of
+    2026-08-07/16, after fixing bugs in the script itself — see
+    PROJECT-STATUS.md) are wired into `tests/test_corpus_invariants.py`
+    as additional zero-tolerance gates in `rebuild_all.sh`'s step 6/6,
+    since it needs only tracked files (no gitignored cache) and runs in
+    under a second. Its checks 4 (self-reference directionality) and 5
+    (lexicon coverage) are deliberately NOT gated — the script's own
+    docstrings mark them not-viable/informational, not zero-tolerance.
+  - **Abbreviation-expansion candidate pipeline** (added 2026-08-16, see
+    PROJECT-STATUS.md — undocumented here until this correction, the same
+    drift class the 2026-08-14 note above already warns about)
+    — `extract_abbreviation_forms.py` (prints the canonical list of every
+    gershayim/geresh-marked abbreviation form in Part 1, with per-klal
+    attribution) and `propose_abbreviation_expansions.py` (categorizes
+    each into `expand`/`stays`/`name`/`scholarly`/`numeral`/`artifact`/
+    `unresolved`/`truncated` and drafts a candidate expansion for the
+    `expand` category, cross-checking `sefaria_reference_corpus/
+    word_freq.json` for single-clear-winner truncated-word completions).
+    Both read-only, standalone, re-runnable; neither writes `part1.json`
+    or `review_decisions.jsonl` — no review/apply stage exists yet, this
+    is candidate generation only. Not wired into `rebuild_all.sh`.
+  - **`review_lexicon_gaps.py`** (added 2026-08-16 — triages
+    `validate_part1_corpus_integrity.py` check 5's raw "951 not-in-lexicon
+    words" list against independent-corpus attestation, prefix-stripped
+    morphology, and the known dropped-lamed shape, down to a short list of
+    genuine candidates; see PROJECT-STATUS.md) is read-only and
+    re-runnable like the validators above, but its output is recorded
+    directly as `klal_flag` decisions (`reviewer: "ai-lexicon-full-
+    review"`) rather than printed for separate action — the same
+    propose→dashboard-flag pattern as the vision/lexicon cross-check
+    work, not a new mechanism. Not wired into `rebuild_all.sh`.
+  - **Witness/reconstruction code** (excluded from this project's own
+    code-revalidation audits by standing scope decision, but genuinely
+    live, not archived — listed here for completeness since it had no
+    bullet of its own before this correction): `verify_reconstruction_
+    witness.py` and `verify_witness_vision.py` produce and vision-triage
+    `reconstruction_witness_queue.json`/`witness_vision_cache.db`, which
+    `review_server.py`'s witness API endpoints actively serve to the
+    dashboard's Witness panel for the still-open ~411-item human review
+    queue (klal 30/75/88) — see "NEXT STEPS" in PROJECT-STATUS.md.
+    `reconstruct_multipage_klalim.py`, the script that originally
+    reconstructed those three klalim's text into `part1.json`, did its
+    one job (already applied, `--apply` run under explicit authorization
+    2026-08-12) and was ARCHIVED 2026-08-16 (`archive/scripts/`) — it was
+    already documented in `tests/test_corpus_invariants.py`'s own comments
+    as "not part of `rebuild_all.sh` ... a deliberate one-off."
   - Root also has a `tests/` directory (the pytest suite above) and
     `requirements-dev.txt` — everything else that was at root as of
     2026-08-06's cleanup (one-off extraction/fix/lexicon scripts) has
