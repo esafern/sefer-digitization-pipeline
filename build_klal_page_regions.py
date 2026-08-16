@@ -292,7 +292,16 @@ def main():
 
     anchored = marker_anchored_regions(klal_pages, markers, end_boundary_positions, docai_by_page)
     heuristic = heuristic_regions(klal_pages, docai_by_page, final_by_id, already_done=set(anchored))
-    regions = {**anchored, **heuristic}
+    # `anchored` last: strategy 1 is the preferred one per this module's
+    # docstring, and the merge should say so directly rather than depend on
+    # heuristic_regions() having honoured `already_done`. It was written
+    # {**anchored, **heuristic}, i.e. the coarse fallback overriding the
+    # marker-anchored box, and was correct only because that second mechanism
+    # holds - two things that have to agree instead of one. Output is
+    # unchanged either way today (0 klal_ids in both maps; verified by a full
+    # rebuild producing a byte-identical klal_page_regions.json), and
+    # tests/test_pipeline_logic.py still checks `already_done` itself.
+    regions = {**heuristic, **anchored}
 
     with open(OUT_PATH, "w", encoding="utf-8") as f:
         json.dump(regions, f, ensure_ascii=False, indent=2)

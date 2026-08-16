@@ -181,6 +181,22 @@ def test_apply_replace_rewrites_only_the_snapshotted_span():
     assert ard.apply_replace(text, 1, "בית גימל", "בות") == "אלף בות דלת"
 
 
+def test_apply_replace_refuses_a_snapshot_with_no_text_to_replace():
+    """Added 2026-08-16 (code audit). With final_text empty the span is [] and
+    `n` fell back to 1, so for an out-of-range word_index the drift check
+    compared `words[wi:wi+1]` - which is [] in Python, not an IndexError -
+    against that empty span, PASSED, and the slice assignment then APPENDED
+    the chosen text to the end of the klal at a position the decision never
+    named. apply_insert_removal() has had the equivalent `n == 0` guard since
+    it was written; this one never did."""
+    text = "אלף בית גימל"
+    assert ard.apply_replace(text, 99, "", "דלת") is None, "must not append at the end of the klal"
+    assert ard.apply_replace(text, 99, None, "דלת") is None
+    assert ard.apply_replace(text, 1, "", "דלת") is None
+    # Positive control: a real replace at a real index still works.
+    assert ard.apply_replace(text, 1, "בית", "דלת") == "אלף דלת גימל"
+
+
 def test_apply_replace_refuses_when_live_text_no_longer_matches_the_snapshot():
     """Second, independent drift guard behind snapshot_matches() (Lesson 9) -
     it compares against the corpus itself, not against the candidate file."""

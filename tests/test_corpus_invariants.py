@@ -559,6 +559,54 @@ def test_no_stale_candidate_flags_are_being_served(corrections):
     )
 
 
+def test_no_rendered_manual_correction_hides_a_machine_candidate(corrections, part1_by_id):
+    """review_frontend/app.js builds its word map as
+    `k.corrections.forEach(c => { if (c.opcode !== 'delete') byIndex[c.word_index] = c })`
+    - a last-write-wins dict. review_server.api_klal() appends synthetic
+    manual_correction entries AFTER the machine candidates, so a manual entry
+    at the same word_index silently replaces the machine candidate: the
+    reviewer sees a green Human-Decided word and never learns the vision pass
+    disputed it. review_server.py's own comment asserts the collision "only
+    ever" happens one way or the other, on the grounds that app.js offers the
+    manual panel only on an unflagged word.
+
+    That holds going FORWARD, but it is not a property of the data: measured
+    2026-08-16, 78 (klal_id, word_index) positions in the decisions log
+    already collide with a live machine candidate - the manual decisions were
+    recorded first and a later rebuild generated candidates at those
+    positions. All 78 are invisible today only because api_klal()'s drift
+    check drops a manual decision whose original_word has moved (they were
+    applied, so it has), leaving exactly 1 manual decision rendering at all
+    and 0 collisions. A future rebuild that produced a candidate at a
+    still-valid manual decision's position would resurrect the whole class,
+    silently. This test is the check that assumption never had (Lesson 8: a
+    cheap mechanical sweep catches what an argument about the UI cannot).
+    """
+    review_server = _import_from_path("review_server", os.path.join(REPO, "review_server.py"))
+    machine = {
+        (int(kid), c["word_index"])
+        for kid, entries in corrections.items() for c in entries if c.get("opcode") != "delete"
+    }
+    collisions = []
+    for (klal_id, word_index), record in review_server.rd.all_current("manual_correction").items():
+        klal = part1_by_id.get(klal_id)
+        if klal is None:
+            continue
+        words = (klal.get("clean_text") or "").split(" ")
+        original_word = (record.get("candidate_snapshot") or {}).get("original_word")
+        # Only a decision that still RENDERS can hide anything.
+        if not review_server._word_matches(words, word_index, original_word):
+            continue
+        if (klal_id, word_index) in machine:
+            collisions.append((klal_id, word_index))
+    assert not collisions, (
+        f"{len(collisions)} position(s) carry BOTH a live machine correction candidate and a "
+        f"currently-rendering manual_correction decision: {sorted(collisions)}. app.js's word map "
+        "is last-write-wins and the manual entry is appended second, so the machine candidate - "
+        "including its vision verdict and confidence - is silently not shown to the reviewer."
+    )
+
+
 def test_every_served_flag_has_a_dashboard_label(corrections):
     """review_frontend/app.js falls back to a bare 'Flagged' for any flag
     review_server.FLAG_LABELS doesn't know, which is indistinguishable from a
