@@ -15,6 +15,43 @@ current handoff, re-written (not just appended to) as state changes.
 
 ## ►► SESSION HANDOFF — read this first, 2026-08-16
 
+### DONE 2026-08-16 — CASE-YAD-MALACHI.md/VERIFIED-AGAINST-THE-INK.html refresh, root reorg, and file hygiene, all closed out
+
+Full detail in the commits themselves (`9d4ea1d` reorg, `a324b72` klalim/ archive,
+`de0750a` doc refresh, `525671c` image regeneration) - compact summary here per this
+file's own "compact current handoff" rule:
+
+- **Root reorganized** into `pipeline/` (9 files, the live rebuild_all.sh chain + review
+  tool) and `tools/` (15 files, everything manual/standalone) per user-selected layout;
+  every `REPO` path, cross-script import, test import, and `rebuild_all.sh` invocation
+  fixed and verified (108/108 pytest, 14/14 Playwright, full clean rebuild, 0 API calls).
+- **Two case/evidence docs refreshed against current reality**: `VERIFIED-AGAINST-
+  THE-INK.html` gained a new centerpiece section on the alef-lamed ligature bug (a real
+  1200 DPI crop generated fresh from `berlin_square_corrected.pdf`, klal 88 page 40) and
+  had every stale number corrected (222/222 klalim trusted, was 208/222; 316/356
+  candidates vision-adjudicated, was 90/794; the klal 92-165 defect marked resolved).
+  `CASE-YAD-MALACHI.md`'s "Current state"/"Bottom line"/"The ask" rewritten to match, 4
+  dead image refs and 4 dead `data/*.md` refs fixed, 2 pre-existing dangling footnotes
+  (`[^linker]`, `[^ocrpd]`) found and fixed while auditing.
+- **Root cause of the broken images found, not just the symptom**: `images/*.png` sat
+  under this repo's blanket `.gitignore` PNG rule with no exception, so any image placed
+  there was never trackable - broken on every clone but the one that made it. Regenerated
+  2 of the 4 original images directly from `berlin_square_corrected.pdf` (title page,
+  Klalei HaAleph opening - both content-verified against existing footnotes/alignment
+  data before use) and added specific `.gitignore` exceptions, matching the precedent
+  already set for the two source PDFs. The other 2 (a citation-screenshot, a Rashi-scan
+  comparison) need assets this repo doesn't hold - left pending, not faked.
+- **Data/file hygiene**: archived a stale, unreferenced `klalim/` directory (668 files,
+  older format) to `archive/data/klalim/`; corrected `CLAUDE.md`'s own claim of a
+  nonexistent `processed_klalim/` directory found in the process. **2026-08-16, later**:
+  4 gitignored/untracked stray root files with no live reference (`test_page.pdf` -
+  confirmed leftover from the archived `orchestrator.py`'s hardcoded test fixture;
+  `document_jsons/test_page-*.json` - DocAI output derived from that same fixture;
+  `test_crop.png` - unexplained; `KiddushinRogochovDraft.pdf` - unexplained, possibly
+  unrelated to this project) moved to `archive/old/` per direct user instruction. Since
+  all four were already gitignored, this is a local filesystem move only - no commit,
+  nothing for git to track either way.
+
 ### DONE 2026-08-16 — semantic-plausibility spot-check ROUND 2, a fresh 20% sample of Part 1 — 32 klalim flagged, 2 possible NEW dropped-lamed-ligature instances, 1 new mechanical check
 
 A second, independent full-sentence reading pass over Part 1, deliberately
