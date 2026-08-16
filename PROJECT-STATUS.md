@@ -313,6 +313,143 @@ pre-`escapeHtml` version of code master already carries escaped. No
 branch-only content found anywhere master lacks. Nothing to delete - the
 ref is already gone - and no further action needed.
 
+### DONE 2026-08-16 — revalidation/refactor audit ROUND 3, merged from worktree `worktree-agent-ac6c84c65115b67e6`
+
+Per direct user request for a third round of the standing revalidation/
+refactor audit, this time explicitly scoped to include witness code (no
+longer excluded) and with an explicit eye toward refactoring, not just
+correctness. One commit (`9103ea9`), one bug found and fixed,
+mutation-verified; two further findings reported at the time, not fixed in
+this worktree (see below for why - **finding 2's locator bug was
+subsequently fixed directly in the main checkout, see the entry above**).
+Independently re-verified before merging, not just the agent's report
+trusted: re-read the actual `tools/verify_witness_vision.py` diff, ran the
+full test suite in the worktree (117/117 passing, 1 skipped for the
+gitignored scan cache not being present in a fresh worktree), and tested
+the migration against a COPY of the real tracked `witness_vision_cache.db`
+(422 rows, not the 419 the worktree's own docstring estimated - migrated
+losslessly either way, backup table preserved, schema correct) rather than
+trusting the synthetic-data test alone.
+
+**1. FIXED (bug, code) - `tools/verify_witness_vision.py`'s `witness_cache`
+table was missing `prompt_hash` from its cache key.** PRIMARY KEY was
+`(crop_hash, word_a, word_b, context_hash)` - the exact gap CLAUDE.md
+Lesson 12 already documents being found and fixed TWICE in this project,
+in `pipeline/verify_corrections_vision.py` (2026-08-14) and
+`tools/propose_punctuation_part1.py` (2026-08-16). This is a THIRD sibling
+script with the identical crop/adjudicate/cache shape, missed both times.
+A future edit to the prompt wording (already documented as a real,
+not-hypothetical event in the sibling's own history) would have silently
+kept serving pre-edit cached answers under the new prompt forever.
+  - Fixed the same way as both siblings: hoisted the inline prompt
+    f-string into a named `PROMPT_TEMPLATE`/`PROMPT_HASH`, added
+    `prompt_hash` to the cache schema/key, and added a lossless
+    `_migrate_add_prompt_hash()` that back-fills existing rows under
+    today's hash rather than dropping them (this cache holds 419 real,
+    already-paid-for Gemini answers per the module's own docstring).
+  - 4 new hermetic tests in `tests/test_pipeline_logic.py`
+    (`test_witness_vision_cache_key_covers_*`,
+    `test_witness_vision_cache_stores_a_null_side_*`,
+    `test_witness_vision_cache_migration_is_lossless_and_idempotent`),
+    directly mirroring the existing `verify_corrections_vision.py` tests.
+    Mutation-verified: reintroduced the exact original bug (dropped
+    `prompt_hash` from `get_cached()`'s WHERE clause), confirmed
+    `test_witness_vision_cache_key_covers_the_prompt_template` went red,
+    restored, confirmed green. 117/117 pytest (was 113), 1 skipped - up
+    from 113 because this worktree had no local venv and one had to be
+    built fresh (`requirements-dev.txt` plus `google-genai`, `pymupdf`,
+    `Levenshtein`, `RapidFuzz`, `beautifulsoup4`, `lxml`, `pytesseract` -
+    matching the main checkout's installed set - to make the
+    `requires_witness_vision_deps`-gated tests actually run rather than
+    skip). Not part of `rebuild_all.sh`'s chain, so no rebuild was needed
+    or run for this fix. **No live Gemini calls were made** - this session
+    deliberately made zero API calls throughout, per the explicit
+    instruction not to compete with a live budget-sensitive job running in
+    the main checkout concurrently.
+  - **NOT fixed for the same reason it hasn't been generalized before**:
+    `verify_corrections_vision.py`'s and `verify_witness_vision.py`'s
+    `sanitize_json`/`unescape_json_fragment`/cache-init/migrate/get/put/
+    crop/retry-loop machinery are now independently duplicated in
+    (at least) these two files, nearly line-for-line - `verify_witness_
+    vision.py`'s own module docstring even says the analogous
+    `tools/verify_flagged_candidates_vision.py` (see finding 2 below)
+    "reuses `pipeline/verify_corrections_vision.py`'s crop/adjudicate/
+    cache machinery directly," but `verify_witness_vision.py` itself does
+    NOT reuse it - it carries its own full copy. This bug is direct,
+    demonstrated proof of Lesson 13 ("a hand-maintained parallel copy
+    drifts"): one copy got the prompt-hash fix twice on other files, this
+    third copy didn't. **Reported, not executed**: extracting a shared
+    module (`vision_adjudication_common.py`-shaped: crop_pdf_bounding_box,
+    sanitize_json, unescape_json_fragment, a cache-table factory keyed the
+    same way, the retry/backoff loop) would remove this duplication at its
+    root, but touches `pipeline/verify_corrections_vision.py` - the exact
+    file the concurrently-running main-checkout Gemini job most plausibly
+    depends on - and a structural refactor of a live paid-API script
+    shouldn't be attempted blind, in the same session as an explicit
+    instruction not to touch that job's path. Recommend as dedicated
+    follow-up work with the live job stopped first, not folded into this
+    round.
+
+**2. REVIEWED, NOT FIXED (two files exist ONLY in the main checkout's
+uncommitted working tree - not in git history at all, on any branch).**
+`tools/check_next_marker_and_title.py` and `tools/verify_flagged_
+candidates_vision.py` were named as first-priority audit targets (written
+this session, never reviewed), but `git log --all` for both paths returns
+nothing in this worktree, and worktrees only see committed history - per
+CLAUDE.md's own "Directory layout" discipline this means neither file is
+part of the tracked codebase yet, only sitting on disk in the main
+checkout. Read both directly from the main-checkout path (read-only, no
+edits possible from an uncommitted, untracked file in a different
+worktree):
+  - `check_next_marker_and_title.py` - reviewed in full, no bugs found.
+    Both checks (next-klal gematria marker, title-vs-opening-line) match
+    their own docstrings' claims; `TITLE_BOUNDARY_TOKENS` scanning takes
+    the earliest-occurring boundary correctly regardless of list order;
+    imports `klal_id_to_gematria`/`GEMATRIA_VALUES` from
+    `validate_part1_corpus_integrity.py` rather than re-deriving them (no
+    duplication).
+  - `verify_flagged_candidates_vision.py` - **one likely real bug found in
+    `locate_word()`'s cross-page disambiguation - AT THE TIME OF THIS
+    WORKTREE'S REPORT, not fixable here (file wasn't in git history yet).
+    Since fixed directly in the main checkout - see the entry above this
+    one for the applied fix, confirmation it DOES fire on real data (4 of
+    160 candidates), and re-verification.** When a candidate word's exact
+    text matches DocAI tokens on BOTH a klal's main page AND one of its
+    continuation pages (`region.get("continuations", [])`), the function's
+    `match_bbox_region`/`match_page` variables were overwritten on every
+    loop iteration that found a match, ending up set to whichever page was
+    iterated LAST (main page first, then continuations, in list order) -
+    not necessarily the page the correct match is actually on. In the
+    ambiguous-disambiguation branch, `match_bbox_region.index(t)` was then
+    computed only against that last page's token list, so any candidate
+    token from an EARLIER page failed `t in match_bbox_region` and was
+    penalized with a hardcoded `1e9` sentinel distance - meaning a
+    same-text match on an earlier page could never legitimately win the
+    proportional-position disambiguation once a later continuation page
+    also had a same-text match, regardless of which one was actually
+    correct. `locate_word()`'s own docstring said it "Disambiguates by
+    proportional read-order position when the same text recurs in one
+    klal" with no carve-out for the cross-page case - a real gap against
+    its own stated contract, and a 4th bug in the exact shape this task
+    brief anticipated (the author's own docstring already recorded 3 found
+    during construction, all about page-continuation/proportional-position
+    logic).
+
+**Scope note**: `review_frontend/app.js` (spot-checked all `innerHTML`/
+`value=` interpolation sites for escaping - all corpus-derived content is
+escaped, `buildLegend()`'s two unescaped interpolations are static
+`STATE_META` labels, not corpus data, so that's correctly unescaped, not a
+gap), `tools/verify_reconstruction_witness.py`, `tools/review_lexicon_
+gaps.py`, `tools/extract_abbreviation_forms.py`, and
+`tools/detect_real_word_substitution.py` were each read in full - no
+further bugs found, matching prior rounds' "checked and found clean"
+convention (round 2's list, further up this file). `tools/verify_
+reconstruction_witness.py` and `pipeline/review_server.py`'s witness
+endpoints in particular already carry extensive fix history from earlier
+2026-08-16 work (the `(klal_id, docai_token_index)` collision guard, the
+furniture/tier word-by-word fixes, the line-wrap bbox fix) and showed no
+further gaps on this pass.
+
 ### DONE 2026-08-16 — systematic detector built for the "real-word substitution" corruption class; 49 klalim flagged (83 candidates)
 
 Per direct user request ("is there a good solution for #3?" / "go") - a real gap
