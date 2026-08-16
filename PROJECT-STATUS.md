@@ -15,6 +15,48 @@ current handoff, re-written (not just appended to) as state changes.
 
 ## ►► SESSION HANDOFF — read this first, 2026-08-16
 
+### DONE 2026-08-16 — item 2 closed: klal 198's 2 candidates scan-verified and applied; klal 212's "missing halacha number" checked and closed, print-faithful
+
+Per direct user request ("2. close the two small loose ends"). Both had been
+sitting open since earlier in the session.
+
+**klal 198 w1055 and w861** couldn't be vision-verified automatically because
+`klal_page_regions.json`'s entry for klal 198 is broken - a near-zero-area
+bbox on page 70 claiming 1087 tokens, nested INSIDE klal 197's own claimed
+region rather than describing klal 198's real location. Root-caused, not just
+worked around: klal 198's actual gematria marker (`קצח`) was found by direct
+search on **page 71**, sitting in the middle of the region klal 197's own
+`continuations` list currently claims in full - so klal 197's page-71 (and
+likely page-72) continuation bounds are the real bug, over-claiming territory
+that belongs to klal 198. Not fixed in `klal_page_regions.json` itself this
+pass (that's a `build_klal_page_regions.py` continuation-detection fix,
+bigger than unblocking these 2 words) - worked around by searching
+`docai_word_boxes` directly for each target word and disambiguating by
+matching context against `part1.json`'s own surrounding words, then cropping
+at 2400 DPI. Both confirmed: w1055 `עוכר`->`עובר` (context `ואמנם אמרו שהוא
+___ בכך וכך עשה` matches exactly), w861 `יצהק`->`יצחק` (context `רבינא ורב
+נחמן בר ___ ס"ל` matches exactly, standard Amora name). Applied via
+`manual_correction` + `apply_reviewer_decisions.py` (2 words, klal 198 only).
+
+**klal 212 w51** - the round-2 semantic-spotcheck's "halacha NUMBER is
+missing" hypothesis (`...הלכה וגם...` with no number, guessed as a dropped
+token) - checked directly against a 2400 DPI crop of the exact gap between
+the two words: **ordinary word-spacing, nothing squeezed in, no sign of a
+dropped token.** The print itself reads `הלכה וגם` with no number - print-
+faithful as transcribed. Closed via `klal_flag` (`needs_revisit: false`), no
+`part1.json` change. Whether the AUTHOR omitted the number is a content
+question outside this pipeline's fidelity scope.
+
+Full rebuild after applying klal 198's 2 words: 131/131 pytest, only
+`part1.json`/`klalim_demo_dataset.json`/`review_decisions.jsonl` changed (no
+new vision candidates generated near these manual-path edits, so
+`corrections_*`/`klal_page_regions.json` correctly unchanged this time).
+
+**Still open**: `klal_page_regions.json`'s continuation-bounds bug for klal
+197/198 (and the separate, already-logged klal 167 undersized-region gap) -
+both real, both would need a `build_klal_page_regions.py` fix, neither
+attempted this pass.
+
 ### DONE 2026-08-16 — 28 independently-reverified corrections applied to part1.json; 5 closed as print-faithful; rebuild clean
 
 Follow-up to the 1200 DPI re-verification entry below. Recorded the 28 CONFIRMED
