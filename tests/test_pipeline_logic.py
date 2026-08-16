@@ -34,6 +34,7 @@ import assemble_corrections_dataset as acd  # noqa: E402
 import audit_applied_decisions as aad  # noqa: E402
 import build_klal_page_regions as bkpr  # noqa: E402
 import check_klal_token_orphans as ckto  # noqa: E402
+import detect_ligature_corruption as dlc  # noqa: E402
 import extract_abbreviation_forms as eaf  # noqa: E402
 import propose_abbreviation_expansions as pae  # noqa: E402
 import validate_lexicon_independent as vli  # noqa: E402
@@ -930,6 +931,55 @@ def test_extract_reports_each_klal_once_per_form_however_often_it_repeats():
     assert counts['רש"י'] == 3, "the count is per occurrence"
     assert klalim['רש"י'] == [1, 2], "the klal list is per klal, deduplicated and in order"
     assert set(counts) == {'רש"י'}
+
+
+# --- detect_ligature_corruption: word indices must mean what everything else
+# --- means by them ----------------------------------------------------------
+
+def test_ligature_detector_indexes_words_the_same_way_the_corpus_mutators_do(tmp_path):
+    """It reported a word_index from `split(" ")`, which keeps an empty string
+    for every run of consecutive spaces; a correction made from its output is
+    recorded and applied against apply_reviewer_decisions.py's `split()`
+    indexing. One double space anywhere in a klal shifted every later index by
+    one - silently, in the one direction that edits the corpus at a position
+    nobody chose. Inert on today's data (0 klalim in any part file where the
+    two splits disagree), so only a synthetic fixture can hold the line."""
+    part = tmp_path / "part_fixture.json"
+    part.write_text(json.dumps(
+        [{"klal_id": 1, "clean_text": " אלף  בית גימל "}], ensure_ascii=False), encoding="utf-8")
+    words = dlc.load_klal_words(str(part))[1]
+    assert words == ["אלף", "בית", "גימל"]
+    assert words == " אלף  בית גימל ".split(), "must match the corpus mutators' own splitting"
+
+
+def test_ligature_detector_still_finds_a_planted_corruption(tmp_path):
+    """Positive control for the two negatives above and for _resolve()'s
+    dominance rule: a detector that found nothing would satisfy an
+    index-shape test just as well."""
+    part = tmp_path / "part_fixture.json"
+    frequent = " ".join(["אלמא"] * 5)
+    part.write_text(json.dumps([
+        {"klal_id": 1, "clean_text": f"{frequent} אמא"},
+        {"klal_id": 2, "clean_text": 'א"א אינו מועמד'},
+    ], ensure_ascii=False), encoding="utf-8")
+    klal_words = dlc.load_klal_words(str(part))
+    counts = dlc.build_frequency_table(klal_words)
+    high, ambiguous = dlc.find_candidates(klal_words, counts)
+    assert [(kid, idx, bad, good) for kid, idx, bad, good, _ in high] == [(1, 5, "אמא", "אלמא")]
+    assert ambiguous == []
+
+
+def test_abbreviations_are_kept_out_of_the_frequency_evidence():
+    """The load-bearing gershayim exclusion is in the frequency table, not in
+    the candidate loop: `א"ה` (Even HaEzer), `א"א` (eshet ish) and friends are
+    real, unrelated tokens, and letting them count as corpus words is the
+    false-positive class the original investigation had to remove (the
+    "~620 ambiguous" estimate that turned out to be 228)."""
+    counts = dlc.build_frequency_table({1: ["אלמא", 'א"א', 'א"א', 'א"ה']})
+    assert counts["אלמא"] == 1
+    assert not [w for w in counts if dlc.has_gershayim(w)], (
+        f"abbreviations reached the frequency table: {[w for w in counts if dlc.has_gershayim(w)]}"
+    )
 
 
 # --- validate_lexicon_independent: the independent reference corpus ----------

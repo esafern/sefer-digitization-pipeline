@@ -24,11 +24,35 @@
 #
 # METHOD (two passes, mirroring how the 130 real instances were found):
 #   1. Mechanical: for a word W and any position where W has an א, does
-#      inserting ל right after it produce a real, high-frequency word
-#      elsewhere in the SAME file? If exactly one insertion position wins
-#      by a wide margin, it's a strong candidate. Covers bare forms and
-#      all single/double-letter Hebrew prefixes (ו/ה/ב/כ/ל/מ/ש/ד and their
-#      2-letter combinations).
+#      inserting ל right after it produce a real word elsewhere in the SAME
+#      file, more often than W itself occurs? If exactly one insertion
+#      position qualifies, it's a candidate.
+#
+#      COVERAGE, corrected 2026-08-16 (code audit) - this used to claim the
+#      pass "covers bare forms and all single/double-letter Hebrew prefixes
+#      (ו/ה/ב/כ/ל/מ/ש/ד and their 2-letter combinations)", backed by two
+#      module constants (PREFIX1, ALL_PREFIXES) that NOTHING in the file ever
+#      read. There is no prefix logic here and there never was. What the
+#      position scan does give for free is that a prefix is not an א, so a
+#      prefixed corrupt form is scanned like any other word - but its
+#      CORRECTED form is then looked up WITH the prefix attached, so a real
+#      instance whose prefixed correction is rare or unattested in this file
+#      is missed. That gap is real (PROJECT-STATUS.md records 5 instances the
+#      original mechanical scan missed and a prefix sweep caught), and it is
+#      NOT closed here: a prefix-stripping variant was measured during this
+#      audit and produces 74 forms / 2,646 occurrences on Part 1, headed by
+#      לא->לאל (699), הוא->הואל (381), דלא->דלאל (251) - i.e. it drowns the
+#      signal, because stripping a prefix also strips the frequency evidence
+#      that makes the bare comparison meaningful. Anyone closing the gap
+#      needs a different discriminator, not this one with prefixes bolted on.
+#
+#      Second known limit, same class: the frequency table is built from the
+#      part file being scanned, so the corpus is validating itself - the
+#      exact independence problem PROJECT-STATUS.md records for lexicon.txt.
+#      sefaria_reference_corpus/ (2026-08-16) is an independent table that
+#      could be cross-checked against; it is deliberately not wired in here,
+#      since doing so changes what this detector reports and that needs its
+#      own verification pass, not a drive-by.
 #   2. NOT automated - context review of "the candidate is also a
 #      legitimate standalone word" cases (א, או, אי, איהו, וא and similar
 #      short, common words). The 2026-08-15 group-3 review of exactly this
@@ -73,8 +97,6 @@ from collections import Counter
 REPO = os.path.dirname(os.path.abspath(__file__))
 
 QUOTE_CHARS = set('"\'׳״')
-PREFIX1 = list("והבכלמשד")
-ALL_PREFIXES = [""] + PREFIX1 + [a + b for a in PREFIX1 for b in PREFIX1]
 
 # Short forms that are ALSO common standalone words - a mechanical hit here
 # is not trustworthy on frequency alone (see METHOD pass 2 above). Reported
@@ -87,10 +109,23 @@ def has_gershayim(w):
 
 
 def load_klal_words(part_path):
+    """Split exactly the way every index-bearing script in this project does
+    (str.split() with no argument).
+
+    FIXED 2026-08-16 (code audit): this was `split(" ")`, which keeps an empty
+    string for each run of consecutive spaces and for a leading/trailing one.
+    find_candidates() reports a word_index, and a correction made from this
+    script's output is recorded and applied against
+    apply_reviewer_decisions.py's `clean_text.split()` indexing - so a single
+    double space anywhere in a klal would silently shift every reported index
+    after it by one, in the one direction that edits the corpus at a position
+    nobody chose. Inert today (verified 2026-08-16: 0 klalim in any of the
+    three part files where the two splits disagree), which is exactly why it
+    needed a test rather than a look."""
     klalim = json.load(open(part_path, encoding="utf-8"))
     out = {}
     for k in klalim:
-        out[k["klal_id"]] = k["clean_text"].split(" ")
+        out[k["klal_id"]] = k["clean_text"].split()
     return out
 
 
