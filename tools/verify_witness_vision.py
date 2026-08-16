@@ -49,20 +49,97 @@ def norm(s):
     return "".join(c for c in s if c in HEB)
 
 
+# Hoisted out of adjudicate() so it can be hashed into the cache key - see
+# init_cache() below. The per-item values (context/option_a_desc/
+# option_b_desc) are substituted in at call time; everything else here is
+# the fixed "question" every cached answer was an answer to. Mirrors
+# pipeline/verify_corrections_vision.py's PROMPT_TEMPLATE/PROMPT_HASH
+# precedent exactly (added there 2026-08-14, and to
+# propose_punctuation_part1.py 2026-08-16) - editing ANY character below (a
+# constraint, the JSON shape, the option wording) must change PROMPT_HASH
+# and correctly invalidate prior answers.
+PROMPT_TEMPLATE = """
+You are an expert Talmudic and Rabbinic textual verification engine analyzing a Hebrew manuscript raster crop.
+
+Surrounding raw OCR context (unverified, may include misreads on either side): "{context}"
+
+Two independent OCR engines disagree about what is printed at the target position:
+Option A (DocAI OCR reading): {option_a_desc}
+Option B (Tesseract OCR reading): {option_b_desc}
+
+CONSTRAINTS:
+1. Perform Rabbinic acronym and semantic analysis using the surrounding context.
+2. Recognize standard Rabbinic acronyms and abbreviations.
+3. Do NOT mistake Rabbinic acronyms for the literal spelled-out Hebrew letter name when context indicates an abbreviation.
+4. If NEITHER option matches the pixels precisely, transcribe what you actually see in "transcription_found" and set selected_option to "NEITHER".
+5. Output "UNCERTAIN" only if the crop is illegible or too ambiguous to read at all.
+
+Respond ONLY with JSON using this structure:
+{{
+  "selected_option": "A" or "B" or "NEITHER" or "UNCERTAIN",
+  "transcription_found": "exact text visible in image",
+  "confidence": 0.0 to 1.0,
+  "reasoning": "contextual Rabbinic paleographic explanation"
+}}
+"""
+PROMPT_HASH = hashlib.sha256(PROMPT_TEMPLATE.encode("utf-8")).hexdigest()[:16]
+
+
 # ---------- cache: keyed on everything that changes the actual question
 # asked (Lesson 12 - a crop-hash-only or word-pair-only key silently reuses
-# a stale answer for a different question on the same crop) ----------
+# a stale answer for a different question on the same crop). FIXED
+# 2026-08-16: this table's key used to omit prompt_hash entirely - the
+# exact gap already found and fixed in verify_corrections_vision.py
+# (2026-08-14) and propose_punctuation_part1.py (2026-08-16), missed here
+# in this third sibling script with the identical crop/adjudicate/cache
+# shape. A future wording edit to PROMPT_TEMPLATE above would have
+# silently kept serving pre-edit answers forever. Migrated, not dropped:
+# existing rows are real, already-paid-for Gemini calls (419/419 per this
+# module's own docstring). ----------
 def init_cache():
     conn = sqlite3.connect(CACHE_DB)
     conn.execute("PRAGMA journal_mode=WAL")
     conn.execute(
         "CREATE TABLE IF NOT EXISTS witness_cache ("
         "crop_hash TEXT NOT NULL, word_a TEXT NOT NULL, word_b TEXT NOT NULL, "
-        "context_hash TEXT NOT NULL, decision_json TEXT, "
-        "PRIMARY KEY (crop_hash, word_a, word_b, context_hash))"
+        "context_hash TEXT NOT NULL, prompt_hash TEXT NOT NULL, decision_json TEXT, "
+        "PRIMARY KEY (crop_hash, word_a, word_b, context_hash, prompt_hash))"
     )
+    _migrate_add_prompt_hash(conn)
     conn.commit()
     conn.close()
+
+
+def _migrate_add_prompt_hash(conn):
+    """Rebuild a pre-fix 4-column witness_cache into the 5-column
+    prompt-hash-keyed schema, back-filling the CURRENT PROMPT_HASH rather
+    than dropping every row - mirrors verify_corrections_vision.py's
+    _migrate_add_prompt_hash exactly (see that function's docstring for the
+    full reasoning). Back-filling is sound here: PROMPT_TEMPLATE above is
+    unchanged from when this script was originally written - only the
+    cache KEY is changing in this fix, not the question any existing row
+    was an answer to."""
+    cols = {r[1] for r in conn.execute("PRAGMA table_info(witness_cache)")}
+    if "prompt_hash" in cols:
+        return
+    conn.execute("ALTER TABLE witness_cache RENAME TO witness_cache_pre_prompt_hash")
+    conn.execute(
+        "CREATE TABLE witness_cache ("
+        "crop_hash TEXT NOT NULL, word_a TEXT NOT NULL, word_b TEXT NOT NULL, "
+        "context_hash TEXT NOT NULL, prompt_hash TEXT NOT NULL, decision_json TEXT, "
+        "PRIMARY KEY (crop_hash, word_a, word_b, context_hash, prompt_hash))"
+    )
+    conn.execute(
+        "INSERT INTO witness_cache "
+        "(crop_hash, word_a, word_b, context_hash, prompt_hash, decision_json) "
+        "SELECT crop_hash, word_a, word_b, context_hash, ?, decision_json "
+        "FROM witness_cache_pre_prompt_hash",
+        (PROMPT_HASH,),
+    )
+    n = conn.execute("SELECT COUNT(*) FROM witness_cache").fetchone()[0]
+    print(f"  cache migrated to prompt-hash-keyed schema: {n} row(s) carried over "
+          f"under prompt_hash {PROMPT_HASH} (old table kept as "
+          f"witness_cache_pre_prompt_hash)")
 
 
 _NONE_SENTINEL = "\x00NONE\x00"
@@ -73,8 +150,9 @@ def get_cached(crop_bytes, word_a, word_b, context):
     context_hash = hashlib.sha256(context.encode("utf-8")).hexdigest()
     conn = sqlite3.connect(CACHE_DB, timeout=10.0)
     row = conn.execute(
-        "SELECT decision_json FROM witness_cache WHERE crop_hash=? AND word_a=? AND word_b=? AND context_hash=?",
-        (crop_hash, word_a or _NONE_SENTINEL, word_b or _NONE_SENTINEL, context_hash),
+        "SELECT decision_json FROM witness_cache WHERE crop_hash=? AND word_a=? "
+        "AND word_b=? AND context_hash=? AND prompt_hash=?",
+        (crop_hash, word_a or _NONE_SENTINEL, word_b or _NONE_SENTINEL, context_hash, PROMPT_HASH),
     ).fetchone()
     conn.close()
     return row[0] if row else None
@@ -85,8 +163,10 @@ def cache_put(crop_bytes, word_a, word_b, context, decision_json):
     context_hash = hashlib.sha256(context.encode("utf-8")).hexdigest()
     conn = sqlite3.connect(CACHE_DB, timeout=10.0)
     conn.execute(
-        "INSERT OR REPLACE INTO witness_cache (crop_hash, word_a, word_b, context_hash, decision_json) VALUES (?,?,?,?,?)",
-        (crop_hash, word_a or _NONE_SENTINEL, word_b or _NONE_SENTINEL, context_hash, decision_json),
+        "INSERT OR REPLACE INTO witness_cache "
+        "(crop_hash, word_a, word_b, context_hash, prompt_hash, decision_json) VALUES (?,?,?,?,?,?)",
+        (crop_hash, word_a or _NONE_SENTINEL, word_b or _NONE_SENTINEL, context_hash,
+         PROMPT_HASH, decision_json),
     )
     conn.commit()
     conn.close()
@@ -207,30 +287,7 @@ def adjudicate(client, crop_bytes, docai_reading, tesseract_reading, context):
         option_a_desc = f'"{docai_reading}"'
     option_b_desc = f'"{tesseract_reading}"' if tesseract_reading else "(nothing - Tesseract found no text here either)"
 
-    prompt = f"""
-You are an expert Talmudic and Rabbinic textual verification engine analyzing a Hebrew manuscript raster crop.
-
-Surrounding raw OCR context (unverified, may include misreads on either side): "{context}"
-
-Two independent OCR engines disagree about what is printed at the target position:
-Option A (DocAI OCR reading): {option_a_desc}
-Option B (Tesseract OCR reading): {option_b_desc}
-
-CONSTRAINTS:
-1. Perform Rabbinic acronym and semantic analysis using the surrounding context.
-2. Recognize standard Rabbinic acronyms and abbreviations.
-3. Do NOT mistake Rabbinic acronyms for the literal spelled-out Hebrew letter name when context indicates an abbreviation.
-4. If NEITHER option matches the pixels precisely, transcribe what you actually see in "transcription_found" and set selected_option to "NEITHER".
-5. Output "UNCERTAIN" only if the crop is illegible or too ambiguous to read at all.
-
-Respond ONLY with JSON using this structure:
-{{
-  "selected_option": "A" or "B" or "NEITHER" or "UNCERTAIN",
-  "transcription_found": "exact text visible in image",
-  "confidence": 0.0 to 1.0,
-  "reasoning": "contextual Rabbinic paleographic explanation"
-}}
-"""
+    prompt = PROMPT_TEMPLATE.format(context=context, option_a_desc=option_a_desc, option_b_desc=option_b_desc)
     models_to_try = ["gemini-3.6-flash", "gemini-3.5-flash"]
     max_retries = 3
     last_err = None
