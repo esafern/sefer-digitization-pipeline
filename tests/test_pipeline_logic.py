@@ -34,6 +34,8 @@ import assemble_corrections_dataset as acd  # noqa: E402
 import audit_applied_decisions as aad  # noqa: E402
 import build_klal_page_regions as bkpr  # noqa: E402
 import check_klal_token_orphans as ckto  # noqa: E402
+import extract_abbreviation_forms as eaf  # noqa: E402
+import propose_abbreviation_expansions as pae  # noqa: E402
 import review_decisions as rd  # noqa: E402
 import review_server as rs  # noqa: E402
 import validate_catchword_continuity as vcc  # noqa: E402
@@ -741,6 +743,192 @@ def test_running_header_words_are_only_matched_as_bare_words():
     assert vcc.is_header_word("כלל") is False, (
         "the bare word כלל ('rule') is real text, not the header token כללי"
     )
+
+
+# --- propose_abbreviation_expansions: how a form gets classified -------------
+# Added 2026-08-16 (code audit). This script writes nothing: it proposes
+# expansions for a human review/apply stage that does not exist yet. That is
+# exactly why its output has to be right BEFORE anything is built on it - a
+# wrong proposal here is a fidelity defect (Success Criterion 1) waiting for a
+# consumer, and every failure below was silent in the printed report, not
+# loud. None of it needs the Sefaria frequency cache: `freq` is passed
+# explicitly so the classification logic is testable with no network, no
+# gitignored cache, and no dependence on what today's reference corpus
+# happens to contain.
+
+def test_a_prefixed_expansion_keeps_the_prefix_it_stripped():
+    """The proposal used to be the ROOT's expansion verbatim, so `דר'` was
+    reported as `רבי` - a proposal that DELETES the ד. 113 forms / 642
+    occurrences, printed in the same column and format as an unprefixed
+    dictionary hit."""
+    assert pae.resolve("דר'", None)["expansion"] == "דרבי"
+    assert pae.resolve("התוס'", None)["expansion"] == "התוספות"
+    assert pae.resolve("ובס'", None)["expansion"] == "ובספר"
+    # A list-valued expansion must keep the prefix on every alternative.
+    assert pae.resolve('ושכ"כ', None)["expansion"] == ["ושכן כתב", "ושכך כתב", "ושכל כך"]
+    # ... and the root/prefix must be reported, not left to be parsed back out
+    # of the human-readable `method` string.
+    assert pae.resolve("דר'", None)["root"] == "ר'"
+    assert pae.resolve("דר'", None)["prefix"] == "ד"
+
+
+def test_a_non_expand_category_keeps_its_gloss_unprefixed():
+    """"name"/"scholarly"/"stays" values are explanatory text, not proposals -
+    prefixing them would produce `הרבי שלמה יצחקי (Rashi)`."""
+    r = pae.resolve('הרא"ש', None)
+    assert r["category"] == "name" and r["root"] == 'רא"ש'
+    assert r["expansion"] == pae.ROOT_ENTRIES['רא"ש'][1]
+
+
+def test_prefix_decomposition_prefers_the_longest_surviving_root():
+    """Was "longest prefix first", which prefers eating the most of the word -
+    backwards, since a longer root is the more specific dictionary match.
+    Each case below flipped a category or an expansion on real Part-1 data."""
+    maharash = pae.resolve('ומוהר"ש', None)
+    assert maharash["root"] == 'מוהר"ש' and maharash["category"] == "name", (
+        "ומ- + וה- + ר\"ש re-analyses the word's own letters מוה as prefixes and lands on "
+        "the generic scholarly ר\"ש, when the name מוהר\"ש is a root"
+    )
+    assert pae.resolve('ומהר"י', None)["category"] == "name"
+    lamed = pae.resolve('ולמ"ד', None)
+    assert lamed["root"] == 'למ"ד' and lamed["expansion"] == "ולמאן דאמר", (
+        "ול- + מ\"ד swallows the ל that is part of the abbreviation itself"
+    )
+    assert pae.resolve('ובפ"ק', None)["root"] == 'בפ"ק'
+
+
+def test_no_prefix_may_stack_on_a_copy_of_itself():
+    """No Hebrew proclitic doubles. Without the guard the 2-level stripper
+    invents roots from the word's own letters: דדחי' -> ד-ד- + חי' ->
+    "דדחידושי"."""
+    assert all(p1 != p2 for p, _ in pae.prefix_decompositions("דדחי'")
+               for p1, p2 in [(p[:1], p[1:2])] if len(p) == 2)
+    assert pae.resolve("דדחי'", None)["category"] != "expand"
+    # The single-level ד- + a real root is untouched by the guard.
+    assert pae.resolve('דא"כ', None)["expansion"] == "דאם כן"
+
+
+def test_a_long_geresh_final_word_is_never_filed_as_a_citation_numeral():
+    """looks_like_bare_numeral() had no upper bound while its docstring
+    promised "a single Hebrew letter or short letter-run", and resolve() falls
+    back to it after truncated-word completion declines - so 187 forms / 249
+    occurrences of plain Hebrew prose were reported under a heading that says
+    they are numbers and need no attention (Lesson 15)."""
+    assert pae.resolve("ובקדושין'", None)["category"] == "unresolved"
+    assert pae.resolve("דתלמידי'", None)["category"] == "unresolved"
+    # The real numerals still classify as numerals - a fix that emptied the
+    # category would pass the two assertions above and prove nothing.
+    assert pae.resolve("ב'", None)["category"] == "numeral"
+    assert pae.resolve("מה'", None)["category"] == "expand"  # a root wins over the shape
+
+
+def test_the_two_readings_of_the_geresh_shape_partition_stem_length_exactly():
+    """Numeral and truncated-word are the same SHAPE with one cut between
+    them. If the two bounds ever drift apart, some stem length is either
+    claimed by both or dropped by both, silently."""
+    assert pae.MAX_NUMERAL_STEM_LETTERS + 1 == pae.MIN_TRUNCATION_STEM_LETTERS
+    for stem_len in range(1, 8):
+        word = "א" * stem_len + "'"
+        numeral = pae.looks_like_bare_numeral(word)
+        truncatable = (pae.ends_in_bare_geresh(word)
+                       and stem_len >= pae.MIN_TRUNCATION_STEM_LETTERS)
+        assert numeral != truncatable, f"stem length {stem_len} is claimed by both or neither"
+
+
+def test_geresh_shape_detection_accepts_the_real_hebrew_geresh_too():
+    """part1.json holds only the ASCII forms today, so this path is inert on
+    real data - which is the point: a later normalisation to U+05F3 would
+    switch off numeral detection AND truncated-word completion while
+    is_abbreviation() kept matching, i.e. no error, just a silently emptied
+    category (Lesson 1)."""
+    assert pae.ends_in_bare_geresh("נרא׳") is True
+    assert pae.looks_like_bare_numeral("ב׳") is True
+    # A gershayim-marked acronym is never the bare-geresh shape, either form.
+    assert pae.ends_in_bare_geresh('רש"י') is False
+    assert pae.ends_in_bare_geresh("רש״י") is False
+
+
+def test_a_frequency_completion_is_not_reported_as_a_dictionary_expansion():
+    """It appends exactly ONE letter, so a multi-letter truncation has no
+    correct candidate on the ballot and a merely-common word wins by default -
+    confirmed on real data (בפי' -> בפיו for בפירוש, בחי' -> בחיי for
+    בחידושי). It gets its own category so the next such form cannot be read
+    as a peer of an editorially-confirmed expansion."""
+    freq = {"נראה": 5000, "נראו": 10, "נראי": 3}
+    r = pae.resolve("נרא'", freq)
+    assert r["category"] == "truncated" and r["expansion"] == "נראה"
+    assert "truncated" in pae.CATEGORY_LABELS and "expand" != r["category"]
+    # The two confirmed misses now resolve through the dictionary instead.
+    assert pae.resolve("בפי'", freq)["expansion"] == "בפירוש"
+    assert pae.resolve("בחי'", freq)["expansion"] == "בחידושי"
+
+
+def test_truncated_completion_answers_only_on_a_single_clear_winner():
+    stem = "נרא"
+    assert pae.resolve_truncated_word(stem + "'", {"נראה": 5000, "נראו": 10}) == "נראה"
+    tie = {"נראה": 200, "נראו": 199}
+    assert pae.resolve_truncated_word(stem + "'", tie) is None, (
+        "two comparably-attested completions are an unanswered question, not a proposal"
+    )
+    below_floor = {"נראה": pae.MIN_COMPLETION_FREQUENCY}
+    assert pae.resolve_truncated_word(stem + "'", below_floor) is None
+    assert pae.resolve_truncated_word("דר'", {"דרך": 9999}) is None, (
+        "a 2-letter stem is a title/prefix shape (דר' = ד + ר'), not a truncated word"
+    )
+    assert pae.resolve_truncated_word("נרא'", None) is None  # no frequency cache built
+    assert pae.resolve_truncated_word('רש"י', {"רשיה": 9999}) is None  # not the geresh shape
+
+
+def test_every_category_resolve_can_produce_is_labelled_in_the_report():
+    """Same guard as FLAG_LABELS above, same reason: main() prints one line
+    per CATEGORY_ORDER entry, so an unlabelled category vanishes from the
+    summary while still sitting in --json. Enumerated from ROOT_ENTRIES plus
+    the dynamically-assigned ones rather than read off the source."""
+    produced = {"truncated", "numeral", "artifact", "unresolved", "expand"}
+    for category, _ in pae.ROOT_ENTRIES.values():
+        produced.add(category)
+    unlabelled = sorted(produced - set(pae.CATEGORY_LABELS))
+    assert not unlabelled, f"unlabelled categories: {unlabelled}"
+    assert set(pae.CATEGORY_ORDER) == set(pae.CATEGORY_LABELS)
+
+
+def test_root_entries_are_well_formed_for_the_report_that_renders_them():
+    for root, entry in pae.ROOT_ENTRIES.items():
+        assert isinstance(entry, tuple) and len(entry) == 2, f"{root!r}: {entry!r}"
+        category, expansion = entry
+        assert category in pae.CATEGORY_LABELS, f"{root!r} has unknown category {category!r}"
+        assert category != "truncated", (
+            f"{root!r}: 'truncated' means the frequency guess, never a dictionary entry"
+        )
+        if category == "scholarly":
+            assert isinstance(expansion, list) and len(expansion) > 1, (
+                f"{root!r}: main() renders scholarly entries with ', '.join(...) - a bare string "
+                "would be printed one character at a time, and a single option is not ambiguous"
+            )
+        assert expansion, f"{root!r} has an empty expansion"
+        for option in (expansion if isinstance(expansion, list) else [expansion]):
+            assert isinstance(option, str) and option.strip(), f"{root!r}: {option!r}"
+
+
+def test_the_two_abbreviation_scripts_still_share_one_definition():
+    """propose_abbreviation_expansions.py re-derives the token list rather
+    than reading extract_abbreviation_forms.py's output, so the two copies of
+    is_abbreviation() are a second-copy-of-the-truth (Lesson 13) - cheap to
+    pin, silent if it drifts."""
+    assert pae.QUOTE_CHARS == eaf.QUOTE_CHARS
+    for word in ['רש"י', "וכו'", "מלה", "נרא׳", "רש״י", "'", '"', ""]:
+        assert pae.is_abbreviation(word) == eaf.is_abbreviation(word), word
+
+
+def test_extract_reports_each_klal_once_per_form_however_often_it_repeats():
+    counts, klalim = eaf.extract([
+        {"klal_id": 1, "clean_text": 'רש"י אמר רש"י ועוד'},
+        {"klal_id": 2, "clean_text": 'רש"י בלבד'},
+        {"klal_id": 3, "clean_text": "אין כאן קיצור"},
+    ])
+    assert counts['רש"י'] == 3, "the count is per occurrence"
+    assert klalim['רש"י'] == [1, 2], "the klal list is per klal, deduplicated and in order"
+    assert set(counts) == {'רש"י'}
 
 
 # --- verify_corrections_vision: response parsing + cache-key coverage --------
