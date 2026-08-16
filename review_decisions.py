@@ -82,6 +82,38 @@ VALID_DECISION_TYPES = {"candidate_choice", "klal_flag", "apply_event", "punctua
                         "witness_choice", "manual_correction"}
 
 
+def _resolve(path):
+    """Resolve a `path=None` argument to the CURRENT value of DECISIONS_PATH.
+
+    FIXED 2026-08-16 (round-2 audit). Every function below used to declare
+    `path=DECISIONS_PATH` as a default argument. Python evaluates a default
+    argument ONCE, at import time, so the default was permanently bound to
+    whatever DECISIONS_PATH held then - and reassigning the module attribute
+    afterwards (`rd.DECISIONS_PATH = tmp`, or `monkeypatch.setattr(rd,
+    "DECISIONS_PATH", tmp)`) silently had NO effect on any call that didn't
+    pass `path=` explicitly. Writes kept landing in the real, git-tracked
+    review_decisions.jsonl.
+
+    That idiom is this project's standard way to redirect a script at a
+    throwaway file: tests/test_pipeline_logic.py uses monkeypatch.setattr on
+    PART1_PATH, RAW_DIR, FREQ_CACHE, FREQ_META, CACHE_DB and
+    SEFARIA_FREQ_CACHE, and it works on every one of them because those
+    modules read their constant at call time. review_decisions.py was the
+    single module where the same idiom failed - and it is the module guarding
+    the append-only human-decision log that CLAUDE.md singles out as the one
+    file no pipeline run may ever clobber.
+
+    It has already misfired twice, both times as a silent write to the
+    tracked log: once during the round-1 audit (a test called a write
+    endpoint without stubbing append_decision, appending a junk row - see
+    PROJECT-STATUS.md), and once during this round-2 audit while confirming
+    this very finding. Both were caught and reverted by a byte-comparison
+    afterwards, not by anything in the code refusing the write. Resolving at
+    call time makes the safety measure actually work.
+    """
+    return path if path is not None else DECISIONS_PATH
+
+
 def _now_iso():
     return datetime.now(timezone.utc).isoformat()
 
@@ -89,7 +121,8 @@ def _now_iso():
 def append_decision(decision_type, klal_id, word_index=None, chosen_source=None,
                      chosen_text=None, candidate_snapshot=None, needs_revisit=None,
                      note=None, reviewer="local", applied_decision_id=None,
-                     path=DECISIONS_PATH):
+                     path=None):
+    path = _resolve(path)  # see _resolve(): NOT a default arg, deliberately
     if decision_type not in VALID_DECISION_TYPES:
         raise ValueError(f"invalid decision_type: {decision_type!r}")
     record = {
@@ -111,7 +144,8 @@ def append_decision(decision_type, klal_id, word_index=None, chosen_source=None,
     return record
 
 
-def _read_all(path=DECISIONS_PATH):
+def _read_all(path=None):
+    path = _resolve(path)
     if not os.path.exists(path):
         return []
     records = []
@@ -123,7 +157,7 @@ def _read_all(path=DECISIONS_PATH):
     return records
 
 
-def history_for(klal_id, word_index=None, decision_type=None, path=DECISIONS_PATH):
+def history_for(klal_id, word_index=None, decision_type=None, path=None):
     """All decisions matching the key, oldest first. Pass word_index to
     narrow to a specific word; omit it (with decision_type="klal_flag") for
     a klal-level query - klal_flag/apply_event rows structurally always
@@ -143,13 +177,13 @@ def history_for(klal_id, word_index=None, decision_type=None, path=DECISIONS_PAT
     return out
 
 
-def current_for(klal_id, word_index=None, decision_type=None, path=DECISIONS_PATH):
+def current_for(klal_id, word_index=None, decision_type=None, path=None):
     """The latest decision matching the key, or None."""
     h = history_for(klal_id, word_index, decision_type, path)
     return h[-1] if h else None
 
 
-def all_current(decision_type, path=DECISIONS_PATH):
+def all_current(decision_type, path=None):
     """Latest decision per (klal_id, word_index) for a given decision_type -
     e.g. every currently-active candidate override, or every klal's current
     flag state. Returns {(klal_id, word_index): record}."""
@@ -163,13 +197,13 @@ def all_current(decision_type, path=DECISIONS_PATH):
     return current
 
 
-def flagged_klalim(path=DECISIONS_PATH):
+def flagged_klalim(path=None):
     """klal_ids whose current klal_flag decision has needs_revisit=True."""
     current = all_current("klal_flag", path)
     return sorted(kid for (kid, _), r in current.items() if r.get("needs_revisit"))
 
 
-def applied_decision_ids(path=DECISIONS_PATH):
+def applied_decision_ids(path=None):
     """ids of decisions already promoted into the corpus, i.e. every
     `applied_decision_id` referenced by an apply_event row.
 
@@ -190,7 +224,7 @@ def applied_decision_ids(path=DECISIONS_PATH):
     }
 
 
-def find_by_id(decision_id, path=DECISIONS_PATH):
+def find_by_id(decision_id, path=None):
     for r in _read_all(path):
         if r["id"] == decision_id:
             return r
