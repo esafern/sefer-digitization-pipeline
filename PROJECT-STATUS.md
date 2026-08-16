@@ -15,6 +15,162 @@ current handoff, re-written (not just appended to) as state changes.
 
 ## ►► SESSION HANDOFF — read this first, 2026-08-16
 
+### DONE 2026-08-16 — semantic-plausibility spot-check ROUND 2, a fresh 20% sample of Part 1 — 32 klalim flagged, 2 possible NEW dropped-lamed-ligature instances, 1 new mechanical check
+
+A second, independent full-sentence reading pass over Part 1, deliberately
+sampling klalim the 2026-08-14 `ai-semantic-spotcheck` pass did NOT flag. **No
+corpus file was touched** — `part1.json`/`part2.json`/`part3.json`/`lexicon.txt`
+are sha256-identical to `HEAD` before and after; `review_decisions.jsonl` grew
+442 → 474 lines with the first 442 byte-identical to `HEAD`; 108/108 pytest
+before and after. The work is 32 appended `klal_flag` rows, nothing else.
+
+**Sample definition — recorded precisely this time, closing the exact gap this
+round had to work around.** The 2026-08-14 pass recorded only "59 of 222
+klalim, seed 20260814" in prose, with no committed script or seed-reproducible
+artifact, so only the 33 klalim that produced a flag were recoverable (via
+`reviewer: "ai-semantic-spotcheck"`); the other ~26 are unrecoverable and may
+have re-entered this round's pool by chance. That is an acknowledged overlap
+risk, not a clean complement.
+- **Pool**: all 222 Part-1 klal_ids minus the 33 recoverable already-sampled
+  ones (1, 8, 29, 37, 39, 41, 44, 48, 54, 60, 61, 64, 66, 68, 92, 94, 97, 106,
+  115, 116, 136, 149, 154, 159, 169, 174, 197, 199, 200, 209, 214, 216, 217)
+  = **189 klalim / 39,452 words**.
+- **Method**: `random.seed(20260816)`, `order = random.sample(pool, len(pool))`
+  (a full permutation of the sorted pool), then take klalim from the front of
+  that permutation while the cumulative word count is < 10,500.
+- **Sample**: **55 klalim / 10,510 words / 19.98% of Part 1's 52,609** —
+  4, 7, 10, 11, 12, 14, 18, 20, 25, 32, 38, 43, 45, 49, 55, 62, 67, 70, 71, 76,
+  78, 86, 87, 88, 89, 96, 98, 101, 107, 108, 110, 111, 114, 118, 123, 126, 128,
+  140, 141, 142, 146, 156, 160, 161, 166, 173, 176, 184, 189, 195, 202, 204,
+  206, 212, 222. Every one was read in full, not skimmed.
+- A THIRD pass can exclude these 55 exactly by re-running the same two lines.
+
+**Result: 32 of the 55 klalim flagged, 85 word-level candidates**
+(`reviewer: "ai-semantic-spotcheck-round2"`, `needs_revisit: true`, one row per
+klal, each note naming every word with its `word_index`, quoted context, and the
+specific reason). Every one of the 85 `(klal_id, word_index, token)` triples was
+validated against `part1.json` before any row was written. **TEXTUAL EVIDENCE
+ONLY — nothing here was checked against the scan**, and klal 88's already-scan-
+verified `רתם`/`התם` (print-faithful broken type) is the standing proof that
+some of these will be faithful to the ink. Flagged klalim: 4, 7, 10, 11, 12, 14,
+18, 25, 38, 45, 49, 62, 67, 70, 71, 76, 88, 96, 98, 101, 107, 110, 126, 128,
+140, 146, 161, 176, 189, 204, 206, 212. **23 klalim were read and deliberately
+NOT flagged** (20, 32, 43, 55, 78, 86, 87, 89, 108, 111, 114, 118, 123, 141,
+142, 156, 160, 166, 173, 184, 195, 202, 222) — see the calibration note below.
+
+- **TWO POSSIBLE NEW INSTANCES OF THE ALEF-LAMED LIGATURE (U+FB4F) DROPPED-LAMED
+  EXTRACTION BUG, in a pattern this file records as complete with "0 known
+  remaining candidates."** Both are a missing `ל` immediately following an `א`,
+  the confirmed mechanism's exact fingerprint:
+  - **klal 206 w2 `או` → `אלו`**, in the klal's head-line AND in its `title`
+    FIELD (`הרי או באזהרה`). The klal's own body writes `הרי אלו באזהרה`
+    correctly **six times**. `detect_ligature_corruption.py` would place `או` in
+    its ambiguous-with-a-common-standalone-word bucket rather than report it —
+    this is precisely the residue only context reading can surface.
+  - **klal 140 w97 `והשוא` → `והשואל`** (`כשחשב המתיר והשואל שמותר להתיר
+    לכתחלה`). Note that script builds its frequency table from the part file
+    being scanned, so a base form rare in Part 1 can be missed.
+  - **NOT YET DONE**: scan-verify both. If confirmed, "0 known remaining
+    candidates" is wrong and the ambiguous bucket needs a second, context-aware
+    pass rather than a frequency test (Lesson 7: fixing one root cause does not
+    explain every symptom that looked the same).
+- **NEW MECHANICAL CHECK, cheap, not yet scripted (Lessons 8/18): the
+  next-klal gematria marker printed after a klal's closing colon.** 29 Part-1
+  klalim carry one; **7 of the 29 disagree with `gematria(klal_id + 1)`** —
+  klal 15 `פז`/`טז`, 21 `כך`/`כב`, 36 `לו`/`לז`, 46 `מו`/`מז`, **49 `ג`/`נ`**,
+  **62 `סוג`/`סג`**, 64 `אין`/`סה`. (21 and 64 are probably ordinary sentence-
+  final words after a colon, not markers; 15/36/46/49/62 each show a single-
+  letter or stray-letter error of exactly the classes already recorded.) Only
+  49 and 62 fall inside this round's sample and are flagged; **the other five
+  are reported here and NOT flagged — nobody has read those klalim in this
+  pass.** This bears on Success Criterion 2 (chunking), and it costs
+  milliseconds to run corpus-wide. Separately, the LEADING marker disagrees
+  in 3 klalim (150 `קן`, 180 `קף`, 190 `קץ` — final forms where the plain form
+  is expected); that reads as a print convention, not corruption, and is
+  recorded as informational only.
+- **TITLE-FIELD data issues, distinct from body text** (they are what Sefaria
+  would display and what a citation resolves to — Success Criterion 3):
+  **klal 101**'s `title` is `מתנין לעקור דבר מן התורה בשב ואל תעשה` but the
+  klal's own opening line reads `ב"ד מתנין לעקור...` — the title has lost its
+  subject. **klal 88**'s `title` carries `וכאבל` (for `ובאבל`) and **klal
+  206**'s carries `או` (for `אלו`), the same corruptions as their body text.
+  No prior check has ever compared a klal's `title` field against its own
+  opening line; that is another cheap sweep nobody has run.
+- **The dominant class is the single-letter OCR-confusion class named by today's
+  lexicon-gap triage, but the majority of these instances are INVISIBLE to that
+  triage because the corrupt form is itself a real Hebrew word in
+  `lexicon.txt`** — the structural failure that entry already flagged as its
+  "SECOND FINDING, and the more important one." Examples from this round, all
+  with internal corroboration owing nothing to a dictionary: klal 107 w26 `כל`
+  → `בל` (the klal's own head-term is `בל תוסיף`); klal 12 w212 `עור` → `עוד`;
+  klal 128 w820 `המפקיר` → `המפקיד` (the same perek is written correctly twice
+  in the same klal); klal 140 w159 `הפרת` → `הפת` (written correctly 23 words
+  earlier); klal 176 w480 `מייתכא` → `מייתבא`; klal 88 w510 `אכל` → `אבל` and
+  w327 `חזה` → `וזה`; klal 38 w27 `מרבץ` → `מרבנן`; klal 110 w76 `לטרוי` →
+  `למהוי` (BK 30a, quoted verbatim otherwise); klal 62 w71 `דודאה` → `הודאה`
+  (BB 40a's three-item list, second item corrupt). **This round did not run a
+  systematic detector for the class** — it read 55 klalim. The systematic sweep
+  that entry records as NOT DONE (an independent-attestation ratio test over
+  every Part-1 token, not a lexicon-membership test) is still not done, and this
+  round is independent evidence that its true corpus-wide count is materially
+  higher than 109.
+- **A recurring `ו`→final-`ן` shape, not previously named**: klal 4 w403 and
+  klal 25 w714 `איהן` → `איהו`, klal 71 w5 `היינן` → `היינו`, klal 126 w54
+  `רבן` → `רבו`, klal 62 w70 `כתובן` → `כתובו`, klal 25 w364 `דברין` → `דבריו`.
+  Six instances in a 20% sample, all in ordinary words, all producing a
+  lexicon-resident token.
+- **Abbreviation-internal letter confusions are systematically under-detected**
+  because a two-or-three-letter gershayim form is rarely in `lexicon.txt` at
+  all and rarely has a "one edit away" neighbour: `ב"ט`→`ב"מ` (klal 25 w136,
+  klal 98 w60), `כ"ט`/`כ"ס`→`כ"מ` (klal 25 w727, klal 128 w126, klal 204 w15),
+  `ח"ט`→`ח"מ` (klal 96 w23), `מר"ת`→`מד"ת` (klal 67 w43), `אע"ס`→`אע"פ` (klal
+  161 w83), `ר"ס`→`ר"פ` (klal 12 w74), `ש"ס`→`ש"מ` (klal 128 w353),
+  `בי"ר`→`בי"ד` (klal 189 w277), `ע"ר`→`ע"ד` (klal 98 w23), `הרל"ם`→`הרמב"ם`
+  (klal 12 w192), `למ"ר`→`למ"ד` (klal 140 w91).
+- **Two further artifact classes, counted corpus-wide (informational, no flags
+  outside the sample):** 45 lone-geresh tokens (a bare `'` standing as its own
+  word, e.g. `בפ' '`) across 29 Part-1 klalim; 43 punctuation-glued tokens
+  (`.לא`, `:לוקי`, `,נתיבות`) across 34 klalim, concentrated almost entirely in
+  klal 168-222. Also a small gershayim-as-double-yod class (`דייה` for `ד"ה`
+  ×3, `לייה`/`לייג`/`לייב`, `יייז`) and a misplaced-gershayim class (klal 45
+  w21 `נלפ"קד` against `נלפק"ד` ×2 / `לפק"ד` ×8 elsewhere).
+- **klal 189 may be TRUNCATED, not merely corrupt**: it ends
+  `...וכל :לוקי דינים אלו בחדושי הריטב"א` with a colon glued to a broken word,
+  no closing `:` and no next-klal marker, unlike its neighbours. Flagged as a
+  possible boundary problem (Success Criterion 2), not only a word-level one.
+
+**Calibration** — 23 of the 55 klalim read produced no flag, and several
+initially-odd readings were deliberately passed rather than flagged: klal 89
+w18 `אכל` is genuine Aramaic `א + כל` ("on each of them"), not the `אבל`
+corruption it superficially resembles; klal 88 w425 `רתם` is the already-scan-
+verified print-faithful instance and is excluded; klal 43 w99 `הרי`, klal 20
+`מדסיפא`, klal 111's `לר"ס`, klal 89 `בעינים`, klal 146 `ערך ספק` and klal 160
+`בשעת הרוח` all read oddly but each has a plausible non-corrupt reading and
+none was flagged; terse elliptical argumentation and dense folio/acronym runs
+were treated as the text's normal register throughout, never as evidence of
+corruption. klal 189 w406 `דרתם` WAS flagged but with an explicit caveat that
+the prior is print-faithful, on klal 88's precedent.
+
+**Overlap with today's other work, called out per klal** (each note carries its
+own OVERLAP line): klal 4, 7, 12, 14, 25, 43, 88, 128 were already flagged by
+`ai-lexicon-full-review` — every candidate reported here is at a DIFFERENT word
+index than that pass's; klal 43 produced nothing new and is not re-flagged.
+klal 4 w36 `טרור` and klal 88 w1061 `ישרץ` are already in this file's 13-item
+lexicon-invisible list and are not re-reported. klal 176 carries one of the 7
+baselined foreign characters (w694 `;`) — a different, already-reported item.
+Note the dashboard shows the LAST row per klal as current, so for those 8
+klalim the `ai-lexicon-full-review` note is no longer the displayed one; nothing
+is lost (the log is append-only and `history_for()` returns all rows), but a
+reviewer working from the dashboard alone will not see both.
+
+**NOT YET DONE, in priority order**: (1) scan-verify the two possible ligature
+instances (klal 206 w2, klal 140 w97) — they bear on whether a pattern this file
+calls closed actually is; (2) scan-verify the 85 candidates through the normal
+review pipeline; (3) script the next-klal-marker check and the title-vs-opening-
+line check and decide whether either belongs in `rebuild_all.sh`; (4) the
+systematic independent-attestation sweep for the lexicon-invisible confusion
+class, still not done.
+
 ### DONE 2026-08-16 — the 3 remaining found-not-fixed items from today's two revalidation rounds, closed (`4171531`)
 
 Per direct user request ("complete 2" against the open-items list). All
