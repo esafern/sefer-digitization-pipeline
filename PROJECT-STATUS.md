@@ -15,7 +15,19 @@ current handoff, re-written (not just appended to) as state changes.
 
 ## ►► SESSION HANDOFF — read this first, 2026-08-16
 
-### AWAITING MERGE 2026-08-16 — full revalidation/refactor audit of the live pipeline (branch `full-revalidation-2026-08-16`, worktree `yad-malachi-pipeline-revalidation-worktree`, 6 commits `f8183e1`..`e9968e6`)
+### DONE 2026-08-16 — full revalidation/refactor audit of the live pipeline, merged (7 commits `f8183e1`..`800564a`, merge commit on `master`)
+
+Independently re-verified before merge, not just the agent's report trusted:
+sha256 of all 9 corpus/derived/decision files confirmed byte-identical
+between the worktree and pre-merge master; 102/102 pytest re-run directly
+(not just read from the report); the diffs in `apply_reviewer_decisions.py`,
+`review_server.py`, and `propose_abbreviation_expansions.py` spot-checked
+against the specific claims below. Merged to master; `review_server.py`
+changed, so the live dashboard was restarted post-merge (Python constants
+there don't hot-reload) and reconfirmed serving on port 8420. Worktree
+(`../yad-malachi-pipeline-revalidation-worktree`) and its branch left in
+place, not yet deleted - safe to remove, kept only in case a re-check of the
+merge is wanted.
 
 All findings are **bugs (code)**, not data issues. No `part*.json` and no
 `review_decisions.jsonl` content was changed (all four byte-identical to
