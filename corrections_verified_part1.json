@@ -174,6 +174,42 @@
     "vision_reasoning": "The crop clearly shows the word 'אדם' (with a Dalet and final Mem) in the middle line, forming part of the standard Talmudic phrase 'אדם חשוב'. Option A misreads the Dalet as a Resh."
   },
   {
+    "klal_id": 7,
+    "page": 17,
+    "opcode": "replace",
+    "word_index_in_final_text": 262,
+    "original_word": "דאס",
+    "corrected_word": "דאם",
+    "bbox": {
+      "x1": 0.19178920984268188,
+      "y1": 0.5867701172828674,
+      "x2": 0.2242647111415863,
+      "y2": 0.6026949882507324
+    },
+    "vision_selected": "B",
+    "vision_transcription": "דאם",
+    "vision_confidence": 0.98,
+    "vision_reasoning": "The middle word in the crop clearly shows the Hebrew letters dalet (ד), aleph (א), and final mem (ם) with its distinctive square bottom-left corner, spelling 'דאם' ('that if'). This aligns perfectly with the Rabbinic sentence context 'דאם כדבריו...'. Option A ('דאס') misidentifies the final mem as a samekh."
+  },
+  {
+    "klal_id": 7,
+    "page": 17,
+    "opcode": "replace",
+    "word_index_in_final_text": 464,
+    "original_word": "דאס",
+    "corrected_word": "דאם",
+    "bbox": {
+      "x1": 0.21997548639774323,
+      "y1": 0.7835851311683655,
+      "x2": 0.25245097279548645,
+      "y2": 0.7999183535575867
+    },
+    "vision_selected": "B",
+    "vision_transcription": "דאם",
+    "vision_confidence": 0.95,
+    "vision_reasoning": "The image clearly shows the word 'דאם' (Dalet, Aleph, Final Mem). The third letter has a square shape with a straight horizontal base and distinct sharp bottom-left corner, characteristic of a final Mem (ם) rather than a rounded Samekh (ס). Furthermore, 'דאם איתא' is a standard classical Rabbinic Talmudic conditional phrase ('for if it is [so]')."
+  },
+  {
     "klal_id": 10,
     "page": 18,
     "opcode": "insert",
@@ -204,6 +240,24 @@
     "vision_reasoning": "The surrounding Rabbinic context ('אפילו הכי כתבו התוספות') requires the third-person plural verb 'כתבו' ('wrote'). Option A ('כתכו') is an OCR misreading resulting from the close visual similarity between the Hebrew letters bet (ב) and kaf (כ) in this typeface."
   },
   {
+    "klal_id": 11,
+    "page": 18,
+    "opcode": "replace",
+    "word_index_in_final_text": 84,
+    "original_word": "וחרב",
+    "corrected_word": "והרב",
+    "bbox": {
+      "x1": 0.34141790866851807,
+      "y1": 0.6956171989440918,
+      "x2": 0.3781094551086426,
+      "y2": 0.712505042552948
+    },
+    "vision_selected": "B",
+    "vision_transcription": "והרב",
+    "vision_confidence": 0.98,
+    "vision_reasoning": "The second letter clearly shows a distinct gap between the top horizontal stroke and the upper left vertical leg, identifying it as a 'ה' rather than a 'ח'. Furthermore, the context 'והרב בית דוד' ('And the Rav [author of] Beit David') confirms the reading of 'והרב'."
+  },
+  {
     "klal_id": 12,
     "page": 18,
     "opcode": "replace",
@@ -219,7 +273,7 @@
     "vision_selected": "B",
     "vision_transcription": "הפוסקים",
     "vision_confidence": 0.99,
-    "vision_reasoning": "The crop clearly displays the word 'הפוסקים'. The final letter is a rectangular final Mem (ם) with flat edges, not a rounded Samekh (ס). Option A is an OCR error. Furthermore, 'הפוסקים' (the Poskim / Halakhic authorities) is standard Rabbinic Hebrew corresponding to the surrounding context 'בדברי הפוסקים'."
+    "vision_reasoning": "The crop clearly shows the word 'הפוסקים' ending in a final mem (ם), matching standard Rabbinic Hebrew grammar and spelling ('בדברי הפוסקים'). Option A incorrectly reads the final letter as a samekh ('ס')."
   },
   {
     "klal_id": 13,
@@ -238,6 +292,24 @@
     "vision_transcription": "יומיה",
     "vision_confidence": 0.98,
     "vision_reasoning": "The contextual phrase from the Talmudic context is 'בר יומיה' (a student of that same day). Paleographically, the final letter is a 'ה' (heh) whose left stroke is characteristic of the font, misread by OCR (Option A) as a 'ח' (chet)."
+  },
+  {
+    "klal_id": 13,
+    "page": 19,
+    "opcode": "replace",
+    "word_index_in_final_text": 261,
+    "original_word": "חך",
+    "corrected_word": "הך",
+    "bbox": {
+      "x1": 0.3761467933654785,
+      "y1": 0.44008180499076843,
+      "x2": 0.39571866393089294,
+      "y2": 0.45603272318840027
+    },
+    "vision_selected": "B",
+    "vision_transcription": "הך",
+    "vision_confidence": 0.98,
+    "vision_reasoning": "Paleographically, the first letter exhibits a clear gap between the left vertical stroke and the top horizontal bar, identifying it as a Heh (ה) rather than a Chet (ח). Contextually, the phrase 'הך לישנא' ('this language/version') is a standard Talmudic/Rabbinic expression."
   },
   {
     "klal_id": 13,
@@ -526,6 +598,24 @@
     "vision_confidence": null,
     "vision_reasoning": "no bbox (insertion) - not vision-cropped",
     "vision_selected": null
+  },
+  {
+    "klal_id": 25,
+    "page": 22,
+    "opcode": "replace",
+    "word_index_in_final_text": 136,
+    "original_word": "דב\"ט",
+    "corrected_word": "דב\"מ",
+    "bbox": {
+      "x1": 0.78115314245224,
+      "y1": 0.44009682536125183,
+      "x2": 0.820830762386322,
+      "y2": 0.45784589648246765
+    },
+    "vision_selected": "B",
+    "vision_transcription": "א דב\"מ וב",
+    "vision_confidence": 0.99,
+    "vision_reasoning": "The visible text on the middle line shows 'א דב\"מ וב'. The acronym דב\"מ stands for דבבא מציעא (de-Bava Metzia), referencing the chapter 'איזהו נשך' mentioned earlier in the surrounding context. Paleographically, the letter following the gershayim is clearly a Mem ('מ'), confirming Option B over Option A."
   },
   {
     "klal_id": 26,
@@ -843,6 +933,24 @@
     "klal_id": 48,
     "page": 30,
     "opcode": "replace",
+    "word_index_in_final_text": 40,
+    "original_word": "טרור",
+    "corrected_word": "טהור",
+    "bbox": {
+      "x1": 0.46571072936058044,
+      "y1": 0.3615569770336151,
+      "x2": 0.503740668296814,
+      "y2": 0.37479937076568604
+    },
+    "vision_selected": "B",
+    "vision_transcription": "טהור",
+    "vision_confidence": 0.98,
+    "vision_reasoning": "The crop clearly shows the word 'טהור' (Tet, Heh, Vav, Resh). The second letter features a distinct left leg characteristic of a Heh (ה), rejecting Option A ('טרור'). This matches the context of the Tosafot citation 'דג טהור'."
+  },
+  {
+    "klal_id": 48,
+    "page": 30,
+    "opcode": "replace",
     "word_index_in_final_text": 87,
     "original_word": "הלבה",
     "corrected_word": "הלכה",
@@ -856,18 +964,6 @@
     "vision_transcription": "הלכה",
     "vision_confidence": 0.98,
     "vision_reasoning": "The raster image clearly shows the phrase 'זו הלכה' (with 'הלכה' visible in the center of the third line). The OCR misread the letter kaf ('כ') as a vet/bet ('ב'), resulting in 'הלבה'. Contextually, 'זו הלכה העלה' is a standard rabbinic phrase meaning 'this is the halakha [conclusion] he yielded'."
-  },
-  {
-    "klal_id": 50,
-    "page": 30,
-    "opcode": "insert",
-    "word_index_in_final_text": 0,
-    "original_word": null,
-    "corrected_word": "נ",
-    "bbox": null,
-    "vision_confidence": null,
-    "vision_reasoning": "no bbox (insertion) - not vision-cropped",
-    "vision_selected": null
   },
   {
     "klal_id": 50,
@@ -1014,16 +1110,22 @@
     "vision_selected": null
   },
   {
-    "klal_id": 63,
+    "klal_id": 62,
     "page": 33,
-    "opcode": "insert",
-    "word_index_in_final_text": 0,
-    "original_word": null,
-    "corrected_word": "סג",
-    "bbox": null,
-    "vision_confidence": null,
-    "vision_reasoning": "no bbox (insertion) - not vision-cropped",
-    "vision_selected": null
+    "opcode": "replace",
+    "word_index_in_final_text": 70,
+    "original_word": "כתובן דודאה",
+    "corrected_word": "כתובו הודאה",
+    "bbox": {
+      "x1": 0.7156076431274414,
+      "y1": 0.5113544464111328,
+      "x2": 0.8099938035011292,
+      "y2": 0.5287915468215942
+    },
+    "vision_selected": "B",
+    "vision_transcription": "כתובו הודאה",
+    "vision_confidence": 0.98,
+    "vision_reasoning": "The center line of the image clearly reads 'כתובו הודאה'. The second word begins with a clear 'ה' (not 'ד') and ends with a 'ה', perfectly matching Option B and the cited Talmudic passage in Bava Batra 40a ('הודאה בפני שנים...')."
   },
   {
     "klal_id": 64,
@@ -1170,10 +1272,28 @@
       "x2": 0.7315102815628052,
       "y2": 0.3939637839794159
     },
-    "vision_selected": "A",
-    "vision_transcription": "בהכמה",
-    "vision_confidence": 0.95,
-    "vision_reasoning": "Visual analysis of the center word in the third line reveals the text 'בהכמה' (a printer's typographical error for the expected context word 'בחכמה'). The second letter distinctly shows a gap between the top horizontal roof and the left vertical leg, characteristic of a 'ה' (hei) rather than a 'ח' (chet)."
+    "vision_selected": "B",
+    "vision_transcription": "בחכמה",
+    "vision_confidence": 0.98,
+    "vision_reasoning": "The sentence context refers to the well-known Talmudic idiom 'בחכמה ובמנין' (in wisdom and in number). Paleographically, the second letter of the word has a fully connected top bar without a left-side gap, characteristic of a 'ח' (chet) rather than 'ה' (heh). DocAI incorrectly misread the 'ח' as a 'ה'."
+  },
+  {
+    "klal_id": 67,
+    "page": 34,
+    "opcode": "replace",
+    "word_index_in_final_text": 43,
+    "original_word": "מר\"ת",
+    "corrected_word": "מד\"ת",
+    "bbox": {
+      "x1": 0.36917340755462646,
+      "y1": 0.3762575387954712,
+      "x2": 0.40957117080688477,
+      "y2": 0.3939637839794159
+    },
+    "vision_selected": "B",
+    "vision_transcription": "מד\"ת",
+    "vision_confidence": 0.98,
+    "vision_reasoning": "The second letter of the word clearly features the sharp right-angled corner characteristic of a Dalet (ד) rather than a rounded Resh (ר). Furthermore, in the surrounding textual context ('שלא יהא גזרות או חמורין מד\"ת עצמה'), the acronym מד\"ת stands for 'מדברי תורה' (from the words of the Torah), which is standard Rabbinic terminology."
   },
   {
     "klal_id": 67,
@@ -1188,10 +1308,10 @@
       "x2": 0.8999378681182861,
       "y2": 0.4253521263599396
     },
-    "vision_selected": "B",
-    "vision_transcription": "שמואל",
+    "vision_selected": "A",
+    "vision_transcription": "שמוא",
     "vision_confidence": 0.95,
-    "vision_reasoning": "The sentence context explicitly references the well-known Rabbinic work 'שו\"ת מעיל שמואל' (Responsa Me'il Shmuel). The cropped text shows 'שמואל' followed by the conjunction 'ו' (leading into 'ובתומת'). Option B accurately represents the full text in context, whereas Option A is an incomplete raw OCR truncation."
+    "vision_reasoning": "The visible text on the third line clearly shows the letters ש, מ, ו, and א (followed by ו and a partial letter). The letter 'ל' from 'שמואל' is omitted/truncated in the image crop, making Option A ('שמוא') the accurate paleographic reading of the raster crop."
   },
   {
     "klal_id": 67,
@@ -1396,6 +1516,24 @@
     "vision_transcription": "אלהים",
     "vision_confidence": 0.98,
     "vision_reasoning": "The image clearly shows the word 'אלהים' followed by 'ה''. The Lamed (ל) is distinctly present with its characteristic tall ascender extending into the line above. Option A ('אהים') is an OCR error that missed the Lamed."
+  },
+  {
+    "klal_id": 70,
+    "page": 35,
+    "opcode": "replace",
+    "word_index_in_final_text": 28,
+    "original_word": "ליב",
+    "corrected_word": "ל\"ב",
+    "bbox": {
+      "x1": 0.21340712904930115,
+      "y1": 0.15134255588054657,
+      "x2": 0.2404673993587494,
+      "y2": 0.16883645951747894
+    },
+    "vision_selected": "B",
+    "vision_transcription": "ל\"ב",
+    "vision_confidence": 0.98,
+    "vision_reasoning": "The crop clearly displays the Hebrew numeral/acronym 'ל\"ב' (representing 32, as in 'כלל ל\"ב' / Rule 32 from the context) with gershayim (double apostrophe mark) between the lamed and bet. OCR incorrectly read the gershayim punctuation mark as the letter yod ('י')."
   },
   {
     "klal_id": 71,
@@ -2400,6 +2538,78 @@
     "vision_reasoning": "The raster image clearly shows the second line as 'נראה' and the third line starting with '\"ל' followed by a 'ז' (zayin) and an 'א' (aleph), spelling 'זא' (an abbreviation for זאת אומרת). Neither Candidate A ('אא') nor Candidate B ('אלא') correctly reflects the visible characters, as the letter between 'ל' and 'א' is a clear zayin rather than an aleph or lamed. Thus, neither candidate maps deterministically to the image array."
   },
   {
+    "klal_id": 96,
+    "page": 43,
+    "opcode": "replace",
+    "word_index_in_final_text": 23,
+    "original_word": "בח\"ט",
+    "corrected_word": "בח\"מ",
+    "bbox": {
+      "x1": 0.5599505305290222,
+      "y1": 0.6349655985832214,
+      "x2": 0.6001235842704773,
+      "y2": 0.6523674726486206
+    },
+    "vision_selected": "B",
+    "vision_transcription": "בח\"מ",
+    "vision_confidence": 0.98,
+    "vision_reasoning": "The text clearly shows the abbreviation 'בח\"מ' (בחלק חושן משפט), referencing the Tur/Shulchan Aruch section cited by the Bach (הב\"ח בח\"מ רסי' ר\"ב). Paleographically, the character after the gershayim has the closed base and structure of a mem ('מ'), not a tet ('ט')."
+  },
+  {
+    "klal_id": 97,
+    "page": 43,
+    "opcode": "replace",
+    "word_index_in_final_text": 105,
+    "original_word": "טרורים",
+    "corrected_word": "טהורים",
+    "bbox": {
+      "x1": 0.7243510484695435,
+      "y1": 0.8316470980644226,
+      "x2": 0.7775030732154846,
+      "y2": 0.8486442565917969
+    },
+    "vision_selected": "B",
+    "vision_transcription": "טהורים",
+    "vision_confidence": 0.99,
+    "vision_reasoning": "The second letter in the word clearly features a top bar with a distinct, disconnected left leg, characteristic of a 'ה' rather than a 'ר'. Thus, the word reads 'טהורים' ('clean/pure'), matching both the paleographic evidence and the Talmudic citation context ('כל משקה המת טהורים'). Option A is a standard OCR misidentification of ה as ר."
+  },
+  {
+    "klal_id": 98,
+    "page": 44,
+    "opcode": "replace",
+    "word_index_in_final_text": 23,
+    "original_word": "ע\"ר",
+    "corrected_word": "ע\"ד",
+    "bbox": {
+      "x1": 0.22401991486549377,
+      "y1": 0.31538769602775574,
+      "x2": 0.25264468789100647,
+      "y2": 0.33186018466949463
+    },
+    "vision_selected": "B",
+    "vision_transcription": "ע\"ד",
+    "vision_confidence": 0.95,
+    "vision_reasoning": "The visible text in the middle line shows 'ע\"ד'. Paleographically, the letter following the gershayim (\") has a distinct right-angled corner with a slight top-right serif/overhang, characteristic of a Dalet ('ד') rather than a rounded Resh ('ר'). Contextually, 'ע\"ד' (amud 4 / column d) is a standard citation format in multi-column Rabbinic printings."
+  },
+  {
+    "klal_id": 98,
+    "page": 44,
+    "opcode": "replace",
+    "word_index_in_final_text": 60,
+    "original_word": "ב\"ט",
+    "corrected_word": "ב\"מ",
+    "bbox": {
+      "x1": 0.1350342184305191,
+      "y1": 0.34592205286026,
+      "x2": 0.168637216091156,
+      "y2": 0.3627963066101074
+    },
+    "vision_selected": "B",
+    "vision_transcription": "ב\"מ",
+    "vision_confidence": 0.99,
+    "vision_reasoning": "The visible characters in the middle line are 'ב\"מ', standing for the standard Talmudic abbreviation for Tractate Bava Metzia (בבא מציעא). This is fully corroborated by the surrounding context ('על ב\"מ דף ק\"ס ע\"ג', referring to the Shitah Mekubetzet on Bava Metzia). Option A ('ב\"ט') is an OCR misinterpretation of the Hebrew Mem."
+  },
+  {
     "klal_id": 100,
     "page": 44,
     "opcode": "delete",
@@ -2814,6 +3024,24 @@
     "vision_reasoning": "The visible text corresponds to the biblical quote 'בן חדש' ('a month old') referenced in the Rabbinic context ('מבן חדש ומעלה'). Paleographically, the middle letter clearly exhibits the right-angle corner of a dalet ('ד') rather than the rounded corner of a resh ('ר'), making 'חדש' (Option B) the correct reading and 'חרש' an OCR error."
   },
   {
+    "klal_id": 126,
+    "page": 47,
+    "opcode": "replace",
+    "word_index_in_final_text": 54,
+    "original_word": "רבן",
+    "corrected_word": "רבו",
+    "bbox": {
+      "x1": 0.4898085296154022,
+      "y1": 0.3499392569065094,
+      "x2": 0.5182211399078369,
+      "y2": 0.36776024103164673
+    },
+    "vision_selected": "B",
+    "vision_transcription": "רבו",
+    "vision_confidence": 0.98,
+    "vision_reasoning": "The image clearly shows the word 'רבו' (Resh-Bet-Vav). Paleographically, the third character does not descend below the baseline, unlike the final nuns visible in 'ידעינן' above and 'סימן' below, confirming it is a Vav ('רבו') rather than a Final Nun ('רבן'). Contextually, 'בשם רבו הוא הרדב\"ז' ('in the name of his master, the Radbaz') is the historically accurate reading referring to R. Bezalel Ashkenazi's teacher."
+  },
+  {
     "klal_id": 127,
     "page": 47,
     "opcode": "replace",
@@ -2925,6 +3153,24 @@
     "klal_id": 128,
     "page": 47,
     "opcode": "replace",
+    "word_index_in_final_text": 126,
+    "original_word": "בכ\"ט",
+    "corrected_word": "בכ\"מ",
+    "bbox": {
+      "x1": 0.16491661965847015,
+      "y1": 0.6075333952903748,
+      "x2": 0.20506484806537628,
+      "y2": 0.6237342953681946
+    },
+    "vision_selected": "B",
+    "vision_transcription": "בכ\"מ",
+    "vision_confidence": 0.98,
+    "vision_reasoning": "The text clearly shows 'בכ\"מ', which is the standard Rabbinic abbreviation for 'בכסף משנה', directly following 'מרן' in the sentence context ('וכתב שם מרן בכ\"מ'). Paleographically, the final letter after the gershayim is a mem (מ), not a tet (ט)."
+  },
+  {
+    "klal_id": 128,
+    "page": 47,
+    "opcode": "replace",
     "word_index_in_final_text": 221,
     "original_word": "שכתכו",
     "corrected_word": "שכתבו",
@@ -2938,6 +3184,24 @@
     "vision_transcription": "שכתבו",
     "vision_confidence": 0.98,
     "vision_reasoning": "The visible line clearly reads 'שכתבו' (meaning 'that they wrote'). The fourth letter of the word has a horizontal base extending rightward at the bottom corner, characteristic of a 'bet' (ב) rather than a 'kaf' (כ). This also perfectly aligns with the surrounding Rabbinic context ('שכתבו בפשיטות')."
+  },
+  {
+    "klal_id": 128,
+    "page": 47,
+    "opcode": "replace",
+    "word_index_in_final_text": 353,
+    "original_word": "ש\"ס",
+    "corrected_word": "ש\"מ",
+    "bbox": {
+      "x1": 0.7936998009681702,
+      "y1": 0.819360077381134,
+      "x2": 0.8282890915870667,
+      "y2": 0.8351559042930603
+    },
+    "vision_selected": "B",
+    "vision_transcription": "ש\"מ",
+    "vision_confidence": 0.98,
+    "vision_reasoning": "The visible text in the prominent center line shows the abbreviation ש\"מ (שמע מינה) following the Talmudic formula ('אמר ר\"פ ש\"מ...'). Paleographically, the second letter has the distinct open-corner base of a mem (מ), contrasting with the rounded closed oval samekh (ס) visible in הש\"ס on the line above."
   },
   {
     "klal_id": 128,
@@ -4894,6 +5158,24 @@
     "vision_transcription": "ע\"ד וכ\"ד",
     "vision_confidence": 0.98,
     "vision_reasoning": "The visible printed letters show clear square right-angle corners with top-right back ear protrusions characteristic of Dalet (ד) rather than rounded Resh (ר). Contextually, in citations of Korban Netanel on the Rosh, columns are denoted as ע\"א, ע\"ב, ע\"ג, ע\"ד (columns 1-4 / a-d), making ע\"ד וכ\"ד ('column d and page 24') the correct textual and paleographic reading."
+  },
+  {
+    "klal_id": 186,
+    "page": 68,
+    "opcode": "replace",
+    "word_index_in_final_text": 11,
+    "original_word": "לסרש",
+    "corrected_word": "לפרש",
+    "bbox": {
+      "x1": 0.3257107436656952,
+      "y1": 0.3872925937175751,
+      "x2": 0.3702101409435272,
+      "y2": 0.40469446778297424
+    },
+    "vision_selected": "B",
+    "vision_transcription": "א לפרש ה",
+    "vision_confidence": 0.98,
+    "vision_reasoning": "The visible text matches the standard Talmudic phrase 'דאיכא לפרש הכי' (where it can be interpreted this way). Paleographically, the second letter of the word is a Hebrew 'פ' (pe), making 'לפרש' the correct reading. Option A ('לסרש') is a classic OCR misreading of 'פ' as 'ס'."
   },
   {
     "klal_id": 187,

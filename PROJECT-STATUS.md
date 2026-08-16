@@ -15,6 +15,89 @@ current handoff, re-written (not just appended to) as state changes.
 
 ## ►► SESSION HANDOFF — read this first, 2026-08-16
 
+### DONE 2026-08-16 — 28 independently-reverified corrections applied to part1.json; 5 closed as print-faithful; rebuild clean
+
+Follow-up to the 1200 DPI re-verification entry below. Recorded the 28 CONFIRMED
+items as `manual_correction` decisions (`reviewer: "local-1200dpi-reverify"`,
+each note citing the specific 1200 DPI crop finding, not just the original
+lower-resolution vision verdict) and the 5 DISCONFIRMED items as closing
+`klal_flag` notes (`needs_revisit: false`, same "checked, print-faithful"
+precedent as klal 88's `רתם`/`התם`) - `review_decisions.jsonl` grew 621 -> 654
+(append-only, verified).
+
+Ran `pipeline/apply_reviewer_decisions.py` (dry-run first, then for real):
+applied exactly the 28 manual corrections (0 replace/insert-delete, matching
+expectation), correctly left 152 already-applied historical decisions alone
+and 10 unrelated drifted ones alone (neither touched by this session).
+**28 word-level corrections across 18 distinct klalim** (klal 4, 7, 11, 12,
+13, 25, 48, 49, 62, 67, 70, 96, 97, 98, 126, 128, 163, 186 - several klalim
+had multiple corrections, e.g. klal 25 had 4, klal 128 had 3).
+
+Ran `./rebuild_all.sh` (full, WITH vision) after: **0 live Gemini calls, every
+candidate a cache hit**, all 5 derived files regenerated
+(`klalim_demo_dataset.json`, `corrections_candidates_part1.json`,
+`corrections_verified_part1.json`, `corrections_part1.json`,
+`klal_page_regions.json`), 131/131 pytest. Dashboard (already running, no
+restart needed - reads fresh from disk) spot-confirmed live via
+`/api/klal/4` showing the corrected `איהו` in place. Git status confirms only
+the expected 9 files changed (7 derived/cache + `part1.json` + `review_decisions.jsonl`),
+nothing else touched.
+
+**Still open from this batch**: the 24 UNCERTAIN items and 8 UNVERIFIABLE
+(band-estimate) items remain exactly as the vision pass left them - flagged,
+not applied, not closed. The 24 uncertain ones still have real linguistic
+support for their candidates (per the detector's own zero-independent-
+attestation method) even without independent visual confirmation - worth
+a second pass with a different technique (e.g. a differently-prompted/
+higher-resolution automated vision call, or direct human reading in the
+dashboard) rather than left indefinitely. The 8 band-estimate ones need
+`klal_page_regions.json`'s continuation-detection gap (klal 167/198) fixed
+before they're even locatable, let alone verifiable.
+
+### DONE 2026-08-16 — independent 1200 DPI re-verification of all 65 vision-"B" candidates: 28 confirmed, 5 confirmed WRONG, 24 genuinely uncertain, 8 unverifiable
+
+Per direct user request to start on item 1 (work the 65 candidate-supported vision
+results). Before applying anything, cross-checked one against this session's own
+earlier klal 140 finding and found a direct contradiction (the low-res vision pass
+said B at 1.0 confidence; a careful 2400 DPI read earlier the same session said the
+opposite) - so did NOT trust the batch blindly. Per user direction, re-cropped all
+65 at 1200 DPI with generous margin (proportional padding, minimum floor) and a red
+box drawn around the exact target token, and read each one directly rather than
+trusting the automated verdict.
+
+**Result: the 300 DPI automated vision pass has a real, non-trivial error rate on
+subtle letter-shape distinctions - not a one-off.** Of the 57 exact-token-located
+items:
+- **28 independently CONFIRMED** - crop unambiguously matches the candidate.
+- **5 independently DISCONFIRMED** (crop actually supports the CURRENT text, not
+  the candidate) - klal 140 w97 (`והשוא`/`והשואל`, found first, see below), klal 71
+  w55 (`דעים`/`רעים` - crop shows ד not ר), klal 75 w1058 (`נהמן`/`נחמן` - crop
+  shows ה not ח; "רב נחמן" is an extremely common Amora name, so this is a
+  genuinely surprising result worth a second look, not dismissed as unlikely just
+  because it's unexpected), klal 217 w313 (`מיר`/`מיד` - crop shows ר not ד), klal
+  161 w105 (`בס'`/`בפ'` - crop shows ס not פ).
+- **24 genuinely UNCERTAIN even at 1200 DPI** - mostly ד/ר, כ/ב, ה/ח confusions,
+  or a bare geresh vs. yod (a single small mark, inherently hard to discriminate
+  at any resolution). Many of these have strong INDEPENDENT linguistic support
+  for the candidate (they came from `detect_real_word_substitution.py`
+  specifically because the candidate is a well-attested real word and the
+  original isn't attested at all - e.g. `ובלבד`/`יבום`/`דהוה` are extremely
+  common Talmudic forms vs. their unattested originals) - the visual uncertainty
+  doesn't cancel that prior, but isn't independent confirmation of it either.
+- **8 UNVERIFIABLE with current crop tooling** - the band-estimate-located items
+  (including all 4 from klal 167's known-broken region data). One highlight crop
+  came back as an entire page-paragraph, confirming these can't be pinned to a
+  single word without first fixing the underlying locator/region-data gap.
+
+Full per-item categorization and reasoning kept in this session's scratch space
+(`/tmp/reverify_crops/categorization.json` - not committed, regenerable from
+`flagged_candidates_vision_report.json` plus this methodology if needed again).
+
+**Not yet acted on** - the 28 confirmed still need to go through the actual
+decision/apply pipeline (next step), and the 5 disconfirmed need to be recorded
+too (as "checked, print-faithful as-is," matching the klal 88/140 precedent) so
+they don't get silently re-flagged as open in the future.
+
 ### RESEARCH 2026-08-16, continued — `scans/` now holds the Livorno original (Rashi, confirmed); expanded OCR-tool research; a Rashi-trained Tesseract model tested EMPIRICALLY and works
 
 Follow-up to the OCR-witness research above, per user request to expand
