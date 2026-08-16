@@ -15,6 +15,92 @@ current handoff, re-written (not just appended to) as state changes.
 
 ## ►► SESSION HANDOFF — read this first, 2026-08-16
 
+### RESEARCH 2026-08-16 — multi-engine OCR witness options revisited (Tesseract/Jochre 3/Kraken/Dicta/ABBYY); one correction to CASE-YAD-MALACHI.md's original proposal, one promising unexplored lead
+
+Per direct user request ("do a deep research into these options to see if
+any will serve as a useful witness against our DocAI scan") - these five
+engines were named in `CASE-YAD-MALACHI.md`'s "Process — ensemble OCR with
+AI adjudication" section (the aspirational "full ensemble" upgrade path,
+never built - the actual pipeline took the "lean single-edition" path:
+DocAI + iterative LLM cleanup on Berlin square only). External web research
+(not just recalled training knowledge), findings below stated with their
+source confidence:
+
+- **Tesseract**: already integrated, narrowly - `tools/verify_witness_
+  vision.py` already compares DocAI vs. Tesseract crops for the klal 30/75/
+  88 witness-reconstruction queue (`pytesseract` in `requirements-dev.txt`).
+  Free, local, zero marginal cost. Real caveat found in general Hebrew-OCR
+  literature (not confirmed against THIS project's own scan directly):
+  Tesseract's accuracy drops substantially on 19th-century-style rabbinic
+  print vs. clean modern Hebrew, and its confusable-letter classes
+  (ו/ז, ב/כ, כ/ס and similar) overlap heavily with the confusion pairs
+  `detect_real_word_substitution.py` already tracks for DocAI's own errors -
+  meaning Tesseract-DocAI agreement is weaker evidence of correctness than
+  the ensemble theory assumes if both engines share the same blind spots,
+  since CASE-YAD-MALACHI.md's own rationale for ensembling ("OCR engines
+  make uncorrelated errors") only holds where the errors ARE actually
+  uncorrelated.
+- **Jochre 3 - CORRECTION to CASE-YAD-MALACHI.md's proposal.** Jochre
+  (Assaf Urieli, since 2009) is built and trained specifically for
+  **Yiddish** OCR - the current Jochre 3 paper (arXiv:2501.08442) describes
+  YOLOv8 layout models and a CNN glyph recognizer trained on a Yiddish
+  corpus, including a Yiddish-specific typeface (Vaybertaytsh) variant. No
+  evidence found of a Hebrew/Rabbinic-tuned Jochre model. Sharing the Hebrew
+  alphabet doesn't make it a good fit for square/Rashi Rabbinic Hebrew - the
+  original CASE doc's Jochre recommendation appears to be a mismatch, not
+  verified against Jochre's actual training target. Not recommended.
+- **Kraken/eScriptorium**: general-purpose, actively used in digital-
+  humanities work on historical non-Latin scripts, with real Hebrew-script
+  precedent (the BiblIA dataset, medieval Hebrew/Aramaic MANUSCRIPTS across
+  6 script traditions) - but that precedent is handwritten, not printed
+  square/Rashi type from an 18th/19th-century press, and no ready pretrained
+  model for this project's actual typeface was found. Kraken is fundamentally
+  a TRAINABLE engine - using it well here would mean preparing labeled
+  training data (line images + transcriptions) and training a custom model,
+  roughly the scale of effort `CASE-YAD-MALACHI.md` already estimated for
+  the full ensemble harness (40-80 dev hrs). Highest technical ceiling of
+  the five, but a real project, not a quick add.
+- **Dicta - the most promising unexplored lead, and a second correction to
+  CASE-YAD-MALACHI.md.** The CASE doc describes Dicta only as a POST-
+  correction NLP layer (abbreviation expansion, the BEREL model) - but
+  Dicta has a real, purpose-built OCR product, **Dicta Maivin**
+  (illuminate.dicta.org.il), specifically adapted to rabbinic typefaces.
+  Professor Moshe Koppel (Dicta's founder) is quoted demonstrating it
+  directly on a 19th-century Rashi-script print (Avkat Rokhel, 1865) -
+  exactly this project's kind of source material, arguably a better match
+  than square type since Rashi is the harder script. Free (Dicta's tools
+  are stated as free/open for public use). **Not yet actionable**: no
+  documented public API or bulk/programmatic access was found - it appears
+  to be a web upload tool, which doesn't fit this pipeline's automated
+  crop-and-compare workflow at 340-460-page scale without either manual
+  per-page work or direct outreach to Dicta asking about API/bulk access.
+  **Worth a direct inquiry** given how precisely it targets this exact
+  problem, free of charge, from an established Hebrew-NLP research org.
+- **ABBYY FineReader**: broad, mature, general multi-language OCR with
+  Hebrew support, but no rabbinic-specific tuning, and a real cost barrier
+  for the tier that actually offers API/scriptable access (FineReader
+  Server, roughly $10k-30k/yr for small-to-mid concurrent-processing
+  deployments per current vendor-pricing pages) - the cheap consumer tier
+  ($16/mo) is desktop-only, no API. Marketing claims of strong Hebrew
+  accuracy found during this search were vague/unsourced (SEO-style content
+  sites, not a rigorous benchmark) and are flagged as such, not repeated as
+  fact. Cost disproportionate to a project this size given free alternatives
+  exist; not recommended as a near-term option.
+
+**Recommendation, in priority order**: (1) short-term, near-zero-cost -
+consider whether Tesseract's existing DocAI-comparison role should extend
+beyond the witness-reconstruction queue to a broader secondary signal, with
+the caveat above about correlated error modes tempering how much weight to
+give agreement between the two; (2) medium-term, potentially high-value -
+directly ask Dicta about API/bulk access to Maivin, since it's the only
+option here actually built and demonstrated for rabbinic-print OCR
+specifically; (3) longer-term, highest ceiling but a real project -
+Kraken/eScriptorium with a custom-trained model, if the corpus ever
+warrants that scale of investment; (4) not recommended - Jochre 3 (wrong
+language target) and ABBYY (cost, no rabbinic-specific advantage).
+**Nothing acted on** - this is research to inform a future decision, not a
+scoped or started implementation.
+
 ### DONE 2026-08-16 — round-3 refactor/correctness audit found a 4th real bug in `verify_flagged_candidates_vision.py`'s locator, fixed while the live vision run was mid-flight
 
 Per direct user request ("another high-powered review... eye toward
