@@ -6,11 +6,12 @@ relied upon but has no public digital text._
 > **Bottom line.** *Yad Malachi* is the **#1 public-domain work Sefaria lacks** — cited
 > **287 times inside Sefaria's own corpus** (every one a dead link) and **243 times** in
 > contemporary halacha. It is public domain, and **four editions in five scans are
-> already in hand** (three in clean square type). A first pass over the full work — all
-> 667 numbered *klalim* — is already OCR'd and structured via the lean single-edition
-> (Berlin) path. **Current step:** bringing image-grounded, confidence-scored AI
-> adjudication — proven on a pilot page — up to full-corpus scale, starting with Part 1
-> (*Klalei HaGemara*), the only range with scan-to-text alignment built so far.
+> already in hand** (three in clean square type). All 667 numbered *klalim* are OCR'd
+> and structured, and **Part 1** (*Klalei HaGemara*, 222 klalim) has already reached
+> full-corpus-scale, image-grounded AI adjudication — not a pilot anymore (see
+> ["Current state"](#current-state) for the verified numbers). **Current step:**
+> independent outside confirmation that Part 1's output is clean, then extending the
+> same scan-to-text alignment and adjudication to Parts 2–3.
 
 ## The work
 
@@ -22,9 +23,9 @@ the tradition, reached for whenever a question of method arises:
 2. **Klalei HaPoskim** — the rules governing the codifiers (Rif, Rambam, Rosh, Tur, Shulchan Aruch).
 3. **Klalei HaDinim** — the principles of halachic decision.
 
-![Title page of the Berlin edition of Yad Malachi, naming the three parts Klalei HaGemara, Klalei HaPoskim, and Klalei HaDinim](images/yad-malachi-berlin-title.png)
-
-_Berlin edition title page — the three parts and the author._
+_[Illustration pending: Berlin edition title page, naming the three parts and the
+author — not currently in the repo; see `VERIFIED-AGAINST-THE-INK.html` for real,
+current scan crops from this same edition.]_
 
 ## Why it matters
 
@@ -71,11 +72,9 @@ subscription) and the proprietary Machon Yerushalayim edition. So all 287 refere
 dead, and anyone quoting the work must **hand-transcribe from a scan**. Digitizing it once
 ends that permanently.
 
-![Two real dead-end citations of Yad Malachi — a Halachipedia footnote and a Shem HaGedolim entry inside Sefaria — each failing to resolve because the work is not in the library](images/yad-malachi-broken-citation.png)
-
-_Two real dead ends: a Halachipedia footnote and the Chida's Shem HaGedolim (already in
-Sefaria) both cite Yad Malachi; the linker returns `linkFailed` — there is no text to
-point to._
+_[Illustration pending: two real dead-end citations — a Halachipedia footnote and the
+Chida's Shem HaGedolim (already in Sefaria) both cite Yad Malachi; the linker returns
+`linkFailed` because there is no text to point to. Screenshot not currently in the repo.]_
 
 ## An ideal candidate
 
@@ -100,11 +99,10 @@ The three later editions bind all three parts and are set in **clean square type
 Rashi** — what general OCR reads best. The same passage (opening of *Klalei HaAleph*),
 Berlin square vs. Livorno Rashi:
 
-![Yad Malachi, opening of Klalei HaAleph: Berlin square type vs. Livorno Rashi type, the same passage side by side](images/yad-malachi-rashi-vs-square.png)
-
-![The opening page of Klalei HaGemara (Aleph section) in the Berlin edition of Yad Malachi, in clean square Hebrew type](images/yad-malachi-berlin-klal-aleph.png)
-
-_Berlin's *Klalei HaGemara* opening — the cleanest square images to OCR._
+_[Illustrations pending: the same Klalei HaAleph opening passage, Berlin square type
+vs. Livorno Rashi type side by side, and Berlin's own Klalei HaGemara opening page —
+neither currently in the repo. `VERIFIED-AGAINST-THE-INK.html` has real, current crops
+from the Berlin edition's square type, including the page-40 example discussed below.]_
 
 ## Process — ensemble OCR with AI adjudication
 
@@ -116,8 +114,8 @@ reading is near-certain and only disagreements need review.
    The two Przemyśl printings share a press (Żupnik/Knoller) — *near*-independent; the
    strongest pairing is Berlin (square) against the Livorno first edition (Rashi).
 2. **OCR the images — don't trust the embedded text.** The shipped OCR layers are unusable
-   ([`data/ocr-samples/`](ocr-samples/): Berlin cleanest but still errs, Przemyśl badly
-   letter-confused, Livorno unusable). Run **Google Cloud Vision / Document AI** +
+   (sample comparison not currently in the repo: Berlin cleanest but still errs, Przemyśl
+   badly letter-confused, Livorno unusable). Run **Google Cloud Vision / Document AI** +
    **Tesseract `heb`** over the square editions' images (many passes to vote on); read the
    Rashi Livorno with **Jochre 3** or a trained **Kraken/eScriptorium** model as a
    collation witness; post-correct with **Dicta**[^dicta] (abbreviation expansion, the
@@ -143,34 +141,63 @@ principle, not legal advice.)
 
 ## Current state
 
-A first pass over the full work — all three parts, 667 numbered *klalim* — has already
-been run via the **lean single-edition path**: extraction and cross-validation from the
-Berlin square-type scan (PDF text layer vs. Document AI), with iterative LLM-driven
-linguistic/lexicon cleanup passes. That text is chunked, structured, and sitting in the
-repo today.
+**REWRITTEN 2026-08-16** — this section previously described an early, "in development"
+snapshot (a single-page pilot, 90 candidates adjudicated, a review interface not yet
+built) that is now badly out of date. What follows is checked directly against the live
+data, not carried forward from an earlier draft.
 
-What's *not* yet done is step 4's **image-grounded, selection-only AI adjudication** at
-corpus scale — but it is no longer a single untested pilot. Of Part 1's 794 flagged
-word-level candidates, 90 have been vision-adjudicated against the actual scan crop, and the
-underlying cache holds 86 live decisions, confidence at or above 0.9 in roughly three
-quarters of them — the model returns an honest low-confidence "uncertain" rather than a
-fabricated guess when a crop is genuinely too ambiguous to call. The method has also caught
-a defect a text-only pass would have missed entirely: klal 83's stored text carried a
-duplicated opening word with klal 82's own closing citation misplaced into the middle of
-it — traced to Document AI detecting one decoratively-set word as two separate tokens and
-extracting both ahead of a citation line that sits physically above them on the page,
-confirmed directly against the raw token coordinates, not inferred from context. Worked
-examples — scan crops, bounding boxes,
-and the underlying JSON — are in [`VERIFIED-AGAINST-THE-INK.html`](VERIFIED-AGAINST-THE-INK.html).
-Most corrections currently in the text came from **text-only LLM linguistic review** —
-plausible given context, but not yet verified against the actual scan pixels, which is a
-gap against this project's own fidelity bar (every correction should be traceable to a
-real disagreement resolved by looking at the scan, not inferred). Scan-to-text alignment
-(the word bounding boxes the crop-and-verify step needs) exists today only for **Part 1**
-(*Klalei HaGemara*, klal 1–222); Parts 2–3 need the same alignment built before they can
-reach equivalent rigor. A human-review interface (crop + candidate readings + confidence,
-alongside the full running text) is in development to make that final adjudication pass
-tractable for a reviewer.
+A first pass over the full work — all three parts, 667 numbered *klalim* — was run via the
+**lean single-edition path**: extraction and cross-validation from the Berlin square-type
+scan (PDF text layer vs. Document AI), with iterative LLM-driven linguistic/lexicon cleanup
+passes. That text is chunked, structured, and sitting in the repo today.
+
+Step 4's **image-grounded, selection-only AI adjudication** is no longer a single untested
+pilot — it is the routine, day-to-day correction pipeline for **Part 1** (*Klalei HaGemara*,
+klal 1–222), run through a purpose-built local review dashboard (crop + candidate readings +
+confidence, alongside the full running text) that a human reviewer works through directly,
+not a tool still being designed. Current state, verified against the live corpus files, not
+estimated:
+
+- **222 / 222** Part-1 klalim have a trusted page-to-klal alignment (up from a partial
+  208/222 earlier in the project) — the scan-to-text mapping every crop depends on.
+- **316 of 356** currently-open flagged word-level candidates have been vision-adjudicated
+  against the actual scan crop, **315 of them at ≥0.9 confidence** — the model returns an
+  honest low-confidence "uncertain" rather than a fabricated guess when a crop is genuinely
+  too ambiguous to call. (The pool of *open* candidates has itself shrunk sharply as
+  corrections get applied — it started in the 700s.)
+- **A systematic, corpus-wide OCR defect was found, root-caused, and fixed**: this print
+  sets the letter pair *aleph-lamed* as a single ligature glyph that the OCR engine has no
+  mapping for and reads as a bare *aleph*, silently dropping the *lamed* — confirmed by
+  three independent kinds of evidence agreeing (the ink itself under high-DPI magnification,
+  a second OCR engine splitting the same glyph the opposite way, and the semantic
+  correctness of every reconstructed reading), not by any single confident-looking output.
+  **131 corrections across 51 klalim**, applied through the same flag → human-review → apply
+  pipeline as every other correction, never a direct edit. Full worked example — the actual
+  scan crop, the ascender comparison, the cross-engine and semantic evidence — is in
+  [`VERIFIED-AGAINST-THE-INK.html`](VERIFIED-AGAINST-THE-INK.html); it is the clearest
+  illustration in the project of what "understanding the actual Rabbinic Hebrew and context"
+  means in practice, not a slogan.
+- The pipeline has also caught structural defects a text-only pass would miss entirely —
+  klal 83's stored text once carried a duplicated opening word with klal 82's own closing
+  citation misplaced into the middle of it, traced to Document AI detecting one
+  decoratively-set word as two separate tokens and extracting both ahead of a citation line
+  that sits physically above them on the page. Confirmed directly against the raw token
+  coordinates, not inferred from context, and fixed. Also worked out in full in
+  [`VERIFIED-AGAINST-THE-INK.html`](VERIFIED-AGAINST-THE-INK.html).
+- Every correction of this kind is recorded through an append-only decision log, kept
+  deliberately separate from the corpus-rebuild pipeline so no automated run can ever
+  silently overwrite a human judgment call, and the codebase carries a standing regression
+  suite (100+ tests) plus multiple independent code-revalidation passes checking the
+  pipeline's own decision logic, not just its output.
+
+Scan-to-text alignment (the word bounding boxes the crop-and-verify step needs) exists
+today only for **Part 1**; Parts 2–3 (*Klalei HaPoskim*, *Klalei HaDinim* — 445 of 667
+klalim) need the same alignment built before they can reach equivalent rigor, and are
+deliberately **out of scope** until Part 1 is independently confirmed clean by an outside
+reviewer — not because the method doesn't generalize, but because Parts 2–3's own scan data
+has already been observed to fail differently, and worse, than Part 1's on at least two
+unrelated defect classes, so a clean Part 1 is not by itself evidence Parts 2–3 will come
+out equally clean by the same process.
 
 ## Cost
 
@@ -206,9 +233,9 @@ The last mile keeps two things separate — **the text** and **the links**:
   references light up automatically** once the work exists.
 - **Link-readiness QA.** Before ingest, run the text through the linker as a *test* (don't
   apply links): it flags each unresolved citation, and this project pairs each with a
-  **verified candidate normalization** for the reviewer — worked example in
-  [`data/link-readiness-demo.md`](link-readiness-demo.md) (7 flagged; 5 got verified
-  candidates, e.g. *Rashi on Nedarim 19b*).
+  **verified candidate normalization** for the reviewer — a worked example (7 flagged; 5
+  got verified candidates, e.g. *Rashi on Nedarim 19b*) was produced during scoping but its
+  file is not currently in the repo.
 
 **Two paths.** *Lean:* OCR just the Berlin edition, proof, structure — a solid version up
 fast (Sefaria is a wiki, refine later). *Full ensemble:* the higher-accuracy upgrade,
@@ -218,12 +245,14 @@ reusable for the next work.
 
 Digitize Yad Malachi and place it in Sefaria — the top freely-digitizable work it lacks.
 
-1. **Bring the proven pilot to full-corpus scale.** Extend image-grounded, confidence-scored
-   adjudication from the one-page proof of concept across Part 1 (*Klalei HaGemara*), where
-   scan-to-text alignment already exists, using the human-review interface now in
-   development.
+1. **Independent outside confirmation that Part 1 is clean.** Image-grounded,
+   confidence-scored adjudication has already reached full-corpus scale for Part 1
+   (*Klalei HaGemara*, 222/222 klalim aligned) through a working human-review dashboard —
+   the next gate is a Talmid Chacham confirming the output independently, not this
+   pipeline's own self-assessment, before anything downstream builds on it.
 2. **Extend scan alignment to Parts 2–3** so the same rigor is possible there, then repeat
-   the adjudication pass.
+   the adjudication pass — deliberately not started before (1), since Parts 2–3's own scan
+   data has already shown it can fail differently, and worse, than Part 1's.
 3. **Coordinate ingest** with Sefaria (**hello@sefaria.org**), attaching each printing as
    its own version.
 
@@ -244,7 +273,10 @@ the cost of every public-domain work after this one.
 
 [^halachipedia]: This project's citation survey of Halachipedia (a large contemporary
     English-language halachic reference): **243** direct citations of Yad Malachi by
-    its numbered klalim, in the full 640-page corpus (`data/CORPUS-COMPARISON.md`).
+    its numbered klalim, in the full 640-page corpus. **CORRECTED 2026-08-16**: the
+    supporting analysis file this note originally cited (`data/CORPUS-COMPARISON.md`)
+    is not currently in the repo, so this count could not be re-verified during this
+    pass — presenting it as originally researched, not re-checked.
 
 [^brown]: Benjamin Brown (Hebrew University of Jerusalem), *"'Some say this, some say
     that': Pragmatics and discourse markers in Yad Malachi's interpretation rules,"*
@@ -273,21 +305,30 @@ the cost of every public-domain work after this one.
     *klalei ha-hora'ah* — the rules of pesak governing the Rif/Rambam/Rosh and the
     Mechaber (e.g. webyeshiva.org, "Rabbi Ovadia Yosef's Halakhic Methodology";
     Nishmat; R. Chaim Jachter, Kol Torah) — which is Yad Malachi's exact domain. The
-    demand figures are this project's Halachipedia analysis (`CORPUS-COMPARISON.md`);
-    the same-footnote co-citations (Yad Malachi with Taharat HaBayit and Yabia Omer)
-    are from the Halachipedia corpus (`pipeline/hp_cache`). **Caveat:** a direct
-    citation count from *within* R. Ovadia's own works could not be machine-verified —
-    they are not in a free, searchable digital corpus — so this is a qualitative
-    observation grounded in his documented method and in contemporary co-citation, not
-    a counted statistic.
+    demand figures are this project's Halachipedia analysis; the same-footnote
+    co-citations (Yad Malachi with Taharat HaBayit and Yabia Omer) are from the
+    Halachipedia corpus, cached at the time in a directory this note called
+    `pipeline/hp_cache` — an EARLIER, unrelated use of the word "pipeline" for a
+    one-off citation-research cache, not this project's current `pipeline/` directory
+    (the live OCR/correction system — see `CLAUDE.md`'s "Directory layout"). Neither
+    that cache nor `CORPUS-COMPARISON.md` is currently in the repo, so this note's
+    specific figures were not re-verified during the 2026-08-16 pass that corrected
+    this ambiguity. **Caveat:** a direct citation count from *within* R. Ovadia's own
+    works could not be machine-verified — they are not in a free, searchable digital
+    corpus — so this is a qualitative observation grounded in his documented method
+    and in contemporary co-citation, not a counted statistic.
 
 [^mostwanted]: Per this project's citation analysis of the full 640-page Halachipedia
-    corpus (`data/SEFARIA-MOST-WANTED.md`, `data/CORPUS-COMPARISON.md`): among the
-    works Sefaria does **not** have, Yad Malachi (243 citations) ranks **#6 overall
-    and #1 of the public-domain tier** — the next public-domain work, Birkei Yosef,
-    trails at 129. The five works ahead of it overall are all modern, in-copyright
-    works (Yalkut Yosef, Chazon Ovadyah, Igrot Moshe, Shemirat Shabbat KeHilchata,
-    Yabia Omer) that cannot be freely digitized; Yad Malachi is the top work that can.
+    corpus: among the works Sefaria does **not** have, Yad Malachi (243 citations)
+    ranks **#6 overall and #1 of the public-domain tier** — the next public-domain
+    work, Birkei Yosef, trails at 129. The five works ahead of it overall are all
+    modern, in-copyright works (Yalkut Yosef, Chazon Ovadyah, Igrot Moshe, Shemirat
+    Shabbat KeHilchata, Yabia Omer) that cannot be freely digitized; Yad Malachi is
+    the top work that can. **CORRECTED 2026-08-16**: the supporting analysis files
+    this note originally cited (`data/SEFARIA-MOST-WANTED.md`, `data/CORPUS-
+    COMPARISON.md`) are not currently in the repo, so this ranking could not be
+    re-verified during this pass — presenting it as originally researched, not
+    re-checked.
 
 [^livorno]: **Livorno 1766–7, first edition** (HebrewBooks #32530 / #32532 / #32531).
     Title page: *ספר יד מלאכי*, by *מלאכי בכמ"ר יעקב הכהן*; the three parts (Klalei
@@ -318,3 +359,23 @@ the cost of every public-domain work after this one.
     non-profit; its Maivin tool vocalizes and punctuates rabbinic text, expands
     abbreviations, and identifies sources, and its BEREL model is a rabbinic-Hebrew
     language model. See also English Wikipedia, "Dicta (organization)."
+
+[^ocrpd]: **ADDED 2026-08-16** — this reference marker existed in the text with no
+    matching note; found during a document-integrity pass and given a minimal one
+    here rather than left dangling. General principle, not legal advice (as the
+    surrounding paragraph itself already says): mechanical OCR of a public-domain
+    text is a reproduction of the underlying work, not an original creative
+    contribution, so it does not itself generate a new copyright over the resulting
+    text — the same reasoning underlying *Bridgeman Art Library v. Corel Corp.*
+    (S.D.N.Y. 1999) for photographic reproductions of public-domain works. This does
+    not extend to a critical edition's own apparatus, annotations, or original
+    scholarly additions, which the "Copyright" note above already treats as
+    off-limits to reproduce.
+
+[^linker]: **ADDED 2026-08-16** — this reference marker also existed with no
+    matching note. The specific research behind "Sefaria's Auto-Linker builds links
+    from parseable citations" was not preserved in this repo, so this note cannot
+    supply the original citation — only confirm the claim is about a real, documented
+    Sefaria feature (its citation-parsing/auto-linking system), not invented for this
+    document. Verify directly against Sefaria's own documentation before relying on
+    the specific mechanics described in the surrounding paragraph.
