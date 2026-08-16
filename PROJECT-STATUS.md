@@ -479,6 +479,110 @@ worktree removed.
   logged here only because CLAUDE.md requires logging confirmed findings
   immediately, not because it's next.
 
+### DONE 2026-08-16 - full triage of check 5's 951 not-in-lexicon words (`review_lexicon_gaps.py`, new) - 109 candidates flagged across 43 klalim, a previously-unnamed corruption class
+
+`validate_part1_corpus_integrity.py`'s check 5 has reported "951 distinct
+not-in-lexicon words / 1104 occurrences / 846 hapax" for months as an
+uninvestigated informational number. It has now been triaged in full. **No
+corpus file was touched** - `part1.json`/`part2.json`/`part3.json` are
+byte-identical (sha256 verified before and after), 102/102 pytest, check 5's own
+output unchanged. The work is a new read-only script plus 43 appended
+`klal_flag` rows.
+
+- **`review_lexicon_gaps.py`** (new, standalone, read-only, re-runnable -
+  verified deterministic across two runs, stdout and `--json` both
+  byte-identical). Attaches five independent signals to each of the 951 forms
+  and buckets each into exactly one bucket, so the counts sum to 951 with
+  nothing dropped: surface punctuation (check 5 strips gershayim, so `א"א`
+  reaches lexicon.txt as `אא`); independent attestation in
+  `sefaria_reference_corpus/` (provenance confirmed current before use -
+  extractor v2, 41 books, Even HaEzer's 106,474 words present, 2,579,701 total);
+  prefix-stripped resolution (imports `propose_abbreviation_expansions.
+  prefix_decompositions()` rather than reimplementing it); the known
+  dropped-lamed shape; and a single-edit-neighbour check added mid-task once the
+  unresolved list turned out to be full of one-letter misreads. `--contexts`
+  prints every occurrence in its own klal's words, which is the actual reading
+  step.
+- **Bucket ordering was itself a finding.** The three "benign explanation"
+  buckets originally outranked the corruption-shape signal and buried real
+  candidates behind an explanation that happened to also apply: `וכלבד` (for
+  `ובלבד`) decomposes as ו+כ+לבד, so a spurious prefix hit explained a misread
+  ב; `וחרמב"ם` (for `והרמב"ם`) carries a gershayim, so the abbreviation rule
+  explained a misread ה. Corrected - an explanation for why a form is missing
+  from lexicon.txt is not evidence the form is right. 16 forms moved buckets.
+- **Triage result** (951 forms / 1104 occurrences): `ocr_shape_to_read` 59/61,
+  `abbreviation_artifact` 105/127, `known_corrupt_form` **0/0**,
+  `independently_attested` 127/168, `prefix_resolved` 329/379,
+  `weakly_attested` 164/195, `unresolved` 167/174. **377 forms were read in
+  context, every occurrence** (the first bucket, the last bucket, and the
+  zero-attestation half of `prefix_resolved`); the other 574 are accounted for
+  by attestation, ordinary prefix morphology, or gershayim-stripping, and their
+  form lists were eyeballed as a check on that.
+- **The dropped-lamed fix has left no residue check 5 can see**: 0 genuine
+  survivors of the 24 purged corrupt forms. The 2 apparent hits (`אא`, `אה`) are
+  every-occurrence-gershayim `א"א`/`א"ה` - the same false-positive class the
+  original investigation had to back out twice, reported explicitly rather than
+  silently bucketed.
+- **NEW FINDING - a single-letter OCR-confusion class, distinct from the
+  dropped-lamed ligature bug.** 109 candidates across 43 klalim, concentrated in
+  a small set of letter pairs: **ב/כ** (`וכתב`→`וכתכ`, `בכתיבת`→`בכתיכת`,
+  `אברהם`→`אכרהם`, `יבום`→`יכום`), **ד/ר** (`בתלמוד`→`בתלמור`,
+  `דשלשה`→`רשלשה`), **ה/ר** (`בהדיא`→`ברדיא`, `עליהם`→`עלירם`,
+  `שהקשה`→`שרקשה`), **ה/ד** (`דבריהם`→`דברידם`, `דאיהו`→`דאידו`,
+  `אליהו`→`אלידו`), **ה/ח** (`מחלוקת`→`מהלוקת`, `חטאת`→`הטאת`), **ט/מ**
+  (`מיניה`→`טיניה`, `הקומץ`→`הקוטץ`), **ס/פ** (`לפרש`→`לסרש`,
+  `בפסחים`→`בססחים`), **ג/נ** (`דמגילה`→`דמנילה`, `אשגח`→`אשנח`). Several carry
+  internal corroboration that owes nothing to a dictionary: klal 143 spells
+  ופומבדיתא correctly at w546 and `ופומכדיתא` at w651; klal 186's `לסרש` sits
+  four words from a correct לפרש in the same clause; klal 92 has `למכבר קראי`
+  once against `למסבר קראי` four times in the same klal; klal 30's corrected
+  `לאקושינהו` occurs independently elsewhere in Part 1. The ד/ה direction is
+  **already scan-confirmed** in this project - `וכוותיידו`/`וכוותייהו`, klal 88,
+  in the witness-method entry in PROJECT-STATUS-HISTORY.md.
+- **Flagged, NOT corrected.** 43 `klal_flag` decisions (`reviewer:
+  "ai-lexicon-full-review"`, `needs_revisit: true`), one per klal, each note
+  listing every candidate word with its `word_index`, the hypothesised reading,
+  and the specific reason. Every one of the 109 word indices was validated
+  against `part1.json` before writing. Verified after: `review_decisions.jsonl`
+  grew 399 -> 442 lines, the first 399 byte-identical to `HEAD`'s version, all 43
+  new rows well-formed `klal_flag`; live dashboard confirmed serving them
+  (`/api/klal/1/flag`, `/30`, `/159`, `/217`). This is textual evidence only -
+  **nothing here was checked against the scan**, and klal 88's already-scan-
+  verified `רתם`/`התם` (print-faithful broken type, correctly excluded from this
+  list after checking the history) is the standing proof that some of these will
+  turn out to be faithful to the ink.
+- **SECOND FINDING, and the more important one: this whole class is largely
+  INVISIBLE to check 5, because `lexicon.txt` contains the corrupt forms.** The
+  contexts read above surfaced 13 further corruptions of the identical shape
+  whose corrupt form is itself a real Hebrew word, so check 5 never reported
+  them: `ישרץ`→`ישראל` (klal 88 w1061; and the prefixed `בישרץ`→`בישראל`, klal
+  144 w907), `שמה`→`שמח` (klal 7, quoting Ps.
+  16:9), `אכל`→`אבל` (klal 30), `ליבא`→`אליבא` (klal 159), `לדם`→`להם` (klal
+  196, quoting Ex. 23:32), `ארת`→`את` (klal 97), `שרוא`→`שהוא` (klal 150),
+  `לדו`→`להו` (klal 37), `דיא`→`היא` (klal 154), `כין`→`בין` (klal 54),
+  `גכ`→`גב` (klal 37), `טרור`→`טהור` (klal 4), `שכתכו`→`שכתבו` (klal 163). All
+  13 verified present in `lexicon.txt`, and each re-verified at a real word
+  index in `part1.json` (that re-check caught one wrong klal-144 claim in this
+  entry's own first draft - the token there is the prefixed `בישרץ`, not
+  `ישרץ` - Lesson 19 applied to this write-up). This is the same structural failure
+  already recorded for the ligature bug ("`lexicon.txt` cannot catch the
+  ligature corruption - it contains it"), now confirmed for a second, unrelated
+  corruption class. **These 13 are NOT in the 43 flags** - they were found while
+  reading context for other words, not by any systematic method, so their true
+  corpus-wide count is unknown and is certainly higher. **NOT DONE**: a
+  systematic sweep for this class. It needs a different detector (an
+  independent-attestation ratio test over every Part-1 token, not a lexicon
+  membership test), the same shape as the gap
+  `detect_ligature_corruption.py`'s docstring records for prefixed forms.
+- **Side effect worth knowing about**: 21 of the 43 klalim already had a
+  `klal_flag` row, and the dashboard shows the LAST row per klal as current, so
+  those earlier notes (e.g. klal 130's and 150's `ai-lexicon-crosscheck`
+  candidates from earlier the same day) are no longer the displayed one. Nothing
+  is lost - the log is append-only and `history_for()` returns all of them - but
+  a reviewer working from the dashboard alone will not see them. Klal 30 is the
+  one case where the previous current row was `needs_revisit: false` (a human
+  had cleared it) and is now re-raised, on the strength of 12 new candidates.
+
 ### DONE 2026-08-16 - independent lexicon cross-check built (closes the "no independent source available" gap above)
 
 Per user request ("do #3"). `lexicon.txt` was built from this project's own
