@@ -13,7 +13,47 @@ issue was resolved. **New dated entries with detailed fix/verification
 prose go there, not here** — this file should only ever hold a compact
 current handoff, re-written (not just appended to) as state changes.
 
-## ►► SESSION HANDOFF — read this first, 2026-08-16
+## ►► SESSION HANDOFF — read this first, 2026-08-16 (continued into 2026-08-17)
+
+### CORRECTION 2026-08-17 — the "near-perfect" heb_rashi claim on the square Przemyśl scan overclaimed; word-level errors verified; Google Cloud Vision tested and found WORSE
+
+Per direct user correction, applying CLAUDE.md Lesson 19 to this session's own
+just-written output: the entry below ("RESEARCH... try the second square scan
+with various ocr tools") called `heb_rashi`'s output on `scans/ספר_יד_מלאכי.pdf`
+page 100 (Przemyśl 1877) "near-perfect" without doing a real word-by-word
+check against the actual scan - exactly the failure Lesson 19 warns about.
+
+**Verified directly at 1200-2400 DPI, not assumed**: the FIRST word `הלכה`
+(halacha) - which the write-up's own comparison line incorrectly implied was
+wrong - is in fact CORRECT; the error was in that comparison's own assumed-
+ground-truth text, not in `heb_rashi`'s reading. The SECOND word IS a
+genuine `heb_rashi` error: the scan reads `כדברי` (standard construction,
+"according to the words of") but `heb_rashi` produced `כדבני` (ר misread as
+נ). Corrected assessment: `heb_rashi` on this page is good but NOT
+error-free - real letter-level mistakes remain, just fewer/subtler than
+standard `heb`'s. The right general lesson: don't grade OCR output against
+your own unverified assumption of the source text - check the actual scan,
+same discipline this project demands everywhere else, now including casual
+tool-comparison narration.
+
+**Google Cloud Vision - installed and tested this session (`google-cloud-
+vision` pip package; required the user to enable the Vision API in the GCP
+console - the existing `doc-ai-worker` service account is scoped narrowly to
+Document AI and has no IAM permission to self-enable new APIs, confirmed by
+trying `gcloud services enable vision.googleapis.com` directly, which was
+denied at the permission level, not just "not yet enabled").** Tested BOTH
+`text_detection` (general/scene-text mode) and `document_text_detection`
+(the dense-document-specific mode, the theoretically-correct choice for this
+material) on the identical page/line already checked above - **both
+endpoints returned byte-identical output**, and it is **visibly worse than
+`heb_rashi`** on the same line: `סלכס כלכרי סכליע לפסל לכל למרי' כן...`
+(ה misread as ס repeatedly, among other errors) vs. `heb_rashi`'s `ספנ הלכה
+כדבני הוכריע אפשר דלא מרי׳ כן...` (first real word correct, one confirmed
+letter error). Not yet checked word-by-word to the same rigor as `heb_rashi`
+above (this finding is itself only a first-pass visual comparison, not a
+verified count) - but the gap looks real enough to record as a genuine
+result, not just noise, while flagging that it hasn't had the full
+verification treatment either.
 
 ### SCOPED, NOT STARTED, 2026-08-16 — Rashi/Livorno second-witness project
 
