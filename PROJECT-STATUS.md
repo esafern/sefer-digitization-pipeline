@@ -15,6 +15,142 @@ current handoff, re-written (not just appended to) as state changes.
 
 ## ►► SESSION HANDOFF — read this first, 2026-08-16
 
+### AWAITING MERGE 2026-08-16 — full revalidation/refactor audit of the live pipeline (branch `full-revalidation-2026-08-16`, worktree `yad-malachi-pipeline-revalidation-worktree`, 6 commits `f8183e1`..`e9968e6`)
+
+All findings are **bugs (code)**, not data issues. No `part*.json` and no
+`review_decisions.jsonl` content was changed (all four byte-identical to
+master); full `./rebuild_all.sh` WITH vision = 316 cache hits / **0 live API
+calls**, all 5 derived JSON files byte-identical; 102/102 pytest (was 77 — 25
+new tests, every one mutation-verified red-then-green); all 5 scan-dependent
+standalone validators' stdout byte-identical.
+
+**1. `propose_abbreviation_expansions.py` (written 2026-08-16, no prior review) — 6 silent miscategorisation bugs.**
+It writes nothing, which is exactly why it had to be right before a review/
+apply stage is built on it.
+  - A prefixed form's proposal was the ROOT's expansion verbatim, dropping
+    the stripped prefix — `דר' -> רבי`, `התוס' -> תוספות`, `ובס' -> בספר`:
+    **113 forms / 642 occurrences**, printed identically to a hand-verified
+    dictionary hit. Substituting one would DELETE a real Hebrew letter
+    (Success Criterion 1).
+  - Prefix decomposition preferred the LONGEST PREFIX, not the longest
+    surviving root. `ומוהר"ש`/`ומהר"י` were re-analysed as `ומ-`+`וה-`+`ר"ש`
+    (SCHOLARLY) instead of `ו-` + a NAME root; `ולמ"ד` lost the ל that is
+    part of the abbreviation.
+  - No guard against a prefix stacking on a copy of itself (`דדחי'` →
+    `ד-ד-`+`חי'` → "דדחידושי").
+  - `looks_like_bare_numeral()` had **no upper length bound** despite its own
+    docstring, and `resolve()` falls back to it — so **187 forms / 249
+    occurrences** of plain Hebrew prose (`ובקדושין'`, `דתלמידי'`, `התוספו'`)
+    were filed under a heading that says they are citation numbers needing no
+    attention. Lesson 15's shape.
+  - The frequency-based truncated-word completion was reported as `expand`.
+    It appends exactly ONE letter, so a multi-letter truncation has no
+    correct candidate and a merely-common word wins by default —
+    **confirmed wrong on real data**: `בפי' -> בפיו` where all 10 Part-1
+    occurrences are `בפירוש` ("בפי' רש"י על החומש"), `בחי' -> בחיי` where all
+    4 are `בחידושי`. Now its own weaker-evidence category.
+  - `looks_like_bare_numeral()` tested only the ASCII apostrophe while
+    QUOTE_CHARS includes U+05F3; inert today, but a normalisation pass would
+    have switched off both geresh-shaped paths with no error.
+  - Dictionary corrections, each verified against its own Part-1 contexts:
+    `משא"כ` was resolving to "אם כן" via a `מש-` prefix (it is **מה שאין כן**,
+    5x); `מ"ל` was "מנא לן" (klal 54's `מ"ל חומרא רבא` is **מה לי**) while
+    `מנ"ל`, the form that IS מנא לן, resolved to "מנראה לי"; **`ר"ל` moved to
+    `scholarly`** — both referents are live in Part 1 (**ריש לקיש** in klal
+    16/39/74/75, **רצה לומר** in klal 30) against a single unconditional
+    expansion for 47 occurrences; `מה'`(122x)/`גמ'`/`בפי'`/`חי'` rescued from
+    NUMERAL as expansions, and `פ'`/`ס'`/`פי'`/`הל'` rescued as genuinely
+    two-way `scholarly` entries.
+
+**2. `validate_lexicon_independent.py` — the independent reference corpus was silently missing a quarter of the Shulchan Arukh.**
+`flatten_strings()` handled str and list but fell through on **dict**, and
+Shulchan Arukh, Even HaEzer's `text` is a dict (`""`, `Seder HaGet`,
+`Seder Halitzah`). It contributed **exactly zero words** while being
+downloaded, counted as present, and named in the docstring: **106,474 words,
+4.3%** of the corpus (2,473,227 → 2,579,701 measured). This is the ONE check
+whose reference data has no lineage to this project's own OCR — the signal
+every other check is measured against. Impact measured, not estimated:
+**111 lexicon.txt words were wrongly reported as having "zero independent
+attestation"** (6056 → 5945), e.g. `ביבמות`, `בכתובות`, `בקונטריס`, `גש`.
+Also added: per-book counts with a loud WARNING for any zero-word book;
+`word_freq.meta.json` provenance (extractor version + source file list) so a
+cache built by the old rule can never be silently reused, with
+`propose_abbreviation_expansions.py` declining a table it cannot vouch for.
+`fetch_sefaria_reference_corpus.py` separately ignored curl's exit status and
+left a failed download on disk, which the next run then counted as present —
+the failure was reported once and invisible after that.
+
+**NOTE:** `sefaria_reference_corpus/word_freq.json` in the MAIN checkout was
+rebuilt (correctly, with Even HaEzer) during this audit — the worktree
+symlinks that gitignored directory, and a validator-baseline run wrote
+through it. Regenerable cache only; nothing tracked was touched.
+
+**3. `detect_ligature_corruption.py`** — `load_klal_words()` used
+`split(" ")` while every index-bearing script uses `split()`; a single double
+space would shift every reported word_index, in the direction that edits the
+corpus at a position nobody chose. Inert today (0 klalim in any part file
+where the two disagree) and gated by
+`test_clean_text_whitespace_is_single_spaces_only`. Its METHOD docstring also
+claimed pass 1 "covers... all single/double-letter Hebrew prefixes", backed
+by two constants (`PREFIX1`, `ALL_PREFIXES`) **nothing in the file ever
+read**. There is no prefix logic. Docstring corrected and the real gap
+recorded with a measurement rather than a guess: a prefix-stripping variant
+yields 74 forms / 2,646 occurrences on Part 1, headed by `לא->לאל` (699),
+`הוא->הואל` (381) — it drowns the signal, so the gap needs a different
+discriminator, not a bolt-on. Second limit now stated: the frequency table is
+built from the part file being scanned, i.e. the corpus validating itself.
+
+**4. `review_server.py`** — both manual_correction render paths
+(`api_klal`, `api_klalim`) bounds-checked only the upper end, the same
+half-a-bounds-check gap fixed in `audit_applied_decisions.py` (2026-08-14)
+and `apply_reviewer_decisions.py` (2026-08-15); the display path was never
+revisited and had two copies of the expression. Extracted to one
+`_word_matches()` with both bounds, and a negative `word_index` is now
+refused at the write endpoint too (the log is append-only, so a bad row can
+only be superseded, never removed).
+
+**5. `apply_reviewer_decisions.apply_replace()`** had no empty-`final_text`
+guard: `span` was `[]` and `n` fell back to 1, so for an out-of-range
+word_index the drift check compared `words[wi:wi+1]` — `[]` in Python, not an
+IndexError — against the empty span, PASSED, and the slice assignment
+APPENDED to the end of the klal. `apply_insert_removal()` has had the
+equivalent guard since it was written. Not reachable today; defence-in-depth
+on the one path that writes `part1.json`.
+
+**6. New corpus-invariant gate:
+`test_no_rendered_manual_correction_hides_a_machine_candidate`.**
+`app.js`'s word map is last-write-wins and `api_klal()` appends manual
+entries after the machine candidates, so a manual entry at the same
+word_index silently replaces the machine candidate — the reviewer sees a
+green Human-Decided word and never learns the vision pass disputed it.
+`review_server.py` asserts in a comment that this can't happen. It is not a
+property of the data: **78 (klal_id, word_index) positions already collide**;
+all are invisible only because the drift check drops them (1 manual decision
+renders at all, 0 collisions). Mutation-verified to fire.
+
+**Found, NOT fixed (reported rather than changed):**
+- `review_frontend/app.js` interpolates `corr.reasoning`, `chosen_text` and
+  `note` into `tooltip.innerHTML` unescaped. Local-only and display-only, but
+  a note or a Gemini rationale containing `<`/`&` is silently mangled in a
+  tool whose job is exact Hebrew fidelity. Not changed here: the frontend's
+  only coverage is the Playwright suite, which is outside the gate, and this
+  audit's rule was to ship no fix without a test that would have caught it.
+- `build_corrections_dataset.py`'s running-header filter is a bare substring
+  test (`"מלאכי" in orig_word`), not a word-boundary one — the weaker form of
+  the bug fixed in `validate_catchword_continuity.is_header_word` 2026-08-14.
+  Currently inert (0 Part-1 stored tokens contain `מלאכי`), and tightening it
+  changes what the pipeline strips with no ground truth to check against —
+  the same reasoning that left the three page-furniture definitions unified.
+- Two defects in **this audit's own work**, both caught by the verification
+  step and fixed in `e9968e6`, recorded because they are the interesting
+  ones: a new test called a write endpoint without stubbing
+  `rd.append_decision`, so mutation-testing the guard it covers appended one
+  junk row to `review_decisions.jsonl` (reverted, never committed, file
+  byte-identical); and a "behaviour-preserving" merge-order change in
+  `build_klal_page_regions.py` reordered all 222 entries of a tracked derived
+  file, caught only by the byte-identical check (Lesson 19 applied to the
+  auditor).
+
 > **This session's work (2026-08-16), in order - full detail lower in this
 > file, dated entries under each heading**: (1) merged and independently
 > re-verified the hard-wired-value audit (`154cb8d`); (2) closed 3 items
