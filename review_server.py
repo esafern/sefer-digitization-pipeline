@@ -167,6 +167,30 @@ def _trusted_page(alignment, klal_id):
     return r.get("matched_page") if r.get("trusted") else None
 
 
+def _word_matches(words, word_index, expected_word):
+    """Is `expected_word` still the word sitting at `word_index`?
+
+    The shared drift check behind both manual_correction render paths
+    (api_klal's synthetic entries and api_klalim's per-klal count). It was
+    written out twice, and BOTH copies bounds-checked only the upper end -
+    the same half-a-bounds-check gap already fixed in
+    audit_applied_decisions.py's three checkers (2026-08-14, finding 9) and
+    in apply_reviewer_decisions.py's five corpus mutators (2026-08-15,
+    finding 8); the display path was simply never revisited. Python does not
+    raise on a negative index: `words[-1]` is the klal's LAST word, so a
+    decision recorded at word_index -1 whose original_word happened to equal
+    that last word passed the check and rendered as a live "Human-Decided"
+    correction attached to a word it never described, and counted toward
+    that klal's decided/total badges.
+
+    Not reachable from today's UI (app.js only ever sends a real index) and
+    0 of the 136 recorded manual_correction decisions carry a negative
+    index - defence-in-depth on the display path, matching what the
+    write-side and corpus-mutating paths already do.
+    """
+    return 0 <= word_index < len(words) and words[word_index] == expected_word
+
+
 def _merge_decision(entry, klal_id, decided):
     """Overlay the current human decision (if any) on top of a raw
     corrections_part1.json entry - never mutates the source data, this is
@@ -219,7 +243,7 @@ def api_klalim():
             continue
         words = (k.get("clean_text") or "").split(" ")
         original_word = rec.get("candidate_snapshot", {}).get("original_word")
-        if wi >= len(words) or words[wi] != original_word:
+        if not _word_matches(words, wi, original_word):
             continue
         manual_count_by_klal[kid] = manual_count_by_klal.get(kid, 0) + 1
 
@@ -332,7 +356,7 @@ def api_klal(klal_id):
         if kid != klal_id:
             continue
         original_word = rec.get("candidate_snapshot", {}).get("original_word")
-        if word_index >= len(words) or words[word_index] != original_word:
+        if not _word_matches(words, word_index, original_word):
             continue
         corrections.append({
             "word_index": word_index,
@@ -589,6 +613,13 @@ def api_post_manual_correction(body):
     empty replacement."""
     klal_id = int(body["klal_id"])
     word_index = int(body["word_index"])
+    if word_index < 0:
+        # Refuse at the write site as well as guarding the two read sites
+        # (_word_matches): a negative index is never a valid position in
+        # clean_text.split(' '), and letting one into the append-only log
+        # means it is there permanently - the log is deliberately never
+        # rewritten, so a bad row can only ever be superseded, not removed.
+        raise ValueError(f"word_index must be >= 0, got {word_index}")
     chosen_text = body.get("chosen_text")
     if chosen_text is None:
         raise ValueError("chosen_text is required (pass '' explicitly to delete)")

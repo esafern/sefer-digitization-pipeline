@@ -933,6 +933,38 @@ def test_extract_reports_each_klal_once_per_form_however_often_it_repeats():
     assert set(counts) == {'רש"י'}
 
 
+# --- review_server: the manual-correction display drift check ----------------
+
+def test_manual_correction_drift_check_bounds_both_ends():
+    """Added 2026-08-16 (code audit). Both render paths for a
+    manual_correction (api_klal's synthetic entry, api_klalim's per-klal
+    count) checked only the UPPER bound - the same half-a-bounds-check gap
+    fixed in audit_applied_decisions.py's checkers (2026-08-14) and
+    apply_reviewer_decisions.py's mutators (2026-08-15), never revisited on
+    the display path. `words[-1]` is the klal's LAST word in Python, so a
+    decision recorded at -1 whose original_word matched that last word
+    rendered as a live "Human-Decided" correction on a word it never
+    described, and counted toward the klal's badges."""
+    words = "אלף בית גימל".split()
+    assert rs._word_matches(words, 1, "בית") is True
+    assert rs._word_matches(words, 1, "דלת") is False, "a moved word is drift"
+    # -1 with the klal's real LAST word is the case that passed before: it is
+    # exactly what a wrapped index resolves to, so a test using any other
+    # word would go green with the guard removed and prove nothing.
+    assert rs._word_matches(words, -1, "גימל") is False
+    assert rs._word_matches(words, 9, "אלף") is False
+
+
+def test_a_manual_correction_cannot_be_recorded_at_a_negative_index():
+    """The log is append-only by design, so a bad row can only ever be
+    superseded, never removed - which makes the write site the right place to
+    refuse one."""
+    with pytest.raises(ValueError):
+        rs.api_post_manual_correction({"klal_id": 1, "word_index": -1, "chosen_text": "אלף"})
+    with pytest.raises(ValueError):
+        rs.api_post_manual_correction({"klal_id": 1, "word_index": 0, "chosen_text": None})
+
+
 # --- detect_ligature_corruption: word indices must mean what everything else
 # --- means by them ----------------------------------------------------------
 
