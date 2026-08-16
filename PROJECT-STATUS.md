@@ -15,6 +15,304 @@ current handoff, re-written (not just appended to) as state changes.
 
 ## ►► SESSION HANDOFF — read this first, 2026-08-16
 
+### DONE 2026-08-16 — round-3 refactor/correctness audit found a 4th real bug in `verify_flagged_candidates_vision.py`'s locator, fixed while the live vision run was mid-flight
+
+Per direct user request ("another high-powered review... eye toward
+refactoring") while the credit-restored vision run below was executing in
+the background. Launched as a worktree-isolated agent per the standing
+round-1/round-2/hard-wired-value-audit pattern - full findings on its own
+branch `worktree-agent-ac6c84c65115b67e6` (not yet merged): **one bug fixed
+there** (`tools/verify_witness_vision.py`'s `witness_cache` table was
+missing `prompt_hash` from its key - the same Lesson-12 gap already fixed
+twice elsewhere in this project, now a third confirmed sibling; mutation-
+tested, 419 existing cached rows migrated losslessly, 117/117 pytest in that
+worktree), **one refactor opportunity reported not executed** (`verify_
+corrections_vision.py`/`verify_witness_vision.py` duplicate near-identical
+crop/adjudicate/cache machinery - the missing-`prompt_hash` bug is direct
+proof the duplication already causes drift; deliberately not touched this
+round since it would edit the file the live vision job was actively using),
+and **one bug found in code the audit's worktree couldn't reach** (`tools/
+verify_flagged_candidates_vision.py` is uncommitted in the main checkout, not
+in git history yet, so the isolated worktree could only read and report it).
+
+**That reported bug was real and is now fixed directly in the main checkout**:
+`locate_word()`'s disambiguation logic tracked only the LAST page's token
+list (`match_bbox_region`/`match_page` overwritten on every page with a
+match), so whenever the same word text matched on BOTH a klal's primary page
+and its continuation page, every match from the earlier page was
+unconditionally penalized (`1e9`, "not in this list") regardless of which
+occurrence was actually closer to `word_index` - the function silently
+always returned whichever page was iterated last. Confirmed on real data:
+**4 of the 160 located candidates were affected** - klal 30 w1263/w250
+`גכי` and klal 41 w256/w473 `כתכו`, each matching on two pages. Fixed by
+ranking every match on one GLOBAL scale (each page's local rank offset by
+the running token count of pages before it - the same technique `locate_
+word_band_fallback()` already used for its own estimate). Verified against
+real data post-fix: klal 30 w250 now correctly resolves to page 24 (primary,
+was wrongly page 25) and klal 41 w256 to page 28 (primary, was wrongly page
+29) - 2 of the 4 demonstrably changed answer, not just a defensive no-op.
+New hermetic test, mutation-verified (reintroduced the exact bug, confirmed
+red, restored, confirmed green). 127/127 pytest.
+
+**Consequence for the live vision run below**: that run's `located` list was
+computed ONCE at process start, before this fix existed, so its in-memory
+copy still has the OLD (wrong-page) bboxes baked in for these 4 candidates -
+editing the source file mid-run does not retroactively fix an already-
+running process. Deliberately NOT killed/restarted (would waste the API
+budget/time already spent on the other 156, all unaffected and correct).
+**Action needed after the current run finishes**: re-run `python3 tools/
+verify_flagged_candidates_vision.py` once more. Because the adjudication
+cache is keyed on `crop_hash` (among other things) and these 4 candidates
+now produce a genuinely different crop, the other 156 will be instant cache
+hits and only these 4 will trigger fresh (now-correct) API calls - no need
+to hand-pick which ones to re-run.
+
+### DONE 2026-08-16 — item 2 from NEXT STEPS: all 160 locatable candidates vision-adjudicated (93 original-confirmed, 65 candidate-supported, 2 uncertain), 72 klal_flag decisions recorded
+
+Per direct user request ("do 1 2 and 3"), then explicit direction ("build full
+pipeline, run all 168") after a scope check-in. This is the biggest of the
+three items - unlike items 1/3, neither the 85 `ai-semantic-spotcheck-round2`
+nor the 83 `ai-real-word-substitution` candidates (168 total across 81
+`klal_flag` rows) has a pre-computed bounding box or structured JSON entry -
+both live only in free-text note prose, and neither went through
+`build_corrections_dataset.py`'s DocAI-vs-stored-text pipeline (by design:
+both detectors exist BECAUSE docai and clean_text already agree on the same
+wrong reading at these positions, so the normal diff pipeline never surfaces
+them as a disagreement in the first place).
+
+**New standalone script, three parts:**
+1. **Note parser** - regex-extracts `(klal_id, word_index, original, candidate)`
+   tuples from both note formats (semicolon-separated for real-word-sub,
+   pipe-separated with an `|| OVERLAP:` suffix to strip for spotcheck2).
+   Tolerates an embedded gershayim inside a quoted word by requiring the
+   CLOSING delimiter to match the OPENING one (backreference) and treating an
+   internal quote-followed-by-Hebrew-letter as part of the word, not a
+   closer - an earlier draft used a bare `["']` for both ends and silently
+   truncated words like `הנז'` wherever wrapped in double quotes, since this
+   corpus's own abbreviation mark IS the ASCII `"`. Also strips a literal
+   backslash-before-quote artifact found in ~19 notes (`ר\"ס` in the stored
+   text, not `ר"ס` - confirmed by reading the raw JSONL, an artifact of how
+   the note prose was written, not real corpus content). 9 further candidates
+   the regex genuinely can't parse (multi-word originals, an "X followed
+   directly by Y" missing-token shape) are hand-transcribed as
+   `MANUAL_OVERRIDES`, each checked against its source note. klal 101's title
+   finding and klal 212's "halacha NUMBER is missing" finding are deliberately
+   EXCLUDED - neither is an option-A-vs-option-B substitution this script's
+   comparison shape fits; klal 101 already has its own flag, klal 212 needs
+   its own one-off look. klal 30's genuinely AMBIGUOUS entry contributes BOTH
+   hypotheses, not one.
+2. **Word locator** - given `(klal_id, word_index)`, searches `klal_page_
+   regions.json` + `docai_word_boxes/` for a token whose text exactly matches
+   the word currently in `part1.json` (reliable per the point above: docai
+   and clean_text already agree here). Two real bugs found and fixed during
+   construction, not just described:
+   - **Only searched the klal's PRIMARY page, not its `continuations`.** 54 of
+     Part 1's 222 klalim span a page break, recorded in `klal_page_regions.
+     json`'s own `continuations` list - a field the dashboard's per-klal crop
+     already reads but this script's first draft didn't. Fixed; confirmed on
+     real data (klal 12 w237, previously unlocatable, now finds it on the
+     continuation page).
+   - **DocAI tokenizes a trailing geresh as its own token**, so a word like
+     `סי'` never has one token matching its full text. Falls back to matching
+     the word with its trailing mark stripped.
+   Went from 71/162 located (exact match, page bug present) to 144/162 after
+   both fixes. The remaining 18 fall back to a coarser **band-estimate**: a
+   several-line-tall crop centered on a purely proportional (word_index /
+   total_words) position, wide enough to tolerate the estimate being off by a
+   few words (CLAUDE.md Lesson 14's "generous crop, visible margin," applied
+   to an estimated rather than exact position). **Found a THIRD real bug via
+   this fallback, not by inspection**: klal 167's `klal_page_regions.json`
+   entry claims 990 tokens on one page for a 1369-word klal with NO
+   `continuations` listed - a genuine gap in that file, not this script's
+   fault. A naive proportional estimate for a late word_index in klal 167
+   landed in the page-FOOTER "Digitized by Google" strip (confirmed by
+   generating and reading the actual crop, not assumed). Added a sanity check
+   - a band containing zero Hebrew-letter tokens is refused, not returned -
+   which correctly excludes klal 198's 2 candidates (same underlying region-
+   data gap, a near-zero-area bbox for 1087 claimed tokens) while still
+   locating klal 167's other 6 (their estimated positions happen to fall
+   inside the klal's genuine, if undersized, region). **klal_page_regions.
+   json's continuation-detection has a real, unfixed gap for at least these
+   two klalim - not chased down further here, logged for a future session.**
+   **Final: 160/162 located (144 exact-token, 16 band-estimate), 2 need a
+   manual crop (klal 198).**
+3. **Vision adjudication** - reuses `pipeline/verify_corrections_vision.py`'s
+   `crop_pdf_bounding_box`/`adjudicate`/`init_cache`/cache functions DIRECTLY
+   (they're already generic over page/bbox and option-A/option-B/context, not
+   tied to the structured candidate schema) rather than reimplementing them -
+   so results land in the same `adjudication_cache.db` cache, keyed the same
+   correct way (crop_hash + word_a + word_b + context_hash + prompt_hash, per
+   CLAUDE.md Lesson 12). Writes a JSON report file only - no `part1.json` or
+   `review_decisions.jsonl` write, per the standing "a vision opinion informs
+   a reviewer, it doesn't become a correction by itself" rule.
+
+11 new hermetic tests in `tests/test_pipeline_logic.py` (note parsing for
+both formats, the backslash-artifact fix, the embedded-gershayim delimiter
+fix, the continuation-page fix, the footer-rejection fix, and - added after
+the round-3 audit below found a 4th bug - the cross-page disambiguation
+fix), all load-bearing ones mutation-verified red/green. 127/127 pytest.
+
+**RUN 2026-08-16, later the same day, after the user topped up Gemini API
+credits.** First run: all 160 located candidates adjudicated cleanly, 0
+errors, `flagged_candidates_vision_report.json` written. Corpus/decision
+files confirmed byte-identical before and after (only `adjudication_cache.
+db` grew). While this run was executing, the round-3 refactor audit
+(separate entry above) found a 4th real bug in the locator - re-ran the
+script a second time after fixing it: 156/160 were instant cache hits (their
+crop didn't change), exactly 2 triggered fresh API calls (klal 30 w250, klal
+41 w256 - the 2 of the 4 affected candidates whose page assignment actually
+flipped), confirming the fix and the caching discipline both worked exactly
+as designed. Corpus/decision files re-confirmed byte-identical after the
+second run too.
+
+**Results: 93 selected A (current text confirmed print-faithful, no
+correction needed - the klal 88 `רתם`/`התם` pattern, now at bulk scale),
+65 selected B (vision favors the proposed candidate correction over what's
+currently stored), 2 UNCERTAIN, 2 not vision-verified (klal 198 - the
+region-data gap noted above).** Spot-checked reasoning text on both A- and
+B-selected results before trusting the aggregate counts (Lesson 2): the
+model grounds its answers in specific letter-shape/paleographic observations
+in both directions (e.g. "a standard vav terminating at the baseline, unlike
+a final nun which would extend below it" for a B-selection; "a rounded
+bottom-right corner without the sharp rightward projection of a bet" for an
+A-selection) - not just picking a side. **Known limitation, not yet fixed**:
+this script reuses `verify_corrections_vision.py`'s `PROMPT_TEMPLATE`
+verbatim, which labels the two options "DocAI raw OCR reading" / "current
+adjudicated text" - both labels are semantically WRONG for this batch
+(option A here is actually the currently-stored word, option B the proposed
+candidate, neither is a DocAI reading). The spot-check above found no sign
+this misled the model's actual visual analysis, but the prompt should be
+adapted to accurate labels before this class of script is reused again -
+flagged, not fixed, since fixing it now would invalidate today's cache and
+require re-running all 160 against a different prompt_hash.
+
+**72 new `klal_flag` decisions** (`reviewer: "ai-vision-verify-flagged-
+candidates"`, `needs_revisit: true`, one per klal, each note listing every
+candidate's verdict + confidence + a trimmed reasoning excerpt + the above
+prompt-labeling caveat). Verified: `review_decisions.jsonl` grew 549 -> 621
+(append-only, spot-confirmed live via `/api/klal/7/flag`), `part1/2/3.json`
+sha256 unchanged, 127/127 pytest. **NOT applied to part1.json** - per the
+standing "a vision opinion informs a reviewer, it doesn't become a
+correction by itself" rule, the 65 B-selected candidates are now the
+highest-value next targets for a human working the dashboard, not
+auto-corrected. klal 198's 2 candidates and the klal 167/198
+`klal_page_regions.json` gap remain open, needing a manual look.
+
+### DONE 2026-08-16 — item 1 from NEXT STEPS: klal 206 w2 and klal 140 w97 scan-verified — BOTH print-faithful, NOT the ligature bug
+
+Per direct user request. The round-2 semantic-spotcheck entry below flagged
+these as "TWO POSSIBLE NEW INSTANCES" of the alef-lamed ligature dropped-
+lamed bug and left "0 known remaining candidates" an open question pending
+scan verification. Direct high-DPI crops (1200-2400 DPI, `berlin_square_
+corrected.pdf`, PyMuPDF) resolve both, cleanly, in the OPPOSITE direction
+from the hypothesis:
+
+- **klal 206 w2, page 73**: the headline `הרי או באזהרה` - the disputed
+  word is unambiguously TWO letters (א-ו), no lamed ascender anywhere, at
+  1200 DPI and again at a 2400 DPI tight zoom. Directly compared against
+  the correctly-spelled `אלו` three lines below on the SAME page/scan
+  (same phrase, `הרי אלו באזהרה`, in the body) which shows an unmistakable
+  tall lamed stroke - confirming the crop-reading method itself is
+  discriminating real letter shapes, not a rendering artifact. The print
+  itself reads `או`, differing from its own body's six correct instances
+  of `אלו` - an authorial/typesetting inconsistency in the original, not
+  an OCR/ligature misread.
+- **klal 140 w97, page 50**: `כשחשב המתיר והשוא שמותר להתיר לכתחלה` - the
+  disputed word is unambiguously FIVE letters (ו-ה-ש-ו-א) at a 2400 DPI
+  tight crop, with clear whitespace before the next word `שמותר` and no
+  trailing lamed. `והשוא` is not a standalone word (`והשואל`, "and the one
+  who asks," is what the sentence grammatically wants), so this reads as a
+  genuine print defect/dropped-type error in the original book, not an
+  extraction bug - but the ink itself has only 5 letters, matching what
+  `part1.json` already stores exactly.
+
+**Both cases: current `part1.json` text is ALREADY print-faithful. No
+correction applied, no `part1.json` change.** Same precedent as klal 88's
+`רתם`/`התם` (CLAUDE.md Lesson 1 in reverse: running the verification this
+time changed the answer FROM "probable corruption" TO "confirmed
+faithful," which is exactly why the check had to be run rather than left
+as a described-but-unverified hypothesis). The dropped-lamed ligature
+pattern's "0 known remaining candidates" claim (2026-08-15 entry) stands -
+these two were a false lead, now closed with evidence rather than left
+open. No `review_decisions.jsonl` action needed (nothing to accept/apply);
+crops kept only in this session's scratch space, not committed (regenerable
+from the coordinates and DPI documented above).
+
+### DONE 2026-08-16 — item 3 from NEXT STEPS: `tools/check_next_marker_and_title.py` built (both checks), 7 new klal_flag decisions
+
+Per direct user request ("do 1 2 and 3" against the open-items list). New
+standalone, read-only, re-runnable script implementing the two cheap
+mechanical checks this file already named as "not yet scripted":
+
+1. **Next-klal gematria marker.** 29/222 Part-1 klalim end `clean_text` with
+   a trailing " : <token>" - a catchword-like preview of the next klal's
+   number. Reproduces exactly the 29-carrier / 7-mismatch figures this file
+   already recorded by hand (klal 15/21/36/46/49/62/64) - all 7 were
+   already flagged in a prior pass (49/62 via `ai-semantic-spotcheck-
+   round2`, the other 5 via `ai-followup-unflagged-findings`), so this
+   check found nothing NEW to flag, only confirmed the existing flags via
+   an independently-reproduced, re-runnable method instead of one-off prose.
+   Tried a lexicon-membership "low-confidence" signal to separate genuine
+   stray-letter errors from ordinary sentence-final words (klal 21/64's
+   documented ambiguity) and dropped it: every one of the 7 mismatches is
+   ALSO an ordinary lexicon word, so the signal discriminated nothing -
+   recorded as a dead end so a future session doesn't retry it.
+2. **Title field vs. own opening line.** Extracts the phrase between a
+   klal's gematria marker and its first sentence-break punctuation,
+   compares to `title`, tolerating a title that's a clean prefix in EITHER
+   direction (ordinary editorial shortening, e.g. klal 83's "בשל תורה" for
+   a much longer sentence; or an internal-punctuation false split, e.g.
+   klal 105/134). After that tolerance, **8 real mismatches**, of which
+   klal 101 was already flagged (round-2 semantic spotcheck) and **7 are
+   NEW findings, now flagged** (`reviewer: "ai-title-vs-opening-check"`):
+   - **klal 102, 103, 104**: same "ב"ד"-dropped-from-title shape as the
+     already-known klal 101 - the issue is a repeated pattern across this
+     run of 4 consecutive klalim, not a one-off.
+   - **klal 69**: title has `אהים`, body has `אלהים` - the title itself
+     is missing a `ל`, a corruption the body doesn't share. Not previously
+     reported anywhere in this file.
+   - **klal 87**: title has `משנה`, body has `ממשנה` - title missing the
+     `מ` prefix. Not previously reported.
+   - **klal 36**: title has `הש"ס'`, body has `השית'` - a real word-form
+     divergence between the two fields, distinct from (but on the same
+     klal as) that klal's already-flagged next-marker mismatch above.
+   - **klal 186**: title lacks a geresh present in the body after
+     `המקיל` - lowest-significance of the 7, likely a stray-punctuation
+     artifact rather than a content corruption, flagged anyway per "log
+     every finding."
+
+Both checks are read-only, standalone, deliberately **NOT wired into
+`rebuild_all.sh`**: neither has a clean zero-false-positive record (next-
+marker's ordinary-word ambiguity; title's editorial-shortening cases,
+tolerated but not proven exhaustive against future edits) - same
+precedent as `detect_ligature_corruption.py`/`review_lexicon_gaps.py`.
+4 new hermetic tests in `tests/test_pipeline_logic.py`, each mutation-
+verified (broke the marker regex's end-anchor, broke the prefix-tolerance
+check - both confirmed red, restored green). 118/118 pytest.
+
+Verified: `review_decisions.jsonl` grew 542 -> 549 (append-only, all 7
+well-formed, spot-confirmed live via `/api/klal/36/flag` showing both this
+klal's next-marker AND title-vs-opening flags in `history`), `part1/2/3.json`
+sha256 unchanged. TEXTUAL EVIDENCE ONLY - nothing here was checked against
+the scan.
+
+### DONE 2026-08-16 — item 5 from NEXT STEPS closed: dangling branch confirmed superseded (already deleted, not by this session)
+
+Per direct user request ("delete after validating not needed"). The branch
+this file flagged as "found, NOT investigated further" (`pipeline-audit-
+fixes-and-page-order-repair`, tip `5a86ef6`) turned out to already be gone -
+the ref no longer exists in `refs/heads` (deleted by an earlier, unlogged
+action; the commit survives only via reflog, not merged into `master`).
+Did the line-by-line confirmation this file said was missing, on the
+highest-risk files: `part1.json`'s one real content diff (klal 144's stray
+extra `כ`) is already fixed identically in current `master`; `rebuild_all.sh`
+and `verify_corrections_vision.py`'s diffs are pure path-reorg/superseded-
+logic (the branch's raw inline prompt vs. master's `PROMPT_TEMPLATE`/
+`PROMPT_HASH`); `review_frontend/app.js`'s 83-line diff is entirely the
+pre-`escapeHtml` version of code master already carries escaped. No
+branch-only content found anywhere master lacks. Nothing to delete - the
+ref is already gone - and no further action needed.
+
 ### DONE 2026-08-16 — systematic detector built for the "real-word substitution" corruption class; 49 klalim flagged (83 candidates)
 
 Per direct user request ("is there a good solution for #3?" / "go") - a real gap
@@ -870,20 +1168,25 @@ worktree removed.
   (`tests/test_corpus_invariants.py` + `tests/test_pipeline_logic.py`)
   passing. `git worktree list` shows only the main checkout - no leftover
   worktrees from this session's merges.
-- **One pre-existing, unrelated dangling branch found during this sweep,
-  NOT investigated further or touched**: `pipeline-audit-fixes-and-page-
-  order-repair`, tip `5a86ef6` (2026-08-11, "fix 8 correctness bugs,
-  repair transposed PDF leaves 37/38"), not an ancestor of `master`. Its
-  diff against its own merge-base is large (~10.7k lines across 32 files)
-  but every file it touches (`propose_punctuation_part1.py`,
-  `reconstruct_multipage_klalim.py`, `verify_reconstruction_witness.py`,
-  etc.) already exists and is live on `master` today via separate later
-  commits, so this is very likely early/superseded work, not orphaned
-  unmerged fixes - but this was NOT confirmed line-by-line, only inferred
-  from file presence. Flagging for a future session to either confirm
-  superseded and delete, or investigate further - not deleted here since
-  that wasn't asked for and the superseded-vs-orphaned question isn't
-  fully closed.
+- **CLOSED 2026-08-16, later** - `pipeline-audit-fixes-and-page-order-
+  repair` (tip `5a86ef6`, "fix 8 correctness bugs, repair transposed PDF
+  leaves 37/38"), previously flagged above as "not investigated further,"
+  is gone: the branch ref itself no longer exists in `refs/heads` (deleted
+  by an earlier, unlogged action - the commit survives only via reflog,
+  not merged into `master`, `git branch --contains 5a86ef6` empty). Per
+  direct user request, did the line-by-line confirmation this entry
+  previously said was missing, on the highest-risk files first:
+  `part1.json`'s one real content diff (klal 144, a stray extra `כ` in
+  `כתב כ הכ"ס`) is already fixed identically in current `master`;
+  `rebuild_all.sh`'s diff is pure path-reorg/comment updates; `verify_
+  corrections_vision.py`'s 48-line diff and `review_frontend/app.js`'s
+  83-line diff both show every branch-only line as an OLDER, less-evolved
+  version of logic `master` already carries further (the branch's raw
+  inline prompt vs. master's named `PROMPT_TEMPLATE`/`PROMPT_HASH`; the
+  branch's unescaped `innerHTML` vs. master's `escapeHtml`/`escapeAttr`).
+  No branch-only content found anywhere that master lacks. Confirmed
+  superseded, not orphaned. Nothing to delete - the ref is already gone -
+  and no further action needed.
 - **Review dashboard is running** (`python3 review_server.py`, PID 54339,
   port 8420) on the CURRENT code - restarted once this session (2026-08-16,
   for the witness-collision-guard fix in `_load_witness_queue()`). No

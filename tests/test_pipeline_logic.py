@@ -41,6 +41,8 @@ import audit_applied_decisions as aad  # noqa: E402
 import build_corrections_dataset as bcd  # noqa: E402
 import build_klal_page_regions as bkpr  # noqa: E402
 import check_klal_token_orphans as ckto  # noqa: E402
+import check_next_marker_and_title as cnmt  # noqa: E402
+import verify_flagged_candidates_vision as vfcv  # noqa: E402
 import detect_ligature_corruption as dlc  # noqa: E402
 import detect_real_word_substitution as drws  # noqa: E402
 import extract_abbreviation_forms as eaf  # noqa: E402
@@ -1610,4 +1612,200 @@ def test_is_running_header_matches_the_exact_token_not_a_substring():
 
     # An unrelated span, and an empty span.
     assert bcd.is_running_header([tok("בהדיא")]) is False
+
+
+# --- check_next_marker_and_title: next-klal marker + title-vs-opening ------
+
+def test_find_next_klal_marker_only_fires_on_a_real_trailing_marker():
+    """The regex must anchor to the END of the text (a colon-then-short-word
+    ANYWHERE would false-positive on ordinary mid-sentence abbreviations like
+    ' : ')  and must not fire when there's no marker at all."""
+    assert cnmt.find_next_klal_marker("דברי הטקסט עד כאן : טו") == "טו"
+    assert cnmt.find_next_klal_marker("דברי הטקסט עד כאן : סוג") == "סוג"
+    # No trailing marker - an ordinary sentence with no colon+short-word tail.
+    assert cnmt.find_next_klal_marker("דברי הטקסט עד כאן ולא יותר") is None
+    # A colon appears, but the tail after it is too long to be a marker.
+    assert cnmt.find_next_klal_marker("דברי הטקסט : זהו משפט ארוך מדי") is None
+
+
+def test_check_next_klal_marker_flags_a_planted_mismatch():
+    """Positive control: klal 1's marker doesn't match gematria(2), klal 2's
+    does - only klal 1 should be reported."""
+    klalim = [
+        {"klal_id": 1, "clean_text": "א דברי הטקסט עד כאן : ג"},  # ג != expected ב
+        {"klal_id": 2, "clean_text": "ב דברי הטקסט עד כאן : ג"},  # correct
+        {"klal_id": 3, "clean_text": "ג דברי הטקסט בלי סימון בסוף"},
+    ]
+    mismatches = cnmt.check_next_klal_marker(klalim)
+    assert [m[0] for m in mismatches] == [1]
+    assert mismatches[0][1:] == ("ג", "ב")
+
+
+def test_opening_phrase_strips_gematria_and_stops_at_first_boundary():
+    assert cnmt.opening_phrase("א שלום עולם . עוד טקסט", "א") == "שלום עולם"
+    assert cnmt.opening_phrase("א שלום עולם [.] עוד טקסט", "א") == "שלום עולם"
+    # klal 166's own convention: a geresh glued directly onto the gematria
+    # numeral before the opening word starts.
+    assert cnmt.opening_phrase("קסו' שלום עולם . עוד", "קסו") == "שלום עולם"
+
+
+def test_check_title_vs_opening_tolerates_prefix_in_either_direction():
+    """A title that's a clean prefix of the opening (ordinary editorial
+    shortening, e.g. klal 83's short title for a long sentence) or whose
+    opening-extraction was cut short by an internal comma (klal 105/134's
+    shape) must NOT be reported - only a genuine divergence should be."""
+    klalim = [
+        # Title is a legitimate shorter label - not a finding.
+        {"klal_id": 1, "gematria": "א",
+         "clean_text": "א בשל תורה הלך אחר המחמיר ולא עוד", "title": "בשל תורה"},
+        # Opening-extraction cut short at an internal comma; title is longer
+        # but starts with the extracted (truncated) opening - not a finding.
+        {"klal_id": 2, "gematria": "ב",
+         "clean_text": "ב שלאחריהם אמרו , קי\"ל כוותייהו", "title": "שלאחריהם אמרו קי\"ל כוותייהו"},
+        # Real divergence: the title has dropped the opening word the body
+        # keeps (the klal 101/102/103/104 shape) - must be flagged.
+        {"klal_id": 3, "gematria": "ג",
+         "clean_text": 'ג ב"ד מתנין לעקור דבר [.] עוד', "title": "מתנין לעקור דבר"},
+    ]
+    mismatches = cnmt.check_title_vs_opening(klalim)
+    assert [m[0] for m in mismatches] == [3]
+    assert mismatches[0][1:] == ("מתנין לעקור דבר", 'ב"ד מתנין לעקור דבר')
+
+
+# --- verify_flagged_candidates_vision: note parsing + word location --------
+
+def test_unescape_strips_literal_backslash_artifact():
+    """Several notes were composed with a literal backslash before an
+    embedded gershayim (the stored note text is literally 'ר\\"ס', not
+    'ר"ס') - confirmed by reading the raw JSONL, not assumed. No real corpus
+    word contains a backslash, so stripping it unconditionally is safe and
+    is what let 19 otherwise-unparseable candidates resolve correctly."""
+    assert vfcv._unescape('ר\\"ס') == 'ר"ס'
+    assert vfcv._unescape("רגיל") == "רגיל"
+
+
+def test_parse_real_word_sub_handles_semicolon_separated_multi_candidates():
+    note = ("... Candidates in this klal: w213 'המאן'->'דמאן' (corrupt 1x); "
+            "w313 'מיר'->'מיד' (corrupt 1x)")
+    out = vfcv.parse_real_word_sub(note, 217)
+    assert out == [(217, 213, "המאן", "דמאן"), (217, 313, "מיר", "מיד")]
+
+
+def test_parse_real_word_sub_skips_ambiguous_entry():
+    """klal 30's AMBIGUOUS entry is deliberately handled via
+    AMBIGUOUS_OVERRIDES, not the regex parser - the regex has no way to
+    extract a single (original, candidate) pair from a genuinely two-way
+    ambiguous note, and must not silently pick one."""
+    note = "Candidates in this klal: w1206 'וטכל'->AMBIGUOUS: 'ומכל' (103x) or 'וטבל' (66x)"
+    assert vfcv.parse_real_word_sub(note, 30) == []
+
+
+def test_parse_semantic_spotcheck2_handles_pipe_separated_and_overlap_suffix():
+    note = ("... Candidates: w95 'כתכו' -> 'כתבו': כ for ב; 'context' | "
+            "w403 'איהן' -> 'איהו': final nun for vav || OVERLAP: w38 already flagged.")
+    out = vfcv.parse_semantic_spotcheck2(note, 4)
+    assert out == [(4, 95, "כתכו", "כתבו"), (4, 403, "איהן", "איהו")]
+
+
+def test_parse_semantic_spotcheck2_tolerates_embedded_gershayim_in_either_quote_style():
+    """The regex must find the closing delimiter that matches the OPENER,
+    not just any quote character - an earlier draft used a bare `["']` for
+    both ends and silently truncated 'הנז'' one character early wherever it
+    was wrapped in double quotes (the corpus's abbreviation mark IS the
+    ASCII double-quote, so 'ר"ס' inside a "..." wrapper is exactly this
+    collision, not a hypothetical edge case)."""
+    note = 'Candidates: w74 "ר"ס" -> "ר"פ": ס for פ'
+    out = vfcv.parse_semantic_spotcheck2(note, 12)
+    assert out == [(12, 74, 'ר"ס', 'ר"פ')]
+
+
+def test_parse_semantic_spotcheck2_tolerates_plausibly_between_arrow_and_target():
+    note = "Candidates: w461 ':לוקי' -> plausibly 'חילוקי': a colon is glued to a truncated word"
+    out = vfcv.parse_semantic_spotcheck2(note, 189)
+    assert out == [(189, 461, ":לוקי", "חילוקי")]
+
+
+def test_locate_word_searches_continuation_pages_not_just_the_first():
+    """FIXED during this script's own construction: 54 of Part 1's 222
+    klalim span a page break via klal_page_regions.json's `continuations`
+    list, and an earlier draft only ever searched the primary `page` -
+    silently failing to locate every candidate whose word landed on the
+    continuation (confirmed real case: klal 12 w237). Reproduced here
+    synthetically rather than trusting the real-data fix without a test."""
+    regions = {
+        "1": {
+            "page": 100,
+            "bbox": {"x1": 0.0, "y1": 0.0, "x2": 1.0, "y2": 0.5},
+            "continuations": [
+                {"page": 101, "bbox": {"x1": 0.0, "y1": 0.0, "x2": 1.0, "y2": 0.5}},
+            ],
+        }
+    }
+    token_cache = {
+        100: [{"text": "אלף", "x1": 0.1, "y1": 0.1, "x2": 0.2, "y2": 0.12}],
+        101: [{"text": "יעד", "x1": 0.1, "y1": 0.1, "x2": 0.2, "y2": 0.12}],
+    }
+    result = vfcv.locate_word(1, 5, "יעד", regions, 10, token_cache)
+    assert result is not None
+    page, token, _ = result
+    assert page == 101, "the target word lives on the continuation page, not the primary one"
+
+
+def test_locate_word_disambiguates_across_a_page_break_not_just_within_one_page():
+    """FIXED (round-3 audit): when the same text matches on BOTH the primary
+    page and a continuation page, an earlier draft tracked only the LAST
+    page's token list for ranking, so any match on an EARLIER page was
+    unconditionally penalized (not in that list) and always lost, regardless
+    of which occurrence was actually closer to word_index - confirmed on
+    real data (klal 30's 'גכי', klal 41's 'כתכו', each duplicated across a
+    page break). Reproduced synthetically: word_index is chosen to fall
+    early in the klal (proportionally on the FIRST page), and the primary
+    page's match must win, not the continuation page's."""
+    regions = {
+        "1": {
+            "page": 100,
+            "bbox": {"x1": 0.0, "y1": 0.0, "x2": 1.0, "y2": 1.0},
+            "continuations": [
+                {"page": 101, "bbox": {"x1": 0.0, "y1": 0.0, "x2": 1.0, "y2": 1.0}},
+            ],
+        }
+    }
+    # 10 filler tokens on the primary page, the target text once near its
+    # start; 10 filler tokens on the continuation, the SAME target text once
+    # near ITS start too - word_index=1 should resolve to the PRIMARY page's
+    # occurrence (global rank ~1 of 20), not the continuation's (~global rank 11).
+    def filler_line(y):
+        return {"text": "x", "x1": 0.5, "y1": y, "x2": 0.6, "y2": y + 0.01}
+
+    primary_tokens = [{"text": "יעד", "x1": 0.5, "y1": 0.01, "x2": 0.6, "y2": 0.02}]
+    primary_tokens += [filler_line(0.02 + i * 0.01) for i in range(9)]
+    cont_tokens = [{"text": "יעד", "x1": 0.5, "y1": 0.01, "x2": 0.6, "y2": 0.02}]
+    cont_tokens += [filler_line(0.02 + i * 0.01) for i in range(9)]
+    token_cache = {100: primary_tokens, 101: cont_tokens}
+
+    page, token, match_count = vfcv.locate_word(1, 1, "יעד", regions, 20, token_cache)
+    assert match_count == 2
+    assert page == 100, "word_index=1 is early in the klal - must resolve to the PRIMARY page's match"
+
+
+def test_locate_word_band_fallback_refuses_a_footer_only_band():
+    """FIXED during this script's own construction: klal 167's region entry
+    claims 990 tokens on one page for a 1369-word klal with no
+    `continuations` listed (a real gap in klal_page_regions.json). A naive
+    proportional estimate for a late word_index lands past the klal's real
+    content, in the page-footer 'Digitized by Google' strip - confirmed on
+    real data. The fallback must recognize a token-free-of-Hebrew-letters
+    band as a non-answer, not hand back a crop of a footer."""
+    regions = {
+        "1": {"page": 50, "bbox": {"x1": 0.0, "y1": 0.0, "x2": 1.0, "y2": 1.0}, "token_count": 3},
+    }
+    token_cache = {
+        50: [
+            {"text": "Digitized", "x1": 0.3, "y1": 0.9, "x2": 0.5, "y2": 0.92},
+            {"text": "by", "x1": 0.5, "y1": 0.9, "x2": 0.55, "y2": 0.92},
+            {"text": "Google", "x1": 0.55, "y1": 0.9, "x2": 0.7, "y2": 0.92},
+        ],
+    }
+    result = vfcv.locate_word_band_fallback(1, 900, regions, 1000, token_cache)
+    assert result is None, "a footer-only band must be refused, not returned as a crop location"
     assert bcd.is_running_header([]) is False
