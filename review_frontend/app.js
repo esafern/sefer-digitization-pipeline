@@ -16,27 +16,38 @@ const navList = document.getElementById('nav-list');
 const legend = document.getElementById('legend');
 const tooltip = document.getElementById('tooltip');
 
-// FIXED 2026-08-16 (code audit): the panels below interpolate externally-
-// sourced text (Gemini's `reasoning`, a reviewer's own typed `note`/
-// `chosen_text`, raw OCR/vision readings) directly into `*.innerHTML`.
-// This is a single-user localhost tool, not multi-tenant, so this is a
-// DISPLAY-FIDELITY fix, not an XSS fix: a literal `<` or `&` in a note or
-// a model's rationale silently mangled the tooltip/panel instead of
-// showing the real text - wrong information shown by the one tool whose
-// job is exact verification. Applied at every site below that interpolates
-// reasoning/note/chosen_text/docai_reading/candidate text. NOT applied to
-// klal context snippets (corpus text, already gated by
-// validate_part1_corpus_integrity.py's character-sanity check) or to
-// labels/values this app itself defines (FLAGS labels, klal_id, state
-// names).
+// ---------- HTML escaping ----------
+// Every interpolation below of corpus text, a recorded decision, a reviewer's
+// note or a Gemini rationale into an innerHTML template MUST go through one
+// of these. This is not a security posture (the server is local-only and the
+// data is the user's own) - it is a FIDELITY one, and it had already broken:
+//
+// The candidate panel's custom-reading input was written
+//   value="${activeText}"
+// and this corpus's abbreviation mark - gershayim - is the literal ASCII
+// character `"`. part1.json's clean_text contains 6,448 of them. So a
+// reviewer who records a custom reading like `ב"ד` (6 such decisions are
+// already in review_decisions.jsonl) and later reopens that panel gets
+//   value="ב"ד"
+// which the browser parses as value="ב" plus a junk attribute: the input
+// silently displays `ב`, and saving again records `ב` as their decision. A
+// human's exact Hebrew reading, truncated at the most common punctuation
+// mark in the book, in the one tool whose entire job is exact fidelity
+// (Success Criterion #1). The manual-correction panel already escaped its
+// own value= for precisely this reason; the candidate panel never did.
+//
+// Element-content interpolations are the same class one step milder: part1's
+// clean_text carries 3 bare `&` tokens (klal 69/77/167), which the context
+// panes render raw. `& ` happens to survive today because it is not a valid
+// entity reference - `&amp` or `&lt` in a future correction would not.
 function escapeHtml(s) {
-  if (s == null) return '';
-  return String(s)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+// Attribute values additionally need the quote characters neutralised -
+// see the gershayim case above.
+function escapeAttr(s) {
+  return escapeHtml(s).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
 // Every flagged word/gap reduces to exactly one of three review states,
@@ -194,7 +205,7 @@ function navItemInnerHtml(k) {
   // punctuation_count/punctuation_open_count for whenever it returns.
   // (That commit left this comment half-rewritten - three unfinished
   // clauses that described a badge which isn't there - until 2026-08-14.)
-  return `<span class="nid">${k.klal_id}</span><span class="ntitle" title="${(k.title || '').replace(/"/g, '&quot;')}">${k.title || ''}</span>${flagIcon}${openBadge}${decidedBadge}`;
+  return `<span class="nid">${k.klal_id}</span><span class="ntitle" title="${escapeAttr(k.title)}">${escapeHtml(k.title)}</span>${flagIcon}${openBadge}${decidedBadge}`;
 }
 
 function buildNav() {
@@ -239,7 +250,7 @@ function buildPlaceholders() {
 
     const head = document.createElement('div');
     head.className = 'klal-head';
-    head.innerHTML = `<span class="kid">כלל ${k.klal_id}</span><span class="sec">${k.section || ''}</span>`;
+    head.innerHTML = `<span class="kid">כלל ${k.klal_id}</span><span class="sec">${escapeHtml(k.section)}</span>`;
     const flagBtn = document.createElement('button');
     flagBtn.className = 'klal-flag-btn' + (k.needs_revisit ? ' active' : '');
     flagBtn.textContent = k.needs_revisit ? '⚑ flagged' : '⚑ flag';
@@ -388,15 +399,15 @@ function attachWordHandlers(el, klalId, corr, isGap) {
   const [label] = FLAGS[corr.flag] || ['Flagged'];
   el.addEventListener('mouseenter', (e) => {
     const confTxt = (corr.confidence != null) ? (Math.round(corr.confidence * 100) + '% confidence') : 'not scan-verified';
-    const hebrewBit = `<bdi>${escapeHtml(corr.docai_reading) || (isGap ? '' : '(none)')}</bdi>`;
+    const hebrewBit = `<bdi>${escapeHtml(corr.docai_reading || (isGap ? '' : '(none)'))}</bdi>`;
     const docaiTxt = isGap
       ? `Scan appears to show: "${hebrewBit}" — not present in current text`
       : `Original OCR reading: "${hebrewBit}"`;
-    const bodyTxt = `<span class="t-conf">${label} — ${confTxt}${corr.reasoning ? ' — ' + escapeHtml(corr.reasoning) : ''}</span>`;
+    const bodyTxt = `<span class="t-conf">${escapeHtml(label)} — ${confTxt}${corr.reasoning ? ' — ' + escapeHtml(corr.reasoning) : ''}</span>`;
     const decisionTxt = corr.current_decision
       ? `<span class="t-hint">Your decision: "${escapeHtml(corr.current_decision.chosen_text)}"${corr.current_decision.note ? ' — ' + escapeHtml(corr.current_decision.note) : ''}</span>`
       : `<span class="t-hint">Click for details / to record a decision</span>`;
-    tooltip.innerHTML = `<span class="t-flag">${statusLabel(corr)}</span><span class="t-docai">${docaiTxt}</span>${bodyTxt}${decisionTxt}`;
+    tooltip.innerHTML = `<span class="t-flag">${escapeHtml(statusLabel(corr))}</span><span class="t-docai">${docaiTxt}</span>${bodyTxt}${decisionTxt}`;
     tooltip.style.display = 'block';
     positionTooltip(e);
   });
@@ -477,9 +488,9 @@ async function openCandidatePanel(klalId, corr) {
     ? corr.final_text.split(' ').length : 1;
   const corrSpanEnd = Math.min(words.length, corr.word_index + corrSpanLen);
   const ctxWords = [
-    words.slice(ctxStart, corr.word_index).join(' '),
-    `<b>${words.slice(corr.word_index, corrSpanEnd).join(' ')}</b>`,
-    words.slice(corrSpanEnd, ctxEnd).join(' '),
+    escapeHtml(words.slice(ctxStart, corr.word_index).join(' ')),
+    `<b>${escapeHtml(words.slice(corr.word_index, corrSpanEnd).join(' '))}</b>`,
+    escapeHtml(words.slice(corrSpanEnd, ctxEnd).join(' ')),
   ].filter(Boolean).join(' ');
 
   const [flagLabel] = FLAGS[corr.flag] || ['Flagged'];
@@ -496,7 +507,7 @@ async function openCandidatePanel(klalId, corr) {
   // choice rather than relying on the non-obvious "pick custom, leave it
   // blank" convention.
   if (corr.opcode === 'insert') {
-    options.push({ source: 'remove', label: 'Remove this text (accept the omission)', text: '(nothing - remove "' + corr.final_text + '")' });
+    options.push({ source: 'remove', label: 'Remove this text (accept the omission)', text: '(nothing - remove "' + (corr.final_text || '') + '")' });
   } else if (!corr.final_text) {
     // The mirror case: nothing is currently stored here (a gap - DocAI/vision
     // saw a candidate word the corpus never captured) and the correct human
@@ -516,7 +527,7 @@ async function openCandidatePanel(klalId, corr) {
     <div class="panel-section">
       <div class="panel-label">Status</div>
       <div><i style="background:${flagColor};width:9px;height:9px;border-radius:2px;display:inline-block;margin-inline-end:6px;"></i>${statusLabel(corr)}</div>
-      <div style="font-size:12px;color:var(--ink-faint);margin-top:4px;">${flagLabel}${corr.confidence != null ? ' · ' + Math.round(corr.confidence * 100) + '% vision confidence' : ''}</div>
+      <div style="font-size:12px;color:var(--ink-faint);margin-top:4px;">${escapeHtml(flagLabel)}${corr.confidence != null ? ' · ' + Math.round(corr.confidence * 100) + '% vision confidence' : ''}</div>
     </div>
     <div class="panel-section">
       <div class="panel-label">Context (klal ${klalId})</div>
@@ -530,13 +541,13 @@ async function openCandidatePanel(klalId, corr) {
         <input type="radio" name="candidate" ${activeSource === 'custom' ? 'checked' : ''}>
         <div class="co-body">
           <div class="co-label">Custom</div>
-          <input type="text" class="custom-text" id="custom-text-input" placeholder="Type the correct reading…" value="${escapeHtml(activeSource === 'custom' ? activeText : '')}">
+          <input type="text" class="custom-text" id="custom-text-input" placeholder="Type the correct reading…" value="${escapeAttr(activeSource === 'custom' ? activeText : '')}">
         </div>
       </div>
     </div>
     <div class="panel-section">
       <div class="panel-label">Note (optional)</div>
-      <textarea id="decision-note" rows="3" placeholder="Why? e.g. &quot;crop-confirmed against page 26&quot;">${decision && decision.note ? escapeHtml(decision.note) : ''}</textarea>
+      <textarea id="decision-note" rows="3" placeholder="Why? e.g. &quot;crop-confirmed against page 26&quot;">${escapeHtml(decision && decision.note)}</textarea>
     </div>
     <div class="panel-section">
       <button class="panel-btn" id="save-decision-btn">Save decision</button>
@@ -788,7 +799,7 @@ async function openManualCorrectionPanel(klalId, wordIndex, word, existing) {
   const ctxStart = Math.max(0, wordIndex - 8);
   const ctxEnd = Math.min(words.length, wordIndex + 9);
   const ctxWords = words.slice(ctxStart, ctxEnd).map((w, idx) =>
-    (ctxStart + idx === wordIndex) ? `<b>[${w}]</b>` : w
+    (ctxStart + idx === wordIndex) ? `<b>[${escapeHtml(w)}]</b>` : escapeHtml(w)
   ).join(' ');
 
   const markedForDeletion = existing && existing.current_decision.chosen_text === '';
@@ -810,7 +821,7 @@ async function openManualCorrectionPanel(klalId, wordIndex, word, existing) {
     <div class="panel-section">
       <div class="panel-label">${existing ? 'Correction on record' : 'Propose a correction'}</div>
       <input type="text" class="custom-text" id="manual-correction-text"
-             placeholder="Correct reading…" value="${escapeHtml(currentText)}">
+             placeholder="Correct reading…" value="${escapeAttr(currentText)}">
     </div>
     <div class="panel-section">
       <div class="panel-label">Note (optional)</div>
@@ -898,7 +909,7 @@ async function openPunctuationPanel(klalId, p) {
   const ctxStart = Math.max(0, idx - 10);
   const ctxEnd = Math.min(words.length, idx + 10);
   const ctxWords = words.slice(ctxStart, ctxEnd).map((w, i) =>
-    (ctxStart + i === idx) ? `<b>[.]</b> ${w}` : w
+    (ctxStart + i === idx) ? `<b>[.]</b> ${escapeHtml(w)}` : escapeHtml(w)
   ).join(' ');
 
   const decision = p.current_decision;
@@ -908,7 +919,7 @@ async function openPunctuationPanel(klalId, p) {
     <div class="panel-section">
       <div class="panel-label">Proposed break (klal ${klalId})</div>
       <div class="panel-word-context">${ctxWords}</div>
-      ${p.reasoning ? `<div style="font-size:12px;color:var(--ink-faint);margin-top:-8px;">${p.reasoning}</div>` : ''}
+      ${p.reasoning ? `<div style="font-size:12px;color:var(--ink-faint);margin-top:-8px;">${escapeHtml(p.reasoning)}</div>` : ''}
     </div>
     <div class="panel-section">
       <div class="panel-label">Decision</div>
@@ -923,7 +934,7 @@ async function openPunctuationPanel(klalId, p) {
     </div>
     <div class="panel-section">
       <div class="panel-label">Note (optional)</div>
-      <textarea id="punct-decision-note" rows="3" placeholder="Why? e.g. &quot;not a real clause break&quot;">${decision && decision.note ? decision.note : ''}</textarea>
+      <textarea id="punct-decision-note" rows="3" placeholder="Why? e.g. &quot;not a real clause break&quot;">${escapeHtml(decision && decision.note)}</textarea>
     </div>
     <div class="panel-section">
       <button class="panel-btn" id="save-punct-decision-btn">Save decision</button>

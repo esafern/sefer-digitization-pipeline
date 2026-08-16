@@ -362,3 +362,127 @@ def test_nav_highlight_and_flagged_filter_survive_a_nav_rebuild(server, page):
     assert page.locator(".nav-item:visible").count() == flagged_before, (
         "the flagged-only filter must still be applied after a rebuild"
     )
+
+
+# --- HTML escaping in review_frontend/app.js (round-2 audit, 2026-08-16) ----
+
+GERSHAYIM_READING = 'ב"ד'  # beit din - the gershayim IS a literal ASCII "
+# Deliberately entity-forming. A bare `&` or `<tag>` round-trips through an
+# unescaped interpolation by accident (`& ` is not a valid entity reference;
+# `<` is inert inside a textarea's RCDATA), so neither discriminates. `&amp;`
+# and a literal `<b>` in an innerHTML context do.
+ADVERSARIAL_NOTE = 'R &amp; J <b>see p. 4</b> &lt;end&gt;'
+
+
+def test_a_recorded_custom_reading_containing_gershayim_survives_a_panel_reopen(
+        server, page):
+    """The candidate panel used to render its custom-reading input as
+    `value="${activeText}"`, unescaped.
+
+    This corpus's abbreviation mark is the literal ASCII `"` (part1.json's
+    clean_text holds 6,448 of them), so a recorded custom reading like `ב"ד`
+    produced `value="ב"ד"` - which a browser parses as value="ב" plus a junk
+    attribute. The reviewer reopened their own decision and saw `ב`, and
+    saving again would have recorded `ב`: a human's exact Hebrew reading
+    silently truncated at the most common punctuation mark in the book, in the
+    tool whose whole purpose is exact fidelity (Success Criterion #1).
+
+    Six candidate_choice decisions whose chosen_text contains a gershayim are
+    already in review_decisions.jsonl, so this is the ordinary case, not an
+    exotic one. The manual-correction panel had escaped its own value= for
+    exactly this reason since it was written; the candidate panel never did.
+    """
+    klal_id, word_index = 1, 85
+
+    status, _ = _post_json(server, "/api/decisions/candidate", {
+        "klal_id": klal_id, "word_index": word_index,
+        "chosen_source": "custom", "chosen_text": GERSHAYIM_READING,
+        "note": ADVERSARIAL_NOTE,
+    })
+    assert status == 201
+
+    _open_dashboard(page, server, klal_id=klal_id)
+    page.evaluate(
+        """async ([kid, widx]) => {
+            const k = await fetch('/api/klal/' + kid).then(r => r.json());
+            openCandidatePanel(kid, k.corrections.find(c => c.word_index === widx));
+        }""",
+        [klal_id, word_index],
+    )
+    page.wait_for_selector("#custom-text-input", timeout=5000)
+
+    assert page.input_value("#custom-text-input") == GERSHAYIM_READING, (
+        "the recorded custom reading came back truncated - the gershayim closed the "
+        "value attribute early (escapeAttr regression in openCandidatePanel)"
+    )
+    # A note carrying HTML-special characters must round-trip verbatim too.
+    # ADVERSARIAL_NOTE is chosen to actually DISCRIMINATE: a textarea's
+    # contents are RCDATA, so a bare `&` or a `<tag>` survives unescaped
+    # interpolation by luck and proves nothing. `&amp;` does not - the parser
+    # decodes it to `&` on the way in, so an unescaped write loses a
+    # character the reviewer typed. Found by mutation testing: a first draft
+    # of this assertion used 'R & J <see p. 4>' and stayed GREEN when
+    # escapeHtml was reduced to a pass-through.
+    assert page.input_value("#decision-note") == ADVERSARIAL_NOTE
+    assert page.test_errors == []
+
+
+def test_a_note_with_html_special_characters_renders_verbatim_in_the_history_panel(
+        server, page):
+    """The decision-history list interpolates chosen_text and note straight
+    into innerHTML - a real HTML parsing context, unlike a textarea's RCDATA.
+    An unescaped note containing markup is not merely mangled, it is
+    INTERPRETED: `<b>` becomes bold formatting and the tag text disappears
+    from what the reviewer reads back."""
+    klal_id, word_index = 1, 85
+    status, _ = _post_json(server, "/api/decisions/candidate", {
+        "klal_id": klal_id, "word_index": word_index,
+        "chosen_source": "custom", "chosen_text": GERSHAYIM_READING,
+        "note": ADVERSARIAL_NOTE,
+    })
+    assert status == 201
+
+    _open_dashboard(page, server, klal_id=klal_id)
+    page.evaluate(
+        """async ([kid, widx]) => {
+            const k = await fetch('/api/klal/' + kid).then(r => r.json());
+            openCandidatePanel(kid, k.corrections.find(c => c.word_index === widx));
+        }""",
+        [klal_id, word_index],
+    )
+    page.wait_for_selector("#history-toggle", timeout=5000)
+    page.click("#history-toggle")
+    page.wait_for_selector("#history-list .h-note", timeout=5000)
+
+    notes = page.locator("#history-list .h-note")
+    rendered = [notes.nth(i).inner_text() for i in range(notes.count())]
+    assert ADVERSARIAL_NOTE in rendered, (
+        f"the note was altered on its way through innerHTML: {rendered!r}"
+    )
+    assert page.locator("#history-list .h-note b").count() == 0, (
+        "the note's literal <b> was parsed as markup instead of shown as text"
+    )
+    assert page.test_errors == []
+
+
+def test_corpus_text_with_html_special_characters_renders_verbatim(server, page):
+    """Part 1's clean_text contains 3 bare `&` tokens (klal 69 word 338, klal
+    77 word 11, klal 167 word 24 - see FOREIGN_CHARACTER_BASELINE in
+    tests/test_corpus_invariants.py). The candidate/manual context panes
+    interpolate clean_text straight into innerHTML, so they must escape it:
+    `& ` survives today only because it is not a valid entity reference, which
+    is luck, not a property anyone chose."""
+    klal_id, word_index = 69, 338
+    _open_dashboard(page, server, klal_id=klal_id)
+    page.evaluate(
+        "([kid, widx]) => openManualCorrectionPanel(kid, widx, '&', null)",
+        [klal_id, word_index],
+    )
+    page.wait_for_selector("#manual-panel-body .panel-word-context", timeout=5000)
+
+    context_text = page.inner_text("#manual-panel-body .panel-word-context")
+    assert "[&]" in context_text, (
+        f"the klal-69 ampersand did not render verbatim in the context pane: {context_text!r}"
+    )
+    assert "&amp;" not in context_text, "double-escaped"
+    assert page.test_errors == []
