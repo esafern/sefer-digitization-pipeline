@@ -792,6 +792,79 @@ def test_part1_character_sanity(part_klalim, part1_integrity_validator):
     assert not issues, f"Part-1 character/encoding sanity issue(s): {issues}"
 
 
+# The 7 characters outside Part 1's documented repertoire that are ALREADY in
+# the corpus as of 2026-08-16, when check_foreign_characters() was added. Each
+# is a DATA issue (per CLAUDE.md's terminology): it must be resolved against
+# the scan through the human review pipeline, never by a code-side rewrite or
+# a blind find-replace - so they are baselined here, exactly like
+# DUPLICATE_WORD_BASELINE above, rather than silently tolerated or "fixed".
+#
+# Keyed by (klal_id, word_index, character) so, per the PASS3_KNOWN_FALSE_
+# POSITIVES precedent (2026-08-14, risk 4), only these exact positions are
+# suppressed - the same character appearing anywhere ELSE in Part 1 still
+# fires. Shrinking this set as instances get scan-verified and corrected is
+# progress; a NEW entry appearing is a regression to investigate.
+#
+# Why these were invisible until now: check_character_sanity()'s stray-letter
+# test is LATIN_RE = [A-Za-z], so a Greek Π (U+03A0) - a homoglyph of the
+# "stray P from page furniture" its own docstring names as the motivating
+# example - passed it, as did every non-Latin, non-digit, non-bracket
+# character. See check_foreign_characters()'s docstring.
+#
+# NOT corrected here, and deliberately so, but worth recording for whoever
+# scan-verifies them: all three `&` instances sit exactly where `אל` would
+# read naturally - klal 69 `כגון אל אלהים ה'` (the biblical אֵל אֱלֹהִים
+# יְהוָה), klal 77 `נוטה אל הודאי`, klal 167 `פנים אל פנים`. That is the same
+# two-letter sequence as the confirmed alef-lamed ligature (U+FB4F) bug this
+# project has already corrected 131 instances of, which raises the question
+# of whether `&` is a THIRD substitution DocAI makes for that one glyph
+# (alongside the bare `א` already confirmed and the bare `לא` the VLM
+# produced). One frequency/semantic signal only - per Lesson 9 that is not
+# enough to act on, and per Success Criterion #1 nothing may be changed
+# without reading the ink.
+FOREIGN_CHARACTER_BASELINE = {
+    (39, 252, "Π"),   # standalone; context דבכולהן Π דבכולהו
+    (66, 97, "!"),    # standalone; context דברי ב"ד ! חבירו
+    (69, 338, "&"),   # standalone; reads as אל - see note above
+    (74, 443, "!"),   # standalone; context ע"ב ב ! ואפ"ה
+    (77, 11, "&"),    # standalone; reads as אל - see note above
+    (167, 24, "&"),   # standalone; reads as אל - see note above
+    (176, 694, ";"),  # standalone, klal-final; context סי' ה' ;
+}
+
+
+def test_part1_no_new_characters_outside_the_documented_repertoire(
+        part_klalim, part1_integrity_validator):
+    """The general case that check_character_sanity()'s three narrow tests
+    (Latin letters, Arabic digits, bracket balance) structurally cannot see.
+
+    Added 2026-08-16 (round-2 audit) after a full character inventory of
+    part1.json found 7 foreign-character tokens across 6 klalim that no check
+    in this pipeline had ever reported - CLAUDE.md Lesson 8: the cheap
+    mechanical sweep catches a different class than the expensive vision and
+    semantic passes, and Lesson 18: run it as a matter of course.
+    """
+    issues = part1_integrity_validator.check_foreign_characters(part_klalim["part1.json"])
+    found = set()
+    for issue in issues:
+        parts = issue.split()
+        kid, widx = int(parts[1]), int(parts[3].rstrip(":"))
+        ch = issue.split("'")[1]
+        found.add((kid, widx, ch))
+
+    new = sorted(found - FOREIGN_CHARACTER_BASELINE)
+    assert not new, (
+        f"{len(new)} character(s) outside Part 1's documented repertoire that are NOT in "
+        f"FOREIGN_CHARACTER_BASELINE: {new}. These are DATA issues - verify against the scan "
+        f"through the review dashboard and correct via apply_reviewer_decisions.py, or add to "
+        f"the baseline with evidence. Never fix one by editing part1.json directly."
+    )
+    stale = sorted(FOREIGN_CHARACTER_BASELINE - found)
+    if stale:
+        print(f"\nNote: FOREIGN_CHARACTER_BASELINE has {len(stale)} entry/entries no longer "
+              f"present (resolved - shrink the baseline): {stale}")
+
+
 def test_part1_no_new_duplicated_phrases(part_klalim, part1_integrity_validator):
     issues = part1_integrity_validator.check_duplicate_phrases(part_klalim["part1.json"], n=10)
     assert not issues, f"Part-1 unexplained duplicated 10+-word phrase(s): {issues}"

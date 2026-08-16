@@ -449,6 +449,52 @@ def test_klal_flag_and_applied_ids_resolve_independently_of_word_index(decisions
     assert rd.applied_decision_ids(path=decisions_path) == {decision["id"]}
 
 
+def test_foreign_character_check_fires_and_respects_the_allowed_repertoire():
+    """Proves check_foreign_characters() CAN fail, on synthetic input.
+
+    tests/test_corpus_invariants.py gates it against the real corpus with a
+    baseline, and that gate alone would stay green if the check were neutered
+    to find nothing (`found - baseline` is empty either way) - per CLAUDE.md
+    Lesson 2, a gate that cannot fail is indistinguishable from one that
+    passes. Same reasoning that put the three older gated integrity checks
+    under their own can-it-fire tests (2026-08-14).
+    """
+    def klal(kid, text):
+        return {"klal_id": kid, "clean_text": text}
+
+    # Everything in the documented repertoire must stay silent: Hebrew, the
+    # gershayim/geresh abbreviation marks, the bullet, the editorial [.]
+    # convention, footnote asterisks, citation parens.
+    clean = [klal(1, 'רש"י אמר וכו\' • [.] (סימן ה\') *) ודו"ק - כן, כך: כך.')]
+    assert vpci.check_foreign_characters(clean) == [], (
+        "a legitimate Part-1 character was flagged - PART1_ALLOWED_NON_HEBREW is too narrow"
+    )
+
+    # The real-corpus cases, reproduced synthetically.
+    greek = vpci.check_foreign_characters([klal(39, "דבכולהן Π דבכולהו")])
+    assert len(greek) == 1 and "U+03A0" in greek[0] and "klal 39 word 1" in greek[0], greek
+    assert "GREEK CAPITAL LETTER PI" in greek[0]
+
+    # The specific blind spot this check exists to close: a Latin 'P' is
+    # caught by check_character_sanity's LATIN_RE, its Greek homoglyph is not.
+    assert vpci.check_character_sanity([klal(39, "דבכולהן P דבכולהו")]), (
+        "sanity precondition: LATIN_RE does catch a Latin P"
+    )
+    assert vpci.check_character_sanity([klal(39, "דבכולהן Π דבכולהו")]) == [], (
+        "this is the blind spot being closed: check_character_sanity is structurally "
+        "unable to see the Greek homoglyph, which is why check_foreign_characters exists"
+    )
+
+    for ch in ("&", "!", ";", "@", "5"):
+        hits = vpci.check_foreign_characters([klal(7, f"פנים {ch} פנים")])
+        assert len(hits) == 1, f"{ch!r} should be reported as outside the repertoire: {hits}"
+
+    # Reported per OCCURRENCE with its own position, not once per klal - the
+    # baseline is keyed by (klal_id, word_index, char) and needs that precision.
+    multi = vpci.check_foreign_characters([klal(9, "אא & בב ! גג")])
+    assert len(multi) == 2 and "word 1" in multi[0] and "word 3" in multi[1], multi
+
+
 def test_reassigning_DECISIONS_PATH_redirects_calls_that_pass_no_explicit_path(
         tmp_path, monkeypatch):
     """Every OTHER test in this file passes `path=` explicitly, which is
