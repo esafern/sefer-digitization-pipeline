@@ -42,6 +42,7 @@ import build_corrections_dataset as bcd  # noqa: E402
 import build_klal_page_regions as bkpr  # noqa: E402
 import check_klal_token_orphans as ckto  # noqa: E402
 import detect_ligature_corruption as dlc  # noqa: E402
+import detect_real_word_substitution as drws  # noqa: E402
 import extract_abbreviation_forms as eaf  # noqa: E402
 import propose_abbreviation_expansions as pae  # noqa: E402
 import propose_punctuation_part1 as ppp  # noqa: E402
@@ -1146,6 +1147,113 @@ def test_abbreviations_are_kept_out_of_the_frequency_evidence():
     assert not [w for w in counts if dlc.has_gershayim(w)], (
         f"abbreviations reached the frequency table: {[w for w in counts if dlc.has_gershayim(w)]}"
     )
+
+
+# --- detect_real_word_substitution: a rare word one confusable letter away
+# --- from a common real word, restricted to zero-independent-attestation
+# --- candidates only ---------------------------------------------------------
+
+def test_substitution_detector_requires_zero_attestation_not_just_low(tmp_path):
+    """The load-bearing fix, mutation-verified here rather than just described:
+    an earlier draft accepted a candidate whenever it merely beat the
+    original's frequency by DOMINANCE_RATIO, which produced 348 "high-
+    confidence" hits on real Part-1 data, most of them ordinary rare-but-real
+    words losing a frequency contest to a common neighbour. Requiring the
+    ORIGINAL word to have ZERO independent attestation cut that to 83 + 1
+    ambiguous. A word with even one independent hit must be refused
+    regardless of how much more frequent the substituted neighbour is."""
+    part = tmp_path / "part_fixture.json"
+    part.write_text(json.dumps(
+        [{"klal_id": 1, "clean_text": "אמה ואמה ואמה"}], ensure_ascii=False), encoding="utf-8")
+    klal_words = drws.load_klal_words(str(part))
+    own_counts = drws.build_own_frequency_table(klal_words)
+    # אמה has real independent attestation (it means "cubit"/"maidservant"),
+    # even though אמר (confusable via ה<->ר? no - not a confusion pair here;
+    # use a word that IS one substitution from a common word but genuinely
+    # attested itself).
+    indep_freq = {"אמה": 50, "אמר": 45266}
+    result = drws._resolve("אמה", indep_freq)
+    assert result is None, "a word with nonzero independent attestation must never be flagged"
+
+
+def test_substitution_detector_finds_a_planted_corruption_with_zero_attestation(tmp_path):
+    """Positive control: a word absent from the independent corpus, one
+    confusable substitution away from a well-attested real word, with no
+    competing option, resolves as high-confidence."""
+    indep_freq = {"אכל": 0, "אבל": 5000}  # אכל = ORIGINAL (corrupt), אבל = corrected
+    result = drws._resolve("אכל", indep_freq)
+    assert result is not None
+    is_ambiguous, options = result
+    assert not is_ambiguous
+    assert options == [("אבל", 5000)]
+
+
+def test_substitution_detector_ambiguous_case_returns_every_qualifying_option():
+    """FIXED during this script's own construction, before it ever shipped:
+    an early draft kept only the highest-frequency option even in the
+    ambiguous bucket, which silently discarded the linguistically correct
+    answer in real spot-checking - klal 30 word 1206 'וטכל' scored 'ומכל'
+    (103x, wrong) ahead of 'וטבל' (66x, right - "and immersed," standard
+    conversion terminology, confirmed by reading the actual sentence). A
+    reviewer working from a truncated list would never see the right answer.
+    This test reproduces that exact shape synthetically: two qualifying
+    substitutions where the higher-frequency one is not dominant enough to
+    settle it alone."""
+    # 'וטכל' -> 'ומכל' (ט->מ) and 'וטבל' (כ->ב) both qualify; neither
+    # dominates the other by DOMINANCE_RATIO (103 <= 5 * 66 = 330).
+    indep_freq = {"וטכל": 0, "ומכל": 103, "וטבל": 66}
+    result = drws._resolve("וטכל", indep_freq)
+    assert result is not None
+    is_ambiguous, options = result
+    assert is_ambiguous, "neither option dominates the other - must not be reported as settled"
+    assert set(options) == {("ומכל", 103), ("וטבל", 66)}, (
+        "BOTH qualifying options must be returned, not just the top-frequency one"
+    )
+
+
+def test_substitution_detector_single_dominant_option_is_not_ambiguous():
+    """The mirror case: when one option dominates the runner-up by
+    DOMINANCE_RATIO, it must be reported as high-confidence, not ambiguous -
+    otherwise every candidate would end up in the low-trust bucket."""
+    indep_freq = {"אכל": 0, "אבל": 5000, "אבד": 10}  # 5000 > 5 * 10
+    result = drws._resolve("אכל", indep_freq)
+    is_ambiguous, options = result
+    assert not is_ambiguous
+    assert options[0] == ("אבל", 5000)
+
+
+def test_substitution_detector_known_false_positive_is_excluded():
+    """klal 88 word 423 'רתם' is already scan-verified (900 DPI) as print-
+    faithful, not a corruption - the standing proof in this project that a
+    confusable-letter/frequency signal can point at real broken type. Must
+    never resurface as a fresh "finding.\""""
+    part_data = [{"klal_id": 88, "clean_text": " ".join(["x"] * 423 + ["רתם"])}]
+    import tempfile
+    with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False, encoding="utf-8") as f:
+        json.dump(part_data, f, ensure_ascii=False)
+        path = f.name
+    try:
+        klal_words = drws.load_klal_words(path)
+        own_counts = drws.build_own_frequency_table(klal_words)
+        indep_freq = {"רתם": 0, "התם": 2415}
+        high, ambiguous = drws.find_candidates(klal_words, own_counts, indep_freq)
+        assert high == [] and ambiguous == [], (
+            "klal 88 word 423 'רתם' must be excluded via KNOWN_FALSE_POSITIVES"
+        )
+    finally:
+        os.unlink(path)
+
+
+def test_substitution_detector_respects_rare_threshold():
+    """A word occurring MORE than RARE_THRESHOLD times in Part 1's own text
+    is not a candidate no matter what the independent corpus says - a
+    corruption is not the print's own common spelling of anything."""
+    words = ["אכל"] * (drws.RARE_THRESHOLD + 1)
+    klal_words = {1: words}
+    own_counts = drws.build_own_frequency_table(klal_words)
+    indep_freq = {"אכל": 0, "אבל": 5000}
+    high, ambiguous = drws.find_candidates(klal_words, own_counts, indep_freq)
+    assert high == [] and ambiguous == [], "a word common in Part 1 itself must not be flagged"
 
 
 # --- validate_lexicon_independent: the independent reference corpus ----------
