@@ -15,6 +15,73 @@ current handoff, re-written (not just appended to) as state changes.
 
 ## ►► SESSION HANDOFF — read this first, 2026-08-16
 
+### DONE 2026-08-16 — systematic detector built for the "real-word substitution" corruption class; 49 klalim flagged (83 candidates)
+
+Per direct user request ("is there a good solution for #3?" / "go") - a real gap
+this file already recorded as **NOT DONE**: the 13 "lexicon-invisible" corruption
+candidates found earlier today (corrupt form is itself a real word, so no
+lexicon-membership check can catch it) were all found by accident, not by any
+repeatable method.
+
+**`tools/detect_real_word_substitution.py`** (new, standalone, read-only).
+Generalizes the exact "one clear winner" method `detect_ligature_corruption.py`
+and `propose_abbreviation_expansions.resolve_truncated_word()` already use, to
+single-letter SUBSTITUTION errors restricted to 8 empirically-observed
+confusion pairs (ב/כ, ד/ר, ה/ר, ה/ד, ה/ח, ט/מ, ס/פ, ג/נ). For a word rare in
+Part 1's own text, tries every confusable substitution and accepts a candidate
+only if (a) the ORIGINAL word has ZERO independent-corpus attestation and (b)
+the substituted form is well-attested there.
+
+**Scope, stated honestly**: catches SUBSTITUTION errors only. Of the 13 known
+incidental instances, ~10 are this shape; 3 (ישרץ->ישראל, ליבא->אליבא,
+ארת->את) are insertion/deletion errors - a different shape, not attempted.
+Cannot solve a confusion pair where BOTH readings are common independently
+(klal 107's כל->בל is the concrete counterexample - כל is far more common than
+בל, so a frequency test goes nowhere useful); that needs contextual/semantic
+reading, not a sharper threshold.
+
+**Real bug found and fixed while building it, not just described**: the first
+working version used a dominance-RATIO test (candidate beats original by 5x)
+rather than requiring zero attestation, and produced **348** "high-confidence"
+hits on real data - mostly ordinary rare-but-real words losing a frequency
+contest to an extremely common neighbour (אמה "cubit" -> אמר just because אמר
+is near-ubiquitous). Requiring zero independent attestation for the original
+cut that to **83** (82 high-confidence + 1 ambiguous), verified by spot-
+checking 7 of them directly against `part1.json` context (all 7 plausible) and
+finding exactly one further false positive: klal 88 w423 `רתם`, already scan-
+verified print-faithful - added as a named, evidenced exclusion
+(`KNOWN_FALSE_POSITIVES`), same precedent as `check_klal_token_orphans.py`'s
+`PASS3_KNOWN_FALSE_POSITIVES`.
+
+**Second bug found and fixed in the same build**: the ambiguous-candidate
+bucket originally kept only the top-frequency option, discarding the others -
+caught by reading klal 30 word 1206 `וטכל` in actual context (`דמל וטכל לשם
+עכדו'`): the script's top pick was `ומכל` (103x), but the linguistically
+correct reading is `וטבל` ("and immersed" - standard conversion/circumcision
+terminology, 66x), a DIFFERENT substitution the frequency contest merely
+ranked second. Fixed to return every qualifying option, not just the winner -
+a reviewer choosing from a truncated list would never have seen the right
+answer.
+
+6 new hermetic tests (`tests/test_pipeline_logic.py`), each mutation-verified
+(reintroduced the dominance-ratio bug, the truncated-ambiguous-list bug, and a
+removed KNOWN_FALSE_POSITIVES exclusion - all 3 confirmed red, restored
+green). 114/114 pytest.
+
+**49 klalim flagged** (`reviewer: "ai-real-word-substitution"`, `needs_revisit:
+true`), covering all 83 candidates (grouped one decision per klal, listing
+every candidate word in that klal, matching `review_lexicon_gaps.py`'s
+convention). Textual/frequency evidence only, nothing scan-verified, no
+`part1.json` edit. Verified: `review_decisions.jsonl` grew 493 -> 542
+(append-only, all 49 well-formed, spot-confirmed live via
+`/api/klal/4/flag`), `part1/2/3.json` sha256 unchanged.
+
+**Still open, correctly not closed by this**: the 3 non-substitution-shaped
+lexicon-invisible instances, and the fundamental "both readings common"
+blind spot (klal 107's כל/בל) - neither is solvable by this method, only by
+context-aware reading (the semantic-plausibility passes, run at partial
+coverage so far).
+
 ### DONE 2026-08-16 — 19 previously reported-but-not-flagged findings, now flagged
 
 Per direct user request ("are the other findings flagged for human review? / yes and
@@ -579,19 +646,19 @@ property of the data: **78 (klal_id, word_index) positions already collide**;
 all are invisible only because the drift check drops them (1 manual decision
 renders at all, 0 collisions). Mutation-verified to fire.
 
-**Found, NOT fixed (reported rather than changed):**
-- `review_frontend/app.js` interpolates `corr.reasoning`, `chosen_text` and
-  `note` into `tooltip.innerHTML` unescaped. Local-only and display-only, but
-  a note or a Gemini rationale containing `<`/`&` is silently mangled in a
-  tool whose job is exact Hebrew fidelity. Not changed here: the frontend's
-  only coverage is the Playwright suite, which is outside the gate, and this
-  audit's rule was to ship no fix without a test that would have caught it.
-- `build_corrections_dataset.py`'s running-header filter is a bare substring
-  test (`"מלאכי" in orig_word`), not a word-boundary one — the weaker form of
-  the bug fixed in `validate_catchword_continuity.is_header_word` 2026-08-14.
-  Currently inert (0 Part-1 stored tokens contain `מלאכי`), and tightening it
-  changes what the pipeline strips with no ground truth to check against —
-  the same reasoning that left the three page-furniture definitions unified.
+**Found, NOT fixed at the time (reported rather than changed) — BOTH SINCE FIXED,
+2026-08-16, see the "3 remaining found-not-fixed items" entry earlier in this
+handoff (`4171531`): this list was left stale for several commits after the
+fix landed, exactly the Lesson-19 failure shape this file keeps warning about,
+now caught and corrected here too:**
+- ~~`review_frontend/app.js` interpolates `corr.reasoning`, `chosen_text` and
+  `note` into `tooltip.innerHTML` unescaped.~~ **FIXED** — `escapeHtml`/
+  `escapeAttr` applied at every site in the candidate/klal-flag/manual panels
+  (`7153e1d`) and the witness panel (`4171531`).
+- ~~`build_corrections_dataset.py`'s running-header filter is a bare substring
+  test.~~ **FIXED** — extracted to `is_running_header()`, now exact-token
+  equality matching `check_klal_token_orphans.FURNITURE_WORDS`'s convention
+  (`4171531`).
 - Two defects in **this audit's own work**, both caught by the verification
   step and fixed in `e9968e6`, recorded because they are the interesting
   ones: a new test called a write endpoint without stubbing
@@ -1741,13 +1808,13 @@ investigated and closed 2026-08-14, 2 still open:**
      clean (419 items, 0 collisions), 77/77 pytest, live server restarted
      and `/api/witness` + the dashboard both confirmed working
      post-change, no data file touched.
-   - **STILL OPEN, not investigated**: `propose_punctuation_part1.py`'s
-     cache key doesn't cover the prompt text or model (risk 3, dormant
-     pipeline, no live effect). **Risk 3's sibling in the LIVE pipeline
-     was found and closed 2026-08-14** - `verify_corrections_vision.py`
-     had the identical gap and it was not dormant; see item 9 above. Risk
-     3 itself is unchanged, but it should no longer be read as "the only
-     place this pattern exists."
+   - **FIXED 2026-08-16** (was "STILL OPEN, not investigated" here since
+     2026-08-14): `propose_punctuation_part1.py`'s cache key didn't cover the
+     prompt text or model (risk 3). Fixed the same way as its LIVE-pipeline
+     sibling below (`verify_corrections_vision.py`, closed 2026-08-14) -
+     `PROMPT_TEMPLATE`/`PROMPT_HASH` extracted, folded into the key, lossless
+     migration added. See the "3 remaining found-not-fixed items" entry
+     earlier in this handoff (`4171531`) for full detail.
    - **CODE-REVIEWED 2026-08-14 (Opus 5, high thoroughness, via
      subagent).** Reviewed everything committed this session so far
      (5 commits) - found 10 concrete issues, several of them real bugs
