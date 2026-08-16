@@ -176,9 +176,13 @@ piece of text back to its origin).
    the environment (not committed — check `credentials.json`, gitignored).
 3. **Assembly & lexicon** — outputs converge into `full_text_cleaned.txt` /
    `full_text_cleaned_goal.txt`, `part1.json` / `part2.json` / `part3.json`
-   (one per Yad Malachi section), `processed_klalim/` (per-klal JSON, 813
-   tracked files), and `lexicon.txt` (~19k unique validated Rabbinic Hebrew
-   words used as a spell-check dictionary during cleanup passes).
+   (one per Yad Malachi section), `aligned_klalim/` / `klalim_batches/`
+   (per-klal JSON at earlier pipeline stages — CORRECTED 2026-08-16, this
+   line used to name a `processed_klalim/` directory that does not exist
+   anywhere in the repo and was never caught; see "Directory layout"
+   below for what actually is tracked), and `lexicon.txt` (~19k unique
+   validated Rabbinic Hebrew words used as a spell-check dictionary
+   during cleanup passes).
 4. **Demos/reports** — `pipeline/review_server.py` + `review_frontend/` (a
    live local server, run with `python3 pipeline/review_server.py` then open
    `http://127.0.0.1:8420/`) is the live, current human-review tool — use it
@@ -485,8 +489,14 @@ claim.
   (`scripts`/`data` in Aug 2026, `docs` added 2026-08-06). Safe to reference
   for *how* a past fix was done or what was investigated, not meant to be
   rerun/treated as current.
-- `aligned_klalim/`, `klalim_batches/`, `processed_klalim/` — tracked,
-  versioned pipeline output at various stages.
+- `aligned_klalim/`, `klalim_batches/` — tracked, versioned pipeline
+  output at various early stages. **CORRECTED 2026-08-16**: this bullet
+  used to also name a third directory, `processed_klalim/`, that does not
+  exist anywhere in the repo — a claim nobody had caught. Root hygiene
+  the same day found a real, separate `klalim/` (668 per-klal JSON files,
+  bare/no-suffix name, likely what `processed_klalim/` actually meant to
+  say) that was tracked but referenced by nothing live (no script, test,
+  or doc pointed at it) — archived to `archive/data/klalim/`.
 - `docai_word_boxes/`, `document_jsons_berlin/`, `klalim_docai/`,
   `llm_klal_starts/`, `sefaria_export/`, `vlm_extractions/`, `scratch/` (see
   the WARNING below) —
