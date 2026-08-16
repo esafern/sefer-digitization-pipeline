@@ -308,12 +308,21 @@ three"), split into two subdirectories by role:
   system: the 5 `rebuild_all.sh`-orchestrated correction-data stages, plus
   the live review tool (`review_server.py` and its 3 decision-layer
   scripts).
-- **`tools/`** (15 files) — everything run manually/standalone: all
-  validators, the lexicon/abbreviation-expansion scripts, the punctuation
-  pass, and the witness/reconstruction scripts.
+- **`tools/`** (18 files as of 2026-08-17, was 15 at the 2026-08-16 reorg -
+  `detect_real_word_substitution.py`, `check_next_marker_and_title.py`, and
+  `verify_flagged_candidates_vision.py` added since; see PROJECT-STATUS.md
+  for each) — everything run manually/standalone: all validators, the
+  lexicon/abbreviation-expansion scripts, the punctuation pass, and the
+  witness/reconstruction scripts.
 - **`tests/`** — unchanged, still holds the pytest suite.
 - Data files, caches, `rebuild_all.sh`, `review_frontend/`, and every `.md`/
   `.html` doc stayed at root — only Python scripts moved.
+  `flagged_candidates_vision_report.json` (added 2026-08-16) is one such
+  data file - the full-detail JSON output of `tools/verify_flagged_
+  candidates_vision.py`'s Gemini vision-adjudication pass, kept at root
+  alongside `corrections_candidates_part1.json` and similar (see
+  PROJECT-STATUS.md for what it holds); not part of the `rebuild_all.sh`
+  chain, a one-off report artifact, not regenerated automatically.
 
 Every script's own `REPO` constant (`os.path.dirname(os.path.abspath(
 __file__))`) was updated to go up one additional directory level so every
