@@ -15,6 +15,115 @@ current handoff, re-written (not just appended to) as state changes.
 
 ## ►► SESSION HANDOFF — read this first, 2026-08-16
 
+### RESEARCH 2026-08-16, continued — `scans/` now holds the Livorno original (Rashi, confirmed); expanded OCR-tool research; a Rashi-trained Tesseract model tested EMPIRICALLY and works
+
+Follow-up to the OCR-witness research above, per user request to expand
+beyond the original five tools, note the newly-consolidated `scans/`
+directory, and actually test whether any tool produces usable candidate
+text - not just survey literature.
+
+**`scans/` directory identified (5 files, none tracked/gitignored status
+not yet decided - see Open Items).** Rendered and read a real page from
+each rather than trusting filenames:
+- **`Hebrewbooks_org_32530.pdf` (348 pages) = the LIVORNO ORIGINAL,
+  CONFIRMED, in Rashi script.** Title page directly reads `נדפס בליוורנו`
+  (printed in Livorno), press of ר' משה עטיאס - this is exactly
+  `CASE-YAD-MALACHI.md`'s own table row citing "HebrewBooks #32530," now an
+  actual file instead of just a citation. **CORRECTS a stale claim** in
+  that same doc (fixed this session) that said "this repo doesn't hold a
+  Livorno scan." **User's hypothesis ("I believe all the old scans are
+  rashi script") is PARTLY right, corrected here**: of the 4 historical-
+  edition PDFs now in `scans/`, only this ONE (the Livorno original) is
+  Rashi - the other three are square type, matching what `CASE-YAD-
+  MALACHI.md`'s table already said (visually confirmed, not assumed):
+  - `Hebrewbooks_org_14122.pdf` (491p) = Przemyśl 1877, square (exact
+    HebrewBooks #14122 match to the table).
+  - `ספר_יד_מלאכי.pdf` (489p) = Przemyśl 1877, 2nd scan, square.
+  - `ספר_יד_מלאכי (1).pdf` (373p) = Przemyśl 1888, square.
+- **`יד מלאכי.PDF` (2 pages) and the two `.jpg` files are NOT historical
+  scans** - a modern typeset critical edition (footer credits "הוצאת
+  מישור" via "אוצר החכמה", page 553) and what look like product-listing
+  photos of a physical 3-volume modern set (`sofrimdeals.com` watermark
+  visible). Useful only as an independent MODERN reference for semantic
+  cross-checking, not as an OCR witness for what the historical prints say.
+
+**Expanded tool research (beyond Tesseract/Jochre 3/Kraken/Dicta/ABBYY):**
+- **EasyOCR and PaddleOCR: RULED OUT.** Confirmed no Hebrew model in either
+  framework's standard offering - not a viable option at all, not just a
+  weak one.
+- **Transkribus / DiJeSt 3.0 - a serious new lead, NOT YET TESTED (needs an
+  account).** A public, actively-maintained model from Haifa University's
+  "Digitizing Jewish Studies" project, explicitly covering "printed (or
+  typed) text in Hebrew Script" (Hebrew/Yiddish/Judeo-Arabic/Ladino,
+  15th-21st c.), reporting 1.79% CER - but that figure is on the model's
+  OWN validation set (Lesson 2: a reported score is a triage signal, not a
+  certificate), and its training-data breakdown (Hasidic Stories, a Yiddish
+  theatre lexicon, Yiddish newspapers) reads Yiddish-heavy - genuine rabbinic
+  Hebrew coverage, let alone Rashi-script specifically, isn't confirmed from
+  available documentation. Free tier exists (50 credits/month), API access
+  requires an Organisation-tier plan. Not testable without an account this
+  session - flagged for the user to try directly if interested, not signed
+  up for autonomously.
+- **Surya OCR**: 90+ languages, local/no-cloud, but no confirmed Hebrew
+  script support found in available docs - unresolved, not ruled in or out.
+- **TrOCR + Kraken**: used together on Dead Sea Scrolls Hebrew fragments per
+  one source - but that's ancient HANDWRITTEN Hebrew, a very different
+  problem from 18th/19th-century PRINTED Rabbinic Hebrew; not a direct
+  precedent for this project's material.
+
+**EMPIRICAL TEST, not just research - the concrete answer to "does any
+scan+tool combo actually work":**
+Downloaded the community `heb_rashi` Tesseract model (gitlab.com/pninim.org/
+tessdata_heb_rashi, LSTM-trained specifically for Hebrew Rashi script) and
+ran real OCR against real 300 DPI crops of a mid-book content page from both
+`Hebrewbooks_org_32530.pdf` (Rashi) and `Hebrewbooks_org_14122.pdf` (square),
+comparing against standard Tesseract `heb`:
+- **Standard `heb` on the SQUARE page**: moderately usable - individual
+  words mostly legible Hebrew with plausible-looking (if error-prone)
+  content, matching this project's own DocAI/Tesseract experience on the
+  Berlin square print.
+- **Standard `heb` on the RASHI page**: effectively USELESS - output is
+  largely incoherent, riddled with stray Arabic digits substituted for
+  Hebrew letters, not a usable starting point for correction. Directly
+  confirms the "Rashi is harder" hypothesis empirically, not just by
+  reputation.
+- **`heb_rashi` (the Rashi-trained model) on the SAME Rashi page**:
+  **dramatically better** - genuinely coherent Rabbinic Hebrew emerges,
+  real legal terminology recognizable (e.g. correctly producing phrases
+  close to `וכ"כ מרן בכ"מ פ"ו מהל' ברכות`), still with real errors (gershayim
+  rendering, some letter confusions) needing correction, but a real,
+  usable CANDIDATE text - not a research claim, an actual output compared
+  directly against the actual page. **This is a genuine, actionable
+  finding: a Rashi-tuned Tesseract model is an effective witness for the
+  Livorno scan specifically**, unlike generic Tesseract or (per the
+  earlier research) Jochre 3.
+- **Bonus finding**: `heb_rashi` ALSO produced good output on the SQUARE
+  test page - comparable quality to the standard `heb` model on the same
+  page. Not confirmed why (broader training diversity than its name
+  suggests, or Rashi-script training generalizing reasonably to square
+  letterforms) - but suggests `heb_rashi` might be usable as a single
+  model across both this project's script types rather than needing to
+  switch, worth confirming on more samples before relying on it.
+
+**Other editions/scans online**: Hebrew Wikipedia's edition list matches
+what's already cataloged (Livorno original; Przemyśl 1877/1888; several
+MODERN critical editions - Mishor 2001, Machon Yerushalayim 2016 - not
+additional historical witnesses) - no additional historical printing found
+beyond what `CASE-YAD-MALACHI.md`'s table and `scans/` already cover.
+**One discrepancy flagged, not resolved**: Wikipedia's summary implies a
+Berlin printing year of 5677 (~1917), sharply different from `CASE-YAD-
+MALACHI.md`'s own "~1857/8" estimate (itself already flagged there as
+unconfirmed) - the fetch/summarization pass that surfaced this may have
+mis-converted a Hebrew-year gematria (a known failure mode, not verified
+against the primary source), so this is reported as a discrepancy worth a
+closer direct look, not a correction to make yet.
+
+**Nothing applied to the pipeline** - this is still research plus one
+concrete empirical test, not a scoped implementation. If a Rashi-script
+extraction pass is ever wanted, `heb_rashi` Tesseract is now a confirmed,
+free, working starting point - worth being a `pipeline/`-tier tool if that
+work is scoped, not a research-only conclusion anymore.
+
 ### RESEARCH 2026-08-16 — multi-engine OCR witness options revisited (Tesseract/Jochre 3/Kraken/Dicta/ABBYY); one correction to CASE-YAD-MALACHI.md's original proposal, one promising unexplored lead
 
 Per direct user request ("do a deep research into these options to see if

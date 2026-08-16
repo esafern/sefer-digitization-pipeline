@@ -105,8 +105,12 @@ layer, but it is **not good enough to use** (see *Process*) — the work is to O
 The three later editions bind all three parts and are set in **clean square type, not
 Rashi** — what general OCR reads best. Berlin's *Klalei HaGemara* opening (**RESTORED
 2026-08-16**, regenerated from `berlin_square_corrected.pdf` page 14, the same way as
-the title page above — this repo doesn't hold a Livorno scan to render the Rashi-type
-side of the original side-by-side comparison, so that half stays pending):
+the title page above — **CORRECTED 2026-08-16, later**: this used to say the repo
+holds no Livorno scan; the user has since consolidated `scans/Hebrewbooks_org_32530.pdf`
+(348 pages, title page confirms `נדפס בליוורנו` and printer ר' משה עטיאס — this
+table's own HebrewBooks #32530 citation, now an actual file, not just a citation), so
+the Rashi-type side of the original side-by-side comparison is buildable when wanted,
+not chased further in this pass):
 
 ![The opening page of Klalei HaGemara (Aleph section) in the Berlin edition of Yad Malachi, in clean square Hebrew type](images/yad-malachi-berlin-klal-aleph.png)
 
