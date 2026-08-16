@@ -65,6 +65,117 @@ session misidentified it - corrected here, not repeated): **klal 183**
    complete as of this entry - its own findings will log to this file
    directly per its instructions when it finishes.
 
+### DONE 2026-08-17 — semantic-plausibility spot-check ROUND 3, a fresh 20% sample of Part 1 — 8 of 40 klalim flagged, one possible NEW boundary/truncation instance, several already-known findings independently re-derived and NOT re-flagged
+
+Third independent full-sentence reading pass over Part 1, per the round-2
+methodology exactly, on a fresh non-overlapping sample. **No corpus file was
+touched** — `part1.json`/`part2.json`/`part3.json`/`lexicon.txt` are
+sha256-identical before and after; `review_decisions.jsonl` grew 687 → 695
+lines with the first 687 byte-identical (confirmed via `git diff`, additions
+only, no changed/removed lines); 131/131 pytest before and after. The work is
+8 appended `klal_flag` rows, nothing else.
+
+**Sample definition.** Verified round 1's 33 and round 2's 55 recorded klal
+sets have **zero overlap** with each other (union = 88 distinct). **Pool**:
+all 222 Part-1 klal_ids minus that union = **134 klalim**. **Method**:
+`random.seed(20260817)`, `order = random.sample(pool, len(pool))` (full
+permutation), then klalim from the front of that permutation while cumulative
+word count < 10,500. **Sample**: **40 klalim / 10,539 words / 20.03% of Part
+1's 52,609** — 3, 17, 19, 21, 22, 23, 27, 30, 31, 34, 52, 58, 65, 69, 90, 103,
+105, 112, 113, 121, 124, 130, 134, 143, 144, 150, 153, 163, 164, 168, 181,
+185, 186, 188, 191, 207, 210, 211, 218, 221. Every one was read in full, not
+skimmed. A FOURTH pass can exclude round 1+2+3's combined 128 klalim exactly
+by re-running the same two lines.
+
+**Result: 8 of the 40 klalim flagged** (`reviewer:
+"ai-semantic-spotcheck-round3"`, `needs_revisit: true`, one row per klal).
+Flagged: 17, 30, 65, 143, 144, 150, 163, 168. **32 klalim were read and
+deliberately NOT flagged**: 3, 19, 21, 22, 23, 27, 31, 34, 52, 58, 69, 90,
+103, 105, 112, 113, 121, 124, 130, 134, 153, 164, 181, 185, 186, 188, 191,
+207, 210, 211, 218, 221.
+
+- **A possible NEW boundary/truncation instance, klal 65** (same shape as
+  round 2's klal 189 flag): the klal's own title phrase repeats VERBATIM
+  mid-body (w60-70, identical to w2-12), then the text breaks off unfinished
+  right where it starts qualifying a new point (`...נלע"ד דהיינו דוקא` —
+  "in my opinion this applies only when...") with no closing colon, jumping
+  straight to the next klal's (66) marker at w75 (which itself correctly
+  matches gematria(66), so `check_next_marker_and_title.py`'s trailing-marker
+  check doesn't catch this — neither does its title check, since the title
+  DOES match the klal's own opening line). **NOT YET DONE: scan-verify.**
+- **klal 17 w308 `יח`**: a bare `יח` breaks the sentence mid-body
+  (`...הנזכר לעיל יח בסתם...`). Corpus-wide `יח` occurs exactly one other
+  time in Part 1 — as klal 18's own opening/marker word — making this look
+  like marker/page-furniture bleed-through into klal 17's body, a different
+  failure shape than the already-scripted trailing-marker check (which only
+  looks at a klal's own end, not a marker-shaped token appearing mid-body).
+- **Internally-corroborated single-letter/word candidates** (the same
+  standard as rounds 1-2 — a correct form of the same word spelled correctly
+  elsewhere in the SAME klal or corpus-wide): klal 143 w684 `שמול`→`שמואל`
+  (correct `רב פפא בר שמואל` earlier in the same klal, w558); klal 150 w244
+  `בשיטרת`→`בשיטת` (correct `בשיטה`/`בשיטת` twice elsewhere in the same
+  klal); klal 168 w455-456 `המחילי רבא`→`המחילה רבה` (the fixed idiom
+  spelled correctly in klal 69 w192 and klal 163 w609); klal 163 w238
+  `למר`→`למד` (ד/ר confusion, restores normal subject+verb grammar).
+- **klal 144** (the author's long methodological essay on the 13 middot,
+  quoting a manuscript at length) produced the most candidates in one klal:
+  w598 a bare `.` token standing where every other `חזון נחום` citation in
+  Part 1 has a work-type word (cf. klal 154's near-identical `חזון נחום על
+  ספר קדשים`) — plausibly a dropped `ספר`/`סדר`; w924 a stray `י` splitting
+  the ordinary phrase `סדר הגון` into three tokens; w949 `למרן` — a common
+  real word elsewhere in Part 1 (9x, always the citation idiom `מצאתי למרן
+  ב...`) but contextually out of place in a sentence about Moshe Rabbeinu at
+  Sinai — plausibly `ומסרן` ("and transmitted them"), the same
+  real-word-substitution shape `detect_real_word_substitution.py` already
+  tracks; w914 and w1078 `הין`→ plausibly `היו`, LOWER CONFIDENCE since the
+  same form recurs a third time in klal 219 (not in this sample) — a
+  genuinely repeated form across two klalim could be this print's own
+  orthographic convention rather than corruption, flagged for review only.
+- **klal 30 w1017 `ראשה`**: sits right after a closing paren+colon ending a
+  bracketed Berlin-editor marginal gloss (the `הג"ה מאת... בק"ק בערלין`
+  note) and doesn't connect grammatically to what follows — flagged as a
+  possible textual seam around the inserted gloss (Success Criterion 2),
+  distinct from a word-substitution candidate.
+
+**Due-diligence DROPS — candidates seriously considered, then ruled out
+before writing any flag, per Lesson 2/the round-2 calibration standard, not
+reported as findings:** klal 23 `ואיהן` (looked like `איהו` misspelled, but
+`איהן` recurs 3x elsewhere in Part 1 in the fixed idiom `איהן גופיה` —
+genuine spelling, not corruption); klal 69 `דא` (looked incomplete for `דאל`,
+but `דא` is a normal standalone Aramaic "this," attested 7x elsewhere in Part
+1); klal 124 `אליה מקום כבודו` (looked broken, but the IDENTICAL phrase
+appears in klal 92 w328 — a genuine fixed idiom, not corruption); klal 69
+w338 `&` (real foreign-character anomaly, but this is ALREADY the
+fully-documented `FOREIGN_CHARACTER_BASELINE` finding from the 2026-08-16
+character-sanity work — not new, not re-flagged).
+
+**OVERLAP with prior work, called out per klal in each flag's own note** (not
+just here): klal 30 — this session also independently spotted w952 `וו"ל`
+(same word as klal 30's, correct form `וז"ל`), but that exact word_index is
+ALREADY flagged by `ai-lexicon-full-review`; not re-flagged, noted only.
+klal 144 — independently also spotted w873 `מהלוקת` and w1040 `ומאו`, both
+ALREADY flagged (`ai-lexicon-full-review`/`ai-real-word-substitution`), and
+w873 has ALREADY been vision-verified (`ai-vision-verify-flagged-
+candidates`) as print-faithful — a useful caution against over-trusting this
+klal's other still-unverified candidates. klal 69 and klal 186 (both in this
+sample) already carry flags from `ai-title-vs-opening-check`/other passes
+for DIFFERENT words than anything found this round; read in full, nothing
+new found, not re-flagged, no new row written.
+
+**Calibration note, consistent with rounds 1-2**: dense folio/acronym runs
+and terse elliptical argumentation remained the text's normal register
+throughout and were not flagged on their own. The 4 due-diligence drops
+above are the clearest evidence yet that checking a candidate against the
+REST of the corpus (not just intuition about whether a word "looks odd")
+is load-bearing — all 4 had a plausible corrupt-looking surface reading that
+turned out to be this author's/print's genuine, repeated usage once checked.
+
+**NOT YET DONE**: scan-verify klal 65's apparent truncation (highest
+priority — bears on Success Criterion 2, klal chunking) and klal 17's `יח`
+mid-body marker-contamination candidate; the rest are ordinary word-level
+candidates in the existing queue, same priority tier as round 1/2's
+unverified items.
+
 ### CORRECTION 2026-08-17 — the "near-perfect" heb_rashi claim on the square Przemyśl scan overclaimed; word-level errors verified; Google Cloud Vision tested and found WORSE
 
 Per direct user correction, applying CLAUDE.md Lesson 19 to this session's own
