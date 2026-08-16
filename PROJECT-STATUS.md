@@ -15,6 +15,56 @@ current handoff, re-written (not just appended to) as state changes.
 
 ## ►► SESSION HANDOFF — read this first, 2026-08-16 (continued into 2026-08-17)
 
+### RESEARCH 2026-08-17 — Document AI tested on both the base (Berlin, square) scan and the Livorno (Rashi) scan for direct comparison; two background jobs launched (full-Part-1 heb_rashi OCR on both scans, and a round-3 semantic-plausibility spot-check)
+
+Per direct user request. Identified the exact klal being used for cross-tool
+comparison this session by direct text search rather than by re-deriving its
+number from a misread gematria marker (an earlier attempt in this same
+session misidentified it - corrected here, not repeated): **klal 183**
+(`הלכה כדברי המכריע`).
+
+- **Berlin (base) scan**: didn't need a fresh API call - klal 183 already
+  has a cached DocAI reading in `docai_word_boxes/page_67.json` from the
+  live pipeline. Extracted it directly: `קפג הלכה כדברי המכריע - אפשר דלא
+  אמרי' כן...` - **zero errors**, exactly matches the correct text. Cleanly
+  better than both `heb_rashi` (one confirmed error, `כדבני` for `כדברי`)
+  and Google Cloud Vision (visibly worse, multiple ה/ס confusions) tested
+  earlier on the same passage - though note the comparison isn't perfectly
+  apples-to-apples on scan quality, since those two were tested against a
+  DIFFERENT physical scan (Przemyśl) of the same text, not this one.
+- **Livorno (Rashi) scan**: a genuinely NEW test - DocAI has never
+  processed this scan before. Called it fresh (`google-cloud-documentai`,
+  same processor already used for Berlin, reusing the calling pattern from
+  archived `extend_docai_ocr.py`) on the same Livorno page already tested
+  with standard `heb` and `heb_rashi` earlier this session. **Result: DocAI
+  got the page header right (`יר מלאכי כללי ההא`, one letter off from `יד`)
+  but the body text is heavily garbled** - comparable in severity to
+  `heb_rashi`'s attempt on the same page, NOT the dramatic advantage DocAI
+  showed on the square scan above. First-pass visual comparison only, NOT
+  word-by-word verified (flagging this explicitly, per the correction
+  entry below about not overclaiming OCR quality from an unverified
+  glance). **Real, calibrated takeaway**: DocAI's apparent edge in this
+  project is specific to square/print type, not a general quality
+  advantage - it does not show a clear win over the purpose-built
+  `heb_rashi` model on genuine Rashi script.
+
+**Two background jobs launched, not yet complete as of this entry:**
+1. Full-Part-1 `heb_rashi` OCR pass on BOTH scans - Berlin (pages 14-76,
+   62 pages, the actual pages Part 1 occupies per `klal_page_regions.json`)
+   and the entire Livorno scan (348 pages, all of Part 1 in that edition).
+   300 DPI, ~1.4 sec/page measured directly, ~10 minutes total, $0 cost
+   (fully local Tesseract). Output: `/tmp/heb_rashi_full_run/berlin_part1_
+   heb_rashi.txt` and `livorno_part1_heb_rashi.txt` (scratch space, not
+   committed - regenerable from `/tmp/heb_rashi_full_run/run_ocr.sh`).
+   Purpose: enable a full-corpus diff against `part1.json`, not just
+   sampled pages.
+2. Semantic-plausibility spot-check ROUND 3 - a background agent given the
+   full round-1/round-2 methodology and told to draw a fresh ~20% sample
+   (`seed 20260817`) excluding both prior rounds' known klalim (33 + 55 =
+   88 distinct), same textual-only, no-scan-check discipline. Not
+   complete as of this entry - its own findings will log to this file
+   directly per its instructions when it finishes.
+
 ### CORRECTION 2026-08-17 — the "near-perfect" heb_rashi claim on the square Przemyśl scan overclaimed; word-level errors verified; Google Cloud Vision tested and found WORSE
 
 Per direct user correction, applying CLAUDE.md Lesson 19 to this session's own
