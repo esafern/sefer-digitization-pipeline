@@ -503,7 +503,31 @@ DOMINANCE_RATIO = 5
 
 
 def load_independent_frequency():
+    """The Sefaria frequency table, or None if it is absent OR of unknown
+    provenance.
+
+    This file is owned and built by validate_lexicon_independent.py; this
+    script is only a consumer. Refusing a cache whose provenance record does
+    not match that builder is deliberate, and it is not theoretical: the
+    table on disk before 2026-08-16 was missing 106,474 words (all of
+    Shulchan Arukh, Even HaEzer - see that script's flatten_strings()) while
+    being indistinguishable from a correct one, and every completion scored
+    against it inherited the gap silently. Lesson 3 - do not trust a derived
+    artifact because it has always been there. Returning None costs nothing:
+    main() prints a NOTE and the truncated-word step is skipped, which is
+    strictly better than answering from a corpus of unknown shape.
+    """
     if not os.path.exists(SEFARIA_FREQ_CACHE):
+        return None
+    try:
+        import validate_lexicon_independent as vli
+    except ImportError:  # standalone use without its sibling script
+        return json.load(open(SEFARIA_FREQ_CACHE, encoding="utf-8"))
+    if not vli.cache_is_current():
+        print("NOTE: sefaria_reference_corpus/word_freq.json was built by a different "
+              "extractor version or from a different set of books - re-run "
+              "validate_lexicon_independent.py to rebuild it. Skipping truncated-word "
+              "completion rather than scoring against a corpus of unknown shape.\n")
         return None
     return json.load(open(SEFARIA_FREQ_CACHE, encoding="utf-8"))
 
@@ -673,7 +697,11 @@ def main():
                 counts[w] += 1
 
     freq = load_independent_frequency()
-    if freq is None:
+    # Only for the absent case: load_independent_frequency() prints its own,
+    # different message when the file IS there but its provenance doesn't
+    # check out, and reporting that as "not found" would send the reader
+    # looking for the wrong problem.
+    if freq is None and not os.path.exists(SEFARIA_FREQ_CACHE):
         print("NOTE: sefaria_reference_corpus/word_freq.json not found - run "
               "fetch_sefaria_reference_corpus.py + validate_lexicon_independent.py "
               "first for truncated-word completion. Continuing without it.\n")

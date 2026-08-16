@@ -36,6 +36,7 @@ import build_klal_page_regions as bkpr  # noqa: E402
 import check_klal_token_orphans as ckto  # noqa: E402
 import extract_abbreviation_forms as eaf  # noqa: E402
 import propose_abbreviation_expansions as pae  # noqa: E402
+import validate_lexicon_independent as vli  # noqa: E402
 import review_decisions as rd  # noqa: E402
 import review_server as rs  # noqa: E402
 import validate_catchword_continuity as vcc  # noqa: E402
@@ -929,6 +930,116 @@ def test_extract_reports_each_klal_once_per_form_however_often_it_repeats():
     assert counts['רש"י'] == 3, "the count is per occurrence"
     assert klalim['רש"י'] == [1, 2], "the klal list is per klal, deduplicated and in order"
     assert set(counts) == {'רש"י'}
+
+
+# --- validate_lexicon_independent: the independent reference corpus ----------
+# Added 2026-08-16 (code audit). This is the ONE check in the pipeline whose
+# reference data has no lineage to this project's own OCR, so a silent gap in
+# it is worse than a gap anywhere else: it is the signal every other check is
+# measured against. Nothing here touches the real (gitignored) corpus - all
+# inputs are synthetic and all writes go to tmp_path.
+
+def test_flatten_strings_reaches_text_held_in_a_dict_not_only_a_list():
+    """Most Sefaria books' `text` is a nested list; a book with named
+    sub-sections is a DICT, and dicts used to fall through silently.
+    Shulchan Arukh, Even HaEzer is one ("", "Seder HaGet", "Seder Halitzah"):
+    106,474 words - 4.3% of the corpus, one of the four chelekim - counted as
+    downloaded, named in the docstring, contributing exactly nothing."""
+    out = []
+    vli.flatten_strings({"": [["אלף", "בית"]], "Seder HaGet": [["גימל"]]}, out)
+    assert out == ["אלף", "בית", "גימל"]
+    # ... and nested the other way round, which is the real shape.
+    out = []
+    vli.flatten_strings([{"א": ["אלף"]}, ["בית"]], out)
+    assert out == ["אלף", "בית"]
+    # Non-text leaves must still be ignored rather than stringified.
+    out = []
+    vli.flatten_strings({"a": [1, None, "אלף"]}, out)
+    assert out == ["אלף"]
+
+
+def test_clean_words_keeps_only_hebrew_letters_and_drops_markup_and_niqqud():
+    assert vli.clean_words('<b>אלף</b> בית') == ["אלף", "בית"]
+    assert vli.clean_words("אָלֶף") == ["אלף"]
+    assert vli.clean_words('רש"י') == ["רשי"], (
+        "gershayim are stripped and the letters joined, so the table holds no abbreviation "
+        "forms - consumers scoring a candidate against it are matching letter-runs only"
+    )
+    assert vli.clean_words("123 !!! ") == []
+
+
+def test_the_frequency_cache_is_rejected_unless_its_provenance_matches(tmp_path, monkeypatch):
+    """The cache is a bare {word: count} file: the version missing Even HaEzer
+    was byte-shaped exactly like a correct one and would have been reused
+    forever, by this script AND by propose_abbreviation_expansions.py.
+    Lesson 12 applied to a derived table - the key must cover the extractor
+    and the inputs, not just "a file exists"."""
+    raw = tmp_path / "raw"
+    raw.mkdir()
+    (raw / "Book.json").write_text(json.dumps({"text": ["אלף בית"]}), encoding="utf-8")
+    monkeypatch.setattr(vli, "RAW_DIR", str(raw))
+    monkeypatch.setattr(vli, "FREQ_CACHE", str(tmp_path / "word_freq.json"))
+    monkeypatch.setattr(vli, "FREQ_META", str(tmp_path / "word_freq.meta.json"))
+
+    assert vli.cache_is_current() is False, "no cache yet"
+    counts = vli.build_or_load_frequency_table()
+    assert counts["אלף"] == 1 and vli.cache_is_current() is True
+
+    # A book appearing (or disappearing) invalidates it - the inputs changed.
+    (raw / "Second.json").write_text(json.dumps({"text": ["אלף"]}), encoding="utf-8")
+    assert vli.cache_is_current() is False
+    assert vli.build_or_load_frequency_table()["אלף"] == 2
+    assert vli.cache_is_current() is True
+
+    # So does a change to the extraction rule itself, which is what the Even
+    # HaEzer fix was - same books in, different words out.
+    monkeypatch.setattr(vli, "EXTRACTOR_VERSION", vli.EXTRACTOR_VERSION + 1)
+    assert vli.cache_is_current() is False
+
+
+def test_a_book_contributing_zero_words_is_reported_not_absorbed(tmp_path, monkeypatch, capsys):
+    """The totals line cannot show a missing book; only a per-book check can.
+    An unhandled `text` shape and a bad download look identical from the sum."""
+    raw = tmp_path / "raw"
+    raw.mkdir()
+    (raw / "Good.json").write_text(json.dumps({"text": ["אלף בית"]}), encoding="utf-8")
+    (raw / "Empty.json").write_text(json.dumps({"text": []}), encoding="utf-8")
+    monkeypatch.setattr(vli, "RAW_DIR", str(raw))
+    monkeypatch.setattr(vli, "FREQ_CACHE", str(tmp_path / "word_freq.json"))
+    monkeypatch.setattr(vli, "FREQ_META", str(tmp_path / "word_freq.meta.json"))
+    vli.build_or_load_frequency_table()
+    out = capsys.readouterr().out
+    assert "ZERO words" in out and "Empty.json" in out and "Good.json" not in out
+
+
+def test_the_abbreviation_proposer_refuses_a_frequency_cache_it_cannot_vouch_for(
+        tmp_path, monkeypatch):
+    """propose_abbreviation_expansions.py is a consumer of the same file. It
+    must not answer from a table of unknown provenance - a completion scored
+    against a corpus quietly missing a quarter of the Shulchan Arukh is worse
+    than no completion, because it is indistinguishable from a good one."""
+    raw = tmp_path / "raw"
+    raw.mkdir()
+    (raw / "Book.json").write_text(json.dumps({"text": ["אלף"]}), encoding="utf-8")
+    cache = tmp_path / "word_freq.json"
+    cache.write_text(json.dumps({"נראה": 9999}), encoding="utf-8")
+    meta = tmp_path / "word_freq.meta.json"
+    monkeypatch.setattr(pae, "SEFARIA_FREQ_CACHE", str(cache))
+    monkeypatch.setattr(vli, "RAW_DIR", str(raw))
+    monkeypatch.setattr(vli, "FREQ_CACHE", str(cache))
+    monkeypatch.setattr(vli, "FREQ_META", str(meta))
+    assert pae.load_independent_frequency() is None, "no provenance record at all"
+
+    meta.write_text(json.dumps({"extractor_version": vli.EXTRACTOR_VERSION - 1,
+                                "source_files": ["Book.json"]}), encoding="utf-8")
+    assert pae.load_independent_frequency() is None, "built by an older extractor"
+
+    meta.write_text(json.dumps({"extractor_version": vli.EXTRACTOR_VERSION,
+                                "source_files": ["Book.json"]}), encoding="utf-8")
+    assert pae.load_independent_frequency() == {"נראה": 9999}, (
+        "a cache whose provenance DOES match must still be used - a guard that refuses "
+        "everything would pass the assertion above and disable the feature outright"
+    )
 
 
 # --- verify_corrections_vision: response parsing + cache-key coverage --------
