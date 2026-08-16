@@ -971,14 +971,35 @@ def test_manual_correction_drift_check_bounds_both_ends():
     assert rs._word_matches(words, 9, "אלף") is False
 
 
-def test_a_manual_correction_cannot_be_recorded_at_a_negative_index():
+def test_a_manual_correction_cannot_be_recorded_at_a_negative_index(monkeypatch):
     """The log is append-only by design, so a bad row can only ever be
     superseded, never removed - which makes the write site the right place to
-    refuse one."""
+    refuse one.
+
+    append_decision is stubbed out rather than merely asserting the raise:
+    api_post_manual_correction() calls rd.append_decision with no `path`, i.e.
+    the REAL git-tracked review_decisions.jsonl. A first draft of this test
+    left it unstubbed and, while mutation-testing the very guard it covers,
+    appended a junk row to that file (caught by the byte-identical hash check
+    at the end of the audit and reverted). Stubbing makes the test state the
+    stronger property anyway - nothing is written at all, not just "an
+    exception was raised somewhere" - and keeps this file's no-writes-to-a-
+    tracked-file rule true even when the code under test is broken, which is
+    exactly when a test is most likely to write something.
+    """
+    appended = []
+    monkeypatch.setattr(rs.rd, "append_decision",
+                        lambda *a, **kw: appended.append((a, kw)) or {"id": "stub"})
     with pytest.raises(ValueError):
         rs.api_post_manual_correction({"klal_id": 1, "word_index": -1, "chosen_text": "אלף"})
     with pytest.raises(ValueError):
         rs.api_post_manual_correction({"klal_id": 1, "word_index": 0, "chosen_text": None})
+    assert appended == [], "a rejected manual correction must never reach the decisions log"
+    # Positive control: a valid one does reach it, so a guard that refused
+    # everything could not pass this test.
+    rs.api_post_manual_correction({"klal_id": 1, "word_index": 0, "chosen_text": "אלף",
+                                   "original_word": "בית"})
+    assert len(appended) == 1
 
 
 # --- detect_ligature_corruption: word indices must mean what everything else
