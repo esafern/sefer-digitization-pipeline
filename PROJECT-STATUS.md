@@ -15,6 +15,58 @@ current handoff, re-written (not just appended to) as state changes.
 
 ## ►► SESSION HANDOFF — read this first, 2026-08-16
 
+### DONE 2026-08-16 — the 3 remaining found-not-fixed items from today's two revalidation rounds, closed (`4171531`)
+
+Per direct user request ("complete 2" against the open-items list). All
+three were already diagnosed by round 1 or round 2 above; this closes them.
+Deliberately touches witness (item 2) and punctuation (item 3) code, which
+the two revalidation rounds excluded by standing scope - user-directed
+exception, naming these three specifically, not a re-opening of that
+exclusion generally.
+
+1. **`build_corrections_dataset.py`'s running-header filter** was a
+   substring test (`"מלאכי" in orig_word`) on the whole joined diff-span
+   text - a real word merely CONTAINING those four letters as a substring
+   (a prefix glued on the front, or an adjacent token fused into the same
+   span) would have been silently treated as header furniture and dropped,
+   never surfacing as a candidate. Extracted to `is_running_header()`, now
+   exact-DocAI-token equality, matching `check_klal_token_orphans.
+   FURNITURE_WORDS`'s existing convention. Verified byte-identical
+   `corrections_candidates_part1.json` before/after - a real no-op on
+   today's data, defence-in-depth against the next scan/print.
+2. **`review_frontend/app.js`'s witness panel** had the identical
+   unescaped-`value=` bug already fixed in the candidate panel this session
+   (round 2's finding 3: a gershayim in a custom reading truncates the
+   displayed value on re-open) - round 2 deliberately left it, citing the
+   witness scope exclusion. Applied the same `escapeHtml`/`escapeAttr`
+   treatment to the witness panel's context highlight, custom-text value,
+   note textarea, and option label/text.
+3. **`propose_punctuation_part1.py`'s cache key** was `sha256(klal_id|
+   clean_text)` only, not covering the prompt template - the identical gap
+   already fixed in `verify_corrections_vision.py` 2026-08-14 (see that
+   file's `PROMPT_HASH` for the precedent and the incident it prevents).
+   Extracted `PROMPT_TEMPLATE`/`PROMPT_HASH` the same way, folded
+   `prompt_hash` into the key via a new `cache_key_for()`, and added a
+   lossless migration (`migrate_add_prompt_hash`) that back-fills any
+   pre-fix cached row whose klal text still matches today's corpus. Checked
+   against the real `punctuation_cache.db` (a scratch copy, not the tracked
+   file): **0 of its 3 existing rows migrate**, because klal 1/2/3's text
+   has itself changed since the 2026-08-14 pilot that cached them - already
+   orphaned by ordinary corpus-content drift, unrelated to and unaffected
+   by this fix. The migration is verified correct against synthetic data
+   instead (a hermetic test with a real matching row, confirming it DOES
+   carry over when the text hasn't drifted).
+
+All three: hermetic unit tests added (`tests/test_pipeline_logic.py`), each
+mutation-verified (reintroduced the original bug, confirmed the new test
+goes red, restored, confirmed green). Full `./rebuild_all.sh` run clean:
+stage 1-2 output confirmed byte-identical before letting the vision stage
+run (a real check, not assumed safe), all cache hits, 0 live API calls,
+108/108 pytest, 14/14 Playwright, all 9 corpus/derived/decision files
+byte-identical. `review_frontend/app.js` is read fresh from disk per
+request (`_serve_static`, no restart needed - confirmed by reading the
+server code, not assumed).
+
 ### DONE 2026-08-16 — revalidation/refactor audit ROUND 2 of the live pipeline, merged (rebased onto master, 4 commits `532391d`..`ffc5b88`, merge commit `a75e028`)
 
 The branch was cut before this session's own follow-on work (the app.js
