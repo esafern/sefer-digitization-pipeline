@@ -53,6 +53,9 @@ def main():
     part1 = json.load(open(os.path.join(REPO, "part1.json"), encoding="utf-8"))
     counts, klalim_by_form = extract(part1)
     total = sum(counts.values())
+    if not counts:
+        print("No abbreviation-marked tokens found in part1.json.")
+        return
 
     print(f"{len(counts)} unique abbreviation-marked forms, {total} total occurrences "
           f"across Part 1's {sum(len(k['clean_text'].split()) for k in part1)} words.\n")

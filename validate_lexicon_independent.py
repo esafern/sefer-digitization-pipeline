@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 # [STANDALONE] Cross-checks lexicon.txt against a genuinely INDEPENDENT
 # Rabbinic Hebrew/Aramaic word-frequency table (Shulchan Arukh + Talmud
-# Bavli, ~2.47M words, via fetch_sefaria_reference_corpus.py) - not a fix,
-# a read-only cross-check.
+# Bavli, ~2.6M words, via fetch_sefaria_reference_corpus.py) - not a fix,
+# a read-only cross-check. The exact word/book totals are printed at
+# runtime and recorded in sefaria_reference_corpus/word_freq.meta.json;
+# don't take the round number here as the checked figure (it was "~2.47M"
+# until 2026-08-16, when an extraction bug hiding 106,474 words was found).
 #
 # WHY THIS EXISTS: lexicon.txt was built from THIS corpus's own OCR output
 # (archive/scripts/build_lexicon.py), so it absorbed and then "validated"
@@ -45,6 +48,12 @@ from collections import Counter
 REPO = os.path.dirname(os.path.abspath(__file__))
 RAW_DIR = os.path.join(REPO, "sefaria_reference_corpus", "raw")
 FREQ_CACHE = os.path.join(REPO, "sefaria_reference_corpus", "word_freq.json")
+# Provenance for FREQ_CACHE - see cache_is_current(). Bump EXTRACTOR_VERSION
+# whenever flatten_strings/clean_words changes what a book contributes, so
+# every consumer of the cache rebuilds instead of silently reusing a table
+# built by the older rule.
+FREQ_META = os.path.join(REPO, "sefaria_reference_corpus", "word_freq.meta.json")
+EXTRACTOR_VERSION = 2  # 2 = 2026-08-16, flatten_strings() handles dict-shaped `text`
 LEXICON_PATH = os.path.join(REPO, "lexicon.txt")
 
 HEB = "אבגדהוזחטיכלמנסעפצקרשתךםןףץ"
@@ -66,10 +75,33 @@ CORRUPT_TO_CORRECT = {
 
 
 def flatten_strings(node, out):
+    """Collect every string in a Sefaria merged-text tree.
+
+    FIXED 2026-08-16 (code audit): dicts used to fall through to a silent
+    no-op. Most books' `text` is a nested list, but a book with named
+    sub-sections is a dict keyed by section title - and Shulchan Arukh, Even
+    HaEzer is one ("", "Seder HaGet", "Seder Halitzah"). It therefore
+    contributed EXACTLY ZERO words to the "independent reference corpus"
+    while being downloaded, counted as present by
+    fetch_sefaria_reference_corpus.py, and named in this file's own
+    docstring: 106,474 words, 4.3% of the total, and one of the four
+    Shulchan Arukh chelekim - precisely the marriage/divorce vocabulary
+    (גט, קידושין, יבום, חליצה) Yad Malachi cites constantly.
+
+    Both reports here read as MORE confident than they were: a lexicon.txt
+    word attested only in Even HaEzer was reported as having "zero
+    independent attestation", and propose_abbreviation_expansions.py's
+    truncated-word completion scores candidates against this same table.
+    CLAUDE.md Lesson 1 in its purest form - the check ran on all 41 books and
+    was structurally incapable of producing output for one of them.
+    """
     if isinstance(node, str):
         out.append(node)
     elif isinstance(node, list):
         for x in node:
+            flatten_strings(x, out)
+    elif isinstance(node, dict):
+        for x in node.values():
             flatten_strings(x, out)
 
 
@@ -84,22 +116,66 @@ def clean_words(raw_html_string):
     return words
 
 
+def cache_is_current(meta_path=None):
+    """Is the frequency cache on disk one THIS version of the extractor built,
+    from the books currently in RAW_DIR?
+
+    Added 2026-08-16 with the dict fix above, and the reason is that fix: the
+    cache is a plain {word: count} file with no record of how it was made, so
+    the version missing 106,474 words looks byte-for-byte like a correct one
+    and would have been reused forever - by this script AND by
+    propose_abbreviation_expansions.py, which reads the same file. A cache
+    key has to cover everything that changes the right answer (Lesson 12);
+    for a derived table that means the extractor version and the inputs, not
+    just "a file exists".
+    """
+    meta_path = meta_path or FREQ_META
+    if not (os.path.exists(FREQ_CACHE) and os.path.exists(meta_path)):
+        return False
+    try:
+        meta = json.load(open(meta_path, encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return False
+    return (meta.get("extractor_version") == EXTRACTOR_VERSION
+            and meta.get("source_files") == sorted(
+                os.path.basename(p) for p in glob.glob(os.path.join(RAW_DIR, "*.json"))))
+
+
 def build_or_load_frequency_table():
-    if os.path.exists(FREQ_CACHE):
+    if cache_is_current():
         return Counter(json.load(open(FREQ_CACHE, encoding="utf-8")))
     paths = sorted(glob.glob(os.path.join(RAW_DIR, "*.json")))
     if not paths:
         raise SystemExit(
             f"No files in {RAW_DIR} - run fetch_sefaria_reference_corpus.py first."
         )
+    if os.path.exists(FREQ_CACHE):
+        print(f"Rebuilding {os.path.basename(FREQ_CACHE)}: it was built by a different "
+              f"extractor version or from a different set of books.")
     counts = Counter()
+    per_book = {}
     for path in paths:
         d = json.load(open(path, encoding="utf-8"))
         strings = []
         flatten_strings(d.get("text", []), strings)
+        book = Counter()
         for s in strings:
-            counts.update(clean_words(s))
+            book.update(clean_words(s))
+        per_book[os.path.basename(path)] = sum(book.values())
+        counts.update(book)
+    empty = sorted(name for name, n in per_book.items() if not n)
+    if empty:
+        # Never again silently. A downloaded book that yields no words is
+        # either an unhandled `text` shape or a bad download, and both look
+        # identical from the totals line.
+        print(f"WARNING: {len(empty)} downloaded book(s) contributed ZERO words - "
+              f"the reference corpus is not what it claims to be: {', '.join(empty)}")
     json.dump(counts, open(FREQ_CACHE, "w", encoding="utf-8"), ensure_ascii=False)
+    json.dump({"extractor_version": EXTRACTOR_VERSION,
+               "source_files": sorted(per_book),
+               "words_per_book": per_book,
+               "total_words": sum(counts.values())},
+              open(FREQ_META, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
     return counts
 
 
@@ -131,6 +207,8 @@ def main():
 
     print("--- Report 2: lexicon.txt words with zero independent attestation ---")
     lexicon = load_lexicon()
+    if not lexicon:
+        raise SystemExit(f"{LEXICON_PATH} is empty - nothing to cross-check.")
     unattested = [w for w in lexicon if freq.get(w, 0) == 0]
     print(f"{len(unattested)}/{len(lexicon)} lexicon.txt words ({len(unattested)/len(lexicon):.1%}) "
           f"do not appear anywhere in the independent corpus.")

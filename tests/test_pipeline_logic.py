@@ -34,6 +34,10 @@ import assemble_corrections_dataset as acd  # noqa: E402
 import audit_applied_decisions as aad  # noqa: E402
 import build_klal_page_regions as bkpr  # noqa: E402
 import check_klal_token_orphans as ckto  # noqa: E402
+import detect_ligature_corruption as dlc  # noqa: E402
+import extract_abbreviation_forms as eaf  # noqa: E402
+import propose_abbreviation_expansions as pae  # noqa: E402
+import validate_lexicon_independent as vli  # noqa: E402
 import review_decisions as rd  # noqa: E402
 import review_server as rs  # noqa: E402
 import validate_catchword_continuity as vcc  # noqa: E402
@@ -175,6 +179,22 @@ def test_apply_replace_rewrites_only_the_snapshotted_span():
     text = "אלף בית גימל דלת"
     assert ard.apply_replace(text, 1, "בית", "בות") == "אלף בות גימל דלת"
     assert ard.apply_replace(text, 1, "בית גימל", "בות") == "אלף בות דלת"
+
+
+def test_apply_replace_refuses_a_snapshot_with_no_text_to_replace():
+    """Added 2026-08-16 (code audit). With final_text empty the span is [] and
+    `n` fell back to 1, so for an out-of-range word_index the drift check
+    compared `words[wi:wi+1]` - which is [] in Python, not an IndexError -
+    against that empty span, PASSED, and the slice assignment then APPENDED
+    the chosen text to the end of the klal at a position the decision never
+    named. apply_insert_removal() has had the equivalent `n == 0` guard since
+    it was written; this one never did."""
+    text = "אלף בית גימל"
+    assert ard.apply_replace(text, 99, "", "דלת") is None, "must not append at the end of the klal"
+    assert ard.apply_replace(text, 99, None, "דלת") is None
+    assert ard.apply_replace(text, 1, "", "דלת") is None
+    # Positive control: a real replace at a real index still works.
+    assert ard.apply_replace(text, 1, "בית", "דלת") == "אלף דלת גימל"
 
 
 def test_apply_replace_refuses_when_live_text_no_longer_matches_the_snapshot():
@@ -740,6 +760,404 @@ def test_running_header_words_are_only_matched_as_bare_words():
     assert vcc.is_header_word("י'ד") is False
     assert vcc.is_header_word("כלל") is False, (
         "the bare word כלל ('rule') is real text, not the header token כללי"
+    )
+
+
+# --- propose_abbreviation_expansions: how a form gets classified -------------
+# Added 2026-08-16 (code audit). This script writes nothing: it proposes
+# expansions for a human review/apply stage that does not exist yet. That is
+# exactly why its output has to be right BEFORE anything is built on it - a
+# wrong proposal here is a fidelity defect (Success Criterion 1) waiting for a
+# consumer, and every failure below was silent in the printed report, not
+# loud. None of it needs the Sefaria frequency cache: `freq` is passed
+# explicitly so the classification logic is testable with no network, no
+# gitignored cache, and no dependence on what today's reference corpus
+# happens to contain.
+
+def test_a_prefixed_expansion_keeps_the_prefix_it_stripped():
+    """The proposal used to be the ROOT's expansion verbatim, so `דר'` was
+    reported as `רבי` - a proposal that DELETES the ד. 113 forms / 642
+    occurrences, printed in the same column and format as an unprefixed
+    dictionary hit."""
+    assert pae.resolve("דר'", None)["expansion"] == "דרבי"
+    assert pae.resolve("התוס'", None)["expansion"] == "התוספות"
+    assert pae.resolve("ובס'", None)["expansion"] == "ובספר"
+    # A list-valued expansion must keep the prefix on every alternative.
+    assert pae.resolve('ושכ"כ', None)["expansion"] == ["ושכן כתב", "ושכך כתב", "ושכל כך"]
+    # ... and the root/prefix must be reported, not left to be parsed back out
+    # of the human-readable `method` string.
+    assert pae.resolve("דר'", None)["root"] == "ר'"
+    assert pae.resolve("דר'", None)["prefix"] == "ד"
+
+
+def test_a_non_expand_category_keeps_its_gloss_unprefixed():
+    """"name"/"scholarly"/"stays" values are explanatory text, not proposals -
+    prefixing them would produce `הרבי שלמה יצחקי (Rashi)`."""
+    r = pae.resolve('הרא"ש', None)
+    assert r["category"] == "name" and r["root"] == 'רא"ש'
+    assert r["expansion"] == pae.ROOT_ENTRIES['רא"ש'][1]
+
+
+def test_prefix_decomposition_prefers_the_longest_surviving_root():
+    """Was "longest prefix first", which prefers eating the most of the word -
+    backwards, since a longer root is the more specific dictionary match.
+    Each case below flipped a category or an expansion on real Part-1 data."""
+    maharash = pae.resolve('ומוהר"ש', None)
+    assert maharash["root"] == 'מוהר"ש' and maharash["category"] == "name", (
+        "ומ- + וה- + ר\"ש re-analyses the word's own letters מוה as prefixes and lands on "
+        "the generic scholarly ר\"ש, when the name מוהר\"ש is a root"
+    )
+    assert pae.resolve('ומהר"י', None)["category"] == "name"
+    lamed = pae.resolve('ולמ"ד', None)
+    assert lamed["root"] == 'למ"ד' and lamed["expansion"] == "ולמאן דאמר", (
+        "ול- + מ\"ד swallows the ל that is part of the abbreviation itself"
+    )
+    assert pae.resolve('ובפ"ק', None)["root"] == 'בפ"ק'
+
+
+def test_no_prefix_may_stack_on_a_copy_of_itself():
+    """No Hebrew proclitic doubles. Without the guard the 2-level stripper
+    invents roots from the word's own letters: דדחי' -> ד-ד- + חי' ->
+    "דדחידושי"."""
+    assert all(p1 != p2 for p, _ in pae.prefix_decompositions("דדחי'")
+               for p1, p2 in [(p[:1], p[1:2])] if len(p) == 2)
+    assert pae.resolve("דדחי'", None)["category"] != "expand"
+    # The single-level ד- + a real root is untouched by the guard.
+    assert pae.resolve('דא"כ', None)["expansion"] == "דאם כן"
+
+
+def test_a_long_geresh_final_word_is_never_filed_as_a_citation_numeral():
+    """looks_like_bare_numeral() had no upper bound while its docstring
+    promised "a single Hebrew letter or short letter-run", and resolve() falls
+    back to it after truncated-word completion declines - so 187 forms / 249
+    occurrences of plain Hebrew prose were reported under a heading that says
+    they are numbers and need no attention (Lesson 15)."""
+    assert pae.resolve("ובקדושין'", None)["category"] == "unresolved"
+    assert pae.resolve("דתלמידי'", None)["category"] == "unresolved"
+    # The real numerals still classify as numerals - a fix that emptied the
+    # category would pass the two assertions above and prove nothing.
+    assert pae.resolve("ב'", None)["category"] == "numeral"
+    assert pae.resolve("מה'", None)["category"] == "expand"  # a root wins over the shape
+
+
+def test_the_two_readings_of_the_geresh_shape_partition_stem_length_exactly():
+    """Numeral and truncated-word are the same SHAPE with one cut between
+    them. If the two bounds ever drift apart, some stem length is either
+    claimed by both or dropped by both, silently."""
+    assert pae.MAX_NUMERAL_STEM_LETTERS + 1 == pae.MIN_TRUNCATION_STEM_LETTERS
+    for stem_len in range(1, 8):
+        word = "א" * stem_len + "'"
+        numeral = pae.looks_like_bare_numeral(word)
+        truncatable = (pae.ends_in_bare_geresh(word)
+                       and stem_len >= pae.MIN_TRUNCATION_STEM_LETTERS)
+        assert numeral != truncatable, f"stem length {stem_len} is claimed by both or neither"
+
+
+def test_geresh_shape_detection_accepts_the_real_hebrew_geresh_too():
+    """part1.json holds only the ASCII forms today, so this path is inert on
+    real data - which is the point: a later normalisation to U+05F3 would
+    switch off numeral detection AND truncated-word completion while
+    is_abbreviation() kept matching, i.e. no error, just a silently emptied
+    category (Lesson 1)."""
+    assert pae.ends_in_bare_geresh("נרא׳") is True
+    assert pae.looks_like_bare_numeral("ב׳") is True
+    # A gershayim-marked acronym is never the bare-geresh shape, either form.
+    assert pae.ends_in_bare_geresh('רש"י') is False
+    assert pae.ends_in_bare_geresh("רש״י") is False
+
+
+def test_a_frequency_completion_is_not_reported_as_a_dictionary_expansion():
+    """It appends exactly ONE letter, so a multi-letter truncation has no
+    correct candidate on the ballot and a merely-common word wins by default -
+    confirmed on real data (בפי' -> בפיו for בפירוש, בחי' -> בחיי for
+    בחידושי). It gets its own category so the next such form cannot be read
+    as a peer of an editorially-confirmed expansion."""
+    freq = {"נראה": 5000, "נראו": 10, "נראי": 3}
+    r = pae.resolve("נרא'", freq)
+    assert r["category"] == "truncated" and r["expansion"] == "נראה"
+    assert "truncated" in pae.CATEGORY_LABELS and "expand" != r["category"]
+    # The two confirmed misses now resolve through the dictionary instead.
+    assert pae.resolve("בפי'", freq)["expansion"] == "בפירוש"
+    assert pae.resolve("בחי'", freq)["expansion"] == "בחידושי"
+
+
+def test_truncated_completion_answers_only_on_a_single_clear_winner():
+    stem = "נרא"
+    assert pae.resolve_truncated_word(stem + "'", {"נראה": 5000, "נראו": 10}) == "נראה"
+    tie = {"נראה": 200, "נראו": 199}
+    assert pae.resolve_truncated_word(stem + "'", tie) is None, (
+        "two comparably-attested completions are an unanswered question, not a proposal"
+    )
+    below_floor = {"נראה": pae.MIN_COMPLETION_FREQUENCY}
+    assert pae.resolve_truncated_word(stem + "'", below_floor) is None
+    assert pae.resolve_truncated_word("דר'", {"דרך": 9999}) is None, (
+        "a 2-letter stem is a title/prefix shape (דר' = ד + ר'), not a truncated word"
+    )
+    assert pae.resolve_truncated_word("נרא'", None) is None  # no frequency cache built
+    assert pae.resolve_truncated_word('רש"י', {"רשיה": 9999}) is None  # not the geresh shape
+
+
+def test_every_category_resolve_can_produce_is_labelled_in_the_report():
+    """Same guard as FLAG_LABELS above, same reason: main() prints one line
+    per CATEGORY_ORDER entry, so an unlabelled category vanishes from the
+    summary while still sitting in --json. Enumerated from ROOT_ENTRIES plus
+    the dynamically-assigned ones rather than read off the source."""
+    produced = {"truncated", "numeral", "artifact", "unresolved", "expand"}
+    for category, _ in pae.ROOT_ENTRIES.values():
+        produced.add(category)
+    unlabelled = sorted(produced - set(pae.CATEGORY_LABELS))
+    assert not unlabelled, f"unlabelled categories: {unlabelled}"
+    assert set(pae.CATEGORY_ORDER) == set(pae.CATEGORY_LABELS)
+
+
+def test_root_entries_are_well_formed_for_the_report_that_renders_them():
+    for root, entry in pae.ROOT_ENTRIES.items():
+        assert isinstance(entry, tuple) and len(entry) == 2, f"{root!r}: {entry!r}"
+        category, expansion = entry
+        assert category in pae.CATEGORY_LABELS, f"{root!r} has unknown category {category!r}"
+        assert category != "truncated", (
+            f"{root!r}: 'truncated' means the frequency guess, never a dictionary entry"
+        )
+        if category == "scholarly":
+            assert isinstance(expansion, list) and len(expansion) > 1, (
+                f"{root!r}: main() renders scholarly entries with ', '.join(...) - a bare string "
+                "would be printed one character at a time, and a single option is not ambiguous"
+            )
+        assert expansion, f"{root!r} has an empty expansion"
+        for option in (expansion if isinstance(expansion, list) else [expansion]):
+            assert isinstance(option, str) and option.strip(), f"{root!r}: {option!r}"
+
+
+def test_the_two_abbreviation_scripts_still_share_one_definition():
+    """propose_abbreviation_expansions.py re-derives the token list rather
+    than reading extract_abbreviation_forms.py's output, so the two copies of
+    is_abbreviation() are a second-copy-of-the-truth (Lesson 13) - cheap to
+    pin, silent if it drifts."""
+    assert pae.QUOTE_CHARS == eaf.QUOTE_CHARS
+    for word in ['רש"י', "וכו'", "מלה", "נרא׳", "רש״י", "'", '"', ""]:
+        assert pae.is_abbreviation(word) == eaf.is_abbreviation(word), word
+
+
+def test_extract_reports_each_klal_once_per_form_however_often_it_repeats():
+    counts, klalim = eaf.extract([
+        {"klal_id": 1, "clean_text": 'רש"י אמר רש"י ועוד'},
+        {"klal_id": 2, "clean_text": 'רש"י בלבד'},
+        {"klal_id": 3, "clean_text": "אין כאן קיצור"},
+    ])
+    assert counts['רש"י'] == 3, "the count is per occurrence"
+    assert klalim['רש"י'] == [1, 2], "the klal list is per klal, deduplicated and in order"
+    assert set(counts) == {'רש"י'}
+
+
+# --- review_server: the manual-correction display drift check ----------------
+
+def test_manual_correction_drift_check_bounds_both_ends():
+    """Added 2026-08-16 (code audit). Both render paths for a
+    manual_correction (api_klal's synthetic entry, api_klalim's per-klal
+    count) checked only the UPPER bound - the same half-a-bounds-check gap
+    fixed in audit_applied_decisions.py's checkers (2026-08-14) and
+    apply_reviewer_decisions.py's mutators (2026-08-15), never revisited on
+    the display path. `words[-1]` is the klal's LAST word in Python, so a
+    decision recorded at -1 whose original_word matched that last word
+    rendered as a live "Human-Decided" correction on a word it never
+    described, and counted toward the klal's badges."""
+    words = "אלף בית גימל".split()
+    assert rs._word_matches(words, 1, "בית") is True
+    assert rs._word_matches(words, 1, "דלת") is False, "a moved word is drift"
+    # -1 with the klal's real LAST word is the case that passed before: it is
+    # exactly what a wrapped index resolves to, so a test using any other
+    # word would go green with the guard removed and prove nothing.
+    assert rs._word_matches(words, -1, "גימל") is False
+    assert rs._word_matches(words, 9, "אלף") is False
+
+
+def test_a_manual_correction_cannot_be_recorded_at_a_negative_index(monkeypatch):
+    """The log is append-only by design, so a bad row can only ever be
+    superseded, never removed - which makes the write site the right place to
+    refuse one.
+
+    append_decision is stubbed out rather than merely asserting the raise:
+    api_post_manual_correction() calls rd.append_decision with no `path`, i.e.
+    the REAL git-tracked review_decisions.jsonl. A first draft of this test
+    left it unstubbed and, while mutation-testing the very guard it covers,
+    appended a junk row to that file (caught by the byte-identical hash check
+    at the end of the audit and reverted). Stubbing makes the test state the
+    stronger property anyway - nothing is written at all, not just "an
+    exception was raised somewhere" - and keeps this file's no-writes-to-a-
+    tracked-file rule true even when the code under test is broken, which is
+    exactly when a test is most likely to write something.
+    """
+    appended = []
+    monkeypatch.setattr(rs.rd, "append_decision",
+                        lambda *a, **kw: appended.append((a, kw)) or {"id": "stub"})
+    with pytest.raises(ValueError):
+        rs.api_post_manual_correction({"klal_id": 1, "word_index": -1, "chosen_text": "אלף"})
+    with pytest.raises(ValueError):
+        rs.api_post_manual_correction({"klal_id": 1, "word_index": 0, "chosen_text": None})
+    assert appended == [], "a rejected manual correction must never reach the decisions log"
+    # Positive control: a valid one does reach it, so a guard that refused
+    # everything could not pass this test.
+    rs.api_post_manual_correction({"klal_id": 1, "word_index": 0, "chosen_text": "אלף",
+                                   "original_word": "בית"})
+    assert len(appended) == 1
+
+
+# --- detect_ligature_corruption: word indices must mean what everything else
+# --- means by them ----------------------------------------------------------
+
+def test_ligature_detector_indexes_words_the_same_way_the_corpus_mutators_do(tmp_path):
+    """It reported a word_index from `split(" ")`, which keeps an empty string
+    for every run of consecutive spaces; a correction made from its output is
+    recorded and applied against apply_reviewer_decisions.py's `split()`
+    indexing. One double space anywhere in a klal shifted every later index by
+    one - silently, in the one direction that edits the corpus at a position
+    nobody chose. Inert on today's data (0 klalim in any part file where the
+    two splits disagree), so only a synthetic fixture can hold the line."""
+    part = tmp_path / "part_fixture.json"
+    part.write_text(json.dumps(
+        [{"klal_id": 1, "clean_text": " אלף  בית גימל "}], ensure_ascii=False), encoding="utf-8")
+    words = dlc.load_klal_words(str(part))[1]
+    assert words == ["אלף", "בית", "גימל"]
+    assert words == " אלף  בית גימל ".split(), "must match the corpus mutators' own splitting"
+
+
+def test_ligature_detector_still_finds_a_planted_corruption(tmp_path):
+    """Positive control for the two negatives above and for _resolve()'s
+    dominance rule: a detector that found nothing would satisfy an
+    index-shape test just as well."""
+    part = tmp_path / "part_fixture.json"
+    frequent = " ".join(["אלמא"] * 5)
+    part.write_text(json.dumps([
+        {"klal_id": 1, "clean_text": f"{frequent} אמא"},
+        {"klal_id": 2, "clean_text": 'א"א אינו מועמד'},
+    ], ensure_ascii=False), encoding="utf-8")
+    klal_words = dlc.load_klal_words(str(part))
+    counts = dlc.build_frequency_table(klal_words)
+    high, ambiguous = dlc.find_candidates(klal_words, counts)
+    assert [(kid, idx, bad, good) for kid, idx, bad, good, _ in high] == [(1, 5, "אמא", "אלמא")]
+    assert ambiguous == []
+
+
+def test_abbreviations_are_kept_out_of_the_frequency_evidence():
+    """The load-bearing gershayim exclusion is in the frequency table, not in
+    the candidate loop: `א"ה` (Even HaEzer), `א"א` (eshet ish) and friends are
+    real, unrelated tokens, and letting them count as corpus words is the
+    false-positive class the original investigation had to remove (the
+    "~620 ambiguous" estimate that turned out to be 228)."""
+    counts = dlc.build_frequency_table({1: ["אלמא", 'א"א', 'א"א', 'א"ה']})
+    assert counts["אלמא"] == 1
+    assert not [w for w in counts if dlc.has_gershayim(w)], (
+        f"abbreviations reached the frequency table: {[w for w in counts if dlc.has_gershayim(w)]}"
+    )
+
+
+# --- validate_lexicon_independent: the independent reference corpus ----------
+# Added 2026-08-16 (code audit). This is the ONE check in the pipeline whose
+# reference data has no lineage to this project's own OCR, so a silent gap in
+# it is worse than a gap anywhere else: it is the signal every other check is
+# measured against. Nothing here touches the real (gitignored) corpus - all
+# inputs are synthetic and all writes go to tmp_path.
+
+def test_flatten_strings_reaches_text_held_in_a_dict_not_only_a_list():
+    """Most Sefaria books' `text` is a nested list; a book with named
+    sub-sections is a DICT, and dicts used to fall through silently.
+    Shulchan Arukh, Even HaEzer is one ("", "Seder HaGet", "Seder Halitzah"):
+    106,474 words - 4.3% of the corpus, one of the four chelekim - counted as
+    downloaded, named in the docstring, contributing exactly nothing."""
+    out = []
+    vli.flatten_strings({"": [["אלף", "בית"]], "Seder HaGet": [["גימל"]]}, out)
+    assert out == ["אלף", "בית", "גימל"]
+    # ... and nested the other way round, which is the real shape.
+    out = []
+    vli.flatten_strings([{"א": ["אלף"]}, ["בית"]], out)
+    assert out == ["אלף", "בית"]
+    # Non-text leaves must still be ignored rather than stringified.
+    out = []
+    vli.flatten_strings({"a": [1, None, "אלף"]}, out)
+    assert out == ["אלף"]
+
+
+def test_clean_words_keeps_only_hebrew_letters_and_drops_markup_and_niqqud():
+    assert vli.clean_words('<b>אלף</b> בית') == ["אלף", "בית"]
+    assert vli.clean_words("אָלֶף") == ["אלף"]
+    assert vli.clean_words('רש"י') == ["רשי"], (
+        "gershayim are stripped and the letters joined, so the table holds no abbreviation "
+        "forms - consumers scoring a candidate against it are matching letter-runs only"
+    )
+    assert vli.clean_words("123 !!! ") == []
+
+
+def test_the_frequency_cache_is_rejected_unless_its_provenance_matches(tmp_path, monkeypatch):
+    """The cache is a bare {word: count} file: the version missing Even HaEzer
+    was byte-shaped exactly like a correct one and would have been reused
+    forever, by this script AND by propose_abbreviation_expansions.py.
+    Lesson 12 applied to a derived table - the key must cover the extractor
+    and the inputs, not just "a file exists"."""
+    raw = tmp_path / "raw"
+    raw.mkdir()
+    (raw / "Book.json").write_text(json.dumps({"text": ["אלף בית"]}), encoding="utf-8")
+    monkeypatch.setattr(vli, "RAW_DIR", str(raw))
+    monkeypatch.setattr(vli, "FREQ_CACHE", str(tmp_path / "word_freq.json"))
+    monkeypatch.setattr(vli, "FREQ_META", str(tmp_path / "word_freq.meta.json"))
+
+    assert vli.cache_is_current() is False, "no cache yet"
+    counts = vli.build_or_load_frequency_table()
+    assert counts["אלף"] == 1 and vli.cache_is_current() is True
+
+    # A book appearing (or disappearing) invalidates it - the inputs changed.
+    (raw / "Second.json").write_text(json.dumps({"text": ["אלף"]}), encoding="utf-8")
+    assert vli.cache_is_current() is False
+    assert vli.build_or_load_frequency_table()["אלף"] == 2
+    assert vli.cache_is_current() is True
+
+    # So does a change to the extraction rule itself, which is what the Even
+    # HaEzer fix was - same books in, different words out.
+    monkeypatch.setattr(vli, "EXTRACTOR_VERSION", vli.EXTRACTOR_VERSION + 1)
+    assert vli.cache_is_current() is False
+
+
+def test_a_book_contributing_zero_words_is_reported_not_absorbed(tmp_path, monkeypatch, capsys):
+    """The totals line cannot show a missing book; only a per-book check can.
+    An unhandled `text` shape and a bad download look identical from the sum."""
+    raw = tmp_path / "raw"
+    raw.mkdir()
+    (raw / "Good.json").write_text(json.dumps({"text": ["אלף בית"]}), encoding="utf-8")
+    (raw / "Empty.json").write_text(json.dumps({"text": []}), encoding="utf-8")
+    monkeypatch.setattr(vli, "RAW_DIR", str(raw))
+    monkeypatch.setattr(vli, "FREQ_CACHE", str(tmp_path / "word_freq.json"))
+    monkeypatch.setattr(vli, "FREQ_META", str(tmp_path / "word_freq.meta.json"))
+    vli.build_or_load_frequency_table()
+    out = capsys.readouterr().out
+    assert "ZERO words" in out and "Empty.json" in out and "Good.json" not in out
+
+
+def test_the_abbreviation_proposer_refuses_a_frequency_cache_it_cannot_vouch_for(
+        tmp_path, monkeypatch):
+    """propose_abbreviation_expansions.py is a consumer of the same file. It
+    must not answer from a table of unknown provenance - a completion scored
+    against a corpus quietly missing a quarter of the Shulchan Arukh is worse
+    than no completion, because it is indistinguishable from a good one."""
+    raw = tmp_path / "raw"
+    raw.mkdir()
+    (raw / "Book.json").write_text(json.dumps({"text": ["אלף"]}), encoding="utf-8")
+    cache = tmp_path / "word_freq.json"
+    cache.write_text(json.dumps({"נראה": 9999}), encoding="utf-8")
+    meta = tmp_path / "word_freq.meta.json"
+    monkeypatch.setattr(pae, "SEFARIA_FREQ_CACHE", str(cache))
+    monkeypatch.setattr(vli, "RAW_DIR", str(raw))
+    monkeypatch.setattr(vli, "FREQ_CACHE", str(cache))
+    monkeypatch.setattr(vli, "FREQ_META", str(meta))
+    assert pae.load_independent_frequency() is None, "no provenance record at all"
+
+    meta.write_text(json.dumps({"extractor_version": vli.EXTRACTOR_VERSION - 1,
+                                "source_files": ["Book.json"]}), encoding="utf-8")
+    assert pae.load_independent_frequency() is None, "built by an older extractor"
+
+    meta.write_text(json.dumps({"extractor_version": vli.EXTRACTOR_VERSION,
+                                "source_files": ["Book.json"]}), encoding="utf-8")
+    assert pae.load_independent_frequency() == {"נראה": 9999}, (
+        "a cache whose provenance DOES match must still be used - a guard that refuses "
+        "everything would pass the assertion above and disable the feature outright"
     )
 
 

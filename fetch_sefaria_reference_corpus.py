@@ -11,8 +11,14 @@
 # one merged Hebrew-text JSON per book, no API key/auth needed. `books.json`
 # is the bucket's own index (title/language/versionTitle -> json_url); this
 # script filters it down to the 41 targets rather than hardcoding URLs, so a
-# future bucket reorganization breaks loudly (KeyError on a missing title)
-# rather than silently fetching nothing.
+# future bucket reorganization breaks loudly (find_urls() exits naming the
+# missing titles) rather than silently fetching nothing.
+#
+# Downloading a book is NOT the same as that book reaching the frequency
+# table - validate_lexicon_independent.py owns the extraction, and one book
+# (Shulchan Arukh, Even HaEzer) sat downloaded-and-counted here while
+# contributing zero words to it until 2026-08-16. That script now warns per
+# book; this one only promises bytes on disk.
 #
 # Output: sefaria_reference_corpus/raw/<Title>.json (41 files, ~45MB) -
 # gitignored, same as this project's other scan-derived caches. Re-run to
@@ -29,6 +35,11 @@ import urllib.request
 REPO = os.path.dirname(os.path.abspath(__file__))
 OUT_DIR = os.path.join(REPO, "sefaria_reference_corpus", "raw")
 BOOKS_JSON_URL = "https://raw.githubusercontent.com/Sefaria/Sefaria-Export/master/books.json"
+# A floor, not a size check: every real book here is >100KB, so anything at
+# or under this is an error page or a truncated transfer, never a short text.
+# It is the ONLY thing separating "downloaded" from "present on disk", which
+# is why download() deletes rather than leaves a file that fails it.
+MIN_VALID_BYTES = 1000
 
 TRACTATES = [
     "Berakhot", "Shabbat", "Eruvin", "Pesachim", "Beitzah", "Rosh Hashanah",
@@ -74,7 +85,18 @@ def download(title, url):
     r = subprocess.run(["curl", "-s", "-o", dest, "-w", "%{http_code}", enc_url],
                         capture_output=True, text=True)
     size = os.path.getsize(dest) if os.path.exists(dest) else 0
-    return r.stdout, size
+    ok = r.returncode == 0 and r.stdout.strip() == "200" and size > MIN_VALID_BYTES
+    if not ok and os.path.exists(dest):
+        # FIXED 2026-08-16 (code audit): curl writes its output file whatever
+        # happens, and main()'s "already have it" test is only
+        # `exists and size > MIN_VALID_BYTES`. A failed fetch that left an
+        # error page or a truncated transfer behind was therefore counted as
+        # a successful download by the NEXT run - the failure is reported
+        # once, then permanently invisible. curl's own exit status was also
+        # ignored entirely, so an aborted transfer still reported http 200.
+        os.remove(dest)
+        size = 0
+    return r.stdout.strip(), size, ok
 
 
 def main():
@@ -83,11 +105,11 @@ def main():
     ok, failed = 0, []
     for title, url in sorted(urls.items()):
         dest = out_path(title)
-        if os.path.exists(dest) and os.path.getsize(dest) > 1000:
+        if os.path.exists(dest) and os.path.getsize(dest) > MIN_VALID_BYTES:
             ok += 1
             continue
-        status, size = download(title, url)
-        if status == "200" and size > 1000:
+        status, size, succeeded = download(title, url)
+        if succeeded:
             ok += 1
         else:
             failed.append((title, status, size))

@@ -94,7 +94,23 @@ def snapshot_matches(snapshot, live_entry):
 def apply_replace(clean_text, word_index, final_text, chosen_text):
     words = clean_text.split()
     span = final_text.split() if final_text else []
-    n = len(span) or 1
+    if not span:
+        # A 'replace' with no stored text to replace is not a replace, and
+        # falling through here is not harmless: `n` would be 1, and for an
+        # out-of-range word_index `words[wi:wi+1]` is [] in Python, which
+        # equals the empty span - so the drift check PASSES and the slice
+        # assignment on the next line APPENDS chosen_text to the end of the
+        # klal, at a position the decision never named. Added 2026-08-16
+        # (code audit); apply_insert_removal() has had this exact `n == 0`
+        # guard since it was written, apply_replace() never did. Not
+        # reachable today - tests/test_corpus_invariants.py::
+        # test_correction_entries_have_the_field_shape_their_opcode_implies
+        # rejects a replace candidate with a null reading, and
+        # snapshot_matches() has to agree with the live entry first -
+        # defence-in-depth on the corpus-mutating path, same standing as the
+        # negative-index guards.
+        return None
+    n = len(span)
     if word_index < 0 or words[word_index:word_index + n] != span:
         return None  # live drift beyond what the snapshot check caught
     words[word_index:word_index + n] = chosen_text.split()
