@@ -45,7 +45,10 @@ import os
 import re
 from collections import Counter
 
-REPO = os.path.dirname(os.path.abspath(__file__))
+# Moved one level deeper (pipeline/ or tools/) 2026-08-16 - REPO now goes up
+# two levels, not one, to keep resolving to the actual repo root where
+# part1.json/docai_word_boxes/etc. live.
+REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RAW_DIR = os.path.join(REPO, "sefaria_reference_corpus", "raw")
 FREQ_CACHE = os.path.join(REPO, "sefaria_reference_corpus", "word_freq.json")
 # Provenance for FREQ_CACHE - see cache_is_current(). Bump EXTRACTOR_VERSION

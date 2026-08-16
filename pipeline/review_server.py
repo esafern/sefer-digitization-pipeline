@@ -32,7 +32,10 @@ from urllib.parse import urlparse
 
 import review_decisions as rd
 
-REPO = os.path.dirname(os.path.abspath(__file__))
+# Moved one level deeper (pipeline/ or tools/) 2026-08-16 - REPO now goes up
+# two levels, not one, to keep resolving to the actual repo root where
+# part1.json/docai_word_boxes/etc. live.
+REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FRONTEND_DIR = os.path.join(REPO, "review_frontend")
 IMAGES_DIR = os.path.join(REPO, "images", "pdf_pages")
 # max(klal_id) in part1.json - this dashboard is Part-1 only, and _load_klalim

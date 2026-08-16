@@ -29,9 +29,16 @@ import argparse
 from google import genai
 from google.genai import types
 
-CACHE_DB = "punctuation_cache.db"
-PART1_PATH = "part1.json"
-OUT_PATH = "punctuation_candidates_part1.json"
+# UPGRADED 2026-08-16 (moved into tools/) from three bare relative filenames
+# (cwd-dependent - worked only because this script always happened to be
+# invoked from the repo root) to the REPO-anchored pattern every sibling
+# script already uses, for the same robustness and consistency reasons -
+# a bare filename silently writes/reads the wrong place if this is ever
+# invoked with a different working directory.
+REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+CACHE_DB = os.path.join(REPO, "punctuation_cache.db")
+PART1_PATH = os.path.join(REPO, "part1.json")
+OUT_PATH = os.path.join(REPO, "punctuation_candidates_part1.json")
 
 MODELS_TO_TRY = ["gemini-3.6-flash", "gemini-3.5-flash", "gemini-2.5-flash"]
 

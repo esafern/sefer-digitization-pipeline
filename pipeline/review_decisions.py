@@ -72,7 +72,10 @@ import os
 import uuid
 from datetime import datetime, timezone
 
-REPO = os.path.dirname(os.path.abspath(__file__))
+# Moved one level deeper (pipeline/ or tools/) 2026-08-16 - REPO now goes up
+# two levels, not one, to keep resolving to the actual repo root where
+# part1.json/docai_word_boxes/etc. live.
+REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Overridable via env var so tests/test_review_server.py can point a live
 # review_server.py subprocess at a throwaway file instead of the real,
 # git-tracked decisions log.

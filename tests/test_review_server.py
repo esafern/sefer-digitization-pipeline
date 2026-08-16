@@ -91,7 +91,7 @@ def server():
     env["REVIEW_DECISIONS_PATH"] = decisions_path
 
     proc = subprocess.Popen(
-        [sys.executable, os.path.join(REPO, "review_server.py"), "--port", str(port)],
+        [sys.executable, os.path.join(REPO, "pipeline", "review_server.py"), "--port", str(port)],
         cwd=REPO, env=env,
         stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
     )

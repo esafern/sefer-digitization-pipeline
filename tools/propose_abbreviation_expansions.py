@@ -99,7 +99,10 @@ import json
 import os
 from collections import Counter
 
-REPO = os.path.dirname(os.path.abspath(__file__))
+# Moved one level deeper (pipeline/ or tools/) 2026-08-16 - REPO now goes up
+# two levels, not one, to keep resolving to the actual repo root where
+# part1.json/docai_word_boxes/etc. live.
+REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 QUOTE_CHARS = set('"\'׳״')
 # The subset of QUOTE_CHARS that can mark a SINGLE-word abbreviation by
 # sitting last (ASCII apostrophe, and the real Hebrew geresh U+05F3 it is

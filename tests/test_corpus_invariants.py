@@ -510,7 +510,7 @@ def test_part1_max_klal_constants_agree_with_the_corpus(part_klalim):
         "review_server.py": None,
     }
     for name in modules:
-        mod = _import_from_path(name.removesuffix(".py"), os.path.join(REPO, name))
+        mod = _import_from_path(name.removesuffix(".py"), os.path.join(REPO, "pipeline", name))
         modules[name] = mod.PART1_MAX_KLAL
     disagreeing = {n: v for n, v in modules.items() if v != part1_max}
     assert not disagreeing, (
@@ -582,7 +582,7 @@ def test_no_rendered_manual_correction_hides_a_machine_candidate(corrections, pa
     silently. This test is the check that assumption never had (Lesson 8: a
     cheap mechanical sweep catches what an argument about the UI cannot).
     """
-    review_server = _import_from_path("review_server", os.path.join(REPO, "review_server.py"))
+    review_server = _import_from_path("review_server", os.path.join(REPO, "pipeline", "review_server.py"))
     machine = {
         (int(kid), c["word_index"])
         for kid, entries in corrections.items() for c in entries if c.get("opcode") != "delete"
@@ -614,7 +614,7 @@ def test_every_served_flag_has_a_dashboard_label(corrections):
     against every flag classify() CAN emit; this checks the ones actually on
     disk right now, which also covers a flag introduced by hand-editing.
     """
-    review_server = _import_from_path("review_server", os.path.join(REPO, "review_server.py"))
+    review_server = _import_from_path("review_server", os.path.join(REPO, "pipeline", "review_server.py"))
     served = {c.get("flag") for entries in corrections.values() for c in entries}
     unlabelled = sorted(f for f in served if f not in review_server.FLAG_LABELS)
     assert not unlabelled, (
@@ -718,7 +718,7 @@ def test_review_decisions_log_is_intact_and_internally_consistent(decision_recor
     nothing means the "already applied, never re-apply" guard is pointing at
     a decision that no longer exists.
     """
-    review_decisions = _import_from_path("review_decisions", os.path.join(REPO, "review_decisions.py"))
+    review_decisions = _import_from_path("review_decisions", os.path.join(REPO, "pipeline", "review_decisions.py"))
     records, malformed = [], []
     for lineno, line in decision_records:
         try:
@@ -778,7 +778,7 @@ def test_review_decisions_log_is_intact_and_internally_consistent(decision_recor
 def part1_integrity_validator():
     return _import_from_path(
         "validate_part1_corpus_integrity",
-        os.path.join(REPO, "validate_part1_corpus_integrity.py"),
+        os.path.join(REPO, "tools", "validate_part1_corpus_integrity.py"),
     )
 
 
@@ -932,7 +932,7 @@ def test_no_new_duplicate_consecutive_words(all_klalim):
 def test_no_new_alphabetical_title_order_violations(all_klalim):
     validator = _import_from_path(
         "validate_title_alphabetical_order",
-        os.path.join(REPO, "validate_title_alphabetical_order.py"),
+        os.path.join(REPO, "tools", "validate_title_alphabetical_order.py"),
     )
     violations, _skipped_bad_first_char = validator.find_violations(all_klalim)
     assert len(violations) <= ALPHABETICAL_ORDER_VIOLATION_BASELINE_MAX, (
@@ -971,7 +971,7 @@ def test_no_new_span_coverage_flags(part1_by_id):
 
     validator = _import_from_path(
         "validate_klal_span_coverage",
-        os.path.join(REPO, "validate_klal_span_coverage.py"),
+        os.path.join(REPO, "tools", "validate_klal_span_coverage.py"),
     )
     trace = {x["klal_id"]: x for x in json.load(open(trace_path, encoding="utf-8"))}
 

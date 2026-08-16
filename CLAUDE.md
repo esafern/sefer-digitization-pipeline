@@ -16,7 +16,7 @@ detail; don't conflate the two.
 > the other. Do not report on, fix, or make claims about corpus quality
 > without having read it first.
 
-> **Start the review dashboard (`python3 review_server.py`, backgrounded) at
+> **Start the review dashboard (`python3 pipeline/review_server.py`, backgrounded) at
 > the start of every session, every time, no exceptions** — check
 > `lsof -i :8420` first and skip only if it's already running. It's the live
 > human-review tool (see "Pipeline shape" below); the user works in it
@@ -179,8 +179,8 @@ piece of text back to its origin).
    (one per Yad Malachi section), `processed_klalim/` (per-klal JSON, 813
    tracked files), and `lexicon.txt` (~19k unique validated Rabbinic Hebrew
    words used as a spell-check dictionary during cleanup passes).
-4. **Demos/reports** — `review_server.py` + `review_frontend/` (a live local
-   server, run with `python3 review_server.py` then open
+4. **Demos/reports** — `pipeline/review_server.py` + `review_frontend/` (a
+   live local server, run with `python3 pipeline/review_server.py` then open
    `http://127.0.0.1:8420/`) is the live, current human-review tool — use it
    to visually verify a correction, per the
    `.gemini/rules/robust_ocr_processing.md` rule file's UI-verification
@@ -294,49 +294,91 @@ correctly; if you add another vision-caching script, key it the same way.
 
 ## Directory layout
 
-**REFACTORED/CORRECTED 2026-08-14** — this section used to be one long
-run-on bullet, and had drifted from reality in three places nobody had
-caught: `build_vlm_demo.py` was listed here as an "active root script"
-while a different paragraph in this same file (above) already said it
-was archived; `validate_title_section_letter.py` was listed as active
-but is archived too (`archive/scripts/`); `validate_catchword_continuity.py`
-is live at root but was missing from this list entirely. Restructured
-into sub-bullets and re-verified against an actual `ls *.py` at root, not
-against the previous version of this file — the lesson (see Lessons
-learned, applied here to CLAUDE.md itself, not just a script docstring):
-this document's own file-existence claims are not automatically true and
-need the same checking as any other claim.
+**REORGANIZED 2026-08-16** — root used to be flat: 24 live `.py` files
+sitting directly next to `part1.json`, `rebuild_all.sh`, and everything
+else, with this section as prose the only map of which script did what.
+Per user request ("root should be clean... consider a code dir or even
+three"), split into two subdirectories by role:
 
-- Root scripts, by role:
+- **`pipeline/`** (9 files) — the scripts that make up the actual running
+  system: the 5 `rebuild_all.sh`-orchestrated correction-data stages, plus
+  the live review tool (`review_server.py` and its 3 decision-layer
+  scripts).
+- **`tools/`** (15 files) — everything run manually/standalone: all
+  validators, the lexicon/abbreviation-expansion scripts, the punctuation
+  pass, and the witness/reconstruction scripts.
+- **`tests/`** — unchanged, still holds the pytest suite.
+- Data files, caches, `rebuild_all.sh`, `review_frontend/`, and every `.md`/
+  `.html` doc stayed at root — only Python scripts moved.
+
+Every script's own `REPO` constant (`os.path.dirname(os.path.abspath(
+__file__))`) was updated to go up one additional directory level so every
+`os.path.join(REPO, ...)` path still resolves to the true repo root
+(verified, not assumed: re-ran `rebuild_all.sh` post-move with byte-
+identical output on all 5 derived files, 108/108 pytest, 14/14 Playwright).
+`review_frontend/` did NOT move — `pipeline/review_server.py` serves it via
+`os.path.join(REPO, "review_frontend")`, which still resolves correctly
+under the same fix. The one cross-directory import this split created —
+`tools/apply_punctuation_decisions.py` needs `pipeline/review_decisions.py`
+— is handled with an explicit `sys.path.insert()`, documented inline at
+that import; every other script's imports stay within its own new
+directory. `tests/*.py` updated to add both `pipeline/` and `tools/` to
+`sys.path`/its dynamic-import calls rather than rewriting every individual
+`import X as Y` line.
+
+Before this reorg, a full-repo audit confirmed the one genuinely
+disconnected script (`reconstruct_multipage_klalim.py` — see the
+Witness/reconstruction bullet below) and archived it; everything else
+below was already live, just partly undocumented here until this pass
+(see each bullet's own added-date).
+
+**Prior correction, 2026-08-14** (kept for the lesson, not just the
+history): this section used to be one long run-on bullet, and had drifted
+from reality in three places nobody had caught — a stale "active root
+script" claim for an already-archived file, an archived file listed as
+active, and a live file missing from the list entirely. Restructured into
+sub-bullets and re-verified against an actual `ls` at root, not against
+the previous version of this file — the lesson (applied again in this
+2026-08-16 pass): this document's own file-existence and file-location
+claims are not automatically true and need the same checking as any other
+claim.
+
+- `pipeline/`, by role:
   - **Correction-data pipeline** (see "Single source of truth" above) —
     `build_klalim_demo_dataset.py`, `build_corrections_dataset.py`,
     `verify_corrections_vision.py`, `assemble_corrections_dataset.py`,
-    `build_klal_page_regions.py`, run in that order by `rebuild_all.sh`.
-    `orchestrator.py` and `chunker.py`, the two earlier OCR/VLM-extraction
-    scripts this pipeline superseded, are both archived
-    (`archive/scripts/`) — see "Pipeline shape" above for why.
-  - **Live review tool** — `review_server.py`, `review_frontend/`,
-    `review_decisions.py`, `apply_reviewer_decisions.py` (added
-    2026-08-07, see "Human review decisions" above), and
-    `audit_applied_decisions.py` (added 2026-08-14, see the same section)
-    — not part of `rebuild_all.sh`, run separately with
-    `python3 review_server.py`.
+    `build_klal_page_regions.py`, run in that order by `rebuild_all.sh`
+    (which calls each as `pipeline/<name>.py`). `orchestrator.py` and
+    `chunker.py`, the two earlier OCR/VLM-extraction scripts this pipeline
+    superseded, are both archived (`archive/scripts/`) — see "Pipeline
+    shape" above for why.
+  - **Live review tool** — `review_server.py`, `review_decisions.py`,
+    `apply_reviewer_decisions.py` (added 2026-08-07, see "Human review
+    decisions" above), and `audit_applied_decisions.py` (added 2026-08-14,
+    see the same section) — not part of `rebuild_all.sh`, run separately
+    with `python3 pipeline/review_server.py`. Serves `review_frontend/`
+    (unmoved, at root) via its own `REPO`-relative path.
+- `tools/`, by role:
   - **Punctuation pass, Part 1 only** — `propose_punctuation_part1.py`
     and `apply_punctuation_decisions.py` (added 2026-08-10, see
     PROJECT-STATUS.md) are a parallel candidate→review→apply pipeline
     for corpus-wide punctuation: the propose script drafts `[.]`-marked
     sentence/clause-break insertions per klal via Gemini into
     `punctuation_candidates_part1.json` (its own sqlite cache,
-    `punctuation_cache.db`, keyed on klal_id + clean_text so a later
-    corpus edit invalidates stale proposals); `review_server.py` surfaces
-    every proposal as a clickable blue `·` marker in the text pane for
+    `punctuation_cache.db`, keyed on klal_id + clean_text + a prompt hash
+    added 2026-08-16 so a later corpus edit OR a prompt-wording edit both
+    invalidate stale proposals — the identical fix `verify_corrections_
+    vision.py`'s cache already had); `review_server.py` surfaces every
+    proposal as a clickable blue `·` marker in the text pane for
     accept/reject via the same `review_decisions.jsonl` audit trail
     (`punctuation_choice` decision type); `apply_punctuation_decisions.py`
     promotes accepted decisions into `part1.json`, mirroring
     `apply_reviewer_decisions.py`'s drift-detection/never-silently-mutate
-    pattern. Like the correction-candidate scripts, not part of
-    `rebuild_all.sh` — run manually. Secondary to the main correction
-    pipeline (user directive 2026-08-14).
+    pattern (and importing it directly from `pipeline/` — the one
+    cross-directory import in the reorg, see above). Like the
+    correction-candidate scripts, not part of `rebuild_all.sh` — run
+    manually. Secondary to the main correction pipeline (user directive
+    2026-08-14).
   - **pytest gate** — `rebuild_all.sh`'s step 6/6 runs
     `tests/test_corpus_invariants.py` AND `tests/test_pipeline_logic.py`
     (added 2026-08-14) as a hard gate; see "Standing regression test
@@ -351,14 +393,13 @@ need the same checking as any other claim.
     invisible to any amount of corpus checking, while each of them was
     added after a real incident. `tests/test_review_server.py` (Playwright,
     live server) stays outside the gate and is run manually.
-  - **Standalone validators, run manually** (CORRECTED list, see note
-    above — `validate_klal_span_coverage.py`, `validate_catchword_
-    continuity.py`, `validate_title_alphabetical_order.py`, and
-    `check_klal_token_orphans.py` (added 2026-08-06 — checks every
-    Part-1 klal boundary for orphaned tokens never captured under any
-    klal_id, or the same tokens captured under two; see
-    PROJECT-STATUS.md "Klal 185-190, 196-197, 215-217 resolved") - not
-    part of `rebuild_all.sh`, each needs the gitignored
+  - **Standalone validators, run manually** — `validate_klal_span_
+    coverage.py`, `validate_catchword_continuity.py`, `validate_title_
+    alphabetical_order.py`, and `check_klal_token_orphans.py` (added
+    2026-08-06 — checks every Part-1 klal boundary for orphaned tokens
+    never captured under any klal_id, or the same tokens captured under
+    two; see PROJECT-STATUS.md "Klal 185-190, 196-197, 215-217 resolved")
+    - not part of `rebuild_all.sh`, each needs the gitignored
     `docai_word_boxes`/scan-derived caches, so none of them can run on a
     fresh clone.
   - **`detect_ligature_corruption.py`** (added 2026-08-15 — re-runnable
@@ -396,8 +437,8 @@ need the same checking as any other claim.
     (lexicon coverage) are deliberately NOT gated — the script's own
     docstrings mark them not-viable/informational, not zero-tolerance.
   - **Abbreviation-expansion candidate pipeline** (added 2026-08-16, see
-    PROJECT-STATUS.md — undocumented here until this correction, the same
-    drift class the 2026-08-14 note above already warns about)
+    PROJECT-STATUS.md — undocumented here until the 2026-08-16 correction,
+    the same drift class the 2026-08-14 note above already warns about)
     — `extract_abbreviation_forms.py` (prints the canonical list of every
     gershayim/geresh-marked abbreviation form in Part 1, with per-klal
     attribution) and `propose_abbreviation_expansions.py` (categorizes
@@ -420,23 +461,22 @@ need the same checking as any other claim.
     work, not a new mechanism. Not wired into `rebuild_all.sh`.
   - **Witness/reconstruction code** (excluded from this project's own
     code-revalidation audits by standing scope decision, but genuinely
-    live, not archived — listed here for completeness since it had no
-    bullet of its own before this correction): `verify_reconstruction_
-    witness.py` and `verify_witness_vision.py` produce and vision-triage
-    `reconstruction_witness_queue.json`/`witness_vision_cache.db`, which
-    `review_server.py`'s witness API endpoints actively serve to the
+    live, not archived): `verify_reconstruction_witness.py` and
+    `verify_witness_vision.py` produce and vision-triage `reconstruction_
+    witness_queue.json`/`witness_vision_cache.db`, which `pipeline/
+    review_server.py`'s witness API endpoints actively serve to the
     dashboard's Witness panel for the still-open ~411-item human review
     queue (klal 30/75/88) — see "NEXT STEPS" in PROJECT-STATUS.md.
     `reconstruct_multipage_klalim.py`, the script that originally
     reconstructed those three klalim's text into `part1.json`, did its
     one job (already applied, `--apply` run under explicit authorization
-    2026-08-12) and was ARCHIVED 2026-08-16 (`archive/scripts/`) — it was
-    already documented in `tests/test_corpus_invariants.py`'s own comments
-    as "not part of `rebuild_all.sh` ... a deliberate one-off."
-  - Root also has a `tests/` directory (the pytest suite above) and
-    `requirements-dev.txt` — everything else that was at root as of
-    2026-08-06's cleanup (one-off extraction/fix/lexicon scripts) has
-    been moved to `archive/scripts/`.
+    2026-08-12) and was ARCHIVED 2026-08-16 (`archive/scripts/`) as part
+    of the same pass that created `pipeline/`/`tools/` — it was already
+    documented in `tests/test_corpus_invariants.py`'s own comments as
+    "not part of `rebuild_all.sh` ... a deliberate one-off."
+- Root also has a `tests/` directory (the pytest suite above) and
+  `requirements-dev.txt` — every `.py` file that isn't in `pipeline/`,
+  `tools/`, or `tests/` has been moved to `archive/scripts/`.
 - `archive/scripts/`, `archive/data/`, `archive/docs/` — one-time,
   already-applied patch/find/debug scripts (hardcoded to specific klal
   numbers or line indices), their throwaway text/JSON dumps, and superseded

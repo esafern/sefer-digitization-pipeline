@@ -32,7 +32,10 @@ import subprocess
 import urllib.parse
 import urllib.request
 
-REPO = os.path.dirname(os.path.abspath(__file__))
+# Moved one level deeper (pipeline/ or tools/) 2026-08-16 - REPO now goes up
+# two levels, not one, to keep resolving to the actual repo root where
+# part1.json/docai_word_boxes/etc. live.
+REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT_DIR = os.path.join(REPO, "sefaria_reference_corpus", "raw")
 BOOKS_JSON_URL = "https://raw.githubusercontent.com/Sefaria/Sefaria-Export/master/books.json"
 # A floor, not a size check: every real book here is >100KB, so anything at

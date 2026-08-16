@@ -35,10 +35,23 @@
 import argparse
 import json
 import os
+import sys
 
-import review_decisions as rd
+# Moved one level deeper (pipeline/ or tools/) 2026-08-16 - REPO now goes up
+# two levels, not one, to keep resolving to the actual repo root where
+# part1.json/docai_word_boxes/etc. live.
+REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-REPO = os.path.dirname(os.path.abspath(__file__))
+# review_decisions.py lives in pipeline/, not tools/ - this is the one
+# cross-directory import in the whole reorg (apply_reviewer_decisions.py
+# and audit_applied_decisions.py, this script's siblings in spirit, both
+# live IN pipeline/ alongside review_decisions.py and need no such fix;
+# this script stayed in tools/ with its propose-script pair per the
+# approved layout, so it needs pipeline/ added to sys.path explicitly
+# rather than getting it for free the way same-directory imports do).
+sys.path.insert(0, os.path.join(REPO, "pipeline"))
+import review_decisions as rd  # noqa: E402
+
 PART1_PATH = os.path.join(REPO, "part1.json")
 CANDIDATES_PATH = os.path.join(REPO, "punctuation_candidates_part1.json")
 

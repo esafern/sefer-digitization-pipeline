@@ -32,7 +32,10 @@ import fitz  # PyMuPDF
 from google import genai
 from google.genai import types
 
-REPO = os.path.dirname(os.path.abspath(__file__))
+# Moved one level deeper (pipeline/ or tools/) 2026-08-16 - REPO now goes up
+# two levels, not one, to keep resolving to the actual repo root where
+# part1.json/docai_word_boxes/etc. live.
+REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PDF_PATH = os.path.join(REPO, "berlin_square_corrected.pdf")
 QUEUE_PATH = os.path.join(REPO, "reconstruction_witness_queue.json")
 CACHE_DB = os.path.join(REPO, "witness_vision_cache.db")

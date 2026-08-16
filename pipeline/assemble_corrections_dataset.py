@@ -6,7 +6,10 @@
 import json
 import os
 
-REPO = os.path.dirname(os.path.abspath(__file__))
+# Moved one level deeper (pipeline/ or tools/) 2026-08-16 - REPO now goes up
+# two levels, not one, to keep resolving to the actual repo root where
+# part1.json/docai_word_boxes/etc. live.
+REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 IN_PATH = os.path.join(REPO, "corrections_verified_part1.json")
 OUT_PATH = os.path.join(REPO, "corrections_part1.json")
 PART1_PATH = os.path.join(REPO, "part1.json")

@@ -27,7 +27,13 @@ import sys
 import pytest
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, REPO)
+# Root reorganized 2026-08-16 into pipeline/ and tools/ (see CLAUDE.md
+# "Directory layout") - both added to sys.path so every `import X as Y`
+# below keeps working unchanged regardless of which of the two a given
+# script now lives in, rather than rewriting every import site to
+# `from pipeline import X` / `from tools import X`.
+sys.path.insert(0, os.path.join(REPO, "pipeline"))
+sys.path.insert(0, os.path.join(REPO, "tools"))
 
 import apply_reviewer_decisions as ard  # noqa: E402
 import assemble_corrections_dataset as acd  # noqa: E402

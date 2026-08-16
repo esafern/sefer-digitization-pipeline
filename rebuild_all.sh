@@ -30,7 +30,13 @@
 # review.html/build_review_html.py were retired 2026-08-07 in favor of
 # review_server.py + review_frontend/ (a live local server, not a
 # regenerated static file) - see PROJECT-STATUS.md "Review dashboard
-# rearchitecture". Run it with `python3 review_server.py`.
+# rearchitecture". Run it with `python3 pipeline/review_server.py`.
+#
+# Root reorganized 2026-08-16 into pipeline/ (the scripts this file calls,
+# plus the live review tool) and tools/ (everything run manually/
+# standalone - validators, lexicon/abbreviation/punctuation/witness
+# scripts) - see CLAUDE.md "Directory layout". This file's own stage
+# scripts all live in pipeline/ now; nothing it calls moved to tools/.
 #
 # The vision-verification step is the only one that costs API calls, and it's
 # cached in adjudication_cache.db's corrections_cache table, keyed on
@@ -68,23 +74,23 @@ for arg in "$@"; do
 done
 
 echo "== 1/6 build_klalim_demo_dataset.py =="
-./venv/bin/python build_klalim_demo_dataset.py
+./venv/bin/python pipeline/build_klalim_demo_dataset.py
 
 echo "== 2/6 build_corrections_dataset.py =="
-./venv/bin/python build_corrections_dataset.py
+./venv/bin/python pipeline/build_corrections_dataset.py
 
 if [ "$SKIP_VISION" = "1" ]; then
   echo "== 3/6 verify_corrections_vision.py SKIPPED (--skip-vision) =="
 else
   echo "== 3/6 verify_corrections_vision.py (may call the Gemini API for new/changed word pairs) =="
-  ./venv/bin/python verify_corrections_vision.py
+  ./venv/bin/python pipeline/verify_corrections_vision.py
 fi
 
 echo "== 4/6 assemble_corrections_dataset.py =="
-./venv/bin/python assemble_corrections_dataset.py
+./venv/bin/python pipeline/assemble_corrections_dataset.py
 
 echo "== 5/6 build_klal_page_regions.py =="
-./venv/bin/python build_klal_page_regions.py
+./venv/bin/python pipeline/build_klal_page_regions.py
 
 echo "== 6/6 tests/ (corpus + pipeline-logic regression suites) =="
 ./venv/bin/python -m pytest tests/test_corpus_invariants.py tests/test_pipeline_logic.py -q

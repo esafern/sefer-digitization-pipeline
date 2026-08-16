@@ -28,7 +28,10 @@ import json
 import os
 import re
 
-REPO = os.path.dirname(os.path.abspath(__file__))
+# Moved one level deeper (pipeline/ or tools/) 2026-08-16 - REPO now goes up
+# two levels, not one, to keep resolving to the actual repo root where
+# part1.json/docai_word_boxes/etc. live.
+REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DOCAI_DIR = os.path.join(REPO, "docai_word_boxes")
 # CORRECTED 2026-08-14: this used to say "pages 1-12 are byte-identical
 # duplicates of 13-24, see CLAUDE.md" - both halves false. Checked all 12
