@@ -15,7 +15,38 @@ current handoff, re-written (not just appended to) as state changes.
 
 ## ►► SESSION HANDOFF — read this first, 2026-08-16
 
-### AWAITING MERGE 2026-08-16 — revalidation/refactor audit ROUND 2 of the live pipeline (worktree `../yad-malachi-pipeline-revalidation-round2`, branch `full-revalidation-round2-2026-08-16`, 3 commits `3cd8937`..`f1d1688` on top of `fa36630`)
+### DONE 2026-08-16 — revalidation/refactor audit ROUND 2 of the live pipeline, merged (rebased onto master, 4 commits `532391d`..`ffc5b88`, merge commit `a75e028`)
+
+The branch was cut before this session's own follow-on work (the app.js
+escaping fix `7153e1d` and the lexicon-gap triage `16a75de`) had landed, so
+merging required a `git rebase` onto current master first, not a plain
+merge. That produced one real conflict in `review_frontend/app.js` - both
+this round and the earlier `7153e1d` had independently added HTML-escaping
+around the same functions. Resolved by taking round 2's version wholesale:
+diffed both against their shared base and confirmed round 2's is a strict
+superset (it also escapes the nav-item title attribute and corpus-text
+context words that `7153e1d` had skipped - the latter now independently
+justified by round 2's own foreign-character finding below, which proves
+Part 1 does contain a few non-Hebrew characters).
+
+Independently re-verified before merging, not just the agent's report
+trusted: mutation-tested the DECISIONS_PATH fix by hand (reintroduced the
+exact historical bug pattern, confirmed the new test goes red, restored
+green) - and in doing so reproduced the bug's own real-world failure mode
+on myself, appending a junk `klal_flag` row (klal_id 424242) to this
+worktree's tracked `review_decisions.jsonl`; caught by the sha256 check
+below and reverted with `git checkout --`, never merged. Independently
+read the actual corpus text at all 7 foreign-character positions and at
+the 6 gershayim-bearing `chosen_text` decisions the app.js fix's
+justification cited - both held up exactly as described (see the entries
+below). Re-ran the full suite post-rebase (105/105 pytest, 14/14
+Playwright) and `./rebuild_all.sh` (0 live API calls - confirmed safe
+beforehand by checking stage 1-2 output was already byte-identical to
+master). sha256 of all 10 corpus/derived/decision files confirmed
+byte-identical to master post-merge. Dashboard restarted post-merge
+(`review_decisions.py` changed - Python doesn't hot-reload). Both this
+round's worktree and round 1's (`../yad-malachi-pipeline-revalidation-
+worktree`) removed after merging; branches left in git history.
 
 **This is a SECOND, separate pass over the same scope as the round-1 audit
 immediately below — not a duplicate of it.** Its brief was to find what round
