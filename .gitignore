@@ -22,6 +22,12 @@ credentials.json
 !berlin_square_corrected.pdf
 !berlin_square_original_transposed.pdf
 *.png
+# ...except CASE-YAD-MALACHI.md's own illustrations. Tracked deliberately, same
+# reasoning as the two PDF exceptions above: this doc is meant to display for any
+# reader who clones the repo, and a gitignored image can't do that - this is why
+# its image references were silently broken from the start (found 2026-08-16).
+!images/yad-malachi-berlin-title.png
+!images/yad-malachi-berlin-klal-aleph.png
 *.jpg
 # Machon Yerushalayim critical-edition sample pages (added 2026-08-16) live
 # here as *.jpg - reference only, for comparing their abbreviation-expansion/

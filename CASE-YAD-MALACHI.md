@@ -23,9 +23,16 @@ the tradition, reached for whenever a question of method arises:
 2. **Klalei HaPoskim** — the rules governing the codifiers (Rif, Rambam, Rosh, Tur, Shulchan Aruch).
 3. **Klalei HaDinim** — the principles of halachic decision.
 
-_[Illustration pending: Berlin edition title page, naming the three parts and the
-author — not currently in the repo; see `VERIFIED-AGAINST-THE-INK.html` for real,
-current scan crops from this same edition.]_
+![Title page of the Berlin edition of Yad Malachi, naming the three parts Klalei HaGemara, Klalei HaPoskim, and Klalei HaDinim](images/yad-malachi-berlin-title.png)
+
+_Berlin edition title page — the three parts and the author. **RESTORED 2026-08-16**:
+regenerated directly from `berlin_square_corrected.pdf` (page 6), since the original
+image was never actually trackable — `images/*.png` sits under this repo's blanket
+`.gitignore` PNG rule with no exception, so this reference was broken from the day it
+was written, on every clone but the one that made it. Fixed both directions: the image
+now exists and is tracked (a specific `.gitignore` exception, matching the precedent
+already set for the two source PDFs), not just re-linked to a file that still
+wouldn't survive a fresh clone._
 
 ## Why it matters
 
@@ -96,13 +103,14 @@ layer, but it is **not good enough to use** (see *Process*) — the work is to O
 | **Przemyśl 1888**[^p1888] | Żupnik, Knoller & Hamerschmidt | **Square** | Google Books | 373 |
 
 The three later editions bind all three parts and are set in **clean square type, not
-Rashi** — what general OCR reads best. The same passage (opening of *Klalei HaAleph*),
-Berlin square vs. Livorno Rashi:
+Rashi** — what general OCR reads best. Berlin's *Klalei HaGemara* opening (**RESTORED
+2026-08-16**, regenerated from `berlin_square_corrected.pdf` page 14, the same way as
+the title page above — this repo doesn't hold a Livorno scan to render the Rashi-type
+side of the original side-by-side comparison, so that half stays pending):
 
-_[Illustrations pending: the same Klalei HaAleph opening passage, Berlin square type
-vs. Livorno Rashi type side by side, and Berlin's own Klalei HaGemara opening page —
-neither currently in the repo. `VERIFIED-AGAINST-THE-INK.html` has real, current crops
-from the Berlin edition's square type, including the page-40 example discussed below.]_
+![The opening page of Klalei HaGemara (Aleph section) in the Berlin edition of Yad Malachi, in clean square Hebrew type](images/yad-malachi-berlin-klal-aleph.png)
+
+_Berlin's *Klalei HaGemara* opening — the cleanest square images to OCR._
 
 ## Process — ensemble OCR with AI adjudication
 
