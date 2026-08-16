@@ -16,6 +16,29 @@ const navList = document.getElementById('nav-list');
 const legend = document.getElementById('legend');
 const tooltip = document.getElementById('tooltip');
 
+// FIXED 2026-08-16 (code audit): the panels below interpolate externally-
+// sourced text (Gemini's `reasoning`, a reviewer's own typed `note`/
+// `chosen_text`, raw OCR/vision readings) directly into `*.innerHTML`.
+// This is a single-user localhost tool, not multi-tenant, so this is a
+// DISPLAY-FIDELITY fix, not an XSS fix: a literal `<` or `&` in a note or
+// a model's rationale silently mangled the tooltip/panel instead of
+// showing the real text - wrong information shown by the one tool whose
+// job is exact verification. Applied at every site below that interpolates
+// reasoning/note/chosen_text/docai_reading/candidate text. NOT applied to
+// klal context snippets (corpus text, already gated by
+// validate_part1_corpus_integrity.py's character-sanity check) or to
+// labels/values this app itself defines (FLAGS labels, klal_id, state
+// names).
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 // Every flagged word/gap reduces to exactly one of three review states,
 // shown identically across the nav legend, the text pane, and the scan
 // pane: a human decision always wins (even overriding a machine
@@ -365,13 +388,13 @@ function attachWordHandlers(el, klalId, corr, isGap) {
   const [label] = FLAGS[corr.flag] || ['Flagged'];
   el.addEventListener('mouseenter', (e) => {
     const confTxt = (corr.confidence != null) ? (Math.round(corr.confidence * 100) + '% confidence') : 'not scan-verified';
-    const hebrewBit = `<bdi>${corr.docai_reading || (isGap ? '' : '(none)')}</bdi>`;
+    const hebrewBit = `<bdi>${escapeHtml(corr.docai_reading) || (isGap ? '' : '(none)')}</bdi>`;
     const docaiTxt = isGap
       ? `Scan appears to show: "${hebrewBit}" — not present in current text`
       : `Original OCR reading: "${hebrewBit}"`;
-    const bodyTxt = `<span class="t-conf">${label} — ${confTxt}${corr.reasoning ? ' — ' + corr.reasoning : ''}</span>`;
+    const bodyTxt = `<span class="t-conf">${label} — ${confTxt}${corr.reasoning ? ' — ' + escapeHtml(corr.reasoning) : ''}</span>`;
     const decisionTxt = corr.current_decision
-      ? `<span class="t-hint">Your decision: "${corr.current_decision.chosen_text}"${corr.current_decision.note ? ' — ' + corr.current_decision.note : ''}</span>`
+      ? `<span class="t-hint">Your decision: "${escapeHtml(corr.current_decision.chosen_text)}"${corr.current_decision.note ? ' — ' + escapeHtml(corr.current_decision.note) : ''}</span>`
       : `<span class="t-hint">Click for details / to record a decision</span>`;
     tooltip.innerHTML = `<span class="t-flag">${statusLabel(corr)}</span><span class="t-docai">${docaiTxt}</span>${bodyTxt}${decisionTxt}`;
     tooltip.style.display = 'block';
@@ -498,7 +521,7 @@ async function openCandidatePanel(klalId, corr) {
     <div class="panel-section">
       <div class="panel-label">Context (klal ${klalId})</div>
       <div class="panel-word-context">${ctxWords}</div>
-      ${corr.reasoning ? `<div style="font-size:12px;color:var(--ink-faint);margin-top:-8px;">${corr.reasoning}</div>` : ''}
+      ${corr.reasoning ? `<div style="font-size:12px;color:var(--ink-faint);margin-top:-8px;">${escapeHtml(corr.reasoning)}</div>` : ''}
     </div>
     <div class="panel-section">
       <div class="panel-label">Choose the correct reading</div>
@@ -507,13 +530,13 @@ async function openCandidatePanel(klalId, corr) {
         <input type="radio" name="candidate" ${activeSource === 'custom' ? 'checked' : ''}>
         <div class="co-body">
           <div class="co-label">Custom</div>
-          <input type="text" class="custom-text" id="custom-text-input" placeholder="Type the correct reading…" value="${activeSource === 'custom' ? (activeText || '') : ''}">
+          <input type="text" class="custom-text" id="custom-text-input" placeholder="Type the correct reading…" value="${escapeHtml(activeSource === 'custom' ? activeText : '')}">
         </div>
       </div>
     </div>
     <div class="panel-section">
       <div class="panel-label">Note (optional)</div>
-      <textarea id="decision-note" rows="3" placeholder="Why? e.g. &quot;crop-confirmed against page 26&quot;">${decision && decision.note ? decision.note : ''}</textarea>
+      <textarea id="decision-note" rows="3" placeholder="Why? e.g. &quot;crop-confirmed against page 26&quot;">${decision && decision.note ? escapeHtml(decision.note) : ''}</textarea>
     </div>
     <div class="panel-section">
       <button class="panel-btn" id="save-decision-btn">Save decision</button>
@@ -532,7 +555,7 @@ async function openCandidatePanel(klalId, corr) {
     div.className = 'candidate-option' + (activeSource === opt.source ? ' active' : '');
     div.dataset.source = opt.source;
     div.innerHTML = `<input type="radio" name="candidate" ${activeSource === opt.source ? 'checked' : ''}>
-      <div class="co-body"><div class="co-label">${opt.label}</div><div class="co-text">${opt.text}</div></div>`;
+      <div class="co-body"><div class="co-label">${escapeHtml(opt.label)}</div><div class="co-text">${escapeHtml(opt.text)}</div></div>`;
     div.onclick = () => selectCandidateOption(opt.source);
     optionsContainer.appendChild(div);
   });
@@ -639,8 +662,8 @@ async function toggleHistory(klalId, wordIndex) {
     ? history.slice().reverse().map(h => `
         <div class="history-item">
           <div class="h-ts">${new Date(h.ts).toLocaleString()}</div>
-          <div class="h-text">${h.chosen_text || ''}</div>
-          ${h.note ? `<div class="h-note">${h.note}</div>` : ''}
+          <div class="h-text">${escapeHtml(h.chosen_text)}</div>
+          ${h.note ? `<div class="h-note">${escapeHtml(h.note)}</div>` : ''}
         </div>`).join('')
     : '<p style="color:var(--ink-faint);font-size:12px;">No decisions recorded yet.</p>';
   list.style.display = 'block';
@@ -663,7 +686,7 @@ async function openKlalFlagPanel(klalId) {
     </div>
     <div class="panel-section">
       <div class="panel-label">Note</div>
-      <textarea id="klal-flag-note" rows="4" placeholder="What needs a second look, and why?">${state.note || ''}</textarea>
+      <textarea id="klal-flag-note" rows="4" placeholder="What needs a second look, and why?">${escapeHtml(state.note)}</textarea>
     </div>
     <div class="panel-section">
       <button class="panel-btn" id="save-klal-flag-btn">Save</button>
@@ -708,7 +731,7 @@ async function openKlalFlagPanel(klalId) {
       ? state.history.slice().reverse().map(h => `
           <div class="history-item">
             <div class="h-ts">${new Date(h.ts).toLocaleString()} — ${h.needs_revisit ? 'flagged' : 'unflagged'}</div>
-            ${h.note ? `<div class="h-note">${h.note}</div>` : ''}
+            ${h.note ? `<div class="h-note">${escapeHtml(h.note)}</div>` : ''}
           </div>`).join('')
       : '<p style="color:var(--ink-faint);font-size:12px;">No history yet.</p>';
     list.style.display = 'block';
@@ -787,11 +810,11 @@ async function openManualCorrectionPanel(klalId, wordIndex, word, existing) {
     <div class="panel-section">
       <div class="panel-label">${existing ? 'Correction on record' : 'Propose a correction'}</div>
       <input type="text" class="custom-text" id="manual-correction-text"
-             placeholder="Correct reading…" value="${currentText.replace(/"/g, '&quot;')}">
+             placeholder="Correct reading…" value="${escapeHtml(currentText)}">
     </div>
     <div class="panel-section">
       <div class="panel-label">Note (optional)</div>
-      <textarea id="manual-correction-note" rows="3" placeholder="Why? e.g. &quot;scan confirms X, not Y&quot;">${currentNote}</textarea>
+      <textarea id="manual-correction-note" rows="3" placeholder="Why? e.g. &quot;scan confirms X, not Y&quot;">${escapeHtml(currentNote)}</textarea>
     </div>
     <div class="panel-section">
       <button class="panel-btn" id="save-manual-correction-btn">Save</button>
@@ -854,8 +877,8 @@ async function openManualCorrectionPanel(klalId, wordIndex, word, existing) {
         ? history.slice().reverse().map(h => `
             <div class="history-item">
               <div class="h-ts">${new Date(h.ts).toLocaleString()}</div>
-              <div class="h-text">${h.chosen_text || ''}</div>
-              ${h.note ? `<div class="h-note">${h.note}</div>` : ''}
+              <div class="h-text">${escapeHtml(h.chosen_text)}</div>
+              ${h.note ? `<div class="h-note">${escapeHtml(h.note)}</div>` : ''}
             </div>`).join('')
         : '<p style="color:var(--ink-faint);font-size:12px;">No decisions recorded yet.</p>';
       list.style.display = 'block';
