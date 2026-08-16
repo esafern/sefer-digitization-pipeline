@@ -15,6 +15,41 @@ current handoff, re-written (not just appended to) as state changes.
 
 ## ►► SESSION HANDOFF — read this first, 2026-08-16
 
+### SCOPED, NOT STARTED, 2026-08-16 — Rashi/Livorno second-witness project
+
+Per direct user request ("scope 3") following the OCR-tool research above.
+Not implemented - a plan only, for a future scope decision.
+
+**Framing, load-bearing**: Livorno and Berlin are DIFFERENT PRINTINGS
+(Berlin's own title page says "with several additions and corrections" -
+see CLAUDE.md "Pipeline shape"). A Livorno/Berlin disagreement is NOT
+automatically "the current pipeline's OCR is wrong" the way a DocAI/
+Tesseract disagreement on the SAME scan is - it could be a genuine edition
+difference. This makes the project a second EDITORIAL witness needing full
+adjudication discipline, not a cheap OCR cross-check - more valuable
+(Livorno is the original printing, arguably closer to authorial intent)
+but a bigger lift than it first looks.
+
+**Five phases**: (1) full-corpus `heb_rashi` Tesseract extraction of all 348
+Livorno pages - the engine is confirmed working (see the empirical test
+above), untested at full-corpus scale; (2) klal-boundary alignment, mapping
+Livorno's own markers to `klal_id`s - THE big unknown, since nothing
+establishes today whether Livorno's layout/pagination/klal count/ordering
+even matches Berlin's; (3) comparison logic (Livorno-OCR vs. stored text) -
+mostly reusable from `build_corrections_dataset.py`'s existing diff shape;
+(4) adjudication - reuse `verify_corrections_vision.py`'s crop/adjudicate/
+cache machinery, but the PROMPT needs real redesign to reason about
+"different editions," not just "which engine misread the same ink"; (5)
+decision integration - a third witness column in the dashboard needs actual
+UI work, not just backend plumbing.
+
+**Recommended next step, if this gets picked up**: timebox a small manual
+investigation of phase 2 first (locate 5-10 klal markers by hand in the
+Livorno scan) before scoping the rest in detail, since alignment risk could
+change the whole project's size. Rough total effort if alignment isn't
+unusually painful: comparable to or larger than the original correction
+pipeline, given the new prompt/UI work phases 4-5 need.
+
 ### DONE 2026-08-16 — item 2 closed: klal 198's 2 candidates scan-verified and applied; klal 212's "missing halacha number" checked and closed, print-faithful
 
 Per direct user request ("2. close the two small loose ends"). Both had been
