@@ -92,6 +92,23 @@ def is_watermark(tok_text):
     return clean_word(tok_text).lower() in WATERMARK_WORDS
 
 
+# Every page carries a running header ("יד מלאכי" + section name) that is
+# correctly stripped from clean_text - it's expected to be "missing" from a
+# diff span, not a real omission, so a span containing it must not be flagged
+# as one. FIXED 2026-08-16 (round-2 follow-up): this used to be a substring
+# test (`"מלאכי" in orig_word`) on the whole joined diff-span text. A real
+# word that merely CONTAINS those four letters as a substring (a prefix
+# glued on the front, or an adjacent token fused into the same span) would
+# have been silently treated as header furniture and dropped - never
+# surfacing as a candidate, with no flag or log to notice by. Matches
+# check_klal_token_orphans.FURNITURE_WORDS's convention instead: exact token
+# equality, not substring containment. Extracted to its own function
+# (previously inline in main()) so it's unit-testable without the full
+# DocAI/page-word pipeline.
+def is_running_header(orig_tokens):
+    return any(t["text"] == "מלאכי" for t in orig_tokens)
+
+
 def sim(a, b):
     return difflib.SequenceMatcher(None, a, b).ratio()
 
@@ -184,10 +201,13 @@ def main():
             orig_word = " ".join(t["text"] for t in orig_tokens) or None
             corrected_word = " ".join(page_words_raw[j1:j2]) or None
 
-            # Every page carries a running header ("יד מלאכי" + section name) that is
-            # correctly stripped from clean_text - it's expected to be "missing", not a
-            # real omission, so don't flag it as one.
-            if orig_word and "מלאכי" in orig_word:
+            # See is_running_header()'s docstring above for why this is an exact-token
+            # test, not the substring test it used to be. Verified empirically that
+            # this diff-span-level header IS always its own standalone DocAI token on
+            # real data - byte-identical corrections_candidates_part1.json before and
+            # after this change - so the fix is a no-op today, defence-in-depth against
+            # the next scan/print where it might not be.
+            if orig_tokens and is_running_header(orig_tokens):
                 continue
 
             if tag == "replace" and orig_word and corrected_word:

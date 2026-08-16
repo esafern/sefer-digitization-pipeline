@@ -32,11 +32,13 @@ sys.path.insert(0, REPO)
 import apply_reviewer_decisions as ard  # noqa: E402
 import assemble_corrections_dataset as acd  # noqa: E402
 import audit_applied_decisions as aad  # noqa: E402
+import build_corrections_dataset as bcd  # noqa: E402
 import build_klal_page_regions as bkpr  # noqa: E402
 import check_klal_token_orphans as ckto  # noqa: E402
 import detect_ligature_corruption as dlc  # noqa: E402
 import extract_abbreviation_forms as eaf  # noqa: E402
 import propose_abbreviation_expansions as pae  # noqa: E402
+import propose_punctuation_part1 as ppp  # noqa: E402
 import validate_lexicon_independent as vli  # noqa: E402
 import review_decisions as rd  # noqa: E402
 import review_server as rs  # noqa: E402
@@ -1398,3 +1400,100 @@ def test_vision_cache_migration_is_lossless_and_idempotent(tmp_path, monkeypatch
     conn = sqlite3.connect(db)
     assert conn.execute("SELECT COUNT(*) FROM corrections_cache").fetchone()[0] == 5
     conn.close()
+
+
+def test_punctuation_cache_key_covers_the_prompt_template(tmp_path, monkeypatch):
+    """FIXED 2026-08-16 (round-2 follow-up, risk 3): propose_punctuation_
+    part1.py's cache key used to be sha256(klal_id|clean_text) only - the
+    PROMPT_TEMPLATE wrapped around that content wasn't part of the key, so
+    editing the template (a real instruction/constraint change) would have
+    silently kept serving answers cached under the OLD question forever.
+    Identical gap already fixed in verify_corrections_vision.py 2026-08-14;
+    this is the same discipline applied here. Two different prompt_hash
+    values must produce two different keys for identical klal content."""
+    key_a = ppp.cache_key_for(1, "some clean text", "hash_a")
+    key_b = ppp.cache_key_for(1, "some clean text", "hash_b")
+    assert key_a != key_b, "changing prompt_hash must change the cache key"
+
+    key_same = ppp.cache_key_for(1, "some clean text", "hash_a")
+    assert key_a == key_same, "the same inputs must produce the same key"
+
+
+def test_punctuation_cache_migration_carries_over_matching_rows_losslessly(
+        tmp_path, monkeypatch):
+    """The migration must back-fill a pre-existing (klal_id|clean_text)-keyed
+    row onto the new (klal_id|clean_text|prompt_hash) key when the klal's
+    CURRENT clean_text still matches what was cached - not drop it, per this
+    project's standing "never silently discard a paid API answer" discipline
+    (CLAUDE.md, verify_corrections_vision.py's own migration). It must also
+    be idempotent (a second run finds nothing new to migrate) and must NOT
+    fabricate a row for a klal whose text has since drifted - which is
+    exactly what happened on the REAL punctuation_cache.db (klal 1/2/3's
+    text changed since the 2026-08-14 pilot that populated it, so 0 of its 3
+    real rows migrate - verified separately by hand against a scratch copy,
+    not asserted here since this test uses synthetic data)."""
+    import hashlib
+    import sqlite3
+
+    db = str(tmp_path / "punct_test.db")
+    monkeypatch.setattr(ppp, "CACHE_DB", db)
+    ppp.init_cache()
+
+    klal_a = {"klal_id": 1, "clean_text": "אלף בית גימל"}
+    klal_b = {"klal_id": 2, "clean_text": "דלת הא וו"}  # no cached row for this one
+
+    old_key_a = hashlib.sha256(
+        f"{klal_a['klal_id']}|{klal_a['clean_text']}".encode("utf-8")
+    ).hexdigest()
+    ppp.cache_response(old_key_a, '{"insertions": []}')
+
+    ppp.migrate_add_prompt_hash([klal_a, klal_b])
+
+    new_key_a = ppp.cache_key_for(klal_a["klal_id"], klal_a["clean_text"], ppp.PROMPT_HASH)
+    assert ppp.get_cached(new_key_a) == '{"insertions": []}', (
+        "a matching old-style row must be carried over under the new key"
+    )
+    # The old row itself is left in place (harmless, and this is a value-level
+    # re-key, not a schema migration - nothing renames or drops the table).
+    assert ppp.get_cached(old_key_a) == '{"insertions": []}'
+
+    # klal_b never had a cached row - nothing to fabricate.
+    new_key_b = ppp.cache_key_for(klal_b["klal_id"], klal_b["clean_text"], ppp.PROMPT_HASH)
+    assert ppp.get_cached(new_key_b) is None
+
+    conn = sqlite3.connect(db)
+    count_after_first = conn.execute("SELECT COUNT(*) FROM cache").fetchone()[0]
+    conn.close()
+
+    ppp.migrate_add_prompt_hash([klal_a, klal_b])  # idempotence
+    conn = sqlite3.connect(db)
+    count_after_second = conn.execute("SELECT COUNT(*) FROM cache").fetchone()[0]
+    conn.close()
+    assert count_after_second == count_after_first, (
+        "a second migration run must find nothing new to migrate"
+    )
+
+
+def test_is_running_header_matches_the_exact_token_not_a_substring():
+    """FIXED 2026-08-16 (round-2 follow-up): is_running_header() used to be a
+    substring test (`"מלאכי" in orig_word`) on the whole joined diff-span
+    text. A real word that merely CONTAINS those four letters as a substring
+    (a prefix glued on the front, or an adjacent token fused into the same
+    span) would have been silently treated as header furniture and dropped -
+    never surfacing as a correction candidate, with no flag or log to notice
+    by. This is the exact-token-equality replacement, tested directly rather
+    than through the full DocAI/page-word pipeline."""
+    def tok(text):
+        return {"text": text}
+
+    # The real running header: its own standalone token.
+    assert bcd.is_running_header([tok("מלאכי")]) is True
+    assert bcd.is_running_header([tok("יד"), tok("מלאכי")]) is True
+
+    # A longer real word that merely CONTAINS "מלאכי" as a substring must NOT
+    # be treated as the header - this is the bug itself, reproduced.
+    assert bcd.is_running_header([tok("ולמלאכיו")]) is False
+
+    # An unrelated span, and an empty span.
+    assert bcd.is_running_header([tok("בהדיא")]) is False
+    assert bcd.is_running_header([]) is False

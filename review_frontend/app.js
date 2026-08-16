@@ -1019,9 +1019,9 @@ async function openWitnessPanel(w) {
     const spanLen = w.docai_reading ? w.docai_reading.split(' ').length : 1;
     const ti = ctx.target_index;
     const tEnd = Math.min(ctx.words.length, ti + spanLen);
-    const before = ctx.words.slice(0, ti).join(' ');
-    const target = ctx.words.slice(ti, tEnd).join(' ');
-    const after = ctx.words.slice(tEnd).join(' ');
+    const before = escapeHtml(ctx.words.slice(0, ti).join(' '));
+    const target = escapeHtml(ctx.words.slice(ti, tEnd).join(' '));
+    const after = escapeHtml(ctx.words.slice(tEnd).join(' '));
     ctxHtml = [before, `<b>[${target}]</b>`, after].filter(Boolean).join(' ');
   } else {
     ctxHtml = '<span style="color:var(--ink-faint);">no context available</span>';
@@ -1044,13 +1044,13 @@ async function openWitnessPanel(w) {
         <input type="radio" name="witness-candidate" ${activeSource === 'custom' ? 'checked' : ''}>
         <div class="co-body">
           <div class="co-label">Custom</div>
-          <input type="text" class="custom-text" id="witness-custom-text" placeholder="Type the correct reading…" value="${activeSource === 'custom' ? (decision.chosen_text || '') : ''}">
+          <input type="text" class="custom-text" id="witness-custom-text" placeholder="Type the correct reading…" value="${escapeAttr(activeSource === 'custom' ? decision.chosen_text : '')}">
         </div>
       </div>
     </div>
     <div class="panel-section">
       <div class="panel-label">Note (optional)</div>
-      <textarea id="witness-decision-note" rows="3" placeholder="Why? e.g. &quot;crop-confirmed against page 26&quot;">${decision && decision.note ? decision.note : ''}</textarea>
+      <textarea id="witness-decision-note" rows="3" placeholder="Why? e.g. &quot;crop-confirmed against page 26&quot;">${escapeHtml(decision && decision.note)}</textarea>
     </div>
     <div class="panel-section">
       <button class="panel-btn" id="save-witness-decision-btn">Save decision</button>
@@ -1064,7 +1064,7 @@ async function openWitnessPanel(w) {
     div.className = 'candidate-option' + (activeSource === opt.source ? ' active' : '');
     div.dataset.source = opt.source;
     div.innerHTML = `<input type="radio" name="witness-candidate" ${activeSource === opt.source ? 'checked' : ''}>
-      <div class="co-body"><div class="co-label">${opt.label}</div><div class="co-text">${opt.text}</div></div>`;
+      <div class="co-body"><div class="co-label">${escapeHtml(opt.label)}</div><div class="co-text">${escapeHtml(opt.text)}</div></div>`;
     div.onclick = () => markActiveWitnessOption(opt.source);
     optionsContainer.appendChild(div);
   });
