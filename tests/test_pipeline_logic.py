@@ -1384,6 +1384,16 @@ except ImportError as exc:  # PyMuPDF / google-genai are pipeline deps, not test
 requires_vision_deps = pytest.mark.skipif(
     vcv is None, reason=f"verify_corrections_vision.py not importable: {VISION_IMPORT_ERROR}")
 
+WITNESS_VISION_IMPORT_ERROR = None
+try:
+    import verify_witness_vision as vwv  # noqa: E402
+except ImportError as exc:  # same optional deps as verify_corrections_vision.py
+    vwv = None
+    WITNESS_VISION_IMPORT_ERROR = str(exc)
+
+requires_witness_vision_deps = pytest.mark.skipif(
+    vwv is None, reason=f"verify_witness_vision.py not importable: {WITNESS_VISION_IMPORT_ERROR}")
+
 
 @requires_vision_deps
 def test_unescape_json_fragment_restores_escaped_quotes_without_touching_raw_ones():
@@ -1515,6 +1525,98 @@ def test_vision_cache_migration_is_lossless_and_idempotent(tmp_path, monkeypatch
     vcv.init_cache()  # second run: nothing left to migrate
     conn = sqlite3.connect(db)
     assert conn.execute("SELECT COUNT(*) FROM corrections_cache").fetchone()[0] == 5
+    conn.close()
+
+
+# --- verify_witness_vision: cache-key coverage + migration -------------------
+# FOUND 2026-08-16 (revalidation/refactor audit round 3): witness_cache's
+# PRIMARY KEY was (crop_hash, word_a, word_b, context_hash) - missing
+# prompt_hash, the exact gap already found and fixed in
+# verify_corrections_vision.py (2026-08-14) and propose_punctuation_part1.py
+# (2026-08-16). This is the third sibling script with the identical
+# crop/adjudicate/cache shape; the fix and its tests mirror those two
+# directly (CLAUDE.md Lesson 12).
+
+@pytest.fixture
+def witness_vision_cache(tmp_path, monkeypatch):
+    monkeypatch.setattr(vwv, "CACHE_DB", str(tmp_path / "witness_cache.db"))
+    vwv.init_cache()
+    return vwv.CACHE_DB
+
+
+@requires_witness_vision_deps
+def test_witness_vision_cache_key_covers_every_input_that_changes_the_right_answer(witness_vision_cache):
+    crop, word_a, word_b, ctx = b"PNG-A", "אלף", "בית", "context one"
+    vwv.cache_put(crop, word_a, word_b, ctx, '{"selected_option": "A"}')
+    assert vwv.get_cached(crop, word_a, word_b, ctx) == '{"selected_option": "A"}'
+
+    assert vwv.get_cached(b"PNG-B", word_a, word_b, ctx) is None, "crop image not in the key"
+    assert vwv.get_cached(crop, "גימל", word_b, ctx) is None, "docai reading not in the key"
+    assert vwv.get_cached(crop, word_a, "גימל", ctx) is None, "tesseract reading not in the key"
+    assert vwv.get_cached(crop, word_a, word_b, "context two") is None, "context not in the key"
+
+
+@requires_witness_vision_deps
+def test_witness_vision_cache_key_covers_the_prompt_template(witness_vision_cache, monkeypatch):
+    """Editing PROMPT_TEMPLATE must invalidate prior answers - before this
+    fix, witness_cache's key had no prompt_hash column at all, so this
+    could never have discriminated no matter what PROMPT_TEMPLATE said."""
+    crop, word_a, word_b, ctx = b"PNG-A", "אלף", "בית", "context"
+    real_prompt_hash = vwv.PROMPT_HASH
+    vwv.cache_put(crop, word_a, word_b, ctx, '{"selected_option": "A"}')
+    monkeypatch.setattr(vwv, "PROMPT_HASH", "a-different-prompt")
+    assert vwv.get_cached(crop, word_a, word_b, ctx) is None
+    vwv.cache_put(crop, word_a, word_b, ctx, '{"selected_option": "B"}')
+    assert vwv.get_cached(crop, word_a, word_b, ctx) == '{"selected_option": "B"}'
+    # Restore only PROMPT_HASH - monkeypatch.undo() would also revert the
+    # temp CACHE_DB this test's fixture set, pointing the next lookup at the
+    # real cache database.
+    monkeypatch.setattr(vwv, "PROMPT_HASH", real_prompt_hash)
+    assert vwv.get_cached(crop, word_a, word_b, ctx) == '{"selected_option": "A"}', (
+        "the two prompts' answers must coexist as separate rows, not overwrite each other"
+    )
+
+
+@requires_witness_vision_deps
+def test_witness_vision_cache_stores_a_null_side_rather_than_failing_the_not_null_schema(witness_vision_cache):
+    """An 'insert' opcode item legitimately has docai_reading as None (DocAI
+    found nothing at that position) - coerced to a sentinel, not stored as
+    SQL NULL, which would never compare equal on lookup."""
+    vwv.cache_put(b"PNG", None, "בית", "ctx", '{"selected_option": "B"}')
+    assert vwv.get_cached(b"PNG", None, "בית", "ctx") == '{"selected_option": "B"}'
+    assert vwv.get_cached(b"PNG", "אלף", "בית", "ctx") is None
+
+
+@requires_witness_vision_deps
+def test_witness_vision_cache_migration_is_lossless_and_idempotent(tmp_path, monkeypatch):
+    """The prompt_hash migration back-fills rather than dropping (419 real
+    answers per the module's own docstring, 0 API calls to redo them)."""
+    db = str(tmp_path / "old_witness.db")
+    monkeypatch.setattr(vwv, "CACHE_DB", db)
+    conn = sqlite3.connect(db)
+    conn.execute(
+        "CREATE TABLE witness_cache (crop_hash TEXT NOT NULL, word_a TEXT NOT NULL, "
+        "word_b TEXT NOT NULL, context_hash TEXT NOT NULL, decision_json TEXT, "
+        "PRIMARY KEY (crop_hash, word_a, word_b, context_hash))"
+    )
+    conn.executemany("INSERT INTO witness_cache VALUES (?, ?, ?, ?, ?)",
+                     [(f"crop{i}", "אלף", "בית", "ctx", '{"selected_option": "A"}') for i in range(5)])
+    conn.commit()
+    conn.close()
+
+    vwv.init_cache()
+    conn = sqlite3.connect(db)
+    rows = conn.execute("SELECT crop_hash, prompt_hash, decision_json FROM witness_cache").fetchall()
+    assert len(rows) == 5, "migration must carry every cached answer over, not drop the table"
+    assert {r[1] for r in rows} == {vwv.PROMPT_HASH}
+    assert conn.execute("SELECT COUNT(*) FROM witness_cache_pre_prompt_hash").fetchone()[0] == 5, (
+        "the pre-migration table must be kept, not deleted"
+    )
+    conn.close()
+
+    vwv.init_cache()  # second run: nothing left to migrate
+    conn = sqlite3.connect(db)
+    assert conn.execute("SELECT COUNT(*) FROM witness_cache").fetchone()[0] == 5
     conn.close()
 
 
