@@ -62,6 +62,7 @@ import difflib
 import json
 import os
 import re
+import unicodedata
 from collections import Counter
 
 REPO = os.path.dirname(os.path.abspath(__file__))
@@ -187,6 +188,71 @@ ARABIC_DIGIT_RE = re.compile(r"\d")
 # the corpus has 0 occurrences of a Hebrew letter directly before `")`, so
 # this is a verified no-op today and only bounds future data.
 FOOTNOTE_MARKER_RE = re.compile(r'(\*+|(?<![א-ת])")\s*\)')
+
+
+# Every character Part 1 legitimately uses outside the Hebrew block
+# (U+0590-U+05FF) and the plain space. DERIVED 2026-08-16, not chosen: taken
+# from a full character inventory of part1.json's clean_text + title, then
+# each entry checked against a real use in the corpus - `"`/`'` are gershayim
+# and geresh (6448/3250 uses, this print's abbreviation marks), `•` is the
+# 207-use bullet, `*` the footnote marker whose `*)` form FOOTNOTE_MARKER_RE
+# above already encodes, and `.` `:` `,` `-` `(` `)` `[` `]` the ordinary
+# punctuation the editorial `[.]` convention and citation parentheses need.
+PART1_ALLOWED_NON_HEBREW = set('"\'.:•[]()-,*')
+
+
+def is_foreign_char(ch):
+    return not ("֐" <= ch <= "׿") and ch != " " and ch not in PART1_ALLOWED_NON_HEBREW
+
+
+def check_foreign_characters(klalim):
+    """Any character outside Part 1's documented repertoire - the general
+    case check_character_sanity() below only covers three special cases of.
+
+    ADDED 2026-08-16 (round-2 audit). check_character_sanity() is a
+    zero-tolerance gate whose own docstring says it "catches leftover OCR/scan
+    artifacts (a stray "P" from page furniture, an unstripped "Google"
+    fragment, a truncated bracket)". Its stray-letter test is
+    LATIN_RE = [A-Za-z] - so it catches a Latin `P` and misses a Greek `Π`
+    (U+03A0), a homoglyph of the exact example it names. Part 1 contains one,
+    at klal 39 word 252, and it has never been reported by anything.
+
+    That is CLAUDE.md Lesson 6 exactly (know a check's blind spot before
+    trusting its silence) and Lesson 8's argument for running the cheap
+    mechanical sweep as well as the sophisticated one: enumerating the
+    corpus's whole character inventory costs milliseconds and found 7 tokens
+    across 6 klalim that three audit rounds of vision, semantic and lexicon
+    checking never surfaced - because no check had ever asked the general
+    question, only three narrow ones.
+
+    Reports, never corrects: per CLAUDE.md's terminology these are DATA
+    issues, and a data issue is resolved against the scan through the human
+    review pipeline, never by a code-side rewrite.
+    """
+    print("\n=== 2b. Characters outside Part 1's documented repertoire ===")
+    issues = []
+    for k in klalim:
+        kid, text = k["klal_id"], k["clean_text"]
+        words = text.split(" ")
+        for idx, w in enumerate(words):
+            for ch in w:
+                if is_foreign_char(ch):
+                    try:
+                        name = unicodedata.name(ch)
+                    except ValueError:
+                        name = "<unnamed>"
+                    lo, hi = max(0, idx - 4), min(len(words), idx + 5)
+                    issues.append(
+                        f"klal {kid} word {idx}: {ch!r} (U+{ord(ch):04X} {name}) "
+                        f"in {w!r} - context: {' '.join(words[lo:hi])}"
+                    )
+    if not issues:
+        print(f"  {len(klalim)}/{len(klalim)} klalim clean.")
+    else:
+        print(f"  {len(issues)} issue(s):")
+        for i in issues:
+            print("   ", i)
+    return issues
 
 
 def check_character_sanity(klalim):
@@ -423,6 +489,7 @@ def main():
 
     r1 = check_gematria_self_consistency(klalim)
     r2 = check_character_sanity(klalim)
+    r2b = check_foreign_characters(klalim)
     r3a = check_intra_klal_duplicate_phrases(klalim, n=10)
     r3b = check_duplicate_phrases(klalim, n=10)
     r4 = check_self_reference_directionality(klalim)
@@ -431,6 +498,7 @@ def main():
     print("\n=== Summary ===")
     print(f"  1. Gematria self-consistency: {len(r1)} issue(s)")
     print(f"  2. Character sanity:          {len(r2)} issue(s)")
+    print(f"  2b. Foreign characters:       {len(r2b)} issue(s) (DATA issues - scan-verify, never code-fix)")
     print(f"  3. Duplicated phrases:        {len(r3a) + len(r3b)} issue(s) "
           f"({len(r3a)} within-klal, {len(r3b)} adjacent-pair)")
     print(f"  4. Self-reference direction:  {len(r4)} issue(s)")

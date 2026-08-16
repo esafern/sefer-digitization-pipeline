@@ -449,6 +449,95 @@ def test_klal_flag_and_applied_ids_resolve_independently_of_word_index(decisions
     assert rd.applied_decision_ids(path=decisions_path) == {decision["id"]}
 
 
+def test_foreign_character_check_fires_and_respects_the_allowed_repertoire():
+    """Proves check_foreign_characters() CAN fail, on synthetic input.
+
+    tests/test_corpus_invariants.py gates it against the real corpus with a
+    baseline, and that gate alone would stay green if the check were neutered
+    to find nothing (`found - baseline` is empty either way) - per CLAUDE.md
+    Lesson 2, a gate that cannot fail is indistinguishable from one that
+    passes. Same reasoning that put the three older gated integrity checks
+    under their own can-it-fire tests (2026-08-14).
+    """
+    def klal(kid, text):
+        return {"klal_id": kid, "clean_text": text}
+
+    # Everything in the documented repertoire must stay silent: Hebrew, the
+    # gershayim/geresh abbreviation marks, the bullet, the editorial [.]
+    # convention, footnote asterisks, citation parens.
+    clean = [klal(1, 'רש"י אמר וכו\' • [.] (סימן ה\') *) ודו"ק - כן, כך: כך.')]
+    assert vpci.check_foreign_characters(clean) == [], (
+        "a legitimate Part-1 character was flagged - PART1_ALLOWED_NON_HEBREW is too narrow"
+    )
+
+    # The real-corpus cases, reproduced synthetically.
+    greek = vpci.check_foreign_characters([klal(39, "דבכולהן Π דבכולהו")])
+    assert len(greek) == 1 and "U+03A0" in greek[0] and "klal 39 word 1" in greek[0], greek
+    assert "GREEK CAPITAL LETTER PI" in greek[0]
+
+    # The specific blind spot this check exists to close: a Latin 'P' is
+    # caught by check_character_sanity's LATIN_RE, its Greek homoglyph is not.
+    assert vpci.check_character_sanity([klal(39, "דבכולהן P דבכולהו")]), (
+        "sanity precondition: LATIN_RE does catch a Latin P"
+    )
+    assert vpci.check_character_sanity([klal(39, "דבכולהן Π דבכולהו")]) == [], (
+        "this is the blind spot being closed: check_character_sanity is structurally "
+        "unable to see the Greek homoglyph, which is why check_foreign_characters exists"
+    )
+
+    for ch in ("&", "!", ";", "@", "5"):
+        hits = vpci.check_foreign_characters([klal(7, f"פנים {ch} פנים")])
+        assert len(hits) == 1, f"{ch!r} should be reported as outside the repertoire: {hits}"
+
+    # Reported per OCCURRENCE with its own position, not once per klal - the
+    # baseline is keyed by (klal_id, word_index, char) and needs that precision.
+    multi = vpci.check_foreign_characters([klal(9, "אא & בב ! גג")])
+    assert len(multi) == 2 and "word 1" in multi[0] and "word 3" in multi[1], multi
+
+
+def test_reassigning_DECISIONS_PATH_redirects_calls_that_pass_no_explicit_path(
+        tmp_path, monkeypatch):
+    """Every OTHER test in this file passes `path=` explicitly, which is
+    exactly why this trap survived three audit rounds unexercised.
+
+    review_decisions.py's functions used to declare `path=DECISIONS_PATH` as a
+    DEFAULT ARGUMENT. Python evaluates that once, at import time, so
+    reassigning the module attribute afterwards did nothing to any call that
+    omitted `path=` - the write still went to the real, git-tracked
+    review_decisions.jsonl. monkeypatch.setattr on a module constant is this
+    suite's standard redirection idiom (PART1_PATH, RAW_DIR, FREQ_CACHE,
+    CACHE_DB, SEFARIA_FREQ_CACHE all rely on it and all work); this module was
+    the one place it silently failed, and it is the module guarding the one
+    file CLAUDE.md says no pipeline run may ever clobber.
+
+    Not hypothetical: it has already produced two accidental writes to the
+    tracked log, one in the round-1 audit and one while confirming this
+    finding in round 2. Both were caught by a byte-comparison afterwards, not
+    by the code refusing.
+    """
+    redirected = str(tmp_path / "redirected.jsonl")
+    monkeypatch.setattr(rd, "DECISIONS_PATH", redirected)
+
+    record = rd.append_decision("klal_flag", klal_id=424242, needs_revisit=True,
+                                note="round-2 redirection probe")
+
+    assert os.path.exists(redirected), (
+        "append_decision() with no explicit path must honour the CURRENT value of "
+        "rd.DECISIONS_PATH. If this fails, the write went somewhere else - which for a "
+        "default-argument binding means the real, tracked review_decisions.jsonl."
+    )
+    with open(redirected, encoding="utf-8") as f:
+        rows = [json.loads(l) for l in f if l.strip()]
+    assert [r["id"] for r in rows] == [record["id"]]
+
+    # The readers must follow the same reassignment, or a redirected write
+    # becomes invisible to the very code meant to read it back.
+    assert rd.flagged_klalim() == [424242]
+    assert rd.find_by_id(record["id"])["note"] == "round-2 redirection probe"
+    assert rd.current_for(424242, decision_type="klal_flag")["id"] == record["id"]
+    assert list(rd.all_current("klal_flag")) == [(424242, None)]
+
+
 # --- audit_applied_decisions: the check on "applied" claims staying true -----
 
 def _klal(text):

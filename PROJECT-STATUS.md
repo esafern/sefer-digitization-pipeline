@@ -15,6 +15,139 @@ current handoff, re-written (not just appended to) as state changes.
 
 ## ►► SESSION HANDOFF — read this first, 2026-08-16
 
+### AWAITING MERGE 2026-08-16 — revalidation/refactor audit ROUND 2 of the live pipeline (worktree `../yad-malachi-pipeline-revalidation-round2`, branch `full-revalidation-round2-2026-08-16`, 3 commits `3cd8937`..`f1d1688` on top of `fa36630`)
+
+**This is a SECOND, separate pass over the same scope as the round-1 audit
+immediately below — not a duplicate of it.** Its brief was to find what round
+1 missed: go deeper, start from what round 1 said it did NOT cover, and don't
+re-derive anything already fixed. 3 findings, all fixed, each
+mutation-verified. Not yet merged — user re-verifies independently first, as
+with every prior round.
+
+All three are **bugs (code)**. Separately, the third one surfaced a **data
+issue** (7 stray characters in Part 1) which is reported and baselined, NOT
+corrected — see finding 2. No `part*.json` and no `review_decisions.jsonl`
+content was changed: all 10 corpus/derived/decision/lexicon files are
+sha256-identical to the pre-audit baseline after a full `./rebuild_all.sh`
+WITH vision (**0 live API calls**, every candidate a cache hit — verified by
+confirming `corrections_candidates_part1.json`, the vision stage's only
+input, was byte-identical BEFORE letting that stage run). 105/105 pytest (was
+102 — 3 new, all mutation-verified) + 14/14 Playwright (was 11 — 3 new). All
+5 scan-dependent standalone validators' stdout byte-identical.
+
+**1. `review_decisions.py` — reassigning `DECISIONS_PATH` was a silent no-op, so writes kept landing in the tracked log.**
+All seven functions declared `path=DECISIONS_PATH` as a **default argument**.
+Python evaluates a default once, at import time, so `rd.DECISIONS_PATH = tmp`
+— and `monkeypatch.setattr(rd, "DECISIONS_PATH", tmp)` — had **no effect** on
+any call that omitted `path=`. The write still went to the real, git-tracked
+`review_decisions.jsonl`.
+  - That idiom is this suite's standard redirection mechanism, and it works
+    everywhere else: `PART1_PATH`, `RAW_DIR`, `FREQ_CACHE`, `FREQ_META`,
+    `CACHE_DB`, `SEFARIA_FREQ_CACHE` all rely on it, because those modules
+    read their constant at call time. `review_decisions.py` was the **single
+    module where it silently failed** — and it is the module guarding the
+    append-only human-decision log CLAUDE.md singles out as the one file no
+    pipeline run may ever clobber.
+  - **It has now misfired twice, both as silent writes to the tracked log**:
+    once during round 1 (a test called a write endpoint without stubbing
+    `rd.append_decision`, appending a junk row) and once during THIS round
+    while confirming the finding. Both were caught by a byte-comparison
+    afterwards, never by the code refusing. Round 1 recorded the incident and
+    fixed its symptom (stubbing that one test); the trap itself survived.
+  - Fixed with call-time resolution (`_resolve()`). Every existing caller
+    either passes an explicit path or relies on the env var (read before
+    import), so behaviour is unchanged for all of them.
+  - Test: `test_reassigning_DECISIONS_PATH_redirects_calls_that_pass_no_
+    explicit_path` — deliberately **the only test in the file that omits
+    `path=`**, which is exactly why the trap went unexercised through three
+    prior audit rounds. Mutation-verified red/green, with the mutated run
+    pointed at a scratch sink via `REVIEW_DECISIONS_PATH` so reproducing the
+    bug could not touch the tracked log.
+
+**2. `validate_part1_corpus_integrity.py` — the character-sanity gate cannot see a stray Greek `Π`, and Part 1 contains one.**
+`check_character_sanity()` is a zero-tolerance gate in `rebuild_all.sh`, and
+its own docstring says it "catches leftover OCR/scan artifacts (a stray `"P"`
+from page furniture, an unstripped `"Google"` fragment, a truncated
+bracket)". Its stray-letter test is `LATIN_RE = [A-Za-z]` — so it catches a
+Latin `P` and misses **its Greek homoglyph `Π` (U+03A0), the exact example it
+names**. CLAUDE.md Lesson 6 in one line.
+  - A full character inventory of `part1.json` (milliseconds — Lessons 8 and
+    18) found **7 foreign-character tokens across 6 klalim** that three prior
+    audit rounds of vision, semantic and lexicon checking never surfaced,
+    because no check had ever asked the general question, only three narrow
+    ones: klal 39 w252 `Π`; klal 66 w97 and klal 74 w443 `!`; klal 69 w338,
+    klal 77 w11, klal 167 w24 `&`; klal 176 w694 `;`.
+  - Added `check_foreign_characters()` — anything outside the Hebrew block,
+    the space, and `PART1_ALLOWED_NON_HEBREW`, a repertoire **derived** from
+    the corpus's own inventory and checked entry by entry against a real use,
+    not chosen. Gated in `tests/test_corpus_invariants.py`.
+  - **The 7 existing instances are a DATA issue and were NOT corrected** —
+    baselined in `FOREIGN_CHARACTER_BASELINE`, keyed by
+    `(klal_id, word_index, char)` per the `PASS3_KNOWN_FALSE_POSITIVES`
+    precedent so only those exact positions are suppressed. **NOT YET DONE:
+    scan-verify all 7 and resolve them through the review pipeline.**
+  - **Recorded with them, deliberately not acted on**: all three `&` sit
+    exactly where `אל` reads naturally — klal 69 `כגון אל אלהים ה'` (the
+    biblical `אֵל אֱלֹהִים יְהוָה`), klal 77 `נוטה אל הודאי`, klal 167
+    `פנים אל פנים`. That is the same two-letter sequence as the confirmed
+    alef-lamed ligature (U+FB4F) bug this project has already corrected 131
+    instances of, raising the question of whether `&` is a **third**
+    substitution DocAI makes for that one glyph (alongside the bare `א` and
+    the bare `לא` the VLM produced). One frequency/semantic signal only —
+    Lesson 9 and Success Criterion #1 both say that is not enough to change a
+    character. Note `detect_ligature_corruption.py` structurally cannot find
+    this shape: it only considers tokens that already contain an `א`.
+  - Two tests, deliberately: the corpus gate, PLUS a hermetic can-it-fire
+    test on synthetic input — without the latter the gate stays green if the
+    check is neutered, since `found - baseline` is empty either way (Lesson
+    2). Same reasoning that put the three older gated checks under
+    can-it-fire tests. 3 mutations, 3 red, restored green.
+
+**3. `review_frontend/app.js` — a recorded custom reading was truncated at the gershayim.**
+The candidate panel rendered its custom-reading input as
+`value="${activeText}"`, unescaped. This corpus's abbreviation mark **is the
+literal ASCII `"`** (`part1.json`'s clean_text holds 6,448 of them), so a
+recorded reading like `ב"ד` produced `value="ב"ד"` — which a browser parses as
+`value="ב"` plus a junk attribute. **The reviewer reopened their own decision
+and saw `ב`; saving again would have recorded `ב`.** A human's exact Hebrew
+reading, silently truncated at the most common punctuation mark in the book,
+in the tool whose entire job is exact fidelity (Success Criterion #1).
+  - Not exotic: **6 `candidate_choice` decisions whose `chosen_text` contains
+    a gershayim are already in `review_decisions.jsonl`** (klal 103/104/105,
+    `ב"ד`). The manual-correction panel had escaped its own `value=` since it
+    was written — the candidate panel never did, so the inconsistency sat
+    visible in the file the whole time.
+  - This is the finding round 1 reported and declined to fix (it found only
+    the milder `tooltip.innerHTML` form, and its rule was no fix without a
+    test). Added `escapeHtml()`/`escapeAttr()` and applied them at all **23**
+    in-scope interpolation sites: nav title (attribute AND content), klal
+    section, tooltip, both context panes (which interpolate `clean_text` —
+    and klal 69/77/167 carry the bare `&` tokens from finding 2), candidate
+    options, all four note textareas, both decision-history lists.
+  - **Left unfixed, out of scope**: the witness panel carries the identical
+    `value=` bug at its own custom-reading input (`app.js` ~line 1047).
+    Reported, not changed, per the standing witness exclusion.
+  - 3 new Playwright tests. **Mutation testing caught a defect in this
+    audit's own test data and it is recorded rather than quietly re-rolled**:
+    the first draft asserted on a note reading `'R & J <see p. 4>'` and
+    stayed **GREEN** when `escapeHtml` was reduced to a pass-through — a bare
+    `&` is not a valid entity reference and `<` is inert inside a textarea's
+    RCDATA, so neither discriminates. Retargeted at `&amp;` and a literal
+    `<b>` in an `innerHTML` context, which do. Lesson 2 applied to the
+    auditor's own fixture. Final: 3 mutations, 3 red, restored green.
+
+**Checked and found clean / hypotheses disproved (recorded so round 3 doesn't
+re-derive them):** `build_klalim_demo_dataset.py`, `assemble_corrections_
+dataset.py`, `build_klal_page_regions.py` (incl. round 1's key-order fix),
+`rebuild_all.sh`, `review_server.py`, `validate_title_alphabetical_order.py`'s
+isotonic DP, `detect_ligature_corruption.py` and
+`fetch_sefaria_reference_corpus.py` — no new findings. One hypothesis was
+tested and **disproved**: that `validate_lexicon_independent.py`'s report 2
+was inflated by a normalisation mismatch (lexicon words carrying gershayim
+can never match a frequency table built with a Hebrew-only filter). Measured:
+`lexicon.txt` contains **zero** non-Hebrew characters, so the two sides
+normalise identically and the 5,945-word figure stands as reported.
+
 ### DONE 2026-08-16 — full revalidation/refactor audit of the live pipeline, merged (7 commits `f8183e1`..`800564a`, merge commit on `master`)
 
 Independently re-verified before merge, not just the agent's report trusted:
