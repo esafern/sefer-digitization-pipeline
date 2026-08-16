@@ -318,18 +318,29 @@ ref is already gone - and no further action needed.
 Per direct user request for a third round of the standing revalidation/
 refactor audit, this time explicitly scoped to include witness code (no
 longer excluded) and with an explicit eye toward refactoring, not just
-correctness. One commit (`9103ea9`), one bug found and fixed,
-mutation-verified; two further findings reported at the time, not fixed in
-this worktree (see below for why - **finding 2's locator bug was
-subsequently fixed directly in the main checkout, see the entry above**).
-Independently re-verified before merging, not just the agent's report
-trusted: re-read the actual `tools/verify_witness_vision.py` diff, ran the
-full test suite in the worktree (117/117 passing, 1 skipped for the
-gitignored scan cache not being present in a fresh worktree), and tested
-the migration against a COPY of the real tracked `witness_vision_cache.db`
-(422 rows, not the 419 the worktree's own docstring estimated - migrated
-losslessly either way, backup table preserved, schema correct) rather than
-trusting the synthetic-data test alone.
+correctness. One commit (`13aee25` after rebase, `9103ea9` in the original
+worktree), one bug found and fixed, mutation-verified; two further findings
+reported at the time, not fixed in this worktree (see below for why -
+**finding 2's locator bug was subsequently fixed directly in the main
+checkout, see the entry above**). Independently re-verified before merging,
+not just the agent's report trusted: re-read the actual `tools/verify_
+witness_vision.py` diff, rebased onto current master (one real conflict in
+this file's own "SESSION HANDOFF" section, both sides' content kept - see
+the merge commit `0cc52d5`), ran the full test suite post-rebase (130/130
+passing in the worktree, 1 skipped for the gitignored scan cache not being
+present there), and tested the migration against a COPY of the real tracked
+`witness_vision_cache.db` (422 rows, not the 419 the worktree's own
+docstring estimated - migrated losslessly either way, backup table
+preserved, schema correct) before merging. **After merging**, ran the
+migration for real on the actual tracked `witness_vision_cache.db` too
+(commit `4b9a261`) - the merge itself only brings in the CODE fix, the
+tracked cache file doesn't migrate itself until something calls
+`init_cache()`, and leaving that implicit would have meant the file sat on
+the old, buggy schema until someone happened to next run `verify_witness_
+vision.py`. Verified: 422/422 rows carried over, `decision_json` byte-
+identical to pre-migration, 131/131 pytest in the main checkout
+post-merge (has the gitignored scan cache, so the one worktree-skip runs
+here). Worktree and its temp helper branches removed after merging.
 
 **1. FIXED (bug, code) - `tools/verify_witness_vision.py`'s `witness_cache`
 table was missing `prompt_hash` from its cache key.** PRIMARY KEY was
