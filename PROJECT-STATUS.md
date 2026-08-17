@@ -15,32 +15,70 @@ current handoff, re-written (not just appended to) as state changes.
 
 ## ►► SESSION HANDOFF — read this first, 2026-08-16 (continued into 2026-08-17)
 
-### OPEN 2026-08-17 — revalidation round 4 ("pipeline improvements") FAILED mid-task on the monthly Claude spend limit; uncommitted work sitting in a worktree, NOT reviewed or merged
+### DONE 2026-08-17 — revalidation round 4 ("pipeline improvements") FAILED mid-task on the monthly Claude spend limit; researched, finished, verified, and merged (`800cd01`), worktree cleaned up
 
 Background agent (`a06c15e0c6c77fa80`) spun off to look for pipeline-code
-improvements (per user request) terminated early: "You've hit your monthly
-spend limit." Its last message before stopping: "Confirmed the divergence.
-Let me update the test to actually catch this mutation." — mid-fix, not
-finished, not verified.
+improvements terminated early on the monthly spend limit, mid-fix. True
+resume wasn't available (`ListAgents` showed nothing reachable - the
+process, not just paused, was gone). Researched the worktree directly
+instead: confirmed via `git diff` against the worktree's actual base
+commit (not against a `master` that had since moved on) that it touched
+only code/tests - `pipeline/verify_corrections_vision.py`,
+`tools/verify_witness_vision.py`, `tools/verify_flagged_candidates_
+vision.py`, `tests/test_pipeline_logic.py`, plus a new
+`pipeline/vision_adjudication_common.py` - and the two changed data
+files (`adjudication_cache.db`, `flagged_candidates_vision_report.json`)
+were pure regenerable side effects of the agent running its own scripts
+while testing, not corpus content. **This is a bug situation start to
+finish, no data issue anywhere in it** - CLAUDE.md's terminology
+distinction applies cleanly here since nothing touched `part1.json`.
 
-**Uncommitted changes sit in `.claude/worktrees/agent-a06c15e0c6c77fa80`**
-(branch `worktree-agent-a06c15e0c6c77fa80`, based on `5c6957e`): modifies
-`pipeline/verify_corrections_vision.py`, `tools/verify_flagged_candidates_
-vision.py`, `tools/verify_witness_vision.py`, `tests/test_pipeline_logic.py`,
-`flagged_candidates_vision_report.json`, `adjudication_cache.db`; adds a new
-`pipeline/vision_adjudication_common.py`. Shape suggests a refactor
-consolidating duplicated vision-adjudication logic across the three
-`verify_*` scripts into one shared module, with a new test guarding
-whatever "divergence"/"mutation" the agent found — but this is inference
-from the diff, not confirmed by reading the agent's own reasoning in
-detail. **Nothing from this worktree has been reviewed, verified, or
-merged.** Per this project's standard (independent re-verification before
-trusting agent output, same as round 3's semantic findings), do NOT merge
-without: reading the actual diff in full, understanding what
-"divergence"/"mutation" it refers to, and re-running `rebuild_all.sh` +
-pytest against the worktree's version before touching `master`. The worktree
-is disposable if the work isn't wanted (nothing has touched `master`) but
-represents real, unverified effort if it is.
+**What it did**: extracted the crop/cache/JSON-recovery/retry machinery
+duplicated across all three vision-adjudication scripts into
+`vision_adjudication_common.py`, motivated by concrete prior drift (the
+missing-`prompt_hash` cache-key bug, CLAUDE.md Lesson 12, had already
+been independently fixed twice in different scripts before round 3
+found it a third time). Fixed two real, confirmed **bugs** in
+`verify_flagged_candidates_vision.py` while doing it: a missing
+request-timeout on client construction (the 2026-08-06 hung-call
+incident class, already fixed in its two siblings), and no per-candidate
+error handling in the batch loop - one candidate's total failure used to
+crash the whole run and discard every already-paid-for Gemini result,
+since output is only written after the loop completes.
+
+**What was left open, root-caused**: ran the worktree's full test suite
+(154 tests) - 153 passed, exactly 1 failed:
+`test_parse_decision_text_prefers_strict_json_first`. Read the
+implementation: `parse_decision_text()`'s docstring promised a 3-tier
+JSON-recovery chain (strict `json.loads`, then a sanitized retry, then
+lenient field extraction) but the function body only ever called the
+lenient extractor - a genuine **bug**, code not data, and almost
+certainly the "divergence"/"mutation" the agent's last message
+referenced (it had written the correct docstring and test but hadn't
+yet finished the implementation to match). This is the same
+docstring-overclaims-implementation shape already flagged as a standing
+risk elsewhere in this file ("docstring/comment overclaims turned up
+repeatedly across both audit rounds").
+
+**Fixed directly** (small, precisely scoped once root-caused): implemented
+the two missing tiers (`json.loads`, then `json.loads(sanitize_json(...))`)
+before falling through to `extract_json_fields`. Verified: 154/154 pytest
+in the worktree, then copied the 5 files into the main checkout (safe -
+confirmed `master` hadn't diverged on any of them since the worktree's
+base commit), 154/154 pytest again, `rebuild_all.sh` clean (140/140 of
+its own two-suite subset, all 5 derived files unchanged - confirms the
+refactor is behavior-preserving on every corpus-facing output). Committed
+`800cd01`. Worktree and its branch removed (`git worktree remove`,
+`git branch -d`) - fully merged, nothing left dangling.
+
+**Pattern worth naming**: this is the THIRD time in this project the same
+class of bug - one script's hand-maintained copy of shared logic missing
+a fix its siblings already got - has been found independently (missing
+`prompt_hash`: twice before this round; missing timeout: found again in a
+third script this round; now `parse_decision_text`'s incomplete chain).
+See the code-consolidation refactor entry below, spawned specifically to
+address this pattern at its root rather than continuing to catch each
+recurrence one at a time.
 
 ### RESEARCH 2026-08-17 — Document AI tested on both the base (Berlin, square) scan and the Livorno (Rashi) scan for direct comparison; two background jobs launched (full-Part-1 heb_rashi OCR on both scans, and a round-3 semantic-plausibility spot-check)
 
