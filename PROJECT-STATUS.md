@@ -15,6 +15,61 @@ current handoff, re-written (not just appended to) as state changes.
 
 ## ►► SESSION HANDOFF — read this first, 2026-08-16 (continued into 2026-08-17)
 
+### DONE 2026-08-18 — audit: several confirmed findings from today existed ONLY as PROJECT-STATUS.md prose, never entered the decision pipeline at all; all now recorded as proper `klal_flag` decisions
+
+Per direct user request ("is this visible in the dashboard? where are these
+tracked?" then "review carefully - any other work sitting in prose but not
+in the pipeline?"). The user's question surfaced a real, systemic gap: this
+session's scan-crop and mechanical-sweep work produced confirmed findings
+that got written up carefully in this file but were never run through
+`review_decisions.py` - so unlike every lexicon-gap finding this session
+(which always ended in `rd.append_decision()`), these existed nowhere a
+human reviewer (or a future dashboard) could ever discover them. Checked
+directly against `review_decisions.jsonl`, not assumed - each klal_id below
+had OTHER, unrelated lexicon-gap entries already, which is exactly why a
+quick glance wouldn't have caught this: the specific finding was missing,
+not the klal.
+
+**All 14 garbled-text leads (10 Pattern A, 4 Pattern B)** - now recorded as
+`klal_flag` decisions, reviewer `ai-scan-verified-parts23-boundary`, each
+with the exact word_index of the garbled placeholder (Pattern A) or the
+start of the stolen prefix (Pattern B), the full diagnosis, and an explicit
+note that this is SCAN-VERIFIED (not a textual hypothesis like the lexicon-
+gap passes) but NOT YET APPLIED to `part2.json`/`part3.json`.
+
+**klal 389's second, previously-unpositioned corruption** (`מרכבת שץ`,
+plausibly `מרכבת המשנה`, plus a second garbled span after a duplicated
+`לא אסרה`) - now has its own `klal_flag` at the correct word_index, marked
+explicitly as NOT yet scan-verified (distinct from the klal's main,
+already-verified Pattern-A finding).
+
+**The klal 556/557 whole-klal swap** - recorded as a GENERAL `klal_flag` on
+both klal 556 and klal 557 (word_index intentionally `None` - this is a
+whole-klal identity problem, not one wrong word, so forcing a word_index
+would misrepresent it). Each note fully cross-references the other and the
+diagnosis in this file.
+
+**6 mid-klal garbled fragments found incidentally during the mechanical
+Pattern-B sweep** (klal 227 `מייאהירא` w832, 245 `המושכינחהו` w856, 265
+`לת"גמצאא'` w385, 349 `כולרחפיקצ"תד` w1254, 424 `הסדסיי` w371, 454 `האו"יכ`
+w861) - recorded as `klal_flag` decisions, reviewer `ai-pattern-b-sweep-
+incidental`, explicitly marked as NOT individually scan-verified (unlike the
+14 leads) - these were spotted while reading for a different pattern
+(boundary theft) and never independently confirmed against the ink.
+
+**21 new decisions total.** 199/199 pytest. `part1/2/3.json` confirmed
+untouched. The Part-1-only dashboard limitation (see the earlier entry)
+still applies to everything Parts 2-3 here - recorded correctly, not yet
+visible in `review_server.py`.
+
+**Lesson for next time, stated plainly so it isn't lost**: "I wrote it
+carefully in PROJECT-STATUS.md" is not the same as "it's tracked." Every
+confirmed finding needs an actual `klal_flag`/`manual_correction` decision,
+the same discipline CLAUDE.md's "Log every finding immediately" rule already
+states for PROJECT-STATUS.md itself - a finding that only lives in prose,
+however carefully written, is exactly as undiscoverable to a reviewer as a
+finding that was never written down at all.
+
 ### DONE 2026-08-18 — fixed the `bucket_for()` ordering bug flagged in the prior entry; retroactively closed 314 already-recorded Parts 2-3 decisions it had misclassified
 
 Per direct user request ("fix the bucket_for() ordering bug now").
