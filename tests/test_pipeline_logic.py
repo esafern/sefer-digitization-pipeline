@@ -43,6 +43,7 @@ import build_klal_page_regions as bkpr  # noqa: E402
 import check_klal_token_orphans as ckto  # noqa: E402
 import check_next_marker_and_title as cnmt  # noqa: E402
 import corpus_io as cio  # noqa: E402
+import vision_adjudication_common as vac  # noqa: E402
 import verify_flagged_candidates_vision as vfcv  # noqa: E402
 import detect_ligature_corruption as dlc  # noqa: E402
 import detect_real_word_substitution as drws  # noqa: E402
@@ -2189,3 +2190,66 @@ def test_the_pipeline_modules_share_one_part1_max_klal():
     assert bcd.PART1_MAX_KLAL is cio.PART1_MAX_KLAL
     assert bkpr.PART1_MAX_KLAL is cio.PART1_MAX_KLAL
     assert rs.PART1_MAX_KLAL is cio.PART1_MAX_KLAL
+
+
+# --- tools/propose_punctuation_part1.py: two code bugs found in the round-4
+# --- survey, both instances of the drift class the shared modules exist to close.
+
+@requires_vision_deps
+def test_propose_punctuation_client_has_the_shared_request_timeout(monkeypatch):
+    """FOUND 2026-08-17: this script built its Gemini client with a bare
+    `genai.Client(api_key=...)`, missing the explicit request-timeout applied
+    to the three vision scripts after the 2026-08-06 hung-call incident (a
+    request that never returned and never raised blocked a run for 20+
+    minutes at zero CPU, because the retry loop only fires on a caught
+    exception). This is the FOURTH independent instance of that same missing
+    fix and the first outside the vision trio - evidence the drift was not
+    confined to the files vision_adjudication_common.py was extracted from.
+    Routed through make_client() so a fifth copy can't be written."""
+    captured = {}
+
+    class FakeClient:
+        def __init__(self, api_key, http_options):
+            captured["api_key"] = api_key
+            captured["timeout"] = http_options.timeout
+
+    monkeypatch.setattr(ppp.vac.genai, "Client", FakeClient)
+    ppp.build_client("test-key")
+    assert captured["api_key"] == "test-key"
+    assert captured["timeout"], "a client with no request timeout can hang forever"
+
+
+def test_propose_punctuation_model_list_excludes_the_permanently_dead_model():
+    """FOUND 2026-08-17: gemini-2.5-flash has permanently 404'd since
+    2026-08-05 ("no longer available to new users") - not a transient
+    condition. It was dropped from the vision scripts' fallback chain then,
+    because a dead model silently eats a retry slot on every fallback path
+    instead of ever helping. This script's independently-written copy of the
+    list never got that fix."""
+    assert "gemini-2.5-flash" not in ppp.MODELS_TO_TRY
+    assert ppp.MODELS_TO_TRY == list(vac.adjudicate_with_retry.__defaults__[0]), (
+        "the fallback chain should match the shared adjudication loop's, not "
+        "be a fourth independently-maintained list"
+    )
+
+
+def test_duplicate_phrase_report_order_is_deterministic():
+    """FOUND 2026-08-17 (bug, code) while proving this refactor
+    behavior-preserving: check 3 iterated a SET of word tuples, so Python's
+    per-process string-hash randomization reordered the report on every run.
+    Confirmed empirically at the time - five runs of identical code against
+    the identical corpus gave five different orderings of the same lines.
+    That defeats this project's standing verification method (diff two runs
+    - CLAUDE.md Lesson 19): a real change and pure noise look the same.
+    Asserting sorted order here rather than "two calls agree", because two
+    calls in ONE process share a hash seed and would agree even with the bug
+    present."""
+    words = "aa bb cc dd ee ff gg hh ii jj kk ll".split()
+    shared_text = " ".join(words)
+    klalim = [
+        {"klal_id": 1, "title": "\u05d0", "clean_text": shared_text},
+        {"klal_id": 2, "title": "\u05d1", "clean_text": shared_text},
+    ]
+    issues = vpci.check_duplicate_phrases(klalim, n=10)
+    assert len(issues) == 3, "12 words, n=10 -> 3 shared 10-grams"
+    assert issues == sorted(issues)

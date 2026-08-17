@@ -31,20 +31,28 @@
 # boundary. Contiguity catches it either way.)
 import json
 import os
+import sys
 from collections import defaultdict
 
 # Moved one level deeper (pipeline/ or tools/) 2026-08-16 - REPO now goes up
 # two levels, not one, to keep resolving to the actual repo root where
 # part1.json/docai_word_boxes/etc. live.
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(REPO, "pipeline"))
+import corpus_io as cio  # noqa: E402
+
 NO_TEXT_TITLE = "(no text available)"
+# The 22 base letters only, NOT corpus_io.HEBREW_LETTERS' 27: this is an
+# ORDERING alphabet for the book's own alphabetical arrangement of klal
+# titles, where a final form is not a distinct sort position. A real
+# difference in purpose, not a fourth copy of the same set - deliberately not
+# merged with corpus_io's constant.
 ALPHABET = "אבגדהוזחטיכלמנסעפצקרשת"
 RANK = {c: i for i, c in enumerate(ALPHABET)}
 
-
-def load_klalim(path):
-    data = json.load(open(path, encoding="utf-8"))
-    return data["klalim"] if isinstance(data, dict) and "klalim" in data else data
+# The wrapper-vs-bare-list tolerance this script implemented inline is now
+# corpus_io.load_klalim, shared with every other reader of these files.
+load_klalim = cio.load_klalim
 
 
 def find_violations(klalim):
@@ -145,7 +153,7 @@ def main():
     # across a part seam. Regenerate it first if part*.json changed
     # (build_klalim_demo_dataset.py / rebuild_all.sh) rather than trusting a
     # stale copy here.
-    path = os.path.join(REPO, "klalim_demo_dataset.json")
+    path = cio.DEMO_DATASET_PATH
     klalim = load_klalim(path)
     klalim = sorted(klalim, key=lambda k: k["klal_id"])
     by_klal, skipped_bad_first_char = find_violations(klalim)

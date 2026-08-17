@@ -42,13 +42,14 @@ import re
 import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "pipeline"))
+import corpus_io as cio  # noqa: E402
 import verify_corrections_vision as vcv  # noqa: E402
 
-REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PART1_PATH = os.path.join(REPO, "part1.json")
+REPO = cio.REPO
+PART1_PATH = cio.PART1_PATH
 DECISIONS_PATH = os.path.join(REPO, "review_decisions.jsonl")
 REGIONS_PATH = os.path.join(REPO, "klal_page_regions.json")
-DOCAI_DIR = os.path.join(REPO, "docai_word_boxes")
+DOCAI_DIR = cio.DOCAI_DIR
 REPORT_PATH = os.path.join(REPO, "flagged_candidates_vision_report.json")
 
 TARGET_REVIEWERS = {"ai-semantic-spotcheck-round2", "ai-real-word-substitution"}
@@ -184,14 +185,14 @@ def load_flagged_candidates(decisions_path=None):
 
 
 def load_regions():
-    return json.load(open(REGIONS_PATH, encoding="utf-8"))
+    return cio.load_json(REGIONS_PATH)
 
 
 def load_page_tokens(page):
-    path = os.path.join(DOCAI_DIR, f"page_{page}.json")
-    if not os.path.exists(path):
-        return []
-    return json.load(open(path, encoding="utf-8"))
+    """[] (not None) for a missing page - locate_word() iterates the result
+    directly. That divergence from the other eight copies of this loader is
+    now an explicit argument rather than a difference you had to notice."""
+    return cio.load_docai_page(page, DOCAI_DIR, default=[])
 
 
 def locate_word(klal_id, word_index, original_text, regions, total_words_in_klal, token_cache):
@@ -387,7 +388,7 @@ def main():
     ap.add_argument("--limit", type=int, default=None, help="process only the first N candidates")
     args = ap.parse_args()
 
-    klalim = json.load(open(PART1_PATH, encoding="utf-8"))
+    klalim = cio.load_part1(PART1_PATH)
     klalim_by_id = {k["klal_id"]: k for k in klalim}
     word_counts = {kid: len(k["clean_text"].split()) for kid, k in klalim_by_id.items()}
     regions = load_regions()

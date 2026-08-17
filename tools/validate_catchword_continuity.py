@@ -27,12 +27,16 @@
 import json
 import os
 import re
+import sys
 
 # Moved one level deeper (pipeline/ or tools/) 2026-08-16 - REPO now goes up
 # two levels, not one, to keep resolving to the actual repo root where
 # part1.json/docai_word_boxes/etc. live.
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DOCAI_DIR = os.path.join(REPO, "docai_word_boxes")
+sys.path.insert(0, os.path.join(REPO, "pipeline"))
+import corpus_io as cio  # noqa: E402
+
+DOCAI_DIR = cio.DOCAI_DIR
 # CORRECTED 2026-08-14: this used to say "pages 1-12 are byte-identical
 # duplicates of 13-24, see CLAUDE.md" - both halves false. Checked all 12
 # pairs: every one differs, and CLAUDE.md says nothing of the sort. Pages
@@ -92,8 +96,11 @@ ABBREV_MARKS = "\"'׳״"
 GEMATRIA_LETTERS = set("אבגדהוזחטיכלמנסעפצקרשתךםןףץ")
 
 
-def clean_word(w):
-    return "".join(c for c in w if c.isalnum())
+# Byte-identical private copy until 2026-08-17; shared with
+# build_corrections_dataset.py and build_klal_page_regions.py. The
+# HEADER_WORDS/FURNITURE_RE furniture rules above are deliberately NOT shared
+# - see corpus_io's docstring for why.
+clean_word = cio.clean_word
 
 
 def is_header_word(w):
@@ -118,10 +125,7 @@ def load_marker_positions():
     opening at all, and this boundary was misclassified as 'no match'.
     Cross-referencing the independently-verified marker position is exact:
     only skip a token when some klal is actually known to start right there."""
-    path = os.path.join(REPO, "gematria_trace_part1.json")
-    if not os.path.exists(path):
-        return {}
-    trace = json.load(open(path, encoding="utf-8"))
+    trace = cio.load_gematria_trace(default=[])
     out = {}
     for e in trace:
         page, pos = e.get("page"), e.get("marker_position")
@@ -183,10 +187,11 @@ def first_real_tokens(tokens, n=4, skip_header_words=6, marker_positions=None):
 
 
 def load_page(page_num):
-    path = os.path.join(DOCAI_DIR, f"page_{page_num}.json")
-    if not os.path.exists(path):
-        return None
-    return json.load(open(path, encoding="utf-8"))
+    """None (not []) for a page that was never extracted - main() branches on
+    falsiness and records it as skipped, which is the same either way here,
+    but the missing-page answer is now an explicit argument rather than
+    whichever of nine hand-written copies you happened to be reading."""
+    return cio.load_docai_page(page_num, DOCAI_DIR)
 
 
 def main():

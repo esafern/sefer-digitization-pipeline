@@ -107,6 +107,7 @@
 import argparse
 import json
 import os
+import sys
 from collections import Counter, defaultdict
 
 import propose_abbreviation_expansions as abbrev
@@ -117,7 +118,10 @@ import validate_part1_corpus_integrity as integrity
 # two levels, not one, to keep resolving to the actual repo root where
 # part1.json/docai_word_boxes/etc. live.
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PART1_PATH = os.path.join(REPO, "part1.json")
+sys.path.insert(0, os.path.join(REPO, "pipeline"))
+import corpus_io as cio  # noqa: E402
+
+PART1_PATH = cio.PART1_PATH
 
 QUOTE_CHARS = abbrev.QUOTE_CHARS
 
@@ -136,7 +140,7 @@ MIN_LIGATURE_TARGET_ATTESTATION = 50
 
 
 def load_part1():
-    return json.load(open(PART1_PATH, encoding="utf-8"))
+    return cio.load_part1(PART1_PATH)
 
 
 def clean_word(w):

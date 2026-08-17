@@ -40,6 +40,7 @@ import hashlib
 import fitz  # PyMuPDF
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "pipeline"))
+import corpus_io as cio  # noqa: E402
 import vision_adjudication_common as vac  # noqa: E402
 from vision_adjudication_common import (  # noqa: E402,F401 - re-exported, see below
     sanitize_json,
@@ -49,19 +50,20 @@ from vision_adjudication_common import (  # noqa: E402,F401 - re-exported, see b
 # Moved one level deeper (pipeline/ or tools/) 2026-08-16 - REPO now goes up
 # two levels, not one, to keep resolving to the actual repo root where
 # part1.json/docai_word_boxes/etc. live.
-REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+REPO = cio.REPO
 PDF_PATH = os.path.join(REPO, "berlin_square_corrected.pdf")
 QUEUE_PATH = os.path.join(REPO, "reconstruction_witness_queue.json")
 CACHE_DB = os.path.join(REPO, "witness_vision_cache.db")
 CACHE_TABLE = "witness_cache"
-DOCAI_DIR = os.path.join(REPO, "docai_word_boxes")
+DOCAI_DIR = cio.DOCAI_DIR
 
 CONTEXT_WINDOW = 12  # raw docai tokens on each side, matching api_witness_context()
-HEB = "אבגדהוזחטיכלמנסעפצקרשתךםןףץ"
-
-
-def norm(s):
-    return "".join(c for c in s if c in HEB)
+# Shared 2026-08-17 with verify_reconstruction_witness.py (which produces the
+# queue this script reads) and review_server.py (which serves it) - all three
+# had their own copy of this literal and this filter, and the queue's stored
+# docai_token_index values are only meaningful if all three agree.
+HEB = cio.HEBREW_LETTERS
+norm = cio.hebrew_letters_only
 
 
 # Hoisted out of adjudicate() so it can be hashed into the cache key - see
@@ -182,8 +184,14 @@ _dtoks_cache = {}
 
 
 def dtoks_for_page(page):
+    """Caches the FILTERED list, not the raw one, so it can't use
+    corpus_io.DocaiPageCache directly - only the load is shared. Like
+    verify_reconstruction_witness.docai_tokens (whose token indices these must
+    match), a missing page stays a hard error rather than an empty result."""
     if page not in _dtoks_cache:
-        toks = json.load(open(os.path.join(DOCAI_DIR, f"page_{page}.json"), encoding="utf-8"))
+        toks = cio.load_docai_page(page, DOCAI_DIR)
+        if toks is None:
+            raise FileNotFoundError(cio.docai_page_path(page, DOCAI_DIR))
         _dtoks_cache[page] = [t for t in toks if norm(t["text"])]
     return _dtoks_cache[page]
 

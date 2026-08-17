@@ -50,13 +50,14 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import validate_part1_corpus_integrity as integrity
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PART1_PATH = os.path.join(REPO, "part1.json")
+sys.path.insert(0, os.path.join(REPO, "pipeline"))
+import corpus_io as cio  # noqa: E402
+
+PART1_PATH = cio.PART1_PATH
 
 
 def load_klalim():
-    klalim = json.load(open(PART1_PATH, encoding="utf-8"))
-    klalim.sort(key=lambda k: k["klal_id"])
-    return klalim
+    return cio.load_part1_sorted(PART1_PATH)
 
 
 # --- Check 1: next-klal gematria marker -------------------------------

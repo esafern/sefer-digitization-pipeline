@@ -62,6 +62,7 @@ import difflib
 import json
 import os
 import re
+import sys
 import unicodedata
 from collections import Counter
 
@@ -69,10 +70,21 @@ from collections import Counter
 # two levels, not one, to keep resolving to the actual repo root where
 # part1.json/docai_word_boxes/etc. live.
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PART1_PATH = os.path.join(REPO, "part1.json")
-LEXICON_PATH = os.path.join(REPO, "lexicon.txt")
+# pipeline/ on sys.path for corpus_io - the same cross-directory import
+# tools/apply_punctuation_decisions.py already uses (CLAUDE.md "Directory
+# layout"). This line has to come after REPO and before the import, which is
+# also why REPO itself cannot live in the shared module.
+sys.path.insert(0, os.path.join(REPO, "pipeline"))
+import corpus_io as cio  # noqa: E402
 
-HEBREW_LETTERS = "אבגדהוזחטיכלמנסעפצקרשתךםןףץ"
+PART1_PATH = cio.PART1_PATH
+LEXICON_PATH = cio.LEXICON_PATH
+
+# Re-exported from corpus_io 2026-08-17. review_lexicon_gaps.py already
+# imports this constant from here by name (rather than re-declaring it) and
+# keeps working unchanged; what changes is that the DEFINITION is no longer a
+# fourth copy of the same 27-character literal - see corpus_io's docstring.
+HEBREW_LETTERS = cio.HEBREW_LETTERS
 GEMATRIA_VALUES = {
     "א": 1, "ב": 2, "ג": 3, "ד": 4, "ה": 5, "ו": 6, "ז": 7, "ח": 8, "ט": 9,
     "י": 10, "כ": 20, "ל": 30, "מ": 40, "נ": 50, "ס": 60, "ע": 70, "פ": 80,
@@ -139,7 +151,7 @@ def gematria_to_value(s):
 
 
 def load_klalim():
-    return json.load(open(PART1_PATH, encoding="utf-8"))
+    return cio.load_part1(PART1_PATH)
 
 
 def check_gematria_self_consistency(klalim):
@@ -366,7 +378,20 @@ def check_duplicate_phrases(klalim, n=10):
         if not shared:
             continue
         same_title = _same_title_cluster(by_id[kid_a]["title"], by_id[kid_b]["title"])
-        for g in shared:
+        # FIXED 2026-08-17 (bug, code): this iterated `shared` - a SET of
+        # word tuples - directly, so Python's per-process string-hash
+        # randomization reordered the reported lines on every run. Confirmed
+        # empirically, not inferred: five consecutive runs of the SAME code
+        # against the SAME corpus produced five different orderings of the
+        # klal 65/66/67 same-title-cluster block (identical line multiset,
+        # different sequence). Found while proving a refactor was
+        # behavior-preserving by diffing this script's output before and
+        # after - which is exactly the harm: this project's standing method
+        # for verifying any change is to diff two runs (CLAUDE.md Lesson 19),
+        # and a report that reorders itself makes a real change and pure
+        # noise look the same. sorted() costs nothing here (a handful of
+        # tuples) and makes the output diffable.
+        for g in sorted(shared):
             entry = f"klal {kid_a}/{kid_b}: identical {n}-word phrase: {' '.join(g)!r}"
             if same_title:
                 same_title_explained.append(entry)
@@ -462,8 +487,12 @@ def check_full_lexicon_coverage(klalim):
         return []
     lexicon = set(w.strip() for w in open(LEXICON_PATH, encoding="utf-8") if w.strip())
 
-    def clean_word(w):
-        return "".join(c for c in w if c in HEBREW_LETTERS)
+    # Hebrew-letters-only, NOT build_corrections_dataset.py's alnum
+    # clean_word() - a different normalization for a different question, which
+    # is why they have different names in corpus_io. review_lexicon_gaps.py
+    # reproduces this closure because it is a closure; both now bottom out in
+    # one implementation.
+    clean_word = cio.hebrew_letters_only
 
     unknown_counter = Counter()
     unknown_klalim = Counter()

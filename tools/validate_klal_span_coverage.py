@@ -37,12 +37,16 @@
 # run there - that's a known gap, not silently skipped.
 import json
 import os
+import sys
 
 # Moved one level deeper (pipeline/ or tools/) 2026-08-16 - REPO now goes up
 # two levels, not one, to keep resolving to the actual repo root where
 # part1.json/docai_word_boxes/etc. live.
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DOCAI_DIR = os.path.join(REPO, "docai_word_boxes")
+sys.path.insert(0, os.path.join(REPO, "pipeline"))
+import corpus_io as cio  # noqa: E402
+
+DOCAI_DIR = cio.DOCAI_DIR
 
 # same-page ratio distribution centers on 1.11 with real klalim rarely below
 # ~0.9; 0.85 leaves margin while still catching klal 175's near-miss
@@ -53,12 +57,14 @@ FLAG_RATIO_THRESHOLD = 0.85
 
 
 def get_page(cache, page):
+    """Signature deliberately unchanged (a plain dict passed in by the
+    caller): tests/test_corpus_invariants.py calls build_spans(trace, part1,
+    {}) directly, so the cache stays the caller's object rather than becoming
+    a corpus_io.DocaiPageCache instance. Only the load itself is shared -
+    four scripts had this same get-or-load body, disagreeing on the
+    missing-page answer. None here, as before."""
     if page not in cache:
-        path = os.path.join(DOCAI_DIR, f"page_{page}.json")
-        if not os.path.exists(path):
-            cache[page] = None
-        else:
-            cache[page] = json.load(open(path, encoding="utf-8"))
+        cache[page] = cio.load_docai_page(page, DOCAI_DIR)
     return cache[page]
 
 
@@ -152,13 +158,13 @@ def build_spans(trace, part1, cache):
 
 
 def main():
-    trace_path = os.path.join(REPO, "gematria_trace_part1.json")
-    part1_path = os.path.join(REPO, "part1.json")
+    trace_path = cio.TRACE_PATH
+    part1_path = cio.PART1_PATH
     if not (os.path.exists(trace_path) and os.path.exists(part1_path)):
         raise SystemExit("Missing gematria_trace_part1.json or part1.json - nothing to validate.")
 
-    trace = {x["klal_id"]: x for x in json.load(open(trace_path, encoding="utf-8"))}
-    part1 = {k["klal_id"]: k for k in json.load(open(part1_path, encoding="utf-8"))}
+    trace = {x["klal_id"]: x for x in cio.load_gematria_trace(trace_path)}
+    part1 = cio.load_part1_by_id(part1_path)
     cache = {}
 
     rows, unmeasured = build_spans(trace, part1, cache)
