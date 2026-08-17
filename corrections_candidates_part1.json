@@ -43,6 +43,20 @@
       }
     },
     {
+      "klal_id": 2,
+      "page": 14,
+      "opcode": "replace",
+      "word_index_in_final_text": 109,
+      "original_word": "אטינא",
+      "corrected_word": "אמינא",
+      "bbox": {
+        "x1": 0.5603715181350708,
+        "y1": 0.8286868929862976,
+        "x2": 0.6080495119094849,
+        "y2": 0.8404040336608887
+      }
+    },
+    {
       "klal_id": 3,
       "page": 15,
       "opcode": "replace",
@@ -5216,8 +5230,8 @@
     }
   ],
   "meta": {
-    "total_candidates": 386,
-    "klalim_covered": 148,
+    "total_candidates": 387,
+    "klalim_covered": 149,
     "skipped_no_docai_page_klalim": [],
     "unattributable_deletes": [],
     "untrusted_klalim_excluded": []
