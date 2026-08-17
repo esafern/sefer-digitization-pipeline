@@ -15,6 +15,101 @@ current handoff, re-written (not just appended to) as state changes.
 
 ## ►► SESSION HANDOFF — read this first, 2026-08-16 (continued into 2026-08-17)
 
+### DONE 2026-08-17 — heavy-agent (Opus, isolated worktree) full pipeline/tools code review and refactor, merged after independent re-verification; 4 real review-server UX gaps flagged, not fixed, need a product decision
+
+Per direct user request ("run a heavy sub-agent to review and refactor the
+whole process ... cover everything"). Scope: whole `pipeline/`/`tools/`
+codebase, with explicit focus on today's new/changed code (`build_gematria_
+trace.py`, the `corpus_io.py` gematria move, both review-harness bug fixes,
+the frontend changes). Hard constraints given to the agent: no data-file
+writes, no live Gemini calls, no weakening test gates without justification,
+no directory-layout changes. It worked in an isolated git worktree and left
+its changes uncommitted for review rather than committing directly.
+
+**Merged after independent re-verification, not on the agent's word alone**
+(the agent's own report already flagged one caution worth double-checking:
+an early `rebuild_all.sh` attempt without the gitignored `docai_word_boxes/`
+cache silently emptied 2 derived files before it caught and reverted them).
+Read every hunk of the diff directly, grep-confirmed each removed `import`
+was genuinely dead, copied the reviewed files into the main checkout myself
+(not `git checkout <branch>` - the agent's changes were uncommitted working-
+tree edits, so that pulled nothing; copied the files directly), then ran
+`pytest tests/ -q` (194/194) and `./rebuild_all.sh --skip-vision` (all 5
+derived files byte-identical before/after) in the main repo independently.
+`git status` before commit showed only `pipeline/`/`tests/`/`tools/` files
+touched - no data file changed.
+
+**What changed** (see commit for full list): removed 13 dead imports left by
+the 2026-08-17 `corpus_io.py` gematria-function move; `check_next_marker_
+and_title.py` no longer imports a whole sibling validator module just to
+reach one function that's itself only a re-export of `corpus_io`; extracted
+`corpus_io.center_y()` from three independent copies (`build_gematria_
+trace.py`, a redefinition nested inside a loop in `build_klal_page_
+regions.py`, and an inline expression written twice in `verify_
+reconstruction_witness.py`) - all three existed for the identical measured
+reason (klal 3/4 marker y1 0.007 apart, a real incident already in this
+file), the same evidentiary bar the module's other extractions use; fixed a
+latent type bug in `build_gematria_trace.py` (`Candidate.seq` was passed
+token text, a string, everywhere else expecting an int - masked because
+`collect_candidates` always overwrites it before `pick()`'s tie-break reads
+it, so never triggered, but a real bug not just a style issue); corrected
+two stale docstring claims (`build_gematria_trace.py`'s own example page
+range 76-235->76-249; `validate_klal_span_coverage.py` named a
+`trace_gematria_sequence.py` that exists nowhere); fixed a real N+1
+performance bug in `review_server.py` - `api_klal`'s punctuation loop and
+`api_page`'s witness loop each called `current_for()` per item, re-parsing
+the whole, permanently-growing `review_decisions.jsonl` on every single
+item, the exact bug class `_merge_decision()`'s own docstring already
+documents as fixed once (Lesson 13's failure mode, applied to code instead
+of data) - switched both to one `all_current()` map each (already-existing
+function, not new), measured `api_page(24)` 0.38s -> 0.01s; strengthened
+(not weakened) today's earlier `word_index` gate relaxation in
+`test_corpus_invariants.py` to also require a present `word_index` be a
+non-negative int, closing a gap the relaxation had left open on the write
+side; added 6 tests in `test_pipeline_logic.py` for two previously
+zero-coverage `build_gematria_trace.py` branches - the placeholder-
+`clean_text` path (runs for 115 of 445 Parts 2-3 klalim, i.e. most of what a
+Parts 2-3 run actually exercises) and the ambiguity-margin vision-
+disambiguation path.
+
+**Deliberately not changed**, per the agent's own report, reasoning
+verified sound: `_general_klal_flag_current` + `_word_level_ai_flags` each
+still re-read the decisions log once per `api_klal` call (2 parses where 1
+would do) - fixing needs a signature change that would churn the 4 tests
+bug #1 added earlier today for a proportionally small win; the vision
+scripts, page-furniture word sets, punctuation cache schema, and each
+script's own argparse/`REPO` line were already correctly rejected by the
+2026-08-11 round-4 audit and that reasoning still holds; no orphaned
+duplicate gematria math found anywhere else in the repo.
+
+**4 real review-server gaps flagged for human triage, NOT fixed** (each
+needs a product decision, not just a code change) - all stem from bug #1's
+`ai_flag` mechanism (word-level AI-pass findings, added earlier today) not
+yet being wired into every OTHER place the dashboard tracks flag/correction
+state:
+1. `api_klalim`'s `correction_count`/`open_count`/`machine_disputed_count`
+   don't include `ai_flag` corrections - a klal can show "0 open" in the nav
+   while its text pane shows a highlighted, undecided AI flag. Live today
+   (69 word-level flags from this session's backfill). Deciding whether an
+   `ai_flag` counts as machine-disputed is a product call, not a bug fix -
+   `api_klalim`'s own comment insists client and server counts must never
+   disagree.
+2. Same root cause, the flag badge: `rd.flagged_klalim()` keys on
+   `(klal_id, word_index)`, so a word-level flag lights the nav ⚑, but
+   `api_klal`'s `needs_revisit` (now general-only, per bug #1's fix) is
+   false - the flag button on that same klal reads "⚑ flag" (inactive), not
+   "⚑ flagged".
+3. `api_decision_history` excludes `klal_flag` rows entirely, so "Show
+   decision history" on an `ai_flag` word reports "No decisions recorded
+   yet" and the panel header reads "Correction on record" for something
+   that isn't one.
+4. Latent, not reachable today: `ai_flag` entries carry `current_decision`,
+   so if any future code path ever reached `wordState()` with one, it would
+   classify it `'human'` (green, "Human-Decided") - silently mislabeling an
+   unresolved AI flag as human-decided. Not live now (the frontend branches
+   on `ai_flag` first and `api_page` never emits them this way), but worth
+   fixing before anything changes that routing.
+
 ### DONE 2026-08-17 — scan-crop verification of the 8 whole-sentence-divergence leads + klal 549: TWO distinct, systematic data issues confirmed by direct render, both well-understood; NO corrections written yet (still needs its own go-ahead per the Parts 2-3 gate)
 
 Direct follow-up to the DocAI-vs-stored investigation logged above. Per user
