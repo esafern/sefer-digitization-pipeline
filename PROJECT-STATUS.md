@@ -15,6 +15,83 @@ current handoff, re-written (not just appended to) as state changes.
 
 ## ►► SESSION HANDOFF — read this first, 2026-08-16 (continued into 2026-08-17)
 
+### DONE 2026-08-17 — Parts 2-3 infra item 3: the previously-throttled vision-adjudication pass completed clean over the full extended page range (76-249)
+
+Re-ran `pipeline/build_gematria_trace.py --vision` (via `venv/bin/python3` -
+the system python lacks PyMuPDF/`fitz`, which the vision tier needs to crop
+the PDF; the mechanical-only runs earlier this session didn't hit this since
+`--vision` wasn't passed) over `part2.json`/`part3.json`, pages 76-249 (was
+76-235 before this session's extraction extension - klal 664-667 now
+reachable). 62 vision adjudications requested (cache-backed, per Lesson 12's
+cache-key discipline - only 3 transient `503 UNAVAILABLE` retries this run,
+all succeeded, no manual resume needed this time). `part1/2/3.json` all
+confirmed untouched (this pass only writes the two trace files + its own
+cache db) - correct, matches the pipeline's read-only-on-corpus design.
+
+Final: `gematria_trace_part2.json` 222 klalim (148 ok / 45 mismatch / 29
+not-found, was 144/36/42 mechanical-only); `gematria_trace_part3.json` 223
+klalim (167 ok / 31 mismatch / 25 not-found, was 161/22/40 mechanical-only
+at the old 76-235 range). Vision resolved some not-found/mismatch into ok
+and reclassified others; not yet spot-checked individually against the raw
+scan beyond what the tool's own cached reasoning shows - same caveat as the
+Part 1 vision tier had at merge time.
+
+### DONE 2026-08-17 — Parts 2-3 infra item 4: investigated the 14 high-value garbled-text leads (DocAI reads clean in all 14; stored text diverges more severely than a single-word typo in most); NEW finding: a cheap word-count outlier sweep surfaces at least 9 klalim shaped like klal 663's merge bug, including 2 of the 14 leads
+
+Investigation only, no corpus writes — per explicit user scope decision, this
+does NOT apply anything to `part2.json`/`part3.json`; CLAUDE.md's Parts 2-3
+gate still requires its own separate go-ahead before any actual correction
+there.
+
+**Method**: for each of the 14 leads (klal 281, 282, 299, 300, 374, 389, 408,
+412, 482, 510, 543, 549, 613, 634 — from the `build_gematria_trace.py` pass
+logged above, all at content agreement ≤0.333), pulled the raw
+`docai_word_boxes` tokens in true reading order (Y-center, then RTL x —
+never array order, per this session's confirmed marker-ordering artifact)
+starting immediately after the confirmed marker, and compared against the
+stored `clean_text` opening.
+
+**All 14 DocAI continuations read as clean, grammatical Rabbinic Hebrew** —
+no garbling on the scan/OCR side, confirming the marker positions
+themselves are trustworthy anchors (consistent with the original finding).
+**The stored text's divergence is not uniformly a single corrupted word.**
+For 6 (300, 374, 389, 510, 543, 549) the opening word(s) match DocAI closely
+and the garble sits a few words in — the shape the original finding assumed.
+But for at least 6 more (281, 282, 299, 408, 412, 482, 613) the stored
+opening diverges from DocAI within the first clause into an entirely
+different sentence, not a plausible single-token misread — e.g. klal 299
+stored `מדאורייתא ע"ש ועיין מ"ש עליו...` vs DocAI `ידע אמורא רישא דברייתא
+ולא ידע סיפא...`, klal 613 stored `כר' יוחנן לגבייהו כ"מ פ"ד...` vs DocAI
+`רב פ"ה מה' ע"ז : תריד רבא ורבא בר עולא...`. This shape (whole differing
+sentences, not a garbled token) is closer to what CLAUDE.md's Parts 2-3 gate
+already warned Part 1's fixes might not generalize to.
+
+**NEW, from a cheap mechanical check run on the side of this investigation**
+(per Lesson 8 — corpus-wide structural sweeps catch what per-klal review
+misses): sorted every Parts 2-3 klal by stored word count. Median is 75
+words, mean 284.9 (skewed by outliers). Top 10: klal 663 (9,545 — already
+flagged, "almost certainly several klalim merged"), 410 (8,041), 301
+(3,146), 256 (3,111), 664 (2,656), 409 (2,594), 556 (2,550), 283 (2,505), 307
+(2,142), **549 (2,121 — one of the 14 leads above)**. klal 634 (also one of
+the 14) is not top-10 but at 750 words is ~10x the median. This is a NEW
+finding, not previously logged: at least 9 klalim beyond 663 are large
+enough to be plausible merge-of-several-klalim candidates by the same
+mechanism, not yet individually checked. 549 and 634 being both on this list
+AND on the garbled-opening list is suggestive (a merge could produce both
+symptoms — wrong/garbled text right after the marker if the marker actually
+belongs to different content than what got stored under it) but not
+confirmed; needs the same scan-crop check as the 3 that were already
+resolved this way (klal 30/75/88, see `reconstruct_multipage_klalim.py`
+history).
+
+**NEXT STEP, not yet done**: scan-crop verification per klal (the project's
+standing method for resolving this class of disagreement, not further token
+comparison) — starting with the 6 whole-different-sentence cases and the 2
+length-outlier overlaps, before any of this becomes a write to `part2/
+3.json`. Full length list for the other 7 top-10 outliers (410, 301, 256,
+664, 409, 556, 283) not yet cross-checked against their own DocAI markers -
+worth doing before concluding klal 663 is the only merge case in the corpus.
+
 ### DONE 2026-08-17 — klal 4 word 36 corrected (טרור→טהור), a data issue: user-recorded manual_correction applied via `apply_reviewer_decisions.py`
 
 User recorded the correction directly via the review dashboard (word 36:

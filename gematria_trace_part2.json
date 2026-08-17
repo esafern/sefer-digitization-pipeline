@@ -175,8 +175,9 @@
     "stored_gematria": "רמ",
     "page": 84,
     "content_match_ratio": null,
-    "status": "marker_not_found_in_window",
-    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'רמ' in the marker x-band was found between the cursor and page 86 - with no stored opening there is no second signal to fall back on"
+    "marker_position": 351,
+    "status": "marker_found_content_mismatch",
+    "note": "positional-only (numeral read as 'רם', confirmed by vision crop) at page 84 token 351: the corpus stores no text for this klal (placeholder clean_text), so the marker was located by numeral, marker x-band and sequence alone and the stored text could not be checked at all - this is NOT a content disagreement"
   },
   {
     "klal_id": 241,
@@ -580,8 +581,8 @@
     "page": 97,
     "content_match_ratio": 0.167,
     "marker_position": 74,
-    "status": "marker_found_content_mismatch",
-    "note": "mechanical-exact: matched 'רפא' at page 97 token 74, but the following 8 tokens agree with the stored opening at only 0.167 - marker position trusted, stored text NOT confirmed; content agreement 0.167 below 0.5; no vision adjudicator available"
+    "status": "ok",
+    "note": "vision-assisted: matched 'רפא' at page 97 token 74, opening agreed with stored title (0.167); content agreement 0.167 below 0.5; marker confirmed by vision crop"
   },
   {
     "klal_id": 282,
@@ -590,8 +591,8 @@
     "page": 97,
     "content_match_ratio": 0.25,
     "marker_position": 137,
-    "status": "marker_found_content_mismatch",
-    "note": "mechanical-exact: matched 'רפב' at page 97 token 137, but the following 8 tokens agree with the stored opening at only 0.250 - marker position trusted, stored text NOT confirmed; content agreement 0.250 below 0.5; no vision adjudicator available"
+    "status": "ok",
+    "note": "vision-assisted: matched 'רפב' at page 97 token 137, opening agreed with stored clean_text (0.250); content agreement 0.250 below 0.5; marker confirmed by vision crop"
   },
   {
     "klal_id": 283,
@@ -639,8 +640,9 @@
     "stored_gematria": "רפז",
     "page": 100,
     "content_match_ratio": null,
-    "status": "marker_not_found_in_window",
-    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'רפז' in the marker x-band was found between the cursor and page 102 - with no stored opening there is no second signal to fall back on"
+    "marker_position": 621,
+    "status": "marker_found_content_mismatch",
+    "note": "positional-only (numeral read as 'רפו', confirmed by vision crop) at page 100 token 621: the corpus stores no text for this klal (placeholder clean_text), so the marker was located by numeral, marker x-band and sequence alone and the stored text could not be checked at all - this is NOT a content disagreement"
   },
   {
     "klal_id": 288,
@@ -768,8 +770,8 @@
     "page": 105,
     "content_match_ratio": 0.333,
     "marker_position": 536,
-    "status": "marker_found_content_mismatch",
-    "note": "mechanical-exact: matched 'ש' at page 105 token 536, but the following 8 tokens agree with the stored opening at only 0.333 - marker position trusted, stored text NOT confirmed; content agreement 0.333 below 0.5; no vision adjudicator available"
+    "status": "ok",
+    "note": "vision-assisted: matched 'ש' at page 105 token 536, opening agreed with stored title (0.333); content agreement 0.333 below 0.5; marker confirmed by vision crop"
   },
   {
     "klal_id": 301,
@@ -804,20 +806,20 @@
     "klal_id": 304,
     "expected_gematria": "שד",
     "stored_gematria": "שד",
-    "page": 110,
+    "page": 112,
     "content_match_ratio": null,
-    "status": "marker_not_found_in_window",
-    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'שד' in the marker x-band was found between the cursor and page 113 - with no stored opening there is no second signal to fall back on"
+    "marker_position": 572,
+    "status": "marker_found_content_mismatch",
+    "note": "positional-only (numeral read as 'שה', confirmed by vision crop) at page 112 token 572: the corpus stores no text for this klal (placeholder clean_text), so the marker was located by numeral, marker x-band and sequence alone and the stored text could not be checked at all - this is NOT a content disagreement"
   },
   {
     "klal_id": 305,
     "expected_gematria": "שה",
     "stored_gematria": "שה",
     "page": 112,
-    "content_match_ratio": 1.0,
-    "marker_position": 572,
-    "status": "ok",
-    "note": "mechanical-exact: matched 'שה' at page 112 token 572, opening agreed with stored clean_text (1.000)"
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window",
+    "note": "no marker-band token matching 'שה' (or any documented-confusion variant) found in pages 112-249 from the last confirmed marker forward, with content agreement >= 0.5, nor on position alone within 114; `page` here is the SEARCH START, not an observed position"
   },
   {
     "klal_id": 306,
@@ -958,10 +960,11 @@
     "klal_id": 320,
     "expected_gematria": "שכ",
     "stored_gematria": "שכ",
-    "page": 116,
+    "page": 117,
     "content_match_ratio": null,
-    "status": "marker_not_found_in_window",
-    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'שכ' in the marker x-band was found between the cursor and page 118 - with no stored opening there is no second signal to fall back on"
+    "marker_position": 5,
+    "status": "marker_found_content_mismatch",
+    "note": "positional-only (numeral read as 'שך', confirmed by vision crop) at page 117 token 5: the corpus stores no text for this klal (placeholder clean_text), so the marker was located by numeral, marker x-band and sequence alone and the stored text could not be checked at all - this is NOT a content disagreement"
   },
   {
     "klal_id": 321,
@@ -1096,10 +1099,11 @@
     "klal_id": 334,
     "expected_gematria": "שלד",
     "stored_gematria": "שלד",
-    "page": 119,
+    "page": 120,
     "content_match_ratio": null,
-    "status": "marker_not_found_in_window",
-    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'שלד' in the marker x-band was found between the cursor and page 121 - with no stored opening there is no second signal to fall back on"
+    "marker_position": 57,
+    "status": "marker_found_content_mismatch",
+    "note": "positional-only (numeral read as 'שלו', confirmed by vision crop) at page 120 token 57: the corpus stores no text for this klal (placeholder clean_text), so the marker was located by numeral, marker x-band and sequence alone and the stored text could not be checked at all - this is NOT a content disagreement"
   },
   {
     "klal_id": 335,
@@ -1157,8 +1161,9 @@
     "stored_gematria": "שמ",
     "page": 121,
     "content_match_ratio": null,
-    "status": "marker_not_found_in_window",
-    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'שמ' in the marker x-band was found between the cursor and page 123 - with no stored opening there is no second signal to fall back on"
+    "marker_position": 503,
+    "status": "marker_found_content_mismatch",
+    "note": "positional-only (numeral read as 'שם', confirmed by vision crop) at page 121 token 503: the corpus stores no text for this klal (placeholder clean_text), so the marker was located by numeral, marker x-band and sequence alone and the stored text could not be checked at all - this is NOT a content disagreement"
   },
   {
     "klal_id": 341,
@@ -1324,8 +1329,9 @@
     "stored_gematria": "שנז",
     "page": 126,
     "content_match_ratio": null,
-    "status": "marker_not_found_in_window",
-    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'שנז' in the marker x-band was found between the cursor and page 128 - with no stored opening there is no second signal to fall back on"
+    "marker_position": 560,
+    "status": "marker_found_content_mismatch",
+    "note": "positional-only (numeral read as 'שנן', confirmed by vision crop) at page 126 token 560: the corpus stores no text for this klal (placeholder clean_text), so the marker was located by numeral, marker x-band and sequence alone and the stored text could not be checked at all - this is NOT a content disagreement"
   },
   {
     "klal_id": 358,
@@ -1423,8 +1429,9 @@
     "stored_gematria": "שסז",
     "page": 128,
     "content_match_ratio": null,
-    "status": "marker_not_found_in_window",
-    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'שסז' in the marker x-band was found between the cursor and page 130 - with no stored opening there is no second signal to fall back on"
+    "marker_position": 193,
+    "status": "marker_found_content_mismatch",
+    "note": "positional-only (numeral read as 'שסו', confirmed by vision crop) at page 128 token 193: the corpus stores no text for this klal (placeholder clean_text), so the marker was located by numeral, marker x-band and sequence alone and the stored text could not be checked at all - this is NOT a content disagreement"
   },
   {
     "klal_id": 368,
@@ -1492,8 +1499,8 @@
     "page": 131,
     "content_match_ratio": 0.167,
     "marker_position": 232,
-    "status": "marker_found_content_mismatch",
-    "note": "mechanical-exact: matched 'שעד' at page 131 token 232, but the following 8 tokens agree with the stored opening at only 0.167 - marker position trusted, stored text NOT confirmed; content agreement 0.167 below 0.5; no vision adjudicator available"
+    "status": "ok",
+    "note": "vision-assisted: matched 'שעד' at page 131 token 232, opening agreed with stored title (0.167); content agreement 0.167 below 0.5; marker confirmed by vision crop"
   },
   {
     "klal_id": 375,
@@ -1521,8 +1528,9 @@
     "stored_gematria": "שעז",
     "page": 131,
     "content_match_ratio": null,
-    "status": "marker_not_found_in_window",
-    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'שעז' in the marker x-band was found between the cursor and page 133 - with no stored opening there is no second signal to fall back on"
+    "marker_position": 703,
+    "status": "marker_found_content_mismatch",
+    "note": "positional-only (numeral read as 'שען', confirmed by vision crop) at page 131 token 703: the corpus stores no text for this klal (placeholder clean_text), so the marker was located by numeral, marker x-band and sequence alone and the stored text could not be checked at all - this is NOT a content disagreement"
   },
   {
     "klal_id": 378,
@@ -1620,8 +1628,9 @@
     "stored_gematria": "שפז",
     "page": 134,
     "content_match_ratio": null,
-    "status": "marker_not_found_in_window",
-    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'שפז' in the marker x-band was found between the cursor and page 136 - with no stored opening there is no second signal to fall back on"
+    "marker_position": 70,
+    "status": "marker_found_content_mismatch",
+    "note": "positional-only (numeral read as 'שפן', confirmed by vision crop) at page 134 token 70: the corpus stores no text for this klal (placeholder clean_text), so the marker was located by numeral, marker x-band and sequence alone and the stored text could not be checked at all - this is NOT a content disagreement"
   },
   {
     "klal_id": 388,
@@ -1640,8 +1649,8 @@
     "page": 134,
     "content_match_ratio": 0.25,
     "marker_position": 146,
-    "status": "marker_found_content_mismatch",
-    "note": "mechanical-exact: matched 'שפט' at page 134 token 146, but the following 8 tokens agree with the stored opening at only 0.250 - marker position trusted, stored text NOT confirmed; content agreement 0.250 below 0.5; no vision adjudicator available"
+    "status": "ok",
+    "note": "vision-assisted: matched 'שפט' at page 134 token 146, opening agreed with stored clean_text (0.250); content agreement 0.250 below 0.5; marker confirmed by vision crop"
   },
   {
     "klal_id": 390,
@@ -1883,8 +1892,9 @@
     "stored_gematria": "תיד",
     "page": 151,
     "content_match_ratio": null,
-    "status": "marker_not_found_in_window",
-    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'תיד' in the marker x-band was found between the cursor and page 153 - with no stored opening there is no second signal to fall back on"
+    "marker_position": 474,
+    "status": "marker_found_content_mismatch",
+    "note": "positional-only (numeral read as 'תיר', confirmed by vision crop) at page 151 token 474: the corpus stores no text for this klal (placeholder clean_text), so the marker was located by numeral, marker x-band and sequence alone and the stored text could not be checked at all - this is NOT a content disagreement"
   },
   {
     "klal_id": 415,
@@ -1940,8 +1950,9 @@
     "stored_gematria": "תכ",
     "page": 156,
     "content_match_ratio": null,
-    "status": "marker_not_found_in_window",
-    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'תכ' in the marker x-band was found between the cursor and page 158 - with no stored opening there is no second signal to fall back on"
+    "marker_position": 177,
+    "status": "marker_found_content_mismatch",
+    "note": "positional-only (numeral read as 'תך', confirmed by vision crop) at page 156 token 177: the corpus stores no text for this klal (placeholder clean_text), so the marker was located by numeral, marker x-band and sequence alone and the stored text could not be checked at all - this is NOT a content disagreement"
   },
   {
     "klal_id": 421,
@@ -2008,8 +2019,9 @@
     "stored_gematria": "תכז",
     "page": 158,
     "content_match_ratio": null,
-    "status": "marker_not_found_in_window",
-    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'תכז' in the marker x-band was found between the cursor and page 160 - with no stored opening there is no second signal to fall back on"
+    "marker_position": 813,
+    "status": "marker_found_content_mismatch",
+    "note": "positional-only (numeral read as 'תכן', confirmed by vision crop) at page 158 token 813: the corpus stores no text for this klal (placeholder clean_text), so the marker was located by numeral, marker x-band and sequence alone and the stored text could not be checked at all - this is NOT a content disagreement"
   },
   {
     "klal_id": 428,
@@ -2075,10 +2087,11 @@
     "klal_id": 434,
     "expected_gematria": "תלד",
     "stored_gematria": "תלד",
-    "page": 161,
+    "page": 163,
     "content_match_ratio": null,
-    "status": "marker_not_found_in_window",
-    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'תלד' in the marker x-band was found between the cursor and page 163 - with no stored opening there is no second signal to fall back on"
+    "marker_position": 76,
+    "status": "marker_found_content_mismatch",
+    "note": "positional-only (numeral read as 'תלה', confirmed by vision crop) at page 163 token 76: the corpus stores no text for this klal (placeholder clean_text), so the marker was located by numeral, marker x-band and sequence alone and the stored text could not be checked at all - this is NOT a content disagreement"
   },
   {
     "klal_id": 435,
@@ -2086,9 +2099,8 @@
     "stored_gematria": "תלה",
     "page": 163,
     "content_match_ratio": null,
-    "marker_position": 76,
-    "status": "marker_found_content_mismatch",
-    "note": "positional-only (exact numeral) at page 163 token 76: the corpus stores no text for this klal (placeholder clean_text), so the marker was located by numeral, marker x-band and sequence alone and the stored text could not be checked at all - this is NOT a content disagreement"
+    "status": "marker_not_found_in_window",
+    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'תלה' in the marker x-band was found between the cursor and page 165 - with no stored opening there is no second signal to fall back on"
   },
   {
     "klal_id": 436,
@@ -2135,8 +2147,9 @@
     "stored_gematria": "תמ",
     "page": 163,
     "content_match_ratio": null,
-    "status": "marker_not_found_in_window",
-    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'תמ' in the marker x-band was found between the cursor and page 165 - with no stored opening there is no second signal to fall back on"
+    "marker_position": 591,
+    "status": "marker_found_content_mismatch",
+    "note": "positional-only (numeral read as 'תם', confirmed by vision crop) at page 163 token 591: the corpus stores no text for this klal (placeholder clean_text), so the marker was located by numeral, marker x-band and sequence alone and the stored text could not be checked at all - this is NOT a content disagreement"
   },
   {
     "klal_id": 441,
@@ -2145,7 +2158,7 @@
     "page": 163,
     "content_match_ratio": null,
     "status": "marker_not_found_in_window",
-    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'תמא' in the marker x-band was found between the cursor and page 166 - with no stored opening there is no second signal to fall back on"
+    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'תמא' in the marker x-band was found between the cursor and page 165 - with no stored opening there is no second signal to fall back on"
   },
   {
     "klal_id": 442,
