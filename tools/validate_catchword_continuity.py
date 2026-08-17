@@ -93,7 +93,11 @@ FURNITURE_RE = re.compile(r"^(Digitized|by|Google)$", re.IGNORECASE)
 # an unrelated earlier token. A running-header word is always a bare word;
 # a gershayim/geresh inside the token means it is an abbreviation instead.
 ABBREV_MARKS = "\"'׳״"
-GEMATRIA_LETTERS = set("אבגדהוזחטיכלמנסעפצקרשתךםןףץ")
+# Same 27-code-point repertoire as corpus_io.HEBREW_LETTERS, used here as a
+# membership test ("does this token contain any Hebrew letter at all") rather
+# than as a filter - a different question, but there is no reason for the
+# REPERTOIRE itself to be defined twice. Shared 2026-08-17.
+GEMATRIA_LETTERS = set(cio.HEBREW_LETTERS)
 
 
 # Byte-identical private copy until 2026-08-17; shared with
