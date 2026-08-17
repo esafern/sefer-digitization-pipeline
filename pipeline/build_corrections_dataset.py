@@ -17,27 +17,31 @@ import json
 import os
 import difflib
 
+import corpus_io as cio
+
 # Moved one level deeper (pipeline/ or tools/) 2026-08-16 - REPO now goes up
 # two levels, not one, to keep resolving to the actual repo root where
 # part1.json/docai_word_boxes/etc. live.
-REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DOCAI_DIR = os.path.join(REPO, "docai_word_boxes")
-ALIGNMENT_PATH = os.path.join(REPO, "part1_header_anchored_alignment.json")
-DEMO_DATASET = os.path.join(REPO, "klalim_demo_dataset.json")
+REPO = cio.REPO
+DOCAI_DIR = cio.DOCAI_DIR
+ALIGNMENT_PATH = cio.ALIGNMENT_PATH
+DEMO_DATASET = cio.DEMO_DATASET_PATH
 # Highest klal_id belonging to Part 1 - i.e. max(klal_id) in part1.json, which
-# is data, not a chosen number. DOCUMENTED 2026-08-15: this same literal is
-# written out independently in build_klal_page_regions.py and review_server.py
-# with no comment in any of the three, and nothing tied it back to the corpus.
-# If Part 1 ever gains or loses a klal (a split/merge - Success Criterion #2's
-# own failure mode) and only one copy is updated, each script fails silently
-# and differently: this one drops the klal from candidate generation AND from
-# the "Klalim covered: N / 222" denominator it prints, build_klal_page_regions
-# gives it no scan region, review_server stops serving it to the dashboard
-# entirely. tests/test_corpus_invariants.py::
-# test_part1_max_klal_constants_agree_with_the_corpus now asserts all three
-# equal max(klal_id) in part1.json, so a drifted copy fails the rebuild gate
-# instead of quietly narrowing coverage.
-PART1_MAX_KLAL = 222
+# is data, not a chosen number. DOCUMENTED 2026-08-15: this same literal used
+# to be written out independently here, in build_klal_page_regions.py and in
+# review_server.py, with no comment in any of the three and nothing tying it
+# back to the corpus. If Part 1 ever gains or loses a klal (a split/merge -
+# Success Criterion #2's own failure mode) and only one copy had been updated,
+# each script would have failed silently and differently: this one drops the
+# klal from candidate generation AND from the "Klalim covered: N / 222"
+# denominator it prints, build_klal_page_regions gives it no scan region,
+# review_server stops serving it to the dashboard entirely.
+# DEDUPLICATED 2026-08-17: all three now read corpus_io.PART1_MAX_KLAL, so
+# there is nothing left for the three copies to disagree about. The half of
+# tests/test_corpus_invariants.py::test_part1_max_klal_constants_agree_with_
+# the_corpus that still matters - the constant equals max(klal_id) in the live
+# part1.json - is unchanged and still gates the rebuild.
+PART1_MAX_KLAL = cio.PART1_MAX_KLAL
 # Longest diff span, in words, still treated as a real per-word correction
 # rather than alignment drift. Named 2026-08-14: it was a bare literal `4`
 # repeated on both sides of the opcode test, and review_frontend/app.js's
@@ -56,8 +60,11 @@ MAX_DIFF_SPAN_WORDS = 4
 MIN_REPLACE_SIMILARITY = 0.5
 
 
-def clean_word(w):
-    return "".join(c for c in w if c.isalnum())
+# Shared with build_klal_page_regions.py and validate_catchword_continuity.py,
+# which each carried a byte-identical private copy until 2026-08-17 - see
+# corpus_io's module docstring. The furniture sets below are deliberately NOT
+# shared, for the reason the comment on WATERMARK_WORDS gives.
+clean_word = cio.clean_word
 
 
 # The Google Books scan watermark ("Digitized by Google") sits at the bottom of
@@ -127,32 +134,29 @@ def union_bbox(tokens):
 
 def load_trusted_klal_pages():
     """Group klal_ids by matched_page, trusted entries only, klal_id order
-    preserved within each page (matches print order)."""
-    alignment = json.load(open(ALIGNMENT_PATH, encoding="utf-8"))
-    klal_pages = {}
-    untrusted_ids = []
-    for r in sorted(alignment, key=lambda r: r["klal_id"]):
-        if not (1 <= r["klal_id"] <= PART1_MAX_KLAL):
-            continue
-        if not r["trusted"]:
-            untrusted_ids.append(r["klal_id"])
-            continue
-        klal_pages.setdefault(r["matched_page"], []).append(r["klal_id"])
-    return klal_pages, untrusted_ids
+    preserved within each page (matches print order).
+
+    Body moved to corpus_io.trusted_klal_pages 2026-08-17 - build_klal_page_
+    regions.py had the same loop, differing only in that it discarded the
+    untrusted list. Kept as a thin wrapper so this module's own
+    ALIGNMENT_PATH/PART1_MAX_KLAL remain what the function reads (and stay
+    monkeypatchable), rather than the shared module's defaults.
+    """
+    return cio.trusted_klal_pages(ALIGNMENT_PATH, PART1_MAX_KLAL)
 
 
 def main():
     klal_pages, untrusted_ids = load_trusted_klal_pages()
 
-    final_by_id = {k["klal_id"]: k for k in json.load(open(DEMO_DATASET))}
+    final_by_id = {k["klal_id"]: k for k in cio.load_demo_dataset(DEMO_DATASET)}
 
     corrections = []
     skipped_no_docai_page = set()
     unattributable_deletes = []
 
     for page_id, klal_ids in sorted(klal_pages.items()):
-        docai_path = os.path.join(DOCAI_DIR, f"page_{page_id}.json")
-        if not os.path.exists(docai_path):
+        raw_tokens = cio.load_docai_page(page_id, DOCAI_DIR)
+        if raw_tokens is None:
             skipped_no_docai_page.update(klal_ids)
             continue
 
@@ -163,8 +167,11 @@ def main():
         # Confirmed 2026-08-07: this was the root cause of 464/762 (61%) of
         # Part 1's correction candidates having a punctuation-only
         # docai_reading/final_text field (PROJECT-STATUS.md "Punctuation-
-        # token diff bug fixed").
-        docai_tokens = [t for t in json.load(open(docai_path))
+        # token diff bug fixed"). The filtering stays here, at the call site,
+        # rather than moving into corpus_io.load_docai_page - that loader is
+        # deliberately unfiltered because marker positions index into the raw
+        # array (see its docstring).
+        docai_tokens = [t for t in raw_tokens
                         if clean_word(t["text"]) and not is_watermark(t["text"])]
         docai_clean = [clean_word(t["text"]) for t in docai_tokens]
 

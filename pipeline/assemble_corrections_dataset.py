@@ -6,13 +6,15 @@
 import json
 import os
 
+import corpus_io as cio
+
 # Moved one level deeper (pipeline/ or tools/) 2026-08-16 - REPO now goes up
 # two levels, not one, to keep resolving to the actual repo root where
 # part1.json/docai_word_boxes/etc. live.
-REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+REPO = cio.REPO
 IN_PATH = os.path.join(REPO, "corrections_verified_part1.json")
 OUT_PATH = os.path.join(REPO, "corrections_part1.json")
-PART1_PATH = os.path.join(REPO, "part1.json")
+PART1_PATH = cio.PART1_PATH
 
 # Minimum vision confidence before classify() treats Gemini's A/B selection as
 # a machine resolution rather than "ambiguous, a human still has to look".
@@ -94,8 +96,8 @@ def classify(c):
 
 
 def main():
-    verified = json.load(open(IN_PATH))
-    part1 = json.load(open(PART1_PATH, encoding="utf-8"))
+    verified = cio.load_json(IN_PATH)
+    part1 = cio.load_part1(PART1_PATH)
     words_by_klal = {k["klal_id"]: k["clean_text"].split() for k in part1}
 
     by_klal = {}

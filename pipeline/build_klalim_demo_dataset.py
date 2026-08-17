@@ -9,21 +9,23 @@
 import json
 import os
 
+import corpus_io as cio
+
 # Moved one level deeper (pipeline/ or tools/) 2026-08-16 - REPO now goes up
 # two levels, not one, to keep resolving to the actual repo root where
 # part1.json/docai_word_boxes/etc. live.
-REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+REPO = cio.REPO
 PARTS = ["part1.json", "part2.json", "part3.json"]
-OUT_PATH = os.path.join(REPO, "klalim_demo_dataset.json")
+OUT_PATH = cio.DEMO_DATASET_PATH
 
-
-def load_klalim(path):
-    d = json.load(open(path, encoding="utf-8"))
-    return d["klalim"] if isinstance(d, dict) and "klalim" in d else d
+# The wrapper-vs-bare-list tolerance this script used to implement inline now
+# lives in corpus_io.load_klalim, where every other reader of these same
+# files gets it too (2026-08-17 refactor - see that module's docstring).
+load_klalim = cio.load_klalim
 
 
 def main():
-    by_part = {part: load_klalim(os.path.join(REPO, part)) for part in PARTS}
+    by_part = {part: load_klalim(cio.repo_path(part)) for part in PARTS}
     combined = [k for part in PARTS for k in by_part[part]]
     combined.sort(key=lambda k: k["klal_id"])
 

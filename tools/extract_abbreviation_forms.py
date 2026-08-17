@@ -21,12 +21,16 @@
 import argparse
 import json
 import os
+import sys
 from collections import Counter
 
 # Moved one level deeper (pipeline/ or tools/) 2026-08-16 - REPO now goes up
 # two levels, not one, to keep resolving to the actual repo root where
 # part1.json/docai_word_boxes/etc. live.
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(REPO, "pipeline"))
+import corpus_io as cio  # noqa: E402
+
 QUOTE_CHARS = set('"\'׳״')
 
 
@@ -53,7 +57,7 @@ def main():
     ap.add_argument("--json", help="also write {form: {count, klalim}} to this path")
     args = ap.parse_args()
 
-    part1 = json.load(open(os.path.join(REPO, "part1.json"), encoding="utf-8"))
+    part1 = cio.load_part1()
     counts, klalim_by_form = extract(part1)
     total = sum(counts.values())
     if not counts:

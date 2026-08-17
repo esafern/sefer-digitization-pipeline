@@ -83,6 +83,8 @@ from collections import Counter
 # two levels, not one, to keep resolving to the actual repo root where
 # part1.json/docai_word_boxes/etc. live.
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(REPO, "pipeline"))
+import corpus_io as cio  # noqa: E402
 
 QUOTE_CHARS = set('"\'׳״')
 
@@ -129,7 +131,7 @@ def load_klal_words(part_path):
     (str.split() with no argument) - see detect_ligature_corruption.py's
     load_klal_words() for why this matters (a word_index reported here is
     applied against apply_reviewer_decisions.py's identical indexing)."""
-    klalim = json.load(open(part_path, encoding="utf-8"))
+    klalim = cio.load_klalim(part_path)
     out = {}
     for k in klalim:
         out[k["klal_id"]] = k["clean_text"].split()
@@ -248,7 +250,7 @@ def _resolve(w, indep_freq):
 
 
 def main():
-    part_path = sys.argv[1] if len(sys.argv) > 1 else os.path.join(REPO, "part1.json")
+    part_path = sys.argv[1] if len(sys.argv) > 1 else cio.PART1_PATH
     if not os.path.isabs(part_path):
         part_path = os.path.join(REPO, part_path)
 

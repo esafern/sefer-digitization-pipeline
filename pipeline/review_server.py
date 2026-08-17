@@ -30,24 +30,26 @@ import re
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse
 
+import corpus_io as cio
 import review_decisions as rd
 
 # Moved one level deeper (pipeline/ or tools/) 2026-08-16 - REPO now goes up
 # two levels, not one, to keep resolving to the actual repo root where
 # part1.json/docai_word_boxes/etc. live.
-REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+REPO = cio.REPO
 FRONTEND_DIR = os.path.join(REPO, "review_frontend")
 IMAGES_DIR = os.path.join(REPO, "images", "pdf_pages")
 # max(klal_id) in part1.json - this dashboard is Part-1 only, and _load_klalim
-# filters klalim_demo_dataset.json (all 667) down with it. Same literal,
-# independently written, in build_corrections_dataset.py and
-# build_klal_page_regions.py; deliberately NOT derived at request time (that
-# would mean reading part1.json on every single HTTP request on top of the
-# demo dataset this server already re-reads per request, by design). The drift
-# risk of three copies is covered instead by
+# filters klalim_demo_dataset.json (all 667) down with it. Still deliberately
+# NOT derived at request time (that would mean reading part1.json on every
+# single HTTP request on top of the demo dataset this server already re-reads
+# per request, by design). Until 2026-08-17 this was the same literal written
+# out independently here, in build_corrections_dataset.py and in
+# build_klal_page_regions.py, with the drift risk of three copies pushed onto
 # tests/test_corpus_invariants.py::test_part1_max_klal_constants_agree_with_
-# the_corpus, which asserts all three equal max(klal_id) in part1.json.
-PART1_MAX_KLAL = 222
+# the_corpus. There is now one definition, and that test still asserts it
+# equals max(klal_id) in the live part1.json.
+PART1_MAX_KLAL = cio.PART1_MAX_KLAL
 
 FLAG_LABELS = {
     "current_text_may_be_wrong": ["Disputed", "#e53e3e"],
@@ -89,12 +91,10 @@ MIME_TYPES = {
 
 # ---------- data loading (fresh off disk every call, deliberately no cache) ----------
 
-def _load_json(name, default=None):
-    path = os.path.join(REPO, name)
-    if not os.path.exists(path):
-        return default
-    with open(path, encoding="utf-8") as f:
-        return json.load(f)
+# Repo-root-relative JSON read; body moved to corpus_io 2026-08-17, where the
+# same exists-check-then-load was written out nine times across pipeline/ and
+# tools/ (see that module's docstring).
+_load_json = cio.load_repo_json
 
 
 def _load_klalim():
@@ -553,11 +553,15 @@ WITNESS_CONTEXT_WINDOW = 12  # docai tokens shown on each side of a witness item
 # target, raw index 14 "נינהו") - confirmed by cross-checking against
 # verify_reconstruction_witness.py's own source. Any fix must re-derive the
 # same filtered sequence, not guess an offset.
-WITNESS_HEB = "אבגדהוזחטיכלמנסעפצקרשתךםןףץ"
-
-
-def _witness_norm(s):
-    return "".join(c for c in s if c in WITNESS_HEB)
+#
+# "Must match ... exactly" was enforced by hand until 2026-08-17: this file,
+# verify_reconstruction_witness.py and verify_witness_vision.py each held
+# their own copy of the same 27-character literal and the same one-line
+# filter. Now all three call corpus_io.hebrew_letters_only, so the
+# must-match-exactly requirement is structural rather than a comment asking
+# the next editor to remember.
+WITNESS_HEB = cio.HEBREW_LETTERS
+_witness_norm = cio.hebrew_letters_only
 
 
 def api_witness_context(page, token_index):
@@ -577,7 +581,7 @@ def api_witness_context(page, token_index):
     words (header vocabulary normalizes to non-empty Hebrew text too, so it
     isn't filtered out here any more than it was in the original script) and
     either engine's own misreads."""
-    tokens = _load_json(f"docai_word_boxes/page_{page}.json")
+    tokens = cio.load_docai_page(page)
     if not tokens:
         return {"words": [], "target_index": None}
     dtoks = [t for t in tokens if _witness_norm(t["text"])]

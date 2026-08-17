@@ -42,6 +42,8 @@ import build_corrections_dataset as bcd  # noqa: E402
 import build_klal_page_regions as bkpr  # noqa: E402
 import check_klal_token_orphans as ckto  # noqa: E402
 import check_next_marker_and_title as cnmt  # noqa: E402
+import corpus_io as cio  # noqa: E402
+import vision_adjudication_common as vac  # noqa: E402
 import verify_flagged_candidates_vision as vfcv  # noqa: E402
 import detect_ligature_corruption as dlc  # noqa: E402
 import detect_real_word_substitution as drws  # noqa: E402
@@ -2068,3 +2070,186 @@ def test_adjudicate_one_records_an_error_instead_of_crashing_the_batch(monkeypat
     result = vfcv.adjudicate_one(None, None, klalim_by_id, c)
     assert result["vision_fields"] is None
     assert "All models failed" in result["error"]
+
+
+# --- corpus_io: the shared file-location/data-loading module ------------------
+# Added 2026-08-17 with the module itself. Every test below covers a specific
+# divergence that existed between the hand-maintained copies this module
+# replaced, not just "the function returns something".
+
+def test_load_klalim_accepts_both_stored_shapes(tmp_path):
+    """The wrapper tolerance existed in 2 of 12 readers of these files; the
+    other 10 would have raised TypeError on a wrapped file. One
+    implementation means the shape is handled the same way everywhere."""
+    bare = tmp_path / "bare.json"
+    bare.write_text(json.dumps([{"klal_id": 1}]), encoding="utf-8")
+    wrapped = tmp_path / "wrapped.json"
+    wrapped.write_text(json.dumps({"klalim": [{"klal_id": 1}]}), encoding="utf-8")
+    assert cio.load_klalim(str(bare)) == [{"klal_id": 1}]
+    assert cio.load_klalim(str(wrapped)) == [{"klal_id": 1}]
+
+
+def test_save_part1_writes_the_tracked_on_disk_format(tmp_path):
+    """ensure_ascii=False + indent=2 is the format part1.json is tracked in,
+    not a style choice: a writer that disagreed would rewrite the entire file
+    as a diff on every apply. Two scripts (apply_reviewer_decisions.py,
+    apply_punctuation_decisions.py) are allowed to write the corpus and each
+    had its own copy of this until 2026-08-17."""
+    p = tmp_path / "part1.json"
+    cio.save_part1([{"klal_id": 1, "clean_text": "\u05d0\u05dc\u05e3 \u05d1\u05d9\u05ea"}], str(p))
+    raw = p.read_text(encoding="utf-8")
+    assert "\u05d0\u05dc\u05e3" in raw, "Hebrew must be written literally, not escaped"
+    assert '\n    "klal_id": 1' in raw, "2-space indent, nested one level inside the list"
+    assert json.loads(raw) == [{"klal_id": 1, "clean_text": "\u05d0\u05dc\u05e3 \u05d1\u05d9\u05ea"}]
+
+
+def test_save_then_load_part1_roundtrips(tmp_path):
+    p = tmp_path / "part1.json"
+    data = [{"klal_id": 2, "clean_text": "\u05d2 \u05d3"}, {"klal_id": 1, "clean_text": "\u05d0 \u05d1"}]
+    cio.save_part1(data, str(p))
+    assert cio.load_part1(str(p)) == data, "file order preserved - writers must not reorder"
+    assert [k["klal_id"] for k in cio.load_part1_sorted(str(p))] == [1, 2]
+    assert set(cio.load_part1_by_id(str(p))) == {1, 2}
+
+
+def test_load_docai_page_returns_the_callers_default_for_a_missing_page(tmp_path):
+    """The nine hand-written copies of this loader disagreed on the
+    missing-page answer - some None, one [], one no exists-check at all (it
+    raised). Making it an explicit argument is the point of the extraction; a
+    caller that branches on `is None` must not silently start seeing []."""
+    assert cio.load_docai_page(999, str(tmp_path)) is None
+    assert cio.load_docai_page(999, str(tmp_path), default=[]) == []
+    (tmp_path / "page_7.json").write_text(json.dumps([{"text": "\u05d0"}]), encoding="utf-8")
+    assert cio.load_docai_page(7, str(tmp_path)) == [{"text": "\u05d0"}]
+
+
+def test_docai_page_cache_loads_each_page_once(tmp_path):
+    """The cached variant existed in 4 scripts with identical get-or-load
+    bodies. Caching a MISSING page matters as much as caching a present one -
+    the naive version re-stats the filesystem for every span that touches a
+    page that was never extracted."""
+    (tmp_path / "page_3.json").write_text(json.dumps([{"text": "\u05d1"}]), encoding="utf-8")
+    cache = cio.DocaiPageCache(str(tmp_path))
+    assert cache.get(3) == [{"text": "\u05d1"}]
+    (tmp_path / "page_3.json").write_text(json.dumps([{"text": "CHANGED"}]), encoding="utf-8")
+    assert cache.get(3) == [{"text": "\u05d1"}], "second get must come from the cache, not disk"
+    assert cache.get(99) is None
+    assert 99 in cache._pages, "a missing page must be cached too, not re-checked every call"
+
+
+def test_hebrew_letters_only_matches_the_three_forms_it_replaced():
+    """The merged copies were written three different ways - a 27-character
+    literal, `re.sub(r"[^<alef>-<tav>]", "", s)`, and a filter over
+    validate_part1_corpus_integrity.HEBREW_LETTERS. Equivalence was asserted
+    when they were merged; this keeps asserting it, so a future edit to the
+    literal that breaks the correspondence fails here rather than silently
+    changing what witness-queue indices mean (review_server.py's
+    _witness_norm must stay byte-compatible with the stored
+    docai_token_index values)."""
+    import re as _re
+    sample = "\u05d0\u05d1\u05d2 \u05d3\"\u05d4 12 abc \u05df,\u05e5 \u05ea"
+    assert cio.hebrew_letters_only(sample) == _re.sub(r"[^\u05d0-\u05ea]", "", sample)
+    assert set(cio.HEBREW_LETTERS) == {chr(c) for c in range(0x05D0, 0x05EA + 1)}
+    assert set(cio.HEBREW_LETTERS) == set(vpci.HEBREW_LETTERS)
+
+
+def test_clean_word_keeps_latin_and_digits():
+    """Not a Hebrew-only filter, deliberately: the Google Books watermark and
+    printed folio numerals must survive clean_word() in order to be
+    recognized as page furniture downstream (build_corrections_dataset.
+    is_watermark lowercases the result and looks it up)."""
+    assert cio.clean_word("Digitized") == "Digitized"
+    assert cio.clean_word("\u05e1\u05d9'") == "\u05e1\u05d9"
+    assert cio.clean_word("...") == ""
+    assert cio.clean_word("41") == "41"
+
+
+def test_trusted_klal_pages_filters_range_and_trust_and_reports_the_untrusted(tmp_path):
+    """CLAUDE.md Lesson 15: an untrusted alignment entry produces SILENCE in
+    the candidate pipeline, not a low-confidence flag. build_klal_page_
+    regions.py's copy discarded that list; returning it is what lets the
+    caller report the silence instead of it being invisible."""
+    p = tmp_path / "align.json"
+    p.write_text(json.dumps([
+        {"klal_id": 2, "trusted": True, "matched_page": 20},
+        {"klal_id": 1, "trusted": True, "matched_page": 20},
+        {"klal_id": 3, "trusted": False, "matched_page": 21},
+        {"klal_id": 900, "trusted": True, "matched_page": 99},
+    ]), encoding="utf-8")
+    pages, untrusted = cio.trusted_klal_pages(str(p), max_klal=222)
+    assert pages == {20: [1, 2]}, "klal_id order within a page must match print order"
+    assert untrusted == [3]
+    assert 99 not in pages, "out-of-range klal_ids are not Part 1 and must be dropped"
+
+
+def test_the_pipeline_modules_share_one_part1_max_klal():
+    """Three private literals until 2026-08-17. tests/test_corpus_invariants.py
+    checks the constant against the live corpus; this checks the sharing
+    itself, which that test can no longer distinguish from three copies that
+    happen to agree."""
+    assert bcd.PART1_MAX_KLAL is cio.PART1_MAX_KLAL
+    assert bkpr.PART1_MAX_KLAL is cio.PART1_MAX_KLAL
+    assert rs.PART1_MAX_KLAL is cio.PART1_MAX_KLAL
+
+
+# --- tools/propose_punctuation_part1.py: two code bugs found in the round-4
+# --- survey, both instances of the drift class the shared modules exist to close.
+
+@requires_vision_deps
+def test_propose_punctuation_client_has_the_shared_request_timeout(monkeypatch):
+    """FOUND 2026-08-17: this script built its Gemini client with a bare
+    `genai.Client(api_key=...)`, missing the explicit request-timeout applied
+    to the three vision scripts after the 2026-08-06 hung-call incident (a
+    request that never returned and never raised blocked a run for 20+
+    minutes at zero CPU, because the retry loop only fires on a caught
+    exception). This is the FOURTH independent instance of that same missing
+    fix and the first outside the vision trio - evidence the drift was not
+    confined to the files vision_adjudication_common.py was extracted from.
+    Routed through make_client() so a fifth copy can't be written."""
+    captured = {}
+
+    class FakeClient:
+        def __init__(self, api_key, http_options):
+            captured["api_key"] = api_key
+            captured["timeout"] = http_options.timeout
+
+    monkeypatch.setattr(ppp.vac.genai, "Client", FakeClient)
+    ppp.build_client("test-key")
+    assert captured["api_key"] == "test-key"
+    assert captured["timeout"], "a client with no request timeout can hang forever"
+
+
+def test_propose_punctuation_model_list_excludes_the_permanently_dead_model():
+    """FOUND 2026-08-17: gemini-2.5-flash has permanently 404'd since
+    2026-08-05 ("no longer available to new users") - not a transient
+    condition. It was dropped from the vision scripts' fallback chain then,
+    because a dead model silently eats a retry slot on every fallback path
+    instead of ever helping. This script's independently-written copy of the
+    list never got that fix."""
+    assert "gemini-2.5-flash" not in ppp.MODELS_TO_TRY
+    assert ppp.MODELS_TO_TRY == list(vac.adjudicate_with_retry.__defaults__[0]), (
+        "the fallback chain should match the shared adjudication loop's, not "
+        "be a fourth independently-maintained list"
+    )
+
+
+def test_duplicate_phrase_report_order_is_deterministic():
+    """FOUND 2026-08-17 (bug, code) while proving this refactor
+    behavior-preserving: check 3 iterated a SET of word tuples, so Python's
+    per-process string-hash randomization reordered the report on every run.
+    Confirmed empirically at the time - five runs of identical code against
+    the identical corpus gave five different orderings of the same lines.
+    That defeats this project's standing verification method (diff two runs
+    - CLAUDE.md Lesson 19): a real change and pure noise look the same.
+    Asserting sorted order here rather than "two calls agree", because two
+    calls in ONE process share a hash seed and would agree even with the bug
+    present."""
+    words = "aa bb cc dd ee ff gg hh ii jj kk ll".split()
+    shared_text = " ".join(words)
+    klalim = [
+        {"klal_id": 1, "title": "\u05d0", "clean_text": shared_text},
+        {"klal_id": 2, "title": "\u05d1", "clean_text": shared_text},
+    ]
+    issues = vpci.check_duplicate_phrases(klalim, n=10)
+    assert len(issues) == 3, "12 words, n=10 -> 3 shared 10-grams"
+    assert issues == sorted(issues)

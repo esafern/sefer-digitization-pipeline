@@ -28,6 +28,7 @@ import re
 
 import fitz  # PyMuPDF
 
+import corpus_io as cio
 import vision_adjudication_common as vac
 from vision_adjudication_common import (  # noqa: F401 - re-exported, see above
     sanitize_json,
@@ -72,12 +73,12 @@ def extract_json_fields(text):
 # Moved one level deeper (pipeline/ or tools/) 2026-08-16 - REPO now goes up
 # two levels, not one, to keep resolving to the actual repo root where
 # part1.json/docai_word_boxes/etc. live.
-REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+REPO = cio.REPO
 PDF_PATH = os.path.join(REPO, "berlin_square_corrected.pdf")
 CANDIDATES_PATH = os.path.join(REPO, "corrections_candidates_part1.json")
 OUT_PATH = os.path.join(REPO, "corrections_verified_part1.json")
 CACHE_DB = os.path.join(REPO, "adjudication_cache.db")
-DEMO_DATASET = os.path.join(REPO, "klalim_demo_dataset.json")
+DEMO_DATASET = cio.DEMO_DATASET_PATH
 
 # Words of surrounding text sent to the model on EACH side of the disputed
 # word, and the character-count fallback used only when word_index_in_final_
@@ -256,8 +257,8 @@ def main():
 
     candidates_path = sys.argv[1] if len(sys.argv) > 1 else CANDIDATES_PATH
     out_path = sys.argv[2] if len(sys.argv) > 2 else OUT_PATH
-    candidates = json.load(open(candidates_path))["corrections"]
-    final_by_id = {k["klal_id"]: k for k in json.load(open(DEMO_DATASET))}
+    candidates = cio.load_json(candidates_path)["corrections"]
+    final_by_id = {k["klal_id"]: k for k in cio.load_demo_dataset(DEMO_DATASET)}
     doc = fitz.open(PDF_PATH)
 
     results = []

@@ -36,17 +36,27 @@ import json
 import os
 import re
 import subprocess
+import sys
 
 # Moved one level deeper (pipeline/ or tools/) 2026-08-16 - REPO now goes up
 # two levels, not one, to keep resolving to the actual repo root where
 # part1.json/docai_word_boxes/etc. live.
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DOCAI_DIR = os.path.join(REPO, "docai_word_boxes")
+sys.path.insert(0, os.path.join(REPO, "pipeline"))
+import corpus_io as cio  # noqa: E402
+
+DOCAI_DIR = cio.DOCAI_DIR
 IMAGES_DIR = os.path.join(REPO, "images", "pdf_pages")
-LEXICON_PATH = os.path.join(REPO, "lexicon.txt")
+LEXICON_PATH = cio.LEXICON_PATH
 OUT_PATH = os.path.join(REPO, "reconstruction_witness_queue.json")
 
-HEB = "אבגדהוזחטיכלמנסעפצקרשתךםןףץ"
+# HEB/norm are load-bearing beyond this file: reconstruction_witness_queue.
+# json's `docai_token_index` is an index into the list of page tokens filtered
+# by norm(), so review_server.py's own copy had to stay byte-compatible with
+# this one and said so in a comment. As of 2026-08-17 all three copies (here,
+# verify_witness_vision.py, review_server.py) call one implementation, so that
+# requirement is structural rather than a note.
+HEB = cio.HEBREW_LETTERS
 FURNITURE = {"יד", "יר", "יך", "מלאכי", "כללי", "האלף", "הבית",
              "הגימל", "הדלת", "ההא", "Digitized", "by", "Google"}
 # page -> the klal whose text that page carries (all three are continuation-only
@@ -56,8 +66,7 @@ PAGE_TO_KLAL = {24: 30, 37: 75, 40: 88}
 MAX_SPAN = 4
 
 
-def norm(s):
-    return "".join(c for c in s if c in HEB)
+norm = cio.hebrew_letters_only
 
 
 def load_lexicon():
@@ -76,7 +85,15 @@ def tesseract_words(page):
 
 
 def docai_tokens(page):
-    toks = json.load(open(os.path.join(DOCAI_DIR, f"page_{page}.json"), encoding="utf-8"))
+    """This is the ONE of the nine page-loading copies that had no
+    exists-check at all - a missing page raised FileNotFoundError rather than
+    returning anything. Behavior kept exactly (default=None then indexing
+    would differ), by passing the missing case straight through as an error:
+    for this script a page with no DocAI extraction is a misconfiguration, not
+    an empty result, and it should keep saying so loudly."""
+    toks = cio.load_docai_page(page, DOCAI_DIR)
+    if toks is None:
+        raise FileNotFoundError(cio.docai_page_path(page, DOCAI_DIR))
     return [t for t in toks if norm(t["text"])]
 
 

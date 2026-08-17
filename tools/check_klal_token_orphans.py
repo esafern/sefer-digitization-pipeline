@@ -45,12 +45,16 @@ import difflib
 import json
 import os
 import re
+import sys
 
 # Moved one level deeper (pipeline/ or tools/) 2026-08-16 - REPO now goes up
 # two levels, not one, to keep resolving to the actual repo root where
 # part1.json/docai_word_boxes/etc. live.
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DOCAI_DIR = os.path.join(REPO, "docai_word_boxes")
+sys.path.insert(0, os.path.join(REPO, "pipeline"))
+import corpus_io as cio  # noqa: E402
+
+DOCAI_DIR = cio.DOCAI_DIR
 OPEN_WINDOW = 50  # words compared for the "does it open correctly" check
 CHUNK_WORDS = 15  # length of a substring chunk used for the double-assignment scan
 GAP_MIN_WORDS = 8  # min length of an unmatched real-token run to report as a likely gap (Pass 3)
@@ -97,8 +101,12 @@ FURNITURE_WORDS = {"יד", "יר", "יך", "מלאכי", "כללי", "Digitized"
 SECTION_WORDS = {"האלף", "הבית", "הגימל", "הדלת", "ההא"}
 
 
-def normalize(text):
-    return re.sub(r"[^א-ת]", "", text)
+# Was `re.sub(r"[^א-ת]", "", text)` - the same function the witness scripts
+# and validate_part1_corpus_integrity.py each wrote a different way. Verified
+# equivalent before merging (the regex range U+05D0-U+05EA and the 27-char
+# literal are the same code points), not assumed - see corpus_io's docstring
+# and the equivalence assertion in tests/test_pipeline_logic.py.
+normalize = cio.hebrew_letters_only
 
 
 # FIXED 2026-08-14 (PROJECT-STATUS.md audit item 4): this used to be a bare
@@ -170,14 +178,15 @@ def word_seq_similarity(real_words, stored_words):
     return difflib.SequenceMatcher(None, rw, sw).ratio()
 
 
-def load_json(path):
-    return json.load(open(path, encoding="utf-8"))
+load_json = cio.load_json
 
 
 def get_page(cache, page):
+    """Signature kept (caller-supplied dict) - this module's own main()
+    threads one cache through three passes. Only the load is shared; None for
+    a missing page, as before."""
     if page not in cache:
-        path = os.path.join(DOCAI_DIR, f"page_{page}.json")
-        cache[page] = load_json(path) if os.path.exists(path) else None
+        cache[page] = cio.load_docai_page(page, DOCAI_DIR)
     return cache[page]
 
 
@@ -245,9 +254,9 @@ def best_match_owner(real_words, part1, self_kid):
 
 
 def main():
-    trace = {x["klal_id"]: x for x in load_json(os.path.join(REPO, "gematria_trace_part1.json"))
+    trace = {x["klal_id"]: x for x in cio.load_gematria_trace()
               if x.get("marker_position") is not None}
-    part1 = {k["klal_id"]: k for k in load_json(os.path.join(REPO, "part1.json"))}
+    part1 = cio.load_part1_by_id()
     ids = sorted(trace)
     cache = {}
 

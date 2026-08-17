@@ -26,7 +26,9 @@ import hashlib
 import sqlite3
 import argparse
 
-from google import genai
+# genai itself is no longer imported here: client construction moved to
+# vision_adjudication_common.make_client (see build_client below). `types` is
+# still needed for the GenerateContentConfig on the call itself.
 from google.genai import types
 
 # UPGRADED 2026-08-16 (moved into tools/) from three bare relative filenames
@@ -36,11 +38,43 @@ from google.genai import types
 # a bare filename silently writes/reads the wrong place if this is ever
 # invoked with a different working directory.
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(REPO, "pipeline"))
+import corpus_io as cio  # noqa: E402
+import vision_adjudication_common as vac  # noqa: E402
+
 CACHE_DB = os.path.join(REPO, "punctuation_cache.db")
-PART1_PATH = os.path.join(REPO, "part1.json")
+PART1_PATH = cio.PART1_PATH
 OUT_PATH = os.path.join(REPO, "punctuation_candidates_part1.json")
 
-MODELS_TO_TRY = ["gemini-3.6-flash", "gemini-3.5-flash", "gemini-2.5-flash"]
+# FIXED 2026-08-17 (bug, code): gemini-2.5-flash was removed from this list.
+# It has permanently 404'd since 2026-08-05 ("no longer available to new
+# users") - not a transient condition - and was removed from the vision
+# scripts' candidate list then, for the concrete reason that a dead model
+# silently eats a retry slot on every fallback path instead of ever helping.
+# This script's copy of the list was written independently and never got that
+# fix: exactly the drift class this round's refactor exists to close, found a
+# second time in this one file (see build_client below for the first).
+MODELS_TO_TRY = ["gemini-3.6-flash", "gemini-3.5-flash"]
+
+
+def build_client(api_key):
+    """FIXED 2026-08-17 (bug, code): this was an inline
+    `genai.Client(api_key=api_key)` in main(), missing the explicit
+    request-timeout (`http_options=types.HttpOptions(timeout=60000)`) that
+    verify_corrections_vision.py, verify_witness_vision.py and (as of the
+    round-4 audit) verify_flagged_candidates_vision.py all carry after the
+    2026-08-06 incident where a hung call blocked a run for 20+ minutes at
+    zero CPU with no retry ever triggering - the retry loop below only fires
+    on a caught exception, so a call that never returns and never raises
+    hangs forever.
+
+    This is the FOURTH independent instance of that same missing fix, and the
+    first one outside the vision trio - direct evidence that the drift class
+    CLAUDE.md Lesson 13 describes was not confined to the three files
+    vision_adjudication_common.py was extracted from. Routed through that
+    module's make_client() rather than patched inline again, so a fifth copy
+    cannot be written."""
+    return vac.make_client(api_key)
 
 
 def init_cache():
@@ -224,12 +258,14 @@ def main():
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
         raise ValueError("GEMINI_API_KEY environment variable is missing.")
-    client = genai.Client(api_key=api_key)
+    client = build_client(api_key)
     init_cache()
 
-    with open(PART1_PATH, encoding="utf-8") as f:
-        data = json.load(f)
-    part1 = [k for k in data if k["klal_id"] <= 222]
+    # The Part-1 cut-off was a bare literal 222 here - a FOURTH copy of
+    # PART1_MAX_KLAL that the 2026-08-15 hard-wired-value audit missed and
+    # that tests/test_corpus_invariants.py's three-module check therefore
+    # never covered. Same value today; now tied to the corpus like the others.
+    part1 = [k for k in cio.load_part1(PART1_PATH) if k["klal_id"] <= cio.PART1_MAX_KLAL]
 
     # Against the FULL Part 1 set, not the --klal-filtered subset below - a
     # pre-migration cached row could be for any klal_id, not just whichever

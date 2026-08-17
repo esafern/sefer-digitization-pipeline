@@ -42,35 +42,39 @@ import sys
 # part1.json/docai_word_boxes/etc. live.
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# review_decisions.py lives in pipeline/, not tools/ - this is the one
-# cross-directory import in the whole reorg (apply_reviewer_decisions.py
-# and audit_applied_decisions.py, this script's siblings in spirit, both
-# live IN pipeline/ alongside review_decisions.py and need no such fix;
-# this script stayed in tools/ with its propose-script pair per the
-# approved layout, so it needs pipeline/ added to sys.path explicitly
-# rather than getting it for free the way same-directory imports do).
+# review_decisions.py and corpus_io.py live in pipeline/, not tools/. This
+# was the one cross-directory import in the 2026-08-16 reorg
+# (apply_reviewer_decisions.py and audit_applied_decisions.py, this script's
+# siblings in spirit, both live IN pipeline/ alongside review_decisions.py and
+# need no such fix; this script stayed in tools/ with its propose-script pair
+# per the approved layout, so it needs pipeline/ added to sys.path explicitly
+# rather than getting it for free the way same-directory imports do). As of
+# the 2026-08-17 corpus_io extraction the same bootstrap serves both imports
+# and is no longer unique to this file - most of tools/ now carries it.
 sys.path.insert(0, os.path.join(REPO, "pipeline"))
+import corpus_io as cio  # noqa: E402
 import review_decisions as rd  # noqa: E402
 
-PART1_PATH = os.path.join(REPO, "part1.json")
+PART1_PATH = cio.PART1_PATH
 CANDIDATES_PATH = os.path.join(REPO, "punctuation_candidates_part1.json")
 
 
+# Thin wrappers so this module's own PART1_PATH stays what they read (and
+# stays monkeypatchable). Both were byte-identical copies of
+# pipeline/apply_reviewer_decisions.py's until 2026-08-17: these two scripts
+# are the only code in the repo allowed to WRITE the hand-edited source of
+# truth, so two independent copies of how it gets serialized was the least
+# acceptable place for a silent divergence.
 def load_part1():
-    with open(PART1_PATH, encoding="utf-8") as f:
-        return json.load(f)
+    return cio.load_part1(PART1_PATH)
 
 
 def save_part1(data):
-    with open(PART1_PATH, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
+    cio.save_part1(data, PART1_PATH)
 
 
 def load_candidates():
-    if not os.path.exists(CANDIDATES_PATH):
-        return {}
-    with open(CANDIDATES_PATH, encoding="utf-8") as f:
-        return json.load(f)
+    return cio.load_json(CANDIDATES_PATH, {})
 
 
 def snapshot_matches(snapshot, live_entry):

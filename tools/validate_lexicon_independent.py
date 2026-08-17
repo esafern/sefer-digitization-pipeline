@@ -43,12 +43,16 @@ import glob
 import json
 import os
 import re
+import sys
 from collections import Counter
 
 # Moved one level deeper (pipeline/ or tools/) 2026-08-16 - REPO now goes up
 # two levels, not one, to keep resolving to the actual repo root where
 # part1.json/docai_word_boxes/etc. live.
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(REPO, "pipeline"))
+import corpus_io as cio  # noqa: E402
+
 RAW_DIR = os.path.join(REPO, "sefaria_reference_corpus", "raw")
 FREQ_CACHE = os.path.join(REPO, "sefaria_reference_corpus", "word_freq.json")
 # Provenance for FREQ_CACHE - see cache_is_current(). Bump EXTRACTOR_VERSION
@@ -57,9 +61,15 @@ FREQ_CACHE = os.path.join(REPO, "sefaria_reference_corpus", "word_freq.json")
 # built by the older rule.
 FREQ_META = os.path.join(REPO, "sefaria_reference_corpus", "word_freq.meta.json")
 EXTRACTOR_VERSION = 2  # 2 = 2026-08-16, flatten_strings() handles dict-shaped `text`
-LEXICON_PATH = os.path.join(REPO, "lexicon.txt")
+LEXICON_PATH = cio.LEXICON_PATH
 
-HEB = "אבגדהוזחטיכלמנסעפצקרשתךםןףץ"
+# Shared 2026-08-17. This one matters more than the other merged copies:
+# this script's whole purpose is comparing lexicon.txt (derived from THIS
+# project's OCR) against an independent reference corpus, and the comparison
+# is only valid if both sides are normalized identically. A private copy of
+# the letter set here could have drifted from the corpus side and turned a
+# normalization mismatch into what looked like a vocabulary finding.
+HEB = cio.HEBREW_LETTERS
 HEB_SET = set(HEB)
 NIQQUD_RE = re.compile(r"[֑-ׇ]")  # cantillation + vowel points
 TAG_RE = re.compile(r"<[^>]+>")
