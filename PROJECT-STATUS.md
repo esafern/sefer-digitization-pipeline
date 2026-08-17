@@ -15,6 +15,139 @@ current handoff, re-written (not just appended to) as state changes.
 
 ## ►► SESSION HANDOFF — read this first, 2026-08-16 (continued into 2026-08-17)
 
+### DONE 2026-08-17 — `pipeline/build_gematria_trace.py` BUILT (the missing marker/trace generator, generic per the reusable-pipeline directive); Parts 2-3 traces produced for the first time; 7 findings logged below, NONE fixed
+
+Closes the "NOT YET DONE: the marker/trace-building script itself" item in
+the entry below. Nothing in this repo regenerated `gematria_trace_part1.json`
+- the file is tracked, hand-corrected and load-bearing
+(`build_klal_page_regions.py` anchors every region on it,
+`check_klal_token_orphans.py` reads it, and its page attribution reaches
+`build_corrections_dataset.py`) but its generator was lost/archived. This is
+that generator, written parameterized (corpus file(s), DocAI directory, page
+range, marker x-band, thresholds - repeated `--part SRC:DEST` pairs trace as
+ONE continuous sequence sharing a cursor) rather than as a Parts-2-3 one-off.
+
+**How a marker is accepted** - three tiers, each with its own evidence bar,
+plus an optional vision tier. Reading order is re-derived from bbox-center Y
+and RTL x on every page and DocAI's array order is never used for anything
+(the marker-out-of-reading-order artifact is confirmed three times in this
+corpus). The search is monotonic and unbounded forward, with ONE bound that
+is load-bearing: a candidate may be accepted on POSITION ALONE only within
+~2 pages of the cursor. The first version had no such bound and it destroyed
+the run - klal 10's absent marker matched an unrelated margin `י` 37 pages
+later at content ratio 0.0, the cursor jumped there, and 201 of 222 klalim
+then reported not-found (Lesson 6, exactly). Tier 2 ("content-anchored":
+anchor on the stored opening, take the short marker-band token before it,
+consult the numeral not at all) is what finds a marker DocAI misread in a way
+nobody catalogued, without widening tier 1 into the unbounded fuzzy numeral
+search Lesson 5 warns against.
+
+**Part 1 validation** (the point of running it there first). 219 ok / 0
+mismatch / 3 not-found mechanically, 220/0/2 with `--vision`, against the
+tracked file's 202/5/12 over 219 entries. **207 of 222 klalim reproduce the
+tracked file's page AND marker_position exactly**; every one of the 20
+disagreements was investigated individually against the raw token context,
+and all 20 favour the new output. Note the tracked file's own statuses are
+heavily hand-corrected (20 of its `ok` entries carry content_match_ratio 0.0,
+flipped by the 2026-08-07 "status was stale" pass), so an exact status match
+was never the target.
+
+**Parts 2-3 traces built for the first time** - `gematria_trace_part2.json`
+(144 ok / 36 mismatch / 42 not-found) and `gematria_trace_part3.json` (161 /
+22 / 40), pages 76-235, ~2.5s mechanical. Part 2 starts on page 77 (klal 223
+at token 53), the Part 2/3 boundary is mid-page 164 (klal 444 at token 253,
+klal 445 at token 312), and marker pages are strictly monotonic across all
+363 placed markers - an independent structural check that the cursor never
+desynchronized.
+
+**FINDINGS - all logged, none fixed, each needs its own routing:**
+
+1. **`gematria_trace_part1.json` has two stale page attributions, both
+   independently corroborated.** klal 129 is recorded as page 47; its marker
+   is an exact `קכט` on page **48** token 843 (content 0.875). klal 190 is
+   recorded as page 68 with `marker_position: null` and a note saying the
+   position was never re-derived; it is on page **69** token 378 (exact `קץ`,
+   content 1.000). Corroboration from a completely separate source:
+   `part1_header_anchored_alignment.json` already says 48 and 69 for these
+   two. Same class as klal 198's page 70->71 fix earlier today, and the same
+   consequence - `build_corrections_dataset.py` reads the alignment file, so
+   the disagreement between the two files is live.
+2. **Three klalim are absent from `gematria_trace_part1.json` entirely** -
+   180, 182, 194, the three split out of their neighbours in the 2026-08-06
+   work. All three now locate cleanly: 180 at page 67 token 319 (exact `קף`,
+   0.875), 182 at page 67 token 576 (content-anchored; DocAI read the marker
+   `קפכ` for `קפב`, 0.750), 194 at page 70 token 5 (`קצר` for `קצד`, 1.000).
+   The alignment file's pages (67/67/70) agree with all three.
+3. **Two stale gematria fields in the trace file.** Its `expected_gematria`
+   for klal 115/116 is `קיה`/`קיו`, from the pre-fix conversion that lacked
+   the ט"ו/ט"ז exception (correct: `קטו`/`קטז`), and its `stored_gematria`
+   for klal 150 is `קנ` where `part1.json` now stores `קן`. Derived-file
+   drift, not a corpus problem - a regenerated trace does not inherit it.
+4. **klal 57's marker is genuinely unresolved and the surrounding text looks
+   wrong.** A marker-band token at page 32 index 694 sits between klal 56
+   (592) and klal 58 (746) where klal 57's must be, but DocAI reads it `נו`
+   (=56, and klal 56's own marker at 592 also reads `נו`), and a vision crop
+   independently read `נו` too at 0.95 confidence - so the script left it
+   unplaced rather than force it. Separately, the tokens after 694 run
+   `אין דלא אזלא סוגיא...` while klal 57's stored text has
+   `אין הלכה כשיטה . לא אמרינן אלא היכא דלא איפסיקא הלכתא בהדיא כחד מינייהו
+   או דלא אזלא סוגיא...` - i.e. the marker+`אין` pair sits in the MIDDLE of
+   the stored text's own sequence. Needs a scan crop, not more inference.
+5. **klal 10 has no marker token on its page at all.** Its opening
+   (`איידי דקתני במתניתין...`) anchors at reading rank 431 on page 18 with
+   preceding tokens at x1 0.51-0.65 - mid-line, no margin glyph. Either
+   DocAI dropped the marker or klal 10's boundary is not at a marker.
+6. **Parts 2-3: 14 klalim have a real (non-placeholder) stored text that
+   disagrees with the scan at their own confirmed marker** - klal 281, 282,
+   299, 300, 374, 389, 408, 412, 482, 510, 543, 549, 613, 634, all at content
+   agreement <= 0.333. Their stored text is visibly garbled at the opening
+   (`תליאא`, `פעלוקלוהל`, `המכק"דהגש`, `הרהשי"אי מבירליתשא`,
+   `דרעשת"ין לדרשג"ייל`, `הבאגממורא ובסתבראת להקסדכמרותן`, `אדהודמדייא`).
+   These are the highest-value Parts 2-3 leads this pass produced: the marker
+   position is trustworthy, the text is not. A further 11 klalim with real
+   stored text could not be placed at all (452, 453, 454, 544, 545, 548, 569,
+   571, 575, 664, 666), and 6 placed `ok` sit at a borderline 0.50-0.67
+   (411, 415, 419, 542, 556, 596).
+7. **DocAI extraction stops at page 235, but the work does not.** klal 663 is
+   the last klal placed (page 234); 664-667 are unplaced because their pages
+   were never extracted. Confirmed by direct render, not inferred: page 236
+   and page 242 both still carry the `יד מלאכי / כללי התיו` running header
+   and solid body text, while page 250 is back matter (the
+   `מפתחות על כללי הגמרא` index). So the body runs to somewhere in 243-249
+   and **extraction needs extending by ~8-14 pages before Part 3's trace can
+   be finished.** Relatedly, klal 663's stored `clean_text` is 9,545 words -
+   by far the largest in the corpus and almost certainly several klalim
+   merged.
+
+**Context for the counts, not a new finding**: 115 of the 445 Parts 2-3
+klalim (70 in Part 2, 45 in Part 3, 0 in Part 1) store `clean_text` as
+literally `"<numeral> כלל <klal_id>"` - placeholders, already quantified with
+the identical 115 figure and id list in PROJECT-STATUS-HISTORY.md. They
+account for 71 of the 82 not-found and 44 of the 58 mismatch entries.
+`has_comparable_opening()` treats them as "nothing to compare" rather than "the
+content disagrees" (a different finding) and locates them on numeral + margin
++ sequence alone, capped at `marker_found_content_mismatch` - never `ok`,
+since `ok` asserts exactly the thing that cannot be checked for them.
+
+**Vision tier**: implemented on `vision_adjudication_common` (cache keyed
+crop+expected+observed+context+prompt_hash, per Lesson 12), used only for
+borderline (0.15-0.50), ambiguous, or placeholder-with-misread-numeral cases
+- never for an unambiguous mechanical match, which a test enforces. It
+independently re-confirmed klal 34's hand-corrected marker (`לד` at 0.98) and
+correctly REFUSED klal 57's. A full Parts 2-3 vision pass is in progress and
+is being throttled upstream (repeated `503 UNAVAILABLE - high demand` on
+gemini-3.6-flash); the cache makes it resumable, so re-running `--vision`
+picks up where it stopped and re-spends nothing.
+
+**NOT DONE, deliberately**: `gematria_trace_part1.json` was NOT overwritten.
+Regenerating it would change 20 entries, add 3, and move two page
+attributions that `build_klal_page_regions.py` and
+`part1_header_anchored_alignment.json` both consume - a data change to a
+tracked, hand-corrected, live-pipeline file that needs its own explicit
+go-ahead, the same as any correction. `rebuild_all.sh` is unaffected (the new
+script is not wired into it). `part1/2/3.json` sha256 verified unchanged
+before and after.
+
 ### DONE 2026-08-17 — full DocAI extraction over the estimated Parts 2-3 page range (93-235, 143 pages); klal_id_to_gematria()/gematria_to_value() moved into corpus_io.py
 
 143 pages extracted (`docai_word_boxes/page_93.json` through `page_235.json`),

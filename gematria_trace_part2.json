@@ -1,0 +1,2180 @@
+[
+  {
+    "klal_id": 223,
+    "expected_gematria": "רכג",
+    "stored_gematria": "רכג",
+    "page": 77,
+    "content_match_ratio": 1.0,
+    "marker_position": 53,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רכג' at page 77 token 53, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 224,
+    "expected_gematria": "רכד",
+    "stored_gematria": "רכד",
+    "page": 77,
+    "content_match_ratio": 1.0,
+    "marker_position": 339,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רכד' at page 77 token 339, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 225,
+    "expected_gematria": "רכה",
+    "stored_gematria": "רכה",
+    "page": 77,
+    "content_match_ratio": 1.0,
+    "marker_position": 373,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רכה' at page 77 token 373, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 226,
+    "expected_gematria": "רכו",
+    "stored_gematria": "רכו",
+    "page": 77,
+    "content_match_ratio": 1.0,
+    "marker_position": 437,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רכו' at page 77 token 437, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 227,
+    "expected_gematria": "רכז",
+    "stored_gematria": "רכז",
+    "page": 77,
+    "content_match_ratio": 1.0,
+    "marker_position": 468,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רכז' at page 77 token 468, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 228,
+    "expected_gematria": "רכח",
+    "stored_gematria": "רכח",
+    "page": 78,
+    "content_match_ratio": 1.0,
+    "marker_position": 505,
+    "status": "ok",
+    "note": "content-anchored: matched 'רכת' at page 78 token 505, opening agreed with stored anchor (1.000); numeral not found by exact or documented-confusion match; recovered by anchoring on the stored opening (1.000) and taking the marker-band token before it, which DocAI read as 'רכת' (expected 'רכח')"
+  },
+  {
+    "klal_id": 229,
+    "expected_gematria": "רכט",
+    "stored_gematria": "רכט",
+    "page": 78,
+    "content_match_ratio": 0.875,
+    "marker_position": 545,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רכט' at page 78 token 545, opening agreed with stored clean_text (0.875)"
+  },
+  {
+    "klal_id": 230,
+    "expected_gematria": "רל",
+    "stored_gematria": "רל",
+    "page": 78,
+    "content_match_ratio": 1.0,
+    "marker_position": 627,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רל' at page 78 token 627, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 231,
+    "expected_gematria": "רלא",
+    "stored_gematria": "רלא",
+    "page": 80,
+    "content_match_ratio": 1.0,
+    "marker_position": 138,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רלא' at page 80 token 138, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 232,
+    "expected_gematria": "רלב",
+    "stored_gematria": "רלב",
+    "page": 80,
+    "content_match_ratio": 1.0,
+    "marker_position": 643,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רלב' at page 80 token 643, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 233,
+    "expected_gematria": "רלג",
+    "stored_gematria": "רלג",
+    "page": 80,
+    "content_match_ratio": 1.0,
+    "marker_position": 726,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רלג' at page 80 token 726, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 234,
+    "expected_gematria": "רלד",
+    "stored_gematria": "רלד",
+    "page": 80,
+    "content_match_ratio": 1.0,
+    "marker_position": 808,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רלד' at page 80 token 808, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 235,
+    "expected_gematria": "רלה",
+    "stored_gematria": "רלה",
+    "page": 81,
+    "content_match_ratio": 0.875,
+    "marker_position": 687,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רלה' at page 81 token 687, opening agreed with stored clean_text (0.875)"
+  },
+  {
+    "klal_id": 236,
+    "expected_gematria": "רלו",
+    "stored_gematria": "רלו",
+    "page": 82,
+    "content_match_ratio": 1.0,
+    "marker_position": 574,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רלו' at page 82 token 574, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 237,
+    "expected_gematria": "רלז",
+    "stored_gematria": "רלז",
+    "page": 82,
+    "content_match_ratio": 0.875,
+    "marker_position": 692,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רלז' at page 82 token 692, opening agreed with stored clean_text (0.875)"
+  },
+  {
+    "klal_id": 238,
+    "expected_gematria": "רלח",
+    "stored_gematria": "רלח",
+    "page": 82,
+    "content_match_ratio": 1.0,
+    "marker_position": 721,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רלח' at page 82 token 721, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 239,
+    "expected_gematria": "רלט",
+    "stored_gematria": "רלט",
+    "page": 84,
+    "content_match_ratio": 1.0,
+    "marker_position": 321,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רלט' at page 84 token 321, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 240,
+    "expected_gematria": "רמ",
+    "stored_gematria": "רמ",
+    "page": 84,
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window",
+    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'רמ' in the marker x-band was found between the cursor and page 86 - with no stored opening there is no second signal to fall back on"
+  },
+  {
+    "klal_id": 241,
+    "expected_gematria": "רמא",
+    "stored_gematria": "רמא",
+    "page": 84,
+    "content_match_ratio": 1.0,
+    "marker_position": 391,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רמא' at page 84 token 391, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 242,
+    "expected_gematria": "רמב",
+    "stored_gematria": "רמב",
+    "page": 84,
+    "content_match_ratio": 0.75,
+    "marker_position": 605,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רמב' at page 84 token 605, opening agreed with stored clean_text (0.750)"
+  },
+  {
+    "klal_id": 243,
+    "expected_gematria": "רמג",
+    "stored_gematria": "רמג",
+    "page": 84,
+    "content_match_ratio": 1.0,
+    "marker_position": 712,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רמג' at page 84 token 712, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 244,
+    "expected_gematria": "רמד",
+    "stored_gematria": "רמד",
+    "page": 85,
+    "content_match_ratio": 1.0,
+    "marker_position": 298,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רמד' at page 85 token 298, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 245,
+    "expected_gematria": "רמה",
+    "stored_gematria": "רמה",
+    "page": 85,
+    "content_match_ratio": 0.875,
+    "marker_position": 366,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רמה' at page 85 token 366, opening agreed with stored clean_text (0.875)"
+  },
+  {
+    "klal_id": 246,
+    "expected_gematria": "רמו",
+    "stored_gematria": "רמו",
+    "page": 85,
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window",
+    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'רמו' in the marker x-band was found between the cursor and page 87 - with no stored opening there is no second signal to fall back on"
+  },
+  {
+    "klal_id": 247,
+    "expected_gematria": "רמז",
+    "stored_gematria": "רמז",
+    "page": 86,
+    "content_match_ratio": 1.0,
+    "marker_position": 443,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רמז' at page 86 token 443, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 248,
+    "expected_gematria": "רמח",
+    "stored_gematria": "רמח",
+    "page": 86,
+    "content_match_ratio": 0.875,
+    "marker_position": 474,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רמח' at page 86 token 474, opening agreed with stored clean_text (0.875)"
+  },
+  {
+    "klal_id": 249,
+    "expected_gematria": "רמט",
+    "stored_gematria": "רמט",
+    "page": 86,
+    "content_match_ratio": 1.0,
+    "marker_position": 534,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רמט' at page 86 token 534, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 250,
+    "expected_gematria": "רן",
+    "stored_gematria": "רנ",
+    "page": 86,
+    "content_match_ratio": null,
+    "marker_position": 742,
+    "status": "marker_found_content_mismatch",
+    "note": "positional-only (exact numeral) at page 86 token 742: the corpus stores no text for this klal (placeholder clean_text), so the marker was located by numeral, marker x-band and sequence alone and the stored text could not be checked at all - this is NOT a content disagreement"
+  },
+  {
+    "klal_id": 251,
+    "expected_gematria": "רנא",
+    "stored_gematria": "רנא",
+    "page": 87,
+    "content_match_ratio": 1.0,
+    "marker_position": 5,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רנא' at page 87 token 5, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 252,
+    "expected_gematria": "רנב",
+    "stored_gematria": "רנב",
+    "page": 87,
+    "content_match_ratio": 1.0,
+    "marker_position": 107,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רנב' at page 87 token 107, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 253,
+    "expected_gematria": "רנג",
+    "stored_gematria": "רנג",
+    "page": 87,
+    "content_match_ratio": 0.875,
+    "marker_position": 265,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רנג' at page 87 token 265, opening agreed with stored clean_text (0.875)"
+  },
+  {
+    "klal_id": 254,
+    "expected_gematria": "רנד",
+    "stored_gematria": "רנד",
+    "page": 87,
+    "content_match_ratio": 1.0,
+    "marker_position": 870,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רנד' at page 87 token 870, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 255,
+    "expected_gematria": "רנה",
+    "stored_gematria": "רנה",
+    "page": 88,
+    "content_match_ratio": 1.0,
+    "marker_position": 63,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רנה' at page 88 token 63, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 256,
+    "expected_gematria": "רנו",
+    "stored_gematria": "רנו",
+    "page": 88,
+    "content_match_ratio": 1.0,
+    "marker_position": 110,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רנו' at page 88 token 110, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 257,
+    "expected_gematria": "רנז",
+    "stored_gematria": "רנז",
+    "page": 91,
+    "content_match_ratio": 1.0,
+    "marker_position": 813,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רנז' at page 91 token 813, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 258,
+    "expected_gematria": "רנח",
+    "stored_gematria": "רנח",
+    "page": 92,
+    "content_match_ratio": 1.0,
+    "marker_position": 396,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רנח' at page 92 token 396, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 259,
+    "expected_gematria": "רנט",
+    "stored_gematria": "רנט",
+    "page": 92,
+    "content_match_ratio": 0.875,
+    "marker_position": 498,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רנט' at page 92 token 498, opening agreed with stored clean_text (0.875)"
+  },
+  {
+    "klal_id": 260,
+    "expected_gematria": "רס",
+    "stored_gematria": "רס",
+    "page": 92,
+    "content_match_ratio": 0.875,
+    "marker_position": 561,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רס' at page 92 token 561, opening agreed with stored clean_text (0.875)"
+  },
+  {
+    "klal_id": 261,
+    "expected_gematria": "רסא",
+    "stored_gematria": "רסא",
+    "page": 92,
+    "content_match_ratio": 1.0,
+    "marker_position": 598,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רסא' at page 92 token 598, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 262,
+    "expected_gematria": "רסב",
+    "stored_gematria": "רסב",
+    "page": 92,
+    "content_match_ratio": 0.875,
+    "marker_position": 632,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רסב' at page 92 token 632, opening agreed with stored clean_text (0.875)"
+  },
+  {
+    "klal_id": 263,
+    "expected_gematria": "רסג",
+    "stored_gematria": "רסג",
+    "page": 92,
+    "content_match_ratio": 1.0,
+    "marker_position": 673,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רסג' at page 92 token 673, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 264,
+    "expected_gematria": "רסד",
+    "stored_gematria": "רסד",
+    "page": 92,
+    "content_match_ratio": 1.0,
+    "marker_position": 703,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רסד' at page 92 token 703, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 265,
+    "expected_gematria": "רסה",
+    "stored_gematria": "רסה",
+    "page": 93,
+    "content_match_ratio": 1.0,
+    "marker_position": 894,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רסה' at page 93 token 894, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 266,
+    "expected_gematria": "רסו",
+    "stored_gematria": "רסו",
+    "page": 94,
+    "content_match_ratio": 1.0,
+    "marker_position": 438,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רסו' at page 94 token 438, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 267,
+    "expected_gematria": "רסז",
+    "stored_gematria": "רסז",
+    "page": 94,
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window",
+    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'רסז' in the marker x-band was found between the cursor and page 96 - with no stored opening there is no second signal to fall back on"
+  },
+  {
+    "klal_id": 268,
+    "expected_gematria": "רסח",
+    "stored_gematria": "רסח",
+    "page": 94,
+    "content_match_ratio": 1.0,
+    "marker_position": 606,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רסח' at page 94 token 606, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 269,
+    "expected_gematria": "רסט",
+    "stored_gematria": "רסט",
+    "page": 94,
+    "content_match_ratio": 1.0,
+    "marker_position": 789,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רסט' at page 94 token 789, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 270,
+    "expected_gematria": "רע",
+    "stored_gematria": "רע",
+    "page": 94,
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window",
+    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'רע' in the marker x-band was found between the cursor and page 96 - with no stored opening there is no second signal to fall back on"
+  },
+  {
+    "klal_id": 271,
+    "expected_gematria": "רעא",
+    "stored_gematria": "רעא",
+    "page": 94,
+    "content_match_ratio": 0.875,
+    "marker_position": 909,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רעא' at page 94 token 909, opening agreed with stored clean_text (0.875)"
+  },
+  {
+    "klal_id": 272,
+    "expected_gematria": "רעב",
+    "stored_gematria": "רעב",
+    "page": 94,
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window",
+    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'רעב' in the marker x-band was found between the cursor and page 96 - with no stored opening there is no second signal to fall back on"
+  },
+  {
+    "klal_id": 273,
+    "expected_gematria": "רעג",
+    "stored_gematria": "רעג",
+    "page": 95,
+    "content_match_ratio": 0.875,
+    "marker_position": 100,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רעג' at page 95 token 100, opening agreed with stored clean_text (0.875)"
+  },
+  {
+    "klal_id": 274,
+    "expected_gematria": "רעד",
+    "stored_gematria": "רעד",
+    "page": 95,
+    "content_match_ratio": 1.0,
+    "marker_position": 278,
+    "status": "ok",
+    "note": "mechanical-near-miss: matched 'רער' at page 95 token 278, opening agreed with stored clean_text (1.000); marker read as 'רער', one documented-confusion substitution from expected 'רעד'"
+  },
+  {
+    "klal_id": 275,
+    "expected_gematria": "רעה",
+    "stored_gematria": "רעה",
+    "page": 95,
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window",
+    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'רעה' in the marker x-band was found between the cursor and page 97 - with no stored opening there is no second signal to fall back on"
+  },
+  {
+    "klal_id": 276,
+    "expected_gematria": "רעו",
+    "stored_gematria": "רעו",
+    "page": 95,
+    "content_match_ratio": 1.0,
+    "marker_position": 654,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רעו' at page 95 token 654, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 277,
+    "expected_gematria": "רעז",
+    "stored_gematria": "רעז",
+    "page": 96,
+    "content_match_ratio": null,
+    "marker_position": 62,
+    "status": "marker_found_content_mismatch",
+    "note": "positional-only (exact numeral) at page 96 token 62: the corpus stores no text for this klal (placeholder clean_text), so the marker was located by numeral, marker x-band and sequence alone and the stored text could not be checked at all - this is NOT a content disagreement"
+  },
+  {
+    "klal_id": 278,
+    "expected_gematria": "רעח",
+    "stored_gematria": "רעח",
+    "page": 96,
+    "content_match_ratio": 1.0,
+    "marker_position": 151,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רעח' at page 96 token 151, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 279,
+    "expected_gematria": "רעט",
+    "stored_gematria": "רעט",
+    "page": 96,
+    "content_match_ratio": 1.0,
+    "marker_position": 247,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רעט' at page 96 token 247, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 280,
+    "expected_gematria": "רף",
+    "stored_gematria": "רפ",
+    "page": 96,
+    "content_match_ratio": null,
+    "marker_position": 791,
+    "status": "marker_found_content_mismatch",
+    "note": "positional-only (exact numeral) at page 96 token 791: the corpus stores no text for this klal (placeholder clean_text), so the marker was located by numeral, marker x-band and sequence alone and the stored text could not be checked at all - this is NOT a content disagreement"
+  },
+  {
+    "klal_id": 281,
+    "expected_gematria": "רפא",
+    "stored_gematria": "רפא",
+    "page": 97,
+    "content_match_ratio": 0.167,
+    "marker_position": 74,
+    "status": "marker_found_content_mismatch",
+    "note": "mechanical-exact: matched 'רפא' at page 97 token 74, but the following 8 tokens agree with the stored opening at only 0.167 - marker position trusted, stored text NOT confirmed; content agreement 0.167 below 0.5; no vision adjudicator available"
+  },
+  {
+    "klal_id": 282,
+    "expected_gematria": "רפב",
+    "stored_gematria": "רפב",
+    "page": 97,
+    "content_match_ratio": 0.25,
+    "marker_position": 137,
+    "status": "marker_found_content_mismatch",
+    "note": "mechanical-exact: matched 'רפב' at page 97 token 137, but the following 8 tokens agree with the stored opening at only 0.250 - marker position trusted, stored text NOT confirmed; content agreement 0.250 below 0.5; no vision adjudicator available"
+  },
+  {
+    "klal_id": 283,
+    "expected_gematria": "רפג",
+    "stored_gematria": "רפג",
+    "page": 97,
+    "content_match_ratio": 1.0,
+    "marker_position": 165,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רפג' at page 97 token 165, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 284,
+    "expected_gematria": "רפד",
+    "stored_gematria": "רפד",
+    "page": 100,
+    "content_match_ratio": 1.0,
+    "marker_position": 64,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רפד' at page 100 token 64, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 285,
+    "expected_gematria": "רפה",
+    "stored_gematria": "רפה",
+    "page": 100,
+    "content_match_ratio": 1.0,
+    "marker_position": 241,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רפה' at page 100 token 241, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 286,
+    "expected_gematria": "רפו",
+    "stored_gematria": "רפו",
+    "page": 100,
+    "content_match_ratio": 1.0,
+    "marker_position": 324,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רפו' at page 100 token 324, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 287,
+    "expected_gematria": "רפז",
+    "stored_gematria": "רפז",
+    "page": 100,
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window",
+    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'רפז' in the marker x-band was found between the cursor and page 102 - with no stored opening there is no second signal to fall back on"
+  },
+  {
+    "klal_id": 288,
+    "expected_gematria": "רפח",
+    "stored_gematria": "רפח",
+    "page": 100,
+    "content_match_ratio": 1.0,
+    "marker_position": 656,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רפח' at page 100 token 656, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 289,
+    "expected_gematria": "רפט",
+    "stored_gematria": "רפט",
+    "page": 101,
+    "content_match_ratio": 1.0,
+    "marker_position": 525,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רפט' at page 101 token 525, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 290,
+    "expected_gematria": "רץ",
+    "stored_gematria": "רצ",
+    "page": 101,
+    "content_match_ratio": null,
+    "marker_position": 641,
+    "status": "marker_found_content_mismatch",
+    "note": "positional-only (exact numeral) at page 101 token 641: the corpus stores no text for this klal (placeholder clean_text), so the marker was located by numeral, marker x-band and sequence alone and the stored text could not be checked at all - this is NOT a content disagreement"
+  },
+  {
+    "klal_id": 291,
+    "expected_gematria": "רצא",
+    "stored_gematria": "רצא",
+    "page": 102,
+    "content_match_ratio": 0.875,
+    "marker_position": 67,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רצא' at page 102 token 67, opening agreed with stored clean_text (0.875)"
+  },
+  {
+    "klal_id": 292,
+    "expected_gematria": "רצב",
+    "stored_gematria": "רצב",
+    "page": 102,
+    "content_match_ratio": 1.0,
+    "marker_position": 152,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רצב' at page 102 token 152, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 293,
+    "expected_gematria": "רצג",
+    "stored_gematria": "רצג",
+    "page": 102,
+    "content_match_ratio": 1.0,
+    "marker_position": 246,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רצג' at page 102 token 246, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 294,
+    "expected_gematria": "רצד",
+    "stored_gematria": "רצד",
+    "page": 103,
+    "content_match_ratio": 1.0,
+    "marker_position": 316,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רצד' at page 103 token 316, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 295,
+    "expected_gematria": "רצה",
+    "stored_gematria": "רצה",
+    "page": 103,
+    "content_match_ratio": 1.0,
+    "marker_position": 506,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רצה' at page 103 token 506, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 296,
+    "expected_gematria": "רצו",
+    "stored_gematria": "רצו",
+    "page": 104,
+    "content_match_ratio": 1.0,
+    "marker_position": 321,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רצו' at page 104 token 321, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 297,
+    "expected_gematria": "רצז",
+    "stored_gematria": "רצז",
+    "page": 104,
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window",
+    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'רצז' in the marker x-band was found between the cursor and page 106 - with no stored opening there is no second signal to fall back on"
+  },
+  {
+    "klal_id": 298,
+    "expected_gematria": "רצח",
+    "stored_gematria": "רצח",
+    "page": 105,
+    "content_match_ratio": 1.0,
+    "marker_position": 42,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רצח' at page 105 token 42, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 299,
+    "expected_gematria": "רצט",
+    "stored_gematria": "רצט",
+    "page": 105,
+    "content_match_ratio": 0.0,
+    "marker_position": 132,
+    "status": "marker_found_content_mismatch",
+    "note": "mechanical-exact: matched 'רצט' at page 105 token 132, but the following 8 tokens agree with the stored opening at only 0.000 - marker position trusted, stored text NOT confirmed"
+  },
+  {
+    "klal_id": 300,
+    "expected_gematria": "ש",
+    "stored_gematria": "ש",
+    "page": 105,
+    "content_match_ratio": 0.333,
+    "marker_position": 536,
+    "status": "marker_found_content_mismatch",
+    "note": "mechanical-exact: matched 'ש' at page 105 token 536, but the following 8 tokens agree with the stored opening at only 0.333 - marker position trusted, stored text NOT confirmed; content agreement 0.333 below 0.5; no vision adjudicator available"
+  },
+  {
+    "klal_id": 301,
+    "expected_gematria": "שא",
+    "stored_gematria": "שא",
+    "page": 105,
+    "content_match_ratio": 1.0,
+    "marker_position": 568,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שא' at page 105 token 568, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 302,
+    "expected_gematria": "שב",
+    "stored_gematria": "שב",
+    "page": 110,
+    "content_match_ratio": 1.0,
+    "marker_position": 849,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שב' at page 110 token 849, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 303,
+    "expected_gematria": "שג",
+    "stored_gematria": "שג",
+    "page": 110,
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window",
+    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'שג' in the marker x-band was found between the cursor and page 112 - with no stored opening there is no second signal to fall back on"
+  },
+  {
+    "klal_id": 304,
+    "expected_gematria": "שד",
+    "stored_gematria": "שד",
+    "page": 110,
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window",
+    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'שד' in the marker x-band was found between the cursor and page 113 - with no stored opening there is no second signal to fall back on"
+  },
+  {
+    "klal_id": 305,
+    "expected_gematria": "שה",
+    "stored_gematria": "שה",
+    "page": 112,
+    "content_match_ratio": 1.0,
+    "marker_position": 572,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שה' at page 112 token 572, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 306,
+    "expected_gematria": "שו",
+    "stored_gematria": "שו",
+    "page": 112,
+    "content_match_ratio": 0.875,
+    "marker_position": 597,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שו' at page 112 token 597, opening agreed with stored clean_text (0.875)"
+  },
+  {
+    "klal_id": 307,
+    "expected_gematria": "שז",
+    "stored_gematria": "שז",
+    "page": 112,
+    "content_match_ratio": 1.0,
+    "marker_position": 745,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שז' at page 112 token 745, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 308,
+    "expected_gematria": "שח",
+    "stored_gematria": "שח",
+    "page": 115,
+    "content_match_ratio": 0.875,
+    "marker_position": 263,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שח' at page 115 token 263, opening agreed with stored clean_text (0.875)"
+  },
+  {
+    "klal_id": 309,
+    "expected_gematria": "שט",
+    "stored_gematria": "שט",
+    "page": 115,
+    "content_match_ratio": null,
+    "marker_position": 299,
+    "status": "marker_found_content_mismatch",
+    "note": "positional-only (exact numeral) at page 115 token 299: the corpus stores no text for this klal (placeholder clean_text), so the marker was located by numeral, marker x-band and sequence alone and the stored text could not be checked at all - this is NOT a content disagreement"
+  },
+  {
+    "klal_id": 310,
+    "expected_gematria": "שי",
+    "stored_gematria": "שי",
+    "page": 115,
+    "content_match_ratio": 1.0,
+    "marker_position": 504,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שי' at page 115 token 504, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 311,
+    "expected_gematria": "שיא",
+    "stored_gematria": "שיא",
+    "page": 115,
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window",
+    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'שיא' in the marker x-band was found between the cursor and page 117 - with no stored opening there is no second signal to fall back on"
+  },
+  {
+    "klal_id": 312,
+    "expected_gematria": "שיב",
+    "stored_gematria": "שיב",
+    "page": 115,
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window",
+    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'שיב' in the marker x-band was found between the cursor and page 118 - with no stored opening there is no second signal to fall back on"
+  },
+  {
+    "klal_id": 313,
+    "expected_gematria": "שיג",
+    "stored_gematria": "שיג",
+    "page": 115,
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window",
+    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'שיג' in the marker x-band was found between the cursor and page 119 - with no stored opening there is no second signal to fall back on"
+  },
+  {
+    "klal_id": 314,
+    "expected_gematria": "שיד",
+    "stored_gematria": "שיד",
+    "page": 115,
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window",
+    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'שיד' in the marker x-band was found between the cursor and page 120 - with no stored opening there is no second signal to fall back on"
+  },
+  {
+    "klal_id": 315,
+    "expected_gematria": "שטו",
+    "stored_gematria": "שטו",
+    "page": 116,
+    "content_match_ratio": 1.0,
+    "marker_position": 275,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שטו' at page 116 token 275, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 316,
+    "expected_gematria": "שטז",
+    "stored_gematria": "שטז",
+    "page": 116,
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window",
+    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'שטז' in the marker x-band was found between the cursor and page 118 - with no stored opening there is no second signal to fall back on"
+  },
+  {
+    "klal_id": 317,
+    "expected_gematria": "שיז",
+    "stored_gematria": "שיז",
+    "page": 116,
+    "content_match_ratio": 1.0,
+    "marker_position": 433,
+    "status": "ok",
+    "note": "mechanical-near-miss: matched 'שין' at page 116 token 433, opening agreed with stored clean_text (1.000); marker read as 'שין', one documented-confusion substitution from expected 'שיז'"
+  },
+  {
+    "klal_id": 318,
+    "expected_gematria": "שיח",
+    "stored_gematria": "שיח",
+    "page": 116,
+    "content_match_ratio": 1.0,
+    "marker_position": 522,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שיח' at page 116 token 522, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 319,
+    "expected_gematria": "שיט",
+    "stored_gematria": "שיט",
+    "page": 116,
+    "content_match_ratio": 0.875,
+    "marker_position": 819,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שיט' at page 116 token 819, opening agreed with stored clean_text (0.875)"
+  },
+  {
+    "klal_id": 320,
+    "expected_gematria": "שכ",
+    "stored_gematria": "שכ",
+    "page": 116,
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window",
+    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'שכ' in the marker x-band was found between the cursor and page 118 - with no stored opening there is no second signal to fall back on"
+  },
+  {
+    "klal_id": 321,
+    "expected_gematria": "שכא",
+    "stored_gematria": "שכא",
+    "page": 117,
+    "content_match_ratio": 1.0,
+    "marker_position": 362,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שכא' at page 117 token 362, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 322,
+    "expected_gematria": "שכב",
+    "stored_gematria": "שכב",
+    "page": 117,
+    "content_match_ratio": 1.0,
+    "marker_position": 454,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שכב' at page 117 token 454, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 323,
+    "expected_gematria": "שכג",
+    "stored_gematria": "שכג",
+    "page": 117,
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window",
+    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'שכג' in the marker x-band was found between the cursor and page 119 - with no stored opening there is no second signal to fall back on"
+  },
+  {
+    "klal_id": 324,
+    "expected_gematria": "שכד",
+    "stored_gematria": "שכד",
+    "page": 118,
+    "content_match_ratio": 1.0,
+    "marker_position": 446,
+    "status": "ok",
+    "note": "mechanical-near-miss: matched 'שכר' at page 118 token 446, opening agreed with stored clean_text (1.000); marker read as 'שכר', one documented-confusion substitution from expected 'שכד'"
+  },
+  {
+    "klal_id": 325,
+    "expected_gematria": "שכה",
+    "stored_gematria": "שכה",
+    "page": 118,
+    "content_match_ratio": 1.0,
+    "marker_position": 549,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שכה' at page 118 token 549, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 326,
+    "expected_gematria": "שכו",
+    "stored_gematria": "שכו",
+    "page": 119,
+    "content_match_ratio": 1.0,
+    "marker_position": 24,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שכו' at page 119 token 24, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 327,
+    "expected_gematria": "שכז",
+    "stored_gematria": "שכז",
+    "page": 119,
+    "content_match_ratio": 1.0,
+    "marker_position": 256,
+    "status": "ok",
+    "note": "mechanical-near-miss: matched 'שכן' at page 119 token 256, opening agreed with stored clean_text (1.000); marker read as 'שכן', one documented-confusion substitution from expected 'שכז'"
+  },
+  {
+    "klal_id": 328,
+    "expected_gematria": "שכח",
+    "stored_gematria": "שכח",
+    "page": 119,
+    "content_match_ratio": 0.875,
+    "marker_position": 348,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שכח' at page 119 token 348, opening agreed with stored clean_text (0.875)"
+  },
+  {
+    "klal_id": 329,
+    "expected_gematria": "שכט",
+    "stored_gematria": "שכט",
+    "page": 119,
+    "content_match_ratio": 1.0,
+    "marker_position": 386,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שכט' at page 119 token 386, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 330,
+    "expected_gematria": "של",
+    "stored_gematria": "של",
+    "page": 119,
+    "content_match_ratio": null,
+    "marker_position": 531,
+    "status": "marker_found_content_mismatch",
+    "note": "positional-only (exact numeral) at page 119 token 531: the corpus stores no text for this klal (placeholder clean_text), so the marker was located by numeral, marker x-band and sequence alone and the stored text could not be checked at all - this is NOT a content disagreement"
+  },
+  {
+    "klal_id": 331,
+    "expected_gematria": "שלא",
+    "stored_gematria": "שלא",
+    "page": 119,
+    "content_match_ratio": null,
+    "marker_position": 553,
+    "status": "marker_found_content_mismatch",
+    "note": "positional-only (exact numeral) at page 119 token 553: the corpus stores no text for this klal (placeholder clean_text), so the marker was located by numeral, marker x-band and sequence alone and the stored text could not be checked at all - this is NOT a content disagreement"
+  },
+  {
+    "klal_id": 332,
+    "expected_gematria": "שלב",
+    "stored_gematria": "שלב",
+    "page": 119,
+    "content_match_ratio": null,
+    "marker_position": 579,
+    "status": "marker_found_content_mismatch",
+    "note": "positional-only (exact numeral) at page 119 token 579: the corpus stores no text for this klal (placeholder clean_text), so the marker was located by numeral, marker x-band and sequence alone and the stored text could not be checked at all - this is NOT a content disagreement"
+  },
+  {
+    "klal_id": 333,
+    "expected_gematria": "שלג",
+    "stored_gematria": "שלג",
+    "page": 119,
+    "content_match_ratio": null,
+    "marker_position": 700,
+    "status": "marker_found_content_mismatch",
+    "note": "positional-only (exact numeral) at page 119 token 700: the corpus stores no text for this klal (placeholder clean_text), so the marker was located by numeral, marker x-band and sequence alone and the stored text could not be checked at all - this is NOT a content disagreement"
+  },
+  {
+    "klal_id": 334,
+    "expected_gematria": "שלד",
+    "stored_gematria": "שלד",
+    "page": 119,
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window",
+    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'שלד' in the marker x-band was found between the cursor and page 121 - with no stored opening there is no second signal to fall back on"
+  },
+  {
+    "klal_id": 335,
+    "expected_gematria": "שלה",
+    "stored_gematria": "שלה",
+    "page": 120,
+    "content_match_ratio": null,
+    "marker_position": 196,
+    "status": "marker_found_content_mismatch",
+    "note": "positional-only (exact numeral) at page 120 token 196: the corpus stores no text for this klal (placeholder clean_text), so the marker was located by numeral, marker x-band and sequence alone and the stored text could not be checked at all - this is NOT a content disagreement"
+  },
+  {
+    "klal_id": 336,
+    "expected_gematria": "שלו",
+    "stored_gematria": "שלו",
+    "page": 120,
+    "content_match_ratio": 1.0,
+    "marker_position": 233,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שלו' at page 120 token 233, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 337,
+    "expected_gematria": "שלז",
+    "stored_gematria": "שלז",
+    "page": 121,
+    "content_match_ratio": 1.0,
+    "marker_position": 61,
+    "status": "ok",
+    "note": "mechanical-near-miss: matched 'שלו' at page 121 token 61, opening agreed with stored clean_text (1.000); marker read as 'שלו', one documented-confusion substitution from expected 'שלז'"
+  },
+  {
+    "klal_id": 338,
+    "expected_gematria": "שלח",
+    "stored_gematria": "שלח",
+    "page": 121,
+    "content_match_ratio": 0.75,
+    "marker_position": 168,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שלח' at page 121 token 168, opening agreed with stored clean_text (0.750)"
+  },
+  {
+    "klal_id": 339,
+    "expected_gematria": "שלט",
+    "stored_gematria": "שלט",
+    "page": 121,
+    "content_match_ratio": 1.0,
+    "marker_position": 451,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שלט' at page 121 token 451, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 340,
+    "expected_gematria": "שמ",
+    "stored_gematria": "שמ",
+    "page": 121,
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window",
+    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'שמ' in the marker x-band was found between the cursor and page 123 - with no stored opening there is no second signal to fall back on"
+  },
+  {
+    "klal_id": 341,
+    "expected_gematria": "שמא",
+    "stored_gematria": "שמא",
+    "page": 121,
+    "content_match_ratio": 1.0,
+    "marker_position": 571,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שמא' at page 121 token 571, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 342,
+    "expected_gematria": "שמב",
+    "stored_gematria": "שמב",
+    "page": 121,
+    "content_match_ratio": 1.0,
+    "marker_position": 794,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שמב' at page 121 token 794, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 343,
+    "expected_gematria": "שמג",
+    "stored_gematria": "שמג",
+    "page": 121,
+    "content_match_ratio": 1.0,
+    "marker_position": 928,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שמג' at page 121 token 928, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 344,
+    "expected_gematria": "שמד",
+    "stored_gematria": "שמד",
+    "page": 121,
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window",
+    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'שמד' in the marker x-band was found between the cursor and page 123 - with no stored opening there is no second signal to fall back on"
+  },
+  {
+    "klal_id": 345,
+    "expected_gematria": "שמה",
+    "stored_gematria": "שמה",
+    "page": 122,
+    "content_match_ratio": 1.0,
+    "marker_position": 65,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שמה' at page 122 token 65, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 346,
+    "expected_gematria": "שמו",
+    "stored_gematria": "שמו",
+    "page": 122,
+    "content_match_ratio": 1.0,
+    "marker_position": 174,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שמו' at page 122 token 174, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 347,
+    "expected_gematria": "שמז",
+    "stored_gematria": "שמז",
+    "page": 122,
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window",
+    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'שמז' in the marker x-band was found between the cursor and page 124 - with no stored opening there is no second signal to fall back on"
+  },
+  {
+    "klal_id": 348,
+    "expected_gematria": "שמח",
+    "stored_gematria": "שמח",
+    "page": 123,
+    "content_match_ratio": 1.0,
+    "marker_position": 406,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שמח' at page 123 token 406, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 349,
+    "expected_gematria": "שמט",
+    "stored_gematria": "שמט",
+    "page": 123,
+    "content_match_ratio": 1.0,
+    "marker_position": 451,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שמט' at page 123 token 451, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 350,
+    "expected_gematria": "שן",
+    "stored_gematria": "שנ",
+    "page": 124,
+    "content_match_ratio": null,
+    "marker_position": 375,
+    "status": "marker_found_content_mismatch",
+    "note": "positional-only (exact numeral) at page 124 token 375: the corpus stores no text for this klal (placeholder clean_text), so the marker was located by numeral, marker x-band and sequence alone and the stored text could not be checked at all - this is NOT a content disagreement"
+  },
+  {
+    "klal_id": 351,
+    "expected_gematria": "שנא",
+    "stored_gematria": "שנא",
+    "page": 124,
+    "content_match_ratio": 0.75,
+    "marker_position": 851,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שנא' at page 124 token 851, opening agreed with stored clean_text (0.750)"
+  },
+  {
+    "klal_id": 352,
+    "expected_gematria": "שנב",
+    "stored_gematria": "שנב",
+    "page": 125,
+    "content_match_ratio": 0.875,
+    "marker_position": 322,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שנב' at page 125 token 322, opening agreed with stored clean_text (0.875)"
+  },
+  {
+    "klal_id": 353,
+    "expected_gematria": "שנג",
+    "stored_gematria": "שנג",
+    "page": 125,
+    "content_match_ratio": 0.875,
+    "marker_position": 376,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שנג' at page 125 token 376, opening agreed with stored clean_text (0.875)"
+  },
+  {
+    "klal_id": 354,
+    "expected_gematria": "שנד",
+    "stored_gematria": "שנד",
+    "page": 125,
+    "content_match_ratio": 1.0,
+    "marker_position": 408,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שנד' at page 125 token 408, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 355,
+    "expected_gematria": "שנה",
+    "stored_gematria": "שנה",
+    "page": 126,
+    "content_match_ratio": 1.0,
+    "marker_position": 98,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שנה' at page 126 token 98, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 356,
+    "expected_gematria": "שנו",
+    "stored_gematria": "שנו",
+    "page": 126,
+    "content_match_ratio": 1.0,
+    "marker_position": 284,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שנו' at page 126 token 284, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 357,
+    "expected_gematria": "שנז",
+    "stored_gematria": "שנז",
+    "page": 126,
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window",
+    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'שנז' in the marker x-band was found between the cursor and page 128 - with no stored opening there is no second signal to fall back on"
+  },
+  {
+    "klal_id": 358,
+    "expected_gematria": "שנח",
+    "stored_gematria": "שנח",
+    "page": 127,
+    "content_match_ratio": 1.0,
+    "marker_position": 5,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שנח' at page 127 token 5, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 359,
+    "expected_gematria": "שנט",
+    "stored_gematria": "שנט",
+    "page": 127,
+    "content_match_ratio": 1.0,
+    "marker_position": 61,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שנט' at page 127 token 61, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 360,
+    "expected_gematria": "שס",
+    "stored_gematria": "שס",
+    "page": 127,
+    "content_match_ratio": 1.0,
+    "marker_position": 89,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שס' at page 127 token 89, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 361,
+    "expected_gematria": "שסא",
+    "stored_gematria": "שסא",
+    "page": 127,
+    "content_match_ratio": 1.0,
+    "marker_position": 264,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שסא' at page 127 token 264, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 362,
+    "expected_gematria": "שסב",
+    "stored_gematria": "שסב",
+    "page": 127,
+    "content_match_ratio": 1.0,
+    "marker_position": 617,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שסב' at page 127 token 617, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 363,
+    "expected_gematria": "שסג",
+    "stored_gematria": "שסג",
+    "page": 127,
+    "content_match_ratio": 1.0,
+    "marker_position": 699,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שסג' at page 127 token 699, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 364,
+    "expected_gematria": "שסד",
+    "stored_gematria": "שסד",
+    "page": 127,
+    "content_match_ratio": 1.0,
+    "marker_position": 783,
+    "status": "ok",
+    "note": "mechanical-near-miss: matched 'שסר' at page 127 token 783, opening agreed with stored clean_text (1.000); marker read as 'שסר', one documented-confusion substitution from expected 'שסד'"
+  },
+  {
+    "klal_id": 365,
+    "expected_gematria": "שסה",
+    "stored_gematria": "שסה",
+    "page": 128,
+    "content_match_ratio": 0.875,
+    "marker_position": 5,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שסה' at page 128 token 5, opening agreed with stored clean_text (0.875)"
+  },
+  {
+    "klal_id": 366,
+    "expected_gematria": "שסו",
+    "stored_gematria": "שסו",
+    "page": 128,
+    "content_match_ratio": 1.0,
+    "marker_position": 101,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שסו' at page 128 token 101, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 367,
+    "expected_gematria": "שסז",
+    "stored_gematria": "שסז",
+    "page": 128,
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window",
+    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'שסז' in the marker x-band was found between the cursor and page 130 - with no stored opening there is no second signal to fall back on"
+  },
+  {
+    "klal_id": 368,
+    "expected_gematria": "שסח",
+    "stored_gematria": "שסח",
+    "page": 128,
+    "content_match_ratio": 1.0,
+    "marker_position": 804,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שסח' at page 128 token 804, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 369,
+    "expected_gematria": "שסט",
+    "stored_gematria": "שסט",
+    "page": 129,
+    "content_match_ratio": 1.0,
+    "marker_position": 43,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שסט' at page 129 token 43, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 370,
+    "expected_gematria": "שע",
+    "stored_gematria": "שע",
+    "page": 129,
+    "content_match_ratio": 1.0,
+    "marker_position": 137,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שע' at page 129 token 137, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 371,
+    "expected_gematria": "שעא",
+    "stored_gematria": "שעא",
+    "page": 129,
+    "content_match_ratio": 1.0,
+    "marker_position": 382,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שעא' at page 129 token 382, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 372,
+    "expected_gematria": "שעב",
+    "stored_gematria": "שעב",
+    "page": 129,
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window",
+    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'שעב' in the marker x-band was found between the cursor and page 131 - with no stored opening there is no second signal to fall back on"
+  },
+  {
+    "klal_id": 373,
+    "expected_gematria": "שעג",
+    "stored_gematria": "שעג",
+    "page": 130,
+    "content_match_ratio": 0.875,
+    "marker_position": 697,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שעג' at page 130 token 697, opening agreed with stored clean_text (0.875)"
+  },
+  {
+    "klal_id": 374,
+    "expected_gematria": "שעד",
+    "stored_gematria": "שעד",
+    "page": 131,
+    "content_match_ratio": 0.167,
+    "marker_position": 232,
+    "status": "marker_found_content_mismatch",
+    "note": "mechanical-exact: matched 'שעד' at page 131 token 232, but the following 8 tokens agree with the stored opening at only 0.167 - marker position trusted, stored text NOT confirmed; content agreement 0.167 below 0.5; no vision adjudicator available"
+  },
+  {
+    "klal_id": 375,
+    "expected_gematria": "שעה",
+    "stored_gematria": "שעה",
+    "page": 131,
+    "content_match_ratio": 1.0,
+    "marker_position": 490,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שעה' at page 131 token 490, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 376,
+    "expected_gematria": "שעו",
+    "stored_gematria": "שעו",
+    "page": 131,
+    "content_match_ratio": 1.0,
+    "marker_position": 634,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שעו' at page 131 token 634, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 377,
+    "expected_gematria": "שעז",
+    "stored_gematria": "שעז",
+    "page": 131,
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window",
+    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'שעז' in the marker x-band was found between the cursor and page 133 - with no stored opening there is no second signal to fall back on"
+  },
+  {
+    "klal_id": 378,
+    "expected_gematria": "שעח",
+    "stored_gematria": "שעח",
+    "page": 131,
+    "content_match_ratio": 1.0,
+    "marker_position": 764,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שעח' at page 131 token 764, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 379,
+    "expected_gematria": "שעט",
+    "stored_gematria": "שעט",
+    "page": 132,
+    "content_match_ratio": 1.0,
+    "marker_position": 363,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שעט' at page 132 token 363, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 380,
+    "expected_gematria": "שף",
+    "stored_gematria": "שפ",
+    "page": 132,
+    "content_match_ratio": null,
+    "marker_position": 796,
+    "status": "marker_found_content_mismatch",
+    "note": "positional-only (exact numeral) at page 132 token 796: the corpus stores no text for this klal (placeholder clean_text), so the marker was located by numeral, marker x-band and sequence alone and the stored text could not be checked at all - this is NOT a content disagreement"
+  },
+  {
+    "klal_id": 381,
+    "expected_gematria": "שפא",
+    "stored_gematria": "שפא",
+    "page": 133,
+    "content_match_ratio": 1.0,
+    "marker_position": 30,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שפא' at page 133 token 30, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 382,
+    "expected_gematria": "שפב",
+    "stored_gematria": "שפב",
+    "page": 133,
+    "content_match_ratio": 1.0,
+    "marker_position": 81,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שפב' at page 133 token 81, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 383,
+    "expected_gematria": "שפג",
+    "stored_gematria": "שפג",
+    "page": 133,
+    "content_match_ratio": null,
+    "marker_position": 231,
+    "status": "marker_found_content_mismatch",
+    "note": "positional-only (exact numeral) at page 133 token 231: the corpus stores no text for this klal (placeholder clean_text), so the marker was located by numeral, marker x-band and sequence alone and the stored text could not be checked at all - this is NOT a content disagreement"
+  },
+  {
+    "klal_id": 384,
+    "expected_gematria": "שפד",
+    "stored_gematria": "שפד",
+    "page": 133,
+    "content_match_ratio": null,
+    "marker_position": 378,
+    "status": "marker_found_content_mismatch",
+    "note": "positional-only (exact numeral) at page 133 token 378: the corpus stores no text for this klal (placeholder clean_text), so the marker was located by numeral, marker x-band and sequence alone and the stored text could not be checked at all - this is NOT a content disagreement"
+  },
+  {
+    "klal_id": 385,
+    "expected_gematria": "שפה",
+    "stored_gematria": "שפה",
+    "page": 133,
+    "content_match_ratio": null,
+    "marker_position": 427,
+    "status": "marker_found_content_mismatch",
+    "note": "positional-only (exact numeral) at page 133 token 427: the corpus stores no text for this klal (placeholder clean_text), so the marker was located by numeral, marker x-band and sequence alone and the stored text could not be checked at all - this is NOT a content disagreement"
+  },
+  {
+    "klal_id": 386,
+    "expected_gematria": "שפו",
+    "stored_gematria": "שפו",
+    "page": 134,
+    "content_match_ratio": 1.0,
+    "marker_position": 5,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שפו' at page 134 token 5, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 387,
+    "expected_gematria": "שפז",
+    "stored_gematria": "שפז",
+    "page": 134,
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window",
+    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'שפז' in the marker x-band was found between the cursor and page 136 - with no stored opening there is no second signal to fall back on"
+  },
+  {
+    "klal_id": 388,
+    "expected_gematria": "שפח",
+    "stored_gematria": "שפח",
+    "page": 134,
+    "content_match_ratio": 1.0,
+    "marker_position": 106,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שפח' at page 134 token 106, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 389,
+    "expected_gematria": "שפט",
+    "stored_gematria": "שפט",
+    "page": 134,
+    "content_match_ratio": 0.25,
+    "marker_position": 146,
+    "status": "marker_found_content_mismatch",
+    "note": "mechanical-exact: matched 'שפט' at page 134 token 146, but the following 8 tokens agree with the stored opening at only 0.250 - marker position trusted, stored text NOT confirmed; content agreement 0.250 below 0.5; no vision adjudicator available"
+  },
+  {
+    "klal_id": 390,
+    "expected_gematria": "שץ",
+    "stored_gematria": "שצ",
+    "page": 134,
+    "content_match_ratio": null,
+    "marker_position": 193,
+    "status": "marker_found_content_mismatch",
+    "note": "positional-only (exact numeral) at page 134 token 193: the corpus stores no text for this klal (placeholder clean_text), so the marker was located by numeral, marker x-band and sequence alone and the stored text could not be checked at all - this is NOT a content disagreement"
+  },
+  {
+    "klal_id": 391,
+    "expected_gematria": "שצא",
+    "stored_gematria": "שצא",
+    "page": 134,
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window",
+    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'שצא' in the marker x-band was found between the cursor and page 136 - with no stored opening there is no second signal to fall back on"
+  },
+  {
+    "klal_id": 392,
+    "expected_gematria": "שצב",
+    "stored_gematria": "שצב",
+    "page": 134,
+    "content_match_ratio": 0.875,
+    "marker_position": 533,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שצב' at page 134 token 533, opening agreed with stored clean_text (0.875)"
+  },
+  {
+    "klal_id": 393,
+    "expected_gematria": "שצג",
+    "stored_gematria": "שצג",
+    "page": 134,
+    "content_match_ratio": 1.0,
+    "marker_position": 593,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שצג' at page 134 token 593, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 394,
+    "expected_gematria": "שצד",
+    "stored_gematria": "שצד",
+    "page": 134,
+    "content_match_ratio": 0.875,
+    "marker_position": 634,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שצד' at page 134 token 634, opening agreed with stored clean_text (0.875)"
+  },
+  {
+    "klal_id": 395,
+    "expected_gematria": "שצה",
+    "stored_gematria": "שצה",
+    "page": 135,
+    "content_match_ratio": 1.0,
+    "marker_position": 166,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שצה' at page 135 token 166, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 396,
+    "expected_gematria": "שצו",
+    "stored_gematria": "שצו",
+    "page": 135,
+    "content_match_ratio": 1.0,
+    "marker_position": 225,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שצו' at page 135 token 225, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 397,
+    "expected_gematria": "שצז",
+    "stored_gematria": "שצז",
+    "page": 135,
+    "content_match_ratio": null,
+    "marker_position": 270,
+    "status": "marker_found_content_mismatch",
+    "note": "positional-only (exact numeral) at page 135 token 270: the corpus stores no text for this klal (placeholder clean_text), so the marker was located by numeral, marker x-band and sequence alone and the stored text could not be checked at all - this is NOT a content disagreement"
+  },
+  {
+    "klal_id": 398,
+    "expected_gematria": "שצח",
+    "stored_gematria": "שצח",
+    "page": 135,
+    "content_match_ratio": 1.0,
+    "marker_position": 302,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שצח' at page 135 token 302, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 399,
+    "expected_gematria": "שצט",
+    "stored_gematria": "שצט",
+    "page": 135,
+    "content_match_ratio": 1.0,
+    "marker_position": 770,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'שצט' at page 135 token 770, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 400,
+    "expected_gematria": "ת",
+    "stored_gematria": "ת",
+    "page": 135,
+    "content_match_ratio": 0.875,
+    "marker_position": 812,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'ת' at page 135 token 812, opening agreed with stored clean_text (0.875)"
+  },
+  {
+    "klal_id": 401,
+    "expected_gematria": "תא",
+    "stored_gematria": "תא",
+    "page": 135,
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window",
+    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'תא' in the marker x-band was found between the cursor and page 137 - with no stored opening there is no second signal to fall back on"
+  },
+  {
+    "klal_id": 402,
+    "expected_gematria": "תב",
+    "stored_gematria": "תב",
+    "page": 135,
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window",
+    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'תב' in the marker x-band was found between the cursor and page 138 - with no stored opening there is no second signal to fall back on"
+  },
+  {
+    "klal_id": 403,
+    "expected_gematria": "תג",
+    "stored_gematria": "תג",
+    "page": 135,
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window",
+    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'תג' in the marker x-band was found between the cursor and page 139 - with no stored opening there is no second signal to fall back on"
+  },
+  {
+    "klal_id": 404,
+    "expected_gematria": "תד",
+    "stored_gematria": "תד",
+    "page": 135,
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window",
+    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'תד' in the marker x-band was found between the cursor and page 140 - with no stored opening there is no second signal to fall back on"
+  },
+  {
+    "klal_id": 405,
+    "expected_gematria": "תה",
+    "stored_gematria": "תה",
+    "page": 136,
+    "content_match_ratio": 1.0,
+    "marker_position": 517,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'תה' at page 136 token 517, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 406,
+    "expected_gematria": "תו",
+    "stored_gematria": "תו",
+    "page": 138,
+    "content_match_ratio": 1.0,
+    "marker_position": 325,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'תו' at page 138 token 325, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 407,
+    "expected_gematria": "תז",
+    "stored_gematria": "תז",
+    "page": 138,
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window",
+    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'תז' in the marker x-band was found between the cursor and page 140 - with no stored opening there is no second signal to fall back on"
+  },
+  {
+    "klal_id": 408,
+    "expected_gematria": "תח",
+    "stored_gematria": "תח",
+    "page": 138,
+    "content_match_ratio": 0.0,
+    "marker_position": 319,
+    "status": "marker_found_content_mismatch",
+    "note": "mechanical-exact: matched 'תח' at page 138 token 319, but the following 8 tokens agree with the stored opening at only 0.000 - marker position trusted, stored text NOT confirmed"
+  },
+  {
+    "klal_id": 409,
+    "expected_gematria": "תט",
+    "stored_gematria": "תט",
+    "page": 138,
+    "content_match_ratio": 1.0,
+    "marker_position": 426,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'תט' at page 138 token 426, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 410,
+    "expected_gematria": "תי",
+    "stored_gematria": "תי",
+    "page": 141,
+    "content_match_ratio": 1.0,
+    "marker_position": 380,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'תי' at page 141 token 380, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 411,
+    "expected_gematria": "תיא",
+    "stored_gematria": "תיא",
+    "page": 150,
+    "content_match_ratio": 0.5,
+    "marker_position": 548,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'תיא' at page 150 token 548, opening agreed with stored clean_text (0.500)"
+  },
+  {
+    "klal_id": 412,
+    "expected_gematria": "תיב",
+    "stored_gematria": "תיב",
+    "page": 151,
+    "content_match_ratio": 0.0,
+    "marker_position": 254,
+    "status": "marker_found_content_mismatch",
+    "note": "mechanical-exact: matched 'תיב' at page 151 token 254, but the following 8 tokens agree with the stored opening at only 0.000 - marker position trusted, stored text NOT confirmed"
+  },
+  {
+    "klal_id": 413,
+    "expected_gematria": "תיג",
+    "stored_gematria": "תיג",
+    "page": 151,
+    "content_match_ratio": 1.0,
+    "marker_position": 398,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'תיג' at page 151 token 398, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 414,
+    "expected_gematria": "תיד",
+    "stored_gematria": "תיד",
+    "page": 151,
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window",
+    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'תיד' in the marker x-band was found between the cursor and page 153 - with no stored opening there is no second signal to fall back on"
+  },
+  {
+    "klal_id": 415,
+    "expected_gematria": "תטו",
+    "stored_gematria": "תטו",
+    "page": 152,
+    "content_match_ratio": 0.5,
+    "marker_position": 248,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'תטו' at page 152 token 248, opening agreed with stored title (0.500)"
+  },
+  {
+    "klal_id": 416,
+    "expected_gematria": "תטז",
+    "stored_gematria": "תטז",
+    "page": 152,
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window",
+    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'תטז' in the marker x-band was found between the cursor and page 154 - with no stored opening there is no second signal to fall back on"
+  },
+  {
+    "klal_id": 417,
+    "expected_gematria": "תיז",
+    "stored_gematria": "תיז",
+    "page": 152,
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window",
+    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'תיז' in the marker x-band was found between the cursor and page 155 - with no stored opening there is no second signal to fall back on"
+  },
+  {
+    "klal_id": 418,
+    "expected_gematria": "תיח",
+    "stored_gematria": "תיח",
+    "page": 156,
+    "content_match_ratio": 1.0,
+    "marker_position": 33,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'תיח' at page 156 token 33, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 419,
+    "expected_gematria": "תיט",
+    "stored_gematria": "תיט",
+    "page": 156,
+    "content_match_ratio": 0.667,
+    "marker_position": 104,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'תיט' at page 156 token 104, opening agreed with stored title (0.667)"
+  },
+  {
+    "klal_id": 420,
+    "expected_gematria": "תכ",
+    "stored_gematria": "תכ",
+    "page": 156,
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window",
+    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'תכ' in the marker x-band was found between the cursor and page 158 - with no stored opening there is no second signal to fall back on"
+  },
+  {
+    "klal_id": 421,
+    "expected_gematria": "תכא",
+    "stored_gematria": "תכא",
+    "page": 156,
+    "content_match_ratio": 1.0,
+    "marker_position": 316,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'תכא' at page 156 token 316, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 422,
+    "expected_gematria": "תכב",
+    "stored_gematria": "תכב",
+    "page": 156,
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window",
+    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'תכב' in the marker x-band was found between the cursor and page 158 - with no stored opening there is no second signal to fall back on"
+  },
+  {
+    "klal_id": 423,
+    "expected_gematria": "תכג",
+    "stored_gematria": "תכג",
+    "page": 156,
+    "content_match_ratio": 1.0,
+    "marker_position": 427,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'תכג' at page 156 token 427, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 424,
+    "expected_gematria": "תכד",
+    "stored_gematria": "תכד",
+    "page": 158,
+    "content_match_ratio": 1.0,
+    "marker_position": 228,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'תכד' at page 158 token 228, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 425,
+    "expected_gematria": "תכה",
+    "stored_gematria": "תכה",
+    "page": 158,
+    "content_match_ratio": 1.0,
+    "marker_position": 637,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'תכה' at page 158 token 637, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 426,
+    "expected_gematria": "תכו",
+    "stored_gematria": "תכו",
+    "page": 158,
+    "content_match_ratio": 1.0,
+    "marker_position": 752,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'תכו' at page 158 token 752, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 427,
+    "expected_gematria": "תכז",
+    "stored_gematria": "תכז",
+    "page": 158,
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window",
+    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'תכז' in the marker x-band was found between the cursor and page 160 - with no stored opening there is no second signal to fall back on"
+  },
+  {
+    "klal_id": 428,
+    "expected_gematria": "תכח",
+    "stored_gematria": "תכח",
+    "page": 158,
+    "content_match_ratio": 1.0,
+    "marker_position": 871,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'תכח' at page 158 token 871, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 429,
+    "expected_gematria": "תכט",
+    "stored_gematria": "תכט",
+    "page": 159,
+    "content_match_ratio": 1.0,
+    "marker_position": 174,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'תכט' at page 159 token 174, opening agreed with stored clean_text (1.000)"
+  },
+  {
+    "klal_id": 430,
+    "expected_gematria": "תל",
+    "stored_gematria": "תל",
+    "page": 159,
+    "content_match_ratio": null,
+    "marker_position": 418,
+    "status": "marker_found_content_mismatch",
+    "note": "positional-only (exact numeral) at page 159 token 418: the corpus stores no text for this klal (placeholder clean_text), so the marker was located by numeral, marker x-band and sequence alone and the stored text could not be checked at all - this is NOT a content disagreement"
+  },
+  {
+    "klal_id": 431,
+    "expected_gematria": "תלא",
+    "stored_gematria": "תלא",
+    "page": 160,
+    "content_match_ratio": null,
+    "marker_position": 293,
+    "status": "marker_found_content_mismatch",
+    "note": "positional-only (exact numeral) at page 160 token 293: the corpus stores no text for this klal (placeholder clean_text), so the marker was located by numeral, marker x-band and sequence alone and the stored text could not be checked at all - this is NOT a content disagreement"
+  },
+  {
+    "klal_id": 432,
+    "expected_gematria": "תלב",
+    "stored_gematria": "תלב",
+    "page": 161,
+    "content_match_ratio": null,
+    "marker_position": 5,
+    "status": "marker_found_content_mismatch",
+    "note": "positional-only (exact numeral) at page 161 token 5: the corpus stores no text for this klal (placeholder clean_text), so the marker was located by numeral, marker x-band and sequence alone and the stored text could not be checked at all - this is NOT a content disagreement"
+  },
+  {
+    "klal_id": 433,
+    "expected_gematria": "תלג",
+    "stored_gematria": "תלג",
+    "page": 161,
+    "content_match_ratio": null,
+    "marker_position": 322,
+    "status": "marker_found_content_mismatch",
+    "note": "positional-only (exact numeral) at page 161 token 322: the corpus stores no text for this klal (placeholder clean_text), so the marker was located by numeral, marker x-band and sequence alone and the stored text could not be checked at all - this is NOT a content disagreement"
+  },
+  {
+    "klal_id": 434,
+    "expected_gematria": "תלד",
+    "stored_gematria": "תלד",
+    "page": 161,
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window",
+    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'תלד' in the marker x-band was found between the cursor and page 163 - with no stored opening there is no second signal to fall back on"
+  },
+  {
+    "klal_id": 435,
+    "expected_gematria": "תלה",
+    "stored_gematria": "תלה",
+    "page": 163,
+    "content_match_ratio": null,
+    "marker_position": 76,
+    "status": "marker_found_content_mismatch",
+    "note": "positional-only (exact numeral) at page 163 token 76: the corpus stores no text for this klal (placeholder clean_text), so the marker was located by numeral, marker x-band and sequence alone and the stored text could not be checked at all - this is NOT a content disagreement"
+  },
+  {
+    "klal_id": 436,
+    "expected_gematria": "תלו",
+    "stored_gematria": "תלו",
+    "page": 163,
+    "content_match_ratio": null,
+    "marker_position": 165,
+    "status": "marker_found_content_mismatch",
+    "note": "positional-only (exact numeral) at page 163 token 165: the corpus stores no text for this klal (placeholder clean_text), so the marker was located by numeral, marker x-band and sequence alone and the stored text could not be checked at all - this is NOT a content disagreement"
+  },
+  {
+    "klal_id": 437,
+    "expected_gematria": "תלז",
+    "stored_gematria": "תלז",
+    "page": 163,
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window",
+    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'תלז' in the marker x-band was found between the cursor and page 165 - with no stored opening there is no second signal to fall back on"
+  },
+  {
+    "klal_id": 438,
+    "expected_gematria": "תלח",
+    "stored_gematria": "תלח",
+    "page": 163,
+    "content_match_ratio": null,
+    "marker_position": 278,
+    "status": "marker_found_content_mismatch",
+    "note": "positional-only (exact numeral) at page 163 token 278: the corpus stores no text for this klal (placeholder clean_text), so the marker was located by numeral, marker x-band and sequence alone and the stored text could not be checked at all - this is NOT a content disagreement"
+  },
+  {
+    "klal_id": 439,
+    "expected_gematria": "תלט",
+    "stored_gematria": "תלט",
+    "page": 163,
+    "content_match_ratio": null,
+    "marker_position": 512,
+    "status": "marker_found_content_mismatch",
+    "note": "positional-only (exact numeral) at page 163 token 512: the corpus stores no text for this klal (placeholder clean_text), so the marker was located by numeral, marker x-band and sequence alone and the stored text could not be checked at all - this is NOT a content disagreement"
+  },
+  {
+    "klal_id": 440,
+    "expected_gematria": "תמ",
+    "stored_gematria": "תמ",
+    "page": 163,
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window",
+    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'תמ' in the marker x-band was found between the cursor and page 165 - with no stored opening there is no second signal to fall back on"
+  },
+  {
+    "klal_id": 441,
+    "expected_gematria": "תמא",
+    "stored_gematria": "תמא",
+    "page": 163,
+    "content_match_ratio": null,
+    "status": "marker_not_found_in_window",
+    "note": "the corpus stores no text for this klal (placeholder clean_text), and no exact 'תמא' in the marker x-band was found between the cursor and page 166 - with no stored opening there is no second signal to fall back on"
+  },
+  {
+    "klal_id": 442,
+    "expected_gematria": "תמב",
+    "stored_gematria": "תמב",
+    "page": 163,
+    "content_match_ratio": null,
+    "marker_position": 764,
+    "status": "marker_found_content_mismatch",
+    "note": "positional-only (exact numeral) at page 163 token 764: the corpus stores no text for this klal (placeholder clean_text), so the marker was located by numeral, marker x-band and sequence alone and the stored text could not be checked at all - this is NOT a content disagreement"
+  },
+  {
+    "klal_id": 443,
+    "expected_gematria": "תמג",
+    "stored_gematria": "תמג",
+    "page": 164,
+    "content_match_ratio": null,
+    "marker_position": 112,
+    "status": "marker_found_content_mismatch",
+    "note": "positional-only (exact numeral) at page 164 token 112: the corpus stores no text for this klal (placeholder clean_text), so the marker was located by numeral, marker x-band and sequence alone and the stored text could not be checked at all - this is NOT a content disagreement"
+  },
+  {
+    "klal_id": 444,
+    "expected_gematria": "תמד",
+    "stored_gematria": "תמד",
+    "page": 164,
+    "content_match_ratio": null,
+    "marker_position": 253,
+    "status": "marker_found_content_mismatch",
+    "note": "positional-only (exact numeral) at page 164 token 253: the corpus stores no text for this klal (placeholder clean_text), so the marker was located by numeral, marker x-band and sequence alone and the stored text could not be checked at all - this is NOT a content disagreement"
+  }
+]
