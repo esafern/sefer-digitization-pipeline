@@ -330,6 +330,53 @@ def context_for(klal_id, word_index, klalim_by_id, window=vcv.CONTEXT_WINDOW_WOR
     return " ".join(words[start:end])
 
 
+def build_client(api_key):
+    """FIXED (round-4 audit, 2026-08-17): this used to be an inline
+    `genai.Client(api_key=api_key)` call in main(), missing the explicit
+    request-timeout fix (`http_options=types.HttpOptions(timeout=60000)`)
+    that vcv (verify_corrections_vision.py) and verify_witness_vision.py
+    both carry after a 2026-08-06 incident where a hung call blocked a run
+    for 20+ minutes at zero CPU with no retry ever triggering - a second,
+    independent instance of the exact drift class CLAUDE.md Lesson 13 /
+    round 3's shared-module finding already documents once (the
+    missing-prompt_hash cache-key bug). Pulled into its own function so the
+    fix is directly testable rather than only reachable via a live API call
+    from main()."""
+    return vcv.vac.make_client(api_key)
+
+
+def adjudicate_one(client, doc, klalim_by_id, c):
+    """Crop, adjudicate, and parse a single located candidate, returning the
+    result dict main() appends to `results`. Isolated per-candidate error
+    handling: FIXED (round-4 audit) - this used to be inline in main()'s
+    loop with no try/except at all, so a single candidate's total failure
+    (a persistent 429 exhausting every retry, a malformed response even the
+    lenient parser can't recover) crashed the whole batch and lost every
+    already-adjudicated result accumulated so far, since `results` is only
+    written to disk after the loop completes. Now caught here and recorded
+    as an error entry, matching vcv.main()'s own established shape, so one
+    bad candidate can't cost the rest of an already-paid-for run.
+
+    Also FIXED: this used to call vcv.extract_json_fields() directly,
+    skipping the strict-json.loads-first attempt every other caller of this
+    parse chain gets (vcv.main()'s own loop, via vcv.parse_decision_text()).
+    extract_json_fields's regex-based recovery doesn't handle a \\uXXXX
+    escape (see its own docstring) - strict json.loads does - so a
+    well-formed response using one would have been silently corrupted
+    rather than parsed correctly. vcv.parse_decision_text() is used here
+    instead, closing that gap.
+    """
+    try:
+        crop_bytes = vcv.crop_pdf_bounding_box(doc, c["page"], c["bbox"], padding=0.03)
+        context = context_for(c["klal_id"], c["word_index"], klalim_by_id)
+        raw = vcv.adjudicate(client, crop_bytes, c["original"], c["candidate"], context)
+        fields = vcv.parse_decision_text(raw)
+        return {**c, "vision_raw": raw, "vision_fields": fields}
+    except Exception as e:
+        print(f"  !! failed: {e}")
+        return {**c, "vision_raw": None, "vision_fields": None, "error": str(e)}
+
+
 # --- 3. Driver ----------------------------------------------------------
 
 
@@ -403,11 +450,10 @@ def main():
         return
 
     import fitz
-    from google import genai
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
         raise SystemExit("GEMINI_API_KEY not set")
-    client = genai.Client(api_key=api_key)
+    client = build_client(api_key)
     vcv.init_cache()
     doc = fitz.open(vcv.PDF_PATH)
 
@@ -415,11 +461,7 @@ def main():
     for i, c in enumerate(located):
         print(f"[{i+1}/{len(located)}] klal {c['klal_id']} w{c['word_index']} "
               f"{c['original']!r} vs {c['candidate']!r}")
-        crop_bytes = vcv.crop_pdf_bounding_box(doc, c["page"], c["bbox"], padding=0.03)
-        context = context_for(c["klal_id"], c["word_index"], klalim_by_id)
-        raw = vcv.adjudicate(client, crop_bytes, c["original"], c["candidate"], context)
-        fields = vcv.extract_json_fields(raw)
-        results.append({**c, "vision_raw": raw, "vision_fields": fields})
+        results.append(adjudicate_one(client, doc, klalim_by_id, c))
 
     for c in unlocated:
         results.append({**c, "vision_raw": None, "vision_fields": None, "error": "not located"})

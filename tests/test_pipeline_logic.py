@@ -1911,3 +1911,160 @@ def test_locate_word_band_fallback_refuses_a_footer_only_band():
     result = vfcv.locate_word_band_fallback(1, 900, regions, 1000, token_cache)
     assert result is None, "a footer-only band must be refused, not returned as a crop location"
     assert bcd.is_running_header([]) is False
+
+
+# --- vision_adjudication_common + round-4 fixes -----------------------------
+# Extracted 2026-08-17 (revalidation/refactor audit round 4): verify_
+# corrections_vision.py and verify_witness_vision.py used to each
+# hand-maintain nearly-identical crop/cache/JSON-recovery/retry machinery -
+# round 3 found direct, concrete proof this already caused drift (the
+# missing-prompt_hash cache-key bug, already fixed twice elsewhere, had to be
+# independently re-fixed a THIRD time in verify_witness_vision.py's own
+# copy). The cache-key/migration logic itself is already covered end-to-end
+# by the existing test_vision_cache_*/test_witness_vision_cache_* tests
+# above (both keep passing unchanged post-extraction, since vcv.init_cache/
+# get_cached_decision/cache_decision and vwv.init_cache/get_cached/cache_put
+# are now thin wrappers over the same shared functions those tests already
+# exercise). What's new here is the genuinely NEW logic this round added:
+# vcv.parse_decision_text() (a named, reusable strict-then-lenient parse
+# chain), and two round-4 bug fixes in verify_flagged_candidates_vision.py
+# (a missing client timeout, and a single candidate's total failure crashing
+# the whole batch).
+
+@requires_vision_deps
+def test_shared_cache_table_respects_has_model_column(tmp_path):
+    """verify_corrections_vision.py's corrections_cache carries a `model`
+    provenance column; verify_witness_vision.py's witness_cache never did -
+    a real, pre-existing schema difference, not accidental drift. The shared
+    factory in vision_adjudication_common.py must keep distinguishing the
+    two via has_model_column rather than silently converging them."""
+    db = str(tmp_path / "cache.db")
+    vcv.vac.init_cache_table(db, "with_model", "hash1", has_model_column=True)
+    vcv.vac.init_cache_table(db, "without_model", "hash1", has_model_column=False)
+    conn = sqlite3.connect(db)
+    with_cols = {r[1] for r in conn.execute("PRAGMA table_info(with_model)")}
+    without_cols = {r[1] for r in conn.execute("PRAGMA table_info(without_model)")}
+    conn.close()
+    assert "model" in with_cols
+    assert "model" not in without_cols
+
+
+@requires_vision_deps
+def test_shared_cache_get_put_roundtrip_without_model_column(tmp_path):
+    db = str(tmp_path / "cache.db")
+    vcv.vac.init_cache_table(db, "witness_cache", "hashA", has_model_column=False)
+    vcv.vac.put_cached_decision(db, "witness_cache", "hashA", b"PNG", "x", "y", "ctx",
+                                 '{"a":1}', has_model_column=False)
+    got = vcv.vac.get_cached_decision(db, "witness_cache", "hashA", b"PNG", "x", "y", "ctx")
+    assert got == '{"a":1}'
+    assert vcv.vac.get_cached_decision(db, "witness_cache", "hashB", b"PNG", "x", "y", "ctx") is None, (
+        "prompt_hash must still be part of the key when routed through the shared factory"
+    )
+
+
+@requires_vision_deps
+def test_make_client_sets_an_explicit_request_timeout(monkeypatch):
+    """Regression for the 2026-08-06 hung-call incident: a request with no
+    timeout can hang forever with no retry ever triggering, since the retry
+    loop only fires on a caught exception. Every vision-adjudication
+    script's client construction must set
+    http_options=types.HttpOptions(timeout=...) - this is the ONE place
+    that now does, shared by all three scripts."""
+    captured = {}
+
+    class FakeClient:
+        def __init__(self, api_key, http_options):
+            captured["api_key"] = api_key
+            captured["timeout"] = http_options.timeout
+
+    monkeypatch.setattr(vcv.vac.genai, "Client", FakeClient)
+    vcv.vac.make_client("test-key", timeout_ms=12345)
+    assert captured == {"api_key": "test-key", "timeout": 12345}
+
+
+@requires_vision_deps
+def test_parse_decision_text_prefers_strict_json_first():
+    """Strict json.loads must be tried before the regex-based lenient
+    extractor: extract_json_fields's unescape doesn't handle a \\uXXXX
+    escape (see its own docstring) and would corrupt it into literal text
+    (\\u05d0 -> the 5 literal characters 'u05d0') where strict json.loads
+    decodes it correctly to the real character. A well-formed response is
+    the common case and must never silently take the lossy path - this is
+    the exact gap round 4 found in verify_flagged_candidates_vision.py,
+    which used to call extract_json_fields directly and skip this tier."""
+    text = '{"selected_option": "A", "transcription_found": "test \\u05d0 escape", "confidence": 0.9, "reasoning": "y"}'
+    parsed = vcv.parse_decision_text(text)
+    assert parsed == json.loads(text)
+    assert parsed["transcription_found"] == "test א escape"
+
+
+@requires_vision_deps
+def test_parse_decision_text_falls_back_to_lenient_extraction_on_embedded_quotes():
+    text = '''{
+      "selected_option": "A",
+      "transcription_found": "סי' כ"ה",
+      "confidence": 0.93,
+      "reasoning": "the crop shows כ\\"ה clearly"
+    }'''
+    with pytest.raises(json.JSONDecodeError):
+        json.loads(text)
+    parsed = vcv.parse_decision_text(text)
+    assert parsed["selected_option"] == "A"
+    assert parsed["transcription_found"] == '''סי' כ"ה'''
+
+
+@requires_vision_deps
+def test_parse_decision_text_raises_when_nothing_recovers_a_decision():
+    with pytest.raises(ValueError):
+        vcv.parse_decision_text("not json at all, and no recognizable fields either")
+
+
+@requires_vision_deps
+def test_build_client_delegates_to_the_shared_timeout_fixed_constructor(monkeypatch):
+    """FOUND round 4: verify_flagged_candidates_vision.py's own client
+    construction used to be a bare `genai.Client(api_key=api_key)`, missing
+    the explicit request-timeout fix every sibling vision script carries
+    (see vision_adjudication_common.make_client) - a second, independent
+    instance of the drift class CLAUDE.md Lesson 13 / round 3's
+    shared-module finding already documents once (the missing-prompt_hash
+    cache-key bug). FIXED by routing through vcv.vac.make_client()."""
+    calls = []
+    monkeypatch.setattr(vcv.vac, "make_client", lambda api_key: calls.append(api_key) or "the-client")
+    result = vfcv.build_client("my-key")
+    assert calls == ["my-key"]
+    assert result == "the-client"
+
+
+@requires_vision_deps
+def test_adjudicate_one_parses_a_successful_response(monkeypatch):
+    monkeypatch.setattr(vcv, "crop_pdf_bounding_box", lambda doc, page, bbox, padding=0.03: b"PNG")
+    monkeypatch.setattr(
+        vcv, "adjudicate",
+        lambda client, crop, a, b, ctx: '{"selected_option":"B","transcription_found":"x",'
+                                        '"confidence":0.8,"reasoning":"r"}')
+    klalim_by_id = {1: {"clean_text": "א ב ג ד ה"}}
+    c = {"klal_id": 1, "word_index": 2, "original": "א", "candidate": "ב", "page": 1, "bbox": {}}
+    result = vfcv.adjudicate_one(None, None, klalim_by_id, c)
+    assert result["vision_fields"]["selected_option"] == "B"
+    assert "error" not in result
+
+
+@requires_vision_deps
+def test_adjudicate_one_records_an_error_instead_of_crashing_the_batch(monkeypatch):
+    """FOUND round 4: main()'s loop used to call crop/adjudicate/parse with
+    no try/except at all - a single candidate's total failure (e.g. every
+    model/retry exhausted) crashed the whole batch and discarded every
+    already-adjudicated (already-paid-for) result accumulated so far, since
+    results are only written to disk after the loop completes.
+    adjudicate_one() must catch that and record an error entry instead."""
+    monkeypatch.setattr(vcv, "crop_pdf_bounding_box", lambda doc, page, bbox, padding=0.03: b"PNG")
+
+    def boom(*a, **k):
+        raise RuntimeError("All models failed: timeout")
+
+    monkeypatch.setattr(vcv, "adjudicate", boom)
+    klalim_by_id = {1: {"clean_text": "א ב ג ד ה"}}
+    c = {"klal_id": 1, "word_index": 2, "original": "א", "candidate": "ב", "page": 1, "bbox": {}}
+    result = vfcv.adjudicate_one(None, None, klalim_by_id, c)
+    assert result["vision_fields"] is None
+    assert "All models failed" in result["error"]

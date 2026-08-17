@@ -20,17 +20,31 @@
 # stale documentation - CLAUDE.md Lesson "General standing caution.")
 #
 # Usage: python3 verify_witness_vision.py [--page 24 37 40]
+#
+# Crop/cache/JSON-recovery/retry machinery shared with pipeline/verify_
+# corrections_vision.py moved to pipeline/vision_adjudication_common.py
+# 2026-08-17 (revalidation round 4) - see that module's docstring. This was
+# round 3's (2026-08-16) reported-not-executed refactor opportunity, picked
+# up now that no live budget-sensitive Gemini job is running concurrently.
+# Round 3 found direct, concrete proof the duplication this removes was
+# already causing drift: this file's own witness_cache table was missing
+# prompt_hash from its key, the exact gap already fixed twice in sibling
+# scripts before being found here a third time.
 import argparse
 import json
 import os
 import re
-import sqlite3
-import time
+import sys
 import hashlib
 
 import fitz  # PyMuPDF
-from google import genai
-from google.genai import types
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "pipeline"))
+import vision_adjudication_common as vac  # noqa: E402
+from vision_adjudication_common import (  # noqa: E402,F401 - re-exported, see below
+    sanitize_json,
+    unescape_json_fragment,
+)
 
 # Moved one level deeper (pipeline/ or tools/) 2026-08-16 - REPO now goes up
 # two levels, not one, to keep resolving to the actual repo root where
@@ -39,6 +53,7 @@ REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PDF_PATH = os.path.join(REPO, "berlin_square_corrected.pdf")
 QUEUE_PATH = os.path.join(REPO, "reconstruction_witness_queue.json")
 CACHE_DB = os.path.join(REPO, "witness_vision_cache.db")
+CACHE_TABLE = "witness_cache"
 DOCAI_DIR = os.path.join(REPO, "docai_word_boxes")
 
 CONTEXT_WINDOW = 12  # raw docai tokens on each side, matching api_witness_context()
@@ -95,120 +110,33 @@ PROMPT_HASH = hashlib.sha256(PROMPT_TEMPLATE.encode("utf-8")).hexdigest()[:16]
 # shape. A future wording edit to PROMPT_TEMPLATE above would have
 # silently kept serving pre-edit answers forever. Migrated, not dropped:
 # existing rows are real, already-paid-for Gemini calls (419/419 per this
-# module's own docstring). ----------
+# module's own docstring).
+#
+# init_cache/get_cached/cache_put/crop_pdf_bounding_box are thin wrappers
+# over vision_adjudication_common (the cache logic itself, including the
+# prompt_hash migration above, moved there 2026-08-17 - see that module's
+# docstring) - kept as module-level functions reading CACHE_DB/PROMPT_HASH
+# fresh from this module's own globals on every call, so
+# `monkeypatch.setattr(vwv, "CACHE_DB", ...)` in tests keeps working exactly
+# as before this extraction. witness_cache has no `model` provenance column
+# (has_model_column=False below) - a real, pre-existing schema difference
+# from verify_corrections_vision.py's corrections_cache, not accidental
+# drift, preserved here rather than papered over. ----------
 def init_cache():
-    conn = sqlite3.connect(CACHE_DB)
-    conn.execute("PRAGMA journal_mode=WAL")
-    conn.execute(
-        "CREATE TABLE IF NOT EXISTS witness_cache ("
-        "crop_hash TEXT NOT NULL, word_a TEXT NOT NULL, word_b TEXT NOT NULL, "
-        "context_hash TEXT NOT NULL, prompt_hash TEXT NOT NULL, decision_json TEXT, "
-        "PRIMARY KEY (crop_hash, word_a, word_b, context_hash, prompt_hash))"
-    )
-    _migrate_add_prompt_hash(conn)
-    conn.commit()
-    conn.close()
-
-
-def _migrate_add_prompt_hash(conn):
-    """Rebuild a pre-fix 4-column witness_cache into the 5-column
-    prompt-hash-keyed schema, back-filling the CURRENT PROMPT_HASH rather
-    than dropping every row - mirrors verify_corrections_vision.py's
-    _migrate_add_prompt_hash exactly (see that function's docstring for the
-    full reasoning). Back-filling is sound here: PROMPT_TEMPLATE above is
-    unchanged from when this script was originally written - only the
-    cache KEY is changing in this fix, not the question any existing row
-    was an answer to."""
-    cols = {r[1] for r in conn.execute("PRAGMA table_info(witness_cache)")}
-    if "prompt_hash" in cols:
-        return
-    conn.execute("ALTER TABLE witness_cache RENAME TO witness_cache_pre_prompt_hash")
-    conn.execute(
-        "CREATE TABLE witness_cache ("
-        "crop_hash TEXT NOT NULL, word_a TEXT NOT NULL, word_b TEXT NOT NULL, "
-        "context_hash TEXT NOT NULL, prompt_hash TEXT NOT NULL, decision_json TEXT, "
-        "PRIMARY KEY (crop_hash, word_a, word_b, context_hash, prompt_hash))"
-    )
-    conn.execute(
-        "INSERT INTO witness_cache "
-        "(crop_hash, word_a, word_b, context_hash, prompt_hash, decision_json) "
-        "SELECT crop_hash, word_a, word_b, context_hash, ?, decision_json "
-        "FROM witness_cache_pre_prompt_hash",
-        (PROMPT_HASH,),
-    )
-    n = conn.execute("SELECT COUNT(*) FROM witness_cache").fetchone()[0]
-    print(f"  cache migrated to prompt-hash-keyed schema: {n} row(s) carried over "
-          f"under prompt_hash {PROMPT_HASH} (old table kept as "
-          f"witness_cache_pre_prompt_hash)")
-
-
-_NONE_SENTINEL = "\x00NONE\x00"
+    vac.init_cache_table(CACHE_DB, CACHE_TABLE, PROMPT_HASH, has_model_column=False)
 
 
 def get_cached(crop_bytes, word_a, word_b, context):
-    crop_hash = hashlib.sha256(crop_bytes).hexdigest()
-    context_hash = hashlib.sha256(context.encode("utf-8")).hexdigest()
-    conn = sqlite3.connect(CACHE_DB, timeout=10.0)
-    row = conn.execute(
-        "SELECT decision_json FROM witness_cache WHERE crop_hash=? AND word_a=? "
-        "AND word_b=? AND context_hash=? AND prompt_hash=?",
-        (crop_hash, word_a or _NONE_SENTINEL, word_b or _NONE_SENTINEL, context_hash, PROMPT_HASH),
-    ).fetchone()
-    conn.close()
-    return row[0] if row else None
+    return vac.get_cached_decision(CACHE_DB, CACHE_TABLE, PROMPT_HASH, crop_bytes, word_a, word_b, context)
 
 
 def cache_put(crop_bytes, word_a, word_b, context, decision_json):
-    crop_hash = hashlib.sha256(crop_bytes).hexdigest()
-    context_hash = hashlib.sha256(context.encode("utf-8")).hexdigest()
-    conn = sqlite3.connect(CACHE_DB, timeout=10.0)
-    conn.execute(
-        "INSERT OR REPLACE INTO witness_cache "
-        "(crop_hash, word_a, word_b, context_hash, prompt_hash, decision_json) VALUES (?,?,?,?,?,?)",
-        (crop_hash, word_a or _NONE_SENTINEL, word_b or _NONE_SENTINEL, context_hash,
-         PROMPT_HASH, decision_json),
-    )
-    conn.commit()
-    conn.close()
+    vac.put_cached_decision(CACHE_DB, CACHE_TABLE, PROMPT_HASH, crop_bytes, word_a, word_b, context,
+                             decision_json, has_model_column=False)
 
 
 def crop_pdf_bounding_box(doc, page_num_1indexed, bbox, padding=0.02):
-    page = doc.load_page(page_num_1indexed - 1)
-    rect_page = page.rect
-    width, height = rect_page.width, rect_page.height
-    xmin = max(0.0, bbox["x1"] - padding) * width
-    ymin = max(0.0, bbox["y1"] - padding) * height
-    xmax = min(1.0, bbox["x2"] + padding) * width
-    ymax = min(1.0, bbox["y2"] + padding) * height
-    pix = page.get_pixmap(clip=fitz.Rect(xmin, ymin, xmax, ymax), dpi=300)
-    return pix.tobytes("png")
-
-
-def sanitize_json(text):
-    return re.sub(r'\\(?!["\\/bfnrtu])', "", text)
-
-
-_JSON_ESCAPES = {'"': '"', "\\": "\\", "/": "/", "b": "\b", "f": "\f", "n": "\n", "r": "\r", "t": "\t"}
-
-
-def unescape_json_fragment(s):
-    """Undo JSON string escape sequences (\\" -> ", \\n -> newline, etc.) in a
-    raw regex-captured substring that was extracted WITHOUT going through
-    json.loads. FIXED 2026-08-14: parse_decision_lenient used to return
-    captured groups verbatim, which is wrong whenever the SAME response
-    escaped some gershayim occurrences correctly (as '\\"') and left others
-    raw (as '"') - the raw ones are why we're in this fallback at all, but
-    the correctly-escaped ones need unescaping same as strict json.loads
-    would do, and returning them verbatim left literal backslashes baked
-    into the data. Confirmed real: klal 30 tok 750/835 and klal 75 tok 555's
-    already-recovered `reasoning` fields had '\\"' (backslash+quote, two
-    literal characters) where the correct text has a single '"' - e.g.
-    'הרא\\"ש' instead of 'הרא"ש'. A raw unescaped '"' has no backslash to
-    match, so it's untouched and stays correct; a properly-escaped '\\"'
-    becomes '"'. Unrecognized backslash sequences drop the backslash,
-    matching sanitize_json's existing behavior; \\uXXXX is not handled -
-    no observed case needs it and it's unlikely in Hebrew source text."""
-    return re.sub(r"\\(.)", lambda m: _JSON_ESCAPES.get(m.group(1), m.group(1)), s, flags=re.DOTALL)
+    return vac.crop_pdf_bounding_box(doc, page_num_1indexed, bbox, padding=padding, dpi=300)
 
 
 def parse_decision_lenient(text):
@@ -270,11 +198,6 @@ def build_context(page, token_index):
 
 
 def adjudicate(client, crop_bytes, docai_reading, tesseract_reading, context):
-    cached = get_cached(crop_bytes, docai_reading, tesseract_reading, context)
-    if cached:
-        print("  -> cache hit")
-        return cached
-
     # Same lesson as verify_corrections_vision.py finding 7: when one side
     # is None (an 'insert' opcode - DocAI has NOTHING at this position but
     # Tesseract found real text), asking the model to pick between a real
@@ -288,28 +211,12 @@ def adjudicate(client, crop_bytes, docai_reading, tesseract_reading, context):
     option_b_desc = f'"{tesseract_reading}"' if tesseract_reading else "(nothing - Tesseract found no text here either)"
 
     prompt = PROMPT_TEMPLATE.format(context=context, option_a_desc=option_a_desc, option_b_desc=option_b_desc)
-    models_to_try = ["gemini-3.6-flash", "gemini-3.5-flash"]
-    max_retries = 3
-    last_err = None
-    for model_name in models_to_try:
-        for attempt in range(max_retries):
-            try:
-                response = client.models.generate_content(
-                    model=model_name,
-                    contents=[types.Part.from_bytes(data=crop_bytes, mime_type="image/png"), prompt],
-                    config=types.GenerateContentConfig(response_mime_type="application/json"),
-                )
-                print(f"  -> live call to {model_name} ok")
-                cache_put(crop_bytes, docai_reading, tesseract_reading, context, response.text)
-                return response.text
-            except Exception as e:
-                last_err = e
-                print(f"  -> {model_name} attempt {attempt} failed: {e}")
-                if "503" in str(e) or "429" in str(e):
-                    time.sleep((2 ** attempt) * 2)
-                else:
-                    break
-    raise RuntimeError(f"All models failed: {last_err}")
+
+    return vac.adjudicate_with_retry(
+        client, crop_bytes, prompt,
+        cache_get=lambda: get_cached(crop_bytes, docai_reading, tesseract_reading, context),
+        cache_put=lambda text, model_name: cache_put(crop_bytes, docai_reading, tesseract_reading, context, text),
+    )
 
 
 def main():
@@ -321,7 +228,7 @@ def main():
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
         raise SystemExit("GEMINI_API_KEY not set")
-    client = genai.Client(api_key=api_key, http_options=types.HttpOptions(timeout=60000))
+    client = vac.make_client(api_key)
 
     data = json.load(open(QUEUE_PATH, encoding="utf-8"))
     queue = data["queue"]

@@ -6,43 +6,33 @@
 # adjudicate_conflict_with_gemini; orchestrator.py was archived 2026-08-11 as
 # dead code carrying 4 real bugs, so this is now the only live vision
 # adjudicator - do not treat it as a copy of anything.)
+#
+# Crop/cache/JSON-recovery/retry machinery shared with tools/verify_witness_
+# vision.py moved to vision_adjudication_common.py 2026-08-17 (revalidation
+# round 4) - see that module's docstring for why (round 3 found the
+# missing-prompt_hash cache-key bug, already fixed here and in
+# propose_punctuation_part1.py, had to be independently re-fixed a THIRD time
+# in verify_witness_vision.py's own hand-maintained copy of this same
+# machinery - direct proof of the drift CLAUDE.md Lesson 13 warns about).
+# sanitize_json/unescape_json_fragment/crop_pdf_bounding_box are re-exported
+# here (not just imported privately) so `import verify_corrections_vision as
+# vcv; vcv.unescape_json_fragment(...)` - the pattern tools/verify_flagged_
+# candidates_vision.py and this file's own tests already use - keeps working
+# unchanged.
 import json
 import os
 import sys
-import time
 import hashlib
-import sqlite3
 
 import re
 
 import fitz  # PyMuPDF
-from google import genai
-from google.genai import types
 
-
-def sanitize_json(text):
-    # Gemini occasionally emits invalid JSON escapes (e.g. \' around a geresh);
-    # strip a backslash unless it precedes a valid JSON escape character.
-    return re.sub(r'\\(?!["\\/bfnrtu])', '', text)
-
-
-_JSON_ESCAPES = {'"': '"', "\\": "\\", "/": "/", "b": "\b", "f": "\f",
-                 "n": "\n", "r": "\r", "t": "\t"}
-
-
-def unescape_json_fragment(s):
-    # A response only reaches extract_json_fields because SOME gershayim in it
-    # were emitted raw; the same response routinely escapes OTHER occurrences
-    # correctly as \", and a regex capture returns both verbatim. Returning the
-    # group as-is therefore bakes a literal backslash into the data wherever the
-    # model got it right - e.g. 'כ\"ה' where the text is 'כ"ה'. Confirmed
-    # 2026-08-14 against adjudication_cache.db: all 5 rows that need this
-    # fallback carry that artifact in `reasoning`. Same bug and same fix as
-    # verify_witness_vision.py's parse_decision_lenient (fixed 2026-08-14;
-    # PROJECT-STATUS.md flagged this file's parser as "not yet audited for the
-    # same gap"). A raw unescaped " has no backslash to match and is left
-    # alone; \uXXXX is not handled, as in the witness script.
-    return re.sub(r"\\(.)", lambda m: _JSON_ESCAPES.get(m.group(1), m.group(1)), s, flags=re.DOTALL)
+import vision_adjudication_common as vac
+from vision_adjudication_common import (  # noqa: F401 - re-exported, see above
+    sanitize_json,
+    unescape_json_fragment,
+)
 
 
 def extract_json_fields(text):
@@ -145,155 +135,84 @@ PROMPT_HASH = hashlib.sha256(PROMPT_TEMPLATE.encode("utf-8")).hexdigest()[:16]
 # Uses its own table (not the `cache` table the archived orchestrator.py wrote,
 # which still sits in this same .db file) and keys on everything that can
 # change the right answer: (crop_hash, word_a, word_b, context_hash,
-# prompt_hash) - see init_cache for the last two. A bare crop_hash key
-# is wrong here: the same crop gets re-cropped across sessions to answer
-# different A/B comparisons as `clean_text` changes (fixes, reverts), and a
-# crop_hash-only cache silently returns a decision for the *wrong* word pair -
-# confirmed 2026-08-05: migrating the old table found 217 word-pair rows
-# collapsed onto only 140 unique (crop_hash, word_a, word_b) triples, i.e. 77
-# decisions had already been silently overwritten by an unrelated comparison
-# that happened to share a crop.
+# prompt_hash) - see vision_adjudication_common.init_cache_table for the last
+# two. A bare crop_hash key is wrong here: the same crop gets re-cropped
+# across sessions to answer different A/B comparisons as `clean_text` changes
+# (fixes, reverts), and a crop_hash-only cache silently returns a decision
+# for the *wrong* word pair - confirmed 2026-08-05: migrating the old table
+# found 217 word-pair rows collapsed onto only 140 unique (crop_hash, word_a,
+# word_b) triples, i.e. 77 decisions had already been silently overwritten by
+# an unrelated comparison that happened to share a crop.
+#
+# Deliberately NOT keyed on the model: models_to_try is a FALLBACK chain, so
+# the same question can legitimately be answered by either model depending on
+# which was reachable that minute. Keying on it would evict good answers
+# whenever the primary model came back up. The model that answered is
+# recorded in a non-key `model` column instead (has_model_column=True below),
+# for provenance - a column verify_witness_vision.py's witness_cache never
+# had, a real pre-existing schema difference the shared factory takes as a
+# parameter rather than papering over.
+#
+# These are thin wrappers (not the cache logic itself, moved to
+# vision_adjudication_common.py 2026-08-17 - see that module's docstring)
+# kept as module-level functions, reading CACHE_DB/PROMPT_HASH fresh from
+# this module's own globals on every call, so `monkeypatch.setattr(vcv,
+# "CACHE_DB", ...)` in tests keeps working exactly as before this extraction.
+CACHE_TABLE = "corrections_cache"
+
+
 def init_cache():
-    conn = sqlite3.connect(CACHE_DB)
-    # WAL mode lets readers and the writer proceed concurrently instead of
-    # blocking on SQLite's default rollback-journal lock - this script opens
-    # a fresh connection per cache read/write and was seeing frequent
-    # "database is locked" errors under the default journal mode, each one
-    # discarding an already-successful API response and forcing a re-call.
-    conn.execute("PRAGMA journal_mode=WAL")
-    # context_hash added 2026-08-10 (PROJECT-STATUS.md "sends the wrong
-    # surrounding sentence context"): the cache key used to be just
-    # (crop_hash, word_a, word_b), but the prompt the model actually saw also
-    # includes `context` - once context was fixed to be a real local window
-    # instead of a fixed head-of-klal slice, a key that doesn't cover context
-    # would keep silently returning the OLD wrong-context decision forever,
-    # the exact cache-key-must-cover-everything-that-changes-the-answer bug
-    # this project already fixed once for adjudication_cache.db (see
-    # CLAUDE.md "Single source of truth" / Lesson 12). Old rows under the
-    # pre-fix 3-column schema are incompatible and were dropped, not
-    # migrated - this is a fully regenerable cache, not source data.
-    # prompt_hash added 2026-08-14, closing the last uncovered part of "the
-    # question": (crop, word_a, word_b, context) are the per-candidate inputs,
-    # but the PROMPT TEMPLATE around them is just as much part of what was
-    # asked, and editing it silently kept serving answers to the old question
-    # forever. Not hypothetical - the template WAS edited 2026-08-12
-    # (option_b_desc, so a delete-opcode candidate stops being asked to compare
-    # the pixels against the literal string "None"), and that fix only took
-    # effect because the unrelated context_hash schema change had already
-    # dropped every row two days earlier. The same edit made today would have
-    # been a silent no-op. PROJECT-STATUS.md tracks this exact gap as an open
-    # risk for propose_punctuation_part1.py; it was live here too, in the
-    # pipeline that actually runs.
-    #
-    # Deliberately NOT keyed on the model: models_to_try is a FALLBACK chain,
-    # so the same question can legitimately be answered by either model
-    # depending on which was reachable that minute. Keying on it would evict
-    # good answers whenever the primary model came back up. The model that
-    # answered is recorded in a non-key column instead, for provenance.
-    conn.execute(
-        "CREATE TABLE IF NOT EXISTS corrections_cache ("
-        "crop_hash TEXT NOT NULL, word_a TEXT NOT NULL, word_b TEXT NOT NULL, "
-        "context_hash TEXT NOT NULL, prompt_hash TEXT NOT NULL, model TEXT, "
-        "decision_json TEXT, PRIMARY KEY (crop_hash, word_a, word_b, context_hash, prompt_hash))"
-    )
-    _migrate_add_prompt_hash(conn)
-    conn.commit()
-    conn.close()
-
-
-def _migrate_add_prompt_hash(conn):
-    """Rebuild a pre-2026-08-14 4-column corrections_cache into the 5-column
-    keyed schema, back-filling the CURRENT prompt hash rather than dropping
-    every row (which is what the 2026-08-10 context_hash change did, at the
-    cost of a full re-run of every candidate against the API).
-
-    Back-filling asserts the surviving rows were produced under today's
-    template. Checked before doing it: all 29 live delete-opcode candidates
-    come back A or UNCERTAIN with reasoning that discusses the actual pixels,
-    and none carries the pre-2026-08-12 "Neither Option A nor Option B
-    ('None')" signature that the template edit was made to remove. Even if a
-    row somehow predated it, back-filling is strictly no worse than the
-    status quo - the unmigrated code served those rows with no prompt
-    protection at all - and it makes every FUTURE template edit invalidate
-    correctly, which is the point.
-    """
-    cols = {r[1] for r in conn.execute("PRAGMA table_info(corrections_cache)")}
-    if "prompt_hash" in cols:
-        return
-    conn.execute("ALTER TABLE corrections_cache RENAME TO corrections_cache_pre_prompt_hash")
-    conn.execute(
-        "CREATE TABLE corrections_cache ("
-        "crop_hash TEXT NOT NULL, word_a TEXT NOT NULL, word_b TEXT NOT NULL, "
-        "context_hash TEXT NOT NULL, prompt_hash TEXT NOT NULL, model TEXT, "
-        "decision_json TEXT, PRIMARY KEY (crop_hash, word_a, word_b, context_hash, prompt_hash))"
-    )
-    conn.execute(
-        "INSERT INTO corrections_cache "
-        "(crop_hash, word_a, word_b, context_hash, prompt_hash, model, decision_json) "
-        "SELECT crop_hash, word_a, word_b, context_hash, ?, NULL, decision_json "
-        "FROM corrections_cache_pre_prompt_hash",
-        (PROMPT_HASH,),
-    )
-    n = conn.execute("SELECT COUNT(*) FROM corrections_cache").fetchone()[0]
-    print(f"  cache migrated to prompt-hash-keyed schema: {n} row(s) carried over "
-          f"under prompt_hash {PROMPT_HASH} (old table kept as "
-          f"corrections_cache_pre_prompt_hash)")
-
-
-_NONE_SENTINEL = "\x00NONE\x00"  # word_a/word_b is NOT NULL; opcode delete/insert
-                                  # legitimately has one side as None (e.g. "X" vs
-                                  # nothing) - coerce rather than relax the schema.
+    vac.init_cache_table(CACHE_DB, CACHE_TABLE, PROMPT_HASH, has_model_column=True)
 
 
 def get_cached_decision(crop_bytes, word_a, word_b, context):
-    crop_hash = hashlib.sha256(crop_bytes).hexdigest()
-    context_hash = hashlib.sha256(context.encode("utf-8")).hexdigest()
-    conn = sqlite3.connect(CACHE_DB, timeout=10.0)
-    row = conn.execute(
-        "SELECT decision_json FROM corrections_cache WHERE crop_hash = ? AND word_a = ? "
-        "AND word_b = ? AND context_hash = ? AND prompt_hash = ?",
-        (crop_hash, word_a or _NONE_SENTINEL, word_b or _NONE_SENTINEL, context_hash, PROMPT_HASH),
-    ).fetchone()
-    conn.close()
-    return row[0] if row else None
+    return vac.get_cached_decision(CACHE_DB, CACHE_TABLE, PROMPT_HASH, crop_bytes, word_a, word_b, context)
 
 
 def cache_decision(crop_bytes, word_a, word_b, context, decision_json, model=None):
-    crop_hash = hashlib.sha256(crop_bytes).hexdigest()
-    context_hash = hashlib.sha256(context.encode("utf-8")).hexdigest()
-    conn = sqlite3.connect(CACHE_DB, timeout=10.0)
-    conn.execute(
-        "INSERT OR REPLACE INTO corrections_cache "
-        "(crop_hash, word_a, word_b, context_hash, prompt_hash, model, decision_json) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?)",
-        (crop_hash, word_a or _NONE_SENTINEL, word_b or _NONE_SENTINEL, context_hash,
-         PROMPT_HASH, model, decision_json),
-    )
-    conn.commit()
-    conn.close()
+    vac.put_cached_decision(CACHE_DB, CACHE_TABLE, PROMPT_HASH, crop_bytes, word_a, word_b, context,
+                             decision_json, model=model, has_model_column=True)
 
 
 def crop_pdf_bounding_box(doc, page_num_1indexed, bbox, padding=CROP_PADDING):
-    page = doc.load_page(page_num_1indexed - 1)
-    rect_page = page.rect
-    width, height = rect_page.width, rect_page.height
+    return vac.crop_pdf_bounding_box(doc, page_num_1indexed, bbox, padding=padding, dpi=CROP_DPI)
 
-    xmin = max(0.0, bbox["x1"] - padding) * width
-    ymin = max(0.0, bbox["y1"] - padding) * height
-    xmax = min(1.0, bbox["x2"] + padding) * width
-    ymax = min(1.0, bbox["y2"] + padding) * height
 
-    crop_rect = fitz.Rect(xmin, ymin, xmax, ymax)
-    pix = page.get_pixmap(clip=crop_rect, dpi=CROP_DPI)
-    return pix.tobytes("png")
+def parse_decision_text(decision_text):
+    """Recover the JSON decision dict from a raw Gemini response robustly:
+    strict JSON first (needed for correct handling of any \\uXXXX escape,
+    which extract_json_fields's regex-based fallback below does not attempt -
+    see its own docstring), then a backslash-sanitized retry (sanitize_json),
+    then full field-by-field lenient extraction (extract_json_fields) as a
+    last resort for a response with an embedded unescaped quote (Hebrew
+    gershayim inside transcription_found/reasoning). Raises ValueError if
+    even that fails - callers decide how to record a total parse failure.
+
+    Factored out 2026-08-17 (revalidation round 4) from what used to be
+    inline in main()'s loop, so tools/verify_flagged_candidates_vision.py -
+    which already reuses this module's crop/adjudicate/cache functions
+    directly per its own docstring - can reuse the SAME robust chain instead
+    of calling extract_json_fields directly and skipping the strict-JSON-
+    first attempt entirely (confirmed during this round: that gap meant a
+    well-formed response containing a \\uXXXX escape, however unlikely in
+    practice, would have been silently corrupted rather than parsed
+    correctly - the exact risk this chain's ordering exists to avoid).
+    """
+    try:
+        return json.loads(decision_text)
+    except json.JSONDecodeError:
+        pass
+    try:
+        return json.loads(sanitize_json(decision_text))
+    except json.JSONDecodeError:
+        pass
+    decision = extract_json_fields(decision_text)
+    if decision is None:
+        raise ValueError(f"could not parse decision JSON: {decision_text[:200]!r}")
+    return decision
 
 
 def adjudicate(client, crop_bytes, option_a, option_b, full_context):
-    cached = get_cached_decision(crop_bytes, option_a, option_b, full_context)
-    if cached:
-        print("  -> cache hit")
-        return cached
-
     # A delete-opcode candidate has option_b is None: the corpus has NO
     # text at all at this position, and DocAI independently proposed
     # option_a as text that belongs there. The old prompt embedded the
@@ -314,35 +233,12 @@ def adjudicate(client, crop_bytes, option_a, option_b, full_context):
     prompt = PROMPT_TEMPLATE.format(
         full_context=full_context, option_a=option_a, option_b_desc=option_b_desc)
 
-    # gemini-2.5-flash removed 2026-08-05: permanently 404s ("no longer
-    # available to new users"), not transient - it was silently eating a
-    # retry slot on every fallback path instead of ever actually helping.
-    models_to_try = ["gemini-3.6-flash", "gemini-3.5-flash"]
-    max_retries = 3
-    last_err = None
-    for model_name in models_to_try:
-        for attempt in range(max_retries):
-            try:
-                response = client.models.generate_content(
-                    model=model_name,
-                    contents=[
-                        types.Part.from_bytes(data=crop_bytes, mime_type="image/png"),
-                        prompt,
-                    ],
-                    config=types.GenerateContentConfig(response_mime_type="application/json"),
-                )
-                print(f"  -> live call to {model_name} ok")
-                cache_decision(crop_bytes, option_a, option_b, full_context, response.text,
-                                model=model_name)
-                return response.text
-            except Exception as e:
-                last_err = e
-                print(f"  -> {model_name} attempt {attempt} failed: {e}")
-                if "503" in str(e) or "429" in str(e):
-                    time.sleep((2 ** attempt) * 2)
-                else:
-                    break
-    raise RuntimeError(f"All models failed: {last_err}")
+    return vac.adjudicate_with_retry(
+        client, crop_bytes, prompt,
+        cache_get=lambda: get_cached_decision(crop_bytes, option_a, option_b, full_context),
+        cache_put=lambda text, model_name: cache_decision(
+            crop_bytes, option_a, option_b, full_context, text, model=model_name),
+    )
 
 
 def main():
@@ -350,12 +246,13 @@ def main():
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
         raise SystemExit("GEMINI_API_KEY not set")
-    # Explicit request timeout: a hung call (observed 2026-08-06 - one crop's
-    # request never returned and never raised, blocking the whole run for
-    # 20+ minutes at zero CPU with no retry ever triggering, since the retry
-    # logic only fires on a caught exception) needs to fail loudly so the
-    # existing retry/backoff loop can actually run instead of hanging forever.
-    client = genai.Client(api_key=api_key, http_options=types.HttpOptions(timeout=60000))
+    # Explicit request timeout (see vision_adjudication_common.make_client):
+    # a hung call (observed 2026-08-06 - one crop's request never returned
+    # and never raised, blocking the whole run for 20+ minutes at zero CPU
+    # with no retry ever triggering, since the retry logic only fires on a
+    # caught exception) needs to fail loudly so the existing retry/backoff
+    # loop can actually run instead of hanging forever.
+    client = vac.make_client(api_key)
 
     candidates_path = sys.argv[1] if len(sys.argv) > 1 else CANDIDATES_PATH
     out_path = sys.argv[2] if len(sys.argv) > 2 else OUT_PATH
@@ -398,15 +295,7 @@ def main():
             crop_bytes = crop_pdf_bounding_box(doc, c["page"], c["bbox"])
             print(f"Klal {c['klal_id']} page {c['page']}: {c['original_word']!r} vs {c['corrected_word']!r}")
             decision_text = adjudicate(client, crop_bytes, c["original_word"], c["corrected_word"], context)
-            try:
-                decision = json.loads(decision_text)
-            except json.JSONDecodeError:
-                try:
-                    decision = json.loads(sanitize_json(decision_text))
-                except json.JSONDecodeError:
-                    decision = extract_json_fields(decision_text)
-                    if decision is None:
-                        raise
+            decision = parse_decision_text(decision_text)
         except Exception as e:
             print(f"  !! failed: {e}")
             decision = {"selected_option": "ERROR", "transcription_found": None, "confidence": None, "reasoning": str(e)}
