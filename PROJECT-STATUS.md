@@ -84,7 +84,10 @@ session misidentified it - corrected here, not repeated): **klal 183**
    heb_rashi.txt` and `livorno_part1_heb_rashi.txt` (scratch space, not
    committed - regenerable from `/tmp/heb_rashi_full_run/run_ocr.sh`).
    Purpose: enable a full-corpus diff against `part1.json`, not just
-   sampled pages.
+   sampled pages. **DONE/REVIEWED 2026-08-17, see the CORRECTION entry
+   below (`heb_rashi` on Berlin) - the run completed but is NOT usable as
+   a full-corpus witness on either scan; no diff against `part1.json` was
+   built, it would have been diffing against near-garbage.**
 2. Semantic-plausibility spot-check ROUND 3 - a background agent given the
    full round-1/round-2 methodology and told to draw a fresh ~20% sample
    (`seed 20260817`) excluding both prior rounds' known klalim (33 + 55 =
@@ -279,6 +282,60 @@ distinguish... in Sotah." Visual and linguistic evidence agree (Lesson
 **Verification**: `git diff part1.json` shows exactly the two changes
 described (klal 65 truncated, klal 66 restructured + the one-word fix).
 `./rebuild_all.sh` clean, 131/131 pytest. No other klal touched.
+
+### CORRECTION 2026-08-17 — `heb_rashi`'s full-Part-1 Berlin run reviewed: near-total garbage, NOT the "works fine on square print too" bonus finding from 2026-08-16. That finding does not generalize to the actual Berlin scan this pipeline uses.
+
+Per user request ("review heb_rashi on part 1"). Read the completed full-run
+output (`/tmp/heb_rashi_full_run/berlin_part1_heb_rashi.txt`,
+`livorno_part1_heb_rashi.txt`) and immediately noticed the Berlin output
+looked like near-total letter salad, not the "roughly comparable to
+standard `heb`" quality the 2026-08-16 "bonus finding" reported. Verified
+directly rather than trusting the visual impression (Lesson 2):
+
+- **Confirmed the rendered source image itself is fine**, ruling out a
+  rendering/pipeline bug before blaming the OCR model: `berlin/page_014.png`
+  (300 DPI, from `run_ocr.sh`) is pristine, right-side-up, correctly-ordered,
+  clearly legible square print - matches klal 1's known opening text exactly
+  by eye.
+- **Re-ran Tesseract directly on that exact image, both models, output to
+  files (not piped)**: `heb_rashi` produced `י - ם ת ש כ י` / `ל כלני וגלף` -
+  meaningless. Standard `heb` on the SAME image produced `אי תניא תניא +
+  מדברי רש"י ז'ל בפ"ב דנדרים ייט ב' משמע רלאו לדחויי ליח קא מכוין` - highly
+  legible, closely matching part1.json's actual klal 1 text.
+- **Confirmed systematic, not a one-page fluke**: repeated the same
+  `heb_rashi` vs `heb` comparison on pages 20, 40, 60 (spread across Part
+  1). `heb_rashi` produced unreadable output on every one; `heb` produced
+  legible, largely-correct Hebrew on every one.
+- **Livorno (genuine Rashi script) checked too, for completeness**: sampled
+  pages 50/150/250. Neither model produces usable output on the body text
+  at full-corpus scale - both garbage - though `heb_rashi` gets the running
+  header line right more often. This re-confirms (does not overturn) the
+  earlier single-page finding that Rashi script remains genuinely hard for
+  both tools; no new claim here.
+
+**What this corrects**: the 2026-08-16 "bonus finding" entry ("`heb_rashi`
+ALSO produced good output on the SQUARE test page... suggests `heb_rashi`
+might be usable as a single model across both this project's script types")
+was tested against `Hebrewbooks_org_14122.pdf` - a DIFFERENT square scan,
+not `berlin_square_corrected.pdf`, the scan this pipeline actually OCRs.
+That entry already explicitly hedged this ("worth confirming on more
+samples before relying on it") - this is that confirmation, and it comes
+back negative. **`heb_rashi` is not a viable OCR choice for the Berlin
+scan specifically**, despite performing reasonably on at least two OTHER
+square-typeface scans of this same work (Przemyśl, `Hebrewbooks_org_14122`)
+tested earlier this session and last. The same standing lesson already in
+CLAUDE.md (Parts 2-3 not inheriting Part 1's pipeline quality) applies at
+a smaller scale here too: OCR-tool performance on one scan of a work does
+not transfer to a different physical scan/copy of the "same" typeface,
+even nominally identical square Hebrew print - each scan needs its own
+direct verification, not an assumption from a different copy.
+
+**Conclusion for the original purpose (enable a full-corpus diff against
+`part1.json`)**: not built, and correctly so - diffing `part1.json` against
+near-garbage OCR would produce a wall of noise, not real signal. No further
+action planned on `heb_rashi` for Berlin. DocAI remains this pipeline's
+correction-candidate source for Berlin (already confirmed clean on klal 183
+in the entry above) and is unaffected by this finding.
 
 ### CORRECTION 2026-08-17 — the "near-perfect" heb_rashi claim on the square Przemyśl scan overclaimed; word-level errors verified; Google Cloud Vision tested and found WORSE
 
@@ -569,6 +626,15 @@ comparing against standard Tesseract `heb`:
   letterforms) - but suggests `heb_rashi` might be usable as a single
   model across both this project's script types rather than needing to
   switch, worth confirming on more samples before relying on it.
+  **CORRECTED 2026-08-17** (see that date's CORRECTION entry near the top
+  of this file's handoff): confirmed on more samples exactly as flagged
+  here as needed - and it came back negative. Tested directly against
+  `berlin_square_corrected.pdf` (this pipeline's actual live scan, not
+  `Hebrewbooks_org_14122.pdf` tested here) across 4 widely-spread pages:
+  `heb_rashi` produces near-total garbage on every one, while standard
+  `heb` on the SAME images stays legible and largely correct. Does not
+  generalize across different scans of nominally the same typeface -
+  each scan needs its own direct check.
 
 **Other editions/scans online**: Hebrew Wikipedia's edition list matches
 what's already cataloged (Livorno original; Przemyśl 1877/1888; several
