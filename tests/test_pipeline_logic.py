@@ -39,6 +39,7 @@ import apply_reviewer_decisions as ard  # noqa: E402
 import assemble_corrections_dataset as acd  # noqa: E402
 import audit_applied_decisions as aad  # noqa: E402
 import build_corrections_dataset as bcd  # noqa: E402
+import build_gematria_trace as bgt  # noqa: E402
 import build_klal_page_regions as bkpr  # noqa: E402
 import check_klal_token_orphans as ckto  # noqa: E402
 import check_next_marker_and_title as cnmt  # noqa: E402
@@ -2253,3 +2254,292 @@ def test_duplicate_phrase_report_order_is_deterministic():
     issues = vpci.check_duplicate_phrases(klalim, n=10)
     assert len(issues) == 3, "12 words, n=10 -> 3 shared 10-grams"
     assert issues == sorted(issues)
+
+
+# --- pipeline/build_gematria_trace.py: marker location ----------------------
+# Added 2026-08-17 with the script. Everything here is synthetic on purpose:
+# the real docai_word_boxes/ cache is gitignored and the vision tier needs an
+# API key, so a test that leaned on either would be silently skipped exactly
+# where this logic is load-bearing. The three matching tiers, the monotonic
+# cursor and the position-only page bound are each covered by the concrete
+# failure they were written for.
+
+def _tokens(lines, y0=0.10, line_h=0.014, line_gap=0.020,
+            x_right=0.89, word_w=0.05, word_gap=0.005, marker_w=0.03):
+    """A synthetic scan page: `lines` is a list of word lists, laid out
+    right-to-left. The first word of a line lands inside the marker x-band
+    (as a real RTL line-initial token does); everything after it does not. A
+    word given as ("MARK", text) is laid out narrow, like a numeral glyph.
+
+    Returned in a DELIBERATELY SCRAMBLED array order (reversed within each
+    line), because array order is precisely what this module must never
+    depend on.
+    """
+    out = []
+    for li, words in enumerate(lines):
+        y = y0 + li * line_gap
+        x = x_right
+        line = []
+        for w in words:
+            width = marker_w if isinstance(w, tuple) else word_w
+            text = w[1] if isinstance(w, tuple) else w
+            line.append({"text": text, "x1": round(x - width, 4), "y1": round(y, 4),
+                         "x2": round(x, 4), "y2": round(y + line_h, 4)})
+            x -= width + word_gap
+        out.append(line)
+    scrambled = []
+    for line in out:
+        scrambled.extend(reversed(line))
+    return scrambled
+
+
+def _gklal(klal_id, gematria, opening, title=None):
+    return {"klal_id": klal_id, "gematria": gematria, "title": title or opening,
+            "clean_text": f"{gematria} {opening}"}
+
+
+OPENING_A = "אין למדים מן הכללות אפילו במקום שנאמר בהן חוץ"
+OPENING_B = "הלכה כדברי המקיל באבל לא אמרינן אלא בחומרא וקולא"
+
+
+def _loader(pages):
+    return lambda p: pages.get(p)
+
+
+def test_reading_order_ignores_array_order_and_reads_rtl_top_to_bottom():
+    """The whole defence against the marker-out-of-reading-order artifact
+    confirmed three times in this corpus (klal 3/4, 17/18, 65/66): a marker
+    glyph gets array-indexed among the PREVIOUS line's tokens. _tokens()
+    scrambles array order on purpose, so a reading_order() that leaked any
+    dependence on it fails here."""
+    tokens = _tokens([["aleph", "bet"], ["gimel", "dalet"]])
+    order = bgt.reading_order(tokens)
+    assert [tokens[i]["text"] for i in order] == ["aleph", "bet", "gimel", "dalet"]
+
+
+def test_reading_order_keeps_a_short_marker_and_a_taller_word_on_one_line():
+    """Clustering is on bbox CENTER Y, not y1, because a marginal numeral and
+    the bold opening word beside it do not share a y1 - measured 0.007 apart
+    on klal 3/4, which is a third of a line."""
+    tokens = _tokens([[("MARK", "כב"), "aleph"]])
+    tokens[0]["y1"] += 0.006  # the taller bold neighbour starts higher
+    order = bgt.reading_order(tokens)
+    assert [tokens[i]["text"] for i in order] == ["כב", "aleph"]
+
+
+def test_near_miss_variants_stay_inside_the_documented_confusion_set():
+    variants = set(bgt.near_miss_variants("קפז"))
+    assert "קפו" in variants, "ז/ו is confirmed six times in this corpus's own markers"
+    assert "קפן" in variants, "ז/ן is confirmed three times"
+    assert "קפא" not in variants, (
+        "an arbitrary letter substitution turns a precise anchor into a guess "
+        "(CLAUDE.md Lesson 5) - only measured confusions belong here"
+    )
+    assert "קפז" not in variants, "the exact spelling is tier 0, not a variant"
+
+
+def test_content_match_accepts_the_title_as_a_second_legitimate_opening():
+    """220 of 222 Part-1 klalim open with their own title, but where klalim
+    share one printed heading (65/66/67) the corpus repeats the shared heading
+    in clean_text while the print shows the klal's own line. Only the title
+    comparison recovers those, so both forms are scored and the better wins."""
+    klal = {"klal_id": 66, "gematria": "סו", "title": OPENING_B,
+            "clean_text": "סו " + OPENING_A}
+    got = [cio.hebrew_letters_only(w) for w in OPENING_B.split()][:bgt.CONTENT_WORDS]
+    ratio, which = bgt.content_match(got, klal)
+    assert which == "title" and ratio == 1.0
+
+
+def test_an_exact_marker_with_matching_opening_is_ok_and_moves_the_cursor():
+    pages = {14: _tokens([[("MARK", "כב")] + OPENING_A.split()])}
+    record, cursor = bgt.resolve_klal(
+        22, _gklal(22, "כב", OPENING_A), (14, -1), 14, _loader(pages), {})
+    assert record["status"] == "ok"
+    assert record["page"] == 14 and record["content_match_ratio"] == 1.0
+    assert cursor is not None
+    assert "mechanical-exact" in record["note"]
+
+
+def test_a_same_numeral_collision_in_running_text_is_rejected_by_the_x_band():
+    """The false positive that put klal 3's marker on the `ג` inside the
+    citation "בפרק ג'" until it was hand-corrected on 2026-08-05. The
+    colliding token here carries the right text but sits mid-line."""
+    pages = {14: _tokens([["בפרק", "ג", "filler", "filler"]])}
+    record, cursor = bgt.resolve_klal(
+        3, _gklal(3, "ג", OPENING_A), (14, -1), 14, _loader(pages), {})
+    assert record["status"] == "marker_not_found_in_window"
+    assert cursor is None
+
+
+def test_a_documented_confusion_misread_is_recovered_when_the_opening_agrees():
+    """klal 37/47/67/84/87/194 in the real corpus: DocAI emits לו for לז,
+    מו for מז, סן for סז, פר for פד, פן for פז, קצר for קצד."""
+    pages = {26: _tokens([[("MARK", "לו")] + OPENING_A.split()])}
+    record, _ = bgt.resolve_klal(
+        37, _gklal(37, "לז", OPENING_A), (26, -1), 26, _loader(pages), {})
+    assert record["status"] == "ok"
+    assert "documented-confusion" in record["note"]
+
+
+def test_content_anchored_recovery_finds_a_marker_no_catalogue_covers():
+    """klal 16/22/50/63/182: markers misread as פז for טז, כך for כב, ג for
+    נ, סוג for סג, קפכ for קפב. Tier 2 does not consult the numeral at all -
+    it anchors on the opening words and takes the short marker-band token in
+    front of them."""
+    pages = {19: _tokens([[("MARK", "פז")] + OPENING_A.split()])}
+    record, _ = bgt.resolve_klal(
+        16, _gklal(16, "טז", OPENING_A), (19, -1), 19, _loader(pages), {})
+    assert record["status"] == "ok"
+    assert "content-anchored" in record["note"]
+    assert record["marker_position"] is not None
+
+
+def test_content_anchored_recovery_declines_when_no_marker_token_exists():
+    """klal 10 and 57: DocAI emitted no marker token at all. Their opening
+    text is right there and matches perfectly, so a content-only rule would
+    happily invent a marker out of the previous line's last word. The x-band
+    half of tier 2's test is what stops it."""
+    pages = {18: _tokens([["tail", "of", "previous", "line"], OPENING_A.split()])}
+    record, cursor = bgt.resolve_klal(
+        10, _gklal(10, "י", OPENING_A), (18, -1), 18, _loader(pages), {})
+    assert record["status"] == "marker_not_found_in_window"
+    assert cursor is None
+
+
+def test_content_anchored_recovery_never_takes_the_previous_klals_marker():
+    """A real shape in this corpus: klal 65/66/67 share one printed heading,
+    so klal 66's stored clean_text opens with the SAME words that follow klal
+    65's marker. Without the cursor guard, tier 2 would anchor there and
+    record klal 65's own marker as klal 66's."""
+    pages = {34: _tokens([[("MARK", "סה")] + OPENING_A.split()])}
+    record, _ = bgt.resolve_klal(
+        66, _gklal(66, "סו", OPENING_A), (34, 0), 34, _loader(pages), {})
+    assert record["status"] == "marker_not_found_in_window", (
+        "the token at the cursor is the PREVIOUS klal's marker and is out of bounds"
+    )
+
+
+def test_a_distant_candidate_is_accepted_only_on_content_not_on_position():
+    """THE regression this bound exists for. The first version of this script
+    had no page bound on position-only acceptance: klal 10's absent marker
+    matched an unrelated margin `י` 37 pages later at content ratio 0.0, the
+    monotonic cursor jumped there, and 201 of 222 klalim then reported
+    not-found (CLAUDE.md Lesson 6, cascading position failure)."""
+    far = {"text": "י", "x1": 0.85, "y1": 0.1, "x2": 0.88, "y2": 0.114}
+    pages = {18: _tokens([["unrelated", "text"]]),
+             55: [far] + _tokens([["nothing", "to", "do", "with", "klal", "ten"]])}
+    record, cursor = bgt.resolve_klal(
+        10, _gklal(10, "י", OPENING_A), (18, -1), 55, _loader(pages), {})
+    assert record["status"] == "marker_not_found_in_window"
+    assert record["page"] == 18, "an unplaced klal reports its SEARCH START, not a guess"
+    assert cursor is None, "an unplaced klal must not move the floor for the klalim after it"
+
+
+def test_a_distant_candidate_whose_opening_agrees_is_still_found():
+    """The other half of the same bound, and the reason it is conditional
+    rather than absolute: klal 198's real marker sat a full page past where
+    the old trace's fixed window stopped, which is why it carried a wrong
+    `marker_not_found_in_window` until 2026-08-17. Content agreement is
+    independent evidence and exempts a candidate from the page bound."""
+    pages = {70: _tokens([["unrelated", "text"]]),
+             71: _tokens([[("MARK", "קצח")] + OPENING_B.split()])}
+    record, cursor = bgt.resolve_klal(
+        198, _gklal(198, "קצח", OPENING_B), (70, -1), 71, _loader(pages), {})
+    assert record["status"] == "ok" and record["page"] == 71
+    assert cursor is not None
+
+
+def test_an_exact_marker_whose_stored_text_disagrees_is_flagged_not_blessed():
+    """klal 66's real shape: the marker is unmistakably there and correctly
+    read, and the corpus's stored text for that klal does not follow it. The
+    position is trustworthy, the TEXT is what is in doubt - and a wrong `ok`
+    here would be invisible to the boundary pass this trace feeds."""
+    pages = {34: _tokens([[("MARK", "סו")]
+                          + "completely different words entirely here now".split()])}
+    record, cursor = bgt.resolve_klal(
+        66, _gklal(66, "סו", OPENING_A), (34, -1), 34, _loader(pages), {})
+    assert record["status"] == "marker_found_content_mismatch"
+    assert record["marker_position"] is not None, "the position is still recorded"
+    assert cursor is not None, "a trusted position still advances the cursor"
+
+
+def test_the_stored_spelling_counts_as_an_exact_match_not_a_near_miss():
+    """part2.json/part3.json store non-final numeral forms (רנ) where the
+    canonical spelling and the print both use final forms (רן). A hit on the
+    corpus's own spelling is a real glyph match, not a weaker one."""
+    pages = {90: _tokens([[("MARK", "רנ")] + OPENING_A.split()])}
+    record, _ = bgt.resolve_klal(
+        250, _gklal(250, "רנ", OPENING_A), (90, -1), 90, _loader(pages), {})
+    assert record["status"] == "ok"
+    assert "mechanical-exact" in record["note"]
+
+
+def test_vision_promotes_a_borderline_candidate_and_a_denial_leaves_it_unplaced():
+    """klal 34's shape: a real marker (a documented ד/ו misread) whose
+    surrounding OCR is so garbled the opening scores 0.375 - below OK_RATIO,
+    above VISION_RATIO_FLOOR. Mocked here, never a live call: a test suite
+    that spends API budget is a test suite people stop running."""
+    garbled = "אין מישורון גזירה אמות מעצמו אלאס איל קבלה".split()
+    pages = {26: _tokens([[("MARK", "לו")] + garbled])}
+    klal = _gklal(34, "לד", "אין אדם דן גזירה שוה מעצמו אלא אכ קבלה")
+    calls = []
+
+    def confirm(k, cand, tokens):
+        calls.append((k["klal_id"], cand.text))
+        return True
+
+    record, cursor = bgt.resolve_klal(
+        34, klal, (26, -1), 26, _loader(pages), {}, vision_confirm=confirm)
+    assert record["status"] == "ok" and "vision" in record["note"]
+    assert calls == [(34, "לו")]
+    assert cursor is not None
+
+    record, cursor = bgt.resolve_klal(
+        34, klal, (26, -1), 26, _loader(pages), {}, vision_confirm=lambda *a: False)
+    assert record["status"] == "marker_not_found_in_window"
+    assert cursor is None
+
+
+def test_vision_is_never_consulted_for_an_unambiguous_mechanical_match():
+    """Every vision call is real money against a paid API. A confident tier-0
+    match with no rival has to be decided mechanically or a full Parts 2-3 run
+    costs 445 needless calls."""
+    pages = {14: _tokens([[("MARK", "כב")] + OPENING_A.split()])}
+
+    def explode(*_args):  # pragma: no cover - the assertion is that it never runs
+        raise AssertionError("vision must not be called for an unambiguous match")
+
+    record, _ = bgt.resolve_klal(
+        22, _gklal(22, "כב", OPENING_A), (14, -1), 14, _loader(pages), {},
+        vision_confirm=explode)
+    assert record["status"] == "ok"
+
+
+def test_trace_emits_one_record_per_klal_in_id_order_with_the_known_vocabulary():
+    pages = {14: _tokens([[("MARK", "א")] + OPENING_A.split(),
+                          [("MARK", "ב")] + OPENING_B.split()])}
+    records = bgt.trace([_gklal(2, "ב", OPENING_B), _gklal(1, "א", OPENING_A)],
+                        14, 14, _loader(pages))
+    assert [r["klal_id"] for r in records] == [1, 2]
+    assert {r["status"] for r in records} <= {
+        "ok", "marker_found_content_mismatch", "marker_not_found_in_window"}
+    for r in records:
+        assert set(r) >= {"klal_id", "page", "expected_gematria", "stored_gematria",
+                          "content_match_ratio", "status", "note"}
+        if r["status"] == "marker_not_found_in_window":
+            assert "marker_position" not in r and r["content_match_ratio"] is None
+        else:
+            assert isinstance(r["marker_position"], int)
+
+
+def test_expected_gematria_comes_from_the_shared_conversion_not_the_stored_field():
+    """gematria_trace_part1.json's own expected_gematria is stale for klal
+    115/116 (קיה/קיו, from a pre-fix conversion lacking the ט"ו/ט"ז
+    exception) and its stored_gematria is stale for klal 150. Deriving
+    expected from corpus_io.klal_id_to_gematria on every run is what stops a
+    regenerated trace from inheriting that."""
+    pages = {14: _tokens([[("MARK", "קטו")] + OPENING_A.split()])}
+    record, _ = bgt.resolve_klal(
+        115, _gklal(115, "קיה", OPENING_A), (14, -1), 14, _loader(pages), {})
+    assert record["expected_gematria"] == "קטו"
+    assert record["stored_gematria"] == "קיה", "the stored field is reported, not trusted"
