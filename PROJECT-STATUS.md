@@ -15,6 +15,65 @@ current handoff, re-written (not just appended to) as state changes.
 
 ## ►► SESSION HANDOFF — read this first, 2026-08-16 (continued into 2026-08-17)
 
+### DONE 2026-08-17 — retroactive backfill: 65 pre-existing AI-pass findings pushed into word-level highlighting (the "not started here" question from bug #1's entry, now resolved); a mandatory drift check caught 49 more that would have highlighted the wrong or now-nonexistent word
+
+Per direct user request, following on from the two review-harness bugs
+above. Scope: every currently-open (`needs_revisit: true`) general-level
+(`word_index: null`) `klal_flag` - 109 total across 10 reviewer categories -
+checked for a parseable single-word candidate to backfill with a real
+`word_index`, using `pipeline/review_server.py`'s new `_word_level_ai_flags()`
+mechanism (bug #1 above).
+
+**Parser, built and tested before trusting it on real data**: the two
+biggest categories (`ai-vision-verify-flagged-candidates`, 58 flags/122
+individual candidate lines; `ai-semantic-spotcheck*`+`ai-lexicon-full-review`,
+33 flags) both use a consistent `w<N> '<word>' -> ...` shape - parsed 122/122
+vision-verify candidate lines successfully (0 unparseable), further filtered
+to skip verdicts of `ORIGINAL TEXT CONFIRMED` (68 - already resolved by that
+pass's own vision check, correctly must NOT be re-highlighted as open) and 2
+non-standard-verdict lines (klal 198's w1055/w861 - already fixed via
+`manual_correction` earlier this session, note is simply stale), keeping only
+`CANDIDATE CORRECTION SUPPORTED`/`UNCERTAIN` (52).
+
+**Mandatory drift check, not optional - caught 49 real problems**: every
+parsed (word_index, word) pair was checked against the word ACTUALLY at that
+position in current `part1.json` before backfilling; only an exact match
+proceeded. 49 of 114 candidates failed this check - some from this session's
+OWN edits shifting indices (klal 65/66's boundary fix moved everything past
+its insertion point; klal 65 w71/w75 no longer even exist, truncated by that
+fix), most from independent EARLIER fixes making the old note simply stale
+(e.g. klal 4/25 w403/714 `איהן`->`איהו` already corrected, klal 149 w130
+`דשמוא`->`דשמואל` already corrected). Backfilling any of these 49 blind would
+have highlighted either the WRONG word or a position that no longer exists -
+this is exactly the failure mode CLAUDE.md Lesson 19 warns about (a
+"fixed"/"applied" claim needs checking against a real diff, not assumed from
+how carefully the note was written), applied to a backfill instead of a fix.
+Full list of all 49 skips kept in this session's scratch space (not
+committed, regenerable from the same parser against current data).
+
+**65 backfilled** (`reviewer: "local-backfill-2026-08-17"`, each a new
+`klal_flag` with `word_index` set, `needs_revisit: true`, note pointing back
+to the original finding's decision id for full context rather than
+duplicating the reasoning). Spot-checked live via `/api/klal/88` - both
+backfilled entries (w622, w1111) render correctly through the same
+`ai_flag`-opcode mechanism bug #1 built and already browser-verified; not
+re-verified in the browser again since it's the identical, already-proven
+code path consuming new data, not new code.
+
+**NOT backfilled, deliberately, with reasons** (18 flags across 4
+categories): `ai-scan-crop-verification` (6 klalim) and `ai-followup-
+unflagged-findings` (4) describe boundary/marker-level findings, not a
+single disputed word_index within the klal's own body text - forcing one
+would misrepresent the finding. `ai-title-vs-opening-check` (3) compares the
+whole `title` field against the whole opening phrase, not one word.
+`local-harness-coverage-audit`/`local-manual-crop-verify` (5, this session's
+own earlier work) already have precise, individually-known positions but
+weren't run through this same generic backfill pass - low priority since I
+already know exactly what they are; can be added directly if it matters
+later.
+
+188/188 pytest, `rebuild_all.sh` clean.
+
 ### DONE 2026-08-17 — review harness BUG #2 fixed: a recorded-but-not-yet-applied manual correction showed the OLD disputed word styled green (Human-Decided), with no indication of what it would actually become
 
 **User bug report, klal 2** (found immediately after bug #1 above was fixed
