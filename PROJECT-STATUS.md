@@ -15,6 +15,27 @@ current handoff, re-written (not just appended to) as state changes.
 
 ## ►► SESSION HANDOFF — read this first, 2026-08-16 (continued into 2026-08-17)
 
+### DONE 2026-08-17 — full DocAI extraction over the estimated Parts 2-3 page range (93-235, 143 pages); klal_id_to_gematria()/gematria_to_value() moved into corpus_io.py
+
+143 pages extracted (`docai_word_boxes/page_93.json` through `page_235.json`),
+0 failures, ~300s total, same processor/calling pattern as the 10-page test
+slice and Part 1's own extraction. `docai_word_boxes/` now has continuous
+coverage page 1-235 with zero gaps (verified by listing, not assumed).
+Real cost still not independently verified (see the entry below on why -
+service-account billing-API permission ceiling) - this is real spend the
+user authorized on an estimate, not a confirmed-cheap number.
+
+Moved `klal_id_to_gematria()`/`gematria_to_value()` (previously only in
+`tools/validate_part1_corpus_integrity.py`) into `pipeline/corpus_io.py`
+so the new marker-detection script (below) reuses the same tested
+conversion instead of a second copy - directly exercising the reusable-
+pipeline goal rather than deferring it. `validate_part1_corpus_integrity.py`
+keeps aliased module attributes so every existing call site (including
+`tools/check_next_marker_and_title.py`'s `integrity.klal_id_to_gematria`
+reference) keeps working unchanged. Spot-checked the moved function
+against known values including Part 2/3's own boundaries (223->`רכג`,
+445->`תמה`, 667->`תרסז`). 166/166 pytest, `rebuild_all.sh` clean.
+
 ### OPEN 2026-08-17 — Parts 2-3 scan-linkage/verification infrastructure: user explicitly authorized starting it (partial override of the standing gate, see CLAUDE.md); reusable-pipeline goal newly documented; extraction stage confirmed to need no new code; marker/trace-building stage NOT yet built - in progress
 
 Per direct user request. Full context/reasoning is in CLAUDE.md's updated
