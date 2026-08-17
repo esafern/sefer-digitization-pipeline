@@ -15,6 +15,81 @@ current handoff, re-written (not just appended to) as state changes.
 
 ## ►► SESSION HANDOFF — read this first, 2026-08-16 (continued into 2026-08-17)
 
+### DONE 2026-08-17/18 — independent reference corpus expanded (Mishneh Torah + Tur + Rashi on Talmud, 2.58M→6.18M words); re-ran the lexicon-gap detector on BOTH Parts 2-3 and Part 1 against it; closed 272 false positives, surfaced 140 new candidates
+
+Per direct user request: "rambam tur rashi add them - then report on benefits
+via new findings", then "why not rerun part 1 as well" (correctly - there was
+no reason to limit the benefit to Parts 2-3).
+
+**`tools/fetch_sefaria_reference_corpus.py` extended**: added Mishneh Torah
+(88 per-hilchot books - Sefaria addresses each of the 14 sifrei's ~83
+sub-sections as its own separate book, not one book or 14), Tur (1 merged
+title, unlike Shulchan Arukh's 4 chelekim), and Rashi on Talmud (36 of 37
+tractates - no Rashi commentary exists for Tamid; deliberately excludes
+"Rashi on X" entries for Tanakh/Midrash, a different register from what
+overlaps with Yad Malachi's own citations). Every title string was read off
+a live `books.json` fetch, not guessed. Rationale: these three aren't just
+more of the same genre, they're specifically the works Yad Malachi is
+*about* (Klalei HaPoskim = the rules governing how Rif/Rambam/Rosh/Tur/
+Shulchan Arukh get decided between), so their vocabulary overlap is
+higher-value than generic Talmud text alone. `validate_lexicon_
+independent.py`'s cache-staleness check already compares `RAW_DIR`'s actual
+file list, not a hardcoded count, so it rebuilt automatically once the new
+files landed - no code change needed there.
+
+**Corpus grew from 41→166 texts, 2.58M→6.18M words, 116,275→185,593 unique
+forms** (~99MB raw, gitignored, `sefaria_reference_corpus/`).
+
+**Benefits, quantified against real findings, not estimated:**
+
+- **272 of 1,030 previously-recorded Parts 2-3 `ocr_shape_to_read` findings
+  (26.4%) were false positives** the smaller corpus couldn't see past - real
+  words (`בתמיה` 683x, `ולר`/`דלר` 114x/57x, `דמנחות` 30x, etc.) that
+  happened to be rare or absent in Shulchan Arukh + Talmud Bavli alone but
+  are ordinary vocabulary once Rambam/Tur/Rashi are in the mix. All 272
+  explicitly CLOSED (`needs_revisit: false`, reviewer `ai-lexicon-gap-
+  parts23-v2`) rather than left sitting as open false alarms - the 758
+  occurrences that remain flagged are now on meaningfully firmer ground.
+- **129 NEW Parts 2-3 candidates surfaced** that were invisible before - no
+  confusable neighbor had cleared the attestation floor in the smaller
+  corpus. Read in context before recording, same as the first pass; excluded
+  36 more forms as the same false-positive class already established
+  (abbreviation artifacts, and - a new wrinkle this exposed - `bucket_for()`
+  checks `ocr_shape` BEFORE `all_surfaces_quoted`, so a form where literally
+  every occurrence carries a stripped geresh can still land in
+  `ocr_shape_to_read` instead of `abbreviation_artifact`; filtered by hand
+  here, not yet fixed in the script itself - flagged as a real gap for a
+  future pass, not chased further in this one).
+- **`unresolved` bucket shrank 1,593→1,114 forms (-30%), `weakly_attested`
+  2,287→1,831 (-20%)** - a large fraction of Parts 2-3's weakest-signal
+  candidates now have SOME independent attestation, meaningfully improving
+  the quality of whatever future pass triages those buckets (still not
+  triaged in this session - see the prior entry).
+- **Part 1, re-run for the same reason**: `independently_attested` grew
+  127→220 forms (+73%), `unresolved` shrank 165→124 (-25%). **11 new
+  candidates recorded** (5 more excluded as abbreviation artifacts) -
+  several (`בתלמור`→`בתלמוד`, `דנראח`→`דנראה`) are findings this project
+  already knew about and named in `review_lexicon_gaps.py`'s own docstring
+  history, but had only ever recorded as prose inside a general klal-level
+  note (`ai-lexicon-full-review`, 2026-08-16, predating today's word-level
+  highlighting mechanism) - these entries give them a precise `word_index`
+  for the first time, so they're now actually clickable/highlighted in the
+  dashboard rather than something a reviewer has to find by reading text.
+  Verified live via the API (klal 1's counts changed accordingly).
+- **Known dropped-lamed corrupt-form cross-check** (`validate_lexicon_
+  independent.py`, informational, not a purge trigger): 7 of the 24 confirmed
+  corrupt forms now show nonzero independent attestation in the bigger
+  corpus (was implicitly fewer before - not directly comparable, the report
+  wasn't run standalone pre-expansion) - does not overturn Part 1's already
+  scan/context-verified fix, but is new evidence worth having on record per
+  CLAUDE.md Lesson 2.
+
+**140 new decisions total** (129 Parts 2-3 + 11 Part 1), **272 closed** - all
+via `ai-lexicon-gap-parts23-v2` / `ai-lexicon-gap-part1-v2`, same "textual/
+frequency evidence only, not scan-verified" framing as every other pass.
+197/197 pytest. The Part-1-only dashboard limitation noted in the prior entry
+still applies to the Parts 2-3 side of this work.
+
 ### DONE 2026-08-17 — klal 556/557 neighbors confirmed clean (isolated, not a cluster); `review_lexicon_gaps.py` extended to Parts 2-3 (found and fixed a real detector bug in the process); 1,350 new textual-signal `klal_flag` findings recorded — but NOT yet visible in the dashboard, which is still Part-1-only
 
 Per direct user request ("do both" - the 556/557 neighbor check and the

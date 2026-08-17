@@ -1,18 +1,33 @@
 #!/usr/bin/env python3
-# [STANDALONE] Downloads Shulchan Arukh (all 4 chelekim) + Talmud Bavli (37
-# tractates) Hebrew text from Sefaria's public export bucket, for use as a
-# GENUINELY INDEPENDENT Rabbinic Hebrew/Aramaic reference corpus - i.e. one
-# not derived from this project's own OCR of the Berlin scan, unlike
-# lexicon.txt (see PROJECT-STATUS.md "`lexicon.txt` cannot catch the
-# ligature corruption - it contains it"). Same halachic-code/Talmudic-
-# citation register as Yad Malachi, which cites both constantly.
+# [STANDALONE] Downloads Shulchan Arukh (4 chelekim) + Talmud Bavli (37
+# tractates) + Mishneh Torah (88 books) + Tur (1) + Rashi on Talmud (36
+# tractates - EXTENDED 2026-08-17, see below) Hebrew text from Sefaria's
+# public export bucket, for use as a GENUINELY INDEPENDENT Rabbinic Hebrew/
+# Aramaic reference corpus - i.e. one not derived from this project's own
+# OCR of the Berlin scan, unlike lexicon.txt (see PROJECT-STATUS.md
+# "`lexicon.txt` cannot catch the ligature corruption - it contains it").
+# Same halachic-code/Talmudic-citation register as Yad Malachi, which cites
+# all of these constantly - Rambam/Tur/Rashi aren't just more of the same
+# genre, they're specifically the works Yad Malachi is ABOUT (Klalei
+# HaPoskim is the rules governing how Rif/Rambam/Rosh/Tur/Shulchan Arukh
+# get decided between), so their vocabulary/phrasing overlap is higher-value
+# than generic Talmud text alone - added per user request 2026-08-17.
 #
 # Source: https://github.com/Sefaria/Sefaria-Export - a public GCS bucket,
 # one merged Hebrew-text JSON per book, no API key/auth needed. `books.json`
 # is the bucket's own index (title/language/versionTitle -> json_url); this
-# script filters it down to the 41 targets rather than hardcoding URLs, so a
-# future bucket reorganization breaks loudly (find_urls() exits naming the
-# missing titles) rather than silently fetching nothing.
+# script filters it down to the TARGETS set rather than hardcoding URLs, so
+# a future bucket reorganization breaks loudly (find_urls() exits naming the
+# missing titles) rather than silently fetching nothing. The exact title
+# strings for Mishneh Torah/Tur/Rashi below were read directly off a live
+# books.json fetch (2026-08-17), not guessed - Sefaria addresses each of
+# Mishneh Torah's 14 sifrei as ~83 separate per-hilchot "books" (e.g.
+# "Mishneh Torah, Human Dispositions"), not one book or 14; Tur is a single
+# merged title unlike Shulchan Arukh's 4 chelekim; Rashi has no entry for
+# Tamid (a known gap in the traditional Rashi corpus, not an omission here)
+# and also covers Tanakh/Midrash under the same "Rashi on X" prefix, which
+# RASHI_ON_TALMUD deliberately excludes - Rashi's Talmud-commentary register
+# is what overlaps with Yad Malachi's own citations, not his Torah commentary.
 #
 # Downloading a book is NOT the same as that book reaching the frequency
 # table - validate_lexicon_independent.py owns the extraction, and one book
@@ -20,7 +35,7 @@
 # contributing zero words to it until 2026-08-16. That script now warns per
 # book; this one only promises bytes on disk.
 #
-# Output: sefaria_reference_corpus/raw/<Title>.json (41 files, ~45MB) -
+# Output: sefaria_reference_corpus/raw/<Title>.json (166 files, ~140MB) -
 # gitignored, same as this project's other scan-derived caches. Re-run to
 # refresh; already-downloaded files are skipped (idempotent, no re-download
 # unless deleted first).
@@ -56,7 +71,67 @@ SHULCHAN_ARUKH = [
     "Shulchan Arukh, Orach Chayim", "Shulchan Arukh, Yoreh De'ah",
     "Shulchan Arukh, Even HaEzer", "Shulchan Arukh, Choshen Mishpat",
 ]
-TARGETS = set(TRACTATES) | set(SHULCHAN_ARUKH)
+# ADDED 2026-08-17 (user request) - see the module docstring for why these
+# three specifically, and why the exact lists below (read off a live
+# books.json, not guessed).
+MISHNEH_TORAH = [
+    "Mishneh Torah, Admission into the Sanctuary", "Mishneh Torah, Agents and Partners",
+    "Mishneh Torah, Appraisals and Devoted Property", "Mishneh Torah, Blessings",
+    "Mishneh Torah, Borrowing and Deposit", "Mishneh Torah, Circumcision",
+    "Mishneh Torah, Creditor and Debtor",
+    "Mishneh Torah, Daily Offerings and Additional Offerings",
+    "Mishneh Torah, Damages to Property", "Mishneh Torah, Defilement by Leprosy",
+    "Mishneh Torah, Defilement by a Corpse", "Mishneh Torah, Defilement of Foods",
+    "Mishneh Torah, Diverse Species", "Mishneh Torah, Divorce", "Mishneh Torah, Eruvin",
+    "Mishneh Torah, Fasts", "Mishneh Torah, Festival Offering",
+    "Mishneh Torah, First Fruits and other Gifts to Priests Outside the Sanctuary",
+    "Mishneh Torah, Firstlings", "Mishneh Torah, Forbidden Foods",
+    "Mishneh Torah, Forbidden Intercourse",
+    "Mishneh Torah, Foreign Worship and Customs of the Nations",
+    "Mishneh Torah, Foundations of the Torah", "Mishneh Torah, Fringes",
+    "Mishneh Torah, Gifts to the Poor", "Mishneh Torah, Heave Offerings",
+    "Mishneh Torah, Hiring", "Mishneh Torah, Human Dispositions",
+    "Mishneh Torah, Immersion Pools", "Mishneh Torah, Inheritances",
+    "Mishneh Torah, Kings and Wars", "Mishneh Torah, Leavened and Unleavened Bread",
+    "Mishneh Torah, Levirate Marriage and Release", "Mishneh Torah, Marriage",
+    "Mishneh Torah, Mourning", "Mishneh Torah, Murderer and the Preservation of Life",
+    "Mishneh Torah, Nazariteship", "Mishneh Torah, Negative Mitzvot",
+    "Mishneh Torah, Neighbors", "Mishneh Torah, Oaths",
+    "Mishneh Torah, Offerings for Those with Incomplete Atonement",
+    "Mishneh Torah, Offerings for Unintentional Transgressions",
+    "Mishneh Torah, One Who Injures a Person or Property",
+    "Mishneh Torah, Other Sources of Defilement",
+    "Mishneh Torah, Overview of Mishneh Torah Contents",
+    "Mishneh Torah, Ownerless Property and Gifts", "Mishneh Torah, Paschal Offering",
+    "Mishneh Torah, Plaintiff and Defendant", "Mishneh Torah, Positive Mitzvot",
+    "Mishneh Torah, Prayer and the Priestly Blessing", "Mishneh Torah, Reading the Shema",
+    "Mishneh Torah, Rebels", "Mishneh Torah, Red Heifer", "Mishneh Torah, Repentance",
+    "Mishneh Torah, Rest on a Holiday", "Mishneh Torah, Rest on the Tenth of Tishrei",
+    "Mishneh Torah, Ritual Slaughter", "Mishneh Torah, Robbery and Lost Property",
+    "Mishneh Torah, Sabbath", "Mishneh Torah, Sabbatical Year and the Jubilee",
+    "Mishneh Torah, Sacrifices Rendered Unfit", "Mishneh Torah, Sacrificial Procedure",
+    "Mishneh Torah, Sales", "Mishneh Torah, Sanctification of the New Month",
+    "Mishneh Torah, Scroll of Esther and Hanukkah",
+    "Mishneh Torah, Second Tithes and Fourth Year's Fruit",
+    "Mishneh Torah, Service on the Day of Atonement", "Mishneh Torah, Sheqel Dues",
+    "Mishneh Torah, Shofar, Sukkah and Lulav", "Mishneh Torah, Slaves",
+    "Mishneh Torah, Substitution", "Mishneh Torah, Tefillin, Mezuzah and the Torah Scroll",
+    "Mishneh Torah, Testimony", "Mishneh Torah, The Chosen Temple",
+    "Mishneh Torah, The Order of Prayer",
+    "Mishneh Torah, The Sanhedrin and the Penalties within Their Jurisdiction",
+    "Mishneh Torah, Theft", "Mishneh Torah, Things Forbidden on the Altar",
+    "Mishneh Torah, Those Who Defile Bed or Seat", "Mishneh Torah, Tithes",
+    "Mishneh Torah, Torah Study", "Mishneh Torah, Transmission of the Oral Law",
+    "Mishneh Torah, Trespass", "Mishneh Torah, Vessels",
+    "Mishneh Torah, Vessels of the Sanctuary and Those Who Serve Therein",
+    "Mishneh Torah, Virgin Maiden", "Mishneh Torah, Vows",
+    "Mishneh Torah, Woman Suspected of Infidelity",
+]
+TUR = ["Tur"]
+# Excludes Tamid (no Rashi commentary exists for it) and every "Rashi on X"
+# outside Talmud (Tanakh, Bereshit Rabbah) - see module docstring.
+RASHI_ON_TALMUD = [f"Rashi on {t}" for t in TRACTATES if t != "Tamid"]
+TARGETS = set(TRACTATES) | set(SHULCHAN_ARUKH) | set(MISHNEH_TORAH) | set(TUR) | set(RASHI_ON_TALMUD)
 
 
 def out_path(title):
