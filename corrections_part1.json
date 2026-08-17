@@ -33,7 +33,25 @@
       "vision_selected": "B",
       "vision_transcription": "ומדקמהדר",
       "confidence": 0.98,
-      "reasoning": "The crop clearly shows the standard Rabbinic Hebrew word 'ומדקמהדר' (u-mi-de-kamehadar). The letters 'ו-מ-ד-ק-מ-ה-ד-ר' are legible, including the clear 'dalet' (ד) rather than 'resh' after the 'mem', matching Option B and the contextual textual flow 'ומדקמהדר לידע'.",
+      "reasoning": "The visible text clearly reads 'ומדקמהדר' (vav, mem, dalet, qof, mem, he, dalet, resh), which perfectly matches Option B and fits the standard Rabbinic phrase 'ומדקמהדר לידע' in the provided contextual sentence.",
+      "flag": "current_text_confirmed"
+    },
+    {
+      "word_index": 446,
+      "opcode": "replace",
+      "docai_reading": "ומידו",
+      "final_text": "ומיהו",
+      "page": 14,
+      "bbox": {
+        "x1": 0.12569659948349,
+        "y1": 0.6755555272102356,
+        "x2": 0.17585138976573944,
+        "y2": 0.6929292678833008
+      },
+      "vision_selected": "B",
+      "vision_transcription": "ומיהו",
+      "confidence": 0.98,
+      "reasoning": "The text clearly reads 'ומיהו' (a common Rabbinic connective word meaning 'however/nevertheless'). In context, it introduces the counter-opinion: 'משמע דלאו דחיה היא • ומיהו ראיתי להגר\"ש...'. Visually, the characters are Vav, Mem, Yod, He, Vav. Option A ('ומידו') is a clear OCR error mistaking the He-Vav sequence.",
       "flag": "current_text_confirmed"
     }
   ],

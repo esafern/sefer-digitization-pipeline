@@ -29,6 +29,20 @@
       }
     },
     {
+      "klal_id": 1,
+      "page": 14,
+      "opcode": "replace",
+      "word_index_in_final_text": 446,
+      "original_word": "ומידו",
+      "corrected_word": "ומיהו",
+      "bbox": {
+        "x1": 0.12569659948349,
+        "y1": 0.6755555272102356,
+        "x2": 0.17585138976573944,
+        "y2": 0.6929292678833008
+      }
+    },
+    {
       "klal_id": 3,
       "page": 15,
       "opcode": "replace",
@@ -5202,7 +5216,7 @@
     }
   ],
   "meta": {
-    "total_candidates": 385,
+    "total_candidates": 386,
     "klalim_covered": 148,
     "skipped_no_docai_page_klalim": [],
     "unattributable_deletes": [],
