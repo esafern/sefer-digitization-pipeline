@@ -326,7 +326,21 @@ function renderKlalBody(block, k) {
       return;
     }
     const corr = byIndex[i];
-    if (corr && corr.opcode === 'manual') {
+    if (corr && corr.opcode === 'ai_flag') {
+      // FIXED 2026-08-17 (user bug report on klal 1: an AI pass's note
+      // named a specific disputed word in prose, but nothing highlighted
+      // it - the reviewer had to find it by reading the note and searching
+      // the text by eye). Routed through the same manual-correction panel
+      // "plain word" clicks already use - it already displays an existing
+      // `note` field (klal_flag's own note, the AI pass's reasoning) and
+      // lets the reviewer propose a fix or dismiss it, no new panel needed.
+      const span = document.createElement('span');
+      span.className = 'flag-word state-ai-flag';
+      span.textContent = w;
+      span.title = corr.reasoning || '';
+      span.onclick = () => openManualCorrectionPanel(k.klal_id, i, w, corr);
+      body.appendChild(span);
+    } else if (corr && corr.opcode === 'manual') {
       // Reviewer-flagged word (2026-08-13, no machine candidate behind it -
       // see openManualCorrectionPanel) - always Human-Decided (there's no
       // machine-disputed phase for these to have come from), routed through

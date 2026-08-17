@@ -162,11 +162,21 @@ def _read_all(path=None):
 
 def history_for(klal_id, word_index=None, decision_type=None, path=None):
     """All decisions matching the key, oldest first. Pass word_index to
-    narrow to a specific word; omit it (with decision_type="klal_flag") for
-    a klal-level query - klal_flag/apply_event rows structurally always
-    carry the word_index they're about (or None for klal_flag), so
-    decision_type alone is enough to disambiguate without needing a
-    separate "match None explicitly" sentinel."""
+    narrow to a specific word.
+
+    CORRECTED 2026-08-17: this docstring used to claim klal_flag rows
+    "structurally always" carry word_index=None - true when written, no
+    longer true. klal_flag can now ALSO name one specific word (an AI pass
+    flagging a single candidate, e.g. detect_real_word_substitution.py -
+    see review_server.py's _word_level_ai_flags() and
+    _general_klal_flag_current()/_general_klal_flag_history(), which are
+    the general-panel-only query this function's old docstring was
+    describing). Omitting word_index here does NOT filter by word_index at
+    all - it returns every decision for the klal regardless, general or
+    word-level alike; a caller that wants ONLY the general (word_index is
+    None) klal_flag rows must filter for that explicitly, which is exactly
+    what the two review_server.py helpers above do rather than relying on
+    this function's word_index=None default to mean that."""
     records = _read_all(path)
     out = []
     for r in records:

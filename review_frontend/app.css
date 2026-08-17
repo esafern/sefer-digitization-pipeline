@@ -206,6 +206,12 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
    a human, green = a human recorded a decision (always wins, even over a
    machine "confirmed" verdict). */
 .flag-word.state-open { border-bottom: 3px solid var(--danger); }
+/* ADDED 2026-08-17: a klal_flag naming a specific word_index (an AI pass
+   like detect_real_word_substitution.py, not the vision-adjudication
+   pipeline behind state-open/state-machine) - visually distinct (dashed,
+   not solid/dotted) since it carries no vision confirmation, only the
+   pass's own textual/frequency reasoning (shown in .title on hover). */
+.flag-word.state-ai-flag { border-bottom: 3px dashed #805ad5; }
 .flag-word.state-machine { border-bottom: 2px dotted var(--pending); opacity: 0.92; }
 .flag-word.state-human { border-bottom: 3px solid #38a169; }
 .flag-word.pending-delete { text-decoration: line-through; text-decoration-color: var(--danger); opacity: 0.7; }

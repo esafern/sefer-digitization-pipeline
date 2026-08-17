@@ -194,6 +194,74 @@ def _word_matches(words, word_index, expected_word):
     return 0 <= word_index < len(words) and words[word_index] == expected_word
 
 
+# FIXED 2026-08-17 (user bug report: "I saw klal 1 was flagged for review...
+# the questionable word was not highlighted, I needed to find it myself").
+# klal_flag decisions were architecturally assumed to always be about the
+# KLAL AS A WHOLE (word_index None - see review_decisions.py's history_for()
+# docstring, which said as much) - true for the reviewer-facing flag panel,
+# but several AI passes (detect_real_word_substitution.py and similar) name
+# one specific disputed word in free-text prose inside the note and never
+# set word_index, even though append_decision() has always accepted it. The
+# result: a real candidate word sat undiscoverable except by reading prose
+# and searching the text by eye - confirmed live on klal 1 w446 (real fix,
+# same session: ומידו->ומיהו). Two distinct concerns, kept structurally
+# separate so a word-level AI flag can never be mistaken for the klal's
+# general note:
+#   - _general_klal_flag_*(): word_index IS None - the reviewer-facing
+#     "needs a second look" panel, unchanged behavior.
+#   - the word-level synthesis loop in api_klal() below: word_index IS NOT
+#     None - synthesized into `corrections` (the same shape manual_
+#     correction entries already use to get highlighted) so these render
+#     exactly like any other flagged word, GOING FORWARD for any script
+#     that starts setting word_index (detect_real_word_substitution.py
+#     fixed the same session, see its own diff) - this does NOT retroactively
+#     help already-recorded flags that never set word_index; that's a
+#     separate backfill decision, not made here.
+def _general_klal_flag_history(klal_id):
+    return [r for r in rd.history_for(klal_id, decision_type="klal_flag")
+            if r.get("word_index") is None]
+
+
+def _general_klal_flag_current(klal_id):
+    h = _general_klal_flag_history(klal_id)
+    return h[-1] if h else None
+
+
+def _word_level_ai_flags(klal_id, words):
+    """klal_flag decisions naming a specific word_index, synthesized into
+    corrections-shaped entries so the frontend highlights them. Only the
+    latest decision per word_index, and only if still open - a closed
+    (needs_revisit: false) word-level flag has already been resolved (see
+    e.g. today's klal 167 closures) and should stop being highlighted, the
+    same way a satisfied manual_correction does."""
+    by_word = {}
+    for r in rd.history_for(klal_id, decision_type="klal_flag"):
+        widx = r.get("word_index")
+        if widx is not None:
+            by_word[widx] = r  # later (later-appended) wins
+    out = []
+    for word_index, rec in sorted(by_word.items()):
+        if not rec.get("needs_revisit"):
+            continue
+        if not (0 <= word_index < len(words)):
+            continue
+        out.append({
+            "word_index": word_index,
+            "opcode": "ai_flag",
+            "docai_reading": None,
+            "final_text": None,
+            "page": None,
+            "bbox": None,
+            "vision_selected": None,
+            "vision_transcription": None,
+            "confidence": None,
+            "reasoning": rec.get("note"),
+            "flag": "ai_flag",
+            "current_decision": rec,
+        })
+    return out
+
+
 def _merge_decision(entry, klal_id, decided):
     """Overlay the current human decision (if any) on top of a raw
     corrections_part1.json entry - never mutates the source data, this is
@@ -355,12 +423,14 @@ def api_klal(klal_id):
     # whose original_word no longer matches what's actually at that
     # position now; only a still-valid decision renders.
     words = (k.get("clean_text") or "").split(" ")
+    manual_word_indices = set()
     for (kid, word_index), rec in rd.all_current("manual_correction").items():
         if kid != klal_id:
             continue
         original_word = rec.get("candidate_snapshot", {}).get("original_word")
         if not _word_matches(words, word_index, original_word):
             continue
+        manual_word_indices.add(word_index)
         corrections.append({
             "word_index": word_index,
             "opcode": "manual",
@@ -375,9 +445,13 @@ def api_klal(klal_id):
             "flag": "manual_correction",
             "current_decision": rec,
         })
+    # A manual correction means a human already acted on this exact word -
+    # an AI flag on the same word_index is now redundant, don't also show it.
+    corrections.extend(f for f in _word_level_ai_flags(klal_id, words)
+                        if f["word_index"] not in manual_word_indices)
     regions = _load_regions()
     region_entry = regions.get(str(klal_id), {})
-    flag_state = rd.current_for(klal_id, decision_type="klal_flag")
+    flag_state = _general_klal_flag_current(klal_id)
 
     punct_candidates = _load_punctuation_candidates().get(str(klal_id), [])
     punctuation = []
@@ -415,8 +489,11 @@ def api_klal(klal_id):
 
 
 def api_klal_flag(klal_id):
-    current = rd.current_for(klal_id, decision_type="klal_flag")
-    history = rd.history_for(klal_id, decision_type="klal_flag")
+    # General klal-level flag panel only (word_index is None) - a word-level
+    # AI flag (word_index set) must never surface here as if it were the
+    # klal's own note; see _general_klal_flag_current()'s docstring above.
+    current = _general_klal_flag_current(klal_id)
+    history = _general_klal_flag_history(klal_id)
     return {
         "needs_revisit": bool(current and current.get("needs_revisit")),
         "note": current.get("note") if current else None,

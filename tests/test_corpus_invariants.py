@@ -772,10 +772,18 @@ def test_review_decisions_log_is_intact_and_internally_consistent(decision_recor
         if not isinstance(r["klal_id"], int):
             problems.append(f"line {lineno}: klal_id {r['klal_id']!r} is not an int - it would match "
                             "no lookup, since every query compares klal_id by value")
-        # klal_flag is klal-level by design; every other type is about one
-        # specific word/token and is looked up by (klal_id, word_index).
-        if (r.get("word_index") is None) != (r["decision_type"] == "klal_flag"):
-            problems.append(f"line {lineno}: {r['decision_type']} with word_index={r.get('word_index')!r}")
+        # RELAXED 2026-08-17 (user bug report on klal 1: an AI pass's note
+        # named a disputed word in prose, but nothing highlighted it - see
+        # review_server.py's _word_level_ai_flags()). klal_flag can now be
+        # EITHER klal-level (word_index None, the reviewer-facing "needs a
+        # second look" panel) OR name one specific word (an AI pass flagging
+        # a single candidate, synthesized into a highlight the same way a
+        # manual_correction is) - append_decision() has always accepted
+        # word_index on any type; only klal_flag actually varies. Every
+        # OTHER type is still always about one specific word/token and must
+        # never have word_index=None.
+        if r["decision_type"] != "klal_flag" and r.get("word_index") is None:
+            problems.append(f"line {lineno}: {r['decision_type']} with word_index=None")
 
     ids = set(seen_ids)
     for lineno, r in records:

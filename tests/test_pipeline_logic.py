@@ -1105,6 +1105,80 @@ def test_a_manual_correction_cannot_be_recorded_at_a_negative_index(monkeypatch)
     assert len(appended) == 1
 
 
+# --- review_server: word-level AI flags must be discoverable, and must never
+# --- leak into the klal's general flag panel --------------------------------
+
+def test_general_klal_flag_ignores_word_level_entries(tmp_path, monkeypatch):
+    """FIXED 2026-08-17 (user bug report on klal 1 w446: an AI pass named a
+    disputed word in free-text prose inside a klal_flag note, but nothing
+    highlighted it - review_decisions.py's own history_for() docstring had
+    assumed klal_flag rows always carry word_index=None). The general panel
+    (api_klal_flag / the klal-level "needs a second look" note) must keep
+    ignoring any klal_flag that DOES carry a word_index - it is about one
+    specific word, not the klal as a whole, and must never be shown as if it
+    were the general note."""
+    path = str(tmp_path / "decisions.jsonl")
+    monkeypatch.setattr(rd, "DECISIONS_PATH", path)
+    rd.append_decision("klal_flag", 1, needs_revisit=True, note="general note", path=path)
+    rd.append_decision("klal_flag", 1, word_index=5, needs_revisit=True,
+                        note="word-level note", path=path)
+    current = rs._general_klal_flag_current(1)
+    assert current["note"] == "general note"
+    history = rs._general_klal_flag_history(1)
+    assert len(history) == 1 and history[0]["note"] == "general note"
+
+
+def test_word_level_ai_flags_synthesizes_a_highlightable_entry(tmp_path, monkeypatch):
+    path = str(tmp_path / "decisions.jsonl")
+    monkeypatch.setattr(rd, "DECISIONS_PATH", path)
+    rd.append_decision("klal_flag", 1, word_index=2, needs_revisit=True,
+                        note="w2 'ומידו' -> 'ומיהו' (corrupt 1x, correction 201x)", path=path)
+    words = "אלף בית גימל דלת הא".split()
+    flags = rs._word_level_ai_flags(1, words)
+    assert len(flags) == 1
+    assert flags[0]["word_index"] == 2
+    assert flags[0]["opcode"] == "ai_flag"
+    assert "ומידו" in flags[0]["reasoning"]
+
+
+def test_word_level_ai_flags_skips_closed_and_out_of_bounds(tmp_path, monkeypatch):
+    """A closed (needs_revisit: false) word-level flag has already been
+    resolved and must stop being highlighted, the same way a satisfied
+    manual_correction does. An out-of-bounds word_index (the klal's text
+    shrank since the flag was written, the same drift class _word_matches
+    guards against for manual_correction) must never be handed to the
+    frontend as a real array index."""
+    path = str(tmp_path / "decisions.jsonl")
+    monkeypatch.setattr(rd, "DECISIONS_PATH", path)
+    rd.append_decision("klal_flag", 1, word_index=1, needs_revisit=True, note="open", path=path)
+    rd.append_decision("klal_flag", 1, word_index=1, needs_revisit=False, note="closed now", path=path)
+    rd.append_decision("klal_flag", 1, word_index=99, needs_revisit=True, note="out of bounds", path=path)
+    words = "אלף בית גימל".split()
+    assert rs._word_level_ai_flags(1, words) == []
+
+
+def test_word_level_ai_flag_yields_to_a_manual_correction_on_the_same_word(monkeypatch):
+    """A human already acting on this exact word (manual_correction) makes
+    the AI's earlier flag redundant - api_klal must not show both."""
+    monkeypatch.setattr(rs, "_load_klalim",
+                        lambda: ({1: {"klal_id": 1, "clean_text": "אלף בית גימל", "page": 1}}, [1]))
+    monkeypatch.setattr(rs, "_load_alignment", lambda: {})
+    monkeypatch.setattr(rs, "_load_corrections", lambda: {})
+    monkeypatch.setattr(rs, "_load_regions", lambda: {})
+    monkeypatch.setattr(rs, "_load_punctuation_candidates", lambda: {})
+    monkeypatch.setattr(rs.rd, "all_current",
+                        lambda dtype: ({(1, 1): {"candidate_snapshot": {"original_word": "בית"},
+                                                  "chosen_text": "בין", "word_index": 1}}
+                                       if dtype == "manual_correction" else {}))
+    monkeypatch.setattr(rs, "_word_level_ai_flags",
+                        lambda klal_id, words: [{"word_index": 1, "opcode": "ai_flag",
+                                                  "reasoning": "should not appear"}])
+    monkeypatch.setattr(rs, "_general_klal_flag_current", lambda klal_id: None)
+    result = rs.api_klal(1)
+    opcodes_at_1 = [c["opcode"] for c in result["corrections"] if c["word_index"] == 1]
+    assert opcodes_at_1 == ["manual"], "manual_correction must win over a redundant AI flag on the same word"
+
+
 # --- detect_ligature_corruption: word indices must mean what everything else
 # --- means by them ----------------------------------------------------------
 
