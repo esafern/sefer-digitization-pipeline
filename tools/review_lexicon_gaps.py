@@ -104,6 +104,13 @@
 #        ./venv/bin/python review_lexicon_gaps.py --contexts --bucket unresolved
 #          (every occurrence of the selected forms in its own klal's words -
 #           the reading step; --min-score N narrows it further)
+#        ./venv/bin/python review_lexicon_gaps.py --part part2.json --part part3.json
+#          (EXTENDED 2026-08-17, Parts 2-3 infra authorization - see
+#          PROJECT-STATUS.md: every function below was already generic over
+#          a list of (klal_id, word_index)-addressed klalim, never Part-1-
+#          specific in its actual logic - only load_part1()'s hardcoded path
+#          was. --part is repeatable and defaults to part1.json alone, so
+#          existing Part-1-only invocations/docs above are unchanged.)
 import argparse
 import json
 import os
@@ -143,6 +150,18 @@ def load_part1():
     return cio.load_part1(PART1_PATH)
 
 
+def load_parts(names):
+    """Concatenate klalim from one or more part files (e.g. ["part1.json",
+    "part2.json"]). klal_id is globally unique 1-667 across all three parts
+    and word_index is per-klal-relative, so nothing downstream needs to know
+    which file a klal came from - same reason build_gematria_trace.py can
+    trace multiple --part files as one continuous sequence."""
+    out = []
+    for name in names:
+        out.extend(cio.load_klalim(cio.repo_path(name)))
+    return out
+
+
 def clean_word(w):
     """Exactly check 5's normalisation - Hebrew letters only. Reproduced here
     (not imported) only because it is a closure inside check 5; kept in sync by
@@ -150,18 +169,53 @@ def clean_word(w):
     return "".join(c for c in w if c in integrity.HEBREW_LETTERS)
 
 
-def collect_unknown_forms(klalim, lexicon):
+def collect_unknown_forms(klalim, lexicon, skip_lexicon_filter=False):
     """form -> {occurrences, klal_ids: Counter, surfaces: Counter, positions}.
 
     Reproduces check 5's selection exactly, plus the provenance check 5 throws
     away: which klal each occurrence is in, at which word index, and what the
-    unnormalised token on the page actually looked like."""
+    unnormalised token on the page actually looked like.
+
+    skip_lexicon_filter (added 2026-08-17, Parts 2-3 extension): lexicon.txt
+    was built from full_text_cleaned_goal.txt (archive/scripts/
+    build_lexicon.py), the pre-chunking text for ALL THREE parts, not just
+    Part 1 - see CLAUDE.md's "Pipeline shape". For Part 1, membership is a
+    meaningful pre-filter because Part 1's own corrections since then have
+    diverged it from the lexicon. For Parts 2-3, which have never been
+    corrected, their own uncorrected vocabulary - corrupt forms included -
+    is largely ALREADY IN lexicon.txt, so the membership filter is close to
+    a no-op there: a live run found only 20 not-in-lexicon forms across
+    445 klalim, against Part 1's 949 across 222, and every one of the
+    15 confirmed-corrupt forms it did surface would have been filtered out
+    entirely by lexicon.txt membership alone. When set, every distinct word
+    is collected regardless of lexicon.txt, and independent_attestation
+    (checked against the genuinely independent Sefaria reference corpus,
+    not this project's own OCR) does the real filtering downstream via
+    bucket_for()'s existing thresholds - unchanged.
+
+    Every klal's clean_text opens with its own gematria-numeral marker as
+    word 0 (e.g. klal 494 opens literally "תצד ..."). With the lexicon
+    filter ON this was never visible - Part 1's own markers are themselves
+    baked into lexicon.txt from the same source text - but skip_lexicon_
+    filter=True exposed it immediately: a live run flagged exactly 445
+    "unknown words", one per Parts 2-3 klal, all at word_index 0, all
+    equal to that klal's own gematria field. A numeral is not vocabulary
+    and will almost never appear as a word in Talmud/Shulchan Arukh text,
+    so every one of the 445 registered as a false "corruption" candidate
+    through the exact same near_attested/ocr_shape machinery a real typo
+    would. Excluded here rather than filtered later, so it never reaches
+    scoring at all."""
     forms = defaultdict(lambda: {"occurrences": 0, "klal_ids": Counter(),
                                  "surfaces": Counter(), "positions": []})
     for k in klalim:
+        own_gematria = cio.hebrew_letters_only(k.get("gematria") or "")
         for i, w in enumerate(k["clean_text"].split()):
             cw = clean_word(w)
-            if not cw or cw in lexicon:
+            if not cw:
+                continue
+            if not skip_lexicon_filter and cw in lexicon:
+                continue
+            if i == 0 and own_gematria and cw == own_gematria:
                 continue
             rec = forms[cw]
             rec["occurrences"] += 1
@@ -431,9 +485,17 @@ def main():
                     help="restrict --contexts to a bucket (repeatable)")
     ap.add_argument("--min-score", type=int, default=0,
                     help="restrict --contexts to forms at or above this score")
+    ap.add_argument("--part", action="append", default=[],
+                    help="corpus file to analyse, repeatable (default: part1.json alone)")
+    ap.add_argument("--skip-lexicon-filter", action="store_true",
+                    help="don't pre-filter on lexicon.txt membership - required for "
+                         "Parts 2-3, whose own uncorrected vocabulary is largely "
+                         "already IN lexicon.txt (see collect_unknown_forms's "
+                         "docstring); relies entirely on independent attestation")
     args = ap.parse_args()
 
-    klalim = load_part1()
+    part_names = args.part or ["part1.json"]
+    klalim = load_parts(part_names)
     lexicon = set(w.strip() for w in open(integrity.LEXICON_PATH, encoding="utf-8") if w.strip())
     # Goes through validate_lexicon_independent's own provenance check, which
     # rebuilds the table if it was built by an older extractor or a different
@@ -442,12 +504,12 @@ def main():
     print(f"Independent reference corpus: {sum(freq.values())} words, "
           f"{len(freq)} unique forms.")
 
-    forms = collect_unknown_forms(klalim, lexicon)
+    forms = collect_unknown_forms(klalim, lexicon, skip_lexicon_filter=args.skip_lexicon_filter)
     total_words = sum(len(k["clean_text"].split()) for k in klalim)
     results = [analyse(f, rec, lexicon, freq) for f, rec in forms.items()]
     results.sort(key=lambda r: (-r["score"], -r["occurrences"], r["form"]))
 
-    print(f"Part 1: {len(klalim)} klalim, {total_words} words, "
+    print(f"{'+'.join(part_names)}: {len(klalim)} klalim, {total_words} words, "
           f"{len(results)} distinct not-in-lexicon forms "
           f"({sum(r['occurrences'] for r in results)} occurrences).\n")
 
@@ -486,8 +548,8 @@ def main():
         print_contexts(results, klalim, args.bucket, args.min_score)
 
     if args.json:
-        json.dump({"generated_from": "part1.json",
-                   "part1_total_words": total_words,
+        json.dump({"generated_from": part_names,
+                   "total_words": total_words,
                    "independent_corpus_words": sum(freq.values()),
                    "buckets": dict(by_bucket),
                    "forms": results},

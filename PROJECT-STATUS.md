@@ -15,6 +15,108 @@ current handoff, re-written (not just appended to) as state changes.
 
 ## ►► SESSION HANDOFF — read this first, 2026-08-16 (continued into 2026-08-17)
 
+### DONE 2026-08-17 — klal 556/557 neighbors confirmed clean (isolated, not a cluster); `review_lexicon_gaps.py` extended to Parts 2-3 (found and fixed a real detector bug in the process); 1,350 new textual-signal `klal_flag` findings recorded — but NOT yet visible in the dashboard, which is still Part-1-only
+
+Per direct user request ("do both" - the 556/557 neighbor check and the
+Parts 2-3 lexicon detector - "also surface any other data issues that have
+not made it into the dashboard yet for human adj[udication]").
+
+**klal 556/557 neighbors (554, 555, 558, 559) all confirmed clean** -
+directly compared each one's real marker content (DocAI's true reading-order
+continuation) against its own stored `clean_text`: all four match verbatim.
+The 556/557 number-swap found earlier today is isolated, not the edge of a
+wider cluster in this immediate vicinity.
+
+**`tools/review_lexicon_gaps.py` extended to Parts 2-3**, per the reusable-
+pipeline directive rather than a one-off script - every function in it was
+already generic over `(klal_id, word_index)`-addressed klalim; only
+`load_part1()`'s hardcoded path was Part-1-specific. Added `--part` (repeatable,
+defaults to `part1.json` alone - existing invocations unchanged) and
+`--skip-lexicon-filter`.
+
+**`--skip-lexicon-filter` is required for Parts 2-3, not optional**: `lexicon.txt`
+was built from `full_text_cleaned_goal.txt` (`archive/scripts/build_lexicon.py`),
+the pre-chunking text for ALL THREE parts, not just Part 1 (CLAUDE.md's
+"Pipeline shape"). For Part 1, lexicon membership is a meaningful pre-filter
+because Part 1's own corrections since then have diverged it from the lexicon.
+Parts 2-3 have never been corrected, so their own uncorrected vocabulary -
+corrupt forms included - is largely ALREADY IN lexicon.txt: a first run with the
+filter still on found only 20 not-in-lexicon forms across 445 klalim (against
+Part 1's 949 across 222), and every one of the eventual 15 confirmed-corrupt
+forms would have been filtered out entirely by lexicon.txt membership alone.
+With `--skip-lexicon-filter`, every distinct word is collected and
+`independent_attestation` (checked against the genuinely independent Sefaria
+reference corpus - Shulchan Arukh + Talmud Bavli, 2.58M words, NOT this
+project's own OCR) does the real filtering: 16,436 candidate forms.
+
+**Found and fixed a real bug this extension exposed**: every klal's `clean_text`
+opens with its own gematria-numeral marker as word 0 (e.g. klal 494 opens
+literally `תצד ...`). With the lexicon filter on this was invisible - Part 1's
+own markers are themselves baked into lexicon.txt - but `--skip-lexicon-filter`
+surfaced it immediately: exactly 445 "unknown words," one per Parts 2-3 klal,
+all at word_index 0, all equal to that klal's own `gematria` field. A numeral
+isn't vocabulary and will almost never appear as a word in Talmud/Shulchan
+Arukh text, so all 445 registered as false "corruption" candidates through the
+same near_attested/ocr_shape machinery a real typo would. Fixed in
+`collect_unknown_forms()` by excluding word 0 when it equals the klal's own
+gematria; Part 1 regression-checked unaffected (949/1102 unchanged, since the
+bug only manifests with `--skip-lexicon-filter`), Parts 2-3 count corrected to
+16,179 forms.
+
+**Triaged and recorded, with drift-check before each write:**
+- **`known_corrupt_form` bucket - 320 occurrences across 98 klalim, ALL
+  recorded** (`reviewer: "ai-dropped-lamed-parts23"`). These are exact matches
+  to the 24-form list already confirmed as the alef-lamed ligature bug (Part
+  1's fix: 131 corrections/51 klalim, 2026-08-15/16). Parts 2-3 has NEVER had
+  this fix applied, and 320/98 here is proportionally worse than Part 1's own
+  count - matches the pattern CLAUDE.md already documents for a different bug
+  class (page-furniture contamination hitting Parts 2-3 at 17% vs Part 1's ~1
+  instance). This is a real, previously-unquantified scope finding on its own.
+- **`ocr_shape_to_read` bucket - 375 of 381 forms, 1,030 of 1,294 occurrences
+  recorded** (`reviewer: "ai-lexicon-gap-parts23"`). Read every form in context
+  before recording (not blind bucket-membership); excluded 6 forms as a
+  confirmed false-positive class after reading - common abbreviations/
+  honorifics/titles the Shulchan Arukh + Talmud Bavli sample just doesn't
+  happen to contain, not corruption: `לר'`/`עכ"ד` (geresh-stripped abbreviation
+  artifacts), `חוות` (Chavot Yair, a real sefer title), `תחזה` (real Aramaic
+  2nd-person imperfect), `מרן` (the R. Yosef Karo honorific - postdates Talmud,
+  and he wouldn't self-cite that way in his own Shulchan Arukh), `כהונת`
+  (Kehunat Olam, another real sefer title). One form, `איהן` (11x, always in
+  the pattern "X איהן גופיה"), is flagged as its own note-worthy open question
+  rather than excluded or blindly recorded - it reads exactly like the standard
+  Talmudic "X איהו גופיה" (he himself) construction, but the detector's own
+  best edit-1 neighbor came back `איתן`, not `איהו`; recorded as a candidate
+  with both readings named in the note rather than silently picking one.
+- **`unresolved` bucket (1,593 forms, ~2,670 occurrences) and `weakly_attested`
+  (2,287 forms) NOT triaged** - lowest-confidence buckets, would need the same
+  per-form context read at several times the volume just processed. Saved to
+  `lexicon_gaps_parts23_report.json` (tracked, trimmed to just these two
+  buckets' full detail - the already-resolved `independently_attested`/
+  `prefix_resolved`/`abbreviation_artifact` buckets are summarized by count
+  only, not kept at full 14MB) for a future pass rather than silently dropped.
+
+**1,350 new `klal_flag` decisions total this pass** (320 + 1,030), all
+`needs_revisit: true`, all carrying the standard "textual/frequency evidence
+only, not scan-verified" framing - exactly the same propose-for-review
+pattern every other `ai-*` reviewer in this project uses, never an applied
+correction.
+
+**IMPORTANT, must not be missed**: `pipeline/review_server.py` is **Part-1-only**
+today (`_load_klalim()` only ever reads `part1.json` - see its own top-of-file
+comment). All 1,350 decisions above are correctly recorded in
+`review_decisions.jsonl` and will be picked up instantly by any future Parts
+2-3-aware dashboard, but **none of them are visible or actionable in the
+dashboard as it exists right now** - klal 556 (or any Parts 2-3 klal_id)
+simply isn't in `api_klalim()`'s output, so it can't appear in the nav, and
+`api_klal(556)` returns `None`. "Surfaced for human adjudication" is only
+half-true until the dashboard itself is extended to serve Parts 2-3 - flagged
+here explicitly rather than left for the user to discover by clicking around
+and finding nothing. Extending `review_server.py` to Parts 2-3 was not done in
+this pass (a genuinely separate, non-trivial piece of work - every endpoint
+assumes one corpus file) and needs its own scoping decision.
+
+197/197 pytest.
+
 ### DONE 2026-08-17 — documentation pass: CASE-YAD-MALACHI.md and VERIFIED-AGAINST-THE-INK.html cleaned up and refreshed against live data; new PIPELINE-DATA-REFERENCE.md written; confirmed CASE doc's images are correctly linked
 
 Per direct user request. Four parts:
