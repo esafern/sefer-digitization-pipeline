@@ -1173,11 +1173,13 @@
   },
   {
     "klal_id": 129,
-    "page": 47,
+    "page": 48,
     "expected_gematria": "קכט",
     "stored_gematria": "קכט",
-    "content_match_ratio": null,
-    "status": "marker_not_found_in_window"
+    "content_match_ratio": 0.875,
+    "status": "ok",
+    "marker_position": 843,
+    "note": "2026-08-17: page/marker_position corrected via pipeline/build_gematria_trace.py, independently re-verified directly against docai_word_boxes/page_48.json token 843 (exact \"קכט\") before applying. Old page:47 attribution was stale (status was marker_not_found_in_window because the search looked on the wrong page)."
   },
   {
     "klal_id": 130,
@@ -1665,6 +1667,16 @@
     "status": "ok"
   },
   {
+    "klal_id": 180,
+    "page": 67,
+    "expected_gematria": "קף",
+    "stored_gematria": "קף",
+    "marker_position": 319,
+    "status": "ok",
+    "content_match_ratio": 0.875,
+    "note": "2026-08-17: added via pipeline/build_gematria_trace.py - klal 180 (split out from a neighbor in the 2026-08-06 boundary-fix work) was never in this trace at all until now. Independently re-verified directly against docai_word_boxes/page_67.json token 319 (exact \"קף\") before applying."
+  },
+  {
     "klal_id": 181,
     "page": 67,
     "expected_gematria": "קפא",
@@ -1672,6 +1684,16 @@
     "content_match_ratio": 1.0,
     "marker_position": 445,
     "status": "ok"
+  },
+  {
+    "klal_id": 182,
+    "page": 67,
+    "expected_gematria": "קפב",
+    "stored_gematria": "קפכ",
+    "marker_position": 576,
+    "status": "marker_found_content_mismatch",
+    "content_match_ratio": 0.75,
+    "note": "2026-08-17: added via pipeline/build_gematria_trace.py - klal 182 (split out from a neighbor in the 2026-08-06 boundary-fix work) was never in this trace at all until now. Independently re-verified directly against docai_word_boxes/page_67.json token 576: DocAI reads \"קפכ\" (200) where \"קפב\" (182) is expected - a ב/כ misread, same confusion family already confirmed elsewhere in this corpus - but the position itself (right margin, x1=0.825) is trustworthy."
   },
   {
     "klal_id": 183,
@@ -1741,13 +1763,13 @@
   },
   {
     "klal_id": 190,
-    "page": 68,
-    "marker_position": null,
+    "page": 69,
+    "marker_position": 378,
     "expected_gematria": "קץ",
     "stored_gematria": "קץ",
     "status": "ok",
     "content_match_ratio": null,
-    "note": "2026-08-06: never in this trace before (was a placeholder, 'marker_not_found_in_window'). Real marker is the word-final-letter spelling קץ (=190, same value as קצ), sitting inside what was klal 189's stored text. marker_position not re-derived as a raw token index (this klal was split by string, not by token-span reconstruction) - if this field is needed later, locate 'קץ' as a genuine title-context word in page 68's tokens, not by exact-string search for 'קצ' alone."
+    "note": "2026-08-06: never in this trace before (was a placeholder, 'marker_not_found_in_window'). Real marker is the word-final-letter spelling קץ (=190, same value as קצ), sitting inside what was klal 189's stored text. marker_position not re-derived as a raw token index (this klal was split by string, not by token-span reconstruction) - if this field is needed later, locate 'קץ' as a genuine title-context word in page 68's tokens, not by exact-string search for 'קצ' alone. UPDATED 2026-08-17: marker_position now derived and independently re-verified directly against docai_word_boxes/page_69.json token 378 (exact \"קץ\", right-margin position, immediately followed by \"הלכה כדברי המקיל\" - a coherent klal opening) before applying, per this note's own earlier suggestion. Page corrected 68->69 to match."
   },
   {
     "klal_id": 191,
@@ -1775,6 +1797,16 @@
     "content_match_ratio": 0.875,
     "marker_position": 648,
     "status": "ok"
+  },
+  {
+    "klal_id": 194,
+    "page": 70,
+    "expected_gematria": "קצד",
+    "stored_gematria": "קצר",
+    "marker_position": 5,
+    "status": "marker_found_content_mismatch",
+    "content_match_ratio": 1.0,
+    "note": "2026-08-17: added via pipeline/build_gematria_trace.py - klal 194 (split out from a neighbor in the 2026-08-06 boundary-fix work) was never in this trace at all until now. Independently re-verified directly against docai_word_boxes/page_70.json token 5: DocAI reads \"קצר\" where \"קצד\" (194) is expected - a ד/ר misread, same confusion family already confirmed elsewhere in this corpus - but content_match_ratio 1.0 (the text immediately following exactly matches klal 194's own stored opening) strongly confirms the position itself."
   },
   {
     "klal_id": 195,

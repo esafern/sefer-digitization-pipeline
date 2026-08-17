@@ -54,6 +54,24 @@
     "vision_reasoning": "The text clearly reads 'ומיהו' (a common Rabbinic connective word meaning 'however/nevertheless'). In context, it introduces the counter-opinion: 'משמע דלאו דחיה היא • ומיהו ראיתי להגר\"ש...'. Visually, the characters are Vav, Mem, Yod, He, Vav. Option A ('ומידו') is a clear OCR error mistaking the He-Vav sequence."
   },
   {
+    "klal_id": 2,
+    "page": 14,
+    "opcode": "replace",
+    "word_index_in_final_text": 109,
+    "original_word": "אטינא",
+    "corrected_word": "אמינא",
+    "bbox": {
+      "x1": 0.5603715181350708,
+      "y1": 0.8286868929862976,
+      "x2": 0.6080495119094849,
+      "y2": 0.8404040336608887
+    },
+    "vision_selected": "B",
+    "vision_transcription": "אמינא",
+    "vision_confidence": 1.0,
+    "vision_reasoning": "The context of the sentence is 'ומ\"מ אמינא שבהדיא איתא הכי...' (And nevertheless I say that it is explicitly so...), where 'אמינא' (Aramaic for 'I say') is the correct and standard Rabbinic phrase. Paleographically, the second letter is a standard Hebrew 'מ' (Mem) which the OCR engine mistook for a 'ט' (Tet)."
+  },
+  {
     "klal_id": 3,
     "page": 15,
     "opcode": "replace",
@@ -133,9 +151,9 @@
       "y2": 0.9147287011146545
     },
     "vision_selected": "UNCERTAIN",
-    "vision_transcription": "סי' צ\"י",
-    "vision_confidence": 0.9,
-    "vision_reasoning": "The crop clearly contains Hebrew text on the top line (such as \"סי' צ\"י\") and a mark/character on the second line. Option A (\"1\") is an OCR misinterpretation of the small mark below, and Option B incorrectly asserts no text exists. Neither candidate option correctly represents the visible Hebrew text."
+    "vision_transcription": "סי' צ\"ד",
+    "vision_confidence": 0.95,
+    "vision_reasoning": "The image clearly contains the Hebrew text 'סי׳ צ״ד׳ (with the letter dalet 'ד' printed in a split or broken form where the horizontal bar is on the top line and its vertical leg is printed below it). Neither Option A ('1') nor Option B ('nothing') accurately represents this text, which corresponds directly to 'סי׳ צ״ד' (referring to Siman 94 of Chavat Yair) as indicated by the surrounding context."
   },
   {
     "klal_id": 5,

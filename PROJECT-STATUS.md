@@ -15,6 +15,68 @@ current handoff, re-written (not just appended to) as state changes.
 
 ## ►► SESSION HANDOFF — read this first, 2026-08-16 (continued into 2026-08-17)
 
+### DONE 2026-08-17 — klal 4 word 36 corrected (טרור→טהור), a data issue: user-recorded manual_correction applied via `apply_reviewer_decisions.py`
+
+User recorded the correction directly via the review dashboard (word 36:
+טרור→טהור), confirming an already-vision-verified candidate (decision
+5d65c7612a3c, `ai-vision-verify-flagged-candidates`, 2026-08-16, conf 0.98
+"CANDIDATE CORRECTION SUPPORTED" - the visible ה construction distinguishes
+it from the stored ר). Applied via `apply_reviewer_decisions.py` (1 applied,
+189 already-promoted skipped as no-ops, 10 pre-existing drifted decisions
+correctly left untouched pending separate human review - unrelated to this
+fix). `./rebuild_all.sh` clean after, 174/174.
+
+Note-quality aside, not a corpus issue: this decision's note initially read
+as a copy-paste of the unrelated backfill-script template (mismatched
+`decision_type`/reviewer), which could have been mistaken for leftover test
+data - corrected in place (uncommitted at the time, so no append-only-history
+concern) to accurately describe it as the user's own dashboard action.
+
+### DONE 2026-08-17 — Parts 2-3 infra item 2: `docai_word_boxes/` extended to full gapless coverage (pages 1-249, was 1-235 estimate); 5 verified `gematria_trace_part1.json` corrections applied (klal 129, 190, 180, 182, 194); `klal_page_regions.json` rebuilt (206→211 marker-anchored)
+
+Per the user's "go ahead with 1 2 3 4" directive under the 2026-08-17
+infrastructure-only Parts 2-3 authorization (CLAUDE.md's gate note) - this is
+item 2 of that list ("apply 5 verified corrections to
+`gematria_trace_part1.json`"), plus the extraction-coverage groundwork item 2
+depended on.
+
+**Physical extent of the whole 667-klal work, confirmed by direct rendering,
+not estimate**: scouted the PDF directly and found page 247 is the literal
+end - klal 666/667 followed by the traditional closing benediction "סליקו
+כללי התיו וסליקו כללי הגמרא... בעורת האל הגדול הגבור והנורא" and a printer's
+colophon. Page 250 is confirmed separate back matter (an index, "מפתחות על
+כללי הגמרא"), not part of the klalim proper. `docai_word_boxes/` extended in
+two passes this session (82→235 as a rough estimate, then 235→249 once the
+true end was located) for full gapless coverage 1-249, 0 extraction failures
+either pass.
+
+**5 `gematria_trace_part1.json` corrections, each independently re-verified
+against raw `docai_word_boxes` tokens before applying** (per Lesson 19 - a
+trace-builder agent's claim is not applied on its say-so alone): klal 129
+(page 47→48, marker_position=843), klal 190 (page 68→69, marker_position
+added=378) - both already verified earlier this session; klal 180, 182, 194
+newly verified this pass and added as brand-new entries (previously entirely
+absent from the trace file) - klal 180 page 67 token 319 exact "קף" match;
+klal 182 page 67 token 576 "קפכ" for expected "קפב" (ב/כ misread, status
+`marker_found_content_mismatch`); klal 194 page 70 token 5 "קצר" for expected
+"קצד" (ד/ר misread, status `marker_found_content_mismatch`). Total trace
+entries 219→222. Cross-checked against `part1_header_anchored_alignment.json`
+after applying - all 5 already agree independently (matched_page 48/69/67/
+67/70, all `trusted: true`), consistent rather than contradictory.
+
+`klal_page_regions.json` rebuilt off the corrected trace: 206→211
+marker-anchored (211-206=5, exactly the 5 klalim just fixed), 16→11 heuristic
+fallback. Full `pytest tests/ -q`: 188 passed. `./rebuild_all.sh` (with
+vision, not skip-vision): completed clean, "174 passed", "== done ==".
+
+Item 3 (resume throttled Parts 2-3 vision-adjudication pass) and item 4 (the
+14 high-value garbled-text leads in Parts 2-3 - klal 281, 282, 299, 300, 374,
+389, 408, 412, 482, 510, 543, 549, 613, 634) still open. Item 4 needs its own
+separate explicit go-ahead before writing any actual correction to `part2/
+3.json`, per CLAUDE.md's gate note - "go ahead with 1 2 3 4" authorized this
+infrastructure work, not yet confirmed to extend to applying Parts 2-3
+corpus corrections.
+
 ### DONE 2026-08-17 — retroactive backfill: 65 pre-existing AI-pass findings pushed into word-level highlighting (the "not started here" question from bug #1's entry, now resolved); a mandatory drift check caught 49 more that would have highlighted the wrong or now-nonexistent word
 
 Per direct user request, following on from the two review-harness bugs
