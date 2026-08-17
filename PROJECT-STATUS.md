@@ -15,6 +15,84 @@ current handoff, re-written (not just appended to) as state changes.
 
 ## ►► SESSION HANDOFF — read this first, 2026-08-16 (continued into 2026-08-17)
 
+### DONE 2026-08-17 — documentation pass: CASE-YAD-MALACHI.md and VERIFIED-AGAINST-THE-INK.html cleaned up and refreshed against live data; new PIPELINE-DATA-REFERENCE.md written; confirmed CASE doc's images are correctly linked
+
+Per direct user request. Four parts:
+
+**`CASE-YAD-MALACHI.md`**: named Halachipedia explicitly in the bottom-line
+callout (was "contemporary halacha," vague); clarified "three in clean
+square type" to "three of the four editions" (was ambiguous against the
+table's five *scans*); led the Cost section with "the real cost is the
+*first* text" instead of burying it in a trailing clause; struck every
+`RESTORED`/`CORRECTED`/`REWRITTEN`/`ADDED 2026-08-16` version-history
+comment throughout (an external-facing case document, not an audit log -
+CLAUDE.md/PROJECT-STATUS.md's philosophy of keeping correction history
+doesn't apply here), rewriting the surrounding prose to state current
+facts directly. Updated the stale Parts 2-3 status: the doc said
+scan-to-text alignment "exists today only for Part 1" and Parts 2-3 "need
+the same alignment built" - both now false since today's Parts 2-3
+scan-linkage infrastructure work (marker-position verification via
+`gematria_trace_part2/3.json`, corpus-wide) - reworded to say alignment is
+now corpus-wide and what's still missing is the scan-region + correction-
+adjudication layer specifically, in both "Current state" and "The ask."
+
+**Refreshed the correction-candidate stats against live data**, not the
+number that was written when the doc was drafted: `corrections_part1.json`
+now holds 387 candidates across 149 klalim (was cited as 356/138); of the
+127 still genuinely open (undecided, machine-disputed) today, 91 already
+carry a vision verdict, 90 at ≥0.9 confidence (was cited as "316 of 356
+open... 315 at ≥0.9" - a materially different framing, since "356" in the
+old text was itself the *open* count, not the total, and today's open
+count is 127, not 356 - the pool really has kept shrinking as the doc's own
+prose already said). Same three numbers corrected in
+`VERIFIED-AGAINST-THE-INK.html`'s ledger and inline JSON sample, plus its
+own Parts 2-3 ledger row reworded the same way as the CASE doc's.
+
+**Confirmed the CASE doc's two images ARE correctly linked** - user asked
+directly ("are the images linked? I don't see them in markdown"). Both
+`images/yad-malachi-berlin-title.png` and `images/yad-malachi-berlin-klal-
+aleph.png` exist on disk, are valid PNGs, are git-tracked (confirmed via
+`git ls-files`), and the markdown `![...](images/...)` syntax referencing
+them is syntactically correct with the right relative path from repo root.
+If they're not rendering in whatever the user was viewing the file in,
+that's a viewer/context issue, not a defect in the document itself -
+flagged back to the user rather than assumed fixed.
+
+**`CORPUS-COMPARISON.md`** (new, added by the user mid-pass, explicitly "not
+a live link, will go stale eventually") directly confirmed three footnote
+claims that had been sitting caveated as "not independently re-verified":
+the 243-citation/#6-ranking Halachipedia figures, and the "~⅓ of every
+citation Sefaria lacks" R. Ovadia Yosef concentration (confirmed exactly:
+~2,300 of 6,771 absent citations there). The "next public-domain work,
+Birkei Yosef, trails at 129" claim is NOT in this file (its own "newly
+surfaced" section only covers works not already known from an earlier,
+smaller sample) and stays caveated - updating a caveat only where the
+evidence actually supports it, not blanket-clearing every "not verified"
+note because one supporting file reappeared.
+
+**`VERIFIED-AGAINST-THE-INK.html`**: stat refresh above, plus a light
+tightening pass on the two densest paragraphs (the klal 82/83 boundary
+explanation, the alef-lamed ligature explanation) - trimmed redundant
+clauses, kept every fact and the existing voice, did not rewrite the
+already-tight sections. All 16 embedded (base64, self-contained) images
+confirmed still present and unchanged after editing.
+
+**New: `PIPELINE-DATA-REFERENCE.md`** - a from-scratch technical reference
+walking through every live pipeline JSON/JSONL file in flow order
+(`docai_word_boxes/page_N.json` through `review_decisions.jsonl`), each
+with one real sample record pulled from the live files (not invented) and
+a field-by-field table. Surfaced and documents a genuinely confusing detail
+worth having on record: `corrections_candidates_part1.json`'s
+`original_word`/`corrected_word` fields are inverted from what their names
+suggest - `original_word` is actually Document AI's fresh OCR reading and
+`corrected_word` is actually the corpus's CURRENTLY STORED text, not a
+proposed fix; verified against `build_corrections_dataset.py`'s actual
+SequenceMatcher call and cross-checked against a live example (klal 1 word
+85) before writing it down, not inferred from the field names. Downstream
+stages rename these to the clearer `docai_reading`/`final_text`, which the
+doc calls out explicitly. Also verified `rebuild_all.sh`'s exact 6-stage
+order directly against the script before citing stage numbers.
+
 ### DONE 2026-08-17 — all 4 flagged review-server UX gaps fixed and browser-verified live (word-level ai_flag counts, flag-button/nav consistency, decision history, a real reachable "Correction on record"/null-value bug the original flagging missed)
 
 Closes the 4 items the heavy-agent refactor pass flagged for human triage

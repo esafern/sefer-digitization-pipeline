@@ -5,13 +5,15 @@ relied upon but has no public digital text._
 
 > **Bottom line.** *Yad Malachi* is the **#1 public-domain work Sefaria lacks** — cited
 > **287 times inside Sefaria's own corpus** (every one a dead link) and **243 times** in
-> contemporary halacha. It is public domain, and **four editions in five scans are
-> already in hand** (three in clean square type). All 667 numbered *klalim* are OCR'd
-> and structured, and **Part 1** (*Klalei HaGemara*, 222 klalim) has already reached
-> full-corpus-scale, image-grounded AI adjudication — not a pilot anymore (see
-> ["Current state"](#current-state) for the verified numbers). **Current step:**
+> **Halachipedia**[^halachipedia] (an open compendium of contemporary halachic analysis).
+> It is public domain, and **four editions in five scans are already in hand** — three
+> of the four editions in clean square type, the kind general OCR reads best. All 667
+> numbered *klalim* are OCR'd and structured, and **Part 1** (*Klalei HaGemara*, 222
+> klalim) has already reached full-corpus-scale, image-grounded AI adjudication — not a
+> pilot anymore (see ["Current state"](#current-state) for the verified numbers).
+> Marker-position verification already reaches all three parts. **Current step:**
 > independent outside confirmation that Part 1's output is clean, then extending the
-> same scan-to-text alignment and adjudication to Parts 2–3.
+> same scan-region and adjudication rigor to Parts 2–3.
 
 ## The work
 
@@ -25,14 +27,8 @@ the tradition, reached for whenever a question of method arises:
 
 ![Title page of the Berlin edition of Yad Malachi, naming the three parts Klalei HaGemara, Klalei HaPoskim, and Klalei HaDinim](images/yad-malachi-berlin-title.png)
 
-_Berlin edition title page — the three parts and the author. **RESTORED 2026-08-16**:
-regenerated directly from `berlin_square_corrected.pdf` (page 6), since the original
-image was never actually trackable — `images/*.png` sits under this repo's blanket
-`.gitignore` PNG rule with no exception, so this reference was broken from the day it
-was written, on every clone but the one that made it. Fixed both directions: the image
-now exists and is tracked (a specific `.gitignore` exception, matching the precedent
-already set for the two source PDFs), not just re-linked to a file that still
-wouldn't survive a fresh clone._
+_Berlin edition title page — the three parts and the author. Rendered directly from
+`berlin_square_corrected.pdf`, page 6._
 
 ## Why it matters
 
@@ -103,18 +99,15 @@ layer, but it is **not good enough to use** (see *Process*) — the work is to O
 | **Przemyśl 1888**[^p1888] | Żupnik, Knoller & Hamerschmidt | **Square** | Google Books | 373 |
 
 The three later editions bind all three parts and are set in **clean square type, not
-Rashi** — what general OCR reads best. Berlin's *Klalei HaGemara* opening (**RESTORED
-2026-08-16**, regenerated from `berlin_square_corrected.pdf` page 14, the same way as
-the title page above — **CORRECTED 2026-08-16, later**: this used to say the repo
-holds no Livorno scan; the user has since consolidated `scans/Hebrewbooks_org_32530.pdf`
-(348 pages, title page confirms `נדפס בליוורנו` and printer ר' משה עטיאס — this
-table's own HebrewBooks #32530 citation, now an actual file, not just a citation), so
-the Rashi-type side of the original side-by-side comparison is buildable when wanted,
-not chased further in this pass):
+Rashi** — what general OCR reads best. Berlin's *Klalei HaGemara* opening, rendered
+directly from `berlin_square_corrected.pdf`, page 14:
 
 ![The opening page of Klalei HaGemara (Aleph section) in the Berlin edition of Yad Malachi, in clean square Hebrew type](images/yad-malachi-berlin-klal-aleph.png)
 
-_Berlin's *Klalei HaGemara* opening — the cleanest square images to OCR._
+_Berlin's *Klalei HaGemara* opening — the cleanest square images to OCR. A Rashi-script
+side-by-side comparison is buildable from the Livorno first edition now in hand
+(`scans/Hebrewbooks_org_32530.pdf`, title page confirms `נדפס בליוורנו` and printer
+ר' משה עטיאס — this table's own HebrewBooks #32530 citation) whenever wanted._
 
 ## Process — ensemble OCR with AI adjudication
 
@@ -153,11 +146,6 @@ principle, not legal advice.)
 
 ## Current state
 
-**REWRITTEN 2026-08-16** — this section previously described an early, "in development"
-snapshot (a single-page pilot, 90 candidates adjudicated, a review interface not yet
-built) that is now badly out of date. What follows is checked directly against the live
-data, not carried forward from an earlier draft.
-
 A first pass over the full work — all three parts, 667 numbered *klalim* — was run via the
 **lean single-edition path**: extraction and cross-validation from the Berlin square-type
 scan (PDF text layer vs. Document AI), with iterative LLM-driven linguistic/lexicon cleanup
@@ -172,11 +160,10 @@ estimated:
 
 - **222 / 222** Part-1 klalim have a trusted page-to-klal alignment (up from a partial
   208/222 earlier in the project) — the scan-to-text mapping every crop depends on.
-- **316 of 356** currently-open flagged word-level candidates have been vision-adjudicated
-  against the actual scan crop, **315 of them at ≥0.9 confidence** — the model returns an
-  honest low-confidence "uncertain" rather than a fabricated guess when a crop is genuinely
-  too ambiguous to call. (The pool of *open* candidates has itself shrunk sharply as
-  corrections get applied — it started in the 700s.)
+- **127 flagged word-level candidates remain open** — down sharply from the high-700s as
+  corrections get applied — and **91 of those already carry a vision-model verdict against
+  the actual scan crop, 90 at ≥0.9 confidence.** The model returns an honest low-confidence
+  "uncertain" rather than a fabricated guess when a crop is genuinely too ambiguous to call.
 - **A systematic, corpus-wide OCR defect was found, root-caused, and fixed**: this print
   sets the letter pair *aleph-lamed* as a single ligature glyph that the OCR engine has no
   mapping for and reads as a bare *aleph*, silently dropping the *lamed* — confirmed by
@@ -202,30 +189,35 @@ estimated:
   suite (100+ tests) plus multiple independent code-revalidation passes checking the
   pipeline's own decision logic, not just its output.
 
-Scan-to-text alignment (the word bounding boxes the crop-and-verify step needs) exists
-today only for **Part 1**; Parts 2–3 (*Klalei HaPoskim*, *Klalei HaDinim* — 445 of 667
-klalim) need the same alignment built before they can reach equivalent rigor, and are
-deliberately **out of scope** until Part 1 is independently confirmed clean by an outside
-reviewer — not because the method doesn't generalize, but because Parts 2–3's own scan data
-has already been observed to fail differently, and worse, than Part 1's on at least two
-unrelated defect classes, so a clean Part 1 is not by itself evidence Parts 2–3 will come
-out equally clean by the same process.
+Marker-position verification — where each klal's own gematria marker sits on the scan,
+and whether the text after it matches what's stored — now reaches all three parts, not
+just Part 1. What Parts 2–3 (*Klalei HaPoskim*, *Klalei HaDinim* — 445 of 667 klalim)
+don't yet have is the layer built on top of that: trusted per-klal scan regions and the
+DocAI-vs-stored-text adjudication pass Part 1 already runs. Building and applying that —
+and any correction it finds — stays deliberately **out of scope** until Part 1 is
+independently confirmed clean by an outside reviewer — not because the method doesn't
+generalize, but because Parts 2–3's own scan data has already been observed to fail
+differently, and worse, than Part 1's on at least two unrelated defect classes, so a
+clean Part 1 is not by itself evidence Parts 2–3 will come out equally clean by the same
+process.
 
 ## Cost
 
-~340–460 pages (the square editions bind all three parts in ~340; the Livorno set is 348 +
-54 + 55).
+**The real cost is the *first* text — everything after is a few hundred dollars,**
+because the harness is reusable. ~340–460 pages (the square editions bind all three
+parts in ~340; the Livorno set is 348 + 54 + 55).
 
-- **One-time harness** (OCR-ensemble + alignment + adjudication): ~40–80 dev hrs,
-  **reusable** for every other PD work — the real cost of the *first* text.
+- **One-time harness** (OCR-ensemble + alignment + adjudication): ~40–80 dev hrs — spent
+  once, **reused** for every public-domain work after this one.
 - **Compute** (multi-engine OCR of the images + AI adjudication): low hundreds of dollars.
 - **Expert review** (flagged set, by a Talmid Chacham): ~5–10 hrs (~$150–350), versus
   ~25–45 to proofread every page.
 
-**Net:** the first work = harness + a few hundred dollars; each work after = a few hundred
-dollars, because the harness is reused. Output can beat any single historic printing. (The
-lean single-edition path skips the harness.) _Cost figures are estimates; page counts from
-the source catalogs; editions identified from the title pages transcribed in the footnotes._
+**Net:** this work = harness + a few hundred dollars. Every work after = a few hundred
+dollars alone, because the harness is already built. Output can beat any single historic
+printing. (The lean single-edition path skips the harness.) _Cost figures are estimates;
+page counts from the source catalogs; editions identified from the title pages
+transcribed in the footnotes._
 
 ## Preparing the text for Sefaria
 
@@ -262,9 +254,11 @@ Digitize Yad Malachi and place it in Sefaria — the top freely-digitizable work
    (*Klalei HaGemara*, 222/222 klalim aligned) through a working human-review dashboard —
    the next gate is a Talmid Chacham confirming the output independently, not this
    pipeline's own self-assessment, before anything downstream builds on it.
-2. **Extend scan alignment to Parts 2–3** so the same rigor is possible there, then repeat
-   the adjudication pass — deliberately not started before (1), since Parts 2–3's own scan
-   data has already shown it can fail differently, and worse, than Part 1's.
+2. **Extend the alignment and correction pipeline to Parts 2–3.** Marker-position
+   verification is already built corpus-wide; what's left is the per-klal scan regions
+   and the DocAI-vs-stored-text adjudication pass Part 1 already has — deliberately not
+   started before (1), since Parts 2–3's own scan data has already shown it can fail
+   differently, and worse, than Part 1's.
 3. **Coordinate ingest** with Sefaria (**hello@sefaria.org**), attaching each printing as
    its own version.
 
@@ -283,12 +277,12 @@ the cost of every public-domain work after this one.
     breakdown in the table (Ayin Zokher 118, Petach Einayim 17, Shem HaGedolim 13,
     Pardes Yosef 11, Kaf HaChayim 9, Rosh David 8, and the further works listed).
 
-[^halachipedia]: This project's citation survey of Halachipedia (a large contemporary
-    English-language halachic reference): **243** direct citations of Yad Malachi by
-    its numbered klalim, in the full 640-page corpus. **CORRECTED 2026-08-16**: the
-    supporting analysis file this note originally cited (`data/CORPUS-COMPARISON.md`)
-    is not currently in the repo, so this count could not be re-verified during this
-    pass — presenting it as originally researched, not re-checked.
+[^halachipedia]: Halachipedia (halachipedia.org) — an open, contemporary,
+    English-language halachic wiki/compendium. This project's citation survey of its
+    full 640-page corpus found **243** direct citations of Yad Malachi by its numbered
+    klalim — confirmed against `CORPUS-COMPARISON.md` (kept in this repo for
+    reference, not a live link to the underlying Halachipedia corpus, so it will go
+    stale if that corpus changes).
 
 [^brown]: Benjamin Brown (Hebrew University of Jerusalem), *"'Some say this, some say
     that': Pragmatics and discourse markers in Yad Malachi's interpretation rules,"*
@@ -317,30 +311,30 @@ the cost of every public-domain work after this one.
     *klalei ha-hora'ah* — the rules of pesak governing the Rif/Rambam/Rosh and the
     Mechaber (e.g. webyeshiva.org, "Rabbi Ovadia Yosef's Halakhic Methodology";
     Nishmat; R. Chaim Jachter, Kol Torah) — which is Yad Malachi's exact domain. The
-    demand figures are this project's Halachipedia analysis; the same-footnote
-    co-citations (Yad Malachi with Taharat HaBayit and Yabia Omer) are from the
-    Halachipedia corpus, cached at the time in a directory this note called
-    `pipeline/hp_cache` — an EARLIER, unrelated use of the word "pipeline" for a
-    one-off citation-research cache, not this project's current `pipeline/` directory
-    (the live OCR/correction system — see `CLAUDE.md`'s "Directory layout"). Neither
-    that cache nor `CORPUS-COMPARISON.md` is currently in the repo, so this note's
-    specific figures were not re-verified during the 2026-08-16 pass that corrected
-    this ambiguity. **Caveat:** a direct citation count from *within* R. Ovadia's own
-    works could not be machine-verified — they are not in a free, searchable digital
-    corpus — so this is a qualitative observation grounded in his documented method
-    and in contemporary co-citation, not a counted statistic.
+    "~⅓ of every citation Sefaria lacks" figure is confirmed against
+    `CORPUS-COMPARISON.md` (kept in this repo for reference; see the Halachipedia
+    footnote above on staleness): R. Ovadia Yosef's circle (Yalkut Yosef, Chazon
+    Ovadyah, Yabia Omer, Yechave Daat, Halacha Brurah, Taharat HaBayit) accounts for
+    ~2,300 of 6,771 absent citations there — a third of the entire demand signal,
+    one beit midrash. A direct citation count from *within* R. Ovadia's own works
+    could not be machine-verified — they are not in a free, searchable digital
+    corpus — so beyond that concentration figure, this remains a qualitative
+    observation grounded in his documented method and in contemporary co-citation,
+    not a counted statistic.
 
 [^mostwanted]: Per this project's citation analysis of the full 640-page Halachipedia
     corpus: among the works Sefaria does **not** have, Yad Malachi (243 citations)
-    ranks **#6 overall and #1 of the public-domain tier** — the next public-domain
-    work, Birkei Yosef, trails at 129. The five works ahead of it overall are all
-    modern, in-copyright works (Yalkut Yosef, Chazon Ovadyah, Igrot Moshe, Shemirat
-    Shabbat KeHilchata, Yabia Omer) that cannot be freely digitized; Yad Malachi is
-    the top work that can. **CORRECTED 2026-08-16**: the supporting analysis files
-    this note originally cited (`data/SEFARIA-MOST-WANTED.md`, `data/CORPUS-
-    COMPARISON.md`) are not currently in the repo, so this ranking could not be
-    re-verified during this pass — presenting it as originally researched, not
-    re-checked.
+    ranks **#6 overall and #1 of the public-domain tier** — both confirmed against
+    `CORPUS-COMPARISON.md` (kept in this repo for reference; see the Halachipedia
+    footnote above on staleness). The five works ahead of it overall are all modern,
+    in-copyright works (Yalkut Yosef, Chazon Ovadyah, Igrot Moshe, Shemirat Shabbat
+    KeHilchata, Yabia Omer) — `CORPUS-COMPARISON.md` confirms this same ranking and
+    this same five, at higher counts (945/573/485/409/320) than the original
+    citation. Yad Malachi is the top work that can be freely digitized. The specific
+    claim that the next public-domain work, Birkei Yosef, trails at 129 isn't in
+    `CORPUS-COMPARISON.md` (its own "newly surfaced" list only covers PD works that
+    weren't already known from an earlier, smaller sample) and so remains presented
+    as originally researched, not independently re-verified here.
 
 [^livorno]: **Livorno 1766–7, first edition** (HebrewBooks #32530 / #32532 / #32531).
     Title page: *ספר יד מלאכי*, by *מלאכי בכמ"ר יעקב הכהן*; the three parts (Klalei
@@ -372,10 +366,8 @@ the cost of every public-domain work after this one.
     abbreviations, and identifies sources, and its BEREL model is a rabbinic-Hebrew
     language model. See also English Wikipedia, "Dicta (organization)."
 
-[^ocrpd]: **ADDED 2026-08-16** — this reference marker existed in the text with no
-    matching note; found during a document-integrity pass and given a minimal one
-    here rather than left dangling. General principle, not legal advice (as the
-    surrounding paragraph itself already says): mechanical OCR of a public-domain
+[^ocrpd]: General principle, not legal advice (as the surrounding paragraph itself
+    already says): mechanical OCR of a public-domain
     text is a reproduction of the underlying work, not an original creative
     contribution, so it does not itself generate a new copyright over the resulting
     text — the same reasoning underlying *Bridgeman Art Library v. Corel Corp.*
@@ -384,10 +376,8 @@ the cost of every public-domain work after this one.
     scholarly additions, which the "Copyright" note above already treats as
     off-limits to reproduce.
 
-[^linker]: **ADDED 2026-08-16** — this reference marker also existed with no
-    matching note. The specific research behind "Sefaria's Auto-Linker builds links
-    from parseable citations" was not preserved in this repo, so this note cannot
-    supply the original citation — only confirm the claim is about a real, documented
-    Sefaria feature (its citation-parsing/auto-linking system), not invented for this
-    document. Verify directly against Sefaria's own documentation before relying on
-    the specific mechanics described in the surrounding paragraph.
+[^linker]: Sefaria's Auto-Linker is a real, documented feature of its
+    citation-parsing/auto-linking system. The specific research behind this note's
+    claim was not preserved in this repo; verify directly against Sefaria's own
+    documentation before relying on the specific mechanics described in the
+    surrounding paragraph.
