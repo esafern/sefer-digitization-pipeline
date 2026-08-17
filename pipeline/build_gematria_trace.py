@@ -161,6 +161,10 @@ VISION_RATIO_FLOOR = 0.15
 # unplaced by the position half of the test rather than by this threshold.
 CONTENT_ANCHOR_RATIO = 0.75
 
+# Fewer usable opening words than this and the content signal is not weak,
+# it is absent - see has_comparable_opening(). Half of CONTENT_WORDS.
+MIN_COMPARABLE_WORDS = 4
+
 # A printed klal numeral in this work is at most 4 letters (תרסז = 667). The
 # guard matters because tier 2 accepts whatever token precedes the anchored
 # opening: without it, an ordinary line-initial word (which shares the
@@ -329,6 +333,26 @@ def opening_forms(klal, n=CONTENT_WORDS):
         if norm:
             out.append((label, norm))
     return out
+
+
+def has_comparable_opening(klal, n=CONTENT_WORDS, min_words=MIN_COMPARABLE_WORDS):
+    """False when the corpus stores no usable opening for this klal, so the
+    content signal cannot decide anything - not "the content disagrees", but
+    "there is nothing to compare".
+
+    This is not a Yad-Malachi special case dressed up as a general rule; it
+    is the general rule, and this corpus happens to exercise it hard. 115 of
+    the 445 Parts 2-3 klalim (70 in Part 2, 45 in Part 3, none in Part 1)
+    store `clean_text` as literally "<numeral> כלל <klal_id>" with the title
+    "כלל <klal_id>" - placeholders for text that was never extracted. That
+    figure and the full id list are already documented in
+    PROJECT-STATUS-HISTORY.md; it is quantified here only because it is what
+    a content-driven tracer runs into first.
+
+    Without this test those klalim look identical to a klal whose stored text
+    genuinely contradicts the scan, which is a completely different finding.
+    """
+    return any(len(words) >= min_words for _, words in opening_forms(klal, n))
 
 
 def content_match(got, klal, n=CONTENT_WORDS):
@@ -580,6 +604,54 @@ def resolve_klal(klal_id, klal, cursor, page_end, page_loader, order_cache,
 
     notes = []
     chosen, tier_label = None, None
+
+    # --- the corpus stores no text for this klal ----------------------------
+    # Every tier below weighs the numeral against the stored opening, and here
+    # there is no stored opening to weigh it against. Falling through would
+    # report `marker_not_found_in_window` for a marker sitting in plain sight,
+    # which is the opposite of useful to the pass that has to reconstruct
+    # these klalim's text from the scan. Located on the three signals that do
+    # still exist - exact numeral, marker x-band, position after the cursor -
+    # and NEVER promoted past marker_found_content_mismatch, because the one
+    # thing "ok" asserts is exactly the thing that cannot be checked here.
+    if not has_comparable_opening(klal, content_words):
+        positional = [c for c in near if c.tier == 0]
+        how = "exact numeral"
+        if not positional and vision_confirm:
+            # A MISREAD numeral plus a margin position is two signals, not
+            # three - not enough on its own. Vision supplies the third by
+            # reading the glyph directly, so this branch exists only when a
+            # vision adjudicator is available.
+            for cand in [c for c in near if c.tier == 1]:
+                if vision_confirm(klal, cand, page_loader(cand.page)) is True:
+                    positional, how = [cand], f"numeral read as {cand.text!r}, confirmed by vision crop"
+                    break
+        if positional:
+            cand = positional[0]
+            record = {
+                **base,
+                "page": cand.page,
+                "content_match_ratio": None,
+                "marker_position": cand.index,
+                "status": "marker_found_content_mismatch",
+            }
+            record["note"] = (
+                f"positional-only ({how}) at page {cand.page} token {cand.index}: the corpus "
+                f"stores no text for this klal (placeholder clean_text), so the marker was "
+                f"located by numeral, marker x-band and sequence alone and the stored text "
+                f"could not be checked at all - this is NOT a content disagreement")
+            return record, (cand.page, cand.rank)
+        record = {
+            **base,
+            "page": cursor[0],
+            "content_match_ratio": None,
+            "status": "marker_not_found_in_window",
+        }
+        record["note"] = (
+            f"the corpus stores no text for this klal (placeholder clean_text), and no "
+            f"exact {expected!r} in the marker x-band was found between the cursor and page "
+            f"{near_limit} - with no stored opening there is no second signal to fall back on")
+        return record, None
 
     # --- tier 0, full content agreement: accepted anywhere in the range -----
     exact_best, exact_clearing = pick(candidates, 0, ok_ratio)
