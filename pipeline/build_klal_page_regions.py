@@ -69,14 +69,31 @@ def load_trusted_klal_pages():
 
 def load_markers():
     """klal_id -> (page, marker_position) for every klal with a confirmed
-    real marker position - only status=='ok' entries are trustworthy
-    (see CLAUDE.md Lesson 3 on gematria_trace's own status field going
-    stale)."""
+    real marker position.
+
+    FIXED 2026-08-17 (bug, code - PROJECT-STATUS.md "klal_page_regions.json
+    continuation-bounds bug"): used to accept status=='ok' only, while
+    load_end_boundary_positions() below - in this SAME file - already
+    accepted 'marker_found_content_mismatch' too, with its own docstring
+    citing the established project convention (also used by
+    tools/check_klal_token_orphans.py) that both statuses "carry a real,
+    usable position," only 'marker_not_found_in_window' does not. That
+    inconsistency meant a klal like 167 (status 'marker_found_content_
+    mismatch', but its marker_position independently scan-verified - see
+    gematria_trace_part1.json's own note) was trusted as an END boundary
+    for its neighbor but NOT as a START anchor for itself, so it fell
+    through to the coarser heuristic_regions() fallback (no multi-page
+    continuation support at all) instead of getting a proper marker-
+    anchored, Y-banded region - producing exactly the "undersized region"
+    bug reported. Matching load_end_boundary_positions()'s filter here
+    fixes klal 167 and, consistently, klal 1/18/86/172 (the same five
+    entries load_end_boundary_positions() already trusted)."""
     trace = cio.load_gematria_trace(TRACE_PATH)
     return {
         e["klal_id"]: (e["page"], e["marker_position"])
         for e in trace
-        if e.get("status") == "ok" and e.get("marker_position") is not None
+        if e.get("status") in ("ok", "marker_found_content_mismatch")
+        and e.get("marker_position") is not None
     }
 
 

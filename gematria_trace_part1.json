@@ -1807,11 +1807,13 @@
   },
   {
     "klal_id": 198,
-    "page": 70,
+    "page": 71,
     "expected_gematria": "קצח",
     "stored_gematria": "קצח",
     "content_match_ratio": null,
-    "status": "marker_not_found_in_window"
+    "status": "ok",
+    "marker_position": 242,
+    "note": "2026-08-17: \"marker_not_found_in_window\" was wrong - the marker exists, correctly read as קצח (not misread, unlike klal 167/196/197), at page 71 token 242 - one page later than this entry's original page:70 attribution, which is presumably why the original search window missed it. Confirmed by direct token context (docai_word_boxes/page_71.json tokens 238-249): token 241 is a klal-closing colon (\":\"), token 242 is קצח at the right-margin marker x-position (x1=0.8185), followed immediately by a coherent new opening (השמר פן ואל אינו אלא לא תעשה). Found while fixing the klal_page_regions.json continuation-bounds bug for klal 197/198 (PROJECT-STATUS.md) - klal 197 had no valid end boundary because klal 198, the true next marker, was invisible to load_end_boundary_positions(), so it fell through to klal 199 instead and over-claimed all of klal 198's territory in between."
   },
   {
     "klal_id": 199,

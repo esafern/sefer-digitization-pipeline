@@ -298,6 +298,20 @@
       }
     },
     {
+      "klal_id": 17,
+      "page": 20,
+      "opcode": "delete",
+      "word_index_in_final_text": 308,
+      "original_word": "יח",
+      "corrected_word": null,
+      "bbox": {
+        "x1": 0.8610591888427734,
+        "y1": 0.42369478940963745,
+        "x2": 0.8828660249710083,
+        "y2": 0.43253013491630554
+      }
+    },
+    {
       "klal_id": 18,
       "page": 20,
       "opcode": "insert",
@@ -4408,6 +4422,160 @@
       }
     },
     {
+      "klal_id": 198,
+      "page": 71,
+      "opcode": "replace",
+      "word_index_in_final_text": 38,
+      "original_word": "והשיכוני",
+      "corrected_word": "והשיבוני",
+      "bbox": {
+        "x1": 0.460966557264328,
+        "y1": 0.35203877091407776,
+        "x2": 0.5216852426528931,
+        "y2": 0.36899474263191223
+      }
+    },
+    {
+      "klal_id": 198,
+      "page": 71,
+      "opcode": "replace",
+      "word_index_in_final_text": 71,
+      "original_word": "דדבר",
+      "corrected_word": "הדבר",
+      "bbox": {
+        "x1": 0.49070632457733154,
+        "y1": 0.3831247389316559,
+        "x2": 0.5291202068328857,
+        "y2": 0.3988696038722992
+      }
+    },
+    {
+      "klal_id": 198,
+      "page": 71,
+      "opcode": "replace",
+      "word_index_in_final_text": 181,
+      "original_word": "מההרא",
+      "corrected_word": "מההיא",
+      "bbox": {
+        "x1": 0.09479553997516632,
+        "y1": 0.47396042943000793,
+        "x2": 0.1480793058872223,
+        "y2": 0.4905127286911011
+      }
+    },
+    {
+      "klal_id": 198,
+      "page": 71,
+      "opcode": "replace",
+      "word_index_in_final_text": 192,
+      "original_word": "אחד",
+      "corrected_word": "אחר",
+      "bbox": {
+        "x1": 0.3667905926704407,
+        "y1": 0.4884941577911377,
+        "x2": 0.40024784207344055,
+        "y2": 0.5054501295089722
+      }
+    },
+    {
+      "klal_id": 198,
+      "page": 71,
+      "opcode": "replace",
+      "word_index_in_final_text": 230,
+      "original_word": "מאך",
+      "corrected_word": "מאד",
+      "bbox": {
+        "x1": 0.17162328958511353,
+        "y1": 0.5195801258087158,
+        "x2": 0.2050805389881134,
+        "y2": 0.5365361571311951
+      }
+    },
+    {
+      "klal_id": 198,
+      "page": 71,
+      "opcode": "replace",
+      "word_index_in_final_text": 364,
+      "original_word": "איזרו",
+      "corrected_word": "איזהו",
+      "bbox": {
+        "x1": 0.09975216537714005,
+        "y1": 0.6394832730293274,
+        "x2": 0.13940520584583282,
+        "y2": 0.6572466492652893
+      }
+    },
+    {
+      "klal_id": 198,
+      "page": 71,
+      "opcode": "replace",
+      "word_index_in_final_text": 403,
+      "original_word": "לי",
+      "corrected_word": "ל'",
+      "bbox": {
+        "x1": 0.586741030216217,
+        "y1": 0.6855066418647766,
+        "x2": 0.6003717184066772,
+        "y2": 0.7028663754463196
+      }
+    },
+    {
+      "klal_id": 198,
+      "page": 71,
+      "opcode": "replace",
+      "word_index_in_final_text": 412,
+      "original_word": "דוא",
+      "corrected_word": "הוא",
+      "bbox": {
+        "x1": 0.1734820306301117,
+        "y1": 0.6855066418647766,
+        "x2": 0.20136307179927826,
+        "y2": 0.7028663754463196
+      }
+    },
+    {
+      "klal_id": 198,
+      "page": 71,
+      "opcode": "replace",
+      "word_index_in_final_text": 453,
+      "original_word": "איבא",
+      "corrected_word": "אליבא",
+      "bbox": {
+        "x1": 0.5,
+        "y1": 0.7307226657867432,
+        "x2": 0.5384138822555542,
+        "y2": 0.7468712329864502
+      }
+    },
+    {
+      "klal_id": 198,
+      "page": 71,
+      "opcode": "replace",
+      "word_index_in_final_text": 475,
+      "original_word": "איביה",
+      "corrected_word": "אליביה",
+      "bbox": {
+        "x1": 0.1926889717578888,
+        "y1": 0.7448526620864868,
+        "x2": 0.23605948686599731,
+        "y2": 0.7630198001861572
+      }
+    },
+    {
+      "klal_id": 198,
+      "page": 71,
+      "opcode": "replace",
+      "word_index_in_final_text": 504,
+      "original_word": "דוי",
+      "corrected_word": "הוי",
+      "bbox": {
+        "x1": 0.36741015315055847,
+        "y1": 0.7751312255859375,
+        "x2": 0.38661709427833557,
+        "y2": 0.7900686264038086
+      }
+    },
+    {
       "klal_id": 199,
       "page": 72,
       "opcode": "replace",
@@ -5034,8 +5202,8 @@
     }
   ],
   "meta": {
-    "total_candidates": 373,
-    "klalim_covered": 147,
+    "total_candidates": 385,
+    "klalim_covered": 148,
     "skipped_no_docai_page_klalim": [],
     "unattributable_deletes": [],
     "untrusted_klalim_excluded": []

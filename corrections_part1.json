@@ -412,6 +412,24 @@
       "confidence": 0.98,
       "reasoning": "The crop clearly shows the prefix bet followed by a heh (with a left leg separated at the top in this rabbinic print typeface), lamed, yod, kaf, vav, and tav, forming the word 'בהליכות'. This matches the textual context referencing the famous work 'הליכות עולם' ('בהליכות עולם').",
       "flag": "current_text_confirmed"
+    },
+    {
+      "word_index": 308,
+      "opcode": "delete",
+      "docai_reading": "יח",
+      "final_text": null,
+      "page": 20,
+      "bbox": {
+        "x1": 0.8610591888427734,
+        "y1": 0.42369478940963745,
+        "x2": 0.8828660249710083,
+        "y2": 0.43253013491630554
+      },
+      "vision_selected": "A",
+      "vision_transcription": "יח",
+      "confidence": 0.98,
+      "reasoning": "The raster crop clearly displays two Hebrew characters, Yod ('י') on the right and Chet ('ח') on the left, forming the string 'יח' (often used as a section/paragraph marker or page number).",
+      "flag": "possible_omission"
     }
   ],
   "18": [
@@ -5982,6 +6000,206 @@
       "confidence": 0.95,
       "reasoning": "The visible text in line 3 reads 'ר' אעאי' with the letter 'ל' omitted in this printing (missing the character and its characteristic high ascender seen in 'תפילין' on the line below). Option A accurately reflects the actual raster crop reading.",
       "flag": "current_text_may_be_wrong"
+    }
+  ],
+  "198": [
+    {
+      "word_index": 38,
+      "opcode": "replace",
+      "docai_reading": "והשיכוני",
+      "final_text": "והשיבוני",
+      "page": 71,
+      "bbox": {
+        "x1": 0.460966557264328,
+        "y1": 0.35203877091407776,
+        "x2": 0.5216852426528931,
+        "y2": 0.36899474263191223
+      },
+      "vision_selected": "B",
+      "vision_transcription": "והשיבוני",
+      "confidence": 0.98,
+      "reasoning": "The visible word clearly shows 'והשיבוני', which fits the surrounding context 'ושאלתי לבני הישיבה והשיבוני דבר' ('and I asked the academy students, and they answered me...'). Paleographically, the letter after the yod is a 'bet' (ב) rather than a 'kaf' (כ).",
+      "flag": "current_text_confirmed"
+    },
+    {
+      "word_index": 71,
+      "opcode": "replace",
+      "docai_reading": "דדבר",
+      "final_text": "הדבר",
+      "page": 71,
+      "bbox": {
+        "x1": 0.49070632457733154,
+        "y1": 0.3831247389316559,
+        "x2": 0.5291202068328857,
+        "y2": 0.3988696038722992
+      },
+      "vision_selected": "A",
+      "vision_transcription": "דדבר",
+      "confidence": 0.95,
+      "reasoning": "Paleographically, the word clearly shows two consecutive 'ד' (dalet) characters followed by 'ב' and 'ר' ('דדבר'). The first letter lacks any left vertical stroke or foot characteristic of a 'ה' (he), making Option A ('דדבר') the precise reading.",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 181,
+      "opcode": "replace",
+      "docai_reading": "מההרא",
+      "final_text": "מההיא",
+      "page": 71,
+      "bbox": {
+        "x1": 0.09479553997516632,
+        "y1": 0.47396042943000793,
+        "x2": 0.1480793058872223,
+        "y2": 0.4905127286911011
+      },
+      "vision_selected": "B",
+      "vision_transcription": "מההיא",
+      "confidence": 0.95,
+      "reasoning": "The contextual phrase is 'מההיא דאמרינן' ('from that [statement] which we say'), a standard Aramaic Talmudic introductory formula. Paleographically, the second to last character before the final Aleph (א) is a narrow vertical stroke representing a Yod (י), not a Resh (ר). Option B accurately reflects both the visible printed text and the required Rabbinic syntax.",
+      "flag": "current_text_confirmed"
+    },
+    {
+      "word_index": 192,
+      "opcode": "replace",
+      "docai_reading": "אחד",
+      "final_text": "אחר",
+      "page": 71,
+      "bbox": {
+        "x1": 0.3667905926704407,
+        "y1": 0.4884941577911377,
+        "x2": 0.40024784207344055,
+        "y2": 0.5054501295089722
+      },
+      "vision_selected": "A",
+      "vision_transcription": "אחד",
+      "confidence": 0.95,
+      "reasoning": "The center word clearly shows an Aleph, Het, and Dalet ('אחד'). Paleographically, the final letter has a sharp right-angled corner with a characteristic overhang on the top right, distinguishing it as a Dalet ('ד') rather than a Resh ('ר'). Contextually, this matches the Talmudic quote from Menachot 99b: 'כל המשכח דבר אחד מלימודו'.",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 230,
+      "opcode": "replace",
+      "docai_reading": "מאך",
+      "final_text": "מאד",
+      "page": 71,
+      "bbox": {
+        "x1": 0.17162328958511353,
+        "y1": 0.5195801258087158,
+        "x2": 0.2050805389881134,
+        "y2": 0.5365361571311951
+      },
+      "vision_selected": "B",
+      "vision_transcription": "מאד",
+      "confidence": 0.99,
+      "reasoning": "The image clearly displays the word 'מאד' (from the verse Deut. 4:9 cited in the text: 'רק השמר לך ושמור נפשך מאד פן'). Paleographically, the final letter has the characteristic sharp top-right corner overhang of a dalet (ד), distinguishing it from a khaf (כ/ך). Option A ('מאך') is a misreading by OCR.",
+      "flag": "current_text_confirmed"
+    },
+    {
+      "word_index": 364,
+      "opcode": "replace",
+      "docai_reading": "איזרו",
+      "final_text": "איזהו",
+      "page": 71,
+      "bbox": {
+        "x1": 0.09975216537714005,
+        "y1": 0.6394832730293274,
+        "x2": 0.13940520584583282,
+        "y2": 0.6572466492652893
+      },
+      "vision_selected": "B",
+      "vision_transcription": "איזהו",
+      "confidence": 0.98,
+      "reasoning": "The image shows the word 'איזהו' (from the famous Mishnah chapter heading 'איזהו נשך' in Bava Metzia). Paleographically, the fourth letter is a Hebrew 'ה' (heh) whose left leg is slightly faint/joined, which caused the raw OCR (Option A) to misread it as 'ר' ('איזרו'). The Rabbinic context confirms Option B ('איזהו').",
+      "flag": "current_text_confirmed"
+    },
+    {
+      "word_index": 403,
+      "opcode": "replace",
+      "docai_reading": "לי",
+      "final_text": "ל'",
+      "page": 71,
+      "bbox": {
+        "x1": 0.586741030216217,
+        "y1": 0.6855066418647766,
+        "x2": 0.6003717184066772,
+        "y2": 0.7028663754463196
+      },
+      "vision_selected": "B",
+      "vision_transcription": "ל'",
+      "confidence": 0.95,
+      "reasoning": "The text context corresponds to 'הלכה ל' שכתב', referring to Halakha 30 (represented by the Hebrew numeral 'ל' with a geresh abbreviation mark). While OCR (Option A) misinterprets the geresh following the lamed as a yod ('לי'), contextually and Rabbinically Option B ('ל'') is the correct transcription.",
+      "flag": "current_text_confirmed"
+    },
+    {
+      "word_index": 412,
+      "opcode": "replace",
+      "docai_reading": "דוא",
+      "final_text": "הוא",
+      "page": 71,
+      "bbox": {
+        "x1": 0.1734820306301117,
+        "y1": 0.6855066418647766,
+        "x2": 0.20136307179927826,
+        "y2": 0.7028663754463196
+      },
+      "vision_selected": "B",
+      "vision_transcription": "הוא",
+      "confidence": 1.0,
+      "reasoning": "The visible word in the center line clearly shows the Hebrew letters ה (Hey), ו (Vav), and א (Aleph), spelling 'הוא'. The letter Hey has a clear left stroke separated from the roof/right leg, which distinguishes it from Dalet ('דוא' is also not a standard Hebrew word in this context). This matches the surrounding context 'וחטא גדול הוא'.",
+      "flag": "current_text_confirmed"
+    },
+    {
+      "word_index": 453,
+      "opcode": "replace",
+      "docai_reading": "איבא",
+      "final_text": "אליבא",
+      "page": 71,
+      "bbox": {
+        "x1": 0.5,
+        "y1": 0.7307226657867432,
+        "x2": 0.5384138822555542,
+        "y2": 0.7468712329864502
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אליבא",
+      "confidence": 1.0,
+      "reasoning": "The crop displays the word 'אליבא' preceding 'ד' (abbreviation for דר\"ל) on line 3, following the final mem ('ם') of 'הכפורים'. Paleographically, the tall ascender of the letter Lamed ('ל') is clearly visible extending upwards into the interlinear space between lines 2 and 3. Contextually, this matches the Rabbinic phrase 'אליבא דר\"ל' (according to Resh Lakish).",
+      "flag": "current_text_confirmed"
+    },
+    {
+      "word_index": 475,
+      "opcode": "replace",
+      "docai_reading": "איביה",
+      "final_text": "אליביה",
+      "page": 71,
+      "bbox": {
+        "x1": 0.1926889717578888,
+        "y1": 0.7448526620864868,
+        "x2": 0.23605948686599731,
+        "y2": 0.7630198001861572
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אליביה",
+      "confidence": 0.98,
+      "reasoning": "The crop aligns with the line 'תלמודא אליביה א\"כ'. On line 3, the end of 'תלמודא' (letter alef) appears on the far right, followed by 'אליביה' in the middle, and 'א' (from 'א\"כ') on the far left. Paleographically, 'אליביה' shows a clear tall ascender for the Lamed (ל), which OCR missed in Option A.",
+      "flag": "current_text_confirmed"
+    },
+    {
+      "word_index": 504,
+      "opcode": "replace",
+      "docai_reading": "דוי",
+      "final_text": "הוי",
+      "page": 71,
+      "bbox": {
+        "x1": 0.36741015315055847,
+        "y1": 0.7751312255859375,
+        "x2": 0.38661709427833557,
+        "y2": 0.7900686264038086
+      },
+      "vision_selected": "B",
+      "vision_transcription": "הוי",
+      "confidence": 0.98,
+      "reasoning": "The visible letters clearly spell 'הוי' (Hei, Vav, Yod) as part of the standard Rabbinic Aramaic phrase 'שפיר הוי מצי למכתב' (could well have written). Option B matches both the visual letterforms and the required grammatical context.",
+      "flag": "current_text_confirmed"
     }
   ],
   "199": [

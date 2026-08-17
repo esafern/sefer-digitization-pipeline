@@ -187,6 +187,51 @@ def _resolve(w, counts):
     return candidate
 
 
+def find_compound_candidates(klal_words, counts):
+    """Returns a list of (klal_id, word_index, corrupt_form, corrected_first,
+    corrected_second, second_freq): a SECOND corruption shape pass 1 above
+    cannot catch (PROJECT-STATUS.md, 2026-08-16 lexicon-crosscheck spot-
+    check) - "אלא" (but/rather) loses its lamed AND its following space in
+    the same stroke, fusing with the next word into one token ("אלא
+    אמוראי" -> "אאמוראי"), not just losing a lamed within one token.
+    pass 1's `_resolve()` cannot see this: it only tries inserting ל at an
+    existing א position within the SAME token, never treats part of a
+    token as a second, separate word.
+
+    Scoped narrowly to the confirmed shape, not a general split search.
+    Worked out empirically from the 4 known instances (PROJECT-STATUS.md),
+    not assumed: splitting each at len(word) - len(known_target) puts the
+    break after the FIRST character in all 4 (אאמוראי -> א + אמוראי,
+    אאיזה -> א + איזה, אאביי -> א + אביי, אאידך -> א + אידך) - i.e. the
+    residue left behind by "אלא" losing its ל is a single א, not "אא";
+    the SECOND leading א belongs to the fused-in following word (all 4
+    of which independently happen to also start with א - a real property
+    of the mechanism, not coincidence: "אלא" ends in א and the next word
+    starts with א, so the space between two ALREADY-IDENTICAL adjacent
+    letters is exactly where a dropped space is least visually detectable).
+    Pre-filtered to tokens starting with "אא" (so the split is well-
+    defined and the false-positive surface stays small), but the actual
+    candidate word checked against the frequency table is `word[1:]`, not
+    `word[2:]`. Same frequency discriminator as `_resolve()` above: the
+    candidate must be independently attested MORE often than the whole
+    unsplit token itself occurs, or this is more likely a coincidental
+    collision than a genuine drop.
+    """
+    compound = []
+    for klal_id, words in klal_words.items():
+        for i, w in enumerate(words):
+            if has_gershayim(w) or not w.startswith("אא") or len(w) <= 2:
+                continue
+            remainder = w[1:]
+            if has_gershayim(remainder):
+                continue
+            freq = counts.get(remainder, 0)
+            if freq <= 0 or freq <= counts.get(w, 0):
+                continue
+            compound.append((klal_id, i, w, "אלא", remainder, freq))
+    return compound
+
+
 def main():
     part_path = sys.argv[1] if len(sys.argv) > 1 else cio.PART1_PATH
     if not os.path.isabs(part_path):
@@ -195,6 +240,7 @@ def main():
     klal_words = load_klal_words(part_path)
     counts = build_frequency_table(klal_words)
     high_confidence, ambiguous = find_candidates(klal_words, counts)
+    compound = find_compound_candidates(klal_words, counts)
 
     print(f"Scanned {os.path.basename(part_path)}: {len(klal_words)} klalim, "
           f"{sum(len(w) for w in klal_words.values())} words.\n")
@@ -214,7 +260,14 @@ def main():
         corrected = next(c[3] for c in ambiguous if c[2] == form)
         print(f"  {form!r} -> {corrected!r}: {n} occurrence(s)")
 
-    if not high_confidence and not ambiguous:
+    print(f"\n--- {len(compound)} compound-token candidate(s) "
+          f"(\"אלא\" fused with the following word - see find_compound_"
+          f"candidates docstring) ---")
+    for klal_id, idx, form, first, second, freq in sorted(compound):
+        print(f"  klal {klal_id} word {idx}: {form!r} -> {first!r} + {second!r} "
+              f"({freq} independent occurrence(s) of {second!r})")
+
+    if not high_confidence and not ambiguous and not compound:
         print("\nNone found.")
 
 

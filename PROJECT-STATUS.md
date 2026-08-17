@@ -15,6 +15,132 @@ current handoff, re-written (not just appended to) as state changes.
 
 ## ►► SESSION HANDOFF — read this first, 2026-08-16 (continued into 2026-08-17)
 
+### DONE 2026-08-17 — 3 open items closed: klal 17's marker-contamination DATA issue fixed; the `klal_page_regions.json` continuation-bounds BUG (klal 197/198/167) fixed at both the code and data layer; `detect_ligature_corruption.py` gained the compound-token second pass it was missing
+
+Per direct user request ("do all 3") against the 3 items offered the prior
+turn. All corpus-text changes went through the normal manual_correction
+pipeline, not a hand-edit; the code/trace fixes were independently
+verified against the raw scan/token data before applying, not assumed.
+
+**1. klal 17 w308 `יח` — DATA issue, FIXED.** Closes round 3's marker-
+contamination flag (`88d7ab4958f8`). Direct 1200 DPI crop of
+`berlin_square_corrected.pdf` page 20 confirms the SAME raw-DocAI-token-
+ordering artifact found earlier today for the klal 65/66 boundary: array
+position 351 sits between "לעיל" (350) and "בסתם" (352) in the raw
+`docai_word_boxes/page_20.json` stream, but its true page position (far-
+right margin, bold, own line) is several lines BELOW both - it is klal
+18's own marker (klal 18's stored text already correctly opens `["יח",
+"אמוראים", ...]`), bled into klal 17's body by the same extraction bug,
+not genuine klal 17 content. Klal 17 itself ends cleanly one line above
+with a closing colon, exactly matching the crop. Recorded as
+`manual_correction` `71a9a7f46daf` (`chosen_text: ""`, i.e. delete - per
+`apply_reviewer_decisions.py`'s documented convention), applied, klal 17's
+flag closed (`5c314d5ea45a`). Klal 18 untouched, unaffected.
+
+**Cross-reference, worth naming**: `pipeline/build_klal_page_regions.py`'s
+own docstring already documented this EXACT artifact class before today
+("klal markers sometimes sit OUT OF READING ORDER in docai's raw token
+array... the same anomaly already documented for klal 3's own marker...
+turned out to also apply to klal 4's marker") and its 2026-08-13 fix
+comment independently re-derives the identical klal 17/18 case by marker
+position, confirming klal 18's marker sits at token 351 on page 20 with
+status `marker_found_content_mismatch` - cross-validating today's crop-
+based finding from a completely different code path. Three confirmed
+instances now (klal 3/4, klal 65/66, klal 17/18) of the same raw-
+extraction-ordering bug independently corrupting BOTH region computation
+AND text extraction, fixed piecemeal in each place it was found so far -
+worth being alert to a fourth.
+
+**2. `klal_page_regions.json`'s continuation-bounds bug — BOTH a bug and a
+data issue, both fixed.** Root cause, traced precisely rather than patched
+around: `build_klal_page_regions.py`'s `load_markers()` (used for a klal's
+OWN start anchor) required `status=='ok'` only, while
+`load_end_boundary_positions()` - in the SAME file - already accepted
+`marker_found_content_mismatch` too, citing the established project
+convention (also used by `tools/check_klal_token_orphans.py`) that both
+statuses carry a real, usable position. That inconsistency meant klal 167
+(status `marker_found_content_mismatch`, but its `marker_position` already
+individually scan-verified per the trace's own note) was trusted as an END
+boundary for its neighbor but not as a START anchor for itself, so it fell
+through to the coarse `heuristic_regions()` fallback - no multi-page
+continuation support at all - producing the reported "undersized region."
+**CODE FIX**: `load_markers()` now accepts both statuses, matching its
+sibling function; this also correctly upgrades klal 1/18/86/172 (the same
+5 entries `load_end_boundary_positions()` already trusted) from heuristic
+to marker-anchored, not just klal 167.
+
+Separately, klal 198 had NO marker position in `gematria_trace_part1.json`
+at all (`status: 'marker_not_found_in_window'`) - the code fix alone
+couldn't help this one. Searched `docai_word_boxes/page_71.json` directly:
+the marker exists, CORRECTLY read as `קצח` (not misread, unlike its
+neighbors), at token 242 - one page later than the trace's `page: 70`
+attribution, which is presumably why the original search window missed
+it. Confirmed by context: token 241 is a klal-closing colon, token 242 is
+`קצח` at the right-margin marker x-position, immediately followed by a
+coherent new opening. **DATA FIX**: `gematria_trace_part1.json`'s klal 198
+entry corrected (`page: 71`, `marker_position: 242`, `status: 'ok'`, noted
+inline). This also fixes klal 197's own bug (its continuation was over-
+claiming all of page 71 because klal 198, the true next marker, was
+invisible to the end-boundary lookup, so it fell through to klal 199
+instead) as a direct consequence - no separate fix needed for 197.
+
+Regenerating `klal_page_regions.json` surfaced one more discrepancy - a
+zero-tolerance test caught it, not missed it: `part1_header_anchored_
+alignment.json` (a separate, older alignment source feeding
+`build_corrections_dataset.py` via `trusted_klal_pages()`) still claimed
+klal 198's page was 70. **DATA FIX**: corrected `matched_page` to 71 in
+that file too (its other provenance fields - `match_ratio`, `jump_tokens`
+etc - describe the ORIGINAL heuristic search that produced the now-
+corrected wrong answer, and are left as-is; no note-field convention
+exists in this file to attach an explanation the way `gematria_trace`'s
+does).
+
+**Consequence, expected and welcome**: `build_corrections_dataset.py` had
+been scanning the WRONG page for klal 198 candidates this entire time (its
+earlier klal 198 corrections this session had to be found by manually
+searching `docai_word_boxes/page_72.json` directly - see the earlier
+manual_correction entries - which is also consistent evidence: klal 198's
+content really does span pages 71-72, matching this fix exactly). Now
+fixed: `rebuild_all.sh` generated 13 new correction candidates for the
+correctly-attributed page (372 -> 385 total), one of which hit a transient
+504 DEADLINE_EXCEEDED on the Gemini call (klal 198 `איבא`->`אליבא`, itself
+another dropped-lamed instance) - resolved cleanly on a second
+`verify_corrections_vision.py` run, 0 errors remaining.
+
+**Verified**: `klal_page_regions.json` regenerated (206 marker-anchored,
+was 200; 16 heuristic, was 22) - visually confirmed klal 197 now caps at
+klal 198's true y-position instead of spanning all of page 71, klal 198
+gets its own proper region (page 71 + continuation onto 72), klal 167 gets
+its documented pages 61-62 continuations. Full `rebuild_all.sh`: clean,
+152/152 pytest, including the zero-tolerance scan-region-vs-alignment
+cross-check that caught the `part1_header_anchored_alignment.json` gap
+above.
+
+**3. `detect_ligature_corruption.py`'s compound-token second pass -
+BUILT.** The 2026-08-16 lexicon-crosscheck finding (5 instances, 4
+klalim: klal 130/168 w11 `אאמוראי`, klal 150 w167 `אאיזה`, klal 168 w162
+`אאביי`, klal 177 w318 `אאידך`) identified a corruption shape pass 1's
+single-token `_resolve()` cannot see: "אלא" losing its ל AND its
+following space in the same stroke, fusing with the next word. New
+`find_compound_candidates()` worked out the exact split point
+empirically from the 4 known instances (not assumed): the residue left
+by "אלא" losing its lamed is a single leading א, not two - the SECOND
+leading א belongs to the fused-in following word, which independently
+happens to also start with א in every confirmed case (the space is
+dropped exactly where it's least visually detectable, between two
+already-identical adjacent letters). Same frequency discriminator as
+pass 1: the candidate split's second half must be independently attested
+MORE often than the whole unsplit token. Re-running against `part1.json`
+finds EXACTLY the 5 known instances, no more, no fewer - a clean fit, not
+overfit to the training examples (verified by first testing the naive
+"drop 2 characters" version, which found ZERO candidates - caught the
+off-by-one before trusting the result, not after). These 5 are already
+visible in `review_decisions.jsonl` (`815a2579b395`/`92a97742f8b3`/
+`0a15fcf0df69`/`4826eb63b40e`, `ai-lexicon-crosscheck`, `needs_revisit:
+true`) - no new flags needed. **Still not scan-verified** - this pass
+finds candidates, exactly like pass 1; it does not confirm or apply
+anything.
+
 ### DONE 2026-08-17 — review-harness coverage audit: user asked "are we ready for Part 2" — answer is no (standing gate unmet), but the question surfaced a real gap: 5 of 7 baselined foreign-character DATA issues were never individually pushed into `review_decisions.jsonl`, invisible on the dashboard despite being "NOT YET DONE: scan-verify" in this file since 2026-08-16. Fixed. Also closed 2 stale-open flags for already-resolved findings.
 
 Per direct user request: "it is critical all open data issues are pushed
