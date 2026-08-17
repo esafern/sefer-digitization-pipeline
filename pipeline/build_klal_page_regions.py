@@ -51,6 +51,7 @@ OUT_PATH = os.path.join(REPO, "klal_page_regions.json")
 # definition in corpus_io, still asserted equal to the live corpus by
 # tests/test_corpus_invariants.py.
 PART1_MAX_KLAL = cio.PART1_MAX_KLAL
+center_y = cio.center_y
 
 # Byte-identical private copy until 2026-08-17; shared with
 # build_corrections_dataset.py and validate_catchword_continuity.py.
@@ -152,10 +153,6 @@ def marker_anchored_regions(klal_pages, markers, end_boundary_positions, docai_b
         if tokens is None or marker_idx >= len(tokens):
             continue
         marker_tok = tokens[marker_idx]
-
-        def center_y(t):
-            return (t["y1"] + t["y2"]) / 2
-
         start_center = center_y(marker_tok)
 
         # End boundary: the NEXT klal_id with any usable marker position

@@ -29,7 +29,6 @@
 # klal stranded in the middle of a Hey run looks like a normal forward jump
 # to a pairwise check, because ד->ה is shaped identically to a real section
 # boundary. Contiguity catches it either way.)
-import json
 import os
 import sys
 from collections import defaultdict

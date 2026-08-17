@@ -42,17 +42,19 @@
 # the same as a checked result, and these need human/context review before
 # either could safely block a rebuild. Same precedent as
 # detect_ligature_corruption.py and review_lexicon_gaps.py.
-import json
 import os
+import re
 import sys
-
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import validate_part1_corpus_integrity as integrity
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(REPO, "pipeline"))
 import corpus_io as cio  # noqa: E402
 
+# Was imported from validate_part1_corpus_integrity, which is itself only a
+# re-export of corpus_io's definition (moved there 2026-08-17) - importing a
+# whole sibling validator to reach one aliased function put a second name on
+# the same thing and made this script look like it depended on that
+# validator's behavior, which it never did.
 PART1_PATH = cio.PART1_PATH
 
 
@@ -61,8 +63,6 @@ def load_klalim():
 
 
 # --- Check 1: next-klal gematria marker -------------------------------
-
-import re
 
 NEXT_MARKER_RE = re.compile(r":\s*([א-ת]{1,4})$")
 
@@ -88,7 +88,7 @@ def check_next_klal_marker(klalim):
         next_id = k["klal_id"] + 1
         if next_id not in by_id:
             continue  # last klal in Part 1, no "next" to check against
-        expected = integrity.klal_id_to_gematria(next_id)
+        expected = cio.klal_id_to_gematria(next_id)
         if marker != expected:
             mismatches.append((k["klal_id"], marker, expected))
     print(f"  {carriers}/{len(klalim)} klalim carry a trailing next-klal marker.")

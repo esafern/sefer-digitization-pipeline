@@ -42,7 +42,6 @@
 # both carry a real, usable position per CLAUDE.md's established
 # convention; 'marker_not_found_in_window' does not and is skipped).
 import difflib
-import json
 import os
 import re
 import sys

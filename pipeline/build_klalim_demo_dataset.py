@@ -7,7 +7,6 @@
 # on every correction, which is exactly the kind of two-copies-of-the-truth
 # setup that goes silently out of sync.
 import json
-import os
 
 import corpus_io as cio
 

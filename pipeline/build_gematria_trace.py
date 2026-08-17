@@ -24,7 +24,7 @@ is the thing worth reusing.
     python3 pipeline/build_gematria_trace.py \
         --part part2.json:gematria_trace_part2.json \
         --part part3.json:gematria_trace_part3.json \
-        --pages 76-235
+        --pages 76-249
 
 Multiple --part pairs are traced as ONE continuous klal sequence sharing one
 monotonic cursor (Parts 1/2/3 are editorial divisions of a single continuous
@@ -262,8 +262,7 @@ def near_miss_variants(gematria, pairs=CONFUSION_PAIRS):
 
 # ------------------------------------------------------------ reading order --
 
-def center_y(tok):
-    return (tok["y1"] + tok["y2"]) / 2
+center_y = cio.center_y
 
 
 def reading_order(tokens, line_tol=LINE_TOL):
@@ -426,9 +425,9 @@ def scan_page(tokens, order, start_rank, exact_forms, near_forms, page, x_band):
             continue
         text = cio.hebrew_letters_only(tok["text"])
         if text in exact_set:
-            found.append(Candidate(page, rank, i, text, 0, text))
+            found.append(Candidate(page, rank, i, text, 0))
         elif text in near_set:
-            found.append(Candidate(page, rank, i, text, 1, text))
+            found.append(Candidate(page, rank, i, text, 1))
     return found
 
 

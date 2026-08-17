@@ -168,6 +168,24 @@ def hebrew_letters_only(s):
     return "".join(c for c in s if c in HEBREW_LETTERS)
 
 
+# ---------- DocAI token geometry ----------
+
+def center_y(tok):
+    """A token's vertical CENTER - the "are these two tokens on the same
+    printed line" signal throughout this pipeline.
+
+    Extracted 2026-08-17 from three independent copies (build_gematria_
+    trace.center_y, a nested redefinition inside build_klal_page_regions.
+    marker_anchored_regions, and an inline expression written twice in
+    verify_reconstruction_witness.py). Not merely similar - all three exist
+    for the identical measured reason, each recorded separately in its own
+    comment: a marginal numeral and the taller bold word beside it on the
+    SAME line do not share a y1 (measured 0.007 apart on klal 3/4, a third
+    of a line), so y1 mis-sorts them and centers do not.
+    """
+    return (tok["y1"] + tok["y2"]) / 2
+
+
 # ---------- gematria (Hebrew numeral) conversion ----------
 # Moved here 2026-08-17 from tools/validate_part1_corpus_integrity.py, the
 # only prior owner, so pipeline/build_gematria_trace.py (new, generic

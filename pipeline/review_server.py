@@ -454,10 +454,17 @@ def api_klal(klal_id):
     flag_state = _general_klal_flag_current(klal_id)
 
     punct_candidates = _load_punctuation_candidates().get(str(klal_id), [])
+    # One all_current() map rather than a per-candidate current_for() - the
+    # same fix _merge_decision() already carries and for the same reason:
+    # every current_for() call re-reads and re-parses the WHOLE, permanently
+    # growing review_decisions.jsonl, so this loop cost one full parse per
+    # proposed punctuation break on every /api/klal request. Same semantics
+    # (both resolve a key to the last matching line in file order).
+    punct_decided = rd.all_current("punctuation_choice")
     punctuation = []
     for p in punct_candidates:
         idx = p["before_word_index"]
-        decision = rd.current_for(klal_id, idx, "punctuation_choice")
+        decision = punct_decided.get((klal_id, idx))
         punctuation.append({
             "before_word_index": idx,
             "reasoning": p.get("reasoning", ""),
@@ -536,14 +543,18 @@ def api_page(page_num):
 
     # Witness disagreements for this page. Keyed by docai_token_index, a
     # different index space from corrections' word_index - safe because
-    # current_for() filters on decision_type, so the two never collide.
+    # all_current() is scoped to one decision_type, so the two never collide.
+    # Resolved from one map rather than a per-item current_for(), the same
+    # fix _merge_decision() already carries: a witness page carries ~140
+    # items, and each current_for() re-parsed the whole decisions log.
+    witness_decided = rd.all_current("witness_choice")
     for w in _load_witness_queue():
         if w.get("page") != page_num or not w.get("bbox"):
             continue
         entry = dict(w)
         entry["kind"] = "witness"
-        entry["current_decision"] = rd.current_for(
-            w["klal_id"], w["docai_token_index"], "witness_choice")
+        entry["current_decision"] = witness_decided.get(
+            (w["klal_id"], w["docai_token_index"]))
         out.append(entry)
     return out
 

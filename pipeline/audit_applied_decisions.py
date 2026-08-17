@@ -52,9 +52,6 @@
 # a later legitimate edit" - doing so would produce false positives, not
 # real findings. Those are reported separately as unverifiable-by-position,
 # not silently treated as passing.
-import json
-import os
-
 import corpus_io as cio
 import review_decisions as rd
 

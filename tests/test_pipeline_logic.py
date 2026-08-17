@@ -2617,3 +2617,109 @@ def test_expected_gematria_comes_from_the_shared_conversion_not_the_stored_field
         115, _gklal(115, "קיה", OPENING_A), (14, -1), 14, _loader(pages), {})
     assert record["expected_gematria"] == "קטו"
     assert record["stored_gematria"] == "קיה", "the stored field is reported, not trusted"
+
+
+# --- build_gematria_trace: the placeholder-clean_text branch -----------------
+# Added here 2026-08-17 (revalidation/refactor round 5). This branch - 72
+# lines deciding a DIFFERENT status vocabulary from every other tier - shipped
+# with no test of its own, and it is the branch that runs for 115 of the 445
+# Parts 2-3 klalim, i.e. most of what a Parts 2-3 run actually exercises.
+
+
+def _placeholder_klal(klal_id, gematria):
+    """A klal whose corpus text was never extracted: clean_text is literally
+    "<numeral> כלל <klal_id>" with a matching placeholder title. 115 of the
+    445 Parts 2-3 klalim are stored this way (70 in Part 2, 45 in Part 3,
+    none in Part 1)."""
+    return {"klal_id": klal_id, "gematria": gematria,
+            "title": f"כלל {klal_id}", "clean_text": f"{gematria} כלל {klal_id}"}
+
+
+def test_a_placeholder_klal_has_no_comparable_opening_at_all():
+    """"Nothing to compare" and "the content disagrees" are different
+    findings. Every matching tier weighs the numeral against the stored
+    opening, so without this test the two collapse into one status."""
+    assert not bgt.has_comparable_opening(_placeholder_klal(250, "רנ"))
+    assert bgt.has_comparable_opening(_gklal(250, "רנ", OPENING_A))
+
+
+def test_a_placeholder_klals_marker_is_located_but_never_promoted_to_ok():
+    """The one thing `ok` asserts - the stored text follows this marker - is
+    exactly what cannot be checked when there is no stored text, so a
+    placeholder klal is capped at marker_found_content_mismatch however
+    convincing its numeral is. A wrong `ok` here would be invisible to the
+    boundary pass this trace feeds."""
+    pages = {90: _tokens([[("MARK", "רנ")] + OPENING_A.split()])}
+    record, cursor = bgt.resolve_klal(
+        250, _placeholder_klal(250, "רנ"), (90, -1), 90, _loader(pages), {})
+    assert record["status"] == "marker_found_content_mismatch"
+    assert record["marker_position"] is not None
+    assert record["content_match_ratio"] is None, (
+        "a null ratio says 'not comparable'; 0.0 would say 'compared and disagreed'"
+    )
+    assert "NOT a content disagreement" in record["note"]
+    assert cursor is not None, "a located marker still advances the monotonic cursor"
+
+
+def test_a_placeholder_klal_with_a_misread_numeral_is_left_to_vision():
+    """A misread numeral plus a margin position is two signals, not three,
+    and the content signal that would normally supply the third does not
+    exist here. Mechanically that must stay unplaced; a vision crop reading
+    the glyph directly is the only thing allowed to promote it."""
+    # ז->ו, the confusion confirmed six times in this corpus's own markers.
+    pages = {50: _tokens([[("MARK", "קו")] + OPENING_A.split()])}
+    klal = _placeholder_klal(107, "קז")
+
+    record, cursor = bgt.resolve_klal(107, klal, (50, -1), 50, _loader(pages), {})
+    assert record["status"] == "marker_not_found_in_window"
+    assert cursor is None
+    assert "no second signal" in record["note"]
+
+    record, cursor = bgt.resolve_klal(107, klal, (50, -1), 50, _loader(pages), {},
+                                      vision_confirm=lambda *a: True)
+    assert record["status"] == "marker_found_content_mismatch"
+    assert "confirmed by vision crop" in record["note"]
+    assert cursor is not None
+
+
+def test_a_placeholder_klals_misread_numeral_stays_unplaced_when_vision_declines():
+    pages = {50: _tokens([[("MARK", "קו")] + OPENING_A.split()])}
+    record, cursor = bgt.resolve_klal(
+        107, _placeholder_klal(107, "קז"), (50, -1), 50, _loader(pages), {},
+        vision_confirm=lambda *a: None)   # could not tell
+    assert record["status"] == "marker_not_found_in_window"
+    assert cursor is None
+
+
+# --- build_gematria_trace: two equally convincing candidates -----------------
+
+def test_two_candidates_within_the_ambiguity_margin_go_to_vision_not_to_the_first():
+    """Both readings clear OK_RATIO and score within one word of each other,
+    so content cannot separate them - taking the earliest silently would be
+    a coin flip recorded as a fact. Vision picks, and its pick wins even
+    though it is the LATER candidate."""
+    pages = {14: _tokens([[("MARK", "כב")] + OPENING_A.split()]),
+             15: _tokens([[("MARK", "כב")] + OPENING_A.split()])}
+    asked = []
+
+    def confirm(_klal, cand, _tokens):
+        asked.append(cand.page)
+        return cand.page == 15
+
+    record, _ = bgt.resolve_klal(
+        22, _gklal(22, "כב", OPENING_A), (14, -1), 15, _loader(pages), {},
+        vision_confirm=confirm)
+    assert asked == [14, 15], "every rival is offered to vision in document order"
+    assert record["page"] == 15 and record["status"] == "ok"
+    assert "sent to vision to disambiguate" in record["note"]
+
+
+def test_an_ambiguity_with_no_vision_available_says_so_instead_of_hiding_it():
+    """Per CLAUDE.md Lesson 1/2, a tool that could not actually decide must
+    not report the fallback as if it were a decision."""
+    pages = {14: _tokens([[("MARK", "כב")] + OPENING_A.split()]),
+             15: _tokens([[("MARK", "כב")] + OPENING_A.split()])}
+    record, _ = bgt.resolve_klal(
+        22, _gklal(22, "כב", OPENING_A), (14, -1), 15, _loader(pages), {})
+    assert record["page"] == 14, "the earliest is taken, per the monotonic cursor"
+    assert "NOT disambiguated" in record["note"]

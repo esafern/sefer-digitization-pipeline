@@ -34,7 +34,6 @@ import argparse
 import difflib
 import json
 import os
-import re
 import subprocess
 import sys
 
@@ -202,9 +201,9 @@ def main():
             # unaffected (every token passes); cross-line spans collapse
             # to just the anchor's line, matching docai_token_index.
             anchor_h = box[0]["y2"] - box[0]["y1"]
-            anchor_yc = (box[0]["y1"] + box[0]["y2"]) / 2
+            anchor_yc = cio.center_y(box[0])
             same_line = [t for t in box
-                         if abs(((t["y1"] + t["y2"]) / 2) - anchor_yc) < anchor_h * 0.6]
+                         if abs(cio.center_y(t) - anchor_yc) < anchor_h * 0.6]
             box = same_line or box[:1]
             queue.append({
                 "klal_id": klal_id,

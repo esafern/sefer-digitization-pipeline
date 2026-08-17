@@ -24,7 +24,6 @@
 # catchword, since it didn't match page 16's real opening word at all,
 # and directly cropping the mark showed it was an isolated ink speck in
 # blank space, not a repeated word).
-import json
 import os
 import re
 import sys

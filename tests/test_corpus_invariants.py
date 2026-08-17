@@ -784,6 +784,20 @@ def test_review_decisions_log_is_intact_and_internally_consistent(decision_recor
         # never have word_index=None.
         if r["decision_type"] != "klal_flag" and r.get("word_index") is None:
             problems.append(f"line {lineno}: {r['decision_type']} with word_index=None")
+        # The shape the relaxation above newly ADMITS was otherwise entirely
+        # ungated: nothing on the write side constrains a word_index that a
+        # script sets by calling append_decision() directly (api_post_klal_
+        # flag never sets one, and only api_post_manual_correction rejects a
+        # negative). Same reasoning as the klal_id int check above - a
+        # non-int index matches no lookup - plus the negative-index case
+        # review_server._word_matches() and _word_level_ai_flags() both
+        # guard on the DISPLAY side, where a bad row is merely hidden. This
+        # log is append-only and tracked, so a bad row written here can only
+        # ever be superseded, never removed; catch it at write time instead.
+        widx = r.get("word_index")
+        if widx is not None and (not isinstance(widx, int) or isinstance(widx, bool) or widx < 0):
+            problems.append(f"line {lineno}: {r['decision_type']} with word_index={widx!r} - "
+                            "must be a non-negative int to address a real word position")
 
     ids = set(seen_ids)
     for lineno, r in records:

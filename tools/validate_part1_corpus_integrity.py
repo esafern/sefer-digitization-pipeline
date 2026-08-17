@@ -59,7 +59,6 @@
 # verification or direct scan crop-checks - they're a triage layer, same
 # caveat as every other automated check in this pipeline (Lesson 2).
 import difflib
-import json
 import os
 import re
 import sys

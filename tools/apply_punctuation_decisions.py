@@ -33,7 +33,6 @@
 #     decisions log.
 #   - Never invokes rebuild_all.sh itself.
 import argparse
-import json
 import os
 import sys
 

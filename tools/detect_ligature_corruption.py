@@ -88,9 +88,7 @@
 #   scope any Parts 2-3 correction work from its output without the user's
 #   explicit sign-off - Parts 2-3 remain out of scope until Part 1 is
 #   independently confirmed clean.
-import json
 import os
-import re
 import sys
 from collections import Counter
 
