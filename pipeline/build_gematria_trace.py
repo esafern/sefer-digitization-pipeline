@@ -490,6 +490,17 @@ def content_anchored_candidates(klal, cursor, near_limit, page_loader, order_cac
             seg = [w for _, w in stream[i:i + content_words]]
             if len(seg) < content_words:
                 break
+            # The window must start ON the opening's first word, not merely
+            # overlap the opening. Without this pin, a window starting ONE
+            # word late still scores 7/8 = 0.875 - and its "preceding token"
+            # is then the opening's own first word, which (being line-initial
+            # in an RTL column) sits in the marker x-band and is often short
+            # enough to pass for a numeral. Found 2026-08-17 by the two tests
+            # named for it: the rule recorded אין, the first word of klal 10's
+            # own text, as klal 10's marker, and recorded klal 65's marker as
+            # klal 66's.
+            if seg[0] != want[0]:
+                continue
             ratio = difflib.SequenceMatcher(None, seg, want, autojunk=False).ratio()
             if ratio < anchor_ratio:
                 continue
