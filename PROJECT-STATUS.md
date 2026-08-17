@@ -15,6 +15,97 @@ current handoff, re-written (not just appended to) as state changes.
 
 ## ►► SESSION HANDOFF — read this first, 2026-08-16 (continued into 2026-08-17)
 
+### DONE 2026-08-17 — scan-crop verification of the 8 whole-sentence-divergence leads + klal 549: TWO distinct, systematic data issues confirmed by direct render, both well-understood; NO corrections written yet (still needs its own go-ahead per the Parts 2-3 gate)
+
+Direct follow-up to the DocAI-vs-stored investigation logged above. Per user
+authorization ("go ahead with scan-crop"), rendered a 400 DPI crop (marker
+token + ~22 following tokens in true reading order, full text-column width,
+per Lesson 14's anchor-margin rule) for each of the 8 whole-sentence
+divergences (281, 282, 299, 408, 412, 482, 613, 634) plus klal 549, and read
+each directly against the printed page. This is investigation only - nothing
+below has been written to `part2.json`/`part3.json`; CLAUDE.md's Parts 2-3
+gate still requires a separate explicit go-ahead before any of it does.
+
+**Correction to the prior entry's speculation**: klal 549 and 634 are NOT
+merge-of-several-klalim candidates (that hypothesis, based only on word
+count, is wrong for these two specifically - see Pattern A below for what
+they actually are). klal 549's 2,121 words appear to be a genuinely long
+single klal (a methodology discussion with many sub-cases) that separately
+also has a Pattern-A opening corruption. The word-count-outlier sweep's
+other 7 entries (410, 301, 256, 664, 409, 556, 283) are still unchecked and
+the merge hypothesis remains open for those - just not for 549/634.
+
+**Pattern A - genuine content loss, needs reconstruction (4 klalim: 281,
+282, 482, 634).** The klal's own real opening is correct, then a real
+passage of the klal's own text is SKIPPED and replaced by a garbled
+placeholder token, then the text picks back up correctly at a later point in
+the same klal. Confirmed by locating the post-placeholder fragment verbatim
+further down the same scan paragraph in all 4 cases:
+- klal 281: stored `רפא חזקה .תליאא תלוי ברצון אחרים...` skips real content
+  `שליח עושה שליחותו · לא אמרו אלא בדבר שאינו תלוי ביד אחרים כי אם ביד השליח
+  דכיון דבדידיה תליא מלתא' אמרי' דמסתמ' עבד שליחותיה אבל בדבר שהוא` (~35
+  words dropped) before correctly resuming at `תלוי ברצון אחרים אם ירצו
+  לקנות...`.
+- klal 282: stored `רפב חזקה פעלוקלוהל א' אפילו לקולא משנה למלך שם` skips
+  `שליח עושה שליחותו דלא מהני לקולא היינו כשהמשלח שולחו אבל אם השליח פתח
+  לומר שהוא רוצה לעשות פעולה` (~20 words dropped, real klal is ~30 words
+  total vs. stored's 10 - most of the klal is currently missing).
+- klal 482: stored `תפב מנלן הרהשי"אי מבירליתשא ל"ג א' שכתב...` skips a
+  multi-line passage between `מנלן` and `ל"ג א'` (exact word count not yet
+  measured - crop window didn't capture the full gap, only confirmed the
+  landing point `ל"ג א' שכתב וז"ל ה"ג ברכת המזון דכתיב וברכת ולא גרסי'`
+  matches the scan exactly).
+- klal 634: stored `תרלד תיקו דבלמאה משמע דלקולא נקטינן...` skips `דאורייתא
+  לחומרא ודרבנן לקולא · כן כתבו הרי"ף והרא"ש בפ' במה אשה כמה מצאתי להר"ן ז"ל
+  בפ"ק דתענית דף רע"א שכתב וז"ל...` before correctly resuming at `משמע
+  דלקולא נקטינן דבדרבנן היא ע"כ וכ"כ עוד בפ"ב דביצה דף רע"ו`.
+- klal 549 also fits this exact pattern (not new to the 8, already known
+  content-mismatch): stored `תקמט קתני אדהודמדייא דרישא לא שנא...` skips
+  `הך מילתא דומיא דאידך · רגיל תלמודא למימר בתרי מילי דסמיכי אהדדי
+  במתניתין או בברייתא לא כבריייתא שנהמלמד יהיה שנוי ברישא ותהיה סיפא דומיא`
+  before correctly resuming at `דרישא לא שנא שיהיה המלמד שנוי בסיפא...`.
+  This is real, non-trivial content loss requiring transcription from the
+  scan to fix, the same class of work as the klal 30/75/88 reconstruction
+  (`reconstruct_multipage_klalim.py`, archived - already-applied precedent
+  for how this gets done).
+
+**Pattern B - boundary misplacement, content already exists in the corpus
+(4 klalim: 299, 408, 412, 613).** The klal's stored text opens with a prefix
+that is actually the missing TAIL of the PREVIOUS klal (298, 407, 411, 612
+respectively), followed correctly by its own real content. Confirmed two
+ways for all 4: (a) the wrong prefix text appears, verbatim, in the lines
+immediately ABOVE the marker on the scan (i.e. genuinely belongs to the
+prior klal's paragraph, not this one); (b) each prior klal's own stored
+`clean_text` currently ends mid-sentence, cut off exactly where the wrong
+prefix would continue it (klal 298 ends `...משמע להדיא דהאי ילפינן הוי`,
+which is precisely completed by klal 299's wrong prefix `מדאורייתא ע"ש
+ועיין...`; klal 411 ends `...ומה גם דממה שכתב הרא"ש בשמיה`, completed by
+klal 412's wrong prefix; klal 612 similarly). klal 407 is one of the
+already-known 115 placeholder klalim (`תז כלל 407`, no real content at all)
+- its true content is the text currently misattributed as klal 408's
+prefix, not duplicated anywhere else, so this is also how klal 407 gets
+filled in. Each klal's OWN real content (after the wrong prefix) was
+confirmed present and correctly formed by direct string search (`ידע אמורא
+רישא` in 299, `מוחלפת השיטה` in 408, `מרשקיל וטרי` in 412, `רב חסדא ורב
+המנונ` in 613 - all found). This pattern is mechanical to fix once
+corrections are authorized: move the wrong prefix from klal N+1's front to
+klal N's end, no scan transcription needed since all the real text already
+exists in the corpus, just misfiled by ~1 klal at a boundary the original
+(unknown, archived) chunking pass got wrong.
+
+**Not yet checked**: the other 6 leads from the original 14
+(300, 374, 389, 510, 543 - close-opening-match - and the un-scan-checked
+half of klal 549's neighbors), and the 7 other word-count outliers (410,
+301, 256, 664, 409, 556, 283) for whether they're genuine merges like klal
+663 or something else. Both Pattern A and Pattern B being confirmed via
+DIRECT SCAN READING (not inference) for every one of the 9 checked so far
+is a strong signal this generalizes across more of the 14 and possibly
+elsewhere in Parts 2-3, not isolated cases - worth a targeted mechanical
+sweep (Pattern B's signature - stored text starting with a phrase that
+completes the PREVIOUS klal's truncated ending - is cheaply detectable
+corpus-wide without a scan crop, per Lesson 18's "cheap sweep" principle)
+before deciding scope of any correction pass.
+
 ### DONE 2026-08-17 — Parts 2-3 infra item 3: the previously-throttled vision-adjudication pass completed clean over the full extended page range (76-249)
 
 Re-ran `pipeline/build_gematria_trace.py --vision` (via `venv/bin/python3` -
@@ -57,7 +148,7 @@ themselves are trustworthy anchors (consistent with the original finding).
 **The stored text's divergence is not uniformly a single corrupted word.**
 For 6 (300, 374, 389, 510, 543, 549) the opening word(s) match DocAI closely
 and the garble sits a few words in — the shape the original finding assumed.
-But for at least 6 more (281, 282, 299, 408, 412, 482, 613) the stored
+But for the remaining 8 (281, 282, 299, 408, 412, 482, 613, 634) the stored
 opening diverges from DocAI within the first clause into an entirely
 different sentence, not a plausible single-token misread — e.g. klal 299
 stored `מדאורייתא ע"ש ועיין מ"ש עליו...` vs DocAI `ידע אמורא רישא דברייתא
