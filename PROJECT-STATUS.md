@@ -15,6 +15,72 @@ current handoff, re-written (not just appended to) as state changes.
 
 ## ►► SESSION HANDOFF — read this first, 2026-08-16 (continued into 2026-08-17)
 
+### DONE 2026-08-17 — review-harness coverage audit: user asked "are we ready for Part 2" — answer is no (standing gate unmet), but the question surfaced a real gap: 5 of 7 baselined foreign-character DATA issues were never individually pushed into `review_decisions.jsonl`, invisible on the dashboard despite being "NOT YET DONE: scan-verify" in this file since 2026-08-16. Fixed. Also closed 2 stale-open flags for already-resolved findings.
+
+Per direct user request: "it is critical all open data issues are pushed
+into the review harness so they are visible" (human verification itself
+explicitly deferred - this was a coverage audit, not a scan-verification
+pass). Checked every "NOT YET DONE"/"STILL OPEN" item currently in this
+file against `review_decisions.jsonl` rather than assuming a documented
+finding is automatically a visible one:
+
+- **klal 17's `יח` marker-contamination candidate (round 3)** - already
+  flagged (`88d7ab4958f8`, `needs_revisit: true`). No action needed.
+- **The ~411-item witness queue (klal 30/75/88)** - has its own dedicated
+  harness mechanism (`review_server.py`'s Witness panel, not `klal_flag`),
+  already live. No action needed.
+- **`FOREIGN_CHARACTER_BASELINE`'s 7 instances** (`tests/test_
+  corpus_invariants.py`, added 2026-08-16) - checked each of the 7 `(klal_id,
+  word_index, char)` tuples against `review_decisions.jsonl` for a flag that
+  actually covers THAT finding (not just any flag on that klal). Only 2 of 7
+  did: klal 39 (w252 `Π`) and klal 66 (w97 `!`, both via the 2026-08-14
+  semantic-spotcheck pass, which happened to independently notice the same
+  characters). **klal 69 (w338 `&`), klal 74 (w443 `!`), klal 77 (w11 `&` -
+  this klal had ZERO klal_flag rows of any kind), klal 167 (w24 `&`), and
+  klal 176 (w694 `;`, only mentioned in passing inside an unrelated flag's
+  note as "already-reported... not re-reported here") had NO flag actually
+  representing this finding.** Pushed 5 new `klal_flag` decisions
+  (`reviewer: "local-harness-coverage-audit"`, `needs_revisit: true`,
+  ids `36a651302e06`/`780a12ec1343`/`03d27685b8a5`/`6bcd4e5ee6dd`/
+  `2a738f66ac41`), each citing the exact character/word_index and
+  `FOREIGN_CHARACTER_BASELINE`. Confirmed live via `/api/klalim` -
+  `needs_revisit: true` now shows for all 5.
+- **klal 66's existing flag (`a6b9c1760675`) is now stale in one detail**
+  (not a coverage gap, a labeling one): its note says "word 97 '!'" -
+  correct when written 2026-08-14, but the klal 65/66 boundary fix
+  (2026-08-17, this file's own entry above) inserted 15 words before that
+  position, so the character now sits at word 112 (matching
+  `FOREIGN_CHARACTER_BASELINE`'s current entry). `review_decisions.jsonl`
+  is append-only, not corrected in place - noted here rather than edited.
+  Anyone scan-verifying should locate the `!` by its quoted context
+  ("`דברי ב"ד ! חבירו`"), not the stale index.
+- **Opposite problem, found while checking klal 206/140**: those two
+  klalim's round-2 semantic-spotcheck flags were STILL showing
+  `needs_revisit: true` on the dashboard for a specific candidate
+  (klal 206 w2, klal 140 w97 - the alef-lamed-ligature hypothesis) that
+  had ALREADY been scan-verified and closed print-faithful (this file's
+  "DONE 2026-08-16 - item 1 from NEXT STEPS" entry) - that resolution
+  explicitly said "No review_decisions.jsonl action needed," which was
+  true for applying a correction but left the dashboard showing a resolved
+  question as still open. Closed with 2 new `klal_flag` decisions
+  (`needs_revisit: false`, ids `033524f85941`/`f4511b968001`), each scoped
+  to ONLY that one candidate - both klalim's OTHER round-2 candidates
+  (klal 140 w91/w159/w84, klal 206 w161) remain open and untouched.
+
+**No `part1.json` change, no human scan-verification performed** (per the
+user's explicit deferral) - this was purely a review_decisions.jsonl
+completeness/accuracy pass. 25/25 pytest re-check on the review-decisions
+integrity test, dashboard confirmed live via direct API calls, not assumed.
+
+**Answer to the actual question asked**: not ready for Part 2. CLAUDE.md's
+standing gate (Part 1 clean AND outside-professional-confirmed, user
+directive 2026-08-10, explicitly not to be revisited until then) is
+unmet on both conditions - Part 1 still has the witness queue, the klal 17
+candidate, the 5 now-visible foreign-character issues just pushed above,
+and the ordinary round 1-3 semantic-spotcheck queue outstanding, and no
+outside professional review has happened. Per "close open items before
+proposing new ones," that queue - not Part 2 - is the next work.
+
 ### DONE 2026-08-17 — revalidation round 4 ("pipeline improvements") FAILED mid-task on the monthly Claude spend limit; researched, finished, verified, and merged (`800cd01`), worktree cleaned up
 
 ### DONE 2026-08-17 — round-5 modularization: `pipeline/corpus_io.py` extracted, all 25 pipeline/+tools/ scripts migrated, 3 more code bugs found doing it. Independently re-verified and merged to master, worktree cleaned up.
