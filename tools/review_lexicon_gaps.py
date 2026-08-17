@@ -357,9 +357,30 @@ def analyse(form, rec, lexicon, freq):
     # word the reference corpus uses regularly. Not a verdict - `להעיר` (a real
     # word, absent from a Talmud/Shulchan-Arukh sample) lands here next to
     # `וכתכ` (plainly `וכתב`) and only a context read separates them.
+    #
+    # FIXED 2026-08-18 (found triaging the Parts 2-3 corpus-expansion re-run,
+    # see PROJECT-STATUS.md): also requires NOT all_surfaces_quoted. Every
+    # occurrence of a form carrying a stripped geresh/gershayim (e.g. נלע"ד
+    # normalising to נלעד, וב"מ to ובמ) is a punctuation artifact of this
+    # check's own normalisation, not a claim about the ink - the SAME
+    # reasoning bucket_for()'s docstring already gives for checking
+    # all_surfaces_quoted ahead of known_corrupt_form/independently_attested/
+    # prefix_resolved, but ocr_shape itself was computed before that
+    # reasoning could apply, so a 100%-quoted form could still satisfy
+    # near_attested + known_confusable + zero-attestation (guaranteed low,
+    # since the reference corpus stores ITS OWN abbreviations with the
+    # geresh present too) and land in ocr_shape_to_read - the "ink misread as
+    # a different letter" bucket - despite having no letter-confusion
+    # question to answer at all. This is a different failure than the
+    # historical וכלבד/וחרמב"ם cases the ordering below was built to guard
+    # against (there, a benign-looking explanation merely COULD apply and
+    # ocr_shape's stronger signal correctly overrode it); here the "form"
+    # ocr_shape would be reasoning about was never the one printed on the
+    # page in the first place.
     signals["ocr_shape"] = bool(
         signals["near_attested"] and signals["near_attested"]["known_confusable"]
-        and signals["independent_attestation"] == 0)
+        and signals["independent_attestation"] == 0
+        and not signals["all_surfaces_quoted"])
     signals["bucket"] = bucket_for(signals)
     signals["score"], signals["score_detail"] = score(signals)
     return signals

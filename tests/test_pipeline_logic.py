@@ -52,6 +52,7 @@ import extract_abbreviation_forms as eaf  # noqa: E402
 import propose_abbreviation_expansions as pae  # noqa: E402
 import propose_punctuation_part1 as ppp  # noqa: E402
 import validate_lexicon_independent as vli  # noqa: E402
+import review_lexicon_gaps as rlg  # noqa: E402
 import review_decisions as rd  # noqa: E402
 import review_server as rs  # noqa: E402
 import validate_catchword_continuity as vcc  # noqa: E402
@@ -2794,3 +2795,36 @@ def test_api_decision_history_includes_a_word_level_klal_flag(tmp_path, monkeypa
     history = rs.api_decision_history(1, 2)
     assert len(history) == 1
     assert history[0]["note"] == "w2 flagged by an AI pass"
+
+
+# --- review_lexicon_gaps: a 100%-quoted form must never reach ocr_shape ----
+# --- even when it also matches a known-confusable near_attested neighbor --
+
+def _lexicon_gap_rec(surface, occurrences=1):
+    from collections import Counter
+    return {"occurrences": occurrences, "klal_ids": Counter({1: occurrences}),
+            "surfaces": Counter({surface: occurrences}), "positions": [(1, 0)] * occurrences}
+
+
+def test_a_fully_quoted_form_is_an_abbreviation_artifact_not_ocr_shape():
+    """FIXED 2026-08-18 (found triaging the Parts 2-3 corpus-expansion
+    re-run - see PROJECT-STATUS.md): ocr_shape used to be computed before
+    checking all_surfaces_quoted, so a form where EVERY occurrence carries a
+    stripped geresh/gershayim (here א"ב, normalising to אב) could still
+    satisfy near_attested + known_confusable + zero-attestation - guaranteed
+    near-zero, since the reference corpus stores its own abbreviations WITH
+    the geresh too - and land in ocr_shape_to_read, the letter-confusion
+    bucket, despite having no letter-confusion question to answer at all."""
+    rec = _lexicon_gap_rec('א"ב', occurrences=2)
+    result = rlg.analyse("אב", rec, lexicon=set(), freq={"אכ": 25})
+    assert result["ocr_shape"] is False
+    assert result["bucket"] == "abbreviation_artifact"
+
+
+def test_the_same_near_attested_pattern_without_quoting_still_reaches_ocr_shape():
+    """Positive control - the fix must not blunt the real signal for an
+    ordinary (unquoted) misread of the same shape."""
+    rec = _lexicon_gap_rec("אב", occurrences=2)
+    result = rlg.analyse("אב", rec, lexicon=set(), freq={"אכ": 25})
+    assert result["ocr_shape"] is True
+    assert result["bucket"] == "ocr_shape_to_read"

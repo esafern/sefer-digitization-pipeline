@@ -15,6 +15,52 @@ current handoff, re-written (not just appended to) as state changes.
 
 ## ►► SESSION HANDOFF — read this first, 2026-08-16 (continued into 2026-08-17)
 
+### DONE 2026-08-18 — fixed the `bucket_for()` ordering bug flagged in the prior entry; retroactively closed 314 already-recorded Parts 2-3 decisions it had misclassified
+
+Per direct user request ("fix the bucket_for() ordering bug now").
+
+**The fix**: `signals["ocr_shape"]` in `analyse()` now also requires `not
+all_surfaces_quoted`. Previously `ocr_shape` (near_attested + known_confusable
++ zero independent attestation) was computed with no awareness of surface
+quoting, so a form where EVERY observed occurrence carries a stripped geresh/
+gershayim could still satisfy all three conditions - zero attestation is
+near-guaranteed for a quote-stripped form, since the reference corpus stores
+its own abbreviations WITH the geresh too - and land in `ocr_shape_to_read`
+(the letter-confusion bucket) ahead of `bucket_for()`'s own `all_surfaces_
+quoted` check, despite there being no real letter-confusion question to ask.
+This is a different failure than the historical `וכלבד`/`וחרמב"ם` cases
+`bucket_for()`'s docstring already documents (there, a benign-looking
+explanation merely COULD apply and the stronger corruption signal correctly
+overrode it) - here the "form" being reasoned about was never what was
+actually printed, since the geresh was stripped before any of the analysis
+ran. Fixed at the signal's source (`analyse()`), not by reordering
+`bucket_for()` - the concept "this looks like ink misread as a different
+letter" should exclude these forms everywhere it's used, including `score()`.
+
+**Verified, not just fixed**: re-ran on Parts 2-3 - `ocr_shape_to_read`
+dropped 370→271 forms (768 vs 968 occurrences), `abbreviation_artifact` grew
+1875→1974, i.e. **99 forms this session's own manual reading had missed**
+(my hand-check earlier only caught 36 of them, checking just the subset that
+was new in the corpus-expansion re-run - the bug also affected forms from
+the ORIGINAL, pre-expansion pass that manual reading happened not to flag).
+Part 1: 61→45 forms, matching exactly the 16 I'd already excluded by hand
+there (0 new instances found - Part 1's smaller, more carefully hand-checked
+run had already caught what this fix catches mechanically).
+
+**314 already-recorded Parts 2-3 klal_flag decisions retroactively CLOSED**
+(`needs_revisit: false`, reviewer `ai-lexicon-gap-parts23-v3`, e.g. `חרמבן`
+at klal 368 - the exact `וחרמב"ם` shape the script's own docstring already
+named as the historical motivating case for checking quoting at all) - found
+by cross-referencing every currently-open `ai-lexicon-gap-parts23`/`-v2`
+decision's word against the freshly-fixed detector's `abbreviation_artifact`
+bucket, not assumed from the aggregate count. Part 1 had zero matches to
+close (confirmed, not assumed - the same cross-reference query ran there
+too). 2 new regression tests added (`test_pipeline_logic.py`) - a fully-
+quoted form with a known-confusable near_attested match must NOT reach
+`ocr_shape_to_read`, and a positive control confirming the same near_attested
+pattern without quoting still does, so the fix can't be blunting the real
+signal. 199/199 pytest.
+
 ### DONE 2026-08-17/18 — independent reference corpus expanded (Mishneh Torah + Tur + Rashi on Talmud, 2.58M→6.18M words); re-ran the lexicon-gap detector on BOTH Parts 2-3 and Part 1 against it; closed 272 false positives, surfaced 140 new candidates
 
 Per direct user request: "rambam tur rashi add them - then report on benefits
