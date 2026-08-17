@@ -168,6 +168,77 @@ def hebrew_letters_only(s):
     return "".join(c for c in s if c in HEBREW_LETTERS)
 
 
+# ---------- gematria (Hebrew numeral) conversion ----------
+# Moved here 2026-08-17 from tools/validate_part1_corpus_integrity.py, the
+# only prior owner, so pipeline/build_gematria_trace.py (new, generic
+# marker-detection script for Parts 2-3 and beyond) can reuse the same
+# tested conversion instead of a second copy - directly exercising the
+# "reusable pipeline" goal (CLAUDE.md) rather than deferring it.
+
+GEMATRIA_VALUES = {
+    "א": 1, "ב": 2, "ג": 3, "ד": 4, "ה": 5, "ו": 6, "ז": 7, "ח": 8, "ט": 9,
+    "י": 10, "כ": 20, "ל": 30, "מ": 40, "נ": 50, "ס": 60, "ע": 70, "פ": 80,
+    "צ": 90, "ק": 100, "ר": 200, "ש": 300, "ת": 400,
+}
+
+# Only נ/פ/צ (not כ/מ) traditionally take their final form at the end of a
+# *multi-letter* Hebrew numeral in this kind of typesetting (e.g. 150 is
+# printed קן not קנ, 190 is קץ not קצ) - but a lone single-letter numeral
+# (20 = כ, 40 = מ, 50 = נ, 80 = פ, 90 = צ) stays in regular form, and כ/מ
+# never finalize even in a multi-letter numeral (120 = קכ not קך, 140 = קמ
+# not קם, 220 = רכ not רך). Confirmed against part1.json's own
+# already-crop-verified gematria field for every case in both directions
+# (2026-08-07, PROJECT-STATUS.md "New standing check
+# validate_part1_corpus_integrity.py added") - an earlier version of this
+# function applied the substitution unconditionally to any of the 5
+# final-letter-eligible letters, which was right for 150/180/190 but wrong
+# for 20/40/50/80/90/120/140/220.
+FINAL_FORMS = {"נ": "ן", "פ": "ף", "צ": "ץ"}
+
+
+def klal_id_to_gematria(n):
+    """Standard Hebrew numeral spelling, with the תשע"ו-style 15/16
+    exception (ט"ו/ט"ז instead of י"ה/י"ו, which would spell divine
+    names) - same convention part1.json's own `gematria` field uses.
+    See FINAL_FORMS above for the word-final-letter substitution rule."""
+    hundreds = [(400, "ת"), (300, "ש"), (200, "ר"), (100, "ק")]
+    tens = [(90, "צ"), (80, "פ"), (70, "ע"), (60, "ס"), (50, "נ"), (40, "מ"),
+            (30, "ל"), (20, "כ"), (10, "י")]
+    ones = [(9, "ט"), (8, "ח"), (7, "ז"), (6, "ו"), (5, "ה"), (4, "ד"),
+            (3, "ג"), (2, "ב"), (1, "א")]
+    rem, letters = n, []
+    for val, ch in hundreds:
+        while rem >= val:
+            letters.append(ch)
+            rem -= val
+    if rem == 15:
+        letters += ["ט", "ו"]
+        rem = 0
+    elif rem == 16:
+        letters += ["ט", "ז"]
+        rem = 0
+    else:
+        for val, ch in tens:
+            if rem >= val:
+                letters.append(ch)
+                rem -= val
+        for val, ch in ones:
+            if rem >= val:
+                letters.append(ch)
+                rem -= val
+    if len(letters) > 1 and letters[-1] in FINAL_FORMS:
+        letters[-1] = FINAL_FORMS[letters[-1]]
+    return "".join(letters)
+
+
+def gematria_to_value(s):
+    """Sum of letter values, ignoring punctuation - for parsing a
+    self-reference numeral out of running text, not for validating a
+    known-position marker (which the trace/alignment tooling does with
+    real docai positions, not this arithmetic-only approach)."""
+    return sum(GEMATRIA_VALUES.get(c, 0) for c in s)
+
+
 # ---------- generic JSON reads ----------
 
 def load_json(path, default=None):
