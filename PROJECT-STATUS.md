@@ -15,6 +15,58 @@ current handoff, re-written (not just appended to) as state changes.
 
 ## ►► SESSION HANDOFF — read this first, 2026-08-16 (continued into 2026-08-17)
 
+### DONE 2026-08-17 — the klal_page_regions.json fix's real payoff: 6 previously-UNVERIFIABLE candidates (klal 167) now exact-token locatable; scan-verified: 1 genuine DATA issue fixed, 3 disconfirmed print-faithful, 2 left genuinely uncertain
+
+Direct follow-through, not just a claim the earlier fix "should help": re-ran
+`locate_word()` from `tools/verify_flagged_candidates_vision.py` against all
+16 previously band-estimate-located candidates in `flagged_candidates_
+vision_report.json`, using the freshly-fixed `klal_page_regions.json`. 6 of
+16 - all of them klal 167's, exactly the klal that fix targeted - now
+resolve to an exact single token instead of a multi-line band (one of
+which, per that locator's own docstring, used to come back as an entire
+page-paragraph). The other 10 (klal 4/37/38/123/176/189/204) are unrelated
+to today's fix and remain band-estimate.
+
+Scan-verified all 6 at 1400-7200 DPI, generous margin, context checked
+against `part1.json` before reading each crop:
+
+- **klal 167 w877 `דרוא`->`דהוא` - CONFIRMED, a genuine DATA issue, FIXED.**
+  Context "...דרב נחמן בר יצחק דהוא בתרא פריך לשמואל..." - the crop
+  unambiguously shows ה (a clear gap-under-bar, not a plain resh hook), a
+  real ר/ה OCR confusion. Recorded as `manual_correction` `6d946f77ec8f`,
+  applied.
+- **3 DISCONFIRMED (print-faithful, closed, no change)**: w1050 `התימא`
+  (candidate `דתימא` - crop clearly shows ה not ד), w1362 `כדנא` (candidate
+  `כהנא` - crop shows ד, a closed corner not a gap-shape ה; also the only
+  reading that makes grammatical sense, "מילתא כדנא" = "such a matter"),
+  w665 `וסליג` (candidate `ופליג` - crop shows a fully closed ס loop, not
+  an open-hooked פ). Each closed with its own `klal_flag`
+  (`455d8a37716d`/`c578bbf72ef0`/`32bf869d65fe`), scoped to that word_index
+  only.
+- **2 left OPEN, genuinely uncertain even at 7200 DPI**: w739 and w898
+  (both `מקטי` -> candidate `מקמי`). Calibrated directly against clean
+  reference letters on the same page (ט from `שיטת`, מ from `תלמיד`)
+  before concluding - still could not call the disputed letter confidently
+  either way; not forcing a verdict either direction just because it's the
+  last one standing. Linguistic signal only, not independent visual
+  confirmation (Lesson 9): `מקמי` ("prior to") is a common, well-attested
+  Aramaic word; `מקטי` doesn't parse as any standard word - real, but not a
+  substitute for a pixel read. Recorded as open `klal_flag`s
+  (`a088141d0c51`/`1fa0416a871b`) for a differently-sourced signal later
+  (e.g. a fresh vision call, per Lesson 9), not decided on inconclusive
+  pixels.
+
+**Verified**: `rebuild_all.sh` clean, 152/152 pytest. `git diff part1.json`
+shows exactly the one `דרוא`->`דהוא` change, nothing else touched.
+
+**Batch score, worth naming plainly**: 1 real fix, 3 false leads, 2 genuine
+unknowns, out of 6 candidates that were completely unreachable before
+today. Not "the fix found 6 new errors" - most of what was previously
+unverifiable turns out to be print-faithful once actually checked, which
+is itself the expected, calibrated outcome (matches this project's
+running pattern: a locate/verify tool existing is not the same as its
+candidates being correct - CLAUDE.md Lesson 1/2).
+
 ### DONE 2026-08-17 — 3 open items closed: klal 17's marker-contamination DATA issue fixed; the `klal_page_regions.json` continuation-bounds BUG (klal 197/198/167) fixed at both the code and data layer; `detect_ligature_corruption.py` gained the compound-token second pass it was missing
 
 Per direct user request ("do all 3") against the 3 items offered the prior
