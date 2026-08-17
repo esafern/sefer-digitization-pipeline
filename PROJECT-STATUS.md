@@ -15,6 +15,54 @@ current handoff, re-written (not just appended to) as state changes.
 
 ## ►► SESSION HANDOFF — read this first, 2026-08-16 (continued into 2026-08-17)
 
+### DONE 2026-08-17 — mechanical Pattern-B sweep run: low precision as a standalone signal (confirmed on Part 1, which is otherwise clean), correctly re-finds all 3 known non-placeholder Pattern-B predecessors, no confident NEW Pattern-B case found on a quick read — but surfaces a bigger, unplanned finding: garbled/jumbled-letter fragments scattered THROUGHOUT klal bodies in Parts 2-3, not just at openings, meaning Pattern-A-style corruption is likely far more widespread than the 10 opening-only instances found so far
+
+**Method**: flagged every non-placeholder klal in Parts 1-3 whose stored
+`clean_text` does NOT end in typical closing punctuation (`:`, `.`, `)`,
+gershayim/geresh) as a truncation candidate. **Confirmed low precision as a
+standalone signal**: Part 1 (independently already verified clean) flags
+50/222 klalim (22.5%) this way - most Part-1 klalim simply don't happen to
+end in one of those characters, so an abrupt ending alone is weak evidence
+of truncation. Part 2 flags 23/222, Part 3 21/223 - comparable rates, not a
+usefully elevated signal on its own. **Recall check passed**: all 3
+non-placeholder klalim already scan-confirmed as Pattern-B predecessors
+this session (298, 411, 612 - 407 is a placeholder so can't appear here)
+are correctly present in the flagged list.
+
+**No confident NEW Pattern-B case found.** Cross-referenced each Part 2/3
+candidate against its immediate successor's opening (skipping successors
+that are themselves placeholders, since there's nothing to compare against)
+- the handful checked closely (227→228, 256→257, 273→274, 301→302,
+355→356) all read as clean, separate, grammatically complete klal
+boundaries, not a stolen prefix. Did not exhaustively scan-crop-verify
+every remaining candidate (~20+) - this was run as the cheap triage pass it
+was scoped to be, not a second full verification round; the ones not
+individually checked remain nominally open but low-confidence given the
+signal's demonstrated 22.5% false-positive rate on known-clean Part 1.
+
+**Unplanned but real finding, larger than what this sweep was built to
+catch**: several flagged klalim contain jumbled, non-lexical letter
+fragments not at the opening (which the original marker-trace content
+check could see) but scattered MID-sentence or near their own ending -
+e.g. klal 227 (`יאהירא דבדלבדרעיתו`), 245 (`המושכינחהו עמ"ינכי`), 265
+(`לת"גמצאא' זדא"תה אומלאר` - plausibly a scrambled `זאת אומרת מצינו`,
+klal 266's own real title phrase, appearing corrupted inside klal 265),
+349 (`כולרחפיקצ"תד`), 424 (`ל"יע הסדסיי 'וטה'צ":ע`), 454 (`האו"יכ
+נהלכעי"דב`), and several more not individually transcribed here. **This
+strongly suggests the Pattern-A corruption mechanism (a real passage
+skipped, replaced by a garbled token) is not confined to klal openings -
+the original 10 Pattern-A instances are only the ones visible to a check
+that compares the first ~8 tokens after the marker; this same corruption
+almost certainly recurs throughout klal bodies at a materially larger
+scale.** This is a genuinely new, bigger-scope question than "do the 14
+leads and the outliers" covers - it needs its own dedicated detection pass
+(most plausibly a lexicon-coverage/non-word sweep over Parts 2-3 body text,
+the same class of check `validate_part1_corpus_integrity.py` already runs
+for Part 1, not yet built for Parts 2-3), not a few more one-off scan crops.
+Flagging here rather than either chasing it ad hoc or silently dropping it -
+this is a scope decision for the user, not something to expand into
+unilaterally.
+
 ### DONE 2026-08-17 — scan-crop verification COMPLETE on all 14 original garbled-text leads (all Pattern A or B, no exceptions); word-count-outlier sweep checked (6 of 7 clean, 1 NEW finding: klal 556/557 content swap); investigation only, still no corpus writes
 
 Closes out the remaining open items from the earlier scan-crop entry. Per
