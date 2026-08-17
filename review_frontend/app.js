@@ -352,11 +352,36 @@ function renderKlalBody(block, k) {
       // and applying it to the corpus are always separate steps, same as
       // every other decision type here), so still shown, struck through
       // to signal "pending removal" rather than "pending replacement".
-      const pendingDelete = corr.current_decision.chosen_text === '';
-      span.className = 'flag-word state-human' + (pendingDelete ? ' pending-delete' : '');
+      const chosenText = corr.current_decision.chosen_text;
+      const pendingDelete = chosenText === '';
+      // FIXED 2026-08-17 (user bug report: a recorded manual correction
+      // turned the word green but kept showing the OLD, disputed text with
+      // no sign of what it would become once applied - confusing, read as
+      // "wrong text" rather than "not yet applied"). A pending REPLACEMENT
+      // (chosen_text set, and actually different from what part1.json
+      // still has - editing a word to itself is a real, if odd, case that
+      // needs no "pending" treatment at all) gets the same struck-through
+      // treatment as pending-delete, plus the actual chosen text shown
+      // right after it, so the reviewer sees the outcome without reopening
+      // the panel.
+      const pendingReplace = !pendingDelete && chosenText && chosenText !== w;
+      span.className = 'flag-word state-human' + (pendingDelete ? ' pending-delete' : '')
+        + (pendingReplace ? ' pending-replace' : '');
       span.textContent = w;
       span.onclick = () => openManualCorrectionPanel(k.klal_id, i, w, corr);
       body.appendChild(span);
+      if (pendingReplace) {
+        const arrow = document.createElement('span');
+        arrow.className = 'pending-replace-arrow';
+        arrow.textContent = ' → ';
+        body.appendChild(arrow);
+        const repl = document.createElement('span');
+        repl.className = 'pending-replace-text';
+        repl.textContent = chosenText;
+        repl.title = 'Pending: recorded but not yet applied to part1.json';
+        repl.onclick = () => openManualCorrectionPanel(k.klal_id, i, w, corr);
+        body.appendChild(repl);
+      }
     } else if (corr) {
       const span = document.createElement('span');
       span.className = 'flag-word state-' + wordState(corr);

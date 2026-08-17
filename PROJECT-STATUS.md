@@ -15,6 +15,47 @@ current handoff, re-written (not just appended to) as state changes.
 
 ## ►► SESSION HANDOFF — read this first, 2026-08-16 (continued into 2026-08-17)
 
+### DONE 2026-08-17 — review harness BUG #2 fixed: a recorded-but-not-yet-applied manual correction showed the OLD disputed word styled green (Human-Decided), with no indication of what it would actually become
+
+**User bug report, klal 2** (found immediately after bug #1 above was fixed
+and while re-testing): "the flag was on, an issue is mentioned in the notes
+but the word was not highlighted" - expected, not a regression, see bug #1's
+"NOT retroactively backfilled" scope note; klal 2's flags all predate the
+fix. "I then manually corrected it, and the word is now marked in green, but
+it has the wrong text." Root-caused directly against the real record
+(`2009bc46c399`, klal 2 word 109, `אטינא`->`אמינא`): the decision was
+recorded correctly, but `part1.json` still had `אטינא` (recording and
+applying are always separate steps, per this project's standing
+architecture) - the frontend's manual-correction render path showed that
+OLD text with only a color change, no indication of the CHOSEN replacement,
+which reads as "wrong" rather than "pending."
+
+**Fix, `review_frontend/app.js`/`app.css`**: a pending replacement (chosen
+text set and different from the still-current word - editing a word to
+itself needs no such treatment) now renders struck-through, followed by an
+arrow and the chosen text in green bold, mirroring the existing
+`pending-delete` treatment rather than inventing a new pattern. The
+machine-candidate pathway (vision A/B choices) already surfaced this via
+its hover tooltip ("Your decision: ...") - this gap was specific to the
+manual-correction pathway, which had no indication at all, not even on
+hover.
+
+**Verified live**, same standard as bug #1: restarted the server, confirmed
+against klal 2's actual real (not synthetic-test) pending correction -
+screenshot shows `אטינא` struck through, `→`, `אמינא` in green bold, exactly
+as designed. 188/188 pytest (frontend-only change, no Python logic touched).
+
+**The apply mechanism itself** (user's direct follow-up question): `pipeline/
+apply_reviewer_decisions.py`, run manually - reads every decision without an
+`apply_event` yet, re-verifies the live text still matches what the decision
+was recorded against (drift check - refuses if the corpus changed underneath
+it since), and only then writes the corpus edit plus an `apply_event` marking
+it done. Never automatic, never part of `rebuild_all.sh` - recording a
+decision and promoting it into the corpus are always two distinct, deliberate
+steps (CLAUDE.md "Human review decisions"), by design, not an oversight - the
+FEEDBACK gap fixed here was that the pending state looked like a mistake
+instead of an intentional waypoint.
+
 ### DONE 2026-08-17 — review harness BUG fixed: a klal_flag naming a specific word (AI-pass free text) was never highlighted in the text pane, forcing the reviewer to find it by reading prose and searching by eye; also applied klal 1 w446's real fix (ומידו->ומיהו) that surfaced the bug
 
 **User bug report, klal 1**: "I saw klal 1 was flagged for review. When I looked at the notes it said there was a question about מידו vs ומיהו - but the questionable word was not highlighted, I needed to find it myself." A second, related report - after fixing it via the dashboard, the corpus text didn't visibly change - turned out to be expected behavior (recording a decision and applying it to part1.json are always separate steps, per this project's standing architecture), not a bug; the actual gap was upstream of that.

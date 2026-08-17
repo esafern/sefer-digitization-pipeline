@@ -215,6 +215,14 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
 .flag-word.state-machine { border-bottom: 2px dotted var(--pending); opacity: 0.92; }
 .flag-word.state-human { border-bottom: 3px solid #38a169; }
 .flag-word.pending-delete { text-decoration: line-through; text-decoration-color: var(--danger); opacity: 0.7; }
+/* ADDED 2026-08-17 (user bug report: "I manually corrected it, and the
+   word is now marked in green, but it has the wrong text" - a recorded-
+   but-not-yet-applied manual correction showed the OLD disputed word,
+   styled as if resolved, with no indication of what it would actually
+   become - see .pending-replace-text below for the paired fix). */
+.flag-word.pending-replace { text-decoration: line-through; text-decoration-color: #38a169; opacity: 0.75; }
+.pending-replace-text { color: #38a169; font-weight: 600; margin: 0 2px; }
+.pending-replace-arrow { color: var(--ink-faint); font-size: 11px; }
 .flag-word:hover { background: rgba(43,108,176,0.08); }
 /* Every word is clickable now (2026-08-13, "flag any word and replace
    it"), not just machine-flagged ones - but a permanent visual mark on
