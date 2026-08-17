@@ -9,6 +9,22 @@ actual scan this pipeline OCRs (`berlin_square_corrected.pdf`) is a
 later Berlin second edition, see "Pipeline shape" below for the verified
 detail; don't conflate the two.
 
+> **The ultimate goal is a reusable digitization pipeline, not a one-off
+> for this single work.** User directive, 2026-08-17: everything built
+> here — DocAI extraction, marker/scan-linkage detection, klal-boundary
+> verification, the DocAI-vs-stored-text diff-and-review machinery, the
+> review dashboard — should be written so it generalizes to OTHER
+> historical Hebrew texts, not hardcoded to Yad Malachi's specific shape
+> where that can reasonably be avoided. This does not relax any of the
+> fidelity/chunking/Sefaria-readiness bar above for THIS work; it's an
+> added constraint on HOW the code gets written — prefer parameterized,
+> documented, reusable scripts (the `pipeline/`+`tools/` shared-library
+> pattern already established for `corpus_io.py`/`vision_adjudication_
+> common.py` is the right shape to extend, not a one-off exception) over
+> quick one-off scripts, especially for anything new built from this
+> point forward (starting with the Parts 2-3 scan-linkage work — see
+> PROJECT-STATUS.md).
+
 > **Read `PROJECT-STATUS.md` at the start of every session, every time, no
 > exceptions.** This file (`CLAUDE.md`) holds durable rules and architecture.
 > `PROJECT-STATUS.md` holds the current, specific, dated truth — what's fixed,
@@ -47,6 +63,27 @@ detail; don't conflate the two.
 > same process, let alone without its own scan-linkage/vision-
 > verification infrastructure ever having been built or run there at
 > all.
+>
+> **PARTIALLY SUPERSEDED 2026-08-17, by the same user, explicitly and
+> knowingly** ("this is my directive so I can decide"): the "do not
+> propose, scope, or start" language above is lifted specifically for
+> building the Parts 2-3 scan-linkage/verification INFRASTRUCTURE itself
+> (DocAI extraction over their page range, marker/trace-building,
+> klal-boundary verification) — not for finalizing or applying Parts 2-3
+> corrections. The rationale above was restated in full to the user
+> before this decision, not skipped past; the user's own read: the code
+> is meaningfully better than it was two weeks ago and they want to see,
+> concretely, whether it holds up on Parts 2-3 rather than defer that
+> question further. Actually promoting any Parts 2-3 `part*.json` edit
+> still needs its own explicit go-ahead, the same as every correction
+> this pipeline has ever applied — building the infrastructure and
+> deciding to trust/apply what it finds are still two separate,
+> deliberate steps (same principle as "Human review decisions" below).
+> The original rationale (page-furniture 17% disparity, no infrastructure
+> ever run there) is not wrong and is not deleted — it's the reason a
+> dedicated klal-boundary verification pass is a required part of this
+> work, not an optional nice-to-have, see PROJECT-STATUS.md for the live
+> plan.
 
 > **Log every finding to `PROJECT-STATUS.md` yourself, immediately, without
 > being asked.** Finding a bug and only mentioning it in chat is not done —

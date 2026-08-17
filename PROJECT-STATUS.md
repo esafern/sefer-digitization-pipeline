@@ -15,6 +15,106 @@ current handoff, re-written (not just appended to) as state changes.
 
 ## ►► SESSION HANDOFF — read this first, 2026-08-16 (continued into 2026-08-17)
 
+### OPEN 2026-08-17 — Parts 2-3 scan-linkage/verification infrastructure: user explicitly authorized starting it (partial override of the standing gate, see CLAUDE.md); reusable-pipeline goal newly documented; extraction stage confirmed to need no new code; marker/trace-building stage NOT yet built - in progress
+
+Per direct user request. Full context/reasoning is in CLAUDE.md's updated
+Parts-2-3-gate callout - not duplicated here in full, but the key facts:
+
+**New durable goal, previously undocumented anywhere** (added to CLAUDE.md
+as its own top-of-file callout): this pipeline's ultimate purpose is to be
+REUSABLE for other historical Hebrew texts, not a Yad-Malachi-only tool.
+This is a real constraint on how new code gets written from this point on
+(prefer parameterized/documented/reusable scripts, extend the `corpus_io.py`
+shared-library pattern rather than one-off scripts), not just an aspiration.
+
+**Scope of what's authorized now vs still gated**: building the scan-
+linkage/verification INFRASTRUCTURE for Parts 2-3 (extraction, marker/
+trace-building, boundary verification) is authorized, starting now.
+Applying any actual Parts 2-3 correction still needs its own separate
+explicit go-ahead - same two-step principle as the rest of this pipeline
+(review vs apply are always distinct deliberate steps).
+
+**Fact-finding done before any code was written, not assumed**:
+- `part2.json`/`part3.json`'s stored `page` field is WRONG - confirmed by
+  directly rendering PDF page 30 (part2's own klal 223's claimed page):
+  it shows PART 1 content (klal ~45-53, "כללי האלף" header), not Part 2 at
+  all. **No scan-linkage of any kind currently exists for Parts 2-3**, not
+  even basic page attribution - this matches and sharpens what the
+  now-partially-superseded gate already said ("without its own scan-
+  linkage/vision-verification infrastructure ever having been built or run
+  there at all").
+- Scouted the real PDF directly (low-DPI renders at pages 77/85/140/200) to
+  find where Parts 2-3 actually live: **page 77 already shows klal 224-227**
+  - Part 2 starts essentially immediately after Part 1 ends (page 76), no
+    gap, no separate title/front matter page. Page 200 shows klal ~559
+    (deep in Part 3). The alphabetical section headers (`כללי האלף` ->
+    `כללי ההא` -> ... -> `כללי הריש`) run CONTINUOUSLY across all three
+    parts, confirming Parts 1/2/3 are editorial/project-management
+    divisions of ONE continuous printed sequence, not separate physical
+    sections with their own front matter. **Working estimate**: the full
+    667-klal work spans roughly pages 14-225 of the 337-page PDF (~3.6
+    klalim/page, matching Part 1's own density); pages beyond ~225 are
+    presumed back matter, not yet confirmed.
+- **Decided against wholesale "regenerate Parts 2-3 from scratch"**: Parts
+  1/2/3 all came from the SAME original chunker-era extraction run (one
+  shared process, chunked into all three part files at once - see
+  CLAUDE.md "Pipeline shape"). Part 1 isn't cleaner because its original
+  extraction was better; it's cleaner because it alone has since been run
+  through hundreds of rounds of the DocAI-diff-and-review pipeline. The
+  right move is to give Parts 2-3 that SAME treatment (diff current stored
+  text against fresh DocAI, correct via the normal review pipeline),
+  preserving whatever's already correct, not discard it. **Real caveat,
+  not waved away**: the one CONFIRMED fact (page-furniture contamination at
+  17% of Parts 2-3's klalim vs ~1 instance in Part 1) is evidence
+  Parts 2-3's klal BOUNDARIES specifically may need more than word-level
+  diffing catches - word-diffing cannot detect a klal split, merged, or
+  mis-numbered (exactly the bug class fixed in Part 1 today: klal 65/66,
+  klal 17/18, klal 197/198 - see entries below). A dedicated boundary/
+  chunking verification pass is therefore a REQUIRED part of this work, not
+  optional, separate from ordinary word-level correction candidates.
+- **Terminology check on today's own 3 fixes, since it's directly relevant
+  to what this new work will produce**: klal 65/66 and klal 17/18 were pure
+  DATA cleanup (direct `part1.json` edits, no code touched). klal 197/198
+  was BOTH - a real CODE bug (`pipeline/build_klal_page_regions.py`'s
+  `load_markers()`, inconsistent with its own sibling function in the same
+  file) and two DATA fixes (`gematria_trace_part1.json`,
+  `part1_header_anchored_alignment.json`). The lesson for Parts 2-3: pure
+  word-level diff-and-review only ever produces data cleanup: boundary/
+  linkage work can surface CODE bugs in the new trace-building script
+  itself, not just data issues in what it reads.
+
+**Extraction stage - confirmed to need NO new code.** Ran a real 10-page
+test slice (pages 83-92, the first pages past what was already cached)
+using the exact calling pattern from the already-archived
+`archive/scripts/extend_docai_ocr.py`, unmodified except for pointing at
+`berlin_square_corrected.pdf` instead of that archived script's pre-page-
+-order-fix `berlin_square.pdf`. Succeeded cleanly: 10/10 pages, 2.65s/page
+average, 800-980 tokens/page, consistent with Part 1's own pages, no
+errors. Given the new reusable-pipeline goal, this script should be
+rehabilitated into a clean, parameterized `pipeline/`-tier script (using
+`corpus_io.py`, no hardcoded processor IDs where avoidable) rather than
+left archived/one-off - not done yet, small cleanup not new logic.
+
+**Cost check, not fully resolved**: could not get a live, verified
+Document-AI billing figure - the `doc-ai-worker` service account lacks
+Cloud Billing API access (`gcloud billing accounts list` ->
+PERMISSION_DENIED, same permission ceiling as the earlier Cloud Vision API
+situation this session). Reported the published-rate order of magnitude
+(likely low-single-digit dollars for the full ~150-page Parts 2-3 range) as
+an ESTIMATE ONLY, explicitly caveated as not live-verified, not stated as
+fact. If precision matters, needs the user's own console access.
+
+**NOT YET DONE**: the marker/trace-building script itself (the one
+genuinely new piece of code this work needs - no live or archived script
+currently builds a `gematria_trace`-equivalent for any part) - currently
+being scoped via a collaboratively-developed prompt, to be handed to a
+high-effort background agent, then independently re-verified before merging
+(same standard as every agent-produced code change this session). Full
+extraction over the ~150-page Parts 2-3 range also not yet run (only the
+10-page test slice); pinpointing the exact Part 2/3 boundary (~klal 445)
+and Part 3's end page also not yet done precisely (currently a working
+estimate from low-DPI scouting only).
+
 ### DONE 2026-08-17 — the klal_page_regions.json fix's real payoff: 6 previously-UNVERIFIABLE candidates (klal 167) now exact-token locatable; scan-verified: 1 genuine DATA issue fixed, 3 disconfirmed print-faithful, 2 left genuinely uncertain
 
 Direct follow-through, not just a claim the earlier fix "should help": re-ran
