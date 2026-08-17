@@ -296,6 +296,49 @@ already been silently overwritten by an unrelated comparison before anyone
 noticed. `verify_corrections_vision.py`'s `corrections_cache` table does this
 correctly; if you add another vision-caching script, key it the same way.
 
+## Shared library modules — check these before hand-rolling a loader, a cache, or a client
+
+Two modules in `pipeline/` are libraries, not entry points. Neither is ever
+run directly; both are imported by scripts in **both** `pipeline/` and
+`tools/`, via `sys.path.insert(0, os.path.join(REPO, "pipeline"))`.
+
+- **`vision_adjudication_common.py`** (2026-08-17) — crop/cache/JSON-recovery/
+  retry/client machinery for every Gemini-calling script.
+- **`corpus_io.py`** (2026-08-17) — repo paths, corpus and derived-artifact
+  loading (`load_klalim`/`load_part1*`/`save_part1`/`load_json`), DocAI
+  page-token loading (`load_docai_page`, `DocaiPageCache`), the alignment and
+  gematria-trace readers, `clean_word`/`hebrew_letters_only`, and
+  `PART1_MAX_KLAL`.
+
+**The standing rule: before writing a new `json.load(open(...))` for a
+corpus/derived file, a new `docai_word_boxes/page_N.json` read, a new Gemini
+client, a new sqlite decision cache, or a new copy of `PART1_MAX_KLAL` or a
+Hebrew-letter set — use the shared module. If what you need genuinely differs,
+add a parameter with a comment saying what real difference it encodes (the way
+`has_model_column` and `load_docai_page(default=)` do), rather than a private
+copy.**
+
+Why this is a rule and not a preference: the identical bug class has now been
+found in a hand-maintained copy **five separate times** in this project — the
+missing-`prompt_hash` cache key three times (2026-08-14, 2026-08-16,
+2026-08-16 again) and the missing Gemini request-timeout twice (2026-08-17,
+in `verify_flagged_candidates_vision.py` and then in
+`propose_punctuation_part1.py`, the latter outside the vision code
+entirely). In every case the fix existed already, in a sibling file, and the
+sibling never got it. That is Lesson 13's failure mode ("a hand-maintained
+parallel copy is a second copy of the truth that happens to usually agree")
+applied to code rather than data.
+
+Each module's own docstring records, per item, the concrete incident that
+justified extracting it — and, equally important, what was examined and
+deliberately **not** extracted (the three page-furniture word sets, which
+match by different rules over different contents; the punctuation cache's
+genuinely different schema; each script's own prompt template and argparse).
+Keep that convention: a coincidental resemblance between two scripts serving
+different concerns is not duplication, and forcing a shared abstraction onto
+one can silently change behavior — a data-affecting change wearing a
+refactor's clothes.
+
 ## Directory layout
 
 **REORGANIZED 2026-08-16** — root used to be flat: 24 live `.py` files
@@ -304,10 +347,18 @@ else, with this section as prose the only map of which script did what.
 Per user request ("root should be clean... consider a code dir or even
 three"), split into two subdirectories by role:
 
-- **`pipeline/`** (9 files) — the scripts that make up the actual running
-  system: the 5 `rebuild_all.sh`-orchestrated correction-data stages, plus
-  the live review tool (`review_server.py` and its 3 decision-layer
-  scripts).
+- **`pipeline/`** (11 files as of 2026-08-17, was 9 at the 2026-08-16
+  reorg) — the scripts that make up the actual running system: the 5
+  `rebuild_all.sh`-orchestrated correction-data stages, plus the live
+  review tool (`review_server.py` and its 3 decision-layer scripts), plus
+  the **two shared library modules** added 2026-08-17 (see "Shared library
+  modules" below): `vision_adjudication_common.py` and `corpus_io.py`.
+  These two are not entry points and are never run directly — they are
+  imported by scripts in BOTH `pipeline/` and `tools/`, which is why they
+  live here rather than in a third directory: `tools/apply_punctuation_
+  decisions.py` already established the `sys.path.insert(0, os.path.join(
+  REPO, "pipeline"))` cross-directory import at the reorg, and reusing it
+  was cheaper than inventing a second convention.
 - **`tools/`** (18 files as of 2026-08-17, was 15 at the 2026-08-16 reorg -
   `detect_real_word_substitution.py`, `check_next_marker_and_title.py`, and
   `verify_flagged_candidates_vision.py` added since; see PROJECT-STATUS.md
@@ -371,6 +422,9 @@ claim.
     see the same section) — not part of `rebuild_all.sh`, run separately
     with `python3 pipeline/review_server.py`. Serves `review_frontend/`
     (unmoved, at root) via its own `REPO`-relative path.
+  - **Shared library modules, imported not run** (both added 2026-08-17,
+    see "Shared library modules" below) — `vision_adjudication_common.py`
+    and `corpus_io.py`.
 - `tools/`, by role:
   - **Punctuation pass, Part 1 only** — `propose_punctuation_part1.py`
     and `apply_punctuation_decisions.py` (added 2026-08-10, see

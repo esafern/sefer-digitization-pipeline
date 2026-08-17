@@ -15,6 +15,144 @@ current handoff, re-written (not just appended to) as state changes.
 
 ## ►► SESSION HANDOFF — read this first, 2026-08-16 (continued into 2026-08-17)
 
+### DONE 2026-08-17 — round-5 modularization: `pipeline/corpus_io.py` extracted, all 25 pipeline/+tools/ scripts migrated, 3 more code bugs found doing it. NOT YET MERGED to master (worktree `agent-a0b300028d41bab51`).
+
+Per direct user request following the `vision_adjudication_common.py` merge
+(`800cd01`): that consolidation happened because the SAME bug class had been
+found and fixed independently three times across three files before anyone
+consolidated. The user's read — "three independent recurrences is a
+duplication-of-logic problem, not a coincidence" — scoped this round to
+survey the wider `pipeline/` + `tools/` directories, not just the vision
+trio. Two commits on branch `worktree-agent-a0b300028d41bab51`, based on
+`800cd01`: `c196bd0` (module + 9 `pipeline/` callers), `81f70fd` (16
+`tools/` callers + 3 bug fixes).
+
+**New shared module `pipeline/corpus_io.py`**, same documented style as
+`vision_adjudication_common.py` (per-item WHY citing the specific prior
+incident, functions parameterized rather than reading module globals,
+explicit tests). What it holds, with the evidence for each:
+
+- **The DocAI page-token loader** — NINE call sites had written the same
+  path-join + exists-check + `json.load` by hand, four of them wrapped in a
+  hand-rolled page cache with identical get-or-load bodies. The copies had
+  ALREADY diverged on what a missing page returns: some `None`, one `[]`,
+  and `verify_reconstruction_witness.py` had no exists-check at all (it
+  raised). Every one of those behaviours is preserved exactly — now as an
+  explicit `default=` argument per call site instead of an accident of which
+  copy you happened to read.
+- **`clean_word()`** (alnum filter) — byte-identical in three files, and the
+  normalization the whole docai-vs-stored-text diff rests on.
+- **`hebrew_letters_only()`** — the SAME function written FOUR ways: a
+  27-character literal (`verify_witness_vision.py`,
+  `verify_reconstruction_witness.py`, `review_server.py`), a regex
+  `[^א-ת]` (`check_klal_token_orphans.normalize`), and a filter over
+  `validate_part1_corpus_integrity.HEBREW_LETTERS`. Verified equivalent, not
+  assumed (same 27 code points, U+05D0–U+05EA). `review_server.py`'s copy
+  carried a comment reading "Must match verify_reconstruction_witness.py's
+  HEB/norm() exactly" — because `reconstruction_witness_queue.json`'s stored
+  `docai_token_index` values are only meaningful if all three agree. That
+  requirement is now structural instead of a note asking the next editor to
+  remember it.
+- **`PART1_MAX_KLAL`** — was three private literals (plus a FOURTH bare `222`
+  found in `propose_punctuation_part1.py`, see bug 2 below, which the
+  2026-08-15 hard-wired-value audit missed entirely).
+- **`load_klalim()`'s `{"klalim": [...]}`-vs-bare-list tolerance** — present
+  in only 2 of 12 readers of those same files, so whether a wrapped file
+  loaded depended on which script you came in through. Plus
+  `load_part1`/`_sorted`/`_by_id` and **`save_part1()`**, the last
+  byte-identical in `apply_reviewer_decisions.py` and
+  `apply_punctuation_decisions.py` — the only two scripts in the repo allowed
+  to WRITE the hand-edited source of truth, i.e. the least acceptable place
+  for two independent copies of how it gets serialized.
+- **`trusted_klal_pages()`** — the same alignment filter loop twice, differing
+  only in whether the untrusted list was collected (Lesson 15's "silence, not
+  a low score"). One function returning both.
+
+**THREE CODE BUGS found in the survey, each an independent instance of the
+drift class this round exists to close** — a fix applied to one copy and
+never to its siblings:
+
+1. **`tools/propose_punctuation_part1.py` built its Gemini client with a bare
+   `genai.Client(api_key=...)`, missing the explicit request timeout.** This
+   is the FOURTH instance of that identical missing fix (after the 2026-08-06
+   hung-call incident, fixed in `verify_corrections_vision.py` and
+   `verify_witness_vision.py`, then found missing in
+   `verify_flagged_candidates_vision.py` in round 4) and the FIRST outside the
+   vision trio — direct evidence the drift was never confined to the three
+   files `vision_adjudication_common.py` was extracted from. Now routed
+   through that module's `make_client()`.
+2. **The same file's `MODELS_TO_TRY` still listed `gemini-2.5-flash`**, which
+   has permanently 404'd since 2026-08-05 ("no longer available to new users")
+   and was dropped from the vision scripts' chain then, because a dead model
+   silently eats a retry slot on every fallback path instead of ever helping.
+   Its independently-written copy never got that fix.
+3. **`tools/validate_part1_corpus_integrity.py`'s check 3 produced a
+   NON-DETERMINISTIC report.** It iterated a SET of word tuples, so Python's
+   per-process string-hash randomization reordered the printed lines on every
+   run. Found by trying to prove this refactor behavior-preserving, and
+   confirmed empirically rather than inferred: five runs of identical code
+   against the identical corpus produced five different orderings of the same
+   lines (klal 65/66/67's same-title-cluster block). **This directly defeats
+   this project's standing verification method** — diffing two runs (Lesson
+   19) — because a real change and pure noise look identical. Fixed with
+   `sorted()`; the reported line multiset is provably unchanged.
+
+**Deliberately NOT extracted, each recorded with its reason in the module
+docstring** (the survey's judgement calls, not oversights): the three
+page-furniture word sets (`WATERMARK_WORDS` / `FURNITURE_WORDS` /
+`HEADER_WORDS`+`FURNITURE_RE` — they LOOK like one concept but match by
+different rules over different contents, and `build_corrections_dataset.py`'s
+own 2026-08-15 comment already records this as examined-and-left-alone;
+unifying them would change what each script strips, i.e. a data-affecting
+change wearing a refactor's clothes); `propose_punctuation_part1.py`'s sqlite
+cache (a genuinely different single-opaque-key schema, correctly keyed for
+Lesson 12 in its own way); each script's own PROMPT_TEMPLATE and argparse
+setup (nine different CLIs resembling each other only because argparse has
+one shape); `validate_title_alphabetical_order.ALPHABET` (22 base letters, an
+ORDERING alphabet where a final form is not a distinct sort position — a
+different purpose, not a fourth copy of the 27-letter set); and the
+`REPO = os.path.dirname(os.path.dirname(...))` line in all 27 scripts, which
+is **structurally irreducible** — a `tools/` script must compute the repo
+root BEFORE it can put `pipeline/` on `sys.path` to import the shared module
+at all. What was removed is everything DERIVED from it.
+
+**Verification, done not assumed:**
+- `./rebuild_all.sh` output **byte-identical on all 5 derived files** against
+  a baseline captured before any edit (`klalim_demo_dataset.json`,
+  `corrections_candidates_part1.json`, `corrections_verified_part1.json`,
+  `corrections_part1.json`, `klal_page_regions.json`), **0 live Gemini
+  calls**.
+- Captured stdout+stderr of **all 14 runnable standalone tools** before and
+  after (via `git stash`, same machine, same data) — byte-identical
+  everywhere except the two deliberate fixes (the model list, and check 3's
+  ordering whose line multiset is provably unchanged).
+- **152/152 pytest** (was 140), **14/14 Playwright** (`test_review_server.py`,
+  run manually as usual — it exercises `review_server.py`, whose `_load_json`
+  and `_witness_norm` both moved).
+- **12 new hermetic tests**, 7 of them mutation-verified red/green
+  (`save_part1`'s on-disk format, `trusted_klal_pages`' untrusted list,
+  `DocaiPageCache` actually caching, the Hebrew-letter set equivalence, the
+  timeout fix, the dead-model list, and the sort — the last run 12x per
+  mutation since that bug is per-process probabilistic; 11/12 red).
+- `part1.json`/`part2.json`/`part3.json`/`review_decisions.jsonl`/
+  `lexicon.txt` **sha256-unchanged**. No corpus data touched — this is a
+  code-organization refactor only.
+
+**`tests/test_corpus_invariants.py::test_part1_max_klal_constants_agree_with_
+the_corpus` was updated, not weakened**: the "three literals agree with each
+other" half is now structural, and the half that a shared constant cannot fix
+by itself — the constant agrees with the LIVE corpus — is unchanged and still
+gates the rebuild. Each module is still read through its own attribute, so a
+module re-introducing a private literal is still caught.
+
+**New standing rule added to CLAUDE.md** ("Shared library modules — check
+these before hand-rolling a loader, a cache, or a client"), with the count
+that motivates it: the identical bug class has now been found in a
+hand-maintained copy **five separate times** in this project.
+
+**NOT YET MERGED.** Same standard as round 3/round 4: read the diff, re-run
+`rebuild_all.sh` + pytest against the worktree before touching `master`.
+
 ### OPEN 2026-08-17 — revalidation round 4 ("pipeline improvements") FAILED mid-task on the monthly Claude spend limit; uncommitted work sitting in a worktree, NOT reviewed or merged
 
 Background agent (`a06c15e0c6c77fa80`) spun off to look for pipeline-code
