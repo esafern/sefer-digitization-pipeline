@@ -15,6 +15,87 @@ current handoff, re-written (not just appended to) as state changes.
 
 ## ►► SESSION HANDOFF — read this first, 2026-08-16 (continued into 2026-08-17)
 
+### DONE 2026-08-17 — scan-crop verification COMPLETE on all 14 original garbled-text leads (all Pattern A or B, no exceptions); word-count-outlier sweep checked (6 of 7 clean, 1 NEW finding: klal 556/557 content swap); investigation only, still no corpus writes
+
+Closes out the remaining open items from the earlier scan-crop entry. Per
+user instruction ("do them all now").
+
+**5 remaining leads (300, 374, 389, 510, 543) all confirmed Pattern A**
+(content skipped mid-klal, garbled placeholder, resumes correctly later),
+same method as before - direct crop read against the printed page:
+- klal 300: skips `משמע שהידה יכול לפרש כן אבל לפי` between `יכולני לפרש
+  וכו'` and the correct resumption `האמת אינו מפרש כן`.
+- klal 374: skips ~30 words (`אחד מצינו בגמרא על כוונות מתחלפות · הר"ן ז"ל
+  בפ' האיש מקדש...`) between `לשון` and the correct resumption `סי' קל"ד
+  וכבר קדמוהו`.
+- klal 389: confirmed Pattern A for its first gap (skips `דקרא נקט לא שייך
+  למימר אלא היכא דכתיבא בגופיה דההוא עניינא אכל אי ההוא` between `לישנא`
+  and the correct resumption `לישנא לא כתיבא`). **Also shows signs of a
+  SECOND, uninvestigated corruption further in** (stored `מרכבת שץ` where
+  the resumed text plausibly should read `מרכבת המשנה`, a known halachic
+  work, plus a second garbled span `ה מפצ"יחנומהד' קשאומפרר` after a
+  duplicated `לא אסרה` - both past this session's crop window, not yet
+  scan-confirmed).
+- klal 510: skips `דעתין · לא מיקרי אלא היכא דמעיקרא אסקיה אדעתיה לקושטא
+  ובזה הוא דרגיל רש"י לענים לפרש כפי המלקא דעתין אבל בבעיא דצדדיה שקולי'
+  אין לו לרש"י` between `סלקא` and the correct resumption `ז"ל הכרח לצד א'`.
+- klal 543: skips ~20 words (`לפעמים מקדים הש"ם סברת האמורא שהוא בתרא
+  לסברת מי שהוא קדמון ממנו לפי שסברתו איתמרת בגמרא דילן וסברת הקדמון
+  נאמר' במערבא`) between `קדימה` and the correct resumption `מעדני מלך`.
+
+**Final tally, all 14 original leads now scan-confirmed**: 10 Pattern A
+(281, 282, 300, 374, 389, 482, 510, 543, 549, 634), 4 Pattern B (299, 408,
+412, 613). No exceptions, no leads left uncategorized.
+
+**7 word-count outliers (410, 301, 256, 664, 409, 556, 283) checked** -
+word-count-vs-available-scan-space ratio computed first as a screen (word
+count / total DocAI tokens across the klal's marker-to-next-marker page
+span), then boundary crops rendered for anything tight or otherwise
+flagged:
+- **256, 283, 301, 409, 410: clean, no merge/misattribution found.** Each
+  klal's stored ending is a natural sentence close (several literally end
+  `... ותו לא מידי:`, a standard closing formula) and the next klal's
+  stored opening starts fresh with its own topic - no Pattern-B-style
+  continuation. klal 410 (8,041 words, the largest of the 7) genuinely
+  ends with the printer's own signature line `הצעיר אברהם ישראל ס"ט`,
+  confirmed present at the identical position on the scan immediately
+  before klal 411's marker - a clean boundary, just a very long klal.
+  These 5 are very likely genuinely long single klalim, not merges.
+- **664: boundary with 665 is genuine, not a merge.** 665's marker (page
+  246 token 803, `תרסה תני כך וכ'`) is a real, bold, correctly-positioned
+  klal-opening marker on the scan - not a false positive inside 664's
+  running prose. 665 is simply one of the already-known 115 placeholder
+  klalim (never extracted), which explains the tight word-count ratio
+  without needing a merge explanation.
+- **556: NEW finding, genuinely wrong, not a placeholder gap.** The
+  trace's marker for klal 556 (page 196 token 503) IS a real, bold klal
+  marker reading `תקנו` (556's correct gematria) - but its title reads
+  `רב ור' יוחנן הלכה` (topic: Rav vs. R. Yochanan) with body opening
+  `הטעם הוא מפני שר' יוחנן הוא בתרא לגבי רב ואפילו לגבי רב ושמואל...`.
+  This does NOT match what `part3.json` currently stores under klal_id 556
+  (title `רב ור' חנינא הלכה…`, topic: Rav vs. R. Chanina). That
+  Rav-vs-Chanina content instead matches, verbatim at the opening, what's
+  printed at the NEXT marker - page 197 token 168, also a real bold
+  marker, correctly reading `תקנז` (557's gematria) - which the corpus
+  currently stores as an EMPTY placeholder (`תקנז כלל 557`). Searched the
+  full corpus (all three parts) for klal 556's real, distinctive
+  Rav-vs-Yochanan opening phrase (`הטעם הוא מפני שר' יוחנן הוא בתרא לגבי
+  רב`) - **not found anywhere.** So: what's stored under klal_id 556 is
+  actually klal 557's real content (correctly transcribed, just under the
+  wrong number), klal 557 is left as an unfilled placeholder despite its
+  real content being exactly where 556's content currently sits, and klal
+  556's OWN real content is entirely unaccounted for in the corpus - not
+  merely garbled or truncated like Pattern A/B, genuinely missing. This is
+  a third, distinct failure shape from Pattern A/B - a whole-klal
+  number/content misattribution rather than a text-boundary slip. Not yet
+  investigated further (e.g. whether 555 or another neighbor is also
+  affected) - flagging as its own open item.
+
+All of the above is investigation only - nothing written to `part2.json`/
+`part3.json`. Still needs the same explicit go-ahead as any Parts 2-3
+correction per CLAUDE.md's gate before any of these 10+4+1 findings become
+a corpus edit.
+
 ### DONE 2026-08-17 — heavy-agent (Opus, isolated worktree) full pipeline/tools code review and refactor, merged after independent re-verification; 4 real review-server UX gaps flagged, not fixed, need a product decision
 
 Per direct user request ("run a heavy sub-agent to review and refactor the
