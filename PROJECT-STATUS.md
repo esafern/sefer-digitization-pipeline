@@ -15,6 +15,56 @@ current handoff, re-written (not just appended to) as state changes.
 
 ## ►► SESSION HANDOFF — read this first, 2026-08-16 (continued into 2026-08-17)
 
+### DONE 2026-08-17 — all 4 flagged review-server UX gaps fixed and browser-verified live (word-level ai_flag counts, flag-button/nav consistency, decision history, a real reachable "Correction on record"/null-value bug the original flagging missed)
+
+Closes the 4 items the heavy-agent refactor pass flagged for human triage
+earlier today.
+
+1. **`api_klalim`'s counts now include open `ai_flag` corrections.** Added
+   an `ai_flag_count` per klal (via `_word_level_ai_flags`, excluding any
+   word_index a valid `manual_correction` already covers - same dedup
+   `api_klal` already uses) into `total_count`/`open_count`/
+   `machine_disputed_count`, never `decided_count`. Verified live: klal 144
+   went from `correction_count: 4` to `10` (4 raw corrections + 6 open
+   ai_flags), nav badge count and legend totals now match what the text
+   pane actually shows highlighted.
+2. **Flag-button/nav consistency.** `rd.flagged_klalim()` (nav badge, and
+   the flag button via `klalById[].needs_revisit`) already included
+   word-level flags: the actual bug was narrower than first flagged - only
+   the klal-flag-panel's Save handler mis-set the button from the local
+   general-only checkbox value after saving, capable of visually
+   un-flagging a klal that still had an open word-level flag. Fixed to read
+   `klalById[klalId].needs_revisit` (server truth, post-refresh) instead.
+   Also added an explanatory line in the panel itself when a klal shows
+   flagged for a word-level reason the general checkbox doesn't control, so
+   "checkbox unchecked, button still says flagged" doesn't read as broken.
+3. **`api_decision_history` now includes word-level `klal_flag` rows.**
+   "Show decision history" on an ai_flag word showed "No decisions recorded
+   yet" even though the flag itself IS a recorded decision - `klal_flag`
+   was entirely absent from the merge. `history_for()`'s own word_index
+   filter keeps a klal's GENERAL note from ever leaking in here. Verified
+   live: klal 144 w598's history now shows the real backfill decision
+   instead of the empty-state message.
+4. **`wordState()` guard against ai_flag mislabeling**, plus a related,
+   more concrete bug the original flagging missed while investigating this
+   one: `openManualCorrectionPanel` (the panel an ai_flag click actually
+   opens) treated an ai_flag's `current_decision` - a `klal_flag` record,
+   which carries no `chosen_text` - like a real manual correction, labeling
+   an un-actioned AI flag "Correction on record". `escapeHtml`'s existing
+   null-guard kept this from literally rendering the text "null", but the
+   mislabeling itself was real and reachable TODAY (every ai_flag click
+   goes through this exact path), not just the latent `wordState()` case.
+   Fixed by branching on `opcode === 'ai_flag'`: shows "AI-flagged word" /
+   "Propose a correction" with a blank input instead. Verified live via
+   screenshot - panel now reads correctly, Save still creates a real
+   `manual_correction` the normal way.
+
+3 new tests in `test_pipeline_logic.py` (`api_klalim` count inclusion + its
+manual-correction dedup, `api_decision_history`'s klal_flag inclusion).
+197/197 pytest, `rebuild_all.sh --skip-vision` clean. `review_server.py`
+restarted to pick up the code changes (data-only changes don't need this;
+code changes do, per this session's own earlier lesson).
+
 ### DONE 2026-08-17 — mechanical Pattern-B sweep run: low precision as a standalone signal (confirmed on Part 1, which is otherwise clean), correctly re-finds all 3 known non-placeholder Pattern-B predecessors, no confident NEW Pattern-B case found on a quick read — but surfaces a bigger, unplanned finding: garbled/jumbled-letter fragments scattered THROUGHOUT klal bodies in Parts 2-3, not just at openings, meaning Pattern-A-style corruption is likely far more widespread than the 10 opening-only instances found so far
 
 **Method**: flagged every non-placeholder klal in Parts 1-3 whose stored

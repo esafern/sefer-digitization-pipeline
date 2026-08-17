@@ -308,6 +308,7 @@ def api_klalim():
     # count for a word it no longer actually describes.
     manual_decided = rd.all_current("manual_correction")  # {(klal_id, word_index): record}
     manual_count_by_klal = {}
+    manual_indices_by_klal = {}
     for (kid, wi), rec in manual_decided.items():
         k = klalim_by_id.get(kid)
         if not k:
@@ -317,6 +318,7 @@ def api_klalim():
         if not _word_matches(words, wi, original_word):
             continue
         manual_count_by_klal[kid] = manual_count_by_klal.get(kid, 0) + 1
+        manual_indices_by_klal.setdefault(kid, set()).add(wi)
 
     # Witness items fold into the SAME tri-state counts as corrections
     # (2026-08-12, user request: "put the witness flags in as
@@ -353,10 +355,28 @@ def api_klalim():
         )
         w_machine_disputed_count = len(w_entries) - w_decided_count
 
+        # Word-level ai_flag corrections (bug #1 fix, earlier today) were
+        # highlighted in the text pane but never counted here - a klal could
+        # show "0 open" in the nav while its text pane had a highlighted,
+        # undecided AI flag (flagged 2026-08-17, code review). Every
+        # synthesized ai_flag entry is by construction still open (see
+        # _word_level_ai_flags' own needs_revisit filter) and machine-raised
+        # (no human decision, no vision-resolved state), so it always adds
+        # to total/open/machine_disputed together, the same as an
+        # undecided correction - never to decided_count. Excludes any
+        # word_index a valid manual_correction already covers, matching
+        # api_klal()'s own dedup so the two endpoints never disagree.
+        words = (k.get("clean_text") or "").split(" ")
+        manual_indices = manual_indices_by_klal.get(kid, set())
+        ai_flag_count = sum(
+            1 for f in _word_level_ai_flags(kid, words)
+            if f["word_index"] not in manual_indices
+        )
+
         manual_count = manual_count_by_klal.get(kid, 0)
-        total_count = len(entries) + len(w_entries) + manual_count
+        total_count = len(entries) + len(w_entries) + manual_count + ai_flag_count
         decided_count = corr_decided_count + w_decided_count + manual_count
-        machine_disputed_count = corr_machine_disputed_count + w_machine_disputed_count
+        machine_disputed_count = corr_machine_disputed_count + w_machine_disputed_count + ai_flag_count
 
         punct_entries = punct_candidates.get(str(kid), [])
         punct_decided_count = sum(
@@ -509,16 +529,28 @@ def api_klal_flag(klal_id):
 
 
 def api_decision_history(klal_id, word_index):
-    # Two decision types can share a (klal_id, word_index) key -
-    # candidate_choice (machine-flagged) and manual_correction
-    # (2026-08-13, reviewer-flagged) - merge both so the frontend's one
-    # generic history panel works for either without needing to know which
-    # kind of word it's looking at. In practice a given word_index only
-    # ever has one or the other (a manual flag is only offered on a word
-    # with no machine candidate - see review_frontend/app.js's
-    # renderKlalBody), but merging costs nothing and doesn't assume that.
+    # Three decision types can share a (klal_id, word_index) key -
+    # candidate_choice (machine-flagged), manual_correction (2026-08-13,
+    # reviewer-flagged), and klal_flag with a word_index set (bug #1 fix,
+    # earlier today - an ai_flag word's own history) - merge all three so
+    # the frontend's one generic history panel works for any of them
+    # without needing to know which kind of word it's looking at. In
+    # practice a given word_index only ever carries one of the three (a
+    # manual flag is only offered on a word with no machine candidate, an
+    # ai_flag is skipped once a manual_correction covers the same word -
+    # see review_frontend/app.js's renderKlalBody and
+    # _word_level_ai_flags() above), but merging costs nothing and doesn't
+    # assume that.
+    #
+    # FIXED 2026-08-17 (code review): before this, "Show decision history"
+    # on an ai_flag word reported "No decisions recorded yet" even though
+    # the flag itself IS a recorded decision - klal_flag was entirely
+    # absent from this merge. history_for()'s own word_index filter (None
+    # never matches a specific index) keeps this from ever leaking a
+    # klal's GENERAL note in here, so no separate exclusion is needed.
     history = rd.history_for(klal_id, word_index, "candidate_choice") + \
-        rd.history_for(klal_id, word_index, "manual_correction")
+        rd.history_for(klal_id, word_index, "manual_correction") + \
+        rd.history_for(klal_id, word_index, "klal_flag")
     history.sort(key=lambda r: r["ts"])
     return history
 

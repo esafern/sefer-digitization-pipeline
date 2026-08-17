@@ -2723,3 +2723,74 @@ def test_an_ambiguity_with_no_vision_available_says_so_instead_of_hiding_it():
         22, _gklal(22, "כב", OPENING_A), (14, -1), 15, _loader(pages), {})
     assert record["page"] == 14, "the earliest is taken, per the monotonic cursor"
     assert "NOT disambiguated" in record["note"]
+
+
+# --- review_server: api_klalim must count word-level ai_flags -------------
+# Added 2026-08-17 (code review, heavy-agent refactor pass finding #1): an
+# open ai_flag was highlighted in the text pane but invisible to every count
+# api_klalim returns - a klal could show "0 open" in the nav while its own
+# text pane had a highlighted, undecided AI flag.
+
+def _patch_klalim_deps(monkeypatch, klalim_by_id, ai_flags_by_klal=None,
+                        manual_decided=None):
+    monkeypatch.setattr(rs, "_load_klalim",
+                        lambda: (klalim_by_id, list(klalim_by_id.values())))
+    monkeypatch.setattr(rs, "_load_alignment", lambda: {})
+    monkeypatch.setattr(rs, "_load_corrections", lambda: {})
+    monkeypatch.setattr(rs, "_load_punctuation_candidates", lambda: {})
+    monkeypatch.setattr(rs, "_load_witness_queue", lambda: [])
+    monkeypatch.setattr(rs.rd, "flagged_klalim", lambda: [])
+    manual_decided = manual_decided or {}
+    monkeypatch.setattr(rs.rd, "all_current",
+                        lambda dtype: manual_decided if dtype == "manual_correction" else {})
+    ai_flags_by_klal = ai_flags_by_klal or {}
+    monkeypatch.setattr(rs, "_word_level_ai_flags",
+                        lambda kid, words: ai_flags_by_klal.get(kid, []))
+
+
+def test_api_klalim_counts_an_open_ai_flag_as_machine_disputed(monkeypatch):
+    klalim_by_id = {1: {"klal_id": 1, "clean_text": "אלף בית גימל", "page": 1}}
+    _patch_klalim_deps(monkeypatch, klalim_by_id,
+                        ai_flags_by_klal={1: [{"word_index": 1, "opcode": "ai_flag"}]})
+    result = rs.api_klalim()
+    row = next(r for r in result if r["klal_id"] == 1)
+    assert row["correction_count"] == 1
+    assert row["open_count"] == 1
+    assert row["machine_disputed_count"] == 1
+    assert row["decided_count"] == 0, "an ai_flag has no human decision - must never count as decided"
+
+
+def test_api_klalim_excludes_an_ai_flag_already_covered_by_a_manual_correction(monkeypatch):
+    """Matches api_klal()'s own dedup (bug #1's fix) - once a human has
+    acted on the exact word an ai_flag named, the two endpoints must agree
+    it's decided, not double-count it as both open and decided."""
+    klalim_by_id = {1: {"klal_id": 1, "clean_text": "אלף בית גימל", "page": 1}}
+    manual_decided = {(1, 1): {"candidate_snapshot": {"original_word": "בית"},
+                                "chosen_text": "בין", "word_index": 1}}
+    _patch_klalim_deps(monkeypatch, klalim_by_id,
+                        ai_flags_by_klal={1: [{"word_index": 1, "opcode": "ai_flag"}]},
+                        manual_decided=manual_decided)
+    result = rs.api_klalim()
+    row = next(r for r in result if r["klal_id"] == 1)
+    assert row["correction_count"] == 1, "the manual correction, not double-counted with the ai_flag it resolved"
+    assert row["decided_count"] == 1
+    assert row["open_count"] == 0
+
+
+# --- review_server: api_decision_history must surface a word-level ai_flag's
+# --- own history, not report "no decisions recorded" -----------------------
+
+def test_api_decision_history_includes_a_word_level_klal_flag(tmp_path, monkeypatch):
+    """FIXED 2026-08-17 (code review): "Show decision history" on an
+    ai_flag word used to report "No decisions recorded yet" even though the
+    flag itself IS a recorded decision - klal_flag was entirely absent from
+    the merge. The klal's GENERAL note (word_index=None) must still never
+    leak in here, only this exact word's own flag."""
+    path = str(tmp_path / "decisions.jsonl")
+    monkeypatch.setattr(rd, "DECISIONS_PATH", path)
+    rd.append_decision("klal_flag", 1, needs_revisit=True, note="general note", path=path)
+    rd.append_decision("klal_flag", 1, word_index=2, needs_revisit=True,
+                        note="w2 flagged by an AI pass", path=path)
+    history = rs.api_decision_history(1, 2)
+    assert len(history) == 1
+    assert history[0]["note"] == "w2 flagged by an AI pass"

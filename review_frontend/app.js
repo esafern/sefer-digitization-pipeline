@@ -62,6 +62,14 @@ const STATE_META = {
   human:   { label: 'Human-Decided',    color: '#38a169' },
 };
 function wordState(corr) {
+  // GUARD added 2026-08-17 (code review): renderKlalBody() branches on
+  // opcode === 'ai_flag' before this ever runs, so it's not reachable
+  // today - but an ai_flag's current_decision is the AI's OWN klal_flag
+  // record, not a human decision, and this function has no other way to
+  // tell the difference. If a future code path ever calls wordState() on
+  // one directly, it must not silently render an unresolved AI flag as
+  // Human-Decided.
+  if (corr.opcode === 'ai_flag') return 'open';
   if (corr.current_decision) return 'human';
   if (corr.flag === 'current_text_confirmed') return 'machine';
   return 'open';
@@ -725,6 +733,14 @@ async function openKlalFlagPanel(klalId) {
   openPanel(klalFlagPanel);
   klalFlagPanelBody.innerHTML = '<p>Loading…</p>';
   const state = await fetch(`/api/klal/${klalId}/flag`).then(r => r.json());
+  // The button/nav badge can be flagged for a reason THIS checkbox doesn't
+  // control - an open word-level ai_flag also lights it (see the save
+  // handler's stillFlagged fix below) but this panel only ever edits the
+  // klal's general note. Surface that explicitly rather than leaving a
+  // silent "button says flagged, checkbox unchecked" mismatch (2026-08-17
+  // code review).
+  const flaggedByWordLevel = !state.needs_revisit
+    && klalById[klalId] && klalById[klalId].needs_revisit;
 
   klalFlagPanelBody.innerHTML = `
     <div class="panel-section">
@@ -733,6 +749,9 @@ async function openKlalFlagPanel(klalId) {
         <input type="checkbox" id="needs-revisit-checkbox" ${state.needs_revisit ? 'checked' : ''}>
         <label for="needs-revisit-checkbox">Needs revisit</label>
       </div>
+      ${flaggedByWordLevel ? `<div style="font-size:12px;color:var(--ink-faint);margin-top:6px;">
+        This klal shows as flagged because of an open AI-flagged word in the text, not this note -
+        that's tracked separately and won't change if you save here unchecked.</div>` : ''}
     </div>
     <div class="panel-section">
       <div class="panel-label">Note</div>
@@ -765,9 +784,20 @@ async function openKlalFlagPanel(klalId) {
     // refreshKlalimList() re-fetches server truth (which already
     // reflects this save, since it POSTed first) instead.
     await refreshKlalimList();
+    // FIXED 2026-08-17 (code review): this used to set the button from the
+    // local `needsRevisit` checkbox value directly - correct only for the
+    // GENERAL note this panel edits, not for the klal's overall flagged
+    // state. rd.flagged_klalim() (which drives the nav badge and this
+    // button's state everywhere else, via klalById[].needs_revisit) also
+    // lights up on an open WORD-LEVEL ai_flag - so saving this panel with
+    // the checkbox left unchecked, on a klal that still had an open
+    // word-level flag, silently un-flagged the button while the word
+    // itself stayed highlighted. refreshKlalimList() just fetched server
+    // truth reflecting both; read the button state from there instead.
     const block = document.getElementById('klal-block-' + klalId);
     const btn = block && block.querySelector('.klal-flag-btn');
-    if (btn) { btn.classList.toggle('active', needsRevisit); btn.textContent = needsRevisit ? '⚑ flagged' : '⚑ flag'; }
+    const stillFlagged = klalById[klalId] ? klalById[klalId].needs_revisit : needsRevisit;
+    if (btn) { btn.classList.toggle('active', stillFlagged); btn.textContent = stillFlagged ? '⚑ flagged' : '⚑ flag'; }
     const status = document.getElementById('klal-flag-save-status');
     status.classList.add('show');
     setTimeout(() => status.classList.remove('show'), 2000);
@@ -841,8 +871,17 @@ async function openManualCorrectionPanel(klalId, wordIndex, word, existing) {
     (ctxStart + idx === wordIndex) ? `<b>[${escapeHtml(w)}]</b>` : escapeHtml(w)
   ).join(' ');
 
-  const markedForDeletion = existing && existing.current_decision.chosen_text === '';
-  const currentText = existing && !markedForDeletion ? existing.current_decision.chosen_text : '';
+  // FIXED 2026-08-17 (code review, follow-up to bug #1's ai_flag routing):
+  // an ai_flag's current_decision is a klal_flag record, which carries no
+  // chosen_text (chosen_source/chosen_text are candidate_choice/manual_
+  // correction fields, always null on klal_flag) - treating it like a real
+  // manual correction pre-filled the text input with `null` and labeled an
+  // un-actioned AI flag "Correction on record" as if a reviewer had already
+  // proposed something. An ai_flag is a machine-raised concern awaiting a
+  // reviewer's first look, not a correction on record.
+  const isAiFlag = existing && existing.opcode === 'ai_flag';
+  const markedForDeletion = !isAiFlag && existing && existing.current_decision.chosen_text === '';
+  const currentText = existing && !isAiFlag && !markedForDeletion ? existing.current_decision.chosen_text : '';
   const currentNote = existing && existing.current_decision.note ? existing.current_decision.note : '';
 
   manualPanelBody.innerHTML = `
@@ -850,6 +889,12 @@ async function openManualCorrectionPanel(klalId, wordIndex, word, existing) {
       <div class="panel-label">Klal ${klalId}, word ${wordIndex}</div>
       <div class="panel-word-context">${ctxWords}</div>
     </div>
+    ${isAiFlag ? `
+    <div class="panel-section">
+      <div class="panel-label">AI-flagged word</div>
+      <div style="font-size:12px;color:var(--ink-faint);">Raised by an automated pass, not yet reviewed
+      by a human. Propose a correction below, or leave it and record your own note.</div>
+    </div>` : ''}
     ${markedForDeletion ? `
     <div class="panel-section">
       <div class="panel-label">Marked for deletion</div>
@@ -858,7 +903,7 @@ async function openManualCorrectionPanel(klalId, wordIndex, word, existing) {
       change your mind, or use Delete again to reconfirm.</div>
     </div>` : ''}
     <div class="panel-section">
-      <div class="panel-label">${existing ? 'Correction on record' : 'Propose a correction'}</div>
+      <div class="panel-label">${existing && !isAiFlag ? 'Correction on record' : 'Propose a correction'}</div>
       <input type="text" class="custom-text" id="manual-correction-text"
              placeholder="Correct reading…" value="${escapeAttr(currentText)}">
     </div>
