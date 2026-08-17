@@ -55,18 +55,18 @@
 import json
 import os
 
+import corpus_io as cio
 import review_decisions as rd
 
 # Moved one level deeper (pipeline/ or tools/) 2026-08-16 - REPO now goes up
 # two levels, not one, to keep resolving to the actual repo root where
 # part1.json/docai_word_boxes/etc. live.
-REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PART1_PATH = os.path.join(REPO, "part1.json")
+REPO = cio.REPO
+PART1_PATH = cio.PART1_PATH
 
 
 def load_part1():
-    with open(PART1_PATH, encoding="utf-8") as f:
-        return {k["klal_id"]: k for k in json.load(f)}
+    return cio.load_part1_by_id(PART1_PATH)
 
 
 def check_candidate_choice(decision, klal):

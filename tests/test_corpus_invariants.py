@@ -513,20 +513,32 @@ def test_part1_no_dropped_lamed_ligature_corruption(part_klalim):
 
 
 def test_part1_max_klal_constants_agree_with_the_corpus(part_klalim):
-    """PART1_MAX_KLAL = 222 is written out independently in three live files
+    """PART1_MAX_KLAL = 222 is max(klal_id) in part1.json, i.e. data, not a
+    chosen number. Added 2026-08-15 during the hard-wired-value audit, when it
+    was written out independently in three live files
     (build_corrections_dataset.py, build_klal_page_regions.py,
-    review_server.py) with no shared definition - it is max(klal_id) in
-    part1.json, i.e. data, not a chosen number. Added 2026-08-15 during the
-    hard-wired-value audit: nothing tied any of the three back to the corpus,
-    and if Part 1's klal count ever moves (a split/merge, Success Criterion
-    #2's own failure mode) and only some copies are updated, every failure is
-    silent - a klal simply stops getting candidates, stops getting a scan
-    region, or stops being served to the dashboard, with no error anywhere.
+    review_server.py) with no shared definition and nothing tying any of the
+    three back to the corpus: if Part 1's klal count ever moves (a split/merge,
+    Success Criterion #2's own failure mode) and only some copies are updated,
+    every failure is silent - a klal simply stops getting candidates, stops
+    getting a scan region, or stops being served to the dashboard, with no
+    error anywhere.
+
+    UPDATED 2026-08-17: the three copies are gone - all three modules (and
+    corpus_io itself, checked here too) now read one definition,
+    corpus_io.PART1_MAX_KLAL. That removes the "three literals must agree with
+    each other" half of this test's job structurally, which is the better fix
+    than a test policing it. The half that still matters and is still checked
+    here is the one a shared constant cannot fix by itself: the constant must
+    agree with the LIVE corpus. Each module is still read through its own
+    attribute rather than corpus_io's, so a module re-introducing a private
+    literal is caught rather than silently passing.
     Zero tolerance: derive-or-assert, not "usually agrees" (CLAUDE.md
     Lesson 13's argument, applied to a constant rather than a file).
     """
     part1_max = max(k["klal_id"] for k in part_klalim["part1.json"])
     modules = {
+        "corpus_io.py": None,
         "build_corrections_dataset.py": None,
         "build_klal_page_regions.py": None,
         "review_server.py": None,

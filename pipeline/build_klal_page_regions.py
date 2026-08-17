@@ -33,36 +33,37 @@ import json
 import os
 import difflib
 
+import corpus_io as cio
+
 # Moved one level deeper (pipeline/ or tools/) 2026-08-16 - REPO now goes up
 # two levels, not one, to keep resolving to the actual repo root where
 # part1.json/docai_word_boxes/etc. live.
-REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DOCAI_DIR = os.path.join(REPO, "docai_word_boxes")
-ALIGNMENT_PATH = os.path.join(REPO, "part1_header_anchored_alignment.json")
-TRACE_PATH = os.path.join(REPO, "gematria_trace_part1.json")
-DEMO_DATASET = os.path.join(REPO, "klalim_demo_dataset.json")
+REPO = cio.REPO
+DOCAI_DIR = cio.DOCAI_DIR
+ALIGNMENT_PATH = cio.ALIGNMENT_PATH
+TRACE_PATH = cio.TRACE_PATH
+DEMO_DATASET = cio.DEMO_DATASET_PATH
 OUT_PATH = os.path.join(REPO, "klal_page_regions.json")
-# max(klal_id) in part1.json. Same literal, independently written, in
-# build_corrections_dataset.py and review_server.py - see the longer note at
-# build_corrections_dataset.py's copy for what each one silently does wrong if
-# they ever disagree. All three are asserted equal to the corpus by
+# max(klal_id) in part1.json. Was the same literal written out independently
+# here, in build_corrections_dataset.py and in review_server.py - see the
+# longer note at build_corrections_dataset.py's copy for what each one
+# silently did wrong if they ever disagreed. DEDUPLICATED 2026-08-17: one
+# definition in corpus_io, still asserted equal to the live corpus by
 # tests/test_corpus_invariants.py.
-PART1_MAX_KLAL = 222
+PART1_MAX_KLAL = cio.PART1_MAX_KLAL
 
-
-def clean_word(w):
-    return "".join(c for c in w if c.isalnum())
+# Byte-identical private copy until 2026-08-17; shared with
+# build_corrections_dataset.py and validate_catchword_continuity.py.
+clean_word = cio.clean_word
 
 
 def load_trusted_klal_pages():
-    alignment = json.load(open(ALIGNMENT_PATH, encoding="utf-8"))
-    klal_pages = {}
-    for r in sorted(alignment, key=lambda r: r["klal_id"]):
-        if not (1 <= r["klal_id"] <= PART1_MAX_KLAL):
-            continue
-        if not r["trusted"]:
-            continue
-        klal_pages.setdefault(r["matched_page"], []).append(r["klal_id"])
+    """This module only needs the page grouping; build_corrections_dataset.py
+    needs the untrusted list too, and had the identical loop. One
+    implementation (corpus_io.trusted_klal_pages) returns both; this caller
+    discards the second value explicitly instead of a second copy of the loop
+    quietly not collecting it."""
+    klal_pages, _untrusted = cio.trusted_klal_pages(ALIGNMENT_PATH, PART1_MAX_KLAL)
     return klal_pages
 
 
@@ -71,7 +72,7 @@ def load_markers():
     real marker position - only status=='ok' entries are trustworthy
     (see CLAUDE.md Lesson 3 on gematria_trace's own status field going
     stale)."""
-    trace = json.load(open(TRACE_PATH, encoding="utf-8"))
+    trace = cio.load_gematria_trace(TRACE_PATH)
     return {
         e["klal_id"]: (e["page"], e["marker_position"])
         for e in trace
@@ -102,7 +103,7 @@ def load_end_boundary_positions():
     IMMEDIATE next klal (47) has NO usable position of any kind, the old
     code stopped there instead of continuing the search to klal 48, which
     does have one on the same page."""
-    trace = json.load(open(TRACE_PATH, encoding="utf-8"))
+    trace = cio.load_gematria_trace(TRACE_PATH)
     return {
         e["klal_id"]: (e["page"], e["marker_position"])
         for e in trace
@@ -261,7 +262,7 @@ def main():
     klal_pages = load_trusted_klal_pages()
     markers = load_markers()
     end_boundary_positions = load_end_boundary_positions()
-    final_by_id = {k["klal_id"]: k for k in json.load(open(DEMO_DATASET, encoding="utf-8"))}
+    final_by_id = {k["klal_id"]: k for k in cio.load_demo_dataset(DEMO_DATASET)}
 
     # Every page in the covered range, not just pages that have a klal marker
     # on them. A page that is ENTIRELY one klal's continuation (no marker of its
@@ -277,9 +278,6 @@ def main():
     pages_needed = set(range(min(anchor_pages), max(anchor_pages) + 1)) if anchor_pages else set()
     docai_by_page = {}
     for page_id in pages_needed:
-        docai_path = os.path.join(DOCAI_DIR, f"page_{page_id}.json")
-        if not os.path.exists(docai_path):
-            continue
         # Deliberately UNFILTERED. Punctuation-only tokens must be dropped
         # before a content diff (2026-08-07, PROJECT-STATUS.md
         # "Punctuation-token diff bug fixed") but must NOT be dropped here:
@@ -290,8 +288,12 @@ def main():
         # marker indices); marker_anchored_regions() needs the array as-is.
         # An earlier version of this comment claimed the filtering happened
         # here, "shared" by both strategies - it never did, and the line
-        # directly below it said the opposite.
-        docai_by_page[page_id] = json.load(open(docai_path, encoding="utf-8"))
+        # directly below it said the opposite. corpus_io.load_docai_page
+        # carries the same unfiltered guarantee in its own docstring.
+        tokens = cio.load_docai_page(page_id, DOCAI_DIR)
+        if tokens is None:
+            continue
+        docai_by_page[page_id] = tokens
 
     anchored = marker_anchored_regions(klal_pages, markers, end_boundary_positions, docai_by_page)
     heuristic = heuristic_regions(klal_pages, docai_by_page, final_by_id, already_done=set(anchored))
