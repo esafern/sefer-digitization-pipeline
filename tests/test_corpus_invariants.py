@@ -221,7 +221,29 @@ PLACEHOLDER_TITLE_COUNT_MAX = 115
 # Recomputing each span's ratio against the PRE-fix word counts confirms
 # all three clear 0.85 - this is the ratio threshold reacting to a real
 # accuracy improvement, not new missing content.
-SPAN_COVERAGE_BASELINE = {15, 83, 106, 123, 130, 175, 195}
+# klal 65 ADDED 2026-08-17: NOT truncation, a marker-position extraction
+# artifact. Fixed a real klal-boundary bug that day (see PROJECT-STATUS.md
+# "klal 65/66 boundary fix"): part1.json had klal 65's clean_text wrongly
+# absorbing klal 66's entire title-phrase ("ב"ד יכול לבטל דברי ב"ד חבירו
+# אא"כ גדול ממנו בחכמה ובמנין • נלע"ד דהיינו דוקא", 15 words) plus a
+# duplicated copy of klal 66's own "סו" marker, moved (scan-verified, 600
+# and 4800 DPI crops of berlin_square_corrected.pdf p.34) to the front of
+# klal 66 where it belongs. gematria_trace_part1.json's marker_position for
+# klal 66 (81) is itself a raw-docai-extraction-order artifact: the bold
+# marginal "סו" glyph was tokenized AFTER the full line of body text
+# ("ב"ד יכול...דוקא") it visually precedes, rather than before it - the
+# rendered page shows "סו" plainly at the START of its own line, not
+# interposed mid-sentence after "דוקא" as raw token order implies. That
+# same artifact is almost certainly what fooled the original chunker into
+# duplicating the marker in the first place. Because build_spans() measures
+# marker-to-marker using this same mis-ordered position, klal 65's now-
+# CORRECT 60-word length reads as short against a 76-token expected span
+# that was never real - the span math has no way to know the marker token
+# it anchored on was extracted out of visual order. Not wired as a general
+# fix (a systemic mis-ordering check is future work, not scoped here);
+# baselined as an explained false positive for this one instance, scan-
+# verified directly, not inferred.
+SPAN_COVERAGE_BASELINE = {15, 65, 83, 106, 123, 130, 175, 195}
 
 # NOT false positives - these are CONFIRMED REAL, UNFIXED corpus damage,
 # kept in a separate constant from SPAN_COVERAGE_BASELINE precisely so that
@@ -824,7 +846,10 @@ def test_part1_character_sanity(part_klalim, part1_integrity_validator):
 # without reading the ink.
 FOREIGN_CHARACTER_BASELINE = {
     (39, 252, "Π"),   # standalone; context דבכולהן Π דבכולהו
-    (66, 97, "!"),    # standalone; context דברי ב"ד ! חבירו
+    (66, 112, "!"),   # standalone; context דברי ב"ד ! חבירו (word_index shifted
+                       # 97->112 2026-08-17 by the klal 65/66 boundary fix, which
+                       # inserted 15 words before it - same character, same text,
+                       # new position; see PROJECT-STATUS.md)
     (69, 338, "&"),   # standalone; reads as אל - see note above
     (74, 443, "!"),   # standalone; context ע"ב ב ! ואפ"ה
     (77, 11, "&"),    # standalone; reads as אל - see note above
@@ -865,18 +890,49 @@ def test_part1_no_new_characters_outside_the_documented_repertoire(
               f"present (resolved - shrink the baseline): {stale}")
 
 
+# ADDED 2026-08-17 alongside the klal 65/66 boundary fix (see PROJECT-STATUS.md
+# and SPAN_COVERAGE_BASELINE's klal-65 entry above for the full scan-verified
+# diagnosis). klal 65, 66, 67 are a genuine 3-klal same-topic cluster on one
+# rule ("אין ב"ד יכול לבטל דברי ב"ד חבירו אא"כ גדול ממנו בחכמה ובמנין" - "a
+# court cannot annul another court's ruling unless greater in wisdom and
+# number"): klal 65 states it, klal 67 restates it verbatim as ITS OWN title
+# too (same-title-cluster, already auto-excluded by check_duplicate_phrases'
+# own same-title check) - but klal 66, sandwiched between them, has its OWN
+# distinct title ("אין ביטול ממש אבל להוסיף...") even though its body opens by
+# quoting the same rule verbatim before qualifying it ("...דוקא ביטול ממש
+# אבל..." - "this is only when [it is] an actual annulment, but..."), so the
+# same-title check can't catch this pair. This is exactly the rhetorical
+# device INTRA_KLAL_DUPLICATE_PHRASE_BASELINE's klal-65 comment already
+# documents (a rule restated verbatim before the author's own gloss) - before
+# the boundary fix that phrase sat wrongly duplicated INSIDE klal 65 alone
+# (caught by the intra-klal test below); the fix moved it to where it
+# belongs, at the start of klal 66, which correctly turns it into a CROSS-
+# klal duplicate against both neighbors instead.
+DUPLICATE_PHRASE_ADJACENT_PAIR_BASELINE = {(65, 66), (66, 67)}
+
+
 def test_part1_no_new_duplicated_phrases(part_klalim, part1_integrity_validator):
     issues = part1_integrity_validator.check_duplicate_phrases(part_klalim["part1.json"], n=10)
-    assert not issues, f"Part-1 unexplained duplicated 10+-word phrase(s): {issues}"
+    new = [i for i in issues if tuple(int(x) for x in i.split(":")[0].replace("klal ", "").split("/"))
+           not in DUPLICATE_PHRASE_ADJACENT_PAIR_BASELINE]
+    assert not new, f"Part-1 unexplained duplicated 10+-word phrase(s): {new}"
 
 
 # check_intra_klal_duplicate_phrases (added 2026-08-12, closing the docstring
 # overclaim the module always had - see validate_part1_corpus_integrity.py)
-# has 4 known-genuine hits, each producing several overlapping n-gram window
-# reports: klal 65 (a rule restated verbatim before the author's own gloss -
-# "ב"ד יכול לבטל דברי ב"ד חבירו אא"כ גדול ממנו בחכמה ובמנין" - visually
-# confirmed as the klal's own title restated in its body, a common
-# rhetorical device in this book, not corruption), klal 189, klal 198.
+# originally had 4 known-genuine hits: klal 65 (a rule restated verbatim
+# before the author's own gloss - "ב"ד יכול לבטל דברי ב"ד חבירו אא"כ גדול
+# ממנו בחכמה ובמנין" - visually confirmed as the klal's own title restated
+# in its body, a common rhetorical device in this book, not corruption),
+# klal 189, klal 198. klal 65 REMOVED from this baseline 2026-08-17: the
+# klal 65/66 boundary fix (see PROJECT-STATUS.md and
+# DUPLICATE_PHRASE_ADJACENT_PAIR_BASELINE above) moved the erroneously-
+# duplicated phrase out of klal 65 entirely, to where it belongs at the
+# start of klal 66 - so the duplicate is no longer intra-klal, it is now
+# correctly a cross-klal duplicate against klal 65/66's shared rule
+# (caught by DUPLICATE_PHRASE_ADJACENT_PAIR_BASELINE instead). Confirmed by
+# re-running check_intra_klal_duplicate_phrases() directly: klal 65 no
+# longer appears in its output.
 # klal 217 added 2026-08-15: surfaced only AFTER the dropped-lamed ligature
 # fix (word 571's אליבא, individually scan-verified against the ink) made
 # it byte-identical to the klal's OTHER, already-correct occurrence of the
@@ -888,7 +944,7 @@ def test_part1_no_new_duplicated_phrases(part_klalim, part1_integrity_validator)
 # "I also now saw what the aforementioned rabbi wrote there in the name
 # of Tosafot"), i.e. the author deliberately quotes the same Tosafot text
 # twice while discussing two different rabbis who each cite it.
-INTRA_KLAL_DUPLICATE_PHRASE_BASELINE = {65, 189, 198, 217}
+INTRA_KLAL_DUPLICATE_PHRASE_BASELINE = {189, 198, 217}
 
 
 def test_part1_no_new_intra_klal_duplicated_phrases(part_klalim, part1_integrity_validator):

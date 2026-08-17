@@ -1338,12 +1338,14 @@
       "confidence": 1.0,
       "reasoning": "The crop displays three distinct lines of text: 'אלא', 'אילו', and 'ט\"ו ב''. The word in question clearly shows the letters aleph, lamed (with its distinct upper ascender), and aleph, spelling 'אלא' (Option B). This matches the Rabbinic context of 'לא אמרינן אלא'.",
       "flag": "current_text_confirmed"
-    },
+    }
+  ],
+  "66": [
     {
-      "word_index": 75,
+      "word_index": 0,
       "opcode": "insert",
       "docai_reading": null,
-      "final_text": "סו",
+      "final_text": "סו אין",
       "page": 34,
       "bbox": null,
       "vision_selected": null,
@@ -1351,6 +1353,42 @@
       "confidence": null,
       "reasoning": "no bbox (insertion) - not vision-cropped",
       "flag": "unverified_insertion"
+    },
+    {
+      "word_index": 17,
+      "opcode": "delete",
+      "docai_reading": "סו אין",
+      "final_text": null,
+      "page": 34,
+      "bbox": {
+        "x1": 0.811062753200531,
+        "y1": 0.15573440492153168,
+        "x2": 0.8993163704872131,
+        "y2": 0.18229375779628754
+      },
+      "vision_selected": "A",
+      "vision_transcription": "סו אין",
+      "confidence": 0.98,
+      "reasoning": "The top line of the crop clearly shows the text 'סו אין' (followed by a partially cropped letter 'ב' on the left), perfectly matching the context of the opening sentence 'סו אין ב\"ד'.",
+      "flag": "possible_omission"
+    },
+    {
+      "word_index": 29,
+      "opcode": "replace",
+      "docai_reading": "מדדיא",
+      "final_text": "מהדיא",
+      "page": 34,
+      "bbox": {
+        "x1": 0.23927906155586243,
+        "y1": 0.15573440492153168,
+        "x2": 0.2871348559856415,
+        "y2": 0.18229375779628754
+      },
+      "vision_selected": "B",
+      "vision_transcription": "מהדיא",
+      "confidence": 0.98,
+      "reasoning": "The second letter in the middle line clearly exhibits the structure of a Hebrew letter Hei (ה) rather than a Dalet (ד), showing a clear gap before the left vertical stroke. Contextually, 'מהדיא' (from the word 'הדיא' / explicitly) is standard Aramaic/Rabbinic Hebrew terminology used here ('ולמדתי כן מהדיא').",
+      "flag": "current_text_confirmed"
     }
   ],
   "67": [

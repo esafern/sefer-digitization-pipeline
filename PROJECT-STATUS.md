@@ -15,6 +15,33 @@ current handoff, re-written (not just appended to) as state changes.
 
 ## ►► SESSION HANDOFF — read this first, 2026-08-16 (continued into 2026-08-17)
 
+### OPEN 2026-08-17 — revalidation round 4 ("pipeline improvements") FAILED mid-task on the monthly Claude spend limit; uncommitted work sitting in a worktree, NOT reviewed or merged
+
+Background agent (`a06c15e0c6c77fa80`) spun off to look for pipeline-code
+improvements (per user request) terminated early: "You've hit your monthly
+spend limit." Its last message before stopping: "Confirmed the divergence.
+Let me update the test to actually catch this mutation." — mid-fix, not
+finished, not verified.
+
+**Uncommitted changes sit in `.claude/worktrees/agent-a06c15e0c6c77fa80`**
+(branch `worktree-agent-a06c15e0c6c77fa80`, based on `5c6957e`): modifies
+`pipeline/verify_corrections_vision.py`, `tools/verify_flagged_candidates_
+vision.py`, `tools/verify_witness_vision.py`, `tests/test_pipeline_logic.py`,
+`flagged_candidates_vision_report.json`, `adjudication_cache.db`; adds a new
+`pipeline/vision_adjudication_common.py`. Shape suggests a refactor
+consolidating duplicated vision-adjudication logic across the three
+`verify_*` scripts into one shared module, with a new test guarding
+whatever "divergence"/"mutation" the agent found — but this is inference
+from the diff, not confirmed by reading the agent's own reasoning in
+detail. **Nothing from this worktree has been reviewed, verified, or
+merged.** Per this project's standard (independent re-verification before
+trusting agent output, same as round 3's semantic findings), do NOT merge
+without: reading the actual diff in full, understanding what
+"divergence"/"mutation" it refers to, and re-running `rebuild_all.sh` +
+pytest against the worktree's version before touching `master`. The worktree
+is disposable if the work isn't wanted (nothing has touched `master`) but
+represents real, unverified effort if it is.
+
 ### RESEARCH 2026-08-17 — Document AI tested on both the base (Berlin, square) scan and the Livorno (Rashi) scan for direct comparison; two background jobs launched (full-Part-1 heb_rashi OCR on both scans, and a round-3 semantic-plausibility spot-check)
 
 Per direct user request. Identified the exact klal being used for cross-tool
@@ -170,11 +197,88 @@ REST of the corpus (not just intuition about whether a word "looks odd")
 is load-bearing — all 4 had a plausible corrupt-looking surface reading that
 turned out to be this author's/print's genuine, repeated usage once checked.
 
-**NOT YET DONE**: scan-verify klal 65's apparent truncation (highest
-priority — bears on Success Criterion 2, klal chunking) and klal 17's `יח`
-mid-body marker-contamination candidate; the rest are ordinary word-level
-candidates in the existing queue, same priority tier as round 1/2's
-unverified items.
+**klal 65's apparent truncation: scan-verified and FIXED**, see the
+"klal 65/66 boundary fix" entry immediately below. klal 17's `יח`
+mid-body marker-contamination candidate is **still NOT YET DONE**; the
+rest remain ordinary word-level candidates in the existing queue, same
+priority tier as round 1/2's unverified items.
+
+### DONE 2026-08-17 — klal 65/66 boundary fix: klal 66's own title-phrase (15 words) was misattributed to klal 65's tail, with a duplicated marker token; moved to where it belongs. One more word-level fix (מדדיא→מהדיא) found opportunistically during scan verification. Both applied, rebuild clean.
+
+Closes round 3's "possible NEW boundary/truncation instance, klal 65" flag
+above, per explicit user direction ("do klal 65 trunc fix"). Diagnosis
+does NOT match round 3's own hypothesis (content lost/truncated) — the
+true bug is a **misplaced boundary**, no content was ever lost.
+
+**Diagnosis, scan-verified against `berlin_square_corrected.pdf` page 34**
+(600 DPI full-context crop across all of klal 65's ending and klal 66's
+first two lines, plus 4800-7200 DPI solo-word crops): klal 65's stored
+`clean_text` correctly ends `...ועיין מגן אברהם סס"י תר"ץ :` (word 59,
+the real closing colon) but then wrongly continued for another 16 words —
+klal 66's own title restated as an opening clause (`ב"ד יכול לבטל דברי
+ב"ד חבירו אא"כ גדול ממנו בחכמה ובמנין • נלע"ד דהיינו דוקא`) plus a
+duplicated copy of klal 66's marker `סו`. klal 66's stored text started
+`סו אין ביטול ממש אבל...`, skipping straight from its marker+`אין` to
+`ביטול ממש` and missing that same 15-word clause entirely.
+
+**Root cause, confirmed via `docai_word_boxes/page_34.json`'s raw token
+stream** (only ONE `סו` token exists on the page, at position 81): the
+raw DocAI extraction put that token AFTER the full line of body text
+(`ב"ד יכול...דוקא`) it visually introduces, rather than before it — the
+rendered page shows `סו` plainly at the START of its own line (`סו אין
+ב"ד יכול לבטל...`), not interposed mid-sentence after `דוקא` as the raw
+token position implies. This same extraction-ordering artifact is almost
+certainly what fooled the original chunker into duplicating the marker
+and mis-splitting the boundary in the first place. `gematria_trace_
+part1.json`'s `marker_position` for klal 66 inherits the same artifact,
+which is why `test_no_new_span_coverage_flags` flagged klal 65 as
+"too short" after the fix — a false positive (baselined with full
+explanation, `tests/test_corpus_invariants.py`'s `SPAN_COVERAGE_BASELINE`).
+
+**Fix applied directly to `part1.json`** (no existing tool supports a
+cross-klal structural move — `apply_reviewer_decisions.py`'s
+`manual_correction`/`candidate_choice` types are same-position-only
+within one klal — so this followed the established precedent for
+boundary fixes, e.g. klal 180/182/194: a careful, directly-verified
+one-off edit to the hand-edited source of truth, not a silent
+find-replace): klal 65 truncated to its correct 60 words; the recovered
+15-word clause inserted into klal 66 between its existing `סו`/`אין` and
+`ביטול`, discarding the duplicate trailing `סו` (klal 66 already has its
+own correct one at word 0).
+
+**Side effect, expected and confirmed correct, not a new bug**: klal 66's
+opening now legitimately duplicates a 10-word phrase with BOTH its
+neighbors — klal 65 (whose title it quotes verbatim before qualifying it,
+`...דוקא ביטול ממש אבל...` — "this applies only when [it is] an actual
+annulment, but...") and klal 67 (which shares klal 65's exact title,
+already an established same-title-cluster). All three klalim are one
+continuous halachic discussion of a single rule. Before the fix this
+same quotation sat wrongly duplicated INSIDE klal 65 alone, which is why
+it was already in `INTRA_KLAL_DUPLICATE_PHRASE_BASELINE` — the fix
+correctly turns it into a cross-klal duplicate instead, so that klal
+entry was removed (now stale) and a new
+`DUPLICATE_PHRASE_ADJACENT_PAIR_BASELINE = {(65, 66), (66, 67)}` added to
+`test_part1_no_new_duplicated_phrases` (which previously had no baseline
+mechanism at all — added one, same pattern as the other two).
+`FOREIGN_CHARACTER_BASELINE`'s existing klal 66 entry also needed its
+`word_index` updated (97→112) since the 15-word insertion shifted every
+later position — same character, same text, confirmed via re-check.
+
+**Second finding, opportunistic**: while scan-verifying the boundary,
+directly adjacent text (klal 66, now word 29) showed `ולמדתי כן מדדיא
+דמשנינן` — `מדדיא` is not an attested word. 4800/7200 DPI crops of the
+same token show a clear gap under the top horizontal stroke on both
+disputed letters, the defining shape of `ה` (he), not `ד`'s (dalet) flush
+corner. `מהדיא` (mem-he-dalet-yod-alef) is a standard, attested Talmudic
+Aramaic idiom ("explicitly/plainly stated," e.g. `איתמר מהדיא`) and fits
+the sentence exactly: "and I learned this explicitly, that we
+distinguish... in Sotah." Visual and linguistic evidence agree (Lesson
+9). Recorded as `manual_correction` (`20b975b2c154`) and applied via
+`apply_reviewer_decisions.py`.
+
+**Verification**: `git diff part1.json` shows exactly the two changes
+described (klal 65 truncated, klal 66 restructured + the one-word fix).
+`./rebuild_all.sh` clean, 131/131 pytest. No other klal touched.
 
 ### CORRECTION 2026-08-17 — the "near-perfect" heb_rashi claim on the square Przemyśl scan overclaimed; word-level errors verified; Google Cloud Vision tested and found WORSE
 

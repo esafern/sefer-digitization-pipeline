@@ -1230,16 +1230,52 @@
     "vision_reasoning": "The crop displays three distinct lines of text: 'אלא', 'אילו', and 'ט\"ו ב''. The word in question clearly shows the letters aleph, lamed (with its distinct upper ascender), and aleph, spelling 'אלא' (Option B). This matches the Rabbinic context of 'לא אמרינן אלא'."
   },
   {
-    "klal_id": 65,
+    "klal_id": 66,
     "page": 34,
     "opcode": "insert",
-    "word_index_in_final_text": 75,
+    "word_index_in_final_text": 0,
     "original_word": null,
-    "corrected_word": "סו",
+    "corrected_word": "סו אין",
     "bbox": null,
     "vision_confidence": null,
     "vision_reasoning": "no bbox (insertion) - not vision-cropped",
     "vision_selected": null
+  },
+  {
+    "klal_id": 66,
+    "page": 34,
+    "opcode": "delete",
+    "word_index_in_final_text": 17,
+    "original_word": "סו אין",
+    "corrected_word": null,
+    "bbox": {
+      "x1": 0.811062753200531,
+      "y1": 0.15573440492153168,
+      "x2": 0.8993163704872131,
+      "y2": 0.18229375779628754
+    },
+    "vision_selected": "A",
+    "vision_transcription": "סו אין",
+    "vision_confidence": 0.98,
+    "vision_reasoning": "The top line of the crop clearly shows the text 'סו אין' (followed by a partially cropped letter 'ב' on the left), perfectly matching the context of the opening sentence 'סו אין ב\"ד'."
+  },
+  {
+    "klal_id": 66,
+    "page": 34,
+    "opcode": "replace",
+    "word_index_in_final_text": 29,
+    "original_word": "מדדיא",
+    "corrected_word": "מהדיא",
+    "bbox": {
+      "x1": 0.23927906155586243,
+      "y1": 0.15573440492153168,
+      "x2": 0.2871348559856415,
+      "y2": 0.18229375779628754
+    },
+    "vision_selected": "B",
+    "vision_transcription": "מהדיא",
+    "vision_confidence": 0.98,
+    "vision_reasoning": "The second letter in the middle line clearly exhibits the structure of a Hebrew letter Hei (ה) rather than a Dalet (ד), showing a clear gap before the left vertical stroke. Contextually, 'מהדיא' (from the word 'הדיא' / explicitly) is standard Aramaic/Rabbinic Hebrew terminology used here ('ולמדתי כן מהדיא')."
   },
   {
     "klal_id": 67,

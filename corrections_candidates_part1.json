@@ -948,13 +948,41 @@
       }
     },
     {
-      "klal_id": 65,
+      "klal_id": 66,
       "page": 34,
       "opcode": "insert",
-      "word_index_in_final_text": 75,
+      "word_index_in_final_text": 0,
       "original_word": null,
-      "corrected_word": "סו",
+      "corrected_word": "סו אין",
       "bbox": null
+    },
+    {
+      "klal_id": 66,
+      "page": 34,
+      "opcode": "delete",
+      "word_index_in_final_text": 17,
+      "original_word": "סו אין",
+      "corrected_word": null,
+      "bbox": {
+        "x1": 0.811062753200531,
+        "y1": 0.15573440492153168,
+        "x2": 0.8993163704872131,
+        "y2": 0.18229375779628754
+      }
+    },
+    {
+      "klal_id": 66,
+      "page": 34,
+      "opcode": "replace",
+      "word_index_in_final_text": 29,
+      "original_word": "מדדיא",
+      "corrected_word": "מהדיא",
+      "bbox": {
+        "x1": 0.23927906155586243,
+        "y1": 0.15573440492153168,
+        "x2": 0.2871348559856415,
+        "y2": 0.18229375779628754
+      }
     },
     {
       "klal_id": 67,
@@ -5006,8 +5034,8 @@
     }
   ],
   "meta": {
-    "total_candidates": 371,
-    "klalim_covered": 146,
+    "total_candidates": 373,
+    "klalim_covered": 147,
     "skipped_no_docai_page_klalim": [],
     "unattributable_deletes": [],
     "untrusted_klalim_excluded": []
