@@ -24,7 +24,26 @@ pytest tests/ -q
 ```
 
 Re-activate the venv (`source venv/bin/activate`) in each new shell session
-before running any pipeline script.
+before running any pipeline script — or set up auto-activation once (below)
+and skip this step forever after.
+
+### Auto-activation with direnv (optional, recommended)
+
+Manually re-activating the venv every session is easy to forget. This repo
+ships a tracked `.envrc` (`source venv/bin/activate`) that
+[direnv](https://direnv.net/) uses to activate/deactivate the venv
+automatically on `cd` in/out of the repo:
+
+```bash
+brew install direnv
+# add to ~/.zshrc (or ~/.bashrc): eval "$(direnv hook zsh)"  — then restart your shell
+cd /path/to/sefer-digitization-pipeline
+direnv allow .          # one-time trust of this repo's .envrc
+```
+
+After that, `cd` into the repo activates the venv automatically (you'll see
+`direnv: loading .envrc` / `direnv: export ...`), and `cd`-ing out
+deactivates it. No `source venv/bin/activate` needed again.
 
 ## Files not in the public repo
 
