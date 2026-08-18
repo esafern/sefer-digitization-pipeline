@@ -15,6 +15,64 @@ current handoff, re-written (not just appended to) as state changes.
 
 ## ►► SESSION HANDOFF — read this first, 2026-08-16 (continued into 2026-08-17)
 
+### DONE 2026-08-18 — repo pushed to GitHub (`esafern/sefer-digitization-pipeline`, public); added the missing `requirements.txt`; new pipeline data-reference artifact for the untriaged lexicon-gap buckets
+
+Per direct user request, setting up for a second machine.
+
+**Pushed to GitHub for the first time.** Found a live, currently-in-use GCP
+service-account private key sitting in `archive/proj.tar`'s tracked git
+history (since late July - predates this session). Did NOT rotate it (user
+call: never left this machine, only read locally). Built the public repo
+from a separate scratch clone, not the working local repo - local history
+stays fully intact, `archive/` and all. Used `git-filter-repo` to strip, from
+that clone only: `archive/` entirely (user's own call - "historical interest
+to me" only, nothing live reads it), and the two ~109MB source PDFs
+(`berlin_square_corrected.pdf`/`berlin_square_original_transposed.pdf` -
+exceed GitHub's 100MB hard limit; user's call to exclude rather than use Git
+LFS). Rewrote commit author/committer email to the GitHub-provided noreply
+address (`109570+esafern@users.noreply.github.com`) rather than exposing the
+real one, since the push was blocked by GitHub's own email-privacy
+protection. **Verified, not assumed**, after every rewrite: grepped every
+blob in the full rewritten history (not just the working tree) for the
+private key string and a broader set of common secret patterns (Google/
+OpenAI/GitHub/Slack token formats, any PEM key header) - zero hits, confirmed
+via a corrected check after an initial verification attempt silently
+produced 0 blobs scanned due to a pipe-format bug, caught before trusting the
+result. Live at https://github.com/esafern/sefer-digitization-pipeline.
+
+**Found `requirements.txt` never existed** - `requirements-dev.txt` only
+ever pinned `pytest`/`playwright` (testing-only), so `pip install -r
+requirements-dev.txt` alone leaves every pipeline script unable to import.
+New `requirements.txt` built from a real import scan of `pipeline/`/
+`tools/`/`tests/` (not `pip freeze` copied blindly) - `pymupdf`,
+`google-genai`, `google-cloud-documentai`. Deliberately excludes several
+packages present in the current dev venv but used only by `archive/`
+scripts: `google-cloud-vision` (used nowhere, live or archived),
+`google-generativeai` (the pre-`google-genai` legacy SDK, 2 archived
+scripts), `beautifulsoup4`/`lxml`/`python-Levenshtein`/`pytesseract`
+(archived hocr/OCR-alternative scripts only). **Verified working, not just
+written**: fresh venv, installed from `requirements.txt` +
+`requirements-dev.txt` alone, 199/199 pytest passed.
+
+**Real gap surfaced along the way, not fixed, noted for later**: Document AI
+extraction - the capability that built and extended `docai_word_boxes/` to
+full coverage this session - is not imported by any currently-tracked
+`pipeline/`/`tools/` script. It only exists in `archive/scripts/
+extend_docai_ocr.py`, an "already-applied one-off" by this project's own
+classification, reused again this session anyway because nothing else could
+do the job. If `archive/` is genuinely archival-only from here on (per the
+"historical interest to me" framing behind excluding it from GitHub),
+extraction has no live home - worth promoting into `pipeline/` or `tools/`
+properly at some point, not done in this pass.
+
+**New artifact**: a browsable, searchable, sortable table of the 3,880
+untriaged Parts 2-3 lexicon-gap candidates (`unresolved`/`weakly_attested`
+buckets from `lexicon_gaps_parts23_report.json`), with expandable in-context
+passages per occurrence (three clause-boundary marks either side, using this
+print's own "."/":" pause-marks, not a scholarly sentence split) drawn live
+from the corpus's own stored text. Not committed to the repo (an Artifact,
+not a file) - link is in this session's chat history only.
+
 ### DONE 2026-08-18 — audit: several confirmed findings from today existed ONLY as PROJECT-STATUS.md prose, never entered the decision pipeline at all; all now recorded as proper `klal_flag` decisions
 
 Per direct user request ("is this visible in the dashboard? where are these

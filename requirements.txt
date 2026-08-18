@@ -1,0 +1,32 @@
+# Runtime dependencies for pipeline/ and tools/ scripts. requirements-dev.txt
+# is testing-only (pytest, playwright) and never covered these - this file
+# didn't exist until 2026-08-18, found setting up a second machine: without
+# it, `pip install -r requirements-dev.txt` alone leaves every pipeline
+# script unable to import.
+#
+# Verified against a real import scan of pipeline/, tools/, tests/ (not
+# copied from `pip freeze` blindly) - google-cloud-vision, google-
+# generativeai (the pre-google-genai legacy SDK), beautifulsoup4, lxml,
+# python-Levenshtein, and pytesseract are all pip-installed in the dev venv
+# this was written from, but used ONLY by archive/ scripts (already-applied
+# one-offs, not the live pipeline - see CLAUDE.md "Directory layout") -
+# deliberately not included here.
+
+# PDF parsing/cropping - pipeline/build_gematria_trace.py,
+# verify_corrections_vision.py, and others crop/render pages from the
+# source PDF directly.
+pymupdf==1.28.0
+
+# Vision-adjudication / Gemini calls - pipeline/vision_adjudication_common.py
+# and every script built on it.
+google-genai==2.14.0
+
+# Document AI OCR extraction. NOT imported by any currently-tracked
+# pipeline/tools/ script - the live extraction pattern currently lives only
+# in archive/scripts/extend_docai_ocr.py (reused as a one-off 2026-08-17 to
+# extend docai_word_boxes/ to full coverage, pages 1-249). Included because
+# that capability is still actively needed, not because a tracked script
+# imports it today - see PROJECT-STATUS.md for the standing note this left
+# behind. google-cloud-storage is pulled in automatically as its own
+# dependency, not listed separately.
+google-cloud-documentai==3.15.0
