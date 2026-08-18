@@ -217,6 +217,56 @@ For exactly what each data file contains, see `PIPELINE-DATA-REFERENCE.md`.
   has been worked on from both Claude Code and Gemini CLI, so check both
   when looking for standing directives.
 
+## Commands
+
+All of these assume the venv is active (automatic if you're using direnv —
+see `SETUP.md`; otherwise `source venv/bin/activate` first).
+
+**Start the review dashboard** (the live human-review tool — see "How the
+pipeline works" above):
+
+```bash
+python3 pipeline/review_server.py
+```
+
+Open <http://127.0.0.1:8420/>. Runs in the foreground by default; background
+it (`... &`) or run it in its own terminal tab if you want your shell back.
+Check `lsof -i :8420` first if it fails to bind — something may already be
+listening on that port.
+
+**Run the test suite**:
+
+```bash
+pytest tests/ -q
+```
+
+**Rebuild the correction-data pipeline** (all 5 stages — see "Single source
+of truth for corpus text" in Part 2) after any edit to a `part*.json` file:
+
+```bash
+./rebuild_all.sh              # full run, including live Gemini vision calls
+./rebuild_all.sh --skip-vision  # skip the Gemini re-verification step, for fast iteration
+```
+
+**Record a review decision, then promote it into the corpus** — two
+separate, deliberate steps (see "Human review decisions" in Part 2):
+recording happens by clicking in the dashboard itself; promoting is:
+
+```bash
+python3 pipeline/apply_reviewer_decisions.py
+python3 pipeline/audit_applied_decisions.py   # read-only check: did every applied decision actually land?
+```
+
+**Standalone validators and one-off tools** (`tools/`, none part of
+`rebuild_all.sh`, run manually) — see "Directory layout" above for what
+each one checks; a few of the most generally useful:
+
+```bash
+python3 tools/validate_part1_corpus_integrity.py   # needs only tracked files, runs on a fresh clone
+python3 tools/check_klal_token_orphans.py          # needs docai_word_boxes/ (gitignored, migrated separately)
+python3 tools/detect_ligature_corruption.py        # needs only part*.json
+```
+
 ## Where to find things
 
 - `SETUP.md` — environment setup, and which files aren't in the public
