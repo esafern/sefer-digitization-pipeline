@@ -93,7 +93,7 @@ layer, but it is **not good enough to use** (see *Process*) — the work is to O
 | Edition | Press | Script | Scan in hand | Pages |
 |---|---|---|---|---|
 | **Livorno 1766–7** — *editio princeps*[^livorno] | (Livorno) | **Rashi** (body); square lemmas | HebrewBooks #32530 / #32532 / #32531 | 348 / 54 / 55 |
-| **Berlin 1851/2**[^berlin] | Ephraim Herz | **Square** | NLI | 337 |
+| **Berlin 1851/2**[^berlin] | Ephraim Herz | **Square** | Google Books (in hand); NLI (catalogued) | 337 |
 | **Przemyśl 1877**[^p1877] | M. A. Knoller | **Square** | HebrewBooks #14122 | 491 |
 | **Przemyśl 1877** (2nd scan)[^p1877] | " | **Square** | Google Books | 489 |
 | **Przemyśl 1888**[^p1888] | Żupnik, Knoller & Hamerschmidt | **Square** | Google Books | 373 |
@@ -224,7 +224,10 @@ transcribed in the footnotes._
 The last mile keeps two things separate — **the text** and **the links**:
 
 - **Text.** OCR the **Berlin edition images** (cleanest square; source from NLI, which also
-  sidesteps Google's terms). Licensing is clean — a PD edition, and mechanical OCR of PD
+  sidesteps Google's terms — **with an NLI account for full resolution**, see [^berlin]:
+  an anonymous download tested 2026-08-18 came through at ~16x fewer pixels than the Google
+  Books copy this project actually uses, not an equivalent copy). Licensing is clean — a
+  PD edition, and mechanical OCR of PD
   text carries no new copyright.[^ocrpd] **Keep the prose faithful:** don't expand
   abbreviations (that's a read-time Dicta layer); *do* proof against the image, strip cruft
   (running headers, page numbers, stamps), restore two-column reading order, and **segment
@@ -342,17 +345,23 @@ the cost of every public-domain work after this one.
     script** with square keyword-lemmas; the roughest of the scans (ink bleed, skew).
     Digitized as three part-files (348 / 54 / 55 pp).
 
-[^berlin]: **Berlin, Hebrew year תרי"ב = 1851/2 CE** — catalogued and
-    digitized by the National Library of Israel, NLI system number
-    `990011859020205171`, <https://www.nli.org.il/en/books/NNL_ALEPH990011859020205171/NLI>.
-    The viewer reports 337 pages; the actual downloadable PDF has 336 —
-    verified 2026-08-18 by downloading it directly: NLI's copy is missing a
-    "Digitized by Google" disclaimer page that a Google Books scan of the
-    same printing has as its own page 0 (confirmed by direct content
-    comparison, not just page counts, including at a specific known
-    leaf-order defect - see `START_HERE.md`'s Berlin-scan section for the
-    full finding, including why this offset matters for anyone acquiring
-    the scan from NLI rather than reusing this project's own tracked PDFs).
+[^berlin]: **Berlin, Hebrew year תרי"ב = 1851/2 CE.** In hand as a Google
+    Books full-view scan (3440×5312px per page). The identical printing is
+    also catalogued and digitized by the National Library of Israel, NLI
+    system number `990011859020205171`,
+    <https://www.nli.org.il/en/books/NNL_ALEPH990011859020205171/NLI> —
+    the right pointer for someone else acquiring this text independently
+    (sidesteps Google Books' terms of use, see "Preparing the text for
+    Sefaria" below), **but get it with an NLI account for full resolution.**
+    An anonymous download (tested 2026-08-18) comes through at only
+    873×1329px JPEG — a ~16x-fewer-pixels, lossy downgrade from the Google
+    Books scan this project actually uses, not an equivalent copy; this
+    project's own pipeline was NOT switched to it for that reason. NLI's
+    PDF is also 336 pages, not 337 (missing the Google-inserted disclaimer
+    page the Google Books scan has as its own page 0) - a constant 1-page
+    offset, confirmed by direct content comparison including at a specific
+    known leaf-order defect. See `START_HERE.md`'s Berlin-scan section and
+    `PROJECT-STATUS.md`'s 2026-08-18 entry for the full finding.
     Title page: *ספר יד מלאכי חלק ראשון*, publisher *אפרים הערץ* (Ephraim Herz),
     *מדינת שלעזיען*, place *ברלין* (Berlin), printer *י. זיטטענפעלד* (Y.
     Zittenfeld); notes it was "printed first in Livorno … and now a second

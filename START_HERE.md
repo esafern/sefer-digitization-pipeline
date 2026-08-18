@@ -58,29 +58,46 @@ never resolved in `PROJECT-STATUS.md` (a Wikipedia summary had implied
 ~1917, evidently a misconverted gematria). See `PROJECT-STATUS.md`'s
 2026-08-18 entry for the full research trail.
 
-**Provenance and acquisition.** NLI is the recommended and validated source
-for acquiring the scan — per `CASE-YAD-MALACHI.md`'s "Preparing the text
-for Sefaria" section, sourcing from NLI sidesteps Google Books' terms of
-use. **Validated end-to-end 2026-08-18**: downloaded the full 337-page
-book directly from the NLI record above (`Download` → "the complete
-document" → PDF), applied the leaf-order fix below to it, and confirmed by
-direct content inspection (matching folio numbers and catchwords, not just
-file existence) that it reproduces the correct reading order.
+**Provenance.** This pipeline's own working PDFs stay Google Books-sourced
+— **do not switch them to an anonymous NLI download.** NLI is still the
+right pointer to give someone else acquiring this text for the first time
+(per `CASE-YAD-MALACHI.md`'s "Preparing the text for Sefaria" section,
+sourcing from NLI sidesteps Google Books' terms of use for redistribution),
+but only if *they* use an NLI account to get full resolution — an
+anonymous download is a real quality downgrade, not an equivalent copy.
 
-**Important: NLI's PDF is 336 pages, not 337 — a constant 1-page offset,
-not a different scan.** This pipeline's tracked `berlin_square_
-corrected.pdf`/`berlin_square_original_transposed.pdf` came from a Google
-Books scan whose page 0 is a "Digitized by Google" disclaimer page that
-Google inserts and NLI's own digitization doesn't have. Confirmed by direct
-comparison: NLI page *i* = the Google-sourced PDF's page *i + 1* for every
-page checked, including at the transposed-leaf region. **This means every
+**Validated end-to-end 2026-08-18, then deliberately NOT adopted, for a
+resolution reason found along the way.** Downloaded the full 337-page book
+directly from the NLI record above (`Download` → "the complete document" →
+PDF); "Maximal (100%)" image size was greyed out (gated behind an NLI
+account this project doesn't have), so the download came through at
+"Medium (50%)." Applied the leaf-order fix below to it and confirmed by
+direct content inspection (matching folio numbers and catchwords, not just
+file existence) that it reproduces the correct reading order — the
+acquisition + fix procedure genuinely works. But comparing the same
+physical page's embedded image directly: this pipeline's tracked PDF is
+**3440×5312px PNG** (~18.3 MP, lossless); the anonymous NLI download of the
+identical page is **873×1329px JPEG** (~1.2 MP, lossy) — about **16x fewer
+pixels**, plus lossy compression on top. Nowhere near this pipeline's
+existing OCR/vision-adjudication quality bar. If NLI's "Maximal" tier
+(untested here, needs an account) matches the current 3440×5312 quality,
+switching would be worth reconsidering; at "Medium," it would be a real
+regression, not a lateral move.
+
+**NLI's PDF is also 336 pages, not 337 — a constant 1-page offset, not a
+different scan** (separate from the quality issue above, and true at
+whatever quality tier you download). This pipeline's tracked
+`berlin_square_corrected.pdf`/`berlin_square_original_transposed.pdf` came
+from a Google Books scan whose page 0 is a "Digitized by Google" disclaimer
+page that Google inserts and NLI's own digitization doesn't have. Confirmed
+by direct comparison: NLI page *i* = the Google-sourced PDF's page *i + 1*
+for every page checked, including at the transposed-leaf region. **Every
 page-indexed cache in this pipeline** (`docai_word_boxes/`,
 `images/pdf_pages/`, `gematria_trace_part1.json`,
 `part1_header_anchored_alignment.json`) **is indexed against the
-Google-sourced 337-page numbering** — an NLI-sourced PDF is NOT a drop-in
-replacement for `berlin_square_corrected.pdf` without re-deriving all of
-those against the new (336-page, shifted-by-1) numbering. Don't swap the
-working PDF for an NLI download without redoing that extraction.
+Google-sourced 337-page numbering** — kept only as a documented offset in
+case a future, actually-equivalent-quality NLI source is ever adopted; not
+acted on now.
 
 **The scan itself had two leaves out of order — a defect in the source
 binding, not an extraction bug.** Two physical leaves were transposed; true
