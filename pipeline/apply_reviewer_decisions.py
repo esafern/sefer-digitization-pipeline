@@ -203,6 +203,14 @@ def main():
     manual_decisions = rd.all_current("manual_correction")
     corrections = load_current_corrections()
     part1 = load_part1()
+    # Normalize clean_text so that .split() (used by machine-candidate paths)
+    # and .split(' ') (used by manual-correction paths to match the frontend's
+    # own indexing) produce the same result. In practice the corpus has no
+    # consecutive/leading/trailing spaces (0 klalim where they disagree,
+    # verified 2026-08-16), so this is a no-op today; it closes the structural
+    # risk documented in review_decisions.py's word_index comment.
+    for k in part1:
+        k["clean_text"] = " ".join(k["clean_text"].split())
     by_klal = {k["klal_id"]: k for k in part1}
     already_applied = rd.applied_decision_ids()
 

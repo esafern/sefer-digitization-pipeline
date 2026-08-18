@@ -99,7 +99,10 @@ REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(REPO, "pipeline"))
 import corpus_io as cio  # noqa: E402
 
-QUOTE_CHARS = set('"\'׳״')
+# QUOTE_CHARS, has_gershayim, and load_klal_words consolidated into corpus_io
+# (2026-08-18) - was duplicated independently in four scripts.
+QUOTE_CHARS = cio.QUOTE_CHARS
+has_gershayim = cio.has_gershayim
 
 # Short forms that are ALSO common standalone words - a mechanical hit here
 # is not trustworthy on frequency alone (see METHOD pass 2 above). Reported
@@ -107,29 +110,7 @@ QUOTE_CHARS = set('"\'׳״')
 AMBIGUOUS_WITH_LAMED_INSERTED = {"אל", "אלו", "אלי", "אליהו", "ואל"}
 
 
-def has_gershayim(w):
-    return any(c in w for c in QUOTE_CHARS)
-
-
-def load_klal_words(part_path):
-    """Split exactly the way every index-bearing script in this project does
-    (str.split() with no argument).
-
-    FIXED 2026-08-16 (code audit): this was `split(" ")`, which keeps an empty
-    string for each run of consecutive spaces and for a leading/trailing one.
-    find_candidates() reports a word_index, and a correction made from this
-    script's output is recorded and applied against
-    apply_reviewer_decisions.py's `clean_text.split()` indexing - so a single
-    double space anywhere in a klal would silently shift every reported index
-    after it by one, in the one direction that edits the corpus at a position
-    nobody chose. Inert today (verified 2026-08-16: 0 klalim in any of the
-    three part files where the two splits disagree), which is exactly why it
-    needed a test rather than a look."""
-    klalim = cio.load_klalim(part_path)
-    out = {}
-    for k in klalim:
-        out[k["klal_id"]] = k["clean_text"].split()
-    return out
+load_klal_words = cio.load_klal_words
 
 
 def build_frequency_table(klal_words):

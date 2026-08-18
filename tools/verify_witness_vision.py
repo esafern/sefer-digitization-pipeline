@@ -141,43 +141,9 @@ def crop_pdf_bounding_box(doc, page_num_1indexed, bbox, padding=0.02):
     return vac.crop_pdf_bounding_box(doc, page_num_1indexed, bbox, padding=padding, dpi=300)
 
 
-def parse_decision_lenient(text):
-    """Field-by-field recovery for responses that are unparseable as strict
-    JSON because a string value contains a literal, unescaped double-quote -
-    e.g. Hebrew gershayim inside transcription_found/reasoning such as
-    ז"ל or הרא"ש. json.loads (and sanitize_json's backslash fix) can't
-    handle that: the model emits {"transcription_found": "ז"ל", ...} where
-    the quote mark that's PART of the Hebrew text terminates the JSON string
-    early, corrupting everything after it. selected_option is a closed
-    vocabulary (A/B/NEITHER/UNCERTAIN) so it can't contain a stray quote;
-    only transcription_found/reasoning need the lenient extraction (and the
-    unescape pass above). Raises ValueError if the expected shape isn't
-    found at all (a genuinely different failure, not this bug).
-
-    confidence and transcription_found are read leniently too (FIXED
-    2026-08-14): confidence accepts an optionally-quoted number (a bare
-    `0.95` previously required - a model that quotes it, e.g. `"0.95"`,
-    silently produced `confidence: None` instead of erroring, which is
-    worse than raising since it looks like a scored-but-uncertain item
-    rather than a parse failure). transcription_found accepts a JSON
-    `null` as well as a quoted string - a genuinely illegible crop is a
-    normal, valid model answer, and treating it as ERROR discarded an
-    otherwise-usable selected_option/confidence/reasoning for no reason."""
-    opt = re.search(r'"selected_option"\s*:\s*"([^"]*)"', text)
-    conf = re.search(r'"confidence"\s*:\s*"?([0-9.]+)"?', text)
-    transcription_str = re.search(
-        r'"transcription_found"\s*:\s*"(.*?)"\s*,\s*\n?\s*"confidence"', text, re.DOTALL
-    )
-    transcription_null = re.search(r'"transcription_found"\s*:\s*null\s*,\s*\n?\s*"confidence"', text)
-    reasoning = re.search(r'"reasoning"\s*:\s*"(.*)"\s*\n?}\s*$', text, re.DOTALL)
-    if not (opt and (transcription_str or transcription_null) and reasoning):
-        raise ValueError("lenient JSON recovery: expected fields not found")
-    return {
-        "selected_option": opt.group(1),
-        "transcription_found": unescape_json_fragment(transcription_str.group(1)) if transcription_str else None,
-        "confidence": float(conf.group(1)) if conf else None,
-        "reasoning": unescape_json_fragment(reasoning.group(1)),
-    }
+# parse_decision_lenient moved to vision_adjudication_common.parse_decision_lenient
+# (2026-08-18) - it was the only caller-local copy; vcv.extract_json_fields() is
+# the sibling with slightly different error semantics, kept separate in that file.
 
 
 _dtoks_cache = {}
@@ -238,7 +204,8 @@ def main():
         raise SystemExit("GEMINI_API_KEY not set")
     client = vac.make_client(api_key)
 
-    data = json.load(open(QUEUE_PATH, encoding="utf-8"))
+    with open(QUEUE_PATH, encoding="utf-8") as f:
+        data = json.load(f)
     queue = data["queue"]
     doc = fitz.open(PDF_PATH)
 
@@ -260,7 +227,7 @@ def main():
                 try:
                     decision = json.loads(sanitize_json(decision_text))
                 except json.JSONDecodeError:
-                    decision = parse_decision_lenient(decision_text)
+                    decision = vac.parse_decision_lenient(decision_text)
         except Exception as e:
             print(f"  !! failed: {e}")
             decision = {"selected_option": "ERROR", "transcription_found": None, "confidence": None, "reasoning": str(e)}

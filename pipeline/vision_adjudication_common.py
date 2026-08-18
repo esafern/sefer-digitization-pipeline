@@ -140,6 +140,8 @@ def init_cache_table(db_path, table_name, prompt_hash, has_model_column=True):
     rows are real, already-paid-for Gemini answers). Idempotent - safe to
     call on every run.
     """
+    assert re.fullmatch(r"[a-z_]+", table_name), \
+        f"table_name must be a plain lowercase identifier, got {table_name!r}"
     conn = sqlite3.connect(db_path)
     # WAL mode lets readers and the writer proceed concurrently instead of
     # blocking on SQLite's default rollback-journal lock.
@@ -214,6 +216,30 @@ def put_cached_decision(db_path, table_name, prompt_hash, crop_bytes, word_a, wo
     conn.close()
 
 
+def _retry_loop(call_fn, models_to_try, max_retries):
+    """Try call_fn(model_name) for each model/attempt with exponential backoff
+    on 503/429. Returns the result of the first successful call. Raises
+    RuntimeError if every model/attempt combination fails.
+
+    Extracted so image-based adjudicate_with_retry() and text-only callers
+    (propose_punctuation_part1.py) can share the same retry discipline without
+    duplicating it.
+    """
+    last_err = None
+    for model_name in models_to_try:
+        for attempt in range(max_retries):
+            try:
+                return call_fn(model_name)
+            except Exception as e:
+                last_err = e
+                print(f"  -> {model_name} attempt {attempt} failed: {e}")
+                if "503" in str(e) or "429" in str(e):
+                    time.sleep((2 ** attempt) * 2)
+                else:
+                    break
+    raise RuntimeError(f"All models failed: {last_err}")
+
+
 def adjudicate_with_retry(client, crop_bytes, prompt, cache_get, cache_put,
                            models_to_try=("gemini-3.6-flash", "gemini-3.5-flash"),
                            max_retries=3):
@@ -237,26 +263,53 @@ def adjudicate_with_retry(client, crop_bytes, prompt, cache_get, cache_put,
         print("  -> cache hit")
         return cached
 
-    last_err = None
-    for model_name in models_to_try:
-        for attempt in range(max_retries):
-            try:
-                response = client.models.generate_content(
-                    model=model_name,
-                    contents=[
-                        types.Part.from_bytes(data=crop_bytes, mime_type="image/png"),
-                        prompt,
-                    ],
-                    config=types.GenerateContentConfig(response_mime_type="application/json"),
-                )
-                print(f"  -> live call to {model_name} ok")
-                cache_put(response.text, model_name)
-                return response.text
-            except Exception as e:
-                last_err = e
-                print(f"  -> {model_name} attempt {attempt} failed: {e}")
-                if "503" in str(e) or "429" in str(e):
-                    time.sleep((2 ** attempt) * 2)
-                else:
-                    break
-    raise RuntimeError(f"All models failed: {last_err}")
+    def call_fn(model_name):
+        response = client.models.generate_content(
+            model=model_name,
+            contents=[
+                types.Part.from_bytes(data=crop_bytes, mime_type="image/png"),
+                prompt,
+            ],
+            config=types.GenerateContentConfig(response_mime_type="application/json"),
+        )
+        print(f"  -> live call to {model_name} ok")
+        cache_put(response.text, model_name)
+        return response.text
+
+    return _retry_loop(call_fn, models_to_try, max_retries)
+
+
+def parse_decision_lenient(text):
+    """Field-by-field recovery for responses that are unparseable as strict
+    JSON because a string value contains a literal, unescaped double-quote -
+    e.g. Hebrew gershayim inside transcription_found/reasoning such as
+    ז"ל or הרא"ש. json.loads (and sanitize_json's backslash fix) can't
+    handle that: the model emits {"transcription_found": "ז"ל", ...} where
+    the quote mark that's PART of the Hebrew text terminates the JSON string
+    early, corrupting everything after it. selected_option is a closed
+    vocabulary (A/B/NEITHER/UNCERTAIN) so it can't contain a stray quote;
+    only transcription_found/reasoning need the lenient extraction.
+    Raises ValueError if the expected shape isn't found at all.
+
+    Moved here 2026-08-18 from tools/verify_witness_vision.py, where it was
+    the only caller-local copy. verify_corrections_vision.py has a sibling
+    extract_json_fields() with slightly different error semantics (returns
+    None vs. raises) and a tighter selected_option regex (A/B/UNCERTAIN only,
+    not NEITHER) — kept separate there since callers already depend on those
+    semantics.
+    """
+    opt = re.search(r'"selected_option"\s*:\s*"([^"]*)"', text)
+    conf = re.search(r'"confidence"\s*:\s*"?([0-9.]+)"?', text)
+    transcription_str = re.search(
+        r'"transcription_found"\s*:\s*"(.*?)"\s*,\s*\n?\s*"confidence"', text, re.DOTALL
+    )
+    transcription_null = re.search(r'"transcription_found"\s*:\s*null\s*,\s*\n?\s*"confidence"', text)
+    reasoning = re.search(r'"reasoning"\s*:\s*"(.*)"\s*\n?}\s*$', text, re.DOTALL)
+    if not (opt and (transcription_str or transcription_null) and reasoning):
+        raise ValueError("lenient JSON recovery: expected fields not found")
+    return {
+        "selected_option": opt.group(1),
+        "transcription_found": unescape_json_fragment(transcription_str.group(1)) if transcription_str else None,
+        "confidence": float(conf.group(1)) if conf else None,
+        "reasoning": unescape_json_fragment(reasoning.group(1)),
+    }

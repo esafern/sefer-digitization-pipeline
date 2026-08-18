@@ -107,7 +107,8 @@ REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(REPO, "pipeline"))
 import corpus_io as cio  # noqa: E402
 
-QUOTE_CHARS = set('"\'׳״')
+# QUOTE_CHARS consolidated into corpus_io (2026-08-18).
+QUOTE_CHARS = cio.QUOTE_CHARS
 # The subset of QUOTE_CHARS that can mark a SINGLE-word abbreviation by
 # sitting last (ASCII apostrophe, and the real Hebrew geresh U+05F3 it is
 # normalised from). part1.json today contains only the ASCII forms (6399 x

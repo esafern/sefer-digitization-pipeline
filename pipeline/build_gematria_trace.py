@@ -227,6 +227,12 @@ UNSUPPORTED_MAX_PAGE_GAP = 2
 # over a 27-letter alphabet turns a precise anchor into a guess, which is
 # exactly the failure CLAUDE.md Lesson 5 warns about. Adding a pair here
 # should mean someone measured it.
+# Gematria-marker confusions — letters commonly misread in marginal Hebrew
+# numeral position (empirically derived from the 13 misread markers across
+# gematria_trace_part1.json's 206 confirmed positions). Adding a pair here
+# should mean someone measured it. See also tools/detect_real_word_substitution.py's
+# CONFUSION_PAIRS for a related but distinct set covering content-word-level
+# letter confusions (frozenset keyed, different scope).
 CONFUSION_PAIRS = (
     ("ז", "ו"), ("ז", "ן"), ("ו", "ן"),          # (a) + the third edge implied by them
     ("ד", "ו"), ("ד", "ר"),                       # (a)

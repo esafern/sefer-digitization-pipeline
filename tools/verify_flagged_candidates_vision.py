@@ -444,7 +444,8 @@ def main():
         for i, c in enumerate(located[:5]):
             crop_bytes = vcv.crop_pdf_bounding_box(doc, c["page"], c["bbox"], padding=0.03)
             out_path = os.path.join(crop_dir, f"{c['klal_id']}_w{c['word_index']}.png")
-            open(out_path, "wb").write(crop_bytes)
+            with open(out_path, "wb") as f:
+                f.write(crop_bytes)
             print(f"  sample crop {i+1}/5 -> {out_path}")
         print(f"\nDRY RUN: {len(located)} candidates ready to adjudicate, "
               f"{len(unlocated)} need manual handling. No API calls made.")

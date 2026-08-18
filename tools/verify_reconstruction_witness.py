@@ -233,9 +233,9 @@ def main():
     by_tier = {}
     for q in queue:
         by_tier[q["tier"]] = by_tier.get(q["tier"], 0) + 1
-    json.dump({"meta": {"stats": stats, "by_tier": by_tier, "total": len(queue)},
-               "queue": queue},
-              open(OUT_PATH, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
+    with open(OUT_PATH, "w", encoding="utf-8") as f:
+        json.dump({"meta": {"stats": stats, "by_tier": by_tier, "total": len(queue)},
+                   "queue": queue}, f, ensure_ascii=False, indent=2)
 
     print("Independent-witness pass (DocAI vs Tesseract, same page image)\n")
     for p, s in stats.items():

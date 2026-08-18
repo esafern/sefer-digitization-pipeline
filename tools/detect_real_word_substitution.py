@@ -85,13 +85,17 @@ REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(REPO, "pipeline"))
 import corpus_io as cio  # noqa: E402
 
-QUOTE_CHARS = set('"\'׳״')
+# QUOTE_CHARS, has_gershayim, and load_klal_words consolidated into corpus_io
+# (2026-08-18) - was duplicated independently in four scripts.
+QUOTE_CHARS = cio.QUOTE_CHARS
+has_gershayim = cio.has_gershayim
 
-# Every confusion pair actually observed across today's findings (the 13
-# lexicon-invisible instances plus the already-catalogued letter-substitution
-# classes from the semantic-plausibility passes). Each pair is bidirectional -
-# either letter can be the print's real one and the other the misread, so
-# both directions of substitution are tried at every candidate position.
+# Content-word letter confusions — pairs observed across today's findings (13
+# lexicon-invisible instances + catalogued letter-substitution classes from
+# semantic-plausibility passes). Each pair is bidirectional. See also
+# pipeline/build_gematria_trace.py's CONFUSION_PAIRS for a related but distinct
+# set covering gematria-marker misreads (tuple keyed, different scope — if you
+# add a new OCR confusion pattern here, check whether it belongs there too).
 CONFUSION_PAIRS = [
     frozenset("בכ"), frozenset("דר"), frozenset("הר"), frozenset("הד"),
     frozenset("הח"), frozenset("טמ"), frozenset("ספ"), frozenset("גנ"),
@@ -121,20 +125,7 @@ MIN_INDEPENDENT_FREQUENCY = 50
 DOMINANCE_RATIO = 5
 
 
-def has_gershayim(w):
-    return any(c in w for c in QUOTE_CHARS)
-
-
-def load_klal_words(part_path):
-    """Split exactly the way every index-bearing script in this project does
-    (str.split() with no argument) - see detect_ligature_corruption.py's
-    load_klal_words() for why this matters (a word_index reported here is
-    applied against apply_reviewer_decisions.py's identical indexing)."""
-    klalim = cio.load_klalim(part_path)
-    out = {}
-    for k in klalim:
-        out[k["klal_id"]] = k["clean_text"].split()
-    return out
+load_klal_words = cio.load_klal_words
 
 
 # Known false positives: (klal_id, word_index, word) already individually

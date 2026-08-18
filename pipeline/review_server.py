@@ -705,7 +705,7 @@ def api_witness_context(page, token_index):
     if not tokens:
         return {"words": [], "target_index": None}
     dtoks = [t for t in tokens if _witness_norm(t["text"])]
-    if token_index >= len(dtoks):
+    if token_index < 0 or token_index >= len(dtoks):
         return {"words": [], "target_index": None}
     lo = max(0, token_index - WITNESS_CONTEXT_WINDOW)
     hi = min(len(dtoks), token_index + WITNESS_CONTEXT_WINDOW + 1)

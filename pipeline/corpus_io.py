@@ -168,6 +168,32 @@ def hebrew_letters_only(s):
     return "".join(c for c in s if c in HEBREW_LETTERS)
 
 
+# Gershayim/geresh characters (real Unicode forms + ASCII surrogates this
+# pipeline's OCR sometimes normalises them to). Consolidated here 2026-08-18:
+# detect_ligature_corruption.py, detect_real_word_substitution.py,
+# extract_abbreviation_forms.py, and propose_abbreviation_expansions.py each
+# had their own copy.
+QUOTE_CHARS = set('"\'׳״')
+
+
+def has_gershayim(w):
+    """True if w contains any gershayim/geresh character (abbreviation marker)."""
+    return any(c in w for c in QUOTE_CHARS)
+
+
+def load_klal_words(part_path):
+    """Load a part file and return {klal_id: [words]}, split the same way
+    every index-bearing pipeline script does (str.split() with no argument,
+    whitespace-collapsing). Consolidated here 2026-08-18 from identical
+    copies in detect_ligature_corruption.py and detect_real_word_substitution.py.
+    """
+    klalim = load_klalim(part_path)
+    out = {}
+    for k in klalim:
+        out[k["klal_id"]] = k["clean_text"].split()
+    return out
+
+
 # ---------- DocAI token geometry ----------
 
 def center_y(tok):

@@ -31,11 +31,9 @@ REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(REPO, "pipeline"))
 import corpus_io as cio  # noqa: E402
 
-QUOTE_CHARS = set('"\'׳״')
-
-
-def is_abbreviation(word):
-    return any(c in word for c in QUOTE_CHARS)
+# QUOTE_CHARS consolidated into corpus_io (2026-08-18).
+QUOTE_CHARS = cio.QUOTE_CHARS
+is_abbreviation = cio.has_gershayim
 
 
 def extract(part1):

@@ -225,28 +225,20 @@ def propose_for_klal(client, klal):
         return json.loads(cached)
 
     prompt = build_prompt(numbered)
-    last_err = None
-    for model_name in MODELS_TO_TRY:
-        for attempt in range(3):
-            try:
-                response = client.models.generate_content(
-                    model=model_name,
-                    contents=[prompt],
-                    config=types.GenerateContentConfig(response_mime_type="application/json"),
-                )
-                data = json.loads(response.text)
-                cache_response(cache_key, json.dumps(data, ensure_ascii=False))
-                print(f"  klal {klal['klal_id']}: {model_name} ok, "
-                      f"{len(data.get('insertions', []))} proposed")
-                return data
-            except Exception as e:  # noqa: BLE001
-                last_err = e
-                print(f"  klal {klal['klal_id']}: {model_name} attempt {attempt} failed: {e}")
-                if "503" in str(e) or "429" in str(e):
-                    time.sleep((2 ** attempt) * 2)
-                else:
-                    break
-    raise RuntimeError(f"klal {klal['klal_id']}: all models failed: {last_err}")
+
+    def call_fn(model_name):
+        response = client.models.generate_content(
+            model=model_name,
+            contents=[prompt],
+            config=types.GenerateContentConfig(response_mime_type="application/json"),
+        )
+        data = json.loads(response.text)
+        cache_response(cache_key, json.dumps(data, ensure_ascii=False))
+        print(f"  klal {klal['klal_id']}: {model_name} ok, "
+              f"{len(data.get('insertions', []))} proposed")
+        return data
+
+    return vac._retry_loop(call_fn, MODELS_TO_TRY, max_retries=3)
 
 
 def main():

@@ -130,7 +130,7 @@ import corpus_io as cio  # noqa: E402
 
 PART1_PATH = cio.PART1_PATH
 
-QUOTE_CHARS = abbrev.QUOTE_CHARS
+QUOTE_CHARS = cio.QUOTE_CHARS
 
 # A form the independent corpus uses this often is ordinary vocabulary. Below
 # it, attestation is weak enough to be a coincidence of a 2.58M-word sample

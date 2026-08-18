@@ -69,6 +69,7 @@
 # file order, oldest first.
 import json
 import os
+import threading
 import uuid
 from datetime import datetime, timezone
 
@@ -83,6 +84,13 @@ DECISIONS_PATH = os.environ.get("REVIEW_DECISIONS_PATH") or os.path.join(REPO, "
 
 VALID_DECISION_TYPES = {"candidate_choice", "klal_flag", "apply_event", "punctuation_choice",
                         "witness_choice", "manual_correction"}
+
+# Guards append_decision() against interleaved partial writes under
+# ThreadingHTTPServer's concurrent-request model. Python's buffered f.write()
+# is not guaranteed to be a single write(2) syscall, so two simultaneous
+# appends could interleave bytes mid-line. Low risk in practice (single user,
+# browser serializes clicks), but the cost of a lock here is zero.
+_APPEND_LOCK = threading.Lock()
 
 
 def _resolve(path):
@@ -142,8 +150,9 @@ def append_decision(decision_type, klal_id, word_index=None, chosen_source=None,
         "reviewer": reviewer,
         "applied_decision_id": applied_decision_id,
     }
-    with open(path, "a", encoding="utf-8") as f:
-        f.write(json.dumps(record, ensure_ascii=False) + "\n")
+    with _APPEND_LOCK:
+        with open(path, "a", encoding="utf-8") as f:
+            f.write(json.dumps(record, ensure_ascii=False) + "\n")
     return record
 
 

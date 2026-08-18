@@ -156,7 +156,8 @@ def cache_is_current(meta_path=None):
 
 def build_or_load_frequency_table():
     if cache_is_current():
-        return Counter(json.load(open(FREQ_CACHE, encoding="utf-8")))
+        with open(FREQ_CACHE, encoding="utf-8") as f:
+            return Counter(json.load(f))
     paths = sorted(glob.glob(os.path.join(RAW_DIR, "*.json")))
     if not paths:
         raise SystemExit(
@@ -168,7 +169,8 @@ def build_or_load_frequency_table():
     counts = Counter()
     per_book = {}
     for path in paths:
-        d = json.load(open(path, encoding="utf-8"))
+        with open(path, encoding="utf-8") as f:
+            d = json.load(f)
         strings = []
         flatten_strings(d.get("text", []), strings)
         book = Counter()
@@ -183,12 +185,13 @@ def build_or_load_frequency_table():
         # identical from the totals line.
         print(f"WARNING: {len(empty)} downloaded book(s) contributed ZERO words - "
               f"the reference corpus is not what it claims to be: {', '.join(empty)}")
-    json.dump(counts, open(FREQ_CACHE, "w", encoding="utf-8"), ensure_ascii=False)
-    json.dump({"extractor_version": EXTRACTOR_VERSION,
-               "source_files": sorted(per_book),
-               "words_per_book": per_book,
-               "total_words": sum(counts.values())},
-              open(FREQ_META, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    with open(FREQ_CACHE, "w", encoding="utf-8") as f:
+        json.dump(counts, f, ensure_ascii=False)
+    with open(FREQ_META, "w", encoding="utf-8") as f:
+        json.dump({"extractor_version": EXTRACTOR_VERSION,
+                   "source_files": sorted(per_book),
+                   "words_per_book": per_book,
+                   "total_words": sum(counts.values())}, f, ensure_ascii=False, indent=1)
     return counts
 
 
