@@ -49,6 +49,9 @@ vlm_extractions/
 scratch/
 sefaria_reference_corpus/
 
+# Generated frequency cache (tools/build_part1_freq.py — stale-detected via SHA)
+part1_word_freq.json
+
 # Junk
 *.old
 *.old.*
