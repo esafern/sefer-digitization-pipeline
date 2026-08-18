@@ -253,9 +253,14 @@ For exactly what each data file contains, see `PIPELINE-DATA-REFERENCE.md`.
   (`extract_abbreviation_forms.py`, `propose_abbreviation_expansions.py`,
   `review_lexicon_gaps.py`), the reference-corpus fetcher
   (`fetch_sefaria_reference_corpus.py`), the punctuation pass
-  (`propose_punctuation_part1.py`, `apply_punctuation_decisions.py`), and
-  the witness/reconstruction scripts (`verify_reconstruction_witness.py`,
-  `verify_witness_vision.py`).
+  (`propose_punctuation_part1.py`, `apply_punctuation_decisions.py`), the
+  witness/reconstruction scripts (`verify_reconstruction_witness.py`,
+  `verify_witness_vision.py`), the DocAI page-extraction script
+  (`extract_docai_pages.py`, promoted 2026-08-18 from
+  `archive/scripts/extend_docai_ocr.py` — needs a GCP service-account key,
+  not part of `rebuild_all.sh`), the leaf-order-fix tool
+  (`fix_transposed_leaf.py`), and the local-setup verifier
+  (`verify_local_setup.py`, see `SETUP.md`).
 - **`tests/`** — the pytest suite. `rebuild_all.sh`'s step 6/6 runs
   `test_corpus_invariants.py` (checks the DATA a pipeline run produced) and
   `test_pipeline_logic.py` (checks the pure decision LOGIC on synthetic

@@ -38,11 +38,6 @@ what drifted last time; don't let dated entries pile up here again.
    vision pass is done; the human review-in-dashboard pass was explicitly
    deferred by the user as a future step (not forgotten, not a gate on
    anything else).
-4. **DocAI extraction has no live home.** The capability only exists in
-   `archive/scripts/extend_docai_ocr.py` (an "already-applied one-off" by
-   this project's own classification), reused anyway whenever Parts 2-3
-   extraction work has needed it. Worth promoting into a proper
-   `pipeline/`/`tools/` script.
 
 ## Recent work (2026-08-18)
 
@@ -67,10 +62,18 @@ entries (prepended today, same date). Headlines only:
   added and verified two independent ways.
 - A `.gitignore` anchoring bug fixed (two PDF exceptions were un-ignoring
   same-named files anywhere in the tree, not just at root).
+- This file itself re-split back down from 5,102 lines (see header).
+- DocAI extraction promoted from `archive/scripts/extend_docai_ocr.py` to
+  `tools/extract_docai_pages.py` (closes the item this section used to
+  list as open): now goes through `corpus_io.py` for paths, defaults to
+  the current `berlin_square_corrected.pdf` (the archived version's
+  `PDF_PATH` was stuck on the pre-page-order-fix filename), and takes
+  `--project-id`/`--location`/`--processor-id` overrides instead of
+  hardcoded constants, for reuse on a different digitization work.
 
 ## Everything before today
 
 See `PROJECT-STATUS-HISTORY.md` — 65 dated entries from 2026-08-14 through
 2026-08-17 covering the Part 1 correction/review work, the Parts 2-3
 infrastructure build-out, multiple independent code-review/refactor
-passes, and the lexicon/reference-corpus work behind items 1 and 4 above.
+passes, and the lexicon/reference-corpus work behind open item 1 above.
