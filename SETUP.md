@@ -1,74 +1,117 @@
 # Setup
 
-## Python environment
+## New machine, step by step
 
-This machine's `python3` (Homebrew) is PEP 668 externally-managed — plain
-`pip3 install` at the system level fails with `error: externally-managed-
-environment`. Use a venv (also keeps this project's pinned versions isolated
-from anything else on the machine):
+### 1 — Clone the repo
+
+```bash
+git clone https://github.com/esafern/sefer-digitization-pipeline.git
+cd sefer-digitization-pipeline
+```
+
+### 2 — Restore gitignored data files
+
+The repo doesn't carry credentials, the source PDFs, or the large cache
+directories. They travel as a single tarball (`yad-malachi-migration.tar`,
+~467 MB) which must be obtained out-of-band (copy it from the previous
+machine or from wherever it was stashed).
+
+Place the tarball in the repo root and extract:
+
+```bash
+tar -xf yad-malachi-migration.tar
+```
+
+This restores `credentials.json`, the two source PDFs, `docai_word_boxes/`,
+and the other cache dirs listed in "Files not in the public repo" below. The
+tarball entries are relative paths, so extracting from the repo root puts
+everything in the right place.
+
+### 3 — Python environment
+
+`python3` on a Homebrew Mac is PEP 668 externally-managed — plain `pip3
+install` fails. Use a venv:
 
 ```bash
 python3 -m venv venv
-source venv/bin/activate        # now `pip` (not just `pip3`) resolves, inside the venv
+source venv/bin/activate
 pip install -r requirements.txt -r requirements-dev.txt
 ```
 
-`requirements.txt` covers the pipeline/tools runtime deps (pymupdf,
-google-genai, google-cloud-documentai); `requirements-dev.txt` covers testing
-(pytest, playwright). Both are needed for local development.
+`requirements.txt` covers pipeline/tools runtime deps (pymupdf, google-genai,
+google-cloud-documentai); `requirements-dev.txt` covers testing (pytest,
+playwright). Both are needed for local development.
 
-Verify with:
+### 4 — Install Playwright's browser
+
+Playwright ships the browser binaries separately from the Python package —
+`pip install` alone leaves the test suite broken with "Executable doesn't
+exist" errors on every browser test:
 
 ```bash
-pytest tests/ -q
+playwright install chromium
 ```
 
-Re-activate the venv (`source venv/bin/activate`) in each new shell session
-before running any pipeline script — or set up auto-activation once (below)
-and skip this step forever after.
+### 5 — Set GEMINI_API_KEY
 
-### Auto-activation with direnv (optional, recommended)
+The vision-adjudication pipeline authenticates to Gemini via an env var, not
+a file. Add to `~/.zshrc` (or `~/.bashrc`) and restart your shell:
 
-Manually re-activating the venv every session is easy to forget. This repo
+```bash
+export GEMINI_API_KEY="your-key-here"
+```
+
+### 6 — Auto-activation with direnv (recommended)
+
+Manually re-activating the venv each session is easy to forget. This repo
 ships a tracked `.envrc` (`source venv/bin/activate`) that
-[direnv](https://direnv.net/) uses to activate/deactivate the venv
-automatically on `cd` in/out of the repo:
+[direnv](https://direnv.net/) picks up automatically on `cd`:
 
 ```bash
 brew install direnv
-# add to ~/.zshrc (or ~/.bashrc): eval "$(direnv hook zsh)"  — then restart your shell
-cd /path/to/sefer-digitization-pipeline
+# add to ~/.zshrc: eval "$(direnv hook zsh)"  — then restart your shell
 direnv allow .          # one-time trust of this repo's .envrc
 ```
 
-After that, `cd` into the repo activates the venv automatically (you'll see
-`direnv: loading .envrc` / `direnv: export ...`), and `cd`-ing out
-deactivates it. No `source venv/bin/activate` needed again.
+After that, `cd` into the repo activates the venv automatically; `cd` out
+deactivates it.
+
+### 7 — Verify
+
+```bash
+python3 tools/verify_local_setup.py   # checks files, PDFs, credentials, GEMINI_API_KEY
+pytest tests/ -q                       # 199 tests; all should pass
+```
+
+---
 
 ## Files not in the public repo
 
-See `PROJECT-STATUS.md` / ask for the migration walkthrough — `credentials.json`,
-the two source PDFs, and several gitignored cache directories
-(`docai_word_boxes/`, `document_jsons_berlin/`, `sefaria_reference_corpus/`,
-`klalim_docai/`, `llm_klal_starts/`, `sefaria_export/`, `vlm_extractions/`,
-`images/pdf_pages/`) must be migrated separately (not via git).
-`images/pdf_pages/` is easy to miss — the review dashboard's left-pane scan
-image depends on it but nothing else does, so its absence doesn't surface
-until you're actually looking at a klal in the dashboard (confirmed
-2026-08-18: it was left off an earlier version of this list and broke the
-dashboard's scan pane on a fresh migration). `GEMINI_API_KEY` is an
-environment variable, not a file — re-export it in your shell profile.
+`credentials.json`, `berlin_square_corrected.pdf`,
+`berlin_square_original_transposed.pdf`, and the following cache directories
+are gitignored and must be migrated separately (step 2 above handles all of
+them if the tarball is complete):
 
-After migrating, verify everything actually landed (not just that the
-migration command exited without error):
+- `docai_word_boxes/` — DocAI per-page word-box JSON
+- `document_jsons_berlin/` — raw Document AI output
+- `sefaria_reference_corpus/` — reference text for lexicon work
+- `klalim_docai/` — klal-level DocAI extractions
+- `llm_klal_starts/` — LLM boundary-detection cache
+- `sefaria_export/` — Sefaria ingest output
+- `vlm_extractions/` — vision-model extraction cache
+- `images/pdf_pages/` — rendered scan pages for the review dashboard
+
+`images/pdf_pages/` is easy to miss: the dashboard's left-pane scan image
+depends on it but nothing else does, so its absence only surfaces when you
+open a klal in the dashboard (caught 2026-08-18 on a fresh migration).
+
+After migrating, verify everything actually landed:
 
 ```bash
 python3 tools/verify_local_setup.py
 ```
 
-Checks presence AND minimal validity of every item above (both PDFs are
-opened and page-counted, not just checked for existing; `credentials.json`
-is parsed and shape-checked; `docai_word_boxes/` is read through
-`corpus_io.load_docai_page`, not just counted) plus the venv's pinned
-packages and whether `GEMINI_API_KEY` is set. Exits non-zero if anything
-*required* is missing; recommended-but-missing items print as warnings.
+Checks presence AND minimal validity (both PDFs opened and page-counted;
+`credentials.json` parsed and shape-checked; `docai_word_boxes/` read through
+`corpus_io.load_docai_page`). Exits non-zero if anything *required* is
+missing; recommended-but-missing items print as warnings.
