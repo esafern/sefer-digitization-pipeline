@@ -9,6 +9,13 @@ git clone https://github.com/esafern/sefer-digitization-pipeline.git
 cd sefer-digitization-pipeline
 ```
 
+Configure git to use GitHub's noreply email (required — GitHub blocks pushes
+that expose a private email address):
+
+```bash
+git config user.email "109570+esafern@users.noreply.github.com"
+```
+
 ### 2 — Restore gitignored data files
 
 The repo doesn't carry credentials, the source PDFs, or the large cache
