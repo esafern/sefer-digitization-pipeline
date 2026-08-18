@@ -15,28 +15,33 @@ current handoff, re-written (not just appended to) as state changes.
 
 ## ►► SESSION HANDOFF — read this first, 2026-08-16 (continued into 2026-08-17)
 
-### CORRECTION 2026-08-18, same day — NLI validated but deliberately NOT adopted: an anonymous download is ~16x fewer pixels than the tracked Google-sourced PDF
+### CORRECTION 2026-08-18, same day — NLI validated but deliberately NOT adopted: even its best anonymous tier is ~4x fewer pixels than the tracked Google-sourced PDF
 
 User caught this before it went further: "hold on it is lower quality
-right." Checked the actual embedded-image resolution for the same physical
-page in both PDFs (not assumed): this pipeline's tracked
-`berlin_square_original_transposed.pdf` is **3440×5312px PNG** (~18.3 MP,
-lossless); the anonymous NLI download of the identical page is
-**873×1329px JPEG** (~1.2 MP, lossy) — "Maximal (100%)" image size was
-greyed out on NLI's download dialog, gated behind an account this project
-doesn't have, so the download came through at "Medium (50%)." That is a
-real, large quality regression, not a lateral move.
+right." Checked the actual embedded/extracted image resolution for the
+same physical page across every option (not assumed): this pipeline's
+tracked `berlin_square_original_transposed.pdf` is **3440×5312px PNG**
+(~18.3 MP, lossless). NLI's download dialog offers PDF or JPEG\ZIP, each
+with Small/Medium/Maximal image-size options; **"Maximal" is greyed out
+under `File format: PDF`** (gated behind an account this project doesn't
+have) but is **selectable anonymously under `File format: JPEG\ZIP`** —
+caught only because the user asked to specifically try that combination
+after the first check (PDF/Medium only) understated what NLI actually
+offers anonymously. Anonymous PDF/Medium: 873×1329px JPEG (~1.2 MP, ~16x
+fewer pixels than ours). Anonymous JPEG\ZIP/Maximal: **1745×2658px JPEG**
+(~4.6 MP, ~4x fewer pixels than ours) — meaningfully better, still a real
+downgrade, not an equivalent copy.
 
 **Decision: this pipeline's working PDFs stay Google Books-sourced.** Did
 NOT proceed with the page-reindexing this would have required (see the
 entry below for the full scope that was mapped out but not executed).
 Updated `START_HERE.md`, `CASE-YAD-MALACHI.md`'s `[^berlin]` footnote, and
-its "Preparing the text for Sefaria" section to stop implying an anonymous
-NLI download is an equivalent-quality substitute — NLI remains the right
-*licensing* pointer for someone else acquiring this text independently,
-but only with their own NLI account for full resolution. If NLI's
-"Maximal" tier turns out to match 3440×5312 quality, this is worth
-revisiting; untested here.
+its "Preparing the text for Sefaria" section with the corrected numbers
+and the PDF-vs-JPEG\ZIP format distinction, so nobody re-checks "Maximal"
+only under PDF and wrongly concludes it's unavailable entirely. NLI
+remains the right *licensing* pointer for someone else acquiring this text
+independently, at whichever tier they can reach; an NLI account might
+unlock something higher than 1745×2658 — untested here.
 
 ### DONE 2026-08-18 — NLI acquisition path validated end-to-end (download + leaf fix); found NLI's PDF is 336 pages, not 337 (a constant 1-page offset vs the tracked Google-sourced PDF); fixed a real .gitignore anchoring bug this surfaced
 

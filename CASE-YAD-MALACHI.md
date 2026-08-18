@@ -224,9 +224,10 @@ transcribed in the footnotes._
 The last mile keeps two things separate — **the text** and **the links**:
 
 - **Text.** OCR the **Berlin edition images** (cleanest square; source from NLI, which also
-  sidesteps Google's terms — **with an NLI account for full resolution**, see [^berlin]:
-  an anonymous download tested 2026-08-18 came through at ~16x fewer pixels than the Google
-  Books copy this project actually uses, not an equivalent copy). Licensing is clean — a
+  sidesteps Google's terms — **check resolution before committing to it**, see [^berlin]:
+  even NLI's best anonymous download tier (JPEG\ZIP, Maximal) tested 2026-08-18 at ~4x
+  fewer pixels than the Google Books copy this project actually uses, not an equivalent
+  copy - an NLI account might unlock something higher, untested). Licensing is clean — a
   PD edition, and mechanical OCR of PD
   text carries no new copyright.[^ocrpd] **Keep the prose faithful:** don't expand
   abbreviations (that's a read-time Dicta layer); *do* proof against the image, strip cruft
@@ -352,12 +353,18 @@ the cost of every public-domain work after this one.
     <https://www.nli.org.il/en/books/NNL_ALEPH990011859020205171/NLI> —
     the right pointer for someone else acquiring this text independently
     (sidesteps Google Books' terms of use, see "Preparing the text for
-    Sefaria" below), **but get it with an NLI account for full resolution.**
-    An anonymous download (tested 2026-08-18) comes through at only
-    873×1329px JPEG — a ~16x-fewer-pixels, lossy downgrade from the Google
-    Books scan this project actually uses, not an equivalent copy; this
-    project's own pipeline was NOT switched to it for that reason. NLI's
-    PDF is also 336 pages, not 337 (missing the Google-inserted disclaimer
+    Sefaria" below), **but check resolution before treating it as
+    equivalent.** NLI's download dialog offers PDF or JPEG\ZIP, each with
+    Small/Medium/Maximal image-size options; "Maximal" is greyed out under
+    PDF (gated behind an NLI account this project doesn't have) but IS
+    selectable anonymously under JPEG\ZIP. Tested 2026-08-18, same physical
+    page: anonymous PDF/Medium comes through at 873×1329px (~16x fewer
+    pixels than the Google Books scan below); anonymous JPEG\ZIP/Maximal
+    is better but still only 1745×2658px (~4x fewer pixels) — neither
+    matches the Google Books scan this project actually uses, so this
+    project's own pipeline was NOT switched to NLI for that reason (an NLI
+    account might unlock something higher; untested). NLI's downloadable
+    copy is also 336 pages, not 337 (missing the Google-inserted disclaimer
     page the Google Books scan has as its own page 0) - a constant 1-page
     offset, confirmed by direct content comparison including at a specific
     known leaf-order defect. See `START_HERE.md`'s Berlin-scan section and
