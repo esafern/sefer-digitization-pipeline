@@ -949,7 +949,9 @@ def test_the_two_readings_of_the_geresh_shape_partition_stem_length_exactly():
     them. If the two bounds ever drift apart, some stem length is either
     claimed by both or dropped by both, silently."""
     assert pae.MAX_NUMERAL_STEM_LETTERS + 1 == pae.MIN_TRUNCATION_STEM_LETTERS
-    for stem_len in range(1, 8):
+    # Cover well past the defined boundaries so a future threshold increase
+    # does not escape the test's range.
+    for stem_len in range(1, max(pae.MAX_NUMERAL_STEM_LETTERS, pae.MIN_TRUNCATION_STEM_LETTERS) + 3):
         word = "א" * stem_len + "'"
         numeral = pae.looks_like_bare_numeral(word)
         truncatable = (pae.ends_in_bare_geresh(word)
@@ -1302,26 +1304,21 @@ def test_substitution_detector_single_dominant_option_is_not_ambiguous():
     assert options[0] == ("אבל", 5000)
 
 
-def test_substitution_detector_known_false_positive_is_excluded():
+def test_substitution_detector_known_false_positive_is_excluded(tmp_path):
     """klal 88 word 423 'רתם' is already scan-verified (900 DPI) as print-
     faithful, not a corruption - the standing proof in this project that a
     confusable-letter/frequency signal can point at real broken type. Must
     never resurface as a fresh "finding.\""""
     part_data = [{"klal_id": 88, "clean_text": " ".join(["x"] * 423 + ["רתם"])}]
-    import tempfile
-    with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False, encoding="utf-8") as f:
-        json.dump(part_data, f, ensure_ascii=False)
-        path = f.name
-    try:
-        klal_words = drws.load_klal_words(path)
-        own_counts = drws.build_own_frequency_table(klal_words)
-        indep_freq = {"רתם": 0, "התם": 2415}
-        high, ambiguous = drws.find_candidates(klal_words, own_counts, indep_freq)
-        assert high == [] and ambiguous == [], (
-            "klal 88 word 423 'רתם' must be excluded via KNOWN_FALSE_POSITIVES"
-        )
-    finally:
-        os.unlink(path)
+    path = tmp_path / "part_fixture.json"
+    path.write_text(json.dumps(part_data, ensure_ascii=False), encoding="utf-8")
+    klal_words = drws.load_klal_words(str(path))
+    own_counts = drws.build_own_frequency_table(klal_words)
+    indep_freq = {"רתם": 0, "התם": 2415}
+    high, ambiguous = drws.find_candidates(klal_words, own_counts, indep_freq)
+    assert high == [] and ambiguous == [], (
+        "klal 88 word 423 'רתם' must be excluded via KNOWN_FALSE_POSITIVES"
+    )
 
 
 def test_substitution_detector_respects_rare_threshold():

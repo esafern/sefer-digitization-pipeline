@@ -304,7 +304,8 @@ SPAN_COVERAGE_KNOWN_REAL_GAPS = set()
 
 
 def _load_klalim(path):
-    d = json.load(open(path, encoding="utf-8"))
+    with open(path, encoding="utf-8") as f:
+        d = json.load(f)
     return d["klalim"] if isinstance(d, dict) and "klalim" in d else d
 
 
@@ -340,17 +341,20 @@ def corrections():
     always present and always expected to be current with part1.json: this
     suite is rebuild_all.sh's LAST step, after the stage that regenerates it.
     """
-    return json.load(open(os.path.join(REPO, "corrections_part1.json"), encoding="utf-8"))
+    with open(os.path.join(REPO, "corrections_part1.json"), encoding="utf-8") as f:
+        return json.load(f)
 
 
 @pytest.fixture(scope="session")
 def regions():
-    return json.load(open(os.path.join(REPO, "klal_page_regions.json"), encoding="utf-8"))
+    with open(os.path.join(REPO, "klal_page_regions.json"), encoding="utf-8") as f:
+        return json.load(f)
 
 
 @pytest.fixture(scope="session")
 def alignment():
-    align = json.load(open(os.path.join(REPO, "part1_header_anchored_alignment.json"), encoding="utf-8"))
+    with open(os.path.join(REPO, "part1_header_anchored_alignment.json"), encoding="utf-8") as f:
+        align = json.load(f)
     return {r["klal_id"]: r for r in align}
 
 
@@ -911,6 +915,15 @@ def test_part1_no_new_characters_outside_the_documented_repertoire(
         ch = issue.split("'")[1]
         found.add((kid, widx, ch))
 
+    # Guard against a parsing failure that silently empties `found`: if the
+    # check produced issues but parsing extracted nothing, the "no new"
+    # assertion below would vacuously pass (empty - baseline == empty), hiding
+    # every real finding behind a broken parser.
+    assert len(found) == len(issues), (
+        f"check_foreign_characters returned {len(issues)} issue(s) but parsing extracted "
+        f"{len(found)} - the output format may have changed, breaking the parser above"
+    )
+
     new = sorted(found - FOREIGN_CHARACTER_BASELINE)
     assert not new, (
         f"{len(new)} character(s) outside Part 1's documented repertoire that are NOT in "
@@ -1063,7 +1076,8 @@ def test_no_new_span_coverage_flags(part1_by_id):
         "validate_klal_span_coverage",
         os.path.join(REPO, "tools", "validate_klal_span_coverage.py"),
     )
-    trace = {x["klal_id"]: x for x in json.load(open(trace_path, encoding="utf-8"))}
+    with open(trace_path, encoding="utf-8") as f:
+        trace = {x["klal_id"]: x for x in json.load(f)}
 
     # Calls the validator's own build_spans() rather than reimplementing the
     # span math here. The previous version of this test had its own copy of
