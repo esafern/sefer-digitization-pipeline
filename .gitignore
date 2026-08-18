@@ -18,9 +18,13 @@ credentials.json
 # the page-order correction lives ONLY in the corrected PDF and the gitignored
 # token/image caches, so without these a clone gets corrected metadata pointing
 # at an uncorrected scan - worse than either state alone. See PROJECT-STATUS.md
-# "What is NOT recoverable from git".
-!berlin_square_corrected.pdf
-!berlin_square_original_transposed.pdf
+# "What is NOT recoverable from git". Anchored to root (leading /) - found
+# 2026-08-18: an unanchored pattern un-ignores any file with this basename
+# ANYWHERE in the tree, which would have silently un-ignored a same-named
+# verification copy under nli_verification/ and risked it being swept into a
+# commit by a careless `git add -A`.
+!/berlin_square_corrected.pdf
+!/berlin_square_original_transposed.pdf
 *.png
 # ...except CASE-YAD-MALACHI.md's own illustrations. Tracked deliberately, same
 # reasoning as the two PDF exceptions above: this doc is meant to display for any

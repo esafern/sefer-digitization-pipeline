@@ -15,6 +15,63 @@ current handoff, re-written (not just appended to) as state changes.
 
 ## ►► SESSION HANDOFF — read this first, 2026-08-16 (continued into 2026-08-17)
 
+### DONE 2026-08-18 — NLI acquisition path validated end-to-end (download + leaf fix); found NLI's PDF is 336 pages, not 337 (a constant 1-page offset vs the tracked Google-sourced PDF); fixed a real .gitignore anchoring bug this surfaced
+
+Per direct user request: pull a fresh copy from NLI and apply the
+documented leaf-order fix to it, in this repo, to actually confirm the
+acquisition path works rather than just asserting it in docs.
+
+**Downloaded the full 337-page book directly from NLI** (record
+`990011859020205171`, "Download" → "the complete document" → PDF, Medium
+quality - Maximal is gated behind a login NLI doesn't offer anonymously).
+**Found the downloaded PDF has 336 pages, not the 337 the viewer's own page
+counter shows.** Root cause, confirmed by direct visual/content comparison
+(not just page counts, which can mislead - Lesson 4/5): the tracked
+`berlin_square_original_transposed.pdf` (Google Books-sourced) has a
+"Digitized by Google" disclaimer page as its own page 0; NLI's direct
+digitization doesn't have that inserted page. Confirmed the offset is a
+constant -1 throughout, including at the transposed-leaf region itself
+(NLI page 34 content-matches the tracked PDF's page 35 exactly - same
+folio, same `פתחון` catchword) - not just checked at the start and assumed
+to hold.
+
+**Applied `tools/fix_transposed_leaf.py` to the NLI download** with the
+offset-adjusted indices (`--from-index 36 --to-index 35`, vs `37`/`36` for
+the Google-sourced numbering) and confirmed by direct content inspection
+that it reproduces the correct reading order (page 35 now opens with
+`דמדקאמר משמו משמע`, matching the documented catchword exactly). This is a
+genuine second, independent verification of the fix script beyond the
+byte-identical check it already had against the tracked PDF.
+
+**Did NOT promote the NLI-sourced files to replace the working
+`berlin_square_corrected.pdf`/`berlin_square_original_transposed.pdf` at
+root.** Every page-indexed cache this pipeline has (`docai_word_boxes/`,
+`images/pdf_pages/`, `gematria_trace_part1.json`,
+`part1_header_anchored_alignment.json`) is indexed against the
+Google-sourced 337-page numbering; swapping the source PDF for an
+NLI-sourced 336-page one would silently misalign every one of them by 1
+page without a full re-extraction. Kept as
+`nli_verification/berlin_square_original_transposed.pdf` /
+`berlin_square_corrected.pdf` (same names, per the user's request, just in
+a subdirectory) purely as a validated reproducibility proof. Documented the
+offset and both sets of fix indices in `START_HERE.md`'s Berlin-scan
+section and `CASE-YAD-MALACHI.md`'s `[^berlin]` footnote so nobody
+naively treats an NLI download as a drop-in replacement later.
+
+**Real bug found and fixed along the way**: `.gitignore`'s
+`!berlin_square_corrected.pdf`/`!berlin_square_original_transposed.pdf`
+negation patterns were unanchored, so they un-ignored ANY file with that
+basename anywhere in the tree - including the verification copies just
+created under `nli_verification/`. A careless `git add -A` would have
+swept ~200MB of redundant test PDFs into a commit and pushed them to the
+public GitHub repo. Fixed by anchoring both to root (`!/berlin_square_...`).
+Verified: `nli_verification/`'s copies are now correctly ignored again;
+the real root-level PDFs are still correctly tracked.
+
+Also removed the "originally sourced via Google Books" framing from
+`START_HERE.md`'s provenance paragraph per direct user request, replacing
+it with NLI as the validated primary acquisition path.
+
 ### FIXED 2026-08-18 — `images/pdf_pages/` was missing from the migration list; broke the review dashboard's scan pane on this fresh machine; now required-checked
 
 Found live: opened the dashboard on this newly-set-up machine (per the

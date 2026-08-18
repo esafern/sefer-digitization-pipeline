@@ -58,24 +58,44 @@ never resolved in `PROJECT-STATUS.md` (a Wikipedia summary had implied
 ~1917, evidently a misconverted gematria). See `PROJECT-STATUS.md`'s
 2026-08-18 entry for the full research trail.
 
-**Provenance and acquisition.** The scan in hand was originally sourced via
-Google Books (see `CASE-YAD-MALACHI.md`'s witness table). NLI's digitized
-copy at the URL above is the same printing and is the recommended source
-for actually *acquiring or redistributing* the images going forward — per
-`CASE-YAD-MALACHI.md`'s "Preparing the text for Sefaria" section, sourcing
-from NLI sidesteps Google Books' terms of use.
+**Provenance and acquisition.** NLI is the recommended and validated source
+for acquiring the scan — per `CASE-YAD-MALACHI.md`'s "Preparing the text
+for Sefaria" section, sourcing from NLI sidesteps Google Books' terms of
+use. **Validated end-to-end 2026-08-18**: downloaded the full 337-page
+book directly from the NLI record above (`Download` → "the complete
+document" → PDF), applied the leaf-order fix below to it, and confirmed by
+direct content inspection (matching folio numbers and catchwords, not just
+file existence) that it reproduces the correct reading order.
+
+**Important: NLI's PDF is 336 pages, not 337 — a constant 1-page offset,
+not a different scan.** This pipeline's tracked `berlin_square_
+corrected.pdf`/`berlin_square_original_transposed.pdf` came from a Google
+Books scan whose page 0 is a "Digitized by Google" disclaimer page that
+Google inserts and NLI's own digitization doesn't have. Confirmed by direct
+comparison: NLI page *i* = the Google-sourced PDF's page *i + 1* for every
+page checked, including at the transposed-leaf region. **This means every
+page-indexed cache in this pipeline** (`docai_word_boxes/`,
+`images/pdf_pages/`, `gematria_trace_part1.json`,
+`part1_header_anchored_alignment.json`) **is indexed against the
+Google-sourced 337-page numbering** — an NLI-sourced PDF is NOT a drop-in
+replacement for `berlin_square_corrected.pdf` without re-deriving all of
+those against the new (336-page, shifted-by-1) numbering. Don't swap the
+working PDF for an NLI download without redoing that extraction.
 
 **The scan itself had two leaves out of order — a defect in the source
-binding, not an extraction bug.** Two physical leaves (0-indexed PDF pages
-36/37, i.e. printed pages 37/38) were transposed; true reading order is
-page 36 → 38 → 37 → 39, found via a catchword-chain sweep (each page's
-closing catchword should match the next page's opening word) and confirmed
-by rendering both pages directly. Fixed by moving leaf 37 to position 36
-(`fitz.move_page`, page count unchanged) — `berlin_square_corrected.pdf`
-(tracked, fixed) is the only PDF that should ever be used as the pipeline's
-source; `berlin_square_original_transposed.pdf` (tracked, pre-fix) is kept
-only as a diffable reference, never to be fed to the pipeline directly.
-Every page-indexed cache built before the fix had to move in lockstep:
+binding, not an extraction bug.** Two physical leaves were transposed; true
+reading order is printed page 36 → 38 → 37 → 39, found via a
+catchword-chain sweep (each page's closing catchword should match the next
+page's opening word) and confirmed by rendering both pages directly. On
+the Google-sourced 337-page numbering (this repo's tracked PDFs), that's
+0-indexed leaf 37 moving to position 36; on an NLI-sourced 336-page PDF
+(one page earlier throughout, see above), the same physical leaves are at
+0-indexed 36 moving to position 35. Fixed with `fitz.move_page` (page count
+unchanged either way) — `berlin_square_corrected.pdf` (tracked, fixed) is
+the only PDF that should ever be used as the pipeline's source;
+`berlin_square_original_transposed.pdf` (tracked, pre-fix) is kept only as
+a diffable reference, never to be fed to the pipeline directly. Every
+page-indexed cache built before the fix had to move in lockstep:
 `docai_word_boxes/page_37.json` ⇄ `page_38.json`, `images/pdf_pages/
 page_37.png` ⇄ `page_38.png`, and klalim 76-84's page attribution in
 `gematria_trace_part1.json`/`part1_header_anchored_alignment.json` remapped
@@ -85,19 +105,27 @@ untouched (already stale/dead metadata for most of Part 1).
 **If you ever need to redo this** — e.g. starting from a completely fresh
 scan download rather than this repo's own tracked `berlin_square_
 corrected.pdf` — use `tools/fix_transposed_leaf.py`, a small reusable CLI
-built and verified 2026-08-18 (its output is pixel-identical to
-`berlin_square_corrected.pdf` on every page checked):
+built 2026-08-18 and verified two ways: byte-for-byte against the tracked
+Google-sourced PDF, and by direct content inspection against a fresh NLI
+download. **Use the indices matching whichever source you actually pulled
+from** — they differ by 1 (see above):
 
 ```bash
+# Google-sourced PDF (this repo's tracked files use this numbering):
 python3 tools/fix_transposed_leaf.py --pdf berlin_square_original_transposed.pdf \
     --from-index 37 --to-index 36 --output berlin_square_corrected.pdf
+
+# NLI-sourced PDF (one page earlier throughout - verified 2026-08-18):
+python3 tools/fix_transposed_leaf.py --pdf berlin_square_original_transposed.pdf \
+    --from-index 36 --to-index 35 --output berlin_square_corrected.pdf
 ```
 
 It only fixes the PDF's own physical page order — it does not know about
 `docai_word_boxes/`, `images/pdf_pages/`, or the alignment/trace files, so
-any of those built from a differently-ordered PDF still need the manual
-remap described above. This is a generic leaf-reordering tool, not
-Yad-Malachi-specific, in keeping with this project's generalization goal.
+any of those built from a differently-ordered (or differently-sourced) PDF
+still need the manual remap described above. This is a generic
+leaf-reordering tool, not Yad-Malachi-specific, in keeping with this
+project's generalization goal.
 
 ## Success criteria (in priority order)
 
