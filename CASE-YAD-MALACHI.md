@@ -381,7 +381,8 @@ the cost of every public-domain work after this one.
     page the Google Books scan has as its own page 0) - a constant 1-page
     offset, confirmed by direct content comparison including at a specific
     known leaf-order defect. See `START_HERE.md`'s Berlin-scan section and
-    `PROJECT-STATUS.md`'s 2026-08-18 entry for the full finding.
+    `PROJECT-STATUS-HISTORY.md`'s 2026-08-18 entries for the full finding
+    (moved there from `PROJECT-STATUS.md` in the same day's re-split).
     Title page: *ספר יד מלאכי חלק ראשון*, publisher *אפרים הערץ* (Ephraim Herz),
     *מדינת שלעזיען*, place *ברלין* (Berlin), printer *י. זיטטענפעלד* (Y.
     Zittenfeld); notes it was "printed first in Livorno … and now a second

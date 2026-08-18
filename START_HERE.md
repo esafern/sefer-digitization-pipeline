@@ -56,9 +56,10 @@ chronogram used as the formal creation-date), both encoding 612 — a
 primary-source confirmation, not an inference. This supersedes an earlier
 "~1857/8" estimate that had been inferred secondhand from a *later*
 edition's title page, and separately resolves a discrepancy flagged but
-never resolved in `PROJECT-STATUS.md` (a Wikipedia summary had implied
-~1917, evidently a misconverted gematria). See `PROJECT-STATUS.md`'s
-2026-08-18 entry for the full research trail.
+never resolved in `PROJECT-STATUS-HISTORY.md` (a Wikipedia summary had
+implied ~1917, evidently a misconverted gematria). See
+`PROJECT-STATUS-HISTORY.md`'s 2026-08-18 entries for the full research
+trail.
 
 **Provenance.** This pipeline's own working PDFs stay Google Books-sourced
 — **do not switch them to an anonymous NLI download.** The original scan
