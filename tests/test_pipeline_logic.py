@@ -58,6 +58,10 @@ import review_server as rs  # noqa: E402
 import validate_catchword_continuity as vcc  # noqa: E402
 import validate_part1_corpus_integrity as vpci  # noqa: E402
 import validate_title_alphabetical_order as vtao  # noqa: E402
+import detect_repeated_words as drw  # noqa: E402
+import detect_insertion_deletion as did  # noqa: E402
+import detect_split_merge as dsm  # noqa: E402
+import detect_cross_klal_errors as dcke  # noqa: E402
 
 
 # --- assemble_corrections_dataset: candidate drift detection -----------------
@@ -3156,3 +3160,152 @@ def test_apply_manual_correction_uses_space_only_split():
     # word_index=1 -> 'אלף'
     result = ard.apply_manual_correction(text, 1, "אלף", "חדש")
     assert result == " חדש בית"  # joined back with space-only convention
+# --- detect_repeated_words: consecutive word dittography ----------------------
+
+def test_repeated_words_finds_consecutive_duplicate():
+    """Basic positive control: an immediately-repeated word is detected."""
+    klal_words = {1: ["אלף", "בית", "בית", "גימל"]}
+    results = drw.find_repeated_words(klal_words)
+    assert len(results) == 1
+    assert results[0][:3] == (1, 1, "בית")
+
+
+def test_repeated_words_ignores_legitimate_repeats():
+    """Words in LEGITIMATE_REPEATS must be excluded from findings."""
+    klal_words = {1: ["אי", "תניא", "תניא", "מדברי"]}
+    results = drw.find_repeated_words(klal_words)
+    assert results == [], "תניא תניא is a legitimate Talmudic phrase"
+
+
+def test_repeated_words_compares_hebrew_letters_only():
+    """A gershayim difference between adjacent words must not prevent
+    detection: 'ב' followed by "ב'" is still a repeated word."""
+    klal_words = {1: ["דף", "ב", "ב'", "ד\"ה"]}
+    results = drw.find_repeated_words(klal_words)
+    assert len(results) == 1
+
+
+def test_repeated_words_skips_empty_hebrew():
+    """Adjacent punctuation-only tokens must not be flagged as repeats."""
+    klal_words = {1: ["אלף", "[.]", "[.]", "בית"]}
+    results = drw.find_repeated_words(klal_words)
+    assert results == [], "punctuation-only tokens have no Hebrew content to compare"
+
+
+# --- detect_insertion_deletion: single-char insertion/deletion ----------------
+
+def test_insertion_deletion_finds_extra_char():
+    """A word with zero attestation, one char deletion away from a common word,
+    resolves as high-confidence extra_char."""
+    indep_freq = {"הלכה": 2290, "הלכרה": 0}
+    result = did._resolve("הלכרה", indep_freq)
+    assert result is not None
+    is_ambiguous, options = result
+    assert not is_ambiguous
+    assert options[0][0] == "הלכה"
+    assert options[0][1] == "extra_char"
+
+
+def test_insertion_deletion_finds_deleted_char():
+    """A word with zero attestation, one char insertion away from a common word,
+    resolves as deleted_char."""
+    indep_freq = {"ילפנן": 0, "ילפינן": 500}
+    result = did._resolve("ילפנן", indep_freq)
+    assert result is not None
+    is_ambiguous, options = result
+    assert options[0][0] == "ילפינן"
+    assert options[0][1] == "deleted_char"
+
+
+def test_insertion_deletion_requires_zero_attestation():
+    """A word with ANY independent attestation must not be flagged."""
+    indep_freq = {"חזות": 5, "חזו": 312}
+    result = did._resolve("חזות", indep_freq)
+    assert result is None
+
+
+def test_insertion_deletion_skips_short_words():
+    """Words shorter than MIN_WORD_LENGTH must be skipped - too many
+    coincidental single-edit neighbours for short Hebrew words."""
+    indep_freq = {"אב": 0, "אבי": 500}
+    result = did._resolve("אב", indep_freq)
+    assert result is None, "2-letter words should be skipped"
+
+
+def test_insertion_deletion_skips_prefix_position():
+    """Inserting or removing a common prefix letter at position 0 should be
+    skipped - that's a prefix-detection problem, not an OCR error."""
+    # "אמרי" with zero attestation, "ואמרי" (with ו prefix) common - but
+    # this should NOT fire because ו at position 0 is a known prefix.
+    indep_freq = {"אמרי": 0, "ואמרי": 800, "האמרי": 600}
+    result = did._resolve("אמרי", indep_freq)
+    # Should return None because the only candidates are prefix insertions
+    assert result is None, "prefix insertions at position 0 should be skipped"
+
+
+# --- detect_split_merge: word-split and word-merge errors ---------------------
+
+def test_merge_detector_finds_split():
+    """A rare unattested word that splits into two common halves is detected."""
+    indep_freq = {"אביי": 2973, "והא": 2500, "אבייוהא": 0}
+    result = dsm._resolve_merge("אבייוהא", indep_freq)
+    assert result is not None
+    left, right, lf, rf = result
+    assert left == "אביי" and right == "והא"
+
+
+def test_merge_detector_requires_both_halves_common():
+    """If only one half is common, no merge candidate should be produced."""
+    indep_freq = {"אביי": 2973, "זקש": 0, "אבייזקש": 0}
+    result = dsm._resolve_merge("אבייזקש", indep_freq)
+    assert result is None
+
+
+def test_merge_detector_requires_minimum_length():
+    """Words shorter than MIN_MERGE_LENGTH should not be candidates."""
+    indep_freq = {"אב": 500, "גד": 500, "אבגד": 0}
+    result = dsm._resolve_merge("אבגד", indep_freq)
+    assert result is None, "4-letter word is below MIN_MERGE_LENGTH=7"
+
+
+def test_split_detector_finds_adjacent_short_tokens():
+    """Two adjacent short tokens whose concatenation is common are detected."""
+    from collections import Counter
+    klal_words = {1: ["דף", "ב", "ת", "גימל"]}
+    own_counts = Counter({"דף": 50, "ב": 1, "ת": 1, "גימל": 50})
+    indep_freq = {"בת": 5000}
+    results = dsm.find_split_candidates(klal_words, own_counts, indep_freq)
+    assert len(results) == 1
+    assert results[0][4] == "בת"  # the concatenation
+
+
+# --- detect_cross_klal_errors: systematic patterns across klalim --------------
+
+def test_cross_klal_finds_repeated_unattested_form():
+    """A form appearing in >= MIN_KLALIM klalim with zero attestation is flagged."""
+    klal_words = {1: ["טרור"], 2: ["טרור"], 3: ["טרור"], 4: ["בית"]}
+    lexicon = set()
+    indep_freq = {"טרור": 0, "בית": 5000}
+    results = dcke.find_cross_klal_suspects(klal_words, lexicon, indep_freq)
+    assert len(results) == 1
+    assert results[0][0] == "טרור"
+    assert results[0][1] == 3  # 3 klalim
+
+
+def test_cross_klal_skips_attested_forms():
+    """A form with independent attestation must not be flagged even if it
+    appears in many klalim."""
+    klal_words = {1: ["בית"], 2: ["בית"], 3: ["בית"]}
+    lexicon = set()
+    indep_freq = {"בית": 5000}
+    results = dcke.find_cross_klal_suspects(klal_words, lexicon, indep_freq)
+    assert results == []
+
+
+def test_cross_klal_skips_gershayim_tokens():
+    """Abbreviation tokens must not be counted."""
+    klal_words = {1: ['א"א'], 2: ['א"א'], 3: ['א"א']}
+    lexicon = set()
+    indep_freq = {}
+    results = dcke.find_cross_klal_suspects(klal_words, lexicon, indep_freq)
+    assert results == []

@@ -99,6 +99,14 @@ has_gershayim = cio.has_gershayim
 CONFUSION_PAIRS = [
     frozenset("בכ"), frozenset("דר"), frozenset("הר"), frozenset("הד"),
     frozenset("הח"), frozenset("טמ"), frozenset("ספ"), frozenset("גנ"),
+    # Added 2026-08-18 from review_lexicon_gaps.py's empirically-observed
+    # pairs (CONFUSABLE_PAIRS), which had already catalogued these from Part 1
+    # spot-checking results. Each pair was found in actual Part 1 OCR errors,
+    # not a theoretical similarity list. Tested against Part 1 before adding:
+    # the 7 new pairs add 45 new candidates, including confirmed real errors
+    # like עולס->עולם (ס/ם) and משוס->משום (ס/ם).
+    frozenset("סם"), frozenset("וי"), frozenset("רת"), frozenset("הת"),
+    frozenset("וז"), frozenset("כן"), frozenset("נן"),
 ]
 # Flat letter -> {other letters this one is confusable with}, built once.
 CONFUSABLE_WITH = {}
