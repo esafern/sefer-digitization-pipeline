@@ -15,6 +15,57 @@ current handoff, re-written (not just appended to) as state changes.
 
 ## ►► SESSION HANDOFF — read this first, 2026-08-16 (continued into 2026-08-17)
 
+### DONE 2026-08-18 — Berlin scan's printing date confirmed from a primary source (NLI); resolves a discrepancy flagged since 2026-08-16; reversed-leaf fix documented and made reproducible
+
+Per direct user request ("get actual pub date; explain provenance; explain
+the reversed page fix").
+
+**Berlin printing date: Hebrew year תרי"ב = 1851/2 CE**, not the "~1857/8"
+this project had been citing. Found via NLI's own catalog record for this
+exact edition (system number `990011859020205171`,
+<https://www.nli.org.il/en/books/NNL_ALEPH990011859020205171/NLI> — same
+"printed a second time... by Efraim Hertz" edition note, Berlin/Zittenfeld
+imprint, and critically the same 337-page count as this project's own
+tracked PDF). The date is a **primary-source confirmation**, not an
+inference: NLI's cataloging records two independent chronograms inside the
+book itself both encoding 612 (the publisher's introduction signing-date,
+and a separate Deuteronomy-verse chronogram used as the formal creation
+date). The old "~1857/8" figure had only ever been inferred secondhand from
+a *different* book's title page (Przemyśl 1877's own claim about the Berlin
+printing, `התרי"ח`/5618) — a secondary source's claim, now superseded. This
+also **resolves the "one discrepancy flagged, not resolved" item logged
+2026-08-16** (Wikipedia's summary had implied ~1917/5677 for the Berlin
+printing, evidently a misconverted gematria) — neither prior estimate was
+right; the correct year is 1851/2, confirmed directly from the book.
+Updated `CASE-YAD-MALACHI.md`'s witness table/footnote and `START_HERE.md`'s
+Berlin-scan section.
+
+**Provenance**: the scan in hand was originally sourced via Google Books.
+NLI independently catalogs and digitizes the identical printing (verified
+by matching edition note, imprint, and exact page count) — per
+`CASE-YAD-MALACHI.md`'s existing "Preparing the text for Sefaria" section,
+NLI is the recommended source for actually acquiring/redistributing the
+images, since it sidesteps Google Books' terms of use. Documented in both
+docs above with the NLI URL.
+
+**Reversed-leaf fix — now documented with a reproducible script, not just
+prose.** The 2026-08-11 leaf-transposition fix (two leaves, printed pages
+37/38, transposed in the source binding itself — see
+PROJECT-STATUS-HISTORY.md for the original catchword-chain discovery) had
+never been captured as a runnable script, only as a description of the
+one-off `fitz.move_page(37, 36)` command used at the time. Added
+`tools/fix_transposed_leaf.py` — a small, generic (not Yad-Malachi-specific)
+CLI wrapper around `fitz.move_page()`, so this class of fix is reproducible
+rather than tribal knowledge. **Verified, not just written**: ran it against
+the tracked pre-fix `berlin_square_original_transposed.pdf` and compared
+rendered pixel hashes against the tracked `berlin_square_corrected.pdf` for
+pages 35-39 — all five pages pixel-identical. The script only fixes the
+PDF's own physical page order; it does not touch `docai_word_boxes/`,
+`images/pdf_pages/`, or the alignment/trace files, which the original fix
+also had to update in lockstep (documented again, in full, in
+`START_HERE.md`'s Berlin-scan section, since that prose had never been
+consolidated in one place before).
+
 ### DONE 2026-08-18 — repo pushed to GitHub (`esafern/sefer-digitization-pipeline`, public); added the missing `requirements.txt`; new pipeline data-reference artifact for the untriaged lexicon-gap buckets
 
 Per direct user request, setting up for a second machine.
@@ -2365,13 +2416,20 @@ what's already cataloged (Livorno original; Przemyśl 1877/1888; several
 MODERN critical editions - Mishor 2001, Machon Yerushalayim 2016 - not
 additional historical witnesses) - no additional historical printing found
 beyond what `CASE-YAD-MALACHI.md`'s table and `scans/` already cover.
-**One discrepancy flagged, not resolved**: Wikipedia's summary implies a
+**RESOLVED 2026-08-18** (see this file's 2026-08-18 handoff entry above):
+neither this entry's Wikipedia-derived "~1917" nor `CASE-YAD-MALACHI.md`'s
+old "~1857/8" was right. NLI's own catalog record for this exact printing
+gives a primary-source date of תרי"ב = 1851/2 CE, confirmed by two
+independent chronograms inside the book itself. `CASE-YAD-MALACHI.md` and
+`START_HERE.md` updated accordingly.
+
+~~**One discrepancy flagged, not resolved**: Wikipedia's summary implies a
 Berlin printing year of 5677 (~1917), sharply different from `CASE-YAD-
 MALACHI.md`'s own "~1857/8" estimate (itself already flagged there as
 unconfirmed) - the fetch/summarization pass that surfaced this may have
 mis-converted a Hebrew-year gematria (a known failure mode, not verified
 against the primary source), so this is reported as a discrepancy worth a
-closer direct look, not a correction to make yet.
+closer direct look, not a correction to make yet.~~
 
 **Nothing applied to the pipeline** - this is still research plus one
 concrete empirical test, not a scoped implementation. If a Rashi-script

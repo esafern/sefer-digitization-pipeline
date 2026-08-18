@@ -93,7 +93,7 @@ layer, but it is **not good enough to use** (see *Process*) — the work is to O
 | Edition | Press | Script | Scan in hand | Pages |
 |---|---|---|---|---|
 | **Livorno 1766–7** — *editio princeps*[^livorno] | (Livorno) | **Rashi** (body); square lemmas | HebrewBooks #32530 / #32532 / #32531 | 348 / 54 / 55 |
-| **Berlin ~1857/8**[^berlin] | Ephraim Herz | **Square** | Google Books | 337 |
+| **Berlin 1851/2**[^berlin] | Ephraim Herz | **Square** | Google Books / NLI | 337 |
 | **Przemyśl 1877**[^p1877] | M. A. Knoller | **Square** | HebrewBooks #14122 | 491 |
 | **Przemyśl 1877** (2nd scan)[^p1877] | " | **Square** | Google Books | 489 |
 | **Przemyśl 1888**[^p1888] | Żupnik, Knoller & Hamerschmidt | **Square** | Google Books | 373 |
@@ -342,12 +342,27 @@ the cost of every public-domain work after this one.
     script** with square keyword-lemmas; the roughest of the scans (ink bleed, skew).
     Digitized as three part-files (348 / 54 / 55 pp).
 
-[^berlin]: **Berlin ~1857/8** (Google Books full-view scan). Title page: *ספר יד
-    מלאכי חלק ראשון*, publisher *אפרים הערץ* (Ephraim Herz), *מדינת שלעזיען*, place
-    *ברלין* (Berlin); notes it was "printed first in Livorno … and now a second time."
-    The Przemyśl 1877 title page dates this Berlin printing to *התרי"ח* (5618 =
-    1857/8). **Square** type, the cleanest scan. (The NLI copy carries the
-    Hazanovitz-collection bookplate — a provenance stamp, not part of the edition.)
+[^berlin]: **Berlin, Hebrew year תרי"ב = 1851/2 CE** (in hand as a Google Books
+    full-view scan; the identical printing is independently catalogued and
+    digitized by the National Library of Israel — NLI system number
+    `990011859020205171`, <https://www.nli.org.il/en/books/NNL_ALEPH990011859020205171/NLI>,
+    337 digitized pages, matching this project's own scan page-for-page).
+    Title page: *ספר יד מלאכי חלק ראשון*, publisher *אפרים הערץ* (Ephraim Herz),
+    *מדינת שלעזיען*, place *ברלין* (Berlin), printer *י. זיטטענפעלד* (Y.
+    Zittenfeld); notes it was "printed first in Livorno … and now a second
+    time." **Date confirmed 2026-08-18 directly from NLI's cataloging of the
+    book itself** — two independent internal chronograms (the publisher's
+    introduction signing-date, and a separate Deuteronomy-verse chronogram
+    used as the formal creation-date) both encode *תרי"ב* (612 = 1851/2). This
+    supersedes an earlier "~1857/8" estimate that had only been inferred
+    secondhand from the *Przemyśl 1877* title page's own claim about the
+    Berlin printing (*התרי"ח*, 5618) — a secondary source's claim about a
+    different book, now superseded by a primary-source date from the Berlin
+    book itself. **Square** type, the cleanest scan. (The NLI copy carries the
+    Hazanovitz-collection bookplate — a provenance stamp, not part of the
+    edition.) See `START_HERE.md`'s Berlin-scan section and `PROJECT-STATUS.md`'s
+    2026-08-18 entry for the full research trail, including why NLI, not
+    Google Books, is the recommended source for actually acquiring the images.
 
 [^p1877]: **Przemyśl 1877** — present in two independent scans: HebrewBooks #14122 and
     a separate Google Books full-view scan. Title page: *ספר יד מלאכי חלק ראשון* …

@@ -40,8 +40,64 @@ actually OCRs, `berlin_square_corrected.pdf`, is a LATER, SECOND printing,
 in Berlin, per its own title page (`נדפס ראשונה בליוורנו... ועתה נדפס פעם
 שנית` — "first printed in Livorno... now printed a second time," colophon
 `ברלין`, editor אפרים הערץ of Silesia). Square Hebrew typeface throughout
-(not Rashi script) — matches the filename. Exact Berlin printing date not
-established. Don't conflate the two editions.
+(not Rashi script) — matches the filename. Don't conflate the two editions.
+
+**Berlin printing date: Hebrew year תרי"ב = 1851/2 CE**, confirmed
+2026-08-18 against the National Library of Israel's catalog record for this
+exact edition (NLI system number `990011859020205171`, viewable at
+<https://www.nli.org.il/en/books/NNL_ALEPH990011859020205171/NLI> — same
+"printed a second time... by Efraim Hertz" edition note, same Berlin/
+Zittenfeld imprint, and the same 337-page count as our tracked PDF). The
+date rests on two independent chronograms inside the book itself (the
+publisher's introduction signing-date, and a separate Deuteronomy-verse
+chronogram used as the formal creation-date), both encoding 612 — a
+primary-source confirmation, not an inference. This supersedes an earlier
+"~1857/8" estimate that had been inferred secondhand from a *later*
+edition's title page, and separately resolves a discrepancy flagged but
+never resolved in `PROJECT-STATUS.md` (a Wikipedia summary had implied
+~1917, evidently a misconverted gematria). See `PROJECT-STATUS.md`'s
+2026-08-18 entry for the full research trail.
+
+**Provenance and acquisition.** The scan in hand was originally sourced via
+Google Books (see `CASE-YAD-MALACHI.md`'s witness table). NLI's digitized
+copy at the URL above is the same printing and is the recommended source
+for actually *acquiring or redistributing* the images going forward — per
+`CASE-YAD-MALACHI.md`'s "Preparing the text for Sefaria" section, sourcing
+from NLI sidesteps Google Books' terms of use.
+
+**The scan itself had two leaves out of order — a defect in the source
+binding, not an extraction bug.** Two physical leaves (0-indexed PDF pages
+36/37, i.e. printed pages 37/38) were transposed; true reading order is
+page 36 → 38 → 37 → 39, found via a catchword-chain sweep (each page's
+closing catchword should match the next page's opening word) and confirmed
+by rendering both pages directly. Fixed by moving leaf 37 to position 36
+(`fitz.move_page`, page count unchanged) — `berlin_square_corrected.pdf`
+(tracked, fixed) is the only PDF that should ever be used as the pipeline's
+source; `berlin_square_original_transposed.pdf` (tracked, pre-fix) is kept
+only as a diffable reference, never to be fed to the pipeline directly.
+Every page-indexed cache built before the fix had to move in lockstep:
+`docai_word_boxes/page_37.json` ⇄ `page_38.json`, `images/pdf_pages/
+page_37.png` ⇄ `page_38.png`, and klalim 76-84's page attribution in
+`gematria_trace_part1.json`/`part1_header_anchored_alignment.json` remapped
+page 37 → 38. `part1.json`'s own `page` field was deliberately left
+untouched (already stale/dead metadata for most of Part 1).
+
+**If you ever need to redo this** — e.g. starting from a completely fresh
+scan download rather than this repo's own tracked `berlin_square_
+corrected.pdf` — use `tools/fix_transposed_leaf.py`, a small reusable CLI
+built and verified 2026-08-18 (its output is pixel-identical to
+`berlin_square_corrected.pdf` on every page checked):
+
+```bash
+python3 tools/fix_transposed_leaf.py --pdf berlin_square_original_transposed.pdf \
+    --from-index 37 --to-index 36 --output berlin_square_corrected.pdf
+```
+
+It only fixes the PDF's own physical page order — it does not know about
+`docai_word_boxes/`, `images/pdf_pages/`, or the alignment/trace files, so
+any of those built from a differently-ordered PDF still need the manual
+remap described above. This is a generic leaf-reordering tool, not
+Yad-Malachi-specific, in keeping with this project's generalization goal.
 
 ## Success criteria (in priority order)
 
