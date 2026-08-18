@@ -223,16 +223,18 @@ All of these assume the venv is active (automatic if you're using direnv —
 see `SETUP.md`; otherwise `source venv/bin/activate` first).
 
 **Start the review dashboard** (the live human-review tool — see "How the
-pipeline works" above):
+pipeline works" above). **Runs in the foreground and blocks the shell it's
+started in** — background it unless you want a terminal permanently tied up:
 
 ```bash
-python3 pipeline/review_server.py
+python3 pipeline/review_server.py &     # backgrounded - shell stays free
 ```
 
-Open <http://127.0.0.1:8420/>. Runs in the foreground by default; background
-it (`... &`) or run it in its own terminal tab if you want your shell back.
-Check `lsof -i :8420` first if it fails to bind — something may already be
-listening on that port.
+Open <http://127.0.0.1:8420/>. To stop it later: `lsof -i :8420` to find the
+PID, then `kill <PID>` (also the first thing to check if it fails to bind —
+something may already be listening on that port). Running it plain in the
+foreground (no `&`) is fine too if you're giving it its own terminal tab on
+purpose.
 
 **Run the test suite**:
 
