@@ -47,7 +47,9 @@ in Berlin, per its own title page (`נדפס ראשונה בליוורנו... ו
 exact edition (NLI system number `990011859020205171`, viewable at
 <https://www.nli.org.il/en/books/NNL_ALEPH990011859020205171/NLI> — same
 "printed a second time... by Efraim Hertz" edition note, same Berlin/
-Zittenfeld imprint, and the same 337-page count as our tracked PDF). The
+Zittenfeld imprint, and the same 337-page count as this repo's local PDF —
+not git-tracked here, see "Files not in the public repo" in `SETUP.md`).
+The
 date rests on two independent chronograms inside the book itself (the
 publisher's introduction signing-date, and a separate Deuteronomy-verse
 chronogram used as the formal creation-date), both encoding 612 — a
@@ -77,7 +79,7 @@ problem, not a formality: NLI's "Maximal (100%)" size is greyed out under
 `File format: PDF` (gated behind an NLI account this project doesn't
 have) but **is selectable under `File format: JPEG\ZIP`, anonymously** —
 comparing the same physical page's embedded/extracted image directly, this
-pipeline's tracked PDF is **3440×5312px PNG** (~18.3 MP, lossless); NLI's
+pipeline's local PDF is **3440×5312px PNG** (~18.3 MP, lossless); NLI's
 best anonymously-available tier (JPEG\ZIP, Maximal) is **1745×2658px
 JPEG** (~4.6 MP, lossy) — about **4x fewer pixels**, plus lossy compression
 on top. (The PDF download path's "Medium" — the only anonymous PDF tier —
@@ -90,7 +92,7 @@ the ceiling.
 
 **NLI's PDF is also 336 pages, not 337 — a constant 1-page offset, not a
 different scan** (separate from the quality issue above, and true at
-whatever quality tier you download). This pipeline's tracked
+whatever quality tier you download). This pipeline's local
 `berlin_square_corrected.pdf`/`berlin_square_original_transposed.pdf` came
 from a Google Books scan whose page 0 is a "Digitized by Google" disclaimer
 page that Google inserts and NLI's own digitization doesn't have. Confirmed
@@ -108,14 +110,15 @@ binding, not an extraction bug.** Two physical leaves were transposed; true
 reading order is printed page 36 → 38 → 37 → 39, found via a
 catchword-chain sweep (each page's closing catchword should match the next
 page's opening word) and confirmed by rendering both pages directly. On
-the Google-sourced 337-page numbering (this repo's tracked PDFs), that's
+the Google-sourced 337-page numbering (this repo's local PDFs), that's
 0-indexed leaf 37 moving to position 36; on an NLI-sourced 336-page PDF
 (one page earlier throughout, see above), the same physical leaves are at
 0-indexed 36 moving to position 35. Fixed with `fitz.move_page` (page count
-unchanged either way) — `berlin_square_corrected.pdf` (tracked, fixed) is
-the only PDF that should ever be used as the pipeline's source;
-`berlin_square_original_transposed.pdf` (tracked, pre-fix) is kept only as
-a diffable reference, never to be fed to the pipeline directly. Every
+unchanged either way) — `berlin_square_corrected.pdf` (local, not
+git-tracked, fixed) is the only PDF that should ever be used as the
+pipeline's source; `berlin_square_original_transposed.pdf` (local,
+pre-fix) is kept only as a diffable reference, never to be fed to the
+pipeline directly. Every
 page-indexed cache built before the fix had to move in lockstep:
 `docai_word_boxes/page_37.json` ⇄ `page_38.json`, `images/pdf_pages/
 page_37.png` ⇄ `page_38.png`, and klalim 76-84's page attribution in
@@ -124,15 +127,15 @@ page 37 → 38. `part1.json`'s own `page` field was deliberately left
 untouched (already stale/dead metadata for most of Part 1).
 
 **If you ever need to redo this** — e.g. starting from a completely fresh
-scan download rather than this repo's own tracked `berlin_square_
+scan download rather than this repo's own local `berlin_square_
 corrected.pdf` — use `tools/fix_transposed_leaf.py`, a small reusable CLI
-built 2026-08-18 and verified two ways: byte-for-byte against the tracked
+built 2026-08-18 and verified two ways: byte-for-byte against the local
 Google-sourced PDF, and by direct content inspection against a fresh NLI
 download. **Use the indices matching whichever source you actually pulled
 from** — they differ by 1 (see above):
 
 ```bash
-# Google-sourced PDF (this repo's tracked files use this numbering):
+# Google-sourced PDF (this repo's local files use this numbering):
 python3 tools/fix_transposed_leaf.py --pdf berlin_square_original_transposed.pdf \
     --from-index 37 --to-index 36 --output berlin_square_corrected.pdf
 

@@ -15,12 +15,13 @@ current handoff, re-written (not just appended to) as state changes.
 
 ## ►► SESSION HANDOFF — read this first, 2026-08-16 (continued into 2026-08-17)
 
-### CORRECTION 2026-08-18, same day — NLI validated but deliberately NOT adopted: even its best anonymous tier is ~4x fewer pixels than the tracked Google-sourced PDF
+### CORRECTION 2026-08-18, same day — NLI validated but deliberately NOT adopted: even its best anonymous tier is ~4x fewer pixels than the local Google-sourced PDF
 
 User caught this before it went further: "hold on it is lower quality
 right." Checked the actual embedded/extracted image resolution for the
 same physical page across every option (not assumed): this pipeline's
-tracked `berlin_square_original_transposed.pdf` is **3440×5312px PNG**
+local `berlin_square_original_transposed.pdf` (not git-tracked - see
+`SETUP.md`) is **3440×5312px PNG**
 (~18.3 MP, lossless). NLI's download dialog offers PDF or JPEG\ZIP, each
 with Small/Medium/Maximal image-size options; **"Maximal" is greyed out
 under `File format: PDF`** (gated behind an account this project doesn't
@@ -43,7 +44,7 @@ remains the right *licensing* pointer for someone else acquiring this text
 independently, at whichever tier they can reach; an NLI account might
 unlock something higher than 1745×2658 — untested here.
 
-### DONE 2026-08-18 — NLI acquisition path validated end-to-end (download + leaf fix); found NLI's PDF is 336 pages, not 337 (a constant 1-page offset vs the tracked Google-sourced PDF); fixed a real .gitignore anchoring bug this surfaced
+### DONE 2026-08-18 — NLI acquisition path validated end-to-end (download + leaf fix); found NLI's PDF is 336 pages, not 337 (a constant 1-page offset vs the local Google-sourced PDF); fixed a real .gitignore anchoring bug this surfaced
 
 Per direct user request: pull a fresh copy from NLI and apply the
 documented leaf-order fix to it, in this repo, to actually confirm the
@@ -51,17 +52,19 @@ acquisition path works rather than just asserting it in docs.
 
 **Downloaded the full 337-page book directly from NLI** (record
 `990011859020205171`, "Download" → "the complete document" → PDF, Medium
-quality - Maximal is gated behind a login NLI doesn't offer anonymously).
-**Found the downloaded PDF has 336 pages, not the 337 the viewer's own page
-counter shows.** Root cause, confirmed by direct visual/content comparison
-(not just page counts, which can mislead - Lesson 4/5): the tracked
-`berlin_square_original_transposed.pdf` (Google Books-sourced) has a
-"Digitized by Google" disclaimer page as its own page 0; NLI's direct
-digitization doesn't have that inserted page. Confirmed the offset is a
-constant -1 throughout, including at the transposed-leaf region itself
-(NLI page 34 content-matches the tracked PDF's page 35 exactly - same
-folio, same `פתחון` catchword) - not just checked at the start and assumed
-to hold.
+quality - "Maximal" was greyed out under this File format: PDF path;
+later found, same day, to be available anonymously under File format:
+JPEG\ZIP instead - see the CORRECTION entry above, which supersedes the
+quality framing here). **Found the downloaded PDF has 336 pages, not the
+337 the viewer's own page counter shows.** Root cause, confirmed by direct
+visual/content comparison (not just page counts, which can mislead -
+Lesson 4/5): the local `berlin_square_original_transposed.pdf` (Google
+Books-sourced, not git-tracked in this repo) has a "Digitized by Google"
+disclaimer page as its own page 0; NLI's direct digitization doesn't have
+that inserted page. Confirmed the offset is a constant -1 throughout,
+including at the transposed-leaf region itself (NLI page 34
+content-matches the local PDF's page 35 exactly - same folio, same
+`פתחון` catchword) - not just checked at the start and assumed to hold.
 
 **Applied `tools/fix_transposed_leaf.py` to the NLI download** with the
 offset-adjusted indices (`--from-index 36 --to-index 35`, vs `37`/`36` for
@@ -69,7 +72,7 @@ the Google-sourced numbering) and confirmed by direct content inspection
 that it reproduces the correct reading order (page 35 now opens with
 `דמדקאמר משמו משמע`, matching the documented catchword exactly). This is a
 genuine second, independent verification of the fix script beyond the
-byte-identical check it already had against the tracked PDF.
+byte-identical check it already had against the local PDF.
 
 **Did NOT promote the NLI-sourced files to replace the working
 `berlin_square_corrected.pdf`/`berlin_square_original_transposed.pdf` at
@@ -94,7 +97,9 @@ created under `nli_verification/`. A careless `git add -A` would have
 swept ~200MB of redundant test PDFs into a commit and pushed them to the
 public GitHub repo. Fixed by anchoring both to root (`!/berlin_square_...`).
 Verified: `nli_verification/`'s copies are now correctly ignored again;
-the real root-level PDFs are still correctly tracked.
+the real root-level PDFs would still be correctly un-ignored if anyone
+ever did commit them (they aren't currently - not git-tracked in this
+repo, see `SETUP.md`).
 
 Also removed the "originally sourced via Google Books" framing from
 `START_HERE.md`'s provenance paragraph per direct user request, replacing
@@ -144,7 +149,7 @@ exact edition (system number `990011859020205171`,
 <https://www.nli.org.il/en/books/NNL_ALEPH990011859020205171/NLI> — same
 "printed a second time... by Efraim Hertz" edition note, Berlin/Zittenfeld
 imprint, and critically the same 337-page count as this project's own
-tracked PDF). The date is a **primary-source confirmation**, not an
+local PDF). The date is a **primary-source confirmation**, not an
 inference: NLI's cataloging records two independent chronograms inside the
 book itself both encoding 612 (the publisher's introduction signing-date,
 and a separate Deuteronomy-verse chronogram used as the formal creation
@@ -175,8 +180,8 @@ one-off `fitz.move_page(37, 36)` command used at the time. Added
 `tools/fix_transposed_leaf.py` — a small, generic (not Yad-Malachi-specific)
 CLI wrapper around `fitz.move_page()`, so this class of fix is reproducible
 rather than tribal knowledge. **Verified, not just written**: ran it against
-the tracked pre-fix `berlin_square_original_transposed.pdf` and compared
-rendered pixel hashes against the tracked `berlin_square_corrected.pdf` for
+the local pre-fix `berlin_square_original_transposed.pdf` and compared
+rendered pixel hashes against the local `berlin_square_corrected.pdf` for
 pages 35-39 — all five pages pixel-identical. The script only fixes the
 PDF's own physical page order; it does not touch `docai_word_boxes/`,
 `images/pdf_pages/`, or the alignment/trace files, which the original fix
