@@ -2828,3 +2828,334 @@ def test_the_same_near_attested_pattern_without_quoting_still_reaches_ocr_shape(
     result = rlg.analyse("אב", rec, lexicon=set(), freq={"אכ": 25})
     assert result["ocr_shape"] is True
     assert result["bucket"] == "ocr_shape_to_read"
+
+
+# --- review_decisions: concurrent appends must not corrupt the file ----------
+# _APPEND_LOCK was added 2026-08-18. This test verifies it actually works:
+# N threads appending simultaneously must all produce complete, valid JSON lines.
+
+def test_concurrent_appends_produce_no_corrupted_lines(tmp_path):
+    """Without the lock, Python's buffered f.write() is not guaranteed to be
+    a single write(2) syscall, so two simultaneous appends could interleave
+    bytes mid-line. Low risk in practice (single user, browser serialises
+    clicks), but a corrupted line in the append-only audit trail is
+    unrecoverable and this lock costs zero."""
+    import threading
+
+    path = str(tmp_path / "concurrent.jsonl")
+    n_threads = 20
+    records_per_thread = 10
+    errors = []
+
+    def append_n(thread_id):
+        try:
+            for i in range(records_per_thread):
+                rd.append_decision("klal_flag", klal_id=thread_id * 1000 + i,
+                                   needs_revisit=True, note=f"t{thread_id}-{i}",
+                                   path=path)
+        except Exception as e:
+            errors.append(e)
+
+    threads = [threading.Thread(target=append_n, args=(t,)) for t in range(n_threads)]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+
+    assert not errors, f"threads raised: {errors}"
+
+    with open(path, encoding="utf-8") as f:
+        lines = [l for l in f if l.strip()]
+    assert len(lines) == n_threads * records_per_thread, (
+        f"expected {n_threads * records_per_thread} lines, got {len(lines)} - "
+        "some appends were lost or interleaved"
+    )
+    malformed = []
+    for i, line in enumerate(lines, 1):
+        try:
+            r = json.loads(line)
+            assert "id" in r and "klal_id" in r
+        except (json.JSONDecodeError, AssertionError) as e:
+            malformed.append((i, str(e)))
+    assert not malformed, f"corrupted line(s): {malformed}"
+
+
+# --- corpus_io: has_gershayim, QUOTE_CHARS, load_klal_words -----------------
+# Added 2026-08-18. These were consolidated from per-script copies; the tests
+# verify they agree with the callers that used to define them locally.
+
+def test_has_gershayim_detects_all_quote_forms():
+    """has_gershayim must match on every character in QUOTE_CHARS and miss
+    on a word with none of them."""
+    assert cio.has_gershayim('רש"י') is True    # ASCII double quote
+    assert cio.has_gershayim("וכו'") is True    # ASCII single quote
+    assert cio.has_gershayim("רש״י") is True    # Unicode gershayim U+05F4
+    assert cio.has_gershayim("נרא׳") is True    # Unicode geresh U+05F3
+    assert cio.has_gershayim("אלף") is False
+    assert cio.has_gershayim("") is False
+
+
+def test_quote_chars_is_the_canonical_source_for_all_callers():
+    """detect_ligature_corruption, detect_real_word_substitution,
+    extract_abbreviation_forms, and propose_abbreviation_expansions each had
+    their own QUOTE_CHARS copy until consolidation. Verify the canonical set
+    matches every downstream user's imported copy."""
+    assert cio.QUOTE_CHARS == dlc.QUOTE_CHARS
+    assert cio.QUOTE_CHARS == drws.QUOTE_CHARS
+    assert cio.QUOTE_CHARS == eaf.QUOTE_CHARS
+    assert cio.QUOTE_CHARS == pae.QUOTE_CHARS
+
+
+def test_load_klal_words_splits_whitespace_collapsing(tmp_path):
+    """load_klal_words must use str.split() (whitespace-collapsing), not
+    str.split(' ') (space-only), matching every index-bearing pipeline
+    script. This was consolidated from detect_ligature_corruption.py and
+    detect_real_word_substitution.py."""
+    p = tmp_path / "part.json"
+    p.write_text(json.dumps([
+        {"klal_id": 1, "clean_text": " אלף  בית  גימל "},
+        {"klal_id": 2, "clean_text": "דלת הא"},
+    ], ensure_ascii=False), encoding="utf-8")
+    result = cio.load_klal_words(str(p))
+    assert result == {1: ["אלף", "בית", "גימל"], 2: ["דלת", "הא"]}
+    # Verify it agrees with the callers' own load_klal_words.
+    assert result == dlc.load_klal_words(str(p))
+    assert result == drws.load_klal_words(str(p))
+
+
+# --- vision_adjudication_common: _retry_loop ---------------------------------
+# _retry_loop was extracted 2026-08-18. These tests exercise the retry and
+# model-fallback behaviour without touching the Gemini API.
+
+@requires_vision_deps
+def test_retry_loop_succeeds_on_first_attempt():
+    calls = []
+    def call_fn(model):
+        calls.append(model)
+        return f"ok-{model}"
+    result = vac._retry_loop(call_fn, ["model-a"], max_retries=3)
+    assert result == "ok-model-a"
+    assert calls == ["model-a"]
+
+
+@requires_vision_deps
+def test_retry_loop_retries_on_503_and_succeeds():
+    attempts = []
+    def call_fn(model):
+        attempts.append(model)
+        if len(attempts) < 3:
+            raise RuntimeError("503 Service Unavailable")
+        return "recovered"
+    result = vac._retry_loop(call_fn, ["model-a"], max_retries=5)
+    assert result == "recovered"
+    assert len(attempts) == 3
+
+
+@requires_vision_deps
+def test_retry_loop_falls_back_to_next_model_on_non_retryable_error():
+    calls = []
+    def call_fn(model):
+        calls.append(model)
+        if model == "model-a":
+            raise RuntimeError("400 Bad Request")
+        return f"ok-{model}"
+    result = vac._retry_loop(call_fn, ["model-a", "model-b"], max_retries=3)
+    assert result == "ok-model-b"
+    assert calls == ["model-a", "model-b"]
+
+
+@requires_vision_deps
+def test_retry_loop_raises_when_all_models_fail():
+    def call_fn(model):
+        raise RuntimeError(f"fatal for {model}")
+    with pytest.raises(RuntimeError, match="All models failed"):
+        vac._retry_loop(call_fn, ["m1", "m2"], max_retries=2)
+
+
+# --- vision_adjudication_common: table-name assertion -------------------------
+
+@requires_vision_deps
+def test_init_cache_table_rejects_sql_metacharacters_in_table_name(tmp_path):
+    """The table name is interpolated into SQL (f-strings, not parameterised),
+    so it MUST be validated. SQL metacharacters in a table name would allow
+    injection via the cache-init call."""
+    db = str(tmp_path / "test.db")
+    with pytest.raises(AssertionError):
+        vac.init_cache_table(db, "bad; DROP TABLE x", "hash1")
+    with pytest.raises(AssertionError):
+        vac.init_cache_table(db, "Bad_Name", "hash1")  # uppercase
+    with pytest.raises(AssertionError):
+        vac.init_cache_table(db, "has spaces", "hash1")
+    with pytest.raises(AssertionError):
+        vac.init_cache_table(db, "", "hash1")
+    # A valid name must still work.
+    vac.init_cache_table(db, "good_table_name", "hash1")
+
+
+# --- vision_adjudication_common: parse_decision_lenient ----------------------
+
+@requires_vision_deps
+def test_parse_decision_lenient_recovers_valid_response():
+    text = '''{
+      "selected_option": "A",
+      "transcription_found": "אלף בית",
+      "confidence": 0.95,
+      "reasoning": "clearly readable"
+    }'''
+    parsed = vac.parse_decision_lenient(text)
+    assert parsed["selected_option"] == "A"
+    assert parsed["transcription_found"] == "אלף בית"
+    assert parsed["confidence"] == 0.95
+    assert parsed["reasoning"] == "clearly readable"
+
+
+@requires_vision_deps
+def test_parse_decision_lenient_recovers_response_with_embedded_gershayim():
+    """The whole reason this function exists: a raw unescaped gershayim
+    inside transcription_found breaks json.loads."""
+    text = '''{
+      "selected_option": "B",
+      "transcription_found": "סי' כ"ה",
+      "confidence": 0.9,
+      "reasoning": "the gershayim in כ"ה is clear"
+    }'''
+    parsed = vac.parse_decision_lenient(text)
+    assert parsed["selected_option"] == "B"
+    assert parsed["transcription_found"] == '''סי' כ"ה'''
+    assert parsed["confidence"] == 0.9
+
+
+@requires_vision_deps
+def test_parse_decision_lenient_handles_null_transcription():
+    text = '''{
+      "selected_option": "UNCERTAIN",
+      "transcription_found": null,
+      "confidence": 0.5,
+      "reasoning": "cannot determine"
+    }'''
+    parsed = vac.parse_decision_lenient(text)
+    assert parsed["selected_option"] == "UNCERTAIN"
+    assert parsed["transcription_found"] is None
+
+
+@requires_vision_deps
+def test_parse_decision_lenient_raises_on_unrecoverable_text():
+    with pytest.raises(ValueError, match="expected fields not found"):
+        vac.parse_decision_lenient("this is not json at all")
+    with pytest.raises(ValueError, match="expected fields not found"):
+        vac.parse_decision_lenient('{"selected_option": "A"}')  # missing other fields
+
+
+# --- vision_adjudication_common: sanitize_json --------------------------------
+
+@requires_vision_deps
+def test_sanitize_json_strips_invalid_escapes_only():
+    """Gemini sometimes emits \\' (invalid in JSON) around a geresh character.
+    Valid JSON escapes (\\", \\n, \\\\, etc.) must be left intact."""
+    assert vac.sanitize_json(r"test \' value") == "test ' value"
+    assert vac.sanitize_json(r'test \" value') == r'test \" value'
+    assert vac.sanitize_json(r"test \n value") == r"test \n value"
+    # A lone backslash followed by a non-JSON-escape character is stripped.
+    assert vac.sanitize_json(r"test \x value") == "test x value"
+    assert vac.sanitize_json("no escapes here") == "no escapes here"
+
+
+# --- review_decisions: all_current supersession + flagged_klalim edge cases ---
+
+def test_all_current_later_record_supersedes_earlier_for_same_key(decisions_path):
+    """A later record for the same (klal_id, word_index) must supersede an
+    earlier one - the 'current' semantics documented in the module header."""
+    rd.append_decision("candidate_choice", klal_id=5, word_index=3,
+                       chosen_text="first", path=decisions_path)
+    rd.append_decision("candidate_choice", klal_id=5, word_index=3,
+                       chosen_text="second", path=decisions_path)
+    rd.append_decision("candidate_choice", klal_id=5, word_index=4,
+                       chosen_text="other", path=decisions_path)
+    current = rd.all_current("candidate_choice", path=decisions_path)
+    assert current[(5, 3)]["chosen_text"] == "second"
+    assert current[(5, 4)]["chosen_text"] == "other"
+    assert len(current) == 2
+
+
+def test_flagged_klalim_returns_only_klalim_whose_latest_flag_is_needs_revisit(decisions_path):
+    """A klal flagged then un-flagged must not appear; a klal flagged,
+    un-flagged, then re-flagged must appear."""
+    rd.append_decision("klal_flag", klal_id=10, needs_revisit=True, path=decisions_path)
+    rd.append_decision("klal_flag", klal_id=20, needs_revisit=True, path=decisions_path)
+    rd.append_decision("klal_flag", klal_id=20, needs_revisit=False, path=decisions_path)
+    rd.append_decision("klal_flag", klal_id=30, needs_revisit=True, path=decisions_path)
+    rd.append_decision("klal_flag", klal_id=30, needs_revisit=False, path=decisions_path)
+    rd.append_decision("klal_flag", klal_id=30, needs_revisit=True, path=decisions_path)
+    assert rd.flagged_klalim(path=decisions_path) == [10, 30]
+
+
+def test_flagged_klalim_includes_word_level_flags(decisions_path):
+    """A word-level klal_flag (word_index != None) with needs_revisit=True
+    should cause the klal to appear in flagged_klalim, since all_current
+    keys by (klal_id, word_index) and the function checks needs_revisit
+    on every entry. This documents the actual behavior, which the nav
+    sidebar relies on."""
+    rd.append_decision("klal_flag", klal_id=42, word_index=5, needs_revisit=True,
+                       note="word-level flag", path=decisions_path)
+    assert 42 in rd.flagged_klalim(path=decisions_path)
+
+
+# --- apply_reviewer_decisions: confirmed-no-op for replace opcode ------------
+
+def test_confirming_the_current_text_of_a_replace_candidate_changes_nothing(
+        apply_harness, decisions_path):
+    """A replace candidate where the reviewer votes 'keep current text'
+    (chosen_text == final_text) is a confirmed-no-op: the reviewer looked
+    at it and decided the current reading is correct. Must NOT modify the
+    text, but must record an apply_event."""
+    entry = _correction(1, "replace", "בות", "בית")
+    apply_harness([{"klal_id": 1, "clean_text": "אלף בית גימל"}], {"1": [entry]})
+    rd.append_decision("candidate_choice", klal_id=1, word_index=1, chosen_source="final_text",
+                       chosen_text="בית", candidate_snapshot=entry, path=decisions_path)
+
+    assert apply_harness.run()[1] == "אלף בית גימל"
+    events = [r for r in rd.history_for(1, 1, "apply_event", path=decisions_path)]
+    assert len(events) == 1 and "no change" in (events[0]["note"] or "")
+
+
+# --- apply_reviewer_decisions: apply_replace with multi-word chosen_text ------
+
+def test_apply_replace_multi_word_replacement():
+    """A replace where the chosen text has a different word count from the
+    original span - the slice assignment handles this correctly."""
+    text = "אלף בית גימל דלת"
+    # Replace a 2-word span with a 1-word replacement.
+    assert ard.apply_replace(text, 1, "בית גימל", "חדש") == "אלף חדש דלת"
+    # Replace a 1-word span with a 2-word replacement.
+    assert ard.apply_replace(text, 1, "בית", "חדש ישן") == "אלף חדש ישן גימל דלת"
+
+
+# --- apply_reviewer_decisions: apply_delete_insertion with multi-word text ----
+
+def test_apply_delete_insertion_multi_word():
+    """Insert a multi-word span and verify the already-present guard
+    works for multi-word spans too."""
+    text = "אלף בית"
+    once = ard.apply_delete_insertion(text, 1, "חדש ישן")
+    assert once == "אלף חדש ישן בית"
+    assert ard.apply_delete_insertion(once, 1, "חדש ישן") is None, (
+        "a multi-word insertion already present must be refused"
+    )
+
+
+# --- apply_reviewer_decisions: apply_manual_correction uses space-only split --
+
+def test_apply_manual_correction_uses_space_only_split():
+    """apply_manual_correction deliberately uses split(' ') to match the
+    frontend's word-index convention. This test verifies that property
+    directly - if it ever switches to split(), the indices from the
+    frontend's click handler would silently misalign."""
+    # With a leading space, split(' ') gives ['', 'אלף', 'בית'] so
+    # word_index=1 points to 'אלף'; split() gives ['אלף', 'בית'] so
+    # word_index=1 would point to 'בית'. The result should use the
+    # space-only split convention.
+    text = " אלף בית"
+    # With space-only split: words = ['', 'אלף', 'בית']
+    # word_index=1 -> 'אלף'
+    result = ard.apply_manual_correction(text, 1, "אלף", "חדש")
+    assert result == " חדש בית"  # joined back with space-only convention
