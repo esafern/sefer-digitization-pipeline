@@ -209,10 +209,15 @@ For exactly what each data file contains, see `PIPELINE-DATA-REFERENCE.md`.
   root is the one piece of that archival material kept public: this
   document's own reorganization/correction history.
 - `docai_word_boxes/`, `document_jsons_berlin/`, `klalim_docai/`,
-  `llm_klal_starts/`, `sefaria_export/`, `vlm_extractions/`, `scratch/`,
-  `sefaria_reference_corpus/` — gitignored regenerable caches/
-  intermediates, not present on a fresh clone. See `SETUP.md` for how to
-  get them.
+  `llm_klal_starts/`, `sefaria_export/`, `vlm_extractions/`,
+  `images/pdf_pages/`, `scratch/`, `sefaria_reference_corpus/` — gitignored
+  caches/intermediates, not present on a fresh clone. "Regenerable" is
+  aspirational for some of these, not a guarantee — `images/pdf_pages/`
+  (the review dashboard's scan-page images) has no live rendering script at
+  all (confirmed 2026-08-18, after its absence broke the dashboard's scan
+  pane on a fresh migration); it must be migrated as a pre-built cache, the
+  same as the others with no generator. See `SETUP.md` for how to get them,
+  and `tools/verify_local_setup.py` to confirm they actually landed.
 - `.gemini/rules/` — Gemini CLI's equivalent of Part 2 below; this project
   has been worked on from both Claude Code and Gemini CLI, so check both
   when looking for standing directives.

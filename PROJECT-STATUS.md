@@ -15,6 +15,39 @@ current handoff, re-written (not just appended to) as state changes.
 
 ## ►► SESSION HANDOFF — read this first, 2026-08-16 (continued into 2026-08-17)
 
+### FIXED 2026-08-18 — `images/pdf_pages/` was missing from the migration list; broke the review dashboard's scan pane on this fresh machine; now required-checked
+
+Found live: opened the dashboard on this newly-set-up machine (per the
+migration walkthrough earlier this session) and klal 1's scan-image pane
+showed a broken-image icon instead of the page. Root cause: `SETUP.md`'s
+"Files not in the public repo" list and the migration tarball built earlier
+this session both enumerated `docai_word_boxes/`, `document_jsons_berlin/`,
+`sefaria_reference_corpus/`, `klalim_docai/`, `llm_klal_starts/`,
+`sefaria_export/`, `vlm_extractions/` — but never `images/pdf_pages/`,
+which `pipeline/review_server.py`'s `IMAGES_DIR` serves the scan-page PNGs
+from with no fallback (`_serve_static`, 404 on anything missing, no
+lazy-render path). Nothing else in the pipeline reads that directory except
+`tools/verify_reconstruction_witness.py`, so its absence caused no test
+failures and no error anywhere except the dashboard UI itself - exactly why
+it went unnoticed until someone actually looked at a klal.
+
+**Fixed**: copied `images/pdf_pages/` (80 PNGs, ~36MB) directly from the
+original local machine - verified in the browser, klal 1's scan now renders
+correctly. **Also confirmed it has no live generator script at all** (only
+archived scripts reference it), so it must always be migrated as a
+pre-built cache, same as the others - `START_HERE.md`'s directory-layout
+bullet calling these caches "regenerable" was itself an inherited,
+unverified claim; corrected to say so explicitly for this one.
+
+**Promoted to REQUIRED, not recommended**, in `tools/verify_local_setup.py`
+and `SETUP.md`: the dashboard is a core, every-session tool per this
+project's own standing rules, not a secondary one, so a missing scan-image
+cache should fail loudly on setup verification, not silently surface only
+when someone happens to open a specific klal. Re-ran
+`tools/verify_local_setup.py` after the fix - all 5 required + 8
+recommended checks pass. 199/199 pytest, unaffected (nothing in the test
+suite touches this directory).
+
 ### DONE 2026-08-18 — Berlin scan's printing date confirmed from a primary source (NLI); resolves a discrepancy flagged since 2026-08-16; reversed-leaf fix documented and made reproducible
 
 Per direct user request ("get actual pub date; explain provenance; explain

@@ -121,6 +121,15 @@ REQUIRED = [
     ("berlin_square_corrected.pdf", lambda: check_pdf("berlin_square_corrected.pdf")),
     ("berlin_square_original_transposed.pdf", lambda: check_pdf("berlin_square_original_transposed.pdf")),
     ("venv packages (pymupdf/google-genai/google-cloud-documentai)", check_venv_packages),
+    # Required, not recommended, despite being a "cache": the review dashboard
+    # is a core, every-session tool (see START_HERE.md Part 2 "Session start"),
+    # and its scan-image pane depends on this with no fallback. Confirmed
+    # 2026-08-18: an earlier version of this script's checklist (and SETUP.md's
+    # migration list) omitted it entirely, and its absence silently broke the
+    # dashboard's left pane on a fresh migration - nothing failed loudly, it
+    # just rendered a broken-image icon. Promoted here so a missing/incomplete
+    # copy is caught before anyone opens the dashboard, not after.
+    ("images/pdf_pages/", lambda: check_dir("images/pdf_pages", required=True)),
 ]
 
 RECOMMENDED = [

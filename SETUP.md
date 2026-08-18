@@ -50,9 +50,14 @@ deactivates it. No `source venv/bin/activate` needed again.
 See `PROJECT-STATUS.md` / ask for the migration walkthrough — `credentials.json`,
 the two source PDFs, and several gitignored cache directories
 (`docai_word_boxes/`, `document_jsons_berlin/`, `sefaria_reference_corpus/`,
-`klalim_docai/`, `llm_klal_starts/`, `sefaria_export/`, `vlm_extractions/`)
-must be migrated separately (not via git). `GEMINI_API_KEY` is an environment
-variable, not a file — re-export it in your shell profile.
+`klalim_docai/`, `llm_klal_starts/`, `sefaria_export/`, `vlm_extractions/`,
+`images/pdf_pages/`) must be migrated separately (not via git).
+`images/pdf_pages/` is easy to miss — the review dashboard's left-pane scan
+image depends on it but nothing else does, so its absence doesn't surface
+until you're actually looking at a klal in the dashboard (confirmed
+2026-08-18: it was left off an earlier version of this list and broke the
+dashboard's scan pane on a fresh migration). `GEMINI_API_KEY` is an
+environment variable, not a file — re-export it in your shell profile.
 
 After migrating, verify everything actually landed (not just that the
 migration command exited without error):
