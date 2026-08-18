@@ -61,12 +61,21 @@ never resolved in `PROJECT-STATUS.md` (a Wikipedia summary had implied
 2026-08-18 entry for the full research trail.
 
 **Provenance.** This pipeline's own working PDFs stay Google Books-sourced
-— **do not switch them to an anonymous NLI download.** NLI is still the
-right pointer to give someone else acquiring this text for the first time
-(per `CASE-YAD-MALACHI.md`'s "Preparing the text for Sefaria" section,
-sourcing from NLI sidesteps Google Books' terms of use for redistribution),
-but only if *they* use an NLI account to get full resolution — an
-anonymous download is a real quality downgrade, not an equivalent copy.
+— **do not switch them to an anonymous NLI download.** The original scan
+is publicly downloadable at
+<https://www.google.com/books/edition/_/OdiHjxI3I0EC> — confirmed
+2026-08-18 (via an actual browser render, not a plain HTML fetch, which
+first misread it as a different edition entirely) to be this exact
+printing: same `דפוס י. זיטטענפעלד` (Zittenfeld) publisher as this scan's
+own title page, and Google's own bibliographic panel states its source as
+the National Library of Israel itself — so this Google Books copy and the
+NLI record below are the same underlying digitization, just re-hosted.
+NLI's own site is still the right pointer to give someone else acquiring
+this text for the first time (per `CASE-YAD-MALACHI.md`'s "Preparing the
+text for Sefaria" section, sourcing from NLI sidesteps Google Books' terms
+of use for redistribution), but only if *they* use an NLI account to get
+full resolution — an anonymous NLI download is a real quality downgrade,
+not an equivalent copy (see below).
 
 **Validated end-to-end 2026-08-18, then deliberately NOT adopted, for a
 resolution reason found along the way.** Downloaded the full 337-page book

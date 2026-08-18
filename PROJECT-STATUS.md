@@ -15,6 +15,35 @@ current handoff, re-written (not just appended to) as state changes.
 
 ## ►► SESSION HANDOFF — read this first, 2026-08-16 (continued into 2026-08-17)
 
+### DONE 2026-08-18 — found and verified the actual Google Books URL for this scan; caught and corrected a WebFetch misread along the way
+
+User asked to find the Google Books URL for the scan this pipeline uses
+(never captured at acquisition time, and the PDF's own metadata was
+stripped during processing). Found it:
+<https://www.google.com/books/edition/_/OdiHjxI3I0EC> - publicly
+downloadable (PDF/ePub).
+
+**A plain WebFetch of this URL first reported the wrong publisher/place
+entirely** (`C. Letteris, Vienna` instead of the correct
+`דפוס י. זיטטענפעלד` / Berlin) - Google Books' page is heavily
+JS-rendered, and WebFetch's HTML-to-markdown conversion picked up
+unrelated sidebar/"more editions" content instead of this book's actual
+bibliographic panel. Did not trust it (Lesson 4/5: verify directly rather
+than trust an indirect signal) - re-checked with an actual browser render
+instead, which showed the correct panel: publisher `דפוס י. זיטטענפעלד`
+(matching this scan's own title page and NLI's catalog record) and,
+notably, **Google's own metadata states its source as the National
+Library of Israel itself**, digitized 2019-08-01 - so this Google Books
+copy and the NLI record already cited in this project are the same
+underlying digitization, just re-hosted by two different institutions.
+Confirmed full-view (real PDF/ePub download links present, not a
+restricted preview) before citing it.
+
+Updated `CASE-YAD-MALACHI.md`'s `[^berlin]` footnote and `START_HERE.md`'s
+Berlin-scan provenance paragraph with the URL and this confirmation,
+including a note about the WebFetch misread as a caution for next time
+(don't trust an HTML fetch of a JS-heavy page over an actual render).
+
 ### CORRECTION 2026-08-18, same day — NLI validated but deliberately NOT adopted: even its best anonymous tier is ~4x fewer pixels than the local Google-sourced PDF
 
 User caught this before it went further: "hold on it is lower quality

@@ -347,8 +347,21 @@ the cost of every public-domain work after this one.
     Digitized as three part-files (348 / 54 / 55 pp).
 
 [^berlin]: **Berlin, Hebrew year תרי"ב = 1851/2 CE.** In hand as a Google
-    Books full-view scan (3440×5312px per page). The identical printing is
-    also catalogued and digitized by the National Library of Israel, NLI
+    Books full-view scan (3440×5312px per page), publicly downloadable
+    (PDF/ePub) at <https://www.google.com/books/edition/_/OdiHjxI3I0EC> —
+    confirmed 2026-08-18 to be this exact scan, not a different edition:
+    Google's own bibliographic panel gives publisher `דפוס י. זיטטענפעלד`
+    (Y. Zittenfeld press, matching this scan's own title page and NLI's
+    catalog record) and notes the source as הספרייה הלאומית של ישראל (the
+    National Library of Israel) itself, digitized 2019-08-01 — so this
+    Google Books copy and the NLI record below are, ultimately, the same
+    underlying digitization. (An earlier automated read of this same URL
+    wrongly reported a different publisher/place entirely - Google Books'
+    page is heavily JS-rendered, and a plain HTML fetch instead of an
+    actual rendered read picked up unrelated sidebar content; verified
+    properly via a real browser render before trusting it.) The identical
+    printing is also separately catalogued and digitized by the National
+    Library of Israel, NLI
     system number `990011859020205171`,
     <https://www.nli.org.il/en/books/NNL_ALEPH990011859020205171/NLI> —
     the right pointer for someone else acquiring this text independently
@@ -361,7 +374,7 @@ the cost of every public-domain work after this one.
     page: anonymous PDF/Medium comes through at 873×1329px (~16x fewer
     pixels than the Google Books scan below); anonymous JPEG\ZIP/Maximal
     is better but still only 1745×2658px (~4x fewer pixels) — neither
-    matches the Google Books scan this project actually uses, so this
+    matches the Google Books scan cited above, so this
     project's own pipeline was NOT switched to NLI for that reason (an NLI
     account might unlock something higher; untested). NLI's downloadable
     copy is also 336 pages, not 337 (missing the Google-inserted disclaimer
