@@ -48,3 +48,8 @@ sefaria_reference_corpus/
 # Junk
 *.old
 *.old.*
+
+# Machine-migration bundle (contains credentials.json + both source PDFs -
+# never commit). Kept at repo root deliberately since /tmp is ephemeral.
+yad-malachi-migration.tar
+yad-malachi-migration.tar.gz
