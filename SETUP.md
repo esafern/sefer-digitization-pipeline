@@ -53,3 +53,17 @@ the two source PDFs, and several gitignored cache directories
 `klalim_docai/`, `llm_klal_starts/`, `sefaria_export/`, `vlm_extractions/`)
 must be migrated separately (not via git). `GEMINI_API_KEY` is an environment
 variable, not a file — re-export it in your shell profile.
+
+After migrating, verify everything actually landed (not just that the
+migration command exited without error):
+
+```bash
+python3 tools/verify_local_setup.py
+```
+
+Checks presence AND minimal validity of every item above (both PDFs are
+opened and page-counted, not just checked for existing; `credentials.json`
+is parsed and shape-checked; `docai_word_boxes/` is read through
+`corpus_io.load_docai_page`, not just counted) plus the venv's pinned
+packages and whether `GEMINI_API_KEY` is set. Exits non-zero if anything
+*required* is missing; recommended-but-missing items print as warnings.

@@ -265,6 +265,7 @@ each one checks; a few of the most generally useful:
 python3 tools/validate_part1_corpus_integrity.py   # needs only tracked files, runs on a fresh clone
 python3 tools/check_klal_token_orphans.py          # needs docai_word_boxes/ (gitignored, migrated separately)
 python3 tools/detect_ligature_corruption.py        # needs only part*.json
+python3 tools/verify_local_setup.py                # after migrating to a new machine: proves everything not in git actually landed
 ```
 
 ## Where to find things
