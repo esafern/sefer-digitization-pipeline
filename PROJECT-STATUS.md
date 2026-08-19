@@ -89,7 +89,9 @@ to) as state changes** — that discipline is what drifted last time.
   item 4 above, which writing it surfaced); `competition.md` + `more
   competition.md` merged into `COMPETITIVE-LANDSCAPE.md` with their
   contradictions resolved and their inaccurate claims about this pipeline
-  corrected.
+  corrected. Both sources were deleted in the same commit; neither was ever
+  git-tracked, so they are not recoverable from history — everything of
+  substance in them is in the merged doc.
 - **Undocumented `tools/` scripts added to `START_HERE.md`'s directory
   layout** — `export_corpus.py`, `build_part1_freq.py`,
   `detect_cross_klal_errors.py`, `detect_insertion_deletion.py`,
@@ -100,6 +102,16 @@ to) as state changes** — that discipline is what drifted last time.
 - **`PIPELINE-DATA-REFERENCE.md` gained the files it was missing** —
   `reconstruction_witness_queue.json` (which `review_server.py` loads),
   `lexicon.txt`, and the four sqlite decision caches.
+- **`VERIFIED-AGAINST-THE-INK.html` stat ledger refreshed** — two `127`
+  references corrected to `125`, and its Parts 2–3 row rewritten: it read
+  "alignment built, adjudication not started," which stopped being true once
+  the Parts 2–3 infrastructure was built and run. Now states 916 klalim
+  flagged, 0 applied.
+- **Cross-reference sweep run over every doc.** All file references in the
+  live docs resolve. The only unresolved ones are in
+  `PROJECT-STATUS-HISTORY.md` and `DOCS-HISTORY.md` and are correct as-is:
+  deliberately-archived scripts, `/tmp` scratch paths, and glob-style names
+  (`page_N.json`, `part1/2/3.json`) that were never literal filenames.
 
 ## Recent work (2026-08-18)
 

@@ -1,12 +1,39 @@
 # CLAUDE.md / START_HERE.md — historical notes
 
+## TL;DR
+
+**You do not need this file to work on the project.** `START_HERE.md` has the
+current, correct state. This is archaeology, kept rather than deleted per this
+project's practice of not discarding history just because the incident got
+fixed.
+
+**Read it when** you're wondering why a doc claim looks odd, whether a script
+you can't find ever existed, or where an archived artifact went.
+
+**What's in it, in one line each:**
+
+- **Pipeline-shape corrections** — the Livorno/Berlin edition mix-up; the
+  DocAI-vs-VLM claim that was actually DocAI-vs-stored-text; where
+  `part1.json`'s original text came from (traced through git, never fully
+  re-traced); `chunker.py` and `orchestrator.py`, both archived as dead.
+- **Retired demo/report artifacts** — `review.html`, `SEFARIA-VLM-DEMO.html`
+  and the rest, and why each was replaced rather than fixed.
+- **Directory-layout history** — the 2026-08-16 flat-root split into
+  `pipeline/` + `tools/`, and the `processed_klalim/` directory that was
+  documented for months without ever existing.
+
+**The recurring lesson, stated three separate times below because it recurred
+three separate times:** *a document's own file-existence and file-location
+claims are not automatically true, and need the same verification as any other
+claim.* Check the layout against an actual `ls`, never against the previous
+version of the document.
+
+---
+
 This file preserves the narrative, self-correction, and reorganization
 history that used to live inline in `CLAUDE.md` before it was split into
 `START_HERE.md` (current state, for humans and LLM instances) and this file
-(archaeology). None of this is required reading to work on the project —
-`START_HERE.md` has the current, correct state. Kept, not deleted, per this
-project's own standing practice of not discarding history just because the
-incident it documents got fixed.
+(archaeology).
 
 Moved here 2026-08-18 when `CLAUDE.md` was split into `START_HERE.md` (a
 short `CLAUDE.md` stub remains, redirecting any LLM instance to

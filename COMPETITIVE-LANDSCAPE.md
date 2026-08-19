@@ -272,8 +272,9 @@ is a good fit for exactly the class of work Sefaria is missing.
 
 ---
 
-_Merged 2026-08-19 from two separate research passes (`competition.md` and
-`more competition.md`), whose contradictions are resolved above. Corrections
+_Merged 2026-08-19 from two separate research passes — `competition.md` and
+`more competition.md`, both removed in the same commit, neither ever tracked in
+git — whose contradictions are resolved above. Corrections
 made to both sources in the process: the disagreement-detection leg is DocAI
 vs. the stored corpus text (DocAI vs. Tesseract is the separate witness pass on
 page-crossing klalim, not the main comparison), and standardized ALTO/PAGE/TEI
