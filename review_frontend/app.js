@@ -1284,6 +1284,9 @@ async function saveWitnessDecision(w) {
 // ---------- scan pane ----------
 let currentPage = null;
 let scanFocusKlalId = null; // which klal's region/continuation to highlight, independent of which page is shown
+let _showPageGen = 0; // generation counter - incremented on every showPage call so stale
+                      // async continuations can detect they've been superseded and abort
+                      // before appending boxes to a container that already belongs to a newer call.
 const pageImg = document.getElementById('page-img');
 const hlContainer = document.getElementById('hl-container');
 const pageIndicator = document.getElementById('page-indicator');
@@ -1329,6 +1332,7 @@ function setupZoomPan() {
 }
 
 async function showPage(page, focusKlalId) {
+  const gen = ++_showPageGen;
   if (page !== currentPage) {
     currentPage = page;
     pageImg.src = `/images/pdf_pages/page_${page}.png`;
@@ -1339,13 +1343,11 @@ async function showPage(page, focusKlalId) {
   hlContainer.innerHTML = '';
 
   const focusKlal = mountedKlal[focusKlalId] || (await fetchKlal(focusKlalId).catch(() => null));
-  // A klal's highlight region can be on its own starting page (`region`)
-  // or, if it continues past a page boundary, on a later page it also
-  // touches (`continuations`) - e.g. klal 4 starts on the last line of
-  // page 15 but most of it is on page 16. Use whichever matches the page
-  // actually being shown, so manually flipping pages (see
-  // goToPageOffset) still highlights the right region instead of showing
-  // nothing once you've moved off the klal's start page.
+  // A newer showPage call superseded this one while we awaited fetchKlal.
+  // The newer call already cleared the container and is drawing its own boxes;
+  // appending ours would corrupt the display (stale region box from a different
+  // klal/page appearing behind the correct word boxes).
+  if (gen !== _showPageGen) return;
   // Only draw the klal region box on the klal's START page (not continuations).
   // Continuation pages often fill the entire page (e.g. klal 30 page 24:
   // bbox covers 93% of the page), so the region box adds no spatial
@@ -1363,6 +1365,7 @@ async function showPage(page, focusKlalId) {
   }
 
   const pageItems = await fetch('/api/page/' + page).then(r => r.json());
+  if (gen !== _showPageGen) return; // superseded while awaiting /api/page/
   pageItems.forEach(c => {
     if (!c.bbox) return;
     if (c.kind === 'witness') {
