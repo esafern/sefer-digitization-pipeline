@@ -290,7 +290,13 @@ def api_klalim():
     alignment = _load_alignment()
     corrections = _load_corrections()
     punct_candidates = _load_punctuation_candidates()
-    flagged = set(rd.flagged_klalim())
+    # Pre-load klal_flag decisions once for all 222 klalim. The old code
+    # called _word_level_ai_flags() per klal inside the loop; that function
+    # calls rd.history_for() which re-reads the full log each time - 222
+    # extra reads per request. Loading all_current("klal_flag") here once
+    # covers both the 'flagged' set and the per-klal ai_flag counts below.
+    all_klal_flags = rd.all_current("klal_flag")  # {(klal_id, word_index): record}
+    flagged = {kid for (kid, _), r in all_klal_flags.items() if r.get("needs_revisit")}
     decided = rd.all_current("candidate_choice")  # {(klal_id, word_index): record}
     punct_decided = rd.all_current("punctuation_choice")
 
@@ -367,10 +373,15 @@ def api_klalim():
         # word_index a valid manual_correction already covers, matching
         # api_klal()'s own dedup so the two endpoints never disagree.
         words = (k.get("clean_text") or "").split(" ")
+        n_words = len(words)
         manual_indices = manual_indices_by_klal.get(kid, set())
         ai_flag_count = sum(
-            1 for f in _word_level_ai_flags(kid, words)
-            if f["word_index"] not in manual_indices
+            1 for (fkid, fwidx), rec in all_klal_flags.items()
+            if fkid == kid
+            and fwidx is not None
+            and rec.get("needs_revisit")
+            and fwidx not in manual_indices
+            and 0 <= fwidx < n_words
         )
 
         manual_count = manual_count_by_klal.get(kid, 0)

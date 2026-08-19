@@ -241,7 +241,7 @@ function applyFlaggedFilter() {
   const only = document.getElementById('filter-flagged').checked;
   document.querySelectorAll('.nav-item').forEach(el => {
     const kid = parseInt(el.dataset.klalId);
-    el.style.display = (!only || klalById[kid].needs_revisit) ? '' : 'none';
+    el.style.display = (!only || klalById[kid]?.needs_revisit) ? '' : 'none';
   });
 }
 
@@ -852,7 +852,7 @@ async function saveManualDecision(klalId, wordIndex, word, chosenText, note) {
   const freshK = await fetchKlal(klalId);
   const block = document.getElementById('klal-block-' + klalId);
   if (block) renderKlalBody(block, freshK);
-  if (currentPage != null) await showPage(currentPage, scanFocusKlalId);
+  if (currentPage != null) await showPage(currentPage, klalId);
 
   // FIXED 2026-08-14 (code review, session audit item 5): this used to
   // patch klalById[klalId]'s correction_count/decided_count in place,
