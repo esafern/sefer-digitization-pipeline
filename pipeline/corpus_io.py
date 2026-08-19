@@ -421,3 +421,51 @@ def trusted_klal_pages(path=ALIGNMENT_PATH, max_klal=PART1_MAX_KLAL):
             continue
         klal_pages.setdefault(r["matched_page"], []).append(r["klal_id"])
     return klal_pages, untrusted_ids
+
+
+def trusted_klal_pages_with_continuations(alignment_path=ALIGNMENT_PATH,
+                                          max_klal=PART1_MAX_KLAL,
+                                          regions_path=None):
+    """Like trusted_klal_pages(), but also maps each continuation page to its
+    klal_id (from klal_page_regions.json's ``continuations`` arrays).
+
+    Without this, build_corrections_dataset.py only diffs a klal's text
+    against the DocAI tokens of the page the klal STARTS on. For the 56
+    klalim that continue onto the next page (some onto two), the continuation
+    words never generated correction candidates - and api_page() never served
+    them.
+
+    Returns the same (page -> [klal_id, ...], untrusted_ids) shape. klal_id
+    order within a page is start-klals first (in ascending klal_id), then
+    continuation-klals (in ascending klal_id) - matches print order on the
+    physical scan.
+    """
+    klal_pages, untrusted_ids = trusted_klal_pages(alignment_path, max_klal)
+
+    trusted_klals = set()
+    for ids in klal_pages.values():
+        trusted_klals.update(ids)
+
+    if regions_path is None:
+        regions_path = repo_path("klal_page_regions.json")
+    regions = load_json(regions_path)
+
+    for kid_str, region in regions.items():
+        kid = int(kid_str)
+        if kid not in trusted_klals:
+            continue
+        for cont in region.get("continuations", []):
+            page = cont["page"]
+            klal_pages.setdefault(page, [])
+            if kid not in klal_pages[page]:
+                klal_pages[page].append(kid)
+
+    # Sort each page's klal list by ascending klal_id. Continuation klals
+    # always have a lower klal_id than start klals on the same page (they
+    # started earlier, on a previous page), so ascending klal_id matches
+    # physical print order on the scan - which is what SequenceMatcher
+    # needs for the word stream to align with the DocAI token stream.
+    for page in klal_pages:
+        klal_pages[page].sort()
+
+    return klal_pages, untrusted_ids

@@ -377,10 +377,13 @@ function renderKlalBody(block, k) {
       span.textContent = w;
       span.title = corr.reasoning || '';
       span.onclick = () => {
-        // Show the klal's scan page (the ai_flag has no per-word bbox, but
-        // seeing the page is better than seeing nothing - mirrors what
-        // attachWordHandlers does for correction candidates via corr.page).
-        if (k.page) showPage(k.page, k.klal_id);
+        // Show the klal's scan page with focused ring on the ai_flag's word.
+        // Respect manualPageLock: if the reviewer manually navigated to a
+        // continuation page, don't snap back to the start page.
+        if (!manualPageLock) {
+          const targetPage = corr.page || k.page;
+          if (targetPage) showPage(targetPage, k.klal_id, corr);
+        }
         openManualCorrectionPanel(k.klal_id, i, w, corr);
       };
       body.appendChild(span);
@@ -396,7 +399,7 @@ function renderKlalBody(block, k) {
         ? `DocAI: ${corr.docai_reading} | Tesseract: ${corr.tesseract_reading || '—'}`
         : '';
       span.onclick = () => {
-        if (corr.page) showPage(corr.page, k.klal_id, corr);
+        if (!manualPageLock && corr.page) showPage(corr.page, k.klal_id, corr);
         openWitnessPanel(corr);
       };
       body.appendChild(span);
@@ -457,7 +460,7 @@ function renderKlalBody(block, k) {
       const span = document.createElement('span');
       span.className = 'plain-word';
       span.textContent = w;
-      span.onclick = () => openManualCorrectionPanel(k.klal_id, i, w, null);
+      span.onclick = () => { clearScanFocus(); openManualCorrectionPanel(k.klal_id, i, w, null); };
       body.appendChild(span);
     }
     body.appendChild(document.createTextNode(' '));
@@ -514,7 +517,13 @@ function attachWordHandlers(el, klalId, corr, isGap) {
   el.addEventListener('mouseleave', () => { tooltip.style.display = 'none'; });
   el.addEventListener('click', () => {
     tooltip.style.display = 'none';
-    if (corr.page) showPage(corr.page, klalId, corr);
+    // Each correction carries its own page field — the physical scan page
+    // where its bbox lives (may be a continuation page for klals that span
+    // multiple pages). Navigate there so the bbox is found.
+    if (!manualPageLock) {
+      const targetPage = corr.page || (klalById[klalId] && klalById[klalId].page);
+      if (targetPage) showPage(targetPage, klalId, corr);
+    }
     openCandidatePanel(klalId, corr);
   });
 }
@@ -540,14 +549,14 @@ const manualPanel = document.getElementById('manual-panel');
 const manualPanelBody = document.getElementById('manual-panel-body');
 
 function setupPanels() {
-  document.getElementById('candidate-panel-close').onclick = closePanels;
-  document.getElementById('klal-flag-panel-close').onclick = closePanels;
-  document.getElementById('punctuation-panel-close').onclick = closePanels;
-  document.getElementById('witness-panel-close').onclick = closePanels;
-  document.getElementById('manual-panel-close').onclick = closePanels;
-  backdrop.onclick = closePanels;
+  document.getElementById('candidate-panel-close').onclick = dismissPanels;
+  document.getElementById('klal-flag-panel-close').onclick = dismissPanels;
+  document.getElementById('punctuation-panel-close').onclick = dismissPanels;
+  document.getElementById('witness-panel-close').onclick = dismissPanels;
+  document.getElementById('manual-panel-close').onclick = dismissPanels;
+  backdrop.onclick = dismissPanels;
   window.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closePanels();
+    if (e.key === 'Escape') dismissPanels();
   });
 }
 function closePanels() {
@@ -557,6 +566,13 @@ function closePanels() {
   punctuationPanel.classList.remove('open');
   witnessPanel.classList.remove('open');
   manualPanel.classList.remove('open');
+}
+// Dismiss panels AND clear scan focus — only for explicit user dismissals
+// (Escape, backdrop click), NOT for openPanel()'s internal closePanels() call
+// which fires before every panel switch.
+function dismissPanels() {
+  closePanels();
+  clearScanFocus();
 }
 function openPanel(panel) {
   closePanels();
@@ -934,7 +950,7 @@ async function openManualCorrectionPanel(klalId, wordIndex, word, existing) {
   const isAiFlag = existing && existing.opcode === 'ai_flag';
   const markedForDeletion = !isAiFlag && existing && existing.current_decision.chosen_text === '';
   const currentText = existing && !isAiFlag && !markedForDeletion ? existing.current_decision.chosen_text : '';
-  const currentNote = existing && existing.current_decision.note ? existing.current_decision.note : '';
+  const currentNote = existing && existing.current_decision && existing.current_decision.note ? existing.current_decision.note : '';
 
   manualPanelBody.innerHTML = `
     <div class="panel-section">
@@ -1301,6 +1317,17 @@ let scanFocusKlalId = null; // which klal's region/continuation to highlight, in
 let _showPageGen = 0; // generation counter - incremented on every showPage call so stale
                       // async continuations can detect they've been superseded and abort
                       // before appending boxes to a container that already belongs to a newer call.
+// When true, setActiveKlal()'s showPage() call is suppressed - prevents scroll-
+// driven klal changes from snapping the scan back to a klal's start page after
+// the reviewer explicitly navigated to a continuation or adjacent page via the
+// prev/next buttons.  Reset when the reviewer clicks a word in the text pane or
+// a nav item, both of which express an explicit intent about which page to show.
+let manualPageLock = false;
+// Focused box that showPage() wants scrolled into view once the new page image
+// has loaded and applyZoom has reset the scroll position. Checked inside the
+// pageImg 'load' handler (setupZoomPan) which fires after applyZoom runs.
+// Set to null when consumed or when a newer showPage supersedes the old focus.
+let _pendingScrollToBox = null;
 const pageImg = document.getElementById('page-img');
 const hlContainer = document.getElementById('hl-container');
 const pageIndicator = document.getElementById('page-indicator');
@@ -1324,7 +1351,20 @@ function applyZoom(anchorRatioX, anchorRatioY) {
 function setupZoomPan() {
   document.getElementById('zoom-in').onclick = () => { zoomLevel = Math.min(3, zoomLevel + 0.25); applyZoom(); };
   document.getElementById('zoom-out').onclick = () => { zoomLevel = Math.max(0.3, zoomLevel - 0.25); applyZoom(); };
-  pageImg.addEventListener('load', () => applyZoom(0.5, 0));
+  pageImg.addEventListener('load', () => {
+    applyZoom(0.5, 0);
+    // applyZoom queues a rAF that scrolls to the top of the new page. If a
+    // focused word box is pending, queue our scroll AFTER it so we win: both
+    // rAFs run in the same frame (registration order), so applyZoom's scroll
+    // runs first and ours overwrites it.
+    if (_pendingScrollToBox) {
+      const box = _pendingScrollToBox;
+      _pendingScrollToBox = null;
+      requestAnimationFrame(() =>
+        box.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' })
+      );
+    }
+  });
 
   let panning = false, panStartX = 0, panStartY = 0, panScrollLeft = 0, panScrollTop = 0;
   scanViewer.addEventListener('mousedown', (e) => {
@@ -1345,9 +1385,28 @@ function setupZoomPan() {
   document.getElementById('page-nav-next').onclick = () => goToPageOffset(1);
 }
 
+// Apply focused-word highlight styles directly via JS (setProperty with
+// 'important' priority) so they work regardless of browser CSS cache state.
+// Thick ring in the box's own state color; background is left unchanged so
+// the scan text under the box remains fully readable.
+function applyFocusStyle(box) {
+  const color = box.style.getPropertyValue('--hl-color') || 'currentColor';
+  box.style.setProperty('box-shadow', `0 0 0 5px ${color}`, 'important');
+  box.style.setProperty('z-index', '5');
+  box.style.setProperty('opacity', '1', 'important');
+}
+
+// Redraw the current scan page without any focused word, restoring all boxes
+// to their normal opacity/style. Called when the reviewer clicks away from a
+// focused word (plain word click, panel close, etc.).
+function clearScanFocus() {
+  if (currentPage != null) showPage(currentPage, scanFocusKlalId);
+}
+
 async function showPage(page, focusKlalId, focusCorr = null) {
   const gen = ++_showPageGen;
-  if (page !== currentPage) {
+  const pageChanged = page !== currentPage;
+  if (pageChanged) {
     currentPage = page;
     pageImg.src = `/images/pdf_pages/page_${page}.png`;
     pageIndicator.textContent = 'Page ' + page;
@@ -1362,12 +1421,12 @@ async function showPage(page, focusKlalId, focusCorr = null) {
   // appending ours would corrupt the display (stale region box from a different
   // klal/page appearing behind the correct word boxes).
   if (gen !== _showPageGen) return;
-  // Only draw the klal region box on the klal's START page (not continuations).
-  // Continuation pages often fill the entire page (e.g. klal 30 page 24:
-  // bbox covers 93% of the page), so the region box adds no spatial
-  // information and just clutters the display behind the word-level boxes.
+  // Only draw the klal region box on the klal's START page (not continuations),
+  // and only when the reviewer hasn't clicked a specific word to focus - when
+  // focusCorr is set, the yellow .focused box is the landmark; drawing the
+  // large gold region box on top of it just adds noise.
   let r = null;
-  if (focusKlal && focusKlal.page === page) r = focusKlal.region;
+  if (!focusCorr && focusKlal && focusKlal.page === page) r = focusKlal.region;
   if (r) {
     const box = document.createElement('div');
     box.className = 'hl-current-klal';
@@ -1380,11 +1439,16 @@ async function showPage(page, focusKlalId, focusCorr = null) {
 
   const pageItems = await fetch('/api/page/' + page).then(r => r.json());
   if (gen !== _showPageGen) return; // superseded while awaiting /api/page/
+  let focusedBox = null;
   pageItems.forEach(c => {
     if (!c.bbox) return;
     // Is this the specific word the reviewer clicked in the text pane?
+    // Branch on focusCorr.opcode (the thing the user clicked) rather than
+    // c.kind (the scan-page item) so the lookup key is always driven by the
+    // source: witness items key on docai_token_index, everything else on
+    // word_index.  Both are integers from the same JSON source, no cast needed.
     const isFocused = focusCorr && c.klal_id === focusKlalId && (
-      c.kind === 'witness'
+      focusCorr.opcode === 'witness'
         ? c.docai_token_index === focusCorr.docai_token_index
         : c.word_index === focusCorr.word_index
     );
@@ -1409,6 +1473,7 @@ async function showPage(page, focusKlalId, focusCorr = null) {
         : `${STATE_META.open.label} (tier ${c.tier}) - click to decide`;
       box.addEventListener('click', () => openWitnessPanel(c));
       hlContainer.appendChild(box);
+      if (isFocused) { focusedBox = box; applyFocusStyle(box); }
       return;
     }
     const box = document.createElement('div');
@@ -1423,7 +1488,36 @@ async function showPage(page, focusKlalId, focusCorr = null) {
     box.style.height = ((c.bbox.y2 - c.bbox.y1) * 100) + '%';
     attachWordHandlers(box, c.klal_id, c);
     hlContainer.appendChild(box);
+    if (isFocused) { focusedBox = box; applyFocusStyle(box); }
   });
+
+  // Only dim other boxes if we actually found a focused box. If focusCorr was
+  // set but nothing matched (e.g. an ai_flag with no bbox in api_page), leave
+  // all boxes at normal opacity rather than dimming everything to nothing.
+  hlContainer.classList.toggle('has-focus', !!focusedBox);
+
+  if (focusedBox) {
+    // applyZoom(0.5, 0) fires on image load and resets scroll to the top of
+    // the new page.  We need to scroll the focused box into view AFTER that.
+    // Two cases:
+    // 1. Page changed: set _pendingScrollToBox; the load handler in
+    //    setupZoomPan will consume it and queue a rAF AFTER applyZoom's rAF.
+    //    Using a global rather than a { once: true } load listener avoids the
+    //    race where a cached image loads before we finish awaiting the page
+    //    items and ever get to register our listener.
+    // 2. Same page: image already loaded (load won't fire again); use a
+    //    double-rAF so we run after any layout passes.
+    if (pageChanged && !pageImg.complete) {
+      _pendingScrollToBox = focusedBox;
+    } else {
+      _pendingScrollToBox = null;
+      requestAnimationFrame(() =>
+        focusedBox.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' })
+      );
+    }
+  } else {
+    _pendingScrollToBox = null; // superseded focus, cancel any pending scroll
+  }
 }
 
 // Witness-queue pages (24/37/40) are continuation-only - no klal marker of
@@ -1455,6 +1549,7 @@ function goToPageOffset(offset) {
   if (idx === -1) return;
   const targetPage = pages[idx + offset];
   if (targetPage == null) return;
+  manualPageLock = true; // suppress scroll-driven setActiveKlal from snapping back
   showPage(targetPage, scanFocusKlalId);
 }
 
@@ -1467,6 +1562,7 @@ function jumpTo(klalId) {
   const block = document.getElementById('klal-block-' + klalId);
   if (!block) return;
   suppressObserverScroll = true;
+  manualPageLock = false; // nav-panel click = explicit klal intent; let setActiveKlal show its page
   lastActiveKlalId = klalId;
   setActiveKlal(klalId);
   mountKlal(klalId);
@@ -1496,7 +1592,11 @@ function setActiveKlal(klalId) {
   const k = klalById[klalId];
   if (k) {
     klalIndicator.textContent = 'כלל ' + klalId;
-    if (k.page) showPage(k.page, klalId);
+    // manualPageLock: reviewer navigated the scan manually via prev/next -
+    // don't snap back to this klal's start page just because the text pane
+    // scrolled to it.  The lock is cleared when a word is clicked in the
+    // text pane or a nav item is jumped to.
+    if (k.page && !manualPageLock) showPage(k.page, klalId);
   }
 }
 

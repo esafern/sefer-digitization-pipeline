@@ -134,15 +134,17 @@ def union_bbox(tokens):
 
 def load_trusted_klal_pages():
     """Group klal_ids by matched_page, trusted entries only, klal_id order
-    preserved within each page (matches print order).
+    preserved within each page (matches print order). Includes continuation
+    pages so that klals spanning multiple pages get correction candidates
+    generated for ALL their pages, not just the start page.
 
-    Body moved to corpus_io.trusted_klal_pages 2026-08-17 - build_klal_page_
-    regions.py had the same loop, differing only in that it discarded the
-    untrusted list. Kept as a thin wrapper so this module's own
-    ALIGNMENT_PATH/PART1_MAX_KLAL remain what the function reads (and stay
-    monkeypatchable), rather than the shared module's defaults.
+    Body moved to corpus_io 2026-08-17; switched from trusted_klal_pages to
+    trusted_klal_pages_with_continuations 2026-08-19 to fix the 56 multi-page
+    klalim whose continuation-page words never generated candidates. Kept as
+    a thin wrapper so this module's own ALIGNMENT_PATH/PART1_MAX_KLAL remain
+    what the function reads (and stay monkeypatchable).
     """
-    return cio.trusted_klal_pages(ALIGNMENT_PATH, PART1_MAX_KLAL)
+    return cio.trusted_klal_pages_with_continuations(ALIGNMENT_PATH, PART1_MAX_KLAL)
 
 
 def main():

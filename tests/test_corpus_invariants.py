@@ -48,10 +48,17 @@ import importlib.util
 import json
 import os
 import re
+import sys
 
 import pytest
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# pipeline/ and tools/ modules use bare `import corpus_io` etc. - they need
+# their directories on sys.path for importlib's exec_module to resolve those
+# imports. Same approach as test_pipeline_logic.py.
+sys.path.insert(0, os.path.join(REPO, "pipeline"))
+sys.path.insert(0, os.path.join(REPO, "tools"))
 PART_FILES = ["part1.json", "part2.json", "part3.json"]
 
 NO_TEXT_TITLE = "(no text available)"

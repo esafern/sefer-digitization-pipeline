@@ -24,6 +24,7 @@
 # Run: python3 review_server.py [--port 8420]
 # Then open http://127.0.0.1:8420/ in a browser.
 import argparse
+import difflib
 import json
 import os
 import re
@@ -171,6 +172,40 @@ def _trusted_page(alignment, klal_id):
     return r.get("matched_page") if r.get("trusted") else None
 
 
+def _klal_all_pages(klal_id, regions=None):
+    """All pages a klal appears on (start + continuations), in print order."""
+    if regions is None:
+        regions = _load_regions()
+    region = regions.get(str(klal_id), {})
+    pages = []
+    start = region.get("page")
+    if start is not None:
+        pages.append(start)
+    for cont in region.get("continuations", []):
+        pages.append(cont["page"])
+    return pages
+
+
+def _klals_on_page(page_num, alignment, regions=None):
+    """All klal_ids whose scan content (start or continuation) is on page_num.
+
+    Combines the alignment's start-page mapping with klal_page_regions.json's
+    continuation data so api_page() can serve corrections for klals that
+    continue onto this page, not just klals that start here."""
+    if regions is None:
+        regions = _load_regions()
+    klals = set()
+    for kid, r in alignment.items():
+        if r.get("trusted") and r.get("matched_page") == page_num:
+            klals.add(kid)
+    for kid_str, region in regions.items():
+        kid = int(kid_str)
+        for cont in region.get("continuations", []):
+            if cont["page"] == page_num:
+                klals.add(kid)
+    return klals
+
+
 def _word_matches(words, word_index, expected_word):
     """Is `expected_word` still the word sitting at `word_index`?
 
@@ -228,6 +263,45 @@ def _general_klal_flag_current(klal_id):
     return h[-1] if h else None
 
 
+_corpus_bbox_cache = {}  # (klal_id, page) -> {word_index -> bbox_dict}
+
+
+def _corpus_word_bboxes(klal_id, words, page):
+    """Map corpus word_index -> scan bbox for words on a given page.
+
+    Uses the same SequenceMatcher alignment as
+    tools/patch_witness_word_indices.py (corpus-to-DocAI token matching)
+    but in the reverse direction: given a corpus word_index, find the
+    DocAI token it aligns to and return that token's bounding box.
+    Cached per (klal_id, page) since the alignment is deterministic."""
+    key = (klal_id, page)
+    if key in _corpus_bbox_cache:
+        return _corpus_bbox_cache[key]
+
+    norm = cio.hebrew_letters_only
+    toks = cio.load_docai_page(page, cio.DOCAI_DIR)
+    if not toks:
+        _corpus_bbox_cache[key] = {}
+        return {}
+
+    dtoks = [t for t in toks if norm(t["text"])]
+    dwords = [norm(t["text"]) for t in dtoks]
+    corpus_norm = [norm(w) for w in words]
+
+    sm = difflib.SequenceMatcher(None, corpus_norm, dwords, autojunk=False)
+    result = {}
+    for corpus_start, dtok_start, size in sm.get_matching_blocks():
+        for offset in range(size):
+            tok = dtoks[dtok_start + offset]
+            if tok.get("x1") is not None:
+                result[corpus_start + offset] = {
+                    "x1": tok["x1"], "y1": tok["y1"],
+                    "x2": tok["x2"], "y2": tok["y2"],
+                }
+    _corpus_bbox_cache[key] = result
+    return result
+
+
 def _word_level_ai_flags(klal_id, words):
     """klal_flag decisions naming a specific word_index, synthesized into
     corrections-shaped entries so the frontend highlights them. Only the
@@ -240,19 +314,35 @@ def _word_level_ai_flags(klal_id, words):
         widx = r.get("word_index")
         if widx is not None:
             by_word[widx] = r  # later (later-appended) wins
+    if not by_word:
+        return []
+
+    # Look up scan bboxes from DocAI tokens for ai_flag words. A klal may
+    # span multiple pages (start + continuations); look up bboxes on each
+    # page so continuation-page words get bboxes too.
+    pages = _klal_all_pages(klal_id)
+    bboxes = {}  # word_index -> (bbox, page)
+    for page in pages:
+        page_bboxes = _corpus_word_bboxes(klal_id, words, page)
+        for wi, bbox in page_bboxes.items():
+            bboxes[wi] = (bbox, page)
+
     out = []
     for word_index, rec in sorted(by_word.items()):
         if not rec.get("needs_revisit"):
             continue
         if not (0 <= word_index < len(words)):
             continue
+        bbox_page = bboxes.get(word_index)
+        bbox = bbox_page[0] if bbox_page else None
+        page = bbox_page[1] if bbox_page else None
         out.append({
             "word_index": word_index,
             "opcode": "ai_flag",
             "docai_reading": None,
             "final_text": None,
-            "page": None,
-            "bbox": None,
+            "page": page,
+            "bbox": bbox,
             "vision_selected": None,
             "vision_transcription": None,
             "confidence": None,
@@ -612,16 +702,20 @@ def api_decision_history(klal_id, word_index):
 
 def api_page(page_num):
     _, klalim = _load_klalim()
+    klalim_by_id = {k["klal_id"]: k for k in klalim}
     alignment = _load_alignment()
+    regions = _load_regions()
     corrections = _load_corrections()
     decided = rd.all_current("candidate_choice")
+    # All klals whose scan content (start or continuation) touches this page.
+    page_klals = _klals_on_page(page_num, alignment, regions)
     out = []
-    for k in klalim:
-        kid = k["klal_id"]
-        if _trusted_page(alignment, kid) != page_num:
-            continue
+    for kid in page_klals:
+        # Filter corrections by their own page field - a klal spanning pages
+        # 15-16 has corrections with page=15 and page=16; only serve the ones
+        # belonging to the requested page.
         for c in corrections.get(str(kid), []):
-            if not c.get("bbox"):
+            if not c.get("bbox") or c.get("page") != page_num:
                 continue
             entry = _merge_decision(c, kid, decided)
             entry["klal_id"] = kid
@@ -643,6 +737,26 @@ def api_page(page_num):
         entry["current_decision"] = witness_decided.get(
             (w["klal_id"], w["docai_token_index"]))
         out.append(entry)
+
+    # AI-flagged words with bboxes (looked up from DocAI tokens via
+    # _corpus_word_bboxes). These have no corrections_part1.json entry of
+    # their own, so they're not caught by the corrections loop above.
+    # Only include ones whose bbox doesn't overlap with an existing
+    # correction at the same word_index (if both exist, the correction's
+    # box is already drawn and the focus matching works by word_index).
+    for kid in page_klals:
+        k = klalim_by_id.get(kid)
+        if not k:
+            continue
+        corr_word_indices = {c["word_index"] for c in corrections.get(str(kid), [])
+                            if c.get("bbox") and c.get("page") == page_num}
+        words = (k.get("clean_text") or "").split(" ")
+        for af in _word_level_ai_flags(kid, words):
+            if af.get("bbox") and af.get("page") == page_num and af["word_index"] not in corr_word_indices:
+                entry = dict(af)
+                entry["klal_id"] = kid
+                entry["kind"] = "correction"  # reuse correction rendering
+                out.append(entry)
     return out
 
 
