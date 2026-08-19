@@ -319,6 +319,18 @@ function renderKlalBody(block, k) {
   body.className = 'klal-body';
   body.innerHTML = '';
 
+  // Witness disagreements (DocAI vs Tesseract on continuation pages) have no
+  // corpus word_index and are not highlighted in the text — they only appear
+  // as colored boxes in the scan pane. Show a banner so the reviewer knows
+  // the nav's open count is driven by scan items, not missing text highlights.
+  if (k.witness_count > 0) {
+    const pages = (k.witness_pages || []).join(', ');
+    const banner = document.createElement('div');
+    banner.className = 'witness-banner';
+    banner.innerHTML = `<b>${k.witness_count}</b> scan-reading disagreement${k.witness_count === 1 ? '' : 's'} on page${k.witness_pages && k.witness_pages.length > 1 ? 's' : ''} ${pages} — reviewable in the scan pane only (no text positions available).`;
+    body.appendChild(banner);
+  }
+
   const words = (k.clean_text || '').split(' ');
   const byIndex = {};
   k.corrections.forEach(c => { if (c.opcode !== 'delete') byIndex[c.word_index] = c; });
@@ -1307,11 +1319,12 @@ async function showPage(page, focusKlalId) {
   // actually being shown, so manually flipping pages (see
   // goToPageOffset) still highlights the right region instead of showing
   // nothing once you've moved off the klal's start page.
+  // Only draw the klal region box on the klal's START page (not continuations).
+  // Continuation pages often fill the entire page (e.g. klal 30 page 24:
+  // bbox covers 93% of the page), so the region box adds no spatial
+  // information and just clutters the display behind the word-level boxes.
   let r = null;
-  if (focusKlal) {
-    if (focusKlal.page === page) r = focusKlal.region;
-    else r = (focusKlal.continuations || []).find(c => c.page === page)?.bbox;
-  }
+  if (focusKlal && focusKlal.page === page) r = focusKlal.region;
   if (r) {
     const box = document.createElement('div');
     box.className = 'hl-current-klal';

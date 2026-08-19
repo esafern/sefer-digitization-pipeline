@@ -484,6 +484,7 @@ def api_klal(klal_id):
     regions = _load_regions()
     region_entry = regions.get(str(klal_id), {})
     flag_state = _general_klal_flag_current(klal_id)
+    klal_witness = [w for w in _load_witness_queue() if w["klal_id"] == klal_id]
 
     punct_candidates = _load_punctuation_candidates().get(str(klal_id), [])
     # One all_current() map rather than a per-candidate current_for() - the
@@ -524,6 +525,13 @@ def api_klal(klal_id):
         "punctuation": punctuation,
         "needs_revisit": bool(flag_state and flag_state.get("needs_revisit")),
         "flag_note": flag_state.get("note") if flag_state else None,
+        # Witness disagreements have no corpus word_index - they live on the
+        # scan's continuation pages only and are never highlighted in the text
+        # pane. Expose the count + pages so renderKlalBody can show an
+        # informational banner instead of silently showing 0 text highlights
+        # for a klal whose nav badge is driven entirely by these scan items.
+        "witness_count": len(klal_witness),
+        "witness_pages": sorted({w["page"] for w in klal_witness if w.get("page")}),
     }
 
 

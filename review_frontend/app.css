@@ -205,6 +205,17 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
    yet, yellow dotted = the vision pass confirmed the current text without
    a human, green = a human recorded a decision (always wins, even over a
    machine "confirmed" verdict). */
+.witness-banner {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  color: var(--ink-soft);
+  background: #fffbeb;
+  border: 1px solid #f6e05e;
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  margin-bottom: 10px;
+  line-height: 1.5;
+}
 .flag-word.state-open { border-bottom: 3px solid var(--danger); }
 /* ADDED 2026-08-17: a klal_flag naming a specific word_index (an AI pass
    like detect_real_word_substitution.py, not the vision-adjudication
