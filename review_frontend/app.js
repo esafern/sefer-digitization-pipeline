@@ -195,6 +195,13 @@ function buildLegend() {
     row.innerHTML = `<i style="${shape}"></i><span>${label}</span><b class="legend-count">${totals[state]}</b>`;
     legend.appendChild(row);
   });
+  // AI-flagged words render with their own purple dashed underline style
+  // (state-ai-flag in app.css) distinct from the three main states above.
+  // Add a key so reviewers know what the colour means.
+  const aiRow = document.createElement('div');
+  aiRow.className = 'legend-row';
+  aiRow.innerHTML = `<i style="border-bottom:3px dashed #805ad5;background:transparent;"></i><span>AI-Flagged</span>`;
+  legend.appendChild(aiRow);
 }
 
 // ---------- nav pane ----------
@@ -346,7 +353,13 @@ function renderKlalBody(block, k) {
       span.className = 'flag-word state-ai-flag';
       span.textContent = w;
       span.title = corr.reasoning || '';
-      span.onclick = () => openManualCorrectionPanel(k.klal_id, i, w, corr);
+      span.onclick = () => {
+        // Show the klal's scan page (the ai_flag has no per-word bbox, but
+        // seeing the page is better than seeing nothing - mirrors what
+        // attachWordHandlers does for correction candidates via corr.page).
+        if (k.page) showPage(k.page, k.klal_id);
+        openManualCorrectionPanel(k.klal_id, i, w, corr);
+      };
       body.appendChild(span);
     } else if (corr && corr.opcode === 'manual') {
       // Reviewer-flagged word (2026-08-13, no machine candidate behind it -
@@ -912,7 +925,8 @@ async function openManualCorrectionPanel(klalId, wordIndex, word, existing) {
       <textarea id="manual-correction-note" rows="3" placeholder="Why? e.g. &quot;scan confirms X, not Y&quot;">${escapeHtml(currentNote)}</textarea>
     </div>
     <div class="panel-section">
-      <button class="panel-btn" id="save-manual-correction-btn">Save</button>
+      <button class="panel-btn" id="save-manual-correction-btn">Save correction</button>
+      ${isAiFlag ? `<button class="panel-btn secondary" id="accept-current-text-btn">Accept current text</button>` : ''}
       <button class="panel-btn secondary" id="delete-manual-word-btn">Delete this word</button>
     </div>
     ${existing ? `
@@ -935,6 +949,20 @@ async function openManualCorrectionPanel(klalId, wordIndex, word, existing) {
     const freshCorr = await saveManualDecision(klalId, wordIndex, word, text, note);
     if (freshCorr) openManualCorrectionPanel(klalId, wordIndex, word, freshCorr);
   };
+
+  // "Accept current text" — dismisses an AI flag without a text change.
+  // Records a manual_correction with chosen_text == the current word (a
+  // deliberate no-op: the reviewer looked at it, the text is correct as-is).
+  // apply_reviewer_decisions.py handles this correctly: replace word with
+  // itself, net change to part1.json is zero, apply_event is recorded.
+  if (isAiFlag) {
+    document.getElementById('accept-current-text-btn').onclick = async () => {
+      const note = document.getElementById('manual-correction-note').value.trim();
+      const freshCorr = await saveManualDecision(klalId, wordIndex, word, word,
+        note || 'AI flag reviewed — current text confirmed');
+      if (freshCorr) openManualCorrectionPanel(klalId, wordIndex, word, freshCorr);
+    };
+  }
 
   // Arm-then-confirm in the panel itself rather than a native confirm()
   // dialog - consistent with the rest of this app (no other action here
