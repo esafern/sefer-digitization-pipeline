@@ -72,6 +72,9 @@ function wordState(corr) {
   if (corr.opcode === 'ai_flag') return 'open';
   if (corr.current_decision) return 'human';
   if (corr.flag === 'current_text_confirmed') return 'machine';
+  // Witness items: vision pass selected a reading -> machine-resolved;
+  // no vision result yet -> open.
+  if (corr.opcode === 'witness') return corr.vision_selected ? 'machine' : 'open';
   return 'open';
 }
 // The word's final display color/underline follows wordState() above (a
@@ -319,15 +322,19 @@ function renderKlalBody(block, k) {
   body.className = 'klal-body';
   body.innerHTML = '';
 
-  // Witness disagreements (DocAI vs Tesseract on continuation pages) have no
-  // corpus word_index and are not highlighted in the text — they only appear
-  // as colored boxes in the scan pane. Show a banner so the reviewer knows
-  // the nav's open count is driven by scan items, not missing text highlights.
-  if (k.witness_count > 0) {
+  // Most witness items now appear as highlighted words in the text (via the
+  // word_index patch). A small number (items whose DocAI token fell in an
+  // alignment gap) have no word_index and remain scan-only. Show a banner
+  // only for those, so the reviewer knows there are a few items they must
+  // find in the scan pane manually. k.witness_count is the TOTAL; the text
+  // highlights cover the mapped ones; the difference is scan-only.
+  const mappedWitnessCount = k.corrections.filter(c => c.opcode === 'witness').length;
+  const unmappedWitness = (k.witness_count || 0) - mappedWitnessCount;
+  if (unmappedWitness > 0) {
     const pages = (k.witness_pages || []).join(', ');
     const banner = document.createElement('div');
     banner.className = 'witness-banner';
-    banner.innerHTML = `<b>${k.witness_count}</b> scan-reading disagreement${k.witness_count === 1 ? '' : 's'} on page${k.witness_pages && k.witness_pages.length > 1 ? 's' : ''} ${pages} — reviewable in the scan pane only (no text positions available).`;
+    banner.innerHTML = `<b>${unmappedWitness}</b> scan-reading disagreement${unmappedWitness === 1 ? '' : 's'} on page${k.witness_pages && k.witness_pages.length > 1 ? 's' : ''} ${pages} could not be mapped to text positions — reviewable in the scan pane only.`;
     body.appendChild(banner);
   }
 
@@ -372,6 +379,22 @@ function renderKlalBody(block, k) {
         // attachWordHandlers does for correction candidates via corr.page).
         if (k.page) showPage(k.page, k.klal_id);
         openManualCorrectionPanel(k.klal_id, i, w, corr);
+      };
+      body.appendChild(span);
+    } else if (corr && corr.opcode === 'witness') {
+      // DocAI-vs-Tesseract disagreement on a continuation page. word_index was
+      // computed from the page's DocAI token stream via sequence alignment in
+      // tools/patch_witness_word_indices.py. Same tri-state coloring as any
+      // other flagged word; opens the witness panel (not the candidate panel).
+      const span = document.createElement('span');
+      span.className = 'flag-word state-' + wordState(corr);
+      span.textContent = w;
+      span.title = corr.docai_reading
+        ? `DocAI: ${corr.docai_reading} | Tesseract: ${corr.tesseract_reading || '—'}`
+        : '';
+      span.onclick = () => {
+        if (corr.page) showPage(corr.page, k.klal_id);
+        openWitnessPanel(corr);
       };
       body.appendChild(span);
     } else if (corr && corr.opcode === 'manual') {

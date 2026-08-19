@@ -481,10 +481,41 @@ def api_klal(klal_id):
     # an AI flag on the same word_index is now redundant, don't also show it.
     corrections.extend(f for f in _word_level_ai_flags(klal_id, words)
                         if f["word_index"] not in manual_word_indices)
+
+    # Witness disagreements that have a corpus word_index (patched in by
+    # tools/patch_witness_word_indices.py) are added as 'witness' entries so
+    # the text pane can highlight them alongside other flagged words.
+    # word_index=None items (9/419 unmapped) are scan-only and stay that way.
+    witness_decided = rd.all_current("witness_choice")
+    klal_witness = []
+    for w in _load_witness_queue():
+        if w["klal_id"] != klal_id:
+            continue
+        klal_witness.append(w)
+        wi = w.get("word_index")
+        if wi is None or not (0 <= wi < len(words)):
+            continue
+        if wi in manual_word_indices:
+            continue
+        corrections.append({
+            "word_index": wi,
+            "opcode": "witness",
+            "docai_reading": w.get("docai_reading"),
+            "tesseract_reading": w.get("tesseract_reading"),
+            "vision_selected": w.get("vision_selected"),
+            "vision_transcription": w.get("vision_transcription"),
+            "final_text": None,
+            "page": w.get("page"),
+            "bbox": w.get("bbox"),
+            "confidence": w.get("vision_confidence"),
+            "reasoning": None,
+            "flag": "witness",
+            "current_decision": witness_decided.get((klal_id, w["docai_token_index"])),
+        })
+
     regions = _load_regions()
     region_entry = regions.get(str(klal_id), {})
     flag_state = _general_klal_flag_current(klal_id)
-    klal_witness = [w for w in _load_witness_queue() if w["klal_id"] == klal_id]
 
     punct_candidates = _load_punctuation_candidates().get(str(klal_id), [])
     # One all_current() map rather than a per-candidate current_for() - the
