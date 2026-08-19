@@ -2743,9 +2743,26 @@ def _patch_klalim_deps(monkeypatch, klalim_by_id, ai_flags_by_klal=None,
     monkeypatch.setattr(rs, "_load_witness_queue", lambda: [])
     monkeypatch.setattr(rs.rd, "flagged_klalim", lambda: [])
     manual_decided = manual_decided or {}
-    monkeypatch.setattr(rs.rd, "all_current",
-                        lambda dtype: manual_decided if dtype == "manual_correction" else {})
     ai_flags_by_klal = ai_flags_by_klal or {}
+    # api_klalim counts ai_flags by iterating all_current("klal_flag")
+    # directly (not via _word_level_ai_flags), so the "klal_flag" return
+    # must carry the same word-level records the ai_flags_by_klal fixture
+    # describes. Each ai_flag entry becomes a (klal_id, word_index) ->
+    # record in the all_current map, with needs_revisit=True (matching what
+    # _word_level_ai_flags filters for in the real code path).
+    klal_flag_decided = {}
+    for kid, flags in ai_flags_by_klal.items():
+        for f in flags:
+            klal_flag_decided[(kid, f["word_index"])] = {
+                "needs_revisit": True, "word_index": f["word_index"],
+            }
+    def _mock_all_current(dtype):
+        if dtype == "manual_correction":
+            return manual_decided
+        if dtype == "klal_flag":
+            return klal_flag_decided
+        return {}
+    monkeypatch.setattr(rs.rd, "all_current", _mock_all_current)
     monkeypatch.setattr(rs, "_word_level_ai_flags",
                         lambda kid, words: ai_flags_by_klal.get(kid, []))
 
