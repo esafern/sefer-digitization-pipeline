@@ -1,0 +1,107 @@
+# Dicta OCR evaluation — Berlin pages 18–20
+
+Testing whether **Dicta's Hebrew OCR** (<https://ocr.dicta.org.il>) is worth
+adopting as a second/third witness engine for this pipeline.
+
+## TL;DR
+
+**Why.** The current second-witness engine, Tesseract, is nearly worthless:
+across 419 disagreements it was right **16 times (3.8%)** while DocAI was right
+91.2%. It fails because it's a *weaker engine on the same scan* — it disagrees
+by being wrong. Dicta is a genuinely different engine, trained on Hebrew, and
+**reads Rashi script**, which is where DocAI is weakest.
+
+**The test set is already adjudicated**, so this is a measurement, not an
+impression. `yad-malachi-berlin-sample.pdf` (3 pages, 1.0 MB, full resolution,
+git-tracked at repo root) = source PDF pages **18, 19, 20** = **klalim 8–22**.
+
+| | |
+|---|---:|
+| Klalim | 15 (8–22) |
+| Ground-truth words | 2,356 |
+| Correction candidates | 23 |
+| …still open | 11 |
+| Human decisions on record | 9 |
+
+**Ground truth** is `groundtruth_klal_8_22.txt` in this directory — the
+`clean_text` from `part1.json`, one section per klal, headed by `klal_id`,
+gematria marker and title so Dicta's output can be aligned section by section.
+
+**The three questions**, in descending order of what they'd change:
+
+1. Does Dicta **agree with the corpus on the 12 settled candidates**? Agreement
+   from a genuinely independent engine is the corroboration Lesson 9 asks for
+   and Tesseract never supplied.
+2. Does it **break any of the 11 still-open ones**? The immediate practical
+   payoff — a third reading on words nobody has ruled on.
+3. Does it **find anything neither DocAI nor the corpus has**? Most
+   interesting, least likely.
+
+**If it wins on square type**, the real prize is running it over the
+**Rashi-script Livorno 1766–7 first edition**, which nothing has successfully
+OCR'd yet — a second *edition* as well as a second engine, which is far
+stronger evidence than any same-scan comparison.
+
+## How the page mapping was established
+
+Not inferred. The sample's three embedded page images were MD5-matched against
+every image in `berlin_square_corrected.pdf`, giving source page indices 18,
+19, 20. Klal attribution for those pages then agreed **exactly** across three
+independent artifacts:
+
+- `gematria_trace_part1.json` (marker position)
+- `part1_header_anchored_alignment.json` (header-anchored alignment)
+- `klal_page_regions.json` (per-klal scan regions)
+
+All three name klalim 8–22, with the same page split (8–12 on p18, 13–16 on
+p19, 17–22 on p20).
+
+## Per-klal coverage
+
+| klal | words | candidates | open | human decisions |
+|---:|---:|---:|---:|---:|
+| 8 | 239 | 1 | 0 | 0 |
+| 9 | 23 | 0 | 0 | 0 |
+| 10 | 131 | 2 | 1 | 1 |
+| 11 | 104 | 1 | 0 | 1 |
+| 12 | 333 | 3 | 0 | 2 |
+| 13 | 293 | 3 | 1 | 1 |
+| 14 | 253 | 0 | 0 | 0 |
+| 15 | 27 | 1 | 1 | 2 |
+| 16 | 163 | 2 | 1 | 1 |
+| 17 | 316 | 2 | 1 | 1 |
+| 18 | 78 | 2 | 2 | 0 |
+| 19 | 217 | 2 | 2 | 0 |
+| 20 | 41 | 2 | 2 | 0 |
+| 21 | 70 | 0 | 0 | 0 |
+| 22 | 68 | 2 | 1 | 0 |
+
+## Status / next step
+
+**Blocked on getting Dicta's output, manually.** Browser automation against
+`ocr.dicta.org.il` failed repeatedly (2026-08-19): `navigate` succeeds, then
+every read against the tab fails with "couldn't determine which page this
+action targets," or times out. Roughly seven attempts across two Chrome
+restarts. Not worth further automation effort — the upload is a minute of
+manual work.
+
+**The UI trap to avoid.** `ocr.dicta.org.il` redirects to `/projects`, a
+project *manager*. With no projects, its empty state offers a Dropbox import
+that accepts only `DOCX`/`TXT` and errors with *"לא נמצאו בתיקייה קבצים
+שהמערכת יכולה לפתוח (DOCX, TXT)"*. That is the **import-existing-text** path,
+not OCR. Look for a create-new-project control and pick the **scan/image**
+source.
+
+Then drop the output in this directory and diff it against
+`groundtruth_klal_8_22.txt`.
+
+## Caveats
+
+- **Unverified:** Dicta's per-file page/size limits, and whether a free account
+  carries a quota. Three pages at 1 MB should be inside anything reasonable —
+  which is the point of testing with the sample before committing 337 pages.
+- The sample PDF was originally produced at **109 MB** for 3 pages (it carried
+  the full 337-page original's resource tree). Re-saved with garbage collection
+  to 1.0 MB with no re-compression — same PNG dimensions per page. If you
+  regenerate it, use `garbage=4, deflate=True, clean=True` or you'll hit upload
+  limits for no reason.

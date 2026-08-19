@@ -19,6 +19,13 @@ below.
 30/75/88; 8 decided, **411 open**. Machine pass done, human pass explicitly
 deferred by the user. Not a gate on anything else.
 
+**The witness queue is also 91% smaller than it looks.** Tesseract was right in
+16 of 419 disagreements (3.8%). Filtering on the vision verdict — not the tier
+— cuts it to 37 items with no findings lost. Open item 4.
+
+**Dicta OCR is queued up as a real replacement witness**, with an adjudicated
+15-klal test set already prepared. Open item 5, detail in `dicta_eval/`.
+
 **Three things to know if you're picking this up cold:** read this file before
 making any claim about corpus quality; the Parts 2-3 gate in `START_HERE.md`
 is binding; and every finding you confirm gets written here immediately, not
@@ -66,7 +73,31 @@ to) as state changes** — that discipline is what drifted last time.
    machine vision pass is done; the human review-in-dashboard pass was
    explicitly deferred by the user as a future step (not forgotten, not a gate
    on anything else).
-4. **The public-domain citation tier is only partly itemized.**
+4. **The witness queue should be filtered by vision verdict, not worked in
+   full — and not pruned by tier.** Analysed 2026-08-19 (full detail and
+   tables in `PROJECT-STATUS-HISTORY.md`). Tesseract was right in only **16 of
+   419** disagreements (3.8%) vs. DocAI's 91.2%; it fails structurally, being a
+   weaker engine on the *same* scan rather than an independent signal. Deleting
+   tier D was considered and **rejected**: D holds the most findings in
+   absolute terms (13 of 37) and **7 of the 8 human decisions already recorded
+   sit in it**. The right cut is `vision_selected in ("B","NEITHER")` — **419 →
+   37 items, 91% less work, zero findings lost.** Not implemented: the queue
+   file is derived, so filtering belongs in
+   `tools/verify_reconstruction_witness.py` or a separate view, never a
+   hand-edit. Caveat: all 419 verdicts came back ≥0.9 confidence, so treat the
+   37 as a priority queue, not proof the other 382 are clean (Lesson 2).
+5. **Dicta OCR evaluation is set up and blocked on manual upload.** See
+   `dicta_eval/README.md`. `yad-malachi-berlin-sample.pdf` (3 pages, 1.0 MB) =
+   source pages 18–20 = klalim 8–22, confirmed by MD5 image match plus exact
+   agreement across the trace, alignment and page-region files. Ground truth
+   (2,356 words, 23 candidates, 11 open, 9 human decisions) is
+   `dicta_eval/groundtruth_klal_8_22.txt`. Browser automation against
+   `ocr.dicta.org.il` failed ~7 times across two Chrome restarts and was
+   abandoned; the upload is a minute of manual work. The prize if Dicta wins on
+   square type is running it over the **Rashi-script Livorno first edition**,
+   which nothing has successfully OCR'd — a second edition *and* a second
+   engine, which is the independent signal Tesseract never was.
+6. **The public-domain citation tier is only partly itemized.**
    `CORPUS-COMPARISON.md` gives the tier totals (21 works / 939 citations) and
    per-work counts *only* for works its wider sweep newly surfaced. The 15
    already-known public-domain works are counted in the totals but never

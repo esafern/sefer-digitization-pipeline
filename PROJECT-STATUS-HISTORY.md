@@ -17,6 +17,68 @@ current file references, or when grepping for how a past finding was
 resolved. Same append-at-top convention as before: newest entries go right
 after this header, not at the bottom.
 
+### DONE 2026-08-19 — witness queue analysed: Tesseract is a 3.8%-useful witness, and TIER IS THE WRONG FILTER (vision verdict is the right one)
+
+Triggered by the user's read that "tesseract sucks as a witness." It does, and
+the numbers are worse than that phrasing. But the follow-on proposal — delete
+tier D to shrink the queue — turned out to be the wrong move, and the analysis
+that showed why also produced a much better filter.
+
+**Tesseract's actual hit rate.** The vision pass has already ruled on all 419
+witness disagreements in `reconstruction_witness_queue.json`:
+
+| verdict | n | share |
+|---|---:|---:|
+| A (DocAI right) | 382 | 91.2% |
+| NEITHER | 21 | 5.0% |
+| B (Tesseract right) | 16 | 3.8% |
+
+So the queue costs 411 open human reviews to recover at most 16 corrections.
+The 8 human `witness_choice` decisions recorded so far went 7-to-1 for DocAI,
+consistent with the machine verdict. Root cause is structural, not a tuning
+problem: Tesseract is a WEAKER ENGINE ON THE SAME SCAN, so it mostly disagrees
+by being wrong. It is not an independent signal in the sense Lesson 9 requires.
+A second EDITION read by a Hebrew-trained engine (Dicta on the Rashi-script
+Livorno) would be — see `dicta_eval/README.md`.
+
+**Why deleting tier D is wrong.** The findings are NOT concentrated in the high
+tiers. Of the 37 items where DocAI was not upheld (B or NEITHER):
+
+| tier | queue size | findings | rate |
+|---|---:|---:|---:|
+| A | 8 | 6 | 75% |
+| B | 36 | 6 | 17% |
+| C | 96 | 12 | 12% |
+| D | 279 | 13 | 5% |
+
+Tier D has the LOWEST rate but the HIGHEST absolute count — 13 of 37. Deleting
+it discards 35% of everything the witness pass found, to remove 67% of the
+queue. Worse: **7 of the 8 human decisions already recorded are on tier D
+items**, so deleting that tier would orphan most of the review already done.
+(An earlier turn in this session did suggest tier-based pruning as "10% of the
+work for a third of the yield" — that was computed on A+B only and did not
+check where the D findings or the existing decisions sat. Corrected here.)
+
+**The right filter is the vision verdict, not the tier.** The machine pass has
+already adjudicated every item, so the interesting ones are known, not guessed:
+filter on `vision_selected in ("B", "NEITHER")` and the queue drops from 419 to
+**37 items — a 91% cut with zero findings lost**, versus tier-D deletion's 67%
+cut that throws away 13.
+
+**Caveat on trusting that filter as proof.** Every one of the 419 verdicts came
+back at >=0.9 confidence (distribution: 0.9 x1, 0.95 x56, 0.98 x246, 0.99 x81,
+1.0 x35). Uniformly high confidence across an entire batch is soft evidence the
+model is not discriminating as finely as the number implies — CLAUDE.md/
+`START_HERE.md` Lesson 2, "a passing score is not a checked result." Treat the
+37 as a priority queue, not as a certificate that the other 382 are clean.
+
+**Not applied.** No change made to `reconstruction_witness_queue.json`,
+`tools/verify_reconstruction_witness.py`, or `pipeline/review_server.py`. The
+queue file is derived, so any filtering belongs in the generator or in a
+separate view, never a hand-edit (Lesson 13). `review_server.py` was left alone
+because another session was editing it concurrently.
+
+
 
 ## Session handoff archive, 2026-08-16 through 2026-08-18 (archived into history 2026-08-18 when PROJECT-STATUS.md was re-split back down to a compact current summary)
 
