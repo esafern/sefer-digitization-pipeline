@@ -15,7 +15,7 @@ public-domain title on record ([the table below](#the-free-to-digitize-tier-is-o
 
 **It is the easiest big win available.** Public domain, cleanly numbered (klalim map
 straight onto a Sefaria schema), and **already scanned** — four editions in five scans in
-hand, three of them in clean square type.
+hand — though only Berlin is in clean square type, the kind general OCR reads best.
 
 **The work is largely done.** All 667 klalim are OCR'd and structured. **Part 1** (*Klalei
 HaGemara*, 222 klalim) has 222/222 trusted page-to-klal alignment and image-grounded,
@@ -135,12 +135,14 @@ layer, but it is **not good enough to use** (see *Process*) — the work is to O
 |---|---|---|---|---|
 | **Livorno 1766–7** — *editio princeps*[^livorno] | (Livorno) | **Rashi** (body); square lemmas | HebrewBooks #32530 / #32532 / #32531 | 348 / 54 / 55 |
 | **Berlin 1851/2**[^berlin] | Ephraim Herz | **Square** | Google Books (in hand); NLI (catalogued) | 337 |
-| **Przemyśl 1877**[^p1877] | M. A. Knoller | **Square** | HebrewBooks #14122 | 491 |
-| **Przemyśl 1877** (2nd scan)[^p1877] | " | **Square** | Google Books | 489 |
-| **Przemyśl 1888**[^p1888] | Żupnik, Knoller & Hamerschmidt | **Square** | Google Books | 373 |
+| **Przemyśl 1877**[^p1877] | M. A. Knoller | **Rashi** (body); square headers/lemmas | HebrewBooks #14122 | 491 |
+| **Przemyśl 1877** (2nd scan)[^p1877] | " | **Rashi** (same printing) | Google Books | 489 |
+| **Przemyśl 1888**[^p1888] | Żupnik, Knoller & Hamerschmidt | *unverified*[^p1888] | Google Books | 373 |
 
-The three later editions bind all three parts and are set in **clean square type, not
-Rashi** — what general OCR reads best. Berlin's *Klalei HaGemara* opening, rendered
+The later editions bind all three parts. **Only Berlin is set in clean square type** —
+the Przemyśl 1877 printing's body is Rashi (corrected 2026-08-19, see [^p1877]), which
+is why Berlin remains the OCR base and why a Rashi-capable engine is needed for
+everything else. Berlin's *Klalei HaGemara* opening, rendered
 directly from `berlin_square_corrected.pdf`, page 14:
 
 ![The opening page of Klalei HaGemara (Aleph section) in the Berlin edition of Yad Malachi, in clean square Hebrew type](images/yad-malachi-berlin-klal-aleph.png)
@@ -162,9 +164,9 @@ reading is near-certain and only disagreements need review.
 2. **OCR the images — don't trust the embedded text.** The shipped OCR layers are unusable
    (sample comparison not currently in the repo: Berlin cleanest but still errs, Przemyśl
    badly letter-confused, Livorno unusable). Run **Google Cloud Vision / Document AI** +
-   **Tesseract `heb`** over the square editions' images (many passes to vote on); read the
-   Rashi Livorno with **Jochre 3** or a trained **Kraken/eScriptorium** model as a
-   collation witness; post-correct with **Dicta**[^dicta] (abbreviation expansion, the
+   **Tesseract `heb`** over Berlin's square images (many passes to vote on); read the
+   Rashi-set editions (Livorno, and Przemyśl 1877 — see [^p1877]) with **Dicta**,
+   **Jochre 3** or a trained **Kraken/eScriptorium** model as collation witnesses; post-correct with **Dicta**[^dicta] (abbreviation expansion, the
    BEREL rabbinic model). ABBYY FineReader / Transkribus are alternatives.
 3. **Align and vote.** Per-token consensus anchored on the numbered *klalim*; agreed tokens
    auto-accepted, conflicts flagged.
@@ -461,12 +463,21 @@ the cost of every public-domain work after this one.
     *מלאכי בכמ"ר יעקב הכהן*; colophon *פרעמישלא בשנת התרל"ז לב"ע* (5637 = 1877),
     publisher *משה אהרן קנעניל* (M. A. Knoller), printed by *ר' חיים אהרן זאפניק ען
     קנאללער* (Zupnik & Knoller); it names the prior Livorno (first) and Berlin
-    (*התרי"ח*) printings. **Square** type. The two Przemyśl printings share this press
+    (*התרי"ח*) printings. **Rashi script in the body, with square running headers and
+    square bold klal-lemmas** — corrected 2026-08-19; this table previously said
+    "Square." Verified by direct render of pages 30, 250, 400 and 480 of
+    HebrewBooks #14122, and independently corroborated by the character-frequency
+    signature of its shipped OCR text (see `PROJECT-STATUS-HISTORY.md`,
+    2026-08-19). The two Przemyśl printings share this press
     lineage, so treat them as *near*-independent.
 
 [^p1888]: **Przemyśl 1888** (Google Books full-view scan). Latin colophon: *JAD
     MALACHI, PRZEMYŚL, Drukiem Żupnika, Knollera i Hamerszmida, 1888*; Hebrew
-    *פרעמישלא בשנת התרמ"ח לב"ע* (5648 = 1888). **Square** type.
+    *פרעמישלא בשנת התרמ"ח לב"ע* (5648 = 1888). Script **not verified** — this table
+    previously said "Square" for every Przemyśl printing, and that proved wrong for
+    1877 (see [^p1877]). Treat 1888's script as unconfirmed until someone renders a
+    body page; it is a separate printing, so 1877's correction does not automatically
+    carry over.
 
 [^dicta]: Dicta — analytical tools for Hebrew texts (dicta.org.il), a free Israeli
     non-profit; its Maivin tool vocalizes and punctuates rabbinic text, expands

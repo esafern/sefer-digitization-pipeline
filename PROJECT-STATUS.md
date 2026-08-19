@@ -97,7 +97,18 @@ to) as state changes** — that discipline is what drifted last time.
    square type is running it over the **Rashi-script Livorno first edition**,
    which nothing has successfully OCR'd — a second edition *and* a second
    engine, which is the independent signal Tesseract never was.
-6. **The public-domain citation tier is only partly itemized.**
+6. **Przemyśl 1888's script is unverified, and HebrewBooks' fastocr is
+   rejected.** Assessed 2026-08-19 (detail and tables in
+   `PROJECT-STATUS-HISTORY.md`). HebrewBooks #14122's shipped
+   "searchable/fastocr" text scores **44.0% lexicon hit vs. our Berlin
+   corpus's 97.8%** — unusable, from systematic letter confusion (ס 9.7×
+   over-produced, א 0.17× under). That signature revealed a real doc error:
+   **Przemyśl 1877's body is Rashi script, not square**, verified by rendering
+   pages 30/250/400/480. `CASE-YAD-MALACHI.md` corrected. **Przemyśl 1888 was
+   deliberately marked *unverified* rather than corrected by analogy** — it's a
+   separate printing and nobody has rendered a body page (Lesson 7). Someone
+   should, and it isn't in hand locally.
+7. **The public-domain citation tier is only partly itemized.**
    `CORPUS-COMPARISON.md` gives the tier totals (21 works / 939 citations) and
    per-work counts *only* for works its wider sweep newly surfaced. The 15
    already-known public-domain works are counted in the totals but never

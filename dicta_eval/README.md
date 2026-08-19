@@ -37,10 +37,21 @@ gematria marker and title so Dicta's output can be aligned section by section.
 3. Does it **find anything neither DocAI nor the corpus has**? Most
    interesting, least likely.
 
-**If it wins on square type**, the real prize is running it over the
-**Rashi-script Livorno 1766–7 first edition**, which nothing has successfully
-OCR'd yet — a second *edition* as well as a second engine, which is far
-stronger evidence than any same-scan comparison.
+**If it wins on square type**, the real prize is the Rashi-script editions —
+**two of which are confirmed in hand locally** (2026-08-19):
+
+| Edition | Local file | Pages |
+|---|---|---:|
+| Livorno 1766–7 (*editio princeps*) | `~/Downloads/Hebrewbooks_org_32530/32531/32532.pdf` | 348/54/55 |
+| Przemyśl 1877 | `~/Downloads/Hebrewbooks_org_14122.pdf` (19.5 MB) | 491 |
+
+Nothing has successfully OCR'd either. HebrewBooks' own "fastocr" for #14122
+was tested and **rejected — 44.0% lexicon hit vs. our corpus's 97.8%**, from a
+square-model-reading-Rashi letter-confusion signature (ס 9.7× over-produced, א
+0.17× under). See `PROJECT-STATUS-HISTORY.md`, 2026-08-19.
+
+A Rashi edition read by a Rashi-capable engine is a second *edition* and a
+second *engine* at once — the independent signal Tesseract never was.
 
 ## How the page mapping was established
 

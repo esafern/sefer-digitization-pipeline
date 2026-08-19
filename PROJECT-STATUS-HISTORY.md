@@ -17,6 +17,75 @@ current file references, or when grepping for how a past finding was
 resolved. Same append-at-top convention as before: newest entries go right
 after this header, not at the bottom.
 
+### DONE 2026-08-19 — HebrewBooks #14122 fastocr assessed and REJECTED as a witness; Przemysl 1877 is RASHI script, not square (CASE-YAD-MALACHI.md corrected)
+
+User surfaced `~/Downloads/Hebrewbooks_org_14122-*` — HebrewBooks' own
+"searchable/fastocr" output for the Przemysl 1877 edition, in three forms
+(searchable PDF 78MB, DOCX, and a plain `-ocr-fastocr.txt`, 502KB / 54,100
+words). The plain text is the usable form; no PDF extraction needed.
+
+**Rejected as a witness — it is not usable text.** Measured against
+`lexicon.txt` (19,015 validated words), the same metric the alignment file's
+`lexicon_hit_rate` uses:
+
+| text | lexicon hit rate | words |
+|---|---:|---:|
+| Berlin corpus, `part1.json` (adjudicated) | **97.8%** | 50,195 |
+| Przemysl fastocr, front matter (first 40 lines) | 63.6% | 236 |
+| Przemysl fastocr, body (line 200+) | **44.0%** | 52,079 |
+
+44% vs 97.8% is far outside edition variation. The lexicon is Berlin-derived
+so it is mildly biased, but not by 54 points.
+
+**Root cause: systematic letter confusion, not noise.** Character-frequency
+comparison against our Berlin text:
+
+| letter | Przemysl | Berlin | ratio |
+|---|---:|---:|---:|
+| ס | 14.21% | 1.46% | **9.7x over** |
+| ל | 14.22% | 6.57% | 2.2x over |
+| כ | 8.28% | 4.09% | 2.0x over |
+| א | 1.46% | 8.49% | **0.17x under** |
+| ש | 1.00% | 4.45% | 0.22x under |
+| ב | 1.45% | 6.19% | 0.23x under |
+| ה | 2.24% | 7.30% | 0.31x under |
+
+That signature — aleph/heh/bet/shin collapsing into samekh/lamed/kaf — is a
+square-Hebrew model reading Rashi script.
+
+**Which led to a real documentation error.** `CASE-YAD-MALACHI.md`'s edition
+table listed Przemysl 1877 as **Square**. It is not: the BODY is Rashi, with
+square used only for running headers and the bold klal-lemmas — the same layout
+the doc already describes for Livorno. Verified by direct render (Lesson 17:
+render and look, do not settle a typeface question on a statistic) of pages
+30, 250, 400 and 480 of `Hebrewbooks_org_14122.pdf`, consistent throughout.
+The frequency signature above is the independent second signal (Lesson 9).
+
+Corrections applied to `CASE-YAD-MALACHI.md`:
+- Table: Przemysl 1877 and its 2nd scan changed Square -> Rashi (body); square
+  headers/lemmas.
+- "The three later editions ... are set in clean square type, not Rashi" ->
+  only Berlin is clean square. The TL;DR's "three of them in clean square type"
+  corrected the same way.
+- Process step 2 no longer says to run DocAI/Tesseract over "the square
+  editions" plural; Rashi-set editions are routed to Dicta/Jochre/Kraken.
+- `[^p1877]` records the correction and its evidence.
+- **Przemysl 1888 marked script-UNVERIFIED rather than silently corrected.** It
+  is a separate printing; 1877's correction does not carry over, and nobody has
+  rendered a body page from it. Not in hand locally either. (Lesson 7: fixing
+  one root cause does not explain every symptom that looked the same.)
+
+**What this changes strategically.** It makes the Dicta case stronger, not
+weaker. Two full Rashi-script editions are now confirmed in hand locally —
+Livorno (`Hebrewbooks_org_32530/32531/32532.pdf`) and Przemysl 1877
+(`Hebrewbooks_org_14122.pdf`, 491pp, 19.5MB) — and Dicta is the one surveyed
+engine that explicitly reads Rashi. A Rashi edition read by a Rashi-capable
+engine is a second EDITION and a second ENGINE at once, which is the
+independent signal Tesseract never was (see the witness-queue entry below).
+
+Nothing ingested, no corpus change. The Downloads files were read only.
+
+
 ### DONE 2026-08-19 — witness queue analysed: Tesseract is a 3.8%-useful witness, and TIER IS THE WRONG FILTER (vision verdict is the right one)
 
 Triggered by the user's read that "tesseract sucks as a witness." It does, and
