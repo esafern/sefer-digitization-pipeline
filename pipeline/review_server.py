@@ -501,7 +501,9 @@ def api_klal(klal_id):
         corrections.append({
             "word_index": wi,
             "opcode": "witness",
+            "klal_id": klal_id,
             "docai_token_index": w["docai_token_index"],
+            "tier": w.get("tier"),
             "docai_reading": w.get("docai_reading"),
             "tesseract_reading": w.get("tesseract_reading"),
             "vision_selected": w.get("vision_selected"),
