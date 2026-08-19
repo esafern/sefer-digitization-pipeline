@@ -27,6 +27,7 @@ import argparse
 import json
 import os
 import re
+import sys
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse
 
@@ -921,13 +922,51 @@ class Handler(BaseHTTPRequestHandler):
             self._send_error_json(500, f"{type(e).__name__}: {e}")
 
 
+def _preflight_check():
+    """Fail loudly at startup if required data files are missing or unreadable,
+    rather than letting the first API request throw an opaque exception.
+    Returns a list of problem strings (empty = all good)."""
+    problems = []
+    required = [
+        (rd.DECISIONS_PATH, "review_decisions.jsonl (append-only audit log)"),
+        (cio.repo_path("klalim_demo_dataset.json"), "klalim_demo_dataset.json (corpus text)"),
+        (cio.repo_path("corrections_part1.json"), "corrections_part1.json (machine candidates)"),
+        (cio.repo_path("part1_header_anchored_alignment.json"), "page alignment"),
+        (cio.repo_path("klal_page_regions.json"), "klal page regions"),
+    ]
+    for path, label in required:
+        if not os.path.exists(path):
+            problems.append(f"  MISSING: {label}\n    → {path}")
+        elif not os.access(path, os.R_OK):
+            problems.append(f"  NOT READABLE: {label}\n    → {path}")
+    return problems
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--port", type=int, default=8420)
     parser.add_argument("--host", default="127.0.0.1")
     args = parser.parse_args()
 
-    server = ThreadingHTTPServer((args.host, args.port), Handler)
+    problems = _preflight_check()
+    if problems:
+        print("ERROR: required files are missing or unreadable:")
+        print("\n".join(problems))
+        sys.exit(1)
+
+    try:
+        server = ThreadingHTTPServer((args.host, args.port), Handler)
+    except OSError as e:
+        if e.errno in (48, 98):  # EADDRINUSE on macOS (48) and Linux (98)
+            print(f"ERROR: port {args.port} is already in use.")
+            print(f"  Is another instance of review_server.py already running?")
+            print(f"  To find it:  lsof -i :{args.port}")
+            print(f"  To stop it:  kill $(lsof -t -i :{args.port})")
+            print(f"  Or start on a different port:  python3 review_server.py --port 8421")
+        else:
+            print(f"ERROR: could not bind to {args.host}:{args.port}: {e}")
+        sys.exit(1)
+
     print(f"Yad Malachi review server: http://{args.host}:{args.port}/")
     print(f"Decisions log: {rd.DECISIONS_PATH}")
     try:
