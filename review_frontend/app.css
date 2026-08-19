@@ -390,17 +390,17 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
 
 .side-panel {
   position: fixed;
-  top: 0; bottom: 0; left: 0;
+  top: 0; bottom: 0; right: 0;
   width: 420px;
   max-width: 92vw;
   background: var(--paper);
-  box-shadow: 8px 0 32px rgba(0,0,0,0.25);
+  box-shadow: -8px 0 32px rgba(0,0,0,0.25);
   z-index: 950;
   display: flex;
   flex-direction: column;
   font-family: 'Inter', sans-serif;
   direction: ltr;
-  transform: translateX(-100%);
+  transform: translateX(100%);
   transition: transform .18s ease;
 }
 .side-panel.open { transform: translateX(0); }

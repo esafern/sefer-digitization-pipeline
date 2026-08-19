@@ -396,6 +396,7 @@ def api_klalim():
             "open_count": total_count - decided_count,
             "machine_disputed_count": machine_disputed_count,
             "machine_resolved_count": machine_resolved_count,
+            "ai_flag_count": ai_flag_count,
             "punctuation_count": len(punct_entries),
             "punctuation_decided_count": punct_decided_count,
             "punctuation_open_count": len(punct_entries) - punct_decided_count,

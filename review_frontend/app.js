@@ -198,9 +198,10 @@ function buildLegend() {
   // AI-flagged words render with their own purple dashed underline style
   // (state-ai-flag in app.css) distinct from the three main states above.
   // Add a key so reviewers know what the colour means.
+  const aiTotal = KLALIM.reduce((s, k) => s + (k.ai_flag_count || 0), 0);
   const aiRow = document.createElement('div');
   aiRow.className = 'legend-row';
-  aiRow.innerHTML = `<i style="border-bottom:3px dashed #805ad5;background:transparent;"></i><span>AI-Flagged</span>`;
+  aiRow.innerHTML = `<i style="border-bottom:3px dashed #805ad5;background:transparent;"></i><span>AI-Flagged</span><b class="legend-count">${aiTotal}</b>`;
   legend.appendChild(aiRow);
 }
 
