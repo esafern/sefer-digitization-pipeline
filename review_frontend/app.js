@@ -72,9 +72,11 @@ function wordState(corr) {
   if (corr.opcode === 'ai_flag') return 'open';
   if (corr.current_decision) return 'human';
   if (corr.flag === 'current_text_confirmed') return 'machine';
-  // Witness items: vision pass selected a reading -> machine-resolved;
-  // no vision result yet -> open.
-  if (corr.opcode === 'witness') return corr.vision_selected ? 'machine' : 'open';
+  // Witness items: vision pass selected a real reading (A or B) ->
+  // machine-resolved; NEITHER (vision couldn't decide) or absent -> open.
+  if (corr.opcode === 'witness') {
+    return (corr.vision_selected === 'A' || corr.vision_selected === 'B') ? 'machine' : 'open';
+  }
   return 'open';
 }
 // The word's final display color/underline follows wordState() above (a
@@ -1153,7 +1155,9 @@ async function openWitnessPanel(w) {
   // hard to place in context. Deliberately labeled as raw/unverified OCR,
   // not the not-yet-applied reconstruction draft - see review_server.py
   // api_witness_context()'s docstring for why.
-  const ctx = await fetch(`/api/witness/context/${w.page}/${w.docai_token_index}`).then(r => r.json());
+  const ctxRaw = await fetch(`/api/witness/context/${w.page}/${w.docai_token_index}`)
+    .then(r => r.ok ? r.json() : null).catch(() => null);
+  const ctx = (ctxRaw && Array.isArray(ctxRaw.words)) ? ctxRaw : { words: [], target_index: null };
   // FIXED 2026-08-14 (user report: clicked a witness box on the scan pane,
   // saw "...וזו היא [שיטת] התוס ג"כ..." - only the FIRST word of a
   // multi-word disagreement was bracketed, even though docai_reading was
