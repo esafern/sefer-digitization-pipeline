@@ -9,6 +9,43 @@ If you only came here from `README.md`, you've got the right file. If
 you're an LLM that loaded `CLAUDE.md` automatically, that file is a short
 redirect to here — read on.
 
+## TL;DR
+
+**The pipeline.** Document AI OCR → diff the fresh OCR against the *currently
+stored* corpus text → crop each disagreement out of the scan and have Gemini
+adjudicate it → human review in a local dashboard → apply. Five build stages,
+orchestrated by `./rebuild_all.sh`, gated by pytest.
+
+**The corpus.** `part1.json` / `part2.json` / `part3.json` are the **only**
+hand-edited source of truth, and they are never hand-edited directly — every
+change goes through the decision pipeline. Everything else that shows klal
+text is derived and must be regenerated.
+
+**The three things that will bite you if you skip them:**
+
+1. **Read `PROJECT-STATUS.md` before making any claim about corpus quality.**
+   This file holds durable rules; that one holds the current dated truth.
+2. **The Parts 2-3 gate is binding.** Building Parts 2–3 infrastructure is
+   authorized; *applying* any `part2.json`/`part3.json` correction is not,
+   until Part 1 is independently confirmed clean by an outside professional.
+3. **Log every finding to `PROJECT-STATUS.md` yourself, immediately.** A bug
+   mentioned only in chat is a dropped ball, and recovering it is not the
+   user's job.
+
+**Vocabulary that matters here.** A problem in the DATA is a "data issue" —
+fixed through human review against the scan. A problem in the CODE is a
+"bug" — fixed by changing code. They have different remedies; don't blur them.
+
+**Before you hand-roll anything**, check `pipeline/corpus_io.py` (paths,
+loaders, Hebrew helpers) and `pipeline/vision_adjudication_common.py`
+(crop/cache/retry/client). A hand-maintained parallel copy has produced the
+same bug class here more than once.
+
+**Then read Part 2's 19 numbered lessons.** They are rules, not history. The
+short version of most of them: a check that wasn't run has verified nothing, a
+passing score is not a checked result, and no single confident signal is
+enough.
+
 ---
 
 # Part 1 — For humans
@@ -35,114 +72,104 @@ halachic-methodology reference with 667 *klalim* across three parts. See
 `CASE-YAD-MALACHI.md` for the rationale (287 dead Sefaria citations
 currently point to this work).
 
-Livorno 1766-7 is the work's ORIGINAL printing. The scan this pipeline
-actually OCRs, `berlin_square_corrected.pdf`, is a LATER, SECOND printing,
-in Berlin, per its own title page (`נדפס ראשונה בליוורנו... ועתה נדפס פעם
-שנית` — "first printed in Livorno... now printed a second time," colophon
-`ברלין`, editor אפרים הערץ of Silesia). Square Hebrew typeface throughout
-(not Rashi script) — matches the filename. Don't conflate the two editions.
+### The scan: which edition, which file, and why not NLI
 
-**Berlin printing date: Hebrew year תרי"ב = 1851/2 CE**, confirmed
-2026-08-18 against the National Library of Israel's catalog record for this
-exact edition (NLI system number `990011859020205171`, viewable at
+**Two editions, don't conflate them.** Livorno 1766-7 is the work's ORIGINAL
+printing. The scan this pipeline actually OCRs, `berlin_square_corrected.pdf`,
+is a LATER, SECOND printing, in Berlin, per its own title page (`נדפס ראשונה
+בליוורנו... ועתה נדפס פעם שנית` — "first printed in Livorno... now printed a
+second time," colophon `ברלין`, editor אפרים הערץ of Silesia). Square Hebrew
+typeface throughout (not Rashi script) — matches the filename.
+
+**Berlin printing date: Hebrew year תרי"ב = 1851/2 CE**, confirmed 2026-08-18
+against the National Library of Israel's catalog record for this exact edition
+(NLI system number `990011859020205171`,
 <https://www.nli.org.il/en/books/NNL_ALEPH990011859020205171/NLI> — same
 "printed a second time... by Efraim Hertz" edition note, same Berlin/
-Zittenfeld imprint, and the same 337-page count as this repo's local PDF —
-not git-tracked here, see "Files not in the public repo" in `SETUP.md`).
-The
-date rests on two independent chronograms inside the book itself (the
-publisher's introduction signing-date, and a separate Deuteronomy-verse
-chronogram used as the formal creation-date), both encoding 612 — a
-primary-source confirmation, not an inference. This supersedes an earlier
-"~1857/8" estimate that had been inferred secondhand from a *later*
-edition's title page, and separately resolves a discrepancy flagged but
-never resolved in `PROJECT-STATUS-HISTORY.md` (a Wikipedia summary had
-implied ~1917, evidently a misconverted gematria). See
-`PROJECT-STATUS-HISTORY.md`'s 2026-08-18 entries for the full research
-trail.
+Zittenfeld imprint, same 337-page count as this repo's local PDF). The date
+rests on two independent chronograms inside the book itself (the publisher's
+introduction signing-date, and a separate Deuteronomy-verse chronogram used as
+the formal creation-date), both encoding 612 — a primary-source confirmation,
+not an inference. This supersedes an earlier "~1857/8" estimate inferred
+secondhand from a *later* edition's title page, and separately resolves a
+discrepancy flagged but never resolved in `PROJECT-STATUS-HISTORY.md` (a
+Wikipedia summary implied ~1917, evidently a misconverted gematria). Full
+research trail: `PROJECT-STATUS-HISTORY.md`, 2026-08-18.
 
-**Provenance.** This pipeline's own working PDFs stay Google Books-sourced
-— **do not switch them to an anonymous NLI download.** The original scan
-is publicly downloadable at
-<https://www.google.com/books/edition/_/OdiHjxI3I0EC> — confirmed
-2026-08-18 (via an actual browser render, not a plain HTML fetch, which
-first misread it as a different edition entirely) to be this exact
-printing: same `דפוס י. זיטטענפעלד` (Zittenfeld) publisher as this scan's
-own title page, and Google's own bibliographic panel states its source as
-the National Library of Israel itself — so this Google Books copy and the
-NLI record below are the same underlying digitization, just re-hosted.
-NLI's own site is still the right pointer to give someone else acquiring
-this text for the first time (per `CASE-YAD-MALACHI.md`'s "Preparing the
-text for Sefaria" section, sourcing from NLI sidesteps Google Books' terms
-of use for redistribution), but only if *they* use an NLI account to get
-full resolution — an anonymous NLI download is a real quality downgrade,
-not an equivalent copy (see below).
+**Provenance: this pipeline's PDFs stay Google Books-sourced — do not switch
+them to an anonymous NLI download.** The original scan is publicly
+downloadable at <https://www.google.com/books/edition/_/OdiHjxI3I0EC> —
+confirmed 2026-08-18 (via an actual browser render; a plain HTML fetch first
+misread it as a different edition entirely) to be this exact printing: same
+`דפוס י. זיטטענפעלד` (Zittenfeld) publisher as this scan's own title page, and
+Google's own bibliographic panel names its source as the National Library of
+Israel. So the Google Books copy and the NLI record are the same underlying
+digitization, re-hosted.
 
-**Validated end-to-end 2026-08-18, then deliberately NOT adopted, for a
-resolution reason found along the way.** Downloaded the full 337-page book
-directly from the NLI record above (`Download` → "the complete document").
-Applied the leaf-order fix below to it and confirmed by direct content
-inspection (matching folio numbers and catchwords, not just file
-existence) that it reproduces the correct reading order — the acquisition
-+ fix procedure genuinely works. But image quality is a real, checked
-problem, not a formality: NLI's "Maximal (100%)" size is greyed out under
-`File format: PDF` (gated behind an NLI account this project doesn't
-have) but **is selectable under `File format: JPEG\ZIP`, anonymously** —
-comparing the same physical page's embedded/extracted image directly, this
-pipeline's local PDF is **3440×5312px PNG** (~18.3 MP, lossless); NLI's
-best anonymously-available tier (JPEG\ZIP, Maximal) is **1745×2658px
-JPEG** (~4.6 MP, lossy) — about **4x fewer pixels**, plus lossy compression
-on top. (The PDF download path's "Medium" — the only anonymous PDF tier —
-is worse still: 873×1329px, ~16x fewer pixels; JPEG\ZIP is the better
-anonymous path if NLI is ever used for real acquisition.) Even at its best
-anonymous tier, NLI is nowhere near this pipeline's existing
-OCR/vision-adjudication quality bar. An NLI account might unlock something
-higher still (untested) — until confirmed otherwise, treat 1745×2658 as
-the ceiling.
+**Why NLI was validated and then deliberately not adopted.** The full 337-page
+book was downloaded from the NLI record, the leaf-order fix below applied to
+it, and correct reading order confirmed by direct content inspection (matching
+folio numbers and catchwords, not just file existence) — the acquisition + fix
+procedure genuinely works. It was rejected on image quality, checked directly
+on the same physical page:
 
-**NLI's PDF is also 336 pages, not 337 — a constant 1-page offset, not a
-different scan** (separate from the quality issue above, and true at
-whatever quality tier you download). This pipeline's local
-`berlin_square_corrected.pdf`/`berlin_square_original_transposed.pdf` came
-from a Google Books scan whose page 0 is a "Digitized by Google" disclaimer
-page that Google inserts and NLI's own digitization doesn't have. Confirmed
-by direct comparison: NLI page *i* = the Google-sourced PDF's page *i + 1*
-for every page checked, including at the transposed-leaf region. **Every
-page-indexed cache in this pipeline** (`docai_word_boxes/`,
+| Source | Resolution | Notes |
+|---|---|---|
+| This repo's local PDF (Google Books) | **3440×5312** (~18.3 MP) | PNG, lossless |
+| NLI, `JPEG\ZIP` + Maximal (best anonymous tier) | 1745×2658 (~4.6 MP) | ~4x fewer pixels, lossy |
+| NLI, PDF + Medium (only anonymous PDF tier) | 873×1329 | ~16x fewer pixels |
+
+NLI's "Maximal (100%)" is greyed out under `File format: PDF` (gated behind an
+NLI account this project doesn't have) but **is** selectable under `File
+format: JPEG\ZIP`, anonymously. Even at its best anonymous tier, NLI is
+nowhere near this pipeline's OCR/vision-adjudication quality bar. An NLI
+account might unlock something higher (untested) — until confirmed otherwise,
+treat 1745×2658 as the ceiling. NLI's site is still the right pointer to give
+someone else acquiring this text for the first time (per
+`CASE-YAD-MALACHI.md`'s "Preparing the text for Sefaria" section, sourcing
+from NLI sidesteps Google Books' terms of use for redistribution) — but only
+if *they* use an NLI account to get full resolution.
+
+**NLI's PDF is 336 pages, not 337 — a constant 1-page offset, not a different
+scan.** This pipeline's local PDFs came from a Google Books scan whose page 0
+is a "Digitized by Google" disclaimer page that NLI's own digitization doesn't
+have. Confirmed by direct comparison: NLI page *i* = the Google-sourced PDF's
+page *i + 1* for every page checked, including at the transposed-leaf region.
+**Every page-indexed cache in this pipeline** (`docai_word_boxes/`,
 `images/pdf_pages/`, `gematria_trace_part1.json`,
 `part1_header_anchored_alignment.json`) **is indexed against the
-Google-sourced 337-page numbering** — kept only as a documented offset in
-case a future, actually-equivalent-quality NLI source is ever adopted; not
-acted on now.
+Google-sourced 337-page numbering** — the offset is documented only in case a
+future, actually-equivalent-quality NLI source is ever adopted; not acted on
+now.
 
-**The scan itself had two leaves out of order — a defect in the source
-binding, not an extraction bug.** Two physical leaves were transposed; true
-reading order is printed page 36 → 38 → 37 → 39, found via a
-catchword-chain sweep (each page's closing catchword should match the next
-page's opening word) and confirmed by rendering both pages directly. On
-the Google-sourced 337-page numbering (this repo's local PDFs), that's
-0-indexed leaf 37 moving to position 36; on an NLI-sourced 336-page PDF
-(one page earlier throughout, see above), the same physical leaves are at
-0-indexed 36 moving to position 35. Fixed with `fitz.move_page` (page count
-unchanged either way) — `berlin_square_corrected.pdf` (local, not
-git-tracked, fixed) is the only PDF that should ever be used as the
-pipeline's source; `berlin_square_original_transposed.pdf` (local,
-pre-fix) is kept only as a diffable reference, never to be fed to the
-pipeline directly. Every
-page-indexed cache built before the fix had to move in lockstep:
-`docai_word_boxes/page_37.json` ⇄ `page_38.json`, `images/pdf_pages/
-page_37.png` ⇄ `page_38.png`, and klalim 76-84's page attribution in
+### The transposed leaves — a defect in the source binding, not an extraction bug
+
+Two physical leaves were bound out of order; true reading order is printed
+page 36 → 38 → 37 → 39. Found via a catchword-chain sweep (each page's closing
+catchword should match the next page's opening word) and confirmed by
+rendering both pages directly.
+
+On the Google-sourced 337-page numbering (this repo's local PDFs) that's
+0-indexed leaf 37 moving to position 36; on an NLI-sourced 336-page PDF, the
+same physical leaves are at 0-indexed 36 moving to position 35. Fixed with
+`fitz.move_page` (page count unchanged either way).
+**`berlin_square_corrected.pdf` is the only PDF that should ever be used as
+the pipeline's source**; `berlin_square_original_transposed.pdf` (pre-fix) is
+kept only as a diffable reference, never fed to the pipeline. Every
+page-indexed cache built before the fix moved in lockstep:
+`docai_word_boxes/page_37.json` ⇄ `page_38.json`,
+`images/pdf_pages/page_37.png` ⇄ `page_38.png`, and klalim 76-84's page
+attribution in
 `gematria_trace_part1.json`/`part1_header_anchored_alignment.json` remapped
-page 37 → 38. `part1.json`'s own `page` field was deliberately left
-untouched (already stale/dead metadata for most of Part 1).
+page 37 → 38. `part1.json`'s own `page` field was deliberately left untouched
+(already stale/dead metadata for most of Part 1).
 
-**If you ever need to redo this** — e.g. starting from a completely fresh
-scan download rather than this repo's own local `berlin_square_
-corrected.pdf` — use `tools/fix_transposed_leaf.py`, a small reusable CLI
-built 2026-08-18 and verified two ways: byte-for-byte against the local
+**If you ever need to redo this** — e.g. starting from a completely fresh scan
+download — use `tools/fix_transposed_leaf.py`, a small reusable CLI built
+2026-08-18 and verified two ways: byte-for-byte against the local
 Google-sourced PDF, and by direct content inspection against a fresh NLI
 download. **Use the indices matching whichever source you actually pulled
-from** — they differ by 1 (see above):
+from** — they differ by 1:
 
 ```bash
 # Google-sourced PDF (this repo's local files use this numbering):
@@ -155,11 +182,11 @@ python3 tools/fix_transposed_leaf.py --pdf berlin_square_original_transposed.pdf
 ```
 
 It only fixes the PDF's own physical page order — it does not know about
-`docai_word_boxes/`, `images/pdf_pages/`, or the alignment/trace files, so
-any of those built from a differently-ordered (or differently-sourced) PDF
-still need the manual remap described above. This is a generic
-leaf-reordering tool, not Yad-Malachi-specific, in keeping with this
-project's generalization goal.
+`docai_word_boxes/`, `images/pdf_pages/`, or the alignment/trace files, so any
+of those built from a differently-ordered (or differently-sourced) PDF still
+need the manual remap described above. This is a generic leaf-reordering tool,
+not Yad-Malachi-specific, in keeping with this project's generalization goal.
+
 
 ## Success criteria (in priority order)
 
@@ -233,7 +260,9 @@ For exactly what each data file contains, see `PIPELINE-DATA-REFERENCE.md`.
   the 5 `rebuild_all.sh`-orchestrated correction-data stages
   (`build_klalim_demo_dataset.py`, `build_corrections_dataset.py`,
   `verify_corrections_vision.py`, `assemble_corrections_dataset.py`,
-  `build_klal_page_regions.py`), the live review tool (`review_server.py`,
+  `build_klal_page_regions.py`), the marker/scan-linkage trace builder run
+  separately from that chain and covering all three parts
+  (`build_gematria_trace.py`), the live review tool (`review_server.py`,
   `review_decisions.py`, `apply_reviewer_decisions.py`,
   `audit_applied_decisions.py`), and two shared library modules that are
   imported, never run directly, by scripts in both `pipeline/` and
@@ -243,28 +272,43 @@ For exactly what each data file contains, see `PIPELINE-DATA-REFERENCE.md`.
   page-token loading, alignment/gematria-trace readers, Hebrew-text
   helpers). Both are imported via
   `sys.path.insert(0, os.path.join(REPO, "pipeline"))`.
-- **`tools/`** — everything run manually/standalone: all validators
-  (`validate_klal_span_coverage.py`, `validate_catchword_continuity.py`,
-  `validate_title_alphabetical_order.py`, `check_klal_token_orphans.py`,
-  `detect_ligature_corruption.py`, `validate_part1_corpus_integrity.py`,
-  `validate_lexicon_independent.py`, `detect_real_word_substitution.py`,
-  `check_next_marker_and_title.py`, `verify_flagged_candidates_vision.py`),
-  the lexicon/abbreviation-expansion scripts
-  (`extract_abbreviation_forms.py`, `propose_abbreviation_expansions.py`,
-  `review_lexicon_gaps.py`), the reference-corpus fetcher
-  (`fetch_sefaria_reference_corpus.py`), the punctuation pass
-  (`propose_punctuation_part1.py`, `apply_punctuation_decisions.py`), the
-  witness/reconstruction scripts (`verify_reconstruction_witness.py`,
-  `verify_witness_vision.py`), the DocAI page-extraction script
-  (`extract_docai_pages.py`, promoted 2026-08-18 from
-  `archive/scripts/extend_docai_ocr.py` — needs a GCP service-account key,
-  not part of `rebuild_all.sh`), the leaf-order-fix tool
-  (`fix_transposed_leaf.py`), and the local-setup verifier
-  (`verify_local_setup.py`, see `SETUP.md`).
+- **`tools/`** — everything run manually/standalone. None of it is part of
+  `rebuild_all.sh`. Grouped by what it's for:
+  - **Validators** (assert an invariant, exit non-zero on violation):
+    `validate_klal_span_coverage.py`, `validate_catchword_continuity.py`,
+    `validate_title_alphabetical_order.py`,
+    `validate_part1_corpus_integrity.py`, `validate_lexicon_independent.py`,
+    `check_klal_token_orphans.py`, `check_next_marker_and_title.py`.
+  - **Corpus-wide defect sweeps** (cheap, mechanical, no LLM — Lesson 8/18:
+    run these routinely after any batch of edits):
+    `detect_ligature_corruption.py`, `detect_real_word_substitution.py`,
+    `detect_cross_klal_errors.py`, `detect_insertion_deletion.py`,
+    `detect_repeated_words.py`, `detect_split_merge.py`.
+  - **Lexicon / abbreviation work**: `extract_abbreviation_forms.py`,
+    `propose_abbreviation_expansions.py`, `review_lexicon_gaps.py`,
+    `build_part1_freq.py`, and the reference-corpus fetcher
+    `fetch_sefaria_reference_corpus.py`.
+  - **Punctuation pass**: `propose_punctuation_part1.py`,
+    `apply_punctuation_decisions.py`.
+  - **Witness / reconstruction** (the DocAI-vs-Tesseract second opinion on
+    page-crossing klalim): `verify_reconstruction_witness.py`,
+    `verify_witness_vision.py`, `verify_flagged_candidates_vision.py`,
+    `patch_witness_word_indices.py`.
+  - **Export**: `export_corpus.py` — writes the reviewed corpus as plain
+    text, ALTO XML v4, PAGE XML 2019, or TEI P5, applying all current human
+    decisions in memory exactly as `apply_reviewer_decisions.py` would,
+    without touching `part1.json`. The archival-standards output that makes
+    the corpus ingestible by institutional tooling.
+  - **Source acquisition and setup**: `extract_docai_pages.py` (DocAI
+    extraction — needs a GCP service-account key; promoted 2026-08-18 from
+    `archive/scripts/extend_docai_ocr.py`), `fix_transposed_leaf.py` (the
+    leaf-order fix, see the scan section above), `verify_local_setup.py`
+    (proves a fresh migration actually landed — see `SETUP.md`).
 - **`tests/`** — the pytest suite. `rebuild_all.sh`'s step 6/6 runs
-  `test_corpus_invariants.py` (checks the DATA a pipeline run produced) and
-  `test_pipeline_logic.py` (checks the pure decision LOGIC on synthetic
-  inputs) as a hard gate. `test_review_server.py` (Playwright, live
+  `test_corpus_invariants.py` (25 tests — checks the DATA a pipeline run
+  produced) and `test_pipeline_logic.py` (197 tests — checks the pure decision
+  LOGIC on synthetic inputs) as a hard gate. `test_review_server.py` (14
+  Playwright tests, live
   server) stays outside the gate, run manually.
 - Data files, caches, `rebuild_all.sh`, `review_frontend/`, and every
   `.md`/`.html` doc live at root.
@@ -351,6 +395,11 @@ python3 tools/verify_local_setup.py                # after migrating to a new ma
 - `PIPELINE-DATA-REFERENCE.md` — what each data file contains, field by
   field.
 - `CASE-YAD-MALACHI.md` — the case for why this work needs digitizing.
+- `CORPUS-COMPARISON.md` — the citation survey behind that case's demand
+  figures.
+- `COMPETITIVE-LANDSCAPE.md` — the other Hebrew digitization platforms, what
+  to borrow from them, and what is genuinely unique here.
+- `VERIFIED-AGAINST-THE-INK.html` — the outward-facing evidence showcase.
 - `DOCS-HISTORY.md` — this document's own history.
 
 ---

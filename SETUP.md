@@ -1,5 +1,33 @@
 # Setup
 
+## TL;DR
+
+Seven steps, and **two of them are the ones that actually bite**:
+
+```bash
+git clone https://github.com/esafern/sefer-digitization-pipeline.git
+cd sefer-digitization-pipeline
+git config user.email "109570+esafern@users.noreply.github.com"
+tar -xf yad-malachi-migration.tar        # ← obtained out-of-band, ~467 MB
+python3 -m venv venv && source venv/bin/activate
+pip install -r requirements.txt -r requirements-dev.txt
+playwright install chromium              # ← separate from pip; easy to skip
+export GEMINI_API_KEY="..."              # put it in ~/.zshrc
+python3 tools/verify_local_setup.py && pytest tests/ -q
+```
+
+**The tarball is not optional and not in git.** The source PDFs, credentials,
+and every large cache directory travel out-of-band. Without it the review
+dashboard's scan pane is blank and most of `tools/` can't run.
+
+**`playwright install chromium` is a separate step from `pip install`.**
+Skipping it leaves the browser tests failing with "Executable doesn't exist"
+and nothing else explaining why.
+
+**`python3 tools/verify_local_setup.py` is the actual proof it worked** — it
+opens both PDFs, parses `credentials.json`, and reads `docai_word_boxes/`
+through the real loader, rather than just checking that filenames exist.
+
 ## New machine, step by step
 
 ### 1 — Clone the repo
@@ -87,8 +115,14 @@ deactivates it.
 
 ```bash
 python3 tools/verify_local_setup.py   # checks files, PDFs, credentials, GEMINI_API_KEY
-pytest tests/ -q                       # 199 tests; all should pass
+pytest tests/ -q                       # 236 tests as of 2026-08-19; all should pass
 ```
+
+That 236 splits as 222 gate tests (`test_corpus_invariants.py` 25 +
+`test_pipeline_logic.py` 197, both run by `rebuild_all.sh`'s step 6/6) and 14
+Playwright browser tests (`test_review_server.py`, outside the gate). The
+count grows as tests are added — treat a *higher* number as normal and any
+failure as real.
 
 ---
 

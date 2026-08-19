@@ -3,17 +3,34 @@
 _Scan, OCR, and structure one foundational public-domain work of Torah that is heavily
 relied upon but has no public digital text._
 
-> **Bottom line.** *Yad Malachi* is the **#1 public-domain work Sefaria lacks** — cited
-> **287 times inside Sefaria's own corpus** (every one a dead link) and **243 times** in
-> **Halachipedia**[^halachipedia] (an open compendium of contemporary halachic analysis).
-> It is public domain, and **four editions in five scans are already in hand** — three
-> of the four editions in clean square type, the kind general OCR reads best. All 667
-> numbered *klalim* are OCR'd and structured, and **Part 1** (*Klalei HaGemara*, 222
-> klalim) has already reached full-corpus-scale, image-grounded AI adjudication — not a
-> pilot anymore (see ["Current state"](#current-state) for the verified numbers).
-> Marker-position verification already reaches all three parts. **Current step:**
-> independent outside confirmation that Part 1's output is clean, then extending the
-> same scan-region and adjudication rigor to Parts 2–3.
+## TL;DR
+
+**The work.** *Yad Malachi* (Livorno 1766–7) is the standard reference on the *rules* of
+halachic reasoning — 667 numbered *klalim* across three parts.
+
+**The demand is measured, not asserted.** Sefaria's own corpus cites it **287 times**, and
+every one is a dead link. Halachipedia cites it **243 times** — **26% of every
+public-domain citation Sefaria lacks, in one work**, and roughly **twice** the next
+public-domain title on record ([the table below](#the-free-to-digitize-tier-is-one-work)).
+
+**It is the easiest big win available.** Public domain, cleanly numbered (klalim map
+straight onto a Sefaria schema), and **already scanned** — four editions in five scans in
+hand, three of them in clean square type.
+
+**The work is largely done.** All 667 klalim are OCR'd and structured. **Part 1** (*Klalei
+HaGemara*, 222 klalim) has 222/222 trusted page-to-klal alignment and image-grounded,
+selection-only AI adjudication running as its routine correction pipeline — not a pilot.
+Parts 2–3 have marker verification and the scan-linkage/adjudication infrastructure built
+and run over their full page range, with 916 klalim carrying an open review flag — and,
+by standing decision, not one correction applied to them yet.
+
+**What's needed.** (1) An outside Talmid Chacham confirming Part 1's output is clean —
+this pipeline's own self-assessment is not the gate. (2) Working through Parts 2–3's open
+flags and applying what they confirm. (3) Coordinating ingest with Sefaria.
+
+**The payoff.** 287 dead references light up automatically, hand-re-keying from scans
+ends, and the harness is reusable — every public-domain work after this one costs a few
+hundred dollars, not a project.
 
 ## The work
 
@@ -60,12 +77,36 @@ each unfollowable, because the work isn't in the library. Who cites it, and what
   edition (2016), a third volume (2018)[^wiki]; and modern scholarship calls it *"one of
   the most important halakhic rule books"* / *"one of the classic books of rules."*[^brown]
 - **243 citations in Halachipedia**[^halachipedia] — the **single most-cited public-domain
-  work Sefaria lacks.**[^mostwanted]
+  work Sefaria lacks**[^mostwanted] (see the table below).
 - **Live debate, and the pain point in the wild** — on one Torah forum, Yad Malachi appears
   in **~108 posts across ~71 discussions** (50 by a specific *klal*), and **6 are requests
   for a *scan* of a klal**, because no clean digital text exists.[^forum]
 - **Central to R. Ovadia Yosef's school** — whose works are ~⅓ of every citation Sefaria
   lacks, and whose method is built on the *klalei ha-hora'ah* that Yad Malachi codifies.[^ovadia]
+
+### The free-to-digitize tier is one work
+
+A survey of Halachipedia's full 640-page corpus[^halachipedia] sorted every work Sefaria
+*lacks* into a public-domain tier (digitize freely, no licensing) and a modern
+in-copyright tier. The public-domain tier is **21 works / 939 citations** — and Yad
+Malachi is a quarter of it by itself:
+
+| Public-domain work Sefaria lacks | Halachipedia citations | vs. Yad Malachi |
+|---|---:|---:|
+| **Yad Malachi** (Malachi HaKohen, d. 1772) | **243** | — |
+| Birkei Yosef (Chida, d. 1806) † | 129 | 1.9× fewer |
+| Sdei Chemed (C. C. Medini, d. 1904) | 32 | 7.6× fewer |
+| Rokeach · Yafeh Lelev · Maharam Chalava (tied) | 18 each | 13.5× fewer |
+
+† The Birkei Yosef figure comes from this project's original citation research and was
+**not** re-derived in the later full-corpus sweep, which itemized per-work counts only for
+works it newly surfaced. So rows 2–4 are the highest per-work figures this repo actually
+records — not certified ranks 2, 3 and 4, and the tier's un-itemized middle is known to
+hold works above 32.[^pdtier]
+
+What is not in doubt is the top row: **243 of the tier's 939 citations — 26% of every
+public-domain citation Sefaria lacks — sit on one work.** Nothing else in the tier is
+close, at either figure on record for the runner-up.
 
 ## The gap this closes
 
@@ -160,9 +201,10 @@ estimated:
 
 - **222 / 222** Part-1 klalim have a trusted page-to-klal alignment (up from a partial
   208/222 earlier in the project) — the scan-to-text mapping every crop depends on.
-- **127 flagged word-level candidates remain open** — down sharply from the high-700s as
-  corrections get applied — and **91 of those already carry a vision-model verdict against
-  the actual scan crop, 90 at ≥0.9 confidence.** The model returns an honest low-confidence
+- **387 word-level correction candidates across 149 klalim**, of which **125 remain open**
+  (machine-disputed, nobody has ruled) — down sharply from the high-700s as corrections
+  get applied — and **91 of those 125 already carry a vision-model verdict against the
+  actual scan crop, 90 at ≥0.9 confidence.** The model returns an honest low-confidence
   "uncertain" rather than a fabricated guess when a crop is genuinely too ambiguous to call.
 - **A systematic, corpus-wide OCR defect was found, root-caused, and fixed**: this print
   sets the letter pair *aleph-lamed* as a single ligature glyph that the OCR engine has no
@@ -186,20 +228,26 @@ estimated:
 - Every correction of this kind is recorded through an append-only decision log, kept
   deliberately separate from the corpus-rebuild pipeline so no automated run can ever
   silently overwrite a human judgment call, and the codebase carries a standing regression
-  suite (100+ tests) plus multiple independent code-revalidation passes checking the
-  pipeline's own decision logic, not just its output.
+  suite (236 tests — 222 gating every pipeline rebuild, 14 browser tests over the review
+  dashboard) plus multiple independent code-revalidation passes checking the pipeline's
+  own decision logic, not just its output.
 
-Marker-position verification — where each klal's own gematria marker sits on the scan,
-and whether the text after it matches what's stored — now reaches all three parts, not
-just Part 1. What Parts 2–3 (*Klalei HaPoskim*, *Klalei HaDinim* — 445 of 667 klalim)
-don't yet have is the layer built on top of that: trusted per-klal scan regions and the
-DocAI-vs-stored-text adjudication pass Part 1 already runs. Building and applying that —
-and any correction it finds — stays deliberately **out of scope** until Part 1 is
-independently confirmed clean by an outside reviewer — not because the method doesn't
-generalize, but because Parts 2–3's own scan data has already been observed to fail
-differently, and worse, than Part 1's on at least two unrelated defect classes, so a
-clean Part 1 is not by itself evidence Parts 2–3 will come out equally clean by the same
-process.
+**Parts 2–3** (*Klalei HaPoskim*, *Klalei HaDinim* — 445 of 667 klalim) are further along
+than they were, and deliberately stopped short of the finish line. Marker-position
+verification — where each klal's own gematria marker sits on the scan, and whether the
+text after it matches what's stored — now reaches all three parts. The scan-linkage and
+vision-adjudication infrastructure has since been built and run over their full page
+range too, and has surfaced real, scan-confirmed data issues: **916 klalim there currently
+carry an open review flag.**
+
+**Not one of those findings has been written into `part2.json`/`part3.json`** — by
+standing decision, not oversight. Applying them waits on the same independent
+confirmation Part 1 is waiting on. The reason is specific rather than precautionary:
+Parts 2–3's scan data has already been observed to fail *differently, and worse*, than
+Part 1's on unrelated defect classes — one page-furniture contamination bug hit Part 1 at
+roughly one instance and Parts 2–3 at 74 of 445 klalim. A clean Part 1 is not by itself
+evidence Parts 2–3 come out clean by the same process, which is exactly why they get
+their own verification pass rather than an inherited verdict.
 
 ## Cost
 
@@ -258,11 +306,11 @@ Digitize Yad Malachi and place it in Sefaria — the top freely-digitizable work
    (*Klalei HaGemara*, 222/222 klalim aligned) through a working human-review dashboard —
    the next gate is a Talmid Chacham confirming the output independently, not this
    pipeline's own self-assessment, before anything downstream builds on it.
-2. **Extend the alignment and correction pipeline to Parts 2–3.** Marker-position
-   verification is already built corpus-wide; what's left is the per-klal scan regions
-   and the DocAI-vs-stored-text adjudication pass Part 1 already has — deliberately not
-   started before (1), since Parts 2–3's own scan data has already shown it can fail
-   differently, and worse, than Part 1's.
+2. **Finish Parts 2–3.** Marker verification and the scan-linkage/adjudication
+   infrastructure are built and have been run over their full page range; 916 klalim there
+   carry an open review flag. What's left is the human review pass and then applying what
+   it confirms — held behind (1) because Parts 2–3's own scan data has already shown it
+   can fail differently, and worse, than Part 1's.
 3. **Coordinate ingest** with Sefaria (**hello@sefaria.org**), attaching each printing as
    its own version.
 
@@ -334,11 +382,19 @@ the cost of every public-domain work after this one.
     in-copyright works (Yalkut Yosef, Chazon Ovadyah, Igrot Moshe, Shemirat Shabbat
     KeHilchata, Yabia Omer) — `CORPUS-COMPARISON.md` confirms this same ranking and
     this same five, at higher counts (945/573/485/409/320) than the original
-    citation. Yad Malachi is the top work that can be freely digitized. The specific
-    claim that the next public-domain work, Birkei Yosef, trails at 129 isn't in
-    `CORPUS-COMPARISON.md` (its own "newly surfaced" list only covers PD works that
-    weren't already known from an earlier, smaller sample) and so remains presented
-    as originally researched, not independently re-verified here.
+    citation. Yad Malachi is the top work that can be freely digitized. For what is and
+    isn't verified about the works *below* it in the public-domain tier, see [^pdtier].
+
+[^pdtier]: Tier totals (21 public-domain works / 939 citations) and the per-work counts
+    for Sdei Chemed, Rokeach, Yafeh Lelev and Maharam Chalava are read directly off
+    `CORPUS-COMPARISON.md` in this repo. That file itemizes per-work counts only for
+    works its wider 640-page sweep *newly surfaced* — the public-domain works already
+    known from the earlier 250-page sample are counted in the 21/939 totals but never
+    listed individually. Arithmetic on what's left makes the gap explicit and is the
+    reason the caveat above is stated rather than glossed: the 15 un-itemized
+    public-domain works share 593 citations, averaging ~40 each, so several of them
+    necessarily sit above Sdei Chemed's 32. Recovering the tier's true ranking would mean
+    re-running the underlying Halachipedia survey, whose raw output is not in this repo.
 
 [^livorno]: **Livorno 1766–7, first edition** (HebrewBooks #32530 / #32532 / #32531).
     Title page: *ספר יד מלאכי*, by *מלאכי בכמ"ר יעקב הכהן*; the three parts (Klalei

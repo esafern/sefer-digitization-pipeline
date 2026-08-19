@@ -3,6 +3,33 @@
 _Mined the entire mineable corpus (640 substantial pages, gently/serially) and
 rebuilt the most-wanted list. This compares it to the original 250-page sample._
 
+## TL;DR
+
+**The 250-page sample was already right.** Going 2.6× wider took citations from
+14,268 → 38,195 but moved the count of *absent* works from 72 → 71. The extra
+data didn't reveal a long tail of new missing works; it piled 2.5× more
+citations onto the works already identified.
+
+**One beit midrash dominates.** R. Ovadia Yosef's circle (Yalkut Yosef, Chazon
+Ovadyah, Yabia Omer, Yechave Daat, Halacha Brurah, Taharat Habayit) accounts
+for ~2,300 of the 6,771 absent citations — **a third of the entire demand
+signal**. It's all modern and in copyright.
+
+**The free win is the public-domain tier: 21 works, 939 citations** — and **Yad
+Malachi alone is 243 of them (26%)**, having jumped straight to #6 overall on
+the wider sweep.
+
+**Read the methodology note before quoting a rank.** The builder only verifies
+the top-250 works by frequency, and this file itemizes per-work counts *only*
+for works the wider sweep newly surfaced. The already-known public-domain works
+are inside the 21/939 totals but never listed individually — so this file
+cannot establish who ranks #2 in that tier. See
+`CASE-YAD-MALACHI.md`'s public-domain table, which states that limit
+explicitly, and `PROJECT-STATUS.md` open item 4.
+
+**This is a snapshot, not a live link.** It will go stale if the Halachipedia
+corpus changes; the raw survey output is not in this repo.
+
 ## Headline: demand concentrated, it didn't broaden
 
 | | 250-page sample | full 640-page | change |
