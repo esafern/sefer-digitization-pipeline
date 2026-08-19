@@ -396,7 +396,7 @@ function renderKlalBody(block, k) {
         ? `DocAI: ${corr.docai_reading} | Tesseract: ${corr.tesseract_reading || '—'}`
         : '';
       span.onclick = () => {
-        if (corr.page) showPage(corr.page, k.klal_id);
+        if (corr.page) showPage(corr.page, k.klal_id, corr);
         openWitnessPanel(corr);
       };
       body.appendChild(span);
@@ -514,7 +514,7 @@ function attachWordHandlers(el, klalId, corr, isGap) {
   el.addEventListener('mouseleave', () => { tooltip.style.display = 'none'; });
   el.addEventListener('click', () => {
     tooltip.style.display = 'none';
-    if (corr.page) showPage(corr.page, klalId);
+    if (corr.page) showPage(corr.page, klalId, corr);
     openCandidatePanel(klalId, corr);
   });
 }
@@ -1345,7 +1345,7 @@ function setupZoomPan() {
   document.getElementById('page-nav-next').onclick = () => goToPageOffset(1);
 }
 
-async function showPage(page, focusKlalId) {
+async function showPage(page, focusKlalId, focusCorr = null) {
   const gen = ++_showPageGen;
   if (page !== currentPage) {
     currentPage = page;
@@ -1382,6 +1382,12 @@ async function showPage(page, focusKlalId) {
   if (gen !== _showPageGen) return; // superseded while awaiting /api/page/
   pageItems.forEach(c => {
     if (!c.bbox) return;
+    // Is this the specific word the reviewer clicked in the text pane?
+    const isFocused = focusCorr && c.klal_id === focusKlalId && (
+      c.kind === 'witness'
+        ? c.docai_token_index === focusCorr.docai_token_index
+        : c.word_index === focusCorr.word_index
+    );
     if (c.kind === 'witness') {
       // Same tri-state treatment as every other flagged word (2026-08-12,
       // user request: "put the witness flags in as machine-disputed same
@@ -1390,7 +1396,7 @@ async function showPage(page, focusKlalId) {
       // an open dispute or a human decision.
       const box = document.createElement('div');
       const state = c.current_decision ? 'human' : 'open';
-      box.className = 'hl-box hl-state-' + state + (c.klal_id === focusKlalId ? '' : ' dim');
+      box.className = 'hl-box hl-state-' + state + (c.klal_id === focusKlalId ? '' : ' dim') + (isFocused ? ' focused' : '');
       const color = STATE_META[state].color;
       box.style.setProperty('--hl-color', color);
       box.style.background = color + '33';
@@ -1407,7 +1413,7 @@ async function showPage(page, focusKlalId) {
     }
     const box = document.createElement('div');
     const state = wordState(c);
-    box.className = 'hl-box hl-state-' + state + (c.klal_id === focusKlalId ? '' : ' dim');
+    box.className = 'hl-box hl-state-' + state + (c.klal_id === focusKlalId ? '' : ' dim') + (isFocused ? ' focused' : '');
     const color = STATE_META[state].color;
     box.style.setProperty('--hl-color', color);
     box.style.background = color + '33';

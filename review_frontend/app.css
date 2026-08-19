@@ -115,6 +115,15 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
    (see comment above), so the scan pane deliberately doesn't reproduce the
    text pane's solid/dotted distinction. */
 .hl-box.dim { opacity: 0.35; }
+/* The specific word clicked in the text pane: thicker ring + glow so it
+   stands out from the other same-colored boxes on the page. z-index so
+   the glow renders above adjacent boxes without shifting layout. */
+.hl-box.focused {
+  box-shadow: 0 0 0 3px var(--hl-color, currentColor), 0 0 8px 2px var(--hl-color, currentColor);
+  background: color-mix(in srgb, var(--hl-color, currentColor) 25%, transparent) !important;
+  z-index: 5;
+  opacity: 1 !important;
+}
 .hl-current-klal {
   position: absolute;
   border-radius: 4px;
