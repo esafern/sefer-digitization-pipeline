@@ -72,9 +72,10 @@ function wordState(corr) {
   if (corr.opcode === 'ai_flag') return 'open';
   if (corr.current_decision) return 'human';
   if (corr.flag === 'current_text_confirmed') return 'machine';
-  // Witness items: vision pass selected a real reading (A or B) ->
-  // machine-resolved; NEITHER (vision couldn't decide) or absent -> open.
+  // Witness items: human decision wins first, then vision-selected A/B ->
+  // machine-resolved; NEITHER or absent -> open.
   if (corr.opcode === 'witness') {
+    if (corr.current_decision) return 'human';
     return (corr.vision_selected === 'A' || corr.vision_selected === 'B') ? 'machine' : 'open';
   }
   return 'open';
@@ -1185,6 +1186,11 @@ async function openWitnessPanel(w) {
       <div style="font-size:12px;color:var(--ink-faint);">Two OCR engines disagree here and both readings are real Hebrew
       words, so a word-lexicon check can't tell them apart - this needs the ink.</div>
     </div>
+    ${decision ? `<div class="panel-section">
+      <div class="panel-label">Current decision</div>
+      <div style="color:${STATE_META.human.color};font-weight:600;">${STATE_META.human.label}: &ldquo;${escapeHtml(decision.chosen_text !== '' ? decision.chosen_text : '(unreadable)')}&rdquo;</div>
+      ${decision.note ? `<div style="font-size:12px;color:var(--ink-faint);margin-top:2px;">${escapeHtml(decision.note)}</div>` : ''}
+    </div>` : ''}
     <div class="panel-section">
       <div class="panel-label">Raw OCR context (page ${w.page}, unverified - furniture/misreads possible)</div>
       <div class="panel-word-context">${ctxHtml}</div>
@@ -1259,6 +1265,14 @@ async function saveWitnessDecision(w) {
     }),
   });
   if (!res.ok) { alert('Save failed: ' + (await res.text())); return; }
+
+  // Re-fetch this klal so text-pane spans get corr.current_decision set,
+  // and the word turns green (human state) immediately without a full reload.
+  delete mountedKlal[w.klal_id];
+  delete fetchInFlight[w.klal_id];
+  const freshK = await fetchKlal(w.klal_id);
+  const block = document.getElementById('klal-block-' + w.klal_id);
+  if (block) renderKlalBody(block, freshK);
 
   // Refresh the witness page summary (decided counts) and redraw this
   // page's boxes so the saved item's box state updates immediately.
