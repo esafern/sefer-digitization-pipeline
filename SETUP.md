@@ -87,7 +87,7 @@ exist" errors on every browser test:
 playwright install chromium
 ```
 
-### 5 — Set GEMINI_API_KEY
+### 5 — Set GEMINI_API_KEY & Model Rules
 
 The vision-adjudication pipeline authenticates to Gemini via an env var, not
 a file. Add to `~/.zshrc` (or `~/.bashrc`) and restart your shell:
@@ -96,7 +96,19 @@ a file. Add to `~/.zshrc` (or `~/.bashrc`) and restart your shell:
 export GEMINI_API_KEY="your-key-here"
 ```
 
-### 6 — Auto-activation with direnv (recommended)
+> [!WARNING]
+> **Gemini Model Invariant:** Never call `gemini-2.x` or `gemini-2.5-flash`
+> (permanently deprecated / 404 since 2026-08-05). Always use `gemini-3.6-flash`
+> (primary) or `gemini-3.5-flash` (fallback), routed through
+> `pipeline/vision_adjudication_common.py` (`make_client()` / `adjudicate_with_retry()`).
+
+### 6 — Python & ML Dependency Version Constraints
+
+If installing optional ML/OCR libraries into the venv (e.g., for local model evaluation):
+- **PyTorch & NumPy:** `torch 2.2.2` requires `numpy<2` (e.g. `numpy 1.26.4`). Installing `numpy>=2.0` breaks PyTorch C-extensions with `_ARRAY_API not found`.
+- **Companion Libraries:** Keep `scipy<1.14` (e.g. `1.13.1`) and `opencv-python-headless<4.10` (e.g. `4.9.0.80`) to prevent NumPy 2.x upgrade conflicts in Python 3.12.
+
+### 7 — Auto-activation with direnv (recommended)
 
 Manually re-activating the venv each session is easy to forget. This repo
 ships a tracked `.envrc` (`source venv/bin/activate`) that
@@ -111,15 +123,15 @@ direnv allow .          # one-time trust of this repo's .envrc
 After that, `cd` into the repo activates the venv automatically; `cd` out
 deactivates it.
 
-### 7 — Verify
+### 8 — Verify
 
 ```bash
 python3 tools/verify_local_setup.py   # checks files, PDFs, credentials, GEMINI_API_KEY
-pytest tests/ -q                       # 236 tests as of 2026-08-19; all should pass
+pytest tests/ -q                       # 241 tests as of 2026-08-20; all should pass
 ```
 
-That 236 splits as 222 gate tests (`test_corpus_invariants.py` 25 +
-`test_pipeline_logic.py` 197, both run by `rebuild_all.sh`'s step 6/6) and 14
+That 241 splits as 227 gate tests (`test_corpus_invariants.py` 25 +
+`test_pipeline_logic.py` 202, both run by `rebuild_all.sh`'s step 6/6) and 14
 Playwright browser tests (`test_review_server.py`, outside the gate). The
 count grows as tests are added — treat a *higher* number as normal and any
 failure as real.

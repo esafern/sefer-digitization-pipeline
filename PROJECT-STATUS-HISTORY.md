@@ -17,6 +17,27 @@ current file references, or when grepping for how a past finding was
 resolved. Same append-at-top convention as before: newest entries go right
 after this header, not at the bottom.
 
+### DONE 2026-08-20 — Dicta OCR portal assessed (Dropbox proofreader, not a public PDF OCR endpoint); codebase review complete
+
+Investigation of `https://ocr.dicta.org.il` and full review of codebase and test suites.
+
+**Dicta OCR portal architecture & investigation:**
+- Inspected the live Vue client bundle (`https://ocr.dicta.org.il/assets/index-B6te2D74.js`).
+- The portal is titled "הגהת מסמכים סרוקים" (Proofreading of Scanned Documents), `toolName: "ocr2"`.
+- Architecture: Integrates with Dropbox OAuth (`/dropbox-auth`) to load existing transcription files (`.docx`, `.txt`) from a user's Dropbox folder for proofreading and saving edits back to Dropbox.
+- Research confirms Dicta provides Hebrew OCR across its platform and digital library; however, the `ocr.dicta.org.il` URL appears to function as a proofreading editor, and the exact mechanism for direct public web upload of raw PDFs remains unconfirmed and under active investigation.
+
+**Bugs and fixes:**
+1. **Review server test suite initialization**: `tests/test_review_server.py` passed an uncreated tempfile to `REVIEW_DECISIONS_PATH`. When `_preflight_check()` verified file existence, the server exited code 1. Fixed by touching the file prior to `Popen`.
+2. **Missing `witness` flag in `review_server.FLAG_LABELS`**: `/api/klal` serves `flag: "witness"` for reconstructed pages, but `FLAG_LABELS` lacked an entry for it. Added `"witness": ["Witness disagreement", "#805ad5"]`.
+3. **Deduplication in `tools/export_corpus.py`**: Replaced 55 lines of duplicated decision-application helpers (`_apply_replace`, `_apply_manual_correction`, etc.) with imports from `pipeline/apply_reviewer_decisions.py`.
+4. **`tools/test_trocr_benchmark.py` path and page mapping**: Fixed PDF resolution and DocAI page mapping (mapping sample PDF pages 1-3 to source pages 18-20 via `corpus_io`).
+5. **Test coverage for `tools/export_corpus.py`**: Added unit tests in `tests/test_pipeline_logic.py` covering plain, ALTO XML, PAGE XML, TEI P5, and bbox coordinate scaling.
+6. **Python dependency resolution & pinning**: Documented in `SETUP.md` that `torch 2.2.2` requires `numpy<2` (`1.26.4`), `scipy<1.14` (`1.13.1`), and `opencv-python-headless<4.10` (`4.9.0.80`) when installing ML/OCR tooling in Python 3.12, preventing C-extension `_ARRAY_API not found` breakage.
+7. **Gemini model invariant**: Re-documented in `SETUP.md` and `START_HERE.md` that `gemini-2.x` / `gemini-2.5-flash` is permanently unavailable/404; always use `gemini-3.6-flash` / `gemini-3.5-flash` via `vision_adjudication_common.py`.
+
+Test suite count increased from 236 to 241 (all 241 tests passing).
+
 ### DONE 2026-08-19 — HebrewBooks #14122 fastocr assessed and REJECTED as a witness; Przemysl 1877 is RASHI script, not square (CASE-YAD-MALACHI.md corrected)
 
 User surfaced `~/Downloads/Hebrewbooks_org_14122-*` — HebrewBooks' own

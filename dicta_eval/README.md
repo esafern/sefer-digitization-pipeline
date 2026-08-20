@@ -89,22 +89,11 @@ p19, 17–22 on p20).
 
 ## Status / next step
 
-**Blocked on getting Dicta's output, manually.** Browser automation against
-`ocr.dicta.org.il` failed repeatedly (2026-08-19): `navigate` succeeds, then
-every read against the tab fails with "couldn't determine which page this
-action targets," or times out. Roughly seven attempts across two Chrome
-restarts. Not worth further automation effort — the upload is a minute of
-manual work.
+**Investigation status (2026-08-20):**
+The web portal `ocr.dicta.org.il` appears to function primarily as an interactive proofreader ("הגהת מסמכים סרוקים") tied to a Dropbox integration for `.docx`/`.txt` files. Research confirms that Dicta provides powerful Hebrew OCR capabilities across its platform and digital library, but the exact mechanism for direct public web upload of raw image PDFs remains unconfirmed and under active investigation.
 
-**The UI trap to avoid.** `ocr.dicta.org.il` redirects to `/projects`, a
-project *manager*. With no projects, its empty state offers a Dropbox import
-that accepts only `DOCX`/`TXT` and errors with *"לא נמצאו בתיקייה קבצים
-שהמערכת יכולה לפתוח (DOCX, TXT)"*. That is the **import-existing-text** path,
-not OCR. Look for a create-new-project control and pick the **scan/image**
-source.
+If Dicta output is obtained (via API, updated web interface, or direct collaboration), drop the raw text output in this directory and run the automated diff against `groundtruth_klal_8_22.txt`.
 
-Then drop the output in this directory and diff it against
-`groundtruth_klal_8_22.txt`.
 
 ## Caveats
 

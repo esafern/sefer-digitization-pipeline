@@ -80,6 +80,9 @@ FLAG_LABELS = {
     # precisely for the unexpected case, which is exactly when rendering it
     # as an anonymous "Flagged" would be worst.
     "unverified": ["Unclassified (unexpected opcode)", "#718096"],
+    # ADDED: witness flag for independent-witness (DocAI vs Tesseract) disagreements
+    # on reconstructed continuation pages (reconstruction_witness_queue.json).
+    "witness": ["Witness disagreement", "#805ad5"],
 }
 
 MIME_TYPES = {

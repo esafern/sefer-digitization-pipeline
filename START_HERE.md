@@ -559,7 +559,9 @@ Two modules in `pipeline/` are libraries, not entry points — imported by
 scripts in **both** `pipeline/` and `tools/`:
 
 - **`vision_adjudication_common.py`** — crop/cache/JSON-recovery/retry/
-  client machinery for every Gemini-calling script.
+  client machinery for every Gemini-calling script. (Always uses
+  `gemini-3.6-flash` / `gemini-3.5-flash`; never call `gemini-2.x`, which is
+  permanently unavailable / 404).
 - **`corpus_io.py`** — repo paths, corpus and derived-artifact loading
   (`load_klalim`/`load_part1*`/`save_part1`/`load_json`), DocAI
   page-token loading (`load_docai_page`, `DocaiPageCache`), the alignment

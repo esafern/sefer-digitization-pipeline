@@ -87,6 +87,8 @@ def _open_dashboard(page, server, klal_id=None):
 def server():
     port = _free_port()
     decisions_path = tempfile.mktemp(suffix=".jsonl", prefix="test_review_decisions_")
+    with open(decisions_path, "w", encoding="utf-8") as f:
+        pass
     env = dict(os.environ)
     env["REVIEW_DECISIONS_PATH"] = decisions_path
 

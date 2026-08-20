@@ -62,6 +62,7 @@ import detect_repeated_words as drw  # noqa: E402
 import detect_insertion_deletion as did  # noqa: E402
 import detect_split_merge as dsm  # noqa: E402
 import detect_cross_klal_errors as dcke  # noqa: E402
+import export_corpus as exp  # noqa: E402
 
 
 # --- assemble_corrections_dataset: candidate drift detection -----------------
@@ -3326,3 +3327,93 @@ def test_cross_klal_skips_gershayim_tokens():
     indep_freq = {}
     results = dcke.find_cross_klal_suspects(klal_words, lexicon, indep_freq)
     assert results == []
+
+
+# --- export_corpus: archival format exports ----------------------------------
+
+def test_export_bbox_pixels_scales_normalized_coordinates():
+    bbox = {"x1": 0.25, "y1": 0.5, "x2": 0.75, "y2": 1.0}
+    x, y, w, h = exp._bbox_pixels(bbox)
+    assert x == 2500
+    assert y == 5000
+    assert w == 5000
+    assert h == 5000
+
+
+def test_export_plain_generates_valid_text_files(tmp_path):
+    sample_klalim = [
+        {"klal_id": 1, "gematria": "א", "title": "כלל ראשון", "clean_text": "טקסט ראשון"},
+        {"klal_id": 2, "gematria": "ב", "title": "כלל שני", "clean_text": "טקסט שני"},
+    ]
+    # Test single file export (returns count of files written: 1)
+    out_single = tmp_path / "single"
+    n_single = exp.export_plain(sample_klalim, str(out_single), by_klal=False)
+    assert n_single == 1
+    corpus_txt = (out_single / "corpus.txt").read_text(encoding="utf-8")
+    assert "[כלל א] כלל ראשון" in corpus_txt
+    assert "טקסט ראשון" in corpus_txt
+    assert "[כלל ב] כלל שני" in corpus_txt
+
+    # Test by-klal export (returns count of files written: 2)
+    out_by_klal = tmp_path / "by_klal"
+    n_by_klal = exp.export_plain(sample_klalim, str(out_by_klal), by_klal=True)
+    assert n_by_klal == 2
+    k1_txt = (out_by_klal / "klal_001.txt").read_text(encoding="utf-8")
+    assert "[כלל א] כלל ראשון" in k1_txt
+    assert "טקסט ראשון" in k1_txt
+
+
+def test_export_alto_generates_valid_xml_structure(tmp_path):
+    import xml.etree.ElementTree as ET
+    sample_klalim = [
+        {"klal_id": 1, "gematria": "א", "title": "כלל ראשון", "clean_text": "שלום עולם", "page": 14},
+    ]
+    regions = {1: {"page": 14, "bbox": {"x1": 0.1, "y1": 0.1, "x2": 0.9, "y2": 0.9}}}
+    word_bboxes = {1: {0: {"x1": 0.1, "y1": 0.1, "x2": 0.3, "y2": 0.2}}}
+    out_dir = tmp_path / "alto"
+    count = exp.export_alto(sample_klalim, str(out_dir), regions, word_bboxes)
+    assert count == 1
+    files = list(out_dir.glob("*.xml"))
+    assert len(files) == 1
+    # Verify XML parses without error
+    tree = ET.parse(files[0])
+    root = tree.getroot()
+    assert "alto" in root.tag.lower()
+
+
+def test_export_page_generates_valid_page_xml(tmp_path):
+    import xml.etree.ElementTree as ET
+    sample_klalim = [
+        {"klal_id": 1, "gematria": "א", "title": "כלל ראשון", "clean_text": "שלום עולם", "page": 14},
+    ]
+    regions = {1: {"page": 14, "bbox": {"x1": 0.1, "y1": 0.1, "x2": 0.9, "y2": 0.9}}}
+    word_bboxes = {1: {0: {"x1": 0.1, "y1": 0.1, "x2": 0.3, "y2": 0.2}}}
+    out_dir = tmp_path / "page"
+    count = exp.export_page(sample_klalim, str(out_dir), regions, word_bboxes)
+    assert count == 1
+    files = list(out_dir.glob("*.xml"))
+    assert len(files) == 1
+    tree = ET.parse(files[0])
+    root = tree.getroot()
+    assert "PcGts" in root.tag
+
+
+def test_export_tei_generates_valid_tei_p5_xml(tmp_path):
+    import xml.etree.ElementTree as ET
+    sample_klalim = [
+        {"klal_id": 1, "gematria": "א", "title": "כלל ראשון", "clean_text": "שלום עולם", "page": 14},
+        {"klal_id": 2, "gematria": "ב", "title": "כלל שני", "clean_text": "טקסט נוסף", "page": 14},
+    ]
+    word_bboxes = {}
+    corrections = {}
+    manual = {}
+    out_dir = tmp_path / "tei"
+    count = exp.export_tei(sample_klalim, str(out_dir),
+                           word_bboxes=word_bboxes, all_corrections=corrections, all_manual=manual, by_klal=False)
+    assert count == 1
+    tei_file = out_dir / "corpus.xml"
+    assert tei_file.exists()
+    tree = ET.parse(tei_file)
+    root = tree.getroot()
+    assert "TEI" in root.tag
+

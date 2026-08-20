@@ -118,20 +118,18 @@ def main():
     parser.add_argument("--dpi", type=int, default=300, help="DPI for rendering crops")
     args = parser.parse_args()
 
-    # Check local file existence
-    if not os.path.exists(args.pdf):
-        sys.exit(f"Error: Sample PDF file not found at: {args.pdf}\nRun page extraction first.")
+    pdf_path = cio.repo_path(args.pdf) if not os.path.isabs(args.pdf) else args.pdf
+    if not os.path.exists(pdf_path):
+        sys.exit(f"Error: PDF file not found at: {pdf_path}")
 
-    for p in args.pages:
-        json_path = f"page_{p}.json"
-        if not os.path.exists(json_path):
-            sys.exit(f"Error: Required fresh raw DocAI JSON file not found: {json_path}\nRun extract_docai_pages.py first.")
+    # Map sample PDF pages 1, 2, 3 to source scan pages 18, 19, 20 if running sample PDF
+    sample_page_map = {1: 18, 2: 19, 3: 20} if os.path.basename(pdf_path) == "yad-malachi-berlin-sample.pdf" else {}
 
     # Check dependencies before loading HF transformers
     has_ml_libs = check_dependencies()
 
-    print(f"Loading PDF: {args.pdf}...")
-    doc = fitz.open(args.pdf)
+    print(f"Loading PDF: {pdf_path}...")
+    doc = fitz.open(pdf_path)
 
     # Load TrOCR model if libraries are present
     processor, model, device = None, None, None
@@ -176,10 +174,18 @@ def main():
         print("="*50)
 
         # Load DocAI raw coordinates
-        with open(f"page_{p}.json", "r", encoding="utf-8") as f:
-            tokens = json.load(f)
+        docai_src_page = sample_page_map.get(p, p)
+        tokens = cio.load_docai_page(docai_src_page, cio.DOCAI_DIR)
+        if tokens is None:
+            local_json = f"page_{p}.json"
+            if os.path.exists(local_json):
+                with open(local_json, "r", encoding="utf-8") as f:
+                    tokens = json.load(f)
+            else:
+                print(f"Warning: No DocAI tokens found for page {p} (source page {docai_src_page}). Skipping.")
+                continue
 
-        print(f"Loaded {len(tokens)} word tokens. Grouping into horizontal lines...")
+        print(f"Loaded {len(tokens)} word tokens for page {p} (source page {docai_src_page}). Grouping into horizontal lines...")
         lines = group_words_into_lines(tokens)
         print(f"Clustered words into {len(lines)} distinct lines.\n")
 

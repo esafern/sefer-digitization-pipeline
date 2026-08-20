@@ -68,7 +68,7 @@ belongs to that ecosystem or interoperates with it.
 The dominant technical powerhouse for Hebrew NLP.
 
 - **Sites:** [dicta.org.il](https://dicta.org.il/) ·
-  [ocr.dicta.org.il](https://ocr.dicta.org.il/) (OCR web tool) ·
+  [ocr.dicta.org.il](https://ocr.dicta.org.il/) (the web portal appears to be "הגהת מסמכים סרוקים", a Dropbox-synced proofreader requiring .docx/.txt; research confirms Dicta provides Hebrew OCR across its platform, but the exact mechanism for direct public web upload of raw PDFs remains unconfirmed) ·
   [library.dicta.org.il](https://library.dicta.org.il/) (digital library)
 - **Code:**
   [github.com/Dicta-Israel-Center-for-Text-Analysis](https://github.com/Dicta-Israel-Center-for-Text-Analysis)
@@ -77,11 +77,11 @@ The dominant technical powerhouse for Hebrew NLP.
   researcher, Bar-Ilan University) · Shaltiel Shmidman (lead NLP developer)
 - **Stack:** PyTorch, HuggingFace transformers (DictaBERT, DictaLM 3.0 with
   tool-calling), custom nikud models.
-- **Strengths:** highly accurate OCR for both square and Rashi script,
+- **Strengths:** highly accurate institutional OCR for both square and Rashi script,
   multi-column layout detection, diacritics. Its digital library carries
   diacriticized transcripts of 300+ classic Rabbinic texts.
-- **Gap vs. us:** no correction workflow, no bounding-box data out, no review
-  UI, no audit log. It is an excellent OCR endpoint, not a pipeline.
+- **Gap vs. us:** public web-upload / batch API workflow for end-users not yet confirmed,
+  no bounding-box data out, no tri-state review UI, no audit log.
 
 ### Sefaria / eScriptorium / Passim (the "Freymat" pipeline)
 
@@ -170,6 +170,21 @@ Community-driven digitization of Jewish liturgical and ritual texts.
 | **Sefaria (the library itself)** | Open digital library with linked texts and community correction | No OCR, no image-level tooling — a text repository |
 | **FromThePage** | Crowdsourced transcription SaaS for libraries/archives | No OCR, no native RTL support |
 | **PRImA Aletheia** | Desktop Java bbox-level ground-truth editor (PAGE XML) | Not web-based, not Hebrew-specific, no machine correction |
+
+### Candidate OCR & Second-Witness Engines (Evaluated vs. Untried)
+
+To ensure high corpus fidelity, an independent second/third witness engine is needed to corroborate readings. Below is the status of all evaluated and potential witness engines:
+
+| Engine | Type | Strengths | Limitations | Status in this Pipeline |
+|---|---|---|---|---|
+| **Google Document AI** | Specialized Cloud OCR | Character & word-level geometric bounding boxes, high square-print baseline accuracy | Cloud dependency, closed-source, weaker on dense Rashi script | **Current Primary Baseline** (`docai_word_boxes/`) |
+| **Multimodal VLMs (Gemini 2.5 Flash / Pro, GPT-4o, Claude 3.5 Sonnet)** | Foundation Multimodal AI | Deep Rabbinic semantic understanding, directly reads high-res raster pixels, robust to ligatures and archaic layout | No native word coordinate bboxes; requires prompt engineering; cost per page | **Evaluated for crop adjudication** (`verify_corrections_vision.py`); **Not yet systematically run** as full-page end-to-end OCR witness |
+| **TrOCR Hebrew (`sivan22/trocr-hebrew`, `cyttic/exp17-trocr-hebrew-synth1m`)** | Line-level Vision Transformer (HuggingFace) | Open weights, runs locally via PyTorch, line-level attention trained on printed Hebrew | Requires prior horizontal line segmentation; memory-heavy | **Prototype harness built** (`tools/test_trocr_benchmark.py`); **Not yet benchmarked** across full corpus |
+| **Kraken (eScriptorium / MiDRASH / NLI models)** | Open HTR/OCR Engine | Industry standard for historical Hebrew manuscripts and early Rabbinic print; open models available | Requires line baseline extraction; complex local dependencies | **Not yet tried locally**; primary recommendation for Rashi-script Livorno edition |
+| **EasyOCR (JaidedAI)** | Open Deep-Learning OCR | Out-of-the-box Hebrew support, lightweight Python library | Weak on archaic fonts, ligature splitting, Rabbinic abbreviations | **Not yet tried in this pipeline** |
+| **PyLaia** | Deep HTR engine (PyTorch) | High accuracy on historical lines with sufficient training data | Requires line segmentation and custom model training | **Not yet tried in this pipeline** |
+| **Dicta OCR Engine** | Proprietary Deep Learning | Best-in-class Rabbinic Hebrew & Rashi recognition | The `ocr.dicta.org.il` URL appears to be a Dropbox-synced proofreader; research confirms Dicta provides Hebrew OCR across its tools, but the exact mechanism for direct public web upload of raw PDFs remains unconfirmed | **Assessed 2026-08-20**: Web upload workflow unconfirmed; under active research |
+
 
 ## 3. Feature comparison
 

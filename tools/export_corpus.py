@@ -26,12 +26,13 @@ from xml.dom import minidom
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(REPO, "pipeline"))
 
+import apply_reviewer_decisions as ard
 import corpus_io as cio
 import review_decisions as rd
 
 
 # ---------------------------------------------------------------------------
-# Decision application (mirrors apply_reviewer_decisions.py logic, read-only)
+# Decision application (delegates to apply_reviewer_decisions.py logic, read-only)
 # ---------------------------------------------------------------------------
 
 def _apply_decisions_to_klalim(klalim):
@@ -126,60 +127,12 @@ def _apply_decisions_to_klalim(klalim):
     return klalim
 
 
-def _snapshot_matches(snapshot, live_entry):
-    if snapshot is None or live_entry is None:
-        return False
-    keys = ("opcode", "docai_reading", "final_text", "word_index")
-    return all(snapshot.get(k) == live_entry.get(k) for k in keys)
-
-
-def _apply_replace(clean_text, word_index, final_text, chosen_text):
-    words = clean_text.split()
-    span = final_text.split() if final_text else []
-    if not span:
-        return None
-    n = len(span)
-    if word_index < 0 or words[word_index:word_index + n] != span:
-        return None
-    words[word_index:word_index + n] = chosen_text.split()
-    return " ".join(words)
-
-
-def _apply_manual_correction(clean_text, word_index, original_word, chosen_text):
-    words = clean_text.split(' ')
-    if word_index < 0 or word_index >= len(words) or words[word_index] != original_word:
-        return None
-    words[word_index] = chosen_text
-    return " ".join(words)
-
-
-def _apply_manual_deletion(clean_text, word_index, original_word):
-    words = clean_text.split(' ')
-    if word_index < 0 or word_index >= len(words) or words[word_index] != original_word:
-        return None
-    del words[word_index]
-    return " ".join(words)
-
-
-def _apply_insert_removal(clean_text, word_index, final_text):
-    words = clean_text.split()
-    span = final_text.split() if final_text else []
-    n = len(span)
-    if n == 0 or word_index < 0 or words[word_index:word_index + n] != span:
-        return None
-    del words[word_index:word_index + n]
-    return " ".join(words)
-
-
-def _apply_delete_insertion(clean_text, word_index, chosen_text):
-    words = clean_text.split()
-    if word_index < 0 or word_index > len(words) or not chosen_text:
-        return None
-    span = chosen_text.split()
-    if words[word_index:word_index + len(span)] == span:
-        return None
-    words[word_index:word_index] = span
-    return " ".join(words)
+_snapshot_matches = ard.snapshot_matches
+_apply_replace = ard.apply_replace
+_apply_manual_correction = ard.apply_manual_correction
+_apply_manual_deletion = ard.apply_manual_deletion
+_apply_insert_removal = ard.apply_insert_removal
+_apply_delete_insertion = ard.apply_delete_insertion
 
 
 # ---------------------------------------------------------------------------

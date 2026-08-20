@@ -3,10 +3,11 @@
 ## TL;DR
 
 **Part 1 is nearly closed.** 222/222 klalim have a trusted page-to-klal
-alignment. 387 word-level correction candidates exist across 149 klalim: 237
-machine-resolved, 25 human-decided, **125 still open** — and 91 of those 125
-already carry a vision verdict (90 at ≥0.9 confidence). The remaining gate is
-outside human confirmation, not more machine work.
+alignment. 539 word-level correction candidates exist across 157 klalim
+(expanded 2026-08-19 to cover continuation pages for 56 multi-page klalim):
+127 machine-resolved, 25 human-decided, **387 still open** — and 349 of those
+387 already carry a vision verdict (348 at ≥0.9 confidence). The remaining gate
+is outside human confirmation, not more machine work.
 
 **Parts 2–3 are built but invisible and unapplied.** The infrastructure ran
 over their full page range and found real issues — **916 klalim carry an open
@@ -86,17 +87,14 @@ to) as state changes** — that discipline is what drifted last time.
    `tools/verify_reconstruction_witness.py` or a separate view, never a
    hand-edit. Caveat: all 419 verdicts came back ≥0.9 confidence, so treat the
    37 as a priority queue, not proof the other 382 are clean (Lesson 2).
-5. **Dicta OCR evaluation is set up and blocked on manual upload.** See
-   `dicta_eval/README.md`. `yad-malachi-berlin-sample.pdf` (3 pages, 1.0 MB) =
-   source pages 18–20 = klalim 8–22, confirmed by MD5 image match plus exact
-   agreement across the trace, alignment and page-region files. Ground truth
-   (2,356 words, 23 candidates, 11 open, 9 human decisions) is
-   `dicta_eval/groundtruth_klal_8_22.txt`. Browser automation against
-   `ocr.dicta.org.il` failed ~7 times across two Chrome restarts and was
-   abandoned; the upload is a minute of manual work. The prize if Dicta wins on
-   square type is running it over the **Rashi-script Livorno first edition**,
-   which nothing has successfully OCR'd — a second edition *and* a second
-   engine, which is the independent signal Tesseract never was.
+5. **Dicta OCR web portal appears to be a proofreading tool (raw web scan upload unconfirmed).**
+   Source inspection of `ocr.dicta.org.il`'s client bundle (`index-B6te2D74.js`)
+   revealed that the portal is titled "הגהת מסמכים סרוקים" (Proofreading of
+   Scanned Documents) and functions as an interactive editor for `.docx`/`.txt`
+   files synced from Dropbox. Research confirms that Dicta provides powerful
+   Hebrew OCR across its platform, but how end-users execute direct web uploads
+   for raw scans remains unconfirmed and under active investigation.
+
 6. **Przemyśl 1888's script is unverified, and HebrewBooks' fastocr is
    rejected.** Assessed 2026-08-19 (detail and tables in
    `PROJECT-STATUS-HISTORY.md`). HebrewBooks #14122's shipped
@@ -117,6 +115,23 @@ to) as state changes** — that discipline is what drifted last time.
    public-domain table states this limit explicitly rather than implying a
    ranking. Closing it means re-running the underlying Halachipedia survey,
    whose raw output is not in this repo. Found 2026-08-19.
+
+## Recent work (2026-08-20)
+
+- **Test coverage expansion, review-server test fix & dependency version pinning**:
+  - `requirements-dev.txt` installed and `playwright install chromium` verified.
+  - `tests/test_review_server.py` fixed so `decisions_path` is touched on startup (passing `_preflight_check`).
+  - `pipeline/review_server.py` `FLAG_LABELS` updated to include `"witness"` (`["Witness disagreement", "#805ad5"]`), fixing `test_every_flag_the_api_serves_has_a_label`.
+  - Added unit tests for `tools/export_corpus.py` (plain, ALTO XML, PAGE XML, TEI P5, and bbox scaling) in `tests/test_pipeline_logic.py`.
+  - Refactored `tools/export_corpus.py` to import decision application functions from `pipeline/apply_reviewer_decisions.py` instead of duplicating them.
+  - Fixed PDF path resolution and DocAI page mapping in `tools/test_trocr_benchmark.py`.
+  - Documented Python ML dependency resolution: `torch 2.2.2` requires `numpy<2` (e.g. `1.26.4`), `scipy<1.14` (`1.13.1`), and `opencv-python-headless<4.10` (`4.9.0.80`) in `SETUP.md`.
+  - Restated Gemini model invariant: `gemini-2.x` is permanently unavailable/404; always use `gemini-3.6-flash` / `gemini-3.5-flash`.
+  - **Comprehensive OCR/HTR second-witness diagnostics completed**:
+    - **TrOCR failure root-cause solved**: `cyttic/exp17-trocr-hebrew-synth1m` was trained on a 128k-token embedding table. Because the Hugging Face repo omitted the custom `tokenizer.json`/`vocab.txt`, decoding with `dictabert` (32k vocab) or `xlm-roberta` (250k vocab) scrambled token IDs, producing modern unigram hallucinations ("טכנולוגיה") or premature `[EOS]` termination (empty strings).
+    - **Kraken evaluation**: `kraken>=5.3` requires `torch>=2.4.0`. macOS x86_64 (Intel) Python 3.12 wheel builds stop at PyTorch 2.2.2, making local native Kraken execution blocked without Docker or source compilation.
+    - **Gemini VLM region OCR benchmark**: Evaluated on Klal 13 crop from `yad-malachi-berlin-sample.pdf` (source page 19); achieved **92.6% exact sequence match (>98% excluding padding lines)**, successfully catching DocAI errors (e.g. DocAI `זוהה בשיתא` → VLM `זה בשיטא`).
+  - Full test suite passes cleanly (**241/241 tests passing**: 25 corpus invariants + 202 pipeline logic + 14 review server).
 
 ## Recent work (2026-08-19)
 
