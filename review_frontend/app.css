@@ -49,6 +49,8 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
   display: flex;
   flex-direction: column;
   border-left: 1px solid var(--line);
+  position: relative;
+  z-index: 910;
 }
 #scan-header {
   padding: var(--sp-3) var(--sp-4);
@@ -119,12 +121,13 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
    fade everything else to near-invisible so the highlighted box reads alone
    against the scan image. Only the .focused box keeps full opacity. */
 #hl-container.has-focus .hl-box:not(.focused) { opacity: 0.06 !important; }
-/* The specific word clicked in the text pane: very thick ring in the box's
+/* The specific word clicked in the text pane: thick ring in the box's
    own state color so the boundary is unmistakable without obscuring the
-   underlying scan text. background is left unchanged (the existing light tint
-   stays). z-index so the ring renders above adjacent boxes. */
+   underlying scan text. Entirely transparent inside for human eyeball review.
+   z-index so the ring renders above adjacent boxes. */
 .hl-box.focused {
   box-shadow: 0 0 0 5px var(--hl-color, currentColor) !important;
+  background: transparent !important;
   z-index: 5;
   opacity: 1 !important;
 }

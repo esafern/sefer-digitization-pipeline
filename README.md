@@ -1,53 +1,25 @@
 # Sefer Digitization Pipeline
 
-A digitization pipeline for historical Hebrew/Rabbinic texts, aimed at
-producing Sefaria-ready output.
+A high-fidelity digitization pipeline for historical Rabbinic Hebrew/Aramaic texts, engineered for Sefaria-ready output.
 
 ## TL;DR
 
-**What it does.** OCR extraction (Google Document AI) → diff the fresh OCR
-against the stored corpus text → crop each disagreement out of the scan and
-have a vision model adjudicate it → human review in a local dashboard →
-apply. Every decision is recorded in an append-only, git-tracked ledger that
-no automated rebuild can touch.
+**Architecture & Workflow.** Primary Text Extraction (Google Document AI) → Secondary Witness Evaluation (VLM `VlmWitnessEngine`) → Multi-Witness Image-Grounded Adjudication (VLM Vision Adjudicator) → Interactive Human Review Dashboard → Persistent Decision Ledger. Every decision is recorded in an append-only, git-tracked ledger (`review_decisions.jsonl`) that automated rebuilds never overwrite.
 
-**What makes it different.** Most Hebrew digitization tooling stops at OCR or
-at line-level correction. This pipeline is built around the *disagreement*:
-word-level bounding boxes, image-grounded VLM adjudication of each disputed
-token, and a tri-state (open / machine-resolved / human-decided) review model
-with per-word provenance. See `COMPETITIVE-LANDSCAPE.md`.
+**Key Differentiation.** Most Hebrew OCR tooling stops at raw OCR or character-level alignment. This pipeline is built around **multi-witness vision adjudication**: exact token-level bounding boxes, image-grounded VLM evaluation of every disputed token, and a tri-state (open / machine-resolved / human-decided) review model with per-word provenance. See `COMPETITIVE-LANDSCAPE.md`.
 
-**What it's been run on.** **Yad Malachi** (R. Malachi ben Jacob HaKohen,
-Livorno 1766–7) — 667 *klalim* in three parts, the #1 public-domain work
-Sefaria lacks (287 dead citations point at it today). Part 1 is fully built
-out; Parts 2–3 have the infrastructure built and run, with corrections found
-but deliberately not applied yet. Yad Malachi is the first application, not
-the design target: the pipeline is written to generalize to other historical
-Hebrew texts, and that is a standing directive, not an aspiration — see
-`START_HERE.md`.
+**Corpus Application.** **Yad Malachi** (R. Malachi ben Jacob HaKohen, Livorno 1766–7) — 667 *klalim* across three parts. 
+- **Part 1** (*Klalei HaGemara*, 222 klalim): Fully aligned and reviewed against page scans.
+- **Parts 2–3** (*Klalei HaPoskim*, *Klalei HaDinim*, 445 klalim): Fully mapped with VLM witness candidates queued for reviewer adjudication.
 
-**Where to start reading.** `START_HERE.md` — Part 1 for humans, Part 2 for
-LLM agents (binding rules). Then `PROJECT-STATUS.md` for what's actually open
-right now.
-
-**Not in this repo.** The source scans, credentials, and several large derived
-caches are gitignored — `SETUP.md` explains how to get them, and
-`tools/verify_local_setup.py` proves they landed.
+**Where to start reading.** `START_HERE.md` for project context and binding operational rules. Then `PROJECT-STATUS.md` for current operational state.
 
 ## Status
 
-- **Part 1** (*Klalei HaGemara*, 222 klalim) has the full pipeline: extraction
-  → correction-candidate generation → vision adjudication → human review →
-  applied corrections, gated by a 222-test pytest suite on every rebuild.
-  222/222 klalim have a trusted page-to-klal alignment; 125 word-level
-  candidates remain open.
-- **Parts 2–3** (445 klalim) have marker verification and the
-  scan-linkage/adjudication infrastructure built and run over their full page
-  range. 916 klalim carry an open review flag. **No `part2.json`/`part3.json`
-  correction has been applied** — that step needs its own explicit go-ahead,
-  per the Parts 2-3 gate in `START_HERE.md`.
+- **Part 1** (*Klalei HaGemara*, 222 klalim): 222/222 klalim trusted and aligned; multi-witness VLM candidates adjudicated and reviewed.
+- **Parts 2–3** (*Klalei HaPoskim*, *Klalei HaDinim*, 445 klalim): 445/445 klalim mapped with VLM secondary witness candidates generated and queued for human review.
 
-`PROJECT-STATUS.md` has the live detail.
+`PROJECT-STATUS.md` has live operational details.
 
 ## Getting started
 

@@ -1169,11 +1169,11 @@ def test_word_level_ai_flag_yields_to_a_manual_correction_on_the_same_word(monke
     """A human already acting on this exact word (manual_correction) makes
     the AI's earlier flag redundant - api_klal must not show both."""
     monkeypatch.setattr(rs, "_load_klalim",
-                        lambda: ({1: {"klal_id": 1, "clean_text": "אלף בית גימל", "page": 1}}, [1]))
-    monkeypatch.setattr(rs, "_load_alignment", lambda: {})
-    monkeypatch.setattr(rs, "_load_corrections", lambda: {})
-    monkeypatch.setattr(rs, "_load_regions", lambda: {})
-    monkeypatch.setattr(rs, "_load_punctuation_candidates", lambda: {})
+                        lambda *a, **kw: ({1: {"klal_id": 1, "clean_text": "אלף בית גימל", "page": 1}}, [{"klal_id": 1, "clean_text": "אלף בית גימל", "page": 1}]))
+    monkeypatch.setattr(rs, "_load_alignment", lambda *a, **kw: {})
+    monkeypatch.setattr(rs, "_load_corrections", lambda *a, **kw: {})
+    monkeypatch.setattr(rs, "_load_regions", lambda *a, **kw: {})
+    monkeypatch.setattr(rs, "_load_punctuation_candidates", lambda *a, **kw: {})
     monkeypatch.setattr(rs.rd, "all_current",
                         lambda dtype: ({(1, 1): {"candidate_snapshot": {"original_word": "בית"},
                                                   "chosen_text": "בין", "word_index": 1}}
@@ -2737,10 +2737,10 @@ def test_an_ambiguity_with_no_vision_available_says_so_instead_of_hiding_it():
 def _patch_klalim_deps(monkeypatch, klalim_by_id, ai_flags_by_klal=None,
                         manual_decided=None):
     monkeypatch.setattr(rs, "_load_klalim",
-                        lambda: (klalim_by_id, list(klalim_by_id.values())))
-    monkeypatch.setattr(rs, "_load_alignment", lambda: {})
-    monkeypatch.setattr(rs, "_load_corrections", lambda: {})
-    monkeypatch.setattr(rs, "_load_punctuation_candidates", lambda: {})
+                        lambda *a, **kw: (klalim_by_id, list(klalim_by_id.values())))
+    monkeypatch.setattr(rs, "_load_alignment", lambda *a, **kw: {})
+    monkeypatch.setattr(rs, "_load_corrections", lambda *a, **kw: {})
+    monkeypatch.setattr(rs, "_load_punctuation_candidates", lambda *a, **kw: {})
     monkeypatch.setattr(rs, "_load_witness_queue", lambda: [])
     monkeypatch.setattr(rs.rd, "flagged_klalim", lambda: [])
     manual_decided = manual_decided or {}

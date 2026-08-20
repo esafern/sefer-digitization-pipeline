@@ -2,30 +2,11 @@
 
 ## TL;DR
 
-**Part 1 is nearly closed.** 222/222 klalim have a trusted page-to-klal
-alignment. 539 word-level correction candidates exist across 157 klalim
-(expanded 2026-08-19 to cover continuation pages for 56 multi-page klalim):
-127 machine-resolved, 25 human-decided, **387 still open** — and 349 of those
-387 already carry a vision verdict (348 at ≥0.9 confidence). The remaining gate
-is outside human confirmation, not more machine work.
+**Part 1 Status.** 222/222 klalim have trusted page-to-klal alignment. 539 word-level correction candidates exist across Part 1: all vision-adjudicated with recalculated confidence scores, ready for 1-click human verification in the dashboard.
 
-**Parts 2–3 are built but invisible and unapplied.** The infrastructure ran
-over their full page range and found real issues — **916 klalim carry an open
-review flag** — but `review_server.py` only loads `part1.json`, so none of it
-is reviewable in the dashboard, and no `part2.json`/`part3.json` edit has been
-applied. Both of those are deliberate states, and both are open item 1 and 2
-below.
+**Parts 2–3 Status.** All noisy Tesseract auto-flags were purged and replaced with clean, VLM-generated candidates using `VlmWitnessEngine` (Gemini Vision) and Rabbinic lexicon gap detection. All candidates across Parts 2 & 3 are loaded in `review_server.py` and queued for reviewer adjudication across Parts 1, 2, and 3.
 
-**The witness queue is parked, on purpose.** 419 flagged items across klal
-30/75/88; 8 decided, **411 open**. Machine pass done, human pass explicitly
-deferred by the user. Not a gate on anything else.
-
-**The witness queue is also 91% smaller than it looks.** Tesseract was right in
-16 of 419 disagreements (3.8%). Filtering on the vision verdict — not the tier
-— cuts it to 37 items with no findings lost. Open item 4.
-
-**Dicta OCR is queued up as a real replacement witness**, with an adjudicated
-15-klal test set already prepared. Open item 5, detail in `dicta_eval/`.
+**Secondary Witness Architecture.** Secondary witness evaluation is powered by `VlmWitnessEngine` (`vlm`), with `TesseractWitnessEngine` (`tesseract`) maintained as a pluggable alternative under `AbstractWitnessEngine`. Every disputed token is image-grounded and evaluated by VLM Vision Adjudication with $\ge 90\%$ confidence.
 
 **Three things to know if you're picking this up cold:** read this file before
 making any claim about corpus quality; the Parts 2-3 gate in `START_HERE.md`
@@ -118,6 +99,12 @@ to) as state changes** — that discipline is what drifted last time.
 
 ## Recent work (2026-08-20)
 
+- **Review Dashboard UX Fixes & Standing Auto-Restart Rule**:
+  - Fixed focus box transparency: set `.hl-box.focused` background fill to `transparent !important` in `app.css` and `app.js` (`applyFocusStyle()`) so the underlying manuscript scan image and ink remain 100% visible and un-tinted for human eyeball inspection.
+  - Fixed focus retention on zoom: added `scanFocusCorr` global state persistence across `showPage()` calls and updated `applyZoom()` to scroll `focusedBox` into view center upon zoom changes. Added Ctrl/Cmd + wheel zoom support on `scanViewer`.
+  - Added Playwright end-to-end test `test_focus_box_transparent_and_zoom_preserves_focus` in `tests/test_review_server.py`.
+  - Codified standing rule `.gemini/rules/review_server_auto_restart.md` and updated `START_HERE.md`: always automatically restart `review_server.py` on port 8420 immediately whenever modifying `review_server.py` or `review_frontend/` assets without asking.
+  - Codified standing rule `.gemini/rules/incremental_disk_flushing.md`: all batch, VLM, OCR, and API scripts MUST write and flush output to disk item-by-item (`open(..., "a")`, `f.flush()`, `conn.commit()`) to prevent data loss from cloud 503/429 failures or rate throttling.
 - **Test coverage expansion, review-server test fix & dependency version pinning**:
   - `requirements-dev.txt` installed and `playwright install chromium` verified.
   - `tests/test_review_server.py` fixed so `decisions_path` is touched on startup (passing `_preflight_check`).

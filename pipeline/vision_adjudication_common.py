@@ -242,7 +242,7 @@ def _retry_loop(call_fn, models_to_try, max_retries):
 
 def adjudicate_with_retry(client, crop_bytes, prompt, cache_get, cache_put,
                            models_to_try=("gemini-3.6-flash", "gemini-3.5-flash"),
-                           max_retries=3):
+                           max_retries=3, response_mime_type="application/json"):
     """Generic model-fallback/retry/backoff loop shared by every caller: check
     `cache_get()` first (a zero-arg closure so each caller's own cache key
     shape - which fields it hashes - stays entirely caller-side); on a miss,
@@ -252,11 +252,6 @@ def adjudicate_with_retry(client, crop_bytes, prompt, cache_get, cache_put,
     model_name)` (also caller-supplied, so a table with no `model` column can
     just ignore the second argument) and return the raw response text.
     Raises RuntimeError if every model/attempt combination failed.
-
-    gemini-2.5-flash was removed from the candidate list 2026-08-05:
-    permanently 404s ("no longer available to new users"), not transient -
-    it was silently eating a retry slot on every fallback path instead of
-    ever actually helping.
     """
     cached = cache_get()
     if cached:
@@ -270,7 +265,7 @@ def adjudicate_with_retry(client, crop_bytes, prompt, cache_get, cache_put,
                 types.Part.from_bytes(data=crop_bytes, mime_type="image/png"),
                 prompt,
             ],
-            config=types.GenerateContentConfig(response_mime_type="application/json"),
+            config=types.GenerateContentConfig(response_mime_type=response_mime_type),
         )
         print(f"  -> live call to {model_name} ok")
         cache_put(response.text, model_name)

@@ -1,7 +1,6 @@
-# Dicta OCR evaluation — Berlin pages 18–20
+# Second-Witness OCR & HTR Evaluation — Berlin pages 18–20
 
-Testing whether **Dicta's Hebrew OCR** (<https://ocr.dicta.org.il>) is worth
-adopting as a second/third witness engine for this pipeline.
+Testing candidate second-witness engines (**Dicta OCR**, **Kraken HTR**, **Gemini 3.6 Flash VLM**) to determine the best replacement witness for this pipeline.
 
 ## TL;DR
 

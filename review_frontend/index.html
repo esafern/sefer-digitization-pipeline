@@ -4,13 +4,20 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Yad Malachi — Correction Review</title>
-<link rel="stylesheet" href="/app.css?v=4">
+<link rel="stylesheet" href="/app.css?v=6">
 </head>
 <body>
 
   <div id="nav-pane">
     <div id="nav-filter">
-      <label><input type="checkbox" id="filter-flagged"> Flagged for revisit only</label>
+      <select id="part-select" style="width: 100%; margin-bottom: 8px; padding: 4px 8px; border-radius: 4px; font-weight: bold; background: #2d3748; color: #edf2f7; border: 1px solid #4a5568; cursor: pointer;">
+        <option value="1" selected>Part 1 (Klalim 1 – 222)</option>
+        <option value="2">Part 2 (Klalim 223 – 444)</option>
+        <option value="3">Part 3 (Klalim 445 – 667)</option>
+        <option value="all">All Parts (Klalim 1 – 667)</option>
+      </select>
+      <label style="display:block;margin-bottom:4px;"><input type="checkbox" id="filter-flagged"> Flagged for revisit only</label>
+      <label style="display:block;"><input type="checkbox" id="filter-high-value"> High-value items only</label>
     </div>
     <div id="nav-list"></div>
     <div id="legend"></div>
@@ -83,6 +90,6 @@
     <div class="panel-body" id="manual-panel-body"></div>
   </div>
 
-  <script src="/app.js"></script>
+  <script src="/app.js?v=6"></script>
 </body>
 </html>

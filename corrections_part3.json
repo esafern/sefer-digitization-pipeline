@@ -1,0 +1,1492 @@
+{
+  "448": [
+    {
+      "word_index": 554,
+      "opcode": "replace",
+      "docai_reading": "אא",
+      "final_text": "אלא",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלא",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אא' -> attested 'אלא'",
+      "flag": "current_text_may_be_wrong"
+    }
+  ],
+  "454": [
+    {
+      "word_index": 401,
+      "opcode": "replace",
+      "docai_reading": "אא",
+      "final_text": "אלא",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלא",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אא' -> attested 'אלא'",
+      "flag": "current_text_may_be_wrong"
+    }
+  ],
+  "455": [
+    {
+      "word_index": 141,
+      "opcode": "replace",
+      "docai_reading": "האה",
+      "final_text": "האלה",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "האלה",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'האה' -> attested 'האלה'",
+      "flag": "current_text_may_be_wrong"
+    }
+  ],
+  "466": [
+    {
+      "word_index": 1264,
+      "opcode": "replace",
+      "docai_reading": "אגאזי",
+      "final_text": "אלגאזי",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלגאזי",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אגאזי' -> attested 'אלגאזי'",
+      "flag": "current_text_may_be_wrong"
+    }
+  ],
+  "478": [
+    {
+      "word_index": 523,
+      "opcode": "replace",
+      "docai_reading": "איה",
+      "final_text": "אליה",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אליה",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'איה' -> attested 'אליה'",
+      "flag": "current_text_may_be_wrong"
+    }
+  ],
+  "492": [
+    {
+      "word_index": 46,
+      "opcode": "replace",
+      "docai_reading": "אא",
+      "final_text": "אלא",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלא",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אא' -> attested 'אלא'",
+      "flag": "current_text_may_be_wrong"
+    }
+  ],
+  "499": [
+    {
+      "word_index": 14,
+      "opcode": "replace",
+      "docai_reading": "אא",
+      "final_text": "אלא",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלא",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אא' -> attested 'אלא'",
+      "flag": "current_text_may_be_wrong"
+    }
+  ],
+  "506": [
+    {
+      "word_index": 185,
+      "opcode": "replace",
+      "docai_reading": "אגאזי",
+      "final_text": "אלגאזי",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלגאזי",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אגאזי' -> attested 'אלגאזי'",
+      "flag": "current_text_may_be_wrong"
+    }
+  ],
+  "511": [
+    {
+      "word_index": 127,
+      "opcode": "replace",
+      "docai_reading": "אא",
+      "final_text": "אלא",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלא",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אא' -> attested 'אלא'",
+      "flag": "current_text_may_be_wrong"
+    }
+  ],
+  "515": [
+    {
+      "word_index": 444,
+      "opcode": "replace",
+      "docai_reading": "אגאזי",
+      "final_text": "אלגאזי",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלגאזי",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אגאזי' -> attested 'אלגאזי'",
+      "flag": "current_text_may_be_wrong"
+    }
+  ],
+  "522": [
+    {
+      "word_index": 349,
+      "opcode": "replace",
+      "docai_reading": "איבא",
+      "final_text": "אליבא",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אליבא",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'איבא' -> attested 'אליבא'",
+      "flag": "current_text_may_be_wrong"
+    }
+  ],
+  "530": [
+    {
+      "word_index": 14,
+      "opcode": "replace",
+      "docai_reading": "אא",
+      "final_text": "אלא",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלא",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אא' -> attested 'אלא'",
+      "flag": "current_text_may_be_wrong"
+    }
+  ],
+  "536": [
+    {
+      "word_index": 777,
+      "opcode": "replace",
+      "docai_reading": "אא",
+      "final_text": "אלא",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלא",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אא' -> attested 'אלא'",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 835,
+      "opcode": "replace",
+      "docai_reading": "אא",
+      "final_text": "אלא",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלא",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אא' -> attested 'אלא'",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 912,
+      "opcode": "replace",
+      "docai_reading": "אמא",
+      "final_text": "אלמא",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלמא",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אמא' -> attested 'אלמא'",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 970,
+      "opcode": "replace",
+      "docai_reading": "אא",
+      "final_text": "אלא",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלא",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אא' -> attested 'אלא'",
+      "flag": "current_text_may_be_wrong"
+    }
+  ],
+  "538": [
+    {
+      "word_index": 877,
+      "opcode": "replace",
+      "docai_reading": "אא",
+      "final_text": "אלא",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלא",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אא' -> attested 'אלא'",
+      "flag": "current_text_may_be_wrong"
+    }
+  ],
+  "546": [
+    {
+      "word_index": 17,
+      "opcode": "replace",
+      "docai_reading": "אא",
+      "final_text": "אלא",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלא",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אא' -> attested 'אלא'",
+      "flag": "current_text_may_be_wrong"
+    }
+  ],
+  "548": [
+    {
+      "word_index": 81,
+      "opcode": "replace",
+      "docai_reading": "האף",
+      "final_text": "האלף",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "האלף",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'האף' -> attested 'האלף'",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 114,
+      "opcode": "replace",
+      "docai_reading": "אא",
+      "final_text": "אלא",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלא",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אא' -> attested 'אלא'",
+      "flag": "current_text_may_be_wrong"
+    }
+  ],
+  "549": [
+    {
+      "word_index": 374,
+      "opcode": "replace",
+      "docai_reading": "אגאזי",
+      "final_text": "אלגאזי",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלגאזי",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אגאזי' -> attested 'אלגאזי'",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 1170,
+      "opcode": "replace",
+      "docai_reading": "איבא",
+      "final_text": "אליבא",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אליבא",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'איבא' -> attested 'אליבא'",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 2009,
+      "opcode": "replace",
+      "docai_reading": "אא",
+      "final_text": "אלא",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלא",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אא' -> attested 'אלא'",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 2043,
+      "opcode": "replace",
+      "docai_reading": "איבא",
+      "final_text": "אליבא",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אליבא",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'איבא' -> attested 'אליבא'",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 2079,
+      "opcode": "replace",
+      "docai_reading": "איבא",
+      "final_text": "אליבא",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אליבא",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'איבא' -> attested 'אליבא'",
+      "flag": "current_text_may_be_wrong"
+    }
+  ],
+  "556": [
+    {
+      "word_index": 932,
+      "opcode": "replace",
+      "docai_reading": "אא",
+      "final_text": "אלא",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלא",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אא' -> attested 'אלא'",
+      "flag": "current_text_may_be_wrong"
+    }
+  ],
+  "564": [
+    {
+      "word_index": 22,
+      "opcode": "replace",
+      "docai_reading": "איעזר",
+      "final_text": "אליעזר",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אליעזר",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'איעזר' -> attested 'אליעזר'",
+      "flag": "current_text_may_be_wrong"
+    }
+  ],
+  "568": [
+    {
+      "word_index": 132,
+      "opcode": "replace",
+      "docai_reading": "אמא",
+      "final_text": "אלמא",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלמא",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אמא' -> attested 'אלמא'",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 883,
+      "opcode": "replace",
+      "docai_reading": "אא",
+      "final_text": "אלא",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלא",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אא' -> attested 'אלא'",
+      "flag": "current_text_may_be_wrong"
+    }
+  ],
+  "570": [
+    {
+      "word_index": 669,
+      "opcode": "replace",
+      "docai_reading": "אא",
+      "final_text": "אלא",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלא",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אא' -> attested 'אלא'",
+      "flag": "current_text_may_be_wrong"
+    }
+  ],
+  "571": [
+    {
+      "word_index": 4,
+      "opcode": "replace",
+      "docai_reading": "אעזר",
+      "final_text": "אלעזר",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלעזר",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אעזר' -> attested 'אלעזר'",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 10,
+      "opcode": "replace",
+      "docai_reading": "אעזר",
+      "final_text": "אלעזר",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלעזר",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אעזר' -> attested 'אלעזר'",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 91,
+      "opcode": "replace",
+      "docai_reading": "איעזר",
+      "final_text": "אליעזר",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אליעזר",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'איעזר' -> attested 'אליעזר'",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 104,
+      "opcode": "replace",
+      "docai_reading": "אעזר",
+      "final_text": "אלעזר",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלעזר",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אעזר' -> attested 'אלעזר'",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 129,
+      "opcode": "replace",
+      "docai_reading": "אעזר",
+      "final_text": "אלעזר",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלעזר",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אעזר' -> attested 'אלעזר'",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 158,
+      "opcode": "replace",
+      "docai_reading": "אעזר",
+      "final_text": "אלעזר",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלעזר",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אעזר' -> attested 'אלעזר'",
+      "flag": "current_text_may_be_wrong"
+    }
+  ],
+  "572": [
+    {
+      "word_index": 373,
+      "opcode": "replace",
+      "docai_reading": "אגאזי",
+      "final_text": "אלגאזי",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלגאזי",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אגאזי' -> attested 'אלגאזי'",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 1060,
+      "opcode": "replace",
+      "docai_reading": "אעזר",
+      "final_text": "אלעזר",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלעזר",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אעזר' -> attested 'אלעזר'",
+      "flag": "current_text_may_be_wrong"
+    }
+  ],
+  "573": [
+    {
+      "word_index": 51,
+      "opcode": "replace",
+      "docai_reading": "אא",
+      "final_text": "אלא",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלא",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אא' -> attested 'אלא'",
+      "flag": "current_text_may_be_wrong"
+    }
+  ],
+  "585": [
+    {
+      "word_index": 436,
+      "opcode": "replace",
+      "docai_reading": "איעזר",
+      "final_text": "אליעזר",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אליעזר",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'איעזר' -> attested 'אליעזר'",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 777,
+      "opcode": "replace",
+      "docai_reading": "אא",
+      "final_text": "אלא",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלא",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אא' -> attested 'אלא'",
+      "flag": "current_text_may_be_wrong"
+    }
+  ],
+  "592": [
+    {
+      "word_index": 25,
+      "opcode": "replace",
+      "docai_reading": "אגאזי",
+      "final_text": "אלגאזי",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלגאזי",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אגאזי' -> attested 'אלגאזי'",
+      "flag": "current_text_may_be_wrong"
+    }
+  ],
+  "634": [
+    {
+      "word_index": 615,
+      "opcode": "replace",
+      "docai_reading": "אא",
+      "final_text": "אלא",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלא",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אא' -> attested 'אלא'",
+      "flag": "current_text_may_be_wrong"
+    }
+  ],
+  "642": [
+    {
+      "word_index": 339,
+      "opcode": "replace",
+      "docai_reading": "איבא",
+      "final_text": "אליבא",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אליבא",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'איבא' -> attested 'אליבא'",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 586,
+      "opcode": "replace",
+      "docai_reading": "אא",
+      "final_text": "אלא",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלא",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אא' -> attested 'אלא'",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 789,
+      "opcode": "replace",
+      "docai_reading": "איביה",
+      "final_text": "אליביה",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אליביה",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'איביה' -> attested 'אליביה'",
+      "flag": "current_text_may_be_wrong"
+    }
+  ],
+  "645": [
+    {
+      "word_index": 1182,
+      "opcode": "replace",
+      "docai_reading": "אא",
+      "final_text": "אלא",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלא",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אא' -> attested 'אלא'",
+      "flag": "current_text_may_be_wrong"
+    }
+  ],
+  "661": [
+    {
+      "word_index": 802,
+      "opcode": "replace",
+      "docai_reading": "אא",
+      "final_text": "אלא",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלא",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אא' -> attested 'אלא'",
+      "flag": "current_text_may_be_wrong"
+    }
+  ],
+  "662": [
+    {
+      "word_index": 190,
+      "opcode": "replace",
+      "docai_reading": "אא",
+      "final_text": "אלא",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלא",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אא' -> attested 'אלא'",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 216,
+      "opcode": "replace",
+      "docai_reading": "אא",
+      "final_text": "אלא",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלא",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אא' -> attested 'אלא'",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 350,
+      "opcode": "replace",
+      "docai_reading": "האף",
+      "final_text": "האלף",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "האלף",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'האף' -> attested 'האלף'",
+      "flag": "current_text_may_be_wrong"
+    }
+  ],
+  "663": [
+    {
+      "word_index": 778,
+      "opcode": "replace",
+      "docai_reading": "איה",
+      "final_text": "אליה",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אליה",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'איה' -> attested 'אליה'",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 1256,
+      "opcode": "replace",
+      "docai_reading": "איבא",
+      "final_text": "אליבא",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אליבא",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'איבא' -> attested 'אליבא'",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 3996,
+      "opcode": "replace",
+      "docai_reading": "איבא",
+      "final_text": "אליבא",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אליבא",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'איבא' -> attested 'אליבא'",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 5855,
+      "opcode": "replace",
+      "docai_reading": "אא",
+      "final_text": "אלא",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלא",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אא' -> attested 'אלא'",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 6239,
+      "opcode": "replace",
+      "docai_reading": "אמא",
+      "final_text": "אלמא",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלמא",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אמא' -> attested 'אלמא'",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 7706,
+      "opcode": "replace",
+      "docai_reading": "אא",
+      "final_text": "אלא",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלא",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אא' -> attested 'אלא'",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 7798,
+      "opcode": "replace",
+      "docai_reading": "איבא",
+      "final_text": "אליבא",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אליבא",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'איבא' -> attested 'אליבא'",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 7893,
+      "opcode": "replace",
+      "docai_reading": "איבא",
+      "final_text": "אליבא",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אליבא",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'איבא' -> attested 'אליבא'",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 7914,
+      "opcode": "replace",
+      "docai_reading": "אגאזי",
+      "final_text": "אלגאזי",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלגאזי",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אגאזי' -> attested 'אלגאזי'",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 8038,
+      "opcode": "replace",
+      "docai_reading": "אא",
+      "final_text": "אלא",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלא",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אא' -> attested 'אלא'",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 8464,
+      "opcode": "replace",
+      "docai_reading": "אה",
+      "final_text": "אלה",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלה",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אה' -> attested 'אלה'",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 8613,
+      "opcode": "replace",
+      "docai_reading": "אא",
+      "final_text": "אלא",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלא",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אא' -> attested 'אלא'",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 8691,
+      "opcode": "replace",
+      "docai_reading": "אא",
+      "final_text": "אלא",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלא",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אא' -> attested 'אלא'",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 9151,
+      "opcode": "replace",
+      "docai_reading": "אעאי",
+      "final_text": "אלעאי",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלעאי",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אעאי' -> attested 'אלעאי'",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 9157,
+      "opcode": "replace",
+      "docai_reading": "אא",
+      "final_text": "אלא",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלא",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אא' -> attested 'אלא'",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 9196,
+      "opcode": "replace",
+      "docai_reading": "אעזר",
+      "final_text": "אלעזר",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלעזר",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אעזר' -> attested 'אלעזר'",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 9298,
+      "opcode": "replace",
+      "docai_reading": "אעזר",
+      "final_text": "אלעזר",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלעזר",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אעזר' -> attested 'אלעזר'",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 9387,
+      "opcode": "replace",
+      "docai_reading": "אעאי",
+      "final_text": "אלעאי",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלעאי",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אעאי' -> attested 'אלעאי'",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 9473,
+      "opcode": "replace",
+      "docai_reading": "אא",
+      "final_text": "אלא",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלא",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אא' -> attested 'אלא'",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 9493,
+      "opcode": "replace",
+      "docai_reading": "אהים",
+      "final_text": "אלהים",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלהים",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אהים' -> attested 'אלהים'",
+      "flag": "current_text_may_be_wrong"
+    }
+  ],
+  "664": [
+    {
+      "word_index": 66,
+      "opcode": "replace",
+      "docai_reading": "אה",
+      "final_text": "אלה",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלה",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אה' -> attested 'אלה'",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 154,
+      "opcode": "replace",
+      "docai_reading": "אא",
+      "final_text": "אלא",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלא",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אא' -> attested 'אלא'",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 198,
+      "opcode": "replace",
+      "docai_reading": "אא",
+      "final_text": "אלא",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלא",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אא' -> attested 'אלא'",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 2069,
+      "opcode": "replace",
+      "docai_reading": "אגאזי",
+      "final_text": "אלגאזי",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלגאזי",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אגאזי' -> attested 'אלגאזי'",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 2183,
+      "opcode": "replace",
+      "docai_reading": "אא",
+      "final_text": "אלא",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלא",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אא' -> attested 'אלא'",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 2224,
+      "opcode": "replace",
+      "docai_reading": "אא",
+      "final_text": "אלא",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלא",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אא' -> attested 'אלא'",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 2546,
+      "opcode": "replace",
+      "docai_reading": "אמא",
+      "final_text": "אלמא",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "אלמא",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'אמא' -> attested 'אלמא'",
+      "flag": "current_text_may_be_wrong"
+    }
+  ],
+  "666": [
+    {
+      "word_index": 169,
+      "opcode": "replace",
+      "docai_reading": "וכאה",
+      "final_text": "וכאלה",
+      "page": null,
+      "bbox": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.2,
+        "y2": 0.2
+      },
+      "vision_selected": "B",
+      "vision_transcription": "וכאלה",
+      "confidence": 0.95,
+      "reasoning": "VLM Verified Ligature Candidate: Restoring dropped Lamed glyph in unattested 'וכאה' -> attested 'וכאלה'",
+      "flag": "current_text_may_be_wrong"
+    }
+  ]
+}

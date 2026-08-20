@@ -30,7 +30,7 @@ import os
 import re
 import sys
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-from urllib.parse import urlparse
+from urllib.parse import urlparse, parse_qs
 
 import corpus_io as cio
 import review_decisions as rd
@@ -102,28 +102,59 @@ MIME_TYPES = {
 _load_json = cio.load_repo_json
 
 
-def _load_klalim():
+def _get_part_num_for_klal(klal_id):
+    if klal_id <= PART1_MAX_KLAL:
+        return 1
+    elif klal_id <= 444:
+        return 2
+    else:
+        return 3
+
+
+def _load_klalim(part_num=1):
     demo = _load_json("klalim_demo_dataset.json", [])
-    klalim = [k for k in demo if k["klal_id"] <= PART1_MAX_KLAL]
+    part_str = str(part_num).lower()
+    if part_str in ("all", "0"):
+        klalim = demo
+    elif part_str == "2":
+        klalim = [k for k in demo if 223 <= k["klal_id"] <= 444]
+    elif part_str == "3":
+        klalim = [k for k in demo if k["klal_id"] >= 445]
+    else:
+        klalim = [k for k in demo if k["klal_id"] <= PART1_MAX_KLAL]
     klalim.sort(key=lambda k: k["klal_id"])
     return {k["klal_id"]: k for k in klalim}, klalim
 
 
-def _load_alignment():
-    align = _load_json("part1_header_anchored_alignment.json", [])
+def _load_alignment(part_num=None):
+    a1 = _load_json("part1_header_anchored_alignment.json", [])
+    a2 = _load_json("part2_header_anchored_alignment.json", [])
+    a3 = _load_json("part3_header_anchored_alignment.json", [])
+    align = a1 + a2 + a3
     return {r["klal_id"]: r for r in align}
 
 
-def _load_corrections():
-    return _load_json("corrections_part1.json", {})
+def _load_corrections(part_num=None):
+    c1 = _load_json("corrections_part1.json", {})
+    c2 = _load_json("corrections_part2.json", {})
+    c3 = _load_json("corrections_part3.json", {})
+    combined = {}
+    if isinstance(c1, dict): combined.update(c1)
+    if isinstance(c2, dict): combined.update(c2)
+    if isinstance(c3, dict): combined.update(c3)
+    return combined
 
 
 def _load_regions():
     return _load_json("klal_page_regions.json", {})
 
 
-def _load_punctuation_candidates():
-    return _load_json("punctuation_candidates_part1.json", {})
+def _load_punctuation_candidates(part_num=1):
+    fname = f"punctuation_candidates_part{part_num}.json"
+    punct = _load_json(fname, {})
+    if not punct and part_num == 1:
+        punct = _load_json("punctuation_candidates_part1.json", {})
+    return punct
 
 
 def _load_witness_queue():
@@ -379,11 +410,11 @@ def api_flags():
     return FLAG_LABELS
 
 
-def api_klalim():
-    klalim_by_id, klalim = _load_klalim()
-    alignment = _load_alignment()
-    corrections = _load_corrections()
-    punct_candidates = _load_punctuation_candidates()
+def api_klalim(part_num=1):
+    klalim_by_id, klalim = _load_klalim(part_num=part_num)
+    alignment = _load_alignment(part_num=part_num)
+    corrections = _load_corrections(part_num=part_num)
+    punct_candidates = _load_punctuation_candidates(part_num=part_num)
     # Pre-load klal_flag decisions once for all 222 klalim. The old code
     # called _word_level_ai_flags() per klal inside the loop; that function
     # calls rd.history_for() which re-reads the full log each time - 222
@@ -515,12 +546,13 @@ def api_klalim():
 
 
 def api_klal(klal_id):
-    klalim_by_id, _ = _load_klalim()
+    part_num = _get_part_num_for_klal(klal_id)
+    klalim_by_id, _ = _load_klalim(part_num=part_num)
     k = klalim_by_id.get(klal_id)
     if not k:
         return None
-    alignment = _load_alignment()
-    corrections = _load_corrections().get(str(klal_id), [])
+    alignment = _load_alignment(part_num=part_num)
+    corrections = _load_corrections(part_num=part_num).get(str(klal_id), [])
     decided = rd.all_current("candidate_choice")
     corrections = [_merge_decision(c, klal_id, decided) for c in corrections]
     # Manual corrections (2026-08-13) as SYNTHETIC entries in the same
@@ -704,7 +736,7 @@ def api_decision_history(klal_id, word_index):
 
 
 def api_page(page_num):
-    _, klalim = _load_klalim()
+    _, klalim = _load_klalim("all")
     klalim_by_id = {k["klal_id"]: k for k in klalim}
     alignment = _load_alignment()
     regions = _load_regions()
@@ -741,25 +773,26 @@ def api_page(page_num):
             (w["klal_id"], w["docai_token_index"]))
         out.append(entry)
 
-    # AI-flagged words with bboxes (looked up from DocAI tokens via
-    # _corpus_word_bboxes). These have no corrections_part1.json entry of
-    # their own, so they're not caught by the corrections loop above.
-    # Only include ones whose bbox doesn't overlap with an existing
-    # correction at the same word_index (if both exist, the correction's
-    # box is already drawn and the focus matching works by word_index).
+    # Word-level bboxes for all words on the page (looked up from DocAI tokens).
+    # Ensures that clicking ANY word (flagged or unflagged) highlights its exact
+    # bounding box on the scan image.
+    served_keys = {(x["klal_id"], x["word_index"]) for x in out if "word_index" in x}
     for kid in page_klals:
         k = klalim_by_id.get(kid)
         if not k:
             continue
-        corr_word_indices = {c["word_index"] for c in corrections.get(str(kid), [])
-                            if c.get("bbox") and c.get("page") == page_num}
         words = (k.get("clean_text") or "").split(" ")
-        for af in _word_level_ai_flags(kid, words):
-            if af.get("bbox") and af.get("page") == page_num and af["word_index"] not in corr_word_indices:
-                entry = dict(af)
-                entry["klal_id"] = kid
-                entry["kind"] = "correction"  # reuse correction rendering
-                out.append(entry)
+        page_bboxes = _corpus_word_bboxes(kid, words, page_num)
+        for wi, bbox in page_bboxes.items():
+            if (kid, wi) not in served_keys:
+                out.append({
+                    "klal_id": kid,
+                    "word_index": wi,
+                    "bbox": bbox,
+                    "page": page_num,
+                    "kind": "plain"
+                })
+                served_keys.add((kid, wi))
     return out
 
 
@@ -948,7 +981,8 @@ class Handler(BaseHTTPRequestHandler):
     server_version = "YadMalachiReview/1.0"
 
     def log_message(self, fmt, *args):
-        pass  # keep stdout clean; errors still raise/print via BaseHTTPRequestHandler's default hooks
+        sys.stderr.write(f"[{self.log_date_time_string()}] {self.address_string()} - {fmt % args}\n")
+        sys.stderr.flush()
 
     def _send_json(self, payload, status=200):
         body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
@@ -980,18 +1014,22 @@ class Handler(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header("Content-Type", content_type)
         self.send_header("Content-Length", str(len(body)))
+        self.send_header("Cache-Control", "no-cache, must-revalidate")
         self.end_headers()
         self.wfile.write(body)
 
     def do_GET(self):
-        path = urlparse(self.path).path
+        parsed = urlparse(self.path)
+        path = parsed.path
+        query = parse_qs(parsed.query)
         try:
             if path == "/api/flags":
                 return self._send_json(api_flags())
             if path == "/api/witness":
                 return self._send_json(api_witness_summary())
             if path == "/api/klalim":
-                return self._send_json(api_klalim())
+                part_val = query.get("part", ["1"])[0]
+                return self._send_json(api_klalim(part_num=part_val))
             m = ROUTE_KLAL_FLAG.match(path)
             if m:
                 return self._send_json(api_klal_flag(int(m.group(1))))

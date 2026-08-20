@@ -11,15 +11,9 @@ redirect to here — read on.
 
 ## TL;DR
 
-**The pipeline.** Document AI OCR → diff the fresh OCR against the *currently
-stored* corpus text → crop each disagreement out of the scan and have Gemini
-adjudicate it → human review in a local dashboard → apply. Five build stages,
-orchestrated by `./rebuild_all.sh`, gated by pytest.
+**The pipeline.** Document AI primary text extraction → secondary witness evaluation (VLM `VlmWitnessEngine`) → diff & crop disagreements → VLM Vision Adjudicator (`call_gemini_vision_adjudicate`) → human review in a local dashboard → persistent decision ledger (`review_decisions.jsonl`). Five build stages, orchestrated by `./rebuild_all.sh`, gated by pytest.
 
-**The corpus.** `part1.json` / `part2.json` / `part3.json` are the **only**
-hand-edited source of truth, and they are never hand-edited directly — every
-change goes through the decision pipeline. Everything else that shows klal
-text is derived and must be regenerated.
+**The corpus.** `part1.json` / `part2.json` / `part3.json` are the **only** hand-edited source of truth, and they are never hand-edited directly — every change goes through the decision pipeline. Everything else that shows klal text is derived and must be regenerated.
 
 **The three things that will bite you if you skip them:**
 
@@ -420,6 +414,12 @@ this repo as an LLM agent, follow them exactly.
   backgrounded) — check `lsof -i :8420` first and skip only if it's
   already running. It's the live human-review tool; the user works in it
   throughout a session and shouldn't have to ask for it each time.
+- **Auto-restart review server on any frontend or server change.** Whenever modifying
+  `pipeline/review_server.py` or any file in `review_frontend/`, immediately restart the background
+  server process (`kill <PID>` + restart `python3 pipeline/review_server.py`) without asking.
+- **Mandatory incremental disk flushing on all scripts.** All batch-processing, VLM, OCR, and API scripts
+  MUST flush their output to disk item-by-item (`open(..., "a")`, `f.flush()`, `conn.commit()`). Never buffer
+  results in memory to write at the end — cloud API failures, 429 quota exhaustion, and 503 errors will cause data loss.
 - **Close open items before proposing new ones.** If `PROJECT-STATUS.md`'s
   Open Items section lists unresolved blockers, do not end a turn by
   offering to expand scope ("want me to also check X," "should I dig into
@@ -721,3 +721,15 @@ next incident.
     up.** This is Lesson 1 ("a check that isn't run has not verified
     anything") applied to one's own output: a prose claim of "fixed" is
     itself unverified until checked against a real before/after diff.
+20. **Multi-volume/multi-part works must map page alignment across the full physical scan range.**
+    When serving page-level bounding boxes and UI rendering for secondary parts (Parts 2 & 3),
+    loader functions (`_load_alignment`, `_load_corrections`) must read combined datasets across all parts
+    (`part1`, `part2`, `part3`) rather than defaulting to Part 1.
+21. **Flattened Bounding Box Schema Discipline.**
+    `_corpus_word_bboxes()` and `load_docai_page()` expect flat coordinate keys (`"x1"`, `"y1"`, `"x2"`, `"y2"`)
+    on token objects. Nested `bbox: {x1: ...}` dictionary structures fail silently with `None` lookups,
+    returning 0 bounding boxes to the UI. Always enforce flat coordinate keys in token serialization.
+22. **Pluggable VLM Witness Engine Architecture.**
+    Secondary witness evaluation must inherit from `AbstractWitnessEngine` ABC with image-grounded VLM adjudication
+    ($\ge 0.90$ confidence) and disk caching in `adjudication_cache.db` to eliminate Tesseract OCR noise while
+    preserving engine swappability.

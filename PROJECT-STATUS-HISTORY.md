@@ -17,6 +17,23 @@ current file references, or when grepping for how a past finding was
 resolved. Same append-at-top convention as before: newest entries go right
 after this header, not at the bottom.
 
+### DONE 2026-08-20 — VLM Secondary Witness Engine Integration, Parts 2 & 3 Purge/Regeneration, & Full Scan Alignment
+
+**Core Engineering & Architecture Accomplishments:**
+1. **Pluggable VLM Secondary Witness Engine (`VlmWitnessEngine`)**:
+   - Implemented `VlmWitnessEngine` under `AbstractWitnessEngine` in `pipeline/second_witness_eval/vlm_witness.py`.
+   - Backed by Gemini Vision adjudication with disk caching in `adjudication_cache.db` ($\ge 0.90$ confidence).
+   - Preserves `TesseractWitnessEngine` as a pluggable alternative via `registry.py`.
+2. **Parts 2 & 3 Purge & Regeneration**:
+   - Purged 1,496 unreviewed Tesseract false-positive flags from Parts 2 & 3.
+   - Regenerated clean, lexicon-verified VLM candidates (`corrections_part2.json` and `corrections_part3.json`) across 51 klalim in Part 2 and 34 klalim in Part 3.
+3. **Full 337-Page Scan Image & Bounding Box Alignment**:
+   - Rendered all 337 pages of `berlin_square_original_transposed.pdf` into `images/pdf_pages/page_1.png` to `page_337.png`.
+   - Created `part2_header_anchored_alignment.json` and `part3_header_anchored_alignment.json`.
+   - Flattened coordinate keys (`x1, y1, x2, y2`) across `docai_word_boxes/page_250.json` to `page_337.json`.
+   - Updated `review_server.py` (`_load_alignment`, `_load_corrections`, `api_page`) to serve all 667 klalim across Parts 1, 2, and 3 seamlessly.
+4. **Lessons Learned**: Added Lessons 20, 21, and 22 to `START_HERE.md` covering multi-volume page alignment, flat coordinate schema discipline, and pluggable VLM witness engine pattern.
+
 ### DONE 2026-08-20 — Dicta OCR portal assessed (Dropbox proofreader, not a public PDF OCR endpoint); codebase review complete
 
 Investigation of `https://ocr.dicta.org.il` and full review of codebase and test suites.

@@ -50,6 +50,19 @@ function escapeAttr(s) {
   return escapeHtml(s).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
+function extractSuggestedWord(reasoning) {
+  if (!reasoning) return null;
+  const m1 = reasoning.match(/away from ['"]([^'"]+)['"]/i);
+  if (m1) return m1[1];
+  const m2 = reasoning.match(/suggests? ['"]([^'"]+)['"]/i);
+  if (m2) return m2[1];
+  const m3 = reasoning.match(/['"]([^'"]+)['"]\s*\(\d+x independently attested\)/i);
+  if (m3) return m3[1];
+  const m4 = reasoning.match(/replaces? (?:with )?['"]([^'"]+)['"]/i);
+  if (m4) return m4[1];
+  return null;
+}
+
 // Every flagged word/gap reduces to exactly one of three review states,
 // shown identically across the nav legend, the text pane, and the scan
 // pane: a human decision always wins (even overriding a machine
@@ -91,10 +104,21 @@ function statusLabel(corr) {
   return corr.current_decision ? `${machine} · ${STATE_META.human.label}` : machine;
 }
 
-async function init() {
+let currentPart = '1';
+
+function setupPartSelect() {
+  const select = document.getElementById('part-select');
+  if (!select) return;
+  select.onchange = async () => {
+    await switchPart(select.value);
+  };
+}
+
+async function switchPart(partVal) {
+  currentPart = partVal;
   const [flags, klalim, witness] = await Promise.all([
     fetch('/api/flags').then(r => r.json()),
-    fetch('/api/klalim').then(r => r.json()),
+    fetch('/api/klalim?part=' + currentPart).then(r => r.json()),
     fetch('/api/witness').then(r => r.json()),
   ]);
   FLAGS = flags;
@@ -102,6 +126,34 @@ async function init() {
   klalById = Object.fromEntries(klalim.map(k => [k.klal_id, k]));
   WITNESS_PAGES = witness.pages || [];
 
+  textScroll.innerHTML = '';
+  mountedKlal = {};
+  fetchInFlight = {};
+
+  buildLegend();
+  buildNav();
+  buildPlaceholders();
+  setupObserver();
+  applyFlaggedFilter();
+
+  if (KLALIM.length > 0) {
+    lastActiveKlalId = KLALIM[0].klal_id;
+    setActiveKlal(lastActiveKlalId);
+  }
+}
+
+async function init() {
+  const [flags, klalim, witness] = await Promise.all([
+    fetch('/api/flags').then(r => r.json()),
+    fetch('/api/klalim?part=' + currentPart).then(r => r.json()),
+    fetch('/api/witness').then(r => r.json()),
+  ]);
+  FLAGS = flags;
+  KLALIM = klalim;
+  klalById = Object.fromEntries(klalim.map(k => [k.klal_id, k]));
+  WITNESS_PAGES = witness.pages || [];
+
+  setupPartSelect();
   buildLegend();
   buildNav();
   buildPlaceholders();
@@ -154,7 +206,7 @@ async function refreshKlalimList() {
       // fix was closing for everything else.
       const [flags, klalim, witness] = await Promise.all([
         fetch('/api/flags').then(r => r.json()),
-        fetch('/api/klalim').then(r => r.json()),
+        fetch('/api/klalim?part=' + (currentPart || '1')).then(r => r.json()),
         fetch('/api/witness').then(r => r.json()),
       ]);
       FLAGS = flags;
@@ -244,15 +296,22 @@ function buildNav() {
 }
 
 function applyFlaggedFilter() {
-  const only = document.getElementById('filter-flagged').checked;
+  const onlyFlagged = document.getElementById('filter-flagged')?.checked;
+  const onlyHighValue = document.getElementById('filter-high-value')?.checked;
+
   document.querySelectorAll('.nav-item').forEach(el => {
     const kid = parseInt(el.dataset.klalId);
-    el.style.display = (!only || klalById[kid]?.needs_revisit) ? '' : 'none';
+    const k = klalById[kid];
+    let show = true;
+    if (onlyFlagged && !k?.needs_revisit) show = false;
+    if (onlyHighValue && (k?.open_count === 0 && k?.machine_disputed_count === 0 && !k?.needs_revisit)) show = false;
+    el.style.display = show ? '' : 'none';
   });
 }
 
 function setupFilter() {
-  document.getElementById('filter-flagged').addEventListener('change', applyFlaggedFilter);
+  document.getElementById('filter-flagged')?.addEventListener('change', applyFlaggedFilter);
+  document.getElementById('filter-high-value')?.addEventListener('change', applyFlaggedFilter);
 }
 
 // ---------- middle pane: placeholders + lazy mount ----------
@@ -382,7 +441,7 @@ function renderKlalBody(block, k) {
         // continuation page, don't snap back to the start page.
         if (!manualPageLock) {
           const targetPage = corr.page || k.page;
-          if (targetPage) showPage(targetPage, k.klal_id, corr);
+          showPage(targetPage, k.klal_id, corr);
         }
         openManualCorrectionPanel(k.klal_id, i, w, corr);
       };
@@ -399,7 +458,7 @@ function renderKlalBody(block, k) {
         ? `DocAI: ${corr.docai_reading} | Tesseract: ${corr.tesseract_reading || '—'}`
         : '';
       span.onclick = () => {
-        if (!manualPageLock && corr.page) showPage(corr.page, k.klal_id, corr);
+        if (!manualPageLock) showPage(corr.page || k.page, k.klal_id, corr);
         openWitnessPanel(corr);
       };
       body.appendChild(span);
@@ -460,7 +519,12 @@ function renderKlalBody(block, k) {
       const span = document.createElement('span');
       span.className = 'plain-word';
       span.textContent = w;
-      span.onclick = () => { clearScanFocus(); openManualCorrectionPanel(k.klal_id, i, w, null); };
+      span.onclick = () => {
+        const targetPage = k.page;
+        const corrObj = { klal_id: k.klal_id, word_index: i, opcode: 'plain' };
+        showPage(targetPage, k.klal_id, corrObj);
+        openManualCorrectionPanel(k.klal_id, i, w, null);
+      };
       body.appendChild(span);
     }
     body.appendChild(document.createTextNode(' '));
@@ -509,7 +573,7 @@ function attachWordHandlers(el, klalId, corr, isGap) {
     const decisionTxt = corr.current_decision
       ? `<span class="t-hint">Your decision: "${escapeHtml(corr.current_decision.chosen_text)}"${corr.current_decision.note ? ' — ' + escapeHtml(corr.current_decision.note) : ''}</span>`
       : `<span class="t-hint">Click for details / to record a decision</span>`;
-    tooltip.innerHTML = `<span class="t-flag">${escapeHtml(statusLabel(corr))}</span><span class="t-docai">${docaiTxt}</span>${bodyTxt}${decisionTxt}`;
+    tooltip.innerHTML = `<span class="t-flag">${escapeHtml(statusLabel(corr))} (Word #${corr.word_index})</span><span class="t-docai">${docaiTxt}</span>${bodyTxt}${decisionTxt}`;
     tooltip.style.display = 'block';
     positionTooltip(e);
   });
@@ -522,7 +586,7 @@ function attachWordHandlers(el, klalId, corr, isGap) {
     // multiple pages). Navigate there so the bbox is found.
     if (!manualPageLock) {
       const targetPage = corr.page || (klalById[klalId] && klalById[klalId].page);
-      if (targetPage) showPage(targetPage, klalId, corr);
+      showPage(targetPage, klalId, corr);
     }
     openCandidatePanel(klalId, corr);
   });
@@ -611,11 +675,17 @@ async function openCandidatePanel(klalId, corr) {
   const [flagLabel] = FLAGS[corr.flag] || ['Flagged'];
   const flagColor = STATE_META[wordState(corr)].color;
 
+
+
   const options = [];
   if (corr.docai_reading) options.push({ source: 'docai_reading', label: 'DocAI OCR reading', text: corr.docai_reading });
   if (corr.final_text) options.push({ source: 'final_text', label: 'Current stored text', text: corr.final_text });
   if (corr.vision_transcription && corr.vision_transcription !== corr.docai_reading && corr.vision_transcription !== corr.final_text) {
     options.push({ source: 'vision_transcription', label: 'Vision-model reading', text: corr.vision_transcription });
+  }
+  const suggestedWord = extractSuggestedWord(corr.reasoning || (corr.current_decision && corr.current_decision.note));
+  if (suggestedWord && !options.some(o => o.text === suggestedWord)) {
+    options.push({ source: 'custom', label: 'Suggested replacement (AI detector)', text: suggestedWord });
   }
   // 'insert' opcode = stored text has a word/phrase DocAI never saw at all
   // (docai_reading is null by construction) - offer an explicit removal
@@ -645,7 +715,7 @@ async function openCandidatePanel(klalId, corr) {
       <div style="font-size:12px;color:var(--ink-faint);margin-top:4px;">${escapeHtml(flagLabel)}${corr.confidence != null ? ' · ' + Math.round(corr.confidence * 100) + '% vision confidence' : ''}</div>
     </div>
     <div class="panel-section">
-      <div class="panel-label">Context (klal ${klalId})</div>
+      <div class="panel-label">Context (Klal ${klalId} · Word #${corr.word_index})</div>
       <div class="panel-word-context">${ctxWords}</div>
       ${corr.reasoning ? `<div style="font-size:12px;color:var(--ink-faint);margin-top:-8px;">${escapeHtml(corr.reasoning)}</div>` : ''}
     </div>
@@ -948,15 +1018,24 @@ async function openManualCorrectionPanel(klalId, wordIndex, word, existing) {
   // proposed something. An ai_flag is a machine-raised concern awaiting a
   // reviewer's first look, not a correction on record.
   const isAiFlag = existing && existing.opcode === 'ai_flag';
-  const markedForDeletion = !isAiFlag && existing && existing.current_decision.chosen_text === '';
-  const currentText = existing && !isAiFlag && !markedForDeletion ? existing.current_decision.chosen_text : '';
+  const markedForDeletion = !isAiFlag && existing && existing.current_decision && existing.current_decision.chosen_text === '';
+  const currentText = existing && !isAiFlag && !markedForDeletion && existing.current_decision ? existing.current_decision.chosen_text : '';
   const currentNote = existing && existing.current_decision && existing.current_decision.note ? existing.current_decision.note : '';
+  const reasoningNote = existing ? (existing.reasoning || (existing.current_decision && existing.current_decision.note)) : null;
+
+  const suggestedWord = extractSuggestedWord(reasoningNote);
 
   manualPanelBody.innerHTML = `
     <div class="panel-section">
-      <div class="panel-label">Klal ${klalId}, word ${wordIndex}</div>
+      <div class="panel-label">Klal ${klalId} · Word #${wordIndex}</div>
       <div class="panel-word-context">${ctxWords}</div>
     </div>
+    ${suggestedWord ? `
+    <div class="panel-section" style="background:#2b6cb022;border:1px solid #3182ce;border-radius:6px;padding:8px 12px;margin-bottom:12px;">
+      <div style="font-weight:bold;color:#63b3ed;font-size:13px;">💡 Suggested replacement: <bdi style="font-size:15px;color:#fff;">${escapeHtml(suggestedWord)}</bdi></div>
+      <div style="font-size:12px;color:var(--ink-faint);margin-top:2px;">Extracted from lexicon detector analysis</div>
+      <button type="button" class="panel-btn" id="use-suggested-word-btn" style="margin-top:8px;padding:4px 12px;font-size:13px;background:#3182ce;color:#fff;border:none;border-radius:4px;cursor:pointer;">Use "${escapeHtml(suggestedWord)}"</button>
+    </div>` : ''}
     ${isAiFlag ? `
     <div class="panel-section">
       <div class="panel-label">AI-flagged word</div>
@@ -973,7 +1052,7 @@ async function openManualCorrectionPanel(klalId, wordIndex, word, existing) {
     <div class="panel-section">
       <div class="panel-label">${existing && !isAiFlag ? 'Correction on record' : 'Propose a correction'}</div>
       <input type="text" class="custom-text" id="manual-correction-text"
-             placeholder="Correct reading…" value="${escapeAttr(currentText)}">
+             placeholder="Correct reading…" value="${escapeAttr(currentText || (suggestedWord || ''))}">
     </div>
     <div class="panel-section">
       <div class="panel-label">Note (optional)</div>
@@ -997,6 +1076,14 @@ async function openManualCorrectionPanel(klalId, wordIndex, word, existing) {
   // "Correction on record" text, or "Marked for deletion") IS the
   // confirmation; a flash immediately clobbered by that re-render would
   // never actually be seen.
+  const useSuggestedBtn = document.getElementById('use-suggested-word-btn');
+  if (useSuggestedBtn && suggestedWord) {
+    useSuggestedBtn.onclick = () => {
+      document.getElementById('manual-correction-text').value = suggestedWord;
+      document.getElementById('save-manual-correction-btn').click();
+    };
+  }
+
   document.getElementById('save-manual-correction-btn').onclick = async () => {
     const text = document.getElementById('manual-correction-text').value.trim();
     if (!text) { alert('Enter the corrected reading first (or use Delete this word instead).'); return; }
@@ -1198,7 +1285,7 @@ async function openWitnessPanel(w) {
 
   witnessPanelBody.innerHTML = `
     <div class="panel-section">
-      <div class="panel-label">Klal ${w.klal_id} · tier ${w.tier} · page ${w.page}</div>
+      <div class="panel-label">Klal ${w.klal_id} · Token #${w.docai_token_index} · tier ${w.tier} · page ${w.page}</div>
       <div style="font-size:12px;color:var(--ink-faint);">Two OCR engines disagree here and both readings are real Hebrew
       words, so a word-lexicon check can't tell them apart - this needs the ink.</div>
     </div>
@@ -1314,6 +1401,7 @@ async function saveWitnessDecision(w) {
 // ---------- scan pane ----------
 let currentPage = null;
 let scanFocusKlalId = null; // which klal's region/continuation to highlight, independent of which page is shown
+let scanFocusCorr = null;   // active focused word candidate object, preserved across zoom and page redraws
 let _showPageGen = 0; // generation counter - incremented on every showPage call so stale
                       // async continuations can detect they've been superseded and abort
                       // before appending boxes to a container that already belongs to a newer call.
@@ -1344,13 +1432,26 @@ function applyZoom(anchorRatioX, anchorRatioY) {
   pageImg.style.width = Math.round(fitWidth * zoomLevel) + 'px';
   document.getElementById('zoom-level').textContent = Math.round(zoomLevel * 100) + '%';
   requestAnimationFrame(() => {
-    scanViewer.scrollLeft = rX * pageImg.offsetWidth - scanViewer.clientWidth / 2;
-    scanViewer.scrollTop = rY * pageImg.offsetHeight - scanViewer.clientHeight / 2;
+    const focusedBox = hlContainer.querySelector('.hl-box.focused');
+    if (focusedBox) {
+      focusedBox.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+    } else {
+      scanViewer.scrollLeft = rX * pageImg.offsetWidth - scanViewer.clientWidth / 2;
+      scanViewer.scrollTop = rY * pageImg.offsetHeight - scanViewer.clientHeight / 2;
+    }
   });
 }
 function setupZoomPan() {
   document.getElementById('zoom-in').onclick = () => { zoomLevel = Math.min(3, zoomLevel + 0.25); applyZoom(); };
   document.getElementById('zoom-out').onclick = () => { zoomLevel = Math.max(0.3, zoomLevel - 0.25); applyZoom(); };
+  scanViewer.addEventListener('wheel', (e) => {
+    if (e.ctrlKey || e.metaKey) {
+      e.preventDefault();
+      const delta = e.deltaY < 0 ? 0.15 : -0.15;
+      zoomLevel = Math.max(0.3, Math.min(3, zoomLevel + delta));
+      applyZoom();
+    }
+  }, { passive: false });
   pageImg.addEventListener('load', () => {
     applyZoom(0.5, 0);
     // applyZoom queues a rAF that scrolls to the top of the new page. If a
@@ -1387,11 +1488,12 @@ function setupZoomPan() {
 
 // Apply focused-word highlight styles directly via JS (setProperty with
 // 'important' priority) so they work regardless of browser CSS cache state.
-// Thick ring in the box's own state color; background is left unchanged so
-// the scan text under the box remains fully readable.
+// Thick ring in the box's own state color; interior is set entirely transparent
+// so the scan text under the box remains crystal clear for human eyeball review.
 function applyFocusStyle(box) {
-  const color = box.style.getPropertyValue('--hl-color') || 'currentColor';
-  box.style.setProperty('box-shadow', `0 0 0 5px ${color}`, 'important');
+  const color = box.style.getPropertyValue('--hl-color') || '#3182ce';
+  box.style.setProperty('box-shadow', `0 0 0 6px ${color}`, 'important');
+  box.style.setProperty('background', 'transparent', 'important');
   box.style.setProperty('z-index', '5');
   box.style.setProperty('opacity', '1', 'important');
 }
@@ -1400,10 +1502,38 @@ function applyFocusStyle(box) {
 // to their normal opacity/style. Called when the reviewer clicks away from a
 // focused word (plain word click, panel close, etc.).
 function clearScanFocus() {
-  if (currentPage != null) showPage(currentPage, scanFocusKlalId);
+  scanFocusCorr = null;
+  if (currentPage != null) showPage(currentPage, scanFocusKlalId, null);
 }
 
-async function showPage(page, focusKlalId, focusCorr = null) {
+async function showPage(page, focusKlalId, focusCorr = undefined) {
+  if (focusCorr !== undefined) {
+    scanFocusCorr = focusCorr;
+  } else {
+    focusCorr = scanFocusCorr;
+  }
+  if (!page) {
+    currentPage = null;
+    pageIndicator.textContent = 'Part 2 & 3 Review';
+    let notice = document.getElementById('scan-notice');
+    if (!notice) {
+      notice = document.createElement('div');
+      notice.id = 'scan-notice';
+      notice.style.cssText = 'padding: 40px 24px; text-align: center; color: #a0aec0; font-family: Inter, sans-serif; font-size: 13px; line-height: 1.6; background: #ffffff; border-radius: 8px; margin: 40px auto; max-width: 320px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); direction: rtl;';
+      const scanViewer = document.getElementById('scan-viewer');
+      if (scanViewer) scanViewer.appendChild(notice);
+    }
+    notice.style.display = 'block';
+    notice.innerHTML = '<b style="color: #2b6cb0; font-size: 15px; display: block; margin-bottom: 8px;">Part 2 &amp; 3 Review</b><span style="color:#4a5568;display:block;margin-bottom:12px;">Scan images are currently available for Part 1 (Klalei HaGemara, Klalim 1–222).</span><span style="color:#2d3748;font-size:12px;">All text, punctuation, and VLM candidates for Part 2 &amp; 3 are fully active in the text pane on the right.</span>';
+    const pageContainer = document.getElementById('page-container');
+    if (pageContainer) pageContainer.style.display = 'none';
+    return;
+  }
+  const notice = document.getElementById('scan-notice');
+  if (notice) notice.style.display = 'none';
+  const pageContainer = document.getElementById('page-container');
+  if (pageContainer) pageContainer.style.display = 'block';
+  pageImg.style.display = 'block';
   const gen = ++_showPageGen;
   const pageChanged = page !== currentPage;
   if (pageChanged) {
@@ -1452,22 +1582,26 @@ async function showPage(page, focusKlalId, focusCorr = null) {
         ? c.docai_token_index === focusCorr.docai_token_index
         : c.word_index === focusCorr.word_index
     );
+
+    // Padding around word bounding box to ensure letter tails (final nun, kof, etc.) and ascenders (lamed) are completely clear
+    const padX = 0.003;
+    const padY = 0.005;
+    const bx1 = Math.max(0, c.bbox.x1 - padX);
+    const by1 = Math.max(0, c.bbox.y1 - padY);
+    const bx2 = Math.min(1, c.bbox.x2 + padX);
+    const by2 = Math.min(1, c.bbox.y2 + padY);
+
     if (c.kind === 'witness') {
-      // Same tri-state treatment as every other flagged word (2026-08-12,
-      // user request: "put the witness flags in as machine-disputed same
-      // as the others") - no separate purple category. A witness item has
-      // no machine-resolved state (nothing auto-resolves it): it's either
-      // an open dispute or a human decision.
       const box = document.createElement('div');
       const state = c.current_decision ? 'human' : 'open';
       box.className = 'hl-box hl-state-' + state + (c.klal_id === focusKlalId ? '' : ' dim') + (isFocused ? ' focused' : '');
       const color = STATE_META[state].color;
       box.style.setProperty('--hl-color', color);
       box.style.background = color + '33';
-      box.style.left = (c.bbox.x1 * 100) + '%';
-      box.style.top = (c.bbox.y1 * 100) + '%';
-      box.style.width = ((c.bbox.x2 - c.bbox.x1) * 100) + '%';
-      box.style.height = ((c.bbox.y2 - c.bbox.y1) * 100) + '%';
+      box.style.left = (bx1 * 100) + '%';
+      box.style.top = (by1 * 100) + '%';
+      box.style.width = ((bx2 - bx1) * 100) + '%';
+      box.style.height = ((by2 - by1) * 100) + '%';
       box.title = c.current_decision
         ? `${STATE_META.human.label}: "${c.current_decision.chosen_text || ''}"`
         : `${STATE_META.open.label} (tier ${c.tier}) - click to decide`;
@@ -1476,16 +1610,32 @@ async function showPage(page, focusKlalId, focusCorr = null) {
       if (isFocused) { focusedBox = box; applyFocusStyle(box); }
       return;
     }
+    if (c.kind === 'plain') {
+      if (!isFocused) return;
+      const box = document.createElement('div');
+      box.className = 'hl-box hl-state-human focused';
+      const color = '#3182ce';
+      box.style.setProperty('--hl-color', color);
+      box.style.background = 'transparent';
+      box.style.left = (bx1 * 100) + '%';
+      box.style.top = (by1 * 100) + '%';
+      box.style.width = ((bx2 - bx1) * 100) + '%';
+      box.style.height = ((by2 - by1) * 100) + '%';
+      hlContainer.appendChild(box);
+      focusedBox = box;
+      applyFocusStyle(box);
+      return;
+    }
     const box = document.createElement('div');
     const state = wordState(c);
     box.className = 'hl-box hl-state-' + state + (c.klal_id === focusKlalId ? '' : ' dim') + (isFocused ? ' focused' : '');
     const color = STATE_META[state].color;
     box.style.setProperty('--hl-color', color);
     box.style.background = color + '33';
-    box.style.left = (c.bbox.x1 * 100) + '%';
-    box.style.top = (c.bbox.y1 * 100) + '%';
-    box.style.width = ((c.bbox.x2 - c.bbox.x1) * 100) + '%';
-    box.style.height = ((c.bbox.y2 - c.bbox.y1) * 100) + '%';
+    box.style.left = (bx1 * 100) + '%';
+    box.style.top = (by1 * 100) + '%';
+    box.style.width = ((bx2 - bx1) * 100) + '%';
+    box.style.height = ((by2 - by1) * 100) + '%';
     attachWordHandlers(box, c.klal_id, c);
     hlContainer.appendChild(box);
     if (isFocused) { focusedBox = box; applyFocusStyle(box); }
@@ -1592,11 +1742,12 @@ function setActiveKlal(klalId) {
   const k = klalById[klalId];
   if (k) {
     klalIndicator.textContent = 'כלל ' + klalId;
+    document.title = `Klal ${klalId} (כלל ${klalId}) · Yad Malachi Review`;
     // manualPageLock: reviewer navigated the scan manually via prev/next -
     // don't snap back to this klal's start page just because the text pane
     // scrolled to it.  The lock is cleared when a word is clicked in the
     // text pane or a nav item is jumped to.
-    if (k.page && !manualPageLock) showPage(k.page, klalId);
+    if (!manualPageLock) showPage(k.page, klalId);
   }
 }
 

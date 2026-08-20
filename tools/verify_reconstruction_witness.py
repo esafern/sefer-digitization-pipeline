@@ -205,13 +205,15 @@ def main():
             same_line = [t for t in box
                          if abs(cio.center_y(t) - anchor_yc) < anchor_h * 0.6]
             box = same_line or box[:1]
+            t = tier(d_seg, t_seg, lex)
             queue.append({
                 "klal_id": klal_id,
                 "page": page,
                 "docai_reading": d_seg or None,
                 "tesseract_reading": t_seg or None,
                 "opcode": tag,
-                "tier": tier(d_seg, t_seg, lex),
+                "tier": t,
+                "high_value": t in ("A", "B", "C"),
                 "bbox": {
                     "x1": min(t["x1"] for t in box), "y1": min(t["y1"] for t in box),
                     "x2": max(t["x2"] for t in box), "y2": max(t["y2"] for t in box),

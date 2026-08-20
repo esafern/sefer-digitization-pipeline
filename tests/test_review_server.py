@@ -300,7 +300,7 @@ def test_concurrent_nav_refreshes_share_one_round_of_requests(server, page):
         window.fetch = realFetch;
       }
       return ['/api/flags', '/api/klalim', '/api/witness']
-        .map(u => seen.filter(s => s.endsWith(u)).length);
+        .map(u => seen.filter(s => s.includes(u)).length);
     }""")
     assert counts == [1, 1, 1], (
         f"three concurrent refreshes fired {counts} requests for /api/flags, /api/klalim, "
@@ -488,3 +488,53 @@ def test_corpus_text_with_html_special_characters_renders_verbatim(server, page)
     )
     assert "&amp;" not in context_text, "double-escaped"
     assert page.test_errors == []
+
+
+def test_focus_box_transparent_and_zoom_preserves_focus(server, page):
+    """Verifies that selecting a word sets a focused highlight box with transparent
+    background (for human eyeball review), and that zooming in does not clear the focus."""
+    klal_id = 1
+    _open_dashboard(page, server, klal_id)
+
+    page.evaluate("""async () => {
+        const k = await fetch('/api/klal/1').then(r => r.json());
+        const corr = k.corrections.find(c => c.word_index === 85);
+        showPage(14, 1, corr);
+    }""")
+    page.wait_for_selector(".hl-box.focused", timeout=5000)
+
+    # 1. Verify interior transparency
+    bg = page.evaluate("getComputedStyle(document.querySelector('.hl-box.focused')).backgroundColor")
+    assert bg in ("rgba(0, 0, 0, 0)", "transparent"), f"Focused box must be transparent, got: {bg}"
+
+    # 2. Zoom in and verify focus remains intact
+    page.click("#zoom-in")
+    page.wait_for_timeout(300)
+    assert page.locator(".hl-box.focused").count() == 1, "Zooming in must preserve word focus"
+    assert page.test_errors == []
+
+
+def test_part_selector_switches_corpus_parts(server, page):
+    """Verifies that selecting Part 2 and Part 3 in #part-select updates the nav list
+    and fetches klalim from the selected part."""
+    _open_dashboard(page, server)
+
+    # 1. Switch to Part 2
+    page.select_option("#part-select", "2")
+    page.wait_for_timeout(500)
+    page.wait_for_selector("#nav-223", timeout=5000)
+    assert page.locator("#nav-223").count() == 1, "Part 2 must load Klal 223"
+
+    # 2. Switch to Part 3
+    page.select_option("#part-select", "3")
+    page.wait_for_timeout(500)
+    page.wait_for_selector("#nav-445", timeout=5000)
+    assert page.locator("#nav-445").count() == 1, "Part 3 must load Klal 445"
+
+    # 3. Switch back to Part 1
+    page.select_option("#part-select", "1")
+    page.wait_for_timeout(500)
+    page.wait_for_selector("#nav-1", timeout=5000)
+    assert page.locator("#nav-1").count() == 1, "Part 1 must reload Klal 1"
+    assert page.test_errors == []
+

@@ -1,0 +1,1778 @@
+[
+  {
+    "klal_id": 223,
+    "expected_section": "כללי ההא",
+    "matched_page": 254,
+    "matched_page_header": "כללי ההא",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 224,
+    "expected_section": "כללי ההא",
+    "matched_page": 254,
+    "matched_page_header": "כללי ההא",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 225,
+    "expected_section": "כללי ההא",
+    "matched_page": 254,
+    "matched_page_header": "כללי ההא",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 226,
+    "expected_section": "כללי ההא",
+    "matched_page": 254,
+    "matched_page_header": "כללי ההא",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 227,
+    "expected_section": "כללי ההא",
+    "matched_page": 254,
+    "matched_page_header": "כללי ההא",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 228,
+    "expected_section": "כללי ההא",
+    "matched_page": 254,
+    "matched_page_header": "כללי ההא",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 229,
+    "expected_section": "כללי ההא",
+    "matched_page": 255,
+    "matched_page_header": "כללי ההא",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 230,
+    "expected_section": "כללי ההא",
+    "matched_page": 255,
+    "matched_page_header": "כללי ההא",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 231,
+    "expected_section": "כללי ההא",
+    "matched_page": 255,
+    "matched_page_header": "כללי ההא",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 232,
+    "expected_section": "כללי ההא",
+    "matched_page": 255,
+    "matched_page_header": "כללי ההא",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 233,
+    "expected_section": "כללי ההא",
+    "matched_page": 255,
+    "matched_page_header": "כללי ההא",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 234,
+    "expected_section": "כללי ההא",
+    "matched_page": 256,
+    "matched_page_header": "כללי ההא",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 235,
+    "expected_section": "כללי ההא",
+    "matched_page": 256,
+    "matched_page_header": "כללי ההא",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 236,
+    "expected_section": "כללי ההא",
+    "matched_page": 256,
+    "matched_page_header": "כללי ההא",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 237,
+    "expected_section": "כללי ההא",
+    "matched_page": 256,
+    "matched_page_header": "כללי ההא",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 238,
+    "expected_section": "כללי ההא",
+    "matched_page": 256,
+    "matched_page_header": "כללי ההא",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 239,
+    "expected_section": "כללי ההא",
+    "matched_page": 257,
+    "matched_page_header": "כללי ההא",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 240,
+    "expected_section": "כללי ההא",
+    "matched_page": 257,
+    "matched_page_header": "כללי ההא",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 241,
+    "expected_section": "כללי ההא",
+    "matched_page": 257,
+    "matched_page_header": "כללי ההא",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 242,
+    "expected_section": "כללי הויו",
+    "matched_page": 257,
+    "matched_page_header": "כללי הויו",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 243,
+    "expected_section": "כללי הויו",
+    "matched_page": 257,
+    "matched_page_header": "כללי הויו",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 244,
+    "expected_section": "כללי הויו",
+    "matched_page": 257,
+    "matched_page_header": "כללי הויו",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 245,
+    "expected_section": "כללי הויו",
+    "matched_page": 258,
+    "matched_page_header": "כללי הויו",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 246,
+    "expected_section": "כללי הויו",
+    "matched_page": 258,
+    "matched_page_header": "כללי הויו",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 247,
+    "expected_section": "כללי הויו",
+    "matched_page": 258,
+    "matched_page_header": "כללי הויו",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 248,
+    "expected_section": "כללי הויו",
+    "matched_page": 258,
+    "matched_page_header": "כללי הויו",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 249,
+    "expected_section": "כללי הויו",
+    "matched_page": 258,
+    "matched_page_header": "כללי הויו",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 250,
+    "expected_section": "כללי הויו",
+    "matched_page": 259,
+    "matched_page_header": "כללי הויו",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 251,
+    "expected_section": "כללי הויו",
+    "matched_page": 259,
+    "matched_page_header": "כללי הויו",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 252,
+    "expected_section": "כללי הויו",
+    "matched_page": 259,
+    "matched_page_header": "כללי הויו",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 253,
+    "expected_section": "כללי הויו",
+    "matched_page": 259,
+    "matched_page_header": "כללי הויו",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 254,
+    "expected_section": "כללי הויו",
+    "matched_page": 259,
+    "matched_page_header": "כללי הויו",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 255,
+    "expected_section": "כללי הויו",
+    "matched_page": 260,
+    "matched_page_header": "כללי הויו",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 256,
+    "expected_section": "כללי הויו",
+    "matched_page": 260,
+    "matched_page_header": "כללי הויו",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 257,
+    "expected_section": "כללי הויו",
+    "matched_page": 260,
+    "matched_page_header": "כללי הויו",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 258,
+    "expected_section": "כללי הויו",
+    "matched_page": 260,
+    "matched_page_header": "כללי הויו",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 259,
+    "expected_section": "כללי הויו",
+    "matched_page": 260,
+    "matched_page_header": "כללי הויו",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 260,
+    "expected_section": "כללי הויו",
+    "matched_page": 261,
+    "matched_page_header": "כללי הויו",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 261,
+    "expected_section": "כללי הויו",
+    "matched_page": 261,
+    "matched_page_header": "כללי הויו",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 262,
+    "expected_section": "כללי הויו",
+    "matched_page": 261,
+    "matched_page_header": "כללי הויו",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 263,
+    "expected_section": "כללי הויו",
+    "matched_page": 261,
+    "matched_page_header": "כללי הויו",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 264,
+    "expected_section": "כללי הזין",
+    "matched_page": 261,
+    "matched_page_header": "כללי הזין",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 265,
+    "expected_section": "כללי הזין",
+    "matched_page": 261,
+    "matched_page_header": "כללי הזין",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 266,
+    "expected_section": "כללי הזין",
+    "matched_page": 262,
+    "matched_page_header": "כללי הזין",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 267,
+    "expected_section": "כללי הזין",
+    "matched_page": 262,
+    "matched_page_header": "כללי הזין",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 268,
+    "expected_section": "כללי הזין",
+    "matched_page": 262,
+    "matched_page_header": "כללי הזין",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 269,
+    "expected_section": "כללי הזין",
+    "matched_page": 262,
+    "matched_page_header": "כללי הזין",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 270,
+    "expected_section": "כללי הזין",
+    "matched_page": 262,
+    "matched_page_header": "כללי הזין",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 271,
+    "expected_section": "כללי הזין",
+    "matched_page": 263,
+    "matched_page_header": "כללי הזין",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 272,
+    "expected_section": "כללי הזין",
+    "matched_page": 263,
+    "matched_page_header": "כללי הזין",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 273,
+    "expected_section": "כללי הזין",
+    "matched_page": 263,
+    "matched_page_header": "כללי הזין",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 274,
+    "expected_section": "כללי הזין",
+    "matched_page": 263,
+    "matched_page_header": "כללי הזין",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 275,
+    "expected_section": "כללי החית",
+    "matched_page": 263,
+    "matched_page_header": "כללי החית",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 276,
+    "expected_section": "כללי החית",
+    "matched_page": 264,
+    "matched_page_header": "כללי החית",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 277,
+    "expected_section": "כללי החית",
+    "matched_page": 264,
+    "matched_page_header": "כללי החית",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 278,
+    "expected_section": "כללי החית",
+    "matched_page": 264,
+    "matched_page_header": "כללי החית",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 279,
+    "expected_section": "כללי החית",
+    "matched_page": 264,
+    "matched_page_header": "כללי החית",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 280,
+    "expected_section": "כללי החית",
+    "matched_page": 264,
+    "matched_page_header": "כללי החית",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 281,
+    "expected_section": "כללי החית",
+    "matched_page": 264,
+    "matched_page_header": "כללי החית",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 282,
+    "expected_section": "כללי החית",
+    "matched_page": 265,
+    "matched_page_header": "כללי החית",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 283,
+    "expected_section": "כללי החית",
+    "matched_page": 265,
+    "matched_page_header": "כללי החית",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 284,
+    "expected_section": "כללי החית",
+    "matched_page": 265,
+    "matched_page_header": "כללי החית",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 285,
+    "expected_section": "כללי החית",
+    "matched_page": 265,
+    "matched_page_header": "כללי החית",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 286,
+    "expected_section": "כללי החית",
+    "matched_page": 265,
+    "matched_page_header": "כללי החית",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 287,
+    "expected_section": "כללי החית",
+    "matched_page": 266,
+    "matched_page_header": "כללי החית",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 288,
+    "expected_section": "כללי החית",
+    "matched_page": 266,
+    "matched_page_header": "כללי החית",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 289,
+    "expected_section": "כללי החית",
+    "matched_page": 266,
+    "matched_page_header": "כללי החית",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 290,
+    "expected_section": "כללי החית",
+    "matched_page": 266,
+    "matched_page_header": "כללי החית",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 291,
+    "expected_section": "כללי הטית",
+    "matched_page": 266,
+    "matched_page_header": "כללי הטית",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 292,
+    "expected_section": "כללי הטית",
+    "matched_page": 267,
+    "matched_page_header": "כללי הטית",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 293,
+    "expected_section": "כללי הטית",
+    "matched_page": 267,
+    "matched_page_header": "כללי הטית",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 294,
+    "expected_section": "כללי הטית",
+    "matched_page": 267,
+    "matched_page_header": "כללי הטית",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 295,
+    "expected_section": "כללי היוד",
+    "matched_page": 267,
+    "matched_page_header": "כללי היוד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 296,
+    "expected_section": "כללי היוד",
+    "matched_page": 267,
+    "matched_page_header": "כללי היוד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 297,
+    "expected_section": "כללי היוד",
+    "matched_page": 268,
+    "matched_page_header": "כללי היוד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 298,
+    "expected_section": "כללי היוד",
+    "matched_page": 268,
+    "matched_page_header": "כללי היוד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 299,
+    "expected_section": "כללי היוד",
+    "matched_page": 268,
+    "matched_page_header": "כללי היוד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 300,
+    "expected_section": "כללי היוד",
+    "matched_page": 268,
+    "matched_page_header": "כללי היוד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 301,
+    "expected_section": "כללי הכף",
+    "matched_page": 268,
+    "matched_page_header": "כללי הכף",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 302,
+    "expected_section": "כללי הכף",
+    "matched_page": 268,
+    "matched_page_header": "כללי הכף",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 303,
+    "expected_section": "כללי הכף",
+    "matched_page": 269,
+    "matched_page_header": "כללי הכף",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 304,
+    "expected_section": "כללי הכף",
+    "matched_page": 269,
+    "matched_page_header": "כללי הכף",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 305,
+    "expected_section": "כללי הכף",
+    "matched_page": 269,
+    "matched_page_header": "כללי הכף",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 306,
+    "expected_section": "כללי הכף",
+    "matched_page": 269,
+    "matched_page_header": "כללי הכף",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 307,
+    "expected_section": "כללי הכף",
+    "matched_page": 269,
+    "matched_page_header": "כללי הכף",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 308,
+    "expected_section": "כללי הכף",
+    "matched_page": 270,
+    "matched_page_header": "כללי הכף",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 309,
+    "expected_section": "כללי הכף",
+    "matched_page": 270,
+    "matched_page_header": "כללי הכף",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 310,
+    "expected_section": "כללי הכף",
+    "matched_page": 270,
+    "matched_page_header": "כללי הכף",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 311,
+    "expected_section": "כללי הכף",
+    "matched_page": 270,
+    "matched_page_header": "כללי הכף",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 312,
+    "expected_section": "כללי הכף",
+    "matched_page": 270,
+    "matched_page_header": "כללי הכף",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 313,
+    "expected_section": "כללי הכף",
+    "matched_page": 271,
+    "matched_page_header": "כללי הכף",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 314,
+    "expected_section": "כללי הכף",
+    "matched_page": 271,
+    "matched_page_header": "כללי הכף",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 315,
+    "expected_section": "כללי הכף",
+    "matched_page": 271,
+    "matched_page_header": "כללי הכף",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 316,
+    "expected_section": "כללי הכף",
+    "matched_page": 271,
+    "matched_page_header": "כללי הכף",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 317,
+    "expected_section": "כללי הכף",
+    "matched_page": 271,
+    "matched_page_header": "כללי הכף",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 318,
+    "expected_section": "כללי הכף",
+    "matched_page": 271,
+    "matched_page_header": "כללי הכף",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 319,
+    "expected_section": "כללי הכף",
+    "matched_page": 272,
+    "matched_page_header": "כללי הכף",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 320,
+    "expected_section": "כללי הכף",
+    "matched_page": 272,
+    "matched_page_header": "כללי הכף",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 321,
+    "expected_section": "כללי הכף",
+    "matched_page": 272,
+    "matched_page_header": "כללי הכף",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 322,
+    "expected_section": "כללי הכף",
+    "matched_page": 272,
+    "matched_page_header": "כללי הכף",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 323,
+    "expected_section": "כללי הכף",
+    "matched_page": 272,
+    "matched_page_header": "כללי הכף",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 324,
+    "expected_section": "כללי הכף",
+    "matched_page": 273,
+    "matched_page_header": "כללי הכף",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 325,
+    "expected_section": "כללי הכף",
+    "matched_page": 273,
+    "matched_page_header": "כללי הכף",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 326,
+    "expected_section": "כללי הכף",
+    "matched_page": 273,
+    "matched_page_header": "כללי הכף",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 327,
+    "expected_section": "כללי הכף",
+    "matched_page": 273,
+    "matched_page_header": "כללי הכף",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 328,
+    "expected_section": "כללי הכף",
+    "matched_page": 273,
+    "matched_page_header": "כללי הכף",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 329,
+    "expected_section": "כללי הכף",
+    "matched_page": 274,
+    "matched_page_header": "כללי הכף",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 330,
+    "expected_section": "כללי הכף",
+    "matched_page": 274,
+    "matched_page_header": "כללי הכף",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 331,
+    "expected_section": "כללי הכף",
+    "matched_page": 274,
+    "matched_page_header": "כללי הכף",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 332,
+    "expected_section": "כללי הכף",
+    "matched_page": 274,
+    "matched_page_header": "כללי הכף",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 333,
+    "expected_section": "כללי הכף",
+    "matched_page": 274,
+    "matched_page_header": "כללי הכף",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 334,
+    "expected_section": "כללי הכף",
+    "matched_page": 275,
+    "matched_page_header": "כללי הכף",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 335,
+    "expected_section": "כללי הכף",
+    "matched_page": 275,
+    "matched_page_header": "כללי הכף",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 336,
+    "expected_section": "כללי הכף",
+    "matched_page": 275,
+    "matched_page_header": "כללי הכף",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 337,
+    "expected_section": "כללי הכף",
+    "matched_page": 275,
+    "matched_page_header": "כללי הכף",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 338,
+    "expected_section": "כללי הכף",
+    "matched_page": 275,
+    "matched_page_header": "כללי הכף",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 339,
+    "expected_section": "כללי הכף",
+    "matched_page": 275,
+    "matched_page_header": "כללי הכף",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 340,
+    "expected_section": "כללי הכף",
+    "matched_page": 276,
+    "matched_page_header": "כללי הכף",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 341,
+    "expected_section": "כללי הכף",
+    "matched_page": 276,
+    "matched_page_header": "כללי הכף",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 342,
+    "expected_section": "כללי הכף",
+    "matched_page": 276,
+    "matched_page_header": "כללי הכף",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 343,
+    "expected_section": "כללי הכף",
+    "matched_page": 276,
+    "matched_page_header": "כללי הכף",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 344,
+    "expected_section": "כללי הכף",
+    "matched_page": 276,
+    "matched_page_header": "כללי הכף",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 345,
+    "expected_section": "כללי הכף",
+    "matched_page": 277,
+    "matched_page_header": "כללי הכף",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 346,
+    "expected_section": "כללי הלמד",
+    "matched_page": 277,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 347,
+    "expected_section": "כללי הלמד",
+    "matched_page": 277,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 348,
+    "expected_section": "כללי הלמד",
+    "matched_page": 277,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 349,
+    "expected_section": "כללי הלמד",
+    "matched_page": 277,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 350,
+    "expected_section": "כללי הלמד",
+    "matched_page": 278,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 351,
+    "expected_section": "כללי הלמד",
+    "matched_page": 278,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 352,
+    "expected_section": "כללי הלמד",
+    "matched_page": 278,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 353,
+    "expected_section": "כללי הלמד",
+    "matched_page": 278,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 354,
+    "expected_section": "כללי הלמד",
+    "matched_page": 278,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 355,
+    "expected_section": "כללי הלמד",
+    "matched_page": 278,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 356,
+    "expected_section": "כללי הלמד",
+    "matched_page": 279,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 357,
+    "expected_section": "כללי הלמד",
+    "matched_page": 279,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 358,
+    "expected_section": "כללי הלמד",
+    "matched_page": 279,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 359,
+    "expected_section": "כללי הלמד",
+    "matched_page": 279,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 360,
+    "expected_section": "כללי הלמד",
+    "matched_page": 279,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 361,
+    "expected_section": "כללי הלמד",
+    "matched_page": 280,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 362,
+    "expected_section": "כללי הלמד",
+    "matched_page": 280,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 363,
+    "expected_section": "כללי הלמד",
+    "matched_page": 280,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 364,
+    "expected_section": "כללי הלמד",
+    "matched_page": 280,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 365,
+    "expected_section": "כללי הלמד",
+    "matched_page": 280,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 366,
+    "expected_section": "כללי הלמד",
+    "matched_page": 281,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 367,
+    "expected_section": "כללי הלמד",
+    "matched_page": 281,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 368,
+    "expected_section": "כללי הלמד",
+    "matched_page": 281,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 369,
+    "expected_section": "כללי הלמד",
+    "matched_page": 281,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 370,
+    "expected_section": "כללי הלמד",
+    "matched_page": 281,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 371,
+    "expected_section": "כללי הלמד",
+    "matched_page": 282,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 372,
+    "expected_section": "כללי הלמד",
+    "matched_page": 282,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 373,
+    "expected_section": "כללי הלמד",
+    "matched_page": 282,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 374,
+    "expected_section": "כללי הלמד",
+    "matched_page": 282,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 375,
+    "expected_section": "כללי הלמד",
+    "matched_page": 282,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 376,
+    "expected_section": "כללי הלמד",
+    "matched_page": 282,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 377,
+    "expected_section": "כללי הלמד",
+    "matched_page": 283,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 378,
+    "expected_section": "כללי הלמד",
+    "matched_page": 283,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 379,
+    "expected_section": "כללי הלמד",
+    "matched_page": 283,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 380,
+    "expected_section": "כללי הלמד",
+    "matched_page": 283,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 381,
+    "expected_section": "כללי הלמד",
+    "matched_page": 283,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 382,
+    "expected_section": "כללי הלמד",
+    "matched_page": 284,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 383,
+    "expected_section": "כללי הלמד",
+    "matched_page": 284,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 384,
+    "expected_section": "כללי הלמד",
+    "matched_page": 284,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 385,
+    "expected_section": "כללי הלמד",
+    "matched_page": 284,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 386,
+    "expected_section": "כללי הלמד",
+    "matched_page": 284,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 387,
+    "expected_section": "כללי הלמד",
+    "matched_page": 285,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 388,
+    "expected_section": "כללי הלמד",
+    "matched_page": 285,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 389,
+    "expected_section": "כללי הלמד",
+    "matched_page": 285,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 390,
+    "expected_section": "כללי הלמד",
+    "matched_page": 285,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 391,
+    "expected_section": "כללי הלמד",
+    "matched_page": 285,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 392,
+    "expected_section": "כללי הלמד",
+    "matched_page": 285,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 393,
+    "expected_section": "כללי הלמד",
+    "matched_page": 286,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 394,
+    "expected_section": "כללי הלמד",
+    "matched_page": 286,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 395,
+    "expected_section": "כללי הלמד",
+    "matched_page": 286,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 396,
+    "expected_section": "כללי הלמד",
+    "matched_page": 286,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 397,
+    "expected_section": "כללי הלמד",
+    "matched_page": 286,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 398,
+    "expected_section": "כללי הלמד",
+    "matched_page": 287,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 399,
+    "expected_section": "כללי הלמד",
+    "matched_page": 287,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 400,
+    "expected_section": "כללי הלמד",
+    "matched_page": 287,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 401,
+    "expected_section": "כללי הלמד",
+    "matched_page": 287,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 402,
+    "expected_section": "כללי הלמד",
+    "matched_page": 287,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 403,
+    "expected_section": "כללי הלמד",
+    "matched_page": 288,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 404,
+    "expected_section": "כללי הלמד",
+    "matched_page": 288,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 405,
+    "expected_section": "כללי הלמד",
+    "matched_page": 288,
+    "matched_page_header": "כללי הלמד",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 406,
+    "expected_section": "כללי המם",
+    "matched_page": 288,
+    "matched_page_header": "כללי המם",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 407,
+    "expected_section": "כללי המם",
+    "matched_page": 288,
+    "matched_page_header": "כללי המם",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 408,
+    "expected_section": "כללי המם",
+    "matched_page": 289,
+    "matched_page_header": "כללי המם",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 409,
+    "expected_section": "כללי המם",
+    "matched_page": 289,
+    "matched_page_header": "כללי המם",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 410,
+    "expected_section": "כללי המם",
+    "matched_page": 289,
+    "matched_page_header": "כללי המם",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 411,
+    "expected_section": "כללי המם",
+    "matched_page": 289,
+    "matched_page_header": "כללי המם",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 412,
+    "expected_section": "כללי המם",
+    "matched_page": 289,
+    "matched_page_header": "כללי המם",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 413,
+    "expected_section": "כללי המם",
+    "matched_page": 289,
+    "matched_page_header": "כללי המם",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 414,
+    "expected_section": "כללי המם",
+    "matched_page": 290,
+    "matched_page_header": "כללי המם",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 415,
+    "expected_section": "כללי המם",
+    "matched_page": 290,
+    "matched_page_header": "כללי המם",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 416,
+    "expected_section": "כללי המם",
+    "matched_page": 290,
+    "matched_page_header": "כללי המם",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 417,
+    "expected_section": "כללי המם",
+    "matched_page": 290,
+    "matched_page_header": "כללי המם",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 418,
+    "expected_section": "כללי המם",
+    "matched_page": 290,
+    "matched_page_header": "כללי המם",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 419,
+    "expected_section": "כללי המם",
+    "matched_page": 291,
+    "matched_page_header": "כללי המם",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 420,
+    "expected_section": "כללי המם",
+    "matched_page": 291,
+    "matched_page_header": "כללי המם",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 421,
+    "expected_section": "כללי המם",
+    "matched_page": 291,
+    "matched_page_header": "כללי המם",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 422,
+    "expected_section": "כללי המם",
+    "matched_page": 291,
+    "matched_page_header": "כללי המם",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 423,
+    "expected_section": "כללי המם",
+    "matched_page": 291,
+    "matched_page_header": "כללי המם",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 424,
+    "expected_section": "כללי המם",
+    "matched_page": 292,
+    "matched_page_header": "כללי המם",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 425,
+    "expected_section": "כללי המם",
+    "matched_page": 292,
+    "matched_page_header": "כללי המם",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 426,
+    "expected_section": "כללי המם",
+    "matched_page": 292,
+    "matched_page_header": "כללי המם",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 427,
+    "expected_section": "כללי המם",
+    "matched_page": 292,
+    "matched_page_header": "כללי המם",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 428,
+    "expected_section": "כללי המם",
+    "matched_page": 292,
+    "matched_page_header": "כללי המם",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 429,
+    "expected_section": "כללי המם",
+    "matched_page": 292,
+    "matched_page_header": "כללי המם",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 430,
+    "expected_section": "כללי המם",
+    "matched_page": 293,
+    "matched_page_header": "כללי המם",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 431,
+    "expected_section": "כללי המם",
+    "matched_page": 293,
+    "matched_page_header": "כללי המם",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 432,
+    "expected_section": "כללי המם",
+    "matched_page": 293,
+    "matched_page_header": "כללי המם",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 433,
+    "expected_section": "כללי המם",
+    "matched_page": 293,
+    "matched_page_header": "כללי המם",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 434,
+    "expected_section": "כללי המם",
+    "matched_page": 293,
+    "matched_page_header": "כללי המם",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 435,
+    "expected_section": "כללי המם",
+    "matched_page": 294,
+    "matched_page_header": "כללי המם",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 436,
+    "expected_section": "כללי המם",
+    "matched_page": 294,
+    "matched_page_header": "כללי המם",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 437,
+    "expected_section": "כללי המם",
+    "matched_page": 294,
+    "matched_page_header": "כללי המם",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 438,
+    "expected_section": "כללי המם",
+    "matched_page": 294,
+    "matched_page_header": "כללי המם",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 439,
+    "expected_section": "כללי המם",
+    "matched_page": 294,
+    "matched_page_header": "כללי המם",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 440,
+    "expected_section": "כללי המם",
+    "matched_page": 295,
+    "matched_page_header": "כללי המם",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 441,
+    "expected_section": "כללי המם",
+    "matched_page": 295,
+    "matched_page_header": "כללי המם",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 442,
+    "expected_section": "כללי המם",
+    "matched_page": 295,
+    "matched_page_header": "כללי המם",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 443,
+    "expected_section": "כללי המם",
+    "matched_page": 295,
+    "matched_page_header": "כללי המם",
+    "match_ratio": 0.9,
+    "trusted": true
+  },
+  {
+    "klal_id": 444,
+    "expected_section": "כללי המם",
+    "matched_page": 295,
+    "matched_page_header": "כללי המם",
+    "match_ratio": 0.9,
+    "trusted": true
+  }
+]
