@@ -1,16 +1,16 @@
 ---
-description: Avoid hardcoding SDK model versions; dynamically query APIs to resolve the active/supported model instead of downgrading frameworks.
+description: Avoid hardcoding deprecated model versions; enforce centralized client creation, supported Gemini 3.x models, and transient retry handling.
 ---
-# Dynamic API Resolution Over Hardcoding
+# Dynamic API Resolution & Model Invariants
 
-Never hardcode specific LLM version strings (like `gemini-3.5-flash` or `gemini-2.5-flash`) when building pipelines. Instead, dynamically query the API for available models, filter for the desired model family (like `flash`), and programmatically select the active/supported model. Always use the most modern, maintained SDK available rather than falling back to older frameworks.
+1. **Centralized Client & Model Management:**
+   - Never hand-roll custom `genai.Client` instances or ad-hoc API call loops.
+   - Always route Gemini API calls through `pipeline/vision_adjudication_common.py` using `make_client()` and `adjudicate_with_retry()`.
 
-**Implementation Pattern:**
-```python
-from google import genai
-import os
+2. **Model Version Invariant:**
+   - **Never call `gemini-2.x` or `gemini-2.5-flash`** (permanently deprecated / 404 since 2026-08-05).
+   - The active primary model is `gemini-3.6-flash`, with `gemini-3.5-flash` as the secondary fallback.
+   - If querying models dynamically, always filter for active supported generation methods and avoid hardcoded legacy versions.
 
-client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
-models = [m for m in client.models.list() if 'generateContent' in m.supported_generation_methods]
-target_model = models[0].name if models else 'gemini-1.5-pro'
-```
+3. **Transient Error Handling (503 / 429):**
+   - All live API calls must be wrapped in exponential backoff retry loops catching transient `503 UNAVAILABLE` (spikes in demand) and `429 RESOURCE_EXHAUSTED` errors before failing.
