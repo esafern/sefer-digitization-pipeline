@@ -10,10 +10,18 @@ from second_witness_eval import (
     VlmWitnessEngine, TesseractWitnessEngine
 )
 
-def test_default_witness_engine_is_vlm():
+def test_default_witness_engine_is_vlm(tmp_path, monkeypatch):
+    # FIXED 2026-08-20 (code review): with no db_path override, VlmWitnessEngine
+    # defaults to REPO/adjudication_cache.db and CREATE TABLE IF NOT EXISTS's
+    # into it - mutating the real git-tracked cache on every test run. Route
+    # its default through a tmp path instead of constructing it directly.
+    monkeypatch.setattr(
+        "second_witness_eval.vlm_witness.REPO", str(tmp_path)
+    )
     set_default_witness_engine("vlm")
     engine = get_witness_engine()
     assert isinstance(engine, VlmWitnessEngine)
+    assert engine.db_path == str(tmp_path / "adjudication_cache.db")
 
 def test_swappable_tesseract_engine():
     engine = get_witness_engine("tesseract")

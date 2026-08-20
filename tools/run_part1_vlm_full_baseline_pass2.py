@@ -72,7 +72,13 @@ def main():
     print(f"RUNNING VLM PASS B (SELF-CONSISTENCY PASS) FOR PART 1 ({len(part1_items)} CROPS)")
     print("=" * 80)
 
-    output_lines = []
+    # Same fix as run_part1_vlm_full_baseline.py, 2026-08-20 (code review):
+    # truncate once up front so a restart doesn't duplicate already-written
+    # blocks; each iteration still appends+flushes incrementally.
+    output_dir = os.path.join(REPO, "tools", "second_witness_eval")
+    os.makedirs(output_dir, exist_ok=True)
+    output_path = os.path.join(output_dir, "vlm_part1_full_baseline_passB.txt")
+    open(output_path, "w", encoding="utf-8").close()
 
     def dummy_cache_get():
         return None
@@ -110,13 +116,6 @@ def main():
             print(f" FAILED: {e}")
             transcription = ""
 
-        output_lines.append(header_str)
-        output_lines.append(transcription)
-        output_lines.append("")
-
-        output_dir = os.path.join(REPO, "tools", "second_witness_eval")
-        os.makedirs(output_dir, exist_ok=True)
-        output_path = os.path.join(output_dir, "vlm_part1_full_baseline_passB.txt")
         with open(output_path, "a", encoding="utf-8") as f:
             f.write(f"{header_str}\n{transcription}\n\n")
 

@@ -379,6 +379,28 @@ async function mountKlal(klalId) {
   observer.unobserve(block);
 }
 
+// Approximate scroll-driven page-flip points within a multi-page klal's own
+// text block. A continuation's token_count is a DocAI-page word count, not
+// an exact index into clean_text.split(' ') (punctuation/markers differ
+// slightly between the two), so this is a same-neighborhood approximation,
+// not an exact boundary - good enough for "the scan flips to the next page
+// at roughly the right point while scrolling", which is strictly better
+// than never flipping at all (the previous behavior - .continuations was
+// served by the API but never read anywhere in this file). Continuations
+// are later pages, so each one's tokens are assumed to be the TAIL of the
+// klal's word list; walked back-to-front for multiple continuations.
+function continuationBoundaries(k) {
+  const totalWords = (k.clean_text || '').split(' ').length;
+  const conts = k.continuations || [];
+  let remaining = totalWords;
+  const boundaries = [];
+  for (let i = conts.length - 1; i >= 0; i--) {
+    remaining = Math.max(0, remaining - (conts[i].token_count || 0));
+    boundaries.unshift({ wordIndex: remaining, page: conts[i].page });
+  }
+  return boundaries; // ascending wordIndex order
+}
+
 function renderKlalBody(block, k) {
   const body = block.querySelector('.klal-body');
   body.className = 'klal-body';
@@ -410,8 +432,16 @@ function renderKlalBody(block, k) {
       gapsBefore[c.word_index].push(c);
     }
   });
+  const contBoundaries = {};
+  continuationBoundaries(k).forEach(b => { contBoundaries[b.wordIndex] = b.page; });
 
   words.forEach((w, i) => {
+    if (contBoundaries[i] != null) {
+      const marker = document.createElement('span');
+      marker.className = 'continuation-marker';
+      marker.dataset.page = contBoundaries[i];
+      body.appendChild(marker);
+    }
     if (gapsBefore[i]) gapsBefore[i].forEach(c => body.appendChild(makeGapMarker(k.klal_id, c)));
     if (w === '[.]') {
       const mark = document.createElement('span');
@@ -685,7 +715,18 @@ async function openCandidatePanel(klalId, corr) {
   }
   const suggestedWord = extractSuggestedWord(corr.reasoning || (corr.current_decision && corr.current_decision.note));
   if (suggestedWord && !options.some(o => o.text === suggestedWord)) {
-    options.push({ source: 'custom', label: 'Suggested replacement (AI detector)', text: suggestedWord });
+    // source MUST be distinct from 'custom' - that value is reserved for the
+    // panel's own free-text #custom-text-input div (id="custom-option").
+    // FIXED 2026-08-20 (code review): this used to reuse 'custom', so
+    // clicking this card and the real Custom field both toggled the same
+    // active/checked state, and saveCandidateDecision() always read
+    // #custom-text-input's (unrelated, unpopulated) value for any
+    // source==='custom' save - either blocking the save on an empty field
+    // or silently persisting stale text from the free-text box instead of
+    // the suggested word. See the 'suggested' branch in
+    // saveCandidateDecision() below, which reads opt.text via the DOM
+    // dataset instead.
+    options.push({ source: 'suggested', label: 'Suggested replacement (AI detector)', text: suggestedWord });
   }
   // 'insert' opcode = stored text has a word/phrase DocAI never saw at all
   // (docai_reading is null by construction) - offer an explicit removal
@@ -750,6 +791,7 @@ async function openCandidatePanel(klalId, corr) {
     const div = document.createElement('div');
     div.className = 'candidate-option' + (activeSource === opt.source ? ' active' : '');
     div.dataset.source = opt.source;
+    div.dataset.text = opt.text;
     div.innerHTML = `<input type="radio" name="candidate" ${activeSource === opt.source ? 'checked' : ''}>
       <div class="co-body"><div class="co-label">${escapeHtml(opt.label)}</div><div class="co-text">${escapeHtml(opt.text)}</div></div>`;
     div.onclick = () => selectCandidateOption(opt.source);
@@ -795,6 +837,13 @@ async function saveCandidateDecision(klalId, corr) {
     // Otherwise (a normal two-reading dispute, real text on both sides) an
     // empty custom answer isn't a real decision, just an unfilled field.
     if (!text && corr.opcode !== 'insert' && corr.final_text) { alert('Enter the custom reading first.'); return; }
+    chosenSource = 'custom';
+  } else if (source === 'suggested') {
+    // The AI-detector suggestion card - not a `corr` property, so read the
+    // word straight from the option's own dataset rather than corr[source].
+    // Persisted as 'custom' (the decision schema has no separate slot for
+    // this), same as the 'remove' branch above.
+    text = activeEl.dataset.text;
     chosenSource = 'custom';
   } else {
     text = corr[source];
@@ -1532,7 +1581,21 @@ async function showPage(page, focusKlalId, focusCorr = undefined) {
   const notice = document.getElementById('scan-notice');
   if (notice) notice.style.display = 'none';
   const pageContainer = document.getElementById('page-container');
-  if (pageContainer) pageContainer.style.display = 'block';
+  // FIXED 2026-08-20 (user report: all scan boxes shifted left, yellow
+  // klal-region box running off the left margin). #page-container's CSS
+  // rule is `display: table` specifically so it shrink-wraps to #page-img's
+  // actual rendered width - #hl-container is `position:absolute; inset:0`
+  // inside it, and every .hl-box left/top is a percentage of that box.
+  // Setting the inline style to 'block' here permanently overrode the CSS
+  // table rule (inline style always wins) on EVERY normal page view, not
+  // just this notice-hiding path - `display:block` stretches to the full
+  // available width instead of shrink-wrapping, so #hl-container became
+  // wider than the actual image (confirmed via Playwright: container
+  // width 475px vs image width 443px, a 32px gap) and every percentage-
+  // based box position was computed against the wrong denominator.
+  // removeProperty (not 'table') so this never has to be kept in sync with
+  // the CSS rule's own value by hand.
+  if (pageContainer) pageContainer.style.removeProperty('display');
   pageImg.style.display = 'block';
   const gen = ++_showPageGen;
   const pageChanged = page !== currentPage;
@@ -1707,6 +1770,7 @@ function goToPageOffset(offset) {
 let suppressObserverScroll = false;
 let suppressTimer = null;
 let lastActiveKlalId = null;
+let lastActiveScanPage = null; // which page updateActiveFromScroll last showed for the active klal
 
 function jumpTo(klalId) {
   const block = document.getElementById('klal-block-' + klalId);
@@ -1715,6 +1779,11 @@ function jumpTo(klalId) {
   manualPageLock = false; // nav-panel click = explicit klal intent; let setActiveKlal show its page
   lastActiveKlalId = klalId;
   setActiveKlal(klalId);
+  // Keep updateActiveFromScroll's continuation-boundary tracking (see
+  // there) in sync with this explicit jump, so scrolling afterward within
+  // the same klal doesn't immediately re-trigger a redundant showPage call
+  // against a stale page from before the jump.
+  lastActiveScanPage = klalById[klalId] ? klalById[klalId].page : null;
   mountKlal(klalId);
   block.scrollIntoView({ behavior: 'smooth', block: 'start' });
   clearTimeout(suppressTimer);
@@ -1747,7 +1816,17 @@ function setActiveKlal(klalId) {
     // don't snap back to this klal's start page just because the text pane
     // scrolled to it.  The lock is cleared when a word is clicked in the
     // text pane or a nav item is jumped to.
-    if (!manualPageLock) showPage(k.page, klalId);
+    //
+    // Explicit `null` here, not the default `undefined` "keep scanFocusCorr"
+    // sentinel - this call fires on every scroll-driven klal change
+    // (updateActiveFromScroll) and every nav-panel jump, neither of which is
+    // the reviewer clicking a specific word. scanFocusCorr from whichever
+    // klal was last focused would otherwise carry into this new klal's page,
+    // and isFocused's match is by word_index alone (not scoped to the klal
+    // the click actually happened in) - a coincidental same word_index in
+    // the new klal then renders a focus ring on the wrong word. FIXED
+    // 2026-08-20 (dashboard regression: misplaced/erratic highlight boxes).
+    if (!manualPageLock) showPage(k.page, klalId, null);
   }
 }
 
@@ -1764,6 +1843,23 @@ function updateActiveFromScroll() {
   if (klalId !== lastActiveKlalId) {
     lastActiveKlalId = klalId;
     setActiveKlal(klalId);
+    lastActiveScanPage = klalById[klalId] ? klalById[klalId].page : null;
+  }
+  // Auto-advance the scan pane to a continuation page as the reader scrolls
+  // past its boundary within the SAME klal's own text - the block above
+  // only fires on a klal-to-klal transition, so a multi-page klal's own
+  // later page was never reached by scrolling, only by the manual scan
+  // prev/next buttons. FIXED 2026-08-20 (user report: "scrolling to the
+  // bottom of klal 4 does not take you to the next page in the scan").
+  if (!manualPageLock) {
+    let targetPage = klalById[klalId] ? klalById[klalId].page : null;
+    current.querySelectorAll('.continuation-marker').forEach(m => {
+      if (m.getBoundingClientRect().top <= line) targetPage = parseInt(m.dataset.page, 10);
+    });
+    if (targetPage != null && targetPage !== lastActiveScanPage) {
+      lastActiveScanPage = targetPage;
+      showPage(targetPage, klalId);
+    }
   }
 }
 

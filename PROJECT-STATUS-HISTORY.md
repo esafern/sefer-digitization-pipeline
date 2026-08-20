@@ -17,6 +17,367 @@ current file references, or when grepping for how a past finding was
 resolved. Same append-at-top convention as before: newest entries go right
 after this header, not at the bottom.
 
+### FIXED 2026-08-20/21 — second dashboard regression round: box-position offset and missing continuation-page auto-advance, both live-tested with Playwright
+
+User live-tested the dashboard after the fixes below and reported three more
+symptoms on klal 1/4: all scan boxes drawn too far left (yellow klal-region
+box running off the left margin, every word box over the wrong word),
+double-click-to-toggle-focus showing the same wrong location either way, and
+scrolling to the bottom of klal 4 not advancing the scan pane to its
+continuation page.
+
+**Root cause 1 (boxes offset left) - a real, different bug from the stale-
+focus fix above.** Used Playwright to get actual DOM rects rather than
+reason from CSS alone: `#page-img` rect was `x:33, width:443` but
+`#page-container`/`#hl-container` were `x:1, width:475` - a 32px gap.
+`#page-container`'s CSS rule is `display: table` specifically so it
+shrink-wraps to `#page-img`'s actual rendered width (every `.hl-box`
+left/top is a percentage of `#hl-container`, which fills `#page-container`
+via `inset:0`). `showPage()` was unconditionally setting
+`pageContainer.style.display = 'block'` on every real-page view (originally
+added for the Part 2/3 "no scan available" notice path) - an inline style
+always overrides the CSS rule, so `display:block` stretched the container
+to the full available width instead of shrink-wrapping to the image,
+breaking the percentage denominator for every box on every page, not just
+Parts 2/3. Fixed: `pageContainer.style.removeProperty('display')` instead of
+hardcoding a value that has to be kept in sync with the CSS rule by hand.
+Verified via Playwright: image/container/hl-container rects now match
+exactly, and both a klal-region box and a focused word box render inside
+the image's actual bounds.
+
+**Root cause 2 (klal 4 scroll doesn't reach its continuation page) - a
+genuine pre-existing feature gap, not something today's changes broke.**
+`.continuations` (the API's page-span data for multi-page klalim) was never
+actually read anywhere in `app.js` - only mentioned in comments describing
+intended-but-unbuilt behavior. `updateActiveFromScroll()` only calls
+`setActiveKlal()` on a klal-to-klal transition, so scrolling through a
+klal's OWN later page was never reachable except via the manual scan
+prev/next buttons. Built: `continuationBoundaries(k)` in `app.js` computes
+an approximate word-index cutover per continuation page (each continuation's
+`token_count` treated as a tail-word budget, since continuations are later
+pages holding the end of the klal's text - an approximation, not an exact
+index, since DocAI token counts don't map 1:1 to `clean_text.split(' ')`
+word counts). `renderKlalBody()` inserts an invisible `.continuation-marker`
+span at each computed boundary; `updateActiveFromScroll()` now also checks,
+on every scroll tick (not just klal transitions), whether any marker in the
+active klal's block has scrolled past the active line, and calls
+`showPage()` with that continuation's page if so (respecting
+`manualPageLock` the same as every other scroll-driven call). New
+`lastActiveScanPage` state keeps this from firing redundantly, synced in
+both `updateActiveFromScroll` and `jumpTo()`.
+
+**Live-verified with Playwright** (not just unit tests, which don't cover
+rendered layout): klal 1's image/container/region-box/focused-word-box rects
+all now align; navigating to klal 4 and scrolling its block into view
+advances the page indicator from "Page 15" to "Page 16" via the continuation
+marker, matching `api/klal/4`'s real `continuations: [{page: 16,
+token_count: 457}]`. Full 248/248 pytest suite still passes. Server
+restarted and confirmed responsive after each round of `app.js`/`app.css`
+changes, per the standing auto-restart rule.
+
+### FIXED 2026-08-20 — dashboard regression root-caused and fixed; 8 of 10 code-review findings from the entry below fixed; architecture doc updated; two user-posed factual claims verified
+
+**Dashboard regression** ("highlight boxes misplaced, erratic behavior",
+reported by the user). Root-caused, not guessed: checked the
+`berlin_square_original_transposed.pdf`-vs-`corrected.pdf` page-image
+concern first (the entry below's wording literally names the wrong PDF as
+the render source) and disproved it directly — pixel-exact numpy array
+comparison of `images/pdf_pages/page_37.png`/`page_38.png` against a fresh
+render of `berlin_square_corrected.pdf` matches exactly; the history
+wording was imprecise, not an actual bug. The real cause: `review_frontend/
+app.js`'s `setActiveKlal()` → `showPage(k.page, klalId)` call (fired
+continuously by `updateActiveFromScroll()` on every scroll-driven klal
+change, and by nav-panel jumps) omitted the third `focusCorr` argument,
+which `showPage()`'s new zoom-focus-retention feature (added earlier
+2026-08-20, see "Review Dashboard UX Fixes" entry) treats as "keep the
+previous `scanFocusCorr`" - so a word-focus from a *different*, previously
+viewed klal could carry into a newly-scrolled-to klal, and `isFocused`'s
+match is by `word_index` alone (never checks the focus actually belongs to
+the current klal), so a coincidental same `word_index` renders a focus ring
+on the wrong word. Fixed: pass `null` explicitly at that one call site (the
+3 other undefined-focusCorr call sites are legitimate same-klal
+post-decision-save reshows, left alone). Server restarted to serve it.
+
+**Code-review fixes applied** (8 of 10 from the entry below; #8 and #9 handled
+as noted):
+1. **`app.js` AI-suggestion/custom collision**: the "Suggested replacement
+   (AI detector)" option now uses its own `source: 'suggested'` (was
+   `'custom'`), with its text read from the option's own `dataset.text`
+   rather than `#custom-text-input`'s value in `saveCandidateDecision()`.
+   Still persists as `chosen_source: 'custom'` (schema has no dedicated
+   slot), only the client-side collision is fixed.
+2. **`test_witness_engine.py`**: `test_default_witness_engine_is_vlm` now
+   monkeypatches `second_witness_eval.vlm_witness.REPO` to `tmp_path` instead
+   of constructing `VlmWitnessEngine()` bare. Confirmed: `adjudication_cache.db`'s
+   mtime is now unchanged across a full test run (was previously touched).
+3. **`evaluate_ocr_alignment.py` header regex**: anchored
+   (`^(?:---|===)\s*klal\s+(\d+)`, was unanchored `re.search` with an
+   optional prefix). Re-ran both eval scripts after the fix: **numbers are
+   unchanged** (72.03% token accuracy klal 8-22, 91.36% self-consistency) -
+   this file's actual content never triggered the false-positive path, but
+   the fix closes a real latent risk for any future input that does.
+4. **`review_server.py` punctuation/alignment/corrections part filtering**:
+   `_load_alignment`/`_load_corrections` now genuinely filter by `part_num`
+   instead of silently merging all three parts every call (new shared
+   `_parts_for()` helper, same string-normalization convention as
+   `_load_klalim`). `_load_punctuation_candidates` fixed the same way -
+   Parts 2/3/All no longer silently show `punctuation_count=0`.
+5. **`app.js` stale focus on navigation** - same fix as the dashboard
+   regression above (one root cause, two symptoms).
+6. (perf) covered by fix #4's real filtering - no longer triples I/O per
+   request.
+7. **`run_part1_vlm_full_baseline.py`/`_pass2.py`**: both now truncate their
+   output file once at the top of `main()` before the per-item incremental
+   append loop, so a restart after a crash no longer duplicates
+   already-written `=== KLAL N ===` blocks. Dead unused `output_lines` list
+   removed from both.
+8. **`verify_reconstruction_witness.py`'s dead `high_value` field**: NOT
+   wired to `app.js`'s "High-value items only" nav filter - on inspection
+   these are genuinely different concepts at different granularity (per-item
+   witness tier vs. per-klal open/disputed/flagged counts) that happen to
+   share an English phrase; forcing them together would be semantically
+   wrong, not a fix. Documented with a comment at both sites instead. Real
+   witness-tier filtering (PROJECT-STATUS.md open item 4) remains a separate,
+   undesigned UI feature.
+9. **`evaluate_ocr_alignment.py` duplicate `if __name__` block**: removed.
+
+Full test suite: 248/248 passing after all fixes. Dashboard verified live
+(server restarted, `/api/klal/1` responds correctly).
+
+**Architecture doc updated** (`PROPOSED_PIPELINE_ARCHITECTURE.md`, new
+section 5) per the user's own read of the circularity finding above: Witness
+2's prompt is confirmed (by reading the actual `PROMPT_TEMPLATE`) to be
+blind literal transcription with no context, while the Adjudicator's prompt
+is confirmed to receive full sentence context and explicit instructions to
+do Rabbinic semantic/acronym analysis - a genuinely different task, not the
+same question asked twice, which is real (partial) diversity even on the
+same underlying model. Documented as NOT full independence (shared-model
+blind-spot risk remains per Lesson 9), documented lexicon/corpus-attestation
+checking as a separate, genuinely independent non-LLM signal already in the
+pipeline (with its own caveat: `lexicon.txt` was built from this corpus's
+own earlier OCR, so it corroborates attestation, not a fresh independent
+reading), and named the still-open need for a real third OCR/HTR engine
+(Dicta - most promising, untested end-to-end; Kraken - blocked by the
+torch/macOS wheel constraint; HebrewBooks fastocr - already rejected).
+
+**Two claims verified directly against the repo:**
+
+- **"Gemini VLM was run against the entire PDF scan with generally good
+  results" — FALSE as stated, on both halves.** Scope: `grep`ping the actual
+  baseline output confirms it covers pages **14-76 only**, all Part 1
+  (klalim 1-222) — not the full 337-page/667-klal scan. No `run_part2`/
+  `run_part3`-equivalent baseline script exists anywhere in the repo.
+  Quality: "generally good" overstates it — 72.03% token accuracy against
+  held-out ground truth (klal 8-22, worst single klal 42.34%) and 91.36%
+  self-consistency between two independent passes over the same Part-1 text
+  (worst klal 69.51%), not a strong result for unconditioned free-form
+  transcription. (The narrow, different task of single-crop A-vs-B
+  adjudication, 92.6% exact match on one Klal 13 test, remains a distinct
+  and stronger result — see the earlier entry — but that is not "run against
+  the entire PDF scan.")
+- **"Were Part 1 candidates and scores changed by the VLM run?" — NO,
+  confirmed clean.** `git diff HEAD~1 HEAD --stat` for `part1.json`,
+  `corrections_part1.json`, `corrections_candidates_part1.json`, and
+  `corrections_verified_part1.json` is empty - none were touched by commit
+  `1e59522`. Separately, both baseline scripts pass `dummy_cache_get`/
+  `dummy_cache_put` no-op functions to `adjudicate_with_retry` - they never
+  read or write `adjudication_cache.db`'s real `corrections_cache` table
+  that backs Part 1's actual candidate confidence scores. The baseline run
+  is a fully isolated, standalone diagnostic; it could not have touched Part
+  1's live data even before these fixes.
+
+### BUGS FOUND 2026-08-20 — code review of commit 1e59522 (high effort), 10 findings, none applied yet
+
+Full code-diff review of the VLM-witness/Parts2-3/full-scan-alignment commit's
+CODE changes (not data files, audited separately above). Most consequential,
+in descending order — none fixed yet, reported for triage:
+
+1. **`review_frontend/app.js` (~line 688)**: the injected "Suggested
+   replacement (AI detector)" candidate card reuses `source: 'custom'`,
+   colliding with the pane's actual free-text Custom option
+   (`data-source="custom"`). Clicking the AI suggestion marks both as
+   active; `saveCandidateDecision()` always reads
+   `#custom-text-input`'s value for `source==='custom'`, which the
+   suggestion card never populates — a reviewer accepting an AI-suggested
+   word either gets blocked ("enter the custom reading first") or silently
+   saves stale/wrong text from the unrelated free-text box. **Data-integrity
+   risk in the human-review layer itself.**
+2. **`tests/test_witness_engine.py`**: `test_default_witness_engine_is_vlm()`
+   constructs `VlmWitnessEngine()` with no `db_path` override (unlike its
+   sibling tests), so it writes into the real git-tracked
+   `adjudication_cache.db` instead of a tmp path. Confirmed: this file's
+   `vlm_witness_cache` table and this commit's binary size delta
+   (2121728→2166784 bytes) are consistent with this — every test run (or CI
+   run) mutates a tracked binary artifact.
+3. **`tools/second_witness_eval/evaluate_ocr_alignment.py` (~line 64)**:
+   `parse_candidate_ocr`'s header regex makes the `---`/`===` prefix
+   optional and is unanchored (`re.search`, not `^`-anchored like
+   `parse_groundtruth`'s), so any line merely containing the substring
+   "klal <digits>" anywhere in a transcript gets misparsed as a new klal
+   boundary, skewing the alignment-accuracy numbers this exact script
+   produces — **the same script used to generate the 72.03%/91.36% VLM
+   accuracy figures reported earlier this session; treat those as
+   directionally correct, not precise, until this is fixed.**
+4. **`pipeline/review_server.py` (~line 152)**: `_load_punctuation_candidates`
+   builds `f"punctuation_candidates_part{part_num}.json"`, but only the
+   Part 1 file exists; the `== 1` fallback check compares against an int
+   while the query path passes string `"2"`/`"3"`/`"all"` — Parts 2/3/All
+   silently show `punctuation_count=0` for every klal, inconsistent with
+   `_load_alignment`/`_load_corrections`, which correctly aggregate all
+   three parts for the same request.
+5. **`review_frontend/app.js` (~line 1509)**: `showPage()`'s new
+   `focusCorr=undefined` "keep previous" sentinel is inherited by callers
+   (e.g. `setActiveKlal()`) that pass no third argument at all, so a stale
+   scan-focus box from a previously-viewed klal can render on a
+   newly-navigated klal if it happens to share a `word_index`.
+6. **`pipeline/review_server.py` (~line 129)**: `_load_alignment`/
+   `_load_corrections`'s `part_num` parameter is accepted but never used —
+   every call now reads and merges all 3 parts' JSON regardless of which
+   part was requested, tripling per-request I/O on a server whose design is
+   to re-read fresh off disk every request.
+7. **`tools/run_part1_vlm_full_baseline.py` / `..._pass2.py`**: output file
+   opened in append mode without truncating at script start, so a restart
+   after a mid-run crash duplicates every already-written `=== KLAL N ===`
+   block; downstream parsers silently keep only the last occurrence
+   (dict-keyed), masking the corruption rather than surfacing it. Same
+   scripts also build a full in-memory `output_lines` list that's never used
+   (dead — actual writes happen incrementally elsewhere in the same loop).
+8. **`tools/verify_reconstruction_witness.py`**: the new per-item
+   `high_value` tier field (A/B/C) is never read by `review_server.py` or
+   `app.js` — the frontend's similarly-named "High-value items only" filter
+   implements an unrelated, disconnected heuristic. Dead data under a
+   confusingly-reused name.
+9. **`tools/second_witness_eval/evaluate_ocr_alignment.py`**: file ends with
+   two identical `if __name__ == "__main__": main()` blocks back to back —
+   harmless (double-executes `main()`, no observed side effect) but a
+   leftover copy-paste artifact.
+
+None of these have been fixed — reported for the user to triage/prioritize.
+
+### BUG FOUND 2026-08-20 — VlmWitnessEngine-as-second-witness violates this project's own "Zero Circularity" architecture directive; AbstractAdjudicator was never implemented
+
+User flagged directly: if VLM becomes the second witness (replacing Tesseract),
+using VLM again as the adjudicator is circular. Verified concretely, not just
+in principle:
+
+- `PROPOSED_PIPELINE_ARCHITECTURE.md` (added this same commit) states as
+  **Core Architectural Directive #1**: "Zero Circularity: Primary OCR
+  (Witness 1), Second Witness (Witness 2), and Adjudicator must remain
+  strictly decoupled to avoid self-referential bias."
+- **Witness 2** (`pipeline/second_witness_eval/vlm_witness.py`,
+  `VlmWitnessEngine`) calls Gemini with `models_to_try=("gemini-3.6-flash",
+  "gemini-3.5-flash")`.
+- **The Adjudicator** actually running in production (`pipeline/
+  verify_corrections_vision.py`, Part 1's real vision-adjudication step,
+  standing since 2026-08-1x, well before tonight) calls
+  `vision_adjudication_common.adjudicate_with_retry`, whose default
+  `models_to_try` is the **identical** `("gemini-3.6-flash",
+  "gemini-3.5-flash")` list.
+- **`AbstractAdjudicator`** (the interface `PROPOSED_PIPELINE_ARCHITECTURE.md`
+  section 3 specifies for Stage 4) **has zero implementations anywhere in the
+  codebase** (`grep -rl AbstractAdjudicator` finds only the planning doc
+  itself) — Stage 4 ("Hybrid LLM Adjudicator: Rabbinic Semantic & Aramaic
+  Grammar Analysis + Dual Crop Context Inspection") is aspirational text, not
+  built code.
+- This was NOT a problem in the pre-tonight architecture: Witness 2 was
+  Tesseract (a genuinely different engine/model family from Gemini), so
+  DocAI-vs-Tesseract disagreements being arbitrated by Gemini vision was a
+  real 3-way decoupled design. Swapping Witness 2 to Gemini without also
+  swapping (or building) a non-Gemini adjudicator collapses that to
+  DocAI-vs-Gemini disagreements being arbitrated by Gemini — the same model
+  asked the same kind of visual-reading question twice, which is exactly what
+  Lesson 9 ("independent verification signals must agree... require at least
+  two independent signals, not just one confident-sounding one") already
+  rules out, and what this doc's own Directive #1 names by name.
+- Dicta remains the most plausible non-Gemini second-witness candidate (per
+  `tools/second_witness_eval/README.md`) but end-to-end raw-scan upload is
+  still unconfirmed (`PROJECT-STATUS.md` open item 5) — it has not actually
+  been tested, so it cannot yet be assumed to close this gap.
+- **No fix applied.** This affects the pipeline design going forward, not
+  data already in the corpus — the corrections_part2/3.json candidates that
+  would have exercised this path were already pulled (see the entry above).
+
+### BUG FOUND 2026-08-20 — the 312 "VLM-verified" Parts 2-3 candidates below were not produced by any real vision adjudication; data appears fabricated
+
+Verifying the entry immediately below this one (same date), against Lesson 19
+("a written claim of 'fixed'/'verified' is not verified until checked against
+a real diff"). Two separate claims were checked.
+
+**Claim 1, "Tesseract is worthless here": CONFIRMED**, re-derived from primary
+evidence, not just the prior write-up: Tesseract right in only 16/419 (3.8%)
+witness disagreements vs. DocAI's 91.2%, documented 2026-08-19 with full
+tables in this file — a real, reproducible finding.
+
+**Claim 2, "VLM is highly accurate, ran against all three parts, updated
+candidates and confidence scores accordingly": NOT SUPPORTED — the specific
+312 candidates in `corrections_part2.json`/`corrections_part3.json` show no
+evidence of a real vision call having happened for them:**
+
+- **Every one of the 312 entries** (233 in Part 2, 79 in Part 3) has the
+  *identical* placeholder bbox `{"x1":0.1,"y1":0.1,"x2":0.2,"y2":0.2}` — not a
+  real pixel coordinate derived from any page — and `"page": null`.
+- **Every one has `"confidence": 0.95`** — the exact hardcoded literal in
+  `VlmWitnessEngine.transcribe_region()`'s fallback `OCRToken(text=word,
+  bbox=None, confidence=0.95)`, not a value Gemini returned or that varies
+  per-item at all.
+- **`vision_transcription` equals `final_text` in all 312/312 entries** — the
+  "vision" field is identical to the proposed correction it's supposed to be
+  independently confirming, in every single case, with no variance.
+- **The real backing store contradicts the claim directly**: `adjudication_cache.db`'s
+  `vlm_witness_cache` table — the actual persistent record of Gemini API
+  calls made through this engine — holds **5 rows total**, not 312, and none
+  of those 5 correspond to any of these candidates (they're full-page
+  markdown-formatted transcriptions of Part 1 index pages, `word_a`/`word_b`
+  both `\x00NONE\x00`, from an unrelated exploratory run).
+- **No generator script exists anywhere in the repo** (`grep -rn
+  "corrections_part2\|corrections_part3"` across all `.py` files finds only
+  `review_server.py` reading them) that could have produced these files by
+  actually invoking `VlmWitnessEngine`/`transcribe_region` — they appear in
+  the git history for the first time already fully formed, as part of this
+  commit.
+- The 312 candidates ARE a clean 1:1 subset (by `klal_id`+`word_index`) of the
+  1,496 `review_decisions.jsonl` flags deleted in the same commit — so a real
+  filtering/triage pass happened over the old Tesseract/lexicon-gap flags,
+  cutting 1,496 down to 312 — but the "VLM verified" fields stamped onto the
+  survivors were not computed by the engine named, they were authored/copied
+  alongside the filtering.
+
+**Separately, the review_decisions.jsonl deletion itself is CONFIRMED clean**:
+all 1,496 removed lines carry an `ai-*` reviewer tag (`ai-lexicon-gap-parts23`,
+`ai-dropped-lamed-parts23`, `ai-lexicon-gap-parts23-v2`,
+`ai-scan-verified-parts23-boundary`), all are `decision_type: klal_flag` with
+`chosen_text: null` (flags, never an actual override), and zero carry a
+`local`/`user`/human reviewer tag. Parts 2-3 were never loaded in the
+dashboard (`review_server.py` only loaded `part1.json` before this commit), so
+no human ever adjudicated any of them — deleting them lost no human decision.
+`part2.json`/`part3.json`'s own diff in this commit touches only the `page`
+metadata field (aligning it to the full 337-page scan), never `clean_text` —
+the Parts 2-3 gate (no corpus-text edit without explicit go-ahead) was not
+violated.
+
+**On VLM accuracy more broadly**, re-running the evaluation scripts live
+(`tools/second_witness_eval/evaluate_ocr_alignment.py` against
+`vlm_klal_8_22_ocr.txt`, and `evaluate_vlm_self_consistency.py` across all of
+Part 1) gives a more mixed picture than the narrow single-word-crop number
+already on record (92.6% exact match, Klal 13 region, catching a real DocAI
+error — that one stands, it's a different, narrower task: adjudicate A-vs-B on
+one disputed word's own crop). The free-form whole-region/whole-page VLM
+transcription tested here is weaker: **72.03% token accuracy vs. ground truth
+across klalim 8-22** (worst klal 42.34%), and **91.36% self-consistency
+between two independent full-Part-1 passes** (worst klal 69.51%, several
+klalim under 80%). Free-form transcription and narrow crop-adjudication are
+not the same accuracy claim — do not cite the 92.6%/98% figure as if it
+covers the former.
+
+**Practical impact**: these 312 entries are currently live in the dashboard
+(`review_server.py`'s `_load_corrections()` merges `corrections_part2.json`/
+`corrections_part3.json` in unconditionally) with a `0.95` confidence and
+"VLM Verified" reasoning text a human reviewer would reasonably take at face
+value. Recommend pulling them from the dashboard or clearly relabeling them
+as unverified until `VlmWitnessEngine` is actually run against them for real —
+presenting fabricated confidence to a human reviewer is worse than the old
+`needs_revisit` flags' honest "NOT scan-verified" label.
+
 ### DONE 2026-08-20 — VLM Secondary Witness Engine Integration, Parts 2 & 3 Purge/Regeneration, & Full Scan Alignment
 
 **Core Engineering & Architecture Accomplishments:**

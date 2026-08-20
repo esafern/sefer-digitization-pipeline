@@ -67,7 +67,16 @@ def parse_candidate_ocr(ocr_text):
     lines = []
 
     for line in ocr_text.splitlines():
-        match = re.search(r"(?:---|===)?\s*klal\s+(\d+)", line, re.IGNORECASE)
+        # FIXED 2026-08-20 (code review): the optional '(?:---|===)?' plus
+        # unanchored re.search matched "klal <digits>" ANYWHERE on any line,
+        # not just a genuine header - splitting/truncating the preceding
+        # klal's text on a false hit and skewing the accuracy numbers this
+        # script reports. Both real formats (vlm_klal_8_22_ocr.txt's
+        # "--- klal N", vlm_part1_full_baseline*.txt's "=== KLAL N (...)")
+        # always start the line with the marker, so anchor like
+        # parse_groundtruth's own ^---\s*klal\s+(\d+) does, just accepting
+        # either marker.
+        match = re.match(r"^(?:---|===)\s*klal\s+(\d+)", line, re.IGNORECASE)
         if match:
             if current_klal is not None:
                 klalim_ocr[current_klal] = " ".join(lines).strip()
@@ -193,10 +202,6 @@ def main():
         sys.exit(1)
 
     evaluate_ocr(args.ocr_file, use_part1=args.use_part1)
-
-
-if __name__ == "__main__":
-    main()
 
 
 if __name__ == "__main__":

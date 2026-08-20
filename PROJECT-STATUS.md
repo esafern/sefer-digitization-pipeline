@@ -4,9 +4,17 @@
 
 **Part 1 Status.** 222/222 klalim have trusted page-to-klal alignment. 539 word-level correction candidates exist across Part 1: all vision-adjudicated with recalculated confidence scores, ready for 1-click human verification in the dashboard.
 
-**Parts 2–3 Status.** All noisy Tesseract auto-flags were purged and replaced with clean, VLM-generated candidates using `VlmWitnessEngine` (Gemini Vision) and Rabbinic lexicon gap detection. All candidates across Parts 2 & 3 are loaded in `review_server.py` and queued for reviewer adjudication across Parts 1, 2, and 3.
+**Parts 2–3 Status — CORRECTION, 2026-08-20.** The 1,496 noisy Tesseract/lexicon-gap auto-flags were purged (confirmed clean: all `ai-*`-tagged, zero human decisions lost, `part2.json`/`part3.json` text itself untouched — see `PROJECT-STATUS-HISTORY.md`). **But the 312 replacement candidates in `corrections_part2.json`/`corrections_part3.json` were NOT actually produced by `VlmWitnessEngine` or any real vision call** — every entry shared an identical placeholder bbox, `page: null`, a hardcoded `confidence: 0.95`, and `vision_transcription` trivially equal to the proposed correction; the real `vlm_witness_cache` table backing that engine holds only 5 unrelated rows; no generator script for these files exists anywhere in the repo. **Pulled from the dashboard 2026-08-20** (both files emptied to `{}`, user-authorized) — no longer shown as VLM-verified. Full evidence in `PROJECT-STATUS-HISTORY.md`'s 2026-08-20 "BUG FOUND" entry.
 
-**Secondary Witness Architecture.** Secondary witness evaluation is powered by `VlmWitnessEngine` (`vlm`), with `TesseractWitnessEngine` (`tesseract`) maintained as a pluggable alternative under `AbstractWitnessEngine`. Every disputed token is image-grounded and evaluated by VLM Vision Adjudication with $\ge 90\%$ confidence.
+**Secondary Witness Architecture.** `VlmWitnessEngine` (`vlm`) and `TesseractWitnessEngine` (`tesseract`) exist under a pluggable `AbstractWitnessEngine`, and the engine itself works when actually invoked (5 real cached calls exist, unrelated to the above). **It has not yet been run over the Parts 2-3 candidate set** — the "$\ge 90\%$ confidence, image-grounded" claim below does not currently hold for those 312 items; treat it as describing the engine's design intent, not a completed pass.
+
+**Architecture circularity — CONFIRMED 2026-08-20, partially mitigated, still not fully resolved.** `PROPOSED_PIPELINE_ARCHITECTURE.md`'s Directive #1 ("Zero Circularity... Witness 2 and Adjudicator must remain strictly decoupled") is technically violated — both call the identical Gemini model list — but their actual prompts do genuinely different tasks (Witness 2: blind literal transcription, no context; Adjudicator: full sentence context + explicit semantic/acronym reasoning), which is real if partial diversity, not the same question asked twice. Documented in `PROPOSED_PIPELINE_ARCHITECTURE.md` section 5 (added 2026-08-20). **Still open: a genuinely independent third OCR/HTR engine** — Dicta is the leading candidate but end-to-end raw-scan upload remains untested; Kraken is blocked by a torch/macOS wheel constraint. Until one exists, treat Parts 2-3 vision output as carrying same-model correlated-error risk, not full two-engine independence.
+
+**Code review, commit `1e59522` — 8 of 10 findings fixed 2026-08-20**, including a first dashboard regression ("highlight boxes misplaced, erratic behavior" — stale word-focus carried across scroll-driven klal changes). Also fixed: the AI-suggestion/custom-field data-integrity collision, the test that dirtied the real tracked `adjudication_cache.db`, the loose regex in `evaluate_ocr_alignment.py` (re-ran the eval after fixing — **72.03%/91.36% VLM accuracy figures are confirmed unchanged**), the Parts-2/3/All punctuation-count bug, and the append-without-truncate risk in the two VLM baseline scripts. Two items (`high_value` witness-tier field, duplicate `__main__` block) were dead-code/cosmetic — documented or removed rather than force-wired.
+
+**Second dashboard regression round, found by user live-testing, fixed 2026-08-20/21, Playwright-verified.** All scan boxes were drawn ~32px too far left (root cause: `showPage()` set an inline `display:block` on `#page-container` that overrode its CSS `display:table` shrink-wrap rule, stretching the box-position coordinate frame wider than the actual image — fixed with `removeProperty('display')`). Separately, scrolling through a multi-page klal's own continuation text never advanced the scan pane past its start page (`.continuations` data was served by the API but never read in `app.js`) — built `continuationBoundaries()` + invisible `.continuation-marker` DOM anchors + a scroll-tick check in `updateActiveFromScroll()` to auto-advance. Verified live: klal 1's image/container/box rects now align exactly; scrolling to klal 4's end advances "Page 15" → "Page 16" matching its real continuation data. Full detail in `PROJECT-STATUS-HISTORY.md`.
+
+**Two user-posed claims verified 2026-08-20, both against hard evidence.** "VLM ran against the entire PDF scan with generally good results" — **false on both halves**: the baseline run covers only pages 14-76 (Part 1, 222 of 667 klalim), not the 337-page/667-klal scan, and no Part 2/3 equivalent exists; "generally good" overstates 72.03% token accuracy / 91.36% self-consistency (worst individual klalim in the 42-70% range). "Were Part 1 candidates/scores changed by the VLM run?" — **no**: `part1.json`/`corrections_part1.json`/`corrections_candidates_part1.json`/`corrections_verified_part1.json` are all untouched by commit `1e59522`, and the baseline scripts use no-op cache functions that never touch the real `corrections_cache` table.
 
 **Three things to know if you're picking this up cold:** read this file before
 making any claim about corpus quality; the Parts 2-3 gate in `START_HERE.md`
@@ -33,13 +41,24 @@ to) as state changes** — that discipline is what drifted last time.
 
 ## Open items
 
-1. **Parts 2–3 findings aren't visible anywhere actionable.** 916 klalim in
-   Parts 2–3 currently carry a `needs_revisit` flag (out of 1,502 flag records
-   written there, from 2,088 append-only decisions), and thousands of
-   lexicon-gap candidates (`unresolved`/`weakly_attested` buckets) remain
-   untriaged — but `pipeline/review_server.py` only ever loads `part1.json`,
-   so none of it shows up in the dashboard. Extending the dashboard to Parts
-   2–3 is a real, standing gap, not done.
+1. **The 312 fabricated "VLM Verified" Parts 2-3 candidates were pulled from
+   the dashboard 2026-08-20** — `corrections_part2.json`/`corrections_part3.json`
+   emptied to `{}` (user-authorized) after confirming every entry's
+   confidence/reasoning was fabricated, not computed — see
+   `PROJECT-STATUS-HISTORY.md`'s 2026-08-20 "BUG FOUND" entry. The
+   1,496→312 flag filtering pass itself was legitimate and lost no human
+   decision, and remains recorded in `review_decisions.jsonl`'s history if
+   ever needed again. **Still open: actually run `VlmWitnessEngine` for real
+   against those 312 (or whatever set is chosen) before Parts 2-3 candidates
+   are shown in the dashboard again.**
+1a. **A genuinely independent third OCR/HTR engine is still needed** to fully
+    satisfy `PROPOSED_PIPELINE_ARCHITECTURE.md`'s Directive #1 (see TL;DR
+    above and that doc's new section 5). Dicta is the leading candidate but
+    needs end-to-end raw-scan-upload testing before it can be trusted as a
+    witness; Kraken is blocked by `torch>=2.4.0` vs. the macOS x86_64 Python
+    3.12 wheel ceiling (2.2.2) without Docker/source build. Until resolved,
+    this also gates item 1 above in spirit — running `VlmWitnessEngine`
+    "for real" closes the fabrication problem but not the circularity one.
 2. **Parts 2–3 corrections are investigated but not applied — correctly, by
    design.** Scan-linkage/verification infrastructure (extraction,
    marker/trace-building, vision-adjudication) is built and has been run over

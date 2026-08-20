@@ -291,6 +291,10 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
   cursor: help;
   opacity: 0.8;
 }
+/* Invisible scroll-position anchor - see continuationBoundaries() in app.js.
+   display:inline-block so it gets its own line-position rect even with no
+   content, without affecting text flow/spacing (width:0). */
+.continuation-marker { display: inline-block; width: 0; pointer-events: none; }
 
 /* ---------- RIGHT: abridged nav ---------- */
 #nav-pane {

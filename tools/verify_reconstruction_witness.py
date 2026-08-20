@@ -213,6 +213,16 @@ def main():
                 "tesseract_reading": t_seg or None,
                 "opcode": tag,
                 "tier": t,
+                # Infrastructure for PROJECT-STATUS.md open item 4 (filter
+                # the witness queue to vision_selected in ("B","NEITHER"),
+                # 419->37 items) - not wired to any UI yet. NOTE: unrelated
+                # to review_frontend/app.js's "High-value items only" nav
+                # checkbox (filter-high-value), which is a klal-level filter
+                # over open/disputed/flagged counts, not this per-item tier.
+                # Same English phrase, different concept/granularity -
+                # confirmed 2026-08-20 (code review) this was never wired
+                # together; do not assume they should be without a real
+                # witness-tier filter UI being designed first.
                 "high_value": t in ("A", "B", "C"),
                 "bbox": {
                     "x1": min(t["x1"] for t in box), "y1": min(t["y1"] for t in box),

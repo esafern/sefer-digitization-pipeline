@@ -74,7 +74,17 @@ def main():
     print(f"RUNNING VLM FULL BASELINE OCR FOR PART 1 ({len(part1_items)} REGION CROPS / 222 KLALIM)")
     print("=" * 80)
 
-    output_lines = []
+    # Truncate once up front, then every iteration below appends+flushes
+    # incrementally (per the standing incremental-disk-flushing rule). FIXED
+    # 2026-08-20 (code review): this file was opened "a" with no truncation
+    # anywhere, so restarting after a mid-run crash/interruption duplicated
+    # every already-written "=== KLAL N ===" block; downstream parsers keep
+    # only the last occurrence (dict-keyed), silently masking the corruption
+    # rather than surfacing it.
+    output_dir = os.path.join(REPO, "tools", "second_witness_eval")
+    os.makedirs(output_dir, exist_ok=True)
+    output_path = os.path.join(output_dir, "vlm_part1_full_baseline.txt")
+    open(output_path, "w", encoding="utf-8").close()
 
     def dummy_cache_get():
         return None
@@ -112,13 +122,6 @@ def main():
             print(f" FAILED: {e}")
             transcription = ""
 
-        output_lines.append(header_str)
-        output_lines.append(transcription)
-        output_lines.append("")
-
-        output_dir = os.path.join(REPO, "tools", "second_witness_eval")
-        os.makedirs(output_dir, exist_ok=True)
-        output_path = os.path.join(output_dir, "vlm_part1_full_baseline.txt")
         with open(output_path, "a", encoding="utf-8") as f:
             f.write(f"{header_str}\n{transcription}\n\n")
 

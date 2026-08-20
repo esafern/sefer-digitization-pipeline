@@ -126,22 +126,43 @@ def _load_klalim(part_num=1):
     return {k["klal_id"]: k for k in klalim}, klalim
 
 
+def _parts_for(part_num):
+    # Same string-normalization convention as _load_klalim above (part_num
+    # arrives as either an int, from a Python call site that already knows
+    # the part, or a raw query-string value like "2"/"3"/"all"). FIXED
+    # 2026-08-20 (code review): _load_alignment/_load_corrections used to
+    # accept part_num and silently ignore it, always merging all three
+    # parts - correct but wasteful (3x the JSON parses this request
+    # actually needs). _load_punctuation_candidates separately compared
+    # this same value with `== 1` (an int), which is never true for the
+    # string values "2"/"3"/"all" the query path passes, and built a
+    # nonexistent "punctuation_candidates_partall.json" filename - Parts
+    # 2/3/All silently showed punctuation_count=0 for every klal.
+    part_str = str(part_num).lower() if part_num is not None else "all"
+    if part_str in ("all", "0", "none"):
+        return (1, 2, 3)
+    if part_str in ("2", "3"):
+        return (int(part_str),)
+    return (1,)
+
+
 def _load_alignment(part_num=None):
-    a1 = _load_json("part1_header_anchored_alignment.json", [])
-    a2 = _load_json("part2_header_anchored_alignment.json", [])
-    a3 = _load_json("part3_header_anchored_alignment.json", [])
-    align = a1 + a2 + a3
+    fnames = {1: "part1_header_anchored_alignment.json",
+              2: "part2_header_anchored_alignment.json",
+              3: "part3_header_anchored_alignment.json"}
+    align = []
+    for p in _parts_for(part_num):
+        align += _load_json(fnames[p], [])
     return {r["klal_id"]: r for r in align}
 
 
 def _load_corrections(part_num=None):
-    c1 = _load_json("corrections_part1.json", {})
-    c2 = _load_json("corrections_part2.json", {})
-    c3 = _load_json("corrections_part3.json", {})
+    fnames = {1: "corrections_part1.json", 2: "corrections_part2.json", 3: "corrections_part3.json"}
     combined = {}
-    if isinstance(c1, dict): combined.update(c1)
-    if isinstance(c2, dict): combined.update(c2)
-    if isinstance(c3, dict): combined.update(c3)
+    for p in _parts_for(part_num):
+        c = _load_json(fnames[p], {})
+        if isinstance(c, dict):
+            combined.update(c)
     return combined
 
 
@@ -150,11 +171,19 @@ def _load_regions():
 
 
 def _load_punctuation_candidates(part_num=1):
-    fname = f"punctuation_candidates_part{part_num}.json"
-    punct = _load_json(fname, {})
-    if not punct and part_num == 1:
-        punct = _load_json("punctuation_candidates_part1.json", {})
-    return punct
+    # Only Part 1 has punctuation candidates generated as of 2026-08-20 -
+    # parts 2/3 correctly return {} (no file) rather than erroring, so this
+    # stays forward-compatible if punctuation_candidates_part{2,3}.json are
+    # ever built.
+    fnames = {1: "punctuation_candidates_part1.json",
+              2: "punctuation_candidates_part2.json",
+              3: "punctuation_candidates_part3.json"}
+    combined = {}
+    for p in _parts_for(part_num):
+        c = _load_json(fnames[p], {})
+        if isinstance(c, dict):
+            combined.update(c)
+    return combined
 
 
 def _load_witness_queue():

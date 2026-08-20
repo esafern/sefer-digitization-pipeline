@@ -120,3 +120,69 @@ class AbstractAdjudicator(ABC):
 2. **Spatial Bounding-Box Anchoring**: All text overrides inherit Document AI's bounding box grid $[x_1, y_1, x_2, y_2]$ for UI rendering.
 3. **Dual Crop Context Inspection**: Adjudicator receives both tight word crop AND full line image to prevent context blindness.
 4. **Decoupled Prompt Versioning**: Cache keys in `adjudication_cache.db` use `prompt_version` (e.g. `"v1"`) to prevent prompt-edit cache invalidation storms.
+
+---
+
+## 5. Current Compliance Status vs. Directive #1 ("Zero Circularity") — 2026-08-20
+
+**This section documents a real gap, found and discussed 2026-08-20, that
+should have been written down when Witness 2 moved to `VlmWitnessEngine`.**
+Directive #1 requires Witness 2 and the Adjudicator to be strictly decoupled.
+As actually implemented, both call Gemini (`gemini-3.6-flash`/
+`gemini-3.5-flash`) — `AbstractAdjudicator` above is a spec, never
+implemented; the real, standing adjudicator is
+`pipeline/verify_corrections_vision.py` via
+`vision_adjudication_common.adjudicate_with_retry`, same model list as
+`VlmWitnessEngine`.
+
+**What partially mitigates this, confirmed by reading both prompts, not
+assumed:**
+
+- **Witness 2's task** (`vlm_witness.py`'s `PROMPT_TEMPLATE`) is deliberately
+  blind, literal transcription: *"You are a literal OCR reader... Transcribe
+  the Hebrew text visible in this image crop verbatim... Do not assume or
+  infer text outside this image."* No sentence context, no semantic
+  reasoning — the same task class as Witness 1 (DocAI), just a different
+  implementation.
+- **The Adjudicator's task** (`verify_corrections_vision.py`'s
+  `PROMPT_TEMPLATE`) is categorically different: it receives the full
+  surrounding sentence and is explicitly instructed to *"Perform Rabbinic
+  acronym and semantic analysis using the surrounding sentence context"* and
+  *"Recognize standard Rabbinic acronyms and abbreviations"* — a
+  plausibility/context judgment, not a re-read of isolated pixels.
+- So the two roles use **different inputs and different task framing**, which
+  is genuine (if partial) diversity — not the same question asked twice. It
+  is **not** full independence: both still run on the same underlying model
+  family, so a systematic blind spot (a specific ligature, a rare glyph)
+  could plausibly fool both roles identically. Per Lesson 9, this is weaker
+  evidence than two independently-implemented engines agreeing.
+- **Separately, and genuinely independently**: lexicon/corpus-attestation
+  checking (`lexicon.txt`, `tools/review_lexicon_gaps.py`,
+  `build_part1_freq.py`) is a real non-LLM, mechanical signal already in the
+  pipeline (Lesson 8) — no model call at all, so no shared-model risk.
+  Caveat: `lexicon.txt` itself was built from this corpus's own earlier OCR
+  history, so it corroborates *plausibility/attestation*, not a fresh,
+  independently-sourced reading — a different limitation than the
+  same-model-twice issue above, not a fix for it.
+
+**Still needed for full Directive #1 compliance: a third, genuinely
+independent OCR/HTR engine**, either as an alternative Witness 2 or to give
+the Adjudicator a real second transcription to arbitrate between, rather than
+relying solely on same-model task-separation. Candidates evaluated so far
+(`tools/second_witness_eval/README.md`):
+
+- **Dicta OCR** — trained on Hebrew, reads Rashi script (DocAI's weakest
+  area). Most promising, but **end-to-end raw-scan upload is still
+  unconfirmed** (`PROJECT-STATUS.md` open item) — its web portal appears to
+  be a `.docx`/`.txt` Dropbox-proofreading tool, not a confirmed raw-PDF-in
+  pipeline. Not yet usable as a real second witness until this is resolved.
+- **Kraken HTR** — blocked locally: `kraken>=5.3` requires `torch>=2.4.0`,
+  and macOS x86_64 (Intel) Python 3.12 wheels stop at PyTorch 2.2.2. Needs
+  Docker or source compilation to evaluate at all.
+- **HebrewBooks "fastocr"** — tested and rejected (44.0% lexicon hit vs. this
+  corpus's 97.8%, systematic letter-confusion signature).
+
+Until one of these (or another candidate) is actually running, treat
+Parts 2-3 vision-adjudicated output as carrying same-model correlated-error
+risk, not full two-engine independence — do not describe it as "$\ge 0.90$
+confidence, image-grounded, independently verified" without this caveat.
