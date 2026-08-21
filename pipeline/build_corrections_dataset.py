@@ -132,6 +132,34 @@ def union_bbox(tokens):
     }
 
 
+def estimate_insert_bbox(docai_tokens, i1):
+    """Bbox estimate for an 'insert'-opcode candidate: stored text with NO
+    matching DocAI token at all (i1 == i2 in the diff span - see the
+    'insert' branch in main() below), so there's no token to crop directly,
+    unlike replace/delete. Added 2026-08-21 (PROJECT-STATUS.md open item 8,
+    user-requested, "baked into the tool, not a one-off"): union the DocAI
+    tokens immediately BEFORE and AFTER the gap in DocAI's own reading-order
+    stream - a band spanning "roughly where the missing word should sit",
+    the same "generous crop, visible margin" precedent as CLAUDE.md
+    Lesson 14, not a precise single-word guess. Callers must treat this
+    differently from a real per-word bbox (see corrections' own
+    `bbox_estimated` field) - it can span two real words' worth of page
+    width if the neighbors aren't adjacent on the same line.
+
+    Returns None only if there are zero DocAI tokens on the whole page
+    (i1 == 0 and docai_tokens is empty) - not expected in practice, since a
+    page that produced any correction candidate at all has tokens by
+    construction, but handled rather than assumed."""
+    neighbors = []
+    if i1 > 0:
+        neighbors.append(docai_tokens[i1 - 1])
+    if i1 < len(docai_tokens):
+        neighbors.append(docai_tokens[i1])
+    if not neighbors:
+        return None
+    return union_bbox(neighbors)
+
+
 def load_trusted_klal_pages():
     """Group klal_ids by matched_page, trusted entries only, klal_id order
     preserved within each page (matches print order). Includes continuation
@@ -266,6 +294,22 @@ def main():
                     continue
                 klal_id, word_idx = page_word_origin[j1]
 
+            # 'insert'-opcode candidates have no matching DocAI token
+            # (orig_tokens is empty - see the attribution comment above),
+            # so union_bbox(orig_tokens) is never usable for them; estimate
+            # a band instead. FIXED 2026-08-21 (PROJECT-STATUS.md open item
+            # 8): these used to always get bbox=None, which meant
+            # verify_corrections_vision.py skipped vision-cropping them
+            # entirely and review_server.py's api_page() never served them
+            # to the dashboard - a real word never got a scan-pane highlight
+            # or a chance at vision adjudication.
+            if tag == "insert":
+                bbox = estimate_insert_bbox(docai_tokens, i1)
+                bbox_estimated = bbox is not None
+            else:
+                bbox = union_bbox(orig_tokens) if orig_tokens else None
+                bbox_estimated = False
+
             corrections.append({
                 "klal_id": klal_id,
                 "page": page_id,
@@ -273,7 +317,8 @@ def main():
                 "word_index_in_final_text": word_idx,
                 "original_word": orig_word,
                 "corrected_word": corrected_word,
-                "bbox": union_bbox(orig_tokens) if orig_tokens else None,
+                "bbox": bbox,
+                "bbox_estimated": bbox_estimated,
             })
 
     out = {

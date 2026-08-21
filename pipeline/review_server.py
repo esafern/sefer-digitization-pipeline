@@ -230,9 +230,42 @@ def _load_witness_queue():
     return items
 
 
-def _trusted_page(alignment, klal_id):
+def _resolve_klal_page(alignment, regions, klal_id):
+    """(page, trusted) for a klal's scan-start page - the source of the
+    top-level "page"/"page_trusted" fields api_klalim()/api_klal() serve.
+
+    FIXED 2026-08-21 (data-integrity finding, see PROJECT-STATUS.md "Parts
+    2-3's matched_page looks systematically wrong"): this used to be
+    `_trusted_page()`, sourcing the page from the header-anchored alignment
+    file's `matched_page` alone (trusted only when that file's own `trusted`
+    flag said so). That flag turned out to be unreliable for Parts 2-3 -
+    391 of 445 klalim disagree with klal_page_regions.json's own,
+    independently-computed page (gematria-trace marker position + Y-band
+    against real DocAI tokens) by up to 177 pages, despite the alignment
+    file marking every single one of them "trusted": true. Directly
+    verified against real DocAI token content (not just comparing two
+    numbers): klal 663's alignment claims page 336, and page 336's tokens DO
+    open with klal 663's exact text - so the text match itself is real, but
+    page 234 has the SAME opening text preceded by a running-header
+    fragment ("יך מלאכי") marking it as the genuine body page, while 336 is
+    apparently some other, non-body occurrence (a back-of-book index is
+    suspected, not yet confirmed) - the header matcher found *a* match, not
+    the *right* one. Part 1's two sources agree in all 222 cases, so this is
+    specific to whatever built Parts 2-3's alignment files (no generator
+    script for them exists in this repo to fix directly - see
+    PROJECT-STATUS.md), not a flaw in the header-anchored method in general.
+
+    klal_page_regions.json now covers all 667 klalim (was Part 1 only, also
+    fixed today) and its own page has been directly verified reliable, so
+    prefer it; fall back to the alignment file's matched_page only for a
+    klal with no region at all (region-building covers every klal in the
+    corpus today, so this fallback is not currently expected to fire, but is
+    kept for robustness rather than assuming that stays true forever)."""
+    region = regions.get(str(klal_id))
+    if region and region.get("page") is not None:
+        return region["page"], True
     r = alignment.get(klal_id, {})
-    return r.get("matched_page") if r.get("trusted") else None
+    return (r.get("matched_page"), True) if r.get("trusted") else (None, False)
 
 
 def _klal_all_pages(klal_id, regions=None):
@@ -365,6 +398,60 @@ def _corpus_word_bboxes(klal_id, words, page):
     return result
 
 
+def _word_pages_map(klal_id, words, region_entry):
+    """word_index -> page for every word aligned to a DocAI token on any
+    page this klal touches, real DocAI alignment (via _corpus_word_bboxes),
+    not an approximation.
+
+    FIXED 2026-08-21 (code review, on the day-of fix for the word_pages
+    field itself): _corpus_word_bboxes() runs a fresh SequenceMatcher
+    against the klal's FULL word list for every page independently, so a
+    word whose text recurs (a common/formulaic term) can align on more than
+    one of the klal's pages. A first draft of this function collected pages
+    in print order and overwrote word_pages[wi] = page unconditionally -
+    last-page-wins - so a word that genuinely lives on an earlier page but
+    also spuriously matches on a later page always resolved to the later
+    page. This is the identical collision class already found and fixed in
+    tools/verify_flagged_candidates_vision.py's locate_word() (see its own
+    FIXED comment, round-3 audit 2026-08-16: klal 30 w1263/w250 'גכי' and
+    klal 41 w256/w473 'כתכו' both matched on two pages). Same fix here:
+    when a word_index matches on more than one page, keep whichever page's
+    own token-count window actually contains that word_index's proportional
+    position among the klal's total words, not whichever was processed
+    last."""
+    page_regions = []
+    start_page = region_entry.get("page")
+    if start_page is not None:
+        page_regions.append((start_page, region_entry.get("token_count", 0)))
+    for cont in region_entry.get("continuations", []):
+        page_regions.append((cont["page"], cont.get("token_count", 0)))
+
+    matches_by_word = {}
+    for page, _ in page_regions:
+        for wi in _corpus_word_bboxes(klal_id, words, page):
+            matches_by_word.setdefault(wi, []).append(page)
+
+    total_words = len(words)
+    total_tokens = sum(tc for _, tc in page_regions)
+    word_pages = {}
+    for wi, pages in matches_by_word.items():
+        if len(pages) == 1:
+            word_pages[wi] = pages[0]
+            continue
+        target = (wi / total_words) * total_tokens if total_words and total_tokens else 0
+        running = 0
+        best_page, best_dist = pages[0], float("inf")
+        for page, tc in page_regions:
+            if page in pages:
+                dist = abs((running + tc / 2) - target)
+                if dist < best_dist:
+                    best_dist = dist
+                    best_page = page
+            running += tc
+        word_pages[wi] = best_page
+    return word_pages
+
+
 def _word_level_ai_flags(klal_id, words):
     """klal_flag decisions naming a specific word_index, synthesized into
     corrections-shaped entries so the frontend highlights them. Only the
@@ -442,6 +529,7 @@ def api_flags():
 def api_klalim(part_num=1):
     klalim_by_id, klalim = _load_klalim(part_num=part_num)
     alignment = _load_alignment(part_num=part_num)
+    regions = _load_regions()
     corrections = _load_corrections(part_num=part_num)
     punct_candidates = _load_punctuation_candidates(part_num=part_num)
     # Pre-load klal_flag decisions once for all 222 klalim. The old code
@@ -547,12 +635,13 @@ def api_klalim(part_num=1):
         punct_decided_count = sum(
             1 for p in punct_entries if (kid, p["before_word_index"]) in punct_decided
         )
+        _page, _page_trusted = _resolve_klal_page(alignment, regions, kid)
         out.append({
             "klal_id": kid,
             "title": k.get("title", ""),
             "section": k.get("section", ""),
-            "page": _trusted_page(alignment, kid),
-            "page_trusted": kid in alignment and bool(alignment[kid].get("trusted")),
+            "page": _page,
+            "page_trusted": _page_trusted,
             "correction_count": total_count,
             # split so the nav badge can distinguish "still needs a look"
             # from "already decided" instead of one undifferentiated count
@@ -673,9 +762,35 @@ def api_klal(klal_id):
 
     regions = _load_regions()
     region_entry = regions.get(str(klal_id), {})
+    _klal_page, _klal_page_trusted = _resolve_klal_page(alignment, regions, klal_id)
     flag_state = _general_klal_flag_current(klal_id)
 
-    punct_candidates = _load_punctuation_candidates().get(str(klal_id), [])
+    # Real (DocAI-alignment-based) word_index -> page map, covering every
+    # word on every page this klal touches - not an approximation. FIXED
+    # 2026-08-21 (user report: klal 2 word 185 stayed on page 15 instead of
+    # jumping back to 14, and highlighted the wrong word). The frontend
+    # previously had no per-word page data for plain (unflagged) words and
+    # fell back to a client-side heuristic (continuationBoundaries() in
+    # app.js, built from a continuation's token_count - a DocAI-page word
+    # count, explicitly documented there as "a same-neighborhood
+    # approximation, not an exact boundary"). That approximation put the
+    # page-14/15 split at word_index 151; the real split (per this same
+    # SequenceMatcher alignment _word_level_ai_flags already trusts for
+    # ai_flag words) is elsewhere, so words in the gap between the two
+    # estimates navigated to the wrong page. See _word_pages_map()'s own
+    # docstring for a second, since-fixed bug in this same field (a
+    # duplicate-text-across-pages collision).
+    word_pages = _word_pages_map(klal_id, words, region_entry)
+
+    # FIXED 2026-08-21 (code review): every sibling loader in this function
+    # (_load_klalim, _load_alignment, _load_corrections) threads part_num
+    # through; this one didn't, defaulting to Part 1's punctuation file for
+    # every klal regardless of which part it's actually in. Currently silent
+    # (only punctuation_candidates_part1.json exists), but
+    # _load_punctuation_candidates()'s own docstring anticipates
+    # punctuation_candidates_part{2,3}.json being added later - once they
+    # are, this would keep reading Part 1's file for every Part 2/3 klal.
+    punct_candidates = _load_punctuation_candidates(part_num=part_num).get(str(klal_id), [])
     # One all_current() map rather than a per-candidate current_for() - the
     # same fix _merge_decision() already carries and for the same reason:
     # every current_for() call re-reads and re-parses the WHOLE, permanently
@@ -702,14 +817,15 @@ def api_klal(klal_id):
         "section": k.get("section", ""),
         "gematria": k.get("gematria", ""),
         "clean_text": k.get("clean_text", ""),
-        "page": _trusted_page(alignment, klal_id),
-        "page_trusted": klal_id in alignment and bool(alignment[klal_id].get("trusted")),
+        "page": _klal_page,
+        "page_trusted": _klal_page_trusted,
         "region": region_entry.get("bbox"),
         # klal's content continues onto one or more later pages (e.g. klal 4:
         # starts on page 15's last line, most of its text is on page 16) -
         # a per-page bbox for each, so the scan-pane highlight can follow
         # the klal when the reviewer manually flips pages.
         "continuations": region_entry.get("continuations", []),
+        "word_pages": word_pages,
         "corrections": corrections,
         "punctuation": punctuation,
         "needs_revisit": bool(flag_state and flag_state.get("needs_revisit")),
@@ -846,7 +962,13 @@ def api_post_punctuation_decision(body):
     klal_id = int(body["klal_id"])
     word_index = int(body["before_word_index"])
     accepted = bool(body["accepted"])
-    candidates = _load_punctuation_candidates().get(str(klal_id), [])
+    # FIXED 2026-08-21 (code review, same omission as api_klal()'s own
+    # _load_punctuation_candidates() call above): must thread part_num
+    # through so a Part 2/3 candidate's snapshot isn't silently looked up
+    # against Part 1's punctuation file once punctuation_candidates_part{2,
+    # 3}.json exist.
+    part_num = _get_part_num_for_klal(klal_id)
+    candidates = _load_punctuation_candidates(part_num=part_num).get(str(klal_id), [])
     snapshot = next((p for p in candidates if p["before_word_index"] == word_index), None)
     record = rd.append_decision(
         "punctuation_choice",

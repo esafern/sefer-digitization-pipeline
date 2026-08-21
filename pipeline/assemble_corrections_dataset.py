@@ -3,8 +3,10 @@
 # flag overlay - the static review.html this used to name was retired
 # 2026-08-07): one entry per flagged word, with a human-readable flag
 # classifying what the vision check implies.
+import difflib
 import json
 import os
+import re
 
 import corpus_io as cio
 
@@ -15,6 +17,16 @@ REPO = cio.REPO
 IN_PATH = os.path.join(REPO, "corrections_verified_part1.json")
 OUT_PATH = os.path.join(REPO, "corrections_part1.json")
 PART1_PATH = cio.PART1_PATH
+# ADDED 2026-08-21 (PROJECT-STATUS.md, "surface the VLM baseline into the
+# dashboard for review" - user-requested, "just enrich"): a THIRD,
+# genuinely independent reading for every candidate this stage already
+# serves - VlmWitnessEngine's blind, whole-klal transcription, diffed
+# against the klal's own current clean_text (the same word-index space
+# every candidate here already uses). Optional input: a fresh clone or a
+# machine that hasn't run tools/run_part1_vlm_full_baseline.py (a paid API
+# script, not part of rebuild_all.sh) simply gets vlm_reading: null
+# everywhere rather than a crash - see load_vlm_baseline()'s own docstring.
+VLM_BASELINE_PATH = os.path.join(REPO, "tools", "second_witness_eval", "vlm_part1_full_baseline.txt")
 
 # Minimum vision confidence before classify() treats Gemini's A/B selection as
 # a machine resolution rather than "ambiguous, a human still has to look".
@@ -26,6 +38,55 @@ PART1_PATH = cio.PART1_PATH
 # Per CLAUDE.md Lesson 2 this is a triage threshold, not a certificate: a
 # candidate scoring above it has been prioritised, not proven correct.
 MIN_VISION_CONFIDENCE = 0.7
+
+
+def load_vlm_baseline(path=VLM_BASELINE_PATH):
+    """{klal_id: [word, ...]} from tools/run_part1_vlm_full_baseline.py's
+    output - a blind, whole-klal transcription per klal, genuinely
+    independent of the DocAI-vs-stored-text comparison every candidate here
+    already comes from (see PROJECT-STATUS.md, 2026-08-21, "the VLM A/B
+    passes... surface the better readings into the dashboard"). Same header
+    format both baseline passes (A and B) write: "=== KLAL N (...) ===".
+    Returns {} - not an error - if the file doesn't exist, so a fresh clone
+    or a machine that hasn't run the (paid-API, not rebuild_all.sh-gated)
+    baseline script yet still assembles correctly, just without VLM
+    enrichment."""
+    if not os.path.exists(path):
+        return {}
+    by_klal = {}
+    current_klal = None
+    lines = []
+    with open(path, "r", encoding="utf-8") as f:
+        for line in f:
+            m = re.match(r"^===\s*KLAL\s+(\d+)", line)
+            if m:
+                if current_klal is not None:
+                    by_klal[current_klal] = " ".join(lines).split()
+                    lines = []
+                current_klal = int(m.group(1))
+            elif current_klal is not None:
+                lines.append(line.strip())
+        if current_klal is not None:
+            by_klal[current_klal] = " ".join(lines).split()
+    return by_klal
+
+
+def build_vlm_alignment(klal_words, vlm_words):
+    """clean_text word_index -> the VLM's own word at that position, for
+    every position where the two align (SequenceMatcher.get_matching_
+    blocks() - same technique tools/second_witness_eval/evaluate_ocr_
+    alignment.py's "Candidate Verification Breakdown" already uses at
+    klal 8-22 scope, generalized here to every klal this stage assembles).
+    A word_index with no entry means the VLM's reading didn't align there -
+    either real disagreement or (per CLAUDE.md Lesson 5) an alignment gap;
+    this function doesn't distinguish the two, callers just get None either
+    way, same as the existing evaluation script's own convention."""
+    sm = difflib.SequenceMatcher(None, klal_words, vlm_words, autojunk=False)
+    alignment = {}
+    for block in sm.get_matching_blocks():
+        for i in range(block.size):
+            alignment[block.a + i] = vlm_words[block.b + i]
+    return alignment
 
 
 def live_word_span(words, word_index, expected_text):
@@ -99,6 +160,19 @@ def main():
     verified = cio.load_json(IN_PATH)
     part1 = cio.load_part1(PART1_PATH)
     words_by_klal = {k["klal_id"]: k["clean_text"].split() for k in part1}
+    vlm_by_klal = load_vlm_baseline()
+    # Built lazily, once per klal actually needed (not all 222) - the
+    # alignment itself is cheap, but no reason to pay for klalim with zero
+    # candidates.
+    vlm_alignment_cache = {}
+
+    def vlm_reading_for(klal_id, word_index):
+        if klal_id not in vlm_by_klal:
+            return None
+        if klal_id not in vlm_alignment_cache:
+            vlm_alignment_cache[klal_id] = build_vlm_alignment(
+                words_by_klal.get(klal_id, []), vlm_by_klal[klal_id])
+        return vlm_alignment_cache[klal_id].get(word_index)
 
     by_klal = {}
     n_drifted = 0
@@ -115,6 +189,15 @@ def main():
             "vision_transcription": c.get("vision_transcription"),
             "confidence": c.get("vision_confidence"),
             "reasoning": c.get("vision_reasoning"),
+            # ADDED 2026-08-21: a third, independent reading from the VLM
+            # baseline pass (see load_vlm_baseline()/build_vlm_alignment()
+            # above) - None if no VLM baseline is available, or if this
+            # word_index doesn't align to anything in it. Purely additive -
+            # never changes `flag`/classify()'s own verdict; a human
+            # reviewer sees it as one more data point, same principle as
+            # the second-witness report tonight's earlier work produced by
+            # hand, now a permanent field every rebuild regenerates.
+            "vlm_reading": vlm_reading_for(c["klal_id"], c["word_index_in_final_text"]),
             # A drifted candidate's flag is forced to "stale_candidate"
             # rather than whatever classify() would say - a confident
             # "current_text_confirmed" is actively misleading once the

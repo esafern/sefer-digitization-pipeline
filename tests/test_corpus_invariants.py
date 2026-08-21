@@ -366,6 +366,24 @@ def alignment():
 
 
 @pytest.fixture(scope="session")
+def all_alignment():
+    """Part 1 + 2 + 3's own header-anchored alignment files, merged - klal_id
+    ranges are disjoint (1-222 / 223-444 / 445-667) so a plain dict update
+    never collides. klal_page_regions.json was generalized to cover all
+    three parts 2026-08-21 (see PROJECT-STATUS.md); this fixture lets the
+    region-coverage test below check against all 667 klalim, not just
+    Part 1's 222."""
+    combined = {}
+    for fname in ("part1_header_anchored_alignment.json",
+                  "part2_header_anchored_alignment.json",
+                  "part3_header_anchored_alignment.json"):
+        with open(os.path.join(REPO, fname), encoding="utf-8") as f:
+            for r in json.load(f):
+                combined[r["klal_id"]] = r
+    return combined
+
+
+@pytest.fixture(scope="session")
 def decision_records():
     """review_decisions.jsonl, read as raw records. Read-only, always - this
     file is the append-only human-decision audit trail, deliberately outside
@@ -718,38 +736,74 @@ def test_correction_entries_have_the_field_shape_their_opcode_implies(correction
     assert not offenders, f"correction entries with an inconsistent shape: {offenders}"
 
 
-def test_every_trusted_klal_has_exactly_one_well_formed_scan_region(regions, alignment, part1_by_id):
+def test_every_trusted_klal_has_exactly_one_well_formed_scan_region(regions, all_alignment, all_klalim, part1_by_id):
     """klal_page_regions.json drives the "you are here" highlight on the scan
     pane for every klal, including the majority with no flagged correction.
     A missing region means the reviewer gets no highlight at all; a malformed
     or fabricated one means they are pointed at the wrong ink - the defect
     that got SEFARIA-VLM-DEMO.html archived (14 placeholder bounding boxes
     served under a "Precise Geometric Bounds" heading, CLAUDE.md).
-    """
-    trusted = {kid for kid, r in alignment.items()
-               if r.get("trusted") and kid in part1_by_id}
+
+    Generalized to all three parts 2026-08-21 when klal_page_regions.json
+    itself was generalized (previously Part 1 only, see PROJECT-STATUS.md).
+    The region-page-vs-alignment-matched_page agreement check below stays
+    scoped to Part 1 only, deliberately: that same day's investigation found
+    391 of 445 Parts 2-3 klalim where klal_page_regions.json's own
+    independently-computed page (gematria-trace marker + Y-band against real
+    DocAI tokens) disagrees with the alignment file's matched_page by up to
+    177 pages - real evidence points at the ALIGNMENT file being wrong there
+    (Part 1's two sources agree in all 222 cases; the alignment method isn't
+    inherently unreliable), not at klal_page_regions.json - but this is
+    logged as an open, unresolved finding, not something to force this test
+    to silently assert as correct for Parts 2-3 before it's actually fixed.
+
+    A "trusted" klal with genuinely no real text (clean_text is exactly
+    "{gematria} כלל {klal_id}" - an auto-generated placeholder, no real
+    transcription) is excluded from the "must have a region" side of this
+    check - found 2026-08-21 via klal 422, whose only prior region
+    (klal_page_regions.json, pre-DocAI-fix) turned out to be a spurious
+    heuristic match sourced from one of the 48 corrupted docai_word_boxes
+    pages (see PROJECT-STATUS.md); once that page was re-extracted cleanly,
+    the spurious match correctly disappeared. 115 of 667 klalim corpus-wide
+    are this kind of placeholder (0 in Part 1, all in Parts 2-3) - a real
+    corpus-completeness gap, not a scan-linkage bug, and out of this test's
+    scope. A placeholder CAN still legitimately have a region from the
+    marker-anchored strategy (a real printed marker's position is meaningful
+    independent of whether the body text has been transcribed yet - 71 of
+    667 placeholder klalim get one this way) - only the "must-have-a-region"
+    direction is relaxed for placeholders, not "any region implies a real,
+    trusted klal_id", which still applies to placeholders too."""
+    def is_placeholder(k):
+        parts = (k.get("clean_text") or "").strip().split(" ")
+        return len(parts) == 3 and parts[1] == "כלל" and parts[2] == str(k["klal_id"])
+
+    all_by_id = {k["klal_id"]: k for k in all_klalim}
+    trusted = {kid for kid, r in all_alignment.items()
+               if r.get("trusted") and kid in all_by_id}
+    must_have_region = {kid for kid in trusted if not is_placeholder(all_by_id[kid])}
     have = {int(k) for k in regions}
-    assert not (trusted - have), f"trusted Part-1 klal(im) with no scan region: {sorted(trusted - have)}"
+    assert not (must_have_region - have), f"trusted klal(im) with no scan region: {sorted(must_have_region - have)}"
     assert not (have - trusted), (
-        f"scan region(s) for klalim that are not trusted Part-1 klalim: {sorted(have - trusted)}"
+        f"scan region(s) for klalim that are not trusted klalim: {sorted(have - trusted)}"
     )
 
     offenders = []
     for kid, region in regions.items():
+        kid = int(kid)
         boxes = [(region["page"], region["bbox"])] + \
             [(c["page"], c["bbox"]) for c in region.get("continuations", [])]
         for page, b in boxes:
             if not (0 <= b["x1"] < b["x2"] <= 1 and 0 <= b["y1"] < b["y2"] <= 1):
-                offenders.append((int(kid), page, f"not a normalised rectangle: {b}"))
+                offenders.append((kid, page, f"not a normalised rectangle: {b}"))
         if region.get("token_count", 0) < 1:
-            offenders.append((int(kid), region["page"], "region covers zero tokens"))
-        if region["page"] != alignment[int(kid)].get("matched_page"):
-            offenders.append((int(kid), region["page"],
+            offenders.append((kid, region["page"], "region covers zero tokens"))
+        if kid in part1_by_id and region["page"] != all_alignment[kid].get("matched_page"):
+            offenders.append((kid, region["page"],
                               f"region page disagrees with the klal's aligned page "
-                              f"{alignment[int(kid)].get('matched_page')}"))
+                              f"{all_alignment[kid].get('matched_page')}"))
         cont_pages = [c["page"] for c in region.get("continuations", [])]
         if cont_pages != sorted(set(cont_pages)) or any(p <= region["page"] for p in cont_pages):
-            offenders.append((int(kid), region["page"],
+            offenders.append((kid, region["page"],
                               f"continuation pages {cont_pages} are not strictly increasing after it"))
     assert not offenders, f"malformed scan region(s): {offenders}"
 

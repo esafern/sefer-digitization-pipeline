@@ -130,6 +130,39 @@ def test_check_drift_flags_a_candidate_for_a_klal_that_no_longer_exists():
     assert acd.check_drift(c, None) is True
 
 
+# --- assemble_corrections_dataset: VLM baseline enrichment ------------------
+# Added 2026-08-21 (PROJECT-STATUS.md, "surface the VLM baseline into the
+# dashboard for review", user-requested "just enrich"): every candidate this
+# stage assembles gains a `vlm_reading` field - a third, independent reading
+# from tools/run_part1_vlm_full_baseline.py's blind per-klal transcription,
+# aligned against the klal's own clean_text at the SAME word_index space
+# every candidate already uses.
+
+def test_load_vlm_baseline_parses_klal_headers(tmp_path):
+    path = tmp_path / "baseline.txt"
+    path.write_text(
+        "=== KLAL 1 (Pages 14) ===\nאלף בית גימל\n\n"
+        "=== KLAL 2 (Pages 14,15) ===\nדלת הא וו\nזין חית\n\n",
+        encoding="utf-8",
+    )
+    result = acd.load_vlm_baseline(str(path))
+    assert result == {1: ["אלף", "בית", "גימל"], 2: ["דלת", "הא", "וו", "זין", "חית"]}
+
+
+def test_load_vlm_baseline_missing_file_returns_empty_not_an_error(tmp_path):
+    assert acd.load_vlm_baseline(str(tmp_path / "does-not-exist.txt")) == {}
+
+
+def test_build_vlm_alignment_maps_matching_word_indices():
+    klal_words = ["אלף", "בית", "גימל", "דלת"]
+    vlm_words = ["אלף", "בות", "גימל", "דלת"]  # word 1 misread by the VLM
+    alignment = acd.build_vlm_alignment(klal_words, vlm_words)
+    assert alignment.get(0) == "אלף"
+    assert alignment.get(2) == "גימל"
+    assert alignment.get(3) == "דלת"
+    assert 1 not in alignment, "a disagreeing word_index has no VLM alignment entry"
+
+
 def test_classify_requires_confidence_before_trusting_a_vision_selection():
     """FIXED 2026-08-13 (PROJECT-STATUS.md finding 8): 'replace' used to trust
     an A/B selection at ANY confidence while 'delete' gated at 0.7. Inert on
@@ -419,6 +452,46 @@ def test_a_clean_replace_decision_is_applied_and_recorded(apply_harness, decisio
     assert [e["applied_decision_id"] for e in events] == [decision["id"]]
 
 
+def test_manual_correction_with_no_original_word_inserts_new_text(apply_harness, decisions_path):
+    """ADDED 2026-08-21 (PROJECT-STATUS.md, klal 9/10 boundary fix): before
+    this, a reviewer's manual_correction could only replace or delete a word
+    that already existed at word_index - there was no way to insert brand-
+    new text the dashboard had never shown at all (e.g. appending a missing
+    tail to a klal). candidate_snapshot with original_word=None + non-empty
+    chosen_text is the new "insert" case, reusing apply_delete_insertion's
+    own logic - verified here at the END of the klal (append), the exact
+    shape the klal 9 fix needed."""
+    apply_harness([{"klal_id": 1, "clean_text": "אלף בית גימל"}], {})
+    decision = rd.append_decision(
+        "manual_correction", klal_id=1, word_index=3,
+        chosen_text="דלת הא", candidate_snapshot={"original_word": None},
+        path=decisions_path,
+    )
+    assert apply_harness.run()[1] == "אלף בית גימל דלת הא"
+    events = rd.history_for(1, 3, "apply_event", path=decisions_path)
+    assert [e["applied_decision_id"] for e in events] == [decision["id"]]
+
+
+def test_manual_insertion_shares_the_word_count_changed_guard_with_manual_deletion(
+        apply_harness, decisions_path):
+    """A manual insertion and a manual deletion in the SAME klal in the SAME
+    run must block each other, exactly like two machine insert/delete
+    decisions already do - both change word count, so applying both in one
+    pass would invalidate the second one's word_index against indices the
+    first one just shifted."""
+    apply_harness([{"klal_id": 1, "clean_text": "אלף בית גימל"}], {})
+    rd.append_decision("manual_correction", klal_id=1, word_index=3,
+                        chosen_text="דלת", candidate_snapshot={"original_word": None},
+                        path=decisions_path)
+    rd.append_decision("manual_correction", klal_id=1, word_index=0,
+                        chosen_text="", candidate_snapshot={"original_word": "אלף"},
+                        path=decisions_path)
+    result = apply_harness.run()[1]
+    # Exactly one of the two took effect this run - which one is an
+    # implementation detail of dict/sort ordering, not the point of the test.
+    assert result in ("אלף בית גימל דלת", "בית גימל")
+
+
 # --- review_decisions: the append-only human-decision audit trail ------------
 
 @pytest.fixture
@@ -706,6 +779,56 @@ def test_heuristic_regions_bbox_always_encloses_every_token_it_counted():
         b = region["bbox"]
         assert b["x1"] < b["x2"] and b["y1"] < b["y2"], f"klal {klal_id} has a degenerate bbox: {b}"
         assert region["token_count"] >= 1
+
+
+# --- trim_overlapping_start_regions() ---------------------------------------
+# Added 2026-08-21 (user bug report: klal 9's marker-anchored region
+# extended into klal 10's own territory because klal 10's marker was never
+# detected, so marker_anchored_regions() skipped past it straight to
+# klal 11's marker as the end boundary - see that function's own docstring).
+
+def _region(page, y1, y2, x1=0.1, x2=0.9):
+    return {"page": page, "bbox": {"x1": x1, "y1": y1, "x2": x2, "y2": y2}, "token_count": 1}
+
+
+def test_trim_overlapping_start_regions_trims_the_earlier_klals_y2():
+    regions = {9: _region(18, 0.4532, 0.6188), 10: _region(18, 0.4994, 0.6184)}
+    trimmed = bkpr.trim_overlapping_start_regions(regions)
+    assert trimmed[9]["bbox"]["y2"] < trimmed[10]["bbox"]["y1"], "must no longer overlap"
+    assert trimmed[9]["bbox"]["y2"] == pytest.approx(0.4994 - bkpr.OVERLAP_TRIM_GAP)
+    assert trimmed[10]["bbox"] == {"x1": 0.1, "y1": 0.4994, "x2": 0.9, "y2": 0.6184}, \
+        "the later klal's own region must be untouched"
+
+
+def test_trim_overlapping_start_regions_leaves_non_overlapping_pairs_alone():
+    regions = {1: _region(14, 0.10, 0.20), 2: _region(14, 0.30, 0.40)}
+    trimmed = bkpr.trim_overlapping_start_regions(regions)
+    assert trimmed[1]["bbox"]["y2"] == 0.20
+    assert trimmed[2]["bbox"]["y1"] == 0.30
+
+
+def test_trim_overlapping_start_regions_ignores_different_pages():
+    regions = {1: _region(14, 0.80, 0.95), 2: _region(15, 0.05, 0.20)}
+    trimmed = bkpr.trim_overlapping_start_regions(regions)
+    assert trimmed[1]["bbox"]["y2"] == 0.95, "different pages can't overlap - must not be touched"
+
+
+def test_trim_overlapping_start_regions_ignores_non_adjacent_klal_ids():
+    """A gap in klal_id (an untrusted/excluded klal, or a Part boundary) means
+    the two entries are not actually print-order neighbors - trimming them
+    against each other would be guessing, not fixing a real collision."""
+    regions = {1: _region(14, 0.10, 0.50), 3: _region(14, 0.30, 0.60)}
+    trimmed = bkpr.trim_overlapping_start_regions(regions)
+    assert trimmed[1]["bbox"]["y2"] == 0.50
+
+
+def test_trim_overlapping_start_regions_works_with_string_keys_too():
+    """main()'s in-memory regions dict uses int keys; the on-disk JSON file
+    (and anything that re-loads it) uses string keys. Must not assume
+    either."""
+    regions = {"9": _region(18, 0.4532, 0.6188), "10": _region(18, 0.4994, 0.6184)}
+    trimmed = bkpr.trim_overlapping_start_regions(regions)
+    assert trimmed["9"]["bbox"]["y2"] < trimmed["10"]["bbox"]["y1"]
 
 
 # --- check_klal_token_orphans: the Pass-3 false-positive allowlist ----------
@@ -1163,6 +1286,84 @@ def test_word_level_ai_flags_skips_closed_and_out_of_bounds(tmp_path, monkeypatc
     rd.append_decision("klal_flag", 1, word_index=99, needs_revisit=True, note="out of bounds", path=path)
     words = "אלף בית גימל".split()
     assert rs._word_level_ai_flags(1, words) == []
+
+
+# --- review_server: _word_pages_map must disambiguate a word_index matched
+# --- on more than one of a klal's pages, not let the last page win --------
+
+def test_word_pages_map_disambiguates_a_word_index_matched_on_two_pages():
+    """FIXED 2026-08-21 (code review, same day the word_pages field itself
+    was added): _corpus_word_bboxes() runs its SequenceMatcher against the
+    klal's FULL word list independently per page, so a word_index whose text
+    recurs can spuriously align on a page it doesn't actually belong to. A
+    first draft of _word_pages_map collected pages in print order and let
+    the LAST page's match win unconditionally - the identical collision
+    class already found and fixed in
+    verify_flagged_candidates_vision.locate_word() (round-3 audit,
+    2026-08-16: klal 30 w1263/w250 'גכי', klal 41 w256/w473 'כתכו', both
+    matched on two pages). Reproduced synthetically here by pre-seeding
+    _corpus_bbox_cache directly (bypassing real DocAI token loading):
+    word_index=1 is early in a 20-word klal and has a bbox on BOTH the
+    primary page (token_count 10) and the continuation (token_count 10) -
+    the fix must keep the primary page's assignment, not the
+    continuation's."""
+    klal_id = 999999
+    words = [f"w{i}" for i in range(20)]
+    region_entry = {
+        "page": 100,
+        "token_count": 10,
+        "continuations": [{"page": 101, "token_count": 10}],
+    }
+    bbox = {"x1": 0.0, "y1": 0.0, "x2": 0.1, "y2": 0.1}
+    rs._corpus_bbox_cache[(klal_id, 100)] = {1: bbox}
+    rs._corpus_bbox_cache[(klal_id, 101)] = {1: bbox}
+    try:
+        word_pages = rs._word_pages_map(klal_id, words, region_entry)
+        assert word_pages[1] == 100, \
+            "word_index=1 is early in the klal - must resolve to the PRIMARY page's match"
+    finally:
+        rs._corpus_bbox_cache.pop((klal_id, 100), None)
+        rs._corpus_bbox_cache.pop((klal_id, 101), None)
+
+
+# --- review_server: _resolve_klal_page must prefer klal_page_regions.json's
+# --- own page over the header-anchored alignment file's matched_page ------
+
+def test_resolve_klal_page_prefers_region_over_alignment():
+    """FIXED 2026-08-21 (data-integrity finding, see PROJECT-STATUS.md
+    "Parts 2-3's matched_page looks systematically wrong"): 391 of 445
+    Parts 2-3 klalim disagree between klal_page_regions.json's own page
+    (gematria-trace marker + Y-band against real DocAI tokens, directly
+    verified reliable) and the header-anchored alignment file's matched_page
+    (marked 'trusted': true for every one of them regardless) by up to 177
+    pages. _resolve_klal_page() must return the region's page whenever a
+    region exists, not the alignment file's, even when the alignment entry
+    claims to be trusted."""
+    alignment = {223: {"matched_page": 254, "trusted": True}}
+    regions = {"223": {"page": 77, "bbox": {}}}
+    page, trusted = rs._resolve_klal_page(alignment, regions, 223)
+    assert page == 77, "must prefer the region's own page, not alignment's matched_page"
+    assert trusted is True
+
+
+def test_resolve_klal_page_falls_back_to_alignment_when_no_region_exists():
+    """A klal with no region at all (region-building covers every klal in
+    the corpus today, but this is the documented fallback for if that ever
+    stops being true) should still get SOME page from a trusted alignment
+    entry, rather than silently returning nothing."""
+    alignment = {999: {"matched_page": 42, "trusted": True}}
+    regions = {}
+    page, trusted = rs._resolve_klal_page(alignment, regions, 999)
+    assert page == 42
+    assert trusted is True
+
+
+def test_resolve_klal_page_untrusted_and_no_region_returns_none():
+    alignment = {999: {"matched_page": 42, "trusted": False}}
+    regions = {}
+    page, trusted = rs._resolve_klal_page(alignment, regions, 999)
+    assert page is None
+    assert trusted is False
 
 
 def test_word_level_ai_flag_yields_to_a_manual_correction_on_the_same_word(monkeypatch):
@@ -1991,6 +2192,43 @@ def test_locate_word_band_fallback_refuses_a_footer_only_band():
     result = vfcv.locate_word_band_fallback(1, 900, regions, 1000, token_cache)
     assert result is None, "a footer-only band must be refused, not returned as a crop location"
     assert bcd.is_running_header([]) is False
+
+
+# --- build_corrections_dataset: estimate_insert_bbox() ----------------------
+# Added 2026-08-21 (PROJECT-STATUS.md open item 8, user-requested, "baked
+# into the tool, not a one-off"): an 'insert'-opcode candidate has NO
+# matching DocAI token (the diff span in DocAI's own reading is empty), so
+# there's nothing to union_bbox() directly - estimate a band from the
+# nearest matched tokens before/after the gap instead.
+
+def _bbox_tok(x1, y1, x2, y2):
+    # Named distinctly from the earlier _tok(text, x1, y1, x2=None, y2=None)
+    # helper (defined above, used by other tests in this file) - a same-name
+    # def here would shadow it module-wide, silently breaking every test
+    # that runs after this one and still expects the original signature.
+    return {"text": "w", "x1": x1, "y1": y1, "x2": x2, "y2": y2}
+
+
+def test_estimate_insert_bbox_unions_neighbors_on_both_sides():
+    tokens = [_bbox_tok(0.1, 0.2, 0.15, 0.22), _bbox_tok(0.3, 0.2, 0.35, 0.22)]
+    result = bcd.estimate_insert_bbox(tokens, 1)
+    assert result == {"x1": 0.1, "y1": 0.2, "x2": 0.35, "y2": 0.22}
+
+
+def test_estimate_insert_bbox_at_start_of_page_uses_only_the_after_token():
+    tokens = [_bbox_tok(0.3, 0.2, 0.35, 0.22)]
+    result = bcd.estimate_insert_bbox(tokens, 0)
+    assert result == {"x1": 0.3, "y1": 0.2, "x2": 0.35, "y2": 0.22}
+
+
+def test_estimate_insert_bbox_at_end_of_page_uses_only_the_before_token():
+    tokens = [_bbox_tok(0.1, 0.2, 0.15, 0.22)]
+    result = bcd.estimate_insert_bbox(tokens, 1)
+    assert result == {"x1": 0.1, "y1": 0.2, "x2": 0.15, "y2": 0.22}
+
+
+def test_estimate_insert_bbox_no_tokens_at_all_returns_none():
+    assert bcd.estimate_insert_bbox([], 0) is None
 
 
 # --- vision_adjudication_common + round-4 fixes -----------------------------

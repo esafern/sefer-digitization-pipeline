@@ -113,7 +113,7 @@ You are an expert Talmudic and Rabbinic textual verification engine analyzing a 
 Surrounding Talmudic/Rabbinic Sentence Context: "{full_context}"
 
 Evaluate the target raster crop against candidate strings:
-Option A (DocAI raw OCR reading): "{option_a}"
+Option A (DocAI raw OCR reading): {option_a_desc}
 Option B (current adjudicated text): {option_b_desc}
 
 CONSTRAINTS:
@@ -230,9 +230,25 @@ def adjudicate(client, crop_bytes, option_a, option_b, full_context):
         f'"{option_b}"' if option_b is not None
         else "(nothing - confirm no text belongs at this position; the corpus currently has none here)"
     )
+    # FIXED 2026-08-21 (PROJECT-STATUS.md open item 8, "baked into the tool,
+    # not a one-off"): the mirror-image case - an 'insert'-opcode candidate
+    # has option_a is None (DocAI's fresh OCR pass found no matching token
+    # at all; option_b is the corpus's current, possibly-unverified text).
+    # Before this fix these candidates never reached adjudicate() at all
+    # (main() skipped any candidate with bbox=None, which every insert
+    # candidate always had - see build_corrections_dataset.py's newly added
+    # estimate_insert_bbox()). Applying the identical fix option_b already
+    # got, for the identical reason: the literal string "None" is not a
+    # real second reading to ask the model to compare against pixels.
+    option_a_desc = (
+        f'"{option_a}"' if option_a is not None
+        else "(nothing - DocAI's fresh OCR pass found no matching text here; "
+             "confirm whether the corpus's Option B text is genuinely visible "
+             "in this crop, or is an unverified addition with no basis in the ink)"
+    )
 
     prompt = PROMPT_TEMPLATE.format(
-        full_context=full_context, option_a=option_a, option_b_desc=option_b_desc)
+        full_context=full_context, option_a_desc=option_a_desc, option_b_desc=option_b_desc)
 
     return vac.adjudicate_with_retry(
         client, crop_bytes, prompt,
@@ -261,10 +277,30 @@ def main():
     final_by_id = {k["klal_id"]: k for k in cio.load_demo_dataset(DEMO_DATASET)}
     doc = fitz.open(PDF_PATH)
 
+    # FIXED 2026-08-21 (found while re-running this script for the insert-
+    # bbox feature, PROJECT-STATUS.md open item 8): results used to be
+    # buffered in memory and written to out_path ONCE, after the whole loop
+    # completed - violating the standing incremental-disk-flushing rule
+    # (START_HERE.md Part 2 / .gemini/rules/incremental_disk_flushing.md),
+    # the same class of bug already fixed in the VLM baseline scripts
+    # 2026-08-20/21. A 429/503/network failure partway through this run (539
+    # real, paid vision-adjudication calls) would lose every prior decision
+    # in the batch with nothing on disk to show for it - the cache table
+    # would still have them (so no API cost is truly lost), but the actual
+    # output file this script exists to produce would not. Re-writes the
+    # whole (small, few-hundred-KB) results list after every candidate
+    # instead of appending text - out_path is a single JSON array, not a
+    # line-oriented log, so this is the equivalent "always current on disk"
+    # guarantee for this file shape.
+    def flush_results(results):
+        with open(out_path, "w", encoding="utf-8") as f:
+            json.dump(results, f, ensure_ascii=False, indent=2)
+
     results = []
     for c in candidates:
         if not c["bbox"]:
             results.append({**c, "vision_confidence": None, "vision_reasoning": "no bbox (insertion) - not vision-cropped", "vision_selected": None})
+            flush_results(results)
             continue
 
         k = final_by_id.get(c["klal_id"], {})
@@ -294,11 +330,11 @@ def main():
 
         try:
             crop_bytes = crop_pdf_bounding_box(doc, c["page"], c["bbox"])
-            print(f"Klal {c['klal_id']} page {c['page']}: {c['original_word']!r} vs {c['corrected_word']!r}")
+            print(f"Klal {c['klal_id']} page {c['page']}: {c['original_word']!r} vs {c['corrected_word']!r}", flush=True)
             decision_text = adjudicate(client, crop_bytes, c["original_word"], c["corrected_word"], context)
             decision = parse_decision_text(decision_text)
         except Exception as e:
-            print(f"  !! failed: {e}")
+            print(f"  !! failed: {e}", flush=True)
             decision = {"selected_option": "ERROR", "transcription_found": None, "confidence": None, "reasoning": str(e)}
 
         results.append({
@@ -308,10 +344,9 @@ def main():
             "vision_confidence": decision.get("confidence"),
             "vision_reasoning": decision.get("reasoning"),
         })
+        flush_results(results)
 
     doc.close()
-    with open(out_path, "w", encoding="utf-8") as f:
-        json.dump(results, f, ensure_ascii=False, indent=2)
     print(f"\nWrote {len(results)} results to {out_path}")
 
 

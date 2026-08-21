@@ -176,13 +176,72 @@ relying solely on same-model task-separation. Candidates evaluated so far
   unconfirmed** (`PROJECT-STATUS.md` open item) — its web portal appears to
   be a `.docx`/`.txt` Dropbox-proofreading tool, not a confirmed raw-PDF-in
   pipeline. Not yet usable as a real second witness until this is resolved.
-- **Kraken HTR** — blocked locally: `kraken>=5.3` requires `torch>=2.4.0`,
-  and macOS x86_64 (Intel) Python 3.12 wheels stop at PyTorch 2.2.2. Needs
-  Docker or source compilation to evaluate at all.
+- **Kraken HTR** — the "blocked locally" status above was checked again
+  2026-08-21 and **found stale**: it described an Intel/x86_64 wheel
+  ceiling, but this machine is arm64 (Apple Silicon), where `kraken 3.0.13`
+  and `torch 2.13.0` install and run without issue. Actually run
+  (`tools/test_kraken_local.py`, plus a real pretrained Hebrew model,
+  `Ashkenazi_01.mlmodel`, downloaded and run against
+  `images/pdf_pages/page_18.png`) — real, readable Hebrew output with
+  letter-level errors (`'יר מלאכי כללו האלף'` vs. the correct `'יד מלאכי
+  כללי האלף'`), expected since that specific model is trained on medieval
+  *handwriting*, not this printing's square type. Kraken itself is not the
+  blocker; a print-typeface-matched model is what's missing.
 - **HebrewBooks "fastocr"** — tested and rejected (44.0% lexicon hit vs. this
   corpus's 97.8%, systematic letter-confusion signature).
+- **EasyOCR, PaddleOCR** — ruled out 2026-08-21, checked directly rather than
+  assumed: EasyOCR's own `config.all_lang_list` does not contain `'he'`
+  (confirmed by import and inspection, not documentation-reading); PaddleOCR
+  confirmed via its own published language list to lack Hebrew entirely.
+  Neither is a real candidate for this project.
+- **Surya OCR** (`datalab-to/surya`, a separate company, not Google/Anthropic)
+  — **the strongest finding to date, installed and run locally, real
+  results, not a documentation claim.** Full-page OCR on
+  `images/pdf_pages/page_18.png` produced an exact match on the running
+  header (`'יד מלאכי כללי האלף'`) and near-exact klal 9 body text (minor
+  noise only: `שכרתבו`/`שכתבו`, `ד"ה`/`דייה`). Most notably, **it correctly
+  segmented klal 10's marker "י" as its own bold span** — the exact marker
+  DocAI's own extraction failed to tokenize at all, independently
+  root-caused the same day as the cause of a corpus-wide region-overlap bug
+  affecting 316 klalim (`PROJECT-STATUS.md`, 2026-08-21). One page is not a
+  benchmark — a proper multi-page Surya-vs-DocAI comparison (reusing
+  `evaluate_ocr_alignment.py`'s existing method) is the concrete next step,
+  not yet done — but this is the first candidate in this list with real,
+  positive, tested evidence rather than an unconfirmed API or a blocked
+  environment.
+- **Claude vision** (the acting coding session's own image-reading
+  capability, via the `Read` tool — not a new API integration) — already
+  used successfully, live, on real data the same night this section was
+  updated: directly rendering and reading `docai_word_boxes/page_19.json`'s
+  disputed marker token and the surrounding scan crop correctly identified
+  that DocAI had misread ט as פ (klal 16's marker, "טז" read as "פז") —
+  a genuine letter-confusion Gemini-based tooling had not caught. Zero
+  integration cost as an interactive, session-driven check; NOT
+  batch-callable by a standalone script the way `VlmWitnessEngine`/
+  `TesseractWitnessEngine` are, unless routed through the Anthropic API
+  directly (no `ANTHROPIC_API_KEY` currently provisioned in this
+  environment) rather than the coding session's own vision. Worth noting
+  as the lowest-friction genuinely-independent signal available *right
+  now*, distinct in kind from the batch-engine candidates above it.
+- **Azure AI Document Intelligence** — confirmed via Microsoft's own
+  documentation to support Hebrew in its Read model. The only candidate
+  evaluated so far that would address circularity at the **primary OCR**
+  level (DocAI itself), not just the witness/adjudicator level — a
+  genuinely different company (Microsoft) from both Google and Anthropic.
+  Not tested: would need a new Azure account/API key, not currently
+  present in this environment. Feasible on paper, unverified in practice.
+- **AWS Textract**, **OpenAI GPT-4V/GPT-4o** — not researched in depth as of
+  2026-08-21; flagged as open, not ruled out.
 
-Until one of these (or another candidate) is actually running, treat
-Parts 2-3 vision-adjudicated output as carrying same-model correlated-error
-risk, not full two-engine independence — do not describe it as "$\ge 0.90$
-confidence, image-grounded, independently verified" without this caveat.
+Until one of these (or another candidate) is actually WIRED IN as a running
+pipeline component — not just installed and spot-tested — treat Parts 2-3
+vision-adjudicated output as carrying same-model correlated-error risk, not
+full two-engine independence — do not describe it as "$\ge 0.90$ confidence,
+image-grounded, independently verified" without this caveat. **Recommended
+next step, ranked by (feasibility right now) × (real independence gained)**:
+(1) a proper multi-page Surya benchmark, given it already outperformed DocAI
+on the one real comparison run; (2) Claude vision via the Anthropic API as a
+batch-callable witness or adjudicator cross-check, given it already caught a
+real DocAI error the standing pipeline missed; (3) Azure AI Document
+Intelligence as an alternative primary-OCR source, the only option here that
+would fix circularity at that specific level.

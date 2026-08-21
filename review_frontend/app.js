@@ -550,9 +550,28 @@ function renderKlalBody(block, k) {
       span.className = 'plain-word';
       span.textContent = w;
       span.onclick = () => {
-        const targetPage = k.page;
+        // FIXED 2026-08-21 (user bug report: klal 2 word 439 didn't jump to
+        // page 15). First fix attempt used contBoundaries (built above from
+        // continuationBoundaries(), a client-side estimate based on a
+        // continuation's token_count) to pick the page - but that's an
+        // approximation the code itself already documented as inexact, and
+        // a second bug report (word 185 wrongly staying on page 15,
+        // highlighting the wrong word) confirmed it: the estimate put the
+        // page-14/15 split at word 151, but the real split is elsewhere, so
+        // words in the gap navigated to the wrong page. k.word_pages is the
+        // real, DocAI-alignment-based word_index -> page map the server now
+        // sends (same alignment ai_flag/witness words already trust via
+        // their own corr.page) - use it, falling back to k.page only for a
+        // word with no alignment match (an OCR gap DocAI never aligned).
+        const targetPage = k.word_pages && k.word_pages[i] != null ? k.word_pages[i] : k.page;
         const corrObj = { klal_id: k.klal_id, word_index: i, opcode: 'plain' };
-        showPage(targetPage, k.klal_id, corrObj);
+        // FIXED 2026-08-21 (code review): every sibling click handler
+        // (ai_flag, witness, attachWordHandlers) guards its showPage() call
+        // with `if (!manualPageLock)` so a reviewer's manual scan-pane
+        // navigation isn't silently overridden by the next word click; this
+        // handler was calling showPage() unconditionally, the one
+        // inconsistent case.
+        if (!manualPageLock) showPage(targetPage, k.klal_id, corrObj);
         openManualCorrectionPanel(k.klal_id, i, w, null);
       };
       body.appendChild(span);
@@ -668,8 +687,43 @@ function dismissPanels() {
   closePanels();
   clearScanFocus();
 }
+// ADDED 2026-08-21 (user-requested): a save used to just flash a small
+// "Saved ✓" label and leave the panel open indefinitely - the reviewer had
+// to manually dismiss it (X button/Escape/backdrop) before moving to the
+// next word. Now: show the confirmation clearly (see .save-status.show's
+// CSS for the visual treatment), hold it for DECISION_SAVED_CLOSE_DELAY_MS
+// so the reviewer actually sees it land, then auto-close - same effect as
+// clicking the panel's own X button (dismissPanels, not just closePanels,
+// for the same reason those are already wired to the same handler: an
+// auto-close should behave identically to a manual one, including
+// clearing scan focus). Shared by every save function that already used
+// the .save-status pattern (candidate/klal-flag/punctuation/witness) -
+// the manual-correction panel deliberately keeps its own different
+// confirmation (re-rendering the panel with the fresh post-save state IS
+// its confirmation - see openManualCorrectionPanel's own comment on why).
+const DECISION_SAVED_CLOSE_DELAY_MS = 2000;
+// Incremented on every openPanel() call - same generation-counter pattern
+// showPage()'s own _showPageGen already uses for the identical class of
+// problem. Without this, a reviewer who saves, then opens a DIFFERENT
+// word's panel within DECISION_SAVED_CLOSE_DELAY_MS, would have that new
+// panel yanked shut by the FIRST save's now-stale delayed close - a real
+// race the auto-close behavior introduces that didn't exist when a save
+// never closed anything on its own.
+let _panelGen = 0;
+
+function flashSavedThenClose(statusElementId) {
+  const status = document.getElementById(statusElementId);
+  if (status) status.classList.add('show');
+  const gen = _panelGen;
+  setTimeout(() => {
+    if (status) status.classList.remove('show');
+    if (gen === _panelGen) dismissPanels();
+  }, DECISION_SAVED_CLOSE_DELAY_MS);
+}
+
 function openPanel(panel) {
   closePanels();
+  _panelGen++;
   backdrop.classList.add('open');
   panel.classList.add('open');
 }
@@ -712,6 +766,17 @@ async function openCandidatePanel(klalId, corr) {
   if (corr.final_text) options.push({ source: 'final_text', label: 'Current stored text', text: corr.final_text });
   if (corr.vision_transcription && corr.vision_transcription !== corr.docai_reading && corr.vision_transcription !== corr.final_text) {
     options.push({ source: 'vision_transcription', label: 'Vision-model reading', text: corr.vision_transcription });
+  }
+  // ADDED 2026-08-21 (PROJECT-STATUS.md, "surface the VLM baseline into the
+  // dashboard for review"): vlm_reading is a genuinely independent third
+  // signal - a blind, whole-klal transcription (tools/run_part1_vlm_full_
+  // baseline.py), not the same-crop A/B adjudication vision_transcription
+  // above comes from. Same "only show if it says something new" gate as
+  // vision_transcription - reusing the existing options list rather than a
+  // new panel row, per the user's own "just enrich" direction.
+  if (corr.vlm_reading && corr.vlm_reading !== corr.docai_reading && corr.vlm_reading !== corr.final_text
+      && corr.vlm_reading !== corr.vision_transcription) {
+    options.push({ source: 'vlm_reading', label: 'VLM baseline reading (independent)', text: corr.vlm_reading });
   }
   const suggestedWord = extractSuggestedWord(corr.reasoning || (corr.current_decision && corr.current_decision.note));
   if (suggestedWord && !options.some(o => o.text === suggestedWord)) {
@@ -893,9 +958,7 @@ async function saveCandidateDecision(klalId, corr) {
   // delta onto a value it doesn't know is already stale.
   await refreshKlalimList();
 
-  const status = document.getElementById('save-status');
-  status.classList.add('show');
-  setTimeout(() => status.classList.remove('show'), 2000);
+  flashSavedThenClose('save-status');
 }
 
 async function toggleHistory(klalId, wordIndex) {
@@ -985,9 +1048,7 @@ async function openKlalFlagPanel(klalId) {
     const btn = block && block.querySelector('.klal-flag-btn');
     const stillFlagged = klalById[klalId] ? klalById[klalId].needs_revisit : needsRevisit;
     if (btn) { btn.classList.toggle('active', stillFlagged); btn.textContent = stillFlagged ? '⚑ flagged' : '⚑ flag'; }
-    const status = document.getElementById('klal-flag-save-status');
-    status.classList.add('show');
-    setTimeout(() => status.classList.remove('show'), 2000);
+    flashSavedThenClose('klal-flag-save-status');
   };
 
   document.getElementById('klal-flag-history-toggle').onclick = async () => {
@@ -1278,9 +1339,7 @@ async function openPunctuationPanel(klalId, p) {
     // replaces the in-place +1/-1 patch.
     await refreshKlalimList();
 
-    const status = document.getElementById('punct-save-status');
-    status.classList.add('show');
-    setTimeout(() => status.classList.remove('show'), 2000);
+    flashSavedThenClose('punct-save-status');
   };
 }
 
@@ -1442,9 +1501,7 @@ async function saveWitnessDecision(w) {
   // in this file - replaced with the same refreshKlalimList() call.
   await refreshKlalimList();
 
-  const status = document.getElementById('witness-save-status');
-  status.classList.add('show');
-  setTimeout(() => status.classList.remove('show'), 2000);
+  flashSavedThenClose('witness-save-status');
 }
 
 // ---------- scan pane ----------

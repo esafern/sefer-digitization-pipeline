@@ -167,6 +167,19 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
   flex-direction: column;
   background: var(--paper);
   min-width: 0;
+  /* FIXED 2026-08-21 (user bug report: switching directly from one
+     highlighted word to another took two clicks, not one). #overlay-
+     backdrop is `position:fixed; inset:0; z-index:900` and opens the
+     instant any candidate/witness/manual panel is open - since #text-pane
+     had no z-index of its own (defaulted to the static stacking level,
+     below the backdrop), a click on a word while a DIFFERENT word's panel
+     was still open hit the backdrop first (dismissing it) instead of the
+     word underneath - only the SECOND click, now that the backdrop was
+     gone, actually reached the word and opened/highlighted it. #scan-pane
+     already carries this exact fix (`z-index: 910`, just below); text-pane
+     never got the same treatment when panels were added. */
+  position: relative;
+  z-index: 910;
 }
 #text-scroll {
   flex: 1;
@@ -539,5 +552,25 @@ textarea.custom-text, input.custom-text {
 .checkbox-row { display: flex; align-items: center; gap: 8px; margin-bottom: var(--sp-4); font-size: 13.5px; }
 .checkbox-row input { width: 16px; height: 16px; }
 
-.save-status { font-size: 12px; color: #38a169; margin-inline-start: var(--sp-3); display: none; }
-.save-status.show { display: inline; }
+/* ENHANCED 2026-08-21 (user-requested): was 12px inline text easy to miss
+   right before the panel closed - now a clear, full-width green banner the
+   reviewer can't mistake for anything but "this decision was recorded",
+   held on screen for DECISION_SAVED_CLOSE_DELAY_MS (app.js) before the
+   panel auto-closes. display:block (not inline) so it reads as its own
+   confirmation, not an appendage to the Save button's line. */
+.save-status {
+  display: block;
+  margin-top: var(--sp-3);
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--radius-sm);
+  background: #38a169;
+  color: white;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-4px);
+  transition: opacity .15s ease, transform .15s ease;
+}
+.save-status.show { opacity: 1; visibility: visible; transform: translateY(0); }

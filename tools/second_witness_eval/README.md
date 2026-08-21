@@ -1,6 +1,11 @@
 # Second-Witness OCR & HTR Evaluation — Berlin pages 18–20
 
-Testing candidate second-witness engines (**Dicta OCR**, **Kraken HTR**, **Gemini 3.6 Flash VLM**) to determine the best replacement witness for this pipeline.
+Testing candidate second-witness engines to determine the best replacement
+witness for this pipeline (currently Tesseract, measured near-worthless —
+see TL;DR below). Original scope (**Dicta OCR**, **Kraken HTR**, **Gemini
+3.6 Flash VLM**); expanded 2026-08-21 with a broader engine/model sweep —
+see "2026-08-21: broader candidate sweep" below for what was actually
+installed and run, not just researched.
 
 ## TL;DR
 
@@ -85,6 +90,77 @@ p19, 17–22 on p20).
 | 20 | 41 | 2 | 2 | 0 |
 | 21 | 70 | 0 | 0 | 0 |
 | 22 | 68 | 2 | 1 | 0 |
+
+## 2026-08-21: broader candidate sweep
+
+Beyond Dicta/Kraken/VLM, actually installed and tested (not just
+researched) a wider set of engines and models, prompted by this project's
+own standing rule that a claim needs real evidence, not an assertion. Full
+detail and reasoning in `PROJECT-STATUS.md`'s 2026-08-21 entries and
+`PROPOSED_PIPELINE_ARCHITECTURE.md` section 5; summarized here:
+
+**Kraken's "blocked" status was stale, not current.** The prior finding
+(`kraken>=5.3` needs `torch>=2.4.0`, blocked on macOS x86_64) describes an
+Intel Mac; this machine is arm64 (Apple Silicon), where `kraken 3.0.13` +
+`torch 2.13.0` install and run without issue. Ran `tools/test_kraken_
+local.py` successfully, then went further: downloaded a real pretrained
+Hebrew model (`Ashkenazi_01.mlmodel`, medieval manuscripts,
+Zenodo DOI 10.5281/zenodo.5468478 — kraken's own `get` command is broken
+against Zenodo's current API, fetched the file directly instead) and ran
+real recognition against `images/pdf_pages/page_18.png`. Output:
+`'יר מלאכי כללו האלף'` (should be `'יד מלאכי כללי האלף'`) — recognizable
+Hebrew with letter-level errors, expected since that model is trained on
+handwriting, not this printing's square type. **Kraken itself is not the
+blocker; a print-typeface-matched model is what's missing**, and none was
+found this session.
+
+**EasyOCR and PaddleOCR ruled out — no Hebrew support at all**, confirmed
+by direct inspection (`easyocr.config.all_lang_list` doesn't contain `'he'`;
+Paddle's own published language list lacks Hebrew entirely), not assumed
+from documentation.
+
+**Surya OCR (`datalab-to/surya`) — the strongest new finding.** A separate
+company from Google/Anthropic, installed and runs 100% locally at zero
+marginal cost. Full-page OCR on `page_18.png`:
+- Running header `'יד מלאכי כללי האלף'` — **exact match** to ground truth
+  (Kraken got this wrong).
+- Klal 9 body text near-exact vs. this session's own independently-verified
+  ground truth (minor noise only: `שכרתבו`/`שכתבו`, `ד"ה`/`דייה`).
+- **Correctly recognized klal 10's marker "י" as its own bold span** — the
+  exact marker DocAI's own extraction failed to tokenize at all, separately
+  root-caused the same session as the cause of a corpus-wide region-overlap
+  bug (`PROJECT-STATUS.md`, 316 klalim affected). Surya succeeded exactly
+  where DocAI failed, on the same page, same marker.
+
+One page is a spot-check, not a benchmark — **the concrete next step is a
+proper multi-page Surya-vs-DocAI comparison**, reusing
+`evaluate_ocr_alignment.py`'s existing method, before deciding how to wire
+Surya in as a permanent `AbstractWitnessEngine` implementation.
+
+**Claude vision — already used successfully, live, no new integration.**
+The acting coding session's own image-reading capability (via its `Read`
+tool, not a new API) directly rendered and read a disputed scan crop and
+correctly identified a real DocAI letter-misread (klal 16's marker: ט read
+as פ) that Gemini-based tooling had missed entirely. Zero setup cost as an
+interactive check; not batch-callable by a standalone script unless
+routed through the Anthropic API (`ANTHROPIC_API_KEY` — not currently
+provisioned in this environment).
+
+**Azure AI Document Intelligence** confirmed (via Microsoft's own docs) to
+support Hebrew — the only candidate found so far that could address
+circularity at the **primary OCR** level (replacing/complementing DocAI
+itself), not just the witness/adjudicator level. Not tested — would need a
+new account. **AWS Textract** and **GPT-4V** were not researched in depth
+this round — open, not ruled out.
+
+**Recommendation, ranked by (feasibility right now) × (real independence
+gained)**: (1) a real multi-page Surya benchmark — already outperformed
+DocAI on the one comparison run, zero cost to pursue further; (2) Claude
+vision via the Anthropic API as a batch-callable witness/adjudicator
+cross-check — already caught a real error the standing pipeline missed,
+needs one new API key; (3) Azure AI Document Intelligence as an
+alternative primary-OCR source — the only option that fixes circularity at
+that level, needs a new account, unverified in practice.
 
 ## Status / next step
 

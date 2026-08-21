@@ -42,6 +42,8 @@
 #                       CLAUDE.md/PROJECT-STATUS.md on this project's
 #                       standing word-index-scheme risk).
 #   chosen_source       "docai_reading"|"final_text"|"vision_transcription"
+#                       |"vlm_reading" (added 2026-08-21 - VLM baseline
+#                       enrichment, see assemble_corrections_dataset.py)
 #                       |"custom"|null for candidate_choice; "accept"|
 #                       "reject" for punctuation_choice; always "custom" for
 #                       manual_correction (it's always free-typed)

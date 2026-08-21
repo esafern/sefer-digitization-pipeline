@@ -317,7 +317,30 @@ def main():
         original_word = decision.get("candidate_snapshot", {}).get("original_word")
         chosen_text = decision["chosen_text"]
 
-        if chosen_text == "":
+        if original_word is None and chosen_text:
+            # 'manual_correction' with no existing word at word_index and
+            # non-empty chosen_text: insert NEW text (a reviewer-initiated
+            # append/insert, not a replace of something already there).
+            # ADDED 2026-08-21 (PROJECT-STATUS.md, klal 9/10 boundary fix):
+            # the dashboard's manual-correction tool only ever REPLACES or
+            # DELETES a word that already exists at word_index - there was
+            # no way for a reviewer to insert brand-new text at all (only
+            # the machine pipeline's 'delete'-opcode candidates could, via
+            # apply_delete_insertion below, which needs a matching
+            # corrections_part1.json candidate this decision type doesn't
+            # have). Reuses apply_delete_insertion's own logic directly -
+            # it's already a pure "insert chosen_text's words at word_index"
+            # operation with no candidate-shape-specific checks in its body,
+            # so this is not a parallel copy (CLAUDE.md Lesson 13), just a
+            # second caller. Word-count-changing, same as a manual deletion.
+            if klal_id in word_count_changed_klalim:
+                print(f"  SKIP klal {klal_id} word {word_index}: another word-count-changing "
+                      f"decision already applied for this klal this run - run ./rebuild_all.sh, "
+                      f"then this script again, to pick up the next one.")
+                continue
+            new_text = apply_delete_insertion(klal["clean_text"], word_index, chosen_text)
+            kind = "manual-insert"
+        elif chosen_text == "":
             if klal_id in word_count_changed_klalim:
                 print(f"  SKIP klal {klal_id} word {word_index}: another word-count-changing "
                       f"decision already applied for this klal this run - run ./rebuild_all.sh, "
@@ -333,7 +356,7 @@ def main():
             skipped_drift.append((klal_id, word_index))
             continue
         klal["clean_text"] = new_text
-        if chosen_text == "":
+        if kind in ("manual-delete", "manual-insert"):
             word_count_changed_klalim.add(klal_id)
         n_manual += 1
         applied.append((klal_id, word_index, kind))

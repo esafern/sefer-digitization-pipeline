@@ -58,17 +58,21 @@ center_y = cio.center_y
 clean_word = cio.clean_word
 
 
-def load_trusted_klal_pages():
+def load_trusted_klal_pages(alignment_path=ALIGNMENT_PATH, max_klal=PART1_MAX_KLAL):
     """This module only needs the page grouping; build_corrections_dataset.py
     needs the untrusted list too, and had the identical loop. One
     implementation (corpus_io.trusted_klal_pages) returns both; this caller
     discards the second value explicitly instead of a second copy of the loop
-    quietly not collecting it."""
-    klal_pages, _untrusted = cio.trusted_klal_pages(ALIGNMENT_PATH, PART1_MAX_KLAL)
+    quietly not collecting it.
+
+    alignment_path/max_klal default to Part 1's own files so every existing
+    call site (and test) keeps behaving identically; main() below passes
+    Part 2/3's own alignment file to build their regions the same way."""
+    klal_pages, _untrusted = cio.trusted_klal_pages(alignment_path, max_klal)
     return klal_pages
 
 
-def load_markers():
+def load_markers(trace_path=TRACE_PATH):
     """klal_id -> (page, marker_position) for every klal with a confirmed
     real marker position.
 
@@ -89,7 +93,7 @@ def load_markers():
     bug reported. Matching load_end_boundary_positions()'s filter here
     fixes klal 167 and, consistently, klal 1/18/86/172 (the same five
     entries load_end_boundary_positions() already trusted)."""
-    trace = cio.load_gematria_trace(TRACE_PATH)
+    trace = cio.load_gematria_trace(trace_path)
     return {
         e["klal_id"]: (e["page"], e["marker_position"])
         for e in trace
@@ -98,7 +102,7 @@ def load_markers():
     }
 
 
-def load_end_boundary_positions():
+def load_end_boundary_positions(trace_path=TRACE_PATH):
     """klal_id -> (page, marker_position) for EVERY klal with any usable
     marker position, independent of load_markers()'s stricter 'ok'-only
     filter and of load_trusted_klal_pages()'s unrelated 'trusted' concept -
@@ -121,7 +125,7 @@ def load_end_boundary_positions():
     IMMEDIATE next klal (47) has NO usable position of any kind, the old
     code stopped there instead of continuing the search to klal 48, which
     does have one on the same page."""
-    trace = cio.load_gematria_trace(TRACE_PATH)
+    trace = cio.load_gematria_trace(trace_path)
     return {
         e["klal_id"]: (e["page"], e["marker_position"])
         for e in trace
@@ -222,6 +226,24 @@ def marker_anchored_regions(klal_pages, markers, end_boundary_positions, docai_b
     return regions
 
 
+def is_placeholder_klal(k):
+    """True if k's clean_text is an auto-generated placeholder ("{gematria}
+    כלל {klal_id}"), not a real transcription - 115 of 667 klalim corpus-wide
+    (0 in Part 1, all in Parts 2-3), confirmed 2026-08-21. heuristic_regions()
+    below must never diff this synthetic text against real DocAI tokens - a
+    3-word generic string routinely produces a SPURIOUS content-diff match
+    somewhere on the page (confirmed: 43 of 114 placeholder klalim that had a
+    region before this fix got it exactly this way), the same class of fake
+    "Precise Geometric Bounds" defect that got SEFARIA-VLM-DEMO.html archived
+    (see this file's own module docstring / CLAUDE.md). marker_anchored_
+    regions() is unaffected and should still run for these klalim - a real
+    printed marker's position is meaningful independent of whether the body
+    text has been transcribed yet (71 of 667 placeholder klalim currently get
+    a real, unaffected marker-anchored region this way)."""
+    parts = (k.get("clean_text") or "").strip().split(" ")
+    return len(parts) == 3 and parts[1] == "כלל" and parts[2] == str(k["klal_id"])
+
+
 def heuristic_regions(klal_pages, docai_by_page, final_by_id, already_done):
     regions = {}
     for page_id, klal_ids in sorted(klal_pages.items()):
@@ -240,7 +262,7 @@ def heuristic_regions(klal_pages, docai_by_page, final_by_id, already_done):
         page_word_origin = []
         for klal_id in klal_ids:
             k = final_by_id.get(klal_id)
-            if not k:
+            if not k or is_placeholder_klal(k):
                 continue
             for idx, w in enumerate(k["clean_text"].split()):
                 cw = clean_word(w)
@@ -272,11 +294,122 @@ def heuristic_regions(klal_pages, docai_by_page, final_by_id, already_done):
     return regions
 
 
+# Minimum vertical gap (page-height fraction) enforced between two adjacent
+# klalim's start regions by trim_overlapping_start_regions() below - small
+# enough to be invisible at normal zoom, large enough that rounding can't
+# put the two boxes back in contact.
+OVERLAP_TRIM_GAP = 0.002
+
+
+def trim_overlapping_start_regions(regions):
+    """No klal's own start region should visually swallow the NEXT klal_id's
+    start region on the same page - trim the earlier one's bbox y2 down to
+    just above the later one's y1 wherever they overlap.
+
+    FIXED 2026-08-21 (user bug report, klal 9/10: "the box for 9 includes
+    10, the box for 10 includes 9... clicking words in 10 looks like
+    klal 9"). Root cause: marker_anchored_regions() bands a klal's region
+    by Y-COORDINATE ONLY, ending at the NEXT klal_id with a usable marker
+    position (see that function's own docstring) - when the immediately
+    next klal_id has NO detected marker at all (gematria_trace_part1.json
+    status 'marker_not_found_in_window' - confirmed for klal 10: no
+    standalone marker token exists anywhere in docai_word_boxes/page_18.
+    json, likely merged into the adjacent bold opening word during OCR),
+    the search skips straight past it to whatever klal DOES have the next
+    marker - here klal 11 - so klal 9's box extends across the whole of
+    klal 10's real territory too. klal 10 separately gets its own, USUALLY
+    correctly-positioned region from the coarser heuristic (content-diff)
+    fallback, which doesn't depend on markers at all - but nothing before
+    this fix related the two, so the oversized marker-anchored box and the
+    correctly-positioned heuristic box just overlapped, uncorrected.
+
+    This is a general, corpus-wide post-processing pass (not a special
+    case for klal 9/10 specifically) - the same collision can happen for
+    any klal whose immediate successor's marker went undetected, and this
+    fixes the visual symptom regardless of WHICH of the two regions is the
+    "wrong" one, without needing to know that (an X-aware same-line split
+    inside marker_anchored_regions() itself, or fixing marker detection at
+    the source, would be a more precise fix for the specific klal 9/10
+    root cause, but wouldn't generalize to a klal pair that overlaps for a
+    different underlying reason - this trim pass covers the visual symptom
+    for all of them uniformly). Only trims the KLAL'S OWN start bbox, never
+    a continuation - the reported symptom and every case this was checked
+    against is a same-page start-region collision, not a continuation
+    page's."""
+    # Keyed by whatever int(k) resolves to - main()'s in-memory regions dict
+    # uses int klal_ids throughout (only json.dump() at the very end turns
+    # them into the on-disk file's string keys), but this function doesn't
+    # assume which: it looks the ORIGINAL key back up via a value map rather
+    # than re-deriving str(kid)/int(kid), so it works unchanged either way.
+    key_by_id = {int(k): k for k in regions}
+    all_ids = sorted(key_by_id)
+    for kid, nxt in zip(all_ids, all_ids[1:]):
+        if nxt != kid + 1:
+            continue  # not an actual print-order-adjacent pair (e.g. a part boundary)
+        r1, r2 = regions[key_by_id[kid]], regions[key_by_id[nxt]]
+        if r1["page"] != r2["page"]:
+            continue
+        b1, b2 = r1["bbox"], r2["bbox"]
+        # Only a GENUINE overlap (y2 > y1) triggers a trim - a pair that's
+        # merely close but not actually overlapping is real, intentional
+        # page layout (klalim routinely sit a fraction of a line apart) and
+        # must be left alone. FIXED 2026-08-21 (found immediately after
+        # writing this function, before it ever ran on real data): the
+        # first version subtracted OVERLAP_TRIM_GAP on the CHECK side too
+        # (`b1["y2"] > b2["y1"] - OVERLAP_TRIM_GAP`), which also matched 75
+        # corpus-wide pairs that were merely within the gap tolerance of
+        # each other, not actually overlapping - trimming those would have
+        # been a cosmetic, unrequested change with no real bug behind it.
+        # The gap only applies to WHERE a genuine overlap gets trimmed to,
+        # not to whether one is judged to exist.
+        if b1["y2"] > b2["y1"]:
+            new_y2 = max(b1["y1"] + OVERLAP_TRIM_GAP, b2["y1"] - OVERLAP_TRIM_GAP)
+            b1["y2"] = new_y2
+    return regions
+
+
+# Part 2/3's own alignment/trace files, generalizing this module beyond Part
+# 1 (2026-08-21 - see PROJECT-STATUS.md "word-click scan navigation in Parts
+# 2-3 lands on the wrong page for any multi-page klal"). Each part's
+# klal_id range is disjoint (1-222 / 223-444 / 445-667, confirmed against the
+# live alignment files), so max_klal only needs to exceed each part's own
+# max - a large constant, not a second hardcoded boundary to keep in sync.
+PART2_ALIGNMENT_PATH = os.path.join(REPO, "part2_header_anchored_alignment.json")
+PART2_TRACE_PATH = os.path.join(REPO, "gematria_trace_part2.json")
+PART3_ALIGNMENT_PATH = os.path.join(REPO, "part3_header_anchored_alignment.json")
+PART3_TRACE_PATH = os.path.join(REPO, "gematria_trace_part3.json")
+_NO_UPPER_BOUND = 10 ** 9
+PARTS = [
+    (ALIGNMENT_PATH, TRACE_PATH, PART1_MAX_KLAL),
+    (PART2_ALIGNMENT_PATH, PART2_TRACE_PATH, _NO_UPPER_BOUND),
+    (PART3_ALIGNMENT_PATH, PART3_TRACE_PATH, _NO_UPPER_BOUND),
+]
+
+
 def main():
-    klal_pages = load_trusted_klal_pages()
-    markers = load_markers()
-    end_boundary_positions = load_end_boundary_positions()
     final_by_id = {k["klal_id"]: k for k in cio.load_demo_dataset(DEMO_DATASET)}
+
+    # Each part's (klal_pages, markers, end_boundary_positions) loaded and
+    # kept SEPARATE per part, deliberately never merged before being handed
+    # to marker_anchored_regions()/heuristic_regions() below. Those two
+    # functions treat "the next klal_id with a usable marker" as a real end
+    # boundary (see marker_anchored_regions()'s own docstring on why -
+    # klal 46/47/48's same-page boundary bug, fixed 2026-08-13) - merging
+    # Part 1's end_boundary_positions with Part 2's would let klal 222 (Part
+    # 1's last klal) pick up klal 223 (Part 2's FIRST klal, an unrelated
+    # section) as its own end boundary if they land on the same or an
+    # adjacent page, silently pulling Part 2 content into Part 1's region.
+    # Keeping each part's inputs scoped to that part's own alignment/trace
+    # file makes that impossible - identical to how Part 1 was always
+    # computed, so Part 1's own output is unaffected by this generalization.
+    parts_loaded = []
+    anchor_pages = set()
+    for alignment_path, trace_path, max_klal in PARTS:
+        klal_pages = load_trusted_klal_pages(alignment_path, max_klal)
+        markers = load_markers(trace_path)
+        end_boundary_positions = load_end_boundary_positions(trace_path)
+        parts_loaded.append((klal_pages, markers, end_boundary_positions))
+        anchor_pages |= set(klal_pages) | {p for p, _ in markers.values()}
 
     # Every page in the covered range, not just pages that have a klal marker
     # on them. A page that is ENTIRELY one klal's continuation (no marker of its
@@ -286,9 +419,8 @@ def main():
     # with the whole of page 37 inside it: the continuation silently listed only
     # page 38. The same hole applies to pages 24 and 40 (klal 30 and klal 88's
     # middle pages) - i.e. precisely the pages needed to verify the outstanding
-    # cross-page reconstruction work. Loading the full range is cheap (~82 small
-    # JSON files) and removes the whole class.
-    anchor_pages = set(klal_pages) | {p for p, _ in markers.values()}
+    # cross-page reconstruction work. Loading the full range is cheap (~325
+    # small JSON files, no LLM/API calls) and removes the whole class.
     pages_needed = set(range(min(anchor_pages), max(anchor_pages) + 1)) if anchor_pages else set()
     docai_by_page = {}
     for page_id in pages_needed:
@@ -309,27 +441,40 @@ def main():
             continue
         docai_by_page[page_id] = tokens
 
-    anchored = marker_anchored_regions(klal_pages, markers, end_boundary_positions, docai_by_page)
-    heuristic = heuristic_regions(klal_pages, docai_by_page, final_by_id, already_done=set(anchored))
-    # Anchored wins on a collision: strategy 1 is the preferred one per this
-    # module's docstring, and the merge should say so directly rather than
-    # depend on heuristic_regions() having honoured `already_done` - two
-    # things that have to agree instead of one. It was written
-    # {**anchored, **heuristic}, i.e. the coarse content-diff fallback
-    # silently overriding the marker-anchored box if that second mechanism
-    # ever lapsed.
-    #
-    # Written as setdefault rather than {**heuristic, **anchored} so the
-    # KEY ORDER is unchanged too (anchored first, then heuristic) - dicts
-    # serialise in insertion order, and the other spelling reorders all 222
-    # entries in a tracked file for no functional reason. 0 klal_ids are in
-    # both maps today, so this is behaviour-preserving in every respect;
-    # verified by a full rebuild producing a byte-identical
-    # klal_page_regions.json. tests/test_pipeline_logic.py still checks
-    # `already_done` itself.
-    regions = dict(anchored)
-    for klal_id, region in heuristic.items():
-        regions.setdefault(klal_id, region)
+    regions = {}
+    total_klal_pages = 0
+    total_anchored = 0
+    total_heuristic = 0
+    for klal_pages, markers, end_boundary_positions in parts_loaded:
+        anchored = marker_anchored_regions(klal_pages, markers, end_boundary_positions, docai_by_page)
+        heuristic = heuristic_regions(klal_pages, docai_by_page, final_by_id, already_done=set(anchored))
+        # Anchored wins on a collision: strategy 1 is the preferred one per this
+        # module's docstring, and the merge should say so directly rather than
+        # depend on heuristic_regions() having honoured `already_done` - two
+        # things that have to agree instead of one. It was written
+        # {**anchored, **heuristic}, i.e. the coarse content-diff fallback
+        # silently overriding the marker-anchored box if that second mechanism
+        # ever lapsed.
+        #
+        # Written as setdefault rather than {**heuristic, **anchored} so the
+        # KEY ORDER is unchanged too (anchored first, then heuristic per part,
+        # parts in order) - dicts serialise in insertion order, and the other
+        # spelling would reorder every entry in a tracked file for no
+        # functional reason. 0 klal_ids are in both maps within a part today,
+        # so this is behaviour-preserving in every respect for Part 1 (verified
+        # by a full rebuild producing a byte-identical klal_page_regions.json
+        # for klal_id 1-222); tests/test_pipeline_logic.py still checks
+        # `already_done` itself. Across parts, klal_id ranges are disjoint, so
+        # regions.update() below never collides either.
+        for klal_id, region in anchored.items():
+            regions[klal_id] = region
+        for klal_id, region in heuristic.items():
+            regions.setdefault(klal_id, region)
+        total_klal_pages += len(klal_pages)
+        total_anchored += len(anchored)
+        total_heuristic += len(heuristic)
+
+    regions = trim_overlapping_start_regions(regions)
 
     with open(OUT_PATH, "w", encoding="utf-8") as f:
         json.dump(regions, f, ensure_ascii=False, indent=2)
@@ -339,8 +484,8 @@ def main():
     # or an empty Y-band, and such a klal then falls through to the heuristic
     # while still being "in markers"). No such klal exists today, which is
     # exactly why the wrong count read as right.
-    print(f"Wrote {OUT_PATH}: {len(regions)} klal regions across {len(klal_pages)} pages "
-          f"({len(anchored)} marker-anchored, {len(heuristic)} heuristic fallback)")
+    print(f"Wrote {OUT_PATH}: {len(regions)} klal regions across {total_klal_pages} pages "
+          f"({total_anchored} marker-anchored, {total_heuristic} heuristic fallback)")
 
 
 if __name__ == "__main__":
