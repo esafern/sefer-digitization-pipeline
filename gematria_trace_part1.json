@@ -1,2069 +1,2219 @@
 [
   {
     "klal_id": 1,
-    "page": 14,
     "expected_gematria": "א",
     "stored_gematria": "א",
-    "content_match_ratio": 0.375,
-    "status": "marker_found_content_mismatch",
-    "marker_position": 0
+    "page": 14,
+    "content_match_ratio": 1.0,
+    "marker_position": 0,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'א' at page 14 token 0, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 2,
-    "page": 14,
     "expected_gematria": "ב",
     "stored_gematria": "ב",
-    "content_match_ratio": 0.875,
+    "page": 14,
+    "content_match_ratio": 1.0,
     "marker_position": 542,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'ב' at page 14 token 542, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 3,
-    "page": 15,
     "expected_gematria": "ג",
     "stored_gematria": "ג",
+    "page": 15,
     "content_match_ratio": 1.0,
-    "status": "ok",
     "marker_position": 480,
-    "note": "Manually corrected 2026-08-05: original exact-match search found token 176 ('ג' inside the citation 'בפרק ג''), a false-positive collision, not the real marker. Real marker is token 480 (the 'ג' sitting in the print's right-margin gap after the bold opening word 'אין'), confirmed by direct scan crop. Token 480 sorts before tokens 481-486 (an earlier footnote line) in docai's raw array order despite appearing physically later - a marker-out-of-reading-order anomaly, same class as the klal 82/83 bug."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'ג' at page 15 token 480, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 4,
-    "page": 15,
     "expected_gematria": "ד",
     "stored_gematria": "ד",
+    "page": 15,
     "content_match_ratio": 1.0,
-    "status": "ok",
     "marker_position": 880,
-    "note": "2026-08-07: marker_found_content_mismatch was a false artifact, not a real problem - re-investigated while fixing a review-dashboard region-box bug. Marker position 880 IS correct (confirmed by direct crop: a lone ד sitting in the right-margin gap next to the bold אין opening word, same convention as klal 3's own marker). But token 880 sits OUT OF READING ORDER in docai's raw array - by Y-coordinate it's on klal 4's own first line (y1=0.881), yet it's array-indexed in the middle of klal 3's trailing tokens (y1=0.844-0.859), the same anomaly class already documented for klal 3's own marker. Any check that reads content forward from marker_position in ARRAY order (not Y-order) hits klal 3's leftover tokens (881-895) before reaching klal 4's real continuation at token 896 ('אין הלכה כרשב\"ג בטריפות...', which matches stored clean_text exactly) - that's what produced content_match_ratio 0.0, not a real content problem. Content confirmed correct; only the naive array-order-based check was wrong."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'ד' at page 15 token 880, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 5,
-    "page": 16,
     "expected_gematria": "ה",
     "stored_gematria": "ה",
+    "page": 16,
     "content_match_ratio": 1.0,
     "marker_position": 457,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'ה' at page 16 token 457, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 6,
-    "page": 17,
     "expected_gematria": "ו",
     "stored_gematria": "ו",
-    "content_match_ratio": 0.75,
+    "page": 17,
+    "content_match_ratio": 0.875,
     "marker_position": 69,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'ו' at page 17 token 69, opening agreed with stored clean_text (0.875)"
   },
   {
     "klal_id": 7,
-    "page": 17,
     "expected_gematria": "ז",
     "stored_gematria": "ז",
+    "page": 17,
     "content_match_ratio": 1.0,
     "marker_position": 278,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'ז' at page 17 token 278, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 8,
-    "page": 18,
     "expected_gematria": "ח",
     "stored_gematria": "ח",
+    "page": 18,
     "content_match_ratio": 0.875,
     "marker_position": 159,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'ח' at page 18 token 159, opening agreed with stored clean_text (0.875)"
   },
   {
     "klal_id": 9,
-    "page": 18,
     "expected_gematria": "ט",
     "stored_gematria": "ט",
-    "content_match_ratio": 0.875,
+    "page": 18,
+    "content_match_ratio": 1.0,
     "marker_position": 409,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'ט' at page 18 token 409, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 10,
-    "page": 18,
     "expected_gematria": "י",
     "stored_gematria": "י",
+    "page": 18,
     "content_match_ratio": null,
-    "status": "marker_not_found_in_window"
+    "status": "marker_not_found_in_window",
+    "note": "no marker-band token matching 'י' (or any documented-confusion variant) found in pages 18-76 from the last confirmed marker forward, with content agreement >= 0.5, nor on position alone within 20; `page` here is the SEARCH START, not an observed position"
   },
   {
     "klal_id": 11,
-    "page": 18,
     "expected_gematria": "יא",
     "stored_gematria": "יא",
-    "content_match_ratio": 0.875,
+    "page": 18,
+    "content_match_ratio": 1.0,
     "marker_position": 564,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'יא' at page 18 token 564, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 12,
-    "page": 18,
     "expected_gematria": "יב",
     "stored_gematria": "יב",
+    "page": 18,
     "content_match_ratio": 1.0,
     "marker_position": 669,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'יב' at page 18 token 669, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 13,
-    "page": 19,
     "expected_gematria": "יג",
     "stored_gematria": "יג",
-    "content_match_ratio": 0.875,
+    "page": 19,
+    "content_match_ratio": 1.0,
     "marker_position": 140,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'יג' at page 19 token 140, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 14,
-    "page": 19,
     "expected_gematria": "יד",
     "stored_gematria": "יד",
+    "page": 19,
     "content_match_ratio": 1.0,
     "marker_position": 441,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'יד' at page 19 token 441, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 15,
-    "page": 19,
     "expected_gematria": "טו",
     "stored_gematria": "טו",
-    "content_match_ratio": 0.875,
+    "page": 19,
+    "content_match_ratio": 1.0,
     "marker_position": 707,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'טו' at page 19 token 707, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 16,
-    "page": 19,
     "expected_gematria": "טז",
     "stored_gematria": "טז",
-    "content_match_ratio": null,
-    "status": "marker_not_found_in_window"
+    "page": 19,
+    "content_match_ratio": 1.0,
+    "marker_position": 733,
+    "status": "ok",
+    "note": "mechanical-near-miss: matched 'פז' at page 19 token 733, opening agreed with stored clean_text (1.000); marker read as 'פז', one documented-confusion substitution from expected 'טז'"
   },
   {
     "klal_id": 17,
-    "page": 20,
     "expected_gematria": "יז",
     "stored_gematria": "יז",
-    "content_match_ratio": 0.875,
+    "page": 20,
+    "content_match_ratio": 1.0,
     "marker_position": 29,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'יז' at page 20 token 29, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 18,
-    "page": 20,
     "expected_gematria": "יח",
     "stored_gematria": "יח",
-    "content_match_ratio": 0.0,
-    "status": "marker_found_content_mismatch",
-    "marker_position": 351
+    "page": 20,
+    "content_match_ratio": 1.0,
+    "marker_position": 351,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'יח' at page 20 token 351, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 19,
-    "page": 20,
     "expected_gematria": "יט",
     "stored_gematria": "יט",
+    "page": 20,
     "content_match_ratio": 1.0,
     "marker_position": 439,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'יט' at page 20 token 439, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 20,
-    "page": 20,
     "expected_gematria": "כ",
     "stored_gematria": "כ",
-    "content_match_ratio": 0.875,
+    "page": 20,
+    "content_match_ratio": 1.0,
     "marker_position": 671,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'כ' at page 20 token 671, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 21,
-    "page": 20,
     "expected_gematria": "כא",
     "stored_gematria": "כא",
+    "page": 20,
     "content_match_ratio": 1.0,
     "marker_position": 714,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'כא' at page 20 token 714, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 22,
-    "page": 20,
     "expected_gematria": "כב",
     "stored_gematria": "כב",
-    "content_match_ratio": null,
-    "status": "marker_not_found_in_window"
+    "page": 20,
+    "content_match_ratio": 1.0,
+    "marker_position": 787,
+    "status": "ok",
+    "note": "content-anchored: matched 'כך' at page 20 token 787, opening agreed with stored anchor (1.000); numeral not found by exact or documented-confusion match; recovered by anchoring on the stored opening (1.000) and taking the marker-band token before it, which DocAI read as 'כך' (expected 'כב')"
   },
   {
     "klal_id": 23,
-    "page": 21,
     "expected_gematria": "כג",
     "stored_gematria": "כג",
+    "page": 21,
     "content_match_ratio": 1.0,
     "marker_position": 5,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'כג' at page 21 token 5, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 24,
-    "page": 21,
     "expected_gematria": "כד",
     "stored_gematria": "כד",
-    "content_match_ratio": 0.875,
+    "page": 21,
+    "content_match_ratio": 1.0,
     "marker_position": 827,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'כד' at page 21 token 827, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 25,
-    "page": 22,
     "expected_gematria": "כה",
     "stored_gematria": "כה",
+    "page": 22,
     "content_match_ratio": 1.0,
     "marker_position": 259,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'כה' at page 22 token 259, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 26,
-    "page": 23,
     "expected_gematria": "כו",
     "stored_gematria": "כו",
+    "page": 23,
     "content_match_ratio": 1.0,
     "marker_position": 223,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'כו' at page 23 token 223, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 27,
-    "page": 23,
     "expected_gematria": "כז",
     "stored_gematria": "כז",
+    "page": 23,
     "content_match_ratio": 1.0,
     "marker_position": 248,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'כז' at page 23 token 248, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 28,
-    "page": 23,
     "expected_gematria": "כח",
     "stored_gematria": "כח",
-    "content_match_ratio": 0.875,
+    "page": 23,
+    "content_match_ratio": 1.0,
     "marker_position": 297,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'כח' at page 23 token 297, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 29,
-    "page": 23,
     "expected_gematria": "כט",
     "stored_gematria": "כט",
-    "content_match_ratio": 0.875,
+    "page": 23,
+    "content_match_ratio": 1.0,
     "marker_position": 345,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'כט' at page 23 token 345, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 30,
-    "page": 23,
     "expected_gematria": "ל",
     "stored_gematria": "ל",
-    "content_match_ratio": 0.875,
+    "page": 23,
+    "content_match_ratio": 1.0,
     "marker_position": 769,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'ל' at page 23 token 769, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 31,
-    "page": 25,
     "expected_gematria": "לא",
     "stored_gematria": "לא",
-    "content_match_ratio": 0.875,
+    "page": 25,
+    "content_match_ratio": 1.0,
     "marker_position": 920,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'לא' at page 25 token 920, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 32,
-    "page": 26,
     "expected_gematria": "לב",
     "stored_gematria": "לב",
-    "content_match_ratio": 0.875,
+    "page": 26,
+    "content_match_ratio": 1.0,
     "marker_position": 183,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'לב' at page 26 token 183, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 33,
-    "page": 26,
     "expected_gematria": "לג",
     "stored_gematria": "לג",
-    "content_match_ratio": 0.875,
+    "page": 26,
+    "content_match_ratio": 1.0,
     "marker_position": 221,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'לג' at page 26 token 221, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 34,
-    "page": 26,
     "expected_gematria": "לד",
     "stored_gematria": "לד",
+    "page": 26,
     "content_match_ratio": null,
-    "status": "ok",
-    "marker_position": 374,
-    "note": "2026-08-07: marker_not_found_in_window resolved - docai raw OCR misread the marker itself (לד/34 -> לו/36, ד/ו confusion, same family as klal 167/196-197's ז/ו misreads elsewhere in this corpus). Confirmed by direct high-DPI crop of berlin_square.pdf page 26 token 374: unambiguous לד (dalet's squared corner, not vav's simple stroke). Content itself was already fixed and crop-confirmed 2026-08-05 (title word-order, missing clause); this closes the remaining marker-position/alignment gap. part1_header_anchored_alignment.json's klal 34 entry updated via a documented MANUAL_OVERRIDES entry in header_anchored_alignment.py (the fuzzy query-match ratio is 0.375 even anchored at the correct position, since docai's OCR is independently garbled on several nearby words too - not fixable by better anchoring alone). Now 222/222 trusted, up from 221/222."
+    "status": "marker_not_found_in_window",
+    "note": "no marker-band token matching 'לד' (or any documented-confusion variant) found in pages 26-76 from the last confirmed marker forward, with content agreement >= 0.5, nor on position alone within 28; `page` here is the SEARCH START, not an observed position"
   },
   {
     "klal_id": 35,
-    "page": 26,
     "expected_gematria": "לה",
     "stored_gematria": "לה",
-    "content_match_ratio": 0.875,
+    "page": 26,
+    "content_match_ratio": 1.0,
     "marker_position": 475,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'לה' at page 26 token 475, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 36,
-    "page": 26,
     "expected_gematria": "לו",
     "stored_gematria": "לו",
-    "content_match_ratio": 0.75,
+    "page": 26,
+    "content_match_ratio": 1.0,
     "marker_position": 592,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'לו' at page 26 token 592, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 37,
-    "page": 26,
     "expected_gematria": "לז",
     "stored_gematria": "לז",
-    "content_match_ratio": null,
-    "status": "marker_not_found_in_window"
+    "page": 26,
+    "content_match_ratio": 1.0,
+    "marker_position": 703,
+    "status": "ok",
+    "note": "mechanical-near-miss: matched 'לו' at page 26 token 703, opening agreed with stored clean_text (1.000); marker read as 'לו', one documented-confusion substitution from expected 'לז'"
   },
   {
     "klal_id": 38,
-    "page": 27,
     "expected_gematria": "לח",
     "stored_gematria": "לח",
-    "content_match_ratio": 0.875,
+    "page": 27,
+    "content_match_ratio": 1.0,
     "marker_position": 283,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'לח' at page 27 token 283, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 39,
-    "page": 27,
     "expected_gematria": "לט",
     "stored_gematria": "לט",
+    "page": 27,
     "content_match_ratio": 1.0,
     "marker_position": 662,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'לט' at page 27 token 662, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 40,
-    "page": 28,
     "expected_gematria": "מ",
     "stored_gematria": "מ",
+    "page": 28,
     "content_match_ratio": 1.0,
     "marker_position": 441,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'מ' at page 28 token 441, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 41,
-    "page": 28,
     "expected_gematria": "מא",
     "stored_gematria": "מא",
-    "content_match_ratio": 0.875,
+    "page": 28,
+    "content_match_ratio": 1.0,
     "marker_position": 488,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'מא' at page 28 token 488, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 42,
-    "page": 29,
     "expected_gematria": "מב",
     "stored_gematria": "מב",
-    "content_match_ratio": 0.875,
+    "page": 29,
+    "content_match_ratio": 1.0,
     "marker_position": 343,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'מב' at page 29 token 343, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 43,
-    "page": 29,
     "expected_gematria": "מג",
     "stored_gematria": "מג",
-    "content_match_ratio": 0.875,
+    "page": 29,
+    "content_match_ratio": 1.0,
     "marker_position": 397,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'מג' at page 29 token 397, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 44,
-    "page": 29,
     "expected_gematria": "מד",
     "stored_gematria": "מד",
-    "content_match_ratio": 0.875,
+    "page": 29,
+    "content_match_ratio": 1.0,
     "marker_position": 511,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'מד' at page 29 token 511, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 45,
-    "page": 30,
     "expected_gematria": "מה",
     "stored_gematria": "מה",
-    "content_match_ratio": 0.875,
+    "page": 30,
+    "content_match_ratio": 1.0,
     "marker_position": 155,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'מה' at page 30 token 155, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 46,
-    "page": 30,
     "expected_gematria": "מו",
     "stored_gematria": "מו",
-    "content_match_ratio": 0.875,
+    "page": 30,
+    "content_match_ratio": 1.0,
     "marker_position": 183,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'מו' at page 30 token 183, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 47,
-    "page": 30,
     "expected_gematria": "מז",
     "stored_gematria": "מז",
-    "content_match_ratio": null,
-    "status": "marker_not_found_in_window"
+    "page": 30,
+    "content_match_ratio": 1.0,
+    "marker_position": 214,
+    "status": "ok",
+    "note": "mechanical-near-miss: matched 'מו' at page 30 token 214, opening agreed with stored clean_text (1.000); marker read as 'מו', one documented-confusion substitution from expected 'מז'"
   },
   {
     "klal_id": 48,
-    "page": 30,
     "expected_gematria": "מח",
     "stored_gematria": "מח",
-    "content_match_ratio": 0.75,
+    "page": 30,
+    "content_match_ratio": 1.0,
     "marker_position": 246,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'מח' at page 30 token 246, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 49,
-    "page": 30,
     "expected_gematria": "מט",
     "stored_gematria": "מט",
-    "content_match_ratio": 0.875,
+    "page": 30,
+    "content_match_ratio": 1.0,
     "marker_position": 367,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'מט' at page 30 token 367, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 50,
-    "page": 30,
     "expected_gematria": "נ",
     "stored_gematria": "נ",
-    "content_match_ratio": null,
-    "status": "marker_not_found_in_window"
+    "page": 30,
+    "content_match_ratio": 0.875,
+    "marker_position": 418,
+    "status": "ok",
+    "note": "content-anchored: matched 'ג' at page 30 token 418, opening agreed with stored anchor (0.875); numeral not found by exact or documented-confusion match; recovered by anchoring on the stored opening (0.875) and taking the marker-band token before it, which DocAI read as 'ג' (expected 'נ')"
   },
   {
     "klal_id": 51,
-    "page": 30,
     "expected_gematria": "נא",
     "stored_gematria": "נא",
-    "content_match_ratio": 0.875,
+    "page": 30,
+    "content_match_ratio": 1.0,
     "marker_position": 512,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'נא' at page 30 token 512, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 52,
-    "page": 30,
     "expected_gematria": "נב",
     "stored_gematria": "נב",
+    "page": 30,
     "content_match_ratio": 1.0,
     "marker_position": 670,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'נב' at page 30 token 670, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 53,
-    "page": 30,
     "expected_gematria": "נג",
     "stored_gematria": "נג",
+    "page": 30,
     "content_match_ratio": 1.0,
     "marker_position": 744,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'נג' at page 30 token 744, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 54,
-    "page": 31,
     "expected_gematria": "נד",
     "stored_gematria": "נד",
+    "page": 31,
     "content_match_ratio": 1.0,
     "marker_position": 389,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'נד' at page 31 token 389, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 55,
-    "page": 32,
     "expected_gematria": "נה",
     "stored_gematria": "נה",
-    "content_match_ratio": 0.875,
+    "page": 32,
+    "content_match_ratio": 1.0,
     "marker_position": 470,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'נה' at page 32 token 470, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 56,
-    "page": 32,
     "expected_gematria": "נו",
     "stored_gematria": "נו",
-    "content_match_ratio": 0.75,
+    "page": 32,
+    "content_match_ratio": 1.0,
     "marker_position": 592,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'נו' at page 32 token 592, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 57,
-    "page": 32,
     "expected_gematria": "נז",
     "stored_gematria": "נז",
+    "page": 32,
     "content_match_ratio": null,
-    "status": "marker_not_found_in_window"
+    "status": "marker_not_found_in_window",
+    "note": "no marker-band token matching 'נז' (or any documented-confusion variant) found in pages 32-76 from the last confirmed marker forward, with content agreement >= 0.5, nor on position alone within 34; `page` here is the SEARCH START, not an observed position"
   },
   {
     "klal_id": 58,
-    "page": 32,
     "expected_gematria": "נח",
     "stored_gematria": "נח",
-    "content_match_ratio": 0.875,
+    "page": 32,
+    "content_match_ratio": 1.0,
     "marker_position": 746,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'נח' at page 32 token 746, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 59,
-    "page": 32,
     "expected_gematria": "נט",
     "stored_gematria": "נט",
-    "content_match_ratio": 0.75,
+    "page": 32,
+    "content_match_ratio": 1.0,
     "marker_position": 765,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'נט' at page 32 token 765, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 60,
-    "page": 33,
     "expected_gematria": "ס",
     "stored_gematria": "ס",
-    "content_match_ratio": 0.875,
+    "page": 33,
+    "content_match_ratio": 1.0,
     "marker_position": 50,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'ס' at page 33 token 50, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 61,
-    "page": 33,
     "expected_gematria": "סא",
     "stored_gematria": "סא",
+    "page": 33,
     "content_match_ratio": 1.0,
     "marker_position": 156,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'סא' at page 33 token 156, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 62,
-    "page": 33,
     "expected_gematria": "סב",
     "stored_gematria": "סב",
-    "content_match_ratio": 0.875,
+    "page": 33,
+    "content_match_ratio": 1.0,
     "marker_position": 394,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'סב' at page 33 token 394, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 63,
-    "page": 33,
     "expected_gematria": "סג",
     "stored_gematria": "סג",
-    "content_match_ratio": null,
-    "status": "marker_not_found_in_window"
+    "page": 33,
+    "content_match_ratio": 1.0,
+    "marker_position": 612,
+    "status": "ok",
+    "note": "content-anchored: matched 'סוג' at page 33 token 612, opening agreed with stored anchor (1.000); numeral not found by exact or documented-confusion match; recovered by anchoring on the stored opening (1.000) and taking the marker-band token before it, which DocAI read as 'סוג' (expected 'סג')"
   },
   {
     "klal_id": 64,
-    "page": 33,
     "expected_gematria": "סד",
     "stored_gematria": "סד",
+    "page": 33,
     "content_match_ratio": 0.875,
     "marker_position": 655,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'סד' at page 33 token 655, opening agreed with stored clean_text (0.875)"
   },
   {
     "klal_id": 65,
-    "page": 34,
     "expected_gematria": "סה",
     "stored_gematria": "סה",
+    "page": 34,
     "content_match_ratio": 0.875,
     "marker_position": 5,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'סה' at page 34 token 5, opening agreed with stored clean_text (0.875)"
   },
   {
     "klal_id": 66,
-    "page": 34,
     "expected_gematria": "סו",
     "stored_gematria": "סו",
+    "page": 34,
     "content_match_ratio": 1.0,
     "marker_position": 81,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'סו' at page 34 token 81, opening agreed with stored title (1.000)"
   },
   {
     "klal_id": 67,
-    "page": 34,
     "expected_gematria": "סז",
     "stored_gematria": "סז",
-    "content_match_ratio": null,
-    "status": "marker_not_found_in_window"
+    "page": 34,
+    "content_match_ratio": 1.0,
+    "marker_position": 287,
+    "status": "ok",
+    "note": "mechanical-near-miss: matched 'סן' at page 34 token 287, opening agreed with stored clean_text (1.000); marker read as 'סן', one documented-confusion substitution from expected 'סז'"
   },
   {
     "klal_id": 68,
-    "page": 34,
     "expected_gematria": "סח",
     "stored_gematria": "סח",
+    "page": 34,
     "content_match_ratio": 1.0,
     "marker_position": 383,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'סח' at page 34 token 383, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 69,
-    "page": 34,
     "expected_gematria": "סט",
     "stored_gematria": "סט",
-    "content_match_ratio": 0.875,
+    "page": 34,
+    "content_match_ratio": 0.933,
     "marker_position": 485,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'סט' at page 34 token 485, opening agreed with stored title (0.933)"
   },
   {
     "klal_id": 70,
-    "page": 35,
     "expected_gematria": "ע",
     "stored_gematria": "ע",
+    "page": 35,
     "content_match_ratio": 1.0,
     "marker_position": 41,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'ע' at page 35 token 41, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 71,
-    "page": 35,
     "expected_gematria": "עא",
     "stored_gematria": "עא",
-    "content_match_ratio": 0.875,
+    "page": 35,
+    "content_match_ratio": 1.0,
     "marker_position": 171,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'עא' at page 35 token 171, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 72,
-    "page": 35,
     "expected_gematria": "עב",
     "stored_gematria": "עב",
-    "content_match_ratio": 0.875,
+    "page": 35,
+    "content_match_ratio": 1.0,
     "marker_position": 236,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'עב' at page 35 token 236, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 73,
-    "page": 35,
     "expected_gematria": "עג",
     "stored_gematria": "עג",
-    "content_match_ratio": 0.875,
+    "page": 35,
+    "content_match_ratio": 1.0,
     "marker_position": 329,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'עג' at page 35 token 329, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 74,
-    "page": 35,
     "expected_gematria": "עד",
     "stored_gematria": "עד",
-    "content_match_ratio": 0.875,
+    "page": 35,
+    "content_match_ratio": 1.0,
     "marker_position": 480,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'עד' at page 35 token 480, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 75,
-    "page": 36,
     "expected_gematria": "עה",
     "stored_gematria": "עה",
-    "content_match_ratio": 0.875,
+    "page": 36,
+    "content_match_ratio": 1.0,
     "marker_position": 720,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'עה' at page 36 token 720, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 76,
-    "page": 38,
     "expected_gematria": "עו",
     "stored_gematria": "עו",
-    "content_match_ratio": 0.75,
+    "page": 38,
+    "content_match_ratio": 1.0,
     "marker_position": 67,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'עו' at page 38 token 67, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 77,
-    "page": 38,
     "expected_gematria": "עז",
     "stored_gematria": "עז",
+    "page": 38,
     "content_match_ratio": 1.0,
     "marker_position": 92,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'עז' at page 38 token 92, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 78,
-    "page": 38,
     "expected_gematria": "עח",
     "stored_gematria": "עח",
+    "page": 38,
     "content_match_ratio": 1.0,
     "marker_position": 188,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'עח' at page 38 token 188, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 79,
-    "page": 38,
     "expected_gematria": "עט",
     "stored_gematria": "עט",
+    "page": 38,
     "content_match_ratio": 1.0,
     "marker_position": 243,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'עט' at page 38 token 243, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 80,
-    "page": 38,
     "expected_gematria": "פ",
     "stored_gematria": "פ",
-    "content_match_ratio": 0.75,
+    "page": 38,
+    "content_match_ratio": 1.0,
     "marker_position": 312,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'פ' at page 38 token 312, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 81,
-    "page": 38,
     "expected_gematria": "פא",
     "stored_gematria": "פא",
-    "content_match_ratio": 0.875,
+    "page": 38,
+    "content_match_ratio": 1.0,
     "marker_position": 381,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'פא' at page 38 token 381, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 82,
-    "page": 38,
     "expected_gematria": "פב",
     "stored_gematria": "פב",
-    "content_match_ratio": 1.0,
+    "page": 38,
+    "content_match_ratio": 0.875,
     "marker_position": 470,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'פב' at page 38 token 470, opening agreed with stored clean_text (0.875)"
   },
   {
     "klal_id": 83,
-    "page": 38,
     "expected_gematria": "פג",
     "stored_gematria": "פג",
-    "content_match_ratio": 0.75,
+    "page": 38,
+    "content_match_ratio": 0.875,
     "marker_position": 523,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'פג' at page 38 token 523, opening agreed with stored clean_text (0.875)"
   },
   {
     "klal_id": 84,
-    "page": 38,
     "expected_gematria": "פד",
     "stored_gematria": "פד",
-    "content_match_ratio": null,
-    "status": "marker_not_found_in_window"
+    "page": 38,
+    "content_match_ratio": 1.0,
+    "marker_position": 585,
+    "status": "ok",
+    "note": "mechanical-near-miss: matched 'פר' at page 38 token 585, opening agreed with stored clean_text (1.000); marker read as 'פר', one documented-confusion substitution from expected 'פד'"
   },
   {
     "klal_id": 85,
-    "page": 39,
     "expected_gematria": "פה",
     "stored_gematria": "פה",
+    "page": 39,
     "content_match_ratio": 1.0,
     "marker_position": 6,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'פה' at page 39 token 6, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 86,
-    "page": 39,
     "expected_gematria": "פו",
     "stored_gematria": "פו",
-    "content_match_ratio": 0.375,
-    "status": "marker_found_content_mismatch",
-    "marker_position": 105
+    "page": 39,
+    "content_match_ratio": 1.0,
+    "marker_position": 105,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'פו' at page 39 token 105, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 87,
-    "page": 39,
     "expected_gematria": "פז",
     "stored_gematria": "פז",
-    "content_match_ratio": null,
-    "status": "marker_not_found_in_window"
+    "page": 39,
+    "content_match_ratio": 1.0,
+    "marker_position": 308,
+    "status": "ok",
+    "note": "mechanical-near-miss: matched 'פן' at page 39 token 308, opening agreed with stored clean_text (1.000); marker read as 'פן', one documented-confusion substitution from expected 'פז'"
   },
   {
     "klal_id": 88,
-    "page": 39,
     "expected_gematria": "פח",
     "stored_gematria": "פח",
-    "content_match_ratio": 0.75,
+    "page": 39,
+    "content_match_ratio": 0.875,
     "marker_position": 583,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'פח' at page 39 token 583, opening agreed with stored clean_text (0.875)"
   },
   {
     "klal_id": 89,
-    "page": 41,
     "expected_gematria": "פט",
     "stored_gematria": "פט",
+    "page": 41,
     "content_match_ratio": 1.0,
     "marker_position": 5,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'פט' at page 41 token 5, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 90,
-    "page": 41,
     "expected_gematria": "צ",
     "stored_gematria": "צ",
+    "page": 41,
     "content_match_ratio": 0.875,
     "marker_position": 61,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'צ' at page 41 token 61, opening agreed with stored clean_text (0.875)"
   },
   {
     "klal_id": 91,
-    "page": 41,
     "expected_gematria": "צא",
     "stored_gematria": "צא",
+    "page": 41,
     "content_match_ratio": 0.875,
     "marker_position": 88,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'צא' at page 41 token 88, opening agreed with stored clean_text (0.875)"
   },
   {
     "klal_id": 92,
-    "page": 41,
     "expected_gematria": "צב",
     "stored_gematria": "צב",
-    "content_match_ratio": 0.25,
-    "status": "ok",
+    "page": 41,
+    "content_match_ratio": 1.0,
     "marker_position": 904,
-    "note": "2026-08-07: status was stale (frozen from before the klal 92-94 fix earlier in the project); content re-verified tonight against real marker position, confirmed already correct."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'צב' at page 41 token 904, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 93,
-    "page": 42,
     "expected_gematria": "צג",
     "stored_gematria": "צג",
-    "content_match_ratio": null,
-    "status": "ok",
+    "page": 42,
+    "content_match_ratio": 1.0,
     "marker_position": 548,
-    "note": "2026-08-07: marker position found by wider/alternate-spelling search (was marker_not_found_in_window); content confirmed already correct (docai raw at this position matches stored clean_text) and marker glyph confirmed by direct crop."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'צג' at page 42 token 548, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 94,
-    "page": 42,
     "expected_gematria": "צד",
     "stored_gematria": "צד",
-    "content_match_ratio": 0.125,
-    "status": "ok",
+    "page": 42,
+    "content_match_ratio": 1.0,
     "marker_position": 729,
-    "note": "2026-08-07: status was stale (frozen from before the klal 92-94 fix earlier in the project); content re-verified tonight against real marker position, confirmed already correct."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'צד' at page 42 token 729, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 95,
-    "page": 43,
     "expected_gematria": "צה",
     "stored_gematria": "צה",
+    "page": 43,
     "content_match_ratio": 1.0,
-    "status": "ok",
     "marker_position": 534,
-    "note": "Manually corrected 2026-08-05: original search reported marker_not_found_in_window. Real marker confirmed at page 43 token 534 by direct scan crop, as part of the klal 92-165 off-by-one shift fix."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'צה' at page 43 token 534, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 96,
-    "page": 43,
     "expected_gematria": "צו",
     "stored_gematria": "צו",
+    "page": 43,
     "content_match_ratio": 1.0,
-    "status": "ok",
     "marker_position": 576,
-    "note": "Manually corrected 2026-08-05: marker position was already correct (576) but content_match failed because stored text was klal 95's content under this ID (off-by-one shift bug). Confirmed by direct scan crop after the fix."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'צו' at page 43 token 576, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 97,
-    "page": 43,
     "expected_gematria": "צז",
     "stored_gematria": "צז",
+    "page": 43,
     "content_match_ratio": 1.0,
-    "status": "ok",
     "marker_position": 699,
-    "note": "Manually corrected 2026-08-05: marker position was already correct (699) but content_match failed because stored text was klal 96's content under this ID (off-by-one shift bug). Confirmed by direct scan crop after the fix. Klal 97 is cross-page (43->44)."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'צז' at page 43 token 699, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 98,
-    "page": 44,
     "expected_gematria": "צח",
     "stored_gematria": "צח",
-    "content_match_ratio": null,
-    "status": "ok",
+    "page": 44,
+    "content_match_ratio": 1.0,
     "marker_position": 249,
-    "note": "Marker position confirmed 2026-08-05 by direct scan crop (page 44 token 249), but klal 98's own clean_text is NOT yet fixed - still holds klal 97's old, truncated content. Next item in the ongoing 92-165 shift-zone fix."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'צח' at page 44 token 249, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 99,
-    "page": 44,
     "expected_gematria": "צט",
     "stored_gematria": "צט",
-    "content_match_ratio": 0.125,
-    "status": "ok",
+    "page": 44,
+    "content_match_ratio": 1.0,
     "marker_position": 342,
-    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'צט' at page 44 token 342, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 100,
-    "page": 44,
     "expected_gematria": "ק",
     "stored_gematria": "ק",
-    "content_match_ratio": 0.0,
-    "status": "ok",
+    "page": 44,
+    "content_match_ratio": 0.875,
     "marker_position": 384,
-    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'ק' at page 44 token 384, opening agreed with stored clean_text (0.875)"
   },
   {
     "klal_id": 101,
-    "page": 44,
     "expected_gematria": "קא",
     "stored_gematria": "קא",
+    "page": 44,
     "content_match_ratio": 0.75,
     "marker_position": 423,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קא' at page 44 token 423, opening agreed with stored clean_text (0.750)"
   },
   {
     "klal_id": 102,
-    "page": 44,
     "expected_gematria": "קב",
     "stored_gematria": "קב",
+    "page": 44,
     "content_match_ratio": 0.875,
     "marker_position": 449,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קב' at page 44 token 449, opening agreed with stored clean_text (0.875)"
   },
   {
     "klal_id": 103,
-    "page": 44,
     "expected_gematria": "קג",
     "stored_gematria": "קג",
-    "content_match_ratio": 0.625,
+    "page": 44,
+    "content_match_ratio": 0.875,
     "marker_position": 571,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קג' at page 44 token 571, opening agreed with stored clean_text (0.875)"
   },
   {
     "klal_id": 104,
-    "page": 44,
     "expected_gematria": "קד",
     "stored_gematria": "קד",
-    "content_match_ratio": 0.75,
+    "page": 44,
+    "content_match_ratio": 0.875,
     "marker_position": 692,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קד' at page 44 token 692, opening agreed with stored clean_text (0.875)"
   },
   {
     "klal_id": 105,
-    "page": 44,
     "expected_gematria": "קה",
     "stored_gematria": "קה",
-    "content_match_ratio": 0.0,
-    "status": "ok",
+    "page": 44,
+    "content_match_ratio": 0.875,
     "marker_position": 726,
-    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קה' at page 44 token 726, opening agreed with stored clean_text (0.875)"
   },
   {
     "klal_id": 106,
-    "page": 44,
     "expected_gematria": "קו",
     "stored_gematria": "קו",
-    "content_match_ratio": 0.0,
-    "status": "ok",
+    "page": 44,
+    "content_match_ratio": 1.0,
     "marker_position": 750,
-    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קו' at page 44 token 750, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 107,
-    "page": 45,
     "expected_gematria": "קז",
     "stored_gematria": "קז",
+    "page": 45,
     "content_match_ratio": 1.0,
-    "status": "ok",
     "marker_position": 5,
-    "note": "Manually corrected 2026-08-05: original search reported marker_not_found_in_window because the marker itself is a docai misread - ז (zayin) read as ו (vav), so exact-text search for 'קז' never matched. Confirmed by direct crop comparison against the confirmed קו marker for klal 106 immediately before it on page 44 - a new letter-pair confusion for this typeface, joining the already-documented ד/ר, ד/ך pairs."
+    "status": "ok",
+    "note": "mechanical-near-miss: matched 'קו' at page 45 token 5, opening agreed with stored clean_text (1.000); marker read as 'קו', one documented-confusion substitution from expected 'קז'"
   },
   {
     "klal_id": 108,
-    "page": 45,
     "expected_gematria": "קח",
     "stored_gematria": "קח",
+    "page": 45,
     "content_match_ratio": 1.0,
+    "marker_position": 95,
     "status": "ok",
-    "marker_position": 95
+    "note": "mechanical-exact: matched 'קח' at page 45 token 95, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 109,
-    "page": 45,
     "expected_gematria": "קט",
     "stored_gematria": "קט",
-    "content_match_ratio": 0.75,
+    "page": 45,
+    "content_match_ratio": 1.0,
     "marker_position": 164,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קט' at page 45 token 164, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 110,
-    "page": 45,
     "expected_gematria": "קי",
     "stored_gematria": "קי",
+    "page": 45,
     "content_match_ratio": 1.0,
+    "marker_position": 201,
     "status": "ok",
-    "marker_position": 201
+    "note": "mechanical-exact: matched 'קי' at page 45 token 201, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 111,
-    "page": 45,
     "expected_gematria": "קיא",
     "stored_gematria": "קיא",
+    "page": 45,
     "content_match_ratio": 1.0,
+    "marker_position": 309,
     "status": "ok",
-    "marker_position": 309
+    "note": "mechanical-exact: matched 'קיא' at page 45 token 309, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 112,
-    "page": 45,
     "expected_gematria": "קיב",
     "stored_gematria": "קיב",
-    "content_match_ratio": 0.0,
-    "status": "ok",
+    "page": 45,
+    "content_match_ratio": 1.0,
     "marker_position": 345,
-    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קיב' at page 45 token 345, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 113,
-    "page": 45,
     "expected_gematria": "קיג",
     "stored_gematria": "קיג",
-    "content_match_ratio": 0.125,
-    "status": "ok",
+    "page": 45,
+    "content_match_ratio": 1.0,
     "marker_position": 564,
-    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קיג' at page 45 token 564, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 114,
-    "page": 45,
     "expected_gematria": "קיד",
     "stored_gematria": "קיד",
-    "content_match_ratio": 0.125,
-    "status": "ok",
+    "page": 45,
+    "content_match_ratio": 1.0,
     "marker_position": 722,
-    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קיד' at page 45 token 722, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 115,
-    "page": 46,
-    "expected_gematria": "קיה",
+    "expected_gematria": "קטו",
     "stored_gematria": "קטו",
-    "content_match_ratio": null,
-    "status": "ok",
+    "page": 46,
+    "content_match_ratio": 1.0,
     "marker_position": 5,
-    "note": "2026-08-07: marker position found by wider/alternate-spelling search (was marker_not_found_in_window); content confirmed already correct (docai raw at this position matches stored clean_text) and marker glyph confirmed by direct crop."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קטו' at page 46 token 5, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 116,
-    "page": 46,
-    "expected_gematria": "קיו",
+    "expected_gematria": "קטז",
     "stored_gematria": "קטז",
-    "content_match_ratio": null,
-    "status": "ok",
+    "page": 46,
+    "content_match_ratio": 1.0,
     "marker_position": 35,
-    "note": "2026-08-07: marker position found by wider/alternate-spelling search (was marker_not_found_in_window); content confirmed already correct (docai raw at this position matches stored clean_text) and marker glyph confirmed by direct crop."
+    "status": "ok",
+    "note": "mechanical-near-miss: matched 'קטן' at page 46 token 35, opening agreed with stored clean_text (1.000); marker read as 'קטן', one documented-confusion substitution from expected 'קטז'"
   },
   {
     "klal_id": 117,
-    "page": 46,
     "expected_gematria": "קיז",
     "stored_gematria": "קיז",
-    "content_match_ratio": 0.0,
-    "status": "ok",
+    "page": 46,
+    "content_match_ratio": 1.0,
     "marker_position": 246,
-    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קיז' at page 46 token 246, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 118,
-    "page": 46,
     "expected_gematria": "קיח",
     "stored_gematria": "קיח",
-    "content_match_ratio": 0.0,
-    "status": "ok",
+    "page": 46,
+    "content_match_ratio": 0.875,
     "marker_position": 297,
-    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קיח' at page 46 token 297, opening agreed with stored clean_text (0.875)"
   },
   {
     "klal_id": 119,
-    "page": 46,
     "expected_gematria": "קיט",
     "stored_gematria": "קיט",
-    "content_match_ratio": 0.0,
-    "status": "ok",
+    "page": 46,
+    "content_match_ratio": 0.875,
     "marker_position": 341,
-    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קיט' at page 46 token 341, opening agreed with stored clean_text (0.875)"
   },
   {
     "klal_id": 120,
-    "page": 46,
     "expected_gematria": "קכ",
     "stored_gematria": "קכ",
-    "content_match_ratio": 0.0,
-    "status": "ok",
+    "page": 46,
+    "content_match_ratio": 1.0,
     "marker_position": 383,
-    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קכ' at page 46 token 383, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 121,
-    "page": 46,
     "expected_gematria": "קכא",
     "stored_gematria": "קכא",
-    "content_match_ratio": 0.0,
-    "status": "ok",
+    "page": 46,
+    "content_match_ratio": 1.0,
     "marker_position": 515,
-    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קכא' at page 46 token 515, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 122,
-    "page": 46,
     "expected_gematria": "קכב",
     "stored_gematria": "קכב",
-    "content_match_ratio": 0.0,
-    "status": "ok",
+    "page": 46,
+    "content_match_ratio": 1.0,
     "marker_position": 586,
-    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קכב' at page 46 token 586, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 123,
-    "page": 46,
     "expected_gematria": "קכג",
     "stored_gematria": "קכג",
-    "content_match_ratio": 0.875,
+    "page": 46,
+    "content_match_ratio": 1.0,
     "marker_position": 741,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קכג' at page 46 token 741, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 124,
-    "page": 47,
     "expected_gematria": "קכד",
     "stored_gematria": "קכד",
-    "content_match_ratio": null,
-    "status": "ok",
+    "page": 47,
+    "content_match_ratio": 1.0,
     "marker_position": 41,
-    "note": "2026-08-07: marker position found by wider/alternate-spelling search (was marker_not_found_in_window); content confirmed already correct (docai raw at this position matches stored clean_text) and marker glyph confirmed by direct crop."
+    "status": "ok",
+    "note": "mechanical-near-miss: matched 'קכר' at page 47 token 41, opening agreed with stored clean_text (1.000); marker read as 'קכר', one documented-confusion substitution from expected 'קכד'"
   },
   {
     "klal_id": 125,
-    "page": 47,
     "expected_gematria": "קכה",
     "stored_gematria": "קכה",
-    "content_match_ratio": 0.0,
-    "status": "ok",
+    "page": 47,
+    "content_match_ratio": 1.0,
     "marker_position": 110,
-    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קכה' at page 47 token 110, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 126,
-    "page": 47,
     "expected_gematria": "קכו",
     "stored_gematria": "קכו",
-    "content_match_ratio": 0.25,
-    "status": "ok",
+    "page": 47,
+    "content_match_ratio": 1.0,
     "marker_position": 212,
-    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קכו' at page 47 token 212, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 127,
-    "page": 47,
     "expected_gematria": "קכז",
     "stored_gematria": "קכז",
-    "content_match_ratio": null,
-    "status": "ok",
+    "page": 47,
+    "content_match_ratio": 1.0,
     "marker_position": 280,
-    "note": "2026-08-07: marker position found by wider/alternate-spelling search (was marker_not_found_in_window); content confirmed already correct (docai raw at this position matches stored clean_text) and marker glyph confirmed by direct crop."
+    "status": "ok",
+    "note": "mechanical-near-miss: matched 'קכן' at page 47 token 280, opening agreed with stored clean_text (1.000); marker read as 'קכן', one documented-confusion substitution from expected 'קכז'"
   },
   {
     "klal_id": 128,
-    "page": 47,
     "expected_gematria": "קכח",
     "stored_gematria": "קכח",
-    "content_match_ratio": 0.0,
-    "status": "ok",
+    "page": 47,
+    "content_match_ratio": 0.75,
     "marker_position": 331,
-    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קכח' at page 47 token 331, opening agreed with stored clean_text (0.750)"
   },
   {
     "klal_id": 129,
-    "page": 48,
     "expected_gematria": "קכט",
     "stored_gematria": "קכט",
+    "page": 48,
     "content_match_ratio": 0.875,
-    "status": "ok",
     "marker_position": 843,
-    "note": "2026-08-17: page/marker_position corrected via pipeline/build_gematria_trace.py, independently re-verified directly against docai_word_boxes/page_48.json token 843 (exact \"קכט\") before applying. Old page:47 attribution was stale (status was marker_not_found_in_window because the search looked on the wrong page)."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קכט' at page 48 token 843, opening agreed with stored clean_text (0.875)"
   },
   {
     "klal_id": 130,
-    "page": 48,
     "expected_gematria": "קל",
     "stored_gematria": "קל",
-    "content_match_ratio": 0.125,
-    "status": "ok",
+    "page": 48,
+    "content_match_ratio": 1.0,
     "marker_position": 891,
-    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קל' at page 48 token 891, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 131,
-    "page": 49,
     "expected_gematria": "קלא",
     "stored_gematria": "קלא",
-    "content_match_ratio": null,
-    "status": "ok",
+    "page": 49,
+    "content_match_ratio": 0.875,
     "marker_position": 38,
-    "note": "2026-08-07: marker position found by wider/alternate-spelling search (was marker_not_found_in_window); content confirmed already correct (docai raw at this position matches stored clean_text) and marker glyph confirmed by direct crop."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קלא' at page 49 token 38, opening agreed with stored clean_text (0.875)"
   },
   {
     "klal_id": 132,
-    "page": 49,
     "expected_gematria": "קלב",
     "stored_gematria": "קלב",
-    "content_match_ratio": 0.0,
-    "status": "ok",
+    "page": 49,
+    "content_match_ratio": 0.875,
     "marker_position": 129,
-    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קלב' at page 49 token 129, opening agreed with stored clean_text (0.875)"
   },
   {
     "klal_id": 133,
-    "page": 49,
     "expected_gematria": "קלג",
     "stored_gematria": "קלג",
-    "content_match_ratio": 0.375,
-    "status": "ok",
+    "page": 49,
+    "content_match_ratio": 0.875,
     "marker_position": 185,
-    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קלג' at page 49 token 185, opening agreed with stored clean_text (0.875)"
   },
   {
     "klal_id": 134,
-    "page": 49,
     "expected_gematria": "קלד",
     "stored_gematria": "קלד",
-    "content_match_ratio": 0.0,
-    "status": "ok",
+    "page": 49,
+    "content_match_ratio": 0.875,
     "marker_position": 227,
-    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קלד' at page 49 token 227, opening agreed with stored clean_text (0.875)"
   },
   {
     "klal_id": 135,
-    "page": 49,
     "expected_gematria": "קלה",
     "stored_gematria": "קלה",
-    "content_match_ratio": 0.0,
-    "status": "ok",
+    "page": 49,
+    "content_match_ratio": 0.875,
     "marker_position": 298,
-    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קלה' at page 49 token 298, opening agreed with stored clean_text (0.875)"
   },
   {
     "klal_id": 136,
-    "page": 49,
     "expected_gematria": "קלו",
     "stored_gematria": "קלו",
-    "content_match_ratio": 0.0,
-    "status": "ok",
+    "page": 49,
+    "content_match_ratio": 0.875,
     "marker_position": 355,
-    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קלו' at page 49 token 355, opening agreed with stored clean_text (0.875)"
   },
   {
     "klal_id": 137,
-    "page": 49,
     "expected_gematria": "קלז",
     "stored_gematria": "קלז",
-    "content_match_ratio": 0.75,
+    "page": 49,
+    "content_match_ratio": 1.0,
     "marker_position": 400,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קלז' at page 49 token 400, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 138,
-    "page": 49,
     "expected_gematria": "קלח",
     "stored_gematria": "קלח",
-    "content_match_ratio": 0.0,
-    "status": "ok",
+    "page": 49,
+    "content_match_ratio": 1.0,
     "marker_position": 560,
-    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קלח' at page 49 token 560, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 139,
-    "page": 50,
     "expected_gematria": "קלט",
     "stored_gematria": "קלט",
-    "content_match_ratio": null,
-    "status": "ok",
+    "page": 50,
+    "content_match_ratio": 1.0,
     "marker_position": 6,
-    "note": "2026-08-07: marker position found by wider/alternate-spelling search (was marker_not_found_in_window); content confirmed already correct (docai raw at this position matches stored clean_text) and marker glyph confirmed by direct crop."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קלט' at page 50 token 6, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 140,
-    "page": 50,
     "expected_gematria": "קמ",
     "stored_gematria": "קמ",
-    "content_match_ratio": 0.5,
-    "status": "ok",
+    "page": 50,
+    "content_match_ratio": 1.0,
     "marker_position": 78,
-    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קמ' at page 50 token 78, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 141,
-    "page": 50,
     "expected_gematria": "קמא",
     "stored_gematria": "קמא",
-    "content_match_ratio": 0.0,
-    "status": "ok",
+    "page": 50,
+    "content_match_ratio": 1.0,
     "marker_position": 300,
-    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קמא' at page 50 token 300, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 142,
-    "page": 50,
     "expected_gematria": "קמב",
     "stored_gematria": "קמב",
-    "content_match_ratio": 0.125,
-    "status": "ok",
+    "page": 50,
+    "content_match_ratio": 1.0,
     "marker_position": 363,
-    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קמב' at page 50 token 363, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 143,
-    "page": 50,
     "expected_gematria": "קמג",
     "stored_gematria": "קמג",
-    "content_match_ratio": 0.125,
-    "status": "ok",
+    "page": 50,
+    "content_match_ratio": 1.0,
     "marker_position": 390,
-    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches). | 2026-08-07: scan-crop pass on 3 lexicon-flagged candidates in this klal's cross-page extension - דמרך->דמהיך confirmed and fixed (ה/ר confusion + dropped י, cross-checked against same-page ה/ר reference letters); שמول and ופומכדיתא confirmed correct as printed (real print inconsistencies vs. the same words spelled differently elsewhere in this klal, not transcription errors - left as-is per fidelity)."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קמג' at page 50 token 390, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 144,
-    "page": 51,
     "expected_gematria": "קמד",
     "stored_gematria": "קמד",
-    "content_match_ratio": null,
-    "status": "ok",
+    "page": 51,
+    "content_match_ratio": 1.0,
     "marker_position": 243,
-    "note": "2026-08-07: marker position found by wider/alternate-spelling search (was marker_not_found_in_window); content confirmed already correct (docai raw at this position matches stored clean_text) and marker glyph confirmed by direct crop. | 2026-08-07: scan-crop pass on lexicon-flagged candidates in this klal's cross-page extension - דעורת->דעות (spurious ר, not printed at all) and לגטרי->לגמרי (ט/מ confusion, cross-checked against this klal's own separately-occurring לגמרי) confirmed and fixed. מהלוקת and ומאו confirmed correct as printed (real print forms, not transcription errors - left as-is per fidelity). בכתיכת/בכתיבת left disclosed as genuinely ambiguous at the letter level (ב/כ) even after crop comparison against same-page references."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קמד' at page 51 token 243, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 145,
-    "page": 52,
     "expected_gematria": "קמה",
     "stored_gematria": "קמה",
-    "content_match_ratio": null,
-    "status": "ok",
+    "page": 52,
+    "content_match_ratio": 1.0,
     "marker_position": 637,
-    "note": "2026-08-07: marker position found by wider/alternate-spelling search (was marker_not_found_in_window); content confirmed already correct (docai raw at this position matches stored clean_text) and marker glyph confirmed by direct crop."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קמה' at page 52 token 637, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 146,
-    "page": 52,
     "expected_gematria": "קמו",
     "stored_gematria": "קמו",
-    "content_match_ratio": 0.0,
-    "status": "ok",
+    "page": 52,
+    "content_match_ratio": 1.0,
     "marker_position": 702,
-    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קמו' at page 52 token 702, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 147,
-    "page": 53,
     "expected_gematria": "קמז",
     "stored_gematria": "קמז",
-    "content_match_ratio": null,
-    "status": "ok",
+    "page": 53,
+    "content_match_ratio": 1.0,
     "marker_position": 99,
-    "note": "2026-08-07: marker position found by wider/alternate-spelling search (was marker_not_found_in_window); content confirmed already correct (docai raw at this position matches stored clean_text) and marker glyph confirmed by direct crop."
+    "status": "ok",
+    "note": "mechanical-near-miss: matched 'קמו' at page 53 token 99, opening agreed with stored clean_text (1.000); marker read as 'קמו', one documented-confusion substitution from expected 'קמז'"
   },
   {
     "klal_id": 148,
-    "page": 53,
     "expected_gematria": "קמח",
     "stored_gematria": "קמח",
-    "content_match_ratio": 0.125,
-    "status": "ok",
+    "page": 53,
+    "content_match_ratio": 1.0,
     "marker_position": 593,
-    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קמח' at page 53 token 593, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 149,
-    "page": 54,
     "expected_gematria": "קמט",
     "stored_gematria": "קמט",
-    "content_match_ratio": null,
-    "status": "ok",
+    "page": 54,
+    "content_match_ratio": 1.0,
     "marker_position": 400,
-    "note": "2026-08-07: marker position found by wider/alternate-spelling search (was marker_not_found_in_window); content confirmed already correct (docai raw at this position matches stored clean_text) and marker glyph confirmed by direct crop."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קמט' at page 54 token 400, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 150,
+    "expected_gematria": "קן",
+    "stored_gematria": "קן",
     "page": 54,
-    "expected_gematria": "קנ",
-    "stored_gematria": "קנ",
-    "content_match_ratio": null,
-    "status": "ok",
+    "content_match_ratio": 1.0,
     "marker_position": 618,
-    "note": "2026-08-07: marker position found by wider/alternate-spelling search (was marker_not_found_in_window); content confirmed already correct (docai raw at this position matches stored clean_text) and marker glyph confirmed by direct crop."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קן' at page 54 token 618, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 151,
-    "page": 55,
     "expected_gematria": "קנא",
     "stored_gematria": "קנא",
-    "content_match_ratio": null,
-    "status": "ok",
+    "page": 55,
+    "content_match_ratio": 1.0,
     "marker_position": 601,
-    "note": "2026-08-07: marker position found by wider/alternate-spelling search (was marker_not_found_in_window); content confirmed already correct (docai raw at this position matches stored clean_text) and marker glyph confirmed by direct crop."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קנא' at page 55 token 601, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 152,
-    "page": 55,
     "expected_gematria": "קנב",
     "stored_gematria": "קנב",
-    "content_match_ratio": 0.125,
-    "status": "ok",
+    "page": 55,
+    "content_match_ratio": 1.0,
     "marker_position": 713,
-    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קנב' at page 55 token 713, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 153,
-    "page": 56,
     "expected_gematria": "קנג",
     "stored_gematria": "קנג",
-    "content_match_ratio": null,
-    "status": "ok",
+    "page": 56,
+    "content_match_ratio": 1.0,
     "marker_position": 58,
-    "note": "2026-08-07: marker position found by wider/alternate-spelling search (was marker_not_found_in_window); content confirmed already correct (docai raw at this position matches stored clean_text) and marker glyph confirmed by direct crop."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קנג' at page 56 token 58, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 154,
-    "page": 56,
     "expected_gematria": "קנד",
     "stored_gematria": "קנד",
-    "content_match_ratio": 0.25,
-    "status": "ok",
+    "page": 56,
+    "content_match_ratio": 1.0,
     "marker_position": 264,
-    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קנד' at page 56 token 264, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 155,
-    "page": 57,
     "expected_gematria": "קנה",
     "stored_gematria": "קנה",
-    "content_match_ratio": null,
-    "status": "ok",
+    "page": 57,
+    "content_match_ratio": 1.0,
     "marker_position": 183,
-    "note": "2026-08-07: marker position found by wider/alternate-spelling search (was marker_not_found_in_window); content confirmed already correct (docai raw at this position matches stored clean_text) and marker glyph confirmed by direct crop."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קנה' at page 57 token 183, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 156,
-    "page": 57,
     "expected_gematria": "קנו",
     "stored_gematria": "קנו",
-    "content_match_ratio": 0.0,
-    "status": "ok",
+    "page": 57,
+    "content_match_ratio": 1.0,
     "marker_position": 327,
-    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קנו' at page 57 token 327, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 157,
-    "page": 57,
     "expected_gematria": "קנז",
     "stored_gematria": "קנז",
-    "content_match_ratio": 0.5,
-    "status": "ok",
+    "page": 57,
+    "content_match_ratio": 1.0,
     "marker_position": 360,
-    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קנז' at page 57 token 360, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 158,
-    "page": 57,
     "expected_gematria": "קנח",
     "stored_gematria": "קנח",
-    "content_match_ratio": 0.625,
+    "page": 57,
+    "content_match_ratio": 1.0,
     "marker_position": 477,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קנח' at page 57 token 477, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 159,
-    "page": 57,
     "expected_gematria": "קנט",
     "stored_gematria": "קנט",
-    "content_match_ratio": 0.625,
+    "page": 57,
+    "content_match_ratio": 1.0,
     "marker_position": 662,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קנט' at page 57 token 662, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 160,
-    "page": 59,
     "expected_gematria": "קס",
     "stored_gematria": "קס",
-    "content_match_ratio": null,
-    "status": "ok",
+    "page": 59,
+    "content_match_ratio": 1.0,
     "marker_position": 5,
-    "note": "2026-08-07: marker position found by wider/alternate-spelling search (was marker_not_found_in_window); content confirmed already correct (docai raw at this position matches stored clean_text) and marker glyph confirmed by direct crop."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קס' at page 59 token 5, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 161,
-    "page": 59,
     "expected_gematria": "קסא",
     "stored_gematria": "קסא",
-    "content_match_ratio": 0.25,
-    "status": "ok",
+    "page": 59,
+    "content_match_ratio": 1.0,
     "marker_position": 47,
-    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קסא' at page 59 token 47, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 162,
-    "page": 59,
     "expected_gematria": "קסב",
     "stored_gematria": "קסב",
-    "content_match_ratio": 0.25,
-    "status": "ok",
+    "page": 59,
+    "content_match_ratio": 1.0,
     "marker_position": 367,
-    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קסב' at page 59 token 367, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 163,
-    "page": 59,
     "expected_gematria": "קסג",
     "stored_gematria": "קסג",
-    "content_match_ratio": 0.125,
-    "status": "ok",
+    "page": 59,
+    "content_match_ratio": 1.0,
     "marker_position": 558,
-    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קסג' at page 59 token 558, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 164,
-    "page": 60,
     "expected_gematria": "קסד",
     "stored_gematria": "קסד",
-    "content_match_ratio": null,
-    "status": "ok",
+    "page": 60,
+    "content_match_ratio": 1.0,
     "marker_position": 275,
-    "note": "2026-08-07: marker position found by wider/alternate-spelling search (was marker_not_found_in_window); content confirmed already correct (docai raw at this position matches stored clean_text) and marker glyph confirmed by direct crop."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קסד' at page 60 token 275, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 165,
-    "page": 60,
     "expected_gematria": "קסה",
     "stored_gematria": "קסה",
-    "content_match_ratio": 0.125,
-    "status": "ok",
+    "page": 60,
+    "content_match_ratio": 1.0,
     "marker_position": 334,
-    "note": "2026-08-07: status was stale (marker_found_content_mismatch frozen from an earlier diagnostic pass, before/without reflecting later content fixes). Re-verified tonight: docai raw text at the recorded marker_position matches stored clean_text (differences are only already-correctly-adjudicated OCR misreads or editorial [.] marks, not real mismatches)."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קסה' at page 60 token 334, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 166,
-    "page": 60,
     "expected_gematria": "קסו",
     "stored_gematria": "קסו",
-    "content_match_ratio": 0.75,
+    "page": 60,
+    "content_match_ratio": 1.0,
     "marker_position": 429,
     "status": "ok",
-    "note": "2026-08-06: real content split out from klal 165's stored text (was merged in, undivided) into its own klal_id 166 record. marker_position 429 was already correct before this fix - only the stored content location was wrong."
+    "note": "mechanical-exact: matched 'קסו' at page 60 token 429, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 167,
-    "page": 60,
     "expected_gematria": "קסז",
     "stored_gematria": "קסז",
-    "content_match_ratio": null,
-    "status": "marker_found_content_mismatch",
+    "page": 60,
+    "content_match_ratio": 1.0,
     "marker_position": 503,
-    "note": "2026-08-06: 'marker_not_found_in_window' was wrong - the marker exists at page 60 token 503, docai read it as 'קסו' (colliding with klal 166's own marker text) instead of 'קסז' - confirmed by direct crop comparison of the two 'קסו'-labeled tokens' last letter, visibly different shapes (vav vs zayin). Content previously classified as a numbering gap; real content extends from here across page 61 and into page 62 up to klal 168's marker (token 140)."
+    "status": "ok",
+    "note": "mechanical-near-miss: matched 'קסו' at page 60 token 503, opening agreed with stored clean_text (1.000); marker read as 'קסו', one documented-confusion substitution from expected 'קסז'"
   },
   {
     "klal_id": 168,
-    "page": 62,
     "expected_gematria": "קסח",
     "stored_gematria": "קסח",
+    "page": 62,
     "content_match_ratio": 1.0,
     "marker_position": 140,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קסח' at page 62 token 140, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 169,
-    "page": 62,
     "expected_gematria": "קסט",
     "stored_gematria": "קסט",
-    "content_match_ratio": 0.875,
+    "page": 62,
+    "content_match_ratio": 1.0,
     "marker_position": 739,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קסט' at page 62 token 739, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 170,
-    "page": 64,
     "expected_gematria": "קע",
     "stored_gematria": "קע",
-    "content_match_ratio": 0.875,
+    "page": 64,
+    "content_match_ratio": 1.0,
     "marker_position": 139,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קע' at page 64 token 139, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 171,
-    "page": 64,
     "expected_gematria": "קעא",
     "stored_gematria": "קעא",
-    "content_match_ratio": 0.875,
+    "page": 64,
+    "content_match_ratio": 1.0,
     "marker_position": 201,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קעא' at page 64 token 201, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 172,
-    "page": 64,
     "expected_gematria": "קעב",
     "stored_gematria": "קעב",
-    "content_match_ratio": 0.5,
-    "status": "marker_found_content_mismatch",
-    "marker_position": 329
+    "page": 64,
+    "content_match_ratio": 1.0,
+    "marker_position": 329,
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קעב' at page 64 token 329, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 173,
-    "page": 64,
     "expected_gematria": "קעג",
     "stored_gematria": "קעג",
-    "content_match_ratio": 0.75,
+    "page": 64,
+    "content_match_ratio": 0.875,
     "marker_position": 483,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קעג' at page 64 token 483, opening agreed with stored clean_text (0.875)"
   },
   {
     "klal_id": 174,
-    "page": 64,
     "expected_gematria": "קעד",
     "stored_gematria": "קעד",
-    "content_match_ratio": 0.875,
+    "page": 64,
+    "content_match_ratio": 1.0,
     "marker_position": 539,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קעד' at page 64 token 539, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 175,
-    "page": 64,
     "expected_gematria": "קעה",
     "stored_gematria": "קעה",
-    "content_match_ratio": 0.75,
+    "page": 64,
+    "content_match_ratio": 1.0,
     "marker_position": 701,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קעה' at page 64 token 701, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 176,
-    "page": 65,
     "expected_gematria": "קעו",
     "stored_gematria": "קעו",
-    "content_match_ratio": 0.875,
+    "page": 65,
+    "content_match_ratio": 1.0,
     "marker_position": 6,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קעו' at page 65 token 6, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 177,
-    "page": 65,
     "expected_gematria": "קעז",
     "stored_gematria": "קעז",
-    "content_match_ratio": 0.875,
+    "page": 65,
+    "content_match_ratio": 1.0,
     "marker_position": 753,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קעז' at page 65 token 753, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 178,
-    "page": 66,
     "expected_gematria": "קעח",
     "stored_gematria": "קעח",
-    "content_match_ratio": 0.875,
+    "page": 66,
+    "content_match_ratio": 1.0,
     "marker_position": 419,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קעח' at page 66 token 419, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 179,
-    "page": 66,
     "expected_gematria": "קעט",
     "stored_gematria": "קעט",
+    "page": 66,
     "content_match_ratio": 1.0,
     "marker_position": 833,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קעט' at page 66 token 833, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 180,
-    "page": 67,
     "expected_gematria": "קף",
     "stored_gematria": "קף",
+    "page": 67,
+    "content_match_ratio": 0.875,
     "marker_position": 319,
     "status": "ok",
-    "content_match_ratio": 0.875,
-    "note": "2026-08-17: added via pipeline/build_gematria_trace.py - klal 180 (split out from a neighbor in the 2026-08-06 boundary-fix work) was never in this trace at all until now. Independently re-verified directly against docai_word_boxes/page_67.json token 319 (exact \"קף\") before applying."
+    "note": "mechanical-exact: matched 'קף' at page 67 token 319, opening agreed with stored clean_text (0.875)"
   },
   {
     "klal_id": 181,
-    "page": 67,
     "expected_gematria": "קפא",
     "stored_gematria": "קפא",
+    "page": 67,
     "content_match_ratio": 1.0,
     "marker_position": 445,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קפא' at page 67 token 445, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 182,
-    "page": 67,
     "expected_gematria": "קפב",
-    "stored_gematria": "קפכ",
-    "marker_position": 576,
-    "status": "marker_found_content_mismatch",
+    "stored_gematria": "קפב",
+    "page": 67,
     "content_match_ratio": 0.75,
-    "note": "2026-08-17: added via pipeline/build_gematria_trace.py - klal 182 (split out from a neighbor in the 2026-08-06 boundary-fix work) was never in this trace at all until now. Independently re-verified directly against docai_word_boxes/page_67.json token 576: DocAI reads \"קפכ\" (200) where \"קפב\" (182) is expected - a ב/כ misread, same confusion family already confirmed elsewhere in this corpus - but the position itself (right margin, x1=0.825) is trustworthy."
+    "marker_position": 576,
+    "status": "ok",
+    "note": "content-anchored: matched 'קפכ' at page 67 token 576, opening agreed with stored anchor (0.750); numeral not found by exact or documented-confusion match; recovered by anchoring on the stored opening (0.750) and taking the marker-band token before it, which DocAI read as 'קפכ' (expected 'קפב')"
   },
   {
     "klal_id": 183,
-    "page": 67,
     "expected_gematria": "קפג",
     "stored_gematria": "קפג",
-    "content_match_ratio": 0.75,
+    "page": 67,
+    "content_match_ratio": 1.0,
     "marker_position": 680,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קפג' at page 67 token 680, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 184,
-    "page": 68,
     "expected_gematria": "קפד",
     "stored_gematria": "קפד",
+    "page": 68,
     "content_match_ratio": 1.0,
     "marker_position": 179,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קפד' at page 68 token 179, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 185,
-    "page": 68,
     "expected_gematria": "קפה",
     "stored_gematria": "קפה",
-    "content_match_ratio": 0.875,
+    "page": 68,
+    "content_match_ratio": 1.0,
     "marker_position": 240,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קפה' at page 68 token 240, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 186,
-    "page": 68,
     "expected_gematria": "קפו",
     "stored_gematria": "קפו",
-    "content_match_ratio": null,
-    "status": "ok",
+    "page": 68,
+    "content_match_ratio": 1.0,
     "marker_position": 316,
-    "note": "2026-08-06: klal_id 186 previously held klal 187's real content (marker קפז misread as קפו). Real 186 is the short span 316-339, its own real content, split out."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קפו' at page 68 token 316, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 187,
-    "page": 68,
-    "marker_position": 340,
     "expected_gematria": "קפז",
     "stored_gematria": "קפז",
+    "page": 68,
+    "content_match_ratio": 1.0,
+    "marker_position": 340,
     "status": "ok",
-    "content_match_ratio": null,
-    "note": "2026-08-06: never in this trace before (was a placeholder). Real marker found - the content already stored under klal_id 186 was actually this klal's, with its own קפז marker misread as קפו (collides with klal 186's own genuine קפו 24 tokens earlier). Confirmed by direct crop: the two 'קפו'-reading tokens have visibly different last-letter shapes."
+    "note": "mechanical-near-miss: matched 'קפו' at page 68 token 340, opening agreed with stored clean_text (1.000); marker read as 'קפו', one documented-confusion substitution from expected 'קפז'"
   },
   {
     "klal_id": 188,
-    "page": 68,
     "expected_gematria": "קפח",
     "stored_gematria": "קפח",
-    "content_match_ratio": 0.875,
+    "page": 68,
+    "content_match_ratio": 1.0,
     "marker_position": 680,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קפח' at page 68 token 680, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 189,
-    "page": 68,
     "expected_gematria": "קפט",
     "stored_gematria": "קפט",
-    "content_match_ratio": null,
+    "page": 68,
+    "content_match_ratio": 1.0,
     "marker_position": 714,
     "status": "ok",
-    "note": "2026-08-06: klal_id 189 previously held klal 190's real content merged in undivided (Lesson 16 pattern), behind a genuinely-read קץ marker that prior marker search never found because it only searched the standard-form spelling קצ, not the word-final-letter form קץ (both spell 190)."
+    "note": "mechanical-exact: matched 'קפט' at page 68 token 714, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 190,
-    "page": 69,
-    "marker_position": 378,
     "expected_gematria": "קץ",
     "stored_gematria": "קץ",
+    "page": 69,
+    "content_match_ratio": 1.0,
+    "marker_position": 378,
     "status": "ok",
-    "content_match_ratio": null,
-    "note": "2026-08-06: never in this trace before (was a placeholder, 'marker_not_found_in_window'). Real marker is the word-final-letter spelling קץ (=190, same value as קצ), sitting inside what was klal 189's stored text. marker_position not re-derived as a raw token index (this klal was split by string, not by token-span reconstruction) - if this field is needed later, locate 'קץ' as a genuine title-context word in page 68's tokens, not by exact-string search for 'קצ' alone. UPDATED 2026-08-17: marker_position now derived and independently re-verified directly against docai_word_boxes/page_69.json token 378 (exact \"קץ\", right-margin position, immediately followed by \"הלכה כדברי המקיל\" - a coherent klal opening) before applying, per this note's own earlier suggestion. Page corrected 68->69 to match."
+    "note": "mechanical-exact: matched 'קץ' at page 69 token 378, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 191,
-    "page": 69,
     "expected_gematria": "קצא",
     "stored_gematria": "קצא",
-    "content_match_ratio": 0.875,
+    "page": 69,
+    "content_match_ratio": 1.0,
     "marker_position": 425,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קצא' at page 69 token 425, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 192,
-    "page": 69,
     "expected_gematria": "קצב",
     "stored_gematria": "קצב",
+    "page": 69,
     "content_match_ratio": 1.0,
     "marker_position": 574,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קצב' at page 69 token 574, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 193,
-    "page": 69,
     "expected_gematria": "קצג",
     "stored_gematria": "קצג",
-    "content_match_ratio": 0.875,
+    "page": 69,
+    "content_match_ratio": 1.0,
     "marker_position": 648,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קצג' at page 69 token 648, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 194,
-    "page": 70,
     "expected_gematria": "קצד",
-    "stored_gematria": "קצר",
-    "marker_position": 5,
-    "status": "marker_found_content_mismatch",
+    "stored_gematria": "קצד",
+    "page": 70,
     "content_match_ratio": 1.0,
-    "note": "2026-08-17: added via pipeline/build_gematria_trace.py - klal 194 (split out from a neighbor in the 2026-08-06 boundary-fix work) was never in this trace at all until now. Independently re-verified directly against docai_word_boxes/page_70.json token 5: DocAI reads \"קצר\" where \"קצד\" (194) is expected - a ד/ר misread, same confusion family already confirmed elsewhere in this corpus - but content_match_ratio 1.0 (the text immediately following exactly matches klal 194's own stored opening) strongly confirms the position itself."
+    "marker_position": 5,
+    "status": "ok",
+    "note": "mechanical-near-miss: matched 'קצר' at page 70 token 5, opening agreed with stored clean_text (1.000); marker read as 'קצר', one documented-confusion substitution from expected 'קצד'"
   },
   {
     "klal_id": 195,
-    "page": 70,
     "expected_gematria": "קצה",
     "stored_gematria": "קצה",
-    "content_match_ratio": 0.75,
+    "page": 70,
+    "content_match_ratio": 0.875,
     "marker_position": 595,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קצה' at page 70 token 595, opening agreed with stored clean_text (0.875)"
   },
   {
     "klal_id": 196,
-    "page": 70,
     "expected_gematria": "קצו",
     "stored_gematria": "קצו",
-    "content_match_ratio": null,
+    "page": 70,
+    "content_match_ratio": 1.0,
     "marker_position": 641,
     "status": "ok",
-    "note": "2026-08-06: klal_id 196 previously held klal 197's real content merged in undivided (same Lesson 16 pattern as 186/187 and 189/190), behind a קצז marker misread as קצו (ז->ו, same confusion family as klal 166/167)."
+    "note": "mechanical-exact: matched 'קצו' at page 70 token 641, opening agreed with stored clean_text (1.000); 2 exact candidates within 0.125 of each other (pages [70]); NOT disambiguated - no vision adjudicator available, earliest taken"
   },
   {
     "klal_id": 197,
-    "page": 70,
-    "marker_position": 737,
     "expected_gematria": "קצז",
     "stored_gematria": "קצז",
+    "page": 70,
+    "content_match_ratio": 1.0,
+    "marker_position": 737,
     "status": "ok",
-    "content_match_ratio": null,
-    "note": "2026-08-06: never in this trace before (was a placeholder). Real marker found at page 70 token 737, misread קצו by docai (ז->ו) - confirmed by sentence-boundary context (clean ':' before it, coherent new content after) and cross-page span read-through."
+    "note": "mechanical-near-miss: matched 'קצו' at page 70 token 737, opening agreed with stored clean_text (1.000); marker read as 'קצו', one documented-confusion substitution from expected 'קצז'"
   },
   {
     "klal_id": 198,
-    "page": 71,
     "expected_gematria": "קצח",
     "stored_gematria": "קצח",
-    "content_match_ratio": null,
-    "status": "ok",
+    "page": 71,
+    "content_match_ratio": 1.0,
     "marker_position": 242,
-    "note": "2026-08-17: \"marker_not_found_in_window\" was wrong - the marker exists, correctly read as קצח (not misread, unlike klal 167/196/197), at page 71 token 242 - one page later than this entry's original page:70 attribution, which is presumably why the original search window missed it. Confirmed by direct token context (docai_word_boxes/page_71.json tokens 238-249): token 241 is a klal-closing colon (\":\"), token 242 is קצח at the right-margin marker x-position (x1=0.8185), followed immediately by a coherent new opening (השמר פן ואל אינו אלא לא תעשה). Found while fixing the klal_page_regions.json continuation-bounds bug for klal 197/198 (PROJECT-STATUS.md) - klal 197 had no valid end boundary because klal 198, the true next marker, was invisible to load_end_boundary_positions(), so it fell through to klal 199 instead and over-claimed all of klal 198's territory in between."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קצח' at page 71 token 242, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 199,
-    "page": 72,
     "expected_gematria": "קצט",
     "stored_gematria": "קצט",
-    "content_match_ratio": 0.875,
+    "page": 72,
+    "content_match_ratio": 1.0,
     "marker_position": 540,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'קצט' at page 72 token 540, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 200,
-    "page": 72,
     "expected_gematria": "ר",
     "stored_gematria": "ר",
+    "page": 72,
     "content_match_ratio": 1.0,
     "marker_position": 593,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'ר' at page 72 token 593, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 201,
-    "page": 73,
     "expected_gematria": "רא",
     "stored_gematria": "רא",
-    "content_match_ratio": 0.75,
+    "page": 73,
+    "content_match_ratio": 1.0,
     "marker_position": 95,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רא' at page 73 token 95, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 202,
-    "page": 73,
     "expected_gematria": "רב",
     "stored_gematria": "רב",
-    "content_match_ratio": 0.875,
+    "page": 73,
+    "content_match_ratio": 1.0,
     "marker_position": 148,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רב' at page 73 token 148, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 203,
-    "page": 73,
     "expected_gematria": "רג",
     "stored_gematria": "רג",
+    "page": 73,
     "content_match_ratio": 1.0,
     "marker_position": 243,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רג' at page 73 token 243, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 204,
-    "page": 73,
     "expected_gematria": "רד",
     "stored_gematria": "רד",
-    "content_match_ratio": 0.75,
+    "page": 73,
+    "content_match_ratio": 0.875,
     "marker_position": 284,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רד' at page 73 token 284, opening agreed with stored clean_text (0.875)"
   },
   {
     "klal_id": 205,
-    "page": 73,
     "expected_gematria": "רה",
     "stored_gematria": "רה",
-    "content_match_ratio": 0.875,
+    "page": 73,
+    "content_match_ratio": 1.0,
     "marker_position": 362,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רה' at page 73 token 362, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 206,
-    "page": 73,
     "expected_gematria": "רו",
     "stored_gematria": "רו",
-    "content_match_ratio": 0.75,
+    "page": 73,
+    "content_match_ratio": 1.0,
     "marker_position": 404,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רו' at page 73 token 404, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 207,
-    "page": 73,
     "expected_gematria": "רז",
     "stored_gematria": "רז",
-    "content_match_ratio": 0.875,
+    "page": 73,
+    "content_match_ratio": 1.0,
     "marker_position": 604,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רז' at page 73 token 604, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 208,
-    "page": 73,
     "expected_gematria": "רח",
     "stored_gematria": "רח",
-    "content_match_ratio": 0.875,
+    "page": 73,
+    "content_match_ratio": 1.0,
     "marker_position": 656,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רח' at page 73 token 656, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 209,
-    "page": 73,
     "expected_gematria": "רט",
     "stored_gematria": "רט",
-    "content_match_ratio": 0.875,
+    "page": 73,
+    "content_match_ratio": 1.0,
     "marker_position": 739,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רט' at page 73 token 739, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 210,
-    "page": 73,
     "expected_gematria": "רי",
     "stored_gematria": "רי",
-    "content_match_ratio": 0.625,
+    "page": 73,
+    "content_match_ratio": 0.875,
     "marker_position": 771,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רי' at page 73 token 771, opening agreed with stored clean_text (0.875)"
   },
   {
     "klal_id": 211,
-    "page": 74,
     "expected_gematria": "ריא",
     "stored_gematria": "ריא",
-    "content_match_ratio": 0.875,
+    "page": 74,
+    "content_match_ratio": 1.0,
     "marker_position": 81,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'ריא' at page 74 token 81, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 212,
-    "page": 74,
     "expected_gematria": "ריב",
     "stored_gematria": "ריב",
-    "content_match_ratio": 0.875,
+    "page": 74,
+    "content_match_ratio": 1.0,
     "marker_position": 162,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'ריב' at page 74 token 162, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 213,
-    "page": 74,
     "expected_gematria": "ריג",
     "stored_gematria": "ריג",
-    "content_match_ratio": 0.75,
+    "page": 74,
+    "content_match_ratio": 1.0,
     "marker_position": 252,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'ריג' at page 74 token 252, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 214,
-    "page": 74,
     "expected_gematria": "ריד",
     "stored_gematria": "ריד",
-    "content_match_ratio": 0.875,
+    "page": 74,
+    "content_match_ratio": 1.0,
     "marker_position": 308,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'ריד' at page 74 token 308, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 215,
-    "page": 74,
     "expected_gematria": "רטו",
     "stored_gematria": "רטו",
-    "content_match_ratio": null,
-    "status": "ok",
+    "page": 74,
+    "content_match_ratio": 1.0,
     "marker_position": 487,
-    "note": "2026-08-06: expected_gematria here should really allow either valid 215 spelling (ריה or רטו) - prior marker search apparently only tried ריה, missing the רטו spelling actually used in print (same class of blind spot as klal 190's קץ/קצ). klal_id 215 also held BOTH klal 216 and klal 217's real content merged in undivided until tonight (a double merge, not just single-neighbor)."
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רטו' at page 74 token 487, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 216,
-    "page": 74,
-    "marker_position": 637,
     "expected_gematria": "רטז",
     "stored_gematria": "רטז",
+    "page": 74,
+    "content_match_ratio": 1.0,
+    "marker_position": 637,
     "status": "ok",
-    "content_match_ratio": null,
-    "note": "2026-08-06: never in this trace before (was a placeholder). Real marker found at page 74 token 637, misread רטן by docai (ז misread as final-nun ן - a new letter-confusion pair for this project, confirmed by direct crop). Content was merged into klal 215's stored text."
+    "note": "mechanical-near-miss: matched 'רטן' at page 74 token 637, opening agreed with stored clean_text (1.000); marker read as 'רטן', one documented-confusion substitution from expected 'רטז'"
   },
   {
     "klal_id": 217,
-    "page": 75,
-    "marker_position": 416,
     "expected_gematria": "ריז",
     "stored_gematria": "ריז",
+    "page": 75,
+    "content_match_ratio": 1.0,
+    "marker_position": 416,
     "status": "ok",
-    "content_match_ratio": null,
-    "note": "2026-08-06: never in this trace before (was a placeholder). Real marker found at page 75 token 416, misread ריו by docai (ז->ו, same confusion family as klal 166/167 and 196/197). Content was merged into klal 215's stored text, spanning across the page 74->75 boundary."
+    "note": "mechanical-near-miss: matched 'ריו' at page 75 token 416, opening agreed with stored clean_text (1.000); marker read as 'ריו', one documented-confusion substitution from expected 'ריז'"
   },
   {
     "klal_id": 218,
-    "page": 76,
     "expected_gematria": "ריח",
     "stored_gematria": "ריח",
+    "page": 76,
     "content_match_ratio": 1.0,
     "marker_position": 525,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'ריח' at page 76 token 525, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 219,
-    "page": 76,
     "expected_gematria": "ריט",
     "stored_gematria": "ריט",
+    "page": 76,
     "content_match_ratio": 0.875,
     "marker_position": 598,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'ריט' at page 76 token 598, opening agreed with stored clean_text (0.875)"
   },
   {
     "klal_id": 220,
-    "page": 76,
     "expected_gematria": "רכ",
     "stored_gematria": "רכ",
-    "content_match_ratio": 0.625,
+    "page": 76,
+    "content_match_ratio": 1.0,
     "marker_position": 707,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רכ' at page 76 token 707, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 221,
-    "page": 76,
     "expected_gematria": "רכא",
     "stored_gematria": "רכא",
-    "content_match_ratio": 0.875,
+    "page": 76,
+    "content_match_ratio": 1.0,
     "marker_position": 755,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רכא' at page 76 token 755, opening agreed with stored clean_text (1.000)"
   },
   {
     "klal_id": 222,
-    "page": 76,
     "expected_gematria": "רכב",
     "stored_gematria": "רכב",
-    "content_match_ratio": 0.75,
+    "page": 76,
+    "content_match_ratio": 1.0,
     "marker_position": 837,
-    "status": "ok"
+    "status": "ok",
+    "note": "mechanical-exact: matched 'רכב' at page 76 token 837, opening agreed with stored clean_text (1.000)"
   }
 ]

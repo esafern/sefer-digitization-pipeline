@@ -239,6 +239,7 @@ CONFUSION_PAIRS = (
     ("ר", "ה"), ("ד", "ה"),                       # (b)
     ("נ", "ן"), ("פ", "ף"), ("צ", "ץ"),          # (c)
     ("כ", "ך"), ("מ", "ם"),                       # (c)
+    ("ט", "פ"),                                   # (d) tet misread as peh in bold klal marker
 )
 
 

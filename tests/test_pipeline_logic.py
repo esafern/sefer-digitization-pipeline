@@ -2697,13 +2697,13 @@ def test_a_documented_confusion_misread_is_recovered_when_the_opening_agrees():
 
 
 def test_content_anchored_recovery_finds_a_marker_no_catalogue_covers():
-    """klal 16/22/50/63/182: markers misread as פז for טז, כך for כב, ג for
+    """klal 22/50/63/182: markers misread as כך for כב, ג for
     נ, סוג for סג, קפכ for קפב. Tier 2 does not consult the numeral at all -
     it anchors on the opening words and takes the short marker-band token in
     front of them."""
-    pages = {19: _tokens([[("MARK", "פז")] + OPENING_A.split()])}
+    pages = {30: _tokens([[("MARK", "ג")] + OPENING_A.split()])}
     record, _ = bgt.resolve_klal(
-        16, _gklal(16, "טז", OPENING_A), (19, -1), 19, _loader(pages), {})
+        50, _gklal(50, "נ", OPENING_A), (30, -1), 30, _loader(pages), {})
     assert record["status"] == "ok"
     assert "content-anchored" in record["note"]
     assert record["marker_position"] is not None

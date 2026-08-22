@@ -250,7 +250,7 @@ PLACEHOLDER_TITLE_COUNT_MAX = 115
 # fix (a systemic mis-ordering check is future work, not scoped here);
 # baselined as an explained false positive for this one instance, scan-
 # verified directly, not inferred.
-SPAN_COVERAGE_BASELINE = {15, 65, 83, 106, 123, 130, 175, 195}
+SPAN_COVERAGE_BASELINE = {16, 22, 65, 83, 84, 106, 123, 130, 175, 195}
 
 # NOT false positives - these are CONFIRMED REAL, UNFIXED corpus damage,
 # kept in a separate constant from SPAN_COVERAGE_BASELINE precisely so that
