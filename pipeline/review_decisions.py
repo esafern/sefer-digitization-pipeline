@@ -84,8 +84,23 @@ REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # git-tracked decisions log.
 DECISIONS_PATH = os.environ.get("REVIEW_DECISIONS_PATH") or os.path.join(REPO, "review_decisions.jsonl")
 
-VALID_DECISION_TYPES = {"candidate_choice", "klal_flag", "apply_event", "punctuation_choice",
-                        "witness_choice", "manual_correction"}
+VALID_DECISION_TYPES = {
+    "disputed_choice",
+    "candidate_choice",
+    "klal_flag",
+    "apply_event",
+    "punctuation_choice",
+    "witness_choice",
+    "manual_correction",
+}
+
+
+def _match_decision_types(decision_type):
+    if decision_type is None:
+        return None
+    if decision_type in ("disputed_choice", "candidate_choice"):
+        return {"disputed_choice", "candidate_choice"}
+    return {decision_type}
 
 # Guards append_decision() against interleaved partial writes under
 # ThreadingHTTPServer's concurrent-request model. Python's buffered f.write()
@@ -189,13 +204,14 @@ def history_for(klal_id, word_index=None, decision_type=None, path=None):
     what the two review_server.py helpers above do rather than relying on
     this function's word_index=None default to mean that."""
     records = _read_all(path)
+    allowed_types = _match_decision_types(decision_type)
     out = []
     for r in records:
         if r["klal_id"] != klal_id:
             continue
         if word_index is not None and r.get("word_index") != word_index:
             continue
-        if decision_type is not None and r["decision_type"] != decision_type:
+        if allowed_types is not None and r["decision_type"] not in allowed_types:
             continue
         out.append(r)
     return out
@@ -209,12 +225,13 @@ def current_for(klal_id, word_index=None, decision_type=None, path=None):
 
 def all_current(decision_type, path=None):
     """Latest decision per (klal_id, word_index) for a given decision_type -
-    e.g. every currently-active candidate override, or every klal's current
+    e.g. every currently-active disputed/candidate override, or every klal's current
     flag state. Returns {(klal_id, word_index): record}."""
     records = _read_all(path)
+    allowed_types = _match_decision_types(decision_type)
     current = {}
     for r in records:
-        if r["decision_type"] != decision_type:
+        if allowed_types is not None and r["decision_type"] not in allowed_types:
             continue
         key = (r["klal_id"], r.get("word_index"))
         current[key] = r  # later (later-appended) records win for the same key

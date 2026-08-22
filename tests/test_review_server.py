@@ -170,9 +170,9 @@ def test_candidate_override_flow_persists_and_does_not_touch_part1json(server, p
 
     disputed = page.locator(f"#klal-block-{klal_id} .flag-word.state-open").first
     disputed.click()
-    page.wait_for_selector("#candidate-panel.open", timeout=5000)
+    page.wait_for_selector("#disputed-panel.open, #candidate-panel.open", timeout=5000)
 
-    options = page.locator(".candidate-option")
+    options = page.locator(".disputed-option, .candidate-option")
     assert options.count() >= 1
 
     # switch to whichever option isn't already active, save a note
@@ -184,7 +184,7 @@ def test_candidate_override_flow_persists_and_does_not_touch_part1json(server, p
     # a recorded decision always wins the tri-state, so the word span
     # should now show the human-resolved (green) state regardless of what
     # it was before
-    page.click("#candidate-panel-close")
+    page.click("#disputed-panel-close, #candidate-panel-close")
     assert page.locator(".flag-word.state-human").count() >= 1
 
     # reload from scratch and confirm the decision persisted server-side,

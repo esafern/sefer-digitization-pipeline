@@ -941,13 +941,13 @@ def api_page(page_num):
     return out
 
 
-def api_post_candidate_decision(body):
+def api_post_disputed_decision(body):
     klal_id = int(body["klal_id"])
     word_index = int(body["word_index"])
     corrections = _load_corrections().get(str(klal_id), [])
     snapshot = next((c for c in corrections if c["word_index"] == word_index), None)
     record = rd.append_decision(
-        "candidate_choice",
+        "disputed_choice",
         klal_id=klal_id,
         word_index=word_index,
         chosen_source=body.get("chosen_source"),
@@ -956,6 +956,9 @@ def api_post_candidate_decision(body):
         note=body.get("note"),
     )
     return record
+
+
+api_post_candidate_decision = api_post_disputed_decision
 
 
 def api_post_punctuation_decision(body):
@@ -1214,8 +1217,8 @@ class Handler(BaseHTTPRequestHandler):
             raw = self.rfile.read(length) if length else b"{}"
             body = json.loads(raw.decode("utf-8"))
 
-            if path == "/api/decisions/candidate":
-                return self._send_json(api_post_candidate_decision(body), status=201)
+            if path in ("/api/decisions/disputed", "/api/decisions/candidate"):
+                return self._send_json(api_post_disputed_decision(body), status=201)
             if path == "/api/decisions/punctuation":
                 return self._send_json(api_post_punctuation_decision(body), status=201)
             if path == "/api/decisions/witness":

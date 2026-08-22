@@ -43,7 +43,40 @@ def parse_vlm_pass(filepath):
     return klalim_text
 
 
-def evaluate_self_consistency():
+import argparse
+import unicodedata
+
+
+def normalize_text_punct(text):
+    """
+    Normalizes Hebrew punctuation and symbols:
+    - Normalizes Hebrew gershayim/geresh Unicode variants to standard ASCII ' and "
+    - Normalizes bullet points '•', mid-dots, colons, periods
+    - Strips outer punctuation around words
+    - Preserves internal quotes in abbreviations (e.g. רש"י, ע"ש, וכו')
+    """
+    text = unicodedata.normalize("NFKC", text)
+    text = (
+        text.replace("־", "-")
+        .replace("״", '"')
+        .replace("׳", "'")
+        .replace("”", '"')
+        .replace("“", '"')
+        .replace("’", "'")
+        .replace("‘", "'")
+        .replace("•", ".")
+        .replace("׃", ":")
+        .replace(";", ":")
+    )
+    words = []
+    for raw_w in text.split():
+        w = raw_w.strip(" \t\n\r.•:,;!?-–—()[]{}")
+        if w:
+            words.append(w)
+    return words
+
+
+def evaluate_self_consistency(normalize_punct=False):
     pass_a_file = os.path.join(REPO, "tools", "second_witness_eval", "vlm_part1_full_baseline.txt")
     pass_b_file = os.path.join(REPO, "tools", "second_witness_eval", "vlm_part1_full_baseline_passB.txt")
 
@@ -56,7 +89,8 @@ def evaluate_self_consistency():
 
     common_klalim = sorted(set(pass_a.keys()) & set(pass_b.keys()))
     print("=" * 85)
-    print(f"EVALUATING VLM SELF-CONSISTENCY (PASS A vs PASS B Across {len(common_klalim)} Klalim)")
+    norm_label = " (Punctuation Normalized)" if normalize_punct else ""
+    print(f"EVALUATING VLM SELF-CONSISTENCY (PASS A vs PASS B Across {len(common_klalim)} Klalim){norm_label}")
     print("=" * 85)
 
     total_words_a = 0
@@ -64,9 +98,14 @@ def evaluate_self_consistency():
     total_matches = 0
     disagreements = []
 
+    def tokenize(text):
+        if normalize_punct:
+            return normalize_text_punct(text)
+        return [w for w in text.split() if w]
+
     for k in common_klalim:
-        words_a = pass_a[k].split()
-        words_b = pass_b[k].split()
+        words_a = tokenize(pass_a[k])
+        words_b = tokenize(pass_b[k])
         sm = SequenceMatcher(None, words_a, words_b)
         matches = sum(triple.size for triple in sm.get_matching_blocks())
 
@@ -95,4 +134,7 @@ def evaluate_self_consistency():
 
 
 if __name__ == "__main__":
-    evaluate_self_consistency()
+    parser = argparse.ArgumentParser(description="Evaluate VLM self-consistency between Pass A and Pass B.")
+    parser.add_argument("--normalize-punct", action="store_true", help="Normalize Hebrew punctuation and strip outer symbols")
+    args = parser.parse_args()
+    evaluate_self_consistency(normalize_punct=args.normalize_punct)

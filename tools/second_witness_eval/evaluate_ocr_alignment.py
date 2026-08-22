@@ -104,7 +104,39 @@ def load_candidates():
     return [c for c in all_candidates if 8 <= c.get("klal_id", 0) <= 22]
 
 
-def evaluate_ocr(ocr_filepath, use_part1=False):
+import unicodedata
+
+
+def normalize_text_punct(text):
+    """
+    Normalizes Hebrew punctuation and symbols:
+    - Normalizes Hebrew gershayim/geresh Unicode variants to standard ASCII ' and "
+    - Normalizes bullet points '•', mid-dots, colons, periods
+    - Strips outer punctuation around words
+    - Preserves internal quotes in abbreviations (e.g. רש"י, ע"ש, וכו')
+    """
+    text = unicodedata.normalize("NFKC", text)
+    text = (
+        text.replace("־", "-")
+        .replace("״", '"')
+        .replace("׳", "'")
+        .replace("”", '"')
+        .replace("“", '"')
+        .replace("’", "'")
+        .replace("‘", "'")
+        .replace("•", ".")
+        .replace("׃", ":")
+        .replace(";", ":")
+    )
+    words = []
+    for raw_w in text.split():
+        w = raw_w.strip(" \t\n\r.•:,;!?-–—()[]{}")
+        if w:
+            words.append(w)
+    return words
+
+
+def evaluate_ocr(ocr_filepath, use_part1=False, normalize_punct=False):
     with open(ocr_filepath, "r", encoding="utf-8") as f:
         ocr_raw = f.read()
 
@@ -117,10 +149,13 @@ def evaluate_ocr(ocr_filepath, use_part1=False):
     total_matched_words = 0
 
     print("=" * 90)
-    print(f"EVALUATING SECOND-WITNESS OCR: {os.path.basename(ocr_filepath)}")
+    norm_label = " (Punctuation Normalized)" if normalize_punct else ""
+    print(f"EVALUATING SECOND-WITNESS OCR: {os.path.basename(ocr_filepath)}{norm_label}")
     print("=" * 90)
 
     def tokenize(text):
+        if normalize_punct:
+            return normalize_text_punct(text)
         return [w for w in text.split() if w]
 
     print("\n### Per-Klal Word Alignment Summary\n")
@@ -194,14 +229,15 @@ def main():
     parser = argparse.ArgumentParser(description="Evaluate second-witness OCR against Berlin Klalim ground truth.")
     parser.add_argument("--ocr-file", help="Path to OCR text file to evaluate")
     parser.add_argument("--use-part1", action="store_true", help="Use all 222 klalim from part1.json as ground truth")
+    parser.add_argument("--normalize-punct", action="store_true", help="Normalize Hebrew punctuation and strip outer symbols")
     args = parser.parse_args()
 
     if not args.ocr_file or not os.path.exists(args.ocr_file):
-        print("Usage: python3 tools/second_witness_eval/evaluate_ocr_alignment.py --ocr-file <path> [--use-part1]")
+        print("Usage: python3 tools/second_witness_eval/evaluate_ocr_alignment.py --ocr-file <path> [--use-part1] [--normalize-punct]")
         print("Note: Ground truth file is ready at tools/second_witness_eval/groundtruth_klal_8_22.txt or --use-part1.")
         sys.exit(1)
 
-    evaluate_ocr(args.ocr_file, use_part1=args.use_part1)
+    evaluate_ocr(args.ocr_file, use_part1=args.use_part1, normalize_punct=args.normalize_punct)
 
 
 if __name__ == "__main__":

@@ -52,14 +52,24 @@ function escapeAttr(s) {
 
 function extractSuggestedWord(reasoning) {
   if (!reasoning) return null;
+  if (typeof reasoning === 'object') {
+    reasoning = reasoning.reasoning || (reasoning.current_decision && reasoning.current_decision.note) || reasoning.note;
+  }
+  if (!reasoning || typeof reasoning !== 'string') return null;
+
+  // 1. Arrow pattern: e.g. "בססחים w30 → בפסחים" or "ידן -> ידו"
+  const mArrow = reasoning.match(/(?:→|->)\s*['"״׳]?([^\s|'"״׳]+)/);
+  if (mArrow) return mArrow[1].trim();
+
+  // 2. Prose patterns
   const m1 = reasoning.match(/away from ['"]([^'"]+)['"]/i);
-  if (m1) return m1[1];
+  if (m1) return m1[1].trim();
   const m2 = reasoning.match(/suggests? ['"]([^'"]+)['"]/i);
-  if (m2) return m2[1];
+  if (m2) return m2[1].trim();
   const m3 = reasoning.match(/['"]([^'"]+)['"]\s*\(\d+x independently attested\)/i);
-  if (m3) return m3[1];
+  if (m3) return m3[1].trim();
   const m4 = reasoning.match(/replaces? (?:with )?['"]([^'"]+)['"]/i);
-  if (m4) return m4[1];
+  if (m4) return m4[1].trim();
   return null;
 }
 
@@ -536,10 +546,33 @@ function renderKlalBody(block, k) {
       }
     } else if (corr) {
       const span = document.createElement('span');
-      span.className = 'flag-word state-' + wordState(corr);
+      const wState = wordState(corr);
+      let chosenText = null;
+      if (corr.current_decision && corr.current_decision.chosen_text !== undefined) {
+        chosenText = corr.current_decision.chosen_text;
+      }
+      const pendingDelete = chosenText === '';
+      const pendingReplace = !pendingDelete && chosenText && chosenText !== w;
+
+      span.className = 'flag-word state-' + wState
+        + (pendingDelete ? ' pending-delete' : '')
+        + (pendingReplace ? ' pending-replace' : '');
       span.textContent = w;
       attachWordHandlers(span, k.klal_id, corr);
       body.appendChild(span);
+
+      if (pendingReplace) {
+        const arrow = document.createElement('span');
+        arrow.className = 'pending-replace-arrow';
+        arrow.textContent = ' → ';
+        body.appendChild(arrow);
+        const repl = document.createElement('span');
+        repl.className = 'pending-replace-text';
+        repl.textContent = chosenText;
+        repl.title = 'Pending: recorded but not yet applied to part1.json';
+        attachWordHandlers(repl, k.klal_id, corr);
+        body.appendChild(repl);
+      }
     } else {
       // Plain, not-yet-flagged word - clickable too (2026-08-13, "add
       // feature for reviewer to flag any word and replace it"), not just
@@ -637,7 +670,7 @@ function attachWordHandlers(el, klalId, corr, isGap) {
       const targetPage = corr.page || (klalById[klalId] && klalById[klalId].page);
       showPage(targetPage, klalId, corr);
     }
-    openCandidatePanel(klalId, corr);
+    openDisputedPanel(klalId, corr);
   });
 }
 function positionTooltip(e) {
@@ -648,10 +681,12 @@ function positionTooltip(e) {
   tooltip.style.top = y + 'px';
 }
 
-// ---------- candidate override panel ----------
+// ---------- disputed word override panel ----------
 const backdrop = document.getElementById('overlay-backdrop');
-const candidatePanel = document.getElementById('candidate-panel');
-const candidatePanelBody = document.getElementById('candidate-panel-body');
+const disputedPanel = document.getElementById('disputed-panel') || document.getElementById('candidate-panel');
+const disputedPanelBody = document.getElementById('disputed-panel-body') || document.getElementById('candidate-panel-body');
+const candidatePanel = disputedPanel;
+const candidatePanelBody = disputedPanelBody;
 const klalFlagPanel = document.getElementById('klal-flag-panel');
 const klalFlagPanelBody = document.getElementById('klal-flag-panel-body');
 const punctuationPanel = document.getElementById('punctuation-panel');
@@ -662,7 +697,8 @@ const manualPanel = document.getElementById('manual-panel');
 const manualPanelBody = document.getElementById('manual-panel-body');
 
 function setupPanels() {
-  document.getElementById('candidate-panel-close').onclick = dismissPanels;
+  const disputedClose = document.getElementById('disputed-panel-close') || document.getElementById('candidate-panel-close');
+  if (disputedClose) disputedClose.onclick = dismissPanels;
   document.getElementById('klal-flag-panel-close').onclick = dismissPanels;
   document.getElementById('punctuation-panel-close').onclick = dismissPanels;
   document.getElementById('witness-panel-close').onclick = dismissPanels;
@@ -674,7 +710,7 @@ function setupPanels() {
 }
 function closePanels() {
   backdrop.classList.remove('open');
-  candidatePanel.classList.remove('open');
+  disputedPanel.classList.remove('open');
   klalFlagPanel.classList.remove('open');
   punctuationPanel.classList.remove('open');
   witnessPanel.classList.remove('open');
@@ -697,7 +733,7 @@ function dismissPanels() {
 // for the same reason those are already wired to the same handler: an
 // auto-close should behave identically to a manual one, including
 // clearing scan focus). Shared by every save function that already used
-// the .save-status pattern (candidate/klal-flag/punctuation/witness) -
+// the .save-status pattern (disputed/klal-flag/punctuation/witness) -
 // the manual-correction panel deliberately keeps its own different
 // confirmation (re-rendering the panel with the fresh post-save state IS
 // its confirmation - see openManualCorrectionPanel's own comment on why).
@@ -728,9 +764,9 @@ function openPanel(panel) {
   panel.classList.add('open');
 }
 
-async function openCandidatePanel(klalId, corr) {
-  openPanel(candidatePanel);
-  candidatePanelBody.innerHTML = '<p>Loading…</p>';
+async function openDisputedPanel(klalId, corr) {
+  openPanel(disputedPanel);
+  disputedPanelBody.innerHTML = '<p>Loading…</p>';
 
   const k = mountedKlal[klalId] || await fetchKlal(klalId);
   const words = (k.clean_text || '').split(' ');
@@ -738,85 +774,82 @@ async function openCandidatePanel(klalId, corr) {
   const ctxEnd = Math.min(words.length, corr.word_index + 7);
   // FIXED 2026-08-14 (same bug class as the witness panel's context
   // highlight, found via user report): a 'replace'/'insert' candidate can
-  // span multiple words (build_corrections_dataset.py allows up to
-  // MAX_DIFF_SPAN_WORDS, currently 4 - the constant was unnamed and this
-  // comment cited a name that didn't exist until 2026-08-14), but this
-  // used to bold only the single word AT
-  // corr.word_index - the rest of a multi-word disagreement (e.g.
-  // final_text "בספר שמות", 2 words) rendered as plain, unhighlighted
-  // text. Bold the whole span, using final_text's own word count
-  // ('delete'/'manual' are always effectively 1 - word_index there is an
-  // insertion anchor point, not a real current-text span).
-  const corrSpanLen = (corr.opcode === 'replace' || corr.opcode === 'insert') && corr.final_text
-    ? corr.final_text.split(' ').length : 1;
-  const corrSpanEnd = Math.min(words.length, corr.word_index + corrSpanLen);
-  const ctxWords = [
-    escapeHtml(words.slice(ctxStart, corr.word_index).join(' ')),
-    `<b>${escapeHtml(words.slice(corr.word_index, corrSpanEnd).join(' '))}</b>`,
-    escapeHtml(words.slice(corrSpanEnd, ctxEnd).join(' ')),
-  ].filter(Boolean).join(' ');
-
-  const [flagLabel] = FLAGS[corr.flag] || ['Flagged'];
-  const flagColor = STATE_META[wordState(corr)].color;
-
-
-
-  const options = [];
-  if (corr.docai_reading) options.push({ source: 'docai_reading', label: 'DocAI OCR reading', text: corr.docai_reading });
-  if (corr.final_text) options.push({ source: 'final_text', label: 'Current stored text', text: corr.final_text });
-  if (corr.vision_transcription && corr.vision_transcription !== corr.docai_reading && corr.vision_transcription !== corr.final_text) {
-    options.push({ source: 'vision_transcription', label: 'Vision-model reading', text: corr.vision_transcription });
-  }
-  // ADDED 2026-08-21 (PROJECT-STATUS.md, "surface the VLM baseline into the
-  // dashboard for review"): vlm_reading is a genuinely independent third
-  // signal - a blind, whole-klal transcription (tools/run_part1_vlm_full_
-  // baseline.py), not the same-crop A/B adjudication vision_transcription
-  // above comes from. Same "only show if it says something new" gate as
-  // vision_transcription - reusing the existing options list rather than a
-  // new panel row, per the user's own "just enrich" direction.
-  if (corr.vlm_reading && corr.vlm_reading !== corr.docai_reading && corr.vlm_reading !== corr.final_text
-      && corr.vlm_reading !== corr.vision_transcription) {
-    options.push({ source: 'vlm_reading', label: 'VLM baseline reading (independent)', text: corr.vlm_reading });
-  }
-  const suggestedWord = extractSuggestedWord(corr.reasoning || (corr.current_decision && corr.current_decision.note));
-  if (suggestedWord && !options.some(o => o.text === suggestedWord)) {
-    // source MUST be distinct from 'custom' - that value is reserved for the
-    // panel's own free-text #custom-text-input div (id="custom-option").
-    // FIXED 2026-08-20 (code review): this used to reuse 'custom', so
-    // clicking this card and the real Custom field both toggled the same
-    // active/checked state, and saveCandidateDecision() always read
-    // #custom-text-input's (unrelated, unpopulated) value for any
-    // source==='custom' save - either blocking the save on an empty field
-    // or silently persisting stale text from the free-text box instead of
-    // the suggested word. See the 'suggested' branch in
-    // saveCandidateDecision() below, which reads opt.text via the DOM
-    // dataset instead.
-    options.push({ source: 'suggested', label: 'Suggested replacement (AI detector)', text: suggestedWord });
-  }
-  // 'insert' opcode = stored text has a word/phrase DocAI never saw at all
-  // (docai_reading is null by construction) - offer an explicit removal
-  // choice rather than relying on the non-obvious "pick custom, leave it
-  // blank" convention.
-  if (corr.opcode === 'insert') {
-    options.push({ source: 'remove', label: 'Remove this text (accept the omission)', text: '(nothing - remove "' + (corr.final_text || '') + '")' });
-  } else if (!corr.final_text) {
-    // The mirror case: nothing is currently stored here (a gap - DocAI/vision
-    // saw a candidate word the corpus never captured) and the correct human
-    // call can be "no, nothing belongs here" - e.g. klal 4 word_index 35: the
-    // scan token is a footnote-reference digit, not real klal text. Without
-    // this, there was no way to record "confirmed omission" at all: the
-    // panel offered no blank option, and the custom field rejected an empty
-    // answer for any opcode other than 'insert'.
-    options.push({ source: 'remove', label: 'Confirm nothing belongs here', text: '(nothing - no insertion needed)' });
-  }
+  // carry a multi-word final_text (e.g. word 8 "רב פפא" where docai saw
+  // only one word), so bolding words[corr.word_index] alone left the rest
+  // of the candidate unstyled. Count how many words final_text actually
+  // holds; if none (a 'delete' opcode, or a word_index at the end of the
+  // text where there is no word to bold), bold one placeholder word at
+  // that index rather than none.
+  const spanLen = corr.final_text ? corr.final_text.split(/\s+/).length : 1;
+  const ctxWords = words.slice(ctxStart, ctxEnd).map((w, idx) => {
+    const absIdx = ctxStart + idx;
+    if (absIdx >= corr.word_index && absIdx < corr.word_index + spanLen) {
+      return `<b>${escapeHtml(w)}</b>`;
+    }
+    return escapeHtml(w);
+  }).join(' ');
 
   const decision = corr.current_decision;
-  const activeSource = decision ? decision.chosen_source : 'final_text';
-  const activeText = decision ? decision.chosen_text : corr.final_text;
+  const flagColor = STATE_META[wordState(corr)].color;
+  const [flagLabel] = FLAGS[corr.flag] || ['Disputed'];
 
-  let html = `
+  const options = [];
+  if (corr.opcode === 'insert') {
+    // Insert: docai found nothing; corpus has a word
+    if (corr.final_text) options.push({ source: 'final_text', label: 'Keep current text', text: corr.final_text });
+    options.push({ source: 'remove', label: 'Remove (accept omission)', text: '—' });
+  } else if (corr.opcode === 'delete') {
+    // Delete: docai found a word; corpus has nothing
+    options.push({ source: 'docai_reading', label: 'Accept inserted word', text: corr.docai_reading || '' });
+    options.push({ source: 'final_text', label: 'Keep current text (no word)', text: '—' });
+  } else {
+    // Normal replace
+    if (corr.final_text) options.push({ source: 'final_text', label: 'Current text', text: corr.final_text });
+    if (corr.docai_reading) options.push({ source: 'docai_reading', label: 'DocAI reading', text: corr.docai_reading });
+  }
+  if (corr.vision_transcription && !options.some(o => o.text === corr.vision_transcription)) {
+    options.push({ source: 'vision_transcription', label: 'Vision reading', text: corr.vision_transcription });
+  }
+  // VLM baseline reading (added 2026-08-21, stage 4 candidate enrichment):
+  // show as an option whenever it differs from everything already listed
+  if (corr.vlm_reading && !options.some(o => o.text === corr.vlm_reading)) {
+    options.push({ source: 'vlm_reading', label: 'VLM baseline reading', text: corr.vlm_reading });
+  }
+
+  // Pre-fill the AI detector's suggested word as an extra selectable option
+  // card when present (added 2026-08-14, see openManualCorrectionPanel's
+  // note on why: typing Hebrew acronyms by hand is slow and error-prone;
+  // this gives the reviewer a 1-click accept option for the AI suggestion
+  // without typing). Matches openManualCorrectionPanel's layout: placed
+  // right below the current-text option, distinctly styled via .co-meta.
+  const suggestedWord = extractSuggestedWord(corr);
+  if (suggestedWord && !options.some(o => o.text === suggestedWord)) {
+    options.splice(1, 0, {
+      source: 'suggested',
+      label: 'AI detector suggestion',
+      text: suggestedWord,
+    });
+  }
+
+  let activeSource = decision ? decision.chosen_source : 'final_text';
+  let activeText = decision ? (decision.chosen_text || '') : '';
+  if (!decision && corr.vision_selected) {
+    if (corr.vision_selected === 'A' && options.some(o => o.source === 'docai_reading')) activeSource = 'docai_reading';
+    else if (corr.vision_selected === 'B' && options.some(o => o.source === 'final_text')) activeSource = 'final_text';
+  }
+
+  // Fall back to custom if the saved source isn't in options
+  if (activeSource && !options.some(o => o.source === activeSource) && activeSource !== 'custom' && activeSource !== 'remove') {
+    // If the saved decision has custom text, treat as custom
+    if (activeText) {
+      activeSource = 'custom';
+    } else {
+      activeSource = 'final_text';
+    }
+  }
+
+  const html = `
     <div class="panel-section">
-      <div class="panel-label">Status</div>
       <div><i style="background:${flagColor};width:9px;height:9px;border-radius:2px;display:inline-block;margin-inline-end:6px;"></i>${statusLabel(corr)}</div>
       <div style="font-size:12px;color:var(--ink-faint);margin-top:4px;">${escapeHtml(flagLabel)}${corr.confidence != null ? ' · ' + Math.round(corr.confidence * 100) + '% vision confidence' : ''}</div>
     </div>
@@ -827,9 +860,9 @@ async function openCandidatePanel(klalId, corr) {
     </div>
     <div class="panel-section">
       <div class="panel-label">Choose the correct reading</div>
-      <div id="candidate-options"></div>
-      <div class="candidate-option" data-source="custom" id="custom-option">
-        <input type="radio" name="candidate" ${activeSource === 'custom' ? 'checked' : ''}>
+      <div id="disputed-options"></div>
+      <div class="disputed-option candidate-option" data-source="custom" id="custom-option">
+        <input type="radio" name="disputed" ${activeSource === 'custom' ? 'checked' : ''}>
         <div class="co-body">
           <div class="co-label">Custom</div>
           <input type="text" class="custom-text" id="custom-text-input" placeholder="Type the correct reading…" value="${escapeAttr(activeSource === 'custom' ? activeText : '')}">
@@ -849,31 +882,37 @@ async function openCandidatePanel(klalId, corr) {
       <div class="history-list" id="history-list" style="display:none;"></div>
     </div>
   `;
-  candidatePanelBody.innerHTML = html;
+  disputedPanelBody.innerHTML = html;
 
-  const optionsContainer = document.getElementById('candidate-options');
+  const optionsContainer = document.getElementById('disputed-options');
   options.forEach(opt => {
     const div = document.createElement('div');
-    div.className = 'candidate-option' + (activeSource === opt.source ? ' active' : '');
+    div.className = 'disputed-option candidate-option' + (activeSource === opt.source ? ' active' : '');
     div.dataset.source = opt.source;
     div.dataset.text = opt.text;
-    div.innerHTML = `<input type="radio" name="candidate" ${activeSource === opt.source ? 'checked' : ''}>
+    div.innerHTML = `<input type="radio" name="disputed" ${activeSource === opt.source ? 'checked' : ''}>
       <div class="co-body"><div class="co-label">${escapeHtml(opt.label)}</div><div class="co-text">${escapeHtml(opt.text)}</div></div>`;
-    div.onclick = () => selectCandidateOption(opt.source);
+    div.onclick = () => selectDisputedOption(opt.source);
     optionsContainer.appendChild(div);
   });
-  document.getElementById('custom-option').onclick = () => selectCandidateOption('custom');
+  document.getElementById('custom-option').onclick = () => selectDisputedOption('custom');
   if (activeSource === 'custom') markActiveOption('custom');
 
-  document.getElementById('save-decision-btn').onclick = () => saveCandidateDecision(klalId, corr);
+  document.getElementById('save-decision-btn').onclick = () => saveDisputedDecision(klalId, corr);
   document.getElementById('history-toggle').onclick = () => toggleHistory(klalId, corr.word_index);
 }
 
-function selectCandidateOption(source) {
+const openCandidatePanel = openDisputedPanel;
+window.openCandidatePanel = openCandidatePanel;
+window.openDisputedPanel = openDisputedPanel;
+
+function selectDisputedOption(source) {
   markActiveOption(source);
 }
+const selectCandidateOption = selectDisputedOption;
+
 function markActiveOption(source) {
-  document.querySelectorAll('.candidate-option').forEach(el => {
+  document.querySelectorAll('.disputed-option, .candidate-option').forEach(el => {
     const active = el.dataset.source === source;
     el.classList.toggle('active', active);
     const radio = el.querySelector('input[type=radio]');
@@ -881,33 +920,18 @@ function markActiveOption(source) {
   });
 }
 
-async function saveCandidateDecision(klalId, corr) {
-  const activeEl = document.querySelector('.candidate-option.active');
+async function saveDisputedDecision(klalId, corr) {
+  const activeEl = document.querySelector('.disputed-option.active, .candidate-option.active');
   const source = activeEl ? activeEl.dataset.source : 'final_text';
   let text, chosenSource;
   if (source === 'remove') {
-    // 'remove' is a UI-only convenience for insert-opcode candidates; the
-    // decision schema itself only knows docai_reading/final_text/
-    // vision_transcription/custom, so this is recorded as an explicit
-    // empty custom answer.
     text = '';
     chosenSource = 'custom';
   } else if (source === 'custom') {
     text = document.getElementById('custom-text-input').value.trim();
-    // Empty is only meaningful (and allowed) when "nothing" is itself a real
-    // answer: an 'insert' opcode candidate (stored text has a word docai
-    // never saw - blank means "remove it, accept the omission") or a gap
-    // with no current final_text (docai/vision saw a candidate word the
-    // corpus never captured - blank means "confirm no insertion needed").
-    // Otherwise (a normal two-reading dispute, real text on both sides) an
-    // empty custom answer isn't a real decision, just an unfilled field.
     if (!text && corr.opcode !== 'insert' && corr.final_text) { alert('Enter the custom reading first.'); return; }
     chosenSource = 'custom';
   } else if (source === 'suggested') {
-    // The AI-detector suggestion card - not a `corr` property, so read the
-    // word straight from the option's own dataset rather than corr[source].
-    // Persisted as 'custom' (the decision schema has no separate slot for
-    // this), same as the 'remove' branch above.
     text = activeEl.dataset.text;
     chosenSource = 'custom';
   } else {
@@ -916,18 +940,13 @@ async function saveCandidateDecision(klalId, corr) {
   }
   const note = document.getElementById('decision-note').value.trim();
 
-  const res = await fetch('/api/decisions/candidate', {
+  const res = await fetch('/api/decisions/disputed', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ klal_id: klalId, word_index: corr.word_index, chosen_source: chosenSource, chosen_text: text, note }),
   });
   if (!res.ok) { alert('Save failed: ' + (await res.text())); return; }
 
-  // Re-fetch this klal fresh from the server instead of patching the
-  // cached copy in place - a save is also the moment to pick up any
-  // flag/text drift that happened server-side since this klal was first
-  // mounted (e.g. a corpus rebuild that ran while this tab stayed open,
-  // which otherwise leaves the text pane showing stale flag colors
   // indefinitely - see PROJECT-STATUS.md "stale client cache after a
   // live rebuild", 2026-08-09).
   delete mountedKlal[klalId];

@@ -480,7 +480,7 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
 }
 .panel-word-context b { color: var(--ink); background: #fff3cd; padding: 0 2px; border-radius: 2px; }
 
-.candidate-option {
+.disputed-option, .candidate-option {
   display: flex; align-items: flex-start; gap: var(--sp-3);
   border: 1.5px solid var(--line);
   border-radius: var(--radius-sm);
@@ -489,21 +489,21 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
   cursor: pointer;
   transition: all .1s ease;
 }
-.candidate-option:hover { border-color: var(--accent); background: var(--accent-wash); }
-.candidate-option.active {
+.disputed-option:hover, .candidate-option:hover { border-color: var(--accent); background: var(--accent-wash); }
+.disputed-option.active, .candidate-option.active {
   border-color: var(--accent);
   background: var(--accent-wash);
   box-shadow: 0 0 0 1px var(--accent);
 }
-.candidate-option input[type=radio] { margin-top: 3px; flex-shrink: 0; }
-.candidate-option .co-body { flex: 1; min-width: 0; }
-.candidate-option .co-label { font-size: 10.5px; font-weight: 600; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.03em; }
-.candidate-option .co-text {
+.disputed-option input[type=radio], .candidate-option input[type=radio] { margin-top: 3px; flex-shrink: 0; }
+.disputed-option .co-body, .candidate-option .co-body { flex: 1; min-width: 0; }
+.disputed-option .co-label, .candidate-option .co-label { font-size: 10.5px; font-weight: 600; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.03em; }
+.disputed-option .co-text, .candidate-option .co-text {
   font-family: 'Frank Ruhl Libre', serif; direction: rtl; text-align: right;
   font-size: 17px; color: var(--ink); margin-top: 2px;
 }
-.candidate-option .co-meta { font-size: 11px; color: var(--ink-faint); margin-top: 3px; }
-.candidate-option.active .co-label { color: var(--accent); }
+.disputed-option .co-meta, .candidate-option .co-meta { font-size: 11px; color: var(--ink-faint); margin-top: 3px; }
+.disputed-option.active .co-label, .candidate-option.active .co-label { color: var(--accent); }
 
 textarea, input[type=text] {
   width: 100%;
