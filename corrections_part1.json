@@ -620,12 +620,12 @@
       "docai_reading": "מוהרי\"קא",
       "vlm_reading": "מוהריי\"ק",
       "flag": "current_text_may_be_wrong",
-      "page": 16,
+      "page": 17,
       "bbox": {
-        "x1": 0.12369231134653091,
-        "y1": 0.5914633870124817,
-        "x2": 0.19753846526145935,
-        "y2": 0.6093496084213257
+        "x1": 0.3707107901573181,
+        "y1": 0.056349530816078186,
+        "x2": 0.43443626165390015,
+        "y2": 0.07962433993816376
       },
       "reasoning": "Dual-VLM consensus reading is 'מוהריי\"ק' (Pass A == Pass B), differing from stored text 'מוהרי\"קא'."
     },
@@ -1881,12 +1881,12 @@
       "docai_reading": "נדות",
       "vlm_reading": "נדורת",
       "flag": "current_text_may_be_wrong",
-      "page": 19,
+      "page": 20,
       "bbox": {
-        "x1": 0.7645260095596313,
-        "y1": 0.8650306463241577,
-        "x2": 0.808562695980072,
-        "y2": 0.881799578666687
+        "x1": 0.8255451917648315,
+        "y1": 0.25180724263191223,
+        "x2": 0.8841121792793274,
+        "y2": 0.269477903842926
       },
       "reasoning": "Dual-VLM consensus reading is 'נדורת' (Pass A == Pass B), differing from stored text 'נדות'."
     }
@@ -4593,9 +4593,9 @@
       "flag": "current_text_may_be_wrong",
       "page": 26,
       "bbox": {
-        "x1": 0.35220909118652344,
+        "x1": 0.42501556873321533,
         "y1": 0.6034551858901978,
-        "x2": 0.3733665347099304,
+        "x2": 0.4772868752479553,
         "y2": 0.619927704334259
       },
       "reasoning": "Dual-VLM consensus reading is 'השיתא' (Pass A == Pass B), differing from stored text 'הש\"ס'."
@@ -8828,12 +8828,12 @@
       "docai_reading": "לא",
       "vlm_reading": "אלא",
       "flag": "current_text_may_be_wrong",
-      "page": 38,
+      "page": 39,
       "bbox": {
-        "x1": 0.5485074520111084,
-        "y1": 0.8311218619346619,
-        "x2": 0.5727611780166626,
-        "y2": 0.8508242964744568
+        "x1": 0.4227692186832428,
+        "y1": 0.8337398171424866,
+        "x2": 0.45538461208343506,
+        "y2": 0.8500000238418579
       },
       "reasoning": "Dual-VLM consensus reading is 'אלא' (Pass A == Pass B), differing from stored text 'לא'."
     },
@@ -8845,12 +8845,12 @@
       "docai_reading": "בחרא",
       "vlm_reading": "בחדא",
       "flag": "current_text_may_be_wrong",
-      "page": 38,
+      "page": 39,
       "bbox": {
-        "x1": 0.5995025038719177,
-        "y1": 0.8480096459388733,
-        "x2": 0.6424129605293274,
-        "y2": 0.8624849319458008
+        "x1": 0.11569231003522873,
+        "y1": 0.8792682886123657,
+        "x2": 0.14092308282852173,
+        "y2": 0.8963414430618286
       },
       "reasoning": "Dual-VLM consensus reading is 'בחדא' (Pass A == Pass B), differing from stored text 'בחרא'."
     },
@@ -8974,9 +8974,9 @@
       "flag": "current_text_may_be_wrong",
       "page": 39,
       "bbox": {
-        "x1": 0.2775384485721588,
+        "x1": 0.3101538419723511,
         "y1": 0.1520325243473053,
-        "x2": 0.2990769147872925,
+        "x2": 0.3784615397453308,
         "y2": 0.16910569369792938
       },
       "reasoning": "Dual-VLM consensus reading is 'לחצוצרות' (Pass A == Pass B), differing from stored text 'לחצרות'."
@@ -9105,9 +9105,9 @@
       "flag": "current_text_may_be_wrong",
       "page": 39,
       "bbox": {
-        "x1": 0.1987692266702652,
+        "x1": 0.26215383410453796,
         "y1": 0.30365854501724243,
-        "x2": 0.25107693672180176,
+        "x2": 0.27569231390953064,
         "y2": 0.319918692111969
       },
       "reasoning": "Dual-VLM consensus reading is 'ט'' (Pass A == Pass B), differing from stored text 'פ''."
@@ -9344,12 +9344,12 @@
       "docai_reading": "ואמת",
       "vlm_reading": "ואמרת",
       "flag": "current_text_may_be_wrong",
-      "page": 39,
+      "page": 41,
       "bbox": {
-        "x1": 0.11323077231645584,
-        "y1": 0.6369918584823608,
-        "x2": 0.1599999964237213,
-        "y2": 0.6528455018997192
+        "x1": 0.7442865967750549,
+        "y1": 0.5091130137443542,
+        "x2": 0.7912291288375854,
+        "y2": 0.5261239409446716
       },
       "reasoning": "Dual-VLM consensus reading is 'ואמרת' (Pass A == Pass B), differing from stored text 'ואמת'."
     },
@@ -9361,12 +9361,12 @@
       "docai_reading": "מפשטן",
       "vlm_reading": "כפשטן",
       "flag": "current_text_may_be_wrong",
-      "page": 39,
+      "page": 41,
       "bbox": {
-        "x1": 0.6067692041397095,
-        "y1": 0.6512194871902466,
-        "x2": 0.6590769290924072,
-        "y2": 0.6678861975669861
+        "x1": 0.5565163493156433,
+        "y1": 0.5091130137443542,
+        "x2": 0.6090179085731506,
+        "y2": 0.5261239409446716
       },
       "reasoning": "Dual-VLM consensus reading is 'כפשטן' (Pass A == Pass B), differing from stored text 'מפשטן'."
     },
@@ -9603,12 +9603,12 @@
       "docai_reading": "אצטדק",
       "vlm_reading": "אצדק",
       "flag": "current_text_may_be_wrong",
-      "page": 40,
+      "page": 41,
       "bbox": {
-        "x1": 0.13391196727752686,
-        "y1": 0.2230738252401352,
-        "x2": 0.19032858312129974,
-        "y2": 0.2384025752544403
+        "x1": 0.17726992070674896,
+        "y1": 0.5690562725067139,
+        "x2": 0.20259419083595276,
+        "y2": 0.5852571725845337
       },
       "reasoning": "Dual-VLM consensus reading is 'אצדק' (Pass A == Pass B), differing from stored text 'אצטדק'."
     },
@@ -9620,12 +9620,12 @@
       "docai_reading": "להר\"ן",
       "vlm_reading": "להרי\"ן",
       "flag": "current_text_may_be_wrong",
-      "page": 40,
+      "page": 41,
       "bbox": {
-        "x1": 0.7464352250099182,
-        "y1": 0.23799918591976166,
-        "x2": 0.7885926961898804,
-        "y2": 0.2553448975086212
+        "x1": 0.4756022095680237,
+        "y1": 0.5840421319007874,
+        "x2": 0.49783816933631897,
+        "y2": 0.6002430319786072
       },
       "reasoning": "Dual-VLM consensus reading is 'להרי\"ן' (Pass A == Pass B), differing from stored text 'להר\"ן'."
     },
@@ -9654,12 +9654,12 @@
       "docai_reading": "בס'",
       "vlm_reading": "בפ'",
       "flag": "current_text_may_be_wrong",
-      "page": 40,
+      "page": 41,
       "bbox": {
-        "x1": 0.453192800283432,
-        "y1": 0.2839854657649994,
-        "x2": 0.4748915135860443,
-        "y2": 0.300121009349823
+        "x1": 0.7183446288108826,
+        "y1": 0.7642770409584045,
+        "x2": 0.7436689138412476,
+        "y2": 0.7816929817199707
       },
       "reasoning": "Dual-VLM consensus reading is 'בפ'' (Pass A == Pass B), differing from stored text 'בס''."
     },
@@ -9705,12 +9705,12 @@
       "docai_reading": "דקי\"ל",
       "vlm_reading": "דקיל",
       "flag": "current_text_may_be_wrong",
-      "page": 40,
+      "page": 41,
       "bbox": {
-        "x1": 0.6590204834938049,
-        "y1": 0.3299717605113983,
-        "x2": 0.7011779546737671,
-        "y2": 0.3469140827655792
+        "x1": 0.1037677600979805,
+        "y1": 0.7642770409584045,
+        "x2": 0.14700432121753693,
+        "y2": 0.7820979952812195
       },
       "reasoning": "Dual-VLM consensus reading is 'דקיל' (Pass A == Pass B), differing from stored text 'דקי\"ל'."
     },
@@ -9722,12 +9722,12 @@
       "docai_reading": "הר\"ן",
       "vlm_reading": "הרין",
       "flag": "current_text_may_be_wrong",
-      "page": 40,
+      "page": 41,
       "bbox": {
-        "x1": 0.8158710598945618,
-        "y1": 0.3457038998603821,
-        "x2": 0.846869170665741,
-        "y2": 0.36143606901168823
+        "x1": 0.24459542334079742,
+        "y1": 0.7804779410362244,
+        "x2": 0.2791846692562103,
+        "y2": 0.7954637408256531
       },
       "reasoning": "Dual-VLM consensus reading is 'הרין' (Pass A == Pass B), differing from stored text 'הר\"ן'."
     },
@@ -10828,12 +10828,12 @@
       "docai_reading": "צב",
       "vlm_reading": "דיומא",
       "flag": "current_text_may_be_wrong",
-      "page": 41,
+      "page": 42,
       "bbox": {
-        "x1": 0.8270537257194519,
-        "y1": 0.8545970320701599,
-        "x2": 0.8523780107498169,
-        "y2": 0.8744431138038635
+        "x1": 0.620261013507843,
+        "y1": 0.056338027119636536,
+        "x2": 0.643256664276123,
+        "y2": 0.0760563388466835
       },
       "reasoning": "Dual-VLM consensus reading is 'דיומא' (Pass A == Pass B), differing from stored text 'צב'."
     },
@@ -11354,12 +11354,12 @@
       "docai_reading": "צז",
       "vlm_reading": "נמי",
       "flag": "current_text_may_be_wrong",
-      "page": 43,
+      "page": 44,
       "bbox": {
-        "x1": 0.8516687154769897,
-        "y1": 0.7414002418518066,
-        "x2": 0.8702101111412048,
-        "y2": 0.7583974003791809
+        "x1": 0.631611704826355,
+        "y1": 0.05544395372271538,
+        "x2": 0.653391420841217,
+        "y2": 0.07432703673839569
       },
       "reasoning": "Dual-VLM consensus reading is 'נמי' (Pass A == Pass B), differing from stored text 'צז'."
     },
@@ -11972,12 +11972,12 @@
       "docai_reading": "י\"א",
       "vlm_reading": "וי\"א",
       "flag": "current_text_may_be_wrong",
-      "page": 44,
+      "page": 45,
       "bbox": {
-        "x1": 0.6154325008392334,
-        "y1": 0.8163921236991882,
-        "x2": 0.6390790343284607,
-        "y2": 0.8364804983139038
+        "x1": 0.6304079294204712,
+        "y1": 0.13435855507850647,
+        "x2": 0.6508034467697144,
+        "y2": 0.15135572850704193
       },
       "reasoning": "Dual-VLM consensus reading is 'וי\"א' (Pass A == Pass B), differing from stored text 'י\"א'."
     },
@@ -11989,12 +11989,12 @@
       "docai_reading": "דקרקעות",
       "vlm_reading": "הקרקעות",
       "flag": "current_text_may_be_wrong",
-      "page": 44,
+      "page": 45,
       "bbox": {
-        "x1": 0.6546359658241272,
-        "y1": 0.8332663774490356,
-        "x2": 0.7205973863601685,
-        "y2": 0.8509441614151001
+        "x1": 0.3405438959598541,
+        "y1": 0.7397814393043518,
+        "x2": 0.36588379740715027,
+        "y2": 0.755159854888916
       },
       "reasoning": "Dual-VLM consensus reading is 'הקרקעות' (Pass A == Pass B), differing from stored text 'דקרקעות'."
     },
@@ -12023,12 +12023,12 @@
       "docai_reading": "בית",
       "vlm_reading": "ביח",
       "flag": "current_text_may_be_wrong",
-      "page": 44,
+      "page": 45,
       "bbox": {
-        "x1": 0.5768512487411499,
-        "y1": 0.8818802833557129,
-        "x2": 0.599253237247467,
-        "y2": 0.8931297659873962
+        "x1": 0.4456118643283844,
+        "y1": 0.8798057436943054,
+        "x2": 0.46909764409065247,
+        "y2": 0.8923512697219849
       },
       "reasoning": "Dual-VLM consensus reading is 'ביח' (Pass A == Pass B), differing from stored text 'בית'."
     },
@@ -12273,12 +12273,12 @@
       "docai_reading": "בכיוצא",
       "vlm_reading": "ככיוצא",
       "flag": "current_text_may_be_wrong",
-      "page": 45,
+      "page": 46,
       "bbox": {
-        "x1": 0.7663782238960266,
-        "y1": 0.8603804111480713,
-        "x2": 0.8281829357147217,
-        "y2": 0.8773775696754456
+        "x1": 0.7296457290649414,
+        "y1": 0.4422535300254822,
+        "x2": 0.7781230807304382,
+        "y2": 0.45875251293182373
       },
       "reasoning": "Dual-VLM consensus reading is 'ככיוצא' (Pass A == Pass B), differing from stored text 'בכיוצא'."
     },
@@ -14480,12 +14480,12 @@
       "docai_reading": "אינן",
       "vlm_reading": "אינו",
       "flag": "current_text_may_be_wrong",
-      "page": 49,
+      "page": 50,
       "bbox": {
-        "x1": 0.3289962708950043,
-        "y1": 0.8813080191612244,
-        "x2": 0.36059480905532837,
-        "y2": 0.8958417177200317
+        "x1": 0.17029210925102234,
+        "y1": 0.5501006245613098,
+        "x2": 0.2156618982553482,
+        "y2": 0.56700199842453
       },
       "reasoning": "Dual-VLM consensus reading is 'אינו' (Pass A == Pass B), differing from stored text 'אינן'."
     },
@@ -15273,10 +15273,10 @@
       "flag": "current_text_may_be_wrong",
       "page": 53,
       "bbox": {
-        "x1": 0.694168746471405,
-        "y1": 0.255542129278183,
-        "x2": 0.7915632724761963,
-        "y2": 0.27529221773147583
+        "x1": 0.5837469100952148,
+        "y1": 0.059250302612781525,
+        "x2": 0.6066997647285461,
+        "y2": 0.07859733700752258
       },
       "reasoning": "Dual-VLM consensus reading is 'קמו' (Pass A == Pass B), differing from stored text 'קמז'."
     },
@@ -16094,12 +16094,12 @@
       "docai_reading": "בתירוצא",
       "vlm_reading": "בתרוצא",
       "flag": "current_text_may_be_wrong",
-      "page": 57,
+      "page": 59,
       "bbox": {
-        "x1": 0.6403454542160034,
-        "y1": 0.84549880027771,
-        "x2": 0.705120325088501,
-        "y2": 0.8633414506912231
+        "x1": 0.49784085154533386,
+        "y1": 0.8195458054542542,
+        "x2": 0.5311536192893982,
+        "y2": 0.8333333134651184
       },
       "reasoning": "Dual-VLM consensus reading is 'בתרוצא' (Pass A == Pass B), differing from stored text 'בתירוצא'."
     },
@@ -18369,9 +18369,9 @@
       "flag": "current_text_may_be_wrong",
       "page": 62,
       "bbox": {
-        "x1": 0.7521685361862183,
+        "x1": 0.781288743019104,
         "y1": 0.4061364531517029,
-        "x2": 0.7744733691215515,
+        "x2": 0.819083034992218,
         "y2": 0.42067015171051025
       },
       "reasoning": "Dual-VLM consensus reading is 'בס\"ד' (Pass A == Pass B), differing from stored text 'בפ\"ד'."
@@ -18682,9 +18682,9 @@
       "flag": "current_text_may_be_wrong",
       "page": 62,
       "bbox": {
-        "x1": 0.4349442422389984,
+        "x1": 0.5055761933326721,
         "y1": 0.8320549130439758,
-        "x2": 0.46344485878944397,
+        "x2": 0.5303593277931213,
         "y2": 0.8486071825027466
       },
       "reasoning": "Dual-VLM consensus reading is 'ג\"כ' (Pass A == Pass B), differing from stored text 'ג\"כ'כך'."
@@ -19599,9 +19599,9 @@
       "flag": "current_text_may_be_wrong",
       "page": 64,
       "bbox": {
-        "x1": 0.27716049551963806,
+        "x1": 0.3123456835746765,
         "y1": 0.5919772982597351,
-        "x2": 0.3006172776222229,
+        "x2": 0.3351851999759674,
         "y2": 0.6110210418701172
       },
       "reasoning": "Dual-VLM consensus reading is 'בס'' (Pass A == Pass B), differing from stored text 'בפ''."
@@ -19671,12 +19671,12 @@
       "docai_reading": "ע\"ר",
       "vlm_reading": "ע\"ד",
       "flag": "current_text_may_be_wrong",
-      "page": 64,
+      "page": 65,
       "bbox": {
-        "x1": 0.635185182094574,
-        "y1": 0.7487844228744507,
-        "x2": 0.6623457074165344,
-        "y2": 0.7625607848167419
+        "x1": 0.5426452159881592,
+        "y1": 0.5989478230476379,
+        "x2": 0.5982694625854492,
+        "y2": 0.6179684400558472
       },
       "reasoning": "Dual-VLM consensus reading is 'ע\"ד' (Pass A == Pass B), differing from stored text 'ע\"ר'."
     },
@@ -19688,12 +19688,12 @@
       "docai_reading": "מר'",
       "vlm_reading": "מרי'",
       "flag": "current_text_may_be_wrong",
-      "page": 64,
+      "page": 65,
       "bbox": {
-        "x1": 0.5234568119049072,
-        "y1": 0.7901134490966797,
-        "x2": 0.5444444417953491,
-        "y2": 0.8055105209350586
+        "x1": 0.48207664489746094,
+        "y1": 0.7503035068511963,
+        "x2": 0.509888768196106,
+        "y2": 0.7681100964546204
       },
       "reasoning": "Dual-VLM consensus reading is 'מרי'' (Pass A == Pass B), differing from stored text 'מר''."
     },
@@ -20571,9 +20571,9 @@
       "flag": "current_text_may_be_wrong",
       "page": 66,
       "bbox": {
-        "x1": 0.7663782238960266,
+        "x1": 0.8145859241485596,
         "y1": 0.6017806529998779,
-        "x2": 0.8053151965141296,
+        "x2": 0.8368356227874756,
         "y2": 0.6183731555938721
       },
       "reasoning": "Dual-VLM consensus reading is 'בפ'' (Pass A == Pass B), differing from stored text 'כפ''."
@@ -21224,10 +21224,10 @@
       "flag": "current_text_may_be_wrong",
       "page": 67,
       "bbox": {
-        "x1": 0.11474398523569107,
+        "x1": 0.15360888838768005,
         "y1": 0.8211678862571716,
-        "x2": 0.14373843371868134,
-        "y2": 0.8357664346694946
+        "x2": 0.1721159815788269,
+        "y2": 0.8353608846664429
       },
       "reasoning": "Dual-VLM consensus reading is 'סי'' (Pass A == Pass B), differing from stored text 'פי''."
     },
@@ -21537,9 +21537,9 @@
       "flag": "current_text_may_be_wrong",
       "page": 68,
       "bbox": {
-        "x1": 0.4487020969390869,
+        "x1": 0.549443781375885,
         "y1": 0.645082950592041,
-        "x2": 0.483312726020813,
+        "x2": 0.5754017233848572,
         "y2": 0.6608660221099854
       },
       "reasoning": "Dual-VLM consensus reading is 'אלי' (Pass A == Pass B), differing from stored text 'אלי,כלל'."
@@ -21573,9 +21573,9 @@
       "flag": "current_text_may_be_wrong",
       "page": 68,
       "bbox": {
-        "x1": 0.6341161727905273,
+        "x1": 0.6619282960891724,
         "y1": 0.7369486093521118,
-        "x2": 0.6557478308677673,
+        "x2": 0.6854140758514404,
         "y2": 0.7535410523414612
       },
       "reasoning": "Dual-VLM consensus reading is 'חד' (Pass A == Pass B), differing from stored text 'דוד'."
@@ -22068,12 +22068,12 @@
       "docai_reading": "איהן",
       "vlm_reading": "איהו",
       "flag": "current_text_may_be_wrong",
-      "page": 69,
+      "page": 70,
       "bbox": {
-        "x1": 0.1534195989370346,
-        "y1": 0.7593344449996948,
-        "x2": 0.1873074620962143,
-        "y2": 0.7771915793418884
+        "x1": 0.3496590256690979,
+        "y1": 0.8640580773353577,
+        "x2": 0.3924364447593689,
+        "y2": 0.8805969953536987
       },
       "reasoning": "Dual-VLM consensus reading is 'איהו' (Pass A == Pass B), differing from stored text 'איהן'."
     },
@@ -22159,12 +22159,12 @@
       "docai_reading": "דשמעיה",
       "vlm_reading": "דשמעה",
       "flag": "current_text_may_be_wrong",
-      "page": 69,
+      "page": 70,
       "bbox": {
-        "x1": 0.7412199378013611,
-        "y1": 0.8668830990791321,
-        "x2": 0.8016019463539124,
-        "y2": 0.8835227489471436
+        "x1": 0.22566646337509155,
+        "y1": 0.8781766891479492,
+        "x2": 0.2851828932762146,
+        "y2": 0.8983461260795593
       },
       "reasoning": "Dual-VLM consensus reading is 'דשמעה' (Pass A == Pass B), differing from stored text 'דשמעיה'."
     },
@@ -23806,9 +23806,9 @@
       "flag": "current_text_may_be_wrong",
       "page": 74,
       "bbox": {
-        "x1": 0.1961633712053299,
+        "x1": 0.23948019742965698,
         "y1": 0.19773554801940918,
-        "x2": 0.22834157943725586,
+        "x2": 0.26485148072242737,
         "y2": 0.2126971334218979
       },
       "reasoning": "Dual-VLM consensus reading is 'אינ' (Pass A == Pass B), differing from stored text 'א\"נ'."
@@ -24521,9 +24521,9 @@
       "flag": "current_text_may_be_wrong",
       "page": 75,
       "bbox": {
-        "x1": 0.19776813685894012,
+        "x1": 0.2889026701450348,
         "y1": 0.5925776362419128,
-        "x2": 0.23930564522743225,
+        "x2": 0.3106013536453247,
         "y2": 0.6099233627319336
       },
       "reasoning": "Dual-VLM consensus reading is 'וכו'' (Pass A == Pass B), differing from stored text 'וכו'מאי'."
@@ -26771,12 +26771,12 @@
       "docai_reading": "דברי",
       "vlm_reading": "דבריו",
       "flag": "current_text_may_be_wrong",
-      "page": 48,
+      "page": 49,
       "bbox": {
-        "x1": 0.8006210923194885,
-        "y1": 0.8638743162155151,
-        "x2": 0.8546583652496338,
-        "y2": 0.8828030824661255
+        "x1": 0.5055761933326721,
+        "y1": 0.05651998519897461,
+        "x2": 0.5811648368835449,
+        "y2": 0.07549455016851425
       },
       "reasoning": "Dual-VLM consensus reading is 'דבריו' (Pass A == Pass B), differing from stored text 'דברי'."
     },
@@ -26966,12 +26966,12 @@
       "docai_reading": "קמו",
       "vlm_reading": "לדרשא",
       "flag": "current_text_may_be_wrong",
-      "page": 52,
+      "page": 53,
       "bbox": {
-        "x1": 0.8695651888847351,
-        "y1": 0.8787756562232971,
-        "x2": 0.9006211161613464,
-        "y2": 0.89810711145401
+        "x1": 0.5837469100952148,
+        "y1": 0.059250302612781525,
+        "x2": 0.6066997647285461,
+        "y2": 0.07859733700752258
       },
       "reasoning": "Dual-VLM consensus reading is 'לדרשא' (Pass A == Pass B), differing from stored text 'קמו'."
     },

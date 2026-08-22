@@ -34,6 +34,28 @@ def norm_word(w):
     return w
 
 
+def get_docai_word_bboxes(klal_id, words, page):
+    norm = cio.hebrew_letters_only
+    toks = cio.load_docai_page(page, cio.DOCAI_DIR)
+    if not toks:
+        return {}
+    dtoks = [t for t in toks if norm(t.get("text", ""))]
+    dwords = [norm(t.get("text", "")) for t in dtoks]
+    corpus_norm = [norm(w) for w in words]
+    sm = SequenceMatcher(None, corpus_norm, dwords, autojunk=False)
+    result = {}
+    for tag, i1, i2, j1, j2 in sm.get_opcodes():
+        if tag in ('equal', 'replace'):
+            for offset in range(min(i2 - i1, j2 - j1)):
+                tok = dtoks[j1 + offset]
+                if tok.get("x1") is not None:
+                    result[i1 + offset] = {
+                        "x1": tok["x1"], "y1": tok["y1"],
+                        "x2": tok["x2"], "y2": tok["y2"],
+                    }
+    return result
+
+
 def extract_consensus_disputes():
     part1_path = os.path.join(REPO, "part1.json")
     corrections_path = os.path.join(REPO, "corrections_part1.json")
@@ -85,7 +107,7 @@ def extract_consensus_disputes():
         pages = rs._klal_all_pages(kid)
         word_to_bbox = {}
         for p in pages:
-            p_bboxes = rs._corpus_word_bboxes(kid, raw_words, p)
+            p_bboxes = get_docai_word_bboxes(kid, raw_words, p)
             for wi, bb in p_bboxes.items():
                 word_to_bbox[wi] = (p, bb)
 
