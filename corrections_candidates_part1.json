@@ -63,6 +63,21 @@
     {
       "klal_id": 2,
       "page": 15,
+      "opcode": "replace",
+      "word_index_in_final_text": 195,
+      "original_word": "לדערת",
+      "corrected_word": "לדעת",
+      "bbox": {
+        "x1": 0.5009196996688843,
+        "y1": 0.08731130510568619,
+        "x2": 0.5524218082427979,
+        "y2": 0.10403916984796524
+      },
+      "bbox_estimated": false
+    },
+    {
+      "klal_id": 2,
+      "page": 15,
       "opcode": "delete",
       "word_index_in_final_text": 632,
       "original_word": "ג",
@@ -1019,36 +1034,6 @@
         "y2": 0.8638007044792175
       },
       "bbox_estimated": false
-    },
-    {
-      "klal_id": 36,
-      "page": 27,
-      "opcode": "insert",
-      "word_index_in_final_text": 52,
-      "original_word": null,
-      "corrected_word": "בשיטה מקובצת",
-      "bbox": {
-        "x1": 0.2130141258239746,
-        "y1": 0.30386966466903687,
-        "x2": 0.30693677067756653,
-        "y2": 0.3205702602863312
-      },
-      "bbox_estimated": true
-    },
-    {
-      "klal_id": 36,
-      "page": 27,
-      "opcode": "insert",
-      "word_index_in_final_text": 56,
-      "original_word": null,
-      "corrected_word": "שבפ\"א",
-      "bbox": {
-        "x1": 0.13996316492557526,
-        "y1": 0.30386966466903687,
-        "x2": 0.2019643932580948,
-        "y2": 0.3205702602863312
-      },
-      "bbox_estimated": true
     },
     {
       "klal_id": 38,
@@ -8087,7 +8072,7 @@
     }
   ],
   "meta": {
-    "total_candidates": 539,
+    "total_candidates": 538,
     "klalim_covered": 157,
     "skipped_no_docai_page_klalim": [],
     "unattributable_deletes": [],

@@ -369,8 +369,10 @@ SPAN_COVERAGE_BASELINE = {22, 65, 83, 84, 106, 123, 130, 175, 195}
 #     is fixed through the review-decision pipeline against the scan, never a
 #     direct part1.json hand-edit, and applying it needs its own go-ahead
 #     (same two-step rule as every correction this pipeline has applied).
-#     Flagged through the pipeline instead (klal_flag dcd9c031b83c, superseded
-#     by a31c9a08f8fe for the corrected tail); see PROJECT-STATUS.md.
+#     Flagged through the pipeline (klal_flag dcd9c031b83c, superseded by
+#     a31c9a08f8fe for the corrected tail), then APPLIED the same day under
+#     explicit user authorization - see this constant's own {16} -> {} entry
+#     below and PROJECT-STATUS.md.
 #
 #     The rest of SPAN_COVERAGE_BASELINE was swept the same way on 2026-08-23
 #     (tools/check_span_shortfall.py, built for this) and every other member
@@ -381,10 +383,20 @@ SPAN_COVERAGE_BASELINE = {22, 65, 83, 84, 106, 123, 130, 175, 195}
 #     klalim 106/123/130/195 are page furniture plus single-token alignment
 #     misses whose words are all present in stored text as exact or one-character
 #     variants. Klal 16 is the only real gap the sweep found.
+#   {16} -> {} 2026-08-23, same day, FIXED. The 23 missing words were applied
+#     through the review-decision pipeline (manual_correction 60a17ad89fb2,
+#     insert at word_index 163 after klal 16's last stored word `אהא`), not
+#     hand-edited. Klal 16 went 163 -> 186 words and DROPPED OFF
+#     validate_klal_span_coverage.py's flagged list entirely (10 spans -> 9),
+#     which is the check that found it. Independently corroborated: a fresh
+#     build_corrections_dataset.py pass generates ZERO new candidates anywhere
+#     at word_index >= 163, i.e. the DocAI-vs-stored diff finds no disagreement
+#     in any of the 23 inserted words - the transcription matches the scan's own
+#     tokens exactly.
 # This set must SHRINK as content is reconstructed and must never grow
 # silently - a klal arriving here is real missing text, not a measurement
 # artifact. Keep this mechanism (not delete it) for the next one that turns up.
-SPAN_COVERAGE_KNOWN_REAL_GAPS = {16}
+SPAN_COVERAGE_KNOWN_REAL_GAPS = set()
 
 
 def _load_klalim(path):

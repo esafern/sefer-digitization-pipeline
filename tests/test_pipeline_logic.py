@@ -3841,3 +3841,22 @@ def test_merge_consensus_disputes_treats_a_missing_file_as_no_disputes():
     by_klal = {"1": [{"word_index": 1, "final_text": "בית"}]}
     assert acd.merge_consensus_disputes(by_klal, path="/nonexistent/consensus.json") == (0, 0)
     assert len(by_klal["1"]) == 1
+
+
+def test_audit_checks_a_multi_word_manual_correction_across_its_whole_span():
+    """REGRESSION 2026-08-23: check_manual_correction compared the entire
+    chosen_text against words[word_index] - ONE word - so every multi-word
+    manual correction reported a false MISMATCH ("expected 'איידי דקתני
+    במתניתין ...', found 'איידי'"). It had been firing on klal 9 word 23 since
+    the multi-word manual-insert case was added 2026-08-21. A check whose only
+    job is flagging decisions that stopped being reflected in the corpus must
+    not fire on correctly-applied data, or it stops being read."""
+    d = {"chosen_text": "אלף בית גימל", "word_index": 1,
+         "candidate_snapshot": {"original_word": None}}
+    assert aad.check_manual_correction(d, _klal("דלת אלף בית גימל הא")) == "ok"
+    bad = aad.check_manual_correction(d, _klal("דלת אלף בות גימל הא"))
+    assert bad.startswith("MISMATCH") and "אלף בות גימל" in bad, bad
+    # a single-word correction must keep behaving exactly as before
+    single = {"chosen_text": "בית", "word_index": 1, "candidate_snapshot": {}}
+    assert aad.check_manual_correction(single, _klal("אלף בית גימל")) == "ok"
+    assert aad.check_manual_correction(single, _klal("אלף בות גימל")).startswith("MISMATCH")

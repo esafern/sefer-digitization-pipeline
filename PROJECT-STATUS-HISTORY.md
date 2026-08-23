@@ -17,6 +17,73 @@ current file references, or when grepping for how a past finding was
 resolved. Same append-at-top convention as before: newest entries go right
 after this header, not at the bottom.
 
+### APPLIED 2026-08-23 — klal 16's 23 missing words are now in part1.json, user-authorized. Span check clean; an audit bug found and fixed on the way.
+
+**Applied through the review-decision pipeline, not a hand-edit**
+(`manual_correction` 60a17ad89fb2, `candidate_snapshot.original_word: null` +
+non-empty `chosen_text` = the insert case added 2026-08-21 for klal 9/10),
+inserted at word_index 163, immediately after klal 16's last stored word `אהא`:
+
+> אף על גב דלא שייך כלל אברייתא דמייתי מדכתבו דר"י ור"ל בסברא בעלמא פליגי ולא
+> תליא מלתייהו כלל בהלכה דקאמר ראב"ע ודוק :
+
+Klal 16 went **163 -> 186 words**.
+
+**Every word was read off the scan at 5-6x magnification before anything was
+written**, not taken from tokens - this is a corpus edit, and success criterion
+#1 is absolute fidelity with no silent normalization. Two readings changed as a
+result of insisting on that: `אברייתא` was confirmed to end in a real final א
+(the first-pass render suggested `אבריית'` with a geresh), and `ראב"ע ודוק` was
+confirmed against the first-pass misread `ראב"י דוק`. Conventions checked against
+the corpus rather than assumed: gershayim written as ASCII `"` (6,400 occurrences
+in part1, zero of U+05F4), and the trailing standalone `:` matching the 172 of
+222 Part-1 klalim that end that way. Klal 16 already contained `ראב"ע` elsewhere,
+independently corroborating that reading.
+
+**Verified after applying, three independent ways:**
+1. `validate_klal_span_coverage.py` - the check that found the gap - **no longer
+   flags klal 16 at all** (10 spans below threshold -> 9). Its ratio was 0.80.
+2. A fresh `build_corrections_dataset.py` pass generates **ZERO new candidates
+   at word_index >= 163**, i.e. the DocAI-vs-stored diff finds no disagreement in
+   any of the 23 inserted words - the transcription matches the scan's own tokens
+   exactly. This is the strongest available corroboration and it is independent
+   of the render.
+3. `audit_applied_decisions.py` confirms the decision is reflected in the corpus.
+`SPAN_COVERAGE_KNOWN_REAL_GAPS` went `{16}` -> `set()`, the direction that
+constant documents as the only acceptable one.
+
+**A second, pre-existing decision landed in the same run and is called out
+rather than buried:** klal 2 word 195, `לדערת` -> `לדעת`, a human decision
+recorded earlier and never applied. `apply_reviewer_decisions.py` applies all
+pending decisions by design, so it went in with klal 16's. It is well-supported -
+Surya and the VLM independently read `לדעת` at that position (found during the
+C1-C4 consensus work), which is what made it the corroboration example there.
+
+**BUG FOUND AND FIXED while verifying: `audit_applied_decisions.py` reported a
+false MISMATCH for every multi-word manual correction.**
+`check_manual_correction()` compared the entire `chosen_text` against
+`words[word_index]` - a SINGLE word - so a 23-word insert reported
+"expected 'אף על גב דלא ...' at word_index 163, found 'אף'". It had been firing
+on klal 9 word 23 since the 2026-08-21 boundary fix introduced the multi-word
+manual-insert case, and nobody had chased it. That is worse than cosmetic in this
+script specifically: its only job is reporting applied decisions that stopped
+being reflected in the corpus, and a check that routinely fires on
+correctly-applied data is a check people learn to scroll past (Lesson 2 in its
+inverted form). Now compares the full span, the way
+`apply_replace`/`apply_delete_insertion` write it. Audit went from 4 MISMATCH to
+**2**, and both survivors are pre-existing and documented (klal 1 word 97, the
+hand-revert precedent named in the script's own docstring; klal 10 word 85, a
+stale candidate from the klal 9/10 work). New regression test
+`test_audit_checks_a_multi_word_manual_correction_across_its_whole_span`.
+
+**Derived files rebuilt with `./rebuild_all.sh --skip-vision`, deliberately.**
+Klal 16's 23 new words would generate fresh candidates and therefore fresh paid
+Gemini calls in stage 3, and the API credits were exhausted as of 2026-08-21.
+**A full `./rebuild_all.sh` (with vision) is still owed** before the 23 new words
+carry vision adjudication like the rest of the corpus - the same condition the
+2026-08-12 reconstruction work was held to. Until then they are stored, correct
+against DocAI, and unadjudicated. 259 tests green.
+
 ### SWEEP 2026-08-23 — every other `SPAN_COVERAGE_BASELINE` member checked. All artifacts; klal 16 is the only real gap. New reusable tool `tools/check_span_shortfall.py`.
 
 The klal 16 finding left an obvious question: if one unverified entry in that

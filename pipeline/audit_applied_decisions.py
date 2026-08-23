@@ -111,10 +111,23 @@ def check_manual_correction(decision, klal):
     # both this and check_punctuation_choice only had the upper half.
     if word_index < 0 or word_index >= len(words):
         return f"MISMATCH: word_index {word_index} out of range (klal now has {len(words)} words)"
-    live = words[word_index]
-    if live == chosen:
+    # FIXED 2026-08-23: this compared the whole chosen_text against
+    # words[word_index], a SINGLE word, so every multi-word manual correction
+    # reported a false MISMATCH - "expected 'איידי דקתני במתניתין ...' at
+    # word_index 23, found 'איידי'". It had been crying wolf on klal 9 word 23
+    # since the 2026-08-21 klal 9/10 boundary fix introduced the multi-word
+    # manual-insert case, and did it again on klal 16 word 163. That is worse
+    # than a cosmetic bug in THIS script specifically: its only job is to
+    # report applied decisions that stopped being reflected in the corpus, and
+    # a check that routinely fires on correctly-applied data is a check people
+    # learn to scroll past. Compare the full span, the same way
+    # apply_reviewer_decisions.apply_replace/apply_delete_insertion write it.
+    span = chosen.split()
+    live_span = words[word_index:word_index + len(span)]
+    if live_span == span:
         return "ok"
-    return f"MISMATCH: expected {chosen!r} at word_index {word_index}, found {live!r}"
+    return (f"MISMATCH: expected {chosen!r} at word_index {word_index}, "
+            f"found {' '.join(live_span)!r}")
 
 
 def check_punctuation_choice(decision, klal):

@@ -203,8 +203,16 @@ to) as state changes** — that discipline is what drifted last time.
     **klal 16 is real, unfixed truncation** and has been moved to
     `SPAN_COVERAGE_KNOWN_REAL_GAPS`.
 
-11. **DATA ISSUE, klal 16 is truncated: ~24 words of printed text are missing
-    from `part1.json`. Flagged, NOT applied — needs your go-ahead.** Its stored
+11. **RESOLVED 2026-08-23: klal 16's 23 missing words are APPLIED** (user-
+    authorized, via `manual_correction` 60a17ad89fb2 through the decision
+    pipeline, not a hand-edit). Klal 16 went 163 → 186 words and no longer
+    appears in `validate_klal_span_coverage.py`'s flagged list; a fresh stage-2
+    pass generates zero new candidates at word_index ≥ 163, so DocAI agrees
+    with every inserted word. `SPAN_COVERAGE_KNOWN_REAL_GAPS` is empty again.
+    **A full `./rebuild_all.sh` WITH vision is still owed** — the rebuild was run
+    `--skip-vision` to avoid spending exhausted API credits, so the 23 new words
+    are stored and DocAI-corroborated but not yet vision-adjudicated. Original
+    finding: Its stored
     text ends mid-sentence on the connective `אהא`; the continuation is printed
     as the first two body lines of page 20 (`אף על גב דלא שייך כלל אברייתא
     דמייתי... דוק:`) and is absent from the corpus. Verified two independent
