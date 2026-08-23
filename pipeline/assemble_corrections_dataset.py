@@ -27,6 +27,7 @@ PART1_PATH = cio.PART1_PATH
 # script, not part of rebuild_all.sh) simply gets vlm_reading: null
 # everywhere rather than a crash - see load_vlm_baseline()'s own docstring.
 VLM_BASELINE_PATH = os.path.join(REPO, "tools", "second_witness_eval", "vlm_part1_full_baseline.txt")
+SURYA_BASELINE_PATH = os.path.join(REPO, "tools", "second_witness_eval", "surya_part1_full_baseline.txt")
 
 # Minimum vision confidence before classify() treats Gemini's A/B selection as
 # a machine resolution rather than "ambiguous, a human still has to look".
@@ -160,11 +161,13 @@ def main():
     verified = cio.load_json(IN_PATH)
     part1 = cio.load_part1(PART1_PATH)
     words_by_klal = {k["klal_id"]: k["clean_text"].split() for k in part1}
-    vlm_by_klal = load_vlm_baseline()
+    vlm_by_klal = load_vlm_baseline(VLM_BASELINE_PATH)
+    surya_by_klal = load_vlm_baseline(SURYA_BASELINE_PATH)
     # Built lazily, once per klal actually needed (not all 222) - the
     # alignment itself is cheap, but no reason to pay for klalim with zero
     # candidates.
     vlm_alignment_cache = {}
+    surya_alignment_cache = {}
 
     def vlm_reading_for(klal_id, word_index):
         if klal_id not in vlm_by_klal:
@@ -173,6 +176,14 @@ def main():
             vlm_alignment_cache[klal_id] = build_vlm_alignment(
                 words_by_klal.get(klal_id, []), vlm_by_klal[klal_id])
         return vlm_alignment_cache[klal_id].get(word_index)
+
+    def surya_reading_for(klal_id, word_index):
+        if klal_id not in surya_by_klal:
+            return None
+        if klal_id not in surya_alignment_cache:
+            surya_alignment_cache[klal_id] = build_vlm_alignment(
+                words_by_klal.get(klal_id, []), surya_by_klal[klal_id])
+        return surya_alignment_cache[klal_id].get(word_index)
 
     by_klal = {}
     n_drifted = 0
@@ -189,15 +200,8 @@ def main():
             "vision_transcription": c.get("vision_transcription"),
             "confidence": c.get("vision_confidence"),
             "reasoning": c.get("vision_reasoning"),
-            # ADDED 2026-08-21: a third, independent reading from the VLM
-            # baseline pass (see load_vlm_baseline()/build_vlm_alignment()
-            # above) - None if no VLM baseline is available, or if this
-            # word_index doesn't align to anything in it. Purely additive -
-            # never changes `flag`/classify()'s own verdict; a human
-            # reviewer sees it as one more data point, same principle as
-            # the second-witness report tonight's earlier work produced by
-            # hand, now a permanent field every rebuild regenerates.
             "vlm_reading": vlm_reading_for(c["klal_id"], c["word_index_in_final_text"]),
+            "surya_reading": surya_reading_for(c["klal_id"], c["word_index_in_final_text"]),
             # A drifted candidate's flag is forced to "stale_candidate"
             # rather than whatever classify() would say - a confident
             # "current_text_confirmed" is actively misleading once the

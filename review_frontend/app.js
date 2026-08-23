@@ -815,6 +815,10 @@ async function openDisputedPanel(klalId, corr) {
   if (corr.vlm_reading && !options.some(o => o.text === corr.vlm_reading)) {
     options.push({ source: 'vlm_reading', label: 'VLM baseline reading', text: corr.vlm_reading });
   }
+  // Surya OCR baseline reading (added 2026-08-23, independent local witness):
+  if (corr.surya_reading && !options.some(o => o.text === corr.surya_reading)) {
+    options.push({ source: 'surya_reading', label: 'Surya OCR reading', text: corr.surya_reading });
+  }
 
   // Pre-fill the AI detector's suggested word as an extra selectable option
   // card when present (added 2026-08-14, see openManualCorrectionPanel's
