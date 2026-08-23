@@ -83,6 +83,26 @@
       "flag": "current_text_confirmed"
     },
     {
+      "word_index": 195,
+      "opcode": "replace",
+      "docai_reading": "לדערת",
+      "final_text": "לדעת",
+      "page": 15,
+      "bbox": {
+        "x1": 0.5009196996688843,
+        "y1": 0.08731130510568619,
+        "x2": 0.5524218082427979,
+        "y2": 0.10403916984796524
+      },
+      "vision_selected": "B",
+      "vision_transcription": "לדעת",
+      "confidence": 0.99,
+      "reasoning": "The middle word clearly shows four letters: Lamed (ל), Dalet (ד), Ayin (ע), and Tav (ת), spelling 'לדעת'. Option A contains a spurious 'ר' inserted by raw OCR. Context confirms 'ואי לדעת הכריתות' ('And according to the opinion of [Sefer] ha-Keritut').",
+      "vlm_reading": "לדעת",
+      "surya_reading": "לדעת",
+      "flag": "current_text_confirmed"
+    },
+    {
       "word_index": 632,
       "opcode": "delete",
       "docai_reading": "ג",
@@ -1887,46 +1907,6 @@
       "vlm_reading": "הוזכר",
       "surya_reading": "חיזכר",
       "flag": "current_text_confirmed"
-    },
-    {
-      "word_index": 52,
-      "opcode": "insert",
-      "docai_reading": null,
-      "final_text": "בשיטה מקובצת",
-      "page": 27,
-      "bbox": {
-        "x1": 0.2130141258239746,
-        "y1": 0.30386966466903687,
-        "x2": 0.30693677067756653,
-        "y2": 0.3205702602863312
-      },
-      "vision_selected": "A",
-      "vision_transcription": "",
-      "confidence": 1.0,
-      "reasoning": "The target text 'בשיטה מקובצת' (Option B) is entirely absent from the image crop. The visible ink reads 'שתא ארעתיה וכו'' on the top line, followed by '[רב]י בצלאל על ב[' on the middle line, and 'כ\"ט ב' תוספות' on the bottom line. Option A correctly identifies that the adjudicated Option B text does not exist in this crop.",
-      "vlm_reading": "בשיטה",
-      "surya_reading": "בשיטה",
-      "flag": "unverified_insertion"
-    },
-    {
-      "word_index": 56,
-      "opcode": "insert",
-      "docai_reading": null,
-      "final_text": "שבפ\"א",
-      "page": 27,
-      "bbox": {
-        "x1": 0.13996316492557526,
-        "y1": 0.30386966466903687,
-        "x2": 0.2019643932580948,
-        "y2": 0.3205702602863312
-      },
-      "vision_selected": "A",
-      "vision_transcription": "ל ב\"מ דף נ\"ו",
-      "confidence": 1.0,
-      "reasoning": "The text 'שבפ\"א' does not appear anywhere in this crop. The visible ink contains the lines: top line '...וכו' אף על ג...', middle line 'ל ב\"מ דף נ\"ו', and bottom line 'ת ד\"ה קפסיק'. Thus, Option A is correct as Option B is not present in the raster image.",
-      "vlm_reading": "שבפ\"א",
-      "surya_reading": "שבפ\"א",
-      "flag": "unverified_insertion"
     },
     {
       "word_index": 60,

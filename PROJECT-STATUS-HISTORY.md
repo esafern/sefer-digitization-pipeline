@@ -17,6 +17,48 @@ current file references, or when grepping for how a past finding was
 resolved. Same append-at-top convention as before: newest entries go right
 after this header, not at the bottom.
 
+### FULL REBUILD (with vision) COMPLETED 2026-08-23 — the owed run. 1 live API call, klal 16's insert needed zero adjudication, klal 2 w195 independently confirmed at 0.99.
+
+Ran `./rebuild_all.sh` in full (not `--skip-vision`), user-authorized, closing the
+item the klal 16 apply left open. **Exit 0, all 6 stages, 259 tests green.**
+
+**Cost was effectively nothing: 537 cache hits and exactly ONE live call.** No
+429/RESOURCE_EXHAUSTED anywhere - the 2026-08-21 credit exhaustion is resolved.
+The single live call hit one `503 UNAVAILABLE` ("high demand") on attempt 0 and
+succeeded on retry, which is `vision_adjudication_common`'s retry machinery
+behaving exactly as designed.
+
+**Klal 16's 23 inserted words generated ZERO candidates.** Stage 2 produced 538
+candidates across 157 klalim and not one sits at `word_index >= 163` in klal 16
+(which now holds 186 words). That closes the caveat the apply left standing -
+those words are not "stored but unadjudicated", there was simply nothing to
+adjudicate: a fresh DocAI-vs-stored diff finds no disagreement in any of the 23.
+The transcription read off the scan at 5-6x matches the scan's own OCR tokens
+exactly, word for word.
+
+**The one live call was klal 2 word 195, and it independently confirmed the
+correction applied earlier that day.** `לדערת` vs `לדעת`: Gemini returned
+`vision_selected: B`, `vision_transcription: לדעת`, **confidence 0.99**, reasoning
+"The middle word clearly shows four letters: Lamed, Dalet, Ayin, Tav... Option A
+contains a spurious ר inserted by raw OCR. Context confirms `ואי לדעת הכריתות`."
+That position now carries FOUR independent confirmations - the human reviewer's
+own recorded choice, Surya, the VLM baseline, and now crop-level vision
+adjudication - and its flag moved to `current_text_confirmed`.
+
+Final state: `corrections_part1.json` 655 items across 170 klalim (539 pipeline +
+117 consensus, minus the two positions now resolved); `unverified_insertion`
+42 -> 40; `current_text_confirmed` 355 -> 356. `klal_page_regions.json` unchanged
+at 623 regions. `part1.json` itself untouched by the rebuild, as it must be.
+
+**Minor pre-existing finding, logged not fixed (out of this run's scope):** the
+one item flagged `error` (klal 163 word 503, `בכתובוב` vs `בכתובות`) is flagged
+that way because the adjudicator answered `vision_selected: "Option A"` where
+`classify()` expects the bare `"A"`. The answer itself is real and reasoned (0.95
+confidence, describing a genuine printing error in the scan - a ב base where a ת
+belongs); only its FORMAT is unrecognised, so a usable verdict is being discarded
+as an error. Present at HEAD before this rebuild, unrelated to it. Worth
+normalising `classify()`'s accepted forms, or constraining the prompt.
+
 ### APPLIED 2026-08-23 — klal 16's 23 missing words are now in part1.json, user-authorized. Span check clean; an audit bug found and fixed on the way.
 
 **Applied through the review-decision pipeline, not a hand-edit**

@@ -209,10 +209,11 @@ to) as state changes** — that discipline is what drifted last time.
     appears in `validate_klal_span_coverage.py`'s flagged list; a fresh stage-2
     pass generates zero new candidates at word_index ≥ 163, so DocAI agrees
     with every inserted word. `SPAN_COVERAGE_KNOWN_REAL_GAPS` is empty again.
-    **A full `./rebuild_all.sh` WITH vision is still owed** — the rebuild was run
-    `--skip-vision` to avoid spending exhausted API credits, so the 23 new words
-    are stored and DocAI-corroborated but not yet vision-adjudicated. Original
-    finding: Its stored
+    **Full `./rebuild_all.sh` WITH vision completed the same day** — 537 cache
+    hits, 1 live call, no quota errors (the 2026-08-21 credit exhaustion is
+    resolved). Klal 16's 23 inserted words generated ZERO candidates, so there
+    was nothing to adjudicate; the one live call was klal 2 w195, which Gemini
+    independently confirmed at 0.99 confidence. Original finding: Its stored
     text ends mid-sentence on the connective `אהא`; the continuation is printed
     as the first two body lines of page 20 (`אף על גב דלא שייך כלל אברייתא
     דמייתי... דוק:`) and is absent from the corpus. Verified two independent

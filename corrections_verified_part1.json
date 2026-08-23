@@ -78,6 +78,25 @@
   {
     "klal_id": 2,
     "page": 15,
+    "opcode": "replace",
+    "word_index_in_final_text": 195,
+    "original_word": "לדערת",
+    "corrected_word": "לדעת",
+    "bbox": {
+      "x1": 0.5009196996688843,
+      "y1": 0.08731130510568619,
+      "x2": 0.5524218082427979,
+      "y2": 0.10403916984796524
+    },
+    "bbox_estimated": false,
+    "vision_selected": "B",
+    "vision_transcription": "לדעת",
+    "vision_confidence": 0.99,
+    "vision_reasoning": "The middle word clearly shows four letters: Lamed (ל), Dalet (ד), Ayin (ע), and Tav (ת), spelling 'לדעת'. Option A contains a spurious 'ר' inserted by raw OCR. Context confirms 'ואי לדעת הכריתות' ('And according to the opinion of [Sefer] ha-Keritut')."
+  },
+  {
+    "klal_id": 2,
+    "page": 15,
     "opcode": "delete",
     "word_index_in_final_text": 632,
     "original_word": "ג",
@@ -1290,44 +1309,6 @@
     "vision_transcription": "שדבריו",
     "vision_confidence": 0.98,
     "vision_reasoning": "The visible text on the third line clearly reads 'שדבריו' (since his words...), which matches the semantic context ('כיון שדבריו הם לקוחים'). Option A ('שרבריו') is an OCR error that misread the letter dalet ('ד') as a resh ('ר')."
-  },
-  {
-    "klal_id": 36,
-    "page": 27,
-    "opcode": "insert",
-    "word_index_in_final_text": 52,
-    "original_word": null,
-    "corrected_word": "בשיטה מקובצת",
-    "bbox": {
-      "x1": 0.2130141258239746,
-      "y1": 0.30386966466903687,
-      "x2": 0.30693677067756653,
-      "y2": 0.3205702602863312
-    },
-    "bbox_estimated": true,
-    "vision_selected": "A",
-    "vision_transcription": "",
-    "vision_confidence": 1.0,
-    "vision_reasoning": "The target text 'בשיטה מקובצת' (Option B) is entirely absent from the image crop. The visible ink reads 'שתא ארעתיה וכו'' on the top line, followed by '[רב]י בצלאל על ב[' on the middle line, and 'כ\"ט ב' תוספות' on the bottom line. Option A correctly identifies that the adjudicated Option B text does not exist in this crop."
-  },
-  {
-    "klal_id": 36,
-    "page": 27,
-    "opcode": "insert",
-    "word_index_in_final_text": 56,
-    "original_word": null,
-    "corrected_word": "שבפ\"א",
-    "bbox": {
-      "x1": 0.13996316492557526,
-      "y1": 0.30386966466903687,
-      "x2": 0.2019643932580948,
-      "y2": 0.3205702602863312
-    },
-    "bbox_estimated": true,
-    "vision_selected": "A",
-    "vision_transcription": "ל ב\"מ דף נ\"ו",
-    "vision_confidence": 1.0,
-    "vision_reasoning": "The text 'שבפ\"א' does not appear anywhere in this crop. The visible ink contains the lines: top line '...וכו' אף על ג...', middle line 'ל ב\"מ דף נ\"ו', and bottom line 'ת ד\"ה קפסיק'. Thus, Option A is correct as Option B is not present in the raster image."
   },
   {
     "klal_id": 38,
