@@ -17,6 +17,86 @@ current file references, or when grepping for how a past finding was
 resolved. Same append-at-top convention as before: newest entries go right
 after this header, not at the bottom.
 
+### SURYA RE-READ 2026-08-23 — both levers ruled out. Klalim 49/129/201 are structurally uncovered, not pending a re-run.
+
+User-requested ("run the surya read on those klalim"). Two things tried, both
+negative, both recorded because the earlier recommendation - mine, and repeated
+in the plan document - said these three "need a re-run" and that was wrong.
+
+**Lever 1: re-run Surya on pages 30/48/73.** Added `--pages` targeting to
+`run_surya_part1_full_baseline.py` (re-running one page is cheap; re-running all
+63 to fix three churns every other cached result for nothing). Ran with
+`--force-recompute`. **The output is byte-identical** - Surya is deterministic,
+so a plain re-run could never have helped. Backed the three page JSONs up first
+and compared block-by-block: 11->11, 3->3, 11->11 blocks, same text.
+
+**Lever 2: higher input resolution.** The cached page images are ~860x1336
+(1.1 MP); the source PDF renders at 1752x2664 (4.7 MP) at 300 DPI, so Surya had
+been reading roughly a quarter of the available pixels. Ran Surya directly on
+300-DPI renders of the same three pages. Block segmentation changed a lot
+(page 30: 11 -> 2 blocks; page 48: 3 -> 11), but **the missing markers stayed
+missing**: klal 49's `מט` and klal 129's `קכט` are unread at both resolutions.
+Klal 201's `רא` is read at both, and remains unusable for the same reason as
+before - klal 202's `רב` is absent from Surya's output too, so there is no second
+anchor and the 201/202 boundary cannot be located without inventing one.
+
+**Not adopted.** The 300-DPI change was NOT applied to the pipeline: it does not
+fix the problem it was tried for, and page 30 going 11 blocks -> 2 would be a
+large, unmeasured change to every klal's text assignment on that page. Worth
+revisiting as its own scoped experiment - "does 300 DPI improve Surya's ~70%
+agreement corpus-wide?" is a real question this did not answer, since it only
+looked at three pages and only at marker detection.
+
+**Conclusion recorded in the plan (§8 item 5):** these three are structurally
+uncovered by Surya as configured. Closing them needs a different engine or a
+different Surya configuration, not a re-run. The current handling - report them
+by name at the end of every run, count them downstream as an absent witness
+rather than as agreement - is correct in the meantime.
+
+### CORRECTION 2026-08-23 — "Tesseract/lexicon-gap auto-flags" was wrong. The purged Parts 2-3 flags were lexicon-gap and dropped-lamed detector output; no Tesseract signal for Parts 2-3 exists in this repo.
+
+Raised by the user ("the witness set on parts 2 and 3 is based on Tesserect").
+Checked rather than accepted, and the on-disk evidence says otherwise - recorded
+here because the confusion traces to this project's own wording.
+
+**Checked against the pre-purge log** (`git show 1e59522~1:review_decisions.jsonl`),
+the 2,088 records with `klal_id > 222` carry these reviewer tags:
+
+| tag | count |
+| :--- | ---: |
+| `ai-lexicon-gap-parts23` (+ `-v2`, `-v3`) | 1,745 |
+| `ai-dropped-lamed-parts23` | 320 |
+| `ai-scan-verified-parts23-boundary` | 17 |
+| `ai-pattern-b-sweep-incidental` | 6 |
+
+No Tesseract tag among them. The only Tesseract artifact in this repo is
+`reconstruction_witness_queue.json` - 419 items with `docai_reading` /
+`tesseract_reading`, covering klalim **30, 75 and 88, all Part 1**.
+`TesseractWitnessEngine` exists in the pluggable registry but is not wired to any
+Parts 2-3 path.
+
+**Where the belief came from is this file's own sibling.** `PROJECT-STATUS.md`'s
+TL;DR read "The 1,496 noisy **Tesseract/lexicon-gap** auto-flags were purged",
+bundling two unrelated sources into one phrase. Corrected there with the tag
+breakdown above. This is the same defect class as a docstring overclaiming its
+own coverage: the text was not false about the purge, it was false about what was
+purged, and it propagated.
+
+**Caveat kept rather than glossed:** this repo deliberately excludes `archive/`,
+and the 312 fabricated Parts 2-3 candidates had no generator script anywhere - so
+a Tesseract pass could have existed in an untracked script. That possibility is
+not evidence, and it does not change the remedy: if any Parts 2-3 signal WAS
+Tesseract-derived, that argues for rebuilding rather than reusing it. This project
+measured Tesseract correct in only **16 of 419** disagreements (3.8%) against
+DocAI's 91.2% and concluded it "fails structurally, being a weaker engine on the
+*same* scan rather than an independent signal."
+
+**The fact that matters either way:** `corrections_part2.json` and
+`corrections_part3.json` are both empty `{}`. **Parts 2-3 has no witness set at
+all today.** Sharpened in `PROJECT-STATUS.md`'s TL;DR and in
+`MULTI-WITNESS-REPAIR-AND-SYNTHESIS-PLAN.md` §7, which previously said only that
+Parts 2-3 was gated - understating it, since there is nothing there to gate.
+
 ### FIXED 2026-08-23 — C16: Surya block re-segmentation built. 10 uncovered klalim -> 3, and the 3 that remain are genuinely unreadable, not mis-assigned.
 
 **The cause was not a Surya failure - it was the assembler.**

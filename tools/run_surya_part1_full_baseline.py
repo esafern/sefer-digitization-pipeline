@@ -224,7 +224,7 @@ def split_block_across_klalim(text, block_y1, block_y2, page_klalim, y_center):
     return out
 
 
-def run_surya_part1(force_recompute=False, assemble_only=False):
+def run_surya_part1(force_recompute=False, assemble_only=False, only_pages=None):
     output_dir = os.path.join(REPO, "tools", "second_witness_eval")
     surya_pages_dir = os.path.join(output_dir, "surya_pages")
     os.makedirs(surya_pages_dir, exist_ok=True)
@@ -237,6 +237,11 @@ def run_surya_part1(force_recompute=False, assemble_only=False):
     pages_to_process = []
     if not assemble_only:
         for p in pages:
+            # --pages targets a re-OCR at specific pages. Re-running one page is
+            # cheap and local; re-running all 63 to fix three is not, and it also
+            # churns every other page's cached result for no reason.
+            if only_pages and p not in only_pages:
+                continue
             page_json = os.path.join(surya_pages_dir, f"page_{p}.json")
             if force_recompute or not os.path.exists(page_json):
                 pages_to_process.append(p)
@@ -362,9 +367,14 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--force-recompute", action="store_true",
                     help="re-run Surya OCR even for pages already cached")
+    ap.add_argument("--pages", type=str, default=None,
+                    help="comma-separated page numbers to (re-)OCR, e.g. 30,48,73; "
+                         "combine with --force-recompute to redo already-cached pages")
     ap.add_argument("--assemble-only", action="store_true",
                     help="rebuild the klal-aligned baseline from cached per-page "
                          "JSON without loading Surya at all (free, and the common "
                          "case after a block->klal mapping change)")
     a = ap.parse_args()
-    run_surya_part1(force_recompute=a.force_recompute, assemble_only=a.assemble_only)
+    only = {int(x) for x in a.pages.split(",")} if a.pages else None
+    run_surya_part1(force_recompute=a.force_recompute, assemble_only=a.assemble_only,
+                    only_pages=only)

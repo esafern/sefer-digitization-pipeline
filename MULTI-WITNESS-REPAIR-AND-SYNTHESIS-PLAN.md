@@ -1,143 +1,319 @@
 # Master Specification: Multi-Witness Typographic Repair & Consensus Synthesis
 
-> **Status:** Production Architecture Specification  
-> **Target Corpus:** 19th/20th-Century Rabbinic Hebrew/Aramaic Print & Manuscript Editions  
-> **Scope:** Full-Corpus Automated Ingestion, Typographic Pre-Repair, Multi-Witness Consensus Synthesis, and Review Triage.
+> **Status:** Working architecture. Partly built, partly specified — every
+> section below is marked **BUILT**, **SPECIFIED**, or **OPEN QUESTION**, and
+> nothing is described as done that is not.
+> **Target Corpus:** 19th/20th-Century Rabbinic Hebrew/Aramaic Print & Manuscript Editions
+> **Scope:** Part 1 only. Parts 2–3 are gated — see §7.
+> **Revised 2026-08-23** after the first real synthesis run measured results that
+> contradicted this document's central mathematical claim. See §2.
 
 ---
 
-## 1. Executive Summary & Design Philosophy
+## 0. What changed in this revision, and why
 
-This document defines the production multi-witness digitization and synthesis architecture for Rabbinic texts (tested and proven on the 1852 Berlin printing of *Sefer Yad Malachi*).
+The first version of this document described a design that had not been run.
+When it was built and run, three things in it turned out to be wrong, and they
+are corrected here rather than quietly edited:
 
-### The Core Problem: Engine-Specific Blind Spots
-Single-engine OCR pipelines fail on 19th-century Rabbinic typography due to systematic, engine-specific blind spots:
-1. **Google Document AI (Cloud OCR)** drops compound printer ligatures (e.g. `ﭏ` $\rightarrow$ `א`, dropping `ל`), splits abbreviation punctuation, and occasionally drops standalone section markers.
-2. **Gemini 3.6 Flash (Multimodal VLM)** provides superior semantic and acronym comprehension (94.5% accuracy) but carries circularity risk with adjudication and occasional repetition-loop hallucinations on low-contrast scans.
-3. **Surya OCR (`surya-ocr-2`)** runs 100% locally on Apple Silicon Metal with zero API cost and perfect header/layout recognition, but suffers from systematic **gershayim-to-yod blindness** (`"` $\rightarrow$ `י`, e.g. `ז"ל` $\rightarrow$ `זיל`) and font confusion (`פ` $\leftrightarrow$ `מ`).
+1. **The independence proof in §2 is false for this corpus.** It priced two
+   engines agreeing on the same wrong token at 3.5 × 10⁻⁷. One Part-1 run
+   produced **37 counterexamples**, including unanimous 3-of-3 agreement. §2 is
+   rewritten around the measured result.
+2. **Two headline accuracy figures were unsourced.** "94.5%" for the VLM and
+   "32.4%" for Surya appear nowhere in this repository. The measured numbers,
+   with their sources, are in §1.
+3. **The roadmap's Phase 4 collided with a binding project rule** (the Parts 2–3
+   gate) without mentioning it. §7 states the gate.
 
-### The Solution: Pre-Alignment Repair Filters + 2-of-N Consensus
-Rather than allowing engine-specific quirks to corrupt the consensus alignment, each engine stream passes through a **dedicated typographic repair filter** before entering a **3-way consensus synthesis matrix**.
-
-```
-                             [ 19th-Century High-DPI Raw Scan ]
-                                             │
-      ┌──────────────────────────────────────┼──────────────────────────────────────┐
-      ▼                                      ▼                                      ▼
-[ Raw DocAI OCR ]                    [ Raw Gemini VLM ]                     [ Raw Surya OCR ]
-      │                                      │                                      │
-      ▼                                      ▼                                      ▼
-┌────────────────────────────┐       ┌────────────────────────────┐       ┌────────────────────────────┐
-│ ★ DOCAI REPAIR FILTER      │       │ ★ VLM REPAIR FILTER        │       │ ★ SURYA REPAIR FILTER      │
-│ • Ligature expansion (א→אל)│       │ • Repetition loop detector │       │ • Gershayim recovery (י→") │
-│ • Header/footer stripping  │       │ • Multi-page stitcher      │       │ • Soft font pairs (פ/מ)    │
-│ • Abbreviation rejoining   │       │ • Format wrapper stripper  │       │ • Multi-klal block split   │
-└─────────────┬──────────────┘       └─────────────┬──────────────┘       └─────────────┬──────────────┘
-              │                                    │                                    │
-              └────────────────────────────┬───────┴────────────────────────────────────┘
-                                           ▼
-                       [ Universal Unicode NFKC Normalizer ]
-                       (Standardize ", ', -, remove cruft)
-                                           │
-                                           ▼
-                       [ Multi-Witness Triangulation Matrix ]
-                                           │
-             ┌─────────────────────────────┼─────────────────────────────┐
-             ▼                             ▼                             ▼
-   [ 3-of-3 Unanimous ]          [ 2-of-3 Consensus ]          [ 3-Way Split / Gap ]
-  (DocAI == VLM == Surya)       (2 engines agree, 1 fails)    (Ambiguous or Lexicon Gap)
-             │                             │                             │
-             │ (~82–86% of text)           │ (~10–14% of text)           │ (~3–5% of text)
-             │                             │                             ▼
-             │                             │                   [ Adjudicator Layer ]
-             │                             │                  (High-DPI crop analyzer)
-             │                             │                             │
-             ▼                             ▼                             ▼
-     [ AUTO-ACCEPTED ]             [ AUTO-ACCEPTED ]             [ HUMAN REVIEW QUEUE ]
-   (100% Confidence)             (High-Confidence Card)        (1-Click UI Dashboard)
-             │                             │                             │
-             └─────────────────────────────┼─────────────────────────────┘
-                                           ▼
-                         [ Final Certified Corpus Text ]
-```
+This project has a documented history of two fabricated figures reaching its own
+status file (`PROJECT-STATUS-HISTORY.md`, 2026-08-21 integrity audit). Every
+number below therefore names where it comes from, and anything not measured is
+labelled as an estimate.
 
 ---
 
-## 2. Mathematical Proof: Signal vs. Noise in Multi-Witness Ensembles
+## 1. The Core Problem: Engine-Specific Blind Spots — **BUILT**
 
-### A. The Noise Risk of Unweighted Disagreement
-If a pipeline flags every word where **any single witness disagrees with the base text** ($\text{Union Rule}: W_1 \neq B \lor W_2 \neq B \lor W_3 \neq B$):
+Single-engine OCR fails on 19th-century Rabbinic typography through systematic,
+engine-specific blind spots:
 
-$$P(\text{Flag}) = 1 - \prod_{i=1}^{n} (1 - \epsilon_i)$$
-
-Given:
-* DocAI error rate: $\epsilon_1 \approx 4.5\%$
-* Gemini VLM error rate: $\epsilon_2 \approx 5.5\%$
-* Surya OCR error rate: $\epsilon_3 \approx 32.4\%$
-
-$$P(\text{Flag}) = 1 - (1 - 0.045)(1 - 0.055)(1 - 0.324) \approx \mathbf{39.3\%} \implies \mathbf{\sim 20,300\text{ review flags across Part 1}}$$
-
-An unweighted union generates **over 20,000 noise flags**, drowning the reviewer in Surya's predictable acronym artifacts.
-
-### B. The Decoupled Certainty of 2-of-N Consensus
-Because **DocAI**, **Gemini VLM**, and **Surya OCR** use completely orthogonal architectures and training sets, the probability that two independent engines produce the **exact same hallucinated token** $w^*$ over a Rabbinic vocabulary $|V| \approx 50,000$ is:
-
-$$P(W_{\text{VLM}} = W_{\text{Surya}} = w^* \neq w_{\text{true}}) \le \epsilon_{\text{VLM}} \times \epsilon_{\text{Surya}} \times \frac{1}{|V|}$$
-
-$$P(\text{Joint Error}) \le 0.055 \times 0.324 \times \frac{1}{50,000} \approx \mathbf{3.5 \times 10^{-7}}$$
-
-**Conclusion**: When two decoupled engines agree on an alternative token against the third, the posterior probability of correctness exceeds **99.9999%**. 
-
----
-
-## 3. Detailed Specifications for Engine Repair Filters
-
-### 1. Surya OCR Typographic Repair Filter (`pipeline/repair_filters/surya_filter.py`)
-* **Gershayim Inversion**: Detect internal `י` / `יי` within candidate words and test if substituting `"` produces a recognized Rabbinic acronym (e.g. `זיל` $\rightarrow$ `ז"ל`, `דיה` $\rightarrow$ `ד"ה`, `עיש` $\rightarrow$ `ע"ש`, `הניל` $\rightarrow$ `הנ"ל`).
-* **Soft Confusion Matching**: Align `(פ, מ)` and `(ד, ר)` letter differences with low substitution penalty.
-* **Block Re-segmentation**: When Surya groups consecutive short sections into a single `<p>` block (e.g. Klal 43 *מ"ג* and Klal 44 *מ"ד* on Page 29), split the text at the detected gematria marker.
-
-### 2. Google DocAI Repair Filter (`pipeline/repair_filters/docai_filter.py`)
-* **Alef-Lamed Ligature Expansion**: Detect instances where DocAI dropped `ל` from the `ﭏ` ligature (e.g. `אא` $\rightarrow$ `אלא`, `איבא` $\rightarrow$ `אליבא`, `או` $\rightarrow$ `אלו`).
-* **Header & Footer Boundary Stripping**: Automatically strip running headers ($y < 0.085$) and scanner stamps ($y > 0.95$).
-* **Abbreviation Re-Joining**: Merge split punctuation tokens (`ד'` + `ה` $\rightarrow$ `ד"ה`, `וכו'` multi-tokens).
-* **Missing Section Marker Restoration**: Inherit single-letter bold section markers (e.g. Klal 10 marker `"י"`) detected by Surya.
-
-### 3. Gemini VLM Repair Filter (`pipeline/repair_filters/vlm_filter.py`)
-* **Repetition Loop Detector**: Prune repetitive trailing phrase hallucinations on low-contrast lines.
-* **Multi-Page Continuation Stitcher**: Merge multi-page klal continuations into unified streams without boundary token loss.
-* **Wrapper Stripping**: Remove any stray markdown, code fences, or JSON formatting artifacts.
-
----
-
-## 4. Multi-Witness Consensus Decision Matrix
-
-| Condition | Example | Pipeline Resolution | Human Review Effort |
+| Engine | Role | Measured performance | Source |
 | :--- | :--- | :--- | :--- |
-| **3-of-3 Unanimous** | `הש"ס` = `הש"ס` = `הש"ס` | **Auto-Approve** (100% confidence). | **0 sec** (~82–86% of book) |
-| **DocAI + VLM agree** | DocAI: `ז"ל`, VLM: `ז"ל`, Surya: `זיל` | **Auto-Approve `ז"ל`** (Surya gershayim noise filtered). | **0 sec** (~10–12% of book) |
-| **VLM + Surya agree** | DocAI: `כאכיי`, VLM: `כאביי`, Surya: `כאביי` | **Auto-Approve `כאביי`** (DocAI typo corrected with original bbox). | **0 sec** (~2–3% of book) |
-| **3-Way Split or Lexicon Gap** | DocAI: `חז"ל`, VLM: `ח"ל`, Surya: `הלל` | **Route to Adjudicator & Dashboard**: High-res crop + 1-click decision card. | **1 click** (~3–5% of book) |
+| **Google Document AI** | Primary extraction | Disagrees with stored text on **1.02%** of Part-1 words (538 of 52,630) | `corrections_verified_part1.json` |
+| **Gemini 3.6 Flash (VLM)** | Witness 2 + adjudicator | **93.34%** token accuracy; **87.43%** Pass-A/Pass-B self-consistency | `tools/second_witness_eval/part1_full_baseline_accuracy_report.txt` |
+| **Surya OCR (local)** | Witness 3 | **~70%** mean token agreement vs. stored text across 219 covered klalim | measured 2026-08-23, `surya_part1_full_baseline.txt` |
+
+**Read the DocAI figure carefully.** It is a *disagreement rate against a base
+text that DocAI itself helped produce*, not an independent error rate. There is
+no unbiased error rate for the primary engine in this pipeline, and claiming one
+would be circular.
+
+Known blind spots, each observed in this corpus:
+
+* **DocAI** — drops the `ל` from the alef-lamed ligature (`ﭏ`), splits
+  abbreviation punctuation, and occasionally drops standalone section markers.
+* **Gemini VLM** — strong on semantics and acronyms, but carries **circularity
+  risk**: it is also the adjudicator, violating `PROPOSED_PIPELINE_ARCHITECTURE.md`
+  Directive #1. Also shows repetition-loop hallucinations on low-contrast lines
+  and occasional early stop on long crops.
+* **Surya** — runs locally on Apple Silicon with zero API cost and good layout
+  recognition, but shows **gershayim-to-yod blindness** (`ז"ל` → `זיל`) and font
+  confusion (`פ` ↔ `מ`). It also returns *layout blocks*, which merge
+  consecutive short klalim — see §3.1.
 
 ---
 
-## 5. Phased Implementation Roadmap
+## 2. Signal vs. Noise in Multi-Witness Ensembles — **REWRITTEN 2026-08-23**
 
-### Phase 1: Modular Repair Filters (`pipeline/repair_filters/`)
-- [x] Establish centralized typography catalog in `pipeline/typography.py`.
-- [x] Ingest Surya OCR baseline for all 63 Part-1 pages (`tools/run_surya_part1_full_baseline.py`).
-- [ ] Implement standalone modular filters: `surya_filter.py`, `docai_filter.py`, `vlm_filter.py`, `unicode_filter.py`.
+### A. The noise risk of unweighted disagreement — still valid
 
-### Phase 2: Consensus Synthesizer (`pipeline/synthesize_multi_witness.py`)
-- [x] Build multi-witness comparison reporter (`tools/second_witness_eval/evaluate_multi_witness_comparison.py`).
-- [x] Build consensus dispute extractor (`tools/extract_surya_consensus_disputes.py`).
-- [ ] Unify 3-way sequence alignment into a single-pass synthesis pipeline that produces candidate datasets directly from raw OCR streams.
+Flagging every word where **any** witness disagrees with the base text produces
+noise dominated by the weakest engine. With Surya's ~30% disagreement rate, a
+union rule over three witnesses flags on the order of **a third of the corpus** —
+tens of thousands of items, most of them Surya's predictable acronym artifacts.
+This is why the pipeline uses a consensus rule rather than a union rule, and that
+reasoning is unchanged.
 
-### Phase 3: Review Dashboard & UI Polish
-- [x] Display Surya OCR reading cards side-by-side with Current, DocAI, and VLM options in `review_frontend/app.js`.
-- [x] Render strike-through and bold green replacement styles in the dashboard text pane.
-- [x] Support 1-click decision logging to `review_decisions.jsonl`.
+### B. The decoupling argument — **FALSE AS ORIGINALLY STATED**
 
-### Phase 4: Full Corpus Rollout (Parts 2 & 3)
-- [ ] Run the unified 3-witness synthesis pipeline across Parts 2 and 3 (pages 77–337).
-- [ ] Export certified final text into plain text, Sefaria JSON, TEI XML, and ALTO XML.
+The original text argued that because the engines have orthogonal architectures,
+the probability of two producing the *same* wrong token is bounded by
+ε₁ × ε₂ × 1/|V| ≈ 3.5 × 10⁻⁷, so a 2-of-N agreement is correct with probability
+> 99.9999%.
+
+**This does not hold, and the failure is not marginal.** The first full synthesis
+run over Part 1 found **37 positions where two or three engines agreed on the
+same wrong reading**, including unanimous DocAI + Surya + VLM agreement. Every
+one is the same artifact: the alef-lamed ligature losing its `ל` —
+`ושמואל`→`ושמוא`, `אליבא`→`איבא`, `אליהו`→`איהו`, `אלגאזי`→`אגאזי`, `ואל`→`וא`.
+
+**Why the argument fails.** The `1/|V|` term assumes a wrong reading is drawn
+roughly uniformly from a 50,000-word vocabulary. It is not. Every engine is
+reading *the same ink*, and where the ink itself carries a defect — a single
+worn or ambiguous printer's sort — all three fail toward the *same visually
+plausible* neighbour. Architectural independence is irrelevant to a defect that
+is upstream of every architecture. The remaining independence is real but far
+weaker than a 1/|V| factor implies.
+
+**A second, narrower error:** the pipeline as first built counted VLM Pass A and
+Pass B as two witnesses. They are one model sampled twice (87.43% measured
+self-consistency), so their agreement carries no independence at all. Corrected —
+see §3.4.
+
+### C. What replaces it
+
+Two rules, both now enforced in code:
+
+1. **A witness is an engine, not a sample.** Consensus requires two *distinct*
+   engines. Pass A/Pass B agreement is a stability gate on the single VLM
+   witness: where the two passes disagree, the VLM abstains rather than votes.
+2. **A consensus every engine can reach through one shared ink defect is not
+   corroboration.** Agreements matching a catalogued typographic artifact are
+   tagged as such and must not be treated as evidence against the stored text.
+
+**The honest posterior is unquantified.** We do not have a defensible number for
+"probability correct given 2-of-3 agreement" on this corpus, because the error
+correlation is driven by print defects nobody has enumerated. Anyone wanting to
+auto-approve on consensus needs that number first — see §5.
+
+---
+
+## 3. Engine Repair Filters
+
+### 3.1 Surya block re-segmentation — **BUILT**
+
+Surya returns *layout* blocks and routinely groups consecutive short klalim into
+a single `<p>`. The assembler originally assigned each block to a klal by the
+block's vertical centre, so a merged block went entirely to one klal and the
+other received nothing — and an empty body was then read downstream as "this
+witness agrees with every word" rather than "this witness has no reading".
+**10 of Part 1's 222 klalim were empty for this reason.**
+
+`split_block_across_klalim()` in `tools/run_surya_part1_full_baseline.py` cuts a
+merged block at each covered klal's gematria marker, using
+`build_gematria_trace.near_miss_variants` so a misread numeral still anchors.
+Three guards, each added after a measured failure:
+
+* Genuine-overlap epsilon — a block starting exactly on the previous klal's
+  bottom edge must not "cover" it.
+* A missing marker does not advance the search cursor (otherwise one absent
+  numeral swallows every klal after it).
+* A positional guard — a cut must land roughly where that klal's region sits in
+  the block, or a numeral-shaped word in ordinary prose becomes a false cut.
+
+**Coverage: 212/222 → 219/222.**
+
+### 3.2 DocAI ligature repair — **PARTIALLY BUILT**
+
+`pipeline/typography.py` catalogues the alef-lamed and chet-zayin sorts and
+provides `dropped_lamed_explains()`, which recognises a reading that is the
+stored word minus one `ל` after an `א`. This is used to *tag* consensus
+agreements, not to rewrite text.
+
+**Still specified, not built:** repairing DocAI's stream before alignment
+(expanding `אא` → `אלא` etc.). Note `tools/detect_ligature_corruption.py` already
+handles the reverse direction — a corrupt form stored *in the corpus* — and its
+header explains why an ingest-level fix is impossible: DocAI collapses the
+ligature before this repo ever sees the text.
+
+### 3.3 Gershayim recovery (Surya) — **SPECIFIED**
+
+Detect internal `י`/`יי` and test whether substituting `"` yields a recognised
+Rabbinic acronym (`זיל`→`ז"ל`, `דיה`→`ד"ה`, `הניל`→`הנ"ל`).
+
+### 3.4 VLM stability gating — **BUILT**
+
+Pass A/Pass B disagreement makes the VLM abstain at that position. Measured:
+**1,577 abstentions** across Part 1 — exactly the positions the pre-correction
+pipeline counted as "dual-VLM consensus".
+
+### 3.5 Filter validation — **OPEN, AND REQUIRED BEFORE ANY FILTER REWRITES TEXT**
+
+Every filter in this section transforms a witness *before* it votes. A wrong
+filter therefore does not produce a visible disagreement — it **erases** one, and
+silence where a check cannot operate is not evidence of correctness (Lesson 15).
+
+No filter may be promoted from tagging to rewriting until it has a measured
+precision/recall against a hand-checked sample, recorded in `PROJECT-STATUS.md`.
+This is not a nice-to-have; §3.1 alone needed three iterations, and one
+intermediate version silently cost three klalim 30–360 words each.
+
+---
+
+## 4. Consensus Decision Matrix — **BUILT, WITH ONE OPEN POLICY QUESTION**
+
+| Condition | Pipeline resolution | Status |
+| :--- | :--- | :--- |
+| All witnesses agree with the stored text | No candidate produced | **BUILT** — the common case; costs nothing |
+| DocAI disagrees with stored text | Vision-adjudicated candidate → human review | **BUILT** — the existing corrections pipeline |
+| Two *distinct* engines agree against the stored text | Consensus dispute → human review, with per-engine attribution | **BUILT** — 176 disputes in Part 1 |
+| Two engines agree, but a catalogued ligature artifact explains it | Surfaced **tagged as an artifact**; stored text presumed correct | **BUILT** |
+| Three-way split / lexicon gap | Human review queue | **BUILT** |
+
+### The open policy question: auto-approval
+
+The original version of this matrix auto-approved 2-of-3 consensus with **"0 sec"**
+human review. That is not implemented, and it should not be implemented without
+an explicit decision, for two reasons:
+
+1. **It contradicts success criterion #1** — every correction must be "resolved
+   by looking at the actual scan, not inferred" — and the record/apply split that
+   keeps machine output separate from human judgement.
+2. **It would have caused measurable damage.** Of the 40 positions where the
+   consensus contradicts a recorded human decision, **32 are the ligature
+   artifact**. Auto-approval would have reverted correct human decisions to the
+   corrupted reading.
+
+**Recommendation:** keep every consensus dispute human-reviewed. If throughput
+becomes the binding constraint, the safe first step is auto-approving only the
+*unanimous 3-of-3* case with **no** catalogued artifact match — and only after
+§3.5's validation exists and §2C's posterior is actually quantified.
+
+---
+
+## 5. How this plugs into the existing pipeline — **BUILT**
+
+The original document did not say where any of this ran, which is why the first
+implementation wrote its results directly into `corrections_part1.json` — a
+**derived** file that `./rebuild_all.sh` regenerates from scratch. 1,108 items
+and any review time spent on them were one rebuild away from deletion.
+
+The rule that prevents a repeat: **a witness contributes a source file the
+pipeline reads; it never edits the pipeline's own output.**
+
+```
+rebuild_all.sh
+  1/6  build_klalim_demo_dataset.py
+  2/6  build_corrections_dataset.py     DocAI vs stored text -> candidates
+  3/6  verify_corrections_vision.py     vision adjudication (the only paid stage)
+  4a/6 synthesize_multi_witness.py      <- witnesses in, consensus_disputes_part1.json out
+  4/6  assemble_corrections_dataset.py  <- merges 4a's output; writes corrections_part1.json
+  5/6  build_klal_page_regions.py
+  6/6  pytest (hard gate)
+```
+
+Witness baselines (`vlm_part1_full_baseline*.txt`, `surya_part1_full_baseline.txt`)
+are inputs produced by separate, manually-run scripts — Surya is local and free,
+the VLM passes are paid. Stage 4a is pure local computation and therefore lives
+inside the gated chain.
+
+Two corpus invariants enforce this: every item in `corrections_part1.json` must
+trace to stage 3 or stage 4a, and no item may report an engine reading identical
+to the stored text.
+
+---
+
+## 6. Current state — Part 1
+
+| Metric | Value |
+| :--- | :--- |
+| Corrections dataset | 658 items (538 vision-adjudicated + 176 consensus, deduplicated) |
+| Consensus disputes | 176 across 85 klalim |
+| Agreements explained by a ligature artifact | 37 |
+| VLM abstentions (Pass A/B instability) | 1,577 |
+| Surya coverage | 219 / 222 klalim |
+| Klalim with no Surya reading | 3 (49, 129, 201) — counted as an **absent witness**, never as agreement |
+
+---
+
+## 7. Parts 2–3 — **GATED, NOT SCHEDULED**
+
+**There is currently no witness set for Parts 2–3 at all.** `corrections_part2.json`
+and `corrections_part3.json` are both empty `{}` (emptied 2026-08-20 when 312
+fabricated "VLM Verified" candidates were pulled). The 419-item
+`reconstruction_witness_queue.json` is DocAI-vs-Tesseract and covers klalim 30,
+75 and 88 — **all Part 1**. So Parts 2–3 work does not mean "run the existing
+pipeline there"; it means building a witness set from zero.
+
+*Open provenance question, flagged rather than assumed:* the ~2,088 Parts 2–3
+flags purged on 2026-08-20 carry reviewer tags naming the lexicon-gap detector
+(1,745) and the dropped-lamed detector (320), not Tesseract — but
+`PROJECT-STATUS.md`'s own TL;DR describes them as "Tesseract/lexicon-gap"
+auto-flags, and this repo excludes the `archive/` directory where a Tesseract
+pass could have lived. If any Parts 2–3 signal was in fact Tesseract-derived,
+that is a reason to rebuild rather than reuse it: this project measured Tesseract
+correct in only 16 of 419 disagreements (3.8%) against DocAI's 91.2%, and
+concluded it "fails structurally, being a weaker engine on the *same* scan rather
+than an independent signal."
+
+**Running this pipeline over Parts 2–3, or exporting certified Parts 2–3 text, is
+not authorized by this document.** `START_HERE.md`'s Parts 2–3 gate is binding:
+building infrastructure is permitted (2026-08-17 supersede); *applying* any
+`part2.json`/`part3.json` correction requires its own explicit go-ahead **and**
+independent confirmation by an outside professional that Part 1 is clean.
+
+The original roadmap listed "run the synthesis pipeline across Parts 2 and 3" and
+"export certified final text" as ordinary next steps. That was wrong and is
+removed. The rationale is not caution for its own sake: the page-furniture
+contamination bug hit Part 1 at ~1 instance and Parts 2–3 at 74/445 klalim
+(~17%), and Parts 2–3's own alignment data is known to be wrong for 391 of 445
+klalim.
+
+---
+
+## 8. Open items
+
+1. **Quantify the posterior for 2-of-3 agreement on this corpus** (§2C). Without
+   it, auto-approval has no defensible threshold.
+2. **Enumerate the printer's defective sorts.** The ligature catalogue has two
+   entries and one has no detector. The 37 measured joint errors all came from
+   the one sort that *is* catalogued — which says more about what has been
+   looked for than about what exists.
+3. **Filter validation harness** (§3.5) before any filter rewrites text.
+4. **A genuinely independent third engine.** Gemini is both witness 2 and
+   adjudicator — `PROPOSED_PIPELINE_ARCHITECTURE.md` Directive #1 is still
+   violated. Dicta is the leading candidate; Kraken is blocked on a macOS
+   torch-wheel constraint.
+5. **3 klalim with no Surya reading** (§6) — **two levers tried, both ruled out
+   2026-08-23.** A plain re-run is futile: Surya is deterministic and the
+   re-OCR of pages 30/48/73 came back byte-identical. Higher input resolution is
+   not the lever either: at 300 DPI (4.7 MP vs the cached 1.1 MP) klal 49's `מט`
+   and klal 129's `קכט` are *still* unread, though the block segmentation changes
+   substantially. Klal 201's own marker IS read, but its block holds no second
+   anchor (klal 202's `רב` is absent from Surya's output too), so the 201/202
+   boundary cannot be located without inventing one — which §3.1's guards exist
+   to prevent. **These three are structurally uncovered by Surya as configured,
+   not pending a re-run.** Closing them needs a different engine or a different
+   Surya configuration, and the current handling — report by name, count as an
+   absent witness — is correct in the meantime.
