@@ -17,6 +17,72 @@ current file references, or when grepping for how a past finding was
 resolved. Same append-at-top convention as before: newest entries go right
 after this header, not at the bottom.
 
+### INVESTIGATION 2026-08-23 — printer's defective sorts enumerated. Exactly ONE ink-level defect exists at detectable frequency; the other 179 shared-engine errors are ordinary letter confusion.
+
+Answers `MULTI-WITNESS-REPAIR-AND-SYNTHESIS-PLAN.md` §8 item 2, and the worry
+that raised it: the 37 measured joint errors that refuted §2.B's independence
+proof all came from the ONE printer's sort that happens to be catalogued, which
+said more about what had been looked for than about what exists. This is the
+systematic look. New reusable tool: `tools/survey_shared_engine_errors.py`.
+
+**Method - the discriminator.** Two different things produce multi-engine
+agreement and they need different remedies. An INK defect (damaged/wrong/
+ligatured sort) is upstream of every engine, so all engines see the same wrong
+glyph: signature is strong CONTEXT-LOCKING (same preceding letter nearly every
+time, because the defect lives in one sort or letter pair) plus raised UNANIMITY.
+An ENGINE confusion is a per-model visual judgement on genuinely similar letters:
+scattered context, near-zero unanimity, often a matching reverse transformation.
+Frequency alone cannot tell them apart, which is why counting disagreements never
+answered this.
+
+**Result over all 216 multi-witness agreements (human-decided positions
+deliberately INCLUDED - a defect a reviewer already corrected is still a defect,
+and those are its clearest instances):**
+
+| transform | n | 3-of-3 | context-lock | verdict |
+| :--- | ---: | ---: | ---: | :--- |
+| `del ל` | 37 | 7 | **100% after `א`** | **INK** (catalogued) |
+| `sub כ->ב` | 23 | 3 | 26% | engine |
+| `sub ר->ד` | 15 | 1 | 40% | engine |
+| `sub ד->ה` | 11 | 0 | 82% | engine |
+| ...14 more | ≤8 | **0** | scattered | engine |
+
+**Exactly one context-locked ink defect: the alef-lamed ligature.** It is the
+only transformation at 100% context-lock, and 16 of the 18 classified
+transformations have ZERO unanimous agreements. **The catalogue is not missing a
+second ink-level defect at detectable frequency** - a genuinely reassuring
+result, and not one that could be assumed.
+
+**The 4 unanimous agreements NOT explained by a catalogued sort were rendered.**
+Three are `כ->ב` (`דרכה`->`דרבה`, and `איכא`->`איבא` TWICE in klal 91), one is
+`אחר`->`אחד`. Rendered klal 91 w453 and w524 from `images/pdf_pages/page_41.png`
+at 8x: both show a third letter with a flat base and a squared bottom-right
+corner extending right - reading as **ב**, and the two instances look identical
+to each other, consistent with one type sort. **Not resolved, and deliberately
+not resolved here:** that is equally consistent with (a) a damaged `כ` sort, the
+corpus being right, or (b) the ink genuinely reading `איבא` and the corpus being
+wrong. `איכא` is standard Aramaic and `איבא` is not, which favours (a) - but that
+is semantic plausibility, exactly the reasoning Lesson 9 says must be
+corroborated rather than relied on. Needs a scholar, not more pixels. Recorded as
+a candidate second sort; NOT added to `pipeline/typography.py`, whose own
+constant carries the standing rule that adding an entry should mean someone
+measured it.
+
+**Chet-zayin** (catalogued, no detector) shows exactly 1 agreement:
+`חז"ל` -> `ח"ל`, which is precisely what that catalogue entry predicts. Below any
+threshold, but consistent - the entry is not fictional, just rare.
+
+**Limits, stated because they bound what this result means:**
+1. **Blind by construction to a defect baked INTO the corpus.** `part1.json` is
+   partly derived from DocAI; if a sort made every engine read the same wrong
+   thing AND that reading was accepted into the corpus, no disagreement remains
+   to detect (Lesson 15). `tools/detect_ligature_corruption.py` attacks that
+   direction using corpus frequencies instead - this survey does not.
+2. Only single-edit transformations are classified; a 2+-edit difference tells us
+   little about any one sort and would dilute the context signal.
+3. `MIN_INSTANCES=4` and `CONTEXT_LOCK_FRACTION=0.90` are triage thresholds, not
+   verdicts. A rare sort defect would not clear them.
+
 ### FIXED 2026-08-23 — witness-queue triage implemented (419 -> 44 served), and a paid vision verdict rescued from the "error" bucket.
 
 Both were open items with the analysis already done and the work never built.

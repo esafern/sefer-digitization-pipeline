@@ -296,10 +296,20 @@ klalim.
 
 1. **Quantify the posterior for 2-of-3 agreement on this corpus** (§2C). Without
    it, auto-approval has no defensible threshold.
-2. **Enumerate the printer's defective sorts.** The ligature catalogue has two
-   entries and one has no detector. The 37 measured joint errors all came from
-   the one sort that *is* catalogued — which says more about what has been
-   looked for than about what exists.
+2. **Enumerate the printer's defective sorts — DONE 2026-08-23, result below.**
+   `tools/survey_shared_engine_errors.py` classified all 216 multi-witness
+   agreements by their corpus→consensus transformation, separating ink defects
+   (context-locked, raised unanimity) from engine confusions (scattered, ~zero
+   unanimity). **Exactly one context-locked ink defect exists at detectable
+   frequency: the alef-lamed ligature (37 instances, 100% locked after `א`).**
+   16 of the 18 classified transformations have zero unanimous agreements. The
+   catalogue is not missing a second ink-level defect at that frequency.
+   *Open residue:* 4 unanimous agreements are unexplained by a catalogued sort,
+   3 of them `כ→ב` (including `איכא`→`איבא` twice in klal 91). Rendered: the ink
+   reads as `ב` in both, identically — consistent with either a damaged `כ` sort
+   or a genuine corpus error. Needs a scholar, not more pixels. **Standing
+   limit:** this method is blind to a defect baked into the corpus itself, since
+   no disagreement would remain to detect.
 3. **Filter validation harness** (§3.5) before any filter rewrites text.
 4. **A genuinely independent third engine.** Gemini is both witness 2 and
    adjudicator — `PROPOSED_PIPELINE_ARCHITECTURE.md` Directive #1 is still
