@@ -17,6 +17,66 @@ current file references, or when grepping for how a past finding was
 resolved. Same append-at-top convention as before: newest entries go right
 after this header, not at the bottom.
 
+### MEASURED 2026-08-23 — the 2-of-3 consensus posterior is ~26-41%, not >99.9999%. Auto-approval is indefensible; consensus is triage, not a decision procedure.
+
+Closes `MULTI-WITNESS-REPAIR-AND-SYNTHESIS-PLAN.md` §8 item 1, the last piece of
+analysis blocking a real decision. New tool:
+`tools/estimate_consensus_posterior.py`.
+
+**The obvious sample is unusable, and saying why matters.** Forty consensus
+positions carry a human decision, and in **39 of 40 the reviewer kept the stored
+text**. Read naively that says consensus is worthless. It does not: that sample
+is ADVERSARIALLY SELECTED - a reviewer looked at those exact words and confirmed
+the corpus, so a consensus proposing a change there loses almost by
+construction. It supports exactly one conclusion, already enforced in
+`synthesize_multi_witness.py`: do not reopen human-confirmed positions.
+
+**The usable estimate** arbitrates the 176 UNDECIDED consensus positions - the
+ones auto-approval would actually act on - with stage 3's crop-level vision
+adjudication. Vision is a fourth opinion, not ground truth; it is used because
+it is the only independent per-word judgement available at scale, and because
+this pipeline already trusts it to classify every candidate it serves.
+
+| subset | n | posterior |
+| :--- | ---: | ---: |
+| all undecided consensus | 56 | 41% |
+| + vision confidence >= 0.9 | 56 | 41% |
+| + catalogued artifacts dropped | 51 | 39% |
+| **VLM-free (arbiter independent of both witnesses)** | 27 | **30%** |
+| + confidence gate + artifacts dropped | 23 | **26%** |
+| unanimous 3-of-3 | 4 | 50% |
+
+**P(consensus correct | two distinct engines agree) is roughly a coin flip at
+best, and about one in four on the least-circular measurement.** The plan
+originally claimed >99.9999%.
+
+**Dropping catalogued ligature artifacts barely moves it** (41% -> 39%). That is
+worth stating plainly: the known sort is NOT what makes consensus weak. The
+alef-lamed enumeration mattered for other reasons, but it does not rescue the
+consensus rule, and nobody should expect a bigger artifact catalogue to.
+
+**A second finding fell out: the circularity gap now has an effect size.** Where
+the VLM is one of the agreeing engines, the Gemini arbiter backs the consensus
+**52%** of the time; where it is not, **30%**. That 22-point spread is what
+`PROPOSED_PIPELINE_ARCHITECTURE.md` Directive #1's ongoing violation is worth in
+practice - previously a documented principle with no measured cost, now a number.
+
+**Operational conclusion, written into the plan (§2D, §4, §8 item 1):**
+auto-approval on 2-of-3 consensus is indefensible at any threshold this data
+supports. Even the unanimous 3-of-3 subset measures 50% (n=4), so the "safe first
+step" the earlier revision floated - auto-approve unanimous, no artifact match -
+is not safe either. Consensus stays a TRIAGE signal: it is good at surfacing
+words worth a human look, and it is not a decision procedure. That is not a
+failure of the architecture, it is the architecture being measured for the first
+time.
+
+**Limits, stated because they bound the number:** vision is an opinion, and a
+better arbiter (a scholar, or a genuinely independent engine) could move this
+substantially; only DocAI-involved positions carry a verdict, so the measured
+subset is the STRONGEST consensus cases, which makes the result more damning for
+the surya+vlm-only majority rather than less; n is small (23-27 for the clean
+estimate). The tool should be re-run as review decisions accumulate.
+
 ### INVESTIGATION 2026-08-23 — printer's defective sorts enumerated. Exactly ONE ink-level defect exists at detectable frequency; the other 179 shared-engine errors are ordinary letter confusion.
 
 Answers `MULTI-WITNESS-REPAIR-AND-SYNTHESIS-PLAN.md` §8 item 2, and the worry

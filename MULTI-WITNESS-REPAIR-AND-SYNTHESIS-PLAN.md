@@ -112,10 +112,41 @@ Two rules, both now enforced in code:
    corroboration.** Agreements matching a catalogued typographic artifact are
    tagged as such and must not be treated as evidence against the stored text.
 
-**The honest posterior is unquantified.** We do not have a defensible number for
-"probability correct given 2-of-3 agreement" on this corpus, because the error
-correlation is driven by print defects nobody has enumerated. Anyone wanting to
-auto-approve on consensus needs that number first — see §5.
+### D. The posterior, measured — **~26–41%, not >99.9999%**
+
+Quantified 2026-08-23 (`tools/estimate_consensus_posterior.py`), using stage 3's
+crop-level vision adjudication as arbiter on the 176 *undecided* consensus
+positions:
+
+| subset | n | posterior |
+| :--- | ---: | ---: |
+| all undecided consensus | 56 | 41% |
+| + catalogued artifacts dropped | 51 | 39% |
+| **VLM-free (arbiter independent of both witnesses)** | 27 | **30%** |
+| + confidence gate + artifacts dropped | 23 | **26%** |
+| unanimous 3-of-3 | 4 | 50% |
+
+**Two-of-three agreement is worth roughly a coin flip at best, and about one in
+four when the arbiter is genuinely independent.** Dropping catalogued ligature
+artifacts barely moves it (41% → 39%), so the known sort is not what makes
+consensus weak — consensus is simply weak.
+
+**The VLM-free gap is itself a measurement of the circularity gap.** Where the
+VLM is one of the agreeing engines, the Gemini arbiter backs the consensus 52%
+of the time; where it is not, 30%. That 22-point spread is what Directive #1's
+violation is worth in practice.
+
+**What the human-decision sample says, and why it is NOT the posterior.** Forty
+consensus positions carry a human decision, and in 39 the reviewer kept the
+stored text. That sample is adversarially selected — a reviewer looked at those
+words and confirmed the corpus, so consensus loses by construction. It supports
+exactly one conclusion, already enforced in code: **consensus must not reopen
+human-confirmed positions.**
+
+*Limits:* vision is a fourth opinion, not ground truth; only DocAI-involved
+positions carry a verdict, and those are the *strongest* consensus cases, which
+makes this more damning for the surya+vlm majority rather than less; n is small.
+Re-run the tool as review decisions accumulate.
 
 ---
 
@@ -205,10 +236,13 @@ an explicit decision, for two reasons:
    artifact**. Auto-approval would have reverted correct human decisions to the
    corrupted reading.
 
-**Recommendation:** keep every consensus dispute human-reviewed. If throughput
-becomes the binding constraint, the safe first step is auto-approving only the
-*unanimous 3-of-3* case with **no** catalogued artifact match — and only after
-§3.5's validation exists and §2C's posterior is actually quantified.
+**Recommendation, now with a measured number behind it:** keep every consensus
+dispute human-reviewed. §2D puts P(consensus correct) at **~26–41%** — auto-
+approval would introduce errors at roughly the rate it fixes them. Even the
+unanimous 3-of-3 subset measures 50% (n=4), so the "safe first step" floated in
+the earlier revision is not safe either. Consensus is a triage signal, not a
+decision procedure, and should be treated as one until a genuinely independent
+arbiter exists (§8 item 4).
 
 ---
 
@@ -294,8 +328,12 @@ klalim.
 
 ## 8. Open items
 
-1. **Quantify the posterior for 2-of-3 agreement on this corpus** (§2C). Without
-   it, auto-approval has no defensible threshold.
+1. **Quantify the posterior — DONE 2026-08-23, and it settles the auto-approval
+   question: ~26–41%** (§2D). Auto-approval on 2-of-3 consensus is indefensible
+   at any threshold this data supports. Consensus remains valuable as a TRIAGE
+   signal — it surfaces words worth a human look — but it is not a decision
+   procedure. Re-run `tools/estimate_consensus_posterior.py` as decisions
+   accumulate.
 2. **Enumerate the printer's defective sorts — DONE 2026-08-23, result below.**
    `tools/survey_shared_engine_errors.py` classified all 216 multi-witness
    agreements by their corpus→consensus transformation, separating ink defects

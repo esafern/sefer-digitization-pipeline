@@ -272,6 +272,17 @@ to) as state changes** — that discipline is what drifted last time.
     re-run rather than only being counted (C16); `match_block_to_klal`'s
     never-None nearest-region fallback (C18).
 
+12. **MEASURED 2026-08-23: P(consensus correct | 2 distinct engines agree)
+    is ~26-41%, not the >99.9999% the plan claimed.** Auto-approval on consensus
+    is indefensible at any threshold this data supports; consensus is a TRIAGE
+    signal, not a decision procedure (`tools/estimate_consensus_posterior.py`).
+    Dropping catalogued ligature artifacts barely moves it (41%→39%), so a bigger
+    artifact catalogue will not rescue the rule. **Second finding: the
+    circularity gap now has an effect size** — where the VLM is one of the
+    agreeing engines the Gemini arbiter backs consensus 52% of the time, versus
+    30% where it is not. That 22-point spread is what Directive #1's violation
+    costs in practice.
+
 10. **`MULTI-WITNESS-REPAIR-AND-SYNTHESIS-PLAN.md` review 2026-08-23 — the
     architecture is sound, four things in it are not.** (a) **Its §2.B independence proof is now empirically refuted, not just
     theoretically doubted: one Part-1 synthesis run produced 16 instances of two
