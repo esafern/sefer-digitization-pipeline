@@ -28,6 +28,10 @@ PART1_PATH = cio.PART1_PATH
 # everywhere rather than a crash - see load_vlm_baseline()'s own docstring.
 VLM_BASELINE_PATH = os.path.join(REPO, "tools", "second_witness_eval", "vlm_part1_full_baseline.txt")
 SURYA_BASELINE_PATH = os.path.join(REPO, "tools", "second_witness_eval", "surya_part1_full_baseline.txt")
+# Written by pipeline/synthesize_multi_witness.py (stage 4a). Absent on a
+# fresh clone or before the synthesizer has run - merged if present, skipped
+# if not, never a hard dependency.
+CONSENSUS_PATH = os.path.join(REPO, "consensus_disputes_part1.json")
 
 # Minimum vision confidence before classify() treats Gemini's A/B selection as
 # a machine resolution rather than "ambiguous, a human still has to look".
@@ -73,21 +77,94 @@ def load_vlm_baseline(path=VLM_BASELINE_PATH):
 
 
 def build_vlm_alignment(klal_words, vlm_words):
-    """clean_text word_index -> the VLM's own word at that position, for
-    every position where the two align (SequenceMatcher.get_matching_
-    blocks() - same technique tools/second_witness_eval/evaluate_ocr_
-    alignment.py's "Candidate Verification Breakdown" already uses at
-    klal 8-22 scope, generalized here to every klal this stage assembles).
-    A word_index with no entry means the VLM's reading didn't align there -
-    either real disagreement or (per CLAUDE.md Lesson 5) an alignment gap;
-    this function doesn't distinguish the two, callers just get None either
-    way, same as the existing evaluation script's own convention."""
-    sm = difflib.SequenceMatcher(None, klal_words, vlm_words, autojunk=False)
-    alignment = {}
-    for block in sm.get_matching_blocks():
-        for i in range(block.size):
-            alignment[block.a + i] = vlm_words[block.b + i]
-    return alignment
+    """clean_text word_index -> the witness's own word at that position.
+
+    FIXED 2026-08-23 (code review, finding C15). This used to walk
+    SequenceMatcher.get_matching_blocks() alone - and a matching block is BY
+    DEFINITION a run where the two sequences are equal, so every value it
+    returned was just the corpus's own word handed back. Measured before the
+    fix: 49,138 aligned VLM words and 34,892 aligned Surya words, ZERO
+    divergent in either. The `vlm_reading`/`surya_reading` fields this feeds
+    were therefore structurally incapable of ever showing the disagreement
+    they were added to surface, and review_frontend/app.js's "only offer it if
+    it says something new" dedupe then dropped every one of them, so the
+    option never rendered at all.
+
+    Now delegates to corpus_io.align_witness, which additionally reports an
+    unambiguous 1:1 substitution as a real differing reading while still
+    refusing to pair words positionally inside a ragged replace block
+    (Lesson 5). Kept as a named wrapper because three call sites and the
+    existing unit tests refer to it, and because "the alignment used by the
+    corrections assembler" is worth a name of its own."""
+    return {wi: reading for wi, (reading, _verdict)
+            in cio.align_witness(klal_words, vlm_words).items()}
+
+
+def merge_consensus_disputes(by_klal, path=CONSENSUS_PATH):
+    """Fold pipeline/synthesize_multi_witness.py's output into this stage's
+    own, so a rebuild REGENERATES multi-witness disputes instead of deleting
+    them.
+
+    ADDED 2026-08-23 (code review, finding C1). The two scripts this replaces
+    (tools/extract_{vlm,surya}_consensus_disputes.py) delivered the same kind
+    of finding by opening corrections_part1.json - this stage's OUTPUT - and
+    appending to it. 1,108 items lived there, and every one of them, plus any
+    human review time spent on them, was destroyed by the next ./rebuild_all.sh
+    run. A witness contributes a source file the pipeline reads; it never
+    edits the pipeline's own product.
+
+    Two cases, deliberately kept distinct:
+      * A position that ALREADY has a candidate (DocAI disagreed there, so
+        this stage built one from the verified set) is ENRICHED - it gains
+        the corroborating engines, not a duplicate row.
+      * A position with no candidate (DocAI agreed with the corpus, but two
+        other engines agree it is wrong) becomes a NEW entry. This is the
+        genuinely new signal multi-witness synthesis adds: a disagreement the
+        DocAI-vs-stored diff cannot see by construction.
+
+    Missing file is not an error - the synthesizer may not have run yet on a
+    fresh clone, same contract as load_vlm_baseline()."""
+    consensus = cio.load_json(path, default={}) or {}
+    n_new = n_enriched = 0
+
+    for kid_str, items in consensus.items():
+        existing = {e["word_index"]: e for e in by_klal.get(kid_str, [])}
+        for d in items:
+            engines = d.get("agreeing_engines", [])
+            witnesses = d.get("witnesses", {})
+            note = (f"Multi-witness consensus: {' + '.join(engines)} agree on "
+                    f"'{d['consensus_reading']}' against stored '{d['final_text']}'.")
+            prior = existing.get(d["word_index"])
+            if prior is not None:
+                prior["consensus_engines"] = engines
+                prior["consensus_reading"] = d["consensus_reading"]
+                n_enriched += 1
+                continue
+            by_klal.setdefault(kid_str, []).append({
+                "word_index": d["word_index"],
+                "opcode": "replace",
+                # C2: these are what each engine ACTUALLY read, or None where
+                # it was not consulted / had no usable reading. Never the
+                # corpus's own word standing in for an engine that never ran.
+                "docai_reading": witnesses.get("docai"),
+                "final_text": d["final_text"],
+                "page": d.get("page"),
+                "bbox": d.get("bbox"),
+                "vision_selected": None,
+                "vision_transcription": None,
+                "confidence": None,
+                "reasoning": note,
+                "vlm_reading": witnesses.get("vlm"),
+                "surya_reading": witnesses.get("surya"),
+                "consensus_engines": engines,
+                "consensus_reading": d["consensus_reading"],
+                "flag": "current_text_may_be_wrong",
+            })
+            n_new += 1
+
+    for items in by_klal.values():
+        items.sort(key=lambda e: e["word_index"])
+    return n_new, n_enriched
 
 
 def live_word_span(words, word_index, expected_text):
@@ -217,6 +294,8 @@ def main():
             n_drifted += 1
         by_klal.setdefault(str(c["klal_id"]), []).append(entry)
 
+    n_new, n_enriched = merge_consensus_disputes(by_klal)
+
     with open(OUT_PATH, "w", encoding="utf-8") as f:
         json.dump(by_klal, f, ensure_ascii=False, indent=2)
 
@@ -225,6 +304,7 @@ def main():
         for e in entries:
             flags[e["flag"]] = flags.get(e["flag"], 0) + 1
     print(f"Wrote {OUT_PATH}: {sum(len(v) for v in by_klal.values())} items across {len(by_klal)} klalim")
+    print(f"  multi-witness consensus: {n_new} new dispute(s), {n_enriched} existing candidate(s) enriched")
     print("By flag:", flags)
     if n_drifted:
         print(f"WARNING: {n_drifted} candidate(s) drifted from live part1.json content - "

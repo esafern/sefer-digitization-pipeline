@@ -722,8 +722,36 @@ def test_correction_entries_have_the_field_shape_their_opcode_implies(correction
     for kid, entries in corrections.items():
         for c in entries:
             op, docai, final = c["opcode"], c["docai_reading"], c["final_text"]
-            if op == "replace" and (docai is None or final is None):
-                offenders.append((int(kid), c["word_index"], "replace with a null reading"))
+            if op == "replace" and final is None:
+                offenders.append((int(kid), c["word_index"], "replace with no stored text"))
+            elif op == "replace" and docai is None:
+                # BROADENED 2026-08-23, deliberately and narrowly. Until the
+                # multi-witness synthesizer existed, every 'replace' came from
+                # the DocAI-vs-stored diff, so "docai_reading is null" and "this
+                # item offers the reviewer nothing to choose against" were the
+                # same statement. They no longer are: a consensus dispute
+                # (pipeline/synthesize_multi_witness.py) is a position where
+                # DocAI AGREED with the corpus and two OTHER engines agree it is
+                # wrong - genuinely null docai_reading, genuinely a real
+                # alternative reading. That case is the whole point of
+                # multi-witness synthesis, and it is exactly what a
+                # DocAI-vs-stored diff cannot see.
+                #
+                # What this test actually protects is unchanged and still
+                # enforced below: the UI must never render an option card with
+                # nothing in it. So a replace still has to offer a real
+                # alternative from SOME engine - it just no longer has to be
+                # DocAI specifically. Anything with no alternative at all is
+                # still an offender.
+                alternative = (c.get("consensus_reading") or c.get("vlm_reading")
+                               or c.get("surya_reading") or c.get("vision_transcription"))
+                if not alternative:
+                    offenders.append((int(kid), c["word_index"],
+                                      "replace with no alternative reading from any engine"))
+                elif not c.get("consensus_engines"):
+                    offenders.append((int(kid), c["word_index"],
+                                      "replace with a null docai_reading but no consensus "
+                                      "attribution - untraceable to any engine"))
             elif op == "insert" and (docai is not None or final is None):
                 offenders.append((int(kid), c["word_index"], "insert must have docai_reading=null, final_text set"))
             elif op == "delete" and (docai is None or final is not None):
@@ -1165,4 +1193,65 @@ def test_no_new_span_coverage_flags(part1_by_id):
     assert len(rows) + len(unmeasured) == len(trace) - len(no_marker), (
         "span accounting does not add up: every klal with a marker must produce "
         "either a measured span or a recorded reason it could not be measured."
+    )
+
+
+def test_every_corrections_item_is_traceable_to_a_pipeline_source(corrections):
+    """REGRESSION 2026-08-23 (code review, finding C1). corrections_part1.json
+    is DERIVED - assemble_corrections_dataset.py truncates and rewrites it on
+    every ./rebuild_all.sh. Two tools/ scripts appended 1,108 items into it
+    directly; the file grew from 539 items to 1,647 and the whole suite stayed
+    green, because nothing asserted that its contents are reproducible from the
+    pipeline's own inputs. Every item must trace to one of exactly two sources:
+    a vision-verified candidate (stage 3), or a multi-witness consensus dispute
+    (stage 4a). An item matching neither is a hand-injection that the next
+    rebuild will silently destroy, taking any human review of it with it."""
+    verified_path = os.path.join(REPO, "corrections_verified_part1.json")
+    consensus_path = os.path.join(REPO, "consensus_disputes_part1.json")
+
+    with open(verified_path, encoding="utf-8") as f:
+        verified = json.load(f)
+    from_pipeline = {(c["klal_id"], c["word_index_in_final_text"]) for c in verified}
+
+    from_consensus = set()
+    if os.path.exists(consensus_path):
+        with open(consensus_path, encoding="utf-8") as f:
+            for kid_str, items in json.load(f).items():
+                for d in items:
+                    from_consensus.add((int(kid_str), d["word_index"]))
+
+    orphans = [
+        (int(kid_str), item["word_index"])
+        for kid_str, items in corrections.items()
+        for item in items
+        if (int(kid_str), item["word_index"]) not in from_pipeline
+        and (int(kid_str), item["word_index"]) not in from_consensus
+    ]
+    assert not orphans, (
+        f"{len(orphans)} item(s) in corrections_part1.json trace to neither "
+        f"corrections_verified_part1.json nor consensus_disputes_part1.json - "
+        f"they were written into a derived file by hand and the next "
+        f"./rebuild_all.sh will delete them. First few: {orphans[:5]}"
+    )
+
+
+def test_no_corrections_item_attributes_the_stored_text_to_an_engine(corrections):
+    """REGRESSION 2026-08-23 (code review, finding C2). The superseded
+    extractors set docai_reading to the stored base text on all 1,108 items
+    they injected, at positions where DocAI was never consulted, and
+    review_frontend/app.js renders that field as a selectable "DocAI reading"
+    card - so the reviewer was shown a fabricated witness that always agreed
+    with the corpus. A candidate exists BECAUSE an engine disagreed; an engine
+    reading identical to final_text is either a contradiction or a fabrication."""
+    bad = [
+        (int(kid_str), item["word_index"])
+        for kid_str, items in corrections.items()
+        for item in items
+        if item.get("docai_reading") is not None
+        and item["docai_reading"] == item.get("final_text")
+    ]
+    assert not bad, (
+        f"{len(bad)} item(s) report a docai_reading identical to the stored text. "
+        f"An engine that was not consulted must read null, never the corpus's own "
+        f"word. First few: {bad[:5]}"
     )

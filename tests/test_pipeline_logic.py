@@ -22,6 +22,7 @@ rebuild_all.sh's gate alongside the corpus suite, which is where it runs.
 import json
 import os
 import sqlite3
+import tempfile
 import sys
 
 import pytest
@@ -154,13 +155,32 @@ def test_load_vlm_baseline_missing_file_returns_empty_not_an_error(tmp_path):
 
 
 def test_build_vlm_alignment_maps_matching_word_indices():
+    """ASSERTION DELIBERATELY INVERTED 2026-08-23 (code review, finding C15) -
+    flagged rather than quietly flipped, because a test changing its mind is
+    exactly where a real regression can hide.
+
+    This used to assert `1 not in alignment` - "a disagreeing word_index has no
+    VLM alignment entry" - and that was true, but it was the DEFECT, not the
+    contract. build_vlm_alignment walked only get_matching_blocks(), where the
+    two sequences are equal by definition, so it could only ever hand back the
+    corpus's own word; measured across the real corpus, 49,138 aligned VLM
+    words and 34,892 aligned Surya words with ZERO divergent readings between
+    them. The vlm_reading/surya_reading fields it feeds were therefore
+    incapable of showing a disagreement, which is the only thing they were
+    added to do. The function now reports an unambiguous 1:1 substitution as a
+    real differing reading (and still drops ragged blocks - see
+    test_align_witness_drops_ragged_blocks_rather_than_pairing_positionally),
+    so word 1 SHOULD now be present and SHOULD carry the VLM's own misreading."""
     klal_words = ["אלף", "בית", "גימל", "דלת"]
     vlm_words = ["אלף", "בות", "גימל", "דלת"]  # word 1 misread by the VLM
     alignment = acd.build_vlm_alignment(klal_words, vlm_words)
     assert alignment.get(0) == "אלף"
     assert alignment.get(2) == "גימל"
     assert alignment.get(3) == "דלת"
-    assert 1 not in alignment, "a disagreeing word_index has no VLM alignment entry"
+    assert alignment.get(1) == "בות", (
+        "a 1:1 disagreement is the whole point of a second witness - it must be "
+        "reported, not dropped (see this test's docstring for the inversion)"
+    )
 
 
 def test_classify_requires_confidence_before_trusting_a_vision_selection():
@@ -706,6 +726,38 @@ def test_a_later_decision_only_suppresses_the_check_if_it_was_itself_applied(aud
     # The newest decision at a key can never be superseded by anything.
     assert aad.is_superseded_by_later_applied(
         never_applied_later, {applied_first["id"], never_applied_later["id"]}) is False
+
+
+def test_every_decision_type_the_dashboard_records_has_an_audit_checker():
+    """REGRESSION 2026-08-23 (code review, finding C4): the candidate->disputed
+    rename gave review_server.py a new decision_type but audit_applied_
+    decisions.py's CHECKERS dict was not updated, and its dispatch does
+    CHECKERS.get(type) -> None -> bare `continue`. Every decision recorded
+    after the rename was therefore silently skipped by the only read-only
+    check on whether an applied decision is still reflected in part1.json -
+    a green audit run that had structurally verified nothing about the new
+    type. Any decision type that can carry an apply_event must have a
+    checker; the audit's silence is only meaningful if it actually looked."""
+    appliable = {"disputed_choice", "candidate_choice", "manual_correction",
+                 "punctuation_choice"}
+    assert appliable <= set(aad.CHECKERS), (
+        f"no audit checker for {appliable - set(aad.CHECKERS)} - applied decisions "
+        f"of that type would be silently skipped, not verified"
+    )
+    assert appliable <= rd.VALID_DECISION_TYPES
+
+
+def test_audit_checks_a_disputed_choice_the_same_way_as_its_pre_rename_name():
+    """disputed_choice and candidate_choice are the same record shape under
+    two names (the 2026-08-23 rename), so they must audit identically -
+    otherwise the rename silently changes whether a decision is verifiable."""
+    d_new = {"candidate_snapshot": {"opcode": "replace"}, "chosen_text": "בות",
+             "word_index": 1, "decision_type": "disputed_choice"}
+    d_old = dict(d_new, decision_type="candidate_choice")
+    klal = _klal("אלף בות גימל")
+    assert aad.CHECKERS["disputed_choice"](d_new, klal) == \
+           aad.CHECKERS["candidate_choice"](d_old, klal) == "ok"
+    assert aad.CHECKERS["disputed_choice"](d_new, _klal("אלף בית גימל")).startswith("MISMATCH")
 
 
 def test_supersession_does_not_leak_across_keys(audit_reads_temp_log):
@@ -3655,3 +3707,137 @@ def test_export_tei_generates_valid_tei_p5_xml(tmp_path):
     root = tree.getroot()
     assert "TEI" in root.tag
 
+
+
+# --- multi-witness consensus synthesis (2026-08-23 code review, C1/C2/C3/C15) ---
+
+import synthesize_multi_witness as smw  # noqa: E402
+
+
+def test_align_witness_reports_a_real_substitution_not_just_agreement():
+    """REGRESSION (finding C15): build_vlm_alignment used to walk only
+    SequenceMatcher.get_matching_blocks(), where the two sequences are EQUAL
+    by definition - so every reading it returned was the corpus's own word
+    handed back, and vlm_reading/surya_reading could never report the
+    disagreement they exist to surface (measured: 49,138 aligned VLM words,
+    0 divergent). An aligner that cannot say "differs" is not a witness."""
+    out = cio.align_witness(["אלף", "בית", "גימל"], ["אלף", "בות", "גימל"])
+    assert out[1] == ("בות", "differs")
+    assert out[0] == ("אלף", "agrees") and out[2] == ("גימל", "agrees")
+    assert any(v == "differs" for _w, v in out.values()), (
+        "an aligner that only ever reports 'agrees' carries no information"
+    )
+
+
+def test_align_witness_drops_ragged_blocks_rather_than_pairing_positionally():
+    """Inside an n-against-m replace block there is no principled word-to-word
+    correspondence; pairing by position is the Lesson 5 failure (fuzzy match
+    is not precise enough for an exact-position claim) and is exactly how the
+    superseded extractors took 260 of 16,026 bboxes from a token that was a
+    DIFFERENT word. Report nothing rather than a guess."""
+    out = cio.align_witness(["אלף", "בית", "גימל"], ["אלף", "ב", "ו", "ת", "גימל"])
+    assert 1 not in out, "a 1-against-3 block has no unambiguous correspondence"
+    assert out[0][1] == "agrees" and out[2][1] == "agrees"
+
+
+def test_build_vlm_alignment_can_now_express_disagreement():
+    assert acd.build_vlm_alignment(["אלף", "בית"], ["אלף", "בות"])[1] == "בות"
+
+
+def test_vlm_pass_b_is_a_stability_gate_not_a_second_vote():
+    """REGRESSION (finding C3): extract_vlm_consensus_disputes.py counted
+    "Pass A == Pass B" as two-witness consensus and emitted 1,051 disputes on
+    that basis; 290 of them had Surya - a genuinely different engine -
+    agreeing with the stored corpus text. Both passes are the same model
+    (87.43% measured self-consistency), so agreeing with yourself buys no
+    independence. A position where the two passes DISAGREE is one where this
+    single witness is unreliable, and it must abstain rather than vote."""
+    words = ["אלף", "בית"]
+    stable = smw.vlm_verdicts(words, ["אלף", "בות"], ["אלף", "בות"])
+    assert stable[1] == ("בות", "differs")
+    unstable = smw.vlm_verdicts(words, ["אלף", "בות"], ["אלף", "בית"])
+    assert 1 not in unstable, "the two passes read different things - abstain"
+
+
+def _klal_fixture(kid, text):
+    return {"klal_id": kid, "clean_text": text}
+
+
+def test_consensus_requires_two_distinct_engines_agreeing_on_the_same_reading():
+    """One engine disagreeing is not consensus, and two engines each reading
+    something DIFFERENT is a 3-way split (a human-review case), not agreement."""
+    part1 = [_klal_fixture(1, "אלף בית גימל")]
+    # Only the VLM differs -> no dispute.
+    d, _ = smw.synthesize(part1, [], {1: ["אלף", "בות", "גימל"]},
+                          {1: ["אלף", "בות", "גימל"]}, {1: ["אלף", "בית", "גימל"]})
+    assert d == [], "a lone dissenting engine is not consensus"
+    # VLM and Surya agree on the same alternative -> dispute.
+    d, _ = smw.synthesize(part1, [], {1: ["אלף", "בות", "גימל"]},
+                          {1: ["אלף", "בות", "גימל"]}, {1: ["אלף", "בות", "גימל"]})
+    assert len(d) == 1 and d[0]["agreeing_engines"] == ["surya", "vlm"]
+    assert d[0]["consensus_reading"] == "בות" and d[0]["final_text"] == "בית"
+    # They differ from the corpus AND from each other -> no consensus.
+    d, _ = smw.synthesize(part1, [], {1: ["אלף", "בות", "גימל"]},
+                          {1: ["אלף", "בות", "גימל"]}, {1: ["אלף", "בזת", "גימל"]})
+    assert d == [], "two engines reading different things is a split, not agreement"
+
+
+def test_a_witness_field_never_carries_the_corpus_word_for_an_engine_that_did_not_vote():
+    """REGRESSION (finding C2): the superseded extractors set docai_reading to
+    the stored base text on all 1,108 items they emitted, for positions where
+    DocAI was never consulted, and the dashboard rendered it as a "DocAI
+    reading" card corroborating the corpus. An engine that did not speak must
+    read None, never the corpus's own word."""
+    part1 = [_klal_fixture(1, "אלף בית גימל")]
+    d, _ = smw.synthesize(part1, [], {1: ["אלף", "בות", "גימל"]},
+                          {1: ["אלף", "בות", "גימל"]}, {1: ["אלף", "בות", "גימל"]})
+    assert d[0]["witnesses"]["docai"] is None, (
+        "DocAI produced no candidate here, so it has no reading - not the base text"
+    )
+    assert d[0]["witnesses"]["vlm"] == "בות" and d[0]["witnesses"]["surya"] == "בות"
+
+
+def test_an_empty_witness_body_is_no_coverage_not_agreement():
+    """REGRESSION: 10 of Part 1's 222 klalim have an empty Surya body, and both
+    superseded consumers read empty as "Surya confirms every word" rather than
+    "this witness has no reading here" (Lesson 15: silence where a tool cannot
+    operate is not evidence of correctness)."""
+    part1 = [_klal_fixture(1, "אלף בית גימל")]
+    d, stats = smw.synthesize(part1, [], {1: ["אלף", "בות", "גימל"]},
+                              {1: ["אלף", "בות", "גימל"]}, {1: []})
+    assert stats["klalim_no_surya"] == 1
+    assert d == [], "an absent witness must not be counted as the second vote"
+
+
+def test_merge_consensus_disputes_enriches_an_existing_candidate_instead_of_duplicating():
+    """REGRESSION (finding C1): the superseded extractors appended into
+    corrections_part1.json, this stage's own output, which a rebuild rewrites.
+    The merge runs inside the stage instead - and a position that already has a
+    candidate must gain attribution, not a second row for the same word."""
+    by_klal = {"1": [{"word_index": 5, "final_text": "בית", "docai_reading": "בות"}]}
+    consensus = {"1": [
+        {"word_index": 5, "final_text": "בית", "consensus_reading": "בות",
+         "agreeing_engines": ["docai", "surya"], "witnesses": {"docai": "בות", "surya": "בות", "vlm": None}},
+        {"word_index": 9, "final_text": "גימל", "consensus_reading": "גומל",
+         "agreeing_engines": ["surya", "vlm"], "witnesses": {"docai": None, "surya": "גומל", "vlm": "גומל"}},
+    ]}
+    with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False, encoding="utf-8") as f:
+        json.dump(consensus, f)
+        path = f.name
+    try:
+        n_new, n_enriched = acd.merge_consensus_disputes(by_klal, path=path)
+    finally:
+        os.unlink(path)
+    assert (n_new, n_enriched) == (1, 1)
+    assert len(by_klal["1"]) == 2, "the existing candidate must be enriched, not duplicated"
+    assert by_klal["1"][0]["consensus_engines"] == ["docai", "surya"]
+    new_entry = by_klal["1"][1]
+    assert new_entry["word_index"] == 9
+    assert new_entry["docai_reading"] is None, "DocAI did not vote here"
+    assert new_entry["surya_reading"] == "גומל" and new_entry["vlm_reading"] == "גומל"
+
+
+def test_merge_consensus_disputes_treats_a_missing_file_as_no_disputes():
+    by_klal = {"1": [{"word_index": 1, "final_text": "בית"}]}
+    assert acd.merge_consensus_disputes(by_klal, path="/nonexistent/consensus.json") == (0, 0)
+    assert len(by_klal["1"]) == 1

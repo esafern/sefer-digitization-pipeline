@@ -86,6 +86,15 @@ else
   ./venv/bin/python pipeline/verify_corrections_vision.py
 fi
 
+# ADDED 2026-08-23 (code review, finding C1). Pure local computation - no API
+# calls, no cost - so it belongs in the gated chain rather than being run by
+# hand. It reads the witness baselines and writes consensus_disputes_part1.json,
+# which stage 4 then merges. Running it HERE, before stage 4, is what makes
+# multi-witness disputes a regenerated pipeline product instead of a hand-append
+# into stage 4's own output that the next rebuild silently destroys.
+echo "== 4a/6 synthesize_multi_witness.py =="
+./venv/bin/python pipeline/synthesize_multi_witness.py
+
 echo "== 4/6 assemble_corrections_dataset.py =="
 ./venv/bin/python pipeline/assemble_corrections_dataset.py
 

@@ -16,7 +16,7 @@
 
 **Two user-posed claims verified 2026-08-20, both against hard evidence.** "VLM ran against the entire PDF scan with generally good results" — **false on both halves**: the baseline run covers only pages 14-76 (Part 1, 222 of 667 klalim), not the 337-page/667-klal scan, and no Part 2/3 equivalent exists; "generally good" overstates 72.03% token accuracy / 91.36% self-consistency (worst individual klalim in the 42-70% range). "Were Part 1 candidates/scores changed by the VLM run?" — **no**: `part1.json`/`corrections_part1.json`/`corrections_candidates_part1.json`/`corrections_verified_part1.json` are all untouched by commit `1e59522`, and the baseline scripts use no-op cache functions that never touch the real `corrections_cache` table.
 
-**Dashboard data is NOT trustworthy as of 2026-08-23.** `corrections_part1.json` holds 1,647 items; 1,108 of them were hand-injected into a derived file by two standalone `tools/` scripts, carry a fabricated `docai_reading`, and will be destroyed by the next `./rebuild_all.sh`. See open item 9 before spending any review time in the dashboard.
+**Dashboard data was rebuilt 2026-08-23 and is trustworthy again.** `corrections_part1.json` went **1,647 items -> 656** (539 real pipeline candidates + 117 multi-witness consensus disputes). The 1,108 hand-injected items with fabricated `docai_reading` are gone, replaced by 215 genuine two-engine disputes produced by a real pipeline stage (`synthesize_multi_witness.py`, stage 4a of `rebuild_all.sh`) that a rebuild regenerates instead of destroying. C1-C4 and C15 fixed; 274 tests green. **Still open: the plan document's own independence proof is empirically false** — see open item 10.
 
 **Three things to know if you're picking this up cold:** read this file before
 making any claim about corpus quality; the Parts 2-3 gate in `START_HERE.md`
@@ -134,8 +134,8 @@ to) as state changes** — that discipline is what drifted last time.
    pipeline (`locate_word_band_fallback()`). Found 2026-08-21; awaiting a
    decision on whether to build it.
 
-9. **CODE REVIEW 2026-08-23 of commits `f4bfe98..02e5980`: 14 findings, 4
-   corpus-integrity critical, NONE fixed yet.** Full evidence trail in
+9. **CODE REVIEW 2026-08-23 of commits `f4bfe98..02e5980`: 18 findings across two
+   passes. C1-C4 and C15 FIXED 2026-08-23; the rest remain open.** Full evidence trail in
    `PROJECT-STATUS-HISTORY.md`'s 2026-08-23 entry. The four that block
    further review work:
    - **C1: `corrections_part1.json` now holds 1,647 items, only 539 of them
@@ -195,9 +195,32 @@ to) as state changes** — that discipline is what drifted last time.
     - The bbox page fallback uses the klal's START page, and the
       neighbour-bbox recovery is gated on that same wrong page number.
 
+9b. **Still open from the 2026-08-23 review (C1-C4/C15 are fixed, these are
+    not):** `SPAN_COVERAGE_BASELINE` widened to absorb klalim 16/22/84 with no
+    scan verification, and klal 84 is simultaneously listed as confirmed damage
+    in the constant below it (H5) — this one is a live correctness question
+    about 40 unaccounted words in klal 16, not a style point;
+    `pipeline/typography.py` is still dead code carrying a third, divergent
+    `CONFUSION_PAIRS` (H6); `run_part1_vlm_patch_passB.py` still violates the
+    incremental-flush rule and no-ops its own cache (H8);
+    `is_gershayim_noise()`'s missing geresh case (M9) is now moot for the
+    superseded extractors but the same normalisation gap should be checked in
+    the repair filters when Phase 1 is built; the disputed panel still
+    pre-selects the machine verdict so one Save click records it as a human
+    decision (M11); 10 klalim still have no Surya coverage and need a real
+    re-run rather than only being counted (C16); `match_block_to_klal`'s
+    never-None nearest-region fallback (C18).
+
 10. **`MULTI-WITNESS-REPAIR-AND-SYNTHESIS-PLAN.md` review 2026-08-23 — the
-    architecture is sound, four things in it are not.** (a) Its §2.B
-    independence proof does not hold for the pair the code actually uses:
+    architecture is sound, four things in it are not.** (a) **Its §2.B independence proof is now empirically refuted, not just
+    theoretically doubted: one Part-1 synthesis run produced 16 instances of two
+    or three engines making the IDENTICAL error, all of them the alef-lamed
+    ligature dropping its `ל`** (`ושמואל`->`ושמוא`, `אליבא`->`איבא`,
+    `אליהו`->`איהו`...), including unanimous 3-of-3 agreement — because the defect
+    is in the ink, not the models. §2.B puts that at 3.5e-7. Under the document's
+    own "2-of-3 -> Auto-Approve, 0 sec" matrix these would have REVERTED correct
+    human decisions to the corrupted reading. The proof also does not hold for
+    the pair the code actually used:
     VLM Pass A / Pass B are the same model, so the `1/|V|` decoupling term is
     unearned, and the term itself assumes hallucinations distribute uniformly
     over a 50k vocabulary when this document's own §1 argues OCR errors are

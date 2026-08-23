@@ -112,6 +112,7 @@
 # module-level globals, so a caller's own PART1_PATH/DOCAI_DIR attribute
 # stays that script's single source of truth and stays monkeypatchable in
 # tests exactly as before.
+import difflib
 import json
 import os
 
@@ -179,6 +180,58 @@ QUOTE_CHARS = set('"\'׳״')
 def has_gershayim(w):
     """True if w contains any gershayim/geresh character (abbreviation marker)."""
     return any(c in w for c in QUOTE_CHARS)
+
+
+def align_witness(corpus_words, witness_words, normalize=hebrew_letters_only):
+    """Map corpus word_index -> (witness's own word, verdict) for a second
+    OCR/VLM reading of the same klal.
+
+    verdict is "agrees" (the two align as an exact normalized match) or
+    "differs" (an unambiguous one-for-one substitution at this position).
+    A word_index absent from the result means this witness has NO usable
+    reading there - either it dropped/added words around that point, or the
+    disagreement is ragged enough that no single witness word corresponds to
+    this one corpus word.
+
+    ADDED 2026-08-23 (code review, finding C15). The function this replaces
+    (assemble_corrections_dataset.build_vlm_alignment) walked only
+    SequenceMatcher.get_matching_blocks(), and a matching block is BY
+    DEFINITION a run where the two sequences are equal - so its output could
+    only ever echo the corpus's own word back. Measured before the fix: 49,138
+    aligned VLM words and 34,892 aligned Surya words, ZERO divergent in
+    either. The `vlm_reading`/`surya_reading` fields it fed were therefore
+    structurally incapable of reporting the disagreement they existed to
+    surface.
+
+    Why only 1:1 replace blocks count as a substitution, and everything else
+    is dropped rather than guessed: inside a ragged replace block (n corpus
+    words against m witness words, n != m) there is no principled way to say
+    which witness word corresponds to which corpus word - pairing them
+    positionally is exactly the "fuzzy match is not precise enough for an
+    exact-position claim" failure Lesson 5 names, and it is the same defect
+    the 2026-08-23 review found in tools/extract_*_consensus_disputes.py's
+    get_docai_word_bboxes (260 of 16,026 bboxes taken from a replace opcode,
+    i.e. from a token that is a DIFFERENT word). Anchor on the exact match
+    first; report nothing rather than a guess.
+
+    Comparison is on `normalize`d forms (Hebrew letters only by default, so
+    gershayim/geresh/punctuation differences are not treated as disagreement),
+    but the returned word is the witness's own RAW text - the reviewer needs
+    to see what the engine actually produced, not a normalized form of it."""
+    corpus_norm = [normalize(w) for w in corpus_words]
+    witness_norm = [normalize(w) for w in witness_words]
+
+    sm = difflib.SequenceMatcher(None, corpus_norm, witness_norm, autojunk=False)
+    out = {}
+    for tag, i1, i2, j1, j2 in sm.get_opcodes():
+        if tag == "equal":
+            for offset in range(i2 - i1):
+                out[i1 + offset] = (witness_words[j1 + offset], "agrees")
+        elif tag == "replace" and (i2 - i1) == 1 and (j2 - j1) == 1:
+            # Exactly one corpus word against exactly one witness word: the
+            # correspondence is unambiguous even though the readings differ.
+            out[i1] = (witness_words[j1], "differs")
+    return out
 
 
 def load_klal_words(part_path):

@@ -130,7 +130,20 @@ def check_punctuation_choice(decision, klal):
     return f"MISMATCH: expected '[.]' at word_index {word_index}, found {live!r}"
 
 
+# FIXED 2026-08-23 (code review, finding C4): "disputed_choice" is what
+# review_server.py has recorded the dashboard's word decisions as since the
+# 2026-08-23 candidate->disputed rename; "candidate_choice" is the same
+# decision under its pre-rename name and both still occur in the log.
+# review_decisions._match_decision_types() aliases the two for
+# all_current()/history_for(), so apply_reviewer_decisions.py and
+# export_corpus.py picked the new type up automatically - this dict did
+# not, and CHECKERS.get() returning None hits a bare `continue` below, so
+# every decision recorded after the rename was silently skipped by the one
+# read-only check that exists to catch an applied decision no longer
+# reflected in the corpus. Both names map to the same checker: the rename
+# changed the label, not the record's shape.
 CHECKERS = {
+    "disputed_choice": check_candidate_choice,
     "candidate_choice": check_candidate_choice,
     "manual_correction": check_manual_correction,
     "punctuation_choice": check_punctuation_choice,
@@ -197,7 +210,8 @@ def main():
                                f"decision {decision_id}): {result}")
 
     total = n_ok + n_mismatch + n_unverifiable + n_missing_klal + n_superseded
-    print(f"Checked {total} applied decisions across candidate_choice/manual_correction/punctuation_choice:")
+    print(f"Checked {total} applied decisions across "
+          f"{'/'.join(sorted(CHECKERS))}:")
     print(f"  {n_ok} confirmed still reflected in part1.json")
     print(f"  {n_superseded} superseded by a later, also-applied decision at the same key (expected, not checked)")
     print(f"  {n_unverifiable} word-count-changing, not position-verifiable post-hoc (see docstring)")
