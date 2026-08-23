@@ -3905,3 +3905,72 @@ def test_typography_no_longer_defines_a_competing_confusion_pair_set():
         "(marker scope) and detect_real_word_substitution.py (content-word "
         "scope); a third copy is what Lesson 13 is about"
     )
+
+
+# --- Surya block re-segmentation (2026-08-23 code review, finding C16) --------
+
+import run_surya_part1_full_baseline as surya_run  # noqa: E402
+
+
+def _surya_region(kid, y1, y2):
+    return {"klal_id": kid, "bbox": {"y1": y1, "y2": y2}}
+
+
+def test_a_merged_surya_block_is_split_at_the_next_klal_marker():
+    """REGRESSION (C16): Surya returns LAYOUT blocks and routinely groups two
+    consecutive short klalim into one <p>. The assembler assigned each block by
+    its Y-CENTRE alone, so a merged block went entirely to whichever klal held
+    that centre and the other got NOTHING - an empty body both consumers then
+    read as "Surya agrees with every word" rather than "no reading here".
+    10 of Part 1's 222 klalim were empty for this reason.
+
+    The real page-29 case: one block spans y 0.452-0.902, covering klal 43
+    (0.453-0.557) and klal 44 (0.559-0.983); its centre 0.677 sits in klal 44,
+    but its text OPENS with מג, klal 43's own marker."""
+    # Word counts follow the regions' share of the block's height, as they do on
+    # the real page - klal 43 is ~23% of the span, klal 44 ~77%.
+    page = [_surya_region(43, 0.453, 0.557), _surya_region(44, 0.559, 0.983)]
+    text = "מג " + " ".join(f"a{i}" for i in range(9)) + " מד " + " ".join(f"b{i}" for i in range(31))
+    out = surya_run.split_block_across_klalim(text, 0.452, 0.902, page, 0.677)
+    assert [kid for kid, _ in out] == [43, 44]
+    frag43, frag44 = out[0][1], out[1][1]
+    assert frag43.startswith("מג") and "a8" in frag43 and "b0" not in frag43
+    assert frag44.startswith("מד") and "b30" in frag44
+
+
+def test_a_block_touching_the_previous_klals_edge_does_not_steal_its_head():
+    """klal_page_regions.json's trim pass butts adjacent klalim right up against
+    each other (klal 42 ends 0.452, klal 43 starts 0.453), so a block beginning
+    exactly on that seam would 'cover' the klal above and take the head of the
+    block - which misfiled klal 43's entire body under klal 42 on the first
+    attempt. Overlap must be genuine, not a touching edge."""
+    page = [_surya_region(42, 0.393, 0.452), _surya_region(43, 0.453, 0.557), _surya_region(44, 0.559, 0.983)]
+    text = "מג " + " ".join(f"a{i}" for i in range(9)) + " מד " + " ".join(f"b{i}" for i in range(31))
+    out = surya_run.split_block_across_klalim(text, 0.452, 0.902, page, 0.677)
+    assert 42 not in [kid for kid, _ in out], "a touching edge is not coverage"
+    assert out[0][0] == 43 and out[0][1].startswith("מג")
+
+
+def test_a_marker_far_from_its_regions_position_in_the_block_is_not_a_cut():
+    """The near-miss variants exist so a misread numeral still anchors, but they
+    widen the match set enough to hit a numeral-shaped word in ordinary prose.
+    Measured before the positional guard: klalim 12, 74 and 210 each lost 30-360
+    words to a spurious deep-body match. A cut must land roughly where that
+    klal's region actually sits inside the block."""
+    # klal 44's region occupies only the LAST fifth of the block, so its marker
+    # is expected near word ~80 of 100 - but here 'מד' sits at word 2, deep in
+    # klal 43's territory, exactly the stray-numeral-in-prose case.
+    page = [_surya_region(43, 0.10, 0.79), _surya_region(44, 0.80, 0.98)]
+    text = "מג a0 מד " + " ".join(f"b{i}" for i in range(97))
+    out = surya_run.split_block_across_klalim(text, 0.10, 0.98, page, 0.5)
+    assert len(out) == 1, "a marker at the wrong position must not cut the block"
+
+
+def test_an_unsplittable_block_falls_back_to_centre_assignment_not_a_guess():
+    """No anchors found -> keep the old behaviour rather than invent a boundary.
+    A wrong cut fabricates text for two klalim instead of starving one, which is
+    worse (Lesson 5)."""
+    page = [_surya_region(43, 0.453, 0.557), _surya_region(44, 0.559, 0.983)]
+    text = " ".join(f"a{i}" for i in range(40))  # no markers at all
+    out = surya_run.split_block_across_klalim(text, 0.452, 0.902, page, 0.677)
+    assert out == [(44, text)], "centre 0.677 is inside klal 44's region"

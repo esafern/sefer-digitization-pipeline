@@ -17,6 +17,89 @@ current file references, or when grepping for how a past finding was
 resolved. Same append-at-top convention as before: newest entries go right
 after this header, not at the bottom.
 
+### FIXED 2026-08-23 — C16: Surya block re-segmentation built. 10 uncovered klalim -> 3, and the 3 that remain are genuinely unreadable, not mis-assigned.
+
+**The cause was not a Surya failure - it was the assembler.**
+`run_surya_part1_full_baseline.py` assigned each Surya LAYOUT block to a klal by
+the block's Y-CENTRE alone. Surya routinely groups two consecutive short klalim
+into a single `<p>`, so a merged block went entirely to whichever klal contained
+that centre and the other got NOTHING. The empty body was then read by both
+downstream consumers as "Surya agrees with every word here" rather than "Surya
+has no reading here" - Lesson 15 exactly.
+
+The documented example turned out to be exact. On page 29 one block spans
+y 0.452-0.902, covering klal 43 (0.453-0.557) AND klal 44 (0.559-0.983); its
+centre 0.677 sits in klal 44, so klal 44 took all 601 words - even though the
+block's own text OPENS with `מג`, klal 43's marker. This is Phase 1's "Block
+Re-segmentation" from `MULTI-WITNESS-REPAIR-AND-SYNTHESIS-PLAN.md`, specified
+there and left unbuilt.
+
+**Built `split_block_across_klalim()`**: for a block whose Y-SPAN covers more
+than one klal region, cut its text at each covered klal's gematria marker.
+Marker forms come from `build_gematria_trace.near_miss_variants` /
+`CONFUSION_PAIRS` - the measured constant - rather than a fourth private
+confusion list. Also added `--assemble-only`, which rebuilds the klal-aligned
+baseline from the cached per-page JSON without importing or loading Surya at
+all: re-assembly is free and is the common case after a mapping change.
+
+**Result: coverage 212/222 -> 219/222.** Klalim 43, 95, 96, 117, 136, 145 and
+195 recovered; **none lost**. The recovered text is real, not filler - word
+counts land almost exactly on the corpus (109/109, 121/120, 51/51, 39/39), each
+fragment opens on its own correct marker, and agreement runs 73-79% against a
+control-klal range of 71-82%. Klal 44 went 601 -> 492 words, exactly 109 fewer:
+klal 43's words moved out of it, arithmetic confirmation that this is
+redistribution rather than invention.
+
+**Three iterations were needed, each fixing a real defect the previous one
+introduced - recorded because the failures are the useful part:**
+
+1. *Requiring every covered klal to have a marker.* Wrong: a block routinely
+   BEGINS part-way through a klal (its continuation text), whose marker is on an
+   earlier block or page. Fixed by anchoring the first covered klal at the
+   block's start.
+2. *A cursor cascade.* Searching klal 200's single-letter marker `ר` across the
+   whole block matched something spurious and pushed the cursor past klal 201's
+   `רא`, which sits at word 0. Lesson 6 verbatim - a cursor-based search cascades
+   when one bad match corrupts the position everything after it searches from.
+   Fixed so a missing marker does NOT advance the cursor, plus a `head_owner`
+   check: if the block's first token IS one of the covered klalim's markers,
+   that klal owns the head regardless of which region starts highest.
+3. *Touching edges counted as coverage, and over-cutting.* `klal_page_regions`'s
+   trim pass butts klalim right against each other (klal 42 ends 0.452, klal 43
+   starts 0.453), so a block starting exactly on the seam "covered" the klal
+   above and stole the head - misfiling klal 43's entire body under klal 42.
+   Fixed with a strict-overlap epsilon. Separately, the near-miss variants
+   widened the match set enough to hit a numeral-shaped word in ordinary prose:
+   **measured, klalim 12, 74 and 210 each lost 30-360 words to a spurious
+   deep-body cut.** Fixed with a positional guard - a cut must land roughly where
+   that klal's region actually sits inside the block.
+
+**Verified against the committed baseline, not just by the coverage count** (a
+net count can hide a swap): 7 klalim gained coverage, 0 lost, 3 improved by more
+than 5 points (klal 97: 0.34 -> 0.62), and after the positional guard only klal
+74 is lower (0.62 -> 0.57) - which is correct, not a regression: klal 74 had
+ABSORBED its neighbour, and the 74/75 pair's total word count is identical
+before and after (2340) while the allocation moved from +266/-268 to -96/+94.
+Corpus-wide mean agreement 70.3%. Klalim 121, 168 and 222 score low but are
+byte-identical before and after - pre-existing, not caused by this.
+
+**The remaining 3 (49, 129, 201) are deliberately NOT chased further.** For
+klalim 49 and 129, Surya never read their markers at all - absent from every
+block on the page, so no re-segmentation can recover them. Klal 201's own marker
+`רא` IS at word 0 of its block, but klal 202's `רב` is absent from that same
+block, so there is no second anchor and the 201/202 boundary cannot be located
+without inventing one. Inventing it is what this function's own docstring
+forbids: a wrong cut fabricates text for two klalim instead of starving one,
+which is worse (Lesson 5). All three are now reported by name at the end of every
+run and counted downstream as an ABSENT WITNESS, never as agreement - which was
+the actual defect in C16. Closing them properly means a Surya re-run with
+different settings, not more heuristics on this output.
+
+**One self-inflicted bug, caught by the suite:** the new tests defined a helper
+`_region()` that shadowed an existing module-level `_region()` used by the
+`trim_overlapping_start_regions` tests, breaking 4 of them. Renamed. 266 tests
+green.
+
 ### FIXED 2026-08-23 — H6, H8, M11 from the code review. `typography.py` earns its keep by recognising the ligature artifact the consensus work measured.
 
 **H6 - `pipeline/typography.py` was dead code carrying a third, divergent

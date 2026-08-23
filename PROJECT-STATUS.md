@@ -245,6 +245,19 @@ to) as state changes** — that discipline is what drifted last time.
     klal and uses the real `vlm_witness_cache`. The disputed panel no longer
     pre-selects the machine verdict.
 
+9e. **C16 FIXED 2026-08-23: Surya coverage 212/222 → 219/222.** The cause was
+    the assembler, not Surya - it assigned each layout block by Y-CENTRE alone,
+    so a block merging two short klalim gave one of them nothing.
+    `split_block_across_klalim()` now cuts merged blocks at the gematria marker
+    (Phase 1's "Block Re-segmentation", specified in the plan and unbuilt).
+    7 klalim recovered, 0 lost, verified against the committed baseline rather
+    than by coverage count alone. New `--assemble-only` flag rebuilds the
+    baseline from cached per-page JSON without loading Surya. **The remaining 3
+    (49, 129, 201) are not recoverable by re-segmentation** - Surya never read
+    klal 49's or 129's marker at all, and klal 201's block has no second anchor -
+    so they are reported by name and counted as an absent witness, never as
+    agreement. Closing them needs a Surya re-run, not more heuristics.
+
 9c. **Still open from the 2026-08-23 review:**
     `pipeline/typography.py` is still dead code carrying a third, divergent
     `CONFUSION_PAIRS` (H6); `run_part1_vlm_patch_passB.py` still violates the

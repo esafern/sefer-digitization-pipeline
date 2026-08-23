@@ -3696,7 +3696,7 @@
       "confidence": 0.95,
       "reasoning": "The context refers to the standard rabbinic passage mentioning 'ור' אלעזר בשתא'. Paleographically, the prominent ascender (neck) of the letter Lamed ('ל') is clearly visible before the 'עזר', confirming 'אלעזר'. The OCR engine (Option A) failed to parse the Lamed, yielding the non-word 'אעזר'.",
       "vlm_reading": "אלעזר",
-      "surya_reading": "איעור",
+      "surya_reading": null,
       "flag": "current_text_confirmed"
     }
   ],
@@ -5466,8 +5466,34 @@
       "confidence": 0.98,
       "reasoning": "The visible word clearly reads 'טהורים' in standard Rabbinic square font, matching the context 'טהורים חוץ מדמו'. The second letter has the distinct structure of a 'ה' rather than a 'ר'.",
       "vlm_reading": "טהורים",
-      "surya_reading": null,
+      "surya_reading": "טהורים",
       "flag": "current_text_confirmed"
+    },
+    {
+      "word_index": 110,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "ארמימות",
+      "page": 43,
+      "bbox": {
+        "x1": 0.483930766582489,
+        "y1": 0.8316470980644226,
+        "x2": 0.5519159436225891,
+        "y2": 0.8486442565917969
+      },
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Multi-witness consensus: surya + vlm agree on 'אדמימות' against stored 'ארמימות'.",
+      "vlm_reading": "אדמימות",
+      "surya_reading": "אדמימות",
+      "consensus_engines": [
+        "surya",
+        "vlm"
+      ],
+      "consensus_reading": "אדמימות",
+      "ligature_artifact": null,
+      "flag": "current_text_may_be_wrong"
     },
     {
       "word_index": 338,
@@ -11752,7 +11778,7 @@
       "confidence": 0.98,
       "reasoning": "The image clearly shows the word 'הירושלמי' followed by a dot/period. There is no final Mem ('ם') present, rendering Option A a misreading of the punctuation mark as a letter.",
       "vlm_reading": "הירושלמי.",
-      "surya_reading": null,
+      "surya_reading": "הירושלמי",
       "flag": "current_text_confirmed"
     }
   ],
@@ -12815,40 +12841,8 @@
       "confidence": 0.98,
       "reasoning": "Paleographically, the letter following the 'ה' extends fully down to the baseline, clearly representing a 'ו' (vav) rather than a suspended 'י' (yod) as seen in 'עלייהו' on the line above. This matches Option B ('הוא'), which also fits the context of the Rabbinic phrase 'אי כתרייתא הוא אם לא'.",
       "vlm_reading": "הוא",
-      "surya_reading": "היא",
-      "flag": "current_text_confirmed",
-      "consensus_engines": [
-        "docai",
-        "surya"
-      ],
-      "consensus_reading": "היא",
-      "ligature_artifact": null
-    },
-    {
-      "word_index": 141,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "נכתכו",
-      "page": 74,
-      "bbox": {
-        "x1": 0.41646039485931396,
-        "y1": 0.16781237721443176,
-        "x2": 0.4628712832927704,
-        "y2": 0.18439142405986786
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: surya + vlm agree on 'נכתבו' against stored 'נכתכו'.",
-      "vlm_reading": "נכתבו",
-      "surya_reading": "נכתבו",
-      "consensus_engines": [
-        "surya",
-        "vlm"
-      ],
-      "consensus_reading": "נכתבו",
-      "ligature_artifact": null,
-      "flag": "current_text_may_be_wrong"
+      "surya_reading": null,
+      "flag": "current_text_confirmed"
     }
   ],
   "211": [
@@ -14034,6 +14028,86 @@
         "vlm"
       ],
       "consensus_reading": "ור'",
+      "ligature_artifact": null,
+      "flag": "current_text_may_be_wrong"
+    }
+  ],
+  "43": [
+    {
+      "word_index": 17,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "ממטונא",
+      "page": 29,
+      "bbox": {
+        "x1": 0.4838709533214569,
+        "y1": 0.4691656529903412,
+        "x2": 0.542803943157196,
+        "y2": 0.48528820276260376
+      },
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Multi-witness consensus: surya + vlm agree on 'מממונא' against stored 'ממטונא'.",
+      "vlm_reading": "מממונא",
+      "surya_reading": "מממונא",
+      "consensus_engines": [
+        "surya",
+        "vlm"
+      ],
+      "consensus_reading": "מממונא",
+      "ligature_artifact": null,
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 94,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "איסור'",
+      "page": 29,
+      "bbox": {
+        "x1": 0.7797766923904419,
+        "y1": 0.5437323451042175,
+        "x2": 0.8238213658332825,
+        "y2": 0.5606610178947449
+      },
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Multi-witness consensus: surya + vlm agree on 'איסורי'' against stored 'איסור''.",
+      "vlm_reading": "איסורי'",
+      "surya_reading": "איסורי",
+      "consensus_engines": [
+        "surya",
+        "vlm"
+      ],
+      "consensus_reading": "איסורי'",
+      "ligature_artifact": null,
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 102,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "וכשמחתינן",
+      "page": 29,
+      "bbox": {
+        "x1": 0.41439205408096313,
+        "y1": 0.5437323451042175,
+        "x2": 0.5,
+        "y2": 0.5606610178947449
+      },
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Multi-witness consensus: surya + vlm agree on 'דכשמחתינן' against stored 'וכשמחתינן'.",
+      "vlm_reading": "דכשמחתינן",
+      "surya_reading": "דכשמחתינן",
+      "consensus_engines": [
+        "surya",
+        "vlm"
+      ],
+      "consensus_reading": "דכשמחתינן",
       "ligature_artifact": null,
       "flag": "current_text_may_be_wrong"
     }

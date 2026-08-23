@@ -848,6 +848,80 @@
       }
     }
   ],
+  "43": [
+    {
+      "klal_id": 43,
+      "word_index": 17,
+      "opcode": "replace",
+      "final_text": "ממטונא",
+      "consensus_reading": "מממונא",
+      "agreeing_engines": [
+        "surya",
+        "vlm"
+      ],
+      "ligature_artifact": null,
+      "witnesses": {
+        "docai": null,
+        "vlm": "מממונא",
+        "surya": "מממונא"
+      },
+      "page": 29,
+      "bbox": {
+        "x1": 0.4838709533214569,
+        "y1": 0.4691656529903412,
+        "x2": 0.542803943157196,
+        "y2": 0.48528820276260376
+      }
+    },
+    {
+      "klal_id": 43,
+      "word_index": 94,
+      "opcode": "replace",
+      "final_text": "איסור'",
+      "consensus_reading": "איסורי'",
+      "agreeing_engines": [
+        "surya",
+        "vlm"
+      ],
+      "ligature_artifact": null,
+      "witnesses": {
+        "docai": null,
+        "vlm": "איסורי'",
+        "surya": "איסורי"
+      },
+      "page": 29,
+      "bbox": {
+        "x1": 0.7797766923904419,
+        "y1": 0.5437323451042175,
+        "x2": 0.8238213658332825,
+        "y2": 0.5606610178947449
+      }
+    },
+    {
+      "klal_id": 43,
+      "word_index": 102,
+      "opcode": "replace",
+      "final_text": "וכשמחתינן",
+      "consensus_reading": "דכשמחתינן",
+      "agreeing_engines": [
+        "surya",
+        "vlm"
+      ],
+      "ligature_artifact": null,
+      "witnesses": {
+        "docai": null,
+        "vlm": "דכשמחתינן",
+        "surya": "דכשמחתינן"
+      },
+      "page": 29,
+      "bbox": {
+        "x1": 0.41439205408096313,
+        "y1": 0.5437323451042175,
+        "x2": 0.5,
+        "y2": 0.5606610178947449
+      }
+    }
+  ],
   "44": [
     {
       "klal_id": 44,
@@ -1793,6 +1867,30 @@
     }
   ],
   "97": [
+    {
+      "klal_id": 97,
+      "word_index": 110,
+      "opcode": "replace",
+      "final_text": "ארמימות",
+      "consensus_reading": "אדמימות",
+      "agreeing_engines": [
+        "surya",
+        "vlm"
+      ],
+      "ligature_artifact": null,
+      "witnesses": {
+        "docai": null,
+        "vlm": "אדמימות",
+        "surya": "אדמימות"
+      },
+      "page": 43,
+      "bbox": {
+        "x1": 0.483930766582489,
+        "y1": 0.8316470980644226,
+        "x2": 0.5519159436225891,
+        "y2": 0.8486442565917969
+      }
+    },
     {
       "klal_id": 97,
       "word_index": 338,
@@ -3960,54 +4058,6 @@
         "y1": 0.09098260849714279,
         "x2": 0.3582920730113983,
         "y2": 0.10756166279315948
-      }
-    },
-    {
-      "klal_id": 210,
-      "word_index": 134,
-      "opcode": "replace",
-      "final_text": "הוא",
-      "consensus_reading": "היא",
-      "agreeing_engines": [
-        "docai",
-        "surya"
-      ],
-      "ligature_artifact": null,
-      "witnesses": {
-        "docai": "היא",
-        "vlm": "הוא",
-        "surya": "היא"
-      },
-      "page": 74,
-      "bbox": {
-        "x1": 0.2611386179924011,
-        "y1": 0.15285079181194305,
-        "x2": 0.28960394859313965,
-        "y2": 0.16942983865737915
-      }
-    },
-    {
-      "klal_id": 210,
-      "word_index": 141,
-      "opcode": "replace",
-      "final_text": "נכתכו",
-      "consensus_reading": "נכתבו",
-      "agreeing_engines": [
-        "surya",
-        "vlm"
-      ],
-      "ligature_artifact": null,
-      "witnesses": {
-        "docai": null,
-        "vlm": "נכתבו",
-        "surya": "נכתבו"
-      },
-      "page": 74,
-      "bbox": {
-        "x1": 0.41646039485931396,
-        "y1": 0.16781237721443176,
-        "x2": 0.4628712832927704,
-        "y2": 0.18439142405986786
       }
     }
   ],

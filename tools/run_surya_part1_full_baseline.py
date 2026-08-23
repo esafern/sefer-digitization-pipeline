@@ -24,6 +24,7 @@ sys.path.insert(0, REPO)
 sys.path.insert(0, os.path.join(REPO, "pipeline"))
 
 import corpus_io
+import build_gematria_trace as bgt
 
 
 def strip_html_tags(html_str):
@@ -78,6 +79,13 @@ def load_part1_regions():
 def match_block_to_klal(block_y_center, page_klalim):
     """
     Finds the klal region that best encloses or is closest to the block's vertical center.
+
+    NOTE (2026-08-23, code review finding C18): the nearest-region fallback below
+    never returns None, so a block enclosed by NO klal region is force-attached
+    to whichever region happens to be closest. Small in practice on pages 14-76
+    (2 blocks / 4 words) but silent by construction. Left as-is deliberately:
+    tightening it changes which text every klal gets, which is a data-affecting
+    change that needs its own measurement, not a drive-by.
     """
     # 1. Exact inclusion: y1 <= yc <= y2
     for k in page_klalim:
@@ -96,7 +104,127 @@ def match_block_to_klal(block_y_center, page_klalim):
     return best_k
 
 
-def run_surya_part1(force_recompute=False):
+def _marker_forms(klal_id):
+    """The gematria numeral for klal_id plus its documented near-miss misreads.
+
+    Reuses build_gematria_trace's own near_miss_variants/CONFUSION_PAIRS rather
+    than hand-rolling a second confusion list - that constant is the measured
+    one ("adding a pair here should mean someone measured it") and a private
+    copy is exactly the Lesson 13 defect this repo keeps finding.
+    """
+    expected = corpus_io.klal_id_to_gematria(klal_id)
+    return [expected] + bgt.near_miss_variants(expected)
+
+
+def split_block_across_klalim(text, block_y1, block_y2, page_klalim, y_center):
+    """Split one Surya layout block's text among the klalim its Y-SPAN covers.
+
+    Returns [(klal_id, text_fragment), ...].
+
+    WHY THIS EXISTS (code review finding C16, and Phase 1 of
+    MULTI-WITNESS-REPAIR-AND-SYNTHESIS-PLAN.md, which specified it and left it
+    unbuilt). Surya returns LAYOUT blocks, and it routinely groups two
+    consecutive short klalim into a single <p>. The assembler assigned each
+    block by its Y-CENTRE alone, so a merged block went entirely to whichever
+    klal contained that centre and the other klal got NOTHING - producing an
+    empty body that both downstream consumers then read as "Surya agrees with
+    every word here" rather than "Surya has no reading here". 10 of Part 1's
+    222 klalim were empty for this reason.
+
+    The documented example is exact: on page 29 a single block spans
+    y 0.452-0.902, covering klal 43 (0.453-0.557) AND klal 44 (0.559-0.983).
+    Its centre 0.677 sits in klal 44, so klal 44 took the lot - even though the
+    block's own text OPENS with `מג`, klal 43's marker.
+
+    That marker is the split point. For every klal whose region the block
+    overlaps, look for its gematria numeral (or a documented near-miss misread
+    of it) as a standalone token, and cut there. If the markers are not found,
+    fall back to the old centre-based assignment rather than guessing at a
+    proportional split - a wrong cut invents text for two klalim instead of
+    starving one, which is worse (Lesson 5).
+    """
+    # Overlap must be GENUINE, not a touching edge. klal_page_regions.json's
+    # trim pass leaves adjacent klalim butted right up against each other
+    # (klal 42 ends at y 0.452, klal 43 starts at 0.453), and a block beginning
+    # exactly on that seam would otherwise "cover" the klal above it and steal
+    # the head of the block - which is what misfiled klal 43's whole body under
+    # klal 42 on the first attempt. EPS is a hair under one trim gap.
+    EPS = 0.002
+    covered = [k for k in page_klalim
+               if min(k["bbox"]["y2"], block_y2) - max(k["bbox"]["y1"], block_y1) > EPS]
+    covered.sort(key=lambda k: k["bbox"]["y1"])
+    if len(covered) < 2:
+        return [(match_block_to_klal(y_center, page_klalim), text)]
+
+    words = text.split()
+    norm = corpus_io.hebrew_letters_only
+
+    # The FIRST covered klal is anchored at the block's start, not on a marker.
+    # A block routinely begins part-way through a klal (its continuation text),
+    # in which case that klal's marker is on an earlier block or an earlier page
+    # and demanding one here would drop the head of the block entirely.
+    #
+    # Every LATER klal must be anchored on its own marker. Searching is strictly
+    # forward from the previous cut, and - important - a marker that is not found
+    # does NOT advance the cursor, so one missing numeral cannot swallow the
+    # klalim after it. Lesson 6: a cursor-based search cascades if one bad match
+    # corrupts the position everything after it searches from. That cascade is
+    # what left klal 201 empty on the first attempt: its own marker `רא` sits at
+    # the very start of the block, but klal 200's single-letter `ר` was searched
+    # for first across the whole block, matched something spurious further in,
+    # and pushed the cursor past `רא`.
+    # If the block's very first token is itself one of the covered klalim's
+    # markers, that klal - not merely the topmost one - owns the head. Belt and
+    # braces with the EPS fix above: a block can legitimately begin exactly on a
+    # marker, and anchoring the head to the wrong klal misfiles an entire body.
+    head_owner = 0
+    first_tok = norm(words[0]) if words else ""
+    for idx, k in enumerate(covered):
+        if first_tok and first_tok in {norm(f) for f in _marker_forms(k["klal_id"])}:
+            head_owner = idx
+            break
+
+    # A marker match must also land roughly WHERE that klal's region sits inside
+    # the block. Without this the near-miss variants (which exist so a misread
+    # numeral still anchors) widen the match set enough to hit a stray token deep
+    # in the body text and cut there - measured: klalim 12, 74 and 210 each lost
+    # 30-360 words to exactly that before the guard, because a numeral-shaped
+    # word occurs in ordinary prose far more often than a marker does. The block
+    # is a vertical strip of one page, so a klal starting at fraction f of the
+    # block's height should start near word f*len(words); allow generous slack
+    # (line lengths vary) but not "anywhere".
+    span_y = max(block_y2 - block_y1, 1e-6)
+    POSITION_SLACK = 0.25  # fraction of the block's words
+
+    cuts, cursor = [(covered[head_owner]["klal_id"], 0)], 0
+    for k in covered[head_owner + 1:]:
+        forms = {norm(f) for f in _marker_forms(k["klal_id"])}
+        frac = (k["bbox"]["y1"] - block_y1) / span_y
+        expected = frac * len(words)
+        slack = max(POSITION_SLACK * len(words), 8)
+        found = next(
+            (i for i in range(cursor + 1, len(words))
+             if norm(words[i]) in forms and abs(i - expected) <= slack),
+            None)
+        if found is None:
+            continue  # no anchor for this klal - leave the cursor where it was
+        cuts.append((k["klal_id"], found))
+        cursor = found
+
+    if len(cuts) < 2:
+        # Not enough anchors to cut on - do not invent a boundary.
+        return [(match_block_to_klal(y_center, page_klalim), text)]
+
+    out = []
+    for idx, (kid, start) in enumerate(cuts):
+        end = cuts[idx + 1][1] if idx + 1 < len(cuts) else len(words)
+        frag = " ".join(words[start:end]).strip()
+        if frag:
+            out.append((kid, frag))
+    return out
+
+
+def run_surya_part1(force_recompute=False, assemble_only=False):
     output_dir = os.path.join(REPO, "tools", "second_witness_eval")
     surya_pages_dir = os.path.join(output_dir, "surya_pages")
     os.makedirs(surya_pages_dir, exist_ok=True)
@@ -106,17 +234,24 @@ def run_surya_part1(force_recompute=False):
     print(f"RUNNING SURYA OCR FOR PART 1: {len(pages)} PAGES (Pages {min(pages)}..{max(pages)})")
     print("=" * 80)
 
-    from surya.inference import SuryaInferenceManager
-    from surya.recognition import RecognitionPredictor
-
-    manager = SuryaInferenceManager()
-    predictor = RecognitionPredictor(manager)
-
     pages_to_process = []
-    for p in pages:
-        page_json = os.path.join(surya_pages_dir, f"page_{p}.json")
-        if force_recompute or not os.path.exists(page_json):
-            pages_to_process.append(p)
+    if not assemble_only:
+        for p in pages:
+            page_json = os.path.join(surya_pages_dir, f"page_{p}.json")
+            if force_recompute or not os.path.exists(page_json):
+                pages_to_process.append(p)
+
+    predictor = None
+    if pages_to_process:
+        # Imported and loaded ONLY when there is actually a page to OCR.
+        # Re-assembling the klal-aligned baseline from the cached per-page JSON
+        # is free and is the common case after a change to the block->klal
+        # mapping; it should not require Surya to be installed, let alone pay
+        # for loading its models. --assemble-only forces that path.
+        from surya.inference import SuryaInferenceManager
+        from surya.recognition import RecognitionPredictor
+        manager = SuryaInferenceManager()
+        predictor = RecognitionPredictor(manager)
 
     print(f"Total pages: {len(pages)}, Cached: {len(pages) - len(pages_to_process)}, To run: {len(pages_to_process)}")
 
@@ -188,10 +323,12 @@ def run_surya_part1(force_recompute=False):
             if not text:
                 continue
 
-            yc = b["bbox_norm"]["yc"]
-            klal_id = match_block_to_klal(yc, page_klalim)
-            if klal_id and 1 <= klal_id <= corpus_io.PART1_MAX_KLAL:
-                klal_texts[klal_id].append(text)
+            bn = b["bbox_norm"]
+            for klal_id, frag in split_block_across_klalim(
+                    text, bn.get("y1", bn["yc"]), bn.get("y2", bn["yc"]),
+                    page_klalim, bn["yc"]):
+                if klal_id and 1 <= klal_id <= corpus_io.PART1_MAX_KLAL:
+                    klal_texts[klal_id].append(frag)
 
     baseline_txt_path = os.path.join(output_dir, "surya_part1_full_baseline.txt")
     with open(baseline_txt_path, "w", encoding="utf-8") as f:
@@ -205,8 +342,29 @@ def run_surya_part1(force_recompute=False):
             body_text = "\n".join(klal_texts[klal_id])
             f.write(f"{header_str}\n{body_text}\n\n")
 
-    print(f"Successfully generated {baseline_txt_path} for 222 klalim!")
+    # Report coverage honestly rather than announcing success for all 222
+    # (code review finding C16): an EMPTY body is "this witness has no reading
+    # here", and both consumers of this file previously read it as "Surya
+    # agrees with every word". Naming the empty klalim is what makes that
+    # distinction visible to whoever runs this.
+    empty = [k for k in range(1, corpus_io.PART1_MAX_KLAL + 1) if not klal_texts[k]]
+    covered = corpus_io.PART1_MAX_KLAL - len(empty)
+    print(f"Wrote {baseline_txt_path}")
+    print(f"  klalim with Surya text: {covered}/{corpus_io.PART1_MAX_KLAL}")
+    if empty:
+        print(f"  klalim with NO Surya coverage ({len(empty)}): {empty}")
+        print("  ^ these are NOT 'Surya agrees' - they are 'no reading'. "
+              "Downstream must treat them as an absent witness.")
 
 
 if __name__ == "__main__":
-    run_surya_part1()
+    import argparse
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--force-recompute", action="store_true",
+                    help="re-run Surya OCR even for pages already cached")
+    ap.add_argument("--assemble-only", action="store_true",
+                    help="rebuild the klal-aligned baseline from cached per-page "
+                         "JSON without loading Surya at all (free, and the common "
+                         "case after a block->klal mapping change)")
+    a = ap.parse_args()
+    run_surya_part1(force_recompute=a.force_recompute, assemble_only=a.assemble_only)
