@@ -31,6 +31,7 @@ import fitz  # PyMuPDF
 import corpus_io as cio
 import vision_adjudication_common as vac
 from vision_adjudication_common import (  # noqa: F401 - re-exported, see above
+    normalize_selected_option,
     sanitize_json,
     unescape_json_fragment,
 )
@@ -52,7 +53,13 @@ def extract_json_fields(text):
         m = re.search(rf'"{name}"\s*:\s*"(.*?)"\s*,?\s*{next_pattern}', text, re.S)
         return unescape_json_fragment(m.group(1)) if m else None
 
-    selected = re.search(r'"selected_option"\s*:\s*"(A|B|UNCERTAIN)"', text)
+    # Accept whatever the model wrote and normalise it, rather than matching
+    # only the three literal forms - a compliant-in-substance answer like
+    # "Option A" used to fail this regex entirely (2026-08-23; see
+    # vision_adjudication_common.normalize_selected_option for the live case).
+    _sel_raw = re.search(r'"selected_option"\s*:\s*"([^"]*)"', text)
+    _sel = normalize_selected_option(_sel_raw.group(1)) if _sel_raw else None
+    selected = _sel_raw if _sel else None
     transcription = field("transcription_found", r'(?="confidence")')
     # Optional quotes around the number: a model that emits "confidence": "0.95"
     # used to fall through to `return None` and be recorded as a hard ERROR,
@@ -64,7 +71,7 @@ def extract_json_fields(text):
     if not (selected and confidence):
         return None
     return {
-        "selected_option": selected.group(1),
+        "selected_option": _sel,
         "transcription_found": transcription,
         "confidence": float(confidence.group(1)),
         "reasoning": reasoning,
@@ -199,17 +206,30 @@ def parse_decision_text(decision_text):
     practice, would have been silently corrupted rather than parsed
     correctly - the exact risk this chain's ordering exists to avoid).
     """
+    decision = None
     try:
-        return json.loads(decision_text)
+        decision = json.loads(decision_text)
     except json.JSONDecodeError:
-        pass
-    try:
-        return json.loads(sanitize_json(decision_text))
-    except json.JSONDecodeError:
-        pass
-    decision = extract_json_fields(decision_text)
+        try:
+            decision = json.loads(sanitize_json(decision_text))
+        except json.JSONDecodeError:
+            decision = extract_json_fields(decision_text)
     if decision is None:
         raise ValueError(f"could not parse decision JSON: {decision_text[:200]!r}")
+    # Normalise selected_option HERE, at the single chokepoint all three parse
+    # paths funnel through, rather than in each extractor - a well-formed
+    # response goes straight through json.loads and never touches the
+    # fallbacks, which is exactly how `"selected_option": "Option A"` reached
+    # classify() unrecognised and got a real 0.95-confidence verdict discarded
+    # as an "error" (klal 163 word 503, found 2026-08-23). Preserves the raw
+    # value under `selected_option_raw` so a genuinely unparseable answer stays
+    # inspectable rather than being silently blanked.
+    if isinstance(decision, dict) and "selected_option" in decision:
+        raw = decision["selected_option"]
+        normalised = normalize_selected_option(raw)
+        if normalised != raw:
+            decision["selected_option_raw"] = raw
+        decision["selected_option"] = normalised
     return decision
 
 

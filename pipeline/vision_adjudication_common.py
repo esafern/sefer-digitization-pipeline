@@ -274,6 +274,34 @@ def adjudicate_with_retry(client, crop_bytes, prompt, cache_get, cache_put,
     return _retry_loop(call_fn, models_to_try, max_retries)
 
 
+def normalize_selected_option(value):
+    """Map whatever the model actually wrote into the closed vocabulary
+    {A, B, NEITHER, UNCERTAIN, ERROR}, or None if it is not recognisable.
+
+    ADDED 2026-08-23. The prompt specifies a closed vocabulary and the recovery
+    code's own docstring asserts one ("selected_option is a closed vocabulary
+    (A/B/NEITHER/UNCERTAIN) so it can't contain a stray quote") - but nothing
+    enforced it, and the model does not always comply. Live example, klal 163
+    word 503: Gemini answered `"selected_option": "Option A"` with a real,
+    reasoned 0.95-confidence verdict describing a genuine printing error in the
+    scan (a ב base where a ת belongs). classify() compares `sel == "A"`, so that
+    answer fell through to flag "error" and was discarded - a paid, correct
+    adjudication thrown away over a four-character formatting difference.
+
+    Deliberately conservative: it strips a leading "option"/"answer" label and
+    surrounding punctuation/whitespace and upper-cases, and it recognises
+    nothing else. An unrecognised value still returns None and still lands in
+    "error", because inventing a verdict for a response we cannot parse is
+    worse than reporting that we could not parse it.
+    """
+    if value is None:
+        return None
+    v = str(value).strip().strip(".:;,'\"").strip()
+    v = re.sub(r"^(?:option|answer|choice)\s+", "", v, flags=re.IGNORECASE).strip()
+    v = v.strip(".:;,'\"").strip().upper()
+    return v if v in {"A", "B", "NEITHER", "UNCERTAIN", "ERROR"} else None
+
+
 def parse_decision_lenient(text):
     """Field-by-field recovery for responses that are unparseable as strict
     JSON because a string value contains a literal, unescaped double-quote -
@@ -303,7 +331,7 @@ def parse_decision_lenient(text):
     if not (opt and (transcription_str or transcription_null) and reasoning):
         raise ValueError("lenient JSON recovery: expected fields not found")
     return {
-        "selected_option": opt.group(1),
+        "selected_option": normalize_selected_option(opt.group(1)),
         "transcription_found": unescape_json_fragment(transcription_str.group(1)) if transcription_str else None,
         "confidence": float(conf.group(1)) if conf else None,
         "reasoning": unescape_json_fragment(reasoning.group(1)),

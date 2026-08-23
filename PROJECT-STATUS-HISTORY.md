@@ -17,6 +17,64 @@ current file references, or when grepping for how a past finding was
 resolved. Same append-at-top convention as before: newest entries go right
 after this header, not at the bottom.
 
+### FIXED 2026-08-23 — witness-queue triage implemented (419 -> 44 served), and a paid vision verdict rescued from the "error" bucket.
+
+Both were open items with the analysis already done and the work never built.
+
+**Open item 4: the witness queue is now served by vision verdict, 419 -> 44
+items.** The 2026-08-19 analysis established the cut (`vision_selected in
+("B","NEITHER")`) and measured its justification: Tesseract was right in only
+**16 of 419** disagreements (3.8%) against DocAI's 91.2% - it fails structurally,
+being a weaker engine on the *same* scan rather than an independent signal. That
+analysis was never implemented.
+
+Implemented as a **view in `review_server._load_witness_queue()`**, not as an
+edit to `reconstruction_witness_queue.json`: the file is the complete evidence
+trail and stays complete, and it is derived, so a hand-edit would be the
+Lesson 13 defect this repo keeps re-finding. `WITNESS_QUEUE_FILTERED = False`
+serves all 419 again; a test asserts that reversibility.
+
+**The union with already-decided items is load-bearing, and measuring it first
+is what stopped a data-visibility bug shipping.** The naive cut is 37 keys. But
+of the 10 recorded `witness_choice` decisions, **7 sit OUTSIDE that cut** - a
+plain filter would have erased every one of them from the dashboard. (My first
+check of this used the queue's `word_index` field and got the wrong answer;
+witness decisions actually key on `docai_token_index`, stored in the decision's
+`word_index` slot - re-checked against `api_post_witness_decision` before
+implementing.) Served set is cut UNION decided = **44 keys, hiding 375, 89% less
+work**, with zero recorded findings lost. This is the same trap that got tier-D
+deletion rejected on 2026-08-19, arrived at from a different direction.
+
+**Caveat carried into the code comment, per Lesson 2:** all 419 verdicts came
+back at >= 0.9 confidence, so the 37 are a PRIORITY QUEUE, not proof the other
+382 are clean.
+
+**A real, paid, correct adjudication was being discarded over four characters.**
+The single item flagged `error` in `corrections_part1.json` (klal 163 word 503,
+`בכתובוב` vs `בכתובות`) was not a failure: Gemini returned a reasoned
+0.95-confidence verdict correctly describing a genuine printing error in the scan
+(a `ב` base where a `ת` belongs). It answered `"selected_option": "Option A"`;
+`classify()` compares `sel == "A"`, so it fell through to `return "error"`.
+
+Fixed with `vision_adjudication_common.normalize_selected_option()`, applied at
+**`parse_decision_text()`** - the single chokepoint all three parse paths funnel
+through. That placement mattered: the first attempt normalised inside the two
+FALLBACK extractors, and re-running changed nothing, because a well-formed
+response goes straight through `json.loads` and never touches them. The raw value
+is preserved as `selected_option_raw` when it differs, so an unparseable answer
+stays inspectable rather than being silently blanked. Deliberately conservative -
+it strips an `option`/`answer`/`choice` label and surrounding punctuation and
+recognises nothing else; anything unrecognised still returns None and still lands
+in `error`, because inventing a verdict for a response we cannot parse is worse
+than reporting that we could not parse it.
+
+**Recovered with no API call**, since `adjudicate_with_retry` caches and returns
+RAW response text which is then re-parsed: klal 163 w503 is now
+`current_text_may_be_wrong`, `vision_selected: "A"`, 0.95 confidence.
+**`corrections_part1.json` now has zero items flagged `error`** (was 1).
+
+270 + 16 tests green.
+
 ### SURYA RE-READ 2026-08-23 — both levers ruled out. Klalim 49/129/201 are structurally uncovered, not pending a re-run.
 
 User-requested ("run the surya read on those klalim"). Two things tried, both

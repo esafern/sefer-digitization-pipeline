@@ -3974,3 +3974,60 @@ def test_an_unsplittable_block_falls_back_to_centre_assignment_not_a_guess():
     text = " ".join(f"a{i}" for i in range(40))  # no markers at all
     out = surya_run.split_block_across_klalim(text, 0.452, 0.902, page, 0.677)
     assert out == [(44, text)], "centre 0.677 is inside klal 44's region"
+
+
+# --- witness queue triage + vision-verdict normalisation (2026-08-23) --------
+
+def test_normalize_selected_option_accepts_a_compliant_in_substance_answer():
+    """FIXED 2026-08-23: Gemini answered `"selected_option": "Option A"` on klal
+    163 word 503 with a real, reasoned 0.95-confidence verdict describing a
+    genuine printing error. classify() compares `sel == "A"`, so that answer
+    fell through to flag "error" and a paid, correct adjudication was discarded
+    over four characters of formatting."""
+    for raw, want in (("Option A", "A"), ("A", "A"), ("option b", "B"),
+                      (" B. ", "B"), ('"NEITHER"', "NEITHER"),
+                      ("UNCERTAIN", "UNCERTAIN"), ("ERROR", "ERROR")):
+        assert vac.normalize_selected_option(raw) == want, raw
+
+
+def test_normalize_selected_option_refuses_to_guess():
+    """Conservative by design: an unrecognised answer returns None and still
+    lands in "error". Inventing a verdict for a response we cannot parse is
+    worse than reporting that we could not parse it."""
+    for raw in ("C", "", None, "Option A and B", "yes", "A or B"):
+        assert vac.normalize_selected_option(raw) is None, raw
+
+
+def test_witness_queue_view_keeps_every_already_decided_item(monkeypatch, tmp_path):
+    """REGRESSION-BY-CONSTRUCTION 2026-08-23. The 2026-08-19 analysis cut this
+    queue to `vision_selected in ("B","NEITHER")` - 419 items to 37, zero
+    findings lost. But measured before shipping: **7 of the 10 recorded
+    decisions sit OUTSIDE that cut**, so a naive filter would have erased every
+    one of them from the dashboard. That is the same trap that got tier-D
+    deletion rejected. The served view must be cut UNION already-decided."""
+    import review_server as rs
+    queue = {"queue": [
+        {"klal_id": 30, "docai_token_index": 1, "vision_selected": "A"},   # hidden
+        {"klal_id": 30, "docai_token_index": 2, "vision_selected": "B"},   # priority
+        {"klal_id": 30, "docai_token_index": 3, "vision_selected": "NEITHER"},
+        {"klal_id": 30, "docai_token_index": 4, "vision_selected": "A"},   # decided
+    ]}
+    monkeypatch.setattr(rs, "_load_json", lambda *a, **k: queue)
+    monkeypatch.setattr(rs.rd, "all_current", lambda t, path=None: {(30, 4): {"id": "x"}})
+    served = {(w["klal_id"], w["docai_token_index"]) for w in rs._load_witness_queue()}
+    assert (30, 4) in served, "an item a human already ruled on must never vanish"
+    assert {(30, 2), (30, 3)} <= served, "the priority cut must be served"
+    assert (30, 1) not in served, "an undecided 'A' verdict is deprioritised"
+
+
+def test_witness_queue_filter_is_reversible(monkeypatch):
+    """The queue FILE stays complete - this is a view, not a prune. Flipping the
+    flag must serve everything again (Lesson 2: the 37 are a priority queue, not
+    proof the other 382 are clean - all 419 verdicts scored >= 0.9)."""
+    import review_server as rs
+    queue = {"queue": [{"klal_id": 30, "docai_token_index": i, "vision_selected": "A"}
+                       for i in range(5)]}
+    monkeypatch.setattr(rs, "_load_json", lambda *a, **k: queue)
+    monkeypatch.setattr(rs.rd, "all_current", lambda t, path=None: {})
+    monkeypatch.setattr(rs, "WITNESS_QUEUE_FILTERED", False)
+    assert len(rs._load_witness_queue()) == 5

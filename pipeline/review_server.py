@@ -186,6 +186,14 @@ def _load_punctuation_candidates(part_num=1):
     return combined
 
 
+# The vision verdicts that keep a witness item in the reviewer's queue. "A"
+# means the vision pass sided with DocAI against Tesseract, which on this
+# corpus is the overwhelmingly common and overwhelmingly correct outcome
+# (DocAI 91.2% vs Tesseract 3.8% across the 419 items).
+WITNESS_PRIORITY_VERDICTS = ("B", "NEITHER")
+WITNESS_QUEUE_FILTERED = True
+
+
 def _load_witness_queue():
     """Independent-witness (Tesseract vs DocAI) disagreements for the
     reconstructed continuation pages - see verify_reconstruction_witness.py.
@@ -227,7 +235,35 @@ def _load_witness_queue():
                 f"tell these apart. See this function's docstring."
             )
         seen[key] = w.get("page")
-    return items
+
+    # ADDED 2026-08-23, implementing the triage decided (and left unbuilt) on
+    # 2026-08-19: work this queue by VISION VERDICT, not in full.
+    #
+    # Tesseract was right in only 16 of 419 disagreements (3.8%) against
+    # DocAI's 91.2% - it fails structurally, being a weaker engine on the SAME
+    # scan rather than an independent signal. Cutting to the items where the
+    # vision pass did NOT side with DocAI leaves 37 of 419 and loses zero of
+    # the recorded findings.
+    #
+    # Filtering here rather than in the queue FILE is deliberate: the file is
+    # the complete evidence trail and stays complete (it is also derived, so a
+    # hand-edit would be the Lesson 13 defect this repo keeps re-finding). This
+    # is a view; flip WITNESS_QUEUE_FILTERED to False to serve everything again.
+    #
+    # The union with already-decided items is not defensive padding - it is
+    # load-bearing. Measured before shipping: 7 of the 10 recorded decisions
+    # sit OUTSIDE the priority cut, so a naive filter would have erased every
+    # one of them from the dashboard. This is the same trap that got tier-D
+    # deletion rejected on 2026-08-19.
+    #
+    # CAVEAT, per Lesson 2: all 419 verdicts came back at >= 0.9 confidence, so
+    # the 37 are a PRIORITY QUEUE, not proof the other 382 are clean.
+    if not WITNESS_QUEUE_FILTERED:
+        return items
+    decided = {k for k in rd.all_current("witness_choice")}
+    return [w for w in items
+            if w.get("vision_selected") in WITNESS_PRIORITY_VERDICTS
+            or (w["klal_id"], w["docai_token_index"]) in decided]
 
 
 def _resolve_klal_page(alignment, regions, klal_id):

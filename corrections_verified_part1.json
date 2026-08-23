@@ -5922,7 +5922,7 @@
       "y2": 0.24345022439956665
     },
     "bbox_estimated": false,
-    "vision_selected": "Option A",
+    "vision_selected": "A",
     "vision_transcription": "ככתובוב",
     "vision_confidence": 0.95,
     "vision_reasoning": "The raster image clearly shows a printing error (typo) where the final letter of the word is a 'ב' (having a flat, sharp-cornered base) instead of the standard 'ת' (which is visible earlier in the same word with its distinctive left leg/foot). Thus, Option A correctly captures this paleographic typo 'בכתובוב/ככתובוב' over the corrected/standard Option B."
