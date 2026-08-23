@@ -173,6 +173,28 @@ to) as state changes** — that discipline is what drifted last time.
    re-violates the incremental-flush rule and no-ops its own cache; zero new
    tests for ~1,310 lines of new code.
 
+9a. **Second review pass over the same range (`/code-review high`) reproduced
+    C1/C2 and added four findings — one of which retires a claimed 2026-08-21
+    feature.** Full detail in `PROJECT-STATUS-HISTORY.md`'s addendum.
+    - **`build_vlm_alignment()` can never report a disagreement.** It maps only
+      `SequenceMatcher.get_matching_blocks()`, and a matching block is by
+      definition a run where the sequences are EQUAL — so `vlm_reading` and
+      `surya_reading` are always either the corpus's own word or absent.
+      Measured: 49,138 aligned VLM words and 34,892 aligned Surya words,
+      **0 divergent in either**. `app.js` then dedupes the field away against
+      "Current text," so it never renders. **The 2026-08-21 entry's "346
+      candidates now carry a real `vlm_reading`" describes a field that
+      structurally cannot disagree** — treat that enrichment as not delivered.
+      Separately, the extractor's own path has written 1,154 divergent
+      `surya_reading` values that the next rebuild will overwrite with the
+      inert version.
+    - **10 of 222 klalim have an empty Surya body**, and both consumers read
+      empty as "Surya agrees" rather than "no witness" (Lesson 15).
+    - The Surya extractor's Pass-B alignment (`vlm_a_to_b`) is **dead code** —
+      the 57 items are gated on Surya == VLM Pass A only.
+    - The bbox page fallback uses the klal's START page, and the
+      neighbour-bbox recovery is gated on that same wrong page number.
+
 10. **`MULTI-WITNESS-REPAIR-AND-SYNTHESIS-PLAN.md` review 2026-08-23 — the
     architecture is sound, four things in it are not.** (a) Its §2.B
     independence proof does not hold for the pair the code actually uses:

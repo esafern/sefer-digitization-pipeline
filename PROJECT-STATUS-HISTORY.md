@@ -144,6 +144,62 @@ with nothing cached (see the 2026-08-21 credit-exhaustion entry).
 `run_surya_part1_full_baseline.py` is fine by comparison — it flushes per-page
 JSON inside the loop and Surya is local/free.
 
+**ADDENDUM 2026-08-23, second review pass (`/code-review high f4bfe98..02e5980`).**
+Independent pass over the same range returned 12 findings; C1/C2/H5/H6/H7/M10/M13
+above were independently reproduced (with sharper numbers: 260 of 16,026 mapped
+bboxes come from a `replace` opcode, and 63 of the 425 disputed positions in
+klalim 1-60 — 15% — get their bbox from that guessed path; 198 cross-page
+last-page-wins overwrites in the same range). Four findings the first pass
+missed, all verified directly here:
+
+**C15 (CRITICAL, supersedes part of the 2026-08-21 `vlm_reading` entry).
+`build_vlm_alignment()` is structurally incapable of ever reporting a
+disagreement, so both `vlm_reading` and the new `surya_reading` are inert.**
+`pipeline/assemble_corrections_dataset.py:87` builds its map from
+`SequenceMatcher.get_matching_blocks()` alone — a matching block is by
+definition a run where the two sequences are **equal**, so `alignment[i]` is
+always `klal_words[i]`. Measured across all 222 klalim: **49,138 aligned VLM
+words, 0 divergent; 34,892 aligned Surya words, 0 divergent.** The field
+therefore carries no information at all — present means "agrees," absent means
+"unknown" — and `app.js:820`'s dedupe drops it against the "Current text"
+option, so it never renders. This means the 2026-08-21 entry's "346 of them now
+carry a real `vlm_reading` value" describes a field that cannot disagree; the
+enrichment shipped, but not the signal it was meant to carry. The 08-23
+`surya_reading` replicates the identical defect. Compounding: the extractor's
+own enrichment path (`corpus_to_surya`, built from matching blocks **and**
+`replace` opcodes) *can* diverge and has written **1,154 divergent
+`surya_reading` values** into `corrections_part1.json` — every one of which the
+next rebuild overwrites with the inert equal-or-absent version.
+
+**C16 (MAJOR). 10 of 222 klalim have an empty Surya body, and empty is
+indistinguishable from "Surya confirms."** `run_surya_part1_full_baseline.py:208`
+prints "Successfully generated ... for 222 klalim!" unconditionally. Both
+consumers read an empty body as agreement: `load_vlm_baseline` yields `[]` so
+`surya_reading_for` returns `None`, and `surya_dict.get(kid, "")` in the
+extractor produces zero `replace` opcodes. Lesson 15 exactly — the tool
+nominally ran, and produces silence rather than a low score precisely where it
+has no coverage.
+
+**C17 (LOW-MEDIUM). The Surya extractor's Pass-B check is dead code.**
+`extract_surya_consensus_disputes.py:130` builds `vlm_a_to_b` from `sm_ab`; it is
+never read (confirmed by grep — assigned at 130, referenced nowhere). So the 57
+Surya-consensus items are gated on **Surya == VLM Pass A** only; Pass B is
+loaded, parsed, aligned and discarded. This does not weaken those 57 (Surya +
+Gemini remain two genuinely different engines) but the third check they appear
+to have does not exist.
+
+**C18 (MEDIUM). The page fallback can stamp a disputed word with the klal's
+start page and then attach a start-page neighbour's bbox to it.**
+`extract_surya_consensus_disputes.py:185` falls back to `r_entry.get("page")`
+(the klal's *start* page) when a word has no bbox, and the neighbour-recovery
+loop below is gated on `neighbor_info[0] == page_num` — so for a word physically
+on a continuation page, both the page number and the box come from the wrong
+page. Also `match_block_to_klal`'s nearest-region fallback
+(`run_surya_part1_full_baseline.py:96`) never returns `None`, force-attaching a
+block enclosed by no klal region to the closest one (2 blocks / 4 words across
+pages 14-76 — small now, silent by construction).
+
+
 **M9. `is_gershayim_noise()` misses the geresh case, producing demonstrable
 false disputes.** It tests `w_base.replace('"', 'י')` but never
 `w_base.replace("'", 'י')`. Two of the 57 Surya-consensus items are exactly
