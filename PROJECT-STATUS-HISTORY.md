@@ -17,6 +17,182 @@ current file references, or when grepping for how a past finding was
 resolved. Same append-at-top convention as before: newest entries go right
 after this header, not at the bottom.
 
+### CODE REVIEW 2026-08-23 — commits `f4bfe98..02e5980` (the Surya/multi-witness/disputed-rename work). 14 findings, 4 of them corpus-integrity critical. Nothing fixed yet; review only, user-requested.
+
+Reviewed the five 2026-08-23 commits (~1,310 lines of real source across 17
+files; the other ~64k diff lines are Surya per-page JSON dumps and baseline
+text). Test suite re-run fresh: **245 pass** (25 corpus invariants + 220
+pipeline logic), matching the commits' own "261 with Playwright" claim. The
+findings below are what the green suite does not cover.
+
+**C1 (CRITICAL). 1,108 items were hand-injected into `corrections_part1.json`,
+a DERIVED file, and the next `./rebuild_all.sh` destroys all of them.**
+`tools/extract_vlm_consensus_disputes.py` (1,051 items) and
+`tools/extract_surya_consensus_disputes.py` (57 items) both open
+`corrections_part1.json`, append new entries, and `json.dump` it back.
+`corrections_part1.json` is stage 4's output — `pipeline/assemble_corrections_
+dataset.py:220` opens it `"w"` and rewrites it from
+`corrections_verified_part1.json` on every rebuild. Measured live: the file now
+holds **1,647 items, of which only 539 come from the pipeline**. This is
+START_HERE Part 2's "Single source of truth" rule and Lesson 13 verbatim ("a
+hand-maintained 'derived' file is not actually derived"), and it is the same
+mechanism class as the 2026-08-21 audit's finding B (`review_decisions.jsonl`
+edited directly rather than through its own append path). Any human review time
+spent on those 1,108 items is lost the moment anyone runs the rebuild the
+single-source-of-truth rule requires after a `part*.json` edit.
+
+**C2 (CRITICAL). All 1,108 injected items carry a fabricated `docai_reading`
+equal to the stored base text; DocAI was never consulted for any of them.**
+Provenance, since the commit titles obscure it: **1,051 of the 1,108 come from
+the dual-VLM extractor** (`f4bfe98`, before any Surya work) and only **57 from
+the Surya extractor** (`9e26529`); the Surya run additionally *enriched* 1,012
+of the pre-existing dual-VLM items with a `surya_reading` field, which is what
+makes C3 measurable. Verified across all three groups: 57/57 Surya-consensus and
+1,051/1,051 dual-VLM items set
+`"docai_reading": <the corpus's own word>`. The dashboard renders a "DocAI
+reading" option card from that field, so a reviewer sees DocAI apparently
+corroborating the corpus on a word DocAI was never asked about. Same defect
+shape as the 312 fabricated Parts 2-3 candidates pulled 2026-08-20 (fields
+populated with values that were asserted, not computed), now at 3.5x the scale
+and on Part 1. None of the 1,108 carry a `confidence` or vision verdict either.
+
+**C3 (CRITICAL). VLM Pass A == Pass B is being treated as two-witness
+consensus; it is one engine sampled twice.** `extract_vlm_consensus_disputes.py`
+flags a word whenever Pass A == Pass B != corpus. Pass A and Pass B are the same
+`gemini-3.6-flash` prompt run twice — measured self-consistency 87.43%, i.e. the
+agreement being used as evidence. This is the correlated-error risk PROJECT-
+STATUS open item 1a already names, operationalised as if it were independence.
+Measured consequence: of the 1,012 dual-VLM items that also carry a Surya
+reading, **290 have Surya agreeing with the stored corpus text against the VLM**
+and 537 have Surya reading a third thing — only 185 have genuine 2-engine
+support. Under the plan document's own decision matrix those 290 are "2-of-3
+agree with base," i.e. not disputes at all. They are in the review queue anyway.
+
+**C4 (CRITICAL). `disputed_choice` decisions are applied but never audited.**
+`review_server.py` now records the dashboard's word decisions as
+`disputed_choice` (was `candidate_choice`). `review_decisions.py`'s new
+`_match_decision_types()` aliases the two for `all_current`/`history_for`, so
+`apply_reviewer_decisions.py:202` and `export_corpus.py:62,627` still see them —
+but `pipeline/audit_applied_decisions.py`'s `CHECKERS` dict (line 134) has keys
+for `candidate_choice`/`manual_correction`/`punctuation_choice` only, and
+`CHECKERS.get(decision_type)` returning `None` hits a bare `continue`. Every
+decision recorded from now on is therefore silently skipped by the read-only
+check START_HERE describes as the boundary guard "from the other direction," and
+the script's own summary line still prints "across candidate_choice/
+manual_correction/punctuation_choice" while counting zero of the new type.
+
+**H5 (HIGH). `SPAN_COVERAGE_BASELINE` was widened to absorb three newly-failing
+klalim, and one of them contradicts the confirmed-damage constant beside it.**
+`tests/test_corpus_invariants.py:254` went from `{15, 65, 83, 106, 123, 130,
+175, 195}` to `{16, 22, 65, 83, 84, 106, 123, 130, 175, 195}` — klal 15 removed,
+klalim **16, 22, 84 added**, no explanatory comment appended, no scan
+verification recorded, no PROJECT-STATUS entry. The constant's own documentation
+says its members are "explained false positive[s]... scan-verified directly, not
+inferred," and the CONFIRMED-DAMAGE constant immediately below it carries "This
+set must SHRINK... and must never grow. It exists to keep the gate usable...
+not to accept the defect" — and lists **"klal 83-84 ratio 0.09 - 1,081 tokens
+unaccounted"** as confirmed real damage. Klal 84 is now simultaneously listed as
+confirmed damage and as an explained false positive. Live validator output:
+klal 16 ratio 0.80 (203-token span, 163 stored words — 40 words unaccounted),
+klal 84 ratio 0.80, klal 22 ratio 0.84. These appeared immediately after
+`decc73a` added (ט, פ) to `CONFUSION_PAIRS`, which moved klal 16's marker to
+Tier 1 and shifted span boundaries. PROJECT-STATUS's own recommended procedure
+for that change was "re-run the trace builder, and manually verify klal 16
+resolves correctly **and nothing else regresses**"; klalim 22 and 84 entering
+the exception list is what that verification existed to catch. The commit
+message calls this "Harmonize... span baselines."
+
+**H6 (HIGH). `pipeline/typography.py` is dead code and a third, divergent copy
+of `CONFUSION_PAIRS`.** Nothing in the repo imports it (grepped `*.py`/`*.js`/
+`*.sh`). It defines its own `CONFUSION_PAIRS` that matches neither existing
+copy: `build_gematria_trace.py`'s (gematria-marker scope, tuple-keyed) nor
+`tools/detect_real_word_substitution.py`'s (content-word scope, frozenset-keyed).
+Those two are deliberate, documented as "a related but distinct set... different
+scope," and cross-reference each other with an instruction to check whether a
+new pair belongs in both. The new copy has no such cross-reference and has
+already diverged in content — it carries (ט, פ) and (ם, ס) but drops
+`detect_real_word_substitution.py`'s (ט, מ) and (ס, פ). The (ט, פ) finding was
+added to `build_gematria_trace.py` and to `typography.py`, and not to
+`detect_real_word_substitution.py`. This is Lesson 13's "second copy of the
+truth that happens to usually agree," except it does not agree. The plan
+document marks "Establish centralized typography catalog" as complete `[x]` and
+calls the module "the single source of truth."
+
+**H7 (HIGH). The bbox extractor takes coordinates from non-matching words and
+lets a later page overwrite an earlier one.** `get_docai_word_bboxes()` —
+duplicated byte-for-byte in both new extractor scripts — walks
+`SequenceMatcher.get_opcodes()` and accepts `tag in ('equal', 'replace')`.
+A `replace` opcode means the corpus word and the DocAI token are *not* the same
+word; its bbox is assigned anyway. Separately, the caller loops every page a
+klal touches and does `word_to_bbox[wi] = (p, bb)` with no guard, so for a
+multi-page klal the last page processed overwrites earlier pages' entries for
+the same word index — the full klal word list is re-aligned against each single
+page's tokens in turn. Commit `f23cd63`'s message claims "**100% exact** DocAI
+token bounding boxes for all consensus disputed words"; that claim is not
+supported by this code path. `review_server.py` already has the established,
+tested `_corpus_word_bboxes()` for exactly this, which neither script uses —
+the "before you hand-roll anything" rule.
+
+**H8 (HIGH). `tools/run_part1_vlm_patch_passB.py` re-violates the incremental-
+disk-flushing rule and disables its own cache.** Line 126 buffers every klal and
+writes the whole file once at the end (`open(output_path, "w")`). This is the
+exact violation fixed in `run_vlm_witness_sample.py` on 2026-08-21 and codified
+in `.gemini/rules/incremental_disk_flushing.md` on 2026-08-20 — reintroduced in
+a new API-calling script two days later. It also installs no-op
+`dummy_cache_get`/`dummy_cache_put` stubs, so every run re-spends API credits
+with nothing cached (see the 2026-08-21 credit-exhaustion entry).
+`run_surya_part1_full_baseline.py` is fine by comparison — it flushes per-page
+JSON inside the loop and Surya is local/free.
+
+**M9. `is_gershayim_noise()` misses the geresh case, producing demonstrable
+false disputes.** It tests `w_base.replace('"', 'י')` but never
+`w_base.replace("'", 'י')`. Two of the 57 Surya-consensus items are exactly
+this: base `מקר'` vs Surya+VLM `מקרי`, and base `בחי'` vs `בחיי` — abbreviation
+geresh read as yod, the documented Surya artifact the filter exists to suppress,
+routed to a human as a real disagreement.
+
+**M10. Three new files each carry their own copy of the word normaliser, and
+they have already diverged.** `extract_surya_consensus_disputes.py:norm_word`,
+`extract_vlm_consensus_disputes.py:norm_word` (identical), and
+`evaluate_multi_witness_comparison.py:normalize_words` (adds `•`→`.`, `׃`→`:`,
+`;`→`:` that the other two lack). The third also reimplements
+`parse_baseline_file` where the other two import `eval_script.parse_candidate_
+ocr`. None of this is in `corpus_io.py`.
+
+**M11. The disputed panel now pre-selects the machine's verdict, so one Save
+click converts an unreviewed machine pick into a human-attested decision.**
+`app.js`: `if (!decision && corr.vision_selected)` presets `activeSource` to
+`docai_reading` (A) or `final_text` (B). The prior code always defaulted to
+`final_text`. Success criterion #1 requires every correction be "resolved by
+looking at the actual scan, not inferred"; a pre-checked radio on the machine's
+own answer makes agreeing with the machine the path of least resistance.
+
+**M12. The `app.js` rewrite stripped the comments recording why prior code-review
+fixes exist.** Most of the deleted lines in `openDisputedPanel`/
+`saveDisputedDecision` are explanatory comments, not code — including the one
+documenting the 2026-08-20 review finding that `'suggested'` must not reuse
+`'custom'` as its source, and the one explaining why an empty custom answer is
+only valid for `insert`. Behaviour is preserved; the reasons are gone. Also
+dropped in the rewrite: the `else if (!corr.final_text)` branch offering
+"Confirm nothing belongs here." Currently latent — zero `replace`-opcode items
+have an empty `final_text` — but it was added deliberately (2026-08-13) for a
+case its own comment names (klal 4 word_index 35).
+
+**M13. Zero new tests for ~1,310 lines of new code.** The only `tests/` changes
+in the five commits are the `SPAN_COVERAGE_BASELINE` widening (H5), a selector
+rename in the Playwright test, and the removal of klal 16's פז/טז case from
+`test_content_anchored_recovery_finds_a_marker_no_catalogue_covers` (legitimate
+— once (ט, פ) is in the catalogue that case is no longer "no catalogue covers
+it" — replaced with klal 50). Nothing covers `disputed_choice`, `typography.py`,
+either consensus extractor, or the bbox mapper. No corpus invariant asserts
+`corrections_part1.json` matches what stage 4 would produce, which is why C1
+passes a green suite.
+
+**M14. None of 2026-08-22/23's work was logged to PROJECT-STATUS.md.** Its
+"Recent work" section ended at 2026-08-21 before this entry. The standing rule
+is "log every finding to PROJECT-STATUS.md yourself, immediately, without being
+asked."
+
 ### FIXED 2026-08-20/21 — second dashboard regression round: box-position offset and missing continuation-page auto-advance, both live-tested with Playwright
 
 User live-tested the dashboard after the fixes below and reported three more

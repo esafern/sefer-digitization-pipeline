@@ -16,6 +16,8 @@
 
 **Two user-posed claims verified 2026-08-20, both against hard evidence.** "VLM ran against the entire PDF scan with generally good results" — **false on both halves**: the baseline run covers only pages 14-76 (Part 1, 222 of 667 klalim), not the 337-page/667-klal scan, and no Part 2/3 equivalent exists; "generally good" overstates 72.03% token accuracy / 91.36% self-consistency (worst individual klalim in the 42-70% range). "Were Part 1 candidates/scores changed by the VLM run?" — **no**: `part1.json`/`corrections_part1.json`/`corrections_candidates_part1.json`/`corrections_verified_part1.json` are all untouched by commit `1e59522`, and the baseline scripts use no-op cache functions that never touch the real `corrections_cache` table.
 
+**Dashboard data is NOT trustworthy as of 2026-08-23.** `corrections_part1.json` holds 1,647 items; 1,108 of them were hand-injected into a derived file by two standalone `tools/` scripts, carry a fabricated `docai_reading`, and will be destroyed by the next `./rebuild_all.sh`. See open item 9 before spending any review time in the dashboard.
+
 **Three things to know if you're picking this up cold:** read this file before
 making any claim about corpus quality; the Parts 2-3 gate in `START_HERE.md`
 is binding; and every finding you confirm gets written here immediately, not
@@ -131,6 +133,74 @@ to) as state changes** — that discipline is what drifted last time.
    tokens), the same band-estimate spirit already used elsewhere in this
    pipeline (`locate_word_band_fallback()`). Found 2026-08-21; awaiting a
    decision on whether to build it.
+
+9. **CODE REVIEW 2026-08-23 of commits `f4bfe98..02e5980`: 14 findings, 4
+   corpus-integrity critical, NONE fixed yet.** Full evidence trail in
+   `PROJECT-STATUS-HISTORY.md`'s 2026-08-23 entry. The four that block
+   further review work:
+   - **C1: `corrections_part1.json` now holds 1,647 items, only 539 of them
+     from the pipeline.** `tools/extract_vlm_consensus_disputes.py` (1,051)
+     and `tools/extract_surya_consensus_disputes.py` (57) write directly into
+     this DERIVED file; `assemble_corrections_dataset.py:220` rewrites it
+     `"w"` on every `./rebuild_all.sh`. **All 1,108 injected items — and any
+     human review time spent on them — are destroyed by the next rebuild.**
+     Lesson 13 / the single-source-of-truth rule.
+   - **C2: all 1,108 carry `docai_reading` set to the stored base text**
+     (verified across every item, not sampled; 1,051 of them come from the
+     dual-VLM extractor and 57 from the Surya one — the Surya run only
+     *enriched* the rest with a `surya_reading` field).
+     DocAI was never called for them, but the dashboard renders a "DocAI
+     reading" card from that field. Same defect shape as the 312 fabricated
+     Parts 2-3 candidates pulled 2026-08-20, at 3.5x scale, on Part 1.
+   - **C3: VLM Pass A == Pass B is being counted as two-witness consensus.**
+     It is one `gemini-3.6-flash` prompt sampled twice (87.43% measured
+     self-consistency). Of the 1,012 dual-VLM items carrying a Surya reading,
+     **290 have Surya siding with the stored corpus against the VLM** and 537
+     have Surya reading a third thing; only 185 have real 2-engine support.
+   - **C4: `disputed_choice` decisions are applied but never audited.** The
+     rename wired the new type into `apply_reviewer_decisions.py` /
+     `export_corpus.py` via `_match_decision_types()`, but
+     `audit_applied_decisions.py`'s `CHECKERS` dict was not updated, so
+     `CHECKERS.get(...)` returns `None` and every new decision is silently
+     skipped by the read-only boundary check.
+   Also open from that review: `SPAN_COVERAGE_BASELINE` widened to absorb
+   klalim 16/22/84 with no scan verification (and klal 84 is listed as
+   confirmed damage in the constant directly below it); `pipeline/typography.py`
+   is dead code carrying a third, already-divergent `CONFUSION_PAIRS`;
+   `get_docai_word_bboxes()` takes bboxes from non-matching `replace` opcodes
+   and lets later pages overwrite earlier ones, contradicting commit
+   `f23cd63`'s "100% exact bounding boxes" claim; `run_part1_vlm_patch_passB.py`
+   re-violates the incremental-flush rule and no-ops its own cache; zero new
+   tests for ~1,310 lines of new code.
+
+10. **`MULTI-WITNESS-REPAIR-AND-SYNTHESIS-PLAN.md` review 2026-08-23 — the
+    architecture is sound, four things in it are not.** (a) Its §2.B
+    independence proof does not hold for the pair the code actually uses:
+    VLM Pass A / Pass B are the same model, so the `1/|V|` decoupling term is
+    unearned, and the term itself assumes hallucinations distribute uniformly
+    over a 50k vocabulary when this document's own §1 argues OCR errors are
+    systematic and glyph-driven. (b) Its **"94.5% accuracy" for the VLM is
+    unsourced** — this repo's measured, verified figure is 93.34%
+    (`part1_full_baseline_accuracy_report.txt`); "Surya error rate 32.4%"
+    appears nowhere in the repo at all; and the "~20,300 review flags"
+    figure does not reconcile with 39.3% of Part 1's 52,607 words (~20,700)
+    or of the VLM's 57,614 (~22,600). Given this project's history with the
+    72.03% figure, unsourced numbers in the load-bearing math section need a
+    citation or removal. (c) **Phase 4 ("Run the unified 3-witness synthesis
+    pipeline across Parts 2 and 3", "Export certified final text") collides
+    with the binding Parts 2-3 gate** and does not mention it — synthesis
+    infrastructure is authorized under the 2026-08-17 supersede, exporting
+    certified Parts 2-3 text is not. (d) Its decision matrix **auto-approves
+    corpus text changes with "0 sec" human review** for the 2-of-3 rows,
+    which is a policy change to success criterion #1 ("resolved by looking at
+    the actual scan, not inferred") and to the two-step record/apply rule —
+    it needs an explicit user decision, not an engineering default. Also
+    missing: any validation plan for the repair filters themselves (a wrong
+    gershayim-recovery rule silently erases the disagreement it should have
+    surfaced — Lesson 15), and any statement of where this plugs into
+    `rebuild_all.sh`, which is the root cause of C1 above. Phase 1's
+    "[x] Establish centralized typography catalog" is checked for a module
+    nothing imports.
 
 ## Recent work (2026-08-21)
 
