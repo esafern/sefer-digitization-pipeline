@@ -250,7 +250,37 @@ PLACEHOLDER_TITLE_COUNT_MAX = 115
 # fix (a systemic mis-ordering check is future work, not scoped here);
 # baselined as an explained false positive for this one instance, scan-
 # verified directly, not inferred.
-SPAN_COVERAGE_BASELINE = {16, 22, 65, 83, 84, 106, 123, 130, 175, 195}
+# klalim 22 and 84 ADDED 2026-08-23, and klal 15 REMOVED, with the
+# verification that the 2026-08-23 widening of this set skipped (code review,
+# finding H5 - the set was widened to absorb three newly-failing klalim with no
+# recorded reason, inside a constant whose whole contract is "scan-verified
+# false positive, not inferred").
+#
+# What actually happened: `decc73a` added (ט, פ) to CONFUSION_PAIRS, which let
+# build_gematria_trace.py finally resolve the markers for klalim 16, 22 and 84
+# (all three went marker_not_found_in_window -> ok). They did not newly BREAK;
+# they became MEASURABLE for the first time. Klal 15 correctly left this set for
+# the same reason - its span used to run past klal 16's missing marker all the
+# way to klal 17, inflating its expected token count; now it is bounded
+# correctly.
+#
+# Klalim 22 (ratio 0.84) and 84 (0.80) are genuine false positives, and the
+# cause is mechanical: validate_klal_span_coverage.py's get_page() does NOT
+# strip page furniture (its module docstring describes the furniture-stripping
+# in an ARCHIVED script, reconstruct_crosspage_v4.py, not in itself), so every
+# cross-page span counts one page's running header and section header as body
+# tokens. Checked directly by diffing each span's tokens against stored text:
+# klal 22's 7 unaccounted tokens are ['כך','סיי','כייה','יר','מלאכי','כללי',
+# 'האלף'] and klal 84's 6 are ['פר','בעיא','יך','מלאכי','כללי','הבית'] - i.e.
+# the misread marker plus `יד מלאכי` (the running header, its ד read as ר/ך,
+# which is why an exact-match furniture list would never catch it) plus the
+# `כללי האלף`/`כללי הבית` section header. No body text is missing from either.
+# This is also exactly why the cross-page mean ratio sits at 0.91 against the
+# same-page 1.11 the 0.85 threshold was tuned on.
+#
+# Klal 16 is NOT here - it was in this set from 2026-08-23 until the same
+# verification found real missing text. See SPAN_COVERAGE_KNOWN_REAL_GAPS.
+SPAN_COVERAGE_BASELINE = {22, 65, 83, 84, 106, 123, 130, 175, 195}
 
 # NOT false positives - these are CONFIRMED REAL, UNFIXED corpus damage,
 # kept in a separate constant from SPAN_COVERAGE_BASELINE precisely so that
@@ -305,9 +335,39 @@ SPAN_COVERAGE_BASELINE = {16, 22, 65, 83, 84, 106, 123, 130, 175, 195}
 #     correctly bounded, then found and fixed a genuine 279-word tail
 #     truncation in klal 37 (crop-verified at both boundaries) - the actual
 #     content behind the ~285-word gap this set used to track.
-# Empty for now - every previously-tracked real gap has a confirmed fix.
-# Keep this mechanism (not delete it) for the next one that turns up.
-SPAN_COVERAGE_KNOWN_REAL_GAPS = set()
+#   {} -> {16} 2026-08-23. The next one turned up, and it turned up because a
+#     code review asked why this set's SIBLING (SPAN_COVERAGE_BASELINE) had
+#     silently grown by three klalim (finding H5). Klal 16 was put in the
+#     false-positive baseline; it is not a false positive.
+#
+#     Klal 16's stored clean_text ENDS MID-SENTENCE on the connective `אהא`
+#     ("regarding this"), which demands a continuation. The continuation is
+#     printed, and it is the first two body lines of page 20:
+#       אף על גב דלא שייך כלל אברייתא דמייתי מדכתבו דר"י ור"ל בסברא בעלמא
+#       פליגי ולא תליא מלתייהו כלל בהלכה דקאמר ראב"י דוק:
+#     ~24 words, terminating in a colon, immediately before klal 17's own bold
+#     `יז` marker and its unrelated opening ("אין הלכה כתלמיד במקום הרב").
+#
+#     VERIFIED TWO INDEPENDENT WAYS, per Lesson 4 (raw data is not
+#     automatically right) and Lesson 14 (render and read, do not infer):
+#       1. Raw DocAI tokens - the run appears contiguous at page 20 tokens
+#          6..23, y 0.086-0.118, x 0.121-0.829, i.e. a full-width first body
+#          line directly under the running header.
+#       2. A direct render of images/pdf_pages/page_20.png, read visually:
+#          running header, then those two body lines, then klal 17's marker.
+#     Ruled out the klal 9/10 failure mode (text stored in the NEIGHBOUR
+#     rather than missing): klal 17 begins cleanly with its own marker and a
+#     different topic, and `מלתייהו` occurs nowhere in part1.json at all.
+#
+#     NOT FIXED HERE. This is a DATA ISSUE, not a bug - per START_HERE.md it
+#     is fixed through the review-decision pipeline against the scan, never a
+#     direct part1.json hand-edit, and applying it needs its own go-ahead
+#     (same two-step rule as every correction this pipeline has applied).
+#     Flagged through the pipeline instead; see PROJECT-STATUS.md.
+# This set must SHRINK as content is reconstructed and must never grow
+# silently - a klal arriving here is real missing text, not a measurement
+# artifact. Keep this mechanism (not delete it) for the next one that turns up.
+SPAN_COVERAGE_KNOWN_REAL_GAPS = {16}
 
 
 def _load_klalim(path):

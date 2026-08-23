@@ -17,6 +17,80 @@ current file references, or when grepping for how a past finding was
 resolved. Same append-at-top convention as before: newest entries go right
 after this header, not at the bottom.
 
+### DATA ISSUE FOUND 2026-08-23 — klal 16 is TRUNCATED, ~24 words of printed text missing. Found by verifying code-review finding H5; flagged through the pipeline, NOT applied.
+
+**H5 was that `SPAN_COVERAGE_BASELINE` had been widened (klalim 16, 22, 84 added,
+klal 15 removed) with no recorded reason, inside a constant whose contract is
+"explained false positive, scan-verified directly, not inferred." Doing the
+verification that widening skipped found that one of the three is not a false
+positive at all.**
+
+**Mechanism first.** `decc73a`'s (ט, פ) addition to `CONFUSION_PAIRS` let
+`build_gematria_trace.py` finally resolve the markers for klalim 16, 22 and 84 -
+all three went `marker_not_found_in_window` -> `ok`. They did not newly break;
+they became MEASURABLE for the first time. Klal 15 correctly left the set for the
+same reason: its span previously ran past klal 16's missing marker all the way to
+klal 17, inflating its expected token count. So the widening was not hiding a
+regression the change caused - it was baselining three pre-existing,
+newly-visible measurements without checking any of them.
+
+**Klalim 22 and 84: genuine false positives, cause identified.**
+`validate_klal_span_coverage.py`'s `get_page()` does NOT strip page furniture -
+its module comment described the furniture-stripping in an ARCHIVED script
+(`archive/scripts/reconstruct_crosspage_v4.py`) that this script never calls and
+this repo does not contain. Every CROSS-PAGE span therefore counts one page's
+running header and section header as body tokens. Checked by diffing each span's
+tokens against stored text: klal 22's 7 unaccounted tokens are
+`['כך','סיי','כייה','יר','מלאכי','כללי','האלף']` and klal 84's 6 are
+`['פר','בעיא','יך','מלאכי','כללי','הבית']` - the misread marker plus `יד מלאכי`
+(the running header, its ד read as ר/ך) plus the `כללי האלף`/`כללי הבית` section
+header. No body text missing from either. This also explains the cross-page mean
+ratio of 0.91 against the same-page 1.11 the 0.85 threshold was tuned on. The
+overclaiming comment is a BUG (a script's docstring overclaiming its own
+coverage - the example START_HERE's Terminology section literally names) and was
+corrected in place. Actually stripping the furniture would change the measured
+ratio for every cross-page klal in the corpus, so it is deliberately left as its
+own scoped change, not folded into a comment fix - and note an exact-match
+furniture list would not be enough, since the header's ד is misread as ר/ך.
+
+**Klal 16: REAL, UNFIXED CORPUS DAMAGE.** Its stored `clean_text` ends
+mid-sentence on the connective `אהא` ("regarding this"), which demands a
+continuation. The continuation is printed as the first two body lines of page 20
+and is absent from the corpus:
+
+> אף על גב דלא שייך כלל אברייתא דמייתי מדכתבו דר"י ור"ל בסברא בעלמא פליגי ולא
+> תליא מלתייהו כלל בהלכה דקאמר ראב"י דוק:
+
+~24 words, terminating in a colon, immediately before klal 17's bold `יז` marker.
+
+**Verified two independent ways**, per Lesson 4 (raw data is not automatically
+right) and Lesson 14 (render and read, do not infer): (1) the raw DocAI tokens
+run contiguously at page 20 tokens 6-23, y 0.086-0.118, x 0.121-0.829 - a
+full-width first body line directly under the running header; (2) a direct visual
+render of `images/pdf_pages/page_20.png`, read off the image: running header,
+then those two body lines, then klal 17's marker. **Ruled out the klal 9/10
+failure mode** (text stored in the NEIGHBOUR rather than missing, Lesson 16):
+klal 17 begins cleanly with its own marker and an unrelated topic
+("אין הלכה כתלמיד במקום הרב"), and `מלתייהו` occurs nowhere in `part1.json` at all.
+
+**Handled per the standing rules, not applied.** This is a DATA ISSUE, not a bug:
+flagged through the real decision pipeline as a `klal_flag` on klal 16 word 162
+(`reviewer: ai-klal-truncation-verification`, `needs_revisit: true`, decision
+`dcd9c031b83c`) with the full evidence in its note - never a direct `part1.json`
+hand-edit. Applying it needs its own explicit go-ahead and a `manual_correction`
+insert through `apply_reviewer_decisions.py`, the same two-step rule as every
+correction this pipeline has ever applied. Moved out of `SPAN_COVERAGE_BASELINE`
+and into `SPAN_COVERAGE_KNOWN_REAL_GAPS` (which was empty; it is now `{16}`), so
+a green suite no longer reports this as explained.
+
+**Scope limit, stated rather than glossed: only the three klalim H5 named were
+verified.** `SPAN_COVERAGE_BASELINE`'s pre-existing members - 83, 106, 123, 130,
+195 (and 65, 175, whose reasons ARE documented in the file) - were not
+independently re-checked in this pass. Klal 16 is direct evidence that an
+unverified entry in that set can hide real missing text, so those five deserve
+the same treatment. Note klal 83 is a SAME-page span (38->38, ratio 0.77), so the
+cross-page furniture explanation does not cover it.
+
 ### FIXED 2026-08-23 — C1-C4 (and C15) from the same day's code review. Multi-witness synthesis rebuilt as a real pipeline stage; 274 tests green.
 
 **C4 — `disputed_choice` decisions were applied but never audited. FIXED.**

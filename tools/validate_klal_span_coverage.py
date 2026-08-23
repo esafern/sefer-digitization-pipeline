@@ -17,15 +17,31 @@
 # 92-165 off-by-one shift bug). A corpus-wide sweep found 15 of 26 cross-page
 # klalim similarly truncated (klal 4 was missing 93% of its real content).
 # All 15 were fixed 2026-08-05 by reconstructing clean_text as the real
-# marker-to-marker docai token span, stripping running-header/catchword/
-# footnote-digit/Google-Books-watermark furniture (see
-# archive/scripts/reconstruct_crosspage_v4.py - moved out of the gitignored
-# scratch/ 2026-08-11, per CLAUDE.md's warning that scratch/ held
-# non-reproducible one-offs - for the furniture-stripping logic and
-# the visual/positional verification that validated it - true catchwords sit
-# centered on their own line, ~0.57-0.60 indented from the page's right
-# margin, regardless of font-size, which turned out to be a more reliable
-# signal than font size alone).
+# marker-to-marker docai token span.
+#
+# CORRECTED 2026-08-23 (code review, finding H5). This comment used to say the
+# span was measured "stripping running-header/catchword/footnote-digit/
+# Google-Books-watermark furniture". IT IS NOT. get_page() below returns a
+# page's raw tokens; the furniture-stripping described here lives in the
+# ARCHIVED archive/scripts/reconstruct_crosspage_v4.py, which this script does
+# not call and this repo does not contain. (That archived script is still the
+# reference for the logic and for the visual/positional verification that
+# validated it - true catchwords sit centered on their own line, ~0.57-0.60
+# indented from the page's right margin, regardless of font-size, which turned
+# out to be a more reliable signal than font size alone.)
+#
+# The consequence is measurable and is the reason two klalim sit in
+# tests/test_corpus_invariants.py's SPAN_COVERAGE_BASELINE: every CROSS-PAGE
+# span counts one page's running header (`יד מלאכי`) and section header
+# (`כללי האלף`) as body tokens, inflating expected_tokens by ~4-6 and pushing
+# the ratio down. That is precisely why the cross-page mean sits at 0.91 while
+# the same-page mean - which crosses no header - sits at 1.11, and the 0.85
+# threshold was tuned on the same-page distribution. Note also that an
+# exact-match furniture list would not fix this on its own: DocAI reads the
+# header's ד as ר or ך (`יר מלאכי`, `יך מלאכי`), so the strip has to be
+# confusion-tolerant. Stripping furniture here would change the measured ratio
+# for every cross-page klal in the corpus, so it is deliberately left as its
+# own scoped change rather than folded into a docstring correction.
 #
 # Same-page klalim are NOT similarly affected (mean stored/expected ratio
 # 1.11 vs 0.70 for cross-page klalim, checked before the fix) - this is

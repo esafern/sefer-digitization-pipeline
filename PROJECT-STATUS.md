@@ -195,11 +195,32 @@ to) as state changes** — that discipline is what drifted last time.
     - The bbox page fallback uses the klal's START page, and the
       neighbour-bbox recovery is gated on that same wrong page number.
 
-9b. **Still open from the 2026-08-23 review (C1-C4/C15 are fixed, these are
-    not):** `SPAN_COVERAGE_BASELINE` widened to absorb klalim 16/22/84 with no
-    scan verification, and klal 84 is simultaneously listed as confirmed damage
-    in the constant below it (H5) — this one is a live correctness question
-    about 40 unaccounted words in klal 16, not a style point;
+9b. **H5 RESOLVED 2026-08-23, and it found real corpus damage — see item 11.**
+    The `SPAN_COVERAGE_BASELINE` widening was verified: klalim 22 and 84 are
+    genuine false positives (cross-page spans counting the running header as
+    body tokens, because `validate_klal_span_coverage.py` does not strip page
+    furniture despite its comment claiming it does — comment corrected), but
+    **klal 16 is real, unfixed truncation** and has been moved to
+    `SPAN_COVERAGE_KNOWN_REAL_GAPS`.
+
+11. **DATA ISSUE, klal 16 is truncated: ~24 words of printed text are missing
+    from `part1.json`. Flagged, NOT applied — needs your go-ahead.** Its stored
+    text ends mid-sentence on the connective `אהא`; the continuation is printed
+    as the first two body lines of page 20 (`אף על גב דלא שייך כלל אברייתא
+    דמייתי... דוק:`) and is absent from the corpus. Verified two independent
+    ways (raw DocAI tokens at page 20 tokens 6-23, and a direct visual render
+    of `images/pdf_pages/page_20.png`); the klal 9/10 failure mode is ruled out
+    (klal 17 starts cleanly on its own marker, and `מלתייהו` appears nowhere in
+    `part1.json`). Recorded as `klal_flag` decision `dcd9c031b83c` on klal 16
+    word 162. Applying it needs an explicit go-ahead and a `manual_correction`
+    insert through `apply_reviewer_decisions.py`, same two-step rule as every
+    other correction. **Related and NOT yet done: the five unverified
+    pre-existing members of `SPAN_COVERAGE_BASELINE` (83, 106, 123, 130, 195)
+    deserve the same check** — klal 16 proves an unverified baseline entry can
+    hide real missing text, and klal 83 is a same-page span so the furniture
+    explanation does not cover it.
+
+9c. **Still open from the 2026-08-23 review:**
     `pipeline/typography.py` is still dead code carrying a third, divergent
     `CONFUSION_PAIRS` (H6); `run_part1_vlm_patch_passB.py` still violates the
     incremental-flush rule and no-ops its own cache (H8);
