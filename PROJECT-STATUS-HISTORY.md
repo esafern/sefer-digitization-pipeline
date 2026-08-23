@@ -17,6 +17,71 @@ current file references, or when grepping for how a past finding was
 resolved. Same append-at-top convention as before: newest entries go right
 after this header, not at the bottom.
 
+### SWEEP 2026-08-23 — every other `SPAN_COVERAGE_BASELINE` member checked. All artifacts; klal 16 is the only real gap. New reusable tool `tools/check_span_shortfall.py`.
+
+The klal 16 finding left an obvious question: if one unverified entry in that
+constant hid ~24 missing words, what about the other five nobody had checked
+(83, 106, 123, 130, 195)? Swept them all.
+
+**Built `tools/check_span_shortfall.py` rather than a one-off**, per this
+project's own preference for parameterized reusable scripts. It answers the
+question `validate_klal_span_coverage.py` structurally cannot: not "is this klal
+short?" but "short of WHAT?" - it reconstructs the same marker-to-marker span
+that validator measures, diffs it against stored text, and classifies the
+unaccounted tokens as page furniture (running header / section header / marker)
+versus body text, then checks whether any body run is simply stored in a
+different klal. Its own docstring is explicit that it is TRIAGE, not a verdict
+(Lesson 2): a clean result is grounds to stop worrying, not proof of
+completeness, and any body-text result still needs a render (Lesson 14).
+
+**Results - all five are artifacts:**
+
+* **klal 83** (same-page 38->38, ratio 0.77 - the one the cross-page furniture
+  explanation could NOT cover, which is why it was singled out as suspicious).
+  Its 11 unaccounted tokens are klal 82's tail. 8 of the 11 are stored verbatim
+  in klal 82 at word 51, and a render of page 38 settles it visually: `פב בשל`
+  opens klal 82, its body runs several lines and closes
+  `...ועיין מקוה ישראל דף ס"א ב' וש"ות זקן אהרן סי' קפ"ג :` on its own centered
+  line, and only then does `פג בשל` open klal 83. DocAI emitted the `פג` marker
+  token BEFORE the line it visually follows - the klal 65/66 marker-order
+  artifact already documented in this repo, now confirmed a second time.
+* **klalim 106, 123, 130, 195** - page furniture plus single-token alignment
+  misses. Every non-furniture token is present in stored text as an exact or
+  one-character variant: klal 123's `ההיתר` is stored exactly at word 16 with
+  `קוהה`/`אפילי` as 1-char variants at 24/26; klal 130's `פחות` is stored exactly
+  at word 31; klal 195's `הירושלמים` is the stored `הירושלמי` plus a final ם;
+  klal 106's `בל` is klal 107's own opening word (`קז בל תוסיף`), pulled into
+  klal 106's span because DocAI read klal 107's `קז` marker as `קו` (the ז/ו
+  confusion already in CONFUSION_PAIRS). No missing body text in any of them.
+
+**Net: `SPAN_COVERAGE_BASELINE`'s remaining members are legitimate, and klal 16
+is the only real gap in the flagged set.** That is a reassuring result, and it is
+worth stating what it is not - this sweep is token-level evidence for four of the
+five (klal 83 was additionally render-verified); it is not a page render of every
+one, and Lesson 2 applies.
+
+**The tool got klal 83 WRONG on its first run and was fixed rather than
+worked around.** Its first `find_elsewhere()` probed the first four unaccounted
+tokens as one exact window; klal 83's run begins `['בשו','דף','ס"א','ב']` where
+`בשו` is an OCR misread, so the exact probe missed and the tool reported
+"candidate REAL truncation" for text stored verbatim one klal over. Now it slides
+across the whole run and takes the longest contiguous match, so a noisy head
+cannot decide the answer (Lesson 6). A second refinement followed immediately:
+matching a SHORT run inside a LONG unaccounted run is usually a stock Aramaic
+formula, not the neighbour's text - klal 16's `אף על גב דלא` matches klal 147
+coincidentally - so the tool now reports the coverage FRACTION and refuses to
+call a <50% match an explanation.
+
+**Klal 16's missing text was corrected on one detail.** Its tail was first
+transcribed `ראב"י דוק:`; re-rendered at 5x magnification it is unambiguously
+`ראב"ע ודוק :` (ראב"ע = רבי אלעזר בן עזריה). The raw DocAI tokens had this right
+and the first-pass visual read did not - Lesson 17 in the direction it is usually
+stated the other way round. Because `review_decisions.jsonl` is APPEND-ONLY, the
+correction was recorded as a SUPERSEDING klal_flag (`a31c9a08f8fe`) citing the
+original (`dcd9c031b83c`), not as an edit to it - the mechanism the 2026-08-21
+integrity audit found violated. Verified by diff: +1 line, nothing rewritten.
+The corrected full insertion text is in that record.
+
 ### DATA ISSUE FOUND 2026-08-23 — klal 16 is TRUNCATED, ~24 words of printed text missing. Found by verifying code-review finding H5; flagged through the pipeline, NOT applied.
 
 **H5 was that `SPAN_COVERAGE_BASELINE` had been widened (klalim 16, 22, 84 added,

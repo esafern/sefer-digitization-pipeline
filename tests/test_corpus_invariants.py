@@ -344,7 +344,13 @@ SPAN_COVERAGE_BASELINE = {22, 65, 83, 84, 106, 123, 130, 175, 195}
 #     ("regarding this"), which demands a continuation. The continuation is
 #     printed, and it is the first two body lines of page 20:
 #       אף על גב דלא שייך כלל אברייתא דמייתי מדכתבו דר"י ור"ל בסברא בעלמא
-#       פליגי ולא תליא מלתייהו כלל בהלכה דקאמר ראב"י דוק:
+#       פליגי ולא תליא מלתייהו כלל בהלכה דקאמר ראב"ע ודוק :
+#     (The last two words were first transcribed `ראב"י דוק:` from a first-pass
+#     render and corrected to `ראב"ע ודוק :` after re-rendering that line at 5x -
+#     the raw DocAI tokens had it right and the first visual read did not.
+#     Lesson 17: a borderline reading is a reason to render bigger, not to settle
+#     it from the first look. review_decisions.jsonl is append-only, so the
+#     correction is a superseding klal_flag, a31c9a08f8fe, not an edit.)
 #     ~24 words, terminating in a colon, immediately before klal 17's own bold
 #     `יז` marker and its unrelated opening ("אין הלכה כתלמיד במקום הרב").
 #
@@ -363,7 +369,18 @@ SPAN_COVERAGE_BASELINE = {22, 65, 83, 84, 106, 123, 130, 175, 195}
 #     is fixed through the review-decision pipeline against the scan, never a
 #     direct part1.json hand-edit, and applying it needs its own go-ahead
 #     (same two-step rule as every correction this pipeline has applied).
-#     Flagged through the pipeline instead; see PROJECT-STATUS.md.
+#     Flagged through the pipeline instead (klal_flag dcd9c031b83c, superseded
+#     by a31c9a08f8fe for the corrected tail); see PROJECT-STATUS.md.
+#
+#     The rest of SPAN_COVERAGE_BASELINE was swept the same way on 2026-08-23
+#     (tools/check_span_shortfall.py, built for this) and every other member
+#     came back an artifact - klal 83's shortfall is klal 82's tail landing in
+#     its span via the klal 65/66 marker-order artifact (8 of its 11 unaccounted
+#     tokens are stored verbatim in klal 82, and a render of page 38 shows
+#     `פב בשל ... קפ"ג :` closing klal 82 before `פג בשל` opens klal 83);
+#     klalim 106/123/130/195 are page furniture plus single-token alignment
+#     misses whose words are all present in stored text as exact or one-character
+#     variants. Klal 16 is the only real gap the sweep found.
 # This set must SHRINK as content is reconstructed and must never grow
 # silently - a klal arriving here is real missing text, not a measurement
 # artifact. Keep this mechanism (not delete it) for the next one that turns up.

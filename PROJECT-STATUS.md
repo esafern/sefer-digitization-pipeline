@@ -214,11 +214,17 @@ to) as state changes** — that discipline is what drifted last time.
     `part1.json`). Recorded as `klal_flag` decision `dcd9c031b83c` on klal 16
     word 162. Applying it needs an explicit go-ahead and a `manual_correction`
     insert through `apply_reviewer_decisions.py`, same two-step rule as every
-    other correction. **Related and NOT yet done: the five unverified
-    pre-existing members of `SPAN_COVERAGE_BASELINE` (83, 106, 123, 130, 195)
-    deserve the same check** — klal 16 proves an unverified baseline entry can
-    hide real missing text, and klal 83 is a same-page span so the furniture
-    explanation does not cover it.
+    other correction. **Sweep DONE 2026-08-23: the other five baseline
+    members (83, 106, 123, 130, 195) are all artifacts** — klal 83's shortfall
+    is klal 82's tail pulled in by the klal 65/66 marker-order artifact (8 of 11
+    tokens stored verbatim in klal 82, plus a page-38 render), and 106/123/130/195
+    are page furniture plus single-token alignment misses whose words are all
+    present in stored text. New reusable tool `tools/check_span_shortfall.py`
+    answers "short of WHAT?" and is the check to run before any klal enters
+    either span constant. **Klal 16 is the only real gap.** Its missing tail was
+    corrected on one detail — `ראב"ע ודוק :`, not `ראב"י דוק:` — recorded as a
+    SUPERSEDING klal_flag (`a31c9a08f8fe`) rather than an edit, since
+    `review_decisions.jsonl` is append-only.
 
 9c. **Still open from the 2026-08-23 review:**
     `pipeline/typography.py` is still dead code carrying a third, divergent
