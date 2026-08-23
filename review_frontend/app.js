@@ -835,12 +835,23 @@ async function openDisputedPanel(klalId, corr) {
     });
   }
 
+  // REVERTED 2026-08-23 (code review, finding M11). A block here used to
+  // pre-select the MACHINE's own answer on an undecided word -
+  // vision_selected 'A' checked the DocAI option, 'B' the current text - so the
+  // radio a reviewer found already filled in was the vision model's verdict,
+  // and a single Save click promoted it into review_decisions.jsonl as a HUMAN
+  // decision, indistinguishable from one where someone actually looked at the
+  // scan. This project's first success criterion is that every correction is
+  // "resolved by looking at the actual scan, not inferred", and the whole
+  // record/apply split exists to keep machine output and human judgement
+  // separate; a pre-checked machine answer quietly makes agreeing with the
+  // machine the path of least resistance. The machine's verdict is still shown
+  // - statusLabel() and the confidence percentage in the panel header both
+  // report it, and wordState() colours the word by it - it just no longer
+  // arrives pre-selected. Undecided words default to the conservative
+  // current stored text, as they did before.
   let activeSource = decision ? decision.chosen_source : 'final_text';
   let activeText = decision ? (decision.chosen_text || '') : '';
-  if (!decision && corr.vision_selected) {
-    if (corr.vision_selected === 'A' && options.some(o => o.source === 'docai_reading')) activeSource = 'docai_reading';
-    else if (corr.vision_selected === 'B' && options.some(o => o.source === 'final_text')) activeSource = 'final_text';
-  }
 
   // Fall back to custom if the saved source isn't in options
   if (activeSource && !options.some(o => o.source === activeSource) && activeSource !== 'custom' && activeSource !== 'remove') {

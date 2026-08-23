@@ -17,6 +17,79 @@ current file references, or when grepping for how a past finding was
 resolved. Same append-at-top convention as before: newest entries go right
 after this header, not at the bottom.
 
+### FIXED 2026-08-23 — H6, H8, M11 from the code review. `typography.py` earns its keep by recognising the ligature artifact the consensus work measured.
+
+**H6 - `pipeline/typography.py` was dead code carrying a third, divergent
+`CONFUSION_PAIRS`. FIXED, and given a real job.** The competing constant is
+gone: it carried (ט,פ) and (ם,ס) while dropping
+`detect_real_word_substitution.py`'s (ט,מ) and (ס,פ), added pairs nobody had
+measured (against that file's explicit "adding a pair here should mean someone
+measured it"), and called itself "the single source of truth" while being
+imported by nothing. The module docstring now names the two REAL sets and their
+scopes instead. A regression test asserts the attribute stays gone.
+
+Rather than delete the module, it was given the consumer it should always have
+had. Its ligature catalog is real knowledge, and the multi-witness work had just
+produced the case that needs it: `dropped_lamed_explains(stored, reading)` -
+true when a witness's reading is the stored word with exactly one ל removed from
+directly after an א, i.e. the alef-lamed sort losing its lamed. Deliberately
+strict (one deletion, only after an א); a general edit-distance-1 check would
+match unrelated single-letter differences and turn a precise signal into a guess
+(Lesson 5). Note this points the OPPOSITE way from
+`tools/detect_ligature_corruption.py`, which asks whether the CORPUS holds a
+corrupt form and answers from corpus frequencies - this asks whether an ENGINE
+read one while the corpus is right.
+
+`synthesize_multi_witness.py` now tags every consensus agreement the predicate
+explains, and says why in its own output: **37 of the run's agreements are this
+one shared ink defect, not independent corroboration.** The contradiction report
+is the part that most needed it - it read "40 decisions contradicted by the
+consensus", which looks like 40 human errors; it now reads **"40, of which 32
+are a known ligature artifact (the engines share the misread, the human is
+right) and 8 are not"**, and lists only the 8. Those 8 are themselves all
+documented artifacts on inspection - ב/כ (`ובא`/`וכא`), ד/ר (`אדם`/`ארם`), נ/ג
+(`וכ"נ`/`וכ"ג`), ת/ר (`כתב`/`כרב`), ד/ך (`ב"ד`/`ב"ך`), and `ל"ב`/`ליב` which is
+Surya's catalogued gershayim-to-yod blindness. **Not one of the 40 is evidence a
+human got it wrong.** The tag is carried through `assemble_corrections_dataset.py`
+into `corrections_part1.json` so the dashboard can label it rather than showing a
+reviewer "3 engines agree" for an ink defect.
+
+**H8 - `tools/run_part1_vlm_patch_passB.py` re-violated the incremental-flush
+rule and no-op'd its own cache. FIXED, both.** It buffered every klal and wrote
+once at the end - the exact violation fixed in `run_vlm_witness_sample.py` on
+2026-08-21 and codified in `.gemini/rules/incremental_disk_flushing.md` the day
+before that. This file is a read-modify-write splice rather than an append, so
+the fix rewrites the full block set after EVERY klal, via a tmp file +
+`os.replace()` so the baseline is never observed half-written. It also installed
+`dummy_cache_get`/`dummy_cache_put` stubs, so every run re-paid for crops it had
+already answered - in a script whose entire purpose is re-running a SUBSET of
+klalim, in a repo that ran its credits to zero on 2026-08-21. Now uses the same
+cache table, key shape and prompt hash as
+`pipeline/second_witness_eval/vlm_witness.py` (`vlm_witness_cache`,
+`vlm_literal_ocr_v1`), so there is one cache of paid answers rather than a
+private second one.
+
+**M11 - the disputed panel pre-selected the machine's own verdict. REVERTED.**
+`vision_selected: 'A'` pre-checked the DocAI option and `'B'` the current text on
+an UNDECIDED word, so the radio a reviewer found already filled in was the vision
+model's answer, and one Save click promoted it into `review_decisions.jsonl` as a
+HUMAN decision - indistinguishable from one where somebody actually looked at the
+scan. Success criterion #1 is that every correction is "resolved by looking at the
+actual scan, not inferred", and the record/apply split exists to keep machine
+output and human judgement apart; a pre-checked machine answer makes agreeing with
+the machine the path of least resistance. The verdict is still fully visible -
+`statusLabel()`, the confidence percentage in the panel header, and the word's own
+colour via `wordState()` all report it - it just no longer arrives selected.
+Undecided words default to the conservative current stored text again. Review
+server restarted per the standing rule; 16 Playwright tests green.
+
+**262 + 16 tests green.** Still open from the review: C16 (10 klalim have no Surya
+coverage at all - counted correctly as "no vote" since C1-C4, but they need an
+actual re-run), C18's never-None `match_block_to_klal` fallback, and the plan
+document items in PROJECT-STATUS open item 10. Also newly logged and not fixed:
+`classify()` discards a real 0.95-confidence adjudication (klal 163 w503) purely
+because the model answered `"Option A"` where it expects `"A"`.
+
 ### FULL REBUILD (with vision) COMPLETED 2026-08-23 — the owed run. 1 live API call, klal 16's insert needed zero adjudication, klal 2 w195 independently confirmed at 0.99.
 
 Ran `./rebuild_all.sh` in full (not `--skip-vision`), user-authorized, closing the

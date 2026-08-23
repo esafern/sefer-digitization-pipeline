@@ -54,6 +54,7 @@ sys.path.insert(0, HERE)
 
 import corpus_io as cio
 import review_server as rs
+import typography
 
 sys.path.insert(0, os.path.join(REPO, "tools", "second_witness_eval"))
 import evaluate_ocr_alignment as eval_script
@@ -153,7 +154,8 @@ def synthesize(part1, verified, vlm_a, vlm_b, surya, decided=None):
     decided = {} if decided is None else decided
     disputes = []
     stats = {"klalim_no_surya": 0, "klalim_no_vlm": 0, "vlm_abstained": 0,
-             "skipped_corroborating_a_human": 0, "contradicting_a_human": []}
+             "skipped_corroborating_a_human": 0, "contradicting_a_human": [],
+             "ligature_artifacts": 0}
 
     for k in part1:
         kid = k["klal_id"]
@@ -207,13 +209,23 @@ def synthesize(part1, verified, vlm_a, vlm_b, surya, decided=None):
                 if len(engines) < 2 or norm_reading == stored_norm:
                     continue
                 reading = readings[engines[0]]
+                # A consensus every engine can reach by sharing ONE printing
+                # artifact is not independent corroboration. Measured on the
+                # first synthesis run: 16 such agreements, all the alef-lamed
+                # sort losing its lamed, including unanimous 3-of-3 - and 11 of
+                # them on words a human had already correctly restored. Tagged,
+                # not dropped: the reviewer should still see it, but must see it
+                # labelled as an artifact rather than as three engines agreeing.
+                artifact = typography.ligature_artifact(stored, reading)
+                if artifact:
+                    stats["ligature_artifacts"] += 1
                 if (kid, wi) in decided:
                     chosen = decided[(kid, wi)]
                     if cio.hebrew_letters_only(chosen or "") == norm_reading:
                         stats["skipped_corroborating_a_human"] += 1
                     else:
                         stats["contradicting_a_human"].append(
-                            (kid, wi, chosen, reading, sorted(engines)))
+                            (kid, wi, chosen, reading, sorted(engines), artifact))
                     break
                 disputes.append({
                     "klal_id": kid,
@@ -222,6 +234,7 @@ def synthesize(part1, verified, vlm_a, vlm_b, surya, decided=None):
                     "final_text": stored,
                     "consensus_reading": reading,
                     "agreeing_engines": sorted(engines),
+                    "ligature_artifact": artifact,
                     # Every engine's own verdict at this position, so the
                     # dashboard and any later audit can tell "agrees",
                     # "differs" and "was never asked" apart. No field here
@@ -325,12 +338,22 @@ def main():
     print(f"  klalim with no Surya coverage: {stats['klalim_no_surya']} "
           f"(counted as no vote, NOT as agreement)")
     print(f"  klalim with no VLM coverage: {stats['klalim_no_vlm']}")
+    print(f"  agreements explainable as a known printer-ligature artifact: "
+          f"{stats['ligature_artifacts']} (shared ink defect, NOT independent "
+          f"corroboration - see pipeline/typography.py)")
     print(f"  VLM abstentions from Pass A/Pass B instability: {stats['vlm_abstained']}")
     print(f"  skipped, already decided by a human and CORROBORATED by the consensus: "
           f"{stats['skipped_corroborating_a_human']}")
     contra = stats["contradicting_a_human"]
-    print(f"  skipped, already decided by a human but CONTRADICTED by the consensus: {len(contra)}")
-    for kid, wi, chosen, reading, engines in contra:
+    art = [c for c in contra if c[5]]
+    real = [c for c in contra if not c[5]]
+    print(f"  skipped, already decided by a human but CONTRADICTED by the consensus: "
+          f"{len(contra)} - of which {len(art)} are a known ligature artifact "
+          f"(the engines share the misread, the human is right) and {len(real)} are not")
+    if art:
+        print(f"    [{len(art)} ligature-artifact contradiction(s) suppressed from the list "
+              f"below - the stored text is correct in each]")
+    for kid, wi, chosen, reading, engines, _a in real:
         # Never buried in a count: a human choosing one reading while two
         # independent engines agree on another is a Lesson 9 case that needs
         # a person to look again, not a silently-dropped row.

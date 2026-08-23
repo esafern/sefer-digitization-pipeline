@@ -235,6 +235,16 @@ to) as state changes** — that discipline is what drifted last time.
     SUPERSEDING klal_flag (`a31c9a08f8fe`) rather than an edit, since
     `review_decisions.jsonl` is append-only.
 
+9d. **H6, H8, M11 FIXED 2026-08-23.** `typography.py`'s competing third
+    `CONFUSION_PAIRS` is gone and the module now earns its keep: it recognises
+    the alef-lamed ligature artifact, and the synthesizer tags agreements it
+    explains — **37 of the run's consensus agreements are that one shared ink
+    defect, not independent corroboration**, and the contradiction report now
+    reads "40, of which 32 are a known ligature artifact (the human is right)"
+    instead of an alarming bare 40. `run_part1_vlm_patch_passB.py` flushes per
+    klal and uses the real `vlm_witness_cache`. The disputed panel no longer
+    pre-selects the machine verdict.
+
 9c. **Still open from the 2026-08-23 review:**
     `pipeline/typography.py` is still dead code carrying a third, divergent
     `CONFUSION_PAIRS` (H6); `run_part1_vlm_patch_passB.py` still violates the

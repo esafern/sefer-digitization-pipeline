@@ -3860,3 +3860,48 @@ def test_audit_checks_a_multi_word_manual_correction_across_its_whole_span():
     single = {"chosen_text": "בית", "word_index": 1, "candidate_snapshot": {}}
     assert aad.check_manual_correction(single, _klal("אלף בית גימל")) == "ok"
     assert aad.check_manual_correction(single, _klal("אלף בות גימל")).startswith("MISMATCH")
+
+
+import typography as typo  # noqa: E402
+
+
+def test_dropped_lamed_predicate_recognises_the_alef_lamed_ligature_artifact():
+    """The measured case (2026-08-23): 2-of-3 and even 3-of-3 engine agreement
+    on a reading that is just the alef-lamed sort losing its lamed. The defect
+    is in the ink, so engine independence buys nothing against it - the plan
+    document's §2.B prices such an agreement at 3.5e-7 and one Part-1 run
+    produced dozens."""
+    for stored, reading in (("ושמואל", "ושמוא"), ("אלא", "אא"), ("אליבא", "איבא"),
+                            ("אליהו", "איהו"), ("ואל", "וא"), ("אלגאזי", "אגאזי"),
+                            ("דאלים", "דאים")):
+        assert typo.dropped_lamed_explains(stored, reading), (stored, reading)
+        assert typo.ligature_artifact(stored, reading) == "alef_lamed"
+
+
+def test_dropped_lamed_predicate_does_not_fire_on_unrelated_differences():
+    """Deliberately strict - exactly one deletion, of a ל preceded by an א. A
+    general edit-distance-1 check would match unrelated single-letter
+    differences and turn a precise signal into a guess (Lesson 5)."""
+    # a lamed NOT preceded by an alef
+    assert not typo.dropped_lamed_explains("שלום", "שום")
+    # a different letter dropped after an alef
+    assert not typo.dropped_lamed_explains("אמר", "אר")
+    # substitution, not deletion
+    assert not typo.dropped_lamed_explains("אלא", "אבא")
+    # two deletions
+    assert not typo.dropped_lamed_explains("אלאל", "אא")
+    # identical, and empty inputs
+    assert not typo.dropped_lamed_explains("אלא", "אלא")
+    assert not typo.dropped_lamed_explains("", "")
+
+
+def test_typography_no_longer_defines_a_competing_confusion_pair_set():
+    """REGRESSION (finding H6): this module defined a THIRD CONFUSION_PAIRS
+    that matched neither real one - it carried (ט,פ) and (ם,ס) while dropping
+    detect_real_word_substitution's (ט,מ) and (ס,פ) - while calling itself the
+    single source of truth, and nothing imported it. Lesson 13."""
+    assert not hasattr(typo, "CONFUSION_PAIRS"), (
+        "the two real confusion-pair sets live in build_gematria_trace.py "
+        "(marker scope) and detect_real_word_substitution.py (content-word "
+        "scope); a third copy is what Lesson 13 is about"
+    )

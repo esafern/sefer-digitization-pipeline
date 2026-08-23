@@ -134,10 +134,21 @@ def merge_consensus_disputes(by_klal, path=CONSENSUS_PATH):
             witnesses = d.get("witnesses", {})
             note = (f"Multi-witness consensus: {' + '.join(engines)} agree on "
                     f"'{d['consensus_reading']}' against stored '{d['final_text']}'.")
+            artifact = d.get("ligature_artifact")
+            if artifact:
+                # The engines agree because they share ONE printing defect, not
+                # because they independently corroborate each other. Carried
+                # through so the dashboard can say so rather than showing a
+                # reviewer "3 engines agree" for a known ink artifact.
+                note += (f" NOTE: explainable as the catalogued '{artifact}' printer "
+                         f"ligature artifact - a shared ink defect, so this agreement "
+                         f"is NOT independent corroboration and the stored text is "
+                         f"most likely correct.")
             prior = existing.get(d["word_index"])
             if prior is not None:
                 prior["consensus_engines"] = engines
                 prior["consensus_reading"] = d["consensus_reading"]
+                prior["ligature_artifact"] = artifact
                 n_enriched += 1
                 continue
             by_klal.setdefault(kid_str, []).append({
@@ -158,6 +169,7 @@ def merge_consensus_disputes(by_klal, path=CONSENSUS_PATH):
                 "surya_reading": witnesses.get("surya"),
                 "consensus_engines": engines,
                 "consensus_reading": d["consensus_reading"],
+                "ligature_artifact": artifact,
                 "flag": "current_text_may_be_wrong",
             })
             n_new += 1
