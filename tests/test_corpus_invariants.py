@@ -45,6 +45,7 @@ the vision cache key) are currently inert on real data and cannot be
 exercised by any amount of looking at the corpus.
 """
 import importlib.util
+import collections
 import json
 import os
 import re
@@ -1376,3 +1377,52 @@ def test_no_corrections_item_attributes_the_stored_text_to_an_engine(corrections
         f"An engine that was not consulted must read null, never the corpus's own "
         f"word. First few: {bad[:5]}"
     )
+
+
+def test_no_word_index_is_served_twice_in_either_pane(part1_by_id):
+    """REGRESSION 2026-08-24, generalising two bugs found by live review.
+
+    review_frontend/app.js builds its word map as
+    `corrections.forEach(c => byIndex[c.word_index] = c)` - LAST WRITE WINS -
+    and the scan pane keys click/focus handling on (klal_id, word_index). So a
+    second entry at the same key means the reviewer silently sees only one of
+    them, losing whatever the other carried: a bbox (no scan highlight at all),
+    both engine readings, a vision verdict and confidence.
+
+    api_klal() builds its list from FOUR sources (machine candidates,
+    manual_correction decisions, word-level klal_flags, witness disagreements)
+    and api_page() builds its own from three. Every source after the first must
+    check whether the index is taken, and each had grown its OWN partial guard -
+    the flag and witness paths both checked `manual_word_indices` but not
+    machine candidates - which is exactly the shape that leaves one combination
+    uncovered.
+
+    Found: manual-over-machine at klal 91 w453/w524 (reported as "the last two
+    disputes weren't properly highlighted"), then by sweep, 4 replace+witness
+    and 1 ai_flag+witness in the text pane and the same 4 again in the scan
+    pane, which repeats the defect independently. This test covers every source
+    and both panes at once, so a fifth source cannot reintroduce it quietly."""
+    review_server = _import_from_path("review_server", os.path.join(REPO, "pipeline", "review_server.py"))
+
+    text_dupes = []
+    for klal_id in part1_by_id:
+        counts = collections.Counter(
+            c["word_index"] for c in review_server.api_klal(klal_id)["corrections"]
+            if c.get("opcode") != "delete")
+        text_dupes += [(klal_id, wi, n) for wi, n in counts.items() if n > 1]
+    assert not text_dupes, (
+        f"{len(text_dupes)} position(s) serve more than one text-pane entry: "
+        f"{text_dupes[:8]}. app.js keeps only the last, so the other is invisible.")
+
+    pages = set()
+    for klal_id in part1_by_id:
+        pages.update(review_server._klal_all_pages(klal_id))
+    scan_dupes = []
+    for page in sorted(pages):
+        counts = collections.Counter(
+            (i.get("klal_id"), i.get("word_index")) for i in review_server.api_page(page)
+            if i.get("word_index") is not None)
+        scan_dupes += [(page, k[0], k[1], n) for k, n in counts.items() if n > 1]
+    assert not scan_dupes, (
+        f"{len(scan_dupes)} position(s) draw more than one scan box: {scan_dupes[:8]}. "
+        f"Two boxes at one (klal_id, word_index) confuse the pane's click and focus handling.")

@@ -17,6 +17,69 @@ current file references, or when grepping for how a past finding was
 resolved. Same append-at-top convention as before: newest entries go right
 after this header, not at the bottom.
 
+### SWEEP 2026-08-24 — the two klal-91 bugs were instances of two CLASSES. Swept both; found 5 more shadowing collisions, fixed the class structurally.
+
+User-requested after the klal 91 fixes ("look for the same issues everywhere").
+
+**CLASS 1 - last-write-wins shadowing. 5 more instances found, all fixed.**
+`review_frontend/app.js` builds its word map as
+`corrections.forEach(c => byIndex[c.word_index] = c)` and the scan pane keys
+click/focus on `(klal_id, word_index)`. `api_klal()` builds its list from FOUR
+sources (machine candidates, manual_correction decisions, word-level klal_flags,
+witness disagreements) and `api_page()` from three - so every source after the
+first must check whether the index is taken.
+
+**The shape of the bug is the useful part: each source had grown its OWN partial
+guard.** The flag path and the witness path both checked `manual_word_indices`
+but neither checked machine candidates. That is exactly the arrangement that
+leaves one combination uncovered, and it left three:
+
+| collision | where | count |
+| :--- | :--- | ---: |
+| manual over machine | text pane | 2 (klal 91 w453/w524 - the reported bug) |
+| witness over machine | text pane | 4 (klal 30 w828/w907, klal 75 w853, klal 88 w310) |
+| witness over ai_flag | text pane | 1 (klal 88 w327) |
+| witness over correction | **scan pane** | 4 (same positions - `api_page()` repeats the defect independently) |
+
+Fixed structurally rather than site-by-site: added `_claim_word_index()`, one
+helper carrying the rule and the reason, and converted all three later sources in
+`api_klal()` to it; `api_page()` got the equivalent guard with a note on why it
+cannot reuse the `served_keys` set below it (that one is built after the witness
+loop, for the plain-word pass).
+
+**Witness data is overlaid, not dropped.** Where a witness item collides with a
+machine candidate the witness reading is attached as `witness_overlay` rather
+than either entry being discarded. The machine candidate is the more valuable of
+the two by a wide margin - it carries a bbox, both readings, a vision verdict and
+a confidence - and this project measured Tesseract correct in only 16 of 419
+witness disagreements (3.8%).
+
+**Verified: 0 duplicate-keyed positions across all 222 klalim (text pane) and all
+51,780 boxes on 63 pages (scan pane).**
+
+**New invariant `test_no_word_index_is_served_twice_in_either_pane`** covers
+every source and BOTH panes in one check, so a fifth source cannot reintroduce
+the class quietly. This replaces the previous arrangement where one narrow test
+watched one of the four combinations.
+
+**CLASS 2 - state that can be set but not cleared. Audited every decision type;
+the word-level klal_flag was the only gap, and it is now closed.**
+
+| decision type | path back to "undecided" |
+| :--- | :--- |
+| `klal_flag` (klal-level) | checkbox, can be unchecked |
+| `klal_flag` (word-level) | **"Clear revisit flag" button - added today; was the reported bug** |
+| `disputed_choice` | re-select any other reading |
+| `punctuation_choice` | explicit reject option |
+| `witness_choice` | options include "unreadable" |
+| `manual_correction` | retype the original and save - append-only log, latest wins |
+
+`manual_correction` has no dedicated undo button, but is genuinely reversible
+because the log is append-only and latest-wins; noting it rather than adding a
+control nobody asked for.
+
+271 + 16 tests green. Review server restarted per the standing rule.
+
 ### FIXED 2026-08-24 — two dashboard bugs found by live review of klal 91, and the `איכא` question ANSWERED by the reviewer's own decisions.
 
 **The reviewer's decisions resolved the open candidate-second-sort question, and

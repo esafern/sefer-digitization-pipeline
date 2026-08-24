@@ -539,6 +539,35 @@ def _word_level_ai_flags(klal_id, words):
     return out
 
 
+def _claim_word_index(corrections, word_index, overlay_key=None, overlay=None):
+    """Return the entry already serving `word_index`, after optionally
+    overlaying extra data onto it - or None if the index is free.
+
+    THE RULE THIS ENFORCES, and why it is a helper rather than three copies:
+    review_frontend/app.js builds its word map as
+    `corrections.forEach(c => byIndex[c.word_index] = c)` - LAST WRITE WINS. So
+    two entries at one word_index means the reviewer silently sees only the
+    second, losing whatever the first carried: its bbox (no scan highlight at
+    all), its readings, its vision verdict and confidence.
+
+    api_klal() builds `corrections` from FOUR sources - machine candidates,
+    manual_correction decisions, word-level klal_flags, and witness
+    disagreements - and every source after the first must therefore check
+    whether the index is already taken. Found 2026-08-24 by live review of klal
+    91 (manual over machine), then by sweeping every klal, which turned up four
+    more `replace+witness` collisions and one `ai_flag+witness`. Each source had
+    grown its own partial guard (the flag and witness paths both checked
+    `manual_word_indices` but not machine candidates), which is exactly the
+    shape that leaves one combination uncovered.
+    """
+    existing = next((c for c in corrections
+                     if c.get("word_index") == word_index and c.get("opcode") != "delete"),
+                    None)
+    if existing is not None and overlay_key is not None:
+        existing[overlay_key] = overlay
+    return existing
+
+
 def _merge_decision(entry, klal_id, decided):
     """Overlay the current human decision (if any) on top of a raw
     corrections_part1.json entry - never mutates the source data, this is
@@ -758,10 +787,7 @@ def api_klal(klal_id):
         # no box. That test's docstring predicted exactly this class would
         # resurrect the moment a still-valid manual decision landed on a live
         # candidate's position; klal 91 w453/w524 is that moment.
-        existing = next((c for c in corrections if c.get("word_index") == word_index
-                         and c.get("opcode") != "delete"), None)
-        if existing is not None:
-            existing["current_decision"] = rec
+        if _claim_word_index(corrections, word_index, "current_decision", rec) is not None:
             continue
         corrections.append({
             "word_index": word_index,
@@ -790,10 +816,8 @@ def api_klal(klal_id):
     for f in _word_level_ai_flags(klal_id, words):
         if f["word_index"] in manual_word_indices:
             continue
-        existing = next((c for c in corrections if c.get("word_index") == f["word_index"]
-                         and c.get("opcode") != "delete"), None)
-        if existing is not None:
-            existing["word_flag"] = f.get("current_decision")
+        if _claim_word_index(corrections, f["word_index"], "word_flag",
+                             f.get("current_decision")) is not None:
             continue
         f["word_flag"] = f.get("current_decision")
         corrections.append(f)
@@ -812,6 +836,26 @@ def api_klal(klal_id):
         if wi is None or not (0 <= wi < len(words)):
             continue
         if wi in manual_word_indices:
+            continue
+        # A witness disagreement at a position that already carries a machine
+        # candidate or a word-level flag must NOT be appended as a second entry -
+        # it would shadow the richer one under app.js's last-write-wins map.
+        # Measured 2026-08-24: 4 replace+witness collisions (klal 30 w828/w907,
+        # klal 75 w853, klal 88 w310) and 1 ai_flag+witness (klal 88 w327).
+        # The machine candidate is the more valuable of the two by a wide
+        # margin - it carries a bbox, both readings, a vision verdict and a
+        # confidence, whereas this project measured Tesseract correct in only
+        # 16 of 419 witness disagreements (3.8%). So overlay the witness data
+        # onto the existing entry rather than replacing it, and keep the item in
+        # klal_witness either way so the witness count and the scan pane are
+        # unaffected.
+        if _claim_word_index(corrections, wi, "witness_overlay", {
+                "docai_token_index": w["docai_token_index"],
+                "tier": w.get("tier"),
+                "docai_reading": w.get("docai_reading"),
+                "tesseract_reading": w.get("tesseract_reading"),
+                "current_decision": witness_decided.get((klal_id, w["docai_token_index"])),
+        }) is not None:
             continue
         corrections.append({
             "word_index": wi,
@@ -981,8 +1025,25 @@ def api_page(page_num):
     # fix _merge_decision() already carries: a witness page carries ~140
     # items, and each current_for() re-parsed the whole decisions log.
     witness_decided = rd.all_current("witness_choice")
+    # Same last-write-wins hazard as api_klal()'s corrections list, on the scan
+    # side: a witness item whose (klal_id, word_index) already has a correction
+    # box would draw a SECOND box at the same coordinates, and the pane's click
+    # and focus handling keys on that pair. Found 2026-08-24 by sweeping all 63
+    # pages after fixing the text-pane collisions - the same four positions turn
+    # up here (klal 30 w828/w907, klal 75 w853, klal 88 w310), because this
+    # function builds its list independently and repeats the defect.
+    # Note the ordering: this dedupe must consider only the CORRECTION boxes
+    # appended above, which is why it is computed here rather than reusing the
+    # `served_keys` set below (that one is built after this loop, for the
+    # plain-word pass). Witness items with word_index=None are scan-only by
+    # design and always render.
+    correction_keys = {(x["klal_id"], x["word_index"]) for x in out
+                       if x.get("word_index") is not None}
     for w in _load_witness_queue():
         if w.get("page") != page_num or not w.get("bbox"):
+            continue
+        wi = w.get("word_index")
+        if wi is not None and (w["klal_id"], wi) in correction_keys:
             continue
         entry = dict(w)
         entry["kind"] = "witness"
