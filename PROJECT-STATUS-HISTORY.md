@@ -17,6 +17,67 @@ current file references, or when grepping for how a past finding was
 resolved. Same append-at-top convention as before: newest entries go right
 after this header, not at the bottom.
 
+### 2026-08-24 — consensus-tightening measured and REJECTED; klal 201 recovered; Surya coverage now 222/222.
+
+**Task 1a: can the consensus rule be tightened into something reliable? Measured
+- NO.** Same vision-arbiter method as the §2D posterior, so the numbers are
+comparable:
+
+| rule | queue kept | precision |
+| :--- | ---: | ---: |
+| current (any 2 distinct engines) | 364 | 42% |
+| require DocAI among the agreeing engines | 67 | 45% |
+| unanimous 3-of-3 | 11 | 64% |
+| exclude Surya-only pairs | 67 | 45% |
+
+Tightening buys **3 points of precision for 82% of the recall**. Only the
+unanimous rule is notably better and it keeps 11 items (n=11, so +/-14pp).
+
+**The deeper reason, and the more important finding: 82% of the queue cannot be
+measured at all.**
+
+| engine pair | in queue | independently measurable |
+| :--- | ---: | ---: |
+| **surya+vlm** | **297** | **5** |
+| docai+surya | 41 | 41 |
+| docai+vlm | 15 | 15 |
+| docai+surya+vlm | 11 | 11 |
+
+A vision verdict exists only where DocAI disagreed with the corpus - that is what
+creates a candidate. For a surya+vlm dispute DocAI AGREED, so there is no
+candidate and no arbiter. The bulk of the review queue is two witnesses
+overruling DocAI plus the corpus with nothing independent to check them against.
+**The consensus rule cannot be triaged into reliability; a genuinely independent
+engine is the blocker, not an optimisation.** (User is pursuing Dicta directly.)
+
+**Task 3: klal 201 recovered. Surya coverage 221/222 -> 222/222, full Part-1
+coverage for the first time.** Added `--fill-gaps`: for any klal left with NO
+text, run Surya on a crop of that klal's own vertical band, bounded below by the
+next klal's recorded start (the region bbox alone is only the START region and
+crops mostly the PREVIOUS klal). This is a DIFFERENT MECHANISM, not another
+splitting heuristic - cropping to the band removes the block-to-klal assignment
+problem entirely, because everything in the crop belongs to that klal by
+construction. It touches only klalim whose text is currently empty, so it
+structurally cannot regress one that already reads. Verified: exactly ONE klal
+changed (201, no reading -> 90% agreement, 51 words); mean agreement unchanged at
+89.85%.
+
+**Task 2 NOT done, and deliberately handed back.** Fixing the 4 mis-assigned
+klalim by tuning `split_block_across_klalim()` was attempted a THIRD time today
+and regressed the corpus again - coverage 221 -> 192, mean agreement 89.85% ->
+87.52%, twelve klalim collapsing (klal 127 0.94 -> 0.10, klal 16 0.96 -> 0.11) -
+and was reverted. The rule tried ("a block that opens with a klal's marker
+belongs to that klal") over-fires, because many blocks legitimately open with a
+NEIGHBOUR's marker. **I had said after the second attempt that I would stop
+tuning this, and then did it again**; the before/after measurement is the only
+reason none of it reached the corpus. The item is now recorded in
+`PROJECT-STATUS.md` as ASSIGNED TO THE USER at their request ("I will do #2 -
+remind me periodically until I remember"), marked not to be attempted by an agent
+without their say-so, with a standing instruction that any LLM instance reading
+that file surface it in its session summary until closed.
+
+278 tests green.
+
 ### BUILT 2026-08-24 — the DocAI alef-lamed ligature repair filter. 24% of the review queue was a pure artifact.
 
 Plan §3.2, specified since the first draft and unbuilt until now. User-requested

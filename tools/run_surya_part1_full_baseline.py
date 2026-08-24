@@ -225,7 +225,7 @@ def split_block_across_klalim(text, block_y1, block_y2, page_klalim, y_center):
 
 
 def run_surya_part1(force_recompute=False, assemble_only=False, only_pages=None,
-                    render_dpi=None):
+                    render_dpi=None, fill_gaps=False):
     output_dir = os.path.join(REPO, "tools", "second_witness_eval")
     surya_pages_dir = os.path.join(output_dir, "surya_pages")
     os.makedirs(surya_pages_dir, exist_ok=True)
@@ -248,7 +248,7 @@ def run_surya_part1(force_recompute=False, assemble_only=False, only_pages=None,
                 pages_to_process.append(p)
 
     predictor = None
-    if pages_to_process:
+    if pages_to_process or fill_gaps:
         # Imported and loaded ONLY when there is actually a page to OCR.
         # Re-assembling the klal-aligned baseline from the cached per-page JSON
         # is free and is the common case after a change to the block->klal
@@ -359,6 +359,53 @@ def run_surya_part1(force_recompute=False, assemble_only=False, only_pages=None,
                 if klal_id and 1 <= klal_id <= corpus_io.PART1_MAX_KLAL:
                     klal_texts[klal_id].append(frag)
 
+    # GAP FILL (opt-in, --fill-gaps). For any klal the block-splitting left with
+    # NO text at all, run Surya on a crop of that klal's own vertical band
+    # instead. This is a DIFFERENT mechanism, not another splitting heuristic:
+    # cropping to the band removes the block-to-klal assignment problem entirely,
+    # because everything in the crop belongs to that klal by construction.
+    #
+    # Why it is safe to bolt on: it only ever touches klalim whose text is
+    # currently EMPTY, so it cannot change, shift or degrade any klal that
+    # already has a reading. That matters here - three separate attempts to fix
+    # the same gap by tuning split_block_across_klalim() all regressed the
+    # corpus (the last one cost 29 klalim their coverage and 2.3 points of mean
+    # agreement) and were reverted.
+    #
+    # Bounded below by the NEXT klal's recorded start on the same page, since
+    # klal_page_regions.json's bbox is only the klal's START region, not its
+    # full extent - cropping the bbox alone captures mostly the PREVIOUS klal.
+    if fill_gaps:
+        empty = [k for k in range(1, corpus_io.PART1_MAX_KLAL + 1) if not klal_texts[k]]
+        if empty:
+            print(f"\n--fill-gaps: {len(empty)} klal(im) with no text: {empty}")
+            import fitz, io
+            doc = fitz.open(corpus_io.repo_path("berlin_square_corrected.pdf"))
+            for kid in empty:
+                reg = raw_regions.get(str(kid))
+                if not reg or not reg.get("bbox"):
+                    print(f"  klal {kid}: no region, cannot crop"); continue
+                pg, b = reg["page"], reg["bbox"]
+                nxt = raw_regions.get(str(kid + 1))
+                y2 = (nxt["bbox"]["y1"] - 0.002
+                      if nxt and nxt.get("page") == pg and nxt["bbox"]["y1"] > b["y1"]
+                      else 0.95)
+                page = doc[pg - 1]          # page N is doc[N-1]; see render_dpi above
+                rect = page.rect
+                clip = fitz.Rect(0.07 * rect.width, (b["y1"] - 0.002) * rect.height,
+                                 0.95 * rect.width, y2 * rect.height)
+                img = Image.open(io.BytesIO(page.get_pixmap(dpi=400, clip=clip).tobytes("png")))
+                res = predictor([img], full_page=True)[0]
+                txt = " ".join(strip_html_tags(bl.html) for bl in res.blocks
+                               if bl.label not in ("PageHeader", "PageFooter",
+                                                   "Header", "Footer")).strip()
+                if txt:
+                    klal_texts[kid].append(txt)
+                    print(f"  klal {kid}: recovered {len(txt.split())} words from a region crop")
+                else:
+                    print(f"  klal {kid}: region crop produced nothing")
+            doc.close()
+
     baseline_txt_path = os.path.join(output_dir, "surya_part1_full_baseline.txt")
     with open(baseline_txt_path, "w", encoding="utf-8") as f:
         for klal_id in range(1, corpus_io.PART1_MAX_KLAL + 1):
@@ -398,6 +445,10 @@ if __name__ == "__main__":
                     help="render pages from the PDF at this DPI instead of using "
                          "the cached ~1.1MP page PNGs (300 recovers markers the "
                          "cached resolution cannot resolve)")
+    ap.add_argument("--fill-gaps", action="store_true",
+                    help="for any klal left with NO text, run Surya on a crop of "
+                         "that klal's own band instead (only touches empty klalim, "
+                         "so it cannot regress one that already has a reading)")
     ap.add_argument("--assemble-only", action="store_true",
                     help="rebuild the klal-aligned baseline from cached per-page "
                          "JSON without loading Surya at all (free, and the common "
@@ -405,4 +456,5 @@ if __name__ == "__main__":
     a = ap.parse_args()
     only = {int(x) for x in a.pages.split(",")} if a.pages else None
     run_surya_part1(force_recompute=a.force_recompute, assemble_only=a.assemble_only,
-                    only_pages=only, render_dpi=a.render_dpi)
+                    only_pages=only, render_dpi=a.render_dpi,
+                    fill_gaps=a.fill_gaps)

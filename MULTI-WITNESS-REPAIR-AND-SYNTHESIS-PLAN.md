@@ -353,8 +353,8 @@ to the stored text.
 | Consensus disputes | 176 across 85 klalim |
 | Agreements explained by a ligature artifact | 37 |
 | VLM abstentions (Pass A/B instability) | 1,577 |
-| Surya coverage | 219 / 222 klalim |
-| Klalim with no Surya reading | 3 (49, 129, 201) — counted as an **absent witness**, never as agreement |
+| Surya coverage | **222 / 222 klalim** |
+| Klalim with no Surya reading | **0** — full coverage as of 2026-08-24 |
 
 ---
 

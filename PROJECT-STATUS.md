@@ -45,7 +45,14 @@ to) as state changes** — that discipline is what drifted last time.
 
 ## Open items
 
-00. **Surya block mis-assignment: 4 klalim carry a neighbour's text** (swept
+00. **[ASSIGNED TO THE USER, 2026-08-24 — "I will do #2 - remind me
+    periodically until I remember"] Surya block mis-assignment: 4 klalim carry a
+    neighbour's text.** NOT to be attempted by an agent without the user saying
+    so: three separate attempts to fix it by tuning
+    `split_block_across_klalim()` have all regressed the corpus and been
+    reverted, the worst costing 29 klalim their coverage and 2.3 points of mean
+    agreement. **Any LLM instance reading this file should mention this open
+    item to the user in its session summary until it is closed.** Details: (swept
     2026-08-24, extent documented per the standing rule). klal 162 (page 59,
     NEW - a regression from the 300-DPI re-render, 0.68 -> 0.09) and its
     knock-on klal 163; klalim 8, 88 and 202 are pre-existing. Root cause for
