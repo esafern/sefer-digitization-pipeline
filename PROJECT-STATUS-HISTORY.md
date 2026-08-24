@@ -17,6 +17,86 @@ current file references, or when grepping for how a past finding was
 resolved. Same append-at-top convention as before: newest entries go right
 after this header, not at the bottom.
 
+### CODE REVIEW 2026-08-24 (`/code-review high 02e5980..HEAD`) — 11 findings on this session's OWN work. Six fixed; the two most serious were things I had already claimed were fixed.
+
+An independent high-effort pass over everything this session added - five new
+modules, a dozen touched files, all written by me. It found eleven, and the
+pattern is uncomfortable: **the two worst are regressions introduced BY my own
+fixes, and one of them I had verified with an invariant that tested the wrong
+property.**
+
+**F1 (HIGH) - nav and legend counted items the text pane never renders. FIXED.**
+`api_klal()` merges colliding entries via `_claim_word_index()`
+(manual-over-candidate, flag-over-candidate, witness-over-candidate) - a fix I
+made earlier the same day - but `api_klalim()` still added every source
+independently. Measured: **nav 1201 vs 1061 rendered, across 88 klalim**, so
+`open_count` overstated the remaining review work and could never reach zero.
+Fixed by counting DISTINCT word_indexes with the same skip conditions
+`api_klal()` applies. Now exact: 1061 = 1061, 0 klalim differing. New invariant
+`test_nav_counts_match_what_the_text_pane_actually_renders` asserts it.
+
+**F4 (MEDIUM) - "Clear revisit flag" was unreachable for 197 of 325 open flags.
+FIXED, and my earlier corpus sweep was wrong.** I added the control to the
+DISPUTED panel, then swept and reported "325 unclearable -> 0". But
+`renderKlalBody` routes `opcode 'ai_flag'` and `opcode 'manual'` words to the
+MANUAL panel, which had no such control. **My invariant asserted that the served
+entry carries a `word_flag` field - not that a panel offering the button
+actually renders.** Testing the served field instead of the reachable control is
+precisely the mistake that file exists to catch. Control added to the manual
+panel too; verified 325/325 reachable, and the invariant corrected to check
+either surface.
+
+**F5 (MEDIUM) - caching Pass B destroyed the independence the stability gate
+depends on. REVERTED.** On 2026-08-23 I "fixed" H8 by pointing
+`run_part1_vlm_patch_passB.py` at the persistent `vlm_witness_cache`, reasoning
+that a script for re-running a subset should not re-pay for answered crops. True
+of cost, fatal to correctness: **Pass A and Pass B exist to be two INDEPENDENT
+SAMPLES of the same model.** That is what `vlm_verdicts()` gates on and what the
+87.43% self-consistency figure measures. A cache keyed on (crop bytes, prompt
+hash) replays Pass A's answer for Pass B, so every replayed position agrees with
+itself BY CONSTRUCTION and sails through the gate. The sibling scripts install
+no-op stubs deliberately, not by oversight - I removed a guard I had not
+understood. Reverted; the incremental-flush half of that fix is kept. The cost
+problem is real and left unsolved with the reasoning recorded.
+
+**F2 (MEDIUM) - one word, three verdicts on one screen. FIXED.** Adding
+`docai_ligature_artifact` as a second machine-resolved flag updated
+`wordState()` only, so 106 items rendered green in the text pane while the nav,
+legend and panel header called them "Machine-Disputed". Replaced the scattered
+equality tests with a shared `MACHINE_RESOLVED_FLAGS` set on both sides, plus
+`test_machine_resolved_flags_agree_between_server_and_frontend` to keep the two
+lists in sync.
+
+**F3 (MEDIUM) - an older manual_correction silently masked a newer
+disputed_choice. FIXED.** 19 positions carry both, and in all 19 the manual
+record is older (klal 91 w109: manual 2026-08-15, disputed 2026-08-24). Their
+chosen text agrees today so nothing was visibly wrong - but the next
+re-decision from the disputed panel would have been recorded and not displayed.
+Now keeps whichever record is newer.
+
+**F6/F7 (MEDIUM-LOW/LOW) - the synthesizer classified artifacts against the
+wrong string, and counted them before the skip. FIXED.**
+`ligature_artifact(stored, reading)` used the stored corpus word, so where a
+reviewer had corrected a word but the decision was not yet applied the artifact
+was missed and the item escalated as "a human chose X while two engines agree on
+Y" - the exact noise that classification removes. 7 of 17 such escalations were
+klal 91's `אליבא` vs the engines' `איבא`. Now classifies against the human's
+text where one exists: contradictions correctly identified as artifacts went
+56/73 -> **63/73**, and the headline artifact count stopped double-reporting
+skipped items (63 -> 7 actually reaching a reviewer).
+
+**Accepted and NOT fixed, recorded with the reasoning:** F8 (a latent crash path
+on a null `chosen_text`, 0 such records exist, plus a `split()` vs `split(" ")`
+mismatch latent until a klal contains a double space), F9 (`docai_verdicts()`
+has no drift guard - 0 of 538 candidates are currently drifted, but a drifted
+one could manufacture a two-engine consensus at an unrelated word), F10 (the
+review queue changes shape depending on the gitignored reference corpus, with no
+warning printed - a clone without it silently gets 118 differently-flagged items
+and no repaired-reading option), F11 (`--render-dpi` still requires the cached
+PNG it does not use). F9 and F10 are the two worth closing next.
+
+280 + 16 tests green.
+
 ### 2026-08-24 — START_HERE lessons 29-31 added. All three were earned by my own failures this session, not found in someone else's code.
 
 Lessons 23-28 were added earlier today from the code review and the user's

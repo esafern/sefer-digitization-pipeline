@@ -1456,8 +1456,15 @@ def test_every_open_word_level_flag_has_a_control_that_can_clear_it(part1_by_id)
     for klal_id, indices in open_by_klal.items():
         if klal_id not in part1_by_id:
             continue
+        # CORRECTED 2026-08-24: this used to check only for a `word_flag` field,
+        # which is the condition the DISPUTED panel's button renders on. But
+        # renderKlalBody routes opcode 'ai_flag' and 'manual' words to the
+        # MANUAL panel instead, so the original assertion passed while 197 of
+        # 325 open flags had no reachable control. Testing the served field
+        # rather than the reachable control is exactly the mistake this file
+        # exists to catch.
         clearable = {c["word_index"] for c in review_server.api_klal(klal_id)["corrections"]
-                     if c.get("word_flag")}
+                     if c.get("word_flag") or c.get("opcode") == "ai_flag"}
         unreachable += [(klal_id, wi) for wi in indices if wi not in clearable]
 
     assert not unreachable, (
@@ -1465,3 +1472,47 @@ def test_every_open_word_level_flag_has_a_control_that_can_clear_it(part1_by_id)
         f"field, so the dashboard renders no control that can clear them: "
         f"{sorted(unreachable)[:10]}. They stay open in the log and keep highlighting "
         f"their word forever.")
+
+
+def test_nav_counts_match_what_the_text_pane_actually_renders(part1_by_id):
+    """REGRESSION 2026-08-24 (code review of that session's own work).
+
+    api_klal() merges colliding entries at one word_index (manual-over-candidate,
+    flag-over-candidate, witness-over-candidate), but api_klalim() counted every
+    source independently, so the nav and legend reported items the text pane
+    never renders. Measured before the fix: nav 1201 vs 1061 rendered, across 88
+    klalim - `open_count` overstated the remaining work and could never reach
+    zero.
+
+    What the text pane actually puts on screen is one entry per non-delete
+    word_index (app.js's byIndex map is last-write-wins) plus every delete entry,
+    which renders as an insertion gap rather than a word span."""
+    review_server = _import_from_path("review_server", os.path.join(REPO, "pipeline", "review_server.py"))
+    listing = review_server.api_klalim(1)
+    rows = listing if isinstance(listing, list) else listing.get("klalim", [])
+    offenders = []
+    for row in rows:
+        corrections = review_server.api_klal(row["klal_id"])["corrections"]
+        rendered = len({c["word_index"] for c in corrections if c.get("opcode") != "delete"}) \
+            + len([c for c in corrections if c.get("opcode") == "delete"])
+        if row["correction_count"] != rendered:
+            offenders.append((row["klal_id"], row["correction_count"], rendered))
+    assert not offenders, (
+        f"{len(offenders)} klal(im) whose nav count disagrees with what the text pane "
+        f"renders (klal_id, nav, rendered): {offenders[:8]}")
+
+
+def test_machine_resolved_flags_agree_between_server_and_frontend():
+    """A flag counted as machine-RESOLVED by the server but not by the frontend
+    (or vice versa) renders the same word with two different verdicts on one
+    screen - green in the text pane, "Machine-Disputed" in the nav and the panel
+    header. That is what happened when `docai_ligature_artifact` was added as a
+    second resolved flag and only `wordState()` learned about it."""
+    review_server = _import_from_path("review_server", os.path.join(REPO, "pipeline", "review_server.py"))
+    with open(os.path.join(REPO, "review_frontend", "app.js"), encoding="utf-8") as f:
+        js = f.read()
+    m = re.search(r"const MACHINE_RESOLVED_FLAGS = \[([^\]]*)\]", js)
+    assert m, "review_frontend/app.js must define MACHINE_RESOLVED_FLAGS"
+    frontend = {v.strip().strip("'\"") for v in m.group(1).split(",") if v.strip()}
+    assert frontend == set(review_server.MACHINE_RESOLVED_FLAGS), (
+        f"server {sorted(review_server.MACHINE_RESOLVED_FLAGS)} != frontend {sorted(frontend)}")

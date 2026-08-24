@@ -216,9 +216,18 @@ def synthesize(part1, verified, vlm_a, vlm_b, surya, decided=None):
                 # them on words a human had already correctly restored. Tagged,
                 # not dropped: the reviewer should still see it, but must see it
                 # labelled as an artifact rather than as three engines agreeing.
-                artifact = typography.ligature_artifact(stored, reading)
-                if artifact:
-                    stats["ligature_artifacts"] += 1
+                # Classify against the HUMAN's text where one exists, not the
+                # stored corpus word. FIXED 2026-08-24 (code review): where a
+                # reviewer has corrected a word but the decision is not yet
+                # applied, `stored` is still the OLD reading, so the artifact was
+                # missed and the item escalated as "a human chose X while two
+                # engines agree on Y" - exactly the noise this classification
+                # removes. Measured: 7 of 17 such escalations were klal 91's
+                # `אליבא` vs the engines' `איבא`, the catalogued dropped lamed.
+                chosen_txt = decided.get((kid, wi)) if (kid, wi) in decided else None
+                artifact = (typography.ligature_artifact(chosen_txt, reading)
+                            if chosen_txt else None) or \
+                           typography.ligature_artifact(stored, reading)
                 if (kid, wi) in decided:
                     chosen = decided[(kid, wi)]
                     if cio.hebrew_letters_only(chosen or "") == norm_reading:
@@ -227,6 +236,8 @@ def synthesize(part1, verified, vlm_a, vlm_b, surya, decided=None):
                         stats["contradicting_a_human"].append(
                             (kid, wi, chosen, reading, sorted(engines), artifact))
                     break
+                if artifact:
+                    stats["ligature_artifacts"] += 1
                 disputes.append({
                     "klal_id": kid,
                     "word_index": wi,

@@ -84,6 +84,11 @@ const STATE_META = {
   machine: { label: 'Machine-Resolved', color: '#d69e2e' },
   human:   { label: 'Human-Decided',    color: '#38a169' },
 };
+// Flags meaning "the machine settled this". Must stay in sync with
+// review_server.MACHINE_RESOLVED_FLAGS - a flag in one list and not the other
+// renders the same word with two different verdicts on one screen.
+const MACHINE_RESOLVED_FLAGS = ['current_text_confirmed', 'docai_ligature_artifact'];
+
 function wordState(corr) {
   // GUARD added 2026-08-17 (code review): renderKlalBody() branches on
   // opcode === 'ai_flag' before this ever runs, so it's not reachable
@@ -94,11 +99,7 @@ function wordState(corr) {
   // Human-Decided.
   if (corr.opcode === 'ai_flag') return 'open';
   if (corr.current_decision) return 'human';
-  if (corr.flag === 'current_text_confirmed') return 'machine';
-  // A candidate whose only difference from the corpus is the alef-lamed
-  // ligature's dropped lamed (pipeline/repair_filters/docai_filter.py). The
-  // repaired DocAI reading IS the stored text, so there is nothing to choose.
-  if (corr.flag === 'docai_ligature_artifact') return 'machine';
+  if (MACHINE_RESOLVED_FLAGS.includes(corr.flag)) return 'machine';
   // Witness items: human decision wins first, then vision-selected A/B ->
   // machine-resolved; NEITHER or absent -> open.
   if (corr.opcode === 'witness') {
@@ -114,7 +115,7 @@ function wordState(corr) {
 // resolved word." The status LABEL (tooltip / candidate panel) shows both
 // axes instead of just the final one.
 function statusLabel(corr) {
-  const machine = corr.flag === 'current_text_confirmed' ? STATE_META.machine.label : STATE_META.open.label;
+  const machine = MACHINE_RESOLVED_FLAGS.includes(corr.flag) ? STATE_META.machine.label : STATE_META.open.label;
   return corr.current_decision ? `${machine} · ${STATE_META.human.label}` : machine;
 }
 
@@ -1278,6 +1279,7 @@ async function openManualCorrectionPanel(klalId, wordIndex, word, existing) {
       <button class="panel-btn" id="save-manual-correction-btn">Save correction</button>
       ${isAiFlag ? `<button class="panel-btn secondary" id="accept-current-text-btn">Accept current text</button>` : ''}
       <button class="panel-btn secondary" id="delete-manual-word-btn">Delete this word</button>
+      ${isAiFlag || (existing && existing.word_flag) ? `<button class="panel-btn secondary" id="clear-word-flag-btn-manual">Clear revisit flag</button>` : ''}
     </div>
     ${existing ? `
     <div class="panel-section">
@@ -1328,6 +1330,34 @@ async function openManualCorrectionPanel(klalId, wordIndex, word, existing) {
   // native dialogs blocking further automated/scripted interaction with
   // the page entirely once triggered.
   let deleteArmed = false;
+  // ADDED 2026-08-24, second pass. The first fix for "i can't clear the revisit
+  // flag" put the control ONLY in the disputed panel - but renderKlalBody routes
+  // opcode 'ai_flag' and opcode 'manual' words to THIS panel, so the control was
+  // unreachable for exactly the flags that render as their own entry. Measured:
+  // 128 of 325 open word-level flags were clearable, 197 were not. The earlier
+  // corpus sweep asserted the wrong property - that the served entry carries a
+  // `word_flag` field, not that a panel offering the button actually renders.
+  const clearFlagManual = document.getElementById('clear-word-flag-btn-manual');
+  if (clearFlagManual) {
+    clearFlagManual.onclick = async () => {
+      const res = await fetch('/api/decisions/klal_flag', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ klal_id: klalId, word_index: wordIndex,
+                               needs_revisit: false,
+                               note: 'Word-level revisit flag cleared from the dashboard.' }),
+      });
+      if (!res.ok) { alert('Could not clear the flag: ' + (await res.text())); return; }
+      delete mountedKlal[klalId];
+      delete fetchInFlight[klalId];
+      const fresh = await fetchKlal(klalId);
+      const block = document.getElementById('klal-block-' + klalId);
+      if (block) renderKlalBody(block, fresh);
+      refreshKlalimList();
+      dismissPanels();
+    };
+  }
+
   const deleteBtn = document.getElementById('delete-manual-word-btn');
   deleteBtn.onclick = async () => {
     if (!deleteArmed) {

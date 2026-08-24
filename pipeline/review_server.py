@@ -53,6 +53,14 @@ IMAGES_DIR = os.path.join(REPO, "images", "pdf_pages")
 # equals max(klal_id) in the live part1.json.
 PART1_MAX_KLAL = cio.PART1_MAX_KLAL
 
+# Flags that mean "the machine settled this; no reading is in dispute". Kept as
+# a set rather than an equality test because a SECOND such flag was added
+# 2026-08-24 (docai_ligature_artifact) and the equality tests scattered through
+# the count/label code were not updated - the same word then rendered green in
+# the text pane, "Machine-Disputed" in the nav and legend, and
+# "Machine-Disputed" in the panel header. Three verdicts on one screen.
+MACHINE_RESOLVED_FLAGS = ("current_text_confirmed", "docai_ligature_artifact")
+
 FLAG_LABELS = {
     "current_text_may_be_wrong": ["Disputed", "#e53e3e"],
     "possible_omission": ["Possibly missing", "#805ad5"],
@@ -664,7 +672,7 @@ def api_klalim(part_num=1):
         # otherwise it's still an open dispute nobody has looked at.
         machine_resolved_count = sum(
             1 for c in entries
-            if (kid, c["word_index"]) not in decided and c.get("flag") == "current_text_confirmed"
+            if (kid, c["word_index"]) not in decided and c.get("flag") in MACHINE_RESOLVED_FLAGS
         )
         corr_machine_disputed_count = len(entries) - corr_decided_count - machine_resolved_count
 
@@ -688,6 +696,12 @@ def api_klalim(part_num=1):
         words = (k.get("clean_text") or "").split(" ")
         n_words = len(words)
         manual_indices = manual_indices_by_klal.get(kid, set())
+        manual_indices_for_count = manual_indices
+        ai_flag_indices_for_count = {
+            fwidx for (fkid, fwidx), rec in all_klal_flags.items()
+            if fkid == kid and fwidx is not None and rec.get("needs_revisit")
+            and fwidx not in manual_indices and 0 <= fwidx < n_words
+        }
         ai_flag_count = sum(
             1 for (fkid, fwidx), rec in all_klal_flags.items()
             if fkid == kid
@@ -698,7 +712,25 @@ def api_klalim(part_num=1):
         )
 
         manual_count = manual_count_by_klal.get(kid, 0)
-        total_count = len(entries) + len(w_entries) + manual_count + ai_flag_count
+        # FIXED 2026-08-24 (code review of this session's own work). api_klal() now
+        # MERGES colliding entries via _claim_word_index() - manual-over-candidate,
+        # flag-over-candidate, witness-over-candidate - but this line still added
+        # every source independently, so the nav and legend counted items the text
+        # pane never renders. Measured before the fix: nav 1201 vs 1021 rendered,
+        # across 88 klalim. open_count therefore overstated the remaining work and
+        # could never reach zero. Count the DISTINCT word_indexes each source
+        # contributes, the same way the merge collapses them.
+        # These four lines must mirror api_klal()'s own skip conditions exactly;
+        # tests/test_corpus_invariants.py::test_nav_counts_match_what_the_text_
+        # pane_renders asserts they still do, so the two cannot drift apart again.
+        _counted = {e["word_index"] for e in entries if e.get("opcode") != "delete"}
+        _counted |= {w["word_index"] for w in w_entries
+                     if w.get("word_index") is not None
+                     and 0 <= w["word_index"] < n_words
+                     and w["word_index"] not in manual_indices}
+        _counted |= manual_indices_for_count
+        _counted |= ai_flag_indices_for_count
+        total_count = len(_counted) + sum(1 for e in entries if e.get("opcode") == "delete")
         decided_count = corr_decided_count + w_decided_count + manual_count
         machine_disputed_count = corr_machine_disputed_count + w_machine_disputed_count + ai_flag_count
 
@@ -793,7 +825,21 @@ def api_klal(klal_id):
         # no box. That test's docstring predicted exactly this class would
         # resurrect the moment a still-valid manual decision landed on a live
         # candidate's position; klal 91 w453/w524 is that moment.
-        if _claim_word_index(corrections, word_index, "current_decision", rec) is not None:
+        # Keep whichever decision is NEWER. _merge_decision() has already set
+        # current_decision from all_current("candidate_choice") (aliased to
+        # disputed_choice); overwriting it unconditionally means an older
+        # manual_correction silently masks a newer disputed_choice. Measured
+        # 2026-08-24: 19 positions carry both, and in all 19 the manual record
+        # is the older one (klal 91 w109: manual 2026-08-15, disputed_choice
+        # 2026-08-24). Their chosen_text agrees today, so nothing is visibly
+        # wrong yet - but the next re-decision from the disputed panel would be
+        # recorded and then not displayed, with the panel still showing the
+        # stale choice.
+        _existing = _claim_word_index(corrections, word_index)
+        if _existing is not None:
+            _prior = _existing.get("current_decision")
+            if not _prior or (rec.get("ts") or "") >= (_prior.get("ts") or ""):
+                _existing["current_decision"] = rec
             continue
         corrections.append({
             "word_index": word_index,

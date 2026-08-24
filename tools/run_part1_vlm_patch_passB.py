@@ -22,16 +22,8 @@ sys.path.insert(0, REPO)
 sys.path.insert(0, os.path.join(REPO, "pipeline"))
 import corpus_io
 import vision_adjudication_common
-from vision_adjudication_common import (
-    init_cache_table, get_cached_decision, put_cached_decision,
-)
-
-# Same cache table, key shape and prompt hash as
-# pipeline/second_witness_eval/vlm_witness.py - one cache of paid answers,
-# not a private second one (START_HERE Part 2, "shared library modules").
-CACHE_DB = os.path.join(REPO, "adjudication_cache.db")
-CACHE_TABLE = "vlm_witness_cache"
-PROMPT_HASH = "vlm_literal_ocr_v1"
+# NOTE: deliberately no cache imports. See cache_for() below - Pass B must not
+# replay Pass A's answers, or the stability gate it feeds becomes tautological.
 
 UNCONDITIONED_OCR_PROMPT = (
     "You are a literal OCR reader for 19th-century Hebrew typography. "
@@ -81,23 +73,32 @@ def main():
     blocks = parse_pass_file_blocks(output_path)
     print(f"Loaded {len(blocks)} existing klal blocks from {output_path}")
 
-    # FIXED 2026-08-23 (code review, finding H8). This used to install no-op
-    # cache stubs, so every run re-paid for every crop it had already answered -
-    # in a script whose whole purpose is re-running a subset of klalim, and in a
-    # repo that ran its API credits to zero on 2026-08-21. Now uses the same
-    # real cache table and key as pipeline/second_witness_eval/vlm_witness.py
-    # (crop bytes + prompt hash), so a re-run costs only what is genuinely new.
-    init_cache_table(CACHE_DB, CACHE_TABLE, PROMPT_HASH, has_model_column=True)
-
-    def cache_for(crop_bytes):
+    # REVERTED 2026-08-24, and the reasoning is worth keeping because the first
+    # version looked like an obvious win.
+    #
+    # On 2026-08-23 this script's no-op cache stubs were "fixed" to use the same
+    # persistent table as vlm_witness.py, on the grounds that a script whose
+    # whole purpose is re-running a SUBSET of klalim should not re-pay for crops
+    # it has already answered. That is true of cost and fatal to correctness.
+    #
+    # Pass A and Pass B exist to be two INDEPENDENT SAMPLES of the same model.
+    # That independence is the entire measurement: it is what
+    # synthesize_multi_witness.vlm_verdicts() gates on (where the two passes
+    # disagree, the VLM abstains) and what the 87.43% self-consistency figure
+    # reports. A cache keyed on (crop bytes, prompt hash) replays Pass A's
+    # stored answer for Pass B, so every replayed position agrees with itself BY
+    # CONSTRUCTION and sails through the stability gate. The sibling scripts
+    # install no-op stubs deliberately, not by oversight.
+    #
+    # The cost problem is real and unsolved here. A Pass-B-private table, or a
+    # per-run component in the key, would fix it without collapsing the sample;
+    # neither is worth building until this script is actually needed again.
+    def cache_for(_crop_bytes):
         def cache_get():
-            return get_cached_decision(
-                CACHE_DB, CACHE_TABLE, PROMPT_HASH, crop_bytes, "", "", "")
+            return None
 
         def cache_put(text, model):
-            put_cached_decision(
-                CACHE_DB, CACHE_TABLE, PROMPT_HASH, crop_bytes, "", "", "",
-                text, model=model)
+            pass
         return cache_get, cache_put
 
     def flush(all_blocks):
