@@ -95,6 +95,10 @@ function wordState(corr) {
   if (corr.opcode === 'ai_flag') return 'open';
   if (corr.current_decision) return 'human';
   if (corr.flag === 'current_text_confirmed') return 'machine';
+  // A candidate whose only difference from the corpus is the alef-lamed
+  // ligature's dropped lamed (pipeline/repair_filters/docai_filter.py). The
+  // repaired DocAI reading IS the stored text, so there is nothing to choose.
+  if (corr.flag === 'docai_ligature_artifact') return 'machine';
   // Witness items: human decision wins first, then vision-selected A/B ->
   // machine-resolved; NEITHER or absent -> open.
   if (corr.opcode === 'witness') {

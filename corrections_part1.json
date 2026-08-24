@@ -4,6 +4,7 @@
       "word_index": 85,
       "opcode": "replace",
       "docai_reading": "לכן",
+      "docai_repaired": null,
       "final_text": "לכו",
       "page": 14,
       "bbox": {
@@ -24,6 +25,7 @@
       "word_index": 437,
       "opcode": "replace",
       "docai_reading": "ומרקמהד",
+      "docai_repaired": null,
       "final_text": "ומדקמהדר",
       "page": 14,
       "bbox": {
@@ -44,6 +46,7 @@
       "word_index": 446,
       "opcode": "replace",
       "docai_reading": "ומידו",
+      "docai_repaired": null,
       "final_text": "ומיהו",
       "page": 14,
       "bbox": {
@@ -66,6 +69,7 @@
       "word_index": 109,
       "opcode": "replace",
       "docai_reading": "אטינא",
+      "docai_repaired": null,
       "final_text": "אמינא",
       "page": 14,
       "bbox": {
@@ -86,6 +90,7 @@
       "word_index": 195,
       "opcode": "replace",
       "docai_reading": "לדערת",
+      "docai_repaired": null,
       "final_text": "לדעת",
       "page": 15,
       "bbox": {
@@ -132,6 +137,7 @@
       "word_index": 632,
       "opcode": "delete",
       "docai_reading": "ג",
+      "docai_repaired": null,
       "final_text": null,
       "page": 15,
       "bbox": {
@@ -154,6 +160,7 @@
       "word_index": 0,
       "opcode": "insert",
       "docai_reading": null,
+      "docai_repaired": null,
       "final_text": "ג",
       "page": 15,
       "bbox": {
@@ -174,6 +181,7 @@
       "word_index": 128,
       "opcode": "replace",
       "docai_reading": "מלמר",
+      "docai_repaired": null,
       "final_text": "מלמד",
       "page": 15,
       "bbox": {
@@ -194,6 +202,7 @@
       "word_index": 170,
       "opcode": "replace",
       "docai_reading": "מלמר",
+      "docai_repaired": null,
       "final_text": "מלמד",
       "page": 15,
       "bbox": {
@@ -214,6 +223,7 @@
       "word_index": 290,
       "opcode": "replace",
       "docai_reading": "מוער",
+      "docai_repaired": null,
       "final_text": "מועד",
       "page": 15,
       "bbox": {
@@ -236,6 +246,7 @@
       "word_index": 0,
       "opcode": "insert",
       "docai_reading": null,
+      "docai_repaired": null,
       "final_text": "ד",
       "page": 15,
       "bbox": {
@@ -256,6 +267,7 @@
       "word_index": 32,
       "opcode": "delete",
       "docai_reading": "1",
+      "docai_repaired": null,
       "final_text": null,
       "page": 15,
       "bbox": {
@@ -276,6 +288,7 @@
       "word_index": 36,
       "opcode": "replace",
       "docai_reading": "טרור",
+      "docai_repaired": null,
       "final_text": "טהור",
       "page": 16,
       "bbox": {
@@ -348,6 +361,7 @@
       "word_index": 403,
       "opcode": "replace",
       "docai_reading": "איהן",
+      "docai_repaired": "אליהן",
       "final_text": "איהו",
       "page": 16,
       "bbox": {
@@ -396,6 +410,7 @@
       "word_index": 204,
       "opcode": "replace",
       "docai_reading": "דאיסליגו",
+      "docai_repaired": null,
       "final_text": "דאיפליגו",
       "page": 16,
       "bbox": {
@@ -496,6 +511,7 @@
       "word_index": 1,
       "opcode": "replace",
       "docai_reading": "ארם",
+      "docai_repaired": null,
       "final_text": "אדם",
       "page": 17,
       "bbox": {
@@ -542,6 +558,7 @@
       "word_index": 61,
       "opcode": "replace",
       "docai_reading": "ארם",
+      "docai_repaired": null,
       "final_text": "אדם",
       "page": 17,
       "bbox": {
@@ -616,6 +633,7 @@
       "word_index": 262,
       "opcode": "replace",
       "docai_reading": "דאס",
+      "docai_repaired": null,
       "final_text": "דאם",
       "page": 17,
       "bbox": {
@@ -662,6 +680,7 @@
       "word_index": 464,
       "opcode": "replace",
       "docai_reading": "דאס",
+      "docai_repaired": null,
       "final_text": "דאם",
       "page": 17,
       "bbox": {
@@ -736,6 +755,7 @@
       "word_index": 1,
       "opcode": "replace",
       "docai_reading": "אייךו",
+      "docai_repaired": null,
       "final_text": "איידי",
       "page": 18,
       "bbox": {
@@ -758,6 +778,7 @@
       "word_index": 0,
       "opcode": "insert",
       "docai_reading": null,
+      "docai_repaired": null,
       "final_text": "י",
       "page": 18,
       "bbox": {
@@ -778,6 +799,7 @@
       "word_index": 74,
       "opcode": "replace",
       "docai_reading": "כתכו",
+      "docai_repaired": null,
       "final_text": "כתבו",
       "page": 18,
       "bbox": {
@@ -800,6 +822,7 @@
       "word_index": 84,
       "opcode": "replace",
       "docai_reading": "וחרב",
+      "docai_repaired": null,
       "final_text": "והרב",
       "page": 18,
       "bbox": {
@@ -822,6 +845,7 @@
       "word_index": 188,
       "opcode": "replace",
       "docai_reading": "הפוסקיס",
+      "docai_repaired": null,
       "final_text": "הפוסקים",
       "page": 18,
       "bbox": {
@@ -842,6 +866,7 @@
       "word_index": 212,
       "opcode": "replace",
       "docai_reading": "עור",
+      "docai_repaired": null,
       "final_text": "עוד",
       "page": 19,
       "bbox": {
@@ -888,6 +913,7 @@
       "word_index": 248,
       "opcode": "replace",
       "docai_reading": "וכתכ",
+      "docai_repaired": null,
       "final_text": "וכתב",
       "page": 19,
       "bbox": {
@@ -962,6 +988,7 @@
       "word_index": 112,
       "opcode": "replace",
       "docai_reading": "יומיח",
+      "docai_repaired": null,
       "final_text": "יומיה",
       "page": 19,
       "bbox": {
@@ -1014,6 +1041,7 @@
       "word_index": 261,
       "opcode": "replace",
       "docai_reading": "חך",
+      "docai_repaired": null,
       "final_text": "הך",
       "page": 19,
       "bbox": {
@@ -1034,6 +1062,7 @@
       "word_index": 292,
       "opcode": "insert",
       "docai_reading": null,
+      "docai_repaired": null,
       "final_text": "יד",
       "page": 19,
       "bbox": {
@@ -1056,6 +1085,7 @@
       "word_index": 0,
       "opcode": "insert",
       "docai_reading": null,
+      "docai_repaired": null,
       "final_text": "טו",
       "page": 19,
       "bbox": {
@@ -1078,6 +1108,7 @@
       "word_index": 0,
       "opcode": "insert",
       "docai_reading": null,
+      "docai_repaired": null,
       "final_text": "טז",
       "page": 19,
       "bbox": {
@@ -1098,6 +1129,7 @@
       "word_index": 100,
       "opcode": "replace",
       "docai_reading": "וכתכו",
+      "docai_repaired": null,
       "final_text": "וכתבו",
       "page": 19,
       "bbox": {
@@ -1120,6 +1152,7 @@
       "word_index": 28,
       "opcode": "replace",
       "docai_reading": "בחליכות",
+      "docai_repaired": null,
       "final_text": "בהליכות",
       "page": 20,
       "bbox": {
@@ -1198,6 +1231,7 @@
       "word_index": 308,
       "opcode": "delete",
       "docai_reading": "יח",
+      "docai_repaired": null,
       "final_text": null,
       "page": 20,
       "bbox": {
@@ -1220,6 +1254,7 @@
       "word_index": 0,
       "opcode": "insert",
       "docai_reading": null,
+      "docai_repaired": null,
       "final_text": "יח",
       "page": 20,
       "bbox": {
@@ -1266,6 +1301,7 @@
       "word_index": 77,
       "opcode": "insert",
       "docai_reading": null,
+      "docai_repaired": null,
       "final_text": "יט",
       "page": 20,
       "bbox": {
@@ -1366,6 +1402,7 @@
       "word_index": 157,
       "opcode": "replace",
       "docai_reading": "בהו",
+      "docai_repaired": null,
       "final_text": "בהן",
       "page": 20,
       "bbox": {
@@ -1392,6 +1429,7 @@
       "word_index": 170,
       "opcode": "replace",
       "docai_reading": "חמתחיל",
+      "docai_repaired": null,
       "final_text": "המתחיל",
       "page": 20,
       "bbox": {
@@ -1414,6 +1452,7 @@
       "word_index": 0,
       "opcode": "insert",
       "docai_reading": null,
+      "docai_repaired": null,
       "final_text": "כ",
       "page": 20,
       "bbox": {
@@ -1434,6 +1473,7 @@
       "word_index": 40,
       "opcode": "insert",
       "docai_reading": null,
+      "docai_repaired": null,
       "final_text": "כא",
       "page": 20,
       "bbox": {
@@ -1456,6 +1496,7 @@
       "word_index": 0,
       "opcode": "insert",
       "docai_reading": null,
+      "docai_repaired": null,
       "final_text": "כב",
       "page": 20,
       "bbox": {
@@ -1476,6 +1517,7 @@
       "word_index": 48,
       "opcode": "replace",
       "docai_reading": "סיי כייה",
+      "docai_repaired": null,
       "final_text": "סי' כ\"ה",
       "page": 20,
       "bbox": {
@@ -1498,6 +1540,7 @@
       "word_index": 187,
       "opcode": "replace",
       "docai_reading": "כרב",
+      "docai_repaired": null,
       "final_text": "כתב",
       "page": 21,
       "bbox": {
@@ -1518,6 +1561,7 @@
       "word_index": 190,
       "opcode": "replace",
       "docai_reading": "משוס",
+      "docai_repaired": null,
       "final_text": "משום",
       "page": 21,
       "bbox": {
@@ -1538,6 +1582,7 @@
       "word_index": 331,
       "opcode": "replace",
       "docai_reading": "גכי",
+      "docai_repaired": null,
       "final_text": "גבי",
       "page": 21,
       "bbox": {
@@ -1558,6 +1603,7 @@
       "word_index": 455,
       "opcode": "replace",
       "docai_reading": "וחנמוקי",
+      "docai_repaired": null,
       "final_text": "והנמוקי",
       "page": 21,
       "bbox": {
@@ -1584,6 +1630,7 @@
       "word_index": 524,
       "opcode": "replace",
       "docai_reading": "כרבו",
+      "docai_repaired": null,
       "final_text": "כתבו",
       "page": 21,
       "bbox": {
@@ -1658,6 +1705,7 @@
       "word_index": 0,
       "opcode": "insert",
       "docai_reading": null,
+      "docai_repaired": null,
       "final_text": "כד",
       "page": 21,
       "bbox": {
@@ -1784,6 +1832,7 @@
       "word_index": 136,
       "opcode": "replace",
       "docai_reading": "דב\"ט",
+      "docai_repaired": null,
       "final_text": "דב\"מ",
       "page": 22,
       "bbox": {
@@ -1882,6 +1931,7 @@
       "word_index": 714,
       "opcode": "replace",
       "docai_reading": "איהן",
+      "docai_repaired": "אליהן",
       "final_text": "איהו",
       "page": 23,
       "bbox": {
@@ -1902,6 +1952,7 @@
       "word_index": 727,
       "opcode": "replace",
       "docai_reading": "הכ\"ט",
+      "docai_repaired": null,
       "final_text": "הכ\"מ",
       "page": 23,
       "bbox": {
@@ -1922,6 +1973,7 @@
       "word_index": 757,
       "opcode": "replace",
       "docai_reading": "וכ\"ג",
+      "docai_repaired": null,
       "final_text": "וכ\"נ",
       "page": 23,
       "bbox": {
@@ -1970,6 +2022,7 @@
       "word_index": 0,
       "opcode": "insert",
       "docai_reading": null,
+      "docai_repaired": null,
       "final_text": "כז",
       "page": 23,
       "bbox": {
@@ -1992,6 +2045,7 @@
       "word_index": 0,
       "opcode": "insert",
       "docai_reading": null,
+      "docai_repaired": null,
       "final_text": "כח",
       "page": 23,
       "bbox": {
@@ -2038,6 +2092,7 @@
       "word_index": 47,
       "opcode": "insert",
       "docai_reading": null,
+      "docai_repaired": null,
       "final_text": "כט",
       "page": 23,
       "bbox": {
@@ -2060,6 +2115,7 @@
       "word_index": 75,
       "opcode": "replace",
       "docai_reading": "כרב",
+      "docai_repaired": null,
       "final_text": "כתב",
       "page": 23,
       "bbox": {
@@ -2134,6 +2190,7 @@
       "word_index": 501,
       "opcode": "replace",
       "docai_reading": "ידן",
+      "docai_repaired": null,
       "final_text": "ידו",
       "page": 24,
       "bbox": {
@@ -2232,6 +2289,7 @@
       "word_index": 987,
       "opcode": "replace",
       "docai_reading": "בתוס",
+      "docai_repaired": null,
       "final_text": "כתוס'",
       "page": 24,
       "bbox": {
@@ -2416,6 +2474,7 @@
       "word_index": 0,
       "opcode": "insert",
       "docai_reading": null,
+      "docai_repaired": null,
       "final_text": "לג",
       "page": 26,
       "bbox": {
@@ -2464,6 +2523,7 @@
       "word_index": 48,
       "opcode": "replace",
       "docai_reading": "פגשתיהן",
+      "docai_repaired": null,
       "final_text": "פגשתיהו",
       "page": 26,
       "bbox": {
@@ -2484,6 +2544,7 @@
       "word_index": 72,
       "opcode": "replace",
       "docai_reading": "דוא",
+      "docai_repaired": null,
       "final_text": "הוא",
       "page": 26,
       "bbox": {
@@ -2506,6 +2567,7 @@
       "word_index": 0,
       "opcode": "insert",
       "docai_reading": null,
+      "docai_repaired": null,
       "final_text": "לה",
       "page": 26,
       "bbox": {
@@ -2526,6 +2588,7 @@
       "word_index": 30,
       "opcode": "delete",
       "docai_reading": "שמות",
+      "docai_repaired": null,
       "final_text": null,
       "page": 26,
       "bbox": {
@@ -2546,6 +2609,7 @@
       "word_index": 44,
       "opcode": "insert",
       "docai_reading": null,
+      "docai_repaired": null,
       "final_text": "בספר שמות",
       "page": 26,
       "bbox": {
@@ -2568,6 +2632,7 @@
       "word_index": 0,
       "opcode": "insert",
       "docai_reading": null,
+      "docai_repaired": null,
       "final_text": "לו",
       "page": 26,
       "bbox": {
@@ -2588,6 +2653,7 @@
       "word_index": 9,
       "opcode": "replace",
       "docai_reading": "רוזכר",
+      "docai_repaired": null,
       "final_text": "הוזכר",
       "page": 26,
       "bbox": {
@@ -2608,6 +2674,7 @@
       "word_index": 60,
       "opcode": "replace",
       "docai_reading": "כתכ",
+      "docai_repaired": null,
       "final_text": "כתב",
       "page": 26,
       "bbox": {
@@ -2656,6 +2723,7 @@
       "word_index": 0,
       "opcode": "insert",
       "docai_reading": null,
+      "docai_repaired": null,
       "final_text": "לז",
       "page": 26,
       "bbox": {
@@ -2676,6 +2744,7 @@
       "word_index": 66,
       "opcode": "replace",
       "docai_reading": "שרבריו",
+      "docai_repaired": null,
       "final_text": "שדבריו",
       "page": 26,
       "bbox": {
@@ -2724,6 +2793,7 @@
       "word_index": 148,
       "opcode": "replace",
       "docai_reading": "איעזר",
+      "docai_repaired": "אליעזר",
       "final_text": "אליעזר",
       "page": 27,
       "bbox": {
@@ -2738,7 +2808,7 @@
       "reasoning": "The context refers to the well-known Talmudic chapter 'פרק רבי אליעזר' ('פרק רבי אליעזר דמילה'). Paleographically, the middle word in line 2 clearly shows the distinctive tall ascender of a Lamed ('ל') followed by Yod ('י'), Ayin ('ע'), Zayin ('ז'), and Resh ('ר') ( forming [א]ליעזר). Option A ('איעזר') is an OCR misreading that omits the clear Lamed, while Option B correctly represents the intended Rabbinic text.",
       "vlm_reading": "אליעזר",
       "surya_reading": "איעזר",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 208,
@@ -2770,6 +2840,7 @@
       "word_index": 286,
       "opcode": "replace",
       "docai_reading": "דרבה",
+      "docai_repaired": null,
       "final_text": "דרכה",
       "page": 27,
       "bbox": {
@@ -2980,6 +3051,7 @@
       "word_index": 366,
       "opcode": "replace",
       "docai_reading": "חכמיס",
+      "docai_repaired": null,
       "final_text": "חכמים",
       "page": 28,
       "bbox": {
@@ -3026,6 +3098,7 @@
       "word_index": 522,
       "opcode": "replace",
       "docai_reading": "דשמוא",
+      "docai_repaired": "דשמואל",
       "final_text": "דשמואל",
       "page": 29,
       "bbox": {
@@ -3040,7 +3113,7 @@
       "reasoning": "The image clearly shows the word 'דשמואל' written in Rabbinic/Rashi-style print. On the far left of the middle line, the upper ascender of the letter lamed (ל) is distinctly visible extending upwards, confirming 'דשמואל' over 'דשמוא'.",
       "vlm_reading": "דשמואל",
       "surya_reading": null,
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 660,
@@ -3126,6 +3199,7 @@
       "word_index": 0,
       "opcode": "insert",
       "docai_reading": null,
+      "docai_repaired": null,
       "final_text": "מו",
       "page": 30,
       "bbox": {
@@ -3148,6 +3222,7 @@
       "word_index": 0,
       "opcode": "insert",
       "docai_reading": null,
+      "docai_repaired": null,
       "final_text": "מז",
       "page": 30,
       "bbox": {
@@ -3168,6 +3243,7 @@
       "word_index": 31,
       "opcode": "insert",
       "docai_reading": null,
+      "docai_repaired": null,
       "final_text": "מח",
       "page": 30,
       "bbox": {
@@ -3216,6 +3292,7 @@
       "word_index": 40,
       "opcode": "replace",
       "docai_reading": "טרור",
+      "docai_repaired": null,
       "final_text": "טהור",
       "page": 30,
       "bbox": {
@@ -3236,6 +3313,7 @@
       "word_index": 87,
       "opcode": "replace",
       "docai_reading": "הלבה",
+      "docai_repaired": null,
       "final_text": "הלכה",
       "page": 30,
       "bbox": {
@@ -3264,6 +3342,7 @@
       "word_index": 2,
       "opcode": "delete",
       "docai_reading": "עונשין",
+      "docai_repaired": null,
       "final_text": null,
       "page": 30,
       "bbox": {
@@ -3284,6 +3363,7 @@
       "word_index": 89,
       "opcode": "insert",
       "docai_reading": null,
+      "docai_repaired": null,
       "final_text": "נא",
       "page": 30,
       "bbox": {
@@ -3306,6 +3386,7 @@
       "word_index": 0,
       "opcode": "insert",
       "docai_reading": null,
+      "docai_repaired": null,
       "final_text": "נב",
       "page": 30,
       "bbox": {
@@ -3352,6 +3433,7 @@
       "word_index": 71,
       "opcode": "insert",
       "docai_reading": null,
+      "docai_repaired": null,
       "final_text": "נג",
       "page": 30,
       "bbox": {
@@ -3452,6 +3534,7 @@
       "word_index": 308,
       "opcode": "replace",
       "docai_reading": "אעזר",
+      "docai_repaired": "אלעזר",
       "final_text": "אלעזר",
       "page": 31,
       "bbox": {
@@ -3466,7 +3549,7 @@
       "reasoning": "The image clearly shows the word 'אלעזר' with the ascender of the letter lamed ('ל') clearly visible between the aleph ('א') and ayin ('ע'). This aligns with the context 'ור' אלעזר לא מבעיא קאמר' (referring to Menachot 11a).",
       "vlm_reading": "אלעזר",
       "surya_reading": "אעזר",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 358,
@@ -3604,6 +3687,7 @@
       "word_index": 786,
       "opcode": "replace",
       "docai_reading": "אא",
+      "docai_repaired": "אלא",
       "final_text": "אלא",
       "page": 32,
       "bbox": {
@@ -3618,7 +3702,7 @@
       "reasoning": "The raster crop clearly shows two consecutive Aleph characters ('אא') between the surrounding text ('ה' on the right and 'ב' on the left). 'אא' is a standard Rabbinic abbreviation for 'אלא'.",
       "vlm_reading": "אלא",
       "surya_reading": "א'",
-      "flag": "current_text_may_be_wrong"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 821,
@@ -3650,6 +3734,7 @@
       "word_index": 876,
       "opcode": "replace",
       "docai_reading": "אה",
+      "docai_repaired": "אלה",
       "final_text": "אלה",
       "page": 32,
       "bbox": {
@@ -3664,12 +3749,13 @@
       "reasoning": "The visible text in the manuscript crop clearly shows the letters aleph and hei ('אה') without an intervening lamed, corresponding to Option A. Option B ('אלה') represents the emended/adjudicated textual context, but the physical raster contains 'אה'.",
       "vlm_reading": "זה",
       "surya_reading": "א'",
-      "flag": "current_text_may_be_wrong"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 906,
       "opcode": "replace",
       "docai_reading": "אא",
+      "docai_repaired": "אלא",
       "final_text": "אלא",
       "page": 32,
       "bbox": {
@@ -3684,7 +3770,7 @@
       "reasoning": "The image clearly shows three Hebrew letters forming the word 'אלא'. The middle letter features the distinctive tall upper stem (ascender) of a Lamed ('ל'), flanked by two Alephs ('א'). This perfectly matches the context 'הך ברייתא אלא משום'.",
       "vlm_reading": "אלא",
       "surya_reading": "א'",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 939,
@@ -3744,6 +3830,7 @@
       "word_index": 0,
       "opcode": "insert",
       "docai_reading": null,
+      "docai_repaired": null,
       "final_text": "נז אין",
       "page": 32,
       "bbox": {
@@ -3764,6 +3851,7 @@
       "word_index": 16,
       "opcode": "delete",
       "docai_reading": "נו אין",
+      "docai_repaired": null,
       "final_text": null,
       "page": 32,
       "bbox": {
@@ -3784,6 +3872,7 @@
       "word_index": 28,
       "opcode": "replace",
       "docai_reading": "טיניידו",
+      "docai_repaired": null,
       "final_text": "מינייהו",
       "page": 32,
       "bbox": {
@@ -3832,6 +3921,7 @@
       "word_index": 24,
       "opcode": "delete",
       "docai_reading": "ר",
+      "docai_repaired": null,
       "final_text": null,
       "page": 32,
       "bbox": {
@@ -3880,6 +3970,7 @@
       "word_index": 102,
       "opcode": "insert",
       "docai_reading": null,
+      "docai_repaired": null,
       "final_text": "סא",
       "page": 33,
       "bbox": {
@@ -3902,6 +3993,7 @@
       "word_index": 0,
       "opcode": "insert",
       "docai_reading": null,
+      "docai_repaired": null,
       "final_text": "סב",
       "page": 33,
       "bbox": {
@@ -3922,6 +4014,7 @@
       "word_index": 70,
       "opcode": "replace",
       "docai_reading": "כתובן דודאה",
+      "docai_repaired": null,
       "final_text": "כתובו הודאה",
       "page": 33,
       "bbox": {
@@ -3944,6 +4037,7 @@
       "word_index": 0,
       "opcode": "insert",
       "docai_reading": null,
+      "docai_repaired": null,
       "final_text": "סד",
       "page": 33,
       "bbox": {
@@ -3964,6 +4058,7 @@
       "word_index": 7,
       "opcode": "replace",
       "docai_reading": "אא",
+      "docai_repaired": "אלא",
       "final_text": "אלא",
       "page": 33,
       "bbox": {
@@ -3978,12 +4073,13 @@
       "reasoning": "The surrounding Rabbinic textual context ('לא שייך למימר אלא בדבר שהצדוקים מודים בו') clearly calls for 'אלא'. Paleographically, the ascender rising above the x-height in the center of the word is the characteristic neck of the Hebrew letter Lamed (ל), confirming 'אלא' against the OCR error 'אא'.",
       "vlm_reading": "לא",
       "surya_reading": "א'",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 24,
       "opcode": "replace",
       "docai_reading": "כתכו",
+      "docai_repaired": null,
       "final_text": "כתבו",
       "page": 33,
       "bbox": {
@@ -4030,6 +4126,7 @@
       "word_index": 99,
       "opcode": "replace",
       "docai_reading": "תודה",
+      "docai_repaired": null,
       "final_text": "תורה",
       "page": 33,
       "bbox": {
@@ -4052,6 +4149,7 @@
       "word_index": 2,
       "opcode": "replace",
       "docai_reading": "ב\"ר",
+      "docai_repaired": null,
       "final_text": "ב\"ד",
       "page": 34,
       "bbox": {
@@ -4072,6 +4170,7 @@
       "word_index": 16,
       "opcode": "replace",
       "docai_reading": "אא",
+      "docai_repaired": "אלא",
       "final_text": "אלא",
       "page": 34,
       "bbox": {
@@ -4086,7 +4185,7 @@
       "reasoning": "The crop clearly displays two distinct Hebrew 'Aleph' characters ('אא'), representing the common Rabbinic abbreviation for 'אלא'. While Option B ('אלא') represents the expanded contextual meaning, Option A ('אא') is the accurate visual transcription of the manuscript characters.",
       "vlm_reading": "דא",
       "surya_reading": "א'",
-      "flag": "current_text_may_be_wrong"
+      "flag": "docai_ligature_artifact"
     }
   ],
   "66": [
@@ -4094,6 +4193,7 @@
       "word_index": 0,
       "opcode": "insert",
       "docai_reading": null,
+      "docai_repaired": null,
       "final_text": "סו אין",
       "page": 34,
       "bbox": {
@@ -4114,6 +4214,7 @@
       "word_index": 17,
       "opcode": "delete",
       "docai_reading": "סו אין",
+      "docai_repaired": null,
       "final_text": null,
       "page": 34,
       "bbox": {
@@ -4134,6 +4235,7 @@
       "word_index": 29,
       "opcode": "replace",
       "docai_reading": "מדדיא",
+      "docai_repaired": null,
       "final_text": "מהדיא",
       "page": 34,
       "bbox": {
@@ -4234,6 +4336,7 @@
       "word_index": 0,
       "opcode": "replace",
       "docai_reading": "סן",
+      "docai_repaired": null,
       "final_text": "סז",
       "page": 34,
       "bbox": {
@@ -4254,6 +4357,7 @@
       "word_index": 36,
       "opcode": "replace",
       "docai_reading": "בהכמה",
+      "docai_repaired": null,
       "final_text": "בחכמה",
       "page": 34,
       "bbox": {
@@ -4274,6 +4378,7 @@
       "word_index": 43,
       "opcode": "replace",
       "docai_reading": "מר\"ת",
+      "docai_repaired": null,
       "final_text": "מד\"ת",
       "page": 34,
       "bbox": {
@@ -4294,6 +4399,7 @@
       "word_index": 65,
       "opcode": "replace",
       "docai_reading": "שמוא",
+      "docai_repaired": "שמואל",
       "final_text": "שמואל",
       "page": 34,
       "bbox": {
@@ -4308,12 +4414,13 @@
       "reasoning": "The visual crop clearly shows the word 'שמואל' (with the tall ascender of the letter Lamed 'ל' visible on the left side of the word) from the context of 'מעיל שמואל'. Option B correctly includes the final 'ל' which OCR Option A omitted.",
       "vlm_reading": "שמואל",
       "surya_reading": "שמוא",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 91,
       "opcode": "insert",
       "docai_reading": null,
+      "docai_repaired": null,
       "final_text": "סח",
       "page": 34,
       "bbox": {
@@ -4336,6 +4443,7 @@
       "word_index": 0,
       "opcode": "insert",
       "docai_reading": null,
+      "docai_repaired": null,
       "final_text": "סט",
       "page": 34,
       "bbox": {
@@ -4356,6 +4464,7 @@
       "word_index": 7,
       "opcode": "replace",
       "docai_reading": "אהים",
+      "docai_repaired": "אלהים",
       "final_text": "אלהים",
       "page": 34,
       "bbox": {
@@ -4370,12 +4479,13 @@
       "reasoning": "The image clearly shows the word 'אלהים'. The ascender of the letter Lamed (ל) is distinctly visible extending above the normal x-height of the surrounding letters (א, ה, י, ם). Option A ('אהים') is a standard OCR error where DocAI failed to transcribe the Lamed ascender.",
       "vlm_reading": "אלהים",
       "surya_reading": null,
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 31,
       "opcode": "replace",
       "docai_reading": "אא",
+      "docai_repaired": "אלא",
       "final_text": "אלא",
       "page": 34,
       "bbox": {
@@ -4390,12 +4500,13 @@
       "reasoning": "The crop shows three lines of text in the second column from the right: Line 1 reads 'רב', Line 2 shows 'אלא' (with the initial aleph partially truncated at the right margin, followed by lamed and aleph), and Line 3 reads 'וכן'. This matches the target phrase 'דקאמר רב... אלא... וכן' from the provided Talmudic textual context.",
       "vlm_reading": "אלא",
       "surya_reading": "א'",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 37,
       "opcode": "replace",
       "docai_reading": "אהים",
+      "docai_repaired": "אלהים",
       "final_text": "אלהים",
       "page": 34,
       "bbox": {
@@ -4410,12 +4521,13 @@
       "reasoning": "The image clearly shows the printed pious spelling variant 'אהים', omitting the letter lamed (ל) to avoid writing out the divine name 'אלהים'. There is no ascender characteristic of a lamed visible above the x-height in the crop.",
       "vlm_reading": "אלהים",
       "surya_reading": "אהים",
-      "flag": "current_text_may_be_wrong"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 113,
       "opcode": "replace",
       "docai_reading": "א",
+      "docai_repaired": null,
       "final_text": "אל",
       "page": 34,
       "bbox": {
@@ -4436,6 +4548,7 @@
       "word_index": 151,
       "opcode": "replace",
       "docai_reading": "אמא",
+      "docai_repaired": "אלמא",
       "final_text": "אלמא",
       "page": 34,
       "bbox": {
@@ -4450,12 +4563,13 @@
       "reasoning": "The crop clearly shows the word 'אלמא' in line 2, complete with the prominent ascender of the letter lamed ('ל') extending upward above the word, matching the context 'אלמא דכינוי'.",
       "vlm_reading": null,
       "surya_reading": "אמא",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 188,
       "opcode": "replace",
       "docai_reading": "א ואהים",
+      "docai_repaired": null,
       "final_text": "אל ואלהים",
       "page": 34,
       "bbox": {
@@ -4476,6 +4590,7 @@
       "word_index": 240,
       "opcode": "replace",
       "docai_reading": "ואהים",
+      "docai_repaired": "ואלהים",
       "final_text": "ואלהים",
       "page": 34,
       "bbox": {
@@ -4490,12 +4605,13 @@
       "reasoning": "The crop clearly shows the word 'ואלהים' in the third line, including the ascender of the letter Lamed (ל) extending upward above the Heh (ה). This matches Option B and the surrounding sentence context ('דא ואלהים נמי...').",
       "vlm_reading": "ואלהים",
       "surya_reading": "ואהים",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 275,
       "opcode": "replace",
       "docai_reading": "אהים",
+      "docai_repaired": "אלהים",
       "final_text": "אלהים",
       "page": 34,
       "bbox": {
@@ -4510,12 +4626,13 @@
       "reasoning": "The crop clearly displays the word 'אלהים' in the middle line. The tall ascender of the letter Lamed ('ל') is plainly visible between the Aleph ('א') and He ('ה'). Option A ('אהים') is an OCR drop of the Lamed.",
       "vlm_reading": "אלהים",
       "surya_reading": "אהים",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 310,
       "opcode": "replace",
       "docai_reading": "אהים",
+      "docai_repaired": "אלהים",
       "final_text": "אלהים",
       "page": 34,
       "bbox": {
@@ -4530,12 +4647,13 @@
       "reasoning": "The contextual Rabbinic phrase contains the divine name 'אלהים'. Paleographically, the image clearly displays the word with the prominent tall ascender of the letter Lamed (ל), which DocAI OCR (Option A) incorrectly omitted.",
       "vlm_reading": "אלהים",
       "surya_reading": "אהים",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 339,
       "opcode": "replace",
       "docai_reading": "אהים",
+      "docai_repaired": "אלהים",
       "final_text": "אלהים",
       "page": 34,
       "bbox": {
@@ -4550,7 +4668,7 @@
       "reasoning": "The image clearly shows the word 'אלהים' followed by 'ה''. The ascender of the letter Lamed (ל) is distinctly visible reaching into the line above between 'הכי' and 'מדבר'.",
       "vlm_reading": "אלהים",
       "surya_reading": null,
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 399,
@@ -4610,6 +4728,7 @@
       "word_index": 28,
       "opcode": "replace",
       "docai_reading": "ליב",
+      "docai_repaired": null,
       "final_text": "ל\"ב",
       "page": 35,
       "bbox": {
@@ -4632,6 +4751,7 @@
       "word_index": 0,
       "opcode": "insert",
       "docai_reading": null,
+      "docai_repaired": null,
       "final_text": "עא",
       "page": 35,
       "bbox": {
@@ -4652,6 +4772,7 @@
       "word_index": 62,
       "opcode": "insert",
       "docai_reading": null,
+      "docai_repaired": null,
       "final_text": "עב",
       "page": 35,
       "bbox": {
@@ -4674,6 +4795,7 @@
       "word_index": 27,
       "opcode": "replace",
       "docai_reading": "יוהנן",
+      "docai_repaired": null,
       "final_text": "יוחנן",
       "page": 35,
       "bbox": {
@@ -4774,6 +4896,7 @@
       "word_index": 77,
       "opcode": "replace",
       "docai_reading": "דהולין",
+      "docai_repaired": null,
       "final_text": "דחולין",
       "page": 35,
       "bbox": {
@@ -4794,6 +4917,7 @@
       "word_index": 85,
       "opcode": "replace",
       "docai_reading": "אעזר",
+      "docai_repaired": "אלעזר",
       "final_text": "אלעזר",
       "page": 35,
       "bbox": {
@@ -4808,7 +4932,7 @@
       "reasoning": "The crop clearly shows the name 'אלעזר' following 'ר''. The letter Lamed ('ל') is clearly present with its distinct tall ascender extending upward into the line above between the Aleph ('א') and Ayin ('ע'). Option A misses the Lamed.",
       "vlm_reading": "אלעזר",
       "surya_reading": "אעזר",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 110,
@@ -4944,6 +5068,7 @@
       "word_index": 400,
       "opcode": "replace",
       "docai_reading": "מהחיא",
+      "docai_repaired": null,
       "final_text": "מההיא",
       "page": 35,
       "bbox": {
@@ -4964,6 +5089,7 @@
       "word_index": 493,
       "opcode": "replace",
       "docai_reading": "אפא",
+      "docai_repaired": "אלפא",
       "final_text": "אלפא",
       "page": 36,
       "bbox": {
@@ -4978,7 +5104,7 @@
       "reasoning": "The image clearly shows the word 'אלפא' preceding 'בי' (from 'ביתא'). The distinct tall ascender/neck of the letter Lamed ('ל') is clearly visible extending upward between the first Alef and Pe, forming 'אלפא'. Option B correctly captures the Lamed, whereas Option A is an OCR omission error.",
       "vlm_reading": "ספא",
       "surya_reading": "אפא",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 496,
@@ -5010,6 +5136,7 @@
       "word_index": 538,
       "opcode": "replace",
       "docai_reading": "איעזר",
+      "docai_repaired": "אליעזר",
       "final_text": "אליעזר",
       "page": 36,
       "bbox": {
@@ -5024,12 +5151,13 @@
       "reasoning": "The visible text in the middle line corresponds to the rabbinic name 'אליעזר' as confirmed by both paleographic analysis (the tall ascender characteristic of the letter Lamed 'ל' is clearly visible between Alef and Ayin) and the surrounding sentence context ('א\"ר אליעזר א\"ר ינאי'). Option A ('איעזר') is an OCR dropout missing the Lamed.",
       "vlm_reading": "איעזר",
       "surya_reading": null,
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 543,
       "opcode": "replace",
       "docai_reading": "איעזר",
+      "docai_repaired": "אליעזר",
       "final_text": "אליעזר",
       "page": 36,
       "bbox": {
@@ -5044,7 +5172,7 @@
       "reasoning": "Paleographic inspection of the raster crop shows the printed word 'איעזר' without the upper ascender characteristic of a 'ל' (Lamed), which is clearly visible in the adjacent word 'ל'. Thus, Option A represents the literal text present in the image, despite 'אליעזר' being the intended Rabbinic name contextually.",
       "vlm_reading": "איעזר",
       "surya_reading": null,
-      "flag": "current_text_may_be_wrong"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 699,
@@ -5076,6 +5204,7 @@
       "word_index": 805,
       "opcode": "replace",
       "docai_reading": "ישרא",
+      "docai_repaired": "ישראל",
       "final_text": "ישראל",
       "page": 36,
       "bbox": {
@@ -5090,12 +5219,13 @@
       "reasoning": "The contextual context 'בארץ ישראל' requires the word 'ישראל'. Paleographically, the fourth letter exhibits a distinct top ascender extending above the character roofline (characteristic of the Hebrew letter Lamed, 'ל'). Although there is print distortion at the bottom, the presence of the characteristic upper ascender together with the surrounding Rabbinic sentence context deterministically confirms Option B ('ישראל').",
       "vlm_reading": "ישראל",
       "surya_reading": "ישראל",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 847,
       "opcode": "replace",
       "docai_reading": "אא",
+      "docai_repaired": "אלא",
       "final_text": "אלא",
       "page": 36,
       "bbox": {
@@ -5110,12 +5240,13 @@
       "reasoning": "The visible text in the center of the crop shows the abbreviation 'זא' (with an abbreviation dot over the aleph), short for 'זאת אומרת'. Neither Option A ('אא') nor Option B ('אלא') correctly reflects the visible letters 'זא'.",
       "vlm_reading": "אלא",
       "surya_reading": "א'",
-      "flag": "ambiguous"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 860,
       "opcode": "replace",
       "docai_reading": "אא",
+      "docai_repaired": "אלא",
       "final_text": "אלא",
       "page": 36,
       "bbox": {
@@ -5130,7 +5261,7 @@
       "reasoning": "Option A ('אא') is a raw OCR misreading of the letters Lamed and Alef. In the manuscript, the ascender of the Lamed is clearly visible rising into the line above. Contextually and paleographically, Option B ('אלא') correctly reflects the Rabbinic textual reading over the OCR error.",
       "vlm_reading": null,
       "surya_reading": null,
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 882,
@@ -5162,6 +5293,7 @@
       "word_index": 969,
       "opcode": "replace",
       "docai_reading": "בארוכ",
+      "docai_repaired": null,
       "final_text": "בארוכה",
       "page": 36,
       "bbox": {
@@ -5189,6 +5321,7 @@
       "word_index": 1055,
       "opcode": "replace",
       "docai_reading": "אעזר",
+      "docai_repaired": "אלעזר",
       "final_text": "אלעזר",
       "page": 36,
       "bbox": {
@@ -5203,7 +5336,7 @@
       "reasoning": "The context refers to the standard rabbinic passage mentioning 'ור' אלעזר בשתא'. Paleographically, the prominent ascender (neck) of the letter Lamed ('ל') is clearly visible before the 'עזר', confirming 'אלעזר'. The OCR engine (Option A) failed to parse the Lamed, yielding the non-word 'אעזר'.",
       "vlm_reading": "אלעזר",
       "surya_reading": null,
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     }
   ],
   "75": [
@@ -5289,6 +5422,7 @@
       "word_index": 208,
       "opcode": "replace",
       "docai_reading": "ישמעא",
+      "docai_repaired": "ישמעאל",
       "final_text": "ישמעאל",
       "page": 36,
       "bbox": {
@@ -5303,7 +5437,7 @@
       "reasoning": "The crop clearly shows the word 'ישמעאל' in line 3 (following the abbreviation mark/resh for ר'), complete with the characteristically tall ascender of the letter lamed (ל) extending upward above the line of script. Option B ('ישמעאל') is the correct transcription, matching both the paleographic evidence and the context ('משום ר' ישמעאל').",
       "vlm_reading": null,
       "surya_reading": "ישמעאל",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 222,
@@ -5335,6 +5469,7 @@
       "word_index": 346,
       "opcode": "replace",
       "docai_reading": "לאפא",
+      "docai_repaired": null,
       "final_text": "לאלפא",
       "page": 37,
       "bbox": {
@@ -5381,6 +5516,7 @@
       "word_index": 877,
       "opcode": "replace",
       "docai_reading": "אעזר",
+      "docai_repaired": "אלעזר",
       "final_text": "אלעזר",
       "page": 37,
       "bbox": {
@@ -5395,12 +5531,13 @@
       "reasoning": "The crop clearly shows the name 'אלעזר' following 'ר'', complete with the tall ascender of the letter Lamed ('ל'). Contextually, the phrase 'ר' יוחנן משום ר' אלעזר' confirms the reading of 'אלעזר' (Option B), whereas Option A ('אעזר') is a raw OCR misreading that dropped the Lamed.",
       "vlm_reading": "אלעזר",
       "surya_reading": "אעזר",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 906,
       "opcode": "replace",
       "docai_reading": "אעזר",
+      "docai_repaired": "אלעזר",
       "final_text": "אלעזר",
       "page": 37,
       "bbox": {
@@ -5415,7 +5552,7 @@
       "reasoning": "In line 3, the word clearly shows the letters Alef (א), followed by a Lamed (ל) with its characteristic tall ascender extending upwards, Ayin (ע), Zayin (ז), and Resh (ר), spelling 'אלעזר'. Option A ('אעזר') is a standard OCR misread that omitted the Lamed ascender.",
       "vlm_reading": "אלעזר",
       "surya_reading": "אעזר",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 919,
@@ -5447,6 +5584,7 @@
       "word_index": 940,
       "opcode": "replace",
       "docai_reading": "ישמעא",
+      "docai_repaired": "ישמעאל",
       "final_text": "ישמעאל",
       "page": 37,
       "bbox": {
@@ -5461,7 +5599,7 @@
       "reasoning": "The image clearly shows the word 'ישמעאל'. The letter lamed (ל) at the end features its characteristic tall ascender extending upwards between the lines to the left of 'מיניה'.",
       "vlm_reading": "ישמעאל",
       "surya_reading": "ישמעא",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 942,
@@ -5493,6 +5631,7 @@
       "word_index": 944,
       "opcode": "replace",
       "docai_reading": "ישמעא",
+      "docai_repaired": "ישמעאל",
       "final_text": "ישמעאל",
       "page": 37,
       "bbox": {
@@ -5507,7 +5646,7 @@
       "reasoning": "The visible word in the center line is clearly 'ישמעאל'. The ascender (tall upper stroke) of the final letter Lamed (ל) is distinctly visible extending upwards above the word towards the line above, confirming 'ישמעאל' (Option B) rather than 'ישמעא' (Option A).",
       "vlm_reading": "ישמעאל",
       "surya_reading": "ישמעא",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 1058,
@@ -5541,6 +5680,7 @@
       "word_index": 45,
       "opcode": "replace",
       "docai_reading": "בטהרורת",
+      "docai_repaired": null,
       "final_text": "בטהרות",
       "page": 38,
       "bbox": {
@@ -5561,6 +5701,7 @@
       "word_index": 68,
       "opcode": "replace",
       "docai_reading": "אא",
+      "docai_repaired": "אלא",
       "final_text": "אלא",
       "page": 38,
       "bbox": {
@@ -5575,7 +5716,7 @@
       "reasoning": "In line 3, following the word '[נ]גע', the text clearly shows 'אלא' (aleph, lamed with its tall vertical ascender, aleph) followed by 'וד[אי]', matching the contextual phrase 'דודאי נגע אלא ודאי'. Option A ('אא') is a common OCR error that misinterprets the central lamed ascender.",
       "vlm_reading": "או",
       "surya_reading": "א'",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     }
   ],
   "79": [
@@ -5583,6 +5724,7 @@
       "word_index": 21,
       "opcode": "replace",
       "docai_reading": "אעזר",
+      "docai_repaired": "אלעזר",
       "final_text": "אלעזר",
       "page": 38,
       "bbox": {
@@ -5597,12 +5739,13 @@
       "reasoning": "The raster image clearly shows the word 'אלעזר' on the second line following 'ר''. The tall ascender of the letter 'ל' (lamed) is distinctly visible extending upwards between the words of the line above, confirming 'אלעזר' rather than 'אעזר' (which was an OCR omission of the lamed).",
       "vlm_reading": "אלעזר",
       "surya_reading": null,
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 50,
       "opcode": "replace",
       "docai_reading": "אעזר",
+      "docai_repaired": "אלעזר",
       "final_text": "אלעזר",
       "page": 38,
       "bbox": {
@@ -5617,7 +5760,7 @@
       "reasoning": "The crop clearly displays the word 'אלעזר' following 'ר'' (Rabbi Eleazar), matching the surrounding Rabbinic context ('על ר' אלעזר'). The ascender of the Lamed ('ל') is clearly visible between the Alef ('א') and Ayin ('ע'), ruling out Option A ('אעזר') which missed the Lamed.",
       "vlm_reading": "אלעזר",
       "surya_reading": "אלעזר",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     }
   ],
   "80": [
@@ -5625,6 +5768,7 @@
       "word_index": 16,
       "opcode": "replace",
       "docai_reading": "אמא",
+      "docai_repaired": "אלמא",
       "final_text": "אלמא",
       "page": 38,
       "bbox": {
@@ -5639,12 +5783,13 @@
       "reasoning": "The image clearly shows the word 'אלמא' (with the distinct tall ascender of the letter Lamed 'ל' rising above the line height). Contextually, the text discusses the Talmudic introductory word 'אלמא' (as in 'לא הו\"לל אלמא'). Option A ('אמא') is an OCR misreading caused by the close spacing of the Aleph and Lamed.",
       "vlm_reading": "אמא",
       "surya_reading": "א'מא",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 38,
       "opcode": "replace",
       "docai_reading": "אא",
+      "docai_repaired": "אלא",
       "final_text": "אלא",
       "page": 38,
       "bbox": {
@@ -5659,12 +5804,13 @@
       "reasoning": "The raster crop clearly displays the two-letter sequence 'אא' without an intervening 'ל' (lamed), which lacks any characteristic tall ascender seen elsewhere in the passage (e.g., in 'בצלאל'). In Rabbinic text transcription, 'אא' is a standard scribal abbreviation for 'אלא'.",
       "vlm_reading": "אלא",
       "surya_reading": "א'",
-      "flag": "current_text_may_be_wrong"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 51,
       "opcode": "replace",
       "docai_reading": "בצלא",
+      "docai_repaired": "בצלאל",
       "final_text": "בצלאל",
       "page": 38,
       "bbox": {
@@ -5679,7 +5825,7 @@
       "reasoning": "The visible text in the manuscript line clearly shows 'בצלא' followed directly by 'בי' (from בשיטת), omitting the final lamed of the name 'בצלאל'. Thus, Option A accurately reflects the literal raster crop transcription.",
       "vlm_reading": "בצלא'",
       "surya_reading": "בצלא",
-      "flag": "current_text_may_be_wrong"
+      "flag": "docai_ligature_artifact"
     }
   ],
   "82": [
@@ -5687,6 +5833,7 @@
       "word_index": 1,
       "opcode": "replace",
       "docai_reading": "בשר",
+      "docai_repaired": null,
       "final_text": "בשל",
       "page": 38,
       "bbox": {
@@ -5741,6 +5888,7 @@
       "word_index": 0,
       "opcode": "insert",
       "docai_reading": null,
+      "docai_repaired": null,
       "final_text": "פג בשל",
       "page": 38,
       "bbox": {
@@ -5761,6 +5909,7 @@
       "word_index": 8,
       "opcode": "delete",
       "docai_reading": "ה",
+      "docai_repaired": null,
       "final_text": null,
       "page": 38,
       "bbox": {
@@ -5781,6 +5930,7 @@
       "word_index": 15,
       "opcode": "replace",
       "docai_reading": "אא",
+      "docai_repaired": "אלא",
       "final_text": "אלא",
       "page": 38,
       "bbox": {
@@ -5795,7 +5945,7 @@
       "reasoning": "The second line clearly contains the word 'אלא', with the central letter showing a distinct Lamed (ל) ascender between two Alefs (א). This matches both the visual paleography and the expected Talmudic context ('הא מלתא לא מתאמרא אלא לגבי'). Option A completely omits the Lamed.",
       "vlm_reading": "אא",
       "surya_reading": "א'",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     }
   ],
   "84": [
@@ -5803,6 +5953,7 @@
       "word_index": 0,
       "opcode": "replace",
       "docai_reading": "פר",
+      "docai_repaired": null,
       "final_text": "פד",
       "page": 38,
       "bbox": {
@@ -5823,6 +5974,7 @@
       "word_index": 55,
       "opcode": "delete",
       "docai_reading": "4 בעיא",
+      "docai_repaired": null,
       "final_text": null,
       "page": 38,
       "bbox": {
@@ -5845,6 +5997,7 @@
       "word_index": 65,
       "opcode": "replace",
       "docai_reading": "משוס",
+      "docai_repaired": null,
       "final_text": "משום",
       "page": 39,
       "bbox": {
@@ -5865,6 +6018,7 @@
       "word_index": 73,
       "opcode": "replace",
       "docai_reading": "מהן לחצצרות",
+      "docai_repaired": null,
       "final_text": "מהו לחצרות",
       "page": 39,
       "bbox": {
@@ -5911,6 +6065,7 @@
       "word_index": 96,
       "opcode": "delete",
       "docai_reading": "פו",
+      "docai_repaired": null,
       "final_text": null,
       "page": 39,
       "bbox": {
@@ -5933,6 +6088,7 @@
       "word_index": 0,
       "opcode": "insert",
       "docai_reading": null,
+      "docai_repaired": null,
       "final_text": "פו",
       "page": 39,
       "bbox": {
@@ -5953,6 +6109,7 @@
       "word_index": 27,
       "opcode": "replace",
       "docai_reading": "איהן",
+      "docai_repaired": "אליהן",
       "final_text": "איהו",
       "page": 39,
       "bbox": {
@@ -5973,6 +6130,7 @@
       "word_index": 44,
       "opcode": "replace",
       "docai_reading": "איהן",
+      "docai_repaired": "אליהן",
       "final_text": "איהו",
       "page": 39,
       "bbox": {
@@ -5993,6 +6151,7 @@
       "word_index": 86,
       "opcode": "replace",
       "docai_reading": "גס",
+      "docai_repaired": null,
       "final_text": "גם",
       "page": 39,
       "bbox": {
@@ -6034,6 +6193,7 @@
       "word_index": 139,
       "opcode": "replace",
       "docai_reading": "קט\"ל",
+      "docai_repaired": null,
       "final_text": "קמ\"ל",
       "page": 39,
       "bbox": {
@@ -6056,6 +6216,7 @@
       "word_index": 0,
       "opcode": "replace",
       "docai_reading": "פן",
+      "docai_repaired": null,
       "final_text": "פז",
       "page": 39,
       "bbox": {
@@ -6076,6 +6237,7 @@
       "word_index": 21,
       "opcode": "replace",
       "docai_reading": "הדחייה",
+      "docai_repaired": null,
       "final_text": "הדחיה",
       "page": 39,
       "bbox": {
@@ -6103,6 +6265,7 @@
       "word_index": 97,
       "opcode": "replace",
       "docai_reading": "פ\"ר",
+      "docai_repaired": null,
       "final_text": "פ\"ד",
       "page": 39,
       "bbox": {
@@ -6123,6 +6286,7 @@
       "word_index": 158,
       "opcode": "replace",
       "docai_reading": "מקובצרת",
+      "docai_repaired": null,
       "final_text": "מקובצת",
       "page": 39,
       "bbox": {
@@ -6143,6 +6307,7 @@
       "word_index": 206,
       "opcode": "replace",
       "docai_reading": "ולכאור",
+      "docai_repaired": null,
       "final_text": "ולכאורי'",
       "page": 39,
       "bbox": {
@@ -6172,6 +6337,7 @@
       "word_index": 2,
       "opcode": "replace",
       "docai_reading": "ובאבל",
+      "docai_repaired": null,
       "final_text": "וכאבל",
       "page": 39,
       "bbox": {
@@ -6198,6 +6364,7 @@
       "word_index": 19,
       "opcode": "replace",
       "docai_reading": "בירושלטי",
+      "docai_repaired": null,
       "final_text": "בירושלמי",
       "page": 39,
       "bbox": {
@@ -6218,6 +6385,7 @@
       "word_index": 149,
       "opcode": "replace",
       "docai_reading": "אעזר",
+      "docai_repaired": "אלעזר",
       "final_text": "אלעזר",
       "page": 39,
       "bbox": {
@@ -6232,7 +6400,7 @@
       "reasoning": "The raster crop visually shows a textual typo in the printed source where the letter 'ל' (lamed) is omitted between the 'א' and 'ע', reading literally 'אעזר' instead of the standard Rabbinic name 'אלעזר'. Thus Option A accurately transcribes the visible printed characters.",
       "vlm_reading": "אלעזר",
       "surya_reading": "אעזר",
-      "flag": "current_text_may_be_wrong"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 192,
@@ -6290,6 +6458,7 @@
       "word_index": 383,
       "opcode": "replace",
       "docai_reading": "אא",
+      "docai_repaired": "אלא",
       "final_text": "אלא",
       "page": 40,
       "bbox": {
@@ -6304,7 +6473,7 @@
       "reasoning": "In the context of the Rabbinic phrase 'דשום תנא לא מחייב אלא א\"כ הוציאו', the text reads 'אלא' (often abbreviated or slightly trimmed in print as part of the phrase 'אלא אם כן' / א\"כ). Option B correctly reflects the required contextual Rabbinic textual reading.",
       "vlm_reading": null,
       "surya_reading": "א'",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 423,
@@ -6362,6 +6531,7 @@
       "word_index": 838,
       "opcode": "replace",
       "docai_reading": "וכוותיידו",
+      "docai_repaired": null,
       "final_text": "וכוותייהו",
       "page": 40,
       "bbox": {
@@ -6408,6 +6578,7 @@
       "word_index": 1149,
       "opcode": "delete",
       "docai_reading": "בעיא 4",
+      "docai_repaired": null,
       "final_text": null,
       "page": 40,
       "bbox": {
@@ -6430,6 +6601,7 @@
       "word_index": 41,
       "opcode": "replace",
       "docai_reading": "אא",
+      "docai_repaired": "אלא",
       "final_text": "אלא",
       "page": 41,
       "bbox": {
@@ -6444,7 +6616,7 @@
       "reasoning": "The raster crop shows the phrase 'אלא ד' from the line 'אלא דאף בתרי'. The middle letter between the two alephs has a distinct tall ascender with a top hook, which is clearly a Lamed ('ל'). Thus, 'אלא' (Option B) is the correct reading, whereas Option A ('אא') incorrectly omits the Lamed.",
       "vlm_reading": "דא",
       "surya_reading": "א'",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     }
   ],
   "90": [
@@ -6452,6 +6624,7 @@
       "word_index": 4,
       "opcode": "delete",
       "docai_reading": "המק",
+      "docai_repaired": null,
       "final_text": null,
       "page": 41,
       "bbox": {
@@ -6474,6 +6647,7 @@
       "word_index": 7,
       "opcode": "replace",
       "docai_reading": "איבא",
+      "docai_repaired": "אליבא",
       "final_text": "איכא",
       "page": 41,
       "bbox": {
@@ -6598,6 +6772,7 @@
       "word_index": 109,
       "opcode": "replace",
       "docai_reading": "אא",
+      "docai_repaired": "אלא",
       "final_text": "אלא",
       "page": 41,
       "bbox": {
@@ -6612,12 +6787,13 @@
       "reasoning": "The sentence context from Tractate Temurah ('לסברא דליתיה אלא דאי משכחת') requires the word 'אלא'. Paleographically, the image shows the character 'ה' (ending 'דליתיה'), followed by 'אלא' (with the characteristic tall ascendender/neck of the letter Lamed 'ל' clearly visible above the line height), followed by 'ד' (beginning 'דאי'). Option A ('אא') is an OCR misreading that missed the central Lamed.",
       "vlm_reading": "אלא",
       "surya_reading": null,
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 243,
       "opcode": "replace",
       "docai_reading": "אא",
+      "docai_repaired": "אלא",
       "final_text": "אלא",
       "page": 41,
       "bbox": {
@@ -6632,12 +6808,13 @@
       "reasoning": "The crop shows two distinct aleph/abbreviation characters ('אא') on line 3 rather than the expanded 'אלא'. Option A correctly reflects the literal raster reading.",
       "vlm_reading": null,
       "surya_reading": "א'",
-      "flag": "current_text_may_be_wrong"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 276,
       "opcode": "replace",
       "docai_reading": "בצלא",
+      "docai_repaired": "בצלאל",
       "final_text": "בצלאל",
       "page": 41,
       "bbox": {
@@ -6652,12 +6829,13 @@
       "reasoning": "The crop clearly displays the string בצלא (Bet-Tzadi-Lamed-Alef) followed by a space and the letter Bet. The second Lamed in 'בצלאל' is omitted/abbreviated in the printed source, matching Option A as the true visual transcription.",
       "vlm_reading": "בצלאל",
       "surya_reading": "בצלא",
-      "flag": "current_text_may_be_wrong"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 293,
       "opcode": "replace",
       "docai_reading": "איבא",
+      "docai_repaired": "אליבא",
       "final_text": "איכא",
       "page": 41,
       "bbox": {
@@ -6678,6 +6856,7 @@
       "word_index": 338,
       "opcode": "replace",
       "docai_reading": "איבא",
+      "docai_repaired": "אליבא",
       "final_text": "אליבא",
       "page": 41,
       "bbox": {
@@ -6692,7 +6871,7 @@
       "reasoning": "The crop clearly shows the word 'אליבא' following the final mem of the previous word. The tall ascender of the lamed ('ל') is visibly present above the letters between the initial aleph and yod. Furthermore, the surrounding Aramaic idiom 'אליבא דחד' ('according to the one [Tanna]') confirms 'אליבא' contextually and semantically over the OCR artifact 'איבא'.",
       "vlm_reading": "איבא",
       "surya_reading": "איבא",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 343,
@@ -6724,6 +6903,7 @@
       "word_index": 363,
       "opcode": "replace",
       "docai_reading": "איבא",
+      "docai_repaired": "אליבא",
       "final_text": "איכא",
       "page": 41,
       "bbox": {
@@ -6744,6 +6924,7 @@
       "word_index": 374,
       "opcode": "replace",
       "docai_reading": "איביה",
+      "docai_repaired": "אליביה",
       "final_text": "אליביה",
       "page": 41,
       "bbox": {
@@ -6758,12 +6939,13 @@
       "reasoning": "The raster crop clearly shows the 5-letter word 'איביה' (alef, yod, bet, yod, he), which is a printer's typo in the original text for the standard Rabbinic phrase 'אליביה' ('alibeh', meaning 'according to him'). Option A accurately transcribes the literal visual text in the image crop, whereas Option B is the contextually emended reading.",
       "vlm_reading": "איביה",
       "surya_reading": "איביה",
-      "flag": "current_text_may_be_wrong"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 439,
       "opcode": "replace",
       "docai_reading": "איביה",
+      "docai_repaired": "אליביה",
       "final_text": "אליביה",
       "page": 41,
       "bbox": {
@@ -6778,12 +6960,13 @@
       "reasoning": "The context requires the standard Talmudic/Rabbinic Aramaic term 'אליביה' ('according to [him]'). Paleographically, the Lamed ascender is clearly visible extending upwards into the interline space above the word, confirming Option B over the OCR misread 'איביה' (Option A).",
       "vlm_reading": null,
       "surya_reading": "איביה",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 453,
       "opcode": "replace",
       "docai_reading": "איבא",
+      "docai_repaired": "אליבא",
       "final_text": "איכא",
       "page": 41,
       "bbox": {
@@ -6830,6 +7013,7 @@
       "word_index": 497,
       "opcode": "replace",
       "docai_reading": "איבא",
+      "docai_repaired": "אליבא",
       "final_text": "איכא",
       "page": 41,
       "bbox": {
@@ -6850,6 +7034,7 @@
       "word_index": 524,
       "opcode": "replace",
       "docai_reading": "איבא",
+      "docai_repaired": "אליבא",
       "final_text": "איכא",
       "page": 41,
       "bbox": {
@@ -6870,6 +7055,7 @@
       "word_index": 553,
       "opcode": "replace",
       "docai_reading": "איבייהו",
+      "docai_repaired": "אליבייהו",
       "final_text": "אליבייהו",
       "page": 41,
       "bbox": {
@@ -6884,12 +7070,13 @@
       "reasoning": "The context 'דמדבעי אליבייהו דרבנן' requires the standard Rabbinic Aramaic word 'אליבייהו' ('according to them'). Paleographically, the tall ascender visible above the word between lines 1 and 2 belongs to the letter Lamed (ל), which DocAI missed in its raw OCR reading ('איבייהו').",
       "vlm_reading": "איביהו",
       "surya_reading": "איבייהו",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 603,
       "opcode": "replace",
       "docai_reading": "איבייהו",
+      "docai_repaired": "אליבייהו",
       "final_text": "אליבייהו",
       "page": 41,
       "bbox": {
@@ -6904,12 +7091,13 @@
       "reasoning": "The context 'אליבייהו דרבנן' is a standard Talmudic phrase ('according to the opinion of the Rabbis'). Paleographically, the tall ascender of the letter lamed (ל) is clearly visible extending upwards into the line above, which OCR engines frequently miss or missegment, leading to Option A ('איבייהו'). Thus Option B is the correct reading.",
       "vlm_reading": "איביהו",
       "surya_reading": "איבייהו",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 605,
       "opcode": "replace",
       "docai_reading": "אא",
+      "docai_repaired": "אלא",
       "final_text": "אלא",
       "page": 41,
       "bbox": {
@@ -6924,12 +7112,13 @@
       "reasoning": "The visible characters in the crop clearly show two alephs ('אא') without a lamed's ascender (unlike the distinct high ascenders of the lameds visible in adjacent lines). 'אא' is a standard Rabbinic printed abbreviation for 'אלא'.",
       "vlm_reading": "אלא",
       "surya_reading": "א'",
-      "flag": "current_text_may_be_wrong"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 629,
       "opcode": "replace",
       "docai_reading": "כווותייהו",
+      "docai_repaired": null,
       "final_text": "כוותייהו",
       "page": 41,
       "bbox": {
@@ -6950,6 +7139,7 @@
       "word_index": 675,
       "opcode": "replace",
       "docai_reading": "איביה",
+      "docai_repaired": "אליביה",
       "final_text": "אליביה",
       "page": 41,
       "bbox": {
@@ -6964,12 +7154,13 @@
       "reasoning": "The visible word clearly shows the letters א, ל (with its distinctive tall ascender extending upwards), י, ב, י, ה, forming 'אליביה'. This matches the surrounding context 'משום דבעי רב אשי אליביה'.",
       "vlm_reading": "איביה",
       "surya_reading": "איביה",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 720,
       "opcode": "replace",
       "docai_reading": "אא",
+      "docai_repaired": "אלא",
       "final_text": "אלא",
       "page": 41,
       "bbox": {
@@ -6984,7 +7175,7 @@
       "reasoning": "The crop clearly shows the word 'אלא' in the third row, matching the phrase 'ד\"ה אלא ר\"מ' from the context. The middle letter features a prominent tall ascender characteristic of the Hebrew letter Lamed ('ל') positioned between two Alephs ('א'), confirming Option B over Option A.",
       "vlm_reading": "אלא",
       "surya_reading": "א'",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     }
   ],
   "92": [
@@ -7044,6 +7235,7 @@
       "word_index": 326,
       "opcode": "replace",
       "docai_reading": "איה",
+      "docai_repaired": null,
       "final_text": "אליה",
       "page": 42,
       "bbox": {
@@ -7064,6 +7256,7 @@
       "word_index": 427,
       "opcode": "replace",
       "docai_reading": "אפא",
+      "docai_repaired": "אלפא",
       "final_text": "אלפא",
       "page": 42,
       "bbox": {
@@ -7078,12 +7271,13 @@
       "reasoning": "The visible text on line 3 clearly shows the tall ascender of the letter Lamed (ל) in 'אלפא', which the raw OCR candidate (Option A) dropped. Contextually and paleographically, Option B ('אלפא') is the correct reading.",
       "vlm_reading": "אלפא",
       "surya_reading": "א'",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 444,
       "opcode": "replace",
       "docai_reading": "לאופי",
+      "docai_repaired": null,
       "final_text": "לאלופי",
       "page": 42,
       "bbox": {
@@ -7106,6 +7300,7 @@
       "word_index": 182,
       "opcode": "replace",
       "docai_reading": "אא",
+      "docai_repaired": "אלא",
       "final_text": "אלא",
       "page": 42,
       "bbox": {
@@ -7120,7 +7315,7 @@
       "reasoning": "The third line of the image clearly contains the word 'אלא' (Option B). The letters from right to left show an alef (א), followed by a lamed (ל) with its characteristic tall ascender, followed by another alef (א). This matches the reading 'אלא' in the Rabbinic context.",
       "vlm_reading": "דא",
       "surya_reading": "א'",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 324,
@@ -7232,6 +7427,7 @@
       "word_index": 23,
       "opcode": "replace",
       "docai_reading": "בח\"ט",
+      "docai_repaired": null,
       "final_text": "בח\"מ",
       "page": 43,
       "bbox": {
@@ -7306,6 +7502,7 @@
       "word_index": 105,
       "opcode": "replace",
       "docai_reading": "טרורים",
+      "docai_repaired": null,
       "final_text": "טהורים",
       "page": 43,
       "bbox": {
@@ -7484,6 +7681,7 @@
       "word_index": 23,
       "opcode": "replace",
       "docai_reading": "ע\"ר",
+      "docai_repaired": null,
       "final_text": "ע\"ד",
       "page": 44,
       "bbox": {
@@ -7504,6 +7702,7 @@
       "word_index": 60,
       "opcode": "replace",
       "docai_reading": "ב\"ט",
+      "docai_repaired": null,
       "final_text": "ב\"מ",
       "page": 44,
       "bbox": {
@@ -7526,6 +7725,7 @@
       "word_index": 1,
       "opcode": "delete",
       "docai_reading": "ביו",
+      "docai_repaired": null,
       "final_text": null,
       "page": 44,
       "bbox": {
@@ -7548,6 +7748,7 @@
       "word_index": 1,
       "opcode": "replace",
       "docai_reading": "ב\"ך",
+      "docai_repaired": null,
       "final_text": "ב\"ד",
       "page": 44,
       "bbox": {
@@ -7574,6 +7775,7 @@
       "word_index": 8,
       "opcode": "replace",
       "docai_reading": "וא",
+      "docai_repaired": "ואל",
       "final_text": "ואל",
       "page": 44,
       "bbox": {
@@ -7588,7 +7790,7 @@
       "reasoning": "The crop clearly shows the letter 'ב' followed by 'וא' (vav and aleph) before the 'ת' of 'תעשה'. There is no tall ascender corresponding to a 'ל' (lamed) in the upper white space above the word, confirming that the text uses the abbreviated form 'וא' (for 'ואל') rather than the fully spelled out 'ואל'.",
       "vlm_reading": "וז",
       "surya_reading": "וא'",
-      "flag": "current_text_may_be_wrong",
+      "flag": "docai_ligature_artifact",
       "consensus_engines": [
         "docai",
         "surya"
@@ -7602,6 +7804,7 @@
       "word_index": 1,
       "opcode": "replace",
       "docai_reading": "ב\"ך",
+      "docai_repaired": null,
       "final_text": "ב\"ד",
       "page": 44,
       "bbox": {
@@ -7628,6 +7831,7 @@
       "word_index": 13,
       "opcode": "replace",
       "docai_reading": "אא",
+      "docai_repaired": "אלא",
       "final_text": "אלא",
       "page": 44,
       "bbox": {
@@ -7642,7 +7846,7 @@
       "reasoning": "The raster image shows the end of the word 'אמרינן' ('נן'), followed by a two-letter abbreviation 'אא' (standing for 'אלא' in Rabbinic shorthand context: 'לא אמרינן אא [אלא] היכא'), followed by the beginning of 'היכא' ('ה...'). Since there are only two letter glyphs visible rather than three spelled out, Option A ('אא') accurately reflects the manuscript transcription.",
       "vlm_reading": "אלא",
       "surya_reading": "א'",
-      "flag": "current_text_may_be_wrong"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 113,
@@ -7676,6 +7880,7 @@
       "word_index": 1,
       "opcode": "replace",
       "docai_reading": "ב\"ר",
+      "docai_repaired": null,
       "final_text": "ב\"ד",
       "page": 44,
       "bbox": {
@@ -7748,6 +7953,7 @@
       "word_index": 74,
       "opcode": "replace",
       "docai_reading": "בשאה",
+      "docai_repaired": "בשאלה",
       "final_text": "בשאלה",
       "page": 44,
       "bbox": {
@@ -7762,7 +7968,7 @@
       "reasoning": "The middle line clearly shows the word 'בשאלה', featuring the letters Bet, Shin, Aleph, Lamed (with its distinct tall ascender extending upwards between the top line's words), and He. This directly aligns with the standard Halakhic phrase 'נדר דאיתיה בשאלה' (a vow subject to inquiry/annulment).",
       "vlm_reading": "בשאלה",
       "surya_reading": "בשאה",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 84,
@@ -7796,6 +8002,7 @@
       "word_index": 1,
       "opcode": "replace",
       "docai_reading": "ב\"ר",
+      "docai_repaired": null,
       "final_text": "ב\"ד",
       "page": 44,
       "bbox": {
@@ -7818,6 +8025,7 @@
       "word_index": 1,
       "opcode": "replace",
       "docai_reading": "ב\"ך",
+      "docai_repaired": null,
       "final_text": "ב\"ד",
       "page": 44,
       "bbox": {
@@ -7892,6 +8100,7 @@
       "word_index": 46,
       "opcode": "delete",
       "docai_reading": "בל",
+      "docai_repaired": null,
       "final_text": null,
       "page": 44,
       "bbox": {
@@ -7914,6 +8123,7 @@
       "word_index": 47,
       "opcode": "replace",
       "docai_reading": "הריוט",
+      "docai_repaired": null,
       "final_text": "הדיוט",
       "page": 45,
       "bbox": {
@@ -8092,6 +8302,7 @@
       "word_index": 151,
       "opcode": "replace",
       "docai_reading": "אטת",
+      "docai_repaired": null,
       "final_text": "אמת",
       "page": 45,
       "bbox": {
@@ -8114,6 +8325,7 @@
       "word_index": 78,
       "opcode": "delete",
       "docai_reading": "בתר",
+      "docai_repaired": null,
       "final_text": null,
       "page": 45,
       "bbox": {
@@ -8136,6 +8348,7 @@
       "word_index": 0,
       "opcode": "replace",
       "docai_reading": "קטן",
+      "docai_repaired": null,
       "final_text": "קטז",
       "page": 46,
       "bbox": {
@@ -8156,6 +8369,7 @@
       "word_index": 11,
       "opcode": "replace",
       "docai_reading": "אעזר",
+      "docai_repaired": "אלעזר",
       "final_text": "אלעזר",
       "page": 46,
       "bbox": {
@@ -8170,12 +8384,13 @@
       "reasoning": "The crop visibly displays the four-letter textual misprint 'אעזר' (omitting the letter 'ל' from 'אלעזר'), matching Option A.",
       "vlm_reading": "אלעזר",
       "surya_reading": "אעזר",
-      "flag": "current_text_may_be_wrong"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 58,
       "opcode": "replace",
       "docai_reading": "קאטרינן",
+      "docai_repaired": null,
       "final_text": "קאמרינן",
       "page": 46,
       "bbox": {
@@ -8230,6 +8445,7 @@
       "word_index": 1,
       "opcode": "replace",
       "docai_reading": "ב\"ך",
+      "docai_repaired": null,
       "final_text": "ב\"ד",
       "page": 46,
       "bbox": {
@@ -8252,6 +8468,7 @@
       "word_index": 8,
       "opcode": "replace",
       "docai_reading": "בקירושין",
+      "docai_repaired": null,
       "final_text": "בקידושין",
       "page": 46,
       "bbox": {
@@ -8274,6 +8491,7 @@
       "word_index": 28,
       "opcode": "replace",
       "docai_reading": "אגאזי",
+      "docai_repaired": null,
       "final_text": "אלגאזי",
       "page": 46,
       "bbox": {
@@ -8322,6 +8540,7 @@
       "word_index": 60,
       "opcode": "delete",
       "docai_reading": "1",
+      "docai_repaired": null,
       "final_text": null,
       "page": 46,
       "bbox": {
@@ -8344,6 +8563,7 @@
       "word_index": 24,
       "opcode": "replace",
       "docai_reading": "קוהה",
+      "docai_repaired": null,
       "final_text": "תוהה",
       "page": 47,
       "bbox": {
@@ -8370,6 +8590,7 @@
       "word_index": 26,
       "opcode": "replace",
       "docai_reading": "אפילי",
+      "docai_repaired": null,
       "final_text": "אפילו",
       "page": 47,
       "bbox": {
@@ -8392,6 +8613,7 @@
       "word_index": 0,
       "opcode": "replace",
       "docai_reading": "קכר",
+      "docai_repaired": null,
       "final_text": "קכד",
       "page": 47,
       "bbox": {
@@ -8418,6 +8640,7 @@
       "word_index": 26,
       "opcode": "replace",
       "docai_reading": "איה",
+      "docai_repaired": null,
       "final_text": "אליה",
       "page": 47,
       "bbox": {
@@ -8440,6 +8663,7 @@
       "word_index": 33,
       "opcode": "replace",
       "docai_reading": "ופרויין",
+      "docai_repaired": null,
       "final_text": "ופדוייו",
       "page": 47,
       "bbox": {
@@ -8460,6 +8684,7 @@
       "word_index": 35,
       "opcode": "replace",
       "docai_reading": "חרש",
+      "docai_repaired": null,
       "final_text": "חדש",
       "page": 47,
       "bbox": {
@@ -8482,6 +8707,7 @@
       "word_index": 54,
       "opcode": "replace",
       "docai_reading": "רבן",
+      "docai_repaired": null,
       "final_text": "רבו",
       "page": 47,
       "bbox": {
@@ -8504,6 +8730,7 @@
       "word_index": 0,
       "opcode": "replace",
       "docai_reading": "קכן",
+      "docai_repaired": null,
       "final_text": "קכז",
       "page": 47,
       "bbox": {
@@ -8526,6 +8753,7 @@
       "word_index": 1,
       "opcode": "replace",
       "docai_reading": "דחקיכן",
+      "docai_repaired": null,
       "final_text": "דחקינן",
       "page": 47,
       "bbox": {
@@ -8546,6 +8774,7 @@
       "word_index": 7,
       "opcode": "replace",
       "docai_reading": "דחר",
+      "docai_repaired": null,
       "final_text": "דחד",
       "page": 47,
       "bbox": {
@@ -8566,6 +8795,7 @@
       "word_index": 28,
       "opcode": "replace",
       "docai_reading": "בחר",
+      "docai_repaired": null,
       "final_text": "בחד",
       "page": 47,
       "bbox": {
@@ -8586,6 +8816,7 @@
       "word_index": 56,
       "opcode": "replace",
       "docai_reading": "בחך",
+      "docai_repaired": null,
       "final_text": "בחד",
       "page": 47,
       "bbox": {
@@ -8606,6 +8837,7 @@
       "word_index": 68,
       "opcode": "replace",
       "docai_reading": "בחר",
+      "docai_repaired": null,
       "final_text": "בחד",
       "page": 47,
       "bbox": {
@@ -8652,6 +8884,7 @@
       "word_index": 126,
       "opcode": "replace",
       "docai_reading": "בכ\"ט",
+      "docai_repaired": null,
       "final_text": "בכ\"מ",
       "page": 47,
       "bbox": {
@@ -8672,6 +8905,7 @@
       "word_index": 221,
       "opcode": "replace",
       "docai_reading": "שכתכו",
+      "docai_repaired": null,
       "final_text": "שכתבו",
       "page": 47,
       "bbox": {
@@ -8718,6 +8952,7 @@
       "word_index": 353,
       "opcode": "replace",
       "docai_reading": "ש\"ס",
+      "docai_repaired": null,
       "final_text": "ש\"מ",
       "page": 47,
       "bbox": {
@@ -8738,6 +8973,7 @@
       "word_index": 408,
       "opcode": "replace",
       "docai_reading": "מרקמתמה",
+      "docai_repaired": null,
       "final_text": "מדקמתמה",
       "page": 47,
       "bbox": {
@@ -8758,6 +8994,7 @@
       "word_index": 457,
       "opcode": "replace",
       "docai_reading": "וכתרי",
+      "docai_repaired": null,
       "final_text": "ובתרי",
       "page": 48,
       "bbox": {
@@ -8784,6 +9021,7 @@
       "word_index": 466,
       "opcode": "replace",
       "docai_reading": "דוה",
+      "docai_repaired": null,
       "final_text": "הוה",
       "page": 48,
       "bbox": {
@@ -8804,6 +9042,7 @@
       "word_index": 497,
       "opcode": "replace",
       "docai_reading": "דרוה",
+      "docai_repaired": null,
       "final_text": "דהוה",
       "page": 48,
       "bbox": {
@@ -8824,6 +9063,7 @@
       "word_index": 576,
       "opcode": "replace",
       "docai_reading": "בחר",
+      "docai_repaired": null,
       "final_text": "בחד",
       "page": 48,
       "bbox": {
@@ -8844,6 +9084,7 @@
       "word_index": 579,
       "opcode": "replace",
       "docai_reading": "בחר",
+      "docai_repaired": null,
       "final_text": "בחד",
       "page": 48,
       "bbox": {
@@ -8864,6 +9105,7 @@
       "word_index": 596,
       "opcode": "replace",
       "docai_reading": "בחר",
+      "docai_repaired": null,
       "final_text": "בחד",
       "page": 48,
       "bbox": {
@@ -8884,6 +9126,7 @@
       "word_index": 698,
       "opcode": "replace",
       "docai_reading": "בחר",
+      "docai_repaired": null,
       "final_text": "בחד",
       "page": 48,
       "bbox": {
@@ -8930,6 +9173,7 @@
       "word_index": 828,
       "opcode": "replace",
       "docai_reading": "אמא",
+      "docai_repaired": "אלמא",
       "final_text": "אלמא",
       "page": 48,
       "bbox": {
@@ -8944,12 +9188,13 @@
       "reasoning": "The word 'אלמא' (meaning 'it follows that' / 'it proves that') is a standard Talmudic Aramaic term in this context ('ופסק כר' יוחנן אלמא ס\"ל'). Paleographically, the prominent ascender rising high into the line above is the characteristic upper stroke of the letter Lamed (ל), ruling out 'אמא'.",
       "vlm_reading": "אמא",
       "surya_reading": "אמא",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 833,
       "opcode": "replace",
       "docai_reading": "ובחר",
+      "docai_repaired": null,
       "final_text": "ובחד",
       "page": 48,
       "bbox": {
@@ -8970,6 +9215,7 @@
       "word_index": 869,
       "opcode": "replace",
       "docai_reading": "וכתרי",
+      "docai_repaired": null,
       "final_text": "ובתרי",
       "page": 48,
       "bbox": {
@@ -8996,6 +9242,7 @@
       "word_index": 896,
       "opcode": "replace",
       "docai_reading": "פלוגתיידן",
+      "docai_repaired": null,
       "final_text": "פלוגתייהו",
       "page": 48,
       "bbox": {
@@ -9016,6 +9263,7 @@
       "word_index": 909,
       "opcode": "replace",
       "docai_reading": "א\"ן",
+      "docai_repaired": null,
       "final_text": "א\"נ",
       "page": 48,
       "bbox": {
@@ -9036,6 +9284,7 @@
       "word_index": 932,
       "opcode": "replace",
       "docai_reading": "ורוק",
+      "docai_repaired": null,
       "final_text": "ודוק",
       "page": 48,
       "bbox": {
@@ -9056,6 +9305,7 @@
       "word_index": 1000,
       "opcode": "replace",
       "docai_reading": "ולשמוץ",
+      "docai_repaired": null,
       "final_text": "ולשמואל",
       "page": 48,
       "bbox": {
@@ -9076,6 +9326,7 @@
       "word_index": 1037,
       "opcode": "delete",
       "docai_reading": "עם",
+      "docai_repaired": null,
       "final_text": null,
       "page": 48,
       "bbox": {
@@ -9096,6 +9347,7 @@
       "word_index": 1039,
       "opcode": "replace",
       "docai_reading": "ושמול",
+      "docai_repaired": null,
       "final_text": "ושמואל",
       "page": 48,
       "bbox": {
@@ -9116,6 +9368,7 @@
       "word_index": 1108,
       "opcode": "replace",
       "docai_reading": "ולשמון",
+      "docai_repaired": null,
       "final_text": "ולשמואל",
       "page": 48,
       "bbox": {
@@ -9136,6 +9389,7 @@
       "word_index": 1163,
       "opcode": "replace",
       "docai_reading": "מראוקמוה",
+      "docai_repaired": null,
       "final_text": "מדאוקמוה",
       "page": 48,
       "bbox": {
@@ -9156,6 +9410,7 @@
       "word_index": 1209,
       "opcode": "replace",
       "docai_reading": "לשמוא",
+      "docai_repaired": "לשמואל",
       "final_text": "לשמואל",
       "page": 48,
       "bbox": {
@@ -9170,7 +9425,7 @@
       "reasoning": "The visible text on the third line clearly reads 'לשמוא' (from right to left: Lamed, Shin, Mem, Vav, Aleph) with the final Lamed omitted/truncated at the end of the line/word in the manuscript, matching Option A rather than the full word in Option B.",
       "vlm_reading": "לשמואל",
       "surya_reading": "לשמוא",
-      "flag": "current_text_may_be_wrong",
+      "flag": "docai_ligature_artifact",
       "consensus_engines": [
         "docai",
         "surya"
@@ -9184,6 +9439,7 @@
       "word_index": 1,
       "opcode": "replace",
       "docai_reading": "דחקיכן",
+      "docai_repaired": null,
       "final_text": "דחקינן",
       "page": 48,
       "bbox": {
@@ -9206,6 +9462,7 @@
       "word_index": 1,
       "opcode": "replace",
       "docai_reading": "דיעבר",
+      "docai_repaired": null,
       "final_text": "דיעבד",
       "page": 49,
       "bbox": {
@@ -9226,6 +9483,7 @@
       "word_index": 18,
       "opcode": "replace",
       "docai_reading": "לדתרות",
+      "docai_repaired": null,
       "final_text": "להתרות",
       "page": 49,
       "bbox": {
@@ -9254,6 +9512,7 @@
       "word_index": 1,
       "opcode": "replace",
       "docai_reading": "דיעבר",
+      "docai_repaired": null,
       "final_text": "דיעבד",
       "page": 49,
       "bbox": {
@@ -9302,6 +9561,7 @@
       "word_index": 1,
       "opcode": "replace",
       "docai_reading": "דיעבך",
+      "docai_repaired": null,
       "final_text": "דיעבד",
       "page": 49,
       "bbox": {
@@ -9324,6 +9584,7 @@
       "word_index": 1,
       "opcode": "replace",
       "docai_reading": "רחיה",
+      "docai_repaired": null,
       "final_text": "דחיה",
       "page": 49,
       "bbox": {
@@ -9346,6 +9607,7 @@
       "word_index": 1,
       "opcode": "replace",
       "docai_reading": "רחיה",
+      "docai_repaired": null,
       "final_text": "דחיה",
       "page": 49,
       "bbox": {
@@ -9368,6 +9630,7 @@
       "word_index": 1,
       "opcode": "replace",
       "docai_reading": "רחיה",
+      "docai_repaired": null,
       "final_text": "דחיה",
       "page": 49,
       "bbox": {
@@ -9416,6 +9679,7 @@
       "word_index": 62,
       "opcode": "replace",
       "docai_reading": "בכורורת",
+      "docai_repaired": null,
       "final_text": "בכורות",
       "page": 49,
       "bbox": {
@@ -9464,6 +9728,7 @@
       "word_index": 23,
       "opcode": "replace",
       "docai_reading": "הכיאו",
+      "docai_repaired": null,
       "final_text": "הביאו",
       "page": 49,
       "bbox": {
@@ -9484,6 +9749,7 @@
       "word_index": 47,
       "opcode": "replace",
       "docai_reading": "והאף",
+      "docai_repaired": null,
       "final_text": "והאלף",
       "page": 49,
       "bbox": {
@@ -9608,6 +9874,7 @@
       "word_index": 265,
       "opcode": "delete",
       "docai_reading": "דיעכר",
+      "docai_repaired": null,
       "final_text": null,
       "page": 49,
       "bbox": {
@@ -9630,6 +9897,7 @@
       "word_index": 187,
       "opcode": "replace",
       "docai_reading": "דנהרדדעא",
+      "docai_repaired": null,
       "final_text": "דנהרדעא",
       "page": 50,
       "bbox": {
@@ -9656,6 +9924,7 @@
       "word_index": 306,
       "opcode": "replace",
       "docai_reading": "נלע\"ר",
+      "docai_repaired": null,
       "final_text": "נלע\"ד",
       "page": 50,
       "bbox": {
@@ -9728,6 +9997,7 @@
       "word_index": 541,
       "opcode": "replace",
       "docai_reading": "דמרך",
+      "docai_repaired": null,
       "final_text": "דמהיך",
       "page": 51,
       "bbox": {
@@ -9802,6 +10072,7 @@
       "word_index": 151,
       "opcode": "replace",
       "docai_reading": "אהרדי",
+      "docai_repaired": null,
       "final_text": "אהדדי",
       "page": 51,
       "bbox": {
@@ -9822,6 +10093,7 @@
       "word_index": 185,
       "opcode": "replace",
       "docai_reading": "מהכמי",
+      "docai_repaired": null,
       "final_text": "מחכמי",
       "page": 51,
       "bbox": {
@@ -9848,6 +10120,7 @@
       "word_index": 528,
       "opcode": "replace",
       "docai_reading": "מחזהרת",
+      "docai_repaired": null,
       "final_text": "מחוזרת",
       "page": 51,
       "bbox": {
@@ -9868,6 +10141,7 @@
       "word_index": 619,
       "opcode": "replace",
       "docai_reading": "האף",
+      "docai_repaired": null,
       "final_text": "האלף",
       "page": 51,
       "bbox": {
@@ -10044,6 +10318,7 @@
       "word_index": 1099,
       "opcode": "replace",
       "docai_reading": "דעורת",
+      "docai_repaired": null,
       "final_text": "דעות",
       "page": 52,
       "bbox": {
@@ -10064,6 +10339,7 @@
       "word_index": 1217,
       "opcode": "replace",
       "docai_reading": "לגטרי",
+      "docai_repaired": null,
       "final_text": "לגמרי",
       "page": 52,
       "bbox": {
@@ -10133,6 +10409,7 @@
       "word_index": 49,
       "opcode": "replace",
       "docai_reading": "דך",
+      "docai_repaired": null,
       "final_text": "הך",
       "page": 53,
       "bbox": {
@@ -10153,6 +10430,7 @@
       "word_index": 91,
       "opcode": "replace",
       "docai_reading": "דאים",
+      "docai_repaired": "דאלים",
       "final_text": "דאלים",
       "page": 53,
       "bbox": {
@@ -10167,12 +10445,13 @@
       "reasoning": "The visible word in the image is 'דאלים' (part of the standard Talmudic phrase 'כל דאלים גבר'). Paleographically, the tall ascender of the letter 'ל' (lamed) is clearly visible extending upward between the lines, followed by the final mem ('ם') at the end of the word. Option A ('דאים') is an OCR misread that omitted the lamed.",
       "vlm_reading": "דאלים",
       "surya_reading": "דאלים",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 122,
       "opcode": "replace",
       "docai_reading": "דשמוא",
+      "docai_repaired": "דשמואל",
       "final_text": "דשמואל",
       "page": 53,
       "bbox": {
@@ -10187,12 +10466,13 @@
       "reasoning": "The raster crop shows the word 'דשמוא' on the second line (following the partial 'ם' of 'דמשום'). The final letter 'ל' of 'דשמואל' is truncated by the left margin of the crop image, making Option A ('דשמוא') the accurate transcription of the visible characters.",
       "vlm_reading": "דשמואל",
       "surya_reading": "דשמואל",
-      "flag": "current_text_may_be_wrong"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 181,
       "opcode": "replace",
       "docai_reading": "דאים",
+      "docai_repaired": "דאלים",
       "final_text": "דאלים",
       "page": 53,
       "bbox": {
@@ -10207,7 +10487,7 @@
       "reasoning": "The raster crop visually shows a printer's typo reading 'דאים' (dalet, aleph, yod, final mem) rather than the full contextually intended Rabbinic phrase 'דאלים' (from 'מאן דאלים גבר'). Option A accurately captures the visual reading present in the image.",
       "vlm_reading": "דאים",
       "surya_reading": "דאלים",
-      "flag": "current_text_may_be_wrong",
+      "flag": "docai_ligature_artifact",
       "consensus_engines": [
         "docai",
         "vlm"
@@ -10219,6 +10499,7 @@
       "word_index": 282,
       "opcode": "replace",
       "docai_reading": "כשמול",
+      "docai_repaired": null,
       "final_text": "כשמואל",
       "page": 53,
       "bbox": {
@@ -10239,6 +10520,7 @@
       "word_index": 335,
       "opcode": "delete",
       "docai_reading": "הפו",
+      "docai_repaired": null,
       "final_text": null,
       "page": 53,
       "bbox": {
@@ -10259,6 +10541,7 @@
       "word_index": 344,
       "opcode": "replace",
       "docai_reading": "אא",
+      "docai_repaired": "אלא",
       "final_text": "אלא",
       "page": 53,
       "bbox": {
@@ -10273,12 +10556,13 @@
       "reasoning": "The crop displays the word 'אלא' following the word 'גבר' (represented by its final letter 'ר' on the right margin) and preceding 'ודאי' (represented by 'ו' on the left). The sentence context 'דכל דאלים גבר אלא ודאי מוכרחים' confirms Option B ('אלא').",
       "vlm_reading": "לא",
       "surya_reading": "א'",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 369,
       "opcode": "replace",
       "docai_reading": "דשמוא",
+      "docai_repaired": "דשמואל",
       "final_text": "דשמואל",
       "page": 53,
       "bbox": {
@@ -10293,12 +10577,13 @@
       "reasoning": "The image clearly shows the word 'דשמואל', including the final letter 'ל' with its characteristic tall ascender stroke. This matches the Rabbinic context ('משום דשמואל תרגמה').",
       "vlm_reading": "דשמואל",
       "surya_reading": "דשמואל",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 421,
       "opcode": "replace",
       "docai_reading": "הלבתא",
+      "docai_repaired": null,
       "final_text": "הלכתא",
       "page": 53,
       "bbox": {
@@ -10373,6 +10658,7 @@
       "word_index": 130,
       "opcode": "replace",
       "docai_reading": "דשמוא",
+      "docai_repaired": "דשמואל",
       "final_text": "דשמואל",
       "page": 54,
       "bbox": {
@@ -10387,12 +10673,13 @@
       "reasoning": "In the target word on line 3, the text reads דשמוא with an abbreviation mark above the letters. It clearly lacks the characteristic tall ascender of a Lamed (ל), which can be seen in adjacent words like 'הל' on line 2 and 'הלכתא' on line 4. Therefore, Option A accurately reflects the literal printed abbreviated text.",
       "vlm_reading": "דשמואל",
       "surya_reading": "דשמוא'",
-      "flag": "current_text_may_be_wrong"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 147,
       "opcode": "replace",
       "docai_reading": "כשמוא",
+      "docai_repaired": "כשמואל",
       "final_text": "כשמואל",
       "page": 54,
       "bbox": {
@@ -10407,7 +10694,7 @@
       "reasoning": "The contextual reading from the Talmudic commentary ('וגם בכלל דהלכתא כשמואל בדיני') confirms the full word 'כשמואל'. Paleographically, the final letter 'ל' (Lamed) is present on the left side of the word in line 2, making Option B the correct full transcription.",
       "vlm_reading": "כשמואל",
       "surya_reading": "כשמוא'",
-      "flag": "current_text_confirmed",
+      "flag": "docai_ligature_artifact",
       "consensus_engines": [
         "docai",
         "surya"
@@ -10419,6 +10706,7 @@
       "word_index": 168,
       "opcode": "replace",
       "docai_reading": "כשמוא",
+      "docai_repaired": "כשמואל",
       "final_text": "כשמואל",
       "page": 54,
       "bbox": {
@@ -10433,7 +10721,7 @@
       "reasoning": "The image shows the word 'כשמואל'. The letter 'ל' (Lamed) at the end of the word is clearly visible with its characteristically tall vertical ascender extending upward into the line above. Thus, Option B ('כשמואל') is the correct transcription.",
       "vlm_reading": "כשמואל",
       "surya_reading": "כשמוא'",
-      "flag": "current_text_confirmed",
+      "flag": "docai_ligature_artifact",
       "consensus_engines": [
         "docai",
         "surya"
@@ -10447,6 +10735,7 @@
       "word_index": 49,
       "opcode": "replace",
       "docai_reading": "דיבמורת",
+      "docai_repaired": null,
       "final_text": "דיבמות",
       "page": 55,
       "bbox": {
@@ -10473,6 +10762,7 @@
       "word_index": 65,
       "opcode": "replace",
       "docai_reading": "דשמוא",
+      "docai_repaired": "דשמואל",
       "final_text": "דשמואל",
       "page": 55,
       "bbox": {
@@ -10487,12 +10777,13 @@
       "reasoning": "The crop clearly shows the word 'דשמואל' on the second line. The final letter 'ל' (lamed) is fully visible with its characteristic tall upper ascender reaching toward the line above, matching the standard Aramaic phrase 'דשמואל' in the context of 'משמיה דשמואל'.",
       "vlm_reading": "דשמואל",
       "surya_reading": "דשמואל",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 69,
       "opcode": "replace",
       "docai_reading": "ואיבא",
+      "docai_repaired": "ואליבא",
       "final_text": "ואיכא",
       "page": 55,
       "bbox": {
@@ -10519,6 +10810,7 @@
       "word_index": 92,
       "opcode": "replace",
       "docai_reading": "רמכריע",
+      "docai_repaired": null,
       "final_text": "המכריע",
       "page": 55,
       "bbox": {
@@ -10541,6 +10833,7 @@
       "word_index": 20,
       "opcode": "replace",
       "docai_reading": "מקובצרת",
+      "docai_repaired": null,
       "final_text": "מקובצת",
       "page": 57,
       "bbox": {
@@ -10569,6 +10862,7 @@
       "word_index": 22,
       "opcode": "replace",
       "docai_reading": "גכי",
+      "docai_repaired": null,
       "final_text": "גבי",
       "page": 57,
       "bbox": {
@@ -10591,6 +10885,7 @@
       "word_index": 10,
       "opcode": "replace",
       "docai_reading": "אלאת",
+      "docai_repaired": null,
       "final_text": "אלא",
       "page": 57,
       "bbox": {
@@ -10611,6 +10906,7 @@
       "word_index": 171,
       "opcode": "replace",
       "docai_reading": "אא",
+      "docai_repaired": "אלא",
       "final_text": "אלא",
       "page": 57,
       "bbox": {
@@ -10625,12 +10921,13 @@
       "reasoning": "The sentence context reads 'שהכ\"הג לא הזכיר אלא להרמ\"ע', where the word 'אלא' follows 'הזכיר' (partially visible as the letter 'ר' on the right of the third line). Paleographically, the characters clearly show the letters of 'אלא', whereas Option A ('אא') incorrectly omits the central 'ל'.",
       "vlm_reading": "דא",
       "surya_reading": "א'",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 176,
       "opcode": "replace",
       "docai_reading": "או",
+      "docai_repaired": null,
       "final_text": "אלו",
       "page": 57,
       "bbox": {
@@ -10653,6 +10950,7 @@
       "word_index": 14,
       "opcode": "replace",
       "docai_reading": "איבא",
+      "docai_repaired": "אליבא",
       "final_text": "אליבא",
       "page": 57,
       "bbox": {
@@ -10667,7 +10965,7 @@
       "reasoning": "The crop clearly shows a word with a tall Lamed ('ל') ascender in the middle of the second line, spelling 'אליבא'. This aligns with Option B and matches the standard Rabbinic phrase 'אליבא ד...' in the surrounding textual context.",
       "vlm_reading": "איכא",
       "surya_reading": "איכא",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 28,
@@ -10699,6 +10997,7 @@
       "word_index": 86,
       "opcode": "replace",
       "docai_reading": "איבא",
+      "docai_repaired": "אליבא",
       "final_text": "אליבא",
       "page": 57,
       "bbox": {
@@ -10713,7 +11012,7 @@
       "reasoning": "The visible text in the middle line clearly reads 'איבא' (Aleph, Yod, Bet, Aleph). There is no ascending stroke characteristic of a Lamed (ל) that would be present in 'אליבא' (as seen clearly in 'הלכות' on the line below). Thus, Option A accurately reflects the paleographic reading of the crop.",
       "vlm_reading": "איכא",
       "surya_reading": "איכא",
-      "flag": "current_text_may_be_wrong"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 116,
@@ -10823,6 +11122,7 @@
       "word_index": 315,
       "opcode": "replace",
       "docai_reading": "איבא",
+      "docai_repaired": "אליבא",
       "final_text": "אליבא",
       "page": 58,
       "bbox": {
@@ -10837,12 +11137,13 @@
       "reasoning": "The crop shows the text from the Talmudic commentary 'ולא כי פליגי אליבא דאחר'. Line 3 contains 'גי' (end of פליגי), followed by 'אליבא' (clearly displaying the tall ascender of the letter Lamed 'ל'), and 'דא' (start of דאחר). Option A ('איבא') is an OCR misreading that ignores the clear ascender of the Lamed.",
       "vlm_reading": "איכא",
       "surya_reading": "איכא",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 360,
       "opcode": "replace",
       "docai_reading": "איבא",
+      "docai_repaired": "אליבא",
       "final_text": "אליבא",
       "page": 58,
       "bbox": {
@@ -10857,12 +11158,13 @@
       "reasoning": "The manuscript image clearly shows the word 'אליבא' on the middle line below 'ד\"ה רבא'. The Lamed ('ל') with its tall ascender is distinctly visible between the initial Alef and Yod, confirming 'אליבא' (standard Rabbinic Aramaic for 'according to') over the OCR misreading 'איבא'.",
       "vlm_reading": null,
       "surya_reading": null,
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 382,
       "opcode": "replace",
       "docai_reading": "איבא",
+      "docai_repaired": "אליבא",
       "final_text": "אליבא",
       "page": 58,
       "bbox": {
@@ -10877,12 +11179,13 @@
       "reasoning": "The raster crop clearly displays the word 'איבא' (Aleph-Yod-Bet-Aleph) without a Lamed, representing a typographical error in the original printed text where 'אליבא' was intended contextually.",
       "vlm_reading": null,
       "surya_reading": null,
-      "flag": "current_text_may_be_wrong"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 415,
       "opcode": "replace",
       "docai_reading": "אומריס",
+      "docai_repaired": null,
       "final_text": "אומרים",
       "page": 58,
       "bbox": {
@@ -10929,6 +11232,7 @@
       "word_index": 557,
       "opcode": "replace",
       "docai_reading": "איבא",
+      "docai_repaired": "אליבא",
       "final_text": "אליבא",
       "page": 58,
       "bbox": {
@@ -10943,7 +11247,7 @@
       "reasoning": "The image clearly shows the word 'אליבא' (Aleph, Lamed, Yod, Bet, Aleph), where the ascender of the Lamed ('ל') is visibly extending upward into the line space above. This corresponds directly with the Talmudic/Rabbinic contextual phrase 'אליבא דר' יוחנן'.",
       "vlm_reading": "איכא",
       "surya_reading": "איבא",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 561,
@@ -11027,6 +11331,7 @@
       "word_index": 699,
       "opcode": "replace",
       "docai_reading": "האה",
+      "docai_repaired": "האלה",
       "final_text": "האלה",
       "page": 58,
       "bbox": {
@@ -11041,7 +11346,7 @@
       "reasoning": "The image clearly shows the word 'האלה' on the third line, featuring the letter 'ה', followed by 'א', a 'ל' with its characteristic tall ascender extending upwards between the lines, and a final 'ה'. This matches the context 'והאמת האלה הנה'.",
       "vlm_reading": "הלה",
       "surya_reading": null,
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 720,
@@ -11073,6 +11378,7 @@
       "word_index": 747,
       "opcode": "replace",
       "docai_reading": "אא",
+      "docai_repaired": "אלא",
       "final_text": "אלא",
       "page": 58,
       "bbox": {
@@ -11087,7 +11393,7 @@
       "reasoning": "In line 3 of the image snippet, following the context 'תלונתי אלא גם', the word preceding 'גם' is 'אלא'. The tall ascender of the letter lamed (ל) is clearly visible extending upwards between lines 2 and 3. DocAI misread the word as 'אא' (Option A), whereas Option B ('אלא') correctly reflects both the paleography (including the lamed ascender) and the Rabbinic sentence context.",
       "vlm_reading": null,
       "surya_reading": "א'",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 875,
@@ -11119,6 +11425,7 @@
       "word_index": 1035,
       "opcode": "delete",
       "docai_reading": "הלכה",
+      "docai_repaired": null,
       "final_text": null,
       "page": 58,
       "bbox": {
@@ -11167,6 +11474,7 @@
       "word_index": 257,
       "opcode": "replace",
       "docai_reading": "וכדכתיכנא",
+      "docai_repaired": null,
       "final_text": "וכדכתיבנא",
       "page": 59,
       "bbox": {
@@ -11189,6 +11497,7 @@
       "word_index": 127,
       "opcode": "replace",
       "docai_reading": "אא",
+      "docai_repaired": "אלא",
       "final_text": "אלא",
       "page": 59,
       "bbox": {
@@ -11203,12 +11512,13 @@
       "reasoning": "The crop clearly shows the two-letter abbreviation 'אא' (standing for 'אלא' in this context: 'דלא אמרו הלכתא כרב נחמן אא בדיני'). There is no tall stem corresponding to a 'ל' visible between or above the letters, confirming Option A ('אא') as the exact paleographic transcription.",
       "vlm_reading": "אלא",
       "surya_reading": null,
-      "flag": "current_text_may_be_wrong"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 131,
       "opcode": "replace",
       "docai_reading": "אהים",
+      "docai_repaired": "אלהים",
       "final_text": "אלהים",
       "page": 59,
       "bbox": {
@@ -11223,7 +11533,7 @@
       "reasoning": "The sentence context comes from the biblical verse 'ואחרי הודיע אלהים אותנו' (Genesis 41:39), quoted in Rabbinic literature. In the image crop, the lamed (with its tall top ascender), he, yod, and final mem of 'אלהים' are clearly visible, while the initial alef is right at the cropped edge. Thus, Option B ('אלהים') correctly represents the complete intended word.",
       "vlm_reading": "אלהים",
       "surya_reading": null,
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     }
   ],
   "163": [
@@ -11257,6 +11567,7 @@
       "word_index": 429,
       "opcode": "replace",
       "docai_reading": "שכתכו",
+      "docai_repaired": null,
       "final_text": "שכתבו",
       "page": 60,
       "bbox": {
@@ -11277,6 +11588,7 @@
       "word_index": 503,
       "opcode": "replace",
       "docai_reading": "בכתובוב",
+      "docai_repaired": null,
       "final_text": "בכתובות",
       "page": 60,
       "bbox": {
@@ -11303,6 +11615,7 @@
       "word_index": 547,
       "opcode": "replace",
       "docai_reading": "אא",
+      "docai_repaired": "אלא",
       "final_text": "אלא",
       "page": 60,
       "bbox": {
@@ -11317,7 +11630,7 @@
       "reasoning": "The raster crop clearly displays two distinct Aleph characters ('אא') serving as a standard Rabbinic abbreviation for 'אלא' in the sentence context ('הרא\"ש אא לגבי'). Thus, Option A ('אא') is the exact literal paleographic transcription of the visible characters.",
       "vlm_reading": "אלא",
       "surya_reading": "א'",
-      "flag": "current_text_may_be_wrong"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 573,
@@ -11351,6 +11664,7 @@
       "word_index": 42,
       "opcode": "replace",
       "docai_reading": "בתלמורא",
+      "docai_repaired": null,
       "final_text": "בתלמודא",
       "page": 60,
       "bbox": {
@@ -11371,6 +11685,7 @@
       "word_index": 55,
       "opcode": "delete",
       "docai_reading": "४",
+      "docai_repaired": null,
       "final_text": null,
       "page": 60,
       "bbox": {
@@ -11393,6 +11708,7 @@
       "word_index": 57,
       "opcode": "replace",
       "docai_reading": "אא",
+      "docai_repaired": "אלא",
       "final_text": "אלא",
       "page": 60,
       "bbox": {
@@ -11407,7 +11723,7 @@
       "reasoning": "The sentence context reads 'לא פליג מסברת עצמו אלא דמתני לקולא'. The word in question is 'אלא', which DocAI misread as 'אא' due to the thin upper stroke of the lamed.",
       "vlm_reading": "אלא",
       "surya_reading": "א'",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     }
   ],
   "167": [
@@ -11415,6 +11731,7 @@
       "word_index": 0,
       "opcode": "replace",
       "docai_reading": "קסו",
+      "docai_repaired": null,
       "final_text": "קסז",
       "page": 60,
       "bbox": {
@@ -11514,6 +11831,7 @@
       "word_index": 201,
       "opcode": "insert",
       "docai_reading": null,
+      "docai_repaired": null,
       "final_text": "שכתב",
       "page": 60,
       "bbox": {
@@ -11560,6 +11878,7 @@
       "word_index": 423,
       "opcode": "replace",
       "docai_reading": "ושמוא",
+      "docai_repaired": "ושמואל",
       "final_text": "ושמואל",
       "page": 61,
       "bbox": {
@@ -11574,7 +11893,7 @@
       "reasoning": "The image clearly shows the word 'ושמואל', including the final letter Lamed ('ל') whose tall ascending neck extends into the interlinear space above. Option B correctly includes the full word as expected from the contextual Rabbinic citation ('לגבי רב ושמואל').",
       "vlm_reading": "ושמוא'",
       "surya_reading": "ושמוא'",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 443,
@@ -11658,6 +11977,7 @@
       "word_index": 594,
       "opcode": "delete",
       "docai_reading": "הרי\"ף",
+      "docai_repaired": null,
       "final_text": null,
       "page": 61,
       "bbox": {
@@ -11704,6 +12024,7 @@
       "word_index": 608,
       "opcode": "replace",
       "docai_reading": "תלמור",
+      "docai_repaired": null,
       "final_text": "תלמוד",
       "page": 61,
       "bbox": {
@@ -11724,6 +12045,7 @@
       "word_index": 645,
       "opcode": "replace",
       "docai_reading": "איעזר",
+      "docai_repaired": "אליעזר",
       "final_text": "אליעזר",
       "page": 61,
       "bbox": {
@@ -11738,7 +12060,7 @@
       "reasoning": "The image clearly shows the word 'אליעזר' on the third line, following 'ק' (end of 'לדמשק'). The letters aleph (א), lamed with its characteristic tall ascender and dot (ל), yod (י), ayin (ע), zayin (ז), and resh (ר) are all present. Context confirms 'לדמשק אליעזר', referring to the classic Rabbinic commentary 'Damasek Eliezer'.",
       "vlm_reading": "אליעזר",
       "surya_reading": null,
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 699,
@@ -11796,6 +12118,7 @@
       "word_index": 813,
       "opcode": "replace",
       "docai_reading": "שמוא",
+      "docai_repaired": "שמואל",
       "final_text": "שמואל",
       "page": 61,
       "bbox": {
@@ -11810,12 +12133,13 @@
       "reasoning": "In the third visible line of the crop, the printed text clearly reads 'שמוא' followed immediately by 'ו' (from 'ולגבי'). The letter 'ל' (lamed) is omitted in this print/abbreviation, as evidenced by the lack of any characteristic upper ascender above the line.",
       "vlm_reading": "שמוא'",
       "surya_reading": "שמוא'",
-      "flag": "current_text_may_be_wrong"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 877,
       "opcode": "replace",
       "docai_reading": "דרוא",
+      "docai_repaired": null,
       "final_text": "דהוא",
       "page": 61,
       "bbox": {
@@ -11862,6 +12186,7 @@
       "word_index": 991,
       "opcode": "replace",
       "docai_reading": "אגאזי",
+      "docai_repaired": null,
       "final_text": "אלגאזי",
       "page": 61,
       "bbox": {
@@ -11882,6 +12207,7 @@
       "word_index": 1235,
       "opcode": "replace",
       "docai_reading": "אא",
+      "docai_repaired": "אלא",
       "final_text": "אלא",
       "page": 61,
       "bbox": {
@@ -11896,12 +12222,13 @@
       "reasoning": "The visible characters in the middle of the third line show an aleph, a lamed with its characteristic tall ascender and top hook, followed by an aleph, forming the word 'אלא'. This perfectly matches the sentence context 'דאין הלכה כבתראי אלא מאביי'.",
       "vlm_reading": "אא",
       "surya_reading": "א'",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 1292,
       "opcode": "delete",
       "docai_reading": "דף",
+      "docai_repaired": null,
       "final_text": null,
       "page": 62,
       "bbox": {
@@ -11924,6 +12251,7 @@
       "word_index": 58,
       "opcode": "replace",
       "docai_reading": "שמוא",
+      "docai_repaired": "שמואל",
       "final_text": "שמואל",
       "page": 62,
       "bbox": {
@@ -11938,12 +12266,13 @@
       "reasoning": "The raster crop clearly shows the word 'שמוא' without a final lamed ('ל'). Comparing it with the letter lamed in 'של' on the line below, which has a prominent upper ascender, there is no ascender present above the word in question, confirming the printed/visible reading is 'שמוא'.",
       "vlm_reading": "שמואל",
       "surya_reading": "שמו'",
-      "flag": "current_text_may_be_wrong"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 62,
       "opcode": "replace",
       "docai_reading": "אא",
+      "docai_repaired": "אלא",
       "final_text": "אלא",
       "page": 62,
       "bbox": {
@@ -11958,12 +12287,13 @@
       "reasoning": "The image clearly shows the word 'אלא' on the second line (with the long vertical neck of the letter 'ל' extending upwards between the two 'א' letters), matching the sentence context 'שלא הביא אלא דברי רבא'. Option A ('אא') is an OCR misread that omitted the 'ל'.",
       "vlm_reading": "צא",
       "surya_reading": "א'",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 117,
       "opcode": "replace",
       "docai_reading": "לכותבם",
+      "docai_repaired": null,
       "final_text": "לכותכם",
       "page": 62,
       "bbox": {
@@ -11991,6 +12321,7 @@
       "word_index": 152,
       "opcode": "replace",
       "docai_reading": "שמול",
+      "docai_repaired": null,
       "final_text": "שמואל",
       "page": 62,
       "bbox": {
@@ -12011,6 +12342,7 @@
       "word_index": 221,
       "opcode": "replace",
       "docai_reading": "שמוא בס\"ד",
+      "docai_repaired": null,
       "final_text": "שמואל בפ\"ד",
       "page": 62,
       "bbox": {
@@ -12031,6 +12363,7 @@
       "word_index": 234,
       "opcode": "replace",
       "docai_reading": "י\"ך",
+      "docai_repaired": null,
       "final_text": "י\"ד",
       "page": 62,
       "bbox": {
@@ -12051,6 +12384,7 @@
       "word_index": 239,
       "opcode": "replace",
       "docai_reading": "בכ\"ט",
+      "docai_repaired": null,
       "final_text": "בכ\"מ",
       "page": 62,
       "bbox": {
@@ -12077,6 +12411,7 @@
       "word_index": 249,
       "opcode": "replace",
       "docai_reading": "ס\"ו",
+      "docai_repaired": null,
       "final_text": "פ\"ו",
       "page": 62,
       "bbox": {
@@ -12103,6 +12438,7 @@
       "word_index": 262,
       "opcode": "replace",
       "docai_reading": "לרס עור",
+      "docai_repaired": null,
       "final_text": "להם עוד",
       "page": 62,
       "bbox": {
@@ -12123,6 +12459,7 @@
       "word_index": 359,
       "opcode": "replace",
       "docai_reading": "או",
+      "docai_repaired": null,
       "final_text": "אלו",
       "page": 62,
       "bbox": {
@@ -12143,6 +12480,7 @@
       "word_index": 386,
       "opcode": "replace",
       "docai_reading": "סע\"ר",
+      "docai_repaired": null,
       "final_text": "סע\"ד",
       "page": 62,
       "bbox": {
@@ -12189,6 +12527,7 @@
       "word_index": 501,
       "opcode": "replace",
       "docai_reading": "כשמול",
+      "docai_repaired": null,
       "final_text": "כשמוץ",
       "page": 62,
       "bbox": {
@@ -12209,6 +12548,7 @@
       "word_index": 515,
       "opcode": "replace",
       "docai_reading": "נגר",
+      "docai_repaired": null,
       "final_text": "נגד",
       "page": 62,
       "bbox": {
@@ -12229,6 +12569,7 @@
       "word_index": 519,
       "opcode": "replace",
       "docai_reading": "דוא",
+      "docai_repaired": null,
       "final_text": "הוא",
       "page": 62,
       "bbox": {
@@ -12251,6 +12592,7 @@
       "word_index": 22,
       "opcode": "replace",
       "docai_reading": "ושמוץ",
+      "docai_repaired": null,
       "final_text": "ושמואל",
       "page": 62,
       "bbox": {
@@ -12271,6 +12613,7 @@
       "word_index": 76,
       "opcode": "replace",
       "docai_reading": "כזה",
+      "docai_repaired": null,
       "final_text": "מזה",
       "page": 62,
       "bbox": {
@@ -12317,6 +12660,7 @@
       "word_index": 170,
       "opcode": "replace",
       "docai_reading": "בר\"ס",
+      "docai_repaired": null,
       "final_text": "בר\"פ",
       "page": 62,
       "bbox": {
@@ -12337,6 +12681,7 @@
       "word_index": 178,
       "opcode": "delete",
       "docai_reading": "והכי הלכתא",
+      "docai_repaired": null,
       "final_text": null,
       "page": 62,
       "bbox": {
@@ -12357,6 +12702,7 @@
       "word_index": 214,
       "opcode": "replace",
       "docai_reading": "עור",
+      "docai_repaired": null,
       "final_text": "עוד",
       "page": 63,
       "bbox": {
@@ -12377,6 +12723,7 @@
       "word_index": 227,
       "opcode": "replace",
       "docai_reading": "ושמוא",
+      "docai_repaired": "ושמואל",
       "final_text": "ושמואל",
       "page": 63,
       "bbox": {
@@ -12391,7 +12738,7 @@
       "reasoning": "The crop clearly shows the full word 'ושמואל', including the final letter Lamed ('ל') with its distinctive top ascender extending upward. This matches the standard context of 'דלא כרב ושמואל'.",
       "vlm_reading": "ושמואל",
       "surya_reading": "ושמוא",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 236,
@@ -12423,6 +12770,7 @@
       "word_index": 293,
       "opcode": "replace",
       "docai_reading": "איבייהו",
+      "docai_repaired": "אליבייהו",
       "final_text": "אליבייהו",
       "page": 63,
       "bbox": {
@@ -12437,12 +12785,13 @@
       "reasoning": "Paleographic inspection of the text in the middle line reveals the sequence א-י-ב-י-י-ה-ו ('איבייהו'). There is no ascending upper stem characteristic of a Lamed (ל) between the Alef and Bet (which is clearly visible in 'למידק' on the line below). Although 'אליבייהו' is the expected Rabbinic standard phrase semantically, Option A accurately captures the literal print/typo present in the raster image.",
       "vlm_reading": "אליבייהו",
       "surya_reading": "איבייהו",
-      "flag": "current_text_may_be_wrong"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 306,
       "opcode": "replace",
       "docai_reading": "האה",
+      "docai_repaired": "האלה",
       "final_text": "האלה",
       "page": 63,
       "bbox": {
@@ -12457,12 +12806,13 @@
       "reasoning": "The visible text on the middle line shows 'ת האלה אי', matching the contextual phrase 'ואחרי הדברים והאמת האלה איכא למידק'. The tall ascender of the letter lamed ('ל') in 'האלה' is clearly visible extending upwards between the lines.",
       "vlm_reading": "דהא",
       "surya_reading": "האה",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 382,
       "opcode": "replace",
       "docai_reading": "איהו",
+      "docai_repaired": null,
       "final_text": "איהן",
       "page": 63,
       "bbox": {
@@ -12516,6 +12866,7 @@
       "word_index": 516,
       "opcode": "replace",
       "docai_reading": "אא",
+      "docai_repaired": "אלא",
       "final_text": "אלא",
       "page": 63,
       "bbox": {
@@ -12530,12 +12881,13 @@
       "reasoning": "The crop clearly shows the word 'אלא' on the second line (following the end of 'אמר'). The tall ascender with the characteristic top serif/dot represents the letter Lamed (ל) positioned between two Alephs (א), matching the context phrase 'אמר אלא אמר'.",
       "vlm_reading": "אא",
       "surya_reading": "א'",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 530,
       "opcode": "replace",
       "docai_reading": "ה\"ג",
+      "docai_repaired": null,
       "final_text": "ה\"נ",
       "page": 63,
       "bbox": {
@@ -12556,6 +12908,7 @@
       "word_index": 538,
       "opcode": "replace",
       "docai_reading": "וא",
+      "docai_repaired": "ואל",
       "final_text": "ואל",
       "page": 63,
       "bbox": {
@@ -12570,12 +12923,13 @@
       "reasoning": "In the third line, following the word 'מי' (from 'עצמי'), the image clearly shows the characters 'ו' and 'א' followed directly by 'ד' (from 'דעות'), omitting the 'ל' present in the expanded standard context ('ואל'). Option A ('וא') accurately reflects the visible text.",
       "vlm_reading": "וא",
       "surya_reading": "וא'",
-      "flag": "current_text_may_be_wrong"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 547,
       "opcode": "replace",
       "docai_reading": "ס\"ס",
+      "docai_repaired": null,
       "final_text": "ס\"פ",
       "page": 63,
       "bbox": {
@@ -12596,6 +12950,7 @@
       "word_index": 583,
       "opcode": "replace",
       "docai_reading": "דוא",
+      "docai_repaired": null,
       "final_text": "הוא",
       "page": 63,
       "bbox": {
@@ -12720,6 +13075,7 @@
       "word_index": 910,
       "opcode": "replace",
       "docai_reading": "להכ\"ס",
+      "docai_repaired": null,
       "final_text": "להכ\"ט",
       "page": 63,
       "bbox": {
@@ -12740,6 +13096,7 @@
       "word_index": 936,
       "opcode": "replace",
       "docai_reading": "ט\"ב",
+      "docai_repaired": null,
       "final_text": "מ\"ב",
       "page": 63,
       "bbox": {
@@ -12760,6 +13117,7 @@
       "word_index": 1045,
       "opcode": "delete",
       "docai_reading": "שורש",
+      "docai_repaired": null,
       "final_text": null,
       "page": 63,
       "bbox": {
@@ -12780,6 +13138,7 @@
       "word_index": 1159,
       "opcode": "replace",
       "docai_reading": "אא",
+      "docai_repaired": "אלא",
       "final_text": "אלא",
       "page": 64,
       "bbox": {
@@ -12794,7 +13153,7 @@
       "reasoning": "The sentence context from Ramban (Milchamot, Bava Kamma) reads 'הא אין עליך לדון אלא בלשון רבינו הגדול'. Line 3 of the image crop shows the final nun of 'לדון', followed by 'אלא' (with the top ascender of the lamed clearly visible extending upwards between lines), followed by 'ב' (the beginning of 'בלשון'). Option A ('אא') is a typical OCR misreading of the ligature/letters in 'אלא'.",
       "vlm_reading": "או",
       "surya_reading": "א'",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     }
   ],
   "170": [
@@ -12802,6 +13161,7 @@
       "word_index": 30,
       "opcode": "replace",
       "docai_reading": "דרוי",
+      "docai_repaired": null,
       "final_text": "דהוי",
       "page": 64,
       "bbox": {
@@ -12824,6 +13184,7 @@
       "word_index": 88,
       "opcode": "replace",
       "docai_reading": "וכב\"ק",
+      "docai_repaired": null,
       "final_text": "ובב\"ק",
       "page": 64,
       "bbox": {
@@ -12844,6 +13205,7 @@
       "word_index": 116,
       "opcode": "delete",
       "docai_reading": "דוכתי דבגמרא",
+      "docai_repaired": null,
       "final_text": null,
       "page": 64,
       "bbox": {
@@ -12866,6 +13228,7 @@
       "word_index": 2,
       "opcode": "replace",
       "docai_reading": "כר\"ט",
+      "docai_repaired": null,
       "final_text": "כר\"מ",
       "page": 64,
       "bbox": {
@@ -12886,6 +13249,7 @@
       "word_index": 51,
       "opcode": "replace",
       "docai_reading": "נ\"ר",
+      "docai_repaired": null,
       "final_text": "נ\"ד",
       "page": 64,
       "bbox": {
@@ -12929,6 +13293,7 @@
       "word_index": 18,
       "opcode": "replace",
       "docai_reading": "אא",
+      "docai_repaired": "אלא",
       "final_text": "אלא",
       "page": 64,
       "bbox": {
@@ -12943,12 +13308,13 @@
       "reasoning": "The image clearly shows the word 'אלא' (with an 'א' followed by a 'לא' ligature) on the second line, matching the standard Dibbur Hamatchel (ד\"ה) reference 'אלא' from the provided Talmudic context ('ד\"ה אלא ובפ''). Option A ('אא') misreads the ligature as a repeated 'aleph'.",
       "vlm_reading": "אא",
       "surya_reading": null,
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 135,
       "opcode": "replace",
       "docai_reading": "אא",
+      "docai_repaired": "אלא",
       "final_text": "לא",
       "page": 64,
       "bbox": {
@@ -13023,6 +13389,7 @@
       "word_index": 116,
       "opcode": "replace",
       "docai_reading": "בכ\"ס",
+      "docai_repaired": null,
       "final_text": "בכ\"ט",
       "page": 64,
       "bbox": {
@@ -13049,6 +13416,7 @@
       "word_index": 173,
       "opcode": "delete",
       "docai_reading": "הלכה 7",
+      "docai_repaired": null,
       "final_text": null,
       "page": 64,
       "bbox": {
@@ -13092,6 +13460,7 @@
       "word_index": 36,
       "opcode": "replace",
       "docai_reading": "בדקומץ",
+      "docai_repaired": null,
       "final_text": "בהקומץ",
       "page": 65,
       "bbox": {
@@ -13118,6 +13487,7 @@
       "word_index": 53,
       "opcode": "replace",
       "docai_reading": "לעד\"ן",
+      "docai_repaired": null,
       "final_text": ".ולעד\"ן",
       "page": 65,
       "bbox": {
@@ -13138,6 +13508,7 @@
       "word_index": 132,
       "opcode": "replace",
       "docai_reading": "בכ\"ס",
+      "docai_repaired": null,
       "final_text": "בכ\"מ",
       "page": 65,
       "bbox": {
@@ -13158,6 +13529,7 @@
       "word_index": 177,
       "opcode": "replace",
       "docai_reading": "אגאזי",
+      "docai_repaired": null,
       "final_text": "אלגאזי",
       "page": 65,
       "bbox": {
@@ -13204,6 +13576,7 @@
       "word_index": 277,
       "opcode": "replace",
       "docai_reading": "חרא רבפ",
+      "docai_repaired": null,
       "final_text": "חדא דבפ'",
       "page": 65,
       "bbox": {
@@ -13224,6 +13597,7 @@
       "word_index": 475,
       "opcode": "delete",
       "docai_reading": "זר",
+      "docai_repaired": null,
       "final_text": null,
       "page": 65,
       "bbox": {
@@ -13244,6 +13618,7 @@
       "word_index": 480,
       "opcode": "replace",
       "docai_reading": "מייתבא",
+      "docai_repaired": null,
       "final_text": "מייתכא",
       "page": 65,
       "bbox": {
@@ -13264,6 +13639,7 @@
       "word_index": 487,
       "opcode": "replace",
       "docai_reading": "דתקבל",
+      "docai_repaired": null,
       "final_text": "התקבל",
       "page": 65,
       "bbox": {
@@ -13284,6 +13660,7 @@
       "word_index": 519,
       "opcode": "replace",
       "docai_reading": "אא",
+      "docai_repaired": "אלא",
       "final_text": "לא",
       "page": 65,
       "bbox": {
@@ -13330,6 +13707,7 @@
       "word_index": 552,
       "opcode": "replace",
       "docai_reading": "אשירה",
+      "docai_repaired": null,
       "final_text": "אשידה",
       "page": 65,
       "bbox": {
@@ -13350,6 +13728,7 @@
       "word_index": 628,
       "opcode": "replace",
       "docai_reading": "וא",
+      "docai_repaired": "ואל",
       "final_text": "ואל",
       "page": 65,
       "bbox": {
@@ -13364,7 +13743,7 @@
       "reasoning": "In the third line of the image crop, between the trailing 'ל' of 'גדול' on the right and the leading 'ד' of 'דעות' on the left, only the letters 'ו' and 'א' are present. The letter 'ל' from 'ואל' is omitted in this textual witness, making 'וא' the correct paleographic reading of the crop.",
       "vlm_reading": "וא'",
       "surya_reading": "וא'",
-      "flag": "current_text_may_be_wrong"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 636,
@@ -13424,6 +13803,7 @@
       "word_index": 33,
       "opcode": "replace",
       "docai_reading": "בכוס",
+      "docai_repaired": null,
       "final_text": "במס'",
       "page": 65,
       "bbox": {
@@ -13470,6 +13850,7 @@
       "word_index": 178,
       "opcode": "delete",
       "docai_reading": "הרמ\"ז על",
+      "docai_repaired": null,
       "final_text": null,
       "page": 65,
       "bbox": {
@@ -13490,6 +13871,7 @@
       "word_index": 185,
       "opcode": "replace",
       "docai_reading": "שרקשה",
+      "docai_repaired": null,
       "final_text": "שהקשה",
       "page": 66,
       "bbox": {
@@ -13516,6 +13898,7 @@
       "word_index": 220,
       "opcode": "replace",
       "docai_reading": "עדיסא",
+      "docai_repaired": null,
       "final_text": "עדיפא",
       "page": 66,
       "bbox": {
@@ -13542,6 +13925,7 @@
       "word_index": 410,
       "opcode": "replace",
       "docai_reading": "אולסיה",
+      "docai_repaired": null,
       "final_text": "אולמיה",
       "page": 66,
       "bbox": {
@@ -13562,6 +13946,7 @@
       "word_index": 456,
       "opcode": "replace",
       "docai_reading": "דערויות",
+      "docai_repaired": null,
       "final_text": "דעדויות",
       "page": 66,
       "bbox": {
@@ -13608,6 +13993,7 @@
       "word_index": 516,
       "opcode": "replace",
       "docai_reading": "לו",
+      "docai_repaired": null,
       "final_text": "לנו",
       "page": 66,
       "bbox": {
@@ -13630,6 +14016,7 @@
       "word_index": 36,
       "opcode": "replace",
       "docai_reading": "מ\"ר",
+      "docai_repaired": null,
       "final_text": "מ\"ד",
       "page": 66,
       "bbox": {
@@ -13697,6 +14084,7 @@
       "word_index": 173,
       "opcode": "replace",
       "docai_reading": "הטרור",
+      "docai_repaired": null,
       "final_text": "הטהור",
       "page": 66,
       "bbox": {
@@ -13717,6 +14105,7 @@
       "word_index": 179,
       "opcode": "replace",
       "docai_reading": "כמה",
+      "docai_repaired": null,
       "final_text": "במה",
       "page": 66,
       "bbox": {
@@ -13737,6 +14126,7 @@
       "word_index": 211,
       "opcode": "replace",
       "docai_reading": "רותר",
+      "docai_repaired": null,
       "final_text": "הותר",
       "page": 66,
       "bbox": {
@@ -13757,6 +14147,7 @@
       "word_index": 277,
       "opcode": "replace",
       "docai_reading": "ולדתירם",
+      "docai_repaired": null,
       "final_text": "ולהתירם",
       "page": 66,
       "bbox": {
@@ -13777,6 +14168,7 @@
       "word_index": 320,
       "opcode": "replace",
       "docai_reading": "אכל",
+      "docai_repaired": null,
       "final_text": "אבל",
       "page": 66,
       "bbox": {
@@ -13803,6 +14195,7 @@
       "word_index": 367,
       "opcode": "replace",
       "docai_reading": "אא",
+      "docai_repaired": "אלא",
       "final_text": "אלא",
       "page": 66,
       "bbox": {
@@ -13817,7 +14210,7 @@
       "reasoning": "The surrounding Rabbinic context contains the phrase 'מכללו אלא הוא הדין'. Line 3 shows the suffix 'לו' (from מכללו), followed by 'אלא', and the prefix 'ה' (from הוא). Option A ('אא') is a raw OCR misreading of 'אלא'.",
       "vlm_reading": "או",
       "surya_reading": "א'",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     }
   ],
   "179": [
@@ -13851,6 +14244,7 @@
       "word_index": 41,
       "opcode": "replace",
       "docai_reading": "ומגן",
+      "docai_repaired": null,
       "final_text": "והמגן",
       "page": 66,
       "bbox": {
@@ -13871,6 +14265,7 @@
       "word_index": 66,
       "opcode": "replace",
       "docai_reading": "קנ\"ר",
+      "docai_repaired": null,
       "final_text": "קנ\"ד",
       "page": 67,
       "bbox": {
@@ -13891,6 +14286,7 @@
       "word_index": 190,
       "opcode": "replace",
       "docai_reading": "ס\"ר",
+      "docai_repaired": null,
       "final_text": "ס\"ד",
       "page": 67,
       "bbox": {
@@ -13911,6 +14307,7 @@
       "word_index": 192,
       "opcode": "replace",
       "docai_reading": "דמרקאמר",
+      "docai_repaired": null,
       "final_text": "דמדקאמר",
       "page": 67,
       "bbox": {
@@ -13931,6 +14328,7 @@
       "word_index": 209,
       "opcode": "replace",
       "docai_reading": "דרקו",
+      "docai_repaired": null,
       "final_text": "דדקו",
       "page": 67,
       "bbox": {
@@ -13951,6 +14349,7 @@
       "word_index": 272,
       "opcode": "replace",
       "docai_reading": "הוה",
+      "docai_repaired": null,
       "final_text": "דוה",
       "page": 67,
       "bbox": {
@@ -13977,6 +14376,7 @@
       "word_index": 284,
       "opcode": "replace",
       "docai_reading": "אא",
+      "docai_repaired": "אלא",
       "final_text": "לא",
       "page": 67,
       "bbox": {
@@ -13997,6 +14397,7 @@
       "word_index": 287,
       "opcode": "replace",
       "docai_reading": "ער",
+      "docai_repaired": null,
       "final_text": "עד",
       "page": 67,
       "bbox": {
@@ -14043,6 +14444,7 @@
       "word_index": 352,
       "opcode": "replace",
       "docai_reading": "אא",
+      "docai_repaired": "אלא",
       "final_text": "לא",
       "page": 67,
       "bbox": {
@@ -14071,6 +14473,7 @@
       "word_index": 1,
       "opcode": "delete",
       "docai_reading": "השמו",
+      "docai_repaired": null,
       "final_text": null,
       "page": 67,
       "bbox": {
@@ -14119,6 +14522,7 @@
       "word_index": 20,
       "opcode": "replace",
       "docai_reading": "סכר",
+      "docai_repaired": null,
       "final_text": "סבר",
       "page": 67,
       "bbox": {
@@ -14165,6 +14569,7 @@
       "word_index": 58,
       "opcode": "replace",
       "docai_reading": "מסורי",
+      "docai_repaired": null,
       "final_text": "מסור",
       "page": 67,
       "bbox": {
@@ -14191,6 +14596,7 @@
       "word_index": 77,
       "opcode": "replace",
       "docai_reading": "דרך",
+      "docai_repaired": null,
       "final_text": "דהך",
       "page": 67,
       "bbox": {
@@ -14211,6 +14617,7 @@
       "word_index": 99,
       "opcode": "replace",
       "docai_reading": "איבא",
+      "docai_repaired": "אליבא",
       "final_text": "אליבא",
       "page": 67,
       "bbox": {
@@ -14225,7 +14632,7 @@
       "reasoning": "The visible text corresponds to the Talmudic phrase 'אליבא דחד' (from Ketubot 57a: 'ולא פליגי תרי אמוראי אליבא דחד אמורא'). Paleographically, the tall ascender of the letter Lamed (ל) is clearly visible extending upwards between the lines above the letters Yod-Bet-Alef, confirming the reading 'אליבא' (Option B).",
       "vlm_reading": "אליבא",
       "surya_reading": "איכא",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     }
   ],
   "182": [
@@ -14233,6 +14640,7 @@
       "word_index": 0,
       "opcode": "replace",
       "docai_reading": "קפכ",
+      "docai_repaired": null,
       "final_text": "קפב",
       "page": 67,
       "bbox": {
@@ -14253,6 +14661,7 @@
       "word_index": 50,
       "opcode": "replace",
       "docai_reading": "וכמנין",
+      "docai_repaired": null,
       "final_text": "ובמנין",
       "page": 67,
       "bbox": {
@@ -14275,6 +14684,7 @@
       "word_index": 34,
       "opcode": "replace",
       "docai_reading": "בסי\"ג",
+      "docai_repaired": null,
       "final_text": "בפי\"ג",
       "page": 67,
       "bbox": {
@@ -14295,6 +14705,7 @@
       "word_index": 89,
       "opcode": "replace",
       "docai_reading": "בסס\"ק",
+      "docai_repaired": null,
       "final_text": "בספ\"ק",
       "page": 67,
       "bbox": {
@@ -14315,6 +14726,7 @@
       "word_index": 185,
       "opcode": "replace",
       "docai_reading": "וככתובות",
+      "docai_repaired": null,
       "final_text": "ובכתובות",
       "page": 67,
       "bbox": {
@@ -14335,6 +14747,7 @@
       "word_index": 234,
       "opcode": "replace",
       "docai_reading": "ומירו",
+      "docai_repaired": null,
       "final_text": "ומיהו",
       "page": 68,
       "bbox": {
@@ -14383,6 +14796,7 @@
       "word_index": 29,
       "opcode": "replace",
       "docai_reading": "ודוקא בראיכא",
+      "docai_repaired": null,
       "final_text": "דדוקא בדאיכא",
       "page": 68,
       "bbox": {
@@ -14403,6 +14817,7 @@
       "word_index": 69,
       "opcode": "replace",
       "docai_reading": "ע\"ר וכ\"ר",
+      "docai_repaired": null,
       "final_text": "ע\"ד וכ\"ד",
       "page": 68,
       "bbox": {
@@ -14425,6 +14840,7 @@
       "word_index": 11,
       "opcode": "replace",
       "docai_reading": "לסרש",
+      "docai_repaired": null,
       "final_text": "לפרש",
       "page": 68,
       "bbox": {
@@ -14447,6 +14863,7 @@
       "word_index": 0,
       "opcode": "replace",
       "docai_reading": "קפו",
+      "docai_repaired": null,
       "final_text": "קפז",
       "page": 68,
       "bbox": {
@@ -14473,6 +14890,7 @@
       "word_index": 18,
       "opcode": "replace",
       "docai_reading": "האכלות",
+      "docai_repaired": null,
       "final_text": "האבלות",
       "page": 68,
       "bbox": {
@@ -14493,6 +14911,7 @@
       "word_index": 57,
       "opcode": "replace",
       "docai_reading": "והלכה",
+      "docai_repaired": null,
       "final_text": "דהלכה",
       "page": 68,
       "bbox": {
@@ -14513,6 +14932,7 @@
       "word_index": 186,
       "opcode": "replace",
       "docai_reading": "דוא",
+      "docai_repaired": null,
       "final_text": "הוא",
       "page": 68,
       "bbox": {
@@ -14556,6 +14976,7 @@
       "word_index": 30,
       "opcode": "replace",
       "docai_reading": "צ\"ר",
+      "docai_repaired": null,
       "final_text": "צ\"ד",
       "page": 68,
       "bbox": {
@@ -14578,6 +14999,7 @@
       "word_index": 30,
       "opcode": "replace",
       "docai_reading": "שמוא",
+      "docai_repaired": "שמואל",
       "final_text": "שמואל",
       "page": 68,
       "bbox": {
@@ -14592,12 +15014,13 @@
       "reasoning": "The crop clearly displays the full word 'שמואל' following 'מר' (part of 'אמר'). The letter 'ל' with its characteristic ascender is clearly visible at the left end of the word, matching 'אמר שמואל' from the textual context.",
       "vlm_reading": "שמואל",
       "surya_reading": "שמואל",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 33,
       "opcode": "replace",
       "docai_reading": "שמוא",
+      "docai_repaired": "שמואל",
       "final_text": "שמואל",
       "page": 68,
       "bbox": {
@@ -14612,12 +15035,13 @@
       "reasoning": "The raster crop clearly shows the letters ש, מ, ו, and א (שמוא) without the final letter lamed (ל) present in standard printed editions of 'שמואל'.",
       "vlm_reading": "שמואל",
       "surya_reading": "שמואל",
-      "flag": "current_text_may_be_wrong"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 78,
       "opcode": "replace",
       "docai_reading": "איססיקא",
+      "docai_repaired": null,
       "final_text": "איפסיקא",
       "page": 68,
       "bbox": {
@@ -14644,6 +15068,7 @@
       "word_index": 95,
       "opcode": "replace",
       "docai_reading": "שרקשו",
+      "docai_repaired": null,
       "final_text": "שהקשו",
       "page": 68,
       "bbox": {
@@ -14664,6 +15089,7 @@
       "word_index": 123,
       "opcode": "delete",
       "docai_reading": "יעה",
+      "docai_repaired": null,
       "final_text": null,
       "page": 68,
       "bbox": {
@@ -14684,6 +15110,7 @@
       "word_index": 233,
       "opcode": "replace",
       "docai_reading": "דס\"ק",
+      "docai_repaired": null,
       "final_text": "דפ\"ק",
       "page": 69,
       "bbox": {
@@ -14710,6 +15137,7 @@
       "word_index": 238,
       "opcode": "replace",
       "docai_reading": "בהרי",
+      "docai_repaired": null,
       "final_text": "בהדי'",
       "page": 69,
       "bbox": {
@@ -14730,6 +15158,7 @@
       "word_index": 277,
       "opcode": "replace",
       "docai_reading": "בי\"ד",
+      "docai_repaired": null,
       "final_text": "בי\"ר",
       "page": 69,
       "bbox": {
@@ -14756,6 +15185,7 @@
       "word_index": 369,
       "opcode": "delete",
       "docai_reading": "דבן",
+      "docai_repaired": null,
       "final_text": null,
       "page": 69,
       "bbox": {
@@ -14776,6 +15206,7 @@
       "word_index": 384,
       "opcode": "delete",
       "docai_reading": "ל\"ח",
+      "docai_repaired": null,
       "final_text": null,
       "page": 69,
       "bbox": {
@@ -14796,6 +15227,7 @@
       "word_index": 396,
       "opcode": "replace",
       "docai_reading": "ומשם",
+      "docai_repaired": null,
       "final_text": "דמשם",
       "page": 69,
       "bbox": {
@@ -14816,6 +15248,7 @@
       "word_index": 406,
       "opcode": "replace",
       "docai_reading": "דדתם",
+      "docai_repaired": null,
       "final_text": "דרתם",
       "page": 69,
       "bbox": {
@@ -14836,6 +15269,7 @@
       "word_index": 415,
       "opcode": "replace",
       "docai_reading": "ול\"ס",
+      "docai_repaired": null,
       "final_text": "ול\"פ",
       "page": 69,
       "bbox": {
@@ -14858,6 +15292,7 @@
       "word_index": 122,
       "opcode": "replace",
       "docai_reading": "יחשדדו",
+      "docai_repaired": null,
       "final_text": "יחשדהו",
       "page": 69,
       "bbox": {
@@ -14906,6 +15341,7 @@
       "word_index": 61,
       "opcode": "replace",
       "docai_reading": "כשמוא",
+      "docai_repaired": "כשמואל",
       "final_text": "כשמואל",
       "page": 69,
       "bbox": {
@@ -14920,7 +15356,7 @@
       "reasoning": "The text clearly reads 'כשמואל' ('like Shmuel'), fitting the Talmudic context 'אי ר\"י קאי כשמואל'. Paleographically, the letter aleph is followed by the ascender of the lamed on the left edge, confirming the full word 'כשמואל'.",
       "vlm_reading": "כשמואל",
       "surya_reading": "כשמוא'",
-      "flag": "current_text_confirmed",
+      "flag": "docai_ligature_artifact",
       "consensus_engines": [
         "docai",
         "surya"
@@ -14958,6 +15394,7 @@
       "word_index": 122,
       "opcode": "replace",
       "docai_reading": "הרריף",
+      "docai_repaired": null,
       "final_text": "הרי\"ף",
       "page": 69,
       "bbox": {
@@ -14978,6 +15415,7 @@
       "word_index": 127,
       "opcode": "replace",
       "docai_reading": "שמוא",
+      "docai_repaired": "שמואל",
       "final_text": "שמואל",
       "page": 69,
       "bbox": {
@@ -14992,7 +15430,7 @@
       "reasoning": "The visual text in the central line clearly shows the sequence ש-מ-ו-א without the final letter 'ל' (lamed) present in the standard spelled-out name 'שמואל', making Option A the accurate literal transcription of the raster image.",
       "vlm_reading": "שמואל",
       "surya_reading": "שמוא'",
-      "flag": "current_text_may_be_wrong",
+      "flag": "docai_ligature_artifact",
       "consensus_engines": [
         "docai",
         "surya"
@@ -15004,6 +15442,7 @@
       "word_index": 209,
       "opcode": "replace",
       "docai_reading": "בר\"ס",
+      "docai_repaired": null,
       "final_text": "בר\"פ",
       "page": 69,
       "bbox": {
@@ -15024,6 +15463,7 @@
       "word_index": 238,
       "opcode": "replace",
       "docai_reading": "ס\"י",
+      "docai_repaired": null,
       "final_text": "פ\"י",
       "page": 69,
       "bbox": {
@@ -15050,6 +15490,7 @@
       "word_index": 244,
       "opcode": "delete",
       "docai_reading": "הלכה",
+      "docai_repaired": null,
       "final_text": null,
       "page": 69,
       "bbox": {
@@ -15072,6 +15513,7 @@
       "word_index": 133,
       "opcode": "replace",
       "docai_reading": "הגחל",
+      "docai_repaired": null,
       "final_text": "הגוזל",
       "page": 70,
       "bbox": {
@@ -15092,6 +15534,7 @@
       "word_index": 136,
       "opcode": "delete",
       "docai_reading": "מתני",
+      "docai_repaired": null,
       "final_text": null,
       "page": 70,
       "bbox": {
@@ -15112,6 +15555,7 @@
       "word_index": 184,
       "opcode": "replace",
       "docai_reading": "כ\"ט",
+      "docai_repaired": null,
       "final_text": "כ\"מ",
       "page": 70,
       "bbox": {
@@ -15139,6 +15583,7 @@
       "word_index": 186,
       "opcode": "replace",
       "docai_reading": "כ\"ד",
+      "docai_repaired": null,
       "final_text": "כ\"ר",
       "page": 70,
       "bbox": {
@@ -15244,6 +15689,7 @@
       "word_index": 387,
       "opcode": "replace",
       "docai_reading": "כתרווויהן",
+      "docai_repaired": null,
       "final_text": "כתרווייהן",
       "page": 70,
       "bbox": {
@@ -15264,6 +15710,7 @@
       "word_index": 425,
       "opcode": "replace",
       "docai_reading": "מיניירו",
+      "docai_repaired": null,
       "final_text": "מינייהו",
       "page": 70,
       "bbox": {
@@ -15312,6 +15759,7 @@
       "word_index": 5,
       "opcode": "replace",
       "docai_reading": "הירושלמים",
+      "docai_repaired": null,
       "final_text": "הירושלמי",
       "page": 70,
       "bbox": {
@@ -15334,6 +15782,7 @@
       "word_index": 0,
       "opcode": "replace",
       "docai_reading": "קצו",
+      "docai_repaired": null,
       "final_text": "קצז",
       "page": 70,
       "bbox": {
@@ -15360,6 +15809,7 @@
       "word_index": 78,
       "opcode": "replace",
       "docai_reading": "אעאי",
+      "docai_repaired": "אלעאי",
       "final_text": "אלעאי",
       "page": 70,
       "bbox": {
@@ -15374,7 +15824,7 @@
       "reasoning": "The middle word on line 2 clearly shows 'אלעאי'. The letter Lamed (ל) is distinctly visible with its long ascender extending upwards into the space between the words on line 1. OCR (Option A) dropped the Lamed. Contextually, this matches the standard Talmudic attribution 'ר' אלעאי'.",
       "vlm_reading": "אעאי",
       "surya_reading": "אלעאי",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 150,
@@ -15434,6 +15884,7 @@
       "word_index": 38,
       "opcode": "replace",
       "docai_reading": "והשיכוני",
+      "docai_repaired": null,
       "final_text": "והשיבוני",
       "page": 71,
       "bbox": {
@@ -15454,6 +15905,7 @@
       "word_index": 71,
       "opcode": "replace",
       "docai_reading": "דדבר",
+      "docai_repaired": null,
       "final_text": "הדבר",
       "page": 71,
       "bbox": {
@@ -15474,6 +15926,7 @@
       "word_index": 181,
       "opcode": "replace",
       "docai_reading": "מההרא",
+      "docai_repaired": null,
       "final_text": "מההיא",
       "page": 71,
       "bbox": {
@@ -15494,6 +15947,7 @@
       "word_index": 192,
       "opcode": "replace",
       "docai_reading": "אחד",
+      "docai_repaired": null,
       "final_text": "אחר",
       "page": 71,
       "bbox": {
@@ -15521,6 +15975,7 @@
       "word_index": 230,
       "opcode": "replace",
       "docai_reading": "מאך",
+      "docai_repaired": null,
       "final_text": "מאד",
       "page": 71,
       "bbox": {
@@ -15567,6 +16022,7 @@
       "word_index": 364,
       "opcode": "replace",
       "docai_reading": "איזרו",
+      "docai_repaired": null,
       "final_text": "איזהו",
       "page": 71,
       "bbox": {
@@ -15587,6 +16043,7 @@
       "word_index": 403,
       "opcode": "replace",
       "docai_reading": "לי",
+      "docai_repaired": null,
       "final_text": "ל'",
       "page": 71,
       "bbox": {
@@ -15607,6 +16064,7 @@
       "word_index": 412,
       "opcode": "replace",
       "docai_reading": "דוא",
+      "docai_repaired": null,
       "final_text": "הוא",
       "page": 71,
       "bbox": {
@@ -15627,6 +16085,7 @@
       "word_index": 453,
       "opcode": "replace",
       "docai_reading": "איבא",
+      "docai_repaired": "אליבא",
       "final_text": "אליבא",
       "page": 71,
       "bbox": {
@@ -15641,12 +16100,13 @@
       "reasoning": "The manuscript raster clearly shows the tall upper ascender characteristic of the letter Lamed (ל) in the word 'אליבא', followed by Yod, Bet, Alef, and the prefix Dalet of the next word ('דר\"ל'). Contextually, 'אליבא דר\"ל' ('according to R. Lakish') is the standard Talmudic phrase, confirming Option B.",
       "vlm_reading": "איכא",
       "surya_reading": "ליבא",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 475,
       "opcode": "replace",
       "docai_reading": "איביה",
+      "docai_repaired": "אליביה",
       "final_text": "אליביה",
       "page": 71,
       "bbox": {
@@ -15661,12 +16121,13 @@
       "reasoning": "The visible text in the middle line contains a clear tall ascender belonging to the letter Lamed ('ל'). In the context of Rabbinic Hebrew ('איך משני שם תלמודא אליביה'), Option B ('אליביה') perfectly matches both the paleographic features (Aleph, Lamed with ascender, Yod, Bet, Yod, Heh) and the syntactic sense of the passage.",
       "vlm_reading": "איכא",
       "surya_reading": "ליביה",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 504,
       "opcode": "replace",
       "docai_reading": "דוי",
+      "docai_repaired": null,
       "final_text": "הוי",
       "page": 71,
       "bbox": {
@@ -15693,6 +16154,7 @@
       "word_index": 576,
       "opcode": "replace",
       "docai_reading": "אחר",
+      "docai_repaired": null,
       "final_text": "אחד",
       "page": 72,
       "bbox": {
@@ -15713,6 +16175,7 @@
       "word_index": 597,
       "opcode": "delete",
       "docai_reading": "נחמ",
+      "docai_repaired": null,
       "final_text": null,
       "page": 72,
       "bbox": {
@@ -15733,6 +16196,7 @@
       "word_index": 639,
       "opcode": "replace",
       "docai_reading": "דברין",
+      "docai_repaired": null,
       "final_text": "דבריו",
       "page": 72,
       "bbox": {
@@ -15753,6 +16217,7 @@
       "word_index": 772,
       "opcode": "replace",
       "docai_reading": "אחר וכל",
+      "docai_repaired": null,
       "final_text": "אחד דכל",
       "page": 72,
       "bbox": {
@@ -15773,6 +16238,7 @@
       "word_index": 780,
       "opcode": "replace",
       "docai_reading": "מסשינן",
+      "docai_repaired": null,
       "final_text": "מפשינן",
       "page": 72,
       "bbox": {
@@ -15825,6 +16291,7 @@
       "word_index": 861,
       "opcode": "replace",
       "docai_reading": "יצהק",
+      "docai_repaired": null,
       "final_text": "יצחק",
       "page": 72,
       "bbox": {
@@ -15845,6 +16312,7 @@
       "word_index": 907,
       "opcode": "replace",
       "docai_reading": "הכיא",
+      "docai_repaired": null,
       "final_text": "הביא",
       "page": 72,
       "bbox": {
@@ -15871,6 +16339,7 @@
       "word_index": 961,
       "opcode": "insert",
       "docai_reading": null,
+      "docai_repaired": null,
       "final_text": "אל",
       "page": 72,
       "bbox": {
@@ -15917,6 +16386,7 @@
       "word_index": 1037,
       "opcode": "replace",
       "docai_reading": "ההם",
+      "docai_repaired": null,
       "final_text": "הרם",
       "page": 72,
       "bbox": {
@@ -15943,6 +16413,7 @@
       "word_index": 1088,
       "opcode": "replace",
       "docai_reading": "אחר",
+      "docai_repaired": null,
       "final_text": "אחד",
       "page": 72,
       "bbox": {
@@ -15965,6 +16436,7 @@
       "word_index": 35,
       "opcode": "replace",
       "docai_reading": "בללין",
+      "docai_repaired": null,
       "final_text": "כללין",
       "page": 72,
       "bbox": {
@@ -15985,6 +16457,7 @@
       "word_index": 38,
       "opcode": "replace",
       "docai_reading": "אא",
+      "docai_repaired": "אלא",
       "final_text": "אלא",
       "page": 72,
       "bbox": {
@@ -15999,7 +16472,7 @@
       "reasoning": "The raster crop clearly shows two consecutive 'א' characters ('אא') on the third line, serving as a standard Rabbinic abbreviation for 'אלא'. Option A accurately transcribes the exact visual Hebrew text present in the image.",
       "vlm_reading": "או",
       "surya_reading": "א'",
-      "flag": "current_text_may_be_wrong"
+      "flag": "docai_ligature_artifact"
     }
   ],
   "200": [
@@ -16007,6 +16480,7 @@
       "word_index": 22,
       "opcode": "replace",
       "docai_reading": "שנתחכטו",
+      "docai_repaired": null,
       "final_text": "שנתחבטו",
       "page": 72,
       "bbox": {
@@ -16027,6 +16501,7 @@
       "word_index": 38,
       "opcode": "replace",
       "docai_reading": "עריף",
+      "docai_repaired": null,
       "final_text": "עדיף",
       "page": 72,
       "bbox": {
@@ -16047,6 +16522,7 @@
       "word_index": 58,
       "opcode": "replace",
       "docai_reading": "איהו",
+      "docai_repaired": null,
       "final_text": "אליהו",
       "page": 72,
       "bbox": {
@@ -16093,6 +16569,7 @@
       "word_index": 95,
       "opcode": "replace",
       "docai_reading": "דוהפרה",
+      "docai_repaired": null,
       "final_text": "דוהפדה",
       "page": 72,
       "bbox": {
@@ -16113,6 +16590,7 @@
       "word_index": 108,
       "opcode": "replace",
       "docai_reading": "באחר",
+      "docai_repaired": null,
       "final_text": "באחד",
       "page": 72,
       "bbox": {
@@ -16133,6 +16611,7 @@
       "word_index": 110,
       "opcode": "replace",
       "docai_reading": "דחירות",
+      "docai_repaired": null,
       "final_text": "החירות",
       "page": 72,
       "bbox": {
@@ -16153,6 +16632,7 @@
       "word_index": 152,
       "opcode": "replace",
       "docai_reading": "מרקש",
+      "docai_repaired": null,
       "final_text": "מהקש",
       "page": 72,
       "bbox": {
@@ -16173,6 +16653,7 @@
       "word_index": 239,
       "opcode": "replace",
       "docai_reading": "דרקש",
+      "docai_repaired": null,
       "final_text": "דהקש",
       "page": 72,
       "bbox": {
@@ -16195,6 +16676,7 @@
       "word_index": 4,
       "opcode": "replace",
       "docai_reading": "ר\"ס",
+      "docai_repaired": null,
       "final_text": "ר\"פ",
       "page": 73,
       "bbox": {
@@ -16215,6 +16697,7 @@
       "word_index": 15,
       "opcode": "replace",
       "docai_reading": "כ\"ט ס\"ה",
+      "docai_repaired": null,
       "final_text": "כ\"ס פ\"ה",
       "page": 73,
       "bbox": {
@@ -16235,6 +16718,7 @@
       "word_index": 40,
       "opcode": "replace",
       "docai_reading": "אמא",
+      "docai_repaired": "אלמא",
       "final_text": "אלמא",
       "page": 73,
       "bbox": {
@@ -16249,12 +16733,13 @@
       "reasoning": "The visible text includes a distinct lamed ('ל') with its characteristic tall ascender extending upwards above the line height between the right word ('אמר') and the rest of the word ('מא'), forming 'אלמא'. This is supported by the contextual quote from the Rabbinic text ('אמר אלמא א\"א לפרושא').",
       "vlm_reading": null,
       "surya_reading": "אמא",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 56,
       "opcode": "replace",
       "docai_reading": "באמי",
+      "docai_repaired": null,
       "final_text": "באמ'",
       "page": 73,
       "bbox": {
@@ -16277,6 +16762,7 @@
       "word_index": 11,
       "opcode": "replace",
       "docai_reading": "אא",
+      "docai_repaired": "אלא",
       "final_text": "לא",
       "page": 73,
       "bbox": {
@@ -16297,6 +16783,7 @@
       "word_index": 29,
       "opcode": "replace",
       "docai_reading": "מתת",
+      "docai_repaired": null,
       "final_text": "מת",
       "page": 73,
       "bbox": {
@@ -16319,6 +16806,7 @@
       "word_index": 15,
       "opcode": "insert",
       "docai_reading": null,
+      "docai_repaired": null,
       "final_text": "חד מסספיע השם",
       "page": 73,
       "bbox": {
@@ -16341,6 +16829,7 @@
       "word_index": 7,
       "opcode": "replace",
       "docai_reading": "למכעי",
+      "docai_repaired": null,
       "final_text": "למבעי",
       "page": 73,
       "bbox": {
@@ -16361,6 +16850,7 @@
       "word_index": 37,
       "opcode": "replace",
       "docai_reading": "ובס",
+      "docai_repaired": null,
       "final_text": "ובפ'",
       "page": 73,
       "bbox": {
@@ -16387,6 +16877,7 @@
       "word_index": 76,
       "opcode": "replace",
       "docai_reading": "בתרייתא",
+      "docai_repaired": null,
       "final_text": "כתרייתא",
       "page": 74,
       "bbox": {
@@ -16413,6 +16904,7 @@
       "word_index": 112,
       "opcode": "replace",
       "docai_reading": "דיא",
+      "docai_repaired": null,
       "final_text": "היא",
       "page": 74,
       "bbox": {
@@ -16433,6 +16925,7 @@
       "word_index": 134,
       "opcode": "replace",
       "docai_reading": "היא",
+      "docai_repaired": null,
       "final_text": "הוא",
       "page": 74,
       "bbox": {
@@ -16455,6 +16948,7 @@
       "word_index": 20,
       "opcode": "replace",
       "docai_reading": "בסתס",
+      "docai_repaired": null,
       "final_text": "בסתם",
       "page": 74,
       "bbox": {
@@ -16496,6 +16990,7 @@
       "word_index": 67,
       "opcode": "delete",
       "docai_reading": "פ\"א דף קע\"א ע\"ד",
+      "docai_repaired": null,
       "final_text": null,
       "page": 74,
       "bbox": {
@@ -16516,6 +17011,7 @@
       "word_index": 73,
       "opcode": "delete",
       "docai_reading": "בשם התוספות",
+      "docai_repaired": null,
       "final_text": null,
       "page": 74,
       "bbox": {
@@ -16538,6 +17034,7 @@
       "word_index": 30,
       "opcode": "replace",
       "docai_reading": "ה\"נ",
+      "docai_repaired": null,
       "final_text": "ה\"ג",
       "page": 74,
       "bbox": {
@@ -16566,6 +17063,7 @@
       "word_index": 157,
       "opcode": "replace",
       "docai_reading": "ישמעא",
+      "docai_repaired": "ישמעאל",
       "final_text": "ישמעאל",
       "page": 74,
       "bbox": {
@@ -16580,12 +17078,13 @@
       "reasoning": "The manuscript uses a standard Rabbinic abbreviation for the Tannaitic sage Rabbi Ishmael ('ר' ישמע'). In adjudicated Rabbinic textual transcription, abbreviated proper names in context ('משום ר' ישמעאל') are correctly expanded to their full semantic form 'ישמעאל' (Option B).",
       "vlm_reading": "ישמעאל",
       "surya_reading": "ישמש",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 160,
       "opcode": "replace",
       "docai_reading": "אא",
+      "docai_repaired": "אלא",
       "final_text": "אלא",
       "page": 74,
       "bbox": {
@@ -16600,7 +17099,7 @@
       "reasoning": "In the third line, following 'רו' (end of 'הכירו'), the word clearly contains an Aleph and a Lamed with a prominent tall ascender reaching up into the line above, matching 'אלא' in the context 'ולא הכירו אלא ודאי'. Option A ('אא') lacks the Lamed, which is clearly visible paleographically.",
       "vlm_reading": "אלא",
       "surya_reading": "א'",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     }
   ],
   "215": [
@@ -16608,6 +17107,7 @@
       "word_index": 19,
       "opcode": "replace",
       "docai_reading": "חזה",
+      "docai_repaired": null,
       "final_text": "וזה",
       "page": 74,
       "bbox": {
@@ -16634,6 +17134,7 @@
       "word_index": 44,
       "opcode": "replace",
       "docai_reading": "אא",
+      "docai_repaired": "אלא",
       "final_text": "אלא",
       "page": 74,
       "bbox": {
@@ -16648,12 +17149,13 @@
       "reasoning": "The visible word in the center of the second line features a clear 'aleph' (א), a central 'lamed' (ל) with its characteristic tall ascender, and a closing 'aleph' (א), spelling 'אלא'. This directly corresponds to the context 'שמקשה מכח כ\"ש אלא כך פירושו'.",
       "vlm_reading": "וא",
       "surya_reading": null,
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 63,
       "opcode": "replace",
       "docai_reading": "טבעייא",
+      "docai_repaired": null,
       "final_text": "מבעייא",
       "page": 74,
       "bbox": {
@@ -16681,6 +17183,7 @@
       "word_index": 68,
       "opcode": "replace",
       "docai_reading": "ודבר",
+      "docai_repaired": null,
       "final_text": "דדבר",
       "page": 74,
       "bbox": {
@@ -16701,6 +17204,7 @@
       "word_index": 72,
       "opcode": "replace",
       "docai_reading": "מצר",
+      "docai_repaired": null,
       "final_text": "מצד",
       "page": 74,
       "bbox": {
@@ -16721,6 +17225,7 @@
       "word_index": 130,
       "opcode": "replace",
       "docai_reading": "ס\"ט",
+      "docai_repaired": null,
       "final_text": "פ\"ט",
       "page": 74,
       "bbox": {
@@ -16743,6 +17248,7 @@
       "word_index": 0,
       "opcode": "replace",
       "docai_reading": "רטן",
+      "docai_repaired": null,
       "final_text": "רטז",
       "page": 74,
       "bbox": {
@@ -16763,6 +17269,7 @@
       "word_index": 37,
       "opcode": "replace",
       "docai_reading": "אא",
+      "docai_repaired": "אלא",
       "final_text": "לא",
       "page": 74,
       "bbox": {
@@ -16783,6 +17290,7 @@
       "word_index": 44,
       "opcode": "replace",
       "docai_reading": "ברמה",
+      "docai_repaired": null,
       "final_text": "בהמה",
       "page": 74,
       "bbox": {
@@ -16810,6 +17318,7 @@
       "word_index": 88,
       "opcode": "replace",
       "docai_reading": "אא",
+      "docai_repaired": "אלא",
       "final_text": "אלא",
       "page": 74,
       "bbox": {
@@ -16824,12 +17333,13 @@
       "reasoning": "The visible text in the middle line of the crop corresponds to the Talmudic citation reference 'כ\"ז א'' (from 'תמורה כ\"ז א''). The characters visible are a Zayin ('ז') followed by an Aleph ('א'). Option A ('אא') is a visual OCR misreading of 'ז א', while Option B ('אלא') incorrectly inserts a Lamed into this acronym. Since neither candidate string accurately represents the pixels ('ז א'), the result is UNCERTAIN.",
       "vlm_reading": "אלא",
       "surya_reading": "א'",
-      "flag": "ambiguous"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 97,
       "opcode": "replace",
       "docai_reading": "וכר",
+      "docai_repaired": null,
       "final_text": "וכו'",
       "page": 74,
       "bbox": {
@@ -16856,6 +17366,7 @@
       "word_index": 183,
       "opcode": "replace",
       "docai_reading": "ישרא",
+      "docai_repaired": "ישראל",
       "final_text": "ישראל",
       "page": 75,
       "bbox": {
@@ -16870,7 +17381,7 @@
       "reasoning": "The image crop clearly displays the word abbreviated as 'ישרא' (with a trailing abbreviation mark/geresh). The letter Lamed ('ל') is absent, as evidenced by the lack of any upper ascender stroke (which can be clearly seen in the word 'למד' on the line below). Therefore, Option A accurately reflects the literal raster text.",
       "vlm_reading": "ישראל",
       "surya_reading": "ישראל",
-      "flag": "current_text_may_be_wrong"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 276,
@@ -16902,6 +17413,7 @@
       "word_index": 337,
       "opcode": "replace",
       "docai_reading": "עוד",
+      "docai_repaired": null,
       "final_text": "עור",
       "page": 75,
       "bbox": {
@@ -16928,6 +17440,7 @@
       "word_index": 377,
       "opcode": "replace",
       "docai_reading": "כתוכים",
+      "docai_repaired": null,
       "final_text": "כתובים",
       "page": 75,
       "bbox": {
@@ -16948,6 +17461,7 @@
       "word_index": 425,
       "opcode": "replace",
       "docai_reading": "כתוכים",
+      "docai_repaired": null,
       "final_text": "כתובים",
       "page": 75,
       "bbox": {
@@ -16970,6 +17484,7 @@
       "word_index": 0,
       "opcode": "replace",
       "docai_reading": "ריו",
+      "docai_repaired": null,
       "final_text": "ריז",
       "page": 75,
       "bbox": {
@@ -17022,6 +17537,7 @@
       "word_index": 342,
       "opcode": "replace",
       "docai_reading": "דתפים",
+      "docai_repaired": null,
       "final_text": "דתפיס",
       "page": 75,
       "bbox": {
@@ -17042,6 +17558,7 @@
       "word_index": 355,
       "opcode": "replace",
       "docai_reading": "אא למ\"ר",
+      "docai_repaired": null,
       "final_text": "אלא למ\"ד",
       "page": 75,
       "bbox": {
@@ -17062,6 +17579,7 @@
       "word_index": 414,
       "opcode": "replace",
       "docai_reading": "אא",
+      "docai_repaired": "אלא",
       "final_text": "אלא",
       "page": 75,
       "bbox": {
@@ -17076,12 +17594,13 @@
       "reasoning": "In line 3 of the crop, between the two Aleph letters, there is a distinct Lamed with its characteristic tall upper neck extending above the main line height. Reading right-to-left, the word is 'אלא', followed by the letter 'ש', matching the surrounding context 'אלא שהוקשה'.",
       "vlm_reading": "או",
       "surya_reading": "אלא",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 527,
       "opcode": "replace",
       "docai_reading": "איבא",
+      "docai_repaired": "אליבא",
       "final_text": "ליבא",
       "page": 76,
       "bbox": {
@@ -17108,6 +17627,7 @@
       "word_index": 543,
       "opcode": "replace",
       "docai_reading": "טוכא",
+      "docai_repaired": null,
       "final_text": "טובא",
       "page": 76,
       "bbox": {
@@ -17128,6 +17648,7 @@
       "word_index": 548,
       "opcode": "replace",
       "docai_reading": "וכפ",
+      "docai_repaired": null,
       "final_text": "ובפ'",
       "page": 76,
       "bbox": {
@@ -17154,6 +17675,7 @@
       "word_index": 571,
       "opcode": "replace",
       "docai_reading": "איבא",
+      "docai_repaired": "אליבא",
       "final_text": "אליבא",
       "page": 76,
       "bbox": {
@@ -17168,12 +17690,13 @@
       "reasoning": "In the context of the Rabbinic excerpt (...לתרוצי אליבא דמ\"ד בתרא...), line 3 contains the word 'אליבא' preceded by the suffix of 'לתרוצי' ('צי') and followed by 'ד'. Option A ('איבא') is a misreading by OCR that dropped the tall ascender of the letter Lamed ('ל').",
       "vlm_reading": "איבא",
       "surya_reading": "איבא",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 602,
       "opcode": "replace",
       "docai_reading": "שרוא",
+      "docai_repaired": null,
       "final_text": "שהוא",
       "page": 76,
       "bbox": {
@@ -17226,6 +17749,7 @@
       "word_index": 704,
       "opcode": "replace",
       "docai_reading": "אא",
+      "docai_repaired": "אלא",
       "final_text": "אלא",
       "page": 76,
       "bbox": {
@@ -17240,12 +17764,13 @@
       "reasoning": "The contextual Talmudic phrase from Tosafot reads 'הניחא למ\"ד ירך אמו אלא למ\"ד לאו ירך אמו'. Paleographically, the central word on the third line clearly shows the letters אלא (Aleph-Lamed-Aleph) between 'מו' and 'ל'.",
       "vlm_reading": "או",
       "surya_reading": "א'",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 719,
       "opcode": "replace",
       "docai_reading": "הוה",
+      "docai_repaired": null,
       "final_text": "דוה",
       "page": 76,
       "bbox": {
@@ -17273,6 +17798,7 @@
       "word_index": 732,
       "opcode": "replace",
       "docai_reading": "איביה",
+      "docai_repaired": "אליביה",
       "final_text": "אליביה",
       "page": 76,
       "bbox": {
@@ -17287,7 +17813,7 @@
       "reasoning": "In the middle line of the crop, the word following 'צי' is clearly printed as 'איביה' without the top ascender of a 'ל' (lamed) that would be present in 'אליביה'. Therefore, Option A accurately reflects the visual text in the raster crop.",
       "vlm_reading": "אליבא",
       "surya_reading": "איביה",
-      "flag": "current_text_may_be_wrong"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 750,
@@ -17345,6 +17871,7 @@
       "word_index": 793,
       "opcode": "replace",
       "docai_reading": "וכאה",
+      "docai_repaired": null,
       "final_text": "וכאלה",
       "page": 76,
       "bbox": {
@@ -17365,6 +17892,7 @@
       "word_index": 806,
       "opcode": "replace",
       "docai_reading": "לא",
+      "docai_repaired": null,
       "final_text": "אלא",
       "page": 76,
       "bbox": {
@@ -17411,6 +17939,7 @@
       "word_index": 857,
       "opcode": "replace",
       "docai_reading": "כרבסמוך",
+      "docai_repaired": null,
       "final_text": "כדבסמוך",
       "page": 76,
       "bbox": {
@@ -17431,6 +17960,7 @@
       "word_index": 869,
       "opcode": "replace",
       "docai_reading": "לא איכא",
+      "docai_repaired": null,
       "final_text": "אלא אליבא",
       "page": 76,
       "bbox": {
@@ -17477,6 +18007,7 @@
       "word_index": 906,
       "opcode": "replace",
       "docai_reading": "אא",
+      "docai_repaired": "אלא",
       "final_text": "לא",
       "page": 76,
       "bbox": {
@@ -17497,6 +18028,7 @@
       "word_index": 917,
       "opcode": "replace",
       "docai_reading": "אא",
+      "docai_repaired": "אלא",
       "final_text": "אלא",
       "page": 76,
       "bbox": {
@@ -17511,7 +18043,7 @@
       "reasoning": "The text in context reads 'פסקו כן אלא משום שינוי', matching line 3 of the crop which shows the end of 'כן' on the right, 'אלא' in the middle, and the start of 'משום' on the left. Option B ('אלא') correctly reflects the intended text, while Option A is an OCR misreading.",
       "vlm_reading": "א",
       "surya_reading": "א'",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     }
   ],
   "218": [
@@ -17519,6 +18051,7 @@
       "word_index": 42,
       "opcode": "replace",
       "docai_reading": "בש\"ס",
+      "docai_repaired": null,
       "final_text": "בש\"מ",
       "page": 76,
       "bbox": {
@@ -17541,6 +18074,7 @@
       "word_index": 5,
       "opcode": "replace",
       "docai_reading": "ישמעץ",
+      "docai_repaired": null,
       "final_text": "ישמעאל",
       "page": 76,
       "bbox": {
@@ -17561,6 +18095,7 @@
       "word_index": 32,
       "opcode": "replace",
       "docai_reading": "עור",
+      "docai_repaired": null,
       "final_text": "עוד",
       "page": 76,
       "bbox": {
@@ -17581,6 +18116,7 @@
       "word_index": 48,
       "opcode": "replace",
       "docai_reading": "אא",
+      "docai_repaired": "אלא",
       "final_text": "אלא",
       "page": 76,
       "bbox": {
@@ -17595,12 +18131,13 @@
       "reasoning": "The surrounding Rabbinic textual context ('דלא אמרי' כן אלא היכא') establishes the phrase 'אלא היכא'. On line 2, the Lamed with its distinctive ascending stem followed by an Alef is clearly visible before 'הי'. DocAI's raw reading 'אא' is a misocr of the Lamed-Alef sequence, making Option B ('אלא') the correct adjudicated text.",
       "vlm_reading": "אא",
       "surya_reading": "א'",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 61,
       "opcode": "replace",
       "docai_reading": "איבא",
+      "docai_repaired": "אליבא",
       "final_text": "אליבא",
       "page": 76,
       "bbox": {
@@ -17615,7 +18152,7 @@
       "reasoning": "The context reads 'תרי תנאי אליבא דרבי ישמעאל'. In the image, line 2 shows 'דלא אמרי', line 3 shows '[תנא]י אליבא ד[רבי]', and line 4 shows 'שגורות בבי[ת]'. The tall ascender above the line in the target word is clearly the letter Lamed ('ל'), confirming 'אליבא' (Option B) rather than the OCR error 'איבא' (Option A).",
       "vlm_reading": "איכא",
       "surya_reading": "איבא",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 76,
@@ -17647,6 +18184,7 @@
       "word_index": 96,
       "opcode": "delete",
       "docai_reading": "ס\"ח ונכון הוא",
+      "docai_repaired": null,
       "final_text": null,
       "page": 76,
       "bbox": {

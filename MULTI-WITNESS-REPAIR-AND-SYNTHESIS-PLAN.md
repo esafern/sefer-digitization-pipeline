@@ -175,20 +175,45 @@ Three guards, each added after a measured failure:
 
 **Coverage: 212/222 → 219/222.**
 
-### 3.2 DocAI ligature repair — **PARTIALLY BUILT**
+### 3.2 DocAI ligature repair — **BUILT 2026-08-24**
 
 `pipeline/typography.py` catalogues the alef-lamed and chet-zayin sorts and
 provides `dropped_lamed_explains()`, which recognises a reading that is the
 stored word minus one `ל` after an `א`. This is used to *tag* consensus
 agreements, not to rewrite text.
 
-**Still specified, not built — and now the highest-value unbuilt component in
-this document.** Measured 2026-08-24 against a reviewer's complete decision set
+**BUILT: `pipeline/repair_filters/docai_filter.py`.** Measured 2026-08-24 against a reviewer's complete decision set
 for klal 91: DocAI agrees with the human on **0 of 18** words raw, and **17 of 18
 (94%)** once the dropped `ל` is restored. Surya goes 10% → 90%. The primary
 engine is reading the ink correctly and nothing downstream expands the ligature,
 so its correct readings are being discarded as errors. Expanding `אא` → `אלא`
-etc. before alignment is what turns that around. Note `tools/detect_ligature_corruption.py` already
+etc. is what turns that around.
+
+**Validated before being trusted, per §3.5, against two independent human
+samples:** the reviewer's complete 22-decision review of klal 91 (DocAI 0/18 raw
+→ **17/18, 94%** repaired, **zero words made worse**), and every candidate the
+reviewer had already resolved by hand that the filter now classifies as a pure
+artifact — **106 of 106 agreement**, the reviewer having kept the stored text in
+every one.
+
+**Arbiter:** `sefaria_reference_corpus` only. `lexicon.txt` is unusable here — it
+was built from this corpus's own OCR and "absorbed and then validated the
+alef-lamed ligature corruption" — and the vision adjudicator is unusable for the
+same reason a fourth reader of the same pixels always is (§2B).
+
+**Impact:** 137 of 498 Part-1 candidates carry a repairable DocAI reading, and
+**118 (24%) repair to EXACTLY the stored text** — the disagreement was the
+ligature and nothing else, so there is no reading to choose between. Those are
+flagged `docai_ligature_artifact` and drop out of the reviewer's open queue.
+
+**The raw `docai_reading` is never overwritten.** The repair is offered
+alongside it as `docai_repaired`; success criterion #1 forbids silent
+normalisation, and the reviewer must be able to see what the engine actually
+produced. Items are flagged, never deleted (Lesson 26).
+
+**Known limitation:** a prefixed collapsed form (`ש"איבא`) is left alone, because
+the expanded form is not attested standalone in the reference corpus. Measured as
+a miss, not a wrong repair. Note `tools/detect_ligature_corruption.py` already
 handles the reverse direction — a corrupt form stored *in the corpus* — and its
 header explains why an ingest-level fix is impossible: DocAI collapses the
 ligature before this repo ever sees the text.

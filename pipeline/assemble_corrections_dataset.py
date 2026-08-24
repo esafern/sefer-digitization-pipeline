@@ -6,9 +6,12 @@
 import difflib
 import json
 import os
+import sys
 import re
 
 import corpus_io as cio
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "repair_filters"))
+import docai_filter
 
 # Moved one level deeper (pipeline/ or tools/) 2026-08-16 - REPO now goes up
 # two levels, not one, to keep resolving to the actual repo root where
@@ -98,6 +101,29 @@ def build_vlm_alignment(klal_words, vlm_words):
     corrections assembler" is worth a name of its own."""
     return {wi: reading for wi, (reading, _verdict)
             in cio.align_witness(klal_words, vlm_words).items()}
+
+
+def _ligature_artifact_flag(c):
+    """"docai_ligature_artifact" when repairing DocAI's reading makes it EXACTLY
+    the stored text, else None.
+
+    This is the safest criterion available and deliberately not a judgement
+    call: the candidate exists only because DocAI's raw output differed from the
+    corpus, and if restoring one known-dropped `ל` makes the two identical then
+    the disagreement was the ligature and nothing else. There is no reading to
+    choose between, so there is nothing for a reviewer to adjudicate.
+
+    Measured 2026-08-24: 118 of 498 Part-1 candidates (24%) are this - a quarter
+    of the review queue that never should have been in it. Flagged rather than
+    DELETED, per Lesson 26: a filter that removes items from a reviewer's view
+    must leave them findable and say why it acted."""
+    repaired = docai_filter.repair_word(c.get("original_word"))
+    if not repaired:
+        return None
+    stored = c.get("corrected_word")
+    if stored and cio.hebrew_letters_only(repaired) == cio.hebrew_letters_only(stored):
+        return "docai_ligature_artifact"
+    return None
 
 
 def merge_consensus_disputes(by_klal, path=CONSENSUS_PATH):
@@ -282,6 +308,15 @@ def main():
             "word_index": c["word_index_in_final_text"],
             "opcode": c["opcode"],
             "docai_reading": c["original_word"],
+            # ADDED 2026-08-24 (plan §3.2, built after being specified since the
+            # first draft). The RAW DocAI reading above is never overwritten -
+            # success criterion #1 forbids silent normalisation, and the reviewer
+            # must be able to see what the engine actually produced. This is the
+            # same reading with the alef-lamed ligature's dropped `ל` restored,
+            # offered alongside it. Measured against a reviewer's complete
+            # 22-decision review of klal 91: DocAI 0/18 raw, 17/18 (94%) repaired,
+            # zero words made worse.
+            "docai_repaired": docai_filter.repair_word(c["original_word"]),
             "final_text": c["corrected_word"],
             "page": c["page"],
             "bbox": c["bbox"],
@@ -300,7 +335,8 @@ def main():
             # any flag other than "current_text_confirmed" as its default
             # "open" state, so this is safe to introduce without a
             # frontend change.
-            "flag": "stale_candidate" if drifted else classify(c),
+            "flag": ("stale_candidate" if drifted
+                     else _ligature_artifact_flag(c) or classify(c)),
         }
         if drifted:
             n_drifted += 1

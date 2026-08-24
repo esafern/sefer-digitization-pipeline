@@ -83,6 +83,12 @@ FLAG_LABELS = {
     # ADDED: witness flag for independent-witness (DocAI vs Tesseract) disagreements
     # on reconstructed continuation pages (reconstruction_witness_queue.json).
     "witness": ["Witness disagreement", "#805ad5"],
+    # ADDED 2026-08-24: DocAI's reading differs from the corpus ONLY by the
+    # alef-lamed ligature's dropped lamed - restoring it makes the two
+    # identical, so there is no reading to choose between. Machine-resolved,
+    # not open; green, and visibly named so a reviewer can tell it apart from a
+    # vision-adjudicated confirmation.
+    "docai_ligature_artifact": ["Ligature artifact (resolved)", "#38a169"],
 }
 
 MIME_TYPES = {

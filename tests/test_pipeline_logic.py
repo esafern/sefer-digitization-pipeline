@@ -4031,3 +4031,78 @@ def test_witness_queue_filter_is_reversible(monkeypatch):
     monkeypatch.setattr(rs.rd, "all_current", lambda t, path=None: {})
     monkeypatch.setattr(rs, "WITNESS_QUEUE_FILTERED", False)
     assert len(rs._load_witness_queue()) == 5
+
+
+# --- DocAI alef-lamed ligature repair filter (plan §3.2, built 2026-08-24) ----
+
+sys.path.insert(0, os.path.join(REPO, "pipeline", "repair_filters"))
+import docai_filter as dlf  # noqa: E402
+
+
+def _freqs(**kw):
+    return {cio.hebrew_letters_only(k): v for k, v in kw.items()}
+
+
+def test_ligature_repair_restores_the_dropped_lamed_in_the_right_place():
+    """The lamed goes at the first LETTER index where the collapsed and expanded
+    forms differ. Comparing prefixes instead is off by one and produced `אילבא`
+    for `אליבא` and `אאל` for `אלא` - caught by this module's smoke test before
+    the filter was used on anything."""
+    f = _freqs(**{"אליבא": 848, "אלא": 47534, "בצלאל": 13})
+    assert dlf.repair_word("איבא", f) == "אליבא"
+    assert dlf.repair_word("אא", f) == "אלא"
+    assert dlf.repair_word("בצלא", f) == "בצלאל"
+
+
+def test_ligature_repair_preserves_abbreviation_marks():
+    """A repair must never silently strip a geresh/gershayim - that would be the
+    silent normalisation success criterion #1 forbids, smuggled in as a fix."""
+    f = _freqs(**{"אליבא": 848, "אלא": 47534})
+    assert dlf.repair_word("איבא'", f) == "אליבא'"
+    assert dlf.repair_word("אא.", f) == "אלא."
+
+
+def test_ligature_repair_refuses_when_the_evidence_is_ambiguous():
+    """Conservative by construction, because this rewrites a witness BEFORE it
+    votes: a wrong expansion fabricates a reading that then carries DocAI's
+    authority into consensus, which is worse than leaving a known artifact
+    visible (Lesson 5)."""
+    # two positions both yield an attested word -> cannot say which lamed was lost
+    ambiguous = _freqs(**{"אלאא": 40, "אאלא": 40})
+    assert dlf.repair_word("אאא", ambiguous) is None
+    # the expansion is too rare to trust
+    assert dlf.repair_word("איבא", _freqs(**{"אליבא": 1})) is None
+    # no alef at all, and no reference data at all
+    assert dlf.repair_word("כוותייהו", _freqs(**{"אלא": 47534})) is None
+    assert dlf.repair_word("איבא", {}) is None
+
+
+def test_ligature_repair_leaves_a_collapsed_form_that_is_itself_common():
+    """`אא` is itself attested (1,145). Only rewrite when the expansion is
+    decisively commoner, or a real word gets overwritten on thin evidence."""
+    assert dlf.repair_word("אא", _freqs(**{"אא": 1145, "אלא": 2000})) is None
+    assert dlf.repair_word("אא", _freqs(**{"אא": 1145, "אלא": 47534})) == "אלא"
+
+
+def test_ligature_repair_stream_reports_what_it_changed():
+    """A filter that changes what a reviewer sees must be able to say exactly
+    what it changed (plan §3.5)."""
+    f = _freqs(**{"אלא": 47534})
+    out, repairs = dlf.repair_stream(["אמר", "אא", "רב"], f)
+    assert out == ["אמר", "אלא", "רב"]
+    assert repairs == [(1, "אא", "אלא")]
+
+
+def test_ligature_artifact_flag_only_fires_on_an_exact_match_to_stored_text():
+    """The flag removes an item from the reviewer's open queue, so its criterion
+    is an identity rather than a judgement: repairing DocAI's reading must make
+    it EXACTLY the stored text. Validated against 106 independent human
+    decisions - the reviewer kept the stored text in 106/106."""
+    assert acd._ligature_artifact_flag(
+        {"original_word": "איבא", "corrected_word": "אליבא"}) == "docai_ligature_artifact"
+    # repair lands somewhere else -> a real dispute, still the reviewer's call
+    assert acd._ligature_artifact_flag(
+        {"original_word": "איבא", "corrected_word": "איכא"}) is None
+    # nothing to repair
+    assert acd._ligature_artifact_flag(
+        {"original_word": "כתבו", "corrected_word": "כתב"}) is None

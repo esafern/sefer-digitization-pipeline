@@ -17,6 +17,64 @@ current file references, or when grepping for how a past finding was
 resolved. Same append-at-top convention as before: newest entries go right
 after this header, not at the bottom.
 
+### BUILT 2026-08-24 — the DocAI alef-lamed ligature repair filter. 24% of the review queue was a pure artifact.
+
+Plan §3.2, specified since the first draft and unbuilt until now. User-requested
+after the klal 91 witness analysis showed it was the highest-value missing piece.
+
+**`pipeline/repair_filters/docai_filter.py`** restores the `ל` that the 19th-
+century `ﭏ` sort drops, using `sefaria_reference_corpus` as the arbiter.
+
+**Arbiter choice was the hard part and both obvious options are circular.**
+`lexicon.txt` cannot be used - it was built from this corpus's own OCR and, per
+`tools/validate_lexicon_independent.py`, "absorbed and then validated the
+alef-lamed ligature corruption", so it CONTAINS the collapsed forms. The vision
+adjudicator cannot be used either: it is a fourth reader of the same pixels and
+an ink defect is upstream of every reader (Lesson 24). Only the reference corpus
+(6.18M words, no lineage connection to this scan) is independent: `איבא` occurs
+**zero** times there, `אליבא` 848.
+
+**VALIDATED BEFORE BEING TRUSTED, per §3.5, on two independent human samples:**
+
+| sample | result |
+| :--- | :--- |
+| reviewer's complete 22-decision review of klal 91 | DocAI **0/18 raw → 17/18 (94%)** repaired, **0 made worse** |
+| candidates the reviewer had already resolved that the filter calls artifacts | **106 / 106 agreement** - the reviewer kept the stored text in every one |
+
+**Impact: 137 of 498 Part-1 candidates carry a repairable DocAI reading, and 118
+(24%) repair to EXACTLY the stored text.** The candidate existed only because
+DocAI's raw output differed from the corpus; if restoring one known-dropped `ל`
+makes them identical, the disagreement WAS the ligature and there is nothing to
+adjudicate. Flagged `docai_ligature_artifact` (green, "Ligature artifact
+(resolved)", machine-resolved in `wordState()`), which drops them from the open
+queue. 106 of the 118 had already cost the reviewer manual decisions.
+
+**Two design choices worth recording, both against the easy path:**
+1. **The raw `docai_reading` is NEVER overwritten.** The repair is offered
+   alongside as `docai_repaired`. Success criterion #1 forbids silent
+   normalisation and the reviewer must be able to see what the engine actually
+   produced - a filter that rewrites history to look right is not a fix.
+2. **Items are flagged, not deleted** (Lesson 26). The criterion for flagging is
+   an IDENTITY (repaired == stored), not a judgement call, which is the safest
+   thing that can justify removing an item from a human's view.
+
+**Conservative by construction, since this rewrites a witness before it votes:**
+a repair needs exactly ONE insertion position yielding an attested word, a
+frequency floor, and a 3x margin over the collapsed form so a collapsed form that
+is itself common (`אא`, 1,145) is not rewritten on thin evidence. Ambiguity means
+no repair - a wrong expansion fabricates a reading carrying DocAI's authority
+into consensus, worse than leaving a known artifact visible (Lesson 5).
+
+**One bug caught by the module's own smoke test before any use:** the lamed was
+being inserted one position late (`אילבא` for `אליבא`, `אאל` for `אלא`) because
+the insert index compared PREFIXES rather than characters.
+
+**Known limitation, measured as a miss rather than a wrong repair:** a prefixed
+collapsed form (`ש"איבא`) is left alone because the expansion is not attested
+standalone in the reference corpus.
+
+278 + 16 tests green (6 new).
+
 ### MAJOR 2026-08-24 — full 300-DPI Surya re-render: mean agreement 71.7% -> 89.9%. The witness had been resolution-starved all along.
 
 User-authorized ("yes full re-render. keep current numbers handy for
