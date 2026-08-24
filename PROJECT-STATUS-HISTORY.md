@@ -17,6 +17,53 @@ current file references, or when grepping for how a past finding was
 resolved. Same append-at-top convention as before: newest entries go right
 after this header, not at the bottom.
 
+### SELF-REVIEW 2026-08-24 — reviewing this session's own code found three defects of ONE shape: fields computed, served, and never displayed.
+
+User-requested ("do a code review while you're waiting on me"). The right target
+was this session's own work - roughly five new modules and a dozen touched files,
+all written by me and reviewed by nobody.
+
+**All three findings are the same failure: I added data and never wired it to a
+human.** Each looked complete because the JSON contained it.
+
+| field | written by | was it visible? |
+| :--- | :--- | :--- |
+| `docai_repaired` | `assemble_corrections_dataset.py` | **no** |
+| `witness_overlay` | `review_server.api_klal()` | **no** |
+| `consensus_engines` / `consensus_reading` | `merge_consensus_disputes()` | only via the reasoning string, and only on NEW entries - enriched candidates showed nothing |
+
+**`docai_repaired` was the serious one.** The whole point of the ligature filter
+is that DocAI's repaired reading is right **94%** of the time where the raw one
+is right **0%** - and the reviewer could neither see nor select it. Now offered
+as a selectable option directly after the raw DocAI reading, so the two read as a
+pair. **19 candidates gain it as a genuinely new choice**, including
+`docai 'איבא' -> repaired 'אליבא'` where the corpus stores `איכא` - precisely the
+case the reviewer resolved by hand in klal 91. Those are now one click.
+
+**`witness_overlay` means an earlier claim of mine was wrong in the part that
+matters.** When merging witness entries onto machine candidates I wrote that
+"witness data is overlaid, not dropped" - true of the JSON, false of the UI.
+Before the merge the witness entry SHADOWED the candidate; after it, the witness
+reading was simply invisible. I traded one invisibility for another and reported
+it as a fix. Now rendered as a context panel (6 served positions), explicitly
+labelled as context rather than a competing reading, since Tesseract measured
+correct in 16 of 419 witness disagreements.
+
+**`consensus_engines`** now shows which engines agree and on what - and, where
+the agreement is a catalogued ink artifact, says so in the panel rather than
+leaving the reviewer to infer that three agreeing engines might all be wrong.
+364 items.
+
+**The transferable lesson, and it is Lesson 25's sibling:** a field that nothing
+reads is not a feature, and a serialized JSON key looks identical to a delivered
+one. The same shape produced C15 earlier this session (`vlm_reading` computed
+from an alignment structurally incapable of disagreeing, then dropped by the
+frontend's dedupe) - twice in one session, both times invisible because the data
+existed. Worth checking, for any new field: who displays this, and what does a
+reviewer do differently because of it?
+
+278 + 16 tests green.
+
 ### 2026-08-24 — consensus-tightening measured and REJECTED; klal 201 recovered; Surya coverage now 222/222.
 
 **Task 1a: can the consensus rule be tightened into something reliable? Measured

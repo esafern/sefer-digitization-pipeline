@@ -823,6 +823,21 @@ async function openDisputedPanel(klalId, corr) {
   if (corr.surya_reading && !options.some(o => o.text === corr.surya_reading)) {
     options.push({ source: 'surya_reading', label: 'Surya OCR reading', text: corr.surya_reading });
   }
+  // DocAI's reading with the alef-lamed ligature's dropped lamed restored
+  // (pipeline/repair_filters/docai_filter.py). ADDED 2026-08-24 in a review of
+  // this session's own code: the field was being computed and served and NEVER
+  // SHOWN, which made the single most valuable reading invisible - measured
+  // against a reviewer's complete klal 91 review, the repaired DocAI reading is
+  // right 94% of the time where the raw one is right 0%. Placed directly after
+  // the raw DocAI option so the two read as a pair.
+  if (corr.docai_repaired && !options.some(o => o.text === corr.docai_repaired)) {
+    const at = options.findIndex(o => o.source === 'docai_reading');
+    options.splice(at < 0 ? options.length : at + 1, 0, {
+      source: 'docai_repaired',
+      label: 'DocAI reading, ligature repaired',
+      text: corr.docai_repaired,
+    });
+  }
 
   // Pre-fill the AI detector's suggested word as an extra selectable option
   // card when present (added 2026-08-14, see openManualCorrectionPanel's
@@ -871,6 +886,8 @@ async function openDisputedPanel(klalId, corr) {
     <div class="panel-section">
       <div><i style="background:${flagColor};width:9px;height:9px;border-radius:2px;display:inline-block;margin-inline-end:6px;"></i>${statusLabel(corr)}</div>
       <div style="font-size:12px;color:var(--ink-faint);margin-top:4px;">${escapeHtml(flagLabel)}${corr.confidence != null ? ' · ' + Math.round(corr.confidence * 100) + '% vision confidence' : ''}</div>
+      ${corr.consensus_engines && corr.consensus_engines.length ? `<div style="font-size:12px;color:var(--ink-faint);margin-top:4px;">
+        ${escapeHtml(corr.consensus_engines.join(' + '))} agree on <b>${escapeHtml(corr.consensus_reading || '')}</b>${corr.ligature_artifact ? ' — but this is a known <b>' + escapeHtml(corr.ligature_artifact) + '</b> ink artifact, so the agreement is a shared misread, not corroboration' : ''}</div>` : ''}
     </div>
     <div class="panel-section">
       <div class="panel-label">Context (Klal ${klalId} · Word #${corr.word_index})</div>
@@ -900,6 +917,20 @@ async function openDisputedPanel(klalId, corr) {
       <span class="history-toggle" id="history-toggle">Show decision history</span>
       <div class="history-list" id="history-list" style="display:none;"></div>
     </div>
+    ${corr.witness_overlay ? `
+    <div class="panel-section">
+      <div class="panel-label">Second-witness disagreement (DocAI vs Tesseract)</div>
+      <div style="font-size:12px;color:var(--ink-faint);">
+        DocAI: ${escapeHtml(corr.witness_overlay.docai_reading || '—')} ·
+        Tesseract: ${escapeHtml(corr.witness_overlay.tesseract_reading || '—')}
+        ${corr.witness_overlay.tier ? ' · tier ' + escapeHtml(corr.witness_overlay.tier) : ''}
+        ${corr.witness_overlay.current_decision ? ' · already decided' : ''}
+      </div>
+      <div style="font-size:11px;color:var(--ink-faint);margin-top:4px;">
+        This word also carries a witness-queue disagreement. Tesseract was measured
+        correct in 16 of 419 such cases (3.8%), so it is shown for context, not as a
+        competing reading.</div>
+    </div>` : ''}
     ${(corr.word_flag || corr.flag === 'ai_flag') ? `
     <div class="panel-section">
       <div class="panel-label">Revisit flag</div>
