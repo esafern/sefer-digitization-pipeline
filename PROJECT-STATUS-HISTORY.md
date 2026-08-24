@@ -17,6 +17,42 @@ current file references, or when grepping for how a past finding was
 resolved. Same append-at-top convention as before: newest entries go right
 after this header, not at the bottom.
 
+### 2026-08-24 — START_HERE lessons 29-31 added. All three were earned by my own failures this session, not found in someone else's code.
+
+Lessons 23-28 were added earlier today from the code review and the user's
+standing-rule directive. These three come from mistakes made while doing that
+work, which is why they are worth writing down rather than filing as incidents.
+
+**29. A field nothing reads is not a feature.** Twice in one session a signal was
+computed, written into the API response, and never shown to a human - finished at
+every layer except the only one that matters. `vlm_reading` was built from an
+alignment structurally incapable of reporting disagreement and then dropped by
+the frontend's dedupe (C15). `docai_repaired`, measured 94% correct where the raw
+DocAI reading is 0%, was served and never rendered, so the reviewer could not
+select the answer the pipeline had already computed. `witness_overlay` was
+described in my own commit message as "overlaid, not dropped" - true of the JSON,
+false of the screen. The check: who displays this, and what does a reviewer do
+differently because of it?
+
+**30. A wrong render looks exactly like a right one.** `fitz.open(pdf)[N]` is
+page N+1 here. Every ad-hoc crop through that path read the neighbouring page,
+and nothing in the images said so - they were legible 19th-century Hebrew, just
+the wrong legible Hebrew. It produced a retracted finding ("resolution is not the
+lever" - it is) and nearly produced a filed pipeline bug ("these three klalim
+have wrong regions") that was false. What caught it was asking where the cropped
+text actually lives in the corpus, not looking harder at the picture.
+
+**31. When your own fix regresses, revert AND STOP.**
+`split_block_across_klalim()` was retuned three times in one day for 4
+mis-assigned klalim; the third attempt cost 29 klalim their coverage and 2.3
+points of mean agreement. I had said after the second that I would stop, and did
+not. The rule is not "measure" (Lesson 19) - it is that repeated retuning of one
+heuristic is itself the signal that the problem is under-specified, and the
+correct move is to document the extent and hand it back. That item is now
+assigned to the user.
+
+TL;DR count updated 28 -> 31. 278 tests green.
+
 ### SELF-REVIEW 2026-08-24 — reviewing this session's own code found three defects of ONE shape: fields computed, served, and never displayed.
 
 User-requested ("do a code review while you're waiting on me"). The right target

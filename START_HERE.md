@@ -39,7 +39,7 @@ loaders, Hebrew helpers) and `pipeline/vision_adjudication_common.py`
 (crop/cache/retry/client). A hand-maintained parallel copy has produced the
 same bug class here more than once.
 
-**Then read Part 2's 28 numbered lessons.** They are rules, not history. The
+**Then read Part 2's 31 numbered lessons.** They are rules, not history. The
 short version of most of them: a check that wasn't run has verified nothing, a
 passing score is not a checked result, and no single confident signal is
 enough.
@@ -838,3 +838,44 @@ next incident.
     real extent, because an open item that says "klal 91" when the answer is
     "104 klalim" reads as handled and is worse than silence. See Part 2's
     "Never fix one instance" section for the operational rule.
+29. **A field nothing reads is not a feature — a serialized JSON key looks
+    exactly like a delivered one.** Twice in one session (2026-08-24) a signal
+    was computed, written into the API response, and never shown to a human, so
+    it looked finished at every layer except the only one that matters.
+    `vlm_reading` was built from an alignment structurally incapable of
+    reporting disagreement and then dropped by the frontend's dedupe;
+    `docai_repaired` - the reading measured **94% correct where the raw DocAI
+    reading is 0%** - was served and never rendered, so the reviewer could not
+    select the answer the pipeline had already worked out. `witness_overlay` was
+    described in a commit message as "overlaid, not dropped": true of the JSON,
+    false of the screen. For every new field ask two questions before calling it
+    done — **who displays this, and what does a reviewer do differently because
+    of it?** If neither has an answer, nothing was delivered. Sibling of Lesson
+    25: that one is about a signal that cannot disagree, this one about a signal
+    nobody sees.
+30. **A wrong render looks exactly like a right one — verify indexing against
+    CONTENT, never against plausibility.** `fitz.open(pdf)[N]` is page N+1 in
+    this repo (`page N == doc[N-1]`, confirmed by pixel correlation:
+    `page_30.png` vs `doc[29]` = 0.995, vs `doc[30]` = 0.038). Every ad-hoc crop
+    made through that path on 2026-08-24 read the neighbouring page, and nothing
+    in the images said so — they were legible 19th-century Hebrew, just the
+    wrong legible Hebrew. It produced a retracted "resolution is not the lever"
+    finding and nearly produced a filed pipeline bug ("these three klalim have
+    wrong regions") that was false. What caught it was not looking harder at the
+    image but asking **where the cropped text actually lives in the corpus** —
+    a uniform +1 offset across three independent cases is a bug in the reader,
+    not the data. Prefer `images/pdf_pages/page_N.png`, which is correctly
+    indexed; when you must render, prove the mapping on a known page first.
+31. **When your own fix regresses on measurement, revert AND STOP — a heuristic
+    you have retuned twice is asking to be handed back, not tuned a third
+    time.** `split_block_across_klalim()` was adjusted three times in one day to
+    fix 4 mis-assigned klalim. Attempt two fixed nothing and cost 0.05pt;
+    attempt three cost **29 klalim their coverage and 2.3 points of mean
+    agreement**, collapsing twelve klalim (0.94 → 0.10 among them). All were
+    reverted, and the only reason none reached the corpus is that a before/after
+    measurement ran every time. The rule is not "measure" — that is Lesson 19 —
+    it is that **repeated retuning of one heuristic is itself the signal**: the
+    problem is under-specified, further attempts are guesses wearing fixes'
+    clothes, and the correct move is to document the issue with its measured
+    extent and hand it to the user. Never let a fix for N instances put the
+    other 200 at risk.
