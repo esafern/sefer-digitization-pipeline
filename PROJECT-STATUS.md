@@ -45,6 +45,17 @@ to) as state changes** — that discipline is what drifted last time.
 
 ## Open items
 
+00. **Surya block mis-assignment: 4 klalim carry a neighbour's text** (swept
+    2026-08-24, extent documented per the standing rule). klal 162 (page 59,
+    NEW - a regression from the 300-DPI re-render, 0.68 -> 0.09) and its
+    knock-on klal 163; klalim 8, 88 and 202 are pre-existing. Root cause for
+    162: the block opening `קסב` sits inside klal 161's recorded region, so it
+    covers one klal, falls through to centre-assignment, and the whole page
+    shifts by one - the marker and the derived region geometry disagree. Two fix
+    attempts reverted rather than risk the 190 klalim the re-render improved;
+    this wants a scoped change with its own before/after. Context: the same
+    re-render cut mis-assignment from 15 klalim to 4.
+
 0. **STANDING RULE, added 2026-08-24 (user directive): never fix one instance —
    sweep the corpus for the class.** Whenever you find and fix an issue, review
    the whole corpus for other instances of the same failure, in the same turn.

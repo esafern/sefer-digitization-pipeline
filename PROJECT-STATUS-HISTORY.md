@@ -17,6 +17,67 @@ current file references, or when grepping for how a past finding was
 resolved. Same append-at-top convention as before: newest entries go right
 after this header, not at the bottom.
 
+### MAJOR 2026-08-24 — full 300-DPI Surya re-render: mean agreement 71.7% -> 89.9%. The witness had been resolution-starved all along.
+
+User-authorized ("yes full re-render. keep current numbers handy for
+comparison"). All 63 Part-1 pages re-rendered from the PDF at 300 DPI
+(1752x2664, 4.7 MP) instead of the cached `images/pdf_pages/*.png`
+(~860x1336, 1.1 MP). ~1 hour, local, free. Before-state and all 63 page JSONs
+backed up first, so the change is reversible.
+
+| metric | before | after |
+| :--- | ---: | ---: |
+| mean agreement vs corpus | 71.67% | **89.85%** |
+| median agreement | 71.21% | **91.84%** |
+| coverage | 221/222 | 221/222 |
+| klalim below 50% | 4 | 3 |
+| klalim improved >5pt | - | **190 of 222** |
+| klalim regressed >5pt | - | 2 |
+| **klalim opening with a NEIGHBOUR's marker** | **15** | **4** |
+
+**+18.2 points of mean agreement, and 190 of 222 klalim improved.** Surya had
+been reading a quarter of the available pixels for the entire life of this
+witness stream, and every consensus dispute derived from it inherited that.
+
+**The mis-assignment sweep is the second finding.** Checking which klalim's Surya
+text OPENS with a neighbour's gematria marker - a direct, cheap test for
+block-to-klal mis-assignment - the re-render cut it from **15 to 4**. Klalim 8,
+88 and 202 were already wrong before and still are; only klal 162 is new.
+
+**Downstream effect on the posterior.** With a materially better third witness,
+P(consensus correct | 2 distinct engines agree) moves **30% -> 34%** on the
+least-circular estimate, and the unanimous-3-of-3 subset from 100% (n=2) to 64%
+(n=11) - a much better-founded number on 5x the sample. Consensus disputes grew
+179 -> 292 as Surya now has an opinion where it previously had noise. **This does
+not change the operational conclusion**: 34% is still far from anything that
+would justify auto-approval, and the plan's §2D stands.
+
+**OPEN ISSUE, documented with its extent per today's standing rule rather than
+left as a one-liner: 4 klalim have Surya text mis-assigned by one klal.**
+
+| klal | opens with | page | status |
+| ---: | :--- | ---: | :--- |
+| 162 | klal 163's marker | 59 | **NEW** - regression from this re-render (0.68 -> 0.09) |
+| 163 | continuation fragment | 59 | knock-on from 162 (0.72 -> 0.39) |
+| 8 | klal 5's marker | 18 | pre-existing |
+| 88 | klal 85's marker | 39 | pre-existing |
+| 202 | klal 201's marker | 73 | pre-existing |
+
+Root cause for klal 162, diagnosed but NOT fixed: on page 59 the block whose
+text opens `קסב` (klal 162's own marker) sits at y 0.167, inside klal **161's**
+region (0.133-0.405), while klal 162's region is recorded at 0.407-0.572. The
+block therefore covers a single klal, falls through to centre-based assignment,
+and every klal on the page shifts by one. **The marker and the region geometry
+disagree, and the region is the derived one.**
+
+**Two fix attempts were made and BOTH REVERTED.** Trusting the marker over the
+geometry (adding the marker's klal to `covered`) is defeated by the
+`len(cuts) < 2` fallback; it fixed nothing and cost 0.05pt of mean agreement.
+Rather than keep tuning a heuristic that governs assignment for all 222 klalim -
+with 190 improvements riding on it - the change was reverted and the issue
+documented. The net is 12 mis-assignments fixed against 1 introduced; tuning
+further is a scoped change with its own before/after, not a drive-by.
+
 ### ANALYSIS 2026-08-24 — what the reviewer's klal 91 decisions tell us about each witness. DocAI is the BEST witness, at 0% raw and 94% repaired.
 
 The reviewer worked klal 91 end to end and recorded 22 word decisions - a
