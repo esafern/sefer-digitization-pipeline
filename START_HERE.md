@@ -35,7 +35,7 @@ loaders, Hebrew helpers) and `pipeline/vision_adjudication_common.py`
 (crop/cache/retry/client). A hand-maintained parallel copy has produced the
 same bug class here more than once.
 
-**Then read Part 2's 19 numbered lessons.** They are rules, not history. The
+**Then read Part 2's 27 numbered lessons.** They are rules, not history. The
 short version of most of them: a check that wasn't run has verified nothing, a
 passing score is not a checked result, and no single confident signal is
 enough.
@@ -733,3 +733,56 @@ next incident.
     Secondary witness evaluation must inherit from `AbstractWitnessEngine` ABC with image-grounded VLM adjudication
     ($\ge 0.90$ confidence) and disk caching in `adjudication_cache.db` to eliminate Tesseract OCR noise while
     preserving engine swappability.
+23. **A witness is an ENGINE, not a SAMPLE. Running one model twice buys no
+    independence.** Two passes of the same model agreeing is a *stability*
+    measurement of that one witness, not corroboration by two. Treating VLM
+    Pass A == Pass B as two-of-three consensus produced 1,051 disputes
+    (2026-08-23); when a genuinely different engine was consulted on the same
+    positions, **290 of them had that engine agreeing with the stored corpus
+    text against the VLM**. Before counting a witness, ask what would have to go
+    wrong for it to fail *differently* from the witness beside it. If the answer
+    is "nothing — it's the same model", it is one witness. Use a repeat run as a
+    reliability gate on that single witness instead: where the two passes
+    disagree, it abstains.
+24. **Architectural independence is defeated by a defect in the shared input.**
+    Different OCR architectures fail differently on *ambiguous* glyphs, and
+    identically on a *defective* one — every engine is reading the same ink, so
+    a worn or ligatured printer's sort is upstream of all of them. Measured
+    2026-08-23: 37 cases of two or three engines producing the identical wrong
+    reading, including unanimous 3-of-3, all from one sort (the alef-lamed
+    ligature `ﭏ` losing its `ל`). A published estimate priced that at
+    3.5 × 10⁻⁷. Never reason about ensemble agreement with a `1/|V|`
+    vocabulary term: hallucinations are not drawn uniformly from a vocabulary,
+    they are drawn from what the glyph plausibly looks like. Corollary, also
+    measured: enumerating and excluding the known defect barely improved the
+    ensemble (41% → 39%), so a bigger artifact catalogue is not the repair.
+25. **A signal that CANNOT disagree carries no information — verify a check can
+    fail before trusting that it passed.** `build_vlm_alignment()` mapped only
+    `SequenceMatcher.get_matching_blocks()`, where the two sequences are equal
+    *by definition*, so the `vlm_reading`/`surya_reading` fields it fed could
+    only ever echo the corpus's own word back: 49,138 and 34,892 aligned words,
+    **zero divergent in either**. The feature shipped, was celebrated in
+    `PROJECT-STATUS.md`, and was structurally incapable of doing its job. For
+    any new comparison, agreement metric, or validator, construct one input that
+    MUST make it report a difference. If you cannot, it is not measuring
+    anything.
+26. **A filter that HIDES is at least as dangerous as one that rewrites, and is
+    harder to catch — validate it by what it suppresses, not by what it
+    emits.** A wrong rewrite produces visible wrong text; a wrong suppression
+    produces *silence*, and silence where a check cannot operate is not evidence
+    of correctness (Lesson 15). This matters in proportion: measured 2026-08-24,
+    the live filters suppress **12,444** items (VLM stability abstentions 1,577;
+    ragged-alignment drops 10,455; witness-queue filtering 375; artifact tagging
+    37) against **216** disputes that actually reach a reviewer — the filters
+    decide roughly 98% of what a human never sees. Any filter standing between
+    the corpus and a reviewer needs a measured false-negative rate against a
+    hand-checked sample before it is trusted, and "it only tags, it doesn't
+    rewrite" is not an exemption.
+27. **An adversarially-selected sample cannot estimate a rate.** 40 consensus
+    positions carried a human decision and in 39 the reviewer kept the stored
+    text — which looks like "consensus is 2.5% accurate" and is not: a reviewer
+    had already examined those exact words and confirmed the corpus, so a
+    proposal to change them loses by construction. The usable estimate had to
+    come from *undecided* positions. Before turning a labelled subset into a
+    rate, ask why those particular items got labelled; if the labelling process
+    selected on the outcome, the rate measures the selection, not the thing.

@@ -199,16 +199,53 @@ Pass A/Pass B disagreement makes the VLM abstain at that position. Measured:
 **1,577 abstentions** across Part 1 — exactly the positions the pre-correction
 pipeline counted as "dual-VLM consensus".
 
-### 3.5 Filter validation — **OPEN, AND REQUIRED BEFORE ANY FILTER REWRITES TEXT**
+### 3.5 Filter validation — **HARNESS BUILT 2026-08-24; 2 of 4 filters measured**
 
 Every filter in this section transforms a witness *before* it votes. A wrong
 filter therefore does not produce a visible disagreement — it **erases** one, and
 silence where a check cannot operate is not evidence of correctness (Lesson 15).
 
+**Correction to an earlier framing in this document's own history:** this was
+once deprioritised as "only matters once a filter rewrites text, and none does".
+That was wrong twice over. The filters are *why the reviewer's queue is usable* —
+they exist to keep engine artifacts from becoming disputes — which is exactly
+why they decide what a human is permitted to see. And a wrong SUPPRESSION is
+harder to catch than a wrong rewrite, not softer: it produces silence, and
+silence where a check cannot operate is not evidence (Lesson 15, Lesson 26).
+
+**Scale, measured 2026-08-24.** The live filters suppress **~12,400** items
+against **216** disputes reaching a reviewer — they decide roughly 98% of the
+review surface:
+
+| filter | suppresses | validated? |
+| :--- | ---: | :--- |
+| VLM Pass-A/B stability gate | 1,577 | **measured**: 61 false negatives (another engine independently agreed) |
+| `align_witness` ragged-block drop | 10,455 | unmeasured — unfalsifiable by construction |
+| Witness-queue vision filter | 375 | partial — the 16/419 Tesseract measurement |
+| Ligature-artifact tagging | 37 | **measured**: 34/37 corroborated |
+
+`tools/validate_suppression_filters.py` reports these. Two findings from
+building it are worth more than the numbers:
+
+* **Picking the arbiter is the hard part, and two obvious choices were circular.**
+  Validating the ligature tag against *vision* is Lesson 24 applied to one's own
+  method — vision is a fourth reader of the same pixels, so it cannot arbitrate a
+  pixel-level defect (it "disagreed" with 14 of 37 tags, because it read the
+  corrupted glyph too). Validating against `lexicon.txt` fails differently: that
+  file was built from this corpus's own OCR and, per
+  `tools/validate_lexicon_independent.py`, "absorbed and then validated the
+  alef-lamed ligature corruption". Only `sefaria_reference_corpus` — 6.18M words
+  that never saw this scan — is independent for this question.
+* **The tag has a real blind spot.** Its one contradicted case is klal 200 w58,
+  `אליהו` → `איהו`: the ligature produced a corrupt form that is itself a common
+  word (Aramaic "he"), so frequency cannot arbitrate and only context can. This
+  is the real-word-substitution class `tools/detect_real_word_substitution.py`
+  exists for, reached from the other direction.
+
 No filter may be promoted from tagging to rewriting until it has a measured
-precision/recall against a hand-checked sample, recorded in `PROJECT-STATUS.md`.
-This is not a nice-to-have; §3.1 alone needed three iterations, and one
-intermediate version silently cost three klalim 30–360 words each.
+rate against an independent signal, recorded in `PROJECT-STATUS.md`. §3.1 alone
+needed three iterations, and one intermediate version silently cost three
+klalim 30–360 words each.
 
 ---
 
@@ -348,7 +385,11 @@ klalim.
    or a genuine corpus error. Needs a scholar, not more pixels. **Standing
    limit:** this method is blind to a defect baked into the corpus itself, since
    no disagreement would remain to detect.
-3. **Filter validation harness** (§3.5) before any filter rewrites text.
+3. **Filter validation harness — BUILT 2026-08-24** (§3.5). 2 of 4 filters now
+   have a measured rate against an independent signal; the `align_witness`
+   ragged-block drop (10,455 slots) and the witness-queue filter (375) remain
+   justified by argument rather than measurement, and closing the former needs a
+   hand-checked sample rather than another derived signal.
 4. **A genuinely independent third engine.** Gemini is both witness 2 and
    adjudicator — `PROPOSED_PIPELINE_ARCHITECTURE.md` Directive #1 is still
    violated. Dicta is the leading candidate; Kraken is blocked on a macOS

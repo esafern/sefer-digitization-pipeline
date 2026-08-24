@@ -17,6 +17,80 @@ current file references, or when grepping for how a past finding was
 resolved. Same append-at-top convention as before: newest entries go right
 after this header, not at the bottom.
 
+### 2026-08-24 — START_HERE lessons 23-27 added; filter-validation harness built after a WRONG prioritisation call was corrected by the user.
+
+**The correction first, because it drove the work.** I had listed the
+filter-validation harness as "lower priority — only matters once a filter starts
+rewriting text, and none does". The user pushed back: isn't the harness there so
+a human sees only the useful disputed words? That is right, and my framing was
+wrong twice over — it also contradicted what I had already written in
+`MULTI-WITNESS-REPAIR-AND-SYNTHESIS-PLAN.md` §3.5 the day before.
+
+Measured immediately, and the scale settles it. The live filters suppress
+**~12,400** items against **216** disputes that reach a reviewer — **they decide
+roughly 98% of the review surface**:
+
+| filter | suppresses | validated? |
+| :--- | ---: | :--- |
+| VLM Pass-A/B stability gate | 1,577 | none at the time |
+| `align_witness` ragged-block drop | 10,455 | none |
+| Witness-queue vision filter | 375 | partial (16/419 Tesseract) |
+| Ligature-artifact tagging | 37 | none |
+
+A wrong REWRITE produces visible wrong text; a wrong SUPPRESSION produces
+silence, which is the harder failure to catch, not the softer one.
+
+**Built `tools/validate_suppression_filters.py`.** Two filters now have a
+measured rate against an independent signal:
+
+* **VLM stability gate: 61 measured false negatives.** Positions where the gate
+  silenced the VLM *and another engine independently produced the same reading*
+  (41 surya+vlm, 14 docai+vlm, 6 unanimous). Cross-engine convergence does not
+  depend on the VLM's run-to-run stability, so the gate discards real evidence
+  along with the noise. Reported as a TRADE-OFF, not a verdict: much of what it
+  hides is exactly the artifact class it exists to suppress (`מקר'`→`מקרי` is
+  Surya's geresh→yod; `בבי`→`בכי` is kaf/bet). Not changed — re-admitting 61
+  items to a queue whose measured posterior is ~26-41% needs its own decision.
+* **Ligature tagging: 34/37 corroborated**, 1 contradicted, 2 unattested.
+
+**Choosing the arbiter was the hard part, and two obvious choices were circular -
+both caught by this repo's own documentation.**
+
+1. *Vision* was tried first and reported 14 of 37 tags "wrong". It was not the
+   tags that were wrong: vision is a fourth reader of the SAME PIXELS, and an ink
+   defect is upstream of every reader. Using a pixel-based arbiter to check a
+   pixel-level defect is **Lesson 24 applied to one''s own validation method**.
+2. *`lexicon.txt`* was tried next. `tools/validate_lexicon_independent.py`'s own
+   header says it: the lexicon "was built from THIS corpus's own OCR output" and
+   "absorbed and then validated the alef-lamed ligature corruption... Every check
+   this project runs against lexicon.txt is only as independent as lexicon.txt
+   itself, which is not independent at all."
+3. *`sefaria_reference_corpus`* — 6.18M words / 185,593 distinct forms of Talmud,
+   Rashi, Rambam, Tur and Shulchan Arukh, with no editorial or data lineage
+   connection to this project — is the one signal that is actually independent
+   here. `אליעזר` 3,410 vs `איעזר` 0; `שמואל` 3,271 vs `שמוא` 0.
+
+**A real blind spot in the tag, found by measuring it:** its single contradicted
+case is klal 200 w58, `אליהו` (275) → `איהו` (714). The ligature produced a
+corrupt form that is itself a COMMON WORD (Aramaic "he"), so frequency cannot
+arbitrate and only context can. That is the real-word-substitution class
+`tools/detect_real_word_substitution.py` exists for, arrived at from the other
+direction.
+
+**Still unmeasured, and labelled as such rather than as clean:** the
+`align_witness` ragged-block drop (10,455 word-slots, 10% of all witness slots)
+is unfalsifiable by construction — it drops exactly the positions where no
+unambiguous correspondence exists, so there is no reading to check it against.
+Closing it needs a hand-checked sample, not another derived signal.
+
+**START_HERE.md gained lessons 23-27**, all from this session and all stated as
+rules rather than history: a witness is an engine not a sample (23); shared-input
+defects defeat architectural independence, with the `1/|V|` warning (24); a
+signal that cannot disagree carries no information (25); a filter that hides is
+as dangerous as one that rewrites (26); an adversarially-selected sample cannot
+estimate a rate (27). The TL;DR's "19 numbered lessons" was stale and now reads
+27.
+
 ### MEASURED 2026-08-23 — the 2-of-3 consensus posterior is ~26-41%, not >99.9999%. Auto-approval is indefensible; consensus is triage, not a decision procedure.
 
 Closes `MULTI-WITNESS-REPAIR-AND-SYNTHESIS-PLAN.md` §8 item 1, the last piece of
