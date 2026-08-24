@@ -17,6 +17,78 @@ current file references, or when grepping for how a past finding was
 resolved. Same append-at-top convention as before: newest entries go right
 after this header, not at the bottom.
 
+### ANALYSIS 2026-08-24 — what the reviewer's klal 91 decisions tell us about each witness. DocAI is the BEST witness, at 0% raw and 94% repaired.
+
+The reviewer worked klal 91 end to end and recorded 22 word decisions - a
+complete review of one klal's dispute set, so unlike the earlier 40-position
+sample this is NOT adversarially selected. Scored every witness against it.
+
+**Raw scores, which are actively misleading:**
+
+| witness | agreed with the reviewer |
+| :--- | ---: |
+| stored corpus | 12/22 (55%) |
+| vision adjudication | 8/18 (44%) |
+| VLM | 5/17 (29%) |
+| Surya | 1/10 (10%) |
+| **DocAI** | **0/18 (0%)** |
+| consensus reading | 0/4 (0%) |
+
+**The same scores after applying the alef-lamed ligature repair** - i.e. asking
+"is this reading one restored `ל` away from the reviewer's answer?":
+
+| witness | raw | repaired |
+| :--- | ---: | ---: |
+| **DocAI** | 0% | **94%** (17/18) |
+| Surya | 10% | **90%** (9/10) |
+| VLM | 29% | 76% |
+| vision adjudication | 44% | 72% |
+| stored corpus | 55% | 59% |
+
+**DocAI was reading the ink correctly the entire time.** It scores 0% only
+because it faithfully reports the ligature-collapsed glyph and NOTHING
+DOWNSTREAM EXPANDS IT. This is the strongest evidence yet for the plan's §3.2
+DocAI ligature repair filter, which is specified and unbuilt - on this klal it
+would move the primary engine from useless to 94%.
+
+**Why the corpus barely improves (55% -> 59%), and what it reveals.** The stored
+form `איכא` is TWO errors from the truth `אליבא`: a missing `ל` and `כ` where the
+ink has `ב`. DocAI's `איבא` is ONE error away. The reference corpus explains how
+that happened: **`איבא` occurs ZERO times in 6.18M words** - it is not a word,
+it is `ﭏ` collapsed - while `איכא` occurs 4,787 times and `אליבא` 848. An earlier
+pass evidently "corrected" the non-word `איבא` to the nearest common REAL word
+rather than expanding the ligature. That is the real-word-substitution trap
+`tools/detect_real_word_substitution.py` exists for, and it is worse than a plain
+OCR error because the result is lexically clean and invisible to every check
+that asks "is this a word".
+
+**CORPUS SWEEP, per the standing rule added today.** All 68 occurrences of
+`איכא` in Part 1 (33 klalim) checked against the witnesses: **57 have no engine
+disagreement** and are likely genuine; **10 show an engine reading `איבא`**;
+1 other. Seven of the ten are klal 91's, which the reviewer independently
+resolved as `אליבא` - the discriminator agrees with a human 7/7.
+
+**The remaining 3 were flagged, then RETRACTED the same session, before any
+human saw them.** klal 10 w54 and klal 217 w710/w843 are genuine `איכא`: klal
+217's two are the fixed Talmudic idiom `מאי איכא למימר` ("what is there to
+say"), and klal 10's is `הא איסורא איכא` ("there is a prohibition"). I proposed
+them without reading the surrounding phrase. The evidence was also visibly
+weaker and I should have noticed before flagging:
+
+| position | engines reading `איבא` |
+| :--- | :--- |
+| klal 91 w7 / w293 / w363 / w453 / w497 / w524 / w611 (CONFIRMED) | docai+vlm, docai, docai, docai+vlm+surya, docai+vlm+surya, docai+vlm+surya, vlm+surya |
+| klal 10 w54, klal 217 w710/w843 (retracted) | **surya alone** in all three |
+
+**Refined discriminator, recorded so the next sweep does not repeat this:**
+Surya alone is not sufficient evidence for this pattern - it is the weakest
+witness here (10% raw on klal 91), and every confirmed case carried DocAI and/or
+VLM. Read the surrounding phrase before proposing a change; a fixed idiom is
+decisive where letter-level evidence is not.
+
+**Net for the corpus:** no unresolved instances of this pattern remain in Part 1
+outside the ones the reviewer already fixed.
+
 ### FIXED 2026-08-24 — klal 91's flags were unclearable, and so were 325 others. New standing rule: never fix one instance.
 
 User report: "91 still shows a flag in the middle pane but there's nothing to

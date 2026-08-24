@@ -182,8 +182,13 @@ provides `dropped_lamed_explains()`, which recognises a reading that is the
 stored word minus one `ל` after an `א`. This is used to *tag* consensus
 agreements, not to rewrite text.
 
-**Still specified, not built:** repairing DocAI's stream before alignment
-(expanding `אא` → `אלא` etc.). Note `tools/detect_ligature_corruption.py` already
+**Still specified, not built — and now the highest-value unbuilt component in
+this document.** Measured 2026-08-24 against a reviewer's complete decision set
+for klal 91: DocAI agrees with the human on **0 of 18** words raw, and **17 of 18
+(94%)** once the dropped `ל` is restored. Surya goes 10% → 90%. The primary
+engine is reading the ink correctly and nothing downstream expands the ligature,
+so its correct readings are being discarded as errors. Expanding `אא` → `אלא`
+etc. before alignment is what turns that around. Note `tools/detect_ligature_corruption.py` already
 handles the reverse direction — a corrupt form stored *in the corpus* — and its
 header explains why an ingest-level fix is impossible: DocAI collapses the
 ligature before this repo ever sees the text.
