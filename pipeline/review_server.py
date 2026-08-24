@@ -743,6 +743,26 @@ def api_klal(klal_id):
         if not _word_matches(words, word_index, original_word):
             continue
         manual_word_indices.add(word_index)
+        # FIXED 2026-08-24 (found by live review of klal 91, and by
+        # tests/test_corpus_invariants.py::test_no_rendered_manual_correction_
+        # hides_a_machine_candidate firing for the first time). If a MACHINE
+        # candidate already exists at this word_index, MERGE the human decision
+        # onto it instead of appending a second entry.
+        #
+        # app.js builds its word map as last-write-wins and this loop appends
+        # after the machine candidates, so a second entry at the same index
+        # silently replaced the real dispute - taking its bbox (no scan
+        # highlight at all), its docai_reading and consensus_reading (nothing
+        # for the panel to compare), and its vision verdict and confidence with
+        # it. The reviewer saw a word marked Human-Decided with no readings and
+        # no box. That test's docstring predicted exactly this class would
+        # resurrect the moment a still-valid manual decision landed on a live
+        # candidate's position; klal 91 w453/w524 is that moment.
+        existing = next((c for c in corrections if c.get("word_index") == word_index
+                         and c.get("opcode") != "delete"), None)
+        if existing is not None:
+            existing["current_decision"] = rec
+            continue
         corrections.append({
             "word_index": word_index,
             "opcode": "manual",
@@ -759,8 +779,24 @@ def api_klal(klal_id):
         })
     # A manual correction means a human already acted on this exact word -
     # an AI flag on the same word_index is now redundant, don't also show it.
-    corrections.extend(f for f in _word_level_ai_flags(klal_id, words)
-                        if f["word_index"] not in manual_word_indices)
+    #
+    # FIXED 2026-08-24, same defect as the manual-correction merge above and
+    # found while fixing it: a word-level flag at a position that ALREADY has a
+    # machine candidate also appended a second entry and shadowed it under
+    # app.js's last-write-wins map. It only escaped notice at klal 91 because a
+    # manual correction happened to pre-empt the flag there. Merge instead:
+    # attach the flag to the live candidate as `word_flag` so the reviewer sees
+    # the dispute AND that it is flagged, and so the panel can offer to clear it.
+    for f in _word_level_ai_flags(klal_id, words):
+        if f["word_index"] in manual_word_indices:
+            continue
+        existing = next((c for c in corrections if c.get("word_index") == f["word_index"]
+                         and c.get("opcode") != "delete"), None)
+        if existing is not None:
+            existing["word_flag"] = f.get("current_decision")
+            continue
+        f["word_flag"] = f.get("current_decision")
+        corrections.append(f)
 
     # Witness disagreements that have a corpus word_index (patched in by
     # tools/patch_witness_word_indices.py) are added as 'witness' entries so
@@ -1108,10 +1144,24 @@ def api_witness_context(page, token_index):
 
 
 def api_post_klal_flag(body):
+    """Record a klal-level OR word-level revisit flag.
+
+    FIXED 2026-08-24 (user report: "i can't clear the revisit flag"). This used
+    to ignore word_index entirely, so it could only ever write a KLAL-level
+    flag. But _word_level_ai_flags() keys word-level flags on word_index and
+    stops rendering one only when a later record at THAT SAME (klal_id,
+    word_index) sets needs_revisit false - which this endpoint had no way to
+    write. Word-level flags (e.g. klal 91 w453/w524, klal 167's) were therefore
+    settable by script and un-clearable from the dashboard.
+
+    word_index is optional and absent means klal-level, preserving the previous
+    behaviour exactly for every existing caller."""
     klal_id = int(body["klal_id"])
+    word_index = body.get("word_index")
     record = rd.append_decision(
         "klal_flag",
         klal_id=klal_id,
+        word_index=int(word_index) if word_index is not None else None,
         needs_revisit=bool(body.get("needs_revisit")),
         note=body.get("note"),
     )

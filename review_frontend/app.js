@@ -896,6 +896,13 @@ async function openDisputedPanel(klalId, corr) {
       <span class="history-toggle" id="history-toggle">Show decision history</span>
       <div class="history-list" id="history-list" style="display:none;"></div>
     </div>
+    ${(corr.word_flag || corr.flag === 'ai_flag') ? `
+    <div class="panel-section">
+      <div class="panel-label">Revisit flag</div>
+      <div style="font-size:12px;color:var(--ink-faint);margin-bottom:6px;">
+        This word carries an open revisit flag${corr.word_flag && corr.word_flag.reviewer ? ' from ' + escapeHtml(corr.word_flag.reviewer) : ''}.</div>
+      <button class="panel-btn" id="clear-word-flag-btn">Clear revisit flag</button>
+    </div>` : ''}
   `;
   disputedPanelBody.innerHTML = html;
 
@@ -915,6 +922,36 @@ async function openDisputedPanel(klalId, corr) {
 
   document.getElementById('save-decision-btn').onclick = () => saveDisputedDecision(klalId, corr);
   document.getElementById('history-toggle').onclick = () => toggleHistory(klalId, corr.word_index);
+
+  // ADDED 2026-08-24 (user report: "i can't clear the revisit flag"). A
+  // WORD-level revisit flag is keyed on (klal_id, word_index) and is cleared
+  // only by a later record at that same key - which the klal-flag panel cannot
+  // write, since it only ever posts klal-level flags. That panel already
+  // admitted the gap in its own copy ("that's tracked separately and won't
+  // change if you save here unchecked") without offering a way to close it.
+  // The control belongs here, on the word itself.
+  const clearBtn = document.getElementById('clear-word-flag-btn');
+  if (clearBtn) {
+    clearBtn.onclick = async () => {
+      const res = await fetch('/api/decisions/klal_flag', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ klal_id: klalId, word_index: corr.word_index,
+                               needs_revisit: false,
+                               note: 'Word-level revisit flag cleared from the dashboard.' }),
+      });
+      if (!res.ok) { alert('Could not clear the flag: ' + (await res.text())); return; }
+      // Same refresh path every other save handler uses (there is no
+      // refreshKlal(); the pattern is drop the cache, refetch, re-render).
+      delete mountedKlal[klalId];
+      delete fetchInFlight[klalId];
+      const fresh = await fetchKlal(klalId);
+      const block = document.getElementById('klal-block-' + klalId);
+      if (block) renderKlalBody(block, fresh);
+      refreshKlalimList();
+      dismissPanels();
+    };
+  }
 }
 
 const openCandidatePanel = openDisputedPanel;

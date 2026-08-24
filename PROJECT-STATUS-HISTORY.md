@@ -17,6 +17,74 @@ current file references, or when grepping for how a past finding was
 resolved. Same append-at-top convention as before: newest entries go right
 after this header, not at the bottom.
 
+### FIXED 2026-08-24 — two dashboard bugs found by live review of klal 91, and the `איכא` question ANSWERED by the reviewer's own decisions.
+
+**The reviewer's decisions resolved the open candidate-second-sort question, and
+my hypothesis was wrong.** At klal 91 w453 and w524 the reviewer chose
+**`אליבא`** - neither the stored `איכא` nor the engines' `איבא`. So there is no
+damaged `כ` sort: the print shows `אליבא` set with the alef-lamed ligature, all
+three engines read the collapsed `איבא`, and the CORPUS carried a third, separate
+error (`איכא`). `typography.dropped_lamed_explains()` never fired because it
+compares stored against consensus - `איכא` vs `איבא` is a כ→ב substitution - and
+the real relation is that the stored form is ALSO wrong. **The predicate's blind
+spot is now known: it can only recognise the ligature when the corpus happens to
+hold the correct form.** Recorded against the standing "candidate second
+defective sort" item, which is closed as NOT a second sort.
+
+**BUG 1 - "the last two disputes weren't properly highlighted in the middle
+pane".** `api_klal()` appended a synthetic entry for a manual_correction even
+when a MACHINE candidate already existed at that word_index, and
+`review_frontend/app.js` builds its word map last-write-wins with the manual
+entry appended second. At klal 91 w453/w524 the manual entry therefore REPLACED
+the real dispute and took its `bbox` (no scan highlight at all), its
+`docai_reading`/`consensus_reading` (nothing for the panel to compare) and its
+vision verdict and confidence with it.
+
+`tests/test_corpus_invariants.py::test_no_rendered_manual_correction_hides_a_
+machine_candidate` **fired for the first time**, naming exactly `[(91, 453),
+(91, 524)]`. Its docstring had predicted this class would "resurrect... silently"
+the moment a still-valid manual decision landed on a live candidate's position -
+written 2026-08-16, correct 8 days later.
+
+**Fixed by MERGING rather than forbidding.** A human deciding a word the machine
+also flagged is normal and will keep happening, so the collision is not the
+defect - the shadowing is. `api_klal()` now attaches the decision to the existing
+candidate. Verified: klal 91 serves 24 -> 22 corrections, no duplicate indices,
+and w453/w524 each keep `bbox`, `docai_reading='איבא'`, `consensus_reading='איבא'`
+AND `current_decision.chosen_text='אליבא'`. The test was **strengthened, not
+relaxed**: it no longer asserts "no collision" (which would now fail on correct
+behaviour) but that at a collision position exactly ONE entry is served and it
+still carries the machine candidate's data.
+
+**The same defect existed on the word-level-flag path** and was found while
+fixing this one - it had escaped notice only because a manual correction happened
+to pre-empt the flag at klal 91. Merged the same way, surfacing the flag as
+`word_flag` on the live candidate.
+
+**BUG 2 - "i can't clear the revisit flag".** `api_post_klal_flag()` never passed
+`word_index`, so it could only ever write a KLAL-level flag. But
+`_word_level_ai_flags()` keys word-level flags on `word_index` and stops
+rendering one only when a later record at that same key sets `needs_revisit`
+false - which no endpoint could write. Word-level flags were settable by script
+and un-clearable from the dashboard. The klal-flag panel had even documented the
+gap in its own copy ("that's tracked separately and won't change if you save here
+unchecked") without offering a way to close it.
+
+Fixed: the endpoint takes an optional `word_index` (absent still means
+klal-level, so every existing caller is unchanged), and the disputed-word panel
+gained a "Clear revisit flag" control that appears when the word carries an open
+word-level flag. The control belongs on the word, not in the klal panel.
+
+**PROCESS ERROR, recorded rather than quietly repaired:** I smoke-tested the new
+clear endpoint against klal 91 w191 - a REAL open flag from
+`ai-semantic-spotcheck-round4` - writing a live record into the append-only
+decisions log. That was a production write made as a test. Restored by appending
+a re-flag (`394f3388e072`) carrying the original's id, reviewer and verbatim
+note; the clearing record (`b6052dbfcf1e`) necessarily remains in the log, since
+it is append-only. A throwaway `klal_id` should have been used.
+
+270 + 16 tests green. Review server restarted per the standing rule.
+
 ### FIXED 2026-08-24 — Surya coverage 219 -> 221/222, and resolution turns out to be a corpus-wide quality lever, not just a fix for 3 klalim.
 
 User-requested ("do surya for the three missing klalim"). The previous session's

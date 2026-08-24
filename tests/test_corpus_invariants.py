@@ -733,6 +733,24 @@ def test_no_rendered_manual_correction_hides_a_machine_candidate(corrections, pa
     still-valid manual decision's position would resurrect the whole class,
     silently. This test is the check that assumption never had (Lesson 8: a
     cheap mechanical sweep catches what an argument about the UI cannot).
+
+    ASSERTION CHANGED 2026-08-24, and STRENGTHENED rather than relaxed.
+
+    The predicted moment arrived: a reviewer working klal 91 recorded manual
+    corrections at w453 and w524, both live machine-candidate positions, and
+    this test fired for the first time. The reported symptom matched exactly -
+    "the last two disputes weren't properly highlighted" - because the manual
+    entry replaced the machine one and took its bbox, its docai/consensus
+    readings and its vision verdict with it.
+
+    Forbidding the collision was never the right fix: a human deciding a word
+    the machine also flagged is NORMAL and will keep happening. api_klal() now
+    MERGES the decision onto the existing candidate instead of appending a
+    second entry, so the collision is safe by construction. This test therefore
+    stops asserting "no collision" (which would now fail on correct behaviour)
+    and starts asserting the property that actually matters: at a collision
+    position, exactly ONE entry is served and it still carries the machine
+    candidate's data.
     """
     review_server = _import_from_path("review_server", os.path.join(REPO, "pipeline", "review_server.py"))
     machine = {
@@ -751,11 +769,25 @@ def test_no_rendered_manual_correction_hides_a_machine_candidate(corrections, pa
             continue
         if (klal_id, word_index) in machine:
             collisions.append((klal_id, word_index))
-    assert not collisions, (
-        f"{len(collisions)} position(s) carry BOTH a live machine correction candidate and a "
-        f"currently-rendering manual_correction decision: {sorted(collisions)}. app.js's word map "
-        "is last-write-wins and the manual entry is appended second, so the machine candidate - "
-        "including its vision verdict and confidence - is silently not shown to the reviewer."
+
+    offenders = []
+    for klal_id, word_index in collisions:
+        served = [c for c in review_server.api_klal(klal_id)["corrections"]
+                  if c.get("word_index") == word_index and c.get("opcode") != "delete"]
+        if len(served) != 1:
+            offenders.append((klal_id, word_index, f"{len(served)} entries served, expected 1"))
+            continue
+        entry = served[0]
+        if entry.get("current_decision") is None:
+            offenders.append((klal_id, word_index, "merged entry lost the human decision"))
+        elif entry.get("opcode") == "manual" or entry.get("docai_reading") is None:
+            offenders.append((klal_id, word_index,
+                              "machine candidate's data was replaced, not merged"))
+    assert not offenders, (
+        f"{len(offenders)} collision position(s) do not merge correctly: {offenders}. "
+        "app.js's word map is last-write-wins, so two entries at one index means the "
+        "machine candidate - its bbox, its readings, its vision verdict - is silently "
+        "not shown to the reviewer."
     )
 
 
