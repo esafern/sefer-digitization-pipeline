@@ -224,7 +224,8 @@ def split_block_across_klalim(text, block_y1, block_y2, page_klalim, y_center):
     return out
 
 
-def run_surya_part1(force_recompute=False, assemble_only=False, only_pages=None):
+def run_surya_part1(force_recompute=False, assemble_only=False, only_pages=None,
+                    render_dpi=None):
     output_dir = os.path.join(REPO, "tools", "second_witness_eval")
     surya_pages_dir = os.path.join(output_dir, "surya_pages")
     os.makedirs(surya_pages_dir, exist_ok=True)
@@ -268,7 +269,30 @@ def run_surya_part1(force_recompute=False, assemble_only=False, only_pages=None)
 
         t0 = time.time()
         print(f"[{idx}/{len(pages_to_process)}] Processing Page {p:3d}...", end=" ", flush=True)
-        img = Image.open(img_path)
+        if render_dpi:
+            # Render fresh from the PDF instead of using the cached page PNG.
+            #
+            # WHY (2026-08-24): the cached images/pdf_pages/*.png are ~860x1336
+            # (1.1 MP) while the source renders at 1752x2664 (4.7 MP) at 300 DPI -
+            # Surya had been reading about a quarter of the available pixels.
+            # Klalim 49, 129 and 201 had NO Surya coverage because their gematria
+            # markers were unreadable at the cached resolution; at 300 DPI all
+            # three are read (klal 49 region agreement 82%, klal 201 92%).
+            #
+            # NOTE THE PAGE INDEX. `page N` throughout this pipeline is
+            # `doc[N-1]` in PyMuPDF - verified by pixel correlation against the
+            # cached renders (page_30.png vs doc[29] = 0.995, vs doc[30] = 0.038).
+            # An off-by-one here reads a neighbouring page and produces
+            # plausible-looking Hebrew from the wrong klal entirely, which is
+            # exactly how a day was lost to a false negative before this comment
+            # existed.
+            import fitz, io
+            doc = fitz.open(corpus_io.repo_path("berlin_square_corrected.pdf"))
+            pm = doc[p - 1].get_pixmap(dpi=render_dpi)
+            img = Image.open(io.BytesIO(pm.tobytes("png")))
+            doc.close()
+        else:
+            img = Image.open(img_path)
         w, h = img.size
 
         # Run OCR
@@ -370,6 +394,10 @@ if __name__ == "__main__":
     ap.add_argument("--pages", type=str, default=None,
                     help="comma-separated page numbers to (re-)OCR, e.g. 30,48,73; "
                          "combine with --force-recompute to redo already-cached pages")
+    ap.add_argument("--render-dpi", type=int, default=None,
+                    help="render pages from the PDF at this DPI instead of using "
+                         "the cached ~1.1MP page PNGs (300 recovers markers the "
+                         "cached resolution cannot resolve)")
     ap.add_argument("--assemble-only", action="store_true",
                     help="rebuild the klal-aligned baseline from cached per-page "
                          "JSON without loading Surya at all (free, and the common "
@@ -377,4 +405,4 @@ if __name__ == "__main__":
     a = ap.parse_args()
     only = {int(x) for x in a.pages.split(",")} if a.pages else None
     run_surya_part1(force_recompute=a.force_recompute, assemble_only=a.assemble_only,
-                    only_pages=only)
+                    only_pages=only, render_dpi=a.render_dpi)

@@ -17,6 +17,92 @@ current file references, or when grepping for how a past finding was
 resolved. Same append-at-top convention as before: newest entries go right
 after this header, not at the bottom.
 
+### FIXED 2026-08-24 — Surya coverage 219 -> 221/222, and resolution turns out to be a corpus-wide quality lever, not just a fix for 3 klalim.
+
+User-requested ("do surya for the three missing klalim"). The previous session's
+conclusion - that klalim 49/129/201 are "structurally uncovered by Surya as
+configured, not pending a re-run" - was **wrong**, and wrong because of my own
+off-by-one (see the page-indexing correction entry above). Re-tested correctly:
+
+| klal | marker found at 300 DPI | region-crop agreement |
+| ---: | :--- | ---: |
+| 49 | yes | 82% |
+| 129 | yes | 61% |
+| 201 | yes (full page) | 92% |
+
+**The cached page images are the bottleneck.** `images/pdf_pages/*.png` are
+~860x1336 (1.1 MP); the source renders at 1752x2664 (4.7 MP) at 300 DPI. Surya
+had been reading roughly a quarter of the available pixels, and the three
+"unreadable" gematria markers are simply below the resolution floor of the
+cached renders.
+
+**Added `--render-dpi` to `run_surya_part1_full_baseline.py`** (renders from the
+PDF instead of loading the cached PNG; the page-index convention `page N ==
+doc[N-1]` is documented in the code, since getting it wrong produces
+plausible-looking Hebrew from the wrong klal). Re-ran pages 30/48/73 at 300 DPI.
+
+**Result: coverage 219 -> 221/222, with ZERO regressions and 19 klalim
+substantially improved.** Klalim 49 (0.86) and 129 (0.80) gained coverage; none
+lost; nothing got worse by >5pt; and on the three re-rendered pages the
+improvements are large - klal 203 0.59 -> 0.92, klal 205 0.69 -> 0.95, klal 206
+0.74 -> 0.96, klal 207 0.82 -> 0.98, klal 202 0.71 -> 0.93, klal 51 0.78 -> 0.92.
+
+**That is the finding that outgrew the request.** 19 of the ~30 klalim on three
+pages improved by more than 5 points. If that ratio holds, the entire Surya
+baseline - and therefore every consensus dispute derived from it - has been
+degraded by input resolution the whole time. Re-rendering all 63 Part-1 pages is
+local, free, and takes about an hour. NOT done yet: it changes the witness stream
+under every existing consensus dispute, so it wants to be a deliberate run with a
+before/after comparison, not a drive-by.
+
+**Klal 201 remains uncovered, and is left that way deliberately.** Its own marker
+`רא` IS now read (it is the first token of the block covering klalim 201-202),
+but klal 202's `רב` is still absent from Surya's output, so the splitter has no
+second anchor and cannot locate the 201/202 boundary. Inventing one is precisely
+what `split_block_across_klalim`'s guards exist to prevent - a wrong cut
+fabricates text for two klalim instead of starving one. Reported by name and
+counted downstream as an absent witness.
+
+### CORRECTION 2026-08-24 — the "resolution is not the lever" finding for klalim 49/129/201 was WRONG. My fitz crops were off by one page.
+
+**`fitz` page N is `doc[N-1]`, not `doc[N]`.** Confirmed by pixel correlation
+against the cached renders: `images/pdf_pages/page_30.png` vs `doc[29]` = 0.995,
+vs `doc[30]` = 0.038. Every ad-hoc crop I made through `fitz.open(...)[pg]` in
+this session read the page AFTER the one intended.
+
+**What this invalidates.** The 2026-08-23 conclusion that "higher input
+resolution is not the lever either — at 300 DPI klal 49's `מט` and klal 129's
+`קכט` are still unread" tested the WRONG PAGES. That negative result is retracted
+and is being re-run correctly. The `--pages 30,48,73 --force-recompute` re-run is
+NOT affected (it goes through `images/pdf_pages/`, not fitz) - Surya being
+deterministic and returning byte-identical output stands.
+
+**What this does NOT invalidate,** checked rather than assumed: every corpus-text
+verification in this session used the `images/pdf_pages/page_N.png` path, which
+is correctly indexed. Klal 16's 24 inserted words (render of `page_20.png`), klal
+83's marker-order artifact (`page_38.png`) and the `איכא` candidate-second-sort
+renders (`page_41.png`) are all unaffected. The one fitz render that WAS affected
+- an early `kaf_bet_candidates.png` - was visibly wrong at the time, redone
+through the PNG path, and the conclusion drawn from the PNG version.
+
+**How it surfaced, which is the useful part.** Region-cropping the three
+uncovered klalim produced text with 4-10% agreement against their corpus text,
+and the crops turned out to contain klal 54, klal 138 and klal 211 - each roughly
+5-10 klal_ids later than intended. I initially read that as "these three klalim
+have WRONG regions", which would have been a serious pipeline bug. Checking it
+against DocAI before writing it up showed the opposite: klal 49's own words align
+on page 30 at y 0.433-0.463, inside its stated region; klal 54 lives on page
+**31**, klal 138 on page **49**, klal 211 on page **74** - each exactly one more
+than the page I had cropped. A uniform +1 offset across three independent cases
+is a bug in the reader, not the data.
+
+**Lesson 4 in its own words** ("raw/source-adjacent data is not automatically
+correct just because it's closer to the scan") cuts both ways: a render is only
+as good as its indexing, and a rendered image that looks like plausible Hebrew
+gives no signal at all that it is the WRONG plausible Hebrew. The check that
+caught it was comparing the crop's content against the corpus and asking where
+that text actually lives - not looking harder at the image.
+
 ### 2026-08-24 — START_HERE lessons 23-27 added; filter-validation harness built after a WRONG prioritisation call was corrected by the user.
 
 **The correction first, because it drove the work.** I had listed the

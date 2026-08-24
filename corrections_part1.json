@@ -2322,7 +2322,7 @@
       "confidence": null,
       "reasoning": "Multi-witness consensus: surya + vlm agree on 'בדליכא' against stored 'בדליכאי'.",
       "vlm_reading": "בדליכא",
-      "surya_reading": "בדליכא\"",
+      "surya_reading": "בדליכא",
       "consensus_engines": [
         "surya",
         "vlm"
@@ -2438,8 +2438,34 @@
       "confidence": 0.98,
       "reasoning": "The crop clearly displays the Hebrew characters 'נב' followed by 'אמימר' on the main line. Option B correctly captures 'נב' which is fully visible at the right side of the line.",
       "vlm_reading": "נב",
-      "surya_reading": "נכ",
+      "surya_reading": "נב",
       "flag": "unverified_insertion"
+    },
+    {
+      "word_index": 17,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "התוסי",
+      "page": 30,
+      "bbox": {
+        "x1": 0.13653366267681122,
+        "y1": 0.7050561904907227,
+        "x2": 0.1801745593547821,
+        "y2": 0.721107542514801
+      },
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Multi-witness consensus: surya + vlm agree on 'התוס'' against stored 'התוסי'.",
+      "vlm_reading": "התוס'",
+      "surya_reading": "התוס'",
+      "consensus_engines": [
+        "surya",
+        "vlm"
+      ],
+      "consensus_reading": "התוס'",
+      "ligature_artifact": null,
+      "flag": "current_text_may_be_wrong"
     },
     {
       "word_index": 71,
@@ -2463,6 +2489,32 @@
     }
   ],
   "53": [
+    {
+      "word_index": 27,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "נזכר",
+      "page": 30,
+      "bbox": {
+        "x1": 0.46384039521217346,
+        "y1": 0.829454243183136,
+        "x2": 0.4887780547142029,
+        "y2": 0.8422953486442566
+      },
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Multi-witness consensus: surya + vlm agree on 'נוכר' against stored 'נזכר'.",
+      "vlm_reading": "נוכר",
+      "surya_reading": "נוכר",
+      "consensus_engines": [
+        "surya",
+        "vlm"
+      ],
+      "consensus_reading": "נוכר",
+      "ligature_artifact": null,
+      "flag": "current_text_may_be_wrong"
+    },
     {
       "word_index": 308,
       "opcode": "replace",
@@ -4895,13 +4947,7 @@
       "reasoning": "The crop clearly displays the word 'איכא' (Aleph-Yod-Kaf-Aleph). The third letter is a Kaf with its characteristic rounded upper-right corner and horizontal base, which forms the standard Aramaic word 'איכא' ('there is') as supported by the surrounding Rabbinic context ('בעי איכא דמאן דלא קי\"ל כותיה').",
       "vlm_reading": "איבא",
       "surya_reading": "איכא",
-      "flag": "current_text_confirmed",
-      "consensus_engines": [
-        "docai",
-        "vlm"
-      ],
-      "consensus_reading": "איבא",
-      "ligature_artifact": null
+      "flag": "current_text_confirmed"
     },
     {
       "word_index": 109,
@@ -4922,32 +4968,6 @@
       "vlm_reading": "אלא",
       "surya_reading": null,
       "flag": "current_text_confirmed"
-    },
-    {
-      "word_index": 191,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "העניניי",
-      "page": 41,
-      "bbox": {
-        "x1": 0.10315009206533432,
-        "y1": 0.3268529772758484,
-        "x2": 0.1568869650363922,
-        "y2": 0.34264883399009705
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: surya + vlm agree on 'העניני'' against stored 'העניניי'.",
-      "vlm_reading": "העניני'",
-      "surya_reading": "העניני",
-      "consensus_engines": [
-        "surya",
-        "vlm"
-      ],
-      "consensus_reading": "העניני'",
-      "ligature_artifact": null,
-      "flag": "current_text_may_be_wrong"
     },
     {
       "word_index": 243,
@@ -6586,8 +6606,14 @@
       "confidence": 0.98,
       "reasoning": "The middle line contains the phrase 'א ובתרי ט', corresponding to the contextual phrase 'בחד תנא ובתרי טעמי' (a standard Talmudic formula). Paleographically, the second letter has a square top-right corner and a base extending slightly to the right at the bottom, distinguishing 'ב' (bet) from 'כ' (kaf).",
       "vlm_reading": "ובתרי",
-      "surya_reading": "ובחרי",
-      "flag": "current_text_confirmed"
+      "surya_reading": "וכתרי",
+      "flag": "current_text_confirmed",
+      "consensus_engines": [
+        "docai",
+        "surya"
+      ],
+      "consensus_reading": "וכתרי",
+      "ligature_artifact": null
     },
     {
       "word_index": 466,
@@ -6606,7 +6632,7 @@
       "confidence": 0.98,
       "reasoning": "The crop shows the word 'הוה', which is a ubiquitous Aramaic/Rabbinic auxiliary verb ('would/was'). Option A ('דוה') is an OCR misreading of the initial letter 'ה' as 'ד'. Contextually and paleographically, Option B ('הוה') is correct.",
       "vlm_reading": "הוה",
-      "surya_reading": "הה",
+      "surya_reading": "דהה",
       "flag": "current_text_confirmed"
     },
     {
@@ -6646,7 +6672,7 @@
       "confidence": 0.98,
       "reasoning": "The visible text on the second line clearly shows 'בחד' followed by 'ט' (short for 'טעמא'). Paleographically, the final letter of the word has a sharp right-angled top-right corner characteristic of a Dalet ('ד'), rather than the rounded corner of a Resh ('ר'). Semantically, 'בחד ט[עמא]' ('with one reason') matches the surrounding Rabbinic textual context perfectly.",
       "vlm_reading": "בחד",
-      "surya_reading": "בחד",
+      "surya_reading": "כחד",
       "flag": "current_text_confirmed"
     },
     {
@@ -6666,7 +6692,7 @@
       "confidence": 0.98,
       "reasoning": "The visible text reads 'בחד' in the phrase 'בחד ט[עמא]'. Paleographically, the final letter exhibits the right-angled corner of a Dalet ('ד') rather than the rounded corner of a Resh ('ר'). Contextually, the Aramaic phrase 'בחד טעמא' ('with one reasoning') is standard in Talmudic discourse.",
       "vlm_reading": "בחד",
-      "surya_reading": "בחד",
+      "surya_reading": "כחד",
       "flag": "current_text_confirmed"
     },
     {
@@ -6686,7 +6712,7 @@
       "confidence": 0.98,
       "reasoning": "The visible word in line 3 (as well as line 4) reads 'בחד' ('in one'), composed of Bet, Chet, Dalet. Paleographically, the right corner of the final letter shows a sharp rightward corner/serif characteristic of Dalet (ד) rather than the rounded top of Resh (ר). Contextually, the phrase is the standard Talmudic Aramaic formula 'רישא בחד טעמא' ('the first part with one rationale'), making Option B the correct reading while Option A is an OCR confusion of Dalet for Resh.",
       "vlm_reading": "בחד",
-      "surya_reading": "בחד",
+      "surya_reading": "כחד",
       "flag": "current_text_confirmed"
     },
     {
@@ -6706,8 +6732,34 @@
       "confidence": 0.98,
       "reasoning": "The image clearly shows the word 'בחד' on the third line. Paleographically, the final letter has the sharp right-angled corner characteristic of a Dalet (ד) rather than the rounded corner of a Resh (ר). Contextually, the Aramaic phrase 'בחד' (meaning 'in one', as in 'בחד תנא' / 'בחד טעמא') perfectly matches the standard Rabbinic Talmudic textual idiom present in the surrounding context.",
       "vlm_reading": "בחד",
-      "surya_reading": "בחד",
+      "surya_reading": "כחד",
       "flag": "current_text_confirmed"
+    },
+    {
+      "word_index": 820,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "המפקיר",
+      "page": 48,
+      "bbox": {
+        "x1": 0.5621117949485779,
+        "y1": 0.43938782811164856,
+        "x2": 0.6204968690872192,
+        "y2": 0.4554973840713501
+      },
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Multi-witness consensus: surya + vlm agree on 'המפקיד' against stored 'המפקיר'.",
+      "vlm_reading": "המפקיד",
+      "surya_reading": "המפקיד",
+      "consensus_engines": [
+        "surya",
+        "vlm"
+      ],
+      "consensus_reading": "המפקיד",
+      "ligature_artifact": null,
+      "flag": "current_text_may_be_wrong"
     },
     {
       "word_index": 828,
@@ -6726,7 +6778,7 @@
       "confidence": 0.98,
       "reasoning": "The word 'אלמא' (meaning 'it follows that' / 'it proves that') is a standard Talmudic Aramaic term in this context ('ופסק כר' יוחנן אלמא ס\"ל'). Paleographically, the prominent ascender rising high into the line above is the characteristic upper stroke of the letter Lamed (ל), ruling out 'אמא'.",
       "vlm_reading": "אמא",
-      "surya_reading": null,
+      "surya_reading": "אמא",
       "flag": "current_text_confirmed"
     },
     {
@@ -6746,7 +6798,7 @@
       "confidence": 0.98,
       "reasoning": "The visible text on the second line reads 'אי ובחד ט'. Paleographically, the final letter of the word 'ובחד' features a sharp right-angled shoulder with a characteristic rightward overhang, identifying it clearly as a dalet ('ד') rather than a rounded resh ('ר') (which can be seen rounded in 'דמפרשי' below). Contextually, 'ובחד טעמא' ('and with one reason') is the established Rabbinic Aramaic phrase opposing 'בב' תנאי' ('in two Tannaim').",
       "vlm_reading": "ובחד",
-      "surya_reading": "ובחד",
+      "surya_reading": "וכחד",
       "flag": "current_text_confirmed"
     },
     {
@@ -6766,8 +6818,14 @@
       "confidence": 0.95,
       "reasoning": "The raster crop clearly displays the word 'וכתרי' with a rounded kaf ('כ') rather than a bet ('ב'), matching Option A. Although contextually 'ובתרי' ('and in two [reasons]') is the intended Rabbinic reading, the actual printed text in the visual crop is a typographical error reading 'וכתרי'.",
       "vlm_reading": "ובתרי",
-      "surya_reading": "ובחרי",
-      "flag": "current_text_may_be_wrong"
+      "surya_reading": "וכתרי",
+      "flag": "current_text_may_be_wrong",
+      "consensus_engines": [
+        "docai",
+        "surya"
+      ],
+      "consensus_reading": "וכתרי",
+      "ligature_artifact": null
     },
     {
       "word_index": 896,
@@ -6786,7 +6844,7 @@
       "confidence": 0.98,
       "reasoning": "The visible text on the second line clearly shows the word 'פלוגתייהו' followed by the prefix 'וכ' (from 'וכדפרש\"י'). Contextually, the phrase 'תליא פלוגתייהו' ('their disagreement depends [on this]') is a standard Aramaic Talmudic idiom. Paleographically, the final two letters are 'ה' and 'ו', rather than 'ד' and 'ן' (final nun, which in this typeface extends significantly below the baseline as seen in 'יוחנן' and 'דבעינן').",
       "vlm_reading": "פלוגתייהו",
-      "surya_reading": null,
+      "surya_reading": "פלוגתייה",
       "flag": "current_text_confirmed"
     },
     {
@@ -6806,7 +6864,7 @@
       "confidence": 0.95,
       "reasoning": "The crop clearly shows the standard Rabbinic abbreviation 'א\"נ' (standing for 'אי נמי'). Paleographically, the letter following the gershayim features a horizontal base stroke extending to the left, which is characteristic of a regular Nun (נ) rather than a final Nun (ן).",
       "vlm_reading": "א\"נ",
-      "surya_reading": null,
+      "surya_reading": "א\"נ",
       "flag": "current_text_confirmed"
     },
     {
@@ -6826,7 +6884,7 @@
       "confidence": 0.98,
       "reasoning": "The crop displays the standard Rabbinic expression 'ודוק' (and examine closely/be precise), followed by 'במ[ש]' in the phrase 'ודוק במ\"ש לעיל'. Paleographically, the second letter has the rightward roof corner characteristic of a Dalet ('ד') rather than a rounded Resh ('ר'). Contextually, 'ודוק' makes complete sense whereas 'ורוק' is a common OCR error.",
       "vlm_reading": null,
-      "surya_reading": null,
+      "surya_reading": "ודוק",
       "flag": "current_text_confirmed"
     },
     {
@@ -6846,7 +6904,7 @@
       "confidence": 0.95,
       "reasoning": "The crop displays the word 'ולשמו'' with an abbreviation mark (gersh) standing for 'ולשמואל' ('and to/according to Samuel'), matching the Talmudic/Rabbinic context discussing the opinions of Rav and Shmuel. Option A ('ולשמוץ') is a classic OCR misreading of the high abbreviation stroke as a final tzadi.",
       "vlm_reading": "ולשמואל",
-      "surya_reading": null,
+      "surya_reading": "ולשמוא",
       "flag": "current_text_confirmed"
     },
     {
@@ -6906,7 +6964,7 @@
       "confidence": 0.98,
       "reasoning": "The crop clearly shows the second line containing the word 'ולשמואל', matching the surrounding Talmudic commentary context ('ולשמואל בחד תנא'). The raw OCR option 'ולשמון' misinterprets the final letters 'ואל'.",
       "vlm_reading": "ולשמואל",
-      "surya_reading": "ולשמוא",
+      "surya_reading": null,
       "flag": "current_text_confirmed"
     },
     {
@@ -6926,34 +6984,8 @@
       "confidence": 0.95,
       "reasoning": "The contextual phrase is 'מדאוקמוה הכי' (Aramaic for 'since they established it thus'). Paleographically, the second letter exhibits the square right-angled corner of a dalet ('ד') rather than the rounded corner of a resh ('ר'), making 'מדאוקמוה' (Option B) the correct Rabbinic reading over the OCR artifact 'מראוקמוה' (Option A).",
       "vlm_reading": "מראוקמה",
-      "surya_reading": "מדאוקומה",
+      "surya_reading": "מדאוקמוה",
       "flag": "current_text_confirmed"
-    },
-    {
-      "word_index": 1192,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "באנסו",
-      "page": 48,
-      "bbox": {
-        "x1": 0.13788819313049316,
-        "y1": 0.7720499634742737,
-        "x2": 0.18571428954601288,
-        "y2": 0.7897704243659973
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: surya + vlm agree on 'באנמו' against stored 'באנסו'.",
-      "vlm_reading": "באנמו",
-      "surya_reading": "באנמו",
-      "consensus_engines": [
-        "surya",
-        "vlm"
-      ],
-      "consensus_reading": "באנמו",
-      "ligature_artifact": null,
-      "flag": "current_text_may_be_wrong"
     },
     {
       "word_index": 1209,
@@ -7000,7 +7032,7 @@
       "confidence": 0.99,
       "reasoning": "The visible text clearly shows the Aramaic Talmudic word 'דחקינן' (dalet-chet-kof-yod-medial nun-final nun). The letter preceding the final nun is a medial nun (נ), not a kaf (כ), which forms the standard Aramaic verb 'דחקינן' ('we interpret stringently/press'), fitting the context 'דחקינן ומוקמינן'.",
       "vlm_reading": "דחקינן",
-      "surya_reading": null,
+      "surya_reading": "דחקינן",
       "flag": "current_text_confirmed"
     }
   ],
@@ -12597,7 +12629,7 @@
       "confidence": 0.95,
       "reasoning": "The letter following the gershayim (ר\") clearly exhibits the characteristic structure of a Hebrew Pe ('פ'), including the top bar, left wall, base stroke, and inner descending tooth. Contextually, 'ר\"פ' is a ubiquitous Rabbinic acronym (such as 'רב פפא' or 'ריש פרק').",
       "vlm_reading": "ר\"פ",
-      "surya_reading": null,
+      "surya_reading": "ר\"פ",
       "flag": "current_text_confirmed"
     },
     {
@@ -12617,7 +12649,7 @@
       "confidence": 0.95,
       "reasoning": "The image clearly shows the standard Rabbinic citation abbreviation 'כ\"ס' (Keseff Mishneh). Option B correctly captures 'כ\"ס' rather than Option A's misread 'כ\"ט'. Contextually, this refers to the Keseff Mishneh on Rambam's Hilchot Nezirut Chapter 5 ('פ\"ה' / printed 'מ\"ה').",
       "vlm_reading": null,
-      "surya_reading": null,
+      "surya_reading": "כ\"מ",
       "flag": "current_text_confirmed"
     },
     {
@@ -12637,7 +12669,7 @@
       "confidence": 0.95,
       "reasoning": "The visible text includes a distinct lamed ('ל') with its characteristic tall ascender extending upwards above the line height between the right word ('אמר') and the rest of the word ('מא'), forming 'אלמא'. This is supported by the contextual quote from the Rabbinic text ('אמר אלמא א\"א לפרושא').",
       "vlm_reading": null,
-      "surya_reading": null,
+      "surya_reading": "אמא",
       "flag": "current_text_confirmed"
     },
     {
@@ -12657,14 +12689,8 @@
       "confidence": 0.98,
       "reasoning": "The image clearly shows the word 'באמ' followed by an elevated geresh (abbreviation mark) indicating an abbreviation for 'באמת' ('באמת אמרו'), which aligns perfectly with the provided Rabbinic context ('גבי באמ' אמרו... דהואיל דבאמת'). Option B correctly captures this as a geresh rather than a letter yod.",
       "vlm_reading": "באט'",
-      "surya_reading": "באמי",
-      "flag": "current_text_confirmed",
-      "consensus_engines": [
-        "docai",
-        "surya"
-      ],
-      "consensus_reading": "באמי",
-      "ligature_artifact": null
+      "surya_reading": "באמ'",
+      "flag": "current_text_confirmed"
     }
   ],
   "208": [
@@ -12685,7 +12711,7 @@
       "confidence": 0.95,
       "reasoning": "The visible text in the middle line clearly shows 'לא' (Lamed followed by Alef), situated between 'י'' (end of 'אמרי'') on the right and 'הי' (start of 'היכא') on the left. The Lamed exhibits its characteristic tall ascender.",
       "vlm_reading": "דא",
-      "surya_reading": "א־",
+      "surya_reading": "א'",
       "flag": "current_text_confirmed"
     },
     {
@@ -12769,7 +12795,7 @@
       "confidence": 0.95,
       "reasoning": "The visible characters in the third line clearly show 'ובס'' with a rounded, fully closed Samekh ('ס'), matching Option A. This is consistent with the paleographic rendering in this square rabbinic font.",
       "vlm_reading": "ובס'",
-      "surya_reading": null,
+      "surya_reading": "ובפ'",
       "flag": "current_text_may_be_wrong",
       "consensus_engines": [
         "docai",
@@ -14218,28 +14244,82 @@
       "flag": "current_text_may_be_wrong"
     },
     {
-      "word_index": 368,
+      "word_index": 362,
       "opcode": "replace",
       "docai_reading": null,
-      "final_text": "אבידה",
+      "final_text": "לירחית",
       "page": 30,
       "bbox": {
-        "x1": 0.2961346507072449,
+        "x1": 0.5623441338539124,
         "y1": 0.0862760841846466,
-        "x2": 0.34351620078086853,
+        "x2": 0.614713191986084,
         "y2": 0.1007223129272461
       },
       "vision_selected": null,
       "vision_transcription": null,
       "confidence": null,
-      "reasoning": "Multi-witness consensus: surya + vlm agree on 'ואבידה!' against stored 'אבידה'.",
-      "vlm_reading": "ואבידה!",
-      "surya_reading": "ואבידה",
+      "reasoning": "Multi-witness consensus: surya + vlm agree on 'לידחות' against stored 'לירחית'.",
+      "vlm_reading": "לידחות",
+      "surya_reading": "לידחות",
       "consensus_engines": [
         "surya",
         "vlm"
       ],
-      "consensus_reading": "ואבידה!",
+      "consensus_reading": "לידחות",
+      "ligature_artifact": null,
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 407,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "הגחל",
+      "page": 30,
+      "bbox": {
+        "x1": 0.7811720967292786,
+        "y1": 0.13202247023582458,
+        "x2": 0.8223192095756531,
+        "y2": 0.14967897534370422
+      },
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Multi-witness consensus: surya + vlm agree on 'הגדול' against stored 'הגחל'.",
+      "vlm_reading": "הגדול",
+      "surya_reading": "הגדול",
+      "consensus_engines": [
+        "surya",
+        "vlm"
+      ],
+      "consensus_reading": "הגדול",
+      "ligature_artifact": null,
+      "flag": "current_text_may_be_wrong"
+    }
+  ],
+  "51": [
+    {
+      "word_index": 145,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "להן",
+      "page": 30,
+      "bbox": {
+        "x1": 0.5766832828521729,
+        "y1": 0.6910112500190735,
+        "x2": 0.6003740429878235,
+        "y2": 0.704253613948822
+      },
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Multi-witness consensus: surya + vlm agree on 'להו' against stored 'להן'.",
+      "vlm_reading": "להו",
+      "surya_reading": "להו",
+      "consensus_engines": [
+        "surya",
+        "vlm"
+      ],
+      "consensus_reading": "להו",
       "ligature_artifact": null,
       "flag": "current_text_may_be_wrong"
     }
