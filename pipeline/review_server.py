@@ -813,12 +813,24 @@ def api_klal(klal_id):
     # manual correction happened to pre-empt the flag there. Merge instead:
     # attach the flag to the live candidate as `word_flag` so the reviewer sees
     # the dispute AND that it is flagged, and so the panel can offer to clear it.
+    # ORDER MATTERS HERE, and getting it wrong is what left klal 91's four open
+    # flags unclearable (reported 2026-08-24: "still shows a flag in the middle
+    # pane but there's nothing to clear in the right pane").
+    #
+    # The `manual_word_indices` skip below predates the ability to clear a
+    # word-level flag: when a flag could only ever be set, dropping a redundant
+    # one at an already-decided word was right. Now that the disputed panel
+    # offers "Clear revisit flag", dropping the flag ALSO drops the only control
+    # that can close it - the flag stays open in the log, keeps the word
+    # highlighted, and is unreachable. So the OVERLAY must happen first and
+    # unconditionally; the skip only governs whether a STANDALONE entry is
+    # appended.
     for f in _word_level_ai_flags(klal_id, words):
-        if f["word_index"] in manual_word_indices:
-            continue
         if _claim_word_index(corrections, f["word_index"], "word_flag",
                              f.get("current_decision")) is not None:
             continue
+        if f["word_index"] in manual_word_indices:
+            continue  # defensive: a manual decision always yields an entry above
         f["word_flag"] = f.get("current_decision")
         corrections.append(f)
 

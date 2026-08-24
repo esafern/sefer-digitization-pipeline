@@ -1426,3 +1426,42 @@ def test_no_word_index_is_served_twice_in_either_pane(part1_by_id):
     assert not scan_dupes, (
         f"{len(scan_dupes)} position(s) draw more than one scan box: {scan_dupes[:8]}. "
         f"Two boxes at one (klal_id, word_index) confuse the pane's click and focus handling.")
+
+
+def test_every_open_word_level_flag_has_a_control_that_can_clear_it(part1_by_id):
+    """REGRESSION 2026-08-24. A word-level klal_flag is cleared only by a later
+    record at the same (klal_id, word_index), which the dashboard can write only
+    from the disputed panel's "Clear revisit flag" control - and that control
+    renders only if the served entry carries `word_flag`.
+
+    api_klal() dropped the flag entirely whenever a manual_correction existed at
+    the same word ("an AI flag on the same word_index is now redundant"). That
+    was right when a flag could only ever be SET; once clearing existed it made
+    the flag unreachable - open in the log, still highlighting the word, with no
+    way to close it. Reported as "still shows a flag in the middle pane but
+    there's nothing to clear in the right pane".
+
+    Corpus sweep at the time of the fix: **325 open word-level flags across 104
+    klalim, every one of them unclearable** - klal 91's four were the visible
+    tip. Any state the UI can set must have a path back (Lesson 26/28); this
+    test asserts it for the whole corpus rather than the one klal that surfaced
+    it."""
+    review_server = _import_from_path("review_server", os.path.join(REPO, "pipeline", "review_server.py"))
+    open_by_klal = collections.defaultdict(list)
+    for (klal_id, word_index), rec in review_server.rd.all_current("klal_flag").items():
+        if word_index is not None and rec.get("needs_revisit"):
+            open_by_klal[klal_id].append(word_index)
+
+    unreachable = []
+    for klal_id, indices in open_by_klal.items():
+        if klal_id not in part1_by_id:
+            continue
+        clearable = {c["word_index"] for c in review_server.api_klal(klal_id)["corrections"]
+                     if c.get("word_flag")}
+        unreachable += [(klal_id, wi) for wi in indices if wi not in clearable]
+
+    assert not unreachable, (
+        f"{len(unreachable)} open word-level flag(s) are served without a `word_flag` "
+        f"field, so the dashboard renders no control that can clear them: "
+        f"{sorted(unreachable)[:10]}. They stay open in the log and keep highlighting "
+        f"their word forever.")

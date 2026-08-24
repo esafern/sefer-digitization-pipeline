@@ -15,7 +15,7 @@ redirect to here — read on.
 
 **The corpus.** `part1.json` / `part2.json` / `part3.json` are the **only** hand-edited source of truth, and they are never hand-edited directly — every change goes through the decision pipeline. Everything else that shows klal text is derived and must be regenerated.
 
-**The three things that will bite you if you skip them:**
+**The four things that will bite you if you skip them:**
 
 1. **Read `PROJECT-STATUS.md` before making any claim about corpus quality.**
    This file holds durable rules; that one holds the current dated truth.
@@ -25,6 +25,10 @@ redirect to here — read on.
 3. **Log every finding to `PROJECT-STATUS.md` yourself, immediately.** A bug
    mentioned only in chat is a dropped ball, and recovering it is not the
    user's job.
+4. **Never fix one instance — sweep the corpus for the class.** Every bug in
+   this project's history that was reported as one case turned out to be many
+   (one unclearable flag was 325 across 104 klalim). See Part 2's "Never fix
+   one instance" section; it is binding whether or not you fix the thing.
 
 **Vocabulary that matters here.** A problem in the DATA is a "data issue" —
 fixed through human review against the scan. A problem in the CODE is a
@@ -35,7 +39,7 @@ loaders, Hebrew helpers) and `pipeline/vision_adjudication_common.py`
 (crop/cache/retry/client). A hand-maintained parallel copy has produced the
 same bug class here more than once.
 
-**Then read Part 2's 27 numbered lessons.** They are rules, not history. The
+**Then read Part 2's 28 numbered lessons.** They are rules, not history. The
 short version of most of them: a check that wasn't run has verified nothing, a
 passing score is not a checked result, and no single confident signal is
 enough.
@@ -464,6 +468,41 @@ is not wrong and is not deleted — it's the reason a dedicated klal-boundary
 verification pass is a required part of this work, not an optional
 nice-to-have, see `PROJECT-STATUS.md` for the live plan.
 
+## Never fix one instance — sweep the corpus for the class
+
+**Whenever you find and fix an issue, you MUST review the entire corpus for
+other instances of the same failure class, in the same turn.** A bug you found
+by looking at one klal is almost never confined to that klal; it is confined to
+where you happened to look. Finding it is evidence about your sampling, not
+about its extent.
+
+**If you fix it on the spot, sweep anyway** — the fix is not done until you have
+measured how many instances existed and confirmed the count is now zero. Report
+the number, not just the fix.
+
+**If you do NOT fix it, sweep anyway**, and document the other instances
+*together with* the open issue in `PROJECT-STATUS.md`, so the next person
+inherits the true scope rather than the one example. An open issue recorded as
+"klal 91 has X" when 104 klalim have X is a worse record than no entry at all,
+because it looks handled.
+
+This is not a counsel of thoroughness — it is a correction for a specific,
+repeated failure in this project's history. Every one of these was found as a
+single instance and turned out to be a class:
+
+| found as | actual extent |
+|---|---|
+| klal 9/10 region-box overlap | 316 of 667 klalim |
+| klal 91's two disputes not highlighted | 5 more collisions, and the scan pane repeating the same defect independently |
+| klal 91's unclearable revisit flag | **325 open flags across 104 klalim, every one unclearable** |
+| klal 663's wrong scan page | `klal_page_regions.json` never built for Parts 2-3 at all |
+| one `marker_not_found_in_window` | 100% correlation with 13 region overlaps |
+
+The sweep is usually cheap — a loop over `api_klal()` for all 222 klalim runs in
+seconds — and it is the difference between fixing a symptom and closing a defect.
+Where a sweep is genuinely expensive, say so explicitly and get a scope decision
+(Lesson 1); never quietly fix the one instance and move on.
+
 ## Log every finding immediately
 
 **Log every finding to `PROJECT-STATUS.md` yourself, immediately, without
@@ -786,3 +825,16 @@ next incident.
     come from *undecided* positions. Before turning a labelled subset into a
     rate, ask why those particular items got labelled; if the labelling process
     selected on the outcome, the rate measures the selection, not the thing.
+28. **A bug found in one place is a statement about where you looked, not about
+    where it is — sweep the corpus before calling it fixed.** Every instance of
+    this class in this project's history was reported as a single case and
+    turned out to be many: a klal 9/10 box overlap that was 316 klalim; two
+    unhighlighted disputes in klal 91 that were five collisions across two
+    independent panes; one unclearable revisit flag that was **325 flags across
+    104 klalim**. The sweep is nearly always cheap (a loop over all 222 klalim
+    runs in seconds) and it changes what you are allowed to claim: without it
+    you have fixed an instance, not closed a defect. This binds whether or not
+    you fix the thing — an issue left open must still be documented with its
+    real extent, because an open item that says "klal 91" when the answer is
+    "104 klalim" reads as handled and is worse than silence. See Part 2's
+    "Never fix one instance" section for the operational rule.

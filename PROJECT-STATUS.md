@@ -45,6 +45,15 @@ to) as state changes** — that discipline is what drifted last time.
 
 ## Open items
 
+0. **STANDING RULE, added 2026-08-24 (user directive): never fix one instance —
+   sweep the corpus for the class.** Whenever you find and fix an issue, review
+   the whole corpus for other instances of the same failure, in the same turn.
+   If you fix it, report how many existed and that the count is now zero. If you
+   do NOT fix it, sweep anyway and document the other instances together with
+   the open issue here — an open item reading "klal 91 has X" when 104 klalim
+   have X looks handled and is worse than no entry. Full rule in `START_HERE.md`
+   Part 2 ("Never fix one instance"); Lesson 28.
+
 1. **The 312 fabricated "VLM Verified" Parts 2-3 candidates were pulled from
    the dashboard 2026-08-20** — `corrections_part2.json`/`corrections_part3.json`
    emptied to `{}` (user-authorized) after confirming every entry's

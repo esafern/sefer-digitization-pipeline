@@ -17,6 +17,46 @@ current file references, or when grepping for how a past finding was
 resolved. Same append-at-top convention as before: newest entries go right
 after this header, not at the bottom.
 
+### FIXED 2026-08-24 — klal 91's flags were unclearable, and so were 325 others. New standing rule: never fix one instance.
+
+User report: "91 still shows a flag in the middle pane but there's nothing to
+clear in the right pane."
+
+**The bug was in yesterday's fix, and it was the same class as the bug it
+fixed.** `api_klal()` drops a word-level flag whenever a manual_correction
+exists at the same word - "an AI flag on the same word_index is now redundant,
+don't also show it". That was correct when a flag could only ever be SET. Once
+the "Clear revisit flag" control existed, dropping the flag also dropped the only
+control that can close it: the flag stays open in the log, keeps highlighting the
+word, and is unreachable. My overlay ran AFTER that skip, so the skip won.
+Fixed by making the overlay unconditional and letting the skip govern only
+whether a STANDALONE entry is appended.
+
+**The sweep is the finding.** Klal 91's four flags were the visible tip:
+**325 open word-level flags across 104 klalim were ALL unclearable.** Every one
+of them would have stayed open forever. After the fix: 0.
+
+**New standing rule in `START_HERE.md` Part 2, "Never fix one instance — sweep
+the corpus for the class", plus Lesson 28 and a fourth entry in the TL;DR's
+"things that will bite you".** User-directed, and the directive is right on the
+evidence: every bug in this project's history reported as a single case turned
+out to be a class.
+
+| found as | actual extent |
+| :--- | :--- |
+| klal 9/10 region-box overlap | 316 of 667 klalim |
+| klal 91's two disputes not highlighted | 5 more collisions, plus the scan pane repeating the defect independently |
+| klal 91's unclearable revisit flag | 325 flags across 104 klalim |
+| klal 663's wrong scan page | `klal_page_regions.json` never built for Parts 2-3 at all |
+| one `marker_not_found_in_window` | 100% correlation with 13 region overlaps |
+
+The rule binds whether or not the issue gets fixed: an unfixed issue must still
+be documented with its real extent, because an open item reading "klal 91 has X"
+when 104 klalim have X looks handled and is worse than no entry.
+
+**New invariant `test_every_open_word_level_flag_has_a_control_that_can_clear_it`**
+asserts it corpus-wide, not for the one klal that surfaced it. 272 + 16 green.
+
 ### SWEEP 2026-08-24 — the two klal-91 bugs were instances of two CLASSES. Swept both; found 5 more shadowing collisions, fixed the class structurally.
 
 User-requested after the klal 91 fixes ("look for the same issues everywhere").
