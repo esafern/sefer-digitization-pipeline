@@ -936,7 +936,9 @@ async function openDisputedPanel(klalId, corr) {
     <div class="panel-section">
       <div class="panel-label">Revisit flag</div>
       <div style="font-size:12px;color:var(--ink-faint);margin-bottom:6px;">
-        This word carries an open revisit flag${corr.word_flag && corr.word_flag.reviewer ? ' from ' + escapeHtml(corr.word_flag.reviewer) : ''}.</div>
+        ${(corr.word_flag && corr.word_flag.answered)
+          ? `Answered — you recorded a decision on this word after the flag was raised${corr.word_flag.reviewer ? ' by ' + escapeHtml(corr.word_flag.reviewer) : ''}, so it no longer counts as outstanding. Clearing it just closes the record.`
+          : `This word carries an open revisit flag${corr.word_flag && corr.word_flag.reviewer ? ' from ' + escapeHtml(corr.word_flag.reviewer) : ''}.`}</div>
       <button class="panel-btn" id="clear-word-flag-btn">Clear revisit flag</button>
     </div>` : ''}
   `;
@@ -1155,6 +1157,18 @@ async function openKlalFlagPanel(klalId) {
     const btn = block && block.querySelector('.klal-flag-btn');
     const stillFlagged = klalById[klalId] ? klalById[klalId].needs_revisit : needsRevisit;
     if (btn) { btn.classList.toggle('active', stillFlagged); btn.textContent = stillFlagged ? '⚑ flagged' : '⚑ flag'; }
+    // ADDED 2026-08-25 (reviewer on klal 163: "i cleared the flag but it still
+    // shows"). Unchecking here clears only the klal's general note; the pennant
+    // also lights for open AI-flagged WORDS, which this panel does not touch.
+    // The panel says so when you RE-OPEN it - which is one click too late, and
+    // is why that clear got clicked twice. Say it in the confirmation itself.
+    const status = document.getElementById('klal-flag-save-status');
+    const wordFlags = klalById[klalId] ? (klalById[klalId].ai_flag_count || 0) : 0;
+    if (status) {
+      status.textContent = (!needsRevisit && stillFlagged && wordFlags)
+        ? `Saved ✓ — still flagged by ${wordFlags} AI-flagged word${wordFlags === 1 ? '' : 's'} in the text`
+        : 'Saved ✓';
+    }
     flashSavedThenClose('klal-flag-save-status');
   };
 

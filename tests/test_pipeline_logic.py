@@ -4187,3 +4187,36 @@ def test_sefaria_export_refuses_a_gap_rather_than_shifting_every_citation(tmp_pa
     with pytest.raises(SystemExit) as err:
         exp.export_sefaria(klalim, str(tmp_path))
     assert "[2]" in str(err.value)
+
+# --- word-level revisit flags answered by a later decision (2026-08-25) -------
+# Reviewer on klal 163: "i cleared the flag but it still shows in the middle and
+# right." They had cleared the KLAL-level flag while three WORD-level flags sat
+# on words they had already decided that afternoon. A flag asks the reviewer to
+# come back and look; a decision recorded at that word afterwards is them having
+# looked. But a flag raised AFTER a decision is a new concern about an
+# already-decided word and must survive.
+
+def test_a_flag_is_answered_only_by_a_decision_recorded_after_it():
+    import review_server as rsrv
+    flag = {"ts": "2026-08-18T22:11:39", "needs_revisit": True}
+    newer = {(163, 427): {"ts": "2026-08-25T16:05:39"}}
+    older = {(163, 427): {"ts": "2026-08-15T09:00:00"}}
+    assert rsrv._flag_answered_by_a_later_decision(163, 427, flag, newer, {}) is True
+    assert rsrv._flag_answered_by_a_later_decision(163, 427, flag, older, {}) is False
+    # a manual_correction answers it just as a candidate_choice does
+    assert rsrv._flag_answered_by_a_later_decision(163, 427, flag, {}, newer) is True
+    # a decision at a DIFFERENT word says nothing about this flag
+    assert rsrv._flag_answered_by_a_later_decision(163, 428, flag, newer, {}) is False
+    # no decision at all
+    assert rsrv._flag_answered_by_a_later_decision(163, 427, flag, {}, {}) is False
+
+
+def test_a_flag_raised_after_a_decision_stays_open():
+    """The ordering guard is the whole safeguard: without it, any word a
+    reviewer had ever touched would swallow every future flag on that word,
+    including one raised by a later detector pass precisely because the earlier
+    decision missed something."""
+    import review_server as rsrv
+    decision = {(91, 109): {"ts": "2026-08-15T12:00:00"}}
+    later_flag = {"ts": "2026-08-24T08:00:00", "needs_revisit": True}
+    assert rsrv._flag_answered_by_a_later_decision(91, 109, later_flag, decision, {}) is False

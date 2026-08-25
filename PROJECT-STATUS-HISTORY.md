@@ -17,6 +17,72 @@ current file references, or when grepping for how a past finding was
 resolved. Same append-at-top convention as before: newest entries go right
 after this header, not at the bottom.
 
+### FIXED 2026-08-25 — "163 i cleared the flag but it still shows in the middle and right." The flag was answered hours earlier and nothing noticed.
+
+**What actually happened, from the ledger.** The reviewer worked klal 163 today:
+five `disputed_choice` decisions (w427, 429, 503, 547, 573) and one
+`manual_correction` (w238), then cleared the klal-level flag at 16:08:25 - and
+cleared it **again at 16:08:54**, 29 seconds later. That second click is the bug
+report: the first one appeared to do nothing.
+
+**It did work. The klal stayed lit for a different reason.** Three WORD-level
+flags were still open - w238 (backfilled 2026-08-17), w427 and w573
+(`ai-semantic-spotcheck-round4`, 2026-08-18) - and the nav's pennant is computed
+over EVERY `klal_flag` record, klal-level and word-level alike. So the
+klal-level control could never turn the pennant off while any word flag
+remained, and nothing on screen said why. The klal-flag panel does explain it -
+but only when you RE-OPEN the panel, which is one click too late.
+
+**The substantive part: all three words were already decided.** The reviewer had
+ruled on w427, w573 and w238 that same afternoon, hours after the flags were
+raised. A flag says "come back and look at this word"; a decision recorded at
+that word afterwards IS the reviewer having looked. Requiring a second, separate
+click to say so is friction, not a safeguard.
+
+**Swept before fixing** (standing rule): **331 open word-level flags across 110
+klalim; 23 of them, across 7 klalim, are answered this way** - klal 88 (12),
+163 (3), 91 (3), 29 (2), and one each in 2, 4, 8. The other 308 are genuinely
+unanswered and are untouched. Klal 88 having twelve is worth noting on its own:
+that is a large part of why the reviewer described working it as "a mess".
+
+**The rule, with the guard that makes it safe.** A word-level flag is answered
+when a human decision at that exact `(klal_id, word_index)` is NEWER than the
+flag. Ordering is the whole safeguard: a flag raised AFTER a decision is a fresh
+concern about an already-decided word - a later detector pass finding what the
+earlier decision missed - and stays open. Without the ordering test, any word a
+reviewer had ever touched would swallow every future flag on it.
+
+**Nothing is written to the ledger.** The flag record stands exactly as
+recorded; this changes only whether the dashboard still treats it as asking for
+something.
+
+**The first version of this fix was wrong, and this repo's own invariant caught
+it.** I initially DROPPED answered flags from `_word_level_ai_flags()`. All tests
+ran; `test_every_open_word_level_flag_has_a_control_that_can_clear_it` failed
+with **24 flags served without a `word_flag` field**. That test exists because
+of the 2026-08-24 incident where 197 of 325 open flags had no reachable control
+- and a flag that renders nowhere is a flag nobody can ever clear, which is the
+same defect wearing a nicer hat. Answered flags are now SERVED and MARKED, not
+dropped: the panel says "Answered - you recorded a decision on this word after
+the flag was raised... clearing it just closes the record", the Clear button
+stays, and only the counts and the pennant stop treating it as outstanding.
+
+**Second fix, for the general case that remains.** A klal with genuinely
+unanswered word flags will still show the pennant after its klal-level note is
+cleared - correctly. The confirmation now says so instead of leaving the button
+reading "⚑ flagged" with no reason: *"Saved ✓ — still flagged by N AI-flagged
+words in the text"*.
+
+**Effect, measured:** klal 163 goes to `needs_revisit: false`, `ai_flag_count 0`,
+`open_count 0` - genuinely finished, which it was before this fix and could not
+show. Corpus-wide: flagged klalim **126 → 123**, word-level flag count
+**319 → 299**.
+
+**Three regression tests**, including the one that matters most - a flag raised
+after a decision must stay open, which is the case that would silently swallow
+real findings if the ordering test were ever dropped. 311 green, server
+restarted.
+
 ### UX FIX 2026-08-25 (user-requested) — the manual-correction panel now auto-closes after a save, like the other four.
 
 "after save correction the right pane should auto-close."

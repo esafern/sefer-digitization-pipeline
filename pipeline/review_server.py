@@ -502,6 +502,46 @@ def _word_pages_map(klal_id, words, region_entry):
     return word_pages
 
 
+def _flag_answered_by_a_later_decision(klal_id, word_index, flag_rec,
+                                       candidate_decisions=None,
+                                       manual_decisions=None):
+    """True when a human recorded a decision at this exact word AFTER the flag
+    was raised.
+
+    ADDED 2026-08-25, reviewer report on klal 163: "i cleared the flag but it
+    still shows in the middle and right." They had cleared the KLAL-level flag,
+    but three word-level flags stayed open on words they had already decided
+    that same afternoon - so the klal stayed lit, the words stayed marked, and
+    the panel still announced an open revisit flag. A flag says "come back and
+    look at this word"; a decision recorded at that word afterwards IS the
+    reviewer having looked. Requiring a second, separate click to say so is the
+    friction, not the safeguard.
+
+    ORDER IS THE WHOLE POINT: only a decision NEWER than the flag answers it. A
+    flag raised after a decision is a fresh concern about an already-decided
+    word (a later detector pass finding something the reviewer did not address)
+    and must stay open.
+
+    Swept 2026-08-25: 331 open word-level flags across 110 klalim, of which 23
+    across 7 klalim are answered this way - klal 88 (12), klal 163 (3), klal 91
+    (3), 29 (2), and one each in 2, 4, 8. The other 308 are genuinely
+    unanswered and are untouched by this.
+
+    Nothing is written to the ledger. The flag record stands exactly as
+    recorded; this only decides whether it is still asking for something.
+    """
+    if candidate_decisions is None:
+        candidate_decisions = rd.all_current("candidate_choice")
+    if manual_decisions is None:
+        manual_decisions = rd.all_current("manual_correction")
+    flag_ts = flag_rec.get("ts") or ""
+    for source in (candidate_decisions, manual_decisions):
+        decision = source.get((klal_id, word_index))
+        if decision and (decision.get("ts") or "") > flag_ts:
+            return True
+    return False
+
+
 def _word_level_ai_flags(klal_id, words):
     """klal_flag decisions naming a specific word_index, synthesized into
     corrections-shaped entries so the frontend highlights them. Only the
@@ -527,18 +567,31 @@ def _word_level_ai_flags(klal_id, words):
         for wi, bbox in page_bboxes.items():
             bboxes[wi] = (bbox, page)
 
+    candidate_decisions = rd.all_current("candidate_choice")
+    manual_decisions = rd.all_current("manual_correction")
     out = []
     for word_index, rec in sorted(by_word.items()):
         if not rec.get("needs_revisit"):
             continue
         if not (0 <= word_index < len(words)):
             continue
+        # ANSWERED flags are still SERVED, deliberately. Dropping them here was
+        # the first shape of this fix and
+        # tests/test_corpus_invariants.py::test_every_open_word_level_flag_has_a_
+        # control_that_can_clear_it caught it: the record stays open in the
+        # append-only log, so a flag nothing renders is a flag nobody can ever
+        # clear - 24 of them, the exact defect that test exists for. Serve it,
+        # mark it answered, and let the panel say so; the counts and the nav
+        # pennant are what stop treating it as outstanding.
+        answered = _flag_answered_by_a_later_decision(
+            klal_id, word_index, rec, candidate_decisions, manual_decisions)
         bbox_page = bboxes.get(word_index)
         bbox = bbox_page[0] if bbox_page else None
         page = bbox_page[1] if bbox_page else None
         out.append({
             "word_index": word_index,
             "opcode": "ai_flag",
+            "flag_answered": answered,
             "docai_reading": None,
             "final_text": None,
             "page": page,
@@ -617,8 +670,25 @@ def api_klalim(part_num=1):
     # extra reads per request. Loading all_current("klal_flag") here once
     # covers both the 'flagged' set and the per-klal ai_flag counts below.
     all_klal_flags = rd.all_current("klal_flag")  # {(klal_id, word_index): record}
-    flagged = {kid for (kid, _), r in all_klal_flags.items() if r.get("needs_revisit")}
     decided = rd.all_current("candidate_choice")  # {(klal_id, word_index): record}
+    _manual_for_flags = rd.all_current("manual_correction")
+
+    def _flag_still_open(kid, widx, rec):
+        """A klal-level flag (word_index None) is open until someone clears it.
+        A WORD-level flag is also answered by a human decision recorded at that
+        word after it was raised - see _flag_answered_by_a_later_decision().
+        Without this, clearing the klal-level flag could never turn the nav's
+        pennant off while any word-level flag remained, which is what the
+        reviewer hit on klal 163: cleared twice, still lit, no explanation."""
+        if not rec.get("needs_revisit"):
+            return False
+        if widx is None:
+            return True
+        return not _flag_answered_by_a_later_decision(kid, widx, rec, decided,
+                                                      _manual_for_flags)
+
+    flagged = {kid for (kid, widx), r in all_klal_flags.items()
+               if _flag_still_open(kid, widx, r)}
     punct_decided = rd.all_current("punctuation_choice")
 
     # Manual corrections (2026-08-13, "flag any word and replace it") are
@@ -682,19 +752,17 @@ def api_klalim(part_num=1):
         n_words = len(words)
         manual_indices = manual_indices_by_klal.get(kid, set())
         manual_indices_for_count = manual_indices
+        # One comprehension, two consumers - these were two copies of the same
+        # condition and the count could drift from the set it was meant to
+        # describe. `_flag_still_open` keeps both in step with what
+        # _word_level_ai_flags() actually renders.
         ai_flag_indices_for_count = {
             fwidx for (fkid, fwidx), rec in all_klal_flags.items()
-            if fkid == kid and fwidx is not None and rec.get("needs_revisit")
+            if fkid == kid and fwidx is not None
+            and _flag_still_open(fkid, fwidx, rec)
             and fwidx not in manual_indices and 0 <= fwidx < n_words
         }
-        ai_flag_count = sum(
-            1 for (fkid, fwidx), rec in all_klal_flags.items()
-            if fkid == kid
-            and fwidx is not None
-            and rec.get("needs_revisit")
-            and fwidx not in manual_indices
-            and 0 <= fwidx < n_words
-        )
+        ai_flag_count = len(ai_flag_indices_for_count)
 
         # api_klal() MERGES colliding entries via _claim_word_index() -
         # manual-over-candidate, flag-over-candidate, witness-over-candidate - so
@@ -909,8 +977,14 @@ def api_klal(klal_id):
     # unconditionally; the skip only governs whether a STANDALONE entry is
     # appended.
     for f in _word_level_ai_flags(klal_id, words):
+        # The overlay carries the flag record PLUS whether a later decision has
+        # already answered it, so the panel can say "answered by your decision"
+        # instead of "carries an open revisit flag" for a word the reviewer has
+        # already ruled on (reviewer report on klal 163, 2026-08-25).
+        _flag_overlay = dict(f.get("current_decision") or {})
+        _flag_overlay["answered"] = bool(f.get("flag_answered"))
         if _claim_word_index(corrections, f["word_index"], "word_flag",
-                             f.get("current_decision")) is not None:
+                             _flag_overlay) is not None:
             continue
         if f["word_index"] in manual_word_indices:
             continue  # defensive: a manual decision always yields an entry above
