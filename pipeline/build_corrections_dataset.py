@@ -132,6 +132,27 @@ def union_bbox(tokens):
     }
 
 
+# An estimated insert box never gets narrower than this, so a box anchored on a
+# one-letter token (a gershayim, a single-letter word) is still clickable and
+# still shows the reviewer some context.
+MIN_ESTIMATED_BOX_WIDTH = 0.03
+
+
+def _same_line(a, b, overlap_fraction=0.5):
+    """True when two DocAI tokens sit on the same printed line.
+
+    Compares vertical overlap rather than a y-midpoint distance: token heights
+    vary with ascenders and descenders in this print, so a fixed tolerance
+    misclassifies exactly the tall glyphs (lamed, final nun) that a klal's bold
+    opening word is full of."""
+    top = max(a["y1"], b["y1"])
+    bottom = min(a["y2"], b["y2"])
+    if bottom <= top:
+        return False
+    shorter = min(a["y2"] - a["y1"], b["y2"] - b["y1"])
+    return shorter > 0 and (bottom - top) >= overlap_fraction * shorter
+
+
 def estimate_insert_bbox(docai_tokens, i1):
     """Bbox estimate for an 'insert'-opcode candidate: stored text with NO
     matching DocAI token at all (i1 == i2 in the diff span - see the
@@ -150,14 +171,42 @@ def estimate_insert_bbox(docai_tokens, i1):
     (i1 == 0 and docai_tokens is empty) - not expected in practice, since a
     page that produced any correction candidate at all has tokens by
     construction, but handled rather than assumed."""
-    neighbors = []
-    if i1 > 0:
-        neighbors.append(docai_tokens[i1 - 1])
-    if i1 < len(docai_tokens):
-        neighbors.append(docai_tokens[i1])
-    if not neighbors:
+    prev_tok = docai_tokens[i1 - 1] if i1 > 0 else None
+    next_tok = docai_tokens[i1] if i1 < len(docai_tokens) else None
+    if prev_tok is None and next_tok is None:
         return None
-    return union_bbox(neighbors)
+
+    # FIXED 2026-08-25 (reviewer, klal 3 and klal 4: "the box is to the left and
+    # very large, including the bottom of klal 2"). Unioning the two neighbours
+    # is right only when they sit on the SAME printed line - then the union is a
+    # tight band with the gap in the middle, which is what this was built for.
+    # When the gap falls at a line break the two tokens are on different lines
+    # and their union spans both, most of the page width, and the tail of the
+    # previous klal. Measured across the corpus before fixing: 21 of 40 insert
+    # candidates had such a box, median width 0.382 of the page against 0.039
+    # for an ordinary word box - roughly 10x too wide - and 26 of the 40 sit at
+    # word_index 0, i.e. a klal's opening marker, where a line break is
+    # guaranteed by construction.
+    if prev_tok is not None and next_tok is not None and _same_line(prev_tok, next_tok):
+        return union_bbox([prev_tok, next_tok])
+
+    # Across a LINE BREAK, step one token-width from the token that follows the
+    # gap. This text is RTL, so the word missing from before `next_tok` sits to
+    # its RIGHT (larger x) - which for a klal's opening marker is the right
+    # margin of the new line, exactly where the bold gematria is printed. 26 of
+    # the 40 insert candidates are that case.
+    if prev_tok is not None and next_tok is not None:
+        width = max(next_tok["x2"] - next_tok["x1"], MIN_ESTIMATED_BOX_WIDTH)
+        return {"x1": min(1.0, next_tok["x2"]),
+                "y1": next_tok["y1"],
+                "x2": min(1.0, next_tok["x2"] + width),
+                "y2": next_tok["y2"]}
+
+    # At a PAGE edge only one neighbour exists, and the missing word may be on
+    # the other page entirely. Point at the neighbour itself rather than stepping
+    # into a margin: it is the nearest real ink, and a crop of it with margin is
+    # what a reviewer can actually act on.
+    return union_bbox([prev_tok or next_tok])
 
 
 def load_trusted_klal_pages():

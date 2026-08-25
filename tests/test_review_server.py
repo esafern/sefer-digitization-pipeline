@@ -355,6 +355,68 @@ def test_the_use_suggestion_button_fills_the_box_without_saving(server, page):
         "no decision may be recorded until the reviewer presses Save")
 
 
+def test_a_multi_page_klal_is_outlined_on_its_continuation_pages_too(server, page):
+    """REGRESSION 2026-08-25 (reviewer, klal 4: "the highlight of the whole klal
+    only covers the first part on the first page, not the rest on the
+    following").
+
+    showPage() drew `region` and only when `focusKlal.page === page`, so a klal
+    starting at the bottom of page 15 and running down page 16 outlined the
+    sliver on 15 and nothing at all on 16 - where most of its text is. The
+    per-page boxes were already served in `continuations[]` and never read."""
+    klal_id = 4
+    klal = _get_json(server, f"/api/klal/{klal_id}")
+    conts = klal.get("continuations") or []
+    if not conts:
+        pytest.skip(f"klal {klal_id} is no longer multi-page")
+    cont_page = conts[0]["page"]
+    assert cont_page != klal["page"], "continuation must be on a different page"
+
+    _open_dashboard(page, server, klal_id)
+    page.wait_for_selector(f"#klal-block-{klal_id}", timeout=8000)
+    # Let the mount's own scroll-driven showPage() settle first, or it lands
+    # after ours and repaints the start page's box over the answer.
+    page.wait_for_timeout(1200)
+    page.evaluate(f"showPage({cont_page}, {klal_id})")
+
+    # Assert the GEOMETRY, not just that a box exists: it has to be the
+    # continuation's OWN bbox. Counting boxes alone passes against the pre-fix
+    # code the moment anything draws one - the same trap the old nav-count
+    # invariant fell into. Polled rather than sampled, since showPage is async.
+    expected_top = round(conts[0]["bbox"]["y1"] * 100, 3)
+    page.wait_for_function(
+        """(want) => {
+            const el = document.querySelector('#hl-container .hl-current-klal');
+            if (!el) return false;
+            return Math.abs(parseFloat(el.style.top) - want) < 0.01;
+        }""",
+        arg=expected_top, timeout=8000)
+    assert page.locator("#hl-container .hl-current-klal").count() == 1
+
+
+def test_clicking_a_manually_corrected_word_focuses_it_on_the_scan(server, page):
+    """REGRESSION 2026-08-25 (reviewer, klal 4: "clicking on word 95 does not
+    highlight that word"). Every other flagged-word branch in renderKlalBody
+    calls showPage() before opening its panel; the `manual` branch opened the
+    panel and left the scan pane alone. The box was always served - api_page()'s
+    plain-word pass covers every aligned word - nothing asked for it."""
+    _open_dashboard(page, server, 1)
+    page.locator("#klal-block-1 .plain-word").first.click()
+    page.wait_for_selector("#manual-panel.open", timeout=5000)
+    page.fill("#manual-correction-text", "בדיקה")
+    page.click("#save-manual-correction-btn")
+    page.wait_for_function(
+        "() => !document.querySelector('#manual-panel').classList.contains('open')",
+        timeout=8000)
+
+    # now click the word again - it is a `manual` entry this time
+    page.locator("#klal-block-1 .flag-word.state-human").first.click()
+    page.wait_for_selector("#manual-panel.open", timeout=5000)
+    page.wait_for_timeout(600)
+    assert page.locator("#hl-container .hl-box.focused").count() >= 1, (
+        "clicking a manually-corrected word must focus its box on the scan pane")
+
+
 def test_decisions_api_reflects_saved_state(server):
     data = _get_json(server, "/api/klal/1/flag")
     # written by test_klal_flag_panel_saves_and_shows_in_nav, which runs

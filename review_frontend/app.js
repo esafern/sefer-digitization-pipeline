@@ -148,7 +148,14 @@ function wordState(corr) {
   // tell the difference. If a future code path ever calls wordState() on
   // one directly, it must not silently render an unresolved AI flag as
   // Human-Decided.
-  if (corr.opcode === 'ai_flag') return 'open';
+  // An ai_flag's current_decision is the AI's OWN klal_flag record, never a
+  // human decision - hence the early return. But a flag the server marks
+  // `flag_answered` HAS a human decision at that word, recorded after the flag
+  // was raised; it renders here at all only because its richer entry is gone
+  // (a consensus dispute the synthesizer drops once decided). Showing it as an
+  // open dispute puts a red word on a position the reviewer already ruled on -
+  // which is the klal 163 report in a second costume.
+  if (corr.opcode === 'ai_flag') return corr.flag_answered ? 'human' : 'open';
   if (corr.current_decision) return 'human';
   if (MACHINE_RESOLVED_FLAGS.includes(corr.flag)) return 'machine';
   // Witness items: human decision wins first, then vision-selected A/B ->
@@ -586,7 +593,21 @@ function renderKlalBody(block, k) {
       span.className = 'flag-word state-human' + (pendingDelete ? ' pending-delete' : '')
         + (pendingReplace ? ' pending-replace' : '');
       span.textContent = w;
-      span.onclick = () => openManualCorrectionPanel(k.klal_id, i, w, corr);
+      // FIXED 2026-08-25 (reviewer, klal 4: "clicking on word 95 does not
+      // highlight that word"). Every sibling branch here - ai_flag, witness,
+      // candidate, plain - calls showPage() before opening its panel; this one
+      // opened the panel and left the scan pane wherever it was. The word's box
+      // is served (api_page's plain-word pass has always covered it, and manual
+      // entries now carry their own page/bbox too); nothing was asking for it.
+      const focusManual = () => {
+        if (!manualPageLock) {
+          const targetPage = corr.page
+            || (k.word_pages && k.word_pages[i] != null ? k.word_pages[i] : k.page);
+          showPage(targetPage, k.klal_id, corr);
+        }
+        openManualCorrectionPanel(k.klal_id, i, w, corr);
+      };
+      span.onclick = focusManual;
       body.appendChild(span);
       if (pendingReplace) {
         const arrow = document.createElement('span');
@@ -597,7 +618,7 @@ function renderKlalBody(block, k) {
         repl.className = 'pending-replace-text';
         repl.textContent = chosenText;
         repl.title = 'Pending: recorded but not yet applied to part1.json';
-        repl.onclick = () => openManualCorrectionPanel(k.klal_id, i, w, corr);
+        repl.onclick = focusManual;
         body.appendChild(repl);
       }
     } else if (corr) {
@@ -1892,12 +1913,26 @@ async function showPage(page, focusKlalId, focusCorr = undefined) {
   // appending ours would corrupt the display (stale region box from a different
   // klal/page appearing behind the correct word boxes).
   if (gen !== _showPageGen) return;
-  // Only draw the klal region box on the klal's START page (not continuations),
-  // and only when the reviewer hasn't clicked a specific word to focus - when
-  // focusCorr is set, the yellow .focused box is the landmark; drawing the
-  // large gold region box on top of it just adds noise.
+  // Draw the klal outline on whichever of its pages is being shown - only when
+  // the reviewer hasn't clicked a specific word to focus, since then the yellow
+  // .focused box is the landmark and a large gold box on top of it is noise.
+  //
+  // FIXED 2026-08-25 (reviewer, klal 4: "the highlight of the whole klal only
+  // covers the first part on the first page, not the rest on the following").
+  // This drew `region` and only on `focusKlal.page`, so a klal spanning pages
+  // 15-16 outlined the sliver on 15 and nothing at all on 16 - where most of its
+  // text actually is. The per-page boxes were already served in
+  // `continuations[]` and simply never read: a field computed, serialized, and
+  // never displayed (Lesson 29).
   let r = null;
-  if (!focusCorr && focusKlal && focusKlal.page === page) r = focusKlal.region;
+  if (!focusCorr && focusKlal) {
+    if (focusKlal.page === page) {
+      r = focusKlal.region;
+    } else {
+      const cont = (focusKlal.continuations || []).find(c => c.page === page);
+      if (cont) r = cont.bbox;
+    }
+  }
   if (r) {
     const box = document.createElement('div');
     box.className = 'hl-current-klal';

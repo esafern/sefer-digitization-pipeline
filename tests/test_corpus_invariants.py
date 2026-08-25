@@ -1524,11 +1524,13 @@ def test_nav_tristate_matches_what_each_word_actually_renders_as(part1_by_id):
     machine_resolved = set(review_server.MACHINE_RESOLVED_FLAGS)
 
     def word_state(c):
-        # app.js wordState(), in the same order - an ai_flag is never human,
-        # a human decision wins, then a machine-resolved flag, then a witness's
-        # own vision verdict.
+        # app.js wordState(), in the same order - an ai_flag carries the AI's
+        # own flag record rather than a human decision, so it is open UNLESS the
+        # server marked it answered (a human ruled on that word after the flag
+        # was raised); then a human decision wins, then a machine-resolved flag,
+        # then a witness's own vision verdict.
         if c.get("opcode") == "ai_flag":
-            return "open"
+            return "human" if c.get("flag_answered") else "open"
         if c.get("current_decision"):
             return "human"
         if c.get("flag") in machine_resolved:

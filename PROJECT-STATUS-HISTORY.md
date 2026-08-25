@@ -17,6 +17,88 @@ current file references, or when grepping for how a past finding was
 resolved. Same append-at-top convention as before: newest entries go right
 after this header, not at the bottom.
 
+### FIXED 2026-08-25 — four separate scan-pane defects reported together on klalim 3 and 4. All four confirmed, three of them corpus-wide.
+
+Reviewer: "klal 3 word 1 ... the box is to the left and very large, including
+the bottom of klal 2. klal 4 similar ... also on klal 4 the highlight of the
+whole klal only covers the first part on the first page, not the rest on the
+following. also on klal 4 clicking on word 95 does not highlight that word."
+
+**1. The giant box: `estimate_insert_bbox()` unioned two tokens across a line
+break.** An `insert` candidate is stored text DocAI produced no token for, so
+there is nothing to crop; the estimator unioned the DocAI tokens on either side
+of the gap, which is a tight band ONLY when both sit on the same printed line.
+At a klal's opening marker the gap is a line break by construction: the previous
+token ends the previous klal's last line and the next token starts the new one,
+so the union spanned both lines and most of the page width - the reviewer's "very
+large, including the bottom of klal 2", exactly.
+
+**Swept: 21 of 40 insert candidates had such a box.** Median width **0.382** of
+the page against **0.039** for an ordinary word box - about 10x too wide - and
+**26 of the 40 sit at word_index 0**, i.e. a klal marker, where the line break is
+guaranteed.
+
+Now: same line -> union (unchanged, that is what it was for); across a line
+break -> step one token-width from the token AFTER the gap, which in RTL is
+where the missing word sits (for a marker, the right margin of the new line);
+at a page edge, where only one neighbour exists and the missing word may be on
+the other page entirely, point at that neighbour rather than into a margin.
+**After: median 0.073, max 0.123, zero boxes wider than a quarter of the page.**
+Klal 3 and klal 4's markers went from 0.410 and 0.636 wide to 0.032.
+
+**Propagating it needed the full chain, which is worth recording.** Stage 2
+(`build_corrections_dataset.py`) had the new boxes immediately, but the dashboard
+reads `corrections_part1.json`, which `assemble` builds from
+`corrections_verified_part1.json` - a stage-3 output that `--skip-vision` does
+not regenerate. So `./rebuild_all.sh --skip-vision` left every old box in place
+and looked like the fix had failed. The full run propagated it (vision cached;
+insert candidates are never cropped, so no new calls for them).
+
+**2. The klal outline stopped at the start page.** `showPage()` drew
+`focusKlal.region` and only `if (focusKlal.page === page)`. Klal 4 starts in the
+last sliver of page 15 and runs down page 16, so the outline covered the sliver
+and page 16 got nothing - where nearly all of its text is. **The per-page boxes
+were already in the API response** (`continuations[].bbox`) and had never been
+read: computed, serialized, never displayed (Lesson 29). Now drawn for whichever
+of the klal's pages is on screen.
+
+**3. Clicking a manually-corrected word did nothing to the scan pane.** Every
+sibling branch in `renderKlalBody` - ai_flag, witness, candidate, plain - calls
+`showPage()` before opening its panel. The `manual` branch was
+`span.onclick = () => openManualCorrectionPanel(...)` and nothing else. The box
+was always being served (api_page's plain-word pass covers every aligned word);
+nothing asked for it. Both the word and its pending-replacement arrow now focus
+it.
+
+**4. Manual entries carried no geometry of their own.** The synthetic entry
+api_klal() builds for a `manual_correction` shipped `page: None, bbox: None`,
+making it the one flagged-word kind with no scan position - and `api_page()`
+drops any bbox-less correction. Extracted `_word_scan_position()` from
+`_word_level_ai_flags()`, which had been doing this lookup for ai_flags all
+along, and used it for manual entries too. Klal 4 w95 now serves page 16 with a
+0.036x0.018 box.
+
+**A fifth defect surfaced from the rebuild, and it is the klal-163 report in a
+new costume.** The rebuild removed **14 entries and added none** - all positions
+the reviewer had just decided, because `synthesize_multi_witness.py` correctly
+drops a consensus dispute once a human has ruled. That leaves any word-level
+flag at those positions with no host entry, so it rendered STANDALONE as an open
+red dispute on a word already decided. 7 such flags across klalim 2, 4, 88, 163,
+167. An answered flag now renders as human-decided and is counted as decided,
+which is what it is; it still renders (and stays clearable) rather than being
+dropped, per the invariant that caught the first version of the answered-flag
+fix.
+
+**Four regression tests, each run against the pre-fix code first.** The
+continuation-outline test is the one worth noting: my first version asserted only
+that *a* box existed, and it passed against the broken code - the same trap the
+old nav-count invariant fell into. It now asserts the box's top matches the
+continuation's own `y1`, polled rather than sampled (the mount's own
+scroll-driven `showPage()` lands after an immediate `evaluate()` and repaints
+the start page's box over the answer).
+
+316 tests green, full rebuild clean, server restarted.
+
 ### SERIOUS BUG FIXED 2026-08-25 — the dashboard offered to replace klal 1's `דנראח` with **`6.18M`**, on one click, with no confirmation step.
 
 Reported by the reviewer: "on klal 1 word 229 - proposed correction is a serious

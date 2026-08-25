@@ -121,16 +121,16 @@
     "original_word": null,
     "corrected_word": "ג",
     "bbox": {
-      "x1": 0.4175352454185486,
-      "y1": 0.5002040266990662,
-      "x2": 0.8270999193191528,
+      "x1": 0.8270999193191528,
+      "y1": 0.5116279125213623,
+      "x2": 0.8589822053909302,
       "y2": 0.5320277214050293
     },
     "bbox_estimated": true,
-    "vision_selected": "A",
-    "vision_transcription": "",
+    "vision_selected": "B",
+    "vision_transcription": "ג",
     "vision_confidence": 0.98,
-    "vision_reasoning": "The letter 'ג' (section mark) does not appear in the crop before 'אין למדין'. The text in the main line clearly begins directly with 'אין' in large heading font without any preceding section letter 'ג' visible in the pixel array."
+    "vision_reasoning": "The Hebrew letter gimel ('ג'), functioning as a section/paragraph header, is clearly legible on the right side of the middle line in the image crop, confirming Option B."
   },
   {
     "klal_id": 3,
@@ -197,16 +197,16 @@
     "original_word": null,
     "corrected_word": "ד",
     "bbox": {
-      "x1": 0.19190680980682373,
-      "y1": 0.8592411279678345,
-      "x2": 0.8283261656761169,
+      "x1": 0.8283261656761169,
+      "y1": 0.8743370175361633,
+      "x2": 0.860821545124054,
       "y2": 0.8943288326263428
     },
     "bbox_estimated": true,
-    "vision_selected": "A",
-    "vision_transcription": "",
-    "vision_confidence": 0.95,
-    "vision_reasoning": "The text in line 3 begins directly with the enlarged word 'אין' followed by 'הלכה כרשב\"ג'. There is no leading letter 'ד' or section index visible before 'אין' in the image."
+    "vision_selected": "B",
+    "vision_transcription": "ד",
+    "vision_confidence": 0.98,
+    "vision_reasoning": "The Hebrew letter Dalet ('ד') is clearly visible on the right side of the bottom line in the manuscript crop, matching the paragraph/section index 'ד' at the beginning of the context sentence."
   },
   {
     "klal_id": 4,
@@ -387,16 +387,16 @@
     "original_word": null,
     "corrected_word": "י",
     "bbox": {
-      "x1": 0.4203979969024658,
-      "y1": 0.48773622512817383,
-      "x2": 0.85447758436203,
+      "x1": 0.85447758436203,
+      "y1": 0.4993968605995178,
+      "x2": 0.9110695719718933,
       "y2": 0.5158826112747192
     },
     "bbox_estimated": true,
     "vision_selected": "B",
     "vision_transcription": "י",
-    "vision_confidence": 0.9,
-    "vision_reasoning": "The standalone Yod ('י') preceding 'איידו דאיידי' is partially visible at the far right margin edge of the third line, corresponding to Option B in the context string."
+    "vision_confidence": 0.95,
+    "vision_reasoning": "The single letter Yod ('י') is clearly visible near the center-right of the crop, corresponding to the initial letter of the contextual sentence 'י איידו דאיידי'."
   },
   {
     "klal_id": 10,
@@ -539,16 +539,16 @@
     "original_word": null,
     "corrected_word": "יד",
     "bbox": {
-      "x1": 0.36024466156959534,
-      "y1": 0.47034764289855957,
-      "x2": 0.8752293586730957,
+      "x1": 0.8752293586730957,
+      "y1": 0.4862985610961914,
+      "x2": 0.9052293586730957,
       "y2": 0.5030674934387207
     },
     "bbox_estimated": true,
     "vision_selected": "B",
     "vision_transcription": "יד",
-    "vision_confidence": 1.0,
-    "vision_reasoning": "The letters 'יד' are clearly legible at the far-right of the third line in the crop, serving as a section marker/heading."
+    "vision_confidence": 0.98,
+    "vision_reasoning": "The center of the manuscript raster crop clearly features the two Hebrew letters 'יד' (Yod-Dalet), matching Option B perfectly."
   },
   {
     "klal_id": 15,
@@ -653,16 +653,16 @@
     "original_word": null,
     "corrected_word": "יח",
     "bbox": {
-      "x1": 0.35264796018600464,
-      "y1": 0.4028112590312958,
-      "x2": 0.8342679142951965,
+      "x1": 0.8342679142951965,
+      "y1": 0.41807228326797485,
+      "x2": 0.949532687664032,
       "y2": 0.43493977189064026
     },
     "bbox_estimated": true,
-    "vision_selected": "A",
-    "vision_transcription": "",
-    "vision_confidence": 0.95,
-    "vision_reasoning": "The visible text on the third line clearly begins directly with the word 'אמוראים' in large/bold lettering. The abbreviation 'יח' does not appear in the crop before 'אמוראים' or anywhere else within this image fragment."
+    "vision_selected": "B",
+    "vision_transcription": "יח",
+    "vision_confidence": 0.98,
+    "vision_reasoning": "The crop clearly shows the Hebrew letters 'יח' prominently in the middle line, corresponding to the start of the Rabbinic sentence provided in the context."
   },
   {
     "klal_id": 18,
@@ -672,16 +672,16 @@
     "original_word": null,
     "corrected_word": "יט",
     "bbox": {
-      "x1": 0.39501556754112244,
-      "y1": 0.4943775236606598,
-      "x2": 0.8822429776191711,
+      "x1": 0.8822429776191711,
+      "y1": 0.5080321431159973,
+      "x2": 0.9122429776191712,
       "y2": 0.5257028341293335
     },
     "bbox_estimated": true,
     "vision_selected": "B",
     "vision_transcription": "יט",
-    "vision_confidence": 1.0,
-    "vision_reasoning": "The entry marker 'יט' is clearly visible at the right edge of the third line in the crop, directly preceding the bold heading 'אסמכתא'."
+    "vision_confidence": 0.95,
+    "vision_reasoning": "The crop clearly shows the Hebrew letters 'י' and 'ט' in the center (yod on the right, tet on the left), matching Option B ('יט') which appears at the end of the context sentence ('עד כאן : יט')."
   },
   {
     "klal_id": 19,
@@ -748,16 +748,16 @@
     "original_word": null,
     "corrected_word": "כא",
     "bbox": {
-      "x1": 0.3632398843765259,
-      "y1": 0.7497991919517517,
-      "x2": 0.8878504633903503,
+      "x1": 0.8878504633903503,
+      "y1": 0.7638553977012634,
+      "x2": 0.9178504633903504,
       "y2": 0.781124472618103
     },
     "bbox_estimated": true,
     "vision_selected": "B",
     "vision_transcription": "כא",
-    "vision_confidence": 0.98,
-    "vision_reasoning": "The letters 'כא' are clearly visible in large/bold typeface on the far right of the third line, introducing the Gemara quote 'אי לאו דדלאי לך חספא'."
+    "vision_confidence": 0.95,
+    "vision_reasoning": "The Hebrew letters כ (Kaf) and א (Alef) are clearly legible in the mid-left portion of the crop, matching Option B ('כא') and aligning with the provided surrounding text context."
   },
   {
     "klal_id": 22,
@@ -1033,16 +1033,16 @@
     "original_word": null,
     "corrected_word": "כט",
     "bbox": {
-      "x1": 0.43608564138412476,
-      "y1": 0.401636004447937,
-      "x2": 0.8568807244300842,
+      "x1": 0.8568807244300842,
+      "y1": 0.4110429584980011,
+      "x2": 0.8868807244300843,
       "y2": 0.4323108494281769
     },
     "bbox_estimated": true,
     "vision_selected": "B",
     "vision_transcription": "כט",
-    "vision_confidence": 1.0,
-    "vision_reasoning": "The Hebrew letters 'כט' are clearly visible at the right side of the third line of the provided text crop, corresponding to Option B."
+    "vision_confidence": 0.95,
+    "vision_reasoning": "The center of the crop clearly displays the Hebrew characters 'כט', serving as a section or paragraph marker matching the end of the provided Rabbinic context."
   },
   {
     "klal_id": 29,
@@ -1204,16 +1204,16 @@
     "original_word": null,
     "corrected_word": "בספר שמות",
     "bbox": {
-      "x1": 0.19850653409957886,
-      "y1": 0.6034551858901978,
-      "x2": 0.8929682374000549,
+      "x1": 0.8929682374000549,
+      "y1": 0.619124174118042,
+      "x2": 0.9377722144126892,
       "y2": 0.6355966329574585
     },
     "bbox_estimated": true,
     "vision_selected": "A",
-    "vision_transcription": "",
-    "vision_confidence": 0.98,
-    "vision_reasoning": "The words 'בספר שמות' do not appear in the crop. The text transitions directly from 'כוותיה •' at the end of line 2 to 'בארץ בכפות תמרים' at the beginning of line 3. Thus, Option A is correct as the text is absent from the visible ink."
+    "vision_transcription": "מש / בא / ע\"ג",
+    "vision_confidence": 1.0,
+    "vision_reasoning": "The text 'בספר שמות' (Option B) is not visible in this image crop. The crop contains vertical line fragments showing 'מש', 'בא', and 'ע\"ג'. Option A is correct as Option B represents an incorrect text alignment/addition with no basis in the visible ink."
   },
   {
     "klal_id": 36,
@@ -1432,16 +1432,16 @@
     "original_word": null,
     "corrected_word": "מח",
     "bbox": {
-      "x1": 0.7200748324394226,
-      "y1": 0.312600314617157,
-      "x2": 0.9052368998527527,
+      "x1": 0.9052368998527527,
+      "y1": 0.3274478316307068,
+      "x2": 0.9352368998527527,
       "y2": 0.3451043367385864
     },
     "bbox_estimated": true,
     "vision_selected": "B",
     "vision_transcription": "מח",
-    "vision_confidence": 0.98,
-    "vision_reasoning": "The Hebrew letters 'מח' (representing section number 48, following section 'מז') are clearly visible on the right side of the line beginning 'מח איסור מטומאה'."
+    "vision_confidence": 0.9,
+    "vision_reasoning": "The crop displays the section header/marker 'מח' partially visible at the bottom edge, following the citation 'שו\"ת מרדכי זיסקינד... ססי' ל\"ג : מח' as expected from the surrounding text context."
   },
   {
     "klal_id": 48,
@@ -1508,16 +1508,16 @@
     "original_word": null,
     "corrected_word": "נא",
     "bbox": {
-      "x1": 0.4457606077194214,
-      "y1": 0.55738365650177,
-      "x2": 0.9033665657043457,
+      "x1": 0.9033665657043457,
+      "y1": 0.5698234438896179,
+      "x2": 0.9333665657043457,
       "y2": 0.5862760543823242
     },
     "bbox_estimated": true,
     "vision_selected": "B",
     "vision_transcription": "נא",
     "vision_confidence": 0.98,
-    "vision_reasoning": "The entry number/heading 'נא' is clearly visible in large, bold Hebrew letters on the right margin of the third line in the crop, directly preceding 'אימא'."
+    "vision_reasoning": "The cropped image clearly shows the Hebrew characters Nun (נ) and Alef (א) forming the word 'נא', matching Candidate B and the end of the surrounding context text."
   },
   {
     "klal_id": 52,
@@ -1546,16 +1546,16 @@
     "original_word": null,
     "corrected_word": "נג",
     "bbox": {
-      "x1": 0.4563590884208679,
-      "y1": 0.7704654932022095,
-      "x2": 0.8990024924278259,
+      "x1": 0.8990024924278259,
+      "y1": 0.7808988690376282,
+      "x2": 0.929002492427826,
       "y2": 0.7985553741455078
     },
     "bbox_estimated": true,
     "vision_selected": "B",
     "vision_transcription": "נג",
-    "vision_confidence": 0.98,
-    "vision_reasoning": "The string 'נג' is clearly visible in large bold print on the right side of the third line, preceding the word 'אמורא'."
+    "vision_confidence": 1.0,
+    "vision_reasoning": "The raster crop clearly displays the Hebrew letters 'נג' in the center, matching the adjudicated text in Option B and the provided surrounding text context."
   },
   {
     "klal_id": 53,
@@ -1641,16 +1641,16 @@
     "original_word": null,
     "corrected_word": "נז אין",
     "bbox": {
-      "x1": 0.24347825348377228,
-      "y1": 0.6790173053741455,
-      "x2": 0.8099378943443298,
+      "x1": 0.8099378943443298,
+      "y1": 0.6943213939666748,
+      "x2": 0.8515527844429016,
       "y2": 0.7100281715393066
     },
     "bbox_estimated": true,
-    "vision_selected": "A",
-    "vision_transcription": "",
+    "vision_selected": "B",
+    "vision_transcription": "אין הל",
     "vision_confidence": 0.95,
-    "vision_reasoning": "The text 'נז' from Option B is entirely outside the cropped image area. At the right margin of line 3, only the end of the word 'אין' (specifically 'ין') is partially visible before 'הלכה כשיטה'. Thus, Option B is an unverified addition not supported by the ink in this crop, making Option A the correct selection."
+    "vision_reasoning": "The visible text clearly shows the word 'אין' (written in a standard Rabbinic/manuscript ductus) followed to its left by 'הל' (the beginning of 'הלכה'), matching the provided Rabbinic textual context 'נז אין הלכה'."
   },
   {
     "klal_id": 57,
@@ -1717,16 +1717,16 @@
     "original_word": null,
     "corrected_word": "סא",
     "bbox": {
-      "x1": 0.19432449340820312,
-      "y1": 0.21248985826969147,
-      "x2": 0.8624305725097656,
+      "x1": 0.8624305725097656,
+      "y1": 0.227899432182312,
+      "x2": 0.8924305725097657,
       "y2": 0.2469586431980133
     },
     "bbox_estimated": true,
     "vision_selected": "B",
     "vision_transcription": "סא",
     "vision_confidence": 0.98,
-    "vision_reasoning": "The letters 'סא' (indicating paragraph/section 61) are clearly legible on the right side of the third line, immediately preceding the large bold word 'אף'."
+    "vision_reasoning": "The middle line of the image clearly displays the Hebrew characters 'ס' followed by 'א' ('סא'), which corresponds directly to Option B and matches the context marker 'סא' at the end of the surrounding Rabbinic passage."
   },
   {
     "klal_id": 62,
@@ -1888,16 +1888,16 @@
     "original_word": null,
     "corrected_word": "סו אין",
     "bbox": {
-      "x1": 0.3492852747440338,
-      "y1": 0.13883300125598907,
-      "x2": 0.8004971742630005,
+      "x1": 0.8004971742630005,
+      "y1": 0.1496981829404831,
+      "x2": 0.8304971742630005,
       "y2": 0.16700200736522675
     },
     "bbox_estimated": true,
-    "vision_selected": "A",
-    "vision_transcription": "ן",
-    "vision_confidence": 1.0,
-    "vision_reasoning": "The text 'סו אין' from Option B is truncated at the right edge of the crop; only the final nun ('ן') of 'אין' is partially visible before 'ב\"ד יכול לבטל'. Since the words 'סו אין' are outside the image frame, Option A correctly notes that Option B's text is not genuinely present in the crop."
+    "vision_selected": "B",
+    "vision_transcription": "אין ב\"ד",
+    "vision_confidence": 0.95,
+    "vision_reasoning": "The crop clearly shows the word 'אין' (or 'זין' as a paleographic variant/scribal form of 'אין') directly preceding 'ב\"ד' on the middle line, matching the text segment 'סו אין ב\"ד' in the surrounding context."
   },
   {
     "klal_id": 66,
@@ -2021,16 +2021,16 @@
     "original_word": null,
     "corrected_word": "סח",
     "bbox": {
-      "x1": 0.3356121778488159,
-      "y1": 0.4233400523662567,
-      "x2": 0.8993163704872131,
+      "x1": 0.8993163704872131,
+      "y1": 0.4378269612789154,
+      "x2": 0.9293163704872132,
       "y2": 0.45875251293182373
     },
     "bbox_estimated": true,
     "vision_selected": "B",
     "vision_transcription": "סח",
     "vision_confidence": 0.98,
-    "vision_reasoning": "The letters 'סח' are clearly printed and visible on the right edge of the third line, immediately preceding the enlarged word 'אין'. Option B is fully verified by the ink."
+    "vision_reasoning": "The middle line of the image clearly displays the Hebrew letters Samekh (ס) and Chet (ח), corresponding to Option B ('סח'), which represents paragraph/section 68 as indicated in the context."
   },
   {
     "klal_id": 69,
@@ -2287,16 +2287,16 @@
     "original_word": null,
     "corrected_word": "עב",
     "bbox": {
-      "x1": 0.24169741570949554,
-      "y1": 0.28966638445854187,
-      "x2": 0.8585485816001892,
+      "x1": 0.8585485816001892,
+      "y1": 0.303498774766922,
+      "x2": 0.8885485816001892,
       "y2": 0.32221317291259766
     },
     "bbox_estimated": true,
     "vision_selected": "B",
     "vision_transcription": "עב",
     "vision_confidence": 0.98,
-    "vision_reasoning": "The entry label 'עב' is clearly visible at the beginning of the third line immediately preceding '- אין למדין הלכה'."
+    "vision_reasoning": "The middle line of the raster crop clearly shows the Hebrew characters ע (Ayin) on the right and ב (Bet) on the left, reading right-to-left as 'עב'. This matches Option B and fits the surrounding context."
   },
   {
     "klal_id": 73,
@@ -2800,16 +2800,16 @@
     "original_word": null,
     "corrected_word": "פג בשל",
     "bbox": {
-      "x1": 0.39303481578826904,
-      "y1": 0.7607559561729431,
-      "x2": 0.7754974961280823,
+      "x1": 0.7754974961280823,
+      "y1": 0.7720144987106323,
+      "x2": 0.8128108978271484,
       "y2": 0.788500189781189
     },
     "bbox_estimated": true,
-    "vision_selected": "A",
-    "vision_transcription": "",
-    "vision_confidence": 0.95,
-    "vision_reasoning": "The target phrase 'פג בשל' does not appear in this raster crop. Line 2 ends with 'סי' קפ\"ג :' and line 3 begins directly with 'תורה הלך אחר המחמיר ובשל סופרים...'. Therefore, Option A is correct as the text 'פג בשל' is not present in the crop."
+    "vision_selected": "B",
+    "vision_transcription": "פג בשל",
+    "vision_confidence": 0.85,
+    "vision_reasoning": "The crop contains the siman/paragraph heading 'פג' at the top (with the characteristic leg of the 'ג'), followed below by 'בשל' (featuring an extended 'ל' with a dot), leading into 'תורה' on the left, matching the text in Option B."
   },
   {
     "klal_id": 83,
@@ -2952,16 +2952,16 @@
     "original_word": null,
     "corrected_word": "פו",
     "bbox": {
-      "x1": 0.39938461780548096,
-      "y1": 0.18414634466171265,
-      "x2": 0.8067692518234253,
+      "x1": 0.8067692518234253,
+      "y1": 0.19756098091602325,
+      "x2": 0.8658462166786194,
       "y2": 0.21463415026664734
     },
     "bbox_estimated": true,
-    "vision_selected": "A",
-    "vision_transcription": "",
-    "vision_confidence": 0.95,
-    "vision_reasoning": "The letters 'פו' do not appear in this image crop; Line 3 begins directly on the right margin with the word 'בעיא' in a larger font."
+    "vision_selected": "B",
+    "vision_transcription": "פו",
+    "vision_confidence": 0.98,
+    "vision_reasoning": "The crop clearly shows the Hebrew letters פ (pey) and ו (vav) centered in the middle line, forming 'פו', which matches the provided surrounding context ('פו בעיא...'). Option B is the accurate transcription."
   },
   {
     "klal_id": 86,
@@ -6030,16 +6030,16 @@
     "original_word": null,
     "corrected_word": "שכתב",
     "bbox": {
-      "x1": 0.13833746314048767,
-      "y1": 0.7416364550590515,
-      "x2": 0.8455334901809692,
+      "x1": 0.8455334901809692,
+      "y1": 0.7593712210655212,
+      "x2": 0.883994996547699,
       "y2": 0.7754937410354614
     },
     "bbox_estimated": true,
     "vision_selected": "B",
     "vision_transcription": "שכתב",
-    "vision_confidence": 0.99,
-    "vision_reasoning": "The word 'שכתב' is clearly legible in multiple positions within the crop (e.g., in line 1 after 'רע\"ב' and line 4 after 'ל\"ג א''), matching the surrounding Rabbinic text context accurately."
+    "vision_confidence": 0.98,
+    "vision_reasoning": "The word 'שכתב' is clearly legible in the middle line of the image crop, matching Option B perfectly."
   },
   {
     "klal_id": 167,
@@ -9260,16 +9260,16 @@
     "original_word": null,
     "corrected_word": "חד מסספיע השם",
     "bbox": {
-      "x1": 0.09944409877061844,
-      "y1": 0.7898785471916199,
-      "x2": 0.7362569570541382,
+      "x1": 0.7362569570541382,
+      "y1": 0.8052631616592407,
+      "x2": 0.7689931988716125,
       "y2": 0.8222672343254089
     },
     "bbox_estimated": true,
     "vision_selected": "A",
-    "vision_transcription": "",
+    "vision_transcription": "שוה הכ\nהד\nסופ",
     "vision_confidence": 1.0,
-    "vision_reasoning": "The string 'חד מסספיע השם' (Option B) does not appear anywhere in the image. Line 3 ends with 'אלא הוא' and Line 4 immediately continues with 'הדין לעונשין'. Therefore, Option A is correct as the text is an unverified extra addition not supported by the visual print."
+    "vision_reasoning": "The crop contains fragments of text from the margins/edges ('שוה הכ', 'הד', 'סופ'), but does not contain the candidate text 'חד מסספיע השם' from Option B. Option A correctly identifies that Option B's text is not present in the ink of this crop."
   },
   {
     "klal_id": 210,

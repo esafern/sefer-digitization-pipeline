@@ -552,6 +552,20 @@ def _flag_answered_by_a_later_decision(klal_id, word_index, flag_rec,
     return False
 
 
+def _word_scan_position(klal_id, words, word_index):
+    """(bbox, page) for one corpus word, from the DocAI alignment.
+
+    Extracted 2026-08-25 from _word_level_ai_flags(), which had been doing this
+    for ai_flag entries only. A klal can span pages, so every page it touches is
+    searched; returns (None, None) when the word has no aligned token (an OCR
+    gap), which callers must handle rather than assume a box exists."""
+    for page in _klal_all_pages(klal_id):
+        page_bboxes = _corpus_word_bboxes(klal_id, words, page)
+        if word_index in page_bboxes:
+            return page_bboxes[word_index], page
+    return None, None
+
+
 def _word_level_ai_flags(klal_id, words):
     """klal_flag decisions naming a specific word_index, synthesized into
     corrections-shaped entries so the frontend highlights them. Only the
@@ -773,6 +787,21 @@ def api_klalim(part_num=1):
             and fwidx not in manual_indices and 0 <= fwidx < n_words
         }
         ai_flag_count = len(ai_flag_indices_for_count)
+        # An ANSWERED flag still renders - it has to, or nothing on screen can
+        # clear it - and it renders as human-decided, since a decision at that
+        # word is what answered it. It usually overlays a richer entry and adds
+        # nothing here; it only stands alone when that entry is gone, which
+        # happens routinely: synthesize_multi_witness.py drops a consensus
+        # dispute once a human has decided the position, so the next rebuild
+        # removes the host. Measured on the 2026-08-25 rebuild: 14 entries
+        # removed, and 7 answered flags across klalim 2/4/88/163/167 were
+        # left standing alone. Counted as DECIDED to match what renders.
+        answered_flag_indices = {
+            fwidx for (fkid, fwidx), rec in all_klal_flags.items()
+            if fkid == kid and fwidx is not None and rec.get("needs_revisit")
+            and not _flag_still_open(fkid, fwidx, rec)
+            and fwidx not in manual_indices and 0 <= fwidx < n_words
+        }
 
         # api_klal() MERGES colliding entries via _claim_word_index() -
         # manual-over-candidate, flag-over-candidate, witness-over-candidate - so
@@ -814,6 +843,8 @@ def api_klalim(part_num=1):
             state[wi] = DECIDED
         for wi in ai_flag_indices_for_count:                # 3. only when standalone;
             state.setdefault(wi, DISPUTED)                  #    otherwise it just overlays
+        for wi in answered_flag_indices:                    # 3b. answered: renders green
+            state.setdefault(wi, DECIDED)
         for w in w_entries:                                 # 4. witness disagreements
             wi = w.get("word_index")
             if wi is None or not (0 <= wi < n_words) or wi in manual_indices:
@@ -950,13 +981,21 @@ def api_klal(klal_id):
             if not _prior or (rec.get("ts") or "") >= (_prior.get("ts") or ""):
                 _existing["current_decision"] = rec
             continue
+        # FIXED 2026-08-25 (reviewer, klal 4: "clicking on word 95 does not
+        # highlight that word"). These synthetic entries shipped page=None and
+        # bbox=None, so a manually-corrected word was the one kind of flagged
+        # word with no scan geometry at all - api_page() drops any bbox-less
+        # correction, and the click handler had no page to navigate to. The
+        # geometry was always available: _word_level_ai_flags() has looked the
+        # same words up from the DocAI alignment since ai_flags were added.
+        _bbox, _page = _word_scan_position(klal_id, words, word_index)
         corrections.append({
             "word_index": word_index,
             "opcode": "manual",
             "docai_reading": None,
             "final_text": rec.get("candidate_snapshot", {}).get("original_word"),
-            "page": None,
-            "bbox": None,
+            "page": _page,
+            "bbox": _bbox,
             "vision_selected": None,
             "vision_transcription": None,
             "confidence": None,
