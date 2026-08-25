@@ -17,6 +17,80 @@ current file references, or when grepping for how a past finding was
 resolved. Same append-at-top convention as before: newest entries go right
 after this header, not at the bottom.
 
+### FIXED 2026-08-25 — klal 88's nav badge showed **-1** while words were still outstanding. The 2026-08-24 fix had corrected the numerator and left the denominator.
+
+Reported by the reviewer working klal 88: "there were also more words highlighted
+than the count so it is now -1 even though a few are outstanding."
+
+**Root cause, and it is half of a fix I made yesterday.** `api_klal()` merges
+colliding entries at one `word_index` via `_claim_word_index()` -
+manual-over-candidate, flag-over-candidate, witness-over-candidate - so exactly
+ONE entry per index reaches the screen. Yesterday's finding F1 made
+`correction_count` count DISTINCT indexes to match that. **It did not touch
+`decided_count` or `machine_disputed_count`, which kept adding up their sources
+independently.** So a word claimed by two sources was counted once in the total
+and twice in decided, and `open_count = total - decided` could go below zero.
+
+**Klal 88's three phantom decisions, itemised:**
+
+| phantom | why it counted twice |
+| :--- | :--- |
+| w327 | a `witness_choice` decision at a position a `manual_correction` already covers - the merge drops the witness entry, the counter did not |
+| token 552 | witness row with **`word_index: None`** - never rendered, still counted as decided |
+| token 861 | same |
+
+**Swept the corpus rather than fixing the one klal** (standing rule): **3 klalim
+carry 6 phantom decisions - 30 (+1), 88 (+3), 91 (+2)**. Only klal 88 had enough
+of them relative to its total to cross zero, which is why only it looked broken.
+The other two were quietly under-reporting open work.
+
+**The fix classifies the surviving entry instead of adding up sources.** One pass
+in api_klal()'s own source order (candidates → manual → flags → witness) assigns
+each rendered word_index exactly one state, so the tri-state sums to the total by
+construction rather than by coincidence. Deletes are classified the same way and
+counted separately, as before.
+
+**A second divergence found while verifying, same shape as finding F2.** With the
+counts newly comparable I checked all 222 klalim against app.js's own
+`wordState()` and 2 still disagreed: **a witness row whose vision pass returned A
+or B renders GREEN (machine-resolved) in the text pane**, while the server called
+every undecided witness "disputed" - `api_klalim`'s own comment still claimed
+"there is no machine-resolved state for a witness item", which stopped being true
+when witness triage shipped. Klalim 30 and 75 showed 6 and 2 more green words on
+screen than the nav admitted. The screen is the ground truth (Lesson 29), so the
+count now follows it.
+
+**Corpus totals move, and the direction is the honest one:** decided 64 → 91,
+machine-resolved 356 → 357, machine-disputed 781 → 613, open 997 → **970**. The
+old numbers double-counted; total (1,061) is unchanged.
+
+**Two regression tests, and the first one was proven to fail before it passed** -
+run against the pre-fix server it reports exactly the reviewer's symptom,
+`(88, 28, 29)`:
+- `test_nav_tristate_matches_what_each_word_actually_renders_as` - transcribes
+  `wordState()` and asserts, for all 222 klalim, that each of the three counts
+  matches what renders, that the three sum to the total, and that `open_count` is
+  never negative. The old test only checked the total, which is exactly why this
+  got through.
+- `test_witness_rows_served_without_a_word_index_are_never_counted` - 6 witness
+  rows are served with no `word_index` and 3 of them carry a human decision;
+  counting what cannot be clicked is how the badge went negative.
+
+**Left open, with its extent:** those 6 unmapped witness rows are still served
+scan-only. `tools/patch_witness_word_indices.py` exists for exactly this and was
+not run here - it is a data backfill on a queue that is being retired anyway (see
+the same day's witness-replacement recommendation), so it wants the user's call
+rather than a drive-by.
+
+**308 tests green** (292 non-Playwright + 16 Playwright), server restarted.
+
+**What klal 88 actually has left: 2 open items, both semantic flags from
+2026-08-18**, neither a machine-vs-machine dispute:
+`w746 גוסיידו` (hapax - appears once in Part 1, zero times in the 6.18M-word
+reference corpus, flagged as a possible corruption of `גופיידו`) and
+`w778 וכאבל` (`כ` for `ב`, the second occurrence in the klal - `ובאבל` is the
+expected form, and the same word in the klal's own title reads `וכאבל` too).
+
 ### CONFIRMED 2026-08-25 — `reconstruction_witness_queue.json` is Tesseract, and it should be replaced by Surya, not by a VLM. Measured, not argued.
 
 User asked to confirm the Tesseract provenance and recommend a replacement
@@ -140,13 +214,33 @@ A block carrying a NEIGHBOUR's text cannot agree with this klal's stored text at
 the same confusion behind klal 1's `דנראח` printer's typo**, so a marker misread
 of exactly this shape is the expected artifact, not a surprise.
 
-**Stated as a measurement, not a verdict:** the decisive check is rendering the
-scan at those three markers, which is one page-render each and was not done here
-(it is the user's item, and three fix attempts have already regressed the corpus).
-But if it holds, the open item's real extent is **2 klalim (162, 163), not 5**,
-and the remaining work is a marker-read fix rather than another pass at
-`split_block_across_klalim()` — which matters, because that function is the one
-Lesson 31 says to stop retuning.
+**CONFIRMED against the ink the same day, after the user asked what they were
+supposed to have checked in klal 8.** All three markers were rendered from
+`berlin_square_corrected.pdf` at 400 DPI, with the page index proven first by
+pixel-correlating a 72-DPI render against the correctly-indexed
+`images/pdf_pages/page_N.png` (Lesson 30 - page 18 scored 0.864 on `doc[17]`
+against 0.172 on `doc[18]`):
+
+| klal | printed | Surya read | verdict |
+| ---: | :--- | :--- | :--- |
+| 8 | `ח` + `איידי משתבח ביה` | `ה` | **marker misread** - the block is klal 8's own text |
+| 88 | `פח בשבת` | `פה` | **marker misread** |
+| 202 | `רב היכא` | `רא` | **marker misread** |
+
+**So open item 00's real extent is 2 klalim (162, 163), not 5**, and the
+remaining work is a marker-read fix rather than another pass at
+`split_block_across_klalim()` - which matters, because that function is the one
+Lesson 31 says to stop retuning. Two of the three are the ח/ה pair behind klal
+1's `דנראח` typo, now this printing's best-confirmed confusion.
+
+**One false alarm, recorded so nobody re-opens it:** at 400 DPI klal 8's bold
+opening word looks like it carries a tall stroke where the corpus has a yod
+(`אוידי` for `איידי`). It is a display-type artifact, not a variant reading -
+the ordinary-weight `איידי` occurs 17 times on the same page with the same
+letter count, DocAI's competitor reading was the garbled `אייךו`, the VLM and
+Surya both read `איידי`, the vision arbiter confirmed the corpus at 0.98, and
+the reviewer decided it as `איידי` on 2026-08-21. Lesson 14's territory: a
+decorative opening letter is the wrong place to judge stroke height.
 
 ### FIXED 2026-08-25 — pages 248-337 re-extracted. The stale-page-file defect was 40 pages, not the 14 my first sweep found.
 

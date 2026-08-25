@@ -4,7 +4,7 @@
 
 **WHAT THE CORPUS IS — corrected 2026-08-25, and it corrects every doc that described it.** The 667 klalim are **Klalei HaGemara in its entirety** (the work's part one), scan pages 14–247, ending `סליקו כללי הגמרא` on page 247. `part1.json`/`part2.json`/`part3.json` are three FILE CHUNKS of that one part — klalim 1–222, 223–444, 445–667 — **not** the work's three parts. **Klalei HaPoskim (`חלק שני`, pages 254–291) and Klalei HaDinim (`חלק שלישי`, pages 292–329) have never been extracted, aligned, or reviewed** — 76 pages, boundaries confirmed 2026-08-25 from freshly re-extracted headers. Within Klalei HaGemara itself, **115 klalim hold a placeholder instead of text** (open item 16); real text stands at 552 of 667 klalim. Evidence and the four independent confirmations: `PROJECT-STATUS-HISTORY.md`, 2026-08-25. The Parts 2-3 gate is unaffected — it names those files, and they are the same files they always were, on their own pages (77–164, 164–247) with their own scan-linkage risk. Only the label was wrong.
 
-**Part 1 Status (klalim 1-222), re-measured live 2026-08-25.** 222/222 klalim have trusted page-to-klal alignment. The dashboard serves **1,061 flagged word positions across 185 klalim** = 538 pipeline candidates (all vision-adjudicated) + 364 multi-witness consensus disputes, 72 of them on the same position. **997 open, 64 decided, 356 machine-resolved** (118 of those are `docai_ligature_artifact`). 126 klalim carry an open revisit flag.
+**Part 1 Status (klalim 1-222), re-measured live 2026-08-25 after the count fix below.** 222/222 klalim have trusted page-to-klal alignment. The dashboard serves **1,061 flagged word positions across 185 klalim** = 538 pipeline candidates (all vision-adjudicated) + 364 multi-witness consensus disputes, 72 of them on the same position. **970 open, 91 decided, 357 machine-resolved** (118 of those are `docai_ligature_artifact`). 126 klalim carry an open revisit flag. The earlier figures (997/64/356) double-counted words claimed by two sources — see open item 17.
 
 **Parts 2–3 Status — CORRECTION, 2026-08-20; the flag PROVENANCE re-checked and corrected 2026-08-23.** The 1,496 noisy auto-flags were purged. **They were lexicon-gap and dropped-lamed detector output, NOT Tesseract** — this line previously read "Tesseract/lexicon-gap auto-flags", which conflated two different things and has since been read as "the Parts 2-3 witness set is Tesseract-based". Checked directly against the pre-purge log (`1e59522~1`): the 2,088 Parts 2–3 records carry reviewer tags `ai-lexicon-gap-parts23` + v2 + v3 (1,745), `ai-dropped-lamed-parts23` (320), `ai-scan-verified-parts23-boundary` (17) and `ai-pattern-b-sweep-incidental` (6) — no Tesseract tag among them. The only Tesseract artifact in this repo is `reconstruction_witness_queue.json` (419 items, `docai_reading`/`tesseract_reading`), and it covers klalim 30, 75 and 88 — **all Part 1**. Caveat kept rather than glossed: this repo excludes `archive/`, so a Tesseract pass could have lived in a script not tracked here; if any Parts 2–3 signal WAS Tesseract-derived that argues for rebuilding rather than reusing it, since Tesseract measured correct in only 16 of 419 disagreements (3.8%) vs DocAI's 91.2%. The purge itself was (confirmed clean: all `ai-*`-tagged, zero human decisions lost, `part2.json`/`part3.json` text itself untouched — see `PROJECT-STATUS-HISTORY.md`). **But the 312 replacement candidates in `corrections_part2.json`/`corrections_part3.json` were NOT actually produced by `VlmWitnessEngine` or any real vision call** — every entry shared an identical placeholder bbox, `page: null`, a hardcoded `confidence: 0.95`, and `vision_transcription` trivially equal to the proposed correction; the real `vlm_witness_cache` table backing that engine holds only 5 unrelated rows; no generator script for these files exists anywhere in the repo. **Pulled from the dashboard 2026-08-20** (both files emptied to `{}`, user-authorized) — no longer shown as VLM-verified. Full evidence in `PROJECT-STATUS-HISTORY.md`'s 2026-08-20 "BUG FOUND" entry.
 
@@ -64,16 +64,17 @@ to) as state changes** — that discipline is what drifted last time.
     attempts reverted rather than risk the 190 klalim the re-render improved;
     this wants a scoped change with its own before/after. Context: the same
     re-render cut mis-assignment from 15 klalim to 4.
-    **MEASURED 2026-08-25, and it may shrink this item from 5 klalim to 2:** the
+    **CONFIRMED AGAINST THE INK 2026-08-25 — this item is 2 klalim, not 5.** The
     detector behind it ("the klal's Surya text opens with a neighbour's marker")
-    cannot tell a mis-assigned block from a MISREAD marker glyph. Klalim 8
-    (`ח`→`ה`), 88 (`פח`→`פה`) and 202 (`רב`→`רא`) agree with their own stored
-    text at **87%, 89% and 93%** — a block carrying a neighbour's text cannot do
-    that; genuinely mis-assigned klal 162 sits at **9%**. The ח/ה pair is the
-    same confusion behind klal 1's `דנראח` printer's typo. If a scan render at
-    those three markers confirms it, the remaining work is a marker-read fix and
-    NOT another pass at `split_block_across_klalim()` (Lesson 31). Left for the
-    user, whose item this is.
+    cannot tell a mis-assigned block from a MISREAD marker glyph. Klalim 8, 88
+    and 202 agree with their own stored text at 87%, 89% and 93% (genuinely
+    mis-assigned klal 162 sits at 9%), and rendering all three markers at 400 DPI
+    settles it: the page prints `ח`, `פח בשבת` and `רב היכא`, where Surya read
+    `ה`, `פה`, `רא`. **All three are marker misreads; their blocks are correctly
+    assigned.** Two are the ח/ה pair behind klal 1's `דנראח` typo. **Only klalim
+    162 and 163 are really mis-assigned**, so the remaining work is a marker-read
+    fix, NOT another pass at `split_block_across_klalim()` (Lesson 31). Nothing
+    to review in klalim 8/88/202 on account of this item.
 
 0. **STANDING RULE, added 2026-08-24 (user directive): never fix one instance —
    sweep the corpus for the class.** Whenever you find and fix an issue, review
@@ -443,6 +444,27 @@ to) as state changes** — that discipline is what drifted last time.
     claims** — the HTML ledger's "klalim with no extracted text: 0" (true of
     `part1.json`, false of the corpus) and the case doc's "all 667 klalim
     extracted"; both now say 552 of 667.
+
+17. **FIXED 2026-08-25 (reviewer-reported): klal 88's nav badge read −1 while
+    words were still outstanding.** 2026-08-24's finding F1 made
+    `correction_count` count distinct word_indexes to match `api_klal()`'s merge,
+    but left `decided_count` and `machine_disputed_count` summing their sources,
+    so a word claimed by two sources counted once in the total and twice in
+    decided. **Swept: 3 klalim (30, 88, 91) carried 6 phantom decisions**; klal
+    88 had enough to cross zero, the other two were silently under-reporting open
+    work. Two of klal 88's three came from witness rows with `word_index: None` —
+    never rendered, still counted. Fixed by classifying the one entry that
+    survives the merge instead of adding up sources, so the tri-state sums to the
+    total by construction. **A second divergence surfaced in the same check**:
+    a witness row with a vision A/B verdict renders green in the text pane while
+    the server called it disputed (klalim 30 and 75, 6 and 2 words) — the server
+    now follows the screen. Corpus totals moved from 997/64/356 to **970 open,
+    91 decided, 357 machine-resolved**; the 1,061 total is unchanged. Two
+    regression tests, the first proven to fail against the pre-fix server with
+    the reviewer's exact symptom. **Still open, small:** 6 witness rows are served
+    with no `word_index` and cannot be clicked;
+    `tools/patch_witness_word_indices.py` exists for it, but the queue is being
+    retired anyway (item 3a), so it needs a decision rather than a drive-by.
 
 ## Recent work (2026-08-21)
 

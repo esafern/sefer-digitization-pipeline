@@ -1502,6 +1502,90 @@ def test_nav_counts_match_what_the_text_pane_actually_renders(part1_by_id):
         f"renders (klal_id, nav, rendered): {offenders[:8]}")
 
 
+def test_nav_tristate_matches_what_each_word_actually_renders_as(part1_by_id):
+    """REGRESSION 2026-08-25, reported by the reviewer: "there were more words
+    highlighted than the count so it is now -1 even though a few are outstanding."
+
+    2026-08-24's fix made `correction_count` count DISTINCT word_indexes, mirroring
+    api_klal()'s merge - but left `decided_count` and `machine_disputed_count`
+    adding up their sources independently. A word claimed by two sources (klal 88
+    w327: a witness decision at a position a manual_correction already covers) was
+    counted once in the total and twice in decided, so `open_count = total -
+    decided` went NEGATIVE. Two more of klal 88's phantom decisions came from
+    witness rows whose word_index is None - never rendered, still counted. Swept:
+    3 klalim (30, 88, 91), 6 phantom decisions.
+
+    The total matching is not enough on its own; each of the three states has to
+    match too, or the legend and the nav badge describe a screen that isn't there.
+    This transcribes app.js's `wordState()`, which is the only thing that decides
+    what colour a reviewer actually sees. (The flag list it depends on is kept in
+    sync by test_machine_resolved_flags_agree_between_server_and_frontend.)"""
+    review_server = _import_from_path("review_server", os.path.join(REPO, "pipeline", "review_server.py"))
+    machine_resolved = set(review_server.MACHINE_RESOLVED_FLAGS)
+
+    def word_state(c):
+        # app.js wordState(), in the same order - an ai_flag is never human,
+        # a human decision wins, then a machine-resolved flag, then a witness's
+        # own vision verdict.
+        if c.get("opcode") == "ai_flag":
+            return "open"
+        if c.get("current_decision"):
+            return "human"
+        if c.get("flag") in machine_resolved:
+            return "machine"
+        if c.get("opcode") == "witness":
+            return "machine" if c.get("vision_selected") in ("A", "B") else "open"
+        return "open"
+
+    listing = review_server.api_klalim(1)
+    rows = listing if isinstance(listing, list) else listing.get("klalim", [])
+    offenders, negative, unbalanced = [], [], []
+    for row in rows:
+        states = [word_state(c) for c in review_server.api_klal(row["klal_id"])["corrections"]]
+        rendered = (states.count("human"), states.count("machine"), states.count("open"))
+        nav = (row["decided_count"], row["machine_resolved_count"], row["machine_disputed_count"])
+        if rendered != nav:
+            offenders.append((row["klal_id"], nav, rendered))
+        if row["open_count"] < 0:
+            negative.append((row["klal_id"], row["correction_count"], row["decided_count"]))
+        if row["correction_count"] != sum(nav):
+            unbalanced.append((row["klal_id"], row["correction_count"], nav))
+
+    assert not negative, (
+        f"open_count went negative - decided is being counted more times than the "
+        f"word is rendered (klal_id, total, decided): {negative}")
+    assert not unbalanced, (
+        f"the tri-state does not add up to correction_count (klal_id, total, "
+        f"(decided, resolved, disputed)): {unbalanced[:8]}")
+    assert not offenders, (
+        f"{len(offenders)} klal(im) whose nav tri-state disagrees with what the text "
+        f"pane renders (klal_id, nav, rendered): {offenders[:8]}")
+
+
+def test_witness_rows_served_without_a_word_index_are_never_counted(part1_by_id):
+    """A witness row with `word_index: None` cannot be highlighted - api_klal()
+    skips it explicitly ("scan-only and stay that way"). Six such rows are served
+    today and three of them carry a human decision, which the old count added to
+    `decided_count` for a word the reviewer could never have clicked. Counting
+    what cannot be reached is how klal 88's badge went to -1."""
+    review_server = _import_from_path("review_server", os.path.join(REPO, "pipeline", "review_server.py"))
+    unmapped = [w for w in review_server._load_witness_queue() if w.get("word_index") is None]
+    if not unmapped:
+        return  # patched away upstream - nothing to guard
+    by_klal = {}
+    for w in unmapped:
+        by_klal.setdefault(w["klal_id"], []).append(w)
+    for kid, rows in by_klal.items():
+        served = review_server.api_klal(kid)["corrections"]
+        token_indexes = {c.get("docai_token_index") for c in served}
+        for w in rows:
+            assert w["docai_token_index"] not in token_indexes or any(
+                c.get("word_index") is not None for c in served
+                if c.get("docai_token_index") == w["docai_token_index"]), (
+                f"klal {kid}: witness token {w['docai_token_index']} has no word_index "
+                "but is served as a standalone entry")
+
+
 def test_machine_resolved_flags_agree_between_server_and_frontend():
     """A flag counted as machine-RESOLVED by the server but not by the frontend
     (or vice versa) renders the same word with two different verdicts on one

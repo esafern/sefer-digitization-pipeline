@@ -665,22 +665,7 @@ def api_klalim(part_num=1):
     for k in klalim:
         kid = k["klal_id"]
         entries = corrections.get(str(kid), [])
-        corr_decided_count = sum(1 for c in entries if (kid, c["word_index"]) in decided)
-        # Tri-state split for the legend's corpus-wide counts: a human
-        # decision always wins (see wordState() in app.js), otherwise
-        # 'current_text_confirmed' means the vision pass resolved it,
-        # otherwise it's still an open dispute nobody has looked at.
-        machine_resolved_count = sum(
-            1 for c in entries
-            if (kid, c["word_index"]) not in decided and c.get("flag") in MACHINE_RESOLVED_FLAGS
-        )
-        corr_machine_disputed_count = len(entries) - corr_decided_count - machine_resolved_count
-
         w_entries = witness_by_klal.get(kid, [])
-        w_decided_count = sum(
-            1 for w in w_entries if (kid, w["docai_token_index"]) in witness_decided
-        )
-        w_machine_disputed_count = len(w_entries) - w_decided_count
 
         # Word-level ai_flag corrections (bug #1 fix, earlier today) were
         # highlighted in the text pane but never counted here - a klal could
@@ -711,28 +696,74 @@ def api_klalim(part_num=1):
             and 0 <= fwidx < n_words
         )
 
-        manual_count = manual_count_by_klal.get(kid, 0)
-        # FIXED 2026-08-24 (code review of this session's own work). api_klal() now
-        # MERGES colliding entries via _claim_word_index() - manual-over-candidate,
-        # flag-over-candidate, witness-over-candidate - but this line still added
-        # every source independently, so the nav and legend counted items the text
-        # pane never renders. Measured before the fix: nav 1201 vs 1021 rendered,
-        # across 88 klalim. open_count therefore overstated the remaining work and
-        # could never reach zero. Count the DISTINCT word_indexes each source
-        # contributes, the same way the merge collapses them.
-        # These four lines must mirror api_klal()'s own skip conditions exactly;
-        # tests/test_corpus_invariants.py::test_nav_counts_match_what_the_text_
-        # pane_renders asserts they still do, so the two cannot drift apart again.
-        _counted = {e["word_index"] for e in entries if e.get("opcode") != "delete"}
-        _counted |= {w["word_index"] for w in w_entries
-                     if w.get("word_index") is not None
-                     and 0 <= w["word_index"] < n_words
-                     and w["word_index"] not in manual_indices}
-        _counted |= manual_indices_for_count
-        _counted |= ai_flag_indices_for_count
-        total_count = len(_counted) + sum(1 for e in entries if e.get("opcode") == "delete")
-        decided_count = corr_decided_count + w_decided_count + manual_count
-        machine_disputed_count = corr_machine_disputed_count + w_machine_disputed_count + ai_flag_count
+        # api_klal() MERGES colliding entries via _claim_word_index() -
+        # manual-over-candidate, flag-over-candidate, witness-over-candidate - so
+        # ONE entry per word_index survives to be rendered. These counts must
+        # describe that surviving entry.
+        #
+        # FIXED 2026-08-24 (code review): the totals used to add every source
+        # independently, counting items the text pane never renders - nav 1201 vs
+        # 1061 rendered across 88 klalim.
+        # FIXED 2026-08-25 (user report: "klal 88 shows -1 even though a few are
+        # outstanding"): that fix made only the NUMERATOR distinct and left
+        # decided_count and machine_disputed_count summing their sources, so a
+        # word claimed by two of them - a witness decision at a position a
+        # manual_correction already covers, klal 88 w327 - was counted once in
+        # the total and twice in decided, and open_count went NEGATIVE. Swept the
+        # corpus: 3 klalim (30, 88, 91) carried 6 such phantom decisions; only 88
+        # had enough of them to cross zero. Two of klal 88's three came from
+        # witness rows whose word_index is None: never rendered, still counted.
+        #
+        # Classify the surviving entry instead, in api_klal()'s own source order.
+        # The tri-state then sums to the total BY CONSTRUCTION, not by
+        # coincidence - which is the property
+        # tests/test_corpus_invariants.py asserts.
+        DECIDED, RESOLVED, DISPUTED = "decided", "machine_resolved", "machine_disputed"
+
+        def _machine_state(entry):
+            # A human decision always wins (wordState() in app.js), otherwise a
+            # machine-resolved flag, otherwise nobody has looked at it yet.
+            if (kid, entry["word_index"]) in decided:
+                return DECIDED
+            return RESOLVED if entry.get("flag") in MACHINE_RESOLVED_FLAGS else DISPUTED
+
+        state = {}
+        for e in entries:                                   # 1. machine candidates
+            if e.get("opcode") == "delete":
+                continue                                    # no word_index slot of its own
+            state[e["word_index"]] = _machine_state(e)
+        for wi in manual_indices_for_count:                 # 2. born decided
+            state[wi] = DECIDED
+        for wi in ai_flag_indices_for_count:                # 3. only when standalone;
+            state.setdefault(wi, DISPUTED)                  #    otherwise it just overlays
+        for w in w_entries:                                 # 4. witness disagreements
+            wi = w.get("word_index")
+            if wi is None or not (0 <= wi < n_words) or wi in manual_indices:
+                continue                                    # not rendered - see api_klal()
+            if wi in state:
+                continue                                    # overlaid onto a richer entry
+            # A witness item the vision pass called (A or B) renders GREEN in
+            # the text pane - app.js's wordState() treats a vision verdict on a
+            # witness exactly as it treats `current_text_confirmed` on a
+            # candidate. This function used to call every undecided witness
+            # DISPUTED, which put klalim 30 and 75 on screen with more green
+            # words than the nav badge admitted (6 and 2). Same divergence class
+            # as `docai_ligature_artifact` in 2026-08-24's finding F2: the screen
+            # is the ground truth, so the count follows it.
+            if (kid, w["docai_token_index"]) in witness_decided:
+                state[wi] = DECIDED
+            elif w.get("vision_selected") in ("A", "B"):
+                state[wi] = RESOLVED
+            else:
+                state[wi] = DISPUTED
+
+        all_states = list(state.values()) + [
+            _machine_state(e) for e in entries if e.get("opcode") == "delete"
+        ]
+        total_count = len(all_states)
+        decided_count = all_states.count(DECIDED)
+        machine_resolved_count = all_states.count(RESOLVED)
+        machine_disputed_count = all_states.count(DISPUTED)
 
         punct_entries = punct_candidates.get(str(kid), [])
         punct_decided_count = sum(
