@@ -213,6 +213,41 @@ def test_klal_flag_panel_saves_and_shows_in_nav(server, page):
     assert "1" == visible_items.first.locator(".nid").inner_text()
 
 
+def test_manual_correction_panel_auto_closes_after_a_save(server, page):
+    """REGRESSION 2026-08-25 (reviewer: "after save correction the right pane
+    should auto-close").
+
+    The manual-correction panel was the one panel in the app that stayed open
+    after a save - it re-opened itself against the fresh post-save state, on the
+    reasoning that the refreshed content was the confirmation. It is also the
+    panel a reviewer uses most, so it was the one leaving a pane to dismiss by
+    hand after every correction. It must now behave like the other four: flash
+    the confirmation, hold it, close.
+
+    Asserts the whole sequence, not just the flash - a test that only waited for
+    `.save-status.show` would have passed against the old behaviour too."""
+    _open_dashboard(page, server, 1)
+
+    page.locator("#klal-block-1 .plain-word").first.click()
+    page.wait_for_selector("#manual-panel.open", timeout=5000)
+
+    page.fill("#manual-correction-text", "בדיקה")
+    page.fill("#manual-correction-note", "e2e auto-close test")
+    page.click("#save-manual-correction-btn")
+
+    # the confirmation is shown...
+    page.wait_for_selector("#manual-save-status.show", timeout=5000)
+    assert page.locator("#manual-panel.open").count() == 1, (
+        "the panel must stay open long enough for the reviewer to see the confirmation")
+
+    # ...and then the panel closes itself, with no click from the reviewer.
+    page.wait_for_function(
+        "() => !document.querySelector('#manual-panel').classList.contains('open')",
+        timeout=6000)
+    assert page.locator("#backdrop.open").count() == 0, (
+        "auto-close must dismiss the backdrop too, exactly as the X button does")
+
+
 def test_decisions_api_reflects_saved_state(server):
     data = _get_json(server, "/api/klal/1/flag")
     # written by test_klal_flag_panel_saves_and_shows_in_nav, which runs

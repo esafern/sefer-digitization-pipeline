@@ -738,10 +738,10 @@ function dismissPanels() {
 // for the same reason those are already wired to the same handler: an
 // auto-close should behave identically to a manual one, including
 // clearing scan focus). Shared by every save function that already used
-// the .save-status pattern (disputed/klal-flag/punctuation/witness) -
-// the manual-correction panel deliberately keeps its own different
-// confirmation (re-rendering the panel with the fresh post-save state IS
-// its confirmation - see openManualCorrectionPanel's own comment on why).
+// the .save-status pattern. As of 2026-08-25 that is ALL FIVE panels -
+// the manual-correction panel kept its own re-render-as-confirmation
+// behaviour until a reviewer pointed out it was the one panel they still
+// had to close by hand after every correction.
 const DECISION_SAVED_CLOSE_DELAY_MS = 2000;
 // Incremented on every openPanel() call - same generation-counter pattern
 // showPage()'s own _showPageGen already uses for the identical class of
@@ -1186,7 +1186,13 @@ async function saveManualDecision(klalId, wordIndex, word, chosenText, note) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ klal_id: klalId, word_index: wordIndex, original_word: word, chosen_text: chosenText, note }),
   });
-  if (!res.ok) { alert('Save failed: ' + (await res.text())); return null; }
+  // Returns FALSE on failure specifically, so a caller can tell a failed save
+  // from a successful one that produced no synthetic entry to return (a delete
+  // can legitimately leave nothing at this word_index). Before the panel
+  // auto-closed, both cases were `null` and both simply skipped the re-render,
+  // so the distinction did not matter; now one must flash-and-close and the
+  // other must not.
+  if (!res.ok) { alert('Save failed: ' + (await res.text())); return false; }
 
   delete mountedKlal[klalId];
   delete fetchInFlight[klalId];
@@ -1280,6 +1286,7 @@ async function openManualCorrectionPanel(klalId, wordIndex, word, existing) {
       ${isAiFlag ? `<button class="panel-btn secondary" id="accept-current-text-btn">Accept current text</button>` : ''}
       <button class="panel-btn secondary" id="delete-manual-word-btn">Delete this word</button>
       ${isAiFlag || (existing && existing.word_flag) ? `<button class="panel-btn secondary" id="clear-word-flag-btn-manual">Clear revisit flag</button>` : ''}
+      <span class="save-status" id="manual-save-status">Saved ✓</span>
     </div>
     ${existing ? `
     <div class="panel-section">
@@ -1288,12 +1295,17 @@ async function openManualCorrectionPanel(klalId, wordIndex, word, existing) {
     </div>` : ''}
   `;
 
-  // No separate "Saved" flash here (unlike every other panel in this
-  // app) - both actions below re-open this same panel against the fresh
-  // post-save state on success, and that refreshed content (the new
-  // "Correction on record" text, or "Marked for deletion") IS the
-  // confirmation; a flash immediately clobbered by that re-render would
-  // never actually be seen.
+  // CHANGED 2026-08-25 (user-requested: "after save correction the right pane
+  // should auto-close"). This panel used to be the one exception in the app: on
+  // save it RE-OPENED itself against the fresh post-save state, on the reasoning
+  // that the refreshed content ("Correction on record" / "Marked for deletion")
+  // was itself the confirmation. In practice that left the reviewer to dismiss a
+  // panel by hand after every single correction - the exact complaint that
+  // produced flashSavedThenClose() for the other four panels on 2026-08-21, and
+  // the manual panel is the one a reviewer uses most. It now behaves like the
+  // rest: flash the confirmation, hold it, close. The re-render is no longer
+  // needed as confirmation because the word itself turns green in the text pane
+  // (renderKlalBody has already run inside saveManualDecision by then).
   const useSuggestedBtn = document.getElementById('use-suggested-word-btn');
   if (useSuggestedBtn && suggestedWord) {
     useSuggestedBtn.onclick = () => {
@@ -1306,8 +1318,8 @@ async function openManualCorrectionPanel(klalId, wordIndex, word, existing) {
     const text = document.getElementById('manual-correction-text').value.trim();
     if (!text) { alert('Enter the corrected reading first (or use Delete this word instead).'); return; }
     const note = document.getElementById('manual-correction-note').value.trim();
-    const freshCorr = await saveManualDecision(klalId, wordIndex, word, text, note);
-    if (freshCorr) openManualCorrectionPanel(klalId, wordIndex, word, freshCorr);
+    const saved = await saveManualDecision(klalId, wordIndex, word, text, note);
+    if (saved !== false) flashSavedThenClose('manual-save-status');
   };
 
   // "Accept current text" — dismisses an AI flag without a text change.
@@ -1318,9 +1330,9 @@ async function openManualCorrectionPanel(klalId, wordIndex, word, existing) {
   if (isAiFlag) {
     document.getElementById('accept-current-text-btn').onclick = async () => {
       const note = document.getElementById('manual-correction-note').value.trim();
-      const freshCorr = await saveManualDecision(klalId, wordIndex, word, word,
+      const saved = await saveManualDecision(klalId, wordIndex, word, word,
         note || 'AI flag reviewed — current text confirmed');
-      if (freshCorr) openManualCorrectionPanel(klalId, wordIndex, word, freshCorr);
+      if (saved !== false) flashSavedThenClose('manual-save-status');
     };
   }
 
@@ -1374,8 +1386,8 @@ async function openManualCorrectionPanel(klalId, wordIndex, word, existing) {
     }
     deleteArmed = false;
     const note = document.getElementById('manual-correction-note').value.trim();
-    const freshCorr = await saveManualDecision(klalId, wordIndex, word, '', note);
-    if (freshCorr) openManualCorrectionPanel(klalId, wordIndex, word, freshCorr);
+    const saved = await saveManualDecision(klalId, wordIndex, word, '', note);
+    if (saved !== false) flashSavedThenClose('manual-save-status');
   };
 
   if (existing) {

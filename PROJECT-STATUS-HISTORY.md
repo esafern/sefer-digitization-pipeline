@@ -17,6 +17,54 @@ current file references, or when grepping for how a past finding was
 resolved. Same append-at-top convention as before: newest entries go right
 after this header, not at the bottom.
 
+### UX FIX 2026-08-25 (user-requested) — the manual-correction panel now auto-closes after a save, like the other four.
+
+"after save correction the right pane should auto-close."
+
+**It was the one panel in the app that did not.** `flashSavedThenClose()` was
+added 2026-08-21 for exactly this complaint and wired into four panels -
+disputed, klal-flag, punctuation, witness. The manual-correction panel was
+deliberately excluded, and its own comment said why: on save it RE-OPENED itself
+against the fresh post-save state, so the refreshed content ("Correction on
+record" / "Marked for deletion") was the confirmation, and a flash would have
+been clobbered by that re-render.
+
+**That reasoning was sound and still produced the wrong outcome.** It is the
+panel a reviewer uses most - every `manual_correction` goes through it, and it
+is where `ai_flag` and `manual` words are routed - so the one panel left open by
+design was the one being dismissed by hand dozens of times a session. Consistency
+across five panels beats a locally-clever exception, and the confirmation the
+re-render provided is now carried by the word itself turning green in the text
+pane (`renderKlalBody` has already run inside `saveManualDecision` by the time
+the flash fires).
+
+**All three save paths in that panel now flash-and-close**: "Save correction",
+"Accept current text" (the AI-flag dismissal), and the second click of "Delete
+this word". The arm-then-confirm delete is unaffected - the first click only
+arms the button and saves nothing.
+
+**One real bug fixed on the way, which the old code could not have hit.**
+`saveManualDecision()` returned `null` both for a FAILED save and for a
+successful one that produced no synthetic entry to hand back - and a delete can
+legitimately leave nothing at that word_index. While the only consumer was a
+re-render, both cases did the same harmless thing. With auto-close they must
+differ: one has to flash-and-close, the other must not. It now returns `false`
+specifically on failure.
+
+**`Clear revisit flag` was left alone**: it already dismissed the panel
+immediately. It closes without a confirmation flash, which is a smaller
+inconsistency in the other direction and was not what the user asked for -
+recorded here rather than changed unasked.
+
+**Playwright regression test, proven to fail before it passed.** Against the
+pre-fix `app.js` it fails on `#manual-save-status.show` never appearing; against
+the fix it passes. It asserts the whole sequence - flash appears, panel is still
+open at that moment, panel then closes on its own, backdrop dismissed with it -
+because a test that only waited for the flash would have passed against the old
+behaviour too the moment a status element existed.
+
+309 tests green (293 non-Playwright + 16 Playwright), server restarted.
+
 ### FIXED 2026-08-25 — klal 88's nav badge showed **-1** while words were still outstanding. The 2026-08-24 fix had corrected the numerator and left the denominator.
 
 Reported by the reviewer working klal 88: "there were also more words highlighted
