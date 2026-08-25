@@ -4136,3 +4136,54 @@ def test_ligature_repair_degrades_visibly_when_the_reference_corpus_is_absent():
     detectable by the caller so it can warn."""
     assert dlf.repair_word("איבא", {}) is None
     assert dlf.reference_frequencies("/nonexistent/word_freq.json") == {}
+
+# --- Sefaria ingest export (2026-08-25) --------------------------------------
+# The corpus holds 115 klalim whose entire stored text is a generated
+# placeholder ("רנ כלל 250"). Shipping those to a public library as text would
+# publish fabricated content under a real citation address, which is the worst
+# thing this pipeline could do; they must export as an empty segment instead.
+# And because the address of every later klal depends on this array's indices,
+# a gap in klal numbering has to be an error, not a silently dropped row.
+
+def test_is_placeholder_separates_generated_stubs_from_real_text():
+    assert exp.is_placeholder("רנ כלל 250") is True
+    assert exp.is_placeholder("  תרסז   כלל   667  ") is True
+    assert exp.is_placeholder("ריח הניחא למ\"ד מופנה מצד אחד למידין") is False
+    assert exp.is_placeholder("") is False
+    assert exp.is_placeholder(None) is False
+    # a real klal that merely MENTIONS a cross-reference is not a placeholder
+    assert exp.is_placeholder("רנ כלל 250 ועיין מה שכתבתי") is False
+
+
+def test_sefaria_export_empties_placeholders_and_keeps_real_text(tmp_path):
+    klalim = [
+        {"klal_id": 1, "clean_text": "א אי תניא תניא מדברי רש\"י"},
+        {"klal_id": 2, "clean_text": "ב כלל 2"},
+        {"klal_id": 3, "clean_text": "ג  ועוד   מצינו "},
+    ]
+    n = exp.export_sefaria(klalim, str(tmp_path))
+    assert n == 3
+    version = json.load(open(tmp_path / "version_hebrew.json", encoding="utf-8"))
+    assert version["text"] == [
+        ["א אי תניא תניא מדברי רש\"י"],
+        [""],                                  # the placeholder, not its stub text
+        ["ג ועוד מצינו"],                       # whitespace normalised, text intact
+    ]
+    assert version["versionSource"].startswith("https://www.google.com/books/")
+    assert "Berlin 1851/2" in version["versionTitle"]
+    assert "1 are not yet extracted" in version["versionNotes"]
+
+    index = json.load(open(tmp_path / "index.json", encoding="utf-8"))
+    node = index["schema"]["nodes"][0]
+    assert [n["key"] for n in index["schema"]["nodes"]] == ["Klalei HaGemara"]
+    assert node["depth"] == 2 and node["sectionNames"] == ["Klal", "Segment"]
+
+
+def test_sefaria_export_refuses_a_gap_rather_than_shifting_every_citation(tmp_path):
+    klalim = [
+        {"klal_id": 1, "clean_text": "א טקסט"},
+        {"klal_id": 3, "clean_text": "ג טקסט"},   # klal 2 missing
+    ]
+    with pytest.raises(SystemExit) as err:
+        exp.export_sefaria(klalim, str(tmp_path))
+    assert "[2]" in str(err.value)

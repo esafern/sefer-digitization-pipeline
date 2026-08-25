@@ -7,17 +7,26 @@ in exactly the same way apply_reviewer_decisions.py would, and writes the result
 in the requested format.
 
 Supported formats:
-  plain  - plain UTF-8 text, one klal per file or concatenated in one file
-  alto   - ALTO XML v4 (one file per page, word-level bboxes where available)
-  page   - PAGE XML 2019 (one file per page, word-level bboxes where available)
-  tei    - TEI P5 XML (one file for all, or one per klal with --by-klal)
+  plain   - plain UTF-8 text, one klal per file or concatenated in one file
+  alto    - ALTO XML v4 (one file per page, word-level bboxes where available)
+  page    - PAGE XML 2019 (one file per page, word-level bboxes where available)
+  tei     - TEI P5 XML (one file for all, or one per klal with --by-klal)
+  sefaria - Sefaria ingest pair: index.json (schema) + version_hebrew.json (text)
+
+Scope: every format defaults to part1.json (klalim 1-222), the reviewed third.
+`--all-parts` loads all three part files - klalim 1-667, the whole of Klalei
+HaGemara - and is the DEFAULT for the sefaria format, which is a whole-work
+deliverable rather than a review artifact. Human decisions are applied by
+klal_id either way; klalim with no decisions pass through unchanged.
 
 Usage:
-  python3 tools/export_corpus.py --format {plain,alto,page,tei} \\
-      --output-dir OUTPUT_DIR [--by-klal] [--klal-id KLAL_ID]
+  python3 tools/export_corpus.py --format {plain,alto,page,tei,sefaria} \\
+      --output-dir OUTPUT_DIR [--by-klal] [--klal-id KLAL_ID] [--all-parts]
 """
 import argparse
+import json
 import os
+import re
 import sys
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
@@ -557,6 +566,136 @@ def export_tei(klalim, output_dir, word_bboxes, all_corrections, all_manual, by_
 # XML pretty-print helper
 # ---------------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------
+# Sefaria ingest export
+# ---------------------------------------------------------------------------
+
+# Edition metadata for the scan this pipeline actually OCRs. Parameterised
+# rather than inlined because a different digitization work needs its own -
+# and because getting this wrong is not cosmetic: a version shipped under the
+# wrong edition attaches the wrong text to the wrong printing in a public
+# library. The previous hand-made export named the Livorno 1766 princeps via
+# NLI; the scan is the Berlin reprint, sourced from Google Books (see
+# START_HERE.md's scan section, confirmed 2026-08-18 against NLI catalog
+# record 990011859020205171).
+SEFARIA_TITLE = "Yad Malachi"
+SEFARIA_HE_TITLE = "יד מלאכי"
+SEFARIA_CATEGORIES = ["Rabbinic Thought", "Methodology"]
+SEFARIA_NODE_EN = "Klalei HaGemara"
+SEFARIA_NODE_HE = "כללי הגמרא"
+SEFARIA_VERSION_TITLE = "Berlin 1851/2 (Zittenfeld) — OCR, vision-adjudicated"
+SEFARIA_VERSION_SOURCE = "https://www.google.com/books/edition/_/OdiHjxI3I0EC"
+
+
+def _sefaria_index():
+    return {
+        "title": SEFARIA_TITLE,
+        "categories": list(SEFARIA_CATEGORIES),
+        "schema": {
+            "titles": [
+                {"lang": "en", "title": SEFARIA_TITLE, "primary": True},
+                {"lang": "he", "title": SEFARIA_HE_TITLE, "primary": True},
+            ],
+            "key": SEFARIA_TITLE,
+            "nodes": [{
+                "key": SEFARIA_NODE_EN,
+                "titles": [
+                    {"lang": "en", "title": SEFARIA_NODE_EN, "primary": True},
+                    {"lang": "he", "title": SEFARIA_NODE_HE, "primary": True},
+                ],
+                "nodeType": "JaggedArrayNode",
+                "depth": 2,
+                "addressTypes": ["Integer", "Integer"],
+                "sectionNames": ["Klal", "Segment"],
+            }],
+        },
+    }
+
+
+# A klal the chunker created but never filled: its whole stored text is the
+# gematria marker plus a generated "כלל N" title, e.g. "רנ כלל 250". 115 of
+# them exist in klalim 223-667 as of 2026-08-25. They are placeholders, not
+# text, and shipping them as text would put fabricated content into a public
+# library under a real citation address - the worst failure this pipeline can
+# have. They export as an EMPTY segment instead: the klal keeps its address,
+# and the absence is visible.
+_STUB_RE = re.compile(r"^\S+\s+כלל\s+\d+\s*$")
+
+
+def is_placeholder(clean_text):
+    return bool(_STUB_RE.match(" ".join((clean_text or "").split())))
+
+
+def export_sefaria(klalim, output_dir, version_title=None, version_source=None):
+    """Write Sefaria's ingest pair: index.json (schema) + version_hebrew.json.
+
+    Depth 2 (Klal -> Segment) with ONE segment per klal. Splitting a klal into
+    sentence-level segments would be an editorial act with no basis in the
+    printed page, and success criterion #1 forbids silent transformation; the
+    Segment level exists so a future segmentation can be added deliberately.
+
+    The klal's own gematria marker is left at the head of its text, as printed.
+    It duplicates the address, but removing it would edit the source.
+
+    Klal numbering is dense and 1-based, so index i of the text array is klal
+    i+1. Any gap would silently shift every later klal's address, so a missing
+    klal_id is an error here, not an empty row.
+    """
+    os.makedirs(output_dir, exist_ok=True)
+    by_id = {k["klal_id"]: k for k in klalim}
+    expected = list(range(1, max(by_id) + 1))
+    missing = [i for i in expected if i not in by_id]
+    if missing:
+        raise SystemExit(
+            f"sefaria export: klal ids are not contiguous - missing {missing[:10]}"
+            f"{'...' if len(missing) > 10 else ''}. Every later klal's citation "
+            "address would be wrong. Export all parts (--all-parts) or fix the corpus."
+        )
+
+    text, placeholders = [], []
+    for i in expected:
+        clean = " ".join(by_id[i]["clean_text"].split())
+        if is_placeholder(clean):
+            placeholders.append(i)
+            text.append([""])
+        else:
+            text.append([clean])
+
+    if placeholders:
+        print(f"  {len(placeholders)} klalim have no extracted text and export as an "
+              f"EMPTY segment (placeholder rows are never shipped as text):")
+        print(f"    {placeholders[:12]}{'...' if len(placeholders) > 12 else ''}")
+
+    notes = (
+        "OCR of the Berlin 1851/2 printing (Google Books scan), corrected through "
+        "an image-grounded review pipeline: every change is adjudicated against the "
+        "scan crop and recorded in an append-only decision ledger. "
+        f"{len(text) - len(placeholders)} of {len(text)} klalim carry extracted text; "
+        f"{len(placeholders)} are not yet extracted and are empty here. "
+        "Klalim 1-222 have been through word-level review; 223-667 have not."
+    )
+
+    version = {
+        "title": SEFARIA_TITLE,
+        "versionTitle": version_title or SEFARIA_VERSION_TITLE,
+        "versionSource": version_source or SEFARIA_VERSION_SOURCE,
+        "versionNotes": notes,
+        "language": "he",
+        "license": "Public Domain",
+        "text": text,
+    }
+
+    index_path = os.path.join(output_dir, "index.json")
+    version_path = os.path.join(output_dir, "version_hebrew.json")
+    with open(index_path, "w", encoding="utf-8") as f:
+        json.dump(_sefaria_index(), f, ensure_ascii=False, indent=2)
+        f.write("\n")
+    with open(version_path, "w", encoding="utf-8") as f:
+        json.dump(version, f, ensure_ascii=False, indent=2)
+        f.write("\n")
+    return len(text)
+
+
 def _write_pretty_xml(tree, path):
     """Serialise an ElementTree to a file with pretty indentation.
 
@@ -594,7 +733,8 @@ def main():
     parser = argparse.ArgumentParser(
         description="Export the reviewed Yad Malachi corpus in multiple archival formats."
     )
-    parser.add_argument("--format", required=True, choices=["plain", "alto", "page", "tei"],
+    parser.add_argument("--format", required=True,
+                        choices=["plain", "alto", "page", "tei", "sefaria"],
                         help="Output format")
     parser.add_argument("--output-dir", required=True,
                         help="Directory to write output files into")
@@ -602,12 +742,30 @@ def main():
                         help="Write one file per klal (plain and tei only)")
     parser.add_argument("--klal-id", type=int, default=None,
                         help="Export only this klal_id (for testing)")
+    parser.add_argument("--all-parts", dest="all_parts", action="store_true", default=None,
+                        help="Load klalim 1-667 (all three part files) instead of part1 only. "
+                             "Default for --format sefaria.")
+    parser.add_argument("--part1-only", dest="all_parts", action="store_false",
+                        help="Force part1-only scope, even for --format sefaria")
+    parser.add_argument("--version-title", default=None,
+                        help="sefaria only: override the version title")
+    parser.add_argument("--version-source", default=None,
+                        help="sefaria only: override the version source URL")
     args = parser.parse_args()
 
-    # Load corpus
-    klalim = cio.load_part1_sorted()
+    # Load corpus. The sefaria export is a whole-work deliverable, so it takes
+    # all three part files unless explicitly told otherwise; the review-oriented
+    # formats stay on part1 unless asked, since that is the reviewed scope.
+    all_parts = args.all_parts if args.all_parts is not None else (args.format == "sefaria")
+    if all_parts:
+        klalim = []
+        for path in (cio.PART1_PATH, cio.repo_path("part2.json"), cio.repo_path("part3.json")):
+            klalim.extend(cio.load_klalim(path) or [])
+        klalim.sort(key=lambda k: k["klal_id"])
+    else:
+        klalim = cio.load_part1_sorted()
     if not klalim:
-        print("ERROR: part1.json not found or empty.", file=sys.stderr)
+        print("ERROR: corpus not found or empty.", file=sys.stderr)
         sys.exit(1)
 
     if args.klal_id is not None:
@@ -616,7 +774,8 @@ def main():
             print(f"ERROR: klal_id {args.klal_id} not found in part1.json.", file=sys.stderr)
             sys.exit(1)
 
-    print(f"Loaded {len(klalim)} klal(im) from part1.json")
+    print(f"Loaded {len(klalim)} klal(im) from "
+          f"{'part1.json + part2.json + part3.json' if all_parts else 'part1.json'}")
 
     # Apply review decisions (in-memory only, no file writes)
     klalim = _apply_decisions_to_klalim(klalim)
@@ -634,6 +793,10 @@ def main():
         n = export_plain(klalim, out, by_klal=args.by_klal)
         label = "file(s)" if n > 1 else "file"
         print(f"plain: wrote {n} {label} to {out}")
+
+    elif fmt == "sefaria":
+        n = export_sefaria(klalim, out, args.version_title, args.version_source)
+        print(f"sefaria: wrote index.json + version_hebrew.json ({n} klalim) to {out}")
 
     elif fmt == "alto":
         n = export_alto(klalim, out, klal_regions, word_bboxes)

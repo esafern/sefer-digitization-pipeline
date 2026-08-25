@@ -18,11 +18,13 @@ public-domain title on record ([the table below](#the-free-to-digitize-tier-is-o
 straight onto a Sefaria schema), and **already scanned** — four editions in five scans in
 hand, one of them in clean square type, the kind general OCR reads best.
 
-**The text is built.** All **667 klalim of Klalei HaGemara** — ~179,000 words, scan pages
-14–247 — are extracted, chunked, and structured. Klalim **1–222** additionally carry the
-full verification pipeline: 222/222 trusted page-to-klal alignment, four independent
-witnesses read against the ink, and **1,061 flagged word positions** in a live review
-dashboard. Klalim 223–667 have text and page alignment but no witness set yet.
+**The text is largely built.** **552 of *Klalei HaGemara*'s 667 klalim** — ~179,000 words,
+scan pages 14–247 — are extracted, chunked, and structured; the remaining **115 are
+placeholders the chunker never filled**, all of them in klalim 223–667. Klalim **1–222**
+are complete and additionally carry the full verification pipeline: 222/222 trusted
+page-to-klal alignment, four independent witnesses read against the ink, and **1,061
+flagged word positions** in a live review dashboard. Klalim 223–667 have text and page
+alignment but no witness set yet.
 
 **What isn't done, stated plainly.** The book's other two parts — *Klalei HaPoskim*
 (pages 254–~295) and *Klalei HaDinim* (~296–331) — are scanned but **not extracted at
@@ -220,10 +222,11 @@ _Every figure below is read from the live corpus and dashboard, not from a past 
 
 | | |
 |:---|:---|
-| **Klalei HaGemara, complete** | 667 klalim, ~179,000 words, scan pages 14–247, extracted, chunked and structured |
-| **Klalim 1–222** (`part1.json`) | full verification pipeline: alignment, four witnesses, vision adjudication, live review dashboard |
+| **Klalei HaGemara, 552 of 667 klalim** | ~179,000 words, scan pages 14–247, extracted, chunked and structured |
+| **115 klalim** | placeholders the chunker never filled — all in klalim 223–667, none in 1–222 |
+| **Klalim 1–222** (`part1.json`) | complete, plus the full verification pipeline: alignment, four witnesses, vision adjudication, live review dashboard |
 | **Klalim 223–667** | text and page-level alignment built; **no witness set yet** |
-| **Klalei HaPoskim / HaDinim** | scanned (pages 254–331), **never extracted** |
+| **Klalei HaPoskim** (pages 254–291) · **Klalei HaDinim** (292–329) | scanned, **never extracted** |
 
 ### Klalim 1–222, in detail
 
@@ -267,7 +270,11 @@ _Every figure below is read from the live corpus and dashboard, not from a past 
   behind independent confirmation that the reviewed third is clean — a standing decision,
   on the reasoning that a clean first third is not evidence the rest comes out clean by the
   same process.
-- **Klalei HaPoskim and Klalei HaDinim have not been started.** Roughly 78 scanned pages.
+- **115 klalim in 223–667 hold a placeholder instead of text.** They export as an empty
+  segment rather than as fabricated content, and filling them is extraction work, not
+  review work.
+- **Klalei HaPoskim (pages 254–291) and Klalei HaDinim (292–329) have not been started.**
+  76 scanned pages, each part with its own numbering, independent of Klalei HaGemara's.
   Extraction there is a fresh run, not a rerun.
 
 ## Cost & effort
@@ -298,7 +305,10 @@ The last mile keeps two things separate — **the text** and **the links**:
   read-time Dicta layer); *do* proof against the image, strip cruft (running headers, page
   numbers, stamps), and **segment into the schema** (*Yad Malachi, Klalei HaGemara,
   Klal N*). The schema this project already emits declares exactly one node —
-  `Klalei HaGemara` — which is what the corpus actually is.
+  `Klalei HaGemara` — which is what the corpus actually is. `tools/export_corpus.py
+  --format sefaria` writes that pair (`index.json` + `version_hebrew.json`) directly, with
+  the 115 unfilled klalim emitted as empty segments so their citation addresses stay
+  correct and nothing fabricated ships as text.
 - **Links.** Don't hand-insert them — Sefaria's **Auto-Linker** builds them from parseable
   citations (title spelled out + numeric ref).[^linker] So the useful "normalization" is on
   the *citation references*, not the prose. Design the schema's addressing to **match how

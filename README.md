@@ -8,14 +8,14 @@ A high-fidelity digitization pipeline for historical Rabbinic Hebrew/Aramaic tex
 
 **Key Differentiation.** Most Hebrew OCR tooling stops at raw OCR or character-level alignment. This pipeline is built around **multi-witness vision adjudication**: exact token-level bounding boxes, image-grounded VLM evaluation of every disputed token, and a tri-state (open / machine-resolved / human-decided) review model with per-word provenance. See `COMPETITIVE-LANDSCAPE.md`.
 
-**Corpus Application.** **Yad Malachi** (R. Malachi ben Jacob HaKohen, Livorno 1766–7). The digitized corpus is the work's part one, ***Klalei HaGemara*, complete** — 667 *klalim*, ~179,000 words, scan pages 14–247 — split across three files for handling (`part1/2/3.json` = klalim 1–222, 223–444, 445–667). The book's other two parts, *Klalei HaPoskim* and *Klalei HaDinim* (pages 254–331), are **not extracted**.
+**Corpus Application.** **Yad Malachi** (R. Malachi ben Jacob HaKohen, Livorno 1766–7). The digitized corpus is the work's part one, ***Klalei HaGemara*** — 552 of its 667 *klalim*, ~179,000 words, scan pages 14–247 — split across three files for handling (`part1/2/3.json` = klalim 1–222, 223–444, 445–667). 115 klalim in 223–667 are unfilled placeholders. The book's other two parts, *Klalei HaPoskim* (pages 254–291) and *Klalei HaDinim* (292–329), are **not extracted**.
 
 **Where to start reading.** `START_HERE.md` for project context and binding operational rules. Then `PROJECT-STATUS.md` for current operational state.
 
 ## Status
 
 - **Klalim 1–222** (`part1.json`): 222/222 trusted page-to-klal alignment; four witnesses read against the ink (Document AI, a VLM sampled twice, Surya at 300 DPI); **1,061 flagged word positions** — 356 machine-resolved as known printer's artifacts, 997 open for a reviewer, 64 decided.
-- **Klalim 223–667** (`part2.json`, `part3.json`): text and page-level alignment built; **no witness set has been run there yet and no correction has been applied** — a standing gate, not an oversight.
+- **Klalim 223–667** (`part2.json`, `part3.json`): text and page-level alignment built for 330 of 445; **115 are unfilled placeholders**, and **no witness set has been run there yet and no correction has been applied** — a standing gate, not an oversight.
 - **Klalei HaPoskim / Klalei HaDinim**: scanned, never extracted.
 
 `PROJECT-STATUS.md` has live operational details, and is the only file to trust for corpus-quality claims.

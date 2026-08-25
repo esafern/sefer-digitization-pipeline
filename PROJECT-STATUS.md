@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-**WHAT THE CORPUS IS — corrected 2026-08-25, and it corrects every doc that described it.** The 667 klalim are **Klalei HaGemara in its entirety** (the work's part one), scan pages 14–247, ending `סליקו כללי הגמרא` on page 247. `part1.json`/`part2.json`/`part3.json` are three FILE CHUNKS of that one part — klalim 1–222, 223–444, 445–667 — **not** the work's three parts. **Klalei HaPoskim (`חלק שני`, pages 254–~295) and Klalei HaDinim (pages ~296–331) have never been extracted, aligned, or reviewed.** Evidence and the four independent confirmations: `PROJECT-STATUS-HISTORY.md`, 2026-08-25. The Parts 2-3 gate is unaffected — it names those files, and they are the same files they always were, on their own pages (77–164, 164–247) with their own scan-linkage risk. Only the label was wrong.
+**WHAT THE CORPUS IS — corrected 2026-08-25, and it corrects every doc that described it.** The 667 klalim are **Klalei HaGemara in its entirety** (the work's part one), scan pages 14–247, ending `סליקו כללי הגמרא` on page 247. `part1.json`/`part2.json`/`part3.json` are three FILE CHUNKS of that one part — klalim 1–222, 223–444, 445–667 — **not** the work's three parts. **Klalei HaPoskim (`חלק שני`, pages 254–291) and Klalei HaDinim (`חלק שלישי`, pages 292–329) have never been extracted, aligned, or reviewed** — 76 pages, boundaries confirmed 2026-08-25 from freshly re-extracted headers. Within Klalei HaGemara itself, **115 klalim hold a placeholder instead of text** (open item 16); real text stands at 552 of 667 klalim. Evidence and the four independent confirmations: `PROJECT-STATUS-HISTORY.md`, 2026-08-25. The Parts 2-3 gate is unaffected — it names those files, and they are the same files they always were, on their own pages (77–164, 164–247) with their own scan-linkage risk. Only the label was wrong.
 
 **Part 1 Status (klalim 1-222), re-measured live 2026-08-25.** 222/222 klalim have trusted page-to-klal alignment. The dashboard serves **1,061 flagged word positions across 185 klalim** = 538 pipeline candidates (all vision-adjudicated) + 364 multi-witness consensus disputes, 72 of them on the same position. **997 open, 64 decided, 356 machine-resolved** (118 of those are `docai_ligature_artifact`). 126 klalim carry an open revisit flag.
 
@@ -368,30 +368,47 @@ to) as state changes** — that discipline is what drifted last time.
     earlier fixes that day, one of them "verified" by an invariant testing the
     wrong property — that is what produced Lessons 29–31.
 
-14. **14 DocAI page files in the 248–337 range hold a different page's tokens**
-    (found and swept 2026-08-25; full table in `PROJECT-STATUS-HISTORY.md`).
-    `page_259/270/271/279/280/292/300/303/304/307/310/314/333/334.json` each
-    duplicate a page from the 14–247 range at Jaccard 0.50–0.87, against a
-    0.10–0.15 baseline for unrelated pages in this book. Confirmed against the
-    ink: `images/pdf_pages/page_304.png` is Klalei HaDinim folio `קמו`, while
-    `docai_word_boxes/page_304.json` holds Klalei HaGemara klal 489. The image is
-    right, the JSON is stale. **No impact on the corpus** (klalim 1–667 come from
-    pages 14–247, all clean) — but these are precisely the pages any Klalei
-    HaPoskim/HaDinim extraction would start from, and a re-run trusting this cache
-    would ingest Gemara text as Poskim. Fix is a re-extraction of pages 248–337
-    with `tools/extract_docai_pages.py`; it costs live DocAI calls on a range
-    nothing currently uses, so it is a scope decision rather than something done
-    unasked.
+14. **RESOLVED 2026-08-25 (user-authorized): pages 248–337 re-extracted — and the
+    defect was 40 pages, not the 14 the first sweep found.** My similarity sweep
+    could only detect a file duplicating ONE other page nearly whole; 26 files
+    holding truncated or mixed copies (as few as 6 tokens) sat below the
+    threshold and read as clean — a Lesson 6 blind spot, not a tuning problem.
+    Replaced with a method that needs no threshold: re-extract all 90 pages and
+    diff against what was cached (50 already correct, 40 wrong). Mapping proven
+    against `images/pdf_pages/page_304.png` before installing. **After install,
+    zero page pairs anywhere in the 337-page book exceed 0.35 similarity**, and a
+    separate sweep confirmed the corpus range 1–247 never had a single duplicate
+    pair. Clean headers also give the book's exact anatomy: Klalei HaPoskim is
+    pages **254–291**, Klalei HaDinim **292–329** (not "~296–331"), 76 pages
+    total. Full detail in `PROJECT-STATUS-HISTORY.md`.
 
-15. **`sefaria_export/` is stale and misattributes its source edition.** Written
-    2026-07-29: 146 klalim (the corpus has 667), `versionTitle`
-    `Livorno 1766 / NLI Digitized Edition`, `versionSource` naming NLI's Livorno
-    princeps — while this pipeline's scan is the **Berlin 1851/2** printing from
-    Google Books. Shipping it would attach the wrong edition to the text. Its
-    `index.json` schema, by contrast, is right and always was: a single
-    `Klalei HaGemara` node. Gitignored and regenerable via
-    `tools/export_corpus.py`; regenerating and re-attributing it is the natural
-    first step whenever ingest coordination actually starts.
+15. **RESOLVED 2026-08-25 (user-authorized): `sefaria_export/` regenerated by
+    script, with the right edition and no fabricated text.** The hand-made
+    2026-07-29 pair held 146 klalim and credited `Livorno 1766 / NLI Digitized
+    Edition` for a **Berlin 1851/2** Google-Books scan. Now produced by
+    `tools/export_corpus.py --format sefaria` (a format of the existing exporter,
+    not a parallel script, so it inherits the decision-application path), with a
+    new `--all-parts` flag: 667 klalim, correct `versionTitle`/`versionSource`,
+    honest `versionNotes`, **placeholders emitted as empty segments**, and a hard
+    error on any gap in klal numbering (the text array is positional — one
+    missing klal shifts every later citation address). `categories` was
+    deliberately left as-is: nothing here establishes Sefaria's correct category
+    path, and guessing at ingest metadata is how the edition attribution went
+    wrong the first time. Three regression tests.
+
+16. **115 of 667 klalim hold a placeholder instead of text** (found 2026-08-25,
+    surfaced by the Sefaria export). Their entire stored text is the gematria
+    marker plus a synthesised `כלל N` title, e.g. `רנ כלל 250`. **All 115 are in
+    klalim 223–667** — 70 in `part2.json`, 45 in `part3.json`; `part1.json` has
+    none. These are real extraction gaps, not short klalim: page 247 prints klal
+    667's text in full while the corpus stores a stub for it. Real text stands at
+    **552 of 667 klalim / 179,077 words**. The export ships them as empty
+    segments so nothing fabricated reaches a public library, but filling them is
+    extraction work against pages 77–247 and belongs with the klalim 223–667
+    witness build. **This also corrected two of this project's own outward-facing
+    claims** — the HTML ledger's "klalim with no extracted text: 0" (true of
+    `part1.json`, false of the corpus) and the case doc's "all 667 klalim
+    extracted"; both now say 552 of 667.
 
 ## Recent work (2026-08-21)
 
