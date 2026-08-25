@@ -127,7 +127,7 @@ nowhere near this pipeline's OCR/vision-adjudication quality bar. An NLI
 account might unlock something higher (untested) — until confirmed otherwise,
 treat 1745×2658 as the ceiling. NLI's site is still the right pointer to give
 someone else acquiring this text for the first time (per
-`CASE-YAD-MALACHI.md`'s "Preparing the text for Sefaria" section, sourcing
+`HOW-THE-PIPELINE-WORKS.md`'s "Preparing the text for Sefaria" section, sourcing
 from NLI sidesteps Google Books' terms of use for redistribution) — but only
 if *they* use an NLI account to get full resolution.
 
@@ -401,7 +401,8 @@ python3 tools/verify_local_setup.py                # after migrating to a new ma
 - `PROJECT-STATUS-HISTORY.md` — older, closed-out history.
 - `PIPELINE-DATA-REFERENCE.md` — what each data file contains, field by
   field.
-- `CASE-YAD-MALACHI.md` — the case for why this work needs digitizing.
+- `CASE-YAD-MALACHI.md` — the case for the project (short; the argument only).
+- `HOW-THE-PIPELINE-WORKS.md` — its companion: method, measurements, state, costs.
 - `CORPUS-COMPARISON.md` — the citation survey behind that case's demand
   figures.
 - `COMPETITIVE-LANDSCAPE.md` — the other Hebrew digitization platforms, what

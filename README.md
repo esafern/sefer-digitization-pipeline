@@ -33,7 +33,8 @@ See `SETUP.md`.
 | `PROJECT-STATUS-HISTORY.md` | The closed-out dated log — the evidence trail behind any finding referenced in the status file. |
 | `SETUP.md` | Environment setup, and which files aren't in this repo and how to get them. |
 | `PIPELINE-DATA-REFERENCE.md` | What each data file actually contains, field by field, in flow order. |
-| `CASE-YAD-MALACHI.md` | The case for why this work needs digitizing — citation demand, editions in hand, method, cost, and the ask. |
+| `CASE-YAD-MALACHI.md` | **The case for the project** — why this work, why it is the cheapest one to fix, why this pipeline, and the ask. Short by design. |
+| `HOW-THE-PIPELINE-WORKS.md` | The companion to that case: method, what the witnesses measured, current state, costs, and the Sefaria last mile. |
 | `CORPUS-COMPARISON.md` | The citation survey behind the case doc's demand figures. |
 | `COMPETITIVE-LANDSCAPE.md` | How this pipeline compares to Dicta, eScriptorium, Transkribus, the MiDRASH/Sefaria pipelines, and others — what to borrow, what's genuinely unique here. |
 | `VERIFIED-AGAINST-THE-INK.html` | Outward-facing evidence showcase: real scan crops, real corrections, worked end-to-end. |
