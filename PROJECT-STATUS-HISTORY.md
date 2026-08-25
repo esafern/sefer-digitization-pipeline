@@ -1059,6 +1059,77 @@ See `PROJECT-STATUS-HISTORY.md` — 65 dated entries from 2026-08-14 through
 infrastructure build-out, multiple independent code-review/refactor passes,
 and the lexicon/reference-corpus work behind open item 1 above.
 
+### 2026-08-25 — 43 of the 115 placeholder klalim now hold real text. New tool; two reverted attempts on the way, both caught by the corpus's own invariants.
+
+User-authorised ("do #1"), which is also the explicit go-ahead the Parts 2-3
+gate requires for a `part2.json`/`part3.json` write.
+
+**The text was recoverable because the boundaries already were.** A klal runs
+from its gematria marker to the next klal's, and `build_gematria_trace.py` had
+located both for most placeholders - so the body is the DocAI token stream
+between two known anchors, in reading order. Klal 240 is the clean case: markers
+at page 84 tokens 351 and 391, and the 39 tokens between them are its complete
+text. **The marker itself is taken from the CORPUS, not from OCR** - klal 240's
+`רמ` comes back from Document AI as `רם`, and the stored value is what every
+citation address depends on.
+
+**New tool: `tools/reconstruct_placeholder_klalim.py`**, parameterised and
+re-runnable rather than a one-off, with `--apply` off by default.
+
+| | klalim |
+| :--- | ---: |
+| placeholders before | 115 |
+| **reconstructed and written** | **43** |
+| skipped: this klal's marker never located | 44 |
+| skipped: next klal's marker not on this page or the next | 13 |
+| skipped: failed a lexical gate | 6 |
+| skipped: would violate a corpus invariant | 9 |
+
+**Corpus: 552 → 595 klalim with real text, 179,077 → 188,131 words.**
+
+**TWO REVERTED ATTEMPTS, and the invariants caught both.** The first version
+wrote all 58 spans it could locate. `test_no_page_header_contamination` failed on
+**15 klalim** and `test_no_new_duplicate_consecutive_words` on **11 pairs**: a
+span that crosses a page seam walks straight through the next page's running
+header, and this print sets a catchword at the foot of each page which Document
+AI reads twice. Reverted the corpus from backups and superseded the 51 flags the
+run had recorded (the ledger is append-only, so they were closed with a note, not
+deleted).
+
+The second version stripped furniture and de-duplicated the seam. Better -
+header contamination 15 → 1, duplicates 11 → 8 - and still not clean.
+
+**The third version stopped cleaning and started refusing.** Retuning a cleaner
+a third time is the signal to stop (Lesson 31), so the corpus's own invariants
+became REFUSAL GATES: a reconstruction that would fail
+`test_no_page_header_contamination` or the duplicate-word check is not written at
+all, and is reported instead. Yield fell 51 → 43. That is the right trade - a
+klal left as a placeholder is honest, a klal filled with page furniture is corpus
+damage.
+
+**Two lexical gates, calibrated rather than chosen.** Both floors are the 2nd
+percentile of the klalim that already have real text: 0.82 for the share of
+≥4-letter words attested in the independent reference corpus, 0.71 for the same
+measure over the first 30 words. The opening gate exists because length dilutes
+the other one - klal 537's reconstruction opens with a visibly interleaved run
+(`קולי יו ב"ש ביש פומפירוש`) and still scores 0.91 overall, better than the real
+median, because a thousand good words follow. Its opening scores 0.58.
+
+**Every reconstructed klal carries a revisit flag.** 43 `klal_flag` records
+naming the source span, the word count, the attestation score, and stating that
+the text has never been read by a human nor adjudicated against the scan. The
+gates reject a span that is broadly wrong; **they cannot see a scramble buried
+inside an otherwise good klal**, and klal 539 - which passes at 0.74 with an
+opening that looks interleaved to my eye - is the standing example. This text is
+extraction output, not reviewed corpus.
+
+**Still placeholders: 72.** 44 have no located marker at all and 13 have no next
+marker to bound them; those need marker-trace work, not extraction work. Nine are
+blocked by the invariant gates and are recoverable once the seam handling is good
+enough to satisfy them.
+
+318 tests green.
+
 ### FIXED 2026-08-25 — the scan pane never showed 195 flagged words as flagged. Two panes, one picture, two sources.
 
 Reviewer, on klal 218: "has only one red item in the right pane. w42 is orange

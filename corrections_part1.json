@@ -18168,32 +18168,6 @@
       "flag": "docai_ligature_artifact"
     },
     {
-      "word_index": 76,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "הין",
-      "page": 76,
-      "bbox": {
-        "x1": 0.259876549243927,
-        "y1": 0.6827390789985657,
-        "x2": 0.28148147463798523,
-        "y2": 0.6973257660865784
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: surya + vlm agree on 'היו' against stored 'הין'.",
-      "vlm_reading": "היו",
-      "surya_reading": "היו",
-      "consensus_engines": [
-        "surya",
-        "vlm"
-      ],
-      "consensus_reading": "היו",
-      "ligature_artifact": null,
-      "flag": "current_text_may_be_wrong"
-    },
-    {
       "word_index": 96,
       "opcode": "delete",
       "docai_reading": "ס\"ח ונכון הוא",

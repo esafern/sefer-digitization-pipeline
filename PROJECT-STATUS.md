@@ -13,9 +13,10 @@ the work's part one, scan pages 14–247, closing with `סליקו כללי הג
 Corrected 2026-08-25 against the printed page; the docs had said otherwise since
 they were written.
 
-**How much text actually exists.** **552 of 667 klalim carry real text**
-(~179,000 words). The other **115 hold a generated placeholder** (`רנ כלל 250`),
-all of them in klalim 223–667 — see open item 16.
+**How much text actually exists.** **595 of 667 klalim carry real text**
+(~188,000 words). The other **72 hold a generated placeholder** (`רנ כלל 250`),
+all in klalim 223–667 — see open item 16. 43 were reconstructed from the DocAI
+token stream on 2026-08-25 and are flagged as unreviewed machine output.
 
 **Where the review stands** (klalim 1–222, the reviewed third):
 
@@ -257,19 +258,16 @@ applying it to the corpus remain two separate, deliberate steps.
     30% where it is not. That 22-point spread is what Directive #1's violation
     costs in practice.
 
-16. **115 of 667 klalim hold a placeholder instead of text** (found 2026-08-25,
-    surfaced by the Sefaria export). Their entire stored text is the gematria
-    marker plus a synthesised `כלל N` title, e.g. `רנ כלל 250`. **All 115 are in
-    klalim 223–667** — 70 in `part2.json`, 45 in `part3.json`; `part1.json` has
-    none. These are real extraction gaps, not short klalim: page 247 prints klal
-    667's text in full while the corpus stores a stub for it. Real text stands at
-    **552 of 667 klalim / 179,077 words**. The export ships them as empty
-    segments so nothing fabricated reaches a public library, but filling them is
-    extraction work against pages 77–247 and belongs with the klalim 223–667
-    witness build. **This also corrected two of this project's own outward-facing
-    claims** — the HTML ledger's "klalim with no extracted text: 0" (true of
-    `part1.json`, false of the corpus) and the case doc's "all 667 klalim
-    extracted"; both now say 552 of 667.
+16. **72 of 667 klalim still hold a placeholder instead of text** (was 115;
+    43 reconstructed 2026-08-25 by `tools/reconstruct_placeholder_klalim.py`,
+    user-authorised, each flagged as unreviewed machine output). All are in
+    klalim 223–667. Of those left: **44 have no located gematria marker** and
+    **13 have no next marker to bound them** — marker-trace work, not extraction
+    work — while 9 are blocked by the corpus invariants (page-header furniture
+    carried across a page seam, or a catchword duplicated at the seam) and 6 by
+    the lexical gates. The reconstructions that DID land are extraction output,
+    never read by a human: the gates reject a broadly-wrong span but cannot see a
+    scramble buried inside an otherwise good klal.
 
 ## Closed — the detail is in `PROJECT-STATUS-HISTORY.md`, by date
 

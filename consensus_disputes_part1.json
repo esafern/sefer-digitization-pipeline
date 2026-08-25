@@ -8426,31 +8426,5 @@
         "y2": 0.48662886023521423
       }
     }
-  ],
-  "219": [
-    {
-      "klal_id": 219,
-      "word_index": 76,
-      "opcode": "replace",
-      "final_text": "הין",
-      "consensus_reading": "היו",
-      "agreeing_engines": [
-        "surya",
-        "vlm"
-      ],
-      "ligature_artifact": null,
-      "witnesses": {
-        "docai": null,
-        "vlm": "היו",
-        "surya": "היו"
-      },
-      "page": 76,
-      "bbox": {
-        "x1": 0.259876549243927,
-        "y1": 0.6827390789985657,
-        "x2": 0.28148147463798523,
-        "y2": 0.6973257660865784
-      }
-    }
   ]
 }
