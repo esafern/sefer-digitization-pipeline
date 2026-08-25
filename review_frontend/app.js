@@ -837,6 +837,24 @@ function setupPanels() {
   document.getElementById('witness-panel-close').onclick = dismissPanels;
   document.getElementById('manual-panel-close').onclick = dismissPanels;
   backdrop.onclick = dismissPanels;
+  // ADDED 2026-08-25 (user request: "clicking away (in a blank part of the
+  // middle pane) should cancel that and close the right pane"). The backdrop
+  // does not cover the text pane - by design, so a reviewer can keep reading
+  // and click straight from one word to the next without a dismiss step - so a
+  // click on the prose itself had no way to say "never mind". Anything that is
+  // a word, a gap marker, a klal header control or a pending-replacement is
+  // still a real target and opens/keeps its panel; a click that lands on none
+  // of them is blank space and cancels.
+  const INTERACTIVE_IN_TEXT = [
+    '.flag-word', '.plain-word', '.flag-gap', '.editorial-mark',
+    '.pending-replace-text', '.klal-flag-btn', '.continuation-marker',
+    'button', 'a', 'input', 'textarea', 'select',
+  ].join(',');
+  textScroll.addEventListener('click', (e) => {
+    if (e.target.closest(INTERACTIVE_IN_TEXT)) return;
+    if (!document.querySelector('.side-panel.open')) return;  // nothing to close
+    dismissPanels();
+  });
   window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') dismissPanels();
   });

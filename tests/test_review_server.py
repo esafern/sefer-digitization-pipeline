@@ -76,7 +76,14 @@ def _open_dashboard(page, server, klal_id=None):
     Navigating explicitly (rather than trusting that a klal happens to be
     inside the initial viewport) matters: klal blocks mount lazily, so a
     bare `.first` selector only ever searches what loaded on screen."""
-    page.goto(server + "/", wait_until="networkidle", timeout=15000)
+    # `networkidle` is the wrong gate here and it made two tests flaky
+    # (2026-08-25): index.html pulls a Google Fonts stylesheet, so "no network
+    # activity for 500ms" depends on a THIRD-PARTY host answering, not on the
+    # dashboard being ready. Wait for the app's own readiness signal instead -
+    # the nav list is built from /api/klalim, so its first item existing means
+    # the page has loaded, fetched and rendered.
+    page.goto(server + "/", wait_until="domcontentloaded", timeout=15000)
+    page.wait_for_selector(".nav-item", timeout=15000)
     page.wait_for_timeout(500)
     if klal_id is not None:
         page.click(f"#nav-{klal_id}")
@@ -92,24 +99,36 @@ def server():
     env = dict(os.environ)
     env["REVIEW_DECISIONS_PATH"] = decisions_path
 
+    # FIXED 2026-08-25. This used stdout=PIPE with nobody reading it. The server
+    # logs one line per request, so once ~64KB of log filled the OS pipe buffer
+    # the server BLOCKED on write and stopped answering - and the symptom was a
+    # page load timing out against a server that answers in 0.01s when you probe
+    # it by hand. It only appeared once this module grew past ~24 browser tests,
+    # which is why it read as flakiness: the last two tests in the file were the
+    # ones that happened to arrive after the buffer filled. Log to a file the
+    # fixture can still dump on failure.
+    log = open(decisions_path + ".serverlog", "w+")
     proc = subprocess.Popen(
         [sys.executable, os.path.join(REPO, "pipeline", "review_server.py"), "--port", str(port)],
         cwd=REPO, env=env,
-        stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+        stdout=log, stderr=subprocess.STDOUT,
     )
     base_url = f"http://127.0.0.1:{port}"
     try:
         ok = _wait_for_server(base_url + "/api/flags")
         if not ok:
-            out = proc.stdout.read().decode("utf-8", "replace") if proc.stdout else ""
+            log.flush(); log.seek(0)
+            out = log.read()
             proc.kill()
             pytest.fail(f"review_server.py never became ready:\n{out}")
         yield base_url
     finally:
         proc.kill()
         proc.wait(timeout=5)
-        if os.path.exists(decisions_path):
-            os.remove(decisions_path)
+        log.close()
+        for path in (decisions_path, decisions_path + ".serverlog"):
+            if os.path.exists(path):
+                os.remove(path)
 
 
 @pytest.fixture(scope="module")
@@ -450,6 +469,42 @@ def test_an_accepted_omission_shows_the_text_it_will_insert(server, page):
     text = page.locator(f"#klal-block-{klal_id}").inner_text()
     assert "טקסט חדש" in text, (
         "an accepted omission must show the text it will insert, not only a coloured gap")
+
+
+def test_clicking_blank_text_closes_the_panel_but_clicking_a_word_does_not(server, page):
+    """ADDED 2026-08-25 (user request: "clicking away (in a blank part of the
+    middle pane) should cancel that and close the right pane").
+
+    The backdrop deliberately does not cover the text pane, so a reviewer can
+    click straight from one word to the next without dismissing first - which
+    left a click on the prose itself with no way to say "never mind".
+
+    Asserts BOTH halves: blank space closes, and a word does not. Testing only
+    the close would pass against a handler that dismissed on every click in the
+    pane, which would make word-to-word review impossible."""
+    _open_dashboard(page, server, 1)
+    page.locator("#klal-block-1 .plain-word").first.click()
+    page.wait_for_selector("#manual-panel.open", timeout=5000)
+
+    # a click on another word must NOT close it - it retargets
+    page.locator("#klal-block-1 .plain-word").nth(3).click()
+    page.wait_for_timeout(300)
+    assert page.locator(".side-panel.open").count() == 1, (
+        "clicking another word must move the panel, not close it")
+
+    # A click on blank space inside the text pane cancels. Pick a point the
+    # open panel does not cover and PROVE it first - the panel is positioned
+    # over the right-hand side of the pane, so an obvious-looking corner lands
+    # on the panel itself and the test would be asserting nothing.
+    box = page.locator("#text-scroll").bounding_box()
+    x, y = box["x"] + 6, box["y"] + 6
+    hit = page.evaluate(
+        "(pt) => { const el = document.elementFromPoint(pt[0], pt[1]); return el && el.id; }",
+        [x, y])
+    assert hit == "text-scroll", f"expected blank text-pane at ({x},{y}), hit {hit!r}"
+    page.mouse.click(x, y)
+    page.wait_for_function(
+        "() => document.querySelectorAll('.side-panel.open').length === 0", timeout=5000)
 
 
 def test_decisions_api_reflects_saved_state(server):

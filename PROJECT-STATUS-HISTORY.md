@@ -1059,6 +1059,83 @@ See `PROJECT-STATUS-HISTORY.md` — 65 dated entries from 2026-08-14 through
 infrastructure build-out, multiple independent code-review/refactor passes,
 and the lexicon/reference-corpus work behind open item 1 above.
 
+### 2026-08-25 — decisions applied; klal 219's omission marker had never rendered; the "flaky" Playwright tests were a blocked pipe.
+
+**APPLIED, user-requested.** `apply_reviewer_decisions.py` promoted **54
+decisions** (7 replace, 21 manual, 26 confirmed-no-op) into `part1.json` — 7
+klalim changed, including `וכאבל`→`ובאבל` (klal 88), `איכא`→`אליבא` (klal 91,
+the ligature case), `עטו`→`עמו` (klal 167), `בססחים`→`בפסחים` (klal 2). Audit:
+248 of 266 applied decisions still reflected; **2 mismatches, both pre-existing**
+position drift from earlier reindexing (klal 1 w97, klal 10 w85 — `כתבו` is
+still there, now at index 74 after the klal 9/10 deletion), neither lost work.
+Full rebuild with vision re-run afterwards.
+
+**Why "149 pending" became "54 applied", since the two numbers look like a
+contradiction.** 149 counted every promotable decision with no apply-event.
+After the run, 106 remain, of which **29 are superseded** by a later decision at
+the same position and **20 are `witness_choice`**, which this script does not
+promote — witness items are a review queue, not corpus edits. What is left is 77
+current-and-unapplied, dominated by 40 `disputed_choice` whose candidate the
+rebuild has since dropped (see below). The lesson for the count: "not applied"
+and "waiting to be applied" are different sets, and the status file should quote
+the second.
+
+**KLAL 219 — "i decided to add the proposed text - but that text is not seen in
+the middle pane." Two defects, the second worse.**
+
+1. An accepted `possible_omission` rendered as a bare coloured sliver: the text
+   it would insert lived only in a hover tooltip, while a pending REPLACEMENT
+   has shown its incoming text inline since 2026-08-17. Same promise, same
+   treatment now.
+2. **Klal 219's gap sits at word_index 96 in a 96-word klal** — text the scan has
+   AFTER the last stored word. `renderKlalBody` walks the stored words and
+   appends each gap before its word, so a gap at that index had no word to
+   render before and **never appeared at all**. Not an edge case: **12 of the 40
+   omission candidates sit there**, three of them a whole missing phrase
+   (`בשם התוספות`, `דוכתי דבגמרא`, `ס"ח ונכון הוא`). The reviewer could only find
+   them through the scan pane. Now rendered at the end of the klal, in reading
+   order.
+
+**KLAL 88 — "i see 9 or more disputes but the count in the right pane is 2."**
+The nav badge used `open_count` (total − decided), which counts machine-RESOLVED
+words — green, needing nothing — as outstanding, while the legend has always
+summed `machine_disputed_count`. Two definitions of "open" in one UI, neither
+matching the colours on screen: klal 88 measured 26 highlighted words = 17
+decided + 5 machine-resolved + 4 disputed, and the badge said 9. The badge now
+counts what actually renders red.
+
+**Click-away to cancel** (user request): a click on blank text-pane space closes
+the panel. The backdrop deliberately does not cover the text pane — so a reviewer
+can go word to word without dismissing — which left the prose itself with no way
+to say "never mind". Word clicks still retarget rather than close; the test
+asserts both halves, because a test of only the close would pass against a
+handler that made word-to-word review impossible.
+
+**THE FLAKY TESTS WERE NOT FLAKY.** Two Playwright tests began failing only when
+the whole suite ran before them, on a 15s page load against a server measured
+answering in 0.01s. I chased machine contention, merged two expensive invariants
+into one pass, and raised the timeout to 30s — it still failed, which is what
+finally made the accommodation untenable and forced the real question.
+
+**The `server` fixture ran the dashboard with `stdout=subprocess.PIPE` and never
+read it.** The server logs one line per request; once ~64KB filled the OS pipe
+buffer, **the server blocked on write and stopped answering**. It only surfaced
+once this module grew past ~24 browser tests, so the last two tests in the file
+were simply the ones that arrived after the buffer filled — which is exactly what
+"flaky" looks like from outside. Logging to a file fixed it; the 30s timeout was
+**reverted to 15s**, because the cause is fixed rather than accommodated, and two
+consecutive full runs pass in ~84s.
+
+**PROJECT-STATUS.md restructured** on the user's instruction: 1,472 → ~300 lines.
+A current-state TL;DR that is measured rather than narrated, the genuinely open
+items, and a closed-item index so an old item number still resolves. The four
+"Recent work" blocks and the old ten-paragraph TL;DR moved verbatim into this
+file. **Open item 8 was stale in a way worth noting** — it asked whether to build
+insert-bbox estimation, which had been built 2026-08-21 and was fixed again
+today; nobody had updated the item, which is how a status file starts lying.
+
+317 tests green, twice in a row.
+
 ### FIXED 2026-08-25 — four separate scan-pane defects reported together on klalim 3 and 4. All four confirmed, three of them corpus-wide.
 
 Reviewer: "klal 3 word 1 ... the box is to the left and very large, including

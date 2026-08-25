@@ -1474,34 +1474,6 @@ def test_every_open_word_level_flag_has_a_control_that_can_clear_it(part1_by_id)
         f"their word forever.")
 
 
-def test_nav_counts_match_what_the_text_pane_actually_renders(part1_by_id):
-    """REGRESSION 2026-08-24 (code review of that session's own work).
-
-    api_klal() merges colliding entries at one word_index (manual-over-candidate,
-    flag-over-candidate, witness-over-candidate), but api_klalim() counted every
-    source independently, so the nav and legend reported items the text pane
-    never renders. Measured before the fix: nav 1201 vs 1061 rendered, across 88
-    klalim - `open_count` overstated the remaining work and could never reach
-    zero.
-
-    What the text pane actually puts on screen is one entry per non-delete
-    word_index (app.js's byIndex map is last-write-wins) plus every delete entry,
-    which renders as an insertion gap rather than a word span."""
-    review_server = _import_from_path("review_server", os.path.join(REPO, "pipeline", "review_server.py"))
-    listing = review_server.api_klalim(1)
-    rows = listing if isinstance(listing, list) else listing.get("klalim", [])
-    offenders = []
-    for row in rows:
-        corrections = review_server.api_klal(row["klal_id"])["corrections"]
-        rendered = len({c["word_index"] for c in corrections if c.get("opcode") != "delete"}) \
-            + len([c for c in corrections if c.get("opcode") == "delete"])
-        if row["correction_count"] != rendered:
-            offenders.append((row["klal_id"], row["correction_count"], rendered))
-    assert not offenders, (
-        f"{len(offenders)} klal(im) whose nav count disagrees with what the text pane "
-        f"renders (klal_id, nav, rendered): {offenders[:8]}")
-
-
 def test_nav_tristate_matches_what_each_word_actually_renders_as(part1_by_id):
     """REGRESSION 2026-08-25, reported by the reviewer: "there were more words
     highlighted than the count so it is now -1 even though a few are outstanding."
@@ -1541,9 +1513,20 @@ def test_nav_tristate_matches_what_each_word_actually_renders_as(part1_by_id):
 
     listing = review_server.api_klalim(1)
     rows = listing if isinstance(listing, list) else listing.get("klalim", [])
-    offenders, negative, unbalanced = [], [], []
+    offenders, negative, unbalanced, miscounted = [], [], [], []
     for row in rows:
-        states = [word_state(c) for c in review_server.api_klal(row["klal_id"])["corrections"]]
+        corrections = review_server.api_klal(row["klal_id"])["corrections"]
+        # The TOTAL check (2026-08-24's finding F1) folded in here 2026-08-25:
+        # it walked the same 222 klalim in its own loop, and two full passes over
+        # api_klal() in one pytest process was enough to starve the Playwright
+        # tests that run after it - two of them began failing on a 15s page load
+        # against a server that answers in 0.01s. One pass, both properties.
+        rendered_total = (
+            len({c["word_index"] for c in corrections if c.get("opcode") != "delete"})
+            + len([c for c in corrections if c.get("opcode") == "delete"]))
+        if row["correction_count"] != rendered_total:
+            miscounted.append((row["klal_id"], row["correction_count"], rendered_total))
+        states = [word_state(c) for c in corrections]
         rendered = (states.count("human"), states.count("machine"), states.count("open"))
         nav = (row["decided_count"], row["machine_resolved_count"], row["machine_disputed_count"])
         if rendered != nav:
@@ -1559,6 +1542,9 @@ def test_nav_tristate_matches_what_each_word_actually_renders_as(part1_by_id):
     assert not unbalanced, (
         f"the tri-state does not add up to correction_count (klal_id, total, "
         f"(decided, resolved, disputed)): {unbalanced[:8]}")
+    assert not miscounted, (
+        f"{len(miscounted)} klal(im) whose nav TOTAL disagrees with what the text pane "
+        f"renders (klal_id, nav, rendered): {miscounted[:8]}")
     assert not offenders, (
         f"{len(offenders)} klal(im) whose nav tri-state disagrees with what the text "
         f"pane renders (klal_id, nav, rendered): {offenders[:8]}")
