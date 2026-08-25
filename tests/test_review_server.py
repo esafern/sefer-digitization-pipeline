@@ -247,6 +247,42 @@ def test_manual_correction_panel_auto_closes_after_a_save(server, page):
     assert page.locator("#backdrop.open").count() == 0, (
         "auto-close must dismiss the backdrop too, exactly as the X button does")
 
+    # RE-DECIDING an already-decided word must close too (reviewer, klal 167
+    # w22: "still doesn't autoclose when i save decision" - reported against a
+    # word that already carried a manual_correction, which is a different render
+    # path from the plain word above: it comes back as an `opcode: manual` entry
+    # with a decision attached, so the panel opens pre-filled).
+    page.locator("#klal-block-1 .flag-word.state-human").first.click()
+    page.wait_for_selector("#manual-panel.open", timeout=5000)
+    assert page.input_value("#manual-correction-text") == "בדיקה", (
+        "re-opening a decided word should pre-fill the recorded reading")
+    page.fill("#manual-correction-text", "בדיקה2")
+    page.click("#save-manual-correction-btn")
+    page.wait_for_selector("#manual-save-status.show", timeout=5000)
+    page.wait_for_function(
+        "() => !document.querySelector('#manual-panel').classList.contains('open')",
+        timeout=6000)
+
+
+def test_index_stamps_asset_versions_from_the_files_themselves(server):
+    """ADDED 2026-08-25. index.html shipped a hand-maintained `?v=6` that was last
+    bumped in 1e59522 and never again, through every app.js change since. The
+    reviewer reported a fix as not working on a tab that had been open since
+    before it landed - running the old file. The stamp is now derived from the
+    file's own mtime and size, so it changes whenever the asset does and nobody
+    has to remember."""
+    import re as _re
+    import urllib.request
+    with urllib.request.urlopen(server + "/") as resp:
+        html = resp.read().decode("utf-8")
+    stamps = dict(_re.findall(r"/(app\.(?:js|css))\?v=([^\"']+)", html))
+    assert set(stamps) == {"app.js", "app.css"}, f"expected both assets stamped, got {stamps}"
+    for name, stamp in stamps.items():
+        assert stamp != "6", f"{name} still carries the stale hand-maintained version"
+        st = os.stat(os.path.join(REPO, "review_frontend", name))
+        assert stamp == f"{int(st.st_mtime)}-{st.st_size}", (
+            f"{name}'s stamp must follow the file: got {stamp}")
+
 
 def test_decisions_api_reflects_saved_state(server):
     data = _get_json(server, "/api/klal/1/flag")

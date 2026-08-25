@@ -17,6 +17,48 @@ current file references, or when grepping for how a past finding was
 resolved. Same append-at-top convention as before: newest entries go right
 after this header, not at the bottom.
 
+### 2026-08-25 — "klal 167 word 22 still doesn't autoclose": the fix was live, the reviewer's TAB was not. Cache-busting is now automatic.
+
+**The code was already correct, and I checked before saying so.** Reproduced klal
+167 w22's exact shape - a word that ALREADY carries a `manual_correction`, which
+renders as an `opcode: manual` entry with the decision attached and opens the
+panel pre-filled - in an isolated harness. It closes. The Playwright test now
+covers that second path explicitly (first-time decision on a plain word, then
+RE-deciding the same word), because the first version of the test only exercised
+the plain-word path and would not have caught a regression in the re-decide one.
+
+**The actual cause: `index.html` shipped `/app.js?v=6`, hand-maintained.** That
+stamp was last bumped in commit `1e59522` and never again - through every app.js
+change since, including yesterday's F1/F2/F4 fixes and this session's auto-close.
+A cache-buster nobody bumps is a cache-buster that does nothing, and the person
+least likely to remember it is the one deep in fixing the bug. The reviewer's tab
+had been open since before the fix landed, so it was running the old file.
+
+`Cache-Control: no-cache, must-revalidate` on every static response means a plain
+reload does pick up new bytes, so nothing was actually broken - it just needed a
+reload nobody knew to do, and the symptom ("your fix doesn't work") is
+indistinguishable from a real regression. That cost a full round trip.
+
+**Fix: the stamp is now derived from the file.** `_stamp_asset_versions()`
+rewrites `/app.js?v=N` and `/app.css?v=N` at serve time to
+`<mtime>-<size>` of the actual file, so it changes exactly when the asset does
+and never needs a human. It fails closed - if the file cannot be stat'd, the
+original markup is served untouched.
+
+**A self-inflicted outage on the way, worth recording.** I inserted the helper
+immediately above `def _serve_static`, which is a METHOD - so the module-level
+function and regex landed INSIDE the class body, and every method defined after
+them (including `do_GET`) fell out of the class. The server started fine and
+answered every request with `501 Unsupported method ('GET')`. I had "verified"
+the change by calling the helper directly in a subprocess, which passed happily,
+and only noticed when a curl hung. **Calling a new function is not testing the
+file that contains it**: the smoke test that mattered was one HTTP request, and
+it takes two seconds. Fixed by moving the block above `class Handler`; both the
+static path and `/api/klalim` re-checked before moving on.
+
+312 tests green, including a new one asserting the served `index.html` stamps
+both assets from their own mtime/size and never ships the stale `v=6`.
+
 ### FIXED 2026-08-25 — "163 i cleared the flag but it still shows in the middle and right." The flag was answered hours earlier and nothing noticed.
 
 **What actually happened, from the ledger.** The reviewer worked klal 163 today:

@@ -1447,6 +1447,36 @@ ROUTE_PAGE = re.compile(r"^/api/page/(\d+)$")
 ROUTE_WITNESS_CONTEXT = re.compile(r"^/api/witness/context/(\d+)/(\d+)$")
 
 
+_ASSET_VERSION_RE = re.compile(rb"/(app\.(?:js|css))\?v=[^\"']*")
+
+
+def _stamp_asset_versions(html, base_dir):
+    """Rewrite `/app.js?v=N` to a version derived from the file itself.
+
+    ADDED 2026-08-25. `index.html` carried a hand-maintained `?v=6` that was last
+    bumped in commit 1e59522 and never again, through every app.js change since -
+    a convention that rots the moment anyone forgets, and nobody remembers to
+    bump a cache-buster while fixing a bug. The reviewer hit exactly that: after
+    the manual-panel auto-close fix landed they reported "still doesn't autoclose
+    when i save decision" on a page whose tab had been open since before the fix,
+    running the old file.
+
+    `Cache-Control: no-cache, must-revalidate` (below) means a plain reload
+    already picks up new bytes, so this is not a correctness fix - it removes a
+    step a human has to remember, and it fails closed: if the file cannot be
+    stat'd the original markup is served untouched.
+    """
+    def _sub(match):
+        name = match.group(1).decode()
+        try:
+            st = os.stat(os.path.join(base_dir, name))
+        except OSError:
+            return match.group(0)
+        stamp = f"{int(st.st_mtime)}-{st.st_size}"
+        return f"/{name}?v={stamp}".encode()
+    return _ASSET_VERSION_RE.sub(_sub, html)
+
+
 class Handler(BaseHTTPRequestHandler):
     server_version = "YadMalachiReview/1.0"
 
@@ -1465,6 +1495,7 @@ class Handler(BaseHTTPRequestHandler):
     def _send_error_json(self, status, message):
         self._send_json({"error": message}, status=status)
 
+
     def _serve_static(self, base_dir, rel_path, default_file=None):
         if rel_path in ("", "/"):
             rel_path = default_file or "index.html"
@@ -1481,6 +1512,8 @@ class Handler(BaseHTTPRequestHandler):
         content_type = MIME_TYPES.get(ext, "application/octet-stream")
         with open(full_path, "rb") as f:
             body = f.read()
+        if os.path.basename(full_path) == "index.html":
+            body = _stamp_asset_versions(body, base_dir)
         self.send_response(200)
         self.send_header("Content-Type", content_type)
         self.send_header("Content-Length", str(len(body)))
