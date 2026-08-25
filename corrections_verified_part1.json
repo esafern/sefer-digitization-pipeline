@@ -60,6 +60,25 @@
     "klal_id": 2,
     "page": 14,
     "opcode": "replace",
+    "word_index_in_final_text": 30,
+    "original_word": "בססחים",
+    "corrected_word": "בפסחים",
+    "bbox": {
+      "x1": 0.16284829378128052,
+      "y1": 0.7507070899009705,
+      "x2": 0.22414860129356384,
+      "y2": 0.7660605907440186
+    },
+    "bbox_estimated": false,
+    "vision_selected": "B",
+    "vision_transcription": "בפסחים",
+    "vision_confidence": 0.98,
+    "vision_reasoning": "The sentence references Rashi on Tractate Pesachim 24a ('ורש\"י כתב בפסחים כ\"ד'). Paleographically, the second letter of the word is a Hebrew 'פ' with its characteristic inner overhang, which was misread as 'ס' by raw OCR (Option A). Thus, Option B ('בפסחים') is the correct text."
+  },
+  {
+    "klal_id": 2,
+    "page": 14,
+    "opcode": "replace",
     "word_index_in_final_text": 109,
     "original_word": "אטינא",
     "corrected_word": "אמינא",
@@ -250,6 +269,44 @@
     "klal_id": 4,
     "page": 16,
     "opcode": "replace",
+    "word_index_in_final_text": 95,
+    "original_word": "כתכו",
+    "corrected_word": "כתבו",
+    "bbox": {
+      "x1": 0.20000000298023224,
+      "y1": 0.1361788660287857,
+      "x2": 0.23630769550800323,
+      "y2": 0.15406504273414612
+    },
+    "bbox_estimated": false,
+    "vision_selected": "B",
+    "vision_transcription": "כתבו",
+    "vision_confidence": 0.98,
+    "vision_reasoning": "The crop displays the word 'כתבו' (meaning 'who wrote' in context). The third letter has the characteristic horizontal base bar and squared bottom-right corner of a Hebrew bet ('ב'). Option A ('כתכו') is an OCR misreading of bet as kaf, which creates a non-word in Hebrew rabbinic syntax."
+  },
+  {
+    "klal_id": 4,
+    "page": 16,
+    "opcode": "replace",
+    "word_index_in_final_text": 131,
+    "original_word": "הנזי",
+    "corrected_word": "הנז׳",
+    "bbox": {
+      "x1": 0.12369231134653091,
+      "y1": 0.16707317531108856,
+      "x2": 0.1538461595773697,
+      "y2": 0.18414634466171265
+    },
+    "bbox_estimated": false,
+    "vision_selected": "B",
+    "vision_transcription": "הנז׳",
+    "vision_confidence": 0.98,
+    "vision_reasoning": "The character following the zayin is an elevated apostrophe/geresh abbreviation mark indicating the standard Rabbinic acronym 'הנז׳' (הנזכר - 'the aforementioned'), rather than a full letter yod ('י'). Option B correctly reflects this abbreviation."
+  },
+  {
+    "klal_id": 4,
+    "page": 16,
+    "opcode": "replace",
     "word_index_in_final_text": 403,
     "original_word": "איהן",
     "corrected_word": "איהו",
@@ -378,6 +435,25 @@
     "vision_transcription": "איידי",
     "vision_confidence": 0.98,
     "vision_reasoning": "The image clearly shows the word 'איידי' (Aleph, Yod, Yod, Dalet, Yod), which perfectly aligns with the Rabbinic textual context 'ח איידי...'. Option A ('אייךו') is a misreading by OCR."
+  },
+  {
+    "klal_id": 8,
+    "page": 18,
+    "opcode": "replace",
+    "word_index_in_final_text": 144,
+    "original_word": "טרור",
+    "corrected_word": "טהור",
+    "bbox": {
+      "x1": 0.19900497794151306,
+      "y1": 0.3474065065383911,
+      "x2": 0.25,
+      "y2": 0.36308807134628296
+    },
+    "bbox_estimated": false,
+    "vision_selected": "B",
+    "vision_transcription": "טהור",
+    "vision_confidence": 0.99,
+    "vision_reasoning": "The image clearly displays the word 'טהור' (Tet, He, Vav, Resh). Paleographically, the second letter has the distinct horizontal top bar and vertical leg structure of a He (ה), not a Resh (ר). Contextually, it completes the standard Talmudic/Rabbinic phrase 'שבוע טהור' (pure week) paired with 'שבוע טמא' (impure week) from Niddah 30a."
   },
   {
     "klal_id": 10,
@@ -3138,25 +3214,6 @@
     "klal_id": 88,
     "page": 39,
     "opcode": "replace",
-    "word_index_in_final_text": 2,
-    "original_word": "ובאבל",
-    "corrected_word": "וכאבל",
-    "bbox": {
-      "x1": 0.671999990940094,
-      "y1": 0.6215447187423706,
-      "x2": 0.7279999852180481,
-      "y2": 0.6382113695144653
-    },
-    "bbox_estimated": false,
-    "vision_selected": "B",
-    "vision_transcription": "וכאבל",
-    "vision_confidence": 0.98,
-    "vision_reasoning": "The crop clearly shows the word 'וכאבל'. Paleographically, the second letter following the initial 'ו' (vav) is a 'כ' (kaf), which features rounded right corners without the sharp bottom-right projection/serif characteristic of a 'ב' (bet) (which is clearly visible on the fourth letter 'ב' of the same word). This reading matches the Rabbinic context ('וכאבל')."
-  },
-  {
-    "klal_id": 88,
-    "page": 39,
-    "opcode": "replace",
     "word_index_in_final_text": 19,
     "original_word": "בירושלטי",
     "corrected_word": "בירושלמי",
@@ -3169,8 +3226,8 @@
     "bbox_estimated": false,
     "vision_selected": "B",
     "vision_transcription": "בירושלמי",
-    "vision_confidence": 0.99,
-    "vision_reasoning": "The raster image clearly shows the word 'בירושלמי' ('in the Jerusalem Talmud'). The letter following the 'ל' is a standard Hebrew 'מ' (mem), which DocAI misrecognized as 'ט' due to slight ink bleed/compression. Contextual Rabbinic syntax ('בירושלמי פ\"ק דע\"ז') confirms 'בירושלמי'."
+    "vision_confidence": 1.0,
+    "vision_reasoning": "The crop clearly displays the word 'בירושלמי' ('in the Jerusalem Talmud'), matching the surrounding rabbinic context ('בירושלמי פ\"ק דע\"ז...'). Option A ('בירושלטי') is a classic OCR misreading of the letters mem (מ) and yod (י)."
   },
   {
     "klal_id": 88,
@@ -3195,6 +3252,25 @@
     "klal_id": 88,
     "page": 40,
     "opcode": "replace",
+    "word_index_in_final_text": 327,
+    "original_word": "חזה",
+    "corrected_word": "וזה",
+    "bbox": {
+      "x1": 0.7631742358207703,
+      "y1": 0.11496571451425552,
+      "x2": 0.7861128449440002,
+      "y2": 0.13231141865253448
+    },
+    "bbox_estimated": false,
+    "vision_selected": "B",
+    "vision_transcription": "וזה",
+    "vision_confidence": 0.95,
+    "vision_reasoning": "The text in line 3 corresponds to the Talmudic quotation from Zevachim 47a cited in the context: 'זה מחשב וזה עובד' ([מחש]ב וזה עו[בד]). Paleographically, the characters visible are 'ו' followed by 'זה' (and the start of 'עו' on the left). DocAI misread the prefix and letters as 'חזה' (Option A)."
+  },
+  {
+    "klal_id": 88,
+    "page": 40,
+    "opcode": "replace",
     "word_index_in_final_text": 383,
     "original_word": "אא",
     "corrected_word": "אלא",
@@ -3214,6 +3290,82 @@
     "klal_id": 88,
     "page": 40,
     "opcode": "replace",
+    "word_index_in_final_text": 423,
+    "original_word": "רתם",
+    "corrected_word": "התם",
+    "bbox": {
+      "x1": 0.13577185571193695,
+      "y1": 0.19160951673984528,
+      "x2": 0.1680099219083786,
+      "y2": 0.20895522832870483
+    },
+    "bbox_estimated": false,
+    "vision_selected": "A",
+    "vision_transcription": "רתם",
+    "vision_confidence": 0.95,
+    "vision_reasoning": "Paleographically, the word visible on the line following 'א' clearly shows a resh (ר) lacking any left leg, followed by tav (ת) and final mem (ם), reading 'רתם'. Although contextually the Talmudic phrase requires 'התם' ('והכי איתא התם'), the visual print in this crop contains a clear printer's error (typo) rendering 'רתם', which Option A accurately transcribes."
+  },
+  {
+    "klal_id": 88,
+    "page": 40,
+    "opcode": "replace",
+    "word_index_in_final_text": 510,
+    "original_word": "אכל",
+    "corrected_word": "אבל",
+    "bbox": {
+      "x1": 0.8400496244430542,
+      "y1": 0.2839854657649994,
+      "x2": 0.8729076385498047,
+      "y2": 0.300121009349823
+    },
+    "bbox_estimated": false,
+    "vision_selected": "A",
+    "vision_transcription": "אכל",
+    "vision_confidence": 0.95,
+    "vision_reasoning": "The clear visual reading in the center of the crop shows the letters 'א', 'כ', and 'ל' ('אכל'). The second letter features a rounded back characteristic of 'כ', distinct from the sharp top-right corner of a 'ב' (as seen in 'בכל' in the line above)."
+  },
+  {
+    "klal_id": 88,
+    "page": 40,
+    "opcode": "replace",
+    "word_index_in_final_text": 533,
+    "original_word": "וכתכו",
+    "corrected_word": "וכתבו",
+    "bbox": {
+      "x1": 0.5213887095451355,
+      "y1": 0.2993142306804657,
+      "x2": 0.56230628490448,
+      "y2": 0.31585317850112915
+    },
+    "bbox_estimated": false,
+    "vision_selected": "B",
+    "vision_transcription": "וכתבו",
+    "vision_confidence": 0.98,
+    "vision_reasoning": "The visible word in the image is 'וכתבו' (meaning 'and [they] wrote', referring to 'וכתבו הרי\"ף והרא\"ש'). Paleographically, the fourth letter exhibits the characteristic square base corner of a bet (ב) rather than the rounded corner of a kaf (כ). Option A ('וכתכו') is an OCR misreading."
+  },
+  {
+    "klal_id": 88,
+    "page": 40,
+    "opcode": "replace",
+    "word_index_in_final_text": 622,
+    "original_word": "מהי",
+    "corrected_word": "מה׳",
+    "bbox": {
+      "x1": 0.1425914466381073,
+      "y1": 0.3755546510219574,
+      "x2": 0.16676999628543854,
+      "y2": 0.3933037519454956
+    },
+    "bbox_estimated": false,
+    "vision_selected": "B",
+    "vision_transcription": "מה׳",
+    "vision_confidence": 0.95,
+    "vision_reasoning": "The character following the letter 'ה' is a high-positioned geresh (׳) indicating an abbreviation for 'מהלכות' (in the phrase 'בפ\"ט מה׳ אבל' - Chapter 9 of Hilkhot Avel), rather than a letter Yod ('י'). Therefore, Option B accurately reflects the Rabbinic abbreviation mark."
+  },
+  {
+    "klal_id": 88,
+    "page": 40,
+    "opcode": "replace",
     "word_index_in_final_text": 838,
     "original_word": "וכוותיידו",
     "corrected_word": "וכוותייהו",
@@ -3227,7 +3379,102 @@
     "vision_selected": "B",
     "vision_transcription": "וכוותייהו",
     "vision_confidence": 0.98,
-    "vision_reasoning": "The visible text in the middle line of the crop clearly reads 'וכוותייהו'. The character preceding the final 'ו' (vav) has the distinct left vertical leg with a gap typical of a 'ה' (he), rather than a 'ד' (dalet). Contextually, 'וכוותייהו' ('and like them / following them') is the standard Rabbinic Aramaic term in this phrase."
+    "vision_reasoning": "The clear Hebrew word in the second line reads 'וכוותייהו' (Aramaic for 'and like them'). Paleographically, the penultimate letter clearly shows the structure of a he ('ה') with a distinct left leg rather than a dalet ('ד'). Contextually, 'וכוותייהו פסקינן' ('and like them we rule') is a standard Rabbinic phrase present in the provided reference context."
+  },
+  {
+    "klal_id": 88,
+    "page": 40,
+    "opcode": "replace",
+    "word_index_in_final_text": 861,
+    "original_word": "כתיכ",
+    "corrected_word": "כתיב",
+    "bbox": {
+      "x1": 0.2690638601779938,
+      "y1": 0.60467928647995,
+      "x2": 0.3081215023994446,
+      "y2": 0.620814859867096
+    },
+    "bbox_estimated": false,
+    "vision_selected": "B",
+    "vision_transcription": "כתיב",
+    "vision_confidence": 0.95,
+    "vision_reasoning": "The target word is 'כתיב' (meaning 'written'), forming part of the standard Rabbinic phrase 'וכדין כתיב בגוה' ('and thus it is written therein'). Option A ('כתיכ') is a typical OCR misreading of the letter 'ב' (Bet) as 'כ' (Khaf) caused by the rounded ink wear on the bottom-right corner of the letter."
+  },
+  {
+    "klal_id": 88,
+    "page": 40,
+    "opcode": "replace",
+    "word_index_in_final_text": 880,
+    "original_word": "למתי",
+    "corrected_word": "לכותי",
+    "bbox": {
+      "x1": 0.1425914466381073,
+      "y1": 0.6196047067642212,
+      "x2": 0.19466832280158997,
+      "y2": 0.6357402205467224
+    },
+    "bbox_estimated": false,
+    "vision_selected": "A",
+    "vision_transcription": "למתי",
+    "vision_confidence": 0.95,
+    "vision_reasoning": "The raster crop clearly displays the word 'למתי' (lamed, mem, tav, yod). The letter following the lamed is a mem (identical in stroke formation to the mem in 'מאי' on line 3), rather than kaf-vav as expected in the contextually intended word 'לכותי'."
+  },
+  {
+    "klal_id": 88,
+    "page": 40,
+    "opcode": "replace",
+    "word_index_in_final_text": 963,
+    "original_word": "ומתי",
+    "corrected_word": "ומתיר",
+    "bbox": {
+      "x1": 0.7966521978378296,
+      "y1": 0.7095603346824646,
+      "x2": 0.8288902640342712,
+      "y2": 0.7265025973320007
+    },
+    "bbox_estimated": false,
+    "vision_selected": "A",
+    "vision_transcription": "ומתי",
+    "vision_confidence": 0.95,
+    "vision_reasoning": "The raster crop clearly shows the Hebrew letters 'ומתי' (Vav, Mem, Tav, Yod). Although the context indicates the full word is 'ומתיר' ('ומתיר להשכיר'), the final letter Resh is cropped off at the left margin of this image, making Option A ('ומתי') the precise visual transcription of the cropped raster."
+  },
+  {
+    "klal_id": 88,
+    "page": 40,
+    "opcode": "replace",
+    "word_index_in_final_text": 1061,
+    "original_word": "ישרץ",
+    "corrected_word": "ישראל",
+    "bbox": {
+      "x1": 0.644761323928833,
+      "y1": 0.8015328645706177,
+      "x2": 0.6850588917732239,
+      "y2": 0.8196853399276733
+    },
+    "bbox_estimated": false,
+    "vision_selected": "B",
+    "vision_transcription": "ישראל",
+    "vision_confidence": 0.95,
+    "vision_reasoning": "The context comes from the Yerushalmi quote 'אומנים ישראל שהיו עושין'. The printed text shows 'ישראל' (following the final mem 'ם' of 'אומנים'), where the 'אל' ligature/letter combination was misidentified by raw OCR (Option A) as a final tzadi 'ץ'."
+  },
+  {
+    "klal_id": 88,
+    "page": 40,
+    "opcode": "replace",
+    "word_index_in_final_text": 1111,
+    "original_word": "וכלבד",
+    "corrected_word": "ובלבד",
+    "bbox": {
+      "x1": 0.7737135887145996,
+      "y1": 0.8471157550811768,
+      "x2": 0.8195908069610596,
+      "y2": 0.8648648858070374
+    },
+    "bbox_estimated": false,
+    "vision_selected": "B",
+    "vision_transcription": "ובלבד",
+    "vision_confidence": 0.98,
+    "vision_reasoning": "The target word on the third line clearly reads 'ובלבד' (and provided that / only), consistent both paleographically with the square base of the letter bet ('ב') vs. rounded kaf ('כ'), and semantically with the standard Rabbinic idiom 'ובלבד בקבולת' present in the context."
   },
   {
     "klal_id": 88,
@@ -3246,7 +3493,7 @@
     "vision_selected": "A",
     "vision_transcription": "בעיא 4*",
     "vision_confidence": 0.95,
-    "vision_reasoning": "The image clearly displays the Hebrew word 'בעיא' on the left and the numeral with an asterisk '4*' on the right, matching Option A."
+    "vision_reasoning": "The raster crop clearly shows the word 'בעיא' on the left side and '4*' on the right side. Option A ('בעיא 4') correctly captures the textual elements visible in the crop, whereas Option B incorrectly asserts there is no text."
   },
   {
     "klal_id": 89,
@@ -3292,7 +3539,7 @@
     "opcode": "replace",
     "word_index_in_final_text": 7,
     "original_word": "איבא",
-    "corrected_word": "איכא",
+    "corrected_word": "אליבא",
     "bbox": {
       "x1": 0.4694255590438843,
       "y1": 0.17699474096298218,
@@ -3301,9 +3548,9 @@
     },
     "bbox_estimated": false,
     "vision_selected": "B",
-    "vision_transcription": "איכא",
+    "vision_transcription": "אליבא",
     "vision_confidence": 0.98,
-    "vision_reasoning": "The crop clearly displays the word 'איכא' (Aleph-Yod-Kaf-Aleph). The third letter is a Kaf with its characteristic rounded upper-right corner and horizontal base, which forms the standard Aramaic word 'איכא' ('there is') as supported by the surrounding Rabbinic context ('בעי איכא דמאן דלא קי\"ל כותיה')."
+    "vision_reasoning": "The text clearly shows the Talmudic phrase 'בעי אליבא ד...' ('בעי אליבא דמאן'). Paleographically, the tall ascender of the letter lamed (ל) is distinctly visible extending upwards into the interlinear space, confirming 'אליבא' (Option B). DocAI's reading of 'איבא' (Option A) is a classic OCR error where the ascender of the lamed was missed."
   },
   {
     "klal_id": 91,
@@ -3323,6 +3570,25 @@
     "vision_transcription": "אלא",
     "vision_confidence": 0.98,
     "vision_reasoning": "The sentence context from Tractate Temurah ('לסברא דליתיה אלא דאי משכחת') requires the word 'אלא'. Paleographically, the image shows the character 'ה' (ending 'דליתיה'), followed by 'אלא' (with the characteristic tall ascendender/neck of the letter Lamed 'ל' clearly visible above the line height), followed by 'ד' (beginning 'דאי'). Option A ('אא') is an OCR misreading that missed the central Lamed."
+  },
+  {
+    "klal_id": 91,
+    "page": 41,
+    "opcode": "replace",
+    "word_index_in_final_text": 191,
+    "original_word": "העניניי",
+    "corrected_word": "העניינים",
+    "bbox": {
+      "x1": 0.10315009206533432,
+      "y1": 0.3268529772758484,
+      "x2": 0.1568869650363922,
+      "y2": 0.34264883399009705
+    },
+    "bbox_estimated": false,
+    "vision_selected": "B",
+    "vision_transcription": "העניני'",
+    "vision_confidence": 0.95,
+    "vision_reasoning": "The raster image clearly shows the word abbreviated with a final geresh as 'העניני''. In Rabbinic text context ('להשיג אמיתת העניינים'), this is a standard abbreviation for 'העניינים'. Thus Option B represents the adjudicated semantic reading of the abbreviated text."
   },
   {
     "klal_id": 91,
@@ -3359,8 +3625,8 @@
     "bbox_estimated": false,
     "vision_selected": "A",
     "vision_transcription": "בצלא",
-    "vision_confidence": 1.0,
-    "vision_reasoning": "The crop clearly displays the string בצלא (Bet-Tzadi-Lamed-Alef) followed by a space and the letter Bet. The second Lamed in 'בצלאל' is omitted/abbreviated in the printed source, matching Option A as the true visual transcription."
+    "vision_confidence": 0.95,
+    "vision_reasoning": "The raster crop contains the four visible Hebrew characters ב-צ-ל-א at the end of the third line shown. The final letter 'ל' of the name 'בצלאל' is truncated/cut off at the margin. Thus, Option A ('בצלא') accurately represents the exact visible characters in the crop."
   },
   {
     "klal_id": 91,
@@ -3368,7 +3634,7 @@
     "opcode": "replace",
     "word_index_in_final_text": 293,
     "original_word": "איבא",
-    "corrected_word": "איכא",
+    "corrected_word": "אליבא",
     "bbox": {
       "x1": 0.8221124410629272,
       "y1": 0.4329688251018524,
@@ -3377,9 +3643,28 @@
     },
     "bbox_estimated": false,
     "vision_selected": "B",
-    "vision_transcription": "איכא",
+    "vision_transcription": "אליבא",
     "vision_confidence": 0.98,
-    "vision_reasoning": "The image clearly shows the Aramaic word 'איכא' in the middle line (followed by 'ד...'). Contextually, the quote from R. Yeshaya di Trani reads 'שייכי איכא דר\"ע', where 'איכא' ('there is') is standard Rabbinic Aramaic. Paleographically, the third letter exhibits the characteristically rounded top-right corner and flat base of a kaf ('כ'), distinguishing it from a bet ('ב')."
+    "vision_reasoning": "The visible text in line 3 shows the standard Talmudic word 'אליבא' (followed by 'דר...'), which forms the well-known phrase 'אליבא דר\"ע' ('according to Rabbi Akiva') confirmed by the surrounding context ('שייכי אליבא דר\"ע'). Paleographically, the tall ascender of the letter Lamed (ל) is clearly visible above the character sequence, which OCR (Option A) erroneously omitted as 'איבא'."
+  },
+  {
+    "klal_id": 91,
+    "page": 41,
+    "opcode": "replace",
+    "word_index_in_final_text": 315,
+    "original_word": "אקים",
+    "corrected_word": "אלקים",
+    "bbox": {
+      "x1": 0.5917232632637024,
+      "y1": 0.44795462489128113,
+      "x2": 0.6306362152099609,
+      "y2": 0.4649655818939209
+    },
+    "bbox_estimated": false,
+    "vision_selected": "B",
+    "vision_transcription": "אלקים",
+    "vision_confidence": 0.98,
+    "vision_reasoning": "The visible text in the middle line reads 'אלקים', forming part of the phrase 'הודיע אלקים אותנו' (referencing Genesis 41:39). The tall vertical ascender of the Lamed is clearly visible extending upwards between the Aleph and the Qof. Option A ('אקים') is an OCR error caused by missing the tall Lamed ascender."
   },
   {
     "klal_id": 91,
@@ -3398,7 +3683,7 @@
     "vision_selected": "B",
     "vision_transcription": "אליבא",
     "vision_confidence": 0.95,
-    "vision_reasoning": "The crop clearly shows the word 'אליבא' following the final mem of the previous word. The tall ascender of the lamed ('ל') is visibly present above the letters between the initial aleph and yod. Furthermore, the surrounding Aramaic idiom 'אליבא דחד' ('according to the one [Tanna]') confirms 'אליבא' contextually and semantically over the OCR artifact 'איבא'."
+    "vision_reasoning": "The sentence context requires the standard Talmudic/Rabbinic term 'אליבא ד...' ('according to [the view of]'). Paleographically, the tall ascender of the letter lamed ('ל') is clearly visible between the aleph and yod, confirming 'אליבא'. Option A ('איבא') represents a raw OCR truncation error."
   },
   {
     "klal_id": 91,
@@ -3406,7 +3691,7 @@
     "opcode": "replace",
     "word_index_in_final_text": 363,
     "original_word": "איבא",
-    "corrected_word": "איכא",
+    "corrected_word": "אליבא",
     "bbox": {
       "x1": 0.6720197796821594,
       "y1": 0.493722140789032,
@@ -3414,10 +3699,10 @@
       "y2": 0.5099230408668518
     },
     "bbox_estimated": false,
-    "vision_selected": "A",
-    "vision_transcription": "איבא",
-    "vision_confidence": 0.95,
-    "vision_reasoning": "Paleographic inspection of the third letter in the target word reveals a distinct right-angled bottom-right corner and flat baseline characteristic of a Bet (ב), rather than the rounded right back of a Kaf (כ) seen elsewhere in the font (such as in 'וכמ\"ש' on the line above). Therefore, the printed raster text literally reads 'איבא' (Option A)."
+    "vision_selected": "B",
+    "vision_transcription": "אליבא",
+    "vision_confidence": 1.0,
+    "vision_reasoning": "The image clearly shows the word 'אליבא' following 'עי'. The Lamed ('ל') with its characteristic tall upper ascender is clearly visible between the Alef and Yod/Bet, matching Option B ('אליבא') and standard Talmudic phrasing ('אליבא ד...'). Option A ('איבא') incorrectly drops the Lamed."
   },
   {
     "klal_id": 91,
@@ -3433,10 +3718,10 @@
       "y2": 0.5099230408668518
     },
     "bbox_estimated": false,
-    "vision_selected": "A",
-    "vision_transcription": "איביה",
-    "vision_confidence": 0.95,
-    "vision_reasoning": "The raster crop clearly shows the 5-letter word 'איביה' (alef, yod, bet, yod, he), which is a printer's typo in the original text for the standard Rabbinic phrase 'אליביה' ('alibeh', meaning 'according to him'). Option A accurately transcribes the literal visual text in the image crop, whereas Option B is the contextually emended reading."
+    "vision_selected": "B",
+    "vision_transcription": "אליביה",
+    "vision_confidence": 0.98,
+    "vision_reasoning": "The visible text on the third line contains the word 'אליביה'. Paleographically, the tall ascender of the letter 'ל' (lamed) is clearly visible extending upward between lines 2 and 3 above the word, followed by 'י', 'ב', 'י', 'ה'. Contextually, the phrase 'לא הוה בעי אליביה' ('would not ask according to his view') is a standard Talmudic/Rabbinic Aramaic idiom, perfectly matching Option B."
   },
   {
     "klal_id": 91,
@@ -3454,8 +3739,8 @@
     "bbox_estimated": false,
     "vision_selected": "B",
     "vision_transcription": "אליביה",
-    "vision_confidence": 0.95,
-    "vision_reasoning": "The context requires the standard Talmudic/Rabbinic Aramaic term 'אליביה' ('according to [him]'). Paleographically, the Lamed ascender is clearly visible extending upwards into the interline space above the word, confirming Option B over the OCR misread 'איביה' (Option A)."
+    "vision_confidence": 1.0,
+    "vision_reasoning": "The crop shows the word 'אליביה' between 'לה' and 'הא' (matching the textual context 'בעו לה אליביה הא'). The character 'ל' is clearly identified by its tall ascender extending above the line of text, which DocAI omitted in Option A ('איביה')."
   },
   {
     "klal_id": 91,
@@ -3463,7 +3748,7 @@
     "opcode": "replace",
     "word_index_in_final_text": 453,
     "original_word": "איבא",
-    "corrected_word": "איכא",
+    "corrected_word": "אליבא",
     "bbox": {
       "x1": 0.6442248225212097,
       "y1": 0.5690562725067139,
@@ -3472,9 +3757,9 @@
     },
     "bbox_estimated": false,
     "vision_selected": "B",
-    "vision_transcription": "איכא",
-    "vision_confidence": 0.95,
-    "vision_reasoning": "The visible word in the center line is 'איכא' (Aramaic for 'there is/are'), fitting the context 'דלא הוו איכא דהלכתא'. Option A ('איבא') is a classic OCR confusion of the Hebrew letter כ (kaf) for ב (bet)."
+    "vision_transcription": "אליבא",
+    "vision_confidence": 0.98,
+    "vision_reasoning": "The middle word in the third line is clearly 'אליבא'. The letter lamed (ל) features a prominent upper ascender reaching into the line above, followed by yod, bet, and aleph. This perfectly matches the context 'דלא הוו אליבא דהלכתא'."
   },
   {
     "klal_id": 91,
@@ -3482,7 +3767,7 @@
     "opcode": "replace",
     "word_index_in_final_text": 497,
     "original_word": "איבא",
-    "corrected_word": "איכא",
+    "corrected_word": "אליבא",
     "bbox": {
       "x1": 0.18344657123088837,
       "y1": 0.5994329452514648,
@@ -3490,10 +3775,10 @@
       "y2": 0.6144188046455383
     },
     "bbox_estimated": false,
-    "vision_selected": "B",
-    "vision_transcription": "איכא",
+    "vision_selected": "A",
+    "vision_transcription": "איבא",
     "vision_confidence": 0.98,
-    "vision_reasoning": "The visible text on the third line clearly reads 'לן איכא ד'. Paleographically, the character between 'י' and 'א' is a Hebrew letter kaf ('כ') with a rounded upper-right corner and no rightward projection at the base, distinguishing it from bet ('ב'). Contextually, 'איכא' (meaning 'there is' in Talmudic Aramaic) perfectly fits the standard Rabbinic phrase 'דמדאבעיא לן איכא...'; Option A ('איבא') is an OCR misreading."
+    "vision_reasoning": "Paleographic inspection of the middle line clearly reveals the letters 'א' (aleph), 'י' (yod), 'ב' (bet), and 'א' (aleph) without a 'ל' (lamed) ascender, forming 'איבא' (a textual/printer error for 'אליבא'). Option A accurately captures the literal characters visible in the print crop."
   },
   {
     "klal_id": 91,
@@ -3501,7 +3786,7 @@
     "opcode": "replace",
     "word_index_in_final_text": 524,
     "original_word": "איבא",
-    "corrected_word": "איכא",
+    "corrected_word": "אליבא",
     "bbox": {
       "x1": 0.4935145080089569,
       "y1": 0.629404604434967,
@@ -3510,9 +3795,9 @@
     },
     "bbox_estimated": false,
     "vision_selected": "B",
-    "vision_transcription": "איכא",
-    "vision_confidence": 0.99,
-    "vision_reasoning": "The visible text clearly reads 'איכא' with the letter kaf (כ), matching both the paleographic structure in the raster crop and the surrounding Rabbinic textual context ('כי תבעי לך איכא דרבנן'). Option A misreads the kaf as a bet."
+    "vision_transcription": "אליבא",
+    "vision_confidence": 0.98,
+    "vision_reasoning": "The visible text clearly shows the word 'אליבא' with the characteristic tall ascender of the letter Lamed (ל) extending upward above the line between the Alef and Yud/Bet. This aligns with both the paleographic evidence in the crop and the standard Talmudic phrase 'אליבא' in the context."
   },
   {
     "klal_id": 91,
@@ -3528,10 +3813,10 @@
       "y2": 0.6755771636962891
     },
     "bbox_estimated": false,
-    "vision_selected": "B",
-    "vision_transcription": "אליבייהו",
-    "vision_confidence": 0.98,
-    "vision_reasoning": "The context 'דמדבעי אליבייהו דרבנן' requires the standard Rabbinic Aramaic word 'אליבייהו' ('according to them'). Paleographically, the tall ascender visible above the word between lines 1 and 2 belongs to the letter Lamed (ל), which DocAI missed in its raw OCR reading ('איבייהו')."
+    "vision_selected": "A",
+    "vision_transcription": "איבייהו",
+    "vision_confidence": 0.95,
+    "vision_reasoning": "In the crop's second line, the word following 'עי' is visually printed as 'איבייהו' (Aleph, Yod, Bet, Yod, Yod, Hei, Vav). The letter following the initial Aleph is a short Yod rather than a tall Lamed (which can be clearly seen with its tall ascender in 'הלכה' on line 1 and 'כלל' on line 3). Thus, Option A accurately captures the literal reading of the image."
   },
   {
     "klal_id": 91,
@@ -3606,8 +3891,27 @@
     "bbox_estimated": false,
     "vision_selected": "B",
     "vision_transcription": "אליביה",
-    "vision_confidence": 0.95,
-    "vision_reasoning": "The visible word clearly shows the letters א, ל (with its distinctive tall ascender extending upwards), י, ב, י, ה, forming 'אליביה'. This matches the surrounding context 'משום דבעי רב אשי אליביה'."
+    "vision_confidence": 0.98,
+    "vision_reasoning": "The crop shows the word 'אליביה'. Paleographically, the top neck/ascender of the 'ל' (lamed) is clearly visible extending upwards above the line of letters, followed by 'י', 'ב', 'י', 'ה'. This matches the surrounding textual context ('משום דבעי רב אשי אליביה דעדיף טפי'). Option A ('איביה') is a misreading that omits the 'ל'."
+  },
+  {
+    "klal_id": 91,
+    "page": 41,
+    "opcode": "replace",
+    "word_index_in_final_text": 702,
+    "original_word": "כוותיידו",
+    "corrected_word": "כוותייהו",
+    "bbox": {
+      "x1": 0.2649783790111542,
+      "y1": 0.7950587272644043,
+      "x2": 0.32180356979370117,
+      "y2": 0.8108546137809753
+    },
+    "bbox_estimated": false,
+    "vision_selected": "B",
+    "vision_transcription": "כוותייהו",
+    "vision_confidence": 0.98,
+    "vision_reasoning": "The image clearly shows the word 'כוותייהו' (k'vatteyhu - 'like them' in Aramaic), matching Option B. The letter before the final vav is a classic Hebrew 'heh' (ה) with a split left leg, not a 'dalet' (ד). This also aligns perfectly with the standard Talmudic phrasing 'דלא כוותייהו' present in the surrounding context."
   },
   {
     "klal_id": 91,
@@ -3626,7 +3930,7 @@
     "vision_selected": "B",
     "vision_transcription": "אלא",
     "vision_confidence": 0.95,
-    "vision_reasoning": "The crop clearly shows the word 'אלא' in the third row, matching the phrase 'ד\"ה אלא ר\"מ' from the context. The middle letter features a prominent tall ascender characteristic of the Hebrew letter Lamed ('ל') positioned between two Alephs ('א'), confirming Option B over Option A."
+    "vision_reasoning": "The image crop shows the Hebrew word 'אלא' on line 3, preceding 'ר' (from 'ר\"מ'). The middle letter features a distinct tall vertical ascender characteristic of a 'ל' (lamed) extending upward between the lines, confirming 'אלא' over 'אא' (which was an OCR error missing the lamed). This aligns with the context phrase 'ד\"ה אלא ר\"מ'."
   },
   {
     "klal_id": 92,
@@ -5891,6 +6195,25 @@
   },
   {
     "klal_id": 163,
+    "page": 59,
+    "opcode": "replace",
+    "word_index_in_final_text": 238,
+    "original_word": "למר",
+    "corrected_word": "למד",
+    "bbox": {
+      "x1": 0.6082664728164673,
+      "y1": 0.7846715450286865,
+      "x2": 0.6403454542160034,
+      "y2": 0.8021087050437927
+    },
+    "bbox_estimated": false,
+    "vision_selected": "B",
+    "vision_transcription": "למד",
+    "vision_confidence": 0.98,
+    "vision_reasoning": "The contextual sentence is 'ומכאן למד ס' יוחסין' ('And from here Sefer Yuchasin inferred...'). Paleographically, the third letter of the word has the distinct right-hand corner overhang/roof characteristic of a dalet ('ד') rather than a rounded resh ('ר'), confirming 'למד' (Option B)."
+  },
+  {
+    "klal_id": 163,
     "page": 60,
     "opcode": "replace",
     "word_index_in_final_text": 429,
@@ -6020,7 +6343,26 @@
     "vision_selected": "B",
     "vision_transcription": "קסז",
     "vision_confidence": 0.98,
-    "vision_reasoning": "The image clearly shows the Hebrew letters ק, ס, and ז (קוף, סמך, זין). The final letter has the characteristic t-shaped top head and central stem of a Zayin (ז), distinguishing it from a Vav (ו). This perfectly matches the context 'קסז' representing section/page 167."
+    "vision_reasoning": "The raster crop clearly shows the three Hebrew characters ק (Qof), ס (Samekh), and ז (Zayin). The leftmost character features a distinct T-shaped horizontal head centered over the vertical shaft, which is paleographically characteristic of the letter Zayin (ז) rather than Vav (ו). This corresponds to Option B ('קסז', gematria 167), matching the surrounding siman numbering context."
+  },
+  {
+    "klal_id": 167,
+    "page": 60,
+    "opcode": "replace",
+    "word_index_in_final_text": 22,
+    "original_word": "עטו",
+    "corrected_word": "עמו",
+    "bbox": {
+      "x1": 0.4336228370666504,
+      "y1": 0.5908907651901245,
+      "x2": 0.4615384638309479,
+      "y2": 0.6078194379806519
+    },
+    "bbox_estimated": false,
+    "vision_selected": "A",
+    "vision_transcription": "עטו",
+    "vision_confidence": 0.95,
+    "vision_reasoning": "The raster image clearly shows the printed text 'עטו' (a classic printer's error for 'עמו' in Rabbinic texts). The letter following the ayin (ע) features the distinct left inward-curving horn and flat base characteristic of a tet (ט), rather than a mem (מ)."
   },
   {
     "klal_id": 167,

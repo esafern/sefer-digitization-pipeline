@@ -3127,58 +3127,6 @@
       "bbox": null
     }
   ],
-  "87": [
-    {
-      "klal_id": 87,
-      "word_index": 21,
-      "opcode": "replace",
-      "final_text": "הדחיה",
-      "consensus_reading": "הדחייה",
-      "agreeing_engines": [
-        "docai",
-        "surya",
-        "vlm"
-      ],
-      "ligature_artifact": null,
-      "witnesses": {
-        "docai": "הדחייה",
-        "vlm": "הדחייה",
-        "surya": "הדחייה"
-      },
-      "page": 39,
-      "bbox": {
-        "x1": 0.3901538550853729,
-        "y1": 0.3955284655094147,
-        "x2": 0.4399999976158142,
-        "y2": 0.41138210892677307
-      }
-    },
-    {
-      "klal_id": 87,
-      "word_index": 206,
-      "opcode": "replace",
-      "final_text": "ולכאורי'",
-      "consensus_reading": "ולכאור",
-      "agreeing_engines": [
-        "docai",
-        "surya",
-        "vlm"
-      ],
-      "ligature_artifact": null,
-      "witnesses": {
-        "docai": "ולכאור",
-        "vlm": "ולכאור'",
-        "surya": "ולכאור'"
-      },
-      "page": 39,
-      "bbox": {
-        "x1": 0.3366153836250305,
-        "y1": 0.5601626038551331,
-        "x2": 0.38769230246543884,
-        "y2": 0.5768292546272278
-      }
-    }
-  ],
   "91": [
     {
       "klal_id": 91,
@@ -8502,32 +8450,6 @@
         "y1": 0.6827390789985657,
         "x2": 0.28148147463798523,
         "y2": 0.6973257660865784
-      }
-    }
-  ],
-  "221": [
-    {
-      "klal_id": 221,
-      "word_index": 49,
-      "opcode": "replace",
-      "final_text": "שכועה",
-      "consensus_reading": "שבועה",
-      "agreeing_engines": [
-        "surya",
-        "vlm"
-      ],
-      "ligature_artifact": null,
-      "witnesses": {
-        "docai": null,
-        "vlm": "שבועה",
-        "surya": "שבועה"
-      },
-      "page": 76,
-      "bbox": {
-        "x1": 0.13765431940555573,
-        "y1": 0.8200972676277161,
-        "x2": 0.18703703582286835,
-        "y2": 0.838735818862915
       }
     }
   ]

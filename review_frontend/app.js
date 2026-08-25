@@ -343,7 +343,17 @@ function navItemInnerHtml(k) {
   // decision, green = already decided (a reviewer wants to know at a
   // glance how much of a klal's queue is actually done, not just how many
   // words were ever flagged).
-  const openBadge = k.open_count ? `<span class="ncount ncount-open">${k.open_count}</span>` : '';
+  // FIXED 2026-08-25 (reviewer, klal 88: "i see 9 or more disputes but the
+  // count in the right pane is 2"). This badge used `open_count`, which is
+  // total - decided, so it counted MACHINE-RESOLVED words - which render GREEN,
+  // needing nothing from a reviewer - as outstanding work. The legend two
+  // functions up has always summed `machine_disputed_count` instead, so the
+  // same word was "open" in the badge and "resolved" in the legend, and neither
+  // matched the colours on screen. Klal 88 measured 26 highlighted words = 17
+  // decided + 5 machine-resolved + 4 disputed: badge said 9, four were red.
+  // The badge now counts what is actually red, which is what a reviewer is
+  // looking for when they scan the nav for remaining work.
+  const openBadge = k.machine_disputed_count ? `<span class="ncount ncount-open">${k.machine_disputed_count}</span>` : '';
   const decidedBadge = k.decided_count ? `<span class="ncount ncount-decided">${k.decided_count}</span>` : '';
   // No punctuation badge here on purpose: the proposed-punctuation
   // affordances (legend swatch, nav badges, inline blue-dot markers) were
@@ -377,7 +387,7 @@ function applyFlaggedFilter() {
     const k = klalById[kid];
     let show = true;
     if (onlyFlagged && !k?.needs_revisit) show = false;
-    if (onlyHighValue && (k?.open_count === 0 && k?.machine_disputed_count === 0 && !k?.needs_revisit)) show = false;
+    if (onlyHighValue && (k?.machine_disputed_count === 0 && !k?.needs_revisit)) show = false;
     el.style.display = show ? '' : 'none';
   });
 }
@@ -515,7 +525,14 @@ function renderKlalBody(block, k) {
       marker.dataset.page = contBoundaries[i];
       body.appendChild(marker);
     }
-    if (gapsBefore[i]) gapsBefore[i].forEach(c => body.appendChild(makeGapMarker(k.klal_id, c)));
+    if (gapsBefore[i]) gapsBefore[i].forEach(c => {
+      body.appendChild(makeGapMarker(k.klal_id, c));
+      const accepted = c.current_decision && c.current_decision.chosen_text;
+      if (accepted) {
+        body.appendChild(makePendingInsertText(accepted));
+        body.appendChild(document.createTextNode(' '));
+      }
+    });
     if (w === '[.]') {
       const mark = document.createElement('span');
       mark.className = 'editorial-mark';
@@ -688,6 +705,28 @@ function renderKlalBody(block, k) {
     }
     body.appendChild(document.createTextNode(' '));
   });
+
+  // FIXED 2026-08-25 (reviewer, klal 219). A `possible_omission` whose
+  // word_index equals the klal's word count is text the scan has AFTER the last
+  // stored word - and the loop above walks the stored words, so a gap at that
+  // index had no word to render before and never appeared at all. Not an edge
+  // case: 12 of the 40 omission candidates sit there, klal 219's among them, and
+  // three of them are a whole missing phrase ('בשם התוספות', 'דוכתי דבגמרא',
+  // 'ס"ח ונכון הוא'). The reviewer could decide one only by finding it in the
+  // scan pane. Rendered at the end of the klal, in reading order, where the
+  // missing text belongs.
+  Object.keys(gapsBefore)
+    .map(Number)
+    .filter(idx => idx >= words.length)
+    .sort((a, b) => a - b)
+    .forEach(idx => gapsBefore[idx].forEach(c => {
+      body.appendChild(makeGapMarker(k.klal_id, c));
+      const accepted = c.current_decision && c.current_decision.chosen_text;
+      if (accepted) {
+        body.appendChild(makePendingInsertText(accepted));
+        body.appendChild(document.createTextNode(' '));
+      }
+    }));
   // A delete-opcode candidate can be filed at word_index == words.length
   // (missing text trails the klal's very last word, e.g. a boundary case
   // at a klal seam) - the forEach above only ever visits i < words.length,
@@ -717,6 +756,23 @@ function makeGapMarker(klalId, corr) {
   span.style.background = STATE_META[wordState(corr)].color;
   attachWordHandlers(span, klalId, corr, true);
   return span;
+}
+
+// FIXED 2026-08-25 (reviewer, klal 219: "i decided to add the proposed text -
+// but that text is not seen in the middle pane"). A `possible_omission` is
+// words the scan has and the corpus lacks; accepting one is a decision to ADD
+// them. It rendered as a bare coloured sliver whose only trace of the accepted
+// text was a hover tooltip - so the reviewer had no way to see, while reading,
+// what they had agreed to insert. A pending REPLACEMENT has shown its incoming
+// text inline since 2026-08-17; an insertion is the same promise and gets the
+// same treatment. Recording still does not touch part1.json - the text renders
+// as pending until apply_reviewer_decisions.py runs.
+function makePendingInsertText(chosenText) {
+  const el = document.createElement('span');
+  el.className = 'pending-replace-text';
+  el.textContent = chosenText;
+  el.title = 'Pending insertion: recorded but not yet applied to part1.json';
+  return el;
 }
 
 // ---------- quick hover tooltip ----------

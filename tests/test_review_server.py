@@ -417,6 +417,41 @@ def test_clicking_a_manually_corrected_word_focuses_it_on_the_scan(server, page)
         "clicking a manually-corrected word must focus its box on the scan pane")
 
 
+def test_an_accepted_omission_shows_the_text_it_will_insert(server, page):
+    """REGRESSION 2026-08-25 (reviewer, klal 219: "i decided to add the proposed
+    text - but that text is not seen in the middle pane").
+
+    A `possible_omission` candidate is words the scan has and the corpus lacks;
+    accepting one is a decision to ADD them. It rendered as a bare coloured
+    sliver, with the accepted text reachable only by hovering - so while reading
+    the klal there was no way to see what had been agreed to. A pending
+    REPLACEMENT has shown its incoming text inline since 2026-08-17."""
+    klal_id, gap = None, None
+    for kid in (219, 4, 30, 88, 91):
+        for c in _get_json(server, f"/api/klal/{kid}")["corrections"]:
+            if c.get("opcode") == "delete":
+                klal_id, gap = kid, c
+                break
+        if gap:
+            break
+    if not gap:
+        pytest.skip("no omission candidate served to test against")
+
+    body = json.dumps({"klal_id": klal_id, "word_index": gap["word_index"],
+                       "chosen_source": "docai_reading",
+                       "chosen_text": "טקסט חדש"}).encode("utf-8")
+    req = urllib.request.Request(server + "/api/decisions/disputed", data=body,
+                                 headers={"Content-Type": "application/json"})
+    with urllib.request.urlopen(req) as resp:
+        assert resp.status in (200, 201)
+
+    _open_dashboard(page, server, klal_id)
+    page.wait_for_selector(f"#klal-block-{klal_id}", timeout=8000)
+    text = page.locator(f"#klal-block-{klal_id}").inner_text()
+    assert "טקסט חדש" in text, (
+        "an accepted omission must show the text it will insert, not only a coloured gap")
+
+
 def test_decisions_api_reflects_saved_state(server):
     data = _get_json(server, "/api/klal/1/flag")
     # written by test_klal_flag_panel_saves_and_shows_in_nav, which runs
