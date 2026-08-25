@@ -466,6 +466,26 @@ to) as state changes** — that discipline is what drifted last time.
     `tools/patch_witness_word_indices.py` exists for it, but the queue is being
     retired anyway (item 3a), so it needs a decision rather than a drive-by.
 
+18. **FIXED 2026-08-25 (reviewer-reported, serious): the dashboard offered to
+    replace klal 1's `דנראח` with `6.18M`, on one click.** `extractSuggestedWord()`
+    took the first `->` in a flag's note; klal 1 w229's note describes the
+    reference corpus growing `2.58M->6.18M words`, so a file-size figure was
+    offered as the reading of a word in the first klal of the work — and
+    `Use "X"` clicked Save itself, so one click recorded a decision the reviewer
+    never saw. **Swept: of 261 open word-level flags carrying a suggestion, 39
+    proposed a string with no Hebrew letter (12 of them `6.18M`) and 27 proposed
+    something containing `?`.** Nothing bad was ever recorded — 0 decisions in
+    the whole ledger have a `chosen_text` without a Hebrew letter. Fixed by
+    ordering extraction (canonical `word wNNN → x` form first, then prose, then a
+    loose arrow) and validating every candidate: no `?`, at least one Hebrew
+    letter, never a single letter for a multi-letter word, never the word already
+    there. `Use "X"` now fills the box and stops. After: **194 offered, 0
+    implausible**; `דנראח → דנראה` is now correct. A second gap surfaced with it:
+    `ai_flag` had no `FLAG_LABELS` entry, so all 299 live word-level flags
+    rendered under app.js's generic fallback — invisible to the end-to-end label
+    test, which runs against an empty decisions file. Two regression tests, both
+    proven to fail against the pre-fix code.
+
 ## Recent work (2026-08-21)
 
 - **This session's OCR/witness-engine research findings written into the

@@ -68,6 +68,16 @@ FLAG_LABELS = {
     "unverified_insertion": ["Unverified addition", "#a0aec0"],
     "ambiguous": ["Ambiguous", "#dd6b20"],
     "error": ["Check failed", "#718096"],
+    # ADDED 2026-08-25. Word-level klal_flags are served with flag "ai_flag" and
+    # had no entry here, so app.js's `FLAGS[corr.flag] || ['Flagged']` fallback
+    # rendered all 299 of them with the same generic word as a flag name that
+    # doesn't exist - the exact defect the stale_candidate note below records,
+    # live on the corpus rather than latent. tests/test_review_server.py's
+    # end-to-end label check could not see it: it runs against an isolated,
+    # empty decisions file, where no word-level flag exists to serve (Lesson 1 -
+    # the check ran, just not on the case that mattered). It surfaced only when
+    # a new test seeded a real flag record through the API.
+    "ai_flag": ["Flagged for revisit", "#d69e2e"],
     # ADDED 2026-08-14: assemble_corrections_dataset.py's drift check
     # (see PROJECT-STATUS.md) forces this flag when a candidate's
     # word_index/corrected_word no longer matches live part1.json. Without

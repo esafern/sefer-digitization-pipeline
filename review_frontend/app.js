@@ -50,26 +50,77 @@ function escapeAttr(s) {
   return escapeHtml(s).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
-function extractSuggestedWord(reasoning) {
+const HEBREW_LETTER_RE = /[\u05D0-\u05EA]/g;
+function hebrewLettersOnly(s) {
+  return (s || '').match(HEBREW_LETTER_RE)?.join('') || '';
+}
+
+// A suggestion is offered to a reviewer as a one-click replacement for a real
+// word in a 174-year-old text, so it has to be a WORD, not whatever happened to
+// sit after the first arrow in a prose note.
+//
+// FIXED 2026-08-25, reported by the reviewer as "klal 1 word 229 - proposed
+// correction is a serious bug", and it was: the panel offered to replace
+// `דנראח` with `6.18M`. The note for that flag says the reference corpus grew
+// "2.58M->6.18M words" and, further along, that the stored form is one
+// substitution "('ח'->'ה') away from 'דנראה'". The old rule took the first
+// `->` in the string and captured the token after it, so it proposed a
+// FILE-SIZE FIGURE as Hebrew scripture - and the "Use ..." button saved it on
+// one click without a confirmation step.
+//
+// Swept before fixing: of 261 open word-level flags carrying a suggestion,
+// **39 proposed something with no Hebrew letter in it at all** (12 of them the
+// literal `6.18M`) and **27 proposed a string containing `?`** (the detectors
+// write `word wNNN → ??` when they have no candidate). Klal 1 word 229 is the
+// first klal of the work.
+function suggestionIsPlausible(suggestion, currentWord) {
+  if (!suggestion) return false;
+  if (suggestion.indexOf('?') !== -1) return false;      // "→ ??" means the detector had none
+  const letters = hebrewLettersOnly(suggestion);
+  if (!letters) return false;                            // "6.18M", "ב.", a bare number
+  if (!currentWord) return true;
+  const wordLetters = hebrewLettersOnly(currentWord);
+  // A single letter proposed for a multi-letter word is the ('ח'->'ה')
+  // confusion-pair notation being read as a replacement, not a reading.
+  if (letters.length === 1 && wordLetters.length > 1) return false;
+  if (letters === wordLetters) return false;             // proposes what is already there
+  return true;
+}
+
+function extractSuggestedWord(reasoning, currentWord) {
   if (!reasoning) return null;
   if (typeof reasoning === 'object') {
+    currentWord = currentWord || reasoning.final_text;
     reasoning = reasoning.reasoning || (reasoning.current_decision && reasoning.current_decision.note) || reasoning.note;
   }
   if (!reasoning || typeof reasoning !== 'string') return null;
 
-  // 1. Arrow pattern: e.g. "בססחים w30 → בפסחים" or "ידן -> ידו"
+  const candidates = [];
+  // 1. The detectors' own canonical form, anchored on the flagged word and its
+  // index: "בפיק w427 → בפ\"ק". This is the only arrow that is a proposal;
+  // every other arrow in these notes is prose.
+  const mAnchored = reasoning.match(/(?:^|\|)\s*\S+\s+w\d+\s*(?:→|->)\s*['"״׳]?([^\s|]+)/);
+  if (mAnchored) candidates.push(mAnchored[1]);
+  // 2. Prose patterns, which name the attested word explicitly.
+  const prose = [
+    /away from ['"]([^'"]+)['"]/i,
+    /suggests? ['"]([^'"]+)['"]/i,
+    /['"]([^'"]+)['"]\s*\(\d+x independently attested\)/i,
+    /replaces? (?:with )?['"]([^'"]+)['"]/i,
+  ];
+  for (const re of prose) {
+    const m = reasoning.match(re);
+    if (m) candidates.push(m[1]);
+  }
+  // 3. Any remaining arrow, last and least - kept so an older note shape still
+  // yields something, but it now has to survive the same plausibility check.
   const mArrow = reasoning.match(/(?:→|->)\s*['"״׳]?([^\s|'"״׳]+)/);
-  if (mArrow) return mArrow[1].trim();
+  if (mArrow) candidates.push(mArrow[1]);
 
-  // 2. Prose patterns
-  const m1 = reasoning.match(/away from ['"]([^'"]+)['"]/i);
-  if (m1) return m1[1].trim();
-  const m2 = reasoning.match(/suggests? ['"]([^'"]+)['"]/i);
-  if (m2) return m2[1].trim();
-  const m3 = reasoning.match(/['"]([^'"]+)['"]\s*\(\d+x independently attested\)/i);
-  if (m3) return m3[1].trim();
-  const m4 = reasoning.match(/replaces? (?:with )?['"]([^'"]+)['"]/i);
-  if (m4) return m4[1].trim();
+  for (const c of candidates) {
+    const trimmed = (c || '').trim().replace(/^['"״׳]|['"״׳]$/g, '');
+    if (suggestionIsPlausible(trimmed, currentWord)) return trimmed;
+  }
   return null;
 }
 
@@ -846,7 +897,7 @@ async function openDisputedPanel(klalId, corr) {
   // this gives the reviewer a 1-click accept option for the AI suggestion
   // without typing). Matches openManualCorrectionPanel's layout: placed
   // right below the current-text option, distinctly styled via .co-meta.
-  const suggestedWord = extractSuggestedWord(corr);
+  const suggestedWord = extractSuggestedWord(corr, corr.final_text);
   if (suggestedWord && !options.some(o => o.text === suggestedWord)) {
     options.splice(1, 0, {
       source: 'suggested',
@@ -1260,7 +1311,7 @@ async function openManualCorrectionPanel(klalId, wordIndex, word, existing) {
   const currentNote = existing && existing.current_decision && existing.current_decision.note ? existing.current_decision.note : '';
   const reasoningNote = existing ? (existing.reasoning || (existing.current_decision && existing.current_decision.note)) : null;
 
-  const suggestedWord = extractSuggestedWord(reasoningNote);
+  const suggestedWord = extractSuggestedWord(reasoningNote, word);
 
   manualPanelBody.innerHTML = `
     <div class="panel-section">
@@ -1323,8 +1374,16 @@ async function openManualCorrectionPanel(klalId, wordIndex, word, existing) {
   const useSuggestedBtn = document.getElementById('use-suggested-word-btn');
   if (useSuggestedBtn && suggestedWord) {
     useSuggestedBtn.onclick = () => {
-      document.getElementById('manual-correction-text').value = suggestedWord;
-      document.getElementById('save-manual-correction-btn').click();
+      // FILL ONLY - no auto-save. This used to click Save itself, so a single
+      // click recorded a decision the reviewer never read. That is what turned
+      // a bad suggestion (klal 1 w229's `6.18M`) from an annoyance into a
+      // corpus-integrity risk. The suggestion now lands in the box and the
+      // reviewer presses Save, which is one extra click and the whole
+      // safeguard: success criterion #1 says a correction is resolved by
+      // looking, not by accepting a proposal sight unseen.
+      const box = document.getElementById('manual-correction-text');
+      box.value = suggestedWord;
+      box.focus();
     };
   }
 

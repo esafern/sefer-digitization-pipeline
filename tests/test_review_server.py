@@ -284,6 +284,77 @@ def test_index_stamps_asset_versions_from_the_files_themselves(server):
             f"{name}'s stamp must follow the file: got {stamp}")
 
 
+def test_a_suggested_replacement_is_a_word_not_a_number_from_the_note(server, page):
+    """REGRESSION 2026-08-25, reviewer: "klal 1 word 229 - proposed correction is
+    a serious bug."
+
+    It was. The panel offered to replace `דנראח` with **`6.18M`**. That flag's
+    note mentions the reference corpus growing "2.58M->6.18M words" long before
+    it says the stored form is one substitution "('ח'->'ה') away from 'דנראה'",
+    and the old extractor took the FIRST arrow in the string. The "Use ..."
+    button then saved on a single click with nothing in between, so one click
+    recorded a file-size figure as the reading of the first klal of the work.
+
+    Swept at the time: of 261 open word-level flags carrying a suggestion, 39
+    proposed a string with no Hebrew letter in it (12 of them literally
+    `6.18M`) and 27 proposed something containing `?`.
+
+    Seeds the real note through the API so the assertion runs against the exact
+    text that produced the bug."""
+    real_note = (
+        "Lexicon-gap detector re-run 2026-08-17/18 against the EXPANDED independent "
+        "reference corpus (added Mishneh Torah + Tur + Rashi on Talmud to the existing "
+        "Shulchan Arukh + Talmud Bavli set, 2.58M->6.18M words) - this candidate's "
+        "confusable neighbor didn't clear the attestation floor in the smaller corpus. "
+        "Stored form 'דנראח' has ZERO attestation in the expanded corpus and is one "
+        "letter-substitution ('ח'->'ה') away from 'דנראה' (43x independently attested)."
+    )
+    body = json.dumps({"klal_id": 1, "word_index": 229, "needs_revisit": True,
+                       "note": real_note}).encode("utf-8")
+    req = urllib.request.Request(server + "/api/decisions/klal_flag", data=body,
+                                 headers={"Content-Type": "application/json"})
+    with urllib.request.urlopen(req) as resp:
+        assert resp.status in (200, 201)
+
+    _open_dashboard(page, server, 1)
+    page.locator("#klal-block-1 .flag-word.state-ai-flag").first.click()
+    page.wait_for_selector("#manual-panel.open", timeout=5000)
+
+    panel = page.locator("#manual-panel").inner_text()
+    assert "6.18M" not in panel, "the panel is offering a corpus-size figure as a reading"
+    assert "??" not in panel, "the panel is offering the detectors' no-candidate marker"
+    # the correct reading IS derivable from this note, so it must be the one offered
+    assert "דנראה" in panel, f"expected the attested reading to be suggested; panel was:\n{panel}"
+    assert page.input_value("#manual-correction-text") in ("", "דנראה"), (
+        "the text box must be empty or pre-filled with the plausible suggestion")
+
+
+def test_the_use_suggestion_button_fills_the_box_without_saving(server, page):
+    """The other half of the same report. `Use "X"` used to click Save itself, so
+    a reviewer accepted a proposed reading without ever seeing it in the box.
+    Success criterion #1 - resolved by looking, not inferred - makes that the
+    wrong default no matter how good the suggestion is."""
+    real_note = "שחפך w110 → שהפך | INTRA: כ for ה in a common verb"
+    body = json.dumps({"klal_id": 1, "word_index": 100, "needs_revisit": True,
+                       "note": real_note}).encode("utf-8")
+    req = urllib.request.Request(server + "/api/decisions/klal_flag", data=body,
+                                 headers={"Content-Type": "application/json"})
+    with urllib.request.urlopen(req) as resp:
+        assert resp.status in (200, 201)
+
+    _open_dashboard(page, server, 1)
+    page.locator("#klal-block-1 .flag-word.state-ai-flag").first.click()
+    page.wait_for_selector("#manual-panel.open", timeout=5000)
+    if page.locator("#use-suggested-word-btn").count() == 0:
+        pytest.skip("no suggestion offered for the seeded flag")
+    page.click("#use-suggested-word-btn")
+    page.wait_for_timeout(400)
+    assert page.locator("#manual-panel.open").count() == 1, (
+        "filling the suggestion must NOT save and close - the reviewer has not agreed yet")
+    assert page.locator("#manual-save-status.show").count() == 0, (
+        "no decision may be recorded until the reviewer presses Save")
+
+
 def test_decisions_api_reflects_saved_state(server):
     data = _get_json(server, "/api/klal/1/flag")
     # written by test_klal_flag_panel_saves_and_shows_in_nav, which runs

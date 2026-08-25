@@ -17,6 +17,76 @@ current file references, or when grepping for how a past finding was
 resolved. Same append-at-top convention as before: newest entries go right
 after this header, not at the bottom.
 
+### SERIOUS BUG FIXED 2026-08-25 — the dashboard offered to replace klal 1's `דנראח` with **`6.18M`**, on one click, with no confirmation step.
+
+Reported by the reviewer: "on klal 1 word 229 - proposed correction is a serious
+bug." It was, and it was worse than a bad suggestion.
+
+**What it proposed and why.** `extractSuggestedWord()` in `app.js` mined the
+flag's note for a proposed reading by taking the FIRST `->` in the string. Klal 1
+w229's note is the lexicon-gap detector's prose, and its first arrow is in
+`2.58M->6.18M words` - describing the reference corpus growing. So the panel
+offered **`6.18M`** as the reading of a word in the first klal of the work. (The
+second arrow, `('ח'->'ה')`, would have yielded the bare letter `ה` - also wrong.
+The correct reading, `דנראה`, was in the same note all along, in the phrase
+"away from 'דנראה' (43x independently attested)", behind a prose rule that never
+ran because the arrow rule matched first.)
+
+**Why "serious" is the right word: the button saved it.** `Use "6.18M"` did
+`box.value = suggestion` and then `save-manual-correction-btn.click()` - one
+click recorded a `manual_correction` the reviewer had never seen in the box.
+Nothing in the flow required a human to read the value being committed, which is
+a direct hit on success criterion #1 ("resolved by looking at the actual scan,
+not inferred").
+
+**Swept before fixing** (standing rule). Of **261** open word-level flags
+carrying a suggestion:
+
+| what it proposed | count |
+| :--- | ---: |
+| a string with NO Hebrew letter at all | **39** |
+| ...of which the literal `6.18M` | **12** |
+| a string containing `?` (the detectors' own "no candidate" marker, `→ ??`) | **27** |
+
+**Nothing bad was ever recorded.** Checked the whole ledger: **0** decisions of
+any type have a `chosen_text` without a Hebrew letter, 0 contain `6.18M`, 0
+contain `??`. The bug was live and reachable but never fired - the reviewer
+caught it before clicking.
+
+**The fix, in two parts.**
+1. **Extraction is now ordered and validated.** Try the detectors' own canonical
+   form first (`word wNNN → suggestion`, anchored on the word and its index),
+   then the prose forms that name an attested word, and only then a loose arrow.
+   Every candidate must then pass `suggestionIsPlausible()`: no `?`, at least one
+   Hebrew letter, never a single letter proposed for a multi-letter word (that is
+   the `('ח'->'ה')` confusion-pair notation being read as a reading), and never
+   the word that is already there. First plausible candidate wins; if none is
+   plausible, **nothing is offered**.
+2. **`Use "X"` fills the box and stops.** The reviewer presses Save. One extra
+   click, and it is the whole safeguard.
+
+**Measured after: 194 suggestions offered, 0 implausible** (down from 261 with 39
++ 27 bad). The 67 that no longer appear are the ones whose only candidate was
+garbage - offering nothing is the correct output there. Spot-checks:
+`דנראח → דנראה` (was `6.18M`), `ר"ס → ר"פ`, `רתם → דתם`, and klal 17 w308's
+`→ ??` now offers nothing.
+
+**A second, real gap surfaced because the new test seeded a real flag.**
+`test_every_flag_the_api_serves_has_a_label` went red: `ai_flag` had no entry in
+`FLAG_LABELS`, so app.js's `FLAGS[corr.flag] || ['Flagged']` fallback was
+rendering all **299** live word-level flags under a generic label. That test runs
+against an isolated, empty decisions file where no word-level flag exists to
+serve, so it could never see it - Lesson 1 in miniature, and the reason the
+seeded-real-data test was worth writing. Labelled "Flagged for revisit".
+
+**Two regression tests, both run against the pre-fix `app.js` first**: one seeds
+klal 1 w229's real note through the API and asserts the panel never shows
+`6.18M` or `??` and does offer `דנראה` (fails on the old code with `6.18M` in the
+panel); the other asserts clicking `Use "X"` leaves the panel open with no
+decision recorded (fails on the old code with the save banner already showing).
+
+314 tests green, server restarted.
+
 ### 2026-08-25 — "klal 167 word 22 still doesn't autoclose": the fix was live, the reviewer's TAB was not. Cache-busting is now automatic.
 
 **The code was already correct, and I checked before saying so.** Reproduced klal
