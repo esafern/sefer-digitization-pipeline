@@ -1059,6 +1059,72 @@ See `PROJECT-STATUS-HISTORY.md` — 65 dated entries from 2026-08-14 through
 infrastructure build-out, multiple independent code-review/refactor passes,
 and the lexicon/reference-corpus work behind open item 1 above.
 
+### 2026-08-25 — the showcase's lead example is now klal 88's kaf-for-bet cluster, verified in the ink at 900 DPI. And the reviewer's "ק instead of ב" was kaf, not kof.
+
+Reviewer: "showcase 88, as I said - וכתבו is correct but the type is clearly two
+kaf chars, and similarly וכאבל should be two beit chars." Also: drop the claim
+that boundary defects are "the most serious", and the `דנראח` case is a
+compositor's type substitution rather than a typo.
+
+**The letter was kaf (כ), not kof (ק) - and once corrected, the claim holds
+strongly.** ק-for-ב occurs **zero** times in Part 1. **כ↔ב is the second-largest
+confusion class in the corpus: 34 kaf-for-bet candidates across 24 klalim**
+(against ר→ד's 68 at the top).
+
+**Klal 88 page 40 is the densest cluster in Part 1 - four on one page:**
+
+| word | printed | required |
+| ---: | :--- | :--- |
+| w510 | `אכל` | `אבל` |
+| w533 | `וכתכו` | `וכתבו` |
+| w861 | `כתיכ` | `כתיב` |
+| w1111 | `וכלבד` | `ובלבד` |
+
+An earlier measurement of mine put klal 88 at ONE such case and I reported that
+to the user. It was run against the git-committed `corrections_part1.json`,
+which predated the day's rebuild; the current data shows four. **A stale input
+produced a confidently stated wrong count** - the same shape as every other
+"measured from the wrong file" error in this log.
+
+**Verified in the ink, not inferred from the diff.** `w1111` rendered at
+**900 DPI** (page index proven first by correlating a 72-DPI render against the
+correctly-indexed cache): the word reads `ו·כ·ל·ב·ד`, and **the second letter
+has no base stroke while the fourth has the projecting bet foot** - two visibly
+different sorts, in one word, on one line, out of one forme, in a word that
+takes bet in both positions. That internal control is what makes this example
+worth more than the `האי`/`האו` one it replaces: a misreading would have to
+explain why the two shapes differ where the type set one letter.
+
+**The showcase now leads with it.** The four-level zoom (page → line → box →
+record) is re-pointed from klal 219 to klal 88 page 40, and a new section, "The
+compositor reached into the wrong box", carries the 900-DPI crop, the four-word
+cluster, and the point that matters: **an OCR engine returning `וכלבד` here is
+not wrong.** Any pipeline scoring engines against a corrected text books these
+four as recognition failures and learns the wrong lesson; they are the 1851
+compositor, faithfully recorded, and choosing between the ink as set and the
+word as meant is an editorial judgement for a person.
+
+**The `דנראח` section reframed** from "a 174-year-old typo" to the same
+phenomenon in the other direction, with the measured counts: **7 words printed
+with ח where ה belongs, and 5 with ה where ח belongs**. The reviewer's read -
+that this is a compositor working from a case short of a sort, not a slip - is
+what the distribution actually looks like.
+
+**Claim removed:** "The most serious defects aren't misread letters - they're
+klal boundaries drawn in the wrong place." Nothing in this project ranks the two,
+and the reviewer asked why boundaries would be *most* serious. Replaced with what
+is actually true and checkable: a boundary error attaches correctly-read words to
+the wrong klal, so a citation resolves to the wrong place - a different kind of
+defect, not a worse one.
+
+**Klal 1 w85 had no image** (the reviewer noticed the card showed styled text
+where every sibling shows a crop). Now a real 700-DPI crop - and the honest
+caption: at that resolution the final letter still looks like a nun. Both `לכו`
+and `לכן` are real words, so no lexicon separates them; only the sentence does.
+That is the card's whole point and it now shows rather than asserts it.
+
+HTML structure validated, 19 images all decode, no console errors, 2.6MB.
+
 ### 2026-08-25 — decisions applied; klal 219's omission marker had never rendered; the "flaky" Playwright tests were a blocked pipe.
 
 **APPLIED, user-requested.** `apply_reviewer_decisions.py` promoted **54
