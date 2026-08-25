@@ -82,23 +82,43 @@ def load_baseline(path):
     return {kid: text.split() for kid, text in by_klal.items()}
 
 
-def docai_verdicts(verified):
+def docai_verdicts(verified, words_by_klal=None):
     """(klal_id, word_index) -> DocAI's own differing reading.
 
     Sourced from the real corrections pipeline: build_corrections_dataset.py
     already diffs fresh DocAI tokens against stored text, and a candidate at a
     position IS DocAI disagreeing there. `original_word` is DocAI's token,
     `corrected_word` is what the corpus stores (see
-    assemble_corrections_dataset.py's own mapping of the same two fields)."""
-    out = {}
+    assemble_corrections_dataset.py's own mapping of the same two fields).
+
+    ADDED 2026-08-24 (code review, finding F9): DRIFT-GUARDED. A candidate's
+    `word_index_in_final_text` can stop pointing at the word it was verified
+    against after any edit that shifts positions - that is the documented
+    2026-08-13 reindexing incident, and it is why
+    assemble_corrections_dataset.check_drift() exists. Keying DocAI's reading by
+    that index with no guard means a drifted candidate contributes a DocAI
+    "vote" at an UNRELATED word, where it can manufacture a two-engine consensus
+    out of nothing. Currently 0 of 538 candidates are drifted, so this was
+    latent - but a consensus dispute fabricated this way would look exactly like
+    a real one, and would carry the primary engine's authority.
+    """
+    import assemble_corrections_dataset as acd
+    out, skipped = {}, 0
     for c in verified:
         if c.get("opcode") != "replace":
             # insert/delete are word-count changes, not a substitution this
             # position-keyed consensus can compare against another engine.
             continue
         reading = c.get("original_word")
-        if reading:
-            out[(c["klal_id"], c["word_index_in_final_text"])] = reading
+        if not reading:
+            continue
+        if words_by_klal is not None and acd.check_drift(c, words_by_klal.get(c["klal_id"])):
+            skipped += 1
+            continue
+        out[(c["klal_id"], c["word_index_in_final_text"])] = reading
+    if skipped:
+        print(f"  docai_verdicts: skipped {skipped} drifted candidate(s) - their "
+              f"word_index no longer points at the word they were verified against")
     return out
 
 
@@ -150,7 +170,7 @@ def active_human_decisions():
 def synthesize(part1, verified, vlm_a, vlm_b, surya, decided=None):
     """Every position where >= 2 distinct engines agree on the same reading
     and that reading differs from the stored corpus text."""
-    docai = docai_verdicts(verified)
+    docai = docai_verdicts(verified, {k["klal_id"]: k["clean_text"].split() for k in part1})
     decided = {} if decided is None else decided
     disputes = []
     stats = {"klalim_no_surya": 0, "klalim_no_vlm": 0, "vlm_abstained": 0,

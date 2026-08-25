@@ -342,6 +342,21 @@ def main():
             n_drifted += 1
         by_klal.setdefault(str(c["klal_id"]), []).append(entry)
 
+    # F10 (code review 2026-08-24): the ligature filter depends on
+    # sefaria_reference_corpus/word_freq.json, which is GITIGNORED. Without it
+    # repair_word() returns None for everything, so this stage silently produces
+    # a materially different reviewer queue - 118 items flagged
+    # current_text_may_be_wrong instead of docai_ligature_artifact, and no
+    # repaired-reading option anywhere - with no indication that anything was
+    # skipped. A clone would look correct and quietly hand its reviewer a
+    # quarter more work. Say so loudly instead.
+    if not docai_filter.reference_frequencies():
+        print("WARNING: sefaria_reference_corpus/word_freq.json is absent - the DocAI "
+              "alef-lamed ligature repair is DISABLED for this run.")
+        print("         ~118 Part-1 candidates that are pure ligature artifacts will be "
+              "served as open disputes, and no repaired reading will be offered.")
+        print("         See SETUP.md for how to obtain the reference corpus.")
+
     n_new, n_enriched = merge_consensus_disputes(by_klal)
 
     with open(OUT_PATH, "w", encoding="utf-8") as f:

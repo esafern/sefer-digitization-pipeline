@@ -4106,3 +4106,33 @@ def test_ligature_artifact_flag_only_fires_on_an_exact_match_to_stored_text():
     # nothing to repair
     assert acd._ligature_artifact_flag(
         {"original_word": "כתבו", "corrected_word": "כתב"}) is None
+
+
+def test_docai_verdicts_skips_a_drifted_candidate(monkeypatch):
+    """REGRESSION 2026-08-24 (code review, finding F9). A candidate's
+    word_index_in_final_text can stop pointing at the word it was verified
+    against after any position-shifting edit - the documented 2026-08-13
+    reindexing incident. Keying DocAI's reading by that index with no guard lets
+    a drifted candidate cast a DocAI 'vote' at an UNRELATED word, where it can
+    manufacture a two-engine consensus out of nothing that would look exactly
+    like a real one and carry the primary engine's authority."""
+    words = {1: ["אלף", "בית", "גימל"]}
+    live = {"klal_id": 1, "opcode": "replace", "word_index_in_final_text": 1,
+            "original_word": "בות", "corrected_word": "בית"}
+    drifted = {"klal_id": 1, "opcode": "replace", "word_index_in_final_text": 1,
+               "original_word": "בות", "corrected_word": "דלת"}   # not what's there now
+    assert smw.docai_verdicts([live], words) == {(1, 1): "בות"}
+    assert smw.docai_verdicts([drifted], words) == {}
+    # unguarded (no word list) keeps the old permissive behaviour for callers
+    # that genuinely have no corpus to check against
+    assert smw.docai_verdicts([drifted]) == {(1, 1): "בות"}
+
+
+def test_ligature_repair_degrades_visibly_when_the_reference_corpus_is_absent():
+    """REGRESSION (finding F10). The repair depends on a GITIGNORED cache. With
+    it missing the filter silently does nothing, so a clone gets ~118 extra open
+    disputes and no repaired-reading option while looking perfectly correct.
+    repair_word must return None rather than guess, and the absence must be
+    detectable by the caller so it can warn."""
+    assert dlf.repair_word("איבא", {}) is None
+    assert dlf.reference_frequencies("/nonexistent/word_freq.json") == {}
