@@ -1574,6 +1574,44 @@ def test_witness_rows_served_without_a_word_index_are_never_counted(part1_by_id)
                 "but is served as a standalone entry")
 
 
+def test_every_flagged_word_in_the_text_pane_has_a_flagged_box_on_the_scan(part1_by_id):
+    """REGRESSION 2026-08-25 (reviewer, klal 218: "has only one red item in the
+    right pane" while the text pane showed two flagged words).
+
+    api_klal() and api_page() build the same picture from different sources:
+    the text pane's list is candidates + manual corrections + word-level flags +
+    witness items, while the scan pane's was candidates + witness + every plain
+    word. A flagged word with no machine candidate behind it therefore reached
+    the scan as an anonymous `plain` box - the same colourless treatment as
+    ordinary prose. Measured before the fix: 187 word-level flags and 8 manual
+    corrections across 88 klalim.
+
+    Two functions drawing one picture from two sources is this project's most
+    repeated defect shape; this asserts they agree."""
+    review_server = _import_from_path("review_server", os.path.join(REPO, "pipeline", "review_server.py"))
+    listing = review_server.api_klalim(1)
+    rows = listing if isinstance(listing, list) else listing.get("klalim", [])
+    by_page = {}
+    offenders = []
+    for row in rows[:60]:   # 60 klalim is ~20 pages, enough to cover every entry kind
+        klal_id = row["klal_id"]
+        for c in review_server.api_klal(klal_id)["corrections"]:
+            page, wi = c.get("page"), c.get("word_index")
+            if page is None or wi is None or not c.get("bbox") or c.get("opcode") == "delete":
+                continue
+            if page not in by_page:
+                by_page[page] = {
+                    (x.get("klal_id"), x.get("word_index"))
+                    for x in review_server.api_page(page)
+                    if x.get("kind") != "plain"
+                }
+            if (klal_id, wi) not in by_page[page]:
+                offenders.append((klal_id, wi, page, c.get("opcode"), c.get("flag")))
+    assert not offenders, (
+        f"{len(offenders)} word(s) the text pane flags but the scan pane serves as plain "
+        f"prose (klal, word, page, opcode, flag): {offenders[:8]}")
+
+
 def test_machine_resolved_flags_agree_between_server_and_frontend():
     """A flag counted as machine-RESOLVED by the server but not by the frontend
     (or vice versa) renders the same word with two different verdicts on one

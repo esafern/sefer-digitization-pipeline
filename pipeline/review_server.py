@@ -1269,6 +1269,51 @@ def api_page(page_num):
             (w["klal_id"], w["docai_token_index"]))
         out.append(entry)
 
+    # Word-level AI flags and manual corrections, which have no entry in
+    # corrections_part1.json and so never reached this endpoint.
+    #
+    # FIXED 2026-08-25 (reviewer, klal 218: "has only one red item in the right
+    # pane" while the text pane shows two flagged words). api_klal() synthesizes
+    # entries for both kinds so the TEXT pane can highlight them; this function
+    # built its list independently from the corrections file, the witness queue
+    # and plain words, so a flagged word with no machine candidate behind it
+    # reached the SCAN pane as an anonymous `plain` box - same colourless
+    # treatment as ordinary prose. Measured: **187 word-level flags and 8 manual
+    # corrections across 88 klalim** were invisible as flagged on the scan.
+    # Two functions drawing the same picture from different sources is the same
+    # defect shape as the 2026-08-24 collision sweep; the precedence below
+    # mirrors api_klal()'s exactly.
+    correction_keys |= {(x["klal_id"], x["word_index"]) for x in out
+                        if x.get("word_index") is not None}
+    manual_current = rd.all_current("manual_correction")
+    for kid in page_klals:
+        k = klalim_by_id.get(kid)
+        if not k:
+            continue
+        words = (k.get("clean_text") or "").split(" ")
+        for (mkid, wi), rec in manual_current.items():
+            if mkid != kid or (kid, wi) in correction_keys:
+                continue
+            original_word = rec.get("candidate_snapshot", {}).get("original_word")
+            if not _word_matches(words, wi, original_word):
+                continue
+            bbox, bpage = _word_scan_position(kid, words, wi)
+            if not bbox or bpage != page_num:
+                continue
+            out.append({"klal_id": kid, "word_index": wi, "bbox": bbox, "page": page_num,
+                        "kind": "correction", "opcode": "manual", "flag": "manual_correction",
+                        "final_text": original_word, "current_decision": rec})
+            correction_keys.add((kid, wi))
+        for f in _word_level_ai_flags(kid, words):
+            wi = f["word_index"]
+            if (kid, wi) in correction_keys or f.get("page") != page_num or not f.get("bbox"):
+                continue
+            entry = dict(f)
+            entry["klal_id"] = kid
+            entry["kind"] = "correction"
+            out.append(entry)
+            correction_keys.add((kid, wi))
+
     # Word-level bboxes for all words on the page (looked up from DocAI tokens).
     # Ensures that clicking ANY word (flagged or unflagged) highlights its exact
     # bounding box on the scan image.

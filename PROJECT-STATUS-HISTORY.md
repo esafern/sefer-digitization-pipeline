@@ -1059,6 +1059,53 @@ See `PROJECT-STATUS-HISTORY.md` — 65 dated entries from 2026-08-14 through
 infrastructure build-out, multiple independent code-review/refactor passes,
 and the lexicon/reference-corpus work behind open item 1 above.
 
+### FIXED 2026-08-25 — the scan pane never showed 195 flagged words as flagged. Two panes, one picture, two sources.
+
+Reviewer, on klal 218: "has only one red item in the right pane. w42 is orange
+dots - machine resolved but still requires human decision."
+
+They were reading a genuine disagreement between the panes. Klal 218 has two
+flagged words - w42, a machine-resolved candidate, and w56, an open word-level
+AI flag - and **the scan pane drew a box for only one of them.**
+
+**Cause: `api_klal()` and `api_page()` build the same picture from different
+sources.** The text pane's list is candidates + manual corrections + word-level
+flags + witness items, all merged. The scan pane's was candidates + witness +
+a plain box for every remaining aligned word. So a flagged word with **no machine
+candidate behind it** - an AI flag, or a reviewer's own manual correction -
+reached the scan as an anonymous `plain` box, coloured like ordinary prose.
+
+**Swept: 187 word-level flags and 8 manual corrections across 88 klalim** were
+invisible as flagged on the scan. Klal 1 w229 - `דנראח`, the case this project's
+own showcase is built around - is one of them.
+
+**This is this project's most repeated defect shape**: two functions drawing one
+picture from two sources, agreeing until they don't. The 2026-08-24 collision
+sweep was the same thing inside `api_klal()` alone; the nav-vs-rendered count
+mismatch was the same thing between the nav and the text pane. `api_page()` now
+synthesizes both kinds with the precedence `api_klal()` uses, and a new
+invariant, `test_every_flagged_word_in_the_text_pane_has_a_flagged_box_on_the_
+scan`, asserts the two agree - it fails against the pre-fix server with 57
+offenders in the first 60 klalim alone.
+
+**One real bug caught by running it, not by reading it.** My first version moved
+the `correction_keys` set below the witness loop that consumes it, so
+`api_page()` raised `UnboundLocalError` on every page carrying witness items -
+pages 24, 37 and 40, which are exactly the three page-crossing reconstructions.
+Caught by calling the endpoint for those pages before committing. Serving a
+partial page would have been worse than the bug being fixed.
+
+**Left for the user, deliberately: the colour question.** They also wrote
+"machine resolved but still requires human decision - should not be considered
+green". Today `machine-resolved` is a terminal state for the counts: the nav
+badge counts only machine-DISPUTED, so **357 machine-resolved words - 118 of
+them catalogued ligature artifacts - are not counted as outstanding**. Treating
+them as still needing a ruling is a policy change with a real number attached,
+not a rendering tweak, and it is theirs to make. Recorded here, and put to them
+directly, rather than changed unasked.
+
+318 tests green.
+
 ### 2026-08-25 — the showcase's lead example is now klal 88's kaf-for-bet cluster, verified in the ink at 900 DPI. And the reviewer's "ק instead of ב" was kaf, not kof.
 
 Reviewer: "showcase 88, as I said - וכתבו is correct but the type is clearly two
