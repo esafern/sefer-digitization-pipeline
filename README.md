@@ -8,18 +8,17 @@ A high-fidelity digitization pipeline for historical Rabbinic Hebrew/Aramaic tex
 
 **Key Differentiation.** Most Hebrew OCR tooling stops at raw OCR or character-level alignment. This pipeline is built around **multi-witness vision adjudication**: exact token-level bounding boxes, image-grounded VLM evaluation of every disputed token, and a tri-state (open / machine-resolved / human-decided) review model with per-word provenance. See `COMPETITIVE-LANDSCAPE.md`.
 
-**Corpus Application.** **Yad Malachi** (R. Malachi ben Jacob HaKohen, Livorno 1766–7) — 667 *klalim* across three parts. 
-- **Part 1** (*Klalei HaGemara*, 222 klalim): Fully aligned and reviewed against page scans.
-- **Parts 2–3** (*Klalei HaPoskim*, *Klalei HaDinim*, 445 klalim): Fully mapped with VLM witness candidates queued for reviewer adjudication.
+**Corpus Application.** **Yad Malachi** (R. Malachi ben Jacob HaKohen, Livorno 1766–7). The digitized corpus is the work's part one, ***Klalei HaGemara*, complete** — 667 *klalim*, ~179,000 words, scan pages 14–247 — split across three files for handling (`part1/2/3.json` = klalim 1–222, 223–444, 445–667). The book's other two parts, *Klalei HaPoskim* and *Klalei HaDinim* (pages 254–331), are **not extracted**.
 
 **Where to start reading.** `START_HERE.md` for project context and binding operational rules. Then `PROJECT-STATUS.md` for current operational state.
 
 ## Status
 
-- **Part 1** (*Klalei HaGemara*, 222 klalim): 222/222 klalim trusted and aligned; multi-witness VLM candidates adjudicated and reviewed.
-- **Parts 2–3** (*Klalei HaPoskim*, *Klalei HaDinim*, 445 klalim): 445/445 klalim mapped with VLM secondary witness candidates generated and queued for human review.
+- **Klalim 1–222** (`part1.json`): 222/222 trusted page-to-klal alignment; four witnesses read against the ink (Document AI, a VLM sampled twice, Surya at 300 DPI); **1,061 flagged word positions** — 356 machine-resolved as known printer's artifacts, 997 open for a reviewer, 64 decided.
+- **Klalim 223–667** (`part2.json`, `part3.json`): text and page-level alignment built; **no witness set has been run there yet and no correction has been applied** — a standing gate, not an oversight.
+- **Klalei HaPoskim / Klalei HaDinim**: scanned, never extracted.
 
-`PROJECT-STATUS.md` has live operational details.
+`PROJECT-STATUS.md` has live operational details, and is the only file to trust for corpus-quality claims.
 
 ## Getting started
 
@@ -29,7 +28,7 @@ See `SETUP.md`.
 
 | File | What it's for |
 |---|---|
-| `START_HERE.md` | **The main onboarding doc.** Part 1: project context, success criteria, architecture, directory layout, commands (for humans). Part 2: binding operational rules for LLM agents — session checklist, the Parts 2-3 gate, the corpus single-source-of-truth rule, 19 numbered lessons. |
+| `START_HERE.md` | **The main onboarding doc.** Part 1: project context, success criteria, architecture, directory layout, commands (for humans). Part 2: binding operational rules for LLM agents — session checklist, the Parts 2-3 gate, the corpus single-source-of-truth rule, 31 numbered lessons. |
 | `PROJECT-STATUS.md` | Current, dated state: what's open, what's in progress. Kept short enough to read in full every session. |
 | `PROJECT-STATUS-HISTORY.md` | The closed-out dated log — the evidence trail behind any finding referenced in the status file. |
 | `SETUP.md` | Environment setup, and which files aren't in this repo and how to get them. |

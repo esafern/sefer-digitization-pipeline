@@ -19,15 +19,22 @@ recognition — Document AI does that. The pipeline is built around what happens
 image-grounded VLM adjudication of each disputed token, tri-state human review,
 and an append-only decision ledger.
 
-**Three things here that no surveyed platform has:**
+**Four things here that no surveyed platform has:**
 
 1. **VLM adjudication of disputed tokens** — crop the disputed bbox out of the
    scan and ask a vision model to *select* between the candidate readings.
    Everyone else either retrains an HTR model (expensive) or leans on
    character-level language-model probability (blind to the ink).
-2. **Tri-state review with per-word provenance** — open / machine-resolved /
+2. **A measured, not assumed, ensemble posterior.** Every multi-engine pipeline
+   in this space rests on the premise that independent engines fail
+   independently. We measured it on this corpus: **P(consensus correct | two
+   distinct engines agree) is ~26–41%**, and 37 measured cases have two or three
+   engines making the *identical* error — because a worn printer's sort is
+   upstream of every reader. Agreement here decides where to look, never what is
+   true. See [§5](#5-where-this-pipeline-is-genuinely-ahead).
+3. **Tri-state review with per-word provenance** — open / machine-resolved /
    human-decided, per word, with the decision history queryable.
-3. **An append-only decision ledger kept outside the build pipeline** — no
+4. **An append-only decision ledger kept outside the build pipeline** — no
    rebuild can clobber a human judgment, and the whole corpus is reproducible
    from the ledger plus the source.
 
@@ -180,11 +187,11 @@ To ensure high corpus fidelity, an independent second/third witness engine is ne
 | **Google Document AI** | Specialized Cloud OCR | Character & word-level geometric bounding boxes, high square-print baseline accuracy | Cloud dependency, closed-source, weaker on dense Rashi script; **confirmed 2026-08-21 to silently fail to tokenize some klal markers at all** (root cause of a corpus-wide region-overlap bug, 316 klalim) | **Current Primary Baseline** (`docai_word_boxes/`) |
 | **Multimodal VLMs (Gemini 3.6 Flash)** | Foundation Multimodal AI | Deep Rabbinic semantic understanding, directly reads high-res raster pixels, robust to ligatures and archaic layout | No native word coordinate bboxes; requires prompt engineering; cost per page; **same model family as the Adjudicator — a real, documented circularity gap (Directive #1)** | **Full-page end-to-end witness run 2026-08-21** — 93.34% token accuracy vs. `part1.json` across all 222 Part-1 klalim, 87.43% Pass-A/Pass-B self-consistency; also used for crop adjudication (`verify_corrections_vision.py`) |
 | **TrOCR Hebrew (`sivan22/trocr-hebrew`, `cyttic/exp17-trocr-hebrew-synth1m`)** | Line-level Vision Transformer (HuggingFace) | Open weights, runs locally via PyTorch, line-level attention trained on printed Hebrew | **Confirmed blocked, not just unbenchmarked**: the model's own custom tokenizer/vocab was never uploaded to its HuggingFace repo, so decoding with any substitute tokenizer scrambles output (root-caused 2026-08-20) — needs the original tokenizer files or retraining, neither available | Root cause diagnosed; **not fixable without upstream data this project doesn't have** |
-| **Kraken (eScriptorium / MiDRASH / NLI models)** | Open HTR/OCR Engine | Industry standard for historical Hebrew manuscripts and early Rabbinic print; open models available | Requires a typeface/period-matched model; the one tested (`Ashkenazi_01`, medieval handwriting) makes letter-level errors on this printing's square type | **Actually installed and run 2026-08-21** (this machine's arm64 architecture was never actually blocked, unlike an earlier x86_64-specific finding) — real, readable Hebrew output with letter errors; a print-matched model still needed |
+| **Kraken (eScriptorium / MiDRASH / NLI models)** | Open HTR/OCR Engine | Industry standard for historical Hebrew manuscripts and early Rabbinic print; open models available | Requires a typeface/period-matched model; the one tested (`Ashkenazi_01`, medieval handwriting) makes letter-level errors on this printing's square type | **Installed and run 2026-08-21 on arm64** — real, readable Hebrew output with letter errors; a print-matched model still needed. The `torch>=2.4` vs. macOS **x86_64** wheel ceiling that blocks it elsewhere is architecture-specific, not a property of Kraken |
 | **EasyOCR (JaidedAI)** | Open Deep-Learning OCR | Lightweight Python library | **No Hebrew support at all** — confirmed 2026-08-21 by direct inspection of `easyocr.config.all_lang_list` (`'he'` absent), not by assumption | **Ruled out** — not a candidate for this project |
 | **PaddleOCR** | Open Deep-Learning OCR | Wide language coverage, actively maintained | **No Hebrew support** — confirmed 2026-08-21 against Paddle's own published language list | **Ruled out** — not a candidate for this project |
 | **PyLaia** | Deep HTR engine (PyTorch) | High accuracy on historical lines with sufficient training data | Requires line segmentation and custom model training | **Not yet tried in this pipeline** |
-| **Surya OCR (`datalab-to/surya`)** | Open multilingual OCR/layout (separate company — not Google, not Anthropic) | Runs 100% locally, zero marginal cost, genuine RTL/Hebrew support | Only spot-tested on one page so far, not benchmarked at corpus scale | **Installed and run 2026-08-21 — the strongest result of this evaluation round.** Exact match on the running header, near-exact klal-body text, and correctly tokenized klal 10's marker where DocAI failed entirely. A full multi-page benchmark is the recommended next step, not yet done. |
+| **Surya OCR (`datalab-to/surya`)** | Open multilingual OCR/layout (separate company — not Google, not Anthropic) | Runs 100% locally, zero marginal cost, genuine RTL/Hebrew support; the only witness here with no cloud dependency and no per-page cost | Layout-block assignment to klalim is the weak seam, not recognition (4 klalim still carry a neighbour's text); resolution-sensitive | **Promoted from spot-test to a full pipeline witness.** All 63 pages re-rendered at 300 DPI 2026-08-24: mean agreement vs. the corpus **71.7% → 89.9%**, median 91.8%, **190 of 222 klalim improved**, coverage now **222/222**. It had been reading a quarter of the available pixels for the life of the witness stream. Contributes to 297 of the 364 live consensus disputes. |
 | **Claude vision (Anthropic, via the coding session's own image-reading capability)** | Foundation Multimodal AI | Genuinely different model family from Google (both DocAI and the Gemini-based witness/adjudicator); zero integration cost as an interactive check | Not batch-callable by a standalone script without a provisioned `ANTHROPIC_API_KEY` (none present in this environment) | **Used successfully, live, 2026-08-21** — directly reading a disputed scan crop correctly identified a real DocAI letter-misread (ט read as פ) that Gemini-based tooling had missed |
 | **Azure AI Document Intelligence** | Commercial Cloud OCR (Microsoft) | Confirmed Hebrew support in its Read model; the only candidate here that could replace/complement DocAI itself, not just the witness/adjudicator layer | Needs a new Azure account/API key, not present in this environment; unverified in practice | **Feasibility-checked 2026-08-21, not tested** |
 | **AWS Textract** | Commercial Cloud OCR (Amazon) | — | Not researched in depth | **Unresearched as of 2026-08-21** |
@@ -197,7 +204,8 @@ To ensure high corpus fidelity, an independent second/third witness engine is ne
 |---|---|---|---|---|---|---|
 | **Primary focus** | General Hebrew NLP; automated Rabbinic libraries | Scale manuscript→library ingestion | General historical HTR | Collaborative liturgy transcription | Ancient manuscripts + paleography | **Surgical, single-work printed Rabbinic digitization** |
 | **OCR engine** | Custom Dicta deep-learning models | eScriptorium / Kraken | PyLaia | Tesseract, EasyOCR | eScriptorium / Kraken | Google Document AI (square-print processor) |
-| **Disagreement detection** | Deep-learning spellcheck / LM probability | Large-scale text-reuse alignment via Passim | Baseline verification + confidence thresholds | Manual volunteer diffing | Algorithmic "join" alignment across witnesses | **Word-level diff of fresh OCR vs. stored corpus text** (`build_corrections_dataset.py`); a second DocAI-vs-Tesseract witness pass on page-crossing klalim |
+| **Disagreement detection** | Deep-learning spellcheck / LM probability | Large-scale text-reuse alignment via Passim | Baseline verification + confidence thresholds | Manual volunteer diffing | Algorithmic "join" alignment across witnesses | **Word-level diff of fresh OCR vs. stored corpus text** (`build_corrections_dataset.py`), plus **multi-witness synthesis** across DocAI, a VLM sampled twice, and Surya (`synthesize_multi_witness.py`) |
+| **Known-defect repair before voting** | — | — | — | — | — | **Yes** (`pipeline/repair_filters/`): the printing's alef-lamed ligature is catalogued and restored, arbitrated by an *independent* 6.18M-word corpus — 24% of the review queue was this one artifact |
 | **VLM adjudication** | No — text-only LM probability | No — character-level alignment | No — HTR line confidence | No | No | **Yes** (`verify_corrections_vision.py`): crops the disputed bbox, asks Gemini to select between readings |
 | **Section/structure tracking** | Simple structural tags | Passim alignment to known chapters | Custom XML baseline anchoring | TEI XML structural mapping | Paleographic layout clustering | **Yes** (`build_gematria_trace.py`): Hebrew-numeral section markers located and verified against physical pages |
 | **Human review UI** | Built-in web proofreader | eScriptorium web transcription | Rich Java/web line-correction client | Wiki-style online editors | eScriptorium + NLI transcribe-a-thons | **Yes** (`review_server.py`): local Flask server with live, coordinate-mapped scan crops |
@@ -223,7 +231,20 @@ To ensure high corpus fidelity, an independent second/third witness engine is ne
 
 ## 5. Where this pipeline is genuinely ahead
 
-1. **Multimodal VLM adjudication.** No surveyed platform crops disputed OCR
+1. **It measured the assumption the whole field runs on, and found it false.**
+   Ensemble OCR is justified by the premise that different engines fail
+   independently, so agreement approximates proof. On this corpus that premise
+   does not hold: **P(consensus correct | two distinct engines agree) is ~26–41%**,
+   and tightening the rule (require the primary engine; require unanimity) buys
+   three points of precision for 82% of the recall. The mechanism is not model
+   quality but the shared input — **37 measured cases of two or three engines
+   producing the *identical* wrong reading**, all traceable to one worn ligature
+   sort that every reader sees the same way. A published-style independence
+   estimate for the same configuration prices that at 3.5 × 10⁻⁷. The practical
+   consequence is architectural: consensus routes attention, the ink decides,
+   and a human signs. Any pipeline here that auto-approves on agreement is
+   trusting a number nobody in this space appears to have measured.
+2. **Multimodal VLM adjudication.** No surveyed platform crops disputed OCR
    zones and queries a vision model to vote on the reading. The alternatives
    are retraining an HTR model on 50+ pages of new ground truth, or trusting a
    character-level language model that never looks at the ink. For a targeted
@@ -231,11 +252,11 @@ To ensure high corpus fidelity, an independent second/third witness engine is ne
    the image. **The safeguard matters as much as the technique**: the model is
    asked to *select* among candidate readings, never to generate — anything
    unattested comes back as a flagged conjecture, not a silent change.
-2. **Structure-aware section anchoring.** Mapping logical Hebrew numerals (klal
+3. **Structure-aware section anchoring.** Mapping logical Hebrew numerals (klal
    א, ב, ג …) to physical page positions and verifying them is specialized
    work. Large-scale pipelines produce PAGE-XML layout lines; they don't build
    a high-level logical index keyed on Hebrew numeral structure.
-3. **Local human-in-the-loop ledgering.** The append-only
+4. **Local human-in-the-loop ledgering.** The append-only
    `review_decisions.jsonl`, committed alongside the code and kept out of the
    rebuild path, makes the corpus 100% reproducible (`rebuild_all.sh`) and
    continuously verified (pytest). Nothing else surveyed treats a human
@@ -282,13 +303,17 @@ independently confirmed.
 ## Bottom line
 
 The academic world is building multi-million-euro infrastructure to transcribe
-thousands of damaged medieval fragments. This pipeline does something
-different and smaller: take one classic printed work, and get it to
-publishable accuracy with a defensible audit trail, run locally by one person.
-Document AI supplies the baseline OCR; the VLM adjudication pass, the tri-state
-review model, and the protected decision ledger supply the accuracy and the
-provenance. That combination is not currently available anywhere else, and it
-is a good fit for exactly the class of work Sefaria is missing.
+thousands of damaged medieval fragments. This pipeline does something different
+and smaller: take one classic printed work — *Klalei HaGemara*, 667 klalim — and
+get it to publishable accuracy with a defensible audit trail, run locally by one
+person. Document AI supplies the baseline OCR; Surya and a VLM supply witnesses
+that fail differently; crop-level adjudication, a catalogued repair filter for
+the printing's own defects, the tri-state review model and the protected decision
+ledger supply the accuracy and the provenance. That combination is not currently
+available anywhere else, and it fits exactly the class of work Sefaria is
+missing — with one finding worth handing to the field whether or not anyone
+adopts the pipeline: **on real historical print, engine agreement is worth far
+less than everyone assumes, and it is cheap to measure.**
 
 ---
 

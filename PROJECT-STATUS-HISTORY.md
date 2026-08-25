@@ -17,6 +17,186 @@ current file references, or when grepping for how a past finding was
 resolved. Same append-at-top convention as before: newest entries go right
 after this header, not at the bottom.
 
+### MAJOR CORRECTION 2026-08-25 — the 667 klalim are Klalei HaGemara COMPLETE, not "the whole work across three parts." Klalei HaPoskim and Klalei HaDinim are not digitized at all.
+
+Found while fact-checking `CASE-YAD-MALACHI.md` against live data, as the user
+asked. Every outward-facing document said the corpus covers "667 numbered klalim
+across three parts" and that `part1.json`/`part2.json`/`part3.json` are "one per
+Yad Malachi section" (`START_HERE.md`'s own words). **Both halves are wrong**,
+and the error has been repeated across `CASE-YAD-MALACHI.md`,
+`VERIFIED-AGAINST-THE-INK.html`, `START_HERE.md` and this file's own vocabulary
+since the docs were written.
+
+**What the scan actually contains**, established from the ink and from the
+running headers, not inferred:
+
+| pages | what is there | in the corpus? |
+| ---: | :--- | :--- |
+| 14–247 | **Klalei HaGemara**, one alphabetical series `כללי האלף` → `כללי התיו`, klalim 1–667 | **yes, all of it** |
+| 248–253 | `מפתחות על כללי הגמרא` — the index to Klalei HaGemara | no |
+| 254–~295 | **Klalei HaPoskim** (`חלק שני`): שני התלמודים, הרי"ף, הרמב"ם, הסמ"ג ורש"י, הרא"ש, הרשב"א והריטב"א, הריב"ה, הש"ע, שאר המחברים | **no** |
+| ~296–331 | **Klalei HaDinim**: alphabetical again, its own numbering | **no** |
+| 332–337 | `קצת הגהות`, `התנצלות המגיה`, library plates | no |
+
+**The decisive evidence, in the order it was found:**
+1. The section labels run CONTINUOUSLY across the three files —
+   `part1.json` ends at klal 222 in `כללי ההא` and `part2.json` opens at klal 223
+   in the same `כללי ההא`. Three parts of a work do not share an alphabet
+   sequence; three chunks of one part do.
+2. **Page 247 ends `סליקו כללי התיו וסליקו כללי הגמרא`** — "the Tav rules are
+   concluded, and Klalei HaGemara is concluded" — immediately after klalim
+   `תרסו` and `תרסז` (666, 667). Read directly off `images/pdf_pages/page_247.png`
+   (Lesson 30: verified against content, not plausibility).
+3. **Page 254 is a part title page**: `יד מלאכי · חלק שני · בס"ד כללי שני התלמודים`,
+   and its first klal is numbered `א`. Klalei HaPoskim restarts at 1; so does
+   Klalei HaDinim (folio קמב-קמג pages are at klal `קג`/`קכב`).
+4. `sefaria_export/index.json` — written 2026-07-29, before any of the prose —
+   already declares exactly ONE node, `Klalei HaGemara`. The export schema had it
+   right and the prose never caught up.
+
+**What this changes.** The corpus is a complete, self-contained, citable unit of
+the work — arguably a better story than the one the docs told, since Klalei
+HaGemara is the part the 287 Sefaria citations overwhelmingly point at. What it
+is NOT is the whole book: **roughly 78 scanned pages (254–331) of Klalei HaPoskim
+and Klalei HaDinim have never been extracted, aligned, or reviewed.** Any claim
+that "all 667 klalim are OCR'd and structured" is true and complete for Klalei
+HaGemara and says nothing about the other two parts.
+
+**What this does NOT change: the Parts 2-3 gate is untouched.** That directive is
+about `part2.json`/`part3.json`, and those files are exactly what they always
+were — klalim 223–444 and 445–667. They are different PAGES (77–164, 164–247)
+with their own scan-linkage risk, which is the gate's actual rationale. Only the
+LABEL was wrong. Renaming is a separate decision for the user, not something to
+do silently to a file the gate names.
+
+**Corrected in this pass:** `CASE-YAD-MALACHI.md`, `VERIFIED-AGAINST-THE-INK.html`,
+`COMPETITIVE-LANDSCAPE.md`, and `START_HERE.md`'s "one per Yad Malachi section"
+line. The Wikipedia-sourced "222 / 299 / 146" per-part split in
+`CASE-YAD-MALACHI.md` is contradicted by the printed book for the first figure
+(Klalei HaGemara is 667, not 222) and is now marked as such rather than repeated.
+
+### FOUND 2026-08-25 — 14 DocAI page files in the 248-337 range hold a DIFFERENT page's tokens. Outside the corpus, so nothing is wrong today; anything built on them tomorrow would be.
+
+Found on the way to the entry above, when `docai_word_boxes/page_259.json` turned
+out to contain klal 251's text — a klal whose own trace puts it on page 87.
+
+**Swept the whole range rather than reporting the one file** (standing rule /
+Lesson 28). Token-set Jaccard of every page 248–337 against every page 1–247:
+
+| bad file | actually holds | Jaccard |
+| :--- | :--- | ---: |
+| `page_259.json` | page 87 | 0.83 |
+| `page_270`, `271` | pages 115, 116 | 0.52, 0.62 |
+| `page_279`, `280` | pages 126, 127 | 0.52, 0.60 |
+| `page_292` | page 158 | 0.54 |
+| `page_300`, `303`, `304`, `307`, `310`, `314` | pages 171, 175, 176, 179, 185, 191 | 0.58–0.87 |
+| `page_333`, `334` | pages 229, 230 | 0.57, 0.50 |
+
+**The baseline matters**: random page pairs in this book score 0.10–0.15, and
+adjacent pages 0.13, so 0.5–0.87 is duplication, not shared vocabulary. The
+offsets are not constant (104 to 172), so this is not an off-by-N indexing bug.
+
+**Confirmed against the ink, not just against the numbers.**
+`images/pdf_pages/page_304.png` shows Klalei HaDinim, folio `קמו`, klalim
+`רח`–`ריב` — while `docai_word_boxes/page_304.json` holds Klalei HaGemara's klal
+489 (`תפט`), the same content as `page_176.json`. **The image is right; the JSON
+is stale.** The remaining 76 files in that range are fine (pages 296–299 carry
+their correct `כללי הדינים` headers).
+
+**Impact today: none.** The corpus is klalim 1–667 = pages 14–247, and every bad
+file is ≥ 248. **Impact tomorrow: total** — these are exactly the pages any
+Klalei HaPoskim / HaDinim extraction would start from, and a re-run that trusts
+this cache would silently ingest Klalei HaGemara text as Klalei HaPoskim.
+`docai_word_boxes/` is gitignored, so the fix is a re-extraction of pages
+248–337 with `tools/extract_docai_pages.py`, not a code change. NOT done here:
+it costs live DocAI calls on a page range nothing currently uses, which is a
+scope decision for the user (Lesson 1 — narrowing coverage silently is the thing
+to avoid, so it is recorded rather than skipped).
+
+### ALSO 2026-08-25 — two smaller corrections found in the same fact-check.
+
+- **`sefaria_export/` is stale and misattributes its own source.** Written
+  2026-07-29, it holds **146 klalim** (the corpus has 667) and its
+  `versionTitle` reads `Livorno 1766 / NLI Digitized Edition` with
+  `versionSource: National Library of Israel (NLI) - Livorno 1766 Editio
+  Princeps`. The pipeline's actual scan is the **Berlin 1851/2** printing,
+  Google-Books-sourced (`START_HERE.md`'s scan section, confirmed 2026-08-18).
+  Shipping that file to Sefaria would attach the wrong edition to the text.
+  Gitignored and regenerable; not regenerated here because `export_corpus.py`'s
+  Sefaria-shaped output is a separate deliverable from this doc pass.
+- **Klal 1 word 229 (`דנראח`) is an OPEN FLAG, not a correction.** Both
+  `CASE-YAD-MALACHI.md` and `VERIFIED-AGAINST-THE-INK.html` presented the
+  printer's-error catch as resolved ("AI Corrected", "resolved in seconds").
+  `part1.json` still stores `דנראח`; the only record for that position is a
+  `klal_flag` from 2026-08-17 with `needs_revisit: true`. The supporting numbers
+  in both docs are exact and were re-verified (`דנראה` 3× in `part1.json`, 12×
+  across all 667 klalim, 43× in the 6,180,337-word reference corpus; `דנראח`
+  nowhere but here) — it is only the STATUS that was overstated. Both docs now
+  say flagged-and-awaiting-a-human, which is also the more honest pitch: the
+  pipeline does not silently emend a 174-year-old printing.
+
+### FIXED 2026-08-25 — F9 and F10 from the 2026-08-24 code review are closed. Both were latent defects that would have been invisible when they fired.
+
+The two findings that entry named as "the two worth closing next." Neither was
+producing wrong output on this machine today; both would have produced wrong
+output that looked entirely correct on the next reindexing edit (F9) or on a
+fresh clone (F10). Committed as `fe3213d`.
+
+**F9 — `docai_verdicts()` had no drift guard, and a drifted candidate can
+manufacture a two-engine consensus at an unrelated word.** The function keys
+DocAI's differing reading by `word_index_in_final_text`, which is exactly the
+field that stops pointing at the word it was verified against after any edit
+that shifts positions — the documented 2026-08-13 reindexing incident, and the
+reason `assemble_corrections_dataset.check_drift()` exists at all. A drifted
+candidate would have cast a DocAI "vote" at whatever word now sits at that
+index; paired with Surya or the VLM agreeing there, that is a fabricated
+consensus dispute indistinguishable from a real one and carrying the primary
+engine's authority. Now guarded with `check_drift()` — the existing function,
+not a second copy of the logic (the shared-module rule). `synthesize()` passes
+`{klal_id: clean_text.split()}` so the guard has live text to check against, and
+the function prints a count when it skips any.
+
+Measured: **0 of 538 candidates are currently drifted**, so the dispute count is
+unchanged at 364 and no served item changes today. The guard is for the next
+reindexing edit, and the reason it is worth having is that the failure it
+prevents is silent — a fabricated consensus does not look different from an
+earned one anywhere in the UI.
+
+**F10 — the ligature repair silently disables itself on a clone, and hands the
+reviewer ~118 items of extra work with no warning.** `docai_ligature_filter`'s
+`repair_word()` needs `sefaria_reference_corpus/word_freq.json` to decide
+whether a repaired reading is a real word; that file is gitignored (3.4MB,
+migrated separately per `SETUP.md`). Without it `reference_frequencies()` is
+empty, `repair_word()` returns `None` for everything, and stage 4 completes
+normally while producing a materially different reviewer queue: the **118 items
+currently flagged `docai_ligature_artifact` are served as open
+`current_text_may_be_wrong` disputes instead**, and no `docai_repaired` option
+is offered anywhere — the reading measured 94% correct where the raw DocAI
+reading is 0%. Nothing in the output said so. `assemble_corrections_dataset.py`
+now prints an explicit warning naming what was disabled, what it costs, and
+where to get the file.
+
+This is Lesson 26's shape (a filter validated by what it suppresses) crossed
+with Lesson 29's (a signal nobody sees): the degraded run is not wrong, it is
+*quietly worse*, and quietly worse is the hard kind to catch.
+
+**Two regression tests**, both written to fail against the pre-fix code:
+`test_docai_verdicts_skips_a_drifted_candidate` (a candidate whose index no
+longer matches contributes no verdict) and
+`test_ligature_repair_degrades_visibly_when_the_reference_corpus_is_absent`.
+
+**Still open from that review, accepted with reasoning recorded:** F8 (a latent
+crash path on a null `chosen_text` — 0 such records exist — plus a `split()` vs
+`split(" ")` mismatch latent until a klal contains a double space) and F11
+(`--render-dpi` still requires the cached PNG it does not use).
+
+**Test suite green: 287 non-Playwright (282 in the two `rebuild_all.sh` gate
+files + 5 witness-engine) + 16 Playwright**, the Playwright pass run against a
+freshly restarted server. Current dashboard shape after the run: 830 distinct
+items across 181 klalim = 538 pipeline candidates + 364 consensus disputes,
+72 of which are the same position (a dispute enriching an existing candidate
+rather than adding one).
+
 ### CODE REVIEW 2026-08-24 (`/code-review high 02e5980..HEAD`) — 11 findings on this session's OWN work. Six fixed; the two most serious were things I had already claimed were fixed.
 
 An independent high-effort pass over everything this session added - five new

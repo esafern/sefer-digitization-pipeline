@@ -66,9 +66,12 @@ pattern below) over quick one-off scripts.
 
 Its first, and so far only fully-built-out, application is **Yad Malachi**
 (R. Malachi ben Jacob HaKohen, Livorno 1766–7), a foundational
-halachic-methodology reference with 667 *klalim* across three parts. See
-`CASE-YAD-MALACHI.md` for the rationale (287 dead Sefaria citations
-currently point to this work).
+halachic-methodology reference in three parts. **The digitized corpus is its
+part one, *Klalei HaGemara*, complete: 667 *klalim*, scan pages 14-247.** The
+other two parts (*Klalei HaPoskim*, pages 254-~295; *Klalei HaDinim*, pages
+~296-331) are scanned but have never been extracted — corrected 2026-08-25, see
+`PROJECT-STATUS.md`'s TL;DR. See `CASE-YAD-MALACHI.md` for the rationale (287
+dead Sefaria citations currently point to this work).
 
 ### The scan: which edition, which file, and why not NLI
 
@@ -215,9 +218,13 @@ holds the older, closed-out history. This file (`START_HERE.md`) holds
 durable rules and architecture; `PROJECT-STATUS.md` holds the current,
 specific, dated truth. Neither substitutes for the other.
 
-Part 1 (*Klalei HaGemara*) has the full pipeline built out. Parts 2-3 are
-gated — see Part 2's "Parts 2-3 gate" section below for the binding rule
-and its rationale.
+`part1.json` (klalim 1-222) has the full pipeline built out. `part2.json` /
+`part3.json` (klalim 223-444 / 445-667 — the rest of the same *Klalei
+HaGemara*, on pages 77-247) are gated — see Part 2's "Parts 2-3 gate" section
+below for the binding rule and its rationale. **"Parts 2-3" throughout this
+repo means those two FILES, not the work's second and third parts**; the
+labelling predates the 2026-08-25 correction above and the gate itself is
+unaffected by it.
 
 ## How the pipeline works
 
@@ -238,8 +245,10 @@ and its rationale.
    2's cache-keying rule). Requires a Gemini API key in the environment
    (not committed — check `credentials.json`, gitignored).
 4. **Assembly** — outputs converge into `part1.json` / `part2.json` /
-   `part3.json` (one per Yad Malachi section — THE corpus, hand-edited
-   only through the decision pipeline in Part 2, never directly),
+   `part3.json` (three file chunks of ONE section — klalim 1-222, 223-444,
+   445-667 of *Klalei HaGemara*, the work's part one; NOT one file per Yad
+   Malachi part, see the scan section above — THE corpus, hand-edited only
+   through the decision pipeline in Part 2, never directly),
    `aligned_klalim/` / `klalim_batches/` (per-klal JSON at earlier
    pipeline stages), and `lexicon.txt` (~19k unique validated Rabbinic
    Hebrew words used as a spell-check dictionary).

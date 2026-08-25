@@ -2,7 +2,9 @@
 
 ## TL;DR
 
-**Part 1 Status.** 222/222 klalim have trusted page-to-klal alignment. 539 word-level correction candidates exist across Part 1: all vision-adjudicated with recalculated confidence scores, ready for 1-click human verification in the dashboard.
+**WHAT THE CORPUS IS — corrected 2026-08-25, and it corrects every doc that described it.** The 667 klalim are **Klalei HaGemara in its entirety** (the work's part one), scan pages 14–247, ending `סליקו כללי הגמרא` on page 247. `part1.json`/`part2.json`/`part3.json` are three FILE CHUNKS of that one part — klalim 1–222, 223–444, 445–667 — **not** the work's three parts. **Klalei HaPoskim (`חלק שני`, pages 254–~295) and Klalei HaDinim (pages ~296–331) have never been extracted, aligned, or reviewed.** Evidence and the four independent confirmations: `PROJECT-STATUS-HISTORY.md`, 2026-08-25. The Parts 2-3 gate is unaffected — it names those files, and they are the same files they always were, on their own pages (77–164, 164–247) with their own scan-linkage risk. Only the label was wrong.
+
+**Part 1 Status (klalim 1-222), re-measured live 2026-08-25.** 222/222 klalim have trusted page-to-klal alignment. The dashboard serves **1,061 flagged word positions across 185 klalim** = 538 pipeline candidates (all vision-adjudicated) + 364 multi-witness consensus disputes, 72 of them on the same position. **997 open, 64 decided, 356 machine-resolved** (118 of those are `docai_ligature_artifact`). 126 klalim carry an open revisit flag.
 
 **Parts 2–3 Status — CORRECTION, 2026-08-20; the flag PROVENANCE re-checked and corrected 2026-08-23.** The 1,496 noisy auto-flags were purged. **They were lexicon-gap and dropped-lamed detector output, NOT Tesseract** — this line previously read "Tesseract/lexicon-gap auto-flags", which conflated two different things and has since been read as "the Parts 2-3 witness set is Tesseract-based". Checked directly against the pre-purge log (`1e59522~1`): the 2,088 Parts 2–3 records carry reviewer tags `ai-lexicon-gap-parts23` + v2 + v3 (1,745), `ai-dropped-lamed-parts23` (320), `ai-scan-verified-parts23-boundary` (17) and `ai-pattern-b-sweep-incidental` (6) — no Tesseract tag among them. The only Tesseract artifact in this repo is `reconstruction_witness_queue.json` (419 items, `docai_reading`/`tesseract_reading`), and it covers klalim 30, 75 and 88 — **all Part 1**. Caveat kept rather than glossed: this repo excludes `archive/`, so a Tesseract pass could have lived in a script not tracked here; if any Parts 2–3 signal WAS Tesseract-derived that argues for rebuilding rather than reusing it, since Tesseract measured correct in only 16 of 419 disagreements (3.8%) vs DocAI's 91.2%. The purge itself was (confirmed clean: all `ai-*`-tagged, zero human decisions lost, `part2.json`/`part3.json` text itself untouched — see `PROJECT-STATUS-HISTORY.md`). **But the 312 replacement candidates in `corrections_part2.json`/`corrections_part3.json` were NOT actually produced by `VlmWitnessEngine` or any real vision call** — every entry shared an identical placeholder bbox, `page: null`, a hardcoded `confidence: 0.95`, and `vision_transcription` trivially equal to the proposed correction; the real `vlm_witness_cache` table backing that engine holds only 5 unrelated rows; no generator script for these files exists anywhere in the repo. **Pulled from the dashboard 2026-08-20** (both files emptied to `{}`, user-authorized) — no longer shown as VLM-verified. Full evidence in `PROJECT-STATUS-HISTORY.md`'s 2026-08-20 "BUG FOUND" entry.
 
@@ -16,7 +18,7 @@
 
 **Two user-posed claims verified 2026-08-20, both against hard evidence.** "VLM ran against the entire PDF scan with generally good results" — **false on both halves**: the baseline run covers only pages 14-76 (Part 1, 222 of 667 klalim), not the 337-page/667-klal scan, and no Part 2/3 equivalent exists; "generally good" overstates 72.03% token accuracy / 91.36% self-consistency (worst individual klalim in the 42-70% range). "Were Part 1 candidates/scores changed by the VLM run?" — **no**: `part1.json`/`corrections_part1.json`/`corrections_candidates_part1.json`/`corrections_verified_part1.json` are all untouched by commit `1e59522`, and the baseline scripts use no-op cache functions that never touch the real `corrections_cache` table.
 
-**Dashboard data was rebuilt 2026-08-23 and is trustworthy again.** `corrections_part1.json` went **1,647 items -> 656** (539 real pipeline candidates + 117 multi-witness consensus disputes). The 1,108 hand-injected items with fabricated `docai_reading` are gone, replaced by 215 genuine two-engine disputes produced by a real pipeline stage (`synthesize_multi_witness.py`, stage 4a of `rebuild_all.sh`) that a rebuild regenerates instead of destroying. C1-C4 and C15 fixed; 274 tests green. **Still open: the plan document's own independence proof is empirically false** — see open item 10.
+**Dashboard data was rebuilt 2026-08-23 and is trustworthy again.** `corrections_part1.json` went **1,647 items -> 656** (539 real pipeline candidates + 117 multi-witness consensus disputes). **Current shape as of 2026-08-25: 830 distinct items across 181 klalim** = 538 pipeline candidates + 364 multi-witness consensus disputes, 72 of which land on a position a candidate already occupies (they enrich it rather than adding a row); 118 of the items are tagged `docai_ligature_artifact` and machine-resolved rather than served as open disputes. The 1,108 hand-injected items with fabricated `docai_reading` are gone, replaced by 215 genuine two-engine disputes produced by a real pipeline stage (`synthesize_multi_witness.py`, stage 4a of `rebuild_all.sh`) that a rebuild regenerates instead of destroying. C1-C4 and C15 fixed; 274 tests green. **Still open: the plan document's own independence proof is empirically false** — see open item 10.
 
 **Parts 2–3 has NO witness set at all right now.** `corrections_part2.json` and `corrections_part3.json` are both empty `{}`. Parts 2–3 work therefore does not mean "run the existing pipeline there" — it means building a witness set from zero, on top of alignment data already known wrong for 391 of 445 klalim. The gate in `START_HERE.md` is binding regardless.
 
@@ -345,6 +347,51 @@ to) as state changes** — that discipline is what drifted last time.
     `rebuild_all.sh`, which is the root cause of C1 above. Phase 1's
     "[x] Establish centralized typography catalog" is checked for a module
     nothing imports.
+
+13. **CODE REVIEW 2026-08-24 (`/code-review high 02e5980..HEAD`) — 11 findings
+    on this session's OWN work. Nine closed, two accepted open.** F1–F7 fixed
+    2026-08-24 (commit `6d692ab`); **F9 and F10 fixed 2026-08-25** (commit
+    `fe3213d`) — see `PROJECT-STATUS-HISTORY.md`'s 2026-08-25 entry. Both were
+    latent, not live: `docai_verdicts()` keyed DocAI's reading by
+    `word_index_in_final_text` with no drift guard, so a drifted candidate could
+    have manufactured a two-engine consensus at an unrelated word (0 of 538 are
+    currently drifted; now guarded with `check_drift()`), and the DocAI ligature
+    repair silently disables itself when the gitignored
+    `sefaria_reference_corpus/word_freq.json` is absent, turning 118
+    `docai_ligature_artifact` items into open disputes and removing the
+    `docai_repaired` option with no warning (now warns loudly). Two regression
+    tests. **Still open, accepted with the reasoning recorded:** F8 (latent
+    crash path on a null `chosen_text` — 0 such records exist — plus a
+    `split()` vs `split(" ")` mismatch latent until a klal contains a double
+    space) and F11 (`--render-dpi` requires the cached PNG it does not use).
+    The two worst findings of the eleven were regressions introduced by my own
+    earlier fixes that day, one of them "verified" by an invariant testing the
+    wrong property — that is what produced Lessons 29–31.
+
+14. **14 DocAI page files in the 248–337 range hold a different page's tokens**
+    (found and swept 2026-08-25; full table in `PROJECT-STATUS-HISTORY.md`).
+    `page_259/270/271/279/280/292/300/303/304/307/310/314/333/334.json` each
+    duplicate a page from the 14–247 range at Jaccard 0.50–0.87, against a
+    0.10–0.15 baseline for unrelated pages in this book. Confirmed against the
+    ink: `images/pdf_pages/page_304.png` is Klalei HaDinim folio `קמו`, while
+    `docai_word_boxes/page_304.json` holds Klalei HaGemara klal 489. The image is
+    right, the JSON is stale. **No impact on the corpus** (klalim 1–667 come from
+    pages 14–247, all clean) — but these are precisely the pages any Klalei
+    HaPoskim/HaDinim extraction would start from, and a re-run trusting this cache
+    would ingest Gemara text as Poskim. Fix is a re-extraction of pages 248–337
+    with `tools/extract_docai_pages.py`; it costs live DocAI calls on a range
+    nothing currently uses, so it is a scope decision rather than something done
+    unasked.
+
+15. **`sefaria_export/` is stale and misattributes its source edition.** Written
+    2026-07-29: 146 klalim (the corpus has 667), `versionTitle`
+    `Livorno 1766 / NLI Digitized Edition`, `versionSource` naming NLI's Livorno
+    princeps — while this pipeline's scan is the **Berlin 1851/2** printing from
+    Google Books. Shipping it would attach the wrong edition to the text. Its
+    `index.json` schema, by contrast, is right and always was: a single
+    `Klalei HaGemara` node. Gitignored and regenerable via
+    `tools/export_corpus.py`; regenerating and re-attributing it is the natural
+    first step whenever ingest coordination actually starts.
 
 ## Recent work (2026-08-21)
 

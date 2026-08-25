@@ -6,7 +6,8 @@ relied upon but has no public digital text._
 ## TL;DR
 
 **The work.** *Yad Malachi* (Livorno 1766–7) is the standard reference on the *rules* of
-halachic reasoning — 667 numbered *klalim* across three parts.
+halachic reasoning. Its first part, ***Klalei HaGemara***, is 667 numbered *klalim*
+running alphabetically from `כללי האלף` to `כללי התיו`.
 
 **The demand is measured, not asserted.** Sefaria's own corpus cites it **287 times**, and
 every one is a dead link. Halachipedia cites it **243 times** — **26% of every
@@ -15,21 +16,25 @@ public-domain title on record ([the table below](#the-free-to-digitize-tier-is-o
 
 **It is the easiest big win available.** Public domain, cleanly numbered (klalim map
 straight onto a Sefaria schema), and **already scanned** — four editions in five scans in
-hand — though only Berlin is in clean square type, the kind general OCR reads best.
+hand, one of them in clean square type, the kind general OCR reads best.
 
-**The work is largely done.** All 667 klalim are OCR'd and structured. **Part 1** (*Klalei
-HaGemara*, 222 klalim) has 222/222 trusted page-to-klal alignment and image-grounded,
-selection-only AI adjudication running as its routine correction pipeline — not a pilot.
-Parts 2–3 have marker verification and the scan-linkage/adjudication infrastructure built
-and run over their full page range, with 916 klalim carrying an open review flag — and,
-by standing decision, not one correction applied to them yet.
+**The text is built.** All **667 klalim of Klalei HaGemara** — ~179,000 words, scan pages
+14–247 — are extracted, chunked, and structured. Klalim **1–222** additionally carry the
+full verification pipeline: 222/222 trusted page-to-klal alignment, four independent
+witnesses read against the ink, and **1,061 flagged word positions** in a live review
+dashboard. Klalim 223–667 have text and page alignment but no witness set yet.
 
-**What's needed.** (1) An outside Talmid Chacham independently confirming Part 1's output is clean —
-this pipeline's own self-assessment is not the gate. (2) Working through Parts 2–3's open
-flags and applying what they confirm. (3) Coordinating ingest with Sefaria.
+**What isn't done, stated plainly.** The book's other two parts — *Klalei HaPoskim*
+(pages 254–~295) and *Klalei HaDinim* (~296–331) — are scanned but **not extracted at
+all**. And no correction anywhere in the corpus is promoted without a human ruling: the
+machine flags, a person decides.
+
+**What's needed.** (1) An outside Talmid Chacham independently confirming the reviewed
+text is clean — this pipeline's own self-assessment is not the gate. (2) Working the open
+queue. (3) Coordinating ingest with Sefaria.
 
 **The payoff.** 287 dead references light up automatically, hand-re-keying from scans
-ends, and the harness is reusable for subsequent public-domain works.
+ends, and the harness is reusable for every subsequent public-domain work.
 
 ## The work
 
@@ -37,9 +42,18 @@ ends, and the harness is reusable for subsequent public-domain works.
 first printed Livorno 1766–7. A three-part masterwork of *methodology* — the *grammar* of
 the tradition, reached for whenever a question of method arises:
 
-1. **Klalei HaGemara** — the rules and technical terms of the Talmud, alphabetical (222 klalim).
-2. **Klalei HaPoskim** — the rules governing the codifiers: Rif, Rambam, Rosh, Tur, Shulchan Aruch (299 klalim).
-3. **Klalei HaDinim** — the principles of halachic decision (146 klalim).
+1. **Klalei HaGemara** — the rules and technical terms of the Talmud, alphabetical.
+   **667 klalim**, and the part this project has digitized end to end.
+2. **Klalei HaPoskim** — the rules governing the codifiers: Rif, Rambam, Semag, Rosh,
+   Rashba/Ritva, Tur, Shulchan Aruch. Its own numbering, restarting at 1.
+3. **Klalei HaDinim** — the principles of halachic decision, alphabetical again, its own
+   numbering.
+
+Parts 2 and 3 are **not digitized** — see [Current state](#current-state). Their klal
+counts are quoted variously in secondary sources (one common figure pairs 299 and 146 with
+a "222" for Klalei HaGemara, which the printed book contradicts outright — the Berlin
+edition closes Klalei HaGemara at klal **667** with the colophon `סליקו כללי התיו וסליקו
+כללי הגמרא` on page 247). Nothing here relies on those counts.[^parts]
 
 ![Title page of the Berlin edition of Yad Malachi, naming the three parts Klalei HaGemara, Klalei HaPoskim, and Klalei HaDinim](images/yad-malachi-berlin-title.png)
 
@@ -74,7 +88,7 @@ each unfollowable, because the work isn't in the library. Who cites it, and what
 
 - **Republished and studied** — new editions in 2001, a Machon Yerushalayim critical
   edition (2016), a third volume (2018)[^wiki]; and modern scholarship calls it *"one of
-  the most important halakhic rule books"* / *"one of the classic books of rules."*[^brown]
+  the most important halakhic rule books."*[^brown]
 - **243 citations in Halachipedia**[^halachipedia] — the **single most-cited public-domain
   work Sefaria lacks**[^mostwanted] (see the table below).
 - **Live debate, and the pain point in the wild** — on one Torah forum, Yad Malachi appears
@@ -124,7 +138,7 @@ and **already scanned** — no physical scanning needed.
 
 Four print editions across five scans (the two Przemyśl 1877 files are one printing scanned
 twice), each inspected page-by-page. These are **page images**; some ship an embedded OCR
-layer, but it is **not good enough to use** (see *Process*) — the work is to OCR the images.
+layer, but it is **not good enough to use** (see *Method*) — the work is to OCR the images.
 
 | Edition                                   | Press                          | Script                                 | Scan in Hand                             | Pages         |
 |:------------------------------------------|:-------------------------------|:---------------------------------------|:-----------------------------------------|:--------------|
@@ -134,51 +148,65 @@ layer, but it is **not good enough to use** (see *Process*) — the work is to O
 | **Przemyśl 1877** (2nd scan)[^p1877]      | "                              | **Rashi** (same printing)              | Google Books                             | 489           |
 | **Przemyśl 1888**[^p1888]                 | Żupnik, Knoller & Hamerschmidt | *unverified*[^p1888]                   | Google Books                             | 373           |
 
-The later editions bind all three parts. **Only Berlin is set in clean square type** —
-the Przemyśl 1877 printing's body is Rashi (corrected 2026-08-19, see [^p1877]), which
-is why Berlin remains the OCR base and why a Rashi-capable engine is needed for
-everything else. Berlin's *Klalei HaGemara* opening, rendered
-directly from `berlin_square_corrected.pdf`, page 14:
+**Only Berlin is set in clean square type** — the Przemyśl 1877 printing's body is Rashi
+(corrected 2026-08-19, see [^p1877]), which is why Berlin is the OCR base and why a
+Rashi-capable engine is needed for everything else. Berlin's *Klalei HaGemara* opening,
+rendered directly from `berlin_square_corrected.pdf`, page 14:
 
 ![The opening page of Klalei HaGemara (Aleph section) in the Berlin edition of Yad Malachi, in clean square Hebrew type](images/yad-malachi-berlin-klal-aleph.png)
 
-_Berlin's *Klalei HaGemara* opening — the cleanest square images to OCR. A Rashi-script
-side-by-side comparison is buildable from the Livorno first edition in hand
-(`scans/Hebrewbooks_org_32530.pdf`, title page confirms `נדפס בליוורנו` and printer
-ר' משה עטיאס — HebrewBooks #32530) whenever wanted._
+_Berlin's *Klalei HaGemara* opening — the cleanest square images to OCR._
 
-## Process — ensemble OCR with AI adjudication
+## Method — many witnesses, one human decision
 
-Accuracy on dense rabbinic Hebrew comes from **consensus across witnesses**, not
-proofreading one pass: OCR engines make uncorrelated errors, so where several agree the
-reading is near-certain and only disagreements need review.
+Accuracy on dense rabbinic Hebrew does not come from proofreading a single OCR pass. It
+comes from putting several *independent* readers in front of the same ink, surfacing every
+place they disagree, and resolving each disagreement **against the scan** — not against a
+model's confidence score.
 
-1. **Gather witnesses.** Five scans / four editions in hand, each an independent witness.
-   The two Przemyśl printings share a press (Żupnik/Knoller) — *near*-independent; the
-   strongest pairing is Berlin (square) against the Livorno first edition (Rashi).
-2. **OCR the images — don't trust embedded text.** The shipped OCR layers are unusable
-   (Berlin cleanest but still errs, Przemyśl badly letter-confused, Livorno unusable).
-   The core pipeline uses **Google Cloud Document AI** to extract full-page words and
-   high-precision bounding boxes over Berlin's square images. Earlier tests using Tesseract
-   `heb` showed low discriminative power on historical rabbinic type (only 3.8% accuracy on
-   disagreements, 16/419); the pipeline now relies on high-resolution multimodal vision
-   models (**Gemini 3.6 Flash**) and rabbinic lexicon validation to resolve disputes against
-   the ink crops. Collation against Rashi-set editions (Livorno, Przemyśl) leverages **Dicta**[^dicta]
-   and trained HTR/VLM models.
-3. **Align and vote.** Per-token consensus anchored on the numbered *klalim*; agreed tokens
-   auto-accepted, conflicts flagged.
-4. **AI adjudication — image-grounded, selection-only.** For each flagged token, give a
-   vision model the candidate readings **plus the cropped scan** and have it *select* —
-   never invent — naming the witness it used. Anything unattested is a flagged conjecture,
-   not a silent change. This is the guardrail against "helpful" emendation.
-5. **Collate the editions** into a variant apparatus — potentially more accurate than any
-   single historic printing. (Not a critical edition; it does not aim to supersede the
-   Machon Yerushalayim text.)
-6. **Expert review — flagged set only.** A Torah scholar (Talmid Chacham) fluent in the
-   genre resolves the conflicts against the scan and spot-checks the rest — reviewing
-   the flagged disputes rather than reading the entire corpus cold.
-7. **Structure and ingest** into the three parts → klalim; output text + confidence map +
-   apparatus.
+1. **Extract.** Google Cloud Document AI produces full-page words with high-precision
+   bounding boxes over the Berlin square-type images. Every downstream crop depends on
+   those coordinates.
+2. **Add witnesses that fail differently.** A multimodal VLM (**Gemini 3.6 Flash**) reads
+   whole pages; **Surya**, a locally-run open OCR engine, reads them again at 300 DPI.
+   Each is measured against the corpus, not assumed: VLM **93.3%** token accuracy over all
+   222 reviewed klalim, Surya **89.9%** mean agreement, Tesseract **3.8%** — which is why
+   Tesseract is retained only as a historical witness and not as a leg of the pipeline.
+3. **Diff, don't trust.** Each witness's reading is aligned against the stored text word by
+   word. Agreement is the null result; every disagreement becomes a candidate with a real
+   bounding box.
+4. **Adjudicate against the ink — selection-only.** Each disputed token's box is cropped
+   from the scan and put to a vision model **with the candidate readings**, which must
+   *select* one and say why. It is never asked to generate a reading; anything unattested
+   comes back as a flagged conjecture, not a silent change.
+5. **Repair known printer's defects before counting agreement.** This printing sets
+   *aleph-lamed* as one ligature sort (`ﭏ`) that OCR has no mapping for and reads as a bare
+   *aleph* — silently dropping the *lamed*. A dedicated filter restores it, arbitrated by
+   an independent 6.18-million-word reference corpus, never by this project's own lexicon.
+6. **A human rules on every change.** Decisions are recorded in an append-only ledger and
+   promoted into the corpus by a separate, deliberate step. No batch run can overwrite a
+   human judgment.
+7. **Structure and ingest** — parts → klalim → one segment per klal, plus a confidence map.
+
+### What we measured that the field assumes
+
+The standard argument for ensemble OCR is that independent engines make uncorrelated
+errors, so agreement is near-proof. **We tested that on this corpus and it is false**, and
+the finding is worth more than the pipeline that produced it:
+
+- **P(the consensus reading is correct | two distinct engines agree) is ~26–41%** —
+  measured, not modelled. A published-style estimate for the same configuration put the
+  odds of correlated error at 3.5 × 10⁻⁷. Consensus is a **triage signal**, not a decision
+  procedure, and auto-approval on consensus is indefensible at any threshold this data
+  supports.
+- **Architectural independence is defeated by a defect in the shared input.** Three
+  different engines read the same worn sort and make the same wrong call: 37 measured cases
+  of two or three engines agreeing on an identical error, including unanimous 3-of-3, all
+  from that one alef-lamed ligature. Every engine is reading the same ink.
+- **Tightening the rule doesn't rescue it.** Requiring the primary engine, or unanimity,
+  buys three points of precision for 82% of the recall — measured, then rejected.
+- So the pipeline uses agreement to decide **where to look first**, and the ink to decide
+  **what is true**. That is the opposite of what a confidence threshold does.
 
 **Copyright.** Reproduce base text only from public-domain printings; you may *consult* a
 modern critical edition for a hard reading, but not reproduce its apparatus. (General
@@ -186,55 +214,77 @@ principle, not legal advice.)
 
 ## Current state
 
-A first pass over the full work — all three parts, 667 numbered *klalim* — was run via the
-**lean single-edition path**: extraction and cross-validation from the Berlin square-type
-scan (PDF text layer vs. Document AI), with iterative LLM-driven linguistic/lexicon cleanup
-passes. That text is chunked, structured, and sitting in the repo today.
+_Every figure below is read from the live corpus and dashboard, not from a past report._
 
-Step 4's **image-grounded, selection-only AI adjudication** is the routine, day-to-day
-correction pipeline for **Part 1** (*Klalei HaGemara*, klal 1–222), run through a
-purpose-built local review dashboard (crop + candidate readings + confidence, alongside
-the full running text) that a human reviewer works through directly. Current state,
-verified against live corpus files:
+### What exists
 
-- **222 / 222** Part-1 klalim have a trusted page-to-klal alignment — the scan-to-text
-  mapping every crop depends on.
-- **539 word-level correction candidates across 149 klalim**, of which **387 remain open**
-  (machine-disputed, awaiting human ruling) — down as corrections get applied. The vision
-  model returns an honest low-confidence "uncertain" rather than a fabricated guess when
-  a crop is genuinely too ambiguous to call.
-- **A systematic, corpus-wide OCR defect was found, root-caused, and fixed**: this print
-  sets the letter pair *aleph-lamed* as a single ligature glyph that the OCR engine has no
-  mapping for and reads as a bare *aleph*, silently dropping the *lamed* — confirmed by
-  three independent kinds of evidence agreeing (the ink itself under high-DPI magnification,
-  cross-engine character distributions, and semantic correctness of every reconstructed
-  reading). **131 corrections across 51 klalim**, applied through the same flag → human-review →
-  apply pipeline, never a direct edit. Full worked example is in
-  [`VERIFIED-AGAINST-THE-INK.html`](VERIFIED-AGAINST-THE-INK.html).
-- **A 170-year-old printer's error in the very first klal was caught by 21st-century AI**: In **Klal 1 (word 229)**, the 1857 Berlin edition typesetter printed **`דנראח`** (with a final Chet `'ח'`). Our automated Rabbinic AI lexicon gap detector flagged this word for review:
-  1. *The printer's word (`דנראח`)* **a) makes no sense textually** in context (`"...דנראה מתוך דבריו..."` — *"it appears from his words"*), and **b) is nowhere else to be found** — zero occurrences in this text, and zero occurrences across our 6.18-million-word Rabbinic reference lexicon (Shulchan Arukh, Talmud Bavli, Mishneh Torah, Tur, Rashi).
-  2. *The correct replacement word (`דנראה`)* is **found 3 times in Part 1** (and 12 times across the full 667-klal Yad Malachi text), and **countless times across the Rabbinic lexicon** (43x independently attested in core reference texts). An error that stood undetected in print for over 160 years was identified and resolved in seconds.
-- The pipeline has also caught structural defects a text-only pass would miss entirely —
-  such as token reordering and heading contamination in klal 83, traced directly to
-  coordinate bounding boxes and fixed.
-- Every correction is recorded through an append-only decision log (`review_decisions.jsonl`),
-  kept separate from the automated rebuild pipeline so no batch run can overwrite a human
-  judgment call. The codebase carries a standing regression suite (**241 tests** — 227
-  gating every pipeline rebuild, 14 browser tests over the review dashboard) plus independent
-  code-revalidation passes checking pipeline logic.
+| | |
+|:---|:---|
+| **Klalei HaGemara, complete** | 667 klalim, ~179,000 words, scan pages 14–247, extracted, chunked and structured |
+| **Klalim 1–222** (`part1.json`) | full verification pipeline: alignment, four witnesses, vision adjudication, live review dashboard |
+| **Klalim 223–667** | text and page-level alignment built; **no witness set yet** |
+| **Klalei HaPoskim / HaDinim** | scanned (pages 254–331), **never extracted** |
 
-**Parts 2–3** (*Klalei HaPoskim*, *Klalei HaDinim* — 445 of 667 klalim): Marker-position
-verification, scan-linkage, and vision-adjudication infrastructure reach all three parts across
-the full 667 klalim, surfacing **916 open review flags** queued for reviewer adjudication.
+### Klalim 1–222, in detail
 
-## Cost & Effort
+- **222 / 222 klalim have a trusted page-to-klal alignment** — the scan-to-text mapping
+  every crop depends on.
+- **1,061 flagged word positions across 185 klalim.** 356 are machine-resolved (a known
+  printer's-defect artifact, not a real disagreement); **997 remain open** for a human,
+  and 64 carry a recorded decision. The vision model returns an honest low-confidence
+  "uncertain" rather than a fabricated guess when a crop is genuinely ambiguous.
+- Those items come from two independent sources — **538 word-level candidates** from the
+  DocAI-vs-corpus diff, and **364 multi-witness consensus disputes** where two or three
+  engines agree on a reading the corpus doesn't have. 72 positions are flagged by both.
+- **The corpus-wide ligature defect was found, root-caused, and repaired.** Confirmed by
+  three independent kinds of evidence agreeing: the ink itself under high-DPI
+  magnification, cross-engine character distributions, and semantic correctness of every
+  reconstructed reading. **131 corrections across 51 klalim** were applied through
+  flag → human review → apply, never a direct edit. The filter that automates the
+  recognition was **validated before it was trusted**: on a reviewer's complete
+  22-decision review of one klal it took the primary engine from **0/18 correct to 17/18**,
+  and on 106 candidates the reviewer had already resolved it agreed **106/106**. It now
+  identifies 118 of the 538 candidates (**24% of the queue**) as pure artifact.
+  Worked example: [`VERIFIED-AGAINST-THE-INK.html`](VERIFIED-AGAINST-THE-INK.html).
+- **A 174-year-old printer's error in the very first klal, flagged and left standing.**
+  In **Klal 1, word 229** the Berlin typesetter set `דנראח` — with a final *chet* — where
+  the sentence requires `דנראה` (`"...דנראה מתוך דבריו..."`, *"it appears from his
+  words"*). The printed word occurs **nowhere else in this work and nowhere in a
+  6.18-million-word rabbinic reference corpus**; the correct form occurs 3× in these 222
+  klalim, 12× across all 667, and 43× in the reference corpus. The pipeline flagged it in
+  seconds — **and the corpus still reads `דנראח` today**, because emending a printed source
+  is a human's call, not a detector's. That is the discipline, not a gap in it.
+- The pipeline also catches structural defects a text-only pass would miss entirely —
+  token reordering and heading contamination traced directly to coordinate bounding boxes.
+- **1,774 decisions in an append-only ledger** (`review_decisions.jsonl`), kept outside the
+  automated rebuild so no batch run can overwrite a human judgment. **303 regression
+  tests** guard the pipeline — 282 gating every rebuild, 5 on the witness engine, 16
+  browser tests over the review dashboard.
+
+### What is deliberately not done
+
+- **No `part2.json`/`part3.json` correction has been applied.** Klalim 223–667 are gated
+  behind independent confirmation that the reviewed third is clean — a standing decision,
+  on the reasoning that a clean first third is not evidence the rest comes out clean by the
+  same process.
+- **Klalei HaPoskim and Klalei HaDinim have not been started.** Roughly 78 scanned pages.
+  Extraction there is a fresh run, not a rerun.
+
+## Cost & effort
 
 The upfront investment is in the **reusable digitization and review harness**; subsequent
-public-domain texts benefit from this infrastructure.
+public-domain texts inherit it.
 
-- **Harness & pipeline engineering** (DocAI ingestion, alignment, VLM adjudication, review UI, export tools): ~80–120 dev hours.
-- **Compute & API costs** (Document AI OCR + Gemini 3.6 Flash vision adjudication): low hundreds of dollars (~$150–$300 for the full corpus).
-- **Expert Talmid Chacham review**: **~40–80 focused hours (~$2,000–$4,000)** to systematically review the ~1,300 flagged candidate readings, verify ambiguous Rabbinic ligature crops against the ink, check obscure Talmudic/Rishonim citations, and certify corpus fidelity across all 667 klalim. (Far more efficient than the 200–300+ hours required to transcribe or proofread raw scans from scratch.)
+- **Harness & pipeline engineering** (DocAI ingestion, alignment, multi-witness synthesis,
+  VLM adjudication, review UI, export tooling): ~80–120 dev hours, done.
+- **Compute & API** (Document AI OCR + Gemini vision adjudication): low hundreds of dollars
+  for the full corpus. Surya is local and free.
+- **Expert Talmid Chacham review**: the live queue is **997 open items across klalim
+  1–222**, at roughly 1–3 minutes each with the crop, the candidates and the model's
+  reasoning already on screen — call it **~30–50 focused hours** for that third, and a
+  comparable pass per remaining third once its witness set is built. That is an estimate
+  from the queue's current size, not a measured throughput; the honest comparison is
+  against the 200–300+ hours transcribing or proofreading raw scans from scratch.
 
 ## Preparing the text for Sefaria
 
@@ -242,32 +292,32 @@ The last mile keeps two things separate — **the text** and **the links**:
 
 - **Text.** OCR the **Berlin edition images** (cleanest square; source from NLI, which also
   sidesteps Google's terms — **check resolution before committing to it**, see [^berlin]:
-  NLI's anonymous download tier tested at ~4x fewer pixels than the high-res scan used in
-  this pipeline). Licensing is clean — a PD edition, and mechanical OCR of PD text carries
-  no new copyright.[^ocrpd] **Keep the prose faithful:** don't expand abbreviations (that's
-  a read-time Dicta layer); *do* proof against the image, strip cruft (running headers,
-  page numbers, stamps), restore two-column reading order, and **segment into the schema**
-  (parts → klalim → one segment per klal, e.g. *Yad Malachi, Klalei HaGemara, Aleph 1*).
+  NLI's anonymous download tier tested at ~4× fewer pixels than the scan used here).
+  Licensing is clean — a PD edition, and mechanical OCR of PD text carries no new
+  copyright.[^ocrpd] **Keep the prose faithful:** don't expand abbreviations (that's a
+  read-time Dicta layer); *do* proof against the image, strip cruft (running headers, page
+  numbers, stamps), and **segment into the schema** (*Yad Malachi, Klalei HaGemara,
+  Klal N*). The schema this project already emits declares exactly one node —
+  `Klalei HaGemara` — which is what the corpus actually is.
 - **Links.** Don't hand-insert them — Sefaria's **Auto-Linker** builds them from parseable
   citations (title spelled out + numeric ref).[^linker] So the useful "normalization" is on
   the *citation references*, not the prose. Design the schema's addressing to **match how
-  the 287 sources cite it**, or the inbound links won't auto-resolve — and those **287
-  references light up automatically** once the work exists.
+  the 287 sources cite it**, or the inbound links won't auto-resolve.
 - **Link-readiness QA.** Before ingest, run the text through the linker as a *test* (don't
-  apply links): it flags each unresolved citation, pairing each with a verified candidate
+  apply links): it flags each unresolved citation and pairs it with a verified candidate
   normalization for the reviewer.
 
 ## The ask
 
 Digitize Yad Malachi and place it in Sefaria — the top freely-digitizable work it lacks.
 
-1. **Independent outside confirmation that Part 1 is clean.** Image-grounded,
-   confidence-scored adjudication has reached full-corpus scale for Part 1 (222/222 klalim
-   aligned) through a working human-review dashboard. The next gate is a Talmid Chacham
-   confirming the output independently before downstream promotion.
-2. **Review and finalize Parts 2–3.** Marker verification and scan-linkage infrastructure
-   are complete; 916 klalim carry review flags. Proceed with expert review and apply
-   verified corrections.
+1. **Independent outside confirmation.** Image-grounded, confidence-scored adjudication has
+   reached full-corpus scale for klalim 1–222 (222/222 aligned) through a working
+   human-review dashboard. The next gate is a Talmid Chacham confirming that output
+   independently, before anything downstream is promoted.
+2. **Work the queue, then extend it.** 997 open items are waiting on a reviewer today;
+   klalim 223–667 need their witness set built next; Klalei HaPoskim and HaDinim need
+   extraction from page 254 on.
 3. **Coordinate ingest** with Sefaria (**hello@sefaria.org**), attaching each printing as
    its own version.
 
@@ -276,10 +326,20 @@ remains available for every subsequent rabbinic digitization project.
 
 ## Notes
 
+[^parts]: The corpus's own three files (`part1.json`, `part2.json`, `part3.json`) are
+    **chunks of Klalei HaGemara** — klalim 1–222, 223–444, 445–667 — not the work's three
+    parts; the repo's "Parts 2-3" vocabulary refers to those files. Established
+    2026-08-25 from the printed book: the alphabetical section headers run continuously
+    across all three files, page 247 closes with `סליקו כללי הגמרא`, page 254 is a fresh
+    part title page (`חלק שני · כללי שני התלמודים`) whose first klal is numbered `א`, and
+    the project's own Sefaria export schema had always declared a single
+    `Klalei HaGemara` node. Evidence trail in `PROJECT-STATUS-HISTORY.md`.
+
 [^wiki]: English Wikipedia, "Malachi ben Jacob ha-Kohen" — three-part structure;
     author's death in 1772; his standing among later authorities and the Chida's
     praise; and the republication history (2001; Machon Yerushalayim critical
-    edition 2016; third volume 2018).
+    edition 2016; third volume 2018). Its per-part klal counts are not used here; see
+    [^parts].
 
 [^sefaria]: Sefaria search API (`search-wrapper`, `type: text`), querying the corpus
     for citations of יד מלאכי: **287** in-corpus references, and the per-work
@@ -326,13 +386,15 @@ remains available for every subsequent rabbinic digitization project.
     Title page: *ספר יד מלאכי*, by *מלאכי בכמ"ר יעקב הכהן*; the three parts (Klalei
     HaGemara / HaPoskim / HaDinim). The *editio princeps*: body set in **Rashi
     script** with square keyword-lemmas. Digitized as three part-files (348 / 54 / 55 pp).
+    Held locally, outside this repo.
 
 [^berlin]: **Berlin, Hebrew year תרי"ב = 1851/2 CE.** In hand as a Google
     Books full-view scan (3440×5312px per page), publicly downloadable
     at <https://www.google.com/books/edition/_/OdiHjxI3I0EC>. Publisher:
     `דפוס י. זיטטענפעלד` (Y. Zittenfeld press, matching NLI catalog record
     `990011859020205171`). Date confirmed 2026-08-18 directly from NLI's
-    cataloging and internal chronograms (*תרי"ב*, 612 = 1851/2). Clean square type.
+    cataloging and two internal chronograms (*תרי"ב*, 612 = 1851/2), superseding an
+    earlier secondhand "~1857" estimate. Clean square type.
 
 [^p1877]: **Przemyśl 1877** — present in two independent scans: HebrewBooks #14122
     and Google Books. Colophon: *פרעמישלא בשנת התרל"ז לב"ע* (5637 = 1877),
@@ -343,10 +405,6 @@ remains available for every subsequent rabbinic digitization project.
 [^p1888]: **Przemyśl 1888** (Google Books full-view scan). Colophon: *JAD MALACHI,
     PRZEMYŚL, Drukiem Żupnika, Knollera i Hamerszmida, 1888* (*התרמ"ח*, 5648).
     Script unverified; treat as unconfirmed.
-
-[^dicta]: Dicta — analytical tools for Hebrew texts (dicta.org.il), an Israeli
-    non-profit; its tools include rabbinic text analysis, abbreviation expansion,
-    and source identification.
 
 [^ocrpd]: General principle, not legal advice: mechanical OCR of a public-domain
     text is a reproduction of the underlying work and does not generate a new copyright
