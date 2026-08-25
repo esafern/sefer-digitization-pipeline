@@ -17,6 +17,137 @@ current file references, or when grepping for how a past finding was
 resolved. Same append-at-top convention as before: newest entries go right
 after this header, not at the bottom.
 
+### CONFIRMED 2026-08-25 — `reconstruction_witness_queue.json` is Tesseract, and it should be replaced by Surya, not by a VLM. Measured, not argued.
+
+User asked to confirm the Tesseract provenance and recommend a replacement
+among Surya / VLM vision / VLM semantic.
+
+**CONFIRMED, from the code and the data, not from the docs:**
+
+- `tools/verify_reconstruction_witness.py:79` shells out to
+  `tesseract <img> stdout -l heb`. That is the witness.
+- **419 items across exactly three klalim** — 30 (160), 88 (140), 75 (119) —
+  built from pages 24, 37, 40. Every row carries `docai_reading` /
+  `tesseract_reading`, DocAI's bbox, and a lexicon triage tier.
+- Per-page agreement with DocAI: **76.1% / 85.6% / 78.1%** over 2,673 DocAI
+  words. Tiers D 279, C 96, B 36, A 8. Vision verdicts: **A (DocAI) 382,
+  NEITHER 21, B (Tesseract) 16**.
+- The reason it exists is still valid and is not a Tesseract fact: the
+  reconstructed text of these three klalim comes FROM the DocAI token stream, so
+  `build_corrections_dataset.py` (DocAI vs. stored text) is circular there —
+  measured at 1 candidate for ~3,800 words. Verifying that text needs an
+  independent reading of the same pixels.
+
+**TWO NEW FACTS ABOUT THE QUEUE, found while confirming:**
+
+1. **Tesseract was resolution-starved, exactly as Surya was.** It reads
+   `images/pdf_pages/page_N.png`, which for pages 24/37/40 measure
+   868×1332, 872×1332, 864×1328 — **1.1–1.2 MP**. The 300-DPI re-render that
+   moved Surya from 71.7% to 89.9% is 4.7 MP. So the "Tesseract right in 16 of
+   419 (3.8%)" figure was measured at a quarter of the available pixels and is a
+   floor, not a fair ceiling. It does not change the recommendation — Tesseract's
+   failure mode here is tokenization collapse (`דמנחות` → `י ו דמנחורז`), not a
+   marginal glyph miss — but the figure should stop being quoted as if the
+   comparison were fair.
+2. **21% of the queue's `word_index` values no longer anchor.** 329 of 419 point
+   at a corpus word that still equals their `docai_reading`; **90 match nothing
+   within ±3 positions**. Expected drift (the corpus has been corrected under
+   them since), but it means any analysis keyed on those indices must anchor
+   first — the numbers below are computed on the anchored subset only.
+
+**THE RECOMMENDATION: Surya as the witness, the VLM as a gated second, semantic
+as triage only.** All three klalim are already covered by both at 300 DPI, at
+zero marginal cost — this is a retirement, not a build.
+
+Sized on the same three klalim, 4,286 stored words:
+
+| witness | positions flagged |
+| :--- | ---: |
+| Tesseract (current) | **419** |
+| Surya alone | **218** |
+| VLM Pass A alone | 176 |
+| VLM with the Pass-A/Pass-B stability gate | **85** |
+| Surya + VLM agreeing (already live in the dashboard) | **25** |
+
+And the part that decides it — what each would have caught, on the queue's own
+adjudicated positions (anchored subset):
+
+| the arbiter's verdict | n | Surya flags | VLM-gated flags |
+| :--- | ---: | ---: | ---: |
+| **NEITHER** — both DocAI and Tesseract wrong, the hardest glyphs | 10 | **7 (70%)** | 3 (30%) |
+| **B** — Tesseract was right, DocAI wrong | 13 | 4 (31%) | 2 (15%) |
+| A — DocAI right, i.e. Tesseract noise | 306 | 45 (15%) | 15 (5%) |
+
+**Surya is roughly 3x better signal-to-noise than Tesseract on this job** — it
+catches 11 of the 23 positions that actually mattered while firing on only 15%
+of the 306 that did not. Its 70% on the NEITHER cases is the strongest single
+result here: those are the positions where two engines already failed.
+
+**Why NOT VLM vision as the primary witness.** It is the same model family as
+the adjudicator that resolves this queue — `PROPOSED_PIPELINE_ARCHITECTURE.md`
+Directive #1, and the violation has a measured price: the arbiter backs a
+consensus 52% of the time when the VLM is one of the agreeing engines versus 30%
+when it is not. A witness that is also the judge is one witness, not two
+(Lesson 23). With the A/B stability gate it is an excellent *second* witness —
+85 flags, 5% noise — and that is how `synthesize_multi_witness.py` already uses
+it.
+
+**Why NOT VLM semantic as a witness at all.** It does not read the ink. The
+failure this queue exists to catch is a page-crossing reconstruction that
+stitched tokens from the wrong place, and that failure produces *fluent,
+plausible* Hebrew — a semantic check is structurally blind to it (Lesson 9:
+pixel-reading and plausibility fail in different directions, so they must
+AGREE, not substitute). Semantics already has the right job here: the
+lexicon-based A/B/C/D tier that ORDERS the queue.
+
+**What NOT to do: delete the queue.** Surya and the gated VLM together would
+have missed roughly half the positions where the arbiter overruled DocAI. The
+419 verdicts are already paid for and cached, and open item 4's cut still
+stands: `vision_selected in ("B","NEITHER")` → **37 items, 91% less work, zero
+findings lost**. Retire the GENERATOR, keep the FINDINGS (Lesson 8: run every
+independent check you have; a cheap old one catches a different class than the
+sophisticated new one).
+
+**Concretely, when someone picks this up:** stop re-running
+`verify_reconstruction_witness.py`'s Tesseract leg; let
+`synthesize_multi_witness.py` (which already covers klalim 30/75/88 and yields
+25 two-engine disputes there) be the standing witness; serve the 37 filtered
+Tesseract items alongside it as a closed, historical tier. Not implemented here
+— the user asked for a recommendation, and rewiring a review queue is its own
+decision.
+
+### FOUND 2026-08-25 — open item 00 may overstate itself: 3 of its 5 klalim look like a MISREAD MARKER, not a mis-assigned block.
+
+Found while checking whether Surya is a trustworthy witness on klal 88, one of
+the three page-crossing klalim.
+
+Open item 00 is assigned to the user and says four klalim "carry a neighbour's
+text", detected by "the klal's Surya text OPENS with a neighbour's gematria
+marker". **That detector cannot distinguish a mis-assigned block from a marker
+glyph that was simply misread** — and the confusions involved are ones this
+project has catalogued.
+
+| klal | corpus marker | Surya read | body AFTER the marker | whole-klal agreement | reading |
+| ---: | :--- | :--- | ---: | ---: | :--- |
+| 8 | `ח` | `ה` | **83%** | **87%** | ח/ה misread, text is right |
+| 88 | `פח` | `פה` | **83%** | **89%** | ח/ה misread, text is right |
+| 202 | `רב` | `רא` | 25% | **93%** | ב/א misread; high agreement says the block is right |
+| 162 | `קסב` | `קסג` | 8% | **9%** | genuinely mis-assigned |
+| 163 | `קסג` | `בהלכות` | 8% | 39% | genuinely damaged (knock-on) |
+
+A block carrying a NEIGHBOUR's text cannot agree with this klal's stored text at
+87-93% — klal 162, which really is mis-assigned, sits at 9%. **The ח/ה pair is
+the same confusion behind klal 1's `דנראח` printer's typo**, so a marker misread
+of exactly this shape is the expected artifact, not a surprise.
+
+**Stated as a measurement, not a verdict:** the decisive check is rendering the
+scan at those three markers, which is one page-render each and was not done here
+(it is the user's item, and three fix attempts have already regressed the corpus).
+But if it holds, the open item's real extent is **2 klalim (162, 163), not 5**,
+and the remaining work is a marker-read fix rather than another pass at
+`split_block_across_klalim()` — which matters, because that function is the one
+Lesson 31 says to stop retuning.
+
 ### FIXED 2026-08-25 — pages 248-337 re-extracted. The stale-page-file defect was 40 pages, not the 14 my first sweep found.
 
 User-authorized ("fix 1 and 2"). Closing the open item filed earlier the same

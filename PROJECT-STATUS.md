@@ -64,6 +64,16 @@ to) as state changes** — that discipline is what drifted last time.
     attempts reverted rather than risk the 190 klalim the re-render improved;
     this wants a scoped change with its own before/after. Context: the same
     re-render cut mis-assignment from 15 klalim to 4.
+    **MEASURED 2026-08-25, and it may shrink this item from 5 klalim to 2:** the
+    detector behind it ("the klal's Surya text opens with a neighbour's marker")
+    cannot tell a mis-assigned block from a MISREAD marker glyph. Klalim 8
+    (`ח`→`ה`), 88 (`פח`→`פה`) and 202 (`רב`→`רא`) agree with their own stored
+    text at **87%, 89% and 93%** — a block carrying a neighbour's text cannot do
+    that; genuinely mis-assigned klal 162 sits at **9%**. The ח/ה pair is the
+    same confusion behind klal 1's `דנראח` printer's typo. If a scan render at
+    those three markers confirms it, the remaining work is a marker-read fix and
+    NOT another pass at `split_block_across_klalim()` (Lesson 31). Left for the
+    user, whose item this is.
 
 0. **STANDING RULE, added 2026-08-24 (user directive): never fix one instance —
    sweep the corpus for the class.** Whenever you find and fix an issue, review
@@ -106,7 +116,31 @@ to) as state changes** — that discipline is what drifted last time.
    reconstructions, covering 2,673 DocAI words at 0.76–0.86 agreement. The
    machine vision pass is done; the human review-in-dashboard pass was
    explicitly deferred by the user as a future step (not forgotten, not a gate
-   on anything else).
+   on anything else). **Tesseract provenance re-confirmed 2026-08-25 from the
+   code (`verify_reconstruction_witness.py:79`, `tesseract -l heb`), with a
+   recommended replacement measured the same day — see item 3a.**
+
+3a. **RECOMMENDED 2026-08-25 (user-requested, measured, not implemented):
+    replace the Tesseract leg with Surya, keep the VLM as a gated second
+    witness, and keep semantics as triage only.** All three klalim are already
+    covered by both at 300 DPI, so this retires a generator rather than building
+    one. On the same 4,286 words: Tesseract flags 419, Surya 218, the
+    stability-gated VLM 85, and the two agreeing 25 (already live). On the
+    queue's own adjudicated positions (anchored subset), Surya catches **7 of 10
+    NEITHER cases (70%)** and 4 of 13 where Tesseract beat DocAI, while firing on
+    only 15% of the 306 positions that were Tesseract noise — roughly **3× the
+    signal-to-noise**. The VLM must not be primary here: it is the adjudicator's
+    own model family (Directive #1; the arbiter backs consensus 52% when the VLM
+    is in it vs 30% when not). A semantic pass cannot be a witness at all — the
+    defect it must catch (a reconstruction stitched from the wrong place) reads
+    as fluent Hebrew. **Do not delete the queue**: Surya + gated VLM would have
+    missed about half the positions where the arbiter overruled DocAI, so retire
+    the generator and keep the findings, filtered per item 4. Two further facts
+    from that check: Tesseract read the **1.1–1.2 MP** cached page renders (the
+    same starvation that cost Surya 18 points), so its 3.8% is a floor rather
+    than a fair number; and **90 of the queue's 419 `word_index` values no longer
+    anchor** to their `docai_reading`, so any index-keyed analysis must anchor
+    first. Full tables in `PROJECT-STATUS-HISTORY.md`.
 4. **The witness queue should be filtered by vision verdict, not worked in
    full — and not pruned by tier.** Analysed 2026-08-19 (full detail and
    tables in `PROJECT-STATUS-HISTORY.md`). Tesseract was right in only **16 of
