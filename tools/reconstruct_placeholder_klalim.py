@@ -38,7 +38,6 @@ import sys
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(REPO, "pipeline"))
 
-import build_gematria_trace as bgt  # noqa: E402
 import corpus_io as cio  # noqa: E402
 
 sys.path.insert(0, os.path.join(REPO, "tools"))
@@ -117,10 +116,23 @@ def load_traces():
 
 
 def page_words(page, cache):
-    """Reading-order token texts for one scan page, cached."""
+    """Raw-array token texts for one scan page, cached.
+
+    FIXED 2026-08-26 (code review). This returned the tokens re-sorted into
+    READING ORDER and then sliced them with `marker_position` - which is an
+    index into the RAW array, as build_gematria_trace states outright:
+    "`marker_position` in the output is still the ARRAY index, because that is
+    what every existing consumer indexes with". The two orders disagree on 23 of
+    391 trace rows, and **6 of the 51 klalim this tool wrote on 2026-08-25 got a
+    boundary from the wrong token** (287, 414, 443, 444, 487, 490).
+
+    tools/check_span_shortfall.py::span_tokens_for already extracts this exact
+    span, from the raw array, "so this explains that function's own number rather
+    than a second opinion" - and this tool disagreeing with it meant the triage
+    tool and the reconstruction tool described different spans for the same klal.
+    """
     if page not in cache:
-        tokens = cio.load_docai_page(page)
-        cache[page] = [tokens[i]["text"] for i in bgt.reading_order(tokens)]
+        cache[page] = [t["text"] for t in cio.load_docai_page(page)]
     return cache[page]
 
 
