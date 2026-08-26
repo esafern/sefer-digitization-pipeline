@@ -101,6 +101,16 @@ echo "== 4/6 assemble_corrections_dataset.py =="
 echo "== 5/6 build_klal_page_regions.py =="
 ./venv/bin/python pipeline/build_klal_page_regions.py
 
+# ADDED 2026-08-26. Same argument that put stage 4a in this chain: pure local
+# computation, ~0.1s on the full corpus, no API calls. It was left out because
+# the two lexical detectors were [STANDALONE] scripts that printed to stdout and
+# wrote nothing - and on 2026-08-26 the reviewer hand-repaired a word in klal 84
+# that one of them had been finding all along. A detector nobody runs has not
+# detected anything. Writes a report, NOT flags: promoting an entry stays a
+# deliberate act, because these carry real false positives.
+echo "== 5b/6 build_lexical_defect_report.py =="
+./venv/bin/python pipeline/build_lexical_defect_report.py
+
 echo "== 6/6 tests/ (corpus + pipeline-logic regression suites) =="
 ./venv/bin/python -m pytest tests/test_corpus_invariants.py tests/test_pipeline_logic.py -q
 

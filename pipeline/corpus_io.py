@@ -115,6 +115,7 @@
 import difflib
 import json
 import os
+import re
 
 
 # This module lives in pipeline/, one level below the repo root, where
@@ -159,6 +160,41 @@ def clean_word(w):
 # what is in it; equivalence to the regex range the merged copies used is
 # asserted in tests/test_pipeline_logic.py.
 HEBREW_LETTERS = "אבגדהוזחטיכלמנסעפצקרשתךםןףץ"
+
+
+# The generated stub a klal carries when the chunker created it but never filled
+# it: the gematria marker plus a synthesised "כלל N" title, e.g. "רנ כלל 250".
+#
+# MOVED HERE 2026-08-26 (code review, flagged independently by both runs). This
+# rule was written twice, byte-identical, in tools/export_corpus.py (_STUB_RE)
+# and tools/reconstruct_placeholder_klalim.py (PLACEHOLDER_RE) - and the two are
+# the two halves of ONE decision: which klalim get rebuilt, and which ship to
+# Sefaria as an empty segment rather than as fabricated text under a real
+# citation address. If they ever drift, either a real klal is dropped from the
+# deliverable or a stub is published as text.
+PLACEHOLDER_RE = re.compile(r"^\S+\s+כלל\s+\d+\s*$")
+
+
+def is_placeholder(clean_text):
+    """True when a klal stores only the generated placeholder, not real text."""
+    return bool(PLACEHOLDER_RE.match(" ".join((clean_text or "").split())))
+
+
+# The Google Books scan watermark ("Digitized by Google"), which sits at the
+# foot of many pages of this scan. It is page furniture, never corpus content.
+#
+# MOVED HERE 2026-08-26 (code review): this lived only in
+# build_corrections_dataset.py, so the filter existed but the one tool that
+# writes corpus text from the raw token stream
+# (tools/reconstruct_placeholder_klalim.py) did not use it - and wrote the
+# watermark into 12 klalim. That is the standing rule's exact failure mode: the
+# fix already existed in a sibling file which never got it.
+WATERMARK_WORDS = {"digitized", "by", "google"}
+
+
+def is_watermark(tok_text):
+    """True when a raw OCR token is part of the scan watermark."""
+    return clean_word(tok_text).lower() in WATERMARK_WORDS
 
 
 def hebrew_letters_only(s):
@@ -291,6 +327,63 @@ GEMATRIA_VALUES = {
 # final-letter-eligible letters, which was right for 150/180/190 but wrong
 # for 20/40/50/80/90/120/140/220.
 FINAL_FORMS = {"נ": "ן", "פ": "ף", "צ": "ץ"}
+
+
+# The running-header and section-header vocabulary, in the forms DocAI actually
+# produces them - `יד מלאכי כללי <letter-section>` plus the OCR variants of both
+# header words. This is page furniture: it is stripped from clean_text by
+# construction, so it must never be MATCHABLE when aligning corpus text to a
+# page's tokens either.
+#
+# MOVED HERE 2026-08-26: it lived in tools/check_span_shortfall.py, so
+# review_server's own alignment could not see it, and 8 Part-1 words were
+# aligned to a page header instead of their real token (klal 7 w497 among them -
+# see PROJECT-STATUS.md item 23). Third instance of the same standing-rule
+# failure this week, after is_watermark and is_placeholder.
+FURNITURE_WORDS = {
+    hebrew_letters_only(w) for w in (
+        "יד", "יר", "יך",                      # running header, word 1 + OCR variants
+        "מלאכי", "מלרכי", "מראכי", "מררכי",    # ...word 2 + the variants the corpus
+                                                #    invariant's `מ[לר][אר]כי` admits
+        "כללי",                                 # section header, word 1
+        "האלף", "הבית", "הגימל", "הדלת",
+        "ההא", "הוו", "הזין", "החית", "הטית",
+        "היוד", "הכף", "הלמד", "המם", "הנון",
+        "הסמך", "העין", "הפא", "הצדי", "הקוף",
+        "הריש", "השין", "התיו",
+    )
+}
+
+# A token whose centre sits in the top this-fraction of a page's vertical extent
+# is in the running-header band. Measured on this scan: header tokens land at
+# <=0.006, the first body line at >=0.03.
+HEADER_BAND_MAX_REL_Y = 0.02
+
+
+def header_furniture_indices(tokens, band=HEADER_BAND_MAX_REL_Y):
+    """Indices of `tokens` that are the page's running header, folio or
+    watermark - i.e. ink that is never part of any klal's text.
+
+    The band test is what keeps this safe: `כללי` is ordinary vocabulary in this
+    work (`כללי הגמרא`), and only the copy printed at the very top of the page is
+    furniture.
+    """
+    ys = [center_y(t) for t in tokens]
+    if not ys:
+        return set()
+    lo, hi = min(ys), max(ys)
+    span = (hi - lo) or 1.0
+    out = set()
+    for i, t in enumerate(tokens):
+        text = t.get("text") or ""
+        if is_watermark(text):
+            out.add(i)
+            continue
+        if (center_y(t) - lo) / span >= band:
+            continue
+        if hebrew_letters_only(text) in FURNITURE_WORDS or text.strip().isdigit():
+            out.add(i)
+    return out
 
 
 def klal_id_to_gematria(n):

@@ -619,11 +619,27 @@ def _sefaria_index():
 # library under a real citation address - the worst failure this pipeline can
 # have. They export as an EMPTY segment instead: the klal keeps its address,
 # and the absence is visible.
-_STUB_RE = re.compile(r"^\S+\s+כלל\s+\d+\s*$")
+# The rule itself lives in corpus_io (moved there 2026-08-26, code review): it
+# was byte-identical here and in tools/reconstruct_placeholder_klalim.py, and
+# the two are one decision seen from both ends - what gets rebuilt, and what
+# ships as empty. Re-exported under the local names so call sites and tests are
+# unchanged.
+_STUB_RE = cio.PLACEHOLDER_RE
+is_placeholder = cio.is_placeholder
 
 
-def is_placeholder(clean_text):
-    return bool(_STUB_RE.match(" ".join((clean_text or "").split())))
+def _reconstructed_klal_ids():
+    """klal_ids whose text was written by tools/reconstruct_placeholder_klalim.py.
+
+    Read from the decision ledger, which is where that tool records one revisit
+    flag per klal it fills - the only durable record that a klal's text is
+    machine output rather than reviewed text.
+    """
+    out = set()
+    for (kid, wi), rec in rd.all_current("klal_flag").items():
+        if wi is None and rec.get("reviewer") == "tools/reconstruct_placeholder_klalim.py":
+            out.add(kid)
+    return out
 
 
 def export_sefaria(klalim, output_dir, version_title=None, version_source=None):
@@ -666,13 +682,35 @@ def export_sefaria(klalim, output_dir, version_title=None, version_source=None):
               f"EMPTY segment (placeholder rows are never shipped as text):")
         print(f"    {placeholders[:12]}{'...' if len(placeholders) > 12 else ''}")
 
+    # FIXED 2026-08-26 (code review). Both sentences below used to be hardcoded:
+    # the review sentence asserted "Klalim 1-222 ... 223-667 have not" even when
+    # --part1-only shipped 222 klalim and 223-667 were not in the file at all,
+    # and nothing disclosed that some klalim are UNREVIEWED MACHINE
+    # RECONSTRUCTIONS lifted from the OCR token stream between two anchors and
+    # never read by a human. For a public version file under a real citation
+    # address that is the most load-bearing caveat there is. Both are now derived
+    # from what the export actually contains.
+    reviewed_here = sorted(i for i in expected if i <= cio.PART1_MAX_KLAL)
+    unreviewed_here = sorted(i for i in expected if i > cio.PART1_MAX_KLAL)
+    scope = []
+    if reviewed_here:
+        scope.append(f"klalim {reviewed_here[0]}-{reviewed_here[-1]} have been "
+                     f"through word-level review")
+    if unreviewed_here:
+        scope.append(f"klalim {unreviewed_here[0]}-{unreviewed_here[-1]} have not")
+    machine = sorted(set(_reconstructed_klal_ids()) & set(expected) - set(placeholders))
+    machine_note = (
+        f" {len(machine)} klalim ({machine[0]}-{machine[-1]}) carry text reconstructed "
+        f"mechanically from the OCR token stream between two located markers; that text "
+        f"has never been read by a human or checked against the scan."
+    ) if machine else ""
     notes = (
         "OCR of the Berlin 1851/2 printing (Google Books scan), corrected through "
         "an image-grounded review pipeline: every change is adjudicated against the "
         "scan crop and recorded in an append-only decision ledger. "
         f"{len(text) - len(placeholders)} of {len(text)} klalim carry extracted text; "
         f"{len(placeholders)} are not yet extracted and are empty here. "
-        "Klalim 1-222 have been through word-level review; 223-667 have not."
+        + "; ".join(scope) + "." + machine_note
     )
 
     version = {
@@ -769,9 +807,23 @@ def main():
         sys.exit(1)
 
     if args.klal_id is not None:
+        if args.format == "sefaria":
+            # FIXED 2026-08-26 (code review). The sefaria export derives every
+            # klal's citation address from its POSITION in a dense 1..N array, so
+            # a one-klal slice can only ever fail its own contiguity check - and
+            # it failed with "missing [1, 2, 3, 4]... Export all parts
+            # (--all-parts) or fix the corpus", which blames the corpus and
+            # suggests a flag that was already on. Refuse it up front, for the
+            # real reason.
+            print("ERROR: --klal-id cannot be combined with --format sefaria - the "
+                  "Sefaria version file addresses klalim by position in a dense "
+                  "1..N array, so it is a whole-work deliverable. Use --by-klal "
+                  "with a text/xml format to export a single klal.", file=sys.stderr)
+            sys.exit(1)
         klalim = [k for k in klalim if k["klal_id"] == args.klal_id]
         if not klalim:
-            print(f"ERROR: klal_id {args.klal_id} not found in part1.json.", file=sys.stderr)
+            source = ("part1.json + part2.json + part3.json" if all_parts else "part1.json")
+            print(f"ERROR: klal_id {args.klal_id} not found in {source}.", file=sys.stderr)
             sys.exit(1)
 
     print(f"Loaded {len(klalim)} klal(im) from "

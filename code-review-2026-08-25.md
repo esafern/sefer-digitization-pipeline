@@ -1,6 +1,9 @@
 # Heavy Code Review: Sefer Digitization Pipeline
 **Date**: 2026-08-25 • **Scope**: Full pipeline + 7 days of changes (70 commits, 2026-08-18 → 2026-08-25)
 
+> **TRIAGED AND CLOSED 2026-08-26**, jointly with `CODE-REVIEW-2026-08-26.md` rather than separately. C1/C2 were also found independently by that run and are fixed (182.5 ms -> 9.6 ms on `/api/page/73`). C3 is real as a class but named the wrong function: `_word_level_ai_flags`' last-page-wins produces 0 wrong answers today, while `_word_scan_position`'s first-page-wins - added in the reviewed range and not flagged here - is the one that diverges; all three resolutions are now collapsed into one. S2/S5 confirmed latent and measured (0 klalim diverge; part boundaries 222/444/667 correct today, still unasserted). S1/C4 accepted and deferred: they are structural refactors that want their own session. See `PROJECT-STATUS.md` item 21.
+
+
 ---
 
 ## Executive Summary

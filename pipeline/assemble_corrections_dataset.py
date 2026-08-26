@@ -103,7 +103,7 @@ def build_vlm_alignment(klal_words, vlm_words):
             in cio.align_witness(klal_words, vlm_words).items()}
 
 
-def _ligature_artifact_flag(c):
+def _ligature_artifact_flag(c, repaired="__derive__"):
     """"docai_ligature_artifact" when repairing DocAI's reading makes it EXACTLY
     the stored text, else None.
 
@@ -117,7 +117,13 @@ def _ligature_artifact_flag(c):
     of the review queue that never should have been in it. Flagged rather than
     DELETED, per Lesson 26: a filter that removes items from a reviewer's view
     must leave them findable and say why it acted."""
-    repaired = docai_filter.repair_word(c.get("original_word"))
+    # `repaired` is passed in by the one production caller, which has already
+    # derived it for the entry's own "docai_repaired" field - deriving it twice
+    # per candidate was ~498 redundant repairs per rebuild (code review
+    # 2026-08-26, H16). Defaulted rather than made required so the tests, which
+    # call this with a bare candidate dict, keep working.
+    if repaired == "__derive__":
+        repaired = docai_filter.repair_word(c.get("original_word"))
     if not repaired:
         return None
     stored = c.get("corrected_word")
@@ -304,6 +310,10 @@ def main():
     n_drifted = 0
     for c in verified:
         drifted = check_drift(c, words_by_klal.get(c["klal_id"]))
+        # Derived once and used twice - for the entry's own "docai_repaired" and
+        # by _ligature_artifact_flag() below, which used to re-derive it from the
+        # same input (~498 redundant repairs per rebuild; code review 2026-08-26).
+        _repaired = docai_filter.repair_word(c["original_word"])
         entry = {
             "word_index": c["word_index_in_final_text"],
             "opcode": c["opcode"],
@@ -316,7 +326,7 @@ def main():
             # offered alongside it. Measured against a reviewer's complete
             # 22-decision review of klal 91: DocAI 0/18 raw, 17/18 (94%) repaired,
             # zero words made worse.
-            "docai_repaired": docai_filter.repair_word(c["original_word"]),
+            "docai_repaired": _repaired,
             "final_text": c["corrected_word"],
             "page": c["page"],
             "bbox": c["bbox"],
@@ -336,7 +346,7 @@ def main():
             # "open" state, so this is safe to introduce without a
             # frontend change.
             "flag": ("stale_candidate" if drifted
-                     else _ligature_artifact_flag(c) or classify(c)),
+                     else _ligature_artifact_flag(c, _repaired) or classify(c)),
         }
         if drifted:
             n_drifted += 1

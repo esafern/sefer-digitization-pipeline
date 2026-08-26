@@ -1,0 +1,4418 @@
+[
+ {
+  "klal_id": 1,
+  "word_index": 23,
+  "stored": "דקאמרא",
+  "proposals": [
+   {
+    "form": "דקאמר",
+    "ref_count": 1304,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 1,
+  "word_index": 229,
+  "stored": "דנראח",
+  "proposals": [
+   {
+    "form": "דנראה",
+    "ref_count": 43,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 1,
+  "word_index": 280,
+  "stored": "לתרוויהו",
+  "proposals": [
+   {
+    "form": "לתרוייהו",
+    "ref_count": 94,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 2,
+  "word_index": 23,
+  "stored": "קדשם",
+  "proposals": [
+   {
+    "form": "קדשים",
+    "ref_count": 1851,
+    "edit": "deleted_char"
+   },
+   {
+    "form": "קדש",
+    "ref_count": 1393,
+    "edit": "extra_char"
+   },
+   {
+    "form": "קדם",
+    "ref_count": 1119,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": true
+ },
+ {
+  "klal_id": 2,
+  "word_index": 188,
+  "stored": "בשרש",
+  "proposals": [
+   {
+    "form": "בשר",
+    "ref_count": 3530,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 2,
+  "word_index": 256,
+  "stored": "מיתור",
+  "proposals": [
+   {
+    "form": "מיתות",
+    "ref_count": 262,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 2,
+  "word_index": 590,
+  "stored": "חזות",
+  "proposals": [
+   {
+    "form": "חזית",
+    "ref_count": 134,
+    "edit": null
+   },
+   {
+    "form": "חזור",
+    "ref_count": 42,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": true
+ },
+ {
+  "klal_id": 2,
+  "word_index": 590,
+  "stored": "חזות",
+  "proposals": [
+   {
+    "form": "חזו",
+    "ref_count": 312,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 4,
+  "word_index": 17,
+  "stored": "חוות",
+  "proposals": [
+   {
+    "form": "חיות",
+    "ref_count": 145,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 4,
+  "word_index": 71,
+  "stored": "בבריתא",
+  "proposals": [
+   {
+    "form": "בברייתא",
+    "ref_count": 269,
+    "edit": "deleted_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 4,
+  "word_index": 225,
+  "stored": "בדוקא",
+  "proposals": [
+   {
+    "form": "ברוקא",
+    "ref_count": 60,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 4,
+  "word_index": 364,
+  "stored": "שרבר",
+  "proposals": [
+   {
+    "form": "שדבר",
+    "ref_count": 93,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 6,
+  "word_index": 43,
+  "stored": "ילפין",
+  "proposals": [
+   {
+    "form": "ילפינן",
+    "ref_count": 398,
+    "edit": "deleted_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 6,
+  "word_index": 46,
+  "stored": "ילפין",
+  "proposals": [
+   {
+    "form": "ילפינן",
+    "ref_count": 398,
+    "edit": "deleted_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 7,
+  "word_index": 14,
+  "stored": "הבכות",
+  "proposals": [
+   {
+    "form": "הבכור",
+    "ref_count": 411,
+    "edit": null
+   },
+   {
+    "form": "הבמות",
+    "ref_count": 114,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": true
+ },
+ {
+  "klal_id": 7,
+  "word_index": 115,
+  "stored": "בבות",
+  "proposals": [
+   {
+    "form": "בבית",
+    "ref_count": 3136,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 7,
+  "word_index": 115,
+  "stored": "בבות",
+  "proposals": [
+   {
+    "form": "בבת",
+    "ref_count": 603,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 7,
+  "word_index": 241,
+  "stored": "העיון",
+  "proposals": [
+   {
+    "form": "העליון",
+    "ref_count": 375,
+    "edit": "deleted_char"
+   },
+   {
+    "form": "העין",
+    "ref_count": 288,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": true
+ },
+ {
+  "klal_id": 7,
+  "word_index": 252,
+  "stored": "הלכרה",
+  "proposals": [
+   {
+    "form": "הלכה",
+    "ref_count": 2290,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 7,
+  "word_index": 263,
+  "stored": "כדבריר",
+  "proposals": [
+   {
+    "form": "כדברי",
+    "ref_count": 375,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 7,
+  "word_index": 264,
+  "stored": "תקשו",
+  "proposals": [
+   {
+    "form": "תקשי",
+    "ref_count": 42,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 7,
+  "word_index": 278,
+  "stored": "מתרר",
+  "proposals": [
+   {
+    "form": "מתרת",
+    "ref_count": 379,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 7,
+  "word_index": 278,
+  "stored": "מתרר",
+  "proposals": [
+   {
+    "form": "מתר",
+    "ref_count": 1220,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 10,
+  "word_index": 1,
+  "stored": "איידו",
+  "proposals": [
+   {
+    "form": "איידי",
+    "ref_count": 285,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 11,
+  "word_index": 40,
+  "stored": "בגזירות",
+  "proposals": [
+   {
+    "form": "בנזירות",
+    "ref_count": 136,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 11,
+  "word_index": 81,
+  "stored": "בשרש",
+  "proposals": [
+   {
+    "form": "בשר",
+    "ref_count": 3530,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 11,
+  "word_index": 96,
+  "stored": "ותשובח",
+  "proposals": [
+   {
+    "form": "ותשובת",
+    "ref_count": 89,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 12,
+  "word_index": 271,
+  "stored": "לייה",
+  "proposals": [
+   {
+    "form": "לויה",
+    "ref_count": 161,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 12,
+  "word_index": 271,
+  "stored": "לייה",
+  "proposals": [
+   {
+    "form": "ליה",
+    "ref_count": 35939,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 12,
+  "word_index": 318,
+  "stored": "נעמוד",
+  "proposals": [
+   {
+    "form": "עמוד",
+    "ref_count": 344,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 13,
+  "word_index": 231,
+  "stored": "זוהה",
+  "proposals": [
+   {
+    "form": "והה",
+    "ref_count": 679,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 19,
+  "word_index": 200,
+  "stored": "להפרי",
+  "proposals": [
+   {
+    "form": "להפר",
+    "ref_count": 316,
+    "edit": "extra_char"
+   },
+   {
+    "form": "להפריש",
+    "ref_count": 278,
+    "edit": "deleted_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": true
+ },
+ {
+  "klal_id": 21,
+  "word_index": 42,
+  "stored": "ירפד",
+  "proposals": [
+   {
+    "form": "ירד",
+    "ref_count": 343,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 21,
+  "word_index": 57,
+  "stored": "ירפד",
+  "proposals": [
+   {
+    "form": "ירד",
+    "ref_count": 343,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 23,
+  "word_index": 23,
+  "stored": "בדוקא",
+  "proposals": [
+   {
+    "form": "ברוקא",
+    "ref_count": 60,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 23,
+  "word_index": 549,
+  "stored": "דמשמא",
+  "proposals": [
+   {
+    "form": "דשמא",
+    "ref_count": 322,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 23,
+  "word_index": 653,
+  "stored": "ואיהן",
+  "proposals": [
+   {
+    "form": "ואין",
+    "ref_count": 12846,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 24,
+  "word_index": 53,
+  "stored": "שכועת",
+  "proposals": [
+   {
+    "form": "שבועת",
+    "ref_count": 836,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 24,
+  "word_index": 136,
+  "stored": "דברידם",
+  "proposals": [
+   {
+    "form": "דבריהם",
+    "ref_count": 310,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 24,
+  "word_index": 136,
+  "stored": "דברידם",
+  "proposals": [
+   {
+    "form": "דברים",
+    "ref_count": 5920,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 24,
+  "word_index": 166,
+  "stored": "ואידן",
+  "proposals": [
+   {
+    "form": "ואין",
+    "ref_count": 12846,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 24,
+  "word_index": 230,
+  "stored": "ואידן",
+  "proposals": [
+   {
+    "form": "ואין",
+    "ref_count": 12846,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 25,
+  "word_index": 137,
+  "stored": "וכין",
+  "proposals": [
+   {
+    "form": "ובין",
+    "ref_count": 1512,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 25,
+  "word_index": 137,
+  "stored": "וכין",
+  "proposals": [
+   {
+    "form": "וכן",
+    "ref_count": 12292,
+    "edit": "extra_char"
+   },
+   {
+    "form": "וכי",
+    "ref_count": 3588,
+    "edit": "extra_char"
+   },
+   {
+    "form": "וכיון",
+    "ref_count": 1688,
+    "edit": "deleted_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": true
+ },
+ {
+  "klal_id": 25,
+  "word_index": 423,
+  "stored": "הזוו",
+  "proposals": [
+   {
+    "form": "הוו",
+    "ref_count": 2052,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 25,
+  "word_index": 663,
+  "stored": "לטעו",
+  "proposals": [
+   {
+    "form": "לטעון",
+    "ref_count": 255,
+    "edit": "deleted_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 30,
+  "word_index": 250,
+  "stored": "גכי",
+  "proposals": [
+   {
+    "form": "גבי",
+    "ref_count": 4780,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 30,
+  "word_index": 823,
+  "stored": "אמילת",
+  "proposals": [
+   {
+    "form": "אכילת",
+    "ref_count": 571,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 30,
+  "word_index": 828,
+  "stored": "גטרינן",
+  "proposals": [
+   {
+    "form": "גמרינן",
+    "ref_count": 206,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 30,
+  "word_index": 1007,
+  "stored": "זלמן",
+  "proposals": [
+   {
+    "form": "זמן",
+    "ref_count": 4442,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 30,
+  "word_index": 1115,
+  "stored": "טיניה",
+  "proposals": [
+   {
+    "form": "מיניה",
+    "ref_count": 2722,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 30,
+  "word_index": 1124,
+  "stored": "לנדון",
+  "proposals": [
+   {
+    "form": "לדון",
+    "ref_count": 443,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 30,
+  "word_index": 1151,
+  "stored": "דמלה",
+  "proposals": [
+   {
+    "form": "דמה",
+    "ref_count": 628,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 30,
+  "word_index": 1206,
+  "stored": "וטכל",
+  "proposals": [
+   {
+    "form": "ומכל",
+    "ref_count": 188,
+    "edit": null
+   },
+   {
+    "form": "וטבל",
+    "ref_count": 168,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": true
+ },
+ {
+  "klal_id": 30,
+  "word_index": 1206,
+  "stored": "וטכל",
+  "proposals": [
+   {
+    "form": "וכל",
+    "ref_count": 6348,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 30,
+  "word_index": 1263,
+  "stored": "גכי",
+  "proposals": [
+   {
+    "form": "גבי",
+    "ref_count": 4780,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 30,
+  "word_index": 1376,
+  "stored": "ראמו",
+  "proposals": [
+   {
+    "form": "אמו",
+    "ref_count": 1506,
+    "edit": "extra_char"
+   },
+   {
+    "form": "ראו",
+    "ref_count": 333,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": true
+ },
+ {
+  "klal_id": 30,
+  "word_index": 1714,
+  "stored": "עיונו",
+  "proposals": [
+   {
+    "form": "עינו",
+    "ref_count": 201,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 31,
+  "word_index": 64,
+  "stored": "השיתא",
+  "proposals": [
+   {
+    "form": "השתא",
+    "ref_count": 1946,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 31,
+  "word_index": 78,
+  "stored": "עולס",
+  "proposals": [
+   {
+    "form": "עולם",
+    "ref_count": 1122,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 34,
+  "word_index": 116,
+  "stored": "מעצמנו",
+  "proposals": [
+   {
+    "form": "מעצמו",
+    "ref_count": 365,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 37,
+  "word_index": 272,
+  "stored": "השיתא",
+  "proposals": [
+   {
+    "form": "השתא",
+    "ref_count": 1946,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 37,
+  "word_index": 335,
+  "stored": "ולאיכא",
+  "proposals": [
+   {
+    "form": "ואיכא",
+    "ref_count": 1005,
+    "edit": "extra_char"
+   },
+   {
+    "form": "וליכא",
+    "ref_count": 500,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": true
+ },
+ {
+  "klal_id": 37,
+  "word_index": 349,
+  "stored": "איתמרו",
+  "proposals": [
+   {
+    "form": "איתמר",
+    "ref_count": 977,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 38,
+  "word_index": 88,
+  "stored": "מכללי",
+  "proposals": [
+   {
+    "form": "מכללו",
+    "ref_count": 77,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 38,
+  "word_index": 208,
+  "stored": "גכי",
+  "proposals": [
+   {
+    "form": "גבי",
+    "ref_count": 4780,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 38,
+  "word_index": 331,
+  "stored": "מהרב",
+  "proposals": [
+   {
+    "form": "מדרב",
+    "ref_count": 104,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 38,
+  "word_index": 331,
+  "stored": "מהרב",
+  "proposals": [
+   {
+    "form": "מרב",
+    "ref_count": 271,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 39,
+  "word_index": 70,
+  "stored": "כרבם",
+  "proposals": [
+   {
+    "form": "כרב",
+    "ref_count": 517,
+    "edit": "extra_char"
+   },
+   {
+    "form": "כרם",
+    "ref_count": 278,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": true
+ },
+ {
+  "klal_id": 39,
+  "word_index": 206,
+  "stored": "וסעד",
+  "proposals": [
+   {
+    "form": "ועד",
+    "ref_count": 1440,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 41,
+  "word_index": 105,
+  "stored": "יהין",
+  "proposals": [
+   {
+    "form": "יין",
+    "ref_count": 3146,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 41,
+  "word_index": 256,
+  "stored": "כתכו",
+  "proposals": [
+   {
+    "form": "כתבו",
+    "ref_count": 734,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 41,
+  "word_index": 441,
+  "stored": "דמלת",
+  "proposals": [
+   {
+    "form": "דלת",
+    "ref_count": 243,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 41,
+  "word_index": 473,
+  "stored": "כתכו",
+  "proposals": [
+   {
+    "form": "כתבו",
+    "ref_count": 734,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 41,
+  "word_index": 523,
+  "stored": "טילת",
+  "proposals": [
+   {
+    "form": "מילת",
+    "ref_count": 50,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 41,
+  "word_index": 602,
+  "stored": "משיירי",
+  "proposals": [
+   {
+    "form": "מיירי",
+    "ref_count": 425,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 41,
+  "word_index": 660,
+  "stored": "רשלשה",
+  "proposals": [
+   {
+    "form": "השלשה",
+    "ref_count": 87,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 41,
+  "word_index": 660,
+  "stored": "רשלשה",
+  "proposals": [
+   {
+    "form": "שלשה",
+    "ref_count": 3251,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 42,
+  "word_index": 29,
+  "stored": "דקטא",
+  "proposals": [
+   {
+    "form": "דקמא",
+    "ref_count": 61,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 42,
+  "word_index": 29,
+  "stored": "דקטא",
+  "proposals": [
+   {
+    "form": "דקא",
+    "ref_count": 1516,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 43,
+  "word_index": 17,
+  "stored": "ממטונא",
+  "proposals": [
+   {
+    "form": "ממונא",
+    "ref_count": 325,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 43,
+  "word_index": 64,
+  "stored": "דשכיחו",
+  "proposals": [
+   {
+    "form": "דשכיחי",
+    "ref_count": 75,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 44,
+  "word_index": 162,
+  "stored": "דרפקר",
+  "proposals": [
+   {
+    "form": "דהפקר",
+    "ref_count": 41,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 44,
+  "word_index": 204,
+  "stored": "משיירי",
+  "proposals": [
+   {
+    "form": "מיירי",
+    "ref_count": 425,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 44,
+  "word_index": 407,
+  "stored": "הגחל",
+  "proposals": [
+   {
+    "form": "הנחל",
+    "ref_count": 41,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 46,
+  "word_index": 8,
+  "stored": "גמורא",
+  "proposals": [
+   {
+    "form": "גמור",
+    "ref_count": 681,
+    "edit": "extra_char"
+   },
+   {
+    "form": "גמרא",
+    "ref_count": 223,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": true
+ },
+ {
+  "klal_id": 51,
+  "word_index": 78,
+  "stored": "וככמה",
+  "proposals": [
+   {
+    "form": "וכמה",
+    "ref_count": 753,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 51,
+  "word_index": 93,
+  "stored": "מובן",
+  "proposals": [
+   {
+    "form": "מוכן",
+    "ref_count": 178,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 51,
+  "word_index": 93,
+  "stored": "מובן",
+  "proposals": [
+   {
+    "form": "מבן",
+    "ref_count": 234,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 53,
+  "word_index": 25,
+  "stored": "דמלת",
+  "proposals": [
+   {
+    "form": "דלת",
+    "ref_count": 243,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 53,
+  "word_index": 97,
+  "stored": "אכרהם",
+  "proposals": [
+   {
+    "form": "אברהם",
+    "ref_count": 415,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 53,
+  "word_index": 214,
+  "stored": "כחייה",
+  "proposals": [
+   {
+    "form": "בחייה",
+    "ref_count": 150,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 53,
+  "word_index": 218,
+  "stored": "במשרו",
+  "proposals": [
+   {
+    "form": "במשהו",
+    "ref_count": 183,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 53,
+  "word_index": 218,
+  "stored": "במשרו",
+  "proposals": [
+   {
+    "form": "בשרו",
+    "ref_count": 382,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 54,
+  "word_index": 59,
+  "stored": "הטאת",
+  "proposals": [
+   {
+    "form": "חטאת",
+    "ref_count": 3278,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 54,
+  "word_index": 59,
+  "stored": "הטאת",
+  "proposals": [
+   {
+    "form": "החטאת",
+    "ref_count": 305,
+    "edit": "deleted_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 54,
+  "word_index": 65,
+  "stored": "אתאכל",
+  "proposals": [
+   {
+    "form": "תאכל",
+    "ref_count": 636,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 54,
+  "word_index": 232,
+  "stored": "אתאכל",
+  "proposals": [
+   {
+    "form": "תאכל",
+    "ref_count": 636,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 54,
+  "word_index": 509,
+  "stored": "יחזו",
+  "proposals": [
+   {
+    "form": "יחזור",
+    "ref_count": 361,
+    "edit": "deleted_char"
+   },
+   {
+    "form": "חזו",
+    "ref_count": 312,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": true
+ },
+ {
+  "klal_id": 54,
+  "word_index": 730,
+  "stored": "עלירם",
+  "proposals": [
+   {
+    "form": "עליהם",
+    "ref_count": 2169,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 54,
+  "word_index": 984,
+  "stored": "ושפתים",
+  "proposals": [
+   {
+    "form": "ושתים",
+    "ref_count": 238,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 59,
+  "word_index": 47,
+  "stored": "כוותה",
+  "proposals": [
+   {
+    "form": "כוותיה",
+    "ref_count": 741,
+    "edit": "deleted_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 62,
+  "word_index": 99,
+  "stored": "קדימת",
+  "proposals": [
+   {
+    "form": "קדימה",
+    "ref_count": 51,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 62,
+  "word_index": 123,
+  "stored": "קדימת",
+  "proposals": [
+   {
+    "form": "קדימה",
+    "ref_count": 51,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 62,
+  "word_index": 202,
+  "stored": "קדימת",
+  "proposals": [
+   {
+    "form": "קדימה",
+    "ref_count": 51,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 64,
+  "word_index": 71,
+  "stored": "ארחין",
+  "proposals": [
+   {
+    "form": "אחין",
+    "ref_count": 378,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 64,
+  "word_index": 153,
+  "stored": "היבין",
+  "proposals": [
+   {
+    "form": "חיבין",
+    "ref_count": 383,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 64,
+  "word_index": 153,
+  "stored": "היבין",
+  "proposals": [
+   {
+    "form": "היין",
+    "ref_count": 1022,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 66,
+  "word_index": 29,
+  "stored": "מהדיא",
+  "proposals": [
+   {
+    "form": "מההיא",
+    "ref_count": 120,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 69,
+  "word_index": 38,
+  "stored": "ואהינו",
+  "proposals": [
+   {
+    "form": "ואינו",
+    "ref_count": 4824,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 69,
+  "word_index": 397,
+  "stored": "ומרן",
+  "proposals": [
+   {
+    "form": "ומתן",
+    "ref_count": 136,
+    "edit": null
+   },
+   {
+    "form": "ומהן",
+    "ref_count": 80,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": true
+ },
+ {
+  "klal_id": 71,
+  "word_index": 5,
+  "stored": "היינן",
+  "proposals": [
+   {
+    "form": "הוינן",
+    "ref_count": 51,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 71,
+  "word_index": 5,
+  "stored": "היינן",
+  "proposals": [
+   {
+    "form": "היין",
+    "ref_count": 1022,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 71,
+  "word_index": 55,
+  "stored": "דעים",
+  "proposals": [
+   {
+    "form": "רעים",
+    "ref_count": 161,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 74,
+  "word_index": 25,
+  "stored": "לדברין",
+  "proposals": [
+   {
+    "form": "לדברי",
+    "ref_count": 635,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 74,
+  "word_index": 110,
+  "stored": "נופי",
+  "proposals": [
+   {
+    "form": "גופי",
+    "ref_count": 46,
+    "edit": null
+   },
+   {
+    "form": "נופו",
+    "ref_count": 46,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": true
+ },
+ {
+  "klal_id": 74,
+  "word_index": 150,
+  "stored": "שלהי",
+  "proposals": [
+   {
+    "form": "שלה",
+    "ref_count": 901,
+    "edit": "extra_char"
+   },
+   {
+    "form": "שלי",
+    "ref_count": 540,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": true
+ },
+ {
+  "klal_id": 74,
+  "word_index": 496,
+  "stored": "דתנאים",
+  "proposals": [
+   {
+    "form": "התנאים",
+    "ref_count": 64,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 74,
+  "word_index": 659,
+  "stored": "בסרק",
+  "proposals": [
+   {
+    "form": "בפרק",
+    "ref_count": 1541,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 74,
+  "word_index": 674,
+  "stored": "שרבא",
+  "proposals": [
+   {
+    "form": "שתבא",
+    "ref_count": 62,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 74,
+  "word_index": 674,
+  "stored": "שרבא",
+  "proposals": [
+   {
+    "form": "שבא",
+    "ref_count": 1270,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 75,
+  "word_index": 209,
+  "stored": "נחוזר",
+  "proposals": [
+   {
+    "form": "חוזר",
+    "ref_count": 1508,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 75,
+  "word_index": 260,
+  "stored": "האומרה",
+  "proposals": [
+   {
+    "form": "האומר",
+    "ref_count": 1278,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 75,
+  "word_index": 446,
+  "stored": "מלפא",
+  "proposals": [
+   {
+    "form": "מלא",
+    "ref_count": 1308,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 75,
+  "word_index": 608,
+  "stored": "בחרא",
+  "proposals": [
+   {
+    "form": "בתרא",
+    "ref_count": 620,
+    "edit": null
+   },
+   {
+    "form": "בחדא",
+    "ref_count": 331,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": true
+ },
+ {
+  "klal_id": 75,
+  "word_index": 608,
+  "stored": "בחרא",
+  "proposals": [
+   {
+    "form": "ברא",
+    "ref_count": 217,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 75,
+  "word_index": 942,
+  "stored": "משוס",
+  "proposals": [
+   {
+    "form": "משום",
+    "ref_count": 15727,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 75,
+  "word_index": 1058,
+  "stored": "נהמן",
+  "proposals": [
+   {
+    "form": "נחמן",
+    "ref_count": 2646,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 75,
+  "word_index": 1242,
+  "stored": "שאמרי",
+  "proposals": [
+   {
+    "form": "שאמרו",
+    "ref_count": 775,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 75,
+  "word_index": 1242,
+  "stored": "שאמרי",
+  "proposals": [
+   {
+    "form": "שאמר",
+    "ref_count": 1988,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 76,
+  "word_index": 7,
+  "stored": "תמהים",
+  "proposals": [
+   {
+    "form": "תמרים",
+    "ref_count": 247,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 79,
+  "word_index": 37,
+  "stored": "בדוקא",
+  "proposals": [
+   {
+    "form": "ברוקא",
+    "ref_count": 60,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 82,
+  "word_index": 27,
+  "stored": "לחוטרא",
+  "proposals": [
+   {
+    "form": "לחומרא",
+    "ref_count": 433,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 84,
+  "word_index": 23,
+  "stored": "בחרא",
+  "proposals": [
+   {
+    "form": "בתרא",
+    "ref_count": 620,
+    "edit": null
+   },
+   {
+    "form": "בחדא",
+    "ref_count": 331,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": true
+ },
+ {
+  "klal_id": 84,
+  "word_index": 23,
+  "stored": "בחרא",
+  "proposals": [
+   {
+    "form": "ברא",
+    "ref_count": 217,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 84,
+  "word_index": 24,
+  "stored": "כסכתא",
+  "proposals": [
+   {
+    "form": "מסכתא",
+    "ref_count": 45,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 85,
+  "word_index": 96,
+  "stored": "דתלמוד",
+  "proposals": [
+   {
+    "form": "התלמוד",
+    "ref_count": 55,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 88,
+  "word_index": 140,
+  "stored": "דאמתניתין",
+  "proposals": [
+   {
+    "form": "דמתניתין",
+    "ref_count": 384,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 88,
+  "word_index": 1066,
+  "stored": "באידן",
+  "proposals": [
+   {
+    "form": "באין",
+    "ref_count": 638,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 88,
+  "word_index": 1078,
+  "stored": "המקרקע",
+  "proposals": [
+   {
+    "form": "הקרקע",
+    "ref_count": 950,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 88,
+  "word_index": 1121,
+  "stored": "ובאכל",
+  "proposals": [
+   {
+    "form": "ובכל",
+    "ref_count": 508,
+    "edit": "extra_char"
+   },
+   {
+    "form": "ואכל",
+    "ref_count": 477,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": true
+ },
+ {
+  "klal_id": 88,
+  "word_index": 1133,
+  "stored": "דאומנין",
+  "proposals": [
+   {
+    "form": "האומנין",
+    "ref_count": 93,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 91,
+  "word_index": 78,
+  "stored": "וכריש",
+  "proposals": [
+   {
+    "form": "וריש",
+    "ref_count": 228,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 91,
+  "word_index": 288,
+  "stored": "דבעיי",
+  "proposals": [
+   {
+    "form": "דבעי",
+    "ref_count": 772,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 92,
+  "word_index": 7,
+  "stored": "נסקי",
+  "proposals": [
+   {
+    "form": "נפקי",
+    "ref_count": 160,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 92,
+  "word_index": 231,
+  "stored": "תלמורא",
+  "proposals": [
+   {
+    "form": "תלמודא",
+    "ref_count": 103,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 92,
+  "word_index": 346,
+  "stored": "דהלא",
+  "proposals": [
+   {
+    "form": "דלא",
+    "ref_count": 12899,
+    "edit": "extra_char"
+   },
+   {
+    "form": "דהא",
+    "ref_count": 4900,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": true
+ },
+ {
+  "klal_id": 92,
+  "word_index": 468,
+  "stored": "לרבנו",
+  "proposals": [
+   {
+    "form": "לבנו",
+    "ref_count": 351,
+    "edit": "extra_char"
+   },
+   {
+    "form": "לרבו",
+    "ref_count": 205,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": true
+ },
+ {
+  "klal_id": 93,
+  "word_index": 44,
+  "stored": "יכום",
+  "proposals": [
+   {
+    "form": "יבום",
+    "ref_count": 144,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 93,
+  "word_index": 44,
+  "stored": "יכום",
+  "proposals": [
+   {
+    "form": "יום",
+    "ref_count": 8786,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 94,
+  "word_index": 16,
+  "stored": "לדערת",
+  "proposals": [
+   {
+    "form": "לדעת",
+    "ref_count": 574,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 94,
+  "word_index": 324,
+  "stored": "וכעיין",
+  "proposals": [
+   {
+    "form": "ועיין",
+    "ref_count": 412,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 94,
+  "word_index": 383,
+  "stored": "בלבכו",
+  "proposals": [
+   {
+    "form": "בלבו",
+    "ref_count": 415,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 94,
+  "word_index": 697,
+  "stored": "דתלמוד",
+  "proposals": [
+   {
+    "form": "התלמוד",
+    "ref_count": 55,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 97,
+  "word_index": 389,
+  "stored": "ומרן",
+  "proposals": [
+   {
+    "form": "ומתן",
+    "ref_count": 136,
+    "edit": null
+   },
+   {
+    "form": "ומהן",
+    "ref_count": 80,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": true
+ },
+ {
+  "klal_id": 102,
+  "word_index": 113,
+  "stored": "אלידו",
+  "proposals": [
+   {
+    "form": "אליהו",
+    "ref_count": 275,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 102,
+  "word_index": 113,
+  "stored": "אלידו",
+  "proposals": [
+   {
+    "form": "לידו",
+    "ref_count": 443,
+    "edit": "extra_char"
+   },
+   {
+    "form": "אליו",
+    "ref_count": 359,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": true
+ },
+ {
+  "klal_id": 103,
+  "word_index": 53,
+  "stored": "דעים",
+  "proposals": [
+   {
+    "form": "רעים",
+    "ref_count": 161,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 103,
+  "word_index": 107,
+  "stored": "בעשין",
+  "proposals": [
+   {
+    "form": "בעין",
+    "ref_count": 374,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 106,
+  "word_index": 8,
+  "stored": "עדורת",
+  "proposals": [
+   {
+    "form": "עדות",
+    "ref_count": 881,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 113,
+  "word_index": 99,
+  "stored": "דגכים",
+  "proposals": [
+   {
+    "form": "דגים",
+    "ref_count": 522,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 117,
+  "word_index": 43,
+  "stored": "כרתב",
+  "proposals": [
+   {
+    "form": "כתב",
+    "ref_count": 5961,
+    "edit": "extra_char"
+   },
+   {
+    "form": "כרת",
+    "ref_count": 1343,
+    "edit": "extra_char"
+   },
+   {
+    "form": "כרב",
+    "ref_count": 517,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": true
+ },
+ {
+  "klal_id": 123,
+  "word_index": 24,
+  "stored": "תוהה",
+  "proposals": [
+   {
+    "form": "תורה",
+    "ref_count": 4031,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 123,
+  "word_index": 24,
+  "stored": "תוהה",
+  "proposals": [
+   {
+    "form": "והה",
+    "ref_count": 679,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 128,
+  "word_index": 102,
+  "stored": "שישית",
+  "proposals": [
+   {
+    "form": "שלישית",
+    "ref_count": 473,
+    "edit": "deleted_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 131,
+  "word_index": 58,
+  "stored": "דתבריה",
+  "proposals": [
+   {
+    "form": "דחבריה",
+    "ref_count": 81,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 131,
+  "word_index": 72,
+  "stored": "לשריה",
+  "proposals": [
+   {
+    "form": "לשתיה",
+    "ref_count": 58,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 137,
+  "word_index": 23,
+  "stored": "בלעולם",
+  "proposals": [
+   {
+    "form": "בעולם",
+    "ref_count": 555,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 138,
+  "word_index": 104,
+  "stored": "ארינן",
+  "proposals": [
+   {
+    "form": "אמרינן",
+    "ref_count": 2493,
+    "edit": "deleted_char"
+   },
+   {
+    "form": "אינן",
+    "ref_count": 1574,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": true
+ },
+ {
+  "klal_id": 138,
+  "word_index": 141,
+  "stored": "קישיא",
+  "proposals": [
+   {
+    "form": "קושיא",
+    "ref_count": 200,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 138,
+  "word_index": 141,
+  "stored": "קישיא",
+  "proposals": [
+   {
+    "form": "קשיא",
+    "ref_count": 2753,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 138,
+  "word_index": 173,
+  "stored": "ויתכן",
+  "proposals": [
+   {
+    "form": "ויתן",
+    "ref_count": 496,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 138,
+  "word_index": 246,
+  "stored": "שירוה",
+  "proposals": [
+   {
+    "form": "שיריה",
+    "ref_count": 64,
+    "edit": null
+   },
+   {
+    "form": "שירות",
+    "ref_count": 48,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": true
+ },
+ {
+  "klal_id": 138,
+  "word_index": 246,
+  "stored": "שירוה",
+  "proposals": [
+   {
+    "form": "שירה",
+    "ref_count": 215,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 140,
+  "word_index": 97,
+  "stored": "והשוא",
+  "proposals": [
+   {
+    "form": "והוא",
+    "ref_count": 6579,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 143,
+  "word_index": 545,
+  "stored": "דגולה",
+  "proposals": [
+   {
+    "form": "הגולה",
+    "ref_count": 90,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 143,
+  "word_index": 650,
+  "stored": "דגולה",
+  "proposals": [
+   {
+    "form": "הגולה",
+    "ref_count": 90,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 143,
+  "word_index": 684,
+  "stored": "שמול",
+  "proposals": [
+   {
+    "form": "שמואל",
+    "ref_count": 3271,
+    "edit": "deleted_char"
+   },
+   {
+    "form": "שמו",
+    "ref_count": 801,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": true
+ },
+ {
+  "klal_id": 144,
+  "word_index": 5,
+  "stored": "מעצמנו",
+  "proposals": [
+   {
+    "form": "מעצמו",
+    "ref_count": 365,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 144,
+  "word_index": 531,
+  "stored": "מיקח",
+  "proposals": [
+   {
+    "form": "מקח",
+    "ref_count": 470,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 144,
+  "word_index": 534,
+  "stored": "יקיח",
+  "proposals": [
+   {
+    "form": "יקח",
+    "ref_count": 399,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 144,
+  "word_index": 592,
+  "stored": "וסרה",
+  "proposals": [
+   {
+    "form": "וסתה",
+    "ref_count": 135,
+    "edit": null
+   },
+   {
+    "form": "ופרה",
+    "ref_count": 53,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": true
+ },
+ {
+  "klal_id": 144,
+  "word_index": 714,
+  "stored": "התלמודים",
+  "proposals": [
+   {
+    "form": "התלמידים",
+    "ref_count": 108,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 144,
+  "word_index": 824,
+  "stored": "שלעת",
+  "proposals": [
+   {
+    "form": "שעת",
+    "ref_count": 535,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 144,
+  "word_index": 873,
+  "stored": "מהלוקת",
+  "proposals": [
+   {
+    "form": "מחלוקת",
+    "ref_count": 636,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 144,
+  "word_index": 1040,
+  "stored": "ומאו",
+  "proposals": [
+   {
+    "form": "ומאי",
+    "ref_count": 1566,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 144,
+  "word_index": 1095,
+  "stored": "העיון",
+  "proposals": [
+   {
+    "form": "העליון",
+    "ref_count": 375,
+    "edit": "deleted_char"
+   },
+   {
+    "form": "העין",
+    "ref_count": 288,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": true
+ },
+ {
+  "klal_id": 146,
+  "word_index": 34,
+  "stored": "רגלין",
+  "proposals": [
+   {
+    "form": "רגלי",
+    "ref_count": 218,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 147,
+  "word_index": 423,
+  "stored": "כסר",
+  "proposals": [
+   {
+    "form": "כפר",
+    "ref_count": 392,
+    "edit": null
+   },
+   {
+    "form": "מסר",
+    "ref_count": 265,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": true
+ },
+ {
+  "klal_id": 148,
+  "word_index": 127,
+  "stored": "בעשין",
+  "proposals": [
+   {
+    "form": "בעין",
+    "ref_count": 374,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 148,
+  "word_index": 139,
+  "stored": "כאיסורי",
+  "proposals": [
+   {
+    "form": "באיסורי",
+    "ref_count": 60,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 148,
+  "word_index": 227,
+  "stored": "וכמרדכי",
+  "proposals": [
+   {
+    "form": "ומרדכי",
+    "ref_count": 239,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 148,
+  "word_index": 370,
+  "stored": "ישמואל",
+  "proposals": [
+   {
+    "form": "ושמואל",
+    "ref_count": 913,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 148,
+  "word_index": 370,
+  "stored": "ישמואל",
+  "proposals": [
+   {
+    "form": "שמואל",
+    "ref_count": 3271,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 149,
+  "word_index": 203,
+  "stored": "מכללי",
+  "proposals": [
+   {
+    "form": "מכללו",
+    "ref_count": 77,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 150,
+  "word_index": 328,
+  "stored": "ואיתה",
+  "proposals": [
+   {
+    "form": "ואותה",
+    "ref_count": 91,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 150,
+  "word_index": 328,
+  "stored": "ואיתה",
+  "proposals": [
+   {
+    "form": "ואתה",
+    "ref_count": 364,
+    "edit": "extra_char"
+   },
+   {
+    "form": "ואית",
+    "ref_count": 270,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": true
+ },
+ {
+  "klal_id": 150,
+  "word_index": 344,
+  "stored": "שמיען",
+  "proposals": [
+   {
+    "form": "שמין",
+    "ref_count": 467,
+    "edit": "extra_char"
+   },
+   {
+    "form": "שמיע",
+    "ref_count": 248,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": true
+ },
+ {
+  "klal_id": 150,
+  "word_index": 684,
+  "stored": "מקטי",
+  "proposals": [
+   {
+    "form": "מקמי",
+    "ref_count": 311,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 150,
+  "word_index": 704,
+  "stored": "ברדיא",
+  "proposals": [
+   {
+    "form": "בהדיא",
+    "ref_count": 692,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 150,
+  "word_index": 704,
+  "stored": "ברדיא",
+  "proposals": [
+   {
+    "form": "בריא",
+    "ref_count": 308,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 150,
+  "word_index": 758,
+  "stored": "דאידו",
+  "proposals": [
+   {
+    "form": "דאיהו",
+    "ref_count": 194,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 150,
+  "word_index": 802,
+  "stored": "בתלמור",
+  "proposals": [
+   {
+    "form": "בתלמוד",
+    "ref_count": 61,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 151,
+  "word_index": 46,
+  "stored": "לדברין",
+  "proposals": [
+   {
+    "form": "לדברי",
+    "ref_count": 635,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 151,
+  "word_index": 100,
+  "stored": "כרתב",
+  "proposals": [
+   {
+    "form": "כתב",
+    "ref_count": 5961,
+    "edit": "extra_char"
+   },
+   {
+    "form": "כרת",
+    "ref_count": 1343,
+    "edit": "extra_char"
+   },
+   {
+    "form": "כרב",
+    "ref_count": 517,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": true
+ },
+ {
+  "klal_id": 152,
+  "word_index": 58,
+  "stored": "שכרתבו",
+  "proposals": [
+   {
+    "form": "שכתבו",
+    "ref_count": 253,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 152,
+  "word_index": 98,
+  "stored": "בסרק",
+  "proposals": [
+   {
+    "form": "בפרק",
+    "ref_count": 1541,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 153,
+  "word_index": 42,
+  "stored": "דבטעמא",
+  "proposals": [
+   {
+    "form": "דטעמא",
+    "ref_count": 224,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 154,
+  "word_index": 79,
+  "stored": "אכללין",
+  "proposals": [
+   {
+    "form": "אכלין",
+    "ref_count": 212,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 154,
+  "word_index": 140,
+  "stored": "דקס",
+  "proposals": [
+   {
+    "form": "דקם",
+    "ref_count": 49,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 154,
+  "word_index": 183,
+  "stored": "מכללי",
+  "proposals": [
+   {
+    "form": "מכללו",
+    "ref_count": 77,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 154,
+  "word_index": 461,
+  "stored": "דככל",
+  "proposals": [
+   {
+    "form": "דבכל",
+    "ref_count": 100,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 154,
+  "word_index": 461,
+  "stored": "דככל",
+  "proposals": [
+   {
+    "form": "דכל",
+    "ref_count": 1423,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 158,
+  "word_index": 27,
+  "stored": "כאכיי",
+  "proposals": [
+   {
+    "form": "כאביי",
+    "ref_count": 56,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 159,
+  "word_index": 28,
+  "stored": "היכאת",
+  "proposals": [
+   {
+    "form": "היכא",
+    "ref_count": 2420,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 159,
+  "word_index": 247,
+  "stored": "הייכא",
+  "proposals": [
+   {
+    "form": "היכא",
+    "ref_count": 2420,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 159,
+  "word_index": 750,
+  "stored": "עצמת",
+  "proposals": [
+   {
+    "form": "עצמה",
+    "ref_count": 1426,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 159,
+  "word_index": 750,
+  "stored": "עצמת",
+  "proposals": [
+   {
+    "form": "עצמות",
+    "ref_count": 347,
+    "edit": "deleted_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 159,
+  "word_index": 771,
+  "stored": "עלידם",
+  "proposals": [
+   {
+    "form": "עליהם",
+    "ref_count": 2169,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 159,
+  "word_index": 931,
+  "stored": "ומירו",
+  "proposals": [
+   {
+    "form": "ומיהו",
+    "ref_count": 1173,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 162,
+  "word_index": 112,
+  "stored": "בהרב",
+  "proposals": [
+   {
+    "form": "בחרב",
+    "ref_count": 51,
+    "edit": null
+   },
+   {
+    "form": "בדרב",
+    "ref_count": 43,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": true
+ },
+ {
+  "klal_id": 162,
+  "word_index": 112,
+  "stored": "בהרב",
+  "proposals": [
+   {
+    "form": "בהר",
+    "ref_count": 242,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 162,
+  "word_index": 166,
+  "stored": "וקושיא",
+  "proposals": [
+   {
+    "form": "וקשיא",
+    "ref_count": 291,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 163,
+  "word_index": 328,
+  "stored": "לישבש",
+  "proposals": [
+   {
+    "form": "לישב",
+    "ref_count": 383,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 163,
+  "word_index": 353,
+  "stored": "ושגם",
+  "proposals": [
+   {
+    "form": "וגם",
+    "ref_count": 862,
+    "edit": "extra_char"
+   },
+   {
+    "form": "ושם",
+    "ref_count": 357,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": true
+ },
+ {
+  "klal_id": 163,
+  "word_index": 427,
+  "stored": "בפיק",
+  "proposals": [
+   {
+    "form": "בפק",
+    "ref_count": 375,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 166,
+  "word_index": 31,
+  "stored": "דפליגו",
+  "proposals": [
+   {
+    "form": "דפליגי",
+    "ref_count": 405,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 166,
+  "word_index": 31,
+  "stored": "דפליגו",
+  "proposals": [
+   {
+    "form": "דפליג",
+    "ref_count": 228,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 167,
+  "word_index": 442,
+  "stored": "ומרן",
+  "proposals": [
+   {
+    "form": "ומתן",
+    "ref_count": 136,
+    "edit": null
+   },
+   {
+    "form": "ומהן",
+    "ref_count": 80,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": true
+ },
+ {
+  "klal_id": 167,
+  "word_index": 665,
+  "stored": "וסליג",
+  "proposals": [
+   {
+    "form": "ופליג",
+    "ref_count": 145,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 167,
+  "word_index": 739,
+  "stored": "מקטי",
+  "proposals": [
+   {
+    "form": "מקמי",
+    "ref_count": 311,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 167,
+  "word_index": 828,
+  "stored": "תלתי",
+  "proposals": [
+   {
+    "form": "תלת",
+    "ref_count": 301,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 167,
+  "word_index": 898,
+  "stored": "מקטי",
+  "proposals": [
+   {
+    "form": "מקמי",
+    "ref_count": 311,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 167,
+  "word_index": 1050,
+  "stored": "התימא",
+  "proposals": [
+   {
+    "form": "דתימא",
+    "ref_count": 711,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 167,
+  "word_index": 1062,
+  "stored": "אכחד",
+  "proposals": [
+   {
+    "form": "אחד",
+    "ref_count": 17308,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 167,
+  "word_index": 1093,
+  "stored": "נופייהו",
+  "proposals": [
+   {
+    "form": "גופייהו",
+    "ref_count": 99,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 168,
+  "word_index": 162,
+  "stored": "אאביי",
+  "proposals": [
+   {
+    "form": "אביי",
+    "ref_count": 2973,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 169,
+  "word_index": 382,
+  "stored": "איהן",
+  "proposals": [
+   {
+    "form": "איתן",
+    "ref_count": 42,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 169,
+  "word_index": 446,
+  "stored": "שרבא",
+  "proposals": [
+   {
+    "form": "שתבא",
+    "ref_count": 62,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 169,
+  "word_index": 446,
+  "stored": "שרבא",
+  "proposals": [
+   {
+    "form": "שבא",
+    "ref_count": 1270,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 169,
+  "word_index": 529,
+  "stored": "ואוף",
+  "proposals": [
+   {
+    "form": "ואף",
+    "ref_count": 1891,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 169,
+  "word_index": 982,
+  "stored": "במקורם",
+  "proposals": [
+   {
+    "form": "במקום",
+    "ref_count": 4540,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 172,
+  "word_index": 82,
+  "stored": "ושארי",
+  "proposals": [
+   {
+    "form": "ושאר",
+    "ref_count": 642,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 176,
+  "word_index": 198,
+  "stored": "בבריתא",
+  "proposals": [
+   {
+    "form": "בברייתא",
+    "ref_count": 269,
+    "edit": "deleted_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 176,
+  "word_index": 374,
+  "stored": "איתמרא",
+  "proposals": [
+   {
+    "form": "איתמר",
+    "ref_count": 977,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 176,
+  "word_index": 506,
+  "stored": "למימרת",
+  "proposals": [
+   {
+    "form": "למימר",
+    "ref_count": 3056,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 176,
+  "word_index": 525,
+  "stored": "הלכי",
+  "proposals": [
+   {
+    "form": "הלכו",
+    "ref_count": 158,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 176,
+  "word_index": 525,
+  "stored": "הלכי",
+  "proposals": [
+   {
+    "form": "הכי",
+    "ref_count": 9173,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 176,
+  "word_index": 555,
+  "stored": "ואיין",
+  "proposals": [
+   {
+    "form": "ואין",
+    "ref_count": 12846,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 177,
+  "word_index": 161,
+  "stored": "ושלהכי",
+  "proposals": [
+   {
+    "form": "ולהכי",
+    "ref_count": 358,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 177,
+  "word_index": 308,
+  "stored": "שטתה",
+  "proposals": [
+   {
+    "form": "שמתה",
+    "ref_count": 221,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 177,
+  "word_index": 340,
+  "stored": "למיפך",
+  "proposals": [
+   {
+    "form": "למיפרך",
+    "ref_count": 246,
+    "edit": "deleted_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 177,
+  "word_index": 480,
+  "stored": "דמתניין",
+  "proposals": [
+   {
+    "form": "דמתניתין",
+    "ref_count": 384,
+    "edit": "deleted_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 177,
+  "word_index": 548,
+  "stored": "מתניי",
+  "proposals": [
+   {
+    "form": "מתניו",
+    "ref_count": 49,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 177,
+  "word_index": 548,
+  "stored": "מתניי",
+  "proposals": [
+   {
+    "form": "מתני",
+    "ref_count": 5096,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 179,
+  "word_index": 16,
+  "stored": "יותה",
+  "proposals": [
+   {
+    "form": "יותר",
+    "ref_count": 3326,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 179,
+  "word_index": 42,
+  "stored": "אברחם",
+  "proposals": [
+   {
+    "form": "אברהם",
+    "ref_count": 415,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 179,
+  "word_index": 267,
+  "stored": "שתרץ",
+  "proposals": [
+   {
+    "form": "שרץ",
+    "ref_count": 583,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 183,
+  "word_index": 47,
+  "stored": "הולקים",
+  "proposals": [
+   {
+    "form": "חולקים",
+    "ref_count": 192,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 183,
+  "word_index": 199,
+  "stored": "חוות",
+  "proposals": [
+   {
+    "form": "חיות",
+    "ref_count": 145,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 183,
+  "word_index": 352,
+  "stored": "שישרים",
+  "proposals": [
+   {
+    "form": "שירים",
+    "ref_count": 263,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 189,
+  "word_index": 406,
+  "stored": "דרתם",
+  "proposals": [
+   {
+    "form": "דהתם",
+    "ref_count": 391,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 191,
+  "word_index": 137,
+  "stored": "ואוף",
+  "proposals": [
+   {
+    "form": "ואף",
+    "ref_count": 1891,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 193,
+  "word_index": 112,
+  "stored": "איהן",
+  "proposals": [
+   {
+    "form": "איתן",
+    "ref_count": 42,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 194,
+  "word_index": 238,
+  "stored": "שכתכ",
+  "proposals": [
+   {
+    "form": "שכתב",
+    "ref_count": 636,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 194,
+  "word_index": 293,
+  "stored": "איהן",
+  "proposals": [
+   {
+    "form": "איתן",
+    "ref_count": 42,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 194,
+  "word_index": 329,
+  "stored": "הלי",
+  "proposals": [
+   {
+    "form": "דלי",
+    "ref_count": 114,
+    "edit": null
+   },
+   {
+    "form": "תלי",
+    "ref_count": 66,
+    "edit": null
+   },
+   {
+    "form": "חלי",
+    "ref_count": 44,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": true
+ },
+ {
+  "klal_id": 196,
+  "word_index": 76,
+  "stored": "הקוטץ",
+  "proposals": [
+   {
+    "form": "הקומץ",
+    "ref_count": 213,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 197,
+  "word_index": 318,
+  "stored": "וכנראה",
+  "proposals": [
+   {
+    "form": "ונראה",
+    "ref_count": 401,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 198,
+  "word_index": 40,
+  "stored": "דאלאו",
+  "proposals": [
+   {
+    "form": "דלאו",
+    "ref_count": 1613,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 198,
+  "word_index": 318,
+  "stored": "דאלאו",
+  "proposals": [
+   {
+    "form": "דלאו",
+    "ref_count": 1613,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 198,
+  "word_index": 583,
+  "stored": "עצומה",
+  "proposals": [
+   {
+    "form": "עצמה",
+    "ref_count": 1426,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 198,
+  "word_index": 830,
+  "stored": "ממלתא",
+  "proposals": [
+   {
+    "form": "מלתא",
+    "ref_count": 290,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 198,
+  "word_index": 892,
+  "stored": "זלזה",
+  "proposals": [
+   {
+    "form": "ולזה",
+    "ref_count": 448,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 198,
+  "word_index": 892,
+  "stored": "זלזה",
+  "proposals": [
+   {
+    "form": "לזה",
+    "ref_count": 2092,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 198,
+  "word_index": 967,
+  "stored": "שכתכתי",
+  "proposals": [
+   {
+    "form": "שכתבתי",
+    "ref_count": 61,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 198,
+  "word_index": 1035,
+  "stored": "שתמנה",
+  "proposals": [
+   {
+    "form": "שמנה",
+    "ref_count": 327,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 200,
+  "word_index": 65,
+  "stored": "עיונו",
+  "proposals": [
+   {
+    "form": "עינו",
+    "ref_count": 201,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 200,
+  "word_index": 323,
+  "stored": "חוות",
+  "proposals": [
+   {
+    "form": "חיות",
+    "ref_count": 145,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 210,
+  "word_index": 68,
+  "stored": "כקמייתא",
+  "proposals": [
+   {
+    "form": "בקמייתא",
+    "ref_count": 55,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 210,
+  "word_index": 76,
+  "stored": "כתרייתא",
+  "proposals": [
+   {
+    "form": "בתרייתא",
+    "ref_count": 120,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 210,
+  "word_index": 133,
+  "stored": "כתרייתא",
+  "proposals": [
+   {
+    "form": "בתרייתא",
+    "ref_count": 120,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 212,
+  "word_index": 1,
+  "stored": "הוון",
+  "proposals": [
+   {
+    "form": "הוו",
+    "ref_count": 2052,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 212,
+  "word_index": 32,
+  "stored": "דהוון",
+  "proposals": [
+   {
+    "form": "דהוו",
+    "ref_count": 481,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 213,
+  "word_index": 41,
+  "stored": "כהדא",
+  "proposals": [
+   {
+    "form": "כחדא",
+    "ref_count": 43,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 216,
+  "word_index": 162,
+  "stored": "כפרק",
+  "proposals": [
+   {
+    "form": "בפרק",
+    "ref_count": 1541,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 216,
+  "word_index": 162,
+  "stored": "כפרק",
+  "proposals": [
+   {
+    "form": "כפר",
+    "ref_count": 392,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 216,
+  "word_index": 262,
+  "stored": "לרבנו",
+  "proposals": [
+   {
+    "form": "לבנו",
+    "ref_count": 351,
+    "edit": "extra_char"
+   },
+   {
+    "form": "לרבו",
+    "ref_count": 205,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": true
+ },
+ {
+  "klal_id": 216,
+  "word_index": 318,
+  "stored": "פרטה",
+  "proposals": [
+   {
+    "form": "פרוטה",
+    "ref_count": 886,
+    "edit": "deleted_char"
+   },
+   {
+    "form": "פרה",
+    "ref_count": 855,
+    "edit": "extra_char"
+   },
+   {
+    "form": "פרט",
+    "ref_count": 818,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": true
+ },
+ {
+  "klal_id": 216,
+  "word_index": 352,
+  "stored": "מהרב",
+  "proposals": [
+   {
+    "form": "מדרב",
+    "ref_count": 104,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 216,
+  "word_index": 352,
+  "stored": "מהרב",
+  "proposals": [
+   {
+    "form": "מרב",
+    "ref_count": 271,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 216,
+  "word_index": 496,
+  "stored": "שיישב",
+  "proposals": [
+   {
+    "form": "שיושב",
+    "ref_count": 46,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 216,
+  "word_index": 554,
+  "stored": "ושגם",
+  "proposals": [
+   {
+    "form": "וגם",
+    "ref_count": 862,
+    "edit": "extra_char"
+   },
+   {
+    "form": "ושם",
+    "ref_count": 357,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": true
+ },
+ {
+  "klal_id": 217,
+  "word_index": 213,
+  "stored": "המאן",
+  "proposals": [
+   {
+    "form": "דמאן",
+    "ref_count": 286,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 217,
+  "word_index": 246,
+  "stored": "שיבאר",
+  "proposals": [
+   {
+    "form": "שיתבאר",
+    "ref_count": 363,
+    "edit": "deleted_char"
+   },
+   {
+    "form": "שיבא",
+    "ref_count": 361,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": true
+ },
+ {
+  "klal_id": 217,
+  "word_index": 313,
+  "stored": "מיר",
+  "proposals": [
+   {
+    "form": "מיד",
+    "ref_count": 2979,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 217,
+  "word_index": 597,
+  "stored": "לחזות",
+  "proposals": [
+   {
+    "form": "לחזור",
+    "ref_count": 1754,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 221,
+  "word_index": 49,
+  "stored": "שכועה",
+  "proposals": [
+   {
+    "form": "שבועה",
+    "ref_count": 2377,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false
+ },
+ {
+  "klal_id": 221,
+  "word_index": 71,
+  "stored": "דהבו",
+  "proposals": [
+   {
+    "form": "דהו",
+    "ref_count": 203,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false
+ }
+]

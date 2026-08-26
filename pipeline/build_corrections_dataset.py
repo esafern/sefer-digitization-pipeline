@@ -95,11 +95,13 @@ clean_word = cio.clean_word
 # delete-opcode attribution was fixed they surfaced as 10 spurious
 # "possible omission" candidates, so they now get filtered explicitly, at the
 # same point punctuation-only tokens are - by design, not by side effect.
-WATERMARK_WORDS = {"digitized", "by", "google"}
-
-
-def is_watermark(tok_text):
-    return clean_word(tok_text).lower() in WATERMARK_WORDS
+# MOVED to corpus_io 2026-08-26 (code review): this filter existed here and
+# nowhere else, so tools/reconstruct_placeholder_klalim.py - the one script that
+# writes corpus text straight from the token stream - never had it, and wrote
+# "Digitized by Google" into 12 klalim. Re-exported under the same names so this
+# module's own call sites and its tests are unchanged.
+WATERMARK_WORDS = cio.WATERMARK_WORDS
+is_watermark = cio.is_watermark
 
 
 # Every page carries a running header ("יד מלאכי" + section name) that is
@@ -196,10 +198,17 @@ def estimate_insert_bbox(docai_tokens, i1):
     # margin of the new line, exactly where the bold gematria is printed. 26 of
     # the 40 insert candidates are that case.
     if prev_tok is not None and next_tok is not None:
+        # Clamp the box's POSITION, never its width. FIXED 2026-08-26 (code
+        # review): both edges were clamped with min(1.0, ...) independently, so a
+        # next_tok already at the right page edge collapsed the box to zero width
+        # - unrenderable and unclickable in the scan pane, which is the whole
+        # point of estimating it. Latent today (the 40 current estimated boxes
+        # have min width 0.030 and none clamps), but the fix costs nothing.
         width = max(next_tok["x2"] - next_tok["x1"], MIN_ESTIMATED_BOX_WIDTH)
-        return {"x1": min(1.0, next_tok["x2"]),
+        x1 = min(next_tok["x2"], 1.0 - width)
+        return {"x1": x1,
                 "y1": next_tok["y1"],
-                "x2": min(1.0, next_tok["x2"] + width),
+                "x2": x1 + width,
                 "y2": next_tok["y2"]}
 
     # At a PAGE edge only one neighbour exists, and the missing word may be on

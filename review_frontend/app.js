@@ -83,7 +83,16 @@ function suggestionIsPlausible(suggestion, currentWord) {
   // A single letter proposed for a multi-letter word is the ('ח'->'ה')
   // confusion-pair notation being read as a replacement, not a reading.
   if (letters.length === 1 && wordLetters.length > 1) return false;
-  if (letters === wordLetters) return false;             // proposes what is already there
+  // "Proposes what is already there" - but compared RAW, not letters-only.
+  // FIXED 2026-08-26 (code review): hebrewLettersOnly() strips the gershayim,
+  // so a suggestion that only MOVES one was judged identical to the word and
+  // silently dropped. Misplaced gershayim is a real repair class in this print,
+  // not detector noise. Swept all open flags before loosening this: exactly two
+  // proposals differ from their word in punctuation alone, and both are valid -
+  // klal 45 w21 `נלפ"קד` -> `נלפק"ד` and klal 212 w40 `פ"יא` -> `פי"א`. No noise
+  // is admitted by the change; the `?`, no-Hebrew-letter and single-letter
+  // guards above are what filter the junk, and they are untouched.
+  if (suggestion.trim() === currentWord.trim()) return false;
   return true;
 }
 
@@ -552,17 +561,23 @@ function renderKlalBody(block, k) {
       // `note` field (klal_flag's own note, the AI pass's reasoning) and
       // lets the reviewer propose a fix or dismiss it, no new panel needed.
       const span = document.createElement('span');
-      span.className = 'flag-word state-ai-flag';
+      // FIXED 2026-08-26 (code review). This hardcoded 'state-ai-flag', so the
+      // `flag_answered` handling added to wordState() on 2026-08-25 never
+      // reached the text pane - the scan pane (which does go through
+      // wordState()) drew the word green and the nav badge counted it decided,
+      // while the text pane kept the purple dashed open-flag treatment on the
+      // same word. Live on 5 standalone answered flags: klal 4 w199/w364,
+      // klal 163 w427/w573, klal 167 w24 - and klal 163 is the klal that fix
+      // was written for.
+      const aiState = wordState(corr);
+      span.className = 'flag-word state-' + (aiState === 'human' ? 'human' : 'ai-flag');
       span.textContent = w;
       span.title = corr.reasoning || '';
       span.onclick = () => {
         // Show the klal's scan page with focused ring on the ai_flag's word.
         // Respect manualPageLock: if the reviewer manually navigated to a
         // continuation page, don't snap back to the start page.
-        if (!manualPageLock) {
-          const targetPage = corr.page || k.page;
-          showPage(targetPage, k.klal_id, corr);
-        }
+        focusWordOnScan(corr.page || k.page, k.klal_id, corr);
         openManualCorrectionPanel(k.klal_id, i, w, corr);
       };
       body.appendChild(span);
@@ -578,7 +593,7 @@ function renderKlalBody(block, k) {
         ? `DocAI: ${corr.docai_reading} | Tesseract: ${corr.tesseract_reading || '—'}`
         : '';
       span.onclick = () => {
-        if (!manualPageLock) showPage(corr.page || k.page, k.klal_id, corr);
+        focusWordOnScan(corr.page || k.page, k.klal_id, corr);
         openWitnessPanel(corr);
       };
       body.appendChild(span);
@@ -617,11 +632,9 @@ function renderKlalBody(block, k) {
       // is served (api_page's plain-word pass has always covered it, and manual
       // entries now carry their own page/bbox too); nothing was asking for it.
       const focusManual = () => {
-        if (!manualPageLock) {
-          const targetPage = corr.page
-            || (k.word_pages && k.word_pages[i] != null ? k.word_pages[i] : k.page);
-          showPage(targetPage, k.klal_id, corr);
-        }
+        focusWordOnScan(corr.page
+          || (k.word_pages && k.word_pages[i] != null ? k.word_pages[i] : k.page),
+          k.klal_id, corr);
         openManualCorrectionPanel(k.klal_id, i, w, corr);
       };
       span.onclick = focusManual;
@@ -692,13 +705,13 @@ function renderKlalBody(block, k) {
         // word with no alignment match (an OCR gap DocAI never aligned).
         const targetPage = k.word_pages && k.word_pages[i] != null ? k.word_pages[i] : k.page;
         const corrObj = { klal_id: k.klal_id, word_index: i, opcode: 'plain' };
-        // FIXED 2026-08-21 (code review): every sibling click handler
-        // (ai_flag, witness, attachWordHandlers) guards its showPage() call
-        // with `if (!manualPageLock)` so a reviewer's manual scan-pane
-        // navigation isn't silently overridden by the next word click; this
-        // handler was calling showPage() unconditionally, the one
-        // inconsistent case.
-        if (!manualPageLock) showPage(targetPage, k.klal_id, corrObj);
+        // All five word-click handlers now go through focusWordOnScan(), which
+        // navigates unconditionally. (2026-08-21 had made them consistent the
+        // OTHER way, all guarding on manualPageLock; 2026-08-26 reversed that
+        // after the lock turned out to make word clicks dead - see
+        // focusWordOnScan's own note. Consistency was right, the choice of
+        // which way was not.)
+        focusWordOnScan(targetPage, k.klal_id, corrObj);
         openManualCorrectionPanel(k.klal_id, i, w, null);
       };
       body.appendChild(span);
@@ -727,13 +740,14 @@ function renderKlalBody(block, k) {
         body.appendChild(document.createTextNode(' '));
       }
     }));
-  // A delete-opcode candidate can be filed at word_index == words.length
-  // (missing text trails the klal's very last word, e.g. a boundary case
-  // at a klal seam) - the forEach above only ever visits i < words.length,
-  // so that gap was silently never rendered. Render it after the loop,
-  // in the same "before word i" position it would have taken at i ==
-  // words.length, i.e. at the end of the body.
-  if (gapsBefore[words.length]) gapsBefore[words.length].forEach(c => body.appendChild(makeGapMarker(k.klal_id, c)));
+  // (The block above supersedes an earlier one-liner that rendered
+  // gapsBefore[words.length] a second time here. REMOVED 2026-08-26 (code
+  // review): its filter is `idx >= words.length`, so a candidate at exactly
+  // words.length was drawn TWICE - once with its accepted insert text, once
+  // bare - in the 12 klalim that have one (84, 88, 106, 114, 138, 159, 164,
+  // 171, 175, 193, 211, 219, including klal 219, the klal the newer block was
+  // written for). The reviewer saw a duplicate proposed insertion at the end
+  // of the klal.)
 }
 
 // ---------- proposed punctuation markers ----------
@@ -799,13 +813,29 @@ function attachWordHandlers(el, klalId, corr, isGap) {
     // Each correction carries its own page field — the physical scan page
     // where its bbox lives (may be a continuation page for klals that span
     // multiple pages). Navigate there so the bbox is found.
-    if (!manualPageLock) {
-      const targetPage = corr.page || (klalById[klalId] && klalById[klalId].page);
-      showPage(targetPage, klalId, corr);
-    }
+    focusWordOnScan(corr.page || (klalById[klalId] && klalById[klalId].page), klalId, corr);
     openDisputedPanel(klalId, corr);
   });
 }
+// Clicking a WORD is explicit intent to look at that word, so it always moves
+// the scan pane - and clears manualPageLock on the way, exactly as jumpTo() does
+// for a nav-panel click.
+//
+// FIXED 2026-08-26 (reviewer: "the review panel is currently in a bad state -
+// clicking on words does not refresh the left pane with just that word
+// highlighted"). manualPageLock is set by the scan pane's own prev/next arrows,
+// and until now it was cleared ONLY by clicking a klal in the nav list. So the
+// moment a reviewer paged the scan by hand - the natural thing to do while
+// reading - every subsequent word click silently stopped refreshing the scan,
+// with nothing on screen saying why and no obvious way out. The lock exists to
+// stop SCROLLING from snapping the page back (its two remaining call sites,
+// setActiveKlal and the scroll auto-advance, still honour it); it was never
+// meant to defeat a deliberate click.
+function focusWordOnScan(targetPage, klalId, corr) {
+  manualPageLock = false;
+  showPage(targetPage, klalId, corr);
+}
+
 function positionTooltip(e) {
   const pad = 16;
   let x = e.clientX + pad, y = e.clientY + pad;
@@ -848,6 +878,14 @@ function setupPanels() {
   const INTERACTIVE_IN_TEXT = [
     '.flag-word', '.plain-word', '.flag-gap', '.editorial-mark',
     '.pending-replace-text', '.klal-flag-btn', '.continuation-marker',
+    // '.punct-marker' added 2026-08-26 (code review). Dormant, not dead:
+    // makePunctuationMarker() is not called from renderKlalBody today (the
+    // punctuation affordances were removed from the UI 2026-08-11, kept
+    // reversible). The moment they return, openPunctuationPanel() opens the
+    // panel synchronously before its first await, the same click bubbles here,
+    // matches nothing, finds '.side-panel.open' and dismisses it - the panel
+    // would shut the instant it opened.
+    '.punct-marker',
     'button', 'a', 'input', 'textarea', 'select',
   ].join(',');
   textScroll.addEventListener('click', (e) => {
@@ -952,7 +990,22 @@ async function openDisputedPanel(klalId, corr) {
   } else if (corr.opcode === 'delete') {
     // Delete: docai found a word; corpus has nothing
     options.push({ source: 'docai_reading', label: 'Accept inserted word', text: corr.docai_reading || '' });
-    options.push({ source: 'final_text', label: 'Keep current text (no word)', text: '—' });
+    // 'no_word', not 'final_text'. FIXED 2026-08-26 (reviewer: klal 66 word 17,
+    // "can't save decision current text (no word)"). A `delete` candidate has NO
+    // final_text by definition - the corpus has nothing at that position - so
+    // this option resolved `corr['final_text']` to undefined and POSTed
+    // chosen_text: null. The null-decision guard added earlier the same day then
+    // refused it, which turned a legitimate reviewer choice ("this proposed
+    // insertion is wrong, the corpus is right as it stands") into an unsaveable
+    // one for all 40 omission candidates across 35 klalim.
+    //
+    // The four pre-existing null rows (klal 90 w4, 88 w1149, 164 w55, 2 w632)
+    // were recorded through THIS option and were correct decisions, not accidents
+    // - the readings they reject are junk (`בעיא 4`, `४`, `ג`). Yesterday's note
+    // calling them "a Save with nothing chosen" was wrong; see PROJECT-STATUS.
+    // An explicit empty string says "no text here" and is exactly what
+    // apply_delete_insertion() already treats as a no-op.
+    options.push({ source: 'no_word', label: 'Keep current text (no word)', text: '—' });
   } else {
     // Normal replace
     if (corr.final_text) options.push({ source: 'final_text', label: 'Current text', text: corr.final_text });
@@ -1160,7 +1213,13 @@ async function saveDisputedDecision(klalId, corr) {
   const activeEl = document.querySelector('.disputed-option.active, .candidate-option.active');
   const source = activeEl ? activeEl.dataset.source : 'final_text';
   let text, chosenSource;
-  if (source === 'remove') {
+  if (source === 'no_word') {
+    // An omission candidate the reviewer rejects: nothing is inserted. Recorded
+    // as an explicit empty string rather than null so it is a decision, not a
+    // missing field - and so it survives the null guard below.
+    text = '';
+    chosenSource = 'final_text';
+  } else if (source === 'remove') {
     text = '';
     chosenSource = 'custom';
   } else if (source === 'custom') {
@@ -1173,6 +1232,20 @@ async function saveDisputedDecision(klalId, corr) {
   } else {
     text = corr[source];
     chosenSource = source;
+  }
+  // FIXED 2026-08-26 (code review). With no option selected, `source` falls
+  // back to 'final_text' - and a `delete` (omission) candidate or a synthesized
+  // `ai_flag` entry has no final_text at all, so this POSTed
+  // chosen_source:'final_text', chosen_text:null. That is not a null decision in
+  // theory: it has already happened FOUR times in review_decisions.jsonl (klal
+  // 90 w4, 88 w1149, 164 w55, 2 w632 - all opcode 'delete', three of them on
+  // 2026-08-24/25). The append-only log keeps them forever; they mark the word
+  // decided and answer its revisit flag, while apply_reviewer_decisions.py can
+  // never promote them (no text to write). An empty string is a real choice
+  // ('remove', and an `insert`'s empty custom box); null never is.
+  if (text == null) {
+    alert('Choose a reading first - this candidate has no default to accept.');
+    return;
   }
   const note = document.getElementById('decision-note').value.trim();
 

@@ -190,8 +190,39 @@ def _load_corrections(part_num=None):
     return combined
 
 
+_regions_cache = {}  # (mtime_ns, size) -> parsed klal_page_regions.json
+
+
 def _load_regions():
-    return _load_json("klal_page_regions.json", {})
+    """klal_page_regions.json, re-parsed whenever the file on disk changes.
+
+    MEMOIZED 2026-08-26 (code review, 2026-08-26 H13). This 187 KB file is
+    re-read many times inside a single request - `_klal_all_pages()` takes an
+    optional `regions` argument precisely so callers can avoid that, and
+    `_word_scan_position()` never passes it. Profiled after the review_decisions
+    memo landed: 6 parses per GET /api/page/73, 4.6 ms of a 14.8 ms request.
+    Caching the loader fixes every caller at once rather than threading the
+    parameter through two of them.
+
+    Keyed on (st_mtime_ns, st_size), so a `rebuild_all.sh` run that regenerates
+    the file invalidates it - the "fresh off disk every call" contract at the top
+    of this section is about not going stale across a rebuild, and this does not.
+    Verified before landing: replaying api_page/api_klal/api_klalim over a shared
+    regions dict mutated none of its 623 entries. This is deliberately NOT
+    applied to _load_corrections(), whose entries api_page() and api_klal() DO
+    mutate in place (`entry["klal_id"] = kid`, `entry["current_decision"] = ...`);
+    caching that would leak one request's overlays into the next.
+    """
+    path = cio.repo_path("klal_page_regions.json")
+    try:
+        st = os.stat(path)
+        stamp = (st.st_mtime_ns, st.st_size)
+    except OSError:
+        return _load_json("klal_page_regions.json", {})
+    if _regions_cache.get("stamp") != stamp:
+        _regions_cache["stamp"] = stamp
+        _regions_cache["data"] = _load_json("klal_page_regions.json", {})
+    return _regions_cache["data"]
 
 
 def _load_punctuation_candidates(part_num=1):
@@ -440,7 +471,21 @@ def _corpus_word_bboxes(klal_id, words, page):
         _corpus_bbox_cache[key] = {}
         return {}
 
-    dtoks = [t for t in toks if norm(t["text"])]
+    # Page furniture is NOT matchable. FIXED 2026-08-26 (reviewer: "clicking on
+    # klal 7 word 497 highlights the wrong word"). The running header, folio and
+    # watermark are stripped from clean_text by construction, but they were still
+    # in the token list this aligns against - so SequenceMatcher was free to
+    # capture a corpus word with a header token. Klal 7's `י"ר` matched page 18's
+    # header `יר` at relative-y 0.000 instead of its real occurrence at the foot
+    # of page 17 (rel-y 0.870), and clicking it rang the running header on the
+    # wrong page. Swept before fixing: 8 Part-1 words across 8 klalim were
+    # aligned to a header token (klalim 5, 7, 25, 30, 54, 59, 144, 154 - the
+    # captured words are `כללי`, `י"ר`, `האלף`, `יד`, `י"ד`, exactly the header's
+    # own vocabulary). The band test in header_furniture_indices() is what makes
+    # this safe: `כללי` is ordinary vocabulary here, and only the copy at the very
+    # top of the page is furniture.
+    furniture = cio.header_furniture_indices(toks)
+    dtoks = [t for i, t in enumerate(toks) if norm(t["text"]) and i not in furniture]
     dwords = [norm(t["text"]) for t in dtoks]
     corpus_norm = [norm(w) for w in words]
 
@@ -552,18 +597,56 @@ def _flag_answered_by_a_later_decision(klal_id, word_index, flag_rec,
     return False
 
 
-def _word_scan_position(klal_id, words, word_index):
+def _word_bboxes_resolved(klal_id, words, regions=None):
+    """{word_index: (bbox, page)} for every word aligned to a DocAI token,
+    with multi-page collisions resolved the ONE way.
+
+    ADDED 2026-08-26 (code review, 2026-08-25 C3). _corpus_word_bboxes() runs a
+    fresh SequenceMatcher per page against the klal's full word list, so a word
+    whose text recurs can align on more than one of the klal's pages - 943 words
+    across the 175 multi-page klalim do. Three functions in this file resolved
+    that collision three different ways: _word_pages_map() proportionally (the
+    one that was actually thought about, and the one with the FIXED comment
+    explaining why), _word_level_ai_flags() last-page-wins, and
+    _word_scan_position() first-page-wins. They disagree on 657 and 293 of those
+    943 words respectively.
+
+    Nothing a reviewer sees is wrong today - measured before landing this: of the
+    331 open word-level flags, exactly ONE sits on a colliding index and
+    last-wins happens to agree there; zero of the 203 manual corrections sit on
+    one at all. That is luck about where the flags fell, not a property of the
+    code, which is the reason to collapse the three into one now rather than
+    after it costs something.
+    """
+    if regions is None:
+        regions = _load_regions()
+    region_entry = regions.get(str(klal_id), {})
+    pages = _klal_all_pages(klal_id, regions)
+    word_pages = _word_pages_map(klal_id, words, region_entry)
+    out = {}
+    for page in pages:
+        for wi, bbox in _corpus_word_bboxes(klal_id, words, page).items():
+            # word_pages is the authority on WHICH page a recurring word is on;
+            # fall back to this page only for a word it has no opinion about.
+            if word_pages.get(wi, page) == page:
+                out[wi] = (bbox, page)
+    return out
+
+
+def _word_scan_position(klal_id, words, word_index, regions=None):
     """(bbox, page) for one corpus word, from the DocAI alignment.
 
     Extracted 2026-08-25 from _word_level_ai_flags(), which had been doing this
     for ai_flag entries only. A klal can span pages, so every page it touches is
     searched; returns (None, None) when the word has no aligned token (an OCR
-    gap), which callers must handle rather than assume a box exists."""
-    for page in _klal_all_pages(klal_id):
-        page_bboxes = _corpus_word_bboxes(klal_id, words, page)
-        if word_index in page_bboxes:
-            return page_bboxes[word_index], page
-    return None, None
+    gap), which callers must handle rather than assume a box exists.
+
+    Multi-page collisions now go through _word_bboxes_resolved() - this used to
+    take the FIRST page that matched, which is a third answer to a question two
+    other functions here already answered differently. `regions` is threaded so
+    callers that already hold it do not re-read the 187 KB regions file.
+    """
+    return _word_bboxes_resolved(klal_id, words, regions).get(word_index, (None, None))
 
 
 def _word_level_ai_flags(klal_id, words):
@@ -584,12 +667,9 @@ def _word_level_ai_flags(klal_id, words):
     # Look up scan bboxes from DocAI tokens for ai_flag words. A klal may
     # span multiple pages (start + continuations); look up bboxes on each
     # page so continuation-page words get bboxes too.
-    pages = _klal_all_pages(klal_id)
-    bboxes = {}  # word_index -> (bbox, page)
-    for page in pages:
-        page_bboxes = _corpus_word_bboxes(klal_id, words, page)
-        for wi, bbox in page_bboxes.items():
-            bboxes[wi] = (bbox, page)
+    # Collisions resolved the one way - this loop used to be last-page-wins.
+    # See _word_bboxes_resolved().
+    bboxes = _word_bboxes_resolved(klal_id, words)  # word_index -> (bbox, page)
 
     candidate_decisions = rd.all_current("candidate_choice")
     manual_decisions = rd.all_current("manual_correction")
@@ -727,7 +807,11 @@ def api_klalim(part_num=1):
     # its word still matches what it was decided against; otherwise a
     # stale decision from before a reindexing edit inflates this klal's
     # count for a word it no longer actually describes.
-    manual_decided = rd.all_current("manual_correction")  # {(klal_id, word_index): record}
+    # Same map as _manual_for_flags above, not a second query. FIXED 2026-08-26
+    # (code review: 2026-08-25 C2, 2026-08-26 H11 - both runs found it) - it was
+    # a copy-paste artifact from the two features landing in different commits,
+    # and it re-derived an identical result 32 lines from where it already sat.
+    manual_decided = _manual_for_flags  # {(klal_id, word_index): record}
     manual_count_by_klal = {}
     manual_indices_by_klal = {}
     for (kid, wi), rec in manual_decided.items():
@@ -890,6 +974,13 @@ def api_klalim(part_num=1):
             # from "already decided" instead of one undifferentiated count
             # (2026-08-07, PROJECT-STATUS.md "review dashboard feedback").
             "decided_count": decided_count,
+            # Served but no longer rendered: the nav badge switched to
+            # machine_disputed_count on 2026-08-25 (see app.js's own note). NOT
+            # Lesson 29's dead field, and deliberately kept - it is the arithmetic
+            # canary for this function's count logic, asserted by
+            # test_corpus_invariants.py::test_nav_tristate_matches_what_each_word_actually_renders_as, which is
+            # what caught the klal 88 "-1" fix-on-fix arc. If you remove it,
+            # remove that test's subject too, not just the key.
             "open_count": total_count - decided_count,
             "machine_disputed_count": machine_disputed_count,
             "machine_resolved_count": machine_resolved_count,
@@ -1037,7 +1128,15 @@ def api_klal(klal_id):
             continue
         if f["word_index"] in manual_word_indices:
             continue  # defensive: a manual decision always yields an entry above
-        f["word_flag"] = f.get("current_decision")
+        # Same shape as the overlay above, not the raw record. FIXED 2026-08-26
+        # (code review): this path handed the panel `current_decision` with no
+        # `answered` key, so a standalone answered flag - the one case that
+        # reaches this branch at all - was announced as "carries an open revisit
+        # flag" for a word the reviewer had already ruled on. That is the klal
+        # 163 report the overlay branch was written to fix, still live on the
+        # path the overlay does not cover.
+        f["word_flag"] = dict(f.get("current_decision") or {},
+                              answered=bool(f.get("flag_answered")))
         corrections.append(f)
 
     # Witness disagreements that have a corpus word_index (patched in by
@@ -1340,6 +1439,20 @@ def api_page(page_num):
 def api_post_disputed_decision(body):
     klal_id = int(body["klal_id"])
     word_index = int(body["word_index"])
+    if body.get("chosen_text") is None:
+        # FIXED 2026-08-26 (code review). api_post_manual_decision() has carried
+        # this exact check, with this exact rationale, since it was written; this
+        # handler never got it. app.js's saveDisputedDecision() falls back to
+        # `source = 'final_text'` when no option is selected, and a `delete`
+        # (omission) candidate or a synthesized `ai_flag` entry has no
+        # final_text - so a Save with nothing chosen POSTed chosen_text: null.
+        # Four such rows are in review_decisions.jsonl already (klal 90 w4,
+        # 88 w1149, 164 w55, 2 w632). They mark the word decided and answer its
+        # revisit flag while being impossible to apply, and the log is
+        # append-only, so they can be superseded but never removed. Guarded at
+        # the write site as well as in the client, because the client is not the
+        # only thing that can POST here.
+        raise ValueError("chosen_text is required (pass '' explicitly to reject)")
     corrections = _load_corrections().get(str(klal_id), [])
     snapshot = next((c for c in corrections if c["word_index"] == word_index), None)
     record = rd.append_decision(

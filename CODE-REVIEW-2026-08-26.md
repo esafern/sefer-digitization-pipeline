@@ -1,5 +1,8 @@
 # Code review, 2026-08-26 — findings inbox (partial run)
 
+> **TRIAGED AND CLOSED 2026-08-26.** Every finding below was verified by running something and then fixed, refuted, or explicitly deferred with a reason. See `PROJECT-STATUS.md` item 21 for the outcome of each, and item 20 for the corpus damage the correctness pass found that no angle here did. Two findings did NOT survive verification - #17 (`open_count`) has a consumer. Kept as the record of what was claimed, not as an open list.
+
+
 `/code-review max a16f9a0^..HEAD` over the 2026-08-24/25 work: **28 commits, 99
 files, +28,288 / −13,750**. The run was launched twice and **exhausted the
 session budget both times**; of ~10 angle agents, **three completed** and

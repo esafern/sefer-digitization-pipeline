@@ -107,6 +107,18 @@ CONFUSION_PAIRS = [
     # like עולס->עולם (ס/ם) and משוס->משום (ס/ם).
     frozenset("סם"), frozenset("וי"), frozenset("רת"), frozenset("הת"),
     frozenset("וז"), frozenset("כן"), frozenset("נן"),
+    # Added 2026-08-26, same rule as the 2026-08-18 batch: each from a real
+    # Part-1 error, not a theoretical similarity list.
+    #   כ/מ - the reviewer hand-repaired `כסכתא`->`מסכתא` (klal 84 w24) after
+    #     nothing flagged it; this pair was simply absent, so the detector could
+    #     not see it. `מסכתא` is confirmed by the klal's own next clause
+    #     (`או בחדא מסכתא או בתרי מסכתי`).
+    #   ח/ת - `בחרא` was hand-repaired the same session. NOTE this pair is the
+    #     noisier of the two and is added with that stated: on klal 84 w23 it
+    #     proposes `בתרא` (620x) where context proves the answer is `בחדא` via
+    #     ד/ר (331x). Frequency loses that one; it is here to SURFACE the word,
+    #     not to answer it, which is what the ambiguous bucket is for.
+    frozenset("כמ"), frozenset("חת"),
 ]
 # Flat letter -> {other letters this one is confusable with}, built once.
 CONFUSABLE_WITH = {}
@@ -129,7 +141,20 @@ RARE_THRESHOLD = 3
 # about what the numbers bound (how OFTEN this answers, not how often it is
 # right - see that script's header for the בפי'/בחי' counterexample of a
 # threshold cleared comfortably by a wrong answer).
-MIN_INDEPENDENT_FREQUENCY = 50
+#
+# LOWERED 50 -> 40, 2026-08-26, from a confirmed miss rather than by feel. The
+# reviewer hand-repaired `כסכתא`->`מסכתא` (klal 84 w24) that nothing had flagged;
+# adding the כ/מ pair above was not enough, because `מסכתא` is attested **45**
+# times in the reference corpus and the floor was 50 - it missed by five. (The
+# reference corpus mostly writes `מסכת`, 82x, not the Aramaic `מסכתא`, so this is
+# a coverage artifact of the arbiter, not evidence about the word.) Measured
+# before changing: the floor moves the detector from 124 findings to 138, and the
+# 18 gained are of the same quality as the rest - `דנראח`->`דנראה` (klal 1 w229,
+# the known typo), `דרפקר`->`דהפקר`, `הגחל`->`הנחל`, `תקשו`->`תקשי`,
+# `איהן`->`איתן` x3 - not a noise floor. Still an uncalibrated triage cut-off,
+# with the same honesty as before: it bounds how OFTEN this answers, not how
+# often it is right.
+MIN_INDEPENDENT_FREQUENCY = 40
 DOMINANCE_RATIO = 5
 
 

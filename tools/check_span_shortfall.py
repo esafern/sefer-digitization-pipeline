@@ -42,17 +42,11 @@ import validate_klal_span_coverage as vksc  # noqa: E402
 # normalized forms of the misreads are listed explicitly rather than relying
 # on a confusion-pair expansion here - see validate_klal_span_coverage.py's
 # own corrected header comment.
-FURNITURE_WORDS = {
-    cio.hebrew_letters_only(w) for w in (
-        "יד", "יר", "יך", "מלאכי",           # running header + its OCR variants
-        "כללי",                                # section header, first word
-        "האלף", "הבית", "הגימל", "הדלת",      # ... and the letter-section names
-        "ההא", "הוו", "הזין", "החית", "הטית",
-        "היוד", "הכף", "הלמד", "המם", "הנון",
-        "הסמך", "העין", "הפא", "הצדי", "הקוף",
-        "הריש", "השין", "התיו",
-    )
-}
+# MOVED to corpus_io 2026-08-26 so review_server's own scan alignment can see it
+# too - it could not, and 8 Part-1 words were aligned to a page header instead of
+# their real token (PROJECT-STATUS.md item 23). Re-exported under the same name
+# so this module's call sites and its importers are unchanged.
+FURNITURE_WORDS = cio.FURNITURE_WORDS
 
 
 def load_trace_by_id():

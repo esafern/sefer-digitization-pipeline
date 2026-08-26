@@ -4043,6 +4043,74 @@ def _freqs(**kw):
     return {cio.hebrew_letters_only(k): v for k, v in kw.items()}
 
 
+def test_decision_write_sites_reject_a_null_chosen_text(tmp_path, monkeypatch):
+    """REGRESSION 2026-08-26 (code review). app.js's saveDisputedDecision() falls
+    back to `source = 'final_text'` when no option is selected, and a `delete`
+    (omission) candidate or a synthesized `ai_flag` entry HAS no final_text - so
+    a Save with nothing chosen POSTed chosen_source:'final_text',
+    chosen_text:null.
+
+    This is not theoretical: four such rows are in review_decisions.jsonl already
+    (klal 90 w4, 88 w1149, 164 w55, 2 w632 - three of them on 2026-08-24/25).
+    They mark the word decided and answer its revisit flag, while
+    apply_reviewer_decisions.py can never promote them (there is no text to
+    write), and the log is append-only so they can be superseded but never
+    removed. api_post_manual_correction() had carried exactly this check since it
+    was written; api_post_disputed_decision() never got it. Both are asserted
+    here so the pair cannot drift apart again.
+
+    An empty STRING stays legal - it is a real choice ('remove', and an insert's
+    empty custom box). Only None is refused."""
+    monkeypatch.setattr(rd, "DECISIONS_PATH", str(tmp_path / "decisions.jsonl"))
+    for handler in (rs.api_post_disputed_decision, rs.api_post_manual_correction):
+        with pytest.raises(ValueError, match="chosen_text is required"):
+            handler({"klal_id": 1, "word_index": 0, "chosen_source": "final_text"})
+        with pytest.raises(ValueError, match="chosen_text is required"):
+            handler({"klal_id": 1, "word_index": 0, "chosen_text": None})
+    # ...and the empty string is accepted by both, not swept up by the guard.
+    rec = rs.api_post_manual_correction({"klal_id": 1, "word_index": 0, "chosen_text": ""})
+    assert rec["chosen_text"] == ""
+
+
+def test_ligature_repair_refuses_multiword_abbreviations():
+    """REGRESSION 2026-08-26 (code review). hebrew_letters_only() strips the
+    gershayim, so `א"ה` (אבן העזר - the corpus prints `ובחלק א"ה סימן ל"ה`) was
+    arbitrated as the bare letters `אה` against `אלה` and "repaired" to `א"לה`:
+    not a word, not an abbreviation, not anything DocAI read. The letters of an
+    abbreviation are INITIALS, so a dropped-lamed reading is meaningless and the
+    frequency comparison is against the wrong object entirely. 97 tokens in the
+    live DocAI stream rewrote this way (`א"ה` x73, `א"א` x20, `ש"א` x3,
+    `וא"ה` x1), and repair_word() feeds `docai_repaired`, which the frontend
+    offers as a SELECTABLE reading - one click would have written a fabricated
+    word into the corpus carrying an engine's authority."""
+    f = _freqs(**{"אלה": 416, "אלא": 47534, "שאל": 300})
+    assert dlf.repair_word('א"ה', f) is None
+    assert dlf.repair_word('א"א', f) is None
+    assert dlf.repair_word('ש"א', f) is None
+    # A TRAILING geresh marks one truncated word, not initials - still repairable.
+    assert dlf.repair_word("אא'", f) == "אלא'"
+
+
+def test_ligature_repair_handles_the_dropped_ALEF_direction():
+    """ADDED 2026-08-26 (reviewer hand-repaired `לא`->`אלא` and asked why the
+    pass had not found it). The `ﭏ` sort can lose EITHER letter. The documented
+    failure (Lesson 24) is it dropping its `ל` - `אליבא`->`איבא` - and the filter
+    only ever modelled that one. It also prints as a bare `ל`, dropping its `א`:
+    `שמואל`->`שמול` is live in klal 143 w684 (`רב פפא בר שמול`).
+
+    Three things had to change together, each of which silently defeated the
+    direction on its own: an early `if "א" not in letters: return None` guard
+    (the surviving letter here is the `ל`), `_reinsert_nonletters()` hardcoding
+    the restored letter as `ל` (which produced `שמול`->`שמולל`), and a minimum
+    length - without it the bare token `ל` "repairs" to `אל` 83 times in the
+    stream, purely because `אל` is four times commoner than standalone `ל`."""
+    f = _freqs(**{"שמואל": 3271, "אל": 4624, "ל": 1154, "אליבא": 848})
+    assert dlf.repair_word("שמול", f) == "שמואל"
+    assert dlf.repair_word("איבא", f) == "אליבא"      # the other direction still works
+    assert dlf.repair_word("ל", f) is None            # a single glyph carries no evidence
+    assert dlf.repair_word("שמול.", f) == "שמואל."    # the mark stays at the end
+
+
 def test_ligature_repair_restores_the_dropped_lamed_in_the_right_place():
     """The lamed goes at the first LETTER index where the collapsed and expanded
     forms differ. Comparing prefixes instead is off by one and produced `אילבא`
@@ -4123,9 +4191,16 @@ def test_docai_verdicts_skips_a_drifted_candidate(monkeypatch):
                "original_word": "בות", "corrected_word": "דלת"}   # not what's there now
     assert smw.docai_verdicts([live], words) == {(1, 1): "בות"}
     assert smw.docai_verdicts([drifted], words) == {}
-    # unguarded (no word list) keeps the old permissive behaviour for callers
-    # that genuinely have no corpus to check against
-    assert smw.docai_verdicts([drifted]) == {(1, 1): "בות"}
+    # CHANGED 2026-08-26 (code review). The default used to be words_by_klal=None
+    # and None meant "skip the check", so a caller that simply did not know to
+    # pass the corpus got an UNGUARDED map - and
+    # tools/validate_suppression_filters.py, the harness whose job is to measure
+    # these filters, was exactly that caller. The default now DERIVES the corpus
+    # and guards; opting out is explicit.
+    assert smw.docai_verdicts([drifted]) == {}
+    # ...and passing None explicitly is still the escape hatch for a caller that
+    # genuinely has no corpus to check against.
+    assert smw.docai_verdicts([drifted], None) == {(1, 1): "בות"}
 
 
 def test_ligature_repair_degrades_visibly_when_the_reference_corpus_is_absent():

@@ -173,16 +173,51 @@ def append_decision(decision_type, klal_id, word_index=None, chosen_source=None,
     return record
 
 
+# (path -> ((mtime_ns, size), records)) for the last file read. See _read_all().
+_READ_CACHE = {}
+
+
 def _read_all(path=None):
+    """Every decision row, oldest first, re-read from disk whenever the file
+    has changed.
+
+    MEMOIZED 2026-08-26 (code review: 2026-08-25 C1/C2, 2026-08-26 H9/H10/H11 -
+    both runs found this independently). A single request calls this many times
+    over - `GET /api/page/73` measured **25 full parses of the 1.8 MB log,
+    182.5 ms**, because api_page() calls _word_level_ai_flags() per klal and
+    that function alone re-reads candidate_choice and manual_correction. With
+    this cache the same request is **14.0 ms**; /api/klal/88 goes 9 parses ->
+    11.6 ms, /api/klalim 7 parses -> 20.4 ms.
+
+    This does NOT weaken review_server.py's "fresh off disk every call,
+    deliberately no cache" contract, and the distinction matters. The key is
+    (st_mtime_ns, st_size), so any write invalidates it - and this file is
+    APPEND-ONLY by design (see the module header), so a write always grows it
+    and the size alone would be enough. A decision recorded in one tab is
+    visible to the next request from another, which is the property that
+    contract exists to protect.
+
+    Returning the cached list means callers share record objects across threads
+    (ThreadingHTTPServer). Verified before landing this: replaying
+    api_page/api_klal/api_klalim over shared records mutated 0 of 2,153 rows -
+    every consumer reads. A caller that needs to mutate a row must copy it.
+    """
     path = _resolve(path)
-    if not os.path.exists(path):
+    try:
+        st = os.stat(path)
+    except OSError:
         return []
+    stamp = (st.st_mtime_ns, st.st_size)
+    cached = _READ_CACHE.get(path)
+    if cached is not None and cached[0] == stamp:
+        return cached[1]
     records = []
     with open(path, encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if line:
                 records.append(json.loads(line))
+    _READ_CACHE[path] = (stamp, records)
     return records
 
 

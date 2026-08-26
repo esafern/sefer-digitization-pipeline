@@ -39,11 +39,14 @@ REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(REPO, "pipeline"))
 
 import corpus_io as cio  # noqa: E402
+from repair_filters import docai_filter  # noqa: E402
 
 sys.path.insert(0, os.path.join(REPO, "tools"))
 from check_span_shortfall import FURNITURE_WORDS  # noqa: E402
 
-PLACEHOLDER_RE = re.compile(r"^\S+\s+כלל\s+\d+\s*$")
+# Shared with tools/export_corpus.py via corpus_io (moved there 2026-08-26, code
+# review) - the two used byte-identical private copies of one decision.
+PLACEHOLDER_RE = cio.PLACEHOLDER_RE
 
 # Lexical gates, CALIBRATED against the klalim that already have real text rather
 # than picked by feel: both floors are the 2nd percentile of the real corpus, so
@@ -61,6 +64,12 @@ MIN_ATTESTED_OPENING = 0.71
 OPENING_WORDS = 30
 MIN_LETTERS_FOR_ATTESTATION = 4
 
+# A token whose centre sits in the top this-fraction of a page's vertical extent
+# is in the running-header band. See is_folio_token(): every genuine folio in the
+# current data measures <= 0.006, the one real word the old text-only rule ate
+# measured 0.032.
+HEADER_BAND_MAX_REL_Y = 0.02
+
 # Page furniture, in the same vocabulary tools/check_span_shortfall.py already
 # uses: the running header, its OCR variants, and the letter-section names.
 # A span that crosses a page seam walks straight through the next page's header,
@@ -76,8 +85,7 @@ MAX_PLAUSIBLE_WORDS = 1400
 MIN_PLAUSIBLE_WORDS = 2
 
 
-def is_placeholder(clean_text):
-    return bool(PLACEHOLDER_RE.match(" ".join((clean_text or "").split())))
+is_placeholder = cio.is_placeholder
 
 
 def attested_share(words, frequencies):
@@ -94,14 +102,29 @@ def attested_share(words, frequencies):
 
 
 def load_reference_frequencies():
-    path = cio.repo_path("sefaria_reference_corpus", "word_freq.json")
-    data = cio.load_json(path)
-    if not data:
+    """The reference-corpus word frequencies, keyed the way attested_share()
+    looks them up.
+
+    FIXED 2026-08-26 (code review). This was a third private copy of the loader
+    and it returned word_freq.json's keys RAW, while its only consumer,
+    attested_share(), looks up `cio.hebrew_letters_only(w)`. Latent, not live:
+    all 185,593 keys in the current cache are already bare letters, so the two
+    forms coincide - measured, not assumed. It would have gone live silently the
+    day that cache is rebuilt keeping geresh/gershayim: every lookup misses,
+    attestation collapses to zero, every span fails the lexical gates, and the
+    reported reason blames the text rather than the arbiter. The canonical
+    loader in pipeline/repair_filters/docai_filter.py normalises and is
+    lru-cached; it is the one to use.
+
+    Its `{}`-when-absent behaviour is kept but NOT kept silent: an absent cache
+    disables the gates, and a gate that cannot fire must say so (Lesson 26).
+    """
+    freqs = docai_filter.reference_frequencies()
+    if not freqs:
         print("WARNING: sefaria_reference_corpus/word_freq.json is absent - the lexical "
               "gates are DISABLED and every located span will be accepted unchecked.")
         print("         See SETUP.md; this file is gitignored and migrated separately.")
-        return {}
-    return data
+    return freqs
 
 
 def load_traces():
@@ -132,7 +155,22 @@ def page_words(page, cache):
     tool and the reconstruction tool described different spans for the same klal.
     """
     if page not in cache:
-        cache[page] = [t["text"] for t in cio.load_docai_page(page)]
+        # load_docai_page() returns None for a page that was never extracted
+        # (its docstring is explicit), and the cross-page branch below can ask
+        # for start_page + 1, which may sit outside the extracted range. Treat a
+        # missing page as an empty span so the caller refuses the klal for a
+        # short span, rather than raising TypeError mid-run. FIXED 2026-08-26
+        # (code review).
+        toks = cio.load_docai_page(page) or []
+        # Each token is carried as (text, in_header_band). The band flag is the
+        # only reliable way to tell the printed folio from the first word of the
+        # body - see is_folio_token(). Computed per page from the page's own
+        # vertical extent, so it does not depend on absolute page geometry.
+        ys = [cio.center_y(t) for t in toks]
+        lo, hi = (min(ys), max(ys)) if ys else (0.0, 1.0)
+        span = (hi - lo) or 1.0
+        cache[page] = [(t["text"], (cio.center_y(t) - lo) / span < HEADER_BAND_MAX_REL_Y)
+                       for t in toks]
     return cache[page]
 
 
@@ -152,14 +190,22 @@ def reconstruct(klal_id, klal, traces, cache):
         # The klal crosses a page break: rest of this page plus the head of the next.
         tail = words[start + 1:]
         head = page_words(start_page + 1, cache)[:nxt["marker_position"]]
-        seam = len(tail)
+        # Count the seam on the FILTERED tail, because `body` is filtered below
+        # before anything slices it with this index. FIXED 2026-08-26 (code
+        # review): `seam = len(tail)` counted raw tokens, so a single empty
+        # token anywhere in the tail pushed the seam past the true boundary and
+        # into the next page's head - mis-splitting the furniture strip and
+        # pointing drop_seam_duplicate() at the wrong pair. Latent today only
+        # because no page in docai_word_boxes/ currently holds a blank token.
+        seam = len([t for t, _ in tail if t.strip()])
         body = tail + head
         note = (f"page {start_page} tokens {start + 1}-end + page {start_page + 1} "
                 f"tokens 0-{nxt['marker_position'] - 1}")
     else:
         return None, "next klal's marker not located on this page or the next"
 
-    body = [w for w in (t.strip() for t in body) if w]
+    body = [(t.strip(), band) for t, band in body]
+    body = [x for x in body if x[0]]
     if seam is not None:
         # count furniture removed BEFORE the seam so the seam index still points
         # at the same word after stripping
@@ -172,7 +218,7 @@ def reconstruct(klal_id, klal, traces, cache):
         return None, f"span holds only {len(body)} token(s)"
     if len(body) > MAX_PLAUSIBLE_WORDS:
         return None, f"span holds {len(body)} tokens - too long for one klal"
-    return f"{klal['gematria']} " + " ".join(body), note
+    return f"{klal['gematria']} " + " ".join(t for t, _ in body), note
 
 
 def strip_page_furniture(words):
@@ -183,21 +229,94 @@ def strip_page_furniture(words):
     Arabic digits. It appears mid-span only where the span crosses a page seam,
     so it is always a short contiguous run of furniture vocabulary - which is
     how this tells it from a klal that legitimately discusses `כללי הבית`."""
+    # Position-independent scan furniture goes first, before the run logic, and
+    # this is a STRIP rather than a refusal because neither kind is ambiguous.
+    # ADDED 2026-08-26 (code review): the run logic below keys on Hebrew
+    # vocabulary and on the folio FOLLOWING a header run, so it could see neither
+    # the Google Books footer (Latin - hebrew_letters_only maps it to "") nor a
+    # folio printed BEFORE the header, which is how page 221 sets it
+    # (`104 יד מלאכי כללי השין`). Both walked into the corpus; see
+    # PROJECT-STATUS.md item 20.
+    words = [w for w in words if not _is_scan_furniture(w)]
     out, i = [], 0
     while i < len(words):
         j = i
-        while j < len(words) and cio.hebrew_letters_only(words[j]) in FURNITURE_WORDS:
+        while j < len(words) and cio.hebrew_letters_only(words[j][0]) in FURNITURE_WORDS:
             j += 1
         run = j - i
-        if run >= 2 and run <= FURNITURE_RUN_MAX:
+        if run > FURNITURE_RUN_MAX:
+            # A run this long is real text, per the comment above - so keep ALL
+            # of it and step past it. FIXED 2026-08-26 (code review): the loop
+            # used to emit only words[i] and advance by one, so the next pass saw
+            # a run one shorter, and a run of 7 kept its first word and stripped
+            # the other 6 - the opposite of what the rule says. No occurrences in
+            # today's data.
+            out.extend(words[i:j])
+            i = j
+            continue
+        if run >= 2:
             # the folio number rides along with the header
-            if j < len(words) and re.fullmatch(r"[\d\u05d0-\u05ea\"\'׳״]{1,5}", words[j] or ""):
+            if j < len(words) and is_folio_token(words[j]):
                 j += 1
             i = j
             continue
         out.append(words[i])
         i += 1
     return out
+
+
+def _is_scan_furniture(token):
+    """True for the scan watermark, and for a numeral printed in the header band.
+
+    The watermark is the Google Books footer, which cannot be corpus content in a
+    Hebrew work. The header-band numeral is the printed folio: it is the same
+    object is_folio_token() looks for, but recognised by WHERE it is rather than
+    by what follows it, so it is caught whether the press set it before or after
+    the running header.
+    """
+    text, _in_header_band = token
+    if cio.is_watermark(text):
+        return True
+    # A bare Arabic-digit token is the printed folio wherever it appears - this
+    # press sets it at the head of some pages and at the FOOT of others, beside
+    # the watermark (pages 86, 126 and 246 put it at relative-y 0.93), so keying
+    # on the header band alone missed three of them. It is never content: the
+    # work numbers in Hebrew letters, and the 222 reviewed klalim of Part 1
+    # contain zero bare Arabic-digit tokens. The klal's own marker and title are
+    # taken from the CORPUS and prepended separately, so this cannot touch them.
+    return bool(re.fullmatch(r"\d{1,4}", text or ""))
+
+
+def is_folio_token(token):
+    r"""True when this token is the printed folio that rides along with a header.
+
+    FIXED 2026-08-26 (code review). The old rule was
+    `re.fullmatch(r'[\d\u05d0-\u05ea"\'׳״]{1,5}', text)`, which matches almost
+    ANY Hebrew word of 1-5 letters, not a numeral - so whenever the header run
+    was not actually followed by a folio, it deleted the first real word of the
+    next page instead, silently. Traced over every firing in the current data:
+    11 of 12 removed a genuine folio or header word and **1 removed real text -
+    klal 616 lost `אכיל` from `ורב היכי אכיל בשרא`**, because page 221 prints its
+    folio as Arabic `104` BEFORE the header, leaving the first body word exactly
+    where the rule expected a numeral.
+
+    The discriminator is geometry, not spelling, and no spelling rule can
+    substitute: a folio numeral like `מה` (45) is also the ordinary word "what",
+    and `אכיל` scans as a perfectly good gematria. Measured on all 12 firings:
+    every genuine folio sits at relative-y <= 0.006 on its page, the wrongly
+    deleted `אכיל` at 0.032 - a clean separation with a 5x margin, which is why
+    the threshold is set at 0.02 rather than tuned to fit.
+
+    NOTE for whoever reads this next: this is the THIRD change to this page-seam
+    cleaner (Lesson 31 counts the two before it). It is not a threshold retune -
+    it replaces a text heuristic with the signal that actually distinguishes the
+    two cases - but the lesson still applies: if it needs a fourth, stop and hand
+    the whole cleaner back rather than adjusting it again.
+    """
+    text, in_header_band = token
+    if not in_header_band:
+        return False
+    return bool(re.fullmatch(r"[\d\u05d0-\u05ea\"\'׳״]{1,5}", text or ""))
 
 
 def drop_seam_duplicate(words, seam_index):
@@ -209,7 +328,13 @@ def drop_seam_duplicate(words, seam_index):
     word elsewhere in the klal is left alone."""
     if seam_index is None or not (0 < seam_index < len(words)):
         return words
-    if cio.hebrew_letters_only(words[seam_index - 1]) == cio.hebrew_letters_only(words[seam_index]):
+    a, b = words[seam_index - 1][0], words[seam_index][0]
+    la, lb = cio.hebrew_letters_only(a), cio.hebrew_letters_only(b)
+    # Both must actually BE Hebrew. FIXED 2026-08-26 (code review): this compared
+    # hebrew_letters_only() forms only, and two DIFFERENT non-Hebrew tokens both
+    # normalise to "" and so compared equal - on klal 616 that deleted the real
+    # folio token `104` as a "duplicate" of `Google`.
+    if la and la == lb:
         return words[:seam_index] + words[seam_index + 1:]
     return words
 
@@ -222,9 +347,29 @@ def drop_seam_duplicate(words, seam_index):
 # tests/test_corpus_invariants.py is simply not written, and is reported instead.
 # Yield is the thing to sacrifice here - a klal left as a placeholder is honest,
 # a klal filled with page furniture is corpus damage.
+# FIXED 2026-08-26 (code review). This name is taken from
+# tests/test_corpus_invariants.py, and the tool's contract is "a reconstruction
+# that would fail the invariants is simply not written" - but the two patterns
+# were NON-OVERLAPPING, so the contract was not enforced. The invariant tolerates
+# OCR misreads of BOTH header words (`מ[לר][אר]כי כ[לר][לר]י`); this required a
+# literal `מלאכי`. Reproduced: `יר מראכי כללי הביח` passed here and failed pytest
+# - i.e. the damage is committed first and found afterwards. The invariant's own
+# pattern is now included verbatim as the first alternative, so anything pytest
+# rejects this refuses; the remaining alternatives stay because they catch
+# furniture pytest does not (a bare `יד מלאכי`, a bare `כללי ה<section>`).
+_PYTEST_INVARIANT_RE = r"מ[לר][אר]כי כ[לר][לר]י"
 HEADER_CONTAMINATION_RE = re.compile(
-    r"(?:י[דרך])\s+מלאכי|כללי\s+ה(?:אלף|בית|גימל|דלת|הא|וו|זין|חית|טית|יוד|כף|למד|"
+    _PYTEST_INVARIANT_RE + r"|"
+    r"(?:י[דרך])\s+מ[לר][אר]כי|כללי\s+ה(?:אלף|בית|גימל|דלת|הא|וו|זין|חית|טית|יוד|כף|למד|"
     r"מם|נון|סמך|עין|פא|צדי|קוף|ריש|שין|תיו)")
+
+# The Google Books scan footer. NOT page furniture to strip_page_furniture():
+# it keys on hebrew_letters_only(), which maps every Latin token to "", so the
+# watermark is invisible to it and walked straight into the corpus - 12 klalim
+# (250, 290, 333, 357, 380, 385, 414, 442, 553, 580, 616, 665), found 2026-08-26,
+# see PROJECT-STATUS.md item 20. No klal of a Hebrew work contains Latin script,
+# so this is a refusal, not a cleaning heuristic.
+LATIN_SCRIPT_RE = re.compile(r"[A-Za-z]")
 
 
 def violates_corpus_invariants(text):
@@ -232,6 +377,8 @@ def violates_corpus_invariants(text):
     reasons = []
     if HEADER_CONTAMINATION_RE.search(text):
         reasons.append("carries page-header furniture")
+    if LATIN_SCRIPT_RE.search(text):
+        reasons.append("carries the scan watermark (Latin script)")
     forms = [cio.hebrew_letters_only(w) for w in text.split()]
     dup = next((a for a, b in zip(forms, forms[1:]) if a and a == b), None)
     if dup:
@@ -246,6 +393,25 @@ def overlaps_neighbour(text, neighbour):
         return False
     opening = " ".join((neighbour.get("clean_text") or "").split()[1:9])
     return bool(opening) and opening in text
+
+
+def _revisit_note(item):
+    """The revisit-flag note for one reconstruction.
+
+    `attested_overall` is None whenever the span held no word long enough to
+    score (and, before this file refused that case, whenever the reference cache
+    was missing) - so this must not assume a number is there. It said `:.2f`
+    unconditionally and raised TypeError.
+    """
+    share = item.get("attested_overall")
+    attested = (f"{share:.2f} of substantial words attested in the independent "
+                f"reference corpus" if share is not None
+                else "attestation not measured (no word long enough to score)")
+    return (f"Reconstructed from the DocAI token stream ({item['source']}) because "
+            f"this klal stored only a placeholder. {item['words']} words, {attested}. "
+            f"NEVER READ BY A HUMAN and never adjudicated against the scan - the "
+            f"extraction is mechanical, the boundaries come from the gematria trace, "
+            f"and a scramble inside the body would not have been caught.")
 
 
 def main():
@@ -264,6 +430,19 @@ def main():
     by_id = {k["klal_id"]: k for ks in loaded.values() for k in ks}
 
     frequencies = load_reference_frequencies()
+    if args.apply and not frequencies:
+        # FIXED 2026-08-26 (code review). Without the reference cache both
+        # lexical gates are skipped (`... if frequencies else None`, below), so
+        # --apply wrote EVERY located span into the corpus unchecked - and then
+        # crashed formatting `None` into the revisit-flag note, after the write,
+        # leaving unreviewed machine text in part2/part3.json with zero flags on
+        # it. That cache is gitignored, so a fresh clone is exactly where this
+        # fires. A gate that cannot fire must not pass silently (Lesson 26):
+        # refuse the write instead.
+        sys.exit("REFUSING to --apply: sefaria_reference_corpus/word_freq.json is "
+                 "absent, so both lexical gates are disabled and every located span "
+                 "would be written unchecked. See SETUP.md for the cache; run without "
+                 "--apply for a report.")
     filled, skipped = [], []
     for part, klalim in loaded.items():
         for klal in klalim:
@@ -321,9 +500,20 @@ def main():
         print(f"report -> {args.out}")
 
     if args.apply:
+        # Notes are formatted BEFORE the corpus is written. They used to be
+        # built after it, inside the append loop, so any formatting failure
+        # (see the `attested_overall is None` path above) left the corpus
+        # written and the flags unrecorded - the one ordering in which a crash
+        # does maximum damage.
+        flag_notes = {item["klal_id"]: _revisit_note(item) for item in filled}
         for part, path in files.items():
-            with open(path, "w", encoding="utf-8") as f:
-                json.dump(loaded[part], f, ensure_ascii=False, indent=2)
+            # cio.save_part1() is THE corpus serializer, not a convenience -
+            # `ensure_ascii=False, indent=2` is the tracked on-disk format, and a
+            # writer that disagrees rewrites the whole file as a diff. This was a
+            # third private copy (code review 2026-08-26); the flags happen to
+            # match today, which is exactly how the two earlier copies looked
+            # right up until they diverged.
+            cio.save_part1(loaded[part], path=path)
         print("WROTE part2.json and part3.json - run ./rebuild_all.sh next")
         if not args.no_flag:
             # Every reconstructed klal is flagged for revisit, because that is
@@ -342,13 +532,7 @@ def main():
                     klal_id=item["klal_id"],
                     word_index=None,
                     needs_revisit=True,
-                    note=(f"Reconstructed 2026-08-25 from the DocAI token stream "
-                          f"({item['source']}) because this klal stored only a placeholder. "
-                          f"{item['words']} words, {item['attested_overall']:.2f} of substantial "
-                          f"words attested in the independent reference corpus. NEVER READ BY A "
-                          f"HUMAN and never adjudicated against the scan - the extraction is "
-                          f"mechanical, the boundaries come from the gematria trace, and a "
-                          f"scramble inside the body would not have been caught."),
+                    note=flag_notes[item["klal_id"]],
                     reviewer="tools/reconstruct_placeholder_klalim.py",
                 )
             print(f"recorded {len(filled)} revisit flags - these klalim are unreviewed machine output")

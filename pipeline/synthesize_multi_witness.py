@@ -82,7 +82,10 @@ def load_baseline(path):
     return {kid: text.split() for kid, text in by_klal.items()}
 
 
-def docai_verdicts(verified, words_by_klal=None):
+_DERIVE_WORDS = object()
+
+
+def docai_verdicts(verified, words_by_klal=_DERIVE_WORDS):
     """(klal_id, word_index) -> DocAI's own differing reading.
 
     Sourced from the real corrections pipeline: build_corrections_dataset.py
@@ -103,6 +106,19 @@ def docai_verdicts(verified, words_by_klal=None):
     a real one, and would carry the primary engine's authority.
     """
     import assemble_corrections_dataset as acd
+    if words_by_klal is _DERIVE_WORDS:
+        # FAIL CLOSED. FIXED 2026-08-26 (code review): the guard defaulted to
+        # None and None meant "skip the check", so any caller that did not know
+        # to pass the corpus silently got an UNGUARDED verdict map - and one
+        # already did: tools/validate_suppression_filters.py calls this with one
+        # argument. That is the harness whose job is to measure these filters, so
+        # it was structurally measuring something the production path no longer
+        # does, and the two would diverge the moment any candidate drifted
+        # (Lesson 25's shape: a check that cannot fail). Derive the corpus here
+        # instead of trusting the caller; pass words_by_klal=None explicitly to
+        # opt out.
+        words_by_klal = {k["klal_id"]: (k.get("clean_text") or "").split()
+                         for k in (cio.load_part1_sorted() or [])}
     out, skipped = {}, 0
     for c in verified:
         if c.get("opcode") != "replace":
@@ -382,8 +398,18 @@ def main():
           f"{len(contra)} - of which {len(art)} are a known ligature artifact "
           f"(the engines share the misread, the human is right) and {len(real)} are not")
     if art:
+        # CORRECTED 2026-08-26 (code review). This said "the stored text is
+        # correct in each", which was true when the bucket held only artifacts
+        # judged against stored text. The chosen_txt widening put a second case
+        # in it: a position where a reviewer has already CORRECTED the word and
+        # the decision is not yet applied - there the stored text is the stale,
+        # wrong reading, and the human's choice is what the artifact matches. An
+        # operator reading the old line was told the corpus was right at
+        # positions where it is known to be wrong.
         print(f"    [{len(art)} ligature-artifact contradiction(s) suppressed from the list "
-              f"below - the stored text is correct in each]")
+              f"below - the engines share a known misread and the human's reading "
+              f"is the one to trust; where a decision is recorded but not yet "
+              f"applied, that reading is NOT what the corpus currently stores]")
     for kid, wi, chosen, reading, engines, _a in real:
         # Never buried in a count: a human choosing one reading while two
         # independent engines agree on another is a Lesson 9 case that needs

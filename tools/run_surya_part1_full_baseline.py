@@ -261,6 +261,7 @@ def run_surya_part1(force_recompute=False, assemble_only=False, only_pages=None,
 
     print(f"Total pages: {len(pages)}, Cached: {len(pages) - len(pages_to_process)}, To run: {len(pages_to_process)}")
 
+    _render_doc = [None]   # lazily opened once; see the render branch below
     for idx, p in enumerate(pages_to_process, 1):
         img_path = os.path.join(REPO, "images", "pdf_pages", f"page_{p}.png")
         if not os.path.exists(img_path):
@@ -286,11 +287,16 @@ def run_surya_part1(force_recompute=False, assemble_only=False, only_pages=None,
             # plausible-looking Hebrew from the wrong klal entirely, which is
             # exactly how a day was lost to a false negative before this comment
             # existed.
-            import fitz, io
-            doc = fitz.open(corpus_io.repo_path("berlin_square_corrected.pdf"))
-            pm = doc[p - 1].get_pixmap(dpi=render_dpi)
+            import io
+            # Opened ONCE for the whole run, not once per page. FIXED 2026-08-26
+            # (code review): this reopened the 114 MB PDF inside the per-page
+            # loop - one open per page rendered - while the --fill-gaps block
+            # added in the same commit already opens it once, correctly.
+            if _render_doc[0] is None:
+                import fitz
+                _render_doc[0] = fitz.open(corpus_io.repo_path("berlin_square_corrected.pdf"))
+            pm = _render_doc[0][p - 1].get_pixmap(dpi=render_dpi)
             img = Image.open(io.BytesIO(pm.tobytes("png")))
-            doc.close()
         else:
             img = Image.open(img_path)
         w, h = img.size

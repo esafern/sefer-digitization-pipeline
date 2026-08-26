@@ -39,7 +39,7 @@ loaders, Hebrew helpers) and `pipeline/vision_adjudication_common.py`
 (crop/cache/retry/client). A hand-maintained parallel copy has produced the
 same bug class here more than once.
 
-**Then read Part 2's 31 numbered lessons.** They are rules, not history. The
+**Then read Part 2's 33 numbered lessons.** They are rules, not history. The
 short version of most of them: a check that wasn't run has verified nothing, a
 passing score is not a checked result, and no single confident signal is
 enough.
@@ -889,3 +889,28 @@ next incident.
     clothes, and the correct move is to document the issue with its measured
     extent and hand it to the user. Never let a fix for N instances put the
     other 200 at risk.
+
+32. **A tool that prints is not a tool that runs. Put a cheap check in the
+    chain, or accept that its findings do not exist.** `detect_real_word_
+    substitution.py` was finding `בחרא`->`בחדא` in klal 84 correctly, in its
+    normal output, for as long as it had existed - and on 2026-08-26 the reviewer
+    found that word by eye, because the script was `[STANDALONE]`, printed to
+    stdout, was in no chain and wrote no file. It costs **0.1 seconds** on the
+    full corpus. This is Lesson 29 ("a field nothing reads is not a feature")
+    raised one level: a whole detector can be correct, maintained, and
+    tested, and still deliver nothing. When you find yourself writing
+    `[STANDALONE]` on something cheap and repeatable, ask what will cause it to
+    run again, and if the answer is "somebody remembers", put it in
+    `rebuild_all.sh` and have it write an artifact. Corollary, learned the same
+    day: routing its output is a SEPARATE decision from running it - these
+    detectors carry real false positives (the independent witnesses contradict
+    149 of 262 findings), so the stage writes a triage report and never a flag.
+
+33. **Check a tool's STATE, not its printout.** After purging 79 rows from
+    `lexicon.txt`, the effect was checked by grepping the corpus-integrity
+    validator's output for the purged forms - 1 of 13 appeared, which read as
+    "the purge did not work". It had worked perfectly; the validator truncates
+    its report to the top entries by frequency. Computing the set membership
+    directly showed all 13. A grep against a summary is a check on the summary.
+    This is Lesson 19's shape ("verify against the data, not against the
+    write-up") applied to tooling output, and it costs a false alarm every time.

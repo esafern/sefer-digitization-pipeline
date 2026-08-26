@@ -543,6 +543,32 @@ def test_no_page_header_contamination(all_klalim):
     )
 
 
+def test_no_scan_watermark_in_clean_text(all_klalim):
+    """The Google Books footer is not corpus content, and Latin script is the
+    cheapest possible way to say so in a Hebrew work.
+
+    ADDED 2026-08-26. This invariant did not exist, and its absence is why
+    `Digitized by Google` sat inside the text of **12 klalim** (250, 290, 333,
+    357, 380, 385, 414, 442, 553, 580, 616, 665) with all 289 gated tests
+    passing - test_no_page_header_contamination above only matches the HEBREW
+    running header, and the watermark is Latin, so nothing looked. The 12 shipped
+    into `sefaria_export/version_hebrew.json` under real citation addresses.
+    tools/reconstruct_placeholder_klalim.py wrote them by walking a page seam
+    straight through the footer, because `strip_page_furniture()` keys on
+    `hebrew_letters_only()`, which maps every Latin token to "". See
+    PROJECT-STATUS.md item 20. Zero tolerance, not a baseline: no klal of this
+    work contains a Latin character.
+    """
+    offenders = [k["klal_id"] for k in all_klalim if re.search(r"[A-Za-z]", k["clean_text"])]
+    assert not offenders, (
+        f"Latin script in clean_text for klal(im) {offenders} - this is the Google "
+        "Books scan watermark ('Digitized by Google'), never real content. It "
+        "reaches the corpus through a page-seam reconstruction; see "
+        "PROJECT-STATUS.md item 20 and tools/reconstruct_placeholder_klalim.py's "
+        "_is_scan_furniture()."
+    )
+
+
 def test_no_debug_artifact_leaks(all_klalim):
     offenders = [k["klal_id"] for k in all_klalim if LEADING_DIGIT_RE.match(k["clean_text"].strip())]
     assert not offenders, (
@@ -1610,6 +1636,127 @@ def test_every_flagged_word_in_the_text_pane_has_a_flagged_box_on_the_scan(part1
     assert not offenders, (
         f"{len(offenders)} word(s) the text pane flags but the scan pane serves as plain "
         f"prose (klal, word, page, opcode, flag): {offenders[:8]}")
+
+
+def test_end_of_klal_gap_marker_is_rendered_exactly_once():
+    """REGRESSION 2026-08-26. A `delete` candidate can sit at
+    word_index == len(words) - text the scan has AFTER the klal's last stored
+    word. Two blocks in renderKlalBody() rendered it: an older one-liner
+    (`gapsBefore[words.length]`) and the newer sorted block that supersedes it,
+    whose filter is `idx >= words.length` and therefore INCLUDES that index. So
+    the candidate was drawn twice - once with its accepted insert text, once bare
+    - in the 12 klalim that have one (84, 88, 106, 114, 138, 159, 164, 171, 175,
+    193, 211, 219, including klal 219, the klal the newer block was written for).
+    The reviewer saw a duplicate proposed insertion at the end of the klal.
+
+    Scraped from source in the same spirit as the MACHINE_RESOLVED_FLAGS check
+    below: the defect is one renderer too many, which is visible in the text."""
+    with open(os.path.join(REPO, "review_frontend", "app.js"), encoding="utf-8") as f:
+        js = f.read()
+    renders = re.findall(r"gapsBefore\[words\.length\]\.forEach", js)
+    assert len(renders) <= 1, (
+        f"review_frontend/app.js renders gapsBefore[words.length] {len(renders)} times; "
+        "the sorted `idx >= words.length` block already covers that index, so a second "
+        "renderer draws every end-of-klal omission candidate twice.")
+
+
+def test_no_corpus_word_is_aligned_to_page_furniture():
+    """REGRESSION 2026-08-26 (reviewer: "clicking on klal 7 word 497 highlights
+    the wrong word").
+
+    _corpus_word_bboxes() aligns the klal's words against a page's DocAI tokens
+    to find each word's scan box. The running header, the folio and the Google
+    Books watermark are stripped from clean_text by construction - so if they are
+    left in the token list, SequenceMatcher is free to capture a corpus word with
+    one of them. Klal 7's `י"ר` matched page 18's header `יר` at relative-y 0.000
+    instead of its real occurrence at the foot of page 17 (rel-y 0.870), and
+    clicking it rang the running header on the wrong page. Eight Part-1 words
+    across eight klalim were boxed on a header token before the fix."""
+    import corpus_io as cio
+    review_server = _import_from_path("review_server", os.path.join(REPO, "pipeline", "review_server.py"))
+    if not os.path.isdir(cio.DOCAI_DIR):
+        pytest.skip("docai_word_boxes/ is gitignored and migrated separately")
+    by_id, _ = review_server._load_klalim(1)
+    regions = review_server._load_regions()
+    offenders = []
+    for klal_id, k in sorted(by_id.items()):
+        words = (k.get("clean_text") or "").split(" ")
+        for page in review_server._klal_all_pages(klal_id, regions):
+            toks = cio.load_docai_page(page, cio.DOCAI_DIR) or []
+            if not toks:
+                continue
+            furniture = {(round(toks[i]["x1"], 6), round(toks[i]["y1"], 6))
+                         for i in cio.header_furniture_indices(toks)}
+            if not furniture:
+                continue
+            for wi, b in review_server._corpus_word_bboxes(klal_id, words, page).items():
+                if (round(b["x1"], 6), round(b["y1"], 6)) in furniture:
+                    offenders.append((klal_id, wi, page))
+    assert not offenders, (
+        f"{len(offenders)} corpus word(s) have a scan box that is a page-header, folio or "
+        f"watermark token (klal, word_index, page): {offenders[:8]}")
+
+
+def test_reject_omission_option_does_not_read_a_field_that_cannot_exist():
+    """REGRESSION 2026-08-26 (reviewer: klal 66 word 17, "can't save decision
+    current text (no word)").
+
+    A `delete`-opcode candidate says the scan has text the corpus lacks. The
+    reviewer's two choices are "accept the inserted word" and "keep current text
+    (no word)" - and the second one is a real, common answer, because many of
+    these proposals are junk (`בעיא 4`, `४`, `ג` among the four already
+    recorded). That option used `source: 'final_text'`, but a delete candidate has
+    NO final_text by definition, so saveDisputedDecision() resolved it to
+    undefined and POSTed a null. When the null guard landed the same day, the
+    option became unsaveable for all 40 omission candidates across 35 klalim -
+    a data-corrupting bug traded for a dead control.
+
+    The option must resolve to an explicit empty string, which
+    apply_delete_insertion() already treats as "insert nothing"."""
+    with open(os.path.join(REPO, "review_frontend", "app.js"), encoding="utf-8") as f:
+        js = f.read()
+    pushes = [ln for ln in js.splitlines()
+              if "options.push" in ln and "Keep current text (no word)" in ln]
+    assert pushes, "app.js must still offer a 'Keep current text (no word)' option"
+    for ln in pushes:
+        assert "'final_text'" not in ln, (
+            "the 'Keep current text (no word)' option resolves to corr.final_text, which is "
+            "always absent on a delete-opcode candidate - it will POST null and be refused "
+            "by the write-site guard, leaving the control dead. Give it a source that "
+            f"yields an explicit empty string. Offending line: {ln.strip()}")
+
+
+def test_lexicon_does_not_whitelist_a_known_corrupt_form():
+    """`lexicon.txt` was built from THIS corpus's own OCR output, so it absorbs
+    the errors and then vindicates them - the structural hole documented for the
+    ligature bug ("lexicon.txt cannot catch the ligature corruption - it contains
+    it") and measured on 2026-08-26 at 22% of its entries having zero attestation
+    in 6.18M words of independent text.
+
+    It was purged twice by hand (24 dropped-lamed forms on 2026-08-15; 79 rows on
+    2026-08-26) and NOTHING prevented re-contamination either time, because the
+    file has no generator in this repo. This test is the gate that was missing:
+    a form confirmed corrupt must never be in the dictionary that decides whether
+    a word looks wrong.
+
+    Adding to this list is how you keep a purge from silently undoing itself -
+    when a reading is confirmed against the scan, put the corrupt form here."""
+    corrupt = {
+        # confirmed 2026-08-26, each read in context; see PROJECT-STATUS item 23
+        "כסכתא", "בחרא", "כרתב", "שרוא", "בסרק", "בישרץ", "מקטי", "כתרייתא",
+        "מאיין", "למיפך", "בתריתא", "זלזה", "איידו", "במשרו",
+    }
+    if not os.path.exists(os.path.join(REPO, "lexicon.txt")):
+        pytest.skip("lexicon.txt not present")
+    with open(os.path.join(REPO, "lexicon.txt"), encoding="utf-8") as f:
+        lexicon = {w.strip() for w in f if w.strip()}
+    offenders = sorted(corrupt & lexicon)
+    assert not offenders, (
+        f"lexicon.txt whitelists {len(offenders)} form(s) confirmed to be OCR corruption: "
+        f"{offenders}. A word in the lexicon can never be flagged as not-a-word, so every "
+        f"occurrence of these becomes invisible to check 5 of "
+        f"validate_part1_corpus_integrity.py. Remove them, or - if one turns out to be a "
+        f"real word after all - take it out of this test with the evidence.")
 
 
 def test_machine_resolved_flags_agree_between_server_and_frontend():

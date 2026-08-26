@@ -514,32 +514,6 @@
       "flag": "current_text_confirmed"
     },
     {
-      "word_index": 50,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "שס",
-      "page": 17,
-      "bbox": {
-        "x1": 0.5226715803146362,
-        "y1": 0.20988158881664276,
-        "x2": 0.5471813678741455,
-        "y2": 0.22703143954277039
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: surya + vlm agree on 'שם' against stored 'שס'.",
-      "vlm_reading": "שם",
-      "surya_reading": "שם",
-      "consensus_engines": [
-        "surya",
-        "vlm"
-      ],
-      "consensus_reading": "שם",
-      "ligature_artifact": null,
-      "flag": "current_text_may_be_wrong"
-    },
-    {
       "word_index": 61,
       "opcode": "replace",
       "docai_reading": "ארם",
@@ -687,12 +661,12 @@
       "opcode": "replace",
       "docai_reading": null,
       "final_text": "י\"ר",
-      "page": 18,
+      "page": 17,
       "bbox": {
-        "x1": 0.611940324306488,
-        "y1": 0.05669481307268143,
-        "x2": 0.6337064504623413,
-        "y2": 0.07961399108171463
+        "x1": 0.34681373834609985,
+        "y1": 0.8476929068565369,
+        "x2": 0.36642158031463623,
+        "y2": 0.859534502029419
       },
       "vision_selected": null,
       "vision_transcription": null,
@@ -9455,7 +9429,7 @@
       "word_index": 1039,
       "opcode": "replace",
       "docai_reading": "ושמול",
-      "docai_repaired": null,
+      "docai_repaired": "ושמואל",
       "final_text": "ושמואל",
       "page": 48,
       "bbox": {
@@ -9470,7 +9444,7 @@
       "reasoning": "In the raster crop, the word following 'רב' is printed defectively without the letter aleph ('א'), reading clearly as 'ושמול' rather than the standard spelling 'ושמואל'. Comparing the letter shapes with the alephs in 'פלוגתא' (line 1) and 'מהא' (line 3) confirms that no aleph is present between the mem/vav and the lamed in line 2.",
       "vlm_reading": "ושמואל",
       "surya_reading": "ושמוא",
-      "flag": "current_text_may_be_wrong"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 1108,
@@ -10607,7 +10581,7 @@
       "word_index": 282,
       "opcode": "replace",
       "docai_reading": "כשמול",
-      "docai_repaired": null,
+      "docai_repaired": "כשמואל",
       "final_text": "כשמואל",
       "page": 53,
       "bbox": {
@@ -10622,7 +10596,7 @@
       "reasoning": "The raster image clearly shows the word spelled defensively without the silent aleph (כתיב חסר: 'כשמול') preceding the word 'כו'. Option B ('כשמואל') includes an aleph that is absent in the manuscript printed text.",
       "vlm_reading": "כשמואל",
       "surya_reading": "כשמואל",
-      "flag": "current_text_may_be_wrong"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 335,
@@ -12334,7 +12308,7 @@
       "word_index": 152,
       "opcode": "replace",
       "docai_reading": "שמול",
-      "docai_repaired": null,
+      "docai_repaired": "שמואל",
       "final_text": "שמואל",
       "page": 62,
       "bbox": {
@@ -12349,7 +12323,7 @@
       "reasoning": "The image clearly shows the word 'שמואל' with the letters shin, mem, vav, aleph, and lamed (with its characteristic upper ascender). This matches the standard Rabbinic text context ('הלכה כאביי נגד שמואל שהוא בתרא') and Option B.",
       "vlm_reading": "שמואל",
       "surya_reading": "שמו'",
-      "flag": "current_text_confirmed"
+      "flag": "docai_ligature_artifact"
     },
     {
       "word_index": 221,
@@ -12540,7 +12514,7 @@
       "word_index": 501,
       "opcode": "replace",
       "docai_reading": "כשמול",
-      "docai_repaired": null,
+      "docai_repaired": "כשמואל",
       "final_text": "כשמוץ",
       "page": 62,
       "bbox": {
