@@ -269,6 +269,21 @@ applying it to the corpus remain two separate, deliberate steps.
     never read by a human: the gates reject a broadly-wrong span but cannot see a
     scramble buried inside an otherwise good klal.
 
+19. **CODE REVIEW 2026-08-26 ran out of budget twice; 3 of ~10 angles finished
+    and their 21 findings are parked in `CODE-REVIEW-2026-08-26.md`.** One is
+    confirmed and fixed: `reconstruct_placeholder_klalim.py` sliced a
+    reading-order token list with `marker_position`, a RAW array index, and **6
+    of the 51 klalim written 2026-08-25 took a boundary from the wrong token**
+    (commit `930ce76`; corpus reverted, tool fixed, reconstruction redone).
+    **The rest are unverified angle output and no correctness angle completed**,
+    so this range has had a reuse/efficiency/simplification pass and NOT a
+    correctness pass. The remaining leads cluster: three more copies of the
+    `word_freq.json` loader and of `is_placeholder`, a header regex that does not
+    match the invariant it claims to enforce, `api_page()` re-parsing the 1.8 MB
+    decision log 25× per request, and `open_count` served with nothing rendering
+    it. **Do not re-run this as one max-effort review over 99 files** — see that
+    file's header for why it died.
+
 ## Closed — the detail is in `PROJECT-STATUS-HISTORY.md`, by date
 
 Kept as an index so a reference to an old item number still resolves. Nothing here needs action.
