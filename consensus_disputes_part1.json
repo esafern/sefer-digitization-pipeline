@@ -2396,54 +2396,6 @@
   "66": [
     {
       "klal_id": 66,
-      "word_index": 82,
-      "opcode": "replace",
-      "final_text": "נקראתת",
-      "consensus_reading": "נקראת",
-      "agreeing_engines": [
-        "surya",
-        "vlm"
-      ],
-      "ligature_artifact": null,
-      "witnesses": {
-        "docai": null,
-        "vlm": "נקראת",
-        "surya": "נקראת"
-      },
-      "page": 34,
-      "bbox": {
-        "x1": 0.1348663717508316,
-        "y1": 0.21086518466472626,
-        "x2": 0.19390925765037537,
-        "y2": 0.22776660323143005
-      }
-    },
-    {
-      "klal_id": 66,
-      "word_index": 105,
-      "opcode": "replace",
-      "final_text": "והתנן",
-      "consensus_reading": "ודתנן",
-      "agreeing_engines": [
-        "surya",
-        "vlm"
-      ],
-      "ligature_artifact": null,
-      "witnesses": {
-        "docai": null,
-        "vlm": "ודתנן",
-        "surya": "ודתנן"
-      },
-      "page": 34,
-      "bbox": {
-        "x1": 0.6500931978225708,
-        "y1": 0.24104627966880798,
-        "x2": 0.6898694634437561,
-        "y2": 0.2587525248527527
-      }
-    },
-    {
-      "klal_id": 66,
       "word_index": 135,
       "opcode": "replace",
       "final_text": "ע\"ס",
@@ -6757,54 +6709,6 @@
         "y1": 0.5398623943328857,
         "x2": 0.13411618769168854,
         "y2": 0.55685955286026
-      }
-    },
-    {
-      "klal_id": 176,
-      "word_index": 636,
-      "opcode": "replace",
-      "final_text": "בחפי\"שה",
-      "consensus_reading": "בחפ\"שה",
-      "agreeing_engines": [
-        "surya",
-        "vlm"
-      ],
-      "ligature_artifact": null,
-      "witnesses": {
-        "docai": null,
-        "vlm": "בחפ\"שה",
-        "surya": "בחפ\"שה"
-      },
-      "page": 65,
-      "bbox": {
-        "x1": 0.2713226079940796,
-        "y1": 0.6454876661300659,
-        "x2": 0.33807170391082764,
-        "y2": 0.6616754531860352
-      }
-    },
-    {
-      "klal_id": 176,
-      "word_index": 691,
-      "opcode": "replace",
-      "final_text": "חי\"ר",
-      "consensus_reading": "חי\"ד",
-      "agreeing_engines": [
-        "surya",
-        "vlm"
-      ],
-      "ligature_artifact": null,
-      "witnesses": {
-        "docai": null,
-        "vlm": "חי\"ד",
-        "surya": "חי\"ד"
-      },
-      "page": 65,
-      "bbox": {
-        "x1": 0.3776266872882843,
-        "y1": 0.709834098815918,
-        "x2": 0.4103831946849823,
-        "y2": 0.7211655378341675
       }
     }
   ],

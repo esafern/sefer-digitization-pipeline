@@ -49,7 +49,7 @@ def build(part_path=None):
     ins_own = ins.build_own_frequency_table(klal_words) if hasattr(ins, "build_own_frequency_table") else own
     ins_hi, ins_amb = ins.find_candidates(klal_words, ins_own, indep)
 
-    def rows(items, kind, ambiguous):
+    def rows(items, kind, ambiguous, own=own):
         """The two detectors return different tuple shapes - the
         insertion/deletion one carries an extra edit-kind field that the
         substitution one has no equivalent for - so unpack positionally and
@@ -70,9 +70,18 @@ def build(part_path=None):
                 ref = next((x for x in rest[1:] if isinstance(x, int)), None)
                 edit = next((x for x in rest[1:] if isinstance(x, str)), None)
                 props.append({"form": form, "ref_count": ref, "edit": edit})
+            best = props[0] if props else {}
             out.append({"klal_id": kid, "word_index": wi, "stored": corrupt,
                         "proposals": props, "detector": kind,
-                        "ambiguous": bool(ambiguous)})
+                        "ambiguous": bool(ambiguous),
+                        # `rank` is what decides whether an entry is REVIEWABLE
+                        # (merged into the dashboard queue) or merely reported.
+                        # It is the reference-corpus count of the best proposal:
+                        # a high number means the reading being proposed is a
+                        # common, well-attested word, which is the sharpest
+                        # cheap signal available. See REVIEW_MIN_REF below.
+                        "rank": best.get("ref_count") or 0,
+                        "corpus_count": own.get(cio.hebrew_letters_only(corrupt), 0)})
         return out
 
     report = (rows(sub_hi, "substitution", False) + rows(sub_amb, "substitution", True)

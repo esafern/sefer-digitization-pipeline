@@ -1023,6 +1023,17 @@ async function openDisputedPanel(klalId, corr) {
   if (corr.surya_reading && !options.some(o => o.text === corr.surya_reading)) {
     options.push({ source: 'surya_reading', label: 'Surya OCR reading', text: corr.surya_reading });
   }
+  // A lexical-defect proposal (pipeline stage 4b). NOT an engine reading - it
+  // comes from the independent reference corpus's frequency table plus the
+  // detectors' one-edit search - so it is labelled for what it is rather than
+  // shown beside the OCR engines as if a witness had read it. ADDED 2026-08-26
+  // (reviewer: "are the 384 words flagged? how can i review?"): without an
+  // option card these entries would render a panel with nothing to choose, which
+  // is the dead-control shape this file already hit twice today.
+  if (corr.lexical_proposal && !options.some(o => o.text === corr.lexical_proposal)) {
+    options.push({ source: 'lexical_proposal', label: 'Lexical proposal (not an engine reading)',
+                   text: corr.lexical_proposal });
+  }
   // DocAI's reading with the alef-lamed ligature's dropped lamed restored
   // (pipeline/repair_filters/docai_filter.py). ADDED 2026-08-24 in a review of
   // this session's own code: the field was being computed and served and NEVER

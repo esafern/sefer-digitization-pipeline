@@ -1,6 +1,23 @@
 {
   "1": [
     {
+      "word_index": 23,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "דקאמרא",
+      "page": null,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Lexical defect: stored 'דקאמרא' has NO attestation in the independent reference corpus and occurs 1x here, while 'דקאמר' is attested 1304x and is one extra_char away. Found by tools/detect_insertion_deletion.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
+      "vlm_reading": null,
+      "surya_reading": null,
+      "lexical_proposal": "דקאמר",
+      "lexical_source": "detect_insertion_deletion.py",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
       "word_index": 85,
       "opcode": "replace",
       "docai_reading": "לכן",
@@ -537,6 +554,23 @@
   ],
   "7": [
     {
+      "word_index": 115,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "בבות",
+      "page": null,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Lexical defect: stored 'בבות' has NO attestation in the independent reference corpus and occurs 1x here, while 'בבית' is attested 3136x and is one None away. Found by tools/detect_real_word_substitution.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
+      "vlm_reading": null,
+      "surya_reading": null,
+      "lexical_proposal": "בבית",
+      "lexical_source": "detect_real_word_substitution.py",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
       "word_index": 229,
       "opcode": "replace",
       "docai_reading": null,
@@ -608,6 +642,23 @@
       "vlm_reading": "דאם",
       "surya_reading": "דאם",
       "flag": "current_text_confirmed"
+    },
+    {
+      "word_index": 278,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "מתרר",
+      "page": null,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Lexical defect: stored 'מתרר' has NO attestation in the independent reference corpus and occurs 1x here, while 'מתר' is attested 1220x and is one extra_char away. Found by tools/detect_insertion_deletion.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
+      "vlm_reading": null,
+      "surya_reading": null,
+      "lexical_proposal": "מתר",
+      "lexical_source": "detect_insertion_deletion.py",
+      "flag": "current_text_may_be_wrong"
     },
     {
       "word_index": 355,
@@ -1015,6 +1066,23 @@
       ],
       "consensus_reading": "ל\"ג",
       "ligature_artifact": null,
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 231,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "זוהה",
+      "page": null,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Lexical defect: stored 'זוהה' has NO attestation in the independent reference corpus and occurs 1x here, while 'והה' is attested 679x and is one extra_char away. Found by tools/detect_insertion_deletion.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
+      "vlm_reading": null,
+      "surya_reading": null,
+      "lexical_proposal": "והה",
+      "lexical_source": "detect_insertion_deletion.py",
       "flag": "current_text_may_be_wrong"
     },
     {
@@ -1830,6 +1898,23 @@
       "flag": "current_text_confirmed"
     },
     {
+      "word_index": 137,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "וכין",
+      "page": null,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Lexical defect: stored 'וכין' has NO attestation in the independent reference corpus and occurs 1x here, while 'ובין' is attested 1512x and is one None away. Found by tools/detect_real_word_substitution.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
+      "vlm_reading": null,
+      "surya_reading": null,
+      "lexical_proposal": "ובין",
+      "lexical_source": "detect_real_word_substitution.py",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
       "word_index": 400,
       "opcode": "replace",
       "docai_reading": null,
@@ -1853,6 +1938,23 @@
       ],
       "consensus_reading": "להו",
       "ligature_artifact": null,
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 423,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "הזוו",
+      "page": null,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Lexical defect: stored 'הזוו' has NO attestation in the independent reference corpus and occurs 1x here, while 'הוו' is attested 2052x and is one extra_char away. Found by tools/detect_insertion_deletion.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
+      "vlm_reading": null,
+      "surya_reading": null,
+      "lexical_proposal": "הוו",
+      "lexical_source": "detect_insertion_deletion.py",
       "flag": "current_text_may_be_wrong"
     },
     {
@@ -2188,6 +2290,23 @@
       "flag": "current_text_confirmed"
     },
     {
+      "word_index": 823,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "אמילת",
+      "page": null,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Lexical defect: stored 'אמילת' has NO attestation in the independent reference corpus and occurs 1x here, while 'אכילת' is attested 571x and is one None away. Found by tools/detect_real_word_substitution.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
+      "vlm_reading": null,
+      "surya_reading": null,
+      "lexical_proposal": "אכילת",
+      "lexical_source": "detect_real_word_substitution.py",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
       "word_index": 828,
       "opcode": "replace",
       "docai_reading": null,
@@ -2293,6 +2412,57 @@
       "ligature_artifact": null
     },
     {
+      "word_index": 1007,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "זלמן",
+      "page": null,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Lexical defect: stored 'זלמן' has NO attestation in the independent reference corpus and occurs 1x here, while 'זמן' is attested 4442x and is one extra_char away. Found by tools/detect_insertion_deletion.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
+      "vlm_reading": null,
+      "surya_reading": null,
+      "lexical_proposal": "זמן",
+      "lexical_source": "detect_insertion_deletion.py",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 1115,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "טיניה",
+      "page": null,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Lexical defect: stored 'טיניה' has NO attestation in the independent reference corpus and occurs 1x here, while 'מיניה' is attested 2722x and is one None away. Found by tools/detect_real_word_substitution.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
+      "vlm_reading": null,
+      "surya_reading": null,
+      "lexical_proposal": "מיניה",
+      "lexical_source": "detect_real_word_substitution.py",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 1151,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "דמלה",
+      "page": null,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Lexical defect: stored 'דמלה' has NO attestation in the independent reference corpus and occurs 1x here, while 'דמה' is attested 628x and is one extra_char away. Found by tools/detect_insertion_deletion.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
+      "vlm_reading": null,
+      "surya_reading": null,
+      "lexical_proposal": "דמה",
+      "lexical_source": "detect_insertion_deletion.py",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
       "word_index": 1165,
       "opcode": "replace",
       "docai_reading": null,
@@ -2316,6 +2486,23 @@
       ],
       "consensus_reading": "בזה",
       "ligature_artifact": null,
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 1206,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "וטכל",
+      "page": null,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Lexical defect: stored 'וטכל' has NO attestation in the independent reference corpus and occurs 1x here, while 'וכל' is attested 6348x and is one extra_char away. Found by tools/detect_insertion_deletion.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
+      "vlm_reading": null,
+      "surya_reading": null,
+      "lexical_proposal": "וכל",
+      "lexical_source": "detect_insertion_deletion.py",
       "flag": "current_text_may_be_wrong"
     },
     {
@@ -2765,6 +2952,23 @@
       ],
       "consensus_reading": "ב\"מ",
       "ligature_artifact": null,
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 349,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "איתמרו",
+      "page": null,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Lexical defect: stored 'איתמרו' has NO attestation in the independent reference corpus and occurs 1x here, while 'איתמר' is attested 977x and is one extra_char away. Found by tools/detect_insertion_deletion.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
+      "vlm_reading": null,
+      "surya_reading": null,
+      "lexical_proposal": "איתמר",
+      "lexical_source": "detect_insertion_deletion.py",
       "flag": "current_text_may_be_wrong"
     }
   ],
@@ -3586,6 +3790,23 @@
   ],
   "54": [
     {
+      "word_index": 59,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "הטאת",
+      "page": null,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Lexical defect: stored 'הטאת' has NO attestation in the independent reference corpus and occurs 1x here, while 'חטאת' is attested 3278x and is one None away. Found by tools/detect_real_word_substitution.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
+      "vlm_reading": null,
+      "surya_reading": null,
+      "lexical_proposal": "חטאת",
+      "lexical_source": "detect_real_word_substitution.py",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
       "word_index": 414,
       "opcode": "replace",
       "docai_reading": null,
@@ -3917,6 +4138,23 @@
       "vlm_reading": "רבי",
       "surya_reading": "רבי",
       "flag": "possible_omission"
+    },
+    {
+      "word_index": 47,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "כוותה",
+      "page": null,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Lexical defect: stored 'כוותה' has NO attestation in the independent reference corpus and occurs 1x here, while 'כוותיה' is attested 741x and is one deleted_char away. Found by tools/detect_insertion_deletion.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
+      "vlm_reading": null,
+      "surya_reading": null,
+      "lexical_proposal": "כוותיה",
+      "lexical_source": "detect_insertion_deletion.py",
+      "flag": "current_text_may_be_wrong"
     }
   ],
   "60": [
@@ -4122,6 +4360,23 @@
       "vlm_reading": "תורה",
       "surya_reading": "תחדה",
       "flag": "current_text_confirmed"
+    },
+    {
+      "word_index": 153,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "היבין",
+      "page": null,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Lexical defect: stored 'היבין' has NO attestation in the independent reference corpus and occurs 1x here, while 'היין' is attested 1022x and is one extra_char away. Found by tools/detect_insertion_deletion.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
+      "vlm_reading": null,
+      "surya_reading": null,
+      "lexical_proposal": "היין",
+      "lexical_source": "detect_insertion_deletion.py",
+      "flag": "current_text_may_be_wrong"
     }
   ],
   "65": [
@@ -4231,58 +4486,6 @@
       "vlm_reading": "מההוא",
       "surya_reading": "מההיא",
       "flag": "current_text_confirmed"
-    },
-    {
-      "word_index": 82,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "נקראתת",
-      "page": 34,
-      "bbox": {
-        "x1": 0.1348663717508316,
-        "y1": 0.21086518466472626,
-        "x2": 0.19390925765037537,
-        "y2": 0.22776660323143005
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: surya + vlm agree on 'נקראת' against stored 'נקראתת'.",
-      "vlm_reading": "נקראת",
-      "surya_reading": "נקראת",
-      "consensus_engines": [
-        "surya",
-        "vlm"
-      ],
-      "consensus_reading": "נקראת",
-      "ligature_artifact": null,
-      "flag": "current_text_may_be_wrong"
-    },
-    {
-      "word_index": 105,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "והתנן",
-      "page": 34,
-      "bbox": {
-        "x1": 0.6500931978225708,
-        "y1": 0.24104627966880798,
-        "x2": 0.6898694634437561,
-        "y2": 0.2587525248527527
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: surya + vlm agree on 'ודתנן' against stored 'והתנן'.",
-      "vlm_reading": "ודתנן",
-      "surya_reading": "ודתנן",
-      "consensus_engines": [
-        "surya",
-        "vlm"
-      ],
-      "consensus_reading": "ודתנן",
-      "ligature_artifact": null,
-      "flag": "current_text_may_be_wrong"
     },
     {
       "word_index": 135,
@@ -4502,6 +4705,23 @@
       "vlm_reading": "אלהים",
       "surya_reading": "אהים",
       "flag": "docai_ligature_artifact"
+    },
+    {
+      "word_index": 38,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "ואהינו",
+      "page": null,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Lexical defect: stored 'ואהינו' has NO attestation in the independent reference corpus and occurs 1x here, while 'ואינו' is attested 4824x and is one extra_char away. Found by tools/detect_insertion_deletion.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
+      "vlm_reading": null,
+      "surya_reading": null,
+      "lexical_proposal": "ואינו",
+      "lexical_source": "detect_insertion_deletion.py",
+      "flag": "current_text_may_be_wrong"
     },
     {
       "word_index": 113,
@@ -4747,6 +4967,23 @@
       "vlm_reading": "עא",
       "surya_reading": "עא",
       "flag": "unverified_insertion"
+    },
+    {
+      "word_index": 5,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "היינן",
+      "page": null,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Lexical defect: stored 'היינן' has NO attestation in the independent reference corpus and occurs 1x here, while 'היין' is attested 1022x and is one extra_char away. Found by tools/detect_insertion_deletion.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
+      "vlm_reading": null,
+      "surya_reading": null,
+      "lexical_proposal": "היין",
+      "lexical_source": "detect_insertion_deletion.py",
+      "flag": "current_text_may_be_wrong"
     },
     {
       "word_index": 62,
@@ -5420,6 +5657,23 @@
       "flag": "docai_ligature_artifact"
     },
     {
+      "word_index": 209,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "נחוזר",
+      "page": null,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Lexical defect: stored 'נחוזר' has NO attestation in the independent reference corpus and occurs 1x here, while 'חוזר' is attested 1508x and is one extra_char away. Found by tools/detect_insertion_deletion.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
+      "vlm_reading": null,
+      "surya_reading": null,
+      "lexical_proposal": "חוזר",
+      "lexical_source": "detect_insertion_deletion.py",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
       "word_index": 222,
       "opcode": "replace",
       "docai_reading": null,
@@ -5446,6 +5700,23 @@
       "flag": "current_text_may_be_wrong"
     },
     {
+      "word_index": 260,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "האומרה",
+      "page": null,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Lexical defect: stored 'האומרה' has NO attestation in the independent reference corpus and occurs 1x here, while 'האומר' is attested 1278x and is one extra_char away. Found by tools/detect_insertion_deletion.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
+      "vlm_reading": null,
+      "surya_reading": null,
+      "lexical_proposal": "האומר",
+      "lexical_source": "detect_insertion_deletion.py",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
       "word_index": 346,
       "opcode": "replace",
       "docai_reading": "לאפא",
@@ -5464,6 +5735,23 @@
       "reasoning": "The raster crop clearly shows the text 'לאפא' (or 'ל' followed by 'אפא'), lacking the second 'ל' present in the standardized 'לאלפא'. There is only a single tall ascender corresponding to the initial prefix 'ל'.",
       "vlm_reading": "לאפא",
       "surya_reading": "לאפא",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 446,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "מלפא",
+      "page": null,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Lexical defect: stored 'מלפא' has NO attestation in the independent reference corpus and occurs 1x here, while 'מלא' is attested 1308x and is one extra_char away. Found by tools/detect_insertion_deletion.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
+      "vlm_reading": null,
+      "surya_reading": null,
+      "lexical_proposal": "מלא",
+      "lexical_source": "detect_insertion_deletion.py",
       "flag": "current_text_may_be_wrong"
     },
     {
@@ -5652,6 +5940,23 @@
       ],
       "consensus_reading": "נחמן",
       "ligature_artifact": null,
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 1242,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "שאמרי",
+      "page": null,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Lexical defect: stored 'שאמרי' has NO attestation in the independent reference corpus and occurs 1x here, while 'שאמרו' is attested 775x and is one None away. Found by tools/detect_real_word_substitution.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
+      "vlm_reading": null,
+      "surya_reading": null,
+      "lexical_proposal": "שאמרו",
+      "lexical_source": "detect_real_word_substitution.py",
       "flag": "current_text_may_be_wrong"
     }
   ],
@@ -6573,6 +6878,40 @@
       "flag": "current_text_confirmed"
     },
     {
+      "word_index": 1066,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "באידן",
+      "page": null,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Lexical defect: stored 'באידן' has NO attestation in the independent reference corpus and occurs 1x here, while 'באין' is attested 638x and is one extra_char away. Found by tools/detect_insertion_deletion.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
+      "vlm_reading": null,
+      "surya_reading": null,
+      "lexical_proposal": "באין",
+      "lexical_source": "detect_insertion_deletion.py",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 1078,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "המקרקע",
+      "page": null,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Lexical defect: stored 'המקרקע' has NO attestation in the independent reference corpus and occurs 1x here, while 'הקרקע' is attested 950x and is one extra_char away. Found by tools/detect_insertion_deletion.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
+      "vlm_reading": null,
+      "surya_reading": null,
+      "lexical_proposal": "הקרקע",
+      "lexical_source": "detect_insertion_deletion.py",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
       "word_index": 1111,
       "opcode": "replace",
       "docai_reading": "וכלבד",
@@ -6870,6 +7209,23 @@
       "vlm_reading": "בצלאל",
       "surya_reading": "בצלא",
       "flag": "docai_ligature_artifact"
+    },
+    {
+      "word_index": 288,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "דבעיי",
+      "page": null,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Lexical defect: stored 'דבעיי' has NO attestation in the independent reference corpus and occurs 1x here, while 'דבעי' is attested 772x and is one extra_char away. Found by tools/detect_insertion_deletion.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
+      "vlm_reading": null,
+      "surya_reading": null,
+      "lexical_proposal": "דבעי",
+      "lexical_source": "detect_insertion_deletion.py",
+      "flag": "current_text_may_be_wrong"
     },
     {
       "word_index": 293,
@@ -7378,6 +7734,23 @@
     }
   ],
   "94": [
+    {
+      "word_index": 16,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "לדערת",
+      "page": null,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Lexical defect: stored 'לדערת' has NO attestation in the independent reference corpus and occurs 1x here, while 'לדעת' is attested 574x and is one extra_char away. Found by tools/detect_insertion_deletion.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
+      "vlm_reading": null,
+      "surya_reading": null,
+      "lexical_proposal": "לדעת",
+      "lexical_source": "detect_insertion_deletion.py",
+      "flag": "current_text_may_be_wrong"
+    },
     {
       "word_index": 182,
       "opcode": "replace",
@@ -8153,6 +8526,23 @@
   ],
   "106": [
     {
+      "word_index": 8,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "עדורת",
+      "page": null,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Lexical defect: stored 'עדורת' has NO attestation in the independent reference corpus and occurs 1x here, while 'עדות' is attested 881x and is one extra_char away. Found by tools/detect_insertion_deletion.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
+      "vlm_reading": null,
+      "surya_reading": null,
+      "lexical_proposal": "עדות",
+      "lexical_source": "detect_insertion_deletion.py",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
       "word_index": 16,
       "opcode": "replace",
       "docai_reading": null,
@@ -8326,6 +8716,23 @@
       ],
       "consensus_reading": "בכ\"מ",
       "ligature_artifact": null,
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 99,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "דגכים",
+      "page": null,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Lexical defect: stored 'דגכים' has NO attestation in the independent reference corpus and occurs 1x here, while 'דגים' is attested 522x and is one extra_char away. Found by tools/detect_insertion_deletion.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
+      "vlm_reading": null,
+      "surya_reading": null,
+      "lexical_proposal": "דגים",
+      "lexical_source": "detect_insertion_deletion.py",
       "flag": "current_text_may_be_wrong"
     },
     {
@@ -9732,6 +10139,23 @@
   ],
   "137": [
     {
+      "word_index": 23,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "בלעולם",
+      "page": null,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Lexical defect: stored 'בלעולם' has NO attestation in the independent reference corpus and occurs 1x here, while 'בעולם' is attested 555x and is one extra_char away. Found by tools/detect_insertion_deletion.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
+      "vlm_reading": null,
+      "surya_reading": null,
+      "lexical_proposal": "בעולם",
+      "lexical_source": "detect_insertion_deletion.py",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
       "word_index": 53,
       "opcode": "replace",
       "docai_reading": null,
@@ -10267,6 +10691,40 @@
       "flag": "current_text_may_be_wrong"
     },
     {
+      "word_index": 824,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "שלעת",
+      "page": null,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Lexical defect: stored 'שלעת' has NO attestation in the independent reference corpus and occurs 1x here, while 'שעת' is attested 535x and is one extra_char away. Found by tools/detect_insertion_deletion.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
+      "vlm_reading": null,
+      "surya_reading": null,
+      "lexical_proposal": "שעת",
+      "lexical_source": "detect_insertion_deletion.py",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 873,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "מהלוקת",
+      "page": null,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Lexical defect: stored 'מהלוקת' has NO attestation in the independent reference corpus and occurs 1x here, while 'מחלוקת' is attested 636x and is one None away. Found by tools/detect_real_word_substitution.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
+      "vlm_reading": null,
+      "surya_reading": null,
+      "lexical_proposal": "מחלוקת",
+      "lexical_source": "detect_real_word_substitution.py",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
       "word_index": 914,
       "opcode": "replace",
       "docai_reading": null,
@@ -10368,6 +10826,23 @@
       ],
       "consensus_reading": "הל\"מ",
       "ligature_artifact": null,
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 1040,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "ומאו",
+      "page": null,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Lexical defect: stored 'ומאו' has NO attestation in the independent reference corpus and occurs 1x here, while 'ומאי' is attested 1566x and is one None away. Found by tools/detect_real_word_substitution.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
+      "vlm_reading": null,
+      "surya_reading": null,
+      "lexical_proposal": "ומאי",
+      "lexical_source": "detect_real_word_substitution.py",
       "flag": "current_text_may_be_wrong"
     },
     {
@@ -11201,6 +11676,23 @@
       "flag": "current_text_may_be_wrong"
     },
     {
+      "word_index": 247,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "הייכא",
+      "page": null,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Lexical defect: stored 'הייכא' has NO attestation in the independent reference corpus and occurs 1x here, while 'היכא' is attested 2420x and is one extra_char away. Found by tools/detect_insertion_deletion.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
+      "vlm_reading": null,
+      "surya_reading": null,
+      "lexical_proposal": "היכא",
+      "lexical_source": "detect_insertion_deletion.py",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
       "word_index": 315,
       "opcode": "replace",
       "docai_reading": "איבא",
@@ -11478,6 +11970,40 @@
       "flag": "docai_ligature_artifact"
     },
     {
+      "word_index": 750,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "עצמת",
+      "page": null,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Lexical defect: stored 'עצמת' has NO attestation in the independent reference corpus and occurs 1x here, while 'עצמה' is attested 1426x and is one None away. Found by tools/detect_real_word_substitution.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
+      "vlm_reading": null,
+      "surya_reading": null,
+      "lexical_proposal": "עצמה",
+      "lexical_source": "detect_real_word_substitution.py",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 771,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "עלידם",
+      "page": null,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Lexical defect: stored 'עלידם' has NO attestation in the independent reference corpus and occurs 1x here, while 'עליהם' is attested 2169x and is one None away. Found by tools/detect_real_word_substitution.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
+      "vlm_reading": null,
+      "surya_reading": null,
+      "lexical_proposal": "עליהם",
+      "lexical_source": "detect_real_word_substitution.py",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
       "word_index": 875,
       "opcode": "replace",
       "docai_reading": null,
@@ -11501,6 +12027,23 @@
       ],
       "consensus_reading": "דאיפליגו",
       "ligature_artifact": null,
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 931,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "ומירו",
+      "page": null,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Lexical defect: stored 'ומירו' has NO attestation in the independent reference corpus and occurs 1x here, while 'ומיהו' is attested 1173x and is one None away. Found by tools/detect_real_word_substitution.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
+      "vlm_reading": null,
+      "surya_reading": null,
+      "lexical_proposal": "ומיהו",
+      "lexical_source": "detect_real_word_substitution.py",
       "flag": "current_text_may_be_wrong"
     },
     {
@@ -12191,6 +12734,40 @@
       "flag": "current_text_confirmed"
     },
     {
+      "word_index": 1050,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "התימא",
+      "page": null,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Lexical defect: stored 'התימא' has NO attestation in the independent reference corpus and occurs 1x here, while 'דתימא' is attested 711x and is one None away. Found by tools/detect_real_word_substitution.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
+      "vlm_reading": null,
+      "surya_reading": null,
+      "lexical_proposal": "דתימא",
+      "lexical_source": "detect_real_word_substitution.py",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 1062,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "אכחד",
+      "page": null,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Lexical defect: stored 'אכחד' has NO attestation in the independent reference corpus and occurs 1x here, while 'אחד' is attested 17308x and is one extra_char away. Found by tools/detect_insertion_deletion.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
+      "vlm_reading": null,
+      "surya_reading": null,
+      "lexical_proposal": "אחד",
+      "lexical_source": "detect_insertion_deletion.py",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
       "word_index": 1235,
       "opcode": "replace",
       "docai_reading": "אא",
@@ -12324,6 +12901,23 @@
       "vlm_reading": "שמואל",
       "surya_reading": "שמו'",
       "flag": "docai_ligature_artifact"
+    },
+    {
+      "word_index": 162,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "אאביי",
+      "page": null,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Lexical defect: stored 'אאביי' has NO attestation in the independent reference corpus and occurs 1x here, while 'אביי' is attested 2973x and is one extra_char away. Found by tools/detect_insertion_deletion.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
+      "vlm_reading": null,
+      "surya_reading": null,
+      "lexical_proposal": "אביי",
+      "lexical_source": "detect_insertion_deletion.py",
+      "flag": "current_text_may_be_wrong"
     },
     {
       "word_index": 221,
@@ -13101,6 +13695,23 @@
       "flag": "current_text_may_be_wrong"
     },
     {
+      "word_index": 982,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "במקורם",
+      "page": null,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Lexical defect: stored 'במקורם' has NO attestation in the independent reference corpus and occurs 1x here, while 'במקום' is attested 4540x and is one extra_char away. Found by tools/detect_insertion_deletion.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
+      "vlm_reading": null,
+      "surya_reading": null,
+      "lexical_proposal": "במקום",
+      "lexical_source": "detect_insertion_deletion.py",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
       "word_index": 1045,
       "opcode": "delete",
       "docai_reading": "שורש",
@@ -13581,6 +14192,23 @@
       "flag": "current_text_confirmed"
     },
     {
+      "word_index": 374,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "איתמרא",
+      "page": null,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Lexical defect: stored 'איתמרא' has NO attestation in the independent reference corpus and occurs 1x here, while 'איתמר' is attested 977x and is one extra_char away. Found by tools/detect_insertion_deletion.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
+      "vlm_reading": null,
+      "surya_reading": null,
+      "lexical_proposal": "איתמר",
+      "lexical_source": "detect_insertion_deletion.py",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
       "word_index": 475,
       "opcode": "delete",
       "docai_reading": "זר",
@@ -13642,6 +14270,23 @@
       "vlm_reading": "התקבל",
       "surya_reading": "התקבל",
       "flag": "current_text_confirmed"
+    },
+    {
+      "word_index": 506,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "למימרת",
+      "page": null,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Lexical defect: stored 'למימרת' has NO attestation in the independent reference corpus and occurs 1x here, while 'למימר' is attested 3056x and is one extra_char away. Found by tools/detect_insertion_deletion.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
+      "vlm_reading": null,
+      "surya_reading": null,
+      "lexical_proposal": "למימר",
+      "lexical_source": "detect_insertion_deletion.py",
+      "flag": "current_text_may_be_wrong"
     },
     {
       "word_index": 519,
@@ -13712,6 +14357,23 @@
       "flag": "current_text_confirmed"
     },
     {
+      "word_index": 555,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "ואיין",
+      "page": null,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Lexical defect: stored 'ואיין' has NO attestation in the independent reference corpus and occurs 1x here, while 'ואין' is attested 12846x and is one extra_char away. Found by tools/detect_insertion_deletion.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
+      "vlm_reading": null,
+      "surya_reading": null,
+      "lexical_proposal": "ואין",
+      "lexical_source": "detect_insertion_deletion.py",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
       "word_index": 628,
       "opcode": "replace",
       "docai_reading": "וא",
@@ -13731,58 +14393,6 @@
       "vlm_reading": "וא'",
       "surya_reading": "וא'",
       "flag": "docai_ligature_artifact"
-    },
-    {
-      "word_index": 636,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "בחפי\"שה",
-      "page": 65,
-      "bbox": {
-        "x1": 0.2713226079940796,
-        "y1": 0.6454876661300659,
-        "x2": 0.33807170391082764,
-        "y2": 0.6616754531860352
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: surya + vlm agree on 'בחפ\"שה' against stored 'בחפי\"שה'.",
-      "vlm_reading": "בחפ\"שה",
-      "surya_reading": "בחפ\"שה",
-      "consensus_engines": [
-        "surya",
-        "vlm"
-      ],
-      "consensus_reading": "בחפ\"שה",
-      "ligature_artifact": null,
-      "flag": "current_text_may_be_wrong"
-    },
-    {
-      "word_index": 691,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "חי\"ר",
-      "page": 65,
-      "bbox": {
-        "x1": 0.3776266872882843,
-        "y1": 0.709834098815918,
-        "x2": 0.4103831946849823,
-        "y2": 0.7211655378341675
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: surya + vlm agree on 'חי\"ד' against stored 'חי\"ר'.",
-      "vlm_reading": "חי\"ד",
-      "surya_reading": "חי\"ד",
-      "consensus_engines": [
-        "surya",
-        "vlm"
-      ],
-      "consensus_reading": "חי\"ד",
-      "ligature_artifact": null,
-      "flag": "current_text_may_be_wrong"
     }
   ],
   "177": [
@@ -13995,6 +14605,23 @@
       "reasoning": "In the target line of the crop (line 2), following 'ין', the text clearly shows the sequence 'ל' (Lamed) followed directly by 'ו' (Vav) forming 'לו' (or directly adjacent to 'ט'), without the additional letter 'נ' (Nun) required for 'לנו'. Thus, Option A accurately reflects the paleographic reading in the image crop.",
       "vlm_reading": "לנו",
       "surya_reading": "לנו",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 548,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "מתניי",
+      "page": null,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Lexical defect: stored 'מתניי' has NO attestation in the independent reference corpus and occurs 1x here, while 'מתני' is attested 5096x and is one extra_char away. Found by tools/detect_insertion_deletion.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
+      "vlm_reading": null,
+      "surya_reading": null,
+      "lexical_proposal": "מתני",
+      "lexical_source": "detect_insertion_deletion.py",
       "flag": "current_text_may_be_wrong"
     }
   ],
@@ -14331,6 +14958,23 @@
       "vlm_reading": "דדקו",
       "surya_reading": "דדקו",
       "flag": "current_text_confirmed"
+    },
+    {
+      "word_index": 267,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "שתרץ",
+      "page": null,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Lexical defect: stored 'שתרץ' has NO attestation in the independent reference corpus and occurs 1x here, while 'שרץ' is attested 583x and is one extra_char away. Found by tools/detect_insertion_deletion.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
+      "vlm_reading": null,
+      "surya_reading": null,
+      "lexical_proposal": "שרץ",
+      "lexical_source": "detect_insertion_deletion.py",
+      "flag": "current_text_may_be_wrong"
     },
     {
       "word_index": 272,
@@ -16159,6 +16803,23 @@
       "flag": "current_text_confirmed"
     },
     {
+      "word_index": 583,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "עצומה",
+      "page": null,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Lexical defect: stored 'עצומה' has NO attestation in the independent reference corpus and occurs 1x here, while 'עצמה' is attested 1426x and is one extra_char away. Found by tools/detect_insertion_deletion.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
+      "vlm_reading": null,
+      "surya_reading": null,
+      "lexical_proposal": "עצמה",
+      "lexical_source": "detect_insertion_deletion.py",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
       "word_index": 597,
       "opcode": "delete",
       "docai_reading": "נחמ",
@@ -16294,6 +16955,23 @@
       "vlm_reading": "יצחק",
       "surya_reading": "יצחק",
       "flag": "current_text_confirmed"
+    },
+    {
+      "word_index": 892,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "זלזה",
+      "page": null,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Lexical defect: stored 'זלזה' has NO attestation in the independent reference corpus and occurs 1x here, while 'לזה' is attested 2092x and is one extra_char away. Found by tools/detect_insertion_deletion.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
+      "vlm_reading": null,
+      "surya_reading": null,
+      "lexical_proposal": "לזה",
+      "lexical_source": "detect_insertion_deletion.py",
+      "flag": "current_text_may_be_wrong"
     },
     {
       "word_index": 907,
@@ -17018,6 +17696,23 @@
   ],
   "212": [
     {
+      "word_index": 1,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "הוון",
+      "page": null,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Lexical defect: stored 'הוון' has NO attestation in the independent reference corpus and occurs 1x here, while 'הוו' is attested 2052x and is one extra_char away. Found by tools/detect_insertion_deletion.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
+      "vlm_reading": null,
+      "surya_reading": null,
+      "lexical_proposal": "הוו",
+      "lexical_source": "detect_insertion_deletion.py",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
       "word_index": 30,
       "opcode": "replace",
       "docai_reading": "ה\"נ",
@@ -17350,6 +18045,23 @@
       "ligature_artifact": null
     },
     {
+      "word_index": 162,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "כפרק",
+      "page": null,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Lexical defect: stored 'כפרק' has NO attestation in the independent reference corpus and occurs 1x here, while 'בפרק' is attested 1541x and is one None away. Found by tools/detect_real_word_substitution.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
+      "vlm_reading": null,
+      "surya_reading": null,
+      "lexical_proposal": "בפרק",
+      "lexical_source": "detect_real_word_substitution.py",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
       "word_index": 183,
       "opcode": "replace",
       "docai_reading": "ישרא",
@@ -17521,6 +18233,23 @@
       "flag": "current_text_may_be_wrong"
     },
     {
+      "word_index": 313,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "מיר",
+      "page": null,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Lexical defect: stored 'מיר' has NO attestation in the independent reference corpus and occurs 1x here, while 'מיד' is attested 2979x and is one None away. Found by tools/detect_real_word_substitution.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
+      "vlm_reading": null,
+      "surya_reading": null,
+      "lexical_proposal": "מיד",
+      "lexical_source": "detect_real_word_substitution.py",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
       "word_index": 342,
       "opcode": "replace",
       "docai_reading": "דתפים",
@@ -17678,6 +18407,23 @@
       "vlm_reading": "איבא",
       "surya_reading": "איבא",
       "flag": "docai_ligature_artifact"
+    },
+    {
+      "word_index": 597,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "לחזות",
+      "page": null,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Lexical defect: stored 'לחזות' has NO attestation in the independent reference corpus and occurs 1x here, while 'לחזור' is attested 1754x and is one None away. Found by tools/detect_real_word_substitution.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
+      "vlm_reading": null,
+      "surya_reading": null,
+      "lexical_proposal": "לחזור",
+      "lexical_source": "detect_real_word_substitution.py",
+      "flag": "current_text_may_be_wrong"
     },
     {
       "word_index": 602,
@@ -18301,6 +19047,23 @@
       "flag": "current_text_may_be_wrong"
     },
     {
+      "word_index": 206,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "וסעד",
+      "page": null,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Lexical defect: stored 'וסעד' has NO attestation in the independent reference corpus and occurs 1x here, while 'ועד' is attested 1440x and is one extra_char away. Found by tools/detect_insertion_deletion.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
+      "vlm_reading": null,
+      "surya_reading": null,
+      "lexical_proposal": "ועד",
+      "lexical_source": "detect_insertion_deletion.py",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
       "word_index": 273,
       "opcode": "replace",
       "docai_reading": null,
@@ -18621,6 +19384,23 @@
   ],
   "51": [
     {
+      "word_index": 78,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "וככמה",
+      "page": null,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Lexical defect: stored 'וככמה' has NO attestation in the independent reference corpus and occurs 1x here, while 'וכמה' is attested 753x and is one extra_char away. Found by tools/detect_insertion_deletion.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
+      "vlm_reading": null,
+      "surya_reading": null,
+      "lexical_proposal": "וכמה",
+      "lexical_source": "detect_insertion_deletion.py",
+      "flag": "current_text_may_be_wrong"
+    },
+    {
       "word_index": 145,
       "opcode": "replace",
       "docai_reading": null,
@@ -18648,6 +19428,23 @@
     }
   ],
   "93": [
+    {
+      "word_index": 44,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "יכום",
+      "page": null,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Lexical defect: stored 'יכום' has NO attestation in the independent reference corpus and occurs 1x here, while 'יום' is attested 8786x and is one extra_char away. Found by tools/detect_insertion_deletion.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
+      "vlm_reading": null,
+      "surya_reading": null,
+      "lexical_proposal": "יום",
+      "lexical_source": "detect_insertion_deletion.py",
+      "flag": "current_text_may_be_wrong"
+    },
     {
       "word_index": 127,
       "opcode": "replace",
@@ -18839,6 +19636,23 @@
       "consensus_reading": "למ\"ד",
       "ligature_artifact": null,
       "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 97,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "והשוא",
+      "page": null,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Lexical defect: stored 'והשוא' has NO attestation in the independent reference corpus and occurs 1x here, while 'והוא' is attested 6579x and is one extra_char away. Found by tools/detect_insertion_deletion.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
+      "vlm_reading": null,
+      "surya_reading": null,
+      "lexical_proposal": "והוא",
+      "lexical_source": "detect_insertion_deletion.py",
+      "flag": "current_text_may_be_wrong"
     }
   ],
   "146": [
@@ -18972,6 +19786,23 @@
       ],
       "consensus_reading": "מה'",
       "ligature_artifact": null,
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 370,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "ישמואל",
+      "page": null,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Lexical defect: stored 'ישמואל' has NO attestation in the independent reference corpus and occurs 1x here, while 'ושמואל' is attested 913x and is one None away. Found by tools/detect_real_word_substitution.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
+      "vlm_reading": null,
+      "surya_reading": null,
+      "lexical_proposal": "ושמואל",
+      "lexical_source": "detect_real_word_substitution.py",
       "flag": "current_text_may_be_wrong"
     }
   ],
@@ -19478,6 +20309,23 @@
     }
   ],
   "172": [
+    {
+      "word_index": 82,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "ושארי",
+      "page": null,
+      "bbox": null,
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Lexical defect: stored 'ושארי' has NO attestation in the independent reference corpus and occurs 1x here, while 'ושאר' is attested 642x and is one extra_char away. Found by tools/detect_insertion_deletion.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
+      "vlm_reading": null,
+      "surya_reading": null,
+      "lexical_proposal": "ושאר",
+      "lexical_source": "detect_insertion_deletion.py",
+      "flag": "current_text_may_be_wrong"
+    },
     {
       "word_index": 132,
       "opcode": "replace",

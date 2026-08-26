@@ -891,15 +891,23 @@ def test_correction_entries_have_the_field_shape_their_opcode_implies(correction
                 # alternative from SOME engine - it just no longer has to be
                 # DocAI specifically. Anything with no alternative at all is
                 # still an offender.
+                # EXTENDED 2026-08-26 for lexical defects (stage 4b): a proposal
+                # that comes from a frequency table and a dictionary rather than
+                # from any engine. It still has to be renderable and it still has
+                # to be attributable - `lexical_source` plays exactly the role
+                # `consensus_engines` plays above. What this test protects is
+                # unchanged: never an option card with nothing in it, and never a
+                # reading that cannot be traced to whatever produced it.
                 alternative = (c.get("consensus_reading") or c.get("vlm_reading")
-                               or c.get("surya_reading") or c.get("vision_transcription"))
+                               or c.get("surya_reading") or c.get("vision_transcription")
+                               or c.get("lexical_proposal"))
                 if not alternative:
                     offenders.append((int(kid), c["word_index"],
                                       "replace with no alternative reading from any engine"))
-                elif not c.get("consensus_engines"):
+                elif not (c.get("consensus_engines") or c.get("lexical_source")):
                     offenders.append((int(kid), c["word_index"],
                                       "replace with a null docai_reading but no consensus "
-                                      "attribution - untraceable to any engine"))
+                                      "or lexical attribution - untraceable to its source"))
             elif op == "insert" and (docai is not None or final is None):
                 offenders.append((int(kid), c["word_index"], "insert must have docai_reading=null, final_text set"))
             elif op == "delete" and (docai is None or final is not None):
@@ -1350,12 +1358,19 @@ def test_every_corrections_item_is_traceable_to_a_pipeline_source(corrections):
     every ./rebuild_all.sh. Two tools/ scripts appended 1,108 items into it
     directly; the file grew from 539 items to 1,647 and the whole suite stayed
     green, because nothing asserted that its contents are reproducible from the
-    pipeline's own inputs. Every item must trace to one of exactly two sources:
-    a vision-verified candidate (stage 3), or a multi-witness consensus dispute
-    (stage 4a). An item matching neither is a hand-injection that the next
-    rebuild will silently destroy, taking any human review of it with it."""
+    pipeline's own inputs. Every item must trace to one of exactly three sources:
+    a vision-verified candidate (stage 3), a multi-witness consensus dispute
+    (stage 4a), or a lexical defect (stage 4b, added 2026-08-26). An item matching
+    none of them is a hand-injection that the next rebuild will silently destroy,
+    taking any human review of it with it.
+
+    Adding a source to this list is the deliberate act - each one is a FILE the
+    pipeline reads and regenerates, never an append into this stage's own output.
+    If you find yourself wanting to extend it to cover rows someone wrote by hand,
+    that is the bug this test exists to catch."""
     verified_path = os.path.join(REPO, "corrections_verified_part1.json")
     consensus_path = os.path.join(REPO, "consensus_disputes_part1.json")
+    lexical_path = os.path.join(REPO, "lexical_defect_report.json")
 
     with open(verified_path, encoding="utf-8") as f:
         verified = json.load(f)
@@ -1368,16 +1383,24 @@ def test_every_corrections_item_is_traceable_to_a_pipeline_source(corrections):
                 for d in items:
                     from_consensus.add((int(kid_str), d["word_index"]))
 
+    from_lexical = set()
+    if os.path.exists(lexical_path):
+        with open(lexical_path, encoding="utf-8") as f:
+            for d in json.load(f):
+                from_lexical.add((d["klal_id"], d["word_index"]))
+
     orphans = [
         (int(kid_str), item["word_index"])
         for kid_str, items in corrections.items()
         for item in items
         if (int(kid_str), item["word_index"]) not in from_pipeline
         and (int(kid_str), item["word_index"]) not in from_consensus
+        and (int(kid_str), item["word_index"]) not in from_lexical
     ]
     assert not orphans, (
         f"{len(orphans)} item(s) in corrections_part1.json trace to neither "
-        f"corrections_verified_part1.json nor consensus_disputes_part1.json - "
+        f"corrections_verified_part1.json, consensus_disputes_part1.json nor "
+        f"lexical_defect_report.json - "
         f"they were written into a derived file by hand and the next "
         f"./rebuild_all.sh will delete them. First few: {orphans[:5]}"
     )

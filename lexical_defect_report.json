@@ -11,7 +11,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 1304,
+  "corpus_count": 1
  },
  {
   "klal_id": 1,
@@ -25,7 +27,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 43,
+  "corpus_count": 1
  },
  {
   "klal_id": 1,
@@ -39,7 +43,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 94,
+  "corpus_count": 1
  },
  {
   "klal_id": 2,
@@ -63,7 +69,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": true
+  "ambiguous": true,
+  "rank": 1851,
+  "corpus_count": 1
  },
  {
   "klal_id": 2,
@@ -77,7 +85,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 3530,
+  "corpus_count": 2
  },
  {
   "klal_id": 2,
@@ -91,7 +101,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 262,
+  "corpus_count": 1
  },
  {
   "klal_id": 2,
@@ -110,7 +122,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": true
+  "ambiguous": true,
+  "rank": 134,
+  "corpus_count": 1
  },
  {
   "klal_id": 2,
@@ -124,7 +138,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 312,
+  "corpus_count": 1
  },
  {
   "klal_id": 4,
@@ -138,7 +154,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 145,
+  "corpus_count": 3
  },
  {
   "klal_id": 4,
@@ -152,7 +170,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 269,
+  "corpus_count": 2
  },
  {
   "klal_id": 4,
@@ -166,7 +186,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 60,
+  "corpus_count": 3
  },
  {
   "klal_id": 4,
@@ -180,7 +202,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 93,
+  "corpus_count": 1
  },
  {
   "klal_id": 6,
@@ -194,7 +218,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 398,
+  "corpus_count": 2
  },
  {
   "klal_id": 6,
@@ -208,7 +234,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 398,
+  "corpus_count": 2
  },
  {
   "klal_id": 7,
@@ -227,7 +255,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": true
+  "ambiguous": true,
+  "rank": 411,
+  "corpus_count": 1
  },
  {
   "klal_id": 7,
@@ -241,7 +271,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 3136,
+  "corpus_count": 1
  },
  {
   "klal_id": 7,
@@ -255,7 +287,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 603,
+  "corpus_count": 1
  },
  {
   "klal_id": 7,
@@ -274,7 +308,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": true
+  "ambiguous": true,
+  "rank": 375,
+  "corpus_count": 2
  },
  {
   "klal_id": 7,
@@ -288,7 +324,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 2290,
+  "corpus_count": 1
  },
  {
   "klal_id": 7,
@@ -302,7 +340,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 375,
+  "corpus_count": 1
  },
  {
   "klal_id": 7,
@@ -316,7 +356,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 42,
+  "corpus_count": 1
  },
  {
   "klal_id": 7,
@@ -330,7 +372,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 379,
+  "corpus_count": 1
  },
  {
   "klal_id": 7,
@@ -344,7 +388,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 1220,
+  "corpus_count": 1
  },
  {
   "klal_id": 10,
@@ -358,7 +404,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 285,
+  "corpus_count": 1
  },
  {
   "klal_id": 11,
@@ -372,7 +420,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 136,
+  "corpus_count": 1
  },
  {
   "klal_id": 11,
@@ -386,7 +436,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 3530,
+  "corpus_count": 2
  },
  {
   "klal_id": 11,
@@ -400,7 +452,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 89,
+  "corpus_count": 1
  },
  {
   "klal_id": 12,
@@ -414,7 +468,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 161,
+  "corpus_count": 1
  },
  {
   "klal_id": 12,
@@ -428,7 +484,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 35939,
+  "corpus_count": 1
  },
  {
   "klal_id": 12,
@@ -442,7 +500,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 344,
+  "corpus_count": 1
  },
  {
   "klal_id": 13,
@@ -456,7 +516,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 679,
+  "corpus_count": 1
  },
  {
   "klal_id": 19,
@@ -475,7 +537,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": true
+  "ambiguous": true,
+  "rank": 316,
+  "corpus_count": 1
  },
  {
   "klal_id": 21,
@@ -489,7 +553,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 343,
+  "corpus_count": 2
  },
  {
   "klal_id": 21,
@@ -503,7 +569,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 343,
+  "corpus_count": 2
  },
  {
   "klal_id": 23,
@@ -517,7 +585,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 60,
+  "corpus_count": 3
  },
  {
   "klal_id": 23,
@@ -531,7 +601,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 322,
+  "corpus_count": 1
  },
  {
   "klal_id": 23,
@@ -545,7 +617,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 12846,
+  "corpus_count": 1
  },
  {
   "klal_id": 24,
@@ -559,7 +633,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 836,
+  "corpus_count": 1
  },
  {
   "klal_id": 24,
@@ -573,7 +649,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 310,
+  "corpus_count": 1
  },
  {
   "klal_id": 24,
@@ -587,7 +665,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 5920,
+  "corpus_count": 1
  },
  {
   "klal_id": 24,
@@ -601,7 +681,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 12846,
+  "corpus_count": 2
  },
  {
   "klal_id": 24,
@@ -615,7 +697,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 12846,
+  "corpus_count": 2
  },
  {
   "klal_id": 25,
@@ -629,7 +713,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 1512,
+  "corpus_count": 1
  },
  {
   "klal_id": 25,
@@ -653,7 +739,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": true
+  "ambiguous": true,
+  "rank": 12292,
+  "corpus_count": 1
  },
  {
   "klal_id": 25,
@@ -667,7 +755,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 2052,
+  "corpus_count": 1
  },
  {
   "klal_id": 25,
@@ -681,7 +771,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 255,
+  "corpus_count": 1
  },
  {
   "klal_id": 30,
@@ -695,7 +787,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 4780,
+  "corpus_count": 3
  },
  {
   "klal_id": 30,
@@ -709,7 +803,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 571,
+  "corpus_count": 1
  },
  {
   "klal_id": 30,
@@ -723,7 +819,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 206,
+  "corpus_count": 1
  },
  {
   "klal_id": 30,
@@ -737,7 +835,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 4442,
+  "corpus_count": 1
  },
  {
   "klal_id": 30,
@@ -751,7 +851,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 2722,
+  "corpus_count": 1
  },
  {
   "klal_id": 30,
@@ -765,7 +867,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 443,
+  "corpus_count": 1
  },
  {
   "klal_id": 30,
@@ -779,7 +883,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 628,
+  "corpus_count": 1
  },
  {
   "klal_id": 30,
@@ -798,7 +904,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": true
+  "ambiguous": true,
+  "rank": 188,
+  "corpus_count": 1
  },
  {
   "klal_id": 30,
@@ -812,7 +920,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 6348,
+  "corpus_count": 1
  },
  {
   "klal_id": 30,
@@ -826,7 +936,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 4780,
+  "corpus_count": 3
  },
  {
   "klal_id": 30,
@@ -845,7 +957,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": true
+  "ambiguous": true,
+  "rank": 1506,
+  "corpus_count": 1
  },
  {
   "klal_id": 30,
@@ -859,7 +973,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 201,
+  "corpus_count": 2
  },
  {
   "klal_id": 31,
@@ -873,7 +989,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 1946,
+  "corpus_count": 2
  },
  {
   "klal_id": 31,
@@ -887,7 +1005,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 1122,
+  "corpus_count": 1
  },
  {
   "klal_id": 34,
@@ -901,7 +1021,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 365,
+  "corpus_count": 2
  },
  {
   "klal_id": 37,
@@ -915,7 +1037,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 1946,
+  "corpus_count": 2
  },
  {
   "klal_id": 37,
@@ -934,7 +1058,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": true
+  "ambiguous": true,
+  "rank": 1005,
+  "corpus_count": 1
  },
  {
   "klal_id": 37,
@@ -948,7 +1074,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 977,
+  "corpus_count": 1
  },
  {
   "klal_id": 38,
@@ -962,7 +1090,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 77,
+  "corpus_count": 3
  },
  {
   "klal_id": 38,
@@ -976,7 +1106,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 4780,
+  "corpus_count": 3
  },
  {
   "klal_id": 38,
@@ -990,7 +1122,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 104,
+  "corpus_count": 2
  },
  {
   "klal_id": 38,
@@ -1004,7 +1138,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 271,
+  "corpus_count": 2
  },
  {
   "klal_id": 39,
@@ -1023,7 +1159,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": true
+  "ambiguous": true,
+  "rank": 517,
+  "corpus_count": 1
  },
  {
   "klal_id": 39,
@@ -1037,7 +1175,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 1440,
+  "corpus_count": 1
  },
  {
   "klal_id": 41,
@@ -1051,7 +1191,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 3146,
+  "corpus_count": 1
  },
  {
   "klal_id": 41,
@@ -1065,7 +1207,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 734,
+  "corpus_count": 2
  },
  {
   "klal_id": 41,
@@ -1079,7 +1223,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 243,
+  "corpus_count": 2
  },
  {
   "klal_id": 41,
@@ -1093,7 +1239,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 734,
+  "corpus_count": 2
  },
  {
   "klal_id": 41,
@@ -1107,7 +1255,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 50,
+  "corpus_count": 1
  },
  {
   "klal_id": 41,
@@ -1121,7 +1271,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 425,
+  "corpus_count": 2
  },
  {
   "klal_id": 41,
@@ -1135,7 +1287,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 87,
+  "corpus_count": 1
  },
  {
   "klal_id": 41,
@@ -1149,7 +1303,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 3251,
+  "corpus_count": 1
  },
  {
   "klal_id": 42,
@@ -1163,7 +1319,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 61,
+  "corpus_count": 1
  },
  {
   "klal_id": 42,
@@ -1177,7 +1335,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 1516,
+  "corpus_count": 1
  },
  {
   "klal_id": 43,
@@ -1191,7 +1351,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 325,
+  "corpus_count": 1
  },
  {
   "klal_id": 43,
@@ -1205,7 +1367,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 75,
+  "corpus_count": 1
  },
  {
   "klal_id": 44,
@@ -1219,7 +1383,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 41,
+  "corpus_count": 1
  },
  {
   "klal_id": 44,
@@ -1233,7 +1399,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 425,
+  "corpus_count": 2
  },
  {
   "klal_id": 44,
@@ -1247,7 +1415,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 41,
+  "corpus_count": 1
  },
  {
   "klal_id": 46,
@@ -1266,7 +1436,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": true
+  "ambiguous": true,
+  "rank": 681,
+  "corpus_count": 1
  },
  {
   "klal_id": 51,
@@ -1280,7 +1452,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 753,
+  "corpus_count": 1
  },
  {
   "klal_id": 51,
@@ -1294,7 +1468,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 178,
+  "corpus_count": 1
  },
  {
   "klal_id": 51,
@@ -1308,7 +1484,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 234,
+  "corpus_count": 1
  },
  {
   "klal_id": 53,
@@ -1322,7 +1500,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 243,
+  "corpus_count": 2
  },
  {
   "klal_id": 53,
@@ -1336,7 +1516,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 415,
+  "corpus_count": 1
  },
  {
   "klal_id": 53,
@@ -1350,7 +1532,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 150,
+  "corpus_count": 1
  },
  {
   "klal_id": 53,
@@ -1364,7 +1548,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 183,
+  "corpus_count": 1
  },
  {
   "klal_id": 53,
@@ -1378,7 +1564,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 382,
+  "corpus_count": 1
  },
  {
   "klal_id": 54,
@@ -1392,7 +1580,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 3278,
+  "corpus_count": 1
  },
  {
   "klal_id": 54,
@@ -1406,7 +1596,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 305,
+  "corpus_count": 1
  },
  {
   "klal_id": 54,
@@ -1420,7 +1612,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 636,
+  "corpus_count": 2
  },
  {
   "klal_id": 54,
@@ -1434,7 +1628,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 636,
+  "corpus_count": 2
  },
  {
   "klal_id": 54,
@@ -1453,7 +1649,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": true
+  "ambiguous": true,
+  "rank": 361,
+  "corpus_count": 1
  },
  {
   "klal_id": 54,
@@ -1467,7 +1665,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 2169,
+  "corpus_count": 1
  },
  {
   "klal_id": 54,
@@ -1481,7 +1681,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 238,
+  "corpus_count": 1
  },
  {
   "klal_id": 59,
@@ -1495,7 +1697,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 741,
+  "corpus_count": 1
  },
  {
   "klal_id": 62,
@@ -1509,7 +1713,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 51,
+  "corpus_count": 3
  },
  {
   "klal_id": 62,
@@ -1523,7 +1729,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 51,
+  "corpus_count": 3
  },
  {
   "klal_id": 62,
@@ -1537,7 +1745,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 51,
+  "corpus_count": 3
  },
  {
   "klal_id": 64,
@@ -1551,7 +1761,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 378,
+  "corpus_count": 1
  },
  {
   "klal_id": 64,
@@ -1565,7 +1777,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 383,
+  "corpus_count": 1
  },
  {
   "klal_id": 64,
@@ -1579,7 +1793,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 1022,
+  "corpus_count": 1
  },
  {
   "klal_id": 66,
@@ -1593,7 +1809,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 120,
+  "corpus_count": 1
  },
  {
   "klal_id": 69,
@@ -1607,7 +1825,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 4824,
+  "corpus_count": 1
  },
  {
   "klal_id": 69,
@@ -1626,7 +1846,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": true
+  "ambiguous": true,
+  "rank": 136,
+  "corpus_count": 3
  },
  {
   "klal_id": 71,
@@ -1640,7 +1862,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 51,
+  "corpus_count": 1
  },
  {
   "klal_id": 71,
@@ -1654,7 +1878,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 1022,
+  "corpus_count": 1
  },
  {
   "klal_id": 71,
@@ -1668,7 +1894,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 161,
+  "corpus_count": 2
  },
  {
   "klal_id": 74,
@@ -1682,7 +1910,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 635,
+  "corpus_count": 2
  },
  {
   "klal_id": 74,
@@ -1701,7 +1931,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": true
+  "ambiguous": true,
+  "rank": 46,
+  "corpus_count": 1
  },
  {
   "klal_id": 74,
@@ -1720,7 +1952,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": true
+  "ambiguous": true,
+  "rank": 901,
+  "corpus_count": 1
  },
  {
   "klal_id": 74,
@@ -1734,7 +1968,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 64,
+  "corpus_count": 1
  },
  {
   "klal_id": 74,
@@ -1748,7 +1984,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 1541,
+  "corpus_count": 2
  },
  {
   "klal_id": 74,
@@ -1762,7 +2000,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 62,
+  "corpus_count": 2
  },
  {
   "klal_id": 74,
@@ -1776,7 +2016,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 1270,
+  "corpus_count": 2
  },
  {
   "klal_id": 75,
@@ -1790,7 +2032,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 1508,
+  "corpus_count": 1
  },
  {
   "klal_id": 75,
@@ -1804,7 +2048,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 1278,
+  "corpus_count": 1
  },
  {
   "klal_id": 75,
@@ -1818,7 +2064,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 1308,
+  "corpus_count": 1
  },
  {
   "klal_id": 75,
@@ -1837,7 +2085,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": true
+  "ambiguous": true,
+  "rank": 620,
+  "corpus_count": 2
  },
  {
   "klal_id": 75,
@@ -1851,7 +2101,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 217,
+  "corpus_count": 2
  },
  {
   "klal_id": 75,
@@ -1865,7 +2117,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 15727,
+  "corpus_count": 1
  },
  {
   "klal_id": 75,
@@ -1879,7 +2133,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 2646,
+  "corpus_count": 1
  },
  {
   "klal_id": 75,
@@ -1893,7 +2149,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 775,
+  "corpus_count": 1
  },
  {
   "klal_id": 75,
@@ -1907,7 +2165,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 1988,
+  "corpus_count": 1
  },
  {
   "klal_id": 76,
@@ -1921,7 +2181,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 247,
+  "corpus_count": 1
  },
  {
   "klal_id": 79,
@@ -1935,7 +2197,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 60,
+  "corpus_count": 3
  },
  {
   "klal_id": 82,
@@ -1949,7 +2213,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 433,
+  "corpus_count": 1
  },
  {
   "klal_id": 84,
@@ -1968,7 +2234,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": true
+  "ambiguous": true,
+  "rank": 620,
+  "corpus_count": 2
  },
  {
   "klal_id": 84,
@@ -1982,7 +2250,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 217,
+  "corpus_count": 2
  },
  {
   "klal_id": 84,
@@ -1996,7 +2266,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 45,
+  "corpus_count": 1
  },
  {
   "klal_id": 85,
@@ -2010,7 +2282,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 55,
+  "corpus_count": 2
  },
  {
   "klal_id": 88,
@@ -2024,7 +2298,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 384,
+  "corpus_count": 1
  },
  {
   "klal_id": 88,
@@ -2038,7 +2314,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 638,
+  "corpus_count": 1
  },
  {
   "klal_id": 88,
@@ -2052,7 +2330,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 950,
+  "corpus_count": 1
  },
  {
   "klal_id": 88,
@@ -2071,7 +2351,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": true
+  "ambiguous": true,
+  "rank": 508,
+  "corpus_count": 1
  },
  {
   "klal_id": 88,
@@ -2085,7 +2367,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 93,
+  "corpus_count": 1
  },
  {
   "klal_id": 91,
@@ -2099,7 +2383,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 228,
+  "corpus_count": 1
  },
  {
   "klal_id": 91,
@@ -2113,7 +2399,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 772,
+  "corpus_count": 1
  },
  {
   "klal_id": 92,
@@ -2127,7 +2415,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 160,
+  "corpus_count": 1
  },
  {
   "klal_id": 92,
@@ -2141,7 +2431,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 103,
+  "corpus_count": 1
  },
  {
   "klal_id": 92,
@@ -2160,7 +2452,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": true
+  "ambiguous": true,
+  "rank": 12899,
+  "corpus_count": 1
  },
  {
   "klal_id": 92,
@@ -2179,7 +2473,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": true
+  "ambiguous": true,
+  "rank": 351,
+  "corpus_count": 2
  },
  {
   "klal_id": 93,
@@ -2193,7 +2489,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 144,
+  "corpus_count": 1
  },
  {
   "klal_id": 93,
@@ -2207,7 +2505,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 8786,
+  "corpus_count": 1
  },
  {
   "klal_id": 94,
@@ -2221,7 +2521,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 574,
+  "corpus_count": 1
  },
  {
   "klal_id": 94,
@@ -2235,7 +2537,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 412,
+  "corpus_count": 1
  },
  {
   "klal_id": 94,
@@ -2249,7 +2553,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 415,
+  "corpus_count": 1
  },
  {
   "klal_id": 94,
@@ -2263,7 +2569,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 55,
+  "corpus_count": 2
  },
  {
   "klal_id": 97,
@@ -2282,7 +2590,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": true
+  "ambiguous": true,
+  "rank": 136,
+  "corpus_count": 3
  },
  {
   "klal_id": 102,
@@ -2296,7 +2606,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 275,
+  "corpus_count": 1
  },
  {
   "klal_id": 102,
@@ -2315,7 +2627,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": true
+  "ambiguous": true,
+  "rank": 443,
+  "corpus_count": 1
  },
  {
   "klal_id": 103,
@@ -2329,7 +2643,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 161,
+  "corpus_count": 2
  },
  {
   "klal_id": 103,
@@ -2343,7 +2659,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 374,
+  "corpus_count": 2
  },
  {
   "klal_id": 106,
@@ -2357,7 +2675,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 881,
+  "corpus_count": 1
  },
  {
   "klal_id": 113,
@@ -2371,7 +2691,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 522,
+  "corpus_count": 1
  },
  {
   "klal_id": 117,
@@ -2395,7 +2717,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": true
+  "ambiguous": true,
+  "rank": 5961,
+  "corpus_count": 2
  },
  {
   "klal_id": 123,
@@ -2409,7 +2733,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 4031,
+  "corpus_count": 1
  },
  {
   "klal_id": 123,
@@ -2423,7 +2749,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 679,
+  "corpus_count": 1
  },
  {
   "klal_id": 128,
@@ -2437,7 +2765,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 473,
+  "corpus_count": 1
  },
  {
   "klal_id": 131,
@@ -2451,7 +2781,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 81,
+  "corpus_count": 1
  },
  {
   "klal_id": 131,
@@ -2465,7 +2797,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 58,
+  "corpus_count": 1
  },
  {
   "klal_id": 137,
@@ -2479,7 +2813,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 555,
+  "corpus_count": 1
  },
  {
   "klal_id": 138,
@@ -2498,7 +2834,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": true
+  "ambiguous": true,
+  "rank": 2493,
+  "corpus_count": 1
  },
  {
   "klal_id": 138,
@@ -2512,7 +2850,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 200,
+  "corpus_count": 1
  },
  {
   "klal_id": 138,
@@ -2526,7 +2866,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 2753,
+  "corpus_count": 1
  },
  {
   "klal_id": 138,
@@ -2540,7 +2882,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 496,
+  "corpus_count": 1
  },
  {
   "klal_id": 138,
@@ -2559,7 +2903,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": true
+  "ambiguous": true,
+  "rank": 64,
+  "corpus_count": 1
  },
  {
   "klal_id": 138,
@@ -2573,7 +2919,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 215,
+  "corpus_count": 1
  },
  {
   "klal_id": 140,
@@ -2587,7 +2935,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 6579,
+  "corpus_count": 1
  },
  {
   "klal_id": 143,
@@ -2601,7 +2951,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 90,
+  "corpus_count": 2
  },
  {
   "klal_id": 143,
@@ -2615,7 +2967,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 90,
+  "corpus_count": 2
  },
  {
   "klal_id": 143,
@@ -2634,7 +2988,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": true
+  "ambiguous": true,
+  "rank": 3271,
+  "corpus_count": 1
  },
  {
   "klal_id": 144,
@@ -2648,7 +3004,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 365,
+  "corpus_count": 2
  },
  {
   "klal_id": 144,
@@ -2662,7 +3020,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 470,
+  "corpus_count": 1
  },
  {
   "klal_id": 144,
@@ -2676,7 +3036,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 399,
+  "corpus_count": 1
  },
  {
   "klal_id": 144,
@@ -2695,7 +3057,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": true
+  "ambiguous": true,
+  "rank": 135,
+  "corpus_count": 1
  },
  {
   "klal_id": 144,
@@ -2709,7 +3073,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 108,
+  "corpus_count": 1
  },
  {
   "klal_id": 144,
@@ -2723,7 +3089,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 535,
+  "corpus_count": 1
  },
  {
   "klal_id": 144,
@@ -2737,7 +3105,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 636,
+  "corpus_count": 1
  },
  {
   "klal_id": 144,
@@ -2751,7 +3121,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 1566,
+  "corpus_count": 1
  },
  {
   "klal_id": 144,
@@ -2770,7 +3142,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": true
+  "ambiguous": true,
+  "rank": 375,
+  "corpus_count": 2
  },
  {
   "klal_id": 146,
@@ -2784,7 +3158,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 218,
+  "corpus_count": 1
  },
  {
   "klal_id": 147,
@@ -2803,7 +3179,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": true
+  "ambiguous": true,
+  "rank": 392,
+  "corpus_count": 1
  },
  {
   "klal_id": 148,
@@ -2817,7 +3195,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 374,
+  "corpus_count": 2
  },
  {
   "klal_id": 148,
@@ -2831,7 +3211,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 60,
+  "corpus_count": 1
  },
  {
   "klal_id": 148,
@@ -2845,7 +3227,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 239,
+  "corpus_count": 1
  },
  {
   "klal_id": 148,
@@ -2859,7 +3243,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 913,
+  "corpus_count": 1
  },
  {
   "klal_id": 148,
@@ -2873,7 +3259,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 3271,
+  "corpus_count": 1
  },
  {
   "klal_id": 149,
@@ -2887,7 +3275,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 77,
+  "corpus_count": 3
  },
  {
   "klal_id": 150,
@@ -2901,7 +3291,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 91,
+  "corpus_count": 1
  },
  {
   "klal_id": 150,
@@ -2920,7 +3312,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": true
+  "ambiguous": true,
+  "rank": 364,
+  "corpus_count": 1
  },
  {
   "klal_id": 150,
@@ -2939,7 +3333,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": true
+  "ambiguous": true,
+  "rank": 467,
+  "corpus_count": 1
  },
  {
   "klal_id": 150,
@@ -2953,7 +3349,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 311,
+  "corpus_count": 3
  },
  {
   "klal_id": 150,
@@ -2967,7 +3365,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 692,
+  "corpus_count": 1
  },
  {
   "klal_id": 150,
@@ -2981,7 +3381,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 308,
+  "corpus_count": 1
  },
  {
   "klal_id": 150,
@@ -2995,7 +3397,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 194,
+  "corpus_count": 1
  },
  {
   "klal_id": 150,
@@ -3009,7 +3413,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 61,
+  "corpus_count": 1
  },
  {
   "klal_id": 151,
@@ -3023,7 +3429,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 635,
+  "corpus_count": 2
  },
  {
   "klal_id": 151,
@@ -3047,7 +3455,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": true
+  "ambiguous": true,
+  "rank": 5961,
+  "corpus_count": 2
  },
  {
   "klal_id": 152,
@@ -3061,7 +3471,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 253,
+  "corpus_count": 1
  },
  {
   "klal_id": 152,
@@ -3075,7 +3487,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 1541,
+  "corpus_count": 2
  },
  {
   "klal_id": 153,
@@ -3089,7 +3503,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 224,
+  "corpus_count": 1
  },
  {
   "klal_id": 154,
@@ -3103,7 +3519,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 212,
+  "corpus_count": 1
  },
  {
   "klal_id": 154,
@@ -3117,7 +3535,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 49,
+  "corpus_count": 1
  },
  {
   "klal_id": 154,
@@ -3131,7 +3551,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 77,
+  "corpus_count": 3
  },
  {
   "klal_id": 154,
@@ -3145,7 +3567,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 100,
+  "corpus_count": 1
  },
  {
   "klal_id": 154,
@@ -3159,7 +3583,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 1423,
+  "corpus_count": 1
  },
  {
   "klal_id": 158,
@@ -3173,7 +3599,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 56,
+  "corpus_count": 1
  },
  {
   "klal_id": 159,
@@ -3187,7 +3615,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 2420,
+  "corpus_count": 1
  },
  {
   "klal_id": 159,
@@ -3201,7 +3631,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 2420,
+  "corpus_count": 1
  },
  {
   "klal_id": 159,
@@ -3215,7 +3647,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 1426,
+  "corpus_count": 1
  },
  {
   "klal_id": 159,
@@ -3229,7 +3663,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 347,
+  "corpus_count": 1
  },
  {
   "klal_id": 159,
@@ -3243,7 +3679,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 2169,
+  "corpus_count": 1
  },
  {
   "klal_id": 159,
@@ -3257,7 +3695,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 1173,
+  "corpus_count": 1
  },
  {
   "klal_id": 162,
@@ -3276,7 +3716,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": true
+  "ambiguous": true,
+  "rank": 51,
+  "corpus_count": 1
  },
  {
   "klal_id": 162,
@@ -3290,7 +3732,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 242,
+  "corpus_count": 1
  },
  {
   "klal_id": 162,
@@ -3304,7 +3748,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 291,
+  "corpus_count": 1
  },
  {
   "klal_id": 163,
@@ -3318,7 +3764,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 383,
+  "corpus_count": 1
  },
  {
   "klal_id": 163,
@@ -3337,7 +3785,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": true
+  "ambiguous": true,
+  "rank": 862,
+  "corpus_count": 2
  },
  {
   "klal_id": 163,
@@ -3351,7 +3801,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 375,
+  "corpus_count": 1
  },
  {
   "klal_id": 166,
@@ -3365,7 +3817,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 405,
+  "corpus_count": 1
  },
  {
   "klal_id": 166,
@@ -3379,7 +3833,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 228,
+  "corpus_count": 1
  },
  {
   "klal_id": 167,
@@ -3398,7 +3854,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": true
+  "ambiguous": true,
+  "rank": 136,
+  "corpus_count": 3
  },
  {
   "klal_id": 167,
@@ -3412,7 +3870,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 145,
+  "corpus_count": 1
  },
  {
   "klal_id": 167,
@@ -3426,7 +3886,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 311,
+  "corpus_count": 3
  },
  {
   "klal_id": 167,
@@ -3440,7 +3902,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 301,
+  "corpus_count": 1
  },
  {
   "klal_id": 167,
@@ -3454,7 +3918,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 311,
+  "corpus_count": 3
  },
  {
   "klal_id": 167,
@@ -3468,7 +3934,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 711,
+  "corpus_count": 1
  },
  {
   "klal_id": 167,
@@ -3482,7 +3950,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 17308,
+  "corpus_count": 1
  },
  {
   "klal_id": 167,
@@ -3496,7 +3966,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 99,
+  "corpus_count": 1
  },
  {
   "klal_id": 168,
@@ -3510,7 +3982,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 2973,
+  "corpus_count": 1
  },
  {
   "klal_id": 169,
@@ -3524,7 +3998,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 42,
+  "corpus_count": 3
  },
  {
   "klal_id": 169,
@@ -3538,7 +4014,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 62,
+  "corpus_count": 2
  },
  {
   "klal_id": 169,
@@ -3552,7 +4030,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 1270,
+  "corpus_count": 2
  },
  {
   "klal_id": 169,
@@ -3566,7 +4046,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 1891,
+  "corpus_count": 2
  },
  {
   "klal_id": 169,
@@ -3580,7 +4062,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 4540,
+  "corpus_count": 1
  },
  {
   "klal_id": 172,
@@ -3594,7 +4078,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 642,
+  "corpus_count": 1
  },
  {
   "klal_id": 176,
@@ -3608,7 +4094,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 269,
+  "corpus_count": 2
  },
  {
   "klal_id": 176,
@@ -3622,7 +4110,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 977,
+  "corpus_count": 1
  },
  {
   "klal_id": 176,
@@ -3636,7 +4126,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 3056,
+  "corpus_count": 1
  },
  {
   "klal_id": 176,
@@ -3650,7 +4142,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 158,
+  "corpus_count": 1
  },
  {
   "klal_id": 176,
@@ -3664,7 +4158,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 9173,
+  "corpus_count": 1
  },
  {
   "klal_id": 176,
@@ -3678,7 +4174,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 12846,
+  "corpus_count": 1
  },
  {
   "klal_id": 177,
@@ -3692,7 +4190,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 358,
+  "corpus_count": 1
  },
  {
   "klal_id": 177,
@@ -3706,7 +4206,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 221,
+  "corpus_count": 1
  },
  {
   "klal_id": 177,
@@ -3720,7 +4222,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 246,
+  "corpus_count": 1
  },
  {
   "klal_id": 177,
@@ -3734,7 +4238,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 384,
+  "corpus_count": 1
  },
  {
   "klal_id": 177,
@@ -3748,7 +4254,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 49,
+  "corpus_count": 1
  },
  {
   "klal_id": 177,
@@ -3762,7 +4270,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 5096,
+  "corpus_count": 1
  },
  {
   "klal_id": 179,
@@ -3776,7 +4286,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 3326,
+  "corpus_count": 1
  },
  {
   "klal_id": 179,
@@ -3790,7 +4302,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 415,
+  "corpus_count": 1
  },
  {
   "klal_id": 179,
@@ -3804,7 +4318,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 583,
+  "corpus_count": 1
  },
  {
   "klal_id": 183,
@@ -3818,7 +4334,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 192,
+  "corpus_count": 1
  },
  {
   "klal_id": 183,
@@ -3832,7 +4350,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 145,
+  "corpus_count": 3
  },
  {
   "klal_id": 183,
@@ -3846,7 +4366,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 263,
+  "corpus_count": 1
  },
  {
   "klal_id": 189,
@@ -3860,7 +4382,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 391,
+  "corpus_count": 1
  },
  {
   "klal_id": 191,
@@ -3874,7 +4398,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 1891,
+  "corpus_count": 2
  },
  {
   "klal_id": 193,
@@ -3888,7 +4414,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 42,
+  "corpus_count": 3
  },
  {
   "klal_id": 194,
@@ -3902,7 +4430,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 636,
+  "corpus_count": 1
  },
  {
   "klal_id": 194,
@@ -3916,7 +4446,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 42,
+  "corpus_count": 3
  },
  {
   "klal_id": 194,
@@ -3940,7 +4472,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": true
+  "ambiguous": true,
+  "rank": 114,
+  "corpus_count": 1
  },
  {
   "klal_id": 196,
@@ -3954,7 +4488,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 213,
+  "corpus_count": 1
  },
  {
   "klal_id": 197,
@@ -3968,7 +4504,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 401,
+  "corpus_count": 1
  },
  {
   "klal_id": 198,
@@ -3982,7 +4520,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 1613,
+  "corpus_count": 2
  },
  {
   "klal_id": 198,
@@ -3996,7 +4536,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 1613,
+  "corpus_count": 2
  },
  {
   "klal_id": 198,
@@ -4010,7 +4552,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 1426,
+  "corpus_count": 1
  },
  {
   "klal_id": 198,
@@ -4024,7 +4568,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 290,
+  "corpus_count": 1
  },
  {
   "klal_id": 198,
@@ -4038,7 +4584,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 448,
+  "corpus_count": 1
  },
  {
   "klal_id": 198,
@@ -4052,7 +4600,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 2092,
+  "corpus_count": 1
  },
  {
   "klal_id": 198,
@@ -4066,7 +4616,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 61,
+  "corpus_count": 1
  },
  {
   "klal_id": 198,
@@ -4080,7 +4632,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 327,
+  "corpus_count": 1
  },
  {
   "klal_id": 200,
@@ -4094,7 +4648,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 201,
+  "corpus_count": 2
  },
  {
   "klal_id": 200,
@@ -4108,7 +4664,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 145,
+  "corpus_count": 3
  },
  {
   "klal_id": 210,
@@ -4122,7 +4680,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 55,
+  "corpus_count": 1
  },
  {
   "klal_id": 210,
@@ -4136,7 +4696,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 120,
+  "corpus_count": 2
  },
  {
   "klal_id": 210,
@@ -4150,7 +4712,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 120,
+  "corpus_count": 2
  },
  {
   "klal_id": 212,
@@ -4164,7 +4728,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 2052,
+  "corpus_count": 1
  },
  {
   "klal_id": 212,
@@ -4178,7 +4744,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 481,
+  "corpus_count": 1
  },
  {
   "klal_id": 213,
@@ -4192,7 +4760,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 43,
+  "corpus_count": 1
  },
  {
   "klal_id": 216,
@@ -4206,7 +4776,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 1541,
+  "corpus_count": 1
  },
  {
   "klal_id": 216,
@@ -4220,7 +4792,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 392,
+  "corpus_count": 1
  },
  {
   "klal_id": 216,
@@ -4239,7 +4813,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": true
+  "ambiguous": true,
+  "rank": 351,
+  "corpus_count": 2
  },
  {
   "klal_id": 216,
@@ -4263,7 +4839,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": true
+  "ambiguous": true,
+  "rank": 886,
+  "corpus_count": 1
  },
  {
   "klal_id": 216,
@@ -4277,7 +4855,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 104,
+  "corpus_count": 2
  },
  {
   "klal_id": 216,
@@ -4291,7 +4871,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 271,
+  "corpus_count": 2
  },
  {
   "klal_id": 216,
@@ -4305,7 +4887,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 46,
+  "corpus_count": 1
  },
  {
   "klal_id": 216,
@@ -4324,7 +4908,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": true
+  "ambiguous": true,
+  "rank": 862,
+  "corpus_count": 2
  },
  {
   "klal_id": 217,
@@ -4338,7 +4924,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 286,
+  "corpus_count": 1
  },
  {
   "klal_id": 217,
@@ -4357,7 +4945,9 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": true
+  "ambiguous": true,
+  "rank": 363,
+  "corpus_count": 1
  },
  {
   "klal_id": 217,
@@ -4371,7 +4961,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 2979,
+  "corpus_count": 1
  },
  {
   "klal_id": 217,
@@ -4385,7 +4977,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 1754,
+  "corpus_count": 1
  },
  {
   "klal_id": 221,
@@ -4399,7 +4993,9 @@
    }
   ],
   "detector": "substitution",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 2377,
+  "corpus_count": 1
  },
  {
   "klal_id": 221,
@@ -4413,6 +5009,8 @@
    }
   ],
   "detector": "insertion_deletion",
-  "ambiguous": false
+  "ambiguous": false,
+  "rank": 203,
+  "corpus_count": 1
  }
 ]
