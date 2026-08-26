@@ -926,14 +926,46 @@ applying it to the corpus remain two separate, deliberate steps.
     a human read the bad flag and recognised what it was about. w120 retracted,
     **w135 flagged and scan-confirmed**.
 
-    That reframes the noise buckets: a flag whose suggestion does not fit its word
-    may be a REAL FINDING AT THE WRONG INDEX, so clearing that bucket wholesale
-    would destroy evidence. Two systematic detectors for the mis-index were tried
-    and **both are too noisy to trust** - matching the suggestion against every
-    other word in the klal returns mostly punctuation artifacts, and matching the
-    reason's cited phrase mostly finds legitimate citations of a CORRECT
-    occurrence elsewhere (`משוס`->`משום` because `משום ר'` appears correctly at
-    w80/90/173). No reliable automatic recovery exists; the 5 have to be read.
+    **ROOT CAUSE FOUND 2026-08-26, on the reviewer asking whether I had actually
+    looked for one. I had not** - I fixed the two instances and stopped at
+    "mis-indexed", which is a symptom. The cause is an **OFF-BY-ONE confined to
+    the 2026-08-18T20:36 batch**: some corrections were attached to the word
+    BEFORE their real target. The reviewer's own words were the diagnosis - "the
+    note is on the following dispute" - and I under-read them as a description
+    rather than a mechanism.
+
+    **Scope, measured per batch** (does a flag's suggestion plausibly fit its own
+    word?): 20:36 = **96%** (133/139), and every later batch = **100%**. So this is
+    not a broken pass; it is **6 items in one batch**, four of which landed in
+    klal 66, which is why the reviewer hit two of them in a row.
+
+    | flagged | note really belongs to | outcome |
+    |---|---|---|
+    | klal 92 w439 `דבבעיות` | w440 `או` -> `אלו` | **real error, now flagged** |
+    | klal 200 w144 `ועל` | w145 `או` -> `אלו` | **real error, now flagged** |
+    | klal 97 w387 `טועה` | w388 `דם` -> `הם` | real, already flagged |
+    | klal 174 w17 `ד"ה` | w18 `אלא` | already correct - asks nothing |
+    | klal 66 w67 `אמרה` | w82 `נקראתת` -> `נקראת` | re-emitted correctly at 22:11 |
+    | klal 66 w120 `הרי` | w135 `ע"ס` -> `ע"פ` | **real, scan-confirmed** |
+
+    All six retracted with a pointer to the true target. **Three real corpus
+    errors were recovered from flags that read as gibberish**, and one of them
+    (klal 66 w135) is confirmed against the ink.
+
+    **What makes these unrecoverable by any detector here:** `או` is attested
+    **37,981x** - a perfectly real word in the wrong place. Every lexical detector
+    in this repo gates on the stored form being UNATTESTED, so this whole class is
+    invisible to them by construction, exactly like the `לא`->`אלא` the reviewer
+    found by eye in klal 84. The 2026-08-18 semantic pass is the only thing that
+    has ever found them, which is an argument for re-running it correctly rather
+    than retiring it.
+
+    Two automatic recovery searches were tried first and **both were too noisy to
+    trust** - matching the suggestion against every other word returns mostly
+    punctuation artifacts, and matching the reason's cited phrase mostly finds
+    legitimate citations of a CORRECT occurrence elsewhere (`משוס`->`משום` because
+    `משום ר'` appears correctly at w80/90/173). What worked was the per-batch
+    fit-rate above, which localises the damage instead of trying to repair it.
 
     **39 CLEARED 2026-08-26, user-authorised - and the count is 39, not 42,
     because I nearly repeated this repo's own bug while counting them.** The
@@ -953,11 +985,32 @@ applying it to the corpus remain two separate, deliberate steps.
     yielded one scan-confirmed corpus error, and clearing them would destroy
     evidence.
 
-    This is the same family as the 312 fabricated "VLM Verified" candidates
-    (item 1): free-text LLM reasoning attached to a flag reads as authoritative
-    and is not checkable by the machinery downstream of it. The reason strings in
-    particular are unverified prose - `FREQ: doubled final tav` was accepted by
-    every layer between that pass and a human's eyes.
+29. **[AUDIT 2026-08-27] Heavy code review & Stage 5b / AI flag diagnostic audit.**
+    Comprehensive review of the full pipeline + 28 commits (Aug 25-27) documented in
+    `CODE-REVIEW-2026-08-27.md` and `LEXICAL-DEFECT-AND-FLAG-AUDIT-2026-08-27.md`.
+    
+    - **Confirmed Fixes from Prior Reviews**: Memoized JSONL decision loading & region caching
+      (182ms -> 9.6ms latency), multi-page bbox collisions, raw token array index alignment in
+      `reconstruct_placeholder_klalim.py`, scan watermark & folio geometry cleaner ($y \le 0.02$),
+      abbreviation ligature guard in `docai_filter.py`, null decision POST prevention at write site.
+    - **Critical Defects & Edge Cases Identified (Ready for Future Triage)**:
+      1. `export_corpus.py:_apply_decisions_to_klalim()` drops manual insertions (`original_word is None`)
+         which `apply_reviewer_decisions.py:320` handles via `apply_delete_insertion()`.
+      2. Multi-word manual replacements (`len(chosen_text.split()) > 1`) change word count without
+         setting `word_count_changed_klalim`, allowing subsequent same-run decisions in the same klal
+         to apply at shifted word indices.
+      3. `corpus_io.py:597` `trusted_klal_pages_with_continuations()` crashes with `AttributeError`
+         if `klal_page_regions.json` is absent (`load_json` defaults to `None`).
+      4. `review_server.py:453` `_corpus_bbox_cache` module-level dict is never invalidated on corpus edits.
+    - **Stage 5b Lexical Defect Report Audit (`lexical_defect_report.json`)**:
+      299 candidates across 96 Part-1 klalim (194 unflagged, 97 currently flagged, 8 already decided).
+      True-positive examples identified against surrounding context (klal 179 w16 `יותה`->`יותר`,
+      klal 30 w250/1263 `גכי`->`גבי`, klal 54 w730 `עלירם`->`עליהם`, klal 7 w252 `הלכרה`->`הלכה`,
+      klal 30 w1115 `טיניה`->`מיניה`); false positives isolated (names like `זלמן`, terms like `בשרש`).
+    - **Active AI Flag Alignment Audit**:
+      455 active flags (144 klal-level, 311 word-level). For the 202 Round 4 flags: 187 (92.6%) are
+      cleanly aligned at their exact stored word index; 12 are already resolved in stored text;
+      only 1 experienced index drift (klal 43 w14 -> w17 `ממטונא`->`מממונא`); 1 is retracted (`למיפך`).
 
 ## Closed — the detail is in `PROJECT-STATUS-HISTORY.md`, by date
 
