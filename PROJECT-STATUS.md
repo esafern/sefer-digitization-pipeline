@@ -1136,6 +1136,24 @@ applying it to the corpus remain two separate, deliberate steps.
     The failure lists are candidates, not confirmed errors - except `both_lost`,
     which is exhaustive, because an ampersand is never Hebrew.
 
+33. **GEMATRIA RULE CONFIRMED AND ENCODED 2026-08-26 (reviewer): a trailing ר in
+    a klal marker is a misread ד - with exactly two exceptions, and this corpus
+    contains both.** The reviewer's reasoning was "the last digit must be between
+    1 and 9". That is right about the UNITS place but not about every numeral:
+    Hebrew numerals run high-to-low and a ROUND number simply stops at a higher
+    place, so a trailing letter need not be א-ט. Within 1-667 the numbers that
+    legitimately end in ר are **200 (`ר`) and 600 (`תר`)** - and klalim 200 and
+    600 are exactly the two the corpus has. Every other trailing ר is
+    arithmetically impossible (`רמר` = 200+40+200), so the ר must be a ד: this
+    fount's ד/ר pair is already a confirmed confusion class.
+
+    Checked corpus-wide: **2 klalim end in ר, both legitimate**, and the
+    gematria trace stores only corpus-derived values, so there is no OCR marker
+    text there to violate it. Zero violations today. Encoded anyway as a gated
+    invariant, `test_no_klal_marker_ends_in_a_resh_that_should_be_a_dalet`,
+    because a future marker misread would otherwise pass silently - the cheap
+    mechanical check Lesson 8 exists for. Verified it can fail (`רמר`, `קכר`).
+
 ## Closed — the detail is in `PROJECT-STATUS-HISTORY.md`, by date
 
 Kept as an index so a reference to an old item number still resolves. Nothing here needs action.

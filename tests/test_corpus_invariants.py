@@ -1785,6 +1785,44 @@ def test_every_flagged_word_can_be_located_on_the_scan(part1_by_id):
         f"(klal, word_index, opcode): {offenders[:8]}")
 
 
+def test_no_klal_marker_ends_in_a_resh_that_should_be_a_dalet(all_klalim):
+    """ד and ר are near-identical in this fount and are a confirmed confusion
+    pair here. In a Hebrew numeral that difference is 4 vs 200, and position
+    makes it decidable: numerals are written high-to-low (hundreds, tens, units),
+    so a TRAILING letter is the units digit and must come from א-ט - unless the
+    number is round and simply stops at a higher place.
+
+    Within 1-667 there are exactly two numbers that legitimately end in ר:
+    **200 (`ר`) and 600 (`תר`)**, and this corpus contains both. Every other
+    trailing ר is arithmetically impossible - `רמר` would be 200+40+200 - and is
+    therefore a ד misread, e.g. `רמר` for `רמד` (244).
+
+    Raised by the reviewer 2026-08-26. Currently zero violations; this exists so a
+    future marker misread cannot pass silently, which is what a cheap mechanical
+    invariant is for (Lesson 8)."""
+    import corpus_io as cio
+    VALUES = dict(zip("אבגדהוזחטיכלמנסעפצקרשת",
+                      [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 30, 40, 50, 60, 70, 80, 90,
+                       100, 200, 300, 400]))
+    LEGITIMATE_TRAILING_RESH = {200, 600}   # ר and תר; nothing else in this range
+
+    offenders = []
+    for k in all_klalim:
+        g = cio.hebrew_letters_only(k.get("gematria") or "")
+        if not g or not g.endswith("ר"):
+            continue
+        if not all(c in VALUES for c in g):
+            continue                        # not a pure numeral: a different question
+        value = sum(VALUES[c] for c in g)
+        if value in LEGITIMATE_TRAILING_RESH:
+            continue
+        offenders.append((k["klal_id"], k.get("gematria"), value,
+                          k.get("gematria", "")[:-1] + "ד"))
+    assert not offenders, (
+        f"{len(offenders)} klal marker(s) end in ר at a position where only א-ט can stand, "
+        f"so the ר is a misread ד (klal_id, stored, its value, likely reading): {offenders}")
+
+
 def test_lexicon_does_not_whitelist_a_known_corrupt_form():
     """`lexicon.txt` was built from THIS corpus's own OCR output, so it absorbs
     the errors and then vindicates them - the structural hole documented for the
