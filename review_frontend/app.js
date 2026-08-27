@@ -1145,6 +1145,7 @@ function pageForWord(k, wordIndex, corr) {
 // meant to defeat a deliberate click.
 function focusWordOnScan(targetPage, klalId, corr) {
   manualPageLock = false;
+  _zoomOnFocus = true;
   // Every word click routes through here, so this is the one place that has to
   // know the address bar exists. replaceState, not pushState: a reviewer moving
   // through a klal should not have to press Back forty times to leave.
@@ -2245,6 +2246,25 @@ const klalIndicator = document.getElementById('klal-indicator');
 const scanViewer = document.getElementById('scan-viewer');
 
 let zoomLevel = 1;
+// Clicking a word zooms the scan in on it (2026-08-26, reviewer request). Set by
+// focusWordOnScan - the single funnel every word click already goes through -
+// and consumed by whichever of showPage's two centring paths runs.
+//
+// It raises the zoom, never lowers it: a reviewer who has deliberately zoomed to
+// 300% to read a worn glyph should not be yanked back to 220% by their next
+// click. And it is a one-shot flag, so scrolling or paging afterwards leaves the
+// zoom alone - only an explicit click re-triggers it.
+const FOCUS_ZOOM = 2.2;
+let _zoomOnFocus = false;
+
+function zoomToFocus(box) {
+  if (zoomLevel < FOCUS_ZOOM) {
+    zoomLevel = FOCUS_ZOOM;
+    applyZoom();          // applyZoom centres .hl-box.focused itself
+  } else {
+    box.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+  }
+}
 function applyZoom(anchorRatioX, anchorRatioY) {
   const rX = anchorRatioX != null ? anchorRatioX
     : (scanViewer.scrollLeft + scanViewer.clientWidth / 2) / (pageImg.offsetWidth || 1);
@@ -2283,9 +2303,12 @@ function setupZoomPan() {
     if (_pendingScrollToBox) {
       const box = _pendingScrollToBox;
       _pendingScrollToBox = null;
-      requestAnimationFrame(() =>
-        box.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' })
-      );
+      const zoomThis = _zoomOnFocus;
+      _zoomOnFocus = false;
+      requestAnimationFrame(() => {
+        if (zoomThis) zoomToFocus(box);
+        else box.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+      });
     }
   });
 
@@ -2511,12 +2534,16 @@ async function showPage(page, focusKlalId, focusCorr = undefined) {
       _pendingScrollToBox = focusedBox;
     } else {
       _pendingScrollToBox = null;
-      requestAnimationFrame(() =>
-        focusedBox.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' })
-      );
+      const zoomThis = _zoomOnFocus;
+      _zoomOnFocus = false;
+      requestAnimationFrame(() => {
+        if (zoomThis) zoomToFocus(focusedBox);
+        else focusedBox.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+      });
     }
   } else {
     _pendingScrollToBox = null; // superseded focus, cancel any pending scroll
+    _zoomOnFocus = false;       // ...and disarm the zoom, or the NEXT render steals it
   }
 }
 

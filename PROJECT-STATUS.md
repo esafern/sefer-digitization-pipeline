@@ -1232,6 +1232,25 @@ applying it to the corpus remain two separate, deliberate steps.
     by suppressing the tooltip in the text pane, which is what made the merge the
     right move rather than just deleting one box.
 
+    **Clicking a word now ZOOMS the scan onto it** (reviewer request). Centring
+    already worked; the zoom did not, and at 100% the page is too small to
+    adjudicate the thing the queue is full of - a ס/פ, a ד/ר, a dropped ligature
+    letter. A click raises the scan to **220%** and centres the focused box.
+
+    Two properties, and the second is the one that would have annoyed daily: it
+    zooms IN only, **never out** - a reviewer who has gone to 300% to read a worn
+    sort is not yanked back by their next click. It is also a one-shot flag set in
+    `focusWordOnScan()` (the single funnel every word click already passes
+    through, from the manualPageLock fix), so scrolling or paging afterwards
+    leaves the zoom alone.
+
+    Measured: a word away from the page edges centres to **dx 0, dy 0**. A word
+    at an edge cannot be centred because the scroll clamps - the test asserts
+    "centred on each axis unless that axis is clamped", since asserting a fixed
+    tolerance would only have been asserting the viewport width. Note the scan
+    pane is RTL, so `scrollLeft` runs 0 -> negative and any clamp check needs
+    `abs()`; the first version of the check missed that.
+
 35. **[AUDIT 2026-08-27] Heavy code review & Stage 5b / AI flag diagnostic audit.**
     Comprehensive review of the full pipeline + 28 commits (Aug 25-27) documented in
     `CODE-REVIEW-2026-08-27.md` and `LEXICAL-DEFECT-AND-FLAG-AUDIT-2026-08-27.md`.

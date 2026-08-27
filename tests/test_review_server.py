@@ -458,6 +458,57 @@ def test_a_flagged_word_shows_exactly_one_floating_box_with_the_detail(server, p
     assert page.test_errors == []
 
 
+def test_clicking_a_word_zooms_and_centres_the_scan_on_it(server, page):
+    """ADDED 2026-08-26 (reviewer: "when i click on a word, zoom in and center on
+    that word in the scan panel"). Adjudicating a ס/פ or a ד/ר means reading one
+    glyph, and at 100% the page is too small to do that.
+
+    Two properties, and the second is the one that would annoy: the click zooms
+    IN to a reading level, and it never zooms OUT - a reviewer who has gone to
+    300% to read a worn sort must not be yanked back by their next click."""
+    page.goto(server + "/klal/66", wait_until="domcontentloaded", timeout=15000)
+    page.wait_for_selector(".nav-item", timeout=15000)
+    page.wait_for_timeout(2200)
+    assert page.inner_text("#zoom-level") == "100%"
+
+    page.eval_on_selector('#klal-block-66 [data-word-index="200"]', "el => el.click()")
+    page.wait_for_timeout(2500)
+    assert page.inner_text("#zoom-level") == "220%", page.inner_text("#zoom-level")
+
+    # Centred on each axis, UNLESS the scroll is clamped at a page edge - a word
+    # in the last line cannot be pulled to the middle of the viewport, and
+    # asserting otherwise would only be asserting the viewport size. The property
+    # is "as centred as the axis allows".
+    off = page.evaluate("""() => {
+      const v = document.getElementById('scan-viewer');
+      const b = document.querySelector('.hl-box.focused');
+      if (!b) return null;
+      const vr = v.getBoundingClientRect(), br = b.getBoundingClientRect();
+      // RTL makes scrollLeft run 0 -> negative, hence the abs()
+      const maxX = v.scrollWidth - v.clientWidth, maxY = v.scrollHeight - v.clientHeight;
+      return {
+        dx: (br.left + br.width/2) - (vr.left + vr.width/2),
+        dy: (br.top + br.height/2) - (vr.top + vr.height/2),
+        clampedX: Math.abs(v.scrollLeft) < 2 || Math.abs(Math.abs(v.scrollLeft) - maxX) < 2,
+        clampedY: v.scrollTop < 2 || Math.abs(v.scrollTop - maxY) < 2,
+      };
+    }""")
+    assert off is not None, "no focused box on the scan"
+    assert off["clampedX"] or abs(off["dx"]) < 12, off
+    assert off["clampedY"] or abs(off["dy"]) < 12, off
+
+    # a manual zoom beyond the target survives the next click
+    for _ in range(3):
+        page.click("#zoom-in")
+    page.wait_for_timeout(600)
+    zoomed = page.inner_text("#zoom-level")
+    page.eval_on_selector('#klal-block-66 [data-word-index="10"]', "el => el.click()")
+    page.wait_for_timeout(2000)
+    assert page.inner_text("#zoom-level") == zoomed, (
+        f"the click zoomed back out from {zoomed} to {page.inner_text('#zoom-level')}")
+    assert page.test_errors == []
+
+
 def test_index_stamps_asset_versions_from_the_files_themselves(server):
     """ADDED 2026-08-25. index.html shipped a hand-maintained `?v=6` that was last
     bumped in 1e59522 and never again, through every app.js change since. The
