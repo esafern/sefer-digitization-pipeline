@@ -1181,6 +1181,28 @@ applying it to the corpus remain two separate, deliberate steps.
     it is not being tried a third time. **The narrow trailing-ר rule stands; the
     general one is abandoned.**
 
+34. **REPORTS ARE NOW SHAREABLE, 2026-08-26 (reviewer: "the json is not a good
+    way to share the urls - it is not clickable with markdown").** Correct - the
+    JSON is what the pipeline reads and diffs, but as a way of HANDING findings to
+    a person its links are inert text. `tools/render_report.py` renders any of
+    these reports to Markdown (default, clickable almost anywhere a finding gets
+    pasted) or HTML (clickable in the browser the dashboard is already open in,
+    where the links are same-origin and simply work).
+
+    It reads every report shape in the repo without any of them being rewritten:
+    position-per-row (`lexical_defect_report.json`), word-per-row with an
+    `occurrences` list (`lexicon_yad_malachi_only.json`), and dict-of-sections
+    (`ligature_words.json`, via `--section`). One trap worth recording: **`word`
+    means a word INDEX in `cleared_flags_*.json` and the word TEXT in
+    `lexicon_yad_malachi_only.json`**, so the key is resolved by TYPE rather than
+    by name - guessing by name silently dropped the word index from every link in
+    the first run, producing links that opened the right klal at the wrong place.
+
+    The rendered `.md`/`.html` are gitignored: they regenerate in a second, and
+    they point at `127.0.0.1:8420`, so they work only on a machine running the
+    dashboard. That is right for a review tool and wrong for anything
+    outward-facing - do not paste these into a published document.
+
 ## Closed — the detail is in `PROJECT-STATUS-HISTORY.md`, by date
 
 Kept as an index so a reference to an old item number still resolves. Nothing here needs action.

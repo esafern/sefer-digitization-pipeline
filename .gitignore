@@ -59,3 +59,17 @@ trocr_benchmark_results.txt
 # never commit). Kept at repo root deliberately since /tmp is ephemeral.
 yad-malachi-migration.tar
 yad-malachi-migration.tar.gz
+
+# Rendered views of the JSON findings reports (tools/render_report.py). The JSON
+# is the artifact; these are a disposable presentation of it, regenerated in a
+# second and pointing at a localhost dashboard, so they are not worth tracking.
+*_report.md
+*_report.html
+cleared_flags_*.md
+cleared_flags_*.html
+ligature_words.md
+ligature_words.html
+lexicon_yad_malachi_only.md
+lexicon_yad_malachi_only.html
+lexical_defect_report.md
+lexical_defect_report.html
