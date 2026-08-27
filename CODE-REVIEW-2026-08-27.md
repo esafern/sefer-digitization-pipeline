@@ -72,8 +72,8 @@ Below is the exhaustive audit of previously identified issues from the August 25
 | **Item 22/23** | Lexical defect detectors | **Fixed** | `detect_real_word_substitution.py` gained כ/מ and ח/ת pairs (floor lowered to 40); `repair_word()` models dropped-alef; added as stage 5b in [`rebuild_all.sh:111-112`](file:///Users/ericsafern/work/sefer-digitization-pipeline/rebuild_all.sh#L111-L112). |
 | **Item 24** | `lexicon.txt` purge & dictionary validation | **Fixed** | 79 corrupt/junk rows purged; `test_lexicon_does_not_whitelist_a_known_corrupt_form` gates against re-contamination; [`tools/lookup_sefaria_dictionaries.py`](file:///Users/ericsafern/work/sefer-digitization-pipeline/tools/lookup_sefaria_dictionaries.py) created. |
 | **Item 26** | 7 non-Hebrew characters in Part 1 | **Tagged** | 3 `&` are `ﭏ` missing both letters ($\rightarrow$ `אל`), 1 `!` is `.` after geresh, 1 `Π` is top folio. Flagged as word-level data items for reviewer confirmation. |
-| **Item 27** | Part 1 page-seam furniture | **Tagged** | Klalim 39, 74, and 210 contain catchword/folio intrusions. Flagged for review. |
-| **Item 28** | Semantic spotcheck round 4 noise | **Fixed** | 39 identical self-suggestions cleared; 5 mis-indexed flags investigated (e.g. klal 66 w120 recovered at w135). |
+| **Item 27** | Part 1 page-seam furniture | **Tagged** | [Klal 39](http://127.0.0.1:8420/#klal=39), [Klal 74](http://127.0.0.1:8420/#klal=74), and [Klal 210](http://127.0.0.1:8420/#klal=210) contain catchword/folio intrusions. Flagged for review. |
+| **Item 28** | Semantic spotcheck round 4 noise | **Fixed** | 39 identical self-suggestions cleared; 5 mis-indexed flags investigated (e.g. [klal 66 w120](http://127.0.0.1:8420/#klal=66&word=120) recovered at [w135](http://127.0.0.1:8420/#klal=66&word=135)). |
 
 ---
 

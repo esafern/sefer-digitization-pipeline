@@ -1648,6 +1648,14 @@ def api_post_manual_correction(body):
 # ---------- HTTP plumbing ----------
 
 ROUTE_KLAL = re.compile(r"^/api/klal/(\d+)$")
+# Shareable, terminal-safe deep links. `/#klal=66&word=135` is the form the
+# frontend actually routes on, but it travels badly: a terminal will not
+# hyperlink Markdown link syntax at all, and many that DO linkify a bare URL
+# stop at the `&` - producing a link that opens the right klal at the wrong
+# word, which is worse than one that plainly fails. A path has no `#` and no
+# `&`, so it survives being pasted anywhere. ADDED 2026-08-26 (reviewer: "sadly
+# those links you shared here in the chat are not clickable").
+ROUTE_SHARE = re.compile(r"^/klal/(\d+)(?:/word/(\d+))?/?$")
 ROUTE_KLAL_FLAG = re.compile(r"^/api/klal/(\d+)/flag$")
 ROUTE_DECISIONS = re.compile(r"^/api/decisions/(\d+)/(\d+)$")
 ROUTE_PAGE = re.compile(r"^/api/page/(\d+)$")
@@ -1740,6 +1748,16 @@ class Handler(BaseHTTPRequestHandler):
             if path == "/api/klalim":
                 part_val = query.get("part", ["1"])[0]
                 return self._send_json(api_klalim(part_num=part_val))
+            m = ROUTE_SHARE.match(path)
+            if m:
+                target = "/#klal=" + m.group(1)
+                if m.group(2) is not None:
+                    target += "&word=" + m.group(2)
+                self.send_response(302)
+                self.send_header("Location", target)
+                self.send_header("Content-Length", "0")
+                self.end_headers()
+                return
             m = ROUTE_KLAL_FLAG.match(path)
             if m:
                 return self._send_json(api_klal_flag(int(m.group(1))))

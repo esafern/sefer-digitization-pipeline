@@ -982,36 +982,6 @@ applying it to the corpus remain two separate, deliberate steps.
 
     That pass now has **202 open flags, down from 238**. The 5 mis-indexed and the
     14 drifted are deliberately untouched: the mis-indexed ones have already
-    yielded one scan-confirmed corpus error, and clearing them would destroy
-    evidence.
-
-29. **[AUDIT 2026-08-27] Heavy code review & Stage 5b / AI flag diagnostic audit.**
-    Comprehensive review of the full pipeline + 28 commits (Aug 25-27) documented in
-    `CODE-REVIEW-2026-08-27.md` and `LEXICAL-DEFECT-AND-FLAG-AUDIT-2026-08-27.md`.
-    
-    - **Confirmed Fixes from Prior Reviews**: Memoized JSONL decision loading & region caching
-      (182ms -> 9.6ms latency), multi-page bbox collisions, raw token array index alignment in
-      `reconstruct_placeholder_klalim.py`, scan watermark & folio geometry cleaner ($y \le 0.02$),
-      abbreviation ligature guard in `docai_filter.py`, null decision POST prevention at write site.
-    - **Critical Defects & Edge Cases Identified (Ready for Future Triage)**:
-      1. `export_corpus.py:_apply_decisions_to_klalim()` drops manual insertions (`original_word is None`)
-         which `apply_reviewer_decisions.py:320` handles via `apply_delete_insertion()`.
-      2. Multi-word manual replacements (`len(chosen_text.split()) > 1`) change word count without
-         setting `word_count_changed_klalim`, allowing subsequent same-run decisions in the same klal
-         to apply at shifted word indices.
-      3. `corpus_io.py:597` `trusted_klal_pages_with_continuations()` crashes with `AttributeError`
-         if `klal_page_regions.json` is absent (`load_json` defaults to `None`).
-      4. `review_server.py:453` `_corpus_bbox_cache` module-level dict is never invalidated on corpus edits.
-    - **Stage 5b Lexical Defect Report Audit (`lexical_defect_report.json`)**:
-      299 candidates across 96 Part-1 klalim (194 unflagged, 97 currently flagged, 8 already decided).
-      True-positive examples identified against surrounding context (klal 179 w16 `יותה`->`יותר`,
-      klal 30 w250/1263 `גכי`->`גבי`, klal 54 w730 `עלירם`->`עליהם`, klal 7 w252 `הלכרה`->`הלכה`,
-      klal 30 w1115 `טיניה`->`מיניה`); false positives isolated (names like `זלמן`, terms like `בשרש`).
-    - **Active AI Flag Alignment Audit**:
-      455 active flags (144 klal-level, 311 word-level). For the 202 Round 4 flags: 187 (92.6%) are
-      cleanly aligned at their exact stored word index; 12 are already resolved in stored text;
-      only 1 experienced index drift (klal 43 w14 -> w17 `ממטונא`->`מממונא`); 1 is retracted (`למיפך`).
-
 29. **DEEP LINKS ADDED 2026-08-26 (reviewer request): a URL now addresses a klal,
     or a klal and a word.**
     `http://127.0.0.1:8420/#klal=66` and `http://127.0.0.1:8420/#klal=66&word=135`.
@@ -1198,10 +1168,32 @@ applying it to the corpus remain two separate, deliberate steps.
     by name - guessing by name silently dropped the word index from every link in
     the first run, producing links that opened the right klal at the wrong place.
 
-    The rendered `.md`/`.html` are gitignored: they regenerate in a second, and
-    they point at `127.0.0.1:8420`, so they work only on a machine running the
-    dashboard. That is right for a review tool and wrong for anything
-    outward-facing - do not paste these into a published document.
+35. **[AUDIT 2026-08-27] Heavy code review & Stage 5b / AI flag diagnostic audit.**
+    Comprehensive review of the full pipeline + 28 commits (Aug 25-27) documented in
+    `CODE-REVIEW-2026-08-27.md` and `LEXICAL-DEFECT-AND-FLAG-AUDIT-2026-08-27.md`.
+    
+    - **Confirmed Fixes from Prior Reviews**: Memoized JSONL decision loading & region caching
+      (182ms -> 9.6ms latency), multi-page bbox collisions, raw token array index alignment in
+      `reconstruct_placeholder_klalim.py`, scan watermark & folio geometry cleaner ($y \le 0.02$),
+      abbreviation ligature guard in `docai_filter.py`, null decision POST prevention at write site.
+    - **Critical Defects & Edge Cases Identified (Ready for Future Triage)**:
+      1. `export_corpus.py:_apply_decisions_to_klalim()` drops manual insertions (`original_word is None`)
+         which `apply_reviewer_decisions.py:320` handles via `apply_delete_insertion()`.
+      2. Multi-word manual replacements (`len(chosen_text.split()) > 1`) change word count without
+         setting `word_count_changed_klalim`, allowing subsequent same-run decisions in the same klal
+         to apply at shifted word indices.
+      3. `corpus_io.py:597` `trusted_klal_pages_with_continuations()` crashes with `AttributeError`
+         if `klal_page_regions.json` is absent (`load_json` defaults to `None`).
+      4. `review_server.py:453` `_corpus_bbox_cache` module-level dict is never invalidated on corpus edits.
+    - **Stage 5b Lexical Defect Report Audit (`lexical_defect_report.json`)**:
+      299 candidates across 96 Part-1 klalim (194 unflagged, 97 currently flagged, 8 already decided).
+      True-positive examples identified against surrounding context ([klal 179 word 16](http://127.0.0.1:8420/#klal=179&word=16) `יותה`->`יותר`,
+      [klal 30 word 250](http://127.0.0.1:8420/#klal=30&word=250)/[1263](http://127.0.0.1:8420/#klal=30&word=1263) `גכי`->`גבי`, [klal 54 word 730](http://127.0.0.1:8420/#klal=54&word=730) `עלירם`->`עליהם`, [klal 7 word 252](http://127.0.0.1:8420/#klal=7&word=252) `הלכרה`->`הלכה`,
+      [klal 30 word 1115](http://127.0.0.1:8420/#klal=30&word=1115) `טיניה`->`מיניה`); false positives isolated (names like `זלמן`, terms like `בשרש`).
+    - **Active AI Flag Alignment Audit**:
+      455 active flags (144 klal-level, 311 word-level). For the 202 Round 4 flags: 187 (92.6%) are
+      cleanly aligned at their exact stored word index; 12 are already resolved in stored text;
+      only 1 experienced index drift ([klal 43 word 14](http://127.0.0.1:8420/#klal=43&word=14) -> [word 17](http://127.0.0.1:8420/#klal=43&word=17) `ממטונא`->`מממונא`); 1 is retracted ([klal 177 word 340](http://127.0.0.1:8420/#klal=177&word=340) `למיפך`).
 
 ## Closed — the detail is in `PROJECT-STATUS-HISTORY.md`, by date
 

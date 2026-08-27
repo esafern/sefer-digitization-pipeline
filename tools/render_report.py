@@ -44,7 +44,16 @@ WORD_KEYS = ("word_index", "word_idx", "word")
 
 
 def link(base, klal, word=None):
-    return f"{base}/#klal={klal}" + ("" if word is None else f"&word={word}")
+    """A PATH link, not the hash form the frontend routes on.
+
+    `/#klal=66&word=135` travels badly: a terminal will not hyperlink Markdown
+    link syntax at all, and several that DO linkify a bare URL stop at the `&` -
+    which opens the right klal at the wrong word, worse than a link that plainly
+    fails. `/klal/66/word/135` has no `#` and no `&`, so it survives being pasted
+    into a terminal, a chat window or a plain-text note. The server 302s it to the
+    hash form (ROUTE_SHARE in review_server.py).
+    """
+    return f"{base}/klal/{klal}" + ("" if word is None else f"/word/{word}")
 
 
 def positions(row):

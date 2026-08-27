@@ -371,6 +371,22 @@ def test_correction_panel_header_copies_the_reference_and_link(server, page):
     assert page.test_errors == []
 
 
+def test_shareable_path_link_redirects_to_the_deep_link(server, page):
+    """ADDED 2026-08-26 (reviewer: "sadly those links you shared here in the chat
+    are not clickable"). `/#klal=66&word=135` is what the frontend routes on, but
+    it does not survive being pasted: terminals do not hyperlink Markdown link
+    syntax, and several that linkify a bare URL truncate at the `&` - opening the
+    right klal at the wrong word, which is worse than failing outright.
+    `/klal/66/word/135` contains no `#` and no `&`."""
+    page.goto(server + "/klal/66/word/135", wait_until="domcontentloaded", timeout=15000)
+    page.wait_for_selector(".nav-item", timeout=15000)
+    page.wait_for_timeout(2500)
+    assert page.url.endswith("/#klal=66&word=135"), page.url
+    assert page.eval_on_selector(".nav-item.active", "el => el.dataset.klalId") == "66"
+    assert page.eval_on_selector_all(".routed-word", "els => els.length") >= 1
+    assert page.test_errors == []
+
+
 def test_index_stamps_asset_versions_from_the_files_themselves(server):
     """ADDED 2026-08-25. index.html shipped a hand-maintained `?v=6` that was last
     bumped in 1e59522 and never again, through every app.js change since. The
