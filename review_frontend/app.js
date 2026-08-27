@@ -343,13 +343,24 @@ function showWordCard(span, klalId) {
     span.dataset.detail = span.getAttribute('title');
     span.removeAttribute('title');
   }
-  const detail = span.dataset.detail || '';
+  // A flagged word gets the FULL detail here rather than in a second floating
+  // box - see attachWordHandlers' note on skipTooltip. A plain word falls back
+  // to whatever native title it carried, which is usually nothing.
+  const corr = span._corr;
+  const detail = corr
+    ? wordDetailHtml(corr, span._isGap)
+    : (span.dataset.detail ? `<span class="t-conf">${escapeHtml(span.dataset.detail)}</span>` : '');
+  const status = corr ? `<span class="wc-status">${escapeHtml(statusLabel(corr))}</span>` : '';
   wordCard.innerHTML =
-    `<span class="wc-ref">${klalRefName(klalId)} &middot; Word #${wi}</span>` +
-    `<button class="copy-ref" type="button" title="Copy reference and link"` +
-    ` data-klal="${klalId}" data-word="${wi}"` +
-    ` data-text="${escapeAttr(span.textContent || '')}">&#128203;</button>` +
-    (detail ? `<span class="wc-detail">${escapeHtml(detail)}</span>` : '');
+    `<div class="wc-head">` +
+      `<span class="wc-ref">${klalRefName(klalId)} &middot; Word #${wi}</span>` +
+      status +
+      `<button class="copy-ref" type="button" title="Copy reference and link"` +
+      ` data-klal="${klalId}" data-word="${wi}"` +
+      ` data-text="${escapeAttr(span.textContent || '')}">&#128203;</button>` +
+    `</div>` +
+    (detail ? `<div class="wc-detail">${detail}</div>` : '');
+  wordCard.classList.toggle('wc-rich', !!corr);
   wordCard.style.display = 'block';
   const r = span.getBoundingClientRect();
   const w = wordCard.offsetWidth, h = wordCard.offsetHeight;
@@ -925,7 +936,7 @@ function renderKlalBody(block, k) {
         + (pendingReplace ? ' pending-replace' : '');
       span.dataset.wordIndex = i;
       span.textContent = w;
-      attachWordHandlers(span, k.klal_id, corr);
+      attachWordHandlers(span, k.klal_id, corr, false, true);
       body.appendChild(span);
 
       if (pendingReplace) {
@@ -937,7 +948,7 @@ function renderKlalBody(block, k) {
         repl.className = 'pending-replace-text';
         repl.textContent = chosenText;
         repl.title = 'Pending: recorded but not yet applied to part1.json';
-        attachWordHandlers(repl, k.klal_id, corr);
+        attachWordHandlers(repl, k.klal_id, corr, false, true);
         body.appendChild(repl);
       }
     } else {
@@ -1029,7 +1040,7 @@ function makeGapMarker(klalId, corr) {
   const span = document.createElement('span');
   span.className = 'flag-gap';
   span.style.background = STATE_META[wordState(corr)].color;
-  attachWordHandlers(span, klalId, corr, true);
+  attachWordHandlers(span, klalId, corr, true, true);
   return span;
 }
 
@@ -1051,24 +1062,46 @@ function makePendingInsertText(chosenText) {
 }
 
 // ---------- quick hover tooltip ----------
-function attachWordHandlers(el, klalId, corr, isGap) {
+// The detail block for a flagged word, shared by both hover surfaces: the scan
+// pane's #tooltip and the text pane's #word-card. Extracted 2026-08-26 so the
+// two cannot drift - they say the same thing about the same word.
+function wordDetailHtml(corr, isGap) {
   const [label] = FLAGS[corr.flag] || ['Flagged'];
-  el.addEventListener('mouseenter', (e) => {
-    const confTxt = (corr.confidence != null) ? (Math.round(corr.confidence * 100) + '% confidence') : 'not scan-verified';
-    const hebrewBit = `<bdi>${escapeHtml(corr.docai_reading || (isGap ? '' : '(none)'))}</bdi>`;
-    const docaiTxt = isGap
-      ? `Scan appears to show: "${hebrewBit}" — not present in current text`
-      : `Original OCR reading: "${hebrewBit}"`;
-    const bodyTxt = `<span class="t-conf">${escapeHtml(label)} — ${confTxt}${corr.reasoning ? ' — ' + escapeHtml(corr.reasoning) : ''}</span>`;
-    const decisionTxt = corr.current_decision
-      ? `<span class="t-hint">Your decision: "${escapeHtml(corr.current_decision.chosen_text)}"${corr.current_decision.note ? ' — ' + escapeHtml(corr.current_decision.note) : ''}</span>`
-      : `<span class="t-hint">Click for details / to record a decision</span>`;
-    tooltip.innerHTML = `<span class="t-flag">${escapeHtml(statusLabel(corr))} (Word #${corr.word_index})</span><span class="t-docai">${docaiTxt}</span>${bodyTxt}${decisionTxt}`;
-    tooltip.style.display = 'block';
-    positionTooltip(e);
-  });
-  el.addEventListener('mousemove', positionTooltip);
-  el.addEventListener('mouseleave', () => { tooltip.style.display = 'none'; });
+  const confTxt = (corr.confidence != null) ? (Math.round(corr.confidence * 100) + '% confidence') : 'not scan-verified';
+  const hebrewBit = `<bdi>${escapeHtml(corr.docai_reading || (isGap ? '' : '(none)'))}</bdi>`;
+  const docaiTxt = isGap
+    ? `Scan appears to show: "${hebrewBit}" — not present in current text`
+    : `Original OCR reading: "${hebrewBit}"`;
+  const bodyTxt = `<span class="t-conf">${escapeHtml(label)} — ${confTxt}${corr.reasoning ? ' — ' + escapeHtml(corr.reasoning) : ''}</span>`;
+  const decisionTxt = corr.current_decision
+    ? `<span class="t-hint">Your decision: "${escapeHtml(corr.current_decision.chosen_text)}"${corr.current_decision.note ? ' — ' + escapeHtml(corr.current_decision.note) : ''}</span>`
+    : `<span class="t-hint">Click for details / to record a decision</span>`;
+  return `<span class="t-docai">${docaiTxt}</span>${bodyTxt}${decisionTxt}`;
+}
+
+// `skipTooltip` is set by the TEXT-pane call sites. A flagged word there was
+// showing TWO floating boxes at once - this #tooltip and the hover card - which
+// the reviewer rightly called redundant ("we don't need both boxes when it is a
+// disputed word"). The card wins in the text pane because it can hold the copy
+// control (#tooltip is pointer-events:none by design, so it can never swallow a
+// click on the scan pane, which is also why it cannot host a button). The card
+// renders wordDetailHtml() itself, so nothing is lost by suppressing this one.
+function attachWordHandlers(el, klalId, corr, isGap, skipTooltip) {
+  if (!skipTooltip) {
+    el.addEventListener('mouseenter', (e) => {
+      tooltip.innerHTML =
+        `<span class="t-flag">${escapeHtml(statusLabel(corr))} (Word #${corr.word_index})</span>` +
+        wordDetailHtml(corr, isGap);
+      tooltip.style.display = 'block';
+      positionTooltip(e);
+    });
+    el.addEventListener('mousemove', positionTooltip);
+    el.addEventListener('mouseleave', () => { tooltip.style.display = 'none'; });
+  }
+  // The card needs the correction to render the same detail; stash it rather
+  // than re-deriving it from mountedKlal on every mouseover.
+  el._corr = corr;
+  el._isGap = !!isGap;
   el.addEventListener('click', () => {
     tooltip.style.display = 'none';
     // Each correction carries its own page field — the physical scan page

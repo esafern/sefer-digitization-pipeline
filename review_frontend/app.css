@@ -642,16 +642,30 @@ textarea.custom-text, input.custom-text {
   gap: 6px;
   max-width: 380px;
 }
+/* One box, two shapes. A PLAIN word gets a single compact row (reference +
+   copy). A flagged word gets the same row plus the full detail block that used
+   to live in a SECOND floating box beside it - the reviewer's point that a
+   disputed word does not need both. */
+#word-card { flex-direction: column; align-items: stretch; }
+#word-card.wc-rich { max-width: 420px; }
+#word-card .wc-head { display: flex; align-items: center; gap: 6px; }
 #word-card .wc-ref { font-weight: 500; white-space: nowrap; }
+#word-card .wc-status {
+  font-size: 10.5px; opacity: 0.75; white-space: nowrap;
+  padding-left: 6px; border-left: 1px solid rgba(255,255,255,0.22);
+}
+#word-card .wc-head .copy-ref { margin-inline-start: auto; }
 #word-card .wc-detail {
-  color: rgba(203, 213, 224, 0.72);
+  margin-top: 5px; padding-top: 5px;
+  border-top: 1px solid rgba(255,255,255,0.16);
+  color: rgba(203, 213, 224, 0.78);
   font-size: 11px;
-  border-left: 1px solid rgba(255,255,255,0.25);
-  padding-left: 6px;
-  direction: rtl;
-  unicode-bidi: isolate;
-  max-height: 3.2em;
+  max-height: 9em;
   overflow: hidden;
 }
+#word-card .wc-detail .t-docai { display: block; margin-bottom: 4px; }
+#word-card .wc-detail .t-conf { display: block; color: rgba(160,174,192,0.9); font-size: 10.5px; }
+#word-card .wc-detail .t-hint { display: block; color: rgba(99,179,237,0.9); font-size: 10.5px; margin-top: 4px; }
+#word-card .wc-detail bdi { direction: rtl; unicode-bidi: isolate; }
 #word-card .copy-ref { color: #f7fafc; opacity: 0.75; }
 #word-card .copy-ref:hover { background: rgba(255,255,255,0.16); opacity: 1; }

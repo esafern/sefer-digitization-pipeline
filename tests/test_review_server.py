@@ -428,19 +428,33 @@ def test_hovering_any_word_offers_its_reference_and_a_copy_control(server, page)
     assert page.test_errors == []
 
 
-def test_a_flagged_word_does_not_show_two_floating_boxes(server, page):
-    """The card takes over the word's native `title`, because the browser's own
-    tooltip would otherwise appear beside it - two floating boxes over one word is
-    worse than none."""
+def test_a_flagged_word_shows_exactly_one_floating_box_with_the_detail(server, page):
+    """REGRESSION 2026-08-26 (reviewer: "we don't need both boxes when it is a
+    disputed word, just the big one with the details").
+
+    A flagged word in the text pane was showing TWO at once: `#tooltip` from
+    attachWordHandlers and `#word-card` from the hover delegation. They are now
+    one box - the card, because it is the only one that can hold the copy control
+    (`#tooltip` is pointer-events:none by design so it can never swallow a click
+    on the scan pane, where it is still used). The card renders the SAME detail
+    via the shared wordDetailHtml(), so suppressing the tooltip here loses
+    nothing. The card also takes over any native `title`, which would otherwise
+    be a third box."""
     page.goto(server + "/klal/66", wait_until="domcontentloaded", timeout=15000)
     page.wait_for_selector(".nav-item", timeout=15000)
     page.wait_for_timeout(2000)
     fw = page.query_selector("#klal-block-66 .flag-word[data-word-index]")
     assert fw, "klal 66 has no flagged word to test with"
     fw.hover()
-    page.wait_for_timeout(400)
+    page.wait_for_timeout(500)
     assert page.is_visible("#word-card")
+    assert not page.is_visible("#tooltip"), "the old tooltip still appears beside the card"
     assert fw.get_attribute("title") in (None, ""), "native title still present beside the card"
+    # the one box must carry the detail the suppressed tooltip used to show
+    text = page.inner_text("#word-card")
+    assert "Word #" in text and "Klal" in text, text
+    assert "reading" in text.lower() or "scan appears" in text.lower(), text
+    assert page.query_selector("#word-card .copy-ref"), "the merged box lost its copy control"
     assert page.test_errors == []
 
 

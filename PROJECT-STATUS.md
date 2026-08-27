@@ -1220,6 +1220,18 @@ applying it to the corpus remain two separate, deliberate steps.
     per-call fetch. The reviewer navigates by id and reads the scan by marker;
     the reference should carry both.
 
+    **ONE box, not two, on a disputed word** (reviewer: "we don't need both boxes
+    when it is a disputed word, just the big one with the details"). A flagged
+    word in the text pane was showing `#tooltip` AND the hover card at once. They
+    are merged into the card, because the card is the only one that CAN hold the
+    copy control - `#tooltip` is `pointer-events: none` by design so it never
+    swallows a click on the scan pane, where it is still used unchanged. The
+    detail block was extracted into a shared `wordDetailHtml()` so the two
+    surfaces cannot drift, and the card renders it in full: status, the original
+    OCR reading, confidence, reasoning and any recorded decision. Nothing was lost
+    by suppressing the tooltip in the text pane, which is what made the merge the
+    right move rather than just deleting one box.
+
 35. **[AUDIT 2026-08-27] Heavy code review & Stage 5b / AI flag diagnostic audit.**
     Comprehensive review of the full pipeline + 28 commits (Aug 25-27) documented in
     `CODE-REVIEW-2026-08-27.md` and `LEXICAL-DEFECT-AND-FLAG-AUDIT-2026-08-27.md`.
