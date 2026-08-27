@@ -608,3 +608,36 @@ textarea.custom-text, input.custom-text {
 .copy-ref:hover { opacity: 1; background: rgba(255,255,255,0.10); }
 .copy-ref.copied { opacity: 1; color: #38a169; }
 .copy-ref.copy-failed { opacity: 1; color: var(--danger); }
+
+/* Hover card on every word in the text pane. Distinct from #tooltip, which sets
+   pointer-events:none so it can never swallow a click - this one CONTAINS a
+   button, so it must be hoverable and clickable. ADDED 2026-08-26. */
+#word-card {
+  position: fixed;
+  z-index: 999;
+  background: var(--ink);
+  color: #f7fafc;
+  padding: 6px 8px;
+  border-radius: 7px;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  direction: ltr;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.28);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 380px;
+}
+#word-card .wc-ref { font-weight: 600; white-space: nowrap; }
+#word-card .wc-detail {
+  color: #cbd5e0;
+  font-size: 11px;
+  border-left: 1px solid rgba(255,255,255,0.25);
+  padding-left: 6px;
+  direction: rtl;
+  unicode-bidi: isolate;
+  max-height: 3.2em;
+  overflow: hidden;
+}
+#word-card .copy-ref { color: #f7fafc; opacity: 0.75; }
+#word-card .copy-ref:hover { background: rgba(255,255,255,0.16); opacity: 1; }

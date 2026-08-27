@@ -1183,6 +1183,26 @@ applying it to the corpus remain two separate, deliberate steps.
     they point at `127.0.0.1:8420`, so they work only on a machine running the
     dashboard. Right for a review tool, wrong for anything outward-facing.
 
+    **EVERY WORD NOW CARRIES ITS ADDRESS ON HOVER** (reviewer: "hovering over any
+    word should always surface a floating box with the klal + word and an icon to
+    copy the link"). Every word in the text pane is addressable, so every word now
+    says what its address IS without being clicked - **plain words previously said
+    nothing at all**, and flagged ones only spoke through a native `title`
+    tooltip, which cannot hold a button.
+
+    It is a HOVERABLE card, not a tooltip, and the distinction is the whole point:
+    `#tooltip` sets `pointer-events: none` precisely so it can never swallow a
+    click, which makes it the wrong element for something containing a control.
+    `#word-card` stays open while the pointer is on it, with a grace period so the
+    pointer can cross the gap from the word - asserted in the tests by actually
+    moving onto the card before clicking, because a control you cannot reach is
+    the failure mode that matters here. It also TAKES OVER the word's native
+    `title` (a flagged word's reasoning) and clears the attribute, since two
+    floating boxes over one word is worse than none.
+
+    The card's copy button and the panel's yield the same payload, now in the
+    paste-safe path form.
+
 35. **[AUDIT 2026-08-27] Heavy code review & Stage 5b / AI flag diagnostic audit.**
     Comprehensive review of the full pipeline + 28 commits (Aug 25-27) documented in
     `CODE-REVIEW-2026-08-27.md` and `LEXICAL-DEFECT-AND-FLAG-AUDIT-2026-08-27.md`.

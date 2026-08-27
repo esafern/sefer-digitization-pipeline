@@ -361,13 +361,16 @@ def test_correction_panel_header_copies_the_reference_and_link(server, page):
     page.wait_for_timeout(2200)
     page.eval_on_selector('#klal-block-66 [data-word-index="135"]', "el => el.click()")
     page.wait_for_timeout(900)
-    btn = page.query_selector(".copy-ref")
+    # scoped to the PANEL: the hover card also renders a .copy-ref
+    btn = page.query_selector(".side-panel.open .copy-ref")
     assert btn, "the panel header carries no copy control"
     btn.click()
     page.wait_for_timeout(600)
     copied = page.evaluate("navigator.clipboard.readText()")
     assert "Klal 66" in copied and "Word #135" in copied, copied
-    assert "#klal=66&word=135" in copied, copied
+    # the PASTE-SAFE path form, not the hash form: `&` is routinely truncated
+    # when a URL is pasted into a terminal or a chat window
+    assert "/klal/66/word/135" in copied, copied
     assert page.test_errors == []
 
 
@@ -384,6 +387,56 @@ def test_shareable_path_link_redirects_to_the_deep_link(server, page):
     assert page.url.endswith("/#klal=66&word=135"), page.url
     assert page.eval_on_selector(".nav-item.active", "el => el.dataset.klalId") == "66"
     assert page.eval_on_selector_all(".routed-word", "els => els.length") >= 1
+    assert page.test_errors == []
+
+
+def test_hovering_any_word_offers_its_reference_and_a_copy_control(server, page):
+    """ADDED 2026-08-26 (reviewer: "hovering over any word should always surface a
+    floating box with the klal + word and an icon to copy the link").
+
+    Every word is addressable, so every word should say what its address is
+    without being clicked - and PLAIN words previously said nothing at all. The
+    card has to be HOVERABLE, not a tooltip: `#tooltip` sets pointer-events:none
+    so it can never swallow a click, which makes it the wrong element for
+    something holding a button. Asserted by actually moving onto the card and
+    clicking, because a control you cannot reach is the failure mode here."""
+    page.context.grant_permissions(["clipboard-read", "clipboard-write"])
+    page.goto(server + "/klal/66", wait_until="domcontentloaded", timeout=15000)
+    page.wait_for_selector(".nav-item", timeout=15000)
+    page.wait_for_timeout(2000)
+
+    page.hover('#klal-block-66 .plain-word[data-word-index="10"]')
+    page.wait_for_timeout(400)
+    assert page.is_visible("#word-card")
+    assert page.inner_text("#word-card .wc-ref") == "Klal 66 · Word #10"
+
+    # move onto the card: it must survive leaving the word, or the button is
+    # unreachable no matter how it is styled
+    page.hover("#word-card .copy-ref")
+    page.wait_for_timeout(400)
+    assert page.is_visible("#word-card"), "the card closed before the pointer reached it"
+
+    page.click("#word-card .copy-ref")
+    page.wait_for_timeout(500)
+    copied = page.evaluate("navigator.clipboard.readText()")
+    assert "Klal 66 · Word #10" in copied, copied
+    assert "/klal/66/word/10" in copied, copied   # the paste-safe path form
+    assert page.test_errors == []
+
+
+def test_a_flagged_word_does_not_show_two_floating_boxes(server, page):
+    """The card takes over the word's native `title`, because the browser's own
+    tooltip would otherwise appear beside it - two floating boxes over one word is
+    worse than none."""
+    page.goto(server + "/klal/66", wait_until="domcontentloaded", timeout=15000)
+    page.wait_for_selector(".nav-item", timeout=15000)
+    page.wait_for_timeout(2000)
+    fw = page.query_selector("#klal-block-66 .flag-word[data-word-index]")
+    assert fw, "klal 66 has no flagged word to test with"
+    fw.hover()
+    page.wait_for_timeout(400)
+    assert page.is_visible("#word-card")
+    assert fw.get_attribute("title") in (None, ""), "native title still present beside the card"
     assert page.test_errors == []
 
 

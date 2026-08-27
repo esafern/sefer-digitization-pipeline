@@ -246,7 +246,9 @@ function wordRefLabel(klalId, wordIndex, word, prefix) {
 }
 
 function wordRefPayload(klalId, wordIndex, word) {
-  const url = `${location.origin}/#klal=${klalId}&word=${wordIndex}`;
+  // The PATH form, not the hash form: it survives being pasted into a terminal
+  // or a chat window, where `&` is routinely truncated. The server 302s it.
+  const url = `${location.origin}/klal/${klalId}/word/${wordIndex}`;
   const head = `Klal ${klalId} · Word #${wordIndex}` + (word ? ` — ${word}` : '');
   return `${head}\n${url}`;
 }
@@ -288,6 +290,89 @@ document.addEventListener('click', async (e) => {
   const before = btn.innerHTML;
   btn.innerHTML = ok ? '&#10003;' : '&#10007;';
   setTimeout(() => { btn.innerHTML = before; btn.classList.remove('copied', 'copy-failed'); }, 1400);
+});
+
+
+// ---------- hover card on every word ----------
+//
+// ADDED 2026-08-26 (reviewer: "hovering over any word should always surface a
+// floating box with the klal + word and an icon to copy the link"). Every word
+// in the text pane is addressable, so every word should say what its address IS
+// without having to be clicked - previously only flagged words said anything,
+// and only through a native `title` tooltip that cannot hold a button.
+//
+// It is a HOVERABLE card, not a tooltip: `#tooltip` sets `pointer-events: none`
+// precisely so it never swallows a click, which makes it the wrong element for
+// something containing a control. The card therefore keeps itself open while the
+// pointer is over it, with a short grace period so the pointer can cross the gap
+// from the word.
+//
+// The word's own `title` (a flagged word's reasoning) is MOVED into the card and
+// the attribute cleared, so the browser's native tooltip does not also appear -
+// two floating boxes over one word is worse than none.
+const wordCard = document.createElement('div');
+wordCard.id = 'word-card';
+wordCard.style.display = 'none';
+document.body.appendChild(wordCard);
+
+let wordCardHideTimer = null;
+let wordCardFor = null;
+
+function hideWordCard(immediate) {
+  clearTimeout(wordCardHideTimer);
+  const go = () => { wordCard.style.display = 'none'; wordCardFor = null; };
+  if (immediate) go(); else wordCardHideTimer = setTimeout(go, 260);
+}
+
+function showWordCard(span, klalId) {
+  const wi = span.dataset.wordIndex;
+  if (wi == null) return;
+  clearTimeout(wordCardHideTimer);
+  if (wordCardFor === span) return;                 // already showing for this word
+  wordCardFor = span;
+  // Take over the native tooltip so only one box appears.
+  if (span.getAttribute('title')) {
+    span.dataset.detail = span.getAttribute('title');
+    span.removeAttribute('title');
+  }
+  const detail = span.dataset.detail || '';
+  wordCard.innerHTML =
+    `<span class="wc-ref">Klal ${klalId} &middot; Word #${wi}</span>` +
+    `<button class="copy-ref" type="button" title="Copy reference and link"` +
+    ` data-klal="${klalId}" data-word="${wi}"` +
+    ` data-text="${escapeAttr(span.textContent || '')}">&#128203;</button>` +
+    (detail ? `<span class="wc-detail">${escapeHtml(detail)}</span>` : '');
+  wordCard.style.display = 'block';
+  const r = span.getBoundingClientRect();
+  const w = wordCard.offsetWidth, h = wordCard.offsetHeight;
+  let left = r.left + r.width / 2 - w / 2;
+  left = Math.max(8, Math.min(left, window.innerWidth - w - 8));
+  let top = r.top - h - 8;
+  if (top < 8) top = r.bottom + 8;                  // flip below when it would clip
+  wordCard.style.left = left + 'px';
+  wordCard.style.top = top + 'px';
+}
+
+textScroll.addEventListener('mouseover', (e) => {
+  const span = e.target.closest && e.target.closest('[data-word-index]');
+  if (!span || !textScroll.contains(span)) return;
+  const block = span.closest('[data-klal-id]');
+  if (!block) return;
+  showWordCard(span, block.dataset.klalId);
+});
+textScroll.addEventListener('mouseout', (e) => {
+  const span = e.target.closest && e.target.closest('[data-word-index]');
+  if (!span) return;
+  if (e.relatedTarget && wordCard.contains(e.relatedTarget)) return;   // moved onto the card
+  hideWordCard(false);
+});
+wordCard.addEventListener('mouseenter', () => clearTimeout(wordCardHideTimer));
+wordCard.addEventListener('mouseleave', () => hideWordCard(false));
+// A click anywhere that is not the copy button dismisses it, so the card never
+// sits over the text the reviewer is trying to read.
+document.addEventListener('click', (e) => {
+  if (e.target.closest && e.target.closest('.copy-ref')) return;
+  hideWordCard(true);
 });
 
 // ---------- deep links ----------
