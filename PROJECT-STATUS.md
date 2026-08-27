@@ -1168,6 +1168,21 @@ applying it to the corpus remain two separate, deliberate steps.
     by name - guessing by name silently dropped the word index from every link in
     the first run, producing links that opened the right klal at the wrong place.
 
+    **The URL SHAPE had to change too** (reviewer: "sadly those links you shared
+    here in the chat are not clickable"). `/#klal=66&word=135` is what the
+    frontend routes on, but it does not survive being pasted: a terminal will not
+    hyperlink Markdown link syntax at all, and several that DO linkify a bare URL
+    stop at the `&` - which opens the right klal at the WRONG word, worse than a
+    link that plainly fails. `review_server.py` now also serves
+    **`/klal/66/word/135`** (`ROUTE_SHARE`), a 302 to the hash form, with no `#`
+    and no `&` to trip anything. That is what `render_report.py` emits and what
+    should be pasted anywhere outside the browser; the hash form remains what the
+    app routes on internally and what the panel's copy button yields.
+
+    The rendered `.md`/`.html` are gitignored: they regenerate in a second, and
+    they point at `127.0.0.1:8420`, so they work only on a machine running the
+    dashboard. Right for a review tool, wrong for anything outward-facing.
+
 35. **[AUDIT 2026-08-27] Heavy code review & Stage 5b / AI flag diagnostic audit.**
     Comprehensive review of the full pipeline + 28 commits (Aug 25-27) documented in
     `CODE-REVIEW-2026-08-27.md` and `LEXICAL-DEFECT-AND-FLAG-AUDIT-2026-08-27.md`.
