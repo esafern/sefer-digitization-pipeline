@@ -283,6 +283,94 @@ def test_manual_correction_panel_auto_closes_after_a_save(server, page):
         timeout=6000)
 
 
+def test_deep_link_lands_on_the_klal_and_rings_the_word(server, page):
+    """ADDED 2026-08-26 with the deep-link feature (reviewer request): a URL can
+    address a klal, or a klal and a word, so a finding written down anywhere can
+    carry a link that lands on it.
+
+    The first working version was defeated by the app's own scroll observer -
+    jumpTo() scrolls SMOOTHLY, the observer calls setActiveKlal() on whatever
+    drifts past during the animation, and routing to klal 66 landed on klal 61
+    with no word ringed. That is what this test pins: not that the hash parses,
+    but that the reviewer actually ends up on the right word."""
+    page.goto(server + "/#klal=66", wait_until="domcontentloaded", timeout=15000)
+    page.wait_for_selector(".nav-item", timeout=15000)
+    page.wait_for_timeout(1500)
+    assert page.eval_on_selector(".nav-item.active", "el => el.dataset.klalId") == "66"
+
+    page.goto(server + "/#klal=66&word=135", wait_until="domcontentloaded", timeout=15000)
+    page.wait_for_selector(".nav-item", timeout=15000)
+    page.wait_for_timeout(2500)
+    assert page.eval_on_selector(".nav-item.active", "el => el.dataset.klalId") == "66"
+    ringed = page.eval_on_selector_all(".routed-word", "els => els.map(e => e.textContent)")
+    assert len(ringed) == 1, f"expected exactly one ringed word, got {ringed}"
+    assert page.test_errors == []
+
+
+def test_clicking_a_word_puts_it_in_the_address_bar(server, page):
+    """The address bar has to be copyable as-is, or the deep links are write-only.
+    replaceState, not pushState: a reviewer moving through a klal must not have to
+    press Back forty times to leave."""
+    _open_dashboard(page, server, klal_id=92)
+    page.eval_on_selector('#klal-block-92 [data-word-index="440"]', "el => el.click()")
+    page.wait_for_timeout(800)
+    assert page.evaluate("location.hash") == "#klal=92&word=440"
+    assert page.test_errors == []
+
+
+def test_deep_link_lands_on_the_klal_and_rings_the_word(server, page):
+    """ADDED 2026-08-26 (reviewer request): a link must address a klal, or a klal
+    and a word, so a finding recorded anywhere can be handed over as a URL rather
+    than as "klal 66, count to 135".
+
+    The scroll observer is the hazard: it calls setActiveKlal on whatever drifts
+    into view, so a SMOOTH scroll let it overwrite the destination mid-animation -
+    routing to klal 66 measurably landed on 61 before this was made deterministic.
+    """
+    page.goto(server + "/#klal=66&word=135", wait_until="domcontentloaded", timeout=15000)
+    page.wait_for_selector(".nav-item", timeout=15000)
+    page.wait_for_timeout(2500)
+    assert page.eval_on_selector(".nav-item.active", "el => el.dataset.klalId") == "66"
+    ringed = page.eval_on_selector_all(".routed-word", "els => els.map(e => e.textContent)")
+    assert ringed, "the routed word carries no .routed-word ring"
+    assert page.test_errors == []
+
+
+def test_clicking_a_word_puts_it_in_the_address_bar(server, page):
+    """The address bar is only useful as a handle if it tracks what is on screen.
+    replaceState, not pushState - a reviewer moving through a klal must not have
+    to press Back once per word to leave the page."""
+    _open_dashboard(page, server, klal_id=92)
+    page.wait_for_timeout(800)
+    page.eval_on_selector('#klal-block-92 [data-word-index="440"]', "el => el.click()")
+    page.wait_for_timeout(800)
+    assert page.evaluate("location.hash") == "#klal=92&word=440"
+    assert page.test_errors == []
+
+
+def test_correction_panel_header_copies_the_reference_and_link(server, page):
+    """ADDED 2026-08-26 (reviewer request). The klal/word header in a correction
+    panel is also a copy control: it yields the readable reference AND the deep
+    link, so a finding can be pasted into a note without anyone retyping an
+    index. Asserted end to end rather than by reading the markup - a copy button
+    that silently does nothing is the dead-control shape this file has shipped
+    more than once."""
+    page.context.grant_permissions(["clipboard-read", "clipboard-write"])
+    page.goto(server + "/#klal=66&word=135", wait_until="domcontentloaded", timeout=15000)
+    page.wait_for_selector(".nav-item", timeout=15000)
+    page.wait_for_timeout(2200)
+    page.eval_on_selector('#klal-block-66 [data-word-index="135"]', "el => el.click()")
+    page.wait_for_timeout(900)
+    btn = page.query_selector(".copy-ref")
+    assert btn, "the panel header carries no copy control"
+    btn.click()
+    page.wait_for_timeout(600)
+    copied = page.evaluate("navigator.clipboard.readText()")
+    assert "Klal 66" in copied and "Word #135" in copied, copied
+    assert "#klal=66&word=135" in copied, copied
+    assert page.test_errors == []
+
+
 def test_index_stamps_asset_versions_from_the_files_themselves(server):
     """ADDED 2026-08-25. index.html shipped a hand-maintained `?v=6` that was last
     bumped in 1e59522 and never again, through every app.js change since. The

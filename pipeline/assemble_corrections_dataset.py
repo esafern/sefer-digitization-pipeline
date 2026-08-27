@@ -250,6 +250,13 @@ def merge_lexical_defects(by_klal, path=LEXICAL_PATH,
     last-write-wins map."""
     report = cio.load_json(path, default=[]) or []
     import review_decisions as rd
+    # Lazily imported: this is the same scan-alignment machinery
+    # synthesize_multi_witness reuses (its own note explains why hand-rolling it
+    # produced 260 wrong bboxes). Kept inside the function so the module does not
+    # pull in the HTTP server just to be imported.
+    import review_server as _rs
+    _scan_position = _rs._word_scan_position
+    klalim_by_id = {k["klal_id"]: k for k in cio.load_part1_sorted()}
     decided = {k for k in rd.all_current("manual_correction")}
     decided |= {k for k in rd.all_current("candidate_choice")}
     decided |= {k for k in rd.all_current("disputed_choice")}
@@ -269,6 +276,17 @@ def merge_lexical_defects(by_klal, path=LEXICAL_PATH,
             # same reason synthesize_multi_witness drops a dispute once decided.
             continue
         prop = (d.get("proposals") or [{}])[0]
+        # Give the entry its real scan position. Without it api_page() cannot
+        # place the entry on a page, so it falls through to the plain-word pass
+        # and the word renders on the scan as ordinary prose rather than as the
+        # flagged word it is - and a click navigates to the klal's START page,
+        # which is wrong for any word past a page break (reviewer: klal 179 w267,
+        # on page 67 of a klal that starts on 66). Same helper the server uses to
+        # answer that question everywhere else.
+        page, bbox = None, None
+        words = (klalim_by_id.get(d["klal_id"], {}).get("clean_text") or "").split(" ")
+        if words:
+            bbox, page = _scan_position(d["klal_id"], words, d["word_index"])
         note = (f"Lexical defect: stored '{d['stored']}' has NO attestation in the "
                 f"independent reference corpus and occurs {d['corpus_count']}x here, while "
                 f"'{prop.get('form')}' is attested {prop.get('ref_count')}x and is one "
@@ -281,8 +299,8 @@ def merge_lexical_defects(by_klal, path=LEXICAL_PATH,
             "opcode": "replace",
             "docai_reading": None,
             "final_text": d["stored"],
-            "page": None,
-            "bbox": None,
+            "page": page,
+            "bbox": bbox,
             "vision_selected": None,
             "vision_transcription": None,
             "confidence": None,

@@ -1012,6 +1012,130 @@ applying it to the corpus remain two separate, deliberate steps.
       cleanly aligned at their exact stored word index; 12 are already resolved in stored text;
       only 1 experienced index drift (klal 43 w14 -> w17 `ממטונא`->`מממונא`); 1 is retracted (`למיפך`).
 
+29. **DEEP LINKS ADDED 2026-08-26 (reviewer request): a URL now addresses a klal,
+    or a klal and a word.**
+    `http://127.0.0.1:8420/#klal=66` and `http://127.0.0.1:8420/#klal=66&word=135`.
+    So a finding recorded in this file, in a report, or in a message can carry a
+    link that lands on the exact word instead of "klal 66, count to 135". The part
+    is derived from the klal id, not carried in the URL, so a link to klal 400
+    works whether or not the reviewer is currently looking at Part 2. The address
+    bar also tracks navigation (`history.replaceState`, so scrolling does not fill
+    the Back button), which makes the current view copyable as-is.
+
+    Word spans now carry `data-word-index`, which is what made this addressable at
+    all. **The scroll observer was the hazard**: it calls `setActiveKlal` on
+    whatever drifts into view, so a smooth scroll let it overwrite the
+    destination mid-animation - measured, routing to klal 66 landed on 61. Routing
+    mounts, jumps instantly, and holds the observer off until it has settled. Two
+    Playwright regressions cover it.
+
+30. **FIXED 2026-08-26 (reviewer: "klal 179 word 267 - clicking does not highlight
+    word in scan page") - a defect introduced by item 24's own merge, the same
+    day.** The lexical-defect entries were written with `page: None, bbox: None`.
+    Two consequences: `api_page()` could not place them, so they fell through to
+    the plain-word pass and rendered on the scan as ordinary prose rather than as
+    flagged words; and the click fell back to the klal's START page. Klal 179 w267
+    is on page 67 in a klal that starts on 66, so the scan showed 66 with nothing
+    to highlight.
+
+    Fixed at both ends: `merge_lexical_defects()` now fills the scan position from
+    the same alignment the server uses, and the frontend gained `pageForWord()` -
+    `corr.page`, then the server's `word_pages` map, then the klal's start page.
+    The manual-correction handler had already worked around this privately; the
+    disputed and flag handlers had not. All 56 lexical entries now carry a
+    position, and klal 179 w267 serves as a `correction` on page 67.
+
+    Swept for the class: **3 other entries** (klal 22 w48, 30 w120, 198 w403) have
+    a `page` that disagrees with the alignment map - but each carries its own bbox
+    and is servable on its claimed page, so all three highlight correctly. Their
+    page came from a verified vision crop, which outranks the proportional
+    heuristic; **deliberately not "fixed"**. A new gated invariant,
+    `test_every_flagged_word_can_be_located_on_the_scan`, catches the real defect.
+
+    **The 39 cleared flags were re-checked against this session's root cause**
+    (item 28's off-by-one) and the file `cleared_flags_2026-08-26.json` lists all
+    of them with a deep link each. All 39 came from the defective 20:36 batch,
+    which raised the question directly; testing whether each suggestion fixes an
+    unattested word 1-2 positions later returns **0 hits**, so they do look like
+    genuine self-suggestions rather than mis-paired corrections. That is evidence,
+    not proof - the klal 66 misplacements were 15 words, not 1 - and the clearing
+    is reversible either way, since the original notes remain in the append-only
+    ledger.
+
+29. **DEEP LINKS + A COPY CONTROL, 2026-08-26 (reviewer requests).** A URL now
+    addresses a klal, or a klal and a word:
+    `http://127.0.0.1:8420/#klal=66&word=135`. The part is derived from the klal
+    id, so a link to klal 400 works whether or not Part 2 is on screen; the
+    address bar tracks navigation via `history.replaceState`, so the current view
+    is always copyable. Word spans carry `data-word-index`, which is what made
+    any of this addressable. **The scroll observer was the hazard** - it calls
+    `setActiveKlal` on whatever drifts into view, so a smooth scroll let it
+    overwrite the destination mid-animation (routing to klal 66 measurably landed
+    on 61); routing now mounts, jumps instantly, and holds the observer off.
+
+    The klal/word header in a correction panel is also a copy button, yielding
+    both lines at once:
+    `Klal 66 · Word #135 — ע"ס` / `http://127.0.0.1:8420/#klal=66&word=135`.
+    It has a non-clipboard fallback, because a copy button that silently does
+    nothing is the dead-control shape this file has shipped more than once.
+    Three Playwright regressions cover the routing, the address bar and the copy.
+
+30. **FIXED 2026-08-26 (reviewer: "klal 179 word 267 - clicking does not
+    highlight word in scan page") - a defect item 24's own merge introduced the
+    same day.** The lexical entries were written with `page: None, bbox: None`, so
+    `api_page()` could not place them (they rendered as plain prose, not as
+    flagged words) and the click fell back to the klal's START page - klal 179
+    w267 is on page 67 in a klal starting on 66. Fixed at both ends:
+    `merge_lexical_defects()` now fills the scan position from the same alignment
+    the server uses, and the frontend gained `pageForWord()` (`corr.page`, then
+    `word_pages`, then the klal's start page). All 56 entries now carry a
+    position; a new gated invariant catches the class. Swept: 3 other entries
+    have a `page` disagreeing with the alignment map, but each carries its own
+    bbox and highlights correctly - their page came from a verified vision crop,
+    which outranks the heuristic, so they are deliberately left alone.
+
+31. **THE MERGED LEXICAL TIER HAS A PREFIX FALSE-POSITIVE CLASS, and no cheap
+    filter separates it (reviewer, klal 179 w267).** `שתרץ` = ש + תרץ ("that he
+    answered") is a normal construction; the detector proposed `שרץ` (a creeping
+    thing), which is nonsense there. A legitimate prefixed form is unattested as a
+    WHOLE in the reference corpus, so an unattested-form detector cannot tell it
+    from a corruption.
+
+    **Two suppression rules were tried and both over-suppress.** A plain
+    "does it parse as prefix+attested-stem" test excuses 29 of the 56 entries,
+    including `כפרק`->`בפרק` (ב/כ, the commonest confusion pair in this print). A
+    narrower "does the proposed edit change the STEM rather than the prefix" test
+    still suppresses 27, including `מיר`->`מיד` and `וכין`->`ובין`, which look
+    real. Both parse; only context decides. **Per Lesson 31 the tuning is handed
+    back rather than attempted a third time** - the filter is NOT in the pipeline.
+    Raising `REVIEW_MIN_REF` is the blunt lever if the tier proves too noisy.
+    klal 179 w267 is recorded as rejected and is the first ground-truth precision
+    datapoint on this tier.
+
+32. **LIST PRODUCED 2026-08-26 (reviewer request): every word set with the
+    alef-lamed ligature.** `tools/list_ligature_words.py` ->
+    `ligature_words.json`. **The ligature codepoint U+FB4F appears ZERO times** in
+    part1/2/3.json and zero times in the DocAI stream - checked, not assumed - so
+    the sort reaches the corpus as the letters `אל` when read correctly and as one
+    of three failure modes otherwise.
+
+    | | Part 1 | Parts 2/3 | total |
+    |---|---|---|---|
+    | words set with the ligature (contain `אל`) | | | **175 distinct / 2,619 occurrences** |
+    | dropped lamed (`אליבא`->`איבא`) | 7 | 314 | 321 |
+    | dropped alef (`שמואל`->`שמול`) | 3 | 16 | 19 |
+    | both lost (`אל`->`&`) | 3 | 0 | 3 |
+
+    The commonest ligature words are `אלא` (765x), `אלו` (150x), `שמואל` (140x),
+    `אליבא` (132x) - which is why this one sort matters more than any other in the
+    fount. **13 of the 19 dropped-alef cases are `שמואל` variants**, and 10 of the
+    dropped-lamed are `ישרא`->`ישראל`. Part 1's actionable set is only **10
+    candidates, 4 of them unflagged**; two of those four are already-resolved
+    false positives (`ויגל`, Psalms 16:9; `אוף`, real Aramaic with its own Jastrow
+    entry) and are marked as such in the tool so no future run re-proposes them.
+    The failure lists are candidates, not confirmed errors - except `both_lost`,
+    which is exhaustive, because an ampersand is never Hebrew.
+
 ## Closed — the detail is in `PROJECT-STATUS-HISTORY.md`, by date
 
 Kept as an index so a reference to an old item number still resolves. Nothing here needs action.

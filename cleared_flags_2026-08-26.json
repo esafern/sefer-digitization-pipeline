@@ -1,0 +1,314 @@
+[
+ {
+  "klal": 4,
+  "word": 403,
+  "stored": "איהו",
+  "reason": "final nun for vav; 'דאולי גם איהו לא אמרה למלתיה'",
+  "ts": "2026-08-18T20:36",
+  "url": "http://127.0.0.1:8420/#klal=4&word=403"
+ },
+ {
+  "klal": 7,
+  "word": 262,
+  "stored": "דאם",
+  "reason": "final samekh for mem; 'דאם כדבריו תקשו להו'",
+  "ts": "2026-08-18T20:36",
+  "url": "http://127.0.0.1:8420/#klal=7&word=262"
+ },
+ {
+  "klal": 7,
+  "word": 464,
+  "stored": "דאם",
+  "reason": "final samekh for mem; 'דרצו בזה דאם איתא דתרי'",
+  "ts": "2026-08-18T20:36",
+  "url": "http://127.0.0.1:8420/#klal=7&word=464"
+ },
+ {
+  "klal": 11,
+  "word": 84,
+  "stored": "והרב",
+  "reason": "ח for ה; 'והרב בית דוד' is a cited author",
+  "ts": "2026-08-18T20:36",
+  "url": "http://127.0.0.1:8420/#klal=11&word=84"
+ },
+ {
+  "klal": 12,
+  "word": 212,
+  "stored": "עוד",
+  "reason": "ר for ד; 'ועיין עוד בבית חדש'",
+  "ts": "2026-08-18T20:36",
+  "url": "http://127.0.0.1:8420/#klal=12&word=212"
+ },
+ {
+  "klal": 25,
+  "word": 136,
+  "stored": "דב\"מ",
+  "reason": "ט for מ; passage about שיטה מקובצת על ב\"מ",
+  "ts": "2026-08-18T20:36",
+  "url": "http://127.0.0.1:8420/#klal=25&word=136"
+ },
+ {
+  "klal": 25,
+  "word": 714,
+  "stored": "איהו",
+  "reason": "final nun for vav; same shape as klal 4 w403",
+  "ts": "2026-08-18T20:36",
+  "url": "http://127.0.0.1:8420/#klal=25&word=714"
+ },
+ {
+  "klal": 25,
+  "word": 727,
+  "stored": "הכ\"מ",
+  "reason": "ט for מ; כסף משנה is the standard commentator",
+  "ts": "2026-08-18T20:36",
+  "url": "http://127.0.0.1:8420/#klal=25&word=727"
+ },
+ {
+  "klal": 25,
+  "word": 757,
+  "stored": "וכ\"נ",
+  "reason": "ג for נ; 'וכן נראה עוד מדבריו'",
+  "ts": "2026-08-18T20:36",
+  "url": "http://127.0.0.1:8420/#klal=25&word=757"
+ },
+ {
+  "klal": 41,
+  "word": 522,
+  "stored": "דשמואל",
+  "reason": "dropped lamed; Shmuel's name truncated",
+  "ts": "2026-08-18T20:36",
+  "url": "http://127.0.0.1:8420/#klal=41&word=522"
+ },
+ {
+  "klal": 48,
+  "word": 40,
+  "stored": "טהור",
+  "reason": "ר for ה; Tosafot Bekhorot 7b ד\"ה דג טהור",
+  "ts": "2026-08-18T20:36",
+  "url": "http://127.0.0.1:8420/#klal=48&word=40"
+ },
+ {
+  "klal": 49,
+  "word": 48,
+  "stored": "נ",
+  "reason": "wrong next-klal marker; klal 50 = gematria נ",
+  "ts": "2026-08-18T20:36",
+  "url": "http://127.0.0.1:8420/#klal=49&word=48"
+ },
+ {
+  "klal": 62,
+  "word": 70,
+  "stored": "כתובו",
+  "reason": "final nun for vav; BB 40a reads 'ואצ\"ל כתובו'",
+  "ts": "2026-08-18T20:36",
+  "url": "http://127.0.0.1:8420/#klal=62&word=70"
+ },
+ {
+  "klal": 62,
+  "word": 71,
+  "stored": "הודאה",
+  "reason": "ד for ה; BB 40a reads 'הודאה בפני שנים'",
+  "ts": "2026-08-18T20:36",
+  "url": "http://127.0.0.1:8420/#klal=62&word=71"
+ },
+ {
+  "klal": 62,
+  "word": 210,
+  "stored": "סג",
+  "reason": "stray vav in next-klal marker for klal 63",
+  "ts": "2026-08-18T20:36",
+  "url": "http://127.0.0.1:8420/#klal=62&word=210"
+ },
+ {
+  "klal": 67,
+  "word": 43,
+  "stored": "מד\"ת",
+  "reason": "ר for ד; next clause reads 'שאפי' ד\"ת יש לכל ב\"ד לעקור'",
+  "ts": "2026-08-18T20:36",
+  "url": "http://127.0.0.1:8420/#klal=67&word=43"
+ },
+ {
+  "klal": 70,
+  "word": 28,
+  "stored": "ל\"ב",
+  "reason": "gershayim rendered as yod, in 'כלל ל\"ב'",
+  "ts": "2026-08-18T20:36",
+  "url": "http://127.0.0.1:8420/#klal=70&word=28"
+ },
+ {
+  "klal": 92,
+  "word": 427,
+  "stored": "אלפא",
+  "reason": "dropped lamed; same sugya 'חסר חד אלפא'",
+  "ts": "2026-08-18T20:36",
+  "url": "http://127.0.0.1:8420/#klal=92&word=427"
+ },
+ {
+  "klal": 92,
+  "word": 444,
+  "stored": "לאלופי",
+  "reason": "dropped lamed; same phrase appears correctly earlier",
+  "ts": "2026-08-18T20:36",
+  "url": "http://127.0.0.1:8420/#klal=92&word=444"
+ },
+ {
+  "klal": 94,
+  "word": 182,
+  "stored": "אלא",
+  "reason": "dropped lamed; 'אלא שבזה חולק'",
+  "ts": "2026-08-18T20:36",
+  "url": "http://127.0.0.1:8420/#klal=94&word=182"
+ },
+ {
+  "klal": 96,
+  "word": 23,
+  "stored": "בח\"מ",
+  "reason": "ט for מ; citation is חושן משפט",
+  "ts": "2026-08-18T20:36",
+  "url": "http://127.0.0.1:8420/#klal=96&word=23"
+ },
+ {
+  "klal": 97,
+  "word": 105,
+  "stored": "טהורים",
+  "reason": "same baraita quoted as 'טהורים' later in this klal",
+  "ts": "2026-08-18T20:36",
+  "url": "http://127.0.0.1:8420/#klal=97&word=105"
+ },
+ {
+  "klal": 98,
+  "word": 23,
+  "stored": "ע\"ד",
+  "reason": "ר for ד; folio-side citation",
+  "ts": "2026-08-18T20:36",
+  "url": "http://127.0.0.1:8420/#klal=98&word=23"
+ },
+ {
+  "klal": 98,
+  "word": 60,
+  "stored": "ב\"מ",
+  "reason": "ט for מ; 'שיטה מקובצת על ב\"מ'",
+  "ts": "2026-08-18T20:36",
+  "url": "http://127.0.0.1:8420/#klal=98&word=60"
+ },
+ {
+  "klal": 116,
+  "word": 11,
+  "stored": "אלעזר",
+  "reason": "dropped lamed; R. Elazar ben Azaryah",
+  "ts": "2026-08-18T20:36",
+  "url": "http://127.0.0.1:8420/#klal=116&word=11"
+ },
+ {
+  "klal": 126,
+  "word": 54,
+  "stored": "רבו",
+  "reason": "final nun for vav; 'בשם רבו הוא הרדב\"ז ז\"ל'",
+  "ts": "2026-08-18T20:36",
+  "url": "http://127.0.0.1:8420/#klal=126&word=54"
+ },
+ {
+  "klal": 128,
+  "word": 126,
+  "stored": "בכ\"מ",
+  "reason": "ט for מ; 'וכתב שם מרן בכ\"מ'",
+  "ts": "2026-08-18T20:36",
+  "url": "http://127.0.0.1:8420/#klal=128&word=126"
+ },
+ {
+  "klal": 128,
+  "word": 353,
+  "stored": "ש\"מ",
+  "reason": "ס for מ; 'אמר ר\"פ שמע מינה'",
+  "ts": "2026-08-18T20:36",
+  "url": "http://127.0.0.1:8420/#klal=128&word=353"
+ },
+ {
+  "klal": 128,
+  "word": 909,
+  "stored": "א\"נ",
+  "reason": "final nun where plain nun required. LOW confidence",
+  "ts": "2026-08-18T20:36",
+  "url": "http://127.0.0.1:8420/#klal=128&word=909"
+ },
+ {
+  "klal": 149,
+  "word": 130,
+  "stored": "דשמואל",
+  "reason": "dropped lamed; 'תנו כוותיה דשמואל'",
+  "ts": "2026-08-18T20:36",
+  "url": "http://127.0.0.1:8420/#klal=149&word=130"
+ },
+ {
+  "klal": 169,
+  "word": 516,
+  "stored": "אלא",
+  "reason": "dropped lamed; 'רבא אמר אלא אמר ליה'",
+  "ts": "2026-08-18T20:36",
+  "url": "http://127.0.0.1:8420/#klal=169&word=516"
+ },
+ {
+  "klal": 169,
+  "word": 538,
+  "stored": "ואל",
+  "reason": "dropped lamed; verse 'ואל דעות ה''",
+  "ts": "2026-08-18T20:36",
+  "url": "http://127.0.0.1:8420/#klal=169&word=538"
+ },
+ {
+  "klal": 169,
+  "word": 1159,
+  "stored": "אלא",
+  "reason": "dropped lamed; second occurrence",
+  "ts": "2026-08-18T20:36",
+  "url": "http://127.0.0.1:8420/#klal=169&word=1159"
+ },
+ {
+  "klal": 197,
+  "word": 78,
+  "stored": "אלעאי",
+  "reason": "dropped lamed; same attribution written correctly 8 words earlier",
+  "ts": "2026-08-18T20:36",
+  "url": "http://127.0.0.1:8420/#klal=197&word=78"
+ },
+ {
+  "klal": 199,
+  "word": 38,
+  "stored": "אלא",
+  "reason": "dropped lamed; klal's own title reads 'אלא'",
+  "ts": "2026-08-18T20:36",
+  "url": "http://127.0.0.1:8420/#klal=199&word=38"
+ },
+ {
+  "klal": 214,
+  "word": 160,
+  "stored": "אלא",
+  "reason": "dropped lamed; 'אלא ודאי מפני שאמרה משמו'",
+  "ts": "2026-08-18T20:36",
+  "url": "http://127.0.0.1:8420/#klal=214&word=160"
+ },
+ {
+  "klal": 216,
+  "word": 183,
+  "stored": "ישראל",
+  "reason": "dropped lamed; 'כדי שיזהרו ישראל במצות'",
+  "ts": "2026-08-18T20:36",
+  "url": "http://127.0.0.1:8420/#klal=216&word=183"
+ },
+ {
+  "klal": 217,
+  "word": 571,
+  "stored": "אליבא",
+  "reason": "dropped lamed; same quotation repeated with 'אליבא' correctly ~25 words later",
+  "ts": "2026-08-18T20:36",
+  "url": "http://127.0.0.1:8420/#klal=217&word=571"
+ },
+ {
+  "klal": 217,
+  "word": 870,
+  "stored": "אליבא",
+  "reason": "dropped lamed",
+  "ts": "2026-08-18T20:36",
+  "url": "http://127.0.0.1:8420/#klal=217&word=870"
+ }
+]

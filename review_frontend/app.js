@@ -224,6 +224,165 @@ async function switchPart(partVal) {
   }
 }
 
+
+// ---------- copyable word reference ----------
+//
+// ADDED 2026-08-26 (reviewer request): the klal/word header in a correction
+// panel doubles as a copy control, handing over both the human-readable
+// reference and the deep link in one go:
+//
+//     Klal 66 · Word #135 — ע"ס
+//     http://127.0.0.1:8420/#klal=66&word=135
+//
+// so a finding can be pasted into a note, a status entry or a message without
+// anyone retyping an index.
+function wordRefLabel(klalId, wordIndex, word, prefix) {
+  const label = `${prefix || ''}Klal ${klalId} &middot; Word #${wordIndex}`;
+  return `<div class="panel-label panel-label-copy">${label}` +
+         `<button class="copy-ref" type="button" title="Copy reference and link"` +
+         ` data-klal="${klalId}" data-word="${wordIndex}"` +
+         ` data-text="${escapeAttr(word == null ? '' : String(word))}"` +
+         `>&#128203;</button></div>`;
+}
+
+function wordRefPayload(klalId, wordIndex, word) {
+  const url = `${location.origin}/#klal=${klalId}&word=${wordIndex}`;
+  const head = `Klal ${klalId} · Word #${wordIndex}` + (word ? ` — ${word}` : '');
+  return `${head}\n${url}`;
+}
+
+async function copyText(text) {
+  // navigator.clipboard needs a secure context. http://127.0.0.1 counts as one,
+  // but not every browser/profile agrees, and a copy button that silently does
+  // nothing is exactly the dead control this file has shipped twice already -
+  // so there is a fallback rather than a bare await.
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch (e) { /* fall through */ }
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    const ok = document.execCommand('copy');
+    document.body.removeChild(ta);
+    return ok;
+  } catch (e) {
+    return false;
+  }
+}
+
+document.addEventListener('click', async (e) => {
+  const btn = e.target.closest && e.target.closest('.copy-ref');
+  if (!btn) return;
+  e.stopPropagation();               // must not bubble into dismissPanels()
+  const payload = wordRefPayload(btn.dataset.klal, btn.dataset.word, btn.dataset.text);
+  const ok = await copyText(payload);
+  btn.classList.add(ok ? 'copied' : 'copy-failed');
+  const before = btn.innerHTML;
+  btn.innerHTML = ok ? '&#10003;' : '&#10007;';
+  setTimeout(() => { btn.innerHTML = before; btn.classList.remove('copied', 'copy-failed'); }, 1400);
+});
+
+// ---------- deep links ----------
+//
+// ADDED 2026-08-26 (reviewer request). A klal, or a klal and a word, can be
+// addressed directly:
+//     http://127.0.0.1:8420/#klal=66
+//     http://127.0.0.1:8420/#klal=66&word=135
+// so a finding recorded anywhere - a status entry, a report, a message - can
+// carry a link that lands on the exact word instead of "klal 66, count to 135".
+//
+// The part is derived from the klal id rather than being part of the URL: a
+// link to klal 400 must work whether or not the reviewer happens to be looking
+// at Part 2 (the nav only holds one part at a time). Same boundaries as
+// review_server._get_part_num_for_klal.
+//
+// The hash is also kept up to date as the reviewer navigates, via
+// history.replaceState so scrolling does not fill the back button with
+// hundreds of entries - the address bar is then always copyable as-is.
+function partForKlal(klalId) {
+  if (klalId <= 222) return '1';
+  if (klalId <= 444) return '2';
+  return '3';
+}
+
+function parseHashRoute() {
+  const h = (location.hash || '').replace(/^#/, '');
+  if (!h) return null;
+  const p = new URLSearchParams(h);
+  const klal = parseInt(p.get('klal'), 10);
+  if (!Number.isInteger(klal)) return null;
+  const word = parseInt(p.get('word'), 10);
+  return { klal, word: Number.isInteger(word) ? word : null };
+}
+
+function updateHash(klalId, wordIndex) {
+  if (!klalId) return;
+  const h = wordIndex == null ? `#klal=${klalId}` : `#klal=${klalId}&word=${wordIndex}`;
+  if (location.hash !== h) history.replaceState(null, '', h);
+}
+
+async function highlightRoutedWord(klalId, wordIndex) {
+  await mountKlal(klalId);
+  const block = document.getElementById('klal-block-' + klalId);
+  if (!block) return;
+  const span = block.querySelector(`[data-word-index="${wordIndex}"]`);
+  if (!span) return;                       // out of range, or the klal has no text
+  span.scrollIntoView({ behavior: 'auto', block: 'center' });
+  // A transient ring, not a permanent class: the word's real state (open,
+  // decided, machine-resolved) must keep owning its colour.
+  span.classList.add('routed-word');
+  setTimeout(() => span.classList.remove('routed-word'), 4000);
+  const k = klalById[klalId];
+  const page = (k && k.word_pages && k.word_pages[wordIndex] != null)
+    ? k.word_pages[wordIndex] : (k ? k.page : null);
+  if (page != null) {
+    focusWordOnScan(page, klalId, { klal_id: klalId, word_index: wordIndex, opcode: 'plain' });
+  }
+}
+
+let routing = false;
+
+async function applyHashRoute() {
+  const route = parseHashRoute();
+  if (!route || routing) return;
+  routing = true;
+  try {
+    const want = partForKlal(route.klal);
+    if (want !== currentPart) {
+      const sel = document.getElementById('part-select');
+      if (sel) sel.value = want;
+      await switchPart(want);
+    }
+    if (!klalById[route.klal]) return;     // not in this corpus
+    // The scroll observer calls setActiveKlal on whatever drifts into view, so a
+    // SMOOTH scroll lets it overwrite the destination before the animation ends
+    // - measured: routing to klal 66 landed on 61. Mount first, jump instantly,
+    // and hold the observer off until everything has settled.
+    suppressObserverScroll = true;
+    clearTimeout(suppressTimer);
+    manualPageLock = false;
+    await mountKlal(route.klal);
+    const block = document.getElementById('klal-block-' + route.klal);
+    if (block) block.scrollIntoView({ behavior: 'auto', block: 'start' });
+    lastActiveKlalId = route.klal;
+    lastActiveScanPage = klalById[route.klal] ? klalById[route.klal].page : null;
+    setActiveKlal(route.klal);
+    if (route.word != null) await highlightRoutedWord(route.klal, route.word);
+    updateHash(route.klal, route.word);    // last word wins, not the observer
+    suppressTimer = setTimeout(() => { suppressObserverScroll = false; }, 900);
+  } finally {
+    routing = false;
+  }
+}
+
 async function init() {
   const [flags, klalim, witness] = await Promise.all([
     fetch('/api/flags').then(r => r.json()),
@@ -247,6 +406,10 @@ async function init() {
 
   lastActiveKlalId = KLALIM[0].klal_id;
   setActiveKlal(lastActiveKlalId);
+
+  // A link that was opened cold beats the default "first klal" landing.
+  await applyHashRoute();
+  window.addEventListener('hashchange', applyHashRoute);
 }
 
 // FIXED 2026-08-14 (PROJECT-STATUS.md audit item 5): KLALIM/klalById were
@@ -571,13 +734,14 @@ function renderKlalBody(block, k) {
       // was written for.
       const aiState = wordState(corr);
       span.className = 'flag-word state-' + (aiState === 'human' ? 'human' : 'ai-flag');
+      span.dataset.wordIndex = i;
       span.textContent = w;
       span.title = corr.reasoning || '';
       span.onclick = () => {
         // Show the klal's scan page with focused ring on the ai_flag's word.
         // Respect manualPageLock: if the reviewer manually navigated to a
         // continuation page, don't snap back to the start page.
-        focusWordOnScan(corr.page || k.page, k.klal_id, corr);
+        focusWordOnScan(pageForWord(k, i, corr), k.klal_id, corr);
         openManualCorrectionPanel(k.klal_id, i, w, corr);
       };
       body.appendChild(span);
@@ -588,12 +752,13 @@ function renderKlalBody(block, k) {
       // other flagged word; opens the witness panel (not the candidate panel).
       const span = document.createElement('span');
       span.className = 'flag-word state-' + wordState(corr);
+      span.dataset.wordIndex = i;
       span.textContent = w;
       span.title = corr.docai_reading
         ? `DocAI: ${corr.docai_reading} | Tesseract: ${corr.tesseract_reading || '—'}`
         : '';
       span.onclick = () => {
-        focusWordOnScan(corr.page || k.page, k.klal_id, corr);
+        focusWordOnScan(pageForWord(k, i, corr), k.klal_id, corr);
         openWitnessPanel(corr);
       };
       body.appendChild(span);
@@ -624,6 +789,7 @@ function renderKlalBody(block, k) {
       const pendingReplace = !pendingDelete && chosenText && chosenText !== w;
       span.className = 'flag-word state-human' + (pendingDelete ? ' pending-delete' : '')
         + (pendingReplace ? ' pending-replace' : '');
+      span.dataset.wordIndex = i;
       span.textContent = w;
       // FIXED 2026-08-25 (reviewer, klal 4: "clicking on word 95 does not
       // highlight that word"). Every sibling branch here - ai_flag, witness,
@@ -664,6 +830,7 @@ function renderKlalBody(block, k) {
       span.className = 'flag-word state-' + wState
         + (pendingDelete ? ' pending-delete' : '')
         + (pendingReplace ? ' pending-replace' : '');
+      span.dataset.wordIndex = i;
       span.textContent = w;
       attachWordHandlers(span, k.klal_id, corr);
       body.appendChild(span);
@@ -688,6 +855,7 @@ function renderKlalBody(block, k) {
       // vast majority of never-touched text doesn't look visually "flagged".
       const span = document.createElement('span');
       span.className = 'plain-word';
+      span.dataset.wordIndex = i;
       span.textContent = w;
       span.onclick = () => {
         // FIXED 2026-08-21 (user bug report: klal 2 word 439 didn't jump to
@@ -813,10 +981,28 @@ function attachWordHandlers(el, klalId, corr, isGap) {
     // Each correction carries its own page field — the physical scan page
     // where its bbox lives (may be a continuation page for klals that span
     // multiple pages). Navigate there so the bbox is found.
-    focusWordOnScan(corr.page || (klalById[klalId] && klalById[klalId].page), klalId, corr);
+    focusWordOnScan(pageForWord(klalById[klalId], corr.word_index, corr), klalId, corr);
     openDisputedPanel(klalId, corr);
   });
 }
+// The scan page a word actually lives on. `corr.page` when the entry carries
+// one, then the server's DocAI-alignment map, and only then the klal's START
+// page - which is right only for a klal that fits on one page.
+//
+// ADDED 2026-08-26 (reviewer: "klal 179 word 267 - clicking does not highlight
+// word in scan page"). That word sits on page 67; klal 179 starts on page 66;
+// its entry had no `page`, so `corr.page || k.page` sent the scan to 66 and the
+// highlight had nothing to match. The manual-correction handler had already
+// worked around this by consulting word_pages; the disputed and flag handlers
+// had not. One helper, used by all of them.
+function pageForWord(k, wordIndex, corr) {
+  if (corr && corr.page != null) return corr.page;
+  if (k && k.word_pages && wordIndex != null && k.word_pages[wordIndex] != null) {
+    return k.word_pages[wordIndex];
+  }
+  return k ? k.page : null;
+}
+
 // Clicking a WORD is explicit intent to look at that word, so it always moves
 // the scan pane - and clears manualPageLock on the way, exactly as jumpTo() does
 // for a nav-panel click.
@@ -833,6 +1019,10 @@ function attachWordHandlers(el, klalId, corr, isGap) {
 // meant to defeat a deliberate click.
 function focusWordOnScan(targetPage, klalId, corr) {
   manualPageLock = false;
+  // Every word click routes through here, so this is the one place that has to
+  // know the address bar exists. replaceState, not pushState: a reviewer moving
+  // through a klal should not have to press Back forty times to leave.
+  if (corr && corr.word_index != null) updateHash(klalId, corr.word_index);
   showPage(targetPage, klalId, corr);
 }
 
@@ -1101,7 +1291,7 @@ async function openDisputedPanel(klalId, corr) {
         ${escapeHtml(corr.consensus_engines.join(' + '))} agree on <b>${escapeHtml(corr.consensus_reading || '')}</b>${corr.ligature_artifact ? ' — but this is a known <b>' + escapeHtml(corr.ligature_artifact) + '</b> ink artifact, so the agreement is a shared misread, not corroboration' : ''}</div>` : ''}
     </div>
     <div class="panel-section">
-      <div class="panel-label">Context (Klal ${klalId} · Word #${corr.word_index})</div>
+      ${wordRefLabel(klalId, corr.word_index, words[corr.word_index], 'Context &middot; ')}
       <div class="panel-word-context">${ctxWords}</div>
       ${corr.reasoning ? `<div style="font-size:12px;color:var(--ink-faint);margin-top:-8px;">${escapeHtml(corr.reasoning)}</div>` : ''}
     </div>
@@ -1494,7 +1684,7 @@ async function openManualCorrectionPanel(klalId, wordIndex, word, existing) {
 
   manualPanelBody.innerHTML = `
     <div class="panel-section">
-      <div class="panel-label">Klal ${klalId} · Word #${wordIndex}</div>
+      ${wordRefLabel(klalId, wordIndex, word, '')}
       <div class="panel-word-context">${ctxWords}</div>
     </div>
     ${suggestedWord ? `

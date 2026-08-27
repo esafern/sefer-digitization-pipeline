@@ -6882,30 +6882,6 @@
   "179": [
     {
       "klal_id": 179,
-      "word_index": 16,
-      "opcode": "replace",
-      "final_text": "יותה",
-      "consensus_reading": "יותר",
-      "agreeing_engines": [
-        "surya",
-        "vlm"
-      ],
-      "ligature_artifact": null,
-      "witnesses": {
-        "docai": null,
-        "vlm": "יותר",
-        "surya": "יותר"
-      },
-      "page": 66,
-      "bbox": {
-        "x1": 0.6143386960029602,
-        "y1": 0.8466207981109619,
-        "x2": 0.6452410221099854,
-        "y2": 0.8615944981575012
-      }
-    },
-    {
-      "klal_id": 179,
       "word_index": 272,
       "opcode": "replace",
       "final_text": "דוה",

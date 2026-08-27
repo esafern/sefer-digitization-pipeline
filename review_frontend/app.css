@@ -574,3 +574,37 @@ textarea.custom-text, input.custom-text {
   transition: opacity .15s ease, transform .15s ease;
 }
 .save-status.show { opacity: 1; visibility: visible; transform: translateY(0); }
+
+/* A word arrived at by deep link (#klal=N&word=M). Transient and additive: the
+   word's own state class keeps owning its colour, this only says "here it is"
+   for a few seconds. ADDED 2026-08-26 with the deep-link feature. */
+.routed-word {
+  outline: 3px solid #d69e2e;
+  outline-offset: 2px;
+  border-radius: 3px;
+  background: rgba(214, 158, 46, 0.18);
+  animation: routed-pulse 1s ease-in-out 2;
+}
+@keyframes routed-pulse {
+  0%, 100% { outline-color: #d69e2e; }
+  50%      { outline-color: rgba(214, 158, 46, 0.25); }
+}
+
+/* Copy-the-reference control in a correction panel's klal/word header.
+   ADDED 2026-08-26: the header doubles as a handle, copying both the readable
+   reference and the deep link so a finding can be pasted anywhere. */
+.panel-label-copy { display: flex; align-items: center; gap: 6px; }
+.copy-ref {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1;
+  padding: 2px 4px;
+  border-radius: 4px;
+  opacity: 0.55;
+  transition: opacity 0.12s, background 0.12s;
+}
+.copy-ref:hover { opacity: 1; background: rgba(255,255,255,0.10); }
+.copy-ref.copied { opacity: 1; color: #38a169; }
+.copy-ref.copy-failed { opacity: 1; color: var(--danger); }

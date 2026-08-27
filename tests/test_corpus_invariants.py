@@ -1749,6 +1749,42 @@ def test_reject_omission_option_does_not_read_a_field_that_cannot_exist():
             f"yields an explicit empty string. Offending line: {ln.strip()}")
 
 
+def test_every_flagged_word_can_be_located_on_the_scan(part1_by_id):
+    """REGRESSION 2026-08-26 (reviewer: "klal 179 word 267 - clicking does not
+    highlight word in scan page").
+
+    A correction entry that carries no `page` cannot be placed on a scan page by
+    api_page(), so it falls through to the plain-word pass and renders as
+    ordinary prose instead of as the flagged word it is - and the click falls
+    back to the klal's START page, which is wrong for any word past a page break.
+    Klal 179 w267 sits on page 67 in a klal that starts on 66, so the scan pane
+    showed 66 and had nothing to highlight.
+
+    A `delete` (omission) candidate is exempt: it marks a gap where the corpus
+    has no word at all, so there is nothing to align."""
+    import corpus_io as cio
+    review_server = _import_from_path("review_server", os.path.join(REPO, "pipeline", "review_server.py"))
+    if not os.path.isdir(cio.DOCAI_DIR):
+        pytest.skip("docai_word_boxes/ is gitignored and migrated separately")
+    offenders = []
+    for klal_id in sorted(part1_by_id):
+        served = review_server.api_klal(klal_id)
+        words = (served.get("clean_text") or "").split(" ")
+        for c in served.get("corrections", []):
+            if c.get("opcode") in ("delete", "ai_flag", "manual"):
+                continue        # gaps and reviewer-raised entries have their own paths
+            if c.get("page") is not None and c.get("bbox"):
+                continue
+            # only an offender if the alignment DOES know where the word is
+            bbox, page = review_server._word_scan_position(klal_id, words, c["word_index"])
+            if bbox and page is not None:
+                offenders.append((klal_id, c["word_index"], c.get("opcode")))
+    assert not offenders, (
+        f"{len(offenders)} machine correction(s) carry no scan position although the DocAI "
+        f"alignment has one, so they render as plain prose and click to the wrong page "
+        f"(klal, word_index, opcode): {offenders[:8]}")
+
+
 def test_lexicon_does_not_whitelist_a_known_corrupt_form():
     """`lexicon.txt` was built from THIS corpus's own OCR output, so it absorbs
     the errors and then vindicates them - the structural hole documented for the
