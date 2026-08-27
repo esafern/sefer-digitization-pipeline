@@ -1147,12 +1147,39 @@ applying it to the corpus remain two separate, deliberate steps.
     arithmetically impossible (`רמר` = 200+40+200), so the ר must be a ד: this
     fount's ד/ר pair is already a confirmed confusion class.
 
-    Checked corpus-wide: **2 klalim end in ר, both legitimate**, and the
-    gematria trace stores only corpus-derived values, so there is no OCR marker
-    text there to violate it. Zero violations today. Encoded anyway as a gated
-    invariant, `test_no_klal_marker_ends_in_a_resh_that_should_be_a_dalet`,
-    because a future marker misread would otherwise pass silently - the cheap
-    mechanical check Lesson 8 exists for. Verified it can fail (`רמר`, `קכר`).
+    Checked corpus-wide: **2 klalim end in ר, both legitimate**. Zero violations
+    among klal markers. Encoded as a gated invariant,
+    `test_no_klal_marker_ends_in_a_resh_that_should_be_a_dalet`, verified it can
+    fail (`רמר`, `קכר`).
+
+    **THE INVARIANT WAS SCOPED TOO NARROWLY AND WOULD HAVE MISSED THE REVIEWER'S
+    OWN CASE.** They had just corrected **klal 179 w66 `קנ"ר` -> `קנ"ד`** (154) -
+    a numeral in the BODY text, not a klal marker. `קנ"ר` is 100, 50, 200: the 200
+    follows a 50, so it is not a numeral at all. Same day they also fixed klal 176
+    w691 `חי"ר` -> `חי"ד`.
+
+    **Swept the class properly.** A numeral here carries gershayim immediately
+    before its final letter (`קנ"ד`), which is what separates it from `ר'` = רבי -
+    a first sweep without that constraint drowned in `דר'`/`לר'`. With it:
+    **54 gershayim-forms corpus-wide end in ר where a ד is valid and the ר is
+    not** - 14 in Part 1, of which **2 were unflagged and are now flagged**:
+    klal 77 w91 `ע"ר` and klal 91 w546 `מ"ר`.
+
+    **The corpus's own usage is the strongest evidence**, better than the
+    reference corpus for abbreviations: Part 1 writes `ע"א` 63x, `ע"ב` 61x,
+    `ע"ד` 37x against `ע"ר` 5x; `י"ד` 36x against `י"ר` 2x; `מ"ד` 9x against
+    `מ"ר` 1x; `כ"ד` 11x against `כ"ר` 2x. Every ר-final form is a rare outlier
+    beside a common ד-final twin. That holds whether the form is a numeral or an
+    abbreviation, which is why the rule is worth more than its arithmetic alone.
+
+    **Generalising it further does NOT work, measured.** Extending to "any
+    gershayim form that is an invalid numeral" returns 205 Part-1 hits, 186 of
+    them unflagged and overwhelmingly standard abbreviations - `עכ"ל`
+    (עד כאן לשונו, 16x), `י"ל`, `כ"ש`, `ס"ל`, `ל"ת`, `פ"ק`, `ר"ן`. Abbreviations
+    do not obey numeral ordering, so the arithmetic test is meaningless for them.
+    Second over-broad rule of the day after item 31's prefix filter; per Lesson 31
+    it is not being tried a third time. **The narrow trailing-ר rule stands; the
+    general one is abandoned.**
 
 ## Closed — the detail is in `PROJECT-STATUS-HISTORY.md`, by date
 
