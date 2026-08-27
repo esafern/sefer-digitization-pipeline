@@ -1251,6 +1251,16 @@ applying it to the corpus remain two separate, deliberate steps.
     pane is RTL, so `scrollLeft` runs 0 -> negative and any clamp check needs
     `abs()`; the first version of the check missed that.
 
+    **Clicking away undoes it** (reviewer). The zoom is the other half of the
+    gesture and has to reverse with the highlight, or the reviewer is left at 220%
+    on a page they have stopped inspecting. It restores the zoom from BEFORE the
+    focus rather than forcing 100%: the normal flow starts at 100% and so returns
+    there, which is what was asked, while a reviewer who had gone to 200% by hand
+    to study the page keeps it. Touching the zoom controls or the wheel while
+    focused hands ownership back - there is then nothing stored to restore.
+    Verified both paths: 100% -> 220% -> 100% with the klal outline back, and a
+    manual 200% surviving a full focus/dismiss cycle.
+
 35. **[AUDIT 2026-08-27] Heavy code review & Stage 5b / AI flag diagnostic audit.**
     Comprehensive review of the full pipeline + 28 commits (Aug 25-27) documented in
     `CODE-REVIEW-2026-08-27.md` and `LEXICAL-DEFECT-AND-FLAG-AUDIT-2026-08-27.md`.

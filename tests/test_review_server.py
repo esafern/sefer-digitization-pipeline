@@ -509,6 +509,45 @@ def test_clicking_a_word_zooms_and_centres_the_scan_on_it(server, page):
     assert page.test_errors == []
 
 
+def test_clicking_away_restores_the_zoom_and_the_klal_outline(server, page):
+    """ADDED 2026-08-26 (reviewer: "clicking away returns the highlight to the
+    entire klal correctly and should also zoom back out to 100").
+
+    The zoom is the other half of the click-to-focus gesture and has to undo with
+    it, or the reviewer is left at 220% looking at a page they have stopped
+    inspecting. It restores what was there BEFORE the focus rather than a hard
+    100%: a reviewer who had zoomed to 200% by hand to study the page keeps it
+    when they dismiss a word - the normal flow starts at 100% and so returns
+    there, which is the requested behaviour without stepping on a manual zoom."""
+    page.goto(server + "/klal/66", wait_until="domcontentloaded", timeout=15000)
+    page.wait_for_selector(".nav-item", timeout=15000)
+    page.wait_for_timeout(2200)
+    assert page.inner_text("#zoom-level") == "100%"
+
+    page.eval_on_selector('#klal-block-66 [data-word-index="200"]', "el => el.click()")
+    page.wait_for_timeout(2200)
+    assert page.inner_text("#zoom-level") == "220%"
+
+    page.keyboard.press("Escape")
+    page.wait_for_timeout(1800)
+    assert page.inner_text("#zoom-level") == "100%", page.inner_text("#zoom-level")
+    assert page.eval_on_selector_all(".hl-current-klal", "e => e.length") > 0, (
+        "the whole-klal outline did not come back")
+
+    # a zoom the reviewer set themselves survives a focus/dismiss cycle
+    for _ in range(4):
+        page.click("#zoom-in")
+    page.wait_for_timeout(600)
+    manual = page.inner_text("#zoom-level")
+    page.eval_on_selector('#klal-block-66 [data-word-index="100"]', "el => el.click()")
+    page.wait_for_timeout(1800)
+    page.keyboard.press("Escape")
+    page.wait_for_timeout(1800)
+    assert page.inner_text("#zoom-level") == manual, (
+        f"a manual zoom of {manual} was reset to {page.inner_text('#zoom-level')}")
+    assert page.test_errors == []
+
+
 def test_index_stamps_asset_versions_from_the_files_themselves(server):
     """ADDED 2026-08-25. index.html shipped a hand-maintained `?v=6` that was last
     bumped in 1e59522 and never again, through every app.js change since. The

@@ -2256,14 +2256,28 @@ let zoomLevel = 1;
 // zoom alone - only an explicit click re-triggers it.
 const FOCUS_ZOOM = 2.2;
 let _zoomOnFocus = false;
+// The zoom in effect before a click zoomed in on a word, so clicking away can
+// put it back (2026-08-26, reviewer: "clicking away ... should also zoom back
+// out to 100"). null means the current zoom was NOT set by a focus, so there is
+// nothing to undo and clearing focus leaves it alone - a reviewer who zoomed to
+// 300% by hand to study a page keeps it when they dismiss a word.
+let _zoomBeforeFocus = null;
 
 function zoomToFocus(box) {
   if (zoomLevel < FOCUS_ZOOM) {
+    if (_zoomBeforeFocus === null) _zoomBeforeFocus = zoomLevel;
     zoomLevel = FOCUS_ZOOM;
     applyZoom();          // applyZoom centres .hl-box.focused itself
   } else {
     box.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
   }
+}
+
+function restoreZoomAfterFocus() {
+  if (_zoomBeforeFocus === null) return;
+  zoomLevel = _zoomBeforeFocus;
+  _zoomBeforeFocus = null;
+  applyZoom(0.5, 0);      // no focused box left to centre on: show the page top
 }
 function applyZoom(anchorRatioX, anchorRatioY) {
   const rX = anchorRatioX != null ? anchorRatioX
@@ -2284,12 +2298,15 @@ function applyZoom(anchorRatioX, anchorRatioY) {
   });
 }
 function setupZoomPan() {
-  document.getElementById('zoom-in').onclick = () => { zoomLevel = Math.min(3, zoomLevel + 0.25); applyZoom(); };
-  document.getElementById('zoom-out').onclick = () => { zoomLevel = Math.max(0.3, zoomLevel - 0.25); applyZoom(); };
+  // Touching the zoom by hand hands ownership back to the reviewer: whatever the
+  // focus had stored is no longer theirs to restore.
+  document.getElementById('zoom-in').onclick = () => { _zoomBeforeFocus = null; zoomLevel = Math.min(3, zoomLevel + 0.25); applyZoom(); };
+  document.getElementById('zoom-out').onclick = () => { _zoomBeforeFocus = null; zoomLevel = Math.max(0.3, zoomLevel - 0.25); applyZoom(); };
   scanViewer.addEventListener('wheel', (e) => {
     if (e.ctrlKey || e.metaKey) {
       e.preventDefault();
       const delta = e.deltaY < 0 ? 0.15 : -0.15;
+      _zoomBeforeFocus = null;   // same as the buttons: manual zoom wins
       zoomLevel = Math.max(0.3, Math.min(3, zoomLevel + delta));
       applyZoom();
     }
@@ -2348,7 +2365,9 @@ function applyFocusStyle(box) {
 // focused word (plain word click, panel close, etc.).
 function clearScanFocus() {
   scanFocusCorr = null;
+  _zoomOnFocus = false;   // a pending focus-zoom must not fire into a cleared view
   if (currentPage != null) showPage(currentPage, scanFocusKlalId, null);
+  restoreZoomAfterFocus();
 }
 
 async function showPage(page, focusKlalId, focusCorr = undefined) {
