@@ -1203,6 +1203,23 @@ applying it to the corpus remain two separate, deliberate steps.
     The card's copy button and the panel's yield the same payload, now in the
     paste-safe path form.
 
+    **Presentation, 2026-08-26 (reviewer):** the decision panel's context header
+    is larger (11px -> 14px) and no longer styled as a caption - it is the line
+    that says WHERE you are and it now carries the copy control. The hover card
+    was made lighter and more transparent (`rgba(26,32,44,0.72)`, text at 0.82),
+    with a **backdrop blur**, which is what keeps it legible at that alpha: this
+    box follows the pointer across text the reviewer is reading, so it should sit
+    over the page rather than block it, and without the blur the Hebrew showing
+    through is unreadable.
+
+    **The klal's gematria is now part of the reference everywhere** - "Klal 66
+    (סו) · Word #135" in the panel header, the hover card and the copied payload.
+    `api_klal` had always carried `gematria`; **`/api/klalim` did not**, so
+    anything working from `klalById` (the hover card, the nav) had no way to name
+    a klal the way the BOOK does. One field added server-side rather than a
+    per-call fetch. The reviewer navigates by id and reads the scan by marker;
+    the reference should carry both.
+
 35. **[AUDIT 2026-08-27] Heavy code review & Stage 5b / AI flag diagnostic audit.**
     Comprehensive review of the full pipeline + 28 commits (Aug 25-27) documented in
     `CODE-REVIEW-2026-08-27.md` and `LEXICAL-DEFECT-AND-FLAG-AUDIT-2026-08-27.md`.

@@ -408,7 +408,11 @@ def test_hovering_any_word_offers_its_reference_and_a_copy_control(server, page)
     page.hover('#klal-block-66 .plain-word[data-word-index="10"]')
     page.wait_for_timeout(400)
     assert page.is_visible("#word-card")
-    assert page.inner_text("#word-card .wc-ref") == "Klal 66 · Word #10"
+    # "Klal 66 (סו) · Word #10" - the id to navigate by AND the marker the book
+    # prints, which is what the reviewer is looking at on the scan.
+    ref = page.inner_text("#word-card .wc-ref")
+    assert "Klal 66" in ref and "Word #10" in ref, ref
+    assert "סו" in ref, f"the klal's gematria is missing from the reference: {ref}"
 
     # move onto the card: it must survive leaving the word, or the button is
     # unreachable no matter how it is styled
@@ -419,7 +423,7 @@ def test_hovering_any_word_offers_its_reference_and_a_copy_control(server, page)
     page.click("#word-card .copy-ref")
     page.wait_for_timeout(500)
     copied = page.evaluate("navigator.clipboard.readText()")
-    assert "Klal 66 · Word #10" in copied, copied
+    assert "Klal 66" in copied and "Word #10" in copied and "סו" in copied, copied
     assert "/klal/66/word/10" in copied, copied   # the paste-safe path form
     assert page.test_errors == []
 

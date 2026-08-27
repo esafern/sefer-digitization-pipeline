@@ -236,8 +236,16 @@ async function switchPart(partVal) {
 //
 // so a finding can be pasted into a note, a status entry or a message without
 // anyone retyping an index.
+function klalRefName(klalId) {
+  // "Klal 66 (סו)" - the id a reviewer navigates by, plus the marker the BOOK
+  // prints, which is what they are actually looking at on the scan. ADDED
+  // 2026-08-26 at the reviewer's request.
+  const g = (klalById[klalId] || {}).gematria;
+  return `Klal ${klalId}` + (g ? ` (${g})` : '');
+}
+
 function wordRefLabel(klalId, wordIndex, word, prefix) {
-  const label = `${prefix || ''}Klal ${klalId} &middot; Word #${wordIndex}`;
+  const label = `${prefix || ''}${klalRefName(klalId)} &middot; Word #${wordIndex}`;
   return `<div class="panel-label panel-label-copy">${label}` +
          `<button class="copy-ref" type="button" title="Copy reference and link"` +
          ` data-klal="${klalId}" data-word="${wordIndex}"` +
@@ -249,7 +257,7 @@ function wordRefPayload(klalId, wordIndex, word) {
   // The PATH form, not the hash form: it survives being pasted into a terminal
   // or a chat window, where `&` is routinely truncated. The server 302s it.
   const url = `${location.origin}/klal/${klalId}/word/${wordIndex}`;
-  const head = `Klal ${klalId} · Word #${wordIndex}` + (word ? ` — ${word}` : '');
+  const head = `${klalRefName(klalId)} · Word #${wordIndex}` + (word ? ` — ${word}` : '');
   return `${head}\n${url}`;
 }
 
@@ -337,7 +345,7 @@ function showWordCard(span, klalId) {
   }
   const detail = span.dataset.detail || '';
   wordCard.innerHTML =
-    `<span class="wc-ref">Klal ${klalId} &middot; Word #${wi}</span>` +
+    `<span class="wc-ref">${klalRefName(klalId)} &middot; Word #${wi}</span>` +
     `<button class="copy-ref" type="button" title="Copy reference and link"` +
     ` data-klal="${klalId}" data-word="${wi}"` +
     ` data-text="${escapeAttr(span.textContent || '')}">&#128203;</button>` +

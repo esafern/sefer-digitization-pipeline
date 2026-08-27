@@ -966,6 +966,12 @@ def api_klalim(part_num=1):
         out.append({
             "klal_id": kid,
             "title": k.get("title", ""),
+            # The klal's own gematria marker, e.g. `סו` for 66. ADDED 2026-08-26
+            # (reviewer: "add the gematria form of the klal to the context
+            # header") - api_klal has always carried it, but the nav//api/klalim
+            # payload did not, so anything working from klalById (the hover card,
+            # the nav) had no way to name a klal the way the BOOK does.
+            "gematria": k.get("gematria", ""),
             "section": k.get("section", ""),
             "page": _page,
             "page_trusted": _page_trusted,

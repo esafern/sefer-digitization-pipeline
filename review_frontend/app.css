@@ -593,7 +593,15 @@ textarea.custom-text, input.custom-text {
 /* Copy-the-reference control in a correction panel's klal/word header.
    ADDED 2026-08-26: the header doubles as a handle, copying both the readable
    reference and the deep link so a finding can be pasted anywhere. */
-.panel-label-copy { display: flex; align-items: center; gap: 6px; }
+/* The klal/word context header. Bigger than a plain .panel-label (2026-08-26,
+   reviewer): it is the line a reviewer reads to know WHERE they are, and it now
+   carries the copy control, so it is a heading rather than a caption. */
+.panel-label-copy {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 14px;
+  letter-spacing: 0.02em;
+  color: var(--ink-soft);
+}
 .copy-ref {
   border: none;
   background: transparent;
@@ -615,22 +623,28 @@ textarea.custom-text, input.custom-text {
 #word-card {
   position: fixed;
   z-index: 999;
-  background: var(--ink);
-  color: #f7fafc;
+  /* Lighter and more transparent (2026-08-26, reviewer). This box follows the
+     pointer across text the reviewer is reading, so it should sit over the page
+     rather than block it. The backdrop blur is what keeps it legible at this
+     alpha - without it, Hebrew text showing through the panel is unreadable. */
+  background: rgba(26, 32, 44, 0.72);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  color: rgba(247, 250, 252, 0.82);
   padding: 6px 8px;
   border-radius: 7px;
   font-family: 'Inter', sans-serif;
   font-size: 12px;
   direction: ltr;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.28);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.18);
   display: flex;
   align-items: center;
   gap: 6px;
   max-width: 380px;
 }
-#word-card .wc-ref { font-weight: 600; white-space: nowrap; }
+#word-card .wc-ref { font-weight: 500; white-space: nowrap; }
 #word-card .wc-detail {
-  color: #cbd5e0;
+  color: rgba(203, 213, 224, 0.72);
   font-size: 11px;
   border-left: 1px solid rgba(255,255,255,0.25);
   padding-left: 6px;
