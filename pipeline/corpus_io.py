@@ -594,7 +594,13 @@ def trusted_klal_pages_with_continuations(alignment_path=ALIGNMENT_PATH,
 
     if regions_path is None:
         regions_path = repo_path("klal_page_regions.json")
-    regions = load_json(regions_path)
+    # `or {}`: load_json returns None for an absent file, and this used to go
+    # straight into .items() - an AttributeError from deep inside stage 2 of
+    # rebuild_all.sh rather than "the regions file is missing". The file is
+    # tracked, so this is a deleted-file case, not a fresh-clone one; it should
+    # still degrade to "no continuations known" instead of a stack trace.
+    # (2026-08-27 audit, verified 2026-08-27.)
+    regions = load_json(regions_path) or {}
 
     for kid_str, region in regions.items():
         kid = int(kid_str)

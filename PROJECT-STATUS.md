@@ -1288,6 +1288,39 @@ applying it to the corpus remain two separate, deliberate steps.
       cleanly aligned at their exact stored word index; 12 are already resolved in stored text;
       only 1 experienced index drift ([klal 43 word 14](http://127.0.0.1:8420/#klal=43&word=14) -> [word 17](http://127.0.0.1:8420/#klal=43&word=17) `ממטונא`->`מממונא`); 1 is retracted ([klal 177 word 340](http://127.0.0.1:8420/#klal=177&word=340) `למיפך`).
 
+36. **THE 2026-08-27 AUDIT'S FOUR "CRITICAL DEFECTS" WERE VERIFIED AND ALL FOUR
+    FIXED — three were LATENT, not live, and saying which is the point.** Item 35
+    listed them; none had been reproduced. Each was run before being touched.
+
+    | audit finding | verified? | live exposure |
+    |---|---|---|
+    | `export_corpus` drops manual insertions | **yes** | **0 today** - both existing inserts are already APPLIED, and applied decisions are skipped because part1.json already carries their text |
+    | multi-word manual replacement shifts indices | **yes** | **0 today** - no manual decision has multi-word text |
+    | `corpus_io` crashes if the regions file is absent | **yes**, `AttributeError` reproduced | 0 - the file is tracked; this is a deleted-file case |
+    | `_corpus_bbox_cache` never invalidated | **yes** | **LIVE** - the only one |
+
+    **The cache was the real one.** It was keyed `(klal_id, page)` and never
+    cleared, but the alignment it stores is computed FROM the klal's words - so
+    applying a decision and rebuilding *while the server ran* left every later
+    request drawing boxes from text that no longer existed. That is the exact
+    sequence a reviewer performs, and it contradicts this section's own "fresh off
+    disk every call" contract. Now keyed on a stamp over part1/2/3.json's
+    (mtime, size), the same pattern as the `_read_all` and `_load_regions` memos.
+
+    The export gap is worth stating precisely because "drops manual insertions"
+    overstates it: the export re-derives from the CURRENT part1.json and skips
+    already-applied decisions, so the gap opens only in the window between
+    recording an insert and applying it - which is, admittedly, exactly when an
+    export is most likely to be taken. `apply_reviewer_decisions` has three manual
+    cases (insert / delete / replace) and the export had two; it now has three,
+    proved by an unapplied insert reaching the export in a temp-ledger harness.
+
+    The multi-word guard had to be scoped to the REPLACE path: written broadly it
+    consumed the word-count slot that the insert branch's own gate then tripped
+    over, and `test_manual_correction_with_no_original_word_inserts_new_text`
+    caught it immediately. `corpus_bbox_cache_key()` is now exported so the test
+    that pre-seeds that cache builds the key the way the module does.
+
 ## Closed — the detail is in `PROJECT-STATUS-HISTORY.md`, by date
 
 Kept as an index so a reference to an old item number still resolves. Nothing here needs action.

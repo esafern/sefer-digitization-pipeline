@@ -1,28 +1,6 @@
 {
   "1": [
     {
-      "word_index": 23,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "דקאמרא",
-      "page": 14,
-      "bbox": {
-        "x1": 0.47739937901496887,
-        "y1": 0.3135353624820709,
-        "x2": 0.5399380922317505,
-        "y2": 0.3309091031551361
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Lexical defect: stored 'דקאמרא' has NO attestation in the independent reference corpus and occurs 1x here, while 'דקאמר' is attested 1304x and is one extra_char away. Found by tools/detect_insertion_deletion.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
-      "vlm_reading": null,
-      "surya_reading": null,
-      "lexical_proposal": "דקאמר",
-      "lexical_source": "detect_insertion_deletion.py",
-      "flag": "current_text_may_be_wrong"
-    },
-    {
       "word_index": 85,
       "opcode": "replace",
       "docai_reading": "לכן",
@@ -607,32 +585,6 @@
       "flag": "current_text_may_be_wrong"
     },
     {
-      "word_index": 252,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "הלכרה",
-      "page": 17,
-      "bbox": {
-        "x1": 0.6225489974021912,
-        "y1": 0.5863617658615112,
-        "x2": 0.6746323704719543,
-        "y2": 0.6026949882507324
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: surya + vlm agree on 'הלכה' against stored 'הלכרה'.",
-      "vlm_reading": "הלכה",
-      "surya_reading": "הלכה",
-      "consensus_engines": [
-        "surya",
-        "vlm"
-      ],
-      "consensus_reading": "הלכה",
-      "ligature_artifact": null,
-      "flag": "current_text_may_be_wrong"
-    },
-    {
       "word_index": 262,
       "opcode": "replace",
       "docai_reading": "דאס",
@@ -745,32 +697,6 @@
         "vlm"
       ],
       "consensus_reading": "י\"ד",
-      "ligature_artifact": null,
-      "flag": "current_text_may_be_wrong"
-    },
-    {
-      "word_index": 632,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "מהרי\"ש",
-      "page": 18,
-      "bbox": {
-        "x1": 0.2257462739944458,
-        "y1": 0.16485725343227386,
-        "x2": 0.2829602062702179,
-        "y2": 0.1813429892063141
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: surya + vlm agree on 'מהר'ש' against stored 'מהרי\"ש'.",
-      "vlm_reading": "מהר'ש",
-      "surya_reading": "מהר\"ש",
-      "consensus_engines": [
-        "surya",
-        "vlm"
-      ],
-      "consensus_reading": "מהר'ש",
       "ligature_artifact": null,
       "flag": "current_text_may_be_wrong"
     }
@@ -10659,58 +10585,6 @@
       "vlm_reading": "דמהך",
       "surya_reading": null,
       "flag": "current_text_confirmed"
-    },
-    {
-      "word_index": 639,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "דהיינן",
-      "page": 51,
-      "bbox": {
-        "x1": 0.7174721360206604,
-        "y1": 0.23132821917533875,
-        "x2": 0.7614622116088867,
-        "y2": 0.24909164011478424
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: surya + vlm agree on 'דהיינו' against stored 'דהיינן'.",
-      "vlm_reading": "דהיינו",
-      "surya_reading": "דהיינו",
-      "consensus_engines": [
-        "surya",
-        "vlm"
-      ],
-      "consensus_reading": "דהיינו",
-      "ligature_artifact": null,
-      "flag": "current_text_may_be_wrong"
-    },
-    {
-      "word_index": 651,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "ופומכדיתא",
-      "page": 51,
-      "bbox": {
-        "x1": 0.7744733691215515,
-        "y1": 0.24666935205459595,
-        "x2": 0.8562577366828918,
-        "y2": 0.262817919254303
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: surya + vlm agree on 'ופומבדיתא' against stored 'ופומכדיתא'.",
-      "vlm_reading": "ופומבדיתא",
-      "surya_reading": "ופומבדיתא",
-      "consensus_engines": [
-        "surya",
-        "vlm"
-      ],
-      "consensus_reading": "ופומבדיתא",
-      "ligature_artifact": null,
-      "flag": "current_text_may_be_wrong"
     }
   ],
   "144": [
@@ -15149,28 +15023,6 @@
       "flag": "current_text_confirmed"
     },
     {
-      "word_index": 267,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "שתרץ",
-      "page": 67,
-      "bbox": {
-        "x1": 0.4454040825366974,
-        "y1": 0.2737226188182831,
-        "x2": 0.491054892539978,
-        "y2": 0.29156529903411865
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Lexical defect: stored 'שתרץ' has NO attestation in the independent reference corpus and occurs 1x here, while 'שרץ' is attested 583x and is one extra_char away. Found by tools/detect_insertion_deletion.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
-      "vlm_reading": null,
-      "surya_reading": null,
-      "lexical_proposal": "שרץ",
-      "lexical_source": "detect_insertion_deletion.py",
-      "flag": "current_text_may_be_wrong"
-    },
-    {
       "word_index": 272,
       "opcode": "replace",
       "docai_reading": "הוה",
@@ -15189,13 +15041,7 @@
       "reasoning": "The visible text in the center line reads 'הוה', which forms the standard Aramaic Talmudic/Rabbinic idiom 'הוה לן' ('we should have / it was incumbent upon us'). Paleographically, the first letter exhibits the top bar and left leg characteristic of a 'ה' rather than a 'ד'.",
       "vlm_reading": "הוה",
       "surya_reading": "הזה",
-      "flag": "current_text_may_be_wrong",
-      "consensus_engines": [
-        "docai",
-        "vlm"
-      ],
-      "consensus_reading": "הוה",
-      "ligature_artifact": null
+      "flag": "current_text_may_be_wrong"
     },
     {
       "word_index": 284,
@@ -15238,32 +15084,6 @@
       "vlm_reading": "עד",
       "surya_reading": "עד",
       "flag": "current_text_confirmed"
-    },
-    {
-      "word_index": 340,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "וה\"ה",
-      "page": 67,
-      "bbox": {
-        "x1": 0.7760641574859619,
-        "y1": 0.34995946288108826,
-        "x2": 0.8075262308120728,
-        "y2": 0.36658555269241333
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: surya + vlm agree on 'והיה' against stored 'וה\"ה'.",
-      "vlm_reading": "והיה",
-      "surya_reading": "והיה",
-      "consensus_engines": [
-        "surya",
-        "vlm"
-      ],
-      "consensus_reading": "והיה",
-      "ligature_artifact": null,
-      "flag": "current_text_may_be_wrong"
     },
     {
       "word_index": 352,

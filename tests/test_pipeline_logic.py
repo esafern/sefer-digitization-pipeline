@@ -1367,8 +1367,10 @@ def test_word_pages_map_disambiguates_a_word_index_matched_on_two_pages():
         "continuations": [{"page": 101, "token_count": 10}],
     }
     bbox = {"x1": 0.0, "y1": 0.0, "x2": 0.1, "y2": 0.1}
-    rs._corpus_bbox_cache[(klal_id, 100)] = {1: bbox}
-    rs._corpus_bbox_cache[(klal_id, 101)] = {1: bbox}
+    # via the module's own key builder: the key gained a corpus stamp on
+    # 2026-08-27 so the cache follows part*.json instead of going stale.
+    rs._corpus_bbox_cache[rs.corpus_bbox_cache_key(klal_id, 100)] = {1: bbox}
+    rs._corpus_bbox_cache[rs.corpus_bbox_cache_key(klal_id, 101)] = {1: bbox}
     try:
         word_pages = rs._word_pages_map(klal_id, words, region_entry)
         assert word_pages[1] == 100, \

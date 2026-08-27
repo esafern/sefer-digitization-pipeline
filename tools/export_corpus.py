@@ -120,7 +120,26 @@ def _apply_decisions_to_klalim(klalim):
         original_word = decision.get("candidate_snapshot", {}).get("original_word")
         chosen_text = decision["chosen_text"]
 
-        if chosen_text == "":
+        # PARITY with apply_reviewer_decisions.py, which has three manual cases,
+        # not two. FIXED 2026-08-27 (audit finding, verified): this file handled
+        # delete and replace but not the reviewer-initiated INSERT
+        # (original_word is None, chosen_text non-empty), so such a decision was
+        # silently dropped from the export while the apply script wrote it into
+        # part1.json - the deliverable and the corpus disagreeing.
+        #
+        # Latent rather than live when found: the two existing inserts (klal 9
+        # w23, klal 16 w163) are already APPLIED, and applied decisions are
+        # skipped above because part1.json already carries their text. The gap
+        # only opens in the window between recording an insert and applying it -
+        # which is exactly the window an export is most likely to be taken in.
+        if original_word is None and chosen_text:
+            if klal_id in word_count_changed_klalim:
+                continue
+            new_text = ard.apply_delete_insertion(klal["clean_text"], word_index, chosen_text)
+            if new_text is not None:
+                klal["clean_text"] = new_text
+                word_count_changed_klalim.add(klal_id)
+        elif chosen_text == "":
             if klal_id in word_count_changed_klalim:
                 continue
             new_text = _apply_manual_deletion(klal["clean_text"], word_index, original_word)

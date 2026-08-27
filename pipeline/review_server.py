@@ -450,7 +450,33 @@ def _general_klal_flag_current(klal_id):
     return h[-1] if h else None
 
 
-_corpus_bbox_cache = {}  # (klal_id, page) -> {word_index -> bbox_dict}
+_corpus_bbox_cache = {}  # (corpus_stamp, klal_id, page) -> {word_index -> bbox_dict}
+
+
+def _corpus_stamp():
+    """A cheap fingerprint of the corpus files, for cache keys.
+
+    ADDED 2026-08-27 (audit finding, verified). _corpus_bbox_cache was keyed on
+    (klal_id, page) alone and never invalidated, but the alignment it stores is
+    computed FROM the klal's words - so applying a decision and rebuilding while
+    the server ran left every later request reading boxes derived from text that
+    no longer exists. That contradicts this section's own "fresh off disk every
+    call" contract, and the reviewer does exactly that sequence routinely.
+    """
+    out = []
+    for name in ("part1.json", "part2.json", "part3.json"):
+        try:
+            st = os.stat(cio.repo_path(name))
+            out.append((st.st_mtime_ns, st.st_size))
+        except OSError:
+            out.append(None)
+    return tuple(out)
+
+
+def corpus_bbox_cache_key(klal_id, page):
+    """The cache key, exposed so tests that pre-seed _corpus_bbox_cache with
+    synthetic alignments build it the same way this module does."""
+    return (_corpus_stamp(), klal_id, page)
 
 
 def _corpus_word_bboxes(klal_id, words, page):
@@ -461,7 +487,7 @@ def _corpus_word_bboxes(klal_id, words, page):
     but in the reverse direction: given a corpus word_index, find the
     DocAI token it aligns to and return that token's bounding box.
     Cached per (klal_id, page) since the alignment is deterministic."""
-    key = (klal_id, page)
+    key = corpus_bbox_cache_key(klal_id, page)
     if key in _corpus_bbox_cache:
         return _corpus_bbox_cache[key]
 

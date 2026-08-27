@@ -145,6 +145,22 @@ def apply_manual_correction(clean_text, word_index, original_word, chosen_text):
     return " ".join(words)
 
 
+def manual_correction_changes_word_count(chosen_text):
+    """True when a manual_correction replaces one word with SEVERAL.
+
+    apply_manual_correction's docstring says "same-position replace only (no
+    word-count change), so unlike insert/delete this needs no per-klal-per-run
+    limit" - but nothing enforced it. The dashboard's custom box accepts any
+    text, and `words[word_index] = "two words"` re-joins into a LONGER list,
+    shifting every later index in the klal. A second decision in the same klal
+    and run would then land one word off.
+
+    Verified 2026-08-27 (audit finding): 0 such decisions exist today, so this is
+    a guard against the next one, not a repair. Callers must fold it into the
+    same word_count_changed_klalim gate the insert/delete opcodes use."""
+    return bool(chosen_text) and len(chosen_text.split()) > 1
+
+
 def apply_manual_deletion(clean_text, word_index, original_word):
     """'manual_correction' decision with chosen_text=='' (2026-08-13: "need
     ability to delete selected word, not just change it") - remove the
@@ -316,6 +332,18 @@ def main():
             continue
         original_word = decision.get("candidate_snapshot", {}).get("original_word")
         chosen_text = decision["chosen_text"]
+
+        # A multi-word REPLACEMENT shifts every later index, exactly like an
+        # insert/delete, so it takes the same one-per-klal-per-run gate. Scoped
+        # to the replace path: the `original_word is None` insert below has its
+        # own gate, and adding to the set here would make that branch skip
+        # itself (caught by test_manual_correction_with_no_original_word_
+        # inserts_new_text the moment this was written too broadly).
+        if original_word is not None and manual_correction_changes_word_count(chosen_text):
+            if klal_id in word_count_changed_klalim:
+                skipped_drift.append((klal_id, word_index))
+                continue
+            word_count_changed_klalim.add(klal_id)
 
         if original_word is None and chosen_text:
             # 'manual_correction' with no existing word at word_index and
