@@ -3288,58 +3288,6 @@
   ],
   "39": [
     {
-      "word_index": 16,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "כדברי",
-      "page": 27,
-      "bbox": {
-        "x1": 0.7108655571937561,
-        "y1": 0.6818737387657166,
-        "x2": 0.7550644278526306,
-        "y2": 0.6993889808654785
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: surya + vlm agree on 'מדברי' against stored 'כדברי'.",
-      "vlm_reading": "מדברי",
-      "surya_reading": "מדברי",
-      "consensus_engines": [
-        "surya",
-        "vlm"
-      ],
-      "consensus_reading": "מדברי",
-      "ligature_artifact": null,
-      "flag": "current_text_may_be_wrong"
-    },
-    {
-      "word_index": 88,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "ס\"ס",
-      "page": 27,
-      "bbox": {
-        "x1": 0.35788828134536743,
-        "y1": 0.742158830165863,
-        "x2": 0.38489872217178345,
-        "y2": 0.7592667937278748
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: surya + vlm agree on 'ס\"פ' against stored 'ס\"ס'.",
-      "vlm_reading": "ס\"פ",
-      "surya_reading": "ס\"פ",
-      "consensus_engines": [
-        "surya",
-        "vlm"
-      ],
-      "consensus_reading": "ס\"פ",
-      "ligature_artifact": null,
-      "flag": "current_text_may_be_wrong"
-    },
-    {
       "word_index": 206,
       "opcode": "replace",
       "docai_reading": null,
@@ -3405,32 +3353,6 @@
         "vlm"
       ],
       "consensus_reading": "הוה",
-      "ligature_artifact": null,
-      "flag": "current_text_may_be_wrong"
-    },
-    {
-      "word_index": 400,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "בס'",
-      "page": 28,
-      "bbox": {
-        "x1": 0.34660857915878296,
-        "y1": 0.21213339269161224,
-        "x2": 0.36963286995887756,
-        "y2": 0.22860586643218994
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: surya + vlm agree on 'בפ'' against stored 'בס''.",
-      "vlm_reading": "בפ'",
-      "surya_reading": "בפ'",
-      "consensus_engines": [
-        "surya",
-        "vlm"
-      ],
-      "consensus_reading": "בפ'",
       "ligature_artifact": null,
       "flag": "current_text_may_be_wrong"
     },
@@ -4050,84 +3972,6 @@
   ],
   "53": [
     {
-      "word_index": 27,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "נזכר",
-      "page": 30,
-      "bbox": {
-        "x1": 0.46384039521217346,
-        "y1": 0.829454243183136,
-        "x2": 0.4887780547142029,
-        "y2": 0.8422953486442566
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: surya + vlm agree on 'נוכר' against stored 'נזכר'.",
-      "vlm_reading": "נוכר",
-      "surya_reading": "נוכר",
-      "consensus_engines": [
-        "surya",
-        "vlm"
-      ],
-      "consensus_reading": "נוכר",
-      "ligature_artifact": null,
-      "flag": "current_text_may_be_wrong"
-    },
-    {
-      "word_index": 95,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "פ\"ב",
-      "page": 31,
-      "bbox": {
-        "x1": 0.22887106239795685,
-        "y1": 0.09164638817310333,
-        "x2": 0.2578655183315277,
-        "y2": 0.1082725077867508
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: surya + vlm agree on 'ס\"ב' against stored 'פ\"ב'.",
-      "vlm_reading": "ס\"ב",
-      "surya_reading": "ס\"ב",
-      "consensus_engines": [
-        "surya",
-        "vlm"
-      ],
-      "consensus_reading": "ס\"ב",
-      "ligature_artifact": null,
-      "flag": "current_text_may_be_wrong"
-    },
-    {
-      "word_index": 135,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "י\"ר",
-      "page": 31,
-      "bbox": {
-        "x1": 0.7415176033973694,
-        "y1": 0.1374695897102356,
-        "x2": 0.7631092071533203,
-        "y2": 0.15409569442272186
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: surya + vlm agree on 'י\"ד' against stored 'י\"ר'.",
-      "vlm_reading": "י\"ד",
-      "surya_reading": "י\"ד",
-      "consensus_engines": [
-        "surya",
-        "vlm"
-      ],
-      "consensus_reading": "י\"ד",
-      "ligature_artifact": null,
-      "flag": "current_text_may_be_wrong"
-    },
-    {
       "word_index": 308,
       "opcode": "replace",
       "docai_reading": "אעזר",
@@ -4147,58 +3991,6 @@
       "vlm_reading": "אלעזר",
       "surya_reading": "אעזר",
       "flag": "docai_ligature_artifact"
-    },
-    {
-      "word_index": 358,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "דס'",
-      "page": 31,
-      "bbox": {
-        "x1": 0.7797656059265137,
-        "y1": 0.33414435386657715,
-        "x2": 0.8013572096824646,
-        "y2": 0.351175993680954
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: surya + vlm agree on 'דפ'' against stored 'דס''.",
-      "vlm_reading": "דפ'",
-      "surya_reading": "דפ'",
-      "consensus_engines": [
-        "surya",
-        "vlm"
-      ],
-      "consensus_reading": "דפ'",
-      "ligature_artifact": null,
-      "flag": "current_text_may_be_wrong"
-    },
-    {
-      "word_index": 376,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "מיטרא",
-      "page": 31,
-      "bbox": {
-        "x1": 0.7754472494125366,
-        "y1": 0.34874290227890015,
-        "x2": 0.8352868556976318,
-        "y2": 0.3653690218925476
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: surya + vlm agree on 'מימרא' against stored 'מיטרא'.",
-      "vlm_reading": "מימרא",
-      "surya_reading": "מימרא",
-      "consensus_engines": [
-        "surya",
-        "vlm"
-      ],
-      "consensus_reading": "מימרא",
-      "ligature_artifact": null,
-      "flag": "current_text_may_be_wrong"
     }
   ],
   "54": [
@@ -4935,32 +4727,6 @@
       "vlm_reading": "נקראת",
       "surya_reading": "נקראת",
       "flag": "current_text_confirmed"
-    },
-    {
-      "word_index": 134,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "ע\"ס",
-      "page": 34,
-      "bbox": {
-        "x1": 0.13362336158752441,
-        "y1": 0.2563380300998688,
-        "x2": 0.16469857096672058,
-        "y2": 0.2736418545246124
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: surya + vlm agree on 'ע\"פ' against stored 'ע\"ס'.",
-      "vlm_reading": "ע\"פ",
-      "surya_reading": "ע\"פ",
-      "consensus_engines": [
-        "surya",
-        "vlm"
-      ],
-      "consensus_reading": "ע\"פ",
-      "ligature_artifact": null,
-      "flag": "current_text_may_be_wrong"
     }
   ],
   "67": [
@@ -5156,28 +4922,6 @@
       "flag": "docai_ligature_artifact"
     },
     {
-      "word_index": 38,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "ואהינו",
-      "page": 34,
-      "bbox": {
-        "x1": 0.6364201307296753,
-        "y1": 0.5589537024497986,
-        "x2": 0.6799254417419434,
-        "y2": 0.5762575268745422
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Lexical defect: stored 'ואהינו' has NO attestation in the independent reference corpus and occurs 1x here, while 'ואינו' is attested 4824x and is one extra_char away. Found by tools/detect_insertion_deletion.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
-      "vlm_reading": null,
-      "surya_reading": null,
-      "lexical_proposal": "ואינו",
-      "lexical_source": "detect_insertion_deletion.py",
-      "flag": "current_text_may_be_wrong"
-    },
-    {
       "word_index": 113,
       "opcode": "replace",
       "docai_reading": "א",
@@ -5323,58 +5067,6 @@
       "vlm_reading": "אלהים",
       "surya_reading": null,
       "flag": "docai_ligature_artifact"
-    },
-    {
-      "word_index": 399,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "ע\"ט",
-      "page": 34,
-      "bbox": {
-        "x1": 0.5208203792572021,
-        "y1": 0.8768611550331116,
-        "x2": 0.5525171160697937,
-        "y2": 0.8945674300193787
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: surya + vlm agree on 'ע\"ש' against stored 'ע\"ט'.",
-      "vlm_reading": "ע\"ש",
-      "surya_reading": "ע\"ש",
-      "consensus_engines": [
-        "surya",
-        "vlm"
-      ],
-      "consensus_reading": "ע\"ש",
-      "ligature_artifact": null,
-      "flag": "current_text_may_be_wrong"
-    },
-    {
-      "word_index": 411,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "הזוהר",
-      "page": 35,
-      "bbox": {
-        "x1": 0.723247230052948,
-        "y1": 0.08991049975156784,
-        "x2": 0.7638376355171204,
-        "y2": 0.10821806639432907
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: surya + vlm agree on 'הזהר' against stored 'הזוהר'.",
-      "vlm_reading": "הזהר",
-      "surya_reading": "הזהר",
-      "consensus_engines": [
-        "surya",
-        "vlm"
-      ],
-      "consensus_reading": "הזהר",
-      "ligature_artifact": null,
-      "flag": "current_text_may_be_wrong"
     }
   ],
   "70": [
@@ -5663,32 +5355,6 @@
       "flag": "current_text_may_be_wrong"
     },
     {
-      "word_index": 228,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "כן",
-      "page": 35,
-      "bbox": {
-        "x1": 0.8444034457206726,
-        "y1": 0.713995099067688,
-        "x2": 0.8603935837745667,
-        "y2": 0.7314890027046204
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: surya + vlm agree on 'בן' against stored 'כן'.",
-      "vlm_reading": "בן",
-      "surya_reading": "בן",
-      "consensus_engines": [
-        "surya",
-        "vlm"
-      ],
-      "consensus_reading": "בן",
-      "ligature_artifact": null,
-      "flag": "current_text_may_be_wrong"
-    },
-    {
       "word_index": 319,
       "opcode": "replace",
       "docai_reading": null,
@@ -5711,32 +5377,6 @@
         "vlm"
       ],
       "consensus_reading": "הגם",
-      "ligature_artifact": null,
-      "flag": "current_text_may_be_wrong"
-    },
-    {
-      "word_index": 391,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "קי\"ג",
-      "page": 35,
-      "bbox": {
-        "x1": 0.661746621131897,
-        "y1": 0.85028475522995,
-        "x2": 0.6924968957901001,
-        "y2": 0.8677786588668823
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: surya + vlm agree on 'ק\"ג' against stored 'קי\"ג'.",
-      "vlm_reading": "ק\"ג",
-      "surya_reading": "ק\"ג",
-      "consensus_engines": [
-        "surya",
-        "vlm"
-      ],
-      "consensus_reading": "ק\"ג",
       "ligature_artifact": null,
       "flag": "current_text_may_be_wrong"
     },
@@ -5781,32 +5421,6 @@
       "vlm_reading": "ספא",
       "surya_reading": "אפא",
       "flag": "docai_ligature_artifact"
-    },
-    {
-      "word_index": 496,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "דתנאים",
-      "page": 36,
-      "bbox": {
-        "x1": 0.5991299152374268,
-        "y1": 0.14929577708244324,
-        "x2": 0.6563082933425903,
-        "y2": 0.16579477488994598
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: surya + vlm agree on 'התנאים' against stored 'דתנאים'.",
-      "vlm_reading": "התנאים",
-      "surya_reading": "התנאים",
-      "consensus_engines": [
-        "surya",
-        "vlm"
-      ],
-      "consensus_reading": "התנאים",
-      "ligature_artifact": null,
-      "flag": "current_text_may_be_wrong"
     },
     {
       "word_index": 538,

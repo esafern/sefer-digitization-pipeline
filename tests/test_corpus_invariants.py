@@ -1879,3 +1879,40 @@ def test_machine_resolved_flags_agree_between_server_and_frontend():
     frontend = {v.strip().strip("'\"") for v in m.group(1).split(",") if v.strip()}
     assert frontend == set(review_server.MACHINE_RESOLVED_FLAGS), (
         f"server {sorted(review_server.MACHINE_RESOLVED_FLAGS)} != frontend {sorted(frontend)}")
+
+
+def test_no_open_flag_names_a_word_that_is_not_at_its_index(part1_by_id):
+    """PROJECT-STATUS item 0C. ./rebuild_all.sh reindexes the CANDIDATE files
+    when a klal's word count changes; review_decisions.jsonl is append-only and
+    nothing reindexes it, so an open flag past the change keeps pointing at what
+    is now a different word - a note attached to the wrong word, the same defect
+    the reviewer caught by hand on 2026-08-18's spot-check batch.
+
+    These notes name their own word ("בססחים w30 -> ...", "'!' w112 -> ..."), so
+    the ledger can be checked against the corpus directly. That is what found
+    klal 43 w14, whose `ממטונא` had drifted three words to w17, and klal 66 w135
+    after a `!` was deleted from the same klal earlier in the run.
+
+    apply_reviewer_decisions.reindex_flags_after_shift() now moves these at apply
+    time; this is the check that says so. Only a MATCHED pair of quotes is a
+    quote - a trailing geresh is part of the word (`סי'`, `בס'`), and stripping
+    it makes three sound flags look moved."""
+    ard = _import_from_path("apply_reviewer_decisions",
+                            os.path.join(REPO, "pipeline", "apply_reviewer_decisions.py"))
+    named = re.compile(r"^\s*(?:'([^']+)'|\"([^\"]+)\"|(\S+))\s+w(\d+)\b")
+    offenders = []
+    for klal_id, klal in sorted(part1_by_id.items()):
+        words = klal["clean_text"].split(" ")
+        for word_index, rec in sorted(ard.open_word_flags(klal_id).items()):
+            m = named.match(rec.get("note") or "")
+            if not m or int(m.group(4)) != word_index:
+                continue        # the note does not name its own index; nothing to check
+            word = m.group(1) or m.group(2) or m.group(3)
+            live = words[word_index] if 0 <= word_index < len(words) else None
+            if live != word:
+                offenders.append((klal_id, word_index, word, live,
+                                  words.index(word) if word in words else None))
+    assert not offenders, (
+        f"{len(offenders)} open flag(s) name a word that is not at their index, so the note is "
+        f"attached to the wrong word (klal, index, note's word, word actually there, where the "
+        f"named word is now): {offenders[:6]}")

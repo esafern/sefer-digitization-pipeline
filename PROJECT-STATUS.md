@@ -67,10 +67,22 @@ applying it to the corpus remain two separate, deliberate steps.
     applied tonight, including w112's `!`, which no longer exists in the text.
     Nothing in the apply path closes a flag, and the two clearing controls are
     per-flag, so a satisfied flag stays lit until someone clicks it individually.
-    NOT YET FIXED — measured and logged only.
+    **(c) FIXED.** `close_flag_satisfied_by()` closes the flag at apply time — a
+    decision applied at that exact word IS a human having ruled there, a
+    confirmed-no-op included. It refuses when the flag is NEWER than the apply:
+    that means somebody re-opened the position knowing the decision had landed,
+    and three real flags depend on it (klal 66 w0, flagged three minutes after its
+    own apply was found wrong and reverted; klal 10 w1; klal 17 w308). Backlog
+    cleared by `tools/close_flags_already_answered.py`, a one-time backfill that
+    reuses the same function rather than restating the rule: **48 dead flags
+    closed, 17% of the open queue**, klal 66's four among them.
+    **(a) STILL OPEN** — the scan-alignment half is untouched: 63 of 306 open
+    flags cannot be located on the scan, so clicking them does nothing.
+    **(b) STILL OPEN** — `test_every_flagged_word_can_be_located_on_the_scan`
+    still exempts `ai_flag`, which is what a flagged word is.
 
-0C. **[2026-08-30] Nothing reindexes the append-only ledger when a klal's word
-    count changes — open flags silently walk off their word.**
+0C. **[FIXED 2026-08-30] Nothing reindexed the append-only ledger when a klal's
+    word count changed — open flags silently walked off their word.**
     `apply_reviewer_decisions.py` limits itself to ONE word-count-changing
     decision per klal per run and prints "run ./rebuild_all.sh, then this script
     again," and that is correct as far as it goes: the rebuild regenerates the
@@ -89,6 +101,16 @@ applying it to the corpus remain two separate, deliberate steps.
     word-count change may have left the same residue, and no check exists that
     would say so. A validator comparing each open flag's note text against the
     word now at its index would find them.
+    **FIXED.** `apply_reviewer_decisions.reindex_flags_after_shift()` moves them
+    at apply time, and only on a VERIFIED landing: a flag is shifted only when the
+    word it named before is the word at the shifted index, otherwise it is left
+    alone and reported — a flag on a guessed word is worse than one a human is
+    told to check. The residue was swept, since these notes name their own word
+    and the ledger can be checked against the corpus directly: **172 of 258 open
+    flags name their own index, and exactly one had drifted** — klal 43 w14, whose
+    `ממטונא` sits at w17, confirmed by the note's own quoted context ending
+    immediately before it. Moved. Gated by
+    `test_no_open_flag_names_a_word_that_is_not_at_its_index`.
 
 0A. **[2026-08-30] A decided dispute could never be applied — 43 rulings
     stranded, now recovered.** `synthesize_multi_witness.active_human_decisions()`

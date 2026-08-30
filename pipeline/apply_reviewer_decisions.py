@@ -51,6 +51,7 @@
 #     is still worth recording as reviewed.
 #   - Never invokes rebuild_all.sh itself.
 import argparse
+import datetime
 import os
 
 import corpus_io as cio
@@ -137,6 +138,101 @@ def snapshot_still_matches_corpus(snapshot, klal):
 # dashboard's click handler - are structurally non-negative), so this is
 # defence-in-depth on the one code path that mutates the corpus, not a fix for
 # an observed corruption.
+# --- Keeping the flag queue honest when the corpus moves -----------------------
+# Applying a decision has side effects on the REVIEW state that nothing used to
+# carry out, so every correction quietly degraded the queue it came from
+# (PROJECT-STATUS open items 0C / 0D). Two of those are closed here; the third
+# (a corrected word losing its DocAI scan alignment) is not fixable from this
+# script.
+
+def open_word_flags(klal_id):
+    """{word_index: record} for every OPEN, word-indexed klal_flag in this klal.
+
+    Latest row per word wins, then the still-open ones are kept - the same
+    reading review_server._word_level_ai_flags() applies, so what this closes is
+    exactly what the dashboard was still lighting up."""
+    by_word = {}
+    for r in rd.history_for(klal_id, decision_type="klal_flag"):
+        wi = r.get("word_index")
+        if wi is not None:
+            by_word[wi] = r
+    return {wi: r for wi, r in by_word.items() if r.get("needs_revisit")}
+
+
+def close_flag_satisfied_by(klal_id, word_index, decision, kind, applied_ts=None):
+    """Close the open flag at a position a decision was just applied to.
+
+    A flag says "a human should look at this word". A decision applied at that
+    exact word IS a human having looked - including a confirmed-no-op, where they
+    looked and said the text stands. Nothing used to close it, and the two
+    clearing controls are per-flag, so a satisfied flag stayed lit until someone
+    clicked it individually: klal 66 alone was showing four whose words had
+    already been corrected, one of them flagging a `!` that no longer existed in
+    the text (reviewer 2026-08-30: "i cleared the flag but it still shows as
+    set").
+
+    Returns True if a flag was closed."""
+    rec = open_word_flags(klal_id).get(word_index)
+    if rec is None:
+        return False
+    # A flag RAISED AFTER the decision was applied is not answered by it - somebody
+    # deliberately re-opened the position knowing the decision had landed, and
+    # closing it would erase that. Two real cases: klal 66 w0, flagged three
+    # minutes after its own apply was found to be wrong and reverted, and klal 91
+    # w191, restored by hand after being cleared as a smoke test.
+    if applied_ts and (rec.get("ts") or "") > applied_ts:
+        return False
+    first_line = (rec.get("note") or "").split("|")[0].strip()
+    rd.append_decision(
+        "klal_flag", klal_id=klal_id, word_index=word_index, needs_revisit=False,
+        applied_decision_id=decision["id"],
+        note=(f"CLOSED BY APPLY {datetime.date.today().isoformat()}: decision {decision['id']} "
+              f"({kind}) was applied at this exact word, which is a human having ruled here - "
+              f"the flag has been answered. Superseded flag was raised by "
+              f"{rec.get('reviewer')} on {rec.get('ts', '')[:10]}: {first_line[:120]}"))
+    return True
+
+
+def reindex_flags_after_shift(klal_id, position, delta, old_words, new_words, skip):
+    """Move open flags past a word-count change onto the words they name.
+
+    ./rebuild_all.sh regenerates the CANDIDATE files against fresh indices, but
+    review_decisions.jsonl is append-only and nothing reindexes it, so every open
+    flag after the change kept pointing at an index that is now a different word.
+    Fired 2026-08-30: deleting a stray `!` at klal 66 w112 shortened the klal, and
+    the flag on `ע"ס` at w135 came to rest on `שהניח`.
+
+    VERIFIED, NEVER ASSUMED. A flag is moved only when the word it sat on before
+    is the word at the shifted index now. If that does not hold the shift is not
+    understood here, and the flag is left exactly where it is and REPORTED rather
+    than moved onto a guess - a flag on the wrong word is worse than one a human
+    is told to check.
+
+    Returns (moved, unverified) as lists of (old_index, new_index)."""
+    moved, unverified = [], []
+    for wi, rec in sorted(open_word_flags(klal_id).items()):
+        if wi <= position or wi in skip:
+            continue
+        new_wi = wi + delta
+        if not (0 <= wi < len(old_words) and 0 <= new_wi < len(new_words)):
+            unverified.append((wi, new_wi)); continue
+        if old_words[wi] != new_words[new_wi]:
+            unverified.append((wi, new_wi)); continue
+        rd.append_decision(
+            "klal_flag", klal_id=klal_id, word_index=wi, needs_revisit=False,
+            note=(f"REINDEXED {datetime.date.today().isoformat()} to w{new_wi}, NOT resolved. A "
+                  f"word-count change at w{position} in this klal shifted every later index by "
+                  f"{delta:+d}; the word this flag names, {old_words[wi]!r}, now sits at w{new_wi}. "
+                  f"Superseded by a new flag there with the original note."))
+        rd.append_decision(
+            "klal_flag", klal_id=klal_id, word_index=new_wi, needs_revisit=True,
+            reviewer=rec.get("reviewer") or "local",
+            note=(f"[reindexed from w{wi} on {datetime.date.today().isoformat()} after a "
+                  f"word-count change at w{position}] " + (rec.get("note") or "")))
+        moved.append((wi, new_wi))
+    return moved, unverified
+
+
 def apply_replace(clean_text, word_index, final_text, chosen_text):
     words = clean_text.split()
     span = final_text.split() if final_text else []
@@ -270,6 +366,13 @@ def main():
         k["clean_text"] = " ".join(k["clean_text"].split())
     by_klal = {k["klal_id"]: k for k in part1}
     already_applied = rd.applied_decision_ids()
+    # The text as it stood BEFORE this run, so reindex_flags_after_shift can
+    # verify a moved flag lands on the same word it named - captured here rather
+    # than re-read later, because by_klal is mutated in place below.
+    words_before = {k["klal_id"]: k["clean_text"].split(" ") for k in part1}
+    # klal_id -> (position, delta). At most one word-count change per klal per
+    # run (the guard below), so one entry each.
+    word_count_shifts = {}
 
     applied = []
     skipped_drift = []
@@ -374,6 +477,8 @@ def main():
             skipped_drift.append((klal_id, word_index))
             continue
 
+        word_count_shifts[klal_id] = (
+            word_index, len(new_text.split(" ")) - len(klal["clean_text"].split(" ")))
         klal["clean_text"] = new_text
         word_count_changed_klalim.add(klal_id)
         n_insert_delete += 1
@@ -451,6 +556,9 @@ def main():
         if new_text is None:
             skipped_drift.append((klal_id, word_index))
             continue
+        if kind in ("manual-delete", "manual-insert") or len(new_text.split(" ")) != len(klal["clean_text"].split(" ")):
+            word_count_shifts[klal_id] = (
+                word_index, len(new_text.split(" ")) - len(klal["clean_text"].split(" ")))
         klal["clean_text"] = new_text
         if kind in ("manual-delete", "manual-insert"):
             word_count_changed_klalim.add(klal_id)
@@ -462,6 +570,26 @@ def main():
 
     if not args.dry_run and (n_replace or n_insert_delete or n_manual):
         save_part1(part1)
+
+    # The review state that has to follow the corpus. Deliberately AFTER the
+    # corpus is written: a flag closed against an edit that never landed would be
+    # worse than one left open.
+    closed_flags, moved_flags, unverified_shifts = [], [], []
+    if not args.dry_run:
+        for klal_id, word_index, kind in applied:
+            if close_flag_satisfied_by(klal_id, word_index,
+                                       decisions.get((klal_id, word_index))
+                                       or manual_decisions.get((klal_id, word_index)), kind):
+                closed_flags.append((klal_id, word_index))
+        for klal_id, (position, delta) in sorted(word_count_shifts.items()):
+            if not delta:
+                continue
+            moved, unverified = reindex_flags_after_shift(
+                klal_id, position, delta, words_before.get(klal_id, []),
+                by_klal[klal_id]["clean_text"].split(" "),
+                {w for k, w in closed_flags if k == klal_id})
+            moved_flags += [(klal_id, a, b) for a, b in moved]
+            unverified_shifts += [(klal_id, a, b) for a, b in unverified]
 
     tag = "[DRY RUN] " if args.dry_run else ""
     print(f"\n{tag}Applied: {len(applied)} ({n_replace} replace, {n_insert_delete} insert/delete, "
@@ -482,6 +610,25 @@ def main():
               f"snapshot_still_matches_corpus():")
         for kid, widx in recovered_from_dropped_entry:
             print(f"  klal {kid} word {widx}")
+
+    if closed_flags:
+        print(f"\n{len(closed_flags)} open flag(s) closed - a decision was applied at that exact "
+              f"word, which answers them:")
+        for kid, widx in closed_flags:
+            print(f"  klal {kid} word {widx}")
+
+    if moved_flags:
+        print(f"\n{len(moved_flags)} open flag(s) REINDEXED onto the word they name, after a "
+              f"word-count change shifted this klal's later indices:")
+        for kid, a, b in moved_flags:
+            print(f"  klal {kid} word {a} -> word {b}")
+
+    if unverified_shifts:
+        print(f"\n{len(unverified_shifts)} open flag(s) sit past a word-count change but could NOT "
+              f"be verified at the shifted index, so they were LEFT WHERE THEY ARE and may now name "
+              f"the wrong word - check these by hand:")
+        for kid, a, b in unverified_shifts:
+            print(f"  klal {kid} word {a} (would have been word {b})")
 
     if refused_partial_span:
         print(f"\n{len(refused_partial_span)} decision(s) REFUSED - an 'insert'-opcode decision "

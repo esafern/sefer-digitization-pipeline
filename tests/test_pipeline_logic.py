@@ -4400,3 +4400,83 @@ def test_an_insert_decision_choosing_the_empty_string_still_removes_the_span(
 
     assert apply_harness.run()[1] == "ב\"ד"
     assert len(rd.history_for(1, 0, "apply_event", path=decisions_path)) == 1
+
+
+# --- apply_reviewer_decisions: keeping the flag queue in step with the corpus --
+
+def test_applying_a_decision_closes_the_flag_it_answers(apply_harness, decisions_path):
+    """REGRESSION 2026-08-30, reviewer: "klal 66 i cleared the flag but it still
+    shows as set in the middle pane".
+
+    A flag says "a human should look at this word"; a decision applied at that
+    exact word IS a human having looked. Nothing closed it, and both clearing
+    controls are per-flag, so klal 66 was lighting up four flags whose words had
+    already been corrected - one of them flagging a `!` that no longer existed in
+    the text at all."""
+    entry = _correction(1, "replace", "כית", "בית")
+    apply_harness([{"klal_id": 1, "clean_text": "אלף בית גימל"}], {"1": [entry]})
+    rd.append_decision("klal_flag", klal_id=1, word_index=1, needs_revisit=True,
+                       reviewer="ai-pass", note="בית w1 -> כית | some finding",
+                       path=decisions_path)
+    rd.append_decision("disputed_choice", klal_id=1, word_index=1, chosen_source="custom",
+                       chosen_text="כית", candidate_snapshot=entry, path=decisions_path)
+
+    assert apply_harness.run()[1] == "אלף כית גימל"
+    assert ard.open_word_flags(1) == {}, "the flag its own correction answered is still open"
+
+
+def test_a_confirmed_no_op_also_closes_the_flag(apply_harness, decisions_path):
+    """"Keep the current text" is a ruling too. The reviewer looked and said the
+    word stands, so the flag asking them to look is answered - otherwise
+    confirming a word leaves it lit forever with no way to tell it apart from one
+    nobody has read."""
+    entry = _correction(1, "replace", "כית", "בית")
+    apply_harness([{"klal_id": 1, "clean_text": "אלף בית גימל"}], {"1": [entry]})
+    rd.append_decision("klal_flag", klal_id=1, word_index=1, needs_revisit=True,
+                       reviewer="ai-pass", note="בית w1 -> כית", path=decisions_path)
+    rd.append_decision("disputed_choice", klal_id=1, word_index=1, chosen_source="final_text",
+                       chosen_text="בית", candidate_snapshot=entry, path=decisions_path)
+
+    assert apply_harness.run()[1] == "אלף בית גימל"
+    assert ard.open_word_flags(1) == {}
+
+
+def test_a_flag_past_a_word_count_change_is_moved_onto_its_word(apply_harness, decisions_path):
+    """REGRESSION 2026-08-30. ./rebuild_all.sh reindexes the CANDIDATE files;
+    review_decisions.jsonl is append-only and nothing reindexes it, so an open
+    flag after a word-count change keeps pointing at what is now a different
+    word. Deleting a stray `!` at klal 66 w112 left the flag on `ע"ס` sitting on
+    `שהניח`."""
+    entry = _correction(1, "insert", None, "זרא")          # applying REMOVES it
+    apply_harness([{"klal_id": 1, "clean_text": "אלף זרא בית גימל"}], {"1": [entry]})
+    rd.append_decision("klal_flag", klal_id=1, word_index=3, needs_revisit=True,
+                       reviewer="ai-pass", note="גימל w3 -> something", path=decisions_path)
+    rd.append_decision("disputed_choice", klal_id=1, word_index=1, chosen_source="docai_reading",
+                       chosen_text="", candidate_snapshot=entry, path=decisions_path)
+
+    assert apply_harness.run()[1] == "אלף בית גימל"
+    flags = ard.open_word_flags(1)
+    assert set(flags) == {2}, f"the flag should have followed `גימל` from w3 to w2; got {set(flags)}"
+    assert "reindexed from w3" in flags[2]["note"]
+
+
+def test_an_already_stale_flag_is_not_shifted_into_a_word_it_never_named(
+        apply_harness, decisions_path):
+    """The reindex is a VERIFIED move, not arithmetic.
+
+    A uniform shift always checks out for a flag that was CORRECT to begin with,
+    so what this guard is really for is a flag that was already wrong - item 0C
+    made several, and an earlier word-count change can leave one pointing past
+    the end of its klal. Shifting that by the delta would land it on a real word
+    it never named and make a broken flag look sound. It stays where it is and is
+    reported for a human instead."""
+    entry = _correction(1, "insert", None, "זרא")
+    apply_harness([{"klal_id": 1, "clean_text": "אלף זרא בית גימל"}], {"1": [entry]})
+    rd.append_decision("klal_flag", klal_id=1, word_index=9, needs_revisit=True,
+                       reviewer="ai-pass", note="stale flag past the end of the klal",
+                       path=decisions_path)
+    rd.append_decision("disputed_choice", klal_id=1, word_index=1, chosen_source="docai_reading",
+                       chosen_text="", candidate_snapshot=entry, path=decisions_path)
+
+    assert apply_harness.run()[1] == "אלף בית גימל"
+    assert set(ard.open_word_flags(1)) == {9}, "an unverifiable shift must not move the flag"
