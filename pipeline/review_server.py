@@ -473,13 +473,17 @@ def _corpus_stamp():
     return tuple(out)
 
 
-def corpus_bbox_cache_key(klal_id, page):
+def corpus_bbox_cache_key(klal_id, page, exact_only=False):
     """The cache key, exposed so tests that pre-seed _corpus_bbox_cache with
-    synthetic alignments build it the same way this module does."""
-    return (_corpus_stamp(), klal_id, page)
+    synthetic alignments build it the same way this module does.
+
+    `exact_only` is part of the key because the two modes answer differently:
+    the exact-only pass is what decides WHICH page a recurring word lives on,
+    and it must not be served a cached map that includes paired matches."""
+    return (_corpus_stamp(), klal_id, page, exact_only)
 
 
-def _corpus_word_bboxes(klal_id, words, page):
+def _corpus_word_bboxes(klal_id, words, page, exact_only=False):
     """Map corpus word_index -> scan bbox for words on a given page.
 
     Uses the same SequenceMatcher alignment as
@@ -487,7 +491,7 @@ def _corpus_word_bboxes(klal_id, words, page):
     but in the reverse direction: given a corpus word_index, find the
     DocAI token it aligns to and return that token's bounding box.
     Cached per (klal_id, page) since the alignment is deterministic."""
-    key = corpus_bbox_cache_key(klal_id, page)
+    key = corpus_bbox_cache_key(klal_id, page, exact_only)
     if key in _corpus_bbox_cache:
         return _corpus_bbox_cache[key]
 
@@ -511,20 +515,58 @@ def _corpus_word_bboxes(klal_id, words, page):
     # this safe: `כללי` is ordinary vocabulary here, and only the copy at the very
     # top of the page is furniture.
     furniture = cio.header_furniture_indices(toks)
+    # A word with no Hebrew letters normalizes to "" and is dropped from both
+    # sides, so it can never be aligned - which orphans exactly the words whose
+    # flags most need a click: the stray `&` (an ﭏ ligature DocAI mangled), `Π`
+    # (a printed folio), `!`, `.`. Ten open flags sit on such words.
+    #
+    # TRIED AND REVERTED 2026-08-30: falling back to the raw text as the match key
+    # so a `&` could match a `&`. It works, and it costs too much - putting
+    # punctuation tokens back into the sequence changed how SequenceMatcher aligns
+    # the REAL words around them: 41 boxes moved and 2 were lost, including runs
+    # of ordinary words shifting to a different box on the same page (klal 47
+    # w1-w4, klal 67 w1-w7). Trading 41 correct boxes for 10 is not a trade.
+    # Left unlocatable deliberately; see PROJECT-STATUS 0D(a).
     dtoks = [t for i, t in enumerate(toks) if norm(t["text"]) and i not in furniture]
     dwords = [norm(t["text"]) for t in dtoks]
     corpus_norm = [norm(w) for w in words]
 
     sm = difflib.SequenceMatcher(None, corpus_norm, dwords, autojunk=False)
     result = {}
-    for corpus_start, dtok_start, size in sm.get_matching_blocks():
-        for offset in range(size):
-            tok = dtoks[dtok_start + offset]
-            if tok.get("x1") is not None:
-                result[corpus_start + offset] = {
-                    "x1": tok["x1"], "y1": tok["y1"],
-                    "x2": tok["x2"], "y2": tok["y2"],
-                }
+
+    def _place(corpus_index, tok):
+        if tok.get("x1") is not None:
+            result[corpus_index] = {"x1": tok["x1"], "y1": tok["y1"],
+                                    "x2": tok["x2"], "y2": tok["y2"]}
+
+    # 'equal' runs are the words the corpus and the OCR agree on, and they used
+    # to be the ONLY words that got a box - the function read get_matching_blocks()
+    # and nothing else. So a word the corpus and DocAI DISAGREE about had no scan
+    # position, could not be highlighted, and a click on it did nothing.
+    #
+    # Which is precisely backwards. A word is flagged BECAUSE the two disagree,
+    # and it stops being locatable the moment somebody repairs it - the corrected
+    # form no longer equals the token still holding the OCR error. Measured
+    # 2026-08-30 (reviewer: "clicking on 69 w338 does not snap the reading pane to
+    # the word"): 63 of 306 open flags, 21%, unlocatable - 16 of them created by
+    # that day's own corrections, and klal 69's misses were every alef-lamed word
+    # in the klal, DocAI holding `אהים` where the corpus has `אלהים`, the ﭏ
+    # ligature read as a bare alef. Repairing the text was blinding the reviewer
+    # to it.
+    #
+    # An EQUAL-LENGTH 'replace' run is exactly that case: n corpus words against n
+    # tokens, between two anchors the alignment already agrees on, so corpus word
+    # k is token k. That is what a letter-substitution repair, a dropped-lamed
+    # ligature and a stray `&` all look like here. Unequal runs are NOT paired -
+    # there the correspondence genuinely is unknown, and a box on a guessed token
+    # would point the reviewer at the wrong ink, which is worse than no box.
+    for tag, i1, i2, j1, j2 in sm.get_opcodes():
+        if tag == "equal":
+            for offset in range(i2 - i1):
+                _place(i1 + offset, dtoks[j1 + offset])
+        elif tag == "replace" and not exact_only and (i2 - i1) == (j2 - j1):
+            for offset in range(i2 - i1):
+                _place(i1 + offset, dtoks[j1 + offset])
     _corpus_bbox_cache[key] = result
     return result
 
@@ -559,7 +601,12 @@ def _word_pages_map(klal_id, words, region_entry):
 
     matches_by_word = {}
     for page, _ in page_regions:
-        for wi in _corpus_word_bboxes(klal_id, words, page):
+        # exact_only: a paired 'replace' match is positional inference, strong
+        # enough to place a box on a page already chosen but NOT to choose the
+        # page. Without this, klal 114's w57-w64 were paired against the page-46
+        # continuation that holds 5 of the klal's 87 tokens and moved off page 45,
+        # where they belong - eight words that had a correct box before.
+        for wi in _corpus_word_bboxes(klal_id, words, page, exact_only=True):
             matches_by_word.setdefault(wi, []).append(page)
 
     total_words = len(words)

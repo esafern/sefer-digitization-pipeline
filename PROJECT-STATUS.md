@@ -43,8 +43,8 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
-0D. **[2026-08-30, reviewer-reported] Correcting a word costs it its scan
-    position, and applying a decision never closes the flag that raised it.**
+0D. **[FIXED 2026-08-30, reviewer-reported] Correcting a word cost it its scan
+    position, and applying a decision never closed the flag that raised it.**
     Three reports, one measurement behind two of them.
     (a) **63 of 306 open word-level flags (21%) cannot be located on the scan at
     all** — `_word_scan_position()` returns no bbox, so clicking the word
@@ -76,10 +76,35 @@ applying it to the corpus remain two separate, deliberate steps.
     cleared by `tools/close_flags_already_answered.py`, a one-time backfill that
     reuses the same function rather than restating the rule: **48 dead flags
     closed, 17% of the open queue**, klal 66's four among them.
-    **(a) STILL OPEN** — the scan-alignment half is untouched: 63 of 306 open
-    flags cannot be located on the scan, so clicking them does nothing.
-    **(b) STILL OPEN** — `test_every_flagged_word_can_be_located_on_the_scan`
-    still exempts `ai_flag`, which is what a flagged word is.
+    **(a) FIXED 2026-08-30 — 63 unlocatable flags down to 10.**
+    `_corpus_word_bboxes()` read `SequenceMatcher.get_matching_blocks()`, so ONLY
+    words the corpus and DocAI agree on got a box. Backwards, for a queue of words
+    flagged BECAUSE the two disagree — and a word lost its box the moment somebody
+    repaired it, the corrected form no longer equalling the token that still holds
+    the OCR error. It now also pairs an EQUAL-LENGTH `replace` run: n corpus words
+    against n tokens between two anchors the alignment already agrees on, so word
+    k is token k. That is what a letter substitution, a dropped-lamed ligature and
+    a stray `&` all look like. Unequal runs are NOT paired — there the
+    correspondence is genuinely unknown and a box on a guessed token points the
+    reviewer at the wrong ink.
+    Measured against the previous behaviour corpus-wide: **51,043 -> 51,554 boxes,
+    511 newly locatable, 0 lost, 0 moved.** The "0 moved" took a second fix:
+    paired matches must not choose the PAGE a recurring word lives on (only exact
+    ones may), or klal 114 w57-w64 pair against the continuation page holding 5 of
+    the klal's 87 tokens and walk off the page they belong to — 8 words that had a
+    correct box before.
+    **Tried and reverted**: matching non-Hebrew words on their raw text so `&`
+    could match `&`. It works and costs too much — putting punctuation tokens back
+    into the sequence moved 41 correct boxes and lost 2, ordinary words included.
+    The 10 remaining unlocatable words carry no Hebrew letter at all and are
+    baselined.
+    **(b) FIXED 2026-08-30.** `test_every_flagged_word_can_be_located_on_the_scan`
+    exempted `opcode in ("delete", "ai_flag", "manual")` — and `ai_flag` is what a
+    flagged word IS — and only fired on the inverse case, an entry lacking a
+    position though the alignment has one. Nothing asserted the alignment has one,
+    which is why it stayed green through all of the above. Replaced by
+    `test_every_open_flag_can_actually_be_found_on_the_scan`, which walks the open
+    flags themselves against `_word_scan_position` and baselines the 10.
 
 0C. **[FIXED 2026-08-30] Nothing reindexed the append-only ledger when a klal's
     word count changed — open flags silently walked off their word.**

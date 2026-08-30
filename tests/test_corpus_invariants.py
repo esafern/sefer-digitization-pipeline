@@ -1758,6 +1758,124 @@ def test_reject_omission_option_does_not_read_a_field_that_cannot_exist():
             f"yields an explicit empty string. Offending line: {ln.strip()}")
 
 
+# The ten words that carry no Hebrew letter at all, so hebrew_letters_only()
+# reduces them to "" and the aligner drops them from both sides. Fixing them
+# needs punctuation tokens back in the sequence, which was tried on 2026-08-30
+# and reverted: it moved 41 correct boxes and lost 2. See _corpus_word_bboxes().
+UNLOCATABLE_FLAGGED_WORD_BASELINE = {
+    (39, 252), (69, 338), (74, 443), (77, 11), (144, 598),
+    (182, 5), (189, 461), (198, 570), (209, 16), (216, 136),
+}
+
+
+# The 21 words whose box already sat out of reading order before the aligner
+# learned to pair `replace` runs on 2026-08-30 - the change introduced none of
+# them and fixed none of them, measured both ways. 13 of the 21 sit immediately
+# beside an IDENTICAL word: the corpus has the word doubled where the page prints
+# it once, so SequenceMatcher maps both copies onto the same token and the two
+# boxes coincide. Several are already flagged as duplicated-word candidates
+# (klal 29 w99 `צדה`, klal 3 w224 `ואם`), so fixing the text is what retires
+# these, not tuning the aligner.
+BOX_READING_ORDER_BASELINE = {
+    (3, 224), (3, 225), (29, 9), (29, 99),
+    (29, 100), (30, 1521), (30, 1522), (41, 10),
+    (41, 11), (57, 15), (57, 16), (68, 30),
+    (82, 25), (82, 26), (94, 189), (147, 406),
+    (147, 407), (158, 50), (158, 51), (167, 68),
+    (167, 69),
+}
+
+
+def test_a_words_scan_box_sits_between_its_neighbours_in_reading_order(part1_by_id):
+    """The aligner pairs equal-length `replace` runs positionally (0D(a)), which
+    is inference, not a match - so it needs a check that can FAIL if the inference
+    is wrong. "Did the box count go up" cannot: a box on arbitrary ink would raise
+    it just as happily.
+
+    Reading order can. The page is RTL, so word k's box must start left of word
+    k-1's box on the same line, or lower down the page - and the same for word k+1
+    relative to it. A box paired onto an unrelated token lands outside that
+    ordering and this fails loudly.
+
+    Applied to EVERY boxed word with both neighbours boxed on the same page, not
+    only the paired ones, so it also guards the exact-match path it inherited."""
+    review_server = _import_from_path("review_server", os.path.join(REPO, "pipeline", "review_server.py"))
+    import corpus_io as cio
+    if not os.path.isdir(cio.DOCAI_DIR):
+        pytest.skip("docai_word_boxes/ is gitignored and migrated separately")
+    out_of_order = []
+    for klal_id, klal in sorted(part1_by_id.items()):
+        words = klal["clean_text"].split(" ")
+        boxes = review_server._word_bboxes_resolved(klal_id, words)
+        for word_index in sorted(boxes):
+            prev, nxt = boxes.get(word_index - 1), boxes.get(word_index + 1)
+            if not prev or not nxt:
+                continue
+            (pbox, ppage), (nbox, npage), (box, page) = prev, nxt, boxes[word_index]
+            if ppage != page or npage != page:
+                continue          # a page seam has its own geometry; not this check
+            # A small tolerance: neighbouring tokens on one line overlap slightly,
+            # and a line break is a y jump, not an x one.
+            after_prev = (box["y1"] > pbox["y1"] + 0.005) or (box["x2"] <= pbox["x1"] + 0.01)
+            before_next = (nbox["y1"] > box["y1"] + 0.005) or (nbox["x2"] <= box["x1"] + 0.01)
+            if not (after_prev and before_next):
+                out_of_order.append((klal_id, word_index, words[word_index]))
+    new = [o for o in out_of_order if (o[0], o[1]) not in BOX_READING_ORDER_BASELINE]
+    assert not new, (
+        f"{len(new)} word(s) have a scan box that does not sit between their neighbours' "
+        f"boxes in RTL reading order, so the alignment put them on the wrong token: "
+        f"{new[:8]}. Verify against the scan before adding to BOX_READING_ORDER_BASELINE.")
+    stale = sorted(BOX_READING_ORDER_BASELINE - {(o[0], o[1]) for o in out_of_order})
+    if stale:
+        print(f"\nNote: BOX_READING_ORDER_BASELINE has {len(stale)} entries that now order "
+              f"correctly (safe to remove): {stale}")
+
+
+def test_every_open_flag_can_actually_be_found_on_the_scan(part1_by_id):
+    """REGRESSION 2026-08-30, reviewer: "clicking on 69 w338 does not snap the
+    reading pane to the word".
+
+    THE SIBLING TEST BELOW DOES NOT COVER THIS, which is why it stayed green
+    through the whole thing: it opens `if c.get("opcode") in ("delete",
+    "ai_flag", "manual"): continue` - and `ai_flag` is precisely what a flagged
+    word is - and it only fires on the INVERSE case, an entry lacking a position
+    though the alignment has one. Nothing asserted that the alignment has one.
+
+    It did not, for 63 of 306 open flags (21%). A word gets a box only where the
+    corpus and DocAI agree, so repairing a word removed its box - the corrected
+    form no longer equals the token still holding the error - and 16 of the 63
+    were made by that day's own corrections. Klal 69's were every alef-lamed word
+    in the klal, DocAI reading the ﭏ ligature as a bare alef.
+
+    A baseline, not a hard zero: ten flagged words carry no Hebrew letter at all
+    and cannot be aligned without a change that costs more than it buys."""
+    review_server = _import_from_path("review_server", os.path.join(REPO, "pipeline", "review_server.py"))
+    ard = _import_from_path("apply_reviewer_decisions",
+                            os.path.join(REPO, "pipeline", "apply_reviewer_decisions.py"))
+    import corpus_io as cio
+    if not os.path.isdir(cio.DOCAI_DIR):
+        pytest.skip("docai_word_boxes/ is gitignored and migrated separately")
+    unlocatable = []
+    for klal_id, klal in sorted(part1_by_id.items()):
+        words = klal["clean_text"].split(" ")
+        for word_index in sorted(ard.open_word_flags(klal_id)):
+            if not (0 <= word_index < len(words)):
+                continue        # an out-of-range flag is item 0C's problem, not this one
+            bbox, page = review_server._word_scan_position(klal_id, words, word_index)
+            if not bbox or page is None:
+                unlocatable.append((klal_id, word_index, words[word_index]))
+    new = [u for u in unlocatable if (u[0], u[1]) not in UNLOCATABLE_FLAGGED_WORD_BASELINE]
+    assert not new, (
+        f"{len(new)} open flag(s) have no scan position, so clicking the word highlights nothing "
+        f"and the focus-zoom has nothing to zoom to: {new[:8]}. Verify against the scan before "
+        f"adding to UNLOCATABLE_FLAGGED_WORD_BASELINE."
+    )
+    stale = sorted(UNLOCATABLE_FLAGGED_WORD_BASELINE - {(u[0], u[1]) for u in unlocatable})
+    if stale:
+        print(f"\nNote: UNLOCATABLE_FLAGGED_WORD_BASELINE has {len(stale)} entries that now "
+              f"resolve (safe to remove): {stale}")
+
+
 def test_every_flagged_word_can_be_located_on_the_scan(part1_by_id):
     """REGRESSION 2026-08-26 (reviewer: "klal 179 word 267 - clicking does not
     highlight word in scan page").

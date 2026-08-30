@@ -4530,32 +4530,6 @@
       "flag": "current_text_confirmed"
     },
     {
-      "word_index": 66,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "כזה",
-      "page": 33,
-      "bbox": {
-        "x1": 0.7902529239654541,
-        "y1": 0.7542579174041748,
-        "x2": 0.8149290680885315,
-        "y2": 0.7708840370178223
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: surya + vlm agree on 'מה' against stored 'כזה'.",
-      "vlm_reading": "מה",
-      "surya_reading": "מה",
-      "consensus_engines": [
-        "surya",
-        "vlm"
-      ],
-      "consensus_reading": "מה",
-      "ligature_artifact": null,
-      "flag": "current_text_may_be_wrong"
-    },
-    {
       "word_index": 99,
       "opcode": "replace",
       "docai_reading": "תודה",
@@ -6593,8 +6567,13 @@
       "opcode": "replace",
       "docai_reading": null,
       "final_text": "פ'",
-      "page": null,
-      "bbox": null,
+      "page": 39,
+      "bbox": {
+        "x1": 0.26215383410453796,
+        "y1": 0.30365854501724243,
+        "x2": 0.27569231390953064,
+        "y2": 0.319918692111969
+      },
       "vision_selected": null,
       "vision_transcription": null,
       "confidence": null,
@@ -14233,8 +14212,13 @@
       "opcode": "replace",
       "docai_reading": null,
       "final_text": "בפ'",
-      "page": null,
-      "bbox": null,
+      "page": 64,
+      "bbox": {
+        "x1": 0.3123456835746765,
+        "y1": 0.5919772982597351,
+        "x2": 0.3351851999759674,
+        "y2": 0.6110210418701172
+      },
       "vision_selected": null,
       "vision_transcription": null,
       "confidence": null,
@@ -14400,8 +14384,13 @@
       "opcode": "replace",
       "docai_reading": null,
       "final_text": "כפ'",
-      "page": null,
-      "bbox": null,
+      "page": 65,
+      "bbox": {
+        "x1": 0.15327565371990204,
+        "y1": 0.10522055625915527,
+        "x2": 0.17552533745765686,
+        "y2": 0.12181302905082703
+      },
       "vision_selected": null,
       "vision_transcription": null,
       "confidence": null,
@@ -15081,8 +15070,13 @@
       "opcode": "replace",
       "docai_reading": null,
       "final_text": "כפ'",
-      "page": null,
-      "bbox": null,
+      "page": 66,
+      "bbox": {
+        "x1": 0.8145859241485596,
+        "y1": 0.6017806529998779,
+        "x2": 0.8368356227874756,
+        "y2": 0.6183731555938721
+      },
       "vision_selected": null,
       "vision_transcription": null,
       "confidence": null,
@@ -15936,8 +15930,13 @@
       "opcode": "replace",
       "docai_reading": null,
       "final_text": "דוד",
-      "page": null,
-      "bbox": null,
+      "page": 68,
+      "bbox": {
+        "x1": 0.6619282960891724,
+        "y1": 0.7369486093521118,
+        "x2": 0.6854140758514404,
+        "y2": 0.7535410523414612
+      },
       "vision_selected": null,
       "vision_transcription": null,
       "confidence": null,
@@ -17994,8 +17993,13 @@
       "opcode": "replace",
       "docai_reading": null,
       "final_text": "א\"נ",
-      "page": null,
-      "bbox": null,
+      "page": 74,
+      "bbox": {
+        "x1": 0.23948019742965698,
+        "y1": 0.19773554801940918,
+        "x2": 0.26485148072242737,
+        "y2": 0.2126971334218979
+      },
       "vision_selected": null,
       "vision_transcription": null,
       "confidence": null,

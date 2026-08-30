@@ -1369,15 +1369,22 @@ def test_word_pages_map_disambiguates_a_word_index_matched_on_two_pages():
     bbox = {"x1": 0.0, "y1": 0.0, "x2": 0.1, "y2": 0.1}
     # via the module's own key builder: the key gained a corpus stamp on
     # 2026-08-27 so the cache follows part*.json instead of going stale.
-    rs._corpus_bbox_cache[rs.corpus_bbox_cache_key(klal_id, 100)] = {1: bbox}
-    rs._corpus_bbox_cache[rs.corpus_bbox_cache_key(klal_id, 101)] = {1: bbox}
+    # exact_only=True: _word_pages_map asks for that mode specifically (a paired
+    # 'replace' match may place a box on a page but may not CHOOSE the page - see
+    # _corpus_word_bboxes), and it is part of the cache key, so seeding the other
+    # mode would leave the function to compute a real alignment for klal 999999.
+    for page in (100, 101):
+        rs._corpus_bbox_cache[rs.corpus_bbox_cache_key(klal_id, page, exact_only=True)] = {1: bbox}
     try:
         word_pages = rs._word_pages_map(klal_id, words, region_entry)
         assert word_pages[1] == 100, \
             "word_index=1 is early in the klal - must resolve to the PRIMARY page's match"
     finally:
-        rs._corpus_bbox_cache.pop((klal_id, 100), None)
-        rs._corpus_bbox_cache.pop((klal_id, 101), None)
+        # Pop the keys actually seeded. The old two-element tuples stopped
+        # matching when the key gained a corpus stamp in 2026-08-27, so this
+        # cleanup had been silently leaking both entries ever since.
+        for page in (100, 101):
+            rs._corpus_bbox_cache.pop(rs.corpus_bbox_cache_key(klal_id, page, exact_only=True), None)
 
 
 # --- review_server: _resolve_klal_page must prefer klal_page_regions.json's

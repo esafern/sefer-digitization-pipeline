@@ -39,10 +39,10 @@
 #   3. NO GUESSED POSITIONS. Alignment goes through corpus_io.align_witness,
 #      which reports a substitution only for an unambiguous 1:1 replace block
 #      and drops ragged ones rather than pairing words positionally (Lesson 5).
-#      Bboxes come from review_server._corpus_word_bboxes / _word_pages_map,
-#      which use matching blocks only and already resolve the multi-page
-#      recurring-word collision - the extractors hand-rolled both and got
-#      260 of 16,026 bboxes from a non-matching `replace` token.
+#      Bboxes come from review_server._word_bboxes_resolved, the single
+#      resolver for "where is this word on the scan", which already settles the
+#      multi-page recurring-word collision - the extractors hand-rolled it and
+#      got 260 of 16,026 bboxes from a non-matching `replace` token.
 import argparse
 import json
 import os
@@ -311,12 +311,21 @@ def attach_scan_positions(disputes, part1_by_id, regions, verified=()):
     right move is to reuse that verified position rather than re-derive or
     estimate one.
 
-    Deliberately NOT hand-rolled: _corpus_word_bboxes uses matching blocks
-    only (never a `replace` opcode's non-matching token) and _word_pages_map
-    already resolves the recurring-word multi-page collision that last-page-
-    wins gets wrong. A dispute with no confident position gets page/bbox
-    None - the dashboard can navigate without a box, but a box drawn on the
-    wrong word is a reviewer reading the wrong ink (Lesson 14)."""
+    Deliberately NOT hand-rolled: it goes through review_server's own
+    _word_bboxes_resolved(), the single resolver for "where is this word on the
+    scan", which already settles the recurring-word multi-page collision that
+    last-page-wins gets wrong. A dispute with no confident position still gets
+    page/bbox None - the dashboard can navigate without a box, but a box drawn on
+    the wrong word is a reviewer reading the wrong ink (Lesson 14).
+
+    FIXED 2026-08-30. This used to ask _word_pages_map() for the page and then
+    _corpus_word_bboxes() for the box, in two steps. Once the aligner learned to
+    pair equal-length `replace` runs (0D(a)), those two steps disagreed: a word
+    locatable ONLY through a paired match has no entry in _word_pages_map, which
+    is deliberately exact-only because a paired match may not choose a page - so
+    `page` came back None and the box was thrown away even though the resolver
+    knew exactly where the word was. Six disputes lost a position that way, all
+    of them geresh-final abbreviations (`פ'`, `בפ'`, `כפ'`)."""
     from_candidate = {}
     for c in verified:
         if c.get("bbox"):
@@ -329,24 +338,16 @@ def attach_scan_positions(disputes, part1_by_id, regions, verified=()):
 
     for kid, items in by_klal.items():
         words = part1_by_id[kid]["clean_text"].split()
-        region = regions.get(str(kid), {})
-        word_pages = None
-        boxes_by_page = {}
+        resolved = None
         for d in items:
             known = from_candidate.get((kid, d["word_index"]))
             if known is not None:
                 d["page"], d["bbox"] = known
                 continue
-            if word_pages is None:  # only pay for the alignment if needed
-                word_pages = rs._word_pages_map(kid, words, region)
-            page = word_pages.get(d["word_index"])
-            d["page"] = page
-            if page is None:
-                d["bbox"] = None
-                continue
-            if page not in boxes_by_page:
-                boxes_by_page[page] = rs._corpus_word_bboxes(kid, words, page)
-            d["bbox"] = boxes_by_page[page].get(d["word_index"])
+            if resolved is None:  # only pay for the alignment if needed
+                resolved = rs._word_bboxes_resolved(kid, words, regions)
+            bbox, page = resolved.get(d["word_index"], (None, None))
+            d["page"], d["bbox"] = page, bbox
     return disputes
 
 
