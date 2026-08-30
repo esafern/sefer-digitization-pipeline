@@ -1,0 +1,185 @@
+{
+ "1. NEEDS YOUR RULING - the ledger and the corpus disagree": [
+  {
+   "klal_id": 66,
+   "word_index": 0,
+   "stored": "סו אין",
+   "reason": "the apply deleted the whole span; text restored. Evidence says keep `סו אין`: the klal re-quotes itself at w105 as `והתנן אין ב\"ד יכול לבטל`, the vision check reads `אין ב\"ד` at 0.95, and klal 57 w0 is the same `נז אין` you chose to keep"
+  }
+ ],
+ "2. APPLIED THIS RUN, but worth your eye": [
+  {
+   "klal_id": 2,
+   "word_index": 316,
+   "stored": "נ״ד",
+   "reason": "content right (Sanhedrin 54b) but typed with a U+05F4 gershayim - the ONLY one in Part 1, against 6404 ASCII quotes"
+  },
+  {
+   "klal_id": 39,
+   "word_index": 242,
+   "stored": "ור",
+   "reason": "was `זר'`; the context is a chain of transmission `מרבי חייא ⟦ור⟧ חייא`, so it reads as `ור'` - the geresh went with the fix"
+  },
+  {
+   "klal_id": 7,
+   "word_index": 632,
+   "stored": "מהר'ש",
+   "reason": "was `מהרי\"ש`; `מהר\"ש אלגאזי` normally takes gershayim, not a geresh"
+  }
+ ],
+ "3. YOUR CORRECTION THAT NO SCRIPT CAN APPLY": [
+  {
+   "klal_id": 7,
+   "word_index": 50,
+   "stored": "ועע\"יש",
+   "repaired": "ועע\"ש",
+   "reason": "recorded 2026-08-27 with candidate_snapshot:null, so neither drift check can run - the only decision in the ledger in that state"
+  }
+ ],
+ "4. OPEN FLAGS awaiting a ruling": [
+  {
+   "klal_id": 39,
+   "word_index": 252,
+   "stored": "Π",
+   "reason": "DELETE - it is the printed FOLIO at the top of page 28"
+  },
+  {
+   "klal_id": 53,
+   "word_index": 218,
+   "stored": "במשרו",
+   "reason": "במשהו (Surya, VLM pass A) / בבשרו (VLM pass B)"
+  },
+  {
+   "klal_id": 66,
+   "word_index": 134,
+   "stored": "ע\"ס",
+   "reason": "ע\"פ"
+  },
+  {
+   "klal_id": 69,
+   "word_index": 338,
+   "stored": "&",
+   "reason": "REPLACE with `אל` - it is the alef-lamed ligature ﭏ"
+  },
+  {
+   "klal_id": 74,
+   "word_index": 416,
+   "stored": "אמר",
+   "reason": "PAGE-SEAM FURNITURE: page 35's catchword `אמר` and a duplicated `רבא א"
+  },
+  {
+   "klal_id": 74,
+   "word_index": 443,
+   "stored": "!",
+   "reason": "REPLACE with `.` - it is a full stop"
+  },
+  {
+   "klal_id": 74,
+   "word_index": 659,
+   "stored": "בסרק",
+   "reason": "בפרק"
+  },
+  {
+   "klal_id": 75,
+   "word_index": 608,
+   "stored": "בחרא",
+   "reason": "בחדא / בתרא"
+  },
+  {
+   "klal_id": 77,
+   "word_index": 11,
+   "stored": "&",
+   "reason": "REPLACE with `אל` - the ﭏ ligature"
+  },
+  {
+   "klal_id": 77,
+   "word_index": 91,
+   "stored": "ע\"ר",
+   "reason": "likely a ד in final position"
+  },
+  {
+   "klal_id": 81,
+   "word_index": 16,
+   "stored": "בתריתא",
+   "reason": "בתרייתא"
+  },
+  {
+   "klal_id": 91,
+   "word_index": 546,
+   "stored": "מ\"ר",
+   "reason": "likely a ד in final position"
+  },
+  {
+   "klal_id": 92,
+   "word_index": 440,
+   "stored": "או",
+   "reason": "אלו"
+  },
+  {
+   "klal_id": 117,
+   "word_index": 43,
+   "stored": "כרתב",
+   "reason": "כתב"
+  },
+  {
+   "klal_id": 144,
+   "word_index": 907,
+   "stored": "בישרץ",
+   "reason": "בישראל"
+  },
+  {
+   "klal_id": 150,
+   "word_index": 684,
+   "stored": "מקטי",
+   "reason": "מקמי / מקרי"
+  },
+  {
+   "klal_id": 152,
+   "word_index": 98,
+   "stored": "בסרק",
+   "reason": "בפרק"
+  },
+  {
+   "klal_id": 167,
+   "word_index": 739,
+   "stored": "מקטי",
+   "reason": "מקמי"
+  },
+  {
+   "klal_id": 169,
+   "word_index": 1074,
+   "stored": "שרוא",
+   "reason": "שהוא"
+  },
+  {
+   "klal_id": 177,
+   "word_index": 340,
+   "stored": "למיפך",
+   "reason": "למיפך w340 - PROPOSAL RETRACTED 2026-08-26, same day it was made. The "
+  },
+  {
+   "klal_id": 198,
+   "word_index": 892,
+   "stored": "זלזה",
+   "reason": "לזה / ולזה"
+  },
+  {
+   "klal_id": 200,
+   "word_index": 145,
+   "stored": "או",
+   "reason": "אלו"
+  },
+  {
+   "klal_id": 210,
+   "word_index": 66,
+   "stored": "לא",
+   "reason": "PAGE-SEAM FURNITURE: the printed FOLIO `לא` (31) sits between two copi"
+  },
+  {
+   "klal_id": 210,
+   "word_index": 133,
+   "stored": "כתרייתא",
+   "reason": "בתרייתא"
+  }
+ ]
+}

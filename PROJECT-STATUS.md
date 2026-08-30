@@ -43,6 +43,100 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0D. **[2026-08-30, reviewer-reported] Correcting a word costs it its scan
+    position, and applying a decision never closes the flag that raised it.**
+    Three reports, one measurement behind two of them.
+    (a) **63 of 306 open word-level flags (21%) cannot be located on the scan at
+    all** — `_word_scan_position()` returns no bbox, so clicking the word
+    highlights nothing and there is nothing for the focus-zoom to zoom to. The
+    zoom code is intact and correct; it is being handed no box. The cause is that
+    the aligner matches CORPUS text against DocAI tokens, so the moment a word is
+    repaired it stops matching the token that still holds the OCR error and the
+    alignment drops it: `דנראה`, `מאין`, `שבועה`, `אברהם`, `ופומבדיתא` are all in
+    the list. **18 of the 63 were created by tonight's own 45 corrections**; 45
+    are older. Fixing a word should not blind the reviewer to it.
+    (b) `tests/test_corpus_invariants.py::test_every_flagged_word_can_be_located_
+    on_the_scan` does NOT cover this: it `continue`s on `opcode in ("delete",
+    "ai_flag", "manual")`, and `ai_flag` is precisely what a flagged word is. It
+    only fires when an entry lacks a position THOUGH the alignment has one — the
+    inverse case. The name promises what it does not check.
+    (c) **Applying a decision does not close the flag that raised it.** The
+    reviewer cleared klal 66's klal-level flag and the middle pane still read as
+    flagged, because `ai_flag_count` counts WORD-level flags and klal 66 has six
+    open — four of them (w14, w82, w97, w112) already satisfied by corrections
+    applied tonight, including w112's `!`, which no longer exists in the text.
+    Nothing in the apply path closes a flag, and the two clearing controls are
+    per-flag, so a satisfied flag stays lit until someone clicks it individually.
+    NOT YET FIXED — measured and logged only.
+
+0C. **[2026-08-30] Nothing reindexes the append-only ledger when a klal's word
+    count changes — open flags silently walk off their word.**
+    `apply_reviewer_decisions.py` limits itself to ONE word-count-changing
+    decision per klal per run and prints "run ./rebuild_all.sh, then this script
+    again," and that is correct as far as it goes: the rebuild regenerates the
+    CANDIDATE files against fresh indices. It does not, and cannot, touch
+    `review_decisions.jsonl` — the log is append-only. So every open `klal_flag`
+    at an index past the change keeps pointing at the index it was written with,
+    which is now a different word. **Fired this run**: deleting the stray `!` at
+    klal 66 w112 shortened the klal 215 -> 214, and the flag on `ע"ס` at w135
+    came to rest on `שהניח`. Superseded by a new flag at w134 (the old row closed
+    with `needs_revisit: false` and an explanation, since nothing may be
+    removed). This is the same defect class the reviewer caught on 2026-08-18's
+    `ai-semantic-spotcheck-round4` batch — a note attached to the wrong word —
+    reached by a different route, so re-verifying that batch did not and could
+    not prevent it. **Not yet swept corpus-wide**: only klalim 66 and 219 changed
+    word count this run and both were checked by hand, but any earlier
+    word-count change may have left the same residue, and no check exists that
+    would say so. A validator comparing each open flag's note text against the
+    word now at its index would find them.
+
+0A. **[2026-08-30] A decided dispute could never be applied — 43 rulings
+    stranded, now recovered.** `synthesize_multi_witness.active_human_decisions()`
+    deliberately DROPS a dispute from the candidate queue the moment a human
+    rules on it, so a resolved dispute is not shown again. Correct for the queue,
+    fatal downstream: `apply_reviewer_decisions.py` drift-checked each decision's
+    `candidate_snapshot` against the live `corrections_part1.json` entry, and an
+    ENTRY THAT NO LONGER EXISTS failed that check the same way a changed one
+    does. So "entry missing" — the normal state of every unapplied decision —
+    read as drift, and the ruling was refused forever. Decide, rebuild, and the
+    decision is stranded. **Extent: 43 decisions from 2026-08-22..27, 24 of them
+    real edits still sitting uncorrected in `part1.json`** (`&` in klal 167 w24
+    among them, plus `שכועה`→`שבועה`, `אברחם`→`אברהם`, `ופומכדיתא`→`ופומבדיתא`).
+    FIXED: `snapshot_still_matches_corpus()` falls back to checking the corpus
+    itself when the entry is absent — which is the only thing the entry was ever
+    proving, and the standard `apply_manual_correction` has always used. An entry
+    that is present and DISAGREES still vetoes; a `delete`-opcode decision names
+    no span and is never recovered this way. Four gated tests. Applied 2026-08-30:
+    80 decisions (27 replace, 2 insert/delete, 15 manual, 36 confirmed-no-op),
+    38 words changed across 19 klalim.
+
+0B. **[2026-08-30] `insert`-opcode apply ignored `chosen_text` and deleted a
+    word the reviewer never voted to delete — corpus damage, reverted.** Sibling
+    of the ★1 finding, same branch, same cause. An `insert` candidate offers one
+    span and `apply_insert_removal()` deletes ALL of it, reading `final_text` and
+    never `chosen_text`. ★1 fixed the case where the reviewer keeps the whole
+    span; nothing covered the reviewer choosing something SHORTER. **It fired on
+    klal 66 w0**: stored `סו אין`, reviewer chose the engines' `סו`, and the run
+    removed both words — dropping the klal marker AND the `אין` that negates the
+    entire klal, turning `אין ב"ד יכול לבטל` (a court CANNOT annul) into `ב"ד
+    יכול לבטל` (a court CAN). Caught by reading the applied diff word by word,
+    not by any test. `clean_text` restored; the `apply_event` (898c9b4e67d5)
+    stands in the append-only log and CANNOT be retracted, so the log now claims
+    a change the corpus does not have. **`audit_applied_decisions.py` does not
+    catch this** - checked 2026-08-30, it sorts klal 66 w0 into its
+    "word-count-changing, not position-verifiable post-hoc" bucket (9 decisions)
+    and never compares it to the corpus at all. A reverted insert/delete is
+    invisible to the one tool built to find exactly this. The durable record is
+    therefore the `klal_flag` appended alongside it, which surfaces on the
+    dashboard as an open flag on klal 66; the auditor's blind spot to a reverted
+    word-count change is itself worth closing. The script now
+    REFUSES this shape rather than guessing. Two gated tests.
+    **OPEN — needs the user's ruling on klal 66 w0.** Two decisions were recorded
+    23 seconds apart (keep `סו אין`, then `סו`). The vision check on this very
+    candidate transcribes `אין ב"ד` at 0.95, and klal 57 w0 is the identical
+    `נז אין` shape the reviewer chose to KEEP — both say `סו אין` is right and
+    Surya/VLM simply missed `אין`.
+
 00. **[ASSIGNED TO THE USER, 2026-08-24 — "I will do #2 - remind me
     periodically until I remember"] Surya block mis-assignment: 4 klalim carry a
     neighbour's text.** NOT to be attempted by an agent without the user saying

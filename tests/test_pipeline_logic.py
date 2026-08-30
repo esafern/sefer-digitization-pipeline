@@ -4297,3 +4297,106 @@ def test_a_flag_raised_after_a_decision_stays_open():
     decision = {(91, 109): {"ts": "2026-08-15T12:00:00"}}
     later_flag = {"ts": "2026-08-24T08:00:00", "needs_revisit": True}
     assert rsrv._flag_answered_by_a_later_decision(91, 109, later_flag, decision, {}) is False
+
+
+# --- apply_reviewer_decisions: a decision whose candidate entry was dropped ---
+
+def test_a_decision_survives_its_candidate_entry_being_dropped_from_the_queue(
+        apply_harness, decisions_path):
+    """synthesize_multi_witness.active_human_decisions() deliberately removes a
+    dispute from the queue the moment a human rules on it, so the reviewer is
+    never shown a resolved dispute again. That made "entry missing" the NORMAL
+    state of a recorded-but-unapplied decision - and snapshot_matches() read it
+    as drift and refused to apply, permanently. Measured 2026-08-30: 43 rulings
+    from 2026-08-22..27 stranded that way, `&` still in klal 167 among them.
+
+    The corpus is the thing the entry was ever proving unmoved, so an absent
+    entry falls back to checking the corpus directly."""
+    entry = _correction(1, "replace", "כית", "בית")
+    apply_harness([{"klal_id": 1, "clean_text": "אלף בית גימל"}], {"1": []})  # queue no longer has it
+    rd.append_decision("disputed_choice", klal_id=1, word_index=1, chosen_source="custom",
+                       chosen_text="כית", candidate_snapshot=entry, path=decisions_path)
+
+    assert apply_harness.run()[1] == "אלף כית גימל"
+    assert len(rd.history_for(1, 1, "apply_event", path=decisions_path)) == 1
+
+
+def test_a_dropped_candidate_entry_still_defers_to_the_live_corpus(
+        apply_harness, decisions_path):
+    """The fallback is a corpus check, not a waiver. If the corpus no longer
+    holds the span the snapshot named, the decision is stranded for a real
+    reason (indices moved) and must still be refused - otherwise the fallback
+    would write the chosen text over whatever happens to sit at that index."""
+    entry = _correction(1, "replace", "כית", "בית")
+    apply_harness([{"klal_id": 1, "clean_text": "אלף דלת גימל"}], {"1": []})  # w1 is no longer בית
+    rd.append_decision("disputed_choice", klal_id=1, word_index=1, chosen_source="custom",
+                       chosen_text="כית", candidate_snapshot=entry, path=decisions_path)
+
+    assert apply_harness.run()[1] == "אלף דלת גימל"
+    assert rd.history_for(1, 1, "apply_event", path=decisions_path) == []
+
+
+def test_a_disagreeing_candidate_entry_still_vetoes_regardless_of_the_corpus(
+        apply_harness, decisions_path):
+    """Only an ABSENT entry falls back. An entry that is present and disagrees
+    means the queue was rebuilt into a different candidate at this position;
+    that is the drift the check was written for, and the corpus agreeing with
+    the stale snapshot must not override it."""
+    snapshot = _correction(1, "replace", "כית", "בית")
+    live = _correction(1, "replace", "בית", "בית")  # regenerated into a different candidate
+    apply_harness([{"klal_id": 1, "clean_text": "אלף בית גימל"}], {"1": [live]})
+    rd.append_decision("disputed_choice", klal_id=1, word_index=1, chosen_source="custom",
+                       chosen_text="כית", candidate_snapshot=snapshot, path=decisions_path)
+
+    assert apply_harness.run()[1] == "אלף בית גימל"
+    assert rd.history_for(1, 1, "apply_event", path=decisions_path) == []
+
+
+def test_a_delete_opcode_is_never_recovered_by_the_corpus_fallback(
+        apply_harness, decisions_path):
+    """A 'delete'-opcode decision (docai saw a word clean_text lacks; applying
+    INSERTS it) names no span that must be present at word_index - final_text
+    is null - so there is nothing in the corpus to check it against. It keeps
+    requiring the live entry rather than being waved through on an empty span."""
+    entry = _correction(1, "delete", "חדש", None)
+    apply_harness([{"klal_id": 1, "clean_text": "אלף בית גימל"}], {"1": []})
+    rd.append_decision("disputed_choice", klal_id=1, word_index=1, chosen_source="docai_reading",
+                       chosen_text="חדש", candidate_snapshot=entry, path=decisions_path)
+
+    assert apply_harness.run()[1] == "אלף בית גימל"
+    assert rd.history_for(1, 1, "apply_event", path=decisions_path) == []
+
+
+def test_an_insert_decision_choosing_part_of_the_span_is_refused_not_executed(
+        apply_harness, decisions_path):
+    """An 'insert'-opcode candidate offers one span, and apply_insert_removal
+    deletes ALL of it - chosen_text is never consulted on that path. So a
+    reviewer choosing a shorter reading ("the marker is `סו`, not `סו אין`")
+    silently deleted the word they did not mention.
+
+    Fired for real on klal 66 w0 (2026-08-30): stored `סו אין`, reviewer chose
+    `סו`, both words removed - taking the `אין` that negates the entire klal.
+    The only two answers this path can execute are "keep the whole span" (the
+    no-op above) and "remove the whole span" (chosen_text == ""); anything
+    else must be refused and re-ruled as an explicit correction."""
+    entry = _correction(0, "insert", None, "סו אין")
+    apply_harness([{"klal_id": 1, "clean_text": "סו אין ב\"ד"}], {"1": [entry]})
+    rd.append_decision("disputed_choice", klal_id=1, word_index=0, chosen_source="vlm_reading",
+                       chosen_text="סו", candidate_snapshot=entry, path=decisions_path)
+
+    assert apply_harness.run()[1] == "סו אין ב\"ד", "no word may be removed on an ambiguous choice"
+    assert rd.history_for(1, 0, "apply_event", path=decisions_path) == []
+
+
+def test_an_insert_decision_choosing_the_empty_string_still_removes_the_span(
+        apply_harness, decisions_path):
+    """The refusal above must not swallow the legitimate answer: an empty
+    chosen_text is how "yes, remove this span" is expressed, and it still
+    applies."""
+    entry = _correction(0, "insert", None, "סו אין")
+    apply_harness([{"klal_id": 1, "clean_text": "סו אין ב\"ד"}], {"1": [entry]})
+    rd.append_decision("disputed_choice", klal_id=1, word_index=0, chosen_source="docai_reading",
+                       chosen_text="", candidate_snapshot=entry, path=decisions_path)
+
+    assert apply_harness.run()[1] == "ב\"ד"
+    assert len(rd.history_for(1, 0, "apply_event", path=decisions_path)) == 1

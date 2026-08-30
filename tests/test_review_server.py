@@ -584,7 +584,19 @@ def test_a_suggested_replacement_is_a_word_not_a_number_from_the_note(server, pa
     `6.18M`) and 27 proposed something containing `?`.
 
     Seeds the real note through the API so the assertion runs against the exact
-    text that produced the bug."""
+    text that produced the bug. The note is what is under test, not the position.
+
+    MOVED off word 229 on 2026-08-30, when the `דנראח`->`דנראה` decision this
+    note describes was finally applied to the corpus. That made part1.json
+    disagree with DocAI's raw reading at 229 for the first time, so the next
+    rebuild generated a `replace` candidate there - and a real candidate
+    outranks a synthesized ai_flag by design (_claim_word_index: "the richer
+    entry wins"), so the word stopped rendering as .state-ai-flag and this test
+    hung on its selector. Every applied correction creates a candidate at its
+    own position that way, so the fix is to seed at a word that carries no
+    candidate rather than to loosen the selector - clicking by data-word-index
+    would open the candidate panel instead and assert nothing about the
+    suggestion extractor, which is the whole point here."""
     real_note = (
         "Lexicon-gap detector re-run 2026-08-17/18 against the EXPANDED independent "
         "reference corpus (added Mishneh Torah + Tur + Rashi on Talmud to the existing "
@@ -593,7 +605,7 @@ def test_a_suggested_replacement_is_a_word_not_a_number_from_the_note(server, pa
         "Stored form 'דנראח' has ZERO attestation in the expanded corpus and is one "
         "letter-substitution ('ח'->'ה') away from 'דנראה' (43x independently attested)."
     )
-    body = json.dumps({"klal_id": 1, "word_index": 229, "needs_revisit": True,
+    body = json.dumps({"klal_id": 1, "word_index": 224, "needs_revisit": True,
                        "note": real_note}).encode("utf-8")
     req = urllib.request.Request(server + "/api/decisions/klal_flag", data=body,
                                  headers={"Content-Type": "application/json"})
@@ -1097,3 +1109,71 @@ def test_part_selector_switches_corpus_parts(server, page):
     assert page.locator("#nav-1").count() == 1, "Part 1 must reload Klal 1"
     assert page.test_errors == []
 
+
+
+def test_a_backticked_replacement_in_a_note_is_offered(server, page):
+    """REGRESSION 2026-08-30, reviewer: "69 w338 ... did not surface the
+    recommended word from the note".
+
+    validate_part1_corpus_integrity.py writes its proposals with BACKTICKS -
+    ``'&' w338 -> REPLACE with `אל` `` - so extractSuggestedWord's anchored
+    pattern captured the literal word "REPLACE", which carries no Hebrew letter
+    and was correctly dropped by suggestionIsPlausible. Nothing else matched,
+    and the panel offered no reading at all for a flag that names one plainly.
+    Three of the four affected flags are the `&` -> `אל` ligature repairs.
+
+    Uses the real note verbatim, and asserts the panel offers `אל` and not the
+    verb."""
+    real_note = (
+        "'&' w338 -> REPLACE with `אל` - it is the alef-lamed ligature ﭏ | "
+        "NON-HEBREW CHARACTER in Part 1 text, one of 7 reported by "
+        "validate_part1_corpus_integrity.py check 2b and never resolved."
+    )
+    # w222, not 224: the `server` fixture's ledger is module-scoped and shared,
+    # and test_a_suggested_replacement_is_a_word_not_a_number_from_the_note seeds
+    # its own flag at 224. Two flags at one index means the later-appended note
+    # wins in _word_level_ai_flags, so the pair passed alone and failed together.
+    # Click by data-word-index too - `.state-ai-flag.first` is whichever flag the
+    # DOM happens to order first once more than one klal-1 flag exists.
+    body = json.dumps({"klal_id": 1, "word_index": 222, "needs_revisit": True,
+                       "note": real_note}).encode("utf-8")
+    req = urllib.request.Request(server + "/api/decisions/klal_flag", data=body,
+                                 headers={"Content-Type": "application/json"})
+    with urllib.request.urlopen(req) as resp:
+        assert resp.status in (200, 201)
+
+    _open_dashboard(page, server, 1)
+    page.locator('#klal-block-1 [data-word-index="222"]').first.click()
+    page.wait_for_selector("#manual-panel.open", timeout=5000)
+
+    panel = page.locator("#manual-panel").inner_text()
+    # The offered reading, not merely the letters appearing somewhere on screen -
+    # the klal text itself is in this panel, so a bare `in panel` would pass on
+    # any note. Assert the "Use ..." control, which is what a click applies.
+    assert 'Use "אל"' in panel, f"the note names `אל` plainly; panel was:\n{panel}"
+
+
+def test_a_backticked_context_word_is_not_mistaken_for_a_proposal(server, page):
+    """The other half of the same fix. Most backticks in these notes hold
+    CONTEXT, not a proposal - klal 74 w416's `אמר` is the catchword the note
+    wants DELETED, not a replacement for it. A bare "first backticked token"
+    rule would offer `אמר` as the new reading of `אמר`, so the backtick is only
+    honoured behind the verb `replace ... with`."""
+    real_note = (
+        "'אמר' w416 -> PAGE-SEAM FURNITURE: page 35's catchword `אמר` and a "
+        "duplicated `רבא אמר` are both present; the catchword should be deleted."
+    )
+    body = json.dumps({"klal_id": 1, "word_index": 226, "needs_revisit": True,
+                       "note": real_note}).encode("utf-8")
+    req = urllib.request.Request(server + "/api/decisions/klal_flag", data=body,
+                                 headers={"Content-Type": "application/json"})
+    with urllib.request.urlopen(req) as resp:
+        assert resp.status in (200, 201)
+
+    _open_dashboard(page, server, 1)
+    page.locator('#klal-block-1 [data-word-index="226"]').first.click()
+    page.wait_for_selector("#manual-panel.open", timeout=5000)
+
+    panel = page.locator("#manual-panel").inner_text()
+    assert "Use `אמר`" not in panel and "Use אמר" not in panel, (
+        f"a context word was offered as a replacement; panel was:\n{panel}")

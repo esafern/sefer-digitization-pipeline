@@ -111,11 +111,26 @@ function extractSuggestedWord(reasoning, currentWord) {
   const mAnchored = reasoning.match(/(?:^|\|)\s*\S+\s+w\d+\s*(?:→|->)\s*['"״׳]?([^\s|]+)/);
   if (mAnchored) candidates.push(mAnchored[1]);
   // 2. Prose patterns, which name the attested word explicitly.
+  // The quote class includes a BACKTICK. validate_part1_corpus_integrity.py
+  // writes its proposals as ``'&' w338 -> REPLACE with `אל` `` - so pattern 1
+  // captured the literal word "REPLACE", which has no Hebrew letter and was
+  // dropped, and the panel offered nothing at all (reviewer, 2026-08-30: "did
+  // not surface the recommended word from the note"). Four open flags were
+  // silently suggestion-less that way, three of them the `&` -> `אל` ligature
+  // repairs.
+  //
+  // Deliberately NOT "take the first backticked token": swept all 25 open flags
+  // whose anchored capture is non-Hebrew, and in most of them the backticks hold
+  // CONTEXT, not a proposal - klal 39 w252's `יד מלאכי כללי האלף` is the folio
+  // header it wants deleted, klal 74 w416's `אמר` is the catchword, klal 176
+  // w694's is "PROBABLY CORRECT AS TRANSCRIBED - do not delete". A bare-backtick
+  // rule would put a wrong word in the box more often than a right one. Anchoring
+  // on the verb `replace ... with` is what makes the proposal a proposal.
   const prose = [
-    /away from ['"]([^'"]+)['"]/i,
-    /suggests? ['"]([^'"]+)['"]/i,
-    /['"]([^'"]+)['"]\s*\(\d+x independently attested\)/i,
-    /replaces? (?:with )?['"]([^'"]+)['"]/i,
+    /away from ['"`]([^'"`]+)['"`]/i,
+    /suggests? ['"`]([^'"`]+)['"`]/i,
+    /['"`]([^'"`]+)['"`]\s*\(\d+x independently attested\)/i,
+    /replaces? (?:with )?['"`]([^'"`]+)['"`]/i,
   ];
   for (const re of prose) {
     const m = reasoning.match(re);

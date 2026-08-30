@@ -1236,7 +1236,16 @@ def test_part1_no_new_duplicated_phrases(part_klalim, part1_integrity_validator)
 # "I also now saw what the aforementioned rabbi wrote there in the name
 # of Tosafot"), i.e. the author deliberately quotes the same Tosafot text
 # twice while discussing two different rabbis who each cite it.
-INTRA_KLAL_DUPLICATE_PHRASE_BASELINE = {189, 198, 217}
+# klal 66 added 2026-08-30. Not new text and not a scramble: the klal OPENS
+# with the maxim `אין ב"ד יכול לבטל דברי ב"ד חבירו אא"כ גדול ממנו בחכמה ובמנין`
+# and quotes it again at word 105 under `והתנן` ("and we learned in the
+# mishnah"), continuing `וכו'` - a verbatim restatement of its own source, which
+# is the style this check's own failure message anticipates. It became visible
+# only because a stray OCR `!` sitting between `ב"ד` and `חבירו` in the second
+# occurrence was deleted this run (decision at w112), making the two copies
+# contiguous for the first time. The second occurrence is also what independently
+# confirms the `אין` at w1 belongs there - see PROJECT-STATUS open item 0B.
+INTRA_KLAL_DUPLICATE_PHRASE_BASELINE = {66, 189, 198, 217}
 
 
 def test_part1_no_new_intra_klal_duplicated_phrases(part_klalim, part1_integrity_validator):

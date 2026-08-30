@@ -17,22 +17,6 @@
  },
  {
   "klal_id": 1,
-  "word_index": 229,
-  "stored": "דנראח",
-  "proposals": [
-   {
-    "form": "דנראה",
-    "ref_count": 43,
-    "edit": null
-   }
-  ],
-  "detector": "substitution",
-  "ambiguous": false,
-  "rank": 43,
-  "corpus_count": 1
- },
- {
-  "klal_id": 1,
   "word_index": 280,
   "stored": "לתרוויהו",
   "proposals": [
@@ -191,22 +175,6 @@
   "corpus_count": 3
  },
  {
-  "klal_id": 4,
-  "word_index": 364,
-  "stored": "שרבר",
-  "proposals": [
-   {
-    "form": "שדבר",
-    "ref_count": 93,
-    "edit": null
-   }
-  ],
-  "detector": "substitution",
-  "ambiguous": false,
-  "rank": 93,
-  "corpus_count": 1
- },
- {
   "klal_id": 6,
   "word_index": 43,
   "stored": "ילפין",
@@ -311,22 +279,6 @@
   "ambiguous": true,
   "rank": 375,
   "corpus_count": 2
- },
- {
-  "klal_id": 7,
-  "word_index": 252,
-  "stored": "הלכרה",
-  "proposals": [
-   {
-    "form": "הלכה",
-    "ref_count": 2290,
-    "edit": "extra_char"
-   }
-  ],
-  "detector": "insertion_deletion",
-  "ambiguous": false,
-  "rank": 2290,
-  "corpus_count": 1
  },
  {
   "klal_id": 7,
@@ -439,22 +391,6 @@
   "ambiguous": false,
   "rank": 3530,
   "corpus_count": 2
- },
- {
-  "klal_id": 11,
-  "word_index": 96,
-  "stored": "ותשובח",
-  "proposals": [
-   {
-    "form": "ותשובת",
-    "ref_count": 89,
-    "edit": null
-   }
-  ],
-  "detector": "substitution",
-  "ambiguous": false,
-  "rank": 89,
-  "corpus_count": 1
  },
  {
   "klal_id": 12,
@@ -1008,6 +944,22 @@
   "ambiguous": false,
   "rank": 1122,
   "corpus_count": 1
+ },
+ {
+  "klal_id": 33,
+  "word_index": 92,
+  "stored": "דוא",
+  "proposals": [
+   {
+    "form": "הוא",
+    "ref_count": 36021,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false,
+  "rank": 36021,
+  "corpus_count": 3
  },
  {
   "klal_id": 34,
@@ -1798,22 +1750,6 @@
   "corpus_count": 1
  },
  {
-  "klal_id": 66,
-  "word_index": 29,
-  "stored": "מהדיא",
-  "proposals": [
-   {
-    "form": "מההיא",
-    "ref_count": 120,
-    "edit": null
-   }
-  ],
-  "detector": "substitution",
-  "ambiguous": false,
-  "rank": 120,
-  "corpus_count": 1
- },
- {
   "klal_id": 69,
   "word_index": 38,
   "stored": "ואהינו",
@@ -2087,7 +2023,7 @@
   "detector": "substitution",
   "ambiguous": true,
   "rank": 620,
-  "corpus_count": 2
+  "corpus_count": 1
  },
  {
   "klal_id": 75,
@@ -2103,7 +2039,7 @@
   "detector": "insertion_deletion",
   "ambiguous": false,
   "rank": 217,
-  "corpus_count": 2
+  "corpus_count": 1
  },
  {
   "klal_id": 75,
@@ -2215,59 +2151,6 @@
   "detector": "substitution",
   "ambiguous": false,
   "rank": 433,
-  "corpus_count": 1
- },
- {
-  "klal_id": 84,
-  "word_index": 23,
-  "stored": "בחרא",
-  "proposals": [
-   {
-    "form": "בתרא",
-    "ref_count": 620,
-    "edit": null
-   },
-   {
-    "form": "בחדא",
-    "ref_count": 331,
-    "edit": null
-   }
-  ],
-  "detector": "substitution",
-  "ambiguous": true,
-  "rank": 620,
-  "corpus_count": 2
- },
- {
-  "klal_id": 84,
-  "word_index": 23,
-  "stored": "בחרא",
-  "proposals": [
-   {
-    "form": "ברא",
-    "ref_count": 217,
-    "edit": "extra_char"
-   }
-  ],
-  "detector": "insertion_deletion",
-  "ambiguous": false,
-  "rank": 217,
-  "corpus_count": 2
- },
- {
-  "klal_id": 84,
-  "word_index": 24,
-  "stored": "כסכתא",
-  "proposals": [
-   {
-    "form": "מסכתא",
-    "ref_count": 45,
-    "edit": null
-   }
-  ],
-  "detector": "substitution",
-  "ambiguous": false,
-  "rank": 45,
   "corpus_count": 1
  },
  {
@@ -2818,6 +2701,22 @@
   "corpus_count": 1
  },
  {
+  "klal_id": 137,
+  "word_index": 53,
+  "stored": "דוא",
+  "proposals": [
+   {
+    "form": "הוא",
+    "ref_count": 36021,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false,
+  "rank": 36021,
+  "corpus_count": 3
+ },
+ {
   "klal_id": 138,
   "word_index": 104,
   "stored": "ארינן",
@@ -2970,27 +2869,6 @@
   "ambiguous": false,
   "rank": 90,
   "corpus_count": 2
- },
- {
-  "klal_id": 143,
-  "word_index": 684,
-  "stored": "שמול",
-  "proposals": [
-   {
-    "form": "שמואל",
-    "ref_count": 3271,
-    "edit": "deleted_char"
-   },
-   {
-    "form": "שמו",
-    "ref_count": 801,
-    "edit": "extra_char"
-   }
-  ],
-  "detector": "insertion_deletion",
-  "ambiguous": true,
-  "rank": 3271,
-  "corpus_count": 1
  },
  {
   "klal_id": 144,
@@ -3277,6 +3155,22 @@
   "detector": "substitution",
   "ambiguous": false,
   "rank": 77,
+  "corpus_count": 3
+ },
+ {
+  "klal_id": 150,
+  "word_index": 281,
+  "stored": "דוא",
+  "proposals": [
+   {
+    "form": "הוא",
+    "ref_count": 36021,
+    "edit": null
+   }
+  ],
+  "detector": "substitution",
+  "ambiguous": false,
+  "rank": 36021,
   "corpus_count": 3
  },
  {
@@ -3790,22 +3684,6 @@
   "corpus_count": 2
  },
  {
-  "klal_id": 163,
-  "word_index": 427,
-  "stored": "בפיק",
-  "proposals": [
-   {
-    "form": "בפק",
-    "ref_count": 375,
-    "edit": "extra_char"
-   }
-  ],
-  "detector": "insertion_deletion",
-  "ambiguous": false,
-  "rank": 375,
-  "corpus_count": 1
- },
- {
   "klal_id": 166,
   "word_index": 31,
   "stored": "דפליגו",
@@ -4272,38 +4150,6 @@
   "detector": "insertion_deletion",
   "ambiguous": false,
   "rank": 5096,
-  "corpus_count": 1
- },
- {
-  "klal_id": 179,
-  "word_index": 16,
-  "stored": "יותה",
-  "proposals": [
-   {
-    "form": "יותר",
-    "ref_count": 3326,
-    "edit": null
-   }
-  ],
-  "detector": "substitution",
-  "ambiguous": false,
-  "rank": 3326,
-  "corpus_count": 1
- },
- {
-  "klal_id": 179,
-  "word_index": 42,
-  "stored": "אברחם",
-  "proposals": [
-   {
-    "form": "אברהם",
-    "ref_count": 415,
-    "edit": null
-   }
-  ],
-  "detector": "substitution",
-  "ambiguous": false,
-  "rank": 415,
   "corpus_count": 1
  },
  {
@@ -4979,22 +4825,6 @@
   "detector": "substitution",
   "ambiguous": false,
   "rank": 1754,
-  "corpus_count": 1
- },
- {
-  "klal_id": 221,
-  "word_index": 49,
-  "stored": "שכועה",
-  "proposals": [
-   {
-    "form": "שבועה",
-    "ref_count": 2377,
-    "edit": null
-   }
-  ],
-  "detector": "substitution",
-  "ambiguous": false,
-  "rank": 2377,
   "corpus_count": 1
  },
  {
