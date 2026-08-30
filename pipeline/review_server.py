@@ -941,7 +941,7 @@ def api_klalim(part_num=1):
             fwidx for (fkid, fwidx), rec in all_klal_flags.items()
             if fkid == kid and fwidx is not None
             and _flag_still_open(fkid, fwidx, rec)
-            and fwidx not in manual_indices and 0 <= fwidx < n_words
+            and 0 <= fwidx < n_words
         }
         ai_flag_count = len(ai_flag_indices_for_count)
         # An ANSWERED flag still renders - it has to, or nothing on screen can
@@ -998,8 +998,18 @@ def api_klalim(part_num=1):
             state[e["word_index"]] = _machine_state(e)
         for wi in manual_indices_for_count:                 # 2. born decided
             state[wi] = DECIDED
-        for wi in ai_flag_indices_for_count:                # 3. only when standalone;
-            state.setdefault(wi, DISPUTED)                  #    otherwise it just overlays
+        # 3. An OPEN flag makes the word disputed, overriding the machine's own
+        # verdict for the entry it overlays. This was setdefault(), so a flag
+        # landing on a `current_text_confirmed` candidate left the word counted
+        # AND coloured machine-resolved - amber, "nothing to do here" - while the
+        # flag underneath was still asking for a human. Seven words corpus-wide;
+        # the reviewer hit two of them (klalim 62, 70: "two flagged words in the
+        # center but the correction pane showed 1 red flag"). A DECIDED word is
+        # not overridden: a decision that post-dates the flag is what answers it,
+        # and _flag_still_open() has already excluded those.
+        for wi in ai_flag_indices_for_count:
+            if state.get(wi) != DECIDED:
+                state[wi] = DISPUTED
         for wi in answered_flag_indices:                    # 3b. answered: renders green
             state.setdefault(wi, DECIDED)
         for w in w_entries:                                 # 4. witness disagreements

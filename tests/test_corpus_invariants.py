@@ -1561,6 +1561,13 @@ def test_nav_tristate_matches_what_each_word_actually_renders_as(part1_by_id):
         # then a witness's own vision verdict.
         if c.get("opcode") == "ai_flag":
             return "human" if c.get("flag_answered") else "open"
+        # An unanswered word-level flag overlaid on a richer entry makes the word
+        # open whatever the entry's own verdict is - added 2026-08-30 alongside
+        # the same rule in app.js, after seven words carried an open flag and
+        # rendered AMBER off a `current_text_confirmed` candidate.
+        wf = c.get("word_flag")
+        if wf and not wf.get("answered"):
+            return "open"
         if c.get("current_decision"):
             return "human"
         if c.get("flag") in machine_resolved:

@@ -726,54 +726,6 @@
   ],
   "7": [
     {
-      "word_index": 115,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "בבות",
-      "page": 17,
-      "bbox": {
-        "x1": 0.30514705181121826,
-        "y1": 0.4548795521259308,
-        "x2": 0.34007352590560913,
-        "y2": 0.4679461121559143
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Lexical defect: stored 'בבות' has NO attestation in the independent reference corpus and occurs 1x here, while 'בבית' is attested 3136x and is one None away. Found by tools/detect_real_word_substitution.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
-      "vlm_reading": null,
-      "surya_reading": null,
-      "lexical_proposal": "בבית",
-      "lexical_source": "detect_real_word_substitution.py",
-      "flag": "current_text_may_be_wrong"
-    },
-    {
-      "word_index": 229,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "מהר\"שם",
-      "page": 17,
-      "bbox": {
-        "x1": 0.1256127506494522,
-        "y1": 0.5565537214279175,
-        "x2": 0.18382352590560913,
-        "y2": 0.5749285221099854
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: surya + vlm agree on 'מהר\"ש' against stored 'מהר\"שם'.",
-      "vlm_reading": "מהר\"ש",
-      "surya_reading": "מהר\"ש",
-      "consensus_engines": [
-        "surya",
-        "vlm"
-      ],
-      "consensus_reading": "מהר\"ש",
-      "ligature_artifact": null,
-      "flag": "current_text_may_be_wrong"
-    },
-    {
       "word_index": 252,
       "opcode": "replace",
       "docai_reading": "הלכרה",
@@ -814,28 +766,6 @@
       "vlm_reading": "דאם",
       "surya_reading": "דאם",
       "flag": "current_text_confirmed"
-    },
-    {
-      "word_index": 278,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "מתרר",
-      "page": 17,
-      "bbox": {
-        "x1": 0.12622548639774323,
-        "y1": 0.6010616421699524,
-        "x2": 0.16850490868091583,
-        "y2": 0.6190281510353088
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Lexical defect: stored 'מתרר' has NO attestation in the independent reference corpus and occurs 1x here, while 'מתר' is attested 1220x and is one extra_char away. Found by tools/detect_insertion_deletion.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
-      "vlm_reading": null,
-      "surya_reading": null,
-      "lexical_proposal": "מתר",
-      "lexical_source": "detect_insertion_deletion.py",
-      "flag": "current_text_may_be_wrong"
     },
     {
       "word_index": 355,
@@ -4549,28 +4479,6 @@
       "vlm_reading": "תורה",
       "surya_reading": "תחדה",
       "flag": "current_text_confirmed"
-    },
-    {
-      "word_index": 153,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "היבין",
-      "page": 33,
-      "bbox": {
-        "x1": 0.6816779971122742,
-        "y1": 0.8304947018623352,
-        "x2": 0.7180752754211426,
-        "y2": 0.8463098406791687
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Lexical defect: stored 'היבין' has NO attestation in the independent reference corpus and occurs 1x here, while 'היין' is attested 1022x and is one extra_char away. Found by tools/detect_insertion_deletion.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
-      "vlm_reading": null,
-      "surya_reading": null,
-      "lexical_proposal": "היין",
-      "lexical_source": "detect_insertion_deletion.py",
-      "flag": "current_text_may_be_wrong"
     }
   ],
   "65": [

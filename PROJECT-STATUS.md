@@ -184,14 +184,22 @@ applying it to the corpus remain two separate, deliberate steps.
     `נז אין` shape the reviewer chose to KEEP — both say `סו אין` is right and
     Surya/VLM simply missed `אין`.
 
-00. **[ASSIGNED TO THE USER, 2026-08-24 — "I will do #2 - remind me
-    periodically until I remember"] Surya block mis-assignment: 4 klalim carry a
-    neighbour's text.** NOT to be attempted by an agent without the user saying
+00. **[CLOSED 2026-08-30 BY THE USER — "close 162/163 surya issue - wasting
+    time". Stop raising it in session summaries; the standing reminder inside is
+    retired with it.] Surya block mis-assignment: 4 klalim carry a neighbour's
+    text.** What was left was a mis-assigned SURYA WITNESS for klalim 162/163,
+    not a corpus defect — the stored text of 161/162/163 was re-read on close and
+    is clean, each klal opening with its own marker. The cost of leaving it is
+    that those two klalim have no working second engine, so cross-checking is
+    blind there; the user has weighed that against three failed fix attempts and
+    closed it. Retained below as the record of what was measured. NOT to be attempted by an agent without the user saying
     so: three separate attempts to fix it by tuning
     `split_block_across_klalim()` have all regressed the corpus and been
     reverted, the worst costing 29 klalim their coverage and 2.3 points of mean
     agreement. **Any LLM instance reading this file should mention this open
-    item to the user in its session summary until it is closed.** Details: (swept
+    item to the user in its session summary until it is closed.** (RETIRED
+    2026-08-30 — the item is closed; do not carry this directive forward.)
+    Details: (swept
     2026-08-24, extent documented per the standing rule). klal 162 (page 59,
     NEW - a regression from the 300-DPI re-render, 0.68 -> 0.09) and its
     knock-on klal 163; klalim 8, 88 and 202 are pre-existing. Root cause for

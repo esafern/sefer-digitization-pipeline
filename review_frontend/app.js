@@ -180,6 +180,18 @@ function wordState(corr) {
   // open dispute puts a red word on a position the reviewer already ruled on -
   // which is the klal 163 report in a second costume.
   if (corr.opcode === 'ai_flag') return corr.flag_answered ? 'human' : 'open';
+  // An UNANSWERED word-level flag makes the word open, whatever else the entry
+  // also is. api_klal() merges a flag onto a richer entry at the same index as
+  // `word_flag` rather than appending a second one, and only the ai_flag branch
+  // above ever looked at it - so a flag sitting on a machine candidate rendered
+  // by the candidate's own verdict. Seven words carried an open flag and showed
+  // AMBER, "the machine settled this", which is the one colour that tells a
+  // reviewer to move on. Reported 2026-08-30 on klalim 62 and 70: "two flagged
+  // words in the center but the correction pane showed 1 red flag".
+  // `answered` is computed server-side (_flag_answered_by_a_later_decision) and
+  // carried on the overlay; a flag a later decision already answered stays out
+  // of this and renders as decided, which is the klal 163 case.
+  if (corr.word_flag && !corr.word_flag.answered) return 'open';
   if (corr.current_decision) return 'human';
   if (MACHINE_RESOLVED_FLAGS.includes(corr.flag)) return 'machine';
   // Witness items: human decision wins first, then vision-selected A/B ->
