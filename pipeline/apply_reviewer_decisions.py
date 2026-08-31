@@ -352,9 +352,19 @@ def manual_correction_changes_word_count(chosen_text):
     shifting every later index in the klal. A second decision in the same klal
     and run would then land one word off.
 
-    Verified 2026-08-27 (audit finding): 0 such decisions exist today, so this is
-    a guard against the next one, not a repair. Callers must fold it into the
-    same word_count_changed_klalim gate the insert/delete opcodes use."""
+    CORRECTED 2026-08-31. The 2026-08-27 audit recorded "0 such decisions exist
+    today, so this is a guard against the next one, not a repair", and the
+    2026-08-31 sweep repeated it. Both are wrong: **klal 57 w44 is one**
+    (`לאורויילן` -> `לאורויי לן`, recorded 2026-08-30T21:13, applied
+    2026-08-30T21:19), and it went through this path while it was unguarded.
+    It did no damage - it was the only word-count-changing decision applied to
+    klal 57 in that run, and the next one (w0) came a day later and sits BEFORE
+    it - but "0 exist" was a claim about a query, not about the log. Count them
+    with the applied ones included; the earlier measurement evidently did not.
+
+    Callers must fold this into the same word_count_changed_klalim gate the
+    insert/delete opcodes use - both apply_reviewer_decisions.py (:599) and
+    tools/export_corpus.py (its manual-replace branch) now do."""
     return bool(chosen_text) and len(chosen_text.split()) > 1
 
 
@@ -590,6 +600,16 @@ def main():
         original_word = decision.get("candidate_snapshot", {}).get("original_word")
         chosen_text = decision["chosen_text"]
 
+        # Whether a PREVIOUS decision this run already moved this klal's
+        # indices - captured BEFORE the multi-word block below can add this
+        # klal on its own behalf. Reading the set directly in the replace
+        # branch instead made a multi-word replace skip ITSELF: it adds, then
+        # the branch it falls through to sees its own entry. (Caught 2026-08-31
+        # by test_a_manual_replace_is_deferred_after_an_earlier_shift_in_the_
+        # same_klal, which reported "Applied: 0" where it expected 1 - the same
+        # self-skip the 2026-08-27 comment below predicted for the insert path.)
+        klal_already_shifted = klal_id in word_count_changed_klalim
+
         # A multi-word REPLACEMENT shifts every later index, exactly like an
         # insert/delete, so it takes the same one-per-klal-per-run gate. Scoped
         # to the replace path: the `original_word is None` insert below has its
@@ -634,6 +654,33 @@ def main():
             new_text = apply_manual_deletion(klal["clean_text"], word_index, original_word)
             kind = "manual-delete"
         else:
+            # A same-count replace does not itself shift anything, but it is
+            # INDEXED, and an earlier decision in this klal this run may already
+            # have shifted the position it names. Deferring it is the same
+            # answer the three branches above give, for the same reason.
+            #
+            # WIDENED 2026-08-31. The 2026-08-27 remedy stopped at "make a
+            # multi-word replace claim the per-run slot", and that is not
+            # sufficient to prevent the corruption the finding itself
+            # describes: the slot stops a SECOND word-count change, while the
+            # decision actually at risk is the ordinary single-word one that
+            # follows a shift. Usually apply_manual_correction's own drift
+            # check saves it - words[word_index] no longer equals
+            # original_word, so it returns None. It does NOT save the case
+            # where the shifted-into position holds the SAME word: a repeated
+            # word (`גימל גימל`), where the check passes and the run rewrites
+            # the wrong occurrence, silently, with the reviewer's note
+            # attached to a word they never looked at.
+            #
+            # Live exposure when written: 0 - measured over every unapplied
+            # manual decision, 1 klal (74) has more than one and all three of
+            # its decisions are word-count-changing, which the existing gate
+            # already handles. Latent, and cheap to close.
+            if klal_already_shifted:
+                print(f"  SKIP klal {klal_id} word {word_index}: a word-count-changing "
+                      f"decision already applied for this klal this run, so this index may "
+                      f"have moved - run ./rebuild_all.sh, then this script again.")
+                continue
             new_text = apply_manual_correction(klal["clean_text"], word_index, original_word, chosen_text)
             kind = "manual"
 

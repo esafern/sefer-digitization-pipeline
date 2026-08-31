@@ -37,6 +37,7 @@ import corpus_io as cio  # noqa: E402
 import review_server as rs  # noqa: E402
 import synthesize_multi_witness as syn  # noqa: E402
 import typography  # noqa: E402
+from repair_filters import docai_filter  # noqa: E402
 
 norm = cio.hebrew_letters_only
 
@@ -88,13 +89,24 @@ def load_reference_freq():
     """Word frequencies from sefaria_reference_corpus - 6.18M words of Talmud,
     Rashi, Rambam, Tur and Shulchan Arukh with NO editorial or data lineage
     connection to this project. Returns {} if the cache is absent (it is
-    gitignored)."""
-    path = os.path.join(REPO, "sefaria_reference_corpus", "word_freq.json")
-    if not os.path.exists(path):
-        return {}
-    import json
-    with open(path, encoding="utf-8") as f:
-        return {norm(w): c for w, c in json.load(f).items()}
+    gitignored).
+
+    FIXED 2026-08-31. This was the SECOND of the two private copies the
+    2026-08-26 review's finding #2 named - and it names this file and this line
+    outright ("validate_suppression_filters.py:87 is a second copy"). The
+    other copy, in reconstruct_placeholder_klalim.py, was consolidated on
+    2026-08-26; this one was not, and both the 2026-08-27 review and the
+    2026-08-31 sweep then recorded #2 as "Fixed" on the strength of the first
+    file alone. Lesson 34: the sibling was written down in the finding itself.
+
+    Behaviourally identical today, measured not assumed - this module's `norm`
+    IS `cio.hebrew_letters_only`, the same normalisation the canonical loader
+    applies, so the two returned the same dict. What the copy lacked was the
+    canonical path constant and the lru_cache; what it risked was the exact
+    failure the original finding describes, the day word_freq.json is rebuilt
+    keeping geresh/gershayim.
+    """
+    return docai_filter.reference_frequencies()
 
 
 def artifact_tag_check(agreements, ref):

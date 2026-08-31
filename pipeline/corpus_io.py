@@ -143,6 +143,53 @@ LEXICON_PATH = repo_path("lexicon.txt")
 # three separate literals having to agree with each other first.
 PART1_MAX_KLAL = 222
 
+# max(klal_id) in part2.json and part3.json. ADDED 2026-08-31, closing the
+# oldest surviving finding of the 2026-08-25 review (S5, restated as the
+# 2026-08-27 review's #6): `223`, `444` and `445` were inline literals in
+# review_server.py's _get_part_num_for_klal() and _load_klalim(), with no
+# constant and no test tying them to the data - so a klal added to or removed
+# from part2/part3 would silently misclassify, and the review UI would serve
+# the wrong part with no error anywhere.
+#
+# Measured against the live corpus, not copied from the review: part1 = 222
+# klalim (1-222), part2 = 222 (223-444), part3 = 223 (445-667), contiguous,
+# no gaps. The three ranges partition 1..667 exactly, which is what lets
+# _get_part_num_for_klal use `<=` cutoffs at all.
+#
+# These get the same treatment PART1_MAX_KLAL gets and for the same reason:
+# the assertion against the live corpus in tests/test_corpus_invariants.py is
+# the load-bearing part, not the literal.
+PART2_MAX_KLAL = 444
+PART3_MAX_KLAL = 667
+
+# First klal of each later part. Derived, never typed twice - the `223`/`445`
+# literals were a second encoding of "one past the previous part's max", and
+# an off-by-one between them and the max constants is exactly the silent
+# misclassification this is here to prevent.
+PART2_MIN_KLAL = PART1_MAX_KLAL + 1
+PART3_MIN_KLAL = PART2_MAX_KLAL + 1
+
+
+def union_bbox(tokens):
+    """The single bounding box enclosing every token in `tokens`.
+
+    MOVED HERE 2026-08-31 (finding H3, restated as the 2026-08-27 review's #8).
+    This exact body lived byte-identically in build_corrections_dataset.py and
+    build_klal_page_regions.py - two pipeline STAGES, both of which turn token
+    runs into the boxes the reviewer clicks. That is the shared-module rule's
+    own example case (Lesson 13): the copies agreed, which is what a second
+    copy of the truth does right up until it doesn't.
+
+    Assumes every token carries x1/y1/x2/y2 and that `tokens` is non-empty -
+    both copies did, and both callers already guard for the empty case.
+    """
+    return {
+        "x1": min(t["x1"] for t in tokens),
+        "y1": min(t["y1"] for t in tokens),
+        "x2": max(t["x2"] for t in tokens),
+        "y2": max(t["y2"] for t in tokens),
+    }
+
 
 # ---------- text normalization shared by readers of DocAI tokens ----------
 

@@ -52,6 +52,14 @@ IMAGES_DIR = os.path.join(REPO, "images", "pdf_pages")
 # the_corpus. There is now one definition, and that test still asserts it
 # equals max(klal_id) in the live part1.json.
 PART1_MAX_KLAL = cio.PART1_MAX_KLAL
+# Same treatment for the Part 2/3 bounds, ADDED 2026-08-31 (finding S5/#6):
+# these two functions below carried `223`/`444`/`445` as bare literals, which
+# is the same three-copies-must-agree problem PART1_MAX_KLAL was consolidated
+# to end, minus the test that made it safe.
+PART2_MAX_KLAL = cio.PART2_MAX_KLAL
+PART3_MAX_KLAL = cio.PART3_MAX_KLAL
+PART2_MIN_KLAL = cio.PART2_MIN_KLAL
+PART3_MIN_KLAL = cio.PART3_MIN_KLAL
 
 # Flags that mean "the machine settled this; no reading is in dispute". Kept as
 # a set rather than an equality test because a SECOND such flag was added
@@ -129,21 +137,66 @@ _load_json = cio.load_repo_json
 def _get_part_num_for_klal(klal_id):
     if klal_id <= PART1_MAX_KLAL:
         return 1
-    elif klal_id <= 444:
+    elif klal_id <= PART2_MAX_KLAL:
         return 2
     else:
         return 3
 
 
+class BadRequest(ValueError):
+    """A query value the CLIENT got wrong - do_GET renders it as a 400.
+
+    A ValueError subclass so existing `except ValueError` call sites keep
+    catching it, but its own type so do_GET can tell "the caller sent
+    ?part=4" apart from an int() blowing up somewhere inside a handler. The
+    second kind is a server bug and must stay a 500; answering it with 400
+    would blame the reviewer for our own defect.
+    """
+
+
+# The accepted `part` values, in one place. "0"/"none" are historical spellings
+# of "all" that the frontend and older call sites both still emit.
+_PART_ALIASES = {"all": "all", "0": "all", "none": "all",
+                 "1": "1", "2": "2", "3": "3"}
+
+
+def _normalize_part(part_num):
+    """Canonical part token ("all"/"1"/"2"/"3") for a raw query value or int.
+
+    RAISES ValueError on anything else. FIXED 2026-08-31 (finding S4, filed in
+    the 2026-08-25 review and restated as the 2026-08-27 review's #5): both
+    _parts_for() and _load_klalim() ended in a bare `else` that returned Part 1,
+    so `?part=4`, `?part=part1`, `?part=all_parts` and a plain typo all served
+    Part 1 data under a 200 - indistinguishable, to the caller, from asking for
+    Part 1. A silent fallthrough in a dispatcher is how a client-side typo turns
+    into a wrong answer nobody can see; the reviewer would be reading Part 1
+    believing it was Part 3.
+
+    Both functions now share this one validator rather than each carrying its
+    own ladder - they had already drifted, in a small way that mattered:
+    _parts_for accepted "none" and _load_klalim did not, so `?part=none` asked
+    two functions the same question and got Parts 1+2+3 from one and Part 1
+    from the other. Lesson 13, at the scale of two `if` chains.
+
+    do_GET turns the ValueError into a 400, so a bad query says so.
+    """
+    part_str = str(part_num).lower() if part_num is not None else "all"
+    if part_str not in _PART_ALIASES:
+        raise BadRequest(
+            f"unknown part {part_str!r} - expected one of "
+            f"{sorted(_PART_ALIASES)}")
+    return _PART_ALIASES[part_str]
+
+
 def _load_klalim(part_num=1):
     demo = _load_json("klalim_demo_dataset.json", [])
-    part_str = str(part_num).lower()
-    if part_str in ("all", "0"):
+    part_str = _normalize_part(part_num)
+    if part_str == "all":
         klalim = demo
     elif part_str == "2":
-        klalim = [k for k in demo if 223 <= k["klal_id"] <= 444]
+        klalim = [k for k in demo if PART2_MIN_KLAL <= k["klal_id"] <= PART2_MAX_KLAL]
     elif part_str == "3":
-        klalim = [k for k in demo if k["klal_id"] >= 445]
+        klalim = [k for k in demo if k["klal_id"] >= PART3_MIN_KLAL]
     else:
         klalim = [k for k in demo if k["klal_id"] <= PART1_MAX_KLAL]
     klalim.sort(key=lambda k: k["klal_id"])
@@ -162,12 +215,10 @@ def _parts_for(part_num):
     # string values "2"/"3"/"all" the query path passes, and built a
     # nonexistent "punctuation_candidates_partall.json" filename - Parts
     # 2/3/All silently showed punctuation_count=0 for every klal.
-    part_str = str(part_num).lower() if part_num is not None else "all"
-    if part_str in ("all", "0", "none"):
+    part_str = _normalize_part(part_num)
+    if part_str == "all":
         return (1, 2, 3)
-    if part_str in ("2", "3"):
-        return (int(part_str),)
-    return (1,)
+    return (int(part_str),)
 
 
 def _load_alignment(part_num=None):
@@ -473,6 +524,30 @@ def _corpus_stamp():
     return tuple(out)
 
 
+def _docai_page_stamp(page):
+    """(mtime_ns, size) of one docai_word_boxes/page_N.json, or None.
+
+    ADDED 2026-08-31, closing the half of finding S3 that the 2026-08-27 fix
+    left open and that PROJECT-STATUS item 37 recorded as still open: the
+    cached alignment is computed from TWO inputs - the klal's corpus words and
+    that page's DocAI tokens - but the key only stamped the corpus. So
+    re-extracting a page (which this project does; `docai_word_boxes/` is a
+    build product, and the transposed-leaf fix rewrote pages wholesale) left
+    every later request in a long-lived server serving boxes aligned against
+    tokens that no longer exist, with no error and no way for the reviewer to
+    tell. The original S3 finding named `docai_word_boxes/*.json` explicitly;
+    only the part*.json half got stamped.
+
+    Stat'ing one small file per cache miss is the whole cost, and it is paid
+    only on a miss - a hit still returns without touching the filesystem.
+    """
+    try:
+        st = os.stat(cio.docai_page_path(page, cio.DOCAI_DIR))
+        return (st.st_mtime_ns, st.st_size)
+    except OSError:
+        return None
+
+
 def corpus_bbox_cache_key(klal_id, page, exact_only=False):
     """The cache key, exposed so tests that pre-seed _corpus_bbox_cache with
     synthetic alignments build it the same way this module does.
@@ -480,7 +555,7 @@ def corpus_bbox_cache_key(klal_id, page, exact_only=False):
     `exact_only` is part of the key because the two modes answer differently:
     the exact-only pass is what decides WHICH page a recurring word lives on,
     and it must not be served a cached map that includes paired matches."""
-    return (_corpus_stamp(), klal_id, page, exact_only)
+    return (_corpus_stamp(), _docai_page_stamp(page), klal_id, page, exact_only)
 
 
 def _corpus_word_bboxes(klal_id, words, page, exact_only=False):
@@ -1896,6 +1971,12 @@ class Handler(BaseHTTPRequestHandler):
             if path.startswith("/api/"):
                 return self._send_error_json(404, "unknown endpoint")
             return self._serve_static(FRONTEND_DIR, path)
+        except BadRequest as e:
+            # A malformed query value (today: ?part=<garbage>, see
+            # _normalize_part) is the CLIENT's error, not the server's, and it
+            # used to be neither - it was silently answered with Part 1.
+            # Mirrors do_POST's existing ValueError -> 400 branch.
+            self._send_error_json(400, f"bad request: {e}")
         except Exception as e:  # noqa: BLE001 - surface as JSON, don't crash the server thread
             self._send_error_json(500, f"{type(e).__name__}: {e}")
 

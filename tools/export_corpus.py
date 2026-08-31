@@ -147,10 +147,36 @@ def _apply_decisions_to_klalim(klalim):
                 klal["clean_text"] = new_text
                 word_count_changed_klalim.add(klal_id)
         else:
+            # A multi-word REPLACEMENT (`ב"ד` -> `בית דין`) re-joins into a
+            # LONGER word list and shifts every later index in the klal, so it
+            # takes the same one-per-klal-per-run gate as the insert and delete
+            # branches directly above. Uses the canonical predicate rather than
+            # a local `len(chosen_text.split()) > 1` - this file's whole
+            # contract is "replicates apply_reviewer_decisions.py exactly", and
+            # a second copy of the rule is how the two drifted in the first
+            # place (Lesson 13).
+            #
+            # FIXED 2026-08-31 (re-sweep). CODE-REVIEW-2026-08-27.md's remedy #2
+            # says the guard belongs "in both apply_reviewer_decisions.py and
+            # tools/export_corpus.py". It landed only in the first; this branch
+            # kept calling _apply_manual_correction with no word-count check
+            # while its own two siblings guarded - Lesson 34, where the sibling
+            # was named in the finding text itself.
+            # The gate applies to EVERY manual replace, not only the multi-word
+            # ones: a same-count replace shifts nothing itself, but its index
+            # may already have been shifted by an earlier decision this run,
+            # and the drift check is blind to that when the shifted-into
+            # position holds the same word (a repeated word). See the longer
+            # note at apply_reviewer_decisions.py's matching branch - this file
+            # exists to mirror that one exactly, and the mirror is the point.
+            if klal_id in word_count_changed_klalim:
+                continue
             new_text = _apply_manual_correction(klal["clean_text"], word_index,
                                                 original_word, chosen_text)
             if new_text is not None:
                 klal["clean_text"] = new_text
+                if ard.manual_correction_changes_word_count(chosen_text):
+                    word_count_changed_klalim.add(klal_id)
 
     return klalim
 

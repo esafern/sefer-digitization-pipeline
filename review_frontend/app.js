@@ -1432,6 +1432,34 @@ function flashSavedThenClose(statusElementId) {
   }, DECISION_SAVED_CLOSE_DELAY_MS);
 }
 
+// ONE definition of "clear the word-level revisit flag", used by both panels.
+// DEDUPLICATED 2026-08-31 (finding #18 of the 2026-08-26 review, restated as
+// the 2026-08-27 review's #9). The disputed panel and the manual-correction
+// panel each carried a ~20-line verbatim copy of this handler, differing only
+// in where they got the word index. Copy-pasting this exact control is how the
+// original unclearable-flag bug reached 325 flags across 104 klalim: a fix
+// applied to one copy leaves the other answering the same click differently.
+async function clearWordFlag(klalId, wordIndex) {
+  const res = await fetch('/api/decisions/klal_flag', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ klal_id: klalId, word_index: wordIndex,
+                           needs_revisit: false,
+                           note: 'Word-level revisit flag cleared from the dashboard.' }),
+  });
+  if (!res.ok) { alert('Could not clear the flag: ' + (await res.text())); return false; }
+  // Same refresh path every other save handler uses (there is no
+  // refreshKlal(); the pattern is drop the cache, refetch, re-render).
+  delete mountedKlal[klalId];
+  delete fetchInFlight[klalId];
+  const fresh = await fetchKlal(klalId);
+  const block = document.getElementById('klal-block-' + klalId);
+  if (block) renderKlalBody(block, fresh);
+  refreshKlalimList();
+  dismissPanels();
+  return true;
+}
+
 function openPanel(panel) {
   closePanels();
   _panelGen++;
@@ -1666,25 +1694,7 @@ async function openDisputedPanel(klalId, corr) {
   // The control belongs here, on the word itself.
   const clearBtn = document.getElementById('clear-word-flag-btn');
   if (clearBtn) {
-    clearBtn.onclick = async () => {
-      const res = await fetch('/api/decisions/klal_flag', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ klal_id: klalId, word_index: corr.word_index,
-                               needs_revisit: false,
-                               note: 'Word-level revisit flag cleared from the dashboard.' }),
-      });
-      if (!res.ok) { alert('Could not clear the flag: ' + (await res.text())); return; }
-      // Same refresh path every other save handler uses (there is no
-      // refreshKlal(); the pattern is drop the cache, refetch, re-render).
-      delete mountedKlal[klalId];
-      delete fetchInFlight[klalId];
-      const fresh = await fetchKlal(klalId);
-      const block = document.getElementById('klal-block-' + klalId);
-      if (block) renderKlalBody(block, fresh);
-      refreshKlalimList();
-      dismissPanels();
-    };
+    clearBtn.onclick = () => clearWordFlag(klalId, corr.word_index);
   }
 }
 
@@ -2089,23 +2099,7 @@ async function openManualCorrectionPanel(klalId, wordIndex, word, existing) {
   // `word_flag` field, not that a panel offering the button actually renders.
   const clearFlagManual = document.getElementById('clear-word-flag-btn-manual');
   if (clearFlagManual) {
-    clearFlagManual.onclick = async () => {
-      const res = await fetch('/api/decisions/klal_flag', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ klal_id: klalId, word_index: wordIndex,
-                               needs_revisit: false,
-                               note: 'Word-level revisit flag cleared from the dashboard.' }),
-      });
-      if (!res.ok) { alert('Could not clear the flag: ' + (await res.text())); return; }
-      delete mountedKlal[klalId];
-      delete fetchInFlight[klalId];
-      const fresh = await fetchKlal(klalId);
-      const block = document.getElementById('klal-block-' + klalId);
-      if (block) renderKlalBody(block, fresh);
-      refreshKlalimList();
-      dismissPanels();
-    };
+    clearFlagManual.onclick = () => clearWordFlag(klalId, wordIndex);
   }
 
   const deleteBtn = document.getElementById('delete-manual-word-btn');

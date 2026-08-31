@@ -133,13 +133,10 @@ def load_end_boundary_positions(trace_path=TRACE_PATH):
     }
 
 
-def union_bbox(tokens):
-    return {
-        "x1": min(t["x1"] for t in tokens),
-        "y1": min(t["y1"] for t in tokens),
-        "x2": max(t["x2"] for t in tokens),
-        "y2": max(t["y2"] for t in tokens),
-    }
+# CONSOLIDATED 2026-08-31 (finding H3/#8): was a byte-identical second copy
+# of the body now in corpus_io.union_bbox. Kept as a module-level name so this
+# file's own call sites and any importer read unchanged.
+union_bbox = cio.union_bbox
 
 
 def marker_anchored_regions(klal_pages, markers, end_boundary_positions, docai_by_page):

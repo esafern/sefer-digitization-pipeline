@@ -42,7 +42,13 @@ import corpus_io as cio  # noqa: E402
 from repair_filters import docai_filter  # noqa: E402
 
 sys.path.insert(0, os.path.join(REPO, "tools"))
-from check_span_shortfall import FURNITURE_WORDS  # noqa: E402
+# FURNITURE_WORDS comes from corpus_io, which is where it was consolidated
+# to. It used to be imported from check_span_shortfall, which is itself only
+# `FURNITURE_WORDS = cio.FURNITURE_WORDS` - an indirection through an
+# unrelated tool, not a divergent copy, so this was never a drift risk (the
+# 2026-08-27 review filed it as #7 on the assumption that it was). Pointed at
+# the source 2026-08-31 so the import says where the value actually lives.
+FURNITURE_WORDS = cio.FURNITURE_WORDS
 
 # Shared with tools/export_corpus.py via corpus_io (moved there 2026-08-26, code
 # review) - the two used byte-identical private copies of one decision.

@@ -703,6 +703,68 @@ def test_part1_max_klal_constants_agree_with_the_corpus(part_klalim):
     assert sorted(k["klal_id"] for k in part_klalim["part1.json"]) == list(range(1, part1_max + 1))
 
 
+def test_part23_max_klal_constants_agree_with_the_corpus(part_klalim):
+    """The Part 2/3 bounds are data, exactly like PART1_MAX_KLAL above.
+
+    ADDED 2026-08-31, the remedy finding S5 asked for on 2026-08-25 and the
+    2026-08-27 review restated as #6. Until now `223`, `444` and `445` were
+    inline literals in review_server.py's _get_part_num_for_klal() and
+    _load_klalim() - the one part-classifying pair in the codebase - with no
+    constant and, unlike PART1_MAX_KLAL, nothing tying them to the corpus at
+    all. The failure mode is the silent one this file's sibling test above
+    describes: a klal added to or removed from part2/part3 and the dashboard
+    serves the wrong part, or drops a klal from every part, with no error.
+
+    Checks the same two properties the Part 1 test checks, for the same
+    reasons: the constants equal the live max, and each part is a contiguous
+    block - because `klal_id <= PART2_MAX_KLAL` only means "in Part 2" if the
+    ranges partition without gaps.
+    """
+    part2_max = max(k["klal_id"] for k in part_klalim["part2.json"])
+    part3_max = max(k["klal_id"] for k in part_klalim["part3.json"])
+
+    modules = {}
+    for name in ("corpus_io.py", "review_server.py"):
+        mod = _import_from_path(name.removesuffix(".py"), os.path.join(REPO, "pipeline", name))
+        modules[name] = (mod.PART2_MAX_KLAL, mod.PART3_MAX_KLAL,
+                         mod.PART2_MIN_KLAL, mod.PART3_MIN_KLAL)
+
+    expected = (part2_max, part3_max,
+                max(k["klal_id"] for k in part_klalim["part1.json"]) + 1,
+                part2_max + 1)
+    disagreeing = {n: v for n, v in modules.items() if v != expected}
+    assert not disagreeing, (
+        f"Part 2/3 constants disagree with the live corpus "
+        f"(PART2_MAX/PART3_MAX/PART2_MIN/PART3_MIN should be {expected}): "
+        f"{disagreeing}."
+    )
+
+    # Contiguity, per part and across the seam - the `<=` cutoffs in
+    # _get_part_num_for_klal depend on it.
+    p2 = sorted(k["klal_id"] for k in part_klalim["part2.json"])
+    p3 = sorted(k["klal_id"] for k in part_klalim["part3.json"])
+    assert p2 == list(range(expected[2], part2_max + 1)), "part2.json is not a contiguous block"
+    assert p3 == list(range(expected[3], part3_max + 1)), "part3.json is not a contiguous block"
+
+
+def test_every_klal_classifies_into_the_part_whose_file_it_came_from(part_klalim):
+    """_get_part_num_for_klal() must agree with which file the klal is IN.
+
+    The constants test above checks the numbers; this checks the function that
+    uses them, against all 667 klalim rather than against the boundaries alone.
+    An off-by-one at a seam (`<` for `<=`) passes a boundary-value test written
+    from the same wrong assumption and fails here.
+    """
+    rs = _import_from_path("review_server", os.path.join(REPO, "pipeline", "review_server.py"))
+    wrong = []
+    for fname, expected_part in (("part1.json", 1), ("part2.json", 2), ("part3.json", 3)):
+        for k in part_klalim[fname]:
+            got = rs._get_part_num_for_klal(k["klal_id"])
+            if got != expected_part:
+                wrong.append((k["klal_id"], fname, got))
+    assert not wrong, f"klalim classified into the wrong part: {wrong[:10]} ({len(wrong)} total)"
+
+
 def test_title_and_clean_text_are_never_empty(all_klalim):
     empty_titles = [k["klal_id"] for k in all_klalim if not k.get("title", "").strip()]
     empty_text = [k["klal_id"] for k in all_klalim if not k.get("clean_text", "").strip()]

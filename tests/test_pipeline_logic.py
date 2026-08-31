@@ -412,6 +412,42 @@ def test_confirming_the_current_text_of_an_insert_candidate_deletes_nothing(appl
     )
 
 
+def test_a_manual_replace_is_deferred_after_an_earlier_shift_in_the_same_klal(
+        apply_harness, decisions_path):
+    """The corruption finding #2 names, reproduced end to end through main().
+
+    A multi-word manual replacement at w1 shifts every later index by +1. The
+    reviewer's second decision names w3. After the shift, w3 holds a DIFFERENT
+    word than the one they were looking at - but because the klal has the same
+    word twice in a row, apply_manual_correction's drift check still passes
+    (`words[3] == original_word` is true of the wrong occurrence), so nothing
+    downstream notices. Deferring the second decision to the next run is the
+    only thing standing between the reviewer and a note attached to a word
+    they never saw.
+
+    ADDED 2026-08-31. The 2026-08-27 remedy for this finding made a multi-word
+    replace claim the per-run slot; that stops a second word-count change and
+    does NOT stop this, which is the case the finding actually describes.
+    """
+    apply_harness([{"klal_id": 1, "clean_text": "אלף בית גימל גימל דלת"}], {})
+    rd.append_decision("manual_correction", klal_id=1, word_index=1,
+                       chosen_source="custom", chosen_text="בית חדש",
+                       candidate_snapshot={"word_index": 1, "original_word": "בית"},
+                       path=decisions_path)
+    rd.append_decision("manual_correction", klal_id=1, word_index=3,
+                       chosen_source="custom", chosen_text="אחר",
+                       candidate_snapshot={"word_index": 3, "original_word": "גימל"},
+                       path=decisions_path)
+
+    text = apply_harness.run()[1]
+    assert text == "אלף בית חדש גימל גימל דלת", (
+        f"expected the w3 decision to be deferred to the next run, got {text!r} - "
+        f"if it reads 'אלף בית חדש אחר גימל דלת' the second decision was applied at "
+        f"an index the first one had already shifted, rewriting the wrong גימל"
+    )
+    assert "אחר" not in text.split(" "), "the deferred decision must not have landed"
+
+
 def test_only_one_word_count_changing_decision_is_applied_per_klal_per_run(apply_harness, decisions_path):
     """Every insert/delete shifts every later word_index in the same klal, so
     a second one in the same run would be applied against indices the first
@@ -3626,6 +3662,129 @@ def test_cross_klal_skips_gershayim_tokens():
     indep_freq = {}
     results = dcke.find_cross_klal_suspects(klal_words, lexicon, indep_freq)
     assert results == []
+
+
+# --- review_server: part-token validation (finding S4) ------------------------
+
+def test_parts_for_and_load_klalim_reject_an_unknown_part():
+    """`?part=<garbage>` must say so, not quietly answer with Part 1.
+
+    REGRESSION (finding S4, filed 2026-08-25, restated as the 2026-08-27
+    review's #5). Both functions ended in a bare `else` returning Part 1, so
+    `?part=4`, `?part=part1` and any typo were indistinguishable from asking
+    for Part 1 - the reviewer could be reading Part 1 believing it was Part 3.
+    """
+    for good, expected in (("all", (1, 2, 3)), ("0", (1, 2, 3)), ("none", (1, 2, 3)),
+                           ("1", (1,)), ("2", (2,)), ("3", (3,)), (1, (1,)), (3, (3,))):
+        assert rs._parts_for(good) == expected, good
+    assert rs._parts_for(None) == (1, 2, 3), "None still means 'all'"
+
+    for bad in ("4", "11", "part1", "all_parts", "", "-1", "1.0"):
+        with pytest.raises(rs.BadRequest):
+            rs._parts_for(bad)
+        with pytest.raises(rs.BadRequest):
+            rs._load_klalim(bad)
+
+
+def test_parts_for_and_load_klalim_accept_exactly_the_same_tokens():
+    """The two used to disagree: _parts_for accepted "none" and _load_klalim
+    did not, so `?part=none` got Parts 1+2+3 from one and Part 1 from the
+    other. They now share one validator; this asserts they cannot drift apart
+    again (Lesson 13 at the scale of two `if` chains)."""
+    for token in ("all", "0", "none", "1", "2", "3"):
+        rs._parts_for(token)
+        rs._load_klalim(token)          # neither raises
+    # and the ranges each token selects are the ones the constants describe
+    _, p2 = rs._load_klalim("2")
+    _, p3 = rs._load_klalim("3")
+    assert p2 and min(k["klal_id"] for k in p2) == rs.PART2_MIN_KLAL
+    assert p2 and max(k["klal_id"] for k in p2) == rs.PART2_MAX_KLAL
+    assert p3 and min(k["klal_id"] for k in p3) == rs.PART3_MIN_KLAL
+    assert p3 and max(k["klal_id"] for k in p3) == rs.PART3_MAX_KLAL
+
+
+# --- review_server: bbox cache invalidation (finding S3, second half) ---------
+
+def test_corpus_bbox_cache_key_covers_docai_reextraction(tmp_path, monkeypatch):
+    """Re-extracting a DocAI page must invalidate the cached alignment.
+
+    REGRESSION (finding S3). The key was stamped on part1/2/3.json only, but
+    the alignment it caches is computed from BOTH the corpus words and that
+    page's DocAI tokens - so a page re-extraction left a long-lived server
+    serving boxes aligned against tokens that no longer existed, silently.
+    The 2026-08-27 fix closed the corpus half; this is the other half.
+    """
+    page_dir = tmp_path / "docai"
+    page_dir.mkdir()
+    page_file = page_dir / "page_7.json"
+    page_file.write_text('[{"text": "\u05d0", "x1": 0, "y1": 0, "x2": 1, "y2": 1}]',
+                         encoding="utf-8")
+    monkeypatch.setattr(rs.cio, "DOCAI_DIR", str(page_dir))
+
+    before = rs.corpus_bbox_cache_key(1, 7)
+    # Same content, same stamp - a cache hit must survive an unrelated request.
+    assert rs.corpus_bbox_cache_key(1, 7) == before
+
+    page_file.write_text('[{"text": "\u05d1", "x1": 0, "y1": 0, "x2": 2, "y2": 2}]',
+                         encoding="utf-8")
+    os.utime(page_file, (1, 1))         # force a distinct mtime, not a same-second rewrite
+    assert rs.corpus_bbox_cache_key(1, 7) != before, (
+        "re-extracting docai_word_boxes/page_7.json did not change the cache key - "
+        "stale bounding boxes would be served until the server restarts"
+    )
+
+    # A page that was never extracted must still produce a usable key, not raise.
+    assert rs.corpus_bbox_cache_key(1, 9999) is not None
+
+
+# --- export_corpus: parity with apply_reviewer_decisions (finding #2) ---------
+
+def test_export_corpus_guards_a_multi_word_manual_replacement(monkeypatch):
+    """A multi-word manual replacement shifts later indices, so export_corpus
+    must apply at most one word-count-changing decision per klal per run -
+    the same gate apply_reviewer_decisions.py uses.
+
+    REGRESSION. CODE-REVIEW-2026-08-27.md's remedy #2 said the guard belongs
+    "in both apply_reviewer_decisions.py and tools/export_corpus.py"; it landed
+    only in the first, and this file's manual-replace branch kept applying
+    unguarded while its own insert and delete siblings guarded (Lesson 34).
+    """
+    # The text has a REPEATED word (גימל twice, adjacent). That is what makes
+    # this a real test rather than a tautology: without it, the snapshot drift
+    # check in apply_manual_correction catches the shifted index by itself
+    # (the word found there no longer equals original_word) and the guarded
+    # and unguarded paths produce identical output. With it, the word sitting
+    # at the shifted index still MATCHES the expected original_word, drift
+    # detection passes, and the second decision silently rewrites the wrong
+    # occurrence. Verified 2026-08-31 against the pre-fix file: the first
+    # version of this test passed on the unguarded code too.
+    klalim = [{"klal_id": 1, "clean_text": "אלף בית גימל גימל דלת", "title": "t"}]
+
+    manual = {
+        # multi-word replacement at w1: shifts every later index by +1
+        (1, 1): {"id": "d1", "chosen_text": "בית חדש",
+                 "candidate_snapshot": {"original_word": "בית"}},
+        # targets the SECOND גימל, at w3
+        (1, 3): {"id": "d2", "chosen_text": "אחר",
+                 "candidate_snapshot": {"original_word": "גימל"}},
+    }
+    monkeypatch.setattr(exp.rd, "all_current",
+                        lambda kind: manual if kind == "manual_correction" else {})
+    monkeypatch.setattr(exp.rd, "applied_decision_ids", lambda: set())
+    monkeypatch.setattr(exp.cio, "load_json", lambda *a, **k: {})
+
+    out = exp._apply_decisions_to_klalim(klalim)[0]["clean_text"]
+
+    # d1 applies and claims the klal's one word-count change for this run;
+    # d2 is deferred to the next run rather than applied at a shifted index.
+    assert out == "אלף בית חדש גימל גימל דלת", out
+    # Unguarded, d2 lands at w3 - which after d1's shift is the FIRST גימל,
+    # not the second one the reviewer was looking at when they decided.
+    assert out.split(" ") != "אלף בית חדש אחר גימל דלת".split(" "), (
+        "d2 was applied at an index d1 had already shifted - it rewrote the "
+        "wrong occurrence of a repeated word, which is precisely what the "
+        "one-word-count-change-per-klal-per-run guard exists to prevent"
+    )
 
 
 # --- export_corpus: archival format exports ----------------------------------
