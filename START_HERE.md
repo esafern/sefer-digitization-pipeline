@@ -39,7 +39,7 @@ loaders, Hebrew helpers) and `pipeline/vision_adjudication_common.py`
 (crop/cache/retry/client). A hand-maintained parallel copy has produced the
 same bug class here more than once.
 
-**Then read Part 2's 33 numbered lessons.** They are rules, not history. The
+**Then read Part 2's 37 numbered lessons.** They are rules, not history. The
 short version of most of them: a check that wasn't run has verified nothing, a
 passing score is not a checked result, and no single confident signal is
 enough.
@@ -311,12 +311,17 @@ For exactly what each data file contains, see `PIPELINE-DATA-REFERENCE.md`.
     `archive/scripts/extend_docai_ocr.py`), `fix_transposed_leaf.py` (the
     leaf-order fix, see the scan section above), `verify_local_setup.py`
     (proves a fresh migration actually landed — see `SETUP.md`).
-- **`tests/`** — the pytest suite. `rebuild_all.sh`'s step 6/6 runs
-  `test_corpus_invariants.py` (25 tests — checks the DATA a pipeline run
-  produced) and `test_pipeline_logic.py` (197 tests — checks the pure decision
-  LOGIC on synthetic inputs) as a hard gate. `test_review_server.py` (14
-  Playwright tests, live
-  server) stays outside the gate, run manually.
+- **`tests/`** — the pytest suite. Counts re-measured 2026-08-31 by collecting
+  each file, not by grepping `def test_` — see Lesson 37 for why those two
+  numbers are not the same thing. `rebuild_all.sh`'s step 6/6 runs
+  `test_corpus_invariants.py` (46 tests — checks the DATA a pipeline run
+  produced) and `test_pipeline_logic.py` (274 tests — checks the pure decision
+  LOGIC on synthetic inputs) as a hard gate, 320 together.
+  `test_review_server.py` (44 Playwright tests, live server) and
+  `test_witness_engine.py` (5 tests) stay outside the gate, run manually.
+  369 in total. One of the gated invariants,
+  `test_no_test_file_defines_the_same_test_name_twice`, exists to keep the
+  declared and collected counts equal — see Lesson 37.
 - Data files, caches, `rebuild_all.sh`, `review_frontend/`, and every
   `.md`/`.html` doc live at root.
 - **This repo has no `archive/` directory.** The original local
@@ -949,9 +954,28 @@ next incident.
     that had just been correctly repaired to `אל`, three sat on a klal whose
     candidates had all been settled. For a general-purpose platform that failure
     mode is inverted - the closer a text gets to correct, the more tests fail.
-    The engine layer is already right (`test_pipeline_logic.py` is 273 tests, 91
+    The engine layer is already right (`test_pipeline_logic.py` is 274 tests as of
+    2026-08-31, 273 when this lesson was written; 91
     purely synthetic, verified on a throwaway `אלף בית גימל` corpus and portable
     to any book); it is the UI layer that needs a synthetic fixture corpus
     carrying one of each condition. Corollary for the invariants that DO read the
     real corpus by design: a baseline keyed `(klal_id, word_index)` shifts on
     every insertion, and nothing can reindex a literal in a test file.
+
+37. **A test that is DEFINED is not a test that RUNS — count what the runner
+    collects, never what the file declares.** `tests/test_review_server.py`
+    declares 38 `def test_` statements and pytest collects **36**: two names are
+    defined twice, and Python rebinds a name on the second `def`, so the first
+    body is discarded at import with no error, no skip and no warning. The only
+    symptom is the difference between two numbers nobody was comparing — and the
+    discarded copy was in both cases the STRICTER one, asserting
+    `len(ringed) == 1` where the survivor asserts merely `assert ringed`, and
+    covering a route (`/#klal=66`, klal without word) the survivor never visits.
+    So the feature read as tested, the suite was green, and the coverage was not
+    there. This is Lesson 32 ("a tool that prints is not a tool that runs") one
+    level in, and Lesson 33's shape as well: `grep -c "^def test_"` is a check on
+    the SOURCE, and the thing that decides what runs is the collector. Whenever
+    you cite a test count — in a status entry, a review, a commit message — get
+    it from `pytest --collect-only -q`, and if the two numbers disagree, the
+    disagreement IS the finding. A `def test_` count equal to the collected count
+    is one cheap assertion; nothing in this repo's gate makes it yet.

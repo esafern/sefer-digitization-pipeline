@@ -214,7 +214,14 @@ def reindex_pending_decisions_after_shift(klal_id, position, delta, old_words, n
     chosen_text and snapshot rewritten to the new index."""
     already = rd.applied_decision_ids()
     moved, unverified = [], []
-    for d_type in ("candidate_choice", "manual_correction"):
+    # `disputed_choice` added 2026-08-31. It was missing, and it is the type that
+    # needs this MOST: a decided dispute is dropped from the candidate queue
+    # (synthesize_multi_witness.active_human_decisions), so it is drift-checked
+    # against part1.json itself - which is exactly the check a shifted index
+    # fails. Leaving it out stranded a ruling the same way item 0A did. Found by
+    # inserting the heading separators, which shifted 4 pending decisions by +1
+    # and only one of them was a type this function moved.
+    for d_type in ("candidate_choice", "manual_correction", "disputed_choice"):
         for (kid, wi), decision in sorted(rd.all_current(d_type).items()):
             if kid != klal_id or wi is None or wi <= position:
                 continue

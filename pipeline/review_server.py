@@ -835,6 +835,24 @@ def api_flags():
     return FLAG_LABELS
 
 
+def api_numerals(max_n=400):
+    """{n: Hebrew numeral} for 1..max_n, so the frontend can render a page or a
+    klal the way the BOOK writes it without carrying its own gematria table.
+
+    ADDED 2026-08-31 (reviewer: the scan header should carry the same reference
+    in Hebrew). Served rather than reimplemented in JS deliberately: a second
+    copy of `klal_id_to_gematria` in app.js would be Lesson 13 exactly, and this
+    one has real edge cases a reimplementation would miss - the 15/16 exception
+    (ט"ו/ט"ז, not י"ה/י"ו, which would spell divine names) and the word-final
+    letter substitution. One fetch at init covers every page and klal id.
+
+    NOTE FOR THE CALLER: for a scan page this is OUR page index written in
+    Hebrew letters, NOT the folio the book prints on that leaf. The printed
+    folio is stripped as furniture and is not stored anywhere in this repo.
+    """
+    return {n: cio.klal_id_to_gematria(n) for n in range(1, max_n + 1)}
+
+
 def api_klalim(part_num=1):
     klalim_by_id, klalim = _load_klalim(part_num=part_num)
     alignment = _load_alignment(part_num=part_num)
@@ -1339,6 +1357,12 @@ def api_klal(klal_id):
         "section": k.get("section", ""),
         "gematria": k.get("gematria", ""),
         "clean_text": k.get("clean_text", ""),
+        # How many leading body words the printed HEADING occupies. The heading
+        # is not separate text in the book - it IS the klal's opening, set in
+        # larger type - so the UI renders it by styling a prefix of the body
+        # rather than by showing `title` as a second copy above it. Computed in
+        # corpus_io so the audit tool and the UI cannot drift apart.
+        "title_word_count": cio.title_word_span(k.get("title", ""), k.get("clean_text", "")),
         "page": _klal_page,
         "page_trusted": _klal_page_trusted,
         "region": region_entry.get("bbox"),
@@ -1834,6 +1858,8 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send_json(api_flags())
             if path == "/api/witness":
                 return self._send_json(api_witness_summary())
+            if path == "/api/numerals":
+                return self._send_json(api_numerals())
             if path == "/api/klalim":
                 part_val = query.get("part", ["1"])[0]
                 return self._send_json(api_klalim(part_num=part_val))

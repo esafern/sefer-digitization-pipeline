@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;500;700&family=Inter:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;500;700&family=David+Libre:wght@400;500;700&family=Inter:wght@400;500;600&display=swap');
 
 :root {
   --ink: #1a202c;
@@ -16,6 +16,33 @@
      than on top of it. Two hardcoded 380s (nav pane, legend) drifting apart is
      how the panel came to cover the klal list completely. */
   --nav-w: 380px;
+  /* ---- Structural typography, 2026-08-31 (reviewer) --------------------------
+     These name the ROLE a piece of text plays in a sefer's structure, not this
+     book's particular layout, so another work with a different shape restyles
+     itself by re-pointing these four values and touches no rules:
+       --font-title   the running head / klal title, wherever it is shown.
+                      Deliberately NOT the body face: the body is set in Frank
+                      Ruhl Libre, so a title in the same face reads as more body
+                      text. David Libre is a different Hebrew serif - same
+                      period feel, visibly distinct letterforms.
+       --font-marker  the section number, in either script
+     The point of the variables is that the SAME role gets the SAME treatment in
+     every pane - the reviewer asked for the title to look identical in the index
+     and in the text, and before this each pane styled its own text ad hoc. Any
+     new surface that shows a title should use `.klal-title`, never a font stack.
+     A work whose headings are set in Rashi script, say, changes --font-title
+     here and both panes follow. */
+  --font-title: 'David Libre', 'David', 'Times New Roman', serif;
+  --font-marker: 'Inter', sans-serif;
+  --title-size: 15px;      /* the heading in the index row */
+  --marker-size: 20px;     /* the section number in the text-pane head */
+  --nav-marker-size: 18px; /* the same number in the index row */
+  --title-inline-size: 18px;  /* the heading where it sits IN the running text */
+  /* The marker INSIDE the running text is its own token, larger than the heading
+     beside it: it is the reader's place-keeper down a long scrolling column and
+     is what the eye looks for when matching against the scan. Raised twice at the
+     reviewer's request (2026-08-31). */
+  --marker-inline-size: 24px;
   --radius: 8px;
   --radius-sm: 5px;
   --sp-1: 4px;
@@ -67,6 +94,24 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
   justify-content: space-between;
   align-items: center;
   direction: ltr;
+}
+/* The Hebrew half of the scan reference (reviewer, 2026-08-31: "white space
+   followed by the same info in Hebrew"). `direction: rtl` with `unicode-bidi:
+   isolate` so the Hebrew orders itself correctly without reordering the
+   surrounding LTR header, and a real gap rather than a padding space, which the
+   flex row would otherwise collapse. */
+#klal-indicator {
+  /* margin-LEFT, explicitly. This was `margin-inline-start`, which resolves
+     against the ELEMENT's own direction - and this span is `direction: rtl`, so
+     it became margin-right: 28px and put the gap on the far side, outside the
+     row. The visible separation was then just the single literal space in
+     index.html, which is exactly what the reviewer saw. Measured after the fix:
+     28px between the two halves. */
+  margin-left: 1.75rem;
+  direction: rtl;
+  unicode-bidi: isolate;
+  font-size: 13.5px;
+  opacity: 0.92;
 }
 #zoom-controls { display: flex; align-items: center; gap: 6px; }
 #zoom-controls button {
@@ -204,7 +249,56 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
   align-items: center;
 }
 .klal-block .klal-head .sec { font-weight: 500; color: var(--ink-faint); font-size: 11.5px; }
-.klal-block .klal-head .kid { color: var(--accent-dark); }
+/* The section marker, larger and bold in the text pane (reviewer 2026-08-31) -
+   it is the reader's place-keeper down a long scrolling column. Uses the shared
+   role tokens so the index pane's marker can never drift away from it. */
+.klal-block .klal-head .kid {
+  color: var(--accent-dark);
+  font-family: var(--font-marker);
+  font-size: var(--marker-size);
+  font-weight: 800;
+  letter-spacing: .01em;
+  white-space: nowrap;
+}
+
+/* ---- .klal-title: ONE rule, both panes ------------------------------------
+   The index row and the text-pane head render the same string and must look the
+   same doing it. Set in --font-title so a title reads as a HEADING rather than
+   as more UI chrome, which is what distinguishes it from the surrounding
+   interface text in either pane. */
+.klal-title {
+  font-family: var(--font-title);
+  font-size: var(--title-size);
+  font-weight: 600;
+  color: var(--ink);
+  direction: rtl;
+  unicode-bidi: isolate;
+}
+/* ---- the heading and marker WHERE THEY ACTUALLY SIT, inside the text --------
+   The book does not print a title above a klal; the klal OPENS with its heading,
+   set in larger type, and the marker before it. So these style words in the
+   running text rather than a separate line (reviewer 2026-08-31). Both are
+   layered ON TOP of whatever state class the word already carries - a heading
+   word can also be disputed or flagged - so neither sets `color`, which would
+   overwrite the state colour the reviewer navigates by. */
+.klal-body .klal-marker-word {
+  font-weight: 800;
+  font-size: var(--marker-inline-size);
+  font-family: var(--font-marker);
+  letter-spacing: .01em;
+}
+.klal-body .klal-title-word {
+  font-family: var(--font-title);
+  font-size: var(--title-inline-size);
+  font-weight: 700;
+}
+/* Breathing room around the heading in the running text (reviewer 2026-08-31:
+   "one more space between count title and text in reading pane"). Logical
+   properties, so this stays correct in an RTL column: `end` is the side the text
+   continues toward. A margin rather than a wider word-space, so it applies once
+   at each boundary instead of between every heading word. */
+.klal-body .klal-marker-word { margin-inline-end: .5em; }
+.klal-body .klal-title-end   { margin-inline-end: .6em; }
 .klal-flag-btn {
   border: 1px solid var(--line);
   background: var(--wash);
@@ -359,8 +453,36 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
    confirmed by measuring rendered text width (11px for "11" vs 14px for
    "10"/"12"). Forcing fixed-width digits makes every klal number occupy
    the same width regardless of which digits it contains. */
-.nav-item .nid { color: var(--accent); font-weight: 700; min-width: 32px; font-family: 'Inter', sans-serif; font-variant-numeric: tabular-nums; }
-.nav-item .ntitle { flex: 1; min-width: 0; color: var(--ink-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Same face as the marker in the text-pane head (--font-marker), larger and
+   bolder than the row around it (reviewer 2026-08-31): the number is what the
+   reviewer scans this column for, and it should read as the same object in both
+   places. */
+.nav-item .nid {
+  color: var(--accent); font-weight: 800; min-width: 34px;
+  font-family: var(--font-marker); font-size: var(--nav-marker-size);
+  font-variant-numeric: tabular-nums;
+}
+/* The number columns and the badges are the fixed furniture of the row; the
+   TITLE is the only thing that may give way. All of them are flex-shrink: 0 so
+   a long title can never squeeze the dispute counts or the flag out of view
+   (reviewer, 2026-08-31) - `.nid` was shrinkable before, which is what let a
+   long title push the row's right-hand end off. `.ntitle` keeps flex: 1 with
+   min-width: 0, which is what makes text-overflow: ellipsis actually fire
+   inside a flex child. */
+.nav-item .nid { flex-shrink: 0; }
+.nav-item .nheb {
+  flex-shrink: 0;
+  min-width: 34px;
+  color: var(--accent);
+  opacity: .8;
+  font-weight: 700;
+  font-size: var(--nav-marker-size);
+  direction: rtl;
+  unicode-bidi: isolate;   /* keep the Hebrew from reordering the LTR row */
+}
+/* colour stays softer than the text pane's (this is a list, not a heading in
+   its own right) but the FONT is the shared one - see .klal-title. */
+.nav-item .ntitle { flex: 1; min-width: 3.5em; color: var(--ink-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .nav-item .nflag { color: var(--pending); font-size: 12px; flex-shrink: 0; }
 .nav-item .ncount {
   color: white; border-radius: 10px;
@@ -371,6 +493,9 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
    the actual remaining work are visually different at a glance. */
 .nav-item .ncount-open { background: var(--danger); }
 .nav-item .ncount-decided { background: #38a169; }
+/* Machine-resolved: the same amber the word itself renders in, so the badge and
+   the text agree at a glance. Added 2026-08-31 - see navItemInnerHtml. */
+.nav-item .ncount-machine { background: var(--pending); }
 /* Punctuation review queue badges - same open/decided shape as
    corrections above, but blue-toned so the two queues read as visually
    distinct at a glance. */

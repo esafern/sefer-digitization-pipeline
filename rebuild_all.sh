@@ -114,6 +114,31 @@ echo "== 4/6 assemble_corrections_dataset.py =="
 echo "== 5/6 build_klal_page_regions.py =="
 ./venv/bin/python pipeline/build_klal_page_regions.py
 
+# 5b: the two STANDALONE corpus reports, folded into the chain 2026-08-31.
+#
+# WHY THEY ARE HERE NOW. Both read the corpus and write a JSON report, and
+# neither was in any chain - so each kept whatever numbers it had from the last
+# time somebody remembered to run it. Measured that day: `ligature_words.json`
+# still claimed `both_lost: 3` when two of those three ampersands had been
+# repaired to `אל` and only klal 77 w11 survived. Nothing was wrong with either
+# tool; the reports had simply aged out of agreement with the text they describe,
+# silently, and a stale count in a report is the kind of number that ends up
+# quoted in a status entry as if it were measured today.
+#
+# This is Lesson 32 in its milder form - not a detector nobody runs, but a report
+# nobody re-runs - and Lesson 13's shape besides: a file fully computable from the
+# corpus is a second copy of the truth until something rebuilds it. Together they
+# cost ~0.5s on the full corpus, which is why the reason for leaving them out
+# never really existed.
+#
+# Both are pure readers: they write only their own report and never a flag, a
+# decision or corpus text. review_lexicon_only_words.py needs the gitignored
+# sefaria_reference_corpus cache and exits 0 with an explicit message when it is
+# absent, so a fresh clone is not broken by this stage.
+echo "== 5b/6 standalone corpus reports (ligature + lexicon-only) =="
+./venv/bin/python tools/list_ligature_words.py
+./venv/bin/python tools/review_lexicon_only_words.py
+
 echo "== 6/6 tests/ (corpus + pipeline-logic regression suites) =="
 ./venv/bin/python -m pytest tests/test_corpus_invariants.py tests/test_pipeline_logic.py -q
 

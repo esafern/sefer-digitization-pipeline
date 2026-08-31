@@ -8,6 +8,14 @@ let klalById = {};
 let mountedKlal = {};     // klal_id -> full payload once fetched
 let fetchInFlight = {};   // klal_id -> Promise, avoids double-fetch races
 let WITNESS_PAGES = [];   // {page, klal_id, total, decided} from /api/witness - continuation-only
+// {n: Hebrew numeral} from /api/numerals, for the scan header's Hebrew half.
+// DECLARED HERE, with the other init()-populated globals, and NOT beside the
+// header code that uses it: as a `let` further down the file than init()'s own
+// assignment it was re-initialised to {} on the synchronous pass and the fetched
+// table was silently discarded - the header rendered `דף 73` instead of `דף עג`
+// with no error, since hebNum() falls back to the digits. Caught by asserting
+// the rendered text, not by reading the code (Lesson 19).
+let NUMERALS = {};
                            // pages (no klal marker of their own, e.g. 24/37/40) that pagesWithKlalim()
                            // can't otherwise reach - see PROJECT-STATUS.md session handoff 2026-08-11.
 
@@ -263,6 +271,12 @@ async function switchPart(partVal) {
 //
 // so a finding can be pasted into a note, a status entry or a message without
 // anyone retyping an index.
+// The title as a LIST label: no terminal period. One place, so every surface
+// that shows a title in a list agrees.
+function displayTitle(title) {
+  return (title || '').replace(/\.\s*$/, '');
+}
+
 function klalRefName(klalId) {
   // "Klal 66 (סו)" - the id a reviewer navigates by, plus the marker the BOOK
   // prints, which is what they are actually looking at on the scan. ADDED
@@ -460,17 +474,51 @@ function updateHash(klalId, wordIndex) {
   if (location.hash !== h) history.replaceState(null, '', h);
 }
 
-async function highlightRoutedWord(klalId, wordIndex) {
+// Clear the ring wherever it is. Exported as a function rather than inlined
+// because three call sites need it and a missed one leaves two rings up.
+function clearRoutedWord(except) {
+  document.querySelectorAll('.routed-word').forEach(el => {
+    if (el !== except) el.classList.remove('routed-word');
+  });
+}
+
+// Scroll the text pane to a word and ring it. FIX 2026-08-31, reviewer:
+// "clicking on the highlighted word in the scan does not highlight the same
+// word in the text". The text->scan direction had a single funnel
+// (focusWordOnScan) and the scan->text direction had NOTHING - a scan box's
+// click opened the decision panel and moved the scan, and the middle pane was
+// never told. This is that missing funnel, and the deep-link router now shares
+// it rather than keeping a second copy of the same four lines.
+async function revealWordInText(klalId, wordIndex) {
   await mountKlal(klalId);
   const block = document.getElementById('klal-block-' + klalId);
-  if (!block) return;
+  if (!block) return null;
   const span = block.querySelector(`[data-word-index="${wordIndex}"]`);
-  if (!span) return;                       // out of range, or the klal has no text
+  if (!span) return null;                  // out of range, or the klal has no text
+  // Hold the scroll observer off: this scroll would otherwise drift the active
+  // klal (and its scan page) off the word we are pointing at - the same hazard
+  // the deep-link router documents above.
+  suppressObserverScroll = true;
+  clearTimeout(suppressTimer);
   span.scrollIntoView({ behavior: 'auto', block: 'center' });
-  // A transient ring, not a permanent class: the word's real state (open,
-  // decided, machine-resolved) must keep owning its colour.
+  suppressTimer = setTimeout(() => { suppressObserverScroll = false; }, 900);
+  // A ring, not a state class: the word's real state (open, decided,
+  // machine-resolved) must keep owning its colour.
+  // FIXED 2026-08-31 (reviewer: "if i move my cursor over the text the highlight
+  // disappears"). It was not the cursor - the ring carried a hard
+  // setTimeout(..., 4000) and simply expired, which happens to land about when
+  // a reviewer has finished reading the line and started moving the mouse, so
+  // the two read as cause and effect. Measured: the ring survives a mouse move
+  // at 900ms and is gone by 4s with the pointer untouched. It now persists until
+  // the reviewer actually goes somewhere else.
+  clearRoutedWord(span);
   span.classList.add('routed-word');
-  setTimeout(() => span.classList.remove('routed-word'), 4000);
+  return span;
+}
+
+async function highlightRoutedWord(klalId, wordIndex) {
+  const span = await revealWordInText(klalId, wordIndex);
+  if (!span) return;
   const k = klalById[klalId];
   const page = (k && k.word_pages && k.word_pages[wordIndex] != null)
     ? k.word_pages[wordIndex] : (k ? k.page : null);
@@ -505,7 +553,7 @@ async function applyHashRoute() {
     if (block) block.scrollIntoView({ behavior: 'auto', block: 'start' });
     lastActiveKlalId = route.klal;
     lastActiveScanPage = klalById[route.klal] ? klalById[route.klal].page : null;
-    setActiveKlal(route.klal);
+    setActiveKlal(route.klal, 'center');
     if (route.word != null) await highlightRoutedWord(route.klal, route.word);
     updateHash(route.klal, route.word);    // last word wins, not the observer
     suppressTimer = setTimeout(() => { suppressObserverScroll = false; }, 900);
@@ -515,12 +563,22 @@ async function applyHashRoute() {
 }
 
 async function init() {
-  const [flags, klalim, witness] = await Promise.all([
+  const [flags, klalim, witness, numerals] = await Promise.all([
     fetch('/api/flags').then(r => r.json()),
     fetch('/api/klalim?part=' + currentPart).then(r => r.json()),
     fetch('/api/witness').then(r => r.json()),
+    // Fetched HERE and nowhere else, deliberately. The same three-fetch block
+    // appears in init(), switchPart() and the post-decision refresh - and the
+    // numeral table is a pure function of the integers, identical in every part
+    // and constant for the life of the process, so re-fetching it on a part
+    // switch would be two more copies of a request that can never return
+    // anything new. (Adding it to switchPart FIRST is exactly the sibling-branch
+    // mistake Lesson 34 describes: the header stayed in digits and the globals
+    // init() sets still looked right, so the wrong edit read as a working one.)
+    fetch('/api/numerals').then(r => r.json()),
   ]);
   FLAGS = flags;
+  NUMERALS = numerals || {};
   KLALIM = klalim;
   klalById = Object.fromEntries(klalim.map(k => [k.klal_id, k]));
   WITNESS_PAGES = witness.pages || [];
@@ -657,6 +715,15 @@ function navItemInnerHtml(k) {
   // The badge now counts what is actually red, which is what a reviewer is
   // looking for when they scan the nav for remaining work.
   const openBadge = k.machine_disputed_count ? `<span class="ncount ncount-open">${k.machine_disputed_count}</span>` : '';
+  // THIRD BADGE added 2026-08-31 (reviewer: "3 badges", after klal 73 read as
+  // "two disputes but the red flag shows only 1"). machine_resolved_count was
+  // served per klal and summed only into the LEGEND total - no row showed its
+  // own - so a klal with one resolved and one open word displayed a single badge
+  // while highlighting two words, and the row could not be reconciled with the
+  // text. Lesson 29 in miniature: computed, served, rendered nowhere it answered
+  // the question being asked. Order is open -> resolved -> decided, which is the
+  // order of decreasing claim on the reviewer's attention.
+  const machineBadge = k.machine_resolved_count ? `<span class="ncount ncount-machine">${k.machine_resolved_count}</span>` : '';
   const decidedBadge = k.decided_count ? `<span class="ncount ncount-decided">${k.decided_count}</span>` : '';
   // No punctuation badge here on purpose: the proposed-punctuation
   // affordances (legend swatch, nav badges, inline blue-dot markers) were
@@ -665,7 +732,19 @@ function navItemInnerHtml(k) {
   // punctuation_count/punctuation_open_count for whenever it returns.
   // (That commit left this comment half-rewritten - three unfinished
   // clauses that described a badge which isn't there - until 2026-08-14.)
-  return `<span class="nid">${k.klal_id}</span><span class="ntitle" title="${escapeAttr(k.title)}">${escapeHtml(k.title)}</span>${flagIcon}${openBadge}${decidedBadge}`;
+  // Both scripts on every line (reviewer, 2026-08-31): the id the reviewer
+  // navigates by AND the marker the BOOK prints, which is what they are matching
+  // against the scan. `gematria` has been on /api/klalim since 2026-08-26; the
+  // nav simply never used it.
+  const heb = k.gematria ? `<span class="nheb">${escapeHtml(k.gematria)}</span>` : '';
+  // The terminal period is NOT shown here (reviewer 2026-08-31: "no period in
+  // the index pane - it is needed in the text pane to sep the title from the
+  // text"). It stays on the stored field, where the gated invariant requires it;
+  // this is a presentation choice, so the strip happens at render time and the
+  // data is untouched. In a list of 222 headings the period is noise; in the
+  // running text it is the only thing marking where the heading stops.
+  const shown = displayTitle(k.title);
+  return `<span class="nid">${k.klal_id}</span>${heb}<span class="ntitle klal-title" title="${escapeAttr(k.title)}">${escapeHtml(shown)}</span>${flagIcon}${openBadge}${machineBadge}${decidedBadge}`;
 }
 
 function buildNav() {
@@ -717,7 +796,13 @@ function buildPlaceholders() {
 
     const head = document.createElement('div');
     head.className = 'klal-head';
-    head.innerHTML = `<span class="kid">כלל ${k.klal_id}</span><span class="sec">${escapeHtml(k.section)}</span>`;
+    // NO title here, deliberately (reviewer 2026-08-31: "i didn't want the title
+    // above the text"). The heading is not a separate string in the book - it IS
+    // the klal's opening words, set in larger type - so showing it above the text
+    // renders it twice. It is styled IN PLACE instead, see markTitleRun() below.
+    const kmark = k.gematria ? `כלל ${k.klal_id} · ${escapeHtml(k.gematria)}` : `כלל ${k.klal_id}`;
+    head.innerHTML = `<span class="kid">${kmark}</span>` +
+      `<span class="sec">${escapeHtml(k.section)}</span>`;
     const flagBtn = document.createElement('button');
     flagBtn.className = 'klal-flag-btn' + (k.needs_revisit ? ' active' : '');
     flagBtn.textContent = k.needs_revisit ? '⚑ flagged' : '⚑ flag';
@@ -787,6 +872,41 @@ function continuationBoundaries(k) {
   return boundaries; // ascending wordIndex order
 }
 
+// Style the klal's MARKER and its printed HEADING in place, inside the running
+// text (reviewer 2026-08-31: "i want the text itself to have bold for counter
+// and title in the diff font - right there in the text").
+//
+// Applied as a PASS OVER THE RENDERED SPANS rather than inside the word loop on
+// purpose: that loop has five separate branches (plain word, ai_flag, disputed,
+// manual, witness) and a word is styled by whichever one claimed it. Decorating
+// from inside would mean the same two lines in five places - the shape this repo
+// keeps finding as Lesson 13/34 - and a title word that happens to be disputed
+// would silently miss out. Here it is one rule over the final DOM, so it cannot
+// matter which branch drew the word.
+//
+// The span comes from the server (corpus_io.title_word_span), not from comparing
+// strings here: the comparison has to skip editorial punctuation and normalise
+// Hebrew, and a second copy of that in JS would drift.
+function markTitleRun(body, k) {
+  const spans = body.querySelectorAll('[data-word-index]');
+  if (!spans.length) return;
+  const n = k.title_word_count || 0;
+  spans.forEach(el => {
+    const i = parseInt(el.dataset.wordIndex, 10);
+    if (i === 0) el.classList.add('klal-marker-word');
+    else if (n && i <= n) el.classList.add('klal-title-word');
+  });
+  // The LAST heading word carries the gap that separates the heading from the
+  // text, and the marker carries the gap before it (reviewer: "one more space
+  // between count title and text in reading pane"). Tagged here rather than
+  // matched with :last-of-type, which would pick the last span in the body
+  // whether or not it belongs to the heading.
+  if (n) {
+    const last = body.querySelector(`[data-word-index="${n}"]`);
+    if (last) last.classList.add('klal-title-end');
+  }
+}
+
 function renderKlalBody(block, k) {
   const body = block.querySelector('.klal-body');
   body.className = 'klal-body';
@@ -841,6 +961,21 @@ function renderKlalBody(block, k) {
       mark.className = 'editorial-mark';
       mark.textContent = '[.]';
       mark.title = 'Editorial insertion: not in the original print. Marks a title/explanation boundary the printer left unpunctuated.';
+      // FIXED 2026-08-31 (reviewer: "36 w14 won't let me click on it - shows ?").
+      // This branch returned early before the word ever got a data-word-index, so
+      // an editorial mark was the one token in the text that could not be
+      // addressed, hovered for its reference, deep-linked, or clicked - while
+      // still consuming a word index, which is what made the reference look
+      // wrong. It matters more now than it did: 17 more of these were inserted
+      // today, one per klal that had no heading separator.
+      // It gets the same click as a plain word - a reviewer must be able to
+      // remove or change a mark this pipeline itself inserted.
+      mark.dataset.wordIndex = i;
+      mark.onclick = () => {
+        const targetPage = k.word_pages && k.word_pages[i] != null ? k.word_pages[i] : k.page;
+        focusWordOnScan(targetPage, k.klal_id, { klal_id: k.klal_id, word_index: i, opcode: 'plain' });
+        openManualCorrectionPanel(k.klal_id, i, w, null);
+      };
       body.appendChild(mark);
       body.appendChild(document.createTextNode(' '));
       return;
@@ -1018,6 +1153,8 @@ function renderKlalBody(block, k) {
     body.appendChild(document.createTextNode(' '));
   });
 
+  markTitleRun(body, k);
+
   // FIXED 2026-08-25 (reviewer, klal 219). A `possible_omission` whose
   // word_index equals the klal's word count is text the scan has AFTER the last
   // stored word - and the loop above walks the stored words, so a gap at that
@@ -1135,6 +1272,11 @@ function attachWordHandlers(el, klalId, corr, isGap, skipTooltip) {
     // where its bbox lives (may be a continuation page for klals that span
     // multiple pages). Navigate there so the bbox is found.
     focusWordOnScan(pageForWord(klalById[klalId], corr.word_index, corr), klalId, corr);
+    // ADDED 2026-08-31: if the click came from the SCAN pane, take the text pane
+    // to the same word. attachWordHandlers is shared by both panes, so this is
+    // gated on where the element lives - a text-pane click is already at its
+    // word and must not be scrolled out from under the reviewer's cursor.
+    if (!textScroll.contains(el)) revealWordInText(klalId, corr.word_index);
     openDisputedPanel(klalId, corr);
   });
 }
@@ -2270,6 +2412,35 @@ const pageImg = document.getElementById('page-img');
 const hlContainer = document.getElementById('hl-container');
 const pageIndicator = document.getElementById('page-indicator');
 const klalIndicator = document.getElementById('klal-indicator');
+let _headerKlalId = null;
+
+// The scan header reads "Page 73 · Klal 210" and then the SAME reference in
+// Hebrew, "דף עג · כלל רי" (reviewer request, 2026-08-31). Before this it showed
+// the page in one span and a bare "כלל 210" in the other - the klal number in
+// Arabic digits beside a Hebrew word, which is not how the book writes it, and
+// no page reference in Hebrew at all.
+//
+// CAVEAT, stated because it is genuinely ambiguous: `דף עג` is OUR page index
+// written in Hebrew letters. It is NOT the folio the printer set on that leaf -
+// the printed folio is stripped as page furniture (item 20/27) and is stored
+// nowhere in this repo, so there is nothing to display for it.
+function hebNum(n) {
+  return NUMERALS[n] || NUMERALS[String(n)] || String(n);
+}
+
+function updateScanHeader() {
+  const page = currentPage;
+  const kid = _headerKlalId;
+  if (page == null) {
+    pageIndicator.textContent = 'Part 2 & 3 Review';
+    klalIndicator.textContent = '';
+    return;
+  }
+  const en = 'Page ' + page + (kid != null ? ' · Klal ' + kid : '');
+  const he = 'דף ' + hebNum(page) + (kid != null ? ' · כלל ' + hebNum(kid) : '');
+  pageIndicator.textContent = en;
+  klalIndicator.textContent = he;
+}
 const scanViewer = document.getElementById('scan-viewer');
 
 let zoomLevel = 1;
@@ -2391,6 +2562,7 @@ function applyFocusStyle(box) {
 // to their normal opacity/style. Called when the reviewer clicks away from a
 // focused word (plain word click, panel close, etc.).
 function clearScanFocus() {
+  clearRoutedWord();          // the ring is half of the same gesture
   scanFocusCorr = null;
   _zoomOnFocus = false;   // a pending focus-zoom must not fire into a cleared view
   if (currentPage != null) showPage(currentPage, scanFocusKlalId, null);
@@ -2444,7 +2616,7 @@ async function showPage(page, focusKlalId, focusCorr = undefined) {
   if (pageChanged) {
     currentPage = page;
     pageImg.src = `/images/pdf_pages/page_${page}.png`;
-    pageIndicator.textContent = 'Page ' + page;
+    updateScanHeader();
   }
   scanFocusKlalId = focusKlalId;
   updatePageNavButtons();
@@ -2484,6 +2656,20 @@ async function showPage(page, focusKlalId, focusCorr = undefined) {
     box.style.width = ((r.x2 - r.x1) * 100) + '%';
     box.style.height = ((r.y2 - r.y1) * 100) + '%';
     hlContainer.appendChild(box);
+    // ADDED 2026-08-31 (reviewer, klal 4: "doesn't move the scan to the correct
+    // klal"). The outline was drawn correctly and could sit off-screen: klal 4
+    // holds 40 of its 497 tokens on its start page, in the bottom 10% of it, so
+    // a reviewer looking at the top of page 15 sees klal 3 and concludes the scan
+    // never moved. 30 of 222 klalim start on a page holding under half their
+    // text - klal 92 is 6%, klal 30 is 7% - so this is a class, not one klal.
+    //
+    // The reviewer's own rule: bottom of the page for a klal that ends it, top
+    // for one that begins the next. `block: 'nearest'` expresses exactly that
+    // without special-casing either - it scrolls the minimum that brings the
+    // region into view, which lands at the bottom for a start-page sliver and the
+    // top for a continuation. It is also a no-op when the whole page already fits,
+    // which is the common case at 100%.
+    requestAnimationFrame(() => box.scrollIntoView({ block: 'nearest', behavior: 'auto' }));
   }
 
   const pageItems = await fetch('/api/page/' + page).then(r => r.json());
@@ -2533,6 +2719,12 @@ async function showPage(page, focusKlalId, focusCorr = undefined) {
       if (!isFocused) return;
       const box = document.createElement('div');
       box.className = 'hl-box hl-state-human focused';
+      // ADDED 2026-08-31: this is the box a DEEP LINK draws, and it carried no
+      // click handler at all - so the one word a shared link exists to point at
+      // was the one word clicking on the scan did nothing for. It has no
+      // correction to open a panel for, so it only reveals the word in the text.
+      box.style.cursor = 'pointer';
+      box.addEventListener('click', () => revealWordInText(c.klal_id, c.word_index));
       const color = '#3182ce';
       box.style.setProperty('--hl-color', color);
       box.style.background = 'transparent';
@@ -2652,11 +2844,47 @@ function jumpTo(klalId) {
   // it was a test sampling the position mid-scroll.
   mountKlal(klalId);
   block.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  clearTimeout(suppressTimer);
-  suppressTimer = setTimeout(() => { suppressObserverScroll = false; }, 700);
+  releaseObserverWhenScrollSettles();
 }
 
-function setActiveKlal(klalId) {
+// FIXED 2026-08-31 (reviewer: "clicking on 105 in the index moves the text pane
+// but not the scan" - item 0E, which had been recorded as open).
+//
+// The symptom was one klal off, not a dead pane: the scan DID go to page 44, but
+// the observer set the active klal to 104 on the way past, so the header read
+// "Klal 104" and the scan outlined 104's region while the text pane sat on 105.
+//
+// jumpTo() scrolls SMOOTHLY and used to release the observer after a FIXED 700ms,
+// but a long jump takes ~1500ms to settle - measured klal 53 -> 12 at
+// -11337, -3737, -893, -24, 12 px sampled every 300ms. For the remaining ~800ms
+// the observer was live and overwrote the destination.
+//
+// A bigger constant would be the same bug with a longer fuse (Lesson 31: do not
+// retune a heuristic, remove the guess). This waits for the scroll to ACTUALLY
+// stop: two consecutive frames at the same offset, with a hard ceiling so a
+// pane that never settles cannot suppress the observer forever.
+function releaseObserverWhenScrollSettles(maxMs = 3000) {
+  clearTimeout(suppressTimer);
+  const started = performance.now();
+  let last = null, stable = 0;
+  const tick = () => {
+    const now = Math.round(textScroll.scrollTop);
+    stable = (now === last) ? stable + 1 : 0;
+    last = now;
+    if (stable >= 2 || performance.now() - started > maxMs) {
+      suppressObserverScroll = false;
+      // The observer was held off for the whole animation, so it never recorded
+      // where we landed. Re-assert the destination rather than leaving whatever
+      // the last scroll-driven update happened to set.
+      if (lastActiveKlalId != null) setActiveKlal(lastActiveKlalId);
+      return;
+    }
+    requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+
+function setActiveKlal(klalId, navBlock) {
   document.querySelectorAll('.nav-item.active').forEach(el => el.classList.remove('active'));
   const navEl = document.getElementById('nav-' + klalId);
   if (navEl) {
@@ -2672,11 +2900,22 @@ function setActiveKlal(klalId) {
     // never complete (rAF-driven smooth-scroll gets throttled when the
     // tab isn't in the foreground), leaving the nav pane stuck instead of
     // just less animated.
-    navEl.scrollIntoView({ block: 'nearest', behavior: 'auto' });
+    // `navBlock` is 'center' for a DELIBERATE jump (a deep link, a nav click)
+    // and undefined for the continuous scroll-driven reaction below.
+    // FIXED 2026-08-31 (reviewer: "the index pane does not scroll all the way to
+    // the actual klal"). 'nearest' scrolls the MINIMUM distance that makes the
+    // row visible, which is right for the scroll reaction and wrong for a jump:
+    // measured on /klal/210/word/133, the row landed at bottom 1001px against a
+    // pane bottom of 1000px - one pixel PAST the fold, so the destination the
+    // reviewer asked for was the one row they could not see. Centring a jump
+    // also gives the surrounding klalim as context, which is the point of the
+    // index pane.
+    navEl.scrollIntoView({ block: navBlock || 'nearest', behavior: 'auto' });
   }
   const k = klalById[klalId];
   if (k) {
-    klalIndicator.textContent = 'כלל ' + klalId;
+    _headerKlalId = klalId;
+    updateScanHeader();
     document.title = `Klal ${klalId} (כלל ${klalId}) · Yad Malachi Review`;
     // manualPageLock: reviewer navigated the scan manually via prev/next -
     // don't snap back to this klal's start page just because the text pane

@@ -1778,6 +1778,12 @@ def test_reject_omission_option_does_not_read_a_field_that_cannot_exist():
 UNLOCATABLE_FLAGGED_WORD_BASELINE = {
     (77, 11), (144, 598), (182, 5), (189, 461),
     (198, 570), (209, 16), (216, 136),
+    # (105, 4) added 2026-08-31: a flag on the `,` that the printer set as a
+    # raised `•` (item 47). Same reason as the seven above - the token carries no
+    # Hebrew letter, so the corpus-to-DocAI aligner has nothing to match it on.
+    # Matching non-Hebrew words on their raw text was tried on 2026-08-30 and
+    # reverted: it works and costs too much, moving 41 correct boxes and losing 2.
+    (105, 4),
 }
 
 
@@ -2107,3 +2113,68 @@ def test_no_candidate_re_raises_a_word_an_applied_decision_already_settled(part1
         f"{len(offenders)} candidate(s) sit on a word an applied human decision already settled, so "
         f"the reviewer is asked to rule again on their own applied fix (klal, word, flag, what they "
         f"chose): {offenders[:8]}")
+
+def test_no_test_file_defines_the_same_test_name_twice():
+    """REGRESSION 2026-08-31 (Lesson 37). `tests/test_review_server.py` defined
+    `test_deep_link_lands_on_the_klal_and_rings_the_word` and
+    `test_clicking_a_word_puts_it_in_the_address_bar` TWICE each. Python rebinds a
+    name on the second `def`, so the first body was discarded at import - no
+    error, no skip, no warning. 38 definitions collected as 36 tests, and the
+    discarded copy was the STRICTER one in both cases (`len(ringed) == 1` against
+    a bare `assert ringed`, plus a klal-only route the survivor never visited).
+
+    The suite was green the whole time, which is the point: a shadowed test looks
+    exactly like a passing one. This is the cheap check that makes the two numbers
+    agree, and it is gated because nothing else in the chain compares them."""
+    import ast
+    offenders = {}
+    tests_dir = os.path.join(REPO, "tests")
+    for name in sorted(os.listdir(tests_dir)):
+        if not (name.startswith("test_") and name.endswith(".py")):
+            continue
+        path = os.path.join(tests_dir, name)
+        with open(path, encoding="utf-8") as fh:
+            tree = ast.parse(fh.read(), filename=path)
+        seen, dupes = set(), []
+        for node in tree.body:      # module level only - a nested def is not collected
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) \
+                    and node.name.startswith("test_"):
+                if node.name in seen:
+                    dupes.append(f"{node.name} (line {node.lineno})")
+                seen.add(node.name)
+        if dupes:
+            offenders[name] = dupes
+    assert not offenders, (
+        "a test name is defined twice, so the earlier body is silently discarded "
+        f"and never runs: {offenders}"
+    )
+
+def test_every_part1_title_ends_with_exactly_one_period(part1_by_id):
+    """ADDED 2026-08-31 (reviewer): "each title should end with one period - no
+    more no less. no other punct acceptable."
+
+    SCOPE IS PART 1 BY DESIGN. Parts 2-3 titles are machine truncations (`…`, and
+    some are literally `כלל 447`) rather than transcribed headings, and they are
+    under the Parts 2-3 gate - normalising their punctuation would be both
+    forbidden and meaningless.
+
+    `"` and `'` are deliberately NOT treated as punctuation here. They are
+    gershayim and geresh, which belong to Hebrew ABBREVIATIONS - `ב"ד` (בית דין),
+    `וכו'` - and stripping them would corrupt 121 and 80 occurrences. Five Part 1
+    titles legitimately end `וכו'.`, keeping the geresh that is part of the word.
+    """
+    import re
+    offenders = []
+    for klal_id, klal in sorted(part1_by_id.items()):
+        title = (klal.get("title") or "").strip()
+        if not title:
+            offenders.append((klal_id, "empty title", title))
+        elif not title.endswith("."):
+            offenders.append((klal_id, "no terminal period", title))
+        elif title.endswith(".."):
+            offenders.append((klal_id, "more than one terminal period", title))
+        elif re.search(r"\.(?!$)", title):
+            offenders.append((klal_id, "period before the end", title))
+        elif re.search(r"[:,;•\[\]…]", title):
+            offenders.append((klal_id, "punctuation other than the terminal period", title))
+    assert not offenders, f"{len(offenders)} title(s) break the punctuation rule: {offenders[:6]}"

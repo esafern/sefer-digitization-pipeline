@@ -43,12 +43,181 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0M. **[2026-08-31] A GERESH READ AS A YOD IN A NUMERAL SLOT — 3 in the corpus,
+    all corroborated by two independent engines. DATA ISSUE, not fixed here.**
+    Surfaced from the Dicta comparison: on the one specimen line, the corpus
+    reads `סעיף אי` where the Dicta Rashi edition, Surya and sofer.ai all read
+    `סעיף א'`. DocAI reads `אי` too - which is exactly WHY the corpus has it
+    (the corpus was built from DocAI, so a DocAI artifact that nothing
+    contradicted became the text).
+
+    **SWEPT the whole of `part1.json`** for the class - a citation word
+    (`סעיף`/`דף`/`סימן`/`אות`/`הלכה`/`כלל`/`פרק`/`ס"ק`/`שורה`) followed by a
+    short token ending in `י`. 13 raw matches, 10 of them legitimate Hebrew
+    (`הלכה כרבי`, `פרק שני`, `כלל לגבי`, `הלכה מפי משנה`). **3 are real:**
+
+    | klal | corpus reads | Surya | Gemini VLM | context |
+    |---:|---|---|---|---|
+    | 12 | `סעיף אי` | `סעיף א'` | `סעיף א'` | `...חשן משפט סימן רס"ט סעיף אי` |
+    | 140 | `אות עי` | `אות ע'` | `אות ע'` | `...הגהות הב"י אות עי שכתב` |
+    | 155 | `סעיף זי` | `סעיף ז'` | `סעיף ז'` | `...ב"ח א"ח סי' שי"ח סעיף זי` |
+
+    Two independent engines agree against the corpus on all three, which is the
+    Lesson 9 bar for routing to a reviewer - **not** for applying. **NOT
+    APPLIED, and `part1.json` NOT touched**: corrections go through the review
+    dashboard against the ink, never a hand-edit or a find-replace (START_HERE,
+    "Single source of truth"). These three want a reviewer's eyes on the crop.
+
+0J. **[2026-08-31] DICTA MEASURED, BOTH SCRIPTS — it is the WORST engine on
+    square type and the FIRST engine ever to read this work's Rashi script.**
+    The user supplied two Dicta OCR samples (square Berlin, and a Rashi-script
+    edition). Both scored with the new `tools/compare_ocr_engines.py` against
+    `part1.json`, artifacts `ocr_engine_comparison_square_13_23.json` and
+    `ocr_engine_comparison_rashi_13_22.json`.
+
+    **Square (Berlin), klalim 13-23, every engine on the SAME three pages:**
+
+    | engine | word acc. | CER (letters) | lexicon hit |
+    |---|---:|---:|---:|
+    | Dicta | **77.6%** | 8.5% | **83.4%** |
+    | DocAI (circular - the corpus was built from it) | 99.0% | 0.8% | 99.1% |
+    | Surya | 94.7% | 1.9% | 96.8% |
+    | Gemini VLM pass A / B | 96.1% / 95.2% | n/a | 98.2% / 98.1% |
+    | corpus itself (ceiling) | 100% | 0% | 99.7% |
+
+    Dicta is beaten by everything already wired in. Its failure is systematic,
+    not noise: `ב->כ` x159, `ה->ח` x48, `נ->ג` x44, `ל->ר` x13, plus 115
+    spurious `ר` insertions. **That is a Rashi-trained model reading square
+    type** - the exact mirror of the HebrewBooks fastocr rejection
+    (`PROJECT-STATUS-HISTORY.md` 2026-08-19: a square model reading Rashi,
+    `ס` 9.7x over, `א` 0.17x under). 83.4% lexicon hit against a 99.7% ceiling
+    is the same rejection metric that killed fastocr at 44.0%.
+
+    **Rashi edition, klalim 13-22, scored against the BERLIN corpus:**
+
+    | engine | word acc. | CER (letters) | lexicon hit |
+    |---|---:|---:|---:|
+    | **Dicta (Rashi ed.)** | **94.8%** | **3.2%** | **98.5%** |
+    | Dicta (square ed.) | 77.5% | 9.0% | 83.4% |
+    | Surya (square ed.) | 93.9% | 2.1% | 96.3% |
+    | DocAI (square ed., circular) | 98.9% | 0.8% | 99.1% |
+
+    94.8% is a FLOOR, not an accuracy: it is a different EDITION, so genuine
+    textual variance is charged to Dicta as error. Read the edition-independent
+    column instead - **98.5% lexicon hit against a 99.6% ceiling**, versus
+    fastocr's 44.0% on the same Rashi-script material. Hand-inspected klal 20
+    (its worst, 82.1%): of 7 mismatches, `דבבא מציעא`->`דבמ` is an edition
+    abbreviation, `הרף`->`הריף` is an edition variant, and the rest is
+    bottom-of-page margin noise. Almost none of its loss is misread letters.
+
+    **Why this matters more than the square result.** Lessons 23/24: a second
+    witness must fail DIFFERENTLY, and architectural independence is defeated
+    by a defect in the shared ink. Dicta-on-Rashi is a different ENGINE reading
+    a different EDITION - different sorts, different compositor, different
+    ligatures - which is the only configuration that escapes both. It is the
+    independent witness this project has wanted since Tesseract was measured at
+    3.8%, and nothing has read either Rashi-script edition before.
+
+    **NOT YET DONE, and this is the whole payoff:** the samples cover 11 klalim.
+    The next step is Dicta over the full Rashi-script edition, then wiring it in
+    as an `AbstractWitnessEngine`. **Do NOT route Dicta at the square scan** -
+    at 77.6% it would inject more disputes than it settles.
+
+0K. **[2026-08-31] THE THREE-PAGE SAMPLE PDF IS PAGES 19-21 / KLALIM 12-24,
+    NOT 18-20 / KLALIM 8-22 — Lesson 30, and it invalidates the eval's stated
+    ground truth.** `tools/second_witness_eval/README.md` derived the mapping by
+    MD5-matching the sample's images into `berlin_square_corrected.pdf`, which
+    returns a **`fitz` doc index**, and reported it as a page number. Lesson 30:
+    `page N == doc[N-1]` in this repo. Confirmed against CONTENT, two ways:
+    sample page 1 aligns **74.2%** with `docai_word_boxes/page_19.json` (846
+    tokens, exactly equal) and **1.9%** with `page_18.json`; and anchoring the
+    sample's own token stream in `part1.json` lands on klalim 12-24.
+
+    **What it invalidates.** `groundtruth_klal_8_22.txt` is the wrong ground
+    truth for this sample - klalim 8-11 are not on these pages at all, and
+    klalim 23-24 are on them but missing from the file. The README's "the test
+    set is already adjudicated" table (2,356 words, 23 candidates, 11 open, 9
+    human decisions) is counted over the wrong klal set, as is its per-klal
+    coverage table. The README's own defence - "klal attribution agreed exactly
+    across three independent artifacts" - did not detect this, because all three
+    were queried with the same wrong page number; they agree with each other and
+    not with the image. **`klal_page_regions.json`, `docai_word_boxes/` and
+    `images/pdf_pages/` are NOT affected** - they use correct repo numbering,
+    and are what proved the error.
+
+    **ONE OF THE SIX WAS A CODE BUG, NOT A COMMENT (Lesson 34 - sweep the
+    siblings).** `tools/test_trocr_benchmark.py` did not merely *say* 18/19/20,
+    it held `sample_page_map = {1: 18, 2: 19, 3: 20}` and fed it to
+    `cio.load_docai_page()`, so every sample page in that benchmark was scored
+    against the NEIGHBOURING page's DocAI tokens. Corrected to `{1: 19, 2: 20,
+    3: 21}`. Any TrOCR number ever produced by that script is void. **Swept
+    every other `fitz` page access in `tools/` and `pipeline/` (13 call sites):
+    all the rest are correct** - they route through
+    `vision_adjudication_common.crop_pdf_bounding_box()`, which does
+    `doc.load_page(page_num_1indexed - 1)`, or through
+    `run_surya_part1_full_baseline.py`'s explicit `doc[p - 1]`.
+    `test_trocr_benchmark.py` was the only site that had its own copy.
+
+    **SWEPT (Lesson 28) - 6 places carried the claim, all corrected 2026-08-31:**
+    `tools/second_witness_eval/README.md` (title, the mapping line, the
+    three-artifact section), `groundtruth_klal_8_22.txt`'s header line,
+    `evaluate_ocr_alignment.py`'s docstring, `run_vlm_witness_sample.py`'s
+    docstring, `test_trocr_benchmark.py`'s page-map comment. **One file was
+    checked and is NOT wrong:** `vlm_klal_8_22_ocr.txt` really is klalim 8-22 -
+    that script crops per-klal from `klal_page_regions.json`, never by page
+    number, so only the page half of its docstring was false.
+
+0L. **[2026-08-31] `vlm_part1_full_baseline*.txt` blocks are PAGE-REGION text,
+    not klal text, for 65 of 222 klalim — any character-level metric read off
+    those files is meaningless.** Found while scoring Dicta. Klal 15 has **25
+    words in the corpus and 245 in the VLM baseline (9.8x)**; klal 9 4.9x, klal
+    36 4.8x. The VLM was given a klal's page region and transcribed everything
+    in it, so a short klal's block carries its neighbours. **Swept all three
+    baseline files:** pass A **65/222** klalim over 1.3x, pass B **46/222**,
+    `surya_part1_full_baseline.txt` only **3/222** (klalim 161, 162, 202).
+    Word accuracy (matched / reference) is unaffected and every accuracy figure
+    quoted in this repo off these files still stands; CER and any
+    length-sensitive metric do not. `tools/compare_ocr_engines.py` prints CER
+    for them but it should be ignored, not compared.
+
+0G. **[2026-08-31] Two UI tests are DEFINED TWICE in the same file, so the
+    first copy of each never runs — and the discarded copy is the stricter one.**
+    `tests/test_review_server.py` holds **38 `def test_` statements and pytest
+    collects 36**: `test_deep_link_lands_on_the_klal_and_rings_the_word` (lines
+    333 and 368) and `test_clicking_a_word_puts_it_in_the_address_bar` (lines 357
+    and 386) are each defined twice, and Python rebinds the name, so the earlier
+    body is discarded at import. No error, no skip, no warning — the count is the
+    only symptom, which is why it survived. Both pairs were written for item 29's
+    deep-link feature.
+    WHAT THE SHADOWING ACTUALLY COSTS, read side by side rather than assumed:
+    the surviving `test_deep_link...` asserts only `assert ringed`, while the
+    discarded one asserts `len(ringed) == 1` ("expected exactly one ringed word")
+    — so a routing bug that rings several words now passes. The discarded copy
+    also exercises the **klal-only** route `/#klal=66` before the klal+word route,
+    and the survivor does not, so the bare-klal deep link has **zero coverage**.
+    The `test_clicking_a_word...` pair differ only by an added settle wait, which
+    costs nothing.
+    Swept the class, per the standing rule: all four test files, **this is the
+    only file affected** — `test_corpus_invariants.py` (44 defs), 
+    `test_pipeline_logic.py` (273) and `test_witness_engine.py` (5) have no
+    duplicate names, and their def-count equals their collected count.
+    **FIXED 2026-08-31.** The weaker copy of each pair was deleted and its
+    surviving twin strengthened, so no coverage was traded away: the deep-link
+    test keeps `len(ringed) == 1` and the klal-only route, and the address-bar
+    test keeps the settle wait the other copy had. 36 defs, 36 collected.
+    **Gated by `test_no_test_file_defines_the_same_test_name_twice`**, which walks
+    every `tests/test_*.py` with `ast` and compares module-level `def test_` names
+    for duplicates. Verified it can actually fail, per Lesson 25: injecting a
+    duplicate into `test_witness_engine.py` fails it by name and line, removing it
+    passes. This was Lesson 32's shape one level in — a test that exists, is
+    maintained, reads as covering the feature, and does not run.
+
 0F. **[2026-08-31] The UI test suite is bound to THIS corpus, in its current
     state of repair — the wrong shape for a general-purpose platform.** Measured:
-    all 38 tests in `tests/test_review_server.py` boot a server against the
-    shipped Yad Malachi corpus and **23 pin a corpus coordinate in executable
-    code** (`#klal-block-66 .flag-word`, `klal_id, word_index = 1, 85`, a literal
-    `&` at klal 69 w338). Zero use synthetic data. So they test the platform PLUS
+    every test in `tests/test_review_server.py` boots a server against the shipped
+    Yad Malachi corpus and **23 pin a corpus coordinate in executable code**
+    (`#klal-block-66 .flag-word`, `klal_id, word_index = 1, 85`, a literal `&` at
+    klal 69 w338). Zero use synthetic data. So they test the platform PLUS
     this book's defects, and the failure mode is backwards: **the closer the text
     gets to correct, the more tests fail**, because each quietly depended on a
     defect surviving. Seven broke at once on 2026-08-31 when the reviewer's
@@ -68,9 +237,18 @@ applying it to the corpus remain two separate, deliberate steps.
     NOT DONE - 2026-08-31 only unpinned the seven that broke, by having them look
     a subject up rather than assume one. That is a patch; the fixture is the fix,
     and it is self-contained work that wants its own scope.
+    **CORRECTED 2026-08-31: "all 38 tests" is wrong — the file DEFINES 38 and
+    pytest collects and runs only 36.** Two names are defined twice and the first
+    body of each is silently discarded; see item 0G. The 38 came from a
+    `grep -c "^def test_"`, which counts the source rather than what runs, and
+    that distinction is the whole of 0G. The 23 pinned coordinates are unaffected.
+    0G is now FIXED and gated, so the count is 36 = 36; the fixture work below is
+    unaffected and still open. Note for whoever builds it: a duplicate name in a
+    file being rewritten test-by-test is exactly how those two got there, and the
+    new guard is what will catch the next one.
 
-0E. **[2026-08-31] A nav jump's smooth scroll outlives the observer
-    suppression, so a focus set during it is wiped.** `jumpTo()` starts a
+0E. **[FIXED 2026-08-31 — see item 46.] A nav jump's smooth scroll outlives the
+    observer suppression, so a focus set during it is wiped.** `jumpTo()` starts a
     `scrollIntoView({behavior:'smooth'})` and sets `suppressObserverScroll` for
     **700ms**; measured 2026-08-31, that scroll takes **~1500ms** to settle from a
     long jump (klal 53 -> klal 12 sampled every 300ms: -11337, -3737, -893, -24,
@@ -226,11 +404,19 @@ applying it to the corpus remain two separate, deliberate steps.
     dashboard as an open flag on klal 66; the auditor's blind spot to a reverted
     word-count change is itself worth closing. The script now
     REFUSES this shape rather than guessing. Two gated tests.
-    **OPEN — needs the user's ruling on klal 66 w0.** Two decisions were recorded
-    23 seconds apart (keep `סו אין`, then `סו`). The vision check on this very
-    candidate transcribes `אין ב"ד` at 0.95, and klal 57 w0 is the identical
-    `נז אין` shape the reviewer chose to KEEP — both say `סו אין` is right and
-    Surya/VLM simply missed `אין`.
+    **RULED AND CLOSED 2026-08-30 — verified 2026-08-31, this entry had gone
+    stale.** It read "OPEN — needs the user's ruling on klal 66 w0" after the
+    ruling had already been given. The reviewer recorded "66 w0 is correct"
+    (superseding `disputed_choice` at 2026-08-30T20:37:07, chosen `סו אין`), the
+    `klal_flag` was closed in the same second with the reasoning, and a
+    confirmed-no-op `apply_event` followed at 21:01:31. The corpus reads
+    `סו אין ב"ד יכול` and no flag is open at that word — all three re-checked
+    against the ledger and `part1.json`, not inferred from the write-up. The
+    evidence had pointed this way: the vision check transcribes `אין ב"ד` at
+    0.95, and klal 57 w0 is the identical `נז אין` shape the reviewer chose to
+    KEEP. The append-only log still carries the reverted apply_event
+    (898c9b4e67d5) claiming a change the corpus does not have; that is by design
+    and is documented above.
 
 00. **[CLOSED 2026-08-30 BY THE USER — "close 162/163 surya issue - wasting
     time". Stop raising it in session summaries; the standing reminder inside is
@@ -398,17 +584,24 @@ applying it to the corpus remain two separate, deliberate steps.
    box is very large, including the bottom of klal 2". After the fix: median
    0.073, max 0.123, zero boxes wider than a quarter page.
 
-9c. **Still open from the 2026-08-23 review:**
-    `pipeline/typography.py` is still dead code carrying a third, divergent
-    `CONFUSION_PAIRS` (H6); `run_part1_vlm_patch_passB.py` still violates the
-    incremental-flush rule and no-ops its own cache (H8);
-    `is_gershayim_noise()`'s missing geresh case (M9) is now moot for the
-    superseded extractors but the same normalisation gap should be checked in
-    the repair filters when Phase 1 is built; the disputed panel still
-    pre-selects the machine verdict so one Save click records it as a human
-    decision (M11); 10 klalim still have no Surya coverage and need a real
-    re-run rather than only being counted (C16); `match_block_to_klal`'s
-    never-None nearest-region fallback (C18).
+9c. **[CORRECTED 2026-08-31 — this entry was STALE and overstated the open
+    work. Four of its six sub-items were fixed in code and the entry was never
+    updated.]** Verified one at a time against the source, not against the
+    write-up (Lesson 19/33):
+
+    | sub-item | claim in this entry | verified state |
+    |---|---|---|
+    | H6 `typography.py` | "still dead code carrying a third, divergent `CONFUSION_PAIRS`" | **FIXED.** Imported by `synthesize_multi_witness.py:57`, `tools/estimate_consensus_posterior.py`, `tools/survey_shared_engine_errors.py` — not dead. Its third `CONFUSION_PAIRS` is **gone**; its own header documents the removal and points to the two real, deliberately-different sets. |
+    | H8 passB | "still violates the incremental-flush rule and no-ops its own cache" | **FIXED / deliberate.** `f.flush()` is at `run_part1_vlm_patch_passB.py:122`. The no-op cache is now a *documented correctness requirement*, not an oversight: Pass A and Pass B must be two INDEPENDENT samples, and a shared crop-keyed cache replays A's answer for B, so every replayed position agrees with itself by construction and sails through the stability gate. Reverted 2026-08-24 with that reasoning in the file. |
+    | M9 `is_gershayim_noise()` | "moot for the superseded extractors" | **MOOT, confirmed.** The identifier does not exist anywhere in the repo. The normalisation point still stands if Phase 1 is built. |
+    | M11 disputed panel | "still pre-selects the machine verdict" | **FIXED.** Reverted 2026-08-23; `review_frontend/app.js:1412-1427` carries the revert and its reasoning. Undecided words default to the stored text. |
+    | C16 Surya coverage | "10 klalim still have no Surya coverage" | **FIXED.** `surya_part1_full_baseline.txt` carries all **222/222** klalim with non-zero text (this file's own TL;DR already said 222/222 — the two disagreed). Thinnest are klal 222 (0.39 of corpus words) and klal 163 (0.42, the known mis-assignment from closed item 00). |
+    | C18 `match_block_to_klal` | never-None nearest-region fallback | **STILL OPEN — the only one.** `tools/run_surya_part1_full_baseline.py:79`. Now carries an explicit deferral note: 2 blocks / 4 words affected on pages 14-76, and tightening it changes which text every klal gets, so it wants its own measurement rather than a drive-by. Accepted open, not forgotten. |
+
+    The lesson this entry is itself an instance of: an open item that lists six
+    things when five are done reads as five outstanding tasks and costs the next
+    reader the time to re-derive all of them. Closed sub-items must be struck
+    when they close, not left standing.
 
 10. **`MULTI-WITNESS-REPAIR-AND-SYNTHESIS-PLAN.md` review 2026-08-23 — the
     architecture is sound, four things in it are not.** (a) **Its §2.B independence proof is now empirically refuted, not just
@@ -1517,6 +1710,853 @@ applying it to the corpus remain two separate, deliberate steps.
     over, and `test_manual_correction_with_no_original_word_inserts_new_text`
     caught it immediately. `corpus_bbox_cache_key()` is now exported so the test
     that pre-seeds that cache builds the key the way the module does.
+
+39. **[2026-08-31] THE `title` FIELD IS UNREVIEWED TERRITORY — it carries its
+    own uncorrected OCR, and no detector in this repo has ever looked at it.**
+    Found because the reviewer read one: "klal 39 the title ends with harav, the
+    amrinan is the beginning of the text." Both halves of that are right, and they
+    are two DIFFERENT defects.
+
+    **(a) The extent defect the reviewer reported.** Klal 39's title is
+    `אין הלכה כתלמיד במקום הרב אמרינן אף כשהתלמידים הם רבים נגד רכם` — it should
+    stop at `הרב`, and `אמרינן ...` is body text that has been pulled into the
+    heading. NOT SWEEPABLE MECHANICALLY, and I checked before claiming so: title
+    length is not the signal, because this book's headings genuinely are long
+    sentences (mean 6.2 words, p90 = 11, and klal 92's legitimate title runs 24).
+    Deciding where a heading ends needs the printed page, where it is set in
+    larger type. So the extent of (a) is UNKNOWN and is not being guessed at.
+
+    **(b) A sweepable defect found while checking (a), extent exact.** A title
+    should be a prefix of its own `clean_text` after the marker. **14 of 222 are
+    not.** Eight are benign alignment offsets (the title starts at a different
+    word than body[1], e.g. klalim 101-105 whose body opens `ב"ד` where the title
+    opens `מתנין`). **Six are real OCR errors sitting in the title where the BODY
+    IS ALREADY CORRECT:**
+
+    | klal | title has | body has | class |
+    |---|---|---|---|
+    | 39 | `רכם` | `רבם` | ב/כ, the commonest confusion in this print |
+    | 69 | `אהים` | `אלהים` | **dropped lamed — the alef-lamed ligature again** |
+    | 91 | `איכא` | `אליבא` | dropped lamed |
+    | 88 | `וכאבל` | `ובאבל` | ב/כ |
+    | 87 | `משנה` | `ממשנה` | dropped letter |
+    | 36 | `הש"ס'` | `השית'` | — |
+
+    **WHY NOTHING CAUGHT THESE:** every detector, validator and witness in this
+    repo reads `clean_text`. `detect_real_word_substitution`, the lexical defect
+    report, the consensus pipeline, the corpus invariants, the vision
+    adjudicator — all of them. The `title` field has never been read by any of
+    them, so it has had no OCR pass at all, and klal 69's is the **same ligature
+    sort** that produced items 26 and 32. Lesson 1 in a place nobody had looked:
+    a check that was never run over this field has verified nothing about it.
+
+    **THE PIPELINE NEEDS A TITLE PASS — this is the standing requirement, and it
+    is not built.** `title` lives in `part1.json`, so it is corpus text under the
+    single-source-of-truth rule, but `apply_reviewer_decisions.py` only ever
+    writes `clean_text`: **there is no mechanism in this pipeline for promoting a
+    title correction, and no detector, witness or invariant reads the field.**
+    What a title pass owes, at minimum: (i) the detectors run over `title` as well
+    as `clean_text`; (ii) an apply path so a ruling on a title can be recorded and
+    promoted like any other, instead of being hand-applied; (iii) a gated
+    invariant that a title is a prefix of its own body, with the legitimate
+    offsets baselined; (iv) a decision on the EXTENT question, which needs the
+    scan because only the printed type size says where a heading stops.
+
+    **5 TITLES HAND-EDITED 2026-08-31, user-authorised** ("for now we will
+    hand-edit part1.json. do it carefully and show me the diffs") — a deliberate,
+    recorded exception to the single-source-of-truth rule, taken because no apply
+    path exists to take instead. Diffs shown and approved before writing:
+
+    | klal | class | was | now |
+    |---|---|---|---|
+    | 39 | EXTENT | `...במקום הרב אמרינן אף כשהתלמידים הם רבים נגד רכם` | `אין הלכה כתלמיד במקום הרב` |
+    | 69 | spelling | `אהים` | `אלהים` |
+    | 87 | spelling | `משנה` | `ממשנה` |
+    | 88 | spelling | `וכאבל` | `ובאבל` |
+    | 91 | spelling | `איכא` | `אליבא` |
+    | 36 | EXTENT | `אלא אין דרך הש"ס' סדרי לומר היכא שלא הוזכר שום אמורא ברישא` | `אלא` |
+
+    Klal 39's truncation removes the `רכם` misread along with the absorbed body
+    text, so it needed no separate spelling fix. Verified after: the title-order
+    validator flags none of the five, and Part 1's first-letter regression count
+    is **118 before and 118 after** — the edits introduced no ordering change.
+    `./rebuild_all.sh --skip-vision` re-run; 318 gated tests pass.
+
+    **KLAL 36 RESOLVED 2026-08-31 BY THE REVIEWER, and it was an EXTENT case, not
+    a spelling one.** I had left it open because title `הש"ס'` and body
+    `השית' סדרי` spell the same thing (`ש"ס` abbreviates `שישה סדרים`; `שיתא סדרי`
+    is its Aramaic), so I could not tell which the printer set. The reviewer's
+    answer dissolved the question: **the heading is just `אלא`** — the term the
+    klal is about — and everything after it was absorbed body text, where
+    `השית' סדרי` is correct as it stands. Title set to `אלא`; the divergence
+    disappeared with the absorbed words. Worth recording as a reasoning error:
+    I had classified it by the DIFFERENCE I could see (one word) instead of asking
+    whether the whole span belonged, and the two classes need to be tested in the
+    other order — extent first, then spelling within what remains.
+
+    **THE EXTENT CLASS REMAINS UNSWEPT.** One klal was corrected because the
+    reviewer identified it. How many others have absorbed body text is unknown and
+    is not being estimated — per item 0's standing rule this is recorded as
+    unmeasured rather than left to read as handled.
+
+    **The alphabetical-order validator is the one thing that does read titles**
+    (`tools/validate_title_alphabetical_order.py`) — it checks ORDERING, not
+    spelling, and a ב/כ misread mid-title cannot fail it.
+
+55. **[2026-08-31] Post-apply state, and two things the apply itself surfaced.**
+    The rebuild/apply loop was run to convergence — 48 + 1 + 3 + 3 decisions over
+    four rounds, since the script deliberately applies only one word-count-changing
+    decision per klal per run. **0 decisions pending at the end.**
+
+    **PART 1 NOW HAS ZERO FOREIGN CHARACTERS** — `validate_part1_corpus_integrity`
+    check 2b reports 0, from **7** at the start of the day. The last `&` (klal 77
+    w11) is `אל`, and `ligature_words.json` now reports **`both_lost: 0`**, closing
+    the last of item 32's three. **Item 27's page-seam furniture is fully removed
+    too**: klal 39's catchword `דבכולהן` is gone, and klal 210 reads
+    `אפשר דהלכה כקמייתא` — matching the printed page — after its three spurious
+    tokens (`דהלכה`, `:`, the folio `לא`) came out one per round.
+
+    **A title diverged from its own body the moment the body was corrected, which
+    is item 39's gap arriving on schedule.** Applying klal 77 w7 `לא` -> `אלא` left
+    the `title` field still reading `לא`: nothing propagates a body correction into
+    the title, because titles have no apply path. Fixed by hand (authorised, same
+    as the rest of today's title work) and Part 1 is back to **222/222 clean
+    prefixes, 0 divergences**. This is the concrete argument for the title pass:
+    every future body correction inside a heading will do this again, silently,
+    and only `compare_titles_to_text.py` would notice.
+
+    **A UI test SKIPPED ITSELF because the corpus got better** —
+    `tests/test_review_server.py:1079`, with the message "no bare `&` left in
+    Part 1 - seed one through the API instead of skipping". That is item 0F /
+    Lesson 36 exactly, caught in the act: a test pinned to a defect stops testing
+    when the defect is repaired, and a skip is quieter than a failure. The test
+    knows what it needs (seed the condition through the API rather than borrow it
+    from the shipped corpus); doing that is part of the synthetic-fixture work item
+    0F describes, and it is now the second concrete case waiting on it.
+
+54. **[2026-08-31] 48 reviewer decisions applied — and I had to repair an
+    index drift I caused myself first. The repair closed a real gap in the
+    reindexer.**
+
+    **WHAT WENT WRONG.** Item 48's `[.]` insertions shifted every later index in
+    17 klalim. I called `reindex_flags_after_shift()` and **not**
+    `reindex_pending_decisions_after_shift()`, which already existed — so open
+    flags moved and PENDING DECISIONS did not. Lesson 35 names both in one
+    sentence and I acted on half of it. Measured before applying anything: **4
+    pending decisions had drifted by exactly +1** (klal 39 w617 and w251, klal 36
+    w73, klal 106 w16), each naming a word that sat at index+1.
+    A stale decision is worse than a stale flag, as that function's own docstring
+    says: a flag points at the wrong word and a human notices, while a decision is
+    refused by the drift guard on every future run and is stranded exactly the way
+    item 0A stranded 43 rulings.
+
+    **THE GAP THE REPAIR EXPOSED: `reindex_pending_decisions_after_shift()` did
+    not cover `disputed_choice`** — only `candidate_choice` and
+    `manual_correction`. That is the type that needs it most: a decided dispute is
+    dropped from the candidate queue, so it is drift-checked against `part1.json`
+    itself, which is precisely the check a shifted index fails. **3 of my 4
+    drifted decisions were `disputed_choice`.** Added to the tuple.
+    My repair pass was scoped too broadly on the first attempt — it ran over every
+    klal whose heading is followed by `[.]`, 92 of them, not the 17 that actually
+    shifted. **The verified-move rule refused every one of the extras**: a
+    decision moves only when the word it named is provably at the shifted index,
+    and in an unshifted klal it is not. 9 moves written, all in klalim 36/39/106,
+    all re-verified afterwards against the corpus. The guard did its job on an
+    operator error, which is the argument for having written it that way.
+
+    **APPLIED: 48 decisions** (16 replace, 15 manual, 17 confirmed-no-op) — up
+    from 44 before the repair, the difference being the 4 recovered. 2 refused and
+    40 drift-skipped, both pre-existing and both correctly left alone.
+    **The applied diff was read word by word before being accepted**, which is how
+    item 0B's corpus damage was caught and is not a step to skip. All six
+    deletions verified against the index they name: three commas the reviewer
+    ruled on (klalim 31, 36, 146), a doubled geresh (klal 69 w11), and **two of
+    item 27's page-seam duplicates finally removed — klal 39's catchword
+    `דבכולהן` and klal 210's `דהלכה`**.
+
+    **Two things worth the reviewer's eye, neither a defect:**
+    - **klal 74 w966 `בארוכה` -> `בארוכ'`.** Item 51's filter had just protected
+      the stored `בארוכה` by rejecting DocAI's `בארוכ` as orthographically
+      impossible. Both are right and they do not conflict: a bare `בארוכ` cannot
+      exist, the page prints the ABBREVIATION `בארוכ'`, and DocAI dropped the
+      geresh. The filter rejected the impossible string; the reviewer supplied the
+      real one.
+    - **klal 77 w91 came in as `ע״ד` with a U+05F4 gershayim**, not the ASCII `"`
+      the corpus uses everywhere else. Part 1 now holds **2** such characters
+      (klal 2 w316 and this) against **6,405** ASCII quotes. Not corrected here —
+      it is the reviewer's own keystroke and corpus text — but it is the same
+      single-instance anomaly flagged on klal 2 w316 in the 2026-08-30 open items.
+
+51. **[FIXED 2026-08-31] An orthographically impossible reading no longer
+    reaches a reviewer.** The reviewer's rule, on klal 36 w61: a word-final `כ`
+    must be `ך`, so `כתכ` cannot be a Hebrew word and no vision call should have
+    been spent on it. `corpus_io.impossible_final_form()` encodes it and
+    `assemble_corrections_dataset.classify()` consults it BEFORE any vision
+    verdict: such a candidate is `current_text_confirmed`, i.e. machine-resolved,
+    not a dispute to put in front of a human.
+
+    **The abbreviation exemption is the load-bearing half**, and it is the same
+    one item 33's trailing-`ר` rule needed: an abbreviation does not obey
+    final-form orthography, because the letter is an INITIAL, not a word ending.
+    `ה"נ` (הכי נמי) is a perfectly good form and is a false positive of the naive
+    rule. Measured: 7 candidates carried such a reading, **6 after the exemption**.
+    Verified after the rebuild: klal 74 w966 (`בארוכ` vs the correct `בארוכה`),
+    klal 36 w61 and klal 182 w0 all now read `current_text_confirmed` — w966 had
+    been **OPEN**, asking a reviewer to weigh a string that cannot exist.
+    Gated by `test_a_reading_ending_in_a_non_final_letter_form_is_impossible`,
+    which is purely synthetic and asserts the exemption as well as the rule.
+
+52. **[2026-08-31, reviewer] The scan pane now scrolls to the klal it is showing,
+    and a word click goes to that word's own page.** Reported as "klal 4 doesn't
+    move the scan to the correct klal". The region outline was drawn correctly all
+    along — the problem is that **klal 4 holds 40 of its 497 tokens (8%) on its
+    start page**, in the bottom tenth of it, so a reviewer looking at the top of
+    page 15 sees klal 3 and concludes nothing moved. **A class, not one klal: 30
+    of 222 klalim start on a page holding under half their text** — klal 92 at 6%,
+    klal 30 at 7%, klal 159 at 16%, klal 169 at 17%.
+    Fixed with `scrollIntoView({block: 'nearest'})` on the region box, which is
+    the reviewer's own rule ("bottom of the page for the first half, top for the
+    second") without special-casing either: it scrolls the minimum that brings the
+    region into view, landing at the bottom for a start-page sliver and the top for
+    a continuation, and is a no-op when the page already fits. Verified in a short
+    viewport where the page cannot fit: klal 4 scrolls to 168px with the region in
+    view, and clicking word 201 takes the scan to page 16, its own page
+    (`pageForWord` already resolved this correctly — confirmed rather than assumed).
+
+53. **[2026-08-31, reviewer: klal 35 w30 "takes me to a completely wrong word"]
+    THE FIX IS TO RETRACT THE CANDIDATE — the word is not missing, and the
+    aligner is why it looked missing.** `שמות` **is already in klal 35, at word
+    45**, in `בספר שמות בארץ בכפות תמרים`. Its stored copy has **no alignment
+    box at all**, so DocAI's token for it matched nothing and was reported as an
+    omission — at word 30, 15 words before the real one. Both independent
+    witnesses read `משמע` at word 30, contradicting the omission outright. The
+    scan pane was faithfully drawing the candidate's own bbox; the candidate is
+    what is wrong.
+
+    **Two sweeps, because the first metric missed the reported case and saying so
+    matters.** A vertical-distance check (is the candidate on a different printed
+    line from its neighbours?) found 5 but NOT klal 35 w30, which sits on the
+    same line 0.72 of the page width away — the opposite end of an RTL line. A
+    reading-order coordinate (line band, then right-to-left within it) catches it:
+    **5 omission candidates whose bbox is out of reading order for their word
+    index** — klal 17 w308, klal 85 w96, klal 2 w632 (all the NEXT klal's marker,
+    a boundary artifact), klal 50 w2, and klal 35 w30.
+
+    **The wider and more useful sweep: 13 of Part 1's 40 omission candidates
+    propose a word that ALREADY appears in the same klal.** Eight of those sit at
+    the candidate's own scan position (klalim 50, 68, 128, 167×2, 169, 189, 194) —
+    unambiguous alignment failures. The rest are further off and need reading:
+    klal 35 w30 (15 words away, and the copy is unaligned), klal 175 w173, klal 2
+    w632, klal 193 w244, klal 159 w1036.
+
+    **NOT auto-suppressed.** A word can legitimately repeat in a klal, and this
+    book restates maxims verbatim as a matter of style — the corpus-integrity
+    validator has a whole check devoted to that. So "already present" is a strong
+    triage signal, not a proof, and turning it into a filter would be the
+    over-suppression this file has recorded twice (items 26 and 31). Recorded with
+    its extent for the reviewer to rule on.
+
+50. **[2026-08-31, reviewer] Three nav badges, and editorial marks are
+    addressable at last. Plus four findings from the same report, three of which
+    need the reviewer's call and are NOT fixed.**
+
+    **FIXED — the third badge.** `machine_resolved_count` was served per klal and
+    summed only into the legend total, so klal 73 showed one badge while
+    highlighting two words (item 49). The nav row now reads open (red) ->
+    machine-resolved (amber) -> human-decided (green), in decreasing order of
+    claim on the reviewer's attention, with the amber matching the colour the
+    word itself renders in.
+
+    **FIXED — `[.]` was the one token in the text that could not be clicked**
+    (reviewer: "36 w14 won't let me click on it - shows ?"). The editorial-mark
+    branch of `renderKlalBody` returned early before the span ever got a
+    `data-word-index`, so the mark could not be addressed, hovered for its
+    reference, deep-linked or clicked - while still CONSUMING a word index, which
+    is what made the reference read wrong. It now carries its index and takes the
+    same click as a plain word, because a reviewer must be able to remove or
+    change a mark this pipeline itself inserted. **This mattered more today than
+    yesterday: item 48 inserted 17 more of them.**
+
+    **NOT FIXED, needs a decision — a nav jump shows the klal's START page, and
+    for 30 of 222 klalim that page holds a MINORITY of the text.** Reported as
+    "klal 4 doesn't move the scan to the correct klal". Measured: klal 4 starts on
+    page 15 with **40 of its 497 tokens (8%)** and continues on page 16 with 457;
+    the region outline IS drawn, correctly, on the bottom 10% of page 15. So the
+    behaviour is right by its own rule and useless in practice. Worst cases:
+    klal 92 (36/584 = 6%), klal 30 (133/2021 = 7%), klal 4 (8%), klal 31 (14%),
+    klal 159 (16%), klal 169 (17%). Options are to jump to the page holding the
+    most of the klal, or to keep the start page (where the marker is) - a
+    presentation decision, and after two wrong inferences today I am not making
+    it unilaterally.
+
+    **NOT FIXED, a cheap filter worth having — 7 candidates propose a reading
+    ending in a NON-FINAL letter form, which Hebrew orthography forbids.** Raised
+    by the reviewer on klal 36 w61: "why was ctc considered? cof is impossible
+    here, would be cof sofit." Exactly right - a word-final `כ` must be `ך`. The
+    class, swept: `כתכ` (36 w61), `בארוכ` (74 w966), `חרא רבפ` (176 w277), `קפכ`
+    (182 w0, a klal MARKER), `נחמ` (198 w597, an insertion candidate), `וכפ`
+    (217 w548), and `ה"נ` (212 w30).
+    **The rule needs the same exception item 33's trailing-`ר` rule needed:
+    abbreviations do not obey final-form orthography** - `ה"נ` (הכי נמי) is a
+    perfectly good abbreviation and is a FALSE POSITIVE of the naive rule, as is
+    anything carrying a geresh or gershayim. Excluding those leaves ~4 genuine
+    impossibilities. **The one that matters: klal 74 w966 is still OPEN**
+    (`current_text_may_be_wrong`), asking the reviewer to weigh `בארוכ` against
+    the correct `בארוכה`. A candidate that cannot be a Hebrew word should never
+    reach the queue, and this is a five-line test on `docai_reading`.
+
+    **NOT FIXED, a data issue — klal 35 w30's omission candidate is
+    mis-positioned** (reviewer: "takes me to a completely wrong word in the
+    scan"). The entry is `opcode: delete` / `possible_omission`, proposing DocAI's
+    `שמות` as missing at word 30; its bbox points at a genuine `שמות` on page 26,
+    but at the end of an unrelated line (`שיתא סדרי לא סבירא ליה כוותיה · שמות`),
+    while corpus word 30 is `משמע` in `לישנא יתירא אמר לך וכו' משמע דההוא אמורא`.
+    Rendered the crop at 4x and read it rather than inferring. **Both independent
+    witnesses read `משמע` there** (`vlm_reading` and `surya_reading` both
+    `משמע`), which contradicts the omission outright - so this looks like a false
+    positive whose box happens to land on a real word elsewhere. The scan pane is
+    faithfully showing the candidate's own bbox; the candidate is what is wrong.
+
+    **EXPLAINED, not a defect — klal 105 w4 does not zoom** (reviewer: "didn't
+    zoom in on the scan panel"). That flag sits on a `,`, a token with no Hebrew
+    letter, so the corpus-to-DocAI aligner has nothing to match it on and returns
+    no bbox; the focus-zoom has nothing to zoom to. It is one of the 8 entries in
+    `UNLOCATABLE_FLAGGED_WORD_BASELINE` for exactly this reason. Matching
+    non-Hebrew tokens on their raw text was tried 2026-08-30 and reverted - it
+    works and costs too much, moving 41 correct boxes and losing 2. The honest
+    position is that punctuation-only flags are not locatable today.
+
+48. **[2026-08-31, reviewer] Five more titles, and the editorial separator `[.]`
+    inserted into 17 klalim — with the flag reindexing the insert made necessary.**
+    Titles: 97/98/99 -> `ברייתא.` (first word only, the same cluster shape as
+    131-133's `דיעבד`), 103/104 -> `ב"ד מתנין לעקור דבר מן התורה.`
+
+    **The bare-separator count went 16 -> 21 because those title edits moved the
+    boundary**, which is worth stating: shortening a heading exposes a gap that
+    was previously inside it. Recomputed rather than reusing the earlier list.
+
+    **17 got `[.]`, and 4 did NOT.** Klalim 180, 182, 190 and 217 have a period
+    already — glued to the following token with no space (`.ודע`,
+    `.דאמרי'בפ'`, `.לא`, `.דאמרינן`). That is a TOKENISATION defect, not a
+    missing mark, and inserting `[.]` would have doubled the punctuation. Left
+    alone and recorded here; the fix there is to split the token, which is a
+    different operation and wants its own pass.
+
+    **`[.]` and not `.`, deliberately.** The printed page has no mark at these
+    positions — verified by rendering klalim 36 and 106 and reading the lines, not
+    inferred. `[.]` is this repo's existing marker for punctuation added by review
+    rather than set by the printer (`review_server.py:1603`, checked by
+    `audit_applied_decisions.py`), so a bare `.` would assert something about the
+    page that is false.
+
+    **EVERY INSERT SHIFTED EVERY LATER INDEX IN ITS KLAL** — Lesson 35 / item 0C,
+    the defect that once walked a flag onto the wrong word. The script reused
+    `apply_reviewer_decisions.reindex_flags_after_shift()` rather than restating
+    the rule, so a flag moved only where the word it named before is the word at
+    the shifted index. **26 open flags reindexed, 0 unverified.** Each insertion
+    also appended a `punctuation_choice` row to the ledger, so the change is
+    traceable in the append-only log rather than appearing as an unexplained diff.
+
+    **The full `./rebuild_all.sh` WITH vision had to run**, not `--skip-vision`:
+    the shifts left 3 vision-adjudicated candidates (klal 36 w9/w60, klal 159
+    w415) pointing at different words, and `test_no_stale_candidate_flags_are_
+    being_served` caught exactly that and said so. 319 gated tests pass after.
+
+49. **[2026-08-31, reviewer: "klal 73 two disputes but the red flag shows only 1"]
+    NOT A COUNTING BUG — but it exposes a field that is served per-klal and
+    rendered nowhere.** Verified by reading both entries and the rendered DOM.
+
+    Klal 73 has two highlighted words and they are in different states:
+    - **w27 `יוחנן`** — DocAI read `יוהנן` (ה for ח); the vision check selected the
+      stored text at **0.98** and transcribed `יוחנן`; context is `משום דר' יוחנן
+      תנא הוא`, and Rabbi Yochanan is right. Flag `current_text_confirmed`, so it
+      renders `state-machine`. **Nothing for a reviewer to decide.**
+    - **w87 `עלי`** — Surya and the VLM both read `על`; flag
+      `current_text_may_be_wrong`; renders `state-open`. **This one needs a
+      ruling.**
+
+    The red badge counts `machine_disputed_count`, which is 1, and that is
+    deliberate: item 17 changed it in 2026-08-25 precisely because counting
+    total-flagged made a klal look like outstanding work when the machine had
+    already settled most of it. So the badge is right, and "two disputes" is also
+    right — they are two disputes, one of them resolved.
+
+    **THE REAL GAP: `machine_resolved_count` is served per klal and only ever
+    summed into the LEGEND total** (`app.js:680`); no nav row shows its own. So a
+    klal with one resolved and one open word shows a single badge and looks like
+    it has one highlighted word, when it has two. That is Lesson 29's shape in
+    miniature — a field computed, served, and never rendered where it would
+    answer the question a reviewer is actually asking. **Not fixed**: adding a
+    third badge changes every one of the 222 rows and is a presentation decision
+    for the reviewer, not an engineering default.
+
+47. **[2026-08-31, reviewer chose option (a)] The heading/text separator: almost
+    nothing was normalisable, and the one case that was is a MISREAD, not a
+    missing period.** Asked to make each klal read heading-then-one-period-then
+    text, I surveyed what actually sits after the heading run in all 222:
+
+    | separator after the heading | count |
+    |---|---|
+    | `[.]` | 92 |
+    | `.` | 61 |
+    | `•` | 46 |
+    | no mark at all | 16 |
+    | `-` | 4 |
+    | `:` | 2 |
+    | `,` | 1 |
+
+    The reviewer chose **(a): normalise only the bare and comma cases, leave
+    `[.]`, `•` and `:` as the faithful record.** Two reasons that was the right
+    call, both established before acting: **`[.]` is a provenance marker, not a
+    period** — `review_server.py:1603` writes it when a reviewer ACCEPTS a
+    proposed punctuation insertion and `audit_applied_decisions.py` checks for it
+    specifically, so flattening 92 of them to `.` would erase the distinction
+    between the printer's punctuation and ours and break that auditor — and `•`
+    and `:` are marks that are **on the page**.
+
+    **The 16 bare cases are correct as they stand.** Rendered klalim 36 and 106 at
+    3x and read the lines: `לו אלא אין דרך השית' סדרי...` and
+    `קו בחירתא היא מס' עדיות י"א שאינו...`. **The printer sets no mark there** —
+    the bold lead word runs straight into the text. Inserting a period would be
+    adding punctuation the original does not have, which is exactly what the `[.]`
+    convention exists to record. No edit made.
+
+    **The single comma is a misread middle dot.** Rendered klal 105 at 4x: the
+    printer sets a raised `·` after `אמרו` — **the same mark it sets after
+    `נינהו` later on the same line, which the corpus already transcribes as `•`**.
+    One printed mark, two transcriptions. So this is not "a comma that should be a
+    period"; it is `,` -> `•`, and the fix restores agreement with the ink rather
+    than imposing a house style on it.
+
+    **Recorded as a word-level flag, not a hand-edit.** Titles were hand-edited
+    this session because no apply path exists for that field; `clean_text` HAS
+    one, so the single-source-of-truth rule applies at full strength and this goes
+    through the dashboard like any other correction. Flag `2e1168f7e5f3` on
+    klal 105 w4, carrying the scan reading.
+
+    **CLASS SWEPT, deliberately not flagged: Part 1 carries 26 commas across 23
+    klalim** (klal 4 w27, 31 w159, 36 w66, 41 w609/w717, 44 w433, 54 w341,
+    70 w94, 83 w41, 91 w579, 94 w22, 100 w31, 105 w4, 118 w14, 126 w44,
+    134 w5, 140 w113, 146 w7/w36, 147 w67, 154 w398, 155 w110, 159 w63,
+    161 w16, 167 w566/w1067). Any of them may be the same misread; **only klal
+    105 w4 has been read against the scan.** The other 25 are recorded here
+    rather than flagged, because 25 flags on unread material is how the 1,496-flag
+    queue in item 1 happened. Whoever picks this up: the check is a 4x render of
+    the line, and the tell is whether the same glyph appears elsewhere on the line
+    already transcribed as `•`.
+
+44. **[2026-08-31] I OVER-CORRECTED SEVEN TITLES ON MY OWN INFERENCE AND
+    REVERTED THEM. Recorded because the reasoning error is the useful part.**
+    The reviewer named klalim 101 (missing `ב"ד`), 105, 132/133 and 134/135.
+    Rendering `page_44.png` and `page_49.png` at 2x showed the printed heading of
+    each klal set in BOLD — `בית דין` for klal 100, `ב"ד` for 101-105, `דיעבד`
+    for 131-133, `דחיה` for 134-135 — and I generalised that into a rule: **the
+    title is the bold lead run**. On that rule I truncated klalim 100-105 to
+    `בית דין.` / `ב"ד.`, including four the reviewer never mentioned.
+
+    **The rule is wrong.** The reviewer's next message gave klal 105's title as
+    `ב"ד שלאחריהם אמרו` — bold word PLUS the following phrase — and klal 106's as
+    `בחירתא היא מס' עדיות`, where `בחירתא` alone is what is bold. So the heading
+    is not the bold run; the bold is a lead-in and the heading continues past it
+    by an amount only a reader can judge. Klal 132 (`דיעבד`) and klal 105
+    (`ב"ד שלאחריהם אמרו`) are the same typographic shape with different answers.
+
+    Reverted: klal 100 to its original title (never asked for), and 101-104 given
+    the `ב"ד` they were missing rather than a truncation, which is what the
+    reviewer actually asked for. 105 and 106 set as dictated.
+
+    **What I should have done, and the rule going forward: STOP INFERRING A
+    GENERAL RULE FOR TITLE EXTENT.** I have now guessed it twice — first that
+    titles were the whole opening sentence, then that they were the bold run —
+    and been wrong both times, in opposite directions. Lesson 31's shape exactly:
+    a heuristic retuned twice is asking to be handed back, not tuned a third time.
+    Title extent is a per-klal reading against the scan and is the reviewer's
+    call; the tooling's job is to SHOW the comparison
+    (`tools/compare_titles_to_text.py`), not to decide it. **27 Part 1 titles are
+    long-but-clean prefixes and remain unadjudicated** — flagged as suspicion,
+    with no rule applied to them.
+
+    Part 1 title state after all of this: **222/222 clean prefixes, 0 divergences,
+    0 offsets.**
+
+45. **[2026-08-31, reviewer] The index shows a title without its terminal period;
+    the running text keeps it, because there it does a job.** "no period in the
+    index pane - it is needed in the text pane to sep the title from the text."
+    The period stays on the stored field, where the gated invariant requires it —
+    this is a presentation choice, stripped at render by `displayTitle()`, one
+    function so every list surface agrees. In a column of 222 headings the period
+    is noise; in running text it is the only thing marking where the heading
+    stops. Spacing added around the heading run in the text pane
+    (`margin-inline-end`, logical properties so it stays correct in the RTL
+    column) rather than a wider word-space, so the gap falls once at each boundary
+    instead of between every heading word.
+
+46. **[FIXED 2026-08-31 — item 0E, reported by the reviewer as "clicking on 105
+    in the index moves the text pane but not the scan".** The symptom was ONE KLAL
+    OFF, not a dead pane: the scan did move to page 44, but the scroll observer
+    set the active klal to **104** on the way past, so the header read "Klal 104"
+    and the scan outlined 104's region while the text pane sat on 105.
+    `jumpTo()` released the observer after a fixed **700ms** and a long smooth
+    scroll takes **~1500ms** to settle.
+    Fixed by `releaseObserverWhenScrollSettles()`, which waits for the scroll to
+    actually stop — two consecutive frames at the same offset, with a 3s ceiling
+    so a pane that never settles cannot suppress the observer forever — and then
+    re-asserts the destination, since the observer was held off for the whole
+    animation and never recorded where it landed. **A bigger constant would have
+    been the same bug with a longer fuse** (Lesson 31: remove the guess, do not
+    retune it).
+    Gated by `test_a_nav_jump_lands_on_the_klal_it_was_asked_for`, which asserts
+    the active klal AND the scan page because the bug moved one without the other,
+    and covers the longest jumps deliberately — at the end of the corpus the
+    scroll clamps and cannot put the destination at the top of the pane, so the
+    observer's "last block above the reading line" answer is structurally wrong
+    there. **Verified it catches the real bug**: with the 700ms behaviour restored
+    it fails with "jumped to klal 105 but the index made klal 104 active".
+    Two findings about the test harness, worth keeping: `suppressObserverScroll`
+    and `currentPage` are script-scoped `let` bindings, NOT window properties, so
+    polling `window.currentPage` silently reads `undefined`. Both are now read
+    from the DOM (the scan `<img>` src carries the page number), which is the
+    honest place to ask what is actually on screen.
+
+42. **[2026-08-31, reviewer] Titles: two more extent fixes, and a punctuation
+    rule now gated. Part 1's title field is, for the first time, internally
+    consistent.**
+
+    | klal | was | now |
+    |---|---|---|
+    | 10 | `איידי דקתני במתניתין ואינו עובר עליו נקט נמי בברייתא הכי` | `איידי דאיידי.` |
+    | 66 | `אין ביטול ממש אבל להוסיף על תקנתם לאו ביטול מקרי` | `אין ב"ד יכול לבטל דברי ב"ד חבירו אא"כ גדול ממנו בחכמה ובמנין.` |
+
+    Both were the two divergences item 41 could not classify, and both were the
+    same shape as klal 36: the stored title was not a misspelling of the heading,
+    it was **different text entirely**. Part 1 now has **0 divergences** — every
+    one of its 222 titles is a clean prefix of its own body.
+
+    **TERMINAL PUNCTUATION, applied to all 222** (reviewer: "each title should end
+    with one period - no more no less. no other punct acceptable"). Not one Part 1
+    title ended with a period before this; none contained one at all. All 222
+    changes were **pure appends** — the dry run confirmed nothing was removed from
+    any title, which is what made this safe to apply in bulk.
+
+    **WHAT "no other punct" WAS NOT ALLOWED TO MEAN.** Read literally it would
+    strip `"` and `'`, and those are gershayim and geresh — parts of Hebrew
+    ABBREVIATIONS, not sentence punctuation. `ב"ד` is בית דין and `וכו'` is a word;
+    removing the marks would have corrupted **121 and 80 occurrences**. The
+    reviewer's own klal 66 title, supplied in the same message, contains `ב"ד` and
+    `אא"כ`, which settles the reading. Five titles legitimately end `וכו'.`,
+    keeping the geresh that belongs to the word and taking the period after it.
+
+    Gated by `test_every_part1_title_ends_with_exactly_one_period`. Verified it can
+    fail, per Lesson 25: replacing klal 1's period with a colon fails it by klal id
+    and reason. **Scoped to Part 1 deliberately** — Parts 2-3 titles are machine
+    truncations (`…`, and some are literally `כלל 447`) rather than transcribed
+    headings, so normalising their punctuation would be both gate-violating and
+    meaningless. `corpus_io.title_word_span()` is unaffected by the new periods
+    because it normalises through `hebrew_letters_only`, verified on five klalim
+    after the change.
+
+43. **[2026-08-31, reviewer] The two standalone corpus reports are now stage 5b
+    of `rebuild_all.sh`, because they had silently aged out of agreement with the
+    corpus.** Raised by the reviewer directly.
+
+    **The mechanism, stated plainly.** `tools/list_ligature_words.py` and
+    `tools/review_lexicon_only_words.py` each read the corpus and write a JSON
+    report, and **neither was in any chain**. So each report kept whatever numbers
+    it had from the last time somebody remembered to run the tool. Nothing was
+    wrong with either tool. `ligature_words.json` was stamped 2026-08-30 21:49,
+    before that night's corpus edits, and still claimed **`both_lost: 3`** when two
+    of those three ampersands had been repaired to `אל` (klal 69 w338, klal 167
+    w24) and only klal 77 w11 survived. `lexicon_yad_malachi_only.json` was stale
+    the same way.
+
+    **Why it matters more than a wrong number in a file:** a stale count is
+    exactly the kind of figure that gets quoted into a status entry or a decision
+    as though it were measured today. This file's own TL;DR says every claim in it
+    is measured rather than remembered; an unrebuilt report quietly breaks that.
+
+    This is **Lesson 32 in its milder form** — not a detector nobody runs, but a
+    report nobody RE-runs — and **Lesson 13** besides: a file fully computable from
+    the corpus is a second copy of the truth until something rebuilds it.
+
+    **FIXED by putting them in the chain**, the same remedy stage 4b got: measured
+    at **0.28s and 0.24s** on the full corpus, so the reason for leaving them out
+    never really existed. Both are pure readers — they write only their own report,
+    never a flag, a decision or corpus text — which is what makes this safe to run
+    unattended on every rebuild. `review_lexicon_only_words.py` needs the gitignored
+    `sefaria_reference_corpus` cache and exits 0 with an explicit "this is not 'no
+    findings'" message when it is absent, verified by hiding the cache, so a fresh
+    clone is not broken by the new stage.
+
+    **Two alternatives considered and rejected:** a gated staleness test comparing
+    report mtimes against `part*.json` would DETECT the problem but then block the
+    build until someone re-ran the tools by hand — detection where prevention costs
+    half a second; and deleting the committed JSON in favour of print-only output
+    would lose the diffable artifact these reports exist to provide.
+
+    Post-rebuild the reports read `both_lost: 1`, dropped-lamed 321, dropped-alef
+    18, and 1,144 lexicon-only words — and note that `both_lost` only became
+    correct because the tool happened to be run, which is the whole argument.
+
+41. **[2026-08-31, reviewer] A TITLE-vs-TEXT COMPARISON NOW EXISTS FOR EVERY
+    KLAL, and the heading is rendered where the book actually puts it — inside the
+    text, not above it.**
+
+    **`tools/compare_titles_to_text.py`**, run over all 667. The structural
+    property it tests: a title should be a PREFIX of its own `clean_text` after
+    the gematria marker, because the printed heading is not separate text — it IS
+    the klal's opening, set in larger type.
+
+    | | all 667 | Part 1 |
+    |---|---|---|
+    | clean prefix of their own body | 581 | 216 |
+    | …of which long (>= 11 words), a suspicion only | 24 | 24 |
+    | DIVERGES — an OCR error in one of the two | 82 | 2 |
+    | offset — title starts at a later body word | 4 | 4 |
+
+    Part 1 is down to **2 divergences** (klalim 10 and 66, where the title matches
+    almost none of its body and something structural is wrong) from 14 before this
+    session's edits. **The remaining 80 divergences are all in Parts 2-3** and are
+    untouched under the gate. Two lessons went into the tool rather than being
+    discovered twice: editorial punctuation tokens in the body (`,` `.` `[.]` `•`)
+    are SKIPPED, not counted as mismatches — without that, klalim 105 and 134 read
+    as OCR divergences when the only difference is a comma the punctuation pass
+    inserted; and a title that is a clean but LONG prefix is reported as a
+    suspicion with the threshold stated, never as a finding, because this book's
+    genuine headings run to 24 words and only the scan says where a heading stops.
+
+    **The heading now renders IN PLACE** (reviewer: "i didn't want the title above
+    the text… i want the text itself to have bold for counter and title in the diff
+    font — right there in the text"). Yesterday's version put the title on its own
+    line above the klal, which renders it twice, since those same words open the
+    body. The marker is bold and the heading run is set in `--font-title`, both as
+    words in the running text. `corpus_io.title_word_span()` computes how many body
+    words the heading occupies and is shared by the server, the audit tool and the
+    UI, so the three cannot disagree; it degrades safely, returning 1 for klal 66
+    where the title matches only the first word.
+
+    **Applied as a pass over the rendered spans, not inside the word loop** —
+    that loop has five branches (plain, ai_flag, disputed, manual, witness) and a
+    word is drawn by whichever claimed it, so decorating from inside would be the
+    same two lines in five places (Lesson 13/34) and a heading word that happened
+    to be disputed would silently miss out. `markTitleRun()` is one rule over the
+    final DOM. Neither role class sets `color`, so the state colour a reviewer
+    navigates by still shows through on a heading word.
+
+    Sizes raised in both panes and the index number set in `--font-marker`, the
+    same face as the text-pane head, so the number reads as the same object in
+    both places. Gated by a regression that reads the expected heading length from
+    `/api/klal/36` rather than hardcoding it, asserts the title is NOT repeated
+    above the text, and compares resolved font families rather than literal names.
+
+40. **[2026-08-31, reviewer] The index pane now carries both scripts on every
+    line, and a long title can no longer squeeze the badges off the row.** Each
+    row reads `39` · `לט` · title · flag · counts, and the text-pane head now
+    reads `כלל 69 · סט` + section + the TITLE, which it never showed at all.
+
+    **Structural typography tokens, added so this generalises past this book.**
+    Four `:root` variables — `--font-title`, `--font-marker`, `--title-size`,
+    `--marker-size` — plus one `.klal-title` role class used by BOTH panes. They
+    name the ROLE a piece of text plays in a sefer's structure, not this printing's
+    layout, so a work set differently restyles itself by re-pointing the tokens and
+    touches no rules. Before this each pane styled its own text ad hoc, which is
+    why the two could differ at all. The title face is deliberately NOT the body
+    face: the body is Frank Ruhl Libre, so a title in it reads as more body text;
+    `David Libre` is a different Hebrew serif of the same period feel. The
+    regression compares RESOLVED font families between panes rather than asserting
+    a literal font name, so re-pointing the token for another work keeps it green —
+    which is the point of having the token.
+
+    **The scan header's two scripts were separated by ONE SPACE, not the gap the
+    rule claimed.** `#klal-indicator` had `margin-inline-start: 1.75rem`, and
+    `margin-inline-start` resolves against the ELEMENT's own direction — that span
+    is `direction: rtl`, so it became `margin-right: 28px` and put the gap on the
+    far side, outside the row. What was left was the literal space in `index.html`:
+    a measured **3px**, which is exactly what the reviewer saw. Now an explicit
+    `margin-left`, measured at 31px. Gated by a test that asserts the rendered GAP
+    between the two boxes — the property was present and read correctly the whole
+    time, and only the geometry showed it was landing on the wrong edge. `gematria` has been on
+    `/api/klalim` since 2026-08-26 and the nav simply never used it. The row's
+    number columns and badges are all `flex-shrink: 0` and only `.ntitle` gives
+    way — `.nid` was shrinkable before, which is what let a long title push the
+    right-hand end of the row out of view. Gated by a regression that asserts the
+    Hebrew column AND checks by GEOMETRY that every badge on the longest-titled
+    row still has non-zero width inside the row box; it locates that row by
+    looking for the badges rather than pinning a klal id, per item 0F.
+
+    **REFACTOR NOTE, requested by the reviewer and earned the hard way: collapse
+    the three duplicated init fetch blocks.** The same
+    `Promise.all([/api/flags, /api/klalim, /api/witness])` appears in `init()`,
+    `switchPart()` and the post-decision refresh path. Adding a fourth fetch to
+    the wrong one of the three cost real time in this session (item 38) and the
+    failure was silent, because the globals the OTHER copy sets still looked
+    populated. It should become one `loadCorpusState(part)` that all three call.
+    Not done here — it touches the app's startup path and wants its own
+    before/after, and this session had already changed the frontend four times.
+    This is the same shape as `union_bbox()` and the `.split(' ')` sites in
+    item 37's structural list; it belongs with them.
+
+38. **[2026-08-31, four reviewer reports on the deep-link flow — all four
+    reproduced, fixed and gated.]** Each was measured in a real browser before
+    being touched, and two of the four were not what the report said they were,
+    which is the part worth keeping.
+
+    **(a) The index pane did not scroll all the way to the klal.** `setActiveKlal`
+    scrolled the nav with `block:'nearest'`, which moves the MINIMUM distance that
+    makes the row visible. Correct for the continuous scroll-driven reaction it
+    was written for; wrong for a jump. Measured on `/klal/210/word/133`: the row
+    landed at bottom **1001px against a pane bottom of 1000px** — one pixel PAST
+    the fold, so the single row the link exists to reach was the one row the
+    reviewer could not see. A deliberate jump now centres; the scroll reaction
+    still uses `nearest`, where it is a no-op when the row is already visible.
+
+    **(b) "Moving the cursor over the text makes the highlight disappear" — it was
+    not the cursor.** The `.routed-word` ring carried a hard
+    `setTimeout(..., 4000)` and simply expired. Measured: the ring survives a
+    mouse move at 900ms and is gone at 4s with the pointer untouched. 4 seconds is
+    about how long it takes to read the line and start moving the mouse, so the
+    two read as cause and effect. The ring now persists until the reviewer
+    actually goes somewhere else (a new route, or `clearScanFocus`). **Worth
+    noting as a diagnosis pattern: the reported trigger was a coincidence of
+    timing, and believing it would have sent the fix into the hover handlers,
+    which are not involved at all.**
+
+    **(c) Clicking a highlighted word in the SCAN did not highlight it in the
+    text.** The text→scan direction has had a single funnel since 2026-08-25
+    (`focusWordOnScan`); the scan→text direction had **nothing** — a scan click
+    moved the scan and opened a decision panel, and the middle pane was never
+    told. Added `revealWordInText()` as the mirror funnel, shared with the
+    deep-link router rather than copied. Two call sites, and the second is the one
+    that mattered: **the `kind === 'plain'` box had no click handler at all**, and
+    that is precisely the box a deep link draws — so the one word a shared link
+    exists to point at was the one word clicking on the scan did nothing for.
+
+    **(d) The scan header now carries the reference in both scripts** (reviewer:
+    "Page xx Klal xx, white space, then the same info in Hebrew"). It reads
+    `Page 73 · Klal 210` and then `דף עג · כלל רי`. Before, it showed the page in
+    one span and a bare `כלל 210` in the other — a Hebrew word beside an Arabic
+    numeral, which is not how the book writes it.
+    **CAVEAT, recorded because it is genuinely ambiguous and could mislead:**
+    `דף עג` is OUR page index written in Hebrew letters. **It is NOT the folio the
+    printer set on that leaf** — the printed folio is stripped as page furniture
+    (items 20 and 27) and is stored nowhere in this repo, so there is nothing to
+    render for it. If that reads as a claim about the book rather than about our
+    pagination, the Hebrew page half should be dropped and only `כלל רי` kept.
+    The numerals are SERVED from a new `/api/numerals` endpoint over
+    `cio.klal_id_to_gematria`, not reimplemented in JS: a JS copy would be
+    Lesson 13, and would have had to re-derive the 15/16 exception (`ט"ו`/`ט"ז`,
+    not `י"ה`/`י"ו`, which would spell divine names) and the final-letter rule.
+
+    **I made this session's own Lesson 34 mistake while fixing (d), and it is
+    recorded rather than quietly corrected.** The three-fetch block at init exists
+    in **three** copies (`init`, `switchPart`, and the post-decision refresh) and I
+    added the numerals fetch to `switchPart` — the wrong sibling. The header
+    rendered `דף 73`, silently, because `hebNum()` falls back to the digits, and my
+    own verification passed on `FLAGS`/`KLALIM` being populated, which `init` had
+    done. What caught it was the server log showing **`/api/numerals` was never
+    requested at all**. The fetch now lives in `init` only, since the table is a
+    pure function of the integers and can never return anything new on a part
+    switch.
+
+    Four Playwright regressions, one per report, plus the 0G guard. **363 tests
+    pass.** The three that can look their subject up off the DOM do so rather than
+    pinning a coordinate (item 0F); the header test necessarily pins klal 210 /
+    page 73, and asserts the Hebrew half contains `עג`/`רי` AND does **not**
+    contain `73`/`210` — without that second half it would have passed against the
+    digits-fallback bug it exists to catch.
+
+37. **[SWEEP 2026-08-31] Every finding in every code- and data-review file
+    re-verified against the live tree. Two new defects; item 9c was stale; the
+    structural backlog is real but smaller than the review files read.** Method:
+    each claim was reproduced by running or reading the current source, never
+    accepted from the write-up (Lesson 19). Files swept:
+    `code-review-2026-08-25.md`, `CODE-REVIEW-2026-08-26.md`,
+    `CODE-REVIEW-2026-08-27.md`, `LEXICAL-DEFECT-AND-FLAG-AUDIT-2026-08-27.md`,
+    `open_items_2026-08-30.json`, `cleared_flags_2026-08-26.*`, and this file's
+    own open items.
+
+    **NEW — see item 0G**: two UI tests shadowed by duplicate definitions, the
+    stricter copy of each discarded.
+
+    **NEW — the multi-word manual-replacement guard landed in ONE of the two
+    files the audit named.** `CODE-REVIEW-2026-08-27.md`'s remedy #2 says
+    explicitly "in both `apply_reviewer_decisions.py` and `tools/export_corpus.py`".
+    `manual_correction_changes_word_count()` exists and is called at
+    `apply_reviewer_decisions.py:592`; `export_corpus.py`'s manual-replace branch
+    (its `else:` at ~line 151) calls `_apply_manual_correction` with **no
+    word-count check and no `word_count_changed_klalim.add`**, though that same
+    function guards its insert and delete branches. Item 36 recorded the fix
+    without noting it was half-applied. This is Lesson 34 exactly — sweep the
+    SIBLINGS, and the sibling here was named in the finding itself.
+    Live exposure **0 today**: no manual decision has multi-word `chosen_text`
+    (re-measured, not remembered). Latent, like its twin was.
+
+    **Verified FIXED and holding** (each re-measured): the four item-36
+    "critical" defects; the `_corpus_bbox_cache` invalidation (now keyed on a
+    `part1/2/3.json` (mtime,size) stamp — note the stamp does NOT cover
+    `docai_word_boxes/` re-extraction, which the original finding also named);
+    item 20's watermark (**0 Latin-script tokens corpus-wide**); item 16
+    (**71 placeholders / 596 with text**, exact); item 0D(a) (**0 new unlocatable
+    open flags**; the baseline shrank 10 -> 7 as words were repaired); item 24
+    (`lexicon.txt` **18,936** rows, exact); item 32 (175 intact / 321
+    dropped-lamed / 19 dropped-alef / 3 both-lost / **0** U+FB4F, exact).
+    All 317 gated tests pass; all 36 collected UI tests pass.
+
+    **Verified STILL OPEN, structural, none of them new** — recorded here because
+    they live only in the review files today: `synthesize_multi_witness.py:56`
+    still imports `review_server` and calls three private helpers (C4);
+    `review_server.py` is now **1,955 lines**, up from the 1,849 that was filed
+    as a God Object and the 1,736 before that (S1); 12 `.split(' ')` sites across
+    5 files (S2 — the review said "14+ across 7", it is 12/5); `_parts_for()`
+    still returns Part 1 for `?part=4` (S4); `223`/`444`/`445` still inline in
+    `review_server.py:132-146` and `corpus_io.py` still exports only
+    `PART1_MAX_KLAL` (S5/#6); `_NO_UPPER_BOUND = 10 ** 9` (H2); `union_bbox()`
+    still byte-identical in two pipeline stages (H3/#8); both superseded
+    `extract_*_consensus_disputes.py` stubs still in `tools/` (H4); the
+    `clear-word-flag` handler still duplicated in `app.js` (#18/#9).
+    **#7 is weaker than filed**: `reconstruct_placeholder_klalim.py` imports
+    `FURNITURE_WORDS` from `check_span_shortfall`, but that module is itself
+    `FURNITURE_WORDS = cio.FURNITURE_WORDS` — an indirection, not a divergent
+    copy, so it cannot drift. Worth tidying, not a Lesson 13 instance.
+
+    **Item 27 is two-thirds done, and the remainder is now UNFLAGGED.** klal 74's
+    seam is fully repaired (both spurious words deleted, 2026-08-30). klal 39 lost
+    its `Π` folio — but the *catchword* `דבכולהן` at w251, which item 27 names as
+    part of the same three-word defect, **is still in the corpus and carries no
+    open flag**, because the flag that was cleared was the folio's. klal 210's
+    Hebrew-numeral folio `לא` at w66 is still present and still flagged.
+
+    **Two standalone reports are stale against the corpus they describe.**
+    `ligature_words.json` and `lexicon_yad_malachi_only.json` are both stamped
+    2026-08-30 21:49, before the 2026-08-31 corpus edits; `ligature_words.json`
+    still lists `both_lost: 3` where only **1** `&` survives. Neither tool is in
+    `rebuild_all.sh` — Lesson 32's exact shape, in a milder form: not a detector
+    nobody runs, but a report that silently ages out of agreement with the text.
+    `lexical_defect_report.json` does NOT have this problem; it is stage 4b and
+    regenerated (now **280 candidates / 93 klalim / 194 unflagged**, against item
+    35's dated 299 / 96 / 194).
+
+    **Item 26 is down to one.** `validate_part1_corpus_integrity.py` check 2b now
+    reports a single out-of-repertoire character, klal 77 w11 `&` — from 7.
+
+    **`open_items_2026-08-30.json` WAS HAND-WRITTEN, and it rotted — now
+    generated.** It is fully computable from `review_decisions.jsonl` plus the
+    corpus, which makes a hand-kept copy Lesson 13 exactly: a "derived" file that
+    is really a second copy of the truth, agreeing until the text moves under it.
+    It moved. Six of its 24 flagged items were resolved and still listed as open,
+    and its lead entry, "NEEDS YOUR RULING on klal 66 w0", had been ruled on the
+    day before it was written. **`tools/build_open_items_report.py`** now derives
+    the queue from live state; `tools/render_report.py` turns it into clickable
+    deep links, so the list cannot age. Current Part 1 queue, measured:
+    **233 open word-level flags, 88 open klal-level flags, 0 out-of-range,
+    4 null decisions still standing.** The rendered `.md`/`.html` are gitignored,
+    the same as every other report view.
+    Two details the generator had to get right, both found by running it rather
+    than reading it: it splits on a SINGLE space (`.split()`'s whitespace
+    collapsing renumbers every word after a double space and points every link one
+    word off), and `word_index == len(words)` is the legitimate END-OF-KLAL append
+    position for an insert/delete opcode, not an out-of-range index — the two
+    surviving null decisions at klal 88 w1149 and klal 164 w55 are both exactly
+    that, and a naive bounds check filed them as corrupt.
 
 ## Closed — the detail is in `PROJECT-STATUS-HISTORY.md`, by date
 

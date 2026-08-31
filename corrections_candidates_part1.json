@@ -438,21 +438,6 @@
     {
       "klal_id": 35,
       "page": 26,
-      "opcode": "insert",
-      "word_index_in_final_text": 0,
-      "original_word": null,
-      "corrected_word": "לה",
-      "bbox": {
-        "x1": 0.8033602833747864,
-        "y1": 0.5729208588600159,
-        "x2": 0.8929682374000549,
-        "y2": 0.5905986428260803
-      },
-      "bbox_estimated": true
-    },
-    {
-      "klal_id": 35,
-      "page": 26,
       "opcode": "delete",
       "word_index_in_final_text": 30,
       "original_word": "שמות",
@@ -483,62 +468,17 @@
     {
       "klal_id": 36,
       "page": 26,
-      "opcode": "insert",
-      "word_index_in_final_text": 0,
-      "original_word": null,
-      "corrected_word": "לו",
-      "bbox": {
-        "x1": 0.7971374988555908,
-        "y1": 0.6777822375297546,
-        "x2": 0.8923459649085999,
-        "y2": 0.6954600214958191
-      },
-      "bbox_estimated": true
-    },
-    {
-      "klal_id": 36,
-      "page": 26,
       "opcode": "replace",
-      "word_index_in_final_text": 9,
-      "original_word": "רוזכר",
-      "corrected_word": "הוזכר",
+      "word_index_in_final_text": 73,
+      "original_word": "אינן",
+      "corrected_word": "אינו",
       "bbox": {
-        "x1": 0.4511512219905853,
-        "y1": 0.6777822375297546,
-        "x2": 0.49159926176071167,
-        "y2": 0.6954600214958191
+        "x1": 0.5787181258201599,
+        "y1": 0.7376456260681152,
+        "x2": 0.6098319888114929,
+        "y2": 0.7533145546913147
       },
       "bbox_estimated": false
-    },
-    {
-      "klal_id": 36,
-      "page": 26,
-      "opcode": "replace",
-      "word_index_in_final_text": 60,
-      "original_word": "כתכ",
-      "corrected_word": "כתב",
-      "bbox": {
-        "x1": 0.45052894949913025,
-        "y1": 0.7239855527877808,
-        "x2": 0.4828873574733734,
-        "y2": 0.7416633367538452
-      },
-      "bbox_estimated": false
-    },
-    {
-      "klal_id": 37,
-      "page": 26,
-      "opcode": "insert",
-      "word_index_in_final_text": 0,
-      "original_word": null,
-      "corrected_word": "לז",
-      "bbox": {
-        "x1": 0.8058494329452515,
-        "y1": 0.7862595319747925,
-        "x2": 0.8898568749427795,
-        "y2": 0.8039373159408569
-      },
-      "bbox_estimated": true
     },
     {
       "klal_id": 37,
@@ -567,6 +507,66 @@
         "y1": 0.591446042060852,
         "x2": 0.3535911738872528,
         "y2": 0.6081466674804688
+      },
+      "bbox_estimated": false
+    },
+    {
+      "klal_id": 39,
+      "page": 27,
+      "opcode": "replace",
+      "word_index_in_final_text": 13,
+      "original_word": "רכם",
+      "corrected_word": "רבם",
+      "bbox": {
+        "x1": 0.20933087170124054,
+        "y1": 0.667209804058075,
+        "x2": 0.24125230312347412,
+        "y2": 0.6883910298347473
+      },
+      "bbox_estimated": false
+    },
+    {
+      "klal_id": 39,
+      "page": 27,
+      "opcode": "replace",
+      "word_index_in_final_text": 17,
+      "original_word": "כדברי",
+      "corrected_word": "מדברי",
+      "bbox": {
+        "x1": 0.7108655571937561,
+        "y1": 0.6818737387657166,
+        "x2": 0.7550644278526306,
+        "y2": 0.6993889808654785
+      },
+      "bbox_estimated": false
+    },
+    {
+      "klal_id": 39,
+      "page": 27,
+      "opcode": "replace",
+      "word_index_in_final_text": 89,
+      "original_word": "ס\"ס",
+      "corrected_word": "ס\"פ",
+      "bbox": {
+        "x1": 0.35788828134536743,
+        "y1": 0.742158830165863,
+        "x2": 0.38489872217178345,
+        "y2": 0.7592667937278748
+      },
+      "bbox_estimated": false
+    },
+    {
+      "klal_id": 39,
+      "page": 28,
+      "opcode": "replace",
+      "word_index_in_final_text": 617,
+      "original_word": "הון",
+      "corrected_word": "הוו",
+      "bbox": {
+        "x1": 0.23771001398563385,
+        "y1": 0.3937324285507202,
+        "x2": 0.2594897449016571,
+        "y2": 0.4102048873901367
       },
       "bbox_estimated": false
     },
@@ -796,6 +796,141 @@
       "bbox_estimated": false
     },
     {
+      "klal_id": 69,
+      "page": 34,
+      "opcode": "replace",
+      "word_index_in_final_text": 30,
+      "original_word": "אא",
+      "corrected_word": "אלא",
+      "bbox": {
+        "x1": 0.1348663717508316,
+        "y1": 0.5444667935371399,
+        "x2": 0.15848353505134583,
+        "y2": 0.5613682270050049
+      },
+      "bbox_estimated": false
+    },
+    {
+      "klal_id": 69,
+      "page": 34,
+      "opcode": "replace",
+      "word_index_in_final_text": 36,
+      "original_word": "אהים ואהינו ואהיכם",
+      "corrected_word": "אלהים ואלהינו ואלהיכם",
+      "bbox": {
+        "x1": 0.5767557621002197,
+        "y1": 0.5589537024497986,
+        "x2": 0.7259167432785034,
+        "y2": 0.5762575268745422
+      },
+      "bbox_estimated": false
+    },
+    {
+      "klal_id": 69,
+      "page": 34,
+      "opcode": "replace",
+      "word_index_in_final_text": 112,
+      "original_word": "א",
+      "corrected_word": "אל",
+      "bbox": {
+        "x1": 0.4083281457424164,
+        "y1": 0.6197183132171631,
+        "x2": 0.4207582473754883,
+        "y2": 0.6370221376419067
+      },
+      "bbox_estimated": false
+    },
+    {
+      "klal_id": 69,
+      "page": 34,
+      "opcode": "replace",
+      "word_index_in_final_text": 150,
+      "original_word": "אמא",
+      "corrected_word": "אלמא",
+      "bbox": {
+        "x1": 0.33374765515327454,
+        "y1": 0.6503018140792847,
+        "x2": 0.37041640281677246,
+        "y2": 0.6676056385040283
+      },
+      "bbox_estimated": false
+    },
+    {
+      "klal_id": 69,
+      "page": 34,
+      "opcode": "replace",
+      "word_index_in_final_text": 187,
+      "original_word": "א ואהים",
+      "corrected_word": "אל ואלהים",
+      "bbox": {
+        "x1": 0.18707270920276642,
+        "y1": 0.6800804734230042,
+        "x2": 0.24798011779785156,
+        "y2": 0.6973842978477478
+      },
+      "bbox_estimated": false
+    },
+    {
+      "klal_id": 69,
+      "page": 34,
+      "opcode": "replace",
+      "word_index_in_final_text": 239,
+      "original_word": "ואהים",
+      "corrected_word": "ואלהים",
+      "bbox": {
+        "x1": 0.33250465989112854,
+        "y1": 0.7255533337593079,
+        "x2": 0.3760099411010742,
+        "y2": 0.7416499257087708
+      },
+      "bbox_estimated": false
+    },
+    {
+      "klal_id": 69,
+      "page": 34,
+      "opcode": "replace",
+      "word_index_in_final_text": 274,
+      "original_word": "אהים",
+      "corrected_word": "אלהים",
+      "bbox": {
+        "x1": 0.19328776001930237,
+        "y1": 0.7561368346214294,
+        "x2": 0.2311995029449463,
+        "y2": 0.772635817527771
+      },
+      "bbox_estimated": false
+    },
+    {
+      "klal_id": 69,
+      "page": 34,
+      "opcode": "replace",
+      "word_index_in_final_text": 309,
+      "original_word": "אהים",
+      "corrected_word": "אלהים",
+      "bbox": {
+        "x1": 0.8297079205513,
+        "y1": 0.8016096353530884,
+        "x2": 0.8676196336746216,
+        "y2": 0.8193159103393555
+      },
+      "bbox_estimated": false
+    },
+    {
+      "klal_id": 69,
+      "page": 34,
+      "opcode": "replace",
+      "word_index_in_final_text": 398,
+      "original_word": "ע\"ט",
+      "corrected_word": "ע\"ש",
+      "bbox": {
+        "x1": 0.5208203792572021,
+        "y1": 0.8768611550331116,
+        "x2": 0.5525171160697937,
+        "y2": 0.8945674300193787
+      },
+      "bbox_estimated": false
+    },
+    {
       "klal_id": 71,
       "page": 35,
       "opcode": "insert",
@@ -837,21 +972,6 @@
         "y1": 0.410496324300766,
         "x2": 0.38314881920814514,
         "y2": 0.4271765649318695
-      },
-      "bbox_estimated": false
-    },
-    {
-      "klal_id": 74,
-      "page": 35,
-      "opcode": "replace",
-      "word_index_in_final_text": 77,
-      "original_word": "דהולין",
-      "corrected_word": "דחולין",
-      "bbox": {
-        "x1": 0.53751540184021,
-        "y1": 0.5768917798995972,
-        "x2": 0.5824108123779297,
-        "y2": 0.5939788222312927
       },
       "bbox_estimated": false
     },
@@ -964,21 +1084,6 @@
       "klal_id": 74,
       "page": 36,
       "opcode": "replace",
-      "word_index_in_final_text": 966,
-      "original_word": "בארוכ",
-      "corrected_word": "בארוכה",
-      "bbox": {
-        "x1": 0.7215662002563477,
-        "y1": 0.5601609945297241,
-        "x2": 0.7700434923171997,
-        "y2": 0.5754527449607849
-      },
-      "bbox_estimated": false
-    },
-    {
-      "klal_id": 74,
-      "page": 36,
-      "opcode": "replace",
       "word_index_in_final_text": 1052,
       "original_word": "אעזר",
       "corrected_word": "אלעזר",
@@ -987,21 +1092,6 @@
         "y1": 0.635814905166626,
         "x2": 0.9055314064025879,
         "y2": 0.6531187295913696
-      },
-      "bbox_estimated": false
-    },
-    {
-      "klal_id": 77,
-      "page": 38,
-      "opcode": "replace",
-      "word_index_in_final_text": 45,
-      "original_word": "בטהרורת",
-      "corrected_word": "בטהרות",
-      "bbox": {
-        "x1": 0.1473880559206009,
-        "y1": 0.2127060741186142,
-        "x2": 0.21579602360725403,
-        "y2": 0.229593887925148
       },
       "bbox_estimated": false
     },
@@ -1039,7 +1129,7 @@
       "klal_id": 83,
       "page": 38,
       "opcode": "delete",
-      "word_index_in_final_text": 8,
+      "word_index_in_final_text": 9,
       "original_word": "ה",
       "corrected_word": null,
       "bbox": {
@@ -1047,6 +1137,21 @@
         "y1": 0.7720144987106323,
         "x2": 0.48134326934814453,
         "y2": 0.788500189781189
+      },
+      "bbox_estimated": false
+    },
+    {
+      "klal_id": 83,
+      "page": 38,
+      "opcode": "replace",
+      "word_index_in_final_text": 16,
+      "original_word": "אא",
+      "corrected_word": "אלא",
+      "bbox": {
+        "x1": 0.7574626803398132,
+        "y1": 0.786489725112915,
+        "x2": 0.7817164063453674,
+        "y2": 0.8025733828544617
       },
       "bbox_estimated": false
     },
@@ -1231,6 +1336,51 @@
       "bbox_estimated": false
     },
     {
+      "klal_id": 97,
+      "page": 43,
+      "opcode": "replace",
+      "word_index_in_final_text": 106,
+      "original_word": "טרורים",
+      "corrected_word": "טהורים",
+      "bbox": {
+        "x1": 0.7243510484695435,
+        "y1": 0.8316470980644226,
+        "x2": 0.7775030732154846,
+        "y2": 0.8486442565917969
+      },
+      "bbox_estimated": false
+    },
+    {
+      "klal_id": 98,
+      "page": 44,
+      "opcode": "replace",
+      "word_index_in_final_text": 24,
+      "original_word": "ע\"ר",
+      "corrected_word": "ע\"ד",
+      "bbox": {
+        "x1": 0.22401991486549377,
+        "y1": 0.31538769602775574,
+        "x2": 0.25264468789100647,
+        "y2": 0.33186018466949463
+      },
+      "bbox_estimated": false
+    },
+    {
+      "klal_id": 98,
+      "page": 44,
+      "opcode": "replace",
+      "word_index_in_final_text": 61,
+      "original_word": "ב\"ט",
+      "corrected_word": "ב\"מ",
+      "bbox": {
+        "x1": 0.1350342184305191,
+        "y1": 0.34592205286026,
+        "x2": 0.168637216091156,
+        "y2": 0.3627963066101074
+      },
+      "bbox_estimated": false
+    },
+    {
       "klal_id": 100,
       "page": 44,
       "opcode": "delete",
@@ -1246,62 +1396,17 @@
       "bbox_estimated": false
     },
     {
-      "klal_id": 101,
+      "klal_id": 103,
       "page": 44,
       "opcode": "replace",
-      "word_index_in_final_text": 1,
-      "original_word": "ב\"ך",
-      "corrected_word": "ב\"ד",
+      "word_index_in_final_text": 75,
+      "original_word": "בשאה",
+      "corrected_word": "בשאלה",
       "bbox": {
-        "x1": 0.8133167624473572,
-        "y1": 0.4817195534706116,
-        "x2": 0.8587430119514465,
-        "y2": 0.5002008676528931
-      },
-      "bbox_estimated": false
-    },
-    {
-      "klal_id": 101,
-      "page": 44,
-      "opcode": "replace",
-      "word_index_in_final_text": 8,
-      "original_word": "וא",
-      "corrected_word": "ואל",
-      "bbox": {
-        "x1": 0.5264468193054199,
-        "y1": 0.4817195534706116,
-        "x2": 0.5413814783096313,
-        "y2": 0.5002008676528931
-      },
-      "bbox_estimated": false
-    },
-    {
-      "klal_id": 102,
-      "page": 44,
-      "opcode": "replace",
-      "word_index_in_final_text": 1,
-      "original_word": "ב\"ך",
-      "corrected_word": "ב\"ד",
-      "bbox": {
-        "x1": 0.8151835799217224,
-        "y1": 0.5126556754112244,
-        "x2": 0.8593652844429016,
-        "y2": 0.5307352542877197
-      },
-      "bbox_estimated": false
-    },
-    {
-      "klal_id": 102,
-      "page": 44,
-      "opcode": "replace",
-      "word_index_in_final_text": 13,
-      "original_word": "אא",
-      "corrected_word": "אלא",
-      "bbox": {
-        "x1": 0.33665215969085693,
-        "y1": 0.5126556754112244,
-        "x2": 0.35967642068862915,
-        "y2": 0.5307352542877197
+        "x1": 0.6322339773178101,
+        "y1": 0.6950582265853882,
+        "x2": 0.6801493763923645,
+        "y2": 0.7123342752456665
       },
       "bbox_estimated": false
     },
@@ -1309,7 +1414,7 @@
       "klal_id": 106,
       "page": 44,
       "opcode": "delete",
-      "word_index_in_final_text": 46,
+      "word_index_in_final_text": 47,
       "original_word": "בל",
       "corrected_word": null,
       "bbox": {
@@ -1981,21 +2086,6 @@
       "bbox_estimated": false
     },
     {
-      "klal_id": 135,
-      "page": 49,
-      "opcode": "replace",
-      "word_index_in_final_text": 1,
-      "original_word": "רחיה",
-      "corrected_word": "דחיה",
-      "bbox": {
-        "x1": 0.7447335720062256,
-        "y1": 0.39241015911102295,
-        "x2": 0.8023543953895569,
-        "y2": 0.41057729721069336
-      },
-      "bbox_estimated": false
-    },
-    {
       "klal_id": 136,
       "page": 49,
       "opcode": "replace",
@@ -2172,6 +2262,21 @@
         "y1": 0.6971405744552612,
         "x2": 0.3919254541397095,
         "y2": 0.7132501006126404
+      },
+      "bbox_estimated": false
+    },
+    {
+      "klal_id": 146,
+      "page": 53,
+      "opcode": "replace",
+      "word_index_in_final_text": 33,
+      "original_word": "רגלין",
+      "corrected_word": "רגליו",
+      "bbox": {
+        "x1": 0.710918128490448,
+        "y1": 0.10600564628839493,
+        "x2": 0.75,
+        "y2": 0.12374042719602585
       },
       "bbox_estimated": false
     },
@@ -2432,9 +2537,84 @@
     },
     {
       "klal_id": 159,
+      "page": 57,
+      "opcode": "replace",
+      "word_index_in_final_text": 15,
+      "original_word": "איבא",
+      "corrected_word": "אליבא",
+      "bbox": {
+        "x1": 0.6748920679092407,
+        "y1": 0.7392538785934448,
+        "x2": 0.7236273884773254,
+        "y2": 0.7558799386024475
+      },
+      "bbox_estimated": false
+    },
+    {
+      "klal_id": 159,
+      "page": 57,
+      "opcode": "replace",
+      "word_index_in_final_text": 87,
+      "original_word": "איבא",
+      "corrected_word": "אליבא",
+      "bbox": {
+        "x1": 0.26341763138771057,
+        "y1": 0.8004866242408752,
+        "x2": 0.30289945006370544,
+        "y2": 0.8175182342529297
+      },
+      "bbox_estimated": false
+    },
+    {
+      "klal_id": 159,
       "page": 58,
       "opcode": "replace",
-      "word_index_in_final_text": 415,
+      "word_index_in_final_text": 316,
+      "original_word": "איבא",
+      "corrected_word": "אליבא",
+      "bbox": {
+        "x1": 0.7509270906448364,
+        "y1": 0.2270335853099823,
+        "x2": 0.7892459630966187,
+        "y2": 0.24443544447422028
+      },
+      "bbox_estimated": false
+    },
+    {
+      "klal_id": 159,
+      "page": 58,
+      "opcode": "replace",
+      "word_index_in_final_text": 361,
+      "original_word": "איבא",
+      "corrected_word": "אליבא",
+      "bbox": {
+        "x1": 0.8461062908172607,
+        "y1": 0.2739781439304352,
+        "x2": 0.8949320316314697,
+        "y2": 0.2929987907409668
+      },
+      "bbox_estimated": false
+    },
+    {
+      "klal_id": 159,
+      "page": 58,
+      "opcode": "replace",
+      "word_index_in_final_text": 383,
+      "original_word": "איבא",
+      "corrected_word": "אליבא",
+      "bbox": {
+        "x1": 0.5716934204101562,
+        "y1": 0.288547158241272,
+        "x2": 0.6100123524665833,
+        "y2": 0.30594900250434875
+      },
+      "bbox_estimated": false
+    },
+    {
+      "klal_id": 159,
+      "page": 58,
+      "opcode": "replace",
+      "word_index_in_final_text": 416,
       "original_word": "אומריס",
       "corrected_word": "אומרים",
       "bbox": {
@@ -2448,8 +2628,53 @@
     {
       "klal_id": 159,
       "page": 58,
+      "opcode": "replace",
+      "word_index_in_final_text": 558,
+      "original_word": "איבא",
+      "corrected_word": "אליבא",
+      "bbox": {
+        "x1": 0.2175525277853012,
+        "y1": 0.4403075575828552,
+        "x2": 0.25957971811294556,
+        "y2": 0.4573047459125519
+      },
+      "bbox_estimated": false
+    },
+    {
+      "klal_id": 159,
+      "page": 58,
+      "opcode": "replace",
+      "word_index_in_final_text": 700,
+      "original_word": "האה",
+      "corrected_word": "האלה",
+      "bbox": {
+        "x1": 0.43881335854530334,
+        "y1": 0.577094316482544,
+        "x2": 0.4697156846523285,
+        "y2": 0.5940914750099182
+      },
+      "bbox_estimated": false
+    },
+    {
+      "klal_id": 159,
+      "page": 58,
+      "opcode": "replace",
+      "word_index_in_final_text": 748,
+      "original_word": "אא",
+      "corrected_word": "אלא",
+      "bbox": {
+        "x1": 0.6835599541664124,
+        "y1": 0.6228247880935669,
+        "x2": 0.7070457339286804,
+        "y2": 0.6394172310829163
+      },
+      "bbox_estimated": false
+    },
+    {
+      "klal_id": 159,
+      "page": 58,
       "opcode": "delete",
-      "word_index_in_final_text": 1035,
+      "word_index_in_final_text": 1036,
       "original_word": "הלכה",
       "corrected_word": null,
       "bbox": {
@@ -2472,6 +2697,96 @@
         "y1": 0.3625304102897644,
         "x2": 0.4953732192516327,
         "y2": 0.3783454895019531
+      },
+      "bbox_estimated": false
+    },
+    {
+      "klal_id": 163,
+      "page": 59,
+      "opcode": "replace",
+      "word_index_in_final_text": 239,
+      "original_word": "למר",
+      "corrected_word": "למד",
+      "bbox": {
+        "x1": 0.6082664728164673,
+        "y1": 0.7846715450286865,
+        "x2": 0.6403454542160034,
+        "y2": 0.8021087050437927
+      },
+      "bbox_estimated": false
+    },
+    {
+      "klal_id": 163,
+      "page": 60,
+      "opcode": "replace",
+      "word_index_in_final_text": 428,
+      "original_word": "בפיק",
+      "corrected_word": "בפ\"ק",
+      "bbox": {
+        "x1": 0.32940447330474854,
+        "y1": 0.15155179798603058,
+        "x2": 0.36786600947380066,
+        "y2": 0.16767431795597076
+      },
+      "bbox_estimated": false
+    },
+    {
+      "klal_id": 163,
+      "page": 60,
+      "opcode": "replace",
+      "word_index_in_final_text": 430,
+      "original_word": "שכתכו",
+      "corrected_word": "שכתבו",
+      "bbox": {
+        "x1": 0.21712158620357513,
+        "y1": 0.15155179798603058,
+        "x2": 0.268610417842865,
+        "y2": 0.16767431795597076
+      },
+      "bbox_estimated": false
+    },
+    {
+      "klal_id": 163,
+      "page": 60,
+      "opcode": "replace",
+      "word_index_in_final_text": 504,
+      "original_word": "בכתובוב",
+      "corrected_word": "בכתובות",
+      "bbox": {
+        "x1": 0.4547146260738373,
+        "y1": 0.22611850500106812,
+        "x2": 0.518610417842865,
+        "y2": 0.24345022439956665
+      },
+      "bbox_estimated": false
+    },
+    {
+      "klal_id": 163,
+      "page": 60,
+      "opcode": "replace",
+      "word_index_in_final_text": 548,
+      "original_word": "אא",
+      "corrected_word": "אלא",
+      "bbox": {
+        "x1": 0.5967742204666138,
+        "y1": 0.27206772565841675,
+        "x2": 0.6296526193618774,
+        "y2": 0.28778716921806335
+      },
+      "bbox_estimated": false
+    },
+    {
+      "klal_id": 163,
+      "page": 60,
+      "opcode": "replace",
+      "word_index_in_final_text": 574,
+      "original_word": "סיי",
+      "corrected_word": "סי'",
+      "bbox": {
+        "x1": 0.13461539149284363,
+        "y1": 0.28738412261009216,
+        "x2": 0.15756823122501373,
+        "y2": 0.3047158420085907
       },
       "bbox_estimated": false
     },
@@ -3991,6 +4306,21 @@
       "bbox_estimated": false
     },
     {
+      "klal_id": 197,
+      "page": 70,
+      "opcode": "replace",
+      "word_index_in_final_text": 79,
+      "original_word": "אעאי",
+      "corrected_word": "אלעאי",
+      "bbox": {
+        "x1": 0.5294482111930847,
+        "y1": 0.803953230381012,
+        "x2": 0.5678859353065491,
+        "y2": 0.8221057057380676
+      },
+      "bbox_estimated": false
+    },
+    {
       "klal_id": 198,
       "page": 71,
       "opcode": "replace",
@@ -4427,76 +4757,16 @@
     },
     {
       "klal_id": 210,
-      "page": 73,
-      "opcode": "replace",
-      "word_index_in_final_text": 7,
-      "original_word": "למכעי",
-      "corrected_word": "למבעי",
-      "bbox": {
-        "x1": 0.45768994092941284,
-        "y1": 0.8352226614952087,
-        "x2": 0.5021618008613586,
-        "y2": 0.852226734161377
-      },
-      "bbox_estimated": false
-    },
-    {
-      "klal_id": 210,
-      "page": 73,
-      "opcode": "replace",
-      "word_index_in_final_text": 37,
-      "original_word": "ובס",
-      "corrected_word": "ובפ'",
-      "bbox": {
-        "x1": 0.5071031451225281,
-        "y1": 0.8651821613311768,
-        "x2": 0.533662736415863,
-        "y2": 0.8797571063041687
-      },
-      "bbox_estimated": false
-    },
-    {
-      "klal_id": 210,
       "page": 74,
       "opcode": "replace",
-      "word_index_in_final_text": 76,
+      "word_index_in_final_text": 73,
       "original_word": "בתרייתא",
-      "corrected_word": "כתרייתא",
+      "corrected_word": "כבתרייתא",
       "bbox": {
         "x1": 0.2926980257034302,
         "y1": 0.09098260849714279,
         "x2": 0.3582920730113983,
         "y2": 0.10756166279315948
-      },
-      "bbox_estimated": false
-    },
-    {
-      "klal_id": 210,
-      "page": 74,
-      "opcode": "replace",
-      "word_index_in_final_text": 112,
-      "original_word": "דיא",
-      "corrected_word": "היא",
-      "bbox": {
-        "x1": 0.5860148668289185,
-        "y1": 0.13708047568798065,
-        "x2": 0.6126237511634827,
-        "y2": 0.1532551497220993
-      },
-      "bbox_estimated": false
-    },
-    {
-      "klal_id": 210,
-      "page": 74,
-      "opcode": "replace",
-      "word_index_in_final_text": 134,
-      "original_word": "היא",
-      "corrected_word": "הוא",
-      "bbox": {
-        "x1": 0.2611386179924011,
-        "y1": 0.15285079181194305,
-        "x2": 0.28960394859313965,
-        "y2": 0.16942983865737915
       },
       "bbox_estimated": false
     },
@@ -4892,9 +5162,9 @@
     }
   ],
   "meta": {
-    "total_candidates": 326,
+    "total_candidates": 344,
     "skipped_settled_by_applied_decision": 279,
-    "klalim_covered": 117,
+    "klalim_covered": 120,
     "skipped_no_docai_page_klalim": [],
     "unattributable_deletes": [],
     "untrusted_klalim_excluded": []

@@ -359,36 +359,7 @@ def test_clicking_a_word_puts_it_in_the_address_bar(server, page):
     replaceState, not pushState: a reviewer moving through a klal must not have to
     press Back forty times to leave."""
     _open_dashboard(page, server, klal_id=92)
-    page.eval_on_selector('#klal-block-92 [data-word-index="440"]', "el => el.click()")
-    page.wait_for_timeout(800)
-    assert page.evaluate("location.hash") == "#klal=92&word=440"
-    assert page.test_errors == []
-
-
-def test_deep_link_lands_on_the_klal_and_rings_the_word(server, page):
-    """ADDED 2026-08-26 (reviewer request): a link must address a klal, or a klal
-    and a word, so a finding recorded anywhere can be handed over as a URL rather
-    than as "klal 66, count to 135".
-
-    The scroll observer is the hazard: it calls setActiveKlal on whatever drifts
-    into view, so a SMOOTH scroll let it overwrite the destination mid-animation -
-    routing to klal 66 measurably landed on 61 before this was made deterministic.
-    """
-    page.goto(server + "/#klal=66&word=135", wait_until="domcontentloaded", timeout=15000)
-    page.wait_for_selector(".nav-item", timeout=15000)
-    page.wait_for_timeout(2500)
-    assert page.eval_on_selector(".nav-item.active", "el => el.dataset.klalId") == "66"
-    ringed = page.eval_on_selector_all(".routed-word", "els => els.map(e => e.textContent)")
-    assert ringed, "the routed word carries no .routed-word ring"
-    assert page.test_errors == []
-
-
-def test_clicking_a_word_puts_it_in_the_address_bar(server, page):
-    """The address bar is only useful as a handle if it tracks what is on screen.
-    replaceState, not pushState - a reviewer moving through a klal must not have
-    to press Back once per word to leave the page."""
-    _open_dashboard(page, server, klal_id=92)
-    page.wait_for_timeout(800)
+    page.wait_for_timeout(800)      # let the mount settle before clicking into it
     page.eval_on_selector('#klal-block-92 [data-word-index="440"]', "el => el.click()")
     page.wait_for_timeout(800)
     assert page.evaluate("location.hash") == "#klal=92&word=440"
@@ -1344,3 +1315,257 @@ def test_a_closed_panel_does_not_park_on_top_of_the_klal_list(server, page):
         return Math.max(0, Math.min(nav.right, panel.right) - Math.max(nav.left, panel.left));
     }""")
     assert overlap == 0, f"a closed panel still overlaps the nav pane by {overlap}px"
+
+# ---------------------------------------------------------------------------
+# 2026-08-31 reviewer reports. All four look the subject up rather than pinning
+# a corpus coordinate where they can (item 0F): the klal is chosen for having a
+# multi-page-safe flagged word, and the word index is read off the DOM.
+# ---------------------------------------------------------------------------
+
+def test_a_deep_link_scrolls_the_index_pane_fully_onto_the_klal(server, page):
+    """REGRESSION 2026-08-31, reviewer: "the index pane does not scroll all the
+    way to the actual klal".
+
+    setActiveKlal scrolled the nav with block:'nearest', which moves the MINIMUM
+    distance that makes the row visible. Right for the continuous scroll reaction,
+    wrong for a jump: measured on /klal/210/word/133 the row landed at bottom
+    1001px against a pane bottom of 1000px - one pixel past the fold, so the
+    destination the link exists to reach was the one row you could not see.
+    Asserts full visibility, not a scrollTop, because a pixel target would only
+    be asserting the viewport height."""
+    page.goto(server + "/klal/210/word/133", wait_until="domcontentloaded", timeout=15000)
+    page.wait_for_selector(".nav-item", timeout=15000)
+    page.wait_for_timeout(2500)
+    visible = page.evaluate("""() => {
+      const nav = document.getElementById('nav-210');
+      if (!nav) return null;
+      let p = nav.parentElement;
+      while (p && p !== document.body) {
+        const st = getComputedStyle(p);
+        if (/(auto|scroll)/.test(st.overflowY) && p.scrollHeight > p.clientHeight) break;
+        p = p.parentElement;
+      }
+      if (!p || p === document.body) return null;
+      const n = nav.getBoundingClientRect(), s = p.getBoundingClientRect();
+      return n.top >= s.top && n.bottom <= s.bottom;
+    }""")
+    assert visible is True, "the deep link's klal is not fully visible in the index pane"
+    assert page.test_errors == []
+
+
+def test_the_routed_word_ring_outlives_the_reader(server, page):
+    """REGRESSION 2026-08-31, reviewer: "if i move my cursor over the text the
+    highlight disappears".
+
+    It was not the cursor. The ring carried a hard setTimeout(..., 4000) and
+    simply expired - which lands about when a reviewer has finished reading the
+    line and started moving the mouse, so the two read as cause and effect. This
+    moves the pointer AND waits past the old expiry, because asserting only one
+    of the two would still pass against the bug."""
+    page.goto(server + "/klal/210/word/133", wait_until="domcontentloaded", timeout=15000)
+    page.wait_for_selector(".routed-word", timeout=15000)
+    page.mouse.move(700, 400)
+    page.wait_for_timeout(400)
+    page.mouse.move(650, 470)
+    page.wait_for_timeout(5000)          # past the 4000ms the ring used to die at
+    ringed = page.eval_on_selector_all(".routed-word",
+                                       "els => els.map(e => e.dataset.wordIndex)")
+    assert ringed == ["133"], f"expected the ring to still be on w133, got {ringed}"
+    assert page.test_errors == []
+
+
+def test_clicking_a_scan_box_reveals_that_word_in_the_text(server, page):
+    """REGRESSION 2026-08-31, reviewer: "clicking on the highlighted word in the
+    scan does not highlight the same word in the text".
+
+    text->scan had a single funnel (focusWordOnScan); scan->text had nothing, so
+    a scan click moved the scan and opened a panel and the middle pane was never
+    told. Reads the box's own klal/word off the DOM rather than pinning one."""
+    page.goto(server + "/klal/210/word/133", wait_until="domcontentloaded", timeout=15000)
+    page.wait_for_selector("#hl-container .hl-box", timeout=15000)
+    page.wait_for_timeout(1500)
+    page.evaluate("document.querySelectorAll('.routed-word').forEach(e => e.classList.remove('routed-word'))")
+    target = page.evaluate("""() => {
+      const boxes = [...document.querySelectorAll('#hl-container .hl-box')];
+      const b = boxes.find(x => x.className.includes('focused')) || boxes[0];
+      if (!b) return null;
+      b.click();
+      return true;
+    }""")
+    assert target, "no highlighted box on the scan page to click"
+    page.wait_for_selector(".routed-word", timeout=8000)
+    got = page.eval_on_selector_all(".routed-word", "els => els.length")
+    assert got == 1, f"expected exactly one word ringed in the text pane, got {got}"
+    assert page.test_errors == []
+
+
+def test_the_scan_header_carries_the_reference_in_both_scripts(server, page):
+    """ADDED 2026-08-31 (reviewer): the scan header should read the page and klal,
+    then whitespace, then the same reference in Hebrew.
+
+    The Hebrew numerals come from /api/numerals rather than a JS gematria table,
+    so this also pins that the fetch actually reached the running code - the first
+    attempt added it to switchPart() instead of init(), and the header quietly
+    rendered `דף 73` because hebNum() falls back to the digits (Lesson 34)."""
+    page.goto(server + "/klal/210/word/133", wait_until="domcontentloaded", timeout=15000)
+    page.wait_for_selector(".nav-item", timeout=15000)
+    page.wait_for_timeout(2500)
+    en = page.eval_on_selector("#page-indicator", "el => el.textContent")
+    he = page.eval_on_selector("#klal-indicator", "el => el.textContent")
+    assert "Page 73" in en and "Klal 210" in en, en
+    # עג = 73, רי = 210 - the numerals the BOOK would use, not the digits.
+    assert "עג" in he and "רי" in he, f"Hebrew half did not render numerals: {he!r}"
+    assert "73" not in he and "210" not in he, f"Hebrew half still shows digits: {he!r}"
+    assert page.test_errors == []
+
+def test_the_index_row_carries_both_scripts_and_never_squeezes_out_its_badges(server, page):
+    """ADDED 2026-08-31 (reviewer): the index pane should show the English number
+    AND the Hebrew on every line, and a long title must be ellipsised rather than
+    pushing the dispute counts and the flag off the row.
+
+    Asserts the SECOND half by geometry, not by eye: it finds a row that actually
+    has both badges and checks each badge still has non-zero width and sits inside
+    the row's own box. A row is chosen by looking for the badges rather than by
+    pinning a klal id, so settling that klal's queue cannot break this (item 0F)."""
+    _open_dashboard(page, server, klal_id=1)
+    page.wait_for_selector(".nav-item .nheb", timeout=15000)
+    got = page.evaluate("""() => {
+      const heb = [...document.querySelectorAll('.nav-item')].slice(0, 5)
+        .map(r => r.querySelector('.nheb') && r.querySelector('.nheb').textContent);
+      // The row with the LONGEST title that carries any fixed furniture at all -
+      // that is the row where a squeeze would show first. Not pinned to a klal,
+      // and not requiring BOTH badges: the test server's ledger is a temp copy
+      // and may carry no decided ones.
+      const cands = [...document.querySelectorAll('.nav-item')]
+        .filter(r => r.querySelector('.ncount, .nflag'));
+      const row = cands.sort((a, b) =>
+        (b.querySelector('.ntitle')?.textContent || '').length -
+        (a.querySelector('.ntitle')?.textContent || '').length)[0];
+      if (!row) return {heb, badges: null};
+      const rr = row.getBoundingClientRect();
+      const badges = [...row.querySelectorAll('.ncount, .nflag')].map(b => {
+        const br = b.getBoundingClientRect();
+        return {w: br.width, inside: br.right <= rr.right + 0.5 && br.left >= rr.left - 0.5};
+      });
+      const t = row.querySelector('.ntitle');
+      return {heb, badges, titleClipped: t ? t.scrollWidth >= t.clientWidth : null};
+    }""")
+    assert got["heb"][:5] == ["א", "ב", "ג", "ד", "ה"], got["heb"]
+    assert got["badges"], "no index row carries a badge or flag to check"
+    for b in got["badges"]:
+        assert b["w"] > 0 and b["inside"], f"a badge is squeezed out of the row: {got['badges']}"
+    assert page.test_errors == []
+
+def test_the_heading_is_styled_in_place_in_the_text_not_repeated_above_it(server, page):
+    """ADDED 2026-08-31 (reviewer): "i didn't want the title above the text. i want
+    the text itself to have bold for counter and title in the diff font - right
+    there in the text."
+
+    The book does not print a title above a klal - the klal OPENS with its
+    heading, set in larger type - so the heading is styled as a PREFIX OF THE BODY
+    and must not also appear as a separate line. Asserts all four properties that
+    makes: the heading run exists in the body, the marker is bold, the heading is
+    in a different face from the body around it, and the index row uses that SAME
+    face so the two panes agree.
+
+    Compares RESOLVED font families rather than literal names, so re-pointing
+    --font-title for a work with a different layout keeps this green - which is
+    the point of having the token. Uses klal 36, whose heading is a single word,
+    and reads the expected length from the API rather than hardcoding it."""
+    _open_dashboard(page, server, klal_id=36)
+    page.wait_for_selector("#klal-block-36 .klal-title-word", timeout=15000)
+    expected = page.evaluate("() => fetch('/api/klal/36').then(r => r.json()).then(d => d.title_word_count)")
+    got = page.evaluate("""() => {
+      const fam = el => el ? getComputedStyle(el).fontFamily.split(',')[0].replace(/["']/g, '').trim() : null;
+      const blk = document.getElementById('klal-block-36');
+      const marker = blk.querySelector('.klal-marker-word');
+      const title = blk.querySelector('.klal-title-word');
+      const plain = [...blk.querySelectorAll('[data-word-index]')]
+        .find(e => parseInt(e.dataset.wordIndex, 10) > 6);
+      return {
+        titleRun: blk.querySelectorAll('.klal-title-word').length,
+        markerWeight: parseInt(getComputedStyle(marker).fontWeight, 10),
+        titleFont: fam(title), bodyFont: fam(plain), navFont: fam(document.querySelector('.nav-item .klal-title')),
+        headRepeatsTitle: !!blk.querySelector('.klal-head .klal-title'),
+      };
+    }""")
+    assert not got["headRepeatsTitle"], "the title is still repeated above the text"
+    assert got["titleRun"] == expected, f"heading run is {got['titleRun']}, API says {expected}"
+    assert got["markerWeight"] >= 700, got
+    assert got["titleFont"] != got["bodyFont"], f"heading is set in the body face: {got}"
+    assert got["titleFont"] == got["navFont"], f"index and text disagree on the title face: {got}"
+    assert page.test_errors == []
+
+
+def test_the_scan_header_actually_separates_its_two_scripts(server, page):
+    """REGRESSION 2026-08-31, reviewer: "i said to add whitespace to sep. eng from
+    heb above the scan page. you left one space!!"
+
+    The rule said `margin-inline-start`, which resolves against the ELEMENT's own
+    direction - and that span is `direction: rtl`, so it became margin-right and
+    put the gap on the far side. What survived was the single literal space in
+    index.html: a measured 3px. Asserts the rendered GAP, because the property
+    was present and correct-looking the whole time and only the geometry showed
+    it was landing on the wrong edge."""
+    _open_dashboard(page, server, klal_id=69)
+    page.wait_for_timeout(1200)
+    gap = page.evaluate("""() => {
+      const a = document.getElementById('page-indicator').getBoundingClientRect();
+      const b = document.getElementById('klal-indicator').getBoundingClientRect();
+      return b.left - a.right;
+    }""")
+    assert gap >= 16, f"english and hebrew halves are only {gap:.0f}px apart"
+    assert page.test_errors == []
+
+def test_a_nav_jump_lands_on_the_klal_it_was_asked_for(server, page):
+    """REGRESSION 2026-08-31, reviewer: "clicking on 105 in the index moves the
+    text pane but not the scan" - item 0E, which had been recorded as open.
+
+    The symptom was ONE KLAL OFF rather than a dead pane: the scan did go to
+    page 44, but the observer set the active klal to 104 on the way past, so the
+    header read "Klal 104" and the scan outlined 104's region while the text pane
+    sat on 105. jumpTo() released the scroll observer after a fixed 700ms and a
+    long smooth scroll takes ~1500ms to settle.
+
+    Covers the LONGEST jumps deliberately - the last klalim are where the scroll
+    clamps at the bottom and cannot put the destination at the top of the pane, so
+    the observer's "last block above the reading line" answer is structurally
+    wrong there. Asserts the active klal AND the scan page, because the bug moved
+    one without the other."""
+    _open_dashboard(page, server, klal_id=1)
+    for target in (105, 219, 2):
+        page.eval_on_selector(f"#nav-{target}", "el => el.click()")
+        # Wait for the SCROLL to settle, observed from the DOM. `suppressObserver
+        # Scroll` is a script-scoped `let`, so it is not a window property and
+        # cannot be polled from here - checking it was the first attempt and it
+        # timed out on a binding that does not exist.
+        page.wait_for_function(
+            """() => {
+              const el = document.getElementById('text-scroll');
+              const now = Math.round(el.scrollTop);
+              const settled = window.__lastTop === now ? (window.__stable = (window.__stable || 0) + 1)
+                                                       : (window.__stable = 0);
+              window.__lastTop = now;
+              return settled >= 3;
+            }""", timeout=10000)
+        page.wait_for_timeout(500)   # let the post-settle re-assert run
+        page.evaluate("() => { window.__stable = 0; window.__lastTop = null; }")
+        # Both read from the DOM. `currentPage` is a script-scoped `let` like
+        # suppressObserverScroll above, so `window.currentPage` is undefined - the
+        # rendered scan is the honest place to ask which page is actually shown.
+        got = page.evaluate("""() => {
+            const m = (document.getElementById('page-img').getAttribute('src') || '')
+                        .match(/page_(\\d+)\\.png/);
+            return {
+              active: document.querySelector('.nav-item.active')?.dataset?.klalId,
+              page: m ? parseInt(m[1], 10) : null,
+            };
+        }""")
+        want_page = page.evaluate(
+            f"() => fetch('/api/klal/{target}').then(r => r.json()).then(d => d.page)")
+        assert got["active"] == str(target), (
+            f"jumped to klal {target} but the index made klal {got['active']} active")
+        assert got["page"] == want_page, (
+            f"jumped to klal {target}: scan shows page {got['page']}, expected {want_page}")
+    assert page.test_errors == []
+

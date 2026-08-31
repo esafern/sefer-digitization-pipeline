@@ -386,6 +386,76 @@ def header_furniture_indices(tokens, band=HEADER_BAND_MAX_REL_Y):
     return out
 
 
+# The five Hebrew letters that take a distinct form at the end of a word. A
+# word-final plain form is not a spelling variant, it is orthographically
+# impossible - so a proposed READING carrying one cannot be what the page says.
+FINAL_FORMS_REQUIRED = {"כ": "ך", "מ": "ם", "נ": "ן", "פ": "ף", "צ": "ץ"}
+
+
+def impossible_final_form(reading):
+    """True when `reading` ends in a letter that Hebrew requires to be final.
+
+    ADDED 2026-08-31, reviewer, on klal 36 w61: "why was ctc considered? cof is
+    impossible here, would be cof sofit." DocAI had read `כתכ` against the stored
+    `כתב`, and a vision call was spent adjudicating a string that cannot be a
+    Hebrew word. This is the cheap orthographic check that settles it first.
+
+    ABBREVIATIONS ARE EXEMPT, and that exemption is the whole subtlety - it is
+    the same one item 33's trailing-resh rule needed. An abbreviation does not
+    obey final-form orthography: `ה"נ` (הכי נמי) legitimately ends in a plain nun
+    because the nun is an initial, not a word ending. Without this the rule
+    returns a false positive on every gershayim form it meets.
+
+    Multi-word readings are judged on their LAST word only; a garbled two-token
+    reading like `חרא רבפ` is still caught by its own final letter.
+    """
+    if not reading:
+        return False
+    last = reading.split()[-1] if reading.split() else ""
+    if not last or '"' in last or "'" in last or "\u05f3" in last or "\u05f4" in last:
+        return False          # an abbreviation - final-form rules do not apply
+    letters = hebrew_letters_only(last)
+    return len(letters) > 1 and letters[-1] in FINAL_FORMS_REQUIRED
+
+
+def title_word_span(title, clean_text):
+    """How many words at the START of `clean_text` (after the gematria marker)
+    the klal's printed HEADING occupies. 0 when the two do not agree at all.
+
+    ADDED 2026-08-31. The heading is not a separate string in the book - it IS
+    the opening of the klal, set in larger type, and `title` is a transcription
+    of it. So rendering the title means styling a PREFIX of the body, and every
+    surface that wants to do that needs the same answer: the review UI (which
+    sets the heading in its own face inline), and
+    tools/compare_titles_to_text.py (which audits the field). Defined once here
+    rather than in each, per the shared-module rule.
+
+    Editorial punctuation tokens the body carries and the heading does not
+    (`,` `.` `[.]` `•`) are skipped, not counted as a mismatch - otherwise a
+    comma the punctuation pass inserted truncates the span at that word.
+
+    Returns a count of RAW body words (punctuation included), so the caller can
+    index `clean_text.split(' ')` with it directly.
+    """
+    tw = (title or "").split()
+    words = (clean_text or "").split(" ")
+    if not tw or not words:
+        return 0
+    matched, consumed = 0, 0
+    for raw in words[1:]:                     # words[0] is the gematria marker
+        consumed += 1
+        if not (hebrew_letters_only(raw) or any(c.isalnum() for c in raw)):
+            continue                          # editorial punctuation - skip, don't fail
+        if matched >= len(tw):
+            break
+        if hebrew_letters_only(raw) != hebrew_letters_only(tw[matched]):
+            return 0 if matched == 0 else consumed - 1
+        matched += 1
+        if matched == len(tw):
+            return consumed
+    return consumed if matched == len(tw) else 0
+
+
 def klal_id_to_gematria(n):
     """Standard Hebrew numeral spelling, with the תשע"ו-style 15/16
     exception (ט"ו/ט"ז instead of י"ה/י"ו, which would spell divine

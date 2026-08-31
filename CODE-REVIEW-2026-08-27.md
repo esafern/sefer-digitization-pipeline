@@ -1,4 +1,36 @@
 # Heavy Code Review: Sefer Digitization Pipeline
+
+> **RE-VERIFIED 2026-08-31 — every finding below was reproduced or refuted against
+> the live tree. This file's own Status column is now STALE in places; treat
+> `PROJECT-STATUS.md` items 36 and 37 as the current state, not this table.**
+>
+> **Section 2's "Critical & Functional Defects" #1-#3 are FIXED** (item 36), and
+> three of the four were LATENT, not live, when filed — `export_corpus.py` now
+> handles the reviewer-initiated insert, `corpus_io.py`'s regions load defaults to
+> `{}`, and the multi-word replacement guard exists. **The one live defect was #4,
+> `_corpus_bbox_cache`**, listed here as a "Latent Shortfall"; it is now keyed on a
+> `part1/2/3.json` (mtime,size) stamp. Note the stamp does NOT cover
+> `docai_word_boxes/` re-extraction, which this finding also named.
+>
+> **Section 1's Status column, corrected where re-verification disagreed:**
+> **S3 is Fixed**, not Open. Still genuinely open and re-confirmed by reading the
+> current source: **C4, S1** (now 1,955 lines, up from the 1,849 filed), **S2**
+> (12 `.split(' ')` sites across 5 files — this table says "14+ across 7"),
+> **S4, S5, H2, H3, H4, #18**.
+> **#7 is weaker than filed**: `reconstruct_placeholder_klalim.py` imports
+> `FURNITURE_WORDS` from `check_span_shortfall`, but that module is itself
+> `FURNITURE_WORDS = cio.FURNITURE_WORDS` — an indirection, not a divergent copy,
+> so it cannot drift. Worth tidying; not a Lesson 13 instance.
+>
+> **Its Priority-1 remedy #2 was only half-applied, and that is a new finding.**
+> The text says the multi-word guard belongs "in both `apply_reviewer_decisions.py`
+> and `tools/export_corpus.py`". It is in the first and NOT in the second, whose
+> manual-replace branch takes no word-count check although its own insert and
+> delete branches do. 0 live exposure today. See `PROJECT-STATUS.md` item 37.
+>
+> **Not covered by this review at all**: two tests in `tests/test_review_server.py`
+> are defined twice and never run (item 0G / Lesson 37).
+
 **Date**: 2026-08-27 • **Scope**: Full pipeline end-to-end + 2 days of intensive changes (28 commits, 44 files, +35,969 / −3,365 lines, covering 2026-08-25 → 2026-08-27)
 
 ---

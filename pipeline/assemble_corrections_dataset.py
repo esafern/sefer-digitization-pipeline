@@ -369,6 +369,19 @@ def classify(c):
     sel = c.get("vision_selected")
     conf = c.get("vision_confidence")
 
+    # ORTHOGRAPHY FIRST, before any vision verdict is consulted. ADDED 2026-08-31
+    # (reviewer, klal 36 w61: "cof is impossible here, would be cof sofit"). A
+    # proposed reading ending in a plain form of a letter that Hebrew writes
+    # differently at a word end cannot be what the page says, whatever a model
+    # scored it - so the stored text stands and this is a machine resolution, not
+    # a dispute to put in front of a human. `impossible_final_form` exempts
+    # abbreviations, which do not obey the rule (see its docstring).
+    # Measured when added: 7 candidates carried such a reading, 6 after the
+    # abbreviation exemption, and klal 74 w966 was still OPEN - asking a reviewer
+    # to weigh `בארוכ` against the correct `בארוכה`.
+    if op in ("replace", "delete") and cio.impossible_final_form(c.get("original_word")):
+        return "current_text_confirmed" if op == "replace" else "ambiguous"
+
     if op == "replace":
         # FIXED 2026-08-13 (PROJECT-STATUS.md finding 8): 'delete' below
         # gates on MIN_VISION_CONFIDENCE before trusting a selection; this

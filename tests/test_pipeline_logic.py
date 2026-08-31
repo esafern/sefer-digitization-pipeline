@@ -4566,3 +4566,33 @@ def test_a_pending_decision_whose_word_did_not_follow_is_left_alone(apply_harnes
     assert rd.all_current("manual_correction").get((1, 3)) is None, \
         "an unverifiable shift must not move a reviewer's ruling"
     assert rd.all_current("manual_correction").get((1, 4)) is not None
+
+def test_a_reading_ending_in_a_non_final_letter_form_is_impossible():
+    """ADDED 2026-08-31 (reviewer, klal 36 w61): "why was ctc considered? cof is
+    impossible here, would be cof sofit."
+
+    Hebrew writes five letters differently at the end of a word, so a proposed
+    READING carrying a plain form there cannot be what the page says - no vision
+    call needed to settle it. Purely synthetic, so it holds for any book.
+
+    The abbreviation exemption is the subtle half and is asserted here too: an
+    abbreviation does not obey final-form orthography, because the letter is an
+    initial rather than a word ending. Without it the rule fires on every
+    gershayim form it meets."""
+    import corpus_io as cio
+    # the five that must take a final form
+    for bad in ("כתכ", "בארוכ", "קפכ", "נחמ", "וכפ", "דבצ"):
+        assert cio.impossible_final_form(bad), f"{bad!r} ends in a non-final form"
+    # correct spellings, including the proper final forms
+    for ok in ("כתב", "בארוכה", "שמות", "מלך", "אדם", "כהן", "אף", "ארץ"):
+        assert not cio.impossible_final_form(ok), f"{ok!r} is a legal spelling"
+    # abbreviations are exempt - gershayim and geresh alike
+    for abbr in ('ה"נ', 'ב"מ', "ובפ'", "וכו'", 'ע"כ'):
+        assert not cio.impossible_final_form(abbr), f"{abbr!r} is an abbreviation"
+    # a garbled multi-word reading is judged on its last word
+    assert cio.impossible_final_form("חרא רבפ")
+    assert not cio.impossible_final_form("חדא דבפרק")
+    # degenerate input must not raise
+    for empty in ("", None, " ", "א"):
+        assert cio.impossible_final_form(empty) is False
+
