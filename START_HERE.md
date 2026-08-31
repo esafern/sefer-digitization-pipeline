@@ -914,3 +914,44 @@ next incident.
     directly showed all 13. A grep against a summary is a check on the summary.
     This is Lesson 19's shape ("verify against the data, not against the
     write-up") applied to tooling output, and it costs a false alarm every time.
+
+34. **Sweep the SIBLINGS of a bug, not just its class of input.** One defect -
+    a decision naming a different span than the one it answers - was fixed three
+    separate times in three branches of the same function: the confirmed-no-op
+    (finding ★1), then the `insert` opcode (klal 66 w0, which deleted the `אין`
+    that negates a klal), then `replace` (klal 69 w188, which deleted `ואלהים`).
+    Each fix was correct and each was scoped to the branch that had just fired,
+    so the next branch fired next. Lesson 28 says a bug found in one place is a
+    statement about where you looked; the sibling branches of the SAME FUNCTION
+    are the cheapest place to look, and both misses cost a real deleted word
+    caught only by reading an applied diff word by word. When a mutator has three
+    paths and one is wrong, read the other two before writing the test.
+
+35. **Applying a correction has side effects on the review state, and every one
+    of them must be carried out in the same step.** Promoting a decision into the
+    corpus is not the end of the operation. It closes the flag that raised it; it
+    shifts every later index in that klal, so both the open flags AND the pending
+    decisions past that point must be re-pointed; and it makes the corpus disagree
+    with the OCR tokens at that word, which regenerates a candidate there unless
+    the generator is told the position is settled. NONE of that was carried out,
+    so every correction quietly degraded the queue it came from: 48 dead flags
+    still lit, one flag walked onto the wrong word, decisions stranded at stale
+    indices, and 279 candidates - 46% of the queue - asking the reviewer to rule
+    again on words they had already settled, 39 of them proposing to UNDO an
+    applied fix. When a step writes to the source of truth, enumerate what else
+    describes that truth and update it in the same breath, or the description
+    rots against the thing it describes.
+
+36. **A test pinned to real corpus content is testing the defect, not the
+    behaviour - and it fails when the corpus IMPROVES.** All 38 UI tests boot
+    against the shipped corpus and 23 pin a coordinate in executable code, so
+    repairing the text broke seven of them at once: one asserted a literal `&`
+    that had just been correctly repaired to `אל`, three sat on a klal whose
+    candidates had all been settled. For a general-purpose platform that failure
+    mode is inverted - the closer a text gets to correct, the more tests fail.
+    The engine layer is already right (`test_pipeline_logic.py` is 273 tests, 91
+    purely synthetic, verified on a throwaway `אלף בית גימל` corpus and portable
+    to any book); it is the UI layer that needs a synthetic fixture corpus
+    carrying one of each condition. Corollary for the invariants that DO read the
+    real corpus by design: a baseline keyed `(klal_id, word_index)` shifts on
+    every insertion, and nothing can reindex a literal in a test file.

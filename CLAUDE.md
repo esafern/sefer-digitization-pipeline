@@ -7,7 +7,7 @@ redirect, not content.
 gives project context (what this is, success criteria, architecture, directory
 layout, commands); Part 2 holds the binding operational rules — the
 session-start checklist, the Parts 2-3 gate, the logging requirement, the
-single-source-of-truth rule for corpus text, and 19 numbered lessons learned
+single-source-of-truth rule for corpus text, and its numbered lessons learned
 that are rules, not history.
 
 Then read `PROJECT-STATUS.md`, every session, before making any claim about
