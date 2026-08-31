@@ -147,7 +147,7 @@ def main():
             skipped_drift.extend((klal_id, wi) for wi, _ in items)
             continue
 
-        words = klal["clean_text"].split(" ")
+        words = cio.words_of(klal)
         for word_index, decision in sorted(items, key=lambda x: -x[0]):
             live_entry = next((c for c in live_list if c["before_word_index"] == word_index), None)
             snapshot = decision.get("candidate_snapshot")

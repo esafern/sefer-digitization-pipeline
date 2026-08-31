@@ -71,7 +71,7 @@ def word_at(klal, word_index):
     Split on a single space, the same convention apply_reviewer_decisions.py
     indexes with - NOT .split(), whose whitespace collapsing would renumber
     every word after a double space and point every link one word off."""
-    words = klal["clean_text"].split(" ")
+    words = cio.words_of(klal)
     if 0 <= word_index < len(words):
         return words[word_index]
     if word_index == len(words):

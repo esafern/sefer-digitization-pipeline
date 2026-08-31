@@ -100,7 +100,7 @@ def check_candidate_choice(decision, klal):
 def check_manual_correction(decision, klal):
     if decision["chosen_text"] == "":
         return "unverifiable_word_count_change"
-    words = klal["clean_text"].split(" ")
+    words = cio.words_of(klal)
     word_index = decision["word_index"]
     chosen = decision["chosen_text"]
     # `word_index < 0` matters as much as the upper bound: Python indexes
@@ -133,7 +133,7 @@ def check_manual_correction(decision, klal):
 def check_punctuation_choice(decision, klal):
     if decision["chosen_source"] != "accept":
         return "unverifiable_word_count_change"  # reject never inserts anything to verify
-    words = klal["clean_text"].split(" ")
+    words = cio.words_of(klal)
     word_index = decision["word_index"]
     if word_index < 0 or word_index >= len(words):
         return f"MISMATCH: word_index {word_index} out of range (klal now has {len(words)} words)"

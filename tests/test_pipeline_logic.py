@@ -3664,6 +3664,98 @@ def test_cross_klal_skips_gershayim_tokens():
     assert results == []
 
 
+# --- corpus_io.words_of: the one space-only split (finding S2) ----------------
+
+def test_words_of_is_space_only_and_indexes_the_way_decisions_were_recorded():
+    """words_of must NOT collapse whitespace, or every stored word_index moves.
+
+    A `word_index` in the ledger means an index into `clean_text.split(' ')` -
+    what the dashboard's click handler computes. `str.split()` collapses runs,
+    so on a text with a double space it renumbers every later word. The
+    2026-08-25 review proposed unifying on `.split()`; doing so would have
+    invalidated the index of every decision ever recorded, which is why the
+    convergence went the other way.
+    """
+    assert cio.words_of("אלף  בית") == ["אלף", "", "בית"], "must not collapse a double space"
+    assert cio.words_of(" אלף בית") == ["", "אלף", "בית"], "must not drop a leading space"
+    assert cio.words_of("אלף בית") == "אלף בית".split(" ")
+    # dict and string forms answer identically
+    assert cio.words_of({"clean_text": "אלף בית"}) == cio.words_of("אלף בית")
+    # absent/empty degrade to the same shape the raw split gave
+    assert cio.words_of({}) == [""] and cio.words_of(None) == [""]
+    assert cio.word_count_of("אלף בית גימל") == 3
+    # and it is genuinely NOT str.split()
+    assert cio.words_of("אלף  בית") != "אלף  בית".split()
+
+
+def test_no_new_raw_space_split_sites_appear_outside_corpus_io():
+    """The space-only split must go through corpus_io.words_of(), not be
+    re-typed at a new call site.
+
+    ADDED 2026-08-31. Finding S2 has been open since 2026-08-25 and the reason
+    it stayed open is that it kept GROWING: the sweep that counted the sites on
+    2026-08-31 missed one written the same day. A finding that spreads faster
+    than it is fixed needs a gate, not another count - this is Lesson 32's
+    argument ("a tool that prints is not a tool that runs") applied to a
+    convention.
+
+    Uses the AST rather than a grep, deliberately: the modules involved discuss
+    `.split(' ')` at length in comments and docstrings (they have to - the
+    two-scheme distinction is the thing being explained), and a text search
+    cannot tell an explanation from a call. This looks only at real Call nodes.
+
+    NOT a ban on `str.split()` with no argument - that is the machine/diff
+    scheme and is legitimate. Only the space-only form is gated.
+    """
+    import ast
+
+    allowed = {
+        # The canonical implementation itself has to do the split somewhere.
+        "pipeline/corpus_io.py",
+        # Splits a VLM ENGINE's output string into tokens for a membership
+        # test - not corpus clean_text, and it produces no word_index. A
+        # different question that happens to use the same operator.
+        "tools/second_witness_eval/run_part1_vlm_second_witness.py",
+    }
+
+    offenders = []
+    for root, _dirs, files in os.walk(REPO):
+        rel_root = os.path.relpath(root, REPO)
+        if not (rel_root == "pipeline" or rel_root == "tools"
+                or rel_root.startswith("pipeline" + os.sep)
+                or rel_root.startswith("tools" + os.sep)):
+            continue
+        if "__pycache__" in rel_root:
+            continue
+        for fn in files:
+            if not fn.endswith(".py"):
+                continue
+            rel = os.path.relpath(os.path.join(root, fn), REPO)
+            if rel.replace(os.sep, "/") in allowed:
+                continue
+            try:
+                tree = ast.parse(open(os.path.join(root, fn), encoding="utf-8").read())
+            except SyntaxError:
+                continue
+            for node in ast.walk(tree):
+                if (isinstance(node, ast.Call)
+                        and isinstance(node.func, ast.Attribute)
+                        and node.func.attr == "split"
+                        and len(node.args) == 1
+                        and isinstance(node.args[0], ast.Constant)
+                        and node.args[0].value == " "):
+                    offenders.append(f"{rel}:{node.lineno}")
+
+    assert not offenders, (
+        "raw space-only split(' ') outside corpus_io.words_of() at: "
+        + ", ".join(offenders)
+        + ". Use cio.words_of(klal_or_text) - it is the single definition of "
+        "the word list a word_index addresses. If a site genuinely means "
+        "something else (splitting an engine's output, say), add it to this "
+        "test's `allowed` set with a comment saying which question it answers."
+    )
+
+
 # --- review_server: part-token validation (finding S4) ------------------------
 
 def test_parts_for_and_load_klalim_reject_an_unknown_part():

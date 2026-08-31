@@ -71,7 +71,7 @@ def scan(part_paths):
     for path in part_paths:
         for k in cio.load_klalim(path) or []:
             kid = k["klal_id"]
-            for i, raw in enumerate((k.get("clean_text") or "").split(" ")):
+            for i, raw in enumerate(cio.words_of(k)):
                 n = cio.hebrew_letters_only(raw)
                 if LIGATURE_CODEPOINT in raw:
                     literal.append({"klal_id": kid, "word_index": i, "word": raw})

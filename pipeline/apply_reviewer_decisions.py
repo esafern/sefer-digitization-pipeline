@@ -335,7 +335,7 @@ def apply_manual_correction(clean_text, word_index, original_word, chosen_text):
     the rest of this file uses for machine candidates would silently
     misalign on any klal where the two schemes disagree (documented open
     risk, see PROJECT-STATUS.md)."""
-    words = clean_text.split(' ')
+    words = cio.words_of(clean_text)
     if word_index < 0 or word_index >= len(words) or words[word_index] != original_word:
         return None  # live drift beyond what the snapshot check caught
     words[word_index] = chosen_text
@@ -376,7 +376,7 @@ def apply_manual_deletion(clean_text, word_index, original_word):
     word_count_changed_klalim per-klal-per-run guard as the insert/delete
     opcodes below - see their comment for why. Same space-only split as
     apply_manual_correction, for the same reason."""
-    words = clean_text.split(' ')
+    words = cio.words_of(clean_text)
     if word_index < 0 or word_index >= len(words) or words[word_index] != original_word:
         return None
     del words[word_index]
@@ -439,7 +439,7 @@ def main():
     # The text as it stood BEFORE this run, so reindex_flags_after_shift can
     # verify a moved flag lands on the same word it named - captured here rather
     # than re-read later, because by_klal is mutated in place below.
-    words_before = {k["klal_id"]: k["clean_text"].split(" ") for k in part1}
+    words_before = {k["klal_id"]: cio.words_of(k) for k in part1}
     # klal_id -> (position, delta). At most one word-count change per klal per
     # run (the guard below), so one entry each.
     word_count_shifts = {}
@@ -572,7 +572,7 @@ def main():
             continue
 
         word_count_shifts[klal_id] = (
-            word_index, len(new_text.split(" ")) - len(klal["clean_text"].split(" ")))
+            word_index, cio.word_count_of(new_text) - cio.word_count_of(klal))
         klal["clean_text"] = new_text
         word_count_changed_klalim.add(klal_id)
         n_insert_delete += 1
@@ -687,9 +687,9 @@ def main():
         if new_text is None:
             skipped_drift.append((klal_id, word_index))
             continue
-        if kind in ("manual-delete", "manual-insert") or len(new_text.split(" ")) != len(klal["clean_text"].split(" ")):
+        if kind in ("manual-delete", "manual-insert") or cio.word_count_of(new_text) != cio.word_count_of(klal):
             word_count_shifts[klal_id] = (
-                word_index, len(new_text.split(" ")) - len(klal["clean_text"].split(" ")))
+                word_index, cio.word_count_of(new_text) - cio.word_count_of(klal))
         klal["clean_text"] = new_text
         if kind in ("manual-delete", "manual-insert"):
             word_count_changed_klalim.add(klal_id)
@@ -717,13 +717,13 @@ def main():
                 continue
             moved, unverified = reindex_flags_after_shift(
                 klal_id, position, delta, words_before.get(klal_id, []),
-                by_klal[klal_id]["clean_text"].split(" "),
+                cio.words_of(by_klal[klal_id]),
                 {w for k, w in closed_flags if k == klal_id})
             moved_flags += [(klal_id, a, b) for a, b in moved]
             unverified_shifts += [(klal_id, a, b) for a, b in unverified]
             d_moved, d_unverified = reindex_pending_decisions_after_shift(
                 klal_id, position, delta, words_before.get(klal_id, []),
-                by_klal[klal_id]["clean_text"].split(" "))
+                cio.words_of(by_klal[klal_id]))
             moved_decisions += [(klal_id, a, b) for a, b in d_moved]
             unverified_shifts += [(klal_id, a, b) for a, b in d_unverified]
 

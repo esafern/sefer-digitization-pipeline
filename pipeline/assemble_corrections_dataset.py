@@ -289,7 +289,7 @@ def merge_lexical_defects(by_klal, path=LEXICAL_PATH,
         # on page 67 of a klal that starts on 66). Same helper the server uses to
         # answer that question everywhere else.
         page, bbox = None, None
-        words = (klalim_by_id.get(d["klal_id"], {}).get("clean_text") or "").split(" ")
+        words = cio.words_of(klalim_by_id.get(d["klal_id"], {}))
         if words:
             bbox, page = _scan_position(d["klal_id"], words, d["word_index"])
         note = (f"Lexical defect: stored '{d['stored']}' has NO attestation in the "

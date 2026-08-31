@@ -215,7 +215,7 @@ def cache_key_for(klal_id, clean_text, prompt_hash):
 
 
 def propose_for_klal(client, klal):
-    words = klal["clean_text"].split(" ")
+    words = cio.words_of(klal)
     numbered = "\n".join(f"{i}:{w}" for i, w in enumerate(words))
     cache_key = cache_key_for(klal["klal_id"], klal["clean_text"], PROMPT_HASH)
 
@@ -278,7 +278,7 @@ def main():
         result = propose_for_klal(client, klal)
         insertions = result.get("insertions", [])
         # basic sanity filter: valid index range, sorted, deduped
-        words = klal["clean_text"].split(" ")
+        words = cio.words_of(klal)
         seen = set()
         clean_insertions = []
         for ins in insertions:

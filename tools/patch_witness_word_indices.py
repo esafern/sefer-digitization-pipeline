@@ -51,7 +51,7 @@ def build_mapping(klal_id, page):
     k = klalim_by_id.get(klal_id)
     if not k:
         return {}
-    corpus_words = (k.get("clean_text") or "").split(" ")
+    corpus_words = cio.words_of(k)
     corpus_norm = [norm(w) for w in corpus_words]
 
     dtoks = docai_tokens_for_page(page)

@@ -192,7 +192,7 @@ def check_foreign_characters(klalim):
     issues = []
     for k in klalim:
         kid, text = k["klal_id"], k["clean_text"]
-        words = text.split(" ")
+        words = cio.words_of(text)
         for idx, w in enumerate(words):
             for ch in w:
                 if is_foreign_char(ch):

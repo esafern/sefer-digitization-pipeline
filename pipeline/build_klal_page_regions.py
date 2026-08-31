@@ -237,7 +237,7 @@ def is_placeholder_klal(k):
     printed marker's position is meaningful independent of whether the body
     text has been transcribed yet (71 of 667 placeholder klalim currently get
     a real, unaffected marker-anchored region this way)."""
-    parts = (k.get("clean_text") or "").strip().split(" ")
+    parts = cio.words_of((k.get("clean_text") or "").strip())
     return len(parts) == 3 and parts[1] == "כלל" and parts[2] == str(k["klal_id"])
 
 

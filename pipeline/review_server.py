@@ -984,7 +984,7 @@ def api_klalim(part_num=1):
         k = klalim_by_id.get(kid)
         if not k:
             continue
-        words = (k.get("clean_text") or "").split(" ")
+        words = cio.words_of(k)
         original_word = rec.get("candidate_snapshot", {}).get("original_word")
         if not _word_matches(words, wi, original_word):
             continue
@@ -1022,7 +1022,7 @@ def api_klalim(part_num=1):
         # undecided correction - never to decided_count. Excludes any
         # word_index a valid manual_correction already covers, matching
         # api_klal()'s own dedup so the two endpoints never disagree.
-        words = (k.get("clean_text") or "").split(" ")
+        words = cio.words_of(k)
         n_words = len(words)
         manual_indices = manual_indices_by_klal.get(kid, set())
         manual_indices_for_count = manual_indices
@@ -1214,7 +1214,7 @@ def api_klal(klal_id):
     # else's chosen_text attached to it. Skip (don't render) a decision
     # whose original_word no longer matches what's actually at that
     # position now; only a still-valid decision renders.
-    words = (k.get("clean_text") or "").split(" ")
+    words = cio.words_of(k)
     manual_word_indices = set()
     for (kid, word_index), rec in rd.all_current("manual_correction").items():
         if kid != klal_id:
@@ -1577,7 +1577,7 @@ def api_page(page_num):
         k = klalim_by_id.get(kid)
         if not k:
             continue
-        words = (k.get("clean_text") or "").split(" ")
+        words = cio.words_of(k)
         for (mkid, wi), rec in manual_current.items():
             if mkid != kid or (kid, wi) in correction_keys:
                 continue
@@ -1609,7 +1609,7 @@ def api_page(page_num):
         k = klalim_by_id.get(kid)
         if not k:
             continue
-        words = (k.get("clean_text") or "").split(" ")
+        words = cio.words_of(k)
         page_bboxes = _corpus_word_bboxes(kid, words, page_num)
         for wi, bbox in page_bboxes.items():
             if (kid, wi) not in served_keys:

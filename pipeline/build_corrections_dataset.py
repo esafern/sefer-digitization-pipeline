@@ -273,7 +273,7 @@ def settled_by_an_applied_decision(part1_by_id):
         klal = part1_by_id.get(decision["klal_id"])
         if not klal:
             continue
-        words = klal["clean_text"].split(" ")
+        words = cio.words_of(klal)
         wi = decision["word_index"]
         chosen = (decision.get("chosen_text") or "").split()
         if chosen and words[wi:wi + len(chosen)] == chosen:

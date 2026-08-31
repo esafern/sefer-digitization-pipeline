@@ -191,6 +191,56 @@ def union_bbox(tokens):
     }
 
 
+# ---------- THE word list for anything carrying a word_index ----------
+
+def words_of(klal_or_text):
+    """The canonical word list of a klal, for every caller that indexes it.
+
+    ADDED 2026-08-31, the remedy finding S2 asked for on 2026-08-25 (restated
+    as the 2026-08-27 review's S2 and as PROJECT-STATUS item 37(b), where the
+    real count was measured at 27 sites across 14 files - and still growing:
+    one of the 27 was written the same day as the sweep that counted them).
+
+    **Space-only, deliberately, and this is the load-bearing sentence.** A
+    `word_index` in this project means an index into `clean_text.split(' ')`,
+    because that is what the dashboard's own click handler computes
+    (`(k.clean_text || '').split(' ')`) and every decision in the append-only
+    ledger was recorded against it. `str.split()` with no argument COLLAPSES
+    runs of whitespace, so on a text with a double space it renumbers every
+    word after that point - which silently points a stored decision, a deep
+    link or a highlight at the wrong word. tools/build_open_items_report.py
+    hit exactly that and its comment says so.
+
+    Note the direction: the 2026-08-25 review proposed unifying on `.split()`.
+    That recommendation is **wrong for this corpus** and is deliberately not
+    followed - it would invalidate the word_index of every decision ever
+    recorded. The scheme to converge on is the one the data is already in.
+
+    This does NOT merge the two schemes. Machine candidate generation
+    legitimately uses `.split()` (whitespace-collapsing) because it is
+    diffing token streams, not addressing stored positions; those sites stay
+    as they are. What this ends is the *unmarked* use of the space-only split
+    in fourteen files, where the two schemes were told apart only by reading
+    each call site and knowing which one it meant.
+
+    Today the two agree - measured: 0 of 667 klalim have a double, leading or
+    trailing space, which `test_no_double_spaces_in_clean_text` gates. That
+    test guards the DATA. This function is what makes the CODE say which
+    scheme it means, so the day a text with unusual whitespace does get in,
+    the divergence is one function's problem instead of fourteen files'.
+
+    Accepts a klal dict or a raw string, so callers holding either can ask
+    the same question.
+    """
+    text = klal_or_text.get("clean_text") if isinstance(klal_or_text, dict) else klal_or_text
+    return (text or "").split(" ")
+
+
+def word_count_of(klal_or_text):
+    """len(words_of(...)), for the callers that only compare counts."""
+    return len(words_of(klal_or_text))
+
+
 # ---------- text normalization shared by readers of DocAI tokens ----------
 
 def clean_word(w):
@@ -482,10 +532,10 @@ def title_word_span(title, clean_text):
     comma the punctuation pass inserted truncates the span at that word.
 
     Returns a count of RAW body words (punctuation included), so the caller can
-    index `clean_text.split(' ')` with it directly.
+    index `words_of(klal)` with it directly.
     """
     tw = (title or "").split()
-    words = (clean_text or "").split(" ")
+    words = words_of(clean_text)
     if not tw or not words:
         return 0
     matched, consumed = 0, 0
