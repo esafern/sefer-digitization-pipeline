@@ -193,6 +193,59 @@ def close_flag_satisfied_by(klal_id, word_index, decision, kind, applied_ts=None
     return True
 
 
+def reindex_pending_decisions_after_shift(klal_id, position, delta, old_words, new_words):
+    """Move UNAPPLIED decisions past a word-count change onto the words they name.
+
+    reindex_flags_after_shift() covers flags; nothing covered decisions, and they
+    have it worse. A stale flag points at the wrong word and a human notices. A
+    stale decision is refused by the drift guard on every future run - correctly,
+    since the corpus no longer holds what it was recorded against - so it is
+    stranded exactly the way 0A stranded a decided dispute, and for a reason this
+    script itself created one run earlier.
+
+    Measured 2026-08-31 on klal 74: deleting a page-seam catchword at w416 left
+    the decisions at w417 (`רבא`, the duplicate the same flag named) and w443
+    (`!`) pointing one word past their targets. The corpus was left reading
+    `אמר רבא רבא אמר` - half a repair, with the other half unappliable.
+
+    Same verified-move rule as the flag version: the word the decision named must
+    be the word at the shifted index, or it is left alone and reported. Nothing is
+    edited - a superseding decision is appended, carrying the original's own
+    chosen_text and snapshot rewritten to the new index."""
+    already = rd.applied_decision_ids()
+    moved, unverified = [], []
+    for d_type in ("candidate_choice", "manual_correction"):
+        for (kid, wi), decision in sorted(rd.all_current(d_type).items()):
+            if kid != klal_id or wi is None or wi <= position:
+                continue
+            if decision["id"] in already:
+                continue                       # already in the corpus, not pending
+            snapshot = decision.get("candidate_snapshot") or {}
+            named = snapshot.get("final_text") or snapshot.get("original_word")
+            if not named:
+                continue                       # nothing to verify a move against
+            span = named.split()
+            new_wi = wi + delta
+            if not (0 <= wi < len(old_words) and 0 <= new_wi <= len(new_words) - len(span)):
+                unverified.append((wi, new_wi)); continue
+            if old_words[wi:wi + len(span)] != span or new_words[new_wi:new_wi + len(span)] != span:
+                unverified.append((wi, new_wi)); continue
+            moved_snapshot = dict(snapshot, word_index=new_wi)
+            rd.append_decision(
+                d_type, klal_id=klal_id, word_index=new_wi,
+                chosen_source=decision.get("chosen_source"),
+                chosen_text=decision.get("chosen_text"),
+                candidate_snapshot=moved_snapshot,
+                reviewer=decision.get("reviewer") or "local",
+                note=(f"[reindexed from w{wi} on {datetime.date.today().isoformat()}: a word-count "
+                      f"change at w{position} in this klal shifted every later index by {delta:+d}, "
+                      f"and {named!r} now sits at w{new_wi}. Carries decision {decision['id']}'s own "
+                      f"ruling unchanged - only the position moved.] "
+                      + (decision.get("note") or "")))
+            moved.append((wi, new_wi))
+    return moved, unverified
+
+
 def reindex_flags_after_shift(klal_id, position, delta, old_words, new_words, skip):
     """Move open flags past a word-count change onto the words they name.
 
@@ -427,6 +480,30 @@ def main():
             continue
 
         if opcode == "replace":
+            # A `replace` whose chosen text has a DIFFERENT word count than the
+            # span it answers is a word-count change wearing a same-position
+            # opcode. apply_replace() substitutes the chosen text for the WHOLE
+            # span, so choosing one word for a two-word span deletes the other -
+            # and none of the insert/delete safeguards apply on this path: no
+            # one-per-klal-per-run gate, no shift recorded, so the flags after it
+            # are never reindexed.
+            #
+            # Third instance of one defect (klal 66 w0 was the `insert` branch,
+            # ★1 the confirmed-no-op): a decision naming fewer words than its
+            # span. It fired here on klal 69 w188, span `אל ואלהים`, chosen `אל` -
+            # deleting a `ואלהים` this candidate's OWN vision check reads at 0.95
+            # and whose flag is `current_text_confirmed`, leaving
+            # `לא שם אל דליתא` where the sentence needs `לא שם אל ואלהים דליתא`.
+            # Swept the whole ledger: that is the only one ever applied.
+            #
+            # Refused rather than gated. A same-count replace is what this opcode
+            # means; anything else is a reviewer answering a different question
+            # than the one asked, and the answer belongs at an explicit index.
+            span_len = len((snapshot.get("final_text") or "").split())
+            chosen_len = len((decision["chosen_text"] or "").split())
+            if span_len and chosen_len and span_len != chosen_len:
+                refused_partial_span.append((klal_id, word_index))
+                continue
             new_text = apply_replace(klal["clean_text"], word_index, snapshot.get("final_text"), decision["chosen_text"])
             if new_text is None:
                 skipped_drift.append((klal_id, word_index))
@@ -574,7 +651,7 @@ def main():
     # The review state that has to follow the corpus. Deliberately AFTER the
     # corpus is written: a flag closed against an edit that never landed would be
     # worse than one left open.
-    closed_flags, moved_flags, unverified_shifts = [], [], []
+    closed_flags, moved_flags, unverified_shifts, moved_decisions = [], [], [], []
     if not args.dry_run:
         for klal_id, word_index, kind in applied:
             if close_flag_satisfied_by(klal_id, word_index,
@@ -590,6 +667,11 @@ def main():
                 {w for k, w in closed_flags if k == klal_id})
             moved_flags += [(klal_id, a, b) for a, b in moved]
             unverified_shifts += [(klal_id, a, b) for a, b in unverified]
+            d_moved, d_unverified = reindex_pending_decisions_after_shift(
+                klal_id, position, delta, words_before.get(klal_id, []),
+                by_klal[klal_id]["clean_text"].split(" "))
+            moved_decisions += [(klal_id, a, b) for a, b in d_moved]
+            unverified_shifts += [(klal_id, a, b) for a, b in d_unverified]
 
     tag = "[DRY RUN] " if args.dry_run else ""
     print(f"\n{tag}Applied: {len(applied)} ({n_replace} replace, {n_insert_delete} insert/delete, "
@@ -623,6 +705,13 @@ def main():
         for kid, a, b in moved_flags:
             print(f"  klal {kid} word {a} -> word {b}")
 
+    if moved_decisions:
+        print(f"\n{len(moved_decisions)} PENDING decision(s) reindexed onto the word they name, "
+              f"after a word-count change shifted this klal's later indices. Re-run this script "
+              f"after ./rebuild_all.sh to apply them:")
+        for kid, a, b in moved_decisions:
+            print(f"  klal {kid} word {a} -> word {b}")
+
     if unverified_shifts:
         print(f"\n{len(unverified_shifts)} open flag(s) sit past a word-count change but could NOT "
               f"be verified at the shifted index, so they were LEFT WHERE THEY ARE and may now name "
@@ -631,10 +720,11 @@ def main():
             print(f"  klal {kid} word {a} (would have been word {b})")
 
     if refused_partial_span:
-        print(f"\n{len(refused_partial_span)} decision(s) REFUSED - an 'insert'-opcode decision "
-              f"whose chosen text is neither the whole stored span nor empty. This path can only "
-              f"keep or remove the whole span; applying it would delete text the reviewer did not "
-              f"vote to delete. Re-rule these as an explicit correction:")
+        print(f"\n{len(refused_partial_span)} decision(s) REFUSED - the chosen text does not "
+              f"match the span it answers: an 'insert' decision that is neither the whole stored "
+              f"span nor empty, or a 'replace' whose chosen text has a different WORD COUNT than "
+              f"the span. Applying either would delete text the reviewer did not vote to delete. "
+              f"Re-rule these against the exact word:")
         for kid, widx in refused_partial_span:
             print(f"  klal {kid} word {widx}")
 

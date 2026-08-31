@@ -233,12 +233,65 @@ def load_trusted_klal_pages():
     return cio.trusted_klal_pages_with_continuations(ALIGNMENT_PATH, PART1_MAX_KLAL)
 
 
+def settled_by_an_applied_decision(part1_by_id):
+    """{(klal_id, word_index)} where a human ruling has ALREADY been promoted into
+    the corpus and the corpus still holds exactly what they chose.
+
+    Correcting a word is precisely what makes part1.json and the DocAI token
+    stream disagree there - the token still carries the OCR error the reviewer
+    just fixed. So every applied correction generated a brand-new candidate at
+    its own position on the next rebuild, undecided, asking the reviewer to rule
+    again on a word they had settled. 39 of them rendered RED, i.e. the pipeline
+    proposing to UNDO an applied fix: `שבועה` back to `שכועה`, `אבל` to `אכל`,
+    `עמו` to `עטו`. Reported 2026-08-31 as "klal 61 I decided the dispute but the
+    reading pane still shows red and yellow boxes"; measured at 279 candidates on
+    settled words, and it would have grown with every correction ever applied.
+
+    Deliberately narrower than "a decision exists here", and both halves matter.
+    APPLIED: a decision still waiting to be promoted must keep its candidate, or
+    the reviewer loses the entry their own ruling hangs on. STILL MATCHES: if the
+    corpus later moves off what they chose, the disagreement is real again and the
+    candidate should come back - so this heals itself rather than suppressing the
+    position forever.
+
+    Filtered here, at generation, rather than downstream: it also stops
+    verify_corrections_vision.py spending a Gemini call re-adjudicating a word a
+    human already settled."""
+    import review_decisions as rd
+    records = {r["id"]: r for r in rd.all_records()} if hasattr(rd, "all_records") else None
+    if records is None:                      # read the log directly; rd has no bulk accessor
+        records = {}
+        with open(os.path.join(REPO, "review_decisions.jsonl"), encoding="utf-8") as f:
+            for line in f:
+                if line.strip():
+                    r = json.loads(line)
+                    records[r["id"]] = r
+    settled = set()
+    for r in records.values():
+        if r["decision_type"] != "apply_event":
+            continue
+        decision = records.get(r.get("applied_decision_id"))
+        if not decision or decision.get("word_index") is None:
+            continue
+        klal = part1_by_id.get(decision["klal_id"])
+        if not klal:
+            continue
+        words = klal["clean_text"].split(" ")
+        wi = decision["word_index"]
+        chosen = (decision.get("chosen_text") or "").split()
+        if chosen and words[wi:wi + len(chosen)] == chosen:
+            settled.add((decision["klal_id"], wi))
+    return settled
+
+
 def main():
     klal_pages, untrusted_ids = load_trusted_klal_pages()
 
     final_by_id = {k["klal_id"]: k for k in cio.load_demo_dataset(DEMO_DATASET)}
+    settled = settled_by_an_applied_decision({k["klal_id"]: k for k in cio.load_part1_sorted()})
 
     corrections = []
+    n_settled_skipped = 0
     skipped_no_docai_page = set()
     unattributable_deletes = []
 
@@ -368,6 +421,12 @@ def main():
                 bbox = union_bbox(orig_tokens) if orig_tokens else None
                 bbox_estimated = False
 
+            if (klal_id, word_idx) in settled:
+                # A human ruled here and the ruling is already in the corpus -
+                # see settled_by_an_applied_decision().
+                n_settled_skipped += 1
+                continue
+
             corrections.append({
                 "klal_id": klal_id,
                 "page": page_id,
@@ -383,6 +442,7 @@ def main():
         "corrections": corrections,
         "meta": {
             "total_candidates": len(corrections),
+            "skipped_settled_by_applied_decision": n_settled_skipped,
             "klalim_covered": len(set(c["klal_id"] for c in corrections)),
             "skipped_no_docai_page_klalim": sorted(skipped_no_docai_page),
             "unattributable_deletes": [{"page": p, "docai_reading": w} for p, w in unattributable_deletes],

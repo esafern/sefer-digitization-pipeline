@@ -43,6 +43,28 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0E. **[2026-08-31] A nav jump's smooth scroll outlives the observer
+    suppression, so a focus set during it is wiped.** `jumpTo()` starts a
+    `scrollIntoView({behavior:'smooth'})` and sets `suppressObserverScroll` for
+    **700ms**; measured 2026-08-31, that scroll takes **~1500ms** to settle from a
+    long jump (klal 53 -> klal 12 sampled every 300ms: -11337, -3737, -893, -24,
+    12). For the remaining ~800ms the scroll observer is live, so
+    `updateActiveFromScroll()` fires, calls `setActiveKlal()`, and that calls
+    `showPage(page, klal, null)` - the explicit null that clears `scanFocusCorr`.
+    Any word focused in that window loses its highlight ring, and the scan pane
+    jumps to whichever klal the scroll is passing.
+    Caught by instrumenting `showPage`: zooming right after a nav jump produced
+    two `showPage(..., null)` calls for klal 4 while the focused word was in klal
+    5. NOT a regression - reproduced with 2026-08-31's frontend and server changes
+    reverted; it surfaced only because a test's subject moved off klal 1 when its
+    corrections were applied.
+    NOT YET FIXED. The clean fix is to end the suppression when the scroll
+    actually settles rather than after a fixed timeout, which is a behaviour
+    change in the scroll/observer path and wants its own before/after. In the
+    meantime `tests/test_review_server.py::test_focus_box_transparent_and_zoom_
+    preserves_focus` waits for the scroll to settle before focusing, so it tests
+    zoom rather than the race.
+
 0D. **[FIXED 2026-08-30, reviewer-reported] Correcting a word cost it its scan
     position, and applying a decision never closed the flag that raised it.**
     Three reports, one measurement behind two of them.

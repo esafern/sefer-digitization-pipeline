@@ -1127,18 +1127,16 @@ def test_part1_character_sanity(part_klalim, part1_integrity_validator):
 # produced). One frequency/semantic signal only - per Lesson 9 that is not
 # enough to act on, and per Success Criterion #1 nothing may be changed
 # without reading the ink.
+# INDEX-KEYED, and indexes move. Every entry here shifts when a word is inserted
+# or deleted earlier in its klal - apply_reviewer_decisions reindexes the FLAGS
+# and the pending DECISIONS after such a change, but nothing can reindex a
+# literal in a test file. When this fails after an apply, check whether the same
+# character is simply at a new position before treating it as new damage.
 FOREIGN_CHARACTER_BASELINE = {
-    (39, 252, "Π"),   # standalone; context דבכולהן Π דבכולהו
-    (66, 112, "!"),   # standalone; context דברי ב"ד ! חבירו (word_index shifted
-                       # 97->112 2026-08-17 by the klal 65/66 boundary fix, which
-                       # inserted 15 words before it - same character, same text,
-                       # new position; see PROJECT-STATUS.md)
-    (69, 338, "&"),   # standalone; reads as אל - see note above
-    (74, 443, "!"),   # standalone; context ע"ב ב ! ואפ"ה
-    (77, 11, "&"),    # standalone; reads as אל - see note above
-    (167, 24, "&"),   # standalone; reads as אל - see note above
-    (176, 694, ";"),  # standalone, klal-final; context סי' ה' ;
+    (74, 441, "!"),
+    (77, 11, "&"),
 }
+
 
 
 def test_part1_no_new_characters_outside_the_documented_repertoire(
@@ -1769,10 +1767,19 @@ def test_reject_omission_option_does_not_read_a_field_that_cannot_exist():
 # reduces them to "" and the aligner drops them from both sides. Fixing them
 # needs punctuation tokens back in the sequence, which was tried on 2026-08-30
 # and reverted: it moved 41 correct boxes and lost 2. See _corpus_word_bboxes().
+# The flagged words carrying no Hebrew letter at all (hebrew_letters_only()
+# reduces them to "", so the aligner drops them from both sides) plus a handful
+# of run-together words - `שתישההולאחם` is `שתי הלחם` fused, `ראיתי'להתוס'` two
+# words with the space lost. Those are a TEXT repair, not an alignment problem;
+# three already carry the right reading in their flag note. Fixing the
+# punctuation-only ones needs punctuation tokens back in the sequence, tried
+# 2026-08-30 and reverted (it moved 41 correct boxes and lost 2).
+# INDEX-KEYED - see the note on FOREIGN_CHARACTER_BASELINE.
 UNLOCATABLE_FLAGGED_WORD_BASELINE = {
-    (39, 252), (69, 338), (74, 443), (77, 11), (144, 598),
-    (182, 5), (189, 461), (198, 570), (209, 16), (216, 136),
+    (74, 441), (77, 11), (144, 598), (182, 5),
+    (189, 461), (198, 570), (209, 16), (216, 136),
 }
+
 
 
 # The 21 words whose box already sat out of reading order before the aligner
@@ -1783,14 +1790,22 @@ UNLOCATABLE_FLAGGED_WORD_BASELINE = {
 # boxes coincide. Several are already flagged as duplicated-word candidates
 # (klal 29 w99 `צדה`, klal 3 w224 `ואם`), so fixing the text is what retires
 # these, not tuning the aligner.
+# Boxes already out of reading order before the aligner learned to pair
+# `replace` runs on 2026-08-30 - measured both ways, the change introduced none
+# and fixed none. Most sit beside an IDENTICAL word: the corpus has it doubled
+# where the page prints it once, so SequenceMatcher maps both copies onto the
+# same token and the boxes coincide. Several are already flagged as
+# duplicated-word candidates, so fixing the TEXT is what retires these, not
+# tuning the aligner. INDEX-KEYED - see FOREIGN_CHARACTER_BASELINE.
 BOX_READING_ORDER_BASELINE = {
     (3, 224), (3, 225), (29, 9), (29, 99),
     (29, 100), (30, 1521), (30, 1522), (41, 10),
-    (41, 11), (57, 15), (57, 16), (68, 30),
-    (82, 25), (82, 26), (94, 189), (147, 406),
-    (147, 407), (158, 50), (158, 51), (167, 68),
-    (167, 69),
+    (41, 11), (57, 15), (57, 16), (68, 28),
+    (68, 29), (82, 25), (82, 26), (94, 189),
+    (147, 406), (147, 407), (158, 50), (158, 51),
+    (167, 68), (167, 69),
 }
+
 
 
 def test_a_words_scan_box_sits_between_its_neighbours_in_reading_order(part1_by_id):
@@ -2041,3 +2056,52 @@ def test_no_open_flag_names_a_word_that_is_not_at_its_index(part1_by_id):
         f"{len(offenders)} open flag(s) name a word that is not at their index, so the note is "
         f"attached to the wrong word (klal, index, note's word, word actually there, where the "
         f"named word is now): {offenders[:6]}")
+
+
+def test_no_candidate_re_raises_a_word_an_applied_decision_already_settled(part1_by_id):
+    """REGRESSION 2026-08-31, reviewer: "klal 61 I decided the dispute but the
+    reading pane still shows red and yellow boxes".
+
+    Correcting a word is exactly what makes part1.json disagree with the DocAI
+    token stream there - the token still carries the error the reviewer just
+    fixed - so every applied correction grew a brand-new candidate at its own
+    position on the next rebuild, undecided, asking for a ruling on a settled
+    word. 279 of them, 46% of the whole queue, and 39 rendered RED: the pipeline
+    proposing to UNDO an applied fix (`שבועה` back to `שכועה`, `אבל` to `אכל`,
+    `עמו` to `עטו`). It would have grown with every correction ever applied.
+
+    The condition is deliberately narrow on both halves - APPLIED (a decision
+    still awaiting promotion must keep the entry its ruling hangs on) and STILL
+    MATCHING (if the corpus later moves off what they chose, the disagreement is
+    real again and the candidate belongs). See
+    build_corrections_dataset.settled_by_an_applied_decision()."""
+    review_server = _import_from_path("review_server", os.path.join(REPO, "pipeline", "review_server.py"))
+    records = {}
+    with open(os.path.join(REPO, "review_decisions.jsonl"), encoding="utf-8") as f:
+        for line in f:
+            if line.strip():
+                r = json.loads(line)
+                records[r["id"]] = r
+    settled = {}
+    for r in records.values():
+        if r["decision_type"] != "apply_event":
+            continue
+        d = records.get(r.get("applied_decision_id"))
+        if not d or d.get("word_index") is None or d["klal_id"] not in part1_by_id:
+            continue
+        words = part1_by_id[d["klal_id"]]["clean_text"].split(" ")
+        chosen = (d.get("chosen_text") or "").split()
+        if chosen and words[d["word_index"]:d["word_index"] + len(chosen)] == chosen:
+            settled[(d["klal_id"], d["word_index"])] = d.get("chosen_text")
+
+    corrections = review_server.cio.load_json(os.path.join(REPO, "corrections_part1.json")) or {}
+    offenders = []
+    for klal_id, entries in corrections.items():
+        for e in entries:
+            key = (int(klal_id), e["word_index"])
+            if key in settled:
+                offenders.append((key[0], key[1], e.get("flag"), settled[key]))
+    assert not offenders, (
+        f"{len(offenders)} candidate(s) sit on a word an applied human decision already settled, so "
+        f"the reviewer is asked to rule again on their own applied fix (klal, word, flag, what they "
+        f"chose): {offenders[:8]}")

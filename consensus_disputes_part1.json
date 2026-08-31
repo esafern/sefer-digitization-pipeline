@@ -100,30 +100,6 @@
   "7": [
     {
       "klal_id": 7,
-      "word_index": 355,
-      "opcode": "replace",
-      "final_text": "דייה",
-      "consensus_reading": "ד\"ה",
-      "agreeing_engines": [
-        "surya",
-        "vlm"
-      ],
-      "ligature_artifact": null,
-      "witnesses": {
-        "docai": null,
-        "vlm": "ד\"ה",
-        "surya": "ד\"ה"
-      },
-      "page": 17,
-      "bbox": {
-        "x1": 0.1672794073820114,
-        "y1": 0.6770110130310059,
-        "x2": 0.1979166716337204,
-        "y2": 0.6929358839988708
-      }
-    },
-    {
-      "klal_id": 7,
       "word_index": 497,
       "opcode": "replace",
       "final_text": "י\"ר",
@@ -144,32 +120,6 @@
         "y1": 0.8476929068565369,
         "x2": 0.36642158031463623,
         "y2": 0.859534502029419
-      }
-    }
-  ],
-  "9": [
-    {
-      "klal_id": 9,
-      "word_index": 17,
-      "opcode": "replace",
-      "final_text": "דייה",
-      "consensus_reading": "ד\"ה",
-      "agreeing_engines": [
-        "surya",
-        "vlm"
-      ],
-      "ligature_artifact": null,
-      "witnesses": {
-        "docai": null,
-        "vlm": "ד\"ה",
-        "surya": "ד\"ה"
-      },
-      "page": 18,
-      "bbox": {
-        "x1": 0.6809701323509216,
-        "y1": 0.4692400395870209,
-        "x2": 0.711442768573761,
-        "y2": 0.4865299463272095
       }
     }
   ],
@@ -1266,7 +1216,7 @@
   "39": [
     {
       "klal_id": 39,
-      "word_index": 273,
+      "word_index": 272,
       "opcode": "replace",
       "final_text": "הנה",
       "consensus_reading": "הוה",
@@ -1290,7 +1240,7 @@
     },
     {
       "klal_id": 39,
-      "word_index": 618,
+      "word_index": 617,
       "opcode": "replace",
       "final_text": "הון",
       "consensus_reading": "הוו",
@@ -2049,58 +1999,6 @@
       }
     }
   ],
-  "59": [
-    {
-      "klal_id": 59,
-      "word_index": 15,
-      "opcode": "replace",
-      "final_text": "אכל",
-      "consensus_reading": "אבל",
-      "agreeing_engines": [
-        "surya",
-        "vlm"
-      ],
-      "ligature_artifact": null,
-      "witnesses": {
-        "docai": null,
-        "vlm": "אבל",
-        "surya": "אבל"
-      },
-      "page": 32,
-      "bbox": {
-        "x1": 0.14037266373634338,
-        "y1": 0.8002416491508484,
-        "x2": 0.18757763504981995,
-        "y2": 0.819170355796814
-      }
-    }
-  ],
-  "60": [
-    {
-      "klal_id": 60,
-      "word_index": 25,
-      "opcode": "replace",
-      "final_text": "דתם",
-      "consensus_reading": "התם",
-      "agreeing_engines": [
-        "surya",
-        "vlm"
-      ],
-      "ligature_artifact": null,
-      "witnesses": {
-        "docai": null,
-        "vlm": "התם",
-        "surya": "התם"
-      },
-      "page": 33,
-      "bbox": {
-        "x1": 0.3923504054546356,
-        "y1": 0.1520681232213974,
-        "x2": 0.42442935705184937,
-        "y2": 0.16788321733474731
-      }
-    }
-  ],
   "73": [
     {
       "klal_id": 73,
@@ -2250,7 +2148,79 @@
     },
     {
       "klal_id": 74,
-      "word_index": 699,
+      "word_index": 491,
+      "opcode": "replace",
+      "final_text": "אלפא",
+      "consensus_reading": "אפא",
+      "agreeing_engines": [
+        "docai",
+        "surya"
+      ],
+      "ligature_artifact": "alef_lamed",
+      "witnesses": {
+        "docai": "אפא",
+        "vlm": null,
+        "surya": "אפא"
+      },
+      "page": 36,
+      "bbox": {
+        "x1": 0.7520198822021484,
+        "y1": 0.14929577708244324,
+        "x2": 0.786824107170105,
+        "y2": 0.16579477488994598
+      }
+    },
+    {
+      "klal_id": 74,
+      "word_index": 536,
+      "opcode": "replace",
+      "final_text": "אליעזר",
+      "consensus_reading": "איעזר",
+      "agreeing_engines": [
+        "docai",
+        "vlm"
+      ],
+      "ligature_artifact": "alef_lamed",
+      "witnesses": {
+        "docai": "איעזר",
+        "vlm": "איעזר",
+        "surya": null
+      },
+      "page": 36,
+      "bbox": {
+        "x1": 0.3673088848590851,
+        "y1": 0.18108652532100677,
+        "x2": 0.41143566370010376,
+        "y2": 0.19718310236930847
+      }
+    },
+    {
+      "klal_id": 74,
+      "word_index": 541,
+      "opcode": "replace",
+      "final_text": "אליעזר",
+      "consensus_reading": "איעזר",
+      "agreeing_engines": [
+        "docai",
+        "vlm"
+      ],
+      "ligature_artifact": "alef_lamed",
+      "witnesses": {
+        "docai": "איעזר",
+        "vlm": "איעזר",
+        "surya": null
+      },
+      "page": 36,
+      "bbox": {
+        "x1": 0.17153511941432953,
+        "y1": 0.18108652532100677,
+        "x2": 0.2169049084186554,
+        "y2": 0.19718310236930847
+      }
+    },
+    {
+      "klal_id": 74,
+      "word_index": 697,
       "opcode": "replace",
       "final_text": "בר\"ס",
       "consensus_reading": "בר\"פ",
@@ -2274,7 +2244,7 @@
     },
     {
       "klal_id": 74,
-      "word_index": 882,
+      "word_index": 880,
       "opcode": "replace",
       "final_text": "ל\"ר",
       "consensus_reading": "ל\"ד",
@@ -2298,7 +2268,7 @@
     },
     {
       "klal_id": 74,
-      "word_index": 969,
+      "word_index": 967,
       "opcode": "replace",
       "final_text": "בארוכה",
       "consensus_reading": "בארוכ",

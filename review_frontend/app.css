@@ -12,6 +12,10 @@
   --accent-wash: #ebf8ff;
   --danger: #e53e3e;
   --pending: #d69e2e;
+  /* The nav pane's width, shared so the side panels can dock BESIDE it rather
+     than on top of it. Two hardcoded 380s (nav pane, legend) drifting apart is
+     how the panel came to cover the klal list completely. */
+  --nav-w: 380px;
   --radius: 8px;
   --radius-sm: 5px;
   --sp-1: 4px;
@@ -311,12 +315,18 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
 
 /* ---------- RIGHT: abridged nav ---------- */
 #nav-pane {
-  width: 380px;
+  width: var(--nav-w);
   flex-shrink: 0;
   background: var(--paper);
   border-right: 1px solid var(--line);
   display: flex;
   flex-direction: column;
+  /* Same treatment #scan-pane and #text-pane already carry, and for the same
+     reason: without a z-index of its own this pane sits below
+     #overlay-backdrop (z 900) and every click on it while a panel is open hits
+     the backdrop instead. It was the only one of the three left out. */
+  position: relative;
+  z-index: 910;
 }
 #nav-filter {
   padding: var(--sp-2) var(--sp-4);
@@ -403,7 +413,7 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
   bottom: 0;
   right: 0;
   z-index: 40;
-  width: 380px;
+  width: var(--nav-w);
   direction: ltr;
   text-align: left;
   padding: 14px 18px;
@@ -434,7 +444,15 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
 
 .side-panel {
   position: fixed;
-  top: 0; bottom: 0; right: 0;
+  /* DOCKED BESIDE THE NAV PANE, NOT OVER IT. At `right: 0` this 420px panel
+     covered the 380px nav pane completely - measured, 380px of overlap, 100% of
+     the pane - so while any decision panel was open the whole klal list was
+     unclickable: the click landed on the panel. Reported 2026-08-31 as "clicking
+     on klal 12 in the correction pane does not jump the text pane to that klal",
+     and it was never about klal 12; it was every klal, whenever a panel was
+     open. The panel now overlays the TEXT pane, which the reviewer is not
+     navigating from. */
+  top: 0; bottom: 0; right: var(--nav-w);
   width: 420px;
   max-width: 92vw;
   background: var(--paper);
@@ -444,9 +462,11 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
   flex-direction: column;
   font-family: 'Inter', sans-serif;
   direction: ltr;
-  transform: translateX(100%);
   transition: transform .18s ease;
 }
+/* Off-screen must clear the nav pane the panel now sits beside, or a closed
+   panel parks on top of the list it was moved off. */
+.side-panel { transform: translateX(calc(100% + var(--nav-w))); }
 .side-panel.open { transform: translateX(0); }
 .panel-head {
   padding: var(--sp-4) var(--sp-5);

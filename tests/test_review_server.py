@@ -165,6 +165,53 @@ def test_klal_lazy_mounts_with_real_content(server, page):
     assert len(block.inner_text()) > 20
 
 
+def _find_klal_with_a_flag_word():
+    """A klal that currently HAS a rendered flagged word.
+
+    Hardcoding one is brittle for the reason _find_disputed_klal() already gives,
+    and 2026-08-31 proved it: five tests pinned to klal 66 and klal 53 broke at
+    once when the reviewer's decisions were applied and
+    build_corrections_dataset's new settled-position filter dropped 279 candidates
+    those klalim no longer needed. The corpus getting BETTER must not fail the
+    suite - a test that depends on a specific defect surviving is testing the
+    defect, not the behaviour."""
+    with open(os.path.join(REPO, "corrections_part1.json"), encoding="utf-8") as f:
+        data = json.load(f)
+    for kid in sorted(data.keys(), key=int):
+        # A `delete` entry marks a GAP where the corpus has no word at all, so it
+        # renders as an omission marker and never as a .flag-word - having an
+        # entry is not the same as having a clickable word.
+        if any(c.get("opcode") != "delete" for c in data[kid]):
+            return int(kid)
+    return None
+
+
+def _find_candidate_position():
+    """(klal_id, word_index) of a live, renderable candidate.
+
+    Same lesson as _find_klal_with_a_flag_word(): three tests pinned themselves to
+    klal 1 word 85, and klal 1 has no candidates at all once its corrections are
+    applied and the settled-position filter drops them. The panel they open needs
+    a real entry behind it; which one is not the point of any of them."""
+    with open(os.path.join(REPO, "corrections_part1.json"), encoding="utf-8") as f:
+        data = json.load(f)
+    for kid in sorted(data.keys(), key=int):
+        for c in data[kid]:
+            if c.get("opcode") != "delete":
+                return int(kid), c["word_index"]
+    return None, None
+
+
+def _find_word_containing(char):
+    """(klal_id, word_index) of a corpus word containing `char`, or None."""
+    with open(PART1_PATH, encoding="utf-8") as f:
+        for klal in json.load(f):
+            for i, w in enumerate(klal["clean_text"].split(" ")):
+                if char in w:
+                    return klal["klal_id"], i
+    return None
+
+
 def _find_disputed_klal():
     # Which klal actually has a `current_text_may_be_wrong` candidate isn't
     # fixed - it shrinks over time as corrections get crop-checked and
@@ -440,11 +487,15 @@ def test_a_flagged_word_shows_exactly_one_floating_box_with_the_detail(server, p
     via the shared wordDetailHtml(), so suppressing the tooltip here loses
     nothing. The card also takes over any native `title`, which would otherwise
     be a third box."""
-    page.goto(server + "/klal/66", wait_until="domcontentloaded", timeout=15000)
+    # Looked up, not hardcoded: klal 66 carried the flagged word this was written
+    # against until 2026-08-31, when the reviewer settled every one of them.
+    kid = _find_klal_with_a_flag_word()
+    assert kid is not None, "no klal currently carries a flagged word to test with"
+    page.goto(server + f"/klal/{kid}", wait_until="domcontentloaded", timeout=15000)
     page.wait_for_selector(".nav-item", timeout=15000)
     page.wait_for_timeout(2000)
-    fw = page.query_selector("#klal-block-66 .flag-word[data-word-index]")
-    assert fw, "klal 66 has no flagged word to test with"
+    fw = page.query_selector(f"#klal-block-{kid} .flag-word[data-word-index]")
+    assert fw, f"klal {kid} has no flagged word to test with"
     fw.hover()
     page.wait_for_timeout(500)
     assert page.is_visible("#word-card")
@@ -965,7 +1016,8 @@ def test_a_recorded_custom_reading_containing_gershayim_survives_a_panel_reopen(
     exotic one. The manual-correction panel had escaped its own value= for
     exactly this reason since it was written; the candidate panel never did.
     """
-    klal_id, word_index = 1, 85
+    klal_id, word_index = _find_candidate_position()
+    assert klal_id is not None, "no live candidate to record a decision against"
 
     status, _ = _post_json(server, "/api/decisions/candidate", {
         "klal_id": klal_id, "word_index": word_index,
@@ -1007,7 +1059,8 @@ def test_a_note_with_html_special_characters_renders_verbatim_in_the_history_pan
     An unescaped note containing markup is not merely mangled, it is
     INTERPRETED: `<b>` becomes bold formatting and the tag text disappears
     from what the reviewer reads back."""
-    klal_id, word_index = 1, 85
+    klal_id, word_index = _find_candidate_position()
+    assert klal_id is not None, "no live candidate to record a decision against"
     status, _ = _post_json(server, "/api/decisions/candidate", {
         "klal_id": klal_id, "word_index": word_index,
         "chosen_source": "custom", "chosen_text": GERSHAYIM_READING,
@@ -1039,13 +1092,21 @@ def test_a_note_with_html_special_characters_renders_verbatim_in_the_history_pan
 
 
 def test_corpus_text_with_html_special_characters_renders_verbatim(server, page):
-    """Part 1's clean_text contains 3 bare `&` tokens (klal 69 word 338, klal
-    77 word 11, klal 167 word 24 - see FOREIGN_CHARACTER_BASELINE in
-    tests/test_corpus_invariants.py). The candidate/manual context panes
-    interpolate clean_text straight into innerHTML, so they must escape it:
-    `& ` survives today only because it is not a valid entity reference, which
-    is luck, not a property anyone chose."""
-    klal_id, word_index = 69, 338
+    """Part 1's clean_text still contains a bare `&` token. The candidate/manual
+    context panes interpolate clean_text straight into innerHTML, so they must
+    escape it: `& ` survives today only because it is not a valid entity
+    reference, which is luck, not a property anyone chose.
+
+    The POSITION is looked up, not hardcoded. This was pinned to klal 69 w338
+    until 2026-08-31, when that `&` was correctly repaired to `אל` - the test then
+    failed because the corpus had improved, which is the wrong thing for a test to
+    notice. Two of the three are now gone; when the last one (klal 77 w11) is
+    repaired this should seed a word with an `&` through the API rather than be
+    deleted, since the escaping behaviour still needs a guard."""
+    found = _find_word_containing("&")
+    if found is None:
+        pytest.skip("no bare `&` left in Part 1 - seed one through the API instead of skipping")
+    klal_id, word_index = found
     _open_dashboard(page, server, klal_id=klal_id)
     page.evaluate(
         "([kid, widx]) => openManualCorrectionPanel(kid, widx, '&', null)",
@@ -1055,7 +1116,7 @@ def test_corpus_text_with_html_special_characters_renders_verbatim(server, page)
 
     context_text = page.inner_text("#manual-panel-body .panel-word-context")
     assert "[&]" in context_text, (
-        f"the klal-69 ampersand did not render verbatim in the context pane: {context_text!r}"
+        f"the klal-{klal_id} ampersand did not render verbatim in the context pane: {context_text!r}"
     )
     assert "&amp;" not in context_text, "double-escaped"
     assert page.test_errors == []
@@ -1064,14 +1125,24 @@ def test_corpus_text_with_html_special_characters_renders_verbatim(server, page)
 def test_focus_box_transparent_and_zoom_preserves_focus(server, page):
     """Verifies that selecting a word sets a focused highlight box with transparent
     background (for human eyeball review), and that zooming in does not clear the focus."""
-    klal_id = 1
+    klal_id, word_index = _find_candidate_position()
+    assert klal_id is not None, "no live candidate to focus on"
     _open_dashboard(page, server, klal_id)
+    # Let the nav jump's SMOOTH scroll finish before focusing a word. It runs
+    # ~1.5s from a long jump, and suppressObserverScroll only masks the scroll
+    # observer for 700ms - so a scroll still in flight fires
+    # updateActiveFromScroll, which calls setActiveKlal -> showPage(page, klal,
+    # null) and wipes scanFocusCorr. Instrumented 2026-08-31: zooming here
+    # produced two showPage(..., null) calls for a DIFFERENT klal than the
+    # focused word's. Not what this test is about - see PROJECT-STATUS 0E for the
+    # window itself.
+    _settle(page, "Math.round(document.getElementById('text-scroll').scrollTop)")
 
-    page.evaluate("""async () => {
-        const k = await fetch('/api/klal/1').then(r => r.json());
-        const corr = k.corrections.find(c => c.word_index === 85);
-        showPage(14, 1, corr);
-    }""")
+    page.evaluate("""async ([kid, widx]) => {
+        const k = await fetch('/api/klal/' + kid).then(r => r.json());
+        const corr = k.corrections.find(c => c.word_index === widx);
+        showPage(corr.page || k.page, kid, corr);
+    }""", [klal_id, word_index])
     page.wait_for_selector(".hl-box.focused", timeout=5000)
 
     # 1. Verify interior transparency
@@ -1177,3 +1248,99 @@ def test_a_backticked_context_word_is_not_mistaken_for_a_proposal(server, page):
     panel = page.locator("#manual-panel").inner_text()
     assert "Use `אמר`" not in panel and "Use אמר" not in panel, (
         f"a context word was offered as a replacement; panel was:\n{panel}")
+
+
+def _settle(page, expr, timeout_ms=9000):
+    """Block until a moving element stops moving, then return where it stopped.
+
+    `expr` is JS returning the number to watch (a left edge, a block's top).
+
+    Two consecutive equal readings are NOT enough, and getting that wrong cost
+    two rounds here: a CSS transition and a smooth scroll both have a beat before
+    anything moves, so the first two samples match the START position and the
+    wait returns instantly - reading the panel off-screen right, or the klal
+    block 34,000px away, and failing for a reason that has nothing to do with the
+    bug. Require the value to have CHANGED at least once, then to hold still
+    across three polls."""
+    import time
+    deadline = time.time() + timeout_ms / 1000
+    first = last = page.evaluate(expr)
+    moved, stable = False, 0
+    while time.time() < deadline:
+        page.wait_for_timeout(120)
+        now = page.evaluate(expr)
+        if now != last:
+            moved, stable = True, 0
+        else:
+            stable += 1
+        last = now
+        if moved and stable >= 3:
+            return now
+        if not moved and stable >= 12:      # it was already where it belongs
+            return now
+    raise AssertionError(f"never settled: started {first}, last read {last}")
+
+
+def test_the_klal_list_is_clickable_while_a_decision_panel_is_open(server, page):
+    """REGRESSION 2026-08-31, reviewer: "clicking on klal 12 in the correction
+    pane does not jump the text pane to that klal".
+
+    It was never about klal 12. `.side-panel` was `position: fixed; right: 0;
+    width: 420px` and the layout is RTL, so the rightmost column - the 380px nav
+    pane listing every klal - sat entirely underneath it: 380px of overlap, 100%
+    of the pane. While any decision panel was open, a click meant for a klal
+    landed on the panel and nothing happened. From a cold page load it worked,
+    which is why it read as klal-specific.
+
+    Asserts the geometry AND the behaviour: zero overlap is what makes the click
+    reach the list, and the click is what the reviewer actually does."""
+    kid = _find_klal_with_a_flag_word()
+    assert kid is not None, "no klal currently carries a candidate to open a panel with"
+    _open_dashboard(page, server, kid)
+    page.locator(f"#klal-block-{kid} .flag-word").first.click()
+    page.wait_for_selector(".side-panel.open", timeout=5000)
+    # .open only adds the class; the panel is still sliding for another 180ms
+    # (transition: transform .18s). Measured mid-flight it reads as off-screen
+    # right, which looks like a pass for the wrong reason - wait for the geometry
+    # to STOP changing rather than for it to reach any particular value, so the
+    # settled position is what gets asserted.
+    _settle(page, "Math.round(document.querySelector('.side-panel.open').getBoundingClientRect().left)")
+
+    overlap = page.evaluate("""() => {
+        const nav = document.getElementById('nav-pane').getBoundingClientRect();
+        const panel = document.querySelector('.side-panel.open').getBoundingClientRect();
+        return Math.max(0, Math.min(nav.right, panel.right) - Math.max(nav.left, panel.left));
+    }""")
+    assert overlap == 0, (
+        f"the open panel covers {overlap:.0f}px of the nav pane, so a click meant for a klal "
+        f"lands on the panel and the list is unusable while any panel is open")
+
+    page.click("#nav-12", timeout=5000)
+    assert page.evaluate("document.querySelector('.nav-item.active')?.id") == "nav-12"
+    # The jump is a SMOOTH scroll and takes ~1.5s to settle from a long distance;
+    # sampled early it reads as thousands of pixels off, which would fail for the
+    # wrong reason. Wait for the position to stop changing, then assert where it
+    # landed - the same shape as _settle_panel above.
+    top = _settle(page, "Math.round(document.getElementById('klal-block-12').getBoundingClientRect().top)")
+    assert abs(top) < 120, f"the text pane did not jump to klal 12 (block settled at top {top}px)"
+
+
+def test_a_closed_panel_does_not_park_on_top_of_the_klal_list(server, page):
+    """The other half of docking the panel beside the nav pane rather than over
+    it: `transform: translateX(100%)` hid a panel anchored at `right: 0`, but a
+    panel anchored at `right: var(--nav-w)` needs to travel its own width PLUS
+    that offset, or closing it leaves it parked over the list it was moved off."""
+    kid = _find_klal_with_a_flag_word()
+    assert kid is not None, "no klal currently carries a candidate to open a panel with"
+    _open_dashboard(page, server, kid)
+    page.locator(f"#klal-block-{kid} .flag-word").first.click()
+    page.wait_for_selector(".side-panel.open", timeout=5000)
+    page.keyboard.press("Escape")
+    _settle(page, "Math.round(document.getElementById('disputed-panel').getBoundingClientRect().left)")
+
+    overlap = page.evaluate("""() => {
+        const nav = document.getElementById('nav-pane').getBoundingClientRect();
+        const panel = document.getElementById('disputed-panel').getBoundingClientRect();
+        return Math.max(0, Math.min(nav.right, panel.right) - Math.max(nav.left, panel.left));
+    }""")
+    assert overlap == 0, f"a closed panel still overlaps the nav pane by {overlap}px"

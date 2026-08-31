@@ -2644,6 +2644,12 @@ function jumpTo(klalId) {
   // the same klal doesn't immediately re-trigger a redundant showPage call
   // against a stale page from before the jump.
   lastActiveScanPage = klalById[klalId] ? klalById[klalId].page : null;
+  // NOT awaited, deliberately - tried on 2026-08-31 and reverted. The theory was
+  // that scrolling against an unmounted block's ESTIMATED height would land off
+  // once the real content resized it; measured on a 188-klal jump it changed
+  // nothing (settled 23px vs 45px, both correct), because the smooth scroll takes
+  // ~1.5s and the mount lands long before it finishes. The symptom that suggested
+  // it was a test sampling the position mid-scroll.
   mountKlal(klalId);
   block.scrollIntoView({ behavior: 'smooth', block: 'start' });
   clearTimeout(suppressTimer);

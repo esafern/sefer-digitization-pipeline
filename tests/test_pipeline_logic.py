@@ -4487,3 +4487,82 @@ def test_an_already_stale_flag_is_not_shifted_into_a_word_it_never_named(
 
     assert apply_harness.run()[1] == "אלף בית גימל"
     assert set(ard.open_word_flags(1)) == {9}, "an unverifiable shift must not move the flag"
+
+
+def test_a_replace_choosing_fewer_words_than_its_span_is_refused(apply_harness, decisions_path):
+    """REGRESSION 2026-08-31. apply_replace() substitutes the chosen text for the
+    WHOLE span, so a two-word span answered with one word silently deletes the
+    other - and this path has none of the insert/delete safeguards: no
+    one-per-klal-per-run gate, and no shift recorded, so flags after it are never
+    reindexed either.
+
+    Third costume of one defect - ★1 was the confirmed-no-op, klal 66 w0 the
+    `insert` branch, and the guard written for that one only covered `insert`. It
+    fired on klal 69 w188: span `אל ואלהים`, chosen `אל`, deleting a `ואלהים`
+    that the candidate's own vision check reads at 0.95 confidence."""
+    entry = _correction(1, "replace", "א ואהים", "אל ואלהים")
+    apply_harness([{"klal_id": 1, "clean_text": "שם אל ואלהים דליתא"}], {"1": [entry]})
+    rd.append_decision("disputed_choice", klal_id=1, word_index=1, chosen_source="custom",
+                       chosen_text="אל", candidate_snapshot=entry, path=decisions_path)
+
+    assert apply_harness.run()[1] == "שם אל ואלהים דליתא", "no word may be dropped from the span"
+    assert rd.history_for(1, 1, "apply_event", path=decisions_path) == []
+
+
+def test_a_replace_with_a_matching_word_count_still_applies(apply_harness, decisions_path):
+    """The refusal must not swallow the normal case: a span answered with the
+    same number of words is exactly what `replace` means, multi-word included."""
+    entry = _correction(1, "replace", "א ואהים", "אל ואהים")
+    apply_harness([{"klal_id": 1, "clean_text": "שם אל ואהים דליתא"}], {"1": [entry]})
+    rd.append_decision("disputed_choice", klal_id=1, word_index=1, chosen_source="custom",
+                       chosen_text="אל ואלהים", candidate_snapshot=entry, path=decisions_path)
+
+    assert apply_harness.run()[1] == "שם אל ואלהים דליתא"
+    assert len(rd.history_for(1, 1, "apply_event", path=decisions_path)) == 1
+
+
+def test_a_pending_decision_past_a_word_count_change_is_moved_too(apply_harness, decisions_path):
+    """REGRESSION 2026-08-31. reindex_flags_after_shift() moved FLAGS onto their
+    words after a word-count change; nothing moved the pending DECISIONS, and
+    they have it worse. A stale flag points at the wrong word and a human
+    notices; a stale decision is refused by the drift guard on every future run -
+    stranded exactly as 0A stranded a decided dispute, for a reason this script
+    created one run earlier.
+
+    Klal 74: deleting a page-seam catchword at w416 left the decisions at w417
+    (the duplicate `רבא` the same flag named) and w443 (`!`) one word past their
+    targets, so the corpus sat at `אמר רבא רבא אמר` - half a repair, the other
+    half unappliable."""
+    entry = _correction(1, "insert", None, "זרא")          # applying REMOVES it
+    apply_harness([{"klal_id": 1, "clean_text": "אלף זרא בית גימל דלת"}], {"1": [entry]})
+    rd.append_decision("disputed_choice", klal_id=1, word_index=1, chosen_source="docai_reading",
+                       chosen_text="", candidate_snapshot=entry, path=decisions_path)
+    # pending, three words along, and about to be shifted by the deletion above
+    rd.append_decision("manual_correction", klal_id=1, word_index=4, chosen_source="custom",
+                       chosen_text="דלית", candidate_snapshot={"word_index": 4, "original_word": "דלת"},
+                       path=decisions_path)
+
+    assert apply_harness.run()[1] == "אלף בית גימל דלת"
+    moved = rd.all_current("manual_correction").get((1, 3))
+    assert moved is not None, "the pending decision was left at w4, where its word no longer is"
+    assert moved["chosen_text"] == "דלית" and moved["candidate_snapshot"]["original_word"] == "דלת"
+    assert "reindexed from w4" in moved["note"]
+
+
+def test_a_pending_decision_whose_word_did_not_follow_is_left_alone(apply_harness, decisions_path):
+    """Same verified-move rule as the flag version: if the word the decision
+    named is not at the shifted index, the shift is not understood and the
+    decision stays where it is and is reported. Moving it would re-point a
+    reviewer's ruling at a word they never saw."""
+    entry = _correction(1, "insert", None, "זרא")
+    apply_harness([{"klal_id": 1, "clean_text": "אלף זרא בית גימל דלת"}], {"1": [entry]})
+    rd.append_decision("disputed_choice", klal_id=1, word_index=1, chosen_source="docai_reading",
+                       chosen_text="", candidate_snapshot=entry, path=decisions_path)
+    rd.append_decision("manual_correction", klal_id=1, word_index=4, chosen_source="custom",
+                       chosen_text="X", candidate_snapshot={"word_index": 4, "original_word": "מלה"},
+                       path=decisions_path)   # `מלה` is nowhere in this klal
+
+    apply_harness.run()
+    assert rd.all_current("manual_correction").get((1, 3)) is None, \
+        "an unverifiable shift must not move a reviewer's ruling"
+    assert rd.all_current("manual_correction").get((1, 4)) is not None
