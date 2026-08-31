@@ -1133,9 +1133,9 @@ def test_part1_character_sanity(part_klalim, part1_integrity_validator):
 # literal in a test file. When this fails after an apply, check whether the same
 # character is simply at a new position before treating it as new damage.
 FOREIGN_CHARACTER_BASELINE = {
-    (74, 441, "!"),
     (77, 11, "&"),
 }
+
 
 
 
@@ -1776,9 +1776,10 @@ def test_reject_omission_option_does_not_read_a_field_that_cannot_exist():
 # 2026-08-30 and reverted (it moved 41 correct boxes and lost 2).
 # INDEX-KEYED - see the note on FOREIGN_CHARACTER_BASELINE.
 UNLOCATABLE_FLAGGED_WORD_BASELINE = {
-    (74, 441), (77, 11), (144, 598), (182, 5),
-    (189, 461), (198, 570), (209, 16), (216, 136),
+    (77, 11), (144, 598), (182, 5), (189, 461),
+    (198, 570), (209, 16), (216, 136),
 }
+
 
 
 
@@ -1805,6 +1806,7 @@ BOX_READING_ORDER_BASELINE = {
     (147, 406), (147, 407), (158, 50), (158, 51),
     (167, 68), (167, 69),
 }
+
 
 
 

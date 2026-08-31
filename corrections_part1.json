@@ -2758,7 +2758,7 @@
       "flag": "current_text_may_be_wrong"
     },
     {
-      "word_index": 491,
+      "word_index": 490,
       "opcode": "replace",
       "docai_reading": "אפא",
       "docai_repaired": "אלפא",
@@ -2785,7 +2785,7 @@
       "ligature_artifact": "alef_lamed"
     },
     {
-      "word_index": 494,
+      "word_index": 493,
       "opcode": "replace",
       "docai_reading": "דתנאים",
       "docai_repaired": null,
@@ -2806,7 +2806,7 @@
       "flag": "current_text_confirmed"
     },
     {
-      "word_index": 536,
+      "word_index": 535,
       "opcode": "replace",
       "docai_reading": "איעזר",
       "docai_repaired": "אליעזר",
@@ -2833,7 +2833,7 @@
       "ligature_artifact": "alef_lamed"
     },
     {
-      "word_index": 541,
+      "word_index": 540,
       "opcode": "replace",
       "docai_reading": "איעזר",
       "docai_repaired": "אליעזר",
@@ -2860,7 +2860,7 @@
       "ligature_artifact": "alef_lamed"
     },
     {
-      "word_index": 697,
+      "word_index": 696,
       "opcode": "replace",
       "docai_reading": null,
       "final_text": "בר\"ס",
@@ -2886,7 +2886,7 @@
       "flag": "current_text_may_be_wrong"
     },
     {
-      "word_index": 803,
+      "word_index": 802,
       "opcode": "replace",
       "docai_reading": "ישרא",
       "docai_repaired": "ישראל",
@@ -2907,7 +2907,7 @@
       "flag": "docai_ligature_artifact"
     },
     {
-      "word_index": 845,
+      "word_index": 844,
       "opcode": "replace",
       "docai_reading": "אא",
       "docai_repaired": "אלא",
@@ -2928,7 +2928,7 @@
       "flag": "docai_ligature_artifact"
     },
     {
-      "word_index": 858,
+      "word_index": 857,
       "opcode": "replace",
       "docai_reading": "אא",
       "docai_repaired": "אלא",
@@ -2949,7 +2949,7 @@
       "flag": "docai_ligature_artifact"
     },
     {
-      "word_index": 880,
+      "word_index": 879,
       "opcode": "replace",
       "docai_reading": null,
       "final_text": "ל\"ר",
@@ -2975,7 +2975,7 @@
       "flag": "current_text_may_be_wrong"
     },
     {
-      "word_index": 967,
+      "word_index": 966,
       "opcode": "replace",
       "docai_reading": "בארוכ",
       "docai_repaired": null,
@@ -3003,7 +3003,7 @@
       "ligature_artifact": null
     },
     {
-      "word_index": 1053,
+      "word_index": 1052,
       "opcode": "replace",
       "docai_reading": "אעזר",
       "docai_repaired": "אלעזר",

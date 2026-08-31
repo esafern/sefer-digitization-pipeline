@@ -859,7 +859,7 @@
       "klal_id": 74,
       "page": 36,
       "opcode": "replace",
-      "word_index_in_final_text": 491,
+      "word_index_in_final_text": 490,
       "original_word": "אפא",
       "corrected_word": "אלפא",
       "bbox": {
@@ -874,7 +874,7 @@
       "klal_id": 74,
       "page": 36,
       "opcode": "replace",
-      "word_index_in_final_text": 494,
+      "word_index_in_final_text": 493,
       "original_word": "דתנאים",
       "corrected_word": "התנאים",
       "bbox": {
@@ -889,7 +889,7 @@
       "klal_id": 74,
       "page": 36,
       "opcode": "replace",
-      "word_index_in_final_text": 536,
+      "word_index_in_final_text": 535,
       "original_word": "איעזר",
       "corrected_word": "אליעזר",
       "bbox": {
@@ -904,7 +904,7 @@
       "klal_id": 74,
       "page": 36,
       "opcode": "replace",
-      "word_index_in_final_text": 541,
+      "word_index_in_final_text": 540,
       "original_word": "איעזר",
       "corrected_word": "אליעזר",
       "bbox": {
@@ -919,7 +919,7 @@
       "klal_id": 74,
       "page": 36,
       "opcode": "replace",
-      "word_index_in_final_text": 803,
+      "word_index_in_final_text": 802,
       "original_word": "ישרא",
       "corrected_word": "ישראל",
       "bbox": {
@@ -934,7 +934,7 @@
       "klal_id": 74,
       "page": 36,
       "opcode": "replace",
-      "word_index_in_final_text": 845,
+      "word_index_in_final_text": 844,
       "original_word": "אא",
       "corrected_word": "אלא",
       "bbox": {
@@ -949,7 +949,7 @@
       "klal_id": 74,
       "page": 36,
       "opcode": "replace",
-      "word_index_in_final_text": 858,
+      "word_index_in_final_text": 857,
       "original_word": "אא",
       "corrected_word": "אלא",
       "bbox": {
@@ -964,7 +964,7 @@
       "klal_id": 74,
       "page": 36,
       "opcode": "replace",
-      "word_index_in_final_text": 967,
+      "word_index_in_final_text": 966,
       "original_word": "בארוכ",
       "corrected_word": "בארוכה",
       "bbox": {
@@ -979,7 +979,7 @@
       "klal_id": 74,
       "page": 36,
       "opcode": "replace",
-      "word_index_in_final_text": 1053,
+      "word_index_in_final_text": 1052,
       "original_word": "אעזר",
       "corrected_word": "אלעזר",
       "bbox": {

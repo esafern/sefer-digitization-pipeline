@@ -2148,7 +2148,7 @@
     },
     {
       "klal_id": 74,
-      "word_index": 491,
+      "word_index": 490,
       "opcode": "replace",
       "final_text": "אלפא",
       "consensus_reading": "אפא",
@@ -2172,7 +2172,7 @@
     },
     {
       "klal_id": 74,
-      "word_index": 536,
+      "word_index": 535,
       "opcode": "replace",
       "final_text": "אליעזר",
       "consensus_reading": "איעזר",
@@ -2196,7 +2196,7 @@
     },
     {
       "klal_id": 74,
-      "word_index": 541,
+      "word_index": 540,
       "opcode": "replace",
       "final_text": "אליעזר",
       "consensus_reading": "איעזר",
@@ -2220,7 +2220,7 @@
     },
     {
       "klal_id": 74,
-      "word_index": 697,
+      "word_index": 696,
       "opcode": "replace",
       "final_text": "בר\"ס",
       "consensus_reading": "בר\"פ",
@@ -2244,7 +2244,7 @@
     },
     {
       "klal_id": 74,
-      "word_index": 880,
+      "word_index": 879,
       "opcode": "replace",
       "final_text": "ל\"ר",
       "consensus_reading": "ל\"ד",
@@ -2268,7 +2268,7 @@
     },
     {
       "klal_id": 74,
-      "word_index": 967,
+      "word_index": 966,
       "opcode": "replace",
       "final_text": "בארוכה",
       "consensus_reading": "בארוכ",

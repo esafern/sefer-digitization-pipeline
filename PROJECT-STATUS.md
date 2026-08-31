@@ -43,6 +43,32 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0F. **[2026-08-31] The UI test suite is bound to THIS corpus, in its current
+    state of repair — the wrong shape for a general-purpose platform.** Measured:
+    all 38 tests in `tests/test_review_server.py` boot a server against the
+    shipped Yad Malachi corpus and **23 pin a corpus coordinate in executable
+    code** (`#klal-block-66 .flag-word`, `klal_id, word_index = 1, 85`, a literal
+    `&` at klal 69 w338). Zero use synthetic data. So they test the platform PLUS
+    this book's defects, and the failure mode is backwards: **the closer the text
+    gets to correct, the more tests fail**, because each quietly depended on a
+    defect surviving. Seven broke at once on 2026-08-31 when the reviewer's
+    decisions were applied — one asserting an `&` that had been correctly repaired
+    to `אל`, three sitting on a klal whose candidates were all settled.
+    THE ENGINE IS NOT THE PROBLEM: `tests/test_pipeline_logic.py` is 273 tests, 91
+    of them purely synthetic and only ~6 touching real data - every fix to the
+    apply path, the drift guards, the reindexers and the flag closing is tested on
+    a throwaway `אלף בית גימל` corpus and would pass on any book.
+    `tests/test_corpus_invariants.py` reads the corpus BY DESIGN, which is right,
+    but its three baselines are keyed `(klal_id, word_index)` and every entry
+    shifts when a word is inserted or deleted earlier in its klal - item 0C
+    reaching into the test suite, where nothing can reindex a literal.
+    FIX: a small synthetic corpus fixture carrying one of each condition (a
+    disputed word, an ai_flag, a manual correction, a multi-page klal, a
+    non-Hebrew character, a duplicated word) for the UI tests to boot against.
+    NOT DONE - 2026-08-31 only unpinned the seven that broke, by having them look
+    a subject up rather than assume one. That is a patch; the fixture is the fix,
+    and it is self-contained work that wants its own scope.
+
 0E. **[2026-08-31] A nav jump's smooth scroll outlives the observer
     suppression, so a focus set during it is wiped.** `jumpTo()` starts a
     `scrollIntoView({behavior:'smooth'})` and sets `suppressObserverScroll` for
