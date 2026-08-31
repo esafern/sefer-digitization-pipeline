@@ -12,6 +12,11 @@ import re
 import corpus_io as cio
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "repair_filters"))
 import docai_filter
+# The one definition of "a human already ruled here and it landed", shared rather
+# than re-derived - the generator and the assembler must agree on it or a
+# suppressed candidate reappears at the next stage, which is exactly what
+# happened on klal 84 w0.
+import build_corrections_dataset as bcd
 
 # Moved one level deeper (pipeline/ or tools/) 2026-08-16 - REPO now goes up
 # two levels, not one, to keep resolving to the actual repo root where
@@ -438,7 +443,23 @@ def main():
 
     by_klal = {}
     n_drifted = 0
+    # A position a human has already ruled on and had APPLIED must not come back
+    # as a candidate. build_corrections_dataset.py drops those when it GENERATES,
+    # but corrections_verified_part1.json is cumulative - it keeps every entry the
+    # vision stage ever verified - so an entry generated before the decision was
+    # applied survives in it and gets re-assembled here.
+    #
+    # FIXED 2026-08-31, caught by test_no_candidate_re_raises_a_word_an_applied_
+    # decision_already_settled on klal 84 w0: the reviewer confirmed the klal
+    # marker `פד` against DocAI's `פר`, it was applied, and the next rebuild put
+    # the same question back in front of them. That is item 35's defect one layer
+    # below where it was fixed - the generator was taught, the assembler was not.
+    n_settled_dropped = 0
+    settled = bcd.settled_by_an_applied_decision({k["klal_id"]: k for k in part1})
     for c in verified:
+        if (c["klal_id"], c.get("word_index_in_final_text")) in settled:
+            n_settled_dropped += 1
+            continue
         drifted = check_drift(c, words_by_klal.get(c["klal_id"]))
         # Derived once and used twice - for the entry's own "docai_repaired" and
         # by _ligature_artifact_flag() below, which used to re-derive it from the
@@ -507,6 +528,9 @@ def main():
     for entries in by_klal.values():
         for e in entries:
             flags[e["flag"]] = flags.get(e["flag"], 0) + 1
+    if n_settled_dropped:
+        print(f"  {n_settled_dropped} verified entry(ies) dropped: a human decision was already "
+              f"APPLIED at that word, so re-serving it would ask them to rule on their own fix")
     print(f"Wrote {OUT_PATH}: {sum(len(v) for v in by_klal.values())} items across {len(by_klal)} klalim")
     print(f"  multi-witness consensus: {n_new} new dispute(s), {n_enriched} existing candidate(s) enriched")
     print(f"  lexical defects (unattested word, one edit from a common one): {n_lex} new entry(ies)")

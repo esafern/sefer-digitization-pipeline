@@ -43,6 +43,125 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0O. **[2026-08-31] THE FULL RASHI EDITION IS IN THE REPO, AND IT IS JERUSALEM
+    1975/6 — NOT Przemysl, and NOT the scan the 94.8% was measured on.**
+    `yad-malachi-jerusalem-rashi-Hebrewbooks_org_14122.pdf`, 491 pages, 19.5 MB,
+    user-supplied. Settled on its own title page after I first mis-called it
+    Przemysl off an approbations page (the haskamos ARE from Przemysl; the
+    imprint is not - the reviewer corrected this, and the title page is the
+    authority. Lesson 17's shape: render the page that actually carries the
+    claim, not a nearby one).
+
+    **Title page, verbatim structure:** `נדפס מחדש בעיה"ק ירושלים תובב"א שנת
+    תשל"ו` = newly printed, Jerusalem, 5736 = **1975/6**. Its own printing
+    history names all four: `נדפס ראשונה בליוורנו בשנת תקכ"ז, ופעם שנית בברלין
+    בשנת תרי"ב, ופעם שלישית בפרעמישלא בשנת תרל"ז` — Livorno 5527 (1766/7),
+    Berlin **5612**, Przemysl 5637 (1877), then this fourth. **That
+    independently corroborates START_HERE's Berlin dating of תרי"ב = 1851/2,
+    from a different edition's own title page** — a fourth witness to a date
+    that previously rested on two chronograms inside the Berlin book plus the
+    NLI catalogue.
+
+    **HebrewBooks' own metadata is wrong about it**, which is where my error and
+    the repo's came from: the PDF's keywords read `פרמישלה תרלז` (Przemysl
+    1877). `tools/second_witness_eval/README.md` inherits that — it lists
+    `~/Downloads/Hebrewbooks_org_14122.pdf` as "Przemysl 1877". Two corrections
+    needed there: the imprint, and the path (both `~/Downloads` Rashi files
+    named in that README are **gone**; this one now lives in the repo).
+
+    **It is a COMPILATION, not just Yad Malachi.** The title page advertises
+    `עם הוספות`, and doc index 18 is Ramchal's `דרכי התלמוד` — added works sit
+    in front of the text. Feeding chunks from page 1 would push dozens of pages
+    of other authors through a free service for nothing.
+
+    **Located the body locally, at zero cost to Dicta**, by anchoring the PDF's
+    embedded HebrewBooks fastocr layer against `part1.json`. fastocr is the
+    44%-accurate text this project already rejected for transcription (item 6) —
+    it is entirely adequate for ANCHORING, which is a different question:
+
+    | | |
+    |---|---|
+    | Yad Malachi body begins | doc index 21 (1-based page 22), klal 1 |
+    | Part 1 (klalim 1–222) spans | 1-based pages **22–114**, 93 pages |
+    | klalim 12–22 (the sample's own range) | doc 28–31 = pages **29–32** |
+    | full Part 1 at 6 pages/chunk | **16 chunks** |
+
+    **THE 94.8% DOES NOT TRANSFER TO THIS FILE UNMEASURED.** The Dicta Rashi
+    sample is a *Google* digitization (it carries a "Digitized by Google"
+    banner); this is HebrewBooks. **0 of the sample's 4 page images appear
+    anywhere in this PDF** — they are two different scans of two different
+    printings. And the resolution differs: sample **~403x473 DPI**
+    (3424x5200 px), this file **301 DPI** (1612x2570 px). 301 DPI is at the
+    threshold this repo's own Surya baseline runs at, so this is a reason to
+    calibrate, not to reject — but quoting 94.8% for this file would be quoting
+    a measurement of a different scan.
+
+    **Calibration chunk built, nothing sent:**
+    `dicta_chunks_calibration/yadmalachi-jer-calib_c0001_p0029-p0032.pdf`,
+    4 pages, 0.16 MB, klalim ~11–23 — the same klalim as the sample, so its
+    result is directly comparable to both the sample and the corpus.
+
+0N. **[2026-08-31] DICTA-AS-WITNESS DRY RUN — measured before building
+    anything, and it moved the design. Also: `AbstractWitnessEngine` IS DEAD
+    CODE, so the integration everyone has been naming is the wrong door.**
+
+    **The wrong door, first.** `tools/second_witness_eval/README.md` names the
+    next step as "wire Surya in as a permanent `AbstractWitnessEngine`
+    implementation", and the 2026-08-31 Dicta report repeated that for Dicta.
+    Checked: `pipeline/second_witness_eval/` is imported by exactly two things -
+    `tests/test_witness_engine.py` (5 tests, outside the gate) and
+    `tools/second_witness_eval/run_part1_vlm_second_witness.py` (a standalone
+    one-off). **No stage of `rebuild_all.sh` touches it.** The live witness path
+    is baseline `.txt` -> `synthesize_multi_witness.py` (stage 4a) ->
+    `assemble_corrections_dataset.py` (stage 4) -> server -> `app.js`. And the
+    ABC could not carry Dicta anyway: `transcribe_region(pdf_path, page_num,
+    bbox)` is crop-based against `berlin_square_corrected.pdf`, while a
+    Rashi-edition witness has a different PDF, different pagination and no
+    shared bbox. START_HERE's TL;DR also calls `VlmWitnessEngine` the secondary
+    witness engine; the VLM's real contribution is its baseline text file.
+
+    **The dry run** (harness in the session scratchpad, wrote nothing): klalim
+    13-22, the 10 the Rashi sample fully covers, 1,549 corpus words.
+
+    | | |
+    |---|---:|
+    | positions where Dicta gets a vote (1:1 alignment) | 1,464 / 1,549 (94.5%) |
+    | …agreeing with the corpus | 1,426 (**97.4%** of its votes) |
+    | …differing | 38 (2.6%) |
+    | existing consensus disputes in scope | 11 |
+    | …Dicta **corroborates** | **8 (73%)** |
+    | NEW disputes Dicta would create | **4** |
+
+    **All 4 new disputes hand-checked - none is edition noise.** klal 13 w18
+    `אכל`->`אבל` (the corpus reads "ate" where "but" belongs), klal 13 w231
+    `זוהה`->`זה`, klal 17 w76 `בכוהרי"ק`->`במוהרי"ק`, klal 17 w242
+    `רי"ז`->`ר"ז`. The first three are wrong by sense; the fourth needs the ink.
+
+    **The safety result, and it is the reason to proceed.** 24 of Dicta's 38
+    disagreements are SOLO (no other engine differs) and **not one became a
+    dispute** - the standing two-distinct-engines rule held every one back. Hand
+    reading all 24: ~12 are edition/orthographic variants (`סימן`->`סי'`,
+    `בספר`->`בס'`, `התו'`->`התוס'`, `דרשה`->`דרשא`, `הר"ף`->`הרי"ף`), ~8 are
+    Dicta's own misreads (`הוזכר`->`החכר`, `דרב`->`דקב`), ~4 want the ink
+    (`א"ה`->`א"ח`, twice). **Cross-edition variance shows up as SOLO
+    disagreement, which the existing rule already discards.** That is the whole
+    safety argument, and it is measured, not assumed.
+
+    **The ragged-alignment filter is what makes a cross-edition witness safe -
+    validated by what it SUPPRESSES (Lesson 26).** 81 positions dropped in
+    scope, read individually: corpus editorial marks the Rashi edition does not
+    carry (`.` `:` `•` `[.]`), klal markers, page-margin garbage, and genuine
+    abbreviation-style edition differences (`דבבא מציעא`->`דב"מ`, 2 words vs 1).
+    Exactly the edition variance, and no letter-level error among them - with
+    **one exception worth a reviewer**: klal 19 w54-56, corpus and Surya read
+    `בסירא ששה`, the VLM reads `בספרא ששה`, Dicta reads `בסיפא`. A genuine
+    three-way split the filter hides because the word counts differ.
+
+    **Extrapolation, labelled as one:** 4 new disputes per 1,549 words scales to
+    roughly **130 across Part 1's ~50,195 words**, and 73% corroboration would
+    touch ~265 of the 364 existing consensus disputes. From 10 klalim - an
+    order of magnitude, not a forecast (Lesson 27).
+
 0M. **[2026-08-31] A GERESH READ AS A YOD IN A NUMERAL SLOT — 3 in the corpus,
     all corroborated by two independent engines. DATA ISSUE, not fixed here.**
     Surfaced from the Dicta comparison: on the one specimen line, the corpus
@@ -539,13 +658,24 @@ applying it to the corpus remain two separate, deliberate steps.
    hand-edit. Caveat: all 419 verdicts came back ≥0.9 confidence, so treat the
    37 as a priority queue, not proof the other 382 are clean (Lesson 2).
 
-5. **Dicta OCR web portal appears to be a proofreading tool (raw web scan upload unconfirmed).**
-   Source inspection of `ocr.dicta.org.il`'s client bundle (`index-B6te2D74.js`)
-   revealed that the portal is titled "הגהת מסמכים סרוקים" (Proofreading of
-   Scanned Documents) and functions as an interactive editor for `.docx`/`.txt`
-   files synced from Dropbox. Research confirms that Dicta provides powerful
-   Hebrew OCR across its platform, but how end-users execute direct web uploads
-   for raw scans remains unconfirmed and under active investigation.
+5. **RESOLVED 2026-08-31 — the Dicta Rashi OCR endpoint is
+   <https://rashiocr.dicta.org.il/>.** User-supplied; it is what produced this
+   repo's two Dicta samples. Every earlier "mechanism unconfirmed" note was
+   searching `ocr.dicta.org.il`, which is a DIFFERENT tool — source inspection of
+   its client bundle (`index-B6te2D74.js`) correctly found a proofreading editor
+   titled "הגהת מסמכים סרוקים" for `.docx`/`.txt` synced from Dropbox. That
+   finding was right about that URL and wrong about Dicta: the raw-scan endpoint
+   exists, at a hostname nobody had looked at. A reminder that "we searched and
+   did not find it" is a statement about where we looked (Lesson 28's shape,
+   applied to research rather than to a bug).
+
+   **STANDING RULE FOR THIS ENDPOINT — it is a free service run by a research
+   institute, not an API we pay for.** Submit in small chunks, serially, with a
+   real delay between them, and never in parallel. User directive 2026-08-31:
+   "be CERTAIN to not flood this url... push them through slowly to be a good
+   neighbor." Any script that touches it must rate-limit by construction, resume
+   from where it stopped rather than restarting, and write each chunk's result to
+   disk as it arrives (the standing incremental-flush rule).
 
 6. **Przemyśl 1888's script is unverified, and HebrewBooks' fastocr is
    rejected.** Assessed 2026-08-19 (detail and tables in
@@ -1802,6 +1932,44 @@ applying it to the corpus remain two separate, deliberate steps.
     **The alphabetical-order validator is the one thing that does read titles**
     (`tools/validate_title_alphabetical_order.py`) — it checks ORDERING, not
     spelling, and a ב/כ misread mid-title cannot fail it.
+
+56. **[FIXED 2026-08-31] Item 35's defect, one layer below where it was fixed:
+    the ASSEMBLER re-served a word an applied decision had settled.** Caught by
+    `test_no_candidate_re_raises_a_word_an_applied_decision_already_settled` on
+    **klal 84 w0** — the reviewer confirmed the klal marker `פד` against DocAI's
+    `פר`, it was applied, and the very next rebuild put the same question back in
+    front of them.
+
+    `build_corrections_dataset.py` has dropped settled positions since item 35 and
+    did so correctly here — `corrections_candidates_part1.json` carried no entry
+    at klal 84 w0. But **`corrections_verified_part1.json` is CUMULATIVE**: it
+    keeps every entry the vision stage has ever verified, including ones generated
+    before the decision existed, and `assemble_corrections_dataset.py` merged it
+    back in. The generator had been taught the rule and the assembler had not.
+    Fixed by importing `settled_by_an_applied_decision` rather than restating it —
+    the two stages must agree on what "already ruled" means or a suppressed
+    candidate simply reappears downstream. The drop is now reported per rebuild
+    ("1 verified entry dropped…") instead of happening silently.
+
+    Worth recording about the diagnosis: I first concluded the entry came from the
+    consensus or lexical merge, because I checked `corrections_verified_part1.json`
+    with `d.get("84")` — and that file is a flat LIST, not a dict keyed by klal.
+    The lookup returned nothing and I read that as "not from here". Checking the
+    SHAPE before trusting a lookup would have gone straight to it; a query that
+    silently returns nothing looks exactly like an absence.
+
+57. **[2026-08-31] `ע״ד` -> `ע"ד` applied; ONE U+05F4 gershayim left in Part 1.**
+    The reviewer's own correction of their own keystroke had been recorded at
+    16:26 and was still UNAPPLIED — it only became appliable once the final
+    rebuild regenerated its candidate, which is why the earlier apply loop
+    reported zero pending and this did not surface until asked about directly.
+    Applied with two other stragglers (klal 169 w1074 `שרוא` -> `שהוא`, and a
+    confirmed-no-op on klal 84 w0 — the one that exposed item 56).
+    **The remaining one is klal 2 w316 `נ״ד`** in `אשכחן בפ"ד מיתות נ״ד ב'
+    דענשינן` — Sanhedrin 54b, content right, gershayim wrong. It predates today
+    (recorded 2026-08-30) and is again the ONLY such character in Part 1, against
+    6,405 ASCII quotes. Not corrected: it is corpus text and wants the reviewer's
+    ruling like any other.
 
 55. **[2026-08-31] Post-apply state, and two things the apply itself surfaced.**
     The rebuild/apply loop was run to convergence — 48 + 1 + 3 + 3 decisions over

@@ -3264,27 +3264,6 @@
   ],
   "84": [
     {
-      "word_index": 0,
-      "opcode": "replace",
-      "docai_reading": "פר",
-      "docai_repaired": null,
-      "final_text": "פד",
-      "page": 38,
-      "bbox": {
-        "x1": 0.8774875402450562,
-        "y1": 0.8315238952636719,
-        "x2": 0.9023631811141968,
-        "y2": 0.8512263894081116
-      },
-      "vision_selected": "B",
-      "vision_transcription": "פד",
-      "confidence": 0.95,
-      "reasoning": "The raster crop clearly displays the Hebrew letters Pe (פ) followed by Dalet (ד), distinguished by the sharp right-angled corner/projection (heel) on the upper right of the second character, which differentiates a Dalet from a rounded Resh. This matches the surrounding Rabbinic text context ('פד בהדיא קתני לה').",
-      "vlm_reading": "פד",
-      "surya_reading": "פד",
-      "flag": "current_text_confirmed"
-    },
-    {
       "word_index": 55,
       "opcode": "delete",
       "docai_reading": "4 בעיא",

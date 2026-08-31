@@ -1158,21 +1158,6 @@
     {
       "klal_id": 84,
       "page": 38,
-      "opcode": "replace",
-      "word_index_in_final_text": 0,
-      "original_word": "פר",
-      "corrected_word": "פד",
-      "bbox": {
-        "x1": 0.8774875402450562,
-        "y1": 0.8315238952636719,
-        "x2": 0.9023631811141968,
-        "y2": 0.8512263894081116
-      },
-      "bbox_estimated": false
-    },
-    {
-      "klal_id": 84,
-      "page": 38,
       "opcode": "delete",
       "word_index_in_final_text": 55,
       "original_word": "4 בעיא",
@@ -5162,8 +5147,8 @@
     }
   ],
   "meta": {
-    "total_candidates": 344,
-    "skipped_settled_by_applied_decision": 279,
+    "total_candidates": 343,
+    "skipped_settled_by_applied_decision": 282,
     "klalim_covered": 120,
     "skipped_no_docai_page_klalim": [],
     "unattributable_deletes": [],

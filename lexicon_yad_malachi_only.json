@@ -2320,14 +2320,14 @@
     "edit": "deletion"
    },
    {
-    "form": "מורא",
-    "ref_count": 41,
-    "edit": "deletion"
-   },
-   {
     "form": "אמורא",
     "ref_count": 41,
     "edit": "substitution"
+   },
+   {
+    "form": "מורא",
+    "ref_count": 41,
+    "edit": "deletion"
    }
   ]
  },
@@ -2990,12 +2990,12 @@
     "edit": "deletion"
    },
    {
-    "form": "יהבו",
+    "form": "דהבא",
     "ref_count": 52,
     "edit": "substitution"
    },
    {
-    "form": "דהבא",
+    "form": "יהבו",
     "ref_count": 52,
     "edit": "substitution"
    }
@@ -4456,12 +4456,12 @@
     "edit": "substitution"
    },
    {
-    "form": "מסרה",
+    "form": "ופרה",
     "ref_count": 53,
     "edit": "substitution"
    },
    {
-    "form": "ופרה",
+    "form": "מסרה",
     "ref_count": 53,
     "edit": "substitution"
    }
@@ -4951,7 +4951,7 @@
     "edit": "deletion"
    },
    {
-    "form": "נופו",
+    "form": "גופי",
     "ref_count": 46,
     "edit": "substitution"
    }
@@ -14613,14 +14613,14 @@
     "edit": "deletion"
    },
    {
-    "form": "ורבינו",
-    "ref_count": 100,
-    "edit": "substitution"
-   },
-   {
     "form": "שבינו",
     "ref_count": 100,
     "edit": "deletion"
+   },
+   {
+    "form": "ורבינו",
+    "ref_count": 100,
+    "edit": "substitution"
    }
   ]
  },
@@ -18190,14 +18190,14 @@
   ],
   "nearest_attested": [
    {
-    "form": "ירצו",
-    "ref_count": 88,
-    "edit": "deletion"
-   },
-   {
     "form": "שירצו",
     "ref_count": 88,
     "edit": "substitution"
+   },
+   {
+    "form": "ירצו",
+    "ref_count": 88,
+    "edit": "deletion"
    }
   ]
  },
