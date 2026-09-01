@@ -796,19 +796,55 @@ def test_audit_checks_a_disputed_choice_the_same_way_as_its_pre_rename_name():
     assert aad.CHECKERS["disputed_choice"](d_new, _klal("אלף בית גימל")).startswith("MISMATCH")
 
 
-def test_supersession_does_not_leak_across_keys(audit_reads_temp_log):
+def test_supersession_does_not_leak_to_another_word(audit_reads_temp_log):
+    """A later applied decision at a DIFFERENT word_index says nothing about
+    this word and must never suppress its check."""
     decisions_path = audit_reads_temp_log
     target = rd.append_decision("candidate_choice", klal_id=1, word_index=5,
                                 chosen_text="אלף", path=decisions_path)
     elsewhere = rd.append_decision("candidate_choice", klal_id=1, word_index=6,
                                    chosen_text="בית", path=decisions_path)
-    other_type = rd.append_decision("manual_correction", klal_id=1, word_index=5,
-                                    chosen_text="גימל", path=decisions_path)
     assert aad.is_superseded_by_later_applied(
-        target, {target["id"], elsewhere["id"], other_type["id"]}) is False, (
-        "only a later decision at the SAME (klal_id, word_index, decision_type) key describes "
-        "the same word - anything else must not suppress the check"
-    )
+        target, {target["id"], elsewhere["id"]}) is False
+
+
+def test_supersession_crosses_replacement_types_at_the_same_word(audit_reads_temp_log):
+    """WIDENED 2026-09-01 on the reviewer's ruling; this assertion used to read
+    the other way.
+
+    The old rule keyed supersession on (klal_id, word_index, decision_type), so
+    a manual_correction superseded by a later, also-applied disputed_choice at
+    the SAME WORD was not recognised and was reported as a mismatch - klal 66
+    w29 and klal 39 w242, in both of which the corpus holds the correct later
+    reading. Two decisions that REPLACE the same word describe the same word;
+    which UI recorded them does not change whether the corpus legitimately
+    moved past the older claim."""
+    decisions_path = audit_reads_temp_log
+    target = rd.append_decision("candidate_choice", klal_id=1, word_index=5,
+                                chosen_text="אלף", path=decisions_path)
+    later = rd.append_decision("manual_correction", klal_id=1, word_index=5,
+                               chosen_text="גימל", path=decisions_path)
+    assert aad.is_superseded_by_later_applied(
+        target, {target["id"], later["id"]}) is True
+    # ...but only when the later one was itself APPLIED. An unapplied later
+    # decision leaves the older claim standing, which is the klal 1 w97 case.
+    assert aad.is_superseded_by_later_applied(
+        target, {target["id"]}) is False
+
+
+def test_a_punctuation_insert_never_suppresses_a_replacement_decision(audit_reads_temp_log):
+    """punctuation_choice INSERTS a `[.]` and shifts the rest; it does not
+    overwrite the word. Letting it suppress a replacement would mask a
+    genuinely reverted correction - the one thing this script exists to catch."""
+    decisions_path = audit_reads_temp_log
+    target = rd.append_decision("manual_correction", klal_id=1, word_index=5,
+                                chosen_text="אלף", path=decisions_path)
+    punct = rd.append_decision("punctuation_choice", klal_id=1, word_index=5,
+                               chosen_text="[.]", chosen_source="accept",
+                               path=decisions_path)
+    assert aad.is_superseded_by_later_applied(
+        target, {target["id"], punct["id"]}) is False
+    assert "punctuation_choice" not in aad.REPLACEMENT_TYPES
 
 
 # --- build_klal_page_regions: the heuristic fallback path --------------------

@@ -157,6 +157,16 @@ def check_punctuation_choice(decision, klal):
 # read-only check that exists to catch an applied decision no longer
 # reflected in the corpus. Both names map to the same checker: the rename
 # changed the label, not the record's shape.
+# The decision types that REPLACE the word at their word_index. A later applied
+# one of these legitimately moves the corpus past an earlier one's claim at the
+# same word, whichever UI recorded it - which is what supersession means.
+#
+# `punctuation_choice` is deliberately NOT here. An accepted one INSERTS a `[.]`
+# at that index and pushes the rest along; it never overwrites the word. Letting
+# it suppress a replacement decision would mask a genuinely reverted correction,
+# and that is the one case this script exists to catch (klal 1 w97).
+REPLACEMENT_TYPES = frozenset({"candidate_choice", "disputed_choice", "manual_correction"})
+
 CHECKERS = {
     "disputed_choice": check_candidate_choice,
     "candidate_choice": check_candidate_choice,
@@ -176,7 +186,19 @@ def is_superseded_by_later_applied(decision, already_applied):
     decision that was never itself applied does NOT count: the older
     applied decision's claim is still the standing one and must be
     checked (this is the klal 1 word 97 case - see module docstring)."""
-    history = rd.history_for(decision["klal_id"], decision["word_index"], decision["decision_type"])
+    # WIDENED 2026-09-01, on the reviewer's ruling. This passed
+    # decision["decision_type"], so a manual_correction superseded by a later,
+    # also-applied disputed_choice AT THE SAME WORD was not recognised and was
+    # reported as a mismatch - klal 66 w29 (`מהדיא` then the correct `מההיא`)
+    # and klal 39 w242 (`ור` then the correct `ור'`). Two decisions that replace
+    # the same word describe the same word; which UI recorded them does not
+    # change whether the corpus has legitimately moved on. Widened across the
+    # REPLACEMENT types only - see REPLACEMENT_TYPES for why punctuation_choice
+    # must keep being checked against its own type alone.
+    kind = decision["decision_type"]
+    group = REPLACEMENT_TYPES if kind in REPLACEMENT_TYPES else {kind}
+    history = [r for r in rd.history_for(decision["klal_id"], decision["word_index"])
+               if r.get("decision_type") in group]
     seen_self = False
     for r in history:
         if r["id"] == decision["id"]:

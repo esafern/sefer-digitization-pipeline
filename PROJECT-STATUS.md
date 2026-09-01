@@ -346,7 +346,26 @@ applying it to the corpus remain two separate, deliberate steps.
       `disputed_choice "ור'"` applied. Corpus reads
       `ורב מרבי חייא ור' חייא מרבי`. Correct.
 
-    **OPEN, and it is a design question I did not settle unilaterally.** The
+    **RULED BY THE REVIEWER 2026-09-01 — "widen it across the three replacement
+    types" — and done.** `is_superseded_by_later_applied()` now resolves
+    supersession across `REPLACEMENT_TYPES` = `candidate_choice` /
+    `disputed_choice` / `manual_correction`, and `punctuation_choice` keeps
+    being checked against its own type alone, because an accepted one INSERTS a
+    `[.]` and shifts rather than overwriting — letting it suppress a
+    replacement would mask a genuinely reverted correction, which is the one
+    case this script exists to catch. **The audit now reports 1 MISMATCH**, and
+    it is klal 1 w97, the deliberately reverted e2e-test artifact that MUST
+    keep firing. Verified in both directions: klal 66 w29 and klal 39 w242 are
+    gone; klal 1 w97 remains.
+
+    `test_supersession_does_not_leak_across_keys` asserted the old scoping on
+    purpose, so it was **rewritten rather than deleted**, into three tests that
+    state the new rule and its boundaries: a later decision at a DIFFERENT word
+    still never suppresses; a later applied REPLACEMENT at the same word now
+    does; a later UNAPPLIED decision still does not (the klal 1 w97 case); and
+    a `punctuation_choice` never suppresses a replacement. Gate 351.
+
+    **The superseded history, for the record.** The
     last two are the same shape: a `manual_correction` superseded by a later,
     also-applied `disputed_choice` AT THE SAME WORD.
     `is_superseded_by_later_applied()` scopes supersession to the same
