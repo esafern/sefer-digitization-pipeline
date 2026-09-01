@@ -269,6 +269,65 @@ applying it to the corpus remain two separate, deliberate steps.
     222/222/223/667 klalim over the right ranges, `/api/klal/88` and
     `/api/page/73` 200, page latency 11.2 ms.
 
+0U. **[2026-09-01] THE 75 AUDIT MISMATCHES ARE NOT LOST CORRECTIONS. 72 were
+    index drift, 3 are benign, and ZERO corrections are missing from the
+    corpus.** `audit_applied_decisions.py` reported **75 of 494** applied
+    decisions "no longer reflected in the corpus", which reads as serious
+    corpus damage. Investigated; it is not.
+
+    **First, it is not a regression.** Built a throwaway worktree at `49cb6ad`
+    and ran the audit there: **75 before** the two 2026-09-01 apply commits,
+    **75 after**. Those commits added 2 applied decisions and 0 mismatches.
+
+    **The cause is Lesson 35, pointed at the auditor itself.** Applying a
+    correction shifts every later index in that klal - `apply_reviewer_
+    decisions.reindex_flags_after_shift()` exists precisely because of it - but
+    a DECISION record keeps the `word_index` it was written with. The auditor
+    compares at that stale index and calls a hit elsewhere a mismatch. Measured
+    offsets: **-11 ×1, -3 ×12, -1 ×28, +1 ×26, +2 ×2**. The corrected text is
+    in the corpus in every one of those cases.
+
+    **FIXED: the auditor now classifies instead of lumping.** A failed exact
+    check is followed by an EXACT search for the same span elsewhere in the
+    klal - drift is reported as "reflected, but at a SHIFTED index", separate
+    from a real mismatch. **Deliberately not fuzzy** (Lesson 5): the check at
+    the decision's own index still passes or fails on its own, and a near-miss,
+    a substring or a word that is genuinely gone all stay MISMATCH. Gated tests
+    pin exactly that. **75 -> 3.** This matters beyond tidiness: the script's own
+    code carries the note that "a check that routinely fires on correctly-applied
+    data is a check people learn to scroll past", and it had become one.
+
+    **All 3 survivors are benign, each read to the bottom:**
+    * **klal 1 w97** - `punctuation_choice '[.]'` noted "e2e test accept",
+      applied, then deliberately reverted by a later `punctuation_choice`. This
+      is the exact precedent named in the auditor's own module docstring as the
+      reason it exists. Working as designed.
+    * **klal 66 w29** - `manual_correction 'מהדיא'` applied, then
+      `disputed_choice 'מההיא'` applied. The corpus has `מההיא`, which is the
+      CORRECT reading (`ולמדתי כן מההיא דמשנינן`).
+    * **klal 39 w242** - `manual_correction 'ור'` applied (its `chosen_text`
+      dropped the geresh the note itself specifies: `זר' w242 → ור'`), then
+      `disputed_choice "ור'"` applied. Corpus reads
+      `ורב מרבי חייא ור' חייא מרבי`. Correct.
+
+    **OPEN, and it is a design question I did not settle unilaterally.** The
+    last two are the same shape: a `manual_correction` superseded by a later,
+    also-applied `disputed_choice` AT THE SAME WORD.
+    `is_superseded_by_later_applied()` scopes supersession to the same
+    `(klal_id, word_index, decision_type)` key, so it does not see them, and
+    `test_supersession_does_not_leak_across_keys` asserts that scoping ON
+    PURPOSE. I tried widening it, the test failed, and I reverted rather than
+    edit a deliberate assertion in corpus-integrity tooling. **The case for
+    widening:** two decisions replacing the same word describe the same word
+    whatever type recorded them, and a later applied one legitimately moved the
+    corpus past the older claim - which is what supersession means.
+    **The case against, and why it cannot be a blanket widening:**
+    `punctuation_choice` INSERTS and shifts rather than overwrites, so it must
+    never suppress a replacement decision. Any fix should widen across the three
+    REPLACEMENT types only (`candidate_choice`/`disputed_choice`/
+    `manual_correction`) and update that test's third assertion with the
+    reasoning. **Needs the reviewer's ruling.**
+
 0T. **[2026-09-01] The four new tools now have gated tests — and the two
     number-changing defects were both in logic no test could reach.**
     They shipped with zero coverage, and every check I ran on them (a

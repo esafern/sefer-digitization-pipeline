@@ -52,6 +52,8 @@
 # a later legitimate edit" - doing so would produce false positives, not
 # real findings. Those are reported separately as unverifiable-by-position,
 # not silently treated as passing.
+import os
+
 import corpus_io as cio
 import review_decisions as rd
 
@@ -185,12 +187,37 @@ def is_superseded_by_later_applied(decision, already_applied):
     return False
 
 
+def expected_span(decision):
+    """The word(s) an applied decision claims it wrote, as a list."""
+    if decision["decision_type"] == "punctuation_choice":
+        return ["[.]"]
+    return (decision.get("chosen_text") or "").split()
+
+
+def find_span(klal, span):
+    """Every index where `span` appears in the klal, EXACT match only.
+
+    Deliberately not fuzzy (Lesson 5: subsequence matching cannot settle an
+    exact-position claim). This does not loosen the audit - the exact check at
+    the decision's own word_index still has to pass or fail on its own. It only
+    classifies a FAILURE: is the text absent from the corpus, or present at a
+    different index because a later apply in the same klal shifted everything
+    after it (Lesson 35)?
+    """
+    if not span:
+        return []
+    words = cio.words_of(klal)
+    n = len(span)
+    return [i for i in range(len(words) - n + 1) if words[i:i + n] == span]
+
+
 def main():
     part1 = load_part1()
     already_applied = rd.applied_decision_ids()
 
     n_ok = n_mismatch = n_unverifiable = n_missing_klal = n_superseded = 0
-    mismatches = []
+    n_drifted = 0
+    mismatches, drifted = [], []
 
     for decision_id in sorted(already_applied):
         decision = rd.find_by_id(decision_id)
@@ -218,21 +245,42 @@ def main():
         elif result == "unverifiable_word_count_change":
             n_unverifiable += 1
         else:
-            n_mismatch += 1
-            mismatches.append(f"klal {klal_id} word {word_index} ({decision_type}, "
-                               f"decision {decision_id}): {result}")
+            # A failed exact check is not automatically a lost correction. If
+            # the text this decision wrote is still in the klal at a different
+            # index, a later apply shifted it and the decision IS still
+            # reflected - the stale number is the decision's word_index, not
+            # the corpus. Counting those as "no longer reflected in the corpus"
+            # is what made this script report 75 and be scrolled past.
+            hits = find_span(klal, expected_span(decision))
+            if hits:
+                nearest = min(hits, key=lambda i: abs(i - word_index))
+                n_drifted += 1
+                drifted.append(f"klal {klal_id} word {word_index} ({decision_type}, "
+                               f"decision {decision_id}): reflected at word_index "
+                               f"{nearest} ({nearest - word_index:+d})")
+            else:
+                n_mismatch += 1
+                mismatches.append(f"klal {klal_id} word {word_index} ({decision_type}, "
+                                   f"decision {decision_id}): {result}")
 
-    total = n_ok + n_mismatch + n_unverifiable + n_missing_klal + n_superseded
+    total = (n_ok + n_mismatch + n_unverifiable + n_missing_klal
+             + n_superseded + n_drifted)
     print(f"Checked {total} applied decisions across "
           f"{'/'.join(sorted(CHECKERS))}:")
     print(f"  {n_ok} confirmed still reflected in part1.json")
     print(f"  {n_superseded} superseded by a later, also-applied decision at the same key (expected, not checked)")
     print(f"  {n_unverifiable} word-count-changing, not position-verifiable post-hoc (see docstring)")
+    print(f"  {n_drifted} reflected, but at a SHIFTED index - a later apply in the "
+          f"same klal moved them (the decision's word_index is stale, not the corpus)")
     print(f"  {n_mismatch + n_missing_klal} MISMATCH - applied decision no longer reflected in the corpus")
     if mismatches:
         print()
         for m in mismatches:
             print(f"  {m}")
+    if drifted and os.environ.get("AUDIT_SHOW_DRIFT"):
+        print("\n  shifted (set AUDIT_SHOW_DRIFT= to hide):")
+        for d in drifted:
+            print(f"  {d}")
 
 
 if __name__ == "__main__":

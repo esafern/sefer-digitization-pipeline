@@ -3664,6 +3664,50 @@ def test_cross_klal_skips_gershayim_tokens():
     assert results == []
 
 
+# --- review_lexicon_only_words: the report must be reproducible ---------------
+
+def test_near_forms_breaks_ties_deterministically():
+    """Equal-ref_count neighbours must come out in a fixed order.
+
+    REGRESSION, 2026-09-01. near_forms() builds a SET and sorted it by
+    `-ref_count` alone, so any two attested forms with the SAME count came out
+    in set-iteration order - which differs between processes. Measured on the
+    real corpus before the fix: four consecutive runs produced four different
+    files (e.g. שחוזר/החוזר, both attested 97 times, swapping places), so every
+    rebuild left a dirty tracked artifact that no data change explained and
+    `git diff` on it carried no information.
+
+    The content was never wrong - same words, same counts. Only the order moved.
+    That is the kind of churn that trains people to ignore a file's diff, which
+    is the real cost.
+    """
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "review_lexicon_only_words",
+        os.path.join(REPO, "tools", "review_lexicon_only_words.py"))
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+
+    # MANY forms one substitution from 'אבגד', all attested EXACTLY the same
+    # number of times - nothing but the tie-break can order them. The count
+    # matters: with only two or three tied entries the set's iteration order
+    # coincides with alphabetical often enough that the test passes against the
+    # BROKEN sort, which is how the first version of this test was useless
+    # (checked against the pre-fix file, per Lesson 25). With ~20 it cannot.
+    ref = {"אבג" + c: 50 for c in "הוזחטיכלמנסעפצקרשת"}
+    got = mod.near_forms("אבגד", ref, 40)
+    forms = [f for f, _c, _e in got]
+    assert len(forms) >= 15, f"fixture did not produce enough tied neighbours: {len(forms)}"
+    assert forms == sorted(forms), (
+        f"tied neighbours are not ordered by form - the sort is not total, so "
+        f"this report's row order depends on set iteration order and the file "
+        f"churns between runs. Got: {forms}"
+    )
+    # and the primary key still dominates the tie-break
+    ref2 = {"אבגה": 50, "אבגו": 90}
+    assert [f for f, _c, _e in mod.near_forms("אבגד", ref2, 40)] == ["אבגו", "אבגה"]
+
+
 # --- scan_alignment: the batch pipeline must not import the HTTP server -------
 
 def test_no_pipeline_stage_imports_the_review_server():
@@ -5102,3 +5146,32 @@ def test_markdown_reports_bake_in_bidi_but_html_never_does():
 def test_to_visual_leaves_a_line_without_hebrew_untouched():
     url = "| [klal 4 w403](http://127.0.0.1:8420/klal/4/word/403) | | |"
     assert rr.to_visual(url) == url
+
+
+# --- audit_applied_decisions: drift is not loss (item 0U) --------------------
+
+import audit_applied_decisions as aud  # noqa: E402
+
+
+def test_find_span_is_exact_and_cannot_mask_a_lost_correction():
+    """The auditor now separates 'reflected at a shifted index' from 'gone'.
+    That must not become a fuzzy match: a correction that was genuinely
+    reverted has to keep reporting MISMATCH, so the classification is allowed
+    to relocate an EXACT span and nothing else (Lesson 5)."""
+    klal = {"klal_id": 999, "clean_text": "אלף בית גימל דלת הא"}
+    assert aud.find_span(klal, ["גימל"]) == [2], "an exact hit elsewhere is drift"
+    assert aud.find_span(klal, ["בית", "גימל"]) == [1], "multi-word spans relocate too"
+    assert aud.find_span(klal, ["שקרשקר"]) == [], "absent text must stay a MISMATCH"
+    assert aud.find_span(klal, ["גימלx"]) == [], "a near miss is not a hit"
+    assert aud.find_span(klal, ["ימ"]) == [], "a substring is not a word match"
+    assert aud.find_span(klal, []) == []
+
+
+def test_expected_span_covers_every_checkable_decision_type():
+    assert aud.expected_span({"decision_type": "punctuation_choice"}) == ["[.]"]
+    assert aud.expected_span(
+        {"decision_type": "manual_correction", "chosen_text": "רב פפא"}) == ["רב", "פפא"]
+    assert aud.expected_span(
+        {"decision_type": "disputed_choice", "chosen_text": "אלהים"}) == ["אלהים"]
+    assert aud.expected_span(
+        {"decision_type": "manual_correction", "chosen_text": None}) == []
