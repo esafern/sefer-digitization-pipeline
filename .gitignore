@@ -75,3 +75,16 @@ lexical_defect_report.md
 lexical_defect_report.html
 open_items_*.md
 open_items_*.html
+
+# Engine OCR output and the comparison tables derived from it. ADDED 2026-09-01.
+# Same class as vlm_extractions/ and sefaria_export/ above: machine output that
+# a tool writes and another tool reads by path, never imported and never read by
+# a test. Tracking them put ~7,100 lines of non-code into every diff, which is
+# what pushed a code review over its size budget on 2026-09-01.
+# Untracked with `git rm --cached`, so the working copies stay on disk and the
+# blobs stay recoverable from history (they were added in b9aa810).
+dicta_output/
+ocr_engine_comparison*.json
+/yad-malachi-berlin-sample_ocr.txt
+/yad-malachi-rashi-sample_ocr.txt
+tools/second_witness_eval/vlm_klal_8_22_ocr.txt
