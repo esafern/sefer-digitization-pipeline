@@ -75,7 +75,8 @@ belongs to that ecosystem or interoperates with it.
 The dominant technical powerhouse for Hebrew NLP.
 
 - **Sites:** [dicta.org.il](https://dicta.org.il/) ·
-  [ocr.dicta.org.il](https://ocr.dicta.org.il/) (the web portal appears to be "הגהת מסמכים סרוקים", a Dropbox-synced proofreader requiring .docx/.txt; research confirms Dicta provides Hebrew OCR across its platform, but the exact mechanism for direct public web upload of raw PDFs remains unconfirmed) ·
+  **[rashiocr.dicta.org.il](https://rashiocr.dicta.org.il/) — the Rashi-script OCR endpoint. RESOLVED 2026-08-31 (user-supplied): this is the public entry point that takes a raw scan and returns text, and it is what produced this repo's Dicta samples.** It supersedes the note below, which searched the wrong URL. ·
+  [ocr.dicta.org.il](https://ocr.dicta.org.il/) (a *different* tool: "הגהת מסמכים סרוקים", a Dropbox-synced proofreader for .docx/.txt — not a raw-scan OCR endpoint, which is why the mechanism read as unconfirmed until 2026-08-31) ·
   [library.dicta.org.il](https://library.dicta.org.il/) (digital library)
 - **Code:**
   [github.com/Dicta-Israel-Center-for-Text-Analysis](https://github.com/Dicta-Israel-Center-for-Text-Analysis)
@@ -195,7 +196,7 @@ To ensure high corpus fidelity, an independent second/third witness engine is ne
 | **Claude vision (Anthropic, via the coding session's own image-reading capability)** | Foundation Multimodal AI | Genuinely different model family from Google (both DocAI and the Gemini-based witness/adjudicator); zero integration cost as an interactive check | Not batch-callable by a standalone script without a provisioned `ANTHROPIC_API_KEY` (none present in this environment) | **Used successfully, live, 2026-08-21** — directly reading a disputed scan crop correctly identified a real DocAI letter-misread (ט read as פ) that Gemini-based tooling had missed |
 | **Azure AI Document Intelligence** | Commercial Cloud OCR (Microsoft) | Confirmed Hebrew support in its Read model; the only candidate here that could replace/complement DocAI itself, not just the witness/adjudicator layer | Needs a new Azure account/API key, not present in this environment; unverified in practice | **Feasibility-checked 2026-08-21, not tested** |
 | **AWS Textract** | Commercial Cloud OCR (Amazon) | — | Not researched in depth | **Unresearched as of 2026-08-21** |
-| **Dicta OCR Engine** | Proprietary Deep Learning | Best-in-class Rabbinic Hebrew & Rashi recognition | The `ocr.dicta.org.il` URL appears to be a Dropbox-synced proofreader; research confirms Dicta provides Hebrew OCR across its tools, but the exact mechanism for direct public web upload of raw PDFs remains unconfirmed | **Assessed 2026-08-20**: Web upload workflow unconfirmed; under active research |
+| **Dicta OCR Engine** | Proprietary Deep Learning | Best-in-class Rabbinic Hebrew & Rashi recognition. **MEASURED 2026-08-31**: 94.8% word accuracy / 98.5% lexicon hit on a Rashi-script edition; 77.6% / 83.4% on this project's square Berlin scan | **Rashi-only.** On square type it is the worst engine available here — route it at Rashi editions and never at the Berlin scan (PROJECT-STATUS.md item 0J) | **Endpoint confirmed 2026-08-31: <https://rashiocr.dicta.org.il/>.** Earlier "workflow unconfirmed" notes were searching `ocr.dicta.org.il`, a different tool |
 
 
 ## 3. Feature comparison

@@ -1,0 +1,62 @@
+{
+  "source_pdf": "yad-malachi-jerusalem-rashi-Hebrewbooks_org_14122.pdf",
+  "source_pages": 491,
+  "pages_per_chunk": 13,
+  "chunks": [
+    {
+      "chunk": 1,
+      "file": "dicta_chunks_remainder/yadmalachi-jer-r_c0001_p0051-p0063.pdf",
+      "first_page": 51,
+      "last_page": 63,
+      "pages": 13,
+      "bytes": 535927,
+      "submitted_at": null,
+      "output_file": null,
+      "status": "pending"
+    },
+    {
+      "chunk": 2,
+      "file": "dicta_chunks_remainder/yadmalachi-jer-r_c0002_p0064-p0076.pdf",
+      "first_page": 64,
+      "last_page": 76,
+      "pages": 13,
+      "bytes": 538159,
+      "submitted_at": null,
+      "output_file": null,
+      "status": "pending"
+    },
+    {
+      "chunk": 3,
+      "file": "dicta_chunks_remainder/yadmalachi-jer-r_c0003_p0077-p0089.pdf",
+      "first_page": 77,
+      "last_page": 89,
+      "pages": 13,
+      "bytes": 566697,
+      "submitted_at": null,
+      "output_file": null,
+      "status": "pending"
+    },
+    {
+      "chunk": 4,
+      "file": "dicta_chunks_remainder/yadmalachi-jer-r_c0004_p0090-p0102.pdf",
+      "first_page": 90,
+      "last_page": 102,
+      "pages": 13,
+      "bytes": 568578,
+      "submitted_at": null,
+      "output_file": null,
+      "status": "pending"
+    },
+    {
+      "chunk": 5,
+      "file": "dicta_chunks_remainder/yadmalachi-jer-r_c0005_p0103-p0114.pdf",
+      "first_page": 103,
+      "last_page": 114,
+      "pages": 12,
+      "bytes": 511230,
+      "submitted_at": null,
+      "output_file": null,
+      "status": "pending"
+    }
+  ]
+}

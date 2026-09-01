@@ -1,0 +1,61 @@
+{
+  "source_pdf": "yad-malachi-jerusalem-rashi-Hebrewbooks_org_14122.pdf",
+  "source_pages": 491,
+  "pages_per_chunk": 7,
+  "chunks": [
+    {
+      "chunk": 1,
+      "file": "dicta_chunks/yadmalachi-jer_c0001_p0022-p0028.pdf",
+      "first_page": 22,
+      "last_page": 28,
+      "pages": 7,
+      "bytes": 285605,
+      "submitted_at": "2026-08-31T22:20:12",
+      "output_file": "dicta_output/yadmalachi-jer_c0001_p0022-p0028_ocr.txt",
+      "status": "done",
+      "job_id": "fc3e657b-528c-4490-960d-e717d71a1b9f"
+    },
+    {
+      "chunk": 2,
+      "file": "dicta_chunks/yadmalachi-jer_c0002_p0033-p0038.pdf",
+      "first_page": 33,
+      "last_page": 38,
+      "pages": 6,
+      "bytes": 255741,
+      "submitted_at": "2026-08-31T22:20:12",
+      "output_file": "dicta_output/yadmalachi-jer_c0002_p0033-p0038_ocr.txt",
+      "status": "done",
+      "job_id": "356238a1-329b-453c-a8ed-11c7f6198022"
+    },
+    {
+      "chunk": 3,
+      "file": "dicta_chunks/yadmalachi-jer_c0003_p0039-p0044.pdf",
+      "first_page": 39,
+      "last_page": 44,
+      "pages": 6,
+      "bytes": 249640,
+      "submitted_at": "2026-08-31T22:20:12",
+      "output_file": "dicta_output/yadmalachi-jer_c0003_p0039-p0044_ocr.txt",
+      "status": "done",
+      "job_id": "c5f40c0b-3bd5-4e82-b259-26908b6cb378"
+    },
+    {
+      "chunk": 4,
+      "file": "dicta_chunks/yadmalachi-jer_c0004_p0045-p0050.pdf",
+      "first_page": 45,
+      "last_page": 50,
+      "pages": 6,
+      "bytes": 251947,
+      "submitted_at": "2026-08-31T22:20:12",
+      "output_file": "dicta_output/yadmalachi-jer_c0004_p0045-p0050_ocr.txt",
+      "status": "done",
+      "job_id": "53a86415-ba82-474f-99f5-f896753cb5d7"
+    }
+  ],
+  "calibration": {
+    "job_id": "4c1fed2b-bb19-4344-b76b-fc204b5d852f",
+    "pages": "29-32",
+    "output_file": "dicta_output/yadmalachi-jer_c0001_p0029-p0032_ocr.txt",
+    "status": "done"
+  }
+}

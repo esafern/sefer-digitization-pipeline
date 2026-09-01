@@ -122,8 +122,11 @@ def main():
     if not os.path.exists(pdf_path):
         sys.exit(f"Error: PDF file not found at: {pdf_path}")
 
-    # Map sample PDF pages 1, 2, 3 to source scan pages 18, 19, 20 if running sample PDF
-    sample_page_map = {1: 18, 2: 19, 3: 20} if os.path.basename(pdf_path) == "yad-malachi-berlin-sample.pdf" else {}
+    # Map sample PDF pages 1, 2, 3 to source scan pages.
+    # CORRECTED 2026-08-31: the sample's pages are 19, 20, 21, not 18, 19, 20 -
+    # the MD5 match that produced the old numbers returns a fitz doc index and
+    # page N == doc[N-1] here (Lesson 30). See PROJECT-STATUS.md item 0K.
+    sample_page_map = {1: 19, 2: 20, 3: 21} if os.path.basename(pdf_path) == "yad-malachi-berlin-sample.pdf" else {}
 
     # Check dependencies before loading HF transformers
     has_ml_libs = check_dependencies()

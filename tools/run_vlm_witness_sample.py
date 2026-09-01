@@ -3,7 +3,7 @@
 tools/run_vlm_witness_sample.py
 
 Runs Gemini 3.6 Flash VLM region-level OCR transcription for Berlin scan
-pages 18-20 (klalim 8-22) using unconditioned visual prompts per
+klalim 8-22 (Berlin pages 18-20) using unconditioned visual prompts per
 .gemini/rules/vlm_ocr_transcription_discipline.md.
 
 Outputs result to dicta_eval/vlm_klal_8_22_ocr.txt.

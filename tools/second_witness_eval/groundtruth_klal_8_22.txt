@@ -1,4 +1,8 @@
-Yad Malachi - Berlin scan pages 18-20 (sample PDF pages 1-3)
+Yad Malachi - Berlin scan pages 18-20, klalim 8-22.
+NOTE 2026-08-31: these are NOT the pages in yad-malachi-berlin-sample.pdf.
+That sample is pages 19-21 = klalim 12-24 (see PROJECT-STATUS.md item 0K).
+This file remains valid ground truth for klalim 8-22 from part1.json;
+it is simply not the ground truth for that sample PDF.
 Ground truth = part1.json clean_text, klalim 8-22
 ======================================================================
 

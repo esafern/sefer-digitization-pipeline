@@ -3,7 +3,15 @@
 dicta_eval/evaluate_ocr_alignment.py
 
 Evaluates candidate second-witness OCR text (e.g. Dicta, Kraken, TrOCR)
-against ground truth for Berlin scan pages 18-20 (klalim 8-22).
+against ground truth for klalim 8-22.
+
+Requires the candidate to carry `--- klal N` / `=== KLAL N` headers; a raw
+engine dump has none and scores 0% here. Use tools/compare_ocr_engines.py
+for those - it anchors on content instead.
+
+NOTE 2026-08-31: klalim 8-22 are Berlin pages 18-20, but they are NOT the
+pages in yad-malachi-berlin-sample.pdf, which is pages 19-21 / klalim 12-24
+(PROJECT-STATUS.md item 0K).
 
 Usage:
   python3 dicta_eval/evaluate_ocr_alignment.py --ocr-file <path_to_candidate_ocr_text>

@@ -43,6 +43,300 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0T. **[2026-08-31] S2 IS CLOSED — `corpus_io.words_of()` is now the one
+    space-only split, and a test stops a new one being typed.** The finding had
+    been open since 2026-08-25 across three reviews, and the reason it stayed
+    open is that it kept GROWING: the 2026-08-31 sweep counted 12 sites and
+    missed one written that same day (item 37(b) corrected the count to 27
+    across 14 files). A finding that spreads faster than it is counted needs a
+    gate, not another count.
+
+    **Converted: 27 call sites in 14 files** — `apply_reviewer_decisions.py` (8),
+    `review_server.py` (5), `audit_applied_decisions.py` (2),
+    `propose_punctuation_part1.py` (2), and one each in `corpus_io.py`,
+    `build_klal_page_regions.py`, `build_corrections_dataset.py`,
+    `assemble_corrections_dataset.py`, `apply_punctuation_decisions.py`,
+    `build_open_items_report.py`, `validate_part1_corpus_integrity.py`,
+    `patch_witness_word_indices.py`, `list_ligature_words.py`. Count
+    comparisons went to `word_count_of()`.
+
+    **The direction matters, and the 2026-08-25 review had it backwards.** That
+    review's remedy R3 says "the answer should be `.split()`". Following it
+    would have invalidated the `word_index` of **every decision ever recorded** —
+    a `word_index` in this project means an index into `clean_text.split(' ')`,
+    because that is what the dashboard's click handler computes and what the
+    ledger was written against. `str.split()` collapses whitespace runs and
+    renumbers every word after a double space. The convergence went onto the
+    scheme the data is already in. **This does not merge the two schemes**:
+    machine candidate generation still uses `.split()` legitimately, because it
+    diffs token streams instead of addressing stored positions. What ended is
+    the *unmarked* use of the space-only split, where the two were told apart
+    only by reading each call site and knowing which one it meant.
+
+    **Verified as an identity, not assumed**: `words_of(k)` equals the raw split
+    it replaced for **all 667 klalim / 188,744 word positions**, and 0 klalim
+    have a double, leading or trailing space today — which is exactly why this
+    was latent rather than live, and exactly why it would have gone live
+    silently.
+
+    **The gate: `test_no_new_raw_space_split_sites_appear_outside_corpus_io`.**
+    AST-based, not grep — these modules discuss `.split(' ')` at length in
+    comments and docstrings because the two-scheme distinction has to be
+    explained somewhere, and a text search cannot tell an explanation from a
+    call. Verified to FAIL on a newly-introduced site before being kept (a
+    throwaway probe file), per Lesson 25. Two documented exemptions:
+    `corpus_io.py` itself, and
+    `second_witness_eval/run_part1_vlm_second_witness.py:61`, which splits a VLM
+    ENGINE's output for a membership test and produces no word_index — a
+    different question that happens to use the same operator.
+
+    Suite: **377 passed, 1 skipped**. Server restarted and re-smoke-tested.
+    Side effect worth noting: running `build_open_items_report.py` to read the
+    queue rewrote the tracked `open_items_2026-08-31.json`; it is a derived
+    report, so it now reflects current state rather than this morning's.
+
+0S. **[2026-08-31] THE 2026-08-25/26/27 REVIEW BACKLOG IS CLOSED EXCEPT FOR THE
+    THREE REFACTORS — nine findings fixed, seven new tests, and the multi-word
+    guard turned out to be guarding the wrong thing.** Branch:
+    `code-review-fixes-2026-08-31` (kept off `master` because a concurrent
+    session is mid-flight on the Dicta work; nothing in that work is touched).
+    Suite: **375 passed, 1 skipped, 376 collected** — collected count from
+    `pytest --collect-only -q`, per Lesson 37, and it equals the declared count
+    in every test file.
+
+    **The one that was not just tidying.** `CODE-REVIEW-2026-08-27.md`'s remedy
+    #2 says a multi-word manual replacement should "claim the per-klal-per-run
+    slot", and item 37 recorded it as half-applied (present in
+    `apply_reviewer_decisions.py`, absent from `export_corpus.py`). Applying it
+    to the second file exposed that **the remedy as written does not prevent the
+    corruption the finding itself describes.** Claiming the slot stops a second
+    *word-count-changing* decision; the decision actually at risk is the
+    ordinary *single-word* one that follows a shift. Normally
+    `apply_manual_correction`'s drift check catches it — the word at the shifted
+    index no longer equals `original_word`. It does **not** catch the case where
+    the shifted-into position holds the SAME word: with a repeated word
+    (`גימל גימל`), the check passes and the run rewrites the wrong occurrence,
+    silently, with the reviewer's note attached to a word they never saw. The
+    gate is now on **every** manual branch in both files. Live exposure when
+    written: **0** — measured across every unapplied manual decision; one klal
+    (74) has more than one and all three of its are word-count-changing, which
+    the existing gate already handled.
+
+    **And the premise both files stated was wrong.** Both say "0 multi-word
+    manual replacements exist today (re-measured, not remembered)". **Klal 57
+    w44 is one** — `לאורויילן` → `לאורויי לן`, recorded 2026-08-30T21:13,
+    applied 21:19, and the corpus reads it as two words now. It went through the
+    unguarded path. It did no damage (it was the only word-count-changing
+    decision in its run, and the next klal-57 decision came a day later and sits
+    at a lower index), but the earlier measurement evidently counted only
+    unapplied decisions. Lesson 19: the claim was checked against a query, not
+    against the log.
+
+    **A test that could not fail, caught before it was committed.** The first
+    version of the `export_corpus` regression test passed against the *pre-fix*
+    file — the drift check alone produced identical output, so the test
+    discriminated nothing (Lesson 25). Rewritten around the repeated-word case
+    and verified to fail on `git show HEAD:tools/export_corpus.py` before being
+    kept. **Any regression test written for this class must be run against the
+    unfixed file first**; the guard and the drift check overlap almost
+    everywhere, and the sliver where they don't is the entire finding.
+
+    **Fixed, each verified live or by a test that fails without it:**
+    S3's open half (the bbox cache key now stamps the DocAI page too, not only
+    `part1/2/3.json` — a page re-extraction no longer serves stale boxes);
+    **S4** (`_parts_for`/`_load_klalim` share one validator and raise
+    `BadRequest`; `?part=4` is a **400 with a message**, live-checked, where it
+    used to be a silent Part 1 — the two had also drifted, `_parts_for`
+    accepting `none` and `_load_klalim` not); **S5/#6** (`PART2_MAX_KLAL=444`,
+    `PART3_MAX_KLAL=667` and derived `*_MIN` constants in `corpus_io.py`, with
+    two invariant tests — one asserting them against the live corpus and
+    contiguity, one running `_get_part_num_for_klal` over all 667 klalim);
+    **H3/#8** (`union_bbox()` → `corpus_io`, both copies now aliases);
+    **H4** (both dead `extract_*_consensus_disputes.py` stubs removed — zero
+    executable references, only prose, and `synthesize_multi_witness.py:7-23`
+    already carries that history); **#18/#9** (one `clearWordFlag()` in
+    `app.js`, both panels call it); **#7** (`FURNITURE_WORDS` imported from
+    `corpus_io` directly); and **08-26 #2's unswept sibling**
+    (`validate_suppression_filters.load_reference_freq` now delegates to
+    `docai_filter.reference_frequencies()` — see item 37(d)).
+
+    **Deliberately NOT done — the three genuine refactors, each wants its own
+    session:** **C4** (four modules import `review_server`, five private-helper
+    call sites — see item 37(a); an `scan_alignment.py` extraction closes three
+    of five, the other two want a decisions/queue loader), **S1** (1,981 lines),
+    **S2** (27 `.split(' ')` sites / 14 files, no `words_of()`). H2
+    (`_NO_UPPER_BOUND = 10 ** 9`) left alone on purpose: replacing it with
+    `PART3_MAX_KLAL` would change what those two alignment rows actually bound,
+    which is a data-affecting change wearing a refactor's clothes.
+
+    Review server restarted (rule) and smoke-tested: parts 1/2/3/all return
+    222/222/223/667 klalim over the right ranges, `/api/klal/88` and
+    `/api/page/73` 200, page latency 11.2 ms.
+
+0R. **[2026-08-31] Hebrew in generated Markdown needs EXPLICIT bidi isolation —
+    the repo already knew this for HTML and the knowledge did not travel.**
+    Reviewer-reported: `DICTA-NEW-DISPUTES.md` rendered its Hebrew backwards.
+    Cause: a Markdown file is an LTR-base document with no stylesheet, so a bare
+    Hebrew run reorders against the Latin, digits, URLs and punctuation beside
+    it — and in a table row of `| url | 5 | 86 | כ"ר |` there is a lot of that.
+
+    **The repo had already solved this, in CSS.** `review_frontend/app.css` uses
+    `direction: rtl; unicode-bidi: isolate` in four places, one with the comment
+    "keep the Hebrew from reordering the LTR row"; `tools/render_report.py` sets
+    the same on `.heb`. First attempt: `U+2067 RIGHT-TO-LEFT ISOLATE` …
+    `U+2069 POP DIRECTIONAL ISOLATE` around every Hebrew run — the character
+    form of that CSS rule.
+
+    **THAT DID NOT WORK, and the reason is the useful part.** Reviewer: "still
+    has heb rev in md." **Measured, not assumed: `glow` does no bidi at all.**
+    Fed `abc כותב xyz`, its output carries the Hebrew byte-for-byte as it read
+    it — KAF,VAV,TAV,BET in, KAF,VAV,TAV,BET out. It expects the TERMINAL to run
+    the Unicode bidi algorithm, and the terminals in use here do not. So logical
+    order displays backwards and **the isolates are inert, because nothing reads
+    them.** There is no Markdown-level fix for a renderer that implements none
+    of the algorithm; the only remaining lever is the character order itself.
+
+    **FIXED with a `--hebrew visual|logical` mode**, default `visual`, which
+    bakes the reordering into the bytes using `python-bidi`'s implementation of
+    the real algorithm (already installed here) rather than a hand-rolled
+    reverse — naive reversal mishandles gershayim, embedded digits and Latin,
+    and this text is full of `דף ג' ב'`. Base direction stays `L`, so URLs and
+    ASCII are provably untouched. **The cost is real and is stated in the
+    file's own header: Hebrew copied out of a visual-order file pastes
+    REVERSED.** `--hebrew logical` regenerates the canonical, copy-safe form for
+    any bidi-aware reader (Chrome, GitHub, VS Code).
+
+    **The general rule this settles:** which order is correct depends entirely
+    on whether the CONSUMER implements bidi, and that is a property of the
+    reader, not of the file. A Hebrew artifact aimed at a terminal and one aimed
+    at a browser cannot be the same bytes.
+
+    **A SECOND defect in the same file, same root: MARKDOWN TABLES DESTROY BOTH
+    THE LINKS AND THE HEBREW.** Reviewer-reported ("glow is word-wrapping the
+    first column - which breaks the link functionality"). Measured with
+    `glow -w 80`, which is how these files actually get read:
+
+    ```
+     http://127.0.0.1:8420/klal/5/word/8 | 5 | 86 | ⁧כ"ר⁩ | ⁧כ"ד⁩ (dicta+surya+vlm)
+     6                                   |   |    |     |
+     http://127.0.0.1:8420/klal/5/word/2 | 5 | 27 | ⁧וככ | ⁧ובכתובות⁩
+     79                                  |   |  9 | תוב |
+    ```
+
+    The URL is wrapped MID-STRING, so it is neither clickable nor copyable, and
+    the same narrow cells chop Hebrew words into vertical fragments. **FIXED by
+    a layout rule, not a tweak: no URL ever shares a line with anything else,
+    and the file has no tables at all.** Verified at 50/60/80/120 columns.
+    A bare `--urls-out` list is emitted alongside for piping. Options tested and
+    rejected: `[text](url)` (glow does emit OSC-8 hyperlinks, but prints the raw
+    URL beside the label, so it is no shorter); shortening to `127.0.0.1:8420/…`
+    (still wraps once other columns exist, and relies on the terminal
+    auto-linking a schemeless string).
+
+    **The lesson, and it is not about Markdown.** Every Hebrew-bearing artifact
+    this project emits into an LTR container needs the isolates, and every
+    link-bearing one needs the no-tables rule; the CSS answer only covers the
+    HTML ones. **NOT YET SWEPT** — `tools/export_corpus.py`'s plain-text
+    export, `open_items_*.md`, `cleared_flags_*.md` and any other generated `.md`
+    carrying Hebrew have the same exposure and have not been checked. Whoever
+    picks this up: the check is whether Hebrew ever shares a line with Latin,
+    digits or a URL, not whether the file "looks fine" in one viewer.
+
+0Q. **[2026-08-31] THE 60 NEW DISPUTES ARE NOW A REVIEWABLE ARTIFACT —
+    `DICTA-NEW-DISPUTES.md`, one dashboard link per position. Still a PREVIEW;
+    nothing written into the pipeline.** Generated by the new
+    `tools/preview_dicta_disputes.py`, which reuses `synthesize_multi_witness`'s
+    own loaders and vote rules rather than re-deriving them, so a preview cannot
+    drift from what stage 4a would actually emit. It reproduces the dry run
+    exactly (60 new / 65 corroborated), which is the consistency check.
+
+    Links use the PATH form `/klal/<id>/word/<index>`, not the `#klal=N&word=M`
+    hash form, because `&` gets truncated when a link is pasted into a terminal
+    or a chat window — `review_frontend/app.js` already made that choice for its
+    copy button and this follows it. **Verified live**: the first three 302 to
+    the hash route off the running server, they are not constructed strings
+    nobody tried.
+
+    **What the 60 are made of:** 33 `dicta+surya`, 27 `dicta+vlm`, **0
+    `dicta+docai`**, across 23 klalim. No position is carried by Dicta alone —
+    the two-distinct-engines rule is doing its job, and the absence of a
+    docai pairing is expected (DocAI's vote comes from the candidate queue,
+    which is already in the reviewer's hands).
+
+    **ONE POSITION NEEDS A HUMAN BEFORE ANY OF THE OTHERS — klal 29 w86.** The
+    corpus reads `חנה`, a reviewer **already ruled** and chose `חנה`, and Dicta
+    and the VLM independently read `הנה`. Context: `…שלא ראיתיו עד חנה זה כמה
+    שנים…`, where `עד הנה` ("until now") is the ordinary reading and `חנה` is
+    not. This is exactly the case Lesson 9 says must not be buried: a human
+    choosing one thing while two independent engines agree on another. The
+    preview marks it and does not hide it. **Not applied** — the ink decides.
+
+0P. **[2026-08-31] DICTA RUN AGAINST THE JERUSALEM EDITION — 29 of 93 Part 1
+    pages done (klalim 1–63), 95.5% word accuracy, and the run was HALTED
+    DELIBERATELY when the service started refusing uploads.**
+
+    Submitted through <https://rashiocr.dicta.org.il/> in the browser, one file
+    at a time, per item 5's standing rule. Chunker: `tools/chunk_pdf_for_ocr.py`.
+    Collector: `tools/fetch_dicta_result.sh`. Manifest with job ids and
+    per-chunk status: `dicta_chunks/manifest.json`. Output: `dicta_output/`.
+
+    **Measured on what came back — this is the real number, not the sample's.**
+
+    | scope | ref tokens | word acc. | CER | lexicon hit |
+    |---|---:|---:|---:|---:|
+    | calibration, klalim 13–22 | 1,505 | 94.9% | 2.8% | 99.0% |
+    | **klalim 1–63 (pages 22–50)** | **16,304** | **95.5%** | **3.8%** | **96.7%** |
+    | _corpus ceiling, same window_ | 16,304 | 100% | 0% | 97.1% |
+
+    **301 DPI was not a handicap.** The calibration chunk matched the
+    higher-resolution Google sample point for point (94.9% vs 94.8%, 99.0% vs
+    98.5% lexicon), and the full 63-klal run came in HIGHER at 95.5%. Item 0O's
+    resolution worry is answered: it was worth checking and it was not a problem.
+
+    **The witness dry run, re-run at 6x the scale — it supersedes item 0N's
+    extrapolation.** Klalim 2–62, 16,177 corpus words:
+
+    | | 10-klal dry run (0N) | **61-klal, real data** |
+    |---|---:|---:|
+    | alignment coverage | 94.5% | **95.4%** |
+    | agrees with corpus | 97.4% | **97.7%** |
+    | corroborates existing disputes | 8 of 11 (73%) | **65 of 83 (78%)** |
+    | NEW disputes created | 4 | **60** |
+
+    **0N extrapolated ~130 new disputes across Part 1; the honest figure is
+    ~218** (60 per 61 klalim x 222). The small sample under-counted by ~60% —
+    exactly why Lesson 27 says label an extrapolation as one. Corroboration held
+    up and improved. 60 new disputes have NOT been hand-checked; the 4 from the
+    small run were, and all 4 were real corpus errors.
+
+    **WHY THE RUN STOPPED, and it is not a bug to fix by retrying.** After five
+    chunks went through quickly, chunk 5 (pages 51–56) failed its Uppy upload
+    twice in a row (`העלאה נכשלה`, `קובץ 0 מתוך 1 הועלה`). Five rapid
+    submissions is the most plausible cause. The run was halted rather than
+    retried a third time — the user's directive is "be CERTAIN to not flood this
+    url," and a service refusing uploads is the signal that rule exists for.
+    **Resume slowly**, minutes apart, not seconds.
+
+    **CONFIRMED BY THE REVIEWER 2026-08-31, independently of this automation:**
+    "i get an error as well when i try to upload to dicta. it is saying to
+    wait." So the refusal is the SERVICE rate-limiting, not a browser-automation
+    artifact, and halting the run was the correct read rather than a lucky one.
+
+    **RE-CHUNKED for a lower request count, at the reviewer's direction.** The
+    remainder is now **5 files, not 11**: pages 51-63, 64-76, 77-89, 90-102,
+    103-114 — 13 pages and ~0.5 MB each, in `dicta_chunks_remainder/` with its
+    own manifest. Fewer, larger requests is the right trade against a
+    per-request limit, and the calibration chunk showed 4 pages processing in
+    under 15 seconds, so 13 is not a long job at their end. `dicta_chunks/`
+    now keeps only the 4 completed chunks, as the record of pages 22-50.
+
+    **Browser-automation note for whoever resumes:** the email field does not
+    reliably accept synthesized keystrokes (~3 of 7 attempts landed). What works
+    every time is setting the value through the native `HTMLInputElement` value
+    setter plus an `InputEvent`/`keyup`/`change` dispatch, then clicking
+    `שליחה`. Always assert the send button is enabled BEFORE clicking it — that
+    guard is what stopped a chunk being submitted with an empty address.
+
 0O. **[2026-08-31] THE FULL RASHI EDITION IS IN THE REPO, AND IT IS JERUSALEM
     1975/6 — NOT Przemysl, and NOT the scan the 94.8% was measured on.**
     `yad-malachi-jerusalem-rashi-Hebrewbooks_org_14122.pdf`, 491 pages, 19.5 MB,
@@ -2686,12 +2980,91 @@ applying it to the corpus remain two separate, deliberate steps.
     `FURNITURE_WORDS = cio.FURNITURE_WORDS` — an indirection, not a divergent
     copy, so it cannot drift. Worth tidying, not a Lesson 13 instance.
 
+    **CORRECTED [2026-08-31, re-sweep] — four of the numbers above were wrong,
+    and one whole finding was missed. Counted, not remembered.** The sweep's
+    method was right and its dispositions hold; its measurements were taken too
+    narrowly, which is Lesson 1 in miniature — a sweep scoped to where the
+    finding pointed rather than to the whole class.
+
+    (a) **C4 is FOUR modules and FIVE private-helper call sites, not one.**
+    `synthesize_multi_witness.py:348` (`rs._word_bboxes_resolved`) and `:370`
+    (`rs._load_regions`) are the two the sweep named, but also
+    `pipeline/assemble_corrections_dataset.py:263` (`_rs._word_scan_position`),
+    `tools/validate_suppression_filters.py:194` (`rs._load_witness_queue`) and
+    `tools/patch_witness_word_indices.py:50` (`rs._load_klalim`). So the batch
+    pipeline's dependency on the live HTTP server's privates is four times
+    wider than the finding that named only `synthesize_multi_witness.py`, and
+    an `scan_alignment.py` extraction alone does not close it — two of the five
+    want a decisions/queue loader, not geometry.
+
+    (b) **S2 is 27 `.split(' ')` code sites across 14 non-test files**, not
+    "12 across 5". Full list from `grep -rn --include='*.py' "split(' ')"
+    pipeline tools`, comments excluded: `apply_reviewer_decisions.py` ×8,
+    `review_server.py` ×5, `audit_applied_decisions.py` ×2,
+    `propose_punctuation_part1.py` ×2, and one each in `corpus_io.py`,
+    `build_klal_page_regions.py`, `build_corrections_dataset.py`,
+    `assemble_corrections_dataset.py`, `apply_punctuation_decisions.py`,
+    `build_open_items_report.py`, `validate_part1_corpus_integrity.py`,
+    `patch_witness_word_indices.py`, `list_ligature_words.py`,
+    `second_witness_eval/run_part1_vlm_second_witness.py`. **The newest site,
+    `tools/build_open_items_report.py:74`, was written on 2026-08-31 — the same
+    day as the sweep that counted 12.** The scheme is not just unconsolidated,
+    it is still spreading, and there is still no `corpus_io.words_of()`.
+
+    (c) **S1 is 1,981 lines**, not 1,955. Third measurement in the same
+    direction: 1,736 → 1,849 → 1,955 → 1,981.
+
+    (d) **NEW — 08-26 finding #2 was half-swept, exactly like the multi-word
+    guard above, and for the same reason.** The finding named TWO copies of the
+    `word_freq.json` loader: `reconstruct_placeholder_klalim.py:97` and
+    "`validate_suppression_filters.py:87` is a second copy". The first now
+    delegates to `docai_filter.reference_frequencies()`;
+    `tools/validate_suppression_filters.py:87 load_reference_freq()` is still a
+    private hand-rolled `json.load` with its own path literal and no
+    `lru_cache`. Live divergence **0** — that file's `norm` is
+    `cio.hebrew_letters_only`, the same normalisation the canonical loader
+    applies, measured not assumed — so it is latent, like its twin was. **Two
+    findings in this batch (this and remedy #2) were each fixed in the first
+    file they named and not the second, and in both cases the second file was
+    named in the finding text itself.** That is Lesson 34 twice in one review
+    cycle; the sibling is not merely nearby, it is written down.
+
+    One more, minor: **#4's fix keeps `HEADER_CONTAMINATION_RE` in step with
+    `tests/test_corpus_invariants.py:92` by COPYING the pattern string
+    (`_PYTEST_INVARIANT_RE`), not importing it, and no test asserts the two
+    agree** — unlike #7's `MACHINE_RESOLVED_FLAGS`, which got exactly such a
+    guard. Working today; a one-line divergence away from not.
+
     **Item 27 is two-thirds done, and the remainder is now UNFLAGGED.** klal 74's
     seam is fully repaired (both spurious words deleted, 2026-08-30). klal 39 lost
     its `Π` folio — but the *catchword* `דבכולהן` at w251, which item 27 names as
     part of the same three-word defect, **is still in the corpus and carries no
     open flag**, because the flag that was cleared was the folio's. klal 210's
     Hebrew-numeral folio `לא` at w66 is still present and still flagged.
+
+    **SUPERSEDED [2026-08-31, later same day] — re-measured by CONTENT, and two
+    of the three statements above no longer hold.** They were written against
+    word INDICES, and the day's own corrections shifted them; re-reading the
+    same indices now describes different words. Search by the token, not the
+    position (Lesson 5's shape, applied to one's own status entry):
+    - **klal 39 is CLEAN.** `דבכולהן` appears **0 times** anywhere in the klal
+      (which now runs 663 words and ends `…והוא פלא :`). The catchword was
+      removed at some point after the sweep. w251 today reads `היכי`.
+    - **klal 210's `לא` cannot be confirmed from the text.** The token appears
+      **twice** (w74, w133), not at the w66 the item names, and `לא` is also
+      one of the commonest words in the language — so which occurrence, if
+      either, is the folio intrusion is **not answerable without the scan**.
+      The flag at w66 now reads `needs_revisit: false`. This one needs a look
+      at the ink, not another grep.
+    - **Item 16 is a Parts 2-3 item, not a Part 1 one:** 71 placeholders
+      corpus-wide and **0 in Part 1**, so it sits behind the Parts 2-3 gate and
+      is not workable now.
+
+    Live queue at the same moment, from `tools/build_open_items_report.py`:
+    **225 open word-level flags, 126 open klal-level, 0 out-of-range, 4 null
+    decisions still standing.** The klal-level count is UP from the 88 recorded
+    earlier in this item — worth knowing before anyone treats that number as a
+    burn-down.
 
     **Two standalone reports are stale against the corpus they describe.**
     `ligature_words.json` and `lexicon_yad_malachi_only.json` are both stamped

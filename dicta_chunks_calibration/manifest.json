@@ -1,0 +1,20 @@
+{
+  "source_pdf": "yad-malachi-jerusalem-rashi-Hebrewbooks_org_14122.pdf",
+  "source_pages": 491,
+  "pages_per_chunk": 4,
+  "chunks": [
+    {
+      "chunk": 1,
+      "file": "dicta_chunks_calibration/yadmalachi-jer-calib_c0001_p0029-p0032.pdf",
+      "first_page": 29,
+      "last_page": 32,
+      "pages": 4,
+      "bytes": 170041,
+      "submitted_at": "2026-08-31T22:03:00",
+      "output_file": "dicta_output/yadmalachi-jer_c0001_p0029-p0032_ocr.txt",
+      "status": "done",
+      "job_id": "4c1fed2b-bb19-4344-b76b-fc204b5d852f",
+      "note": "calibration: 94.9% word acc / 99.0% lexicon hit vs the corpus, matching the higher-resolution Google sample - see PROJECT-STATUS.md 0P"
+    }
+  ]
+}
