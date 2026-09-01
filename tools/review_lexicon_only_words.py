@@ -59,7 +59,16 @@ def near_forms(word, ref, min_ref):
         cand = word[:i] + word[i + 1:]
         if ref.get(cand, 0) >= min_ref:
             out.add((cand, ref[cand], "deletion"))
-    return sorted(out, key=lambda x: -x[1])
+    # TOTAL order, not just by count. FIXED 2026-09-01: `out` is a SET and the
+    # key was `-x[1]` alone, so forms with an equal ref_count came out in set
+    # iteration order - which changes between processes, because Python
+    # randomises string hashing per run. The report's CONTENT was stable (same
+    # words, same counts) while its ORDER was not, so every rebuild rewrote the
+    # file and `git status` showed a dirty tracked artifact that no data change
+    # explained. Observed as pairs swapping places on consecutive runs with an
+    # otherwise untouched corpus: שחוזר/החוזר (both 97), ופרה/מסרה (both 53).
+    # Tie-break on the form, then the edit kind, so the file is reproducible.
+    return sorted(out, key=lambda x: (-x[1], x[0], x[2]))
 
 
 def build(min_ref=40, part_path=None):
@@ -90,8 +99,12 @@ def build(min_ref=40, part_path=None):
             "occurrences": positions[n][:12],
             "nearest_attested": [{"form": a, "ref_count": b, "edit": c} for a, b, c in nb[:5]],
         })
+    # Same reason as near_forms() above - `r["word"]` is the final tie-break so
+    # two rows with an equal count and an equal top-neighbour ref_count cannot
+    # swap between runs.
     rows.sort(key=lambda r: (r["count"],
-                             -(r["nearest_attested"][0]["ref_count"] if r["nearest_attested"] else 0)))
+                             -(r["nearest_attested"][0]["ref_count"] if r["nearest_attested"] else 0),
+                             r["word"]))
     return rows
 
 
