@@ -43,6 +43,48 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+1F. **[2026-09-01] KLAL 209 APPLIED — three spurious words removed, and the
+    sentence the 2026-08-14 spot-check called unparseable now parses.**
+    34 -> 31 words.
+
+    | | |
+    |---|---|
+    | was | `…אלא הוא חד מסספיע השם הדין לעונשין שהם מדברי סופרים…` |
+    | now | `…אלא הוא הדין לעונשין שהם מדברי סופרים…` |
+
+    `הוא הדין` — "the same law applies" — is a standard rabbinic phrase, and it
+    was sitting there all along with `חד מסספיע השם` wedged inside it. The
+    spot-check had flagged w16 `מסספיע` as "unreadable as written: not a word in
+    any reading", and it was right about the word and short of the real defect,
+    which was a three-word intrusion, not one corrupt token.
+
+    **Two independent signals agreed before anything was applied.** The vision
+    pass on the `unverified_insertion` candidate at w15 read the crop as marginal
+    fragments (`שוה הכ`, `הד`, `סופ`) and reported that the candidate text is NOT
+    in the ink; the reviewer then chose to remove the whole span. Semantics and
+    the scan pointed the same way (Lesson 9 satisfied).
+
+    **Three overlapping decisions, one intent, and the guards handled it.** The
+    reviewer recorded a span removal at w15 AND separate deletions of w16
+    `מסספיע` and w17 `השם` — all describing the same three words. Run 1 applied
+    the span removal and the per-klal-per-run gate deferred the other two; after
+    the rebuild they DRIFTED (w16 now reads `לעונשין`, w17 `שהם`) and were
+    correctly skipped, subsumed rather than lost. This is the drift check doing
+    exactly its job: three ways of saying one thing collapsed to one edit with no
+    double-deletion.
+
+    **A `--skip-vision` shortcut was wrong here and the gate caught it.** The
+    first rebuild used `--skip-vision`, and
+    `test_no_stale_candidate_survives_a_rebuild` failed with one
+    `stale_candidate` at (209, 15) and the instruction to re-run without the
+    flag. Removing words changes which candidate sits at a position, so the
+    vision stage is what refreshes it. **`--skip-vision` is for iteration that
+    does not move word positions**; after any word-count change it leaves the
+    reviewer facing a verdict about a different word.
+
+    Post-rebuild: `corrections_part1.json` **624 items across 147 klalim** (was
+    625/148). Full suite **405 passed, 1 skipped**.
+
 1E. **[2026-09-01, reviewer-requested] SWEPT THE OPEN-ITEMS LIST ITSELF. Of
     eight checkable claims, three were stale, one was misleading, and one of my
     own was a false alarm. Every error ran the same direction: recorded as open,

@@ -5985,25 +5985,6 @@
     "vision_reasoning": "The image shows 'האיסור' on the top line, followed on the second line by the final letter 'ת' of 'טומאת' on the far right, a word space, and then the word 'מת' (composed of mem and tav). Option A ('מתת') incorrectly merged the preceding letter 'ת' from 'טומאת' into the target word 'מת'."
   },
   {
-    "klal_id": 209,
-    "page": 73,
-    "opcode": "insert",
-    "word_index_in_final_text": 15,
-    "original_word": null,
-    "corrected_word": "חד מסספיע השם",
-    "bbox": {
-      "x1": 0.7362569570541382,
-      "y1": 0.8052631616592407,
-      "x2": 0.7689931988716125,
-      "y2": 0.8222672343254089
-    },
-    "bbox_estimated": true,
-    "vision_selected": "A",
-    "vision_transcription": "שוה הכ\nהד\nסופ",
-    "vision_confidence": 1.0,
-    "vision_reasoning": "The crop contains fragments of text from the margins/edges ('שוה הכ', 'הד', 'סופ'), but does not contain the candidate text 'חד מסספיע השם' from Option B. Option A correctly identifies that Option B's text is not present in the ink of this crop."
-  },
-  {
     "klal_id": 210,
     "page": 74,
     "opcode": "replace",

@@ -4726,21 +4726,6 @@
       "bbox_estimated": false
     },
     {
-      "klal_id": 209,
-      "page": 73,
-      "opcode": "insert",
-      "word_index_in_final_text": 15,
-      "original_word": null,
-      "corrected_word": "חד מסספיע השם",
-      "bbox": {
-        "x1": 0.7362569570541382,
-        "y1": 0.8052631616592407,
-        "x2": 0.7689931988716125,
-        "y2": 0.8222672343254089
-      },
-      "bbox_estimated": true
-    },
-    {
       "klal_id": 210,
       "page": 74,
       "opcode": "replace",
@@ -5147,9 +5132,9 @@
     }
   ],
   "meta": {
-    "total_candidates": 343,
+    "total_candidates": 342,
     "skipped_settled_by_applied_decision": 283,
-    "klalim_covered": 120,
+    "klalim_covered": 119,
     "skipped_no_docai_page_klalim": [],
     "unattributable_deletes": [],
     "untrusted_klalim_excluded": []
