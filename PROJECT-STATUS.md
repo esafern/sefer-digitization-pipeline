@@ -43,6 +43,49 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+1E. **[2026-09-01, reviewer-requested] SWEPT THE OPEN-ITEMS LIST ITSELF. Of
+    eight checkable claims, three were stale, one was misleading, and one of my
+    own was a false alarm. Every error ran the same direction: recorded as open,
+    actually closed.**
+
+    | item | claim | verified |
+    |---|---|---|
+    | 26 | 1 `&` left (per item 37) | **stale** — now 0 |
+    | 0G | 2 UI tests never collected | **stale** — 44 declared, 44 collected |
+    | 27 | 3 klalim carry seam furniture | **stale** — all 3 repaired (item 1A) |
+    | 3 | 419 items, 8 decided, **411 remain** | **misleading** — see below |
+    | 16 | 71 of 667 placeholders | accurate — but **0 in Part 1**, so it is gated |
+    | 57 | 1 U+05F4 left | accurate — and it is a *ruling to keep*, not a loose end |
+    | 0M | 3 geresh-read-as-yod | accurate — klal 12 `סעיף אי`, 140 `אות עי`, 155 `סעיף זי`, all still present |
+    | 22/43 | detector not in the rebuild chain | **my false alarm** — see below |
+
+    **Item 3 is the one that matters**, because its number is the one a reader
+    would quote. 419 is exact for the FILE; the reviewer is served 44, of which
+    24 are open. Corrected in place rather than rewritten, so the drift stays
+    legible.
+
+    **My own false alarm, recorded because the method was wrong and the method
+    is the point.** I grepped `rebuild_all.sh` for `detect_real_word_substitution`,
+    found nothing, and nearly filed "the detector does not run". It runs:
+    `build_lexical_defect_report.py:32` imports it, and that IS stage 4b. A grep
+    on a shell script answers "is this a stage", not "does this run" — the same
+    shape as Lesson 32 and Lesson 37, where the source and the runner disagree.
+    Check the import graph, not the driver script.
+
+    **Five duplicate labels, now resolved:** `0S`, `0T`, `0U`, `29`, `30` each
+    appeared twice — two sessions appended to this list concurrently on
+    2026-09-01 and picked the same next letter. Mine were renamed to `1B`/`1C`/
+    `1D` (the other `0U` is cited by name at `tests/test_pipeline_logic.py:5294`,
+    so it kept the label); the second 29/30 pair is marked `29b`/`30b` as
+    duplicate entries rather than deleted. **A shared newest-first list with
+    hand-assigned labels does not survive two concurrent writers** — worth
+    knowing before the next parallel session.
+
+    **The systematic finding: nothing was recorded as closed while still broken.**
+    That is the safer direction, but it means this list overstates outstanding
+    work, and the two numbers most likely to be quoted — 411 witness items, 3
+    seam klalim — were the two most wrong.
+
 1A. **[2026-09-01] ITEM 27 IS FULLY CLOSED — all three page-seam klalim are
     clean, and the "remaining" one was repaired on 2026-08-31. Reviewer-prompted
     ("what is wrong with 210? i don't see anything") — nothing is.**
@@ -295,7 +338,7 @@ applying it to the corpus remain two separate, deliberate steps.
     server writing one dict and the geometry reading another — which surfaces as
     stale bounding boxes, not as an error.
 
-0U. **[2026-09-01] TWO DECISIONS APPLIED — ONE REAL EDIT — AND IT CLOSES THE
+1D. **[2026-09-01] TWO DECISIONS APPLIED — ONE REAL EDIT — AND IT CLOSES THE
     ONE POSITION ITEM 0Q SAID NEEDED A HUMAN FIRST.** `apply_reviewer_decisions.py`
     then `./rebuild_all.sh` (full, vision included). Corpus diff: **exactly one
     word**, word count unchanged (klal 29: 400 → 400).
@@ -335,7 +378,7 @@ applying it to the corpus remain two separate, deliberate steps.
     0 literal U+FB4F. Rebuild gate green (344), full suite **392 passed, 1
     skipped**.
 
-0T. **[2026-08-31] S2 IS CLOSED — `corpus_io.words_of()` is now the one
+1C. **[2026-08-31] S2 IS CLOSED — `corpus_io.words_of()` is now the one
     space-only split, and a test stops a new one being typed.** The finding had
     been open since 2026-08-25 across three reviews, and the reason it stayed
     open is that it kept GROWING: the 2026-08-31 sweep counted 12 sites and
@@ -387,7 +430,7 @@ applying it to the corpus remain two separate, deliberate steps.
     queue rewrote the tracked `open_items_2026-08-31.json`; it is a derived
     report, so it now reflects current state rather than this morning's.
 
-0S. **[2026-08-31] THE 2026-08-25/26/27 REVIEW BACKLOG IS CLOSED EXCEPT FOR THE
+1B. **[2026-08-31] THE 2026-08-25/26/27 REVIEW BACKLOG IS CLOSED EXCEPT FOR THE
     THREE REFACTORS — nine findings fixed, seven new tests, and the multi-word
     guard turned out to be guarding the wrong thing.** Branch:
     `code-review-fixes-2026-08-31` (kept off `master` because a concurrent
@@ -1072,7 +1115,7 @@ applying it to the corpus remain two separate, deliberate steps.
     length-sensitive metric do not. `tools/compare_ocr_engines.py` prints CER
     for them but it should be ignored, not compared.
 
-0G. **[2026-08-31] Two UI tests are DEFINED TWICE in the same file, so the
+0G. **[FIXED — verified 2026-09-01 from the collector, not the source: tests/test_review_server.py declares 44 and pytest collects 44.]** [2026-08-31] Two UI tests are DEFINED TWICE in the same file, so the
     first copy of each never runs — and the discarded copy is the stricter one.**
     `tests/test_review_server.py` holds **38 `def test_` statements and pytest
     collects 36**: `test_deep_link_lands_on_the_klal_and_rings_the_word` (lines
@@ -1394,6 +1437,19 @@ applying it to the corpus remain two separate, deliberate steps.
    on anything else). **Tesseract provenance re-confirmed 2026-08-25 from the
    code (`verify_reconstruction_witness.py:79`, `tesseract -l heb`), with a
    recommended replacement measured the same day — see item 3a.**
+
+**CORRECTED 2026-09-01 — the 419 is right about the FILE and wrong about the
+   work.** `reconstruction_witness_queue.json` does still hold exactly 419 rows,
+   160/119/140 across klalim 30/75/88, so that half of this item has not
+   drifted. But the reviewer is never served 419: item 4's remedy was
+   implemented, `WITNESS_QUEUE_FILTERED` is on with priority verdicts
+   `("B","NEITHER")`, and the dashboard serves **44** — of which **24 are still
+   open**. Decisions recorded: **20**, not the 8 this item claims.
+
+   So "411 remain" overstates the outstanding work by roughly 17x, and it is the
+   number a reader would most likely quote. The file count and the queue count
+   are two different quantities and this item conflates them; item 4 changed
+   what the second one means and nothing came back to update the first.
 
 3a. **RECOMMENDED 2026-08-25 (user-requested, measured, not implemented):
     replace the Tesseract leg with Surya, keep the VLM as a gated second
@@ -2130,7 +2186,7 @@ applying it to the corpus remain two separate, deliberate steps.
     - **7 non-Hebrew characters in Part 1** that the new invariant does not match
       (item 24).
 
-26. **RESOLVED AGAINST THE SCAN 2026-08-26: the 7 non-Hebrew characters are not
+26. **[FULLY CLOSED 2026-09-01 — 0 `&` remain corpus-wide, verified by content; item 37 had recorded one survivor at klal 77 w11.]** RESOLVED AGAINST THE SCAN 2026-08-26: the 7 non-Hebrew characters are not
     one thing, and DELETING them would be wrong for four of them.** The reviewer
     asked whether they could simply be removed. They were rendered from
     `images/pdf_pages` at 4x and read directly (Lesson 14/30 - render and look,
@@ -2325,7 +2381,7 @@ applying it to the corpus remain two separate, deliberate steps.
     is reversible either way, since the original notes remain in the append-only
     ledger.
 
-29. **DEEP LINKS + A COPY CONTROL, 2026-08-26 (reviewer requests).** A URL now
+29b. **[DUPLICATE ENTRY — the same feature as item 29 above, written twice on the same day. Kept, not deleted, because the two texts differ in detail.]** DEEP LINKS + A COPY CONTROL, 2026-08-26 (reviewer requests). A URL now
     addresses a klal, or a klal and a word:
     `http://127.0.0.1:8420/#klal=66&word=135`. The part is derived from the klal
     id, so a link to klal 400 works whether or not Part 2 is on screen; the
@@ -2343,7 +2399,7 @@ applying it to the corpus remain two separate, deliberate steps.
     nothing is the dead-control shape this file has shipped more than once.
     Three Playwright regressions cover the routing, the address bar and the copy.
 
-30. **FIXED 2026-08-26 (reviewer: "klal 179 word 267 - clicking does not
+30b. **[DUPLICATE ENTRY — same incident as item 30 above.]** FIXED 2026-08-26 (reviewer: "klal 179 word 267 - clicking does not
     highlight word in scan page") - a defect item 24's own merge introduced the
     same day.** The lexical entries were written with `page: None, bbox: None`, so
     `api_page()` could not place them (they rendered as plain prose, not as
