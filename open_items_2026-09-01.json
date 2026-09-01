@@ -1,0 +1,1887 @@
+{
+ "open word-level flags": [
+  {
+   "klal_id": 12,
+   "word_index": 74,
+   "stored": "ר\"ס",
+   "reason": "ר\"ס w74 → ר\"פ | INTRA: ס for פ; w99 writes ר\"פ correctly for same amora | «לא אסר אמר ר\"ס אימא אע\"פ שלא»"
+  },
+  {
+   "klal_id": 12,
+   "word_index": 110,
+   "stored": "שחפך",
+   "reason": "Lexicon-gap detector re-run 2026-08-17/18 against the EXPANDED independent reference corpus (added Mishneh Torah + Tur + Rashi on Talmud to the existing Shulchan Arukh + Talmud Ba…"
+  },
+  {
+   "klal_id": 12,
+   "word_index": 160,
+   "stored": "נידו",
+   "reason": "Backfilled 2026-08-17 (retroactive highlighting pass): this word was already named as an open candidate in an earlier 'ai-vision-verify-flagged-candidates' finding (decision 8f035…"
+  },
+  {
+   "klal_id": 12,
+   "word_index": 192,
+   "stored": "הרל\"ם",
+   "reason": "הרל\"ם w192 → הרמב\"ם | INTRA: w250 writes הרמב\"ם correctly | «אמרינן כן עיין הרל\"ם בפרק א' מהלכות»"
+  },
+  {
+   "klal_id": 12,
+   "word_index": 219,
+   "stored": "אי",
+   "reason": "Backfilled 2026-08-17 (retroactive highlighting pass): this word was already named as an open candidate in an earlier 'ai-vision-verify-flagged-candidates' finding (decision 8f035…"
+  },
+  {
+   "klal_id": 12,
+   "word_index": 237,
+   "stored": "למשח",
+   "reason": "למשח w237 → למשה | FREQ: ח/ה confusion; 'הלכה למשה' (law to Moses) ref=435 | «שהר\"ב הלכה למשח בח\"ב דף»"
+  },
+  {
+   "klal_id": 14,
+   "word_index": 158,
+   "stored": "דמגילח",
+   "reason": "Lexicon-gap detector re-run 2026-08-17/18 against the EXPANDED independent reference corpus (added Mishneh Torah + Tur + Rashi on Talmud to the existing Shulchan Arukh + Talmud Ba…"
+  },
+  {
+   "klal_id": 14,
+   "word_index": 207,
+   "stored": "ביה",
+   "reason": "ביה w207 → בי | INTRA: klal writes 'בי' correctly at w28/40/77/102/138/180/198/201/214; LOW confidence | «דרב הוא דאמרי ביה רב הוא ששמעום»"
+  },
+  {
+   "klal_id": 16,
+   "word_index": 162,
+   "stored": "אהא",
+   "reason": "SUPERSEDES klal_flag dcd9c031b83c (same klal/word) - CORRECTING THE FINAL TWO WORDS of the missing text, not the finding. This log is append-only, so the earlier record stays and …"
+  },
+  {
+   "klal_id": 17,
+   "word_index": 72,
+   "stored": "בספרתם",
+   "reason": "בספרתם w72 → בספריהם? | HAPAX-ABSENT: p1=1,ref=0; unexpected form; context 'הלא בספרתם' | «האחרונים הלא בספרתם וטעם לזה»"
+  },
+  {
+   "klal_id": 17,
+   "word_index": 299,
+   "stored": "השיריי",
+   "reason": "השיריי w299 → השיירי | HAPAX-ABSENT: p1=1,ref=0; transposed yod; שיירי כנה\"ג is standard citation | «כללין ובכללי השיריי שלו אות»"
+  },
+  {
+   "klal_id": 17,
+   "word_index": 308,
+   "stored": "בסתם",
+   "reason": "בסתם w308 → ?? | FRAGMENT: bare token mid-sentence; possible marker contamination from klal 18 | «הב\"ח הנזכר לעיל בסתם ולא שת לבו»"
+  },
+  {
+   "klal_id": 18,
+   "word_index": 44,
+   "stored": "ולשיחתו",
+   "reason": "ולשיחתו w44 → ולשיטתו | FREQ: ח for ט; 'ולשיטתו דלשם לא זכינו' | «רבן גמליאל . ולשיחתו דלשם לא זכינו»"
+  },
+  {
+   "klal_id": 23,
+   "word_index": 653,
+   "stored": "ואיהן",
+   "reason": "ואיהן w653 → ואיהו | FREQ: ן/ו confusion; ואיהו standard Aramaic ref=126 | «מאריה דשמעתתא ואיהן לאו אורחיה»"
+  },
+  {
+   "klal_id": 24,
+   "word_index": 53,
+   "stored": "שכועת",
+   "reason": "שכועת w53 → שבועת | FREQ: כ/ב confusion; שבועת ref=836, p1=4 | «כ\"י פ' שכועת הדיינין וכ\"כ»"
+  },
+  {
+   "klal_id": 24,
+   "word_index": 136,
+   "stored": "דברידם",
+   "reason": "Backfilled 2026-08-17 (retroactive highlighting pass): this word was already named as an open candidate in an earlier 'ai-vision-verify-flagged-candidates' finding (decision 4aa3a…"
+  },
+  {
+   "klal_id": 24,
+   "word_index": 247,
+   "stored": "הכמים",
+   "reason": "Backfilled 2026-08-17 (retroactive highlighting pass): this word was already named as an open candidate in an earlier 'ai-vision-verify-flagged-candidates' finding (decision 4aa3a…"
+  },
+  {
+   "klal_id": 25,
+   "word_index": 137,
+   "stored": "וכין",
+   "reason": "וכין w137 → וכן/ובין | HAPAX-ABSENT: p1=1,ref=0; stray yod; context 'דבין ההיא דב\"מ וכין ההיא' suggests ובין | «ההיא דב\"מ וכין ההיא דפ\"ק»"
+  },
+  {
+   "klal_id": 25,
+   "word_index": 364,
+   "stored": "דברין",
+   "reason": "דברין w364 → דבריו | FREQ: final nun for vav; standard closing 'ע\"כ דבריו'. LOW confidence | «שם בתוספות ע\"כ דברין . ואחרי המחילה»"
+  },
+  {
+   "klal_id": 25,
+   "word_index": 373,
+   "stored": "מיירו",
+   "reason": "מיירו w373 → מיירי | FREQ: ו for י; 'שהתוספות לא מיירי כלל'. LOW confidence | «דק שהתוספות לא מיירו כלל בתלמיד ששותק»"
+  },
+  {
+   "klal_id": 25,
+   "word_index": 423,
+   "stored": "הזוו",
+   "reason": "הזוו w423 → הוו | HAPAX-ABSENT: p1=1,ref=0; stray zayin; 'הוו כמו תלמיד חבר' is standard Aramaic | «ורב אסי הזוו כמו תלמיד»"
+  },
+  {
+   "klal_id": 25,
+   "word_index": 779,
+   "stored": "הגמי",
+   "reason": "Backfilled 2026-08-17 (retroactive highlighting pass): this word was already named as an open candidate in an earlier 'ai-vision-verify-flagged-candidates' finding (decision 65a42…"
+  },
+  {
+   "klal_id": 30,
+   "word_index": 828,
+   "stored": "גטרינן",
+   "reason": "גטרינן w828 → גמרינן | HAPAX-ABSENT: ט/מ confusion; גמרינן (we derive) expected in context 'ומינה גמרינן' | «דנתקבלה ומינה גטרינן לגופו של»"
+  },
+  {
+   "klal_id": 30,
+   "word_index": 952,
+   "stored": "וו\"ל",
+   "reason": "Backfilled 2026-08-17 (retroactive highlighting pass): this word was already named as an open candidate in an earlier 'ai-semantic-spotcheck-round3' finding (decision 4ead24677dda…"
+  },
+  {
+   "klal_id": 30,
+   "word_index": 1017,
+   "stored": "ראשה",
+   "reason": "Backfilled 2026-08-17 (retroactive highlighting pass): this word was already named as an open candidate in an earlier 'ai-semantic-spotcheck-round3' finding (decision 4ead24677dda…"
+  },
+  {
+   "klal_id": 30,
+   "word_index": 1206,
+   "stored": "וטכל",
+   "reason": "וטכל w1206 → וטבל | FREQ: כ/ב confusion; טבל (immersed) ref=168 | «דכיון דמל וטכל לשם עכדו'»"
+  },
+  {
+   "klal_id": 30,
+   "word_index": 1326,
+   "stored": "לאקושינרו",
+   "reason": "לאקושינרו w1326 → לאקושינהו | HAPAX-ABSENT: ר/ה confusion; Aramaic 'to compare them' | «סברא דלא לאקושינרו לא מקשינן»"
+  },
+  {
+   "klal_id": 37,
+   "word_index": 96,
+   "stored": "ב\"ט",
+   "reason": "ב\"ט w96 → ב\"מ | FREQ: ט for מ; שיטה מקובצת על ב\"מ | «בשיטתו המקובצת על ב\"ט שכתב גם הוא»"
+  },
+  {
+   "klal_id": 37,
+   "word_index": 129,
+   "stored": "אכל",
+   "reason": "אכל w129 → אבל | FREQ: כ for ב; 'אבל אנן קי\"ל דהלכתא היא' | «היא או לא אכל אנן קי\"ל דהלכתא»"
+  },
+  {
+   "klal_id": 37,
+   "word_index": 310,
+   "stored": "לדו",
+   "reason": "Backfilled 2026-08-17 (retroactive highlighting pass): this word was already named as an open candidate in an earlier 'ai-vision-verify-flagged-candidates' finding (decision f8581…"
+  },
+  {
+   "klal_id": 37,
+   "word_index": 344,
+   "stored": "גכ",
+   "reason": "גכ w344 → גב | FREQ: כ for ב; 'אף על גב' | «וכו' אף על גכ דתרי הלישני בהדי»"
+  },
+  {
+   "klal_id": 37,
+   "word_index": 352,
+   "stored": "ורוק",
+   "reason": "ורוק w352 → ודוק | FREQ: ר for ד; 'ודוק' | «איתמרו שם ע\"ש ורוק • ועוד עיין»"
+  },
+  {
+   "klal_id": 37,
+   "word_index": 363,
+   "stored": "ע\"ר",
+   "reason": "ע\"ר w363 → ע\"ד | FREQ: ר for ד; folio side amud dalet | «ב\"מ דף נ\"ו ע\"ר ולא אסיק אדעתיה»"
+  },
+  {
+   "klal_id": 38,
+   "word_index": 27,
+   "stored": "מרבץ",
+   "reason": "Backfilled 2026-08-17 (retroactive highlighting pass): this word was already named as an open candidate in an earlier 'ai-vision-verify-flagged-candidates' finding (decision bc203…"
+  },
+  {
+   "klal_id": 38,
+   "word_index": 103,
+   "stored": "עלוי",
+   "reason": "עלוי w103 → עליו | FREQ: ו/י swap; 'כל שהחולקים עליו קדמונים' | «לא כל שהחולקים עלוי קדמונים מרבו הוה»"
+  },
+  {
+   "klal_id": 38,
+   "word_index": 208,
+   "stored": "גכי",
+   "reason": "גכי w208 → גבי | FREQ: כ for ב; 'גבי רב הונא ורבי יוחנן' | «לגביה וכ\"כ התוס' גכי רב הונא ורבי»"
+  },
+  {
+   "klal_id": 38,
+   "word_index": 286,
+   "stored": "דרכה",
+   "reason": "Unanimous 3-of-3: docai+surya+vlm all read 'דרבה' against stored 'דרכה'. stored='דרכה' consensus='דרבה' page=27 current flag='current_text_may_be_wrong'. Found 2026-08-24 by tools…"
+  },
+  {
+   "klal_id": 41,
+   "word_index": 105,
+   "stored": "יהין",
+   "reason": "יהין w105 → יהיו | FREQ: ן/ו confusion; 'לא יהיו אלא בקדש' (will only be in holiness) | «מעשיה לא יהין אלא בקדש»"
+  },
+  {
+   "klal_id": 41,
+   "word_index": 110,
+   "stored": "רוא",
+   "reason": "רוא w110 → הוא | HAPAX-RARE: ר/ה confusion; 'דעיכובא הוא' (it's essential) | «דמשמע דעיכובא רוא פסק כן»"
+  },
+  {
+   "klal_id": 41,
+   "word_index": 256,
+   "stored": "כתכו",
+   "reason": "כתכו w256 → כתבו | FREQ: כ for ב; 3 such tokens corpus-wide vs 52 correct | «והרמ\"ז סס\"ו דעירובין כתכו דלישנא דאין מערבין»"
+  },
+  {
+   "klal_id": 41,
+   "word_index": 277,
+   "stored": "לדומ",
+   "reason": "לדומ w277 → ?? | HAPAX-ABSENT: p1=1,ref=0; 'לא ידענא מאין לדומ לומר כן' - unclear fragment | «ידענא מאין לדומ לומר כן»"
+  },
+  {
+   "klal_id": 41,
+   "word_index": 378,
+   "stored": "מהדויינן",
+   "reason": "מהדויינן w378 → מהדרינן | HAPAX-ABSENT: not a word; same sentence has mehadrinan correctly | «תלמודא דעיכובא הוא מהדויינן ליה . ומיהו»"
+  },
+  {
+   "klal_id": 41,
+   "word_index": 435,
+   "stored": "כסי",
+   "reason": "כסי w435 → כפי | FREQ: ס for פ; 'כפי גירסת התוס' שם' | «בלבד קאמר ( כסי גירסת התוס' שם»"
+  },
+  {
+   "klal_id": 41,
+   "word_index": 473,
+   "stored": "כתכו",
+   "reason": "כתכו w473 → כתבו | FREQ: כ for ב; second occurrence in this klal | «שעבוד מלכיות בלבד כתכו שם ז\"ל דצ\"ל»"
+  },
+  {
+   "klal_id": 41,
+   "word_index": 523,
+   "stored": "טילת",
+   "reason": "טילת w523 → מילת | FREQ: ט for מ; phrase 'מילת בלבד' recurs correctly | «גרסי' במילתיה דשמואל טילת בלבד אי נמי»"
+  },
+  {
+   "klal_id": 41,
+   "word_index": 660,
+   "stored": "רשלשה",
+   "reason": "רשלשה w660 → דשלשה | FREQ: ר for ד; quoting Shmuel's dictum 'דשלשה שמין להן' | «על מימרת שמואל רשלשה שמין להן השבח»"
+  },
+  {
+   "klal_id": 43,
+   "word_index": 17,
+   "stored": "ממטונא",
+   "reason": "[reindexed from w14 on 2026-08-30, stale by 3 after an earlier word-count change] ממטונא w14 → מממונא | HAPAX-RARE: ט/מ confusion; 'ומחתינן דרגא לאיסורא מממונא' standard | «לממונא…"
+  },
+  {
+   "klal_id": 44,
+   "word_index": 162,
+   "stored": "דרפקר",
+   "reason": "דרפקר w162 → דהפקר | INTRA: ר for ה; same sentence has הפקר correctly | «דממונא הוי משום דרפקר בית דין הפקר»"
+  },
+  {
+   "klal_id": 44,
+   "word_index": 362,
+   "stored": "לירחית",
+   "reason": "Backfilled 2026-08-17 (retroactive highlighting pass): this word was already named as an open candidate in an earlier 'ai-lexicon-full-review' finding (decision 3b5626b83f83, see …"
+  },
+  {
+   "klal_id": 44,
+   "word_index": 407,
+   "stored": "הגחל",
+   "reason": "Backfilled 2026-08-17 (retroactive highlighting pass): this word was already named as an open candidate in an earlier 'ai-lexicon-full-review' finding (decision 3b5626b83f83, see …"
+  },
+  {
+   "klal_id": 45,
+   "word_index": 21,
+   "stored": "נלפ\"קד",
+   "reason": "נלפ\"קד w21 → נלפק\"ד | INTRA: gershayim in wrong position; Part 1 writes נלפק\"ד correctly 2x | «הוא ולפי זה נלפ\"קד דטומאה מאיסור שפיר»"
+  },
+  {
+   "klal_id": 48,
+   "word_index": 7,
+   "stored": "בדליכאי",
+   "reason": "בדליכאי w7 → בדליכא | FREQ: stray yod on דליכא | «גמרי' . היינו בדליכאי סברא למיגמר מטומאה»"
+  },
+  {
+   "klal_id": 48,
+   "word_index": 11,
+   "stored": "אכל",
+   "reason": "אכל w11 → אבל | FREQ: כ for ב; 'אבל היכא דאיכא סברא' | «סברא למיגמר מטומאה אכל היכא דאיכא סברא»"
+  },
+  {
+   "klal_id": 48,
+   "word_index": 103,
+   "stored": "ויאורו",
+   "reason": "ויאורו w103 → ויאירו | HAPAX-ABSENT: ו/י confusion; 'ויאירו עיניך' (may your eyes be enlightened) | «מדרשא ע\"ש ויאורו עיניך :»"
+  },
+  {
+   "klal_id": 54,
+   "word_index": 59,
+   "stored": "הטאת",
+   "reason": "הטאת w59 → חטאת | FREQ: ה/ח confusion; חטאת (sin-offering) ref=3278 | «בפרק דם הטאת צ\"ז רע\"ב»"
+  },
+  {
+   "klal_id": 54,
+   "word_index": 401,
+   "stored": "שבתנוס\"ד",
+   "reason": "שבתנוס\"ד w401 → ?? | GRAM: unreadable run-together non-word | «מיתת ב\"ד דחי שבתנוס\"ד דתלמודא השתא דמאי»"
+  },
+  {
+   "klal_id": 54,
+   "word_index": 414,
+   "stored": "כין",
+   "reason": "כין w414 → בין | FREQ: כ/ב confusion; 'בין בחול בין בשבת' standard | «בין בחול כין בשבת ה\"ט»"
+  },
+  {
+   "klal_id": 70,
+   "word_index": 32,
+   "stored": "סרק",
+   "reason": "סרק w32 → פרק | FREQ: ס for פ; 'וכן מצאתי להרא\"ש פרק כל שעה' | «וכן מצאתי להרא\"ש סרק כל שעה וכן»"
+  },
+  {
+   "klal_id": 71,
+   "word_index": 5,
+   "stored": "היינן",
+   "reason": "היינן w5 → היינו | FREQ: final nun for vav; klal's opening explanatory word | «הלכה כשיטה • היינן היכא דאמרן פלוני»"
+  },
+  {
+   "klal_id": 74,
+   "word_index": 913,
+   "stored": "השמיעה",
+   "reason": "[reindexed from w914 on 2026-08-31 after a word-count change at w441] [reindexed from w915 on 2026-08-31 after a word-count change at w416] [reindexed from w916 on 2026-08-31 afte…"
+  },
+  {
+   "klal_id": 74,
+   "word_index": 1025,
+   "stored": "שחיה",
+   "reason": "[reindexed from w1026 on 2026-08-31 after a word-count change at w441] [reindexed from w1027 on 2026-08-31 after a word-count change at w416] [reindexed from w1028 on 2026-08-31 a…"
+  },
+  {
+   "klal_id": 75,
+   "word_index": 156,
+   "stored": "משים",
+   "reason": "משים w156 → משום | INTRA: י/ו confusion; משום appears 27x in this klal! | «ר' בלשון משים וכן יש»"
+  },
+  {
+   "klal_id": 75,
+   "word_index": 197,
+   "stored": "מרשימש",
+   "reason": "מרשימש w197 → ?? | HAPAX-ABSENT: p1=1,ref=0; corrupt/unclear in context 'ר\"מ מרשימש את שניהם' | «שהוא ר\"מ מרשימש את שניהם»"
+  },
+  {
+   "klal_id": 75,
+   "word_index": 608,
+   "stored": "בחרא",
+   "reason": "בחרא w608 -> בחדא / בתרא | LEXICON-ONLY WORD, found 2026-08-26 by reviewing every lexicon.txt entry absent from all 166 books of the independent reference corpus (6.18M words) and…"
+  },
+  {
+   "klal_id": 75,
+   "word_index": 942,
+   "stored": "משוס",
+   "reason": "משוס w942 → משום | HAPAX-ABSENT: ס/ם confusion; 'משום ר' ישמעאל' standard | «ישמעאל אומר משוס ר' ישמעאל»"
+  },
+  {
+   "klal_id": 75,
+   "word_index": 1058,
+   "stored": "נהמן",
+   "reason": "נהמן w1058 → נחמן | FREQ: ה/ח confusion; נחמן (proper name) ref=2646 | «משמיה דרב נהמן אמר וכו'»"
+  },
+  {
+   "klal_id": 76,
+   "word_index": 6,
+   "stored": "סי'",
+   "reason": "סי' w6 → פי' | FREQ: ס for פ; must be 'פירוש' not 'סימן' | «מן המתמיהין • סי' תמהים עליו בני»"
+  },
+  {
+   "klal_id": 81,
+   "word_index": 16,
+   "stored": "בתריתא",
+   "reason": "בתריתא w16 -> בתרייתא | LEXICON-ONLY WORD, found 2026-08-26 by reviewing every lexicon.txt entry absent from all 166 books of the independent reference corpus (6.18M words) and cr…"
+  },
+  {
+   "klal_id": 88,
+   "word_index": 746,
+   "stored": "גוסיידו",
+   "reason": "גוסיידו w746 → ?? | HAPAX-ABSENT: p1=1,ref=0; possibly 'גופיידו' or other corruption | «אריסא אינהו גוסיידו מייתו ליה»"
+  },
+  {
+   "klal_id": 91,
+   "word_index": 546,
+   "stored": "מ\"ר",
+   "reason": "מ\"ר w546 -> likely a ד in final position | TRAILING-RESH RULE, reviewer 2026-08-26: in this fount ד and ר are a confirmed confusion pair, and a ר in final position is wrong in BOT…"
+  },
+  {
+   "klal_id": 92,
+   "word_index": 7,
+   "stored": "נסקי",
+   "reason": "נסקי w7 → נפקי | FREQ: ס/פ confusion; 'דלא נפקי מינה מידי' standard | «במילתא דלא נסקי מינה מידי»"
+  },
+  {
+   "klal_id": 92,
+   "word_index": 128,
+   "stored": "רפפחים",
+   "reason": "רפפחים w128 → דפסחים | HAPAX-ABSENT: multiple corruption; tractate פסחים expected | «ואשכחית בפ\"ט רפפחים צ\"ו א'»"
+  },
+  {
+   "klal_id": 92,
+   "word_index": 188,
+   "stored": "דדוה",
+   "reason": "Backfilled 2026-08-17 (retroactive highlighting pass): this word was already named as an open candidate in an earlier 'ai-vision-verify-flagged-candidates' finding (decision af961…"
+  },
+  {
+   "klal_id": 92,
+   "word_index": 231,
+   "stored": "תלמורא",
+   "reason": "תלמורא w231 → תלמודא | FREQ: ר for ד | «כתיב וכו' ופריך תלמורא למאי נ\"מ כרבו»"
+  },
+  {
+   "klal_id": 92,
+   "word_index": 234,
+   "stored": "כרבו",
+   "reason": "כרבו w234 → כתבו | FREQ: ר for ת; 'כתבו הם ז\"ל' introducing Tosafot quote | «תלמורא למאי נ\"מ כרבו הם ז\"ל וז\"ל»"
+  },
+  {
+   "klal_id": 92,
+   "word_index": 319,
+   "stored": "הנלע\"ר",
+   "reason": "הנלע\"ר w319 → הנלע\"ד | FREQ: ר for ד; standard abbreviation ends in dalet | «למסבר קראי וכפי הנלע\"ר אף שלא ציינו»"
+  },
+  {
+   "klal_id": 92,
+   "word_index": 416,
+   "stored": "אפים",
+   "reason": "אפים w416 → אלפים | FREQ: dropped lamed; Sanhedrin 95b 'מאתים וששי' רבוא אלפים' | «מאתים וששי' רבוא אפים חסר חד בעי»"
+  },
+  {
+   "klal_id": 92,
+   "word_index": 440,
+   "stored": "או",
+   "reason": "או w440 -> אלו | RECOVERED FROM A MIS-INDEXED FLAG. ROOT CAUSE, established 2026-08-26: the ai-semantic-spotcheck-round4 batch of 2026-08-18T20:36 attached some corrections to the…"
+  },
+  {
+   "klal_id": 93,
+   "word_index": 44,
+   "stored": "יכום",
+   "reason": "Backfilled 2026-08-17 (retroactive highlighting pass): this word was already named as an open candidate in an earlier 'ai-vision-verify-flagged-candidates' finding (decision 63ddb…"
+  },
+  {
+   "klal_id": 94,
+   "word_index": 16,
+   "stored": "לדערת",
+   "reason": "Backfilled 2026-08-17 (retroactive highlighting pass): this word was already named as an open candidate in an earlier 'ai-lexicon-full-review' finding (decision 960c5798bf54, see …"
+  },
+  {
+   "klal_id": 94,
+   "word_index": 188,
+   "stored": "על",
+   "reason": "על w188 → ?? | GRAM: adjacent duplicated word 'על על' | «( הירושלמי ) על על הש\"ס שלנו»"
+  },
+  {
+   "klal_id": 94,
+   "word_index": 324,
+   "stored": "וכעיין",
+   "reason": "Backfilled 2026-08-17 (retroactive highlighting pass): this word was already named as an open candidate in an earlier 'ai-lexicon-full-review' finding (decision 960c5798bf54, see …"
+  },
+  {
+   "klal_id": 94,
+   "word_index": 374,
+   "stored": "לכו",
+   "reason": "לכו w374 → לבו | FREQ: כ for ב; 'לא שת לבו להזכירם' | «איך לא שת לכו להזכירם מיהא ומה»"
+  },
+  {
+   "klal_id": 94,
+   "word_index": 383,
+   "stored": "בלבכו",
+   "reason": "Backfilled 2026-08-17 (retroactive highlighting pass): this word was already named as an open candidate in an earlier 'ai-lexicon-full-review' finding (decision 960c5798bf54, see …"
+  },
+  {
+   "klal_id": 94,
+   "word_index": 480,
+   "stored": "גס",
+   "reason": "גס w480 → גם | FREQ: ס for final-mem; 'ותמה גם הוא' | «רל\"ב ע\"ג ותמה גס הוא על מ\"ש»"
+  },
+  {
+   "klal_id": 94,
+   "word_index": 513,
+   "stored": "דהייתינן",
+   "reason": "Backfilled 2026-08-17 (retroactive highlighting pass): this word was already named as an open candidate in an earlier 'ai-lexicon-full-review' finding (decision 960c5798bf54, see …"
+  },
+  {
+   "klal_id": 96,
+   "word_index": 1,
+   "stored": "בעיו",
+   "reason": "בעיו w1 → בעיא | INTRA: parallel klalim 86/87/89 spell 'בעיא' | «צו בעיו דסמיכי אהדדי ובראשונה»"
+  },
+  {
+   "klal_id": 97,
+   "word_index": 111,
+   "stored": "ארמימות",
+   "reason": "[reindexed from w110 on 2026-08-31 after a word-count change at w1] ארמימות w110 → אדמומית | INTRA: quoted correctly as אדמומית later in this klal | «מדמו וכל מראה ארמימות שבו מטמ…"
+  },
+  {
+   "klal_id": 97,
+   "word_index": 339,
+   "stored": "דום",
+   "reason": "[reindexed from w338 on 2026-08-31 after a word-count change at w1] דום w338 → דדם | FREQ: 'דההיא דדם שנתערב במים' | «על מ\"ש דההיא דום שנתערב במים אינה»"
+  },
+  {
+   "klal_id": 97,
+   "word_index": 353,
+   "stored": "שארירת",
+   "reason": "[reindexed from w352 on 2026-08-31 after a word-count change at w1] שארירת w352 → שארית | FREQ: extra resh; book is שארית יוסף | «ואחריו נמשך הר\"ב שארירת יוסף בנתיב הפירוש»"
+  },
+  {
+   "klal_id": 97,
+   "word_index": 372,
+   "stored": "ער",
+   "reason": "[reindexed from w371 on 2026-08-31 after a word-count change at w1] ער w371 → על | FREQ: ר for ל; 'ויש לתמוה על מוהרש\"א' | «התוס' ויש לתמוה ער מוהרש\"א שם והר\"ב»"
+  },
+  {
+   "klal_id": 107,
+   "word_index": 26,
+   "stored": "כל",
+   "reason": "כל w26 → בל | INTRA: כ for ב; title and w1-2 are 'בל תוסיף' | «לצורך אין כאן כל תוסיף דכבר נאמר»"
+  },
+  {
+   "klal_id": 107,
+   "word_index": 47,
+   "stored": "שלי",
+   "reason": "Backfilled 2026-08-17 (retroactive highlighting pass): this word was already named as an open candidate in an earlier 'ai-vision-verify-flagged-candidates' finding (decision 4cfaa…"
+  },
+  {
+   "klal_id": 110,
+   "word_index": 76,
+   "stored": "לטרוי",
+   "reason": "לטרוי w76 → למהוי | HAPAX-ABSENT: BK 30a reads 'למהוי חסידא'; ט for מ plus ר for ה | «האי מאן דבעי לטרוי חסידא ליקיים מילי»"
+  },
+  {
+   "klal_id": 115,
+   "word_index": 22,
+   "stored": "ב\"ט",
+   "reason": "Backfilled 2026-08-17 (retroactive highlighting pass): this word was already named as an open candidate in an earlier 'ai-semantic-spotcheck' finding (decision 651597bf4acf, see t…"
+  },
+  {
+   "klal_id": 116,
+   "word_index": 126,
+   "stored": "זה\"ה",
+   "reason": "זה\"ה w126 → וה\"ה | FREQ: ז for ו; 'וה\"ה ברייתא' | «לאו דוקא משנה זה\"ה ברייתא וכפי הנראה»"
+  },
+  {
+   "klal_id": 117,
+   "word_index": 43,
+   "stored": "כרתב",
+   "reason": "כרתב w43 -> כתב | LEXICON-ONLY WORD, found 2026-08-26 by reviewing every lexicon.txt entry absent from all 166 books of the independent reference corpus (6.18M words) and cross-ch…"
+  },
+  {
+   "klal_id": 128,
+   "word_index": 482,
+   "stored": "כתרי",
+   "reason": "כתרי w482 → בתרי | INTRA: כ/ב confusion; בתרי appears 23x in this klal | «רבינו הקדוש כתרי תנאי דפליגי»"
+  },
+  {
+   "klal_id": 128,
+   "word_index": 820,
+   "stored": "המפקיר",
+   "reason": "המפקיר w820 → המפקיד | INTRA: ר for ד; w186 and w1113 write המפקיד correctly | «דעת הרי\"ף פ' המפקיר דדחי לאוקומת דרב»"
+  },
+  {
+   "klal_id": 128,
+   "word_index": 822,
+   "stored": "לאוקומת",
+   "reason": "Lexicon-gap detector re-run 2026-08-17/18 against the EXPANDED independent reference corpus (added Mishneh Torah + Tur + Rashi on Talmud to the existing Shulchan Arukh + Talmud Ba…"
+  },
+  {
+   "klal_id": 130,
+   "word_index": 58,
+   "stored": "למוהרייקא",
+   "reason": "Backfilled 2026-08-17 (retroactive highlighting pass): this word was already named as an open candidate in an earlier 'ai-lexicon-full-review' finding (decision b8f134a0c27f, see …"
+  },
+  {
+   "klal_id": 136,
+   "word_index": 16,
+   "stored": "דכשהרוחה",
+   "reason": "Backfilled 2026-08-17 (retroactive highlighting pass): this word was already named as an open candidate in an earlier 'ai-semantic-spotcheck' finding (decision 9859f896110c, see t…"
+  },
+  {
+   "klal_id": 138,
+   "word_index": 104,
+   "stored": "ארינן",
+   "reason": "ארינן w104 → אמרינן? | HAPAX-ABSENT: p1=1,ref=0; possibly truncated 'אמרינן' (we say) | «אר מדקא ארינן גלל בב\"ק»"
+  },
+  {
+   "klal_id": 138,
+   "word_index": 141,
+   "stored": "קישיא",
+   "reason": "קישיא w141 → קושיא | FREQ: י/ו confusion; 'לשון קושיא' (language of difficulty) ref=200 | «הוא לשון קישיא דומיא דההיא»"
+  },
+  {
+   "klal_id": 140,
+   "word_index": 84,
+   "stored": "עי",
+   "reason": "עי w84 → ע' | FRAGMENT: geresh read as yod, in 'הגהות הב\"י אות ע'' | «הגהות הב\"י אות עי שכתב בשם כמה»"
+  },
+  {
+   "klal_id": 140,
+   "word_index": 91,
+   "stored": "למ\"ר",
+   "reason": "למ\"ר w91 → למ\"ד | FREQ: ר for ד; למאן דאמר | «מגדולי הפוסקי דאפי' למ\"ר דבדיעבד מותר היינו»"
+  },
+  {
+   "klal_id": 140,
+   "word_index": 97,
+   "stored": "והשוא",
+   "reason": "והשוא w97 → והשואל | FREQ: *** possible residual dropped-lamed ***; 'כשחשב המתיר והשואל שמותר' | «היינו כשחשב המתיר והשוא שמותר להתיר לכתחלה»"
+  },
+  {
+   "klal_id": 140,
+   "word_index": 159,
+   "stored": "הפרת",
+   "reason": "הפרת w159 → הפת | FREQ: stray ר; same clause written 'הפת מותרת' correctly at w136-137 | «תו דיעבד ואמאי הפרת מותרת כיון שעברה»"
+  },
+  {
+   "klal_id": 143,
+   "word_index": 1,
+   "stored": "דיוני",
+   "reason": "דיוני w1 → דייני | FREQ: ו/י confusion; 'דייני גולה' (judges of the exile) ref=134 | «קמג דיוני גולה הוא»"
+  },
+  {
+   "klal_id": 143,
+   "word_index": 347,
+   "stored": "חסרא",
+   "reason": "חסרא w347 → חסדא | FREQ: ר/ד confusion; רב חסדא (Rav Chisda) ref=1795 | «הא דרב חסרא שטר כיס»"
+  },
+  {
+   "klal_id": 143,
+   "word_index": 392,
+   "stored": "גרכינן",
+   "reason": "גרכינן w392 → גרסינן | HAPAX-ABSENT: כ/ס confusion; 'גרסינן בפרק' (we learn in chapter) standard | «המקבל כתב גרכינן בפרק המוכר»"
+  },
+  {
+   "klal_id": 144,
+   "word_index": 598,
+   "stored": ".",
+   "reason": "Backfilled 2026-08-17 (retroactive highlighting pass): this word was already named as an open candidate in an earlier 'ai-semantic-spotcheck-round3' finding (decision ff4d20238cba…"
+  },
+  {
+   "klal_id": 144,
+   "word_index": 821,
+   "stored": "בכתיכת",
+   "reason": "בכתיכת w821 → בכתיבת | HAPAX-ABSENT: כ/ב confusion; 'בכתיבת יד' (in handwriting) standard | «בעודו בידי בכתיכת יד ואף»"
+  },
+  {
+   "klal_id": 144,
+   "word_index": 873,
+   "stored": "מהלוקת",
+   "reason": "Backfilled 2026-08-17 (retroactive highlighting pass): this word was already named as an open candidate in an earlier 'ai-semantic-spotcheck-round3' finding (decision ff4d20238cba…"
+  },
+  {
+   "klal_id": 144,
+   "word_index": 907,
+   "stored": "בישרץ",
+   "reason": "בישרץ w907 -> בישראל | LEXICON-ONLY WORD, found 2026-08-26 by reviewing every lexicon.txt entry absent from all 166 books of the independent reference corpus (6.18M words) and cro…"
+  },
+  {
+   "klal_id": 144,
+   "word_index": 914,
+   "stored": "הין",
+   "reason": "הין w914 → היו | FREQ: ן for ו; 'לימודים היו דנים מעצמם'. LOWER confidence | «מדות ושאר לימודים הין דנים מעצמם חכמי»"
+  },
+  {
+   "klal_id": 144,
+   "word_index": 924,
+   "stored": "י",
+   "reason": "Backfilled 2026-08-17 (retroactive highlighting pass): this word was already named as an open candidate in an earlier 'ai-semantic-spotcheck-round3' finding (decision ff4d20238cba…"
+  },
+  {
+   "klal_id": 144,
+   "word_index": 949,
+   "stored": "למרן",
+   "reason": "Backfilled 2026-08-17 (retroactive highlighting pass): this word was already named as an open candidate in an earlier 'ai-semantic-spotcheck-round3' finding (decision ff4d20238cba…"
+  },
+  {
+   "klal_id": 144,
+   "word_index": 1040,
+   "stored": "ומאו",
+   "reason": "Backfilled 2026-08-17 (retroactive highlighting pass): this word was already named as an open candidate in an earlier 'ai-semantic-spotcheck-round3' finding (decision ff4d20238cba…"
+  },
+  {
+   "klal_id": 144,
+   "word_index": 1078,
+   "stored": "הין",
+   "reason": "Backfilled 2026-08-17 (retroactive highlighting pass): this word was already named as an open candidate in an earlier 'ai-semantic-spotcheck-round3' finding (decision ff4d20238cba…"
+  },
+  {
+   "klal_id": 147,
+   "word_index": 376,
+   "stored": "תמירתו",
+   "reason": "Lexicon-gap detector re-run 2026-08-17/18 against the EXPANDED independent reference corpus (added Mishneh Torah + Tur + Rashi on Talmud to the existing Shulchan Arukh + Talmud Ba…"
+  },
+  {
+   "klal_id": 147,
+   "word_index": 423,
+   "stored": "כסר",
+   "reason": "Backfilled 2026-08-17 (retroactive highlighting pass): this word was already named as an open candidate in an earlier 'ai-vision-verify-flagged-candidates' finding (decision 378cb…"
+  },
+  {
+   "klal_id": 147,
+   "word_index": 461,
+   "stored": "כססקייהו",
+   "reason": "כססקייהו w461 → כפסקייהו | HAPAX-ABSENT: ס/פ confusion; 'כפסקייהו' (like their ruling) | «הגמרא וקי\"ל כססקייהו וכן פסקו»"
+  },
+  {
+   "klal_id": 148,
+   "word_index": 224,
+   "stored": "דמנילה",
+   "reason": "Lexicon-gap detector re-run 2026-08-17/18 against the EXPANDED independent reference corpus (added Mishneh Torah + Tur + Rashi on Talmud to the existing Shulchan Arukh + Talmud Ba…"
+  },
+  {
+   "klal_id": 148,
+   "word_index": 227,
+   "stored": "וכמרדכי",
+   "reason": "Backfilled 2026-08-17 (retroactive highlighting pass): this word was already named as an open candidate in an earlier 'ai-lexicon-full-review' finding (decision ab0463d82c86, see …"
+  },
+  {
+   "klal_id": 148,
+   "word_index": 370,
+   "stored": "ישמואל",
+   "reason": "Backfilled 2026-08-17 (retroactive highlighting pass): this word was already named as an open candidate in an earlier 'ai-lexicon-full-review' finding (decision ab0463d82c86, see …"
+  },
+  {
+   "klal_id": 148,
+   "word_index": 446,
+   "stored": "כמותהין",
+   "reason": "כמותהין w446 → כוותייהו? | HAPAX-ABSENT: p1=1,ref=0; unusual Aramaic suffix | «ההוראה ושאר כמותהין הך כללא»"
+  },
+  {
+   "klal_id": 150,
+   "word_index": 244,
+   "stored": "בשיטרת",
+   "reason": "Backfilled 2026-08-17 (retroactive highlighting pass): this word was already named as an open candidate in an earlier 'ai-semantic-spotcheck-round3' finding (decision 2374a16ebcc0…"
+  },
+  {
+   "klal_id": 150,
+   "word_index": 328,
+   "stored": "ואיתה",
+   "reason": "Lexicon-gap detector re-run 2026-08-17/18 against the EXPANDED independent reference corpus (added Mishneh Torah + Tur + Rashi on Talmud to the existing Shulchan Arukh + Talmud Ba…"
+  },
+  {
+   "klal_id": 150,
+   "word_index": 684,
+   "stored": "מקטי",
+   "reason": "מקטי w684 -> מקמי / מקרי | LEXICON-ONLY WORD, found 2026-08-26 by reviewing every lexicon.txt entry absent from all 166 books of the independent reference corpus (6.18M words) and…"
+  },
+  {
+   "klal_id": 150,
+   "word_index": 802,
+   "stored": "בתלמור",
+   "reason": "Lexicon-gap detector re-run 2026-08-17/18 against the EXPANDED independent reference corpus (added Mishneh Torah + Tur + Rashi on Talmud to the existing Shulchan Arukh + Talmud Ba…"
+  },
+  {
+   "klal_id": 151,
+   "word_index": 45,
+   "stored": "סער",
+   "reason": "סער w45 → סעד | HAPAX-ABSENT: ר/ד confusion; 'סעד לדברים' (support for the words) expected | «שם ומצאתי סער לדברין בפרק»"
+  },
+  {
+   "klal_id": 151,
+   "word_index": 100,
+   "stored": "כרתב",
+   "reason": "כרתב w100 → כתב | HAPAX-ABSENT: stray ר; 'כתב כן בפשיטות' expected | «שבסי' ח' כרתב כן בפשיטור»"
+  },
+  {
+   "klal_id": 151,
+   "word_index": 102,
+   "stored": "בפשיטור",
+   "reason": "בפשיטור w102 → בפשיטות | HAPAX-ABSENT: ר/ת confusion; 'בפשיטות' (simply) standard | «כרתב כן בפשיטור :»"
+  },
+  {
+   "klal_id": 152,
+   "word_index": 58,
+   "stored": "שכרתבו",
+   "reason": "Backfilled 2026-08-17 (retroactive highlighting pass): this word was already named as an open candidate in an earlier 'ai-lexicon-full-review' finding (decision 276f50170bd8, see …"
+  },
+  {
+   "klal_id": 152,
+   "word_index": 98,
+   "stored": "בסרק",
+   "reason": "בסרק w98 -> בפרק | LEXICON-ONLY WORD, found 2026-08-26 by reviewing every lexicon.txt entry absent from all 166 books of the independent reference corpus (6.18M words) and cross-c…"
+  },
+  {
+   "klal_id": 152,
+   "word_index": 127,
+   "stored": "ראוטר",
+   "reason": "Backfilled 2026-08-17 (retroactive highlighting pass): this word was already named as an open candidate in an earlier 'ai-lexicon-full-review' finding (decision 276f50170bd8, see …"
+  },
+  {
+   "klal_id": 154,
+   "word_index": 21,
+   "stored": "מאיזן",
+   "reason": "[reindexed from w20 on 2026-08-31 after a word-count change at w6] מאיזן w20 → מאיזו | HAPAX-ABSENT: ן/ו confusion; 'מאיזו ברייתא' (from which baraita) | «בר פלוגתיה מאיזן ברייתא …"
+  },
+  {
+   "klal_id": 154,
+   "word_index": 38,
+   "stored": "כרכא",
+   "reason": "[reindexed from w37 on 2026-08-31 after a word-count change at w6] כרכא w37 → כרבא | INTRA: כ/ב confusion; כרבא appears 5x in this klal | «לתלמודא דהלכה כרכא בהא ולא»"
+  },
+  {
+   "klal_id": 154,
+   "word_index": 141,
+   "stored": "דקס",
+   "reason": "[reindexed from w140 on 2026-08-31 after a word-count change at w6] דקס w140 → דקם? | HAPAX-ABSENT: ס/ם confusion; 'דקם ליה בתיובתא' (objection stands) | «אותה ברייתא דקס ליה בתיו…"
+  },
+  {
+   "klal_id": 154,
+   "word_index": 187,
+   "stored": "דמשכשתא",
+   "reason": "[reindexed from w186 on 2026-08-31 after a word-count change at w6] דמשכשתא w186 → דמשכחתא? | HAPAX-ABSENT: ש/ח possible confusion; 'דמשכחתא' (that is found) | «דקים להו דמשכשתא ד…"
+  },
+  {
+   "klal_id": 154,
+   "word_index": 289,
+   "stored": "אלן",
+   "reason": "[reindexed from w288 on 2026-08-31 after a word-count change at w6] אלן w288 → אלו | FREQ: final nun for vav; 'זולת אלו הלכתא כוותיה דרבה' | «דבכל התלמוד זולת אלן הלכתא כוותיה דרב…"
+  },
+  {
+   "klal_id": 154,
+   "word_index": 434,
+   "stored": "ככר",
+   "reason": "[reindexed from w433 on 2026-08-31 after a word-count change at w6] ככר w433 → כבר | FREQ: כ for ב; 'כבר אני בעניי עשיתי סמוכות' | «עליה דהאי כללא ככר אני בעניי עשיתי»"
+  },
+  {
+   "klal_id": 154,
+   "word_index": 462,
+   "stored": "דככל",
+   "reason": "[reindexed from w461 on 2026-08-31 after a word-count change at w6] דככל w461 → דבכל | FREQ: כ for ב; 'דבכל שאר הדינים' | «הוי כאילו פירשו דככל שאר הדינים לית»"
+  },
+  {
+   "klal_id": 154,
+   "word_index": 543,
+   "stored": "שיהבאתי",
+   "reason": "[reindexed from w542 on 2026-08-31 after a word-count change at w6] שיהבאתי w542 → שהבאתי | FREQ: stray yod | «מדברי רש\"י וכ\"מ שיהבאתי מוכח בבירור דכל»"
+  },
+  {
+   "klal_id": 158,
+   "word_index": 27,
+   "stored": "כאכיי",
+   "reason": "כאכיי w27 → כאביי | FREQ: כ/ב confusion; 'הלכה כאביי' (ruling like Abaye) ref=56 | «רבים והלכה כאכיי כן יש»"
+  },
+  {
+   "klal_id": 159,
+   "word_index": 10,
+   "stored": "איכא",
+   "reason": "[reindexed from w9 on 2026-08-31 after a word-count change at w4] איכא w9 → אליבא | INTRA: 'איכא דנפשייהו' should be 'אליבא דנפשייהו'; אליבא appears 21x in Part 1 | «היכא דאיפליגו…"
+  },
+  {
+   "klal_id": 159,
+   "word_index": 29,
+   "stored": "היכאת",
+   "reason": "[reindexed from w28 on 2026-08-31 after a word-count change at w4] היכאת w28 → היכא | FREQ: stray tav | «שהבאתי למעלה דאף היכאת דפליגי בפסק הלכה»"
+  },
+  {
+   "klal_id": 159,
+   "word_index": 157,
+   "stored": "דנפשיידו",
+   "reason": "[reindexed from w156 on 2026-08-31 after a word-count change at w4] דנפשיידו w156 → דנפשייהו | HAPAX-ABSENT: ד/ה confusion; 'אליבא דנפשייהו' standard | «איפליגו ליבא דנפשיידו וכ\"כ…"
+  },
+  {
+   "klal_id": 159,
+   "word_index": 240,
+   "stored": "עכ\"ר",
+   "reason": "[reindexed from w239 on 2026-08-31 after a word-count change at w4] עכ\"ר w239 → עכ\"ל | FREQ: ר for ל; 'עד כאן לשונו' | «ובצדי צדדים פליגי עכ\"ר מבואר שפיר דסברי»"
+  },
+  {
+   "klal_id": 159,
+   "word_index": 360,
+   "stored": "דאיסליגו",
+   "reason": "[reindexed from w359 on 2026-08-31 after a word-count change at w4] דאיסליגו w359 → דאיפליגו | FREQ: ס for פ | «לגבי אביי אף דאיסליגו אליבא דאחריני ע\"ש»"
+  },
+  {
+   "klal_id": 159,
+   "word_index": 657,
+   "stored": "חרא",
+   "reason": "[reindexed from w656 on 2026-08-31 after a word-count change at w4] חרא w656 → חדא | FREQ: ר/ד confusion; חדא (one) ref=1935 | «דסמי מכאן חרא מקמי תלתא»"
+  },
+  {
+   "klal_id": 159,
+   "word_index": 772,
+   "stored": "עלידם",
+   "reason": "[reindexed from w771 on 2026-08-31 after a word-count change at w4] Backfilled 2026-08-17 (retroactive highlighting pass): this word was already named as an open candidate in an e…"
+  },
+  {
+   "klal_id": 159,
+   "word_index": 794,
+   "stored": "ובקוכץ",
+   "reason": "[reindexed from w793 on 2026-08-31 after a word-count change at w4] ובקוכץ w793 → ובקובץ | HAPAX-ABSENT: כ/ב confusion; 'ובקובץ' (and in collection) | «סימן מ\"ו ובקוכץ ג' דף»"
+  },
+  {
+   "klal_id": 159,
+   "word_index": 932,
+   "stored": "ומירו",
+   "reason": "[reindexed from w931 on 2026-08-31 after a word-count change at w4] ומירו w931 → ?? | HAPAX-ABSENT: p1=1,ref=0; unclear in context | «תלמוד • ומירו אע\"פ שאיני»"
+  },
+  {
+   "klal_id": 161,
+   "word_index": 83,
+   "stored": "אע\"ס",
+   "reason": "אע\"ס w83 → אע\"פ | FREQ: ס for פ; 'אף על פי' | «ז\"ל שבסוף פרק אע\"ס גבי ואוכלת עמו»"
+  },
+  {
+   "klal_id": 161,
+   "word_index": 105,
+   "stored": "בס'",
+   "reason": "בס' w105 → בפ' | FREQ: ס for פ; 'מציאת האשה' is a PEREK | «אשכחנא ליה תו בס' מציא' האשה גבי»"
+  },
+  {
+   "klal_id": 161,
+   "word_index": 289,
+   "stored": "נתנן",
+   "reason": "נתנן w289 → נתנאל | FREQ: dropped אל; work is קרבן נתנאל | «עיין ס' קרבן נתנן דף ק\"ד ב'»"
+  },
+  {
+   "klal_id": 167,
+   "word_index": 460,
+   "stored": "ובגביל",
+   "reason": "ובגביל w460 → ?? | HAPAX-ABSENT: p1=1,ref=0; context unclear 'ובגביל לתורי פסק כרב' | «כתב הכ\"מ ובגביל לתורי פסק»"
+  },
+  {
+   "klal_id": 167,
+   "word_index": 665,
+   "stored": "וסליג",
+   "reason": "וסליג w665 → ופליג | FREQ: ס/פ confusion; 'ופליג אשניהם' (disagrees with both) ref=145 | «יוסי הגלילי וסליג אשניהם לכן»"
+  },
+  {
+   "klal_id": 167,
+   "word_index": 739,
+   "stored": "מקטי",
+   "reason": "מקטי w739 -> מקמי | UNFLAGGED OCR ERROR found 2026-08-26 by re-running tools/detect_real_word_substitution.py + detect_insertion_deletion.py and triaging all 262 findings against …"
+  },
+  {
+   "klal_id": 167,
+   "word_index": 828,
+   "stored": "תלתי",
+   "reason": "תלתי w828 → תלתא | HAPAX-ABSENT: י/א confusion; 'הני תלתא' (these three) standard Aramaic | «בכולהו הני תלתי שהזכיר דפסק»"
+  },
+  {
+   "klal_id": 167,
+   "word_index": 1038,
+   "stored": "שבגופי",
+   "reason": "Lexicon-gap detector re-run 2026-08-17/18 against the EXPANDED independent reference corpus (added Mishneh Torah + Tur + Rashi on Talmud to the existing Shulchan Arukh + Talmud Ba…"
+  },
+  {
+   "klal_id": 167,
+   "word_index": 1093,
+   "stored": "נופייהו",
+   "reason": "נופייהו w1093 → גופייהו | FREQ: נ/ג confusion; 'אינהו גופייהו' (they themselves) standard | «למ\"ש אינהו נופייהו בחזקת הבתים»"
+  },
+  {
+   "klal_id": 168,
+   "word_index": 117,
+   "stored": "לכותכם",
+   "reason": "לכותכם w117 → לכותבם | HAPAX-ABSENT: כ/ב confusion; 'נלאיתי לכותבם' (I tired of writing them) | «אצלי נלאיתי לכותכם ועיין הרי\"ף»"
+  },
+  {
+   "klal_id": 168,
+   "word_index": 324,
+   "stored": "דמצו",
+   "reason": "דמצו w324 → דמצי | INTRA: ו/י confusion; דמצי appears 2x in this klal | «דאין ספק דמצו מפלג אקמאי»"
+  },
+  {
+   "klal_id": 168,
+   "word_index": 455,
+   "stored": "המחילי",
+   "reason": "המחילי w455 → המחילה | INTRA: klal 69 w192 and klal 163 w609 have 'המחילה' correctly | «בענין אחר ואחרי המחילי רבא גברי קא»"
+  },
+  {
+   "klal_id": 168,
+   "word_index": 456,
+   "stored": "רבא",
+   "reason": "רבא w456 → רבה | INTRA: fixed idiom 'אחרי המחילה רבה'; klal 69/163 have 'רבה' | «אחר ואחרי המחילי רבא גברי קא חזינא»"
+  },
+  {
+   "klal_id": 169,
+   "word_index": 85,
+   "stored": "ודבי",
+   "reason": "ודבי w85 → ורבי | FREQ: ד/ר confusion; 'ורבי ינאי' (and R. Yannai) ref=4054 | «בר כהנא ודבי ר' ינאי»"
+  },
+  {
+   "klal_id": 169,
+   "word_index": 657,
+   "stored": "כה\"לק",
+   "reason": "Backfilled 2026-08-17 (retroactive highlighting pass): this word was already named as an open candidate in an earlier 'ai-semantic-spotcheck' finding (decision 270b97d0d5d5, see t…"
+  },
+  {
+   "klal_id": 174,
+   "word_index": 116,
+   "stored": "לא",
+   "reason": "לא w116 → אלא | FREQ: dropped lamed; 'דליתיה להך כללא אלא היכא דאיכא מאן דפליג' | «דליתיה להך כללא לא היכא דאיכא מאן»"
+  },
+  {
+   "klal_id": 174,
+   "word_index": 135,
+   "stored": "לא",
+   "reason": "לא w135 → אלא | FREQ: dropped lamed; 'אלא דמ\"מ לא הו\"ל למנקט' | «שם בשם הר\"ן לא דמ\"מ לא הו\"ל»"
+  },
+  {
+   "klal_id": 176,
+   "word_index": 29,
+   "stored": "כפ'",
+   "reason": "כפ' w29 → בפ' | INTRA: כ for ב; w465 and w611 write 'בפ' correctly | «דאית ליה הכי כפ' בהמה המקשה ע\"ה»"
+  },
+  {
+   "klal_id": 176,
+   "word_index": 214,
+   "stored": "והכ\"ם",
+   "reason": "והכ\"ם w214 → והכ\"מ | INTRA: final mem where plain mem required; w130 writes בכ\"מ correctly | «הרי\"ף והרא\"ש והתוס' והכ\"ם דלאפוקי דעת זו»"
+  },
+  {
+   "klal_id": 176,
+   "word_index": 234,
+   "stored": "בכ\"ם",
+   "reason": "בכ\"ם w234 → בכ\"מ | INTRA: same; second occurrence | «עוד על מרן בכ\"ם שמצאתי אליו ז\"ל»"
+  },
+  {
+   "klal_id": 176,
+   "word_index": 480,
+   "stored": "מייתכא",
+   "reason": "מייתכא w480 → מייתבא | FREQ: כ for ב; 'לא מייתבא דעתי' is fixed idiom | «• גם לא מייתכא דעתי בהך פסקא»"
+  },
+  {
+   "klal_id": 176,
+   "word_index": 525,
+   "stored": "הלכי",
+   "reason": "הלכי w525 → הלכה | INTRA: geresh/ה read as yod; w186 and w589 write 'הלכה' correctly | «ששנה ר\"ש שזורי הלכי כמותו ואני בעניי»"
+  },
+  {
+   "klal_id": 177,
+   "word_index": 340,
+   "stored": "למיפך",
+   "reason": "למיפך w340 - PROPOSAL RETRACTED 2026-08-26, same day it was made. The earlier flag on this word proposed `למיפרך` ('to refute') on frequency evidence. A Sefaria dictionary lookup …"
+  },
+  {
+   "klal_id": 178,
+   "word_index": 69,
+   "stored": "מכללן",
+   "reason": "מכללן w69 → מכללו | INTRA: ן/ו confusion; מכללו appears 9x in this klal | «לא הותרו מכללן תאמר בבשר»"
+  },
+  {
+   "klal_id": 182,
+   "word_index": 5,
+   "stored": ".דאמרי'בפ'",
+   "reason": "Backfilled 2026-08-17 (retroactive highlighting pass): this word was already named as an open candidate in an earlier 'ai-lexicon-full-review' finding (decision 6133853d1698, see …"
+  },
+  {
+   "klal_id": 183,
+   "word_index": 47,
+   "stored": "הולקים",
+   "reason": "הולקים w47 → חולקים | FREQ: ה/ח confusion; חולקים (disagree) ref=192 | «מוצא שנים הולקים ואחד מכריע»"
+  },
+  {
+   "klal_id": 183,
+   "word_index": 355,
+   "stored": "למעניתם",
+   "reason": "למעניתם w355 → למענותם? | HAPAX-ABSENT: p1=1,ref=0; unusual form; context unclear | «בליבותם האריכו למעניתם בביטול פי'»"
+  },
+  {
+   "klal_id": 189,
+   "word_index": 277,
+   "stored": "בי\"ר",
+   "reason": "Backfilled 2026-08-17 (retroactive highlighting pass): this word was already named as an open candidate in an earlier 'ai-vision-verify-flagged-candidates' finding (decision 97aa0…"
+  },
+  {
+   "klal_id": 189,
+   "word_index": 339,
+   "stored": "ומכיק",
+   "reason": "Backfilled 2026-08-17 (retroactive highlighting pass): this word was already named as an open candidate in an earlier 'ai-vision-verify-flagged-candidates' finding (decision 97aa0…"
+  },
+  {
+   "klal_id": 189,
+   "word_index": 406,
+   "stored": "דרתם",
+   "reason": "דרתם w406 → דהתם | FREQ: ר for ה; same form as klal 88 scan-verified 'רתם' | «רבים ויש ליישב דרתם לא מקרו רבים»"
+  },
+  {
+   "klal_id": 189,
+   "word_index": 461,
+   "stored": ":לוקי",
+   "reason": "Backfilled 2026-08-17 (retroactive highlighting pass): this word was already named as an open candidate in an earlier 'ai-vision-verify-flagged-candidates' finding (decision 97aa0…"
+  },
+  {
+   "klal_id": 194,
+   "word_index": 238,
+   "stored": "שכתכ",
+   "reason": "שכתכ w238 → שכתב | FREQ: כ/ב confusion; שכתב (that he wrote) ref=636 | «הלכה י\"ד שכתכ דלפום מאי»"
+  },
+  {
+   "klal_id": 194,
+   "word_index": 329,
+   "stored": "הלי",
+   "reason": "הלי w329 → הכי | HAPAX-ABSENT: ל/כ possible confusion; 'דלא קי\"ל הכי' standard | «דלא קי\"ל הלי כבתראי אלא»"
+  },
+  {
+   "klal_id": 194,
+   "word_index": 420,
+   "stored": "דמשסתמו",
+   "reason": "דמשסתמו w420 → דמשסתמו? | HAPAX-ABSENT: p1=1,ref=0; possible stray ס | «טעמי חדא דמשסתמו דבריהם ולא»"
+  },
+  {
+   "klal_id": 196,
+   "word_index": 76,
+   "stored": "הקוטץ",
+   "reason": "הקוטץ w76 → הקוטף? | HAPAX-ABSENT: ץ/ף confusion; chapter name in Shabbat | «רש\"י בפרק הקוטץ רבה ל\"ו»"
+  },
+  {
+   "klal_id": 197,
+   "word_index": 120,
+   "stored": "לאו",
+   "reason": "[reindexed from w119 on 2026-08-31 after a word-count change at w7] לאו w119 → אלא | FREQ: dropped lamed; 'לאו דוקא השמר הוא דהוי לאו אלא כל לשון שמירה' | «השמר הוא דהוי לאו לא כל…"
+  },
+  {
+   "klal_id": 197,
+   "word_index": 151,
+   "stored": "אטרי'",
+   "reason": "[reindexed from w150 on 2026-08-31 after a word-count change at w7] Backfilled 2026-08-17 (retroactive highlighting pass): this word was already named as an open candidate in an e…"
+  },
+  {
+   "klal_id": 197,
+   "word_index": 279,
+   "stored": "משמות",
+   "reason": "[reindexed from w278 on 2026-08-31 after a word-count change at w7] משמות w278 → משמרת | INTRA: same verse quoted correctly earlier in this klal | «שנאמר ושמרתם את משמות הקדש ולשו…"
+  },
+  {
+   "klal_id": 198,
+   "word_index": 192,
+   "stored": "אחר",
+   "reason": "Unanimous 3-of-3: docai+surya+vlm all read 'אחד' against stored 'אחר'. stored='אחר' consensus='אחד' page=71 current flag='current_text_may_be_wrong'. Found 2026-08-24 by tools/sur…"
+  },
+  {
+   "klal_id": 198,
+   "word_index": 408,
+   "stored": "מלהלות",
+   "reason": "מלהלות w408 → מלהלוות | HAPAX-ABSENT: missing ו; 'מלהלוות' (from lending) expected | «מי שנמנע מלהלות וכו' וחטא»"
+  },
+  {
+   "klal_id": 198,
+   "word_index": 570,
+   "stored": "שתישההולאחם",
+   "reason": "שתישההולאחם w570 → שתי הלחם | HAPAX-ABSENT: severely corrupted/fused; 'פרק שתי הלחם' (ch. Two Loaves) | «ובמנחות פרק שתישההולאחם משמע דס\"ל»"
+  },
+  {
+   "klal_id": 198,
+   "word_index": 892,
+   "stored": "זלזה",
+   "reason": "זלזה w892 -> לזה / ולזה | LEXICON-ONLY WORD, found 2026-08-26 by reviewing every lexicon.txt entry absent from all 166 books of the independent reference corpus (6.18M words) and …"
+  },
+  {
+   "klal_id": 198,
+   "word_index": 967,
+   "stored": "שכתכתי",
+   "reason": "שכתכתי w967 → שכתבתי | FREQ: כ/ב confusion; שכתבתי (that I wrote) ref=61 | «נגד מה שכתכתי דעל שניהם»"
+  },
+  {
+   "klal_id": 200,
+   "word_index": 81,
+   "stored": "הון",
+   "reason": "Backfilled 2026-08-17 (retroactive highlighting pass): this word was already named as an open candidate in an earlier 'ai-semantic-spotcheck' finding (decision e0b2475e7eba, see t…"
+  },
+  {
+   "klal_id": 200,
+   "word_index": 145,
+   "stored": "או",
+   "reason": "או w145 -> אלו | RECOVERED FROM A MIS-INDEXED FLAG. ROOT CAUSE, established 2026-08-26: the ai-semantic-spotcheck-round4 batch of 2026-08-18T20:36 attached some corrections to the…"
+  },
+  {
+   "klal_id": 204,
+   "word_index": 15,
+   "stored": "כ\"ס",
+   "reason": "Backfilled 2026-08-17 (retroactive highlighting pass): this word was already named as an open candidate in an earlier 'ai-vision-verify-flagged-candidates' finding (decision fa3a6…"
+  },
+  {
+   "klal_id": 206,
+   "word_index": 2,
+   "stored": "או",
+   "reason": "או w2 → אלו | INTRA: dropped lamed; body writes 'הרי אלו' correctly 6x; also in title field | «רו הרי או באזהרה [.] .כל»"
+  },
+  {
+   "klal_id": 206,
+   "word_index": 161,
+   "stored": "בזהרה",
+   "reason": "בזהרה w161 → באזהרה | FREQ: dropped א; 'תני לישנא דהרי אלו באזהרה' | «לישנא דהרי אלו בזהרה וע\"ש ונלע\"ד ראיה»"
+  },
+  {
+   "klal_id": 209,
+   "word_index": 16,
+   "stored": "מסספיע",
+   "reason": "Backfilled 2026-08-17 (retroactive highlighting pass): this word was already named as an open candidate in an earlier 'ai-semantic-spotcheck' finding (decision 4c5c22f73659, see t…"
+  },
+  {
+   "klal_id": 212,
+   "word_index": 40,
+   "stored": "פ\"יא",
+   "reason": "פ\"יא w40 → פי\"א | FREQ: gershayim in wrong position (minor artifact) | «כסף משנה ריש פ\"יא מה' תרומות ומהר\"י»"
+  },
+  {
+   "klal_id": 212,
+   "word_index": 51,
+   "stored": "הלכה",
+   "reason": "הלכה w51 → הלכה [+number] | GRAM: 'הלכה וגם' - halacha number missing; every other citation in this klal carries its number | «מתנות עניים הלכה וגם מוהרי\"ב»"
+  },
+  {
+   "klal_id": 214,
+   "word_index": 150,
+   "stored": "ישמע",
+   "reason": "Backfilled 2026-08-17 (retroactive highlighting pass): this word was already named as an open candidate in an earlier 'ai-semantic-spotcheck' finding (decision a2a83cd3c5d4, see t…"
+  },
+  {
+   "klal_id": 216,
+   "word_index": 37,
+   "stored": "לא",
+   "reason": "לא w37 → אלא | FREQ: dropped lamed; occurs 3x as bare 'לא' in this klal | «לא מסרך הכתוב לא לחכמים לפרש שיעור»"
+  },
+  {
+   "klal_id": 216,
+   "word_index": 123,
+   "stored": "לא",
+   "reason": "לא w123 → אלא | FREQ: dropped lamed; second occurrence | «לא מסרו הכתוב לא לחכמים דידעי למימר»"
+  },
+  {
+   "klal_id": 216,
+   "word_index": 136,
+   "stored": "ראיתי'להתוס'",
+   "reason": "ראיתי'להתוס' w136 → ראיתי להתוס' | FREQ: two words run together around stray geresh | «חילול ע\"כ וכן ראיתי'להתוס' ז\"ל דנקטו הך»"
+  },
+  {
+   "klal_id": 216,
+   "word_index": 162,
+   "stored": "כפרק",
+   "reason": "כפרק w162 → בפרק | FREQ: כ/ב confusion; 'בפרק לולב הגזול' standard | «וכ\"כ הרא\"ש כפרק לולב הגזול»"
+  },
+  {
+   "klal_id": 216,
+   "word_index": 196,
+   "stored": "עכ\"ר",
+   "reason": "עכ\"ר w196 → עכ\"ל | FREQ: ר for ל; 'עד כאן לשונו' | «אחר מברכין עליהם עכ\"ר נמצאת אתה למד»"
+  },
+  {
+   "klal_id": 216,
+   "word_index": 281,
+   "stored": "לא",
+   "reason": "לא w281 → אלא | FREQ: dropped lamed; third occurrence | «ולא מסרו הכתוב לא לחכמים וכן כתב»"
+  },
+  {
+   "klal_id": 216,
+   "word_index": 337,
+   "stored": "עור",
+   "reason": "עור w337 → עוד | FREQ: ר for ד | «למלכות וכה\"ג כתב עור בפ\"ב מה' חמץ»"
+  },
+  {
+   "klal_id": 217,
+   "word_index": 313,
+   "stored": "מיר",
+   "reason": "מיר w313 → מיד | FREQ: ר/ד confusion; 'מיד שליח בעלה' (from husband's agent) ref=2979 | «לקבל גיטה מיר שליח בעלה»"
+  },
+  {
+   "klal_id": 217,
+   "word_index": 510,
+   "stored": "המלך",
+   "reason": "המלך w510 → ?? | GRAM: adjacent duplicated word in book title גן המלך | «גינת ורדים שבגן המלך המלך שלו סי'»"
+  },
+  {
+   "klal_id": 217,
+   "word_index": 527,
+   "stored": "ליבא",
+   "reason": "ליבא w527 → אליבא | FREQ: dropped lamed; 'הניחא אליבא דפלוני' | «דקאמר תלמודא הניחא ליבא דפלוני דהוי הלכתא»"
+  },
+  {
+   "klal_id": 217,
+   "word_index": 761,
+   "stored": "ובססחים",
+   "reason": "ובססחים w761 → ובפסחים | HAPAX-ABSENT: ס/פ confusion; tractate פסחים | «ו' א' ובססחים כ\"ו א'»"
+  },
+  {
+   "klal_id": 218,
+   "word_index": 56,
+   "stored": "חצוניות",
+   "reason": "חצוניות w56 → חיצוניות | HAPAX-ABSENT: missing yod; 'תוספתות חיצוניות' (external Tosefta) | «בשם תו' חצוניות דפרק פסולי»"
+  },
+  {
+   "klal_id": 227,
+   "word_index": 832,
+   "stored": "מייאהירא",
+   "reason": "Found incidentally during the mechanical Pattern-B sweep (2026-08-17, see PROJECT-STATUS.md) while reading abrupt-ending klalim for a DIFFERENT pattern (boundary theft) - this wor…"
+  },
+  {
+   "klal_id": 245,
+   "word_index": 856,
+   "stored": "המושכינחהו",
+   "reason": "Found incidentally during the mechanical Pattern-B sweep (2026-08-17, see PROJECT-STATUS.md) while reading abrupt-ending klalim for a DIFFERENT pattern (boundary theft) - this wor…"
+  },
+  {
+   "klal_id": 265,
+   "word_index": 385,
+   "stored": "לת\"גמצאא'",
+   "reason": "Found incidentally during the mechanical Pattern-B sweep (2026-08-17, see PROJECT-STATUS.md) while reading abrupt-ending klalim for a DIFFERENT pattern (boundary theft) - this wor…"
+  },
+  {
+   "klal_id": 349,
+   "word_index": 1254,
+   "stored": "כולרחפיקצ\"תד",
+   "reason": "Found incidentally during the mechanical Pattern-B sweep (2026-08-17, see PROJECT-STATUS.md) while reading abrupt-ending klalim for a DIFFERENT pattern (boundary theft) - this wor…"
+  },
+  {
+   "klal_id": 424,
+   "word_index": 371,
+   "stored": "הסדסיי",
+   "reason": "Found incidentally during the mechanical Pattern-B sweep (2026-08-17, see PROJECT-STATUS.md) while reading abrupt-ending klalim for a DIFFERENT pattern (boundary theft) - this wor…"
+  },
+  {
+   "klal_id": 454,
+   "word_index": 861,
+   "stored": "האו\"יכ",
+   "reason": "Found incidentally during the mechanical Pattern-B sweep (2026-08-17, see PROJECT-STATUS.md) while reading abrupt-ending klalim for a DIFFERENT pattern (boundary theft) - this wor…"
+  }
+ ],
+ "open klal-level flags": [
+  {
+   "klal_id": 7,
+   "reason": "Gemini vision adjudication (tools/verify_flagged_candidates_vision.py, 2026-08-16), run against the ai-semantic-spotcheck-round2 candidate(s) this klal was previously flagged for …"
+  },
+  {
+   "klal_id": 12,
+   "reason": "Gemini vision adjudication (tools/verify_flagged_candidates_vision.py, 2026-08-16), run against the ai-real-word-substitution + ai-semantic-spotcheck-round2 candidate(s) this klal…"
+  },
+  {
+   "klal_id": 13,
+   "reason": "Gemini vision adjudication (tools/verify_flagged_candidates_vision.py, 2026-08-16), run against the ai-real-word-substitution candidate(s) this klal was previously flagged for (te…"
+  },
+  {
+   "klal_id": 14,
+   "reason": "Gemini vision adjudication (tools/verify_flagged_candidates_vision.py, 2026-08-16), run against the ai-semantic-spotcheck-round2 candidate(s) this klal was previously flagged for …"
+  },
+  {
+   "klal_id": 15,
+   "reason": "Next-klal gematria marker mismatch (mechanical check, review round 2, 2026-08-16): klal 15's own printed next-klal marker reads פז where gematria(16) = טז is expected - a single-l…"
+  },
+  {
+   "klal_id": 18,
+   "reason": "Gemini vision adjudication (tools/verify_flagged_candidates_vision.py, 2026-08-16), run against the ai-semantic-spotcheck-round2 candidate(s) this klal was previously flagged for …"
+  },
+  {
+   "klal_id": 21,
+   "reason": "Next-klal gematria marker mismatch (mechanical check, review round 2, 2026-08-16): klal 21's printed next-klal marker reads כך where gematria(22) = כב is expected. LOWER CONFIDENC…"
+  },
+  {
+   "klal_id": 24,
+   "reason": "Gemini vision adjudication (tools/verify_flagged_candidates_vision.py, 2026-08-16), run against the ai-real-word-substitution candidate(s) this klal was previously flagged for (te…"
+  },
+  {
+   "klal_id": 25,
+   "reason": "Gemini vision adjudication (tools/verify_flagged_candidates_vision.py, 2026-08-16), run against the ai-real-word-substitution + ai-semantic-spotcheck-round2 candidate(s) this klal…"
+  },
+  {
+   "klal_id": 29,
+   "reason": "AI semantic-plausibility spot-check 2026-08-14 (random ~20% Part-1 sample, 10,858 words / 59 klalim, read in context). SEMANTIC SIGNAL ONLY - no scan crop was opened and nothing h…"
+  },
+  {
+   "klal_id": 30,
+   "reason": "Semantic-plausibility spot-check round 3 (fresh 20% sample, seed 20260817). w1017 'ראשה' (context: '...ז\"ל בק\"ק לונדון יע\"א ) : ראשה מפני ג\"ש דלה לה ואם יקשה...') sits immediately…"
+  },
+  {
+   "klal_id": 31,
+   "reason": "Lexicon-gap full review (review_lexicon_gaps.py, 2026-08-16): 1 word(s) in this klal are not in lexicon.txt, have ZERO attestation in the independent Sefaria reference corpus (Shu…"
+  },
+  {
+   "klal_id": 36,
+   "reason": "Title field vs. own opening line (check_next_marker_and_title.py, 2026-08-16): compares each klal's `title` field against the opening phrase of its own clean_text (text between th…"
+  },
+  {
+   "klal_id": 37,
+   "reason": "Gemini vision adjudication (tools/verify_flagged_candidates_vision.py, 2026-08-16), run against the ai-real-word-substitution candidate(s) this klal was previously flagged for (te…"
+  },
+  {
+   "klal_id": 38,
+   "reason": "Gemini vision adjudication (tools/verify_flagged_candidates_vision.py, 2026-08-16), run against the ai-real-word-substitution + ai-semantic-spotcheck-round2 candidate(s) this klal…"
+  },
+  {
+   "klal_id": 39,
+   "reason": "AI semantic-plausibility spot-check 2026-08-14 (random ~20% Part-1 sample, 10,858 words / 59 klalim, read in context). SEMANTIC SIGNAL ONLY - no scan crop was opened and nothing h…"
+  },
+  {
+   "klal_id": 41,
+   "reason": "Gemini vision adjudication (tools/verify_flagged_candidates_vision.py, 2026-08-16), run against the ai-real-word-substitution candidate(s) this klal was previously flagged for (te…"
+  },
+  {
+   "klal_id": 43,
+   "reason": "Lexicon-gap full review (review_lexicon_gaps.py, 2026-08-16): 1 word(s) in this klal are not in lexicon.txt, have ZERO attestation in the independent Sefaria reference corpus (Shu…"
+  },
+  {
+   "klal_id": 44,
+   "reason": "Lexicon-gap full review (review_lexicon_gaps.py, 2026-08-16): 2 word(s) in this klal are not in lexicon.txt, have ZERO attestation in the independent Sefaria reference corpus (Shu…"
+  },
+  {
+   "klal_id": 45,
+   "reason": "Gemini vision adjudication (tools/verify_flagged_candidates_vision.py, 2026-08-16), run against the ai-semantic-spotcheck-round2 candidate(s) this klal was previously flagged for …"
+  },
+  {
+   "klal_id": 46,
+   "reason": "Next-klal gematria marker mismatch (mechanical check, review round 2, 2026-08-16): klal 46's printed next-klal marker reads מו where gematria(47) = מז is expected - a single-lette…"
+  },
+  {
+   "klal_id": 48,
+   "reason": "Gemini vision adjudication (tools/verify_flagged_candidates_vision.py, 2026-08-16), run against the ai-real-word-substitution candidate(s) this klal was previously flagged for (te…"
+  },
+  {
+   "klal_id": 49,
+   "reason": "Gemini vision adjudication (tools/verify_flagged_candidates_vision.py, 2026-08-16), run against the ai-semantic-spotcheck-round2 candidate(s) this klal was previously flagged for …"
+  },
+  {
+   "klal_id": 51,
+   "reason": "Gemini vision adjudication (tools/verify_flagged_candidates_vision.py, 2026-08-16), run against the ai-real-word-substitution candidate(s) this klal was previously flagged for (te…"
+  },
+  {
+   "klal_id": 54,
+   "reason": "Gemini vision adjudication (tools/verify_flagged_candidates_vision.py, 2026-08-16), run against the ai-real-word-substitution candidate(s) this klal was previously flagged for (te…"
+  },
+  {
+   "klal_id": 59,
+   "reason": "Lexicon-gap full review (review_lexicon_gaps.py, 2026-08-16): 1 word(s) in this klal are not in lexicon.txt, have ZERO attestation in the independent Sefaria reference corpus (Shu…"
+  },
+  {
+   "klal_id": 60,
+   "reason": "AI semantic-plausibility spot-check 2026-08-14 (random ~20% Part-1 sample, 10,858 words / 59 klalim, read in context). SEMANTIC SIGNAL ONLY - no scan crop was opened and nothing h…"
+  },
+  {
+   "klal_id": 67,
+   "reason": "Gemini vision adjudication (tools/verify_flagged_candidates_vision.py, 2026-08-16), run against the ai-semantic-spotcheck-round2 candidate(s) this klal was previously flagged for …"
+  },
+  {
+   "klal_id": 70,
+   "reason": "Gemini vision adjudication (tools/verify_flagged_candidates_vision.py, 2026-08-16), run against the ai-semantic-spotcheck-round2 candidate(s) this klal was previously flagged for …"
+  },
+  {
+   "klal_id": 74,
+   "reason": "Pushing an existing DATA issue into the review harness so it is visible on the dashboard - not a new finding. Character '!' outside Part 1's documented Hebrew-letter repertoire at…"
+  },
+  {
+   "klal_id": 76,
+   "reason": "Gemini vision adjudication (tools/verify_flagged_candidates_vision.py, 2026-08-16), run against the ai-real-word-substitution candidate(s) this klal was previously flagged for (te…"
+  },
+  {
+   "klal_id": 80,
+   "reason": "AI SCAN-CROP VERIFICATION 2026-08-14 (dropped-lamed pattern, root-cause pass). ROOT CAUSE FOUND AND CONFIRMED AGAINST THE INK: this print sets the letter pair aleph+lamed as the s…"
+  },
+  {
+   "klal_id": 82,
+   "reason": "Gemini vision adjudication (tools/verify_flagged_candidates_vision.py, 2026-08-16), run against the ai-real-word-substitution candidate(s) this klal was previously flagged for (te…"
+  },
+  {
+   "klal_id": 88,
+   "reason": "Gemini vision adjudication (tools/verify_flagged_candidates_vision.py, 2026-08-16), run against the ai-real-word-substitution + ai-semantic-spotcheck-round2 candidate(s) this klal…"
+  },
+  {
+   "klal_id": 92,
+   "reason": "Gemini vision adjudication (tools/verify_flagged_candidates_vision.py, 2026-08-16), run against the ai-real-word-substitution candidate(s) this klal was previously flagged for (te…"
+  },
+  {
+   "klal_id": 93,
+   "reason": "Gemini vision adjudication (tools/verify_flagged_candidates_vision.py, 2026-08-16), run against the ai-real-word-substitution candidate(s) this klal was previously flagged for (te…"
+  },
+  {
+   "klal_id": 94,
+   "reason": "Lexicon-gap full review (review_lexicon_gaps.py, 2026-08-16): 4 word(s) in this klal are not in lexicon.txt, have ZERO attestation in the independent Sefaria reference corpus (Shu…"
+  },
+  {
+   "klal_id": 96,
+   "reason": "Gemini vision adjudication (tools/verify_flagged_candidates_vision.py, 2026-08-16), run against the ai-semantic-spotcheck-round2 candidate(s) this klal was previously flagged for …"
+  },
+  {
+   "klal_id": 97,
+   "reason": "Gemini vision adjudication (tools/verify_flagged_candidates_vision.py, 2026-08-16), run against the ai-real-word-substitution candidate(s) this klal was previously flagged for (te…"
+  },
+  {
+   "klal_id": 103,
+   "reason": "Gemini vision adjudication (tools/verify_flagged_candidates_vision.py, 2026-08-16), run against the ai-real-word-substitution candidate(s) this klal was previously flagged for (te…"
+  },
+  {
+   "klal_id": 107,
+   "reason": "Gemini vision adjudication (tools/verify_flagged_candidates_vision.py, 2026-08-16), run against the ai-semantic-spotcheck-round2 candidate(s) this klal was previously flagged for …"
+  },
+  {
+   "klal_id": 110,
+   "reason": "Gemini vision adjudication (tools/verify_flagged_candidates_vision.py, 2026-08-16), run against the ai-semantic-spotcheck-round2 candidate(s) this klal was previously flagged for …"
+  },
+  {
+   "klal_id": 115,
+   "reason": "AI semantic-plausibility spot-check 2026-08-14 (random ~20% Part-1 sample, 10,858 words / 59 klalim, read in context). SEMANTIC SIGNAL ONLY - no scan crop was opened and nothing h…"
+  },
+  {
+   "klal_id": 116,
+   "reason": "AI SCAN-CROP VERIFICATION 2026-08-14 (dropped-lamed pattern, root-cause pass). ROOT CAUSE FOUND AND CONFIRMED AGAINST THE INK: this print sets the letter pair aleph+lamed as the s…"
+  },
+  {
+   "klal_id": 123,
+   "reason": "Gemini vision adjudication (tools/verify_flagged_candidates_vision.py, 2026-08-16), run against the ai-real-word-substitution candidate(s) this klal was previously flagged for (te…"
+  },
+  {
+   "klal_id": 126,
+   "reason": "Gemini vision adjudication (tools/verify_flagged_candidates_vision.py, 2026-08-16), run against the ai-semantic-spotcheck-round2 candidate(s) this klal was previously flagged for …"
+  },
+  {
+   "klal_id": 128,
+   "reason": "Gemini vision adjudication (tools/verify_flagged_candidates_vision.py, 2026-08-16), run against the ai-semantic-spotcheck-round2 candidate(s) this klal was previously flagged for …"
+  },
+  {
+   "klal_id": 130,
+   "reason": "Lexicon-gap full review (review_lexicon_gaps.py, 2026-08-16): 1 word(s) in this klal are not in lexicon.txt, have ZERO attestation in the independent Sefaria reference corpus (Shu…"
+  },
+  {
+   "klal_id": 136,
+   "reason": "AI semantic-plausibility spot-check 2026-08-14 (random ~20% Part-1 sample, 10,858 words / 59 klalim, read in context). SEMANTIC SIGNAL ONLY - no scan crop was opened and nothing h…"
+  },
+  {
+   "klal_id": 143,
+   "reason": "Semantic-plausibility spot-check round 3 (fresh 20% sample, seed 20260817). w684 'שמול' (context: '...ודייני דפומבדיתא רב פפא בר שמול ודבר תימה הוא...') should plausibly be 'שמואל…"
+  },
+  {
+   "klal_id": 144,
+   "reason": "Semantic-plausibility spot-check round 3 (fresh 20% sample, seed 20260817). Multiple candidates in this long klal (the author's extended methodological essay on the 13 middot, quo…"
+  },
+  {
+   "klal_id": 145,
+   "reason": "Gemini vision adjudication (tools/verify_flagged_candidates_vision.py, 2026-08-16), run against the ai-real-word-substitution candidate(s) this klal was previously flagged for (te…"
+  },
+  {
+   "klal_id": 147,
+   "reason": "Gemini vision adjudication (tools/verify_flagged_candidates_vision.py, 2026-08-16), run against the ai-real-word-substitution candidate(s) this klal was previously flagged for (te…"
+  },
+  {
+   "klal_id": 148,
+   "reason": "Lexicon-gap full review (review_lexicon_gaps.py, 2026-08-16): 3 word(s) in this klal are not in lexicon.txt, have ZERO attestation in the independent Sefaria reference corpus (Shu…"
+  },
+  {
+   "klal_id": 149,
+   "reason": "AI semantic-plausibility spot-check 2026-08-14 (random ~20% Part-1 sample, 10,858 words / 59 klalim, read in context). SEMANTIC SIGNAL ONLY - no scan crop was opened and nothing h…"
+  },
+  {
+   "klal_id": 150,
+   "reason": "Semantic-plausibility spot-check round 3 (fresh 20% sample, seed 20260817). w244 'בשיטרת' (context: '...ה\"ע בש\"ב פ\"ב וכן מצאתי להריטב\"א בשיטרת עירובין דף ג' רע\"ג...') should plaus…"
+  },
+  {
+   "klal_id": 152,
+   "reason": "Lexicon-gap full review (review_lexicon_gaps.py, 2026-08-16): 2 word(s) in this klal are not in lexicon.txt, have ZERO attestation in the independent Sefaria reference corpus (Shu…"
+  },
+  {
+   "klal_id": 154,
+   "reason": "Gemini vision adjudication (tools/verify_flagged_candidates_vision.py, 2026-08-16), run against the ai-real-word-substitution candidate(s) this klal was previously flagged for (te…"
+  },
+  {
+   "klal_id": 159,
+   "reason": "Gemini vision adjudication (tools/verify_flagged_candidates_vision.py, 2026-08-16), run against the ai-real-word-substitution candidate(s) this klal was previously flagged for (te…"
+  },
+  {
+   "klal_id": 167,
+   "reason": "Re-verification of a previously-UNVERIFIABLE candidate at word_index 898 (\"מקטי\"->\"מקמי\") - now exact-token locatable (klal_page_regions.json fix) but the disputed letter (tet vs …"
+  },
+  {
+   "klal_id": 168,
+   "reason": "Semantic-plausibility spot-check round 3 (fresh 20% sample, seed 20260817). w455-456 'המחילי רבא' (context: '...דף ד' ע\"ב מהלאוין בענין אחר ואחרי המחילי רבא גברי קא חזינא תיובתא..…"
+  },
+  {
+   "klal_id": 169,
+   "reason": "AI semantic-plausibility spot-check 2026-08-14 (random ~20% Part-1 sample, 10,858 words / 59 klalim, read in context). SEMANTIC SIGNAL ONLY - no scan crop was opened and nothing h…"
+  },
+  {
+   "klal_id": 174,
+   "reason": "AI semantic-plausibility spot-check 2026-08-14 (random ~20% Part-1 sample, 10,858 words / 59 klalim, read in context). SEMANTIC SIGNAL ONLY - no scan crop was opened and nothing h…"
+  },
+  {
+   "klal_id": 175,
+   "reason": "Gemini vision adjudication (tools/verify_flagged_candidates_vision.py, 2026-08-16), run against the ai-real-word-substitution candidate(s) this klal was previously flagged for (te…"
+  },
+  {
+   "klal_id": 176,
+   "reason": "Pushing an existing DATA issue into the review harness so it is visible on the dashboard - not a new finding. Character ';' outside Part 1's documented Hebrew-letter repertoire at…"
+  },
+  {
+   "klal_id": 177,
+   "reason": "Gemini vision adjudication (tools/verify_flagged_candidates_vision.py, 2026-08-16), run against the ai-real-word-substitution candidate(s) this klal was previously flagged for (te…"
+  },
+  {
+   "klal_id": 178,
+   "reason": "AI SCAN-CROP VERIFICATION 2026-08-14 (dropped-lamed pattern, root-cause pass). ROOT CAUSE FOUND AND CONFIRMED AGAINST THE INK: this print sets the letter pair aleph+lamed as the s…"
+  },
+  {
+   "klal_id": 182,
+   "reason": "Lexicon-gap full review (review_lexicon_gaps.py, 2026-08-16): 1 word(s) in this klal are not in lexicon.txt, have ZERO attestation in the independent Sefaria reference corpus (Shu…"
+  },
+  {
+   "klal_id": 183,
+   "reason": "Gemini vision adjudication (tools/verify_flagged_candidates_vision.py, 2026-08-16), run against the ai-real-word-substitution candidate(s) this klal was previously flagged for (te…"
+  },
+  {
+   "klal_id": 184,
+   "reason": "Gemini vision adjudication (tools/verify_flagged_candidates_vision.py, 2026-08-16), run against the ai-real-word-substitution candidate(s) this klal was previously flagged for (te…"
+  },
+  {
+   "klal_id": 186,
+   "reason": "Gemini vision adjudication (tools/verify_flagged_candidates_vision.py, 2026-08-16), run against the ai-real-word-substitution candidate(s) this klal was previously flagged for (te…"
+  },
+  {
+   "klal_id": 189,
+   "reason": "Gemini vision adjudication (tools/verify_flagged_candidates_vision.py, 2026-08-16), run against the ai-semantic-spotcheck-round2 candidate(s) this klal was previously flagged for …"
+  },
+  {
+   "klal_id": 194,
+   "reason": "Gemini vision adjudication (tools/verify_flagged_candidates_vision.py, 2026-08-16), run against the ai-real-word-substitution candidate(s) this klal was previously flagged for (te…"
+  },
+  {
+   "klal_id": 196,
+   "reason": "Gemini vision adjudication (tools/verify_flagged_candidates_vision.py, 2026-08-16), run against the ai-real-word-substitution candidate(s) this klal was previously flagged for (te…"
+  },
+  {
+   "klal_id": 197,
+   "reason": "Lexicon-gap full review (review_lexicon_gaps.py, 2026-08-16): 1 word(s) in this klal are not in lexicon.txt, have ZERO attestation in the independent Sefaria reference corpus (Shu…"
+  },
+  {
+   "klal_id": 198,
+   "reason": "Gemini vision adjudication (tools/verify_flagged_candidates_vision.py, 2026-08-16), run against the ai-real-word-substitution candidate(s) this klal was previously flagged for (te…"
+  },
+  {
+   "klal_id": 199,
+   "reason": "AI SCAN-CROP VERIFICATION 2026-08-14 (dropped-lamed pattern, root-cause pass). ROOT CAUSE FOUND AND CONFIRMED AGAINST THE INK: this print sets the letter pair aleph+lamed as the s…"
+  },
+  {
+   "klal_id": 200,
+   "reason": "AI semantic-plausibility spot-check 2026-08-14 (random ~20% Part-1 sample, 10,858 words / 59 klalim, read in context). SEMANTIC SIGNAL ONLY - no scan crop was opened and nothing h…"
+  },
+  {
+   "klal_id": 204,
+   "reason": "Gemini vision adjudication (tools/verify_flagged_candidates_vision.py, 2026-08-16), run against the ai-semantic-spotcheck-round2 candidate(s) this klal was previously flagged for …"
+  },
+  {
+   "klal_id": 209,
+   "reason": "AI semantic-plausibility spot-check 2026-08-14 (random ~20% Part-1 sample, 10,858 words / 59 klalim, read in context). SEMANTIC SIGNAL ONLY - no scan crop was opened and nothing h…"
+  },
+  {
+   "klal_id": 214,
+   "reason": "AI semantic-plausibility spot-check 2026-08-14 (random ~20% Part-1 sample, 10,858 words / 59 klalim, read in context). SEMANTIC SIGNAL ONLY - no scan crop was opened and nothing h…"
+  },
+  {
+   "klal_id": 216,
+   "reason": "Gemini vision adjudication (tools/verify_flagged_candidates_vision.py, 2026-08-16), run against the ai-real-word-substitution candidate(s) this klal was previously flagged for (te…"
+  },
+  {
+   "klal_id": 240,
+   "reason": "Reconstructed 2026-08-25 from the DocAI token stream (page 84 tokens 352-390) because this klal stored only a placeholder. 39 words, 0.93 of substantial words attested in the inde…"
+  },
+  {
+   "klal_id": 250,
+   "reason": "Reconstructed from the DocAI token stream (page 86 tokens 743-end + page 87 tokens 0-4) because this klal stored only a placeholder. 237 words, 0.89 of substantial words attested …"
+  },
+  {
+   "klal_id": 277,
+   "reason": "Reconstructed 2026-08-25 from the DocAI token stream (page 96 tokens 63-150) because this klal stored only a placeholder. 88 words, 1.00 of substantial words attested in the indep…"
+  },
+  {
+   "klal_id": 287,
+   "reason": "Reconstructed 2026-08-25 from the DocAI token stream (page 100 tokens 622-655) because this klal stored only a placeholder. 34 words, 0.92 of substantial words attested in the ind…"
+  },
+  {
+   "klal_id": 290,
+   "reason": "Reconstructed from the DocAI token stream (page 101 tokens 642-end + page 102 tokens 0-66) because this klal stored only a placeholder. 315 words, 0.86 of substantial words attest…"
+  },
+  {
+   "klal_id": 320,
+   "reason": "Reconstructed 2026-08-25 from the DocAI token stream (page 117 tokens 6-361) because this klal stored only a placeholder. 356 words, 0.92 of substantial words attested in the inde…"
+  },
+  {
+   "klal_id": 331,
+   "reason": "Reconstructed 2026-08-25 from the DocAI token stream (page 119 tokens 554-578) because this klal stored only a placeholder. 25 words, 1.00 of substantial words attested in the ind…"
+  },
+  {
+   "klal_id": 332,
+   "reason": "Reconstructed 2026-08-25 from the DocAI token stream (page 119 tokens 580-699) because this klal stored only a placeholder. 120 words, 0.91 of substantial words attested in the in…"
+  },
+  {
+   "klal_id": 333,
+   "reason": "Reconstructed from the DocAI token stream (page 119 tokens 701-end + page 120 tokens 0-56) because this klal stored only a placeholder. 212 words, 0.92 of substantial words attest…"
+  },
+  {
+   "klal_id": 334,
+   "reason": "Reconstructed 2026-08-25 from the DocAI token stream (page 120 tokens 58-195) because this klal stored only a placeholder. 138 words, 0.97 of substantial words attested in the ind…"
+  },
+  {
+   "klal_id": 335,
+   "reason": "Reconstructed 2026-08-25 from the DocAI token stream (page 120 tokens 197-232) because this klal stored only a placeholder. 36 words, 0.93 of substantial words attested in the ind…"
+  },
+  {
+   "klal_id": 340,
+   "reason": "Reconstructed 2026-08-25 from the DocAI token stream (page 121 tokens 504-570) because this klal stored only a placeholder. 67 words, 0.97 of substantial words attested in the ind…"
+  },
+  {
+   "klal_id": 350,
+   "reason": "Reconstructed 2026-08-25 from the DocAI token stream (page 124 tokens 376-850) because this klal stored only a placeholder. 475 words, 0.95 of substantial words attested in the in…"
+  },
+  {
+   "klal_id": 357,
+   "reason": "Reconstructed from the DocAI token stream (page 126 tokens 561-end + page 127 tokens 0-4) because this klal stored only a placeholder. 408 words, 0.94 of substantial words atteste…"
+  },
+  {
+   "klal_id": 367,
+   "reason": "Reconstructed 2026-08-25 from the DocAI token stream (page 128 tokens 194-803) because this klal stored only a placeholder. 610 words, 0.93 of substantial words attested in the in…"
+  },
+  {
+   "klal_id": 377,
+   "reason": "Reconstructed 2026-08-25 from the DocAI token stream (page 131 tokens 704-763) because this klal stored only a placeholder. 60 words, 0.94 of substantial words attested in the ind…"
+  },
+  {
+   "klal_id": 380,
+   "reason": "Reconstructed from the DocAI token stream (page 132 tokens 797-end + page 133 tokens 0-29) because this klal stored only a placeholder. 130 words, 0.89 of substantial words attest…"
+  },
+  {
+   "klal_id": 383,
+   "reason": "Reconstructed 2026-08-25 from the DocAI token stream (page 133 tokens 232-377) because this klal stored only a placeholder. 146 words, 0.89 of substantial words attested in the in…"
+  },
+  {
+   "klal_id": 384,
+   "reason": "Reconstructed 2026-08-25 from the DocAI token stream (page 133 tokens 379-426) because this klal stored only a placeholder. 48 words, 0.92 of substantial words attested in the ind…"
+  },
+  {
+   "klal_id": 385,
+   "reason": "Reconstructed from the DocAI token stream (page 133 tokens 428-end + page 134 tokens 0-4) because this klal stored only a placeholder. 486 words, 0.90 of substantial words atteste…"
+  },
+  {
+   "klal_id": 387,
+   "reason": "Reconstructed 2026-08-25 from the DocAI token stream (page 134 tokens 71-105) because this klal stored only a placeholder. 35 words, 0.95 of substantial words attested in the inde…"
+  },
+  {
+   "klal_id": 414,
+   "reason": "Reconstructed from the DocAI token stream (page 151 tokens 475-end + page 152 tokens 0-247) because this klal stored only a placeholder. 686 words, 0.92 of substantial words attes…"
+  },
+  {
+   "klal_id": 420,
+   "reason": "Reconstructed 2026-08-25 from the DocAI token stream (page 156 tokens 178-315) because this klal stored only a placeholder. 138 words, 0.94 of substantial words attested in the in…"
+  },
+  {
+   "klal_id": 427,
+   "reason": "Reconstructed 2026-08-25 from the DocAI token stream (page 158 tokens 814-870) because this klal stored only a placeholder. 57 words, 0.91 of substantial words attested in the ind…"
+  },
+  {
+   "klal_id": 439,
+   "reason": "Reconstructed 2026-08-25 from the DocAI token stream (page 163 tokens 513-590) because this klal stored only a placeholder. 78 words, 0.97 of substantial words attested in the ind…"
+  },
+  {
+   "klal_id": 442,
+   "reason": "Reconstructed from the DocAI token stream (page 163 tokens 765-end + page 164 tokens 0-111) because this klal stored only a placeholder. 194 words, 0.94 of substantial words attes…"
+  },
+  {
+   "klal_id": 443,
+   "reason": "Reconstructed 2026-08-25 from the DocAI token stream (page 164 tokens 113-252) because this klal stored only a placeholder. 140 words, 0.96 of substantial words attested in the in…"
+  },
+  {
+   "klal_id": 444,
+   "reason": "Reconstructed 2026-08-25 from the DocAI token stream (page 164 tokens 254-311) because this klal stored only a placeholder. 58 words, 0.94 of substantial words attested in the ind…"
+  },
+  {
+   "klal_id": 457,
+   "reason": "Reconstructed 2026-08-25 from the DocAI token stream (page 168 tokens 775-864) because this klal stored only a placeholder. 90 words, 0.90 of substantial words attested in the ind…"
+  },
+  {
+   "klal_id": 480,
+   "reason": "Reconstructed 2026-08-25 from the DocAI token stream (page 174 tokens 500-545) because this klal stored only a placeholder. 46 words, 0.88 of substantial words attested in the ind…"
+  },
+  {
+   "klal_id": 487,
+   "reason": "Reconstructed 2026-08-25 from the DocAI token stream (page 175 tokens 488-510) because this klal stored only a placeholder. 18 words, 0.91 of substantial words attested in the ind…"
+  },
+  {
+   "klal_id": 490,
+   "reason": "Reconstructed 2026-08-25 from the DocAI token stream (page 176 tokens 84-116) because this klal stored only a placeholder. 33 words, 0.94 of substantial words attested in the inde…"
+  },
+  {
+   "klal_id": 497,
+   "reason": "Reconstructed 2026-08-25 from the DocAI token stream (page 177 tokens 150-176) because this klal stored only a placeholder. 27 words, 0.89 of substantial words attested in the ind…"
+  },
+  {
+   "klal_id": 517,
+   "reason": "Reconstructed 2026-08-25 from the DocAI token stream (page 184 tokens 634-862) because this klal stored only a placeholder. 229 words, 0.92 of substantial words attested in the in…"
+  },
+  {
+   "klal_id": 520,
+   "reason": "Reconstructed 2026-08-25 from the DocAI token stream (page 185 tokens 69-106) because this klal stored only a placeholder. 38 words, 0.87 of substantial words attested in the inde…"
+  },
+  {
+   "klal_id": 540,
+   "reason": "Reconstructed 2026-08-25 from the DocAI token stream (page 190 tokens 812-852) because this klal stored only a placeholder. 41 words, 0.96 of substantial words attested in the ind…"
+  },
+  {
+   "klal_id": 553,
+   "reason": "Reconstructed from the DocAI token stream (page 195 tokens 489-end + page 196 tokens 0-367) because this klal stored only a placeholder. 899 words, 0.90 of substantial words attes…"
+  },
+  {
+   "klal_id": 580,
+   "reason": "Reconstructed from the DocAI token stream (page 209 tokens 297-end + page 210 tokens 0-428) because this klal stored only a placeholder. 1020 words, 0.88 of substantial words atte…"
+  },
+  {
+   "klal_id": 590,
+   "reason": "Reconstructed 2026-08-25 from the DocAI token stream (page 215 tokens 233-254) because this klal stored only a placeholder. 22 words, 1.00 of substantial words attested in the ind…"
+  },
+  {
+   "klal_id": 607,
+   "reason": "Reconstructed 2026-08-25 from the DocAI token stream (page 219 tokens 503-540) because this klal stored only a placeholder. 38 words, 0.93 of substantial words attested in the ind…"
+  },
+  {
+   "klal_id": 608,
+   "reason": "Reconstructed 2026-08-25 from the DocAI token stream (page 219 tokens 542-564) because this klal stored only a placeholder. 23 words, 1.00 of substantial words attested in the ind…"
+  },
+  {
+   "klal_id": 616,
+   "reason": "Reconstructed from the DocAI token stream (page 220 tokens 9-end + page 221 tokens 0-75) because this klal stored only a placeholder. 990 words, 0.91 of substantial words attested…"
+  },
+  {
+   "klal_id": 640,
+   "reason": "Reconstructed 2026-08-25 from the DocAI token stream (page 225 tokens 260-297) because this klal stored only a placeholder. 38 words, 0.89 of substantial words attested in the ind…"
+  },
+  {
+   "klal_id": 665,
+   "reason": "Reconstructed from the DocAI token stream (page 246 tokens 804-end + page 247 tokens 0-239) because this klal stored only a placeholder. 439 words, 0.92 of substantial words attes…"
+  }
+ ],
+ "flags whose word index is out of range": [],
+ "null decisions still standing": [
+  {
+   "klal_id": 90,
+   "word_index": 4,
+   "stored": "המקובל",
+   "reason": "NULL DECISION recorded 2026-08-24 (disputed_choice) - marks this word decided while nothing can promote it; supersede it with a real ruling"
+  },
+  {
+   "klal_id": 88,
+   "word_index": 1149,
+   "stored": "<end of klal>",
+   "reason": "NULL DECISION recorded 2026-08-25 (disputed_choice) - marks this word decided while nothing can promote it; supersede it with a real ruling"
+  },
+  {
+   "klal_id": 164,
+   "word_index": 55,
+   "stored": "<end of klal>",
+   "reason": "NULL DECISION recorded 2026-08-25 (disputed_choice) - marks this word decided while nothing can promote it; supersede it with a real ruling"
+  },
+  {
+   "klal_id": 2,
+   "word_index": 632,
+   "stored": "הרמב\"ם",
+   "reason": "NULL DECISION recorded 2026-08-25 (disputed_choice) - marks this word decided while nothing can promote it; supersede it with a real ruling"
+  }
+ ]
+}
