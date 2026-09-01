@@ -317,10 +317,27 @@ applying it to the corpus remain two separate, deliberate steps.
     (still wraps once other columns exist, and relies on the terminal
     auto-linking a schemeless string).
 
-    **The lesson, and it is not about Markdown.** Every Hebrew-bearing artifact
-    this project emits into an LTR container needs the isolates, and every
-    link-bearing one needs the no-tables rule; the CSS answer only covers the
-    HTML ones. **NOT YET SWEPT** — `tools/export_corpus.py`'s plain-text
+    **SWEPT AND FIXED 2026-09-01 — the same defect was in the SHARED renderer.**
+    `tools/render_report.py` carries both paths, and the asymmetry was exact:
+    `render_html()` sets `direction:rtl;unicode-bidi:isolate` on `.heb`, and
+    `render_markdown()` had nothing. So every Markdown report it has ever
+    written displayed its Hebrew backwards in the terminal they are read in -
+    `cleared_flags_2026-08-26.md` (39 rows), `open_items_2026-08-31.md` (242
+    mixed lines), and anything else rendered through it. **`render_markdown()`
+    now takes the same `--hebrew visual|logical` option**, defaulting to visual,
+    and **HTML is explicitly excluded** — it has a real bidi engine and
+    pre-reordered characters would double-reverse. Two gated tests pin exactly
+    that asymmetry. `cleared_flags_2026-08-26.md` regenerated.
+
+    **One file deliberately NOT regenerated:** `open_items_2026-08-31.md`. Its
+    source `.json` is being edited by a concurrent session right now, and
+    regenerating a derived report from a half-written source is how stale
+    artifacts get made. It needs one `python3 tools/render_report.py
+    open_items_2026-08-31.json` once that settles.
+
+    **The older lesson still stands.** Every Hebrew-bearing artifact this
+    project emits into an LTR container needs this, and every link-bearing one
+    needs the no-tables rule. **STILL NOT SWEPT** — `tools/export_corpus.py`'s plain-text
     export, `open_items_*.md`, `cleared_flags_*.md` and any other generated `.md`
     carrying Hebrew have the same exposure and have not been checked. Whoever
     picks this up: the check is whether Hebrew ever shares a line with Latin,

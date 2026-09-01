@@ -4992,3 +4992,31 @@ def test_trim_to_reference_drops_overhang_but_keeps_the_aligned_stretch():
     ref = ["אבג", "דהו", "זחט", "יכל"]
     cand = ["שקר", "שקר"] + ref + ["שקר"]
     assert coe.trim_to_reference(ref, cand) == ref
+
+
+# --- render_report.py's markdown path and bidi (item 0R) ---------------------
+
+import render_report as rr  # noqa: E402
+
+
+def test_markdown_reports_bake_in_bidi_but_html_never_does():
+    """render_html sets `direction:rtl;unicode-bidi:isolate` on `.heb`; Markdown
+    has no stylesheet and is read in a terminal that implements no bidi, so its
+    Hebrew has to be reordered at generation time. Handing the SAME treatment to
+    HTML would double-reverse it - the browser has a real bidi engine."""
+    # `stored` and `reason` are the keys describe() actually reads.
+    rows = {"": [{"klal_id": 4, "word_index": 403, "stored": "איהו",
+                  "reason": "final nun for vav"}]}
+    md_vis = rr.render_markdown("t", rows, "http://x", 0, hebrew="visual")
+    md_log = rr.render_markdown("t", rows, "http://x", 0, hebrew="logical")
+    heb = lambda s: [c for c in s if "֐" <= c <= "׿"]
+    assert heb(md_log)[:4] == list("איהו"), "logical mode must store reading order"
+    assert heb(md_vis)[:4] == list("והיא"), "visual mode must reverse the run"
+    html_out = rr.render_html("t", rows, "http://x", 0)
+    assert heb(html_out)[:4] == list("איהו"), "HTML must stay logical"
+    assert "unicode-bidi:isolate" in html_out
+
+
+def test_to_visual_leaves_a_line_without_hebrew_untouched():
+    url = "| [klal 4 w403](http://127.0.0.1:8420/klal/4/word/403) | | |"
+    assert rr.to_visual(url) == url

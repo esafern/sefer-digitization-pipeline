@@ -25,6 +25,7 @@ import argparse
 import html
 import json
 import os
+import re
 import sys
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -108,7 +109,32 @@ def rows_of(data, section):
     return {k: v for k, v in data.items() if isinstance(v, list) and v}
 
 
-def render_markdown(name, sections, base, limit):
+# Markdown has no stylesheet, so the `direction:rtl;unicode-bidi:isolate` that
+# render_html() sets on `.heb` has no counterpart here - and measured
+# 2026-09-01, `glow` and the terminals in use implement no bidi at all (Hebrew
+# comes out byte-for-byte as it went in). Logical order therefore DISPLAYS
+# BACKWARDS in the one place these reports are actually read, and bidi control
+# characters are inert because nothing reads them. The only remaining lever is
+# to bake the reordering into the characters. See PROJECT-STATUS.md item 0R.
+#
+# HTML must never get this treatment: it has a real bidi engine and would
+# double-reverse.
+HEBREW_RE = re.compile(r"[\u0590-\u05ff]")
+
+
+def to_visual(text):
+    """Reorder a line's Hebrew for a renderer that does none of it itself.
+
+    python-bidi's implementation of the real algorithm, not a hand-rolled
+    reverse: naive reversal mishandles gershayim, embedded digits and Latin,
+    and these reports are full of `דף ג' ב'` and mixed Hebrew/English detail.
+    Base direction stays L, so links, digits and ASCII are untouched.
+    """
+    from bidi.algorithm import get_display
+    return get_display(text, base_dir="L") if HEBREW_RE.search(text) else text
+
+
+def render_markdown(name, sections, base, limit, hebrew="visual"):
     out = [f"# {name}", ""]
     for title, rows in sections.items():
         if title:
@@ -127,6 +153,8 @@ def render_markdown(name, sections, base, limit):
                 out.append(f"| … | | _{len(rows) - rows.index(row) - 1} more rows omitted_ |")
                 break
         out.append("")
+    if hebrew == "visual":
+        out = [to_visual(l) for l in out]
     return "\n".join(out)
 
 
@@ -165,6 +193,12 @@ def main():
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("report", help="a report .json in the repo root")
     ap.add_argument("--format", choices=("markdown", "html"), default="markdown")
+    ap.add_argument("--hebrew", choices=("visual", "logical"), default="visual",
+                    help="markdown only. visual (default): reorder Hebrew so it "
+                         "reads correctly in a terminal that does no bidi, e.g. "
+                         "glow - but do not copy Hebrew out of it. logical: "
+                         "canonical order, correct in any bidi-aware reader. "
+                         "HTML is always logical; it has its own bidi engine.")
     ap.add_argument("--section", default=None, help="one key, for a report that is a dict of lists")
     ap.add_argument("--limit", type=int, default=0, help="cap rows per section (0 = all)")
     ap.add_argument("--base", default=DEFAULT_BASE)
@@ -176,8 +210,13 @@ def main():
         data = json.load(f)
     sections = rows_of(data, args.section)
     name = os.path.basename(path)
-    body = (render_markdown if args.format == "markdown" else render_html)(
-        name, sections, args.base.rstrip("/"), args.limit)
+    # hebrew= is markdown-only: render_html relies on CSS bidi and would
+    # double-reverse if handed pre-reordered characters.
+    if args.format == "markdown":
+        body = render_markdown(name, sections, args.base.rstrip("/"), args.limit,
+                               hebrew=args.hebrew)
+    else:
+        body = render_html(name, sections, args.base.rstrip("/"), args.limit)
     out = args.out or os.path.splitext(path)[0] + (".md" if args.format == "markdown" else ".html")
     with open(out, "w", encoding="utf-8") as f:
         f.write(body)
