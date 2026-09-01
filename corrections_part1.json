@@ -8434,7 +8434,7 @@
       "vision_selected": "A",
       "vision_transcription": "שורש",
       "confidence": 0.99,
-      "reasoning": "The word 'שורש' (shoresh) is clearly visible in the center of the image, matching Option A and the surrounding context 'ומוהרי\"ק שורש פ\"ד'.",
+      "reasoning": "The image clearly shows the word 'שורש' on the second line, matching the citation 'ומוהרי\"ק שורש פ\"ד' in the surrounding Rabbinic text context.",
       "vlm_reading": "פ\"ד",
       "surya_reading": "פ\"ד",
       "flag": "possible_omission"

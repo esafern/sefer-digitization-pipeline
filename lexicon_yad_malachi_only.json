@@ -1458,12 +1458,12 @@
     "edit": "substitution"
    },
    {
-    "form": "החוזר",
+    "form": "שחוזר",
     "ref_count": 97,
     "edit": "substitution"
    },
    {
-    "form": "שחוזר",
+    "form": "החוזר",
     "ref_count": 97,
     "edit": "substitution"
    }
@@ -2320,14 +2320,14 @@
     "edit": "deletion"
    },
    {
-    "form": "אמורא",
-    "ref_count": 41,
-    "edit": "substitution"
-   },
-   {
     "form": "מורא",
     "ref_count": 41,
     "edit": "deletion"
+   },
+   {
+    "form": "אמורא",
+    "ref_count": 41,
+    "edit": "substitution"
    }
   ]
  },
@@ -4951,7 +4951,7 @@
     "edit": "deletion"
    },
    {
-    "form": "גופי",
+    "form": "נופו",
     "ref_count": 46,
     "edit": "substitution"
    }
@@ -14613,14 +14613,14 @@
     "edit": "deletion"
    },
    {
-    "form": "שבינו",
-    "ref_count": 100,
-    "edit": "deletion"
-   },
-   {
     "form": "ורבינו",
     "ref_count": 100,
     "edit": "substitution"
+   },
+   {
+    "form": "שבינו",
+    "ref_count": 100,
+    "edit": "deletion"
    }
   ]
  },
@@ -20183,9 +20183,9 @@
     "edit": "deletion"
    },
    {
-    "form": "להר",
+    "form": "לקרן",
     "ref_count": 120,
-    "edit": "deletion"
+    "edit": "substitution"
    }
   ]
  },

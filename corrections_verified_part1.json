@@ -1465,25 +1465,6 @@
   {
     "klal_id": 84,
     "page": 38,
-    "opcode": "replace",
-    "word_index_in_final_text": 0,
-    "original_word": "פר",
-    "corrected_word": "פד",
-    "bbox": {
-      "x1": 0.8774875402450562,
-      "y1": 0.8315238952636719,
-      "x2": 0.9023631811141968,
-      "y2": 0.8512263894081116
-    },
-    "bbox_estimated": false,
-    "vision_selected": "B",
-    "vision_transcription": "פד",
-    "vision_confidence": 0.95,
-    "vision_reasoning": "The raster crop clearly displays the Hebrew letters Pe (פ) followed by Dalet (ד), distinguished by the sharp right-angled corner/projection (heel) on the upper right of the second character, which differentiates a Dalet from a rounded Resh. This matches the surrounding Rabbinic text context ('פד בהדיא קתני לה')."
-  },
-  {
-    "klal_id": 84,
-    "page": 38,
     "opcode": "delete",
     "word_index_in_final_text": 55,
     "original_word": "4 בעיא",
@@ -4006,7 +3987,7 @@
     "vision_selected": "A",
     "vision_transcription": "שורש",
     "vision_confidence": 0.99,
-    "vision_reasoning": "The word 'שורש' (shoresh) is clearly visible in the center of the image, matching Option A and the surrounding context 'ומוהרי\"ק שורש פ\"ד'."
+    "vision_reasoning": "The image clearly shows the word 'שורש' on the second line, matching the citation 'ומוהרי\"ק שורש פ\"ד' in the surrounding Rabbinic text context."
   },
   {
     "klal_id": 170,

@@ -43,6 +43,46 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0U. **[2026-09-01] TWO DECISIONS APPLIED — ONE REAL EDIT — AND IT CLOSES THE
+    ONE POSITION ITEM 0Q SAID NEEDED A HUMAN FIRST.** `apply_reviewer_decisions.py`
+    then `./rebuild_all.sh` (full, vision included). Corpus diff: **exactly one
+    word**, word count unchanged (klal 29: 400 → 400).
+
+    **klal 29 w86 `חנה` → `הנה` — item 0Q's blocker, resolved by the reviewer
+    reversing their own earlier ruling.** Item 0Q flagged this as the one
+    position that had to be settled before the other 59 Dicta disputes: the
+    corpus read `חנה`, a reviewer had already chosen `חנה` on 2026-08-19, and
+    Dicta and the VLM independently read `הנה` — a human holding one reading
+    while two independent engines agree on another, which Lesson 9 says must not
+    be buried. **On 2026-08-31T19:46 the reviewer ruled again and chose `הנה`.**
+    The context now reads `…שלא ראיתיו עד הנה זה כמה שנים…` — `עד הנה`, "until
+    now", the ordinary phrase. The ink decided, as item 0Q said it would.
+
+    **klal 2 w316 was a confirm-no-change, and it settles item 57.** The decision
+    chose `נ״ד` where the corpus already read `נ״ד` — byte-identical, checked at
+    the codepoint level (`U+05E0 U+05F4 U+05D3`), not by eye. So the single
+    remaining **U+05F4 GERSHAYIM in Part 1 is a deliberate reviewer ruling, twice
+    over** (2026-08-30 and again 2026-08-31), not an oversight item 57 left
+    outstanding. Item 57 should be read as *ruled and kept*, not *pending*.
+
+    **Two other open items closed themselves and nobody had noticed.** Measured
+    after the rebuild, not remembered:
+    - **Item 26 is fully closed: 0 `&` remain corpus-wide** (item 37 recorded
+      one survivor at klal 77 w11). It was resolved by the reviewer's own
+      already-applied decisions somewhere between that sweep and now.
+    - **`ligature_words.json`'s staleness is gone**: it now reports
+      `both_lost: 0`, agreeing with the corpus, where item 37 caught it claiming
+      3. Stage 5b regenerating it is what fixed that — the remedy item 43 put in
+      place is working.
+
+    Post-rebuild figures, all regenerated: `corrections_part1.json` **625 items
+    across 148 klalim**; `lexical_defect_report.json` **271 candidates across 90
+    klalim** (was 280/93); `klal_page_regions.json` **623 regions across 140
+    pages** (610 marker-anchored, 13 heuristic); ligature census **176 distinct
+    words / 2,631 occurrences**, 321 dropped-lamed, 18 dropped-alef, 0 both-lost,
+    0 literal U+FB4F. Rebuild gate green (344), full suite **392 passed, 1
+    skipped**.
+
 0T. **[2026-08-31] S2 IS CLOSED — `corpus_io.words_of()` is now the one
     space-only split, and a test stops a new one being typed.** The finding had
     been open since 2026-08-25 across three reviews, and the reason it stayed
