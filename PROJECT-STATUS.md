@@ -43,6 +43,58 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+### RESUME HERE — finishing the Dicta pass (pages 51–114)
+
+_The only thing this needs is the OCR text coming back. Everything else is
+built. Written 2026-09-01 as a single sequence because the pieces are otherwise
+spread across items 0P, 0W and 0Y2, and reassembling them from a 2,800-line file
+is its own tax._
+
+**State.** Pages 22–50 are done (klalim 1–63, 95.5% word accuracy). Five chunks
+covering pages 51–114 are cut and waiting in `dicta_chunks_remainder/`
+(13 pages / ~0.5 MB each). Dicta is rate-limiting; the reviewer hit it too, so
+it is the service, not the automation.
+
+1. **Submit**, one file at a time, at <https://rashiocr.dicta.org.il/>. It needs
+   an email address before Send unlocks, and mails a link — but the **status
+   page also shows it**, so results never require the inbox. Two things that
+   cost an hour to learn: synthesized keystrokes reach that email field only
+   about half the time — set the value through the native `HTMLInputElement`
+   value setter plus dispatched `InputEvent`/`keyup`/`change` — and **assert the
+   Send button is enabled before clicking**, which is what stopped a chunk going
+   out with an empty address. If uploads start failing (`העלאה נכשלה`), that is
+   the rate limit: stop, do not retry a third time.
+2. **Collect.** The status URL carries a job id; the result is at a predictable
+   path, so `tools/fetch_dicta_result.sh <job-id> yadmalachi-jer-r_cNNNN_pXXXX-pYYYY_ocr.txt`
+   pulls it straight into `dicta_output/`. It refuses an empty or non-Hebrew
+   body rather than saving an error page as a "successful" result.
+3. **Mark done** in `dicta_chunks_remainder/manifest.json`: set `job_id`,
+   `output_file` (repo-relative), and `status: "done"` on each chunk.
+4. **Rebuild the baseline** — `python3 tools/build_dicta_baseline.py`. It orders
+   by page from the manifests and **refuses to write on a gap or overlap**, so a
+   missing chunk fails loudly instead of producing a short baseline. Its header
+   flips from PARTIAL to COMPLETE on its own once pages 22–114 are all in.
+5. **Re-score and re-preview** over the full range:
+   ```bash
+   python3 tools/compare_ocr_engines.py --klalim 2-221 \
+       --ocr "dicta=tools/second_witness_eval/dicta_jerusalem_part1_baseline.txt"
+   python3 tools/preview_dicta_disputes.py \
+       --witness tools/second_witness_eval/dicta_jerusalem_part1_baseline.txt \
+       --label dicta --klalim 2-221 \
+       --out DICTA-NEW-DISPUTES.md --urls-out DICTA-NEW-DISPUTES-URLS.txt
+   ```
+   Expect roughly 3–4× the current 58 disputes. **They are a PREVIEW** — nothing
+   is wired into `rebuild_all.sh`, and wiring it in is a separate decision
+   (item 0N has the integration points: `synthesize_multi_witness.py`'s
+   `ENGINES`, one line in `assemble_corrections_dataset.py`, and a
+   `dicta_reading` option in `app.js` — without that last one the field is
+   serialized and never seen).
+
+**Two standing constraints.** Never point Dicta at the square Berlin scan — it
+scores 77.6% there, worse than everything already wired in. And Dicta is
+deterministic (item 0V), so a repeat run buys nothing: it cannot be its own
+reliability check, and every dispute still needs the ink or a different engine.
+
 > **Item IDs are allocated per LANE, and are never reassigned once written.**
 > Two concurrent sessions share this file, and a newest-first list with
 > hand-picked single letters cannot survive that: both writers reach for "the
