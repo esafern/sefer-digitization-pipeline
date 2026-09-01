@@ -445,6 +445,47 @@ this repo as an LLM agent, follow them exactly.
   Y next") — propose a plan to close the existing open items first, or ask
   which to prioritize.
 
+## Working in parallel — use a worktree, and symlink the inputs
+
+**Two agents in one clone share one HEAD.** Whatever either commits lands on
+whichever branch happens to be checked out, and a `git checkout -b` by one
+moves the ground under the other. This is not hypothetical: on 2026-09-01 four
+commits from a second session landed on a refactor branch they had nothing to
+do with, and were then swept onto `master` by a fast-forward.
+
+The fix is `git worktree` — a separate directory with its own HEAD, index and
+files, sharing one object database. **But a plain `git worktree add` gives you a
+directory where the test suite cannot run**, because everything the pipeline
+actually reads is gitignored. Symlink it back:
+
+```bash
+git worktree add ../sefer-digitization-pipeline-<lane> -b <branch>
+cd ../sefer-digitization-pipeline-<lane>
+for p in venv docai_word_boxes sefaria_reference_corpus credentials.json \
+         berlin_square_corrected.pdf berlin_square_original_transposed.pdf \
+         klalim_docai llm_klal_starts vlm_extractions document_jsons_berlin \
+         sefaria_export; do
+  ln -s "../sefer-digitization-pipeline/$p" "$p"
+done
+ln -s ../../sefer-digitization-pipeline/images/pdf_pages images/pdf_pages
+```
+
+That is ~1.9 GB shared rather than copied (`venv` alone is 1.5 GB). Verify with
+`python -m pytest -q` in the new directory: it must report the same counts as
+the main tree, and it does — 405 passed / 1 skipped, checked 2026-09-01.
+
+Two things do NOT symlink, and both matter:
+
+- **Only one worktree may run the review server.** It binds port 8420; a second
+  one either fails to start or silently serves a different tree's corpus. Keep
+  the dashboard in the main clone.
+- **`review_decisions.jsonl` and `adjudication_cache.db` are TRACKED**, so each
+  worktree gets its own copy at whatever commit it sits on, and they diverge.
+  Do not symlink them — git would see a type change. **Human review stays in the
+  main clone**; a decision recorded in one worktree does not exist in the other
+  until it is committed and merged. A refactor lane is fine with a slightly
+  stale ledger; a review lane is not.
+
 ## Parts 2-3 gate
 
 **Parts 2-3 are out of scope until Part 1 is clean AND an outside
