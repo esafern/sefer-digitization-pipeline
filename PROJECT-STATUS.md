@@ -571,12 +571,33 @@ applying it to the corpus remain two separate, deliberate steps.
     from the start, so they will never enter history at all, and losing them
     means re-queuing against a service that is already saying "wait".
 
-    **Narrow proposal, not yet done:** keep the per-chunk intermediates
-    untracked as now, but track the single concatenated baseline as
-    `tools/second_witness_eval/dicta_jerusalem_part1_baseline.txt`, beside the
-    Surya and VLM baselines it is the peer of. One file, ~1,400 lines, matching
-    the convention already in place for the other two witnesses, and it keeps
-    the diff-size fix intact.
+    **DONE 2026-09-01, on the reviewer's approval.** The per-chunk
+    intermediates stay untracked; the single concatenated baseline is now
+    tracked as `tools/second_witness_eval/dicta_jerusalem_part1_baseline.txt`,
+    beside the Surya and VLM baselines it is the peer of. The diff-size fix
+    stays intact — one file, not thirteen.
+
+    **Built by a script, not a `cat`.** `tools/build_dicta_baseline.py` reads
+    the chunk manifests and concatenates in PAGE order. That is not ceremony:
+    the calibration chunk is `c0001` in its own manifest and covers pages 29-32,
+    which falls INSIDE the range another manifest's `c0001` covers, so ordering
+    on chunk id or filename interleaves the book. It also **refuses to write on
+    a gap or an overlap** — a missing page silently drops text from the middle
+    of the baseline and a repeated one duplicates it, and either would surface
+    downstream as a mystifying alignment failure rather than an error. Three
+    gated tests; 360 passing.
+
+    The file carries an ASCII header naming its page coverage and saying
+    **PARTIAL**, so it cannot be quoted as full Part 1 while it stops at page
+    50. That is safe only because every consumer tokenizes to Hebrew-bearing
+    words, which is asserted by a test rather than assumed. Verified the
+    tracked path reproduces the untracked one exactly: identical klal
+    segmentation, identical 16,392 tokens, identical 124 dispute URLs.
+
+    **When pages 51-114 land**, drop the outputs in `dicta_output/`, mark them
+    done in `dicta_chunks_remainder/manifest.json`, and re-run the builder — it
+    will refuse if a chunk is missing rather than quietly producing a
+    short baseline.
 
 0V. **[2026-09-01] DICTA IS DETERMINISTIC — same PDFs, second run, BIT-IDENTICAL
     output. It therefore needs no stability gate, and can never be its own

@@ -5318,3 +5318,41 @@ def test_expected_span_covers_every_checkable_decision_type():
         {"decision_type": "disputed_choice", "chosen_text": "אלהים"}) == ["אלהים"]
     assert aud.expected_span(
         {"decision_type": "manual_correction", "chosen_text": None}) == []
+
+
+# --- the tracked Dicta baseline (item 0W) ------------------------------------
+
+import build_dicta_baseline as bdb  # noqa: E402
+
+
+def test_baseline_chunks_are_ordered_by_page_not_by_chunk_id():
+    """The calibration chunk is `c0001` in its own manifest and covers pages
+    29-32, which falls INSIDE the range another manifest's `c0001` covers.
+    Ordering on chunk id or filename interleaves the book."""
+    chunks = bdb.collect_chunks()
+    pages = [c["first_page"] for c in chunks]
+    assert pages == sorted(pages), "must be page-ordered"
+    assert len(chunks) >= 2
+
+
+def test_baseline_builder_refuses_a_gap_or_an_overlap():
+    """A missing page drops text from the middle of the baseline and a repeated
+    one duplicates it; either surfaces downstream as a mystifying alignment
+    failure rather than an error, so it has to fail loudly here."""
+    contiguous = [{"first_page": 1, "last_page": 5, "path": "a"},
+                  {"first_page": 6, "last_page": 9, "path": "b"}]
+    assert bdb.check_coverage(contiguous) == []
+    gapped = [{"first_page": 1, "last_page": 5, "path": "a"},
+              {"first_page": 8, "last_page": 9, "path": "b"}]
+    assert any("GAP" in p for p in bdb.check_coverage(gapped))
+    overlapping = [{"first_page": 1, "last_page": 6, "path": "a"},
+                   {"first_page": 5, "last_page": 9, "path": "b"}]
+    assert any("OVERLAP" in p for p in bdb.check_coverage(overlapping))
+
+
+def test_the_baselines_ascii_header_is_invisible_to_every_consumer():
+    """The header states the baseline's page coverage so a PARTIAL file cannot
+    be quoted as complete. It is safe only because every consumer tokenizes to
+    Hebrew-bearing words - assert that rather than trust it."""
+    header_words = "# Dicta RashiOCR baseline - Jerusalem 1975/6 edition".split()
+    assert all(not cio.hebrew_letters_only(w) for w in header_words)
