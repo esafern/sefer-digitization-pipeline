@@ -621,6 +621,40 @@ reliability check, and every dispute still needs the ink or a different engine.
     222/222/223/667 klalim over the right ranges, `/api/klal/88` and
     `/api/page/73` 200, page latency 11.2 ms.
 
+0Z2. **[2026-09-01] A crash in `compare_ocr_engines.py` on its DEFAULT path,
+    introduced by yesterday's fix to the very blindness it was fixing.** Found by
+    a peer `/code-review high` that was killed by a session rate limit before it
+    could report — its last line was "now let me confirm the
+    `compare_ocr_engines` crash end-to-end", which was enough to go looking.
+
+    **The bug.** Finding F9 said the letter-frequency signature iterated the
+    REFERENCE's alphabet only, so a letter an engine INVENTS was invisible — in
+    the one signal credited with diagnosing fastocr as a hallucinating square
+    model. The fix iterates the union and gives an invented letter a ratio of
+    infinity. But JSON cannot carry infinity, so `evaluate()` stores it as
+    `None` and sets an `invented` flag beside it — and the PRINT path then
+    inferred "invented" by comparing the stored ratio back to `float("inf")`,
+    which is `False` for `None`, and fell through to `abs(1.0 - None)`:
+    **`TypeError`**.
+
+    **It fires on the default.** `--letters` defaults to 6, so any candidate
+    containing a Hebrew letter absent from the scored window crashes the tool.
+    It never fired on this project's own runs because every Hebrew letter
+    appears somewhere in a window of 10+ klalim — but the module's own docstring
+    advertises reuse on "the next book", and a narrow window is exactly where an
+    absent letter is normal. Reproduced deliberately: klal 9 alone has no
+    `ג`/`ח`/`צ`; a candidate inventing `ג` crashes it.
+
+    **Fixed** by sorting and labelling on the `invented` FLAG rather than the
+    ratio — the flag is the contract, the ratio is not — with a gated test that
+    asserts an invented letter sorts to the top and that the ordering key never
+    touches `.ratio` for one. **Gate 362.**
+
+    **The shape worth remembering:** a fix that adds a sentinel value has to
+    make every consumer of that value agree on how to recognise it. I stored the
+    sentinel one way (a flag plus `None`) and read it another (`== inf`), in the
+    same function, on the same day.
+
 0Y2. **[2026-09-01] A peer session's `/code-review high` on the docs commit —
     11 findings, all fair, plus a real seam defect in code I wrote today. One
     claim of my own retracted.**

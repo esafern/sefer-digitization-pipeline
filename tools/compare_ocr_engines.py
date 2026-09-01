@@ -428,10 +428,17 @@ def main():
     if args.letters:
         print("\n### Letter-frequency signature (most distorted vs corpus)\n")
         for r in results:
+            # Sort on the `invented` FLAG, not on the ratio. evaluate() stores an
+            # invented letter's ratio as None (JSON cannot carry infinity), so
+            # comparing it back to float("inf") here is always False and the
+            # else-branch then does abs(1.0 - None) -> TypeError. That crashed
+            # on the DEFAULT --letters 6 for any candidate containing a letter
+            # absent from the window - i.e. exactly the case the `invented`
+            # flag was added to surface.
             worst = sorted(r["letter_ratios"].items(),
-                           key=lambda kv: (float("inf") if kv[1]["ratio"] == float("inf")
+                           key=lambda kv: (float("inf") if kv[1].get("invented")
                                            else abs(1.0 - kv[1]["ratio"])), reverse=True)[:args.letters]
-            parts = [(f"{ch} NEW (absent from the corpus)" if v["ratio"] == float("inf")
+            parts = [(f"{ch} NEW (absent from the corpus)" if v.get("invented")
                       else f"{ch} {v['ratio']:.2f}x") for ch, v in worst]
             print(f"- **{r['label']}**: " + ", ".join(parts))
 

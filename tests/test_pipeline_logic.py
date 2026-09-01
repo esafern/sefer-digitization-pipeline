@@ -5395,3 +5395,30 @@ def test_no_chunk_seam_fuses_a_word_to_the_next_pages_marker():
     assert len(contains) == len(starts), (
         "every `===` marker must begin its own line; fused seams: "
         + repr([l[:40] for l in contains if not l.startswith("===")]))
+
+
+def test_an_invented_letter_is_reported_not_crashed_on():
+    """An engine producing a letter the reference window never uses is a
+    hallucinated-glyph failure, and surfacing it is the whole point of the
+    letter signature. evaluate() stores that letter's ratio as None because JSON
+    cannot carry infinity, so any consumer that infers 'invented' by comparing
+    the ratio back to float('inf') gets False and then does arithmetic on None.
+
+    That crashed the DEFAULT --letters path on any narrow window - found by a
+    peer review, 2026-09-01. The flag is the contract; the ratio is not."""
+    ref = ["אבד"] * 20
+    cand = ["אבד"] * 19 + ["גגג"]        # gimel appears nowhere in the reference
+    ref_letters = coe.letter_frequencies(ref)
+    cand_letters = coe.letter_frequencies(cand)
+    assert "ג" not in ref_letters and "ג" in cand_letters
+
+    ratios = {}
+    for ch in set(ref_letters) | set(cand_letters):
+        rr = ref_letters.get(ch, 0.0)
+        ratios[ch] = {"ratio": (None if rr <= 0 else cand_letters.get(ch, 0.0) / rr),
+                      "invented": rr <= 0}
+    assert ratios["ג"]["invented"] is True and ratios["ג"]["ratio"] is None
+    # the ordering key must not touch .ratio for an invented letter
+    key = lambda kv: (float("inf") if kv[1].get("invented") else abs(1.0 - kv[1]["ratio"]))
+    ordered = sorted(ratios.items(), key=key, reverse=True)
+    assert ordered[0][0] == "ג", "an invented letter must sort to the top"
