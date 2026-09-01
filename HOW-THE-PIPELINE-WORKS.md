@@ -24,6 +24,17 @@ ink, surfacing every place they disagree, and resolving each disagreement
    accuracy** over all 222 reviewed klalim, **Surya 89.9%** mean agreement,
    **Tesseract 3.8%** — which is why Tesseract is retained as a historical
    witness and not as a leg of the pipeline.
+
+   **A second *edition* is being added, which is a stronger thing than a second
+   engine.** Every witness above reads the same Berlin scan, so all of them fail
+   together on a worn sort (see below). Dicta's Rashi-script engine reads a
+   *different printing*, set by a different compositor from different type —
+   measured 2026-09-01 at **95.5% word accuracy / 96.7% lexicon hit** over
+   klalim 1–63. On a 61-klal dry run it agreed with the corpus at **97.7%** of
+   the positions it votes on, **corroborated 65 of 83** existing consensus
+   disputes, and would add 60 new ones. It is deliberately routed at Rashi
+   editions only: on the square Berlin scan the same engine drops to 77.6%,
+   worse than everything already wired in.
 3. **Diff, don't trust.** Each witness's reading is aligned against the stored
    text word by word. Agreement is the null result; every disagreement becomes a
    candidate with a real bounding box.
@@ -59,7 +70,12 @@ it:
   Three different engines read the same worn sort and make the same wrong call:
   37 measured cases of two or three engines agreeing on an identical error,
   including unanimous 3-of-3, all from that one alef-lamed ligature. Every engine
-  is reading the same ink.
+  is reading the same ink. **The only real escape is a different edition** — a
+  different compositor, different type, a different sort in that position — which
+  is why the Rashi-edition witness above matters more than a fourth engine on the
+  same scan would. Enumerating and excluding the known defect was tried and
+  barely helped (ensemble precision 41% → 39%): a bigger artifact catalogue is
+  not the repair.
 - **Tightening the rule doesn't rescue it.** Requiring the primary engine, or
   unanimity, buys three points of precision for 82% of the recall — measured,
   then rejected.
@@ -85,12 +101,12 @@ Worked examples, with the crops: [`VERIFIED-AGAINST-THE-INK.html`](VERIFIED-AGAI
 
 ## Current state
 
-_Re-measured from the live corpus, 2026-08-25._
+_Re-measured from the live corpus, 2026-09-01._
 
 | | |
 |:---|:---|
-| **Klalei HaGemara** | 595 of 667 klalim carry real text (~188,000 words), scan pages 14–247 |
-| 72 klalim | still hold a generated placeholder, all in klalim 223–667 |
+| **Klalei HaGemara** | 596 of 667 klalim carry real text (~188,500 words), scan pages 14–247 |
+| 71 klalim | still hold a generated placeholder, all in klalim 223–667 |
 | **Klalim 1–222** | full verification pipeline: 222/222 trusted page alignment, four witnesses, vision adjudication, live review dashboard |
 | Klalim 223–667 | text and page-level alignment; no witness set has been run there |
 | **Klalei HaPoskim** (pages 254–291) · **Klalei HaDinim** (292–329) | scanned, never extracted |
@@ -102,8 +118,9 @@ catalogued ligature artifact); the rest wait for a human.
 
 **Guardrails.** Every correction is recorded in an append-only ledger
 (`review_decisions.jsonl`) kept outside the automated rebuild, so no batch run
-can overwrite a human judgment. 318 regression tests, 282 of them gating every
-pipeline rebuild.
+can overwrite a human judgment. **409 regression tests, 360 of them gating every
+pipeline rebuild** (counts taken from the collector, not from grepping the test
+files — the two are not the same number).
 
 **Deliberately not done.** No `part2.json`/`part3.json` correction is applied
 without its own go-ahead: a clean first third is not evidence the rest comes out
@@ -133,7 +150,10 @@ The last mile keeps two things separate — **the text** and **the links**:
 
 - **Text.** OCR the Berlin edition images (cleanest square type). Licensing is
   clean: a public-domain edition, and mechanical OCR of PD text carries no new
-  copyright. **Keep the prose faithful** — don't expand abbreviations (that's a
+  copyright. **Berlin is the source; other printings are witnesses only.** The
+  Jerusalem 1975/6 reprint this project reads for cross-checking is modern and
+  carries added matter of its own — its readings route a reviewer to a position
+  in the Berlin text, and none of its words are ingested. **Keep the prose faithful** — don't expand abbreviations (that's a
   read-time layer); do proof against the image, strip running headers and page
   numbers, and segment into the schema (*Yad Malachi, Klalei HaGemara, Klal N*).
   The schema this project emits declares exactly one node, `Klalei HaGemara`,

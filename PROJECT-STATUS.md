@@ -550,6 +550,67 @@ applying it to the corpus remain two separate, deliberate steps.
     222/222/223/667 klalim over the right ranges, `/api/klal/88` and
     `/api/page/73` 200, page latency 11.2 ms.
 
+0X. **[2026-09-01] Outward-facing docs reviewed. One FACTUAL ERROR corrected,
+    one legal separation that was missing, and four stale counts.** The public
+    set is six files, not the three named: `CASE-YAD-MALACHI.md`,
+    `CORPUS-COMPARISON.md`, `COMPETITIVE-LANDSCAPE.md`, plus
+    **`HOW-THE-PIPELINE-WORKS.md`** (the case doc's own companion),
+    **`VERIFIED-AGAINST-THE-INK.html`** (the evidence showcase) and
+    **`README.md`** (the front door, and the stalest of the lot).
+
+    **The factual error.** `CASE-YAD-MALACHI.md`'s `[^p1877]` listed HebrewBooks
+    **#14122** as a second scan of Przemysl 1877. It is **Jerusalem 1975/6** —
+    the same mistake I made on 2026-09-01 and the reviewer corrected (item 0O),
+    made independently by whoever wrote that footnote, and for the same reason:
+    #14122's HebrewBooks metadata mis-catalogues it as `פרמישלה תרלז` and its
+    approbations genuinely are from Przemysl, so a reader who checks a nearby
+    page rather than the title page finds "Przemysl" and stops. The **script**
+    verification stands (pages 30/250/400/480 rendered, Rashi-bodied); the
+    imprint did not. The two-independent-scans claim is withdrawn rather than
+    re-asserted, since I have not re-verified the Google Books one.
+
+    **The separation that was missing, and it matters for a doc whose core claim
+    is "public domain, nothing to license".** The edition this pipeline is now
+    OCRing is a **1975/6 printing** advertising `עם הוספות` — added matter,
+    including Ramchal's `דרכי התלמוד` set before the text. The underlying work is
+    PD and mechanical OCR of it carries no new copyright, but modern editorial
+    additions are not covered by that. Both docs now state the rule this project
+    actually follows: **Berlin 1851/2 is the SOURCE; every other printing is a
+    WITNESS.** A witness's readings route a reviewer to a position in the Berlin
+    text; none of its words are ingested. Stated as what this project does, not
+    as legal advice.
+
+    **The strengthening, which is the reason this was worth doing now.** Until
+    this week only ONE of the five printings was machine-readable, so "a second
+    edition" was an aspiration - the weakest joint in the "nobody has to trust
+    the machine" argument, because every witness was reading the same ink and
+    they fail together on a worn sort (37 measured cases). Dicta at 95.5% turns a
+    Rashi printing into a real second edition. Both docs now say so, with both
+    caveats attached: the 95.5% is scored against a DIFFERENT edition so genuine
+    variants count against it and it is a floor, and the same engine reads the
+    square Berlin scan at 77.6% and must never be pointed there.
+
+    **Stale counts corrected** (measured, not remembered): README `552 of 667` ->
+    **596**, `~179,000 words` -> **~188,500**, `115 placeholders` -> **71**,
+    `31 numbered lessons` -> **37**; HOW-THE-PIPELINE-WORKS `595` -> **596**,
+    `72 placeholders` -> **71**, `318 tests / 282 gating` -> **409 / 360**.
+
+    **Two things fixed that were wrong in kind, not just out of date.** The
+    README's architecture line named `VlmWitnessEngine`, which no stage of
+    `rebuild_all.sh` imports (item 0N) — replaced with what the pipeline
+    actually does. And its status block quoted `1,061 flagged — 356
+    machine-resolved, 997 open, 64 decided`, three numbers that **do not sum to
+    the total** and go stale every session; replaced with a pointer to the
+    dashboard, which is the discipline `PROJECT-STATUS.md` already applies to
+    itself.
+
+    **`CORPUS-COMPARISON.md` needed nothing.** It is a citation-demand survey,
+    untouched by anything measured this week, and it already states its own
+    limits (the top-250 verification floor, the snapshot caveat, and an explicit
+    "cannot establish who ranks #2"). **`VERIFIED-AGAINST-THE-INK.html` NOT
+    reviewed** — 2.7 MB of generated showcase, and it predates every measurement
+    above; whether its worked examples still match the corpus is unchecked.
+
 0W. **[2026-09-01] Dicta's OCR output is now the ONLY witness baseline not in
     version control, and it is the only one that cannot be regenerated on
     demand.** `b46dcde` untracked `dicta_output/` and the comparison tables. The

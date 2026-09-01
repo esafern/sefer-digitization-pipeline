@@ -79,16 +79,34 @@ certified ranks — the tier's un-itemized middle is known to hold works above
 
 **Public domain.** No licensing, no rights-holder, no negotiation.
 
-**Already scanned.** Four printings across five scans, each inspected
-page-by-page. One of them — Berlin, 1851/2 — is set in clean square type, the
-kind general OCR reads best.[^berlin] Nothing needs to be photographed.
+**Already scanned.** Five printings, each inspected page-by-page. One — Berlin,
+1851/2 — is set in clean square type, the kind general OCR reads best[^berlin]
+and the edition this project transcribes. Nothing needs to be photographed.
 
 | Edition | Script | Scan in hand |
 |:---|:---|:---|
 | **Livorno 1766–7** (*princeps*)[^livorno] | **Rashi** (body) | HebrewBooks |
 | **Berlin 1851/2**[^berlin] | **Square** — cleanest print | Google Books; NLI catalogued |
-| **Przemyśl 1877**[^p1877] | **Rashi** (body) | HebrewBooks + Google Books |
+| **Przemyśl 1877**[^p1877] | **Rashi** (body) | Google Books |
 | **Przemyśl 1888**[^p1888] | *unverified* | Google Books |
+| **Jerusalem 1975/6** (4th printing)[^jerusalem] | **Rashi** (body) | HebrewBooks #14122 |
+
+_Only the pre-1929 printings are used as text sources. The Jerusalem 1975/6
+reprint is in hand and is being OCR'd as a **second-edition witness** — a
+cross-check on readings, not a source of text — precisely because its own added
+matter is modern; see [^jerusalem]._
+
+**And the other printings are now readable too — which was not true a week
+ago.** Yad Malachi's remaining editions are set in *Rashi script*, which general
+OCR does not read: HebrewBooks' own searchable text for one of them scores
+**44.0%** against a validated Rabbinic Hebrew word list, against this project's
+corpus at 97.8% — unusable. Measured 2026-09-01, **Dicta's Rashi-script engine
+reads one of them at 95.5% word accuracy and 96.7% lexicon hit** across 63
+klalim, within half a point of the adjudicated corpus's own ceiling.[^dicta]
+That turns a second *edition* into something a machine can read for the first
+time, and a second edition is worth more than a second engine: two engines on
+one scan are both reading the same ink, and fail together on a worn sort. Two
+editions were set by different compositors from different type.
 
 **Cleanly numbered.** Numbered klalim map straight onto a Sefaria schema, and
 they are how every one of the 287 sources cites the work — so the inbound links
@@ -214,11 +232,43 @@ stays available for every public-domain work after this one.
     cataloging and two internal chronograms (*תרי"ב*, 612 = 1851/2), superseding an
     earlier secondhand "~1857" estimate. Clean square type.
 
-[^p1877]: **Przemyśl 1877** — present in two independent scans: HebrewBooks #14122
-    and Google Books. Colophon: *פרעמישלא בשנת התרל"ז לב"ע* (5637 = 1877),
-    publisher M. A. Knoller, printed by Żupnik & Knoller. **Rashi script in the body,
-    with square running headers and square bold klal-lemmas** (corrected 2026-08-19;
-    verified by direct render of pages 30, 250, 400, 480).
+[^p1877]: **Przemyśl 1877** — Google Books full-view scan. Colophon:
+    *פרעמישלא בשנת התרל"ז לב"ע* (5637 = 1877), publisher M. A. Knoller, printed by
+    Żupnik & Knoller. **Rashi script in the body, with square running headers and
+    square bold klal-lemmas.**
+
+    **CORRECTED 2026-09-01: HebrewBooks #14122 is NOT this printing.** This
+    footnote used to list #14122 as a second scan of Przemyśl 1877. Its title
+    page reads `נדפס מחדש בעיה"ק ירושלים תובב"א שנת תשל"ו` — Jerusalem, 5736 —
+    and its own printing history names Przemyśl 5637 as the *third* printing,
+    not itself; see [^jerusalem]. The error is an easy one and was made twice
+    independently: #14122's HebrewBooks metadata mis-catalogues it as
+    `פרמישלה תרלז`, and its approbations genuinely are from Przemyśl, so a
+    reader who checks a nearby page rather than the title page finds
+    "Przemyśl" and stops. The **script** verification stands — pages 30, 250,
+    400 and 480 were rendered directly and are Rashi-bodied — it is the
+    *imprint* that was wrong. Whether the Google Books scan cited here is a
+    genuinely distinct Przemyśl 1877 has not been re-verified since the
+    correction; treat the two-independent-scans claim as withdrawn.
+
+[^jerusalem]: **Jerusalem, Hebrew year תשל"ו = 1975/6** — HebrewBooks #14122,
+    491 pages, ~301 DPI, Rashi script in the body. Title page: `נדפס מחדש בעיה"ק
+    ירושלים תובב"א שנת תשל"ו`, with its own printing history naming all four —
+    *"first printed in Livorno 5527, a second time in Berlin **5612**, a third
+    time in Przemyśl 5637"* — which independently corroborates this project's
+    Berlin dating of תרי"ב = 1851/2 from a fourth source.
+
+    **It is a modern printing, and the case above does not rest on it.** The
+    underlying work is public domain and mechanical OCR of it carries no new
+    copyright[^ocrpd], but this edition advertises `עם הוספות` — added matter,
+    including R. Moshe Chaim Luzzatto's `דרכי התלמוד` set before the text — and
+    modern editorial additions are not covered by that principle. This project
+    therefore uses it as a **witness**: a second edition, read by a different
+    engine, whose disagreements route a reviewer to a position in the *Berlin*
+    text. No word of it is ingested as source text, and the ingest edition
+    remains Berlin 1851/2. Anyone reusing this edition should make the same
+    separation, and should take their own view rather than this footnote's —
+    it is a statement of what this project does, not legal advice.
 
 [^p1888]: **Przemyśl 1888** (Google Books full-view scan). Colophon: *JAD MALACHI,
     PRZEMYŚL, Drukiem Żupnika, Knollera i Hamerszmida, 1888* (*התרמ"ח*, 5648).
@@ -228,6 +278,20 @@ stays available for every public-domain work after this one.
     text is a reproduction of the underlying work and does not generate a new copyright
     (*Bridgeman Art Library v. Corel Corp.*). This does not extend to modern critical
     apparatuses or annotations.
+
+[^dicta]: Dicta's Rashi-script OCR endpoint (<https://rashiocr.dicta.org.il/>),
+    measured 2026-09-01 against `part1.json` over klalim 1–63 of the Jerusalem
+    1975/6 printing[^jerusalem]: **95.5%** word accuracy, 3.8% character error
+    rate, **96.7%** lexicon hit against a 97.1% corpus ceiling. The comparison
+    figure is HebrewBooks' shipped "fastocr" text for the same edition, rejected
+    2026-08-19 at **44.0%** lexicon hit — a failure traced to systematic letter
+    confusion (`ס` 9.7× over-produced, `א` 0.17× under), the signature of a
+    square-type model reading Rashi. Two caveats stated plainly: the 95.5% is
+    scored against a *different edition's* text, so genuine variants between the
+    printings count against it and it is a floor rather than an accuracy; and the
+    same engine reads the **square** Berlin scan at only 77.6%, so it is useful
+    on Rashi editions and actively harmful on square ones. Method and full
+    tables: `tools/compare_ocr_engines.py`, `PROJECT-STATUS.md` items 0J/0P.
 
 [^linker]: Sefaria's Auto-Linker parses structured citations (title + section) to
     automatically generate cross-corpus links.
