@@ -43,6 +43,50 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0Y. **[2026-09-01] C4 IS CLOSED. `pipeline/review_data.py` takes the last two
+    stragglers, and NOTHING outside `tests/` imports `review_server` any more.**
+    `review_server.py` **1,981 → 1,423 today** — 558 lines into three modules
+    (`scan_alignment` 391, `review_counts` 310, `review_data` 240).
+
+    Item 0V left C4 two-thirds done and said so rather than claiming the win:
+    `tools/validate_suppression_filters.py` wanted `_load_witness_queue()` and
+    `tools/patch_witness_word_indices.py` wanted `_load_klalim()`. Neither is
+    geometry, so `scan_alignment` was never their answer. `review_data.py` is —
+    the part-token vocabulary, the four per-part JSON readers, and the witness
+    queue with its filtering rules. All pure reading.
+
+    `BadRequest` is the one deliberate seam left: raised in `review_data`,
+    caught in the server's `do_GET`, which turns it into a 400. That module
+    knows what a bad part token is; only the server knows what a status code is.
+
+    **The gate now covers `tools/` as well as `pipeline/`**, and was re-probed
+    against a `tools/` offender to confirm the widening actually took.
+
+    **A test caught me changing behaviour on the way through, and the lesson is
+    the general one.** The extraction inlined `_load_json = cio.load_repo_json`
+    at its five call sites — tidier, and wrong: that indirection is the seam
+    `test_witness_queue_view_keeps_every_already_decided_item` and
+    `test_witness_queue_filter_is_reversible` patch to feed a synthetic queue.
+    Both failed. **Keep an extraction a MOVE and change nothing else on the way
+    through**; the "while I'm here" tidy is what turns a provable no-op into a
+    debugging session. The seam is restored and commented so it does not read as
+    an oversight.
+
+    The same two tests also had to be repointed from `rs` to `rdata`: a function
+    reads its OWN module's globals, so patching a review_server alias does not
+    reach a moved function. That is a real property of every one of today's
+    three extractions and is now written down in the tests that depend on it.
+
+    **Verified as a no-op on real data**: `api_klalim` for all 667 klalim,
+    `api_klal` for klalim 1/29/88/163/222, and `api_witness_summary` are all
+    **byte-identical** before and after, both versions run in place. Suite
+    **405 passed, 1 skipped**. Server restarted; `/api/witness` 200,
+    `?part=4` still 400.
+
+    **S1's remainder, unchanged by this**: `api_klal` (280 lines) is the
+    merged-entry builder — finding #6's other half, and a design question rather
+    than a move. `api_page` (121) after it.
+
 0X. **[2026-09-01] `pipeline/review_counts.py` EXTRACTED — S1's second half.
     `review_server.py` 1,981 → 1,585 today; `api_klalim` 249 → 168.** With
     `scan_alignment.py` earlier the same day, the God Object has shed **396

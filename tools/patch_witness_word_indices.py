@@ -29,7 +29,7 @@ sys.path.insert(0, os.path.join(REPO, "pipeline"))
 sys.path.insert(0, os.path.join(REPO, "tools"))
 
 import corpus_io as cio  # noqa: E402
-import review_server as rs  # noqa: E402
+import review_data as rdata  # noqa: E402
 
 OUT_PATH = os.path.join(REPO, "reconstruction_witness_queue.json")
 DOCAI_DIR = cio.DOCAI_DIR
@@ -47,7 +47,7 @@ def docai_tokens_for_page(page):
 
 def build_mapping(klal_id, page):
     """Return dict: docai_token_index -> corpus_word_index for this page."""
-    klalim_by_id, _ = rs._load_klalim()
+    klalim_by_id, _ = rdata.load_klalim()
     k = klalim_by_id.get(klal_id)
     if not k:
         return {}

@@ -34,7 +34,7 @@ REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(REPO, "pipeline"))
 
 import corpus_io as cio  # noqa: E402
-import review_server as rs  # noqa: E402
+import review_data as rdata  # noqa: E402
 import synthesize_multi_witness as syn  # noqa: E402
 import typography  # noqa: E402
 from repair_filters import docai_filter  # noqa: E402
@@ -203,7 +203,7 @@ def main():
     print("=" * 74)
     import json
     full = json.load(open(os.path.join(REPO, "reconstruction_witness_queue.json")))["queue"]
-    served = rs._load_witness_queue()
+    served = rdata.load_witness_queue()
     print(f"  suppressed: {len(full) - len(served)} of {len(full)}")
     print("  EVIDENCE: Tesseract measured right in 16 of 419 disagreements (3.8%)")
     print("  vs DocAI's 91.2%. PARTIAL - all 419 vision verdicts scored >= 0.9, so")

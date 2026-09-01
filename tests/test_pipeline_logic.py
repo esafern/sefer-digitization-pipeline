@@ -1508,7 +1508,7 @@ def test_word_level_ai_flag_yields_to_a_manual_correction_on_the_same_word(monke
     monkeypatch.setattr(rs, "_load_corrections", lambda *a, **kw: {})
     monkeypatch.setattr(rs, "_load_regions", lambda *a, **kw: {})
     monkeypatch.setattr(rs, "_load_punctuation_candidates", lambda *a, **kw: {})
-    monkeypatch.setattr(rs.rd, "all_current",
+    monkeypatch.setattr(rdata.rd, "all_current",
                         lambda dtype: ({(1, 1): {"candidate_snapshot": {"original_word": "בית"},
                                                   "chosen_text": "בין", "word_index": 1}}
                                        if dtype == "manual_correction" else {}))
@@ -3134,7 +3134,7 @@ def _patch_klalim_deps(monkeypatch, klalim_by_id, ai_flags_by_klal=None,
         if dtype == "klal_flag":
             return klal_flag_decided
         return {}
-    monkeypatch.setattr(rs.rd, "all_current", _mock_all_current)
+    monkeypatch.setattr(rdata.rd, "all_current", _mock_all_current)
     monkeypatch.setattr(rs, "_word_level_ai_flags",
                         lambda kid, words: ai_flags_by_klal.get(kid, []))
 
@@ -3707,6 +3707,7 @@ def test_cross_klal_skips_gershayim_tokens():
 # branch produced them, and cannot exercise a case the live corpus lacks.
 
 import review_counts as rcount  # noqa: E402
+import review_data as rdata  # noqa: E402
 
 
 def _ws(**kw):
@@ -3863,42 +3864,48 @@ def test_no_pipeline_stage_imports_the_review_server():
     the coupling does not come back - a count in a status file did not stop
     finding S2 from spreading, and it would not stop this either.
 
-    Scoped to pipeline/ deliberately. Two tools/ scripts still import
-    review_server for a witness-queue reader and a corpus reader - NOT
-    geometry, so scan_alignment is not their answer either. They are still
-    open C4 instances; see PROJECT-STATUS. A tool is also not a build stage,
-    which is what made the pipeline/ cases the ones that mattered.
+    WIDENED to tools/ 2026-09-01, when C4 was finished. The two stragglers -
+    tools/validate_suppression_filters.py wanting the witness queue and
+    tools/patch_witness_word_indices.py wanting the klal loader - were never
+    geometry, so scan_alignment was not their answer; review_data.py is. With
+    those repointed, NOTHING outside tests/ imports review_server, and this
+    test now holds that line for both directories rather than just the one
+    that had a build stage in it.
+
+    review_server.py itself is excluded, obviously, and so is tests/ - a test
+    that exercises the endpoints has to import them.
     """
     import ast
 
     offenders = []
-    pipeline_dir = os.path.join(REPO, "pipeline")
-    for root, _dirs, files in os.walk(pipeline_dir):
-        if "__pycache__" in root:
-            continue
-        for fn in sorted(files):
-            if not fn.endswith(".py") or fn == "review_server.py":
-                continue
-            full = os.path.join(root, fn)
-            rel = os.path.relpath(full, REPO)
-            try:
-                tree = ast.parse(open(full, encoding="utf-8").read())
-            except SyntaxError:
-                continue
-            for node in ast.walk(tree):
-                if isinstance(node, ast.Import):
-                    for a in node.names:
-                        if a.name == "review_server":
-                            offenders.append(f"{rel}:{node.lineno}")
-                elif isinstance(node, ast.ImportFrom) and node.module == "review_server":
-                    offenders.append(f"{rel}:{node.lineno}")
+    for scanned in ("pipeline", "tools"):
+      for root, _dirs, files in os.walk(os.path.join(REPO, scanned)):
+          if "__pycache__" in root:
+              continue
+          for fn in sorted(files):
+              if not fn.endswith(".py") or fn == "review_server.py":
+                  continue
+              full = os.path.join(root, fn)
+              rel = os.path.relpath(full, REPO)
+              try:
+                  tree = ast.parse(open(full, encoding="utf-8").read())
+              except SyntaxError:
+                  continue
+              for node in ast.walk(tree):
+                  if isinstance(node, ast.Import):
+                      for a in node.names:
+                          if a.name == "review_server":
+                              offenders.append(f"{rel}:{node.lineno}")
+                  elif isinstance(node, ast.ImportFrom) and node.module == "review_server":
+                      offenders.append(f"{rel}:{node.lineno}")
 
     assert not offenders, (
-        "a pipeline/ module imports review_server at " + ", ".join(offenders)
-        + ". The rebuild chain must not depend on the HTTP server. If you need "
-        "scan geometry, import scan_alignment (public API). If you need "
-        "something else that lives in review_server, that is a sign it should "
-        "move out of the server too - see finding C4."
+        "a pipeline/ or tools/ module imports review_server at " + ", ".join(offenders)
+        + ". Nothing outside tests/ may depend on the HTTP server. If you need "
+        "scan geometry import scan_alignment; for per-part corpus/queue "
+        "loading import review_data. If you need something else that lives in "
+        "review_server, that is a sign it should move out of the server too - "
+        "which is how both of those modules came to exist (finding C4)."
     )
 
 
@@ -4534,8 +4541,8 @@ def test_witness_queue_view_keeps_every_already_decided_item(monkeypatch, tmp_pa
         {"klal_id": 30, "docai_token_index": 3, "vision_selected": "NEITHER"},
         {"klal_id": 30, "docai_token_index": 4, "vision_selected": "A"},   # decided
     ]}
-    monkeypatch.setattr(rs, "_load_json", lambda *a, **k: queue)
-    monkeypatch.setattr(rs.rd, "all_current", lambda t, path=None: {(30, 4): {"id": "x"}})
+    monkeypatch.setattr(rdata, "_load_json", lambda *a, **k: queue)
+    monkeypatch.setattr(rdata.rd, "all_current", lambda t, path=None: {(30, 4): {"id": "x"}})
     served = {(w["klal_id"], w["docai_token_index"]) for w in rs._load_witness_queue()}
     assert (30, 4) in served, "an item a human already ruled on must never vanish"
     assert {(30, 2), (30, 3)} <= served, "the priority cut must be served"
@@ -4549,9 +4556,9 @@ def test_witness_queue_filter_is_reversible(monkeypatch):
     import review_server as rs
     queue = {"queue": [{"klal_id": 30, "docai_token_index": i, "vision_selected": "A"}
                        for i in range(5)]}
-    monkeypatch.setattr(rs, "_load_json", lambda *a, **k: queue)
-    monkeypatch.setattr(rs.rd, "all_current", lambda t, path=None: {})
-    monkeypatch.setattr(rs, "WITNESS_QUEUE_FILTERED", False)
+    monkeypatch.setattr(rdata, "_load_json", lambda *a, **k: queue)
+    monkeypatch.setattr(rdata.rd, "all_current", lambda t, path=None: {})
+    monkeypatch.setattr(rdata, "WITNESS_QUEUE_FILTERED", False)
     assert len(rs._load_witness_queue()) == 5
 
 
