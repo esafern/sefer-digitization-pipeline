@@ -34,6 +34,7 @@ from urllib.parse import urlparse, parse_qs
 
 import corpus_io as cio
 import scan_alignment as sa
+import review_counts as rcount
 import review_decisions as rd
 
 # Moved one level deeper (pipeline/ or tools/) 2026-08-16 - REPO now goes up
@@ -53,6 +54,17 @@ IMAGES_DIR = os.path.join(REPO, "images", "pdf_pages")
 # the_corpus. There is now one definition, and that test still asserts it
 # equals max(klal_id) in the live part1.json.
 PART1_MAX_KLAL = cio.PART1_MAX_KLAL
+
+# Word-state rule and the counts over it live in review_counts.py as of
+# 2026-09-01 (finding S1, second half; finding #6's "shared word_state()").
+# Aliased for the same reason scan_alignment's names are - existing call sites
+# and two tests read review_server.MACHINE_RESOLVED_FLAGS and friends directly.
+MACHINE_RESOLVED_FLAGS = rcount.MACHINE_RESOLVED_FLAGS
+_word_matches = rcount.word_matches
+_flag_answered_by_a_later_decision = rcount.flag_answered_by_a_later_decision
+_claim_word_index = rcount.claim_word_index
+_merge_decision = rcount.merge_decision
+
 
 # ---------------------------------------------------------------------------
 # Scan geometry lives in scan_alignment.py as of 2026-09-01 (finding C4 / S1).
@@ -99,13 +111,6 @@ PART3_MAX_KLAL = cio.PART3_MAX_KLAL
 PART2_MIN_KLAL = cio.PART2_MIN_KLAL
 PART3_MIN_KLAL = cio.PART3_MIN_KLAL
 
-# Flags that mean "the machine settled this; no reading is in dispute". Kept as
-# a set rather than an equality test because a SECOND such flag was added
-# 2026-08-24 (docai_ligature_artifact) and the equality tests scattered through
-# the count/label code were not updated - the same word then rendered green in
-# the text pane, "Machine-Disputed" in the nav and legend, and
-# "Machine-Disputed" in the panel header. Three verdicts on one screen.
-MACHINE_RESOLVED_FLAGS = ("current_text_confirmed", "docai_ligature_artifact")
 
 FLAG_LABELS = {
     "current_text_may_be_wrong": ["Disputed", "#e53e3e"],
@@ -385,28 +390,6 @@ def _load_witness_queue():
 
 
 
-def _word_matches(words, word_index, expected_word):
-    """Is `expected_word` still the word sitting at `word_index`?
-
-    The shared drift check behind both manual_correction render paths
-    (api_klal's synthetic entries and api_klalim's per-klal count). It was
-    written out twice, and BOTH copies bounds-checked only the upper end -
-    the same half-a-bounds-check gap already fixed in
-    audit_applied_decisions.py's three checkers (2026-08-14, finding 9) and
-    in apply_reviewer_decisions.py's five corpus mutators (2026-08-15,
-    finding 8); the display path was simply never revisited. Python does not
-    raise on a negative index: `words[-1]` is the klal's LAST word, so a
-    decision recorded at word_index -1 whose original_word happened to equal
-    that last word passed the check and rendered as a live "Human-Decided"
-    correction attached to a word it never described, and counted toward
-    that klal's decided/total badges.
-
-    Not reachable from today's UI (app.js only ever sends a real index) and
-    0 of the 136 recorded manual_correction decisions carry a negative
-    index - defence-in-depth on the display path, matching what the
-    write-side and corpus-mutating paths already do.
-    """
-    return 0 <= word_index < len(words) and words[word_index] == expected_word
 
 
 # FIXED 2026-08-17 (user bug report: "I saw klal 1 was flagged for review...
@@ -454,44 +437,6 @@ def _general_klal_flag_current(klal_id):
 
 
 
-def _flag_answered_by_a_later_decision(klal_id, word_index, flag_rec,
-                                       candidate_decisions=None,
-                                       manual_decisions=None):
-    """True when a human recorded a decision at this exact word AFTER the flag
-    was raised.
-
-    ADDED 2026-08-25, reviewer report on klal 163: "i cleared the flag but it
-    still shows in the middle and right." They had cleared the KLAL-level flag,
-    but three word-level flags stayed open on words they had already decided
-    that same afternoon - so the klal stayed lit, the words stayed marked, and
-    the panel still announced an open revisit flag. A flag says "come back and
-    look at this word"; a decision recorded at that word afterwards IS the
-    reviewer having looked. Requiring a second, separate click to say so is the
-    friction, not the safeguard.
-
-    ORDER IS THE WHOLE POINT: only a decision NEWER than the flag answers it. A
-    flag raised after a decision is a fresh concern about an already-decided
-    word (a later detector pass finding something the reviewer did not address)
-    and must stay open.
-
-    Swept 2026-08-25: 331 open word-level flags across 110 klalim, of which 23
-    across 7 klalim are answered this way - klal 88 (12), klal 163 (3), klal 91
-    (3), 29 (2), and one each in 2, 4, 8. The other 308 are genuinely
-    unanswered and are untouched by this.
-
-    Nothing is written to the ledger. The flag record stands exactly as
-    recorded; this only decides whether it is still asking for something.
-    """
-    if candidate_decisions is None:
-        candidate_decisions = rd.all_current("candidate_choice")
-    if manual_decisions is None:
-        manual_decisions = rd.all_current("manual_correction")
-    flag_ts = flag_rec.get("ts") or ""
-    for source in (candidate_decisions, manual_decisions):
-        decision = source.get((klal_id, word_index))
-        if decision and (decision.get("ts") or "") > flag_ts:
-            return True
-    return False
 
 
 
@@ -559,50 +504,8 @@ def _word_level_ai_flags(klal_id, words):
     return out
 
 
-def _claim_word_index(corrections, word_index, overlay_key=None, overlay=None):
-    """Return the entry already serving `word_index`, after optionally
-    overlaying extra data onto it - or None if the index is free.
-
-    THE RULE THIS ENFORCES, and why it is a helper rather than three copies:
-    review_frontend/app.js builds its word map as
-    `corrections.forEach(c => byIndex[c.word_index] = c)` - LAST WRITE WINS. So
-    two entries at one word_index means the reviewer silently sees only the
-    second, losing whatever the first carried: its bbox (no scan highlight at
-    all), its readings, its vision verdict and confidence.
-
-    api_klal() builds `corrections` from FOUR sources - machine candidates,
-    manual_correction decisions, word-level klal_flags, and witness
-    disagreements - and every source after the first must therefore check
-    whether the index is already taken. Found 2026-08-24 by live review of klal
-    91 (manual over machine), then by sweeping every klal, which turned up four
-    more `replace+witness` collisions and one `ai_flag+witness`. Each source had
-    grown its own partial guard (the flag and witness paths both checked
-    `manual_word_indices` but not machine candidates), which is exactly the
-    shape that leaves one combination uncovered.
-    """
-    existing = next((c for c in corrections
-                     if c.get("word_index") == word_index and c.get("opcode") != "delete"),
-                    None)
-    if existing is not None and overlay_key is not None:
-        existing[overlay_key] = overlay
-    return existing
 
 
-def _merge_decision(entry, klal_id, decided):
-    """Overlay the current human decision (if any) on top of a raw
-    corrections_part1.json entry - never mutates the source data, this is
-    a display-time merge only.
-
-    `decided` is one all_current("candidate_choice") map, built once by the
-    caller. This used to call rd.current_for() per entry, and every such
-    call re-reads and re-parses the WHOLE review_decisions.jsonl - so a
-    klal with 11 candidates cost 11 full parses of the append-only log on
-    every single /api/klal request, growing with the log forever. Same
-    semantics either way (current_for and all_current both resolve a key to
-    the last matching line in file order), just resolved once."""
-    entry = dict(entry)
-    entry["current_decision"] = decided.get((klal_id, entry["word_index"]))
-    return entry
 
 
 # ---------- API payload builders ----------
@@ -645,18 +548,8 @@ def api_klalim(part_num=1):
     _manual_for_flags = rd.all_current("manual_correction")
 
     def _flag_still_open(kid, widx, rec):
-        """A klal-level flag (word_index None) is open until someone clears it.
-        A WORD-level flag is also answered by a human decision recorded at that
-        word after it was raised - see _flag_answered_by_a_later_decision().
-        Without this, clearing the klal-level flag could never turn the nav's
-        pennant off while any word-level flag remained, which is what the
-        reviewer hit on klal 163: cleared twice, still lit, no explanation."""
-        if not rec.get("needs_revisit"):
-            return False
-        if widx is None:
-            return True
-        return not _flag_answered_by_a_later_decision(kid, widx, rec, decided,
-                                                      _manual_for_flags)
+        # rcount.flag_still_open() with this request's two decision maps bound.
+        return rcount.flag_still_open(kid, widx, rec, decided, _manual_for_flags)
 
     flagged = {kid for (kid, widx), r in all_klal_flags.items()
                if _flag_still_open(kid, widx, r)}
@@ -754,86 +647,21 @@ def api_klalim(part_num=1):
             and fwidx not in manual_indices and 0 <= fwidx < n_words
         }
 
-        # api_klal() MERGES colliding entries via _claim_word_index() -
-        # manual-over-candidate, flag-over-candidate, witness-over-candidate - so
-        # ONE entry per word_index survives to be rendered. These counts must
-        # describe that surviving entry.
-        #
-        # FIXED 2026-08-24 (code review): the totals used to add every source
-        # independently, counting items the text pane never renders - nav 1201 vs
-        # 1061 rendered across 88 klalim.
-        # FIXED 2026-08-25 (user report: "klal 88 shows -1 even though a few are
-        # outstanding"): that fix made only the NUMERATOR distinct and left
-        # decided_count and machine_disputed_count summing their sources, so a
-        # word claimed by two of them - a witness decision at a position a
-        # manual_correction already covers, klal 88 w327 - was counted once in
-        # the total and twice in decided, and open_count went NEGATIVE. Swept the
-        # corpus: 3 klalim (30, 88, 91) carried 6 such phantom decisions; only 88
-        # had enough of them to cross zero. Two of klal 88's three came from
-        # witness rows whose word_index is None: never rendered, still counted.
-        #
-        # Classify the surviving entry instead, in api_klal()'s own source order.
-        # The tri-state then sums to the total BY CONSTRUCTION, not by
-        # coincidence - which is the property
-        # tests/test_corpus_invariants.py asserts.
-        DECIDED, RESOLVED, DISPUTED = "decided", "machine_resolved", "machine_disputed"
-
-        def _machine_state(entry):
-            # A human decision always wins (wordState() in app.js), otherwise a
-            # machine-resolved flag, otherwise nobody has looked at it yet.
-            if (kid, entry["word_index"]) in decided:
-                return DECIDED
-            return RESOLVED if entry.get("flag") in MACHINE_RESOLVED_FLAGS else DISPUTED
-
-        state = {}
-        for e in entries:                                   # 1. machine candidates
-            if e.get("opcode") == "delete":
-                continue                                    # no word_index slot of its own
-            state[e["word_index"]] = _machine_state(e)
-        for wi in manual_indices_for_count:                 # 2. born decided
-            state[wi] = DECIDED
-        # 3. An OPEN flag makes the word disputed, overriding the machine's own
-        # verdict for the entry it overlays. This was setdefault(), so a flag
-        # landing on a `current_text_confirmed` candidate left the word counted
-        # AND coloured machine-resolved - amber, "nothing to do here" - while the
-        # flag underneath was still asking for a human. Seven words corpus-wide;
-        # the reviewer hit two of them (klalim 62, 70: "two flagged words in the
-        # center but the correction pane showed 1 red flag"). A DECIDED word is
-        # not overridden: a decision that post-dates the flag is what answers it,
-        # and _flag_still_open() has already excluded those.
-        for wi in ai_flag_indices_for_count:
-            if state.get(wi) != DECIDED:
-                state[wi] = DISPUTED
-        for wi in answered_flag_indices:                    # 3b. answered: renders green
-            state.setdefault(wi, DECIDED)
-        for w in w_entries:                                 # 4. witness disagreements
-            wi = w.get("word_index")
-            if wi is None or not (0 <= wi < n_words) or wi in manual_indices:
-                continue                                    # not rendered - see api_klal()
-            if wi in state:
-                continue                                    # overlaid onto a richer entry
-            # A witness item the vision pass called (A or B) renders GREEN in
-            # the text pane - app.js's wordState() treats a vision verdict on a
-            # witness exactly as it treats `current_text_confirmed` on a
-            # candidate. This function used to call every undecided witness
-            # DISPUTED, which put klalim 30 and 75 on screen with more green
-            # words than the nav badge admitted (6 and 2). Same divergence class
-            # as `docai_ligature_artifact` in 2026-08-24's finding F2: the screen
-            # is the ground truth, so the count follows it.
-            if (kid, w["docai_token_index"]) in witness_decided:
-                state[wi] = DECIDED
-            elif w.get("vision_selected") in ("A", "B"):
-                state[wi] = RESOLVED
-            else:
-                state[wi] = DISPUTED
-
-        all_states = list(state.values()) + [
-            _machine_state(e) for e in entries if e.get("opcode") == "delete"
-        ]
-        total_count = len(all_states)
-        decided_count = all_states.count(DECIDED)
-        machine_resolved_count = all_states.count(RESOLVED)
-        machine_disputed_count = all_states.count(DISPUTED)
+        # The word-state rule and the counts over it now live in
+        # review_counts.py (2026-09-01, finding S1 / finding #6). This loop used
+        # to carry ~90 lines classifying each word inline, which is the third
+        # encoding of a rule app.js and api_klal() also express; the history of
+        # what each branch is defending against moved with it, into the
+        # docstrings there.
+        states = rcount.word_states(
+            kid, n_words, entries, w_entries,
+            manual_indices=manual_indices_for_count,
+            open_flag_indices=ai_flag_indices_for_count,
+            answered_flag_indices=answered_flag_indices,
+            decided=decided,
+            witness_decided=witness_decided,
+        )
+        counts = rcount.count_row(kid, states, entries, decided)
 
         punct_entries = punct_candidates.get(str(kid), [])
         punct_decided_count = sum(
@@ -852,21 +680,15 @@ def api_klalim(part_num=1):
             "section": k.get("section", ""),
             "page": _page,
             "page_trusted": _page_trusted,
-            "correction_count": total_count,
             # split so the nav badge can distinguish "still needs a look"
             # from "already decided" instead of one undifferentiated count
             # (2026-08-07, PROJECT-STATUS.md "review dashboard feedback").
-            "decided_count": decided_count,
-            # Served but no longer rendered: the nav badge switched to
-            # machine_disputed_count on 2026-08-25 (see app.js's own note). NOT
-            # Lesson 29's dead field, and deliberately kept - it is the arithmetic
-            # canary for this function's count logic, asserted by
-            # test_corpus_invariants.py::test_nav_tristate_matches_what_each_word_actually_renders_as, which is
-            # what caught the klal 88 "-1" fix-on-fix arc. If you remove it,
-            # remove that test's subject too, not just the key.
-            "open_count": total_count - decided_count,
-            "machine_disputed_count": machine_disputed_count,
-            "machine_resolved_count": machine_resolved_count,
+            # correction_count / decided_count / open_count /
+            # machine_disputed_count / machine_resolved_count all come from
+            # rcount.count_row() as one block - they are one arithmetic
+            # identity, and splitting them across the payload is how they
+            # drifted apart before.
+            **counts,
             "ai_flag_count": ai_flag_count,
             "punctuation_count": len(punct_entries),
             "punctuation_decided_count": punct_decided_count,

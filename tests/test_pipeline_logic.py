@@ -3700,6 +3700,106 @@ def test_cross_klal_skips_gershayim_tokens():
     assert results == []
 
 
+# --- review_counts.word_states: the shared word-state rule (finding S1/#6) ----
+# Extracted from api_klalim() 2026-09-01. Until then the rule was reachable only
+# through a 249-line endpoint, so every branch below was covered ONLY by the
+# corpus-wide tri-state invariant - which says the totals agree but not WHICH
+# branch produced them, and cannot exercise a case the live corpus lacks.
+
+import review_counts as rcount  # noqa: E402
+
+
+def _ws(**kw):
+    """word_states() with the boring arguments defaulted."""
+    base = dict(klal_id=1, n_words=10, entries=[], witness_entries=[],
+                manual_indices=set(), open_flag_indices=set(),
+                answered_flag_indices=set(), decided={}, witness_decided={})
+    base.update(kw)
+    kid = base.pop("klal_id"); n = base.pop("n_words")
+    e = base.pop("entries"); w = base.pop("witness_entries")
+    return rcount.word_states(kid, n, e, w, **base)
+
+
+def test_an_open_flag_overrides_a_machine_resolved_candidate():
+    """REGRESSION (klalim 62, 70 - reviewer: "two flagged words in the center
+    but the correction pane showed 1 red flag"). This was a setdefault(), so a
+    flag landing on a `current_text_confirmed` candidate left the word amber -
+    "nothing to do here" - while the flag underneath was still asking for a
+    human. Seven words corpus-wide."""
+    entries = [{"word_index": 3, "flag": "current_text_confirmed"}]
+    assert _ws(entries=entries)[3] == rcount.RESOLVED       # without the flag
+    assert _ws(entries=entries, open_flag_indices={3})[3] == rcount.DISPUTED
+
+
+def test_an_open_flag_does_not_override_a_human_decision():
+    """A decision that post-dates the flag is what ANSWERS it, so a DECIDED
+    word must survive an open-flag pass. flag_still_open() has already excluded
+    those, but the rule is stated here too because it is the branch that would
+    silently re-open every answered flag."""
+    entries = [{"word_index": 3, "flag": "ambiguous"}]
+    st = _ws(entries=entries, decided={(1, 3): {"x": 1}}, open_flag_indices={3})
+    assert st[3] == rcount.DECIDED
+
+
+def test_a_witness_with_a_vision_verdict_counts_as_machine_resolved():
+    """REGRESSION (klalim 30 and 75, 6 and 2 words). Every undecided witness
+    used to be called DISPUTED, which put more green words on screen than the
+    nav badge admitted - app.js treats a vision verdict on a witness exactly as
+    it treats current_text_confirmed on a candidate."""
+    w = [{"word_index": 2, "docai_token_index": 99, "vision_selected": "A"}]
+    assert _ws(witness_entries=w)[2] == rcount.RESOLVED
+    w2 = [{"word_index": 2, "docai_token_index": 99, "vision_selected": None}]
+    assert _ws(witness_entries=w2)[2] == rcount.DISPUTED
+
+
+def test_witness_rows_that_never_render_are_never_counted():
+    """REGRESSION (klal 88, the "-1 outstanding" arc). Two of klal 88's three
+    phantom decisions came from witness rows whose word_index is None - never
+    drawn, still counted - and the third sat at a position a manual_correction
+    already covered, so it was counted once in the total and twice in decided."""
+    rows = [
+        {"word_index": None, "docai_token_index": 1, "vision_selected": None},
+        {"word_index": 99, "docai_token_index": 2, "vision_selected": None},   # out of range
+        {"word_index": 4, "docai_token_index": 3, "vision_selected": None},    # manual covers it
+    ]
+    st = _ws(witness_entries=rows, manual_indices={4}, n_words=10)
+    assert None not in st and 99 not in st
+    assert st[4] == rcount.DECIDED, "the manual correction owns the word, not the witness"
+    assert len(st) == 1
+
+
+def test_the_tristate_sums_to_the_total_by_construction():
+    """decided + machine_resolved + machine_disputed == correction_count is an
+    IDENTITY here, not an arithmetic coincidence the counts must be careful
+    about - that is the whole point of classifying the surviving entry instead
+    of adding up sources. open_count going negative is what happens when it is
+    not (klal 88, 2026-08-25)."""
+    entries = [{"word_index": 0, "flag": "ambiguous"},
+               {"word_index": 1, "flag": "current_text_confirmed"},
+               {"word_index": 2, "flag": "ambiguous", "opcode": "delete"}]
+    w = [{"word_index": 5, "docai_token_index": 7, "vision_selected": "B"}]
+    st = _ws(entries=entries, witness_entries=w, manual_indices={3},
+             decided={(1, 0): {"x": 1}})
+    row = rcount.count_row(1, st, entries, {(1, 0): {"x": 1}})
+    assert (row["decided_count"] + row["machine_resolved_count"]
+            + row["machine_disputed_count"] == row["correction_count"])
+    assert row["open_count"] == row["correction_count"] - row["decided_count"]
+    assert row["open_count"] >= 0
+    # the delete-opcode entry has no word_index slot of its own but is still counted
+    assert row["correction_count"] == len(st) + 1
+
+
+def test_a_delete_opcode_entry_claims_no_word_index_slot():
+    """Two deletes can name the same index, so they are counted alongside the
+    per-word states rather than inside them - the one place a count is not
+    one-per-word."""
+    entries = [{"word_index": 2, "flag": "ambiguous", "opcode": "delete"},
+               {"word_index": 2, "flag": "ambiguous", "opcode": "delete"}]
+    st = _ws(entries=entries)
+    assert st == {}, "a delete must not occupy a word slot"
+    assert rcount.count_row(1, st, entries, {})["correction_count"] == 2
+
+
 # --- review_lexicon_only_words: the report must be reproducible ---------------
 
 def test_near_forms_breaks_ties_deterministically():

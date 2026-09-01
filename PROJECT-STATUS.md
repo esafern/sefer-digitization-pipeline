@@ -43,6 +43,56 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0X. **[2026-09-01] `pipeline/review_counts.py` EXTRACTED — S1's second half.
+    `review_server.py` 1,981 → 1,585 today; `api_klalim` 249 → 168.** With
+    `scan_alignment.py` earlier the same day, the God Object has shed **396
+    lines** into two modules that are pure, importable and directly testable.
+
+    **The point was not size, it was finding #6.** The 2026-08-26 review said
+    the word-state rule was encoded THREE times — `api_klalim()` for nav counts,
+    `api_klal()` for the text pane, `app.js` `wordState()` for colour — and that
+    both production defects in that range came from the copies disagreeing (nav
+    1,201 vs 1,061 rendered; then klal 88's "-1 outstanding"). It also recorded
+    the counter-argument, which still holds: the obvious dedup, having
+    `api_klalim` call `api_klal` 222 times, is what starved the Playwright
+    suite. So what is now shared is the **rule**, not the request:
+    `word_states()` answers "what is every word in this klal?" from data the
+    caller already loaded, and `api_klalim` calls it per klal with no extra file
+    reads. `app.js` remains a fourth encoding in another language and cannot be
+    imported away; it stays held by the tri-state invariant test.
+
+    **Verified as a no-op on real data, not just green.** `api_klalim()` output
+    for **all 667 klalim across parts 1/2/3 is byte-identical** before and
+    after — dumped from HEAD's `review_server.py` and from the extracted one,
+    both run IN PLACE so the data is held constant. Suite **405 passed, 1
+    skipped**.
+
+    **Six unit tests the rule never had.** Until now every branch was reachable
+    only through a 249-line endpoint, so all of it was covered *only* by the
+    corpus-wide tri-state invariant — which says the totals agree but not which
+    branch produced them, and cannot exercise a case the live corpus does not
+    contain. Each test names the defect it guards: the open flag overriding a
+    `current_text_confirmed` candidate (klalim 62, 70), the open flag NOT
+    overriding a human decision, a witness vision verdict rendering green
+    (klalim 30, 75), witness rows with `word_index: None` or out of range or
+    already owned by a manual correction never being counted (klal 88's three
+    phantoms), the tri-state summing to the total by construction, and a
+    `delete`-opcode entry claiming no word slot.
+
+    **Mutation-tested, not assumed.** Each of the three historical bugs was
+    reintroduced into `review_counts.py` in turn — flag override back to
+    `setdefault`, witness verdict back to always-DISPUTED, `word_index: None`
+    back to counted — and each broke **exactly one** test. Given that three
+    separate first-draft tests this week could not fail, that check is now the
+    default here rather than a flourish.
+
+    **What is left of S1**: `api_klal` (280 lines) is the largest remaining
+    function and builds the merged entry list — the "merged-entry builder" half
+    of finding #6's remedy. It shares the precedence rule with `word_states()`
+    but expresses it as entry merging rather than classification, so unifying
+    them is a real design question, not a move. `api_page` (121) is next after
+    that. Neither is urgent now that the rule they share has one home.
+
 0W. **[2026-09-01] `lexicon_yad_malachi_only.json` WAS NON-REPRODUCIBLE — the
     report rewrote itself on every run with no data change behind it.** Found
     while regenerating it to commit a stale copy: the regen produced a diff, and
