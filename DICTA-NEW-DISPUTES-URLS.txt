@@ -22,7 +22,6 @@ http://127.0.0.1:8420/klal/25/word/307
 http://127.0.0.1:8420/klal/25/word/423
 http://127.0.0.1:8420/klal/25/word/635
 http://127.0.0.1:8420/klal/25/word/705
-http://127.0.0.1:8420/klal/29/word/86
 http://127.0.0.1:8420/klal/30/word/712
 http://127.0.0.1:8420/klal/30/word/763
 http://127.0.0.1:8420/klal/30/word/952
@@ -58,6 +57,7 @@ http://127.0.0.1:8420/klal/54/word/634
 http://127.0.0.1:8420/klal/54/word/794
 http://127.0.0.1:8420/klal/59/word/84
 http://127.0.0.1:8420/klal/59/word/130
+http://127.0.0.1:8420/klal/59/word/47
 http://127.0.0.1:8420/klal/5/word/86
 http://127.0.0.1:8420/klal/5/word/279
 http://127.0.0.1:8420/klal/5/word/396
@@ -122,4 +122,3 @@ http://127.0.0.1:8420/klal/54/word/730
 http://127.0.0.1:8420/klal/54/word/770
 http://127.0.0.1:8420/klal/54/word/821
 http://127.0.0.1:8420/klal/54/word/971
-http://127.0.0.1:8420/klal/59/word/47

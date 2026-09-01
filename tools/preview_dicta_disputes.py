@@ -50,6 +50,12 @@ sys.path.insert(0, os.path.join(REPO, "pipeline"))
 import corpus_io as cio
 import synthesize_multi_witness as smw
 
+# Imported at module scope on purpose. It backs the DEFAULT --hebrew mode, and
+# burying it inside write_md() meant a fresh clone ran the whole corpus-wide
+# alignment and only then died with ModuleNotFoundError, having written nothing.
+# Listed in requirements.txt for the same reason that file exists at all.
+from bidi.algorithm import get_display
+
 # The PATH form of the dashboard deep link, not the `#klal=N&word=M` hash form:
 # review_frontend/app.js uses this one for anything copied out, because `&`
 # gets truncated when a link is pasted into a terminal or a chat window. The
@@ -97,7 +103,6 @@ def to_visual(lines):
     The cost, and it is the reason this is not the default: text from a visual
     file is REVERSED if copied back into anything that expects logical order.
     """
-    from bidi.algorithm import get_display
     return [get_display(l, base_dir="L") if HEBREW_RE.search(l) else l
             for l in lines]
 
@@ -120,7 +125,7 @@ def witness_by_klal(path, part1):
 
     ctoks, owner = [], []
     for k in sorted(part1, key=lambda x: x["klal_id"]):
-        for w in k["clean_text"].split():
+        for w in cio.words_of(k):
             n = cio.hebrew_letters_only(w)
             if n:
                 ctoks.append(n)
@@ -159,17 +164,22 @@ def collect(part1, klal_lo, klal_hi, witness, label):
     vlm_b = smw.load_baseline(smw.VLM_B_PATH)
     surya = smw.load_baseline(smw.SURYA_PATH)
     decided = smw.active_human_decisions()
+    # words_of(), not .split(): a `word_index` in this project is an index into
+    # `clean_text.split(' ')` - the scheme the dashboard's click handler and every
+    # stored decision use (corpus_io.words_of, finding S2). Whitespace-collapsing
+    # .split() agrees with it only until the first klal acquires a double space,
+    # and then every link this file emits points at the wrong word.
     docai = smw.docai_verdicts(
-        verified, {k["klal_id"]: k["clean_text"].split() for k in part1})
+        verified, {k["klal_id"]: cio.words_of(k) for k in part1})
 
-    new, joins = [], []
+    new, joins, escalations, contested = [], [], [], []
     covered = voted = agreed = 0
 
     for k in sorted(part1, key=lambda x: x["klal_id"]):
         kid = k["klal_id"]
         if not (klal_lo <= kid <= klal_hi):
             continue
-        words = k["clean_text"].split()
+        words = cio.words_of(k)
         covered += len(words)
 
         s_al = cio.align_witness(words, surya.get(kid) or []) if surya.get(kid) else {}
@@ -203,17 +213,48 @@ def collect(part1, klal_lo, klal_hi, witness, label):
                 "decided": decided.get((kid, wi)),
                 "title": (k.get("title") or "").strip(),
             }
+
+            # A position a human has already ruled on NEVER becomes a dispute:
+            # synthesize_multi_witness.synthesize() breaks out of it. Counting
+            # these as "new" overstated the queue depth this preview exists to
+            # predict, in a file that claims parity with stage 4a. They are not
+            # dropped either - a human choosing X while independent engines
+            # agree on Y is exactly what Lesson 9 says must not be buried - so
+            # they get their own section.
+            if (kid, wi) in decided:
+                chosen = cio.hebrew_letters_only(decided[(kid, wi)] or "")
+                # Only when THIS witness is part of the contradicting consensus.
+                # Without that test the section fills with pre-existing
+                # surya+vlm escalations the candidate had no vote in - 4 of 5 on
+                # the first run - which is a report about the queue, not about
+                # what this witness adds.
+                if chosen != with_it[0] and label in with_it[1]:
+                    escalations.append(row)
+                continue
+
             if without is None:
                 new.append(row)
             elif label in with_it[1]:
-                joins.append(row)
+                # Both consensuses exist - but they are only CORROBORATION if
+                # they name the same reading. A 2-2 split (docai+dicta read X
+                # while vlm+surya read Y) satisfies "both non-None" and would
+                # otherwise be filed under a heading asserting agreement with a
+                # dispute it in fact contradicts. 0 such cases in the shipped
+                # data; the check is here because the classification, not the
+                # count, is what the sections claim.
+                if without[0] == with_it[0]:
+                    joins.append(row)
+                else:
+                    row["displaced"] = without[2]
+                    row["displaced_engines"] = without[1]
+                    contested.append(row)
 
-    return new, joins, {"corpus_words": covered, "witness_votes": voted,
-                        "witness_agrees": agreed}
+    return new, joins, escalations, contested, {
+        "corpus_words": covered, "witness_votes": voted, "witness_agrees": agreed}
 
 
-def write_md(path, new, joins, stats, label, klal_lo, klal_hi, base, witness_file,
-              hebrew="visual"):
+def write_md(path, new, joins, escalations, contested, stats, label,
+              klal_lo, klal_hi, base, witness_file, hebrew="visual"):
     """Emit the report.
 
     **No URL ever shares a line with anything else, and there are no tables.**
@@ -248,6 +289,11 @@ def write_md(path, new, joins, stats, label, klal_lo, klal_hi, base, witness_fil
     L.append(f"| …agreeing with the corpus | {stats['witness_agrees']:,} ({pct:.1f}%) |")
     L.append(f"| **new disputes it would create** | **{len(new)}** |")
     L.append(f"| existing disputes it corroborates | {len(joins)} |")
+    if escalations:
+        L.append(f"| positions a human already ruled, against this consensus | "
+                 f"**{len(escalations)}** |")
+    if contested:
+        L.append(f"| positions where it displaces a different consensus | {len(contested)} |")
     L.append("")
     L.append("Links open the review dashboard "
              f"(`python3 pipeline/review_server.py`, {base}). "
@@ -283,12 +329,44 @@ def write_md(path, new, joins, stats, label, klal_lo, klal_hi, base, witness_fil
         L.append(f"{base}/klal/{r['klal_id']}/word/{r['word_index']}")
         L.append("")
 
+    if escalations:
+        L.append(f"## A human already ruled here, and the engines disagree ({len(escalations)})")
+        L.append("")
+        L.append("The Lesson 9 case: the reviewer chose one reading while independent engines agree on another. stage 4a never emits these as disputes, so they are NOT counted above as new work — but they are the rows most worth a second look.")
+        L.append("")
+        for r in escalations:
+            L.append(f"**klal {r['klal_id']} · word {r['word_index']}** — "
+                     f"corpus {rtl(r['stored'], iso)}, "
+                     f"`{'+'.join(r['engines'])}` read {rtl(r['reading'], iso)}"
+                     + (f", reviewer chose {rtl(r['decided'], iso)}" if r.get('decided') else "")
+                     + (f", displacing {rtl(r.get('displaced',''), iso)} "
+                        f"(`{'+'.join(r.get('displaced_engines',[]))}`)" if r.get('displaced') else ""))
+            L.append("")
+            L.append(f"{base}/klal/{r['klal_id']}/word/{r['word_index']}")
+            L.append("")
+
+    if contested:
+        L.append(f"## It displaces a different consensus ({len(contested)})")
+        L.append("")
+        L.append("A consensus already existed here on ANOTHER reading. This witness forms a second one, so the position is a three-way split, not corroboration.")
+        L.append("")
+        for r in contested:
+            L.append(f"**klal {r['klal_id']} · word {r['word_index']}** — "
+                     f"corpus {rtl(r['stored'], iso)}, "
+                     f"`{'+'.join(r['engines'])}` read {rtl(r['reading'], iso)}"
+                     + (f", reviewer chose {rtl(r['decided'], iso)}" if r.get('decided') else "")
+                     + (f", displacing {rtl(r.get('displaced',''), iso)} "
+                        f"(`{'+'.join(r.get('displaced_engines',[]))}`)" if r.get('displaced') else ""))
+            L.append("")
+            L.append(f"{base}/klal/{r['klal_id']}/word/{r['word_index']}")
+            L.append("")
+
     # Bare list last, in a fence: the form to copy out or pipe somewhere. A
     # fenced block is also the one context a renderer will not reflow.
     L.append("## Every link, bare")
     L.append("")
     L.append("```")
-    for r in new + joins:
+    for r in new + escalations + contested + joins:
         L.append(f"{base}/klal/{r['klal_id']}/word/{r['word_index']}")
     L.append("```")
     L.append("")
@@ -327,26 +405,35 @@ def main():
         lo, hi = int(m.group(1)), int(m.group(2))
     else:
         ks = sorted(witness)
+        if not ks:
+            raise SystemExit(
+                f"could not anchor {args.witness} anywhere in "
+                f"{os.path.basename(cio.PART1_PATH)} - no klal claimed a single "
+                f"token. Wrong book, wrong part, or not Hebrew? Pass --klalim to "
+                f"score a window anyway.")
         # Drop the first and last klal: a page-bounded dump almost always cuts
         # them mid-klal, and a partial klal scores as an error rather than one.
         lo, hi = (ks[1], ks[-2]) if len(ks) > 3 else (ks[0], ks[-1])
 
-    new, joins, stats = collect(part1, lo, hi, witness, args.label)
-    write_md(args.out, new, joins, stats, args.label, lo, hi,
+    new, joins, escalations, contested, stats = collect(part1, lo, hi, witness, args.label)
+    write_md(args.out, new, joins, escalations, contested, stats, args.label, lo, hi,
              args.base_url.rstrip("/"), args.witness, hebrew=args.hebrew)
 
-    print(f"klalim {lo}-{hi}: {len(new)} new disputes, {len(joins)} corroborated")
+    print(f"klalim {lo}-{hi}: {len(new)} new disputes, {len(joins)} corroborated, "
+          f"{len(escalations)} already ruled by a human, {len(contested)} displacing "
+          f"a different consensus")
     print(f"  {args.label} votes at {stats['witness_votes']}/{stats['corpus_words']} "
           f"positions, agrees at {stats['witness_agrees']}")
     print(f"Wrote {args.out}")
     if args.urls_out:
         base = args.base_url.rstrip("/")
         with open(args.urls_out, "w", encoding="utf-8") as f:
-            for r in new + joins:
+            for r in new + escalations + contested + joins:
                 f.write(f"{base}/klal/{r['klal_id']}/word/{r['word_index']}\n")
             f.flush()
-        print(f"Wrote {args.urls_out} ({len(new) + len(joins)} links, "
-              f"{len(new)} new first, then {len(joins)} corroborated)")
+        n = len(new) + len(escalations) + len(contested) + len(joins)
+        print(f"Wrote {args.urls_out} ({n} links: new, then human-ruled, "
+              f"then displacing, then corroborated)")
 
 
 if __name__ == "__main__":

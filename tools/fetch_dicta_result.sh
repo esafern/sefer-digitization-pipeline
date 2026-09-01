@@ -18,7 +18,21 @@ for i in $(seq 1 30); do
     # Only a non-empty body counts: a 200 carrying nothing would otherwise be
     # saved as a "successful" empty baseline and silently score as total failure.
     if [ -s "$TMP" ]; then
-      mv "$TMP" "$OUT"; trap - EXIT
+      # A 200 is not proof of OCR text: a maintenance or error page is also a
+      # non-empty 200, and saving one as a "successful" result would score as a
+      # total OCR failure with nothing to say why. Require actual Hebrew.
+      # $'...' so the shell emits real bytes: Hebrew is U+05xx, whose UTF-8
+      # lead byte is 0xD6 or 0xD7. A BRE '\xd7' would match the literal text.
+      if ! LC_ALL=C grep -q $'[\xd6\xd7]' "$TMP"; then
+        echo "FAILED: 200 but the body contains no Hebrew - not an OCR result" >&2
+        head -c 200 "$TMP" >&2; echo >&2
+        exit 1
+      fi
+      if ! mv "$TMP" "$OUT"; then
+        echo "FAILED to save $OUT (missing directory, or not writable from $(pwd))" >&2
+        exit 1
+      fi
+      trap - EXIT
       echo "OK $2 ($(wc -c <"$OUT" | tr -d ' ') bytes)"; exit 0
     fi
     echo "200 but empty body - still generating, waiting" >&2

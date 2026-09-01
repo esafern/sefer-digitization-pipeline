@@ -173,6 +173,62 @@ applying it to the corpus remain two separate, deliberate steps.
     222/222/223/667 klalim over the right ranges, `/api/klal/88` and
     `/api/page/73` 200, page latency 11.2 ms.
 
+0S. **[2026-09-01] `/code-review high` on the session's four new tools — 10
+    findings, ALL TEN REAL, and two of them changed published numbers.** The
+    review agent had failed on a rate limit the night before, so the tools had
+    shipped on my own review only; this is what an independent pass found.
+
+    **Two that moved numbers, both verified before fixing:**
+    * **A human-ruled position was counted as a new dispute.**
+      `synthesize()` skips a decided position entirely; the preview annotated it
+      and counted it anyway. 60 new / 65 corroborated became **59 / 64 / 1**.
+    * **A 2-2 engine split was filed as "corroborated."** `without`/`with_it`
+      were compared for None-ness but never for the same READING, so a witness
+      forming a SECOND consensus on a DIFFERENT reading landed under a heading
+      asserting it agreed with the dispute it contradicts. Reproduced
+      synthetically; **0 occurrences in the shipped data**, so nothing published
+      was wrong — a landmine, not an error.
+
+    **One found only because the fix was tested, not because the review said
+    so:** scoping escalations by `(kid, wi) in decided` alone swept in 4
+    pre-existing `surya+vlm` escalations Dicta had no vote in — a report about
+    the queue, not about what this witness adds. Now requires
+    `label in with_it[1]`.
+
+    **And one the data answered on its own:** klal 29 w86 — the Lesson 9 case
+    item 0Q flagged, corpus `חנה` against `dicta+vlm` reading `הנה` — **was ruled
+    by the reviewer during the session, in the engines' favour**
+    (`review_decisions.jsonl` gained it mid-run). It correctly drops out as
+    "human agreed with the engines".
+
+    **The other eight, all fixed and each with its check:**
+    `.split()` where the repo means `cio.words_of()` (space-only; **0 of 222
+    klalim differ today**, so every committed link was right — but this is the
+    exact class finding S2 swept 27 sites for, one commit earlier);
+    `python-bidi` absent from `requirements.txt` while backing the DEFAULT code
+    path, imported after the full corpus alignment so a fresh clone burned the
+    run then died (now module-scope + listed); `IndexError` instead of a message
+    when a witness anchors nowhere; `fetch_dicta_result.sh` printing `OK` and
+    exiting 0 on a failed `mv`, and accepting any non-empty 200 — an HTML error
+    page would have been saved as a "successful" OCR result (both now guarded,
+    and the Hebrew guard itself false-positived on first write because `\xd7` in
+    a BRE is the literal text, fixed with `$'...'`); the chunker rewriting
+    `manifest.json` wholesale so a second partial run destroyed run 1's resume
+    state — **which this repo had already hit and repaired by hand** (now merges
+    by page range and refuses a different source PDF); CER quadratic with no
+    ceiling, and not comparable across engines with different in-window
+    coverage (now capped, and the offenders carry a ⚠ with an explanation);
+    the letter-frequency signature iterating only the REFERENCE's alphabet, so a
+    letter the engine INVENTS was invisible — in the one signal credited with
+    diagnosing fastocr as a hallucinating square model (now the union);
+    `detect_span`'s `min_block=3` able to widen a window on a 3-token
+    coincidence (now 8, and it prints its anchors).
+
+    **The lesson worth keeping:** eight of the ten were in code that had passed
+    my own review the same evening, and the two that moved numbers were both in
+    classification logic that "looked obviously right". A tool that reports
+    counts needs its CLASSIFICATION tested, not just its arithmetic.
+
 0R. **[2026-08-31] Hebrew in generated Markdown needs EXPLICIT bidi isolation —
     the repo already knew this for HTML and the knowledge did not travel.**
     Reviewer-reported: `DICTA-NEW-DISPUTES.md` rendered its Hebrew backwards.
@@ -248,7 +304,15 @@ applying it to the corpus remain two separate, deliberate steps.
     `tools/preview_dicta_disputes.py`, which reuses `synthesize_multi_witness`'s
     own loaders and vote rules rather than re-deriving them, so a preview cannot
     drift from what stage 4a would actually emit. It reproduces the dry run
-    exactly (60 new / 65 corroborated), which is the consistency check.
+    exactly, which is the consistency check.
+
+    **NUMBERS CORRECTED 2026-09-01 by a `/code-review high` pass — the first
+    figures were 60 new / 65 corroborated and both were wrong.** The preview
+    counted positions a human had already ruled on, which
+    `synthesize_multi_witness.synthesize()` never emits as disputes (it breaks
+    out of them). **The honest figures are 59 new, 64 corroborated, 1 human-ruled
+    escalation, 0 contested.** The gap was small but the entry claimed parity
+    with stage 4a, and that claim is what makes the numbers quotable.
 
     Links use the PATH form `/klal/<id>/word/<index>`, not the `#klal=N&word=M`
     hash form, because `&` gets truncated when a link is pasted into a terminal
@@ -257,7 +321,7 @@ applying it to the corpus remain two separate, deliberate steps.
     the hash route off the running server, they are not constructed strings
     nobody tried.
 
-    **What the 60 are made of:** 33 `dicta+surya`, 27 `dicta+vlm`, **0
+    **What they are made of:** 33 `dicta+surya`, 27 `dicta+vlm`, **0
     `dicta+docai`**, across 23 klalim. No position is carried by Dicta alone —
     the two-distinct-engines rule is doing its job, and the absence of a
     docai pairing is expected (DocAI's vote comes from the candidate queue,
@@ -306,7 +370,7 @@ applying it to the corpus remain two separate, deliberate steps.
     **0N extrapolated ~130 new disputes across Part 1; the honest figure is
     ~218** (60 per 61 klalim x 222). The small sample under-counted by ~60% —
     exactly why Lesson 27 says label an extrapolation as one. Corroboration held
-    up and improved. 60 new disputes have NOT been hand-checked; the 4 from the
+    up and improved. The new disputes have NOT been hand-checked; the 4 from the
     small run were, and all 4 were real corpus errors.
 
     **WHY THE RUN STOPPED, and it is not a bug to fix by retrying.** After five

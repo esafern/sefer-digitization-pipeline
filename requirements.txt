@@ -30,3 +30,11 @@ google-genai==2.14.0
 # behind. google-cloud-storage is pulled in automatically as its own
 # dependency, not listed separately.
 google-cloud-documentai==3.15.0
+
+# Unicode bidi algorithm. Required by tools/preview_dicta_disputes.py's DEFAULT
+# --hebrew visual mode: `glow` and the terminals in use here implement no bidi
+# (measured 2026-08-31 - Hebrew comes out byte-for-byte as it went in), so a
+# report meant to be read in a terminal has to have the reordering baked into
+# the characters. python-bidi rather than a hand-rolled reverse, which gets
+# gershayim, embedded digits and Latin wrong.
+python-bidi

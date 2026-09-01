@@ -9,12 +9,13 @@ Preview only — **nothing has been written into the pipeline.** `dicta_jerusale
 | corpus words in scope | 16,177 |
 | positions `dicta` votes at | 15,436 |
 | …agreeing with the corpus | 15,075 (97.7%) |
-| **new disputes it would create** | **60** |
-| existing disputes it corroborates | 65 |
+| **new disputes it would create** | **59** |
+| existing disputes it corroborates | 64 |
+| positions a human already ruled, against this consensus | **1** |
 
 Links open the review dashboard (`python3 pipeline/review_server.py`, http://127.0.0.1:8420). A position where only this witness differs is **not** listed — one engine disagreeing is not a dispute, and across editions it is usually a textual variant rather than a misread.
 
-## New disputes (60)
+## New disputes (59)
 
 ### klal 2 · word 379
 
@@ -159,13 +160,6 @@ Links open the review dashboard (`python3 pipeline/review_server.py`, http://127
 - corpus reads **וספ'** → `dicta+surya` read **קוספ**
 - context: …יבר ימק והבא יבר רמאקד 'וספ ןיד לעד 'ב 'כ לגרה…
 - http://127.0.0.1:8420/klal/25/word/705
-
-### klal 29 · word 86  ⚠️ **a reviewer already ruled here**
-
-- corpus reads **הנח** → `dicta+vlm` read **הנה**
-- reviewer's standing choice: **הנה**
-- context: …ןכ יתבתכש םינש המכ הז הנח דע -ויתיאר אלש ףאש תמאבו…
-- http://127.0.0.1:8420/klal/29/word/86
 
 ### klal 30 · word 712
 
@@ -377,7 +371,7 @@ Links open the review dashboard (`python3 pipeline/review_server.py`, http://127
 - context: …סוקרוק י"רהמ ןייעו קודו 'וכו ס"ר רמאק אל כ"ע אמליד ןושלב…
 - http://127.0.0.1:8420/klal/59/word/130
 
-## Corroborated — already disputed, `dicta` agrees (65)
+## Corroborated — already disputed, `dicta` agrees (64)
 
 These change no queue depth; they are the independent second opinion Lesson 9 asks for.
 
@@ -637,7 +631,11 @@ http://127.0.0.1:8420/klal/54/word/821
 
 http://127.0.0.1:8420/klal/54/word/971
 
-**klal 59 · word 47** — התווכ → היתווכ (`dicta+surya+vlm`)
+## A human already ruled here, and the engines disagree (1)
+
+The Lesson 9 case: the reviewer chose one reading while independent engines agree on another. stage 4a never emits these as disputes, so they are NOT counted above as new work — but they are the rows most worth a second look.
+
+**klal 59 · word 47** — corpus היתווכ, `dicta+surya+vlm` read התווכ, reviewer chose היתווכ
 
 http://127.0.0.1:8420/klal/59/word/47
 
@@ -668,7 +666,6 @@ http://127.0.0.1:8420/klal/25/word/307
 http://127.0.0.1:8420/klal/25/word/423
 http://127.0.0.1:8420/klal/25/word/635
 http://127.0.0.1:8420/klal/25/word/705
-http://127.0.0.1:8420/klal/29/word/86
 http://127.0.0.1:8420/klal/30/word/712
 http://127.0.0.1:8420/klal/30/word/763
 http://127.0.0.1:8420/klal/30/word/952
@@ -704,6 +701,7 @@ http://127.0.0.1:8420/klal/54/word/634
 http://127.0.0.1:8420/klal/54/word/794
 http://127.0.0.1:8420/klal/59/word/84
 http://127.0.0.1:8420/klal/59/word/130
+http://127.0.0.1:8420/klal/59/word/47
 http://127.0.0.1:8420/klal/5/word/86
 http://127.0.0.1:8420/klal/5/word/279
 http://127.0.0.1:8420/klal/5/word/396
@@ -768,5 +766,4 @@ http://127.0.0.1:8420/klal/54/word/730
 http://127.0.0.1:8420/klal/54/word/770
 http://127.0.0.1:8420/klal/54/word/821
 http://127.0.0.1:8420/klal/54/word/971
-http://127.0.0.1:8420/klal/59/word/47
 ```

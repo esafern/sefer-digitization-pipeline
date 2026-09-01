@@ -68,6 +68,9 @@ PAGE_HEADER_RE = re.compile(
 )
 KLAL_HEADER_RE = re.compile(r"^\s*(?:={2,}|-{2,})\s*klal\s+(\d+)", re.IGNORECASE)
 
+# Above this, difflib's quadratic CER stops being worth waiting for.
+CER_MAX_CHARS = 120_000
+
 
 def load_lexicon():
     """The same validated word list every other checker in this repo uses."""
@@ -179,6 +182,11 @@ def char_error_rate(ref, cand):
     a, b = "".join(ref), "".join(cand)
     if not a:
         return None
+    # difflib is quadratic. The shipped windows are ~10k chars; a full-corpus
+    # window is ~250k and would appear to hang rather than fail. Refuse instead
+    # of pretending - word_accuracy carries the comparison at that size.
+    if max(len(a), len(b)) > CER_MAX_CHARS:
+        return None
     sm = difflib.SequenceMatcher(None, a, b, autojunk=False)
     errors = 0
     for tag, i1, i2, j1, j2 in sm.get_opcodes():
@@ -232,7 +240,7 @@ def letter_frequencies(tokens):
     return {ch: n / total for ch, n in counter.items()}
 
 
-def detect_span(cand_tokens, klalim, min_block=3):
+def detect_span(cand_tokens, klalim, min_block=8):
     """Which klalim a headerless OCR dump actually covers - by CONTENT.
 
     Lesson 30: a page index that looks right is not a page index that IS
@@ -250,6 +258,13 @@ def detect_span(cand_tokens, klalim, min_block=3):
         return None
     lo = blocks[0].a
     hi = blocks[-1].a + blocks[-1].size
+    # Report the anchors, so an implausible span is visible rather than silent.
+    # min_block is 8, not 3: three consecutive normalized Hebrew tokens recur by
+    # coincidence in a rabbinic text, and one such hit before the true span
+    # stretches klal_lo downward, inflating the reference and depressing every
+    # engine's accuracy with nothing printed to say so.
+    print(f"  anchored on {len(blocks)} block(s) of >= {min_block} tokens; "
+          f"first {blocks[0].size}, last {blocks[-1].size}")
     return min(owners[lo:hi]), max(owners[lo:hi])
 
 
@@ -269,10 +284,17 @@ def evaluate(label, path, ref_tokens, ref_owners, lexicon, ref_letters,
     hit, hit_n = lexicon_hit_rate(cand, lexicon)
     cand_letters = letter_frequencies(cand)
     ratios = {}
-    for ch, ref_rate in ref_letters.items():
-        if ref_rate <= 0:
-            continue
-        ratios[ch] = (cand_letters.get(ch, 0.0) / ref_rate, cand_letters.get(ch, 0.0), ref_rate)
+    # The UNION, not the reference's alphabet. Iterating the reference alone
+    # made this signal blind to a letter the engine produces that the corpus
+    # never uses - which is precisely a hallucinated-glyph failure, and this is
+    # the signal credited with diagnosing fastocr as a square model reading
+    # Rashi. An unseen candidate letter gets ratio inf and sorts to the top,
+    # the same way an unproduced reference letter gets 0 and does.
+    for ch in set(ref_letters) | set(cand_letters):
+        ref_rate = ref_letters.get(ch, 0.0)
+        cand_rate = cand_letters.get(ch, 0.0)
+        ratio = (cand_rate / ref_rate) if ref_rate > 0 else float("inf")
+        ratios[ch] = (ratio, cand_rate, ref_rate)
 
     return {
         "label": label,
@@ -289,7 +311,9 @@ def evaluate(label, path, ref_tokens, ref_owners, lexicon, ref_letters,
         "per_klal": {str(k): {"matched": v[0], "reference": v[1],
                               "accuracy": v[0] / v[1] if v[1] else None}
                      for k, v in per_klal.items()},
-        "letter_ratios": {ch: {"ratio": r, "candidate": c, "reference": rr}
+        "letter_ratios": {ch: {"ratio": (None if r == float("inf") else r),
+                               "invented": r == float("inf"),
+                               "candidate": c, "reference": rr}
                           for ch, (r, c, rr) in ratios.items()},
         "confusions": [{"corpus": a, "engine": b, "count": n}
                        for (a, b), n in confusion_pairs(ref_tokens, cand)],
@@ -364,14 +388,26 @@ def main():
     print("| Engine | OCR words | Word acc. | CER (letters) | Lexicon hit |")
     print("|---|---:|---:|---:|---:|")
     for r in results:
+        cer = "too large" if r["cer"] is None and r["candidate_tokens"] else pct(r["cer"])
+        # An engine that emits far more tokens than the window holds is charged
+        # for them as insertions, so its CER and its word accuracy point in
+        # opposite directions (the VLM baselines: 96.1% accuracy, 20.2% CER).
+        # Flag it rather than leave the reader to wonder which column to believe.
+        if r["cer"] is not None and r["candidate_tokens"] > len(ref_tokens) * 1.15:
+            cer += " ⚠"
         print(f"| {r['label']} | {r['candidate_tokens']} | {pct(r['word_accuracy'])} "
-              f"| {pct(r['cer'])} | {pct(r['lexicon_hit_rate'])} |")
+              f"| {cer} | {pct(r['lexicon_hit_rate'])} |")
 
     # Corpus baseline: what the adjudicated text itself scores on the
     # corpus-independent metric, so a candidate's lexicon hit has a ceiling
     # to be read against rather than being quoted bare.
     base_hit, _ = lexicon_hit_rate(ref_tokens, lexicon)
     print(f"| _corpus (adjudicated, ceiling)_ | {len(ref_tokens)} | 100.0% | 0.0% | {pct(base_hit)} |")
+    if any(r["cer"] is not None and r["candidate_tokens"] > len(ref_tokens) * 1.15
+           for r in results):
+        print("\n⚠ = emits >15% more tokens than the window holds, so its CER counts "
+              "that overhang as insertions and is NOT comparable with the others. "
+              "Word accuracy is unaffected (it divides by the reference).")
 
     print("\n### Per-klal word accuracy\n")
     kids = sorted({int(k) for r in results for k in r["per_klal"]})
@@ -393,8 +429,10 @@ def main():
         print("\n### Letter-frequency signature (most distorted vs corpus)\n")
         for r in results:
             worst = sorted(r["letter_ratios"].items(),
-                           key=lambda kv: abs(1.0 - kv[1]["ratio"]), reverse=True)[:args.letters]
-            parts = [f"{ch} {v['ratio']:.2f}x" for ch, v in worst]
+                           key=lambda kv: (float("inf") if kv[1]["ratio"] == float("inf")
+                                           else abs(1.0 - kv[1]["ratio"])), reverse=True)[:args.letters]
+            parts = [(f"{ch} NEW (absent from the corpus)" if v["ratio"] == float("inf")
+                      else f"{ch} {v['ratio']:.2f}x") for ch, v in worst]
             print(f"- **{r['label']}**: " + ", ".join(parts))
 
     if args.out:
