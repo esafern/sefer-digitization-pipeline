@@ -508,6 +508,77 @@ applying it to the corpus remain two separate, deliberate steps.
     222/222/223/667 klalim over the right ranges, `/api/klal/88` and
     `/api/page/73` 200, page latency 11.2 ms.
 
+0W. **[2026-09-01] Dicta's OCR output is now the ONLY witness baseline not in
+    version control, and it is the only one that cannot be regenerated on
+    demand.** `b46dcde` untracked `dicta_output/` and the comparison tables. The
+    reasoning is good and the problem was mine: `b9aa810` put ~7,100 lines of
+    machine output into the tree and pushed a code review over its size budget.
+    Working copies stay on disk, and the blobs remain recoverable from history.
+
+    **The asymmetry, though:**
+
+    | baseline | tracked | cost to regenerate |
+    |---|---|---|
+    | `surya_part1_full_baseline.txt` | **yes** | local, zero marginal cost |
+    | `vlm_part1_full_baseline{,_passB}.txt` | **yes** | paid API we control |
+    | `dicta_output/…` | **no** | free third-party service, **rate-limited, refusing us today** |
+
+    The one output that is expensive and outside our control is the one not
+    kept. For pages 22-50 this is fine - they are in history at `b9aa810`. **The
+    real exposure is pages 51-114**: when they arrive they will be untracked
+    from the start, so they will never enter history at all, and losing them
+    means re-queuing against a service that is already saying "wait".
+
+    **Narrow proposal, not yet done:** keep the per-chunk intermediates
+    untracked as now, but track the single concatenated baseline as
+    `tools/second_witness_eval/dicta_jerusalem_part1_baseline.txt`, beside the
+    Surya and VLM baselines it is the peer of. One file, ~1,400 lines, matching
+    the convention already in place for the other two witnesses, and it keeps
+    the diff-size fix intact.
+
+0V. **[2026-09-01] DICTA IS DETERMINISTIC — same PDFs, second run, BIT-IDENTICAL
+    output. It therefore needs no stability gate, and can never be its own
+    reliability check.** The reviewer re-submitted pages 22-50 by mistake; the
+    accident is a free repeatability measurement this project would not
+    otherwise have paid for.
+
+    | | |
+    |---|---|
+    | all 5 chunk outputs, run 1 vs run 2 | **byte-identical** (md5 each) |
+    | concatenated baseline | byte-identical |
+    | word accuracy / CER / lexicon hit | 95.5% / 3.8% / 96.7% — unchanged |
+    | dispute URLs, positions and order | **identical, all 124** |
+    | verdicts | 59 new / 64 corroborated / 1 escalation / 0 contested — unchanged |
+
+    **The one number that moved, and why it is a good sign.** Agreement with the
+    corpus went **15,075 -> 15,076**. Not Dicta drifting: `part1.json` moved
+    under it. Commit `6d956ae` applied the klal 29 w86 ruling, `חנה` -> `הנה`,
+    and Dicta had read `הנה` there all along — so a position where it previously
+    DIFFERED now AGREES. The corpus caught up with the witness. That is the same
+    position item 0Q flagged as the Lesson 9 case, closing the loop end to end:
+    engine proposes, reviewer rules, agreement rises by exactly one.
+
+    **What this changes architecturally.** The VLM needs Pass A/Pass B as a
+    STABILITY GATE because it is not deterministic (87.43% self-consistency,
+    Lesson 23) — where its two passes disagree, it abstains. **Dicta needs no
+    such gate**: a second pass would abstain nowhere, so wiring one would burn
+    requests against a free service for zero information.
+
+    **The flip side, and it is the more important half.** A repeat Dicta run
+    buys literally nothing — it cannot serve as its own reliability check the
+    way the VLM's can. Determinism is repeatability, NOT correctness: Dicta
+    reproduces its mistakes exactly as faithfully as its successes. Every one of
+    the 59 disputes still needs a second, genuinely different signal or the ink.
+    Lesson 23's rule holds with the sign flipped — running this witness twice
+    buys no independence *because there is nothing to learn from the second
+    run at all*.
+
+    **Scope of the claim.** Same PDFs, same service, same day. It shows the
+    endpoint is deterministic for identical input; it says nothing about
+    stability across a future model update on Dicta's side. If the remaining
+    pages 51-114 are ever re-run months apart, that is the measurement that
+    would test it.
+
 0U. **[2026-09-01] THE 75 AUDIT MISMATCHES ARE NOT LOST CORRECTIONS. 72 were
     index drift, 3 are benign, and ZERO corrections are missing from the
     corpus.** `audit_applied_decisions.py` reported **75 of 494** applied
