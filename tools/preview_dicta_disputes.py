@@ -158,6 +158,37 @@ def consensus_of(readings, stored_norm):
     return None
 
 
+def classify(readings, stored_norm, label, decided_choice=None):
+    """Which section a position belongs in - the whole judgement, in one place.
+
+    Pulled out of collect() 2026-09-01 so it can be tested on synthetic
+    readings: both defects a /code-review pass found were HERE, and neither was
+    reachable by a test while this logic sat inside a loop over the real corpus.
+
+    Returns one of: None (no consensus), "new", "joins", "contested",
+    "escalation", "settled".
+    """
+    with_it = consensus_of(readings, stored_norm)
+    if with_it is None:
+        return None, None, None
+    without = consensus_of({e: t for e, t in readings.items() if e != label},
+                           stored_norm)
+
+    # A human ruling ends the matter: synthesize() never emits these.
+    if decided_choice is not None:
+        chosen = cio.hebrew_letters_only(decided_choice or "")
+        if chosen != with_it[0] and label in with_it[1]:
+            return "escalation", with_it, without
+        return "settled", with_it, without
+
+    if without is None:
+        return "new", with_it, without
+    if label not in with_it[1]:
+        return None, with_it, without
+    # Only corroboration when both consensuses name the SAME reading.
+    return ("joins" if without[0] == with_it[0] else "contested"), with_it, without
+
+
 def collect(part1, klal_lo, klal_hi, witness, label):
     verified = cio.load_json(os.path.join(REPO, "corrections_verified_part1.json"), []) or []
     vlm_a = smw.load_baseline(smw.VLM_A_PATH)
@@ -201,10 +232,10 @@ def collect(part1, klal_lo, klal_hi, witness, label):
             if wi in w_al and w_al[wi][1] == "differs":
                 readings[label] = w_al[wi][0]
 
-            without = consensus_of({e: t for e, t in readings.items() if e != label},
-                                   stored_norm)
-            with_it = consensus_of(readings, stored_norm)
-            if with_it is None:
+            kind, with_it, without = classify(
+                readings, stored_norm, label, decided.get((kid, wi))
+                if (kid, wi) in decided else None)
+            if kind is None:
                 continue
             row = {
                 "klal_id": kid, "word_index": wi, "stored": stored,
@@ -214,40 +245,18 @@ def collect(part1, klal_lo, klal_hi, witness, label):
                 "title": (k.get("title") or "").strip(),
             }
 
-            # A position a human has already ruled on NEVER becomes a dispute:
-            # synthesize_multi_witness.synthesize() breaks out of it. Counting
-            # these as "new" overstated the queue depth this preview exists to
-            # predict, in a file that claims parity with stage 4a. They are not
-            # dropped either - a human choosing X while independent engines
-            # agree on Y is exactly what Lesson 9 says must not be buried - so
-            # they get their own section.
-            if (kid, wi) in decided:
-                chosen = cio.hebrew_letters_only(decided[(kid, wi)] or "")
-                # Only when THIS witness is part of the contradicting consensus.
-                # Without that test the section fills with pre-existing
-                # surya+vlm escalations the candidate had no vote in - 4 of 5 on
-                # the first run - which is a report about the queue, not about
-                # what this witness adds.
-                if chosen != with_it[0] and label in with_it[1]:
-                    escalations.append(row)
-                continue
-
-            if without is None:
+            if kind == "settled":
+                continue          # human agreed with the engines; nothing to show
+            if kind == "escalation":
+                escalations.append(row)
+            elif kind == "new":
                 new.append(row)
-            elif label in with_it[1]:
-                # Both consensuses exist - but they are only CORROBORATION if
-                # they name the same reading. A 2-2 split (docai+dicta read X
-                # while vlm+surya read Y) satisfies "both non-None" and would
-                # otherwise be filed under a heading asserting agreement with a
-                # dispute it in fact contradicts. 0 such cases in the shipped
-                # data; the check is here because the classification, not the
-                # count, is what the sections claim.
-                if without[0] == with_it[0]:
-                    joins.append(row)
-                else:
-                    row["displaced"] = without[2]
-                    row["displaced_engines"] = without[1]
-                    contested.append(row)
+            elif kind == "joins":
+                joins.append(row)
+            elif kind == "contested":
+                row["displaced"] = without[2]
+                row["displaced_engines"] = without[1]
+                contested.append(row)
 
     return new, joins, escalations, contested, {
         "corpus_words": covered, "witness_votes": voted, "witness_agrees": agreed}

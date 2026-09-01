@@ -4847,3 +4847,148 @@ def test_a_reading_ending_in_a_non_final_letter_form_is_impossible():
     for empty in ("", None, " ", "א"):
         assert cio.impossible_final_form(empty) is False
 
+
+
+# --- the OCR-witness comparison tools (tools/compare_ocr_engines.py, ---------
+# --- tools/preview_dicta_disputes.py, tools/chunk_pdf_for_ocr.py) -----------
+#
+# ADDED 2026-09-01. These four tools shipped 2026-08-31 with no tests, and their
+# verification - a falsifiability check, a 2-2 split reproduction, a manifest
+# merge - lived in throwaway scratchpad scripts. Lesson 32: nothing would have
+# caused any of it to run again. A /code-review pass then found ten defects,
+# and the two that changed published numbers were both in CLASSIFICATION logic
+# that looked obviously right. Every test below pins a specific one of those,
+# on synthetic input, so the fix cannot silently regress.
+
+import compare_ocr_engines as coe  # noqa: E402
+import preview_dicta_disputes as pdd  # noqa: E402
+import chunk_pdf_for_ocr as cpo  # noqa: E402
+
+
+def test_a_two_two_engine_split_is_classified_contested_not_corroborated():
+    """The defect: `without`/`with_it` were tested for None-ness but never for
+    the same READING, so a witness forming a SECOND consensus on a DIFFERENT
+    reading was filed under a heading asserting it agreed with the dispute it
+    contradicts. Latin placeholders cannot express this - hebrew_letters_only
+    strips them all to '' and collapses every reading into one group - so the
+    fixture has to be real Hebrew."""
+    readings = {"docai": "כתב", "dicta": "כתב", "vlm": "ספר", "surya": "ספר"}
+    kind, with_it, without = pdd.classify(readings, "אבג", "dicta")
+    assert with_it is not None and without is not None
+    assert "dicta" in with_it[1]          # the old, insufficient condition
+    assert with_it[0] != without[0]       # two different consensuses
+    assert kind == "contested", "a 2-2 split must never be filed as corroboration"
+
+
+def test_classify_covers_every_section_the_report_prints():
+    corroborate = {"dicta": "כתב", "vlm": "כתב", "surya": "כתב"}
+    assert pdd.classify(corroborate, "אבג", "dicta")[0] == "joins"
+    # remove the candidate and no consensus survives -> the candidate created it
+    assert pdd.classify({"dicta": "כתב", "vlm": "כתב"}, "אבג", "dicta")[0] == "new"
+    # a consensus the candidate takes no part in is not this report's business
+    assert pdd.classify({"vlm": "כתב", "surya": "כתב"}, "אבג", "dicta")[0] is None
+
+
+def test_a_position_a_human_ruled_is_never_counted_as_a_new_dispute():
+    """synthesize_multi_witness.synthesize() breaks out of a decided position
+    and never emits it. The preview counted them anyway, overstating the queue
+    depth it exists to predict - in a file claiming parity with stage 4a."""
+    readings = {"dicta": "הנה", "vlm": "הנה"}
+    # reviewer chose something else -> an escalation, NOT new work
+    assert pdd.classify(readings, "חנה", "dicta", decided_choice="חנה")[0] == "escalation"
+    # reviewer agreed with the engines -> nothing to show at all
+    assert pdd.classify(readings, "חנה", "dicta", decided_choice="הנה")[0] == "settled"
+    # nobody ruled -> a genuine new dispute
+    assert pdd.classify(readings, "חנה", "dicta", decided_choice=None)[0] == "new"
+
+
+def test_an_escalation_requires_the_candidate_to_be_in_the_contradicting_consensus():
+    """Found by testing the fix, not by the review: scoping on 'a human ruled
+    here' alone swept in pre-existing surya+vlm escalations Dicta had no vote
+    in - a report about the queue, not about what this witness adds."""
+    without_dicta = {"vlm": "מנדה", "surya": "מנדה"}
+    kind, _, _ = pdd.classify(without_dicta, "מנה", "dicta", decided_choice="מנה")
+    assert kind == "settled", "not this witness's escalation to report"
+
+
+def test_consensus_needs_two_distinct_engines_agreeing_on_the_same_reading():
+    only_one = pdd.consensus_of({"dicta": "כתב", "vlm": "ספר"}, "אבג")
+    assert only_one is None, "one engine per reading is a split, not a consensus"
+    agrees_with_corpus = pdd.consensus_of({"dicta": "אבג", "vlm": "אבג"}, "אבג")
+    assert agrees_with_corpus is None, "agreeing with the stored text is not a dispute"
+    real = pdd.consensus_of({"dicta": "כתב", "vlm": "כתב"}, "אבג")
+    assert real is not None and real[0] == "כתב"
+
+
+def test_visual_order_reorders_hebrew_and_leaves_urls_alone():
+    """--hebrew visual bakes the bidi reordering into the bytes, because glow
+    and the terminals in use implement none of it. The URL must survive: it is
+    the payload, and a mangled one is neither clickable nor copyable."""
+    url = "http://127.0.0.1:8420/klal/5/word/86"
+    out = pdd.to_visual([f"- corpus reads כותב", url])
+    assert out[1] == url, "an ASCII-only line must be untouched"
+    assert "".join(c for c in out[0] if c in "כותב") == "בתוכ", \
+        "Hebrew must come out in visual order (reversed from logical)"
+    assert pdd.to_visual(["no hebrew here"]) == ["no hebrew here"]
+
+
+def test_rtl_isolates_only_in_logical_mode():
+    assert pdd.rtl("כתב", isolate=True) == "⁧כתב⁩"
+    assert pdd.rtl("כתב", isolate=False) == "כתב"
+    assert pdd.rtl("", isolate=True) == "", "an isolate around nothing is noise"
+
+
+def test_chunk_ranges_tiles_the_page_span_exactly():
+    """No gap, no overlap, nothing outside the requested span - a dropped page
+    is a hole in the OCR nobody would notice until alignment failed."""
+    rs = cpo.chunk_ranges(22, 50, 6)
+    assert rs[0][0] == 22 and rs[-1][1] == 50
+    covered = [p for a, b in rs for p in range(a, b + 1)]
+    assert covered == list(range(22, 51)), "must tile the span with no gap or repeat"
+    assert cpo.chunk_ranges(1, 1, 8) == [(1, 1)]
+    assert cpo.chunk_ranges(1, 13, 13) == [(1, 13)], "an exact multiple is one chunk"
+
+
+def test_confusion_pairs_recovers_injected_substitutions():
+    """The falsifiability check (Lesson 25), promoted out of a scratchpad file.
+    A signal that cannot report a difference is not measuring anything - so
+    construct an input that MUST make it report one."""
+    ref = ["אבג"] * 10
+    cand = ["סבג"] * 10          # alef -> samekh, ten times
+    pairs = dict(((a, b), n) for (a, b), n in coe.confusion_pairs(ref, cand))
+    assert pairs.get(("א", "ס")) == 10
+    assert coe.confusion_pairs(ref, list(ref)) == [], "identity must report nothing"
+
+
+def test_word_alignment_and_cer_are_zero_only_on_identity():
+    ref = ["אבג", "דהו", "זחט"]
+    assert coe.word_alignment(ref, list(ref))[0] == 3
+    assert coe.char_error_rate(ref, list(ref)) == 0.0
+    matched, _ = coe.word_alignment(ref, ["אבג", "שקר", "זחט"])
+    assert matched == 2, "a changed word must not count as matched"
+    assert coe.char_error_rate(ref, ["אבג", "שקר", "זחט"]) > 0
+
+
+def test_cer_refuses_an_input_too_large_to_diff_rather_than_hanging():
+    """difflib is quadratic; a full-corpus window would appear to hang. None
+    means 'not computed', and the caller prints 'too large' rather than a
+    number that took ten minutes."""
+    big = ["א" * 200] * (coe.CER_MAX_CHARS // 200 + 10)
+    assert coe.char_error_rate(big, big) is None
+
+
+def test_letter_ratios_surface_a_letter_the_engine_INVENTED():
+    """The signature iterated the reference's alphabet only, so a letter the
+    candidate produces that the corpus never uses was invisible - in the one
+    signal credited with diagnosing fastocr as a hallucinating square model."""
+    ref_letters = coe.letter_frequencies(["אבג"])
+    cand_letters = coe.letter_frequencies(["אבס"])       # samekh appears from nowhere
+    assert "ס" not in ref_letters and "ס" in cand_letters
+    union = set(ref_letters) | set(cand_letters)
+    assert "ס" in union, "the union is what makes an invented letter visible"
+
+
+def test_trim_to_reference_drops_overhang_but_keeps_the_aligned_stretch():
+    ref = ["אבג", "דהו", "זחט", "יכל"]
+    cand = ["שקר", "שקר"] + ref + ["שקר"]
+    assert coe.trim_to_reference(ref, cand) == ref

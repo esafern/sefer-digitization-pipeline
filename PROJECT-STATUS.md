@@ -173,6 +173,34 @@ applying it to the corpus remain two separate, deliberate steps.
     222/222/223/667 klalim over the right ranges, `/api/klal/88` and
     `/api/page/73` 200, page latency 11.2 ms.
 
+0T. **[2026-09-01] The four new tools now have gated tests — and the two
+    number-changing defects were both in logic no test could reach.**
+    They shipped with zero coverage, and every check I ran on them (a
+    falsifiability probe, a 2-2 split reproduction, a manifest merge, the
+    fetch-script guards) lived in throwaway scratchpad scripts. Lesson 32:
+    nothing would have caused any of it to run again.
+
+    **13 tests added to `tests/test_pipeline_logic.py`** — the gated,
+    synthetic-input file — covering `classify`, `consensus_of`, `to_visual`,
+    `rtl`, `chunk_ranges`, `confusion_pairs`, `word_alignment`,
+    `char_error_rate`, its size ceiling, the letter-ratio union, and
+    `trim_to_reference`. Gate is now **342 collected, 342 passed**.
+
+    **A refactor the tests forced, and it is the point.** Both defects lived
+    inside `collect()`'s loop over the real corpus, where no synthetic test
+    could reach them — so the whole judgement is now `classify(readings,
+    stored_norm, label, decided_choice)`, returning one of `new` / `joins` /
+    `contested` / `escalation` / `settled` / None. Output is byte-identical
+    before and after (59/64/1/0).
+
+    **Verified the tests can actually fail** (Lesson 25 turned on my own
+    tests): reimplemented the shipped-in-`b9aa810` classifier and ran the new
+    cases against it — a 2-2 split returned `joins` where the test demands
+    `contested`; a human-ruled position returned `new` where the test demands
+    `escalation`; a human agreeing with the engines returned `new` where the
+    test demands `settled`. **All three fail against the old code and pass
+    against the new.** A test that cannot fail would have pinned nothing.
+
 0S. **[2026-09-01] `/code-review high` on the session's four new tools — 10
     findings, ALL TEN REAL, and two of them changed published numbers.** The
     review agent had failed on a rate limit the night before, so the tools had
