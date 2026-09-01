@@ -3664,6 +3664,88 @@ def test_cross_klal_skips_gershayim_tokens():
     assert results == []
 
 
+# --- scan_alignment: the batch pipeline must not import the HTTP server -------
+
+def test_no_pipeline_stage_imports_the_review_server():
+    """A rebuild_all.sh stage must not depend on the live HTTP server module.
+
+    REGRESSION GATE for finding C4, filed 2026-08-25 and open until
+    2026-09-01. synthesize_multi_witness.py - stage 4a of the rebuild chain -
+    did `import review_server as rs` at module scope and called its PRIVATE
+    helpers; assemble_corrections_dataset.py (stage 4) did the same inside a
+    function, with a comment explaining that the laziness was there to avoid
+    pulling in the HTTP server. Either way the corpus build depended on the
+    server's internals, so a refactor inside the server could break the
+    rebuild with nothing to catch it.
+
+    The geometry those stages actually wanted now lives in
+    pipeline/scan_alignment.py, imported as public API by both. This asserts
+    the coupling does not come back - a count in a status file did not stop
+    finding S2 from spreading, and it would not stop this either.
+
+    Scoped to pipeline/ deliberately. Two tools/ scripts still import
+    review_server for a witness-queue reader and a corpus reader - NOT
+    geometry, so scan_alignment is not their answer either. They are still
+    open C4 instances; see PROJECT-STATUS. A tool is also not a build stage,
+    which is what made the pipeline/ cases the ones that mattered.
+    """
+    import ast
+
+    offenders = []
+    pipeline_dir = os.path.join(REPO, "pipeline")
+    for root, _dirs, files in os.walk(pipeline_dir):
+        if "__pycache__" in root:
+            continue
+        for fn in sorted(files):
+            if not fn.endswith(".py") or fn == "review_server.py":
+                continue
+            full = os.path.join(root, fn)
+            rel = os.path.relpath(full, REPO)
+            try:
+                tree = ast.parse(open(full, encoding="utf-8").read())
+            except SyntaxError:
+                continue
+            for node in ast.walk(tree):
+                if isinstance(node, ast.Import):
+                    for a in node.names:
+                        if a.name == "review_server":
+                            offenders.append(f"{rel}:{node.lineno}")
+                elif isinstance(node, ast.ImportFrom) and node.module == "review_server":
+                    offenders.append(f"{rel}:{node.lineno}")
+
+    assert not offenders, (
+        "a pipeline/ module imports review_server at " + ", ".join(offenders)
+        + ". The rebuild chain must not depend on the HTTP server. If you need "
+        "scan geometry, import scan_alignment (public API). If you need "
+        "something else that lives in review_server, that is a sign it should "
+        "move out of the server too - see finding C4."
+    )
+
+
+def test_scan_alignment_and_review_server_share_one_bbox_cache():
+    """review_server._corpus_bbox_cache must BE scan_alignment.bbox_cache.
+
+    The extraction kept the private alias so ~40 call sites and a dozen tests
+    read unchanged. For a mutable module-level cache that only works if the
+    alias is the same object - a rebinding would leave the server writing one
+    dict and the geometry reading another, which fails as stale boxes rather
+    than as an error. Several tests pre-seed the cache through the
+    review_server name and assert through code that reads the scan_alignment
+    one, so this is load-bearing, not decorative.
+    """
+    import scan_alignment as sa
+    assert rs._corpus_bbox_cache is sa.bbox_cache
+    assert rs._word_bboxes_resolved is sa.word_bboxes_resolved
+    assert rs.corpus_bbox_cache_key is sa.corpus_bbox_cache_key
+    # and the alias really does round-trip a write
+    key = ("probe", 0, 0, False)
+    sa.bbox_cache[key] = {"probe": True}
+    try:
+        assert rs._corpus_bbox_cache[key] == {"probe": True}
+    finally:
+        sa.bbox_cache.pop(key, None)
+
+
 # --- corpus_io.words_of: the one space-only split (finding S2) ----------------
 
 def test_words_of_is_space_only_and_indexes_the_way_decisions_were_recorded():

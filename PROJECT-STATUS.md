@@ -43,6 +43,62 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0V. **[2026-09-01] `pipeline/scan_alignment.py` EXTRACTED — C4 is closed for the
+    rebuild chain, S1 is down 218 lines, and neither the pipeline's output nor
+    the test count moved.** `review_server.py` **1,981 → 1,763**;
+    `scan_alignment.py` is 391 lines of pure geometry.
+
+    **What moved and why those:** `load_regions`, `resolve_klal_page`,
+    `klal_all_pages`, `klals_on_page`, `corpus_stamp`, `docai_page_stamp`,
+    `corpus_bbox_cache_key`, `corpus_word_bboxes`, `word_pages_map`,
+    `word_bboxes_resolved`, `word_scan_position`, and the two module caches.
+    Every one is pure computation over files on disk — no HTTP, no request
+    state, no ledger reads — which is what made the move mechanical. Dependency
+    analysis before touching anything showed the whole cluster needs only `cio`,
+    `os`, `difflib` and its own two caches.
+
+    **The names are PUBLIC now, and that is the actual fix.** C4 was never
+    really "a batch stage imports a module"; it was "a batch stage reaches for
+    an HTTP server's UNDERSCORE-prefixed internals", which is what made the
+    coupling fragile rather than merely present.
+
+    **Both rebuild stages are free of it.** `synthesize_multi_witness.py`
+    (stage 4a) and `assemble_corrections_dataset.py` (stage 4) no longer
+    reference `review_server` at all. The latter's `import review_server`
+    was deliberately hidden *inside a function* with a comment saying the
+    laziness existed "so the module does not pull in the HTTP server just to be
+    imported" — a workaround for a dependency that should not have existed. It
+    is now removed rather than deferred.
+
+    **C4 is NOT fully closed, and the remaining two are not this module's
+    problem.** `tools/validate_suppression_filters.py:37` wants
+    `_load_witness_queue()` and `tools/patch_witness_word_indices.py:32` wants
+    `_load_klalim()` — a queue reader and a corpus reader, neither of them
+    geometry. Both are tools rather than build stages, which is why the
+    pipeline/ cases were the ones that mattered. Recorded here so the next
+    session inherits the true remainder rather than "C4: done".
+
+    **Evidence the move is behaviour-preserving**, not just green:
+    - Full suite **392 passed, 1 skipped** — identical to the count immediately
+      before the extraction.
+    - The rebuild chain re-run end to end produces **byte-identical** output:
+      `git status` reports NO change to `corrections_part1.json`,
+      `klal_page_regions.json`, `consensus_disputes_part1.json`,
+      `lexical_defect_report.json`, `klalim_demo_dataset.json` or
+      `ligature_words.json` after regenerating them through the new import.
+    - Server restarted and smoke-tested; klal 29 w86 serves `הנה`.
+
+    **Two gates added, both verified to FAIL before being kept** (Lesson 25):
+    `test_no_pipeline_stage_imports_the_review_server` (AST-based, probed with a
+    throwaway `pipeline/` module that imports the server) and
+    `test_scan_alignment_and_review_server_share_one_bbox_cache`. The second
+    guards something a green suite would not catch on its own: the extraction
+    kept `review_server._corpus_bbox_cache` as an ALIAS so ~40 call sites and a
+    dozen tests read unchanged, and for a mutable module-level cache that only
+    works while the alias is the *same object*. A rebinding would leave the
+    server writing one dict and the geometry reading another — which surfaces as
+    stale bounding boxes, not as an error.
+
 0U. **[2026-09-01] TWO DECISIONS APPLIED — ONE REAL EDIT — AND IT CLOSES THE
     ONE POSITION ITEM 0Q SAID NEEDED A HUMAN FIRST.** `apply_reviewer_decisions.py`
     then `./rebuild_all.sh` (full, vision included). Corpus diff: **exactly one

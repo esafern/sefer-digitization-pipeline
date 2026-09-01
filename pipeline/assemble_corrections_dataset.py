@@ -255,12 +255,17 @@ def merge_lexical_defects(by_klal, path=LEXICAL_PATH,
     last-write-wins map."""
     report = cio.load_json(path, default=[]) or []
     import review_decisions as rd
-    # Lazily imported: this is the same scan-alignment machinery
-    # synthesize_multi_witness reuses (its own note explains why hand-rolling it
-    # produced 260 wrong bboxes). Kept inside the function so the module does not
-    # pull in the HTTP server just to be imported.
-    import review_server as _rs
-    _scan_position = _rs._word_scan_position
+    # The same scan-alignment machinery synthesize_multi_witness reuses (its own
+    # note explains why hand-rolling it produced 260 wrong bboxes).
+    #
+    # This used to be `import review_server as _rs`, deliberately INSIDE the
+    # function, with the comment "so the module does not pull in the HTTP server
+    # just to be imported" - a lazy import working around a dependency that
+    # should never have existed. scan_alignment.py (2026-09-01, finding C4) is
+    # that dependency removed rather than deferred, so the import can be
+    # ordinary. Kept local only to keep this diff to the coupling itself.
+    import scan_alignment as _sa
+    _scan_position = _sa.word_scan_position
     klalim_by_id = {k["klal_id"]: k for k in cio.load_part1_sorted()}
     decided = {k for k in rd.all_current("manual_correction")}
     decided |= {k for k in rd.all_current("candidate_choice")}

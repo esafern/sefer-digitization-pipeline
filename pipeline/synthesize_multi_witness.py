@@ -39,7 +39,7 @@
 #   3. NO GUESSED POSITIONS. Alignment goes through corpus_io.align_witness,
 #      which reports a substitution only for an unambiguous 1:1 replace block
 #      and drops ragged ones rather than pairing words positionally (Lesson 5).
-#      Bboxes come from review_server._word_bboxes_resolved, the single
+#      Bboxes come from scan_alignment.word_bboxes_resolved, the single
 #      resolver for "where is this word on the scan", which already settles the
 #      multi-page recurring-word collision - the extractors hand-rolled it and
 #      got 260 of 16,026 bboxes from a non-matching `replace` token.
@@ -53,7 +53,7 @@ REPO = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
 
 import corpus_io as cio
-import review_server as rs
+import scan_alignment as sa
 import typography
 
 sys.path.insert(0, os.path.join(REPO, "tools", "second_witness_eval"))
@@ -311,7 +311,7 @@ def attach_scan_positions(disputes, part1_by_id, regions, verified=()):
     right move is to reuse that verified position rather than re-derive or
     estimate one.
 
-    Deliberately NOT hand-rolled: it goes through review_server's own
+    Deliberately NOT hand-rolled: it goes through scan_alignment's own
     _word_bboxes_resolved(), the single resolver for "where is this word on the
     scan", which already settles the recurring-word multi-page collision that
     last-page-wins gets wrong. A dispute with no confident position still gets
@@ -345,7 +345,7 @@ def attach_scan_positions(disputes, part1_by_id, regions, verified=()):
                 d["page"], d["bbox"] = known
                 continue
             if resolved is None:  # only pay for the alignment if needed
-                resolved = rs._word_bboxes_resolved(kid, words, regions)
+                resolved = sa.word_bboxes_resolved(kid, words, regions)
             bbox, page = resolved.get(d["word_index"], (None, None))
             d["page"], d["bbox"] = page, bbox
     return disputes
@@ -367,7 +367,7 @@ def main():
 
     disputes, stats = synthesize(part1, verified, vlm_a, vlm_b, surya,
                                  decided=active_human_decisions())
-    disputes = attach_scan_positions(disputes, part1_by_id, rs._load_regions(), verified)
+    disputes = attach_scan_positions(disputes, part1_by_id, sa.load_regions(), verified)
 
     by_klal = {}
     for d in disputes:
