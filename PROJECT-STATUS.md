@@ -43,6 +43,46 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+1A. **[2026-09-01] ITEM 27 IS FULLY CLOSED — all three page-seam klalim are
+    clean, and the "remaining" one was repaired on 2026-08-31. Reviewer-prompted
+    ("what is wrong with 210? i don't see anything") — nothing is.**
+
+    Checked by CONTENT, not by the indices the item names:
+    - **klal 39**: `דבכולהן` — **0 occurrences**.
+    - **klal 74**: reads `אמר רבא אמר רב יהודה`, which is exactly what item 27
+      says the PAGE reads; the corpus had stored `אמר רבא אמר רבא אמר רב יהודה`.
+    - **klal 210**: one `דהלכה`, and the phrase reads
+      `אפשר דהלכה כקמייתא ולא כבתרייתא` — "it is possible the halacha is like
+      the first and NOT like the latter". `ולא` at w66 is ordinary Hebrew.
+      **Every flag on the klal is cleared.**
+
+    **The repair is in the ledger, in detail.** On 2026-08-31 at 11:29-11:30 the
+    reviewer recorded three deletions — `דהלכה` (the duplicated catchword), `:`,
+    and `לא` (the folio numeral). They took FOUR apply runs to land (15:54,
+    15:59, 16:00, 16:00) because of the one-word-count-change-per-klal-per-run
+    limit, with the ledger re-indexing the survivors between each run — visible
+    in the log as the same decision migrating w66 -> w65 -> w64. That machinery
+    (item 0C) worked exactly as designed.
+
+    **THE METHOD ERROR, made three times on this one item, twice by me.**
+    Item 37 read klal 39 and klal 210 at the word INDEX item 27 named and
+    reported both as "still present"; the indices had moved under the repairs.
+    Earlier today I corrected the klal 39 half — and then repeated the mistake on
+    klal 210, searching the text for the token `לא`, finding two ordinary
+    occurrences, and concluding it "needs the scan" to tell which was furniture.
+    It never needed the scan. It needed `review_decisions.jsonl`, which records
+    the reviewer deleting that exact word.
+
+    **The rule this earns:** when a status entry names a word position, the
+    ledger is the first thing to read, not the last. The corpus tells you what
+    the text says NOW; only the ledger tells you whether somebody already
+    answered the question. Re-deriving from the text alone will keep producing
+    "still open" for things that were closed, because a repair is exactly the
+    event that invalidates the index the entry was written against. This is
+    Lesson 5 (indices are not stable identifiers) meeting Lesson 19 (verify the
+    claim, not the write-up) — and the cheap check is
+    `rd._read_all()` filtered to the klal, which is four lines.
+
 0Z. **[2026-09-01] `tools/patch_witness_word_indices.py` HAS NO ARGUMENT
     PARSING AND WRITES ON ANY INVOCATION — I ran it with `--help` and it
     silently rewrote the witness queue.** Reverted; no lasting damage. Recorded
@@ -2118,7 +2158,7 @@ applying it to the corpus remain two separate, deliberate steps.
     word-level flag with the scan reading; `apply_reviewer_decisions.py` promotes
     them once the reviewer rules.
 
-27. **NEW 2026-08-26 - PART 1 CARRIES PAGE-SEAM FURNITURE TOO, not just the
+27. **[CLOSED 2026-09-01 - all three repaired; see item 1A for the evidence and for the index-vs-ledger error this item's own follow-ups kept making.]** NEW 2026-08-26 - PART 1 CARRIES PAGE-SEAM FURNITURE TOO, not just the
     reconstructions.** Found by sweeping for the class behind klal 39's `Π`
     (standing rule), which turned out to be a folio sitting next to page 27's
     CATCHWORD. Swept all of Part 1 for near-duplicate word pairs at a page
