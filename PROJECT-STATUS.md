@@ -43,6 +43,32 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0Z. **[2026-09-01] `tools/patch_witness_word_indices.py` HAS NO ARGUMENT
+    PARSING AND WRITES ON ANY INVOCATION — I ran it with `--help` and it
+    silently rewrote the witness queue.** Reverted; no lasting damage. Recorded
+    because the next person will do the same thing.
+
+    The tool ignores `sys.argv` entirely: `main()` reads, re-derives every
+    `word_index`, and writes `reconstruction_witness_queue.json` unconditionally
+    (`:107`). There is no `argparse`, no `--dry-run`, and it is NOT in
+    `rebuild_all.sh` — so it is a hand-run mutator whose safest-looking possible
+    invocation is a mutation.
+
+    **What it did:** set klal 88 w310 and w327 to `word_index: null`. Those two
+    are not arbitrary — **w327 is the exact row behind the klal 88 "-1
+    outstanding" arc**, the witness decision sitting at a position a
+    manual_correction already covers. Nulling them removes both from what the
+    reviewer is served. Whether the re-derivation is RIGHT is a separate
+    question nobody asked and nobody reviewed; the point is that an unreviewed
+    answer was written to a tracked file by a command that looked like a
+    request for documentation.
+
+    Not fixed here, deliberately — it is a one-line `argparse` guard plus a
+    `--dry-run`, but it changes a tool's interface and belongs with a decision
+    about whether the re-derivation it performs is currently correct at all.
+    Whoever picks it up: check what those two nulls SHOULD be before restoring
+    or re-running.
+
 0Y. **[2026-09-01] C4 IS CLOSED. `pipeline/review_data.py` takes the last two
     stragglers, and NOTHING outside `tests/` imports `review_server` any more.**
     `review_server.py` **1,981 → 1,423 today** — 558 lines into three modules
