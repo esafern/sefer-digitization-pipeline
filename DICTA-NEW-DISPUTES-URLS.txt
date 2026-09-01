@@ -9,7 +9,6 @@ http://127.0.0.1:8420/klal/7/word/534
 http://127.0.0.1:8420/klal/7/word/597
 http://127.0.0.1:8420/klal/8/word/55
 http://127.0.0.1:8420/klal/8/word/129
-http://127.0.0.1:8420/klal/12/word/74
 http://127.0.0.1:8420/klal/12/word/124
 http://127.0.0.1:8420/klal/13/word/18
 http://127.0.0.1:8420/klal/13/word/231

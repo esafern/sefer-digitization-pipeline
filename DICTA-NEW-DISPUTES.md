@@ -2,20 +2,20 @@
 
 > **Hebrew below is in VISUAL order**, reordered so it reads correctly in a terminal renderer that does no bidi (`glow`). **Do not copy Hebrew out of this file** — it will paste reversed. Regenerate with `--hebrew logical` for a copy-safe version.
 
-Preview only — **nothing has been written into the pipeline.** `dicta_jerusalem_p0022-p0050.txt` scored against `part1.json` klalim 2–62 under the live stage-4a consensus rules.
+Preview only — **nothing has been written into the pipeline.** `dicta_jerusalem_part1_baseline.txt` scored against `part1.json` klalim 2–62 under the live stage-4a consensus rules.
 
 | | |
 |---|---:|
 | corpus words in scope | 16,177 |
 | positions `dicta` votes at | 15,436 |
-| …agreeing with the corpus | 15,075 (97.7%) |
-| **new disputes it would create** | **59** |
+| …agreeing with the corpus | 15,076 (97.7%) |
+| **new disputes it would create** | **58** |
 | existing disputes it corroborates | 64 |
 | positions a human already ruled, against this consensus | **1** |
 
 Links open the review dashboard (`python3 pipeline/review_server.py`, http://127.0.0.1:8420). A position where only this witness differs is **not** listed — one engine disagreeing is not a dispute, and across editions it is usually a textual variant rather than a misread.
 
-## New disputes (59)
+## New disputes (58)
 
 ### klal 2 · word 379
 
@@ -82,12 +82,6 @@ Links open the review dashboard (`python3 pipeline/review_server.py`, http://127
 - corpus reads **יל** → `dicta+surya` read **ל'**
 - context: …עובשד אגלפ אנתד ידייא 'א יל הדנב ישילשה תא יתאבהו םירדנל…
 - http://127.0.0.1:8420/klal/8/word/129
-
-### klal 12 · word 74
-
-- corpus reads **ס"ר** → `dicta+surya` read **פ"ר**
-- context: …וכו קיזחה אלש פ"עא אמיא ס"ר רמא רסא אל קיזחה אל'…
-- http://127.0.0.1:8420/klal/12/word/74
 
 ### klal 12 · word 124
 
@@ -653,7 +647,6 @@ http://127.0.0.1:8420/klal/7/word/534
 http://127.0.0.1:8420/klal/7/word/597
 http://127.0.0.1:8420/klal/8/word/55
 http://127.0.0.1:8420/klal/8/word/129
-http://127.0.0.1:8420/klal/12/word/74
 http://127.0.0.1:8420/klal/12/word/124
 http://127.0.0.1:8420/klal/13/word/18
 http://127.0.0.1:8420/klal/13/word/231

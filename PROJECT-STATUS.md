@@ -43,6 +43,25 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+> **Item IDs are allocated per LANE, and are never reassigned once written.**
+> Two concurrent sessions share this file, and a newest-first list with
+> hand-picked single letters cannot survive that: both writers reach for "the
+> next letter" and collide. It happened twice in one day — `0S/0T/0U`, then
+> `0V/0W/0X` within hours — and renaming after the fact is not a fix, because
+> item IDs are load-bearing: `apply_reviewer_decisions.py` and three test files
+> cite them by name in comments (`item 0A`, `0B`, `0C`, `0F`, `0R`, `0U`, `0W`).
+>
+> - **`0A`–`0Z` — the review/corpus lane** (the main clone, which holds the
+>   dashboard and the decision ledger).
+> - **`1A`–`1Z` — the refactor lane** (the `-refactor` worktree).
+> - A third lane takes `2A`–`2Z`. **Before writing an item, grep the file for
+>   your next letter** — the cost of checking is one command; the cost of not
+>   checking is an ambiguous cross-reference that a rename cannot safely undo.
+>
+> Resolved 2026-09-01 by moving the refactor lane's three colliding entries to
+> `1G`/`1H`/`1I` — chosen over renaming the review lane's because those are the
+> ones code references.
+
 1F. **[2026-09-01] KLAL 209 APPLIED — three spurious words removed, and the
     sentence the 2026-08-14 spot-check called unparseable now parses.**
     34 -> 31 words.
@@ -238,7 +257,7 @@ applying it to the corpus remain two separate, deliberate steps.
     merged-entry builder — finding #6's other half, and a design question rather
     than a move. `api_page` (121) after it.
 
-0X. **[2026-09-01] `pipeline/review_counts.py` EXTRACTED — S1's second half.
+1I. **[2026-09-01] `pipeline/review_counts.py` EXTRACTED — S1's second half.
     `review_server.py` 1,981 → 1,585 today; `api_klalim` 249 → 168.** With
     `scan_alignment.py` earlier the same day, the God Object has shed **396
     lines** into two modules that are pure, importable and directly testable.
@@ -288,7 +307,7 @@ applying it to the corpus remain two separate, deliberate steps.
     them is a real design question, not a move. `api_page` (121) is next after
     that. Neither is urgent now that the rule they share has one home.
 
-0W. **[2026-09-01] `lexicon_yad_malachi_only.json` WAS NON-REPRODUCIBLE — the
+1H. **[2026-09-01] `lexicon_yad_malachi_only.json` WAS NON-REPRODUCIBLE — the
     report rewrote itself on every run with no data change behind it.** Found
     while regenerating it to commit a stale copy: the regen produced a diff, and
     regenerating AGAIN produced a different diff.
@@ -324,7 +343,7 @@ applying it to the corpus remain two separate, deliberate steps.
 
     Suite **397 passed, 1 skipped**.
 
-0V. **[2026-09-01] `pipeline/scan_alignment.py` EXTRACTED — C4 is closed for the
+1G. **[2026-09-01] `pipeline/scan_alignment.py` EXTRACTED — C4 is closed for the
     rebuild chain, S1 is down 218 lines, and neither the pipeline's output nor
     the test count moved.** `review_server.py` **1,981 → 1,763**;
     `scan_alignment.py` is 391 lines of pure geometry.
@@ -549,6 +568,57 @@ applying it to the corpus remain two separate, deliberate steps.
     Review server restarted (rule) and smoke-tested: parts 1/2/3/all return
     222/222/223/667 klalim over the right ranges, `/api/klal/88` and
     `/api/page/73` 200, page latency 11.2 ms.
+
+0Y2. **[2026-09-01] A peer session's `/code-review high` on the docs commit —
+    11 findings, all fair, plus a real seam defect in code I wrote today. One
+    claim of my own retracted.**
+
+    **The seam defect, verified myself.** `build_dicta_baseline.py`
+    concatenated chunk files with no separator, and Dicta's outputs carry no
+    trailing newline — so the last word of chunk N fused to the page marker
+    opening chunk N+1 (`תורה=== עמוד 1 ===`), 4 seams, defeating the
+    line-anchored `^===\s*עמוד.*$` strip and leaking 4 phantom `עמוד` tokens into
+    the witness stream. Fixed (`rstrip("\n") + "\n"`), rebuilt, and a gated test
+    now asserts every `===` begins its own line.
+
+    **I MISREPORTED ITS IMPACT AND AM CORRECTING THAT.** I said the bug "had
+    injected a false dispute" because the count moved 59 -> 58 after the fix. It
+    had not. Running BOTH baselines against the SAME ledger gives identical
+    disputes: **the seam fix changes nothing downstream.** The 59 -> 58 was the
+    reviewer ruling klal 12 w74 (`ר"ס` -> `ר"פ`, agreeing with dicta+surya) in
+    the interval — the same ledger-moves-under-the-measurement effect as klal 29
+    w86 in item 0V. The defect is real and worth fixing; its published impact
+    was zero. The peer hedged correctly ("could be an alignment artifact"); I
+    over-read the hedge as confirmation.
+
+    **Public-doc accuracy, both real:** `HOW-THE-PIPELINE-WORKS.md` was still
+    publishing the pre-review 60-new/65-corroborated figures that item 0S
+    retracted — and so was item 0P's own table, which is where the doc sourced
+    them. Both now read 58/64/1. And `CASE-YAD-MALACHI.md`'s Przemysl correction
+    **cited evidence it had just invalidated**: it kept the script claim on
+    renders "of pages 30, 250, 400, 480", which are pages of `14122` — the file
+    the same footnote reassigns to Jerusalem. The renders prove Jerusalem is
+    Rashi-set and say nothing about Przemysl. Re-sourced to the project owner's
+    determination of the editions, which also settles Livorno, Przemysl 1877 and
+    1888 as Rashi and lets `[^p1888]` drop "unverified".
+
+    **The rest, all fixed:** README presented Dicta as a shipped stage when item
+    0Q says preview (`grep -i dicta` finds nothing in `rebuild_all.sh`);
+    `START_HERE.md`'s TL;DR still named `VlmWitnessEngine` after item 0N flagged
+    that exact line — Lesson 34, sibling unswept, and I swept only the README;
+    "five printings, each inspected page-by-page" overstated what this project
+    inspected; "the other printings are now readable" generalised from ONE
+    measured edition, and the one this doc excludes as a text source; 97.8% and
+    97.1% were mixed in a single comparison ("within half a point" holds only
+    against 97.1); "barely helped (41% -> 39%)" described a FALL as a small
+    help; and `[^dicta]` pointed at comparison tables that are deliberately
+    untracked — now points at the tracked baseline instead.
+
+    **Item-ID collisions are now a written rule, not a repeated cleanup.** See
+    the note at the head of Open Items: `0x` is the review lane, `1x` the
+    refactor lane. The peer's three colliding entries moved to `1G`/`1H`/`1I`
+    rather than mine, because code references `item 0W`/`0U`/`0R` by name and a
+    rename there breaks a comment that a test relies on for its reasoning.
 
 0X. **[2026-09-01] Outward-facing docs reviewed. One FACTUAL ERROR corrected,
     one legal separation that was missing, and four stale counts.** The public
@@ -1019,6 +1089,11 @@ applying it to the corpus remain two separate, deliberate steps.
     | agrees with corpus | 97.4% | **97.7%** |
     | corroborates existing disputes | 8 of 11 (73%) | **65 of 83 (78%)** |
     | NEW disputes created | 4 | **60** |
+
+    **SUPERSEDED — these two rows are the pre-review figures.** The 60/65 counted
+    a position a human had already ruled on, which `synthesize()` never emits
+    (item 0S). Corrected: **58 new / 64 corroborated / 1 human-ruled escalation**
+    (58, not 59, after the reviewer ruled klal 12 w74 on 2026-09-01). Quote those.
 
     **0N extrapolated ~130 new disputes across Part 1; the honest figure is
     ~218** (60 per 61 klalim x 222). The small sample under-counted by ~60% —

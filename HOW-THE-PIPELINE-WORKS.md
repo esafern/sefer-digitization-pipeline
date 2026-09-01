@@ -31,10 +31,12 @@ ink, surfacing every place they disagree, and resolving each disagreement
    *different printing*, set by a different compositor from different type —
    measured 2026-09-01 at **95.5% word accuracy / 96.7% lexicon hit** over
    klalim 1–63. On a 61-klal dry run it agreed with the corpus at **97.7%** of
-   the positions it votes on, **corroborated 65 of 83** existing consensus
-   disputes, and would add 60 new ones. It is deliberately routed at Rashi
-   editions only: on the square Berlin scan the same engine drops to 77.6%,
-   worse than everything already wired in.
+   the positions it votes on, **corroborated 64** existing consensus disputes,
+   and would add **58** new ones. It is deliberately routed at Rashi editions
+   only: on the square Berlin scan the same engine drops to 77.6%, worse than
+   everything already wired in. **It is a preview, not a shipped stage** — the
+   readings have been measured and previewed for a reviewer, and nothing is
+   wired into the rebuild chain yet.
 3. **Diff, don't trust.** Each witness's reading is aligned against the stored
    text word by word. Agreement is the null result; every disagreement becomes a
    candidate with a real bounding box.
@@ -74,7 +76,7 @@ it:
   different compositor, different type, a different sort in that position — which
   is why the Rashi-edition witness above matters more than a fourth engine on the
   same scan would. Enumerating and excluding the known defect was tried and
-  barely helped (ensemble precision 41% → 39%): a bigger artifact catalogue is
+  did not help — ensemble precision **fell**, 41% → 39%: a bigger artifact catalogue is
   not the repair.
 - **Tightening the rule doesn't rescue it.** Requiring the primary engine, or
   unanimity, buys three points of precision for 82% of the recall — measured,

@@ -4,7 +4,7 @@ A high-fidelity digitization pipeline for historical Rabbinic Hebrew/Aramaic tex
 
 ## TL;DR
 
-**Architecture & Workflow.** Primary text extraction (Google Document AI) → witness baselines that fail differently (a VLM read twice, Surya at 300 DPI, and a Rashi-script engine on a second *edition*) → multi-witness consensus synthesis → image-grounded vision adjudication of every disputed token → interactive human review dashboard → persistent decision ledger. Every decision is recorded in an append-only, git-tracked ledger (`review_decisions.jsonl`) that automated rebuilds never overwrite.
+**Architecture & Workflow.** Primary text extraction (Google Document AI) → witness baselines that fail differently (a VLM read twice, Surya at 300 DPI) → multi-witness consensus synthesis → image-grounded vision adjudication of every disputed token → interactive human review dashboard → persistent decision ledger. A second-*edition* Rashi-script witness (Dicta) has been measured and previewed but is **not yet wired into the rebuild chain**. Every decision is recorded in an append-only, git-tracked ledger (`review_decisions.jsonl`) that automated rebuilds never overwrite.
 
 **Key Differentiation.** Most Hebrew OCR tooling stops at raw OCR or character-level alignment. This pipeline is built around **multi-witness vision adjudication**: exact token-level bounding boxes, image-grounded VLM evaluation of every disputed token, and a tri-state (open / machine-resolved / human-decided) review model with per-word provenance. See `COMPETITIVE-LANDSCAPE.md`.
 
@@ -14,7 +14,7 @@ A high-fidelity digitization pipeline for historical Rabbinic Hebrew/Aramaic tex
 
 ## Status
 
-- **Klalim 1–222** (`part1.json`): 222/222 trusted page-to-klal alignment; witnesses read against the ink (Document AI, a VLM sampled twice, Surya at 300 DPI, and a second-edition Rashi engine over klalim 1–63). The flag queue moves every session — **re-measure it from the dashboard rather than quoting a number here**, which is the same discipline `PROJECT-STATUS.md` applies to itself.
+- **Klalim 1–222** (`part1.json`): 222/222 trusted page-to-klal alignment; witnesses read against the ink (Document AI, a VLM sampled twice, Surya at 300 DPI). A second-edition Rashi witness has been measured over klalim 1–63 and its findings previewed for a reviewer; it is not a pipeline stage yet. The flag queue moves every session — **re-measure it from the dashboard rather than quoting a number here**, which is the same discipline `PROJECT-STATUS.md` applies to itself.
 - **Klalim 223–667** (`part2.json`, `part3.json`): text and page-level alignment built; **71 are unfilled placeholders**, and **no witness set has been run there yet and no correction has been applied** — a standing gate, not an oversight.
 - **Klalei HaPoskim / Klalei HaDinim**: scanned, never extracted.
 

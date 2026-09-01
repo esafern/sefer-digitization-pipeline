@@ -5353,6 +5353,45 @@ def test_baseline_builder_refuses_a_gap_or_an_overlap():
 def test_the_baselines_ascii_header_is_invisible_to_every_consumer():
     """The header states the baseline's page coverage so a PARTIAL file cannot
     be quoted as complete. It is safe only because every consumer tokenizes to
-    Hebrew-bearing words - assert that rather than trust it."""
-    header_words = "# Dicta RashiOCR baseline - Jerusalem 1975/6 edition".split()
-    assert all(not cio.hebrew_letters_only(w) for w in header_words)
+    Hebrew-bearing words - assert that rather than trust it.
+
+    Reads the header the builder actually wrote, not a copy of line 1 pasted
+    into the test: the previous version hardcoded the first line, so lines 2-4
+    - the ones carrying the page range and the PARTIAL/COMPLETE claim - were
+    never checked at all."""
+    path = os.path.join(REPO, "tools", "second_witness_eval",
+                        "dicta_jerusalem_part1_baseline.txt")
+    if not os.path.exists(path):
+        pytest.skip("baseline not built in this tree")
+    with open(path, encoding="utf-8") as f:
+        header = [next(f) for _ in range(4)]
+    assert all(l.startswith("#") for l in header), "the header must be comment lines"
+    for line in header:
+        for w in line.split():
+            assert not cio.hebrew_letters_only(w), f"header word reaches the tokenizer: {w!r}"
+    assert any("PARTIAL" in l or "COMPLETE" in l for l in header), \
+        "the header must state whether the baseline covers all of Part 1"
+
+
+def test_no_chunk_seam_fuses_a_word_to_the_next_pages_marker():
+    """Dicta's per-chunk outputs do not end with a newline, so a bare
+    concatenation produces `תורה=== עמוד 1 ===` at every seam. That defeats the
+    line-anchored `^===\s*עמוד.*$` strip every consumer uses and leaks a phantom
+    `עמוד` token into the witness stream, at the chunk boundary - which is
+    exactly where alignment is least able to absorb one.
+
+    Measured when found: 4 fused seams, 4 phantom tokens, and (verified by
+    re-running both baselines against the same ledger) ZERO effect on the
+    disputes. Latent, not damaging - but it scales with the number of chunks,
+    and pages 51-114 add five more seams."""
+    path = os.path.join(REPO, "tools", "second_witness_eval",
+                        "dicta_jerusalem_part1_baseline.txt")
+    if not os.path.exists(path):
+        pytest.skip("baseline not built in this tree")
+    with open(path, encoding="utf-8") as f:
+        lines = f.read().splitlines()
+    contains = [l for l in lines if "===" in l]
+    starts = [l for l in lines if l.startswith("===")]
+    assert len(contains) == len(starts), (
+        "every `===` marker must begin its own line; fused seams: "
+        + repr([l[:40] for l in contains if not l.startswith("===")]))

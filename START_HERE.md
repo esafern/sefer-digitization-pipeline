@@ -11,7 +11,7 @@ redirect to here — read on.
 
 ## TL;DR
 
-**The pipeline.** Document AI primary text extraction → secondary witness evaluation (VLM `VlmWitnessEngine`) → diff & crop disagreements → VLM Vision Adjudicator (`call_gemini_vision_adjudicate`) → human review in a local dashboard → persistent decision ledger (`review_decisions.jsonl`). Five build stages, orchestrated by `./rebuild_all.sh`, gated by pytest.
+**The pipeline.** Document AI primary text extraction → witness baselines that fail differently (a VLM read twice, Surya at 300 DPI), written as text files the rebuild reads → multi-witness consensus synthesis (`synthesize_multi_witness.py`) → diff & crop disagreements → VLM Vision Adjudicator (`call_gemini_vision_adjudicate`) → human review in a local dashboard → persistent decision ledger (`review_decisions.jsonl`). Orchestrated by `./rebuild_all.sh`, gated by pytest. **`pipeline/second_witness_eval/`'s `VlmWitnessEngine` is NOT on this path** — no rebuild stage imports it (item 0N); it is used only by `tools/second_witness_eval/run_part1_vlm_second_witness.py` and its own tests.
 
 **The corpus.** `part1.json` / `part2.json` / `part3.json` are the **only** hand-edited source of truth, and they are never hand-edited directly — every change goes through the decision pipeline. Everything else that shows klal text is derived and must be regenerated.
 

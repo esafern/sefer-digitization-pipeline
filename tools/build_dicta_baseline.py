@@ -33,9 +33,6 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
-sys.path.insert(0, REPO)
-sys.path.insert(0, os.path.join(REPO, "pipeline"))
-
 DEFAULT_OUT = os.path.join(REPO, "tools", "second_witness_eval",
                            "dicta_jerusalem_part1_baseline.txt")
 
@@ -119,16 +116,27 @@ def main():
     # dropped before alignment - asserted by tests. It is here because a tracked
     # baseline whose coverage is not stated IN the file is a stale artifact
     # waiting to be quoted as if it were complete.
+    complete = first <= 22 and last >= 114
     header = (f"# Dicta RashiOCR baseline - Jerusalem 1975/6 edition\n"
               f"# Scan pages {first}-{last} of "
               f"yad-malachi-jerusalem-rashi-Hebrewbooks_org_14122.pdf\n"
-              f"# PARTIAL until pages 22-114 are all present; Part 1 is pages 22-114.\n"
-              f"# Built by tools/build_dicta_baseline.py - do not hand-edit.\n")
+              # Gated, not unconditional: a finished baseline that still says
+              # PARTIAL trains the reader to ignore the line.
+              + (f"# COMPLETE for Part 1 (pages 22-114).\n" if complete else
+                 f"# PARTIAL - Part 1 is pages 22-114; this stops at {last}.\n")
+              + f"# Built by tools/build_dicta_baseline.py - do not hand-edit.\n")
     with open(args.out, "w", encoding="utf-8") as f:
         f.write(header)
         for c in chunks:
             with open(c["path"], encoding="utf-8") as src:
-                f.write(src.read())
+                # Exactly one newline at every seam. Dicta's outputs do not end
+                # with one, so a bare concatenation fuses the last word of chunk
+                # N to the `=== עמוד 1 ===` marker opening chunk N+1
+                # (`תורה=== עמוד 1 ===`). That defeats the line-anchored strip
+                # every consumer uses (`^===\s*עמוד.*$`) and leaks one phantom
+                # `עמוד` token into the witness stream per seam - at the chunk
+                # boundary, which is exactly where alignment is most fragile.
+                f.write(src.read().rstrip("\n") + "\n")
             f.flush()
     print(f"\nWrote {os.path.relpath(args.out, REPO)} "
           f"({os.path.getsize(args.out):,} bytes)")
