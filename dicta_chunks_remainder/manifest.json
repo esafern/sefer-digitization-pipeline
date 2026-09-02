@@ -10,9 +10,10 @@
       "last_page": 63,
       "pages": 13,
       "bytes": 535927,
-      "submitted_at": null,
-      "output_file": null,
-      "status": "pending"
+      "submitted_at": "2026-09-02T09:10:58",
+      "output_file": "dicta_output/yadmalachi-jer-r_c0001_p0051-p0063_ocr.txt",
+      "status": "done",
+      "job_id": null
     },
     {
       "chunk": 2,
@@ -21,9 +22,10 @@
       "last_page": 76,
       "pages": 13,
       "bytes": 538159,
-      "submitted_at": null,
-      "output_file": null,
-      "status": "pending"
+      "submitted_at": "2026-09-02T09:13:19",
+      "output_file": "dicta_output/yadmalachi-jer-r_c0002_p0064-p0076_ocr.txt",
+      "status": "done",
+      "job_id": null
     },
     {
       "chunk": 3,
@@ -32,9 +34,10 @@
       "last_page": 89,
       "pages": 13,
       "bytes": 566697,
-      "submitted_at": null,
-      "output_file": null,
-      "status": "pending"
+      "submitted_at": "2026-09-02T09:14:26",
+      "output_file": "dicta_output/yadmalachi-jer-r_c0003_p0077-p0089_ocr.txt",
+      "status": "done",
+      "job_id": null
     },
     {
       "chunk": 4,
@@ -43,9 +46,10 @@
       "last_page": 102,
       "pages": 13,
       "bytes": 568578,
-      "submitted_at": null,
-      "output_file": null,
-      "status": "pending"
+      "submitted_at": "2026-09-02T09:15:51",
+      "output_file": "dicta_output/yadmalachi-jer-r_c0004_p0090-p0102_ocr.txt",
+      "status": "done",
+      "job_id": null
     },
     {
       "chunk": 5,
@@ -54,9 +58,10 @@
       "last_page": 114,
       "pages": 12,
       "bytes": 511230,
-      "submitted_at": null,
-      "output_file": null,
-      "status": "pending"
+      "submitted_at": "2026-09-02T09:18:29",
+      "output_file": "dicta_output/yadmalachi-jer-r_c0005_p0103-p0114_ocr.txt",
+      "status": "done",
+      "job_id": null
     }
   ]
 }
