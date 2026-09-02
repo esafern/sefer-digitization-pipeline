@@ -1938,6 +1938,13 @@ const RECORDED_STATUS_META = {
 // review_server._decision_index_is_stale(): `status` is what happened to the
 // RULING, this is what happened to its ADDRESS, and a ruling can be honoured and
 // still have an index that no longer points at the word it described.
+// Who ruled. A `manual_correction` written by an automated pass renders exactly
+// like one a person clicked - green, settled, out of the queue - which is how a
+// pattern-matching sweep put 131 corrections into the corpus that nobody ever
+// adjudicated (reviewer, 2026-09-02: "did a human (me) adjudicate it? it wasn't
+// marked in yellow or red"). This is the filter that answers that.
+const RECORDED_MACHINE_LABEL = ['by a script',
+  'Written by an automated pass, not by a person - the `reviewer` field is a tool or an `ai-*` tag rather than `local`. These render green like any other ruling and so never appeared in a review queue. Filter here to audit them.'];
 const RECORDED_STALE_LABEL = ['stale address',
   'The ruling\u2019s recorded word_index no longer points at the word it names, because a later apply in the same klal shifted everything after it and nothing re-pointed the decision. Open item 0AB. Most of these were still HONOURED - it is the address that rotted, not the ruling.'];
 
@@ -1977,7 +1984,8 @@ function flagListItemHtml(r, recorded) {
   let cls = 'flag-list-item';
   let title = '';
   if (recorded) {
-    cls += ' recorded-item rec-' + (r.status || 'unknown') + (r.index_stale ? ' rec-stale' : '');
+    cls += ' recorded-item rec-' + (r.status || 'unknown') + (r.index_stale ? ' rec-stale' : '')
+         + (r.by_human ? '' : ' rec-machine');
     // Only show the arrow when the ruling actually CHANGED something. A reviewer
     // confirming the stored text (chosen_source "final_text") is the commonest
     // decision in this corpus by far, and rendering "word -> same word" 300
@@ -1987,9 +1995,11 @@ function flagListItemHtml(r, recorded) {
                                         : `<bdi class="rec-chosen">${escapeHtml(String(r.chosen_text))}</bdi>`;
     middle = `<span class="rec-status">${escapeHtml((RECORDED_STATUS_META[r.status] || [r.status])[0])}</span>` +
              (r.index_stale ? `<span class="rec-stale-mark" title="${escapeAttr(RECORDED_STALE_LABEL[1])}">&#9888;</span>` : '') +
+             (r.by_human ? '' : `<span class="rec-machine-mark" title="${escapeAttr('Written by ' + (r.reviewer || 'an automated pass') + ', not adjudicated by a person.')}">\u2699</span>`) +
              word + (changed ? `<span class="rec-arrow">&rarr;</span>${chosen}` : '');
     const when = (r.ts || '').slice(0, 10);
-    title = `${r.decision_type || 'decision'}${when ? ' on ' + when : ''}` +
+    title = `${r.decision_type || 'decision'}${when ? ' on ' + when : ''}`
+          + ` by ${r.reviewer || 'unknown'}` +
             (r.original_word != null ? ` \u2014 ruled on "${r.original_word}"` : '') +
             (r.note ? ` \u2014 ${r.note}` : '') +
             `\n${(RECORDED_STATUS_META[r.status] || ['', ''])[1]}`;
@@ -2011,7 +2021,9 @@ function renderFlagList(label) {
     return;
   }
   const matches = (r) => flagListStatus === 'all'
-    || (flagListStatus === 'stale' ? r.index_stale : r.status === flagListStatus);
+    || (flagListStatus === 'stale' ? r.index_stale
+        : flagListStatus === 'machine' ? !r.by_human
+        : r.status === flagListStatus);
   const shown = flagListRows.filter(matches);
 
   let head = `<p class="flag-list-summary">${flagListRows.length} word(s) &mdash; ${escapeHtml(label)}. ` +
@@ -2020,20 +2032,24 @@ function renderFlagList(label) {
     // The status breakdown, as filters. A senior reviewer reviewing someone's
     // work does not want 478 rows in one undifferentiated column - they want
     // "which of these never landed", which is exactly the split this offers.
-    const counts = { stale: 0 };
+    const counts = { stale: 0, machine: 0 };
     flagListRows.forEach(r => {
       counts[r.status] = (counts[r.status] || 0) + 1;
       if (r.index_stale) counts.stale += 1;
+      if (!r.by_human) counts.machine += 1;
     });
     // RECORDED_STATUS_META's key order is the order these appear in, and it runs
     // from "needs a human" to "settled" - the chips a senior reviewer reaches for
     // first should not be at the end of the row. `stale` rides along at the end
     // because it cuts ACROSS the statuses rather than being one of them.
     const order = ['all'].concat(Object.keys(RECORDED_STATUS_META).filter(st => counts[st]))
-                         .concat(counts.stale ? ['stale'] : []);
+                         .concat(counts.stale ? ['stale'] : [])
+                         .concat(counts.machine ? ['machine'] : []);
     const chips = order.map(st => {
         const n = st === 'all' ? flagListRows.length : counts[st];
-        const meta = st === 'stale' ? RECORDED_STALE_LABEL : RECORDED_STATUS_META[st];
+        const meta = st === 'stale' ? RECORDED_STALE_LABEL
+                   : st === 'machine' ? RECORDED_MACHINE_LABEL
+                   : RECORDED_STATUS_META[st];
         return `<button type="button" class="rec-chip rec-${st}` +
                (flagListStatus === st ? ' rec-chip-on' : '') + `" data-status="${st}"` +
                ` title="${escapeAttr(meta ? meta[1] : 'Every ruling on record for this part.')}">` +

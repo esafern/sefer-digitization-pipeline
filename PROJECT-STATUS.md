@@ -113,6 +113,59 @@ reliability check, and every dispute still needs the ink or a different engine.
 > borrowing `2A`–`2Z`, which names a different lane and would misattribute the
 > work. Same rule as above: never reassign an ID once written.
 
+0AT. **[2026-09-02] 131 CORRECTIONS ENTERED THE CORPUS THAT NO HUMAN EVER
+    ADJUDICATED, and the dashboard has been drawing them GREEN as "Human-Decided"
+    the whole time. OPEN — the corrections need eyes; the display is fixed.**
+
+    Reviewer, having changed all 8 of item `0AQ`'s positions against the ink:
+    *"there is no al-la lig on those last two — the lamed should never have been
+    there. I see a prev. pass flagged it to add the lamed based on pattern
+    matching — but did a human (me) adjudicate it? it wasn't marked in yellow or
+    red."*
+
+    **It did not.** Klal 92 w326 and klal 124 w26 both carry
+    `reviewer: 'ai-dropped-lamed-correction'`, written in the same microsecond by
+    a script. They are `manual_correction` records — the type this dashboard
+    renders GREEN as Human-Decided — so they entered the corpus already looking
+    settled and never appeared in any review queue. That is exactly why they were
+    never yellow or red.
+
+    | | |
+    |---|---:|
+    | rulings in the ledger written by a PERSON (`local`/`user`) | 905 |
+    | **rulings written by a script** (`ai-*`, `tools/*`) | **1,615** |
+    | of the 503 the dashboard counts as recorded, machine-written | 102 |
+    | the `ai-dropped-lamed-correction` pass: records / klalim / applied | 131 / 51 / **131** |
+
+    **The pass cannot tell a defect from a real word, and 66 of its 131 replaced
+    an attested one.** Judged against the independent 6.18M-word reference corpus
+    (NOT `lexicon.txt`, which is built from this corpus and so has already lost
+    any word the pass corrected away — Lesson 3): `או` → `אלו` fired on a word
+    attested 19,452 times, `א` → `אל` on one attested 17,870 times, `איה` → `אליה`
+    on one attested 78 times. **Attestation alone does not prove any single one
+    wrong** — `אא` → `אלא` is very likely a genuine ligature repair in context —
+    but it does prove the rule was operating on strings with no way to tell the
+    two apart, and nobody checked.
+
+    **The reviewer has now confirmed two of them wrong from the ink** (klal 92
+    w326, klal 124 w26: the lamed should never have been added). The other 64
+    attested-original cases are unaudited and are the queue this creates.
+
+    **Lesson 24 needs re-reading in this light.** It cites the alef-lamed
+    ligature as the case where architectural independence fails because every
+    engine reads the same defective sort. That is still true where the ligature
+    IS present — but this pass ADDED lameds where there was no ligature at all,
+    and the engines reading `איה` were reading the ink correctly.
+
+    **FIXED in the display:** every recorded ruling now serves its `reviewer` and
+    a `by_human` flag, the recorded list marks machine-written rulings with a cog
+    and a `by a script` filter chip, and each row's tooltip names who wrote it.
+    A human ruling and a script's are no longer indistinguishable on screen.
+
+    **NOT fixed:** the 64. And the deeper question this raises — whether a script
+    should be able to write `manual_correction` at all, rather than a candidate a
+    human must clear — is a design decision, not a bug fix.
+
 0AS. **[2026-09-02] A WORD WITH NO OCR ALIGNMENT OPENED THE KLAL'S FIRST PAGE
     INSTEAD OF ITS OWN — 746 words across 55 multi-page klalim. FIXED, and the
     remaining un-placeable ones now SAY so.**

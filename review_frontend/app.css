@@ -845,6 +845,11 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
    independent fact about the row (see RECORDED_STALE_LABEL) and a ruling can be
    honoured and still carry one. */
 .rec-stale-mark { color: var(--pending); flex-shrink: 0; cursor: help; font-size: 12px; }
+/* A ruling no person adjudicated. Deliberately a MARK, not a colour swap: it is
+   orthogonal to the status - a script-written ruling can be applied, pending or
+   drifted like any other. */
+.rec-machine-mark { color: var(--ink-faint); flex-shrink: 0; cursor: help; font-size: 11px; }
+.rec-chip.rec-machine.rec-chip-on { background: var(--ink-soft); border-color: var(--ink-soft); }
 .rec-chip.rec-stale.rec-chip-on { background: var(--pending); border-color: var(--pending); }
 .rec-arrow { opacity: 0.45; flex-shrink: 0; }
 .rec-chosen {

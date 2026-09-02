@@ -660,6 +660,25 @@ def _decision_original_word(rec):
     return original
 
 
+# Reviewer tags that mean A PERSON RULED. Everything else in the ledger was
+# written by a script - `ai-dropped-lamed-correction`, `ai-semantic-spotcheck`,
+# `tools/review_lexicon_gaps.py` and two dozen more.
+#
+# ADDED 2026-09-02, from a reviewer question that had no answer on screen: "did a
+# human (me) adjudicate it? it wasn't marked in yellow or red." It was not. Those
+# passes write `manual_correction` records, which this dashboard has always drawn
+# GREEN as Human-Decided - so a machine ruling entered the corpus already looking
+# settled and never appeared in anyone's queue. Measured that day: 1,615 of the
+# ledger's 2,520 rulings were machine-written, and 102 of the 503 the dashboard
+# currently counts as recorded.
+HUMAN_REVIEWERS = ("local", "user")
+
+
+def _ruled_by_human(rec):
+    reviewer = (rec or {}).get("reviewer") or ""
+    return reviewer in HUMAN_REVIEWERS or reviewer.startswith("local")
+
+
 def _decision_index_is_stale(rec, words, word_index):
     """Does this ruling's recorded word_index still describe the word it ruled on?
 
@@ -829,6 +848,8 @@ def api_word_states(part_num=1):
                 "note": rec.get("note"),
                 "ts": rec.get("ts"),
                 "decision_id": rec.get("id"),
+                "reviewer": rec.get("reviewer"),
+                "by_human": _ruled_by_human(rec),
                 "original_word": _decision_original_word(rec),
                 "status": _decision_status(rec, words, wi, applied_ids),
                 "index_stale": _decision_index_is_stale(rec, words, wi),

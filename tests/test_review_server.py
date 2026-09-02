@@ -2791,3 +2791,45 @@ def test_a_word_that_cannot_be_placed_on_the_scan_says_so(server, page):
     if page.locator("#hl-container .hl-box.focused").count() == 1:
         assert not warned_ok, "warned about a word that was found on the scan"
     assert page.test_errors == []
+
+
+def test_a_recorded_ruling_says_who_made_it(server, page):
+    """REGRESSION 2026-09-02, reviewer on the alef-lamed pair: "did a human (me)
+    adjudicate it? it wasn't marked in yellow or red."
+
+    It did not. Automated passes write `manual_correction` records, which this
+    dashboard has always drawn GREEN as Human-Decided - so a machine ruling
+    entered the corpus already looking settled and never appeared in anyone's
+    queue. Measured: 1,615 of the ledger's 2,520 rulings were machine-written.
+    Every recorded row now carries its `reviewer`, and a chip filters to the ones
+    no person adjudicated.
+    """
+    status, _ = _post_json(server, "/api/decisions/manual", {
+        "klal_id": 22, "word_index": 3, "original_word": "לא-המילה-שכאן",
+        "chosen_text": "תחליף", "note": "a ruling a person made",
+    })
+    assert status == 201
+    rows = _get_json(server, "/api/word-states?part=1")["recorded"]
+    assert rows, "no recorded rulings to judge"
+    for r in rows:
+        assert "by_human" in r and isinstance(r["by_human"], bool), r
+        assert "reviewer" in r, r
+    # The endpoint writes `reviewer: local`, which is what a person clicking is.
+    mine = [r for r in rows if r["klal_id"] == 22 and r["word_index"] == 3]
+    assert mine and mine[0]["by_human"], mine
+
+    _open_dashboard(page, server)
+    page.eval_on_selector("#legend .legend-clickable[data-bucket='recorded']", "el => el.click()")
+    page.wait_for_selector("#flag-list-panel .flag-list-item", timeout=10000)
+    served_machine = sum(1 for r in rows if not r["by_human"])
+    chip = page.locator("#flag-list-panel .rec-chip[data-status='machine']")
+    if served_machine:
+        assert chip.count() == 1, "no chip for the rulings nobody adjudicated"
+        assert int(chip.locator("b").inner_text()) == served_machine
+        chip.click()
+        page.wait_for_timeout(300)
+        assert page.locator("#flag-list-panel .flag-list-item").count() == served_machine
+        assert page.locator("#flag-list-panel .recorded-item.rec-machine").count() == served_machine
+    else:
+        assert chip.count() == 0, "a chip for a category with nothing in it"
+    assert page.test_errors == []
