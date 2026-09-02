@@ -149,7 +149,21 @@ def _now_iso():
 def append_decision(decision_type, klal_id, word_index=None, chosen_source=None,
                      chosen_text=None, candidate_snapshot=None, needs_revisit=None,
                      note=None, reviewer="local", applied_decision_id=None,
-                     path=None):
+                     supersedes=None, path=None):
+    """`supersedes` is the id of an earlier ruling this one REPLACES.
+
+    ADDED 2026-09-02 for tools/repoint_stale_decisions.py. An append-only log has
+    no way to correct a record - which is its point - but it does need a way to
+    say "that one is no longer the answer", or a re-pointed ruling appears
+    alongside its own stale predecessor and the reviewer sees both. Nothing is
+    edited or removed; the superseded record stands exactly as written, and this
+    is a forward reference to it.
+
+    Deliberately NOT honoured by all_current(): a consumer that applies decisions
+    to the corpus has its own drift check and will skip a stale one on the text,
+    and widening the meaning of "current" across every consumer is a change with
+    a much larger blast radius than the display problem this solves.
+    """
     path = _resolve(path)  # see _resolve(): NOT a default arg, deliberately
     if decision_type not in VALID_DECISION_TYPES:
         raise ValueError(f"invalid decision_type: {decision_type!r}")
@@ -166,6 +180,7 @@ def append_decision(decision_type, klal_id, word_index=None, chosen_source=None,
         "note": note,
         "reviewer": reviewer,
         "applied_decision_id": applied_decision_id,
+        "supersedes": supersedes,
     }
     with _APPEND_LOCK:
         with open(path, "a", encoding="utf-8") as f:
@@ -298,6 +313,18 @@ def applied_decision_ids(path=None):
         for r in _read_all(path)
         if r["decision_type"] == "apply_event" and r.get("applied_decision_id")
     }
+
+
+def superseded_ids(path=None):
+    """Every ruling id that a LATER record declares it replaces.
+
+    ADDED 2026-09-02 with `supersedes` - the read side of it. A separate function
+    rather than a filter inside all_current() on purpose: see append_decision's
+    note. This is what a DISPLAY needs to stop showing a ruling beside the
+    corrected copy of itself; what a corpus-mutating consumer needs is its own
+    drift check, which it already has.
+    """
+    return {r["supersedes"] for r in _read_all(path) if r.get("supersedes")}
 
 
 def find_by_id(decision_id, path=None):

@@ -497,8 +497,16 @@ def api_klalim(part_num=1, on_klal_states=None):
     # re-deriving "what counts as recorded" a second time. Newest ruling wins
     # where a word carries more than one.
     recorded_by_klal = {}
+    # Rulings a later record explicitly replaces (review_decisions.append_decision's
+    # `supersedes`). A re-pointed ruling lands at the CORRECT word_index, but the
+    # log is append-only so the stale original still sits at the old one and is
+    # still the newest record THERE - so without this the reviewer sees both, and
+    # the stale-address count barely moves.
+    _superseded = rd.superseded_ids()
 
     def _remember(kid, wi, rec):
+        if rec.get("id") in _superseded:
+            return
         slot = recorded_by_klal.setdefault(kid, {})
         prior = slot.get(wi)
         if prior is None or (rec.get("ts") or "") >= (prior.get("ts") or ""):
@@ -1487,10 +1495,58 @@ def api_post_manual_correction(body):
         word_index=word_index,
         chosen_source="custom" if chosen_text else "delete",
         chosen_text=chosen_text,
-        candidate_snapshot={"word_index": word_index, "original_word": body.get("original_word")},
+        candidate_snapshot=_manual_snapshot(klal_id, word_index, body.get("original_word")),
         note=body.get("note"),
     )
     return record
+
+
+def _manual_snapshot(klal_id, word_index, original_word):
+    """What a manual_correction records about the word it is ruling on.
+
+    THE SCAN POSITION IS PART OF IT, since 2026-09-02. It used to be
+    `{word_index, original_word}` and nothing else, which made a manual ruling
+    unrecoverable the moment a later apply shifted this klal's indices: with no
+    bbox there is no way to ask the INK where the word went, only to search the
+    text for it, and a unique text match is not evidence of position (measured
+    and rejected - see MAX_EXPLAINABLE_SHIFT in audit_applied_decisions.py).
+
+    Measured on the day this was added: of 105 rulings whose recorded word_index
+    no longer described their word, **55 were manual_corrections** - and every
+    one of those was unrecoverable from the ink for exactly this reason, while 40
+    of the 50 that DID carry a bbox could be re-pointed with two independent
+    signals agreeing. This does not repair the 55; it stops the next 55.
+
+    The geometry is not new work: `_word_scan_position()` already computes it on
+    every render so the scan pane can highlight the word. Best-effort - a word
+    the DocAI alignment never matched has no bbox, and a snapshot without one is
+    still better than no snapshot.
+    """
+    snapshot = {"word_index": word_index, "original_word": original_word}
+    try:
+        part_num = _get_part_num_for_klal(klal_id)
+        klalim_by_id, _ = _load_klalim(part_num=part_num)
+        klal = klalim_by_id.get(klal_id)
+        if klal is not None:
+            bbox, page = _word_scan_position(klal_id, cio.words_of(klal), word_index)
+            if bbox is not None:
+                snapshot["bbox"] = bbox
+                snapshot["page"] = page
+            else:
+                # Not an error: 1-4% of words in a klal have no aligned DocAI
+                # token (an OCR gap), and word_scan_position documents returning
+                # (None, None) there. Recorded so a later recovery pass can tell
+                # "never had one" from "lost it".
+                snapshot["bbox_unavailable"] = "no aligned DocAI token"
+    except Exception as e:  # noqa: BLE001
+        # A snapshot is an audit record, not a precondition: never let a geometry
+        # lookup stop a reviewer's ruling from being written down. But SAY SO -
+        # a bare `pass` here would be the same silent-failure shape that made a
+        # missing /api/corpus render as a blank space (item 0AL), and the whole
+        # point of this snapshot is that somebody can rely on it later.
+        print(f"  WARNING: no scan position recorded for klal {klal_id} w{word_index}: "
+              f"{type(e).__name__}: {e}")
+    return snapshot
 
 
 # ---------- HTTP plumbing ----------

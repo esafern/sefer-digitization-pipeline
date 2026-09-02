@@ -5466,3 +5466,48 @@ def test_an_invented_letter_is_reported_not_crashed_on():
     key = lambda kv: (float("inf") if kv[1].get("invented") else abs(1.0 - kv[1]["ratio"]))
     ordered = sorted(ratios.items(), key=key, reverse=True)
     assert ordered[0][0] == "ג", "an invented letter must sort to the top"
+
+
+def test_a_superseded_ruling_stops_counting_but_is_never_removed(monkeypatch, tmp_path):
+    """`supersedes` is how an APPEND-ONLY log corrects an address.
+
+    ADDED 2026-09-02 with tools/repoint_stale_decisions.py. A ruling whose
+    word_index no longer describes its word is re-pointed by appending a
+    corrected copy - the original cannot be edited or deleted, and must not be,
+    because it is the record of what actually happened. But it is still the
+    newest record at its OLD key, so without an explicit forward reference the
+    display shows the ruling twice: once correctly placed and once stale.
+
+    Asserts BOTH halves - that the original still reads back in full, and that it
+    stops being counted as a separate ruling.
+    """
+    path = tmp_path / "decisions.jsonl"
+    monkeypatch.setattr(rd, "DECISIONS_PATH", str(path))
+
+    first = rd.append_decision("manual_correction", klal_id=7, word_index=40,
+                               chosen_source="custom", chosen_text="תחליף",
+                               candidate_snapshot={"word_index": 40, "original_word": "מקור"},
+                               note="the original ruling")
+    assert first["supersedes"] is None, "an ordinary ruling supersedes nothing"
+
+    second = rd.append_decision("manual_correction", klal_id=7, word_index=31,
+                                chosen_source="custom", chosen_text="תחליף",
+                                candidate_snapshot={"word_index": 31, "original_word": "מקור"},
+                                supersedes=first["id"], note="re-pointed")
+
+    assert rd.superseded_ids() == {first["id"]}
+    # NEVER REMOVED: the original must still be readable, verbatim.
+    back = rd.find_by_id(first["id"])
+    assert back is not None and back["word_index"] == 40 and back["note"] == "the original ruling"
+    assert len(rd.history_for(7)) == 2, "the log must still hold both records"
+    # ...and the corrected copy is what the current view resolves to.
+    assert rd.current_for(7, 31, "manual_correction")["id"] == second["id"]
+
+
+def test_superseded_ids_is_empty_on_a_log_that_has_never_used_it():
+    """The field is new, and every record written before 2026-09-02 lacks it
+    entirely. `superseded_ids()` must read a missing key as "supersedes
+    nothing", not crash and not invent one."""
+    ids = rd.superseded_ids()
+    assert isinstance(ids, set)
+    assert None not in ids, "a record with no `supersedes` must contribute nothing"

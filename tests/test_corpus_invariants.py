@@ -1782,10 +1782,17 @@ def test_recorded_decision_count_is_every_ruling_not_only_the_rendered_ones():
     rows = review_server.api_klalim(part_num=1)
     by_klal = {r["klal_id"]: r for r in rows}
 
+    # A ruling a later record explicitly REPLACES is not a second ruling. Added
+    # 2026-09-02 with tools/repoint_stale_decisions.py: the log is append-only,
+    # so a re-pointed ruling lands at the correct word_index while its stale
+    # original stays put at the old one and remains the newest record THERE.
+    # Without this the reviewer would be shown both, and the count would climb
+    # every time a stale address was repaired.
+    superseded = rd.superseded_ids()
     expected = {}
     for dmap in (rd.all_current("candidate_choice"), rd.all_current("manual_correction")):
-        for (kid, wi) in dmap:
-            if kid in by_klal:
+        for (kid, wi), rec in dmap.items():
+            if kid in by_klal and rec.get("id") not in superseded:
                 expected.setdefault(kid, set()).add(wi)
     # The witness leg, re-derived here rather than trusted: witness_choice keys
     # on docai_token_index, so it has to be mapped through the witness queue's
@@ -1795,7 +1802,8 @@ def test_recorded_decision_count_is_every_ruling_not_only_the_rendered_ones():
     witness_decided = rd.all_current("witness_choice")
     for w in review_server._load_witness_queue():
         kid, wi = w.get("klal_id"), w.get("word_index")
-        if kid in by_klal and wi is not None and (kid, w.get("docai_token_index")) in witness_decided:
+        rec = witness_decided.get((kid, w.get("docai_token_index")))
+        if kid in by_klal and wi is not None and rec and rec.get("id") not in superseded:
             expected.setdefault(kid, set()).add(wi)
 
     wrong = [(kid, r["recorded_decision_count"], len(expected.get(kid, ())))

@@ -56,6 +56,11 @@ import os
 
 import corpus_io as cio
 import review_decisions as rd
+import scan_alignment as sa
+
+# Loaded once: word_bboxes_resolved() re-reads the 187 KB regions file otherwise,
+# and this runs per failed decision.
+_REGIONS = sa.load_regions()
 
 # Moved one level deeper (pipeline/ or tools/) 2026-08-16 - REPO now goes up
 # two levels, not one, to keep resolving to the actual repo root where
@@ -246,9 +251,21 @@ def expected_span(decision):
 # indices without any decision recording it. The ledger cannot see every edit,
 # so it cannot bound the shift.
 #
-# 5 rather than 3 leaves headroom for one more edit in either direction. If this
-# ever needs raising, the right fix is NOT a wider window - it is recording the
-# actual shift at apply time, which is Lesson 35's outstanding repair.
+# 5 rather than 3 leaves headroom for one more edit in either direction.
+#
+# CORRECTED 2026-09-02, ONE DAY LATER, BY BETTER EVIDENCE. The bound above was
+# derived from shift MAGNITUDE alone, which is the weakest thing available - and
+# it was wrong about the very case it was written for. Mapping each decision's
+# snapshot BBOX onto the word standing at that scan position now (the same
+# geometry the dashboard highlights with) shows klal 10's `כתבו` really is at
+# w74: the ink and the letters agree, at a shift of -11, and the ruling was
+# honoured rather than lost. Genuine shifts corroborated that way reach -31.
+#
+# So the magnitude bound is now the FALLBACK, used only where no scan position
+# was recorded. Where a bbox exists it decides, because "which word is at this
+# place on the page" is a question about the page, and a shift count is a guess
+# about a number. This is Lesson 9 applied to the audit itself: prefer two
+# independent signals over one confident-sounding one.
 MAX_EXPLAINABLE_SHIFT = 5
 
 
@@ -267,6 +284,33 @@ def find_span(klal, span):
     words = cio.words_of(klal)
     n = len(span)
     return [i for i in range(len(words) - n + 1) if words[i:i + n] == span]
+
+
+def _bbox_word_index(decision, klal):
+    """Which word occupies this decision's recorded scan position now, or None.
+
+    ADDED 2026-09-02. `candidate_choice`/`disputed_choice` snapshots carry the
+    crop's bbox and page; mapping that onto the current alignment answers "where
+    did this word GO" from the page rather than from a shift count.
+    `manual_correction` recorded no scan position before this date, so this
+    returns None for those and the magnitude bound still governs them.
+    """
+    snap = decision.get("candidate_snapshot") or {}
+    bbox, page = snap.get("bbox"), snap.get("page")
+    if not bbox or page is None:
+        return None
+    words = cio.words_of(klal)
+    resolved = sa.word_bboxes_resolved(klal["klal_id"], words, _REGIONS)
+    here = [(i, bb) for i, (bb, pg) in resolved.items() if bb and pg == page]
+    if not here:
+        return None
+
+    def centre(b):
+        return ((b["x1"] + b["x2"]) / 2, (b["y1"] + b["y2"]) / 2)
+
+    ax, ay = centre(bbox)
+    return min(here, key=lambda kv: (centre(kv[1])[0] - ax) ** 2
+                                    + (centre(kv[1])[1] - ay) ** 2)[0]
 
 
 def main():
@@ -311,7 +355,16 @@ def main():
             # is what made this script report 75 and be scrolled past.
             hits = find_span(klal, expected_span(decision))
             nearest = min(hits, key=lambda i: abs(i - word_index)) if hits else None
-            if nearest is not None and abs(nearest - word_index) <= MAX_EXPLAINABLE_SHIFT:
+            # The ink outranks the magnitude: where the decision recorded a scan
+            # position AND the word now standing there is one of the hits, the
+            # relocation is corroborated by two independent signals and the
+            # distance does not matter.
+            by_bbox = _bbox_word_index(decision, klal)
+            corroborated = by_bbox is not None and hits and by_bbox in hits
+            if corroborated:
+                nearest = by_bbox
+            if nearest is not None and (corroborated
+                                        or abs(nearest - word_index) <= MAX_EXPLAINABLE_SHIFT):
                 n_drifted += 1
                 drifted.append(f"klal {klal_id} word {word_index} ({decision_type}, "
                                f"decision {decision_id}): reflected at word_index "

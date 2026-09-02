@@ -113,6 +113,60 @@ reliability check, and every dispute still needs the ink or a different engine.
 > borrowing `2A`–`2Z`, which names a different lane and would misattribute the
 > work. Same rule as above: never reassign an ID once written.
 
+0AP. **[2026-09-02] 40 STALE ADDRESSES RE-POINTED FROM THE INK; the ledger
+    learned to say "superseded"; and yesterday's MAX_EXPLAINABLE_SHIFT was WRONG
+    about the very case it was written for.**
+
+    Reviewer, on item 0AB: "looking at the first two in klal 1 I see the
+    corrected word earlier in the klal — can we recover them all?"
+
+    **No, but 40 of 105.** `tools/repoint_stale_decisions.py` (new) re-points a
+    ruling only when TWO independent signals agree: the snapshot BBOX mapped onto
+    whichever word occupies that place on the scan now, and the TEXT searched for
+    the ruling's chosen or original word. Where only one is available, or the two
+    disagree, it refuses. Stale addresses **105 → 77**; the remaining 97 rulings
+    are 18 bbox-only, 27 text-only, 3 conflicting, 31 ambiguous, 18 with no
+    evidence left, and they sit under the recorded list's `stale address` chip.
+
+    **A unique text match was deliberately not accepted as sufficient**, and that
+    is measured, not cautious: the text-only candidates imply shifts of −108 and
+    −107, the exact shape of the false relocation that MAX_EXPLAINABLE_SHIFT was
+    added to catch.
+
+    **`supersedes` — the ledger's new primitive.** An append-only log cannot
+    correct a record, which is its point, but it needs to say "that one is no
+    longer the answer". Without it a re-pointed ruling appears BESIDE its own
+    stale predecessor, because the original is still the newest record at the old
+    key: measured, the stale count moved 105 → 102 without it and 105 → 77 with
+    it. Nothing is edited or removed — the original reads back verbatim, and a
+    gated test asserts exactly that. Deliberately NOT honoured by `all_current()`:
+    a corpus-mutating consumer has its own drift check, and widening the meaning
+    of "current" everywhere is a far larger blast radius than the display problem
+    it solves. The re-point tool skips already-superseded rulings, so a second run
+    finds nothing and writes nothing.
+
+    **I WAS WRONG YESTERDAY, and the better evidence is the ink.**
+    `MAX_EXPLAINABLE_SHIFT = 5` (item 0AJ) was derived from shift MAGNITUDE
+    alone, and it misjudged the one case it was written for: mapping klal 10's
+    snapshot bbox onto the current alignment shows `כתבו` really is at w74 — the
+    ink and the letters agree at a shift of −11, so that ruling was HONOURED, not
+    lost. Genuine bbox-corroborated shifts reach −31. The magnitude bound is now
+    the FALLBACK, used only where no scan position was recorded; where a bbox
+    exists it decides. `audit_applied_decisions.py` goes **2 MISMATCH → 1**, and
+    the survivor is klal 1 w97, the hand-reverted punctuation case its own
+    docstring names as its motivating example.
+
+    **And the forward fix, so the class stops growing.** 55 of the 105 were
+    `manual_correction`, which snapshotted `{word_index, original_word}` and
+    nothing else — the structural reason half of them were unrecoverable from the
+    ink. `api_post_manual_correction` now records the bbox and page too, from the
+    geometry `_word_scan_position()` already computes for rendering; a word with
+    no aligned DocAI token (1–4% of a klal) records `bbox_unavailable` rather
+    than silently nothing.
+
+    Full suite **451 collected, 450 passed, 1 skipped**.
+
+
 0AO. **[2026-09-02, reviewer-requested] THE COUNT COLUMNS LINE UP, AND THE
     LEGEND EXPLAINS ITSELF.**
 
