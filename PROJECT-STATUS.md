@@ -113,6 +113,101 @@ reliability check, and every dispute still needs the ink or a different engine.
 > borrowing `2A`–`2Z`, which names a different lane and would misattribute the
 > work. Same rule as above: never reassign an ID once written.
 
+0AQ. **[2026-09-02] THE 8 POSITIONS WHERE DICTA'S CONSENSUS CONTRADICTS A HUMAN
+    RULING, itemised. TWO OF THEM LOOK LIKE THE CORPUS CARRYING AN EDITORIAL
+    EXPANSION AS IF IT WERE THE AUTHOR'S TEXT. OPEN.**
+
+    The Dicta preview reports these only as a count. Itemised at the reviewer's
+    request; nothing has been changed.
+
+    | klal · word | corpus | engines read | agreeing | ruled |
+    |---|---|---|---|---|
+    | 59 · 47 | כוותיה | כוותה | dicta+surya+vlm | 08-30, `lexical_proposal` |
+    | 74 · 203 | דגם | הגם | dicta+surya+vlm | 08-31, confirmed the stored text |
+    | 77 · 22 | וטומאות | וטמאות | dicta+surya | 08-31, manual |
+    | 77 · 24 | טומאות | טמאות | dicta+surya+vlm | 08-31, manual |
+    | **88 · 963** | ומתיר | **ומתי׳** | dicta+surya+vlm | 08-25, manual, *"LOW confidence"* |
+    | **91 · 191** | העניינים | **העניני׳** | dicta+surya+vlm | 08-24, manual |
+    | 92 · 326 | אליה | איה | dicta+surya+vlm | 08-15, ligature repair |
+    | 124 · 26 | אליה | איה | dicta+surya+vlm | 08-15, ligature repair |
+
+    **The two that matter (88 w963, 91 w191): three independent engines read a
+    printed ABBREVIATION with a geresh — `ומתי׳`, `העניני׳` — and the human
+    expanded it to a full word.** That cuts directly against success criterion #1
+    ("no paraphrase, no silent normalization"); klal 88's own note says LOW
+    confidence. If the ink shows an abbreviation, the corpus is carrying an
+    editorial expansion presented as the author's text. **Klal 77 w22/24 are the
+    same shape in spelling** — engines read defective (`טמאות`), corpus has plene
+    (`טומאות`), two adjacent words ruled by the same reviewer in the same minute.
+
+    **Klal 74 is settled** (the reviewer explicitly confirmed the stored text)
+    and **92/124 are the known alef-lamed ligature** — engines share the misread,
+    the human is right. But note a wrinkle worth chasing: **Lesson 24's premise
+    is that every engine reads the same ink, and Dicta does not** — it reads the
+    Jerusalem 1975/6 edition, not the Berlin scan. Either that printing sets the
+    same ligature or Dicta's agreement has another cause; Lesson 24 is
+    load-bearing and it is worth knowing which.
+
+    **DocAI cannot arbitrate any of the four contested ones.** All four fall
+    inside NON-MATCHING alignment blocks, so the primary OCR of the Berlin scan
+    has no placeable reading there. That is not a clean bill of health — it is
+    Lesson 15's flag (silence exactly where the sources are too divergent to
+    align), and the clustering is itself consistent with the corpus having moved
+    away from the ink. These need the scan; the dashboard links are
+    `/klal/88/word/963` and `/klal/91/word/191`.
+
+0AR. **[2026-09-02] HOW TO MAKE THE TEST SUITE BOOK-INDEPENDENT — the measured
+    plan. NOT STARTED.**
+
+    Reviewer: "I want to test the code not the material because this will be a
+    general purpose util." Measured where the coupling actually is:
+
+    | suite | tests | reads the real corpus | pins a klal id |
+    |---|---:|---:|---:|
+    | `test_pipeline_logic.py` | 316 | 4 | — |
+    | `test_witness_engine.py` | 5 | 0 | — |
+    | `test_corpus_invariants.py` | 50 | **30** | 0 |
+    | `test_review_server.py` | 67 | **62** | **23** |
+
+    **Three tiers wear one name, and that reframing is most of the answer.**
+    The engine tests (321) are already book-independent by construction. The ~30
+    corpus invariants are **not tests at all for a general-purpose tool** — they
+    assert that *this book's data* is well-formed, and belong behind a
+    `validate <book>` command; today a corpus REPAIR can turn the suite red,
+    which is backwards. Only the ~67 behaviour tests are the real problem.
+
+    **One structural blocker.** `corpus_io.REPO` is `dirname(dirname(__file__))`
+    and ~35 constants derive from it, so the corpus location is a function of
+    where the source file lives. There is exactly ONE env seam in the whole data
+    layer (`REVIEW_DECISIONS_PATH`), added for this same reason. **The
+    test-independence problem and the general-purpose problem are the same
+    problem**: a tool that cannot be pointed at another book at runtime cannot be
+    pointed at a fixture either. Add `SEFER_CORPUS_ROOT` + `--corpus`, honoured
+    by `repo_path()`, and both fall out. Resolution must be at CALL time — those
+    constants are evaluated at import, and reassigning afterwards silently does
+    nothing, the bug `review_decisions._resolve()` exists to document.
+
+    **The fixture corpus must be GENERATED, not written** (Lesson 13): a script
+    that emits a tiny `part1.json` + a small PDF via `fitz`, then runs the real
+    rebuild stages against it. It needs one of each condition the UI branches on:
+    a klal spanning a page break; both machine-resolved flags; a human decision;
+    an answered flag standing alone; a word-level `ai_flag`; witness rows with
+    and without a `word_index`; a `possible_omission` at `len(words)`; two
+    `delete` opcodes at one index; a punctuation candidate; an editorial mark; a
+    title with a terminal period; a word whose page ≠ its klal's start page; and
+    two identical adjacent words. The last two are exactly the conditions behind
+    this week's real bugs (the dead deep-link branch, and the klal 68 deletion).
+
+    **And one gated guard, or it decays**: assert that no test outside the
+    validator module resolves a path under the real corpus root.
+
+    Order: the seam (no test changes, independently useful) → fixture generator
+    plus a `conftest.py` (there is none today) → move the 23 pinned UI tests →
+    split the invariants → add the guard. Honest risk: a fixture is a second
+    corpus, and if it drifts from real shapes the tests pass against a book that
+    does not exist — mitigated by generating it and keeping a few real-corpus
+    smoke tests.
+
 0AP. **[2026-09-02] 40 STALE ADDRESSES RE-POINTED FROM THE INK; the ledger
     learned to say "superseded"; and yesterday's MAX_EXPLAINABLE_SHIFT was WRONG
     about the very case it was written for.**
