@@ -128,9 +128,10 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
   font-weight: 500;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;      /* the reference sits in the MIDDLE of its pane */
   gap: var(--sp-3);
   direction: ltr;
+  position: relative;           /* so the settings gear can pin to the edge */
   /* A FIXED height, not a min-height. All three bars sit on one line across the
      top of the window, and whichever one happened to hold the tallest control
      was setting its own height - the index pane stood 2px proud of the scan pane
@@ -145,41 +146,58 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
    The titles bookend; the two references sit together in the middle, which is
    what puts real whitespace between the title and the reference (reviewer: "need
    whitespace btw title and klal") without any pane needing its own rule. */
-.ph-mid { display: flex; align-items: baseline; gap: var(--sp-2); min-width: 0; }
-.ph-end { display: flex; align-items: center; gap: var(--sp-2); min-width: 0; }
+.ph-mid {
+  display: flex; align-items: baseline; min-width: 0;
+  /* A thin rule between slots instead of raw whitespace - it reads as one line
+     with parts, rather than four things that happen to be near each other. */
+  gap: var(--sp-3);
+}
+/* PHYSICAL border-left, not an ::before with a logical margin. The Hebrew slots
+   are `direction: rtl`, so a pseudo-element inside one renders at ITS start edge
+   - the right - which put the rule on the wrong side of the Hebrew items and
+   stacked two of them together next to the Latin ones. The flex ROW is laid out
+   ltr regardless of what each item's own text direction is, so the left edge is
+   unambiguous here and a physical property is the correct tool. */
+.ph-mid > * + * {
+  border-left: 1px solid var(--header-line);
+  padding-left: var(--sp-3);
+}
 .ph-title, .ph-ref { white-space: nowrap; }
 .ph-he {
   direction: rtl; unicode-bidi: isolate;
   font-family: 'Frank Ruhl Libre', 'David', serif;
 }
-.ph-title.ph-he { font-size: 16px; font-weight: 700; flex-shrink: 0; line-height: 1.1; }
-.ph-ref.ph-he { font-size: 13.5px; color: var(--header-muted); }
+/* The title is a PEER of the reference beside it, not a heading over it
+   (reviewer 2026-09-02: "make them the same size and boldness - the hebrew is
+   darker and bigger than the other hebrew in the header"). It was 16px/700 in
+   full-strength ink against 13.5px/500 muted, so it read as a title with
+   metadata trailing it rather than as one line. One size per SCRIPT, because
+   Hebrew and Latin do not have the same optical size at the same px. */
+.ph-title.ph-he, .ph-ref.ph-he {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--header-muted);
+  flex-shrink: 0;
+  line-height: 1.2;
+}
 /* The English reference yields FIRST when a pane is too narrow: it is the slot
    whose Hebrew twin sits immediately to its left, so an ellipsis here costs the
    least. The index pane clears its content by only ~5px at 380px, and a work
    with a longer section name than "Klalei HaGemara" would otherwise break the
    bar rather than shorten a word. */
-.ph-ref.ph-en {
-  font-size: 11px;
+.ph-ref.ph-en, .ph-title.ph-en {
+  font-size: 11.5px;
+  font-weight: 500;
   color: var(--header-muted);
   font-variant-numeric: tabular-nums;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-/* The quietest thing in the bar, and the FIRST to go when a pane is too narrow.
-   It is the one slot whose content is already on screen twice over - the Hebrew
-   title says the same thing two slots to its left, and the book's own running
-   head prints the Hebrew, not the English. `flex-shrink` plus `overflow:hidden`
-   would leave a half-word ("YAD MAL"), which is worse than nothing, so it is
-   dropped whole below the width at which it fits. */
-.ph-title.ph-en {
-  font-size: 9.5px;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--header-muted);
-  flex-shrink: 0;
-}
+/* Peer of the English reference, for the same reason as the Hebrew pair above.
+   The uppercase + letter-spacing treatment went with it: small caps read as a
+   LABEL, which is the opposite of the "one line of peers" this bar is now. */
+.ph-title.ph-en { flex-shrink: 0; }
 /* An empty slot must take no room, or the gaps double up before /api/corpus
    lands and on the panes whose reference is not set yet. */
 .ph-title:empty, .ph-ref:empty { display: none; }
@@ -697,9 +715,13 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
   gap: 6px;
   border-top-left-radius: 6px;
   box-shadow: 0 -1px 6px rgba(0,0,0,0.18);
-  opacity: 0.95;
 }
-#legend:hover { opacity: 1; }
+/* NO element opacity. It was 0.95, which made the four nav rows sitting behind
+   this fixed box GHOST THROUGH the counts - klal titles overprinting numbers, in
+   the one place on screen that is nothing but numbers. Element opacity applies to
+   the background as well as the text, so "slightly transparent" is never just a
+   softer panel; if this ever wants to feel lighter, that belongs in the
+   background colour, not in opacity. */
 #legend .legend-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 #legend i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; flex-shrink: 0; }
 #legend .legend-count { margin-left: auto; font-weight: 700; font-variant-numeric: tabular-nums; }
@@ -775,6 +797,10 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
    away somewhere - settings icon?" A preference set once does not belong beside
    the two filters that get toggled while reading. */
 #settings-btn {
+  position: absolute;
+  right: var(--sp-4);
+  top: 50%;
+  transform: translateY(-50%);
   background: transparent;
   border: 1px solid var(--header-line);
   color: var(--header-fg);

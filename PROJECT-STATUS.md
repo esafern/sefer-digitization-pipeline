@@ -113,6 +113,51 @@ reliability check, and every dispute still needs the ink or a different engine.
 > borrowing `2A`–`2Z`, which names a different lane and would misattribute the
 > work. Same rule as above: never reassign an ID once written.
 
+0AM. **[2026-09-02, reviewer-requested] THE PANE HEADERS READ AS ONE CENTRED
+    LINE OF PEERS — and the legend stopped letting the klal list show through it.**
+
+    Reviewer: "center the header in each pane. move the titles a bit closer to
+    the center and make them the same size and boldness - the hebrew is darker
+    and bigger than the other hebrew in the header."
+
+    Measured before changing anything: the Hebrew title was **16px / weight 700 /
+    full-strength ink** against a Hebrew reference at **13.5px / 500 / muted**,
+    and the two TITLES did not match each other either (9.5px uppercase English
+    against an 11px reference). So the bar read as a heading with metadata
+    trailing it. All four slots are now peers — one size per SCRIPT (13.5px
+    Hebrew, 11.5px Latin, because the two do not have the same optical size at
+    the same px), one weight, one colour — and the English title lost its
+    uppercase/letter-spacing treatment, which reads as a LABEL and was the
+    opposite of the intent.
+
+    The slots also moved into a single group that centres as a unit, rather than
+    bookending the bar with the reference stranded between them. The settings
+    gear left the flow (`position: absolute`) because a control sitting in the
+    row would push the centred text off-centre by half its width, in one pane
+    only.
+
+    **A separator bug, found by looking at the render.** The thin rule between
+    slots was an `::before` with a logical `margin-inline-end` — and the Hebrew
+    slots are `direction: rtl`, so the pseudo-element rendered at ITS start edge,
+    the right, stacking two rules together beside the Latin slots and leaving a
+    gap where one belonged. The flex ROW is laid out ltr regardless of each
+    item's own text direction, so a physical `border-left` is the correct tool.
+    (I also misread the first screenshot as showing the two Hebrew slots in the
+    wrong ORDER; measuring their offsets showed 753 / 810 / 868 / 931, correct —
+    the glyphs inside each box read RTL, which is what fooled the eye. Measured
+    rather than "fixed".)
+
+    **The legend was translucent.** `opacity: 0.95` applies to the background as
+    well as the text, so the four nav rows sitting behind that fixed box ghosted
+    through the counts — klal titles overprinting numbers, in the one place on
+    screen that is nothing but numbers. Removed; if it ever wants to feel
+    lighter that belongs in the background colour.
+
+    Three tests added, asserting the RELATIONSHIP (every Hebrew slot matching
+    every other, every Latin slot matching every other, each group centred to
+    within 1px) rather than the particular sizes, which are a design choice that
+    may move again. Full suite **444 collected, 443 passed, 1 skipped**.
+
 0AL. **[2026-09-02] THE ZOOM LADDER COULD NOT REACH 100%, and a missing
     /api/corpus rendered as a blank space with nothing in the console. FIXED.**
 

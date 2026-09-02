@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Yad Malachi — Correction Review</title>
-<link rel="stylesheet" href="/app.css?v=13">
+<link rel="stylesheet" href="/app.css?v=14">
 </head>
 <body>
 
@@ -27,11 +27,11 @@
         <span class="ph-ref ph-he" id="nav-ref-he"></span>
         <span class="ph-ref ph-en" id="nav-ref-en"></span>
       </span>
-      <span class="ph-end">
-        <!-- The settings tray. Reviewer: "don't put click word on link up there
-             on the index pane, hide it away somewhere - settings icon?" -->
-        <button id="settings-btn" type="button" title="Settings" aria-expanded="false">&#9881;</button>
-      </span>
+      <!-- Pinned to the right edge and OUT of the flow: a control sitting in the
+           row would push the centred reference off-centre by half its width, and
+           only in this one pane. Reviewer: "don't put click word on link up
+           there on the index pane, hide it away somewhere - settings icon?" -->
+      <button id="settings-btn" type="button" title="Settings" aria-expanded="false">&#9881;</button>
     </div>
     <div id="settings-popover" hidden>
       <label><input type="checkbox" id="filter-copy-link" checked> Copy word link on click</label>
@@ -68,20 +68,16 @@
          one of the three without a bar, which is what made the other two read as
          heavy - and its reference (which klal you are reading) earns the line on
          its own. Same four slots as the other two. -->
+    <!-- ONE centred group, all four slots inside it. Reviewer 2026-09-02:
+         "center the header in each pane. move the titles a bit closer to the
+         center". The titles used to bookend the bar at its far edges with the
+         reference stranded between them, so the pane read as three islands; now
+         they sit together and the group centres as a unit. -->
     <div id="text-header" class="pane-header">
-      <span class="ph-title ph-he" data-slot="title-he"></span>
       <span class="ph-mid">
+        <span class="ph-title ph-he" data-slot="title-he"></span>
         <span class="ph-ref ph-he" id="text-ref-he"></span>
         <span class="ph-ref ph-en" id="text-ref-en"></span>
-      </span>
-      <!-- No English title here, nor in the scan bar. The four-slot order put the
-           work's name at both ends of all three bars, so it appeared six times
-           across the top of one window - on a screen whose complaint was clutter.
-           Dropped from the two panes that repeat it (reviewer: "yes drop the
-           extra eng titles"); the index pane keeps one, and the Hebrew title
-           stays everywhere because the BOOK prints it as a running head on every
-           page, which is what the reviewer is matching against. -->
-      <span class="ph-end">
         <span class="ph-title ph-en" data-slot="title-en"></span>
       </span>
     </div>
@@ -102,7 +98,6 @@
         <span class="ph-ref ph-he" id="klal-indicator"></span>
         <span class="ph-ref ph-en" id="page-indicator">Page —</span>
       </span>
-      <span class="ph-end"></span>
     </div>
     <!-- The overlay controls are siblings of #scan-viewer, NOT children of it.
          #scan-viewer is the element that SCROLLS, and an absolutely-positioned
@@ -183,6 +178,6 @@
     <div class="panel-body" id="manual-panel-body"></div>
   </div>
 
-  <script src="/app.js?v=13"></script>
+  <script src="/app.js?v=14"></script>
 </body>
 </html>

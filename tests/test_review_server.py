@@ -2481,3 +2481,51 @@ def test_a_missing_corpus_endpoint_says_so_instead_of_rendering_nothing(server, 
     assert "restart the server" in named[0], named[0]
     # ...and the dashboard must still WORK without it - the title is chrome.
     assert page.locator(".nav-item").count() > 0, "a missing title endpoint broke the whole page"
+
+
+def test_the_pane_headers_are_centred_and_their_slots_are_peers(server, page):
+    """Reviewer, 2026-09-02: "center the header in each pane. move the titles a
+    bit closer to the center and make them the same size and boldness - the
+    hebrew is darker and bigger than the other hebrew in the header."
+
+    The Hebrew title was 16px/700 in full-strength ink beside a 13.5px/500 muted
+    Hebrew reference, so it read as a heading with metadata trailing it rather
+    than as one line. Asserts the RELATIONSHIP - every Hebrew slot matching every
+    other, every Latin slot matching every other - not the particular sizes,
+    which are a design choice that may move again.
+    """
+    _open_dashboard(page, server, klal_id=12)
+    page.wait_for_timeout(600)
+    data = page.evaluate("""() => {
+        const out = { centring: [], he: [], en: [] };
+        for (const id of ['nav-header', 'text-header', 'scan-header']) {
+            const h = document.getElementById(id);
+            const hr = h.getBoundingClientRect();
+            const g = h.querySelector('.ph-mid').getBoundingClientRect();
+            out.centring.push({ id, off: Math.round((g.left + g.right) / 2 - (hr.left + hr.right) / 2) });
+            for (const e of h.querySelectorAll('.ph-title, .ph-ref')) {
+                const cs = getComputedStyle(e);
+                const key = e.classList.contains('ph-he') ? 'he' : 'en';
+                out[key].push(cs.fontSize + '/' + cs.fontWeight + '/' + cs.color);
+            }
+        }
+        return out;
+    }""")
+    for row in data["centring"]:
+        assert abs(row["off"]) <= 1, f"{row['id']} content is {row['off']}px off centre"
+    assert len(set(data["he"])) == 1, f"the Hebrew slots do not match each other: {set(data['he'])}"
+    assert len(set(data["en"])) == 1, f"the Latin slots do not match each other: {set(data['en'])}"
+    assert page.test_errors == []
+
+
+def test_the_legend_does_not_let_the_klal_list_show_through_it(server, page):
+    """The legend is a FIXED box over the index pane's own bottom corner, and it
+    carried `opacity: 0.95` - which applies to the background too, so the four
+    nav rows behind it ghosted through the counts. Klal titles overprinting
+    numbers, in the one place on screen that is nothing but numbers."""
+    _open_dashboard(page, server)
+    opacity = page.evaluate("() => getComputedStyle(document.getElementById('legend')).opacity")
+    assert opacity == "1", f"#legend is translucent ({opacity}); the nav rows behind it show through"
+    bg = page.evaluate("() => getComputedStyle(document.getElementById('legend')).backgroundColor")
+    assert "rgba" not in bg or bg.endswith(", 1)"), f"#legend's background is translucent: {bg}"
+    assert page.test_errors == []
