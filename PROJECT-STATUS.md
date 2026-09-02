@@ -113,6 +113,59 @@ reliability check, and every dispute still needs the ink or a different engine.
 > borrowing `2A`–`2Z`, which names a different lane and would misattribute the
 > work. Same rule as above: never reassign an ID once written.
 
+0AN. **[2026-09-02] THE INDEX PENNANT AND THE TEXT PANE ANSWERED DIFFERENT
+    QUESTIONS WITH THE SAME WORD — 15 of 222 klalim. FIXED, along with four
+    reviewer-requested trims.**
+
+    Reported as "117 shows flagged in the middle pane but not in the index
+    pane". Klal 117 turned out to be neither: its klal-level flag is clear and
+    its one word-level flag at w43 is ANSWERED, so nothing is flagged — the
+    button simply read `⚑ flag`, an affordance that scans as a status. It now
+    says `⚑ Flag klal` when clear and `⚑ Flagged` when set.
+
+    **The sweep found the real defect, in the mirror direction.** The index
+    pennant means "anything in this klal is flagged", klal-level OR word-level;
+    `api_klal`'s `needs_revisit` is the klal-level flag ALONE — which is correct,
+    because the text pane's button toggles exactly that and would refuse to clear
+    what it displayed otherwise. So the two panes disagreed on **15 of 222**
+    klalim (17, 23, 71, 75, 81, 91, 138, 140, 151, 158, …), every one of them
+    index-says-flagged / text-says-not. The text pane now shows an `⚑ N words`
+    marker for the open word-level flags, so it EXPLAINS the pennant instead of
+    contradicting it.
+
+    **The first fix was itself a second encoding and did not even render.** I
+    added `word_flags_open` to `/api/klal` — a fresh copy of a rule `api_klalim`
+    already computes as `ai_flag_count`, and invisible anyway, because the klal
+    heading is built from the NAV payload and never saw the field. Removed;
+    the marker reads `ai_flag_count`, which is the same rule that builds the
+    pennant, computed once. That field's name predates word-level flags being
+    raised by anything other than an AI pass; the name is stale, the meaning is
+    exactly "open word-level revisit flags".
+
+    **Four trims, all reviewer-requested.**
+
+    - The klal heading drops the section name (constant down the whole pane, and
+      the header bar already names the work) and sets both numerals at one size —
+      the same fact in two scripts, so sizing one above the other implied a
+      hierarchy that is not there.
+    - The flag pill sits WITH its heading. `margin-inline-start: auto` had been
+      pushing it to the far end of a pane-wide row, ~490px from the heading it
+      belongs to.
+    - The nav shows only the red open count at rest; the resolved and decided
+      badges appear on hover or on the active row. Three coloured pills per row
+      made the column read as decoration and buried the one number asking for
+      something. Two more klalim now fit on screen.
+    - The legend is one 40px line instead of a 124px block of five rows.
+
+    **One suggestion of mine was simply wrong and is withdrawn.** I had proposed
+    defaulting the scan to fit-width; measured, it already IS — the page uses 94%
+    of the viewer's width (the rest is padding) and its full height fits without
+    scrolling. There was nothing to reclaim.
+
+    Six tests added. Two initially SKIPPED against the fixture's empty ledger and
+    were rewritten to create their own conditions — a test that skips is not a
+    test. Full suite **447 collected, 446 passed, 1 skipped**.
+
 0AM. **[2026-09-02, reviewer-requested] THE PANE HEADERS READ AS ONE CENTRED
     LINE OF PEERS — and the legend stopped letting the klal list show through it.**
 

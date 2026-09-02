@@ -376,8 +376,29 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
   display: flex;
   gap: var(--sp-3);
   align-items: center;
+  /* Packed against the heading (reviewer 2026-09-02: put the flag pill with its
+     heading). The row is as wide as the pane, so without this the controls
+     drifted to the far edge and read as belonging to nothing. `start` in an RTL
+     column is the right-hand side, where the heading is. */
+  justify-content: flex-start;
 }
-.klal-block .klal-head .sec { font-weight: 500; color: var(--ink-faint); font-size: 11.5px; }
+/* .sec (the section name) was dropped from the heading 2026-09-02 - it never
+   changed down the whole pane and the header bar already names the work. The
+   rule goes with it rather than lingering as a selector for nothing. */
+/* Both numerals at ONE size: the same fact in two scripts, so sizing one above
+   the other implied a hierarchy that is not there. */
+.klal-block .klal-head .kid-n { font-size: var(--marker-size); }
+.klal-wordflags {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--pending);
+  border: 1px solid var(--pending);
+  border-radius: 999px;
+  padding: 1px 8px;
+  cursor: help;
+  white-space: nowrap;
+}
 /* The section marker, larger and bold in the text pane (reviewer 2026-08-31) -
    it is the reader's place-keeper down a long scrolling column. Uses the shared
    role tokens so the index pane's marker can never drift away from it. */
@@ -437,7 +458,9 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
   font-family: 'Inter', sans-serif;
   padding: 2px 9px;
   cursor: pointer;
-  margin-inline-start: auto;
+  /* `margin-inline-start: auto` used to push this to the far end of a
+     pane-wide row, ~490px from the heading it belongs to - a control floating
+     against nothing. Reviewer 2026-09-02: put the pill with its heading. */
   transition: all .12s ease;
 }
 .klal-flag-btn:hover { border-color: var(--pending); color: var(--pending); }
@@ -639,6 +662,18 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
   color: white; border-radius: 10px;
   font-size: 10px; font-family: 'Inter', sans-serif; padding: 1px 6px; flex-shrink: 0;
 }
+/* ONE badge at rest - the red one, which is the only count that is asking the
+   reviewer for something. Reviewer 2026-09-02: "show the red open count and the
+   rest on hover". Three coloured pills on every row made the column read as
+   decoration, and the number that matters was the hardest to pick out of it.
+   The others are still there, one hover away, and the row does not reflow when
+   they appear because the space is reserved either way. */
+.nav-item .ncount-machine,
+.nav-item .ncount-decided { visibility: hidden; }
+.nav-item:hover .ncount-machine,
+.nav-item:hover .ncount-decided,
+.nav-item.active .ncount-machine,
+.nav-item.active .ncount-decided { visibility: visible; }
 /* Two distinct badges, not one undifferentiated count: red = still open
    (needs a decision), green = already decided - so the queue length and
    the actual remaining work are visually different at a glance. */
@@ -722,7 +757,29 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
    the background as well as the text, so "slightly transparent" is never just a
    softer panel; if this ever wants to feel lighter, that belongs in the
    background colour, not in opacity. */
-#legend .legend-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+/* ONE LINE, not five rows (reviewer 2026-09-02: "try 5 let's see"). The block
+   was the tallest thing in the index pane's corner and the loudest, for four
+   numbers. Each state is now a swatch + its count, wrapping only if the pane is
+   too narrow; the labels moved into `title` so the vocabulary is still one hover
+   away without spending five rows on it. */
+#legend { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 10px 14px; }
+#legend .legend-row { display: flex; align-items: center; gap: 5px; }
+#legend .legend-label { display: none; }
+#legend .legend-count { margin-left: 0; }
+#legend .legend-row-sub { padding-left: 0; }
+/* The recorded total has no swatch, so it needs a word to be readable at all. */
+/* The recorded total is the one entry with no colour swatch, so it needs a word
+   or it is an unexplained number. "Human-Decided (total recorded)" is three
+   times longer than anything else on the line and was the only thing forcing a
+   wrap, so the ROW carries a short standing label and the full wording stays in
+   its `title`. (Written as the row's own ::before, not the label's ::after - a
+   pseudo-element inside a clipped element is clipped with it, which is how the
+   first attempt rendered nothing at all.) */
+#legend .legend-row-sub::before {
+  content: 'recorded';
+  opacity: 0.75;
+  font-size: 10.5px;
+}
 #legend i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; flex-shrink: 0; }
 #legend .legend-count { margin-left: auto; font-weight: 700; font-variant-numeric: tabular-nums; }
 

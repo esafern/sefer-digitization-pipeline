@@ -2529,3 +2529,98 @@ def test_the_legend_does_not_let_the_klal_list_show_through_it(server, page):
     bg = page.evaluate("() => getComputedStyle(document.getElementById('legend')).backgroundColor")
     assert "rgba" not in bg or bg.endswith(", 1)"), f"#legend's background is translucent: {bg}"
     assert page.test_errors == []
+
+
+def test_the_klal_heading_keeps_its_flag_control_beside_it(server, page):
+    """Reviewer, 2026-09-02: put the flag pill with its heading, and drop the
+    section name.
+
+    `.klal-flag-btn` carried `margin-inline-start: auto` in a pane-wide flex row,
+    which pushed it ~490px away from the heading it belongs to - a control
+    floating against nothing. The section name is gone because it never changed
+    down the whole pane and the header bar already names the work.
+    """
+    _open_dashboard(page, server, klal_id=12)
+    page.wait_for_timeout(800)
+    geom = page.evaluate("""() => {
+        const h = document.querySelector('#klal-block-12 .klal-head');
+        const kid = h.querySelector('.kid').getBoundingClientRect();
+        const btn = h.querySelector('.klal-flag-btn').getBoundingClientRect();
+        const gap = Math.round(Math.max(kid.left, btn.left) - Math.min(kid.right, btn.right));
+        const sizes = [...h.querySelectorAll('.kid-n')]
+            .map(e => getComputedStyle(e).fontSize);
+        return { gap, sizes, hasSection: !!h.querySelector('.sec') };
+    }""")
+    assert not geom["hasSection"], "the section name is still in the klal heading"
+    assert geom["gap"] <= 40, f"the flag control sits {geom['gap']}px from its heading"
+    # "make both numbers the same size" - they are the same fact in two scripts.
+    assert len(set(geom["sizes"])) == 1, f"the two klal numerals differ in size: {geom['sizes']}"
+    assert page.test_errors == []
+
+
+def test_only_the_open_count_shows_on_a_nav_row_until_it_is_hovered(server, page):
+    """Reviewer, 2026-09-02: "show the red open count and the rest on hover."
+    Three coloured pills on every row made the column read as decoration, and the
+    one number actually asking for something was the hardest to pick out."""
+    # Targets the MACHINE-RESOLVED badge, which comes from the corpus and so
+    # exists whatever the ledger holds. Keying on the decided badge made this
+    # skip against the fixture's empty ledger, and a test that skips is not a
+    # test.
+    klal_id = next((r["klal_id"] for r in _get_json(server, "/api/klalim?part=1")
+                    if r["machine_resolved_count"] and r["machine_disputed_count"]), None)
+    assert klal_id is not None, "no klal carries both an open and a resolved count"
+    _open_dashboard(page, server, klal_id=klal_id)
+    page.wait_for_timeout(400)
+    vis = """(id) => {
+        const r = document.getElementById('nav-' + id);
+        const v = sel => { const e = r.querySelector(sel);
+                           return e ? getComputedStyle(e).visibility : null; };
+        return { open: v('.ncount-open'), machine: v('.ncount-machine') };
+    }"""
+    # setActiveKlal marks the row `.active`, which reveals the extra counts by
+    # design - measure a row the reviewer is NOT on.
+    other = next(r["klal_id"] for r in _get_json(server, "/api/klalim?part=1")
+                 if r["klal_id"] != klal_id and r["machine_resolved_count"] and r["machine_disputed_count"])
+    at_rest = page.evaluate(vis, other)
+    assert at_rest["machine"] == "hidden", f"the resolved badge is showing at rest: {at_rest}"
+    assert at_rest["open"] == "visible", f"the open count must stay visible: {at_rest}"
+    page.hover(f"#nav-{other}")
+    page.wait_for_timeout(250)
+    assert page.evaluate(vis, other)["machine"] == "visible", (
+        "hovering the row did not reveal the other counts")
+    assert page.test_errors == []
+
+
+def test_the_text_pane_accounts_for_the_index_pennant(server, page):
+    """REGRESSION 2026-09-02, reviewer: "117 shows flagged in the middle pane but
+    not in the index pane."
+
+    The index pennant means "anything in this klal is flagged", klal-level OR
+    word-level; the text pane's button toggles the KLAL-level flag alone, and
+    would refuse to clear what it displayed if it showed anything more. So the
+    two panes answered different questions with the same word, and 15 of 222
+    klalim showed a pennant in the index against an unflagged button in the text.
+    The pane now names the open word-level flags as their own marker.
+    """
+    # Create the condition rather than hunt for it: the fixture's ledger is
+    # empty, so nothing is flagged at all and this would otherwise skip.
+    target = 30
+    status, _ = _post_json(server, "/api/decisions/klal_flag", {
+        "klal_id": target, "word_index": 5, "needs_revisit": True,
+        "note": "a word-level flag, with no klal-level flag beside it",
+    })
+    assert status == 201
+    nav = next(r for r in _get_json(server, "/api/klalim?part=1") if r["klal_id"] == target)
+    klal = _get_json(server, f"/api/klal/{target}")
+    assert nav["needs_revisit"], "a word-level flag must raise the index pennant"
+    assert not klal["needs_revisit"], "...without claiming the KLAL itself is flagged"
+    assert nav["ai_flag_count"] >= 1, "the open word-level flag is not being counted"
+
+    _open_dashboard(page, server, klal_id=target)
+    page.wait_for_timeout(800)
+    assert page.locator(f"#nav-{target} .nflag").count() == 1, "the index pennant vanished"
+    marker = page.locator(f"#klal-block-{target} .klal-wordflags")
+    assert marker.count() == 1, (
+        f"klal {target} shows a pennant in the index and nothing in the text pane")
+    assert "word" in marker.inner_text()
+    assert page.test_errors == []

@@ -983,6 +983,9 @@ function buildLegend() {
       ? `${totals.human} word(s) are drawn as human-decided in the text right now. A ruling stops being drawn once it is settled - the rebuild drops its candidate entry - so this is NOT the number of rulings on record; see the row below.`
       : `Show all ${totals[state]} \u2014 ${label}`;
     const shape = state === 'machine' ? 'border-radius:2px;border:1.5px dotted ' + color + ';background:transparent;' : 'background:' + color + ';';
+    // The label is hidden by CSS in the one-line layout, so the row itself has
+    // to carry the vocabulary - otherwise the legend is four unexplained numbers.
+    row.title = `${shown}: ${totals[state]}. ` + row.title;
     row.innerHTML = `<i style="${shape}"></i><span class="legend-label">${shown}</span><b class="legend-count">${totals[state]}</b>`;
     legend.appendChild(row);
 
@@ -1009,7 +1012,7 @@ function buildLegend() {
   aiRow.className = 'legend-row legend-clickable';
   aiRow.dataset.bucket = LEGEND_BUCKET.ai;
   aiRow.dataset.label = 'AI-Flagged';
-  aiRow.title = `Show all ${aiTotal} \u2014 AI-Flagged`;
+  aiRow.title = `AI-Flagged: ${aiTotal}. Show all ${aiTotal}.`;
   aiRow.innerHTML = `<i style="border-bottom:3px dashed #805ad5;background:transparent;"></i><span class="legend-label">AI-Flagged</span><b class="legend-count">${aiTotal}</b>`;
   legend.appendChild(aiRow);
 }
@@ -1117,14 +1120,51 @@ function buildPlaceholders() {
     // above the text"). The heading is not a separate string in the book - it IS
     // the klal's opening words, set in larger type - so showing it above the text
     // renders it twice. It is styled IN PLACE instead, see markTitleRun() below.
-    const kmark = k.gematria ? `כלל ${k.klal_id} · ${escapeHtml(k.gematria)}` : `כלל ${k.klal_id}`;
-    head.innerHTML = `<span class="kid">${kmark}</span>` +
-      `<span class="sec">${escapeHtml(k.section)}</span>`;
+    // The section name is GONE from here (reviewer 2026-09-02: "drop the sec
+    // name"). It never changes down the whole pane, and the header bar above
+    // already names the work; a constant repeated 222 times is furniture, not
+    // information. The two numerals are one size now ("make both numbers the
+    // same size") - they are the same fact in two scripts, and sizing one above
+    // the other implied a hierarchy that is not there.
+    const kmark = k.gematria
+      ? `כלל <span class="kid-n">${k.klal_id}</span> · <span class="kid-n">${escapeHtml(k.gematria)}</span>`
+      : `כלל <span class="kid-n">${k.klal_id}</span>`;
+    head.innerHTML = `<span class="kid">${kmark}</span>`;
     const flagBtn = document.createElement('button');
     flagBtn.className = 'klal-flag-btn' + (k.needs_revisit ? ' active' : '');
-    flagBtn.textContent = k.needs_revisit ? '⚑ flagged' : '⚑ flag';
+    // "flag" read as a STATUS rather than a control - which is what the reviewer
+    // hit on klal 117, whose klal-level flag is clear and whose one word flag is
+    // answered: nothing is flagged, and the button still said "flag". The verb
+    // is explicit now, and only the active state says "Flagged".
+    flagBtn.textContent = k.needs_revisit ? '⚑ Flagged' : '⚑ Flag klal';
+    flagBtn.title = k.needs_revisit
+      ? 'This klal is flagged for revisit - click to review or clear'
+      : 'Flag this klal for revisit';
     flagBtn.onclick = (e) => { e.stopPropagation(); openKlalFlagPanel(k.klal_id); };
     head.appendChild(flagBtn);
+    // ...and the word-level flags the INDEX pennant is counting, which the klal
+    // button deliberately does not (it toggles the klal-level flag alone). Both
+    // panes now tell the same story instead of answering different questions
+    // with the same word - 15 of 222 klalim showed a pennant in the index and an
+    // unflagged button here (reviewer: "117 shows flagged in the middle pane but
+    // not in the index pane").
+    //
+    // `ai_flag_count` IS the open-word-level-flag count: api_klalim computes it
+    // with the very rule that builds the pennant, and it is the name that field
+    // has carried since word-level flags were only ever raised by an AI pass. A
+    // second field on /api/klal would have been a second encoding of one rule,
+    // which is this file's most-repeated defect - and the first attempt was
+    // exactly that, and did not even render, because THIS head is built from the
+    // nav payload and never saw it.
+    const openWordFlags = k.ai_flag_count || 0;
+    if (openWordFlags) {
+      const wf = document.createElement('span');
+      wf.className = 'klal-wordflags';
+      wf.textContent = `⚑ ${openWordFlags} word${openWordFlags === 1 ? '' : 's'}`;
+      wf.title = `${openWordFlags} word-level revisit flag(s) still open in this klal. `
+               + 'This is what the index pennant is showing; clear them from each word\u2019s own panel.';
+      head.appendChild(wf);
+    }
     block.appendChild(head);
 
     const body = document.createElement('div');
