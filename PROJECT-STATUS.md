@@ -768,6 +768,44 @@ reliability check, and every dispute still needs the ink or a different engine.
     It is just not the same defect as a lost correction, and reporting 105 lost
     corrections was wrong.
 
+    **RECOVERABILITY, measured 2026-09-02** (reviewer: "looking at the first two
+    in klal 1 I see the corrected word earlier in the klal — can we recover them
+    all?"). No — 43 of 105 can be re-pointed mechanically, and the rest cannot:
+
+    | evidence | rulings | |
+    |---|---:|---|
+    | snapshot bbox AND text agree | **40** | two independent signals, Lesson 9 satisfied |
+    | deletion carrying a bbox | 3 | position known, nothing to text-match |
+    | text only, exactly one occurrence | 21 | ONE signal — see the caveat below |
+    | bbox present, signals disagree | 7 | needs a human |
+    | text only, several occurrences | 20 | ambiguous by construction |
+    | no evidence at all | 14 | the word is gone |
+
+    **The 21 single-signal ones are not safe as a class.** Their implied shifts
+    include **−108 and −107**, which is the exact shape of the false relocation
+    that `MAX_EXPLAINABLE_SHIFT` was added to catch (klal 10's was unique in its
+    klal and −11 away, and it was a different occurrence of the same word). A
+    unique text match is not evidence of position — that was measured and
+    rejected once already.
+
+    **Two things fall out of this.**
+
+    - **55 of the 105 are `manual_correction`, which snapshots no scan position
+      at all** — `{word_index, original_word}` and nothing else. That is the
+      structural reason half of this class is unrecoverable from the ink, and it
+      is a FORWARD fix: `api_post_manual_correction` could snapshot the bbox at
+      decision time, since `_word_scan_position()` already computes exactly that
+      for rendering. Every future manual ruling would then survive a reindex.
+    - **Genuine shifts reach −31** among the 40 two-signal recoveries, well past
+      the ±5 `MAX_EXPLAINABLE_SHIFT` set in `audit_applied_decisions.py` on
+      2026-09-01. Not a contradiction — that constant governs a narrower
+      population (decisions carrying an apply_event, where measured legitimate
+      shifts ran −3..+2) — but bbox evidence is a better basis for that bound
+      than the empirical range, and it should be re-derived from it.
+
+    Nothing has been re-pointed: the ledger is append-only and protected, and
+    re-pointing is a write to it. Awaiting an explicit go-ahead.
+
     `unknown` is mostly `witness_choice`, which snapshots `docai_reading` vs
     `tesseract_reading` and never records the stored word, plus the records
     carrying a **null `chosen_text`** — the 2026-09-01 review's finding #3, still
