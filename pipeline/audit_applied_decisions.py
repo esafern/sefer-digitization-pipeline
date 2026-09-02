@@ -216,6 +216,42 @@ def expected_span(decision):
     return (decision.get("chosen_text") or "").split()
 
 
+# How far a legitimately-shifted decision can have moved before its relocation
+# stops being credible.
+#
+# ADDED 2026-09-01 (code review finding #1). find_span() searches the WHOLE
+# klal, so the relocation below accepted a hit at any distance - and one did:
+# klal 10's applied candidate_choice claims `כתבו` at w85, the corpus has `למד`
+# there and `כתבו` at w74, ELEVEN words away and a plainly different occurrence
+# in a klal whose applies shift by one. It was being reported as "reflected at
+# word_index 74 (-11)" and, because the drift list only printed under an env
+# var, printed nowhere. That single reclassification moved the headline from
+# 57 MISMATCH to 1 - so the one thing this script exists to catch, a correction
+# that silently stopped being true, was being absorbed by the feature meant to
+# reduce noise around it.
+#
+# Measured over all 56 relocations on the live corpus: legitimate shifts span
+# -3..+2, and 44 of them are exactly ±1. The outlier is -11, alone beyond ±3.
+#
+# Uniqueness was tried first as the discriminator and is WRONG - it was measured
+# rather than assumed, which is the only reason it did not ship: klal 10's false
+# relocation is the one case whose span occurs EXACTLY ONCE in its klal, while
+# 36 of the legitimate ones match a word appearing 2-6 times (`אלהים` six times
+# in klal 69, `אליבא` six times in klal 159). Requiring a unique occurrence
+# would have rejected two thirds of the true relocations and kept the false one.
+#
+# A shift bound derived from the LEDGER was also tried and is unsound: klalim
+# 159 and 163 show real ±1 shifts while every applied decision in them is
+# word-count-neutral, because the pipeline's own editorial-mark insertions move
+# indices without any decision recording it. The ledger cannot see every edit,
+# so it cannot bound the shift.
+#
+# 5 rather than 3 leaves headroom for one more edit in either direction. If this
+# ever needs raising, the right fix is NOT a wider window - it is recording the
+# actual shift at apply time, which is Lesson 35's outstanding repair.
+MAX_EXPLAINABLE_SHIFT = 5
+
+
 def find_span(klal, span):
     """Every index where `span` appears in the klal, EXACT match only.
 
@@ -274,16 +310,24 @@ def main():
             # the corpus. Counting those as "no longer reflected in the corpus"
             # is what made this script report 75 and be scrolled past.
             hits = find_span(klal, expected_span(decision))
-            if hits:
-                nearest = min(hits, key=lambda i: abs(i - word_index))
+            nearest = min(hits, key=lambda i: abs(i - word_index)) if hits else None
+            if nearest is not None and abs(nearest - word_index) <= MAX_EXPLAINABLE_SHIFT:
                 n_drifted += 1
                 drifted.append(f"klal {klal_id} word {word_index} ({decision_type}, "
                                f"decision {decision_id}): reflected at word_index "
                                f"{nearest} ({nearest - word_index:+d})")
             else:
+                # Either the text is gone, or it is present so far away that it
+                # is a different occurrence of the same word rather than the one
+                # this decision wrote. Both are MISMATCHES - a relocation this
+                # script cannot explain must be handed to a human, not absorbed.
                 n_mismatch += 1
+                far = ("" if nearest is None else
+                       f" (nearest occurrence of {' '.join(expected_span(decision))!r} is at "
+                       f"word_index {nearest}, {nearest - word_index:+d} - too far to be a shift, "
+                       f"see MAX_EXPLAINABLE_SHIFT)")
                 mismatches.append(f"klal {klal_id} word {word_index} ({decision_type}, "
-                                   f"decision {decision_id}): {result}")
+                                   f"decision {decision_id}): {result}{far}")
 
     total = (n_ok + n_mismatch + n_unverifiable + n_missing_klal
              + n_superseded + n_drifted)
@@ -299,8 +343,15 @@ def main():
         print()
         for m in mismatches:
             print(f"  {m}")
-    if drifted and os.environ.get("AUDIT_SHOW_DRIFT"):
-        print("\n  shifted (set AUDIT_SHOW_DRIFT= to hide):")
+    # PRINTED BY DEFAULT since 2026-09-01 (same review finding). These were
+    # behind AUDIT_SHOW_DRIFT, and the hint string said "set AUDIT_SHOW_DRIFT=
+    # to hide" - which could only ever be read by someone who had already set it.
+    # A row moved out of the MISMATCH count has to be visible somewhere, or the
+    # reclassification is just a smaller number with the evidence deleted; that
+    # is Lesson 32's shape, a correct finding that reaches nobody.
+    if drifted and not os.environ.get("AUDIT_HIDE_DRIFT"):
+        print("\n  shifted, NOT lost - the decision's word_index is stale, not the corpus")
+        print("  (set AUDIT_HIDE_DRIFT=1 to suppress this list):")
         for d in drifted:
             print(f"  {d}")
 

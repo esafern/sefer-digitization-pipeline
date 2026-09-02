@@ -145,17 +145,50 @@ def witness_by_klal(path, part1):
     return dict(out)
 
 
-def consensus_of(readings, stored_norm):
-    """The synthesizer's own rule: >= 2 DISTINCT engines agreeing on the same
-    alternative reading. Two engines each reading something different is a
-    three-way split and a human-review case, not a consensus."""
+def consensus_groups(readings, stored_norm):
+    """EVERY >= 2-engine agreement on an alternative reading, strongest first.
+
+    Split out of consensus_of() 2026-09-01 (code review finding #2), which
+    returned the first such group in DICT-INSERTION ORDER and so answered a
+    2-2 split by accident. collect() always inserts docai, vlm, surya, then the
+    candidate engine, so on a genuine even split - docai+vlm reading X against
+    surya+dicta reading Y - it always returned X; classify() then found the
+    candidate absent from it and dropped the position entirely. The "contested"
+    section could therefore only ever fire when the candidate happened to agree
+    with DocAI, which is not a property anybody chose.
+
+    Ordered by size, then by the reading itself, so the answer does not depend on
+    which order the caller happened to build the dict in.
+    """
     by = {}
     for engine, txt in readings.items():
         by.setdefault(cio.hebrew_letters_only(txt), []).append(engine)
-    for norm, engines in by.items():
-        if len(engines) >= 2 and norm != stored_norm:
-            return norm, sorted(engines), readings[engines[0]]
-    return None
+    groups = [(norm, sorted(engines), readings[sorted(engines)[0]])
+              for norm, engines in by.items()
+              if len(engines) >= 2 and norm != stored_norm]
+    groups.sort(key=lambda g: (-len(g[1]), g[0]))
+    return groups
+
+
+def consensus_of(readings, stored_norm, prefer=None):
+    """The synthesizer's own rule: >= 2 DISTINCT engines agreeing on the same
+    alternative reading. Two engines each reading something different is a
+    three-way split and a human-review case, not a consensus.
+
+    `prefer` names an engine whose own agreement wins when it has one. That is
+    not a thumb on the scale - it is the question this tool asks: what does
+    adding THIS engine do to the consensus? A 2-2 split has two equally strong
+    answers, and the one the caller needs is the candidate's, because the very
+    next thing classify() does is compare it against the consensus computed
+    WITHOUT that engine. Absent `prefer`, the strongest group wins and ties break
+    on the reading text - deterministic either way.
+    """
+    groups = consensus_groups(readings, stored_norm)
+    if prefer is not None:
+        for group in groups:
+            if prefer in group[1]:
+                return group
+    return groups[0] if groups else None
 
 
 def classify(readings, stored_norm, label, decided_choice=None):
@@ -168,7 +201,11 @@ def classify(readings, stored_norm, label, decided_choice=None):
     Returns one of: None (no consensus), "new", "joins", "contested",
     "escalation", "settled".
     """
-    with_it = consensus_of(readings, stored_norm)
+    # `prefer=label`: with the candidate engine in a >= 2 agreement, THAT is the
+    # consensus this function is about to test against the one without it. See
+    # consensus_of() - picking the other side of an even split here is what made
+    # `label not in with_it[1]` fire below and swallow the position.
+    with_it = consensus_of(readings, stored_norm, prefer=label)
     if with_it is None:
         return None, None, None
     without = consensus_of({e: t for e, t in readings.items() if e != label},

@@ -5189,6 +5189,50 @@ def test_consensus_needs_two_distinct_engines_agreeing_on_the_same_reading():
     assert real is not None and real[0] == "כתב"
 
 
+def test_an_even_split_is_classified_the_same_whichever_order_the_engines_arrive_in():
+    """Code review finding #2, 2026-09-01. consensus_of() returned the first
+    >= 2 group in DICT-INSERTION ORDER, and collect() always inserts docai, vlm,
+    surya, candidate - so on a genuine 2-2 split it always picked the docai side,
+    classify() found the candidate missing from it, and the position was dropped
+    with no trace. In practice the "contested" section could only fire when the
+    candidate happened to agree with DocAI.
+
+    The old test asserted only the ordering that worked, which is why the defect
+    survived it. This one writes the SAME split both ways round and requires the
+    same verdict - a test that cannot tell the two apart is not testing the
+    thing (Lesson 25).
+    """
+    docai_side = {"docai": "כתב", "dicta": "כתב", "vlm": "ספר", "surya": "ספר"}
+    other_side = {"docai": "ספר", "vlm": "ספר", "surya": "כתב", "dicta": "כתב"}
+    kinds = {name: pdd.classify(r, "אחר", "dicta")[0]
+             for name, r in (("candidate with docai", docai_side),
+                             ("candidate against docai", other_side))}
+    assert kinds["candidate with docai"] == kinds["candidate against docai"] == "contested", kinds
+    # ...and the group reported is the one the CANDIDATE is in, since the very
+    # next comparison classify() makes is against the consensus without it.
+    for readings in (docai_side, other_side):
+        _kind, with_it, _without = pdd.classify(readings, "אחר", "dicta")
+        assert "dicta" in with_it[1], with_it
+
+
+def test_consensus_groups_are_ordered_by_strength_not_by_insertion():
+    """The ordering guarantee the fix rests on, asserted directly: a 3-engine
+    agreement outranks a 2-engine one no matter which was inserted first, and
+    two same-size groups break the tie on the reading itself rather than on
+    dict order."""
+    three_first = {"a": "כתב", "b": "כתב", "c": "כתב", "d": "ספר", "e": "ספר"}
+    two_first = {"d": "ספר", "e": "ספר", "a": "כתב", "b": "כתב", "c": "כתב"}
+    for readings in (three_first, two_first):
+        groups = pdd.consensus_groups(readings, "אחר")
+        assert [len(g[1]) for g in groups] == [3, 2], groups
+        assert groups[0][0] == "כתב"
+    tied_one = {"a": "בבב", "b": "בבב", "c": "אאא", "d": "אאא"}
+    tied_two = {"c": "אאא", "d": "אאא", "a": "בבב", "b": "בבב"}
+    assert ([g[0] for g in pdd.consensus_groups(tied_one, "אחר")]
+            == [g[0] for g in pdd.consensus_groups(tied_two, "אחר")]), \
+        "a tie must not be broken by which reading was inserted first"
+
+
 def test_visual_order_reorders_hebrew_and_leaves_urls_alone():
     """--hebrew visual bakes the bidi reordering into the bytes, because glow
     and the terminals in use implement none of it. The URL must survive: it is
