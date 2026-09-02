@@ -162,9 +162,46 @@ reliability check, and every dispute still needs the ink or a different engine.
     and a `by a script` filter chip, and each row's tooltip names who wrote it.
     A human ruling and a script's are no longer indistinguishable on screen.
 
-    **NOT fixed:** the 64. And the deeper question this raises — whether a script
-    should be able to write `manual_correction` at all, rather than a candidate a
-    human must clear — is a design decision, not a bug fix.
+    **THE FLAGS THE PASS PROMISED WERE NEVER WRITTEN.** Its note ends *"Flagging
+    for human review per user instruction (apply the mechanically-confirmed
+    corrections, flag every one)"* — and **114 of the 131 carry no flag at all**.
+    (Of the 17 that do, 16 were raised later by the reviewer independently and 1
+    by a different AI pass; none came from this one.) Lesson 19 exactly:
+    describing a step in writing is not performing it. That is the whole reason
+    these were invisible — applied, drawn green, never queued.
+
+    **RESOLVED 2026-09-02/03, in three parts.**
+
+    - **`append_decision` now REFUSES a machine-written `manual_correction`**
+      (reviewer: "manual correction was the wrong flag for an automated change
+      where the note says it should be reviewed"). That type means A PERSON
+      RULED; an automated pass that wants a human to look raises a `klal_flag`,
+      which is what a queue is made of. It refuses rather than warns — a warning
+      in a batch script's output is a warning nobody reads.
+    - **`tools/flag_unreviewed_auto_corrections.py` (new) raised the 87** that
+      were unflagged and whose recorded position still holds the corrected word.
+      27 more had drifted and were skipped rather than guessed at; 3 were
+      withdrawn again because the word has no scan position, and a flag saying
+      "check this against the scan" that cannot take you there is a dead end the
+      gated invariant forbids. No corpus text was changed and no correction was
+      reversed. The open queue went 498 → 579, the pennant count 94 → 108.
+    - **A rule divergence surfaced by those flags, and fixed.**
+      `review_counts.word_states()` refused to let an open flag override a
+      DECIDED word, while `app.js`'s `wordState()` has always tested
+      `word_flag && !answered` BEFORE `current_decision`. The guard contradicted
+      its own comment — `flag_still_open()` has already removed every answered
+      flag, so anything reaching that loop is unanswered — and it had simply
+      never fired, because until now no word carried both. Klalim 92 and 124, the
+      pair the reviewer had just corrected, were the first two. The screen is the
+      ground truth, so the count follows it.
+
+      Two logic tests were pinning the old behaviour, and both were doing it
+      through fixtures with NO TIMESTAMPS — so the answered-by-a-later-decision
+      comparison was `"" > ""`, always false, and every fixture flag read as
+      unanswered. They now carry timestamps and assert the ordering rule itself.
+
+    **STILL NOT FIXED: the 64 corrections whose original was an attested word.**
+    They are now in the queue, with the `by a script` filter to walk them.
 
 0AS. **[2026-09-02] A WORD WITH NO OCR ALIGNMENT OPENED THE KLAL'S FIRST PAGE
     INSTEAD OF ITS OWN — 746 words across 55 multi-page klalim. FIXED, and the

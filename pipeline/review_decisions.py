@@ -146,6 +146,15 @@ def _now_iso():
     return datetime.now(timezone.utc).isoformat()
 
 
+# Reviewer tags that mean a PERSON ruled, as opposed to a script. Kept beside
+# append_decision because it is a WRITE-side rule first: see the manual_correction
+# guard there. review_server has its own copy for the display side, which is a
+# different question (what to show) with the same answer.
+def _is_human_reviewer(reviewer):
+    reviewer = reviewer or ""
+    return reviewer in ("local", "user") or reviewer.startswith("local")
+
+
 def append_decision(decision_type, klal_id, word_index=None, chosen_source=None,
                      chosen_text=None, candidate_snapshot=None, needs_revisit=None,
                      note=None, reviewer="local", applied_decision_id=None,
@@ -167,6 +176,27 @@ def append_decision(decision_type, klal_id, word_index=None, chosen_source=None,
     path = _resolve(path)  # see _resolve(): NOT a default arg, deliberately
     if decision_type not in VALID_DECISION_TYPES:
         raise ValueError(f"invalid decision_type: {decision_type!r}")
+    # A SCRIPT MAY NOT RECORD A HUMAN RULING. `manual_correction` is the type the
+    # dashboard renders GREEN as Human-Decided and drops out of every queue, so
+    # writing one from an automated pass says "a person settled this" about
+    # something no person has seen.
+    #
+    # ADDED 2026-09-02, reviewer: "manual correction was the wrong flag for an
+    # automated change where the note says it should be reviewed." The
+    # `ai-dropped-lamed-correction` pass wrote 131 of them, its own note said "A
+    # human should still check this specific instance against the scan" and
+    # "flag every one" - and 114 of the 131 were never flagged. Applied to the
+    # corpus, drawn as settled, invisible to review. Two of them are now
+    # confirmed wrong against the ink.
+    #
+    # An automated pass that wants a human to look raises a `klal_flag`, which is
+    # what a queue is made of. This refuses rather than warns: a warning in a
+    # batch script's output is a warning nobody reads.
+    if decision_type == "manual_correction" and not _is_human_reviewer(reviewer):
+        raise ValueError(
+            f"reviewer {reviewer!r} may not write a manual_correction: that type means "
+            "A PERSON RULED, and the dashboard renders it as settled. An automated "
+            "pass records a klal_flag (needs_revisit=True) so a human still sees it.")
     record = {
         "id": uuid.uuid4().hex[:12],
         "ts": _now_iso(),

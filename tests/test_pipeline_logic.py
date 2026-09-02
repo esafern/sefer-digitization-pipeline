@@ -3127,6 +3127,15 @@ def _patch_klalim_deps(monkeypatch, klalim_by_id, ai_flags_by_klal=None,
         for f in flags:
             klal_flag_decided[(kid, f["word_index"])] = {
                 "needs_revisit": True, "word_index": f["word_index"],
+                # A TIMESTAMP, since 2026-09-02. Whether a flag is still open
+                # turns entirely on whether a decision at that word POST-DATES
+                # it, and with no ts on either side that comparison is ""> "",
+                # i.e. always false - so every fixture flag read as unanswered
+                # and the tests were exercising a state production cannot reach.
+                # Flags default to the epoch so a decision carrying any real
+                # timestamp answers them; a test wanting the opposite sets
+                # `ts` on the flag explicitly.
+                "ts": f.get("ts", "1970-01-01T00:00:00+00:00"),
             }
     def _mock_all_current(dtype):
         if dtype == "manual_correction":
@@ -3157,7 +3166,10 @@ def test_api_klalim_excludes_an_ai_flag_already_covered_by_a_manual_correction(m
     it's decided, not double-count it as both open and decided."""
     klalim_by_id = {1: {"klal_id": 1, "clean_text": "אלף בית גימל", "page": 1}}
     manual_decided = {(1, 1): {"candidate_snapshot": {"original_word": "בית"},
-                                "chosen_text": "בין", "word_index": 1}}
+                                "chosen_text": "בין", "word_index": 1,
+                                # Post-dates the flag, which is what ANSWERS it -
+                                # see flag_answered_by_a_later_decision().
+                                "ts": "2026-01-01T00:00:00+00:00"}}
     _patch_klalim_deps(monkeypatch, klalim_by_id,
                         ai_flags_by_klal={1: [{"word_index": 1, "opcode": "ai_flag"}]},
                         manual_decided=manual_decided)
@@ -3732,14 +3744,34 @@ def test_an_open_flag_overrides_a_machine_resolved_candidate():
     assert _ws(entries=entries, open_flag_indices={3})[3] == rcount.DISPUTED
 
 
-def test_an_open_flag_does_not_override_a_human_decision():
-    """A decision that post-dates the flag is what ANSWERS it, so a DECIDED
-    word must survive an open-flag pass. flag_still_open() has already excluded
-    those, but the rule is stated here too because it is the branch that would
-    silently re-open every answered flag."""
+def test_an_unanswered_flag_overrides_a_human_decision():
+    """A flag that a decision did NOT answer re-opens the word, even a decided one.
+
+    REWRITTEN 2026-09-02. This asserted the opposite, via a self-contradictory
+    input: it put the flag in `open_flag_indices` - which means
+    flag_still_open() judged it UNANSWERED - while also supplying a decision that
+    was supposed to have answered it. Production cannot reach that state, and the
+    guard it was pinning made word_states() disagree with app.js's wordState(),
+    which has always tested `word_flag && !answered` BEFORE `current_decision`.
+    The divergence went unnoticed until item 0AT raised review flags on already-
+    corrected words and the tri-state invariant fired on klalim 92 and 124.
+
+    ORDER IS THE WHOLE POINT and it lives in flag_still_open(), asserted below:
+    a decision after the flag answers it; a flag after the decision is a fresh
+    concern and must stay open.
+    """
     entries = [{"word_index": 3, "flag": "ambiguous"}]
     st = _ws(entries=entries, decided={(1, 3): {"x": 1}}, open_flag_indices={3})
-    assert st[3] == rcount.DECIDED
+    assert st[3] == rcount.DISPUTED
+
+    # ...and the flag never reaches that set once a LATER decision answers it.
+    flag = {"needs_revisit": True, "ts": "2026-01-01T00:00:00+00:00"}
+    answered = {(1, 3): {"ts": "2026-02-01T00:00:00+00:00"}}
+    assert not rcount.flag_still_open(1, 3, flag, answered, {}), \
+        "a decision recorded after the flag answers it"
+    earlier = {(1, 3): {"ts": "2025-12-01T00:00:00+00:00"}}
+    assert rcount.flag_still_open(1, 3, flag, earlier, {}), \
+        "a flag raised after the decision is a fresh concern and stays open"
 
 
 def test_a_witness_with_a_vision_verdict_counts_as_machine_resolved():
@@ -5511,3 +5543,37 @@ def test_superseded_ids_is_empty_on_a_log_that_has_never_used_it():
     ids = rd.superseded_ids()
     assert isinstance(ids, set)
     assert None not in ids, "a record with no `supersedes` must contribute nothing"
+
+
+def test_a_script_may_not_record_a_human_ruling(monkeypatch, tmp_path):
+    """REGRESSION 2026-09-02, reviewer: "manual correction was the wrong flag for
+    an automated change where the note says it should be reviewed."
+
+    `manual_correction` is the type the dashboard renders GREEN as Human-Decided
+    and drops out of every queue, so an automated pass writing one asserts that a
+    person settled something no person has seen. The
+    `ai-dropped-lamed-correction` pass wrote 131 of them; its own note said "A
+    human should still check this specific instance against the scan" and that
+    every one would be flagged, and 114 of the 131 never were. Two are now
+    confirmed wrong against the ink.
+
+    The guard REFUSES rather than warns: a warning in a batch script's output is
+    a warning nobody reads.
+    """
+    path = tmp_path / "decisions.jsonl"
+    monkeypatch.setattr(rd, "DECISIONS_PATH", str(path))
+
+    ok = rd.append_decision("manual_correction", klal_id=1, word_index=0,
+                            chosen_text="x", reviewer="local")
+    assert ok["decision_type"] == "manual_correction", "a person must still be able to rule"
+
+    for reviewer in ("ai-dropped-lamed-correction", "tools/review_lexicon_gaps.py",
+                     "ai-semantic-spotcheck", None):
+        with pytest.raises(ValueError, match="manual_correction"):
+            rd.append_decision("manual_correction", klal_id=1, word_index=0,
+                               chosen_text="x", reviewer=reviewer)
+
+    # ...and the route an automated pass IS meant to take stays open.
+    flag = rd.append_decision("klal_flag", klal_id=1, word_index=0, needs_revisit=True,
+                              reviewer="ai-dropped-lamed-correction", note="please look")
+    assert flag["decision_type"] == "klal_flag" and flag["needs_revisit"] is True

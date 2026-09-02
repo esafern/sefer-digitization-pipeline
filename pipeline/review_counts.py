@@ -235,12 +235,22 @@ def word_states(klal_id, n_words, entries, witness_entries, *,
     # coloured machine-resolved - amber, "nothing to do here" - while the flag
     # underneath was still asking for a human. Seven words corpus-wide; the
     # reviewer hit two (klalim 62, 70: "two flagged words in the center but the
-    # correction pane showed 1 red flag"). A DECIDED word is NOT overridden: a
-    # decision post-dating the flag is what answers it, and flag_still_open()
-    # has already excluded those.
+    # correction pane showed 1 red flag").
+    #
+    # A DECIDED word IS overridden too, and the `!= DECIDED` guard that used to
+    # sit here was wrong on its own reasoning. flag_still_open() has ALREADY
+    # removed every flag a later decision answered, so a flag reaching this loop
+    # is one the decision did not answer - a fresh concern about an
+    # already-decided word, which is precisely the case that must stay open.
+    # app.js's wordState() has always tested `word_flag && !answered` BEFORE
+    # `current_decision`, so the guard also made the nav disagree with the
+    # screen; it simply never fired, because until 2026-09-02 no word carried
+    # both an unanswered flag and a decision. Raising the review flags that
+    # `ai-dropped-lamed-correction` promised and never wrote (item 0AT) created
+    # the first two - klalim 92 and 124, the pair the reviewer had just
+    # corrected against the ink - and the tri-state invariant caught it.
     for wi in open_flag_indices:
-        if state.get(wi) != DECIDED:
-            state[wi] = DISPUTED
+        state[wi] = DISPUTED
 
     # 3b. An ANSWERED flag still renders - it has to, or nothing on screen can
     # clear it - and it renders as human-decided, since a decision at that word
