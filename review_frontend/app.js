@@ -1344,7 +1344,7 @@ function renderKlalBody(block, k) {
       // remove or change a mark this pipeline itself inserted.
       mark.dataset.wordIndex = i;
       mark.onclick = () => {
-        const targetPage = k.word_pages && k.word_pages[i] != null ? k.word_pages[i] : k.page;
+        const targetPage = pageForWord(k, i, null);
         focusWordOnScan(targetPage, k.klal_id, { klal_id: k.klal_id, word_index: i, opcode: 'plain' });
         openManualCorrectionPanel(k.klal_id, i, w, null);
       };
@@ -1436,8 +1436,7 @@ function renderKlalBody(block, k) {
       // is served (api_page's plain-word pass has always covered it, and manual
       // entries now carry their own page/bbox too); nothing was asking for it.
       const focusManual = () => {
-        focusWordOnScan(corr.page
-          || (k.word_pages && k.word_pages[i] != null ? k.word_pages[i] : k.page),
+        focusWordOnScan(pageForWord(k, i, corr),
           k.klal_id, corr);
         openManualCorrectionPanel(k.klal_id, i, w, corr);
       };
@@ -1509,7 +1508,10 @@ function renderKlalBody(block, k) {
         // sends (same alignment ai_flag/witness words already trust via
         // their own corr.page) - use it, falling back to k.page only for a
         // word with no alignment match (an OCR gap DocAI never aligned).
-        const targetPage = k.word_pages && k.word_pages[i] != null ? k.word_pages[i] : k.page;
+        // pageForWord(), not a fourth copy of it - see its own note. This
+        // branch carried the `k.page` fallback that sent klal 88 w963 to the
+        // klal's first page instead of the one the word is on.
+        const targetPage = pageForWord(k, i, null);
         const corrObj = { klal_id: k.klal_id, word_index: i, opcode: 'plain' };
         // All five word-click handlers now go through focusWordOnScan(), which
         // navigates unconditionally. (2026-08-21 had made them consistent the
@@ -1677,8 +1679,25 @@ function klalForPageLookup(klalId) {
 
 function pageForWord(k, wordIndex, corr) {
   if (corr && corr.page != null) return corr.page;
-  if (k && k.word_pages && wordIndex != null && k.word_pages[wordIndex] != null) {
-    return k.word_pages[wordIndex];
+  const pages = k && k.word_pages;
+  if (pages && wordIndex != null) {
+    if (pages[wordIndex] != null) return pages[wordIndex];
+    // NO ALIGNED TOKEN for this word - 1,649 of Part 1's 52,630 words, because
+    // DocAI never matched them. Falling straight through to the klal's START
+    // page is a guess, and in a klal that spans pages it is usually the WRONG
+    // guess: 746 of those words live in a multi-page klal, and klal 88 w963 -
+    // reported 2026-09-02 - is on page 40 of a klal that starts on 39 and runs
+    // to 41. The scan opened on 39, the word had no box there, and nothing
+    // highlighted or zoomed.
+    //
+    // Words are in reading order, so the nearest word that IS aligned is a far
+    // better answer than the klal's first page. Walk outward, preferring the
+    // preceding neighbour: text flows forward, so the word before this one is
+    // on this one's page unless a page break falls between them.
+    for (let d = 1; d <= 500; d++) {
+      if (pages[wordIndex - d] != null) return pages[wordIndex - d];
+      if (pages[wordIndex + d] != null) return pages[wordIndex + d];
+    }
   }
   return k ? k.page : null;
 }
@@ -3049,6 +3068,8 @@ let manualPageLock = false;
 // pageImg 'load' handler (setupZoomPan) which fires after applyZoom runs.
 // Set to null when consumed or when a newer showPage supersedes the old focus.
 let _pendingScrollToBox = null;
+// Pending "this word is not on the scan" warning - see the end of showPage().
+let _noScanPositionTimer = null;
 const pageImg = document.getElementById('page-img');
 const hlContainer = document.getElementById('hl-container');
 const pageIndicator = document.getElementById('page-indicator');
@@ -3424,6 +3445,7 @@ async function showPage(page, focusKlalId, focusCorr = undefined) {
   hlContainer.classList.toggle('has-focus', !!focusedBox);
 
   if (focusedBox) {
+    clearTimeout(_noScanPositionTimer);   // a later render found it after all
     // applyZoom(0.5, 0) fires on image load and resets scroll to the top of
     // the new page.  We need to scroll the focused box into view AFTER that.
     // Two cases:
@@ -3448,6 +3470,25 @@ async function showPage(page, focusKlalId, focusCorr = undefined) {
   } else {
     _pendingScrollToBox = null; // superseded focus, cancel any pending scroll
     _zoomOnFocus = false;       // ...and disarm the zoom, or the NEXT render steals it
+    // SAY SO when a word the reviewer asked for cannot be put on the scan.
+    // 1,649 of Part 1's words have no aligned DocAI token at all, so there is
+    // no box to draw and nothing to zoom to - and the pane simply sat there
+    // looking like a bug, which is how it was reported ("it doesnt zoom in").
+    // Only for an explicit word request: showPage() is also called with
+    // focusCorr null on every scroll, and a toast on those would be constant.
+    // DEFERRED AND CANCELLABLE. Routing to a word calls showPage() several times
+    // - clearScanFocus, setActiveKlal, then focusWordOnScan - and the earlier
+    // ones legitimately find no box because they are still on the previous page.
+    // Announcing on the first miss fired this warning on words that DO get a
+    // box a moment later (klal 88 w963 did, measured). Wait, and let a
+    // successful render call it off.
+    if (focusCorr && focusCorr.word_index != null) {
+      clearTimeout(_noScanPositionTimer);
+      _noScanPositionTimer = setTimeout(() => {
+        showToast('That word has no OCR alignment, so it cannot be located on the '
+                  + 'scan \u2014 showing the page it falls on.');
+      }, 900);
+    }
   }
 }
 

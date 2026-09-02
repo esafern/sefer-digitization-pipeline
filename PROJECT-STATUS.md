@@ -113,6 +113,46 @@ reliability check, and every dispute still needs the ink or a different engine.
 > borrowing `2A`–`2Z`, which names a different lane and would misattribute the
 > work. Same rule as above: never reassign an ID once written.
 
+0AS. **[2026-09-02] A WORD WITH NO OCR ALIGNMENT OPENED THE KLAL'S FIRST PAGE
+    INSTEAD OF ITS OWN — 746 words across 55 multi-page klalim. FIXED, and the
+    remaining un-placeable ones now SAY so.**
+
+    Reported on the first link from item `0AQ`: "the scan shows the wrong page,
+    the klal extends over two and that word is on the following page. and it
+    doesnt zoom in." Klal 88 w963: `word_pages["963"]` is **None** — DocAI never
+    matched that word — so the lookup fell straight through to the klal's start
+    page, 39, while the word is on 40. **Both symptoms were one cause:** wrong
+    page, so no box on it, so nothing to zoom to.
+
+    **1,649 of Part 1's 52,630 words have no aligned token at all; 746 of those
+    are in a klal that spans pages**, where the start-page fallback is a guess and
+    usually the wrong one (klal 88 puts 283 words on page 39 and 840 on page 40).
+    Words are in reading order, so the nearest ALIGNED neighbour is a far better
+    answer, and that is what `pageForWord()` now walks out to.
+
+    **The first fix changed nothing, and the reason is this file's most-repeated
+    defect.** THREE click handlers — editorial mark, manual, plain word — each
+    carried their own copy of `word_pages[i] ?? k.page`, and only the shared
+    `pageForWord()` was corrected. The deep link dispatches the word's own click
+    (item 0AK), so it went through a copy. All three now call the one function,
+    and a gated test asserts no fourth copy appears: `word_pages[i]` must not
+    occur outside it.
+
+    **Words that cannot be placed AT ALL now say so.** Some have no alignment
+    anywhere, so even the right page has no box and nothing to zoom to, and the
+    pane simply sat there looking broken — which is how this was reported. The
+    warning is deferred 900ms and cancellable, because routing calls `showPage()`
+    several times and the earlier ones legitimately find no box yet; announcing
+    on the first miss fired it on klal 88 w963, which DOES get a box a moment
+    later. Verified on four cases: warn / no-warn / warn / no-warn.
+
+    Two of my own measurement errors along the way, both caught before they
+    became "findings": the toast looked broken because I polled at 2200ms and it
+    auto-hides at 1800, and then looked broken again because the PREVIOUS case's
+    toast was still on screen when the next case started polling.
+
+    Full suite **454 collected, 453 passed, 1 skipped**.
+
 0AQ. **[2026-09-02] THE 8 POSITIONS WHERE DICTA'S CONSENSUS CONTRADICTS A HUMAN
     RULING, itemised. TWO OF THEM LOOK LIKE THE CORPUS CARRYING AN EDITORIAL
     EXPANSION AS IF IT WERE THE AUTHOR'S TEXT. OPEN.**

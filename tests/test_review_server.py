@@ -14,6 +14,7 @@
 import hashlib
 import json
 import os
+import re
 import socket
 import subprocess
 import sys
@@ -2681,4 +2682,112 @@ def test_every_legend_count_explains_itself_on_hover(server, page):
             f"{r['bucket']}'s tooltip does not mention its own count {r['count']}")
         assert r["title"].count("—") <= 1 or r["title"].count(r["bucket"]) <= 1, (
             f"{r['bucket']}'s tooltip repeats its own name: {r['title'][:120]}")
+    assert page.test_errors == []
+
+
+def _find_unaligned_word_in_a_multi_page_klal(server):
+    """(klal_id, word_index) of a word with NO DocAI alignment, in a klal that
+    spans pages - the case where falling back to the klal's start page is a
+    guess, and usually the wrong one."""
+    for row in _get_json(server, "/api/klalim?part=1"):
+        klal = _get_json(server, f"/api/klal/{row['klal_id']}")
+        pages = klal.get("word_pages") or {}
+        distinct = {p for p in pages.values() if p is not None}
+        if len(distinct) < 2:
+            continue
+        n = len(klal["clean_text"].split(" "))
+        missing = [i for i in range(n) if pages.get(str(i)) is None]
+        if missing:
+            return row["klal_id"], missing[len(missing) // 2], klal["page"]
+    return None, None, None
+
+
+def test_a_word_with_no_alignment_still_opens_the_page_it_falls_on(server, page):
+    """REGRESSION 2026-09-02, reviewer on klal 88 w963: "the scan shows the wrong
+    page, the klal extends over two and that word is on the following page. and
+    it doesnt zoom in."
+
+    1,649 of Part 1's words have no aligned DocAI token, so `word_pages` has no
+    entry for them - and the fallback went straight to the klal's START page.
+    For the 746 of those that sit in a MULTI-PAGE klal that is usually wrong, and
+    both symptoms followed from it: wrong page, so no box on it, so nothing to
+    zoom to. Words are in reading order, so the nearest ALIGNED neighbour is a far
+    better answer than the klal's first page.
+
+    Three click handlers each carried their own copy of this lookup and only
+    `pageForWord()` was fixed first, which is why the first attempt changed
+    nothing; all of them go through the one function now.
+    """
+    klal_id, word_index, start_page = _find_unaligned_word_in_a_multi_page_klal(server)
+    assert klal_id is not None, "no unaligned word in a multi-page klal - nothing to test"
+    klal = _get_json(server, f"/api/klal/{klal_id}")
+    pages = klal["word_pages"]
+    neighbours = [pages[str(i)] for i in range(word_index - 40, word_index + 41)
+                  if pages.get(str(i)) is not None]
+    assert neighbours, "the word has no aligned neighbour within 40 words either way"
+
+    _open_dashboard(page, server)
+    page.evaluate(f"() => {{ location.hash = '#klal={klal_id}&word={word_index}'; }}")
+    page.wait_for_timeout(2500)
+    shown = int(page.evaluate(
+        r"() => (document.getElementById('page-img').getAttribute('src') || '')"
+        r".match(/page_(\d+)/)[1]"))
+    assert shown in neighbours, (
+        f"klal {klal_id} w{word_index} has no alignment; the scan opened page {shown}, "
+        f"which is not where its neighbours are ({sorted(set(neighbours))})")
+    assert page.test_errors == []
+
+
+def test_only_one_page_lookup_exists(server, page):
+    """The bug above survived its first fix because three click handlers each
+    carried their own copy of `word_pages[i] ?? k.page`, and only the shared
+    helper was corrected. This is the cheap assertion that keeps them merged -
+    the same defect class this file has now recorded four times."""
+    app_js = os.path.join(REPO, "review_frontend", "app.js")
+    with open(app_js, encoding="utf-8") as f:
+        source = f.read()
+    body = re.sub(r"//.*", "", source)
+    copies = body.count("word_pages[i]")
+    assert copies == 0, (
+        f"{copies} hand-rolled per-word page lookup(s) outside pageForWord(); "
+        "route them through it instead")
+
+
+def test_a_word_that_cannot_be_placed_on_the_scan_says_so(server, page):
+    """Some words have no alignment ANYWHERE, so even the right page has no box
+    to draw and nothing to zoom to. The pane just sat there looking broken -
+    which is how it was reported. The warning is deferred and cancellable:
+    routing calls showPage() several times and the earlier ones legitimately find
+    no box yet, so announcing on the first miss fired it on words that DO get one
+    a moment later."""
+    klal_id, word_index, _ = _find_unaligned_word_in_a_multi_page_klal(server)
+    assert klal_id is not None
+    _open_dashboard(page, server)
+
+    def route_and_watch(kid, wi):
+        page.wait_for_function(
+            "() => document.getElementById('toast').style.display !== 'block'", timeout=6000)
+        page.evaluate("() => { location.hash = '#'; }")
+        page.evaluate(f"() => {{ location.hash = '#klal={kid}&word={wi}'; }}")
+        for _ in range(28):
+            page.wait_for_timeout(120)
+            text = page.evaluate(
+                "() => document.getElementById('toast').style.display === 'block'"
+                " ? document.getElementById('toast').textContent : null")
+            if text and "no OCR alignment" in text:
+                return True
+        return False
+
+    warned = route_and_watch(klal_id, word_index)
+    boxes = page.locator("#hl-container .hl-box.focused").count()
+    # Exactly one of the two must be true: either the word IS on the scan, or the
+    # reviewer is told it is not. Silence with no box is the reported bug.
+    assert warned or boxes == 1, (
+        f"klal {klal_id} w{word_index}: no focus box and no explanation")
+
+    # ...and a word that IS locatable must NOT be warned about.
+    kid, wi = _find_disputed_word()
+    warned_ok = route_and_watch(kid, wi)
+    if page.locator("#hl-container .hl-box.focused").count() == 1:
+        assert not warned_ok, "warned about a word that was found on the scan"
     assert page.test_errors == []
