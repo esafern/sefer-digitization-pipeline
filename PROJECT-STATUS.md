@@ -30,9 +30,11 @@ this file that should be read before quoting the 596.
 | open / decided / machine-resolved | see the dashboard — re-measure, don't quote from here |
 | witnesses read against the ink | DocAI, a VLM sampled twice, Surya at 300 DPI |
 
-**What the witnesses are worth, measured.** VLM 93.3% token accuracy, Surya
-89.9% mean agreement (222/222 coverage), Tesseract 3.8% on disagreements — the
-last is why it is being retired (item 3a). **P(consensus correct | two distinct
+**What the witnesses are worth, measured.** **Dicta 95.6% word accuracy over
+klalim 2–221 (full Part 1 coverage, 2026-09-02 — the strongest witness here)**,
+VLM 93.3% token accuracy, Surya 89.9% mean agreement (222/222 coverage),
+Tesseract 3.8% on disagreements — the last is why it is being retired (item 3a).
+Dicta is a PREVIEW only: nothing is wired into `rebuild_all.sh`. **P(consensus correct | two distinct
 engines agree) is 26–41%**, so agreement routes attention and the ink decides;
 auto-approval on consensus is indefensible at any threshold this data supports.
 
@@ -43,55 +45,47 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
-### RESUME HERE — finishing the Dicta pass (pages 51–114)
+### The Dicta pass is COMPLETE — pages 22–114, all of Part 1
 
-_The only thing this needs is the OCR text coming back. Everything else is
-built. Written 2026-09-01 as a single sequence because the pieces are otherwise
-spread across items 0P, 0W and 0Y2, and reassembling them from a 2,800-line file
-is its own tax._
+_Closed 2026-09-02. The reviewer submitted the five remaining chunks by hand and
+dropped the results in `~/Downloads`; they were validated, copied into
+`dicta_output/`, and the baseline rebuilt. This section was the file's top open
+item since 2026-08-31 and is kept only as the record of what it produced._
 
-**State.** Pages 22–50 are done (klalim 1–63, 95.5% word accuracy). Five chunks
-covering pages 51–114 are cut and waiting in `dicta_chunks_remainder/`
-(13 pages / ~0.5 MB each). Dicta is rate-limiting; the reviewer hit it too, so
-it is the service, not the automation.
+**`tools/second_witness_eval/dicta_jerusalem_part1_baseline.txt` now covers scan
+pages 22–114** — 467,093 bytes, 10 chunks, header self-flipped from PARTIAL to
+COMPLETE. `build_dicta_baseline.py` refuses to write on a gap or overlap, so the
+clean write is itself the contiguity proof.
 
-1. **Submit**, one file at a time, at <https://rashiocr.dicta.org.il/>. It needs
-   an email address before Send unlocks, and mails a link — but the **status
-   page also shows it**, so results never require the inbox. Two things that
-   cost an hour to learn: synthesized keystrokes reach that email field only
-   about half the time — set the value through the native `HTMLInputElement`
-   value setter plus dispatched `InputEvent`/`keyup`/`change` — and **assert the
-   Send button is enabled before clicking**, which is what stopped a chunk going
-   out with an empty address. If uploads start failing (`העלאה נכשלה`), that is
-   the rate limit: stop, do not retry a third time.
-2. **Collect.** The status URL carries a job id; the result is at a predictable
-   path, so `tools/fetch_dicta_result.sh <job-id> yadmalachi-jer-r_cNNNN_pXXXX-pYYYY_ocr.txt`
-   pulls it straight into `dicta_output/`. It refuses an empty or non-Hebrew
-   body rather than saving an error page as a "successful" result.
-3. **Mark done** in `dicta_chunks_remainder/manifest.json`: set `job_id`,
-   `output_file` (repo-relative), and `status: "done"` on each chunk.
-4. **Rebuild the baseline** — `python3 tools/build_dicta_baseline.py`. It orders
-   by page from the manifests and **refuses to write on a gap or overlap**, so a
-   missing chunk fails loudly instead of producing a short baseline. Its header
-   flips from PARTIAL to COMPLETE on its own once pages 22–114 are all in.
-5. **Re-score and re-preview** over the full range:
-   ```bash
-   python3 tools/compare_ocr_engines.py --klalim 2-221 \
-       --ocr "dicta=tools/second_witness_eval/dicta_jerusalem_part1_baseline.txt"
-   python3 tools/preview_dicta_disputes.py \
-       --witness tools/second_witness_eval/dicta_jerusalem_part1_baseline.txt \
-       --label dicta --klalim 2-221 \
-       --out DICTA-NEW-DISPUTES.md --urls-out DICTA-NEW-DISPUTES-URLS.txt
-   ```
-   Expect roughly 3–4× the current 58 disputes. **They are a PREVIEW** — nothing
-   is wired into `rebuild_all.sh`, and wiring it in is a separate decision
-   (item 0N has the integration points: `synthesize_multi_witness.py`'s
-   `ENGINES`, one line in `assemble_corrections_dataset.py`, and a
-   `dicta_reading` option in `app.js` — without that last one the field is
-   serialized and never seen).
+| measured over klalim 2–221 (51,115 reference tokens) | |
+|---|---:|
+| Dicta word accuracy | **95.6%** |
+| lexicon hit rate | 97.1% (corpus ceiling 97.8%) |
+| positions Dicta votes at | 50,362 of 52,057 |
+| …agreeing with the corpus | 48,842 (97.0%) |
 
-**Two standing constraints.** Never point Dicta at the square Berlin scan — it
-scores 77.6% there, worse than everything already wired in. And Dicta is
+**95.6% across the whole of Part 1, against 95.5% measured on the pages 22–50
+third** — the score held when coverage tripled, which is the thing a partial
+measurement could not tell us. Dicta is now the strongest witness this project
+has by a wide margin: VLM 93.3%, Surya 89.9%, Tesseract 3.8%.
+
+**The preview (`DICTA-NEW-DISPUTES.md`, 419 links) reports 225 new disputes, 186
+corroborated, 8 positions a human already ruled against, 0 displacing a different
+consensus.** 225 is 3.9x the 58 from the partial baseline — inside the 3–4x this
+file predicted. **It is still a PREVIEW: nothing is wired into `rebuild_all.sh`,**
+and wiring it in remains a separate decision (item 0N has the three integration
+points: `synthesize_multi_witness.ENGINES`, one line in
+`assemble_corrections_dataset.py`, and a `dicta_reading` option in `app.js` —
+without that last one the field is serialized and never seen, Lesson 29).
+
+`job_id` is null for the five new chunks in `dicta_chunks_remainder/manifest.json`:
+they were fetched by hand from the RashiOCR status page rather than through
+`tools/fetch_dicta_result.sh`, so no job id was ever seen here. Left null rather
+than invented — a value in an audit trail that resolves to nothing is worse than
+an absent one.
+
+**The two standing constraints still hold.** Never point Dicta at the square
+Berlin scan (77.6% there, worse than everything already wired in), and Dicta is
 deterministic (item 0V), so a repeat run buys nothing: it cannot be its own
 reliability check, and every dispute still needs the ink or a different engine.
 
@@ -113,6 +107,537 @@ reliability check, and every dispute still needs the ink or a different engine.
 > Resolved 2026-09-01 by moving the refactor lane's three colliding entries to
 > `1G`/`1H`/`1I` — chosen over renaming the review lane's because those are the
 > ones code references.
+
+> **The review lane has run out of single letters — `0A`–`0Z` are all
+> allocated.** Continuing as `0AA`, `0AB`, … in the same band rather than
+> borrowing `2A`–`2Z`, which names a different lane and would misattribute the
+> work. Same rule as above: never reassign an ID once written.
+
+0AJ. **[2026-09-02] A NAV JUMP RE-ASSERTED THE LABEL BUT NOT THE GEOMETRY, so
+    clicking a klal in the index could select the one above it. 5 of 222 klalim.
+    FIXED.**
+
+    Caught by `test_a_nav_jump_lands_on_the_klal_it_was_asked_for` going red on a
+    run whose only other change was Dicta data — the corpus was byte-identical, so
+    the cause had to be the frontend, and it was: yesterday's new 46px text-pane
+    header shortened `#text-scroll` and tipped a marginal case over.
+
+    Klal blocks mount lazily behind ESTIMATED placeholder heights, and the blocks
+    a jump scrolls PAST resize as they mount — so the destination drifts below the
+    reading line while the smooth scroll is still running.
+    `releaseObserverWhenScrollSettles()` then re-asserted the right klal into the
+    nav on top of a page whose geometry said otherwise, and the first scroll event
+    after the observer was released recomputed the geometric answer and overwrote
+    it. Click klal 105, land on 104.
+
+    The fix re-seats the destination block before releasing the observer, instead
+    of only re-writing the label. `READING_LINE_OFFSET` is now one constant:
+    `updateActiveFromScroll()` asks "which klal am I reading" and this function
+    has to give the same answer, and the offset was written out twice.
+
+    **Swept, and the first sweep was wrong.** Sampling 260ms after each click
+    reported **125 of 222** klalim landing wrong — and that is the exact artifact
+    `jumpTo`'s own comment warns about, a measurement taken mid-animation on a
+    ~1.5s smooth scroll. Re-measured after waiting for the scroll to settle: **5
+    of 222** (klalim 168, 217, 218, 221, 222), now **2**. The two survivors are
+    the last klalim in the corpus, where the nav label is CORRECT and only the
+    geometric observer disagrees — no scroll can fix them, because there is
+    nothing below them to scroll into, and nothing can scroll further to trigger
+    an override. Left alone deliberately.
+
+    Lesson 19's shape, on my own measurement: the first number was 25x the real
+    one and would have read as a catastrophe.
+
+0AH. **[2026-09-01] "SO GREEN WORDS ARE APPLIED BUT NOT REBUILT? WHY?" — THEY
+    WERE NOT APPLIED. A status label I shipped this morning conflated a
+    confirmation with a promotion, and published a wrong number for item 0AB.**
+
+    The reviewer asked the right question about the wrong premise, and the
+    premise was mine. `_decision_status()` had one `applied` bucket meaning
+    nothing more than `corpus == chosen_text` — which is **trivially true for a
+    ruling that keeps the stored reading**, and that is the commonest decision in
+    this corpus. Measured on the live corpus:
+
+    | of the 56 words drawn human-decided | |
+    |---|---|
+    | keep the stored text (nothing to promote) | 46 |
+    | change the text, not yet promoted | 9 |
+    | changed the text AND promoted | **1** |
+
+    It had been reporting 27 of those as "applied". The one genuine case is klal
+    68 w29 — a `chosen_text: ""` deletion of a duplicated `הניזקין`, which **did**
+    land (the duplicate is verifiably gone) but reads as un-applied because
+    deleting one of two identical adjacent words leaves its twin standing at the
+    deleted one's index. Text equality cannot tell that from "never applied", so
+    the status now takes `applied_decision_ids()` as outranking the inference —
+    a recorded apply_event is a positive statement; equality is a guess a
+    duplicate defeats. Whether that claim is still TRUE remains
+    `audit_applied_decisions.py`'s job, not the display's.
+
+    **Statuses are now `confirmed` / `applied` / `pending` / `drifted` /
+    `unplaced` / `unknown`, and `index_stale` is a separate field** — see 0AB,
+    whose headline number this corrects from "105 orphaned" to "105 stale
+    addresses, 79 of them on rulings that were honoured anyway".
+
+    And the direct answer to the question as asked: **nothing here is waiting on a
+    rebuild.** `part1.json` was last written 14:20 and the last rebuild ran 14:21;
+    no apply has run since. The green words are green because they still carry a
+    live queue entry, not because a rebuild is overdue.
+
+    Two gated invariants added: a ruling that kept the stored reading must report
+    `confirmed`, and `index_stale` must not be a synonym for a lost ruling.
+
+0AI. **[2026-09-01] COULD NOT REPRODUCE: "scan pane is oriented to the middle of
+    the page" after dismissing a word. OPEN, needs one detail from the reviewer.**
+
+    Reported for klal 12: selecting a word then clicking away or committing
+    leaves the scan mid-page instead of at the klal's region, while navigating
+    straight to the klal is correct.
+
+    Tried and NOT reproducing, all with the region box's position measured
+    against the viewport rather than eyeballed: window heights 1000/760/560;
+    words on the klal's start page (18) and on its continuation (19); dismiss
+    delays of 60/150/400/2000 ms; with and without a manual zoom; with and
+    without the focus zoom having fired. In every combination the klal-region
+    outline ends up in view, at the same scroll offset as a direct nav.
+
+    One hypothesis was measured and **disproved**: `applyZoom()` scrolls the
+    focused word into view with `behavior: 'smooth'` and `block: 'center'`, and a
+    smooth scroll still animating when the panel is dismissed would land the view
+    centred on the word — "the middle" — overriding the instant region scroll.
+    That is a real race in the code, but dismissing at 60 ms (well inside the
+    animation) does not trigger it. Not fixed on a story: this is the shape
+    Lesson 31 warns about, tuning something that has not been measured.
+
+    The one real difference I CAN see: selecting a word on the continuation page
+    and dismissing leaves the scan on **page 19** showing klal 12's continuation
+    at the top, where a direct nav shows page 18 with the region at the bottom.
+    That is defensible behaviour (you were looking at page 19) but it does read
+    as "not where the klal is". If that is the report, the fix is a decision about
+    which page a dismiss should return to, not a bug hunt.
+
+    **To pin it:** the browser window height, and whether the word selected was on
+    page 18 or page 19.
+
+0AG. **[2026-09-01, reviewer-requested] THE INDEX ROW AND THE LEGEND, TIGHTENED —
+    and a shared font token that named no Hebrew face.**
+
+    - **The two klal markers were set in different faces**, one pane apart
+      (reviewer: "is the heb num in the index pane the same font as the text
+      nums? it should be"). `--font-marker` was `'Inter', sans-serif`, and **Inter
+      carries no Hebrew**, so every Hebrew marker resolved to whatever the system
+      picked — while the index pane's `.nheb` declared no `font-family` at all and
+      inherited the body's Frank Ruhl Libre. The same `יב` was a system sans in
+      the text pane and a serif in the index, under a token whose own comment
+      claimed it was "the section number, in either script". The token now names
+      `'Inter', 'David Libre', 'David'`: font matching is per-glyph, so Latin
+      digits still take Inter and Hebrew letters take the face `--font-title`
+      already uses — the book's own type. An unspecified fallback was never a
+      choice, it just looked like one.
+    - **The Latin klal id shrank** (18px/34px → 13px/24px, its own
+      `--nav-id-size`). It was the widest fixed thing in the index row after the
+      badges, at the size of the Hebrew marker beside it, for the half of the
+      reference the BOOK does not print.
+    - **The part dropdown stopped being a band across the index pane** — "part
+      dropdown creates asymmetry any suggestions?" It was full-width while the
+      other two panes had nothing at that height. Shrunk to its content and
+      folded into the filter row; the option labels drop the klal ranges, which
+      are already the first and last rows of the list beneath it. Two rows
+      reclaimed for the index across this and the previous pass.
+    - **The two Human-Decided counts are two rows**, not one row with a sentence
+      hanging off it. Only the first carries a colour swatch — nothing on screen
+      is painted for the second, which is the whole reason it exists.
+    - **The English title now appears once**, in the index bar. Four slots put it
+      at both ends of all three bars, i.e. the work's name six times across one
+      window; the Hebrew stays everywhere because the book prints it as a running
+      head on every page.
+
+    **ONE THING WAS ASKED FOR AND DELIBERATELY NOT SHIPPED AS WORDED.** The
+    request was to label the first row "human-decided (not yet applied)". Measured
+    before writing it: of the 54 words drawn as human-decided, **27 are already
+    applied** and only **4 are genuinely not yet applied**. Shipping that label
+    would have told the reviewer 54 rulings await promotion when the real backlog
+    is 4. The row reads "(still shown)" instead, which is what it counts — a
+    ruling stops being drawn once its candidate entry is dropped by the rebuild,
+    whether or not it was applied. The true not-yet-applied figure is the
+    `pending` chip in the recorded list, and making it a third row is a one-line
+    change if wanted.
+
+    Full suite **438 collected, 437 passed, 1 skipped**.
+
+0AF. **[2026-09-01, reviewer-requested] ONE HEADER BAR, THREE PANES, LIGHTENED —
+    and the old one was overflowing invisibly on two of them.**
+
+    Reviewer: "ui looks ugly and cluttered - needs uniform look and feel. text
+    differs between two blue headers ... both headers same size and shape. try
+    lighter color since text pane has no matching header. maybe sacrifice a line
+    at top to add header that just says something like page text."
+
+    **Four slots, one order, all three panes** — the order taken verbatim from
+    the reviewer's own description of the scan pane:
+
+        [Hebrew title]  [Hebrew reference]  [English reference]  [English title]
+
+    | pane | reference |
+    |---|---|
+    | index | the section being listed (`כללי הגמרא` / Klalei HaGemara) |
+    | text | the klal being read (`כלל יב` / Klal 12) — **new**, the pane had no bar at all |
+    | scan | the page and klal being shown (`דף יח · כלל יב` / Page 18 · Klal 12) |
+
+    The text pane's bar is the one that was "sacrificed": it was the only pane
+    without a header, which is what made the other two read as heavy — and the
+    pane a reviewer spends the most time in was the one that never said where
+    they were. Its Hebrew numeral comes from `/api/numerals`, the same table the
+    scan header uses, not a second gematria implementation.
+
+    **Each pane used to style its own title, which is exactly how the two bars
+    came to say different things in a different order.** There is now one slot
+    vocabulary (`[data-slot]`, `.ph-*`) and one function filling it, so a pane
+    cannot carry a title the others do not. `document.title` was the last
+    hardcoded "Yad Malachi" in the frontend and now comes from `/api/corpus` too.
+
+    **The bar was overflowing, invisibly, and `overflow: hidden` was the reason
+    nobody could see it.** Measured rather than eyeballed: the index header
+    needed 365px in a 347px space at EVERY window width, and the scan header
+    overflowed by 58px at 1280. The symptom was a silently eaten slot
+    ("Klalei HaGem"), not a broken layout. Fixed by tightening the type scale and
+    **moving the zoom cluster out of the scan header onto the scan itself**,
+    beside the page arrows already floating there — which is also what makes the
+    three bars one object rather than two bars and a toolbar. All three now clear
+    their content at 1280/1600/1920, and the new test measures need against
+    available rather than trusting the picture.
+
+    **Lighter, and the whole chrome with it.** `--header-bg/fg/muted/line/hover`
+    replace the solid `--accent-dark`. The part-select (inline-styled dark navy,
+    sitting directly under the newly-lightened index header) and the legend
+    (solid `--accent`) moved to the same palette — after the bars were lightened
+    those were the only saturated blocks left, and "uniform look and feel" is
+    about the chrome, not only the bars.
+
+    **Also:** the two index filters share one line ("max real estate for the
+    index"), and the page arrows' GLYPHS swapped back — "arrow behavior is
+    correct but swap two icons" — so each points inward along the book's
+    right-to-left reading direction. Sides and handlers untouched.
+
+    **Two existing tests were pinned to the old layout.**
+    `test_the_scan_header_actually_separates_its_two_scripts` measured
+    `hebrew.left - english.right`, which assumes English comes first; the
+    reviewer specified the opposite order, so a correct bar scored -173. The
+    requirement is unchanged and still pinned — the measurement is now
+    order-independent, so re-ordering the bar again cannot fail it for the wrong
+    reason. The arrow test's glyph literals were swapped with the glyphs.
+
+    **One thing delivered exactly as specified that is worth a second look:** the
+    four-slot order puts the work's name at both ends of every bar, so
+    `יד מלאכי` and `YAD MALACHI` now each appear three times across the top of the
+    window. That is what was asked for and it is what makes the bars uniform, but
+    it is also six repetitions of one fact on a screen whose complaint was
+    clutter. Dropping the English title from the text and scan bars would leave
+    the shape identical and remove four of the six; not done, because it was not
+    what was asked.
+
+    Full suite **435 collected, 434 passed, 1 skipped**.
+
+0AE. **[2026-09-01] EVERY DEEP LINK TO A WORD ON A CONTINUATION PAGE LANDED ON
+    THE WRONG PAGE WITH NO HIGHLIGHT — 18,044 words across 55 klalim. FIXED.**
+
+    Reported as one word: "klal 12 w 219 clicking does not show that word
+    highlighted." Klal 12 starts on page 18 and word 219 is on page 19; the link
+    showed page 18, where that word has no box — so nothing highlighted, and no
+    error anywhere.
+
+    **`highlightRoutedWord()` carried a hand-rolled second copy of
+    `pageForWord()`, and its `word_pages` branch COULD NOT FIRE.** `klalById` is
+    built from `/api/klalim`, whose payload has no `word_pages` key at all — only
+    `/api/klal` carries it — so `k.word_pages && …` was always false and every
+    deep link fell through to the klal's START page. Lesson 25 in its exact
+    shape: a condition that can never be true is not a fallback, it is dead code
+    wearing one.
+
+    **Swept before fixing, and it is a class, not a word: 18,044 of Part 1's
+    52,630 words sit on a page other than their klal's start page**, across 55
+    klalim (klal 30 alone has 1,716). Every deep link to any of them was landing
+    on the wrong page — including every row of the word lists added in `0AA`/
+    `0AC`, which are deep links, which is how the reviewer met it.
+
+    **The same wrong object was being handed to the real `pageForWord()`** at its
+    other call site (`attachWordHandlers`), disabling the same branch there.
+    Latent rather than live — it is reached only for a correction served with
+    `page: null`, of which Part 1 has 7, none on a continuation page — but it is
+    the branch that function was written for (klal 179 w267, 2026-08-26). Both
+    call sites now go through `klalForPageLookup()`, which prefers the mounted
+    `/api/klal` payload.
+
+    **A SECOND, INDEPENDENT DEFECT, found while reproducing it.** The click set
+    the right page and a scroll event a few hundred ms later undid it:
+    `updateActiveFromScroll()` resolved a different klal and `setActiveKlal()`
+    showed THAT klal's start page. `manualPageLock` guards the scan pane's
+    prev/next arrows against exactly this, and a word click deliberately CLEARS
+    it (2026-08-26, because the lock was making word clicks dead) — which left
+    the click the one deliberate navigation with no protection. It now holds the
+    observer off while it settles, the same as `revealWordInText()` and
+    `applyHashRoute()` already did; it was simply the third member of that set
+    that never joined it.
+
+    **One existing test was pinned to the defect and went red on the repair.**
+    `test_the_scan_header_carries_the_reference_in_both_scripts` asserted a
+    literal "Page 73" for klal 210 word 133 — but `word_pages["133"]` is 74, and
+    the klal splits 61 words on 73 against 69 on 74. 73 was the START page, i.e.
+    the wrong answer the bug produced. Lesson 36, verbatim: the test failed
+    because the dashboard got BETTER. Its page now comes from the server; its
+    Hebrew numerals, which are what it is actually about, follow the resolved
+    page rather than a second literal.
+
+0AD. **[2026-09-01, reviewer-requested] DASHBOARD CHROME: one header bar shared
+    by both panes, the copy-on-click switch behind a settings icon, the legend
+    saying what its two numbers ARE, and the word list getting out of the way.**
+
+    Five small things, from one message.
+
+    - **The index pane's title is now IN a header bar**, not above one. It first
+      shipped inside `#nav-filter`, which is white — and its own colours are
+      near-white, so it was very nearly invisible. **The Playwright test asserted
+      its TEXT and passed the whole time**, which is the limit of checking
+      content and never appearance; the new test checks the bar's geometry and
+      that the title is not the same colour as the ground it sits on. Both panes
+      now share `.pane-header` and measure 48px, aligned at the top of the
+      window.
+    - **Whitespace between the scan pane's title and its page/klal reference** —
+      they were running together. `.pane-ref` is the gap.
+    - **The copy-on-click switch moved behind a settings icon.** "Don't put click
+      word on link up there on the index pane, hide it away somewhere - settings
+      icon?" It is set once and lived with; it does not earn a permanent line
+      beside the two filters that get toggled while reading. The tray does not
+      close on the click that flips its own switch — that is a control you would
+      have to reopen to confirm.
+    - **The legend reads "Human-Decided · 51 · visible out of 478 total
+      recorded"**, the reviewer's own wording. It said "51 / of 478 recorded",
+      which does not say what either number is.
+    - **The word list closes on a click in the text or scan pane.** Only that
+      panel: the other five are OPENED by a click in those panes, so closing on
+      the same click would shut them the instant they opened.
+
+    Full suite **432 collected, 431 passed, 1 skipped** (`pytest --collect-only
+    -q`, per Lesson 37).
+
+0AC. **[2026-09-01, reviewer-requested] A SENIOR-REVIEW VIEW OF EVERY RULING,
+    the book title on both panes, the scan arrows swapped — and two code-review
+    findings fixed, one of which was hiding a real lost correction.**
+
+    **The senior-review view.** "Add a function to show all previously decided
+    words — so a sr reviewer can review a human's work." Reviewing a ruling means
+    seeing what was decided AND whether it landed, and neither was reachable: a
+    ruling stops rendering once it is settled, so the dashboard showed 51 of 478
+    and nothing at all about the rest. "of 478 recorded" in the legend is now its
+    own control opening its own list — every ruling, with the word now at that
+    index, what was chosen, which panel recorded it, when, and a status:
+    `applied` / `pending` / `drifted` / `unplaced` / `unknown`, filterable by
+    chips. It is the first surface that shows item `0AB` at all; it names
+    stranded rulings and does not repair them, which stays a separate decision.
+
+    The click handler tests the recorded button BEFORE the row it sits inside —
+    `closest('.legend-clickable')` would otherwise walk past it and open the
+    51-word list from a control labelled 478.
+
+    One defect of my own, caught by its test: `rendered` was read from the
+    `states` dict, which has no slot for a `delete`-opcode entry (two deletes can
+    share an index), so it reported 39 against a legend showing 51 — a third
+    number on a screen that already has two. It now comes from `state_rows()`,
+    the same source the count uses.
+
+    **Book title on both panes**, from a new `/api/corpus` backed by five
+    constants in `corpus_io.py` — not written into `index.html`, because a title
+    in the markup is one more place a second work would have to be edited.
+    Hebrew first on both surfaces, the same reasoning the nav already applies to
+    klal markers: the reviewer is matching against the printed page, and the page
+    says `יד מלאכי`. The edition is on hover only.
+
+    **Scan arrows swapped** — previous to the left, next to the right. The glyphs
+    moved with the buttons, so each still points away from the centre; swapping
+    only the sides would have left "previous" on the left pointing right.
+
+    **Code review finding #1 — `audit_applied_decisions.py` was absorbing a real
+    lost correction.** `find_span()` searches the whole klal, so the
+    shifted-index reclassification accepted a hit at ANY distance, and the
+    drifted list only printed under an env var whose hint string could only be
+    read by someone who had already set it. Klal 10's applied `candidate_choice`
+    claims `כתבו` at w85; the corpus has `למד` there and `כתבו` at w74, eleven
+    words away in a klal whose applies shift by one. It was being reported as
+    "reflected at word_index 74 (-11)" — printed nowhere — and that single
+    reclassification took the headline from 57 MISMATCH to 1.
+
+    Now bounded by `MAX_EXPLAINABLE_SHIFT = 5`, and the drift list prints by
+    default (`AUDIT_HIDE_DRIFT=1` suppresses it). Audit goes 1 → **2 MISMATCH**,
+    56 → 55 shifted, and klal 10 is back in front of a human.
+
+    **Two candidate rules were measured and REJECTED before this one.**
+    Requiring the relocated span to be UNIQUE in the klal is exactly backwards:
+    klal 10's false relocation is the one case whose word occurs exactly once,
+    while 36 of the 55 legitimate ones match a word appearing 2–6 times
+    (`אלהים` six times in klal 69). And a bound derived from the ledger's own
+    word-count deltas is unsound — klalim 159 and 163 show real ±1 shifts while
+    every applied decision in them is word-count-neutral, because the pipeline's
+    editorial-mark insertions move indices without any decision recording it.
+    Measured, not assumed; had either shipped it would have been worse than the
+    bug. Observed legitimate shifts span −3..+2, 44 of them exactly ±1.
+
+    **Code review finding #2 — `preview_dicta_disputes.consensus_of()` answered a
+    2-2 split by dict-insertion order.** `collect()` always inserts docai, vlm,
+    surya, candidate, so an even split always resolved to the docai side;
+    `classify()` then found the candidate absent from it and dropped the position
+    with no trace. In practice the "contested" section could only ever fire when
+    the candidate happened to agree with DocAI. Split into `consensus_groups()`
+    (ordered by size, ties on the reading — never on insertion order) plus a
+    `prefer=` argument, which is the question the tool asks: what does adding
+    THIS engine do to the consensus.
+
+    **Zero effect on today's output** — new/joins/escalations/contested are
+    unchanged at 59/63/1/0, because the current Dicta baseline covers only pages
+    22–50 and no position there hits a 2-2 split. It is latent, and pages 51–114
+    are expected to bring 3–4× the disputes. Verified by construction instead:
+    the same split written both ways round now yields the same verdict, which is
+    the assertion the old test was missing.
+
+    Findings #3–#8 of that review are untouched and still open. #3 in particular
+    is now doing visible damage in a second place: the null `chosen_text` records
+    it names are what the recorded list has to report as `unknown`.
+
+    Full suite **426 collected, 425 passed, 1 skipped** (`pytest --collect-only
+    -q`, per Lesson 37).
+
+0AB. **[2026-09-01] 105 OF PART 1's 483 RECORDED RULINGS CARRY A STALE ADDRESS —
+    but 79 of those were HONOURED anyway. The rulings actually unaccounted for
+    number 26. OPEN, and smaller than this entry first claimed.**
+
+    Found while measuring where the legend's "51" comes from (item `0AA`); not
+    fixed. **Now visible in the dashboard** — the recorded-rulings list added in
+    `0AC` shows a status and a stale-address marker per row, with filters for
+    both, so this item finally has a surface.
+
+    **THIS ENTRY'S ORIGINAL NUMBER CONFLATED TWO DIFFERENT THINGS and overstated
+    the damage.** It counted a ruling as orphaned whenever the word at its index
+    was neither the one ruled on nor the one chosen — which is true both for a
+    ruling that was LOST and for one that was HONOURED and then had its index
+    shifted out from under it by a later apply in the same klal.
+    `audit_applied_decisions.py` separates exactly those two (55 shifted, 2
+    genuinely missing); this entry did not. Corrected 2026-09-01 by splitting the
+    display's `status` (what happened to the RULING) from `index_stale` (what
+    happened to its ADDRESS):
+
+    | | rulings | |
+    |---|---|---|
+    | applied | 259 | changed the text, and the change is in the corpus |
+    | confirmed | 162 | KEPT the stored reading — nothing was ever to be promoted |
+    | **pending** | **5** | changes the text, not yet promoted — the real apply backlog |
+    | **drifted** | **16** | fate cannot be told from here |
+    | **unplaced** | **10** | `word_index` outside the klal entirely |
+    | unknown | 31 | nothing usable was snapshotted — see below |
+    | **stale address** | **105** | index no longer points at the word it names — 50 of them `applied`, 29 `confirmed` |
+
+    **So: 105 stale addresses, of which 79 belong to rulings that were honoured
+    anyway; 26 rulings genuinely unaccounted for; 5 awaiting promotion.** A stale
+    address is still a defect — a re-decision at that key lands on the wrong word,
+    and both display paths silently drop it — which is what Lesson 35 is about.
+    It is just not the same defect as a lost correction, and reporting 105 lost
+    corrections was wrong.
+
+    `unknown` is mostly `witness_choice`, which snapshots `docai_reading` vs
+    `tesseract_reading` and never records the stored word, plus the records
+    carrying a **null `chosen_text`** — the 2026-09-01 review's finding #3, still
+    open. Klalim carrying the most stale addresses: 69, 74, 36, 57, 63, 66, 1, 39.
+
+    **This is Lesson 35's failure mode at scale.** Applying a correction shifts
+    every later index in that klal, and nothing re-points the decisions past it.
+    That lesson was written from an incident of **10** orphaned decisions
+    (2026-08-13); the real figure today is 119.
+
+    **Why nothing shows it.** Both display paths drop a drifted decision rather
+    than render a wrong word — `api_klal`'s manual loop and `api_klalim`'s count
+    both skip on `_word_matches` — which is the RIGHT call for the screen (it is
+    what stops someone else's `chosen_text` appearing on an unrelated word) and
+    is why no count, badge or legend reflects them. They are neither applied nor
+    visible nor audited.
+
+    **Not proposing a repair here, deliberately.** Re-pointing 119 decisions
+    means reconstructing an edit history from `apply_event` rows, and per
+    Lesson 31 a mutator that has to guess where a word went is exactly what
+    should be handed back rather than tuned. What is needed first is a decision
+    on what a stranded ruling MEANS: re-point it, retire it, or surface it to
+    the reviewer as "you ruled here once and the ground moved". `audit_applied_
+    decisions.py` is the natural home for detecting them; today it does not.
+
+    Measured with `review_decisions.all_current()` over `candidate_choice`
+    (aliased to `disputed_choice`) and `manual_correction`, against live
+    `part1.json`. Re-measure before quoting — the numbers move with every apply.
+
+0AA. **[2026-09-01, reviewer-requested] THE LEGEND'S "HUMAN-DECIDED 51" WAS
+    COUNTING THE SCREEN, NOT THE LEDGER — it now shows both. Plus: every legend
+    count opens the list of words behind it, and clicking a word copies its
+    link.**
+
+    Reviewer: "count for human decisions is 51 — not correct." It was not a
+    counting bug — `decided_count` faithfully counts the words rendered GREEN,
+    and `test_nav_tristate_matches_what_each_word_actually_renders_as` passes —
+    it was a LABELLING one. A decision stops rendering the moment it is settled:
+    `assemble_corrections_dataset.py` drops the candidate entry, and an applied
+    `manual_correction` fails the display drift check because the word it names
+    is no longer there. So 478 rulings on record displayed as 51, and the number
+    read as "you have decided 51 words".
+
+    | Part 1 | |
+    |---|---|
+    | words rendering human-decided | 51 |
+    | distinct word positions carrying a ruling | 478 |
+    | …of which the corpus already agrees with | 344 (the rest: item `0AB`) |
+
+    **Kept both numbers rather than replacing one.** Swapping in the larger
+    figure would have broken the tri-state identity
+    (`decided + resolved + disputed == total`) the invariant above asserts. The
+    legend row now reads `Human-Decided  51  of 478 recorded`, with the
+    distinction in its `title`.
+
+    `recorded_decision_count` (new, on `/api/klalim`) is the union of
+    `candidate_choice`/`disputed_choice`, `manual_correction` and
+    `witness_choice` positions, keyed to one index space — witness rulings are
+    mapped through the witness queue's own `word_index`, exactly as
+    `review_counts.word_states()` maps them before colouring the word. **Leaving
+    that third leg out was a real defect in the first cut** and klal 30 caught
+    it immediately: recorded=3 against decided=9, a context figure SMALLER than
+    the count it was giving context to. `punctuation_choice` stays out —
+    `before_word_index` addresses the gap between two words, not a word.
+
+    **Two features landed with it, both reviewer-requested.**
+
+    - **Every legend count is now a control.** Clicking one opens the list of
+      the words it counts, each row a working deep link, via a new
+      `/api/word-states`. The lists are built in the SAME pass as the counts
+      (`api_klalim`'s `on_klal_states` callback) — a list that is a different
+      length from the number that opened it is this file's oldest defect family
+      (nav 1,201 vs 1,061 rendered; klal 88's "-1"; klal 73's missing badge),
+      every instance of it two encodings of one rule disagreeing. Holding the
+      pointer on a row for 400ms reveals its copy button; a hover would put a
+      button under the cursor on all 518 rows and make the list unreadable.
+      `review_counts.state_rows()` was extracted for this and `count_row()`
+      redefined on top of it, so the enumeration and the count cannot diverge.
+    - **Clicking a word copies its URL**, with a toast saying so, and a
+      "Copy word link on click" checkbox turns it off (persisted in
+      localStorage). Hooked into `focusWordOnScan()` — already the single funnel
+      every word click passes through, and already the only place that maintains
+      the address bar — so the link copied is the same address the hash is set
+      to by construction. `highlightRoutedWord()` passes `viaClick: false`:
+      arriving somewhere by following a link must not overwrite the clipboard
+      the reviewer used to get there.
+
+    `#legend` was raised from `z-index: 40` to `920`; at 40 it went under the
+    panel backdrop its own click opens, so switching legend rows would have
+    needed a dismiss step first. `closePanels()` now queries `.side-panel.open`
+    instead of naming five panels by hand — a sixth was being added, and a panel
+    missing from that list stays open underneath the next one.
+
+    Eight new tests: two gated invariants (list length equals the count it came
+    from; recorded is the ledger's union and never below what renders) and six
+    Playwright. Full suite **420 collected, 419 passed, 1 skipped** — count from
+    `pytest --collect-only -q`, per Lesson 37.
 
 1F. **[2026-09-01] KLAL 209 APPLIED — three spurious words removed, and the
     sentence the 2026-08-14 spot-check called unparseable now parses.**
