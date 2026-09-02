@@ -113,6 +113,54 @@ reliability check, and every dispute still needs the ink or a different engine.
 > borrowing `2A`–`2Z`, which names a different lane and would misattribute the
 > work. Same rule as above: never reassign an ID once written.
 
+0AL. **[2026-09-02] THE ZOOM LADDER COULD NOT REACH 100%, and a missing
+    /api/corpus rendered as a blank space with nothing in the console. FIXED.**
+
+    - **Zoom.** Reviewer: "zoom -+ goes directly from 95% to 120. 100 seems
+      pretty basic." The buttons stepped `current ± 0.25`, and **the clamp is
+      what broke it**: from 100%, three zoom-outs give 75 → 50 → **30**
+      (clamped at the floor), and the way back up is 55 → 80 → 105. One clamp
+      knocks the value off the quarter grid and every later step inherits the
+      offset, so 100% — and every other round number — becomes unreachable. The
+      ctrl+wheel's 0.15 steps do the same thing faster, which is how 95% happened.
+      Replaced with fixed stops (0.3 / 0.5 / 0.75 / 1 / 1.25 / 1.5 / 2 / 2.5 / 3):
+      the clamp is now harmless and 100% is always one walk away, including from
+      an off-ladder value the wheel or the focus zoom left behind.
+
+      **The related report did NOT reproduce.** "After clicking on a word it went
+      back to normal" — measured: a manual 125% goes to 220% for the focus zoom
+      and back to 125% on dismiss, repeatably. The focus zoom is deliberate and
+      the restore works; if the complaint is that clicking a word changes the
+      zoom AT ALL, that is a design question, not a bug, and worth saying so.
+
+    - **Titles.** Reviewer: "remove more titles from the top bar. just show one
+      in hebrew and one in eng in the center pane." Both now live in the centre
+      pane only; the index and scan bars carry just their own reference. The
+      four-slot order had put the work's name at both ends of all three bars —
+      six repetitions of one fact, on a screen whose complaint was clutter.
+
+    - **A missing /api/corpus was silent.** Reviewer: "when i sync this repo on
+      another machine no titles render — is there code still needing to be
+      committed and pushed?" **No: nothing was missing.** `WORK_TITLE`,
+      `api_corpus()`, its route and the `data-slot` markup were all on
+      origin/master. The cause is a `review_server.py` process **started before
+      the endpoint existed** — Python loads the module once, so a synced-but-not-
+      restarted server still answers 404.
+
+      That should have been obvious from the console and was not, and that part
+      is a defect I shipped: the fetch was
+      `fetch('/api/corpus').then(r => r.json()).catch(() => null)` with **no
+      `r.ok` check**, so a 404's JSON error body parsed cleanly, `CORPUS` became
+      `{error: ...}`, every title rendered as an empty string, and
+      `.ph-title:empty` hid it. A deployment problem became a blank space with
+      nothing to diagnose — Lesson 26's shape, a filter that HIDES being more
+      dangerous than one that rewrites. It now checks `r.ok` and logs the likely
+      cause by name. **Restarting the dashboard on that machine is the fix.**
+
+    Three tests added, including one that fulfils a 404 for `/api/corpus` and
+    asserts the diagnostic appears AND the dashboard still works without it.
+    Full suite **442 collected, 441 passed, 1 skipped**.
+
 0AK. **[2026-09-02] THE SCAN PANE'S OVERLAY CONTROLS SCROLLED AWAY WITH THE
     PAGE — the zoom cluster since yesterday, the page arrows since they were
     added. FIXED. And a word URL now behaves like clicking that word.**

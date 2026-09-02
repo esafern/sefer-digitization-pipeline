@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Yad Malachi — Correction Review</title>
-<link rel="stylesheet" href="/app.css?v=12">
+<link rel="stylesheet" href="/app.css?v=13">
 </head>
 <body>
 
@@ -17,14 +17,17 @@
          on that background was very nearly invisible. It now shares
          `.pane-header` with #scan-header, so the two panes are the same object
          at the same height. -->
+    <!-- NO TITLE HERE. Reviewer, 2026-09-02: "remove more titles from the top
+         bar. just show one in hebrew and one in eng in the center pane." The
+         four-slot order put the work's name at both ends of every bar - six
+         repetitions of one fact across the top of one window. The centre pane
+         carries the pair; the outer two carry only their own reference. -->
     <div id="nav-header" class="pane-header">
-      <span class="ph-title ph-he" data-slot="title-he"></span>
       <span class="ph-mid">
         <span class="ph-ref ph-he" id="nav-ref-he"></span>
         <span class="ph-ref ph-en" id="nav-ref-en"></span>
       </span>
       <span class="ph-end">
-        <span class="ph-title ph-en" data-slot="title-en"></span>
         <!-- The settings tray. Reviewer: "don't put click word on link up there
              on the index pane, hide it away somewhere - settings icon?" -->
         <button id="settings-btn" type="button" title="Settings" aria-expanded="false">&#9881;</button>
@@ -78,7 +81,9 @@
            extra eng titles"); the index pane keeps one, and the Hebrew title
            stays everywhere because the BOOK prints it as a running head on every
            page, which is what the reviewer is matching against. -->
-      <span class="ph-end"></span>
+      <span class="ph-end">
+        <span class="ph-title ph-en" data-slot="title-en"></span>
+      </span>
     </div>
     <div id="text-scroll"></div>
   </div>
@@ -93,7 +98,6 @@
          both halves, and both names are load-bearing in app.js and in the tests,
          so the names stayed and only the ORDER moved. -->
     <div id="scan-header" class="pane-header">
-      <span class="ph-title ph-he" data-slot="title-he"></span>
       <span class="ph-mid">
         <span class="ph-ref ph-he" id="klal-indicator"></span>
         <span class="ph-ref ph-en" id="page-indicator">Page —</span>
@@ -179,6 +183,6 @@
     <div class="panel-body" id="manual-panel-body"></div>
   </div>
 
-  <script src="/app.js?v=12"></script>
+  <script src="/app.js?v=13"></script>
 </body>
 </html>

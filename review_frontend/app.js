@@ -818,7 +818,24 @@ async function init() {
     // directly above: the work's title is constant for the life of the process
     // and identical in every part, so re-fetching it on a part switch could
     // never return anything new.
-    fetch('/api/corpus').then(r => r.json()).catch(() => null),
+    // `r.ok` is checked, and the failure is REPORTED. FIXED 2026-09-02 (reviewer:
+    // "when i sync this repo on another machine no titles render ... is there
+    // code still needing to be committed and pushed?" - no, there was not).
+    // A server process started BEFORE /api/corpus existed answers 404 with a
+    // JSON body, `r.json()` parses it happily, CORPUS becomes {error: ...}, and
+    // every title renders as an empty string that `.ph-title:empty` then hides.
+    // A deployment problem became a blank space with nothing in the console -
+    // Lesson 26: a filter that HIDES is more dangerous than one that rewrites.
+    fetch('/api/corpus').then(r => {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    }).catch(e => {
+      console.error(
+        `/api/corpus failed (${e.message}) - the pane headers will have no title. ` +
+        'The usual cause is a review_server.py process that was started BEFORE ' +
+        'this endpoint existed: restart the server after pulling.');
+      return null;
+    }),
   ]);
   FLAGS = flags;
   NUMERALS = numerals || {};
@@ -3064,11 +3081,36 @@ function applyZoom(anchorRatioX, anchorRatioY) {
     }
   });
 }
-function setupZoomPan() {
+// FIXED STOPS, not `current +- 0.25` (reviewer 2026-09-02: "zoom -+ goes
+// directly from 95% to 120. 100 seems pretty basic").
+//
+// The old buttons stepped by a quarter from wherever they happened to be, and
+// the clamp is what broke it: from 100%, three zoom-outs give 75 -> 50 -> 30
+// (clamped), and from 30 the way back is 55 -> 80 -> 105. One clamp knocks the
+// value off the quarter grid and EVERY later step inherits the offset, so 100%
+// becomes unreachable - as does any round number. The ctrl+wheel's 0.15 steps do
+// the same thing faster.
+//
+// Stops make the clamp harmless and 100% always one click away, from anywhere,
+// including from a value the wheel or the focus zoom left behind.
+const ZOOM_STOPS = [0.3, 0.5, 0.75, 1, 1.25, 1.5, 2, 2.5, 3];
+
+function zoomStep(direction) {
+  const eps = 1e-6;   // 0.75 + 0.25 is not exactly 1 in binary floating point
+  const next = direction > 0
+    ? ZOOM_STOPS.find(z => z > zoomLevel + eps)
+    : ZOOM_STOPS.slice().reverse().find(z => z < zoomLevel - eps);
+  if (next === undefined) return;          // already at an end of the ladder
   // Touching the zoom by hand hands ownership back to the reviewer: whatever the
   // focus had stored is no longer theirs to restore.
-  document.getElementById('zoom-in').onclick = () => { _zoomBeforeFocus = null; zoomLevel = Math.min(3, zoomLevel + 0.25); applyZoom(); };
-  document.getElementById('zoom-out').onclick = () => { _zoomBeforeFocus = null; zoomLevel = Math.max(0.3, zoomLevel - 0.25); applyZoom(); };
+  _zoomBeforeFocus = null;
+  zoomLevel = next;
+  applyZoom();
+}
+
+function setupZoomPan() {
+  document.getElementById('zoom-in').onclick = () => zoomStep(+1);
+  document.getElementById('zoom-out').onclick = () => zoomStep(-1);
   scanViewer.addEventListener('wheel', (e) => {
     if (e.ctrlKey || e.metaKey) {
       e.preventDefault();

@@ -2007,25 +2007,28 @@ def test_every_pane_header_carries_the_book_title_from_the_server(server, page):
     corpus = _get_json(server, "/api/corpus")
     assert corpus["title_he"] and corpus["title"], corpus
     _open_dashboard(page, server)
-    for header in PANE_HEADERS:
-        he = page.locator(f"#{header} [data-slot='title-he']")
-        assert he.inner_text().strip() == corpus["title_he"], header
-        # The edition is the thing START_HERE.md warns about conflating; it
-        # belongs on hover, not on screen.
-        assert corpus["edition"] in he.get_attribute("title"), header
-    # The ENGLISH title appears ONCE, in the index bar. It was in all three, which
-    # put the work's name six times across the top of one window - on a screen
-    # whose complaint was clutter (reviewer: "yes drop the extra eng titles"). The
-    # Hebrew stays everywhere because the book prints it as a running head on
-    # every page, which is what the reviewer is matching against.
+    # EXACTLY ONE of each, and both in the CENTRE pane. Reviewer, 2026-09-02:
+    # "remove more titles from the top bar. just show one in hebrew and one in
+    # eng in the center pane." The four-slot order had put the work's name at
+    # both ends of all three bars - six repetitions of one fact across the top of
+    # one window, on a screen whose complaint was clutter. The outer panes now
+    # carry only their own reference.
+    he = page.locator("[data-slot='title-he']")
     en = page.locator("[data-slot='title-en']")
+    assert he.count() == 1, f"{he.count()} Hebrew titles on screen, expected 1"
     assert en.count() == 1, f"{en.count()} English titles on screen, expected 1"
+    assert he.inner_text().strip() == corpus["title_he"]
     # text_content(), not inner_text(): the slot is styled `text-transform:
     # uppercase`, and inner_text() returns what is PAINTED.
     assert en.text_content().strip() == corpus["title"]
-    assert page.evaluate(
-        "() => document.getElementById('nav-header').contains(document.querySelector(\"[data-slot='title-en']\"))"
-    ), "the one English title is not in the index bar"
+    # The edition is the thing START_HERE.md warns about conflating; it belongs
+    # on hover, not on screen.
+    assert corpus["edition"] in he.get_attribute("title")
+    for slot in ("title-he", "title-en"):
+        assert page.evaluate(
+            "(sel) => document.getElementById('text-header')"
+            ".contains(document.querySelector(sel))", f"[data-slot='{slot}']"
+        ), f"{slot} is not in the centre pane"
     assert page.test_errors == []
 
 
@@ -2152,7 +2155,7 @@ def test_the_three_pane_headers_are_one_bar_in_the_same_order(server, page):
           bg: cs.backgroundColor,
           slots: [...h.querySelectorAll('.ph-title, .ph-ref')]
                    .map(e => e.className.replace(/\s+/g, ' ').trim()),
-          fg: getComputedStyle(h.querySelector('.ph-title.ph-he')).color,
+          fg: getComputedStyle(h.querySelector('.ph-ref.ph-he')).color,
         };
     })""", list(PANE_HEADERS))
 
@@ -2160,14 +2163,19 @@ def test_the_three_pane_headers_are_one_bar_in_the_same_order(server, page):
     assert len(heights) == 1, f"the three bars are different heights: {geom}"
     assert {g["top"] for g in geom} == {0}, f"the bars do not start at the top: {geom}"
     assert len({g["bg"] for g in geom}) == 1, f"the bars are different colours: {geom}"
-    # The English title is the one slot that is not on every bar - see
-    # test_every_pane_header_carries_the_book_title_from_the_server. Everything
-    # before it must match, in order, on all three.
-    want = ["ph-title ph-he", "ph-ref ph-he", "ph-ref ph-en"]
+    # The two REFERENCE slots, Hebrew then English, are what every bar shares.
+    # The titles are the centre pane's alone - see
+    # test_every_pane_header_carries_the_book_title_from_the_server.
+    want = ["ph-ref ph-he", "ph-ref ph-en"]
     for g in geom:
-        assert g["slots"][:3] == want, f"{g['id']} slots are {g['slots']}, expected {want} first"
-        assert g["slots"][3:] in ([], ["ph-title ph-en"]), g["slots"]
-        assert g["fg"] != g["bg"], f"{g['id']}: the title is the colour of its own bar"
+        refs = [c for c in g["slots"] if c.startswith("ph-ref")]
+        assert refs == want, f"{g['id']} reference slots are {refs}, expected {want}"
+        titles = [c for c in g["slots"] if c.startswith("ph-title")]
+        if g["id"] == "text-header":
+            assert titles == ["ph-title ph-he", "ph-title ph-en"], g["slots"]
+        else:
+            assert titles == [], f"{g['id']} still carries a title: {g['slots']}"
+        assert g["fg"] != g["bg"], f"{g['id']}: its text is the colour of its own bar"
 
     # Nothing may overflow its bar. `overflow: hidden` on the header means an
     # over-wide bar shows no symptom at all - it silently eats a slot - so this
@@ -2401,3 +2409,75 @@ def test_the_part_selector_shares_the_filter_row(server, page):
     assert page.locator(".nav-item").count() > 0
     assert page.locator(".nav-item").first.get_attribute("data-klal-id") == "223"
     assert page.test_errors == []
+
+
+def test_the_zoom_ladder_always_contains_one_hundred_percent(server, page):
+    """REGRESSION 2026-09-02, reviewer: "zoom -+ goes directly from 95% to 120.
+    100 seems pretty basic."
+
+    The buttons stepped by `current +- 0.25` and the CLAMP is what broke it: from
+    100%, three zoom-outs give 75 -> 50 -> 30 (clamped), and the way back is
+    55 -> 80 -> 105. One clamp knocks the value off the quarter grid and every
+    later step inherits the offset, so 100% - and every other round number -
+    becomes unreachable. The ctrl+wheel's 0.15 steps do it faster.
+
+    Asserts reachability from BOTH ends and from an off-ladder value the focus
+    zoom leaves behind, which is the case a fixed grid alone would not cover.
+    """
+    _open_dashboard(page, server, klal_id=2)
+    read = lambda: page.inner_text("#zoom-level")
+
+    for _ in range(6):                       # down to the floor and stay there
+        page.click("#zoom-out")
+        page.wait_for_timeout(120)
+    floor = read()
+    seen = []
+    for _ in range(6):
+        page.click("#zoom-in")
+        page.wait_for_timeout(120)
+        seen.append(read())
+    assert "100%" in seen, f"climbing from {floor} never passes 100%: {seen}"
+
+    # ...and from an OFF-LADDER value, which is the case the reviewer actually
+    # hit. ctrl+wheel zooms continuously in 0.15 steps, so it lands between
+    # stops; the buttons must then walk back ONTO the ladder rather than carrying
+    # the offset forward forever, which is what "95% -> 120%" was.
+    _open_dashboard(page, server, klal_id=2)
+    page.hover("#scan-viewer")
+    page.keyboard.down("Control")
+    page.mouse.wheel(0, -120)
+    page.keyboard.up("Control")
+    page.wait_for_timeout(400)
+    off = read()
+    assert off != "100%", "the wheel did not move the zoom off 100% - this half tests nothing"
+    walked = []
+    for _ in range(3):
+        page.click("#zoom-out")
+        page.wait_for_timeout(150)
+        walked.append(read())
+    assert "100%" in walked, f"from an off-ladder {off}, stepping down never hits 100%: {walked}"
+    assert page.test_errors == []
+
+
+def test_a_missing_corpus_endpoint_says_so_instead_of_rendering_nothing(server, page):
+    """REGRESSION 2026-09-02, reviewer: "when i sync this repo on another machine
+    no titles render ... is there code still needing to be committed and pushed?"
+
+    Nothing was missing from the repo. A review_server.py process started BEFORE
+    /api/corpus existed answers 404 with a JSON body; `r.json()` parses it
+    happily, CORPUS becomes {error: ...}, every title renders as an empty string,
+    and `.ph-title:empty` hides it. A deployment problem became a blank space
+    with nothing in the console - Lesson 26, a filter that HIDES being worse than
+    one that rewrites. The fetch now checks `r.ok` and names the likely cause.
+    """
+    errors = []
+    page.on("console", lambda m: errors.append(m.text) if m.type == "error" else None)
+    page.route("**/api/corpus", lambda route: route.fulfill(
+        status=404, content_type="application/json", body='{"error": "unknown endpoint"}'))
+    _open_dashboard(page, server)
+    page.wait_for_timeout(800)
+    named = [e for e in errors if "/api/corpus failed" in e]
+    assert named, f"a missing /api/corpus produced no diagnostic at all: {errors}"
+    assert "restart the server" in named[0], named[0]
+    # ...and the dashboard must still WORK without it - the title is chrome.
+    assert page.locator(".nav-item").count() > 0, "a missing title endpoint broke the whole page"
