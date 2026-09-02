@@ -342,6 +342,114 @@ document.addEventListener('click', async (e) => {
 });
 
 
+// ---------- transient status toast ----------
+//
+// ADDED 2026-09-01, for the copy-on-click confirmation below. A copy that
+// succeeds silently is indistinguishable from one that failed - the dead-control
+// failure copyText()'s own note above records this file shipping twice - and the
+// feedback that already exists (a checkmark swapped into the .copy-ref button
+// that was clicked) has no button to live in when the trigger is the WORD ITSELF.
+// role="status" so a screen reader announces it without stealing focus from the
+// text the reviewer is reading.
+const toastEl = document.createElement('div');
+toastEl.id = 'toast';
+toastEl.setAttribute('role', 'status');
+toastEl.style.display = 'none';
+document.body.appendChild(toastEl);
+let toastTimer = null;
+
+function showToast(message, ok) {
+  toastEl.textContent = message;
+  toastEl.classList.toggle('toast-fail', ok === false);
+  toastEl.style.display = 'block';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { toastEl.style.display = 'none'; }, 1800);
+}
+
+
+// ---------- copy a word's link on click ----------
+//
+// ADDED 2026-09-01 (reviewer: "clicking on a word should push the url for that
+// word into the clipboard, with a popup message saying so ... should be a flag
+// to disable this behavior").
+//
+// Hooked into focusWordOnScan() rather than into the six click handlers: that
+// function is already the single funnel every word click passes through, and
+// already the one place that maintains the address bar, so the link copied is
+// the same address the hash is set to BY CONSTRUCTION instead of by a second
+// formatter that can drift from it. The payload is wordRefPayload()'s path form
+// - byte-identical to what the hover card's clipboard button has produced since
+// 2026-08-26. Two copy affordances yielding different text for the same word
+// would be worse than having only one.
+//
+// The OFF-SWITCH is a checkbox in the nav filter, persisted in localStorage so
+// it survives the reload every review_server.py restart forces. Opt-OUT
+// (default on) because that is what was asked for. Every localStorage access is
+// wrapped: a profile with site data blocked THROWS on read, and an exception
+// here would take the click handler - and so the panel - down with it.
+const COPY_ON_CLICK_KEY = 'ym.copyWordLinkOnClick';
+let copyOnClick = true;
+
+function setupSettingsTray() {
+  const btn = document.getElementById('settings-btn');
+  const tray = document.getElementById('settings-popover');
+  if (!btn || !tray) return;
+  const setOpen = (open) => {
+    tray.hidden = !open;
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  };
+  btn.onclick = (e) => {
+    e.stopPropagation();
+    setOpen(tray.hidden);
+  };
+  // Clicking anywhere else puts it away. Not on the tray itself - the reviewer
+  // is in there to flip a switch, and a tray that closes on the click that flips
+  // it is a control you have to reopen to confirm.
+  document.addEventListener('click', (e) => {
+    if (tray.hidden) return;
+    if (e.target.closest('#settings-popover') || e.target.closest('#settings-btn')) return;
+    setOpen(false);
+  });
+}
+
+function setupCopyOnClickToggle() {
+  try {
+    copyOnClick = localStorage.getItem(COPY_ON_CLICK_KEY) !== '0';
+  } catch (e) {
+    copyOnClick = true;
+  }
+  const box = document.getElementById('filter-copy-link');
+  if (!box) return;
+  box.checked = copyOnClick;
+  box.onchange = () => {
+    copyOnClick = box.checked;
+    try { localStorage.setItem(COPY_ON_CLICK_KEY, copyOnClick ? '1' : '0'); } catch (e) { /* not fatal */ }
+    showToast(copyOnClick ? 'Copying each word\u2019s link on click'
+                          : 'Copy-on-click off');
+  };
+}
+
+// The word as it is actually rendered. focusWordOnScan() gets a correction, not
+// a span, and a correction does not reliably carry the surface word (a plain
+// word's is synthesized on the spot, and a candidate's `final_text` can be a
+// multi-word replacement). The klal is always mounted by the time a word in it
+// can be clicked, so read it off the DOM - the same source the hover card's own
+// copy button uses (span.textContent), which is what keeps the two payloads
+// identical.
+function wordTextAt(klalId, wordIndex) {
+  const block = document.getElementById('klal-block-' + klalId);
+  const span = block && block.querySelector(`[data-word-index="${wordIndex}"]`);
+  return span ? (span.textContent || '').trim() : '';
+}
+
+async function copyWordLink(klalId, wordIndex) {
+  if (!copyOnClick || klalId == null || wordIndex == null) return;
+  const ok = await copyText(wordRefPayload(klalId, wordIndex, wordTextAt(klalId, wordIndex)));
+  showToast(ok ? `Link copied \u2014 ${klalRefName(klalId)} \u00b7 Word #${wordIndex}`
+               : 'Could not copy the link to the clipboard', ok);
+}
+
+
 // ---------- hover card on every word ----------
 //
 // ADDED 2026-08-26 (reviewer: "hovering over any word should always surface a
@@ -519,11 +627,28 @@ async function revealWordInText(klalId, wordIndex) {
 async function highlightRoutedWord(klalId, wordIndex) {
   const span = await revealWordInText(klalId, wordIndex);
   if (!span) return;
-  const k = klalById[klalId];
-  const page = (k && k.word_pages && k.word_pages[wordIndex] != null)
-    ? k.word_pages[wordIndex] : (k ? k.page : null);
+  // FIXED 2026-09-01 (reviewer: "klal 12 w 219 clicking does not show that word
+  // highlighted" - reached from a list row, which is a deep link).
+  //
+  // These four lines were a hand-rolled second copy of pageForWord(), and its
+  // word_pages branch COULD NOT FIRE: `klalById` is built from /api/klalim,
+  // whose payload has no `word_pages` key at all (only /api/klal carries it), so
+  // the test was always false and every deep link fell through to the klal's
+  // START page. Klal 12 word 219 lives on page 19 and the link showed page 18,
+  // where the word has no box - so nothing highlighted, with no error.
+  //
+  // Lesson 25 exactly: a condition that cannot be true is not a fallback, it is
+  // dead code wearing one. Swept: 18,044 words across 55 klalim sit on a page
+  // other than their klal's start page, and every deep link to one of them was
+  // landing on the wrong page.
+  //
+  // pageForWord() now, against the MOUNTED klal - revealWordInText() has just
+  // awaited mountKlal(), so mountedKlal[klalId] is the /api/klal payload that
+  // does carry word_pages.
+  const page = pageForWord(klalForPageLookup(klalId), wordIndex, null);
   if (page != null) {
-    focusWordOnScan(page, klalId, { klal_id: klalId, word_index: wordIndex, opcode: 'plain' });
+    focusWordOnScan(page, klalId, { klal_id: klalId, word_index: wordIndex, opcode: 'plain' },
+                    { viaClick: false });
   }
 }
 
@@ -562,8 +687,65 @@ async function applyHashRoute() {
   }
 }
 
+// ---------- the book this dashboard has loaded ----------
+//
+// ADDED 2026-09-01 (reviewer: "on index pane header should show book title also
+// scan pane"). Fetched from /api/corpus rather than written into index.html:
+// this pipeline is built to generalize past one work, and a title in the markup
+// is one more place a second book would have to be edited.
+//
+// Both surfaces get the HEBREW title first. That is the same reasoning the nav
+// already applies to klal markers - the reviewer is matching what they see
+// against the printed page, and the page says `יד מלאכי`, not "Yad Malachi".
+let CORPUS = null;
+
+// Fill the title slots in EVERY pane header at once.
+//
+// REWRITTEN 2026-09-01 (reviewer: "text differs between two blue headers ...
+// both headers same size and shape"). Each pane used to build its own title
+// markup, which is precisely how the two bars came to say different things in a
+// different order. There is now one slot vocabulary - `[data-slot]` - and one
+// function that fills it, so a pane cannot have a title the others do not.
+function renderBookTitle() {
+  if (!CORPUS) return;
+  const heb = CORPUS.title_he || '';
+  const eng = CORPUS.title || '';
+  // The edition, on hover only. It matters - START_HERE.md spends a section on
+  // not confusing this Berlin reprint with the Livorno original - but it is not
+  // what a reviewer needs on screen at all times, and three copies of it across
+  // three bars is the clutter this pass is removing.
+  const tip = [eng, CORPUS.section, CORPUS.edition].filter(Boolean).join(' \u2014 ');
+  document.querySelectorAll('[data-slot="title-he"]').forEach(el => {
+    el.textContent = heb; el.title = tip;
+  });
+  document.querySelectorAll('[data-slot="title-en"]').forEach(el => {
+    el.textContent = eng; el.title = tip;
+  });
+  // The index pane's reference is the SECTION it is listing, which is the
+  // standing answer to "what am I looking at" for that pane - the other two
+  // panes' references move as you read, and this one does not.
+  const navHe = document.getElementById('nav-ref-he');
+  const navEn = document.getElementById('nav-ref-en');
+  if (navHe) navHe.textContent = CORPUS.section_he || '';
+  if (navEn) navEn.textContent = CORPUS.section || '';
+}
+
+// The text pane's reference: the klal being read, in both scripts, exactly as
+// the scan pane names the page it is showing. ADDED 2026-09-01 with that pane's
+// first header - it was the only one of the three without a bar, and the pane a
+// reviewer spends the most time in was the one that never said where they were.
+function updateTextHeader() {
+  const he = document.getElementById('text-ref-he');
+  const en = document.getElementById('text-ref-en');
+  if (!he || !en) return;
+  const kid = _headerKlalId;
+  if (kid == null) { he.textContent = ''; en.textContent = ''; return; }
+  he.textContent = 'כלל ' + hebNum(kid);
+  en.textContent = 'Klal ' + kid;
+}
+
 async function init() {
-  const [flags, klalim, witness, numerals] = await Promise.all([
+  const [flags, klalim, witness, numerals, corpus] = await Promise.all([
     fetch('/api/flags').then(r => r.json()),
     fetch('/api/klalim?part=' + currentPart).then(r => r.json()),
     fetch('/api/witness').then(r => r.json()),
@@ -576,9 +758,16 @@ async function init() {
     // mistake Lesson 34 describes: the header stayed in digits and the globals
     // init() sets still looked right, so the wrong edit read as a working one.)
     fetch('/api/numerals').then(r => r.json()),
+    // Fetched here and nowhere else, for the same reason as the numeral table
+    // directly above: the work's title is constant for the life of the process
+    // and identical in every part, so re-fetching it on a part switch could
+    // never return anything new.
+    fetch('/api/corpus').then(r => r.json()).catch(() => null),
   ]);
   FLAGS = flags;
   NUMERALS = numerals || {};
+  CORPUS = corpus;
+  renderBookTitle();
   KLALIM = klalim;
   klalById = Object.fromEntries(klalim.map(k => [k.klal_id, k]));
   WITNESS_PAGES = witness.pages || [];
@@ -589,6 +778,8 @@ async function init() {
   buildPlaceholders();
   setupObserver();
   setupFilter();
+  setupSettingsTray();
+  setupCopyOnClickToggle();
   setupZoomPan();
   setupPanels();
   setupNavRefreshOnReturn();
@@ -672,28 +863,81 @@ async function refreshKlalimList() {
   return klalimRefreshInFlight;
 }
 
+// Which /api/word-states list stands behind each legend row. The names are the
+// server's own state constants (review_counts.DECIDED/RESOLVED/DISPUTED), not a
+// second vocabulary - a legend row whose bucket name does not exist on the
+// server opens an empty list and says nothing about why.
+const LEGEND_BUCKET = {
+  open: 'machine_disputed',
+  machine: 'machine_resolved',
+  human: 'decided',
+  ai: 'ai_flag',
+};
+
 function buildLegend() {
   legend.innerHTML = '';
   const totals = { open: 0, machine: 0, human: 0 };
+  // RECORDED decisions, which is NOT what the three tri-state totals count.
+  // See review_server.api_klalim's own note: decided_count is the number of
+  // words rendered GREEN right now, and a decision stops rendering the moment
+  // it is settled - the candidate entry is dropped by the rebuild, and an
+  // applied manual correction fails the drift check because the word it names
+  // is no longer there. Part 1 reads 51 green against 463 rulings recorded.
+  // Both are true and they answer different questions, so the row shows both
+  // rather than one replacing the other: swapping in the larger number would
+  // break the tri-state identity (decided + resolved + disputed == total) that
+  // test_nav_tristate_matches_what_each_word_actually_renders_as asserts, and
+  // leaving only the smaller one is what made 51 read as "you have decided 51
+  // words".
+  let recorded = 0;
   KLALIM.forEach(k => {
     totals.open += k.machine_disputed_count || 0;
     totals.machine += k.machine_resolved_count || 0;
     totals.human += k.decided_count || 0;
+    recorded += k.recorded_decision_count || 0;
   });
+  // The Human-Decided row says WHICH human-decided count it is. The bare label
+  // read as "you have decided 54 words", which is not what it counts - see
+  // review_server.api_klalim's note on recorded_decision_count.
+  const LEGEND_SUFFIX = { human: ' (still shown)' };
   Object.entries(STATE_META).forEach(([state, { label, color }]) => {
+    const shown = label + (LEGEND_SUFFIX[state] || '');
     const row = document.createElement('div');
-    row.className = 'legend-row';
+    row.className = 'legend-row legend-clickable';
+    row.dataset.bucket = LEGEND_BUCKET[state];
+    row.dataset.label = shown;
+    row.title = state === 'human'
+      ? `${totals.human} word(s) are drawn as human-decided in the text right now. A ruling stops being drawn once it is settled - the rebuild drops its candidate entry - so this is NOT the number of rulings on record; see the row below.`
+      : `Show all ${totals[state]} \u2014 ${label}`;
     const shape = state === 'machine' ? 'border-radius:2px;border:1.5px dotted ' + color + ';background:transparent;' : 'background:' + color + ';';
-    row.innerHTML = `<i style="${shape}"></i><span>${label}</span><b class="legend-count">${totals[state]}</b>`;
+    row.innerHTML = `<i style="${shape}"></i><span class="legend-label">${shown}</span><b class="legend-count">${totals[state]}</b>`;
     legend.appendChild(row);
+
+    // ...and its own row directly beneath it, not a sentence hanging off it
+    // (reviewer 2026-09-01: "one row human-decided (...) and the following row
+    // human-decided (total recorded)"). No swatch: nothing on screen is painted
+    // this colour, which is exactly the point of the row.
+    if (state === 'human' && recorded) {
+      const sub = document.createElement('div');
+      sub.className = 'legend-row legend-row-sub legend-clickable';
+      sub.dataset.bucket = 'recorded';
+      sub.dataset.label = 'Every recorded ruling';
+      sub.title = `${recorded} distinct word position(s) in this part carry a recorded ruling. Click to review all of them - what each one chose, and whether the corpus reflects it.`;
+      sub.innerHTML = `<span class="legend-label">${label} (total recorded)</span>` +
+                      `<b class="legend-count">${recorded}</b>`;
+      legend.appendChild(sub);
+    }
   });
   // AI-flagged words render with their own purple dashed underline style
   // (state-ai-flag in app.css) distinct from the three main states above.
   // Add a key so reviewers know what the colour means.
   const aiTotal = KLALIM.reduce((s, k) => s + (k.ai_flag_count || 0), 0);
   const aiRow = document.createElement('div');
-  aiRow.className = 'legend-row';
-  aiRow.innerHTML = `<i style="border-bottom:3px dashed #805ad5;background:transparent;"></i><span>AI-Flagged</span><b class="legend-count">${aiTotal}</b>`;
+  aiRow.className = 'legend-row legend-clickable';
+  aiRow.dataset.bucket = LEGEND_BUCKET.ai;
+  aiRow.dataset.label = 'AI-Flagged';
+  aiRow.title = `Show all ${aiTotal} \u2014 AI-Flagged`;
+  aiRow.innerHTML = `<i style="border-bottom:3px dashed #805ad5;background:transparent;"></i><span class="legend-label">AI-Flagged</span><b class="legend-count">${aiTotal}</b>`;
   legend.appendChild(aiRow);
 }
 
@@ -1271,7 +1515,7 @@ function attachWordHandlers(el, klalId, corr, isGap, skipTooltip) {
     // Each correction carries its own page field — the physical scan page
     // where its bbox lives (may be a continuation page for klals that span
     // multiple pages). Navigate there so the bbox is found.
-    focusWordOnScan(pageForWord(klalById[klalId], corr.word_index, corr), klalId, corr);
+    focusWordOnScan(pageForWord(klalForPageLookup(klalId), corr.word_index, corr), klalId, corr);
     // ADDED 2026-08-31: if the click came from the SCAN pane, take the text pane
     // to the same word. attachWordHandlers is shared by both panes, so this is
     // gated on where the element lives - a text-pane click is already at its
@@ -1290,6 +1534,19 @@ function attachWordHandlers(el, klalId, corr, isGap, skipTooltip) {
 // highlight had nothing to match. The manual-correction handler had already
 // worked around this by consulting word_pages; the disputed and flag handlers
 // had not. One helper, used by all of them.
+// The klal object that actually KNOWS which page each word is on.
+//
+// ADDED 2026-09-01 with the deep-link fix above. `klalById` comes from
+// /api/klalim - the nav payload, which carries `page` but not `word_pages` - so
+// handing it to pageForWord() silently disables that function's whole middle
+// branch, which is the branch it was written for. Every caller wanting a
+// per-WORD page must ask the mounted /api/klal payload; the nav object is the
+// fallback for a klal that is not mounted yet, where the start page is the only
+// answer available.
+function klalForPageLookup(klalId) {
+  return mountedKlal[klalId] || klalById[klalId];
+}
+
 function pageForWord(k, wordIndex, corr) {
   if (corr && corr.page != null) return corr.page;
   if (k && k.word_pages && wordIndex != null && k.word_pages[wordIndex] != null) {
@@ -1312,13 +1569,41 @@ function pageForWord(k, wordIndex, corr) {
 // stop SCROLLING from snapping the page back (its two remaining call sites,
 // setActiveKlal and the scroll auto-advance, still honour it); it was never
 // meant to defeat a deliberate click.
-function focusWordOnScan(targetPage, klalId, corr) {
+function focusWordOnScan(targetPage, klalId, corr, opts) {
   manualPageLock = false;
   _zoomOnFocus = true;
   // Every word click routes through here, so this is the one place that has to
   // know the address bar exists. replaceState, not pushState: a reviewer moving
   // through a klal should not have to press Back forty times to leave.
-  if (corr && corr.word_index != null) updateHash(klalId, corr.word_index);
+  if (corr && corr.word_index != null) {
+    updateHash(klalId, corr.word_index);
+    // ...and the one place that copies that address, for the same reason - see
+    // copyWordLink(). `viaClick: false` is passed by the ONLY non-click caller,
+    // highlightRoutedWord(): arriving somewhere by following a link must not
+    // overwrite the clipboard the reviewer used to get there, and a deep link
+    // opened cold would otherwise fire a toast at a reviewer who clicked
+    // nothing.
+    if (!opts || opts.viaClick !== false) copyWordLink(klalId, corr.word_index);
+  }
+  // FIXED 2026-09-01, found while reproducing the klal 12 w219 report: the click
+  // set page 19 correctly and then a scroll event fired a few hundred ms later,
+  // updateActiveFromScroll() resolved a different klal, and setActiveKlal()
+  // showed THAT klal's start page - undoing the navigation the click had just
+  // made, with nothing on screen saying why.
+  //
+  // manualPageLock guards the scan pane's own prev/next arrows against exactly
+  // this, and a word click deliberately CLEARS it (2026-08-26, because the lock
+  // was making word clicks dead) - which left the click itself the one
+  // deliberate navigation with no protection at all. revealWordInText() and
+  // applyHashRoute() both already hold the observer off while they settle; this
+  // is the third member of that set and simply never joined it.
+  //
+  // lastActiveScanPage is moved with it so the observer's own page branch does
+  // not treat the new page as a change and re-show the old one.
+  suppressObserverScroll = true;
+  clearTimeout(suppressTimer);
+  lastActiveScanPage = targetPage;
+  suppressTimer = setTimeout(() => { suppressObserverScroll = false; }, 900);
   showPage(targetPage, klalId, corr);
 }
 
@@ -1344,6 +1629,8 @@ const witnessPanel = document.getElementById('witness-panel');
 const witnessPanelBody = document.getElementById('witness-panel-body');
 const manualPanel = document.getElementById('manual-panel');
 const manualPanelBody = document.getElementById('manual-panel-body');
+const flagListPanel = document.getElementById('flag-list-panel');
+const flagListPanelBody = document.getElementById('flag-list-panel-body');
 
 function setupPanels() {
   const disputedClose = document.getElementById('disputed-panel-close') || document.getElementById('candidate-panel-close');
@@ -1352,6 +1639,7 @@ function setupPanels() {
   document.getElementById('punctuation-panel-close').onclick = dismissPanels;
   document.getElementById('witness-panel-close').onclick = dismissPanels;
   document.getElementById('manual-panel-close').onclick = dismissPanels;
+  document.getElementById('flag-list-panel-close').onclick = dismissPanels;
   backdrop.onclick = dismissPanels;
   // ADDED 2026-08-25 (user request: "clicking away (in a blank part of the
   // middle pane) should cancel that and close the right pane"). The backdrop
@@ -1384,12 +1672,12 @@ function setupPanels() {
   });
 }
 function closePanels() {
+  // Was five hand-listed panels until 2026-09-01, when a sixth was added: a
+  // panel missing from this list stays open UNDER the next one, and nothing on
+  // screen says which of the two is answering your click. Querying the class
+  // that already defines "is a side panel" cannot be forgotten.
   backdrop.classList.remove('open');
-  disputedPanel.classList.remove('open');
-  klalFlagPanel.classList.remove('open');
-  punctuationPanel.classList.remove('open');
-  witnessPanel.classList.remove('open');
-  manualPanel.classList.remove('open');
+  document.querySelectorAll('.side-panel.open').forEach(p => p.classList.remove('open'));
 }
 // Dismiss panels AND clear scan focus — only for explicit user dismissals
 // (Escape, backdrop click), NOT for openPanel()'s internal closePanels() call
@@ -1459,6 +1747,237 @@ async function clearWordFlag(klalId, wordIndex) {
   dismissPanels();
   return true;
 }
+
+// ---------- the word list behind a legend count ----------
+//
+// ADDED 2026-09-01 (reviewer: "clicking on a flag count at the bottom of the
+// index panel should pop up a list of those flags as clickable links, hovering
+// for a while should pop up a copy to clipboard icon").
+//
+// The legend has shown four totals since it was built and there was no way to
+// get from a total to the words inside it: a reviewer wanting to work through
+// the open disputes had to open klalim one at a time looking for red. This is
+// Lesson 29's question asked of the legend itself - who acts on this number,
+// and how? - and until now the answer was "nobody can".
+//
+// The lists come from /api/word-states, which is computed in the SAME pass as
+// the counts (api_klalim's on_klal_states callback), so a list can never be a
+// different length from the number that opened it.
+//
+// COPY ICON ON DWELL, not on hover: a list of 518 rows with a control on every
+// one is a wall of buttons, and the same icon appearing under the pointer the
+// instant it crosses a row makes the list unreadable while scrolling. The row
+// has to be held.
+const FLAG_LIST_DWELL_MS = 400;
+let flagListDwellTimer = null;
+// The rows currently in the panel, kept so the recorded view's status filter can
+// re-render without another round trip.
+let flagListRows = [];
+let flagListBucket = null;
+let flagListStatus = 'all';
+
+// What each status means, in the words a senior reviewer needs. Order is the
+// order the chips appear in, which is decreasing claim on their attention:
+// something that never landed matters more than something that did.
+const RECORDED_STATUS_META = {
+  pending:   ['pending',   'The ruling CHANGES the text and the corpus does not have the change yet. This, and only this, is the promote-to-corpus backlog: run apply_reviewer_decisions.py.'],
+  drifted:   ['drifted',   'The word at this position is neither the one ruled on nor the one chosen, and no apply_event claims the ruling was promoted - so what became of it cannot be told from here.'],
+  unplaced:  ['unplaced',  'The recorded word_index is outside this klal entirely.'],
+  unknown:   ['unknown',   'No original word was snapshotted - witness rulings record docai vs tesseract and never the stored word - so there is nothing to compare against.'],
+  applied:   ['applied',   'The ruling changed the text and the change is in the corpus.'],
+  confirmed: ['confirmed', 'The ruling KEPT the stored reading. There was never anything to promote - this is the commonest decision in the corpus, and counting it as "applied" is what made 27 of 54 drawn-green words look promoted when only 1 was.'],
+};
+// Not a status - a second, independent fact about the same row. See
+// review_server._decision_index_is_stale(): `status` is what happened to the
+// RULING, this is what happened to its ADDRESS, and a ruling can be honoured and
+// still have an index that no longer points at the word it described.
+const RECORDED_STALE_LABEL = ['stale address',
+  'The ruling\u2019s recorded word_index no longer points at the word it names, because a later apply in the same klal shifted everything after it and nothing re-pointed the decision. Open item 0AB. Most of these were still HONOURED - it is the address that rotted, not the ruling.'];
+
+async function openFlagListPanel(bucket, label) {
+  openPanel(flagListPanel);
+  document.getElementById('flag-list-panel-title').textContent = label;
+  flagListPanelBody.innerHTML = '<p>Loading…</p>';
+  flagListBucket = bucket;
+  flagListStatus = 'all';
+  let data;
+  try {
+    const res = await fetch('/api/word-states?part=' + (currentPart || '1'));
+    if (!res.ok) throw new Error(await res.text());
+    data = await res.json();
+  } catch (e) {
+    // Not an alert(): the panel is already open and is the natural place to say
+    // so. A silent empty list would read as "there are none", which is the one
+    // wrong thing this panel can say.
+    flagListPanelBody.innerHTML =
+      `<p class="flag-list-empty">Could not load the word list: ${escapeHtml(String(e.message || e))}</p>`;
+    return;
+  }
+  flagListRows = data[bucket] || [];
+  renderFlagList(label);
+}
+
+function flagListItemHtml(r, recorded) {
+  const href = `#klal=${r.klal_id}&word=${r.word_index}`;
+  const name = `Klal ${r.klal_id}` + (r.gematria ? ` (${r.gematria})` : '');
+  // A null word is a possible_omission sitting at len(words) - text the scan
+  // has and the corpus does not - so there is nothing to print, and saying
+  // "(not in text)" is the whole content of that row.
+  const word = r.word == null
+    ? '<span class="flag-list-nul">(not in text)</span>'
+    : `<bdi class="flag-list-word">${escapeHtml(r.word)}</bdi>`;
+  let middle = word;
+  let cls = 'flag-list-item';
+  let title = '';
+  if (recorded) {
+    cls += ' recorded-item rec-' + (r.status || 'unknown') + (r.index_stale ? ' rec-stale' : '');
+    // Only show the arrow when the ruling actually CHANGED something. A reviewer
+    // confirming the stored text (chosen_source "final_text") is the commonest
+    // decision in this corpus by far, and rendering "word -> same word" 300
+    // times would bury the rulings that did change the text.
+    const changed = r.chosen_text != null && r.chosen_text !== r.word;
+    const chosen = r.chosen_text === '' ? '<span class="rec-deleted">(deleted)</span>'
+                                        : `<bdi class="rec-chosen">${escapeHtml(String(r.chosen_text))}</bdi>`;
+    middle = `<span class="rec-status">${escapeHtml((RECORDED_STATUS_META[r.status] || [r.status])[0])}</span>` +
+             (r.index_stale ? `<span class="rec-stale-mark" title="${escapeAttr(RECORDED_STALE_LABEL[1])}">&#9888;</span>` : '') +
+             word + (changed ? `<span class="rec-arrow">&rarr;</span>${chosen}` : '');
+    const when = (r.ts || '').slice(0, 10);
+    title = `${r.decision_type || 'decision'}${when ? ' on ' + when : ''}` +
+            (r.original_word != null ? ` \u2014 ruled on "${r.original_word}"` : '') +
+            (r.note ? ` \u2014 ${r.note}` : '') +
+            `\n${(RECORDED_STATUS_META[r.status] || ['', ''])[1]}`;
+  }
+  return `<a class="${cls}" href="${href}" title="${escapeAttr(title)}"` +
+           ` data-klal="${r.klal_id}" data-word="${r.word_index}">` +
+           `<span class="flag-list-ref">${escapeHtml(name)} &middot; #${r.word_index}</span>` +
+           middle +
+           `<button class="copy-ref flag-list-copy" type="button" tabindex="-1"` +
+           ` title="Copy reference and link" data-klal="${r.klal_id}" data-word="${r.word_index}"` +
+           ` data-text="${escapeAttr(r.word == null ? '' : String(r.word))}">&#128203;</button>` +
+         `</a>`;
+}
+
+function renderFlagList(label) {
+  const recorded = flagListBucket === 'recorded';
+  if (!flagListRows.length) {
+    flagListPanelBody.innerHTML = '<p class="flag-list-empty">No words in this state in the current part.</p>';
+    return;
+  }
+  const matches = (r) => flagListStatus === 'all'
+    || (flagListStatus === 'stale' ? r.index_stale : r.status === flagListStatus);
+  const shown = flagListRows.filter(matches);
+
+  let head = `<p class="flag-list-summary">${flagListRows.length} word(s) &mdash; ${escapeHtml(label)}. ` +
+             `Click one to go to it; hold the pointer on a row for its copy button.</p>`;
+  if (recorded) {
+    // The status breakdown, as filters. A senior reviewer reviewing someone's
+    // work does not want 478 rows in one undifferentiated column - they want
+    // "which of these never landed", which is exactly the split this offers.
+    const counts = { stale: 0 };
+    flagListRows.forEach(r => {
+      counts[r.status] = (counts[r.status] || 0) + 1;
+      if (r.index_stale) counts.stale += 1;
+    });
+    // RECORDED_STATUS_META's key order is the order these appear in, and it runs
+    // from "needs a human" to "settled" - the chips a senior reviewer reaches for
+    // first should not be at the end of the row. `stale` rides along at the end
+    // because it cuts ACROSS the statuses rather than being one of them.
+    const order = ['all'].concat(Object.keys(RECORDED_STATUS_META).filter(st => counts[st]))
+                         .concat(counts.stale ? ['stale'] : []);
+    const chips = order.map(st => {
+        const n = st === 'all' ? flagListRows.length : counts[st];
+        const meta = st === 'stale' ? RECORDED_STALE_LABEL : RECORDED_STATUS_META[st];
+        return `<button type="button" class="rec-chip rec-${st}` +
+               (flagListStatus === st ? ' rec-chip-on' : '') + `" data-status="${st}"` +
+               ` title="${escapeAttr(meta ? meta[1] : 'Every ruling on record for this part.')}">` +
+               `${st === 'all' ? 'all' : escapeHtml(meta[0])} <b>${n}</b></button>`;
+      }).join('');
+    head = `<p class="flag-list-summary">Every ruling recorded for this part &mdash; what was decided, ` +
+           `and whether the corpus reflects it. A ruling stops being highlighted in the text once it is ` +
+           `settled, which is why this list is far longer than the Human-Decided count.</p>` +
+           `<div class="rec-chips">${chips}</div>`;
+  }
+  flagListPanelBody.innerHTML = head +
+    (shown.length
+      ? `<div class="flag-list">${shown.map(r => flagListItemHtml(r, recorded)).join('')}</div>`
+      : '<p class="flag-list-empty">Nothing in that state.</p>');
+}
+
+// Delegated, so the handlers survive every re-render of the list body.
+flagListPanelBody.addEventListener('click', (e) => {
+  if (e.target.closest('.copy-ref')) return;      // the global .copy-ref handler owns this
+  const chip = e.target.closest('.rec-chip');
+  if (chip) {
+    flagListStatus = chip.dataset.status;
+    renderFlagList(document.getElementById('flag-list-panel-title').textContent);
+    return;
+  }
+  const a = e.target.closest('.flag-list-item');
+  if (!a) return;
+  e.preventDefault();
+  // Set the hash AND route explicitly. Assigning an unchanged hash fires no
+  // hashchange event, so re-clicking the row you are already on would do
+  // nothing at all; applyHashRoute() is idempotent and its own `routing` guard
+  // makes the duplicate call from the hashchange listener a no-op.
+  location.hash = `#klal=${a.dataset.klal}&word=${a.dataset.word}`;
+  applyHashRoute();
+  // The panel deliberately STAYS OPEN - the point of the list is working down
+  // it, and dismissing on every jump would mean reopening it 518 times.
+});
+flagListPanelBody.addEventListener('mouseover', (e) => {
+  const a = e.target.closest && e.target.closest('.flag-list-item');
+  if (!a || !flagListPanelBody.contains(a)) return;
+  clearTimeout(flagListDwellTimer);
+  flagListDwellTimer = setTimeout(() => {
+    flagListPanelBody.querySelectorAll('.flag-list-item.dwell')
+      .forEach(el => el.classList.remove('dwell'));
+    a.classList.add('dwell');
+  }, FLAG_LIST_DWELL_MS);
+});
+flagListPanelBody.addEventListener('mouseout', (e) => {
+  const a = e.target.closest && e.target.closest('.flag-list-item');
+  if (!a) return;
+  // Moving onto the row's own copy button must not cancel the dwell that
+  // revealed it - that is the one move the reviewer is about to make.
+  if (e.relatedTarget && a.contains(e.relatedTarget)) return;
+  clearTimeout(flagListDwellTimer);
+  a.classList.remove('dwell');
+});
+
+// Put the list away when the reviewer goes back to the text or the scan
+// (reviewer 2026-09-01: "pop up from index human-decided should disappear when
+// clicked inside text pane or scan pane").
+//
+// Only THIS panel, and without clearScanFocus(): the other five are opened BY a
+// click in those panes, so closing on the same click would shut them the instant
+// they opened - the exact failure the '.punct-marker' entry in setupPanels'
+// INTERACTIVE_IN_TEXT list is a standing note about. The list is the one panel
+// opened from the index, so leaving the index is what dismisses it.
+//
+// Capture phase, so it runs before the word's own handler opens its panel and
+// the ordering is close-then-open rather than the reverse.
+function closeFlagListPanel() {
+  if (!flagListPanel.classList.contains('open')) return;
+  flagListPanel.classList.remove('open');
+  if (!document.querySelector('.side-panel.open')) backdrop.classList.remove('open');
+}
+['text-pane', 'scan-pane'].forEach(id => {
+  const pane = document.getElementById(id);
+  if (pane) pane.addEventListener('click', closeFlagListPanel, true);
+});
+
+// The legend is rebuilt from scratch by buildLegend() on every refresh, so this
+// is delegated to the container rather than bound per row.
+legend.addEventListener('click', (e) => {
+  if (!e.target.closest) return;
+  // Every legend entry is now a sibling ROW, including the recorded total, so
+  // one lookup serves all of them. It used to be a button nested inside the
+  // Human-Decided row, which needed testing first or `closest` walked past it to
+  // the row and opened the 54-word list from a control labelled 481.
+  const row = e.target.closest('.legend-clickable');
+  if (!row || !legend.contains(row)) return;
+  openFlagListPanel(row.dataset.bucket, row.dataset.label);
+});
 
 function openPanel(panel) {
   closePanels();
@@ -2857,6 +3376,17 @@ function jumpTo(klalId) {
 // retune a heuristic, remove the guess). This waits for the scroll to ACTUALLY
 // stop: two consecutive frames at the same offset, with a hard ceiling so a
 // pane that never settles cannot suppress the observer forever.
+// Where "which klal am I reading" is decided: the last block whose top is at or
+// above this line. ONE definition, because updateActiveFromScroll() asks the
+// question and releaseObserverWhenScrollSettles() has to give the same answer -
+// they had the offset written out separately, and a jump that lands just past a
+// line the jump code cannot see is a jump that undoes itself.
+const READING_LINE_OFFSET = 48;
+
+function readingLine() {
+  return textScroll.getBoundingClientRect().top + READING_LINE_OFFSET;
+}
+
 function releaseObserverWhenScrollSettles(maxMs = 3000) {
   clearTimeout(suppressTimer);
   const started = performance.now();
@@ -2866,11 +3396,36 @@ function releaseObserverWhenScrollSettles(maxMs = 3000) {
     stable = (now === last) ? stable + 1 : 0;
     last = now;
     if (stable >= 2 || performance.now() - started > maxMs) {
-      suppressObserverScroll = false;
       // The observer was held off for the whole animation, so it never recorded
       // where we landed. Re-assert the destination rather than leaving whatever
       // the last scroll-driven update happened to set.
-      if (lastActiveKlalId != null) setActiveKlal(lastActiveKlalId);
+      //
+      // FIXED 2026-09-02: re-asserting the LABEL was not enough. Klal blocks
+      // mount lazily behind estimated placeholder heights, and the ones the jump
+      // scrolls PAST resize as they mount - so the destination drifts below the
+      // reading line while the animation is still running. setActiveKlal() then
+      // wrote the right klal into the nav on top of a page whose geometry said
+      // otherwise, and the first scroll event after the observer was released
+      // recomputed the geometric answer and overwrote it: click klal 105, land on
+      // 104. Re-seat the block BEFORE releasing, so the two agree.
+      //
+      // Order matters: the re-seat is an instant scroll, and doing it while the
+      // observer is still suppressed keeps it from firing the very handler this
+      // is defending against.
+      if (lastActiveKlalId != null) {
+        const block = document.getElementById('klal-block-' + lastActiveKlalId);
+        // `> line` only: a block sitting ABOVE the line is already the answer,
+        // and re-seating it would fight the reviewer at the end of the corpus,
+        // where the container bottoms out and the last klalim CANNOT be scrolled
+        // to the top. Those keep the re-asserted label (measured 2026-09-02:
+        // klalim 221 and 222 land 218px and 546px past the line and no scroll
+        // can fix it - there is nothing below them to scroll into).
+        if (block && block.getBoundingClientRect().top > readingLine()) {
+          block.scrollIntoView({ behavior: 'auto', block: 'start' });
+        }
+        setActiveKlal(lastActiveKlalId);
+      }
+      suppressObserverScroll = false;
       return;
     }
     requestAnimationFrame(tick);
@@ -2910,7 +3465,11 @@ function setActiveKlal(klalId, navBlock) {
   if (k) {
     _headerKlalId = klalId;
     updateScanHeader();
-    document.title = `Klal ${klalId} (כלל ${klalId}) · Yad Malachi Review`;
+    updateTextHeader();
+    // The work's name comes from /api/corpus like every other surface that
+    // shows it (2026-09-01) - this was the last hardcoded "Yad Malachi" left in
+    // the frontend, and a second book would have renamed every tab but this one.
+    document.title = `Klal ${klalId} (כלל ${hebNum(klalId)}) · ${(CORPUS && CORPUS.title) || 'Review'}`;
     // manualPageLock: reviewer navigated the scan manually via prev/next -
     // don't snap back to this klal's start page just because the text pane
     // scrolled to it.  The lock is cleared when a word is clicked in the
@@ -2931,8 +3490,7 @@ function setActiveKlal(klalId, navBlock) {
 
 function updateActiveFromScroll() {
   const allBlocks = Array.from(document.querySelectorAll('.klal-block'));
-  const containerTop = textScroll.getBoundingClientRect().top;
-  const line = containerTop + 48;
+  const line = readingLine();   // see READING_LINE_OFFSET - one definition
   let current = allBlocks[0];
   for (const block of allBlocks) {
     if (block.getBoundingClientRect().top <= line) current = block;

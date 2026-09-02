@@ -370,7 +370,19 @@ def api_numerals(max_n=400):
     return {n: cio.klal_id_to_gematria(n) for n in range(1, max_n + 1)}
 
 
-def api_klalim(part_num=1):
+def api_klalim(part_num=1, on_klal_states=None):
+    """The nav payload for one part.
+
+    `on_klal_states` is an optional callback invoked once per klal with
+    a context dict (klal, words, states, ai_flag_indices, entries, recorded) -
+    everything /api/word-states
+    needs to ENUMERATE the words this endpoint COUNTS. It is a callback rather
+    than a second function because the two answers must come from one pass: the
+    counts in the legend and the list behind each count are the same set, and
+    the way this file has produced disagreeing numbers before is by computing
+    them in two places (see review_counts.py's header). Nothing about the JSON
+    payload changes when it is passed.
+    """
     klalim_by_id, klalim = _load_klalim(part_num=part_num)
     alignment = _load_alignment(part_num=part_num)
     regions = _load_regions()
@@ -437,6 +449,80 @@ def api_klalim(part_num=1):
         witness_by_klal.setdefault(w["klal_id"], []).append(w)
     witness_decided = rd.all_current("witness_choice")
 
+    # RECORDED word-level decisions, per klal - deliberately NOT drift-checked
+    # and deliberately NOT limited to what still renders.
+    #
+    # ADDED 2026-09-01 (reviewer: "count for human decisions is 51 - not
+    # correct"). The legend's Human-Decided total is decided_count, which counts
+    # words currently rendered GREEN, and a decision stops being rendered the
+    # moment it is settled: assemble_corrections_dataset.py drops the candidate
+    # entry, and the manual_correction drift check above skips a decision whose
+    # `original_word` is no longer at that index - which is precisely what
+    # applying it does. So the reviewer's 463 recorded decisions in Part 1
+    # displayed as 51, and the number read as "you have decided 51 words".
+    #
+    # Both numbers are wanted and they answer different questions: decided_count
+    # is "how much green is on screen", this is "how much have I ruled on". The
+    # legend shows them together rather than replacing one with the other -
+    # swapping them would have broken the tri-state identity
+    # (decided + resolved + disputed == total) that
+    # test_nav_tristate_matches_what_each_word_actually_renders_as asserts.
+    #
+    # ALL THREE decision types that can turn a word green are folded in, keyed to
+    # one index space so the union deduplicates (63 Part 1 positions carry both a
+    # manual correction and a candidate/disputed ruling):
+    #   - candidate_choice, which review_decisions._match_decision_types aliases
+    #     to disputed_choice, so `decided` already covers both;
+    #   - manual_correction, which shares the word_index space directly;
+    #   - witness_choice, which does NOT - it keys on docai_token_index - and so
+    #     is mapped through the witness queue's own word_index, exactly as
+    #     review_counts.word_states() maps it before colouring the word.
+    #
+    # That third one is not tidiness. It was left out of the first cut of this
+    # count and klal 30 immediately served recorded=3 against decided=9: six
+    # witness rulings that colour a word green while the number claiming to
+    # count rulings did not see them, so the "of N recorded" figure was SMALLER
+    # than the count it was meant to give context to. Caught by
+    # test_recorded_decision_count_is_every_ruling_not_only_the_rendered_ones,
+    # which asserts recorded >= decided for every klal. klalim 30 and 75 are the
+    # same two that word_states()' own witness branch was written for.
+    #
+    # punctuation_choice (20 in Part 1) stays out: before_word_index addresses
+    # the GAP between two words, not a word, and no punctuation decision renders
+    # a word human-decided - including it would inflate a word count with
+    # something that is not a word.
+    # {klal_id: {word_index: the decision record}} - the RECORD, not just the
+    # index, so /api/word-states can serve the senior-reviewer view (what was
+    # ruled, by which panel, when, and whether the corpus reflects it) without
+    # re-deriving "what counts as recorded" a second time. Newest ruling wins
+    # where a word carries more than one.
+    recorded_by_klal = {}
+
+    def _remember(kid, wi, rec):
+        slot = recorded_by_klal.setdefault(kid, {})
+        prior = slot.get(wi)
+        if prior is None or (rec.get("ts") or "") >= (prior.get("ts") or ""):
+            slot[wi] = rec
+
+    for _dmap in (decided, _manual_for_flags):
+        for (kid, wi), rec in _dmap.items():
+            _remember(kid, wi, rec)
+    for kid, w_rows in witness_by_klal.items():
+        for w in w_rows:
+            wi = w.get("word_index")
+            # A witness row with no word_index is never rendered and never
+            # counted - see test_witness_rows_served_without_a_word_index_are_
+            # never_counted, which exists because counting one put klal 88's
+            # badge at -1.
+            if wi is None:
+                continue
+            # NB the witness decision's own `word_index` field holds a
+            # docai_token_index, not a word index - which is exactly why it has
+            # to be re-keyed through the queue row here.
+            rec = witness_decided.get((kid, w.get("docai_token_index")))
+            if rec is not None:
+                _remember(kid, wi, rec)
+
     out = []
     for k in klalim:
         kid = k["klal_id"]
@@ -500,6 +586,12 @@ def api_klalim(part_num=1):
             witness_decided=witness_decided,
         )
         counts = rcount.count_row(kid, states, entries, decided)
+        if on_klal_states is not None:
+            on_klal_states({
+                "klal": k, "words": words, "states": states,
+                "ai_flag_indices": ai_flag_indices_for_count, "entries": entries,
+                "recorded": recorded_by_klal.get(kid, {}),
+            })
 
         punct_entries = punct_candidates.get(str(kid), [])
         punct_decided_count = sum(
@@ -528,6 +620,9 @@ def api_klalim(part_num=1):
             # drifted apart before.
             **counts,
             "ai_flag_count": ai_flag_count,
+            # Sits OUTSIDE the `counts` block on purpose: those five are one
+            # arithmetic identity over what renders, and this is not part of it.
+            "recorded_decision_count": len(recorded_by_klal.get(kid, {})),
             "punctuation_count": len(punct_entries),
             "punctuation_decided_count": punct_decided_count,
             "punctuation_open_count": len(punct_entries) - punct_decided_count,
@@ -538,6 +633,210 @@ def api_klalim(part_num=1):
             "text_length": len(k.get("clean_text", "")),
         })
     return out
+
+
+def _decision_original_word(rec):
+    """What the word WAS when this ruling was made.
+
+    Three panels record it in two places: manual_correction snapshots
+    `original_word`, candidate/disputed snapshot the candidate's `final_text`
+    (the stored reading it was offering to change), and witness_choice snapshots
+    neither - it offers `docai_reading` against `tesseract_reading` and the
+    stored word is not part of the record. None where it genuinely is not known,
+    rather than a guess dressed as a snapshot.
+    """
+    snap = rec.get("candidate_snapshot") or {}
+    original = snap.get("original_word")
+    if original is None:
+        original = snap.get("final_text")
+    return original
+
+
+def _decision_index_is_stale(rec, words, word_index):
+    """Does this ruling's recorded word_index still describe the word it ruled on?
+
+    A SEPARATE question from _decision_status(), and separating them 2026-09-01
+    corrected a number this file had already published. Item 0AB counted 105
+    "orphaned" rulings by asking only "is the word at that index neither the
+    original nor the chosen one" - which is true both for a ruling that was LOST
+    and for one that was HONOURED and then had its index shifted out from under
+    it by a later apply in the same klal. audit_applied_decisions.py separates
+    exactly those two (55 shifted, 2 genuinely missing); this display did not,
+    and reported both as the same failure.
+
+    So: `status` is what happened to the RULING, this is what happened to its
+    ADDRESS. Both matter and they are not the same defect - a stale address still
+    breaks things (a re-decision at that key lands on the wrong word, and both
+    display paths drop it) even when the ruling itself was honoured, which is
+    what Lesson 35 is about.
+    """
+    if not (0 <= word_index < len(words)):
+        return True
+    original = _decision_original_word(rec)
+    if original is None:
+        return False               # nothing to compare - not a claim either way
+    current = words[word_index]
+    return current != original and current != rec.get("chosen_text")
+
+
+def _decision_status(rec, words, word_index, applied_ids=()):
+    """Does the corpus reflect this ruling? The senior-reviewer question.
+
+    ADDED 2026-09-01 (reviewer: "add a function to show all previously decided
+    words - so a sr reviewer can review a human's work"). Reviewing a ruling
+    means seeing what was decided AND whether it landed, and until now neither
+    was reachable: a settled decision stops rendering entirely (the rebuild drops
+    its candidate entry; an applied manual correction fails the display drift
+    check), so the dashboard showed 51 of 478 rulings and nothing about the rest.
+
+      confirmed - the ruling KEPT the stored reading. There was never anything to
+                  promote, and it is not evidence of anything having been applied
+      applied   - the ruling changed the text and the change is in the corpus
+      pending   - the ruling changes the text and the corpus does not have it yet;
+                  this, and only this, is the promote-to-corpus backlog
+      drifted   - the word is neither the one ruled on nor the one chosen: a later
+                  apply shifted this klal and nothing re-pointed the decision
+      unplaced  - word_index is outside the klal entirely
+      unknown   - no original word was snapshotted (witness_choice), so there is
+                  nothing to compare against
+
+    FIXED 2026-09-01, same day, on the reviewer's question "so green words are
+    applied but not rebuilt? why?". They were not applied. This function had one
+    `applied` bucket meaning nothing more than `corpus == chosen_text`, which is
+    TRIVIALLY TRUE for a ruling that keeps the stored reading - and that is the
+    commonest decision in this corpus. It reported 27 of the 54 drawn-green words
+    as applied when the real figure was 1; 46 of them were confirmations with
+    nothing to apply. A status that cannot separate "confirmed, nothing to do"
+    from "changed and promoted" answers the reviewer's actual question wrongly.
+
+    `applied_ids` is review_decisions.applied_decision_ids(), and it OUTRANKS the
+    text comparison. Deleting one of two identical adjacent words leaves its twin
+    standing at the deleted one's index, so the corpus reads exactly as it did
+    before and the inference says `pending` for a deletion that landed - klal 68
+    w29 (a duplicated `הניזקין`) is that case, and the duplicate is verifiably
+    gone. A recorded apply_event is a positive statement; text equality is an
+    inference a duplicate defeats. Whether an apply_event's claim is still TRUE
+    is audit_applied_decisions.py's job, not this display's.
+    """
+    if not (0 <= word_index < len(words)):
+        return "unplaced"
+    original = _decision_original_word(rec)
+    chosen = rec.get("chosen_text")
+    if original is None:
+        return "unknown"
+    if chosen is not None and chosen == original:
+        return "confirmed"
+    if rec.get("id") in applied_ids:
+        return "applied"
+    current = words[word_index]
+    if chosen is not None and current == chosen:
+        return "applied"
+    if current == original:
+        return "pending"
+    return "drifted"
+
+
+def api_corpus():
+    """What work is loaded - so the dashboard can name the book it is showing.
+
+    ADDED 2026-09-01 (reviewer: "on index pane header should show book title
+    also scan pane"). Served rather than hardcoded in review_frontend/: the
+    project's goal is to generalize past one text, and a title baked into
+    index.html is one more place a second book would have to be edited. The
+    values live in corpus_io, with every other fact about the corpus.
+    """
+    return {
+        "title": cio.WORK_TITLE,
+        "title_he": cio.WORK_TITLE_HE,
+        "section": cio.WORK_SECTION,
+        "section_he": cio.WORK_SECTION_HE,
+        "edition": cio.WORK_EDITION,
+    }
+
+
+def api_word_states(part_num=1):
+    """Every word the legend counts, enumerated - one list per legend row.
+
+    ADDED 2026-09-01 (reviewer: "clicking on a flag count at the bottom of the
+    index panel should pop up a list of those flags as clickable links"). The
+    legend has shown four totals since it was built and there was no way to get
+    from a total to the words in it; a reviewer who wanted to work through the
+    518 open disputes had to open klalim one at a time looking for red.
+
+    The lists come from the SAME pass as the counts (api_klalim's
+    `on_klal_states` callback), not a second traversal, so a list can never
+    disagree with the number above it. `machine_disputed`/`machine_resolved`/
+    `decided` partition the words; `ai_flag` is an OVERLAY on them, exactly as
+    it is in the legend - an open word-level flag renders its word disputed, so
+    every ai_flag entry also appears in `machine_disputed`. That is not double
+    counting, it is what the four legend rows have always meant.
+
+    `word` is null where the index has no stored word: a `possible_omission`
+    sits at len(words) by construction (text the scan has and the corpus does
+    not), and that is the point of it.
+    """
+    buckets = {rcount.DISPUTED: [], rcount.RESOLVED: [], rcount.DECIDED: []}
+    ai_flags = []
+    recorded = []
+    # Read ONCE, outside the callback. rd.all_current() re-reads and re-parses
+    # the whole append-only log on every call, and this callback fires 222 times
+    # - the same shape as the per-entry current_for() that merge_decision()'s
+    # docstring records having to undo.
+    decided = rd.all_current("candidate_choice")
+    # Read once, like `decided` above - applied_decision_ids() walks the whole
+    # append-only log, and the callback below fires 222 times.
+    applied_ids = rd.applied_decision_ids()
+
+    def collect(ctx):
+        k, words = ctx["klal"], ctx["words"]
+        kid = k["klal_id"]
+        gem = k.get("gematria", "")
+
+        def row(wi):
+            return {
+                "klal_id": kid,
+                "word_index": wi,
+                "word": words[wi] if 0 <= wi < len(words) else None,
+                "gematria": gem,
+            }
+
+        state_rows = rcount.state_rows(kid, states=ctx["states"],
+                                       entries=ctx["entries"], decided=decided)
+        for wi, state in state_rows:
+            buckets[state].append(row(wi))
+        # From state_rows, NOT from ctx["states"]: a `delete`-opcode entry has no
+        # slot in that dict (two deletes can share one index) and is carried
+        # alongside it, so asking the dict alone reported 39 rendered against a
+        # legend showing 51 - a third number on a screen that already has two.
+        decided_indices = {wi for wi, state in state_rows if state == rcount.DECIDED}
+        for wi in sorted(ctx["ai_flag_indices"]):
+            ai_flags.append(row(wi))
+
+        for wi, rec in sorted(ctx["recorded"].items()):
+            item = row(wi)
+            item.update({
+                "decision_type": rec.get("decision_type"),
+                "chosen_text": rec.get("chosen_text"),
+                "chosen_source": rec.get("chosen_source"),
+                "note": rec.get("note"),
+                "ts": rec.get("ts"),
+                "decision_id": rec.get("id"),
+                "original_word": _decision_original_word(rec),
+                "status": _decision_status(rec, words, wi, applied_ids),
+                "index_stale": _decision_index_is_stale(rec, words, wi),
+                "rendered": wi in decided_indices,
+            })
+            recorded.append(item)
+
+    api_klalim(part_num=part_num, on_klal_states=collect)
+    return {
+        "part": str(part_num),
+        "machine_disputed": buckets[rcount.DISPUTED],
+        "machine_resolved": buckets[rcount.RESOLVED],
+        "decided": buckets[rcount.DECIDED],
+        "ai_flag": ai_flags,
+        "recorded": recorded,
+    }
 
 
 def api_klal(klal_id):
@@ -1299,6 +1598,11 @@ class Handler(BaseHTTPRequestHandler):
             if path == "/api/klalim":
                 part_val = query.get("part", ["1"])[0]
                 return self._send_json(api_klalim(part_num=part_val))
+            if path == "/api/corpus":
+                return self._send_json(api_corpus())
+            if path == "/api/word-states":
+                part_val = query.get("part", ["1"])[0]
+                return self._send_json(api_word_states(part_num=part_val))
             m = ROUTE_SHARE.match(path)
             if m:
                 target = "/#klal=" + m.group(1)

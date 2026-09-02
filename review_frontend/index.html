@@ -4,39 +4,116 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Yad Malachi — Correction Review</title>
-<link rel="stylesheet" href="/app.css?v=6">
+<link rel="stylesheet" href="/app.css?v=11">
 </head>
 <body>
 
   <div id="nav-pane">
+    <!-- The index pane's own header bar. MOVED here 2026-09-01 (reviewer: "index
+         pane has title above blue header - should be inside blue header - should
+         be very similar look to scan pane"): the title first shipped inside
+         #nav-filter, which is white, so it sat ABOVE the pane's dark controls
+         instead of in a header - and its own text colour was near-white, which
+         on that background was very nearly invisible. It now shares
+         `.pane-header` with #scan-header, so the two panes are the same object
+         at the same height. -->
+    <div id="nav-header" class="pane-header">
+      <span class="ph-title ph-he" data-slot="title-he"></span>
+      <span class="ph-mid">
+        <span class="ph-ref ph-he" id="nav-ref-he"></span>
+        <span class="ph-ref ph-en" id="nav-ref-en"></span>
+      </span>
+      <span class="ph-end">
+        <span class="ph-title ph-en" data-slot="title-en"></span>
+        <!-- The settings tray. Reviewer: "don't put click word on link up there
+             on the index pane, hide it away somewhere - settings icon?" -->
+        <button id="settings-btn" type="button" title="Settings" aria-expanded="false">&#9881;</button>
+      </span>
+    </div>
+    <div id="settings-popover" hidden>
+      <label><input type="checkbox" id="filter-copy-link" checked> Copy word link on click</label>
+      <p class="settings-hint">Clicking a word in the text puts its URL on the clipboard.</p>
+    </div>
+
     <div id="nav-filter">
-      <select id="part-select" style="width: 100%; margin-bottom: 8px; padding: 4px 8px; border-radius: 4px; font-weight: bold; background: #2d3748; color: #edf2f7; border: 1px solid #4a5568; cursor: pointer;">
-        <option value="1" selected>Part 1 (Klalim 1 – 222)</option>
-        <option value="2">Part 2 (Klalim 223 – 444)</option>
-        <option value="3">Part 3 (Klalim 445 – 667)</option>
-        <option value="all">All Parts (Klalim 1 – 667)</option>
-      </select>
-      <label style="display:block;margin-bottom:4px;"><input type="checkbox" id="filter-flagged"> Flagged for revisit only</label>
-      <label style="display:block;"><input type="checkbox" id="filter-high-value"> High-value items only</label>
+      <!-- ONE ROW: part selector + both filters. Reviewer: "part dropdown creates
+           asymmetry any suggestions?" - it was a full-width block spanning the
+           index pane while the other two panes had nothing at that height, which
+           is what read as lopsided. Shrunk to its content and folded into the
+           filter row, it stops being a band across the pane AND gives the list
+           back a row, which was the other standing ask ("max real estate for the
+           index"). The labels shorten to "Part 1 … Part 3 / All" because the klal
+           ranges are already the first and last rows of the list underneath. -->
+      <div id="nav-toggles">
+        <select id="part-select" title="Which part of the corpus to list">
+          <option value="1" selected>Part 1</option>
+          <option value="2">Part 2</option>
+          <option value="3">Part 3</option>
+          <option value="all">All parts</option>
+        </select>
+        <label title="Show only klalim flagged for revisit"><input type="checkbox" id="filter-flagged"> Flagged</label>
+        <label title="Show only high-value items"><input type="checkbox" id="filter-high-value"> High-value</label>
+      </div>
     </div>
     <div id="nav-list"></div>
     <div id="legend"></div>
   </div>
 
   <div id="text-pane">
+    <!-- ADDED 2026-09-01 (reviewer: "maybe sacrifice a line at top to add header
+         that just says something like page text"). The middle pane was the only
+         one of the three without a bar, which is what made the other two read as
+         heavy - and its reference (which klal you are reading) earns the line on
+         its own. Same four slots as the other two. -->
+    <div id="text-header" class="pane-header">
+      <span class="ph-title ph-he" data-slot="title-he"></span>
+      <span class="ph-mid">
+        <span class="ph-ref ph-he" id="text-ref-he"></span>
+        <span class="ph-ref ph-en" id="text-ref-en"></span>
+      </span>
+      <!-- No English title here, nor in the scan bar. The four-slot order put the
+           work's name at both ends of all three bars, so it appeared six times
+           across the top of one window - on a screen whose complaint was clutter.
+           Dropped from the two panes that repeat it (reviewer: "yes drop the
+           extra eng titles"); the index pane keeps one, and the Hebrew title
+           stays everywhere because the BOOK prints it as a running head on every
+           page, which is what the reviewer is matching against. -->
+      <span class="ph-end"></span>
+    </div>
     <div id="text-scroll"></div>
   </div>
 
   <div id="scan-pane">
-    <div id="scan-header">
-      <span><span id="page-indicator">Page —</span> <span id="klal-indicator"></span></span>
+    <!-- Reviewer, 2026-09-01: "scan pane heb title w.s. heb klal page w.s eng
+         klal page w.s. eng title ... both headers same size and shape". That
+         order is now the template all three panes follow:
+             [Hebrew title] [Hebrew reference] [English reference] [English title]
+         NOTE the ids: #klal-indicator holds the HEBREW reference and
+         #page-indicator the ENGLISH one. They were named before either carried
+         both halves, and both names are load-bearing in app.js and in the tests,
+         so the names stayed and only the ORDER moved. -->
+    <div id="scan-header" class="pane-header">
+      <span class="ph-title ph-he" data-slot="title-he"></span>
+      <span class="ph-mid">
+        <span class="ph-ref ph-he" id="klal-indicator"></span>
+        <span class="ph-ref ph-en" id="page-indicator">Page —</span>
+      </span>
+      <span class="ph-end"></span>
+    </div>
+    <div id="scan-viewer">
+      <!-- The zoom cluster lives over the scan, not in the header - see
+           #zoom-controls in app.css for why. -->
       <span id="zoom-controls">
         <button id="zoom-out" title="Zoom out">−</button>
         <span id="zoom-level">100%</span>
         <button id="zoom-in" title="Zoom in">+</button>
       </span>
-    </div>
-    <div id="scan-viewer">
+      <!-- SIDES swapped 2026-09-01 (reviewer: "on scan page - arrows should
+           switch places"): previous on the LEFT, next on the RIGHT. The GLYPHS
+           were then swapped back the same day - "arrow behavior is correct but
+           swap two icons" - so each arrow points INWARD, along the book's
+           right-to-left reading direction rather than the buttons'. Behaviour
+           and positions are untouched; only these two characters moved. -->
       <button id="page-nav-prev" class="page-nav-btn" title="Previous page">&#8250;</button>
       <button id="page-nav-next" class="page-nav-btn" title="Next page">&#8249;</button>
       <div id="page-container">
@@ -82,6 +159,18 @@
     <div class="panel-body" id="witness-panel-body"></div>
   </div>
 
+  <!-- ADDED 2026-09-01 (reviewer: "clicking on a flag count at the bottom of the
+       index panel should pop up a list of those flags as clickable links").
+       A .side-panel like the other five, so backdrop-click and Escape dismiss it
+       through the machinery that already exists. -->
+  <div id="flag-list-panel" class="side-panel">
+    <div class="panel-head">
+      <span class="panel-title" id="flag-list-panel-title">Flagged words</span>
+      <button class="panel-close" id="flag-list-panel-close">&times;</button>
+    </div>
+    <div class="panel-body" id="flag-list-panel-body"></div>
+  </div>
+
   <div id="manual-panel" class="side-panel">
     <div class="panel-head">
       <span class="panel-title">Flag / correct word</span>
@@ -90,6 +179,6 @@
     <div class="panel-body" id="manual-panel-body"></div>
   </div>
 
-  <script src="/app.js?v=6"></script>
+  <script src="/app.js?v=11"></script>
 </body>
 </html>

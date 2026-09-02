@@ -277,21 +277,37 @@ def word_states(klal_id, n_words, entries, witness_entries, *,
     return state
 
 
-def count_row(klal_id, states, entries, decided):
-    """The four tri-state counts, from word_states()' output.
+def state_rows(klal_id, states, entries, decided):
+    """Every item count_row() counts, as (word_index, state) pairs.
 
     `delete`-opcode entries have no word_index slot of their own (two of them
-    can sit at the same index), so they are counted alongside the per-word
+    can sit at the same index), so they are carried alongside the per-word
     states rather than inside them - the one place a count is not one-per-word.
+    They still HAVE a word_index; what they lack is exclusive use of it, which
+    is why they cannot live in the `states` dict.
+
+    EXTRACTED 2026-09-01 so /api/word-states can enumerate the same items the
+    legend counts. The legend now shows a count and offers a list behind it, and
+    those two must be the same set or the list is a fifth encoding of the rule
+    this module exists to hold once (see the header). count_row() is defined on
+    this function for exactly that reason - not as a convenience.
+
+    Sorted by word_index so the list a reviewer opens reads in text order.
+    """
+    rows = sorted(states.items())
+    rows += [(e["word_index"], machine_state(klal_id, e, decided))
+             for e in entries if e.get("opcode") == "delete"]
+    return rows
+
+
+def count_row(klal_id, states, entries, decided):
+    """The four tri-state counts, from word_states()' output.
 
     The tri-state sums to the total BY CONSTRUCTION here, not by coincidence,
     which is the property test_nav_tristate_matches_what_each_word_actually_
     renders_as asserts.
     """
-    all_states = list(states.values()) + [
-        machine_state(klal_id, e, decided) for e in entries
-        if e.get("opcode") == "delete"
-    ]
+    all_states = [st for _wi, st in state_rows(klal_id, states, entries, decided)]
     total = len(all_states)
     decided_count = all_states.count(DECIDED)
     return {

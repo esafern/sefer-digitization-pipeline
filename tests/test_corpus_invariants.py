@@ -1675,6 +1675,145 @@ def test_nav_tristate_matches_what_each_word_actually_renders_as(part1_by_id):
         f"pane renders (klal_id, nav, rendered): {offenders[:8]}")
 
 
+
+def test_the_word_list_behind_a_legend_count_is_exactly_what_that_count_counts():
+    """/api/word-states must ENUMERATE precisely what /api/klalim COUNTS.
+
+    ADDED 2026-09-01, with the legend's click-through. The legend has shown four
+    totals since it was built with no way to reach the words inside them; it now
+    opens a list, and a list of a different length from the number that opened it
+    is the same defect class this file already carries three regressions for -
+    the nav saying 1,201 where the pane rendered 1,061, then klal 88's "-1", then
+    klal 73's missing badge. Each one was two encodings of one rule disagreeing.
+
+    The two answers are built in ONE pass (api_klalim's `on_klal_states`
+    callback), which is what makes them agree; this asserts the property that
+    arrangement exists to provide, so that replacing it with a second traversal
+    fails here rather than in front of a reviewer.
+
+    Deliberately pins no COUNT - only the equality - per Lesson 36: the numbers
+    move every time the corpus improves or a decision is recorded, and a test
+    that fails when the text gets better is testing the defect.
+    """
+    review_server = _import_from_path("review_server", os.path.join(REPO, "pipeline", "review_server.py"))
+    rows = review_server.api_klalim(part_num=1)
+    lists = review_server.api_word_states(part_num=1)
+    for bucket, field in (("machine_disputed", "machine_disputed_count"),
+                          ("machine_resolved", "machine_resolved_count"),
+                          ("decided", "decided_count"),
+                          ("ai_flag", "ai_flag_count"),
+                          # The senior-review list behind "of N recorded". Same
+                          # property, same reason: the control is labelled with
+                          # the number, so opening a list of another length
+                          # would be a control that lies about itself.
+                          ("recorded", "recorded_decision_count")):
+        assert len(lists[bucket]) == sum(r[field] for r in rows), (
+            f"the legend's {field} and the list behind it disagree: "
+            f"{sum(r[field] for r in rows)} counted, {len(lists[bucket])} listed")
+    # Every listed word must be addressable - the list's whole purpose is that a
+    # row is a working deep link. A row missing either half of (klal, word) is a
+    # link to nowhere, which renders as a list item that silently does nothing.
+    for bucket, items in lists.items():
+        if not isinstance(items, list):
+            continue
+        for item in items:
+            assert isinstance(item.get("klal_id"), int) and isinstance(item.get("word_index"), int), (
+                f"{bucket} carries an unaddressable row: {item}")
+
+    # Every recorded row must carry a status a reviewer can act on, and
+    # `rendered` must agree with the decided list rather than being a third
+    # opinion about the same word - it was computed from the wrong structure
+    # first and reported 39 against a legend showing 51.
+    statuses = {"confirmed", "applied", "pending", "drifted", "unplaced", "unknown"}
+    unknown_status = [r for r in lists["recorded"] if r.get("status") not in statuses]
+    assert not unknown_status, f"recorded rows with an unrecognised status: {unknown_status[:5]}"
+
+    # `confirmed` must be its OWN bucket and not be folded back into `applied`.
+    # It was, until 2026-09-01: `applied` meant nothing more than
+    # `corpus == chosen_text`, which is trivially true for a ruling that keeps
+    # the stored reading - the commonest decision in this corpus. That reported
+    # 27 of 54 drawn-green words as applied when the real figure was 1, and it is
+    # what the reviewer's "so green words are applied but not rebuilt? why?"
+    # was actually asking about.
+    for row in lists["recorded"]:
+        kept_stored = (row.get("chosen_text") is not None
+                       and row.get("chosen_text") == row.get("original_word"))
+        if kept_stored and row["status"] not in ("unplaced",):
+            assert row["status"] == "confirmed", (
+                f"a ruling that kept the stored reading is reported as "
+                f"{row['status']!r}, which claims something was promoted: {row}")
+
+    # `index_stale` is a SECOND, independent fact - what happened to the ruling's
+    # ADDRESS, not to the ruling. Collapsing the two is what made open item 0AB
+    # count 105 "orphaned" rulings when 79 of those had in fact been honoured and
+    # only had a stale index. A stale address is still a defect (Lesson 35); it
+    # is just not the same defect.
+    for row in lists["recorded"]:
+        assert isinstance(row.get("index_stale"), bool), row
+    assert any(r["status"] == "applied" and r["index_stale"] for r in lists["recorded"]) or \
+           not any(r["index_stale"] for r in lists["recorded"]), (
+        "index_stale is being treated as a synonym for a lost ruling - no applied "
+        "ruling carries one, which is not what the audit script measures")
+    marked_rendered = {(r["klal_id"], r["word_index"]) for r in lists["recorded"] if r["rendered"]}
+    assert marked_rendered <= {(r["klal_id"], r["word_index"]) for r in lists["decided"]}, (
+        "a recorded ruling marked `rendered` is not in the decided list")
+
+
+def test_recorded_decision_count_is_every_ruling_not_only_the_rendered_ones():
+    """The legend's second Human-Decided number - every ruling on record.
+
+    ADDED 2026-09-01 (reviewer: "count for human decisions is 51 - not
+    correct"). `decided_count` counts words rendered GREEN, and a decision stops
+    rendering the moment it is settled - the rebuild drops the candidate entry,
+    and an applied manual_correction fails the display drift check because the
+    word it names is no longer there. Part 1 read 51 against 463 rulings on
+    record.
+
+    This asserts the two are DIFFERENT MEASURES, not that either is a particular
+    number (Lesson 36 - both move every time the corpus improves or a decision is
+    recorded): recorded must cover at least what renders, since a rendered
+    decision is by definition recorded, and it must equal the ledger's own union
+    of candidate/disputed, manual and witness positions. The drift check that
+    governs `decided_count` must NOT govern this one, which is the entire point
+    of it.
+    """
+    review_server = _import_from_path("review_server", os.path.join(REPO, "pipeline", "review_server.py"))
+    rd = _import_from_path("review_decisions", os.path.join(REPO, "pipeline", "review_decisions.py"))
+    rows = review_server.api_klalim(part_num=1)
+    by_klal = {r["klal_id"]: r for r in rows}
+
+    expected = {}
+    for dmap in (rd.all_current("candidate_choice"), rd.all_current("manual_correction")):
+        for (kid, wi) in dmap:
+            if kid in by_klal:
+                expected.setdefault(kid, set()).add(wi)
+    # The witness leg, re-derived here rather than trusted: witness_choice keys
+    # on docai_token_index, so it has to be mapped through the witness queue's
+    # own word_index to join the other two in ONE index space. Leaving it out is
+    # what made the first cut of this count serve klal 30 recorded=3 against
+    # decided=9.
+    witness_decided = rd.all_current("witness_choice")
+    for w in review_server._load_witness_queue():
+        kid, wi = w.get("klal_id"), w.get("word_index")
+        if kid in by_klal and wi is not None and (kid, w.get("docai_token_index")) in witness_decided:
+            expected.setdefault(kid, set()).add(wi)
+
+    wrong = [(kid, r["recorded_decision_count"], len(expected.get(kid, ())))
+             for kid, r in by_klal.items()
+             if r["recorded_decision_count"] != len(expected.get(kid, ()))]
+    assert not wrong, (
+        f"recorded_decision_count does not match the ledger (klal_id, served, "
+        f"ledger): {wrong[:8]}")
+
+    short = [(kid, r["recorded_decision_count"], r["decided_count"])
+             for kid, r in by_klal.items()
+             if r["recorded_decision_count"] < r["decided_count"]]
+    assert not short, (
+        "a word rendering as human-decided must also be counted as recorded "
+        f"(klal_id, recorded, decided): {short[:8]}")
+
+
+
 def test_witness_rows_served_without_a_word_index_are_never_counted(part1_by_id):
     """A witness row with `word_index: None` cannot be highlighted - api_klal()
     skips it explicitly ("scan-only and stay that way"). Six such rows are served

@@ -252,6 +252,24 @@ def clean_word(w):
     return "".join(c for c in w if c.isalnum())
 
 
+# ---------- what work this corpus IS ----------
+#
+# ADDED 2026-09-01 (reviewer: "on index pane header should show book title also
+# scan pane"). Here rather than in the frontend because this project's stated
+# goal is to generalize beyond one work: the dashboard should NAME the book it
+# has loaded, not have one book's name baked into its markup. A second text run
+# through this pipeline changes these five lines and nothing else.
+#
+# The edition matters enough to carry: START_HERE.md warns at length against
+# conflating the Livorno 1766-7 original with the Berlin reprint this pipeline
+# actually OCRs, and the scan pane is the one place a reviewer is looking at
+# that specific printing.
+WORK_TITLE = "Yad Malachi"
+WORK_TITLE_HE = "יד מלאכי"
+WORK_SECTION = "Klalei HaGemara"
+WORK_SECTION_HE = "כללי הגמרא"
+WORK_EDITION = "Berlin, 1851/2 - the second printing, not the Livorno 1766-7 original"
+
 # 22 Hebrew letters + the 5 final forms, i.e. exactly U+05D0-U+05EA. Written
 # out rather than range-generated so it is greppable and so a reader can see
 # what is in it; equivalence to the regex range the merged copies used is

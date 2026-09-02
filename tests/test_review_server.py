@@ -1406,16 +1406,34 @@ def test_the_scan_header_carries_the_reference_in_both_scripts(server, page):
     The Hebrew numerals come from /api/numerals rather than a JS gematria table,
     so this also pins that the fetch actually reached the running code - the first
     attempt added it to switchPart() instead of init(), and the header quietly
-    rendered `דף 73` because hebNum() falls back to the digits (Lesson 34)."""
+    rendered `דף 73` because hebNum() falls back to the digits (Lesson 34).
+
+    UPDATED 2026-09-01. This asserted a LITERAL "Page 73", and klal 210 word 133
+    is on page 74 - `word_pages["133"]` says so, and the klal splits 61 words on
+    73 against 69 on 74. 73 was the klal's START page, which is what the deep
+    link wrongly showed until highlightRoutedWord()'s dead word_pages branch was
+    fixed. So this test was pinning the defect and went red on the repair, which
+    is Lesson 36 in its exact shape. The page now comes from the server, the way
+    the two new deep-link tests take theirs; the numerals, which are what this
+    test is actually about, keep their literals because 210 -> רי is arithmetic
+    and does not move with the corpus.
+    """
+    klal = _get_json(server, "/api/klal/210")
+    want_page = (klal.get("word_pages") or {}).get("133") or klal.get("page")
     page.goto(server + "/klal/210/word/133", wait_until="domcontentloaded", timeout=15000)
     page.wait_for_selector(".nav-item", timeout=15000)
     page.wait_for_timeout(2500)
     en = page.eval_on_selector("#page-indicator", "el => el.textContent")
     he = page.eval_on_selector("#klal-indicator", "el => el.textContent")
-    assert "Page 73" in en and "Klal 210" in en, en
-    # עג = 73, רי = 210 - the numerals the BOOK would use, not the digits.
-    assert "עג" in he and "רי" in he, f"Hebrew half did not render numerals: {he!r}"
-    assert "73" not in he and "210" not in he, f"Hebrew half still shows digits: {he!r}"
+    assert f"Page {want_page}" in en and "Klal 210" in en, f"{en!r}, expected page {want_page}"
+    # Both numerals, the ones the BOOK would use rather than the digits. The PAGE
+    # numeral comes from /api/numerals keyed on the page the server actually
+    # resolved, so it follows the fix above instead of re-pinning a literal; רי
+    # (210) stays literal because the klal id does not move.
+    want_he_page = _get_json(server, "/api/numerals")[str(want_page)]
+    assert want_he_page in he, f"Hebrew half did not render the page numeral: {he!r}"
+    assert "רי" in he, f"Hebrew half did not render the klal numeral: {he!r}"
+    assert str(want_page) not in he and "210" not in he, f"Hebrew half still shows digits: {he!r}"
     assert page.test_errors == []
 
 def test_the_index_row_carries_both_scripts_and_never_squeezes_out_its_badges(server, page):
@@ -1506,15 +1524,24 @@ def test_the_scan_header_actually_separates_its_two_scripts(server, page):
     put the gap on the far side. What survived was the single literal space in
     index.html: a measured 3px. Asserts the rendered GAP, because the property
     was present and correct-looking the whole time and only the geometry showed
-    it was landing on the wrong edge."""
+    it was landing on the wrong edge.
+
+    UPDATED 2026-09-01. This measured `hebrew.left - english.right`, which
+    assumes the English half comes FIRST - and the reviewer then specified the
+    opposite order for every pane ("heb title w.s. heb klal page w.s eng klal
+    page w.s. eng title"), so a correct layout scored -173. The requirement is
+    unchanged and still worth pinning: the two scripts must not run together.
+    Only the measurement is now order-independent, so re-ordering the bar again
+    cannot fail it for the wrong reason."""
     _open_dashboard(page, server, klal_id=69)
     page.wait_for_timeout(1200)
     gap = page.evaluate("""() => {
       const a = document.getElementById('page-indicator').getBoundingClientRect();
       const b = document.getElementById('klal-indicator').getBoundingClientRect();
-      return b.left - a.right;
+      // The clear space between them, whichever sits on the left.
+      return Math.max(a.left, b.left) - Math.min(a.right, b.right);
     }""")
-    assert gap >= 16, f"english and hebrew halves are only {gap:.0f}px apart"
+    assert gap >= 6, f"english and hebrew halves are only {gap:.0f}px apart"
     assert page.test_errors == []
 
 def test_a_nav_jump_lands_on_the_klal_it_was_asked_for(server, page):
@@ -1569,3 +1596,712 @@ def test_a_nav_jump_lands_on_the_klal_it_was_asked_for(server, page):
             f"jumped to klal {target}: scan shows page {got['page']}, expected {want_page}")
     assert page.test_errors == []
 
+
+
+# --- the legend as a control, and copy-on-click (2026-09-01) ----------------
+# Both features were asked for in one message ("clicking on a word should push
+# the url for that word into the clipboard... clicking on a flag count at the
+# bottom of the index panel should pop up a list of those flags as clickable
+# links, hovering for a while should pop up a copy to clipboard icon"), and both
+# are pure UI: nothing below asserts a COUNT, only that the number shown and the
+# thing behind it agree. Lesson 36 - this module boots against the shipped
+# corpus, and 23 of its tests once pinned a coordinate in executable code, so
+# seven broke at once when the text was REPAIRED.
+
+
+def _legend_rows(page):
+    """[(bucket, label, count)] for every clickable legend row."""
+    return page.evaluate("""() => [...document.querySelectorAll('#legend .legend-clickable')]
+        .map(r => ({
+          bucket: r.dataset.bucket,
+          label: r.dataset.label,
+          count: parseInt(r.querySelector('.legend-count').textContent, 10),
+        }))""")
+
+
+def test_a_legend_count_opens_the_list_of_exactly_the_words_it_counts(server, page):
+    """The property the whole arrangement exists for.
+
+    /api/word-states is built in the same pass as /api/klalim's counts precisely
+    so a list can never be a different length from the number that opened it.
+    Every regression this file already carries in that family - nav 1,201 vs
+    1,061 rendered, klal 88's "-1", klal 73's missing badge - was two encodings
+    of one rule disagreeing, and a list is a third surface for the same rule.
+    """
+    _open_dashboard(page, server)
+    rows = _legend_rows(page)
+    assert rows, "the legend rendered no clickable rows at all"
+    # The four state rows are always there. The `recorded` row appears only once
+    # a ruling exists, so it is optional HERE - this test ran clean in isolation
+    # and failed in the full suite, where earlier tests have recorded decisions
+    # and the fifth row shows up. An equality on this set is a test that depends
+    # on which other tests ran first.
+    buckets = {r["bucket"] for r in rows}
+    assert {"machine_disputed", "machine_resolved", "decided", "ai_flag"} <= buckets, buckets
+    assert buckets <= {"machine_disputed", "machine_resolved", "decided", "ai_flag", "recorded"}, buckets
+
+    for row in rows:
+        page.keyboard.press("Escape")
+        page.eval_on_selector(
+            f"#legend .legend-clickable[data-bucket='{row['bucket']}']", "el => el.click()")
+        page.wait_for_selector("#flag-list-panel.open", timeout=5000)
+        page.wait_for_function(
+            "() => !document.querySelector('#flag-list-panel-body p')?.textContent.includes('Loading')",
+            timeout=10000)
+        listed = page.locator("#flag-list-panel .flag-list-item").count()
+        assert listed == row["count"], (
+            f"legend row '{row['label']}' says {row['count']} but its list holds {listed}")
+        if row["count"] == 0:
+            assert page.locator("#flag-list-panel .flag-list-empty").count() == 1, (
+                "a zero count must SAY there are none - an empty panel body reads as a broken list")
+    assert page.test_errors == []
+
+
+def test_a_row_in_the_word_list_navigates_to_its_word(server, page):
+    """A list of links whose links do nothing is Lesson 29's dead field with a
+    cursor on it. Asserts the text pane actually lands on the word - the ring
+    class revealWordInText() puts there - not merely that the hash changed."""
+    _open_dashboard(page, server)
+    page.eval_on_selector("#legend .legend-clickable[data-bucket='machine_disputed']", "el => el.click()")
+    page.wait_for_selector("#flag-list-panel .flag-list-item", timeout=10000)
+    target = page.evaluate("""() => {
+        const a = document.querySelector('#flag-list-panel .flag-list-item');
+        return { klal: a.dataset.klal, word: a.dataset.word };
+    }""")
+    page.eval_on_selector("#flag-list-panel .flag-list-item", "el => el.click()")
+    page.wait_for_timeout(1200)
+    assert page.evaluate("() => location.hash") == f"#klal={target['klal']}&word={target['word']}"
+    ringed = page.locator(
+        f"#klal-block-{target['klal']} [data-word-index='{target['word']}'].routed-word")
+    assert ringed.count() >= 1, (
+        f"clicked the list row for klal {target['klal']} word {target['word']} and the text pane "
+        "never ringed it")
+    assert page.locator("#flag-list-panel.open").count() == 1, (
+        "the panel must stay open - the point of the list is working down it")
+    assert page.test_errors == []
+
+
+def test_holding_the_pointer_on_a_list_row_reveals_its_copy_button(server, page):
+    """"hovering for a while should pop up a copy to clipboard icon" - the
+    reviewer asked for a DWELL, and the difference matters: 518 rows each showing
+    a button the instant the pointer crosses them is a list you cannot scroll
+    through and read."""
+    _open_dashboard(page, server)
+    page.eval_on_selector("#legend .legend-clickable[data-bucket='machine_disputed']", "el => el.click()")
+    page.wait_for_selector("#flag-list-panel .flag-list-item", timeout=10000)
+    row = page.locator("#flag-list-panel .flag-list-item").first
+    assert not row.locator(".flag-list-copy").is_visible(), (
+        "the copy button must start hidden, or the dwell buys nothing")
+    row.hover()
+    page.wait_for_timeout(150)          # inside FLAG_LIST_DWELL_MS (400ms)
+    assert not row.locator(".flag-list-copy").is_visible(), (
+        "the copy button appeared before the dwell elapsed - a pointer merely "
+        "crossing the row must not reveal it")
+    page.wait_for_timeout(600)          # past it
+    assert row.locator(".flag-list-copy").is_visible()
+    assert page.test_errors == []
+
+
+def _grant_clipboard(page, server):
+    page.context.grant_permissions(["clipboard-read", "clipboard-write"], origin=server)
+
+
+def test_clicking_a_word_copies_its_link_and_says_so(server, page):
+    """"clicking on a word should push the url for that word into the clipboard,
+    with a popup message saying so."
+
+    Asserts the CLIPBOARD, not just the toast: a confirmation that fires whether
+    or not anything was copied is exactly the dead control copyText()'s own note
+    records this file shipping twice.
+    """
+    _grant_clipboard(page, server)
+    _open_dashboard(page, server, klal_id=1)
+    page.evaluate("() => navigator.clipboard.writeText('nothing copied yet')")
+    word = page.locator("#klal-block-1 [data-word-index]").nth(3)
+    index = word.get_attribute("data-word-index")
+    text = word.inner_text().strip()
+    word.click()
+    page.wait_for_selector("#toast", state="visible", timeout=5000)
+    toast = page.locator("#toast").inner_text()
+    assert "Link copied" in toast and f"#{index}" in toast, toast
+
+    copied = page.evaluate("() => navigator.clipboard.readText()")
+    assert copied.endswith(f"/klal/1/word/{index}"), (
+        f"the clipboard does not hold this word's link: {copied!r}")
+    # The SAME payload the hover card's own copy button produces - two copy
+    # affordances yielding different text for one word would be worse than one.
+    assert f"Word #{index}" in copied and text in copied, copied
+    assert page.test_errors == []
+
+
+def test_the_copy_on_click_toggle_turns_it_off_and_survives_a_reload(server, page):
+    """"should be a flag to disable this behavior" - and a preference that
+    forgets itself on reload is not a preference, in a dashboard whose own
+    standing rule is to restart the server on every frontend change."""
+    _grant_clipboard(page, server)
+    _open_dashboard(page, server, klal_id=1)
+
+    def open_settings():
+        # MOVED into the settings tray 2026-09-01 (reviewer: "don't put click
+        # word on link up there on the index pane, hide it away somewhere -
+        # settings icon?"), so the switch has to be revealed before it is used.
+        if page.locator("#settings-popover").is_hidden():
+            page.click("#settings-btn")
+            page.wait_for_timeout(200)
+
+    def click_word():
+        # Every word click also opens a decision panel, and that panel then sits
+        # over the text - so a second click has to dismiss it first or Playwright
+        # (correctly) reports the panel intercepting the pointer.
+        page.keyboard.press("Escape")
+        page.wait_for_timeout(150)
+        page.locator("#klal-block-1 [data-word-index]").nth(5).click()
+        page.wait_for_timeout(600)
+
+    open_settings()
+    page.uncheck("#filter-copy-link")
+    page.evaluate("() => navigator.clipboard.writeText('untouched')")
+    click_word()
+    assert page.evaluate("() => navigator.clipboard.readText()") == "untouched", (
+        "the toggle is off and the click still wrote to the clipboard")
+
+    _open_dashboard(page, server, klal_id=1)
+    open_settings()
+    assert page.locator("#filter-copy-link").is_checked() is False, (
+        "the off-switch reset itself on reload")
+    click_word()
+    assert page.evaluate("() => navigator.clipboard.readText()") == "untouched"
+
+    page.keyboard.press("Escape")
+    open_settings()
+    page.check("#filter-copy-link")
+    click_word()
+    assert page.evaluate("() => navigator.clipboard.readText()") != "untouched", (
+        "turning it back on did not restore the copy")
+    assert page.test_errors == []
+
+
+def test_following_a_deep_link_does_not_touch_the_clipboard(server, page):
+    """Arriving somewhere by following a link must not overwrite the clipboard
+    the reviewer used to get there. highlightRoutedWord() is the one non-click
+    caller of focusWordOnScan(), and it is the caller that would otherwise fire a
+    toast at a reviewer who clicked nothing."""
+    _grant_clipboard(page, server)
+    _open_dashboard(page, server)
+    page.evaluate("() => navigator.clipboard.writeText('the link I followed')")
+    page.evaluate("() => { location.hash = '#klal=4&word=10'; }")
+    page.wait_for_timeout(1500)
+    assert page.evaluate("() => navigator.clipboard.readText()") == "the link I followed"
+    assert page.locator("#toast").is_visible() is False
+    # ...and it still ROUTED, or this test passes for the wrong reason.
+    assert page.locator("#klal-block-4 [data-word-index='10'].routed-word").count() == 1
+    assert page.test_errors == []
+
+
+def test_the_legend_names_recorded_rulings_beside_the_rendered_count(server, page):
+    """The reviewer's actual report: "count for human decisions is 51 - not
+    correct." decided_count counts words rendered GREEN, and a ruling stops
+    rendering once it is settled - the rebuild drops the candidate entry, and an
+    applied manual_correction fails the display drift check because the word it
+    names is no longer there. 463 rulings on record showed as 51.
+
+    Recorded is built WITHOUT that drift check, so a decision whose snapshotted
+    word has moved still counts. This posts exactly such a decision and asserts
+    it reaches the recorded figure and NOT the rendered one - the difference
+    between the two numbers is the whole feature.
+    """
+    before = _get_json(server, "/api/klalim?part=1")
+    row_before = next(r for r in before if r["klal_id"] == 12)
+
+    status, _ = _post_json(server, "/api/decisions/manual", {
+        "klal_id": 12, "word_index": 3, "original_word": "לא-המילה-שכאן",
+        "chosen_text": "תחליף", "note": "drifted on purpose - recorded, not rendered",
+    })
+    assert status == 201
+    row_after = next(r for r in _get_json(server, "/api/klalim?part=1") if r["klal_id"] == 12)
+    assert row_after["recorded_decision_count"] == row_before["recorded_decision_count"] + 1, (
+        "a ruling whose word has drifted is still a ruling - it must reach the recorded count")
+    assert row_after["decided_count"] == row_before["decided_count"], (
+        "it must NOT reach the rendered count - nothing on screen is green because of it")
+
+    _open_dashboard(page, server)
+    shown = int(page.locator(
+        "#legend .legend-clickable[data-bucket='decided'] .legend-count").inner_text())
+    recorded = int(page.locator(
+        "#legend .legend-clickable[data-bucket='recorded'] .legend-count").inner_text())
+    assert recorded > shown, (
+        f"the legend shows {shown} still drawn and {recorded} recorded; the second number exists "
+        "because the first one alone read as 'you have decided 51 words'")
+    assert page.test_errors == []
+
+
+def test_the_recorded_total_opens_every_ruling_with_its_status(server, page):
+    """"add a function to show all previously decided words - so a sr reviewer
+    can review a human's work" (2026-09-01).
+
+    Reviewing someone's work means seeing what they decided AND whether it
+    landed, and neither was reachable: a ruling stops rendering once it is
+    settled, so the dashboard showed 51 of 478 and nothing about the rest. The
+    recorded total is its own control opening its own list, with a status per
+    row - NOT a second reading of the count beside it, which is why the click
+    handler has to test it before the row it sits inside.
+    """
+    status, _ = _post_json(server, "/api/decisions/manual", {
+        "klal_id": 8, "word_index": 2, "original_word": "לא-המילה-שכאן",
+        "chosen_text": "תחליף", "note": "recorded, and it never landed",
+    })
+    assert status == 201
+    _open_dashboard(page, server)
+
+    page.eval_on_selector("#legend .legend-clickable[data-bucket='recorded']", "el => el.click()")
+    page.wait_for_selector("#flag-list-panel .flag-list-item", timeout=10000)
+    rows = page.locator("#flag-list-panel .flag-list-item").count()
+    served = len(_get_json(server, "/api/word-states?part=1")["recorded"])
+    assert rows == served, f"the recorded list holds {rows}, the API serves {served}"
+
+    # It must NOT have opened the Human-Decided list - that is the defect the
+    # nested control invites, and the two lists differ in length.
+    rendered = int(page.locator(
+        "#legend .legend-clickable[data-bucket='decided'] .legend-count").inner_text())
+    assert rows != rendered or served == rendered, (
+        "clicking 'of N recorded' opened the rendered-count list instead")
+
+    # The ruling just posted names a word that is not there, so it must be
+    # listed AND marked - it is exactly the case a senior reviewer is hunting.
+    drifted = page.locator("#flag-list-panel .recorded-item.rec-drifted")
+    assert drifted.count() >= 1, "a ruling that never landed is not marked as such"
+    assert page.test_errors == []
+
+
+def test_a_recorded_status_chip_filters_the_list(server, page):
+    """478 rows in one undifferentiated column is not a review tool. The chips
+    are the split a senior reviewer actually wants - 'which of these never
+    landed' - so each must narrow the list to its own count."""
+    _open_dashboard(page, server)
+    page.eval_on_selector("#legend .legend-clickable[data-bucket='recorded']", "el => el.click()")
+    page.wait_for_selector("#flag-list-panel .flag-list-item", timeout=10000)
+    total = page.locator("#flag-list-panel .flag-list-item").count()
+
+    chips = page.evaluate("""() => [...document.querySelectorAll('#flag-list-panel .rec-chip')]
+        .map(c => ({ status: c.dataset.status, n: parseInt(c.querySelector('b').textContent, 10) }))""")
+    assert len(chips) >= 2, f"expected an 'all' chip and at least one status: {chips}"
+    assert chips[0]["status"] == "all" and chips[0]["n"] == total
+
+    for chip in chips[1:]:
+        page.eval_on_selector(
+            f"#flag-list-panel .rec-chip[data-status='{chip['status']}']", "el => el.click()")
+        page.wait_for_timeout(250)
+        shown = page.locator("#flag-list-panel .flag-list-item").count()
+        assert shown == chip["n"], (
+            f"chip '{chip['status']}' claims {chip['n']} and the list shows {shown}")
+    assert page.test_errors == []
+
+
+PANE_HEADERS = ("nav-header", "text-header", "scan-header")
+
+
+def test_every_pane_header_carries_the_book_title_from_the_server(server, page):
+    """"on index pane header should show book title also scan pane", and then
+    "maybe sacrifice a line at top to add header" for the third pane.
+
+    Asserts against /api/corpus rather than a literal: this pipeline is meant to
+    generalize past one work, and a test pinning "Yad Malachi" would make the
+    second book's arrival look like a regression.
+    """
+    corpus = _get_json(server, "/api/corpus")
+    assert corpus["title_he"] and corpus["title"], corpus
+    _open_dashboard(page, server)
+    for header in PANE_HEADERS:
+        he = page.locator(f"#{header} [data-slot='title-he']")
+        assert he.inner_text().strip() == corpus["title_he"], header
+        # The edition is the thing START_HERE.md warns about conflating; it
+        # belongs on hover, not on screen.
+        assert corpus["edition"] in he.get_attribute("title"), header
+    # The ENGLISH title appears ONCE, in the index bar. It was in all three, which
+    # put the work's name six times across the top of one window - on a screen
+    # whose complaint was clutter (reviewer: "yes drop the extra eng titles"). The
+    # Hebrew stays everywhere because the book prints it as a running head on
+    # every page, which is what the reviewer is matching against.
+    en = page.locator("[data-slot='title-en']")
+    assert en.count() == 1, f"{en.count()} English titles on screen, expected 1"
+    # text_content(), not inner_text(): the slot is styled `text-transform:
+    # uppercase`, and inner_text() returns what is PAINTED.
+    assert en.text_content().strip() == corpus["title"]
+    assert page.evaluate(
+        "() => document.getElementById('nav-header').contains(document.querySelector(\"[data-slot='title-en']\"))"
+    ), "the one English title is not in the index bar"
+    assert page.test_errors == []
+
+
+def test_the_scan_page_arrows_sit_on_the_sides_the_reviewer_asked_for(server, page):
+    """"on scan page - arrows should switch places" (2026-09-01). Previous moved
+    to the LEFT and next to the RIGHT, and the glyphs moved with them so each
+    still points away from the centre - swapping only the sides would have left
+    'previous' on the left pointing right. Asserts geometry, not CSS text, since
+    the property that matters is where they land on screen."""
+    _open_dashboard(page, server, klal_id=2)
+    box = page.evaluate("""() => {
+        const p = document.getElementById('page-nav-prev').getBoundingClientRect();
+        const n = document.getElementById('page-nav-next').getBoundingClientRect();
+        return {
+          prev: p.left, next: n.left,
+          prevGlyph: document.getElementById('page-nav-prev').textContent.trim(),
+          nextGlyph: document.getElementById('page-nav-next').textContent.trim(),
+        };
+    }""")
+    assert box["prev"] < box["next"], (
+        f"previous must sit left of next: prev at {box['prev']}, next at {box['next']}")
+    # GLYPHS SWAPPED BACK 2026-09-01: "arrow behavior is correct but swap two
+    # icons". The sides and the handlers are unchanged; the two characters trade
+    # places so each arrow points INWARD, along the book's right-to-left reading
+    # direction rather than the buttons' left-to-right one.
+    assert box["prevGlyph"] == "›", box["prevGlyph"]
+    assert box["nextGlyph"] == "‹", box["nextGlyph"]
+    assert page.test_errors == []
+
+
+def test_a_deep_link_lands_on_the_page_the_word_is_actually_on(server, page):
+    """REGRESSION 2026-09-01, reviewer: "klal 12 w 219 clicking does not show
+    that word highlighted" - reached from a list row, which is a deep link.
+
+    highlightRoutedWord() carried a hand-rolled copy of pageForWord() whose
+    word_pages branch COULD NOT FIRE: `klalById` is built from /api/klalim,
+    whose payload has no `word_pages` key at all, so the test was always false
+    and every deep link fell through to the klal's START page. Klal 12 word 219
+    lives on page 19; the link showed page 18, where that word has no box - so
+    nothing highlighted, and no error anywhere. Lesson 25.
+
+    Swept: 18,044 words across 55 klalim sit on a page other than their klal's
+    start page, so this was every one of them. Asserts against the server's own
+    word_pages rather than a literal page number, and picks its cases from the
+    live data - a klal that stops spanning pages must not fail this test.
+    """
+    spanning = []
+    for row in _get_json(server, "/api/klalim?part=1"):
+        if len(spanning) >= 3:
+            break
+        klal = _get_json(server, f"/api/klal/{row['klal_id']}")
+        start, pages = klal.get("page"), klal.get("word_pages") or {}
+        off = sorted((int(i) for i, p in pages.items() if p is not None and p != start))
+        if off:
+            spanning.append((row["klal_id"], off[len(off) // 2], pages[str(off[len(off) // 2])]))
+    assert spanning, "no klal in Part 1 spans more than one page - this test has no subject"
+
+    _open_dashboard(page, server)
+    for klal_id, word_index, want_page in spanning:
+        page.evaluate("() => { location.hash = '#'; }")
+        page.evaluate(f"() => {{ location.hash = '#klal={klal_id}&word={word_index}'; }}")
+        page.wait_for_timeout(2000)
+        src = page.locator("#page-img").get_attribute("src")
+        assert f"page_{want_page}.png" in src, (
+            f"deep link to klal {klal_id} word {word_index} should show page {want_page}, got {src}")
+        assert page.locator("#hl-container .hl-box.focused").count() == 1, (
+            f"klal {klal_id} word {word_index}: right page, no highlight on the word")
+    assert page.test_errors == []
+
+
+def test_a_word_click_survives_the_scroll_that_follows_it(server, page):
+    """Found while reproducing the klal 12 w219 report, and a distinct defect
+    from the deep-link one above.
+
+    The click set the right page, then a scroll event a few hundred ms later had
+    updateActiveFromScroll() resolve a different klal and setActiveKlal() show
+    THAT klal's start page - undoing the navigation, silently. manualPageLock
+    guards the scan pane's prev/next arrows against exactly this and a word click
+    deliberately clears it, which left the click the one deliberate navigation
+    with no protection. Clicking with Playwright scrolls the element into view
+    first, which is what makes this reproducible here.
+    """
+    klal_id, word_index, want_page = None, None, None
+    for row in _get_json(server, "/api/klalim?part=1"):
+        klal = _get_json(server, f"/api/klal/{row['klal_id']}")
+        start, pages = klal.get("page"), klal.get("word_pages") or {}
+        off = sorted((int(i) for i, p in pages.items() if p is not None and p != start))
+        if off:
+            klal_id, word_index = row["klal_id"], off[len(off) // 2]
+            want_page = pages[str(word_index)]
+            break
+    assert klal_id is not None, "no klal spans a page break - nothing to assert"
+
+    _open_dashboard(page, server, klal_id=klal_id)
+    page.keyboard.press("Escape")
+    page.locator(f"#klal-block-{klal_id} [data-word-index='{word_index}']").first.click()
+    page.wait_for_timeout(2000)     # past the settle window the fix installs
+    src = page.locator("#page-img").get_attribute("src")
+    assert f"page_{want_page}.png" in src, (
+        f"clicked klal {klal_id} word {word_index} (page {want_page}); the scan drifted to {src}")
+    assert page.locator("#hl-container .hl-box.focused").count() == 1
+    assert page.test_errors == []
+
+
+def test_the_three_pane_headers_are_one_bar_in_the_same_order(server, page):
+    """"text differs between two blue headers ... both headers same size and
+    shape", with the scan pane's own order given as the template:
+
+        [Hebrew title]  [Hebrew reference]  [English reference]  [English title]
+
+    They sit side by side across the top of one window, so a difference in
+    height, position or slot order reads as a mistake. The title also has to be
+    READABLE, which is what its first version was not - it shipped near-white on
+    the white filter block and the test that asserted only its TEXT passed the
+    whole time."""
+    _open_dashboard(page, server)
+    geom = page.evaluate(r"""(ids) => ids.map(id => {
+        const h = document.getElementById(id);
+        const r = h.getBoundingClientRect();
+        const cs = getComputedStyle(h);
+        return {
+          id,
+          h: Math.round(r.height), top: Math.round(r.top),
+          bg: cs.backgroundColor,
+          slots: [...h.querySelectorAll('.ph-title, .ph-ref')]
+                   .map(e => e.className.replace(/\s+/g, ' ').trim()),
+          fg: getComputedStyle(h.querySelector('.ph-title.ph-he')).color,
+        };
+    })""", list(PANE_HEADERS))
+
+    heights = {g["h"] for g in geom}
+    assert len(heights) == 1, f"the three bars are different heights: {geom}"
+    assert {g["top"] for g in geom} == {0}, f"the bars do not start at the top: {geom}"
+    assert len({g["bg"] for g in geom}) == 1, f"the bars are different colours: {geom}"
+    # The English title is the one slot that is not on every bar - see
+    # test_every_pane_header_carries_the_book_title_from_the_server. Everything
+    # before it must match, in order, on all three.
+    want = ["ph-title ph-he", "ph-ref ph-he", "ph-ref ph-en"]
+    for g in geom:
+        assert g["slots"][:3] == want, f"{g['id']} slots are {g['slots']}, expected {want} first"
+        assert g["slots"][3:] in ([], ["ph-title ph-en"]), g["slots"]
+        assert g["fg"] != g["bg"], f"{g['id']}: the title is the colour of its own bar"
+
+    # Nothing may overflow its bar. `overflow: hidden` on the header means an
+    # over-wide bar shows no symptom at all - it silently eats a slot - so this
+    # measures need against available rather than trusting the picture. Checked
+    # at the narrowest width the layout targets as well as the default.
+    for width in (1280, 1600):
+        page.set_viewport_size({"width": width, "height": 1000})
+        page.wait_for_timeout(300)
+        over = page.evaluate("""(ids) => ids.map(id => {
+            const h = document.getElementById(id);
+            const kids = [...h.children];
+            const need = kids.reduce((s, k) => s + k.scrollWidth, 0) + 12 * (kids.length - 1);
+            return { id, over: Math.round(need - (h.clientWidth - 32)) };
+        }).filter(r => r.over > 0)""", list(PANE_HEADERS))
+        assert not over, f"at {width}px these headers overflow (px): {over}"
+    assert page.test_errors == []
+
+
+def test_the_copy_on_click_switch_is_behind_the_settings_icon(server, page):
+    """"don't put click word on link up there on the index pane, hide it away
+    somewhere - settings icon?" A preference set once does not belong beside the
+    two filters that get toggled while reading."""
+    _open_dashboard(page, server)
+    assert page.locator("#nav-filter #filter-copy-link").count() == 0, (
+        "the switch is still sitting in the filter block")
+    assert page.locator("#settings-popover").is_hidden(), "the tray must start closed"
+    page.click("#settings-btn")
+    page.wait_for_timeout(250)
+    assert page.locator("#filter-copy-link").is_visible()
+    # A tray that closes on the click that flips the switch is a control you have
+    # to reopen to confirm.
+    page.click("#filter-copy-link")
+    page.wait_for_timeout(200)
+    assert page.locator("#settings-popover").is_visible(), "the tray closed on its own switch"
+    page.click("#nav-list")
+    page.wait_for_timeout(250)
+    assert page.locator("#settings-popover").is_hidden(), "an outside click must put it away"
+    assert page.test_errors == []
+
+
+def test_the_word_list_closes_when_the_reviewer_goes_back_to_reading(server, page):
+    """"pop up from index human-decided should disappear when clicked inside text
+    pane or scan pane." Only THIS panel closes that way - the other five are
+    OPENED by a click in those panes, so closing on the same click would shut
+    them the instant they opened."""
+    _open_dashboard(page, server, klal_id=2)
+    for pane in ("#scan-pane", "#text-scroll"):
+        page.eval_on_selector(
+            "#legend .legend-clickable[data-bucket='machine_disputed']", "el => el.click()")
+        page.wait_for_selector("#flag-list-panel .flag-list-item", timeout=10000)
+        page.eval_on_selector(pane, "el => el.click()")
+        page.wait_for_timeout(350)
+        assert page.locator("#flag-list-panel.open").count() == 0, (
+            f"a click in {pane} left the word list open")
+        assert page.locator("#overlay-backdrop.open").count() == 0, (
+            f"a click in {pane} closed the list but left the backdrop over the page")
+    # A word click still opens ITS panel - closing the list must not have eaten it.
+    page.locator("#klal-block-2 [data-word-index]").nth(4).click()
+    page.wait_for_timeout(600)
+    assert page.locator(".side-panel.open").count() == 1, (
+        "clicking a word no longer opens its decision panel")
+    assert page.test_errors == []
+
+
+def test_the_legend_gives_each_human_decided_count_its_own_row(server, page):
+    """Reviewer, 2026-09-01: "for counts at bottom one row human-decided (...)
+    and the following row human-decided (total recorded)".
+
+    Two counts hanging off one row read as one number with a footnote; they are
+    two different measures. The first is what is still DRAWN in the text - a
+    ruling stops being drawn once it is settled - and the second is what is on
+    record. Only the first carries a colour swatch, because only the first
+    describes something painted on screen.
+
+    Records its own ruling first: the fixture's ledger starts EMPTY, so with no
+    decisions there is no second row at all - and a test that passes because the
+    thing it checks is absent has checked nothing (Lesson 25).
+    """
+    status, _ = _post_json(server, "/api/decisions/manual", {
+        "klal_id": 20, "word_index": 1, "original_word": "לא-המילה-שכאן",
+        "chosen_text": "תחליף", "note": "so the legend has something to count",
+    })
+    assert status == 201
+    _open_dashboard(page, server)
+    rows = page.evaluate("""() => [...document.querySelectorAll('#legend .legend-row')].map(r => ({
+        bucket: r.dataset.bucket,
+        label: (r.querySelector('.legend-label') || {}).textContent || '',
+        count: parseInt((r.querySelector('.legend-count') || {}).textContent, 10),
+        swatch: !!r.querySelector('i'),
+    }))""")
+    by_bucket = {r["bucket"]: r for r in rows if r["bucket"]}
+    assert "decided" in by_bucket and "recorded" in by_bucket, rows
+
+    drawn, recorded = by_bucket["decided"], by_bucket["recorded"]
+    # Adjacent rows, in that order - "the FOLLOWING row".
+    order = [r["bucket"] for r in rows]
+    assert order.index("recorded") == order.index("decided") + 1, order
+    assert "total recorded" in recorded["label"], recorded
+    assert recorded["count"] >= drawn["count"], (drawn, recorded)
+    # The swatch is the colour key. Nothing on screen is painted for the recorded
+    # row - that is the whole reason it exists - so it must not claim a colour.
+    assert drawn["swatch"] and not recorded["swatch"], (drawn, recorded)
+    assert page.test_errors == []
+
+
+def test_the_index_filters_share_one_line(server, page):
+    """"put two flags above index pane on same line to max real estate for the
+    index." Every row the filter block costs is a klal the list cannot show."""
+    _open_dashboard(page, server)
+    same_line = page.evaluate("""() => {
+        const a = document.getElementById('filter-flagged').getBoundingClientRect();
+        const b = document.getElementById('filter-high-value').getBoundingClientRect();
+        return { same: Math.abs(a.top - b.top) < 2, aTop: Math.round(a.top), bTop: Math.round(b.top) };
+    }""")
+    assert same_line["same"], f"the two filters are on different lines: {same_line}"
+    assert page.test_errors == []
+
+
+def test_the_scan_controls_are_not_inside_the_header(server, page):
+    """The scan bar could not fit four text slots AND a control cluster - it
+    overflowed by 58px at a 1280px window, invisibly, because the header clips.
+    The zoom controls moved onto the scan itself, beside the page arrows that
+    were already there, which is also what makes the three bars the same object
+    rather than two bars and one toolbar."""
+    _open_dashboard(page, server, klal_id=2)
+    assert page.evaluate(
+        "() => !document.getElementById('scan-header').contains(document.getElementById('zoom-controls'))"
+    ), "the zoom cluster is still inside the scan header"
+    # Moved, not lost: it must still be on screen and still zoom.
+    assert page.locator("#zoom-controls").is_visible()
+    page.click("#zoom-in")
+    page.wait_for_timeout(300)
+    assert page.inner_text("#zoom-level") != "100%", "the zoom controls stopped working after the move"
+    assert page.test_errors == []
+
+
+def test_the_text_pane_header_names_the_klal_being_read(server, page):
+    """"maybe sacrifice a line at top to add header that just says something like
+    page text." The middle pane was the only one of the three without a bar, and
+    the pane a reviewer spends the most time in was the one that never said where
+    they were. Its reference is the klal, in both scripts, exactly as the scan
+    pane names the page it is showing - and it has to FOLLOW the reviewer, not
+    just render once."""
+    _open_dashboard(page, server, klal_id=2)
+    page.wait_for_timeout(600)
+    assert page.inner_text("#text-ref-en").strip() == "Klal 2"
+    assert "כלל" in page.inner_text("#text-ref-he")
+    page.click("#nav-8")
+    page.wait_for_timeout(900)
+    assert page.inner_text("#text-ref-en").strip() == "Klal 8", (
+        "the text pane's header did not follow the reviewer to another klal")
+    # The Hebrew numeral comes from /api/numerals, the same table the scan header
+    # uses - not a second gematria implementation (Lesson 13).
+    assert _get_json(server, "/api/numerals")["8"] in page.inner_text("#text-ref-he")
+    assert page.test_errors == []
+
+
+def test_the_two_klal_markers_are_set_in_the_same_face(server, page):
+    """Reviewer, 2026-09-01: "is the heb num in the index pane the same font as
+    the text nums? it should be" - it was not.
+
+    `--font-marker` was `'Inter', sans-serif`, and Inter carries no Hebrew, so
+    every Hebrew marker resolved to whatever the system happened to pick; the
+    index pane's `.nheb` meanwhile declared no font-family at all and inherited
+    the body's Frank Ruhl Libre. The same numeral was a sans in one pane and a
+    serif in the other, one pane apart, and the token's own comment claimed it
+    was "the section number, in either script".
+
+    Asserts the computed stack rather than a literal face name: the point is that
+    the two agree and that the fallback is a CHOICE, not that it is any
+    particular font - re-pointing --font-marker for another work must not fail
+    this.
+    """
+    _open_dashboard(page, server, klal_id=12)
+    page.wait_for_timeout(600)
+    faces = page.evaluate("""() => {
+        const f = sel => { const e = document.querySelector(sel);
+                           return e ? getComputedStyle(e).fontFamily : null; };
+        return { navHeb: f('#nav-12 .nheb'), navId: f('#nav-12 .nid'),
+                 textMarker: f('#klal-block-12 .klal-marker-word'),
+                 textHead: f('#klal-block-12 .klal-head .kid') };
+    }""")
+    assert all(faces.values()), faces
+    assert len(set(faces.values())) == 1, (
+        f"the klal markers are set in different faces across the panes: {faces}")
+    # ...and the stack must actually name a Hebrew face, or "the same font" is
+    # only true by accident of whatever the system resolves today.
+    assert "David" in faces["navHeb"], (
+        f"--font-marker names no Hebrew face, so its Hebrew fallback is unspecified: {faces['navHeb']}")
+    assert page.test_errors == []
+
+
+def test_the_latin_klal_id_does_not_outweigh_the_hebrew_one_in_the_index(server, page):
+    """"english numbers are too large wasting space." The Latin id shared
+    --nav-marker-size at 18px with a 34px min-width, in a 380px column of 222
+    rows - the widest fixed thing in the row after the badges, for the half of
+    the reference the BOOK does not print. The Hebrew marker keeps the larger
+    size: that is the one a reviewer matches against the scan."""
+    _open_dashboard(page, server)
+    sizes = page.evaluate("""() => {
+        const px = sel => parseFloat(getComputedStyle(document.querySelector(sel)).fontSize);
+        const w  = sel => document.querySelector(sel).getBoundingClientRect().width;
+        return { idSize: px('#nav-12 .nid'), hebSize: px('#nav-12 .nheb'),
+                 idWidth: w('#nav-12 .nid') };
+    }""")
+    assert sizes["idSize"] < sizes["hebSize"], (
+        f"the Latin id is not smaller than the Hebrew marker it sits beside: {sizes}")
+    assert sizes["idWidth"] <= 30, f"the Latin id column is {sizes['idWidth']:.0f}px wide"
+    assert page.test_errors == []
+
+
+def test_the_part_selector_shares_the_filter_row(server, page):
+    """"part dropdown creates asymmetry any suggestions?" It was a full-width
+    block spanning the index pane while the other two panes had nothing at that
+    height. Folded into the filter row it stops being a band across the pane and
+    gives the list back a row - the standing "max real estate" ask."""
+    _open_dashboard(page, server)
+    geom = page.evaluate("""() => {
+        const s = document.getElementById('part-select').getBoundingClientRect();
+        const f = document.getElementById('filter-flagged').getBoundingClientRect();
+        const pane = document.getElementById('nav-filter').getBoundingClientRect();
+        return { sameRow: Math.abs((s.top + s.height/2) - (f.top + f.height/2)) < 6,
+                 selW: Math.round(s.width), paneW: Math.round(pane.width) };
+    }""")
+    assert geom["sameRow"], f"the part selector is not on the filter row: {geom}"
+    assert geom["selW"] < geom["paneW"] * 0.5, (
+        f"the part selector still spans the pane: {geom['selW']}px of {geom['paneW']}px")
+    # Still switches parts - moving a control must not break it.
+    page.select_option("#part-select", "2")
+    page.wait_for_timeout(1200)
+    assert page.locator(".nav-item").count() > 0
+    assert page.locator(".nav-item").first.get_attribute("data-klal-id") == "223"
+    assert page.test_errors == []
