@@ -2624,3 +2624,61 @@ def test_the_text_pane_accounts_for_the_index_pennant(server, page):
         f"klal {target} shows a pennant in the index and nothing in the text pane")
     assert "word" in marker.inner_text()
     assert page.test_errors == []
+
+
+def test_every_nav_row_reserves_all_three_badge_slots_with_red_leftmost(server, page):
+    """Reviewer, 2026-09-02: "red pill first on the left so they all line up.
+    green orange always in their slot even if nothing before it."
+
+    A badge was omitted entirely at zero, so the red count - the only one asking
+    the reviewer for something - sat at a different x on every row and the column
+    could not be read down. Asserts the geometry across many rows, not the markup:
+    the property is that the columns LINE UP.
+    """
+    _open_dashboard(page, server)
+    rows = page.evaluate("""() => [...document.querySelectorAll('.nav-item')].slice(0, 25).map(r => {
+        const at = sel => {
+          const e = r.querySelector(sel);
+          return e ? Math.round(e.getBoundingClientRect().left) : null;
+        };
+        return { klal: r.dataset.klalId, open: at('.ncount-open'),
+                 machine: at('.ncount-machine'), decided: at('.ncount-decided') };
+    })""")
+    assert len(rows) >= 10, "not enough nav rows to judge alignment"
+    for name in ("open", "machine", "decided"):
+        missing = [r["klal"] for r in rows if r[name] is None]
+        assert not missing, f"klal(im) {missing} have no {name} slot reserved at all"
+        xs = {r[name] for r in rows}
+        assert len(xs) == 1, f"the {name} badge sits at {len(xs)} different x positions: {sorted(xs)}"
+    for r in rows:
+        assert r["open"] < r["machine"] < r["decided"], (
+            f"klal {r['klal']}: badges are not red, amber, green left to right: {r}")
+    assert page.test_errors == []
+
+
+def test_every_legend_count_explains_itself_on_hover(server, page):
+    """Reviewer, 2026-09-02: "hovering over the counts on the bottom surface
+    explanation." The one-line legend hides its labels, so without these the bar
+    is five unexplained numbers. Each must say what the state MEANS - not repeat
+    its own name, which is what the first version did."""
+    status, _ = _post_json(server, "/api/decisions/manual", {
+        "klal_id": 20, "word_index": 1, "original_word": "לא-המילה-שכאן",
+        "chosen_text": "תחליף", "note": "so the recorded row exists",
+    })
+    assert status == 201
+    _open_dashboard(page, server)
+    rows = page.evaluate("""() => [...document.querySelectorAll('#legend .legend-row')].map(r => ({
+        bucket: r.dataset.bucket,
+        title: r.title,
+        count: (r.querySelector('.legend-count') || {}).textContent,
+    }))""")
+    assert len(rows) >= 5, f"expected every state plus the recorded total: {rows}"
+    for r in rows:
+        assert r["title"], f"legend row {r['bucket']} has no hover explanation"
+        # A real explanation, not the label echoed back with a number.
+        assert len(r["title"]) > 80, f"{r['bucket']}'s tooltip is too thin to explain anything: {r['title']}"
+        assert r["count"] in r["title"], (
+            f"{r['bucket']}'s tooltip does not mention its own count {r['count']}")
+        assert r["title"].count("—") <= 1 or r["title"].count(r["bucket"]) <= 1, (
+            f"{r['bucket']}'s tooltip repeats its own name: {r['title'][:120]}")
+    assert page.test_errors == []

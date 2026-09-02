@@ -658,10 +658,22 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
    its own right) but the FONT is the shared one - see .klal-title. */
 .nav-item .ntitle { flex: 1; min-width: 3.5em; color: var(--ink-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .nav-item .nflag { color: var(--pending); font-size: 12px; flex-shrink: 0; }
+/* The badge group is `direction: ltr` inside an RTL row, so DOM order is
+   left-to-right here: red is written first and therefore sits leftmost, on every
+   row (reviewer 2026-09-02: "red pill first on the left so they all line up").
+   Every slot is always present and every slot is the same width, so the column
+   can be read straight down - a badge omitted at zero used to move the red one
+   sideways on every row. */
+.nav-item .ncounts { display: flex; direction: ltr; gap: 4px; flex-shrink: 0; }
 .nav-item .ncount {
   color: white; border-radius: 10px;
   font-size: 10px; font-family: 'Inter', sans-serif; padding: 1px 6px; flex-shrink: 0;
+  min-width: 22px; text-align: center;
+  font-variant-numeric: tabular-nums;
 }
+/* An empty slot holds its width and draws nothing. More specific than the three
+   colour rules below, so no !important is needed. */
+.nav-item .ncount.ncount-empty { background: transparent; }
 /* ONE badge at rest - the red one, which is the only count that is asking the
    reviewer for something. Reviewer 2026-09-02: "show the red open count and the
    rest on hover". Three coloured pills on every row made the column read as
@@ -765,7 +777,10 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
 #legend { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 10px 14px; }
 #legend .legend-row { display: flex; align-items: center; gap: 5px; }
 #legend .legend-label { display: none; }
-#legend .legend-count { margin-left: 0; }
+/* Same treatment as the nav badges: one width, tabular figures, so the counts
+   line up instead of drifting with their digit count. */
+#legend .legend-count { margin-left: 0; min-width: 2.4em; text-align: right; }
+#legend .legend-row { cursor: pointer; }
 #legend .legend-row-sub { padding-left: 0; }
 /* The recorded total has no swatch, so it needs a word to be readable at all. */
 /* The recorded total is the one entry with no colour swatch, so it needs a word

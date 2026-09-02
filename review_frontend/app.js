@@ -973,19 +973,32 @@ function buildLegend() {
   // read as "you have decided 54 words", which is not what it counts - see
   // review_server.api_klalim's note on recorded_decision_count.
   const LEGEND_SUFFIX = { human: ' (still shown)' };
+  const LEGEND_EXPLAIN = {
+    open: 'Machine-Disputed \u2014 {n} words. An OCR engine or the multi-witness '
+        + 'consensus reads something other than what the corpus stores, and nobody '
+        + 'has ruled on it yet. This is the outstanding review queue.',
+    machine: 'Machine-Resolved \u2014 {n} words. The pipeline settled these itself: '
+           + 'either the scan was crop-checked and confirmed the stored reading, or '
+           + 'the disagreement is a known printer-ligature artifact. No reviewer '
+           + 'action is needed.',
+    human: 'Human-Decided (still shown) \u2014 {n} words are DRAWN this colour right '
+         + 'now. A ruling stops being drawn once it is settled, because the rebuild '
+         + 'drops its candidate entry, so this is not the number of rulings on '
+         + 'record - the next count along is.',
+  };
   Object.entries(STATE_META).forEach(([state, { label, color }]) => {
     const shown = label + (LEGEND_SUFFIX[state] || '');
     const row = document.createElement('div');
     row.className = 'legend-row legend-clickable';
     row.dataset.bucket = LEGEND_BUCKET[state];
     row.dataset.label = shown;
-    row.title = state === 'human'
-      ? `${totals.human} word(s) are drawn as human-decided in the text right now. A ruling stops being drawn once it is settled - the rebuild drops its candidate entry - so this is NOT the number of rulings on record; see the row below.`
-      : `Show all ${totals[state]} \u2014 ${label}`;
+    // The one-line legend hides the labels, so these ARE the vocabulary now -
+    // without them the bar is five unexplained numbers (reviewer 2026-09-02:
+    // "hovering over the counts on the bottom surface explanation"). Each says
+    // what the state MEANS and what clicking does, not just its own name again.
+    row.title = LEGEND_EXPLAIN[state].replace('{n}', totals[state])
+              + `\n\nClick to list all ${totals[state]}.`;
     const shape = state === 'machine' ? 'border-radius:2px;border:1.5px dotted ' + color + ';background:transparent;' : 'background:' + color + ';';
-    // The label is hidden by CSS in the one-line layout, so the row itself has
-    // to carry the vocabulary - otherwise the legend is four unexplained numbers.
-    row.title = `${shown}: ${totals[state]}. ` + row.title;
     row.innerHTML = `<i style="${shape}"></i><span class="legend-label">${shown}</span><b class="legend-count">${totals[state]}</b>`;
     legend.appendChild(row);
 
@@ -998,7 +1011,11 @@ function buildLegend() {
       sub.className = 'legend-row legend-row-sub legend-clickable';
       sub.dataset.bucket = 'recorded';
       sub.dataset.label = 'Every recorded ruling';
-      sub.title = `${recorded} distinct word position(s) in this part carry a recorded ruling. Click to review all of them - what each one chose, and whether the corpus reflects it.`;
+      sub.title = `Human-Decided (total recorded) \u2014 ${recorded} distinct word `
+                + 'positions in this part carry a ruling on record, whether or not it is '
+                + 'still drawn in the text. This is the number to quote for "how much has '
+                + 'been reviewed".\n\nClick to review all of them: what each one chose, '
+                + 'and whether the corpus reflects it.';
       sub.innerHTML = `<span class="legend-label">${label} (total recorded)</span>` +
                       `<b class="legend-count">${recorded}</b>`;
       legend.appendChild(sub);
@@ -1012,7 +1029,10 @@ function buildLegend() {
   aiRow.className = 'legend-row legend-clickable';
   aiRow.dataset.bucket = LEGEND_BUCKET.ai;
   aiRow.dataset.label = 'AI-Flagged';
-  aiRow.title = `AI-Flagged: ${aiTotal}. Show all ${aiTotal}.`;
+  aiRow.title = `AI-Flagged \u2014 ${aiTotal} words carry an open word-level revisit `
+              + 'flag, raised by an automated pass rather than by a disagreement between '
+              + 'engines. These are also counted in Machine-Disputed: the flag makes the '
+              + `word open whatever its own entry says.\n\nClick to list all ${aiTotal}.`;
   aiRow.innerHTML = `<i style="border-bottom:3px dashed #805ad5;background:transparent;"></i><span class="legend-label">AI-Flagged</span><b class="legend-count">${aiTotal}</b>`;
   legend.appendChild(aiRow);
 }
@@ -1034,28 +1054,23 @@ function navItemInnerHtml(k) {
   // decided + 5 machine-resolved + 4 disputed: badge said 9, four were red.
   // The badge now counts what is actually red, which is what a reviewer is
   // looking for when they scan the nav for remaining work.
-  const openBadge = k.machine_disputed_count ? `<span class="ncount ncount-open">${k.machine_disputed_count}</span>` : '';
-  // THIRD BADGE added 2026-08-31 (reviewer: "3 badges", after klal 73 read as
-  // "two disputes but the red flag shows only 1"). machine_resolved_count was
-  // served per klal and summed only into the LEGEND total - no row showed its
-  // own - so a klal with one resolved and one open word displayed a single badge
-  // while highlighting two words, and the row could not be reconciled with the
-  // text. Lesson 29 in miniature: computed, served, rendered nowhere it answered
-  // the question being asked. Order is open -> resolved -> decided, which is the
-  // order of decreasing claim on the reviewer's attention.
-  const machineBadge = k.machine_resolved_count ? `<span class="ncount ncount-machine">${k.machine_resolved_count}</span>` : '';
-  const decidedBadge = k.decided_count ? `<span class="ncount ncount-decided">${k.decided_count}</span>` : '';
-  // No punctuation badge here on purpose: the proposed-punctuation
-  // affordances (legend swatch, nav badges, inline blue-dot markers) were
-  // removed from the UI 2026-08-11 on user feedback, leaving that feature
-  // dormant-but-reversible rather than deleted. /api/klalim still serves
-  // punctuation_count/punctuation_open_count for whenever it returns.
-  // (That commit left this comment half-rewritten - three unfinished
-  // clauses that described a badge which isn't there - until 2026-08-14.)
-  // Both scripts on every line (reviewer, 2026-08-31): the id the reviewer
-  // navigates by AND the marker the BOOK prints, which is what they are matching
-  // against the scan. `gematria` has been on /api/klalim since 2026-08-26; the
-  // nav simply never used it.
+  // ALL THREE SLOTS, ALWAYS, and red first (reviewer 2026-09-02: "red pill first
+  // on the left so they all line up. green orange always in their slot even if
+  // nothing before it"). A badge was omitted entirely at zero, so the red count -
+  // the only one asking for something - sat at a different x on every row and
+  // the column could not be read down. An empty slot keeps its width and draws
+  // nothing.
+  //
+  // The group is `direction: ltr` (see .ncounts), so DOM order IS left-to-right
+  // order here even though the row around it is RTL. Red first therefore means
+  // red leftmost, on every row, whatever the other two hold.
+  const badge = (cls, n) =>
+    `<span class="ncount ${cls}${n ? '' : ' ncount-empty'}">${n || ''}</span>`;
+  const badges = '<span class="ncounts">'
+    + badge('ncount-open', k.machine_disputed_count)
+    + badge('ncount-machine', k.machine_resolved_count)
+    + badge('ncount-decided', k.decided_count)
+    + '</span>';
   const heb = k.gematria ? `<span class="nheb">${escapeHtml(k.gematria)}</span>` : '';
   // The terminal period is NOT shown here (reviewer 2026-08-31: "no period in
   // the index pane - it is needed in the text pane to sep the title from the
@@ -1064,7 +1079,7 @@ function navItemInnerHtml(k) {
   // data is untouched. In a list of 222 headings the period is noise; in the
   // running text it is the only thing marking where the heading stops.
   const shown = displayTitle(k.title);
-  return `<span class="nid">${k.klal_id}</span>${heb}<span class="ntitle klal-title" title="${escapeAttr(k.title)}">${escapeHtml(shown)}</span>${flagIcon}${openBadge}${machineBadge}${decidedBadge}`;
+  return `<span class="nid">${k.klal_id}</span>${heb}<span class="ntitle klal-title" title="${escapeAttr(k.title)}">${escapeHtml(shown)}</span>${flagIcon}${badges}`;
 }
 
 function buildNav() {

@@ -113,6 +113,35 @@ reliability check, and every dispute still needs the ink or a different engine.
 > borrowing `2A`–`2Z`, which names a different lane and would misattribute the
 > work. Same rule as above: never reassign an ID once written.
 
+0AO. **[2026-09-02, reviewer-requested] THE COUNT COLUMNS LINE UP, AND THE
+    LEGEND EXPLAINS ITSELF.**
+
+    - **Every nav row reserves all three badge slots, red leftmost.** A badge was
+      omitted entirely at zero, so the red open count — the only one asking the
+      reviewer for anything — sat at a different x on every row and the column
+      could not be read down. All three slots are always present, one width,
+      tabular figures; an empty one holds its space and draws nothing. Measured
+      across 25 rows: one x per colour (red 1238, amber 1264, green 1290).
+
+      The group is `direction: ltr` inside the RTL row, so DOM order IS
+      left-to-right there — which is what lets "red written first" mean "red
+      leftmost" without reversing anything.
+
+    - **The legend counts line up the same way** (one width, tabular), and each
+      now carries a real explanation on hover. The one-line layout hides the
+      labels, so without them the bar is five unexplained numbers. The first
+      version of these merely echoed the label and its own number back
+      ("Machine-Disputed: 498. Machine-Disputed — 498 words…"); they now say what
+      the state MEANS and what clicking does. The AI-Flagged tooltip also states
+      the thing that most needs stating — that those words are ALSO counted in
+      Machine-Disputed, because an open flag makes a word open whatever its own
+      entry says — and the recorded row says it is the figure to quote for "how
+      much has been reviewed".
+
+    Two tests added, asserting the GEOMETRY (one x per colour across 25 rows,
+    red < amber < green) rather than the markup, and that no tooltip is thin
+    enough to be a label echo. Full suite **449 collected, 448 passed, 1 skipped**.
+
 0AN. **[2026-09-02] THE INDEX PENNANT AND THE TEXT PANE ANSWERED DIFFERENT
     QUESTIONS WITH THE SAME WORD — 15 of 222 klalim. FIXED, along with four
     reviewer-requested trims.**
