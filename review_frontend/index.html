@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Yad Malachi — Correction Review</title>
-<link rel="stylesheet" href="/app.css?v=11">
+<link rel="stylesheet" href="/app.css?v=12">
 </head>
 <body>
 
@@ -100,22 +100,22 @@
       </span>
       <span class="ph-end"></span>
     </div>
+    <!-- The overlay controls are siblings of #scan-viewer, NOT children of it.
+         #scan-viewer is the element that SCROLLS, and an absolutely-positioned
+         child of a scroll container is positioned against the scrolled content,
+         so both of these slid away with the page: measured at 300% zoom, the
+         zoom cluster and both arrows sat at negative y - completely gone - once
+         the scan was scrolled past the top. #scan-pane is position:relative and
+         does not scroll, so anchoring here pins them to the pane. -->
+    <span id="zoom-controls">
+      <button id="zoom-out" title="Zoom out">−</button>
+      <span id="zoom-level">100%</span>
+      <button id="zoom-in" title="Zoom in">+</button>
+    </span>
+    <button id="page-nav-prev" class="page-nav-btn" title="Previous page">&#8250;</button>
+    <button id="page-nav-next" class="page-nav-btn" title="Next page">&#8249;</button>
+
     <div id="scan-viewer">
-      <!-- The zoom cluster lives over the scan, not in the header - see
-           #zoom-controls in app.css for why. -->
-      <span id="zoom-controls">
-        <button id="zoom-out" title="Zoom out">−</button>
-        <span id="zoom-level">100%</span>
-        <button id="zoom-in" title="Zoom in">+</button>
-      </span>
-      <!-- SIDES swapped 2026-09-01 (reviewer: "on scan page - arrows should
-           switch places"): previous on the LEFT, next on the RIGHT. The GLYPHS
-           were then swapped back the same day - "arrow behavior is correct but
-           swap two icons" - so each arrow points INWARD, along the book's
-           right-to-left reading direction rather than the buttons'. Behaviour
-           and positions are untouched; only these two characters moved. -->
-      <button id="page-nav-prev" class="page-nav-btn" title="Previous page">&#8250;</button>
-      <button id="page-nav-next" class="page-nav-btn" title="Next page">&#8249;</button>
       <div id="page-container">
         <img id="page-img" src="">
         <div id="hl-container"></div>
@@ -179,6 +179,6 @@
     <div class="panel-body" id="manual-panel-body"></div>
   </div>
 
-  <script src="/app.js?v=11"></script>
+  <script src="/app.js?v=12"></script>
 </body>
 </html>

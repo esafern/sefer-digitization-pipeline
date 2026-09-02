@@ -389,6 +389,10 @@ function showToast(message, ok) {
 // here would take the click handler - and so the panel - down with it.
 const COPY_ON_CLICK_KEY = 'ym.copyWordLinkOnClick';
 let copyOnClick = true;
+// True only while highlightRoutedWord() is synthesizing a click from a URL.
+// See its own note: the deep-link path wants everything a click does EXCEPT the
+// clipboard write.
+let _routedClick = false;
 
 function setupSettingsTray() {
   const btn = document.getElementById('settings-btn');
@@ -443,7 +447,7 @@ function wordTextAt(klalId, wordIndex) {
 }
 
 async function copyWordLink(klalId, wordIndex) {
-  if (!copyOnClick || klalId == null || wordIndex == null) return;
+  if (!copyOnClick || _routedClick || klalId == null || wordIndex == null) return;
   const ok = await copyText(wordRefPayload(klalId, wordIndex, wordTextAt(klalId, wordIndex)));
   showToast(ok ? `Link copied \u2014 ${klalRefName(klalId)} \u00b7 Word #${wordIndex}`
                : 'Could not copy the link to the clipboard', ok);
@@ -624,9 +628,19 @@ async function revealWordInText(klalId, wordIndex) {
   return span;
 }
 
-async function highlightRoutedWord(klalId, wordIndex) {
+async function highlightRoutedWord(klalId, wordIndex, opts) {
   const span = await revealWordInText(klalId, wordIndex);
   if (!span) return;
+  if (opts && opts.fromList) {
+    // Reveal and focus only - see the word list's own click handler for why a
+    // row must not open the word's panel.
+    const page = pageForWord(klalForPageLookup(klalId), wordIndex, null);
+    if (page != null) {
+      focusWordOnScan(page, klalId, { klal_id: klalId, word_index: wordIndex, opcode: 'plain' },
+                      { viaClick: false });
+    }
+    return;
+  }
   // FIXED 2026-09-01 (reviewer: "klal 12 w 219 clicking does not show that word
   // highlighted" - reached from a list row, which is a deep link).
   //
@@ -645,18 +659,52 @@ async function highlightRoutedWord(klalId, wordIndex) {
   // pageForWord() now, against the MOUNTED klal - revealWordInText() has just
   // awaited mountKlal(), so mountedKlal[klalId] is the /api/klal payload that
   // does carry word_pages.
-  const page = pageForWord(klalForPageLookup(klalId), wordIndex, null);
-  if (page != null) {
-    focusWordOnScan(page, klalId, { klal_id: klalId, word_index: wordIndex, opcode: 'plain' },
-                    { viaClick: false });
+  // A URL THAT NAMES A WORD BEHAVES LIKE CLICKING THAT WORD (reviewer,
+  // 2026-09-02). It used to only reveal and highlight, so following a link left
+  // the reviewer looking at the right word with no way to act on it - they had
+  // to click the word they had just been taken to.
+  //
+  // The click is DISPATCHED on the span rather than reimplemented, deliberately.
+  // Five different render branches attach five different handlers (disputed,
+  // manual, ai_flag, witness, plain), and picking the right one here would be a
+  // sixth copy of that mapping - which is the exact defect the comment above
+  // records fixing in this very function. Dispatching cannot pick wrong.
+  //
+  // `_routedClick` suppresses only the clipboard write. A real click copies the
+  // word's URL; doing that here would be pointless (the reviewer HAS the URL -
+  // they just opened it) and would usually fail anyway, because a page loaded
+  // cold from a link has no transient user activation and the browser rejects
+  // the clipboard write - which would put a "Could not copy" toast on screen
+  // every time someone followed a link.
+  _routedClick = true;
+  try {
+    span.click();
+  } finally {
+    _routedClick = false;
   }
 }
 
 let routing = false;
 
-async function applyHashRoute() {
-  const route = parseHashRoute();
-  if (!route || routing) return;
+// Route to a klal, optionally to a word inside it. THE one implementation;
+// applyHashRoute() is the thin wrapper that reads an address off the URL.
+//
+// SPLIT 2026-09-02, to take the word list off the hash entirely. The row handler
+// used to set `location.hash` and then call applyHashRoute({fromList: true}),
+// and setting the hash queues a hashchange TASK that calls applyHashRoute again
+// with no options. The `routing` guard was supposed to swallow that second call,
+// and usually did - but only while the first was still in flight. When the klal
+// is ALREADY MOUNTED every await inside resolves as a microtask, the whole route
+// finishes before the macrotask queue is reached, `routing` is false again, and
+// the hashchange runs the full click path: the row opened the word's panel,
+// which closes the list the row lives in.
+//
+// That is why the test passed alone and failed in the suite - whether klal 1 was
+// already mounted decided it. Routing directly means no hashchange is ever
+// queued: updateHash() uses replaceState, which fires no event.
+async function routeToKlal(klalId, wordIndex, opts) {
+  if (routing) return;
+  const route = { klal: klalId, word: wordIndex };
   routing = true;
   try {
     const want = partForKlal(route.klal);
@@ -679,12 +727,20 @@ async function applyHashRoute() {
     lastActiveKlalId = route.klal;
     lastActiveScanPage = klalById[route.klal] ? klalById[route.klal].page : null;
     setActiveKlal(route.klal, 'center');
-    if (route.word != null) await highlightRoutedWord(route.klal, route.word);
+    if (route.word != null) {
+      await highlightRoutedWord(route.klal, route.word, opts);
+    }
     updateHash(route.klal, route.word);    // last word wins, not the observer
     suppressTimer = setTimeout(() => { suppressObserverScroll = false; }, 900);
   } finally {
     routing = false;
   }
+}
+
+async function applyHashRoute() {
+  const route = parseHashRoute();
+  if (!route) return;
+  return routeToKlal(route.klal, route.word);
 }
 
 // ---------- the book this dashboard has loaded ----------
@@ -1915,14 +1971,14 @@ flagListPanelBody.addEventListener('click', (e) => {
   const a = e.target.closest('.flag-list-item');
   if (!a) return;
   e.preventDefault();
-  // Set the hash AND route explicitly. Assigning an unchanged hash fires no
-  // hashchange event, so re-clicking the row you are already on would do
-  // nothing at all; applyHashRoute() is idempotent and its own `routing` guard
-  // makes the duplicate call from the hashchange listener a no-op.
-  location.hash = `#klal=${a.dataset.klal}&word=${a.dataset.word}`;
-  applyHashRoute();
-  // The panel deliberately STAYS OPEN - the point of the list is working down
-  // it, and dismissing on every jump would mean reopening it 518 times.
+  // Route DIRECTLY - never via location.hash. Setting the hash queues a
+  // hashchange that re-routes with no options, which on an already-mounted klal
+  // wins the race and opens the word's panel; that calls closePanels() and shuts
+  // this list on every row. routeToKlal()'s own note has the mechanism.
+  // `fromList` is what keeps the row from opening that panel: a URL that names a
+  // word behaves like clicking it, but a row already has the list as its
+  // context, and the point of the list is working down it.
+  routeToKlal(Number(a.dataset.klal), Number(a.dataset.word), { fromList: true });
 });
 flagListPanelBody.addEventListener('mouseover', (e) => {
   const a = e.target.closest && e.target.closest('.flag-list-item');

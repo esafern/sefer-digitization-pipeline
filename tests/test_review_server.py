@@ -1781,20 +1781,116 @@ def test_the_copy_on_click_toggle_turns_it_off_and_survives_a_reload(server, pag
     assert page.test_errors == []
 
 
-def test_following_a_deep_link_does_not_touch_the_clipboard(server, page):
-    """Arriving somewhere by following a link must not overwrite the clipboard
-    the reviewer used to get there. highlightRoutedWord() is the one non-click
-    caller of focusWordOnScan(), and it is the caller that would otherwise fire a
-    toast at a reviewer who clicked nothing."""
+def _find_disputed_word():
+    """(klal_id, word_index) of a live machine-disputed word.
+
+    _find_disputed_klal() answers only the klal half, and these tests need the
+    exact word. Derived from corrections_part1.json for the same reason that one
+    gives: which klal and word carry an open dispute shrinks as corrections get
+    applied, so a hardcoded pair is a test that fails when the corpus IMPROVES
+    (Lesson 36).
+    """
+    with open(os.path.join(REPO, "corrections_part1.json"), encoding="utf-8") as f:
+        data = json.load(f)
+    for kid in sorted(data.keys(), key=int):
+        for c in data[kid]:
+            if c.get("flag") == "current_text_may_be_wrong" and c.get("opcode") != "delete":
+                return int(kid), c["word_index"]
+    raise AssertionError("no open dispute in the corpus - these tests have no subject")
+
+
+def test_a_word_url_behaves_like_clicking_that_word(server, page):
+    """"opening a url that specif. a word should behave like clik on a wrd"
+    (reviewer, 2026-09-02). It used to only reveal and highlight, so following a
+    link left you looking at the right word with no way to act on it - you had to
+    click the word you had just been taken to.
+
+    Asserts the URL and the CLICK produce the same state rather than pinning what
+    that state is: five render branches attach five different handlers, and which
+    panel a given word opens is not this test's business.
+    """
+    _grant_clipboard(page, server)
+    _open_dashboard(page, server)
+    klal_id, word_index = _find_disputed_word()
+    page.evaluate(f"() => {{ location.hash = '#klal={klal_id}&word={word_index}'; }}")
+    page.wait_for_timeout(2500)
+    via_url = page.evaluate("""() => ({
+        panels: [...document.querySelectorAll('.side-panel.open')].map(p => p.id),
+        focused: document.querySelectorAll('#hl-container .hl-box.focused').length,
+        page: (document.getElementById('page-img').getAttribute('src') || '').match(/page_(\\d+)/)[1],
+    })""")
+    assert via_url["panels"], "following a word URL opened no panel at all"
+
+    page.keyboard.press("Escape")
+    page.wait_for_timeout(400)
+    page.eval_on_selector(f"#klal-block-{klal_id} [data-word-index='{word_index}']", "el => el.click()")
+    page.wait_for_timeout(1500)
+    via_click = page.evaluate("""() => ({
+        panels: [...document.querySelectorAll('.side-panel.open')].map(p => p.id),
+        focused: document.querySelectorAll('#hl-container .hl-box.focused').length,
+        page: (document.getElementById('page-img').getAttribute('src') || '').match(/page_(\\d+)/)[1],
+    })""")
+    assert via_url == via_click, f"URL gave {via_url}, click gave {via_click}"
+    assert page.test_errors == []
+
+
+def test_following_a_word_url_still_leaves_the_clipboard_alone(server, page):
+    """The ONE thing a routed click must not do. A real click copies the word's
+    URL; doing that on arrival would be pointless - the reviewer HAS the URL,
+    they just opened it - and a page loaded cold from a link has no transient
+    user activation, so the browser would reject the write and put a "Could not
+    copy" toast on screen every time anyone followed a link."""
     _grant_clipboard(page, server)
     _open_dashboard(page, server)
     page.evaluate("() => navigator.clipboard.writeText('the link I followed')")
-    page.evaluate("() => { location.hash = '#klal=4&word=10'; }")
-    page.wait_for_timeout(1500)
+    klal_id, word_index = _find_disputed_word()
+    page.evaluate(f"() => {{ location.hash = '#klal={klal_id}&word={word_index}'; }}")
+    page.wait_for_timeout(2500)
     assert page.evaluate("() => navigator.clipboard.readText()") == "the link I followed"
-    assert page.locator("#toast").is_visible() is False
-    # ...and it still ROUTED, or this test passes for the wrong reason.
-    assert page.locator("#klal-block-4 [data-word-index='10'].routed-word").count() == 1
+    # ...and it still ROUTED, or this passes for the wrong reason.
+    assert page.locator(f"#klal-block-{klal_id} [data-word-index='{word_index}']").count() == 1
+    assert page.locator(".side-panel.open").count() >= 1
+    assert page.test_errors == []
+
+
+def test_the_scan_overlay_controls_stay_put_when_the_scan_is_scrolled(server, page):
+    """REGRESSION 2026-09-02, reviewer: "what happened to my zoom controls?"
+
+    They were children of #scan-viewer - the element that SCROLLS - and an
+    absolutely-positioned child of a scroll container is positioned against the
+    scrolled CONTENT, so they slid away with the page. Measured at 300% zoom
+    scrolled past the top, the zoom cluster and both page arrows sat at negative
+    y: entirely gone. The arrows had carried this since they were added; moving
+    the zoom cluster in beside them gave it the same defect, which is how it was
+    noticed. Both are now anchored to #scan-pane, which does not scroll.
+    """
+    _open_dashboard(page, server, klal_id=2)
+    for _ in range(8):
+        page.click("#zoom-in")
+        page.wait_for_timeout(120)
+    page.wait_for_timeout(400)
+    seen = []
+    for frac in (0.0, 0.5, 1.0):
+        page.evaluate(f"() => {{ const v = document.getElementById('scan-viewer');"
+                      f" v.scrollTop = v.scrollHeight * {frac}; }}")
+        page.wait_for_timeout(300)
+        seen.append(page.evaluate("""() => {
+            const v = document.getElementById('scan-viewer').getBoundingClientRect();
+            const at = id => {
+              const r = document.getElementById(id).getBoundingClientRect();
+              return { y: Math.round(r.top),
+                       visible: r.bottom > v.top + 2 && r.top < v.bottom - 2 };
+            };
+            return { zoom: at('zoom-controls'), prev: at('page-nav-prev'), next: at('page-nav-next') };
+        }"""))
+    for i, s in enumerate(seen):
+        for name in ("zoom", "prev", "next"):
+            assert s[name]["visible"], f"at scroll position {i}, #{name} is off-screen: {s}"
+    # ...and they must not MOVE either - a control that wanders is as bad as one
+    # that vanishes.
+    for name in ("zoom", "prev", "next"):
+        ys = {s[name]["y"] for s in seen}
+        assert len(ys) == 1, f"#{name} moved with the scroll: y values {sorted(ys)}"
     assert page.test_errors == []
 
 

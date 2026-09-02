@@ -113,6 +113,58 @@ reliability check, and every dispute still needs the ink or a different engine.
 > borrowing `2A`–`2Z`, which names a different lane and would misattribute the
 > work. Same rule as above: never reassign an ID once written.
 
+0AK. **[2026-09-02] THE SCAN PANE'S OVERLAY CONTROLS SCROLLED AWAY WITH THE
+    PAGE — the zoom cluster since yesterday, the page arrows since they were
+    added. FIXED. And a word URL now behaves like clicking that word.**
+
+    Reviewer: "what happened to my zoom controls?"
+
+    Both were children of `#scan-viewer`, **the element that scrolls** — and an
+    absolutely-positioned child of a scroll container is positioned against the
+    scrolled CONTENT, not the visible box. So they slid with the page. Measured
+    at 300% zoom: at the top of the scan the zoom cluster sits at y=656, scrolled
+    to the middle it is at **y=-388**, at the bottom **y=-777**. Gone.
+
+    **The arrows had carried this since they were added**; moving the zoom
+    cluster in beside them yesterday (item 0AF) gave it the same defect, which is
+    the only reason it was noticed. Both are now anchored to `#scan-pane`, which
+    does not scroll. `--pane-header-h` became a token so the arrows can centre on
+    the SCAN rather than on the pane, which now includes a header bar.
+
+    **A URL that names a word behaves like clicking that word.** It used to only
+    reveal and highlight, so following a link left the reviewer looking at the
+    right word with no way to act on it. `highlightRoutedWord()` now DISPATCHES
+    the click on the span rather than reimplementing it: five render branches
+    attach five different handlers, and choosing between them here would be a
+    sixth copy of that mapping — the exact defect item 0AE records fixing in this
+    same function. The clipboard write is the one thing suppressed: a page loaded
+    cold from a link has no transient user activation, so the browser rejects it
+    and a "Could not copy" toast would appear on every followed link.
+
+    Word-list rows keep their own behaviour (`fromList`) — a row already has the
+    list as its context, and opening the word's panel calls `closePanels()`,
+    which would shut the list on every row.
+
+    **TWO BUGS OF MY OWN IN THAT CHANGE, both caught by a test that passed alone
+    and failed in the suite.** First, `addEventListener('hashchange',
+    applyHashRoute)` hands the listener's HashChangeEvent in as the options
+    argument, so `event.fromList` was undefined. Second, and the real one:
+    wrapping that was not enough, because the row handler set `location.hash` and
+    THEN routed — and setting the hash queues a hashchange *task* that re-routes
+    with no options. The `routing` guard swallowed it only while the first route
+    was still in flight; **on an already-mounted klal every await resolves as a
+    microtask, so the route finishes before the task queue is reached** and the
+    hashchange ran the full click path. Whether klal 1 happened to be mounted
+    decided it, which is precisely why it was invisible in isolation.
+
+    Resolved by splitting `routeToKlal(klalId, wordIndex, opts)` out of
+    `applyHashRoute()`, so the list routes DIRECTLY and no hashchange is ever
+    queued — `updateHash()` uses `replaceState`, which fires no event.
+
+    Three tests added, one of which asserts the overlay controls do not MOVE, not
+    merely that they are visible: a control that wanders is as bad as one that
+    vanishes. Full suite **440 collected, 439 passed, 1 skipped**.
+
 0AJ. **[2026-09-02] A NAV JUMP RE-ASSERTED THE LABEL BUT NOT THE GEOMETRY, so
     clicking a klal in the index could select the one above it. 5 of 222 klalim.
     FIXED.**

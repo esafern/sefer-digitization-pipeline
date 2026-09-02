@@ -21,6 +21,11 @@
   --header-muted: #5a7ba6;
   --header-line: #c2d4e8;
   --header-hover: rgba(26, 54, 93, 0.10);
+  /* The pane headers' height, as a token since 2026-09-02: the scan pane's
+     overlay controls now anchor to the PANE (they used to anchor to the
+     scrolling viewer and slid away with the page), so they have to subtract the
+     bar to stay centred on the scan rather than on the pane. */
+  --pane-header-h: 46px;
   --pending: #d69e2e;
   /* The nav pane's width, shared so the side panels can dock BESIDE it rather
      than on top of it. Two hardcoded 380s (nav pane, legend) drifting apart is
@@ -130,7 +135,7 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
      top of the window, and whichever one happened to hold the tallest control
      was setting its own height - the index pane stood 2px proud of the scan pane
      because of a 26px gear button. Nothing inside may exceed this. */
-  height: 46px;
+  height: var(--pane-header-h);
   flex-shrink: 0;
   overflow: hidden;
 }
@@ -204,7 +209,7 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
 #zoom-controls {
   position: absolute;
   bottom: 12px; left: 12px;
-  z-index: 6;
+  z-index: 8;
   display: flex; align-items: center; gap: 6px;
   padding: 4px 6px;
   border-radius: 999px;
@@ -289,9 +294,12 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
 }
 .page-nav-btn {
   position: absolute;
-  top: 50%;
+  /* Centred on the SCAN AREA, not the pane: these are anchored to #scan-pane
+     (see index.html for why they left the scrolling viewer), which includes the
+     header, so a bare 50% would sit 23px high. */
+  top: calc(var(--pane-header-h) + (100% - var(--pane-header-h)) / 2);
   transform: translateY(-50%);
-  z-index: 5;
+  z-index: 8;
   width: 36px; height: 36px;
   border-radius: 50%;
   border: none;
