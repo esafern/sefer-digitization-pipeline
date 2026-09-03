@@ -160,7 +160,16 @@ reliability check, and every dispute still needs the ink or a different engine.
     asserts the two against each other so they cannot drift, and the row tooltips
     say the scan pane boxes the same colours.
 
-    Full suite **458 collected, 457 passed, 1 skipped**.
+    **And the footer stopped wrapping** (reviewer: "count footer is a bit too
+    wide, wraps to anothe line"). It needed 394px in a 347px pane, so it took two
+    lines — and it is pinned over the index pane's own bottom corner, where a
+    second line eats another row of klalim. The width came from five entries each
+    carrying a swatch, a gap and a fixed-width count, so it was trimmed across
+    all of those rather than by dropping an entry: 336px in 347 now, one line,
+    36px tall against 65. A test asserts the geometry — one row, no wrap — rather
+    than any of the particular sizes, since any of them may move again.
+
+    Full suite **459 collected, 458 passed, 1 skipped**.
 
 0AT. **[2026-09-02] 131 CORRECTIONS ENTERED THE CORPUS THAT NO HUMAN EVER
     ADJUDICATED, and the dashboard has been drawing them GREEN as "Human-Decided"

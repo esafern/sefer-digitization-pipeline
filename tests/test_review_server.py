@@ -2923,3 +2923,36 @@ def test_each_legend_swatch_matches_the_line_the_text_pane_draws(server, page):
     # ...and every swatch is the SAME KIND of mark - that was the complaint.
     assert all(v[1] in ("solid", "dashed", "dotted") for v in got.values()), got
     assert page.test_errors == []
+
+
+def test_the_count_footer_fits_on_one_line(server, page):
+    """Reviewer, 2026-09-03: "count footer is a bit too wide, wraps to anothe
+    line." It needed 394px in a 347px pane.
+
+    The legend is pinned over the index pane's own bottom corner, so a second
+    line eats another row of klalim and pushes the box up over the list. Asserts
+    the GEOMETRY - one row of items, no wrap - rather than any particular size,
+    since the trim was spread across padding, gaps, swatch width and the count
+    column and any of those may move again.
+    """
+    _open_dashboard(page, server)
+    geom = page.evaluate("""() => {
+        const legend = document.getElementById('legend');
+        const cs = getComputedStyle(legend);
+        const rows = [...legend.querySelectorAll('.legend-row')];
+        const need = rows.reduce((s, r) => s + r.getBoundingClientRect().width, 0)
+                     + parseFloat(cs.columnGap) * (rows.length - 1);
+        return {
+            lines: new Set(rows.map(r => Math.round(r.getBoundingClientRect().top))).size,
+            rows: rows.length,
+            needs: Math.round(need),
+            avail: Math.round(legend.clientWidth
+                              - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight)),
+        };
+    }""")
+    assert geom["rows"] >= 4, f"the legend lost entries: {geom}"
+    assert geom["lines"] == 1, (
+        f"the count footer wraps onto {geom['lines']} lines "
+        f"(needs {geom['needs']}px, has {geom['avail']}px)")
+    assert geom["needs"] <= geom["avail"], geom
+    assert page.test_errors == []

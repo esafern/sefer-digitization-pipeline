@@ -746,7 +746,7 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
   width: var(--nav-w);
   direction: ltr;
   text-align: left;
-  padding: 12px 16px;
+  padding: 10px 12px;
   /* Same palette as the three pane headers, 2026-09-01. It was solid --accent,
      which after the headers were lightened made it the one saturated block left
      on screen - the reviewer's "uniform look and feel" applies to the whole
@@ -774,12 +774,19 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
    numbers. Each state is now a swatch + its count, wrapping only if the pane is
    too narrow; the labels moved into `title` so the vocabulary is still one hover
    away without spending five rows on it. */
-#legend { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 10px 14px; }
-#legend .legend-row { display: flex; align-items: center; gap: 5px; }
+/* Sized to fit the 380px pane on ONE line. It needed 394px in 347 and wrapped
+   (reviewer 2026-09-03: "count footer is a bit too wide, wraps to anothe line").
+   The width came from five entries each carrying a swatch, a gap and a
+   fixed-width count, so it is trimmed across all three rather than by dropping
+   anything: the counts are the content and none of them is optional. */
+#legend { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 8px 10px; }
+#legend .legend-row { display: flex; align-items: center; gap: 4px; }
 #legend .legend-label { display: none; }
 /* Same treatment as the nav badges: one width, tabular figures, so the counts
    line up instead of drifting with their digit count. */
-#legend .legend-count { margin-left: 0; min-width: 2.4em; text-align: right; }
+/* min-width, not width: a count is free to grow past four digits, it just may
+   not shrink below a common column. */
+#legend .legend-count { margin-left: 0; min-width: 2em; text-align: right; }
 #legend .legend-row { cursor: pointer; }
 #legend .legend-row-sub { padding-left: 0; }
 /* The recorded total has no swatch, so it needs a word to be readable at all. */
@@ -799,7 +806,7 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
    pane puts under the word (see LEGEND_SWATCH in app.js), so the key shows the
    thing it is a key for. Sized to read as a rule rather than a box. */
 #legend i {
-  width: 16px; height: 9px;
+  width: 13px; height: 9px;
   display: inline-block; flex-shrink: 0;
   background: transparent;
 }
