@@ -49,21 +49,38 @@ import os
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-REPO = os.path.dirname(HERE)
+# THIS INSTALLATION's own directory, for sys.path bootstrapping ONLY - kept
+# separate from the corpus root below (cio.REPO/cio.repo_path), the same split
+# review_server.py's INSTALL_DIR/REPO makes and for the identical reason.
+#
+# FOUND 2026-09-03 (item 0AR's fixture generator, running this script as a
+# subprocess against a fixture corpus): this module used to define its own
+# `REPO = os.path.dirname(HERE)` and route BOTH the sys.path bootstrap AND its
+# two data-file paths (`VERIFIED_PATH`, `OUT_PATH`) through it - the one script
+# of five in this chain that did not go through corpus_io's seam at all. With
+# $SEFER_CORPUS_ROOT set to a fixture directory, every other stage correctly
+# wrote into the fixture; this one silently wrote `consensus_disputes_part1.
+# json` into the REAL repository instead, truncating 6,981 lines of live,
+# tracked, previously-computed consensus-dispute data to empty. Caught only
+# because `git status` showed a tracked file modified after a test run that
+# should have touched nothing outside a temp directory - restored from git,
+# no data lost, but this is exactly the failure mode the whole seam exists to
+# prevent, in the one place nobody had converted yet.
+INSTALL_DIR = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
 
 import corpus_io as cio
 import scan_alignment as sa
 import typography
 
-sys.path.insert(0, os.path.join(REPO, "tools", "second_witness_eval"))
+sys.path.insert(0, os.path.join(INSTALL_DIR, "tools", "second_witness_eval"))
 import evaluate_ocr_alignment as eval_script
 
-VERIFIED_PATH = os.path.join(REPO, "corrections_verified_part1.json")
+VERIFIED_PATH = cio.repo_path("corrections_verified_part1.json")
 VLM_A_PATH = cio.repo_path("tools", "second_witness_eval", "vlm_part1_full_baseline.txt")
 VLM_B_PATH = cio.repo_path("tools", "second_witness_eval", "vlm_part1_full_baseline_passB.txt")
 SURYA_PATH = cio.repo_path("tools", "second_witness_eval", "surya_part1_full_baseline.txt")
-OUT_PATH = os.path.join(REPO, "consensus_disputes_part1.json")
+OUT_PATH = cio.repo_path("consensus_disputes_part1.json")
 
 # Engines that can vote. DocAI's vote comes from the corrections pipeline's own
 # candidates (it is the primary extraction, already diffed against the corpus by

@@ -713,6 +713,179 @@ reliability check, and every dispute still needs the ink or a different engine.
     Extent queue: **97**, down from 101 at the top of this session. Full suite
     **488 passed, 1 skipped**.
 
+0BJ. **[2026-09-03] ITEM 0AR IS DONE, in its own order: fixture generator →
+    conftest.py → moved 4 pinned UI tests → split the invariants behind a
+    `book_content` marker and a real `validate <book>` command → the guard.
+    Building it found two of item `0BI`'s 51 seam-bypass bugs live, one of
+    which had already overwritten tracked production data.**
+
+    **The fixture** (`tests/fixtures/`) is four invented klalim on two
+    invented pages - alphabet-letter placeholder words, nothing borrowed from
+    Yad Malachi - built by RUNNING five real pipeline stages as subprocesses
+    against it (`build_klalim_demo_dataset.py`, `build_corrections_dataset.py`,
+    `assemble_corrections_dataset.py`, `build_klal_page_regions.py`,
+    `synthesize_multi_witness.py`), not by hand-writing their output (Lesson
+    13). What IS injected, and why, is named at each injection site:
+    verification (a real Gemini call), two machine-resolved flags (Yad
+    Malachi's own ligature-defect classification, exactly what generalization
+    Phase 3 is meant to extract), an end-of-klal omission and a two-candidate
+    collision (forcing difflib to land at an exact boundary is coercing a
+    heuristic, not exercising it), and a klal's continuation onto a second
+    page (its detection is Y-coordinate banding against a REAL printed
+    layout - a two-line synthetic page has no realistic version of that
+    geometry to find). Twelve of item 0AR's own thirteen named conditions are
+    verified by `tests/test_fixture_corpus.py` directly against the generator's
+    real output, not assumed from the generator's intent - two rounds of that
+    verification caught real fixture bugs (a stale conflicting "insert"
+    candidate left alongside an injected clean one; `docai_reading ==
+    final_text` on a "machine-resolved" row, which - checked against a REAL
+    such row - turned out to mean the opposite of what was assumed).
+
+    **Found while building it, and fixed immediately - two live instances of
+    item `0BI`'s class, both self-inflicted by this exact generator:**
+
+    - **`synthesize_multi_witness.py` silently truncated the real repo's
+      `consensus_disputes_part1.json` from 6,981 lines to `{}`** the first
+      time it ran as a subprocess against the fixture - its own hardcoded
+      `REPO`, not `cio.REPO`, so `$SEFER_CORPUS_ROOT` did nothing. Restored
+      from git (nothing was lost); the script now splits `INSTALL_DIR` (sys
+      path bootstrap) from `REPO = cio.repo_path(...)` (data), the same split
+      `review_server.py`'s `FRONTEND_DIR` needed one script earlier (below).
+    - **`review_server.py` 404'd on `/`, `/app.js`, `/app.css`** the first
+      time it served the fixture: `FRONTEND_DIR` was `REPO`-derived, and REPO
+      is the corpus root - so it went looking for `review_frontend/` INSIDE
+      the fixture directory, which has never held it. Split the same way:
+      `INSTALL_DIR` (this file's own location, for the server's OWN static
+      assets) vs `REPO` (the corpus - correct for `IMAGES_DIR`, which really
+      is per-book data).
+    - **`test_corpus_invariants.py` had the identical conflation at BULK
+      scale**: 25 `_import_from_path(...)` call sites used `REPO` (this
+      session's own earlier fix, repointing it at the corpus root for the
+      invariant fixtures) to locate CODE - `review_server.py`,
+      `apply_reviewer_decisions.py`, three `tools/validate_*.py` scripts -
+      which broke every one of them the moment `--corpus` pointed anywhere
+      but the real repo (`FileNotFoundError`, not a data mismatch). Every
+      site now builds its path from `INSTALL_DIR`, introduced alongside
+      `REPO` in the same edit that split them.
+
+    **Four tests moved onto the fixture** (`test_deep_link_lands_on_the_klal_
+    and_rings_the_word`, `test_clicking_a_word_puts_it_in_the_address_bar`,
+    `test_correction_panel_header_copies_the_reference_and_link`,
+    `test_shareable_path_link_redirects_to_the_deep_link`) - the ones whose
+    mechanism (routing, scroll-observer races, copy-to-clipboard, path
+    redirects) has nothing to do with which klal or word number is involved.
+    **Not all 23** item `0AR` counted: the rest pin real prose, real scroll
+    distances, or a specific real bug's exact position (klal 210 w133's
+    scroll-jump, klal 36's `title_word_count`) and moving them needs their
+    assertions re-derived against the fixture's own shape, not just a
+    find-replace of the klal id - left in place, not silently claimed done.
+
+    **The ~44 corpus-content invariants are marked, not moved.** `tests/
+    conftest.py` tags any test whose fixture closure touches one of 8
+    corpus-reading fixtures (`part_klalim`, `all_klalim`, `part1_by_id`,
+    `corrections`, `regions`, `alignment`, `all_alignment`,
+    `decision_records`) with `@pytest.mark.book_content` -
+    `pytest_collection_modifyitems`, driven by the real dependency graph, not
+    43 hand-typed decorators that the 44th test can silently fall outside of.
+    `tools/validate_corpus.py [--corpus DIR]` is the `validate <book>`
+    command: `pytest -m book_content` against whichever corpus root it names,
+    duplicating no assertion.
+
+    **Run against the fixture, it correctly finds 7 real gaps** - not
+    mechanism bugs (those are the two above, both fixed), but book-specific
+    assumptions baked into the invariants themselves, which is exactly what a
+    validator run on a genuinely different book should surface:
+    `PART1_MAX_KLAL`/`PART2_MAX_KLAL`/`PART3_MAX_KLAL` and the expected
+    `1..667` sequence are Yad-Malachi-sized literals; `TITLE_NOT_PREFIX_OF_
+    BODY_BASELINE = {9, 186}` and `DUPLICATE_WORD_BASELINE` are real-corpus-
+    specific exception lists hardcoded into general-shaped checks; the
+    corrections-traceability and scan-box-ordering checks correctly reject
+    this fixture's own injected, non-pipeline data and crude placeholder
+    geometry. All 7 are Phase 2/3 material (move book-sized constants and
+    exception baselines into the per-book manifest that phase proposes), not
+    something to patch around in the fixture.
+
+    **The guard turned out to need reframing while writing it** - "no test
+    outside the validator touches the real corpus" is false today
+    (`test_review_server.py`'s own `server` fixture legitimately serves the
+    real corpus for most of its tests, and correctly stays that way). The
+    guard that actually matches item 0BI's finding, in
+    `test_pipeline_logic.py`: `test_the_corpus_root_bypass_count_has_not_grown`
+    scans `pipeline/`+`tools/` for the exact `REPO = os.path.dirname(...)`
+    pattern that let two scripts ignore `$SEFER_CORPUS_ROOT` this session, and
+    fails if the count exceeds the known 51 (`KNOWN_BYPASS_COUNT`,
+    `_KNOWN_BYPASS_FILES`) OR if a NEW, not-yet-known file joins the list -
+    fixing one script and breaking a different one cannot cancel out to the
+    same passing number. Proven able to fail first (Lesson 25,
+    `test_the_bypass_detector_can_actually_detect_something`), and it caught
+    its own author immediately: `tools/validate_corpus.py`'s first draft used
+    exactly this pattern for a wholly benign reason (locating its own sibling
+    test file, never touching corpus data) and had to be renamed to
+    `INSTALL_DIR` before the guard would accept it - the guard doing exactly
+    the job it was written for, one file after being written.
+
+    Full suite **504 passed, 1 skipped** (up from 489 at the top of this
+    session). `./rebuild_all.sh --skip-vision` clean against the real corpus;
+    `git status` confirms no tracked file outside this commit's own diff moved.
+
+0BI. **[2026-09-03] 51 SCRIPTS BYPASS THE CORPUS-ROOT SEAM ITEM `0AZ` BUILT —
+    including one that ALREADY SILENTLY OVERWROTE LIVE, TRACKED DATA the first
+    time anything exercised it. Restored from git; no data lost. The 0AZ claim
+    that "the seam is in" was true only for `corpus_io.py` and the handful of
+    callers that read `cio.REPO` — most of the toolset never did.**
+
+    Found building item 0AR's fixture generator (`tests/fixtures/
+    build_fixture_corpus.py`), which runs five real pipeline stages as
+    subprocesses with `$SEFER_CORPUS_ROOT` pointed at a temp fixture directory
+    — exactly the seam's intended use. Running `synthesize_multi_witness.py`
+    that way **truncated the real repo's `consensus_disputes_part1.json` from
+    6,981 lines to `{}`**: the script defines its own `REPO =
+    os.path.dirname(HERE)`, never touching `corpus_io.REPO`, so the env var did
+    nothing and it wrote straight into the real repository regardless of which
+    corpus the subprocess was told to target. Caught immediately by `git
+    status` showing a tracked file modified after a test run that should have
+    touched nothing outside `/tmp`; `git checkout --` recovered it exactly,
+    since nothing had been committed over it.
+
+    **Swept per the standing rule, and the number is much larger than one
+    script.** `grep` for `^REPO\s*=` across `pipeline/` and `tools/` that does
+    NOT read `cio.REPO`/`corpus_io.REPO`: **51 files**, all but four of them in
+    `tools/` — every `detect_*.py`, every `validate_*.py`, the witness/VLM
+    baseline runners, `apply_punctuation_decisions.py`,
+    `reconstruct_placeholder_klalim.py`, `patch_witness_word_indices.py`,
+    `export_corpus.py`, and three more `pipeline/` stages
+    (`build_gematria_trace.py`, `build_lexical_defect_report.py`,
+    `build_title_report.py` — the last one is this session's OWN new code,
+    item `0AY`, which inherited the same pattern from its siblings without
+    anyone checking). Full list in the commit. One entry,
+    `pipeline/review_decisions.py`, is a DIFFERENT, BENIGN case: its `REPO` is
+    only the fallback behind `os.environ.get("REVIEW_DECISIONS_PATH")`, so a
+    caller that sets that env var (every one of this session's fixture flows
+    does) is unaffected — listed for completeness, not as a bug.
+
+    **FIXED: `synthesize_multi_witness.py` only**, the one script this
+    session's own generator actually invokes. Split into `INSTALL_DIR`
+    (sys.path bootstrapping, always the real install location) and `REPO =
+    cio.repo_path(...)`-derived data paths — the same INSTALL_DIR/REPO split
+    this session already made in `review_server.py` (item `0BC`'s
+    `FRONTEND_DIR` bug, found the same way, one script earlier) and in
+    `test_corpus_invariants.py` (this same item's own split, below).
+
+    **THE OTHER 50 ARE NOT FIXED — recorded as their real extent, not
+    guessed at, per the standing rule.** None is invoked by anything in this
+    repo's own automation today (`rebuild_all.sh`, this session's fixture
+    generator), so nothing currently running is at risk. But any future
+    automation, test, or documentation that runs one of these against a
+    non-default `$SEFER_CORPUS_ROOT` — expecting the seam to apply, because it
+    now applies everywhere ELSE — will silently target the real repository
+    instead, and several of them (`apply_punctuation_decisions.py`,
+    `reconstruct_placeholder_klalim.py`, `patch_witness_word_indices.py`,
+    `export_corpus.py`) WRITE corpus-shaped output, not just reports. This is
+    the generalization plan's Phase 1 finding that most needs a dedicated pass
+    before any of these 50 scripts is trusted with a second book's data — a
+    mechanical but not risk-free sweep (each one needs its actual read/write
+    behavior checked, not just its `REPO =` line swapped).
+
 0AW. **[2026-09-03] WHY `הרל"ם → הרמב"ם` WAS PROPOSED: an abbreviation naming a
     DIFFERENT authority is indistinguishable, to every detector here, from a
     misprint of a commoner one. Reviewer ruled KEEP from the ink. 11 more

@@ -390,54 +390,68 @@ def test_manual_correction_panel_auto_closes_after_a_save(server, page):
         timeout=6000)
 
 
-def test_deep_link_lands_on_the_klal_and_rings_the_word(server, page):
+def test_deep_link_lands_on_the_klal_and_rings_the_word(fixture_server, page):
     """ADDED 2026-08-26 with the deep-link feature (reviewer request): a URL can
     address a klal, or a klal and a word, so a finding written down anywhere can
     carry a link that lands on it.
 
     The first working version was defeated by the app's own scroll observer -
     jumpTo() scrolls SMOOTHLY, the observer calls setActiveKlal() on whatever
-    drifts past during the animation, and routing to klal 66 landed on klal 61
-    with no word ringed. That is what this test pins: not that the hash parses,
-    but that the reviewer actually ends up on the right word."""
-    page.goto(server + "/#klal=66", wait_until="domcontentloaded", timeout=15000)
+    drifts past during the animation, and routing to a klal landed on its
+    NEIGHBOUR with no word ringed. That is what this test pins: not that the
+    hash parses, but that the reviewer actually ends up on the right word.
+
+    MOVED onto the fixture corpus 2026-09-03 (item 0AR, step 3): the mechanism
+    under test is the routing/scroll-observer race, which has nothing to do
+    with which klal or word number is involved - klal 2 word 3 ("חית", the
+    fixture's own human-decided word) exercises it exactly as klal 66 word 135
+    did."""
+    page.goto(fixture_server + "/#klal=2", wait_until="domcontentloaded", timeout=15000)
     page.wait_for_selector(".nav-item", timeout=15000)
     page.wait_for_timeout(1500)
-    assert page.eval_on_selector(".nav-item.active", "el => el.dataset.klalId") == "66"
+    assert page.eval_on_selector(".nav-item.active", "el => el.dataset.klalId") == "2"
 
-    page.goto(server + "/#klal=66&word=135", wait_until="domcontentloaded", timeout=15000)
+    page.goto(fixture_server + "/#klal=2&word=3", wait_until="domcontentloaded", timeout=15000)
     page.wait_for_selector(".nav-item", timeout=15000)
     page.wait_for_timeout(2500)
-    assert page.eval_on_selector(".nav-item.active", "el => el.dataset.klalId") == "66"
+    assert page.eval_on_selector(".nav-item.active", "el => el.dataset.klalId") == "2"
     ringed = page.eval_on_selector_all(".routed-word", "els => els.map(e => e.textContent)")
     assert len(ringed) == 1, f"expected exactly one ringed word, got {ringed}"
     assert page.test_errors == []
 
 
-def test_clicking_a_word_puts_it_in_the_address_bar(server, page):
+def test_clicking_a_word_puts_it_in_the_address_bar(fixture_server, page):
     """The address bar has to be copyable as-is, or the deep links are write-only.
     replaceState, not pushState: a reviewer moving through a klal must not have to
-    press Back forty times to leave."""
-    _open_dashboard(page, server, klal_id=92)
+    press Back forty times to leave.
+
+    MOVED onto the fixture corpus 2026-09-03 - purely mechanical (does a click
+    write the hash), so klal 3 word 2 (any real word in a mounted klal) tests
+    it exactly as klal 92 word 440 did."""
+    _open_dashboard(page, fixture_server, klal_id=3)
     page.wait_for_timeout(800)      # let the mount settle before clicking into it
-    page.eval_on_selector('#klal-block-92 [data-word-index="440"]', "el => el.click()")
+    page.eval_on_selector('#klal-block-3 [data-word-index="2"]', "el => el.click()")
     page.wait_for_timeout(800)
-    assert page.evaluate("location.hash") == "#klal=92&word=440"
+    assert page.evaluate("location.hash") == "#klal=3&word=2"
     assert page.test_errors == []
 
 
-def test_correction_panel_header_copies_the_reference_and_link(server, page):
+def test_correction_panel_header_copies_the_reference_and_link(fixture_server, page):
     """ADDED 2026-08-26 (reviewer request). The klal/word header in a correction
     panel is also a copy control: it yields the readable reference AND the deep
     link, so a finding can be pasted into a note without anyone retyping an
     index. Asserted end to end rather than by reading the markup - a copy button
     that silently does nothing is the dead-control shape this file has shipped
-    more than once."""
+    more than once.
+
+    MOVED onto the fixture corpus 2026-09-03 - klal 2 word 3 ("חית") is the
+    fixture's own human-decided word, so the panel this test drives opens with
+    real recorded state exactly as klal 66 word 135 did."""
     page.context.grant_permissions(["clipboard-read", "clipboard-write"])
-    page.goto(server + "/#klal=66&word=135", wait_until="domcontentloaded", timeout=15000)
+    page.goto(fixture_server + "/#klal=2&word=3", wait_until="domcontentloaded", timeout=15000)
     page.wait_for_selector(".nav-item", timeout=15000)
     page.wait_for_timeout(2200)
-    page.eval_on_selector('#klal-block-66 [data-word-index="135"]', "el => el.click()")
+    page.eval_on_selector('#klal-block-2 [data-word-index="3"]', "el => el.click()")
     page.wait_for_timeout(900)
     # scoped to the PANEL: the hover card also renders a .copy-ref
     btn = page.query_selector(".side-panel.open .copy-ref")
@@ -445,25 +459,28 @@ def test_correction_panel_header_copies_the_reference_and_link(server, page):
     btn.click()
     page.wait_for_timeout(600)
     copied = page.evaluate("navigator.clipboard.readText()")
-    assert "Klal 66" in copied and "Word #135" in copied, copied
+    assert "Klal 2" in copied and "Word #3" in copied, copied
     # the PASTE-SAFE path form, not the hash form: `&` is routinely truncated
     # when a URL is pasted into a terminal or a chat window
-    assert "/klal/66/word/135" in copied, copied
+    assert "/klal/2/word/3" in copied, copied
     assert page.test_errors == []
 
 
-def test_shareable_path_link_redirects_to_the_deep_link(server, page):
+def test_shareable_path_link_redirects_to_the_deep_link(fixture_server, page):
     """ADDED 2026-08-26 (reviewer: "sadly those links you shared here in the chat
     are not clickable"). `/#klal=66&word=135` is what the frontend routes on, but
     it does not survive being pasted: terminals do not hyperlink Markdown link
     syntax, and several that linkify a bare URL truncate at the `&` - opening the
     right klal at the wrong word, which is worse than failing outright.
-    `/klal/66/word/135` contains no `#` and no `&`."""
-    page.goto(server + "/klal/66/word/135", wait_until="domcontentloaded", timeout=15000)
+    `/klal/N/word/M` contains no `#` and no `&`.
+
+    MOVED onto the fixture corpus 2026-09-03 - the redirect logic does not read
+    the klal/word values, only the URL shape."""
+    page.goto(fixture_server + "/klal/2/word/3", wait_until="domcontentloaded", timeout=15000)
     page.wait_for_selector(".nav-item", timeout=15000)
     page.wait_for_timeout(2500)
-    assert page.url.endswith("/#klal=66&word=135"), page.url
-    assert page.eval_on_selector(".nav-item.active", "el => el.dataset.klalId") == "66"
+    assert page.url.endswith("/#klal=2&word=3"), page.url
+    assert page.eval_on_selector(".nav-item.active", "el => el.dataset.klalId") == "2"
     assert page.eval_on_selector_all(".routed-word", "els => els.length") >= 1
     assert page.test_errors == []
 

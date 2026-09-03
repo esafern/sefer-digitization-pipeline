@@ -53,19 +53,37 @@ import sys
 
 import pytest
 
-REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# THIS INSTALLATION's own directory - where this test file, pipeline/ and
+# tools/ live - kept separate from REPO below (the CORPUS root) for the same
+# reason review_server.py's INSTALL_DIR/REPO split exists (item 0AR's fixture
+# found that exact conflation there first: "where is the code" and "where is
+# the data" are different questions that happen to share an answer for every
+# corpus this tool has served so far). sys.path bootstrapping must always use
+# THIS location - pipeline/corpus_io.py does not live inside a corpus
+# directory, and never will.
+INSTALL_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # pipeline/ and tools/ modules use bare `import corpus_io` etc. - they need
 # their directories on sys.path for importlib's exec_module to resolve those
 # imports. Same approach as test_pipeline_logic.py.
-sys.path.insert(0, os.path.join(REPO, "pipeline"))
-sys.path.insert(0, os.path.join(REPO, "tools"))
+sys.path.insert(0, os.path.join(INSTALL_DIR, "pipeline"))
+sys.path.insert(0, os.path.join(INSTALL_DIR, "tools"))
 
 # The decision ledger, read by the ligature invariant below: a corpus rule that
 # a person overruled from the scan is not a corpus defect, and only the ledger
 # knows which those are. See test_part1_no_dropped_lamed_ligature_corruption.
 import review_decisions as rd  # noqa: E402
 import corpus_io as cio  # noqa: E402
+
+# THE CORPUS root, as opposed to INSTALL_DIR above - resolved through the
+# seam (item 0AZ), so `tools/validate_corpus.py --corpus DIR` (a subprocess,
+# which sets $SEFER_CORPUS_ROOT before this module is ever imported - the one
+# case reassigning it is safe, per corpus_io's own note) can point every data
+# read below at a different book. Every one of this file's OWN fixtures below
+# must build its paths from THIS, never from INSTALL_DIR or a fresh
+# os.path.dirname(__file__) - that reintroduction is exactly what the guard
+# test at the bottom of this file exists to catch.
+REPO = cio.corpus_root()
 
 PART_FILES = ["part1.json", "part2.json", "part3.json"]
 
@@ -414,6 +432,19 @@ def _load_klalim(path):
 
 
 def _import_from_path(name, path):
+    """Every call site below builds `path` from INSTALL_DIR, never REPO - this
+    loads CODE (review_server.py, a tools/ validator), and code lives beside
+    this test file regardless of which book REPO currently points at.
+
+    FOUND 2026-09-03 (item 0BI, the same session that split REPO from
+    INSTALL_DIR here): the split itself briefly broke every one of these 25
+    call sites, which had all been written as `os.path.join(REPO, "pipeline"/
+    "tools", ...)` from when REPO and INSTALL_DIR were the same thing - a
+    `validate_corpus.py --corpus <fixture>` run turned into 5 FileNotFoundError
+    the moment REPO stopped meaning "this file's own directory". Exactly the
+    conflation review_server.py's FRONTEND_DIR and synthesize_multi_witness.py
+    both had; this file had it at bulk import-path scale instead of one path.
+    """
     spec = importlib.util.spec_from_file_location(name, path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
@@ -981,7 +1012,7 @@ def test_part1_max_klal_constants_agree_with_the_corpus(part_klalim):
         "review_server.py": None,
     }
     for name in modules:
-        mod = _import_from_path(name.removesuffix(".py"), os.path.join(REPO, "pipeline", name))
+        mod = _import_from_path(name.removesuffix(".py"), os.path.join(INSTALL_DIR, "pipeline", name))
         modules[name] = mod.PART1_MAX_KLAL
     disagreeing = {n: v for n, v in modules.items() if v != part1_max}
     assert not disagreeing, (
@@ -1017,7 +1048,7 @@ def test_part23_max_klal_constants_agree_with_the_corpus(part_klalim):
 
     modules = {}
     for name in ("corpus_io.py", "review_server.py"):
-        mod = _import_from_path(name.removesuffix(".py"), os.path.join(REPO, "pipeline", name))
+        mod = _import_from_path(name.removesuffix(".py"), os.path.join(INSTALL_DIR, "pipeline", name))
         modules[name] = (mod.PART2_MAX_KLAL, mod.PART3_MAX_KLAL,
                          mod.PART2_MIN_KLAL, mod.PART3_MIN_KLAL)
 
@@ -1047,7 +1078,7 @@ def test_every_klal_classifies_into_the_part_whose_file_it_came_from(part_klalim
     An off-by-one at a seam (`<` for `<=`) passes a boundary-value test written
     from the same wrong assumption and fails here.
     """
-    rs = _import_from_path("review_server", os.path.join(REPO, "pipeline", "review_server.py"))
+    rs = _import_from_path("review_server", os.path.join(INSTALL_DIR, "pipeline", "review_server.py"))
     wrong = []
     for fname, expected_part in (("part1.json", 1), ("part2.json", 2), ("part3.json", 3)):
         for k in part_klalim[fname]:
@@ -1133,7 +1164,7 @@ def test_no_rendered_manual_correction_hides_a_machine_candidate(corrections, pa
     position, exactly ONE entry is served and it still carries the machine
     candidate's data.
     """
-    review_server = _import_from_path("review_server", os.path.join(REPO, "pipeline", "review_server.py"))
+    review_server = _import_from_path("review_server", os.path.join(INSTALL_DIR, "pipeline", "review_server.py"))
     machine = {
         (int(kid), c["word_index"])
         for kid, entries in corrections.items() for c in entries if c.get("opcode") != "delete"
@@ -1179,7 +1210,7 @@ def test_every_served_flag_has_a_dashboard_label(corrections):
     against every flag classify() CAN emit; this checks the ones actually on
     disk right now, which also covers a flag introduced by hand-editing.
     """
-    review_server = _import_from_path("review_server", os.path.join(REPO, "pipeline", "review_server.py"))
+    review_server = _import_from_path("review_server", os.path.join(INSTALL_DIR, "pipeline", "review_server.py"))
     served = {c.get("flag") for entries in corrections.values() for c in entries}
     unlabelled = sorted(f for f in served if f not in review_server.FLAG_LABELS)
     assert not unlabelled, (
@@ -1355,7 +1386,7 @@ def test_review_decisions_log_is_intact_and_internally_consistent(decision_recor
     nothing means the "already applied, never re-apply" guard is pointing at
     a decision that no longer exists.
     """
-    review_decisions = _import_from_path("review_decisions", os.path.join(REPO, "pipeline", "review_decisions.py"))
+    review_decisions = _import_from_path("review_decisions", os.path.join(INSTALL_DIR, "pipeline", "review_decisions.py"))
     records, malformed = [], []
     for lineno, line in decision_records:
         try:
@@ -1437,7 +1468,7 @@ def test_review_decisions_log_is_intact_and_internally_consistent(decision_recor
 def part1_integrity_validator():
     return _import_from_path(
         "validate_part1_corpus_integrity",
-        os.path.join(REPO, "tools", "validate_part1_corpus_integrity.py"),
+        os.path.join(INSTALL_DIR, "tools", "validate_part1_corpus_integrity.py"),
     )
 
 
@@ -1641,7 +1672,7 @@ def test_no_new_duplicate_consecutive_words(all_klalim):
 def test_no_new_alphabetical_title_order_violations(all_klalim):
     validator = _import_from_path(
         "validate_title_alphabetical_order",
-        os.path.join(REPO, "tools", "validate_title_alphabetical_order.py"),
+        os.path.join(INSTALL_DIR, "tools", "validate_title_alphabetical_order.py"),
     )
     violations, _skipped_bad_first_char = validator.find_violations(all_klalim)
     assert len(violations) <= ALPHABETICAL_ORDER_VIOLATION_BASELINE_MAX, (
@@ -1680,7 +1711,7 @@ def test_no_new_span_coverage_flags(part1_by_id):
 
     validator = _import_from_path(
         "validate_klal_span_coverage",
-        os.path.join(REPO, "tools", "validate_klal_span_coverage.py"),
+        os.path.join(INSTALL_DIR, "tools", "validate_klal_span_coverage.py"),
     )
     with open(trace_path, encoding="utf-8") as f:
         trace = {x["klal_id"]: x for x in json.load(f)}
@@ -1812,7 +1843,7 @@ def test_no_word_index_is_served_twice_in_either_pane(part1_by_id):
     and 1 ai_flag+witness in the text pane and the same 4 again in the scan
     pane, which repeats the defect independently. This test covers every source
     and both panes at once, so a fifth source cannot reintroduce it quietly."""
-    review_server = _import_from_path("review_server", os.path.join(REPO, "pipeline", "review_server.py"))
+    review_server = _import_from_path("review_server", os.path.join(INSTALL_DIR, "pipeline", "review_server.py"))
 
     text_dupes = []
     for klal_id in part1_by_id:
@@ -1883,7 +1914,7 @@ def test_every_open_word_level_flag_has_a_control_that_can_clear_it(part1_by_id)
     tip. Any state the UI can set must have a path back (Lesson 26/28); this
     test asserts it for the whole corpus rather than the one klal that surfaced
     it."""
-    review_server = _import_from_path("review_server", os.path.join(REPO, "pipeline", "review_server.py"))
+    review_server = _import_from_path("review_server", os.path.join(INSTALL_DIR, "pipeline", "review_server.py"))
     open_by_klal = collections.defaultdict(list)
     for (klal_id, word_index), rec in review_server.rd.all_current("klal_flag").items():
         if word_index is not None and rec.get("needs_revisit"):
@@ -1929,7 +1960,7 @@ def test_nav_tristate_matches_what_each_word_actually_renders_as(part1_by_id):
     This transcribes app.js's `wordState()`, which is the only thing that decides
     what colour a reviewer actually sees. (The flag list it depends on is kept in
     sync by test_machine_resolved_flags_agree_between_server_and_frontend.)"""
-    review_server = _import_from_path("review_server", os.path.join(REPO, "pipeline", "review_server.py"))
+    review_server = _import_from_path("review_server", os.path.join(INSTALL_DIR, "pipeline", "review_server.py"))
     machine_resolved = set(review_server.MACHINE_RESOLVED_FLAGS)
 
     def word_state(c):
@@ -2014,7 +2045,7 @@ def test_the_word_list_behind_a_legend_count_is_exactly_what_that_count_counts()
     move every time the corpus improves or a decision is recorded, and a test
     that fails when the text gets better is testing the defect.
     """
-    review_server = _import_from_path("review_server", os.path.join(REPO, "pipeline", "review_server.py"))
+    review_server = _import_from_path("review_server", os.path.join(INSTALL_DIR, "pipeline", "review_server.py"))
     rows = review_server.api_klalim(part_num=1)
     lists = review_server.api_word_states(part_num=1)
     for bucket, field in (("machine_disputed", "machine_disputed_count"),
@@ -2096,8 +2127,8 @@ def test_recorded_decision_count_is_every_ruling_not_only_the_rendered_ones():
     governs `decided_count` must NOT govern this one, which is the entire point
     of it.
     """
-    review_server = _import_from_path("review_server", os.path.join(REPO, "pipeline", "review_server.py"))
-    rd = _import_from_path("review_decisions", os.path.join(REPO, "pipeline", "review_decisions.py"))
+    review_server = _import_from_path("review_server", os.path.join(INSTALL_DIR, "pipeline", "review_server.py"))
+    rd = _import_from_path("review_decisions", os.path.join(INSTALL_DIR, "pipeline", "review_decisions.py"))
     rows = review_server.api_klalim(part_num=1)
     by_klal = {r["klal_id"]: r for r in rows}
 
@@ -2147,7 +2178,7 @@ def test_witness_rows_served_without_a_word_index_are_never_counted(part1_by_id)
     today and three of them carry a human decision, which the old count added to
     `decided_count` for a word the reviewer could never have clicked. Counting
     what cannot be reached is how klal 88's badge went to -1."""
-    review_server = _import_from_path("review_server", os.path.join(REPO, "pipeline", "review_server.py"))
+    review_server = _import_from_path("review_server", os.path.join(INSTALL_DIR, "pipeline", "review_server.py"))
     unmapped = [w for w in review_server._load_witness_queue() if w.get("word_index") is None]
     if not unmapped:
         return  # patched away upstream - nothing to guard
@@ -2179,7 +2210,7 @@ def test_every_flagged_word_in_the_text_pane_has_a_flagged_box_on_the_scan(part1
 
     Two functions drawing one picture from two sources is this project's most
     repeated defect shape; this asserts they agree."""
-    review_server = _import_from_path("review_server", os.path.join(REPO, "pipeline", "review_server.py"))
+    review_server = _import_from_path("review_server", os.path.join(INSTALL_DIR, "pipeline", "review_server.py"))
     listing = review_server.api_klalim(1)
     rows = listing if isinstance(listing, list) else listing.get("klalim", [])
     by_page = {}
@@ -2238,7 +2269,7 @@ def test_no_corpus_word_is_aligned_to_page_furniture():
     clicking it rang the running header on the wrong page. Eight Part-1 words
     across eight klalim were boxed on a header token before the fix."""
     import corpus_io as cio
-    review_server = _import_from_path("review_server", os.path.join(REPO, "pipeline", "review_server.py"))
+    review_server = _import_from_path("review_server", os.path.join(INSTALL_DIR, "pipeline", "review_server.py"))
     if not os.path.isdir(cio.DOCAI_DIR):
         pytest.skip("docai_word_boxes/ is gitignored and migrated separately")
     by_id, _ = review_server._load_klalim(1)
@@ -2357,7 +2388,7 @@ def test_a_words_scan_box_sits_between_its_neighbours_in_reading_order(part1_by_
 
     Applied to EVERY boxed word with both neighbours boxed on the same page, not
     only the paired ones, so it also guards the exact-match path it inherited."""
-    review_server = _import_from_path("review_server", os.path.join(REPO, "pipeline", "review_server.py"))
+    review_server = _import_from_path("review_server", os.path.join(INSTALL_DIR, "pipeline", "review_server.py"))
     import corpus_io as cio
     if not os.path.isdir(cio.DOCAI_DIR):
         pytest.skip("docai_word_boxes/ is gitignored and migrated separately")
@@ -2407,9 +2438,9 @@ def test_every_open_flag_can_actually_be_found_on_the_scan(part1_by_id):
 
     A baseline, not a hard zero: ten flagged words carry no Hebrew letter at all
     and cannot be aligned without a change that costs more than it buys."""
-    review_server = _import_from_path("review_server", os.path.join(REPO, "pipeline", "review_server.py"))
+    review_server = _import_from_path("review_server", os.path.join(INSTALL_DIR, "pipeline", "review_server.py"))
     ard = _import_from_path("apply_reviewer_decisions",
-                            os.path.join(REPO, "pipeline", "apply_reviewer_decisions.py"))
+                            os.path.join(INSTALL_DIR, "pipeline", "apply_reviewer_decisions.py"))
     import corpus_io as cio
     if not os.path.isdir(cio.DOCAI_DIR):
         pytest.skip("docai_word_boxes/ is gitignored and migrated separately")
@@ -2448,7 +2479,7 @@ def test_every_flagged_word_can_be_located_on_the_scan(part1_by_id):
     A `delete` (omission) candidate is exempt: it marks a gap where the corpus
     has no word at all, so there is nothing to align."""
     import corpus_io as cio
-    review_server = _import_from_path("review_server", os.path.join(REPO, "pipeline", "review_server.py"))
+    review_server = _import_from_path("review_server", os.path.join(INSTALL_DIR, "pipeline", "review_server.py"))
     if not os.path.isdir(cio.DOCAI_DIR):
         pytest.skip("docai_word_boxes/ is gitignored and migrated separately")
     offenders = []
@@ -2547,7 +2578,7 @@ def test_machine_resolved_flags_agree_between_server_and_frontend():
     screen - green in the text pane, "Machine-Disputed" in the nav and the panel
     header. That is what happened when `docai_ligature_artifact` was added as a
     second resolved flag and only `wordState()` learned about it."""
-    review_server = _import_from_path("review_server", os.path.join(REPO, "pipeline", "review_server.py"))
+    review_server = _import_from_path("review_server", os.path.join(INSTALL_DIR, "pipeline", "review_server.py"))
     with open(os.path.join(REPO, "review_frontend", "app.js"), encoding="utf-8") as f:
         js = f.read()
     m = re.search(r"const MACHINE_RESOLVED_FLAGS = \[([^\]]*)\]", js)
@@ -2574,7 +2605,7 @@ def test_no_open_flag_names_a_word_that_is_not_at_its_index(part1_by_id):
     quote - a trailing geresh is part of the word (`סי'`, `בס'`), and stripping
     it makes three sound flags look moved."""
     ard = _import_from_path("apply_reviewer_decisions",
-                            os.path.join(REPO, "pipeline", "apply_reviewer_decisions.py"))
+                            os.path.join(INSTALL_DIR, "pipeline", "apply_reviewer_decisions.py"))
     named = re.compile(r"^\s*(?:'([^']+)'|\"([^\"]+)\"|(\S+))\s+w(\d+)\b")
     offenders = []
     for klal_id, klal in sorted(part1_by_id.items()):
@@ -2611,7 +2642,7 @@ def test_no_candidate_re_raises_a_word_an_applied_decision_already_settled(part1
     MATCHING (if the corpus later moves off what they chose, the disagreement is
     real again and the candidate belongs). See
     build_corrections_dataset.settled_by_an_applied_decision()."""
-    review_server = _import_from_path("review_server", os.path.join(REPO, "pipeline", "review_server.py"))
+    review_server = _import_from_path("review_server", os.path.join(INSTALL_DIR, "pipeline", "review_server.py"))
     records = {}
     with open(os.path.join(REPO, "review_decisions.jsonl"), encoding="utf-8") as f:
         for line in f:

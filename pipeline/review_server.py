@@ -42,7 +42,31 @@ import review_decisions as rd
 # two levels, not one, to keep resolving to the actual repo root where
 # part1.json/docai_word_boxes/etc. live.
 REPO = cio.REPO
-FRONTEND_DIR = os.path.join(REPO, "review_frontend")
+
+# THIS INSTALLATION's own directory - where review_server.py and
+# review_frontend/ live on disk - kept SEPARATE from `REPO` above.
+#
+# FOUND 2026-09-03 (item 0AR's fixture, the first time anything ever served
+# this app against a corpus NOT living beside its own code): FRONTEND_DIR used
+# to be `os.path.join(REPO, "review_frontend")`, and REPO is corpus_io's
+# corpus-root seam - so pointing $SEFER_CORPUS_ROOT at a fixture directory
+# (or, in production, at any second book kept in its own directory rather
+# than a sibling of this checkout) made the server 404 on `/`, `/app.js` and
+# `/app.css`: it went looking for review_frontend/ INSIDE the corpus
+# directory, which has never held it and was never meant to. "Where is the
+# DATA" and "where is the PROGRAM" are two different questions that both
+# happened to have the same answer for every corpus this tool has served so
+# far, which is exactly how a conflation like this survives undetected -
+# Lesson 6's shape (every anchoring strategy has its own blind spot; this
+# one's blind spot was "there has only ever been one corpus location and it
+# happened to equal the install location").
+#
+# Resolved once, from THIS FILE's own location, never from corpus_io - a
+# relocated corpus must never change where the server finds its own UI.
+INSTALL_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+FRONTEND_DIR = os.path.join(INSTALL_DIR, "review_frontend")
+# Page images ARE corpus data (one book's scanned pages), unlike the frontend
+# above - correctly derived from the corpus root, not the installation.
 IMAGES_DIR = os.path.join(REPO, "images", "pdf_pages")
 # max(klal_id) in part1.json - this dashboard is Part-1 only, and _load_klalim
 # filters klalim_demo_dataset.json (all 667) down with it. Still deliberately

@@ -395,6 +395,157 @@ def test_detector_args_accepts_a_corpus_directory():
         cio.set_corpus_root(previous)
 
 
+# --- the guard: item 0AR's "or it decays" clause -----------------------------
+#
+# A seam nobody checks the OTHER side of decays silently - which is exactly
+# what happened here before this guard existed. Item 0AR built
+# corpus_io's $SEFER_CORPUS_ROOT seam and believed it was done; item 0BI, one
+# session later, found 51 pipeline/tools scripts with their OWN hardcoded
+# `REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))` -
+# never routed through corpus_io.REPO at all - two of which were exercised
+# for the first time by item 0AR's own fixture generator, and one of THOSE
+# (synthesize_multi_witness.py) silently overwrote 6,981 lines of live,
+# tracked production data (consensus_disputes_part1.json) because
+# $SEFER_CORPUS_ROOT did nothing for it.
+#
+# This is that finding, made permanent as a regression guard rather than a
+# one-time sweep: the count of files with their own hardcoded REPO must not
+# GROW without a conscious edit to KNOWN_BYPASS_COUNT below. It does not
+# assert zero - fixing the other 50 is real, scoped, and separately-tracked
+# work (item 0BI), not something this test should silently declare done by
+# demanding a shrink it cannot verify happened safely. What it forbids is the
+# silent case: a 52nd script added tomorrow with the same copy-pasted REPO
+# line, which is exactly how the first 51 accumulated - one script at a time,
+# each one plausible in isolation, never counted.
+KNOWN_BYPASS_COUNT = 51
+
+
+def _files_with_hardcoded_repo(repo):
+    """Every .py under pipeline/ and tools/ that computes its OWN repo-root
+    constant instead of reading corpus_io.REPO - the exact pattern that let
+    $SEFER_CORPUS_ROOT silently do nothing for the file that has it.
+
+    `corpus_io.py` itself is excluded - it IS the seam, not a bypass of it.
+    `review_decisions.py` is a DIFFERENT, benign shape (its REPO is only the
+    fallback behind `$REVIEW_DECISIONS_PATH`, a separate, already-working
+    seam) but is still counted here, deliberately: the pattern-match this
+    guard does cannot tell "benign fallback" from "genuine bypass" any more
+    reliably than a human skimming 51 files could, which is the whole reason
+    this is a COUNT to review, not a rule that silently exempts anything.
+    """
+    import re
+    pattern = re.compile(
+        r'^REPO\s*=\s*os\.path\.dirname\(os\.path\.dirname\(os\.path\.abspath\(__file__\)\)\)'
+        r'|^REPO\s*=\s*os\.path\.dirname\(HERE\)',
+        re.M,
+    )
+    hits = []
+    for root_dir in ("pipeline", "tools"):
+        dir_path = os.path.join(repo, root_dir)
+        if not os.path.isdir(dir_path):
+            continue
+        for name in sorted(os.listdir(dir_path)):
+            if not name.endswith(".py") or name == "corpus_io.py":
+                continue
+            path = os.path.join(dir_path, name)
+            if pattern.search(open(path, encoding="utf-8").read()):
+                hits.append(os.path.join(root_dir, name))
+    return hits
+
+
+def test_the_corpus_root_bypass_count_has_not_grown(monkeypatch):
+    """See KNOWN_BYPASS_COUNT's own comment: this is item 0BI, kept from
+    decaying further. A new script copy-pasting the old `REPO =
+    os.path.dirname(...)` pattern - the single easiest thing to paste from a
+    sibling file in this repo - fails this test instead of silently joining
+    the 51 that already ignore $SEFER_CORPUS_ROOT.
+    """
+    hits = _files_with_hardcoded_repo(REPO)
+    assert len(hits) <= KNOWN_BYPASS_COUNT, (
+        f"{len(hits)} files bypass corpus_io's seam with their own hardcoded REPO - "
+        f"more than the known {KNOWN_BYPASS_COUNT} (item 0BI). New files: "
+        f"{sorted(set(hits) - set(_KNOWN_BYPASS_FILES))}. Either route the new file's "
+        f"REPO through corpus_io.REPO / corpus_io.repo_path(...), or update "
+        f"KNOWN_BYPASS_COUNT and _KNOWN_BYPASS_FILES deliberately."
+    )
+    # The list, not just the count - a script FIXED and a DIFFERENT script
+    # BROKEN in the same edit must not cancel out to the same number.
+    unexpected = sorted(set(hits) - set(_KNOWN_BYPASS_FILES))
+    assert not unexpected, f"newly-bypassing file(s) not in the known list: {unexpected}"
+
+
+def test_the_bypass_detector_can_actually_detect_something(tmp_path):
+    """Lesson 25: prove the pattern match fires before trusting that it does."""
+    (tmp_path / "pipeline").mkdir()
+    (tmp_path / "tools").mkdir()
+    (tmp_path / "pipeline" / "corpus_io.py").write_text("REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))\n")
+    (tmp_path / "pipeline" / "clean.py").write_text("REPO = cio.REPO\n")
+    (tmp_path / "tools" / "bypasses.py").write_text(
+        "HERE = os.path.dirname(os.path.abspath(__file__))\nREPO = os.path.dirname(HERE)\n")
+    hits = _files_with_hardcoded_repo(str(tmp_path))
+    assert hits == [os.path.join("tools", "bypasses.py")], (
+        "corpus_io.py must be excluded (it IS the seam) and a clean cio.REPO-based "
+        "file must not be flagged"
+    )
+
+
+# The known 51, as of 2026-09-03 (item 0BI's own sweep) - one entry, one
+# script, and the ONLY file this test suite lets stay silently un-seamed.
+_KNOWN_BYPASS_FILES = [
+    "pipeline/build_gematria_trace.py",
+    "pipeline/build_lexical_defect_report.py",
+    "pipeline/build_title_report.py",
+    "pipeline/review_decisions.py",
+    "tools/apply_punctuation_decisions.py",
+    "tools/build_dicta_baseline.py",
+    "tools/build_open_items_report.py",
+    "tools/build_part1_freq.py",
+    "tools/check_klal_token_orphans.py",
+    "tools/check_next_marker_and_title.py",
+    "tools/check_span_shortfall.py",
+    "tools/chunk_pdf_for_ocr.py",
+    "tools/close_flags_already_answered.py",
+    "tools/compare_ocr_engines.py",
+    "tools/compare_titles_to_text.py",
+    "tools/detect_cross_klal_errors.py",
+    "tools/detect_insertion_deletion.py",
+    "tools/detect_ligature_corruption.py",
+    "tools/detect_real_word_substitution.py",
+    "tools/detect_repeated_words.py",
+    "tools/detect_split_merge.py",
+    "tools/estimate_consensus_posterior.py",
+    "tools/export_corpus.py",
+    "tools/extract_abbreviation_forms.py",
+    "tools/extract_docai_pages.py",
+    "tools/fetch_sefaria_reference_corpus.py",
+    "tools/list_ligature_words.py",
+    "tools/lookup_sefaria_dictionaries.py",
+    "tools/patch_witness_word_indices.py",
+    "tools/preview_dicta_disputes.py",
+    "tools/propose_abbreviation_expansions.py",
+    "tools/propose_punctuation_part1.py",
+    "tools/reconstruct_placeholder_klalim.py",
+    "tools/render_report.py",
+    "tools/review_lexicon_gaps.py",
+    "tools/review_lexicon_only_words.py",
+    "tools/run_part1_vlm_full_baseline_pass2.py",
+    "tools/run_part1_vlm_full_baseline.py",
+    "tools/run_part1_vlm_patch_passB.py",
+    "tools/run_surya_part1_full_baseline.py",
+    "tools/run_vlm_witness_sample.py",
+    "tools/survey_shared_engine_errors.py",
+    "tools/test_trocr_benchmark.py",
+    "tools/validate_catchword_continuity.py",
+    "tools/validate_klal_span_coverage.py",
+    "tools/validate_lexicon_independent.py",
+    "tools/validate_part1_corpus_integrity.py",
+    "tools/validate_suppression_filters.py",
+    "tools/validate_title_alphabetical_order.py",
+    "tools/verify_local_setup.py",
+    "tools/verify_reconstruction_witness.py",
+]
+
+
 # --- apply_reviewer_decisions: the only code that mutates part1.json ---------
 
 def test_apply_replace_rewrites_only_the_snapshotted_span():
