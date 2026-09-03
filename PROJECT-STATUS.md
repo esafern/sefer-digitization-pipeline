@@ -319,6 +319,39 @@ reliability check, and every dispute still needs the ink or a different engine.
     work added tests on both sides of that line — the seam tests are fixture-only,
     the title-prefix invariant deliberately reads the real corpus.
 
+0BA. **[2026-09-03] THE DICTA CONSTRAINT IS AN ACQUISITION LIMIT, NOT A WIRING
+    ONE — and item `0N` reads as though they were the same thing. Wiring the
+    baseline this repo already holds needs ZERO fetches.**
+
+    Reviewer, on why Dicta is not wired in: *"prob is we don't have an api, just
+    an upload page that allows just five files per day."* That is right about the
+    service and it does not block the integration, so it is worth separating the
+    two before the next reader treats item `0N` as blocked.
+
+    **What the pipeline would consume is a FILE, already on disk.**
+    `tools/second_witness_eval/dicta_jerusalem_part1_baseline.txt` — 467,093
+    bytes, complete for Part 1 (pages 22–114), written 2026-09-02 — and
+    `synthesize_multi_witness.load_baseline()` reads witness baselines from text
+    files exactly as it does Surya's and the VLM's. Adding `"dicta"` to
+    `ENGINES`, one line in `assemble_corrections_dataset.py`, and a
+    `dicta_reading` option in `app.js` (without which the field is serialized and
+    never seen — Lesson 29) makes no network call at all. The 5-files-a-day
+    ceiling costs nothing here.
+
+    **What the ceiling DOES constrain** is acquiring more Dicta text: a re-run,
+    or extending coverage. Part 1's 93 pages took 9 chunks at ~10 pages each, so
+    roughly two days of quota — and the same ratio puts klalim 223–667 near 19
+    chunks, about four days. Recorded as arithmetic about the constraint, not as
+    a proposal: the Parts 2-3 gate is untouched by this entry.
+
+    **Two standing facts still bound any use of it.** Dicta is deterministic
+    (item `0V`), so a repeat run is not a reliability check and buys nothing but
+    quota; and it must never be pointed at the square Berlin scan (77.6% there,
+    worse than everything already wired in). Its 95.6% is on the Jerusalem
+    edition, which is also why it is a genuinely independent witness — it is not
+    reading the same ink as DocAI, Surya and the VLM, and item `0AQ` flagged that
+    as the open question against Lesson 24.
+
 0AW. **[2026-09-03] WHY `הרל"ם → הרמב"ם` WAS PROPOSED: an abbreviation naming a
     DIFFERENT authority is indistinguishable, to every detector here, from a
     misprint of a commoner one. Reviewer ruled KEEP from the ink. 11 more
