@@ -116,6 +116,7 @@ import difflib
 import json
 import os
 import re
+import sys
 
 
 # This module lives in pipeline/, one level below the repo root, where
@@ -239,6 +240,35 @@ def words_of(klal_or_text):
 def word_count_of(klal_or_text):
     """len(words_of(...)), for the callers that only compare counts."""
     return len(words_of(klal_or_text))
+
+
+# `title` is corpus text too, and until 2026-09-03 nothing in this repo read it.
+# Item 39 measured the consequence: six OCR errors sat in titles whose BODY was
+# already correct, including the same alef-lamed ligature sort as items 26/32,
+# because every detector, witness, validator and invariant here reads
+# `clean_text` and only `clean_text`. A field no check has ever looked at has
+# been verified about nothing (Lesson 1).
+TITLE_FIELD = "title"
+TEXT_FIELD = "clean_text"
+CORPUS_TEXT_FIELDS = (TEXT_FIELD, TITLE_FIELD)
+
+
+def title_words_of(klal):
+    """The title's word list, addressed the same way `words_of` addresses a body.
+
+    Space-only for the identical reason (see words_of): a `word_index` in a
+    title_correction decision is an index into `title.split(' ')`, and the
+    ledger is append-only, so the scheme has to be fixed before the first
+    ruling is recorded rather than after.
+
+    A title index and a body index are DIFFERENT ADDRESSES in the same klal -
+    klal 39 word 2 is one word in the heading and another in the text - which
+    is why a title ruling is its own decision type (`title_correction`) rather
+    than a `manual_correction` carrying a field tag: `all_current()` keys on
+    (klal_id, word_index), so a shared namespace would have let one silently
+    overwrite the other.
+    """
+    return ((klal or {}).get(TITLE_FIELD) or "").split(" ")
 
 
 # ---------- text normalization shared by readers of DocAI tokens ----------
@@ -385,17 +415,105 @@ def align_witness(corpus_words, witness_words, normalize=hebrew_letters_only):
     return out
 
 
-def load_klal_words(part_path):
+def detector_args(argv, default_part=None):
+    """Parse the argv every `tools/detect_*.py` sweep shares: an optional part
+    file, and `--field clean_text|title`.
+
+    ONE parser, six callers, added 2026-09-03 with the title pass. All six had
+    written `sys.argv[1] if len(sys.argv) > 1 else PART1_PATH` - identical, and
+    each would have needed its own `--field` handling. It also gives them a
+    `--help` that does not run the sweep, which is the cheap half of item 0Z's
+    lesson: `tools/patch_witness_word_indices.py` had no argument parsing at
+    all and rewrote the witness queue when it was invoked with `--help`. These
+    detectors only print, so nothing was at risk here - but the shape was the
+    same, in six files.
+
+    Returns (part_path, field). Raises SystemExit on `--help` or a bad field.
+    """
+    part_path, field = None, TEXT_FIELD
+    args = list(argv)
+    i = 0
+    while i < len(args):
+        a = args[i]
+        if a in ("-h", "--help"):
+            raise SystemExit(
+                f"usage: {os.path.basename(sys.argv[0] if sys.argv else 'detector')} "
+                f"[part_file] [--field {'|'.join(CORPUS_TEXT_FIELDS)}]\n"
+                f"  part_file   defaults to part1.json\n"
+                f"  --field     which corpus text to sweep; `title` is item 39's "
+                f"title pass and addresses title.split() indices, NOT body ones."
+            )
+        if a == "--field":
+            if i + 1 >= len(args):
+                raise SystemExit("--field needs a value")
+            field = args[i + 1]
+            i += 2
+            continue
+        if a.startswith("--field="):
+            field = a.split("=", 1)[1]
+            i += 1
+            continue
+        if a.startswith("-"):
+            raise SystemExit(f"unknown option {a!r}")
+        part_path = a
+        i += 1
+    if field not in CORPUS_TEXT_FIELDS:
+        raise SystemExit(f"unknown --field {field!r}; expected one of {', '.join(CORPUS_TEXT_FIELDS)}")
+    part_path = part_path or default_part or PART1_PATH
+    if not os.path.isabs(part_path):
+        part_path = os.path.join(REPO, part_path)
+    return part_path, field
+
+
+def load_klal_words(part_path, field=TEXT_FIELD):
     """Load a part file and return {klal_id: [words]}, split the same way
     every index-bearing pipeline script does (str.split() with no argument,
     whitespace-collapsing). Consolidated here 2026-08-18 from identical
     copies in detect_ligature_corruption.py and detect_real_word_substitution.py.
+
+    `field` added 2026-09-03 for item 39's title pass. Six detectors call this
+    function and none of them could see the `title` field; parameterising the
+    ONE loader gives all six title coverage in a single place, which is the
+    point of this module existing (START_HERE's shared-module rule). A klal with
+    no title yields an empty list rather than being dropped, so callers that
+    index by klal_id still find every klal.
+
+    Note the split: whitespace-collapsing here, because these callers diff token
+    streams rather than address stored positions. `title_words_of` is the
+    space-only one, for anything that records an index. Same two schemes, same
+    reason, spelled out in words_of.
     """
+    if field not in CORPUS_TEXT_FIELDS:
+        raise ValueError(f"unknown corpus text field {field!r}; expected one of {CORPUS_TEXT_FIELDS}")
     klalim = load_klalim(part_path)
     out = {}
     for k in klalim:
-        out[k["klal_id"]] = k["clean_text"].split()
+        words = (k.get(field) or "").split()
+        if field == TITLE_FIELD:
+            words = strip_title_terminal_period(words)
+        out[k["klal_id"]] = words
     return out
+
+
+def strip_title_terminal_period(words):
+    """Drop the sentence period every title in this corpus ends with.
+
+    Measured 2026-09-03 across Part 1: **all 222 titles end in `.` and none
+    contains one anywhere else**, so this is a display convention of the field
+    (item 45 - the reviewer asked for the period to be SHOWN), not part of the
+    last word. Without stripping it, every title's final token is a form that
+    occurs exactly once in the corpus, which is precisely the trigger condition
+    for the rare-form detectors - the first title run produced
+    `מעצמנו.` -> `מעצמו` on klal 144 purely because of the glued period, on a
+    word the body spells the same way and spells correctly.
+
+    Index-preserving: it edits the last element, never removes one, so a
+    `word_index` into the result still addresses the same word as
+    `title_words_of`.
+    """
+    if words and words[-1].endswith(".") and len(words[-1]) > 1:
+        words = words[:-1] + [words[-1][:-1]]
+    return words
 
 
 # ---------- DocAI token geometry ----------

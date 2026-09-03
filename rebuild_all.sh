@@ -108,6 +108,22 @@ echo "== 4a/6 synthesize_multi_witness.py =="
 echo "== 4b/6 build_lexical_defect_report.py =="
 ./venv/bin/python pipeline/build_lexical_defect_report.py
 
+# 4c: the TITLE field, which no stage read at all until 2026-09-03.
+#
+# Item 39: every detector, witness, validator and invariant in this repo read
+# `clean_text`, so `title` - which is corpus text under the single-source-of-
+# truth rule - had never been checked by anything. Six OCR errors were sitting
+# in headings whose bodies were already correct, found only because a reviewer
+# read one. This stage runs the prefix check (a title must be a prefix of its
+# own body) and the 4b detectors over `--field title`, and writes
+# title_defect_report.json.
+#
+# Same discipline as 4b: it writes a triage report and never a flag. Two of the
+# three candidates its first run produced are words the body spells identically
+# and spells correctly.
+echo "== 4c/6 build_title_report.py =="
+./venv/bin/python pipeline/build_title_report.py
+
 echo "== 4/6 assemble_corrections_dataset.py =="
 ./venv/bin/python pipeline/assemble_corrections_dataset.py
 

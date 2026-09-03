@@ -451,6 +451,7 @@ def main():
     skipped_already_applied = []
     word_count_changed_klalim = set()
     n_replace = n_insert_delete = n_noop = n_manual = 0
+    n_title = 0  # title_correction decisions promoted (item 39)
 
     for (klal_id, word_index), decision in sorted(decisions.items()):
         # Already promoted into part1.json by an earlier run - never re-apply.
@@ -699,7 +700,67 @@ def main():
             rd.append_decision("apply_event", klal_id=klal_id, word_index=word_index,
                                 applied_decision_id=decision["id"])
 
-    if not args.dry_run and (n_replace or n_insert_delete or n_manual):
+    # ---- title_correction: item 39's missing apply path -------------------
+    #
+    # `title` is corpus text under the single-source-of-truth rule, but every
+    # writer in this file until 2026-09-03 wrote `clean_text` and nothing else,
+    # so the five title repairs of 2026-08-31 had to be HAND-EDITED into
+    # part1.json as a recorded exception to that rule. This is the path they
+    # should have taken.
+    #
+    # It reuses apply_manual_correction / apply_manual_deletion unchanged: both
+    # take a TEXT and return a text, so they were already field-agnostic, and a
+    # title index is `title.split(' ')` exactly as a body index is
+    # `clean_text.split(' ')` (cio.title_words_of). Not a parallel copy - the
+    # same two functions with a different string (Lesson 13).
+    #
+    # The address spaces are separate, so the per-run word-count gate is too: a
+    # title replace that changes word count shifts later TITLE indices only, and
+    # a body edit in the same klal shifts nothing in the heading.
+    #
+    # One shape to know when ruling on the LAST word of a title: every title in
+    # this corpus ends with a period glued to its final word (measured: 222 of
+    # 222), so `original_word` for that position is e.g. `שכר.`, period included.
+    # The drift check compares exactly, so a ruling recorded without it is
+    # skipped rather than misapplied.
+    title_decisions = rd.all_current("title_correction")
+    title_count_changed_klalim = set()
+    for (klal_id, word_index), decision in sorted(title_decisions.items()):
+        if decision["id"] in already_applied:
+            skipped_already_applied.append((klal_id, word_index))
+            continue
+        klal = by_klal.get(klal_id)
+        if klal is None:
+            skipped_drift.append((klal_id, word_index))
+            continue
+        original_word = decision.get("candidate_snapshot", {}).get("original_word")
+        chosen_text = decision["chosen_text"]
+        if klal_id in title_count_changed_klalim:
+            print(f"  SKIP klal {klal_id} title word {word_index}: another word-count-changing "
+                  f"title decision already applied for this klal this run - run "
+                  f"./rebuild_all.sh, then this script again.")
+            continue
+        changes_count = chosen_text == "" or manual_correction_changes_word_count(chosen_text)
+        if chosen_text == "":
+            new_title = apply_manual_deletion(klal.get("title") or "", word_index, original_word)
+            kind = "title-delete"
+        else:
+            new_title = apply_manual_correction(
+                klal.get("title") or "", word_index, original_word, chosen_text)
+            kind = "title"
+        if new_title is None:
+            skipped_drift.append((klal_id, word_index))
+            continue
+        if changes_count:
+            title_count_changed_klalim.add(klal_id)
+        klal["title"] = new_title
+        n_title += 1
+        applied.append((klal_id, word_index, kind))
+        if not args.dry_run:
+            rd.append_decision("apply_event", klal_id=klal_id, word_index=word_index,
+                                applied_decision_id=decision["id"])
+
+    if not args.dry_run and (n_replace or n_insert_delete or n_manual or n_title):
         save_part1(part1)
 
     # The review state that has to follow the corpus. Deliberately AFTER the
@@ -729,7 +790,7 @@ def main():
 
     tag = "[DRY RUN] " if args.dry_run else ""
     print(f"\n{tag}Applied: {len(applied)} ({n_replace} replace, {n_insert_delete} insert/delete, "
-          f"{n_manual} manual, {n_noop} confirmed-no-op)")
+          f"{n_manual} manual, {n_title} title, {n_noop} confirmed-no-op)")
     for kid, widx, kind in applied:
         print(f"  klal {kid} word {widx}: {kind}")
 

@@ -174,6 +174,98 @@ reliability check, and every dispute still needs the ink or a different engine.
     classifies as shifted rather than lost (klal 1 w97 punctuation). No applied
     decision is missing from the corpus.
 
+0AY. **[2026-09-03] ITEM 39's TITLE PASS IS BUILT — (i) the detectors read the
+    field, (ii) a title ruling has an apply path, (iii) a gated invariant. Only
+    (iv), the EXTENT question, is left, and it needs the printed page. The very
+    first run found 2 divergences and 3 candidates in a field nothing in this
+    repo had ever read.**
+
+    **(i) `--field title`, through one seam.** Six `tools/detect_*.py` sweeps
+    call `corpus_io.load_klal_words`, so the field became a parameter THERE
+    rather than in six files, and all six gained title coverage at once. They
+    also share a new `corpus_io.detector_args()` — one parser where each had
+    written its own `sys.argv[1]`, which additionally gives them a `--help` that
+    does not run the sweep (item `0Z`'s shape: `patch_witness_word_indices.py`
+    had no parsing at all and rewrote the witness queue on `--help`).
+
+    **Two measurement defects had to be fixed before the numbers meant
+    anything**, and both were found by reading the first output rather than
+    trusting it:
+
+    - **Every title ends with a period glued to its last word** — measured 222
+      of 222, with none anywhere else — so that token is a form occurring once
+      in the corpus, which is the exact trigger for the rare-form detectors. The
+      first run duly proposed `מעצמנו.` → `מעצמו` on klal 144. Stripped, and
+      index-preserving so a `word_index` still addresses the same word.
+    - **The frequency table must stay the BODY's.** The title field is 1,287
+      words; counting rare-ness inside it makes EVERY title word a hapax and the
+      gate stops gating. `own_counts` now always comes from `clean_text`
+      whatever field is scanned — which leaves body sweeps bit-identical, since
+      for them the counting corpus already WAS the scanned one.
+
+    **(ii) `title_correction`, a new decision type.** Not a `manual_correction`
+    with a field tag: `all_current()` keys on `(klal_id, word_index)` and a title
+    index is a DIFFERENT ADDRESS from a body index in the same klal, so one
+    ruling would have silently displaced the other. The apply reuses
+    `apply_manual_correction`/`apply_manual_deletion` unchanged — both already
+    took a text and returned a text — with its own per-klal-per-run word-count
+    slot, because a title shift moves nothing in the body. **This is the path
+    the five hand-edits of 2026-08-31 should have had**; that exception to the
+    single-source-of-truth rule need not be taken again.
+
+    Five tests, all synthetic: the title is written and the body untouched at the
+    same index; drift is refused; a ruling naming the last word WITHOUT its
+    period is refused (my own first fixtures were wrong this way, and the drift
+    check caught them); a second run is a no-op; and a multi-word title replace
+    defers the next ruling in that klal.
+
+    **(iii) `test_every_title_is_a_prefix_of_its_own_body`, gated.** The body
+    reprints the heading, so they must agree word for word over the title's
+    length — no corpus statistics needed, which is why this class found all six
+    of item 39's original defects. **Two klalim diverge and both are baselined
+    by ID, with reasons, not by count:**
+
+    - **klal 186** — title `המקיל`, body `המקיל'`. One carries a stray geresh;
+      both are complete words, so no frequency test can say which. Needs the ink.
+    - **klal 9** — title `איידי`, body `איידי.`, the stop GLUED to the word where
+      everywhere else it becomes a separate `[.]`. **Swept the class the moment
+      it fired: exactly 2 body words in Part 1 carry a glued terminal period** —
+      this one and klal 169 w444 `דוי.`. Deliberately NOT normalised away by
+      stripping stops from the body side, which would have made the check pass by
+      ceasing to look and left the class unrecorded (Lesson 26).
+
+    A companion test builds a heading with one letter changed and asserts the
+    comparison reports it — Lesson 25, since a prefix check that cannot fail is
+    not a check.
+
+    **Stage 4c, `pipeline/build_title_report.py`, in `rebuild_all.sh`.** Lesson
+    32: a detector that only prints is a detector that does not run. It writes
+    `title_defect_report.json` and, like 4b, **never a flag** — the ledger is
+    permanent and these candidates carry real false positives.
+
+    **What the first run says.** 222 titles, 1,287 words, 2 prefix divergences
+    (above), 3 detector candidates:
+
+    | klal · title word | stored | proposed | body reads | read |
+    |---|---|---|---|---|
+    | 92 · 6 | נסקי | נפקי | **נסקי, the same** | needs the ink — the idiom is `לא נפקא מינה מידי`, and the body carries the same form, so if it is wrong it is wrong in both |
+    | 144 · 4 | מעצמנו | מעצמו | מעצמנו | false positive — "by ourselves" is correct in context |
+    | 212 · 0 | הוון | הוו | הוון | false positive — Galilean Aramaic, correct as printed |
+
+    So the detector half found nothing title-specific on its first pass, and the
+    PREFIX half found both real questions. Worth recording, because the cheap
+    structural check outperformed the expensive statistical one here exactly as
+    Lesson 8 predicts.
+
+    **(iv) EXTENT REMAINS UNMEASURED AND UNSWEEPABLE.** A title that has
+    swallowed body text still agrees with its body over its own length, so no
+    textual check can see it; only the printed type size says where a heading
+    stops. The report names this in its own header rather than letting a clean
+    run read as "titles are fine". Two are known (klalim 36, 39, both
+    reviewer-identified); how many more is unknown and is not being estimated.
+
+    Full suite **467 collected, 466 passed, 1 skipped**.
+
 0AW. **[2026-09-03] WHY `הרל"ם → הרמב"ם` WAS PROPOSED: an abbreviation naming a
     DIFFERENT authority is indistinguishable, to every detector here, from a
     misprint of a commoner one. Reviewer ruled KEEP from the ink. 11 more

@@ -158,9 +158,10 @@ def _resolve(w, indep_freq):
 
 
 def main():
-    part_path = sys.argv[1] if len(sys.argv) > 1 else cio.PART1_PATH
-    if not os.path.isabs(part_path):
-        part_path = os.path.join(REPO, part_path)
+    # `--field title` added 2026-09-03 (item 39): this sweep could not see the
+    # `title` field, which is corpus text no detector had ever read. Shared
+    # parser, so all six sweeps take the same flag and none re-rolls argv.
+    part_path, field = cio.detector_args(sys.argv[1:])
 
     indep_freq = load_independent_frequency()
     if indep_freq is None:
@@ -168,9 +169,17 @@ def main():
               "Run fetch_sefaria_reference_corpus.py + validate_lexicon_independent.py first.")
         return
 
-    klal_words = cio.load_klal_words(part_path)
+    klal_words = cio.load_klal_words(part_path, field=field)
+    # The frequency table is ALWAYS built from `clean_text`, whatever field is
+    # being scanned. Added 2026-09-03 with `--field title`: "how often does this
+    # form occur in this book" is a question about the book, and the title field
+    # is 1,287 words, so counting within it makes EVERY title word a hapax and
+    # the rare-form gate stops gating anything (the first title run proposed
+    # `מעצמנו` -> `מעצמו` on klal 144, a word the body spells the same way and
+    # spells correctly). Bodies are unchanged by this: a clean_text sweep counts
+    # exactly what it counted before, since the counting corpus IS clean_text.
     own_counts = Counter()
-    for words in klal_words.values():
+    for words in cio.load_klal_words(part_path).values():
         for w in words:
             if not cio.has_gershayim(w):
                 own_counts[w] += 1

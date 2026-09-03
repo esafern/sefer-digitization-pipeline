@@ -1,0 +1,54 @@
+{
+ "field": "title",
+ "klalim_scanned": 222,
+ "title_words": 1287,
+ "prefix_divergences": [
+  {
+   "klal_id": 9,
+   "word_index": 0,
+   "title_word": "איידי",
+   "body_word": "איידי.",
+   "klass": "prefix_divergence"
+  },
+  {
+   "klal_id": 186,
+   "word_index": 2,
+   "title_word": "המקיל",
+   "body_word": "המקיל'",
+   "klass": "prefix_divergence"
+  }
+ ],
+ "detector_candidates": [
+  {
+   "klal_id": 92,
+   "word_index": 6,
+   "title_word": "נסקי",
+   "proposal": "נפקי",
+   "ref_count": 160,
+   "detector": "substitution",
+   "ambiguous": false,
+   "klass": "detector_candidate"
+  },
+  {
+   "klal_id": 144,
+   "word_index": 4,
+   "title_word": "מעצמנו",
+   "proposal": "מעצמו",
+   "ref_count": 365,
+   "detector": "insertion_deletion",
+   "ambiguous": false,
+   "klass": "detector_candidate"
+  },
+  {
+   "klal_id": 212,
+   "word_index": 0,
+   "title_word": "הוון",
+   "proposal": "הוו",
+   "ref_count": 2052,
+   "detector": "insertion_deletion",
+   "ambiguous": false,
+   "klass": "detector_candidate"
+  }
+ ],
+ "not_checked": "EXTENT: whether a title has swallowed body text. A title that has still agrees with its body over its own length, so nothing here can see it - only the printed type size can. Item 39 (iv), unmeasured."
+}

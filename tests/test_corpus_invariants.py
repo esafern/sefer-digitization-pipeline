@@ -65,6 +65,7 @@ sys.path.insert(0, os.path.join(REPO, "tools"))
 # a person overruled from the scan is not a corpus defect, and only the ledger
 # knows which those are. See test_part1_no_dropped_lamed_ligature_corruption.
 import review_decisions as rd  # noqa: E402
+import corpus_io as cio  # noqa: E402
 
 PART_FILES = ["part1.json", "part2.json", "part3.json"]
 
@@ -633,6 +634,104 @@ DROPPED_LAMED_CORRUPT_FORMS = {
     "אמא", "אעאי", "אעזר", "אפא", "בצלא", "דשמוא", "האה", "האף", "ואהים",
     "והאף", "וכאה", "ושמוא", "ישמעא", "ישרא", "שמוא",
 }
+
+
+# The two klalim in Part 1 whose title is not a prefix of their own body, as of
+# 2026-09-03. Baselined rather than "fixed" because BOTH need the printed page,
+# and guessing which side is right is exactly the silent normalisation success
+# criterion #1 forbids. Both are in the title report as open questions.
+#
+#   klal 186 - title `המקיל`, body `המקיל'`. One of the two carries a stray
+#     geresh; the word is a complete word either way, so no frequency test can
+#     say which, and only the ink can.
+#   klal 9 - title `איידי`, body `איידי.` with the stop GLUED to the word. Not a
+#     title defect at all: everywhere else in the corpus the heading's stop
+#     becomes a separate `[.]` mark, and here it did not. Swept the class the
+#     moment this fired, per the standing rule - exactly 2 body words in Part 1
+#     carry a glued terminal period, this one and klal 169 w444 `דוי.`.
+#
+# Deliberately NOT normalised away by stripping stops from the body side: that
+# would make this check pass by ceasing to look, and the glued-stop class would
+# have gone unrecorded (Lesson 26 - validate a filter by what it hides).
+#
+# The baseline is a set of klal_ids, not a count: a NEW divergence must fail
+# even while these stand, which a count would not catch.
+TITLE_NOT_PREFIX_OF_BODY_BASELINE = {9, 186}
+
+# Editorial marks the pipeline inserts into the body but never into a title -
+# the punctuation pass's `[.]`, the seam bullet, bare stops. They are skipped on
+# both sides so the comparison is about WORDS.
+TITLE_COMPARISON_MARKS = {"\u2022", "[.]", "[,]", ".", ":", ",", ";"}
+
+
+def title_prefix_divergences(klalim):
+    """Klalim whose `title` is not a prefix of their own body text.
+
+    A title is the klal's printed heading and the body reprints it verbatim
+    before continuing, so the two must agree word for word over the title's
+    length. Where they do not, ONE of them carries an OCR error the other does
+    not - which is how item 39's six title-only defects were found, every one
+    of them in a klal whose body was already correct.
+
+    Returns [(klal_id, index, title_word, body_word)] for the FIRST divergence
+    in each klal - the rest of a title usually diverges as a consequence of the
+    first, so listing them all buries the finding.
+    """
+    out = []
+    for k in klalim:
+        title = [w for w in cio.title_words_of(k) if w not in TITLE_COMPARISON_MARKS]
+        title = cio.strip_title_terminal_period(title)
+        # body[0] is the klal's gematria marker, which no title repeats.
+        body = [w for w in cio.words_of(k)[1:] if w not in TITLE_COMPARISON_MARKS]
+        if not title:
+            continue
+        for i in range(min(len(title), len(body))):
+            if title[i] != body[i]:
+                out.append((k["klal_id"], i, title[i], body[i]))
+                break
+    return out
+
+
+def test_every_title_is_a_prefix_of_its_own_body(part_klalim):
+    """Item 39 (iii). The `title` field had NO check of any kind until
+    2026-09-03 - not a detector, not a witness, not an invariant - so six OCR
+    errors sat in headings whose bodies were already correct, one of them the
+    same alef-lamed ligature sort as items 26 and 32.
+
+    This is the cheap half of a title pass and it is mechanical: the body
+    reprints the heading, so the two must agree, and where they do not exactly
+    one of them is wrong. It cannot see the EXTENT class (a title that has
+    swallowed body text still agrees over its own length) - that one needs the
+    printed type size, and item 39 records it as unmeasured rather than
+    guessed.
+    """
+    divergences = title_prefix_divergences(part_klalim["part1.json"])
+    unexpected = [d for d in divergences if d[0] not in TITLE_NOT_PREFIX_OF_BODY_BASELINE]
+    assert not unexpected, (
+        f"A title no longer matches its own body: {unexpected}. One of the two carries an OCR "
+        f"error the other does not - read the scan, rule it in the dashboard, and let "
+        f"apply_reviewer_decisions.py promote it. Do not hand-edit part1.json."
+    )
+    healed = TITLE_NOT_PREFIX_OF_BODY_BASELINE - {d[0] for d in divergences}
+    assert not healed, (
+        f"Klal(im) {sorted(healed)} no longer diverge - remove them from "
+        f"TITLE_NOT_PREFIX_OF_BODY_BASELINE so the guard stays honest."
+    )
+
+
+def test_the_title_prefix_check_can_actually_fail():
+    """Lesson 25: a comparison nobody has made report a difference has not been
+    shown to be a comparison. Two synthetic klalim, one clean and one with a
+    single letter changed in the heading."""
+    clean = {"klal_id": 1, "title": "\u05d0\u05dc\u05e3 \u05d1\u05d9\u05ea.", "clean_text": "\u05d0 \u05d0\u05dc\u05e3 \u05d1\u05d9\u05ea [.] \u05d2\u05d9\u05de\u05dc"}
+    assert title_prefix_divergences([clean]) == []
+
+    broken = dict(clean, klal_id=2, title="\u05d0\u05dc\u05e3 \u05d1\u05d9\u05d3.")
+    assert title_prefix_divergences([broken]) == [(2, 1, "\u05d1\u05d9\u05d3", "\u05d1\u05d9\u05ea")]
+
+    # A title SHORTER than its body is normal - that is every klal in the book.
+    short = dict(clean, klal_id=3, title="\u05d0\u05dc\u05e3.")
+    assert title_prefix_divergences([short]) == []
 
 
 def ligature_offenders(klalim, manual_decisions):

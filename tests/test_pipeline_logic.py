@@ -386,13 +386,105 @@ def apply_harness(tmp_path, monkeypatch, decisions_path):
         return {k["klal_id"]: k["clean_text"]
                 for k in json.loads(part1_path.read_text(encoding="utf-8"))}
 
+    def run_titles():
+        """Same run, reading the TITLE field. Added 2026-09-03 with item 39's
+        title apply path - `run()` returns clean_text only, which is exactly the
+        blind spot that let `title` go unwritten by this script for a month."""
+        ard.main()
+        return {k["klal_id"]: k.get("title")
+                for k in json.loads(part1_path.read_text(encoding="utf-8"))}
+
     setup.run = run
+    setup.run_titles = run_titles
     return setup
 
 
 def _correction(word_index, opcode, docai, final):
     return {"word_index": word_index, "opcode": opcode, "docai_reading": docai,
             "final_text": final, "flag": "ambiguous"}
+
+
+def test_a_title_correction_writes_the_title_and_leaves_the_body_alone(
+        apply_harness, decisions_path):
+    """Item 39 (ii): until 2026-09-03 this script wrote `clean_text` and nothing
+    else, so five title repairs had to be hand-edited into part1.json as a
+    recorded exception to the single-source-of-truth rule."""
+    apply_harness([{"klal_id": 1, "title": "אלף בית גימל.",
+                    "clean_text": "א אלף בית גימל [.] דלת"}], {})
+    rd.append_decision("title_correction", klal_id=1, word_index=1,
+                       chosen_source="custom", chosen_text="בות",
+                       candidate_snapshot={"original_word": "בית"}, path=decisions_path)
+
+    assert apply_harness.run_titles()[1] == "אלף בות גימל."
+
+
+def test_a_title_correction_does_not_touch_the_body_at_the_same_index(
+        apply_harness, decisions_path):
+    """A title index and a body index are different addresses in one klal. Here
+    w1 is `בית` in the heading and `אלף` in the text; ruling on the heading must
+    move exactly one of them. This is why title_correction is its own decision
+    type rather than a manual_correction with a field tag - all_current() keys
+    on (klal_id, word_index) and the two would have shared a slot."""
+    apply_harness([{"klal_id": 1, "title": "אלף בית גימל.",
+                    "clean_text": "א אלף בית גימל [.] דלת"}], {})
+    rd.append_decision("title_correction", klal_id=1, word_index=1,
+                       chosen_source="custom", chosen_text="בות",
+                       candidate_snapshot={"original_word": "בית"}, path=decisions_path)
+    ard.main()
+    klalim = {k["klal_id"]: k for k in json.loads(
+        open(ard.PART1_PATH, encoding="utf-8").read())}
+    assert klalim[1]["title"] == "אלף בות גימל."
+    assert klalim[1]["clean_text"] == "א אלף בית גימל [.] דלת", "the body must be untouched"
+
+
+def test_a_title_correction_drift_checks_the_original_word(apply_harness, decisions_path):
+    """Same drift rule as every other writer here: if the word at that index is
+    not the one the reviewer looked at, skip rather than guess. The last word of
+    a title carries the terminal period, so a ruling on it must name it."""
+    apply_harness([{"klal_id": 1, "title": "אלף בית גימל.",
+                    "clean_text": "א אלף בית גימל [.] דלת"}], {})
+    rd.append_decision("title_correction", klal_id=1, word_index=1,
+                       chosen_source="custom", chosen_text="בות",
+                       candidate_snapshot={"original_word": "דלת"}, path=decisions_path)
+    assert apply_harness.run_titles()[1] == "אלף בית גימל.", "a drifted ruling must not be applied"
+
+    # And the shape that produced this test: the LAST word carries the period,
+    # so a ruling naming it without one is a drift, not a correction.
+    rd.append_decision("title_correction", klal_id=1, word_index=2,
+                       chosen_source="custom", chosen_text="דלת.",
+                       candidate_snapshot={"original_word": "גימל"}, path=decisions_path)
+    assert apply_harness.run_titles()[1] == "אלף בית גימל."
+
+
+def test_a_title_correction_is_never_applied_twice(apply_harness, decisions_path):
+    """The already_applied guard covers the new type too - a second run must be
+    a no-op, not a second write."""
+    apply_harness([{"klal_id": 1, "title": "אלף בית גימל.",
+                    "clean_text": "א אלף בית גימל [.] דלת"}], {})
+    rd.append_decision("title_correction", klal_id=1, word_index=1,
+                       chosen_source="custom", chosen_text="בות",
+                       candidate_snapshot={"original_word": "בית"}, path=decisions_path)
+    assert apply_harness.run_titles()[1] == "אלף בות גימל."
+    assert apply_harness.run_titles()[1] == "אלף בות גימל."
+    events = rd.history_for(1, 1, "apply_event", path=decisions_path)
+    assert len(events) == 1, f"expected one apply_event, got {len(events)}"
+
+
+def test_only_one_word_count_changing_title_decision_lands_per_klal_per_run(
+        apply_harness, decisions_path):
+    """A multi-word title replace shifts every later TITLE index, so it takes
+    the same one-per-klal-per-run slot the body edits take - and the slot is a
+    SEPARATE set, because a body shift moves nothing in the heading."""
+    apply_harness([{"klal_id": 1, "title": "אלף בית גימל.", "clean_text": "א אלף בית גימל"}], {})
+    rd.append_decision("title_correction", klal_id=1, word_index=0,
+                       chosen_source="custom", chosen_text="אלף אחר",
+                       candidate_snapshot={"original_word": "אלף"}, path=decisions_path)
+    rd.append_decision("title_correction", klal_id=1, word_index=2,
+                       chosen_source="custom", chosen_text="דלת.",
+                       candidate_snapshot={"original_word": "גימל."}, path=decisions_path)
+    assert apply_harness.run_titles()[1] == "אלף אחר בית גימל.", (
+        "the second decision names an index the first one moved, so it must wait for a rebuild"
+    )
 
 
 def test_confirming_the_current_text_of_an_insert_candidate_deletes_nothing(apply_harness, decisions_path):

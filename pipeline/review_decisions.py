@@ -92,6 +92,16 @@ VALID_DECISION_TYPES = {
     "punctuation_choice",
     "witness_choice",
     "manual_correction",
+    # A ruling on a klal's TITLE. Its own type, not a manual_correction with a
+    # field tag, because all_current() keys on (klal_id, word_index) and a title
+    # index is a DIFFERENT ADDRESS from a body index in the same klal - klal 39
+    # word 2 names one word in the heading and another in the text. Sharing the
+    # namespace would have let one ruling silently displace the other.
+    # ADDED 2026-09-03 for item 39: `title` is corpus text under the
+    # single-source-of-truth rule, and until now the pipeline had no way to
+    # promote a correction to it, so five were HAND-EDITED into part1.json on
+    # 2026-08-31 as a recorded exception. This is the path they should have had.
+    "title_correction",
 }
 
 
