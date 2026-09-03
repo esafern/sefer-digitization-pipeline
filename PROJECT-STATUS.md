@@ -336,6 +336,35 @@ reliability check, and every dispute still needs the ink or a different engine.
     same ligature or Dicta's agreement has another cause; Lesson 24 is
     load-bearing and it is worth knowing which.
 
+    **ALL 8 WERE RULED BY THE REVIEWER, 2026-09-02, AGAINST THE INK — and every
+    one went the engines' way.** `reviewer: local` on all eight, and in each case
+    the chosen text is the reading the engines gave:
+
+    | | corpus still holds | reviewer chose |
+    |---|---|---|
+    | 59 · 47 | כוותיה | כוותה |
+    | 74 · 203 | דגם | הגם |
+    | 77 · 22 | וטומאות | וטמאות |
+    | 77 · 24 | טומאות | טמאות |
+    | 88 · 963 | ומתיר | **ומתי׳** |
+    | 91 · 191 | העניינים | **העניני׳** |
+    | 92 · 326 | אליה | **איה** |
+    | 124 · 26 | אליה | **איה** |
+
+    So the abbreviation-expansion reading above is confirmed: the ink shows
+    `ומתי׳` and `העניני׳`, and the corpus was carrying an editorial expansion.
+    And the reviewer's verdict on the last two — *"there is no al-la lig on those
+    last two, the lamed should never have been there"* — is what opened item
+    `0AT`.
+
+    **NONE OF THE EIGHT IS APPLIED YET.** Recording and promoting are separate
+    steps; `apply_reviewer_decisions.py` has not been run for them, so
+    `part1.json` still holds the old readings. That is the next action on this
+    item. The Dicta preview's escalation count consequently reads **1**, not 8 —
+    the survivor is klal 210 w73 (`כבתרייתא` vs `בתרייתא`), which surfaced after
+    the `0AP` re-points; the "8" in the Dicta section above is the pre-ruling
+    figure and is left as the record of what was found.
+
     **DocAI cannot arbitrate any of the four contested ones.** All four fall
     inside NON-MATCHING alignment blocks, so the primary OCR of the Berlin scan
     has no placeable reading there. That is not a clean bill of health — it is
