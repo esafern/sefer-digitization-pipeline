@@ -1194,10 +1194,18 @@ function buildPlaceholders() {
     // two fields are different addresses (item 0BB) and the UI has to keep them
     // visibly apart.
     const titleBtn = document.createElement('button');
-    titleBtn.className = 'klal-title-btn';
-    titleBtn.textContent = '✎ Heading';
-    titleBtn.title = 'Correct a word in this klal\u2019s heading (the `title` field), '
-                   + 'which is stored separately from the body text';
+    // The PENDING mark, added 2026-09-03 (item 0BE). Recording a heading ruling
+    // does not change `title` - promoting it is a separate, manual step, as it is
+    // for every decision here - so without this the button looked identical before
+    // and after a save, and the reviewer recorded klal 89 TWICE because nothing on
+    // screen said the first one had landed.
+    titleBtn.className = 'klal-title-btn' + (k.title_pending ? ' pending' : '');
+    titleBtn.textContent = k.title_pending ? '✎ Heading · pending' : '✎ Heading';
+    titleBtn.title = k.title_pending
+      ? 'A heading correction is recorded for this klal and NOT yet applied to '
+        + 'part1.json. Click to see it.'
+      : 'Correct this klal\u2019s heading (the `title` field), which is stored '
+        + 'separately from the body text';
     titleBtn.onclick = (e) => { e.stopPropagation(); openTitlePanel(k.klal_id); };
     head.appendChild(titleBtn);
     // ...and the word-level flags the INDEX pennant is counting, which the klal
@@ -2211,6 +2219,29 @@ function openPanel(panel) {
 // reviewer retyping the word without it would be recording a different string,
 // and the apply's drift check would refuse the ruling. Better to show what is
 // actually stored.
+// Re-mark the klal's `✎ Heading` button after a ruling is recorded.
+//
+// The button is drawn from the NAV payload (KLALIM/klalById), not from
+// /api/klal, so saving a heading left it unmarked until a full reload - which
+// is most of why a working save read as a no-op. Deliberately narrow: it
+// updates the one klal's cached flag and redraws that one button, rather than
+// refetching 222 nav rows, because the panel auto-closes two seconds later and
+// a nav rebuild mid-close is the kind of race _panelGen exists to prevent.
+async function refreshTitlePending(klalId) {
+  const k = klalById[klalId];
+  if (k) k.title_pending = true;
+  if (mountedKlal[klalId]) delete mountedKlal[klalId];
+  const block = document.getElementById('klal-block-' + klalId);
+  const btn = block && block.querySelector('.klal-title-btn');
+  if (btn) {
+    btn.classList.add('pending');
+    btn.textContent = '\u270e Heading \u00b7 pending';
+    btn.title = 'A heading correction is recorded for this klal and NOT yet '
+              + 'applied to part1.json. Click to see it.';
+  }
+}
+
+
 async function openTitlePanel(klalId) {
   openPanel(titlePanel);
   titlePanelBody.innerHTML = '<p>Loading…</p>';
@@ -2223,7 +2254,21 @@ async function openTitlePanel(klalId) {
   const chips = words.map((w, i) =>
     `<button type="button" class="title-word-chip" data-i="${i}">` +
     `<bdi>${escapeHtml(w)}</bdi><span class="title-word-i">${i}</span></button>`).join(' ');
+  // WHAT IS ALREADY ON RECORD. Without this the panel reopened looking exactly
+  // as it did before the save - `title` still reads as stored, because
+  // recording and applying are separate steps - so a save that worked was
+  // indistinguishable from one that did nothing (item 0BE).
+  const dec = k.title_decision;
+  const pendingHtml = (dec && !dec.applied) ? `
+    <div class="title-pending-note">
+      <b>Recorded, not yet applied.</b> The heading below still reads as stored in
+      <code>part1.json</code>; it changes when <code>apply_reviewer_decisions.py</code>
+      runs. On record: <bdi>${escapeHtml(dec.chosen_text || '(delete)')}</bdi>
+      ${dec.stale ? '<br><b>And it no longer matches the stored heading</b>, so an apply '
+                  + 'will skip it - re-record it against the heading as it now reads.' : ''}
+    </div>` : '';
   titlePanelBody.innerHTML = `
+    ${pendingHtml}
     <div class="panel-section">
       <div class="panel-label">Klal ${klalId} \u2014 heading (the <code>title</code> field)</div>
       <div style="font-size:12px;color:var(--ink-faint);margin-bottom:8px;">
@@ -2279,6 +2324,7 @@ async function openTitlePanel(klalId) {
       }),
     });
     if (!res.ok) { alert('Could not record the heading: ' + await res.text()); return; }
+    await refreshTitlePending(klalId);
     flashSavedThenClose('title-whole-status');
   };
   document.getElementById('save-whole-title-btn').onclick = postWhole;
@@ -2335,6 +2381,7 @@ async function openTitlePanel(klalId) {
       alert('Could not record the heading correction: ' + detail);
       return;
     }
+    await refreshTitlePending(klalId);
     flashSavedThenClose('title-save-status');
   };
   document.getElementById('save-title-correction-btn').onclick = () =>

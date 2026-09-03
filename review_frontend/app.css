@@ -1235,12 +1235,22 @@ textarea.custom-text, input.custom-text {
    0BC nothing on screen could correct one - the five repairs of 2026-08-31
    were hand-edits to part1.json.
 
-   THESE RULES SPENT ONE COMMIT IN A FILE NOTHING LOADS. They were appended to
-   review_frontend/style.css, which index.html does not link and which did not
-   exist until that commit created it - so the chips rendered as bare buttons
-   and the reviewer saw a word and its index with nothing between them. The
-   stylesheet this page loads is app.css, and it is the only one. Same shape as
-   Lesson 29: written, correct, and reaching nobody.
+   TWO BUGS LIVED IN THE FIRST VERSION OF THIS BLOCK, both from writing colours
+   instead of using this file's tokens:
+
+     1. It was appended to review_frontend/style.css, which index.html does not
+        link and which did not exist until that commit created it (`>>` makes a
+        file silently). Every rule was inert.
+     2. Moved here, it rendered BLACK ON BLACK: the chips hardcoded a dark
+        `background: #262b34` with `color: inherit`, and this app is LIGHT
+        (--ink is #1a202c on --paper #ffffff). Dark text on a dark chip. The
+        `var(--rule, ...)` fallbacks were the tell - `--rule` is not a token in
+        this file, so every one of them fell through to a dark literal.
+
+   So: no literal colours below. --paper/--wash/--line/--ink are the surface and
+   --accent/--accent-wash mark the picked chip, exactly as .disputed-option
+   already does. A panel that invents its own palette is a second copy of the
+   theme, which is Lesson 13 in CSS.
 
    The chips carry their word's index deliberately - a heading index is NOT a
    body index (item 0BB) - so the number has to read as an annotation and not
@@ -1249,40 +1259,75 @@ textarea.custom-text, input.custom-text {
    gap alone left them touching at the sizes this actually renders at. */
 .klal-title-btn {
   background: none;
-  border: 1px solid var(--rule, #3a3f4b);
-  color: var(--ink-faint, #a0aec0);
-  border-radius: 4px;
+  border: 1px solid var(--line);
+  color: var(--ink-soft);
+  border-radius: var(--radius-sm);
   font: inherit;
   font-size: 12px;
   padding: 1px 8px;
   margin-inline-start: 6px;
   cursor: pointer;
 }
-.klal-title-btn:hover { color: var(--ink, #e8e8e8); border-color: #5a6270; }
+.klal-title-btn:hover { color: var(--ink); border-color: var(--accent); }
+/* A heading ruling is RECORDED, not applied - the same two-step boundary every
+   other decision here has. Without this the button looked identical before and
+   after saving, which is exactly what happened: the reviewer saved klal 89, saw
+   nothing change, and saved the identical ruling again half an hour later. */
+.klal-title-btn.pending {
+  border-color: var(--pending);
+  color: var(--pending);
+  font-weight: 600;
+}
 
 .title-word-row { display: flex; flex-wrap: wrap; gap: 6px; }
 .title-word-chip {
-  background: #262b34;
-  border: 1px solid #3a3f4b;
-  border-radius: 4px;
-  color: inherit;
-  font: inherit;
-  font-size: 15px;
+  background: var(--wash);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  font-family: 'Frank Ruhl Libre', serif;
+  font-size: 17px;
   padding: 3px 9px;
   cursor: pointer;
   display: inline-flex;
   align-items: baseline;
-  gap: 8px;
+  gap: 6px;
   line-height: 1.5;
 }
-.title-word-chip:hover { border-color: #5a6270; }
-.title-word-chip.picked { border-color: #3182ce; background: #2b6cb033; }
+.title-word-chip:hover { border-color: var(--accent); background: var(--accent-wash); }
+.title-word-chip.picked {
+  border-color: var(--accent);
+  background: var(--accent-wash);
+  box-shadow: 0 0 0 1px var(--accent);
+}
 .title-word-i {
+  font-family: 'Inter', sans-serif;
   font-size: 10px;
-  color: var(--ink-faint, #a0aec0);
+  color: var(--ink-faint);
   /* The separator proper. `gap` alone is not enough here - see the note above. */
   margin-inline-start: 4px;
   padding-inline-start: 6px;
-  border-inline-start: 1px solid #3a3f4b;
+  border-inline-start: 1px solid var(--line);
 }
-#title-panel textarea { width: 100%; font-size: 15px; line-height: 1.6; }
+#title-panel textarea {
+  font-family: 'Frank Ruhl Libre', serif;
+  font-size: 17px;
+  line-height: 1.6;
+}
+/* "Recorded, not yet applied" - said in the panel as well as on the button,
+   because the panel is where a reviewer is looking when they wonder whether the
+   last save landed. */
+.title-pending-note {
+  border: 1.5px solid var(--pending);
+  background: #fffaf0;
+  border-radius: var(--radius-sm);
+  padding: var(--sp-2) var(--sp-3);
+  margin-bottom: var(--sp-2);
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+.title-pending-note bdi {
+  font-family: 'Frank Ruhl Libre', serif;
+  font-size: 16px;
+  color: var(--ink);
+}

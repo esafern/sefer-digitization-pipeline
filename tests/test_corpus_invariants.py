@@ -775,6 +775,72 @@ def test_the_title_prefix_check_can_actually_fail():
     assert title_prefix_divergences([short]) == []
 
 
+def test_the_frontend_only_loads_stylesheets_that_exist():
+    """Every stylesheet index.html links must be a real file, and every .css file
+    in review_frontend/ must be linked by it.
+
+    BOTH DIRECTIONS, because the bug was the second one. The heading panel's
+    rules were appended to `review_frontend/style.css` - a file `>>` created on
+    the spot, that index.html has never linked - so they were inert, and the
+    symptom reached the reviewer as a visual defect ("need a space after the
+    word") rather than as a missing file. A one-way check would have passed.
+
+    This is Lesson 29's shape in CSS and Lesson 32's in miniature: a stylesheet
+    nothing loads is a stylesheet that does not run.
+    """
+    here = os.path.join(REPO, "review_frontend")
+    html = open(os.path.join(here, "index.html"), encoding="utf-8").read()
+    linked = {m.split("?")[0].lstrip("/")
+              for m in re.findall(r'<link[^>]+href="([^"]+\.css[^"]*)"', html)}
+    on_disk = {f for f in os.listdir(here) if f.endswith(".css")}
+
+    missing = sorted(f for f in linked if not os.path.exists(os.path.join(here, f)))
+    assert not missing, f"index.html links stylesheet(s) that do not exist: {missing}"
+
+    unloaded = sorted(on_disk - linked)
+    assert not unloaded, (
+        f"These stylesheets exist but nothing loads them: {unloaded}. Rules in them are "
+        f"inert - either link the file from index.html or fold its rules into the one that "
+        f"is loaded. A stylesheet nobody serves is not styling."
+    )
+
+
+def test_the_heading_panel_uses_theme_tokens_rather_than_its_own_colours():
+    """The heading panel's rules rendered BLACK ON BLACK on first contact with a
+    reviewer: they hardcoded a dark `background: #262b34` with `color: inherit`,
+    and this app is light (--ink #1a202c on --paper #ffffff). The `var(--rule,
+    #3a3f4b)` fallbacks were the tell - `--rule` is not a token in this file, so
+    every one of them fell through to its dark literal.
+
+    So the rule this pins is: the heading panel names colours through the
+    variables :root actually defines. A block that invents its own palette is a
+    second copy of the theme, and it agrees with the real one right up until it
+    does not - Lesson 13, in CSS.
+    """
+    css = open(os.path.join(REPO, "review_frontend", "app.css"), encoding="utf-8").read()
+    root = css[css.index(":root"):css.index("}", css.index(":root"))]
+    defined = set(re.findall(r"(--[a-z0-9-]+):", root))
+
+    start = css.index("/* ---- The heading panel")
+    block = css[start:]
+    body = re.sub(r"/\*.*?\*/", "", block, flags=re.S)  # rules only, not the commentary
+
+    used = set(re.findall(r"var\((--[a-z0-9-]+)", body))
+    undefined = sorted(used - defined)
+    assert not undefined, (
+        f"The heading panel uses CSS variable(s) :root does not define: {undefined}. "
+        f"Each one silently falls through to its fallback, which is how this block "
+        f"rendered black on black."
+    )
+
+    hex_colours = set(re.findall(r"#[0-9a-fA-F]{3,8}", body))
+    # One literal is allowed and named: the pending wash, which has no token.
+    assert hex_colours <= {"#fffaf0"}, (
+        f"The heading panel hardcodes colour(s): {sorted(hex_colours)}. Use the :root "
+        f"tokens (--ink/--paper/--wash/--line/--accent/--pending) so it follows the theme."
+    )
+
+
 def ligature_offenders(klalim, manual_decisions):
     """Which tokens in `klalim` are a dropped-lamed corrupt form NOBODY ruled on?
 

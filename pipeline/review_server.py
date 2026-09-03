@@ -404,6 +404,15 @@ def api_klalim(part_num=1, on_klal_states=None):
     flagged = {kid for (kid, widx), r in all_klal_flags.items()
                if _flag_still_open(kid, widx, r)}
     punct_decided = rd.all_current("punctuation_choice")
+    # Heading rulings recorded but not yet promoted into part1.json. Loaded ONCE
+    # here rather than per klal, for the reason the comment above the
+    # all_klal_flags load gives: a per-klal rd call re-reads the whole ledger and
+    # this loop runs 222 times.
+    _applied_ids = rd.applied_decision_ids()
+    _pending_title_klalim = {
+        kid for (kid, _widx), rec in rd.all_current("title_correction").items()
+        if rec["id"] not in _applied_ids
+    }
 
     # Manual corrections (2026-08-13, "flag any word and replace it") are
     # born already-decided - there's no machine-detected "open" phase to
@@ -609,6 +618,13 @@ def api_klalim(part_num=1, on_klal_states=None):
         out.append({
             "klal_id": kid,
             "title": k.get("title", ""),
+            # Is a heading ruling recorded and not yet applied? The klal header's
+            # `✎ Heading` button is built from THIS payload, not from /api/klal,
+            # so a pending mark has to be served here or it cannot be drawn -
+            # the same trap this file's own comment records two fields below,
+            # where an ai_flag count was added to /api/klal and never rendered
+            # because the header never sees that response. Item 0BE.
+            "title_pending": kid in _pending_title_klalim,
             # The klal's own gematria marker, e.g. `סו` for 66. ADDED 2026-08-26
             # (reviewer: "add the gematria form of the klal to the context
             # header") - api_klal has always carried it, but the nav//api/klalim
@@ -1132,6 +1148,17 @@ def api_klal(klal_id):
         # rather than by showing `title` as a second copy above it. Computed in
         # corpus_io so the audit tool and the UI cannot drift apart.
         "title_word_count": cio.title_word_span(k.get("title", ""), k.get("clean_text", "")),
+        # A HEADING RULING ON RECORD, if there is one, and whether it has been
+        # promoted into part1.json yet.
+        #
+        # ADDED 2026-09-03 (item 0BE) because its absence had a cost the same
+        # day the panel shipped: the reviewer trimmed klal 89's heading, nothing
+        # on screen acknowledged it - `title` still read as stored, because
+        # recording and applying are separate steps here - and they recorded the
+        # identical ruling again half an hour later. Every other decision in this
+        # app says "recorded, pending" somewhere visible; this one said nothing,
+        # which made a working save indistinguishable from a broken one.
+        "title_decision": _title_decision(k),
         "page": _klal_page,
         "page_trusted": _klal_page_trusted,
         "region": region_entry.get("bbox"),
@@ -1535,6 +1562,49 @@ def api_post_manual_correction(body):
         note=body.get("note"),
     )
     return record
+
+
+def _title_decision(klal):
+    """The current heading ruling for this klal, as the UI needs to show it.
+
+    `applied` is the thing that matters on screen: a recorded ruling has NOT
+    changed `title` yet, and the panel has to say so or a reviewer cannot tell a
+    save that worked from one that did nothing. Derived rather than stored -
+    `rd.applied_decision_ids()` is the same source apply_reviewer_decisions.py
+    uses to decide what it has already promoted, so the two cannot disagree.
+
+    Returns None when nothing is on record, which is the common case (2 of 222
+    klalim as of today).
+    """
+    rec = rd.all_current("title_correction").get((klal["klal_id"], 0))
+    if rec is None:
+        # A word-level heading ruling lives at its own index, so look wider
+        # before concluding there is nothing: any title_correction on this klal
+        # counts for the button's pending mark.
+        for (kid, _widx), r in rd.all_current("title_correction").items():
+            if kid == klal["klal_id"]:
+                rec = r
+                break
+    if rec is None:
+        return None
+    snap = rec.get("candidate_snapshot") or {}
+    applied = rec["id"] in rd.applied_decision_ids()
+    return {
+        "id": rec["id"],
+        "whole": bool(snap.get("whole")),
+        "word_index": rec.get("word_index"),
+        "chosen_text": rec.get("chosen_text"),
+        "note": rec.get("note"),
+        "ts": rec.get("ts"),
+        "by_human": _ruled_by_human(rec),
+        "applied": applied,
+        # Has the heading moved under the ruling since it was recorded? A
+        # whole-field ruling drift-checks the ENTIRE stored title, so a reviewer
+        # needs to see that before wondering why an apply skipped it.
+        "stale": bool(snap.get("whole")
+                      and (klal.get("title") or "") != (snap.get("original_title") or "")
+                      and not applied),
+    }
 
 
 def api_post_title_correction(body):

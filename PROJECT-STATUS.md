@@ -534,6 +534,59 @@ reliability check, and every dispute still needs the ink or a different engine.
 
     Full suite **479 passed, 1 skipped**.
 
+0BE. **[2026-09-03, reviewer] THE HEADING CHIPS WERE BLACK ON BLACK, AND A SAVE
+    THAT WORKED LOOKED LIKE A SAVE THAT DID NOTHING — the reviewer recorded klal
+    89 twice. Both fixed, both gated.**
+
+    Reviewer: *"individ words are black on black. clicked save heading nothing
+    changed"*.
+
+    **BLACK ON BLACK — I wrote a second copy of the theme.** The chips hardcoded
+    `background: #262b34` with `color: inherit`, and this app is LIGHT: `--ink`
+    is `#1a202c` on `--paper #ffffff`. Dark text on a dark chip. The tell was in
+    the same block — `var(--rule, #3a3f4b)`, and **`--rule` is not a token in
+    this file at all**, so every one of those fell through to its dark literal.
+    Rewritten on `--wash`/`--line`/`--ink`/`--accent`/`--accent-wash`, the same
+    tokens `.disputed-option` already uses. Lesson 13 in CSS: a block that
+    invents its own palette agrees with the real theme until it doesn't.
+
+    **"NOTHING CHANGED" — the save had worked, and nothing said so.** Two
+    `title_correction` rows for klal 89 are in the ledger, identical, 31 minutes
+    apart. Recording and applying are separate steps here, so `title` correctly
+    still read as stored — but **every other decision in this app shows a
+    pending state and this one showed none**, which makes a working save
+    indistinguishable from a broken one. That is the failure, not the duplicate.
+
+    Fixed in three places, because the button and the panel are fed by different
+    endpoints:
+
+    - `/api/klalim` serves `title_pending` — it had to be THERE, not just on
+      `/api/klal`, because the klal header is built from the nav payload. This
+      file already carries a comment recording that exact trap, from the time an
+      `ai_flag` count was added to `/api/klal` and never rendered because the
+      header never sees that response. Loaded once for all 222 klalim, not per
+      klal.
+    - `/api/klal` serves `title_decision` — what is on record, `applied`, and
+      `stale` (a whole-heading ruling drift-checks the ENTIRE stored title, so a
+      reviewer needs to see when the heading has moved under it).
+    - The button reads `✎ Heading · pending` in the pending colour, the panel
+      opens with a "Recorded, not yet applied" note naming the recorded text, and
+      a save re-marks the button without refetching the nav.
+
+    **Three gated tests, each one proven to fail before being kept** (Lesson 25 —
+    I ran each against a synthetic input that must trip it):
+
+    - **stylesheets, BOTH directions.** Every `<link>` resolves to a real file,
+      AND every `.css` in `review_frontend/` is linked. The second direction is
+      the one that mattered: item `0BD`'s inert `style.css` would have passed a
+      one-way check.
+    - **the heading block uses no undefined CSS variable** — `--rule` would have
+      failed this on the day it was written.
+    - **the heading block hardcodes no colour** except one named exception, the
+      pending wash, which has no token.
+
+    Full suite **481 passed, 1 skipped**.
+
 0AW. **[2026-09-03] WHY `הרל"ם → הרמב"ם` WAS PROPOSED: an abbreviation naming a
     DIFFERENT authority is indistinguishable, to every detector here, from a
     misprint of a commoner one. Reviewer ruled KEEP from the ink. 11 more
