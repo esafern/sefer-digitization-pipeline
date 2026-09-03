@@ -14,10 +14,10 @@ and stop. **Almost nobody is working the middle**: getting *one* important
 printed work to publishable accuracy, cheaply, with a real audit trail.
 
 **Our niche is the disagreement, not the OCR.** We don't compete on
-recognition — Document AI does that. The pipeline is built around what happens
-*after*: word-level bounding boxes, an explicit diff against the stored text,
-image-grounded VLM adjudication of each disputed token, tri-state human review,
-and an append-only decision ledger.
+recognition — Document AI (DocAI) does that. The pipeline is built around
+what happens *after*: word-level bounding boxes, an explicit diff against
+the stored text, image-grounded VLM adjudication of each disputed token,
+tri-state human review, and an append-only decision ledger.
 
 **Four things here that no surveyed platform has:**
 
@@ -196,7 +196,7 @@ To ensure high corpus fidelity, an independent second/third witness engine is ne
 | **Claude vision (Anthropic, via the coding session's own image-reading capability)** | Foundation Multimodal AI | Genuinely different model family from Google (both DocAI and the Gemini-based witness/adjudicator); zero integration cost as an interactive check | Not batch-callable by a standalone script without a provisioned `ANTHROPIC_API_KEY` (none present in this environment) | **Used successfully, live, 2026-08-21** — directly reading a disputed scan crop correctly identified a real DocAI letter-misread (ט read as פ) that Gemini-based tooling had missed |
 | **Azure AI Document Intelligence** | Commercial Cloud OCR (Microsoft) | Confirmed Hebrew support in its Read model; the only candidate here that could replace/complement DocAI itself, not just the witness/adjudicator layer | Needs a new Azure account/API key, not present in this environment; unverified in practice | **Feasibility-checked 2026-08-21, not tested** |
 | **AWS Textract** | Commercial Cloud OCR (Amazon) | — | Not researched in depth | **Unresearched as of 2026-08-21** |
-| **Dicta OCR Engine** | Proprietary Deep Learning | Best-in-class Rabbinic Hebrew & Rashi recognition. **MEASURED 2026-08-31**: 94.8% word accuracy / 98.5% lexicon hit on a Rashi-script edition; 77.6% / 83.4% on this project's square Berlin scan | **Rashi-only.** On square type it is the worst engine available here — route it at Rashi editions and never at the Berlin scan (PROJECT-STATUS.md item 0J) | **Endpoint confirmed 2026-08-31: <https://rashiocr.dicta.org.il/>.** Earlier "workflow unconfirmed" notes were searching `ocr.dicta.org.il`, a different tool |
+| **Dicta OCR Engine** | Proprietary Deep Learning | Best-in-class Rabbinic Hebrew & Rashi recognition. **MEASURED 2026-08-31**: 94.8% word accuracy / 98.5% lexicon hit on a Rashi-script edition; 77.6% / 83.4% on this project's square Berlin scan | **Rashi-only.** On square type it is the worst engine available here — route it at Rashi editions and never at the Berlin scan (PROJECT-STATUS.md item 0J) | **Endpoint confirmed 2026-08-31: <https://rashiocr.dicta.org.il/>** (earlier "workflow unconfirmed" notes were searching `ocr.dicta.org.il`, a different tool). **Recommended as the first-tier witness for any future Rashi-script edition** (e.g. the Rashi-script Livorno first printing) — never for the Berlin square scan, where it measured worst |
 
 
 ## 3. Feature comparison
@@ -303,18 +303,20 @@ independently confirmed.
 
 ## Bottom line
 
-The academic world is building multi-million-euro infrastructure to transcribe
-thousands of damaged medieval fragments. This pipeline does something different
-and smaller: take one classic printed work — *Klalei HaGemara*, 667 klalim — and
-get it to publishable accuracy with a defensible audit trail, run locally by one
-person. Document AI supplies the baseline OCR; Surya and a VLM supply witnesses
-that fail differently; crop-level adjudication, a catalogued repair filter for
-the printing's own defects, the tri-state review model and the protected decision
-ledger supply the accuracy and the provenance. That combination is not currently
-available anywhere else, and it fits exactly the class of work Sefaria is
-missing — with one finding worth handing to the field whether or not anyone
-adopts the pipeline: **on real historical print, engine agreement is worth far
-less than everyone assumes, and it is cheap to measure.**
+The academic world is building multi-million-euro infrastructure to
+transcribe thousands of damaged medieval fragments. This pipeline does
+something different and smaller: take one classic printed work — Yad
+Malachi's part one, *Klalei HaGemara*, 667 klalim in full, the first 222 of
+them fully reviewed through this pipeline — and get it to publishable
+accuracy with a defensible audit trail, run locally by one person. DocAI
+supplies the baseline OCR; Surya and a VLM supply witnesses that fail
+differently; crop-level adjudication, a catalogued repair filter for the
+printing's own defects, the tri-state review model and the protected
+decision ledger supply the accuracy and the provenance. That combination is
+not currently available anywhere else, and it fits exactly the class of work
+Sefaria is missing — with one finding worth handing to the field whether or
+not anyone adopts the pipeline: **on real historical print, engine agreement
+is worth far less than everyone assumes, and it is cheap to measure.**
 
 ---
 
