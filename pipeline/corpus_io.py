@@ -301,6 +301,56 @@ def words_of(klal_or_text):
     return (text or "").split(" ")
 
 
+def occurrence_of(words, index):
+    """Which occurrence of `words[index]` this position is, 1-based.
+
+    THE STABLE HALF OF A WORD'S ADDRESS. A `word_index` is invalidated by ANY
+    edit earlier in the klal - measured over Part 1, an insertion or deletion at
+    a random point invalidates 100% of the positions after it, which is what
+    items 0AB (105 stale rulings), 0AP (40 re-pointed by hand) and Lesson 35 are
+    all about. `(word, occurrence)` is invalidated only by an edit that adds or
+    removes THE SAME WORD earlier in the same klal: 0.3% of later positions,
+    averaged over every edit point in Part 1. That is 318x more edits survived.
+
+    Why the ordinal and not the word alone: the bare word is not an address at
+    all here. 47% of Part 1's word positions hold a word that repeats inside its
+    own klal - klal 54 has 44 `לא`, klal 74 has 39 `אמר` - so `(klal, word)`
+    names one position for barely half the corpus.
+
+    And why this is not the "search the text for it" recovery that
+    review_server._manual_snapshot explicitly REJECTS: that one asks "where does
+    this word occur", and a unique match is not evidence of position. This
+    records WHICH occurrence was ruled on at ruling time, so recovery is a
+    lookup rather than a search. It is a second independent signal beside the
+    snapshot's bbox (Lesson 9), not a replacement for it.
+
+    Returns None for an out-of-range index rather than raising: a snapshot is an
+    audit record and must never be the thing that stops a ruling being written.
+    """
+    if not (0 <= index < len(words)):
+        return None
+    target = words[index]
+    return sum(1 for w in words[:index + 1] if w == target)
+
+
+def index_of_occurrence(words, word, occurrence):
+    """The index of the `occurrence`-th `word` in `words`, or None.
+
+    The inverse of occurrence_of. None means the address no longer resolves -
+    the word was corrected away, or the klal now holds fewer of them - which is
+    a REPORTABLE state, not a reason to guess at a nearby position.
+    """
+    if not word or not occurrence or occurrence < 1:
+        return None
+    seen = 0
+    for i, w in enumerate(words):
+        if w == word:
+            seen += 1
+            if seen == occurrence:
+                return i
+    return None
+
+
 def word_count_of(klal_or_text):
     """len(words_of(...)), for the callers that only compare counts."""
     return len(words_of(klal_or_text))

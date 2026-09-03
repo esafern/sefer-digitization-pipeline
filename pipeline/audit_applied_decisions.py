@@ -408,6 +408,63 @@ def main():
         for d in drifted:
             print(f"  {d}")
 
+    report_stale_addresses()
+
+
+def report_stale_addresses():
+    """Every ruling whose recorded word_index no longer holds its own word, and
+    whether a stable address could still say where it went.
+
+    ADDED 2026-09-03 (item 0BB) as a REPORT, not a repair. The counts here are
+    the honest answer to "does content-addressing fix drift": it does, but the
+    ordinal has to have been recorded at ruling time, and for every ruling made
+    before this existed it was not - so most of what is stale today is stale
+    permanently, and the value of the change is forward-looking.
+
+    Note what dominates and why it is not a defect: an APPLIED ruling normally
+    cannot find its own word, because applying it is what replaced that word.
+    Those are honoured rulings, not lost ones - the same distinction item 0AB
+    had to draw when it counted 105 "orphans" and audit_applied_decisions found
+    55 shifted and 2 genuinely missing.
+    """
+    klalim = cio.load_part1_by_id()
+    applied = rd.applied_decision_ids()
+    buckets = {}
+    for dtype in ("candidate_choice", "disputed_choice", "manual_correction", "title_correction"):
+        for (kid, widx), rec in rd.all_current(dtype).items():
+            klal = klalim.get(kid)
+            if klal is None or widx is None:
+                continue
+            words = (cio.title_words_of(klal) if dtype == "title_correction"
+                     else cio.words_of(klal))
+            snap = rec.get("candidate_snapshot") or {}
+            if snap.get("original_word") is None:
+                continue
+            idx, how = rd.resolve_word_index(rec, words)
+            if how == "index":
+                continue  # the address is fine
+            was_applied = rec["id"] in applied
+            key = ("applied" if was_applied else "UNAPPLIED", how or "unresolvable")
+            buckets.setdefault(key, []).append((dtype, kid, widx, snap["original_word"]))
+
+    if not buckets:
+        print("\n  no ruling carries a stale address.")
+        return
+    print("\n  rulings whose recorded word_index no longer holds their own word:")
+    for (state, how) in sorted(buckets):
+        rows = buckets[(state, how)]
+        note = {
+            "unresolvable": "word is gone - for an APPLIED ruling this is the normal, "
+                            "correct outcome; for an unapplied one it needs a human",
+            "occurrence": "recovered from the recorded occurrence ordinal (item 0BB)",
+            "unique": "the word occurs exactly once, so there is only one thing it can "
+                      "mean - a HINT for a human re-point, never an automatic move",
+        }[how]
+        print(f"    {state:<10} {how:<13} {len(rows):>4}  - {note}")
+        if state == "UNAPPLIED" and how != "unresolvable":
+            for dtype, kid, widx, word in rows[:10]:
+                print(f"        {dtype} klal {kid} w{widx} {word!r}")
+
 
 if __name__ == "__main__":
     main()

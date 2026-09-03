@@ -246,6 +246,85 @@ def test_flag_labels_are_well_formed_label_and_colour_pairs():
         )
 
 
+# --- the stable half of a word's address: (word, occurrence) -----------------
+# Item 0BB. A word_index is invalidated by ANY earlier edit; `(word,
+# occurrence)` only by an edit touching the same word earlier in the klal.
+# Measured over Part 1: 100% of later positions vs 0.3%.
+
+def test_occurrence_of_and_its_inverse_round_trip():
+    words = "אלף בית אלף גימל אלף".split()
+    assert [cio.occurrence_of(words, i) for i in range(5)] == [1, 1, 2, 1, 3]
+    for i, w in enumerate(words):
+        assert cio.index_of_occurrence(words, w, cio.occurrence_of(words, i)) == i
+
+
+def test_an_occurrence_address_survives_an_edit_that_a_word_index_does_not():
+    """The property the whole scheme rests on, asserted directly rather than
+    assumed. Inserting a word at the front moves every index by one; the third
+    `אלף` is still the third `אלף`."""
+    before = "אלף בית אלף גימל אלף".split()
+    ruled_at = 4
+    address = (before[ruled_at], cio.occurrence_of(before, ruled_at))
+    assert address == ("אלף", 3)
+
+    after = ["דלת"] + before
+    assert after[ruled_at] != before[ruled_at], "the numeric index must have broken"
+    assert cio.index_of_occurrence(after, *address) == ruled_at + 1
+
+    # And the case it does NOT survive, stated so nobody over-trusts it: an edit
+    # that adds the SAME word earlier renumbers the ordinal, so the address now
+    # names a DIFFERENT POSITION - the text there is identical, which is exactly
+    # what makes this failure silent and worth pinning.
+    same_word_added = ["אלף"] + before
+    moved_to = cio.index_of_occurrence(same_word_added, *address)
+    assert moved_to == 3, "the third אלף is now an earlier one"
+    assert moved_to != ruled_at + 1, "and it is NOT the position that was ruled on"
+    assert same_word_added[moved_to] == before[ruled_at], (
+        "the word text still matches, which is why this cannot be caught by a drift check"
+    )
+
+
+def test_index_of_occurrence_reports_rather_than_guesses():
+    words = "אלף בית גימל".split()
+    assert cio.index_of_occurrence(words, "אלף", 2) is None, "no second one exists"
+    assert cio.index_of_occurrence(words, "דלת", 1) is None
+    assert cio.index_of_occurrence(words, "אלף", 0) is None
+    assert cio.occurrence_of(words, 99) is None
+
+
+def test_resolve_word_index_names_HOW_it_resolved():
+    """The `how` is the point: an exact index and a lucky unique text match are
+    not the same evidence, and review_server._manual_snapshot records that a
+    unique text match is explicitly NOT evidence of position. The resolver must
+    say which one it used so a caller can treat them differently."""
+    words = "אלף בית אלף גימל אלף".split()
+    snap = lambda **kw: {"candidate_snapshot": kw}
+
+    assert rd.resolve_word_index(
+        dict(snap(original_word="אלף"), word_index=2), words) == (2, "index")
+    assert rd.resolve_word_index(
+        dict(snap(original_word="אלף", word_occurrence=3), word_index=99), words) == (4, "occurrence")
+    assert rd.resolve_word_index(
+        dict(snap(original_word="גימל"), word_index=99), words) == (3, "unique")
+    # Ambiguous with no recorded occurrence: refuse, do not pick one.
+    assert rd.resolve_word_index(
+        dict(snap(original_word="אלף"), word_index=99), words) == (None, None)
+    # The word is gone entirely - the ordinary shape of an APPLIED ruling.
+    assert rd.resolve_word_index(
+        dict(snap(original_word="דלת"), word_index=1), words) == (None, None)
+    # A recorded occurrence that no longer exists must not fall back to a
+    # different occurrence of the same word.
+    assert rd.resolve_word_index(
+        dict(snap(original_word="אלף", word_occurrence=9), word_index=99), words) == (None, None)
+
+
+def test_a_ruling_with_no_snapshot_word_resolves_to_nothing():
+    """klal_flags mostly carry no original_word. The resolver must return
+    (None, None) rather than raising - it runs over the whole ledger."""
+    assert rd.resolve_word_index({"word_index": 0}, ["אלף"]) == (None, None)
+    assert rd.resolve_word_index({"candidate_snapshot": {}}, ["אלף"]) == (None, None)
+
+
 # --- corpus_io: WHERE the corpus is, resolved at call time -------------------
 # Item 0AR's structural blocker, and the first step of its plan. `corpus_io.REPO`
 # was `dirname(dirname(__file__))` with ~35 constants derived from it at import,

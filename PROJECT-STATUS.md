@@ -352,6 +352,82 @@ reliability check, and every dispute still needs the ink or a different engine.
     reading the same ink as DocAI, Surya and the VLM, and item `0AQ` flagged that
     as the open question against Lesson 24.
 
+0BB. **[2026-09-03, reviewer proposal] CONTENT-ADDRESSING FOR DRIFT: yes, but
+    the address must be `(klal, word, OCCURRENCE)` — the bare word names one
+    position for barely half the corpus — and the title cannot share the body's
+    namespace, because the body reprints the title. Primitives, snapshot field
+    and a stale-address report are in; nothing re-keys the ledger.**
+
+    Reviewer: *"can we address drift by using klal+word as the index? same for
+    title - klal+0"*. Measured before answering, and the measurements changed the
+    answer twice.
+
+    **1. `(klal, word)` alone is not an address here.** Of Part 1's 52,627 word
+    positions, **24,746 (47.0%) hold a word that repeats inside its own klal**,
+    and 213 of 222 klalim contain at least one repeat. Klal 54 has 44 `לא`, klal
+    74 has 39 `אמר`, klal 75 has 37 `ר'`. So the bare word names a unique
+    position for 53% of the corpus and is ambiguous for the rest.
+
+    **2. `(klal, word, occurrence)` is what the proposal wants, and it is worth
+    318x.** Averaged over every single-word edit point in Part 1: a numeric
+    `word_index` is invalidated by **100%** of the edits before it — that is the
+    definition of the thing — while `(word, occurrence)` is invalidated only by
+    an edit that adds or removes THE SAME WORD earlier in the same klal, which is
+    **0.3%** of later positions.
+
+    | | invalidated by an edit earlier in the klal |
+    |---|---:|
+    | `word_index` | 16,450,912 / 16,450,912 (100%) |
+    | `(word, occurrence)` | 51,723 / 16,450,912 (0.3%) |
+
+    **3. The title CANNOT be `klal+0` in a shared namespace, and the number is
+    the argument: 1,286 of Part 1's 1,287 title words also occur in their own
+    body — 99.9%.** That is not a coincidence to be worked around, it is the
+    field's definition: the body reprints the heading verbatim before continuing,
+    so a content address cannot tell the two apart. **The single exception is
+    klal 186 `המקיל`, whose body reads `המקיל'` — i.e. the ONE title word that
+    does not collide is the one already flagged as a defect.** The separate
+    `title_correction` type (item `0AY`) is therefore required, not incidental.
+
+    **What was built — additive, and deliberately not a re-key.**
+    `corpus_io.occurrence_of` / `index_of_occurrence`; `word_occurrence` recorded
+    in every new `manual_correction` snapshot beside the bbox item `0AP` added;
+    and `review_decisions.resolve_word_index(rec, words)` returning `(index,
+    how)` where `how` is `index` / `occurrence` / `unique` / None.
+
+    **It REPORTS; it does not relocate.** `review_server._manual_snapshot`'s
+    docstring already records that "a unique text match is not evidence of
+    position" — measured and rejected when `MAX_EXPLAINABLE_SHIFT` was written —
+    and that judgement stands. `occurrence` is a stronger claim than that,
+    because the ordinal was recorded AT RULING TIME rather than inferred now, but
+    promoting it to an automatic re-point is a separate decision and has not been
+    taken. It pairs with the bbox as the second independent signal re-pointing
+    requires (Lesson 9).
+
+    **The live exposure is small, and most of what looks stale is not.**
+    `audit_applied_decisions.py` now ends with the breakdown:
+
+    | | |
+    |---|---:|
+    | applied, word gone — **the normal outcome; applying it replaced the word** | 245 |
+    | applied, recoverable | 3 |
+    | **UNAPPLIED, unresolvable — needs a human** | **17** |
+    | **UNAPPLIED, recoverable as a unique word** | **5** |
+
+    So the drift that actually costs something today is ~22 rulings, not the 270
+    a naive "does the word still sit at its index" count returns — the same trap
+    item `0AB` fell into at 105.
+
+    **Therefore the honest scope of the fix: it is forward-looking.** No ruling
+    made before today recorded an ordinal, so the 22 above cannot be recovered by
+    it; they need the ink or the bbox. What changes is that the next word-count
+    edit does not manufacture a new batch. A full re-key of the 3,100-row
+    append-only ledger — with `all_current()` keyed on `(klal_id, word_index)`
+    everywhere and `app.js` computing the index from a click — is a much larger
+    change and is NOT proposed here.
+
+    Full suite **475 passed, 1 skipped**.
+
 0AW. **[2026-09-03] WHY `הרל"ם → הרמב"ם` WAS PROPOSED: an abbreviation naming a
     DIFFERENT authority is indistinguishable, to every detector here, from a
     misprint of a commoner one. Reviewer ruled KEEP from the ink. 11 more

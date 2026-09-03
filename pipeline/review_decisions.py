@@ -184,6 +184,57 @@ def ruled_by_human(rec):
 _is_human_reviewer = is_human_reviewer  # pre-2026-09-03 internal name
 
 
+def resolve_word_index(rec, words):
+    """Where does this ruling's word sit in `words` TODAY? -> (index, how).
+
+    `how` is one of:
+      "index"      - the recorded word_index still holds the recorded word.
+      "occurrence" - it does not, but the ruling recorded WHICH occurrence of
+                     that word it was, and that occurrence exists. This is a
+                     lookup, not a search.
+      "unique"     - no occurrence was recorded (every ruling before
+                     2026-09-03), and the word occurs exactly once in the klal,
+                     so there is only one thing it can mean.
+      None         - unresolvable. The word is gone (usually because the ruling
+                     was APPLIED and the word it names was replaced), or it is
+                     ambiguous and nothing recorded says which one.
+
+    DELIBERATELY A REPORTER, NOT A MUTATOR. Nothing in the apply path calls
+    this to silently relocate a ruling: review_server._manual_snapshot's own
+    docstring records that "a unique text match is not evidence of position",
+    measured and rejected, and that judgement stands - `"unique"` in particular
+    is a hint for a human re-point (item 0AP's flow, which pairs it with the
+    snapshot's bbox), never an authority to move a correction onto a word
+    nobody looked at. `"occurrence"` is stronger because the ruling recorded
+    the ordinal at ruling time rather than inferring it now, but promoting it
+    to an automatic re-point is a separate decision that has not been taken.
+    """
+    snap = rec.get("candidate_snapshot") or {}
+    word = snap.get("original_word")
+    idx = rec.get("word_index")
+    if word is None or idx is None:
+        return None, None
+    if 0 <= idx < len(words) and words[idx] == word:
+        return idx, "index"
+    occurrence = snap.get("word_occurrence")
+    if occurrence:
+        found = _cio().index_of_occurrence(words, word, occurrence)
+        if found is not None:
+            return found, "occurrence"
+    hits = [i for i, w in enumerate(words) if w == word]
+    if len(hits) == 1:
+        return hits[0], "unique"
+    return None, None
+
+
+def _cio():
+    """corpus_io imported lazily: this module is imported BY corpus_io's callers
+    and by tools that do not need the corpus loaders, and a top-level import
+    would make the ledger depend on the whole data layer to append one row."""
+    import corpus_io
+    return corpus_io
+
+
 def append_decision(decision_type, klal_id, word_index=None, chosen_source=None,
                      chosen_text=None, candidate_snapshot=None, needs_revisit=None,
                      note=None, reviewer="local", applied_decision_id=None,

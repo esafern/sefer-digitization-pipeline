@@ -1564,6 +1564,15 @@ def _manual_snapshot(klal_id, word_index, original_word):
         klalim_by_id, _ = _load_klalim(part_num=part_num)
         klal = klalim_by_id.get(klal_id)
         if klal is not None:
+            # WHICH OCCURRENCE of that word this is, since 2026-09-03 (item 0BB).
+            # The other half of a stable address, and the cheap half: a
+            # word_index is invalidated by any earlier edit (100% of later
+            # positions), `(word, occurrence)` only by an edit touching the same
+            # word earlier in the klal (0.3%). It does not replace the bbox
+            # above - it is the second independent signal that re-pointing needs
+            # (Lesson 9), and unlike a text search it records what was ruled on
+            # rather than asking where the word happens to be now.
+            snapshot["word_occurrence"] = cio.occurrence_of(cio.words_of(klal), word_index)
             bbox, page = _word_scan_position(klal_id, cio.words_of(klal), word_index)
             if bbox is not None:
                 snapshot["bbox"] = bbox
