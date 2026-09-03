@@ -719,6 +719,47 @@ def test_every_title_is_a_prefix_of_its_own_body(part_klalim):
     )
 
 
+def test_trimming_a_heading_cannot_orphan_text(part_klalim):
+    """NOTHING IS LOST when a heading is trimmed, and this is why.
+
+    The reviewer asked it directly (2026-09-03): if klal 92's heading goes from
+    24 words to 1, what happens to the other 23? Nothing - because `title` is not
+    where those words LIVE. It is a second copy of the klal's opening words, and
+    `clean_text` holds them too: measured, 220 of 222 Part 1 headings are an
+    exact word-for-word prefix of their own body, and the two exceptions (klalim
+    9 and 186) are the known divergences this file already baselines, not missing
+    text. A heading trim edits one field and leaves `clean_text` untouched, so it
+    moves where the HEADING is declared to end and removes no word from the
+    corpus.
+
+    That is a property of the DATA, not of the trim code, which is why it is
+    asserted here: the day a heading stops being a prefix of its body is the day
+    trimming it WOULD orphan something, and that must fail loudly rather than
+    silently discard the words only the title carried.
+
+    Deliberately distinct from test_every_title_is_a_prefix_of_its_own_body,
+    which asks whether the two AGREE (an OCR question). This asks whether the
+    body CONTAINS the heading (a containment question, and the safety property
+    behind the whole-heading apply path). The baselined pair is allowed here for
+    the same reason it is allowed there - klal 9 differs by a glued stop, klal
+    186 by a geresh, and in both cases the body still carries the word.
+    """
+    orphaning = []
+    for k in part_klalim["part1.json"]:
+        title = cio.strip_title_terminal_period(
+            [w for w in cio.title_words_of(k) if w not in TITLE_COMPARISON_MARKS])
+        body = [w for w in cio.words_of(k)[1:] if w not in TITLE_COMPARISON_MARKS]
+        if not title:
+            continue
+        if title != body[:len(title)] and k["klal_id"] not in TITLE_NOT_PREFIX_OF_BODY_BASELINE:
+            orphaning.append((k["klal_id"], title[:4], body[:4]))
+    assert not orphaning, (
+        f"These headings hold text their own body does not: {orphaning}. Trimming one would "
+        f"DELETE those words from the corpus rather than just shortening the heading - resolve "
+        f"the divergence against the scan before any heading ruling is applied here."
+    )
+
+
 def test_the_title_prefix_check_can_actually_fail():
     """Lesson 25: a comparison nobody has made report a difference has not been
     shown to be a comparison. Two synthetic klalim, one clean and one with a

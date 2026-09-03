@@ -488,6 +488,52 @@ reliability check, and every dispute still needs the ink or a different engine.
 
     Full suite green: gate 389, UI 84 passed / 1 skipped.
 
+0BD. **[2026-09-03, reviewer] I PUT THE HEADING PANEL'S CSS IN A FILE NOTHING
+    LOADS — a file that did not exist until I created it. Fixed. And the answer
+    to "what happens to the words orphaned?": nothing, now gated.**
+
+    Reviewer: *"need a space after the word before the num in the heading
+    corrector selector. what happens to the words orphaned?"*
+
+    **The missing space was not a spacing bug.** I appended the panel's rules to
+    `review_frontend/style.css`. `index.html` links **`app.css`**, and `style.css`
+    did not exist in this repo until my own commit created it with `cat >>` —
+    so every rule was inert and the chips rendered as bare buttons with the index
+    touching the Hebrew. The file is deleted and the rules are in `app.css`, with
+    both cache versions bumped to `v=15`.
+
+    Lesson 29 again, and worth recording as the third instance in two days: the
+    apply path shipped with nothing able to call it (item `0BC`), and now its
+    styling shipped into a stylesheet nobody serves. **`>>` on a path that does
+    not exist creates it silently, which is the whole mechanism** — the same
+    shape as writing a JSON field nothing renders. The check that would have
+    caught it in one second is `grep stylesheet index.html`.
+
+    The separator is real spacing (`margin-inline-start` + a rule) rather than a
+    flex `gap`: the chip row is RTL, so the index sits at the word's left, and at
+    the sizes this renders at a gap alone left them touching.
+
+    **NOTHING IS ORPHANED, and the reason is structural rather than careful
+    coding.** `title` is not where those words live — it is a SECOND COPY of the
+    klal's opening words, and `clean_text` holds them too. Measured: **220 of 222
+    Part 1 headings are an exact word-for-word prefix of their own body**, the two
+    exceptions being klalim 9 and 186, already baselined, where the body still
+    carries the word and differs by a glued stop and a geresh. Klal 92 checked
+    end to end: all 24 heading words are a body prefix, so trimming to `בעיא`
+    removes 23 words from the `title` field and leaves `clean_text` at 539 words,
+    untouched. The trim moves where the heading is DECLARED to end. It deletes no
+    text.
+
+    **Gated, because that is a property of the data and could stop being true.**
+    `test_trimming_a_heading_cannot_orphan_text` asserts the body CONTAINS the
+    heading — deliberately a different question from
+    `test_every_title_is_a_prefix_of_its_own_body`, which asks whether the two
+    AGREE. The day a heading holds a word its body does not, trimming it would
+    genuinely delete that word, and this fails rather than letting it go
+    silently.
+
+    Full suite **479 passed, 1 skipped**.
+
 0AW. **[2026-09-03] WHY `הרל"ם → הרמב"ם` WAS PROPOSED: an abbreviation naming a
     DIFFERENT authority is indistinguishable, to every detector here, from a
     misprint of a commoner one. Reviewer ruled KEEP from the ink. 11 more
