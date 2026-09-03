@@ -648,6 +648,44 @@ reliability check, and every dispute still needs the ink or a different engine.
     Klalim 91, 92 and 94 carry heading rulings recorded and not yet applied.
     Full suite **486 passed, 1 skipped**.
 
+0BG. **[2026-09-03, reviewer] THE HEADING PANEL READ ITS OWN STATE FROM A STALE
+    CACHE — the reviewer corrected klal 96's heading, reopened the panel, and it
+    "doesn't explain my change like the others." Fixed with a dedicated
+    endpoint, fetched fresh every open, plus a history list like the word
+    panels have always had.**
+
+    Reviewer: *"i corrected 96 heading but when I go back into the pending popup
+    it doesn't explain my change like the others"*.
+
+    **The bug: `openTitlePanel` read `title_decision` off `mountedKlal`** — the
+    frontend's `/api/klal` cache, populated whenever a klal first scrolls into
+    view and held for the rest of the page session. Decision state is the ONE
+    thing on that screen that changes while the page stays open, so caching it
+    is wrong on its face; a tab that had been open since before `title_decision`
+    existed would show nothing at all, no matter how many rulings landed after.
+
+    **Fix: `GET /api/klal/<id>/title-history`, fetched on every panel open, never
+    cached.** Same principle the word panels already follow via
+    `api_decision_history` — this is that same idea, extended to the heading,
+    which had nothing like it. Returns every heading ruling for the klal,
+    newest first, each carrying `applied` (from `rd.applied_decision_ids()`, the
+    same source `apply_reviewer_decisions.py` itself checks, so the two cannot
+    disagree) and `was` (the original word or the original whole heading).
+
+    **The panel now says three different things depending on state**, which is
+    what "explain my change" needed: *recorded, not yet applied* (with the
+    `was → chosen` line and any note), *applied* (styled differently — an
+    applied ruling must not wear the pending amber), and, when there is more
+    than one ruling, a **Show heading history** toggle listing all of them —
+    the one thing the word panels had that this one never did.
+
+    Two tests, against the real dashboard's ports (an isolated temp ledger, not
+    `review_decisions.jsonl`): the endpoint's shape is well-formed for every
+    field a row must carry, and a freshly recorded ruling round-trips back as
+    `applied: false` with `was` equal to the heading it was recorded against.
+
+    Full suite **489 collected, 488 passed, 1 skipped**.
+
 0AW. **[2026-09-03] WHY `הרל"ם → הרמב"ם` WAS PROPOSED: an abbreviation naming a
     DIFFERENT authority is indistinguishable, to every detector here, from a
     misprint of a commoner one. Reviewer ruled KEEP from the ink. 11 more

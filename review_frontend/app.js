@@ -2254,19 +2254,52 @@ async function openTitlePanel(klalId) {
   const chips = words.map((w, i) =>
     `<button type="button" class="title-word-chip" data-i="${i}">` +
     `<bdi>${escapeHtml(w)}</bdi><span class="title-word-i">${i}</span></button>`).join(' ');
-  // WHAT IS ALREADY ON RECORD. Without this the panel reopened looking exactly
-  // as it did before the save - `title` still reads as stored, because
-  // recording and applying are separate steps - so a save that worked was
-  // indistinguishable from one that did nothing (item 0BE).
-  const dec = k.title_decision;
-  const pendingHtml = (dec && !dec.applied) ? `
-    <div class="title-pending-note">
-      <b>Recorded, not yet applied.</b> The heading below still reads as stored in
-      <code>part1.json</code>; it changes when <code>apply_reviewer_decisions.py</code>
-      runs. On record: <bdi>${escapeHtml(dec.chosen_text || '(delete)')}</bdi>
-      ${dec.stale ? '<br><b>And it no longer matches the stored heading</b>, so an apply '
-                  + 'will skip it - re-record it against the heading as it now reads.' : ''}
+  // WHAT IS ALREADY ON RECORD - fetched FRESH, never read from `mountedKlal`.
+  //
+  // That cache is the /api/klal payload from whenever the klal was first
+  // scrolled into view, and it lives for the whole page session. Decision state
+  // is the one thing on this screen that changes while the page is open, so
+  // reading it from there showed a tab open across a server restart a payload
+  // from before `title_decision` existed - the panel then explained nothing at
+  // all, which is what the reviewer hit on klal 96 (item 0BG). The word panels
+  // have always fetched their history for exactly this reason.
+  let hist = { history: [], current: null };
+  try {
+    const r = await fetch(`/api/klal/${klalId}/title-history`);
+    if (r.ok) hist = await r.json();
+  } catch (e) { /* a panel that cannot reach the log still has to open */ }
+  const dec = hist.current;
+  const stale = dec && dec.whole && !dec.applied && dec.was !== (k.title || '');
+  const decHtml = dec ? `
+    <div class="title-pending-note${dec.applied ? ' applied' : ''}">
+      <b>${dec.applied ? 'Applied.' : 'Recorded, not yet applied.'}</b>
+      ${dec.applied
+        ? 'This ruling is in <code>part1.json</code>; the heading below is the result.'
+        : 'The heading below still reads as stored in <code>part1.json</code>; it changes '
+          + 'when <code>apply_reviewer_decisions.py</code> runs.'}
+      <div style="margin-top:6px;">
+        ${dec.whole ? '' : `heading word ${dec.word_index}: `}
+        <bdi>${escapeHtml(dec.was || '')}</bdi>
+        <span class="pending-replace-arrow">\u2192</span>
+        <bdi>${escapeHtml(dec.chosen_text || '(delete)')}</bdi>
+      </div>
+      ${dec.note ? `<div style="margin-top:4px;">${escapeHtml(dec.note)}</div>` : ''}
+      ${stale ? '<div style="margin-top:6px;"><b>The stored heading has changed since this '
+              + 'was recorded</b>, so an apply will skip it - re-record it against the '
+              + 'heading as it now reads.</div>' : ''}
     </div>` : '';
+  const historyHtml = hist.history.length > 1 ? `
+    <div class="panel-section">
+      <span class="history-toggle" id="title-history-toggle">Show heading history (${hist.history.length})</span>
+      <div class="history-list" id="title-history-list" style="display:none;">
+        ${hist.history.map(h => `<div class="history-item">
+           <span class="h-ts">${escapeHtml((h.ts || '').replace('T', ' ').slice(0, 19))}</span>
+           <span>${h.applied ? 'applied' : 'recorded'}${h.by_human ? '' : ' by a script'}</span>
+           <bdi>${escapeHtml(h.chosen_text || '(delete)')}</bdi>
+         </div>`).join('')}
+      </div>
+    </div>` : '';
+  const pendingHtml = decHtml;
   titlePanelBody.innerHTML = `
     ${pendingHtml}
     <div class="panel-section">
@@ -2306,7 +2339,18 @@ async function openTitlePanel(klalId) {
       <button class="panel-btn secondary" id="delete-title-word-btn">Delete this word</button>
       <span class="save-status" id="title-save-status">Saved \u2713</span>
     </div>
+    ${historyHtml}
   `;
+  const histToggle = document.getElementById('title-history-toggle');
+  if (histToggle) {
+    histToggle.onclick = () => {
+      const list = document.getElementById('title-history-list');
+      const open = list.style.display !== 'none';
+      list.style.display = open ? 'none' : '';
+      histToggle.textContent = (open ? 'Show' : 'Hide')
+        + ` heading history (${hist.history.length})`;
+    };
+  }
   const wholeBox = document.getElementById('title-whole-text');
   const postWhole = async () => {
     const text = wholeBox.value.trim();

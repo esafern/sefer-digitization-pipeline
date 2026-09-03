@@ -1607,6 +1607,54 @@ def _title_decision(klal):
     }
 
 
+def api_title_history(klal_id):
+    """Every heading ruling ever recorded for this klal, newest first, each with
+    whether it has been promoted into part1.json.
+
+    ADDED 2026-09-03 (item 0BG) because the panel was reading its state out of
+    `mountedKlal`, the frontend's /api/klal cache - which is populated when a
+    klal is first scrolled into view and lives for the whole page session. A tab
+    open across a server restart therefore held a payload from BEFORE
+    `title_decision` existed, and the panel showed nothing at all: the reviewer
+    corrected klal 96's heading and reopened the panel to find it did not
+    "explain my change like the others".
+
+    Decision state is not cacheable page-lifetime data - it is the one thing on
+    this screen that changes while the page is open - so the panel now asks for
+    it directly instead of reading a snapshot of it. Same reasoning as
+    api_decision_history, which the word panels have always used.
+
+    Returns the full history rather than only the current ruling, because "like
+    the others" is exactly what the reviewer asked for: the word panels carry a
+    Show-decision-history toggle and this one carried nothing.
+    """
+    klalim_by_id, _ = _load_klalim(part_num=_get_part_num_for_klal(klal_id))
+    klal = klalim_by_id.get(klal_id)
+    if klal is None:
+        return None
+    applied_ids = rd.applied_decision_ids()
+    stored = klal.get("title") or ""
+    rows = []
+    for rec in rd.history_for(klal_id, decision_type="title_correction"):
+        snap = rec.get("candidate_snapshot") or {}
+        whole = bool(snap.get("whole"))
+        rows.append({
+            "id": rec["id"],
+            "ts": rec.get("ts"),
+            "reviewer": rec.get("reviewer"),
+            "by_human": _ruled_by_human(rec),
+            "whole": whole,
+            "word_index": rec.get("word_index"),
+            "chosen_text": rec.get("chosen_text"),
+            "was": snap.get("original_title") if whole else snap.get("original_word"),
+            "note": rec.get("note"),
+            "applied": rec["id"] in applied_ids,
+        })
+    rows.sort(key=lambda r: r["ts"] or "", reverse=True)
+    return {"klal_id": klal_id, "title": stored, "history": rows,
+            "current": rows[0] if rows else None}
+
+
 def api_post_title_correction(body):
     """A reviewer ruling on a klal's TITLE (item 39, 2026-09-03).
 
@@ -1776,6 +1824,7 @@ ROUTE_KLAL = re.compile(r"^/api/klal/(\d+)$")
 # those links you shared here in the chat are not clickable").
 ROUTE_SHARE = re.compile(r"^/klal/(\d+)(?:/word/(\d+))?/?$")
 ROUTE_KLAL_FLAG = re.compile(r"^/api/klal/(\d+)/flag$")
+ROUTE_TITLE_HISTORY = re.compile(r"^/api/klal/(\d+)/title-history$")
 ROUTE_DECISIONS = re.compile(r"^/api/decisions/(\d+)/(\d+)$")
 ROUTE_PAGE = re.compile(r"^/api/page/(\d+)$")
 ROUTE_WITNESS_CONTEXT = re.compile(r"^/api/witness/context/(\d+)/(\d+)$")
@@ -1890,6 +1939,12 @@ class Handler(BaseHTTPRequestHandler):
             m = ROUTE_KLAL.match(path)
             if m:
                 payload = api_klal(int(m.group(1)))
+                if payload is None:
+                    return self._send_error_json(404, "klal not found")
+                return self._send_json(payload)
+            m = ROUTE_TITLE_HISTORY.match(path)
+            if m:
+                payload = api_title_history(int(m.group(1)))
                 if payload is None:
                     return self._send_error_json(404, "klal not found")
                 return self._send_json(payload)

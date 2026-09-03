@@ -1331,3 +1331,8 @@ textarea.custom-text, input.custom-text {
   font-size: 16px;
   color: var(--ink);
 }
+/* An APPLIED ruling is not pending, so it must not wear the pending colour -
+   the panel has to distinguish "recorded, waiting" from "this is what the
+   heading now says", which is the whole question the reviewer asked. */
+.title-pending-note.applied { border-color: var(--line); background: var(--wash); }
+#title-panel .history-item { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }

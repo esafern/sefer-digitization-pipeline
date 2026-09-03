@@ -150,6 +150,65 @@ def page(browser):
     pg.close()
 
 
+def test_the_title_history_endpoint_reports_every_heading_ruling(server):
+    """The panel's state comes from HERE, not from the /api/klal cache.
+
+    ADDED 2026-09-03 (item 0BG). openTitlePanel used to read `title_decision`
+    out of `mountedKlal` - the /api/klal payload from whenever the klal was
+    first scrolled into view, which lives for the whole page session. A tab open
+    across a server restart therefore held a payload from before that field
+    existed, and the panel explained nothing: the reviewer corrected klal 96's
+    heading, reopened, and found it did not "explain my change like the others".
+
+    Decision state is the one thing on that screen that changes while the page
+    is open, so it must be fetched, not cached.
+    """
+    payload = _get_json(server, "/api/klal/1/title-history")
+    assert payload["klal_id"] == 1
+    assert isinstance(payload["history"], list)
+    assert "title" in payload
+    # `current` is the newest ruling or None - never absent, so the frontend
+    # never has to distinguish "no key" from "no ruling".
+    assert "current" in payload
+
+    for row in payload["history"]:
+        for field in ("id", "ts", "chosen_text", "applied", "whole", "by_human"):
+            assert field in row, f"{field} missing from a heading-history row: {row}"
+        assert isinstance(row["applied"], bool), (
+            "`applied` is what tells a reviewer whether the heading they are "
+            "looking at already reflects the ruling - it must never be absent"
+        )
+
+
+def test_a_recorded_heading_ruling_is_reported_as_not_yet_applied(server):
+    """Record one and read it straight back: it must come back UNAPPLIED.
+
+    That distinction is the whole complaint this endpoint answers - recording
+    and applying are separate steps here, so a panel that cannot tell them apart
+    makes a save that worked look like one that did nothing.
+    """
+    before = _get_json(server, "/api/klal/2/title-history")
+    stored_title = before["title"]
+
+    status, rec = _post_json(server, "/api/decisions/title", {
+        "klal_id": 2, "word_index": 0, "whole": True,
+        "chosen_text": stored_title,  # a no-op ruling: records without proposing a change
+        "note": "test_a_recorded_heading_ruling_is_reported_as_not_yet_applied",
+    })
+    assert status == 201, rec
+
+    after = _get_json(server, "/api/klal/2/title-history")
+    assert len(after["history"]) == len(before["history"]) + 1
+    current = after["current"]
+    assert current["id"] == rec["id"]
+    assert current["applied"] is False, "a freshly recorded ruling has not been applied"
+    assert current["whole"] is True
+    assert current["was"] == stored_title, (
+        "a whole-heading ruling records the ENTIRE stored heading as its drift check"
+    )
+    assert after["title"] == stored_title, "recording must not change part1.json"
+
+
 def test_nav_populates_and_no_console_errors(server, page):
     _open_dashboard(page, server)
     nav_items = page.locator(".nav-item")
