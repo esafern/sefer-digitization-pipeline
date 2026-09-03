@@ -119,22 +119,86 @@ import re
 import sys
 
 
-# This module lives in pipeline/, one level below the repo root, where
-# part1.json / docai_word_boxes / etc. live.
-REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# ---------- where the corpus lives: the one runtime seam ----------
+#
+# THE PROBLEM THIS SOLVES, stated as item 0AR states it: the test-independence
+# problem and the general-purpose problem are the SAME problem. This pipeline is
+# meant to work on any historical Hebrew text, but the corpus location was a
+# function of where THIS source file sits on disk - `dirname(dirname(__file__))`
+# - so it could not be pointed at another book, and therefore could not be
+# pointed at a test fixture either. 64 modules compute that same expression for
+# themselves, and ~35 constants derive from it.
+#
+# Resolution order, and it is resolved at CALL time, never at import:
+#   1. an explicit root set by set_corpus_root() - what `--corpus` uses
+#   2. $SEFER_CORPUS_ROOT
+#   3. the source-relative default (this file lives one level below the root),
+#      which is what every existing caller gets when neither is set
+#
+# CALL TIME IS THE WHOLE POINT and it is not a style preference. The constants
+# below were module-level assignments evaluated at import, so a caller that set
+# the root afterwards changed nothing and got no error - silently the old path.
+# That is the exact bug `review_decisions._resolve()` exists to document, and
+# the reason this module now resolves its paths through PEP 562 `__getattr__`:
+# `cio.PART1_PATH` is a fresh lookup every time. Nothing in this repo does
+# `from corpus_io import PART1_PATH` (checked: zero occurrences), which is what
+# makes that safe - a from-import would bind the value once and reintroduce the
+# defect, so don't add one.
+_CORPUS_ROOT_OVERRIDE = None
+
+# The source-relative default: this module lives in pipeline/, one level below
+# the repo root, where part1.json / docai_word_boxes / etc. live.
+_DEFAULT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+CORPUS_ROOT_ENV = "SEFER_CORPUS_ROOT"
+
+
+def corpus_root():
+    """The directory holding part1.json and the caches, resolved NOW."""
+    if _CORPUS_ROOT_OVERRIDE:
+        return _CORPUS_ROOT_OVERRIDE
+    return os.environ.get(CORPUS_ROOT_ENV) or _DEFAULT_ROOT
+
+
+def set_corpus_root(root):
+    """Point every path in this module at `root` (None restores the default).
+
+    Returns the previous override so a caller can restore it - tests use that
+    rather than leaving a process-wide setting behind them.
+    """
+    global _CORPUS_ROOT_OVERRIDE
+    previous = _CORPUS_ROOT_OVERRIDE
+    _CORPUS_ROOT_OVERRIDE = os.path.abspath(root) if root else None
+    return previous
 
 
 def repo_path(*parts):
-    return os.path.join(REPO, *parts)
+    return os.path.join(corpus_root(), *parts)
 
 
-DOCAI_DIR = repo_path("docai_word_boxes")
-PART1_PATH = repo_path("part1.json")
-PART_PATHS = [repo_path(name) for name in ("part1.json", "part2.json", "part3.json")]
-DEMO_DATASET_PATH = repo_path("klalim_demo_dataset.json")
-ALIGNMENT_PATH = repo_path("part1_header_anchored_alignment.json")
-TRACE_PATH = repo_path("gematria_trace_part1.json")
-LEXICON_PATH = repo_path("lexicon.txt")
+# Resolved on every attribute access, not at import - see the note above. The
+# names and their meanings are unchanged; only the moment of resolution moved.
+_LAZY_PATHS = {
+    "REPO": lambda: corpus_root(),
+    "DOCAI_DIR": lambda: repo_path("docai_word_boxes"),
+    "PART1_PATH": lambda: repo_path("part1.json"),
+    "PART_PATHS": lambda: [repo_path(n) for n in ("part1.json", "part2.json", "part3.json")],
+    "DEMO_DATASET_PATH": lambda: repo_path("klalim_demo_dataset.json"),
+    "ALIGNMENT_PATH": lambda: repo_path("part1_header_anchored_alignment.json"),
+    "TRACE_PATH": lambda: repo_path("gematria_trace_part1.json"),
+    "LEXICON_PATH": lambda: repo_path("lexicon.txt"),
+}
+
+
+def __getattr__(name):
+    """PEP 562 module-level attribute hook: `cio.PART1_PATH` resolves here."""
+    if name in _LAZY_PATHS:
+        return _LAZY_PATHS[name]()
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+
+def __dir__():
+    return sorted(list(globals()) + list(_LAZY_PATHS))
 
 # max(klal_id) in part1.json. Part 1 is the only section with scan-linked
 # correction/region data, so several scripts slice the combined 667-klal
@@ -438,11 +502,22 @@ def detector_args(argv, default_part=None):
         if a in ("-h", "--help"):
             raise SystemExit(
                 f"usage: {os.path.basename(sys.argv[0] if sys.argv else 'detector')} "
-                f"[part_file] [--field {'|'.join(CORPUS_TEXT_FIELDS)}]\n"
+                f"[part_file] [--field {'|'.join(CORPUS_TEXT_FIELDS)}] [--corpus DIR]\n"
                 f"  part_file   defaults to part1.json\n"
                 f"  --field     which corpus text to sweep; `title` is item 39's "
-                f"title pass and addresses title.split() indices, NOT body ones."
+                f"title pass and addresses title.split() indices, NOT body ones.\n"
+                f"  --corpus    the book to read (default ${CORPUS_ROOT_ENV}, else this repo)"
             )
+        if a == "--corpus":
+            if i + 1 >= len(args):
+                raise SystemExit("--corpus needs a directory")
+            set_corpus_root(args[i + 1])
+            i += 2
+            continue
+        if a.startswith("--corpus="):
+            set_corpus_root(a.split("=", 1)[1])
+            i += 1
+            continue
         if a == "--field":
             if i + 1 >= len(args):
                 raise SystemExit("--field needs a value")
@@ -459,9 +534,9 @@ def detector_args(argv, default_part=None):
         i += 1
     if field not in CORPUS_TEXT_FIELDS:
         raise SystemExit(f"unknown --field {field!r}; expected one of {', '.join(CORPUS_TEXT_FIELDS)}")
-    part_path = part_path or default_part or PART1_PATH
+    part_path = part_path or default_part or repo_path("part1.json")
     if not os.path.isabs(part_path):
-        part_path = os.path.join(REPO, part_path)
+        part_path = os.path.join(corpus_root(), part_path)
     return part_path, field
 
 
@@ -766,22 +841,22 @@ def load_klalim(path):
     return data
 
 
-def load_part1(path=PART1_PATH):
+def load_part1(path=None):
     """Part 1's klalim, in stored file order (NOT sorted - several callers
     write the list back out and must not reorder it; use load_part1_sorted()
     when order matters for reading)."""
-    return load_klalim(path)
+    return load_klalim(path or repo_path("part1.json"))
 
 
-def load_part1_sorted(path=PART1_PATH):
+def load_part1_sorted(path=None):
     return sorted(load_part1(path), key=lambda k: k["klal_id"])
 
 
-def load_part1_by_id(path=PART1_PATH):
+def load_part1_by_id(path=None):
     return {k["klal_id"]: k for k in load_part1(path)}
 
 
-def save_part1(klalim, path=PART1_PATH):
+def save_part1(klalim, path=None):
     """The ONE serialization used to write the hand-edited source of truth.
 
     `ensure_ascii=False, indent=2` is not a style preference here - it is the
@@ -791,21 +866,23 @@ def save_part1(klalim, path=PART1_PATH):
     apply_punctuation_decisions.py); the corpus writers are the last place a
     silent divergence should be possible.
     """
+    path = path or repo_path("part1.json")
     with open(path, "w", encoding="utf-8") as f:
         json.dump(klalim, f, ensure_ascii=False, indent=2)
 
 
-def load_demo_dataset(path=DEMO_DATASET_PATH):
-    return load_klalim(path)
+def load_demo_dataset(path=None):
+    return load_klalim(path or repo_path("klalim_demo_dataset.json"))
 
 
 # ---------- DocAI scan cache (docai_word_boxes/) ----------
 
-def docai_page_path(page, docai_dir=DOCAI_DIR):
+def docai_page_path(page, docai_dir=None):
+    docai_dir = docai_dir or repo_path("docai_word_boxes")
     return os.path.join(docai_dir, f"page_{page}.json")
 
 
-def load_docai_page(page, docai_dir=DOCAI_DIR, default=None):
+def load_docai_page(page, docai_dir=None, default=None):
     """Raw, UNFILTERED token list for one scan page, or `default` if that
     page was never extracted.
 
@@ -827,7 +904,7 @@ class DocaiPageCache:
     here rather than a per-copy accident.
     """
 
-    def __init__(self, docai_dir=DOCAI_DIR, default=None):
+    def __init__(self, docai_dir=None, default=None):
         self.docai_dir = docai_dir
         self.default = default
         self._pages = {}
@@ -840,7 +917,8 @@ class DocaiPageCache:
 
 # ---------- scan-linkage data (alignment, gematria trace) ----------
 
-def load_gematria_trace(path=TRACE_PATH, default=None):
+def load_gematria_trace(path=None, default=None):
+    path = path or repo_path("gematria_trace_part1.json")
     """The raw trace list. Callers reshape it themselves (by klal_id, or
     page -> marker positions) and filter on marker_position/status
     differently on purpose - see check_klal_token_orphans.py, which accepts
@@ -849,7 +927,7 @@ def load_gematria_trace(path=TRACE_PATH, default=None):
     return load_json(path, default)
 
 
-def trusted_klal_pages(path=ALIGNMENT_PATH, max_klal=PART1_MAX_KLAL):
+def trusted_klal_pages(path=None, max_klal=None):
     """(page -> [klal_id, ...], [untrusted klal_id, ...]) from the
     header-anchored alignment, trusted entries only, klal_id order preserved
     within each page (which matches print order).
@@ -859,7 +937,8 @@ def trusted_klal_pages(path=ALIGNMENT_PATH, max_klal=PART1_MAX_KLAL):
     that klal at all. The untrusted list is returned rather than discarded so
     a caller can report that silence instead of it being invisible.
     """
-    alignment = load_json(path, [])
+    alignment = load_json(path or repo_path("part1_header_anchored_alignment.json"), [])
+    max_klal = PART1_MAX_KLAL if max_klal is None else max_klal
     klal_pages = {}
     untrusted_ids = []
     for r in sorted(alignment, key=lambda r: r["klal_id"]):
@@ -872,7 +951,7 @@ def trusted_klal_pages(path=ALIGNMENT_PATH, max_klal=PART1_MAX_KLAL):
     return klal_pages, untrusted_ids
 
 
-def trusted_klal_pages_with_continuations(alignment_path=ALIGNMENT_PATH,
+def trusted_klal_pages_with_continuations(alignment_path=None,
                                           max_klal=PART1_MAX_KLAL,
                                           regions_path=None):
     """Like trusted_klal_pages(), but also maps each continuation page to its

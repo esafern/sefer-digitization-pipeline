@@ -266,6 +266,59 @@ reliability check, and every dispute still needs the ink or a different engine.
 
     Full suite **467 collected, 466 passed, 1 skipped**.
 
+0AZ. **[2026-09-03] ITEM 0AR IS STARTED: the corpus-root seam is in, and it
+    resolves at CALL time. `--corpus DIR` and `$SEFER_CORPUS_ROOT` now point the
+    whole data layer at another book. The remaining four steps are unchanged.**
+
+    Item `0AR`'s own framing is the thing that makes this one seam instead of two
+    projects: **the test-independence problem and the general-purpose problem are
+    the same problem.** A tool that cannot be pointed at another book at runtime
+    cannot be pointed at a fixture either.
+
+    **The coupling, re-measured today** — larger than the item's "~35 constants":
+    **64 modules compute their own `REPO = dirname(dirname(__file__))`**, and
+    `corpus_io`'s eight derived paths are referenced across 74 files (`REPO` 74,
+    `PART1_PATH` 20, `repo_path` 20, `DOCAI_DIR` 16).
+
+    **Resolution order, decided at every call:** an explicit `set_corpus_root()`
+    (what `--corpus` uses) → `$SEFER_CORPUS_ROOT` → the source-relative default,
+    which is exactly what every existing caller already got. Nothing needed to
+    change at any call site.
+
+    **CALL TIME IS THE WHOLE POINT, and the module made the mistake itself while
+    I was fixing it.** The eight constants were module-level assignments, so a
+    root set after import changed nothing and raised nothing — the silent defect
+    `review_decisions._resolve()` exists to document, and the one `0AR` names as
+    the trap. They are now PEP 562 `__getattr__` lookups, which is safe here for
+    a checked reason: **`from corpus_io import X` appears zero times in this
+    repo**, and a from-import would bind once and put the defect straight back.
+    Then the first import crashed — `def load_part1(path=PART1_PATH)` evaluates
+    its default at import too, and a module-level `__getattr__` does not answer a
+    bare name inside its own module. Eleven signatures took a `None` sentinel and
+    resolve in the body. The crash was the good outcome: the same shape in a
+    caller would have been silent.
+
+    **Four tests, and the first one asserts the property rather than the
+    plumbing** — not "the setter works" but "the value CHANGES after import",
+    which is the only thing that distinguishes this from what was there before.
+    The others pin the precedence (an explicit `--corpus` outranks a stale env
+    var), prove the LOADERS actually read a two-klal book written into a temp
+    directory through the ordinary no-argument API, and cover the flag on the
+    shared parser.
+
+    Full `./rebuild_all.sh` green, full suite **470 passed, 1 skipped**.
+
+    **What is NOT done, in `0AR`'s own order:** the fixture-corpus GENERATOR (it
+    must be generated, not written — Lesson 13) plus a `conftest.py`, which does
+    not exist today; moving the 23 UI tests that pin a klal id; splitting the ~30
+    corpus invariants out into a `validate <book>` command, since asserting that
+    THIS book's data is well-formed is not a test of a general-purpose tool and
+    means a corpus REPAIR can turn the suite red; and the gated guard that no
+    test outside the validator module resolves a path under the real corpus root.
+    That guard is what stops this decaying, and it is worth noting that today's
+    work added tests on both sides of that line — the seam tests are fixture-only,
+    the title-prefix invariant deliberately reads the real corpus.
+
 0AW. **[2026-09-03] WHY `הרל"ם → הרמב"ם` WAS PROPOSED: an abbreviation naming a
     DIFFERENT authority is indistinguishable, to every detector here, from a
     misprint of a commoner one. Reviewer ruled KEEP from the ink. 11 more

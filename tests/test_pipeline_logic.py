@@ -246,6 +246,76 @@ def test_flag_labels_are_well_formed_label_and_colour_pairs():
         )
 
 
+# --- corpus_io: WHERE the corpus is, resolved at call time -------------------
+# Item 0AR's structural blocker, and the first step of its plan. `corpus_io.REPO`
+# was `dirname(dirname(__file__))` with ~35 constants derived from it at import,
+# so the corpus location was a function of where the SOURCE file sits - which
+# meant the tool could not be pointed at another book, and therefore could not be
+# pointed at a test fixture either. Those are the same problem, which is the
+# reframing that makes this one seam rather than two projects.
+
+def test_the_corpus_root_resolves_at_call_time_not_at_import(monkeypatch):
+    """The bug this seam is built to avoid, asserted directly.
+
+    A module-level `PART1_PATH = repo_path("part1.json")` is evaluated once at
+    import, so anything that sets the root afterwards changes nothing and gets
+    no error - silently the old path. That is the defect
+    review_decisions._resolve() exists to document, and item 0AR names it as the
+    trap to avoid when adding this. So the test is not "the setter works"; it is
+    "the value CHANGES after import".
+    """
+    before = cio.PART1_PATH
+    monkeypatch.setenv(cio.CORPUS_ROOT_ENV, "/tmp/some-other-book")
+    assert cio.PART1_PATH == "/tmp/some-other-book/part1.json"
+    assert cio.DOCAI_DIR == "/tmp/some-other-book/docai_word_boxes"
+    assert cio.REPO == "/tmp/some-other-book"
+    assert cio.PART_PATHS[2].endswith("/some-other-book/part3.json")
+    monkeypatch.delenv(cio.CORPUS_ROOT_ENV)
+    assert cio.PART1_PATH == before
+
+
+def test_an_explicit_corpus_root_outranks_the_environment(monkeypatch):
+    """Resolution order: set_corpus_root() (what --corpus uses) > env > the
+    source-relative default. A caller that passed --corpus explicitly must not
+    have it quietly overridden by an env var left in the shell."""
+    monkeypatch.setenv(cio.CORPUS_ROOT_ENV, "/tmp/from-env")
+    previous = cio.set_corpus_root("/tmp/from-flag")
+    try:
+        assert cio.PART1_PATH == "/tmp/from-flag/part1.json"
+    finally:
+        cio.set_corpus_root(previous)
+    assert cio.PART1_PATH == "/tmp/from-env/part1.json"
+
+
+def test_the_loaders_read_the_book_the_root_points_at(tmp_path):
+    """The seam is worth nothing if the LOADERS still read the old place. A
+    two-klal book in a temp directory, read through the ordinary API with no
+    path argument anywhere."""
+    (tmp_path / "part1.json").write_text(json.dumps([
+        {"klal_id": 1, "title": "אלף.", "clean_text": "א אלף בית"},
+        {"klal_id": 2, "title": "גימל.", "clean_text": "ב גימל דלת"},
+    ], ensure_ascii=False), encoding="utf-8")
+    previous = cio.set_corpus_root(str(tmp_path))
+    try:
+        assert [k["klal_id"] for k in cio.load_part1()] == [1, 2]
+        assert cio.load_klal_words(cio.PART1_PATH)[2] == ["ב", "גימל", "דלת"]
+        assert cio.load_klal_words(cio.PART1_PATH, field="title")[1] == ["אלף"]
+    finally:
+        cio.set_corpus_root(previous)
+
+
+def test_detector_args_accepts_a_corpus_directory():
+    """`--corpus` is the CLI half of the same seam, on the parser all six
+    detect_*.py sweeps share."""
+    previous = cio.set_corpus_root(None)
+    try:
+        part_path, field = cio.detector_args(["--corpus", "/tmp/book2", "--field", "title"])
+        assert part_path == "/tmp/book2/part1.json"
+        assert field == "title"
+    finally:
+        cio.set_corpus_root(previous)
+
+
 # --- apply_reviewer_decisions: the only code that mutates part1.json ---------
 
 def test_apply_replace_rewrites_only_the_snapshotted_span():
