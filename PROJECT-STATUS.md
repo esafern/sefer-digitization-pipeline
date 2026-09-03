@@ -686,6 +686,33 @@ reliability check, and every dispute still needs the ink or a different engine.
 
     Full suite **489 collected, 488 passed, 1 skipped**.
 
+0BH. **[2026-09-03] FOUR MORE HEADINGS APPLIED (91, 92, 94, 96) — and klal
+    92 demonstrated the drift check working exactly as `0BC` designed it, not a
+    bug: the apply refused it, correctly, because a LATER body sync had moved
+    the heading out from under the recorded trim.**
+
+    | klal | was | now |
+    |---|---|---|
+    | 91 | 11-word heading | `בעיא.` |
+    | 92 | 24-word heading (after `0BF`'s `נסקי`→`נפקי` sync) | `בעיא.` |
+    | 94 | 8-word heading | trimmed by one word, `... הוי פשיטותא.` dropped |
+    | 96 | 16-word heading (after `0BF`'s `בעיו`→`בעיי` sync) | `בעיי דסמיכי אהדדי.` |
+
+    All four body word counts unchanged — the orphaning guarantee (item `0BD`)
+    held again.
+
+    **Klal 92's first apply attempt was correctly SKIPPED, not silently
+    applied.** Its trim ruling's `original_title` snapshot was taken before
+    `0BF`'s body-correction sync rewrote `נסקי`→`נפקי` inside that same heading;
+    by the time the apply ran, the stored heading no longer matched the
+    snapshot, so the whole-field drift check refused it — exactly the
+    protection it exists for, distinguishing "the ruling is stale" from "the
+    ruling was lost". Re-recorded against the current heading text and applied
+    cleanly on the next run.
+
+    Extent queue: **97**, down from 101 at the top of this session. Full suite
+    **488 passed, 1 skipped**.
+
 0AW. **[2026-09-03] WHY `הרל"ם → הרמב"ם` WAS PROPOSED: an abbreviation naming a
     DIFFERENT authority is indistinguishable, to every detector here, from a
     misprint of a commoner one. Reviewer ruled KEEP from the ink. 11 more

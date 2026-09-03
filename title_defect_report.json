@@ -1,7 +1,7 @@
 {
  "field": "title",
  "klalim_scanned": 222,
- "title_words": 1262,
+ "title_words": 1214,
  "prefix_divergences": [
   {
    "klal_id": 9,
@@ -41,12 +41,6 @@
   }
  ],
  "extent_queue": [
-  {
-   "klal_id": 92,
-   "shared_first_word": "בעיא",
-   "stored_heading_words": 24,
-   "stored_heading": "בעיא מצינו דבעי בגמרא במילתא דלא נפקי מינה מידי אף בזמן התלמוד מפני שהוא דבר שכבר עבר ואפ\"ה קבעי לה משום דרוש וקבל שכר."
-  },
   {
    "klal_id": 150,
    "shared_first_word": "הלכה",
@@ -112,12 +106,6 @@
    "shared_first_word": "אתי",
    "stored_heading_words": 11,
    "stored_heading": "אתי עשה ודחי לא תעשה אף לא תעשה שיש בו כרת."
-  },
-  {
-   "klal_id": 91,
-   "shared_first_word": "בעיא",
-   "stored_heading_words": 11,
-   "stored_heading": "בעיא מצינו בש\"ס דבכמה דוכתי בעי אליבא דמאן דלא קי\"ל כותיה."
   },
   {
    "klal_id": 166,
@@ -232,12 +220,6 @@
    "shared_first_word": "בעיא",
    "stored_heading_words": 8,
    "stored_heading": "בעיא דאבעיא בתלמוד ירושלמי ולא איבעיא בגמרא דילן."
-  },
-  {
-   "klal_id": 94,
-   "shared_first_word": "בעיא",
-   "stored_heading_words": 8,
-   "stored_heading": "בעיא דלא איפשיטא בגמרין ואיפשיטא בירושלמי הוי פשיטותא."
   },
   {
    "klal_id": 184,
@@ -364,6 +346,12 @@
    "shared_first_word": "בעיא",
    "stored_heading_words": 6,
    "stored_heading": "בעיא אשכחן דבעי דבר שהוא פשוט."
+  },
+  {
+   "klal_id": 94,
+   "shared_first_word": "בעיא",
+   "stored_heading_words": 6,
+   "stored_heading": "בעיא דלא איפשיטא בגמרין ואיפשיטא בירושלמי."
   },
   {
    "klal_id": 103,
