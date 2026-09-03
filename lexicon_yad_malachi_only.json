@@ -4603,43 +4603,6 @@
   ]
  },
  {
-  "word": "נסקי",
-  "count": 1,
-  "occurrences": [
-   [
-    92,
-    7
-   ]
-  ],
-  "nearest_attested": [
-   {
-    "form": "עסקי",
-    "ref_count": 231,
-    "edit": "substitution"
-   },
-   {
-    "form": "נקי",
-    "ref_count": 191,
-    "edit": "deletion"
-   },
-   {
-    "form": "נפקי",
-    "ref_count": 160,
-    "edit": "substitution"
-   },
-   {
-    "form": "פסקי",
-    "ref_count": 149,
-    "edit": "substitution"
-   },
-   {
-    "form": "נסכי",
-    "ref_count": 64,
-    "edit": "substitution"
-   }
-  ]
- },
- {
   "word": "ממילת",
   "count": 1,
   "occurrences": [

@@ -553,6 +553,78 @@ def _correction(word_index, opcode, docai, final):
             "final_text": final, "flag": "ambiguous"}
 
 
+def test_a_body_correction_inside_the_heading_run_is_carried_into_the_title():
+    """`title` is a SECOND COPY of the klal's opening words, so correcting the
+    body inside the heading run desynchronises the two unless this happens in the
+    same step (Lesson 35).
+
+    Found the hard way 2026-09-03: klal 92 w7 `נסקי`->`נפקי` and klal 96 w1
+    `בעיו`->`בעיי` were applied, and the corpus briefly held two spellings of one
+    printed word until the gated prefix invariant caught it. Nobody had to think
+    about this before, because until that day nothing here could write `title`.
+
+    Not a new adjudication: the reviewer already ruled the word against the ink,
+    and the heading is the same printed word.
+    """
+    k = {"klal_id": 1, "title": "אלף בית גימל.", "clean_text": "א אלף בית גימל"}
+    # body word 2 is heading word 1 - body[0] is the gematria marker.
+    assert ard.sync_heading_word(k, 2, "בית", "בות") is True
+    assert k["title"] == "אלף בות גימל."
+
+
+def test_the_heading_sync_refuses_when_the_two_already_diverge():
+    """The guard that makes it safe. Where a heading and its body differ ON
+    PURPOSE - klalim 9 and 186, a glued stop and a geresh, both baselined
+    pending the scan - a correction elsewhere must not overwrite that."""
+    k = {"klal_id": 186, "title": "הלכה כדברי המקיל בעירוב.",
+         "clean_text": "קפו הלכה כדברי המקיל' בעירוב"}
+    assert ard.sync_heading_word(k, 3, "המקיל'", "המקיל''") is False
+    assert k["title"] == "הלכה כדברי המקיל בעירוב.", "an unrelated divergence must survive"
+
+
+def test_the_heading_sync_does_not_carry_body_punctuation_into_a_heading():
+    """A heading is punctuated differently from the body: all 222 Part 1
+    headings end in a period and NONE has one anywhere else.
+
+    The first version of this function had no such guard, and klal 9's body
+    carries a stop glued to `איידי` - one of only two such words in Part 1, and a
+    recorded data issue in its own right. It duly produced the heading
+    `איידי. אפשר דאמרינן ...`, with a period in the middle. Propagating a
+    correction is right; propagating body punctuation is not.
+    """
+    k = {"klal_id": 9, "title": "איידי אפשר לברייתא.", "clean_text": "ט איידי. אפשר לברייתא"}
+    assert ard.sync_heading_word(k, 1, "איידי", "איידי.") is False
+    assert k["title"] == "איידי אפשר לברייתא."
+
+
+def test_the_heading_sync_handles_the_terminal_period_in_both_directions():
+    """The one systematic difference between a heading word and its body twin.
+
+    All 222 Part 1 headings end with a period glued to their last word and none
+    has one elsewhere; the body writes that stop as a separate `[.]` token. So
+    the last heading word is `שכר.` where the body has `שכר` - they do not
+    compare equal, and a naive guard on that made a correction to the last
+    heading word never propagate at all. The prefix invariant then fails on it,
+    because it compares with the period stripped. Caught by this test, not by
+    reasoning about it.
+    """
+    k = {"klal_id": 1, "title": "אלף בית.", "clean_text": "א אלף בית"}
+    assert ard.sync_heading_word(k, 2, "בית", "בות") is True
+    assert k["title"] == "אלף בות.", "the heading keeps its own terminal period"
+
+    # And a reviewer who types the period themselves must not get two.
+    k2 = {"klal_id": 1, "title": "אלף בית.", "clean_text": "א אלף בית"}
+    assert ard.sync_heading_word(k2, 2, "בית", "בות.") is True
+    assert k2["title"] == "אלף בות."
+
+
+def test_the_heading_sync_ignores_a_correction_outside_the_heading_run():
+    """Most corrections are in the body proper and must not touch the heading."""
+    k = {"klal_id": 1, "title": "אלף בית.", "clean_text": "א אלף בית גימל דלת"}
+    assert ard.sync_heading_word(k, 4, "דלת", "דלה") is False
+    assert k["title"] == "אלף בית."
+
+
 def test_a_whole_heading_ruling_replaces_the_field_in_one_apply(
         apply_harness, decisions_path):
     """The EXTENT fix, which is what the reviewer actually needs (2026-09-03:

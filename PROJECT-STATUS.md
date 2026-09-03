@@ -587,6 +587,67 @@ reliability check, and every dispute still needs the ink or a different engine.
 
     Full suite **481 passed, 1 skipped**.
 
+0BF. **[2026-09-03] THE HEADINGS ARE APPLIED — klalim 89 and 90 now read
+    `בעיא.` — and applying them exposed a coupling nobody had needed to think
+    about: a body correction inside the heading run silently desynchronised
+    `title`. Fixed at all three write sites, with two guards each found by a
+    test rather than by reasoning.**
+
+    Reviewer: *"the text didn't change, I just see heading pending"*. Correct and
+    by design — recording and applying are separate steps — so the apply ran.
+
+    **7 promoted:** klal 89 and 90 headings trimmed to `בעיא.` (from 11 and 16
+    words), klal 92 w7 `נסקי`→`נפקי`, klal 96 w1 `בעיו`→`בעיי`, one more manual
+    and two confirmed-no-ops. **The orphaning guarantee held exactly as item
+    `0BD` predicted**: klal 89's body stayed 56 words, klal 90's 25 — the trims
+    removed 26 words from `title` and none from the corpus.
+
+    **THEN THE GATE WENT RED, and it was right.** `title` is a SECOND COPY of a
+    klal's opening words, so correcting klal 92 w7 and klal 96 w1 in the body
+    left the heading holding the old spelling — the corpus briefly carried two
+    spellings of one printed word. Nobody had had to think about this before,
+    because until this morning nothing in this pipeline could write `title` at
+    all. Lesson 35 exactly: when a step writes to the source of truth, enumerate
+    what else describes that truth and update it in the same breath.
+
+    **`sync_heading_word()` carries a body correction into the heading, and it is
+    wired at ALL THREE `clean_text` write sites** — the machine `replace`, the
+    machine insert/delete, and the manual path — per Lesson 34, which is about
+    exactly this: a mutator with three branches, fixed one branch at a time,
+    firing again from the next one. The two word-count-changing paths cannot map
+    an index safely, so they REPORT rather than guess, and the gated prefix
+    invariant is the backstop.
+
+    It is not a new adjudication and needs no ruling of its own: the reviewer
+    already decided the word against the ink and the heading is the same printed
+    word. A machine deciding a word on its own would be item `0AT`'s defect;
+    completing the human's is not.
+
+    **Two guards, and I got both wrong first — each was caught by a test, not by
+    thinking about it.**
+
+    - **It propagated body PUNCTUATION into a heading.** The one-time repair
+      duly turned klal 9's title into `איידי. אפשר דאמרינן ...`, a period
+      mid-heading, because klal 9's body carries a stop glued to `איידי` — one
+      of only two such words in Part 1 and a recorded data issue in its own
+      right. Reverted by hand, then guarded. Measured: 222 of 222 headings end
+      in a period, 0 have one elsewhere.
+    - **Then the guard was too strict in the other direction.** Refusing on any
+      period meant a correction to the LAST heading word never propagated — and
+      that word is exactly where every heading's own terminal period lives, so
+      the two never compare equal. The prefix invariant, which strips that
+      period before comparing, would then fail on it. Both directions are now
+      handled and both are pinned by tests.
+
+    Five tests in all: the sync fires inside the heading run; refuses where the
+    two already diverge on purpose (klalim 9 and 186 survive a correction
+    elsewhere); refuses body punctuation; handles the terminal period in both
+    directions; ignores a correction outside the heading run.
+
+    **State:** `title_defect_report.json`'s extent queue is down to 99 from 101.
+    Klalim 91, 92 and 94 carry heading rulings recorded and not yet applied.
+    Full suite **486 passed, 1 skipped**.
+
 0AW. **[2026-09-03] WHY `הרל"ם → הרמב"ם` WAS PROPOSED: an abbreviation naming a
     DIFFERENT authority is indistinguishable, to every detector here, from a
     misprint of a commoner one. Reviewer ruled KEEP from the ink. 11 more

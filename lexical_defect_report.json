@@ -1979,22 +1979,6 @@
  },
  {
   "klal_id": 92,
-  "word_index": 7,
-  "stored": "נסקי",
-  "proposals": [
-   {
-    "form": "נפקי",
-    "ref_count": 160,
-    "edit": null
-   }
-  ],
-  "detector": "substitution",
-  "ambiguous": false,
-  "rank": 160,
-  "corpus_count": 1
- },
- {
-  "klal_id": 92,
   "word_index": 231,
   "stored": "תלמורא",
   "proposals": [

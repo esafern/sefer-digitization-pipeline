@@ -319,6 +319,74 @@ def apply_replace(clean_text, word_index, final_text, chosen_text):
     return " ".join(words)
 
 
+def sync_heading_word(klal, word_index, original_word, chosen_text):
+    """Carry a body correction across into `title` when it lands in the heading.
+
+    THE COUPLING THIS EXISTS FOR, found the hard way 2026-09-03. `title` is not
+    separate text - it is a SECOND COPY of the klal's opening words, which the
+    body reprints (220 of 222 headings are an exact prefix of their own body).
+    So correcting a body word inside the heading run silently desynchronises the
+    two: klal 92 w7 `נסקי`->`נפקי` and klal 96 w1 `בעיו`->`בעיי` were applied,
+    the gate went red, and the corpus briefly held two spellings of one printed
+    word. Nobody had to think about this before, because until today nothing in
+    this pipeline could write `title` at all.
+
+    Lesson 35, exactly: when a step writes to the source of truth, enumerate
+    what else describes that truth and update it in the same breath.
+
+    NOT A NEW ADJUDICATION, which is why it needs no ruling of its own. The
+    reviewer already decided this word against the ink; the heading is the same
+    printed word, and propagating their decision to the second copy completes it
+    rather than making a second one. A machine deciding a word on its own would
+    be item 0AT's defect, and this is not that.
+
+    Index mapping: `body[0]` is the klal's gematria marker, which no heading
+    repeats, so heading word i is body word i+1.
+
+    THE GUARD IS WHAT MAKES IT SAFE: it syncs only when the heading currently
+    holds exactly the word the body was correcting away from. Where the two
+    already diverge on purpose (klalim 9 and 186 - a glued stop, a geresh) it
+    does nothing, so an unrelated divergence can never be overwritten by a
+    correction elsewhere.
+
+    Returns True if the heading changed.
+    """
+    title_words = cio.title_words_of(klal)
+    i = word_index - 1
+    if not (0 <= i < len(title_words)):
+        return False
+    # A HEADING IS PUNCTUATED DIFFERENTLY FROM THE BODY, so a body word does not
+    # always equal its heading twin character for character, and the sync has to
+    # know about exactly one such difference: the TERMINAL PERIOD. Measured, all
+    # 222 Part 1 headings end with one glued to their last word and NONE contains
+    # one anywhere else, while the body writes the stop as a separate `[.]`
+    # token. So the last heading word is `שכר.` where the body has `שכר`.
+    #
+    # Both directions of that mattered, and each was found by a test rather than
+    # by reasoning:
+    #   - Copying a body stop INTO a heading is wrong. Klal 9's body carries one
+    #     glued to `איידי` - one of only two such words in Part 1, itself a
+    #     recorded data issue - and the first version of this function duly
+    #     produced `איידי. אפשר דאמרינן ...`, a period mid-heading.
+    #   - Refusing on the terminal period is also wrong: it made a correction to
+    #     the LAST heading word never propagate, which the prefix invariant then
+    #     fails on, since it compares with that period stripped.
+    is_last = i == len(title_words) - 1
+    stored = title_words[i]
+    if is_last and stored.endswith(".") and len(stored) > 1:
+        stored = stored[:-1]
+    if stored != original_word or chosen_text == original_word:
+        return False
+    if "." in chosen_text and not is_last:
+        return False
+    replacement = chosen_text
+    if is_last and not replacement.endswith("."):
+        replacement += "."
+    title_words[i] = replacement
+    klal["title"] = " ".join(title_words)
+    return True
+
+
 def apply_manual_correction(clean_text, word_index, original_word, chosen_text):
     """'manual_correction' decision (2026-08-13): a reviewer flagged and
     replaced a word the machine pipeline never generated a candidate for,
@@ -452,6 +520,10 @@ def main():
     word_count_changed_klalim = set()
     n_replace = n_insert_delete = n_noop = n_manual = 0
     n_title = 0  # title_correction decisions promoted (item 39)
+    # Word-count changes that landed inside a klal's heading run: the heading
+    # is a second copy of those words and its own indices moved, so this is
+    # reported for a human rather than synced by guess.
+    heading_desync = []
 
     for (klal_id, word_index), decision in sorted(decisions.items()):
         # Already promoted into part1.json by an earlier run - never re-apply.
@@ -527,6 +599,13 @@ def main():
                 skipped_drift.append((klal_id, word_index))
                 continue
             klal["clean_text"] = new_text
+            # Carry it into the heading if it landed there (see
+            # sync_heading_word). Only for a SINGLE-word span: a multi-word
+            # replace changes the heading's word count too, and that is the
+            # reported case below, not the synced one.
+            _orig = (snapshot.get("final_text") or "").split()
+            if len(_orig) == 1 and sync_heading_word(klal, word_index, _orig[0], decision["chosen_text"]):
+                applied.append((klal_id, word_index, "heading-sync"))
             n_replace += 1
             applied.append((klal_id, word_index, "replace"))
             if not args.dry_run:
@@ -575,6 +654,13 @@ def main():
         word_count_shifts[klal_id] = (
             word_index, cio.word_count_of(new_text) - cio.word_count_of(klal))
         klal["clean_text"] = new_text
+        # A word-count change inside the heading run shifts the HEADING's own
+        # indices too, and there is no safe one-word mapping to sync - so this
+        # is REPORTED rather than guessed at. The gated invariant
+        # test_every_title_is_a_prefix_of_its_own_body will fail on it, which is
+        # the intended backstop; this message is so the operator knows why.
+        if word_index <= len(cio.title_words_of(klal)):
+            heading_desync.append((klal_id, word_index, opcode))
         word_count_changed_klalim.add(klal_id)
         n_insert_delete += 1
         applied.append((klal_id, word_index, opcode))
@@ -692,6 +778,10 @@ def main():
             word_count_shifts[klal_id] = (
                 word_index, cio.word_count_of(new_text) - cio.word_count_of(klal))
         klal["clean_text"] = new_text
+        if kind == "manual" and sync_heading_word(klal, word_index, original_word, chosen_text):
+            applied.append((klal_id, word_index, "heading-sync"))
+        elif kind in ("manual-delete", "manual-insert") and word_index <= len(cio.title_words_of(klal)):
+            heading_desync.append((klal_id, word_index, kind))
         if kind in ("manual-delete", "manual-insert"):
             word_count_changed_klalim.add(klal_id)
         n_manual += 1
@@ -818,6 +908,13 @@ def main():
           f"{n_manual} manual, {n_title} title, {n_noop} confirmed-no-op)")
     for kid, widx, kind in applied:
         print(f"  klal {kid} word {widx}: {kind}")
+
+    if heading_desync:
+        print(f"\n{len(heading_desync)} edit(s) changed the word count INSIDE a klal's heading run. "
+              f"`title` is a second copy of those words and was NOT adjusted - rule on the heading "
+              f"itself (the \u270e Heading button) so the two agree again:")
+        for kid, widx, kind in heading_desync:
+            print(f"  klal {kid} word {widx} ({kind})")
 
     if skipped_already_applied:
         print(f"\n{len(skipped_already_applied)} decision(s) skipped - already promoted into "

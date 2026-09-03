@@ -1,7 +1,7 @@
 {
  "field": "title",
  "klalim_scanned": 222,
- "title_words": 1287,
+ "title_words": 1262,
  "prefix_divergences": [
   {
    "klal_id": 9,
@@ -19,16 +19,6 @@
   }
  ],
  "detector_candidates": [
-  {
-   "klal_id": 92,
-   "word_index": 6,
-   "title_word": "נסקי",
-   "proposal": "נפקי",
-   "ref_count": 160,
-   "detector": "substitution",
-   "ambiguous": false,
-   "klass": "detector_candidate"
-  },
   {
    "klal_id": 144,
    "word_index": 4,
@@ -55,13 +45,7 @@
    "klal_id": 92,
    "shared_first_word": "בעיא",
    "stored_heading_words": 24,
-   "stored_heading": "בעיא מצינו דבעי בגמרא במילתא דלא נסקי מינה מידי אף בזמן התלמוד מפני שהוא דבר שכבר עבר ואפ\"ה קבעי לה משום דרוש וקבל שכר."
-  },
-  {
-   "klal_id": 90,
-   "shared_first_word": "בעיא",
-   "stored_heading_words": 16,
-   "stored_heading": "בעיא דבעי בש\"ס המקובל אצלינו בדרכי התלמוד הוא שהצד הוא פשוט יותר אצל הבעיין תופס תחלה."
+   "stored_heading": "בעיא מצינו דבעי בגמרא במילתא דלא נפקי מינה מידי אף בזמן התלמוד מפני שהוא דבר שכבר עבר ואפ\"ה קבעי לה משום דרוש וקבל שכר."
   },
   {
    "klal_id": 150,
@@ -128,12 +112,6 @@
    "shared_first_word": "אתי",
    "stored_heading_words": 11,
    "stored_heading": "אתי עשה ודחי לא תעשה אף לא תעשה שיש בו כרת."
-  },
-  {
-   "klal_id": 89,
-   "shared_first_word": "בעיא",
-   "stored_heading_words": 11,
-   "stored_heading": "בעיא היכא דבעי תרי בעיות מתרי בעינים מוחלקים ולא קאמר תיקו."
   },
   {
    "klal_id": 91,
