@@ -1181,6 +1181,25 @@ function buildPlaceholders() {
       : 'Flag this klal for revisit';
     flagBtn.onclick = (e) => { e.stopPropagation(); openKlalFlagPanel(k.klal_id); };
     head.appendChild(flagBtn);
+    // THE HEADING, as something a reviewer can rule on (item 39, 2026-09-03).
+    // `title` is corpus text under the single-source-of-truth rule and until
+    // today there was no way to correct one except by hand-editing part1.json -
+    // which is what happened on 2026-08-31, as a recorded exception. The apply
+    // path and the decision type exist now; without this button they would be
+    // Lesson 29 exactly, a capability nothing on screen can reach.
+    //
+    // It is a separate control rather than making the heading words in the text
+    // pane clickable, because those words are the BODY's reprint of the heading
+    // and carry body indices - clicking one must go on ruling on the body. The
+    // two fields are different addresses (item 0BB) and the UI has to keep them
+    // visibly apart.
+    const titleBtn = document.createElement('button');
+    titleBtn.className = 'klal-title-btn';
+    titleBtn.textContent = '✎ Heading';
+    titleBtn.title = 'Correct a word in this klal\u2019s heading (the `title` field), '
+                   + 'which is stored separately from the body text';
+    titleBtn.onclick = (e) => { e.stopPropagation(); openTitlePanel(k.klal_id); };
+    head.appendChild(titleBtn);
     // ...and the word-level flags the INDEX pennant is counting, which the klal
     // button deliberately does not (it toggles the klal-level flag alone). Both
     // panes now tell the same story instead of answering different questions
@@ -1800,6 +1819,8 @@ const witnessPanel = document.getElementById('witness-panel');
 const witnessPanelBody = document.getElementById('witness-panel-body');
 const manualPanel = document.getElementById('manual-panel');
 const manualPanelBody = document.getElementById('manual-panel-body');
+const titlePanel = document.getElementById('title-panel');
+const titlePanelBody = document.getElementById('title-panel-body');
 const flagListPanel = document.getElementById('flag-list-panel');
 const flagListPanelBody = document.getElementById('flag-list-panel-body');
 
@@ -1810,6 +1831,7 @@ function setupPanels() {
   document.getElementById('punctuation-panel-close').onclick = dismissPanels;
   document.getElementById('witness-panel-close').onclick = dismissPanels;
   document.getElementById('manual-panel-close').onclick = dismissPanels;
+  document.getElementById('title-panel-close').onclick = dismissPanels;
   document.getElementById('flag-list-panel-close').onclick = dismissPanels;
   backdrop.onclick = dismissPanels;
   // ADDED 2026-08-25 (user request: "clicking away (in a blank part of the
@@ -2172,6 +2194,154 @@ function openPanel(panel) {
   backdrop.classList.add('open');
   panel.classList.add('open');
 }
+
+// THE HEADING PANEL (item 39, 2026-09-03). Every word of the `title` field, as
+// a chip; click one to replace or delete it.
+//
+// Why a panel of its own rather than a `field` argument threaded through
+// openManualCorrectionPanel: that function is ~200 lines of body-specific
+// machinery - scan focus, bbox highlighting, AI-flag routing, the suggested-word
+// extractor - and a title has NONE of it. Titles carry no DocAI alignment, so
+// there is no crop to show and no scan pane to drive. Passing a flag through all
+// of it would have meant a dozen `if (field === 'title')` branches inside code
+// whose own history is a list of branches disagreeing with each other.
+//
+// The terminal period is shown, not hidden. Every title in this corpus ends with
+// one glued to its last word, so it is part of that word's stored text: a
+// reviewer retyping the word without it would be recording a different string,
+// and the apply's drift check would refuse the ruling. Better to show what is
+// actually stored.
+async function openTitlePanel(klalId) {
+  openPanel(titlePanel);
+  titlePanelBody.innerHTML = '<p>Loading…</p>';
+  const k = mountedKlal[klalId] || await fetchKlal(klalId);
+  const words = (k.title || '').split(' ').filter(w => w.length);
+  if (!words.length) {
+    titlePanelBody.innerHTML = '<div class="panel-section">This klal has no stored heading.</div>';
+    return;
+  }
+  const chips = words.map((w, i) =>
+    `<button type="button" class="title-word-chip" data-i="${i}">` +
+    `<bdi>${escapeHtml(w)}</bdi><span class="title-word-i">${i}</span></button>`).join(' ');
+  titlePanelBody.innerHTML = `
+    <div class="panel-section">
+      <div class="panel-label">Klal ${klalId} \u2014 heading (the <code>title</code> field)</div>
+      <div style="font-size:12px;color:var(--ink-faint);margin-bottom:8px;">
+        Stored separately from the body text, and addressed by its own word numbers \u2014
+        heading word 2 is not body word 2.
+      </div>
+      <div class="panel-label">The heading, as one field</div>
+      <textarea id="title-whole-text" rows="3" dir="rtl">${escapeHtml(k.title || '')}</textarea>
+      <div style="font-size:12px;color:var(--ink-faint);margin:4px 0 8px;">
+        This is how to fix a heading that has swallowed body text: set it to what the
+        printed page sets in larger type. One ruling, however many words it removes.
+      </div>
+      <button class="panel-btn" id="save-whole-title-btn">Save heading</button>
+      <span class="save-status" id="title-whole-status">Saved \u2713</span>
+    </div>
+    <div class="panel-section">
+      <div class="panel-label">Or end the heading after a word</div>
+      <div style="font-size:12px;color:var(--ink-faint);margin-bottom:6px;">
+        Click a word to cut the heading there (it fills the box above \u2014 nothing is
+        recorded until you save). Click twice to correct that one word instead.
+      </div>
+      <div class="title-word-row" dir="rtl">${chips}</div>
+    </div>
+    <div class="panel-section" id="title-edit-section" style="display:none;">
+      <div class="panel-label" id="title-edit-label"></div>
+      <input type="text" class="custom-text" id="title-correction-text" placeholder="Correct reading…">
+      <div style="font-size:12px;color:var(--ink-faint);margin-top:4px;" id="title-edit-hint"></div>
+    </div>
+    <div class="panel-section" id="title-save-section" style="display:none;">
+      <div class="panel-label">Note (optional)</div>
+      <textarea id="title-correction-note" rows="3" placeholder="Why? e.g. &quot;scan shows X&quot;"></textarea>
+    </div>
+    <div class="panel-section" id="title-buttons" style="display:none;">
+      <button class="panel-btn" id="save-title-correction-btn">Save correction</button>
+      <button class="panel-btn secondary" id="delete-title-word-btn">Delete this word</button>
+      <span class="save-status" id="title-save-status">Saved \u2713</span>
+    </div>
+  `;
+  const wholeBox = document.getElementById('title-whole-text');
+  const postWhole = async () => {
+    const text = wholeBox.value.trim();
+    if (!text) { alert('The heading cannot be empty.'); return; }
+    if (text === (k.title || '').trim()) {
+      alert('That is the heading already \u2014 nothing to record.');
+      return;
+    }
+    const res = await fetch('/api/decisions/title', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        klal_id: klalId, word_index: 0, whole: true, chosen_text: text,
+        note: document.getElementById('title-correction-note')?.value || null,
+      }),
+    });
+    if (!res.ok) { alert('Could not record the heading: ' + await res.text()); return; }
+    flashSavedThenClose('title-whole-status');
+  };
+  document.getElementById('save-whole-title-btn').onclick = postWhole;
+
+  let picked = null;
+  titlePanelBody.querySelectorAll('.title-word-chip').forEach(btn => {
+    btn.onclick = () => {
+      const i = parseInt(btn.dataset.i, 10);
+      // FIRST click on a word cuts the heading there; a SECOND click on the same
+      // word switches to correcting that one word. Truncation is the common case
+      // by a wide margin - the extent class is what a reviewer reading headings
+      // actually finds - so it gets the first click.
+      if (picked !== i) {
+        const cut = words.slice(0, i + 1);
+        // The heading keeps its terminal period wherever it now ends.
+        cut[cut.length - 1] = cut[cut.length - 1].replace(/\.*$/, '') + '.';
+        wholeBox.value = cut.join(' ');
+      }
+      picked = i;
+      titlePanelBody.querySelectorAll('.title-word-chip')
+        .forEach(b => b.classList.toggle('picked', b === btn));
+      document.getElementById('title-edit-section').style.display = '';
+      document.getElementById('title-save-section').style.display = '';
+      document.getElementById('title-buttons').style.display = '';
+      document.getElementById('title-edit-label').textContent =
+        `Heading word ${picked}: ${words[picked]} \u2014 click again to correct this word alone`;
+      const input = document.getElementById('title-correction-text');
+      input.value = words[picked];
+      input.focus();
+      input.select();
+      // Say the period out loud rather than stripping it silently: it is part of
+      // the stored word, and a ruling that drops it is a different string.
+      document.getElementById('title-edit-hint').textContent =
+        words[picked].endsWith('.')
+          ? 'This is the last word of the heading, so it carries the terminal period. '
+            + 'Keep the period unless you mean to change it.'
+          : '';
+    };
+  });
+  const post = async (chosenText) => {
+    if (picked === null) return;
+    const res = await fetch('/api/decisions/title', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        klal_id: klalId,
+        word_index: picked,
+        chosen_text: chosenText,
+        note: document.getElementById('title-correction-note').value || null,
+      }),
+    });
+    if (!res.ok) {
+      const detail = await res.text();
+      alert('Could not record the heading correction: ' + detail);
+      return;
+    }
+    flashSavedThenClose('title-save-status');
+  };
+  document.getElementById('save-title-correction-btn').onclick = () =>
+    post(document.getElementById('title-correction-text').value.trim());
+  document.getElementById('delete-title-word-btn').onclick = () => post('');
+}
+
 
 async function openDisputedPanel(klalId, corr) {
   openPanel(disputedPanel);

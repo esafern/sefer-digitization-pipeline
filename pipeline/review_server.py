@@ -1537,6 +1537,106 @@ def api_post_manual_correction(body):
     return record
 
 
+def api_post_title_correction(body):
+    """A reviewer ruling on a klal's TITLE (item 39, 2026-09-03).
+
+    Its own decision type rather than a manual_correction with a field tag,
+    for a measured reason: `rd.all_current()` keys on (klal_id, word_index) and
+    a title index is a DIFFERENT ADDRESS from a body index in the same klal.
+    Content cannot separate them either - 1,286 of Part 1's 1,287 title words
+    also occur in their own body, because the body reprints the heading (item
+    0BB). So the namespaces have to be separate at the type level.
+
+    Two things this accepts that the body path does not need:
+      * `word_index == len(title_words)` is NOT valid here - a title has no
+        trailing insertion point in the UI - but a word_index equal to the last
+        word is, and that word carries the terminal period every title in this
+        corpus ends with. The snapshot records what is actually there, so a
+        reviewer who retypes the word without its period gets a drift skip
+        rather than a silent period deletion.
+      * chosen_text == "" deletes the word, same convention as the body path -
+        which is how an EXTENT fix (a heading that swallowed body text) is
+        recorded: delete the absorbed words one per run, since each deletion
+        shifts the indices after it.
+    """
+    klal_id = int(body["klal_id"])
+    word_index = int(body["word_index"])
+    if word_index < 0:
+        raise ValueError(f"word_index must be >= 0, got {word_index}")
+    chosen_text = body.get("chosen_text")
+    if chosen_text is None:
+        raise ValueError("chosen_text is required (pass '' explicitly to delete)")
+    chosen_text = chosen_text.strip()
+
+    part_num = _get_part_num_for_klal(klal_id)
+    klalim_by_id, _ = _load_klalim(part_num=part_num)
+    klal = klalim_by_id.get(klal_id)
+    if klal is None:
+        raise ValueError(f"no klal {klal_id}")
+
+    # WHOLE-FIELD RULING, at (klal, 0). The reviewer's own proposal - "same for
+    # title - klal+0" - and the EXTENT class is why it has to exist.
+    #
+    # A heading that swallowed body text is corrected by REMOVING a run of
+    # words, sometimes most of them: klal 90's stored title is 17 words and the
+    # printed heading is the first one. Word-by-word deletion cannot express
+    # that - every deletion shifts the indices after it, so the apply's
+    # one-word-count-change-per-klal-per-run limit would make a 16-word trim
+    # sixteen apply/rebuild cycles. As ONE ruling naming the whole field it is
+    # atomic, drift-checks against the entire stored string, and reads in the
+    # ledger as what it is: "the heading is X".
+    if body.get("whole"):
+        stored = klal.get("title") or ""
+        if not chosen_text:
+            raise ValueError("a whole-heading ruling needs the new heading text "
+                             "(use a word-level ruling to delete one word)")
+        return rd.append_decision(
+            "title_correction",
+            klal_id=klal_id,
+            word_index=0,
+            chosen_source="custom",
+            chosen_text=chosen_text,
+            candidate_snapshot={
+                "field": cio.TITLE_FIELD,
+                "whole": True,
+                "word_index": 0,
+                # The drift check for a whole-field ruling is the whole field.
+                "original_title": stored,
+                "original_word": cio.title_words_of(klal)[0] if stored else None,
+            },
+            note=body.get("note"),
+        )
+
+    words = cio.title_words_of(klal)
+    if word_index >= len(words):
+        raise ValueError(
+            f"word_index {word_index} is past the end of klal {klal_id}'s title "
+            f"({len(words)} words)")
+    snapshot = {
+        "field": cio.TITLE_FIELD,
+        "word_index": word_index,
+        "original_word": words[word_index],
+        # The stable half of the address (item 0BB). Titles repeat words far
+        # less than bodies do, but `בעיא`-style runs and doubled particles exist
+        # and the ordinal costs nothing.
+        "word_occurrence": cio.occurrence_of(words, word_index),
+        # NO bbox: title geometry is not computed anywhere in this pipeline -
+        # _word_scan_position indexes clean_text tokens. Recorded as absent
+        # rather than omitted so a later recovery pass can tell "never had one"
+        # from "lost it", the same distinction _manual_snapshot draws.
+        "bbox_unavailable": "title words have no DocAI alignment in this pipeline",
+    }
+    return rd.append_decision(
+        "title_correction",
+        klal_id=klal_id,
+        word_index=word_index,
+        chosen_source="custom" if chosen_text else "delete",
+        chosen_text=chosen_text,
+        candidate_snapshot=snapshot,
+        note=body.get("note"),
+    )
+
+
 def _manual_snapshot(klal_id, word_index, original_word):
     """What a manual_correction records about the word it is ruling on.
 
@@ -1763,6 +1863,8 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send_json(api_post_klal_flag(body), status=201)
             if path == "/api/decisions/manual":
                 return self._send_json(api_post_manual_correction(body), status=201)
+            if path == "/api/decisions/title":
+                return self._send_json(api_post_title_correction(body), status=201)
             return self._send_error_json(404, "unknown endpoint")
         except (KeyError, ValueError, TypeError) as e:
             return self._send_error_json(400, f"bad request: {e}")

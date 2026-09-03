@@ -108,6 +108,44 @@ def detector_candidates(part_path):
     return rows
 
 
+def extent_queue(klalim):
+    """Headings that MAY have swallowed body text - a work queue, not findings.
+
+    ADDED 2026-09-03 after the reviewer read the `בעיא` run and said the whole
+    heading is the single first word in each - so the extent class is not the two
+    known cases (klalim 36, 39) but something much wider.
+
+    THERE IS NO MECHANICAL TEST FOR THIS AND THIS IS NOT ONE. Item 39 measured
+    that length is not the signal: this book's headings genuinely run long (mean
+    5.8 words, p90 11, and klal 92 stores 24), and the reviewer confirmed klal
+    96's heading is 3 words while klal 88's alone is long and correct. Only the
+    printed type size says where a heading stops.
+
+    What this DOES is order the field so a human can walk it fast in the heading
+    panel: klalim whose first heading word is shared with an adjacent klal - the
+    book is ordered alphabetically by each klal's opening TERM, so a run of
+    klalim sharing one is a run whose heading may well BE that term - longest
+    stored heading first, because a long heading inside such a run is where an
+    absorbed body run would show up biggest.
+    """
+    ordered = sorted(klalim, key=lambda k: k["klal_id"])
+    words = {k["klal_id"]: cio.strip_title_terminal_period(cio.title_words_of(k))
+             for k in ordered}
+    in_run = set()
+    for a, b in zip(ordered, ordered[1:]):
+        wa, wb = words[a["klal_id"]], words[b["klal_id"]]
+        if wa and wb and wa[0] == wb[0]:
+            in_run.add(a["klal_id"])
+            in_run.add(b["klal_id"])
+    rows = [{"klal_id": k["klal_id"], "shared_first_word": words[k["klal_id"]][0],
+             "stored_heading_words": len(words[k["klal_id"]]),
+             "stored_heading": k.get("title")}
+            for k in ordered
+            if k["klal_id"] in in_run and len(words[k["klal_id"]]) >= 4]
+    rows.sort(key=lambda r: -r["stored_heading_words"])
+    return rows
+
+
 def build(part_path=None):
     part_path = part_path or cio.PART1_PATH
     klalim = cio.load_klalim(part_path)
@@ -120,10 +158,14 @@ def build(part_path=None):
         # None (not []) when the gitignored reference cache is absent, so an
         # unrunnable detector never reads as "no defects found" (Lesson 26).
         "detector_candidates": candidates,
+        # A QUEUE, not findings - see extent_queue's docstring. Nothing here is
+        # a claim that a heading is wrong.
+        "extent_queue": extent_queue(klalim),
         "not_checked": (
             "EXTENT: whether a title has swallowed body text. A title that has "
             "still agrees with its body over its own length, so nothing here can "
-            "see it - only the printed type size can. Item 39 (iv), unmeasured."
+            "see it - only the printed type size can. Item 39 (iv): `extent_queue` "
+            "orders the field for a human, and is NOT a detector."
         ),
     }
 
@@ -147,7 +189,12 @@ def main():
     else:
         print(f"  {len(cands)} detector candidate(s) in titles - NOT flags and NOT fixes, "
               f"a triage queue; the body often spells the same word the same way.")
-    print("  NOT CHECKED: title EXTENT (item 39 (iv)) - needs the printed page.")
+    q = report["extent_queue"]
+    print(f"  {len(q)} heading(s) queued for the EXTENT question - a work queue for a "
+          f"human, NOT findings; only the printed type size says where a heading stops.")
+    if q:
+        print("    longest first: " + ", ".join(
+            f"klal {r['klal_id']} ({r['stored_heading_words']}w)" for r in q[:8]) + " ...")
 
 
 if __name__ == "__main__":

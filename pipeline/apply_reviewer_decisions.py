@@ -733,8 +733,33 @@ def main():
         if klal is None:
             skipped_drift.append((klal_id, word_index))
             continue
-        original_word = decision.get("candidate_snapshot", {}).get("original_word")
+        snapshot = decision.get("candidate_snapshot", {})
+        original_word = snapshot.get("original_word")
         chosen_text = decision["chosen_text"]
+
+        # A WHOLE-HEADING ruling replaces the field outright, drift-checked
+        # against the entire stored string rather than one word. This is the
+        # shape an EXTENT fix takes - a heading that swallowed body text, where
+        # the repair removes a run of words and word-by-word deletion would cost
+        # one apply/rebuild cycle per word.
+        if snapshot.get("whole"):
+            if (klal.get("title") or "") != (snapshot.get("original_title") or ""):
+                skipped_drift.append((klal_id, word_index))
+                continue
+            if klal_id in title_count_changed_klalim:
+                print(f"  SKIP klal {klal_id} heading: another heading decision already "
+                      f"applied for this klal this run - run ./rebuild_all.sh, then this "
+                      f"script again.")
+                continue
+            title_count_changed_klalim.add(klal_id)
+            klal["title"] = chosen_text
+            n_title += 1
+            applied.append((klal_id, word_index, "title-whole"))
+            if not args.dry_run:
+                rd.append_decision("apply_event", klal_id=klal_id, word_index=word_index,
+                                    applied_decision_id=decision["id"])
+            continue
+
         if klal_id in title_count_changed_klalim:
             print(f"  SKIP klal {klal_id} title word {word_index}: another word-count-changing "
                   f"title decision already applied for this klal this run - run "

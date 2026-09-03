@@ -2299,56 +2299,6 @@
       }
     }
   ],
-  "96": [
-    {
-      "klal_id": 96,
-      "word_index": 86,
-      "opcode": "replace",
-      "final_text": "צבורין",
-      "consensus_reading": "ציבורין",
-      "agreeing_engines": [
-        "surya",
-        "vlm"
-      ],
-      "ligature_artifact": null,
-      "witnesses": {
-        "docai": null,
-        "vlm": "ציבורין",
-        "surya": "ציבורין"
-      },
-      "page": 43,
-      "bbox": {
-        "x1": 0.7676143646240234,
-        "y1": 0.6964791417121887,
-        "x2": 0.8152039647102356,
-        "y2": 0.7130716443061829
-      }
-    },
-    {
-      "klal_id": 96,
-      "word_index": 97,
-      "opcode": "replace",
-      "final_text": "צבורין",
-      "consensus_reading": "ציבורין",
-      "agreeing_engines": [
-        "surya",
-        "vlm"
-      ],
-      "ligature_artifact": null,
-      "witnesses": {
-        "docai": null,
-        "vlm": "ציבורין",
-        "surya": "ציבורין"
-      },
-      "page": 43,
-      "bbox": {
-        "x1": 0.21322619915008545,
-        "y1": 0.6964791417121887,
-        "x2": 0.26081582903862,
-        "y2": 0.7130716443061829
-      }
-    }
-  ],
   "97": [
     {
       "klal_id": 97,

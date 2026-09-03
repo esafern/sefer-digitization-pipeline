@@ -50,5 +50,613 @@
    "klass": "detector_candidate"
   }
  ],
- "not_checked": "EXTENT: whether a title has swallowed body text. A title that has still agrees with its body over its own length, so nothing here can see it - only the printed type size can. Item 39 (iv), unmeasured."
+ "extent_queue": [
+  {
+   "klal_id": 92,
+   "shared_first_word": "בעיא",
+   "stored_heading_words": 24,
+   "stored_heading": "בעיא מצינו דבעי בגמרא במילתא דלא נסקי מינה מידי אף בזמן התלמוד מפני שהוא דבר שכבר עבר ואפ\"ה קבעי לה משום דרוש וקבל שכר."
+  },
+  {
+   "klal_id": 90,
+   "shared_first_word": "בעיא",
+   "stored_heading_words": 16,
+   "stored_heading": "בעיא דבעי בש\"ס המקובל אצלינו בדרכי התלמוד הוא שהצד הוא פשוט יותר אצל הבעיין תופס תחלה."
+  },
+  {
+   "klal_id": 150,
+   "shared_first_word": "הלכה",
+   "stored_heading_words": 16,
+   "stored_heading": "הלכה כשמואל באיסורי פסקינן לפעמים היכא דאשכחן ברייתא דפליגי תנאי בההיא פלוגתא גופא דאיפליגו בה רב."
+  },
+  {
+   "klal_id": 75,
+   "shared_first_word": "אמר",
+   "stored_heading_words": 14,
+   "stored_heading": "אמר ר' פלוני משום ר\"ס כגון אמר ר' יוחנן משום רשב\"י לא שמעה ממנו."
+  },
+  {
+   "klal_id": 128,
+   "shared_first_word": "דחקינן",
+   "stored_heading_words": 14,
+   "stored_heading": "דחקינן ומוקמינן מתניתין בתרי טעמי ואליבא דחד תנא ולא מוקמי' בתרי תנאי ובחד טעמא."
+  },
+  {
+   "klal_id": 43,
+   "shared_first_word": "איסורא",
+   "stored_heading_words": 12,
+   "stored_heading": "איסורא מממונא ילפינן היכא דהילפותא דאיסורא לא הוי דומה בדומה ממש לממונא."
+  },
+  {
+   "klal_id": 61,
+   "shared_first_word": "אף",
+   "stored_heading_words": 12,
+   "stored_heading": "אף אנן נמי תנינא קאמר כשאמורא חד מייתי סיעתא לדברי אמורא אחרינא."
+  },
+  {
+   "klal_id": 65,
+   "shared_first_word": "אין",
+   "stored_heading_words": 12,
+   "stored_heading": "אין ב\"ד יכול לבטל דברי ב\"ד חבירו אא\"כ גדול ממנו בחכמה ובמנין."
+  },
+  {
+   "klal_id": 66,
+   "shared_first_word": "אין",
+   "stored_heading_words": 12,
+   "stored_heading": "אין ב\"ד יכול לבטל דברי ב\"ד חבירו אא\"כ גדול ממנו בחכמה ובמנין."
+  },
+  {
+   "klal_id": 67,
+   "shared_first_word": "אין",
+   "stored_heading_words": 12,
+   "stored_heading": "אין ב\"ד יכול לבטל דברי ב\"ד חבירו אא\"כ גדול ממנו בחכמה ובמנין."
+  },
+  {
+   "klal_id": 86,
+   "shared_first_word": "בעיא",
+   "stored_heading_words": 12,
+   "stored_heading": "בעיא דרך התלמוד בהרבה מקומות להציע ולפתוח בדבר פשוט כדי למבעי אחריו."
+  },
+  {
+   "klal_id": 87,
+   "shared_first_word": "בעיא",
+   "stored_heading_words": 12,
+   "stored_heading": "בעיא לפעמים נמצא בש\"ס דהבעיין סותר התירוץ שנתנה לו ממשנה או ברייתא."
+  },
+  {
+   "klal_id": 54,
+   "shared_first_word": "אתי",
+   "stored_heading_words": 11,
+   "stored_heading": "אתי עשה ודחי לא תעשה אף לא תעשה שיש בו כרת."
+  },
+  {
+   "klal_id": 89,
+   "shared_first_word": "בעיא",
+   "stored_heading_words": 11,
+   "stored_heading": "בעיא היכא דבעי תרי בעיות מתרי בעינים מוחלקים ולא קאמר תיקו."
+  },
+  {
+   "klal_id": 91,
+   "shared_first_word": "בעיא",
+   "stored_heading_words": 11,
+   "stored_heading": "בעיא מצינו בש\"ס דבכמה דוכתי בעי אליבא דמאן דלא קי\"ל כותיה."
+  },
+  {
+   "klal_id": 166,
+   "shared_first_word": "הלכה",
+   "stored_heading_words": 11,
+   "stored_heading": "הלכה כמר בר רב אשי בכוליה תלמודא בר ממיפך שבועה ואודיתא."
+  },
+  {
+   "klal_id": 34,
+   "shared_first_word": "אין",
+   "stored_heading_words": 10,
+   "stored_heading": "אין אדם דן גזירה שוה מעצמו אלא א\"כ קבלה מרבו."
+  },
+  {
+   "klal_id": 140,
+   "shared_first_word": "דיעבד",
+   "stored_heading_words": 10,
+   "stored_heading": "דיעבד לא מקרי אלא היכא שלא ידע שיש איסור בדבר."
+  },
+  {
+   "klal_id": 175,
+   "shared_first_word": "הלכה",
+   "stored_heading_words": 10,
+   "stored_heading": "הלכה כר' מחבירו ואפילו אצל ר' אלעזר בר ר' שמעון."
+  },
+  {
+   "klal_id": 7,
+   "shared_first_word": "איידי",
+   "stored_heading_words": 9,
+   "stored_heading": "איידי דבעי למתני הך מילתא בסיפא תנייה נמי ברישא."
+  },
+  {
+   "klal_id": 22,
+   "shared_first_word": "אין",
+   "stored_heading_words": 9,
+   "stored_heading": "אין למדים מן הכללות אפילו במקום שנאמר בהן חוץ."
+  },
+  {
+   "klal_id": 23,
+   "shared_first_word": "אין",
+   "stored_heading_words": 9,
+   "stored_heading": "אין למדין מן הכללות אפילו במקום שנאמר בהן חוץ."
+  },
+  {
+   "klal_id": 24,
+   "shared_first_word": "אין",
+   "stored_heading_words": 9,
+   "stored_heading": "אין למדין מן הכללות אפי' במקום שנאמר בהן חוץ."
+  },
+  {
+   "klal_id": 74,
+   "shared_first_word": "אמר",
+   "stored_heading_words": 9,
+   "stored_heading": "אמר ר' פלוני אמר ר\"פ רבו היה ושמעה ממנו."
+  },
+  {
+   "klal_id": 101,
+   "shared_first_word": "ב\"ד",
+   "stored_heading_words": 9,
+   "stored_heading": "ב\"ד מתנין לעקור דבר מן התורה בשב ואל תעשה."
+  },
+  {
+   "klal_id": 102,
+   "shared_first_word": "ב\"ד",
+   "stored_heading_words": 9,
+   "stored_heading": "ב\"ד מתנין לעקור דבר מן התורה בשב ואל תעשה."
+  },
+  {
+   "klal_id": 127,
+   "shared_first_word": "גזירה",
+   "stored_heading_words": 9,
+   "stored_heading": "גזירה שוה שהיא מופנה מב' צדדין למידין ואין משיבין."
+  },
+  {
+   "klal_id": 129,
+   "shared_first_word": "דחקינן",
+   "stored_heading_words": 9,
+   "stored_heading": "דחקינן ומוקמינן מתניתין בתרי טעמי ולא מוקמינן בתרי תנאי."
+  },
+  {
+   "klal_id": 149,
+   "shared_first_word": "הלכה",
+   "stored_heading_words": 9,
+   "stored_heading": "הלכה כרב באיסורי אינו אלא היכא דפליגי רב ושמואל."
+  },
+  {
+   "klal_id": 176,
+   "shared_first_word": "הלכה",
+   "stored_heading_words": 9,
+   "stored_heading": "הלכה כר' שמעון שזורי במסוכן ובתרומת מעשר של דמאי."
+  },
+  {
+   "klal_id": 218,
+   "shared_first_word": "הניחא",
+   "stored_heading_words": 9,
+   "stored_heading": "הניחא למ\"ד מופנה מצד אחד למידין ואין משיבין וכו'."
+  },
+  {
+   "klal_id": 70,
+   "shared_first_word": "אין",
+   "stored_heading_words": 8,
+   "stored_heading": "אין סדר למשנה בתרי מסכתי כ\"ש בתרי סדרי."
+  },
+  {
+   "klal_id": 72,
+   "shared_first_word": "אין",
+   "stored_heading_words": 8,
+   "stored_heading": "אין למדין הלכה ממדרש הרבות ולא מן ההגדות."
+  },
+  {
+   "klal_id": 93,
+   "shared_first_word": "בעיא",
+   "stored_heading_words": 8,
+   "stored_heading": "בעיא דאבעיא בתלמוד ירושלמי ולא איבעיא בגמרא דילן."
+  },
+  {
+   "klal_id": 94,
+   "shared_first_word": "בעיא",
+   "stored_heading_words": 8,
+   "stored_heading": "בעיא דלא איפשיטא בגמרין ואיפשיטא בירושלמי הוי פשיטותא."
+  },
+  {
+   "klal_id": 184,
+   "shared_first_word": "הלכה",
+   "stored_heading_words": 8,
+   "stored_heading": "הלכה כדברי המקיל בעירוב דוקא אבל לא במחיצות."
+  },
+  {
+   "klal_id": 30,
+   "shared_first_word": "אין",
+   "stored_heading_words": 7,
+   "stored_heading": "אין גזרה שוה למחצה ואין היקש למחצה."
+  },
+  {
+   "klal_id": 49,
+   "shared_first_word": "אין",
+   "stored_heading_words": 7,
+   "stored_heading": "אין תרי עשה דחו לא תעשה ועשה."
+  },
+  {
+   "klal_id": 95,
+   "shared_first_word": "בעיא",
+   "stored_heading_words": 7,
+   "stored_heading": "בעיא דקאמר בה לדברי האומר וכו' מהו."
+  },
+  {
+   "klal_id": 122,
+   "shared_first_word": "גדול",
+   "stored_heading_words": 7,
+   "stored_heading": "גדול כבוד הבריות שדוחה לא תעשה שבתורה."
+  },
+  {
+   "klal_id": 123,
+   "shared_first_word": "גדול",
+   "stored_heading_words": 7,
+   "stored_heading": "גדול כבוד הבריות שדוחה לא תעשה שבתורה."
+  },
+  {
+   "klal_id": 139,
+   "shared_first_word": "דיעבד",
+   "stored_heading_words": 7,
+   "stored_heading": "דיעבד לא מקרי אלא כשעושה הדבר באקראי."
+  },
+  {
+   "klal_id": 153,
+   "shared_first_word": "הלכה",
+   "stored_heading_words": 7,
+   "stored_heading": "הלכה כרבא לגבי דאביי בר מיע\"ל קג\"ם."
+  },
+  {
+   "klal_id": 174,
+   "shared_first_word": "הלכה",
+   "stored_heading_words": 7,
+   "stored_heading": "הלכה כר\"מ בגזרותיו דוקא אבל לא בקנסותיו."
+  },
+  {
+   "klal_id": 177,
+   "shared_first_word": "הלכה",
+   "stored_heading_words": 7,
+   "stored_heading": "הלכה כרבי פלוני הואיל דתנן בבחירתא כוותיה."
+  },
+  {
+   "klal_id": 196,
+   "shared_first_word": "השמר",
+   "stored_heading_words": 7,
+   "stored_heading": "השמר פן ואל אינו אלא לא תעשה."
+  },
+  {
+   "klal_id": 197,
+   "shared_first_word": "השמר",
+   "stored_heading_words": 7,
+   "stored_heading": "השמר פן ואל אינו אלא לא תעשה."
+  },
+  {
+   "klal_id": 198,
+   "shared_first_word": "השמר",
+   "stored_heading_words": 7,
+   "stored_heading": "השמר פן ואל אינו אלא לא תעשה."
+  },
+  {
+   "klal_id": 207,
+   "shared_first_word": "השוה",
+   "stored_heading_words": 7,
+   "stored_heading": "השוה הכתוב אשה לאיש לכל עונשין שבתורה."
+  },
+  {
+   "klal_id": 208,
+   "shared_first_word": "השוה",
+   "stored_heading_words": 7,
+   "stored_heading": "השוה הכתוב אשה לאיש לכל עונשין שבתורה."
+  },
+  {
+   "klal_id": 209,
+   "shared_first_word": "השוה",
+   "stored_heading_words": 7,
+   "stored_heading": "השוה הכתוב אשה לאיש לכל עונשין שבתורה."
+  },
+  {
+   "klal_id": 9,
+   "shared_first_word": "איידי",
+   "stored_heading_words": 6,
+   "stored_heading": "איידי אפשר דאמרינן ליה ממשנה לברייתא."
+  },
+  {
+   "klal_id": 27,
+   "shared_first_word": "אין",
+   "stored_heading_words": 6,
+   "stored_heading": "אין רבוי אחר רבוי אלא למעט."
+  },
+  {
+   "klal_id": 29,
+   "shared_first_word": "אין",
+   "stored_heading_words": 6,
+   "stored_heading": "אין מיעוט אחר מיעוט אלא לרבות."
+  },
+  {
+   "klal_id": 68,
+   "shared_first_word": "אין",
+   "stored_heading_words": 6,
+   "stored_heading": "אין עושין כך וכך מה טעם."
+  },
+  {
+   "klal_id": 85,
+   "shared_first_word": "בעיא",
+   "stored_heading_words": 6,
+   "stored_heading": "בעיא אשכחן דבעי דבר שהוא פשוט."
+  },
+  {
+   "klal_id": 103,
+   "shared_first_word": "ב\"ד",
+   "stored_heading_words": 6,
+   "stored_heading": "ב\"ד מתנין לעקור דבר מן התורה."
+  },
+  {
+   "klal_id": 104,
+   "shared_first_word": "ב\"ד",
+   "stored_heading_words": 6,
+   "stored_heading": "ב\"ד מתנין לעקור דבר מן התורה."
+  },
+  {
+   "klal_id": 108,
+   "shared_first_word": "בדרבנן",
+   "stored_heading_words": 6,
+   "stored_heading": "בדרבנן עבדינן עובדא והדר מותבינן תיובתא."
+  },
+  {
+   "klal_id": 109,
+   "shared_first_word": "בדרבנן",
+   "stored_heading_words": 6,
+   "stored_heading": "בדרבנן עבדינן עובדא והדר מותבינן תיובתא."
+  },
+  {
+   "klal_id": 154,
+   "shared_first_word": "הלכתא",
+   "stored_heading_words": 6,
+   "stored_heading": "הלכתא כוותיה דאביי ביע\"ל קגם דוקא."
+  },
+  {
+   "klal_id": 155,
+   "shared_first_word": "הלכתא",
+   "stored_heading_words": 6,
+   "stored_heading": "הלכתא כוותיה דאביי ביע\"ל קג\"ם דוקא."
+  },
+  {
+   "klal_id": 217,
+   "shared_first_word": "הניחא",
+   "stored_heading_words": 6,
+   "stored_heading": "הניחא למ\"ד וכו' אלא למ\"ד וכו'."
+  },
+  {
+   "klal_id": 3,
+   "shared_first_word": "אין",
+   "stored_heading_words": 5,
+   "stored_heading": "אין למדין למד מלמד בקדשים."
+  },
+  {
+   "klal_id": 11,
+   "shared_first_word": "איידי",
+   "stored_heading_words": 5,
+   "stored_heading": "איידי דאתי מדרשא חביבא ליה."
+  },
+  {
+   "klal_id": 28,
+   "shared_first_word": "אין",
+   "stored_heading_words": 5,
+   "stored_heading": "אין סדר למשנה בתרי מסכתי."
+  },
+  {
+   "klal_id": 38,
+   "shared_first_word": "אין",
+   "stored_heading_words": 5,
+   "stored_heading": "אין הלכה כתלמיד במקום הרב."
+  },
+  {
+   "klal_id": 39,
+   "shared_first_word": "אין",
+   "stored_heading_words": 5,
+   "stored_heading": "אין הלכה כתלמיד במקום הרב."
+  },
+  {
+   "klal_id": 55,
+   "shared_first_word": "אתי",
+   "stored_heading_words": 5,
+   "stored_heading": "אתי עשה ודחי לא תעשה."
+  },
+  {
+   "klal_id": 56,
+   "shared_first_word": "אתי",
+   "stored_heading_words": 5,
+   "stored_heading": "אתי עשה ודחי לא תעשה."
+  },
+  {
+   "klal_id": 82,
+   "shared_first_word": "בשל",
+   "stored_heading_words": 5,
+   "stored_heading": "בשל סופרים הלך אחר המקיל."
+  },
+  {
+   "klal_id": 148,
+   "shared_first_word": "הלכה",
+   "stored_heading_words": 5,
+   "stored_heading": "הלכה כרב באיסורי וכשמואל בדיני."
+  },
+  {
+   "klal_id": 168,
+   "shared_first_word": "הלכה",
+   "stored_heading_words": 5,
+   "stored_heading": "הלכה כבתראי מאביי ורבא ואילך."
+  },
+  {
+   "klal_id": 172,
+   "shared_first_word": "הלכה",
+   "stored_heading_words": 5,
+   "stored_heading": "הלכה כר\"ע מחבירו ולא מחבירין."
+  },
+  {
+   "klal_id": 195,
+   "shared_first_word": "הלכה",
+   "stored_heading_words": 5,
+   "stored_heading": "הלכה כרב מונא ברוב הירושלמי."
+  },
+  {
+   "klal_id": 4,
+   "shared_first_word": "אין",
+   "stored_heading_words": 4,
+   "stored_heading": "אין הלכה כרשב\"ג בטריפות."
+  },
+  {
+   "klal_id": 33,
+   "shared_first_word": "אין",
+   "stored_heading_words": 4,
+   "stored_heading": "אין משיבין לאחר מעשה."
+  },
+  {
+   "klal_id": 42,
+   "shared_first_word": "איסורא",
+   "stored_heading_words": 4,
+   "stored_heading": "איסורא מממונא לא ילפינן."
+  },
+  {
+   "klal_id": 44,
+   "shared_first_word": "איסורא",
+   "stored_heading_words": 4,
+   "stored_heading": "איסורא מממונא לא ילפינן."
+  },
+  {
+   "klal_id": 45,
+   "shared_first_word": "איסור",
+   "stored_heading_words": 4,
+   "stored_heading": "איסור מטומאה לא גמרינן."
+  },
+  {
+   "klal_id": 46,
+   "shared_first_word": "איסור",
+   "stored_heading_words": 4,
+   "stored_heading": "איסור מטומאה לא גמרינן."
+  },
+  {
+   "klal_id": 47,
+   "shared_first_word": "איסור",
+   "stored_heading_words": 4,
+   "stored_heading": "איסור מטומאה לא גמרינן."
+  },
+  {
+   "klal_id": 48,
+   "shared_first_word": "איסור",
+   "stored_heading_words": 4,
+   "stored_heading": "איסור מטומאה לא גמרי'."
+  },
+  {
+   "klal_id": 50,
+   "shared_first_word": "אין",
+   "stored_heading_words": 4,
+   "stored_heading": "אין עונשין מן הדין."
+  },
+  {
+   "klal_id": 60,
+   "shared_first_word": "אף",
+   "stored_heading_words": 4,
+   "stored_heading": "אף אנן נמי תנינא."
+  },
+  {
+   "klal_id": 152,
+   "shared_first_word": "הלכה",
+   "stored_heading_words": 4,
+   "stored_heading": "הלכה כר' יוחנן מחבירו."
+  },
+  {
+   "klal_id": 156,
+   "shared_first_word": "הלכה",
+   "stored_heading_words": 4,
+   "stored_heading": "הלכה כרבא לגבי אביי."
+  },
+  {
+   "klal_id": 157,
+   "shared_first_word": "הלכה",
+   "stored_heading_words": 4,
+   "stored_heading": "הלכה כרבא לגבי אביי."
+  },
+  {
+   "klal_id": 158,
+   "shared_first_word": "הלכה",
+   "stored_heading_words": 4,
+   "stored_heading": "הלכה כרבא לגבי אביי."
+  },
+  {
+   "klal_id": 159,
+   "shared_first_word": "הלכה",
+   "stored_heading_words": 4,
+   "stored_heading": "הלכה כרבא לגבי אביי."
+  },
+  {
+   "klal_id": 160,
+   "shared_first_word": "הלכה",
+   "stored_heading_words": 4,
+   "stored_heading": "הלכה כרבא לגבי אביי."
+  },
+  {
+   "klal_id": 161,
+   "shared_first_word": "הלכה",
+   "stored_heading_words": 4,
+   "stored_heading": "הלכה כרב נחמן בדיני."
+  },
+  {
+   "klal_id": 162,
+   "shared_first_word": "הלכה",
+   "stored_heading_words": 4,
+   "stored_heading": "הלכה כרב ששת באיסורי."
+  },
+  {
+   "klal_id": 182,
+   "shared_first_word": "הלכה",
+   "stored_heading_words": 4,
+   "stored_heading": "הלכה כפלוני נגד פלוני."
+  },
+  {
+   "klal_id": 185,
+   "shared_first_word": "הלכה",
+   "stored_heading_words": 4,
+   "stored_heading": "הלכה כדברי המקיל בעירוב."
+  },
+  {
+   "klal_id": 186,
+   "shared_first_word": "הלכה",
+   "stored_heading_words": 4,
+   "stored_heading": "הלכה כדברי המקיל בעירוב."
+  },
+  {
+   "klal_id": 187,
+   "shared_first_word": "הלכה",
+   "stored_heading_words": 4,
+   "stored_heading": "הלכה כדברי המקיל באבל."
+  },
+  {
+   "klal_id": 188,
+   "shared_first_word": "הלכה",
+   "stored_heading_words": 4,
+   "stored_heading": "הלכה כדברי המקיל באבל."
+  },
+  {
+   "klal_id": 189,
+   "shared_first_word": "הלכה",
+   "stored_heading_words": 4,
+   "stored_heading": "הלכה כדברי המקיל באבל."
+  },
+  {
+   "klal_id": 190,
+   "shared_first_word": "הלכה",
+   "stored_heading_words": 4,
+   "stored_heading": "הלכה כדברי המקיל באבל."
+  },
+  {
+   "klal_id": 191,
+   "shared_first_word": "הלכה",
+   "stored_heading_words": 4,
+   "stored_heading": "הלכה ואין מורין כן."
+  }
+ ],
+ "not_checked": "EXTENT: whether a title has swallowed body text. A title that has still agrees with its body over its own length, so nothing here can see it - only the printed type size can. Item 39 (iv): `extent_queue` orders the field for a human, and is NOT a detector."
 }

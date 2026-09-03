@@ -13195,60 +13195,6 @@
       "flag": "current_text_may_be_wrong"
     }
   ],
-  "96": [
-    {
-      "word_index": 86,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "צבורין",
-      "page": 43,
-      "bbox": {
-        "x1": 0.7676143646240234,
-        "y1": 0.6964791417121887,
-        "x2": 0.8152039647102356,
-        "y2": 0.7130716443061829
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: surya + vlm agree on 'ציבורין' against stored 'צבורין'.",
-      "vlm_reading": "ציבורין",
-      "surya_reading": "ציבורין",
-      "consensus_engines": [
-        "surya",
-        "vlm"
-      ],
-      "consensus_reading": "ציבורין",
-      "ligature_artifact": null,
-      "flag": "current_text_may_be_wrong"
-    },
-    {
-      "word_index": 97,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "צבורין",
-      "page": 43,
-      "bbox": {
-        "x1": 0.21322619915008545,
-        "y1": 0.6964791417121887,
-        "x2": 0.26081582903862,
-        "y2": 0.7130716443061829
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: surya + vlm agree on 'ציבורין' against stored 'צבורין'.",
-      "vlm_reading": "ציבורין",
-      "surya_reading": "ציבורין",
-      "consensus_engines": [
-        "surya",
-        "vlm"
-      ],
-      "consensus_reading": "ציבורין",
-      "ligature_artifact": null,
-      "flag": "current_text_may_be_wrong"
-    }
-  ],
   "110": [
     {
       "word_index": 76,

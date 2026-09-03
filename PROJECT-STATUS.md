@@ -428,6 +428,66 @@ reliability check, and every dispute still needs the ink or a different engine.
 
     Full suite **475 passed, 1 skipped**.
 
+0BC. **[2026-09-03, reviewer] THE EXTENT CLASS IS THE BIG ONE, AND THE HEADING
+    HAD NO WRITE PATH AT ALL. `✎ Heading` now rules on a title from the
+    dashboard, whole-field at (klal, 0) — the reviewer's own addressing
+    proposal. 101 headings are queued for the question. Klalim 89–92 are NOT a
+    defect in the way they first looked.**
+
+    Reviewer: *"klal 89 - 92 title is same first word"* → *"no entire title is
+    that single first word, all the same. 96 title last word ahddei"*.
+
+    **The repeated first word is the book's own ordering, not a defect.**
+    *Klalei HaGemara* is ordered alphabetically by each klal's opening TERM, so
+    runs are the norm: **133 of 222 klalim sit in a shared-first-word run**,
+    across 35 runs — `הלכה` klalim 166–177 is twelve in a row, and `בעיא` covers
+    81, 85–87, 89–95. That much I could answer from the data.
+
+    **What I could not, and what the reviewer supplied, is that the stored
+    heading for those klalim is WRONG AT THE OTHER END.** The printed heading is
+    the single word `בעיא`; klal 92 stores 24 words, klal 90 stores 16. Klal 96
+    is the counter-example that kills any mechanical rule: its heading is three
+    words, `בעיו דסמיכי אהדדי`, not one. Item 39 (iv) said length is not the
+    signal and only the printed type size decides; this is that, confirmed by a
+    reader.
+
+    **I HAD SHIPPED THE APPLY PATH WITH NOTHING ABLE TO CALL IT.** Item `0AY`
+    built the `title_correction` type, the apply, the invariant and the report —
+    and no endpoint and no control, so the answer to "how can i / you correct?"
+    was *neither of us can*. Lesson 29, committed the same day the lesson's own
+    file was edited: a capability nothing on screen reaches was not delivered.
+
+    **`POST /api/decisions/title` and a `✎ Heading` button on every klal.** The
+    panel leads with the heading AS ONE FIELD, because that is the shape the
+    extent fix takes; clicking a word cuts the heading there and fills the box
+    (nothing is recorded until Save), clicking it twice corrects that one word
+    instead. It is a separate control from the text pane's heading words on
+    purpose: those are the BODY's reprint and carry body indices.
+
+    **Whole-field rulings are addressed at `(klal, 0)` — the reviewer's "same for
+    title - klal+0", and the reason is arithmetic.** An extent fix removes a RUN
+    of words, and every deletion shifts the indices after it, so the apply's
+    one-word-count-change-per-klal-per-run limit would turn klal 92's trim into
+    **23 apply/rebuild cycles**. As one ruling naming the field it is atomic, and
+    its drift check is the ENTIRE stored heading rather than one word — if the
+    heading moved at all since the ruling, it describes a heading that no longer
+    exists and is skipped. Three tests: it replaces the field, it refuses on
+    drift, it never applies twice.
+
+    **The queue: 101 headings**, written into `title_defect_report.json` by stage
+    4c. It is klalim in a shared-first-word run whose stored heading is ≥4 words,
+    longest first — **explicitly a work queue and not a detector**, since the
+    same measurement that motivates it (mean 5.8 words, p90 11, max 24) is the
+    one proving length cannot decide. Klal 92 (24w) and klal 90 (16w) lead it.
+
+    **Two live rulings landed from the dashboard while this was being built**,
+    and one of them is the answer to item `0AY`'s open question: klal 92 w7
+    `נסקי` → `נפקי`, the title-detector candidate whose body carried the same
+    form. The other, klal 96 w1 `בעיו` → `בעיי`, is the first record to carry the
+    `word_occurrence` field from item `0BB`.
+
+    Full suite green: gate 389, UI 84 passed / 1 skipped.
+
 0AW. **[2026-09-03] WHY `הרל"ם → הרמב"ם` WAS PROPOSED: an abbreviation naming a
     DIFFERENT authority is indistinguishable, to every detector here, from a
     misprint of a commoner one. Reviewer ruled KEEP from the ink. 11 more

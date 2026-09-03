@@ -553,6 +553,56 @@ def _correction(word_index, opcode, docai, final):
             "final_text": final, "flag": "ambiguous"}
 
 
+def test_a_whole_heading_ruling_replaces_the_field_in_one_apply(
+        apply_harness, decisions_path):
+    """The EXTENT fix, which is what the reviewer actually needs (2026-09-03:
+    klalim 89-92's whole heading is their single first word, and klal 90 stores
+    17). Word-by-word deletion would cost one apply/rebuild cycle per word,
+    because each deletion shifts the indices after it."""
+    apply_harness([{"klal_id": 1, "title": "אלף בית גימל דלת.",
+                    "clean_text": "א אלף בית גימל דלת [.] הא"}], {})
+    rd.append_decision("title_correction", klal_id=1, word_index=0,
+                       chosen_source="custom", chosen_text="אלף.",
+                       candidate_snapshot={"whole": True, "field": "title",
+                                           "original_title": "אלף בית גימל דלת.",
+                                           "original_word": "אלף"},
+                       path=decisions_path)
+    assert apply_harness.run_titles()[1] == "אלף."
+
+
+def test_a_whole_heading_ruling_drift_checks_the_ENTIRE_stored_title(
+        apply_harness, decisions_path):
+    """Its drift check is the whole field, not one word - that is the point of
+    naming the field rather than a position. If the stored heading changed at
+    all since the ruling was made, the ruling describes a heading that no longer
+    exists and must not be applied over the new one."""
+    apply_harness([{"klal_id": 1, "title": "אלף בית גימל.",
+                    "clean_text": "א אלף בית גימל [.] הא"}], {})
+    rd.append_decision("title_correction", klal_id=1, word_index=0,
+                       chosen_source="custom", chosen_text="אלף.",
+                       candidate_snapshot={"whole": True, "field": "title",
+                                           "original_title": "אלף בית דלת.",
+                                           "original_word": "אלף"},
+                       path=decisions_path)
+    assert apply_harness.run_titles()[1] == "אלף בית גימל.", (
+        "a heading that changed under the ruling must be left alone"
+    )
+
+
+def test_a_whole_heading_ruling_is_never_applied_twice(apply_harness, decisions_path):
+    apply_harness([{"klal_id": 1, "title": "אלף בית גימל.",
+                    "clean_text": "א אלף בית גימל [.] הא"}], {})
+    rd.append_decision("title_correction", klal_id=1, word_index=0,
+                       chosen_source="custom", chosen_text="אלף.",
+                       candidate_snapshot={"whole": True, "field": "title",
+                                           "original_title": "אלף בית גימל.",
+                                           "original_word": "אלף"},
+                       path=decisions_path)
+    assert apply_harness.run_titles()[1] == "אלף."
+    assert apply_harness.run_titles()[1] == "אלף."
+    assert len(rd.history_for(1, 0, "apply_event", path=decisions_path)) == 1
+
+
 def test_a_title_correction_writes_the_title_and_leaves_the_body_alone(
         apply_harness, decisions_path):
     """Item 39 (ii): until 2026-09-03 this script wrote `clean_text` and nothing
