@@ -713,6 +713,35 @@ reliability check, and every dispute still needs the ink or a different engine.
     Extent queue: **97**, down from 101 at the top of this session. Full suite
     **488 passed, 1 skipped**.
 
+0BK. **[2026-09-03] RE-CONFIRMED DIRECTLY AGAINST THE INK: the closing page
+    reads `סליקו כללי התיו וסליקו כללי הגמרא`, and the final klal is `תרסז`
+    (667), not `תרט"ז` (616).**
+
+    Reviewer: *"the final entry in klalei haTalmud (not gemara) is תרט״ז."*
+    Checked by rendering `berlin_square_corrected.pdf`'s own page 247 at 600
+    DPI (not the review dashboard's downscaled cache) and cropping the
+    running header, the two closing bold section-markers, and the colophon
+    separately, per Lesson 4 (verify with the most direct method available).
+
+    **`התיו` is not `התלמוד`.** It is the fully-spelled name of the letter ת
+    (Tav) — the same convention klal 1's own `section` field already uses,
+    `כללי האלף` ("Rules of the letter Aleph"). The book is organized
+    alphabetically by each klal's opening term; Tav is the last letter, so the
+    colophon closes two levels at once: the final letter-group (Tav), then the
+    whole part — `הגמרא` ("the Gemara") is printed plainly in the very same
+    sentence, immediately after. There is no `תלמוד` anywhere on the page.
+
+    **The final marker reads `תרסז`, not `תרט"ז`.** ת(400)+ר(200)+ס(60)+ז(7) =
+    **667**, matching every figure already on record in this file and in
+    `START_HERE.md`. `תרט"ז` would be 616 — a one-letter misread (`ס`/samech
+    vs `ט`/tet, both closed roundish forms in this font) plausible on a lower-
+    resolution source, not on this render.
+
+    **Nothing changes**: the existing `667` / `Klalei HaGemara` claims stand,
+    independently re-verified rather than merely re-asserted. Recorded per the
+    standing rule that a finding — including a re-confirmation — gets logged
+    immediately, not left to live only in chat.
+
 0BJ. **[2026-09-03] ITEM 0AR IS DONE, in its own order: fixture generator →
     conftest.py → moved 4 pinned UI tests → split the invariants behind a
     `book_content` marker and a real `validate <book>` command → the guard.
