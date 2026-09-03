@@ -113,6 +113,55 @@ reliability check, and every dispute still needs the ink or a different engine.
 > borrowing `2A`–`2Z`, which names a different lane and would misattribute the
 > work. Same rule as above: never reassign an ID once written.
 
+0AU. **[2026-09-03] A GAP STOLE THE SCAN HIGHLIGHT FROM THE WORD SHARING ITS
+    INDEX — 40 positions across 35 klalim. FIXED. And the legend's swatches now
+    show the mark the text pane actually draws.**
+
+    Reviewer: "clicking on Klal 17 (יז) · Word #308 — בסתם highlights the wrong
+    word."
+
+    A `delete`-opcode entry is a GAP: text the scan HAS and the corpus lacks,
+    addressed by the index it would be inserted BEFORE. It therefore shares that
+    index with the word standing there while its bbox points at different ink —
+    klal 17 w308 is `בסתם` at x=0.62, and the omission sharing its index sits at
+    **x=0.86**. Two faults compounded:
+
+    - **`api_page` let the gap's key SUPPRESS the word.** Its `served_keys` guard
+      treats any entry at (klal, word_index) as covering that word, so the word
+      was never emitted at all and the only box on offer was the gap's.
+    - **`app.js` matched focus on `word_index` alone**, so even once both are
+      served the gap could take the focus.
+
+    The alignment was never wrong — w308's box sits exactly on the DocAI token
+    `בסתם`, distance 0.0 — which is worth recording, because "the highlight is on
+    the wrong word" reads like an alignment fault and is not one here.
+
+    Fixed on both sides: `served_keys` ignores `delete` entries, and the focus
+    test requires gap-ness to match between the clicked thing and the candidate
+    entry. The gap stays reachable in its own right — `renderKlalBody` draws a
+    marker for it, and clicking THAT passes the gap as the focus.
+
+    `test_no_word_index_is_served_twice_in_either_pane` had to be widened: its
+    scan half counted a gap and a word at one index as a duplicate, which is how
+    the wrong box passed as the right one. It now excludes `delete` entries from
+    that count exactly as its TEXT half already did, and separately asserts that
+    no two GAPS share a key — the one case the focus test genuinely cannot
+    disambiguate.
+
+    **The legend swatches.** Reviewer: "why are the purple words shown in the
+    count with a purple underline but all the others are shown as boxes? in the
+    scan page they are all boxes and in the text page they are all lines." The
+    legend was inconsistent with ITSELF — three box-ish chips and one underline —
+    and matched neither pane. It cannot mirror both, so it mirrors the TEXT pane,
+    where the LINE STYLE carries meaning colour alone does not: solid = the
+    vision pipeline ruled, dotted = the machine settled it, dashed = an automated
+    pass flagged it on textual reasoning with no vision confirmation. Each swatch
+    is now drawn with the same border as its `.flag-word.state-*` rule, a test
+    asserts the two against each other so they cannot drift, and the row tooltips
+    say the scan pane boxes the same colours.
+
+    Full suite **458 collected, 457 passed, 1 skipped**.
+
 0AT. **[2026-09-02] 131 CORRECTIONS ENTERED THE CORPUS THAT NO HUMAN EVER
     ADJUDICATED, and the dashboard has been drawing them GREEN as "Human-Decided"
     the whole time. OPEN — the corrections need eyes; the display is fixed.**

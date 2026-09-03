@@ -795,7 +795,14 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
   opacity: 0.75;
   font-size: 10.5px;
 }
-#legend i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; flex-shrink: 0; }
+/* A LINE sample, not a chip: each swatch is drawn with the same border the text
+   pane puts under the word (see LEGEND_SWATCH in app.js), so the key shows the
+   thing it is a key for. Sized to read as a rule rather than a box. */
+#legend i {
+  width: 16px; height: 9px;
+  display: inline-block; flex-shrink: 0;
+  background: transparent;
+}
 #legend .legend-count { margin-left: auto; font-weight: 700; font-variant-numeric: tabular-nums; }
 
 /* ADDED 2026-09-01. Each legend row opens the list of the words it counts, so

@@ -1293,7 +1293,17 @@ def api_page(page_num):
     # Word-level bboxes for all words on the page (looked up from DocAI tokens).
     # Ensures that clicking ANY word (flagged or unflagged) highlights its exact
     # bounding box on the scan image.
-    served_keys = {(x["klal_id"], x["word_index"]) for x in out if "word_index" in x}
+    # A `delete`-opcode entry is a GAP - text the scan has and the corpus lacks,
+    # addressed by the index it would be inserted BEFORE - so it does NOT serve
+    # the word standing at that index, and must not suppress it here. FIXED
+    # 2026-09-03 (reviewer: "clicking on Klal 17 (יז) · Word #308 — בסתם
+    # highlights the wrong word"): the omission at klal 17 w308 claimed the key,
+    # the word itself was never emitted, and the scan boxed the omission's ink at
+    # x=0.86 while the word sits at x=0.62. The two share an index and are
+    # different objects; both need serving, and app.js tells them apart by
+    # opcode when it decides which one a click focused.
+    served_keys = {(x["klal_id"], x["word_index"]) for x in out
+                   if "word_index" in x and x.get("opcode") != "delete"}
     for kid in page_klals:
         k = klalim_by_id.get(kid)
         if not k:

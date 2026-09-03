@@ -2833,3 +2833,93 @@ def test_a_recorded_ruling_says_who_made_it(server, page):
     else:
         assert chip.count() == 0, "a chip for a category with nothing in it"
     assert page.test_errors == []
+
+
+def test_a_gap_does_not_steal_the_focus_from_the_word_at_its_index(server, page):
+    """REGRESSION 2026-09-03, reviewer: "clicking on Klal 17 (יז) · Word #308 —
+    בסתם highlights the wrong word."
+
+    A `delete`-opcode entry is a GAP - text the scan has and the corpus lacks -
+    addressed by the index it would be inserted BEFORE. It therefore SHARES that
+    index with the word standing there while its bbox points somewhere else
+    entirely: klal 17 w308 is `בסתם` at x=0.62 and the omission sharing its index
+    sits at x=0.86. Two faults compounded - api_page let the gap's key suppress
+    the word so it was never served at all, and app.js matched focus on
+    word_index alone so the gap took it. 40 gap entries across 35 klalim share an
+    index with a real word.
+    """
+    corr = json.load(open(os.path.join(REPO, "corrections_part1.json"), encoding="utf-8"))
+    target = None
+    for kid, items in sorted(corr.items(), key=lambda kv: int(kv[0])):
+        for c in items:
+            if c.get("opcode") == "delete" and c.get("bbox") and c.get("page") is not None:
+                target = (int(kid), c["word_index"], c["page"], c["bbox"])
+                break
+        if target:
+            break
+    assert target, "no gap entry with a scan position - nothing to test"
+    klal_id, word_index, gap_page, gap_bbox = target
+
+    items = _get_json(server, f"/api/page/{gap_page}")
+    here = [c for c in items if c.get("klal_id") == klal_id and c.get("word_index") == word_index]
+    kinds = {c.get("kind") for c in here}
+    assert "plain" in kinds or any(c.get("opcode") != "delete" for c in here), (
+        f"klal {klal_id} w{word_index}: the gap suppressed the word - only {kinds} served")
+
+    _open_dashboard(page, server)
+    page.evaluate(f"() => {{ location.hash = '#klal={klal_id}&word={word_index}'; }}")
+    page.wait_for_timeout(2500)
+    focused = page.evaluate("""() => {
+        const f = document.querySelectorAll('#hl-container .hl-box.focused');
+        return [...f].map(b => parseFloat(b.style.left));
+    }""")
+    assert len(focused) == 1, f"expected exactly one focused box, got {len(focused)}"
+    # ...and it must NOT be the gap's box.
+    gap_left = gap_bbox["x1"] * 100
+    assert abs(focused[0] - gap_left) > 1.0, (
+        f"the focused box sits on the gap at {gap_left:.1f}%, not on the word")
+    assert page.test_errors == []
+
+
+def test_each_legend_swatch_matches_the_line_the_text_pane_draws(server, page):
+    """Reviewer, 2026-09-03: "why are the purple words shown in the count with a
+    purple underline but all the others are shown as boxes?"
+
+    The legend was inconsistent with ITSELF - three box-ish chips and one
+    underline - and matched neither pane. It cannot mirror both (the scan draws
+    boxes, the text draws rules), so it mirrors the TEXT pane, where the line
+    STYLE carries meaning colour alone does not: solid = the vision pipeline
+    ruled, dotted = the machine settled it, dashed = an automated pass flagged it
+    on textual reasoning with no vision confirmation.
+
+    Asserts the swatches against app.css's own `.flag-word.state-*` rules, so the
+    two cannot drift apart.
+    """
+    with open(os.path.join(REPO, "review_frontend", "app.css"), encoding="utf-8") as f:
+        css = f.read()
+    wanted = {}
+    for state, bucket in (("open", "machine_disputed"), ("machine", "machine_resolved"),
+                          ("human", "decided"), ("ai-flag", "ai_flag")):
+        m = re.search(r"\.flag-word\.state-" + re.escape(state)
+                      + r"\s*\{[^}]*border-bottom:\s*(\d+)px\s+(solid|dashed|dotted)", css)
+        assert m, f"no border-bottom rule for .flag-word.state-{state}"
+        wanted[bucket] = (m.group(1) + "px", m.group(2))
+
+    _open_dashboard(page, server)
+    got = page.evaluate("""() => {
+        const out = {};
+        for (const r of document.querySelectorAll('#legend .legend-row')) {
+            const i = r.querySelector('i');
+            if (!i || !r.dataset.bucket) continue;
+            const cs = getComputedStyle(i);
+            out[r.dataset.bucket] = [cs.borderBottomWidth, cs.borderBottomStyle];
+        }
+        return out;
+    }""")
+    for bucket, expect in wanted.items():
+        assert bucket in got, f"no legend swatch for {bucket}"
+        assert tuple(got[bucket]) == expect, (
+            f"{bucket}: legend draws {got[bucket]}, the text pane draws {list(expect)}")
+    # ...and every swatch is the SAME KIND of mark - that was the complaint.
+    assert all(v[1] in ("solid", "dashed", "dotted") for v in got.values()), got
+    assert page.test_errors == []

@@ -940,6 +940,29 @@ async function refreshKlalimList() {
 // server's own state constants (review_counts.DECIDED/RESOLVED/DISPUTED), not a
 // second vocabulary - a legend row whose bucket name does not exist on the
 // server opens an empty list and says nothing about why.
+// EACH SWATCH IS A SAMPLE OF THE LINE THE TEXT PANE ACTUALLY DRAWS - same
+// width, same style, same colour as `.flag-word.state-*` in app.css.
+//
+// Reviewer, 2026-09-03: "why are the purple words shown in the count with a
+// purple underline but all the others are shown as boxes? in the scan page they
+// are all boxes and in the text page they are all lines." The legend was
+// inconsistent with ITSELF - three box-ish chips and one underline - and none of
+// them matched either pane. It cannot mirror both panes at once, so it mirrors
+// the TEXT pane, because that is where the LINE STYLE carries meaning that
+// colour alone does not: solid = the vision pipeline ruled, dotted = the machine
+// settled it, dashed = an automated pass flagged it on textual reasoning with no
+// vision confirmation at all. The scan pane draws the same COLOURS as boxes, and
+// the row tooltips say so.
+//
+// Kept in step with app.css by
+// tests/test_review_server.py::test_each_legend_swatch_matches_the_line_the_text_pane_draws.
+const LEGEND_SWATCH = {
+  open:    'border-bottom:3px solid #e53e3e;',
+  machine: 'border-bottom:2px dotted #d69e2e;',
+  human:   'border-bottom:3px solid #38a169;',
+  ai:      'border-bottom:3px dashed #805ad5;',
+};
+
 const LEGEND_BUCKET = {
   open: 'machine_disputed',
   machine: 'machine_resolved',
@@ -997,9 +1020,10 @@ function buildLegend() {
     // "hovering over the counts on the bottom surface explanation"). Each says
     // what the state MEANS and what clicking does, not just its own name again.
     row.title = LEGEND_EXPLAIN[state].replace('{n}', totals[state])
+              + '\n\nThe swatch is the line the TEXT pane draws; the scan pane boxes the '
+              + 'same colour.'
               + `\n\nClick to list all ${totals[state]}.`;
-    const shape = state === 'machine' ? 'border-radius:2px;border:1.5px dotted ' + color + ';background:transparent;' : 'background:' + color + ';';
-    row.innerHTML = `<i style="${shape}"></i><span class="legend-label">${shown}</span><b class="legend-count">${totals[state]}</b>`;
+    row.innerHTML = `<i style="${LEGEND_SWATCH[state]}"></i><span class="legend-label">${shown}</span><b class="legend-count">${totals[state]}</b>`;
     legend.appendChild(row);
 
     // ...and its own row directly beneath it, not a sentence hanging off it
@@ -1033,7 +1057,7 @@ function buildLegend() {
               + 'flag, raised by an automated pass rather than by a disagreement between '
               + 'engines. These are also counted in Machine-Disputed: the flag makes the '
               + `word open whatever its own entry says.\n\nClick to list all ${aiTotal}.`;
-  aiRow.innerHTML = `<i style="border-bottom:3px dashed #805ad5;background:transparent;"></i><span class="legend-label">AI-Flagged</span><b class="legend-count">${aiTotal}</b>`;
+  aiRow.innerHTML = `<i style="${LEGEND_SWATCH.ai}"></i><span class="legend-label">AI-Flagged</span><b class="legend-count">${aiTotal}</b>`;
   legend.appendChild(aiRow);
 }
 
@@ -3385,10 +3409,23 @@ async function showPage(page, focusKlalId, focusCorr = undefined) {
     // c.kind (the scan-page item) so the lookup key is always driven by the
     // source: witness items key on docai_token_index, everything else on
     // word_index.  Both are integers from the same JSON source, no cast needed.
+    // A `delete`-opcode entry is a GAP: text the scan has and the corpus does
+    // not, addressed by the index it would be inserted BEFORE. It shares that
+    // index with the word standing there, and its bbox points somewhere else
+    // entirely - so matching on word_index alone let the gap steal the focus
+    // from the word. FIXED 2026-09-03 (reviewer: "clicking on Klal 17 (יז) ·
+    // Word #308 — בסתם highlights the wrong word"): klal 17 w308 is `בסתם` at
+    // x=0.62, and the possible_omission sharing that index sits at x=0.86, so
+    // the scan boxed a stretch of ink the reviewer had not clicked. The gap is
+    // reachable in its own right - renderKlalBody draws a marker for it and
+    // clicking THAT passes the gap entry as focusCorr - so the two only need
+    // telling apart, which `isGap` on the click does.
+    const clickedAGap = !!(focusCorr && focusCorr.opcode === 'delete');
+    const entryIsAGap = c.opcode === 'delete';
     const isFocused = focusCorr && c.klal_id === focusKlalId && (
       focusCorr.opcode === 'witness'
         ? c.docai_token_index === focusCorr.docai_token_index
-        : c.word_index === focusCorr.word_index
+        : c.word_index === focusCorr.word_index && entryIsAGap === clickedAGap
     );
 
     // Padding around word bounding box to ensure letter tails (final nun, kof, etc.) and ascenders (lamed) are completely clear

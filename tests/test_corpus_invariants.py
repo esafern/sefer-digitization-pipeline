@@ -1535,15 +1535,42 @@ def test_no_word_index_is_served_twice_in_either_pane(part1_by_id):
     pages = set()
     for klal_id in part1_by_id:
         pages.update(review_server._klal_all_pages(klal_id))
+    # `delete` entries are EXCLUDED here, exactly as they already are from the
+    # text half above. A gap is text the scan HAS and the corpus lacks, addressed
+    # by the index it would be inserted BEFORE - so it shares that index with the
+    # word standing there while pointing at different ink, and the two are
+    # different objects that both need drawing. 40 such pairs exist across 35
+    # klalim.
+    #
+    # WIDENED 2026-09-03. api_page used to let the gap's key SUPPRESS the word, so
+    # only one box was drawn and this test passed - by drawing the wrong one.
+    # Klal 17 w308 is `בסתם` at x=0.62 and its omission sits at x=0.86; clicking
+    # the word boxed the omission (reviewer: "highlights the wrong word"). Both
+    # are served now, and app.js's focus test branches on the gap opcode so a
+    # click still resolves to exactly one. What this invariant protects is that
+    # no TWO ENTRIES OF THE SAME KIND share a key, which is still asserted.
     scan_dupes = []
     for page in sorted(pages):
         counts = collections.Counter(
             (i.get("klal_id"), i.get("word_index")) for i in review_server.api_page(page)
-            if i.get("word_index") is not None)
+            if i.get("word_index") is not None and i.get("opcode") != "delete")
         scan_dupes += [(page, k[0], k[1], n) for k, n in counts.items() if n > 1]
     assert not scan_dupes, (
         f"{len(scan_dupes)} position(s) draw more than one scan box: {scan_dupes[:8]}. "
         f"Two boxes at one (klal_id, word_index) confuse the pane's click and focus handling.")
+
+    # ...and a gap must never share its key with ANOTHER gap, which the focus
+    # test genuinely could not tell apart.
+    gap_dupes = []
+    for page in sorted(pages):
+        counts = collections.Counter(
+            (i.get("klal_id"), i.get("word_index")) for i in review_server.api_page(page)
+            if i.get("word_index") is not None and i.get("opcode") == "delete")
+        gap_dupes += [(page, k[0], k[1], n) for k, n in counts.items() if n > 1]
+    assert not gap_dupes, (
+        f"{len(gap_dupes)} position(s) draw more than one GAP box: {gap_dupes[:8]}. "
+        "Two gaps at one index cannot be told apart by the focus test, which branches "
+        "only on gap-vs-word.")
 
 
 def test_every_open_word_level_flag_has_a_control_that_can_clear_it(part1_by_id):
