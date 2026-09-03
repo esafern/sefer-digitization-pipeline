@@ -2278,6 +2278,38 @@
   ]
  },
  {
+  "word": "כוותה",
+  "count": 1,
+  "occurrences": [
+   [
+    59,
+    47
+   ]
+  ],
+  "nearest_attested": [
+   {
+    "form": "כוותיה",
+    "ref_count": 741,
+    "edit": "insertion"
+   },
+   {
+    "form": "כוונה",
+    "ref_count": 150,
+    "edit": "substitution"
+   },
+   {
+    "form": "כמותה",
+    "ref_count": 99,
+    "edit": "substitution"
+   },
+   {
+    "form": "דכוותה",
+    "ref_count": 68,
+    "edit": "insertion"
+   }
+  ]
+ },
+ {
   "word": "שבהדיא",
   "count": 1,
   "occurrences": [
@@ -3266,6 +3298,43 @@
    {
     "form": "מעבירין",
     "ref_count": 135,
+    "edit": "substitution"
+   }
+  ]
+ },
+ {
+  "word": "לפקר",
+  "count": 1,
+  "occurrences": [
+   [
+    75,
+    351
+   ]
+  ],
+  "nearest_attested": [
+   {
+    "form": "הפקר",
+    "ref_count": 423,
+    "edit": "substitution"
+   },
+   {
+    "form": "לשקר",
+    "ref_count": 175,
+    "edit": "substitution"
+   },
+   {
+    "form": "לפר",
+    "ref_count": 127,
+    "edit": "deletion"
+   },
+   {
+    "form": "לבקר",
+    "ref_count": 93,
+    "edit": "substitution"
+   },
+   {
+    "form": "מפקר",
+    "ref_count": 43,
     "edit": "substitution"
    }
   ]
@@ -11353,28 +11422,6 @@
   "nearest_attested": []
  },
  {
-  "word": "וככתובות",
-  "count": 1,
-  "occurrences": [
-   [
-    5,
-    279
-   ]
-  ],
-  "nearest_attested": []
- },
- {
-  "word": "וכסוטה",
-  "count": 1,
-  "occurrences": [
-   [
-    5,
-    423
-   ]
-  ],
-  "nearest_attested": []
- },
- {
   "word": "וכשמחתינן",
   "count": 1,
   "occurrences": [
@@ -14636,47 +14683,6 @@
     "form": "משייר",
     "ref_count": 40,
     "edit": "deletion"
-   }
-  ]
- },
- {
-  "word": "לפקר",
-  "count": 2,
-  "occurrences": [
-   [
-    54,
-    770
-   ],
-   [
-    75,
-    351
-   ]
-  ],
-  "nearest_attested": [
-   {
-    "form": "הפקר",
-    "ref_count": 423,
-    "edit": "substitution"
-   },
-   {
-    "form": "לשקר",
-    "ref_count": 175,
-    "edit": "substitution"
-   },
-   {
-    "form": "לפר",
-    "ref_count": 127,
-    "edit": "deletion"
-   },
-   {
-    "form": "לבקר",
-    "ref_count": 93,
-    "edit": "substitution"
-   },
-   {
-    "form": "מפקר",
-    "ref_count": 43,
-    "edit": "substitution"
    }
   ]
  },

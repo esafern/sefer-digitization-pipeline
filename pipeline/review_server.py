@@ -671,12 +671,17 @@ def _decision_original_word(rec):
 # settled and never appeared in anyone's queue. Measured that day: 1,615 of the
 # ledger's 2,520 rulings were machine-written, and 102 of the 503 the dashboard
 # currently counts as recorded.
-HUMAN_REVIEWERS = ("local", "user")
+#
+# THE RULE ITSELF MOVED to review_decisions.py 2026-09-03 and these two names now
+# delegate. It was written out twice - here for the display and there for the
+# append guard - and a third consumer then needed it (the ligature invariant).
+# Same answer in all three places, so it is one definition, per START_HERE's
+# shared-module rule.
+HUMAN_REVIEWERS = rd.HUMAN_REVIEWERS
 
 
 def _ruled_by_human(rec):
-    reviewer = (rec or {}).get("reviewer") or ""
-    return reviewer in HUMAN_REVIEWERS or reviewer.startswith("local")
+    return rd.ruled_by_human(rec)
 
 
 def _decision_index_is_stale(rec, words, word_index):

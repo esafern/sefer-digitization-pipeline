@@ -60,6 +60,12 @@ REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # imports. Same approach as test_pipeline_logic.py.
 sys.path.insert(0, os.path.join(REPO, "pipeline"))
 sys.path.insert(0, os.path.join(REPO, "tools"))
+
+# The decision ledger, read by the ligature invariant below: a corpus rule that
+# a person overruled from the scan is not a corpus defect, and only the ledger
+# knows which those are. See test_part1_no_dropped_lamed_ligature_corruption.
+import review_decisions as rd  # noqa: E402
+
 PART_FILES = ["part1.json", "part2.json", "part3.json"]
 
 NO_TEXT_TITLE = "(no text available)"
@@ -629,6 +635,29 @@ DROPPED_LAMED_CORRUPT_FORMS = {
 }
 
 
+def ligature_offenders(klalim, manual_decisions):
+    """Which tokens in `klalim` are a dropped-lamed corrupt form NOBODY ruled on?
+
+    EXTRACTED from the test below 2026-09-03 so the exemption can be exercised
+    on synthetic input rather than only on whatever the live corpus happens to
+    contain - Lesson 25: a check nobody has made FAIL has not been shown to
+    work. See test_the_ligature_exemption_needs_a_human_and_an_exact_match.
+
+    `manual_decisions` is rd.all_current("manual_correction") - passed in rather
+    than read here so a caller can hand it a fixture.
+    """
+    offenders = []
+    for k in klalim:
+        for i, w in enumerate(k["clean_text"].split(" ")):
+            if w not in DROPPED_LAMED_CORRUPT_FORMS:
+                continue
+            rec = manual_decisions.get((k["klal_id"], i))
+            if rec and rd.ruled_by_human(rec) and rec.get("chosen_text") == w:
+                continue
+            offenders.append((k["klal_id"], i, w))
+    return offenders
+
+
 def test_part1_no_dropped_lamed_ligature_corruption(part_klalim):
     """Regression guard for the alef-lamed ligature extraction bug - see
     DROPPED_LAMED_CORRUPT_FORMS above. Matches whole space-split tokens
@@ -645,16 +674,73 @@ def test_part1_no_dropped_lamed_ligature_corruption(part_klalim):
     so this test must not fail on their still-uncorrected text. A
     Parts-2-3 version of this check is future work for whenever that gate
     lifts, not something to smuggle in via a corpus-wide fixture now."""
-    offenders = []
-    for k in part_klalim["part1.json"]:
-        for i, w in enumerate(k["clean_text"].split(" ")):
-            if w in DROPPED_LAMED_CORRUPT_FORMS:
-                offenders.append((k["klal_id"], i, w))
+    # A POSITION A PERSON RULED ON, AGAINST THE INK, IS NOT A REGRESSION.
+    # Added 2026-09-03, when this test blocked the rebuild on klal 92 w326 and
+    # klal 124 w26 - both `איה`, both put there by the reviewer that morning
+    # after reading the scan: "there is no al-la lig on those last two, the
+    # lamed should never have been there" (items 0AQ/0AT).
+    #
+    # Seven of the 24 forms above are themselves attested words in the
+    # independent 6.18M-word reference corpus (`אא` 1,145, `איה` 74, `אה` 49,
+    # `אמא` 22, `האף` 18, `אפא` 11, `והאף` 2), so membership in this set is a
+    # SUSPICION, not a verdict, and the ink outranks it. That is the same defect
+    # the `ai-dropped-lamed-correction` pass had - it could not tell a ligature
+    # artifact from a real word and rewrote 66 attested ones - and a blacklist
+    # that cannot be overruled by a human reading the page would re-assert
+    # exactly the belief that pass got wrong.
+    #
+    # The exemption is deliberately narrow, and every clause earns its place:
+    # it must be a manual_correction, ruled BY A PERSON (rd.ruled_by_human - a
+    # script's ruling exempts nothing, which is item 0AT's whole point), it must
+    # name THIS klal and THIS word index, and its chosen_text must be exactly the
+    # form standing there. Lesson 36: pin the behaviour, not the corpus.
+    offenders = ligature_offenders(
+        part_klalim["part1.json"], rd.all_current("manual_correction")
+    )
     assert not offenders, (
         f"Dropped-lamed ligature corruption reappeared in Part 1: {offenders}. This exact class "
         f"of bug was found and fixed 2026-08-14/15 (see PROJECT-STATUS-HISTORY.md) - re-verify "
-        f"against the scan before correcting, don't assume the same fix applies blindly."
+        f"against the scan before correcting, don't assume the same fix applies blindly. "
+        f"If the scan really shows this form, record it as a manual_correction from the "
+        f"dashboard and this check will stand down for that position alone."
     )
+
+
+def test_the_ligature_exemption_needs_a_human_and_an_exact_match():
+    """The stand-down clause above, exercised on synthetic input.
+
+    Written 2026-09-03 together with the exemption, because an exemption is a
+    SUPPRESSION and Lesson 26 is explicit that a filter is validated by what it
+    hides, not by what it lets through. Each case below is one way the guard
+    must still fire; if any of them stops failing, the blacklist has quietly
+    become unenforceable.
+    """
+    klalim = [{"klal_id": 92, "clean_text": "אמר איה לרב"}]  # `איה` at index 1
+    unruled = (92, 1, "איה")
+
+    # Nothing recorded at all: the form is an offender, as it always was.
+    assert ligature_offenders(klalim, {}) == [unruled]
+
+    # A PERSON ruled this exact position to this exact form: stand down.
+    human = {(92, 1): {"reviewer": "local", "chosen_text": "איה"}}
+    assert ligature_offenders(klalim, human) == []
+
+    # A SCRIPT ruled it. This is item 0AT's entire finding - the
+    # `ai-dropped-lamed-correction` pass wrote `manual_correction` records that
+    # rendered as human rulings - so a script must exempt nothing.
+    script = {(92, 1): {"reviewer": "ai-dropped-lamed-correction", "chosen_text": "איה"}}
+    assert ligature_offenders(klalim, script) == [unruled]
+
+    # Right person, WRONG WORD: a ruling that chose something else does not
+    # cover the form standing there (this is what a stale index looks like after
+    # an apply shifts a klal - item 0AB).
+    other = {(92, 1): {"reviewer": "local", "chosen_text": "אליה"}}
+    assert ligature_offenders(klalim, other) == [unruled]
+
+    # Right person, right word, DIFFERENT POSITION: keyed on the pair, so it
+    # cannot license the same form elsewhere in the klal.
+    elsewhere = {(92, 7): {"reviewer": "local", "chosen_text": "איה"}}
+    assert ligature_offenders(klalim, elsewhere) == [unruled]
 
 
 def test_part1_max_klal_constants_agree_with_the_corpus(part_klalim):

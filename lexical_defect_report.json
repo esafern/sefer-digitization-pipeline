@@ -474,54 +474,6 @@
  },
  {
   "klal_id": 24,
-  "word_index": 53,
-  "stored": "שכועת",
-  "proposals": [
-   {
-    "form": "שבועת",
-    "ref_count": 836,
-    "edit": null
-   }
-  ],
-  "detector": "substitution",
-  "ambiguous": false,
-  "rank": 836,
-  "corpus_count": 1
- },
- {
-  "klal_id": 24,
-  "word_index": 136,
-  "stored": "דברידם",
-  "proposals": [
-   {
-    "form": "דבריהם",
-    "ref_count": 310,
-    "edit": null
-   }
-  ],
-  "detector": "substitution",
-  "ambiguous": false,
-  "rank": 310,
-  "corpus_count": 1
- },
- {
-  "klal_id": 24,
-  "word_index": 136,
-  "stored": "דברידם",
-  "proposals": [
-   {
-    "form": "דברים",
-    "ref_count": 5920,
-    "edit": "extra_char"
-   }
-  ],
-  "detector": "insertion_deletion",
-  "ambiguous": false,
-  "rank": 5920,
-  "corpus_count": 1
- },
- {
-  "klal_id": 24,
   "word_index": 166,
   "stored": "ואידן",
   "proposals": [
@@ -1442,22 +1394,6 @@
  },
  {
   "klal_id": 54,
-  "word_index": 730,
-  "stored": "עלירם",
-  "proposals": [
-   {
-    "form": "עליהם",
-    "ref_count": 2169,
-    "edit": null
-   }
-  ],
-  "detector": "substitution",
-  "ambiguous": false,
-  "rank": 2169,
-  "corpus_count": 1
- },
- {
-  "klal_id": 54,
   "word_index": 984,
   "stored": "ושפתים",
   "proposals": [
@@ -1470,6 +1406,22 @@
   "detector": "insertion_deletion",
   "ambiguous": false,
   "rank": 238,
+  "corpus_count": 1
+ },
+ {
+  "klal_id": 59,
+  "word_index": 47,
+  "stored": "כוותה",
+  "proposals": [
+   {
+    "form": "כוותיה",
+    "ref_count": 741,
+    "edit": "deleted_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false,
+  "rank": 741,
   "corpus_count": 1
  },
  {
@@ -2265,32 +2217,6 @@
   "corpus_count": 1
  },
  {
-  "klal_id": 117,
-  "word_index": 43,
-  "stored": "כרתב",
-  "proposals": [
-   {
-    "form": "כתב",
-    "ref_count": 5961,
-    "edit": "extra_char"
-   },
-   {
-    "form": "כרת",
-    "ref_count": 1343,
-    "edit": "extra_char"
-   },
-   {
-    "form": "כרב",
-    "ref_count": 517,
-    "edit": "extra_char"
-   }
-  ],
-  "detector": "insertion_deletion",
-  "ambiguous": true,
-  "rank": 5961,
-  "corpus_count": 2
- },
- {
   "klal_id": 123,
   "word_index": 24,
   "stored": "תוהה",
@@ -3053,7 +2979,7 @@
   "detector": "insertion_deletion",
   "ambiguous": true,
   "rank": 5961,
-  "corpus_count": 2
+  "corpus_count": 1
  },
  {
   "klal_id": 152,

@@ -146,13 +146,32 @@ def _now_iso():
     return datetime.now(timezone.utc).isoformat()
 
 
-# Reviewer tags that mean a PERSON ruled, as opposed to a script. Kept beside
-# append_decision because it is a WRITE-side rule first: see the manual_correction
-# guard there. review_server has its own copy for the display side, which is a
-# different question (what to show) with the same answer.
-def _is_human_reviewer(reviewer):
+# Reviewer tags that mean a PERSON ruled, as opposed to a script. This lives
+# beside append_decision because it is a WRITE-side rule first: see the
+# manual_correction guard there.
+#
+# PUBLIC as of 2026-09-03, and review_server.py's `_ruled_by_human` now delegates
+# to it instead of keeping the second copy it carried since 2026-09-02. The old
+# comment here said the display side was "a different question with the same
+# answer", which is exactly the shape START_HERE's shared-module rule and Lesson
+# 13 warn about - a parallel copy that happens to agree. It had already grown a
+# third consumer (the ligature invariant, which must not exempt a position on a
+# SCRIPT's say-so, item 0AT), and three copies of one predicate is how the
+# `ai-dropped-lamed-correction` pass got to look human in the first place.
+HUMAN_REVIEWERS = ("local", "user")
+
+
+def is_human_reviewer(reviewer):
     reviewer = reviewer or ""
-    return reviewer in ("local", "user") or reviewer.startswith("local")
+    return reviewer in HUMAN_REVIEWERS or reviewer.startswith("local")
+
+
+def ruled_by_human(rec):
+    """Did a PERSON write this ledger record? Takes the record, not the tag."""
+    return is_human_reviewer((rec or {}).get("reviewer"))
+
+
+_is_human_reviewer = is_human_reviewer  # pre-2026-09-03 internal name
 
 
 def append_decision(decision_type, klal_id, word_index=None, chosen_source=None,

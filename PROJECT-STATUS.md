@@ -113,6 +113,165 @@ reliability check, and every dispute still needs the ink or a different engine.
 > borrowing `2A`–`2Z`, which names a different lane and would misattribute the
 > work. Same rule as above: never reassign an ID once written.
 
+0AX. **[2026-09-03] THE 58 ARE APPLIED — and the gate blocked them, correctly,
+    because a corpus invariant still held the belief the reviewer had just
+    overturned from the ink. The blacklist now defers to a human ruling.**
+
+    All 58 promoted (11 replace, 2 delete, 16 manual, 29 confirmed-no-op); 16
+    klalim changed text; `--dry-run` now reports 0 outstanding. Item `0AQ`'s
+    eight escalations are in the corpus:
+
+    | klal · word | was | now |
+    |---|---|---|
+    | 59 · 47 | כוותיה | כוותה |
+    | 74 · 203 | דגם | הגם |
+    | 77 · 22 / 24 | וטומאות / טומאות | וטמאות / טמאות |
+    | 88 · 963 | ומתיר | **ומתי'** |
+    | 91 · 191 | העניינים | **העניני'** |
+    | 92 · 326, 124 · 26 | אליה | **איה** |
+
+    The two abbreviations are the ones that mattered: the corpus was carrying an
+    editorial expansion as if it were the author's text, against success
+    criterion #1, and it no longer is. Every one of the 16 text changes was read
+    in context against its before/after (Lesson 19) — the three deletions are
+    `יד`, `פז`, `יט`, page furniture at a klal's foot, not words.
+
+    **`test_part1_no_dropped_lamed_ligature_corruption` failed the rebuild on
+    klal 92 w326 and 124 w26.** It asserts no token in Part 1 is one of 24
+    `DROPPED_LAMED_CORRUPT_FORMS`, and `איה` is in that set — put there by the
+    2026-08-14/15 ligature fix, and put in the CORPUS that morning by the
+    reviewer, from the scan. Lesson 36 exactly: a test pinned to corpus content
+    fails when the corpus IMPROVES.
+
+    **Measured before touching it: 7 of the 24 forms are themselves attested
+    words in the independent reference corpus** — `אא` 1,145, `איה` 74, `אה` 49,
+    `אמא` 22, `האף` 18, `אפא` 11, `והאף` 2. So membership is a suspicion, never a
+    verdict, and this is the same blind spot that let `ai-dropped-lamed-
+    correction` rewrite 66 attested words (item `0AT`). A blacklist no human can
+    overrule would re-assert precisely the belief that pass got wrong.
+
+    **The exemption is narrow and every clause was made to fail on purpose.**
+    A position stands down only for a `manual_correction`, written BY A PERSON,
+    at that klal AND that word index, whose `chosen_text` is exactly the form
+    standing there. `ligature_offenders()` was extracted so it can be run on
+    synthetic input, and a new test asserts the guard STILL FIRES in each of the
+    four ways it must: nothing recorded, a script's ruling (item `0AT`'s case —
+    a script exempts nothing), a human ruling naming a different word, and a
+    human ruling at a different index. Lesson 26: an exemption is a suppression,
+    and a suppression is validated by what it hides.
+
+    **One duplicate predicate collapsed on the way.** "Did a person rule this?"
+    existed twice — `review_decisions._is_human_reviewer` (the append guard) and
+    `review_server._ruled_by_human` (the display), the latter's comment calling
+    them "a different question with the same answer". The invariant needed a
+    third. It is now one public `review_decisions.ruled_by_human`, with both old
+    names delegating: START_HERE's shared-module rule and Lesson 13.
+
+    **State after the rebuild:** full `./rebuild_all.sh` green, gate 370 passed.
+    `audit_applied_decisions.py` over 553 applied decisions: 56 reflected at a
+    shifted index (the known stale-address class, items `0AB`/`0AP` — the ruling
+    landed, its recorded index did not move with it) and 1 the audit itself
+    classifies as shifted rather than lost (klal 1 w97 punctuation). No applied
+    decision is missing from the corpus.
+
+0AW. **[2026-09-03] WHY `הרל"ם → הרמב"ם` WAS PROPOSED: an abbreviation naming a
+    DIFFERENT authority is indistinguishable, to every detector here, from a
+    misprint of a commoner one. Reviewer ruled KEEP from the ink. 11 more
+    abbreviation-change flags are open; none is this shape.**
+
+    Reviewer: *"i don't know why the suggestion was made... the scan is clear,
+    rlm means the rav lechem mishnah."* `הרל"ם` = הרב לחם משנה, R. Abraham de
+    Boton's commentary — a real, distinct authority, and the citation reads
+    `עיין הרל"ם בפרק א' מהלכות`, which is the idiomatic way to cite a commentary
+    ON the Mishneh Torah. The stored text was right.
+
+    **The mechanism.** The note's `INTRA` class is intra-klal consistency: klal
+    12 writes `הרמב"ם` at w250, and w192 is a near-neighbour string that occurs
+    once. Every arbiter in this repo would make the same call, because an
+    abbreviation defeats all three of them at once — it is SHORT (so edit
+    distance to a commoner abbreviation is 1-2 letters), it is RARE as a string
+    (so a frequency test reads "unattested"), and its expansion is not in the
+    text (so nothing can tell that `הרל"ם` and `הרמב"ם` name two different men,
+    both of whom are cited on `הלכות`). A consistency heuristic cannot separate
+    *one authority written two ways* from *two authorities cited in one klal*.
+    This is item 31's prefix false-positive class in a second grammar, and item
+    22's point that `lexicon.txt` cannot help here (it learned this corpus's own
+    OCR).
+
+    **I was wrong about the four rulings, and the correction matters** because I
+    used them as evidence. Klal 12's five manual corrections did NOT come from
+    one report: w74 and w192 are `INTRA`, w237 is `FREQ`, w110 is the lexicon-gap
+    detector re-run, w160 is the 2026-08-17 retroactive-highlighting backfill.
+    Four separate passes landing in one klal is what "sibling rulings" looked
+    like from the ledger, and the inference I drew from it — that a keep was
+    anomalous among them — had no basis.
+
+    **Swept the class, per the standing rule.** 296 rulings in the ledger carry a
+    `X wN → Y | CLASS:` proposal note (FREQ 161, HAPAX-ABSENT 63, INTRA 47, GRAM
+    17, FRAGMENT 6, HAPAX-RARE 2); **no script in this repo writes that format**,
+    so the pass that produced them was external and its rationale survives only
+    in these notes. 31 of the 296 target a gershayim abbreviation, 30 of those
+    propose another abbreviation, and 4 of the 30 propose a string IDENTICAL to
+    the original — those are the U+05F4-vs-ASCII normalisation of item 57, not
+    letter changes.
+
+    **11 abbreviation-change flags are still open**, and every one is a
+    letter-confusion repair of a form that is not a word in any reading
+    (`ב"ט`→`ב"מ`, `ע"ר`→`ע"ד`, `הנלע"ר`→`הנלע"ד`, `זה"ה`→`וה"ה`, `למ"ר`→`למ"ד`,
+    `אע"ס`→`אע"פ`, `עכ"ר`→`עכ"ל`, `והכ"ם`/`בכ"ם`→`מ`, `פ"יא`→`פי"א`,
+    `נלפ"קד`→`נלפק"ד` — klalim 37 ×2, 45, 92, 116, 140, 161, 176 ×2, 212, 216).
+    **None has the הרל"ם shape**, where the ORIGINAL is itself a valid distinct
+    abbreviation. So the exposure this found is one position, already ruled — but
+    the blind spot is structural and will fire again on any book citing two
+    authorities whose abbreviations are near-neighbours, which is most of
+    rabbinic literature. **The cheap mitigation is a stop-list of attested
+    work/authority abbreviations that suppresses a proposal to REWRITE one into
+    another; it is not built, and per Lesson 31 it should not be bolted onto the
+    external pass that is no longer in this repo.**
+
+0AV. **[2026-09-03] STATUS SWEEP: the suite is green at 459, `START_HERE.md`'s
+    test counts were stale by five sessions, and 58 recorded rulings are sitting
+    unapplied — 8 of them item `0AQ`'s Dicta escalations.**
+
+    Nothing was changed in the corpus. Everything below is measured today, from
+    the runner and from the dry run, not quoted from this file.
+
+    **The suite.** `pytest --collect-only -q` reports **459**; the whole suite is
+    **458 passed, 1 skipped** (gate 369 passed in 18s; the ungated UI + witness
+    pair 89 passed / 1 skipped in 3m28s). Per file, from the collector per
+    Lesson 37: invariants 50, logic 319, review_server 85, witness_engine 5.
+
+    **`START_HERE.md` was carrying the 2026-08-31 figures** — 46/274 gated
+    (320) and 369 total — which had been overtaken by five sessions of new
+    tests. Corrected in place, with the superseded numbers kept in the sentence
+    so the drift stays legible. The doc's own rule is that it holds durable
+    architecture while this file holds dated truth; a hard-coded count is
+    neither, and it will go stale again the next time a lesson earns a test.
+
+    **58 decisions are recorded and not promoted** (`apply_reviewer_decisions.py
+    --dry-run`): 11 replace, 2 insert, 16 manual, 29 confirmed-no-op, against
+    453 already applied. That backlog includes **all 8 of item `0AQ`'s Dicta
+    escalations** (59 w47, 74 w203, 77 w22, 77 w24, 88 w963, 91 w191, 92 w326,
+    124 w26), which `0AQ` names as its next action. Applying them is a separate,
+    deliberate step and has not been taken.
+
+    **Live queue, from `/api/klalim` rather than from any prose here:** 892
+    flagged positions in Part 1 = 105 decided + 210 machine-resolved + 577
+    machine-disputed; 504 recorded rulings; 146 klalim with something open; 107
+    carrying a revisit pennant; 66 of 67 punctuation candidates open; 222/222
+    pages trusted.
+
+    **One ruling worth a second look, not a finding.** The uncommitted ledger
+    line — klal 12 w192, recorded 05:08 today — has `chosen_text` equal to
+    `original_word` (`הרל"ם`), while its note carries the proposal
+    `הרל"ם → הרמב"ם`. Swept the class: **6 no-op `manual_correction`s whose note
+    names a concrete different word**, and the four older ones are legitimate
+    "keep the stored text" rulings (klal 210 w68 was independently confirmed
+    correct in item `1A`). So the shape is normal reviewer behaviour and this is
+    most likely a deliberate rejection of the proposal — but the four sibling
+    rulings in klal 12 from the same report all recorded the CHANGE, so it is
+    worth confirming it was meant as a keep before it is applied as one.
+
 0AU. **[2026-09-03] A GAP STOLE THE SCAN HIGHLIGHT FROM THE WORD SHARING ITS
     INDEX — 40 positions across 35 klalim. FIXED. And the legend's swatches now
     show the mark the text pane actually draws.**
