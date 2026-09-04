@@ -14,7 +14,9 @@ import corpus_io as cio
 # two levels, not one, to keep resolving to the actual repo root where
 # part1.json/docai_word_boxes/etc. live.
 REPO = cio.REPO
-PARTS = ["part1.json", "part2.json", "part3.json"]
+# From the manifest, not a literal list - a book with one file chunk has one
+# entry here and this stage concatenates one file (Phase 2, 2026-09-04).
+PARTS = [p["file"] for p in cio.parts()]
 OUT_PATH = cio.DEMO_DATASET_PATH
 
 # The wrapper-vs-bare-list tolerance this script used to implement inline now

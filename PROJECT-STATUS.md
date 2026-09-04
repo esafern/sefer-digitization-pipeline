@@ -713,6 +713,70 @@ reliability check, and every dispute still needs the ink or a different engine.
     Extent queue: **97**, down from 101 at the top of this session. Full suite
     **488 passed, 1 skipped**.
 
+0BN. **[2026-09-04] PHASE 2: THE BOOK'S SHAPE IS DECLARED, NOT HARDCODED.
+    `book.json` now says how the corpus is chunked; 222/444/667 and the
+    three-file layout are its DEFAULTS, not literals in the code. A one-chunk,
+    four-klal book now works end to end.**
+
+    The generalization plan's Phase 2. Identity landed with item `0BM`'s work;
+    this is the structural half.
+
+    **What was hardcoded.** `PART1_MAX_KLAL = 222`, `PART2_MAX_KLAL = 444`,
+    `PART3_MAX_KLAL = 667` as literals in `corpus_io`, the file list
+    `["part1.json", "part2.json", "part3.json"]` in three places, and the ranges
+    re-encoded a THIRD time as `<=` ladders in `review_data.get_part_num_for_klal`
+    and `load_klalim`. Those numbers are Yad Malachi's own - and `part1/2/3.json`
+    are three FILE CHUNKS of one section, not the work's three parts (this file's
+    own 2026-08-25 correction), so they are doubly an accident of this book.
+
+    **What replaced it.** `book.json`'s `parts` array declares
+    `[{file, first_klal, last_klal}, ...]`, any length. `cio.parts()` and
+    `cio.part_number_for_klal()` read it at call time; the five constant NAMES
+    survive as derived values, because ~40 call sites across `pipeline/`,
+    `tools/` and `tests/` use them and renaming all of them would buy nothing.
+    Verified: the defaults reproduce 222/444/667/223/445 exactly, and part
+    membership still partitions as 222/222/223.
+
+    **Two real defects fell out of the ladders being replaced.**
+    `get_part_num_for_klal` ended in a bare `return 3`, so ANY klal past part
+    2's bound was called part 3 no matter how many chunks a book has - klal 999
+    classified as real content. And `review_data` copied the constants into
+    module globals AT IMPORT, re-freezing precisely what `corpus_io` had just
+    made resolvable: the same import-time-freeze trap item `0AZ` documents for
+    paths, one layer out. Both now answer `None` / read per call.
+
+    **Baselines are scoped to the book they describe.**
+    `DUPLICATE_WORD_BASELINE` (112 entries), `TITLE_NOT_PREFIX_OF_BODY_BASELINE`
+    and `BOX_READING_ORDER_BASELINE` are findings ALREADY verified against Yad
+    Malachi's scan. They stay as annotated Python rather than moving into
+    `book.json` - each entry's inline comment records that verification and JSON
+    cannot hold it, and the provenance is the valuable half. What they no longer
+    do is apply to a DIFFERENT book: for any other corpus the baseline is empty
+    and every finding is reported, because for a new book every finding genuinely
+    IS new. Silently suppressing another book's findings under this book's
+    baseline is Lesson 26's exact shape.
+
+    **The measured result.** `tools/validate_corpus.py --corpus <fixture>` went
+    from **7 failures to 3**, and the three that remain are the validator
+    correctly reporting real properties of that corpus - its deliberate
+    `בית בית`, its injected non-pipeline corrections, its synthetic bbox grid -
+    not book-shape bugs. The fixture now declares itself a ONE-chunk book of four
+    klalim and `/api/corpus` names it "Fixture Sefer".
+
+    Four new tests, including that a one-chunk book has `PART2_MAX_KLAL is None`
+    rather than inheriting a stale 444. Full suite **516 passed, 1 skipped**.
+
+    **Also folded in, from the 2026-09-03 ultra review:** the per-klal bbox cache
+    `audit_applied_decisions` was missing (its sibling tool already had it - same
+    result, 558 checked), and the history-toggle pattern that had four copies in
+    `app.js` - two converted to a shared helper, the other two left because they
+    genuinely differ in how content is produced, which is the difference between
+    consolidating and forcing.
+
+    **STILL OPEN from that review (3 of 19):** the third copy-ref button inline
+    in `flagListItemHtml`, and the header-gap test threshold loosened 16 -> 6.
+    Neither is a correctness bug.
+
 0BM. **[2026-09-04, reviewer-requested] EVERY DECISION NOW CARRIES A STRUCTURED
     ACTOR: who ruled, by stable internal id, and which tool recorded it. The
     single free-text `reviewer` string was doing three jobs and had grown 35

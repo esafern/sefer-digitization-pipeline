@@ -623,6 +623,81 @@ def test_every_corpus_reading_invariant_is_marked():
     )
 
 
+# --- the book manifest: how THIS book is chunked into files -------------------
+# Phase 2. `part1/2/3.json` are three FILE CHUNKS of one section, and 222/444/667
+# are Yad Malachi's own numbers - an accident of this book's size, not a shape
+# any other book shares. They were literals in corpus_io and re-encoded as `<=`
+# ladders in review_data and review_server.
+
+def test_the_default_manifest_reproduces_this_books_historical_constants():
+    """The fallback must be exactly what the literals were, or this refactor
+    silently redefined the corpus. 222/444/667 and the two derived minimums."""
+    assert cio.PART1_MAX_KLAL == 222
+    assert cio.PART2_MAX_KLAL == 444
+    assert cio.PART3_MAX_KLAL == 667
+    assert cio.PART2_MIN_KLAL == 223
+    assert cio.PART3_MIN_KLAL == 445
+    assert [p["file"] for p in cio.parts()] == ["part1.json", "part2.json", "part3.json"]
+
+
+def test_a_one_chunk_book_declares_its_own_shape(tmp_path):
+    """The whole point: a book with ONE file and four klalim gets four, not 222,
+    and genuinely has no part 2 - `None` rather than a stale 444 inherited from
+    a different book."""
+    (tmp_path / "book.json").write_text(json.dumps({
+        "title": "Some Other Sefer",
+        "parts": [{"file": "part1.json", "first_klal": 1, "last_klal": 4}],
+    }), encoding="utf-8")
+    previous = cio.set_corpus_root(str(tmp_path))
+    try:
+        assert cio.PART1_MAX_KLAL == 4
+        assert cio.PART2_MAX_KLAL is None, "a one-chunk book has no second chunk"
+        assert cio.part_number_for_klal(3) == 1
+        assert cio.part_number_for_klal(300) is None, (
+            "a klal outside every declared range must not be attributed to the last chunk")
+        assert cio.WORK_TITLE == "Some Other Sefer"
+    finally:
+        cio.set_corpus_root(previous)
+
+
+def test_part_attribution_no_longer_falls_through_to_the_last_chunk(tmp_path):
+    """The `<=` ladder it replaces ended in a bare `return 3`, so ANY klal past
+    part 2's bound was called part 3 no matter how many chunks existed - a klal
+    id off the end of the book classified as real content."""
+    sys.path.insert(0, os.path.join(REPO, "pipeline"))
+    import review_data as rdata
+    (tmp_path / "book.json").write_text(json.dumps({
+        "parts": [{"file": "part1.json", "first_klal": 1, "last_klal": 10},
+                  {"file": "part2.json", "first_klal": 11, "last_klal": 20}],
+    }), encoding="utf-8")
+    previous = cio.set_corpus_root(str(tmp_path))
+    try:
+        assert rdata.get_part_num_for_klal(5) == 1
+        assert rdata.get_part_num_for_klal(15) == 2
+        assert rdata.get_part_num_for_klal(999) is None
+    finally:
+        cio.set_corpus_root(previous)
+
+
+def test_review_data_reads_the_manifest_per_call_not_at_import(tmp_path):
+    """review_data used to copy the constants into module globals at import,
+    which re-froze exactly what corpus_io had just made resolvable - the same
+    import-time-freeze trap item 0AZ documents for paths."""
+    sys.path.insert(0, os.path.join(REPO, "pipeline"))
+    import review_data as rdata
+    before = rdata.get_part_num_for_klal(300)
+    (tmp_path / "book.json").write_text(json.dumps({
+        "parts": [{"file": "part1.json", "first_klal": 1, "last_klal": 4}],
+    }), encoding="utf-8")
+    previous = cio.set_corpus_root(str(tmp_path))
+    try:
+        assert rdata.get_part_num_for_klal(300) is None, (
+            "review_data still answering from the previous book's ranges")
+    finally:
+        cio.set_corpus_root(previous)
+    assert rdata.get_part_num_for_klal(300) == before
+
+
 # --- identity: WHO made a decision -------------------------------------------
 # A single free-text `reviewer` string was doing three jobs (who / human-vs-
 # machine / which pass), which is how 35 distinct strings accumulated for about

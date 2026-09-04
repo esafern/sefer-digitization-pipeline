@@ -2025,6 +2025,29 @@ async function openFlagListPanel(bucket, label) {
   renderFlagList(label);
 }
 
+// Show/hide a history list and flip its label. FOUR panels had grown their own
+// copy of this (the manual-correction panel, the klal-flag panel, the flag-list
+// and now the heading panel) - found by the 2026-09-03 ultra review.
+//
+// Only the SHARED half is extracted. The four genuinely differ in how their
+// content is produced: two render up front, one fetches lazily on first open,
+// one re-renders every time. `render` is therefore optional and is awaited on
+// open when given, which lets the lazy ones keep being lazy instead of forcing
+// four different behaviours into one shape - the mistake that makes a shared
+// helper worse than the duplication it replaced.
+function wireHistoryToggle({ toggleId, listId, label, render }) {
+  const toggle = document.getElementById(toggleId);
+  const list = document.getElementById(listId);
+  if (!toggle || !list) return;
+  toggle.onclick = async () => {
+    const open = list.style.display !== 'none';
+    if (!open && render) list.innerHTML = await render();
+    list.style.display = open ? 'none' : 'block';
+    toggle.textContent = (open ? 'Show' : 'Hide') + ' ' + label;
+  };
+}
+
+
 // WHO ruled, for display. One helper so every surface names a reviewer the
 // same way.
 //
@@ -2378,16 +2401,10 @@ async function openTitlePanel(klalId) {
     </div>
     ${historyHtml}
   `;
-  const histToggle = document.getElementById('title-history-toggle');
-  if (histToggle) {
-    histToggle.onclick = () => {
-      const list = document.getElementById('title-history-list');
-      const open = list.style.display !== 'none';
-      list.style.display = open ? 'none' : '';
-      histToggle.textContent = (open ? 'Show' : 'Hide')
-        + ` heading history (${hist.history.length})`;
-    };
-  }
+  wireHistoryToggle({
+    toggleId: 'title-history-toggle', listId: 'title-history-list',
+    label: `heading history (${hist.history.length})`,
+  });
   const wholeBox = document.getElementById('title-whole-text');
   const postWhole = async () => {
     const text = wholeBox.value.trim();
@@ -2902,20 +2919,17 @@ async function openKlalFlagPanel(klalId) {
     flashSavedThenClose('klal-flag-save-status');
   };
 
-  document.getElementById('klal-flag-history-toggle').onclick = async () => {
-    const list = document.getElementById('klal-flag-history-list');
-    const toggle = document.getElementById('klal-flag-history-toggle');
-    if (list.style.display === 'block') { list.style.display = 'none'; toggle.textContent = 'Show history'; return; }
-    list.innerHTML = state.history.length
+  wireHistoryToggle({
+    toggleId: 'klal-flag-history-toggle', listId: 'klal-flag-history-list',
+    label: 'history',
+    render: () => state.history.length
       ? state.history.slice().reverse().map(h => `
           <div class="history-item">
             <div class="h-ts">${new Date(h.ts).toLocaleString()} — ${h.needs_revisit ? 'flagged' : 'unflagged'}</div>
             ${h.note ? `<div class="h-note">${escapeHtml(h.note)}</div>` : ''}
           </div>`).join('')
-      : '<p style="color:var(--ink-faint);font-size:12px;">No history yet.</p>';
-    list.style.display = 'block';
-    toggle.textContent = 'Hide history';
-  };
+      : '<p style="color:var(--ink-faint);font-size:12px;">No history yet.</p>',
+  });
 }
 
 // ---------- manual word correction (2026-08-13: "add feature for reviewer

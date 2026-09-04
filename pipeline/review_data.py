@@ -32,11 +32,12 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import corpus_io as cio  # noqa: E402
 import review_decisions as rd  # noqa: E402
 
-PART1_MAX_KLAL = cio.PART1_MAX_KLAL
-PART2_MAX_KLAL = cio.PART2_MAX_KLAL
-PART3_MAX_KLAL = cio.PART3_MAX_KLAL
-PART2_MIN_KLAL = cio.PART2_MIN_KLAL
-PART3_MIN_KLAL = cio.PART3_MIN_KLAL
+# NOT copied into module constants. `PART1_MAX_KLAL = cio.PART1_MAX_KLAL` at
+# import time froze the value, which defeats the whole point of corpus_io
+# resolving the book's shape at call time (Phase 2, 2026-09-04): a server
+# pointed at another book would have kept this book's ranges. Both functions
+# below ask corpus_io each time instead. This is the same import-time-freeze
+# trap item 0AZ documents for paths, one layer out.
 
 # The indirection review_server had, kept deliberately rather than inlined to
 # cio.load_repo_json. It is the seam the witness-queue tests patch to feed a
@@ -47,12 +48,15 @@ _load_json = cio.load_repo_json
 
 
 def get_part_num_for_klal(klal_id):
-    if klal_id <= PART1_MAX_KLAL:
-        return 1
-    elif klal_id <= PART2_MAX_KLAL:
-        return 2
-    else:
-        return 3
+    """Which declared chunk holds this klal.
+
+    The `<=` ladder this replaces hardcoded 222/444 and, by falling through to
+    `return 3`, assumed a book has exactly three chunks and that anything past
+    part 2 must be part 3. corpus_io.part_number_for_klal reads the manifest, so
+    a one-file book answers 1 for everything and a klal outside every declared
+    range is None rather than silently attributed to the last chunk.
+    """
+    return cio.part_number_for_klal(klal_id)
 
 class BadRequest(ValueError):
     """A query value the CLIENT got wrong - do_GET renders it as a 400.
@@ -101,12 +105,20 @@ def load_klalim(part_num=1):
     part_str = normalize_part(part_num)
     if part_str == "all":
         klalim = demo
-    elif part_str == "2":
-        klalim = [k for k in demo if PART2_MIN_KLAL <= k["klal_id"] <= PART2_MAX_KLAL]
-    elif part_str == "3":
-        klalim = [k for k in demo if k["klal_id"] >= PART3_MIN_KLAL]
     else:
-        klalim = [k for k in demo if k["klal_id"] <= PART1_MAX_KLAL]
+        # One rule for every chunk, from the manifest - not a three-branch ladder
+        # with a different shape per part (part 2 bounded both ends, part 3 open
+        # ended, part 1 by upper bound alone). Those three spellings were three
+        # chances to disagree, and the open-ended part-3 branch silently claimed
+        # any klal past 445 no matter how many chunks the book declares.
+        wanted = int(part_str)
+        declared = cio.parts()
+        if wanted > len(declared):
+            klalim = []
+        else:
+            bounds = declared[wanted - 1]
+            klalim = [k for k in demo
+                      if bounds["first_klal"] <= k["klal_id"] <= bounds["last_klal"]]
     klalim.sort(key=lambda k: k["klal_id"])
     return {k["klal_id"]: k for k in klalim}, klalim
 

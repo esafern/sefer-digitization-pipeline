@@ -145,6 +145,32 @@ LEADING_DIGIT_RE = re.compile(r"^\d")
 # baseline down when that happens. A NEW pair appearing here that isn't
 # already in this set is exactly the klal-128 failure mode and should be
 # investigated, not silently added.
+# --- baselines are per-BOOK data, and stay scoped to the book they describe ---
+#
+# DUPLICATE_WORD_BASELINE, TITLE_NOT_PREFIX_OF_BODY_BASELINE and
+# BOX_READING_ORDER_BASELINE are lists of findings ALREADY REVIEWED against Yad
+# Malachi's scan and accepted - "this doubled word is really printed twice",
+# "this title divergence needs the ink". Each entry's inline comment records
+# that verification, which is why they stay here as annotated Python rather
+# than moving into book.json: JSON cannot hold the provenance, and the
+# provenance is the valuable half.
+#
+# What they must NOT do is apply to a DIFFERENT book. A finding accepted on
+# klal 29 of Yad Malachi says nothing about klal 29 of anything else, and
+# silently suppressing another book's findings under this book's baseline is
+# the exact "filter validated by what it emits, not what it hides" failure
+# Lesson 26 is about. So they are scoped: for any other corpus the baseline is
+# EMPTY, and every finding is reported for review - which is correct, because
+# for a new book every finding genuinely is new. (Phase 2, 2026-09-04.)
+BASELINE_BOOK = "Yad Malachi"
+
+
+def _baseline(entries):
+    """`entries` if the loaded corpus is the book they were verified against,
+    otherwise an empty baseline."""
+    return entries if cio.WORK_TITLE == BASELINE_BOOK else type(entries)()
+
+
 DUPLICATE_WORD_BASELINE = {
     (1, "תניא"), (2, "לשוא"), (3, "ואם"), (8, "דאיידי"), (16, "עב"),
     (29, "לא"), (29, "שור"), (29, "צדה"),
@@ -527,8 +553,16 @@ def decision_records():
 
 def test_klal_id_sequence_is_complete_unique_and_ordered(all_klalim):
     ids = [k["klal_id"] for k in all_klalim]
-    assert ids == list(range(1, 668)), (
-        "klal_id sequence must be exactly 1..667 with no gaps or duplicates "
+    # 1..N from the MANIFEST, not the literal 668. 667 is Yad Malachi's own klal
+    # count; a differently-shaped book declares its own extent in book.json and
+    # this invariant follows it (Phase 2, 2026-09-04). The rule being asserted -
+    # complete, unique, ordered, gaps kept as explicit placeholders - is the
+    # book-independent part and is unchanged.
+    declared = cio.parts()
+    last = max(p["last_klal"] for p in declared)
+    assert ids == list(range(declared[0]["first_klal"], last + 1)), (
+        f"klal_id sequence must be exactly {declared[0]['first_klal']}..{last} "
+        "with no gaps or duplicates "
         "(the 6 confirmed numbering gaps stay IN the sequence as explicit "
         "placeholders, not removed - see CONFIRMED_NUMBERING_GAPS)."
     )
@@ -737,13 +771,13 @@ def test_every_title_is_a_prefix_of_its_own_body(part_klalim):
     guessed.
     """
     divergences = title_prefix_divergences(part_klalim["part1.json"])
-    unexpected = [d for d in divergences if d[0] not in TITLE_NOT_PREFIX_OF_BODY_BASELINE]
+    unexpected = [d for d in divergences if d[0] not in _baseline(TITLE_NOT_PREFIX_OF_BODY_BASELINE)]
     assert not unexpected, (
         f"A title no longer matches its own body: {unexpected}. One of the two carries an OCR "
         f"error the other does not - read the scan, rule it in the dashboard, and let "
         f"apply_reviewer_decisions.py promote it. Do not hand-edit part1.json."
     )
-    healed = TITLE_NOT_PREFIX_OF_BODY_BASELINE - {d[0] for d in divergences}
+    healed = _baseline(TITLE_NOT_PREFIX_OF_BODY_BASELINE) - {d[0] for d in divergences}
     assert not healed, (
         f"Klal(im) {sorted(healed)} no longer diverge - remove them from "
         f"TITLE_NOT_PREFIX_OF_BODY_BASELINE so the guard stays honest."
@@ -1027,6 +1061,8 @@ def test_part1_max_klal_constants_agree_with_the_corpus(part_klalim):
 
 
 def test_part23_max_klal_constants_agree_with_the_corpus(part_klalim):
+    if len(cio.parts()) < 3:
+        pytest.skip("this book declares fewer than three file chunks")
     """The Part 2/3 bounds are data, exactly like PART1_MAX_KLAL above.
 
     ADDED 2026-08-31, the remedy finding S5 asked for on 2026-08-25 and the
@@ -2409,7 +2445,7 @@ def test_a_words_scan_box_sits_between_its_neighbours_in_reading_order(part1_by_
             before_next = (nbox["y1"] > box["y1"] + 0.005) or (nbox["x2"] <= box["x1"] + 0.01)
             if not (after_prev and before_next):
                 out_of_order.append((klal_id, word_index, words[word_index]))
-    new = [o for o in out_of_order if (o[0], o[1]) not in BOX_READING_ORDER_BASELINE]
+    new = [o for o in out_of_order if (o[0], o[1]) not in _baseline(BOX_READING_ORDER_BASELINE)]
     assert not new, (
         f"{len(new)} word(s) have a scan box that does not sit between their neighbours' "
         f"boxes in RTL reading order, so the alignment put them on the wrong token: "

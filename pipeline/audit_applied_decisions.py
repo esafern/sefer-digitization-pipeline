@@ -286,6 +286,26 @@ def find_span(klal, span):
     return [i for i in range(len(words) - n + 1) if words[i:i + n] == span]
 
 
+# Per-klal cache for the alignment `_bbox_word_index` needs.
+#
+# main() iterates decisions sorted by UUID, not grouped by klal, so a klal with
+# several stale rulings re-ran the full per-page SequenceMatcher alignment once
+# PER DECISION. tools/repoint_stale_decisions.py - written the same week, doing
+# the same lookup - already carried exactly this {klal_id: resolved} cache; this
+# file did not. Found by the 2026-09-03 ultra review.
+#
+# Keyed by klal_id alone: `words` is derived from the same klal object and
+# nothing mutates the corpus during an audit, which is read-only by design.
+_RESOLVED_CACHE = {}
+
+
+def _resolved_bboxes(klal, words):
+    kid = klal["klal_id"]
+    if kid not in _RESOLVED_CACHE:
+        _RESOLVED_CACHE[kid] = sa.word_bboxes_resolved(kid, words, _REGIONS)
+    return _RESOLVED_CACHE[kid]
+
+
 def _bbox_word_index(decision, klal):
     """Which word occupies this decision's recorded scan position now, or None.
 
@@ -300,7 +320,7 @@ def _bbox_word_index(decision, klal):
     if not bbox or page is None:
         return None
     words = cio.words_of(klal)
-    resolved = sa.word_bboxes_resolved(klal["klal_id"], words, _REGIONS)
+    resolved = _resolved_bboxes(klal, words)
     here = [(i, bb) for i, (bb, pg) in resolved.items() if bb and pg == page]
     if not here:
         return None

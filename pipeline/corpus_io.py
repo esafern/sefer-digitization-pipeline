@@ -182,7 +182,7 @@ _LAZY_PATHS = {
     "REPO": lambda: corpus_root(),
     "DOCAI_DIR": lambda: repo_path("docai_word_boxes"),
     "PART1_PATH": lambda: repo_path("part1.json"),
-    "PART_PATHS": lambda: [repo_path(n) for n in ("part1.json", "part2.json", "part3.json")],
+    "PART_PATHS": lambda: [repo_path(p["file"]) for p in parts()],
     "DEMO_DATASET_PATH": lambda: repo_path("klalim_demo_dataset.json"),
     "ALIGNMENT_PATH": lambda: repo_path("part1_header_anchored_alignment.json"),
     "TRACE_PATH": lambda: repo_path("gematria_trace_part1.json"),
@@ -201,45 +201,89 @@ def __getattr__(name):
         return _LAZY_PATHS[name]()
     if name in _WORK_ATTRS:
         return book_identity()[_WORK_ATTRS[name]]
+    if name in _SHAPE_ATTRS:
+        return _SHAPE_ATTRS[name]()
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 def __dir__():
-    return sorted(list(globals()) + list(_LAZY_PATHS) + list(_WORK_ATTRS))
+    return sorted(list(globals()) + list(_LAZY_PATHS) + list(_WORK_ATTRS)
+                  + list(_SHAPE_ATTRS))
 
-# max(klal_id) in part1.json. Part 1 is the only section with scan-linked
-# correction/region data, so several scripts slice the combined 667-klal
-# dataset down with this. Asserted against the live corpus by
-# tests/test_corpus_invariants.py - the assertion is the load-bearing part
-# and survives this consolidation; what does not survive (deliberately) is
-# three separate literals having to agree with each other first.
-PART1_MAX_KLAL = 222
-
-# max(klal_id) in part2.json and part3.json. ADDED 2026-08-31, closing the
-# oldest surviving finding of the 2026-08-25 review (S5, restated as the
-# 2026-08-27 review's #6): `223`, `444` and `445` were inline literals in
-# review_server.py's _get_part_num_for_klal() and _load_klalim(), with no
-# constant and no test tying them to the data - so a klal added to or removed
-# from part2/part3 would silently misclassify, and the review UI would serve
-# the wrong part with no error anywhere.
+# ---------- how this book is CHUNKED into files ----------
 #
-# Measured against the live corpus, not copied from the review: part1 = 222
-# klalim (1-222), part2 = 222 (223-444), part3 = 223 (445-667), contiguous,
-# no gaps. The three ranges partition 1..667 exactly, which is what lets
-# _get_part_num_for_klal use `<=` cutoffs at all.
+# DECLARED, not hardcoded, since 2026-09-04 (generalization plan, Phase 2).
 #
-# These get the same treatment PART1_MAX_KLAL gets and for the same reason:
-# the assertion against the live corpus in tests/test_corpus_invariants.py is
-# the load-bearing part, not the literal.
-PART2_MAX_KLAL = 444
-PART3_MAX_KLAL = 667
+# `part1/2/3.json` are three FILE CHUNKS of ONE section - Klalei HaGemara,
+# klalim 1-222 / 223-444 / 445-667 - and NOT the work's three parts; that
+# distinction is PROJECT-STATUS.md's own 2026-08-25 correction. The chunking is
+# an accident of this book's size and of how the files were split, so a second
+# book has no reason to have three of them, or 222 klalim in the first, or 667
+# in total. Until now those numbers were literals in this file and the ranges
+# were re-encoded as `<=` cutoffs in review_server and review_data.
+#
+# `book.json`'s `parts` array declares them; the Yad Malachi values below are
+# the fallback, so this repo's own corpus is unchanged and no caller moves. A
+# book with ONE file declares one entry, and every derived name below follows.
+#
+# STILL ASSERTED AGAINST THE DATA. Deriving from a manifest just moves where the
+# number is written - a manifest that disagrees with the corpus is the same
+# silent misclassification the 2026-08-31 note below warned about. So
+# tests/test_corpus_invariants.py continues to assert manifest == live corpus,
+# and that assertion remains the load-bearing part. The original note, kept
+# because its reasoning still applies:
+#
+#   `223`, `444` and `445` were inline literals in review_server.py's
+#   _get_part_num_for_klal() and _load_klalim(), with no constant and no test
+#   tying them to the data - so a klal added to or removed from part2/part3
+#   would silently misclassify, and the review UI would serve the wrong part
+#   with no error anywhere. The three ranges partition 1..667 exactly, which is
+#   what lets _get_part_num_for_klal use `<=` cutoffs at all.
+_PARTS_DEFAULT = [
+    {"file": "part1.json", "first_klal": 1, "last_klal": 222},
+    {"file": "part2.json", "first_klal": 223, "last_klal": 444},
+    {"file": "part3.json", "first_klal": 445, "last_klal": 667},
+]
 
-# First klal of each later part. Derived, never typed twice - the `223`/`445`
-# literals were a second encoding of "one past the previous part's max", and
-# an off-by-one between them and the max constants is exactly the silent
-# misclassification this is here to prevent.
-PART2_MIN_KLAL = PART1_MAX_KLAL + 1
-PART3_MIN_KLAL = PART2_MAX_KLAL + 1
+
+def parts():
+    """The book's file chunks, in order: [{file, first_klal, last_klal}, ...].
+
+    Resolved at call time against the current corpus root, like everything else
+    here. Any number of entries; a one-file book is a list of one.
+    """
+    declared = (load_json(repo_path("book.json"), None) or {}).get("parts")
+    if not declared:
+        return [dict(p) for p in _PARTS_DEFAULT]
+    return [dict(p) for p in declared]
+
+
+def part_number_for_klal(klal_id):
+    """1-based index of the chunk holding this klal, or None if no chunk claims
+    it. Replaces the `<=` cutoff ladders that hardcoded 222/444."""
+    for i, p in enumerate(parts(), start=1):
+        if p["first_klal"] <= klal_id <= p["last_klal"]:
+            return i
+    return None
+
+
+def _part_bound(index, key, default=None):
+    """`last_klal` of chunk `index` (1-based), or None when the book has fewer
+    chunks than that - a one-part book genuinely has no PART2_MAX_KLAL."""
+    declared = parts()
+    return declared[index - 1][key] if len(declared) >= index else default
+
+
+# The five names ~40 call sites across pipeline/, tools/ and tests/ already use.
+# DERIVED now rather than renamed: renaming them would touch every one of those
+# sites for no behavioural gain, and the names still say what they mean.
+_SHAPE_ATTRS = {
+    "PART1_MAX_KLAL": lambda: _part_bound(1, "last_klal"),
+    "PART2_MAX_KLAL": lambda: _part_bound(2, "last_klal"),
+    "PART3_MAX_KLAL": lambda: _part_bound(3, "last_klal"),
+    "PART2_MIN_KLAL": lambda: _part_bound(2, "first_klal"),
+    "PART3_MIN_KLAL": lambda: _part_bound(3, "first_klal"),
+}
 
 
 def union_bbox(tokens):
@@ -1035,7 +1079,7 @@ def trusted_klal_pages(path=None, max_klal=None):
     a caller can report that silence instead of it being invisible.
     """
     alignment = load_json(path or repo_path("part1_header_anchored_alignment.json"), [])
-    max_klal = PART1_MAX_KLAL if max_klal is None else max_klal
+    max_klal = _part_bound(1, 'last_klal') if max_klal is None else max_klal
     klal_pages = {}
     untrusted_ids = []
     for r in sorted(alignment, key=lambda r: r["klal_id"]):
@@ -1049,7 +1093,7 @@ def trusted_klal_pages(path=None, max_klal=None):
 
 
 def trusted_klal_pages_with_continuations(alignment_path=None,
-                                          max_klal=PART1_MAX_KLAL,
+                                          max_klal=None,
                                           regions_path=None):
     """Like trusted_klal_pages(), but also maps each continuation page to its
     klal_id (from klal_page_regions.json's ``continuations`` arrays).

@@ -458,7 +458,26 @@ def build(root):
     """Build the fixture corpus into `root` (created if absent). Returns root."""
     os.makedirs(root, exist_ok=True)
 
+    # book.json - the manifest (Phase 2). This fixture is a ONE-CHUNK book with
+    # four klalim, which is the point: it exercises the declared-shape path
+    # rather than inheriting Yad Malachi's three files and 667-klal range. Its
+    # identity fields are here too, so /api/corpus names THIS book - until
+    # 2026-09-04 the WORK_* constants were hardcoded and the fixture's own name
+    # was dead code nothing could read (ultra review).
+    _write_json(os.path.join(root, "book.json"), {
+        "title": book.WORK_TITLE,
+        "title_he": book.WORK_TITLE_HE,
+        "section": book.SECTION,
+        "section_he": book.SECTION_HE,
+        "edition": "Synthetic fixture - no scan, no edition",
+        "parts": [{"file": "part1.json", "first_klal": 1,
+                   "last_klal": max(k["klal_id"] for k in book.KLALIM)}],
+    })
     _write_json(os.path.join(root, "part1.json"), book.KLALIM)
+    # part2/3 still written, EMPTY, because build_klal_page_regions.py loads all
+    # three parts' alignment/trace files unconditionally (see below). They are
+    # not declared in the manifest, so nothing treats them as chunks of this
+    # book - the difference between "a file exists" and "the book has 3 parts".
     _write_json(os.path.join(root, "part2.json"), [])
     _write_json(os.path.join(root, "part3.json"), [])
     # build_corrections_dataset.py reads review_decisions.jsonl directly (to
