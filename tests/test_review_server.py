@@ -3443,3 +3443,184 @@ def test_navigating_to_another_klal_closes_the_open_word_panel(server, page):
             "navigating closed the corpus-wide worklist, which exists to be "
             "navigated from")
     assert page.test_errors == []
+
+
+def test_a_mounted_klal_does_not_keep_its_placeholder_height(server, page):
+    """Reviewer, 2026-09-04: "too much whitespace btw klals in the middle pane."
+
+    buildPlaceholders() gives every block a `min-height` estimated from
+    text_length so mounting real content does not jerk the scroll. Nothing took
+    it back down, so it stayed a FLOOR for the life of the page and every klal
+    whose estimate ran long kept the difference as dead space under its own
+    text. The estimate is a chars-per-line guess made without knowing the pane's
+    width, so it is wrong upward by design - which is right for a scaffold and
+    wrong for a permanent minimum. Measured before the fix: 504px of blank below
+    klal 1, 628px below klal 6, 2090px below klal 7.
+
+    Asserted as GEOMETRY below the last rendered word, not by grepping for the
+    style property: what the reviewer sees is the blank, and a min-height that
+    happens to match the content is not a bug.
+    """
+    _open_dashboard(page, server, 5)
+    # Mount an explicit set rather than trusting whatever the viewport happens
+    # to pull in: which klalim are mounted at any instant depends on scroll
+    # position and fetch timing, and a first draft of this test saw 7 of them
+    # one run and 2 the next.
+    page.evaluate("() => Promise.all([1,2,3,4,5,6,7].map(k => mountKlal(k)))")
+    page.wait_for_timeout(900)
+
+    rows = page.evaluate("""() => {
+        const out = [];
+        const blocks = [...document.querySelectorAll('.klal-block')];
+        for (let i = 0; i < blocks.length - 1; i++) {
+            const a = blocks[i], b = blocks[i + 1];
+            const body = a.querySelector('.klal-body');
+            // Only MOUNTED blocks: an unmounted one is supposed to be holding
+            // its estimate open, and asserting against those would be asserting
+            // the scaffold is broken. Told apart by the `loading` class, NOT by
+            // whether the body has text - buildPlaceholders() fills an unmounted
+            // body with a "..." so every block has text from the first paint.
+            if (!body || body.classList.contains('loading')) continue;
+            out.push({ kid: a.dataset.klalId,
+                       slack: Math.round(b.getBoundingClientRect().top
+                                         - body.getBoundingClientRect().bottom) });
+        }
+        return out;
+    }""")
+    assert len(rows) >= 4, f"too few klalim mounted to judge: {rows}"
+
+    # The only space between one klal's last word and the next klal is
+    # .klal-block's own margin-bottom (--sp-6, 32px). Anything materially more
+    # is placeholder height that was never released.
+    bad = [r for r in rows if r["slack"] > 48]
+    assert not bad, (
+        "these mounted klalim carry dead space under their text - the "
+        f"lazy-mount min-height estimate was never released: {bad}")
+
+    # ...and the scaffold itself must still be doing its job before mount, or
+    # this "fix" would just be deleting the thing that keeps the scroll steady.
+    unmounted_held = page.evaluate("""() => {
+        return [...document.querySelectorAll('.klal-block')]
+            .filter(b => { const y = b.querySelector('.klal-body');
+                           return !y || y.classList.contains('loading'); })
+            .filter(b => parseInt(b.style.minHeight || '0', 10) > 40).length;
+    }""")
+    assert unmounted_held > 0, (
+        "no unmounted block is holding an estimated height any more - the "
+        "placeholder scaffold is gone, and mounting will jerk the scroll")
+    assert page.test_errors == []
+
+
+def test_the_final_klalim_keep_their_label_when_they_cannot_reach_the_top(server, page):
+    """Guards the case the re-seat rule was ORIGINALLY written to protect, now
+    that its condition has changed.
+
+    releaseObserverWhenScrollSettles() used to refuse to re-seat any block that
+    landed above the reading line, which covered two different situations with
+    one test: "arrived" and "the container has nothing left below to scroll
+    into". Releasing the lazy-mount min-height on 2026-09-04 introduced a third -
+    "overshot" - which the old condition also refused to fix, so it now tests
+    for the end of the container directly.
+
+    That is a behaviour change to a rule whose comment cites a measurement
+    (klalim 221 and 222 landing 218px and 546px past the line, unfixable), and
+    nothing covered it. This does. The property is not WHERE the last klal
+    lands - the container decides that - but that the app agrees with itself
+    about which klal it is on, and does not scroll-loop trying to reach a
+    position that does not exist.
+    """
+    last = max(k["klal_id"] for k in _get_json(server, "/api/klalim?part=1"))
+    _open_dashboard(page, server)
+    page.click(f"#nav-{last}", timeout=5000)
+    page.wait_for_timeout(2500)
+
+    settled = _settle(page, "Math.round(document.getElementById('text-scroll').scrollTop)")
+    page.wait_for_timeout(700)
+    again = page.evaluate("Math.round(document.getElementById('text-scroll').scrollTop)")
+    assert abs(again - settled) <= 2, (
+        f"the text pane is still moving after it settled ({settled} -> {again}) - "
+        f"the re-seat is fighting a container that cannot scroll any further")
+
+    # DELIBERATELY NOT ASSERTED: which klal the nav highlights after this jump.
+    # It is not the one clicked - measured 2026-09-04, jumping to 222 leaves the
+    # nav on 219. That is PRE-EXISTING and not what this test guards: checked by
+    # reverting both of today's changes (the min-height release and the re-seat
+    # condition) and re-running, where it lands on 220. The final klalim cannot
+    # be scrolled to the reading line at all, so the observer's geometric answer
+    # legitimately disagrees with the re-asserted label and wins the next scroll
+    # event. Worth fixing on its own; asserting it here would make this test fail
+    # for a reason it was not written to catch.
+    at_end = page.evaluate("""() => {
+        const t = document.getElementById('text-scroll');
+        return t.scrollTop + t.clientHeight >= t.scrollHeight - 4;
+    }""")
+    assert at_end, "jumping to the final klal did not reach the end of the pane"
+    assert page.test_errors == []
+
+
+def test_the_text_pane_head_stops_claiming_a_flag_the_index_has_cleared(server, page):
+    """REGRESSION 2026-09-04, reviewer with a screenshot of klal 64: "no flag on
+    the index pane but two flags on the text pane." The same report landed on
+    klal 53 the day before, where the reported "?" turned out to be this pill's
+    own `cursor: help`.
+
+    The text-pane head's three controls were set once, inline in
+    buildPlaceholders(), which runs ONCE per page load. refreshKlalimList() -
+    which every save calls - refetches /api/klalim and rebuilds the INDEX from
+    it, and nothing ever revisited the text pane. So the moment a reviewer
+    cleared the last open word flag, the index pennant vanished and this head
+    went on claiming a flag for the rest of the session - in a pill whose own
+    tooltip says "This is what the index pennant is showing".
+
+    Driven through the REAL refresh path rather than by calling the sync helper
+    directly: the defect was never in the rendering, it was that nothing called
+    it, and a test that calls it itself would pass on the broken code.
+    """
+    kid = _find_klal_with_a_flag_word()
+    assert kid is not None, "no klal carries a word-level flag to clear"
+    _open_dashboard(page, server, kid)
+    page.wait_for_timeout(500)
+
+    def head_state():
+        return page.evaluate("""(kid) => {
+            const head = document.querySelector('#klal-block-' + kid + ' .klal-head');
+            const wf = head.querySelector('.klal-wordflags');
+            const fb = head.querySelector('.klal-flag-btn');
+            const nav = document.getElementById('nav-' + kid);
+            return { pill: wf ? wf.textContent.trim() : null,
+                     btn: fb ? fb.textContent.trim() : null,
+                     pennant: !!(nav && nav.querySelector('.nflag')) };
+        }""", kid)
+
+    # Whatever the starting state is, the two panes must already agree about it -
+    # a pill present with no pennant is the bug, in either direction.
+    head_state()   # starting state recorded for the failure messages below
+
+    # Now make the server's answer change and refresh through the real path.
+    # A klal-level flag moves `needs_revisit`, which drives BOTH the pennant and
+    # the head's own button.
+    status, _ = _post_json(server, "/api/decisions/klal_flag",
+                           {"klal_id": kid, "needs_revisit": True, "note": "sync probe"})
+    assert status in (200, 201), status
+    page.evaluate("() => refreshKlalimList()")
+    page.wait_for_timeout(700)
+    flagged = head_state()
+    assert flagged["pennant"], f"the index pennant did not appear: {flagged}"
+    assert flagged["btn"] == "⚑ Flagged", (
+        f"the text-pane head did not pick up the flag the server now reports: {flagged}")
+
+    status, _ = _post_json(server, "/api/decisions/klal_flag",
+                           {"klal_id": kid, "needs_revisit": False, "note": "sync probe cleared"})
+    assert status in (200, 201), status
+    page.evaluate("() => refreshKlalimList()")
+    page.wait_for_timeout(700)
+    cleared = head_state()
+
+    # THE HALF A "just set the class" REFRESH FORGETS: a state going false has to
+    # REMOVE what a state going true added.
+    assert not cleared["pennant"], "the index pennant did not clear"
+    assert cleared["btn"] == "⚑ Flag klal", (
+        f"the text-pane head still reads as flagged after the index cleared: "
+        f"{cleared} - the two panes are reading the same payload and only one "
+        f"of them took the new copy")
+    assert page.test_errors == []

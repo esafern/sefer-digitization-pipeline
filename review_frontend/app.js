@@ -954,6 +954,9 @@ async function refreshKlalimList() {
       WITNESS_PAGES = witness.pages || [];
       buildLegend();
       buildNav();
+      // The TEXT pane's heads read this same payload and were the half nobody
+      // refreshed - see syncKlalHead(). Both panes, one fetch.
+      syncAllKlalHeads();
       applyFlaggedFilter(); // buildNav() rebuilds nav-items from scratch, unfiltered - reapply
       // FIXED 2026-08-14 (code review, session audit item 5, finding 8):
       // buildNav()'s full innerHTML rebuild also wipes the '.active' class
@@ -1179,6 +1182,80 @@ function setupFilter() {
   document.getElementById('filter-high-value')?.addEventListener('change', applyFlaggedFilter);
 }
 
+// EVERY STATE THE TEXT-PANE HEAD SHOWS, IN ONE PLACE, so it can be RE-applied.
+//
+// REGRESSION 2026-09-04, reviewer with a screenshot of klal 64: "no flag on the
+// index pane but two flags on the text pane." The same report landed on klal 53
+// the day before, where the "?" turned out to be this pill's own `cursor: help`.
+//
+// These three controls were set once, inline in buildPlaceholders(), which runs
+// ONCE per page load. refreshKlalimList() - which every save calls - refetches
+// /api/klalim and rebuilds the INDEX pane from it, and nothing ever revisited
+// the text pane. So the moment a reviewer cleared the last open word flag the
+// index pennant vanished and this head went on claiming a flag for the rest of
+// the session, in a pill whose own tooltip says "This is what the index pennant
+// is showing". Two panes, one payload, one of them reading a stale copy.
+// Measured when reported: the server said klal 64 was ai_flag_count 0,
+// needs_revisit false while the head showed both.
+//
+// Subtractive as well as additive: a state going FALSE has to remove what a
+// state going true added, which is the half a "just set the class" refresh
+// forgets - and is exactly the direction that was broken here.
+function syncKlalHead(head, k) {
+  const flagBtn = head.querySelector('.klal-flag-btn');
+  if (flagBtn) {
+    flagBtn.classList.toggle('active', !!k.needs_revisit);
+    // "flag" read as a STATUS rather than a control - which is what the reviewer
+    // hit on klal 117, whose klal-level flag is clear and whose one word flag is
+    // answered: nothing is flagged, and the button still said "flag". The verb
+    // is explicit now, and only the active state says "Flagged".
+    flagBtn.textContent = k.needs_revisit ? '⚑ Flagged' : '⚑ Flag klal';
+    flagBtn.title = k.needs_revisit
+      ? 'This klal is flagged for revisit - click to review or clear'
+      : 'Flag this klal for revisit';
+  }
+  const titleBtn = head.querySelector('.klal-title-btn');
+  if (titleBtn) {
+    titleBtn.classList.toggle('pending', !!k.title_pending);
+    titleBtn.textContent = k.title_pending ? '✎ Heading · pending' : '✎ Heading';
+  }
+
+  // ...and the word-level flags the INDEX pennant counts, which the klal button
+  // deliberately does not (it toggles the klal-level flag alone). Both panes
+  // tell the same story instead of answering different questions with the same
+  // word - 15 of 222 klalim once showed a pennant in the index and an unflagged
+  // button here (reviewer: "117 shows flagged in the middle pane but not in the
+  // index pane").
+  //
+  // `ai_flag_count` IS the open-word-level-flag count: api_klalim computes it
+  // with the very rule that builds the pennant, and it is the name that field
+  // has carried since word-level flags were only ever raised by an AI pass. A
+  // second field would be a second encoding of one rule.
+  const n = k.ai_flag_count || 0;
+  let wf = head.querySelector('.klal-wordflags');
+  if (!n) {
+    if (wf) wf.remove();
+    return;
+  }
+  if (!wf) {
+    wf = document.createElement('span');
+    wf.className = 'klal-wordflags';
+    head.appendChild(wf);
+  }
+  wf.textContent = `⚑ ${n} word${n === 1 ? '' : 's'}`;
+  wf.title = `${n} word-level revisit flag(s) still open in this klal. `
+           + 'This is what the index pennant is showing; clear them from each word\u2019s own panel.';
+}
+
+// Re-apply every mounted text-pane head from the CURRENT nav payload, wherever
+// the index pane is rebuilt, so the two cannot drift apart again.
+function syncAllKlalHeads() {
+  KLALIM.forEach(k => {
+    const head = document.querySelector('#klal-block-' + k.klal_id + ' .klal-head');
+    if (head) syncKlalHead(head, k);
+  });
+}
+
 // ---------- middle pane: placeholders + lazy mount ----------
 function buildPlaceholders() {
   textScroll.innerHTML = '';
@@ -1211,15 +1288,13 @@ function buildPlaceholders() {
       : `כלל <span class="kid-n">${k.klal_id}</span>`;
     head.innerHTML = `<span class="kid">${kmark}</span>`;
     const flagBtn = document.createElement('button');
-    flagBtn.className = 'klal-flag-btn' + (k.needs_revisit ? ' active' : '');
+    // Base class only - the `active` modifier and the label belong to
+    // syncKlalHead(), so the first paint and every later refresh agree.
+    flagBtn.className = 'klal-flag-btn';
     // "flag" read as a STATUS rather than a control - which is what the reviewer
     // hit on klal 117, whose klal-level flag is clear and whose one word flag is
     // answered: nothing is flagged, and the button still said "flag". The verb
     // is explicit now, and only the active state says "Flagged".
-    flagBtn.textContent = k.needs_revisit ? '⚑ Flagged' : '⚑ Flag klal';
-    flagBtn.title = k.needs_revisit
-      ? 'This klal is flagged for revisit - click to review or clear'
-      : 'Flag this klal for revisit';
     flagBtn.onclick = (e) => { e.stopPropagation(); openKlalFlagPanel(k.klal_id); };
     head.appendChild(flagBtn);
     // THE HEADING, as something a reviewer can rule on (item 39, 2026-09-03).
@@ -1240,8 +1315,7 @@ function buildPlaceholders() {
     // for every decision here - so without this the button looked identical before
     // and after a save, and the reviewer recorded klal 89 TWICE because nothing on
     // screen said the first one had landed.
-    titleBtn.className = 'klal-title-btn' + (k.title_pending ? ' pending' : '');
-    titleBtn.textContent = k.title_pending ? '✎ Heading · pending' : '✎ Heading';
+    titleBtn.className = 'klal-title-btn';
     titleBtn.title = k.title_pending
       ? 'A heading correction is recorded for this klal and NOT yet applied to '
         + 'part1.json. Click to see it.'
@@ -1263,15 +1337,7 @@ function buildPlaceholders() {
     // which is this file's most-repeated defect - and the first attempt was
     // exactly that, and did not even render, because THIS head is built from the
     // nav payload and never saw it.
-    const openWordFlags = k.ai_flag_count || 0;
-    if (openWordFlags) {
-      const wf = document.createElement('span');
-      wf.className = 'klal-wordflags';
-      wf.textContent = `⚑ ${openWordFlags} word${openWordFlags === 1 ? '' : 's'}`;
-      wf.title = `${openWordFlags} word-level revisit flag(s) still open in this klal. `
-               + 'This is what the index pennant is showing; clear them from each word\u2019s own panel.';
-      head.appendChild(wf);
-    }
+    syncKlalHead(head, k);
     block.appendChild(head);
 
     const body = document.createElement('div');
@@ -1311,6 +1377,21 @@ async function mountKlal(klalId) {
   block.dataset.mounted = 'true'; // set immediately, avoid re-entrant double mount
   const data = await fetchKlal(klalId);
   renderKlalBody(block, data);
+  // RELEASE THE PLACEHOLDER FLOOR. Reviewer, 2026-09-04: "too much whitespace
+  // btw klals in the middle pane."
+  //
+  // buildPlaceholders() gives every block a `min-height` estimated from
+  // text_length so that mounting real content does not jerk the scroll. That is
+  // a PRE-MOUNT scaffold - but nothing ever took it down, so it stayed a floor
+  // for the life of the page, and every klal whose estimate ran long kept the
+  // difference as dead space under its own text. Measured before this line:
+  // klal 1 rendered 504px of blank below its last word, klal 6 628px, klal 7
+  // 2090px, on a block whose computed min-height was still the 1,554px guess.
+  // The estimate has to be generous (it is a chars-per-line guess against a
+  // pane whose width it does not know), which means it is wrong upward by
+  // design - fine while it is holding space open, dead weight the moment real
+  // content can measure itself.
+  block.style.minHeight = '';
   observer.unobserve(block);
 }
 
@@ -4143,13 +4224,31 @@ function releaseObserverWhenScrollSettles(maxMs = 3000) {
       // is defending against.
       if (lastActiveKlalId != null) {
         const block = document.getElementById('klal-block-' + lastActiveKlalId);
-        // `> line` only: a block sitting ABOVE the line is already the answer,
-        // and re-seating it would fight the reviewer at the end of the corpus,
-        // where the container bottoms out and the last klalim CANNOT be scrolled
-        // to the top. Those keep the re-asserted label (measured 2026-09-02:
-        // klalim 221 and 222 land 218px and 546px past the line and no scroll
-        // can fix it - there is nothing below them to scroll into).
-        if (block && block.getBoundingClientRect().top > readingLine()) {
+        // RE-SEAT IN BOTH DIRECTIONS, but never fight a container that has
+        // nothing left to give.
+        //
+        // This used to correct only a block that landed BELOW the reading line,
+        // on the reasoning that one sitting above it is already the answer. That
+        // held while placeholder heights could only be too SMALL - a mounting
+        // block grew, so the destination drifted down. It stopped holding on
+        // 2026-09-04, when mountKlal() began releasing the placeholder
+        // min-height: blocks the jump scrolls past now SHRINK by as much as
+        // 2,000px each, the smooth scroll overshoots, and the target lands far
+        // above the line. Measured: klal 12 settled at top -2524px and this
+        // guard declined to fix it, because "above the line" was being read as
+        // "arrived" when it now also means "overshot".
+        //
+        // The case the original guard was protecting is real and stays
+        // protected, but it is not "above the line" - it is THE CONTAINER IS AT
+        // ITS END. At the bottom of the corpus klalim 221 and 222 cannot be
+        // scrolled to the top because there is nothing below them to scroll
+        // into (measured 2026-09-02 at 218px and 546px past the line), and
+        // re-seating there would fight the reviewer forever. So test for that
+        // directly instead of inferring it from the direction of the error.
+        const r = block && block.getBoundingClientRect();
+        const bottomedOut = textScroll.scrollTop + textScroll.clientHeight
+                            >= textScroll.scrollHeight - 2;
+        if (r && (r.top > readingLine() || !bottomedOut)) {
           block.scrollIntoView({ behavior: 'auto', block: 'start' });
         }
         setActiveKlal(lastActiveKlalId);
