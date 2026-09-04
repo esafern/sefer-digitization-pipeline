@@ -1022,3 +1022,150 @@ next incident.
     it from `pytest --collect-only -q`, and if the two numbers disagree, the
     disagreement IS the finding. A `def test_` count equal to the collected count
     is one cheap assertion; nothing in this repo's gate makes it yet.
+
+38. **A witness reading a DIFFERENT SOURCE is not a second opinion about this
+    one — its disagreement has an explanation the others cannot have.** DocAI,
+    Surya and the VLM all read the Berlin 1851 scan, so when one differs from the
+    corpus exactly one party misread that ink and the remedy is a correction.
+    Dicta reads the Jerusalem 1975/6 printing: a different compositor, different
+    type, different sheet. Its disagreement has three explanations, not one — the
+    corpus misread, Dicta misread, or **the two printings genuinely differ** —
+    and acting on the third edits the Berlin text to match Jerusalem, which is
+    the opposite of transcribing this book and is what the reviewer ruled against
+    in item `0AQ`. This is the complement of Lesson 24: independence of SOURCE
+    does not merely remove a shared failure mode, it adds one. Two consequences,
+    both now in the code. Every dispute a cross-edition witness takes part in
+    carries `cross_edition`, `same_edition_agreeing` (how many engines read THIS
+    ink — 223 of 506 have exactly one) and `abbreviation_shape`, and the
+    dashboard says so in words, because "2 engines agree" is a different claim
+    when one of them was reading a different book. And the genuine variants go to
+    a collation artifact that is never a correction queue: only the shape that is
+    verifiable without judgement (Berlin abbreviates with a geresh, Jerusalem
+    spells the same word out — 74 rows, 91% attested), never the full set.
+
+    **Corollary, and the reason this lesson is worded as strongly as it is: the
+    repo was already carrying the opposite claim as though it were measured.**
+    `tools/preview_dicta_disputes.py` printed, in its own generated output, that
+    a solo cross-edition difference "is usually a textual variant rather than a
+    misread." Nobody had measured it. When measured, it went the other way by
+    about 6:1 — in the 68 differences that are only a vav/yod swap, Dicta's
+    reading is unattested in 6.18M words of independent Hebrew 24 times against
+    the corpus's 4. A plausible sentence written into a tool's OUTPUT is read by
+    everyone downstream as a finding; if it is a guess, it has to say so.
+
+39. **State that changes while a page is open must not be read from a cache
+    populated when the page loaded.** Hit twice in two days, in two different
+    panes, with the same shape. The heading panel read `title_decision` from
+    `mountedKlal` — the frontend's `/api/klal` cache, filled once when a klal
+    scrolls into view and held for the session — so a correction the reviewer had
+    just made was unreadable to them ("doesn't explain my change like the
+    others"). Then the text-pane klal head, whose three controls were set inline
+    in `buildPlaceholders()`, which runs ONCE per page load: `refreshKlalimList()`
+    refetches `/api/klalim` on every save and rebuilds the INDEX from it, and
+    nothing ever revisited the text pane, so clearing the last open word flag
+    left the head claiming a flag for the rest of the session — in a pill whose
+    own tooltip reads "This is what the index pennant is showing" (measured: the
+    server said klal 64 was `ai_flag_count` 0, `needs_revisit` false while the
+    head showed both). This is not Lesson 12, which is about cache KEYS; the
+    defect is caching the value at all. **When one payload feeds two views, the
+    refresh path must feed both** — a partial refresh looks exactly like a
+    correct one until the two views are on screen together and disagree, which is
+    why both of these were found by a reviewer and not by a test.
+
+40. **Tearing a scaffold down is a SEPARATE step from putting it up, and it is
+    the one that gets forgotten.** `buildPlaceholders()` gives every klal block a
+    `min-height` estimated from `text_length` so that lazy-mounting real content
+    does not jerk the scroll. Nothing ever took it down, so it stayed a FLOOR for
+    the life of the page and every klal whose estimate ran long kept the
+    difference as dead space under its own text: 504px below klal 1, 948px below
+    klal 217, 2090px below klal 7. The estimate is a chars-per-line guess made
+    without knowing the pane's width, so it is wrong upward BY DESIGN — correct
+    for a scaffold, dead weight the moment real content can measure itself. The
+    same asymmetry, in state rather than layout: a refresh that sets a class when
+    a flag is true and does nothing when it is false is not a refresh, because
+    the FALSE direction has to remove what the true direction added. Whenever you
+    write "set this up", write down where it comes down, and when you write a
+    sync, test the transition in both directions — the true→false leg is the one
+    that ships broken.
+
+41. **A guard that tests a PROXY for its real condition breaks silently the day a
+    new cause produces the same proxy value.**
+    `releaseObserverWhenScrollSettles()` re-seats a klal that a smooth jump
+    landed on imprecisely, and it fired only when the target sat BELOW the
+    reading line — on the reasoning that above the line means "arrived". That
+    reasoning held only while placeholder heights could be too small and never
+    too large, so a mounting block could only push its neighbours DOWN. The
+    moment Lesson 40's fix let blocks shrink by up to 2,000px each, a long jump
+    began to overshoot and the target landed far ABOVE the line: klal 12 settled
+    at top −2524px and the guard declined to fix it, because "above the line" now
+    aliased three different states — arrived, overshot, and *the container has
+    nothing left below to scroll into*. Only the third was ever the reason for
+    the guard, and it is directly testable (`scrollTop + clientHeight >=
+    scrollHeight`), so it is tested directly now. **When a condition is expressed
+    as a symptom rather than as the thing itself, every future change that can
+    produce that symptom inherits the guard's behaviour without inheriting its
+    intent.**
+
+42. **A mutation that does NOT fail the test is a finding, not a pass — resolve
+    whether the TEST is blind or the CODE is inert before you write a comment
+    claiming the code does something.** Both outcomes occurred in one session.
+    `flex-shrink: 0` on `#scan-pane` survived its mutation because it does
+    nothing: measured across 1700→800px with and without it, the geometry is
+    identical at every width, because `#text-pane` is `flex: 1; min-width: 0` and
+    absorbs the whole deficit so none ever reaches the scan. A comment had
+    already been written saying it fixed a real squeeze. The `bottomedOut` guard
+    in Lesson 41 also survived its first mutation — and there the answer was the
+    opposite: a full-suite probe showed removing it fails
+    `test_the_klal_heading_keeps_its_flag_control_beside_it`, so it is
+    load-bearing and the mutation was simply aimed at a case that suite section
+    does not exercise. The rule is not "delete code that survives a mutation" and
+    not "keep it either" — it is that the surviving mutation is an unanswered
+    question, and shipping a comment that asserts an effect you have not measured
+    is how Lesson 19's failure mode gets written into the source where the next
+    reader will believe it.
+
+43. **A browser test that measures a transient or off-screen element can pass
+    against the very defect it was written for.** Two in one session, both caught
+    only because a mutation failed to fail. The first regression test for the
+    side-panel dock read `getBoundingClientRect()` immediately after adding
+    `.open` — but a closed panel is parked off-screen by
+    `transform: translateX(100% + nav-w)`, so the rect reported the
+    pre-transition position and read identically whether the bug was present or
+    not; the fix is to assert the computed `right` (`0px` vs `300px`), which is
+    the actual rule and has no animation in it. The second dispatched
+    `mouseover` on a word 4,000px down the scroll: `dispatchEvent` does not
+    scroll, so the hover card was positioned at y=4635 and `elementFromPoint` —
+    which only answers about the visible viewport — returned `null` for every
+    probe, reporting a live button as dead. **Scroll it into view first, assert
+    on settled or non-animated properties, and make the test fail loudly when the
+    element it is measuring is outside the frame.** This is Lesson 25 in a
+    browser: a probe that cannot see the difference carries no information.
+
+44. **Do not mutate the working tree from a background job while you are editing
+    it, and kill process TREES, not parents.** Three self-inflicted incidents in
+    one session, none of which lost work only because they were noticed. A
+    `git stash` run to get a baseline fired while two background pytest runs were
+    reading the same tree, and the job that would have run `git stash pop` was
+    then killed before it got there — the work sat in a dangling stash until it
+    was popped by hand. A background probe whose cleanup step was
+    `cp /tmp/app.js.bak review_frontend/app.js` fired minutes later, on a file
+    being actively edited, and silently reverted a finished fix mid-work. And
+    `pkill -f pytest` matched the pytest parents but not the `review_server.py`
+    children they had spawned, leaving four orphaned servers running against the
+    REAL corpus (not the fixture) for half an hour. Long-running verification
+    belongs on a snapshot you are not editing; a cleanup that restores a file is
+    a foreground step you watch; and after killing a test runner, check for
+    survivors before assuming the tree is quiet.
+
+45. **A reviewer reporting a UI symptom is describing PIXELS, not the DOM — when
+    a text search for what they said finds nothing, ask for a screenshot instead
+    of searching harder.** Two turns were spent hunting a reported "hovering
+    gives me a ?" on klal 53: the server said the klal was clean
+    (`open_count` 0, `needs_revisit` false), a fresh render showed no flag, and a
+    sweep of every element whose text content is exactly `?` returned nothing —
+    because the `?` was never text. It is the mouse cursor: `.klal-wordflags`
+    carries `cursor: help`, which macOS draws as a question mark. The same report
+    said "a flag that says word 1", which was `⚑ 1 word` reordered by RTL. One
+    screenshot resolved both, and they turned out to be a single bug (Lesson 39).
+    Cursors, RTL reordering, `::before` content, a font's fallback glyph and a
+    native `title` tooltip are all things a reviewer can see and `grep` cannot.
