@@ -4293,6 +4293,12 @@ function releaseObserverWhenScrollSettles(maxMs = 3000) {
         if (r && (r.top > readingLine() || !bottomedOut)) {
           block.scrollIntoView({ behavior: 'auto', block: 'start' });
         }
+        // The re-seat above declines when the container is at its end, which
+        // is exactly "this klal cannot be brought to the line". Record it, so
+        // the scroll handler stops overwriting the label the reviewer asked
+        // for - see endClampKlalId.
+        endClampKlalId = (r && !(r.top > readingLine()) && bottomedOut)
+                         ? lastActiveKlalId : null;
         setActiveKlal(lastActiveKlalId);
       }
       suppressObserverScroll = false;
@@ -4358,9 +4364,40 @@ function setActiveKlal(klalId, navBlock) {
   }
 }
 
+// THE KLAL A JUMP ASKED FOR, WHEN THE PANE CANNOT PUT IT AT THE READING LINE.
+//
+// At the end of the corpus the scroll container clamps: measured 2026-09-04,
+// jumping to klal 219 leaves it at top -246px because klalim 219-222 together
+// are 1,086px of content in a 954px pane, and no scroll position exists that
+// puts 219 on the line. updateActiveFromScroll's rule - "the last block whose
+// top is above the line" - then answers 220, which is geometrically true and
+// answers a question the reviewer did not ask. They clicked 219; the index must
+// say 219.
+//
+// Held only while the container is still AT ITS END and only for a klal the
+// geometry genuinely cannot reach, so scrolling away releases it immediately
+// and nothing is suppressed anywhere a normal jump works. Which klalim fall in
+// this zone is not fixed - it moved to 219 when this session's apply changed
+// the heights of klalim 218-221 - so it cannot be a hardcoded range.
+let endClampKlalId = null;
+
 function updateActiveFromScroll() {
   const allBlocks = Array.from(document.querySelectorAll('.klal-block'));
   const line = readingLine();   // see READING_LINE_OFFSET - one definition
+  if (endClampKlalId != null) {
+    const t = textScroll;
+    const held = document.getElementById('klal-block-' + endClampKlalId);
+    const stillClamped = t.scrollTop + t.clientHeight >= t.scrollHeight - 2
+                         && held && held.getBoundingClientRect().top <= line;
+    if (stillClamped) {
+      if (endClampKlalId !== lastActiveKlalId) {
+        lastActiveKlalId = endClampKlalId;
+        setActiveKlal(endClampKlalId);
+      }
+      return;
+    }
+    endClampKlalId = null;   // scrolled off the end - the geometry rules again
+  }
   let current = allBlocks[0];
   for (const block of allBlocks) {
     if (block.getBoundingClientRect().top <= line) current = block;

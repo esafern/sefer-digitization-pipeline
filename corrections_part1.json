@@ -1790,30 +1790,6 @@
       "flag": "possible_omission"
     }
   ],
-  "36": [
-    {
-      "word_index": 73,
-      "opcode": "replace",
-      "docai_reading": "אינן",
-      "docai_repaired": null,
-      "final_text": "אינו",
-      "page": 26,
-      "bbox": {
-        "x1": 0.5787181258201599,
-        "y1": 0.7376456260681152,
-        "x2": 0.6098319888114929,
-        "y2": 0.7533145546913147
-      },
-      "vision_selected": "B",
-      "vision_transcription": "אינו",
-      "confidence": 0.98,
-      "reasoning": "The crop clearly shows the word 'אינו' on the third line. Paleographically, the final letter has a top hook and terminates at the baseline, typical of a Vav (ו) rather than extending below as a final Nun (ן). Contextually, the text refers to the singular subject 'התלמיד' ('אין התלמיד מדקדק... ולפעמים אינו אומר אלא'), confirming 'אינו'.",
-      "vlm_reading": "אינו",
-      "surya_reading": "אינו",
-      "dicta_reading": "אינו",
-      "flag": "current_text_confirmed"
-    }
-  ],
   "37": [
     {
       "word_index": 51,
@@ -2185,50 +2161,6 @@
       "flag": "current_text_confirmed"
     },
     {
-      "word_index": 17,
-      "opcode": "replace",
-      "docai_reading": "כדברי",
-      "docai_repaired": null,
-      "final_text": "מדברי",
-      "page": 27,
-      "bbox": {
-        "x1": 0.7108655571937561,
-        "y1": 0.6818737387657166,
-        "x2": 0.7550644278526306,
-        "y2": 0.6993889808654785
-      },
-      "vision_selected": "B",
-      "vision_transcription": "מדברי",
-      "confidence": 0.95,
-      "reasoning": "The context of the passage is 'כן למדתי מדברי הרמב\"ן במלחמותיו'. In early Hebrew printing typesets, the letter Mem ('מ') is frequently composed of two distinct glyph parts resembling a Kaf ('כ') and a Vav/Yod ('ו'/'י') in close proximity. This visual separation can be misread by raw OCR engines as 'כודברי' or 'כדברי', but contextually and paleographically, it represents the single letter 'מ', making 'מדברי' (Option B) the correct reading.",
-      "vlm_reading": "מדברי",
-      "surya_reading": "מדברי",
-      "dicta_reading": "מדברי",
-      "flag": "current_text_confirmed"
-    },
-    {
-      "word_index": 89,
-      "opcode": "replace",
-      "docai_reading": "ס\"ס",
-      "docai_repaired": null,
-      "final_text": "ס\"פ",
-      "page": 27,
-      "bbox": {
-        "x1": 0.35788828134536743,
-        "y1": 0.742158830165863,
-        "x2": 0.38489872217178345,
-        "y2": 0.7592667937278748
-      },
-      "vision_selected": "B",
-      "vision_transcription": "ס\"פ",
-      "confidence": 0.98,
-      "reasoning": "The visible word after 'הרא\"ש' and before 'מי שמת' is 'ס\"פ' (abbreviation for סוף פרק, 'end of the chapter' [Mi Shemat]). Paleographically, the second letter after the gershayim clearly displays the inner curl and base of a Peh (פ), distinguishing it from Samekh (ס).",
-      "vlm_reading": "ס\"פ",
-      "surya_reading": "ס\"פ",
-      "dicta_reading": "ס\"פ",
-      "flag": "current_text_confirmed"
-    },
-    {
       "word_index": 207,
       "opcode": "replace",
       "docai_reading": null,
@@ -2283,28 +2215,6 @@
       ],
       "same_edition_agreeing": 2,
       "abbreviation_shape": null,
-      "flag": "current_text_may_be_wrong"
-    },
-    {
-      "word_index": 617,
-      "opcode": "replace",
-      "docai_reading": "הון",
-      "docai_repaired": null,
-      "final_text": "הוו",
-      "page": 28,
-      "bbox": {
-        "x1": 0.23771001398563385,
-        "y1": 0.3937324285507202,
-        "x2": 0.2594897449016571,
-        "y2": 0.4102048873901367
-      },
-      "vision_selected": "A",
-      "vision_transcription": "הון",
-      "confidence": 0.95,
-      "reasoning": "Paleographically, the text in the crop clearly shows the letters ה-ו-ן ('הון'), where the final character extends below the baseline in the distinct form of a final Nun (ן). Contextually, 'הון' here is a well-known printer's typographical error for the Aramaic word 'הוו' in the phrase 'דרבים הוו'.",
-      "vlm_reading": "הוו",
-      "surya_reading": "הוו",
-      "dicta_reading": "הוו",
       "flag": "current_text_may_be_wrong"
     },
     {
@@ -3430,28 +3340,6 @@
   ],
   "69": [
     {
-      "word_index": 36,
-      "opcode": "replace",
-      "docai_reading": "אהים ואהינו ואהיכם",
-      "docai_repaired": null,
-      "final_text": "אלהים ואלהינו ואלהיכם",
-      "page": 34,
-      "bbox": {
-        "x1": 0.5767557621002197,
-        "y1": 0.5589537024497986,
-        "x2": 0.7259167432785034,
-        "y2": 0.5762575268745422
-      },
-      "vision_selected": "B",
-      "vision_transcription": "אלהים ואלהינו ואלהיכם",
-      "confidence": 1.0,
-      "reasoning": "The image clearly shows the words 'אלהים ואלהינו ואלהיכם' with distinct 'ל' (lamed) ascenders present in each of the three words. Option A omits the lamed characters due to an OCR failure to capture tall ascenders.",
-      "vlm_reading": "אלהים",
-      "surya_reading": null,
-      "dicta_reading": "אלהים",
-      "flag": "current_text_confirmed"
-    },
-    {
       "word_index": 173,
       "opcode": "replace",
       "docai_reading": null,
@@ -3537,28 +3425,6 @@
       "vlm_reading": null,
       "surya_reading": null,
       "dicta_reading": "אל",
-      "flag": "current_text_confirmed"
-    },
-    {
-      "word_index": 398,
-      "opcode": "replace",
-      "docai_reading": "ע\"ט",
-      "docai_repaired": null,
-      "final_text": "ע\"ש",
-      "page": 34,
-      "bbox": {
-        "x1": 0.5208203792572021,
-        "y1": 0.8768611550331116,
-        "x2": 0.5525171160697937,
-        "y2": 0.8945674300193787
-      },
-      "vision_selected": "B",
-      "vision_transcription": "ע\"ש",
-      "confidence": 0.98,
-      "reasoning": "The glyph clearly shows the letter ayin (ע), double quotes (\"), followed by shin (ש). Contextually, 'ע\"ש' (abbreviation for עיין שם - 'see there') is a ubiquitous Rabbinic cross-reference formula following 'ומרן ז\"ל'.",
-      "vlm_reading": "ע\"ש",
-      "surya_reading": "ע\"ש",
-      "dicta_reading": "ע\"ש",
       "flag": "current_text_confirmed"
     }
   ],
@@ -3856,28 +3722,6 @@
       "same_edition_agreeing": 1,
       "abbreviation_shape": null,
       "flag": "current_text_may_be_wrong"
-    },
-    {
-      "word_index": 493,
-      "opcode": "replace",
-      "docai_reading": "דתנאים",
-      "docai_repaired": null,
-      "final_text": "התנאים",
-      "page": 36,
-      "bbox": {
-        "x1": 0.5991299152374268,
-        "y1": 0.14929577708244324,
-        "x2": 0.6563082933425903,
-        "y2": 0.16579477488994598
-      },
-      "vision_selected": "B",
-      "vision_transcription": "התנאים",
-      "confidence": 0.95,
-      "reasoning": "The sentence context refers to 'אלפא ביתא של התנאים' (a well-known index/section in Rabbinic literature such as Sefer Yuchasin). The adjudicated text is 'התנאים' (Option B), where DocAI misread the initial letter 'ה' as 'ד' due to print fading on the left stem.",
-      "vlm_reading": "התנאים",
-      "surya_reading": "התנאים",
-      "dicta_reading": "התנאים",
-      "flag": "current_text_confirmed"
     },
     {
       "word_index": 802,
@@ -8228,30 +8072,6 @@
       "flag": "current_text_may_be_wrong"
     }
   ],
-  "146": [
-    {
-      "word_index": 33,
-      "opcode": "replace",
-      "docai_reading": "רגלין",
-      "docai_repaired": null,
-      "final_text": "רגליו",
-      "page": 53,
-      "bbox": {
-        "x1": 0.710918128490448,
-        "y1": 0.10600564628839493,
-        "x2": 0.75,
-        "y2": 0.12374042719602585
-      },
-      "vision_selected": "B",
-      "vision_transcription": "רגליו",
-      "confidence": 0.98,
-      "reasoning": "The visible text on the second line corresponds to 'רגליו' from the phrase 'שתי רגליו כאחד' referenced in the provided text context. Paleographically, the final letter is a vav (ו) terminating at the baseline, distinct from a final nun (ן) or tzadi (ץ) which extends significantly below the baseline (as seen in 'קופץ' on the line above).",
-      "vlm_reading": "רגליו",
-      "surya_reading": "רגליו",
-      "dicta_reading": "רגליו",
-      "flag": "current_text_confirmed"
-    }
-  ],
   "147": [
     {
       "word_index": 0,
@@ -10166,184 +9986,6 @@
       "flag": "current_text_confirmed"
     }
   ],
-  "163": [
-    {
-      "word_index": 12,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "ר\"ג",
-      "page": 59,
-      "bbox": {
-        "x1": 0.2714373767375946,
-        "y1": 0.5742092728614807,
-        "x2": 0.2924121022224426,
-        "y2": 0.5916463732719421
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: dicta + vlm agree on 'י\"ג' against stored 'ר\"ג'. NOTE: this is a CROSS-EDITION consensus - dicta read the Jerusalem 1975/6 printing, not this Berlin scan. Only ONE engine that read THIS scan differs from the corpus here, so a difference between the two printings is a live explanation - check the ink.",
-      "vlm_reading": "י\"ג",
-      "surya_reading": null,
-      "dicta_reading": "י\"ג",
-      "consensus_engines": [
-        "dicta",
-        "vlm"
-      ],
-      "consensus_reading": "י\"ג",
-      "ligature_artifact": null,
-      "cross_edition": true,
-      "cross_edition_engines": [
-        "dicta"
-      ],
-      "same_edition_agreeing": 1,
-      "abbreviation_shape": null,
-      "flag": "current_text_may_be_wrong"
-    },
-    {
-      "word_index": 133,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "דוה",
-      "page": 59,
-      "bbox": {
-        "x1": 0.7353485226631165,
-        "y1": 0.6938361525535583,
-        "x2": 0.7600246667861938,
-        "y2": 0.7100567817687988
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: dicta + vlm agree on 'הוה' against stored 'דוה'. NOTE: this is a CROSS-EDITION consensus - dicta read the Jerusalem 1975/6 printing, not this Berlin scan. Only ONE engine that read THIS scan differs from the corpus here, so a difference between the two printings is a live explanation - check the ink.",
-      "vlm_reading": "הוה",
-      "surya_reading": null,
-      "dicta_reading": "הוה",
-      "consensus_engines": [
-        "dicta",
-        "vlm"
-      ],
-      "consensus_reading": "הוה",
-      "ligature_artifact": null,
-      "cross_edition": true,
-      "cross_edition_engines": [
-        "dicta"
-      ],
-      "same_edition_agreeing": 1,
-      "abbreviation_shape": null,
-      "flag": "current_text_may_be_wrong"
-    },
-    {
-      "word_index": 428,
-      "opcode": "replace",
-      "docai_reading": "בפיק",
-      "docai_repaired": null,
-      "final_text": "בפ\"ק",
-      "page": 60,
-      "bbox": {
-        "x1": 0.32940447330474854,
-        "y1": 0.15155179798603058,
-        "x2": 0.36786600947380066,
-        "y2": 0.16767431795597076
-      },
-      "vision_selected": "B",
-      "vision_transcription": "בפ\"ק",
-      "confidence": 0.98,
-      "reasoning": "The image clearly shows the standard Rabbinic abbreviation 'בפ\"ק' (abbreviation for בפרק קמא, 'in the first chapter'). The high punctuation mark between the 'פ' and 'ק' is an abbreviation indicator (gershayim/geresh), not a letter Yod ('י'). Contextually, 'בפ\"ק דמכות' refers to Chapter 1 of Tractate Makkot.",
-      "vlm_reading": "בפ\"ק",
-      "surya_reading": "בפ\"ק",
-      "dicta_reading": "בפ\"ק",
-      "flag": "current_text_confirmed"
-    },
-    {
-      "word_index": 461,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "דוה",
-      "page": 60,
-      "bbox": {
-        "x1": 0.1699751913547516,
-        "y1": 0.18097540736198425,
-        "x2": 0.1947890818119049,
-        "y2": 0.19871020317077637
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: dicta + vlm agree on 'הוה' against stored 'דוה'. NOTE: this is a CROSS-EDITION consensus - dicta read the Jerusalem 1975/6 printing, not this Berlin scan. Only ONE engine that read THIS scan differs from the corpus here, so a difference between the two printings is a live explanation - check the ink.",
-      "vlm_reading": "הוה",
-      "surya_reading": "הזה",
-      "dicta_reading": "הוה",
-      "consensus_engines": [
-        "dicta",
-        "vlm"
-      ],
-      "consensus_reading": "הוה",
-      "ligature_artifact": null,
-      "cross_edition": true,
-      "cross_edition_engines": [
-        "dicta"
-      ],
-      "same_edition_agreeing": 1,
-      "abbreviation_shape": null,
-      "flag": "current_text_may_be_wrong"
-    },
-    {
-      "word_index": 512,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "דס'",
-      "page": 60,
-      "bbox": {
-        "x1": 0.8182381987571716,
-        "y1": 0.24264410138130188,
-        "x2": 0.8405707478523254,
-        "y2": 0.25916969776153564
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: dicta + vlm agree on 'דפ'' against stored 'דס''. NOTE: this is a CROSS-EDITION consensus - dicta read the Jerusalem 1975/6 printing, not this Berlin scan. Only ONE engine that read THIS scan differs from the corpus here, so a difference between the two printings is a live explanation - check the ink.",
-      "vlm_reading": "דפ'",
-      "surya_reading": null,
-      "dicta_reading": "דפ'",
-      "consensus_engines": [
-        "dicta",
-        "vlm"
-      ],
-      "consensus_reading": "דפ'",
-      "ligature_artifact": null,
-      "cross_edition": true,
-      "cross_edition_engines": [
-        "dicta"
-      ],
-      "same_edition_agreeing": 1,
-      "abbreviation_shape": null,
-      "flag": "current_text_may_be_wrong"
-    },
-    {
-      "word_index": 574,
-      "opcode": "replace",
-      "docai_reading": "סיי",
-      "docai_repaired": null,
-      "final_text": "סי'",
-      "page": 60,
-      "bbox": {
-        "x1": 0.13461539149284363,
-        "y1": 0.28738412261009216,
-        "x2": 0.15756823122501373,
-        "y2": 0.3047158420085907
-      },
-      "vision_selected": "B",
-      "vision_transcription": "סי'",
-      "confidence": 0.98,
-      "reasoning": "The crop shows the standard Rabbinic abbreviation for 'סימן' (siman), consisting of samekh, yod, and an apostrophe/geresh mark (סי'). The mark after the yod is clearly elevated geresh punctuation rather than a second letter yod.",
-      "vlm_reading": "סי'",
-      "surya_reading": "סי'",
-      "dicta_reading": "סימן",
-      "flag": "current_text_confirmed"
-    }
-  ],
   "164": [
     {
       "word_index": 55,
@@ -11263,28 +10905,6 @@
   ],
   "169": [
     {
-      "word_index": 76,
-      "opcode": "replace",
-      "docai_reading": "כזה",
-      "docai_repaired": null,
-      "final_text": "מזה",
-      "page": 62,
-      "bbox": {
-        "x1": 0.19083023071289062,
-        "y1": 0.7702866196632385,
-        "x2": 0.21995043754577637,
-        "y2": 0.7876463532447815
-      },
-      "vision_selected": "A",
-      "vision_transcription": "כזה",
-      "confidence": 0.95,
-      "reasoning": "The visible text on line 3 clearly shows the word 'כזה' (preceded by 'סק' from 'פסק'). The initial letter of the target word is an open, rounded כ rather than a מ, confirming Option A ('כזה') over Option B.",
-      "vlm_reading": "מזה",
-      "surya_reading": "מזה",
-      "dicta_reading": "מזה",
-      "flag": "current_text_may_be_wrong"
-    },
-    {
       "word_index": 170,
       "opcode": "replace",
       "docai_reading": "בר\"ס",
@@ -11797,53 +11417,9 @@
       "surya_reading": "ובב\"ק",
       "dicta_reading": "וגב\"ק",
       "flag": "current_text_confirmed"
-    },
-    {
-      "word_index": 116,
-      "opcode": "delete",
-      "docai_reading": "דוכתי דבגמרא",
-      "docai_repaired": null,
-      "final_text": null,
-      "page": 64,
-      "bbox": {
-        "x1": 0.462345689535141,
-        "y1": 0.3837115168571472,
-        "x2": 0.5716049671173096,
-        "y2": 0.3934359848499298
-      },
-      "vision_selected": "A",
-      "vision_transcription": "דוכתי דבגמרא",
-      "confidence": 1.0,
-      "reasoning": "The middle line of the image crop clearly displays the Hebrew words 'דוכתי דבגמרא' followed by a colon colon (sof pasuq).",
-      "vlm_reading": null,
-      "surya_reading": null,
-      "dicta_reading": null,
-      "flag": "possible_omission"
     }
   ],
   "173": [
-    {
-      "word_index": 2,
-      "opcode": "replace",
-      "docai_reading": "כר\"ט",
-      "docai_repaired": null,
-      "final_text": "כר\"מ",
-      "page": 64,
-      "bbox": {
-        "x1": 0.7166666388511658,
-        "y1": 0.5291734337806702,
-        "x2": 0.7555555701255798,
-        "y2": 0.5502431392669678
-      },
-      "vision_selected": "B",
-      "vision_transcription": "כר\"מ",
-      "confidence": 0.99,
-      "reasoning": "The visible characters clearly form 'כר\"מ' (כ-ר-\"-מ), referring to standard Rabbinic shorthand for 'כרבי מאיר' (like Rabbi Meir). The final letter after the gershayim is clearly a mem (מ), not a tet (ט), fully matching Option B and the surrounding Talmudic commentary context 'הלכה כר\"מ בגזירותיו'.",
-      "vlm_reading": "כר\"מ",
-      "surya_reading": "כר\"מ",
-      "dicta_reading": "כר\"מ",
-      "flag": "current_text_confirmed"
-    },
     {
       "word_index": 51,
       "opcode": "replace",
@@ -11864,30 +11440,6 @@
       "vlm_reading": "נ\"ד",
       "surya_reading": "נ\"ד",
       "dicta_reading": "נ\"ד",
-      "flag": "current_text_confirmed"
-    }
-  ],
-  "174": [
-    {
-      "word_index": 135,
-      "opcode": "replace",
-      "docai_reading": "אא",
-      "docai_repaired": "אלא",
-      "final_text": "לא",
-      "page": 64,
-      "bbox": {
-        "x1": 0.3314814865589142,
-        "y1": 0.6985413432121277,
-        "x2": 0.354938268661499,
-        "y2": 0.7171798944473267
-      },
-      "vision_selected": "B",
-      "vision_transcription": "לא",
-      "confidence": 0.98,
-      "reasoning": "The visible text in the middle line clearly shows the Hebrew word 'לא', comprising a Lamed with its distinctive upper ascender followed by an Aleph. This aligns perfectly with the surrounding sentence context '...להך כללא לא היכא דאיכא...'.",
-      "vlm_reading": "אא",
-      "surya_reading": "א'",
-      "dicta_reading": "אלא",
       "flag": "current_text_confirmed"
     }
   ],
@@ -11991,39 +11543,6 @@
       ],
       "same_edition_agreeing": 2,
       "abbreviation_shape": null
-    },
-    {
-      "word_index": 168,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "מיה",
-      "page": 64,
-      "bbox": {
-        "x1": 0.44876542687416077,
-        "y1": 0.8824959397315979,
-        "x2": 0.47962963581085205,
-        "y2": 0.8991085886955261
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: dicta + surya agree on 'מ\"ה' against stored 'מיה'. NOTE: this is a CROSS-EDITION consensus - dicta read the Jerusalem 1975/6 printing, not this Berlin scan. Only ONE engine that read THIS scan differs from the corpus here, so a difference between the two printings is a live explanation - check the ink.",
-      "vlm_reading": "ס\"ה",
-      "surya_reading": "מ\"ה",
-      "dicta_reading": "מ\"ה",
-      "consensus_engines": [
-        "dicta",
-        "surya"
-      ],
-      "consensus_reading": "מ\"ה",
-      "ligature_artifact": null,
-      "cross_edition": true,
-      "cross_edition_engines": [
-        "dicta"
-      ],
-      "same_edition_agreeing": 1,
-      "abbreviation_shape": null,
-      "flag": "current_text_may_be_wrong"
     },
     {
       "word_index": 173,
@@ -12160,39 +11679,6 @@
       "flag": "current_text_confirmed"
     },
     {
-      "word_index": 214,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "והכ\"ם",
-      "page": 65,
-      "bbox": {
-        "x1": 0.20828182995319366,
-        "y1": 0.2703358829021454,
-        "x2": 0.2533992528915405,
-        "y2": 0.28692835569381714
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: dicta + vlm agree on 'והכ\"מ' against stored 'והכ\"ם'. NOTE: this is a CROSS-EDITION consensus - dicta read the Jerusalem 1975/6 printing, not this Berlin scan. Only ONE engine that read THIS scan differs from the corpus here, so a difference between the two printings is a live explanation - check the ink.",
-      "vlm_reading": "והכ\"מ",
-      "surya_reading": null,
-      "dicta_reading": "והכ\"מ",
-      "consensus_engines": [
-        "dicta",
-        "vlm"
-      ],
-      "consensus_reading": "והכ\"מ",
-      "ligature_artifact": null,
-      "cross_edition": true,
-      "cross_edition_engines": [
-        "dicta"
-      ],
-      "same_edition_agreeing": 1,
-      "abbreviation_shape": null,
-      "flag": "current_text_may_be_wrong"
-    },
-    {
       "word_index": 234,
       "opcode": "replace",
       "docai_reading": null,
@@ -12222,28 +11708,6 @@
       "same_edition_agreeing": 2,
       "abbreviation_shape": null,
       "flag": "current_text_may_be_wrong"
-    },
-    {
-      "word_index": 277,
-      "opcode": "replace",
-      "docai_reading": "חרא רבפ",
-      "docai_repaired": null,
-      "final_text": "חדא דבפ'",
-      "page": 65,
-      "bbox": {
-        "x1": 0.33003708720207214,
-        "y1": 0.3306353688240051,
-        "x2": 0.4054388105869293,
-        "y2": 0.3476325273513794
-      },
-      "vision_selected": "B",
-      "vision_transcription": "חדא דבפ'",
-      "confidence": 0.98,
-      "reasoning": "The crop clearly displays 'חדא דבפ''. The second letter of the first word is a dalet ('ד'), not a resh ('ר'), as evidenced by its squared right shoulder. The second word begins with a dalet ('ד') followed by bet ('ב'), pe ('פ'), and an apostrophe/geresh ('''), forming the standard Rabbinic abbreviation 'דבפ'' ('דבפרק' - 'that in the chapter of'). This perfectly matches the context 'חדא דבפ' הקומץ'.",
-      "vlm_reading": "חזא",
-      "surya_reading": "חדא",
-      "dicta_reading": "חדא",
-      "flag": "current_text_confirmed"
     },
     {
       "word_index": 374,
@@ -12740,28 +12204,6 @@
       "cross_edition_engines": [],
       "same_edition_agreeing": 2,
       "abbreviation_shape": null,
-      "flag": "current_text_may_be_wrong"
-    },
-    {
-      "word_index": 518,
-      "opcode": "replace",
-      "docai_reading": "לו",
-      "docai_repaired": null,
-      "final_text": "לנו",
-      "page": 66,
-      "bbox": {
-        "x1": 0.7441285252571106,
-        "y1": 0.4055038392543793,
-        "x2": 0.7663782238960266,
-        "y2": 0.42250099778175354
-      },
-      "vision_selected": "A",
-      "vision_transcription": "לו",
-      "confidence": 0.95,
-      "reasoning": "In the target line of the crop (line 2), following 'ין', the text clearly shows the sequence 'ל' (Lamed) followed directly by 'ו' (Vav) forming 'לו' (or directly adjacent to 'ט'), without the additional letter 'נ' (Nun) required for 'לנו'. Thus, Option A accurately reflects the paleographic reading in the image crop.",
-      "vlm_reading": "לנו",
-      "surya_reading": "לנו",
-      "dicta_reading": "לנו",
       "flag": "current_text_may_be_wrong"
     },
     {
@@ -14340,28 +13782,6 @@
   ],
   "194": [
     {
-      "word_index": 136,
-      "opcode": "delete",
-      "docai_reading": "מתני",
-      "docai_repaired": null,
-      "final_text": null,
-      "page": 70,
-      "bbox": {
-        "x1": 0.7197768092155457,
-        "y1": 0.2117789387702942,
-        "x2": 0.7557346820831299,
-        "y2": 0.2271077036857605
-      },
-      "vision_selected": "A",
-      "vision_transcription": "מתני'",
-      "confidence": 0.98,
-      "reasoning": "The image clearly shows the word מתני' (abbreviation for מתניתין / mishna) in the center line, corresponding to the surrounding textual context 'על מתני' דנתן לחרש'.",
-      "vlm_reading": "מתני'",
-      "surya_reading": "מתני'",
-      "dicta_reading": "מתני'",
-      "flag": "possible_omission"
-    },
-    {
       "word_index": 232,
       "opcode": "replace",
       "docai_reading": null,
@@ -15468,30 +14888,6 @@
       "surya_reading": null,
       "dicta_reading": "מת",
       "flag": "current_text_confirmed"
-    }
-  ],
-  "210": [
-    {
-      "word_index": 73,
-      "opcode": "replace",
-      "docai_reading": "בתרייתא",
-      "docai_repaired": null,
-      "final_text": "כבתרייתא",
-      "page": 74,
-      "bbox": {
-        "x1": 0.2926980257034302,
-        "y1": 0.09098260849714279,
-        "x2": 0.3582920730113983,
-        "y2": 0.10756166279315948
-      },
-      "vision_selected": "UNCERTAIN",
-      "vision_transcription": "כתרייתא",
-      "confidence": 0.95,
-      "reasoning": "The image clearly displays the printed word 'כתרייתא' (with a missing 'ב' relative to the contextually expected 'כבתרייתא'). Since Option A ('בתרייתא') lacks the leading 'כ' and Option B ('כבתרייתא') includes a 'ב' not present in the raster crop, neither candidate string deterministically matches the exact printed pixel array.",
-      "vlm_reading": "בתרייתא",
-      "surya_reading": "כתרייתא",
-      "dicta_reading": "בתרייתא",
-      "flag": "ambiguous"
     }
   ],
   "211": [
@@ -21524,6 +20920,140 @@
       "flag": "current_text_may_be_wrong"
     }
   ],
+  "163": [
+    {
+      "word_index": 12,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "ר\"ג",
+      "page": 59,
+      "bbox": {
+        "x1": 0.2714373767375946,
+        "y1": 0.5742092728614807,
+        "x2": 0.2924121022224426,
+        "y2": 0.5916463732719421
+      },
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Multi-witness consensus: dicta + vlm agree on 'י\"ג' against stored 'ר\"ג'. NOTE: this is a CROSS-EDITION consensus - dicta read the Jerusalem 1975/6 printing, not this Berlin scan. Only ONE engine that read THIS scan differs from the corpus here, so a difference between the two printings is a live explanation - check the ink.",
+      "vlm_reading": "י\"ג",
+      "surya_reading": null,
+      "dicta_reading": "י\"ג",
+      "consensus_engines": [
+        "dicta",
+        "vlm"
+      ],
+      "consensus_reading": "י\"ג",
+      "ligature_artifact": null,
+      "cross_edition": true,
+      "cross_edition_engines": [
+        "dicta"
+      ],
+      "same_edition_agreeing": 1,
+      "abbreviation_shape": null,
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 133,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "דוה",
+      "page": 59,
+      "bbox": {
+        "x1": 0.7353485226631165,
+        "y1": 0.6938361525535583,
+        "x2": 0.7600246667861938,
+        "y2": 0.7100567817687988
+      },
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Multi-witness consensus: dicta + vlm agree on 'הוה' against stored 'דוה'. NOTE: this is a CROSS-EDITION consensus - dicta read the Jerusalem 1975/6 printing, not this Berlin scan. Only ONE engine that read THIS scan differs from the corpus here, so a difference between the two printings is a live explanation - check the ink.",
+      "vlm_reading": "הוה",
+      "surya_reading": null,
+      "dicta_reading": "הוה",
+      "consensus_engines": [
+        "dicta",
+        "vlm"
+      ],
+      "consensus_reading": "הוה",
+      "ligature_artifact": null,
+      "cross_edition": true,
+      "cross_edition_engines": [
+        "dicta"
+      ],
+      "same_edition_agreeing": 1,
+      "abbreviation_shape": null,
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 461,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "דוה",
+      "page": 60,
+      "bbox": {
+        "x1": 0.1699751913547516,
+        "y1": 0.18097540736198425,
+        "x2": 0.1947890818119049,
+        "y2": 0.19871020317077637
+      },
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Multi-witness consensus: dicta + vlm agree on 'הוה' against stored 'דוה'. NOTE: this is a CROSS-EDITION consensus - dicta read the Jerusalem 1975/6 printing, not this Berlin scan. Only ONE engine that read THIS scan differs from the corpus here, so a difference between the two printings is a live explanation - check the ink.",
+      "vlm_reading": "הוה",
+      "surya_reading": "הזה",
+      "dicta_reading": "הוה",
+      "consensus_engines": [
+        "dicta",
+        "vlm"
+      ],
+      "consensus_reading": "הוה",
+      "ligature_artifact": null,
+      "cross_edition": true,
+      "cross_edition_engines": [
+        "dicta"
+      ],
+      "same_edition_agreeing": 1,
+      "abbreviation_shape": null,
+      "flag": "current_text_may_be_wrong"
+    },
+    {
+      "word_index": 512,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "דס'",
+      "page": 60,
+      "bbox": {
+        "x1": 0.8182381987571716,
+        "y1": 0.24264410138130188,
+        "x2": 0.8405707478523254,
+        "y2": 0.25916969776153564
+      },
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Multi-witness consensus: dicta + vlm agree on 'דפ'' against stored 'דס''. NOTE: this is a CROSS-EDITION consensus - dicta read the Jerusalem 1975/6 printing, not this Berlin scan. Only ONE engine that read THIS scan differs from the corpus here, so a difference between the two printings is a live explanation - check the ink.",
+      "vlm_reading": "דפ'",
+      "surya_reading": null,
+      "dicta_reading": "דפ'",
+      "consensus_engines": [
+        "dicta",
+        "vlm"
+      ],
+      "consensus_reading": "דפ'",
+      "ligature_artifact": null,
+      "cross_edition": true,
+      "cross_edition_engines": [
+        "dicta"
+      ],
+      "same_edition_agreeing": 1,
+      "abbreviation_shape": null,
+      "flag": "current_text_may_be_wrong"
+    }
+  ],
   "165": [
     {
       "word_index": 17,
@@ -21590,62 +21120,6 @@
         "dicta"
       ],
       "same_edition_agreeing": 1,
-      "abbreviation_shape": null,
-      "flag": "current_text_may_be_wrong"
-    }
-  ],
-  "172": [
-    {
-      "word_index": 82,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "ושארי",
-      "page": 64,
-      "bbox": {
-        "x1": 0.8469135761260986,
-        "y1": 0.4688006341457367,
-        "x2": 0.8932098746299744,
-        "y2": 0.48743921518325806
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Lexical defect: stored 'ושארי' has NO attestation in the independent reference corpus and occurs 1x here, while 'ושאר' is attested 642x and is one extra_char away. Found by tools/detect_insertion_deletion.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
-      "vlm_reading": null,
-      "dicta_reading": null,
-      "surya_reading": null,
-      "lexical_proposal": "ושאר",
-      "lexical_source": "detect_insertion_deletion.py",
-      "flag": "current_text_may_be_wrong"
-    },
-    {
-      "word_index": 139,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "מחכירו",
-      "page": 64,
-      "bbox": {
-        "x1": 0.3641975224018097,
-        "y1": 0.5174230337142944,
-        "x2": 0.41913580894470215,
-        "y2": 0.5332252979278564
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: surya + vlm agree on 'מחבירו' against stored 'מחכירו'.",
-      "vlm_reading": "מחבירו",
-      "surya_reading": "מחבירו",
-      "dicta_reading": null,
-      "consensus_engines": [
-        "surya",
-        "vlm"
-      ],
-      "consensus_reading": "מחבירו",
-      "ligature_artifact": null,
-      "cross_edition": false,
-      "cross_edition_engines": [],
-      "same_edition_agreeing": 2,
       "abbreviation_shape": null,
       "flag": "current_text_may_be_wrong"
     }
@@ -21786,6 +21260,31 @@
       ],
       "same_edition_agreeing": 1,
       "abbreviation_shape": null,
+      "flag": "current_text_may_be_wrong"
+    }
+  ],
+  "172": [
+    {
+      "word_index": 82,
+      "opcode": "replace",
+      "docai_reading": null,
+      "final_text": "ושארי",
+      "page": 64,
+      "bbox": {
+        "x1": 0.8469135761260986,
+        "y1": 0.4688006341457367,
+        "x2": 0.8932098746299744,
+        "y2": 0.48743921518325806
+      },
+      "vision_selected": null,
+      "vision_transcription": null,
+      "confidence": null,
+      "reasoning": "Lexical defect: stored 'ושארי' has NO attestation in the independent reference corpus and occurs 1x here, while 'ושאר' is attested 642x and is one extra_char away. Found by tools/detect_insertion_deletion.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
+      "vlm_reading": null,
+      "dicta_reading": null,
+      "surya_reading": null,
+      "lexical_proposal": "ושאר",
+      "lexical_source": "detect_insertion_deletion.py",
       "flag": "current_text_may_be_wrong"
     }
   ]

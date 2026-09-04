@@ -11827,37 +11827,6 @@
       }
     }
   ],
-  "172": [
-    {
-      "klal_id": 172,
-      "word_index": 139,
-      "opcode": "replace",
-      "final_text": "מחכירו",
-      "consensus_reading": "מחבירו",
-      "agreeing_engines": [
-        "surya",
-        "vlm"
-      ],
-      "ligature_artifact": null,
-      "cross_edition": false,
-      "cross_edition_engines": [],
-      "same_edition_agreeing": 2,
-      "abbreviation_shape": null,
-      "witnesses": {
-        "docai": null,
-        "vlm": "מחבירו",
-        "surya": "מחבירו",
-        "dicta": null
-      },
-      "page": 64,
-      "bbox": {
-        "x1": 0.3641975224018097,
-        "y1": 0.5174230337142944,
-        "x2": 0.41913580894470215,
-        "y2": 0.5332252979278564
-      }
-    }
-  ],
   "175": [
     {
       "klal_id": 175,
@@ -11951,37 +11920,6 @@
         "x2": 0.8975308537483215,
         "y2": 0.8525121808052063
       }
-    },
-    {
-      "klal_id": 175,
-      "word_index": 168,
-      "opcode": "replace",
-      "final_text": "מיה",
-      "consensus_reading": "מ\"ה",
-      "agreeing_engines": [
-        "dicta",
-        "surya"
-      ],
-      "ligature_artifact": null,
-      "cross_edition": true,
-      "cross_edition_engines": [
-        "dicta"
-      ],
-      "same_edition_agreeing": 1,
-      "abbreviation_shape": null,
-      "witnesses": {
-        "docai": null,
-        "vlm": "ס\"ה",
-        "surya": "מ\"ה",
-        "dicta": "מ\"ה"
-      },
-      "page": 64,
-      "bbox": {
-        "x1": 0.44876542687416077,
-        "y1": 0.8824959397315979,
-        "x2": 0.47962963581085205,
-        "y2": 0.8991085886955261
-      }
     }
   ],
   "176": [
@@ -12044,37 +11982,6 @@
         "y1": 0.11978955566883087,
         "x2": 0.6625463366508484,
         "y2": 0.13719141483306885
-      }
-    },
-    {
-      "klal_id": 176,
-      "word_index": 214,
-      "opcode": "replace",
-      "final_text": "והכ\"ם",
-      "consensus_reading": "והכ\"מ",
-      "agreeing_engines": [
-        "dicta",
-        "vlm"
-      ],
-      "ligature_artifact": null,
-      "cross_edition": true,
-      "cross_edition_engines": [
-        "dicta"
-      ],
-      "same_edition_agreeing": 1,
-      "abbreviation_shape": null,
-      "witnesses": {
-        "docai": null,
-        "vlm": "והכ\"מ",
-        "surya": null,
-        "dicta": "והכ\"מ"
-      },
-      "page": 65,
-      "bbox": {
-        "x1": 0.20828182995319366,
-        "y1": 0.2703358829021454,
-        "x2": 0.2533992528915405,
-        "y2": 0.28692835569381714
       }
     },
     {

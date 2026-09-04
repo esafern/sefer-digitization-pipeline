@@ -3534,12 +3534,19 @@ def test_the_final_klalim_keep_their_label_when_they_cannot_reach_the_top(server
     page.click(f"#nav-{last}", timeout=5000)
     page.wait_for_timeout(2500)
 
-    settled = _settle(page, "Math.round(document.getElementById('text-scroll').scrollTop)")
-    page.wait_for_timeout(700)
-    again = page.evaluate("Math.round(document.getElementById('text-scroll').scrollTop)")
+    # SETTLE TWICE rather than sampling a fixed delay after settling once.
+    # FIXED 2026-09-04: this used `_settle(...)` then a flat 700ms wait, which
+    # passed alone and in this file but failed in the FULL suite - under that
+    # load a ~1.5s smooth scroll had not finished inside the window, so the test
+    # was measuring the animation rather than the re-seat. Re-settling asserts
+    # the same property (the pane stops and stays stopped) without depending on
+    # how busy the machine is.
+    read = "Math.round(document.getElementById('text-scroll').scrollTop)"
+    settled = _settle(page, read)
+    again = _settle(page, read)
     assert abs(again - settled) <= 2, (
-        f"the text pane is still moving after it settled ({settled} -> {again}) - "
-        f"the re-seat is fighting a container that cannot scroll any further")
+        f"the text pane settled at {settled} and then moved to {again} - the "
+        f"re-seat is fighting a container that cannot scroll any further")
 
     # DELIBERATELY NOT ASSERTED: which klal the nav highlights after this jump.
     # It is not the one clicked - measured 2026-09-04, jumping to 222 leaves the
@@ -3748,4 +3755,45 @@ def test_one_word_of_a_multi_word_span_can_be_deleted_on_its_own(server, page):
         assert page.locator("#disputed-panel .span-del-btn").count() == 0, (
             "a single-word span offers a per-word delete, which is just the "
             "whole-span answer wearing a different control")
+    assert page.test_errors == []
+
+
+def test_the_end_of_corpus_label_hold_releases_when_you_scroll_away(server, page):
+    """The other half of endClampKlalId, and the half a mutation showed nothing
+    covered.
+
+    At the end of the corpus the container clamps and a jump cannot put its
+    destination on the reading line - measured 2026-09-04, klal 219 lands at top
+    -246px because klalim 219-222 are 1,086px of content in a 954px pane. The
+    label is held there so the index says the klal the reviewer actually asked
+    for. But a hold that never lets go is its own bug: scroll back up and the
+    index would still claim a klal you left.
+
+    Asserted by scrolling, because "it releases" is a behaviour and not a flag.
+    A hold-forever mutation passes every other test in this file.
+    """
+    _open_dashboard(page, server, klal_id=1)
+    last = max(k["klal_id"] for k in _get_json(server, "/api/klalim?part=1"))
+    page.eval_on_selector(f"#nav-{last - 3}", "el => el.click()")
+    page.wait_for_timeout(2500)
+
+    at_end = page.evaluate("""() => {
+        const t = document.getElementById('text-scroll');
+        return { active: document.querySelector('.nav-item.active')?.id,
+                 atEnd: t.scrollTop + t.clientHeight >= t.scrollHeight - 2 };
+    }""")
+    if not at_end["atEnd"]:
+        import pytest
+        pytest.skip("this corpus does not clamp on that jump - nothing to release")
+    assert at_end["active"] == f"nav-{last - 3}", (
+        f"the jump did not hold its own klal: {at_end}")
+
+    # Scroll well away from the end - the geometry must take over again.
+    page.evaluate("() => { document.getElementById('text-scroll').scrollTop = 0; }")
+    page.wait_for_timeout(700)
+    after = page.evaluate("document.querySelector('.nav-item.active')?.id")
+    assert after != f"nav-{last - 3}", (
+        f"the index still claims {after} after scrolling to the top - the "
+        f"end-of-corpus hold never releases, so it now lies in the other "
+        f"direction")
     assert page.test_errors == []

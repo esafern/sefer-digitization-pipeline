@@ -41,6 +41,7 @@ import assemble_corrections_dataset as acd  # noqa: E402
 import audit_applied_decisions as aad  # noqa: E402
 import build_corrections_dataset as bcd  # noqa: E402
 import build_collation_report as bcr  # noqa: E402
+import close_satisfied_rulings as csr  # noqa: E402
 import build_gematria_trace as bgt  # noqa: E402
 import build_klal_page_regions as bkpr  # noqa: E402
 import check_klal_token_orphans as ckto  # noqa: E402
@@ -6669,3 +6670,69 @@ def test_the_assembler_carries_cross_edition_marking_down_BOTH_write_paths():
         assert "different edition" in entry.get("reasoning", "").lower() or \
                "CROSS-EDITION" in entry.get("reasoning", ""), \
             f"{label}: the note must say a different printing is involved"
+
+
+# --- Closing rulings the corpus already satisfied -----------------------------
+
+def _ruling(wi, chosen, original=None, bbox=None, page=None):
+    snap = {"original_word": original} if original is not None else {}
+    if bbox is not None:
+        snap.update(bbox=bbox, page=page)
+    return {"klal_id": 1, "word_index": wi, "chosen_text": chosen,
+            "candidate_snapshot": snap}
+
+
+def test_a_ruling_is_only_closed_when_the_corpus_really_holds_its_text():
+    """tools/close_satisfied_rulings.py writes an `apply_event`, which asserts
+    "this decision is in the corpus". It may only do that when it is true."""
+    words = "אלף בית גימל".split()
+    v, _ = csr.classify(_ruling(1, "בית", original="בית"), words, None, {})
+    assert v == "confirmation", "the reviewer chose the word already there"
+    v, why = csr.classify(_ruling(1, "דלת", original="בית"), words, None, {})
+    assert v is None and "does not hold" in why, (
+        "the corpus holds 'בית' at w1, not 'דלת' - closing this would claim a "
+        "correction had landed when it had not")
+
+
+def test_a_repeated_word_is_not_closed_on_the_text_alone():
+    """THE ALIASING TRAP, and the reason this tool has three tiers. After a shift
+    an index can land on a DIFFERENT instance of the same word - `אליבא` occurs
+    11 times in klal 91, `מתני'` 6 times in klal 194 - so "w453 holds אליבא" is
+    not evidence that THIS ruling's אליבא is the one sitting there.
+
+    Measured on the real ledger when the tool was written: 17 of 39 candidates
+    were repeated-word cases, 14 corroborated by the ink and 3 refused - and one
+    of the three, klal 66 w17, had its bbox resolve to w34. Closing that on the
+    text alone would have marked a ruling applied at a word it does not name.
+    """
+    words = "אלף בית גימל בית דלת".split()          # 'בית' twice
+    v, why = csr.classify(_ruling(3, "בית", original="אחר"), words, None, {})
+    assert v is None and "repeats" in why, (
+        "a repeated word was closed on a text match alone")
+
+    # Unique word, same shape -> closable, so the refusal above is about the
+    # REPETITION and not about corrections in general (Lesson 25: show the
+    # check can pass too).
+    v, _ = csr.classify(_ruling(4, "דלת", original="אחר"), words, None, {})
+    assert v == "unique", "a chosen word occurring once has nothing to alias onto"
+
+
+def test_the_ink_can_corroborate_a_repeated_word(monkeypatch):
+    """The third tier: a repeated word closes only if the recorded scan position
+    resolves to the SAME index. Two independent signals, the standing bar
+    (Lesson 9) - and the same one repoint_stale_decisions.py holds itself to."""
+    words = "אלף בית גימל בית דלת".split()
+    box = {"x1": 0.1, "y1": 0.1, "x2": 0.2, "y2": 0.2}
+    monkeypatch.setattr(csr.sa, "word_bboxes_resolved",
+                        lambda kid, w, regions: {3: (box, 7), 1: ({"x1": 0.8, "y1": 0.8,
+                                                                  "x2": 0.9, "y2": 0.9}, 7)})
+    v, why = csr.classify(_ruling(3, "בית", original="אחר", bbox=box, page=7),
+                          words, None, {})
+    assert v == "bbox", f"the ink names w3 and the ruling is at w3: {why}"
+
+    # ...and when the ink names a DIFFERENT word, it must refuse. This is the
+    # klal 66 w17 case, where the bbox resolved to w34.
+    v, why = csr.classify(_ruling(1, "בית", original="אחר", bbox=box, page=7),
+                          words, None, {})
+    assert v is None and "w3" in why, (
+        f"the ink puts this ruling at w3 but it was closed at w1: {why}")

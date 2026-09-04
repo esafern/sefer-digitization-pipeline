@@ -1,11 +1,11 @@
 {
-  "total": 103,
+  "total": 108,
   "counts": {
     "recoverable": 0,
-    "bbox-only": 22,
-    "text-only": 27,
+    "bbox-only": 25,
+    "text-only": 28,
     "conflict": 4,
-    "ambiguous": 31,
+    "ambiguous": 32,
     "no-evidence": 19
   },
   "rulings": [
@@ -238,6 +238,42 @@
       "word_at_recorded_index": "פ\"ד"
     },
     {
+      "decision_id": "2e7cc5268eaf",
+      "decision_type": "disputed_choice",
+      "klal_id": 171,
+      "recorded_word_index": 116,
+      "new_word_index": 108,
+      "verdict": "bbox-only",
+      "why": "the scan position points at w108, but there is no text to check it against",
+      "ruled_on": null,
+      "chose": "דוכתי דבגמרא",
+      "word_at_recorded_index": "דוכתי"
+    },
+    {
+      "decision_id": "9b4ca31dce0e",
+      "decision_type": "disputed_choice",
+      "klal_id": 175,
+      "recorded_word_index": 173,
+      "new_word_index": 172,
+      "verdict": "bbox-only",
+      "why": "the scan position points at w172, but there is no text to check it against",
+      "ruled_on": null,
+      "chose": "",
+      "word_at_recorded_index": null
+    },
+    {
+      "decision_id": "7a99cc31a0ed",
+      "decision_type": "disputed_choice",
+      "klal_id": 176,
+      "recorded_word_index": 277,
+      "new_word_index": 260,
+      "verdict": "bbox-only",
+      "why": "the scan position points at w260, but there is no text to check it against",
+      "ruled_on": "חדא דבפ'",
+      "chose": "חדא דבפ'",
+      "word_at_recorded_index": "חדא"
+    },
+    {
       "decision_id": "35d5a424ca7b",
       "decision_type": "disputed_choice",
       "klal_id": 177,
@@ -284,6 +320,18 @@
       "ruled_on": "לכן",
       "chose": "לכו",
       "word_at_recorded_index": "דוכתי"
+    },
+    {
+      "decision_id": "2d376f761455",
+      "decision_type": "manual_correction",
+      "klal_id": 35,
+      "recorded_word_index": 44,
+      "new_word_index": 54,
+      "verdict": "text-only",
+      "why": "the text matches once, at w54, but nothing corroborates it",
+      "ruled_on": "בספר",
+      "chose": "",
+      "word_at_recorded_index": "שמות"
     },
     {
       "decision_id": "c46cc56d3923",
@@ -598,16 +646,16 @@
       "word_at_recorded_index": null
     },
     {
-      "decision_id": "66bdf1a385b4",
+      "decision_id": "b31859365c12",
       "decision_type": "disputed_choice",
       "klal_id": 35,
       "recorded_word_index": 44,
       "new_word_index": null,
       "verdict": "conflict",
-      "why": "the scan position says w66 and the text says [45]",
-      "ruled_on": "בספר שמות",
-      "chose": "שמות",
-      "word_at_recorded_index": "בספר"
+      "why": "the scan position says w65 and the text says [54]",
+      "ruled_on": "בספר",
+      "chose": "בספר שמות",
+      "word_at_recorded_index": "שמות"
     },
     {
       "decision_id": "71200d4af5e2",
@@ -944,6 +992,18 @@
       "ruled_on": "איבא",
       "chose": "אליבא",
       "word_at_recorded_index": "ורבא"
+    },
+    {
+      "decision_id": "d45fd2cc473d",
+      "decision_type": "disputed_choice",
+      "klal_id": 174,
+      "recorded_word_index": 116,
+      "new_word_index": null,
+      "verdict": "ambiguous",
+      "why": "the text matches at [18, 135] and nothing chooses between them",
+      "ruled_on": null,
+      "chose": "אלא",
+      "word_at_recorded_index": "לא"
     },
     {
       "decision_id": "06eef5c4a9ea",
