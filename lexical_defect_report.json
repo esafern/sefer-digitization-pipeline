@@ -356,22 +356,6 @@
   "corpus_count": 1
  },
  {
-  "klal_id": 13,
-  "word_index": 231,
-  "stored": "זוהה",
-  "proposals": [
-   {
-    "form": "והה",
-    "ref_count": 679,
-    "edit": "extra_char"
-   }
-  ],
-  "detector": "insertion_deletion",
-  "ambiguous": false,
-  "rank": 679,
-  "corpus_count": 1
- },
- {
   "klal_id": 19,
   "word_index": 200,
   "stored": "להפרי",
@@ -1926,27 +1910,6 @@
  },
  {
   "klal_id": 88,
-  "word_index": 1121,
-  "stored": "ובאכל",
-  "proposals": [
-   {
-    "form": "ובכל",
-    "ref_count": 508,
-    "edit": "extra_char"
-   },
-   {
-    "form": "ואכל",
-    "ref_count": 477,
-    "edit": "extra_char"
-   }
-  ],
-  "detector": "insertion_deletion",
-  "ambiguous": true,
-  "rank": 508,
-  "corpus_count": 1
- },
- {
-  "klal_id": 88,
   "word_index": 1133,
   "stored": "דאומנין",
   "proposals": [
@@ -2671,22 +2634,6 @@
   "detector": "substitution",
   "ambiguous": false,
   "rank": 60,
-  "corpus_count": 1
- },
- {
-  "klal_id": 148,
-  "word_index": 227,
-  "stored": "וכמרדכי",
-  "proposals": [
-   {
-    "form": "ומרדכי",
-    "ref_count": 239,
-    "edit": "extra_char"
-   }
-  ],
-  "detector": "insertion_deletion",
-  "ambiguous": false,
-  "rank": 239,
   "corpus_count": 1
  },
  {
@@ -3490,7 +3437,23 @@
   "detector": "substitution",
   "ambiguous": false,
   "rank": 42,
-  "corpus_count": 3
+  "corpus_count": 2
+ },
+ {
+  "klal_id": 169,
+  "word_index": 382,
+  "stored": "איהן",
+  "proposals": [
+   {
+    "form": "אין",
+    "ref_count": 33339,
+    "edit": "extra_char"
+   }
+  ],
+  "detector": "insertion_deletion",
+  "ambiguous": false,
+  "rank": 33339,
+  "corpus_count": 2
  },
  {
   "klal_id": 169,
@@ -3686,7 +3649,7 @@
  },
  {
   "klal_id": 177,
-  "word_index": 308,
+  "word_index": 310,
   "stored": "שטתה",
   "proposals": [
    {
@@ -3702,7 +3665,7 @@
  },
  {
   "klal_id": 177,
-  "word_index": 340,
+  "word_index": 342,
   "stored": "למיפך",
   "proposals": [
    {
@@ -3718,7 +3681,7 @@
  },
  {
   "klal_id": 177,
-  "word_index": 480,
+  "word_index": 482,
   "stored": "דמתניין",
   "proposals": [
    {
@@ -3734,7 +3697,7 @@
  },
  {
   "klal_id": 177,
-  "word_index": 548,
+  "word_index": 550,
   "stored": "מתניי",
   "proposals": [
    {
@@ -3750,7 +3713,7 @@
  },
  {
   "klal_id": 177,
-  "word_index": 548,
+  "word_index": 550,
   "stored": "מתניי",
   "proposals": [
    {
@@ -3874,65 +3837,23 @@
   "detector": "substitution",
   "ambiguous": false,
   "rank": 42,
-  "corpus_count": 3
+  "corpus_count": 2
  },
  {
-  "klal_id": 194,
-  "word_index": 238,
-  "stored": "שכתכ",
-  "proposals": [
-   {
-    "form": "שכתב",
-    "ref_count": 636,
-    "edit": null
-   }
-  ],
-  "detector": "substitution",
-  "ambiguous": false,
-  "rank": 636,
-  "corpus_count": 1
- },
- {
-  "klal_id": 194,
-  "word_index": 293,
+  "klal_id": 193,
+  "word_index": 112,
   "stored": "איהן",
   "proposals": [
    {
-    "form": "איתן",
-    "ref_count": 42,
-    "edit": null
+    "form": "אין",
+    "ref_count": 33339,
+    "edit": "extra_char"
    }
   ],
-  "detector": "substitution",
+  "detector": "insertion_deletion",
   "ambiguous": false,
-  "rank": 42,
-  "corpus_count": 3
- },
- {
-  "klal_id": 194,
-  "word_index": 329,
-  "stored": "הלי",
-  "proposals": [
-   {
-    "form": "דלי",
-    "ref_count": 114,
-    "edit": null
-   },
-   {
-    "form": "תלי",
-    "ref_count": 66,
-    "edit": null
-   },
-   {
-    "form": "חלי",
-    "ref_count": 44,
-    "edit": null
-   }
-  ],
-  "detector": "substitution",
-  "ambiguous": true,
-  "rank": 114,
-  "corpus_count": 1
+  "rank": 33339,
+  "corpus_count": 2
  },
  {
   "klal_id": 196,

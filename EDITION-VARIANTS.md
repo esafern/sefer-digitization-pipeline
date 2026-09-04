@@ -8,9 +8,9 @@ Only positions where **every Berlin-reading engine agrees with the corpus** are 
 
 | | |
 |---|---:|
-| expansions found | 74 |
-| klalim they fall in | 48 |
-| …whose expanded form is attested in independent Hebrew | 67 of 74 (91%) |
+| expansions found | 75 |
+| klalim they fall in | 49 |
+| …whose expanded form is attested in independent Hebrew | 68 of 75 (91%) |
 
 
 ### klal 1
@@ -186,6 +186,10 @@ Only positions where **every Berlin-reading engine agrees with the corpus** are 
 
 - word 431: Berlin הירבד' - Jerusalem םהירבד (attested 310 times)
 - word 795: Berlin כיאו' - Jerusalem אכיאו (attested 1,005 times)
+
+### klal 168
+
+- word 455: Berlin ליחמה' - Jerusalem הליחמה (attested 14 times)
 
 ### klal 169
 

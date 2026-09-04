@@ -1,12 +1,12 @@
 {
-  "total": 97,
+  "total": 103,
   "counts": {
     "recoverable": 0,
-    "bbox-only": 18,
+    "bbox-only": 22,
     "text-only": 27,
-    "conflict": 3,
+    "conflict": 4,
     "ambiguous": 31,
-    "no-evidence": 18
+    "no-evidence": 19
   },
   "rulings": [
     {
@@ -46,6 +46,30 @@
       "word_at_recorded_index": "מקומו"
     },
     {
+      "decision_id": "4ae83494e3e6",
+      "decision_type": "disputed_choice",
+      "klal_id": 13,
+      "recorded_word_index": 292,
+      "new_word_index": 266,
+      "verdict": "bbox-only",
+      "why": "the scan position points at w266, but there is no text to check it against",
+      "ruled_on": "יד",
+      "chose": "",
+      "word_at_recorded_index": null
+    },
+    {
+      "decision_id": "8fa38e13bb75",
+      "decision_type": "disputed_choice",
+      "klal_id": 18,
+      "recorded_word_index": 77,
+      "new_word_index": 56,
+      "verdict": "bbox-only",
+      "why": "the scan position points at w56, but there is no text to check it against",
+      "ruled_on": "יט",
+      "chose": "",
+      "word_at_recorded_index": null
+    },
+    {
       "decision_id": "977f364ac5e9",
       "decision_type": "disputed_choice",
       "klal_id": 35,
@@ -56,6 +80,18 @@
       "ruled_on": null,
       "chose": "",
       "word_at_recorded_index": "משמע"
+    },
+    {
+      "decision_id": "5ae1a13bd23b",
+      "decision_type": "disputed_choice",
+      "klal_id": 52,
+      "recorded_word_index": 71,
+      "new_word_index": 49,
+      "verdict": "bbox-only",
+      "why": "the scan position points at w49, but there is no text to check it against",
+      "ruled_on": "נג",
+      "chose": "",
+      "word_at_recorded_index": null
     },
     {
       "decision_id": "a2e9859dde2b",
@@ -200,6 +236,18 @@
       "ruled_on": null,
       "chose": "",
       "word_at_recorded_index": "פ\"ד"
+    },
+    {
+      "decision_id": "35d5a424ca7b",
+      "decision_type": "disputed_choice",
+      "klal_id": 177,
+      "recorded_word_index": 178,
+      "new_word_index": 178,
+      "verdict": "bbox-only",
+      "why": "the scan position points at w178, but there is no text to check it against",
+      "ruled_on": null,
+      "chose": "הרמ\"ז על",
+      "word_at_recorded_index": "הרמ\"ז"
     },
     {
       "decision_id": "939ce5f5b841",
@@ -586,6 +634,18 @@
       "word_at_recorded_index": "ה'"
     },
     {
+      "decision_id": "a8519106a1eb",
+      "decision_type": "disputed_choice",
+      "klal_id": 74,
+      "recorded_word_index": 203,
+      "new_word_index": null,
+      "verdict": "conflict",
+      "why": "the scan position says w203 and the text says [319, 915]",
+      "ruled_on": "דגם",
+      "chose": "דגם",
+      "word_at_recorded_index": "הגם"
+    },
+    {
       "decision_id": "cd67d854a7c5",
       "decision_type": "manual_correction",
       "klal_id": 39,
@@ -968,6 +1028,18 @@
       "ruled_on": null,
       "chose": "איידי דקתני במתניתין ואינו עובר עליו נקט נמי בברייתא הכי :",
       "word_at_recorded_index": "איידי"
+    },
+    {
+      "decision_id": "3fccd1284deb",
+      "decision_type": "manual_correction",
+      "klal_id": 15,
+      "recorded_word_index": 26,
+      "new_word_index": null,
+      "verdict": "no-evidence",
+      "why": "no scan position recorded and the word is nowhere in the klal",
+      "ruled_on": "פז",
+      "chose": "",
+      "word_at_recorded_index": null
     },
     {
       "decision_id": "60a17ad89fb2",

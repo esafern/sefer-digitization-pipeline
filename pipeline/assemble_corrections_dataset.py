@@ -544,11 +544,27 @@ def main():
     # the same question back in front of them. That is item 35's defect one layer
     # below where it was fixed - the generator was taught, the assembler was not.
     n_settled_dropped = 0
+    n_unaddressable = 0
     settled = bcd.settled_by_an_applied_decision({k["klal_id"]: k for k in part1})
     for c in verified:
         if (c["klal_id"], c.get("word_index_in_final_text")) in settled:
             n_settled_dropped += 1
             continue
+        # A CANDIDATE OUTSIDE ITS OWN KLAL IS NOT SERVEABLE, whatever else is
+        # true of it. corrections_verified_part1.json is cumulative, so an entry
+        # whose word was later DELETED keeps pointing at an index the klal no
+        # longer has - there is no word to crop, no word to highlight, and
+        # test_correction_word_index_points_inside_its_own_klal rejects it. The
+        # settled-check above is the root-cause fix and catches this one; this is
+        # the structural guard, so no future path can serve an unaddressable
+        # candidate even if it slips past that check. Dropped and COUNTED, never
+        # silently.
+        _kw = words_by_klal.get(c["klal_id"])
+        if _kw is not None:
+            _max = len(_kw) if c["opcode"] == "delete" else len(_kw) - 1
+            if not (0 <= c["word_index_in_final_text"] <= _max):
+                n_unaddressable += 1
+                continue
         drifted = check_drift(c, words_by_klal.get(c["klal_id"]))
         # Derived once and used twice - for the entry's own "docai_repaired" and
         # by _ligature_artifact_flag() below, which used to re-derive it from the
@@ -618,6 +634,9 @@ def main():
     for entries in by_klal.values():
         for e in entries:
             flags[e["flag"]] = flags.get(e["flag"], 0) + 1
+    if n_unaddressable:
+        print(f"  {n_unaddressable} verified entry(ies) dropped: word_index points outside the "
+              f"klal, which happens when the word they name was deleted from the corpus")
     if n_settled_dropped:
         print(f"  {n_settled_dropped} verified entry(ies) dropped: a human decision was already "
               f"APPLIED at that word, so re-serving it would ask them to rule on their own fix")

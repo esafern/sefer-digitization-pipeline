@@ -1,7 +1,7 @@
 {
  "field": "title",
  "klalim_scanned": 222,
- "title_words": 1214,
+ "title_words": 1211,
  "prefix_divergences": [
   {
    "klal_id": 9,
@@ -448,12 +448,6 @@
    "shared_first_word": "הלכה",
    "stored_heading_words": 5,
    "stored_heading": "הלכה כרב באיסורי וכשמואל בדיני."
-  },
-  {
-   "klal_id": 168,
-   "shared_first_word": "הלכה",
-   "stored_heading_words": 5,
-   "stored_heading": "הלכה כבתראי מאביי ורבא ואילך."
   },
   {
    "klal_id": 172,

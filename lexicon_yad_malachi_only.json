@@ -1290,6 +1290,43 @@
   ]
  },
  {
+  "word": "והכמ",
+  "count": 1,
+  "occurrences": [
+   [
+    2,
+    602
+   ]
+  ],
+  "nearest_attested": [
+   {
+    "form": "והכי",
+    "ref_count": 1667,
+    "edit": "substitution"
+   },
+   {
+    "form": "והכא",
+    "ref_count": 1206,
+    "edit": "substitution"
+   },
+   {
+    "form": "והכל",
+    "ref_count": 263,
+    "edit": "substitution"
+   },
+   {
+    "form": "והמ",
+    "ref_count": 192,
+    "edit": "deletion"
+   },
+   {
+    "form": "והכה",
+    "ref_count": 48,
+    "edit": "substitution"
+   }
+  ]
+ },
+ {
   "word": "בפרח",
   "count": 1,
   "occurrences": [
@@ -2364,44 +2401,12 @@
   ]
  },
  {
-  "word": "זוהה",
-  "count": 1,
-  "occurrences": [
-   [
-    13,
-    231
-   ]
-  ],
-  "nearest_attested": [
-   {
-    "form": "והה",
-    "ref_count": 679,
-    "edit": "deletion"
-   },
-   {
-    "form": "זונה",
-    "ref_count": 377,
-    "edit": "substitution"
-   },
-   {
-    "form": "זוכה",
-    "ref_count": 270,
-    "edit": "substitution"
-   },
-   {
-    "form": "שוהה",
-    "ref_count": 56,
-    "edit": "substitution"
-   }
-  ]
- },
- {
   "word": "שטתה",
   "count": 1,
   "occurrences": [
    [
     177,
-    308
+    310
    ]
   ],
   "nearest_attested": [
@@ -2524,23 +2529,6 @@
    {
     "form": "דהכל",
     "ref_count": 41,
-    "edit": "substitution"
-   }
-  ]
- },
- {
-  "word": "שכתכ",
-  "count": 1,
-  "occurrences": [
-   [
-    194,
-    238
-   ]
-  ],
-  "nearest_attested": [
-   {
-    "form": "שכתב",
-    "ref_count": 636,
     "edit": "substitution"
    }
   ]
@@ -3526,7 +3514,7 @@
   "occurrences": [
    [
     177,
-    480
+    482
    ]
   ],
   "nearest_attested": [
@@ -4880,7 +4868,7 @@
   "occurrences": [
    [
     177,
-    205
+    207
    ]
   ],
   "nearest_attested": [
@@ -6875,7 +6863,7 @@
   "occurrences": [
    [
     177,
-    502
+    504
    ]
   ],
   "nearest_attested": [
@@ -7231,23 +7219,6 @@
     "form": "דחבריה",
     "ref_count": 81,
     "edit": "substitution"
-   }
-  ]
- },
- {
-  "word": "שפתידם",
-  "count": 1,
-  "occurrences": [
-   [
-    194,
-    517
-   ]
-  ],
-  "nearest_attested": [
-   {
-    "form": "שפתים",
-    "ref_count": 87,
-    "edit": "deletion"
    }
   ]
  },
@@ -8419,23 +8390,6 @@
   ]
  },
  {
-  "word": "התוסי",
-  "count": 1,
-  "occurrences": [
-   [
-    52,
-    17
-   ]
-  ],
-  "nearest_attested": [
-   {
-    "form": "התוס",
-    "ref_count": 48,
-    "edit": "deletion"
-   }
-  ]
- },
- {
   "word": "ובכולי",
   "count": 1,
   "occurrences": [
@@ -8492,7 +8446,7 @@
   "occurrences": [
    [
     177,
-    314
+    316
    ]
   ],
   "nearest_attested": [
@@ -9135,7 +9089,7 @@
   "occurrences": [
    [
     177,
-    231
+    233
    ]
   ],
   "nearest_attested": []
@@ -9652,7 +9606,7 @@
   "occurrences": [
    [
     177,
-    443
+    445
    ]
   ],
   "nearest_attested": []
@@ -9894,7 +9848,7 @@
   "occurrences": [
    [
     177,
-    406
+    408
    ]
   ],
   "nearest_attested": []
@@ -10180,7 +10134,7 @@
   "occurrences": [
    [
     177,
-    484
+    486
    ]
   ],
   "nearest_attested": []
@@ -10279,7 +10233,7 @@
   "occurrences": [
    [
     177,
-    215
+    217
    ]
   ],
   "nearest_attested": []
@@ -10472,17 +10426,6 @@
   "nearest_attested": []
  },
  {
-  "word": "המחילי",
-  "count": 1,
-  "occurrences": [
-   [
-    168,
-    455
-   ]
-  ],
-  "nearest_attested": []
- },
- {
   "word": "המיעוטין",
   "count": 1,
   "occurrences": [
@@ -10543,7 +10486,7 @@
   "occurrences": [
    [
     177,
-    178
+    180
    ]
   ],
   "nearest_attested": []
@@ -11577,7 +11520,7 @@
   "occurrences": [
    [
     177,
-    421
+    423
    ]
   ],
   "nearest_attested": []
@@ -12089,17 +12032,6 @@
   "nearest_attested": []
  },
  {
-  "word": "כשמוץ",
-  "count": 1,
-  "occurrences": [
-   [
-    168,
-    501
-   ]
-  ],
-  "nearest_attested": []
- },
- {
   "word": "כשמכריע",
   "count": 1,
   "occurrences": [
@@ -12348,17 +12280,6 @@
    [
     150,
     183
-   ]
-  ],
-  "nearest_attested": []
- },
- {
-  "word": "לכותכם",
-  "count": 1,
-  "occurrences": [
-   [
-    168,
-    117
    ]
   ],
   "nearest_attested": []
@@ -13953,7 +13874,7 @@
   "occurrences": [
    [
     177,
-    572
+    574
    ]
   ],
   "nearest_attested": []
@@ -13970,6 +13891,47 @@
   "nearest_attested": []
  },
  {
+  "word": "איהן",
+  "count": 2,
+  "occurrences": [
+   [
+    169,
+    382
+   ],
+   [
+    193,
+    112
+   ]
+  ],
+  "nearest_attested": [
+   {
+    "form": "אין",
+    "ref_count": 33339,
+    "edit": "deletion"
+   },
+   {
+    "form": "אינן",
+    "ref_count": 1574,
+    "edit": "substitution"
+   },
+   {
+    "form": "איהו",
+    "ref_count": 714,
+    "edit": "substitution"
+   },
+   {
+    "form": "אילן",
+    "ref_count": 672,
+    "edit": "substitution"
+   },
+   {
+    "form": "אביהן",
+    "ref_count": 256,
+    "edit": "insertion"
+   }
+  ]
+ },
+ {
   "word": "מתניי",
   "count": 2,
   "occurrences": [
@@ -13979,7 +13941,7 @@
    ],
    [
     177,
-    548
+    550
    ]
   ],
   "nearest_attested": [
@@ -15689,7 +15651,7 @@
    ],
    [
     177,
-    193
+    195
    ]
   ],
   "nearest_attested": [
@@ -16264,7 +16226,7 @@
    ],
    [
     177,
-    397
+    399
    ]
   ],
   "nearest_attested": []
@@ -16410,11 +16372,11 @@
   "occurrences": [
    [
     177,
-    450
+    452
    ],
    [
     177,
-    456
+    458
    ]
   ],
   "nearest_attested": []
@@ -16594,7 +16556,7 @@
    ],
    [
     177,
-    569
+    571
    ]
   ],
   "nearest_attested": []
@@ -17333,51 +17295,6 @@
    ]
   ],
   "nearest_attested": []
- },
- {
-  "word": "איהן",
-  "count": 3,
-  "occurrences": [
-   [
-    169,
-    382
-   ],
-   [
-    193,
-    112
-   ],
-   [
-    194,
-    293
-   ]
-  ],
-  "nearest_attested": [
-   {
-    "form": "אין",
-    "ref_count": 33339,
-    "edit": "deletion"
-   },
-   {
-    "form": "אינן",
-    "ref_count": 1574,
-    "edit": "substitution"
-   },
-   {
-    "form": "איהו",
-    "ref_count": 714,
-    "edit": "substitution"
-   },
-   {
-    "form": "אילן",
-    "ref_count": 672,
-    "edit": "substitution"
-   },
-   {
-    "form": "אביהן",
-    "ref_count": 256,
-    "edit": "insertion"
-   }
-  ]
  },
  {
   "word": "הירו",
@@ -18461,11 +18378,11 @@
    ],
    [
     177,
-    274
+    276
    ],
    [
     177,
-    293
+    295
    ]
   ],
   "nearest_attested": []
@@ -18723,7 +18640,7 @@
   "occurrences": [
    [
     177,
-    554
+    556
    ],
    [
     178,
@@ -19516,7 +19433,7 @@
    ],
    [
     177,
-    574
+    576
    ],
    [
     197,
@@ -20817,11 +20734,11 @@
    ],
    [
     177,
-    426
+    428
    ],
    [
     177,
-    517
+    519
    ],
    [
     179,
@@ -21090,31 +21007,31 @@
    ],
    [
     177,
-    229
+    231
    ],
    [
     177,
-    303
+    305
    ],
    [
     177,
-    336
+    338
    ],
    [
     177,
-    392
+    394
    ],
    [
     177,
-    441
+    443
    ],
    [
     177,
-    481
+    483
    ],
    [
     177,
-    536
+    538
    ]
   ],
   "nearest_attested": []

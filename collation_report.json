@@ -897,6 +897,21 @@
    "actionable": false
   },
   {
+   "klal_id": 168,
+   "word_index": 455,
+   "this_edition": "המחיל'",
+   "other_edition": "המחילה",
+   "expansion_of": "המחיל",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 14,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
    "klal_id": 169,
    "word_index": 695,
    "this_edition": "החכמי'",

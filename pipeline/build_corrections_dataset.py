@@ -276,7 +276,30 @@ def settled_by_an_applied_decision(part1_by_id):
         words = cio.words_of(klal)
         wi = decision["word_index"]
         chosen = (decision.get("chosen_text") or "").split()
-        if chosen and words[wi:wi + len(chosen)] == chosen:
+        if chosen:
+            if words[wi:wi + len(chosen)] == chosen:
+                settled.add((decision["klal_id"], wi))
+            continue
+        # AN APPLIED DELETION IS ALSO SETTLED, and `if chosen` alone silently
+        # said it was not. A ruling that removes a word carries an EMPTY
+        # chosen_text, which is falsy, so every applied deletion fell straight
+        # through this check and its verified entry came back on the next
+        # rebuild. 35 applied decisions are in that state; most went unnoticed
+        # because their index stayed inside the klal and the entry merely
+        # re-asked a settled question (the very defect this function exists to
+        # stop). Klal 52 w71 is the one that could not hide: the word it removed
+        # was the LAST in the klal, so the returning entry pointed at index 71 of
+        # a 71-word klal and broke test_correction_word_index_points_inside_
+        # its_own_klal on the rebuild that followed applying it.
+        #
+        # "Still matches" for a deletion means the word is GONE. Checked against
+        # the word the decision actually named rather than assumed, so this keeps
+        # the self-healing property the docstring promises: if that word ever
+        # comes back to this position, the disagreement is real again and so is
+        # the candidate.
+        snap = decision.get("candidate_snapshot") or {}
+        removed = snap.get("final_text") or snap.get("original_word")
+        if removed and words[wi:wi + 1] != [removed]:
             settled.add((decision["klal_id"], wi))
     return settled
 
