@@ -3624,3 +3624,57 @@ def test_the_text_pane_head_stops_claiming_a_flag_the_index_has_cleared(server, 
         f"{cleared} - the two panes are reading the same payload and only one "
         f"of them took the new copy")
     assert page.test_errors == []
+
+
+def test_every_ruling_path_records_the_stable_half_of_its_address(server, page):
+    """REGRESSION 2026-09-04, found scoping the move to stable word addressing.
+
+    `word_occurrence` is the stable half of a ruling's address, added
+    2026-09-03. It went into the two snapshot builders written by hand here -
+    the title path and _manual_snapshot - and NOT into the dispute path, which
+    builds no snapshot at all: it stores the candidate entry from
+    corrections_part1.json verbatim, and that file has no such field. Measured
+    when this was written: 14 of 765 rulings carried the anchor, and the 751
+    without it were every dispute ever ruled. Lesson 34 exactly - the siblings
+    of a fix are where the fix is missing.
+
+    Why it is worth having: simulating one single-word insert/delete at every
+    position in Part 1, `word_index` loses 50.0% of the klal's addresses and
+    `(word, occurrence)` loses 0.18%. Today that difference is 68 rulings the
+    applier refuses and 103 the re-pointer cannot recover.
+
+    Driven through the HTTP endpoint, not the helper, because the defect was
+    never in the helper - it was that this path never called one.
+    """
+    klal_id = _find_disputed_klal()
+    assert klal_id is not None, "no disputed candidate exists to rule on"
+    corr = _get_json(server, f"/api/klal/{klal_id}")["corrections"]
+    target = next((c for c in corr
+                   if c.get("word_index") is not None and c.get("final_text")), None)
+    assert target, f"klal {klal_id} has no addressable candidate"
+    wi = target["word_index"]
+
+    status, rec = _post_json(server, "/api/decisions/disputed", {
+        "klal_id": klal_id, "word_index": wi,
+        "chosen_source": "final_text", "chosen_text": target["final_text"],
+        "note": "anchor regression probe",
+    })
+    assert status == 201, (status, rec)
+
+    snap = rec.get("candidate_snapshot") or {}
+    assert snap.get("word_occurrence") is not None, (
+        "a disputed_choice was recorded with no stable anchor - only its "
+        "word_index, which any earlier edit invalidates")
+    assert snap.get("original_word"), "the snapshot does not say which word was ruled on"
+
+    # The anchor must actually RESOLVE - an ordinal that does not find its own
+    # word is not an address, it is a number.
+    words = (_get_json(server, f"/api/klal/{klal_id}")["clean_text"]).split(" ")
+    hits = [i for i, w in enumerate(words) if w == snap["original_word"]]
+    assert len(hits) >= snap["word_occurrence"], (
+        f"occurrence {snap['word_occurrence']} of {snap['original_word']!r} does not "
+        f"exist in the klal ({len(hits)} found)")
+    assert hits[snap["word_occurrence"] - 1] == wi, (
+        f"the anchor resolves to w{hits[snap['word_occurrence'] - 1]}, not the w{wi} "
+        f"that was ruled on")
+    assert page.test_errors == []

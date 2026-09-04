@@ -1402,6 +1402,7 @@ def api_post_disputed_decision(body):
         raise ValueError("chosen_text is required (pass '' explicitly to reject)")
     corrections = _load_corrections().get(str(klal_id), [])
     snapshot = next((c for c in corrections if c["word_index"] == word_index), None)
+    snapshot = _with_stable_anchor(snapshot, klal_id, word_index)
     record = rd.append_decision(
         "disputed_choice",
         klal_id=klal_id,
@@ -1819,6 +1820,48 @@ def _shadowed_title_ruling_id(klal_id, word_index):
     """
     existing = rd.all_current("title_correction").get((klal_id, word_index))
     return existing["id"] if existing else None
+
+
+def _with_stable_anchor(snapshot, klal_id, word_index):
+    """Add `(word, occurrence)` to a snapshot that is about to be recorded.
+
+    THE ANCHOR EXISTED AND THIS PATH DID NOT WRITE IT. `word_occurrence` was
+    added 2026-09-03 as the stable half of a ruling's address, and it went into
+    the two snapshot builders that are written by hand here - the title path and
+    _manual_snapshot - but NOT into the dispute path, which does not build a
+    snapshot at all: it stores the candidate entry from corrections_part1.json
+    verbatim, and that file has no such field. Measured 2026-09-04: 14 of 765
+    rulings carry the anchor, and the 751 without it are every dispute ever
+    ruled. Lesson 34 - the siblings of a fix are where the fix is missing.
+
+    WHY THE ORDINAL IS WORTH A LINE OF CODE. Simulating one single-word
+    insert/delete at every position in Part 1 and counting the addresses it
+    invalidates: `word_index` loses 50.0% of them, `(word, occurrence)` loses
+    0.18%, a stable id would lose none. 47% of Part 1's word positions hold a
+    word that repeats inside its own klal, which is why the ordinal and not the
+    word alone. This does not replace the bbox the candidate already carries -
+    it is the second independent signal re-pointing needs (Lesson 9), and it
+    records what was RULED ON rather than asking where the word happens to be
+    now.
+
+    Non-destructive: a snapshot that already carries an anchor keeps it, and a
+    position that cannot be resolved records nothing rather than a guess.
+    """
+    if snapshot is None:
+        return None
+    if snapshot.get("word_occurrence") is not None:
+        return snapshot
+    klalim_by_id, _ = _load_klalim(part_num=_get_part_num_for_klal(klal_id))
+    klal = klalim_by_id.get(klal_id)
+    if not klal:
+        return snapshot
+    words = cio.words_of(klal)
+    if not (0 <= word_index < len(words)):
+        return snapshot          # an append-position `delete` names no word
+    snapshot = dict(snapshot)
+    snapshot["word_occurrence"] = cio.occurrence_of(words, word_index)
+    snapshot.setdefault("original_word", words[word_index])
+    return snapshot
 
 
 def _manual_snapshot(klal_id, word_index, original_word):
