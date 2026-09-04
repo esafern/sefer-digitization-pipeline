@@ -15,8 +15,8 @@
     "bbox_estimated": false,
     "vision_selected": "A",
     "vision_transcription": "ג",
-    "vision_confidence": 0.95,
-    "vision_reasoning": "The raster crop clearly displays the single Hebrew character 'ג' (Gimel), featuring its characteristic top head, vertical right stroke, and bottom leftward-pointing foot."
+    "vision_confidence": 0.98,
+    "vision_reasoning": "The image clearly contains a single Hebrew letter Gimel ('ג'). Option A correctly identifies this character."
   },
   {
     "klal_id": 4,
@@ -74,25 +74,6 @@
     "vision_transcription": "בהליכות",
     "vision_confidence": 0.98,
     "vision_reasoning": "The text clearly shows 'בהליכות' (referencing the classical rabbinic work 'הליכות עולם'). Paleographically, the second letter is a ה with a distinct top gap separating the left leg/roof, not a ח. OCR misread ה as ח."
-  },
-  {
-    "klal_id": 17,
-    "page": 20,
-    "opcode": "delete",
-    "word_index_in_final_text": 308,
-    "original_word": "יח",
-    "corrected_word": null,
-    "bbox": {
-      "x1": 0.8610591888427734,
-      "y1": 0.42369478940963745,
-      "x2": 0.8828660249710083,
-      "y2": 0.43253013491630554
-    },
-    "bbox_estimated": false,
-    "vision_selected": "A",
-    "vision_transcription": "יח",
-    "vision_confidence": 0.98,
-    "vision_reasoning": "The crop clearly displays two distinct Hebrew characters: a 'Yod' (י) on the right and a 'Chet' (ח) on the left, forming 'יח' (often a section/paragraph number in Rabbinic prints). Option A correctly captures this reading."
   },
   {
     "klal_id": 18,
@@ -720,44 +701,6 @@
     "vision_transcription": "נא",
     "vision_confidence": 0.98,
     "vision_reasoning": "The cropped image clearly shows the Hebrew characters Nun (נ) and Alef (א) forming the word 'נא', matching Candidate B and the end of the surrounding context text."
-  },
-  {
-    "klal_id": 52,
-    "page": 30,
-    "opcode": "insert",
-    "word_index_in_final_text": 0,
-    "original_word": null,
-    "corrected_word": "נב",
-    "bbox": {
-      "x1": 0.782418966293335,
-      "y1": 0.7106741666793823,
-      "x2": 0.9014962315559387,
-      "y2": 0.721508800983429
-    },
-    "bbox_estimated": true,
-    "vision_selected": "B",
-    "vision_transcription": "נב אמימר",
-    "vision_confidence": 0.98,
-    "vision_reasoning": "The crop clearly displays the Hebrew characters 'נב' followed by 'אמימר' on the main line. Option B correctly captures 'נב' which is fully visible at the right side of the line."
-  },
-  {
-    "klal_id": 52,
-    "page": 30,
-    "opcode": "insert",
-    "word_index_in_final_text": 71,
-    "original_word": null,
-    "corrected_word": "נג",
-    "bbox": {
-      "x1": 0.8990024924278259,
-      "y1": 0.7808988690376282,
-      "x2": 0.929002492427826,
-      "y2": 0.7985553741455078
-    },
-    "bbox_estimated": true,
-    "vision_selected": "B",
-    "vision_transcription": "נג",
-    "vision_confidence": 1.0,
-    "vision_reasoning": "The raster crop clearly displays the Hebrew letters 'נג' in the center, matching the adjudicated text in Option B and the provided surrounding text context."
   },
   {
     "klal_id": 57,
@@ -3214,25 +3157,6 @@
     "klal_id": 168,
     "page": 62,
     "opcode": "replace",
-    "word_index_in_final_text": 117,
-    "original_word": "לכותבם",
-    "corrected_word": "לכותכם",
-    "bbox": {
-      "x1": 0.22862453758716583,
-      "y1": 0.2991521954536438,
-      "x2": 0.2874844968318939,
-      "y2": 0.3169156312942505
-    },
-    "bbox_estimated": false,
-    "vision_selected": "B",
-    "vision_transcription": "לכותכם",
-    "vision_confidence": 0.95,
-    "vision_reasoning": "In the raster crop, the word following 'נלאיתי' clearly reads 'לכותכם'. The fifth letter between the 'ת' (tav) and 'ם' (final mem) features a rounded top-right corner identical to the 'כ' (kaf) earlier in the same word ('לכ...'), lacking the distinct horizontal base extension/sharp corner of a 'ב' (bet) seen in 'דביצה' on the line below. Thus, Option B ('לכותכם') correctly reflects the visible text."
-  },
-  {
-    "klal_id": 168,
-    "page": 62,
-    "opcode": "replace",
     "word_index_in_final_text": 234,
     "original_word": "י\"ך",
     "corrected_word": "י\"ד",
@@ -3325,63 +3249,6 @@
     "vision_reasoning": "The center line clearly shows the letters Samekh, Ayin, gershayim, and Dalet (\"סע\"ד\"). The final letter features a sharp upper-right corner characteristic of a Dalet ('ד'), rather than a curved Resh ('ר'). Contextually, \"סע\"ד\" is the standard Rabbinic abbreviation for 'סעיף ד'' (paragraph/section 4), corresponding to the citation format following the page reference 'דף ס\"ו'."
   },
   {
-    "klal_id": 168,
-    "page": 62,
-    "opcode": "replace",
-    "word_index_in_final_text": 501,
-    "original_word": "כשמול",
-    "corrected_word": "כשמוץ",
-    "bbox": {
-      "x1": 0.8042131066322327,
-      "y1": 0.6633023619651794,
-      "x2": 0.8587360382080078,
-      "y2": 0.6814695000648499
-    },
-    "bbox_estimated": false,
-    "vision_selected": "A",
-    "vision_transcription": "כשמול",
-    "vision_confidence": 0.98,
-    "vision_reasoning": "The context discusses halakhic rulings following Shmuel over Rav ('סברי כשמואל כוותיה פסקינן לגבי רב'). The image clearly shows the word 'כשמול' (a defective spelling of 'כשמואל') with the final letter having a prominent ascending upper stroke characteristic of a Lamed (ל). Option B ('כשמוץ') is a contextually nonsensical transcription error."
-  },
-  {
-    "klal_id": 168,
-    "page": 62,
-    "opcode": "replace",
-    "word_index_in_final_text": 515,
-    "original_word": "נגר",
-    "corrected_word": "נגד",
-    "bbox": {
-      "x1": 0.14002478122711182,
-      "y1": 0.6633023619651794,
-      "x2": 0.1672862470149994,
-      "y2": 0.6814695000648499
-    },
-    "bbox_estimated": false,
-    "vision_selected": "B",
-    "vision_transcription": "נגד",
-    "vision_confidence": 0.98,
-    "vision_reasoning": "The clear word in the third line of the image is 'נגד'. Paleographically, the final letter has the right-angled square corner/roof characteristic of a dalet ('ד') rather than a rounded resh ('ר'). Semantically, this matches the provided context 'דהלכה כאביי נגד ר' יוחנן' (that the halakha follows Abaye against R. Yochanan)."
-  },
-  {
-    "klal_id": 168,
-    "page": 62,
-    "opcode": "replace",
-    "word_index_in_final_text": 519,
-    "original_word": "דוא",
-    "corrected_word": "הוא",
-    "bbox": {
-      "x1": 0.7416356801986694,
-      "y1": 0.679854691028595,
-      "x2": 0.7763320803642273,
-      "y2": 0.696003258228302
-    },
-    "bbox_estimated": false,
-    "vision_selected": "B",
-    "vision_transcription": "הוא",
-    "vision_confidence": 0.95,
-    "vision_reasoning": "The surrounding Rabbinic phrase is 'דבתרא הוא יע\"ש' ('he is a later authority, see there'). Contextually and paleographically, the word is 'הוא', fitting Option B."
-  },
-  {
     "klal_id": 169,
     "page": 62,
     "opcode": "replace",
@@ -3417,7 +3284,7 @@
     "vision_selected": "B",
     "vision_transcription": "בר\"פ",
     "vision_confidence": 0.98,
-    "vision_reasoning": "The text refers to the beginning of the Talmudic chapter 'Haya Qore' (Berakhot 13b), where 'בר\"פ' stands for the standard Rabbinic acronym בראש פרק (at the beginning of the chapter). Paleographically, the letter after the gershayim clearly displays the characteristic head and inner loop of a פ (pe), rather than the closed loop of a ס (samakh)."
+    "vision_reasoning": "The crop clearly shows the letters ב-ר-\"-פ. Contextually, this is the standard Rabbinic acronym 'בר\"פ' (בראש פרק - 'at the beginning of the chapter'), introducing the chapter title 'היה קורא' (Talmud Bavli, Berakhot 13b)."
   },
   {
     "klal_id": 169,
@@ -3436,7 +3303,7 @@
     "vision_selected": "A",
     "vision_transcription": "והכי הלכתא",
     "vision_confidence": 0.98,
-    "vision_reasoning": " The middle line of the crop clearly displays the words 'והכי הלכתא' in standard Hebrew Rabbinic print, matching Option A."
+    "vision_reasoning": "The second line clearly contains the Hebrew words 'והכי הלכתא' in standard rabbinic print, which is missing from Option B but present in Option A."
   },
   {
     "klal_id": 169,
@@ -3934,47 +3801,9 @@
   },
   {
     "klal_id": 177,
-    "page": 65,
-    "opcode": "delete",
-    "word_index_in_final_text": 178,
-    "original_word": "הרמ\"ז על",
-    "corrected_word": null,
-    "bbox": {
-      "x1": 0.2231149524450302,
-      "y1": 0.8725212216377258,
-      "x2": 0.29480841755867004,
-      "y2": 0.8895184397697449
-    },
-    "bbox_estimated": false,
-    "vision_selected": "A",
-    "vision_transcription": "הרמ\"ז על",
-    "vision_confidence": 0.98,
-    "vision_reasoning": "The image clearly displays the Rabbinic abbreviation 'הרמ\"ז' (referring to Rabbi Moses Zacuto) followed by the preposition 'על'. This perfectly matches Option A."
-  },
-  {
-    "klal_id": 177,
     "page": 66,
     "opcode": "replace",
-    "word_index_in_final_text": 185,
-    "original_word": "שרקשה",
-    "corrected_word": "שהקשה",
-    "bbox": {
-      "x1": 0.6378244757652283,
-      "y1": 0.08741400390863419,
-      "x2": 0.6959208846092224,
-      "y2": 0.1060299500823021
-    },
-    "bbox_estimated": false,
-    "vision_selected": "A",
-    "vision_transcription": "שרקשה",
-    "vision_confidence": 0.95,
-    "vision_reasoning": "Paleographic examination of the second letter in the crop reveals a clear resh (ר) with a rounded upper-right shoulder and no left leg/stroke (unlike the clear hei at the end of the word). Although contextually intended as 'שהקשה' (Option B), the printed raster text literally reads 'שרקשה' (Option A) due to a common printer/typesetting error."
-  },
-  {
-    "klal_id": 177,
-    "page": 66,
-    "opcode": "replace",
-    "word_index_in_final_text": 220,
+    "word_index_in_final_text": 222,
     "original_word": "עדיסא",
     "corrected_word": "עדיפא",
     "bbox": {
@@ -3993,7 +3822,7 @@
     "klal_id": 177,
     "page": 66,
     "opcode": "replace",
-    "word_index_in_final_text": 410,
+    "word_index_in_final_text": 412,
     "original_word": "אולסיה",
     "corrected_word": "אולמיה",
     "bbox": {
@@ -4012,7 +3841,7 @@
     "klal_id": 177,
     "page": 66,
     "opcode": "replace",
-    "word_index_in_final_text": 456,
+    "word_index_in_final_text": 458,
     "original_word": "דערויות",
     "corrected_word": "דעדויות",
     "bbox": {
@@ -4031,7 +3860,7 @@
     "klal_id": 177,
     "page": 66,
     "opcode": "replace",
-    "word_index_in_final_text": 516,
+    "word_index_in_final_text": 518,
     "original_word": "לו",
     "corrected_word": "לנו",
     "bbox": {
@@ -4885,25 +4714,6 @@
   {
     "klal_id": 194,
     "page": 70,
-    "opcode": "replace",
-    "word_index_in_final_text": 133,
-    "original_word": "הגחל",
-    "corrected_word": "הגוזל",
-    "bbox": {
-      "x1": 0.8326100707054138,
-      "y1": 0.2117789387702942,
-      "x2": 0.8716676831245422,
-      "y2": 0.2271077036857605
-    },
-    "bbox_estimated": false,
-    "vision_selected": "B",
-    "vision_transcription": "הגוזל",
-    "vision_confidence": 0.95,
-    "vision_reasoning": "The sentence context references 'בפ' הגוזל עצים' (Chapter 'HaGozel Etzim' in Bava Kama). Paleographically, the standard print font has the letters vav ('ו') and zayin ('ז') adjacent, which standard OCR engines often misread as a single het ('ח') resulting in the erroneous string 'הגחל'."
-  },
-  {
-    "klal_id": 194,
-    "page": 70,
     "opcode": "delete",
     "word_index_in_final_text": 136,
     "original_word": "מתני",
@@ -4919,44 +4729,6 @@
     "vision_transcription": "מתני'",
     "vision_confidence": 0.98,
     "vision_reasoning": "The image clearly shows the word מתני' (abbreviation for מתניתין / mishna) in the center line, corresponding to the surrounding textual context 'על מתני' דנתן לחרש'."
-  },
-  {
-    "klal_id": 194,
-    "page": 70,
-    "opcode": "replace",
-    "word_index_in_final_text": 184,
-    "original_word": "כ\"ט",
-    "corrected_word": "כ\"מ",
-    "bbox": {
-      "x1": 0.7346559166908264,
-      "y1": 0.25655505061149597,
-      "x2": 0.7662740349769592,
-      "y2": 0.271077036857605
-    },
-    "bbox_estimated": false,
-    "vision_selected": "B",
-    "vision_transcription": "כ\"מ",
-    "vision_confidence": 0.98,
-    "vision_reasoning": "The visible characters clearly show the letters Kaf and Mem with quotation marks (כ\"מ), representing the standard Rabbinic abbreviation for the Kesef Mishneh commentary on Maimonides (הרמב\"ם), which directly aligns with the contextual citation 'וע\"ע כ\"מ פ' כ\"ר מה' אישות'."
-  },
-  {
-    "klal_id": 194,
-    "page": 70,
-    "opcode": "replace",
-    "word_index_in_final_text": 186,
-    "original_word": "כ\"ד",
-    "corrected_word": "כ\"ר",
-    "bbox": {
-      "x1": 0.6794792413711548,
-      "y1": 0.25655505061149597,
-      "x2": 0.707377552986145,
-      "y2": 0.271077036857605
-    },
-    "bbox_estimated": false,
-    "vision_selected": "A",
-    "vision_transcription": "כ\"ד",
-    "vision_confidence": 0.98,
-    "vision_reasoning": "The crop clearly shows the letters כ\"ד with a sharp right roof corner on the dalet (ד). Contextually, 'פ' כ\"ד מה' אישות הל' י\"ב' refers to Chapter 24 (כ\"ד) of Rambam's Hilchot Ishut, Halacha 12 (where Kesef Mishneh discusses המקללת יולדיו בפניו), confirming option A ('כ\"ד') as correct over the erroneous 'כ\"ר'."
   },
   {
     "klal_id": 194,

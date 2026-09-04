@@ -15,8 +15,8 @@
       },
       "vision_selected": "A",
       "vision_transcription": "ג",
-      "confidence": 0.95,
-      "reasoning": "The raster crop clearly displays the single Hebrew character 'ג' (Gimel), featuring its characteristic top head, vertical right stroke, and bottom leftward-pointing foot.",
+      "confidence": 0.98,
+      "reasoning": "The image clearly contains a single Hebrew letter Gimel ('ג'). Option A correctly identifies this character.",
       "vlm_reading": "הרמב\"ם",
       "surya_reading": "הרמב\"ם",
       "dicta_reading": "הרמב\"ם",
@@ -11322,7 +11322,7 @@
       "vision_selected": "B",
       "vision_transcription": "בר\"פ",
       "confidence": 0.98,
-      "reasoning": "The text refers to the beginning of the Talmudic chapter 'Haya Qore' (Berakhot 13b), where 'בר\"פ' stands for the standard Rabbinic acronym בראש פרק (at the beginning of the chapter). Paleographically, the letter after the gershayim clearly displays the characteristic head and inner loop of a פ (pe), rather than the closed loop of a ס (samakh).",
+      "reasoning": "The crop clearly shows the letters ב-ר-\"-פ. Contextually, this is the standard Rabbinic acronym 'בר\"פ' (בראש פרק - 'at the beginning of the chapter'), introducing the chapter title 'היה קורא' (Talmud Bavli, Berakhot 13b).",
       "vlm_reading": "בר\"פ",
       "surya_reading": "בר\"פ",
       "dicta_reading": "בר\"פ",
@@ -11344,7 +11344,7 @@
       "vision_selected": "A",
       "vision_transcription": "והכי הלכתא",
       "confidence": 0.98,
-      "reasoning": " The middle line of the crop clearly displays the words 'והכי הלכתא' in standard Hebrew Rabbinic print, matching Option A.",
+      "reasoning": "The second line clearly contains the Hebrew words 'והכי הלכתא' in standard rabbinic print, which is missing from Option B but present in Option A.",
       "vlm_reading": "דקי\"ל",
       "surya_reading": "דקי\"ל",
       "dicta_reading": "דקי\"ל",
@@ -12658,29 +12658,7 @@
       "flag": "current_text_may_be_wrong"
     },
     {
-      "word_index": 185,
-      "opcode": "replace",
-      "docai_reading": "שרקשה",
-      "docai_repaired": null,
-      "final_text": "שהקשה",
-      "page": 66,
-      "bbox": {
-        "x1": 0.6378244757652283,
-        "y1": 0.08741400390863419,
-        "x2": 0.6959208846092224,
-        "y2": 0.1060299500823021
-      },
-      "vision_selected": "A",
-      "vision_transcription": "שרקשה",
-      "confidence": 0.95,
-      "reasoning": "Paleographic examination of the second letter in the crop reveals a clear resh (ר) with a rounded upper-right shoulder and no left leg/stroke (unlike the clear hei at the end of the word). Although contextually intended as 'שהקשה' (Option B), the printed raster text literally reads 'שרקשה' (Option A) due to a common printer/typesetting error.",
-      "vlm_reading": "פרק",
-      "surya_reading": "פרק",
-      "dicta_reading": "פרק",
-      "flag": "stale_candidate"
-    },
-    {
-      "word_index": 220,
+      "word_index": 222,
       "opcode": "replace",
       "docai_reading": "עדיסא",
       "docai_repaired": null,
@@ -12696,13 +12674,23 @@
       "vision_transcription": "עדיפא",
       "confidence": 0.95,
       "reasoning": "The sentence quotes the Talmudic concept from Pesachim/Beitzah ('סתמא דמגביהין עדיפא'). Contextually and semantically, the word is 'עדיפא' ('preferable/superior'). Graphically, heavy ink application in the historic print has filled in the inner cavity of the letter 'פ' (pe), causing raw OCR engines to misidentify it as a 'ס' (samekh) ('עדיסא').",
-      "vlm_reading": "דסתמא",
-      "surya_reading": "דסתמא",
-      "dicta_reading": "דסתמא",
-      "flag": "stale_candidate"
+      "vlm_reading": "עדיפא",
+      "surya_reading": "עדיסא",
+      "dicta_reading": "עדיפא",
+      "flag": "current_text_confirmed",
+      "consensus_engines": [
+        "docai",
+        "surya"
+      ],
+      "consensus_reading": "עדיסא",
+      "ligature_artifact": null,
+      "cross_edition": false,
+      "cross_edition_engines": [],
+      "same_edition_agreeing": 2,
+      "abbreviation_shape": null
     },
     {
-      "word_index": 410,
+      "word_index": 412,
       "opcode": "replace",
       "docai_reading": "אולסיה",
       "docai_repaired": null,
@@ -12718,13 +12706,13 @@
       "vision_transcription": "אולמיה",
       "confidence": 0.99,
       "reasoning": "The visible printed text clearly shows the word 'אולמיה' on the middle line. The third letter from the left in that word is a standard square Hebrew letter 'מ' (mem), not 'ס' (samech). Furthermore, this aligns with the well-known Rabbinic idiom 'מאי אולמיה' present in the surrounding textual context.",
-      "vlm_reading": "במ\"ש",
-      "surya_reading": "במ\"ש",
-      "dicta_reading": "במ\"ש",
-      "flag": "stale_candidate"
+      "vlm_reading": "אולמיה",
+      "surya_reading": "אולמיה",
+      "dicta_reading": "אולמיה",
+      "flag": "current_text_confirmed"
     },
     {
-      "word_index": 456,
+      "word_index": 458,
       "opcode": "replace",
       "docai_reading": "דערויות",
       "docai_repaired": null,
@@ -12740,10 +12728,10 @@
       "vision_transcription": "דעדויות דכיון",
       "confidence": 0.98,
       "reasoning": "The context discusses Tractate Eduyot ('דעדויות מהך דשבת...'), where 'דעדויות' (of Eduyot) is the correct Rabbinic term, spelled with a 'dalet' (ד), not a 'resh' (ר). The visual letter following the 'ayin' displays the characteristic right-angled roof of a dalet, matching Option B.",
-      "vlm_reading": "גם",
-      "surya_reading": "גם",
-      "dicta_reading": "גם",
-      "flag": "stale_candidate"
+      "vlm_reading": "דעדויות",
+      "surya_reading": "דעדויות",
+      "dicta_reading": "דעדיות",
+      "flag": "current_text_confirmed"
     },
     {
       "word_index": 463,
@@ -12777,7 +12765,7 @@
       "flag": "current_text_may_be_wrong"
     },
     {
-      "word_index": 516,
+      "word_index": 518,
       "opcode": "replace",
       "docai_reading": "לו",
       "docai_repaired": null,
@@ -12793,10 +12781,10 @@
       "vision_transcription": "לו",
       "confidence": 0.95,
       "reasoning": "In the target line of the crop (line 2), following 'ין', the text clearly shows the sequence 'ל' (Lamed) followed directly by 'ו' (Vav) forming 'לו' (or directly adjacent to 'ט'), without the additional letter 'נ' (Nun) required for 'לנו'. Thus, Option A accurately reflects the paleographic reading in the image crop.",
-      "vlm_reading": "הוא",
-      "surya_reading": "הוא",
-      "dicta_reading": "הוא",
-      "flag": "stale_candidate"
+      "vlm_reading": "לנו",
+      "surya_reading": "לנו",
+      "dicta_reading": "לנו",
+      "flag": "current_text_may_be_wrong"
     },
     {
       "word_index": 550,

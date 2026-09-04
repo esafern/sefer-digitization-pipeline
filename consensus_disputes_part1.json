@@ -12325,6 +12325,35 @@
     },
     {
       "klal_id": 177,
+      "word_index": 222,
+      "opcode": "replace",
+      "final_text": "עדיפא",
+      "consensus_reading": "עדיסא",
+      "agreeing_engines": [
+        "docai",
+        "surya"
+      ],
+      "ligature_artifact": null,
+      "cross_edition": false,
+      "cross_edition_engines": [],
+      "same_edition_agreeing": 2,
+      "abbreviation_shape": null,
+      "witnesses": {
+        "docai": "עדיסא",
+        "vlm": "עדיפא",
+        "surya": "עדיסא",
+        "dicta": "עדיפא"
+      },
+      "page": 66,
+      "bbox": {
+        "x1": 0.5080345869064331,
+        "y1": 0.11857547610998154,
+        "x2": 0.55562424659729,
+        "y2": 0.1355726420879364
+      }
+    },
+    {
+      "klal_id": 177,
       "word_index": 463,
       "opcode": "replace",
       "final_text": "במאי",
