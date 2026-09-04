@@ -66,11 +66,10 @@ def _distance(a, b):
     return ((ax - bx) ** 2 + (ay - by) ** 2) ** 0.5
 
 
-def original_word(rec):
-    """The word a ruling was made against - see review_server._decision_original_word."""
-    snap = rec.get("candidate_snapshot") or {}
-    got = snap.get("original_word")
-    return snap.get("final_text") if got is None else got
+# The word a ruling was made against. Imported, not re-implemented: this was a
+# verbatim second copy of review_server._decision_original_word until 2026-09-04
+# (ultra review), referencing it only in a comment.
+original_word = rd.original_word
 
 
 def bbox_signal(klal_id, words, rec, regions, cache):
@@ -188,27 +187,54 @@ def main():
         print("\nDRY RUN - nothing written to the decision log. Re-run with --apply.")
         return
 
+    refused = []
     for r in fixable:
         rec = rd.find_by_id(r["decision_id"])
         snap = dict(rec.get("candidate_snapshot") or {})
         snap["word_index"] = r["new_word_index"]
-        rd.append_decision(
-            rec["decision_type"],
-            klal_id=r["klal_id"],
-            word_index=r["new_word_index"],
-            chosen_source=rec.get("chosen_source"),
-            chosen_text=rec.get("chosen_text"),
-            candidate_snapshot=snap,
-            supersedes=r["decision_id"],
-            note=(f"RE-POINTED from word_index {r['recorded_word_index']} to "
-                  f"{r['new_word_index']} (open item 0AB). The original ruling "
-                  f"{r['decision_id']} stands unchanged in this log; a later apply in "
-                  f"this klal shifted every index after it and nothing re-pointed the "
-                  f"decision, so it named a word it never described and both display "
-                  f"paths dropped it. Re-pointed only because {r['why']}. "
-                  f"Original note: {rec.get('note') or '(none)'}"),
-        )
-    print(f"\nAppended {len(fixable)} corrected ruling(s). The originals are untouched.")
+        # CARRY THE ORIGINAL AUTHOR FORWARD. Until 2026-09-04 this call omitted
+        # `reviewer=`, so every re-pointed ruling took append_decision's default
+        # of "local" - a HUMAN tag - no matter who actually made it. Re-pointing
+        # one of the 131 machine-written corrections (item 0AT) therefore
+        # laundered it into a human ruling: ruled_by_human() flipped False->True
+        # and the dashboard drew it as adjudicated. A re-point changes a ruling's
+        # ADDRESS, never its authorship. Found by the 2026-09-03 ultra review.
+        #
+        # A machine-tagged `manual_correction` is refused by append_decision's
+        # own guard (also item 0AT: a script may not record a human ruling). That
+        # guard is right and stays - so such records are SKIPPED and reported,
+        # not laundered to get past it and not crashed on.
+        author = rec.get("reviewer")
+        try:
+            rd.append_decision(
+                rec["decision_type"],
+                klal_id=r["klal_id"],
+                word_index=r["new_word_index"],
+                chosen_source=rec.get("chosen_source"),
+                chosen_text=rec.get("chosen_text"),
+                candidate_snapshot=snap,
+                reviewer=author,
+                supersedes=r["decision_id"],
+                note=(f"RE-POINTED from word_index {r['recorded_word_index']} to "
+                      f"{r['new_word_index']} (open item 0AB). The original ruling "
+                      f"{r['decision_id']} stands unchanged in this log; a later apply "
+                      f"in this klal shifted every index after it and nothing "
+                      f"re-pointed the decision, so it named a word it never described "
+                      f"and both display paths dropped it. Re-pointed only because "
+                      f"{r['why']}. Original note: {rec.get('note') or '(none)'}"),
+            )
+        except ValueError as e:
+            refused.append((r["decision_id"], author, str(e)))
+
+    print(f"\nAppended {len(fixable) - len(refused)} corrected ruling(s). "
+          f"The originals are untouched.")
+    if refused:
+        print(f"\n{len(refused)} SKIPPED - a script may not re-record them under their "
+              f"own machine authorship, and re-pointing them as 'local' would forge a "
+              f"human ruling (item 0AT). They keep their stale index; fix them from the "
+              f"dashboard instead:")
+        for decision_id, author, why in refused:
+            print(f"  {decision_id} (reviewer {author!r}): {why}")
 
 
 if __name__ == "__main__":

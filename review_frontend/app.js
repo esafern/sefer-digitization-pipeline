@@ -2246,14 +2246,29 @@ async function openTitlePanel(klalId) {
   openPanel(titlePanel);
   titlePanelBody.innerHTML = '<p>Loading…</p>';
   const k = mountedKlal[klalId] || await fetchKlal(klalId);
-  const words = (k.title || '').split(' ').filter(w => w.length);
-  if (!words.length) {
+  // UNFILTERED split, matching the server's cio.title_words_of() exactly.
+  //
+  // This used to `.filter(w => w.length)`, dropping empty tokens - so a heading
+  // with a double space (reachable today: neither the textarea nor the server
+  // trims INTERIOR whitespace, only the outer edges) gave the client
+  // [w0,w1,w2] where the server sees [w0,w1,'',w2]. Clicking the chip labelled
+  // 2 then posted word_index=2, and the server recorded original_word='' - a
+  // ruling silently filed against the wrong word. Latent (no live heading has a
+  // double space) but reachable through the free-text edit path; found by the
+  // 2026-09-03 ultra review.
+  //
+  // Empty tokens are not RENDERED - a blank chip is not something to click - but
+  // they still consume their index, so every chip's data-i is the index the
+  // server will resolve. Display and addressing disagreeing is the whole bug.
+  const words = (k.title || '').split(' ');
+  if (!words.some(w => w.length)) {
     titlePanelBody.innerHTML = '<div class="panel-section">This klal has no stored heading.</div>';
     return;
   }
-  const chips = words.map((w, i) =>
+  const chips = words.map((w, i) => !w.length ? '' :
     `<button type="button" class="title-word-chip" data-i="${i}">` +
-    `<bdi>${escapeHtml(w)}</bdi><span class="title-word-i">${i}</span></button>`).join(' ');
+    `<bdi>${escapeHtml(w)}</bdi><span class="title-word-i">${i}</span></button>`)
+    .filter(Boolean).join(' ');
   // WHAT IS ALREADY ON RECORD - fetched FRESH, never read from `mountedKlal`.
   //
   // That cache is the /api/klal payload from whenever the klal was first

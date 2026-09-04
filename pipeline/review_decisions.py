@@ -184,6 +184,29 @@ def ruled_by_human(rec):
 _is_human_reviewer = is_human_reviewer  # pre-2026-09-03 internal name
 
 
+def original_word(rec):
+    """What the word WAS when this ruling was made, or None if unknowable.
+
+    Three panels record it in two places: manual_correction snapshots
+    `original_word`, candidate/disputed snapshot the candidate's `final_text`
+    (the stored reading it was offering to change), and witness_choice snapshots
+    neither - it offers `docai_reading` against `tesseract_reading` and the
+    stored word is not part of the record. None where it genuinely is not known,
+    rather than a guess dressed as a snapshot.
+
+    HERE as of 2026-09-04, because it had been written out twice - as
+    review_server._decision_original_word and as
+    tools/repoint_stale_decisions.original_word, the second referencing the
+    first only in a comment. Both were introduced the same week and a change to
+    the snapshot shape would have had to find both. Same consolidation, same
+    reasoning, as ruled_by_human above: a question ABOUT a ledger record belongs
+    to the ledger module. Found by the 2026-09-03 ultra review.
+    """
+    snap = (rec or {}).get("candidate_snapshot") or {}
+    got = snap.get("original_word")
+    return snap.get("final_text") if got is None else got
+
+
 def resolve_word_index(rec, words):
     """Where does this ruling's word sit in `words` TODAY? -> (index, how).
 
@@ -344,6 +367,23 @@ def _read_all(path=None):
                 records.append(json.loads(line))
     _READ_CACHE[path] = (stamp, records)
     return records
+
+
+def all_records(path=None):
+    """Every row in the log, oldest first, through the shared cache.
+
+    THE GAP THIS FILLS, found by the 2026-09-03 ultra review: there was no
+    public way to ask for all rows. `history_for` needs a real klal_id and
+    `all_current` dedupes to latest-per-key, so a caller wanting the whole log -
+    tools/flag_unreviewed_auto_corrections.py did - had to reach into the
+    private `_resolve()` and re-parse the file by hand, paying the full parse
+    every run (measured in this module's own notes at 182.5ms vs 14.0ms cached)
+    and bypassing the mtime/size cache that exists precisely to avoid it.
+
+    Returns the cached list itself, not a copy: callers must not mutate it, the
+    same contract every other reader here already has.
+    """
+    return _read_all(path)
 
 
 def history_for(klal_id, word_index=None, decision_type=None, path=None):

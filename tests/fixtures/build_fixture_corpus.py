@@ -368,21 +368,34 @@ def _write_witness_queue(root):
     WITNESS_PRIORITY_VERDICTS ("B"/"NEITHER") so review_server's own filter
     (WITNESS_QUEUE_FILTERED) actually serves them - a queue entry the filter
     drops would silently test nothing."""
+    #
+    # `docai_token_index` is PAGE-RELATIVE - an index into that page's own token
+    # list, exactly as verify_reconstruction_witness.py produces it - not an
+    # offset within the klal. Page 2's tokens are klal 1's 3 continuation words
+    # (0-2), then klal 2's 6 (3-8), then klal 3's 5 (9-13), then klal 4's 4
+    # (14-17), so klal 4's "עין"/"פא" are 16/17. The first version of this
+    # fixture wrote 2/3 - klal-relative offsets, which resolve to "הא"/"ב" on the
+    # real page - so any test reading api_witness_context here would have
+    # inspected the wrong word while appearing to pass, hiding the very
+    # page-vs-klal indexing bug class this fixture exists to catch. Found by the
+    # 2026-09-03 ultra review.
+    #
+    # meta.stats is keyed by the SCAN PAGE, likewise matching the real generator.
     queue = {
-        "meta": {"stats": {"1": {"klal_id": 4, "docai_words": 4,
+        "meta": {"stats": {"2": {"klal_id": 4, "docai_words": 4,
                                   "tesseract_words": 4, "agreement": 0.5,
                                   "flagged": 2}}},
         "queue": [
             {"klal_id": 4, "page": 2, "docai_reading": "עין",
              "tesseract_reading": "עיו", "opcode": "replace", "tier": "D",
              "bbox": {"x1": 0.15, "y1": 0.42, "x2": 0.21, "y2": 0.45},
-             "docai_token_index": 2, "vision_selected": "B",
+             "docai_token_index": 16, "vision_selected": "B",
              "vision_transcription": "עין", "vision_confidence": 0.9,
              "vision_reasoning": "fixture", "word_index": 2},
             {"klal_id": 4, "page": 2, "docai_reading": "פא",
              "tesseract_reading": "פה", "opcode": "replace", "tier": "D",
              "bbox": {"x1": 0.1, "y1": 0.42, "x2": 0.16, "y2": 0.45},
-             "docai_token_index": 3, "vision_selected": "NEITHER",
+             "docai_token_index": 17, "vision_selected": "NEITHER",
              "vision_transcription": "פ", "vision_confidence": 0.6,
              "vision_reasoning": "fixture: no word_index - never aligned to a corpus word"},
         ],
@@ -391,8 +404,14 @@ def _write_witness_queue(root):
 
 
 def _write_punctuation_candidates(root):
+    # `before_word_index` is the index the mark is inserted BEFORE, i.e. the
+    # index of `word_after` - verified against the real corpus (klal 1's entry at
+    # 87 has words[87] == its own word_after). Klal 2's words are
+    # [ב,וו,זין,חית,...], so a break between "זין" (2) and "חית" (3) is 3, not 2.
+    # The first version wrote 2 and the smoke test asserted that same wrong value
+    # back, so nothing caught it. Found by the 2026-09-03 ultra review.
     _write_json(os.path.join(root, "punctuation_candidates_part1.json"), {
-        "2": [{"before_word_index": 2, "word_before": "זין", "word_after": "חית",
+        "2": [{"before_word_index": 3, "word_before": "זין", "word_after": "חית",
                "reasoning": "fixture: a proposed sentence break"}],
     })
 

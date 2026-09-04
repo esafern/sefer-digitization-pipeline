@@ -684,7 +684,8 @@ def api_klalim(part_num=1, on_klal_states=None):
 
 
 def _decision_original_word(rec):
-    """What the word WAS when this ruling was made.
+    """What the word WAS when this ruling was made. Delegates to
+    review_decisions.original_word, the canonical copy as of 2026-09-04.
 
     Three panels record it in two places: manual_correction snapshots
     `original_word`, candidate/disputed snapshot the candidate's `final_text`
@@ -693,11 +694,7 @@ def _decision_original_word(rec):
     stored word is not part of the record. None where it genuinely is not known,
     rather than a guess dressed as a snapshot.
     """
-    snap = rec.get("candidate_snapshot") or {}
-    original = snap.get("original_word")
-    if original is None:
-        original = snap.get("final_text")
-    return original
+    return rd.original_word(rec)
 
 
 # Reviewer tags that mean A PERSON RULED. Everything else in the ledger was
@@ -1600,12 +1597,19 @@ def _title_decision(klal):
     Returns None when nothing is on record, which is the common case (2 of 222
     klalim as of today).
     """
-    rec = rd.all_current("title_correction").get((klal["klal_id"], 0))
+    # ONE all_current() call, reused. It rebuilds its current-state dict from
+    # every cached ledger record on each call (the mtime/size cache in
+    # _read_all only avoids re-PARSING the file, not re-BUILDING this dict), and
+    # this function runs once per klal from api_klal - so calling it twice on
+    # the miss path doubled that rebuild per request. Found by the 2026-09-03
+    # ultra review.
+    current = rd.all_current("title_correction")
+    rec = current.get((klal["klal_id"], 0))
     if rec is None:
         # A word-level heading ruling lives at its own index, so look wider
         # before concluding there is nothing: any title_correction on this klal
         # counts for the button's pending mark.
-        for (kid, _widx), r in rd.all_current("title_correction").items():
+        for (kid, _widx), r in current.items():
             if kid == klal["klal_id"]:
                 rec = r
                 break
@@ -1747,6 +1751,7 @@ def api_post_title_correction(body):
                 "original_word": cio.title_words_of(klal)[0] if stored else None,
             },
             note=body.get("note"),
+            supersedes=_shadowed_title_ruling_id(klal_id, 0),
         )
 
     words = cio.title_words_of(klal)
@@ -1776,7 +1781,36 @@ def api_post_title_correction(body):
         chosen_text=chosen_text,
         candidate_snapshot=snapshot,
         note=body.get("note"),
+        supersedes=_shadowed_title_ruling_id(klal_id, word_index),
     )
+
+
+def _shadowed_title_ruling_id(klal_id, word_index):
+    """The id of the heading ruling this new one is about to SHADOW, or None.
+
+    THE COLLISION THIS EXISTS FOR, found by the 2026-09-03 ultra review. A
+    whole-heading ruling is addressed at (klal, 0) - the reviewer's own
+    "same for title - klal+0" proposal - and so is a word-level ruling on the
+    heading's FIRST word. `rd.all_current()` keys on (klal_id, word_index) and
+    silently keeps whichever was appended last, so the two are indistinguishable
+    at that key: record a whole-heading trim, then correct heading word 0, and
+    the trim is gone from every read path - never applied, never listed as
+    pending, never reported as skipped.
+
+    Later-wins is the RIGHT outcome (the newest ruling is the reviewer's current
+    intent, exactly as for every other decision type). What was wrong is that it
+    happened SILENTLY. `supersedes` already exists for precisely this - item 0AP
+    added it so "that one is no longer the answer" could be said out loud in an
+    append-only log - so the fix is to say it: the shadowed ruling stays in the
+    ledger exactly as written, and now carries a forward reference explaining
+    what replaced it.
+
+    Deliberately not a refusal. A reviewer re-ruling a heading is ordinary work,
+    not an error to block; the defect was the missing audit trail, not the
+    overwrite.
+    """
+    existing = rd.all_current("title_correction").get((klal_id, word_index))
+    return existing["id"] if existing else None
 
 
 def _manual_snapshot(klal_id, word_index, original_word):

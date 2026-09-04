@@ -191,14 +191,21 @@ _LAZY_PATHS = {
 
 
 def __getattr__(name):
-    """PEP 562 module-level attribute hook: `cio.PART1_PATH` resolves here."""
+    """PEP 562 module-level attribute hook: `cio.PART1_PATH` resolves here.
+
+    Also serves the five WORK_* identity names (see book_identity), for the same
+    reason: they are per-book data, so freezing them at import would put the
+    first book's title on every later one.
+    """
     if name in _LAZY_PATHS:
         return _LAZY_PATHS[name]()
+    if name in _WORK_ATTRS:
+        return book_identity()[_WORK_ATTRS[name]]
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 def __dir__():
-    return sorted(list(globals()) + list(_LAZY_PATHS))
+    return sorted(list(globals()) + list(_LAZY_PATHS) + list(_WORK_ATTRS))
 
 # max(klal_id) in part1.json. Part 1 is the only section with scan-linked
 # correction/region data, so several scripts slice the combined 667-klal
@@ -401,18 +408,58 @@ def clean_word(w):
 # ADDED 2026-09-01 (reviewer: "on index pane header should show book title also
 # scan pane"). Here rather than in the frontend because this project's stated
 # goal is to generalize beyond one work: the dashboard should NAME the book it
-# has loaded, not have one book's name baked into its markup. A second text run
-# through this pipeline changes these five lines and nothing else.
+# has loaded, not have one book's name baked into its markup.
 #
 # The edition matters enough to carry: START_HERE.md warns at length against
 # conflating the Livorno 1766-7 original with the Berlin reprint this pipeline
 # actually OCRs, and the scan pane is the one place a reviewer is looking at
 # that specific printing.
-WORK_TITLE = "Yad Malachi"
-WORK_TITLE_HE = "יד מלאכי"
-WORK_SECTION = "Klalei HaGemara"
-WORK_SECTION_HE = "כללי הגמרא"
-WORK_EDITION = "Berlin, 1851/2 - the second printing, not the Livorno 1766-7 original"
+#
+# READ FROM THE CORPUS, not hardcoded, since 2026-09-04. The 2026-09-01 version
+# of this block said "a second text run through this pipeline changes these five
+# lines and nothing else" - which was the whole defect: five lines of SOURCE had
+# to change, so pointing $SEFER_CORPUS_ROOT at another book did not change them.
+# An ultra code review verified it live: with the root pointed at the test
+# fixture, /api/corpus still answered "Yad Malachi", and the fixture's own
+# WORK_TITLE was dead code nothing read. Book identity is per-book DATA, so it
+# now resolves through the same seam every other corpus fact does.
+#
+# `book.json` in the corpus root supplies it; the Yad Malachi values below are
+# the fallback when that file is absent, so this repo's own corpus keeps working
+# untouched and no existing caller changes. This is deliberately the smallest
+# possible first slice of the generalization plan's Phase 2 manifest - identity
+# only, not yet the file-chunking/klal-count constants that phase also has to
+# move.
+_WORK_DEFAULTS = {
+    "title": "Yad Malachi",
+    "title_he": "יד מלאכי",
+    "section": "Klalei HaGemara",
+    "section_he": "כללי הגמרא",
+    "edition": "Berlin, 1851/2 - the second printing, not the Livorno 1766-7 original",
+}
+
+
+def book_identity():
+    """What work the CURRENT corpus root holds, as a dict of the five fields.
+
+    Resolved at call time, like every other path in this module - a caller that
+    changes the corpus root gets the new book's identity, which is the entire
+    point (see the note above).
+    """
+    stored = load_json(repo_path("book.json"), None) or {}
+    return {key: stored.get(key) or default for key, default in _WORK_DEFAULTS.items()}
+
+
+# The five names kept as module attributes for the existing call sites, resolved
+# through __getattr__ below so they follow the corpus root rather than freezing
+# at import (the same reason PART1_PATH and friends are lazy).
+_WORK_ATTRS = {
+    "WORK_TITLE": "title",
+    "WORK_TITLE_HE": "title_he",
+    "WORK_SECTION": "section",
+    "WORK_SECTION_HE": "section_he",
+    "WORK_EDITION": "edition",
+}
 
 # 22 Hebrew letters + the 5 final forms, i.e. exactly U+05D0-U+05EA. Written
 # out rather than range-generated so it is greppable and so a reader can see
@@ -968,12 +1015,12 @@ class DocaiPageCache:
 # ---------- scan-linkage data (alignment, gematria trace) ----------
 
 def load_gematria_trace(path=None, default=None):
-    path = path or repo_path("gematria_trace_part1.json")
     """The raw trace list. Callers reshape it themselves (by klal_id, or
     page -> marker positions) and filter on marker_position/status
     differently on purpose - see check_klal_token_orphans.py, which accepts
     both 'ok' and 'marker_found_content_mismatch', vs. build_klal_page_
     regions.py, which requires 'ok'."""
+    path = path or repo_path("gematria_trace_part1.json")
     return load_json(path, default)
 
 

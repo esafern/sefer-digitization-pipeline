@@ -520,6 +520,12 @@ def main():
     word_count_changed_klalim = set()
     n_replace = n_insert_delete = n_noop = n_manual = 0
     n_title = 0  # title_correction decisions promoted (item 39)
+    # Heading mirrors of a body correction (sync_heading_word). Counted, because
+    # they are appended to `applied` and `len(applied)` is what the summary
+    # prints as its total: without a counter of their own the total stopped
+    # equalling the sum of its own breakdown whenever one fired. Found by the
+    # 2026-09-03 ultra review.
+    n_heading_sync = 0
     # Word-count changes that landed inside a klal's heading run: the heading
     # is a second copy of those words and its own indices moved, so this is
     # reported for a human rather than synced by guess.
@@ -606,6 +612,7 @@ def main():
             _orig = (snapshot.get("final_text") or "").split()
             if len(_orig) == 1 and sync_heading_word(klal, word_index, _orig[0], decision["chosen_text"]):
                 applied.append((klal_id, word_index, "heading-sync"))
+                n_heading_sync += 1
             n_replace += 1
             applied.append((klal_id, word_index, "replace"))
             if not args.dry_run:
@@ -780,6 +787,7 @@ def main():
         klal["clean_text"] = new_text
         if kind == "manual" and sync_heading_word(klal, word_index, original_word, chosen_text):
             applied.append((klal_id, word_index, "heading-sync"))
+            n_heading_sync += 1
         elif kind in ("manual-delete", "manual-insert") and word_index <= len(cio.title_words_of(klal)):
             heading_desync.append((klal_id, word_index, kind))
         if kind in ("manual-delete", "manual-insert"):
@@ -905,7 +913,8 @@ def main():
 
     tag = "[DRY RUN] " if args.dry_run else ""
     print(f"\n{tag}Applied: {len(applied)} ({n_replace} replace, {n_insert_delete} insert/delete, "
-          f"{n_manual} manual, {n_title} title, {n_noop} confirmed-no-op)")
+          f"{n_manual} manual, {n_title} title, {n_noop} confirmed-no-op, "
+          f"{n_heading_sync} heading-sync)")
     for kid, widx, kind in applied:
         print(f"  klal {kid} word {widx}: {kind}")
 

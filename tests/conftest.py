@@ -163,6 +163,32 @@ CORPUS_CONTENT_FIXTURES = {
     "regions", "alignment", "all_alignment", "decision_records",
 }
 
+# ...AND the tests that read the real corpus WITHOUT going through any of those
+# fixtures, which the closure rule above cannot see.
+#
+# FOUND 2026-09-03 by an ultra review, and it is the exact hole the fixture rule
+# was always going to have: the marker is derived from a test's fixture
+# dependencies, so a test that opens a corpus file by path, or calls
+# review_server's loaders directly, is invisible to it. Both of these do:
+#   - test_lexicon_does_not_whitelist_a_known_corrupt_form reads lexicon.txt
+#   - test_no_corpus_word_is_aligned_to_page_furniture calls review_server's
+#     _load_klalim/_load_regions against the live corpus
+# Both therefore sat in the general/portable bucket, where a legitimate lexicon
+# purge or realignment turns them red - the precise false alarm the book_content
+# split exists to prevent - while tools/validate_corpus.py, which runs only
+# `-m book_content`, never exercised them at all.
+#
+# A NAME LIST IS A HAND-MAINTAINED THING and this repo has learned twice what
+# those cost (Lesson 13), so it does not stand alone:
+# test_every_corpus_reading_invariant_is_marked in test_pipeline_logic.py greps
+# the test source for corpus-reading calls and fails if one is neither
+# fixture-covered nor listed here. Adding a test that reads the corpus without
+# updating this set is a test failure, not a silent miss.
+CORPUS_CONTENT_TESTS = {
+    "test_lexicon_does_not_whitelist_a_known_corrupt_form",
+    "test_no_corpus_word_is_aligned_to_page_furniture",
+}
+
 
 def pytest_configure(config):
     config.addinivalue_line(
@@ -175,7 +201,9 @@ def pytest_configure(config):
 
 def pytest_collection_modifyitems(config, items):
     for item in items:
-        if CORPUS_CONTENT_FIXTURES & set(getattr(item, "fixturenames", ())):
+        by_fixture = CORPUS_CONTENT_FIXTURES & set(getattr(item, "fixturenames", ()))
+        by_name = item.name in CORPUS_CONTENT_TESTS
+        if by_fixture or by_name:
             item.add_marker(pytest.mark.book_content)
 
 
@@ -185,7 +213,7 @@ def pytest_collection_modifyitems(config, items):
 # added AFTER tests already reference the real corpus by path has nothing to
 # check against; adding it now, while only a handful of files do, is what
 # keeps the number from growing unnoticed. See test_pipeline_logic.py's
-# test_only_the_validator_reads_the_real_corpus_root for the assertion
+# test_the_corpus_root_bypass_count_has_not_grown for the assertion
 # itself - kept there rather than here so it participates in the SAME suite
 # 0AR measured (test_pipeline_logic.py, not this file, which no CI stage
 # collects on its own).

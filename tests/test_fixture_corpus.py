@@ -60,8 +60,22 @@ def test_a_human_decision_manual_correction(use_fixture_corpus, fixture_decision
 
 
 def test_a_punctuation_candidate(use_fixture_corpus):
+    """Asserts the RELATIONSHIP, not the literal index.
+
+    The first version of this test asserted `== 2`, which was the value the
+    fixture happened to write - and the fixture was wrong (off by one). A test
+    that reads a hardcoded value back out of the thing it is testing cannot
+    catch that; it just restates it. `before_word_index` is the index the mark
+    is inserted BEFORE, so it must equal the index of `word_after` and sit one
+    past `word_before` - which is checkable against the klal's real words.
+    Found by the 2026-09-03 ultra review.
+    """
     candidates = cio.load_json(cio.repo_path("punctuation_candidates_part1.json"))
-    assert candidates["2"][0]["before_word_index"] == 2
+    entry = candidates["2"][0]
+    words = cio.words_of(cio.load_part1_by_id()[2])
+    i = entry["before_word_index"]
+    assert words[i] == entry["word_after"], "the mark goes BEFORE word_after"
+    assert words[i - 1] == entry["word_before"]
 
 
 def test_both_machine_resolved_flags(use_fixture_corpus):

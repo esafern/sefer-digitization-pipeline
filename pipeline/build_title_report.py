@@ -88,8 +88,19 @@ def detector_candidates(part_path):
     indep = sub.load_independent_frequency()
     if not indep:
         return None
-    title_words = cio.load_klal_words(part_path, field=cio.TITLE_FIELD)
-    own = sub.build_own_frequency_table(cio.load_klal_words(part_path))
+    # ONE parse of part1.json, both fields derived from it. This used to call
+    # load_klal_words twice - once per field - each re-reading and re-parsing
+    # the whole file, on top of the load_klalim() in build() below: three parses
+    # per run. corpus_io deliberately has no JSON cache (an mtime/size cache
+    # would be a hazard for the write-then-read flows in
+    # apply_reviewer_decisions.py, where a same-second rewrite of identical size
+    # would read back stale), so the fix is not to ask twice. Found by the
+    # 2026-09-03 ultra review.
+    klalim = cio.load_klalim(part_path)
+    title_words = {k["klal_id"]: cio.strip_title_terminal_period(
+        (k.get(cio.TITLE_FIELD) or "").split()) for k in klalim}
+    body_words = {k["klal_id"]: (k.get(cio.TEXT_FIELD) or "").split() for k in klalim}
+    own = sub.build_own_frequency_table(body_words)
     rows = []
     for detector, name in ((sub, "substitution"), (ins, "insertion_deletion")):
         hi, amb = detector.find_candidates(title_words, own, indep)

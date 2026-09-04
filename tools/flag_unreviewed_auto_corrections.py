@@ -51,9 +51,12 @@ def main():
     ap.add_argument("--apply", action="store_true")
     args = ap.parse_args()
 
-    records = rd.history_for(None) if False else None  # (kept explicit below)
-    with open(rd._resolve(None), encoding="utf-8") as f:
-        rows = [json.loads(line) for line in f if line.strip()]
+    # The whole log, through the module's own cached accessor - not a
+    # hand-rolled re-parse via the private rd._resolve(). Until 2026-09-04 this
+    # was a dead `if False` statement followed by exactly that, which paid the
+    # full parse cost on every run; rd.all_records() was added to close the API
+    # gap that forced it. Found by the 2026-09-03 ultra review.
+    rows = rd.all_records()
 
     corrections = [r for r in rows if r.get("reviewer") == args.reviewer
                    and r.get("decision_type") == "manual_correction"]

@@ -546,6 +546,83 @@ _KNOWN_BYPASS_FILES = [
 ]
 
 
+def test_every_corpus_reading_invariant_is_marked():
+    """A test in test_corpus_invariants.py that reads the REAL corpus must land
+    in the book_content bucket - by fixture, or by name in conftest's
+    CORPUS_CONTENT_TESTS.
+
+    The marker is derived from a test's FIXTURE closure, which cannot see a test
+    that opens a corpus file by path or calls review_server's loaders directly.
+    Two did exactly that (found by the 2026-09-03 ultra review) and sat in the
+    general/portable bucket, where a legitimate corpus repair turns them red -
+    the false alarm the whole split exists to prevent - while
+    tools/validate_corpus.py never ran them at all.
+
+    conftest's answer to that is a hand-maintained name set, and this is what
+    stops the name set from rotting: it re-derives the "does this read the
+    corpus" question from the test SOURCE, so a new unmarked corpus reader fails
+    here instead of silently joining the general bucket. Same shape as
+    test_the_corpus_root_bypass_count_has_not_grown above - a hand list is only
+    safe when something independent checks it.
+    """
+    import ast
+    sys.path.insert(0, os.path.join(REPO, "tests"))
+    import conftest
+
+    src_path = os.path.join(REPO, "tests", "test_corpus_invariants.py")
+    tree = ast.parse(open(src_path, encoding="utf-8").read())
+
+    # Names that mean "this touches the real corpus". Deliberately the LOADERS
+    # and the corpus paths, not the word "corpus" - a docstring mentioning the
+    # corpus is not a read.
+    # Two ways a test reaches the corpus: through a LOADER, or by joining the
+    # corpus root with a DATA filename. Both are listed, and the data filenames
+    # are named individually rather than matching `os.path.join(REPO` broadly -
+    # that broader form also catches the tests reading review_frontend/app.js,
+    # tests/ and pipeline/ through the same root, which are CODE reads and
+    # belong in the general bucket.
+    #
+    # Both narrowings were forced by running the detection and reading what came
+    # back, not by reasoning: listing only the loaders returned just ONE of the
+    # two known cases (the lexicon test reads `os.path.join(REPO, "lexicon.txt")`
+    # directly), and the broad REPO-join form returned six false positives.
+    READS = ("_load_klalim", "_load_regions", "_load_alignment", "_load_corrections",
+             "load_part1", "load_klalim", "load_demo_dataset", "LEXICON_PATH",
+             "load_klal_words", "PART1_PATH",
+             '"lexicon.txt"', '"part1.json"', '"klalim_demo_dataset.json"',
+             '"corrections_part1.json"', '"corrections_verified_part1.json"',
+             '"klal_page_regions.json"', '"part1_header_anchored_alignment.json"',
+             '"gematria_trace_part1.json"', '"consensus_disputes_part1.json"',
+             '"lexical_defect_report.json"', '"docai_word_boxes"')
+
+    unmarked = []
+    for node in tree.body:
+        if not (isinstance(node, ast.FunctionDef) and node.name.startswith("test_")):
+            continue
+        params = {a.arg for a in node.args.args}
+        if params & conftest.CORPUS_CONTENT_FIXTURES:
+            continue                       # already marked, by fixture
+        if node.name in conftest.CORPUS_CONTENT_TESTS:
+            continue                       # already marked, by name
+        # DOCSTRING EXCLUDED. Matching the whole unparsed function flagged six
+        # tests whose prose merely NAMES a corpus file while their code reads
+        # review_frontend/app.js or the test files - a docstring mentioning
+        # corrections_part1.json is not a read of it.
+        body = node.body[1:] if (node.body and isinstance(node.body[0], ast.Expr)
+                                 and isinstance(node.body[0].value, ast.Constant)
+                                 and isinstance(node.body[0].value.value, str)) else node.body
+        body_src = "\n".join(ast.unparse(stmt) for stmt in body)
+        if any(name in body_src for name in READS):
+            unmarked.append(node.name)
+
+    assert not unmarked, (
+        f"These tests read the real corpus but land in the general/portable bucket: "
+        f"{unmarked}. Add each to CORPUS_CONTENT_TESTS in tests/conftest.py (or give it "
+        f"a corpus fixture), or it will false-alarm the plain suite on a legitimate "
+        f"corpus repair and never run under tools/validate_corpus.py."
+    )
+
+
 # --- apply_reviewer_decisions: the only code that mutates part1.json ---------
 
 def test_apply_replace_rewrites_only_the_snapshotted_span():
