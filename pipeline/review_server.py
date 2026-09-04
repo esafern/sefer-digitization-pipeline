@@ -36,6 +36,7 @@ import corpus_io as cio
 import scan_alignment as sa
 import review_counts as rcount
 import review_data as rdata
+import identity
 import review_decisions as rd
 
 # Moved one level deeper (pipeline/ or tools/) 2026-08-16 - REPO now goes up
@@ -892,6 +893,12 @@ def api_word_states(part_num=1):
                 "decision_id": rec.get("id"),
                 "reviewer": rec.get("reviewer"),
                 "by_human": _ruled_by_human(rec),
+                # WHO, not just human-vs-machine. `by_human` (item 0AT) answers
+                # "did a person rule this"; with more than one reviewer that is
+                # no longer enough - the panel has to be able to say WHICH.
+                # actor_of maps the 3,203 pre-2026-09-04 records too, so a
+                # legacy row renders as "local" rather than blank.
+                "actor": identity.actor_of(rec),
                 "original_word": _decision_original_word(rec),
                 "status": _decision_status(rec, words, wi, applied_ids),
                 "index_stale": _decision_index_is_stale(rec, words, wi),
@@ -1671,6 +1678,7 @@ def api_title_history(klal_id):
             "ts": rec.get("ts"),
             "reviewer": rec.get("reviewer"),
             "by_human": _ruled_by_human(rec),
+            "actor": identity.actor_of(rec),
             "whole": whole,
             "word_index": rec.get("word_index"),
             "chosen_text": rec.get("chosen_text"),

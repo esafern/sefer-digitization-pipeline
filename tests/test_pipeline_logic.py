@@ -623,6 +623,112 @@ def test_every_corpus_reading_invariant_is_marked():
     )
 
 
+# --- identity: WHO made a decision -------------------------------------------
+# A single free-text `reviewer` string was doing three jobs (who / human-vs-
+# machine / which pass), which is how 35 distinct strings accumulated for about
+# six agents and how item 0AT's 131 machine corrections passed as human rulings.
+
+def test_a_legacy_reviewer_string_still_maps_to_an_actor():
+    """3,203 records predate actors and the log is append-only, so nothing is
+    migrated - they are mapped on READ, forever. A human maps to id "local" with
+    no email on purpose: the old rows do not say WHICH person, and inventing one
+    would be fabricating provenance in an audit trail."""
+    import identity
+    human = identity.actor_from_legacy_reviewer("local-backfill-2026-08-17")
+    assert human["kind"] == "human" and human["id"] == "local"
+    assert "email" not in human and human["legacy"] is True
+
+    tool = identity.actor_from_legacy_reviewer("ai-dropped-lamed-correction")
+    assert tool["kind"] == "tool" and tool["id"] == "ai-dropped-lamed-correction"
+    assert identity.is_human(tool) is False
+
+
+def test_the_actor_mapping_agrees_with_the_rule_it_replaces_on_every_record():
+    """The whole live ledger, both ways. A new rule that disagreed with the old
+    one anywhere would be silently reclassifying real history."""
+    import identity
+    records = rd.all_records()
+    assert len(records) > 1000, "expected the real ledger"
+    disagreed = [r.get("reviewer") for r in records
+                 if identity.is_human(identity.actor_of(r))
+                 != rd.is_human_reviewer(r.get("reviewer"))]
+    assert not disagreed, f"actor mapping disagrees with the legacy rule for: {set(disagreed)}"
+
+
+def test_a_human_actor_carries_an_internal_id_not_an_email(tmp_path, monkeypatch):
+    """The user's own call: the ledger stores a STABLE INTERNAL ID, because
+    emails change and this log is permanent. The email is a roster attribute,
+    snapshotted onto the record as provenance - what we believed then - never
+    the key."""
+    import identity
+    roster = tmp_path / "reviewers.json"
+    roster.write_text(json.dumps({"reviewers": {
+        "r-test": {"email": "someone@example.com", "display": "Some One"}}}),
+        encoding="utf-8")
+    monkeypatch.setattr(identity, "ROSTER_PATH", str(roster))
+
+    actor = identity.resolve_actor("r-test")
+    assert actor["id"] == "r-test", "the id is the key, not the address"
+    assert actor["email"] == "someone@example.com"
+    assert actor["display"] == "Some One"
+    # Asserted, not authenticated - and the record must say so.
+    assert actor["verified"] is False
+
+
+def test_an_unregistered_actor_is_marked_rather_than_rejected(tmp_path, monkeypatch):
+    """A new automated pass must be able to run, but 35 free-text reviewer
+    strings is the sprawl this registry exists to stop - so an unknown id is
+    flagged, not silently accepted as though it were known."""
+    import identity
+    monkeypatch.setattr(identity, "ROSTER_PATH", str(tmp_path / "absent.json"))
+    assert identity.tool_actor("brand-new-pass")["unregistered"] is True
+    assert identity.tool_actor("docai").get("unregistered") is None
+    assert identity.resolve_actor("r-ghost")["unregistered"] is True
+
+
+def test_a_new_decision_records_both_an_actor_and_a_legacy_reviewer(decisions_path):
+    """Both, always: every existing reader still reads `reviewer`, and the
+    derived string keeps is_human_reviewer's prefix rule true by construction
+    rather than by luck."""
+    import identity
+    rd.append_decision("klal_flag", klal_id=1, word_index=1, needs_revisit=True,
+                       actor=identity.tool_actor("dicta"), path=decisions_path)
+    rec = rd.all_records(decisions_path)[-1]
+    assert rec["actor"]["id"] == "dicta" and rec["actor"]["kind"] == "tool"
+    assert rec["reviewer"] == "dicta"
+    assert rd.ruled_by_human(rec) is False
+
+    rd.append_decision("klal_flag", klal_id=2, word_index=1, needs_revisit=True,
+                       path=decisions_path)
+    human = rd.all_records(decisions_path)[-1]
+    assert human["actor"]["kind"] == "human"
+    assert rd.is_human_reviewer(human["reviewer"]), (
+        "the derived legacy string must still read as human to every old reader")
+
+
+def test_a_tool_may_not_write_a_manual_correction_through_an_actor(decisions_path):
+    """Item 0AT's guard, via the new path. A script recording a human ruling is
+    the defect that put 131 unadjudicated corrections on screen as green."""
+    import identity
+    with pytest.raises(ValueError):
+        rd.append_decision("manual_correction", klal_id=1, word_index=0,
+                           chosen_text="x", candidate_snapshot={"original_word": "y"},
+                           actor=identity.tool_actor("docai"), path=decisions_path)
+
+
+def test_which_tool_decided_is_separate_from_whose_reading_won():
+    """`actor` is WHO RECORDED the decision; `chosen_source` is WHOSE READING was
+    chosen. They are different questions and the ledger already answered the
+    second one - collapsing them would lose information."""
+    import identity
+    actor = identity.tool_actor("gemini-vision-adjudicator",
+                                via="verify_corrections_vision.py")
+    assert actor["id"] == "gemini-vision-adjudicator"   # who recorded it
+    assert actor["via"] == "verify_corrections_vision.py"  # through which script
+    # ...and chosen_source ("docai_reading"/"vlm_reading"/...) is untouched by
+    # any of this; it remains the record of which engine's text was selected.
+
+
 # --- apply_reviewer_decisions: the only code that mutates part1.json ---------
 
 def test_apply_replace_rewrites_only_the_snapshotted_span():

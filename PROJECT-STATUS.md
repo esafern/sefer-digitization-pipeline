@@ -713,6 +713,77 @@ reliability check, and every dispute still needs the ink or a different engine.
     Extent queue: **97**, down from 101 at the top of this session. Full suite
     **488 passed, 1 skipped**.
 
+0BM. **[2026-09-04, reviewer-requested] EVERY DECISION NOW CARRIES A STRUCTURED
+    ACTOR: who ruled, by stable internal id, and which tool recorded it. The
+    single free-text `reviewer` string was doing three jobs and had grown 35
+    distinct values for about six agents.**
+
+    Reviewer: *"track multiple reviewers... each decision carries a reviewer ID
+    tied to an email address... we can also track which tool made a given
+    decision"*, with identity to be swappable for Google auth later.
+
+    **The measured problem.** One string carried WHO, WHAT KIND (human vs
+    machine) and WHICH PASS at once — 3,203 records, **35 distinct reviewer
+    strings**, of which 1,372 are `local`, ~880 `ai-*`, ~380 `tools/*.py` and 5
+    more `local-*` variants that are all the same one person. That conflation is
+    the direct cause of item `0AT`: `is_human_reviewer()` had nothing to read
+    but a `"local"` PREFIX, so a script's `manual_correction` was
+    indistinguishable from a person's and 131 machine corrections rendered as
+    adjudicated.
+
+    **`pipeline/identity.py` is the whole seam**, two functions wide:
+    `resolve_actor()` (who is acting now) and `actor_of(record)` (who acted
+    then). Swapping in OIDC later replaces the body of the first and nothing
+    else — deliberately the same shape as `corpus_root()`.
+
+    **The id is INTERNAL, not an email** (reviewer's call). The ledger is
+    permanent and an address is not, so `reviewers.json` maps `r-eric` → current
+    email/display and the ledger stores only the id. The email IS also
+    snapshotted onto each record — not a contradiction but what an append-only
+    log is for: the id answers "who is this, forever", the snapshot answers "what
+    did we believe when this was written", recoverable if the roster is edited or
+    lost.
+
+    **`verified: false`, said out loud.** Identity today is ASSERTED by whoever
+    ran the process (`$SEFER_REVIEWER`), not proven. Writing an email into a
+    permanent audit trail while implying authentication would be exactly the
+    overclaim this file exists to catch. Google OIDC sets it true and adds an
+    `auth` block; nothing else changes.
+
+    **WHO RECORDED IT is kept separate from WHOSE READING WON.** `chosen_source`
+    (`docai_reading`/`vlm_reading`/`surya_reading`/`vision_transcription`)
+    already answers the second question correctly, so the reviewer's
+    "docai-decided / gemini-decided / dicta-decided" idea is served by the actor's
+    `id` + `via` WITHOUT collapsing the two — merging them would have destroyed
+    information the ledger already had.
+
+    **Nothing was migrated and nothing broke.** Records carry BOTH the structured
+    actor and the legacy string, so all existing readers work untouched; the 3,203
+    older rows are mapped on read. Verified across the whole live ledger:
+    **1,498 human / 1,705 tool, and ZERO disagreements** with the rule the actor
+    replaces. The dashboard's 7 write sites needed no edit at all — none passed
+    `reviewer=`, so they inherit the resolved actor.
+
+    **A guard I nearly weakened, caught by an existing test.** Before actors, an
+    OMITTED `reviewer` meant "a person" (the default was literally `"local"`)
+    while an explicit `reviewer=None` meant "no reviewer" and was REFUSED for a
+    manual_correction. A plain `reviewer=None` default silently merged those, so
+    a caller explicitly disclaiming a reviewer could have recorded a human ruling
+    — item `0AT`'s exact defect, reintroduced. `test_a_script_may_not_record_a_
+    human_ruling` failed, and a sentinel restores the distinction.
+
+    Eight new tests, including the whole-ledger agreement check. Full suite green
+    (fast suites 421, UI 86 passed / 1 skipped).
+
+    **On AWS + Google auth, assessed but NOT started:** auth is the easy half.
+    The blockers are that `review_decisions.jsonl` is an append-only file guarded
+    by an in-process `threading.Lock` (which protects one process, not two app
+    servers), and that `apply_reviewer_decisions.py` mutates `part1.json` in a
+    git working tree expecting a human to inspect the diff. The realistic split
+    is the review UI going multi-user in the cloud against a shared store, with
+    the corpus build and apply staying local/CI. This item is the prerequisite
+    either way and is useful immediately while everything stays local.
+
 0BK. **[2026-09-03] RE-CONFIRMED DIRECTLY AGAINST THE INK: the closing page
     reads `סליקו כללי התיו וסליקו כללי הגמרא`, and the final klal is `תרסז`
     (667), not `תרט"ז` (616).**

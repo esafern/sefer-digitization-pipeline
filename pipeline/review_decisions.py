@@ -177,8 +177,16 @@ def is_human_reviewer(reviewer):
 
 
 def ruled_by_human(rec):
-    """Did a PERSON write this ledger record? Takes the record, not the tag."""
-    return is_human_reviewer((rec or {}).get("reviewer"))
+    """Did a PERSON write this ledger record? Takes the record, not the tag.
+
+    Reads the STRUCTURED actor as of 2026-09-04 (identity.actor_of), which falls
+    back to mapping the legacy `reviewer` string for the 3,203 records written
+    before actors existed - so this answers the same way for both eras without
+    the caller knowing which it holds. The old prefix test on `reviewer` is
+    what it replaces: "starts with local" was never a fact about authorship,
+    only the closest thing available to read.
+    """
+    return _identity().is_human(_identity().actor_of(rec))
 
 
 _is_human_reviewer = is_human_reviewer  # pre-2026-09-03 internal name
@@ -250,6 +258,18 @@ def resolve_word_index(rec, words):
     return None, None
 
 
+# "Argument not supplied", distinct from an explicit None - see append_decision.
+_UNSET = object()
+
+
+def _identity():
+    """identity.py, imported lazily for the same reason _cio is: this module is
+    imported by tools that have no need of the reviewer roster, and a top-level
+    import would make appending one row depend on it."""
+    import identity
+    return identity
+
+
 def _cio():
     """corpus_io imported lazily: this module is imported BY corpus_io's callers
     and by tools that do not need the corpus loaders, and a top-level import
@@ -260,8 +280,8 @@ def _cio():
 
 def append_decision(decision_type, klal_id, word_index=None, chosen_source=None,
                      chosen_text=None, candidate_snapshot=None, needs_revisit=None,
-                     note=None, reviewer="local", applied_decision_id=None,
-                     supersedes=None, path=None):
+                     note=None, reviewer=_UNSET, applied_decision_id=None,
+                     supersedes=None, path=None, actor=None):
     """`supersedes` is the id of an earlier ruling this one REPLACES.
 
     ADDED 2026-09-02 for tools/repoint_stale_decisions.py. An append-only log has
@@ -295,6 +315,32 @@ def append_decision(decision_type, klal_id, word_index=None, chosen_source=None,
     # An automated pass that wants a human to look raises a `klal_flag`, which is
     # what a queue is made of. This refuses rather than warns: a warning in a
     # batch script's output is a warning nobody reads.
+    # ACTOR AND REVIEWER, resolved together so a record always carries both.
+    #
+    # `actor` is the structured identity (identity.py); `reviewer` is the legacy
+    # free-text string every existing reader still reads. A caller may pass
+    # either: an actor is authoritative and the string is derived from it, a bare
+    # string is mapped to an actor so no NEW record is ever written without one.
+    # Neither given means the historical default, an unidentified local human -
+    # which is exactly what the 1,372 existing "local" rows already mean.
+    # OMITTED and EXPLICITLY-None are different, and the difference is a guard.
+    # Before actors existed the default was the literal "local", so omitting the
+    # argument meant "a person at the keyboard" while passing None meant "no
+    # reviewer" - which the manual_correction guard below then refused. A plain
+    # `reviewer=None` default would have quietly merged those two, letting a
+    # caller that explicitly disclaims a reviewer record a human ruling. Caught
+    # by test_a_script_may_not_record_a_human_ruling.
+    if reviewer is _UNSET:
+        reviewer = None if actor is not None else "local"
+    if actor is None and reviewer is not None:
+        actor = _identity().actor_from_legacy_reviewer(reviewer)
+    if actor is None:
+        # An explicit reviewer=None: no identity is being claimed. Left as-is so
+        # the guard sees it, exactly as it did before actors.
+        actor = None
+    if reviewer is None and actor is not None:
+        reviewer = _identity().reviewer_string(actor)
+
     if decision_type == "manual_correction" and not _is_human_reviewer(reviewer):
         raise ValueError(
             f"reviewer {reviewer!r} may not write a manual_correction: that type means "
@@ -312,6 +358,7 @@ def append_decision(decision_type, klal_id, word_index=None, chosen_source=None,
         "needs_revisit": needs_revisit,
         "note": note,
         "reviewer": reviewer,
+        "actor": actor,
         "applied_decision_id": applied_decision_id,
         "supersedes": supersedes,
     }

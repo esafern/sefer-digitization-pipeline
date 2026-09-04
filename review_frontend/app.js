@@ -2025,6 +2025,28 @@ async function openFlagListPanel(bucket, label) {
   renderFlagList(label);
 }
 
+// WHO ruled, for display. One helper so every surface names a reviewer the
+// same way.
+//
+// `by_human` (item 0AT) answers "was this a person"; with more than one
+// reviewer that stopped being enough - the panel has to say WHICH person. The
+// server sends a structured `actor` (pipeline/identity.py) that also maps the
+// 3,203 records written before actors existed, so a legacy row still renders
+// something truthful ("local") rather than blank.
+//
+// An UNVERIFIED human identity is marked. Until real authentication exists the
+// email/name is asserted by whoever ran the server, not proven, and a reviewer
+// reading an audit trail should be able to see that distinction rather than
+// infer it. A tool actor is never marked - nobody claimed it was a person.
+function actorName(r) {
+  const a = r && r.actor;
+  if (!a) return (r && r.reviewer) || 'unknown';
+  const name = a.display || a.id || 'unknown';
+  if (a.kind === 'human' && a.email) return `${name} <${a.email}>`;
+  return name;
+}
+
+
 function flagListItemHtml(r, recorded) {
   const href = `#klal=${r.klal_id}&word=${r.word_index}`;
   const name = `Klal ${r.klal_id}` + (r.gematria ? ` (${r.gematria})` : '');
@@ -2049,11 +2071,11 @@ function flagListItemHtml(r, recorded) {
                                         : `<bdi class="rec-chosen">${escapeHtml(String(r.chosen_text))}</bdi>`;
     middle = `<span class="rec-status">${escapeHtml((RECORDED_STATUS_META[r.status] || [r.status])[0])}</span>` +
              (r.index_stale ? `<span class="rec-stale-mark" title="${escapeAttr(RECORDED_STALE_LABEL[1])}">&#9888;</span>` : '') +
-             (r.by_human ? '' : `<span class="rec-machine-mark" title="${escapeAttr('Written by ' + (r.reviewer || 'an automated pass') + ', not adjudicated by a person.')}">\u2699</span>`) +
+             (r.by_human ? '' : `<span class="rec-machine-mark" title="${escapeAttr('Written by ' + actorName(r) + ', not adjudicated by a person.')}">\u2699</span>`) +
              word + (changed ? `<span class="rec-arrow">&rarr;</span>${chosen}` : '');
     const when = (r.ts || '').slice(0, 10);
     title = `${r.decision_type || 'decision'}${when ? ' on ' + when : ''}`
-          + ` by ${r.reviewer || 'unknown'}` +
+          + ` by ${actorName(r)}` +
             (r.original_word != null ? ` \u2014 ruled on "${r.original_word}"` : '') +
             (r.note ? ` \u2014 ${r.note}` : '') +
             `\n${(RECORDED_STATUS_META[r.status] || ['', ''])[1]}`;

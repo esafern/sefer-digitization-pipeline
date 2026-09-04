@@ -1,0 +1,19 @@
+{
+  "_comment": [
+    "The reviewer roster: internal id -> current email and display name.",
+    "The LEDGER stores the internal id, never the email - ids are permanent and",
+    "emails are not, and review_decisions.jsonl is append-only. Change someone's",
+    "address here and every past decision still resolves to them.",
+    "Each decision also snapshots the email/display as they read AT WRITE TIME,",
+    "so history survives this file being edited or lost; that snapshot is",
+    "provenance, not the authoritative present-day lookup.",
+    "Identity here is ASSERTED, not authenticated - see pipeline/identity.py.",
+    "Set $SEFER_REVIEWER to the id of whoever is reviewing."
+  ],
+  "reviewers": {
+    "r-eric": {
+      "email": "eric.safern@gmail.com",
+      "display": "Eric Safern"
+    }
+  }
+}
