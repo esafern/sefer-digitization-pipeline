@@ -106,6 +106,19 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
 /* ---------- LEFT: scan ---------- */
 #scan-pane {
   width: 34%;
+  /* A FORWARD GUARD, and INERT TODAY - said plainly because the obvious reading
+     of this line is that it fixed something. Measured 2026-09-04 across 1600 →
+     800px with and without it: identical geometry at every width. #text-pane is
+     `flex: 1; min-width: 0`, so it absorbs the entire remainder and no deficit
+     ever reaches this pane to shrink it. What actually holds the scan's floor
+     is `min-width` below, and what enforces the reviewer's collapse order is
+     the breakpoints at the end of this file.
+     Kept anyway, at one line: it becomes load-bearing the moment anyone gives
+     #text-pane a min-width of its own, and that is precisely the change that
+     would start squeezing the ink without anyone noticing. */
+  flex-shrink: 0;
+  /* The scan's floor. It still narrows with the window (34% of it) down to
+     here, then holds - it never disappears, which is the rule. */
   min-width: 320px;
   background: #eef1f6;
   display: flex;
@@ -1350,3 +1363,52 @@ textarea.custom-text, input.custom-text {
    heading now says", which is the whole question the reviewer asked. */
 .title-pending-note.applied { border-color: var(--line); background: var(--wash); }
 #title-panel .history-item { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+
+
+/* ---------- Horizontal collapse order ----------
+
+   Reviewer, 2026-09-04: "shrinking the window horiz should always collapse the
+   index then the text never the scan."
+
+   The order is a claim about what the reviewer cannot work without. The scan is
+   the ink, and every decision in this project is made against it - a ruling
+   entered without seeing the page is the failure Lesson 14 names. The text pane
+   is next: it is where the word is clicked. The index is the most replaceable of
+   the three, because a klal can also be reached by URL, by the deep links in
+   the worklists, and by the nav that returns the moment the window widens.
+
+   STAGED, not continuous, and that is deliberate: #legend is `position: fixed`
+   with `width: var(--nav-w)` so it can overlay the index pane's own bottom. If
+   the index narrowed continuously the legend would keep its old width and hang
+   over the text; stepping the variable instead means the legend tracks it for
+   free, which is the whole reason the width was a variable to begin with.
+
+   Reversible by widening the window - nothing here is a mode the reviewer can
+   get stuck in. But note the consequence at the narrow end: with the index gone
+   so is the settings gear and the part selector, so those are wide-window
+   controls. */
+
+/* 1. The index gives up width first, before the text loses any. */
+@media (max-width: 1400px) {
+  :root { --nav-w: 300px; }
+}
+
+/* 2. Then the index goes entirely. `display: none` on the pane also removes
+      #legend, which is its child in the markup even though it is positioned
+      out of the flow - so the count readout leaves with the pane it belongs
+      to rather than stranding itself over the text. */
+@media (max-width: 1100px) {
+  #nav-pane { display: none; }
+}
+
+/* 3. Only then does the text go, and the scan takes the whole window. Its
+      `width: 34%` has to be released here or the pane would hold a third of the
+      viewport with nothing beside it. */
+@media (max-width: 720px) {
+  #text-pane { display: none; }
+  #scan-pane {
+    width: auto;
+    flex: 1 1 auto;
+    border-left: none;
+  }
+}

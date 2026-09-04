@@ -3032,3 +3032,147 @@ def test_the_count_footer_fits_on_one_line(server, page):
         f"(needs {geom['needs']}px, has {geom['avail']}px)")
     assert geom["needs"] <= geom["avail"], geom
     assert page.test_errors == []
+
+
+def test_the_scan_is_the_last_pane_standing_as_the_window_narrows(server, page):
+    """Reviewer, 2026-09-04: "shrinking the window horiz should always collapse
+    the index then the text never the scan."
+
+    The order is a claim about what a reviewer cannot work without. The scan is
+    the ink, and every ruling in this project is made against it - entering one
+    without seeing the page is the failure Lesson 14 names. So the index yields
+    first (a klal is also reachable by URL and by the worklists' deep links),
+    the text second, and the scan never.
+
+    Measured at real viewport widths rather than by reading the media queries
+    back, because a rule that is present but overridden - or one whose
+    breakpoint does not line up with the pane's own min-width - looks identical
+    to a correct one in the stylesheet (Lesson 32: a rule that is written is not
+    a rule that fires).
+    """
+    _open_dashboard(page, server)
+
+    def geometry(width):
+        page.set_viewport_size({"width": width, "height": 1000})
+        page.wait_for_timeout(320)
+        return page.evaluate("""() => {
+            const out = {};
+            for (const id of ['nav-pane', 'text-pane', 'scan-pane']) {
+                const el = document.getElementById(id);
+                const r = el.getBoundingClientRect();
+                out[id] = { shown: r.width > 0 && r.height > 0,
+                            w: Math.round(r.width) };
+            }
+            const lg = document.getElementById('legend').getBoundingClientRect();
+            out.legend = { shown: lg.width > 0 && lg.height > 0,
+                           w: Math.round(lg.width), left: Math.round(lg.left) };
+            return out;
+        }""")
+
+    wide = geometry(1600)
+    assert all(wide[p]["shown"] for p in ("nav-pane", "text-pane", "scan-pane")), \
+        f"all three panes must be up at 1600px: {wide}"
+
+    # 1. The index yields width BEFORE the text loses any.
+    mid = geometry(1300)
+    assert mid["nav-pane"]["w"] < wide["nav-pane"]["w"], (
+        f"the index did not give up any width first: {wide['nav-pane']} -> "
+        f"{mid['nav-pane']}")
+    assert mid["text-pane"]["shown"] and mid["scan-pane"]["shown"], mid
+
+    # 2. Then the index goes, and the other two are still up.
+    narrow = geometry(1000)
+    assert not narrow["nav-pane"]["shown"], \
+        f"the index must be gone at 1000px, got {narrow['nav-pane']}"
+    assert narrow["text-pane"]["shown"], "the text went before the index"
+    assert narrow["scan-pane"]["shown"], "the scan went before the index"
+    assert not narrow["legend"]["shown"], (
+        "the legend is `position: fixed` at the index's own width - with the "
+        "index gone it must go too, not hang over the text")
+
+    # 3. Only then the text, leaving the scan the whole window.
+    tiny = geometry(680)
+    assert not tiny["text-pane"]["shown"], f"the text must be gone at 680px: {tiny}"
+    assert tiny["scan-pane"]["shown"], "THE SCAN MUST NEVER COLLAPSE"
+    assert tiny["scan-pane"]["w"] >= 600, (
+        f"with both other panes gone the scan should take the window, got "
+        f"{tiny['scan-pane']['w']}px of 680")
+
+    # And the scan never gave up a pixel it was not forced to: it holds its
+    # share while the text absorbs the deficit.
+    assert narrow["scan-pane"]["w"] >= 320, narrow
+    page.set_viewport_size({"width": 1600, "height": 1000})
+    assert page.test_errors == []
+
+
+def _find_disputed_klal_with_most_options():
+    """The klal whose candidate offers the LONGEST option list.
+
+    A panel with two readings never scrolls, so testing "can you reach Save"
+    against an arbitrary candidate would be testing nothing (Lesson 25). The
+    worst case is what has to fit, and the worst case moves: the list grew by a
+    whole engine on 2026-09-04 when the cross-edition witness was wired in.
+    Derived from the data rather than pinned to a klal id, for the same reason
+    _find_disputed_klal() is.
+    """
+    with open(os.path.join(REPO, "corrections_part1.json"), encoding="utf-8") as f:
+        data = json.load(f)
+    best, best_n = None, -1
+    reading_fields = ("final_text", "docai_reading", "docai_repaired",
+                      "vision_transcription", "vlm_reading", "surya_reading",
+                      "dicta_reading", "lexical_proposal")
+    for kid in sorted(data.keys(), key=int):
+        for c in data[kid]:
+            if c.get("flag") != "current_text_may_be_wrong":
+                continue
+            n = len({c[f] for f in reading_fields if c.get(f)})
+            if n > best_n:
+                best, best_n = (int(kid), c["word_index"]), n
+    return best, best_n
+
+
+def test_save_is_on_screen_without_scrolling_the_worst_case_panel(server, page):
+    """Reviewer, 2026-09-04: "sometimes i have to scroll to see the save button -
+    move it above 'choose'".
+
+    The option list is the only part of this panel that grows, so with Save
+    underneath it the control that ENDS the interaction sat at an offset that
+    depended on how many engines happened to disagree at that word - and the day
+    this was reported, a fourth engine had just been added to that list.
+
+    Asserted by GEOMETRY against the worst case actually present in the corpus,
+    not by reading the markup order back: Save being earlier in the DOM does not
+    by itself prove it is on screen, which is the only thing the reviewer asked
+    for.
+    """
+    (klal_id, word_index), n_options = _find_disputed_klal_with_most_options()
+    assert klal_id is not None, "no disputed candidate exists to test against"
+    assert n_options >= 3, (
+        f"the worst case offers only {n_options} readings - too short to scroll, "
+        f"so this test would pass on a panel that could never fail")
+
+    _open_dashboard(page, server, klal_id)
+    page.locator(f"#klal-block-{klal_id} [data-word-index='{word_index}']").first.click()
+    page.wait_for_selector("#disputed-panel.open, #candidate-panel.open", timeout=5000)
+    page.wait_for_timeout(300)
+
+    geom = page.evaluate("""() => {
+        const btn = document.getElementById('save-decision-btn');
+        const panel = btn.closest('.side-panel');
+        const body = panel.querySelector('.panel-body') || panel;
+        const b = btn.getBoundingClientRect(), p = body.getBoundingClientRect();
+        const opts = document.getElementById('disputed-options');
+        return { btnTop: Math.round(b.top), btnBottom: Math.round(b.bottom),
+                 paneTop: Math.round(p.top), paneBottom: Math.round(p.bottom),
+                 optsTop: Math.round(opts.getBoundingClientRect().top),
+                 scrolled: Math.round(body.scrollTop) };
+    }""")
+
+    assert geom["scrolled"] == 0, "the panel opened already scrolled"
+    assert geom["btnBottom"] <= geom["paneBottom"], (
+        f"Save is below the fold of its own panel with {n_options} readings "
+        f"offered: {geom}")
+    assert geom["btnTop"] >= geom["paneTop"], f"Save is above the panel top: {geom}"
+    assert geom["btnTop"] < geom["optsTop"], (
+        f"Save must sit ABOVE the option list, which is the part that grows: {geom}")
+    assert page.test_errors == []

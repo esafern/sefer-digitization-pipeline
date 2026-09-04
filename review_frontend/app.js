@@ -2709,6 +2709,20 @@ async function openDisputedPanel(klalId, corr) {
       <div class="panel-word-context">${ctxWords}</div>
       ${corr.reasoning ? `<div style="font-size:12px;color:var(--ink-faint);margin-top:-8px;">${escapeHtml(corr.reasoning)}</div>` : ''}
     </div>
+    <!-- SAVE SITS ABOVE THE OPTIONS, not under them. Reviewer, 2026-09-04:
+         "sometimes i have to scroll to see the save button - move it above
+         'choose'". The option list is the part of this panel that GROWS - it
+         gained a fourth engine reading the same day this was asked - so the
+         control that ends the interaction was the one thing whose position
+         depended on how many readings happened to be offered. Above the list it
+         is at a fixed offset from the top of the panel and always on screen.
+         The two panels that carry an option list (this one and the witness
+         panel below) both do this; the other three have fixed-height bodies and
+         are unaffected. -->
+    <div class="panel-section">
+      <button class="panel-btn" id="save-decision-btn">Save decision</button>
+      <span class="save-status" id="save-status">Saved ✓</span>
+    </div>
     <div class="panel-section">
       <div class="panel-label">Choose the correct reading</div>
       <div id="disputed-options"></div>
@@ -2723,10 +2737,6 @@ async function openDisputedPanel(klalId, corr) {
     <div class="panel-section">
       <div class="panel-label">Note (optional)</div>
       <textarea id="decision-note" rows="3" placeholder="Why? e.g. &quot;crop-confirmed against page 26&quot;">${escapeHtml(decision && decision.note)}</textarea>
-    </div>
-    <div class="panel-section">
-      <button class="panel-btn" id="save-decision-btn">Save decision</button>
-      <span class="save-status" id="save-status">Saved ✓</span>
     </div>
     <div class="panel-section">
       <span class="history-toggle" id="history-toggle">Show decision history</span>
@@ -3373,6 +3383,11 @@ async function openWitnessPanel(w) {
       <div class="panel-label">Raw OCR context (page ${w.page}, unverified - furniture/misreads possible)</div>
       <div class="panel-word-context">${ctxHtml}</div>
     </div>
+    <!-- Save above the options here too - see the disputed panel above. -->
+    <div class="panel-section">
+      <button class="panel-btn" id="save-witness-decision-btn">Save decision</button>
+      <span class="save-status" id="witness-save-status">Saved ✓</span>
+    </div>
     <div class="panel-section">
       <div class="panel-label">Choose the correct reading</div>
       <div id="witness-options"></div>
@@ -3387,10 +3402,6 @@ async function openWitnessPanel(w) {
     <div class="panel-section">
       <div class="panel-label">Note (optional)</div>
       <textarea id="witness-decision-note" rows="3" placeholder="Why? e.g. &quot;crop-confirmed against page 26&quot;">${escapeHtml(decision && decision.note)}</textarea>
-    </div>
-    <div class="panel-section">
-      <button class="panel-btn" id="save-witness-decision-btn">Save decision</button>
-      <span class="save-status" id="witness-save-status">Saved ✓</span>
     </div>
   `;
 
