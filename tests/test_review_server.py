@@ -3329,3 +3329,117 @@ def test_narrowing_the_window_never_makes_the_scan_pane_jump_bigger(server, page
         "on a frozen layout")
     page.set_viewport_size({"width": 1600, "height": 1000})
     assert page.test_errors == []
+
+
+def test_the_hover_card_does_not_block_clicking_the_word_underneath(server, page):
+    """Reviewer, 2026-09-04: "when i move my cursor to click on a word behind a
+    hover pane it should move out of the way so i dont have to click blindly."
+
+    #word-card is placed ABOVE the word it describes, so by construction it
+    covers the line above - words the reviewer clicks. While it swallowed
+    pointer events, reaching a covered word meant moving off the text entirely,
+    waiting out the 260ms hide timer, and coming back blind.
+
+    Tested by asking the document WHAT IS AT THAT POINT (elementFromPoint), not
+    by reading the CSS: `pointer-events` is inherited and overridden in ways a
+    grep cannot settle, and the thing that matters is whether a real click lands
+    on the word or on the card.
+    """
+    _open_dashboard(page, server, 66)
+    page.wait_for_timeout(400)
+
+    hit = page.evaluate("""() => {
+        const blk = document.getElementById('klal-block-66');
+        const words = [...blk.querySelectorAll('[data-word-index]')];
+        if (words.length < 60) return { err: 'not enough words mounted' };
+        // A word far enough down that there is text above it for the card to
+        // cover once it opens.
+        const anchor = words[50];
+        // Scroll it into view FIRST. showWordCard() positions from the word's
+        // viewport rect, so hovering a word that is still 4,000px down the
+        // scroll puts the card off-screen and elementFromPoint - which only
+        // answers about the visible viewport - returns null for every probe
+        // below. That is how the first version of this test reported the copy
+        // button as dead when it was merely out of frame.
+        anchor.scrollIntoView({ block: 'center' });
+        anchor.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
+        const card = document.getElementById('word-card');
+        if (!card || card.style.display === 'none') return { err: 'card did not open' };
+        const c = card.getBoundingClientRect();
+        if (c.width < 10 || c.height < 10) return { err: 'card has no size' };
+        if (c.top < 0 || c.bottom > window.innerHeight)
+            return { err: 'card is outside the viewport: ' + JSON.stringify(c) };
+        const cx = Math.round(c.left + c.width / 2);
+        const cy = Math.round(c.top + c.height / 2);
+        const el = document.elementFromPoint(cx, cy);
+        const btn = card.querySelector('.copy-ref');
+        const b = btn.getBoundingClientRect();
+        const btnEl = document.elementFromPoint(
+            Math.round(b.left + b.width / 2), Math.round(b.top + b.height / 2));
+        return {
+            bodyHitsCard: !!(el && card.contains(el)),
+            bodyHitTag: el ? (el.className || el.tagName) : null,
+            btnHitsButton: btnEl === btn || (btnEl && btn.contains(btnEl)),
+        };
+    }""")
+    assert not hit.get("err"), hit["err"]
+
+    assert not hit["bodyHitsCard"], (
+        "a click in the middle of the hover card still lands on the card, so "
+        f"the word underneath cannot be reached (hit {hit['bodyHitTag']!r})")
+    # ...and the one live target survives: a button that cannot be clicked is
+    # not a button.
+    assert hit["btnHitsButton"], (
+        "the card's copy button is pass-through too, so it is dead")
+    assert page.test_errors == []
+
+
+def test_navigating_to_another_klal_closes_the_open_word_panel(server, page):
+    """Reviewer, 2026-09-04: "if I click on a diff klal, the current pop up
+    disputed word should disapp - I've moved on."
+
+    The panel is about ONE word in ONE klal, but nothing kept that association
+    once it was on screen, so it outlived the reason it was opened: it stayed
+    over the new klal's text, still showing the old klal's word, with its Save
+    button still wired to the old position. A reviewer scrolling and pressing
+    Save would have ruled on a word they were no longer looking at.
+
+    Three cases, because the interesting content of this rule is what it must
+    NOT close.
+    """
+    klal_id = _find_disputed_klal()
+    assert klal_id is not None, "no disputed candidate exists to test against"
+    other = 1 if klal_id != 1 else 2
+
+    _open_dashboard(page, server, klal_id)
+    page.locator(f"#klal-block-{klal_id} .flag-word.state-open").first.click()
+    page.wait_for_selector("#disputed-panel.open, #candidate-panel.open", timeout=5000)
+
+    # 1. The SAME klal is not "moving on" - closing there would undo the
+    #    reviewer's own click.
+    page.click(f"#nav-{klal_id}")
+    page.wait_for_timeout(400)
+    assert page.locator(".side-panel.open").count() == 1, (
+        "clicking the klal you are already in closed the panel you just opened")
+
+    # 2. A DIFFERENT klal closes it.
+    page.click(f"#nav-{other}")
+    page.wait_for_timeout(600)
+    assert page.locator(".side-panel.open").count() == 0, (
+        "the word panel is still open over a different klal's text, still wired "
+        "to the word the reviewer navigated away from")
+    assert page.locator("#overlay-backdrop.open").count() == 0, \
+        "the panel closed but its backdrop did not - clicks still hit nothing"
+
+    # 3. The corpus-wide flag list must SURVIVE navigation: it is the worklist,
+    #    and jumping from it to the klal it names is the entire point of it.
+    #    A rule that closed everything would break the tool it was meant to help.
+    page.evaluate("() => document.querySelector('#legend .legend-row').click()")
+    page.wait_for_timeout(500)
+    if page.locator("#flag-list-panel.open").count():
+        page.click(f"#nav-{klal_id}")
+        page.wait_for_timeout(500)
+        assert page.locator("#flag-list-panel.open").count() == 1, (
+            "navigating closed the corpus-wide worklist, which exists to be "
+            "navigated from")
+    assert page.test_errors == []

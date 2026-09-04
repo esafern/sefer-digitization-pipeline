@@ -1284,6 +1284,20 @@ textarea.custom-text, input.custom-text {
   font-size: 12px;
   direction: ltr;
   box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+  /* THE BODY LETS THE POINTER THROUGH. Reviewer, 2026-09-04: "when i move my
+     cursor to click on a word behind a hover pane it should move out of the way
+     so i dont have to click blindly."
+     This card is placed over the running text by construction - it sits above
+     the word it describes, which means it covers the LINE ABOVE, and those are
+     words the reviewer clicks. While it swallowed pointer events the only way
+     to reach a covered word was to move off the text entirely, wait 260ms for
+     the card to time out, and come back blind.
+     Pass-through instead: the mouse reaches the word underneath, that word's
+     own mouseover fires, and the card re-anchors to it - so moving toward a
+     covered word makes the card follow the cursor away from it. The head keeps
+     `pointer-events: auto` below, because it carries the copy button and a
+     button you cannot click is not a button. */
+  pointer-events: none;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -1296,6 +1310,13 @@ textarea.custom-text, input.custom-text {
 #word-card { flex-direction: column; align-items: stretch; }
 #word-card.wc-rich { max-width: 420px; }
 #word-card .wc-head { display: flex; align-items: center; gap: 6px; }
+/* THE COPY BUTTON IS THE ONLY LIVE TARGET IN THE CARD, and nothing larger.
+   Making the whole head interactive was not enough: for a plain word the card
+   IS its head - one line, no detail body - so the head covered the text and the
+   pointer still could not get through. Only the button takes events now, which
+   keeps it clickable while every other pixel of the card lets the reviewer
+   reach the word underneath. */
+#word-card .copy-ref { pointer-events: auto; }
 #word-card .wc-ref { font-weight: 500; white-space: nowrap; }
 #word-card .wc-status {
   font-size: 10.5px; opacity: 0.75; white-space: nowrap;

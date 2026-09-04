@@ -570,11 +570,17 @@ textScroll.addEventListener('mouseover', (e) => {
 textScroll.addEventListener('mouseout', (e) => {
   const span = e.target.closest && e.target.closest('[data-word-index]');
   if (!span) return;
-  if (e.relatedTarget && wordCard.contains(e.relatedTarget)) return;   // moved onto the card
+  if (e.relatedTarget && wordCard.contains(e.relatedTarget)) return;   // moved onto the card head
   hideWordCard(false);
 });
-wordCard.addEventListener('mouseenter', () => clearTimeout(wordCardHideTimer));
-wordCard.addEventListener('mouseleave', () => hideWordCard(false));
+// `mouseover`/`mouseout`, not `mouseenter`/`mouseleave`: the card itself is
+// `pointer-events: none` now (see #word-card in app.css), so it receives no
+// pointer events of its own and mouseenter would never fire. Its head strip
+// re-enables them, and those events BUBBLE to here - which is exactly the
+// keep-alive we want, alive only while the pointer is on the part that has
+// something to click.
+wordCard.addEventListener('mouseover', () => clearTimeout(wordCardHideTimer));
+wordCard.addEventListener('mouseout', () => hideWordCard(false));
 // A click anywhere that is not the copy button dismisses it, so the card never
 // sits over the text the reviewer is trying to read.
 document.addEventListener('click', (e) => {
@@ -1930,6 +1936,7 @@ function setupPanels() {
   });
 }
 function closePanels() {
+  openPanelKlalId = null;
   // Was five hand-listed panels until 2026-09-01, when a sixth was added: a
   // panel missing from this list stays open UNDER the next one, and nothing on
   // screen says which of the two is answering your click. Querying the class
@@ -2060,6 +2067,8 @@ const RECORDED_STALE_LABEL = ['stale address',
   'The ruling\u2019s recorded word_index no longer points at the word it names, because a later apply in the same klal shifted everything after it and nothing re-pointed the decision. Open item 0AB. Most of these were still HONOURED - it is the address that rotted, not the ruling.'];
 
 async function openFlagListPanel(bucket, label) {
+  // No klal id: this list is corpus-wide and navigating FROM it is what it
+  // is for, so it must survive a jump that closes the per-word panels.
   openPanel(flagListPanel);
   document.getElementById('flag-list-panel-title').textContent = label;
   flagListPanelBody.innerHTML = '<p>Loading…</p>';
@@ -2298,9 +2307,16 @@ legend.addEventListener('click', (e) => {
   openFlagListPanel(row.dataset.bucket, row.dataset.label);
 });
 
-function openPanel(panel) {
+// WHICH KLAL THE OPEN PANEL IS ABOUT. Recorded so navigating away can close it
+// - see jumpTo(). Every panel is opened for a specific word or klal, but until
+// now nothing kept that association once the panel was on screen, so a panel
+// outlived the reason it was opened.
+let openPanelKlalId = null;
+
+function openPanel(panel, klalId) {
   closePanels();
   _panelGen++;
+  openPanelKlalId = klalId == null ? null : Number(klalId);
   backdrop.classList.add('open');
   panel.classList.add('open');
 }
@@ -2345,7 +2361,7 @@ async function refreshTitlePending(klalId) {
 
 
 async function openTitlePanel(klalId) {
-  openPanel(titlePanel);
+  openPanel(titlePanel, klalId);
   titlePanelBody.innerHTML = '<p>Loading…</p>';
   const k = mountedKlal[klalId] || await fetchKlal(klalId);
   // UNFILTERED split, matching the server's cio.title_words_of() exactly.
@@ -2546,7 +2562,7 @@ async function openTitlePanel(klalId) {
 
 
 async function openDisputedPanel(klalId, corr) {
-  openPanel(disputedPanel);
+  openPanel(disputedPanel, klalId);
   disputedPanelBody.innerHTML = '<p>Loading…</p>';
 
   const k = mountedKlal[klalId] || await fetchKlal(klalId);
@@ -2924,7 +2940,7 @@ async function toggleHistory(klalId, wordIndex) {
 
 // ---------- klal-level flag panel ----------
 async function openKlalFlagPanel(klalId) {
-  openPanel(klalFlagPanel);
+  openPanel(klalFlagPanel, klalId);
   klalFlagPanelBody.innerHTML = '<p>Loading…</p>';
   const state = await fetch(`/api/klal/${klalId}/flag`).then(r => r.json());
   // The button/nav badge can be flagged for a reason THIS checkbox doesn't
@@ -3067,7 +3083,7 @@ async function saveManualDecision(klalId, wordIndex, word, chosenText, note) {
 }
 
 async function openManualCorrectionPanel(klalId, wordIndex, word, existing) {
-  openPanel(manualPanel);
+  openPanel(manualPanel, klalId);
   manualPanelBody.innerHTML = '<p>Loading…</p>';
 
   const k = mountedKlal[klalId] || await fetchKlal(klalId);
@@ -3250,7 +3266,7 @@ async function openManualCorrectionPanel(klalId, wordIndex, word, existing) {
 
 // ---------- proposed-punctuation review panel ----------
 async function openPunctuationPanel(klalId, p) {
-  openPanel(punctuationPanel);
+  openPanel(punctuationPanel, klalId);
   punctuationPanelBody.innerHTML = '<p>Loading…</p>';
 
   const k = mountedKlal[klalId] || await fetchKlal(klalId);
@@ -3336,7 +3352,7 @@ async function openPunctuationPanel(klalId, p) {
 // corrections' word_index - the two never collide since the server keys
 // decisions by decision_type ("witness_choice" vs "candidate_choice"). ----------
 async function openWitnessPanel(w) {
-  openPanel(witnessPanel);
+  openPanel(witnessPanel, w.klal_id);
   witnessPanelBody.innerHTML = '<p>Loading…</p>';
 
   const decision = w.current_decision;
@@ -4037,6 +4053,22 @@ let lastActiveScanPage = null; // which page updateActiveFromScroll last showed 
 function jumpTo(klalId) {
   const block = document.getElementById('klal-block-' + klalId);
   if (!block) return;
+  // MOVING TO A DIFFERENT KLAL CLOSES THE OPEN PANEL. Reviewer, 2026-09-04:
+  // "if I click on a diff klal, the current pop up disputed word should disapp
+  // - I've moved on."
+  //
+  // The panel is about ONE word in ONE klal, but it outlived that context: it
+  // stayed open over the new klal's text, still showing the old klal's word,
+  // its Save button still wired to the old position. A reviewer who scrolled
+  // and clicked Save would have ruled on a word they were no longer looking at.
+  //
+  // Only on a DIFFERENT klal. Clicking the klal you are already in (the nav row
+  // for the current one) is not moving on, and closing the panel there would
+  // undo the reviewer's own click.
+  if (openPanelKlalId != null && openPanelKlalId !== Number(klalId)) {
+    dismissPanels();
+  }
+  hideWordCard(true);
   suppressObserverScroll = true;
   manualPageLock = false; // nav-panel click = explicit klal intent; let setActiveKlal show its page
   lastActiveKlalId = klalId;
