@@ -3678,3 +3678,74 @@ def test_every_ruling_path_records_the_stable_half_of_its_address(server, page):
         f"the anchor resolves to w{hits[snap['word_occurrence'] - 1]}, not the w{wi} "
         f"that was ruled on")
     assert page.test_errors == []
+
+
+def test_one_word_of_a_multi_word_span_can_be_deleted_on_its_own(server, page):
+    """Reviewer, 2026-09-04, klal 35 w44, span of two words: "remove word
+    b'sefer leave shmot" - then three attempts that could not express it.
+
+    Every answer the disputed panel offered was about the WHOLE span, and the
+    applier is right to refuse a partial-span answer: apply_insert_removal
+    deletes all of final_text and ignores chosen_text, which is exactly how klal
+    66 w0 lost the word that negates its klal. The remedy its own comment names
+    is "the answer belongs at an explicit index" - and there was no way to give
+    one, because a word carrying a candidate always routes to this panel and
+    never to the manual panel that owns "Delete this word".
+
+    So the fix is an affordance, not a relaxed guard: a control per word of the
+    span that records a manual_correction AT THAT WORD, which
+    apply_manual_deletion removes on its own after checking it is still the word
+    named. This test asserts the control exists for a multi-word span, is absent
+    for a single-word one, and addresses each word at its own index.
+    """
+    _open_dashboard(page, server)
+    multi = page.evaluate("""async () => {
+        for (const k of KLALIM.slice(0, 90)) {
+            const d = await fetch('/api/klal/' + k.klal_id).then(r => r.json());
+            const c = (d.corrections || []).find(x => x.final_text
+                && String(x.final_text).split(' ').filter(Boolean).length > 1
+                && x.word_index != null);
+            if (c) return { klal_id: k.klal_id, word_index: c.word_index,
+                            span: c.final_text };
+        }
+        return null;
+    }""")
+    if not multi:
+        import pytest
+        pytest.skip("no multi-word candidate span in the corpus to test against")
+
+    page.evaluate("""async (m) => {
+        const d = await fetch('/api/klal/' + m.klal_id).then(r => r.json());
+        openDisputedPanel(m.klal_id, d.corrections.find(c => c.word_index === m.word_index));
+    }""", multi)
+    page.wait_for_timeout(400)
+
+    btns = page.evaluate("""() => [...document.querySelectorAll('#disputed-panel .span-del-btn')]
+        .map(b => ({ off: b.dataset.offset, word: b.dataset.word }))""")
+    words = [w for w in multi["span"].split(" ") if w]
+    assert len(btns) == len(words), (
+        f"span {multi['span']!r} has {len(words)} words but the panel offers "
+        f"{len(btns)} per-word delete control(s)")
+    for i, (b, w) in enumerate(zip(btns, words)):
+        assert b["word"] == w and int(b["off"]) == i, (
+            f"control {i} names {b['word']!r} at offset {b['off']}, expected {w!r} at {i} - "
+            f"an off-by-one here deletes the wrong word")
+
+    # A SINGLE-word span must NOT get the control: there is nothing partial to
+    # express, and the ordinary answers already cover it.
+    single = page.evaluate("""async () => {
+        for (const k of KLALIM.slice(0, 60)) {
+            const d = await fetch('/api/klal/' + k.klal_id).then(r => r.json());
+            const c = (d.corrections || []).find(x => x.final_text
+                && String(x.final_text).split(' ').filter(Boolean).length === 1
+                && x.word_index != null);
+            if (c) { openDisputedPanel(k.klal_id, c); return true; }
+        }
+        return false;
+    }""")
+    if single:
+        page.wait_for_timeout(400)
+        assert page.locator("#disputed-panel .span-del-btn").count() == 0, (
+            "a single-word span offers a per-word delete, which is just the "
+            "whole-span answer wearing a different control")
+    assert page.test_errors == []

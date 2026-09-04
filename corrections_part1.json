@@ -1788,28 +1788,6 @@
       "surya_reading": "משמע",
       "dicta_reading": "משמע",
       "flag": "possible_omission"
-    },
-    {
-      "word_index": 44,
-      "opcode": "insert",
-      "docai_reading": null,
-      "docai_repaired": null,
-      "final_text": "בספר שמות",
-      "page": 26,
-      "bbox": {
-        "x1": 0.8929682374000549,
-        "y1": 0.619124174118042,
-        "x2": 0.9377722144126892,
-        "y2": 0.6355966329574585
-      },
-      "vision_selected": "A",
-      "vision_transcription": "מש / בא / ע\"ג",
-      "confidence": 1.0,
-      "reasoning": "The text 'בספר שמות' (Option B) is not visible in this image crop. The crop contains vertical line fragments showing 'מש', 'בא', and 'ע\"ג'. Option A is correct as Option B represents an incorrect text alignment/addition with no basis in the visible ink.",
-      "vlm_reading": null,
-      "surya_reading": null,
-      "dicta_reading": null,
-      "flag": "unverified_insertion"
     }
   ],
   "36": [

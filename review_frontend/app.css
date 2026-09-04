@@ -1501,3 +1501,13 @@ textarea.custom-text, input.custom-text {
     border-left: none;
   }
 }
+
+/* Per-word deletion inside a multi-word candidate span (2026-09-04). Laid out
+   as a row of small buttons rather than another radio option, because it is not
+   an answer to "which reading is right" - it is a different, narrower edit. */
+.span-word-row { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+.span-del-btn { font-size: 13px; direction: rtl; }
+.span-word-hint {
+  font-size: 11px; color: var(--ink-faint); margin-top: var(--sp-2);
+  font-family: 'Inter', sans-serif;
+}

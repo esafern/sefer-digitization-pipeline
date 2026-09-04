@@ -331,21 +331,6 @@
       "bbox_estimated": false
     },
     {
-      "klal_id": 35,
-      "page": 26,
-      "opcode": "insert",
-      "word_index_in_final_text": 44,
-      "original_word": null,
-      "corrected_word": "בספר שמות",
-      "bbox": {
-        "x1": 0.8929682374000549,
-        "y1": 0.619124174118042,
-        "x2": 0.9377722144126892,
-        "y2": 0.6355966329574585
-      },
-      "bbox_estimated": true
-    },
-    {
       "klal_id": 36,
       "page": 26,
       "opcode": "replace",
@@ -4607,8 +4592,8 @@
     }
   ],
   "meta": {
-    "total_candidates": 307,
-    "skipped_settled_by_applied_decision": 353,
+    "total_candidates": 306,
+    "skipped_settled_by_applied_decision": 354,
     "klalim_covered": 112,
     "skipped_no_docai_page_klalim": [],
     "unattributable_deletes": [],

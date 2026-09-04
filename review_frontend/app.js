@@ -2793,6 +2793,11 @@ async function openDisputedPanel(klalId, corr) {
     }
   }
 
+  // The words the candidate's span actually covers. `final_text` is the stored
+  // span, which for an `insert` candidate can be several words - and that is
+  // the case this panel could not answer until 2026-09-04.
+  const spanWords = (corr.final_text || '').split(' ').filter(Boolean);
+
   const html = `
     <div class="panel-section">
       <div><i style="background:${flagColor};width:9px;height:9px;border-radius:2px;display:inline-block;margin-inline-end:6px;"></i>${statusLabel(corr)}</div>
@@ -2821,6 +2826,32 @@ async function openDisputedPanel(klalId, corr) {
       <div class="panel-label">Note (optional)</div>
       <textarea id="decision-note" rows="3" placeholder="Why? e.g. &quot;crop-confirmed against page 26&quot;">${escapeHtml(decision && decision.note)}</textarea>
     </div>
+    ${spanWords.length > 1 ? `
+    <!-- PER-WORD DELETION INSIDE A MULTI-WORD SPAN. Reviewer, 2026-09-04, on
+         klal 35 w44, span of two words: "remove word b'sefer leave shmot" -
+         then three attempts that could not express it, because every answer
+         this panel offers is about the WHOLE span.
+         The applier is right to refuse a partial-span answer:
+         apply_insert_removal deletes all of final_text and ignores
+         chosen_text, which is how klal 66 w0 lost the word that negates its
+         klal. Its comment names the
+         remedy - "the answer belongs at an explicit index" - and there was no
+         way to give one, because a word carrying a candidate always routes here
+         and never to the manual panel that owns "Delete this word".
+         (No backticks in this comment - it sits inside a template literal.)
+         These buttons record a manual_correction at the EXACT word, which
+         apply_manual_deletion removes on its own after checking it is still the
+         word named. No applier guard is relaxed to make this work. -->
+    <div class="panel-section">
+      <div class="panel-label">Or remove one word of this span</div>
+      <div class="span-word-row">
+        ${spanWords.map((w, i) => `<button class="panel-btn secondary span-del-btn" type="button"
+             data-offset="${i}" data-word="${escapeAttr(w)}"
+             title="Record a manual deletion of just this word (klal ${klalId} word ${corr.word_index + i})"
+           >&times; <bdi>${escapeHtml(w)}</bdi></button>`).join('')}
+      </div>
+      <div class="span-word-hint">Deletes that word alone and leaves the rest of the span. Recorded at its own word index.</div>
+    </div>` : ''}
     <div class="panel-section">
       <span class="history-toggle" id="history-toggle">Show decision history</span>
       <div class="history-list" id="history-list" style="display:none;"></div>
@@ -2889,6 +2920,17 @@ async function openDisputedPanel(klalId, corr) {
   if (activeSource === 'custom') markActiveOption('custom');
 
   document.getElementById('save-decision-btn').onclick = () => saveDisputedDecision(klalId, corr);
+  disputedPanel.querySelectorAll('.span-del-btn').forEach(btn => {
+    btn.onclick = async () => {
+      const off = parseInt(btn.dataset.offset, 10);
+      const word = btn.dataset.word;
+      const note = (document.getElementById('decision-note').value || '').trim();
+      const saved = await saveManualDecision(
+        klalId, corr.word_index + off, word, '',
+        note || `removed "${word}" from the span "${corr.final_text}"`);
+      if (saved !== false) flashSavedThenClose('save-status');
+    };
+  });
   document.getElementById('history-toggle').onclick = () => toggleHistory(klalId, corr.word_index);
 
   // ADDED 2026-08-24 (user report: "i can't clear the revisit flag"). A
