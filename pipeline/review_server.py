@@ -1844,6 +1844,14 @@ def _with_stable_anchor(snapshot, klal_id, word_index):
     records what was RULED ON rather than asking where the word happens to be
     now.
 
+    WHAT SHIFTS AN INDEX, stated exactly, because a commit message of mine got
+    this wrong on 2026-09-04 and the reviewer caught it. A REPLACE of equal word
+    count shifts NOTHING - every later position stays where it was, which is why
+    31 of that day's 61 applied rulings moved no index at all. Only a change to
+    the WORD COUNT shifts anything: klal 52 lost a word and klal 177 gained two,
+    and those two are the entire source of that day's 104 rotted addresses.
+    "Changing a word in place affects the following words" is false.
+
     Non-destructive: a snapshot that already carries an anchor keeps it, and a
     position that cannot be resolved records nothing rather than a guess.
     """
