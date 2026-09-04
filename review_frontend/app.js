@@ -2709,20 +2709,6 @@ async function openDisputedPanel(klalId, corr) {
       <div class="panel-word-context">${ctxWords}</div>
       ${corr.reasoning ? `<div style="font-size:12px;color:var(--ink-faint);margin-top:-8px;">${escapeHtml(corr.reasoning)}</div>` : ''}
     </div>
-    <!-- SAVE SITS ABOVE THE OPTIONS, not under them. Reviewer, 2026-09-04:
-         "sometimes i have to scroll to see the save button - move it above
-         'choose'". The option list is the part of this panel that GROWS - it
-         gained a fourth engine reading the same day this was asked - so the
-         control that ends the interaction was the one thing whose position
-         depended on how many readings happened to be offered. Above the list it
-         is at a fixed offset from the top of the panel and always on screen.
-         The two panels that carry an option list (this one and the witness
-         panel below) both do this; the other three have fixed-height bodies and
-         are unaffected. -->
-    <div class="panel-section">
-      <button class="panel-btn" id="save-decision-btn">Save decision</button>
-      <span class="save-status" id="save-status">Saved ✓</span>
-    </div>
     <div class="panel-section">
       <div class="panel-label">Choose the correct reading</div>
       <div id="disputed-options"></div>
@@ -2765,6 +2751,29 @@ async function openDisputedPanel(klalId, corr) {
           : `This word carries an open revisit flag${corr.word_flag && corr.word_flag.reviewer ? ' from ' + escapeHtml(corr.word_flag.reviewer) : ''}.`}</div>
       <button class="panel-btn" id="clear-word-flag-btn">Clear revisit flag</button>
     </div>` : ''}
+    <!-- STICKY SAVE, AND IT MUST BE LAST. Reviewer, 2026-09-04: first
+         "sometimes i have to scroll to see the save button - move it above
+         'choose'", then "try sticky save bar". Moving it above the options put
+         it on screen but left the optional Note below the button that ends the
+         interaction - the same annoyance inverted. Pinned to the bottom of the
+         scrolling body instead, it is reachable at every scroll position AND
+         the reading order stays choose then note then save.
+
+         LAST CHILD, not merely late: a bottom-sticky element floats at the
+         bottom edge of the scroll viewport while anything after it scrolls
+         UNDER it, so content below is covered and never settles. Placed before
+         the history section on the first attempt, it left #history-toggle
+         permanently unstable and Playwright could not click it at all -
+         test_a_note_with_html_special_characters_renders_verbatim_in_the_
+         history_panel timed out after 30s waiting for the element to stop
+         moving. Everything the panel renders goes above this.
+
+         NOTE FOR EDITORS: no backticks in this comment. It sits inside a
+         template literal, so one would end the string. -->
+    <div class="panel-save-bar">
+      <button class="panel-btn" id="save-decision-btn">Save decision</button>
+      <span class="save-status" id="save-status">Saved \u2713</span>
+    </div>
   `;
   disputedPanelBody.innerHTML = html;
 
@@ -3383,11 +3392,6 @@ async function openWitnessPanel(w) {
       <div class="panel-label">Raw OCR context (page ${w.page}, unverified - furniture/misreads possible)</div>
       <div class="panel-word-context">${ctxHtml}</div>
     </div>
-    <!-- Save above the options here too - see the disputed panel above. -->
-    <div class="panel-section">
-      <button class="panel-btn" id="save-witness-decision-btn">Save decision</button>
-      <span class="save-status" id="witness-save-status">Saved ✓</span>
-    </div>
     <div class="panel-section">
       <div class="panel-label">Choose the correct reading</div>
       <div id="witness-options"></div>
@@ -3402,6 +3406,11 @@ async function openWitnessPanel(w) {
     <div class="panel-section">
       <div class="panel-label">Note (optional)</div>
       <textarea id="witness-decision-note" rows="3" placeholder="Why? e.g. &quot;crop-confirmed against page 26&quot;">${escapeHtml(decision && decision.note)}</textarea>
+    </div>
+    <!-- Sticky here too - see the disputed panel above. -->
+    <div class="panel-save-bar">
+      <button class="panel-btn" id="save-witness-decision-btn">Save decision</button>
+      <span class="save-status" id="witness-save-status">Saved ✓</span>
     </div>
   `;
 
@@ -3589,6 +3598,55 @@ function applyZoom(anchorRatioX, anchorRatioY) {
     }
   });
 }
+// THE PAGE IMAGE MUST RE-FIT WHEN ITS PANE CHANGES WIDTH. Reviewer, 2026-09-04:
+// "still jittery as it shrinks".
+//
+// applyZoom() sizes the image from `scanViewer.clientWidth - 32`, so at 100% the
+// page exactly fits its pane - but nothing ever recomputed it. The width was set
+// once, when the page was loaded or a zoom button was pressed, and then kept its
+// PIXEL value forever. Drag the window narrower and the pane shrank while the
+// image did not: measured 2026-09-04 sweeping 1700 -> 1380px, the image stayed
+// 515px while the viewer went to 435, a horizontal scrollbar appeared, and
+// #page-container's `margin: 0 auto` pushed its left edge to -80px - the scan
+// visibly slid sideways and lost its left margin as the window moved. That is
+// the jitter, and it had nothing to do with the pane widths themselves.
+//
+// A ResizeObserver on the VIEWER rather than a window resize listener: the pane
+// also changes width when a media query fires and when the index pane
+// disappears, neither of which is a window resize the image would otherwise
+// hear about.
+//
+// TWO GUARDS, because this loop can feed itself. Re-sizing the image changes
+// scrollHeight, which can toggle the vertical scrollbar, which changes
+// clientWidth, which fires the observer again - a genuine infinite loop. So:
+// only act when the fit width actually MOVED (a scrollbar's worth of change is
+// still a real change, but the second pass will find it unmoved and stop), and
+// coalesce to one re-fit per animation frame so a drag-resize does not queue
+// hundreds.
+let _lastFitWidth = null;
+let _refitPending = false;
+
+function refitScanToPane() {
+  const w = scanViewer.clientWidth;
+  if (!w || !pageImg.getAttribute('src')) return;
+  if (_lastFitWidth !== null && Math.abs(w - _lastFitWidth) < 2) return;
+  _lastFitWidth = w;
+  // null anchors: keep whatever the reviewer is currently looking at centred,
+  // rather than jumping them back to the top of the page on every resize.
+  applyZoom(null, null);
+}
+
+if (typeof ResizeObserver !== 'undefined') {
+  new ResizeObserver(() => {
+    if (_refitPending) return;
+    _refitPending = true;
+    requestAnimationFrame(() => {
+      _refitPending = false;
+      refitScanToPane();
+    });
+  }).observe(scanViewer);
+}
+
 // FIXED STOPS, not `current +- 0.25` (reviewer 2026-09-02: "zoom -+ goes
 // directly from 95% to 120. 100 seems pretty basic").
 //

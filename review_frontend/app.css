@@ -30,7 +30,16 @@
   /* The nav pane's width, shared so the side panels can dock BESIDE it rather
      than on top of it. Two hardcoded 380s (nav pane, legend) drifting apart is
      how the panel came to cover the klal list completely. */
-  --nav-w: 380px;
+  /* CONTINUOUS, not stepped. Reviewer, 2026-09-04: "still jittery as it
+     shrinks." It was stepped (380 -> 300 at a breakpoint), and because the scan
+     pane takes THE REMAINDER, every step in this variable became a jump in the
+     scan: measured sweeping 1406 -> 1400px, the scan went 435 -> 512, so
+     dragging the window smaller made the ink pane suddenly bigger, then smaller
+     again, then bigger at the next breakpoint. A sawtooth.
+     clamp() gives the same narrowing without a single discontinuity, so the
+     scan changes smoothly all the way down to the one intended step - the point
+     where the index leaves entirely. */
+  --nav-w: clamp(240px, 24vw, 380px);
   /* ---- Structural typography, 2026-08-31 (reviewer) --------------------------
      These name the ROLE a piece of text plays in a sefer's structure, not this
      book's particular layout, so another work with a different shape restyles
@@ -105,7 +114,19 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
 
 /* ---------- LEFT: scan ---------- */
 #scan-pane {
-  width: 34%;
+  /* THE SCAN TAKES WHAT IS LEFT. Reviewer, 2026-09-04: "i don't see the scan
+     winning... the middle pane doesn't shrink after that. the scan does."
+     Exactly right, and it was backwards: this pane had `width: 34%`, a
+     PERCENTAGE OF THE WINDOW, so it shrank on every pixel the window lost -
+     while #text-pane was `flex: 1`, which takes the remainder and therefore
+     ABSORBED what the scan gave up. The narrower the window, the more the text
+     won. Inverted here: the text now carries the percentage basis and this pane
+     grows into everything else, so tightening the window takes width from the
+     text and the ink keeps its size. That also settles the popup case - "when I
+     have a popup disputed word, the only import parts are the scan and the
+     popup" - because .side-panel overlays the TEXT pane, so a panel now opens
+     over the pane that shrank rather than beside a scan that did. */
+  flex: 1 1 0;
   /* A FORWARD GUARD, and INERT TODAY - said plainly because the obvious reading
      of this line is that it fixed something. Measured 2026-09-04 across 1600 →
      800px with and without it: identical geometry at every width. #text-pane is
@@ -116,10 +137,8 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
      Kept anyway, at one line: it becomes load-bearing the moment anyone gives
      #text-pane a min-width of its own, and that is precisely the change that
      would start squeezing the ink without anyone noticing. */
-  flex-shrink: 0;
-  /* The scan's floor. It still narrows with the window (34% of it) down to
-     here, then holds - it never disappears, which is the rule. */
-  min-width: 320px;
+  /* The scan's floor - it never goes below this and never disappears. */
+  min-width: 400px;
   background: #eef1f6;
   display: flex;
   flex-direction: column;
@@ -353,11 +372,15 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
 
 /* ---------- MIDDLE: running text ---------- */
 #text-pane {
-  flex: 1;
+  /* THE PANE THAT YIELDS. Basis is a share of the window, shrink is on, so this
+     is what a narrowing window takes width from - see #scan-pane above for why
+     the two were swapped. 42% keeps the wide-window proportions the reviewer
+     already had (at 1600px: text 672, scan 548, against 676/544 before). */
+  flex: 0 1 42%;
   display: flex;
   flex-direction: column;
   background: var(--paper);
-  min-width: 0;
+  min-width: 220px;
   /* FIXED 2026-08-21 (user bug report: switching directly from one
      highlighted word to another took two clicks, not one). #overlay-
      backdrop is `position:fixed; inset:0; z-index:900` and opens the
@@ -759,9 +782,18 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
    so the nav pane's per-klal badges and this box always use the same
    red/yellow/green vocabulary. dir:ltr because the legend text is English. */
 #legend {
-  position: fixed;
+  /* ABSOLUTE INSIDE #nav-pane, not fixed to the viewport. It was `position:
+     fixed` with `width: var(--nav-w)`, which meant its width could only follow
+     the index pane if that width changed in STEPS - and those steps are exactly
+     what made the scan pane sawtooth as the window shrank (see --nav-w above).
+     Anchored to the pane instead, it is the pane's width by construction, at
+     any width, with no variable to keep in sync. #nav-pane is already
+     `position: relative` and sits at z-index 910, above the backdrop, so its
+     children clear the backdrop without needing their own escape. */
+  position: absolute;
   bottom: 0;
   right: 0;
+  left: 0;
   /* RAISED from 40 to 920 on 2026-09-01, when the rows became controls. The
      backdrop is `position:fixed; inset:0; z-index:900` and covers the whole
      viewport, so at 40 the legend went UNDER it the moment its own click opened
@@ -770,7 +802,6 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
      #nav-pane and #text-pane already use to stay above the backdrop (910), and
      stays below .side-panel (950) so a panel still covers it. */
   z-index: 920;
-  width: var(--nav-w);
   direction: ltr;
   text-align: left;
   padding: 10px 12px;
@@ -1144,9 +1175,39 @@ textarea.custom-text, input.custom-text {
    held on screen for DECISION_SAVED_CLOSE_DELAY_MS (app.js) before the
    panel auto-closes. display:block (not inline) so it reads as its own
    confirmation, not an appendage to the Save button's line. */
+/* The bar the Save button lives in, pinned to the bottom of the scrolling
+   panel body. `position: sticky` works here because .panel-body is the element
+   with `overflow-y: auto`, so this sticks to the bottom of ITS scroll viewport
+   rather than the window's. Opaque background and a rule above it because the
+   option list scrolls UNDER this - a transparent bar would show text through
+   the button. */
+.panel-save-bar {
+  position: sticky;
+  bottom: 0;
+  margin-top: var(--sp-4);
+  /* Cancels .panel-body's own bottom padding so the bar reaches the true
+     bottom edge instead of floating above a strip of paper. */
+  margin-bottom: calc(-1 * var(--sp-5));
+  padding: var(--sp-3) var(--sp-5);
+  margin-inline: calc(-1 * var(--sp-5));
+  background: var(--paper);
+  border-top: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  z-index: 2;
+}
+
 .save-status {
-  display: block;
-  margin-top: var(--sp-3);
+  /* INLINE, not block. Reviewer, 2026-09-04: "too much whitespace below the
+     save." This was `display: block` with `margin-top: 12px`, and it is hidden
+     with `visibility`/`opacity` rather than `display: none` - which means it
+     kept its box whether or not it was showing, reserving a permanent ~50px
+     strip of nothing under every Save button in all five panels. Inline in the
+     flex bar above, it costs no vertical space at all and still appears in
+     place without shifting anything when a save lands. */
+  display: inline-block;
+  margin-top: 0;
   padding: var(--sp-2) var(--sp-3);
   border-radius: var(--radius-sm);
   background: #38a169;
@@ -1388,17 +1449,24 @@ textarea.custom-text, input.custom-text {
    so is the settings gear and the part selector, so those are wide-window
    controls. */
 
-/* 1. The index gives up width first, before the text loses any. */
-@media (max-width: 1400px) {
-  :root { --nav-w: 300px; }
-}
+/* 1. The index narrowing first is handled by --nav-w's clamp(), not by a
+      breakpoint - see the variable's own note on why a step there sawtoothed
+      the scan pane.
 
-/* 2. Then the index goes entirely. `display: none` on the pane also removes
+   2. The index goes entirely. `display: none` on the pane also removes
       #legend, which is its child in the markup even though it is positioned
       out of the flow - so the count readout leaves with the pane it belongs
       to rather than stranding itself over the text. */
-@media (max-width: 1100px) {
+@media (max-width: 1200px) {
   #nav-pane { display: none; }
+  /* AND THE VARIABLE GOES WITH IT. `.side-panel` docks at `right: var(--nav-w)`
+     so it sits BESIDE the index rather than over it (that fix is documented on
+     .side-panel itself). With the index hidden but the variable still 300px,
+     every decision panel floated 300px short of the window edge with dead space
+     behind it - introduced by this very media query on 2026-09-04 and caught by
+     the reviewer the same afternoon. The gap is only correct while there is
+     something in it. */
+  :root { --nav-w: 0px; }
 }
 
 /* 3. Only then does the text go, and the scan takes the whole window. Its

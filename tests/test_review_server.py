@@ -3081,9 +3081,9 @@ def test_the_scan_is_the_last_pane_standing_as_the_window_narrows(server, page):
     assert mid["text-pane"]["shown"] and mid["scan-pane"]["shown"], mid
 
     # 2. Then the index goes, and the other two are still up.
-    narrow = geometry(1000)
+    narrow = geometry(1100)
     assert not narrow["nav-pane"]["shown"], \
-        f"the index must be gone at 1000px, got {narrow['nav-pane']}"
+        f"the index must be gone at 1100px, got {narrow['nav-pane']}"
     assert narrow["text-pane"]["shown"], "the text went before the index"
     assert narrow["scan-pane"]["shown"], "the scan went before the index"
     assert not narrow["legend"]["shown"], (
@@ -3098,9 +3098,45 @@ def test_the_scan_is_the_last_pane_standing_as_the_window_narrows(server, page):
         f"with both other panes gone the scan should take the window, got "
         f"{tiny['scan-pane']['w']}px of 680")
 
-    # And the scan never gave up a pixel it was not forced to: it holds its
-    # share while the text absorbs the deficit.
-    assert narrow["scan-pane"]["w"] >= 320, narrow
+    # 4. THE SCAN WINS THE REMAINDER. Reviewer: "i don't see the scan winning...
+    #    the middle pane doesn't shrink after that. the scan does." It was
+    #    backwards - the scan carried a percentage of the window and the text
+    #    took what was left, so every pixel lost came out of the ink. Now the
+    #    text yields and the scan grows into it, which is checked here by
+    #    comparing the two DIRECTLY rather than against a floor: a min-width
+    #    would pass this while the text still won every contested pixel.
+    assert narrow["scan-pane"]["w"] > narrow["text-pane"]["w"], (
+        f"with the index gone the scan must be the larger pane, got "
+        f"scan {narrow['scan-pane']['w']} vs text {narrow['text-pane']['w']}")
+    squeezed = geometry(900)
+    assert squeezed["scan-pane"]["w"] > squeezed["text-pane"]["w"], (
+        f"the text must be the pane that yields, not the scan: {squeezed}")
+    assert squeezed["text-pane"]["w"] < narrow["text-pane"]["w"], (
+        "narrowing the window took nothing from the text")
+
+    # 5. And the decision panel docks to the window edge once the index it was
+    #    docked beside is gone - REGRESSION 2026-09-04, introduced by the media
+    #    query above: `.side-panel` sits at `right: var(--nav-w)`, so hiding the
+    #    pane without zeroing the variable left every panel floating 300px short
+    #    with dead space behind it.
+    #
+    #    Measured from the COMPUTED `right`, not from a bounding rect: a closed
+    #    panel is parked off-screen with `transform: translateX(100% + nav-w)`,
+    #    so a rect taken right after adding `.open` reports the pre-transition
+    #    position and reads identically whether the bug is present or not. That
+    #    is how the first version of this assertion passed against the very
+    #    defect it was written for.
+    page.set_viewport_size({"width": 1000, "height": 1000})
+    page.wait_for_timeout(250)
+    dock = page.evaluate("""() => {
+        const p = document.getElementById('disputed-panel');
+        return { right: getComputedStyle(p).right,
+                 navw: getComputedStyle(document.documentElement)
+                         .getPropertyValue('--nav-w').trim() };
+    }""")
+    assert dock["right"] in ("0px", "auto"), (
+        f"the decision panel is docked {dock['right']} from the edge with no "
+        f"index pane there to sit beside (--nav-w is {dock['navw']})")
     page.set_viewport_size({"width": 1600, "height": 1000})
     assert page.test_errors == []
 
@@ -3131,19 +3167,22 @@ def _find_disputed_klal_with_most_options():
     return best, best_n
 
 
-def test_save_is_on_screen_without_scrolling_the_worst_case_panel(server, page):
-    """Reviewer, 2026-09-04: "sometimes i have to scroll to see the save button -
-    move it above 'choose'".
+def test_save_stays_on_screen_at_every_scroll_position_of_the_worst_case_panel(server, page):
+    """Reviewer, 2026-09-04: "sometimes i have to scroll to see the save button",
+    then "try sticky save bar".
 
     The option list is the only part of this panel that grows, so with Save
     underneath it the control that ENDS the interaction sat at an offset that
-    depended on how many engines happened to disagree at that word - and the day
-    this was reported, a fourth engine had just been added to that list.
+    depended on how many engines happened to disagree at that word - and a
+    fourth engine had just been added to that list the same day. Moving Save
+    above the list fixed the reachability and broke the reading order (the
+    optional Note ended up below the button). A sticky bar fixes both.
 
-    Asserted by GEOMETRY against the worst case actually present in the corpus,
-    not by reading the markup order back: Save being earlier in the DOM does not
-    by itself prove it is on screen, which is the only thing the reviewer asked
-    for.
+    Asserted by GEOMETRY at BOTH ends of the scroll, against the worst case
+    actually present in the corpus. Scrolling is the point: a button that is
+    visible only before the reviewer scrolls is the bug being fixed, and
+    `position: sticky` is exactly the kind of rule that silently does nothing
+    when an ancestor is not the scroll container.
     """
     (klal_id, word_index), n_options = _find_disputed_klal_with_most_options()
     assert klal_id is not None, "no disputed candidate exists to test against"
@@ -3156,23 +3195,137 @@ def test_save_is_on_screen_without_scrolling_the_worst_case_panel(server, page):
     page.wait_for_selector("#disputed-panel.open, #candidate-panel.open", timeout=5000)
     page.wait_for_timeout(300)
 
-    geom = page.evaluate("""() => {
-        const btn = document.getElementById('save-decision-btn');
-        const panel = btn.closest('.side-panel');
-        const body = panel.querySelector('.panel-body') || panel;
-        const b = btn.getBoundingClientRect(), p = body.getBoundingClientRect();
-        const opts = document.getElementById('disputed-options');
-        return { btnTop: Math.round(b.top), btnBottom: Math.round(b.bottom),
-                 paneTop: Math.round(p.top), paneBottom: Math.round(p.bottom),
-                 optsTop: Math.round(opts.getBoundingClientRect().top),
-                 scrolled: Math.round(body.scrollTop) };
-    }""")
+    def measure():
+        return page.evaluate("""() => {
+            const btn = document.getElementById('save-decision-btn');
+            const body = btn.closest('.panel-body');
+            const b = btn.getBoundingClientRect(), p = body.getBoundingClientRect();
+            return { btnTop: Math.round(b.top), btnBottom: Math.round(b.bottom),
+                     paneTop: Math.round(p.top), paneBottom: Math.round(p.bottom),
+                     scrollTop: Math.round(body.scrollTop),
+                     scrollable: body.scrollHeight - body.clientHeight > 8 };
+        }""")
 
-    assert geom["scrolled"] == 0, "the panel opened already scrolled"
-    assert geom["btnBottom"] <= geom["paneBottom"], (
-        f"Save is below the fold of its own panel with {n_options} readings "
-        f"offered: {geom}")
-    assert geom["btnTop"] >= geom["paneTop"], f"Save is above the panel top: {geom}"
-    assert geom["btnTop"] < geom["optsTop"], (
-        f"Save must sit ABOVE the option list, which is the part that grows: {geom}")
+    at_top = measure()
+    assert at_top["btnBottom"] <= at_top["paneBottom"] + 1, (
+        f"Save is below the fold with {n_options} readings offered: {at_top}")
+    assert at_top["btnTop"] >= at_top["paneTop"], f"Save is above the panel: {at_top}"
+
+    # Scroll to the very bottom, and back up, and it must not move off screen.
+    page.evaluate("""() => {
+        const b = document.getElementById('save-decision-btn').closest('.panel-body');
+        b.scrollTop = b.scrollHeight;
+    }""")
+    page.wait_for_timeout(250)
+    at_bottom = measure()
+    assert at_bottom["btnBottom"] <= at_bottom["paneBottom"] + 1 and \
+        at_bottom["btnTop"] >= at_bottom["paneTop"], (
+            f"Save left the viewport once the panel was scrolled: {at_bottom}")
+
+    if at_bottom["scrollable"]:
+        assert at_bottom["scrollTop"] > 0, "the panel did not actually scroll"
+        # STICKY, not merely last: at the top of a scrollable panel the button
+        # must already be pinned to the bottom edge rather than sitting wherever
+        # the content happened to end.
+        assert abs(at_top["btnBottom"] - at_top["paneBottom"]) < 40, (
+            f"Save is not pinned to the panel's bottom edge at scrollTop 0 - a "
+            f"`position: sticky` that is not sticking looks exactly like this: "
+            f"{at_top}")
+
+    # THE BAR MUST BE THE LAST CHILD OF THE SCROLLING BODY. A bottom-sticky
+    # element floats at the bottom edge of its scroll viewport while anything
+    # after it scrolls UNDER it - so content placed below is covered and never
+    # settles. That is not theoretical: on the first attempt this bar sat before
+    # the decision-history section, and #history-toggle became permanently
+    # unstable - Playwright timed out after 30s trying to click it, in a test
+    # about HTML escaping that had nothing to do with layout.
+    last_ok = page.evaluate("""() => {
+        const bar = document.querySelector('#disputed-panel .panel-save-bar');
+        if (!bar) return 'no save bar';
+        const body = bar.closest('.panel-body');
+        return body.lastElementChild === bar ? true
+             : 'last child is ' + body.lastElementChild.className;
+    }""")
+    assert last_ok is True, (
+        f"the sticky save bar is not the last thing in the panel body, so "
+        f"whatever follows it scrolls underneath and cannot be clicked: {last_ok}")
+
+    # The hidden "Saved ✓" chip must cost NO vertical space ("too much
+    # whitespace below the save"): it sits beside the button, not under it.
+    gap = page.evaluate("""() => {
+        const btn = document.getElementById('save-decision-btn');
+        const st = document.getElementById('save-status');
+        const b = btn.getBoundingClientRect(), s = st.getBoundingClientRect();
+        return Math.round(s.top - b.bottom);
+    }""")
+    assert gap < 0, (
+        f"the save-status chip is stacked BELOW the button, reserving dead "
+        f"space even while hidden (gap {gap}px)")
+    assert page.test_errors == []
+
+
+def test_narrowing_the_window_never_makes_the_scan_pane_jump_bigger(server, page):
+    """Reviewer, 2026-09-04: "still jittery as it shrinks."
+
+    Two independent causes, both found by sweeping widths rather than by
+    reading the CSS:
+
+    1. THE SAWTOOTH. The scan pane takes the remainder, so every STEP in
+       --nav-w became a jump in the scan. Measured at the time: 1406px -> scan
+       435, 1400px -> scan 512. Dragging the window smaller made the ink pane
+       suddenly bigger, then smaller, then bigger again at the next breakpoint.
+       --nav-w is a clamp() now, and #legend is anchored to the pane instead of
+       to that variable, which is what had forced the stepping.
+    2. THE PAGE IMAGE NEVER RE-FIT. applyZoom() sizes it from the viewer's
+       clientWidth, but nothing recomputed it on resize - so the image kept its
+       old PIXEL width while the pane shrank around it, gained a horizontal
+       scrollbar, and slid off centre (measured left edge at -80px).
+
+    Swept, not spot-checked: a single sample at either side of a breakpoint
+    cannot see a sawtooth, and that is the shape being tested for.
+    """
+    _open_dashboard(page, server, 2)
+
+    samples = []
+    width = 1700
+    while width >= 1240:          # stop above the one intended step (1200)
+        page.set_viewport_size({"width": width, "height": 1000})
+        page.wait_for_timeout(70)
+        samples.append((width, page.evaluate("""() => {
+            const v = document.getElementById('scan-viewer');
+            const c = document.getElementById('page-container');
+            const nav = document.getElementById('nav-pane').getBoundingClientRect();
+            return { scan: Math.round(document.getElementById('scan-pane')
+                                        .getBoundingClientRect().width),
+                     imgLeft: Math.round(c.getBoundingClientRect().left),
+                     hbar: v.scrollWidth > v.clientWidth + 1,
+                     nav: Math.round(nav.width),
+                     legend: Math.round(document.getElementById('legend')
+                                          .getBoundingClientRect().width) };
+        }""")))
+        width -= 20
+
+    grew = [(w, s["scan"]) for (w, s), (_, prev) in zip(samples[1:], samples)
+            if s["scan"] > prev["scan"] + 1]
+    assert not grew, (
+        "the scan pane got BIGGER as the window got smaller - a sawtooth the "
+        f"reviewer sees as jitter. At these widths: {grew}")
+
+    for w, s in samples:
+        assert not s["hbar"], (
+            f"at {w}px the scan has a horizontal scrollbar: the page image did "
+            f"not re-fit when its pane changed width")
+        assert s["imgLeft"] >= 0, (
+            f"at {w}px the page image has slid off centre to {s['imgLeft']}px - "
+            f"an over-wide image under `margin: 0 auto` loses its left edge")
+        assert abs(s["legend"] - s["nav"]) <= 3, (
+            f"at {w}px the legend is {s['legend']}px against a {s['nav']}px "
+            f"index pane - it must track the pane, not a stepped variable")
+
+    # And the scan genuinely moved across the sweep, so the monotonicity above
+    # is a real result and not a pane that simply sat at a min-width.
+    assert samples[0][1]["scan"] - samples[-1][1]["scan"] > 100, (
+        "the scan barely changed across 460px of window - this test would pass "
+        "on a frozen layout")
+    page.set_viewport_size({"width": 1600, "height": 1000})
     assert page.test_errors == []
