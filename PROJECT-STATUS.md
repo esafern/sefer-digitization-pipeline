@@ -34,7 +34,7 @@ this file that should be read before quoting the 596.
 klalim 2–221 (full Part 1 coverage, 2026-09-02 — the strongest witness here)**,
 VLM 93.3% token accuracy, Surya 89.9% mean agreement (222/222 coverage),
 Tesseract 3.8% on disagreements — the last is why it is being retired (item 3a).
-Dicta is a PREVIEW only: nothing is wired into `rebuild_all.sh`. **P(consensus correct | two distinct
+**Dicta is now a voting engine** (2026-09-04) and every dispute it takes part in is marked `cross_edition`, because its vote is a reading of a different PRINTING, not a second look at this ink. **P(consensus correct | two distinct
 engines agree) is 26–41%**, so agreement routes attention and the ink decides;
 auto-approval on consensus is indefensible at any threshold this data supports.
 
@@ -69,14 +69,92 @@ third** — the score held when coverage tripled, which is the thing a partial
 measurement could not tell us. Dicta is now the strongest witness this project
 has by a wide margin: VLM 93.3%, Surya 89.9%, Tesseract 3.8%.
 
-**The preview (`DICTA-NEW-DISPUTES.md`, 419 links) reports 225 new disputes, 186
-corroborated, 8 positions a human already ruled against, 0 displacing a different
-consensus.** 225 is 3.9x the 58 from the partial baseline — inside the 3–4x this
-file predicted. **It is still a PREVIEW: nothing is wired into `rebuild_all.sh`,**
+**WIRED IN 2026-09-04, at the reviewer's instruction.** All three integration
+points item `0N` named are done: `synthesize_multi_witness.ENGINES`,
+`assemble_corrections_dataset.py`, and a `dicta_reading` option in `app.js`
+(without that last one the field would be serialized and never seen — Lesson 29,
+and this file's history has two prior instances of exactly that).
+
+**Stage 4a went from 283 to 506 consensus disputes.** 405 of the 506 have Dicta
+among the agreeing engines; **223 of those have only ONE engine that read this
+scan** dissenting from the corpus, which is the number a reviewer needs and
+cannot get from the engine names alone.
+
+**How a cross-edition dispute is RECOGNISED**, since its vote does not mean what
+a same-edition vote means. Three fields on every record, rendered in three
+places:
+
+| field | says |
+|---|---|
+| `cross_edition` | a different printing is one of the agreeing voices |
+| `same_edition_agreeing` | how many engines that read THIS scan differ from the corpus (1 = the ink has a single dissenter) |
+| `abbreviation_shape` | this disagreement is about an abbreviation mark, in one of two directions that mean opposite things |
+
+In the dashboard: the reading is offered as a choice labelled *"Dicta reading — a
+DIFFERENT edition (Jerusalem 1975/6)"*; the panel shows an amber warning banner
+naming the edition and, where `same_edition_agreeing == 1`, saying the ink has
+one dissenter; and the word carries a superscript **J** in the text pane so the
+reviewer can spot these without opening each one. In the ledger, a decision that
+took Dicta's word records `chosen_source: "dicta_reading"` — the only source in
+the schema that is not a reading of this book's own scan, greppable on purpose.
+
+**`abbreviation_shape` found something, and it runs both ways.** Measured on the
+real corpus:
+
+* **`consensus_abbreviates` — 18 positions** where the consensus would RESTORE
+  an abbreviation mark the corpus spelled out. This is item `0AQ`'s own defect
+  found systematically: the corpus reads the abbreviation geresh as a **yod**,
+  so `מה׳` is stored as `מהי` (7 instances), `הל׳` as `הלי`, `התוס׳` as `התוסי`.
+  Real correction candidates. The class was already 13 without Dicta; Dicta adds
+  5 and corroborates the rest — which is the clearest thing it has earned.
+* **`consensus_expands` — 4 positions** where the consensus would SPELL OUT an
+  abbreviation the corpus stores. All 4 are cross-edition with
+  `same_edition_agreeing == 1`, exactly the profile that says "the other
+  printing writes it out." Item `0AQ` ruled the Berlin abbreviation is what the
+  corpus keeps, so these are flagged with that ruling quoted in the note, not
+  proposed as fixes.
+
+**The preview (`DICTA-NEW-DISPUTES.md`) reports 223 new disputes, 182
+corroborated, 1 position a human already ruled against, 0 displacing a different
+consensus** (regenerated 2026-09-04; it read 225/186/8 before the 0AQ rulings
+were applied). 223 is 3.8x the 58 from the partial baseline — inside the 3–4x
+this file predicted, and it is the number that actually landed. **It is still a PREVIEW: nothing is wired into `rebuild_all.sh`,**
 and wiring it in remains a separate decision (item 0N has the three integration
 points: `synthesize_multi_witness.ENGINES`, one line in
 `assemble_corrections_dataset.py`, and a `dicta_reading` option in `app.js` —
 without that last one the field is serialized and never seen, Lesson 29).
+
+**What its SOLO differences are worth, measured 2026-09-04 — and the answer
+corrected a guess this file used to carry.** Dicta reads a different PRINTING
+(Jerusalem 1975/6), so a position where Dicta alone differs could be a real
+difference between the editions. There are 943 of them, and `preview_dicta_
+disputes.py` used to say in its own output that such a position "is usually a
+textual variant rather than a misread." **That was wrong.** Of the 68 that
+differ only by a vav/yod swap, DICTA's reading is unattested in 6.18M words of
+independent Hebrew 24 times against the corpus's 4 — roughly 6:1 that the
+witness, not the edition, is the source (`הטור`→`הטיר`, 0x attested;
+`אותו`→`איתו`, 9,384x against 1x). At 95.6% accuracy over ~50,000 aligned
+positions Dicta is expected to misread ~2,000 words, so 943 solo-differs is
+consistent with mostly noise. The sentence has been corrected in the script.
+
+**The subset that IS a real cross-edition difference is now collated, and is
+never a correction.** `pipeline/build_collation_report.py` (stage 4d) reports
+only the structurally verifiable class: the Berlin word ends in a geresh and the
+Jerusalem word continues the same letters, so it is the same word abbreviated in
+one printing and spelled out in the other — the shape itself is the evidence,
+not a judgement about which is right. **74 rows across 48 klalim; 67 of the 74
+expanded forms are attested in the independent corpus (91%)**, scored as
+corroboration and not as the selection rule. Output: `collation_report.json` and
+the readable `EDITION-VARIANTS.md`.
+
+This artifact is deliberately **not** wired to the dashboard and nothing
+downstream reads it. Applying a row would edit the Berlin text to match
+Jerusalem — the exact thing the reviewer ruled against in item `0AQ`, where the
+corpus had to keep `ומתי׳` over the editorial expansion `ומתיר`. Every row
+carries `"actionable": false` and no field the applier keys on. Six tests in
+`test_pipeline_logic.py` hold the boundary, two of them proving the gate can
+fail: a position where a Berlin engine ALSO differs is refused (that is stage
+4a's dispute, not collation), as is a position no Berlin engine read at all.
 
 `job_id` is null for the five new chunks in `dicta_chunks_remainder/manifest.json`:
 they were fetched by hand from the RashiOCR status page rather than through

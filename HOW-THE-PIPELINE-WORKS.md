@@ -34,9 +34,27 @@ ink, surfacing every place they disagree, and resolving each disagreement
    the positions it votes on, **corroborated 64** existing consensus disputes,
    and would add **58** new ones. It is deliberately routed at Rashi editions
    only: on the square Berlin scan the same engine drops to 77.6%, worse than
-   everything already wired in. **It is a preview, not a shipped stage** — the
-   readings have been measured and previewed for a reviewer, and nothing is
-   wired into the rebuild chain yet.
+   everything already wired in. It votes as of 2026-09-04, taking the consensus
+   queue from 283 disputes to 506.
+
+   **Reading a different printing cuts both ways, and that shaped what its vote
+   is allowed to claim.** Because it is not a second look at *this* ink, every
+   dispute it takes part in is marked as cross-edition and says how many engines
+   that *did* read this scan actually differ from the corpus — 223 of the 506
+   have exactly one. The dashboard labels its reading with the edition it came
+   from, warns in the panel, and marks the word with a superscript **J**, so a
+   reviewer never reads "two engines agree" without knowing one of them was
+   reading a different book. When the Berlin-reading engines disagree, exactly one of
+   them misread the ink, and the remedy is a correction. When Dicta disagrees
+   alone, it may instead be reporting a genuine difference between the two
+   *printings* — and "correcting" that would edit the Berlin text to match
+   Jerusalem, which is the opposite of transcribing this book. Measured, most
+   solo disagreements are simply Dicta misreading its own page (roughly 6:1
+   against it in the class that could be checked). So the pipeline reports only
+   the subset that is verifiable by *shape* — Berlin abbreviates with a geresh,
+   Jerusalem spells the same word out — into `EDITION-VARIANTS.md` as
+   **collation, never a correction**: 74 places where the other edition writes
+   out a word this one cuts short. Nothing downstream reads it.
 3. **Diff, don't trust.** Each witness's reading is aligned against the stored
    text word by word. Agreement is the null result; every disagreement becomes a
    candidate with a real bounding box.

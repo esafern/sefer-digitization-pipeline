@@ -17,6 +17,9 @@ import docai_filter
 # suppressed candidate reappears at the next stage, which is exactly what
 # happened on klal 84 w0.
 import build_corrections_dataset as bcd
+# For the cross-edition witness's loader and path. smw imports THIS module only
+# inside docai_verdicts(), so the dependency runs one way at import time.
+import synthesize_multi_witness as smw
 
 # Moved one level deeper (pipeline/ or tools/) 2026-08-16 - REPO now goes up
 # two levels, not one, to keep resolving to the actual repo root where
@@ -186,6 +189,40 @@ def merge_consensus_disputes(by_klal, path=CONSENSUS_PATH):
             witnesses = d.get("witnesses", {})
             note = (f"Multi-witness consensus: {' + '.join(engines)} agree on "
                     f"'{d['consensus_reading']}' against stored '{d['final_text']}'.")
+            cross = bool(d.get("cross_edition"))
+            same_n = d.get("same_edition_agreeing")
+            shape = d.get("abbreviation_shape")
+            # Accumulated separately from `note` so the ENRICHMENT branch below
+            # can append them to a candidate that already has its own vision
+            # reasoning. Without that, the 73 enriched items - the ones with the
+            # most evidence attached, and so the most likely to be acted on -
+            # carried the marking in their fields but said nothing about it in
+            # the text a reviewer actually reads.
+            caveats = ""
+            if cross:
+                # A reviewer must never read "2 engines agree" without being
+                # told that one of them was reading a DIFFERENT PRINTING. The
+                # Jerusalem edition is a genuinely independent voice, but it is
+                # not a second opinion about THIS ink, and where only one engine
+                # read this ink the ink itself has only one dissenter.
+                caveats += (f" NOTE: this is a CROSS-EDITION consensus - "
+                         f"{' + '.join(d.get('cross_edition_engines') or [])} read "
+                         f"the Jerusalem 1975/6 printing, not this Berlin scan.")
+                if same_n == 1:
+                    caveats += (" Only ONE engine that read THIS scan differs from the "
+                             "corpus here, so a difference between the two printings "
+                             "is a live explanation - check the ink.")
+            if shape == "consensus_expands":
+                caveats += (" NOTE: this would EXPAND an abbreviation the corpus stores. "
+                         "Item 0AQ ruled the Berlin abbreviation is what the corpus "
+                         "keeps; spelling it out is an editorial change, not a "
+                         "correction. If the ink shows the mark, the stored text is "
+                         "right.")
+            elif shape == "consensus_abbreviates":
+                caveats += (" NOTE: this would RESTORE an abbreviation mark the corpus "
+                         "spelled out - the item 0AQ defect. Usually the abbreviation "
+                         "geresh misread as a yod.")
+            note += caveats
             artifact = d.get("ligature_artifact")
             if artifact:
                 # The engines agree because they share ONE printing defect, not
@@ -201,6 +238,19 @@ def merge_consensus_disputes(by_klal, path=CONSENSUS_PATH):
                 prior["consensus_engines"] = engines
                 prior["consensus_reading"] = d["consensus_reading"]
                 prior["ligature_artifact"] = artifact
+                # Carried onto an EXISTING candidate too. A DocAI candidate that
+                # a cross-edition witness later joined is still a cross-edition
+                # consensus, and a reviewer opening it must see that; an
+                # enrichment path that dropped the marking would hide it on
+                # exactly the items with the most evidence attached (Lesson 34 -
+                # sweep the siblings, both write paths or neither).
+                prior["cross_edition"] = cross
+                prior["cross_edition_engines"] = d.get("cross_edition_engines") or []
+                prior["same_edition_agreeing"] = same_n
+                prior["abbreviation_shape"] = shape
+                prior["dicta_reading"] = witnesses.get("dicta")
+                if caveats:
+                    prior["reasoning"] = (prior.get("reasoning") or "") + caveats
                 n_enriched += 1
                 continue
             by_klal.setdefault(kid_str, []).append({
@@ -219,9 +269,18 @@ def merge_consensus_disputes(by_klal, path=CONSENSUS_PATH):
                 "reasoning": note,
                 "vlm_reading": witnesses.get("vlm"),
                 "surya_reading": witnesses.get("surya"),
+                # The cross-edition witness's own word. Serialized AND rendered
+                # (review_frontend/app.js offers it as a choosable reading) -
+                # a witness field the dashboard never shows is a field nobody
+                # reads, which is Lesson 29 and is what item 0N warned about.
+                "dicta_reading": witnesses.get("dicta"),
                 "consensus_engines": engines,
                 "consensus_reading": d["consensus_reading"],
                 "ligature_artifact": artifact,
+                "cross_edition": cross,
+                "cross_edition_engines": d.get("cross_edition_engines") or [],
+                "same_edition_agreeing": same_n,
+                "abbreviation_shape": shape,
                 "flag": "current_text_may_be_wrong",
             })
             n_new += 1
@@ -316,6 +375,7 @@ def merge_lexical_defects(by_klal, path=LEXICAL_PATH,
             "confidence": None,
             "reasoning": note,
             "vlm_reading": None,
+            "dicta_reading": None,
             "surya_reading": None,
             # A RENDERABLE, ATTRIBUTED proposal. Not `vision_transcription` or any
             # engine field: no engine read this. It comes from a frequency table
@@ -424,6 +484,11 @@ def main():
     words_by_klal = {k["klal_id"]: k["clean_text"].split() for k in part1}
     vlm_by_klal = load_vlm_baseline(VLM_BASELINE_PATH)
     surya_by_klal = load_vlm_baseline(SURYA_BASELINE_PATH)
+    # Loaded through the synthesizer's own cross-edition loader, not
+    # load_vlm_baseline: the Jerusalem dump carries no `=== KLAL N ===` headers
+    # (another edition's pagination has nothing to do with ours), so its klal
+    # boundaries are recovered from content by corpus_io.segment_witness_by_klal.
+    dicta_by_klal = smw.load_cross_edition_baseline(smw.DICTA_PATH, part1)
     # Built lazily, once per klal actually needed (not all 222) - the
     # alignment itself is cheap, but no reason to pay for klalim with zero
     # candidates.
@@ -445,6 +510,25 @@ def main():
             surya_alignment_cache[klal_id] = build_vlm_alignment(
                 words_by_klal.get(klal_id, []), surya_by_klal[klal_id])
         return surya_alignment_cache[klal_id].get(word_index)
+
+    # The CROSS-EDITION witness's reading on an ordinary DocAI candidate - shown
+    # for context the same way vlm_reading and surya_reading are, and for the
+    # same reason: leaving it out would make Dicta the one witness whose reading
+    # disappears the moment it is not part of a consensus, on exactly the
+    # positions a reviewer is already looking at.
+    #
+    # It is NOT the same kind of evidence as the two above, and the dashboard
+    # says so at the point of choice: its option is labelled as the Jerusalem
+    # printing, not as a second reading of this scan.
+    dicta_alignment_cache = {}
+
+    def dicta_reading_for(klal_id, word_index):
+        if klal_id not in dicta_by_klal:
+            return None
+        if klal_id not in dicta_alignment_cache:
+            dicta_alignment_cache[klal_id] = build_vlm_alignment(
+                words_by_klal.get(klal_id, []), dicta_by_klal[klal_id])
+        return dicta_alignment_cache[klal_id].get(word_index)
 
     by_klal = {}
     n_drifted = 0
@@ -492,6 +576,7 @@ def main():
             "reasoning": c.get("vision_reasoning"),
             "vlm_reading": vlm_reading_for(c["klal_id"], c["word_index_in_final_text"]),
             "surya_reading": surya_reading_for(c["klal_id"], c["word_index_in_final_text"]),
+            "dicta_reading": dicta_reading_for(c["klal_id"], c["word_index_in_final_text"]),
             # A drifted candidate's flag is forced to "stale_candidate"
             # rather than whatever classify() would say - a confident
             # "current_text_confirmed" is actively misleading once the

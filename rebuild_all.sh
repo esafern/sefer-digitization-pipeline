@@ -124,6 +124,19 @@ echo "== 4b/6 build_lexical_defect_report.py =="
 echo "== 4c/6 build_title_report.py =="
 ./venv/bin/python pipeline/build_title_report.py
 
+# 4d: the ONLY stage whose output is deliberately not actionable.
+#
+# Dicta reads a DIFFERENT PRINTING (Jerusalem 1975/6) than every other witness,
+# so its disagreements are not all misreads - some are real differences between
+# the two editions. This stage reports the subset that is verifiable by shape
+# (Berlin abbreviates with a geresh, Jerusalem spells the same word out) into
+# collation_report.json, and NOTHING downstream consumes it. Applying a row here
+# would edit the Berlin text to match Jerusalem - the exact thing item 0AQ ruled
+# against. It runs before stage 4 only to keep the witness stages together;
+# stage 4 does not read it.
+echo "== 4d/6 build_collation_report.py =="
+./venv/bin/python pipeline/build_collation_report.py
+
 echo "== 4/6 assemble_corrections_dataset.py =="
 ./venv/bin/python pipeline/assemble_corrections_dataset.py
 

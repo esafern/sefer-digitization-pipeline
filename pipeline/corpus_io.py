@@ -1144,3 +1144,53 @@ def trusted_klal_pages_with_continuations(alignment_path=None,
         klal_pages[page].sort()
 
     return klal_pages, untrusted_ids
+
+
+def segment_witness_by_klal(text, part1):
+    """{klal_id: [raw words]} from a page-oriented OCR dump that carries no
+    klal headers of its own.
+
+    A same-edition witness baseline is written with `=== KLAL N ===` markers and
+    needs none of this - load those with synthesize_multi_witness.load_baseline.
+    This is for a witness read off a DIFFERENT printing, whose pagination has no
+    relation to ours, so the only thing the two texts share is their words.
+
+    Segmentation is by CONTENT ANCHORING: every witness token inherits the klal
+    of the corpus token it aligns to, and a token that aligns to nothing joins
+    the klal before it. That decides BOUNDARIES only. Every reading stays the
+    witness's own word, and align_witness re-aligns inside each klal afterwards,
+    so nothing here can make the witness agree with the corpus where it would
+    not have anyway - the property that lets this feed a consensus vote.
+
+    MOVED HERE 2026-09-04 from tools/preview_dicta_disputes.py, when the Dicta
+    witness was wired into stage 4a. It had been living in a [STANDALONE]
+    preview tool, and both a production stage and the preview now need it;
+    leaving it there would have made pipeline/ import tools/ for a load-bearing
+    function, and copying it would have been Lesson 13. The preview delegates
+    here now, which is also what keeps the preview's numbers quotable against
+    what the real synthesizer does.
+    """
+    txt = re.sub(r"^===\s*עמוד.*$", "", text, flags=re.M)
+    raw = [w for w in txt.split() if hebrew_letters_only(w)]
+    norm = [hebrew_letters_only(w) for w in raw]
+
+    ctoks, owner = [], []
+    for k in sorted(part1, key=lambda x: x["klal_id"]):
+        for w in words_of(k):
+            n = hebrew_letters_only(w)
+            if n:
+                ctoks.append(n)
+                owner.append(k["klal_id"])
+
+    sm = difflib.SequenceMatcher(None, ctoks, norm, autojunk=False)
+    assign = {}
+    for b in sm.get_matching_blocks():
+        for i in range(b.size):
+            assign[b.b + i] = owner[b.a + i]
+
+    out, cur = {}, None
+    for j, w in enumerate(raw):
+        cur = assign.get(j, cur)
+        if cur is not None:
+            out.setdefault(cur, []).append(w)
+    return out

@@ -80,12 +80,38 @@ VERIFIED_PATH = cio.repo_path("corrections_verified_part1.json")
 VLM_A_PATH = cio.repo_path("tools", "second_witness_eval", "vlm_part1_full_baseline.txt")
 VLM_B_PATH = cio.repo_path("tools", "second_witness_eval", "vlm_part1_full_baseline_passB.txt")
 SURYA_PATH = cio.repo_path("tools", "second_witness_eval", "surya_part1_full_baseline.txt")
+DICTA_PATH = cio.repo_path("tools", "second_witness_eval",
+                           "dicta_jerusalem_part1_baseline.txt")
 OUT_PATH = cio.repo_path("consensus_disputes_part1.json")
 
 # Engines that can vote. DocAI's vote comes from the corrections pipeline's own
 # candidates (it is the primary extraction, already diffed against the corpus by
 # build_corrections_dataset.py) rather than from a re-derivation here.
-ENGINES = ("docai", "vlm", "surya")
+ENGINES = ("docai", "vlm", "surya", "dicta")
+
+# WHICH INK EACH ENGINE READ, and it is not decoration - it changes what that
+# engine's vote MEANS.
+#
+# docai/vlm/surya all read the same Berlin 1851 square scan. When one of them
+# differs from the corpus, exactly one party misread that ink, and the remedy
+# is a correction. `dicta` reads the Jerusalem 1975/6 Rashi printing: a
+# different compositor, different type, different sheet. When IT differs, the
+# corpus may be wrong, Dicta may be wrong, or THE TWO PRINTINGS MAY SIMPLY
+# DIFFER - and the third case is not an error to fix. Correcting it would edit
+# the Berlin text to match Jerusalem, which is the opposite of transcribing
+# this book, and is what the reviewer ruled against in item 0AQ.
+#
+# So every dispute Dicta takes part in is marked (see `cross_edition`,
+# `same_edition_agreeing` and `edition_artifact` on each record) and the
+# dashboard says so in words. The vote is real - a second PRINTING agreeing
+# with a Berlin engine against the corpus is strong evidence - but a reviewer
+# must never be shown "2 engines agree" without being told that one of them was
+# reading a different book.
+SAME_EDITION_ENGINES = frozenset(("docai", "vlm", "surya"))
+CROSS_EDITION_ENGINES = frozenset(("dicta",))
+assert set(ENGINES) == SAME_EDITION_ENGINES | CROSS_EDITION_ENGINES, (
+    "every voting engine must declare which printing it read - an unclassified "
+    "engine would silently be treated as reading the Berlin ink")
 
 
 def load_baseline(path):
@@ -97,6 +123,25 @@ def load_baseline(path):
     with open(path, "r", encoding="utf-8") as f:
         by_klal = eval_script.parse_candidate_ocr(f.read())
     return {kid: text.split() for kid, text in by_klal.items()}
+
+
+def load_cross_edition_baseline(path, part1):
+    """{klal_id: [words]} for a witness read off a DIFFERENT printing.
+
+    Not load_baseline(): that parses `=== KLAL N ===` headers, which only a
+    witness read off OUR OWN scan can have. Another edition's pagination has no
+    relation to ours, so the klal boundaries have to be recovered from the
+    content - corpus_io.segment_witness_by_klal does that, and does it by
+    anchoring on words the two texts already share, so it cannot manufacture
+    agreement (see its docstring).
+
+    Missing file degrades to "no vote", same contract as load_baseline: a fresh
+    clone has no paid-OCR baseline and must still run.
+    """
+    if not os.path.exists(path):
+        return {}
+    with open(path, "r", encoding="utf-8") as f:
+        return cio.segment_witness_by_klal(f.read(), part1)
 
 
 _DERIVE_WORDS = object()
@@ -200,15 +245,21 @@ def active_human_decisions():
     return out
 
 
-def synthesize(part1, verified, vlm_a, vlm_b, surya, decided=None):
+def synthesize(part1, verified, vlm_a, vlm_b, surya, decided=None, dicta=None):
     """Every position where >= 2 distinct engines agree on the same reading
-    and that reading differs from the stored corpus text."""
+    and that reading differs from the stored corpus text.
+
+    `dicta` is the CROSS-EDITION witness and is optional - omit it and this
+    behaves exactly as it did before that witness existed."""
     docai = docai_verdicts(verified, {k["klal_id"]: k["clean_text"].split() for k in part1})
     decided = {} if decided is None else decided
+    dicta = dicta or {}
     disputes = []
     stats = {"klalim_no_surya": 0, "klalim_no_vlm": 0, "vlm_abstained": 0,
              "skipped_corroborating_a_human": 0, "contradicting_a_human": [],
-             "ligature_artifacts": 0}
+             "ligature_artifacts": 0, "klalim_no_dicta": 0,
+             "cross_edition": 0, "consensus_expands": 0,
+             "consensus_abbreviates": 0}
 
     for k in part1:
         kid = k["klal_id"]
@@ -226,7 +277,12 @@ def synthesize(part1, verified, vlm_a, vlm_b, surya, decided=None):
         if not vlm_a_words or not vlm_b_words:
             stats["klalim_no_vlm"] += 1
 
+        dicta_words = dicta.get(kid) or []
+        if not dicta_words:
+            stats["klalim_no_dicta"] += 1
+
         surya_align = cio.align_witness(words, surya_words) if surya_words else {}
+        dicta_align = cio.align_witness(words, dicta_words) if dicta_words else {}
         vlm_align = (vlm_verdicts(words, vlm_a_words, vlm_b_words)
                      if vlm_a_words and vlm_b_words else {})
         if vlm_a_words and vlm_b_words:
@@ -246,6 +302,9 @@ def synthesize(part1, verified, vlm_a, vlm_b, surya, decided=None):
             s = surya_align.get(wi)
             if s is not None and s[1] == "differs":
                 readings["surya"] = s[0]
+            x = dicta_align.get(wi)
+            if x is not None and x[1] == "differs":
+                readings["dicta"] = x[0]
 
             if len(readings) < 2:
                 continue
@@ -291,6 +350,57 @@ def synthesize(part1, verified, vlm_a, vlm_b, surya, decided=None):
                     break
                 if artifact:
                     stats["ligature_artifacts"] += 1
+
+                # HOW A CROSS-EDITION DISPUTE IS RECOGNISED. Three fields, each
+                # answering a question a reviewer would otherwise have to work
+                # out from the engine names:
+                #
+                #   cross_edition          - is a different PRINTING one of the
+                #                            voices here at all?
+                #   same_edition_agreeing  - how many engines that read OUR ink
+                #                            actually differ from the corpus?
+                #                            1 means only one engine read this
+                #                            page and disagreed; the second
+                #                            voice was reading another book.
+                #   abbreviation_shape     - this disagreement is about an
+                #                            ABBREVIATION, in one of two
+                #                            directions that mean opposite
+                #                            things (below).
+                #
+                # Tagged, never dropped - the same discipline `ligature_artifact`
+                # follows a few lines up. The reviewer should still see it; they
+                # must not see it presented as plain corroboration.
+                #
+                # THE TWO ABBREVIATION DIRECTIONS, and why they are not one flag:
+                #
+                #   consensus_expands    - the corpus has `נרא׳`, the consensus
+                #     reads `נראה`. With a cross-edition voice among the engines
+                #     this is most likely a difference between the PRINTINGS,
+                #     and item 0AQ ruled the Berlin abbreviation is what the
+                #     corpus keeps. Applying it would be an editorial expansion.
+                #   consensus_abbreviates - the corpus has `ומתיר`, the
+                #     consensus reads `ומתי׳`. This is item 0AQ's ACTUAL defect,
+                #     running the other way: the corpus had silently spelled out
+                #     what the ink cuts short, and the reviewer restored the
+                #     abbreviation. A real correction candidate.
+                #
+                # Not gated on `cross_edition`, because the second direction is
+                # about the Berlin ink and two Berlin engines can find it alone.
+                cross = sorted(set(engines) & CROSS_EDITION_ENGINES)
+                same_edition = sorted(set(engines) & SAME_EDITION_ENGINES)
+                corpus_txt = chosen_txt or stored
+                if typography.abbreviation_expansion(corpus_txt, reading):
+                    abbrev_shape = "consensus_expands"
+                elif typography.abbreviation_expansion(reading, corpus_txt):
+                    abbrev_shape = "consensus_abbreviates"
+                else:
+                    abbrev_shape = None
+                if cross:
+                    stats["cross_edition"] += 1
+                if abbrev_shape:
+                    stats.setdefault(abbrev_shape, 0)
+                    stats[abbrev_shape] += 1
+
                 disputes.append({
                     "klal_id": kid,
                     "word_index": wi,
@@ -299,6 +409,10 @@ def synthesize(part1, verified, vlm_a, vlm_b, surya, decided=None):
                     "consensus_reading": reading,
                     "agreeing_engines": sorted(engines),
                     "ligature_artifact": artifact,
+                    "cross_edition": bool(cross),
+                    "cross_edition_engines": cross,
+                    "same_edition_agreeing": len(same_edition),
+                    "abbreviation_shape": abbrev_shape,
                     # Every engine's own verdict at this position, so the
                     # dashboard and any later audit can tell "agrees",
                     # "differs" and "was never asked" apart. No field here
@@ -308,6 +422,7 @@ def synthesize(part1, verified, vlm_a, vlm_b, surya, decided=None):
                         "docai": docai.get((kid, wi)),
                         "vlm": vlm_align[wi][0] if wi in vlm_align else None,
                         "surya": surya_align[wi][0] if wi in surya_align else None,
+                        "dicta": dicta_align[wi][0] if wi in dicta_align else None,
                     },
                 })
                 break  # at most one consensus alternative per position
@@ -383,7 +498,8 @@ def main():
     surya = load_baseline(SURYA_PATH)
 
     disputes, stats = synthesize(part1, verified, vlm_a, vlm_b, surya,
-                                 decided=active_human_decisions())
+                                 decided=active_human_decisions(),
+                                 dicta=load_cross_edition_baseline(DICTA_PATH, part1))
     disputes = attach_scan_positions(disputes, part1_by_id, sa.load_regions(), verified)
 
     by_klal = {}
@@ -403,6 +519,23 @@ def main():
     print(f"  klalim with no Surya coverage: {stats['klalim_no_surya']} "
           f"(counted as no vote, NOT as agreement)")
     print(f"  klalim with no VLM coverage: {stats['klalim_no_vlm']}")
+    print(f"  klalim with no Dicta coverage: {stats['klalim_no_dicta']}")
+    print(f"  disputes a DIFFERENT EDITION takes part in: {stats['cross_edition']} "
+          f"(marked `cross_edition` - one of the agreeing voices read the "
+          f"Jerusalem printing, not this scan)")
+    cross_solo = sum(1 for d in disputes
+                     if d.get("cross_edition") and d.get("same_edition_agreeing") == 1)
+    print(f"    ...of which only ONE engine read THIS ink: {cross_solo}")
+    exp_cross = sum(1 for d in disputes
+                    if d.get("abbreviation_shape") == "consensus_expands"
+                    and d.get("cross_edition"))
+    print(f"  consensus would EXPAND an abbreviation the corpus stores: "
+          f"{stats['consensus_expands']} ({exp_cross} of them cross-edition - "
+          f"most likely a difference between the printings, and item 0AQ ruled "
+          f"the Berlin abbreviation is what the corpus keeps)")
+    print(f"  consensus would RESTORE an abbreviation the corpus spelled out: "
+          f"{stats['consensus_abbreviates']} (item 0AQ's own defect - a real "
+          f"correction candidate)")
     print(f"  agreements explainable as a known printer-ligature artifact: "
           f"{stats['ligature_artifacts']} (shared ink defect, NOT independent "
           f"corroboration - see pipeline/typography.py)")

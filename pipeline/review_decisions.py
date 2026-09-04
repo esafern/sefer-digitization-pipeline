@@ -44,6 +44,16 @@
 #   chosen_source       "docai_reading"|"final_text"|"vision_transcription"
 #                       |"vlm_reading" (added 2026-08-21 - VLM baseline
 #                       enrichment, see assemble_corrections_dataset.py)
+#                       |"surya_reading" (2026-08-23)
+#                       |"docai_repaired"|"lexical_proposal"|"suggested"
+#                       |"dicta_reading" (2026-09-04) - and this last one is
+#                       worth knowing by name when auditing the ledger: it is
+#                       the ONLY source that is not a reading of this book's
+#                       own scan. Dicta reads the Jerusalem 1975/6 printing, so
+#                       a decision sourced from it accepted another edition's
+#                       word. Legitimate where the Berlin ink really says that
+#                       too; a defect where the two printings simply differ
+#                       (item 0AQ). Greppable on purpose.
 #                       |"custom"|null for candidate_choice; "accept"|
 #                       "reject" for punctuation_choice; always "custom" for
 #                       manual_correction (it's always free-typed)

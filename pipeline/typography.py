@@ -126,3 +126,48 @@ def ligature_artifact(stored, reading):
     if dropped_lamed_explains(stored, reading):
         return "alef_lamed"
     return None
+
+
+# Marks this printing uses to signal "this word is cut short here". A geresh
+# after Hebrew letters is the abbreviation mark proper; the gershayim variants
+# appear in the same role in the Berlin sorts.
+ABBREV_MARKS = "׳'\"״"
+
+
+def abbreviation_expansion(stored, reading):
+    """`reading` is `stored` with its abbreviation SPELLED OUT, or None.
+
+    `נרא׳` against `נראה` is not a disagreement about which letters are on a
+    page - it is the same word, cut short in one printing and written in full
+    in another. Recognising that shape matters in two places, and this is the
+    single predicate both of them use (Lesson 13 - the two would drift apart
+    the moment either was tuned):
+
+      * pipeline/build_collation_report.py, where the Berlin ink is SETTLED
+        (every Berlin-reading engine agrees with the corpus) and the shape is
+        therefore a genuine difference between the two printings - collation,
+        never a correction.
+      * pipeline/synthesize_multi_witness.py, where the Berlin ink is NOT
+        settled (some Berlin engine reads it differently too) and the shape is
+        a warning: a consensus that would EXPAND an abbreviation is proposing
+        the exact edit item 0AQ ruled against, where the reviewer restored the
+        Berlin `ומתי׳` over the editorial `ומתיר`.
+
+    Returns the base (the stored word minus its mark) so a caller can quote
+    what is being expanded. Deliberately conservative - the reading must
+    CONTINUE the stored letters, not merely resemble them, because the whole
+    value of this test is that it needs no judgement about which is right.
+    """
+    if not stored or not reading:
+        return None
+    base = stored.rstrip(ABBREV_MARKS)
+    if base == stored:
+        return None  # no abbreviation mark: nothing is being expanded
+    # A bare mark with no letters (`׳` alone, which occurs as a token) leaves an
+    # EMPTY base, and every string startswith("") - without this guard any
+    # reading at all would come back as an "expansion" of nothing.
+    if not any("א" <= c <= "ת" for c in base):
+        return None
+    if not reading.startswith(base) or len(reading) <= len(base):
+        return None
+    return base

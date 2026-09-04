@@ -26,8 +26,12 @@ Two categories, and the difference matters:
                This is corroboration (Lesson 9), and it changes no queue depth.
 
 A position where the candidate differs ALONE is neither, and is deliberately
-not listed: one witness disagreeing is not a dispute, and for a cross-edition
-witness it is usually an edition variant rather than a misread.
+not listed: one witness disagreeing is not a dispute. For a cross-edition
+witness that MIGHT be a real difference between the printings, but measured
+2026-09-04 it usually is not - in the one class that could be checked, Dicta's
+solo reading is unattested in independent Hebrew about 6x as often as the
+corpus's. The subset that IS verifiable as a genuine edition difference is
+collated by pipeline/build_collation_report.py, and is never a correction.
 
 Usage:
   python3 tools/preview_dicta_disputes.py \
@@ -36,8 +40,6 @@ Usage:
 """
 
 import argparse
-import collections
-import difflib
 import os
 import re
 import sys
@@ -108,41 +110,14 @@ def to_visual(lines):
 
 
 def witness_by_klal(path, part1):
-    """{klal_id: [raw words]} from a page-oriented OCR dump of ANOTHER EDITION.
+    """{klal_id: [raw words]} for a cross-edition witness FILE.
 
-    Segmentation by content-anchoring: each witness token inherits the klal of
-    the corpus token it aligns to, unaligned tokens join the preceding klal.
-    This decides BOUNDARIES only - every reading stays the witness's own word,
-    and align_witness re-aligns inside each klal afterwards, so nothing here
-    can make the witness agree with the corpus that would not have anyway.
-
-    A same-edition witness with `=== KLAL N ===` headers does not need this;
-    load it with smw.load_baseline() instead.
+    Thin wrapper: the segmentation itself is corpus_io.segment_witness_by_klal,
+    shared with stage 4a since 2026-09-04 so this preview and the real
+    synthesizer cannot disagree about which klal a witness word belongs to.
     """
-    txt = re.sub(r"^===\s*עמוד.*$", "", open(path, encoding="utf-8").read(), flags=re.M)
-    raw = [w for w in txt.split() if cio.hebrew_letters_only(w)]
-    norm = [cio.hebrew_letters_only(w) for w in raw]
-
-    ctoks, owner = [], []
-    for k in sorted(part1, key=lambda x: x["klal_id"]):
-        for w in cio.words_of(k):
-            n = cio.hebrew_letters_only(w)
-            if n:
-                ctoks.append(n)
-                owner.append(k["klal_id"])
-
-    sm = difflib.SequenceMatcher(None, ctoks, norm, autojunk=False)
-    assign = {}
-    for b in sm.get_matching_blocks():
-        for i in range(b.size):
-            assign[b.b + i] = owner[b.a + i]
-
-    out, cur = collections.defaultdict(list), None
-    for j, w in enumerate(raw):
-        cur = assign.get(j, cur)
-        if cur is not None:
-            out[cur].append(w)
-    return dict(out)
+    with open(path, encoding="utf-8") as f:
+        return cio.segment_witness_by_klal(f.read(), part1)
 
 
 def consensus_groups(readings, stored_norm):
@@ -341,11 +316,21 @@ def write_md(path, new, joins, escalations, contested, stats, label,
     if contested:
         L.append(f"| positions where it displaces a different consensus | {len(contested)} |")
     L.append("")
+    # CORRECTED 2026-09-04. This sentence used to end "and across editions it is
+    # usually a textual variant rather than a misread" - which was a guess, and
+    # measurement went the other way. Of the 943 solo-differ positions, the 68
+    # that differ only by a vav/yod swap have DICTA's reading unattested in
+    # 6.18M words of independent Hebrew 24 times against the corpus's 4 - about
+    # 6:1 that the witness, not the edition, is the source. Most solo-differs
+    # are Dicta misreading its own page.
     L.append("Links open the review dashboard "
              f"(`python3 pipeline/review_server.py`, {base}). "
              "A position where only this witness differs is **not** listed — one "
-             "engine disagreeing is not a dispute, and across editions it is "
-             "usually a textual variant rather than a misread.")
+             "engine disagreeing is not a dispute. Measured, most of those are "
+             "this witness misreading its own page rather than a real difference "
+             "between the printings; the subset that IS verifiable as a genuine "
+             "cross-edition difference is collated separately in "
+             "`EDITION-VARIANTS.md`, and is never a correction.")
     L.append("")
     L.append(f"## New disputes ({len(new)})")
     L.append("")

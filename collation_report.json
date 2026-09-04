@@ -1,0 +1,1108 @@
+{
+ "this_edition": "Berlin, 1851/2 - the second printing, not the Livorno 1766-7 original",
+ "other_edition": "Jerusalem 1975/6 (Rashi script), via Dicta RashiOCR",
+ "kind": "collation - NOT a correction queue",
+ "note": "Where the other printing spells out a word this one abbreviates. These are NOT errors and must never be applied to the corpus: the Berlin text is what this project transcribes, and every row here is a position where the Berlin ink is settled (both Berlin-reading engines agree with the corpus). See pipeline/build_collation_report.py for why the wider set of cross-edition differences is deliberately not reported.",
+ "rows": [
+  {
+   "klal_id": 1,
+   "word_index": 50,
+   "this_edition": "נרא'",
+   "other_edition": "נראה",
+   "expansion_of": "נרא",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 1182,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 1,
+   "word_index": 161,
+   "this_edition": "משו'",
+   "other_edition": "משום",
+   "expansion_of": "משו",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 15727,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 1,
+   "word_index": 234,
+   "this_edition": "פירו'",
+   "other_edition": "פירוש",
+   "expansion_of": "פירו",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 504,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 1,
+   "word_index": 267,
+   "this_edition": "אליב'",
+   "other_edition": "אליבא",
+   "expansion_of": "אליב",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 848,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 1,
+   "word_index": 328,
+   "this_edition": "ובמכונו'",
+   "other_edition": "ובמכונות",
+   "expansion_of": "ובמכונו",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya"
+   ],
+   "expansion_attested": 0,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 1,
+   "word_index": 337,
+   "this_edition": "בגמר'",
+   "other_edition": "בגמרא",
+   "expansion_of": "בגמר",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 983,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 1,
+   "word_index": 403,
+   "this_edition": "בחידו'",
+   "other_edition": "בחידושי",
+   "expansion_of": "בחידו",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 1,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 2,
+   "word_index": 85,
+   "this_edition": "משו'",
+   "other_edition": "משום",
+   "expansion_of": "משו",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya"
+   ],
+   "expansion_attested": 15727,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 2,
+   "word_index": 96,
+   "this_edition": "צריכי'",
+   "other_edition": "צריכים",
+   "expansion_of": "צריכי",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 355,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 3,
+   "word_index": 124,
+   "this_edition": "התור'",
+   "other_edition": "התורה",
+   "expansion_of": "התור",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 1941,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 3,
+   "word_index": 215,
+   "this_edition": "מילת'",
+   "other_edition": "מילתא",
+   "expansion_of": "מילת",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 1883,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 4,
+   "word_index": 334,
+   "this_edition": "אומ'",
+   "other_edition": "אומר",
+   "expansion_of": "אומ",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 14482,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 4,
+   "word_index": 340,
+   "this_edition": "הפוסקי'",
+   "other_edition": "הפוסקים",
+   "expansion_of": "הפוסקי",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 66,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 4,
+   "word_index": 382,
+   "this_edition": "והולכ'",
+   "other_edition": "והולכת",
+   "expansion_of": "והולכ",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 101,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 5,
+   "word_index": 392,
+   "this_edition": "במחלוק'",
+   "other_edition": "במחלוקת",
+   "expansion_of": "במחלוק",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 45,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 16,
+   "word_index": 61,
+   "this_edition": "התו'",
+   "other_edition": "התוס'",
+   "expansion_of": "התו",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 48,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 19,
+   "word_index": 86,
+   "this_edition": "בתו'",
+   "other_edition": "בתוס'",
+   "expansion_of": "בתו",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 11,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 23,
+   "word_index": 92,
+   "this_edition": "התנאי'",
+   "other_edition": "התנאים",
+   "expansion_of": "התנאי",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya"
+   ],
+   "expansion_attested": 64,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 23,
+   "word_index": 595,
+   "this_edition": "בכתובו'",
+   "other_edition": "בכתובות",
+   "expansion_of": "בכתובו",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya"
+   ],
+   "expansion_attested": 113,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 23,
+   "word_index": 723,
+   "this_edition": "הכללו'",
+   "other_edition": "הכללות",
+   "expansion_of": "הכללו",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 13,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 23,
+   "word_index": 725,
+   "this_edition": "במקו'",
+   "other_edition": "במקום",
+   "expansion_of": "במקו",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 4540,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 24,
+   "word_index": 45,
+   "this_edition": "כללו'",
+   "other_edition": "כללות",
+   "expansion_of": "כללו",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 52,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 28,
+   "word_index": 14,
+   "this_edition": "דדילמ'",
+   "other_edition": "דדילמא",
+   "expansion_of": "דדילמ",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 56,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 29,
+   "word_index": 279,
+   "this_edition": "בכללי'",
+   "other_edition": "בכללים",
+   "expansion_of": "בכללי",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 0,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 30,
+   "word_index": 169,
+   "this_edition": "מקו'",
+   "other_edition": "מקום",
+   "expansion_of": "מקו",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 5865,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 38,
+   "word_index": 270,
+   "this_edition": "בכורי'",
+   "other_edition": "בכורים",
+   "expansion_of": "בכורי",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 199,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 39,
+   "word_index": 227,
+   "this_edition": "גלות'",
+   "other_edition": "גלותא",
+   "expansion_of": "גלות",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 159,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 40,
+   "word_index": 40,
+   "this_edition": "סי'",
+   "other_edition": "סיי",
+   "expansion_of": "סי",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 0,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 44,
+   "word_index": 79,
+   "this_edition": "איסו'",
+   "other_edition": "איסור",
+   "expansion_of": "איסו",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 2260,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 54,
+   "word_index": 392,
+   "this_edition": "דמושבות'",
+   "other_edition": "דמושבותם",
+   "expansion_of": "דמושבות",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 0,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 54,
+   "word_index": 974,
+   "this_edition": "אפי'",
+   "other_edition": "אפילו",
+   "expansion_of": "אפי",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya"
+   ],
+   "expansion_attested": 10660,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 62,
+   "word_index": 21,
+   "this_edition": "אחר'",
+   "other_edition": "אחרת",
+   "expansion_of": "אחר",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 2194,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 64,
+   "word_index": 155,
+   "this_edition": "ואחריה'",
+   "other_edition": "ואחריהם",
+   "expansion_of": "ואחריה",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 13,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 69,
+   "word_index": 296,
+   "this_edition": "נמחקי'",
+   "other_edition": "נמחקים",
+   "expansion_of": "נמחקי",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 6,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 74,
+   "word_index": 157,
+   "this_edition": "ר'",
+   "other_edition": "רי",
+   "expansion_of": "ר",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 431,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 75,
+   "word_index": 964,
+   "this_edition": "א'",
+   "other_edition": "אי",
+   "expansion_of": "א",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 11678,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 87,
+   "word_index": 137,
+   "this_edition": "בפ'",
+   "other_edition": "בפרק",
+   "expansion_of": "בפ",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 1541,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 87,
+   "word_index": 206,
+   "this_edition": "ולכאור'",
+   "other_edition": "ולכאורה",
+   "expansion_of": "ולכאור",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 13,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 88,
+   "word_index": 1008,
+   "this_edition": "בריית'",
+   "other_edition": "ברייתא",
+   "expansion_of": "בריית",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 309,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 92,
+   "word_index": 414,
+   "this_edition": "וששי'",
+   "other_edition": "וששים",
+   "expansion_of": "וששי",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 54,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 94,
+   "word_index": 512,
+   "this_edition": "ממרי'",
+   "other_edition": "ממרים",
+   "expansion_of": "ממרי",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 11,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 94,
+   "word_index": 604,
+   "this_edition": "דבירו'",
+   "other_edition": "דבירושלמי",
+   "expansion_of": "דבירו",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya"
+   ],
+   "expansion_attested": 2,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 94,
+   "word_index": 641,
+   "this_edition": "דבירוש'",
+   "other_edition": "דבירושלמי",
+   "expansion_of": "דבירוש",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 2,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 97,
+   "word_index": 22,
+   "this_edition": "בפר'",
+   "other_edition": "בפרק",
+   "expansion_of": "בפר",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya"
+   ],
+   "expansion_attested": 1541,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 108,
+   "word_index": 65,
+   "this_edition": "סי'",
+   "other_edition": "סימן",
+   "expansion_of": "סי",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 2206,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 122,
+   "word_index": 49,
+   "this_edition": "בפשיטו'",
+   "other_edition": "בפשיטות",
+   "expansion_of": "בפשיטו",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 1,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 128,
+   "word_index": 566,
+   "this_edition": "דקאמ'",
+   "other_edition": "דקאמר",
+   "expansion_of": "דקאמ",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 1304,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 128,
+   "word_index": 852,
+   "this_edition": "דאתי'",
+   "other_edition": "דאתיי",
+   "expansion_of": "דאתי",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 1,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 142,
+   "word_index": 6,
+   "this_edition": "דקאמ'",
+   "other_edition": "דקאמר",
+   "expansion_of": "דקאמ",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 1304,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 143,
+   "word_index": 24,
+   "this_edition": "ה'",
+   "other_edition": "הלכות",
+   "expansion_of": "ה",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 745,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 144,
+   "word_index": 782,
+   "this_edition": "מתנהגי'",
+   "other_edition": "מתנהגים",
+   "expansion_of": "מתנהגי",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 2,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 144,
+   "word_index": 1204,
+   "this_edition": "התור'",
+   "other_edition": "התורה",
+   "expansion_of": "התור",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 1941,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 144,
+   "word_index": 1207,
+   "this_edition": "ולפעמי'",
+   "other_edition": "ולפעמים",
+   "expansion_of": "ולפעמי",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 8,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 147,
+   "word_index": 464,
+   "this_edition": "הגאוני'",
+   "other_edition": "הגאונים",
+   "expansion_of": "הגאוני",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 335,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 161,
+   "word_index": 149,
+   "this_edition": "הלכו'",
+   "other_edition": "הלכות",
+   "expansion_of": "הלכו",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 745,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 161,
+   "word_index": 280,
+   "this_edition": "ותרא'",
+   "other_edition": "ותראה",
+   "expansion_of": "ותרא",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 45,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 162,
+   "word_index": 51,
+   "this_edition": "ואמוראי'",
+   "other_edition": "ואמוראים",
+   "expansion_of": "ואמוראי",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "vlm"
+   ],
+   "expansion_attested": 1,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 163,
+   "word_index": 574,
+   "this_edition": "סי'",
+   "other_edition": "סימן",
+   "expansion_of": "סי",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 2206,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 167,
+   "word_index": 431,
+   "this_edition": "דבריה'",
+   "other_edition": "דבריהם",
+   "expansion_of": "דבריה",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 310,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 167,
+   "word_index": 795,
+   "this_edition": "ואיכ'",
+   "other_edition": "ואיכא",
+   "expansion_of": "ואיכ",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 1005,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 169,
+   "word_index": 695,
+   "this_edition": "החכמי'",
+   "other_edition": "החכמים",
+   "expansion_of": "החכמי",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 121,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 171,
+   "word_index": 61,
+   "this_edition": "שנתעור'",
+   "other_edition": "שנתעורר",
+   "expansion_of": "שנתעור",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 0,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 176,
+   "word_index": 606,
+   "this_edition": "מסקנ'",
+   "other_edition": "מסקנת",
+   "expansion_of": "מסקנ",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 112,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 176,
+   "word_index": 613,
+   "this_edition": "המקש'",
+   "other_edition": "המקשה",
+   "expansion_of": "המקש",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 97,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 179,
+   "word_index": 139,
+   "this_edition": "עיניה'",
+   "other_edition": "עיניהם",
+   "expansion_of": "עיניה",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 60,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 194,
+   "word_index": 224,
+   "this_edition": "הל'",
+   "other_edition": "הלי",
+   "expansion_of": "הל",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 0,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 194,
+   "word_index": 326,
+   "this_edition": "בפשיטו'",
+   "other_edition": "בפשיטור",
+   "expansion_of": "בפשיטו",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 0,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 197,
+   "word_index": 133,
+   "this_edition": "בלשונו'",
+   "other_edition": "בלשונות",
+   "expansion_of": "בלשונו",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 6,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 197,
+   "word_index": 153,
+   "this_edition": "בפר'",
+   "other_edition": "בפרק",
+   "expansion_of": "בפר",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya"
+   ],
+   "expansion_attested": 1541,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 198,
+   "word_index": 110,
+   "this_edition": "דאמרי'",
+   "other_edition": "דאמרינן",
+   "expansion_of": "דאמרי",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 865,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 198,
+   "word_index": 281,
+   "this_edition": "הפסוקי'",
+   "other_edition": "הפסוקים",
+   "expansion_of": "הפסוקי",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 36,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 199,
+   "word_index": 11,
+   "this_edition": "במצו'",
+   "other_edition": "במצוה",
+   "expansion_of": "במצו",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 138,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 200,
+   "word_index": 34,
+   "this_edition": "דממקו'",
+   "other_edition": "דממקום",
+   "expansion_of": "דממקו",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya",
+    "vlm"
+   ],
+   "expansion_attested": 6,
+   "kind": "edition_variant",
+   "actionable": false
+  },
+  {
+   "klal_id": 204,
+   "word_index": 56,
+   "this_edition": "באמ'",
+   "other_edition": "באמת",
+   "expansion_of": "באמ",
+   "other_edition_label": "Jerusalem 1975/6 (Rashi script), via Dicta",
+   "berlin_engines_agreeing": [
+    "surya"
+   ],
+   "expansion_attested": 112,
+   "kind": "edition_variant",
+   "actionable": false
+  }
+ ]
+}

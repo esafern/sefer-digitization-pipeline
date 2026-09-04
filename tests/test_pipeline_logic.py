@@ -40,6 +40,7 @@ import apply_reviewer_decisions as ard  # noqa: E402
 import assemble_corrections_dataset as acd  # noqa: E402
 import audit_applied_decisions as aad  # noqa: E402
 import build_corrections_dataset as bcd  # noqa: E402
+import build_collation_report as bcr  # noqa: E402
 import build_gematria_trace as bgt  # noqa: E402
 import build_klal_page_regions as bkpr  # noqa: E402
 import check_klal_token_orphans as ckto  # noqa: E402
@@ -6349,3 +6350,322 @@ def test_a_script_may_not_record_a_human_ruling(monkeypatch, tmp_path):
     flag = rd.append_decision("klal_flag", klal_id=1, word_index=0, needs_revisit=True,
                               reviewer="ai-dropped-lamed-correction", note="please look")
     assert flag["decision_type"] == "klal_flag" and flag["needs_revisit"] is True
+
+
+# --- Cross-edition collation (pipeline/build_collation_report.py) -------------
+#
+# The load-bearing claim of that file is a NEGATIVE one: a reading that comes
+# from a different PRINTING must never reach the correction queue, because
+# applying it would edit the Berlin text to match Jerusalem - the exact defect
+# item 0AQ ruled against (`ומתי׳` kept over the editorial `ומתיר`). The tests
+# below exercise that boundary on synthetic input, in both directions, because
+# on today's real data the gate is nearly silent: 74 rows survive out of 943
+# candidate positions, so a gate that had quietly stopped filtering would still
+# look plausible from the output alone (Lesson 26 - validate a filter by what it
+# HIDES, not by what it emits).
+
+def _collate(corpus_text, dicta_words, surya_text=None, vlm_text=None,
+             vlm_b_text=None, freq=None):
+    """Run collate() on one synthetic klal. Absent engine text = that engine
+    read the klal exactly as the corpus has it."""
+    kid = 7
+    surya = {kid: (surya_text if surya_text is not None else corpus_text).split()}
+    vlm_a = {kid: (vlm_text if vlm_text is not None else corpus_text).split()}
+    vlm_b = {kid: (vlm_b_text if vlm_b_text is not None else
+                   (vlm_text if vlm_text is not None else corpus_text)).split()}
+    return bcr.collate([{"klal_id": kid, "clean_text": corpus_text}],
+                       {kid: dicta_words.split()}, "Test edition",
+                       (surya, vlm_a, vlm_b), freq or {})
+
+
+def test_collation_reports_an_expansion_the_other_edition_spells_out():
+    """The whole point of the artifact: Berlin abbreviates, Jerusalem spells out,
+    and the shape itself proves they are the same word - no guessing which is
+    right, because neither is wrong."""
+    rows = _collate("אמר משו' דבר", "אמר משום דבר", freq={"משום": 15727})
+
+    assert len(rows) == 1, f"expected the one expansion, got {rows}"
+    r = rows[0]
+    assert (r["this_edition"], r["other_edition"]) == ("משו'", "משום")
+    assert r["expansion_of"] == "משו"
+    assert r["word_index"] == 1, "must address the corpus's own space-split index"
+    assert r["expansion_attested"] == 15727
+    assert r["kind"] == "edition_variant" and r["actionable"] is False
+
+
+def test_collation_refuses_the_position_when_a_berlin_engine_also_differs():
+    """PROVES THE GATE CAN FAIL. Same expansion as the test above, but here
+    Surya reads the Berlin ink as `משום` too - so the abbreviation may simply be
+    a corpus misread of the Berlin page, which is stage 4a's dispute to settle
+    against the scan, not a fact about the Jerusalem printing. Dropping it here
+    is not a lost finding; it is a finding routed to the queue that can act on
+    it."""
+    rows = _collate("אמר משו' דבר", "אמר משום דבר", surya_text="אמר משום דבר")
+    assert rows == [], "Berlin ink in doubt must not be reported as an edition variant"
+
+    # ...and the VLM alone is equally disqualifying.
+    rows = _collate("אמר משו' דבר", "אמר משום דבר", vlm_text="אמר משום דבר")
+    assert rows == [], "one dissenting Berlin engine is enough to disqualify"
+
+
+def test_collation_ignores_unstable_vlm_and_reports_on_surya_alone():
+    """Stage 4a's stability rule, not re-litigated here: a VLM that read the
+    position differently on its two passes has no usable vote, so it neither
+    confirms nor disqualifies. Surya's agreement still settles the Berlin ink."""
+    rows = _collate("אמר משו' דבר", "אמר משום דבר",
+                    vlm_text="אמר משום דבר", vlm_b_text="אמר משו' דבר")
+    assert len(rows) == 1, "an unstable VLM must abstain, not veto"
+    assert rows[0]["berlin_engines_agreeing"] == ["surya"]
+
+
+def test_collation_reports_nothing_when_no_berlin_engine_read_the_position():
+    """No Berlin witness at all means the ink is UNVERIFIED, which is not the
+    same as verified-and-settled. Silence must not read as agreement."""
+    rows = bcr.collate([{"klal_id": 7, "clean_text": "אמר משו' דבר"}],
+                       {7: "אמר משום דבר".split()}, "Test edition", ({}, {}, {}), {})
+    assert rows == [], "an unwitnessed position is unverified, not confirmed"
+
+
+def test_collation_excludes_differences_that_are_not_expansions():
+    """The 943 positions where Dicta alone differs are mostly Dicta's OWN
+    misreads - measured 6:1 against it in the vav/yod class. Only the
+    structurally verifiable shape (Berlin ends in a geresh, Jerusalem continues
+    the same letters) is a variant this file will assert."""
+    cases = {
+        "a vav/yod swap": ("אמר אותו דבר", "אמר איתו דבר"),
+        "a different word entirely": ("אמר משו' דבר", "אמר וכן דבר"),
+        "a word with no abbreviation mark": ("אמר משום דבר", "אמר משומים דבר"),
+        "a TRUNCATION rather than an expansion": ("אמר משום' דבר", "אמר משו דבר"),
+    }
+    for label, (corpus_text, dicta) in cases.items():
+        assert _collate(corpus_text, dicta) == [], f"{label} is not an edition variant"
+
+
+def test_collation_output_never_looks_like_a_correction_candidate():
+    """A guard against the failure this artifact exists to prevent: some future
+    pass globbing the repo for `{klal_id, word_index, ...}` rows and feeding
+    them to the applier. Every row must carry its own refusal, so the mistake
+    has to be made deliberately rather than by omission."""
+    rows = _collate("אמר משו' דבר ופירו' כאן", "אמר משום דבר ופירוש כאן")
+    assert len(rows) == 2
+    for r in rows:
+        assert r["actionable"] is False and r["kind"] == "edition_variant"
+        # The applier keys on these; none may be present to key on.
+        for field in ("chosen_text", "suggested_text", "decision_type", "corrected"):
+            assert field not in r, f"{field} would make a collation row applicable"
+
+
+def test_collation_does_not_expand_a_bare_abbreviation_mark():
+    """A token that is ONLY a geresh strips to an empty base, and every string
+    startswith("") - so the position would otherwise match whatever the other
+    edition happens to have there and be published as an expansion of nothing."""
+    assert _collate("אמר ' דבר", "אמר משום דבר") == [], \
+        "a mark with no letters expands to nothing"
+
+
+# --- The cross-edition witness (Dicta) as a voting engine ---------------------
+#
+# Wired into stage 4a on 2026-09-04. Everything below defends ONE property: a
+# vote from an engine that read a DIFFERENT PRINTING must never reach a reviewer
+# looking like a second opinion about this scan's ink. Its agreement is real
+# evidence - a different compositor setting the same text - but the third
+# explanation for a disagreement (the two editions simply differ) does not exist
+# for the same-edition engines, and acting on it edits Berlin to match Jerusalem.
+
+def test_dicta_can_supply_the_second_vote_that_creates_a_consensus():
+    """It is a real engine, not an annotation. Wiring it in and having it change
+    no queue would mean it was never actually voting."""
+    part1 = [_klal_fixture(1, "אלף בית גימל")]
+    same = {1: ["אלף", "בית", "גימל"]}          # agrees with the corpus
+    dissent = {1: ["אלף", "בות", "גימל"]}
+
+    d, _ = smw.synthesize(part1, [], same, same, dissent)
+    assert d == [], "Surya alone is not a consensus"
+    d, _ = smw.synthesize(part1, [], same, same, dissent, dicta=dissent)
+    assert len(d) == 1 and d[0]["agreeing_engines"] == ["dicta", "surya"]
+    assert d[0]["witnesses"]["dicta"] == "בות"
+
+
+def test_a_dispute_a_different_edition_took_part_in_says_so():
+    """The whole recognition mechanism, in the record itself. `dicta+surya` in a
+    caption does not tell a reviewer that one of those read another book; these
+    three fields do, and the dashboard renders them as a warning banner and a
+    superscript on the word."""
+    part1 = [_klal_fixture(1, "אלף בית גימל")]
+    same = {1: ["אלף", "בית", "גימל"]}
+    dissent = {1: ["אלף", "בות", "גימל"]}
+
+    d, stats = smw.synthesize(part1, [], same, same, dissent, dicta=dissent)
+    r = d[0]
+    assert r["cross_edition"] is True
+    assert r["cross_edition_engines"] == ["dicta"]
+    assert r["same_edition_agreeing"] == 1, (
+        "only Surya read THIS ink and differed - the reviewer must be able to "
+        "see that the scan itself has exactly one dissenter here")
+    assert stats["cross_edition"] == 1
+
+    # ...and a consensus reached entirely on this printing must NOT be marked,
+    # or the marking would mean nothing (Lesson 26 - a filter that flags
+    # everything hides as much as one that flags nothing).
+    d, stats = smw.synthesize(part1, [], dissent, dissent, dissent)
+    r = d[0]
+    assert r["cross_edition"] is False and r["cross_edition_engines"] == []
+    assert r["same_edition_agreeing"] == 2 and stats["cross_edition"] == 0
+
+
+def test_same_edition_agreeing_counts_only_engines_that_read_this_scan():
+    """Three agreeing engines where one read another edition is TWO looks at
+    this ink, not three. The count is what a reviewer weighs; getting it from
+    len(agreeing_engines) would silently inflate every cross-edition item."""
+    part1 = [_klal_fixture(1, "אלף בית גימל")]
+    dissent = {1: ["אלף", "בות", "גימל"]}
+    d, _ = smw.synthesize(part1, [], dissent, dissent, dissent, dicta=dissent)
+    r = d[0]
+    assert r["agreeing_engines"] == ["dicta", "surya", "vlm"]
+    assert r["same_edition_agreeing"] == 2
+    assert r["cross_edition"] is True
+
+
+def test_a_consensus_that_would_expand_an_abbreviation_is_flagged_not_applied():
+    """Item 0AQ, generalised. The corpus stored `ומתיר` where the Berlin ink
+    reads `ומתי׳`, and the reviewer restored the abbreviation - the corpus
+    transcribes THIS printing, marks included. The mirror case is a consensus
+    proposing to spell an abbreviation out, which with a cross-edition voice
+    among the engines is most likely a difference between the printings. Flagged
+    so the reviewer is told, not dropped."""
+    part1 = [_klal_fixture(1, "אמר משו' דבר")]
+    same = {1: ["אמר", "משו'", "דבר"]}
+    expand = {1: ["אמר", "משום", "דבר"]}
+
+    d, stats = smw.synthesize(part1, [], same, same, expand, dicta=expand)
+    assert len(d) == 1, "it must still reach the reviewer"
+    assert d[0]["abbreviation_shape"] == "consensus_expands"
+    assert d[0]["cross_edition"] is True
+    assert stats["consensus_expands"] == 1
+
+
+def test_a_consensus_that_would_restore_an_abbreviation_is_the_opposite_finding():
+    """The same shape running the other way, and it means the opposite thing:
+    the corpus spelled out what the ink cuts short - usually the geresh misread
+    as a yod (`מה׳` stored as `מהי`). That IS a correction candidate, and it must
+    not be filed under the same label as the case above. Measured on the real
+    corpus 2026-09-04: 18 of these against 4 of the other."""
+    part1 = [_klal_fixture(1, "אמר מהי דבר")]
+    abbrev = {1: ["אמר", "מה'", "דבר"]}
+
+    # Both BERLIN engines read the mark; the cross-edition witness is not
+    # supplied at all, which is the point of the last assertion below.
+    d, stats = smw.synthesize(part1, [], abbrev, abbrev, abbrev)
+    assert d[0]["abbreviation_shape"] == "consensus_abbreviates"
+    assert stats["consensus_abbreviates"] == 1
+    assert d[0]["cross_edition"] is False, (
+        "this direction is about THIS ink and two Berlin engines can find it "
+        "alone - gating it on the cross-edition witness would hide it")
+
+
+def test_an_ordinary_disagreement_carries_no_abbreviation_shape():
+    """PROVES THE FLAG CAN BE ABSENT. A marking that is set on everything is
+    not a marking."""
+    part1 = [_klal_fixture(1, "אלף בית גימל")]
+    dissent = {1: ["אלף", "בות", "גימל"]}
+    d, stats = smw.synthesize(part1, [], dissent, dissent, dissent, dicta=dissent)
+    assert d[0]["abbreviation_shape"] is None
+    assert stats["consensus_expands"] == 0 and stats["consensus_abbreviates"] == 0
+
+
+def test_every_voting_engine_declares_which_printing_it_read():
+    """The guard that keeps this honest as engines are added. An engine in
+    ENGINES but in neither edition set would default to being treated as a
+    reading of the Berlin ink - silently, and with no reviewer-visible sign."""
+    assert set(smw.ENGINES) == smw.SAME_EDITION_ENGINES | smw.CROSS_EDITION_ENGINES
+    assert not (smw.SAME_EDITION_ENGINES & smw.CROSS_EDITION_ENGINES), \
+        "an engine cannot have read both printings"
+    assert "dicta" in smw.CROSS_EDITION_ENGINES
+
+
+def test_a_cross_edition_witness_is_absent_rather_than_agreeing_when_unwired():
+    """Same contract as every other witness (Lesson 15): no baseline file means
+    NO VOTE, never "this witness confirms every word". A fresh clone has no
+    paid-OCR output and must still produce the same disputes it used to."""
+    part1 = [_klal_fixture(1, "אלף בית גימל")]
+    dissent = {1: ["אלף", "בות", "גימל"]}
+    assert smw.load_cross_edition_baseline("/nonexistent/dicta.txt", part1) == {}
+    d, stats = smw.synthesize(part1, [], dissent, dissent, dissent, dicta={})
+    assert len(d) == 1 and d[0]["cross_edition"] is False
+    assert stats["klalim_no_dicta"] == 1
+    assert d[0]["witnesses"]["dicta"] is None, \
+        "an engine that was never asked has no reading - not the corpus's word"
+
+
+def test_the_dashboard_renders_the_cross_edition_witness_and_its_warning():
+    """Lesson 29, and the specific warning item 0N left standing: a witness
+    field that is serialized and never rendered is a field nobody reads, and
+    `dicta_reading` would have been the third one in this file's history. Checked
+    against the real app.js because that is where the omission would live."""
+    app_js = open(os.path.join(REPO, "review_frontend", "app.js"),
+                  encoding="utf-8").read()
+    assert "corr.dicta_reading" in app_js, "the reading must be offered as a choice"
+    assert "Jerusalem" in app_js, "the option must name the edition it came from"
+    assert app_js.count("crossEditionWarningHtml") >= 2, \
+        "the warning builder must be both defined AND called"
+    # Comment lines stripped: this file's own comment EXPLAINS the fallback it
+    # forbids, and matching that would be a test that can only ever pass by
+    # accident of prose.
+    app_code = "\n".join(l for l in app_js.split("\n")
+                         if not l.lstrip().startswith("//"))
+    assert "|| ['dicta']" not in app_code, (
+        "REGRESSION 2026-09-04: the banner defaulted the engine name to 'dicta' "
+        "when the record did not carry `cross_edition_engines` - and the "
+        "assembler was not serializing that field at all, so a page showing a "
+        "confident engine name was reading it from the fallback. A default that "
+        "makes a missing field indistinguishable from a present one is how the "
+        "omission survived to a live API response")
+    assert "cross-edition-mark" in app_js, \
+        "a reviewer must be able to spot these in the text without opening each"
+
+    app_css = open(os.path.join(REPO, "review_frontend", "app.css"),
+                   encoding="utf-8").read()
+    assert ".cross-edition-mark" in app_css, \
+        "an unstyled marker is one the reviewer does not see (Lesson 32)"
+
+
+def test_the_assembler_carries_cross_edition_marking_down_BOTH_write_paths():
+    """REGRESSION 2026-09-04, caught against a live /api/klal response.
+
+    merge_consensus_disputes() writes through two branches - a NEW candidate and
+    an EXISTING one being enriched - and the marking was added to only one of
+    them, then `cross_edition_engines` to neither. Lesson 34: sweep the
+    siblings. The enrichment branch is the worse one to miss, because it fires
+    on positions that already carry a DocAI candidate, i.e. the items with the
+    most evidence attached and the most likely to be acted on.
+    """
+    consensus = {"1": [{
+        "klal_id": 1, "word_index": 0, "opcode": "replace",
+        "final_text": "מהי", "consensus_reading": "מה'",
+        "agreeing_engines": ["dicta", "surya"], "ligature_artifact": None,
+        "cross_edition": True, "cross_edition_engines": ["dicta"],
+        "same_edition_agreeing": 1, "abbreviation_shape": "consensus_abbreviates",
+        "witnesses": {"docai": None, "vlm": None, "surya": "מה'", "dicta": "מה'"},
+    }]}
+
+    fh = tempfile.NamedTemporaryFile("w", suffix=".json", delete=False,
+                                     encoding="utf-8")
+    json.dump(consensus, fh)
+    fh.close()
+
+    for label, by_klal in (
+            ("new candidate", {}),
+            ("enriched candidate", {"1": [{"word_index": 0, "final_text": "מהי",
+                                           "docai_reading": "מהי"}]})):
+        acd.merge_consensus_disputes(by_klal, fh.name)
+        entry = by_klal["1"][0]
+        assert entry["cross_edition"] is True, label
+        assert entry["cross_edition_engines"] == ["dicta"], (
+            f"{label}: the banner names the edition from this field - unset, it "
+            f"either says nothing or invents a name")
+        assert entry["same_edition_agreeing"] == 1, label
+        assert entry["abbreviation_shape"] == "consensus_abbreviates", label
+        assert entry["dicta_reading"] == "מה'", label
+        assert "different edition" in entry.get("reasoning", "").lower() or \
+               "CROSS-EDITION" in entry.get("reasoning", ""), \
+            f"{label}: the note must say a different printing is involved"

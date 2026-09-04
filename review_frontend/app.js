@@ -216,6 +216,41 @@ function wordState(corr) {
 // overrode an open dispute" from "a human double-checked an already-
 // resolved word." The status LABEL (tooltip / candidate panel) shows both
 // axes instead of just the final one.
+// WHY A CROSS-EDITION CONSENSUS GETS ITS OWN BANNER, and not just a line in
+// the note. Every other engine in this pipeline read the SAME Berlin scan the
+// corpus transcribes, so "2 engines agree" means two independent looks at this
+// ink. Dicta read the Jerusalem 1975/6 printing. Its agreement is real evidence
+// - a second compositor setting the same text - but it is not a second look at
+// THIS page, and where it is the only voice besides one Berlin engine, the ink
+// itself has exactly one dissenter. A reviewer reading `dicta + surya` in a
+// grey caption will not reconstruct that on their own, and the cost of them not
+// reconstructing it is an edit that changes Berlin to match Jerusalem.
+function crossEditionWarningHtml(corr) {
+  if (!corr) return '';
+  const bits = [];
+  if (corr.cross_edition) {
+    // No `|| ['dicta']` fallback. A default here would render a plausible
+    // engine name for a record that never carried one, so an assembler that
+    // stopped serializing the field would look exactly like one that did -
+    // which is how this was nearly shipped on 2026-09-04 (the field WAS
+    // missing, and a hardcoded fallback hid it). Say "a different edition"
+    // when the record does not name which; never invent the name.
+    const named = corr.cross_edition_engines || [];
+    const who = named.length ? named.join(' + ') : 'A different edition';
+    bits.push(`<b>${escapeHtml(who)}</b> read a <b>different edition</b> (Jerusalem 1975/6), not this Berlin scan.` +
+      (corr.same_edition_agreeing === 1
+        ? ' Only <b>one</b> engine that read this scan differs from the corpus here, so a genuine difference between the two printings is a live explanation — check the ink.'
+        : ''));
+  }
+  if (corr.abbreviation_shape === 'consensus_expands') {
+    bits.push('This would <b>expand an abbreviation</b> the corpus stores. The Berlin abbreviation is what the corpus keeps (item 0AQ) — if the ink shows the mark, the stored text is already right.');
+  } else if (corr.abbreviation_shape === 'consensus_abbreviates') {
+    bits.push('This would <b>restore an abbreviation mark</b> the corpus spelled out — usually the geresh misread as a yod. A real correction candidate.');
+  }
+  if (!bits.length) return '';
+  return `<div style="font-size:12px;margin-top:6px;padding:6px 8px;border-inline-start:3px solid var(--warn,#b8860b);background:rgba(184,134,11,0.08);">${bits.join('<br>')}</div>`;
+}
+
 function statusLabel(corr) {
   const machine = MACHINE_RESOLVED_FLAGS.includes(corr.flag) ? STATE_META.machine.label : STATE_META.open.label;
   return corr.current_decision ? `${machine} · ${STATE_META.human.label}` : machine;
@@ -1515,13 +1550,35 @@ function renderKlalBody(block, k) {
       const pendingDelete = chosenText === '';
       const pendingReplace = !pendingDelete && chosenText && chosenText !== w;
 
+      // A cross-edition dispute is marked IN THE TEXT, not only in the panel.
+      // A reviewer scanning a klal decides which words to open by what the
+      // text pane shows them; if "one of these voices was reading a different
+      // printing" only appears after they open it, they have already spent the
+      // attention. The marker is deliberately a small superscript rather than
+      // another underline colour - the underline already encodes decision
+      // state, and overloading it would make two unrelated facts compete.
       span.className = 'flag-word state-' + wState
         + (pendingDelete ? ' pending-delete' : '')
-        + (pendingReplace ? ' pending-replace' : '');
+        + (pendingReplace ? ' pending-replace' : '')
+        + (corr.cross_edition ? ' cross-edition' : '');
       span.dataset.wordIndex = i;
       span.textContent = w;
       attachWordHandlers(span, k.klal_id, corr, false, true);
       body.appendChild(span);
+      // AFTER the word, not before it - and before the pending-replace arrow
+      // below, so the mark stays attached to the word it describes rather than
+      // to the proposed replacement.
+      if (corr.cross_edition) {
+        const mark = document.createElement('sup');
+        mark.className = 'cross-edition-mark';
+        mark.textContent = 'J';
+        mark.title = 'A different edition (Jerusalem 1975/6) is one of the '
+          + 'agreeing voices here'
+          + (corr.same_edition_agreeing === 1
+             ? ' \u2014 and only one engine that read this scan differs from the corpus.'
+             : '.');
+        body.appendChild(mark);
+      }
 
       if (pendingReplace) {
         const arrow = document.createElement('span');
@@ -2558,6 +2615,17 @@ async function openDisputedPanel(klalId, corr) {
   if (corr.surya_reading && !options.some(o => o.text === corr.surya_reading)) {
     options.push({ source: 'surya_reading', label: 'Surya OCR reading', text: corr.surya_reading });
   }
+  // Dicta, the CROSS-EDITION witness (added 2026-09-04). Every option above is
+  // an engine's reading of THIS scan; this one is a reading of a different
+  // printing (Jerusalem 1975/6), so the label says which book it read. Choosing
+  // it when the two editions genuinely differ would edit the Berlin text to
+  // match Jerusalem, which is the opposite of transcribing this book - the
+  // reviewer needs to know that from the option itself, not from the note.
+  if (corr.dicta_reading && !options.some(o => o.text === corr.dicta_reading)) {
+    options.push({ source: 'dicta_reading',
+                   label: 'Dicta reading — a DIFFERENT edition (Jerusalem 1975/6)',
+                   text: corr.dicta_reading });
+  }
   // A lexical-defect proposal (pipeline stage 4b). NOT an engine reading - it
   // comes from the independent reference corpus's frequency table plus the
   // detectors' one-edit search - so it is labelled for what it is rather than
@@ -2634,6 +2702,7 @@ async function openDisputedPanel(klalId, corr) {
       <div style="font-size:12px;color:var(--ink-faint);margin-top:4px;">${escapeHtml(flagLabel)}${corr.confidence != null ? ' · ' + Math.round(corr.confidence * 100) + '% vision confidence' : ''}</div>
       ${corr.consensus_engines && corr.consensus_engines.length ? `<div style="font-size:12px;color:var(--ink-faint);margin-top:4px;">
         ${escapeHtml(corr.consensus_engines.join(' + '))} agree on <b>${escapeHtml(corr.consensus_reading || '')}</b>${corr.ligature_artifact ? ' — but this is a known <b>' + escapeHtml(corr.ligature_artifact) + '</b> ink artifact, so the agreement is a shared misread, not corroboration' : ''}</div>` : ''}
+      ${crossEditionWarningHtml(corr)}
     </div>
     <div class="panel-section">
       ${wordRefLabel(klalId, corr.word_index, words[corr.word_index], 'Context &middot; ')}

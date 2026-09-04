@@ -6,16 +6,16 @@ Preview only — **nothing has been written into the pipeline.** `dicta_jerusale
 
 | | |
 |---|---:|
-| corpus words in scope | 52,057 |
-| positions `dicta` votes at | 50,362 |
-| …agreeing with the corpus | 48,842 (97.0%) |
-| **new disputes it would create** | **225** |
-| existing disputes it corroborates | 186 |
-| positions a human already ruled, against this consensus | **8** |
+| corpus words in scope | 52,054 |
+| positions `dicta` votes at | 50,365 |
+| …agreeing with the corpus | 48,868 (97.0%) |
+| **new disputes it would create** | **223** |
+| existing disputes it corroborates | 182 |
+| positions a human already ruled, against this consensus | **1** |
 
-Links open the review dashboard (`python3 pipeline/review_server.py`, http://127.0.0.1:8420). A position where only this witness differs is **not** listed — one engine disagreeing is not a dispute, and across editions it is usually a textual variant rather than a misread.
+Links open the review dashboard (`python3 pipeline/review_server.py`, http://127.0.0.1:8420). A position where only this witness differs is **not** listed — one engine disagreeing is not a dispute. Measured, most of those are this witness misreading its own page rather than a real difference between the printings; the subset that IS verifiable as a genuine cross-edition difference is collated separately in `EDITION-VARIANTS.md`, and is never a correction.
 
-## New disputes (225)
+## New disputes (223)
 
 ### klal 2 · word 379
 
@@ -617,12 +617,6 @@ Links open the review dashboard (`python3 pipeline/review_server.py`, http://127
 - context: …לכד םג המו אהימ םריכזהל וכל תש אל ךיא אטישפיא אל…
 - http://127.0.0.1:8420/klal/94/word/374
 
-### klal 96 · word 1
-
-- corpus reads **ויעב** → `dicta+surya` read **ייעב**
-- context: …ןניעב טקנ הנושארבו ידדהא יכימסד ויעב וצ…
-- http://127.0.0.1:8420/klal/96/word/1
-
 ### klal 97 · word 156
 
 - corpus reads **ז"ס** → `dicta+surya` read **ז"פ**
@@ -664,12 +658,6 @@ Links open the review dashboard (`python3 pipeline/review_server.py`, http://127
 - corpus reads **הנשמכ** → `dicta+surya` read **הנשמב**
 - context: …ה"הז הנשמ אקוד ואל 'וכו הנשמכ םויב וב רמאיש םוקמ לכב…
 - http://127.0.0.1:8420/klal/116/word/121
-
-### klal 117 · word 43
-
-- corpus reads **בתרכ** → `dicta+vlm` read **בתכ**
-- context: …ג"כ ףד ןירדהנסל וישודיחב ן"רה בתרכ ןכ רשפא אל אה התימל…
-- http://127.0.0.1:8420/klal/117/word/43
 
 ### klal 120 · word 12
 
@@ -1367,13 +1355,9 @@ Links open the review dashboard (`python3 pipeline/review_server.py`, http://127
 - context: …אל. [.] הלע ףיסול אלד ןבה אכר…
 - http://127.0.0.1:8420/klal/221/word/1
 
-## Corroborated — already disputed, `dicta` agrees (186)
+## Corroborated — already disputed, `dicta` agrees (182)
 
 These change no queue depth; they are the independent second opinion Lesson 9 asks for.
-
-**klal 5 · word 396** — לב → ילב' (`dicta+surya+vlm`)
-
-http://127.0.0.1:8420/klal/5/word/396
 
 **klal 12 · word 271** — ה"ל → הייל (`dicta+surya+vlm`)
 
@@ -1578,14 +1562,6 @@ http://127.0.0.1:8420/klal/52/word/17
 **klal 54 · word 414** — ןיב → ןיכ (`dicta+surya+vlm`)
 
 http://127.0.0.1:8420/klal/54/word/414
-
-**klal 54 · word 730** — םהילע → םרילע (`dicta+surya+vlm`)
-
-http://127.0.0.1:8420/klal/54/word/730
-
-**klal 54 · word 770** — ד"קפל → ר"קפל (`dicta+surya+vlm`)
-
-http://127.0.0.1:8420/klal/54/word/770
 
 **klal 54 · word 821** — השקהש → השקרש (`dicta+surya+vlm`)
 
@@ -2079,10 +2055,6 @@ http://127.0.0.1:8420/klal/198/word/1037
 
 http://127.0.0.1:8420/klal/200/word/81
 
-**klal 210 · word 73** — אתיירתב → אתיירתבכ (`dicta+docai+vlm`)
-
-http://127.0.0.1:8420/klal/210/word/73
-
 **klal 212 · word 30** — נ"ה → ג"ה (`dicta+docai+vlm`)
 
 http://127.0.0.1:8420/klal/212/word/30
@@ -2115,41 +2087,13 @@ http://127.0.0.1:8420/klal/217/word/839
 
 http://127.0.0.1:8420/klal/217/word/893
 
-## A human already ruled here, and the engines disagree (8)
+## A human already ruled here, and the engines disagree (1)
 
 The Lesson 9 case: the reviewer chose one reading while independent engines agree on another. stage 4a never emits these as disputes, so they are NOT counted above as new work — but they are the rows most worth a second look.
 
-**klal 59 · word 47** — corpus היתווכ, `dicta+surya+vlm` read התווכ, reviewer chose היתווכ
+**klal 210 · word 73** — corpus אתיירתבכ, `dicta+docai+vlm` read אתיירתב, reviewer chose אתיירתבכ
 
-http://127.0.0.1:8420/klal/59/word/47
-
-**klal 74 · word 203** — corpus םגד, `dicta+surya+vlm` read םגה, reviewer chose םגד
-
-http://127.0.0.1:8420/klal/74/word/203
-
-**klal 77 · word 22** — corpus תואמוטו, `dicta+surya` read תואמטו, reviewer chose תואמוטו
-
-http://127.0.0.1:8420/klal/77/word/22
-
-**klal 77 · word 24** — corpus תואמוט, `dicta+surya+vlm` read תואמט, reviewer chose תואמוט
-
-http://127.0.0.1:8420/klal/77/word/24
-
-**klal 88 · word 963** — corpus ריתמו, `dicta+surya+vlm` read יתמו', reviewer chose ריתמו
-
-http://127.0.0.1:8420/klal/88/word/963
-
-**klal 91 · word 191** — corpus םיניינעה, `dicta+surya+vlm` read ינינעה', reviewer chose םיניינעה
-
-http://127.0.0.1:8420/klal/91/word/191
-
-**klal 92 · word 326** — corpus הילא, `dicta+surya+vlm` read היא, reviewer chose הילא
-
-http://127.0.0.1:8420/klal/92/word/326
-
-**klal 124 · word 26** — corpus הילא, `dicta+surya+vlm` read היא, reviewer chose הילא
-
-http://127.0.0.1:8420/klal/124/word/26
+http://127.0.0.1:8420/klal/210/word/73
 
 ## Every link, bare
 
@@ -2254,7 +2198,6 @@ http://127.0.0.1:8420/klal/94/word/16
 http://127.0.0.1:8420/klal/94/word/74
 http://127.0.0.1:8420/klal/94/word/317
 http://127.0.0.1:8420/klal/94/word/374
-http://127.0.0.1:8420/klal/96/word/1
 http://127.0.0.1:8420/klal/97/word/156
 http://127.0.0.1:8420/klal/97/word/353
 http://127.0.0.1:8420/klal/104/word/28
@@ -2262,7 +2205,6 @@ http://127.0.0.1:8420/klal/104/word/31
 http://127.0.0.1:8420/klal/113/word/99
 http://127.0.0.1:8420/klal/113/word/150
 http://127.0.0.1:8420/klal/116/word/121
-http://127.0.0.1:8420/klal/117/word/43
 http://127.0.0.1:8420/klal/120/word/12
 http://127.0.0.1:8420/klal/125/word/64
 http://127.0.0.1:8420/klal/128/word/191
@@ -2379,15 +2321,7 @@ http://127.0.0.1:8420/klal/217/word/313
 http://127.0.0.1:8420/klal/217/word/778
 http://127.0.0.1:8420/klal/220/word/34
 http://127.0.0.1:8420/klal/221/word/1
-http://127.0.0.1:8420/klal/59/word/47
-http://127.0.0.1:8420/klal/74/word/203
-http://127.0.0.1:8420/klal/77/word/22
-http://127.0.0.1:8420/klal/77/word/24
-http://127.0.0.1:8420/klal/88/word/963
-http://127.0.0.1:8420/klal/91/word/191
-http://127.0.0.1:8420/klal/92/word/326
-http://127.0.0.1:8420/klal/124/word/26
-http://127.0.0.1:8420/klal/5/word/396
+http://127.0.0.1:8420/klal/210/word/73
 http://127.0.0.1:8420/klal/12/word/271
 http://127.0.0.1:8420/klal/12/word/298
 http://127.0.0.1:8420/klal/13/word/175
@@ -2439,8 +2373,6 @@ http://127.0.0.1:8420/klal/48/word/7
 http://127.0.0.1:8420/klal/51/word/145
 http://127.0.0.1:8420/klal/52/word/17
 http://127.0.0.1:8420/klal/54/word/414
-http://127.0.0.1:8420/klal/54/word/730
-http://127.0.0.1:8420/klal/54/word/770
 http://127.0.0.1:8420/klal/54/word/821
 http://127.0.0.1:8420/klal/54/word/971
 http://127.0.0.1:8420/klal/73/word/87
@@ -2564,7 +2496,6 @@ http://127.0.0.1:8420/klal/198/word/302
 http://127.0.0.1:8420/klal/198/word/809
 http://127.0.0.1:8420/klal/198/word/1037
 http://127.0.0.1:8420/klal/200/word/81
-http://127.0.0.1:8420/klal/210/word/73
 http://127.0.0.1:8420/klal/212/word/30
 http://127.0.0.1:8420/klal/216/word/337
 http://127.0.0.1:8420/klal/217/word/212
