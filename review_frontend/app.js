@@ -4384,26 +4384,41 @@ let endClampKlalId = null;
 function updateActiveFromScroll() {
   const allBlocks = Array.from(document.querySelectorAll('.klal-block'));
   const line = readingLine();   // see READING_LINE_OFFSET - one definition
-  if (endClampKlalId != null) {
-    const t = textScroll;
-    const held = document.getElementById('klal-block-' + endClampKlalId);
-    const stillClamped = t.scrollTop + t.clientHeight >= t.scrollHeight - 2
-                         && held && held.getBoundingClientRect().top <= line;
-    if (stillClamped) {
-      if (endClampKlalId !== lastActiveKlalId) {
-        lastActiveKlalId = endClampKlalId;
-        setActiveKlal(endClampKlalId);
-      }
-      return;
-    }
-    endClampKlalId = null;   // scrolled off the end - the geometry rules again
-  }
   let current = allBlocks[0];
   for (const block of allBlocks) {
     if (block.getBoundingClientRect().top <= line) current = block;
     else break;
   }
-  const klalId = parseInt(current.dataset.klalId);
+  let klalId = parseInt(current.dataset.klalId);
+
+  // THE HELD KLAL WINS THE LABEL, and only the label.
+  //
+  // At the end of the corpus the container clamps and a jump cannot put its
+  // destination on the reading line, so the geometry above answers the NEXT
+  // klal - true, and not what the reviewer clicked. endClampKlalId overrides
+  // it. Released by the held block coming back DOWN past the line, which only
+  // scrolling up can do: watching the container instead (either "still at the
+  // end" or "scrollTop has not risen") let go on its own, because a block
+  // mounting below adds height and the browser's scroll anchoring then moves
+  // scrollTop to compensate. Measured over six identical jumps, scrollTop
+  // ranged 5,000px and the klal landed at -88 or -246 depending on what had
+  // mounted.
+  //
+  // OVERRIDE, NOT AN EARLY RETURN. The first version returned here, which
+  // skipped the continuation-page tracking below - so while a hold was active
+  // the SCAN PANE stopped following the reader, and
+  // test_a_word_click_survives_the_scroll_that_follows_it caught it. `current`
+  // moves with the label so the markers read below come from the held klal.
+  if (endClampKlalId != null) {
+    const held = document.getElementById('klal-block-' + endClampKlalId);
+    if (held && held.getBoundingClientRect().top <= line) {
+      klalId = endClampKlalId;
+      current = held;
+    } else {
+      endClampKlalId = null;
+    }
+  }
+
   if (klalId !== lastActiveKlalId) {
     lastActiveKlalId = klalId;
     setActiveKlal(klalId);

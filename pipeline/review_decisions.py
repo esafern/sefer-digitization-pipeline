@@ -501,6 +501,41 @@ def flagged_klalim(path=None):
     return sorted(kid for (kid, _), r in current.items() if r.get("needs_revisit"))
 
 
+def superseded_by_an_applied_decision(path=None):
+    """ids of rulings a LATER ruling replaced, where that later ruling is itself
+    already in the corpus.
+
+    FOUND 2026-09-05, tracing why apply_reviewer_decisions.py kept refusing the
+    same rulings run after run. `all_current()` deliberately does not honour
+    `supersedes` (see append_decision), so a ruling that
+    tools/repoint_stale_decisions.py re-pointed is STILL the current record at
+    its OLD, rotted key. The re-pointed copy at the corrected index was applied
+    on 2026-09-02; the original stayed live at an index that no longer names its
+    word, so every run since has picked it up, failed the drift check, and
+    counted it as work a human still owed. 8 of the 47 the applier was refusing
+    were in that state - finished twice over and reported as outstanding.
+
+    Deliberately narrower than "has been superseded". A ruling replaced by one
+    that is NOT yet applied is still live work: the replacement has to be
+    promoted, and skipping the pair would lose both. Only the applied successor
+    settles the question, which is the same "APPLIED, not merely decided" bar
+    build_corrections_dataset.settled_by_an_applied_decision holds.
+    """
+    records = {r["id"]: r for r in _read_all(path)}
+    # KEYWORD, not positional. tests/test_pipeline_logic.py's applier harness
+    # redirects the ledger by wrapping these functions and injecting
+    # `path=<tmpdir>`, so a positional `path` here arrives alongside that
+    # keyword and raises "multiple values for argument 'path'" - which is what
+    # 31 tests did the moment this function was added.
+    applied = applied_decision_ids(path=path)
+    out = set()
+    for r in records.values():
+        old = r.get("supersedes")
+        if old and r["id"] in applied:
+            out.add(old)
+    return out
+
+
 def applied_decision_ids(path=None):
     """ids of decisions already promoted into the corpus, i.e. every
     `applied_decision_id` referenced by an apply_event row.

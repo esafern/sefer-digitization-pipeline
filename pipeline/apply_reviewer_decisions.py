@@ -504,6 +504,12 @@ def main():
         k["clean_text"] = " ".join(k["clean_text"].split())
     by_klal = {k["klal_id"]: k for k in part1}
     already_applied = rd.applied_decision_ids()
+    # A ruling whose REPLACEMENT is already in the corpus is finished, even
+    # though it is still the current record at its own (rotted) key - see
+    # review_decisions.superseded_by_an_applied_decision for why that happens.
+    # Without this the applier retries it every run, fails the drift check, and
+    # it is counted as outstanding review work forever.
+    settled_by_successor = rd.superseded_by_an_applied_decision()
     # The text as it stood BEFORE this run, so reindex_flags_after_shift can
     # verify a moved flag lands on the same word it named - captured here rather
     # than re-read later, because by_klal is mutated in place below.
@@ -533,7 +539,7 @@ def main():
 
     for (klal_id, word_index), decision in sorted(decisions.items()):
         # Already promoted into part1.json by an earlier run - never re-apply.
-        if decision["id"] in already_applied:
+        if decision["id"] in already_applied or decision["id"] in settled_by_successor:
             skipped_already_applied.append((klal_id, word_index))
             continue
         live_list = corrections.get(str(klal_id), [])
@@ -684,7 +690,7 @@ def main():
     # block each other). A same-position replace (non-empty chosen_text)
     # needs no such limit.
     for (klal_id, word_index), decision in sorted(manual_decisions.items()):
-        if decision["id"] in already_applied:
+        if decision["id"] in already_applied or decision["id"] in settled_by_successor:
             skipped_already_applied.append((klal_id, word_index))
             continue
         klal = by_klal.get(klal_id)
@@ -824,7 +830,7 @@ def main():
     title_decisions = rd.all_current("title_correction")
     title_count_changed_klalim = set()
     for (klal_id, word_index), decision in sorted(title_decisions.items()):
-        if decision["id"] in already_applied:
+        if decision["id"] in already_applied or decision["id"] in settled_by_successor:
             skipped_already_applied.append((klal_id, word_index))
             continue
         klal = by_klal.get(klal_id)

@@ -935,7 +935,13 @@ def apply_harness(tmp_path, monkeypatch, decisions_path):
         part1_path.write_text(json.dumps(klalim, ensure_ascii=False), encoding="utf-8")
         monkeypatch.setattr(ard, "PART1_PATH", str(part1_path))
         monkeypatch.setattr(ard, "load_current_corrections", lambda: corrections)
-        for name in ("all_current", "applied_decision_ids", "append_decision", "history_for"):
+        # `superseded_by_an_applied_decision` joined this list 2026-09-05 with
+        # the applier's ghost-skip. A ledger reader missing from here silently
+        # reads the REAL review_decisions.jsonl while every other call in the
+        # same run reads the temp one, so the applier under test would decide
+        # what to skip from production data (Lesson 36's shape, one layer in).
+        for name in ("all_current", "applied_decision_ids", "append_decision",
+                     "history_for", "superseded_by_an_applied_decision"):
             real = getattr(rd, name)
             monkeypatch.setattr(ard.rd, name,
                                 lambda *a, _f=real, **kw: _f(*a, **{**kw, "path": decisions_path}))
@@ -6736,3 +6742,69 @@ def test_the_ink_can_corroborate_a_repeated_word(monkeypatch):
                           words, None, {})
     assert v is None and "w3" in why, (
         f"the ink puts this ruling at w3 but it was closed at w1: {why}")
+
+
+def test_a_ruling_whose_replacement_is_applied_is_not_retried_forever(tmp_path, monkeypatch):
+    """REGRESSION 2026-09-05, found tracing why apply_reviewer_decisions.py
+    refused the same rulings run after run.
+
+    `all_current()` deliberately does not honour `supersedes`, so a ruling that
+    repoint_stale_decisions.py re-pointed is STILL the current record at its OLD,
+    rotted key. Its re-pointed copy at the corrected index was applied on
+    2026-09-02; the original stayed live at an index that no longer names its
+    word, so every run since picked it up, failed the drift check, and counted it
+    as work a human still owed. 8 of the 47 refusals were in that state -
+    finished twice over and reported as outstanding.
+
+    The bar is narrow on purpose, and the second half of this test is what pins
+    it: a ruling replaced by one that is NOT yet applied is still live work,
+    because the replacement has to be promoted and skipping the pair would lose
+    both.
+    """
+    path = tmp_path / "decisions.jsonl"
+    monkeypatch.setattr(rd, "DECISIONS_PATH", str(path))
+
+    old = rd.append_decision("disputed_choice", klal_id=1, word_index=8,
+                             chosen_source="custom", chosen_text="עדות",
+                             reviewer="local")
+    moved = rd.append_decision("disputed_choice", klal_id=1, word_index=9,
+                               chosen_source="custom", chosen_text="עדות",
+                               supersedes=old["id"], reviewer="local")
+
+    # The replacement exists but has NOT been applied - the pair is still work.
+    assert rd.superseded_by_an_applied_decision(str(path)) == set(), (
+        "a ruling whose replacement is still pending was written off; the "
+        "replacement has to be promoted and now neither would be")
+
+    rd.append_decision("apply_event", klal_id=1, word_index=9,
+                       applied_decision_id=moved["id"], reviewer="local")
+    settled = rd.superseded_by_an_applied_decision(str(path))
+    assert old["id"] in settled, (
+        "the replacement is in the corpus, so the original is finished - leaving "
+        "it live is what made the applier retry it on every run")
+    assert moved["id"] not in settled, "the replacement itself supersedes nothing"
+
+
+def test_the_applier_skips_a_ruling_its_replacement_already_settled():
+    """The skip is wired into apply_reviewer_decisions, not merely available.
+
+    Lesson 32's shape: `superseded_by_an_applied_decision` existing is not the
+    same as the applier calling it, and the defect was eight rulings being
+    RETRIED, which only the call site prevents."""
+    src = open(os.path.join(REPO, "pipeline", "apply_reviewer_decisions.py"),
+               encoding="utf-8").read()
+    assert "superseded_by_an_applied_decision()" in src, (
+        "the applier does not consult it, so a re-pointed ruling is still retried")
+    # EVERY branch, not a count. A threshold is a guess about how many places
+    # there are - the first version of this assertion said ">= 3" when there are
+    # four occurrences, so deleting a branch still passed it. The property is
+    # that no place asks "already applied?" without also asking "settled by its
+    # replacement?", and that stays true as branches are added or removed
+    # (Lesson 34).
+    checks = [l.strip() for l in src.split("\n")
+              if 'decision["id"] in already_applied' in l]
+    assert checks, "the applier no longer checks already_applied at all"
+    unswept = [l for l in checks if "settled_by_successor" not in l]
+    assert not unswept, (
+        f"{len(unswept)} of {len(checks)} already-applied checks do not also skip a "
+        f"ruling its replacement settled, so that branch retries it forever: {unswept}")

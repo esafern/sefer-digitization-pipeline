@@ -3585,38 +3585,6 @@
  },
  {
   "klal_id": 176,
-  "word_index": 525,
-  "stored": "הלכי",
-  "proposals": [
-   {
-    "form": "הלכו",
-    "ref_count": 158,
-    "edit": null
-   }
-  ],
-  "detector": "substitution",
-  "ambiguous": false,
-  "rank": 158,
-  "corpus_count": 1
- },
- {
-  "klal_id": 176,
-  "word_index": 525,
-  "stored": "הלכי",
-  "proposals": [
-   {
-    "form": "הכי",
-    "ref_count": 9173,
-    "edit": "extra_char"
-   }
-  ],
-  "detector": "insertion_deletion",
-  "ambiguous": false,
-  "rank": 9173,
-  "corpus_count": 1
- },
- {
-  "klal_id": 176,
   "word_index": 555,
   "stored": "ואיין",
   "proposals": [
@@ -4326,22 +4294,6 @@
   "detector": "insertion_deletion",
   "ambiguous": true,
   "rank": 363,
-  "corpus_count": 1
- },
- {
-  "klal_id": 217,
-  "word_index": 313,
-  "stored": "מיר",
-  "proposals": [
-   {
-    "form": "מיד",
-    "ref_count": 2979,
-    "edit": null
-   }
-  ],
-  "detector": "substitution",
-  "ambiguous": false,
-  "rank": 2979,
   "corpus_count": 1
  },
  {

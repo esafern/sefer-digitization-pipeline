@@ -4174,21 +4174,6 @@
       "klal_id": 217,
       "page": 75,
       "opcode": "replace",
-      "word_index_in_final_text": 0,
-      "original_word": "ריו",
-      "corrected_word": "ריז",
-      "bbox": {
-        "x1": 0.8388096690177917,
-        "y1": 0.4703509509563446,
-        "x2": 0.863608181476593,
-        "y2": 0.48769664764404297
-      },
-      "bbox_estimated": false
-    },
-    {
-      "klal_id": 217,
-      "page": 75,
-      "opcode": "replace",
       "word_index_in_final_text": 342,
       "original_word": "דתפים",
       "corrected_word": "דתפיס",
@@ -4322,8 +4307,8 @@
     }
   ],
   "meta": {
-    "total_candidates": 288,
-    "skipped_settled_by_applied_decision": 373,
+    "total_candidates": 287,
+    "skipped_settled_by_applied_decision": 382,
     "klalim_covered": 107,
     "skipped_no_docai_page_klalim": [],
     "unattributable_deletes": [],

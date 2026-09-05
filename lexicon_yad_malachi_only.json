@@ -138,43 +138,6 @@
   ]
  },
  {
-  "word": "הלכי",
-  "count": 1,
-  "occurrences": [
-   [
-    176,
-    525
-   ]
-  ],
-  "nearest_attested": [
-   {
-    "form": "הכי",
-    "ref_count": 9173,
-    "edit": "deletion"
-   },
-   {
-    "form": "הלכך",
-    "ref_count": 2836,
-    "edit": "substitution"
-   },
-   {
-    "form": "היכי",
-    "ref_count": 2731,
-    "edit": "substitution"
-   },
-   {
-    "form": "הלכה",
-    "ref_count": 2290,
-    "edit": "substitution"
-   },
-   {
-    "form": "הלוי",
-    "ref_count": 175,
-    "edit": "substitution"
-   }
-  ]
- },
- {
   "word": "לייב",
   "count": 1,
   "occurrences": [
