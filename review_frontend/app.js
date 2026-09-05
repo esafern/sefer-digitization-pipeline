@@ -320,13 +320,25 @@ function klalRefName(klalId) {
   return `Klal ${klalId}` + (g ? ` (${g})` : '');
 }
 
+// ONE COPY BUTTON, THREE CALLERS. Written out by hand in three places until
+// 2026-09-05 (a code-review finding): wordRefLabel, the hover card's head, and
+// the flag-list row. All three carried the same five attributes, and the
+// delegated `.copy-ref` handler keys on every one of them - so a fourth caller,
+// or a change to what the clipboard payload needs, had three places to get
+// right and no way to notice missing one (Lesson 13).
+function copyRefButton(klalId, wordIndex, word, opts) {
+  const o = opts || {};
+  return `<button class="copy-ref${o.cls ? ' ' + o.cls : ''}" type="button"` +
+         (o.tabindex != null ? ` tabindex="${o.tabindex}"` : '') +
+         ` title="Copy reference and link"` +
+         ` data-klal="${klalId}" data-word="${wordIndex}"` +
+         ` data-text="${escapeAttr(word == null ? '' : String(word))}">&#128203;</button>`;
+}
+
 function wordRefLabel(klalId, wordIndex, word, prefix) {
   const label = `${prefix || ''}${klalRefName(klalId)} &middot; Word #${wordIndex}`;
   return `<div class="panel-label panel-label-copy">${label}` +
-         `<button class="copy-ref" type="button" title="Copy reference and link"` +
-         ` data-klal="${klalId}" data-word="${wordIndex}"` +
-         ` data-text="${escapeAttr(word == null ? '' : String(word))}"` +
-         `>&#128203;</button></div>`;
+         copyRefButton(klalId, wordIndex, word) + `</div>`;
 }
 
 function wordRefPayload(klalId, wordIndex, word) {
@@ -543,9 +555,7 @@ function showWordCard(span, klalId) {
     `<div class="wc-head">` +
       `<span class="wc-ref">${klalRefName(klalId)} &middot; Word #${wi}</span>` +
       status +
-      `<button class="copy-ref" type="button" title="Copy reference and link"` +
-      ` data-klal="${klalId}" data-word="${wi}"` +
-      ` data-text="${escapeAttr(span.textContent || '')}">&#128203;</button>` +
+      copyRefButton(klalId, wi, span.textContent || '') +
     `</div>` +
     (detail ? `<div class="wc-detail">${detail}</div>` : '');
   wordCard.classList.toggle('wc-rich', !!corr);
@@ -2254,9 +2264,8 @@ function flagListItemHtml(r, recorded) {
            ` data-klal="${r.klal_id}" data-word="${r.word_index}">` +
            `<span class="flag-list-ref">${escapeHtml(name)} &middot; #${r.word_index}</span>` +
            middle +
-           `<button class="copy-ref flag-list-copy" type="button" tabindex="-1"` +
-           ` title="Copy reference and link" data-klal="${r.klal_id}" data-word="${r.word_index}"` +
-           ` data-text="${escapeAttr(r.word == null ? '' : String(r.word))}">&#128203;</button>` +
+           copyRefButton(r.klal_id, r.word_index, r.word,
+                         { cls: 'flag-list-copy', tabindex: -1 }) +
          `</a>`;
 }
 

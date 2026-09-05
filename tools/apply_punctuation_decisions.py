@@ -39,7 +39,15 @@ import sys
 # Moved one level deeper (pipeline/ or tools/) 2026-08-16 - REPO now goes up
 # two levels, not one, to keep resolving to the actual repo root where
 # part1.json/docai_word_boxes/etc. live.
-REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# THE SPLIT, and it is not cosmetic (item 0BI). `REPO` here used to be BOTH
+# "where this code lives" and "where the corpus lives", and those are different
+# questions the moment $SEFER_CORPUS_ROOT points somewhere else. A script that
+# conflates them ignores the seam entirely and writes into the real repository
+# no matter which corpus it was told to target - which is exactly what
+# synthesize_multi_witness.py did on 2026-09-03, truncating 6,981 lines of
+# tracked data to `{}` the first time anything exercised it. INSTALL_DIR is the
+# checkout, for sys.path only; corpus data goes through cio.repo_path().
+INSTALL_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # review_decisions.py and corpus_io.py live in pipeline/, not tools/. This
 # was the one cross-directory import in the 2026-08-16 reorg
@@ -50,12 +58,12 @@ REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # rather than getting it for free the way same-directory imports do). As of
 # the 2026-08-17 corpus_io extraction the same bootstrap serves both imports
 # and is no longer unique to this file - most of tools/ now carries it.
-sys.path.insert(0, os.path.join(REPO, "pipeline"))
+sys.path.insert(0, os.path.join(INSTALL_DIR, "pipeline"))
 import corpus_io as cio  # noqa: E402
 import review_decisions as rd  # noqa: E402
 
 PART1_PATH = cio.PART1_PATH
-CANDIDATES_PATH = os.path.join(REPO, "punctuation_candidates_part1.json")
+CANDIDATES_PATH = cio.repo_path("punctuation_candidates_part1.json")
 
 
 # Thin wrappers so this module's own PART1_PATH stays what they read (and

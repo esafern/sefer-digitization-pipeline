@@ -1618,7 +1618,22 @@ def test_the_scan_header_actually_separates_its_two_scripts(server, page):
       // The clear space between them, whichever sits on the left.
       return Math.max(a.left, b.left) - Math.min(a.right, b.right);
     }""")
-    assert gap >= 6, f"english and hebrew halves are only {gap:.0f}px apart"
+    # 10px, and the number is derived rather than picked. The designed
+    # separation is `.ph-mid { gap: var(--sp-3) }` = 12px, so 10 leaves two
+    # pixels for subpixel and font rounding and still fails the 3px collapse
+    # this test was written for.
+    #
+    # TIGHTENED BACK 2026-09-05 (code-review finding). It read `>= 16`, which
+    # the layout never achieved - nothing in the CSS ever produced 16px - and
+    # was then loosened to `>= 6` to make it pass. 6 is half the real gap: a
+    # layout that had lost most of its separation would still have scored a
+    # pass, which is a check that cannot fail for the reason it exists
+    # (Lesson 25). Measured today: 12px.
+    assert gap >= 10, (
+        f"english and hebrew halves are {gap:.0f}px apart; .ph-mid's own "
+        f"`gap: var(--sp-3)` is 12px, so anything under 10 means the separation "
+        f"is coming from somewhere other than the rule that is supposed to "
+        f"provide it")
     assert page.test_errors == []
 
 def test_a_nav_jump_lands_on_the_klal_it_was_asked_for(server, page):
@@ -3796,4 +3811,50 @@ def test_the_end_of_corpus_label_hold_releases_when_you_scroll_away(server, page
         f"the index still claims {after} after scrolling to the top - the "
         f"end-of-corpus hold never releases, so it now lies in the other "
         f"direction")
+    assert page.test_errors == []
+
+
+def test_every_copy_button_carries_what_the_clipboard_handler_reads(server, page):
+    """Three call sites built this button by hand until 2026-09-05, each
+    repeating the same five attributes, and the delegated `.copy-ref` handler
+    keys on every one of them - so a caller that dropped `data-text` produced a
+    button that looked right and copied nothing (Lesson 13).
+
+    Asserts the RENDERED attributes at every site, not that a helper exists: a
+    shared helper called with the wrong arguments has the same symptom.
+    """
+    kid = _find_klal_with_a_flag_word()
+    assert kid is not None, "no klal carries a flag word"
+    _open_dashboard(page, server, kid)
+
+    # 1. the hover card's head
+    page.evaluate("""(kid) => {
+        const blk = document.getElementById('klal-block-' + kid);
+        const w = blk.querySelector('[data-word-index]');
+        w.scrollIntoView({ block: 'center' });
+        w.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
+    }""", kid)
+    page.wait_for_timeout(300)
+    # 2. the panel label, and 3. the flag-list row
+    page.locator(f"#klal-block-{kid} .flag-word").first.click()
+    page.wait_for_selector(".side-panel.open", timeout=5000)
+    page.evaluate("() => document.querySelector('#legend .legend-row')?.click()")
+    page.wait_for_timeout(500)
+
+    bad = page.evaluate("""() => {
+        const out = [];
+        for (const b of document.querySelectorAll('.copy-ref')) {
+            const missing = ['data-klal', 'data-word']
+                .filter(a => b.getAttribute(a) === null);
+            if (b.getAttribute('data-text') === null) missing.push('data-text');
+            if (!b.title) missing.push('title');
+            if (missing.length) out.push({ cls: b.className, missing });
+        }
+        return { bad: out, seen: document.querySelectorAll('.copy-ref').length };
+    }""")
+    assert bad["seen"] >= 2, (
+        f"only {bad['seen']} copy button(s) rendered - this test is not "
+        f"exercising the call sites it is meant to cover")
+    assert not bad["bad"], (
+        f"copy buttons missing attributes the clipboard handler reads: {bad['bad']}")
     assert page.test_errors == []

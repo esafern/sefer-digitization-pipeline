@@ -32,8 +32,16 @@ import xml.etree.ElementTree as ET
 from xml.dom import minidom
 
 # Bootstrap: this file lives in tools/, one level below the repo root.
-REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, os.path.join(REPO, "pipeline"))
+# THE SPLIT, and it is not cosmetic (item 0BI). `REPO` here used to be BOTH
+# "where this code lives" and "where the corpus lives", and those are different
+# questions the moment $SEFER_CORPUS_ROOT points somewhere else. A script that
+# conflates them ignores the seam entirely and writes into the real repository
+# no matter which corpus it was told to target - which is exactly what
+# synthesize_multi_witness.py did on 2026-09-03, truncating 6,981 lines of
+# tracked data to `{}` the first time anything exercised it. INSTALL_DIR is the
+# checkout, for sys.path only; corpus data goes through cio.repo_path().
+INSTALL_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(INSTALL_DIR, "pipeline"))
 
 import apply_reviewer_decisions as ard
 import corpus_io as cio
@@ -67,7 +75,7 @@ def _apply_decisions_to_klalim(klalim):
         k["clean_text"] = " ".join(k["clean_text"].split())
 
     by_klal = {k["klal_id"]: k for k in klalim}
-    corrections = cio.load_json(os.path.join(REPO, "corrections_part1.json")) or {}
+    corrections = cio.load_json(cio.repo_path("corrections_part1.json")) or {}
     decisions = rd.all_current("candidate_choice")
     manual_decisions = rd.all_current("manual_correction")
     already_applied = rd.applied_decision_ids()
@@ -198,7 +206,7 @@ def _load_word_bboxes():
 
     Only flagged (candidate) words have individual bboxes in this pipeline.
     """
-    raw = cio.load_json(os.path.join(REPO, "corrections_part1.json")) or {}
+    raw = cio.load_json(cio.repo_path("corrections_part1.json")) or {}
     out = {}
     for klal_id_str, entries in raw.items():
         klal_id = int(klal_id_str)
@@ -213,7 +221,7 @@ def _load_word_bboxes():
 
 def _load_klal_regions():
     """Return {klal_id: {page, bbox}} from klal_page_regions.json."""
-    raw = cio.load_json(os.path.join(REPO, "klal_page_regions.json")) or {}
+    raw = cio.load_json(cio.repo_path("klal_page_regions.json")) or {}
     out = {}
     for klal_id_str, info in raw.items():
         out[int(klal_id_str)] = info
@@ -517,7 +525,7 @@ def _build_tei(klalim, word_bboxes, all_corrections, all_manual):
 
     # Build per-klal word-level correction maps (word_index -> (orig, reg))
     # for decisions NOT yet in part1.json (still pending)
-    corrections_raw = cio.load_json(os.path.join(REPO, "corrections_part1.json")) or {}
+    corrections_raw = cio.load_json(cio.repo_path("corrections_part1.json")) or {}
 
     for klal in klalim:
         kid = klal["klal_id"]

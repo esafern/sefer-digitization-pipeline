@@ -21,6 +21,7 @@ rebuild_all.sh's gate alongside the corpus suite, which is where it runs.
 """
 import json
 import os
+import re
 import sqlite3
 import tempfile
 import sys
@@ -6808,3 +6809,124 @@ def test_the_applier_skips_a_ruling_its_replacement_already_settled():
     assert not unswept, (
         f"{len(unswept)} of {len(checks)} already-applied checks do not also skip a "
         f"ruling its replacement settled, so that branch retries it forever: {unswept}")
+
+
+# --- The corpus-root seam (item 0BI) -----------------------------------------
+
+# EVERY SCRIPT STILL DEFINING ITS OWN `REPO`, i.e. still ignoring the seam.
+#
+# `REPO = os.path.dirname(os.path.dirname(__file__))` answers "where does this
+# CODE live". Corpus data has to come from corpus_io.repo_path(), which honours
+# $SEFER_CORPUS_ROOT. A script that conflates the two writes into the real
+# repository no matter which corpus it was told to target - which is not
+# hypothetical: synthesize_multi_witness.py did exactly that on 2026-09-03 and
+# truncated 6,981 lines of tracked consensus data to `{}` the first time the
+# fixture generator ran it.
+#
+# This list is EXACT, not a ceiling, and that is the point. Adding a script that
+# bypasses the seam fails this test; FIXING one also fails it, until the name is
+# removed here - which is the prompt to record the progress rather than let the
+# list rot into a number nobody trusts. It can only shrink.
+SEAM_BYPASS_ALLOWLIST = {
+    "pipeline/build_gematria_trace.py",
+    "pipeline/build_lexical_defect_report.py",
+    "pipeline/build_title_report.py",
+    "pipeline/repair_filters/docai_filter.py",
+    "pipeline/review_decisions.py",
+    "pipeline/second_witness_eval/tesseract_witness.py",
+    "pipeline/second_witness_eval/vlm_witness.py",
+    "tools/build_dicta_baseline.py",
+    "tools/build_open_items_report.py",
+    "tools/build_part1_freq.py",
+    "tools/check_klal_token_orphans.py",
+    "tools/check_next_marker_and_title.py",
+    "tools/check_span_shortfall.py",
+    "tools/chunk_pdf_for_ocr.py",
+    "tools/close_flags_already_answered.py",
+    "tools/compare_ocr_engines.py",
+    "tools/compare_titles_to_text.py",
+    "tools/detect_cross_klal_errors.py",
+    "tools/detect_insertion_deletion.py",
+    "tools/detect_ligature_corruption.py",
+    "tools/detect_real_word_substitution.py",
+    "tools/detect_repeated_words.py",
+    "tools/detect_split_merge.py",
+    "tools/estimate_consensus_posterior.py",
+    "tools/extract_abbreviation_forms.py",
+    "tools/extract_docai_pages.py",
+    "tools/fetch_sefaria_reference_corpus.py",
+    "tools/list_ligature_words.py",
+    "tools/lookup_sefaria_dictionaries.py",
+    "tools/preview_dicta_disputes.py",
+    "tools/propose_abbreviation_expansions.py",
+    "tools/propose_punctuation_part1.py",
+    "tools/render_report.py",
+    "tools/review_lexicon_gaps.py",
+    "tools/review_lexicon_only_words.py",
+    "tools/run_part1_vlm_full_baseline.py",
+    "tools/run_part1_vlm_full_baseline_pass2.py",
+    "tools/run_part1_vlm_patch_passB.py",
+    "tools/run_surya_part1_full_baseline.py",
+    "tools/run_vlm_witness_sample.py",
+    "tools/second_witness_eval/evaluate_multi_witness_comparison.py",
+    "tools/second_witness_eval/evaluate_ocr_alignment.py",
+    "tools/second_witness_eval/evaluate_vlm_self_consistency.py",
+    "tools/second_witness_eval/run_part1_vlm_second_witness.py",
+    "tools/survey_shared_engine_errors.py",
+    "tools/test_trocr_benchmark.py",
+    "tools/validate_catchword_continuity.py",
+    "tools/validate_klal_span_coverage.py",
+    "tools/validate_lexicon_independent.py",
+    "tools/validate_part1_corpus_integrity.py",
+    "tools/validate_suppression_filters.py",
+    "tools/validate_title_alphabetical_order.py",
+    "tools/verify_local_setup.py",
+    "tools/verify_reconstruction_witness.py",
+}
+
+
+def _scripts_defining_their_own_repo():
+    """Files under pipeline/ and tools/ whose module-level `REPO` is not
+    derived from the seam."""
+    out = set()
+    for root in ("pipeline", "tools"):
+        for dirpath, _dirs, files in os.walk(os.path.join(REPO, root)):
+            for fn in sorted(files):
+                if not fn.endswith(".py"):
+                    continue
+                full = os.path.join(dirpath, fn)
+                rel = os.path.relpath(full, REPO).replace(os.sep, "/")
+                with open(full, encoding="utf-8") as f:
+                    src = f.read()
+                m = re.search(r"^REPO\s*=.*$", src, re.M)
+                if not m:
+                    continue
+                if any(t in m.group(0) for t in
+                       ("cio.REPO", "corpus_io.REPO", "repo_path", "corpus_root")):
+                    continue
+                out.add(rel)
+    return out
+
+
+def test_no_new_script_bypasses_the_corpus_root_seam():
+    """A script that resolves corpus paths from its own location ignores
+    $SEFER_CORPUS_ROOT, and will write into the real repository while believing
+    it is writing into a fixture.
+
+    Item 0BI recorded 51 of these and fixed one. The count is pinned here so the
+    debt is visible and bounded: a NEW bypass fails immediately, and clearing an
+    old one fails until it is struck off the list. Exact equality in both
+    directions, because a ceiling-only check lets the list rot - it would keep
+    passing long after the names in it stopped being true.
+    """
+    actual = _scripts_defining_their_own_repo()
+    added = sorted(actual - SEAM_BYPASS_ALLOWLIST)
+    assert not added, (
+        "these scripts resolve corpus paths from their own install location "
+        "instead of corpus_io.repo_path(), so $SEFER_CORPUS_ROOT does not reach "
+        f"them: {added}. Split INSTALL_DIR (sys.path) from the corpus root, as "
+        "pipeline/synthesize_multi_witness.py does.")
+    fixed = sorted(SEAM_BYPASS_ALLOWLIST - actual)
+    assert not fixed, (
+        f"these no longer bypass the seam - strike them off "
+        f"SEAM_BYPASS_ALLOWLIST so the remaining debt stays honest: {fixed}")

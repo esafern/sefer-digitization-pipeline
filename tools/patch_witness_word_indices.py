@@ -24,14 +24,22 @@ import json
 import os
 import sys
 
-REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, os.path.join(REPO, "pipeline"))
-sys.path.insert(0, os.path.join(REPO, "tools"))
+# THE SPLIT, and it is not cosmetic (item 0BI). `REPO` here used to be BOTH
+# "where this code lives" and "where the corpus lives", and those are different
+# questions the moment $SEFER_CORPUS_ROOT points somewhere else. A script that
+# conflates them ignores the seam entirely and writes into the real repository
+# no matter which corpus it was told to target - which is exactly what
+# synthesize_multi_witness.py did on 2026-09-03, truncating 6,981 lines of
+# tracked data to `{}` the first time anything exercised it. INSTALL_DIR is the
+# checkout, for sys.path only; corpus data goes through cio.repo_path().
+INSTALL_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(INSTALL_DIR, "pipeline"))
+sys.path.insert(0, os.path.join(INSTALL_DIR, "tools"))
 
 import corpus_io as cio  # noqa: E402
 import review_data as rdata  # noqa: E402
 
-OUT_PATH = os.path.join(REPO, "reconstruction_witness_queue.json")
+OUT_PATH = cio.repo_path("reconstruction_witness_queue.json")
 DOCAI_DIR = cio.DOCAI_DIR
 norm = cio.hebrew_letters_only
 FURNITURE = {"יד", "יר", "יך", "מלאכי", "כללי", "האלף", "הבית",
