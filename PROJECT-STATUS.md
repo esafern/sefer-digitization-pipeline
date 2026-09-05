@@ -5,6 +5,12 @@
 _Current state only. Every claim here is measured, not remembered; the dated
 evidence for each is in `PROJECT-STATUS-HISTORY.md`._
 
+> **Picking up where the last session stopped? Read item `0BO` first** (top of
+> Open items). It is the 2026-09-05 handoff: what changed, what the ledger
+> measurements say, and a numbered plan for the next session, highest-value
+> first. Written because the alternative is re-deriving it from commit
+> messages.
+
 **What the corpus is.** The 667 klalim are ***Klalei HaGemara* in its entirety** —
 the work's part one, scan pages 14–247, closing with `סליקו כללי הגמרא` on page
 247. `part1/2/3.json` are three FILE CHUNKS of that one part (klalim 1–222,
@@ -44,6 +50,146 @@ applying it to the corpus remain two separate, deliberate steps.
 
 
 ## Open items
+
+0BO. **[2026-09-05] SESSION LOG AND THE NEXT SESSION'S PLAN. Read this first;
+    it is the handoff.**
+
+    **A PROCESS BREACH TO NOTE, because the next session should not repeat it.**
+    Almost everything below was written only into commit messages during the
+    2026-09-04/05 session, not into this file, which is the standing requirement
+    ("log every finding immediately, without being asked"). Only the Dicta
+    wiring, `HOW-THE-PIPELINE-WORKS.md`, and Lessons 38-45 were logged as they
+    happened. This entry is the batched catch-up the rule exists to prevent.
+
+    ### Where the corpus stands (re-measure; do not quote these)
+
+    | | |
+    |---|---:|
+    | rulings naming a text | 690 |
+    | applied | 625 |
+    | unapplied | 65 — the applier is CONVERGED at 0 applicable |
+    | drifted, needs a human | **39** |
+    | open disputes (`current_text_may_be_wrong`) | 454, of which **362 cross-edition** |
+    | open klal flags | 385 (~82% machine-raised) |
+    | unreviewed machine corrections IN the corpus | **74**, of which **32 carry no flag** |
+
+    ### What was built (all committed and pushed, `3897d65`..`a5942bc`)
+
+    **Dicta votes** (`3897d65`). Stage 4a 283 -> 506 disputes; 405 involve
+    Dicta, 223 with only ONE Berlin engine dissenting. Every such record carries
+    `cross_edition`, `same_edition_agreeing` and `abbreviation_shape`, rendered
+    three ways in the dashboard, and `chosen_source: "dicta_reading"` is
+    greppable in the ledger. Stage 4d (`build_collation_report.py`) reports 74
+    genuine cross-edition differences as COLLATION that is never a correction.
+
+    **`abbreviation_shape` found a real defect class**: 18 positions where the
+    corpus read the abbreviation geresh as a YOD (`מה׳` stored as `מהי`). The
+    reviewer has closed most; 5 remain.
+
+    **Two applier defects, both live for weeks.** (i)
+    `settled_by_an_applied_decision` tested `if chosen:` on `chosen_text`, and an
+    applied DELETION carries an empty one — so **every applied deletion fell
+    through and its verified entry returned on the next rebuild**. 35 decisions
+    were in that state. (ii) `all_current()` does not honour `supersedes`, so a
+    re-pointed ruling stayed live at its OLD key while its replacement was
+    applied — the applier retried **8 of them every run**, counted as work a
+    human owed. Both fixed; `superseded_by_an_applied_decision()` is the new
+    predicate.
+
+    **New tools.** `close_satisfied_rulings.py` (closed 36 rulings the corpus
+    already held, in three tiers, refusing 3 where a repeated word had no ink
+    corroboration — klal 66 w17's bbox resolves to w34, so closing it on text
+    alone would have been wrong). `list_drifted_rulings.py` ->
+    `DRIFTED-RULINGS-WORKLIST.md`. `analyze_decision_ledger.py`.
+    `list_cross_edition_disputes.py` -> `CROSS-EDITION-WORKLIST.md`.
+
+    **Item 0BI moved.** The four scripts that write corpus-shaped output
+    (`apply_punctuation_decisions`, `reconstruct_placeholder_klalim`,
+    `patch_witness_word_indices`, `export_corpus`) now split INSTALL_DIR from
+    `repo_path()`, verified against a temp `$SEFER_CORPUS_ROOT`. **The guard's
+    detector used `os.listdir` and could not see subdirectories** — it read 51
+    while the real figure was higher. Now recursive and exact in BOTH directions
+    (fixing a script fails until its name is struck off). `KNOWN_BYPASS_COUNT`
+    51 -> **47**.
+
+    ### What the ledger says (from `tools/analyze_decision_ledger.py`)
+
+    * **The vision arbiter's confidence carries no signal.** 0.972 mean when
+      right, 0.962 when wrong, 169 of 171 ratings in one narrow band. Any
+      threshold on it (`MIN_VISION_CONFIDENCE`) selects nothing. When it
+      PROPOSES A CHANGE it is right 6 times in 50.
+    * Head-to-head (the unbiased comparison): **VLM beats Surya 42-9**, Dicta
+      beats Surya 9-4 and VLM 5-4. DocAI's apparent 12% is selection, not
+      accuracy — candidates are generated FROM its disagreements.
+    * **Raw DocAI 0% vs ligature-repaired 97%** on the same 36 positions.
+    * Consensus ladder on human-ruled positions: 1 engine 3%, 2 engines 57%,
+      3 engines 73%. NOT the same quantity as `estimate_consensus_posterior.py`'s
+      26-41%, which uses the vision arbiter on UNDECIDED positions precisely
+      because this sample is selected.
+    * Error signatures differ by engine, which is why consensus works at all:
+      DocAI ד/ר 25x, Surya ו/ז 10x, VLM diffuse.
+
+    ### NEXT SESSION — do these, in this order
+
+    **1. Make the 32 unfindable corrections findable.** They are applied to the
+    corpus, no person has reviewed them, and they carry NO flag, so nothing in
+    the dashboard shows them. `tools/flag_unreviewed_auto_corrections.py`
+    reports exactly why: **27 skipped because the position has DRIFTED** — it
+    will not write a flag at an index that no longer names its word (item 0AB's
+    failure). The fix is machinery that now exists: re-derive the position from
+    the snapshot bbox with two-signal corroboration, as
+    `repoint_stale_decisions.py` and `close_satisfied_rulings.py` do. EXTEND
+    THAT TOOL; do not write a fourth worklist. Highest priority because the
+    corpus currently holds text nobody verified and there is no queue entry
+    pointing at it.
+
+    **2. Generalization Phase 3 — extract print-run defect knowledge.** Reviewer
+    approved the shape on 2026-09-05 and asked to see the inventory first; it is
+    below, and it was shown. No second book is in view, and the reviewer
+    confirmed Phase 3 can proceed without one.
+
+    *The mechanism already exists* — `book.json` + `corpus_io.book_identity()` +
+    `_WORK_DEFAULTS` is Phase 2's, resolved at call time through the seam.
+    `book.json` does not exist on disk; the defaults carry Yad Malachi. Phase 3
+    adds a `defects` block in the same shape as Phase 2's `parts` array, read
+    through `corpus_io`, with today's values as defaults so behaviour is
+    identical for this book.
+
+    | what | where it is now | why it is this book's |
+    |---|---|---|
+    | ligature catalogue (`alef_lamed` ﭏ, `chet_zayin`) | `pipeline/typography.py`, hardcoded | sorts THIS compositor used |
+    | `dropped_lamed_explains()` | `typography.py` | the detector for one specific sort |
+    | the 24 corrupt forms | **TWO copies** — `tests/test_corpus_invariants.py:697` and `tools/validate_lexicon_independent.py:77` | the words this ligature produced in this text |
+
+    Three cautions recorded with the reviewer:
+    - The 24 forms are **already duplicated**, and the second copy's own comment
+      says "same 24 forms as" the first. Extraction collapses a live Lesson 13,
+      which is an argument for doing it.
+    - They are **not purely a property of the press**: 7 of the 24 are attested
+      Hebrew words, which is why the ligature guard needed a per-position
+      human-ruling exemption (item 0AX). Extract them labelled as
+      MEASURED-FROM-THIS-CORPUS, not as a declared fact about the printing.
+    - `ABBREV_MARKS` is probably universal Hebrew — leave it. "Berlin" appears in
+      15 Python files but is mostly explanatory PROSE; extract only what is
+      behaviour (paths, labels, the edition string) and leave the commentary
+      alone, or 15 files get worse.
+
+    **3. The 39 drifted rulings** are human work, not engineering.
+    `DRIFTED-RULINGS-WORKLIST.md` has them bucketed by which signals exist.
+    Regenerate it after any apply.
+
+    **4. Known-flaky, pre-existing, NOT from this session's work.**
+    `test_a_word_click_survives_the_scroll_that_follows_it` fails roughly 1 run
+    in 8 — measured with `app.js` reverted to HEAD, so it is not the scroll
+    changes. Worth fixing; nobody has.
+
+    **5. Still open and untouched:** Phases 4 (UI vocabulary — "klal",
+    "gematria", "section" are hardcoded across `app.js` and the server) and 5
+    (onboard a second book, the only phase that can validate 1-4). The 47
+    remaining seam bypasses. The nav label drifting at the very end of the
+    corpus is FIXED (`endClampKlalId`), but its root cause — the container
+    clamping so a jump cannot reach the reading line — is inherent.
+
 
 ### The Dicta pass is COMPLETE — pages 22–114, all of Part 1
 
