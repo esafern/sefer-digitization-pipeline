@@ -7117,3 +7117,65 @@ def test_accepting_a_proposed_insertion_still_inserts(apply_harness, decisions_p
                        candidate_snapshot=entry, path=decisions_path)
 
     assert apply_harness.run()[1] == "אלף גימל בית"
+
+
+def test_the_restart_rule_names_every_module_the_server_actually_imports():
+    """START_HERE's restart rule lists the modules whose edit leaves a running
+    dashboard stale. A hand-written list of imports is a second copy of the
+    import graph (Lesson 13), and this one is load-bearing: the rule named only
+    the server and the frontend until 2026-09-06, which was true while
+    review_server.py was a God Object and silently stopped being true when six
+    modules were extracted from it - and a stale dashboard has no symptom except
+    disagreeing with the code.
+
+    So the list is derived from the AST here and compared. Adding a new import to
+    review_server.py fails this until the rule names it; deleting one fails it
+    until the rule stops.
+    """
+    import ast
+    pipeline_dir = os.path.join(REPO, "pipeline")
+    local_modules = {f[:-3] for f in os.listdir(pipeline_dir) if f.endswith(".py")}
+
+    imported, frontier = set(), {"review_server"}
+    while frontier:
+        module = frontier.pop()
+        tree = ast.parse(open(os.path.join(pipeline_dir, module + ".py"),
+                              encoding="utf-8").read())
+        for node in ast.walk(tree):
+            names = []
+            if isinstance(node, ast.Import):
+                names = [a.name.split(".")[0] for a in node.names]
+            elif isinstance(node, ast.ImportFrom) and node.module:
+                names = [node.module.split(".")[0]]
+            for name in names:
+                if name in local_modules and name != "review_server" and name not in imported:
+                    imported.add(name)
+                    frontier.add(name)
+
+    rule = open(os.path.join(REPO, "START_HERE.md"), encoding="utf-8").read()
+    start = rule.index("Auto-restart the review server")
+    # THE LIST, not the whole clause. Scanning the surrounding prose made this
+    # test blind in the direction that matters: the paragraph below the list
+    # NAMES `scan_alignment.py` while recounting the incident, so deleting it
+    # from the list still found it and the mutation passed. The enumeration is
+    # delimited by the em-dashes in "...the server imports — <list> —
+    # immediately restart", and only what is between them counts.
+    body = rule[start:start + 2500]
+    opened = body.index("the server imports —") + len("the server imports —")
+    clause = body[opened:body.index("—", opened)]
+    missing = sorted(m for m in imported if f"`{m}.py`" not in clause)
+    assert not missing, (
+        f"review_server.py imports {missing} (directly or transitively) and "
+        f"START_HERE's restart rule does not name them - editing one of those "
+        f"leaves a running dashboard serving the old code with no symptom. Add "
+        f"them to the rule, or stop importing them."
+    )
+    # `review_server.py` itself is named on purpose - it is the server, not one
+    # of its imports - so it is not a stale entry.
+    named = {m for m in local_modules if f"`{m}.py`" in clause} - {"review_server"}
+    stale = sorted(named - imported)
+    assert not stale, (
+        f"the restart rule names {stale}, which the server no longer imports - "
+        f"a rule that lists files it does not need is how the list stops being "
+        f"read at all"
+    )

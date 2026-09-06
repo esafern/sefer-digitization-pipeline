@@ -3702,6 +3702,81 @@ def test_every_ruling_path_records_the_stable_half_of_its_address(server, page):
     assert page.test_errors == []
 
 
+def test_every_ruling_path_records_the_scan_position_of_the_word_it_names(server, page):
+    """The SIBLING of the anchor guard above, and it was missing.
+
+    A ruling's address has two independent recoverable halves: the stable text
+    anchor `(original_word, word_occurrence)` - guarded by the test above across
+    every path - and the SCAN POSITION, `bbox` + `page`, which is what lets a
+    re-pointing pass ask the INK where the word went rather than searching the
+    text for it (Lesson 9: a unique text match is not evidence of position).
+    `_manual_snapshot` has recorded it since 2026-09-02 and the dispute path
+    inherits it from the corrections entry, and NOTHING asserted either.
+
+    Why that matters concretely: the largest block of unreviewed machine
+    corrections in this corpus - the 131 `ai-dropped-lamed-correction` records
+    from 2026-08-15, written by a script and not by this dashboard - carry a
+    two-key snapshot with no bbox at all, and `repoint_stale_decisions.py` and
+    `close_satisfied_rulings.py` both return None on their first line without
+    one. The whole of item 0BO's plan item 1 was built on re-deriving those
+    positions from a bbox that does not exist. This is the guard that stops a
+    future write path quietly rejoining them.
+
+    `bbox_unavailable` counts as recording it. 1-4% of words in a klal have no
+    aligned DocAI token, and saying "never had one" is a real answer - what is
+    forbidden is a snapshot that is silent on the question.
+    """
+    klal_id = _find_disputed_klal()
+    assert klal_id is not None, "no disputed candidate exists to rule on"
+    corr = _get_json(server, f"/api/klal/{klal_id}")["corrections"]
+    target = next((c for c in corr
+                   if c.get("word_index") is not None and c.get("final_text")), None)
+    assert target, f"klal {klal_id} has no addressable candidate"
+    wi = target["word_index"]
+
+    def _has_scan_position(snap, path):
+        located = snap.get("bbox") is not None and snap.get("page") is not None
+        declined = bool(snap.get("bbox_unavailable"))
+        assert located or declined, (
+            f"the {path} path recorded a ruling with no scan position and no "
+            f"statement that one was unavailable - snapshot keys "
+            f"{sorted(snap)}. A ruling with neither cannot be re-pointed from "
+            f"the ink after a later apply shifts this klal"
+        )
+        if located:
+            for k in ("x1", "y1", "x2", "y2"):
+                assert k in snap["bbox"], (
+                    f"the {path} path recorded a bbox missing {k!r}: "
+                    f"{snap['bbox']} - _corpus_word_bboxes and load_docai_page "
+                    f"expect FLAT coordinate keys (Lesson 21), and a nested or "
+                    f"partial box fails silently as a None lookup"
+                )
+
+    status, disputed = _post_json(server, "/api/decisions/disputed", {
+        "klal_id": klal_id, "word_index": wi,
+        "chosen_source": "final_text", "chosen_text": target["final_text"],
+        "note": "scan-position regression probe",
+    })
+    assert status == 201, (status, disputed)
+    _has_scan_position(disputed.get("candidate_snapshot") or {}, "disputed")
+
+    # The MANUAL path, at a word the machine never flagged - the shape the
+    # 2026-08-15 script wrote and the one with no corrections entry to inherit
+    # a bbox from, so it has to compute the geometry itself.
+    words = (_get_json(server, f"/api/klal/{klal_id}")["clean_text"]).split(" ")
+    plain = next((i for i, w in enumerate(words)
+                  if i != wi and len(w) > 2), None)
+    assert plain is not None, f"klal {klal_id} has no ordinary word to rule on"
+    status, manual = _post_json(server, "/api/decisions/manual", {
+        "klal_id": klal_id, "word_index": plain,
+        "original_word": words[plain], "chosen_text": words[plain],
+        "note": "scan-position regression probe",
+    })
+    assert status == 201, (status, manual)
+    _has_scan_position(manual.get("candidate_snapshot") or {}, "manual")
+    assert page.test_errors == []
+
+
 def test_one_word_of_a_multi_word_span_can_be_deleted_on_its_own(server, page):
     """Reviewer, 2026-09-04, klal 35 w44, span of two words: "remove word
     b'sefer leave shmot" - then three attempts that could not express it.

@@ -53,6 +53,79 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0BR. **[2026-09-06] THE MANUAL WRITE PATH ALREADY RECORDS THE SCAN POSITION -
+    WHAT WAS MISSING WAS THE GUARD. AND THE RESTART RULE NOW COVERS WHAT THE
+    SERVER IMPORTS.**
+
+    ### The requested change was already in place - correcting an impression 0BP created
+
+    Asked to make the dashboard's manual-correction write path record `bbox` and
+    `page` "the way the disputed panel already does". **It has, since
+    2026-09-02**: `review_server._manual_snapshot()` computes the geometry
+    through `_word_scan_position()` and stores `bbox` + `page`, or an explicit
+    `bbox_unavailable` when the word has no aligned DocAI token. The disputed
+    path gets the same fields by snapshotting the `corrections_part1.json` entry.
+    Verified against the ledger rather than the code:
+
+    | manual_corrections | with bbox+page | explicit `bbox_unavailable` |
+    |---|---:|---:|
+    | 329 written BEFORE 2026-09-02 | **0** | 0 |
+    | 40 written ON/AFTER | **37** | 1 |
+
+    The 2 remaining are 17:38 and 18:21 on 2026-09-02 itself, before that day's
+    deploy. There is no live gap.
+
+    **`0BP`'s "0 of 108 carry a bbox" was about SCRIPT-written records, not the
+    dashboard** - the 131 `ai-dropped-lamed-correction` rows of 2026-08-15 - and
+    reading it as a statement about the write path is a fair reading of how it
+    was phrased. Stated plainly here so the next person does not rebuild a
+    feature that exists.
+
+    ### What was actually missing: nothing asserted it
+
+    `test_every_ruling_path_records_the_stable_half_of_its_address` guards
+    `word_occurrence` across every ruling path. **Its sibling for the scan
+    position did not exist** - Lesson 34 again, in the test layer this time.
+    Added `test_every_ruling_path_records_the_scan_position_of_the_word_it_names`
+    (in `test_review_server.py`, driven through HTTP like its sibling): every
+    path must record `bbox`+`page` or say `bbox_unavailable`, and a recorded bbox
+    must carry FLAT `x1/y1/x2/y2` keys (Lesson 21 - a nested box fails silently
+    as a None lookup). Two mutations checked: blanking the manual path's geometry
+    fails it, and nesting the bbox under a sub-key fails it. The first mutation's
+    message prints `['original_word', 'word_index', 'word_occurrence']` - the
+    exact snapshot shape the 2026-08-15 script wrote - so the guard demonstrably
+    catches the historical case it exists for.
+
+    ### The restart rule now names what the server imports
+
+    `START_HERE.md`'s rule said "review_server.py or any file in
+    review_frontend/". That was complete while `review_server.py` was a
+    1,981-line God Object and silently stopped being complete when six modules
+    were extracted from it. **It bit on 2026-09-06**: the server was correctly
+    restarted after a `review_server.py` change, `scan_alignment.py` was edited
+    six minutes later, and the dashboard served the pre-edit module for the next
+    half hour. Python binds an imported module at import time, so the only
+    symptom is a running dashboard disagreeing with the code on disk - no error,
+    and the "reads its source files fresh off disk every request" contract does
+    not cover it, because that contract is about DATA. Lesson 39 one level up.
+
+    The rule now names all six (`corpus_io`, `identity`, `review_counts`,
+    `review_data`, `review_decisions`, `scan_alignment`), **derived from the AST
+    import graph, not from memory**. And because a hand-written list of imports
+    is a second copy of the import graph (Lesson 13),
+    `test_the_restart_rule_names_every_module_the_server_actually_imports`
+    re-derives it and compares, in both directions: a new server import fails
+    until the rule names it, and a name the server no longer imports fails until
+    the rule drops it.
+
+    **That guard was itself blind on first writing**, and the mutation is what
+    said so: it searched the whole 1,400-character clause, and the paragraph
+    below the list NAMES `scan_alignment.py` while recounting the incident - so
+    deleting it from the list still found it in the prose and the mutation
+    passed. Scoped to the enumeration between the em-dashes now; both mutations
+    fail correctly. Third time in two days that a mutation check has caught a
+    test that could not fail (the seam test, the TEI test, this one).
+
 0BQ. **[2026-09-06] ITEM 0BO's PLAN ITEMS 1 AND 3, DONE - AND THE ADDRESSING
     PROBLEM HAS A CHEAP SOLVENT THE BBOX WAS HIDING.**
 

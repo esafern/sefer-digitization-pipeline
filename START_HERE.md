@@ -438,9 +438,28 @@ this repo as an LLM agent, follow them exactly.
   backgrounded) — check `lsof -i :8420` first and skip only if it's
   already running. It's the live human-review tool; the user works in it
   throughout a session and shouldn't have to ask for it each time.
-- **Auto-restart review server on any frontend or server change.** Whenever modifying
-  `pipeline/review_server.py` or any file in `review_frontend/`, immediately restart the background
-  server process (`kill <PID>` + restart `python3 pipeline/review_server.py`) without asking.
+- **Auto-restart the review server on any change to it OR TO ANYTHING IT
+  IMPORTS.** Whenever modifying `pipeline/review_server.py`, any file in
+  `review_frontend/`, or any of the six pipeline modules the server imports —
+  `corpus_io.py`, `identity.py`, `review_counts.py`, `review_data.py`,
+  `review_decisions.py`, `scan_alignment.py` (derived from
+  its import graph 2026-09-06, not guessed, and pinned by
+  `test_the_restart_rule_names_every_module_the_server_actually_imports`) — immediately restart the background server process
+  (`kill <PID>` + restart `python3 pipeline/review_server.py`) without asking.
+
+  **The "anything it imports" half was added after it bit.** The rule used to
+  name only the server and the frontend, which was complete when
+  `review_server.py` was a 1,981-line God Object and is not since the extraction
+  split six modules out of it. On 2026-09-06 the server was correctly restarted
+  after a `review_server.py` change and then `scan_alignment.py` was edited six
+  minutes later; the dashboard served the pre-edit module for the next half
+  hour. Python binds an imported module at import time, so **the only symptom is
+  that a running dashboard silently disagrees with the code on disk** — no
+  error, no stale-file warning, and the "reads its source files fresh off disk
+  every request" contract does not cover it, because that contract is about
+  DATA. This is Lesson 39 one level up: a value cached at load time behind a
+  live view. Check `stat` on the module against the server's start time if you
+  are unsure which is older.
 - **Mandatory incremental disk flushing on all scripts.** All batch-processing, VLM, OCR, and API scripts
   MUST flush their output to disk item-by-item (`open(..., "a")`, `f.flush()`, `conn.commit()`). Never buffer
   results in memory to write at the end — cloud API failures, 429 quota exhaustion, and 503 errors will cause data loss.
