@@ -172,12 +172,16 @@ def id_at(state, klal_id, index):
     return ids[index] if 0 <= index < len(ids) else None
 
 
-def index_of(state, klal_id, word_id):
-    """Where the word with this id sits NOW, or None if it is gone.
+def _index_of(state, klal_id, word_id):
+    """Where the word with this id sits NOW, or None. PRIVATE - use locate().
 
-    None is a real answer and the important one: a retired id means the word was
-    deleted, which a caller must be able to tell apart from "it moved". Nothing
-    here searches for a replacement.
+    MADE PRIVATE 2026-09-06. It returns None for a RETIRED id and None for one
+    that never existed, and those are different answers - the same
+    one-value-for-two-meanings defect the tombstone was added to fix in the DATA,
+    still reachable through the API. A caller asking this question gets a
+    confident impression from a value that cannot support one. locate() returns
+    the status alongside the index and is the only accessor callers should have;
+    this exists because locate() needs it.
     """
     ids = ids_for(state, klal_id)
     try:
@@ -203,7 +207,7 @@ def locate(state, klal_id, word_id):
     The accessor callers should prefer over index_of, because it distinguishes
     the three outcomes rather than collapsing two of them into None.
     """
-    idx = index_of(state, klal_id, word_id)
+    idx = _index_of(state, klal_id, word_id)
     if idx is not None:
         return idx, "live"
     if retirement_of(state, klal_id, word_id) is not None:
@@ -214,8 +218,13 @@ def locate(state, klal_id, word_id):
 def ancestors(state, klal_id, word_id):
     """Ids this word was rewritten FROM, oldest first.
 
-    An uneven rewrite retires the n old words and mints m new ones, recording
-    `replaced_by` on each tombstone (reconcile refuses to pair them off, because
+    Two pointers lead here. An uneven rewrite retires the n old words and mints
+    m new ones, recording `replaced_by` on each tombstone; a word DELETED in one
+    run and restored in a later one records `restored_by` on the tombstone the
+    restoration matched. Both are pointers, not claims of sameness.
+
+    The rewrite case, in the original wording: it retires the n old words and
+    mints m new ones, recording `replaced_by` on each tombstone (reconcile refuses to pair them off, because
     no correspondence is establishable - see its docstring). That forward
     pointer, read backwards, is the only lineage this module can honestly
     offer: "the word here came out of a rewrite of these".
@@ -229,7 +238,12 @@ def ancestors(state, klal_id, word_id):
     while frontier:
         current = frontier.pop()
         for raw_id, stone in dead.items():
-            if current in (stone.get("replaced_by") or []):
+            # `restored_by` is the delete-then-restore link, `replaced_by` the
+            # rewrite one. Both are pointers of the same standing, so lineage
+            # follows both - a word that was removed and brought back carries
+            # what was ruled about it before, marked as borrowed.
+            if current == stone.get("restored_by") or \
+                    current in (stone.get("replaced_by") or []):
                 got = int(raw_id)
                 if got not in seen:
                     seen.add(got)
@@ -270,13 +284,47 @@ def reconcile(state, klal_id, old_words, new_words):
 
     out, retired, minted = [], [], []
     tombstones = dict(entry.get("retired") or {})
+    # THE TOMBSTONES AS THEY STOOD BEFORE THIS RUN. A restoration is a word
+    # reappearing after an EARLIER run removed it; a delete and an insert inside
+    # THIS reconcile are one opcode and already carry `replaced_by`. Matching
+    # against the live dict would relabel that case as a restoration.
+    pre_existing = dict(tombstones)
     sm = difflib.SequenceMatcher(None, old_words, new_words, autojunk=False)
     for tag, i1, i2, j1, j2 in sm.get_opcodes():
         if tag == "equal" or (tag == "replace" and (i2 - i1) == (j2 - j1)):
             out.extend(old_ids[i1:i2])
         else:
             fresh = []
-            for _ in range(j2 - j1):
+            for offset in range(j2 - j1):
+                # A WORD THAT COMES BACK GETS A NEW ID, AND A POINTER TO THE OLD
+                # ONE. The new id is right and is not negotiable: nothing here
+                # can know that a reappearing `בית` is THE SAME WORD rather than
+                # a different one that happens to match, and reusing the old id
+                # would assert a sameness nobody established - the aliasing this
+                # module refuses everywhere else, and a reissue besides.
+                #
+                # What was missing is the LINK. Deleting a word in one apply run
+                # and restoring it in a later one leaves two unrelated events, so
+                # the word's history splits and `history_for_word_id` on the new
+                # id says nothing about the deletion. Klal 57 w0 is the corpus's
+                # own instance: `נז אין` -> `נז` on 2026-08-30, back to
+                # `נז אין` on 2026-09-04, and it reads `נז אין הלכה כשיטה` today.
+                #
+                # EVIDENCE, NOT IDENTITY - the same standing this module gives
+                # `replaced_by`. The word text must match exactly, exactly one
+                # tombstone may hold it (two and the restoration is ambiguous, so
+                # nothing is recorded), and that tombstone must not already be
+                # claimed. Recorded on the TOMBSTONE, which is the record that
+                # exists; a live id has no record to hang anything on, and
+                # inventing one for this would be a second structure for one
+                # fact.
+                word = new_words[j1 + offset]
+                claimants = [rid for rid, stone in pre_existing.items()
+                             if stone.get("word") == word
+                             and not tombstones.get(rid, {}).get("restored_by")]
+                if len(claimants) == 1:
+                    tombstones[claimants[0]] = dict(tombstones[claimants[0]],
+                                                    restored_by=nxt)
                 out.append(nxt)
                 minted.append(nxt)
                 fresh.append(nxt)
@@ -403,14 +451,9 @@ def snapshot_fields(state, klal_id, word_index):
     return {"word_id": wid} if wid is not None else {}
 
 
-def resolve(state, rec, klal_id=None):
-    """Where the word this ruling named sits NOW, by id alone. -> index or None.
-
-    Independent of the ruling's text, which is what makes it work where
-    review_decisions.resolve_word_index cannot: it never asks what the word was.
-    """
-    snap = (rec or {}).get("candidate_snapshot") or {}
-    wid = snap.get("word_id")
-    if wid is None:
-        return None
-    return index_of(state, klal_id if klal_id is not None else rec["klal_id"], wid)
+# `resolve(state, rec)` REMOVED 2026-09-06. It pulled word_id out of a record and
+# returned a bare index - a second accessor answering almost the question
+# locate() answers, with locate()'s status dropped on the floor. Nothing in
+# production called it. Callers read the id from the snapshot themselves and ask
+# locate(), which is one way in rather than two (see the narrowing note on
+# _index_of).

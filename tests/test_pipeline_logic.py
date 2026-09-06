@@ -7197,7 +7197,7 @@ def test_a_corrected_word_keeps_its_id():
         state, 1, "אלף בית גימל".split(), "אלף בות גימל".split())
     assert (kept, retired, minted) == (3, [], [])
     assert wid.id_at(state, 1, 1) == before, "correcting the text changed the id"
-    assert wid.index_of(state, 1, before) == 1
+    assert wid.locate(state, 1, before) == (1, "live")
 
 
 def test_an_insertion_earlier_moves_a_word_without_changing_its_id():
@@ -7206,7 +7206,7 @@ def test_an_insertion_earlier_moves_a_word_without_changing_its_id():
     _kept, retired, minted = wid.reconcile(
         state, 1, "אלף בית גימל".split(), "אלף חדש בית גימל".split())
     assert retired == [] and len(minted) == 1
-    assert wid.index_of(state, 1, gimel) == 3, "the id must follow the word"
+    assert wid.locate(state, 1, gimel) == (3, "live"), "the id must follow the word"
     assert minted[0] not in (wid.id_at(state, 1, 0), gimel)
 
 
@@ -7219,12 +7219,13 @@ def test_a_deleted_words_id_retires_and_is_never_reissued():
     _k, retired, _m = wid.reconcile(
         state, 1, "אלף בית גימל".split(), "אלף גימל".split())
     assert retired == [doomed]
-    assert wid.index_of(state, 1, doomed) is None, "a retired id must not resolve"
+    assert wid.locate(state, 1, doomed) == (None, "retired"), (
+        "a retired id must report WHY it does not resolve")
 
     _k2, _r2, minted = wid.reconcile(
         state, 1, "אלף גימל".split(), "אלף חדש גימל".split())
     assert doomed not in minted, "a retired id was handed out again"
-    assert wid.index_of(state, 1, doomed) is None
+    assert wid.locate(state, 1, doomed)[1] == "retired"
 
 
 def test_an_uneven_replacement_refuses_to_claim_the_words_are_the_same():
@@ -7292,9 +7293,10 @@ def test_resolve_finds_a_ruling_whose_word_was_replaced_out_from_under_it():
 
     # The id finds it, both through the module and through the resolver - and the
     # resolver is handed THIS state, never the one on disk.
-    assert wid.resolve(state, ruling) == 3, (
+    found, status = wid.locate(state, 7, ruling["candidate_snapshot"]["word_id"])
+    assert (found, status) == (3, "live"), (
         "the id must still name the word, which now sits at w3 reading 'גמל'")
-    assert after[wid.resolve(state, ruling)] == "גמל"
+    assert after[found] == "גמל"
     assert rd.resolve_word_index(ruling, after, id_state=state) == (3, "word_id")
 
 
@@ -7330,7 +7332,7 @@ def test_the_applier_carries_word_ids_across_an_edit_it_makes(
     assert wid.verify([{"klal_id": 1, "clean_text": "אלף חדש בית גימל"}], after) == [], (
         "the sidecar did not follow the corpus through an applied insert - it "
         "now describes a klal that no longer exists")
-    assert wid.index_of(after, 1, gimel_id) == 3, (
+    assert wid.locate(after, 1, gimel_id) == (3, "live"), (
         f"`גימל` moved from w2 to w3 and its id must move with it, not stay at "
         f"w2 naming `בית`")
     assert wid.id_at(after, 1, 1) not in wid.ids_for(before, 1), (
@@ -7541,7 +7543,7 @@ def test_a_deleted_words_id_is_a_tombstone_not_an_erasure():
     doomed = wid.id_at(state, 1, 1)
     wid.reconcile(state, 1, "אלף בית גימל".split(), "אלף גימל".split())
 
-    assert wid.index_of(state, 1, doomed) is None, "it has no position any more"
+    assert wid.locate(state, 1, doomed)[0] is None, "it has no position any more"
     assert wid.locate(state, 1, doomed) == (None, "retired")
     assert wid.locate(state, 1, 9999) == (None, "unknown"), (
         "an id that never existed must not read as a deletion")
@@ -7686,3 +7688,110 @@ def test_history_by_id_follows_a_rewrite_and_marks_the_borrowed_rows(decisions_p
     bare, _ = rd.history_for_word_id(1, merged, path=decisions_path,
                                      id_state=state, include_ancestors=False)
     assert bare == []
+
+
+def test_a_word_deleted_then_restored_gets_a_new_id_that_points_at_the_old_one():
+    """Reviewer, 2026-09-06: "what happens if a follow up edit restores the word,
+    and even changes it?"
+
+    THE NEW ID IS RIGHT AND IS NOT NEGOTIABLE. Nothing here can know that a
+    reappearing `אין` is THE SAME WORD rather than a different one that happens
+    to match, and reusing the old id would assert a sameness nobody established -
+    the aliasing this module refuses everywhere, plus a reissue.
+
+    What was missing is the LINK. A delete in one apply run and a restore in a
+    later one are two unrelated events, so the word's history split and
+    history_for_word_id on the new id said nothing about the deletion. The corpus
+    has its own instance: klal 57 w0 went `נז אין` -> `נז` on 2026-08-30 and back
+    to `נז אין` on 2026-09-04, and reads `נז אין הלכה כשיטה` today.
+    """
+    state = {1: wid.seed_klal("נז אין הלכה".split())}
+    ayin = wid.id_at(state, 1, 1)
+    wid.reconcile(state, 1, "נז אין הלכה".split(), "נז הלכה".split())
+    wid.reconcile(state, 1, "נז הלכה".split(), "נז אין הלכה".split())
+
+    restored = wid.id_at(state, 1, 1)
+    assert restored != ayin, "a restored word must not reuse the retired id"
+    assert wid.locate(state, 1, ayin) == (None, "retired")
+    assert wid.ancestors(state, 1, restored) == [ayin], (
+        "the restoration must point back, or the word's history stays split")
+    assert wid.retirement_of(state, 1, ayin)["restored_by"] == restored
+
+
+def test_a_word_restored_with_DIFFERENT_text_claims_no_ancestry():
+    """The second half of the same question. Different text is not a
+    restoration, and guessing there is the aliasing error again."""
+    state = {1: wid.seed_klal("אלף בית גימל".split())}
+    wid.reconcile(state, 1, "אלף בית גימל".split(), "אלף גימל".split())
+    wid.reconcile(state, 1, "אלף גימל".split(), "אלף בות גימל".split())
+    assert wid.ancestors(state, 1, wid.id_at(state, 1, 1)) == []
+
+
+def test_an_ambiguous_restoration_records_nothing():
+    """Two tombstones holding the same word: which one came back is not
+    determined, so nothing is claimed - the same refusal drift_recovery makes
+    when two shifts fit equally well."""
+    state = {1: wid.seed_klal("בית אלף בית".split())}
+    wid.reconcile(state, 1, "בית אלף בית".split(), "אלף".split())
+    wid.reconcile(state, 1, "אלף".split(), "אלף בית".split())
+    dead = state[1]["retired"]
+    assert len([s for s in dead.values() if s.get("restored_by")]) == 0
+    assert wid.ancestors(state, 1, wid.id_at(state, 1, 1)) == []
+
+
+def test_a_same_run_rewrite_is_not_relabelled_as_a_restoration():
+    """A delete and an insert inside ONE reconcile are one opcode and already
+    carry `replaced_by`, so they must not also read as a restoration."""
+    state = {1: wid.seed_klal("אלף בית גימל".split())}
+    wid.reconcile(state, 1, "אלף בית גימל".split(), "אלף מאוחד".split())
+    dead = state[1]["retired"].values()
+    assert all(s.get("replaced_by") for s in dead)
+    assert not any(s.get("restored_by") for s in dead)
+
+
+def test_a_word_moved_within_one_run_is_not_called_a_restoration():
+    """THE CASE THAT ACTUALLY PINS `pre_existing`, and the test above does not.
+
+    Matching against the live tombstone dict instead of the pre-run snapshot
+    survives the rewrite test purely by statement ORDER - there the mint happens
+    before the tombstone is written, so the two dicts are identical at the moment
+    of the check. A mutation swapping them passed, which made it an unanswered
+    question rather than a pass (Lesson 42).
+
+    Two SEPARATE opcodes in one reconcile do distinguish them: delete `בית` early
+    and insert `בית` late, and the earlier opcode's tombstone already exists when
+    the later one mints. Within one run that is a move, not a word coming back
+    after an earlier run removed it - and this module does not claim moves,
+    because a delete here plus an insert there is equally well two unrelated
+    edits. Refusing keeps `restored_by` meaning one thing.
+    """
+    old = "אלף בית גימל דלת הא וו".split()
+    new = "אלף גימל דלת הא וו בית".split()
+    state = {1: wid.seed_klal(old)}
+    doomed = wid.id_at(state, 1, 1)
+    wid.reconcile(state, 1, old, new)
+
+    stone = wid.retirement_of(state, 1, doomed)
+    assert stone["word"] == "בית" and stone["reason"] == "deleted"
+    assert stone.get("restored_by") is None, (
+        "a within-run move must not be recorded as a restoration")
+    assert wid.ancestors(state, 1, wid.id_at(state, 1, 5)) == []
+
+
+def test_a_restored_words_history_reaches_back_past_the_deletion(decisions_path):
+    """The point of the pointer: the reviewer sees one story, not two."""
+    state = {1: wid.seed_klal("נז אין הלכה".split())}
+    ayin = wid.id_at(state, 1, 1)
+    rd.append_decision("manual_correction", klal_id=1, word_index=1,
+                       chosen_source="custom", chosen_text="",
+                       candidate_snapshot={"original_word": "אין", "word_id": ayin},
+                       path=decisions_path)
+    wid.reconcile(state, 1, "נז אין הלכה".split(), "נז הלכה".split())
+    wid.reconcile(state, 1, "נז הלכה".split(), "נז אין הלכה".split())
+
+    rows, basis = rd.history_for_word_id(1, wid.id_at(state, 1, 1),
+                                         path=decisions_path, id_state=state)
+    assert basis == "word_id" and len(rows) == 1
+    assert rows[0]["via_ancestor"] == ayin, (
+        "the deletion is part of this word's story and must be marked as "
+        "borrowed from the id it had before")

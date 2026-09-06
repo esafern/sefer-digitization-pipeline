@@ -53,6 +53,96 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0BY. **[2026-09-06] THE ID API IS NARROWED TO ONE ACCESSOR, AND A RESTORED WORD
+    NOW POINTS BACK AT THE ONE IT REPLACES.**
+
+    Two reviewer decisions, taken after the design was argued out in the session:
+    keep the positional array (storage choice A) and add the restoration link.
+
+    ### Why the array stayed
+
+    The reviewer asked why an id has to be a slot and why it could not be an
+    arbitrary permanent id with a mutable index attached. **It already is that** -
+    ids are permanent, unique per klal and never reissued; the positional array
+    is an ENCODING of the id-to-index relation, not the identity model. The two
+    forms are informationally equivalent for live words, so the choice is
+    storage, not identity, and it was decided on one property:
+
+    `len(ids) == len(words)` proves "exactly one id per word, in order, no gaps,
+    no duplicates" in a single comparison. An id-keyed map turns that into three
+    checks `verify()` must keep proving. Measured, the other axes do not decide
+    it: `_index_of` is a linear scan at **10.2us** on the worst klal (1,870
+    words) against 0.03us for a dict, but that is ~6ms across all 594 rulings;
+    and the map costs 2.5x on disk flat (494KB vs 200KB) or 5.1x with per-word
+    records. The map is a better-shaped data model and remains a legitimate
+    future choice - if it is ever taken, write and mutation-test the three
+    explicit invariants FIRST and migrate onto them, not the reverse.
+
+    ### The narrowing
+
+    `index_of()` is now `_index_of()`. It returned None for a RETIRED id and None
+    for one that never existed - the same one-value-two-meanings defect the
+    tombstone fixed in the DATA, still reachable through the API. `locate()`,
+    which returns `(index, "live"|"retired"|"unknown")`, is the only accessor.
+    `resolve(state, rec)` is DELETED: it pulled `word_id` out of a record and
+    returned a bare index, dropping locate's status - a second way in answering
+    almost the same question. Neither had a production caller; both were
+    test-only, so this cost nothing but the tests that used them.
+
+    ### The restoration link
+
+    A word deleted in one apply run and restored in a LATER one got a fresh id
+    and no connection to the old one, so its history split in two and
+    `history_for_word_id` on the new id said nothing about the deletion. **The
+    corpus has its own instance**: klal 57 w0 went `נז אין` -> `נז` on
+    2026-08-30 and back to `נז אין` on 2026-09-04, and reads
+    `נז אין הלכה כשיטה` today.
+
+    The new id is right and is not negotiable - nothing can know a reappearing
+    `אין` is THE SAME WORD rather than a different one that matches, and reusing
+    the old id would assert a sameness nobody established. What was missing is
+    the POINTER. `reconcile` now records `restored_by` on the tombstone the
+    restoration matched, and `ancestors()` follows it exactly as it follows
+    `replaced_by`, so the earlier rulings come back marked `via_ancestor`.
+
+    Evidence, not identity, with three refusals each pinned by a test whose
+    mutation fails:
+    * the text must match EXACTLY - a word restored as `בות` where `בית` was
+      deleted claims no ancestry;
+    * exactly ONE tombstone may hold that word - two and the restoration is
+      ambiguous, so nothing is recorded;
+    * the tombstone must PRE-DATE this reconcile - a delete and an insert in one
+      run are a rewrite (`replaced_by`) or a move, not a word coming back.
+
+    **One of those three tests was blind when written and the mutation said so.**
+    Swapping the pre-run tombstone snapshot for the live dict passed the
+    same-run-rewrite test, because there the mint happens before the tombstone is
+    written and the two dicts are identical at the moment of the check. The case
+    that distinguishes them is TWO opcodes in one reconcile - delete `בית` early,
+    insert `בית` late - where the earlier tombstone already exists. That test
+    exists now and the mutation fails it. Lesson 42: a surviving mutation is an
+    unanswered question, not a pass.
+
+    Gate 478 passed. Sidecar verifies clean. No corpus text changed.
+
+    ### AND A STALE NUMBER CORRECTED: the known flaky UI test is far worse than
+    ### recorded
+
+    `test_a_word_click_survives_the_scroll_that_follows_it` failed in this
+    session's ungated run. It is item `0BO` plan item 4's known flake, recorded
+    there as failing "roughly 1 run in 8" - **that figure is no longer true.**
+    Measured today as a CONTROL, in a clean worktree at `5fc3077`, i.e. with none
+    of this session's id work present: **3 failures in 6 runs.** The working tree
+    showed 1 in 3 in isolation.
+
+    So it is not a regression from the id changes - which was the reason for
+    running the control, since a scroll test failing after unrelated work is
+    exactly the coincidence that gets misattributed - but the rate has degraded
+    from ~12% to ~50% at some point since it was measured, and anyone reading
+    "1 in 8" will under-weight it. It is now the most likely single cause of a
+    red ungated run, and it should be treated as a real defect rather than
+    background noise.
+
 0BX. **[2026-09-06] ARCHITECTURAL SWEEP FOR THE FAILURE CLASSES THIS WEEK KEPT
     PRODUCING. Four classes checked clean, one real finding, two stranded
     features.**
