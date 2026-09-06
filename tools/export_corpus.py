@@ -125,7 +125,7 @@ def _apply_decisions_to_klalim(klalim):
         klal = by_klal.get(klal_id)
         if klal is None:
             continue
-        original_word = decision.get("candidate_snapshot", {}).get("original_word")
+        original_word = (decision.get("candidate_snapshot") or {}).get("original_word")
         chosen_text = decision["chosen_text"]
 
         # PARITY with apply_reviewer_decisions.py, which has three manual cases,
@@ -509,13 +509,28 @@ def _build_tei(klalim, word_bboxes, all_corrections, all_manual):
     fd = ET.SubElement(header, f"{{{TEI_NS}}}fileDesc")
     tt = ET.SubElement(fd, f"{{{TEI_NS}}}titleStmt")
     title = ET.SubElement(tt, f"{{{TEI_NS}}}title")
-    title.text = "יד מלאכי — Yad Malachi (Berlin 1851/2, Part 1)"
+    # COMPOSED FROM book_identity(), not hardcoded (Phase 3). This line, the
+    # sourceDesc below and the whole SEFARIA_* block named the book in the output
+    # that actually ships, so a second corpus exported through this pipeline
+    # carried Yad Malachi's title into its TEI header and its Sefaria index - a
+    # wrong edition attribution in a public library, which is the failure the
+    # SEFARIA_* comment already warns about from the other direction.
+    #
+    # The scope label is DERIVED rather than fixed at "Part 1": the old string
+    # said Part 1 even under --all-parts, which was wrong on its face for a
+    # 667-klal export.
+    ident = cio.book_identity()
+    kl_ids = [k["klal_id"] for k in klalim] or [0]
+    scope = cio.scope_label(min(kl_ids), max(kl_ids))
+    title.text = (f"{ident['title_he']} — {ident['title']} "
+                  f"({ident['edition_label']}, {scope})")
     pubstmt = ET.SubElement(fd, f"{{{TEI_NS}}}publicationStmt")
     p = ET.SubElement(pubstmt, f"{{{TEI_NS}}}p")
     p.text = "Digitization pipeline export. Human-reviewed corrections applied."
     srcstmt = ET.SubElement(fd, f"{{{TEI_NS}}}sourceDesc")
     sp = ET.SubElement(srcstmt, f"{{{TEI_NS}}}p")
-    sp.text = "Berlin 1851/2 printing (Zittenfeld); scan via Google Books / NLI."
+    sp.text = (f"{ident['edition_label']} printing ({ident['publisher']}); "
+               f"scan via {ident['scan_source']}.")
 
     # --- text body ---
     text = ET.SubElement(root, f"{{{TEI_NS}}}text")
@@ -553,8 +568,27 @@ def _build_tei(klalim, word_bboxes, all_corrections, all_manual):
                 continue
             if dec["id"] in already_applied:
                 continue
-            snap = dec.get("candidate_snapshot", {})
-            orig = snap.get("final_text", "")
+            # `or {}`, NOT `.get(..., {})`. A dict default only applies when the
+            # key is ABSENT, and 2,678 ledger records carry the key with an
+            # explicit null - so `.get("candidate_snapshot", {})` returned None
+            # and `.get` on it raised. THE FULL TEI EXPORT CRASHED ON THE REAL
+            # CORPUS because of this, at every commit since the file was written
+            # (verified against 137988f): 3 disputed_choice records have a null
+            # snapshot and one is enough. Nothing caught it because
+            # test_export_tei_generates_valid_tei_p5_xml builds two synthetic
+            # klalim with no decisions at all, and nobody had run the export -
+            # Lesson 1, a tool that is not run on what it applies to has verified
+            # nothing. Swept: the same idiom was at 9 sites across three files.
+            snap = dec.get("candidate_snapshot") or {}
+            # AND WHEN THERE IS NO RECORDED ORIGINAL, take it from the corpus.
+            # `snap.get("final_text", "")` yielded "" for a null snapshot, so TEI
+            # emitted `<orig></orig>` - an archival record ASSERTING that the
+            # reading before this pending correction was nothing. The decision is
+            # by definition unapplied here (applied ones are skipped two lines
+            # up), so the word standing at that index IS the original, and saying
+            # so is both true and cheaper than a snapshot lookup.
+            orig = snap.get("final_text") or (
+                words[d_wi] if 0 <= d_wi < len(words) else "")
             reg = dec.get("chosen_text", "")
             if orig != reg:
                 choice_map[d_wi] = (orig, reg)
@@ -564,8 +598,9 @@ def _build_tei(klalim, word_bboxes, all_corrections, all_manual):
                 continue
             if dec["id"] in already_applied:
                 continue
-            snap = dec.get("candidate_snapshot", {})
-            orig = snap.get("original_word", "")
+            snap = dec.get("candidate_snapshot") or {}
+            orig = snap.get("original_word") or (
+                words[d_wi] if 0 <= d_wi < len(words) else "")
             reg = dec.get("chosen_text", "")
             if orig != reg:
                 choice_map[d_wi] = (orig, reg)
@@ -638,30 +673,60 @@ def export_tei(klalim, output_dir, word_bboxes, all_corrections, all_manual, by_
 # NLI; the scan is the Berlin reprint, sourced from Google Books (see
 # START_HERE.md's scan section, confirmed 2026-08-18 against NLI catalog
 # record 990011859020205171).
-SEFARIA_TITLE = "Yad Malachi"
-SEFARIA_HE_TITLE = "יד מלאכי"
-SEFARIA_CATEGORIES = ["Rabbinic Thought", "Methodology"]
-SEFARIA_NODE_EN = "Klalei HaGemara"
-SEFARIA_NODE_HE = "כללי הגמרא"
-SEFARIA_VERSION_TITLE = "Berlin 1851/2 (Zittenfeld) — OCR, vision-adjudicated"
-SEFARIA_VERSION_SOURCE = "https://www.google.com/books/edition/_/OdiHjxI3I0EC"
+# RESOLVED AT CALL TIME through corpus_io.book_identity(), never frozen here.
+# These were module-level literals naming the book in the output that ships.
+# Plain functions rather than a module __getattr__: nothing outside this file
+# reads them (checked), and a __getattr__ hook is NOT consulted for a bare global
+# lookup inside the module's own functions - it raises NameError instead, which
+# is the trap two tools/ scripts fell into on 2026-09-06. A function has no such
+# asymmetry.
+#
+# The Yad Malachi values are book_identity()'s defaults, so this book's export is
+# byte-identical - verified against a pre-change TEI and Sefaria export.
+def _sefaria_title():
+    return cio.book_identity()["title"]
+
+
+def _sefaria_he_title():
+    return cio.book_identity()["title_he"]
+
+
+def _sefaria_categories():
+    return list(cio.book_identity()["categories"])
+
+
+def _sefaria_node_en():
+    return cio.book_identity()["section"]
+
+
+def _sefaria_node_he():
+    return cio.book_identity()["section_he"]
+
+
+def _sefaria_version_title():
+    ident = cio.book_identity()
+    return f"{ident['edition_label']} ({ident['publisher']}) — OCR, vision-adjudicated"
+
+
+def _sefaria_version_source():
+    return cio.book_identity()["version_source"]
 
 
 def _sefaria_index():
     return {
-        "title": SEFARIA_TITLE,
-        "categories": list(SEFARIA_CATEGORIES),
+        "title": _sefaria_title(),
+        "categories": _sefaria_categories(),
         "schema": {
             "titles": [
-                {"lang": "en", "title": SEFARIA_TITLE, "primary": True},
-                {"lang": "he", "title": SEFARIA_HE_TITLE, "primary": True},
+                {"lang": "en", "title": _sefaria_title(), "primary": True},
+                {"lang": "he", "title": _sefaria_he_title(), "primary": True},
             ],
-            "key": SEFARIA_TITLE,
+            "key": _sefaria_title(),
             "nodes": [{
-                "key": SEFARIA_NODE_EN,
+                "key": _sefaria_node_en(),
                 "titles": [
-                    {"lang": "en", "title": SEFARIA_NODE_EN, "primary": True},
-                    {"lang": "he", "title": SEFARIA_NODE_HE, "primary": True},
+                    {"lang": "en", "title": _sefaria_node_en(), "primary": True},
+                    {"lang": "he", "title": _sefaria_node_he(), "primary": True},
                 ],
                 "nodeType": "JaggedArrayNode",
                 "depth": 2,
@@ -774,9 +839,9 @@ def export_sefaria(klalim, output_dir, version_title=None, version_source=None):
     )
 
     version = {
-        "title": SEFARIA_TITLE,
-        "versionTitle": version_title or SEFARIA_VERSION_TITLE,
-        "versionSource": version_source or SEFARIA_VERSION_SOURCE,
+        "title": _sefaria_title(),
+        "versionTitle": version_title or _sefaria_version_title(),
+        "versionSource": version_source or _sefaria_version_source(),
         "versionNotes": notes,
         "language": "he",
         "license": "Public Domain",

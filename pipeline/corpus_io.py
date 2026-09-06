@@ -258,6 +258,30 @@ def parts():
     return [dict(p) for p in declared]
 
 
+def scope_label(first_klal, last_klal):
+    """How an export should NAME the klal range it covers, e.g. "Part 1".
+
+    Derived from the declared chunking rather than fixed, because the string it
+    replaces was the literal "Part 1" in tools/export_corpus.py's TEI title -
+    printed even under --all-parts, which named a 667-klal export after its first
+    third. A range covering exactly one declared chunk is named for that chunk; a
+    range spanning several says so; anything else states the klalim it holds
+    rather than inventing a label for it.
+    """
+    chunks = parts()
+    covering = [i for i, p in enumerate(chunks, start=1)
+                if p["first_klal"] <= first_klal and last_klal <= p["last_klal"]]
+    if covering:
+        return f"Part {covering[0]}"
+    spanned = [i for i, p in enumerate(chunks, start=1)
+               if not (p["last_klal"] < first_klal or p["first_klal"] > last_klal)]
+    if len(spanned) == len(chunks) and len(chunks) > 1:
+        return "complete"
+    if len(spanned) > 1:
+        return f"Parts {spanned[0]}-{spanned[-1]}"
+    return f"klalim {first_klal}-{last_klal}"
+
+
 def part_number_for_klal(klal_id):
     """1-based index of the chunk holding this klal, or None if no chunk claims
     it. Replaces the `<=` cutoff ladders that hardcoded 222/444."""
@@ -480,6 +504,27 @@ _WORK_DEFAULTS = {
     "section": "Klalei HaGemara",
     "section_he": "כללי הגמרא",
     "edition": "Berlin, 1851/2 - the second printing, not the Livorno 1766-7 original",
+    # PUBLICATION FIELDS, added 2026-09-06 (generalization Phase 3, the slice on
+    # the deliverable path). tools/export_corpus.py hardcoded the book in the
+    # output that actually ships - the TEI title and sourceDesc, and the whole
+    # SEFARIA_* block - so a second book exported through this pipeline would
+    # have carried Yad Malachi's name into its TEI header and its Sefaria index.
+    # A wrong edition attribution in a public library is the failure that file's
+    # own comment already warns about for a different reason.
+    #
+    # Deliberately SHORT, composable strings rather than the finished sentences.
+    # Storing "Berlin 1851/2 printing (Zittenfeld); scan via Google Books / NLI."
+    # whole would mean a second book has to restate the sentence's grammar as
+    # well as its facts; storing the parts lets the exporter compose the same
+    # bytes for this book and a correct sentence for any other. Verified
+    # byte-identical against the pre-change export.
+    "edition_label": "Berlin 1851/2",
+    "publisher": "Zittenfeld",
+    "scan_source": "Google Books / NLI",
+    "version_source": "https://www.google.com/books/edition/_/OdiHjxI3I0EC",
+    # Sefaria's own taxonomy, which is a property of the WORK and not of this
+    # pipeline - a second book is unlikely to be Rabbinic Thought / Methodology.
+    "categories": ["Rabbinic Thought", "Methodology"],
 }
 
 
@@ -503,6 +548,11 @@ _WORK_ATTRS = {
     "WORK_SECTION": "section",
     "WORK_SECTION_HE": "section_he",
     "WORK_EDITION": "edition",
+    "WORK_EDITION_LABEL": "edition_label",
+    "WORK_PUBLISHER": "publisher",
+    "WORK_SCAN_SOURCE": "scan_source",
+    "WORK_VERSION_SOURCE": "version_source",
+    "WORK_CATEGORIES": "categories",
 }
 
 # 22 Hebrew letters + the 5 final forms, i.e. exactly U+05D0-U+05EA. Written

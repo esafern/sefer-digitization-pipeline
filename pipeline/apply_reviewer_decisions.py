@@ -721,7 +721,7 @@ def main():
         if klal is None:
             skipped_drift.append((klal_id, word_index))
             continue
-        original_word = decision.get("candidate_snapshot", {}).get("original_word")
+        original_word = (decision.get("candidate_snapshot") or {}).get("original_word")
         chosen_text = decision["chosen_text"]
 
         # Whether a PREVIOUS decision this run already moved this klal's
@@ -861,7 +861,7 @@ def main():
         if klal is None:
             skipped_drift.append((klal_id, word_index))
             continue
-        snapshot = decision.get("candidate_snapshot", {})
+        snapshot = decision.get("candidate_snapshot") or {}
         original_word = snapshot.get("original_word")
         chosen_text = decision["chosen_text"]
 

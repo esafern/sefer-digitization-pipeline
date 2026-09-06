@@ -53,6 +53,90 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0BU. **[2026-09-06] PHASE 3, THE SLICE ON THE DELIVERABLE PATH - AND THE TEI
+    EXPORT WAS CRASHING ON THE REAL CORPUS THE WHOLE TIME.**
+
+    Item `0BR`'s Phase 3 guide said to do step 5 first: `export_corpus.py`
+    hardcodes the book in the output that actually ships. Doing it turned up a
+    live defect in the same file that nothing had ever run into.
+
+    ### THE TEI EXPORT CRASHED. Every commit since the file was written.
+
+    `python3 tools/export_corpus.py --format tei --output-dir X` dies with
+    `AttributeError: 'NoneType' object has no attribute 'get'`. Verified against
+    `137988f` in a clean worktree, so it is not from this week's work - it has
+    never worked on the full corpus.
+
+    Cause: `dec.get("candidate_snapshot", {})`. A dict default applies only when
+    the key is ABSENT, and **2,678 of 3,504 ledger records carry the key with an
+    explicit null** - 3 of them `disputed_choice`, which is the map this path
+    reads, and one is enough.
+
+    **Why nothing caught it** is the more useful half.
+    `test_export_tei_generates_valid_tei_p5_xml` builds two synthetic klalim with
+    no decisions at all, so the branch never executed; and nobody had run the
+    export on the corpus. Lesson 1 exactly - a tool not run on what it applies to
+    has verified nothing - against one of the three archival formats
+    `START_HERE.md` names as the institutional-ingestion deliverable (success
+    criterion 3). Swept the idiom: 9 sites across three files, all converted.
+
+    **A second defect underneath it.** With no snapshot, `orig` fell back to `""`
+    and TEI emitted `<orig></orig>` - an archival record ASSERTING that the
+    reading before a pending correction was nothing. The decision is unapplied by
+    construction on that path, so the word standing at the index IS the original.
+    13 lines of the full export change: 12 empty originals filled in, and one
+    `<choice>` collapsing to a plain `<w>` because the reviewer's pick matched
+    the word already there, so there is no variant to show. Zero `<orig/>`
+    remain.
+
+    ### The identity extraction
+
+    `book_identity()` gains the publication fields (`edition_label`, `publisher`,
+    `scan_source`, `version_source`, `categories`), deliberately as SHORT
+    composable strings rather than finished sentences - storing "Berlin 1851/2
+    printing (Zittenfeld); scan via Google Books / NLI." whole would make a
+    second book restate the sentence's grammar as well as its facts.
+    `cio.scope_label()` derives "Part 1"/"complete"/"Parts 1-2" from the declared
+    chunking, replacing a literal `Part 1` that the TEI title printed even under
+    `--all-parts`, naming a 667-klal export after its first third.
+
+    **The Yad Malachi export is byte-identical**: both Sefaria files match a
+    pre-change export exactly, and the TEI differs only in the 13 lines above.
+    **And the seam demonstrably works**: with a `book.json` naming a different
+    book, the TEI title, the sourceDesc, the Sefaria index title, its categories,
+    its node key, the versionTitle and the versionSource all follow. Both
+    properties are pinned by tests; the byte-identity one asserts the composed
+    strings so a later edit to `_WORK_DEFAULTS` cannot move the deliverable
+    silently.
+
+    The `SEFARIA_*` constants became plain accessor FUNCTIONS, not a module
+    `__getattr__`: nothing outside the file reads them (checked), and a
+    `__getattr__` hook is not consulted for a bare global lookup inside the
+    module's own functions - the trap two `tools/` scripts fell into earlier the
+    same day.
+
+    ### A precedence bug I introduced, and the tests caught
+
+    Sweeping `.get("candidate_snapshot", {})` -> `.get("candidate_snapshot") or
+    {}` with a blind `str.replace` turned six CHAINED sites into
+    `x.get("candidate_snapshot") or {}.get("original_word")`, which parses as
+    `x.get(...) or ({}.get(...))` and returns **the whole snapshot dict instead
+    of the field**. Five tests failed immediately - the manual-correction apply
+    paths - and the fix is parentheses. Worth recording because the sweep was the
+    right instinct and the mechanism was not: a chained expression is not a
+    string, and a regex that knows about the chain (or an AST edit) is what that
+    change needed.
+
+    Gate 464 passed. plain/alto/page/tei/sefaria all export. No corpus text
+    changed.
+
+    ### Phase 3, still to do
+
+    Steps 1-3 of `0BR`'s guide - extracting the ligature catalogue and the 24
+    corrupt forms - are NOT done. Step 3's guard is the part not to skip: the
+    invariant must keep its own literal and assert equality against
+    `cio.defects()`, never read its expectation from the file it guards.
+
 0BT. **[2026-09-06] SELF-INFLICTED: `git checkout -- .` DESTROYED NINE FILES OF
     UNCOMMITTED WORK. FIVE WERE REBUILT FROM THE TRANSCRIPT, NOT FROM A BACKUP -
     READ THIS BEFORE AUDITING THEM.**

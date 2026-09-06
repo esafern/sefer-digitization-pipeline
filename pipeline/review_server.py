@@ -482,7 +482,7 @@ def api_klalim(part_num=1, on_klal_states=None):
         if not k:
             continue
         words = cio.words_of(k)
-        original_word = rec.get("candidate_snapshot", {}).get("original_word")
+        original_word = (rec.get("candidate_snapshot") or {}).get("original_word")
         if not _word_matches(words, wi, original_word):
             continue
         manual_count_by_klal[kid] = manual_count_by_klal.get(kid, 0) + 1
@@ -975,7 +975,7 @@ def api_klal(klal_id):
     for (kid, word_index), rec in rd.all_current_live("manual_correction").items():
         if kid != klal_id:
             continue
-        original_word = rec.get("candidate_snapshot", {}).get("original_word")
+        original_word = (rec.get("candidate_snapshot") or {}).get("original_word")
         if not _word_matches(words, word_index, original_word):
             continue
         manual_word_indices.add(word_index)
@@ -1022,7 +1022,7 @@ def api_klal(klal_id):
             "word_index": word_index,
             "opcode": "manual",
             "docai_reading": None,
-            "final_text": rec.get("candidate_snapshot", {}).get("original_word"),
+            "final_text": (rec.get("candidate_snapshot") or {}).get("original_word"),
             "page": _page,
             "bbox": _bbox,
             "vision_selected": None,
@@ -1348,7 +1348,7 @@ def api_page(page_num):
         for (mkid, wi), rec in manual_current.items():
             if mkid != kid or (kid, wi) in correction_keys:
                 continue
-            original_word = rec.get("candidate_snapshot", {}).get("original_word")
+            original_word = (rec.get("candidate_snapshot") or {}).get("original_word")
             if not _word_matches(words, wi, original_word):
                 continue
             bbox, bpage = _word_scan_position(kid, words, wi)

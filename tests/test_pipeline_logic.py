@@ -7406,3 +7406,114 @@ def test_adoption_is_measured_against_what_the_consensus_ACTUALLY_proposed():
     with mock.patch.object(rank.rd, "all_records", lambda: rows):
         sample = rank.calibration_sample()
     assert [a for _s, a in sample] == [True, False]
+
+
+# --- Phase 3: the shipped export names the book from book.json ----------------
+
+def test_the_export_names_the_book_from_book_identity_not_from_a_literal(tmp_path):
+    """Generalization Phase 3, the slice on the DELIVERABLE path.
+
+    tools/export_corpus.py hardcoded the book in the output that actually ships -
+    the TEI title and sourceDesc, and the whole SEFARIA_* block - while
+    cio.book_identity() existed from Phase 2 with two production readers, neither
+    of them the exporter. A second corpus run through this pipeline would have
+    carried Yad Malachi's title into its TEI header and its Sefaria index, which
+    is a wrong edition attribution in a public library.
+
+    Asserts the OUTPUT, not that the constants were replaced: a helper that reads
+    the seam and is never called has the identical symptom (Lesson 29).
+    """
+    previous = cio.set_corpus_root(str(tmp_path))
+    try:
+        (tmp_path / "book.json").write_text(json.dumps({
+            "title": "Sefer Bedikah", "title_he": "ספר הבדיקה",
+            "section": "Shaar Rishon", "section_he": "שער ראשון",
+            "edition_label": "Vilna 1899", "publisher": "Romm",
+            "scan_source": "NLI", "version_source": "https://example.org/x",
+            "categories": ["Halakhah"],
+        }, ensure_ascii=False), encoding="utf-8")
+        klalim = [{"klal_id": 1, "gematria": "א", "title": "כלל ראשון",
+                   "clean_text": "אלף בית", "page": 14}]
+
+        root = exp._build_tei(klalim, {}, {}, {}).getroot()
+        ns = {"t": "http://www.tei-c.org/ns/1.0"}
+        title = root.find(".//t:titleStmt/t:title", ns).text
+        assert "Sefer Bedikah" in title and "ספר הבדיקה" in title, title
+        assert "Yad Malachi" not in title and "מלאכי" not in title, (
+            f"the TEI header still names the wrong book: {title!r}")
+        source = root.find(".//t:sourceDesc/t:p", ns).text
+        assert "Vilna 1899" in source and "Romm" in source, source
+        assert "Berlin" not in source and "Zittenfeld" not in source, source
+
+        index = exp._sefaria_index()
+        assert index["title"] == "Sefer Bedikah"
+        assert index["categories"] == ["Halakhah"]
+        assert index["schema"]["nodes"][0]["key"] == "Shaar Rishon"
+        assert exp._sefaria_version_source() == "https://example.org/x"
+        assert "Vilna 1899 (Romm)" in exp._sefaria_version_title()
+    finally:
+        cio.set_corpus_root(previous)
+
+
+def test_the_export_is_byte_identical_for_this_book_after_the_extraction():
+    """The defaults must reproduce the literals they replaced, exactly.
+
+    An extraction that quietly changes the shipped bytes is a corpus deliverable
+    edited by a refactor. Verified against a real pre-change export when this
+    landed; pinned here on the strings themselves so a later edit to
+    _WORK_DEFAULTS cannot move them without saying so."""
+    ident = cio.book_identity()
+    assert (f"{ident['title_he']} — {ident['title']} "
+            f"({ident['edition_label']}, Part 1)") == \
+        "יד מלאכי — Yad Malachi (Berlin 1851/2, Part 1)"
+    assert (f"{ident['edition_label']} printing ({ident['publisher']}); "
+            f"scan via {ident['scan_source']}.") == \
+        "Berlin 1851/2 printing (Zittenfeld); scan via Google Books / NLI."
+    assert exp._sefaria_version_title() == \
+        "Berlin 1851/2 (Zittenfeld) — OCR, vision-adjudicated"
+    assert exp._sefaria_version_source() == \
+        "https://www.google.com/books/edition/_/OdiHjxI3I0EC"
+    assert exp._sefaria_categories() == ["Rabbinic Thought", "Methodology"]
+
+
+def test_the_scope_label_does_not_call_a_whole_book_export_part_1():
+    """The TEI title said "Part 1" even under --all-parts, naming a 667-klal
+    export after its first third."""
+    assert cio.scope_label(1, 222) == "Part 1"
+    assert cio.scope_label(223, 444) == "Part 2"
+    assert cio.scope_label(1, 667) == "complete"
+    assert cio.scope_label(1, 300) == "Parts 1-2"
+
+
+def test_the_full_tei_export_survives_a_ruling_with_a_null_snapshot(tmp_path):
+    """REGRESSION: the full TEI export CRASHED on the real corpus, at every
+    commit since the file was written (verified against 137988f).
+
+    `dec.get("candidate_snapshot", {})` returns None when the key is present and
+    null - a dict default only applies when the key is ABSENT - and 2,678 ledger
+    records carry it as null, 3 of them disputed_choice, which is where this
+    path reads. One is enough to raise AttributeError.
+
+    Nothing caught it because test_export_tei_generates_valid_tei_p5_xml builds
+    two synthetic klalim with no decisions at all, and nobody had run the export
+    on the corpus (Lesson 1). Swept: the same idiom was at 9 sites across three
+    files.
+    """
+    klalim = [{"klal_id": 1, "gematria": "א", "title": "כלל ראשון",
+               "clean_text": "אלף בית גימל", "page": 14}]
+    null_snapshot = {(1, 1): {"id": "d1", "chosen_text": "בות",
+                              "candidate_snapshot": None}}
+    tree = exp._build_tei(klalim, {}, null_snapshot, {})
+    ns = {"t": "http://www.tei-c.org/ns/1.0"}
+    para = tree.getroot().find(".//t:body/t:div/t:p", ns)
+    choice = para.find("t:choice", ns)
+    assert choice is not None, "the pending decision should still render"
+    # AND THE ORIGINAL MUST BE THE CORPUS WORD, not "". With no recorded snapshot
+    # the exporter emitted `<orig></orig>`, an archival record asserting the
+    # reading before this correction was nothing. The decision is unapplied, so
+    # the word at that index IS the original.
+    assert choice.find("t:orig", ns).text == "בית"
+    assert choice.find("t:reg", ns).text == "בות"
+    read = [(el.find("t:orig", ns).text if el.find("t:orig", ns) is not None
+             else el.text) for el in para]
+    assert " ".join(read) == "אלף בית גימל", read
