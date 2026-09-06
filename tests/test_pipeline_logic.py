@@ -7873,6 +7873,109 @@ def test_the_audit_counts_a_word_id_address_as_clean_not_as_drift():
         "the audit still treats a stable-id address as a stale one")
     assert '"retired":' in src, (
         "the audit has no wording for a word its id says was deleted")
+
+
+def test_the_applier_follows_a_stable_id_instead_of_the_recorded_index(
+        apply_harness, decisions_path, tmp_path, monkeypatch):
+    """THE POINT OF THE ID: a ruling applies to its WORD, not to the slot it was
+    recorded at. Without this the applier reads the position off all_current()'s
+    key, which rots the moment an earlier edit changes the klal's word count -
+    the drift that reindex_pending_decisions_after_shift() exists to paper over.
+
+    The ruling here names `גימל`, was recorded when it sat at w2, and the corpus
+    has since gained a word before it, so `גימל` is at w3. The recorded index now
+    holds `בית`. Applying at the recorded index would corrupt the wrong word.
+    """
+    import word_identity as wid
+    state_path = tmp_path / "word_identity.json"
+    monkeypatch.setattr(wid, "path", lambda: str(state_path))
+    wid.save({1: wid.seed_klal("אלף בית גימל".split())})
+    gimel = wid.id_at(wid.load(), 1, 2)
+    # the corpus gained a word at w1; גימל now sits at w3
+    moved = wid.load_for_update()
+    wid.reconcile(moved, 1, "אלף בית גימל".split(), "אלף חדש בית גימל".split())
+    wid.save(moved)
+    assert wid.locate(wid.load(), 1, gimel) == (3, "live")
+
+    entry = _correction(2, "replace", "גמל", "גימל")
+    apply_harness([{"klal_id": 1, "clean_text": "אלף חדש בית גימל"}], {"1": []})
+    rd.append_decision("candidate_choice", klal_id=1, word_index=2,
+                       chosen_source="docai_reading", chosen_text="גמל",
+                       candidate_snapshot=dict(entry, word_id=gimel),
+                       path=decisions_path)
+
+    assert apply_harness.run()[1] == "אלף חדש בית גמל", (
+        "the ruling must land on the word its id names (w3), not on the index it "
+        "was recorded at (w2, which now holds בית)")
+
+
+def test_the_applier_refuses_a_ruling_whose_word_was_deleted(
+        apply_harness, decisions_path, tmp_path, monkeypatch):
+    """`retired` has nowhere to apply. Falling back to the recorded index would
+    write a human's ruling onto whatever slid into that slot."""
+    import word_identity as wid
+    state_path = tmp_path / "word_identity.json"
+    monkeypatch.setattr(wid, "path", lambda: str(state_path))
+    wid.save({1: wid.seed_klal("אלף בית גימל".split())})
+    bet = wid.id_at(wid.load(), 1, 1)
+    st = wid.load_for_update()
+    wid.reconcile(st, 1, "אלף בית גימל".split(), "אלף גימל".split())
+    wid.save(st)
+    assert wid.locate(wid.load(), 1, bet)[1] == "retired"
+
+    entry = _correction(1, "replace", "בות", "בית")
+    apply_harness([{"klal_id": 1, "clean_text": "אלף גימל"}], {"1": []})
+    rd.append_decision("candidate_choice", klal_id=1, word_index=1,
+                       chosen_source="docai_reading", chosen_text="בות",
+                       candidate_snapshot=dict(entry, word_id=bet),
+                       path=decisions_path)
+
+    assert apply_harness.run()[1] == "אלף גימל", (
+        "a ruling whose word was deleted must not be applied to the word that "
+        "took its place")
+
+
+def test_the_applier_drift_checks_the_correction_entry_at_the_resolved_index(
+        apply_harness, decisions_path, tmp_path, monkeypatch):
+    """The live entry has to be fetched AFTER the position is resolved, not before.
+
+    corrections_part1.json is regenerated against the current corpus by
+    rebuild_all.sh, so its entries sit at TODAY's indices - while the ruling's own
+    `word_index` is the one it was recorded at. Look the entry up by the recorded
+    index and, for exactly the rulings a stable id just rescued, you fetch the
+    entry belonging to a different word and drift-check the ruling against it.
+
+    Both words here are open corrections, which is ordinary in a klal. The ruling
+    names `גימל` (id-resolved to w3); w2 now holds `בית`, whose own correction is
+    a different one. Checked against that neighbour the ruling reads as drift and
+    is refused - a correct ruling silently stranded, the failure the id exists to
+    end.
+    """
+    import word_identity as wid
+    state_path = tmp_path / "word_identity.json"
+    monkeypatch.setattr(wid, "path", lambda: str(state_path))
+    wid.save({1: wid.seed_klal("אלף בית גימל".split())})
+    gimel = wid.id_at(wid.load(), 1, 2)
+    moved = wid.load_for_update()
+    wid.reconcile(moved, 1, "אלף בית גימל".split(), "אלף חדש בית גימל".split())
+    wid.save(moved)
+    assert wid.locate(wid.load(), 1, gimel) == (3, "live")
+
+    mine = _correction(3, "replace", "גמל", "גימל")
+    neighbour = _correction(2, "replace", "בות", "בית")
+    apply_harness([{"klal_id": 1, "clean_text": "אלף חדש בית גימל"}],
+                  {"1": [neighbour, mine]})
+    rd.append_decision("candidate_choice", klal_id=1, word_index=2,
+                       chosen_source="docai_reading", chosen_text="גמל",
+                       candidate_snapshot=dict(_correction(2, "replace", "גמל", "גימל"),
+                                               word_id=gimel),
+                       path=decisions_path)
+
+    assert apply_harness.run()[1] == "אלף חדש בית גמל", (
+        "the ruling was drift-checked against the correction entry at its stale "
+        "recorded index (בית's) instead of the one at the index its id resolved to")
+
+
 def test_a_backfilled_id_resolves_a_ruling_that_recorded_none(decisions_path, tmp_path,
                                                               monkeypatch):
     """Ids began 2026-09-06; every ruling before then names its word by index

@@ -83,14 +83,21 @@ def load_current_corrections():
     return cio.load_json(os.path.join(REPO, "corrections_part1.json"))
 
 
-def snapshot_matches(snapshot, live_entry):
+def snapshot_matches(snapshot, live_entry, ignore_index=False):
     if snapshot is None or live_entry is None:
         return False
-    keys = ("opcode", "docai_reading", "final_text", "word_index")
+    # `word_index` drops out of the comparison when the position was resolved by
+    # a stable id: the id's whole purpose is that the word MOVED, so requiring the
+    # recorded index to still match would refuse precisely the rulings it rescues.
+    # The identity-bearing fields are still compared, so this is narrower than it
+    # looks - what is dropped is the address, not the evidence.
+    keys = ("opcode", "docai_reading", "final_text")
+    if not ignore_index:
+        keys += ("word_index",)
     return all(snapshot.get(k) == live_entry.get(k) for k in keys)
 
 
-def snapshot_still_matches_corpus(snapshot, klal):
+def snapshot_still_matches_corpus(snapshot, klal, at=None):
     """Fallback drift check for a decision whose corrections_part1.json entry
     is GONE rather than changed.
 
@@ -119,7 +126,11 @@ def snapshot_still_matches_corpus(snapshot, klal):
     if snapshot is None or klal is None:
         return False
     span = (snapshot.get("final_text") or "").split()
-    word_index = snapshot.get("word_index")
+    # `at` is the position resolved_position() settled on. It differs from the
+    # snapshot's own only when a stable id said the word moved - and then the
+    # snapshot's index is the STALE one, so checking against it would refuse the
+    # ruling for having succeeded at exactly what the id is for.
+    word_index = snapshot.get("word_index") if at is None else at
     if not span or not isinstance(word_index, int) or word_index < 0:
         return False
     words = klal["clean_text"].split()
@@ -486,6 +497,63 @@ def apply_delete_insertion(clean_text, word_index, chosen_text):
     return " ".join(words)
 
 
+def resolved_position(decision, klal, recorded_index, id_state, backfilled):
+    """Where this ruling applies NOW -> (index, how) or (None, "retired").
+
+    `how` is "word_id" when the position came from the stable id and may
+    therefore DIFFER from the recorded one - which is what the drift checks below
+    have to be told, because they compare against the recorded index and that is
+    exactly what an id-resolved ruling has moved away from.
+
+    THE ONE PLACE THE APPLIER ASKS "WHERE". Every loop below used the word_index
+    off `all_current()`'s KEY, which is the recorded index and rots the moment an
+    earlier edit changes the klal's word count. That is what
+    reindex_pending_decisions_after_shift() exists to paper over, and what item
+    0BX's collision risk comes out of: rulings being moved between index-shaped
+    slots.
+
+    A ruling that carries a stable word_id does not need any of that. The id
+    names the word, the sidecar was updated by whichever writer moved it, and the
+    answer is exact. Asking here - once per loop, rebinding the local
+    `word_index` - is why this is a one-line change at each of the two body loops
+    rather than an edit to the 26 places that consume the position.
+
+    THE TITLE LOOP IS DELIBERATELY NOT CONVERTED. A title_correction's index is
+    into `title.split(' ')`, a different address space from the body words the
+    sidecar numbers, so an id from here would name the wrong word confidently.
+
+    DELIBERATELY STRICTER THAN review_decisions.resolve_word_index. That function
+    also answers "occurrence" and "unique", and its own docstring says those are
+    hints for a human re-point and never an authority to move a correction onto a
+    word nobody looked at. This is the corpus mutator; it takes only the two
+    EXACT answers:
+
+      word_id  - the sidecar knows where that word is. Survives any shift.
+      index    - the recorded index still holds the recorded word.
+
+    and refuses `retired` outright, because a ruling whose word was deleted has
+    nowhere to apply.
+
+    INERT UNTIL IDS EXIST, which is the safety property that makes this landable
+    on a corpus mid-flight: no ruling recorded before 2026-09-06 carries a
+    word_id, so every one of them resolves by "index" exactly as before or fails
+    exactly as before. Behaviour changes only for rulings that carry an id.
+    """
+    idx, how = rd.resolve_word_index(decision, cio.words_of(klal),
+                                     id_state=id_state, backfilled=backfilled)
+    if how == "word_id":
+        return idx, "word_id"
+    if how == "index":
+        return recorded_index, "index"
+    if how == "retired":
+        return None, "retired"
+    # "occurrence"/"unique"/None: the address did not verify exactly. Fall back to
+    # the recorded index and let the drift checks below rule on it, which is what
+    # this loop did before ids existed - a refusal here would change today's
+    # behaviour for every pre-id ruling.
+    return recorded_index, "recorded"
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--dry-run", action="store_true", help="report what would happen, change nothing")
@@ -515,6 +583,10 @@ def main():
     # verify a moved flag lands on the same word it named - captured here rather
     # than re-read later, because by_klal is mutated in place below.
     words_before = {k["klal_id"]: cio.words_of(k) for k in part1}
+    # Read ONCE for the whole run: resolved_position() consults both per ruling,
+    # and each is a full read of its file.
+    id_state = widentity.load()
+    backfilled = rd.backfilled_word_ids()
     # klal_id -> (position, delta). At most one word-count change per klal per
     # run (the guard below), so one entry each.
     word_count_shifts = {}
@@ -543,21 +615,40 @@ def main():
         if decision["id"] in already_applied or decision["id"] in settled_by_successor:
             skipped_already_applied.append((klal_id, word_index))
             continue
-        live_list = corrections.get(str(klal_id), [])
-        live_entry = next((c for c in live_list if c["word_index"] == word_index), None)
         snapshot = decision.get("candidate_snapshot")
 
         klal = by_klal.get(klal_id)
         if klal is None:
             skipped_drift.append((klal_id, word_index))
             continue
+        # WHERE, asked once - see resolved_position(). Everything below reads this
+        # local (the live-entry lookup, the text mutation, the apply_event, the
+        # reporting), so the position is resolved here and nowhere else. That is
+        # why this is one line at each loop rather than an edit to the 26 places
+        # that consume it.
+        word_index, _how = resolved_position(decision, klal, word_index, id_state, backfilled)
+        if word_index is None:
+            skipped_drift.append((klal_id, decision.get("word_index")))
+            print(f"  SKIP klal {klal_id} word {decision.get('word_index')}: "
+                  f"its word was deleted from the corpus by a later ruling")
+            continue
+
+        # AT THE RESOLVED INDEX, which is why this sits below and not above.
+        # corrections_part1.json is regenerated against the CURRENT corpus by
+        # rebuild_all.sh, so its entries are at today's positions - looking one up
+        # at the ruling's recorded index would, for a ruling the id just moved,
+        # fetch the entry belonging to some other word and drift-check against it.
+        live_list = corrections.get(str(klal_id), [])
+        live_entry = next((c for c in live_list if c["word_index"] == word_index), None)
 
         # A live entry that DISAGREES is real drift and always wins the veto.
         # A live entry that is simply absent falls back to the corpus itself -
         # see snapshot_still_matches_corpus() for why the queue legitimately
         # loses the entry the moment the decision is recorded.
-        if not snapshot_matches(snapshot, live_entry):
-            if live_entry is not None or not snapshot_still_matches_corpus(snapshot, klal):
+        by_id = (_how == "word_id")
+        if not snapshot_matches(snapshot, live_entry, ignore_index=by_id):
+            if live_entry is not None or not snapshot_still_matches_corpus(
+                    snapshot, klal, at=word_index):
                 skipped_drift.append((klal_id, word_index))
                 continue
             recovered_from_dropped_entry.append((klal_id, word_index))
@@ -720,6 +811,17 @@ def main():
         klal = by_klal.get(klal_id)
         if klal is None:
             skipped_drift.append((klal_id, word_index))
+            continue
+        # WHERE, asked once - see resolved_position(). Everything below reads this
+        # local (the original_word check, the text mutation, the shift bookkeeping,
+        # the apply_event, the reporting), so the position is resolved here and
+        # nowhere else. That is why this is one line at each loop rather than an
+        # edit to the 26 places that consume it.
+        word_index, _how = resolved_position(decision, klal, word_index, id_state, backfilled)
+        if word_index is None:
+            skipped_drift.append((klal_id, decision.get("word_index")))
+            print(f"  SKIP klal {klal_id} word {decision.get('word_index')}: "
+                  f"its word was deleted from the corpus by a later ruling")
             continue
         original_word = (decision.get("candidate_snapshot") or {}).get("original_word")
         chosen_text = decision["chosen_text"]
