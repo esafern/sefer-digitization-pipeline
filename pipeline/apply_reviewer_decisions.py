@@ -579,6 +579,10 @@ def main():
     # Without this the applier retries it every run, fails the drift check, and
     # it is counted as outstanding review work forever.
     settled_by_successor = rd.superseded_by_an_applied_decision()
+    # The mirror of the above: a ruling that only MOVED an applied ruling's
+    # address carries a correction the corpus already holds. See
+    # review_decisions.restates_an_applied_ruling for what wrote 23 of them.
+    settled_by_successor |= rd.restates_an_applied_ruling()
     # The text as it stood BEFORE this run, so reindex_flags_after_shift can
     # verify a moved flag lands on the same word it named - captured here rather
     # than re-read later, because by_klal is mutated in place below.

@@ -178,7 +178,23 @@ def main():
     # re-pointed again on every run, appending a duplicate each time. Skip
     # anything already answered.
     already = rd.superseded_ids()
-    seen, rows = {}, []
+    # ALREADY IN THE CORPUS IS NOT PENDING, and this guard was missing while its
+    # own sibling had it: reindex_pending_decisions_after_shift skips exactly this
+    # set, with exactly this reasoning. Re-pointing an APPLIED ruling writes an
+    # unapplied superseding copy carrying its chosen_text - which drops out of
+    # applied_decision_ids(), is drift-checked against a corpus that already holds
+    # the result, and lands in the applier's worklist as work nobody owes.
+    #
+    # MEASURED, on the 2026-09-07 run that did it: of 24 copies written, 23
+    # superseded an applied ruling, and 13 of them went straight into the drift
+    # bucket - which grew 22 -> 24 while 11 real refusals stayed exactly where
+    # they were. The run made the worklist worse.
+    #
+    # Nothing is lost by skipping them. A stale address on an APPLIED ruling is a
+    # display problem, and since 2026-09-06 the display resolves it from the
+    # stable id (api_word_states) rather than needing the ledger rewritten.
+    applied = rd.applied_decision_ids()
+    seen, rows, skipped_applied = {}, [], 0
     for dtype in WORD_TYPES:
         for (kid, wi), rec in rd.all_current(dtype).items():
             if kid not in part1:
@@ -188,6 +204,9 @@ def main():
             if rec["id"] in seen or rec["id"] in already:
                 continue
             seen[rec["id"]] = True
+            if rec["id"] in applied:
+                skipped_applied += 1
+                continue
             verdict, new_wi, why = classify(kid, part1[kid], rec, regions, cache,
                                             backfilled)
             if verdict == "ok":
@@ -206,6 +225,10 @@ def main():
     counts = {v: sum(1 for r in rows if r["verdict"] == v) for v in order}
 
     print(f"{len(rows)} ruling(s) whose recorded word_index no longer describes their word:\n")
+    if skipped_applied:
+        print(f"  ({skipped_applied} more are stale but ALREADY IN THE CORPUS and are left "
+              f"alone - re-pointing one writes an unapplied copy of a finished ruling, "
+              f"and the display resolves their address from the stable id anyway.)\n")
     for v in order:
         if counts[v]:
             print(f"  {counts[v]:4d}  {v}")

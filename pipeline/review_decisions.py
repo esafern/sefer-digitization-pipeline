@@ -681,6 +681,53 @@ def word_id_of(rec, backfilled=None, path=None):
     return table.get(rec["id"])
 
 
+def restates_an_applied_ruling(path=None):
+    """ids of rulings that only MOVED an already-applied ruling's address.
+
+    THE MIRROR OF superseded_by_an_applied_decision, and the direction that had
+    no answer. That one asks "was this ruling replaced by one already in the
+    corpus"; this asks "does this ruling replace one already in the corpus, and
+    change nothing but where it points". Both mean the same thing to an applier:
+    there is nothing left to promote.
+
+    FOUND 2026-09-07, from damage rather than from reading. tools/
+    repoint_stale_decisions.py re-pointed 24 rulings and 23 of them were already
+    applied - so it wrote 23 unapplied copies of finished work, each carrying a
+    chosen_text the corpus already held. 13 landed straight in the applier's
+    drift bucket, which grew 22 -> 24. The tool now refuses to re-point an
+    applied ruling at all; this is what settles the copies it already wrote, and
+    any that arrive by another route.
+
+    DELIBERATELY EXACT, AND NARROW. The chain is followed through `supersedes`
+    to an applied ancestor, and it counts only when `chosen_text` is IDENTICAL
+    the whole way. A re-decision that changed what the reviewer chose is real
+    work and must stay in the queue - only an address-only copy is settled here,
+    which is the one case where the corpus provably already holds the answer.
+    """
+    records = {r["id"]: r for r in _read_all(path)}
+    # KEYWORD, not positional - the same trap superseded_by_an_applied_decision
+    # documents twenty lines up, and walked straight into anyway. The applier's
+    # test harness wraps these readers to inject `path=<tmpdir>`, so a positional
+    # path arrives alongside that keyword and raises "multiple values for
+    # argument 'path'". Cost: 38 failing tests in one run.
+    applied = applied_decision_ids(path=path)
+    out = set()
+    for rid, rec in records.items():
+        if rid in applied:
+            continue
+        chosen, seen = rec.get("chosen_text"), {rid}
+        cur = rec
+        while cur.get("supersedes") and cur["supersedes"] not in seen:
+            seen.add(cur["supersedes"])
+            cur = records.get(cur["supersedes"])
+            if cur is None or cur.get("chosen_text") != chosen:
+                break
+            if cur["id"] in applied:
+                out.add(rid)
+                break
+    return out
+
+
 def all_current_live(decision_type, path=None):
     """all_current(), minus every ruling a later record replaced. FOR DISPLAY.
 

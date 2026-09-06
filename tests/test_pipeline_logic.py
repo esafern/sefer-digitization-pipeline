@@ -957,9 +957,15 @@ def apply_harness(tmp_path, monkeypatch, decisions_path):
         # test builds - so without it the applier under test reads its ids from
         # the real ledger. It resolves through this module's globals at call
         # time, so rebinding the name here does intercept it.
+        # `restates_an_applied_ruling` joined 2026-09-07 and its absence cost 39
+        # failing tests in one run: the applier under test read it from the REAL
+        # review_decisions.jsonl while every other call read the temp log, so it
+        # settled synthetic rulings against production ids. This list is the
+        # whole seam - a ledger reader missing from it is invisible until it
+        # disagrees.
         for name in ("all_current", "applied_decision_ids", "append_decision",
                      "history_for", "superseded_by_an_applied_decision",
-                     "backfilled_word_ids"):
+                     "backfilled_word_ids", "restates_an_applied_ruling"):
             real = getattr(rd, name)
             monkeypatch.setattr(ard.rd, name,
                                 lambda *a, _f=real, **kw: _f(*a, **{**kw, "path": decisions_path}))
@@ -8331,3 +8337,78 @@ def test_the_panel_does_not_restate_a_status_on_a_text_match(monkeypatch):
     assert body.index('item["status"] = _decision_status(rec, words, wi, applied_ids)')         < body.index('if how in ("word_id", "index"):'), (
         "the recorded-index status must be assigned before the branches, or a "
         "row can be served with no status at all")
+
+
+def test_a_repointed_copy_of_an_applied_ruling_is_not_work(decisions_path):
+    """WHAT A TOOL RUN ACTUALLY DID, kept as a check. On 2026-09-07
+    tools/repoint_stale_decisions.py re-pointed 24 rulings and 23 of them were
+    ALREADY APPLIED - so it wrote 23 unapplied copies of finished work, each
+    carrying a chosen_text the corpus already held. 13 went straight into the
+    applier's drift bucket, which grew 22 -> 24 while the 11 genuine refusals sat
+    unchanged. The run made the worklist worse.
+
+    A copy that moved an applied ruling's ADDRESS and changed nothing else has
+    nothing left to promote. This is the mirror of
+    superseded_by_an_applied_decision - that one asks whether a ruling was
+    replaced by an applied successor, this asks whether it replaces an applied
+    predecessor - and the direction had no answer.
+    """
+    rd.append_decision("manual_correction", klal_id=1, word_index=5,
+                       chosen_text="בות", candidate_snapshot={"original_word": "בית"},
+                       path=decisions_path)
+    original = rd.all_records(path=decisions_path)[-1]
+    rd.append_decision("apply_event", klal_id=1, word_index=5,
+                       applied_decision_id=original["id"], path=decisions_path)
+    rd.append_decision("manual_correction", klal_id=1, word_index=6,
+                       chosen_text="בות", candidate_snapshot={"original_word": "בית"},
+                       supersedes=original["id"], path=decisions_path)
+    copy = rd.all_records(path=decisions_path)[-1]
+
+    assert copy["id"] in rd.restates_an_applied_ruling(path=decisions_path), (
+        "an address-only copy of an applied ruling is being offered as work the "
+        "corpus does not have")
+    assert original["id"] not in rd.restates_an_applied_ruling(path=decisions_path), (
+        "the applied ruling itself is not 'restating' anything")
+
+
+def test_a_redecision_that_changed_its_mind_is_still_work(decisions_path):
+    """The narrowness that makes the rule above safe. Only an ADDRESS-only copy
+    is settled by its predecessor; a superseding ruling that chose something
+    DIFFERENT is a reviewer changing their mind, and swallowing it would lose a
+    correction nobody applied."""
+    rd.append_decision("manual_correction", klal_id=2, word_index=5,
+                       chosen_text="בות", candidate_snapshot={"original_word": "בית"},
+                       path=decisions_path)
+    original = rd.all_records(path=decisions_path)[-1]
+    rd.append_decision("apply_event", klal_id=2, word_index=5,
+                       applied_decision_id=original["id"], path=decisions_path)
+    rd.append_decision("manual_correction", klal_id=2, word_index=5,
+                       chosen_text="ביתה", candidate_snapshot={"original_word": "בית"},
+                       supersedes=original["id"], path=decisions_path)
+    changed = rd.all_records(path=decisions_path)[-1]
+
+    assert changed["id"] not in rd.restates_an_applied_ruling(path=decisions_path), (
+        "a ruling that chose different text than the one it supersedes was "
+        "treated as already in the corpus")
+
+
+def test_repoint_leaves_a_ruling_the_corpus_already_holds_alone():
+    """The guard its own sibling already had.
+
+    reindex_pending_decisions_after_shift skips applied_decision_ids with the
+    comment "already in the corpus, not pending"; repoint_stale_decisions guarded
+    only idempotence (superseded_ids) and re-pointed applied rulings freely. That
+    is Lesson 34 between two functions that do the same job on the same records.
+
+    Nothing is lost by skipping them: a stale address on an APPLIED ruling is a
+    display problem, and api_word_states has resolved it from the stable id since
+    2026-09-06 rather than needing the ledger rewritten.
+    """
+    src = open(os.path.join(REPO, "tools", "repoint_stale_decisions.py"),
+               encoding="utf-8").read()
+    body = src[src.index("def main("):]
+    assert "applied = rd.applied_decision_ids()" in body, (
+        "repoint does not read the applied set at all")
+    assert 'if rec["id"] in applied:' in body, (
+        "repoint will re-point rulings the corpus already holds, writing unapplied "
+        "copies of finished work")
