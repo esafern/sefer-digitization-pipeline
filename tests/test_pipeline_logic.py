@@ -8114,3 +8114,82 @@ def test_a_recorded_word_id_is_marked_apart_from_a_backfilled_one(
                                          backfilled={})
     assert basis == "word_id"
     assert [r["word_id_source"] for r in rows] == ["recorded"]
+
+
+def test_the_dashboard_records_who_is_reviewing(decisions_path, monkeypatch):
+    """$SEFER_REVIEWER, wired. reviewers.json has told the reader to set it since
+    2026-09-04 - "Set $SEFER_REVIEWER to the id of whoever is reviewing" - while
+    identity.resolve_actor(), the only thing that reads it, had NO production
+    caller. All seven write handlers passed neither actor nor reviewer, so
+    append_decision's default stamped the literal "local" on all 902 rulings
+    recorded since. The variable did nothing, silently, and the docs said it
+    worked.
+
+    Asserted through the write path rather than on resolve_actor(), because
+    resolve_actor() already passed its own tests while nothing called it - which
+    is precisely how this survived a sweep for half-finished features.
+    """
+    import review_server as srv
+    roster = {"reviewers": {"r-test": {"email": "t@example.com", "display": "Test Reviewer"}}}
+    import identity, json as _json, tempfile, os as _os
+    fd, rpath = tempfile.mkstemp(suffix=".json")
+    with _os.fdopen(fd, "w") as f:
+        _json.dump(roster, f)
+    monkeypatch.setattr(identity, "ROSTER_PATH", rpath)
+    monkeypatch.setenv("SEFER_REVIEWER", "r-test")
+
+    actor = srv._actor()
+    assert actor["id"] == "r-test", "the dashboard is not reading $SEFER_REVIEWER"
+    assert actor["display"] == "Test Reviewer"
+    assert actor["email"] == "t@example.com"
+    assert not actor.get("unregistered")
+    # The LEDGER stores the id, never the email - ids are permanent, emails are
+    # not, and the log is append-only.
+    assert identity.reviewer_string(actor) == "local:r-test"
+
+
+def test_an_unset_reviewer_records_exactly_what_it_always_did(monkeypatch):
+    """The wiring must not invent an identity for a reviewer who asserted none.
+
+    Every existing reader keys on the legacy `reviewer` string, and 3,203 records
+    predate actors entirely - so an unset variable has to keep writing "local"
+    verbatim, or the wiring becomes a silent migration of everyone's provenance.
+    """
+    import review_server as srv, identity
+    monkeypatch.delenv("SEFER_REVIEWER", raising=False)
+    actor = srv._actor()
+    assert actor["id"] == "local"
+    assert identity.reviewer_string(actor) == "local", (
+        "an unidentified reviewer must still be recorded as plain 'local'")
+
+
+def test_an_unregistered_reviewer_id_is_marked_not_rejected(monkeypatch):
+    """A new person must be able to record before someone edits the roster, and
+    the gap must be visible rather than indistinguishable from a known reviewer."""
+    import review_server as srv
+    monkeypatch.setenv("SEFER_REVIEWER", "r-nobody")
+    actor = srv._actor()
+    assert actor["id"] == "r-nobody"
+    assert actor["unregistered"] is True
+
+
+def test_every_dashboard_write_path_records_an_actor():
+    """Lesson 34: the siblings of a fix are where the fix is missing. The
+    occurrence anchor went into two of three snapshot builders and missed the
+    dispute path; 751 of 765 rulings lost it. Seven handlers write to the ledger
+    here, and an actor attached to six of them is the same defect."""
+    import ast
+    src = open(os.path.join(REPO, "pipeline", "review_server.py"), encoding="utf-8").read()
+    tree = ast.parse(src)
+    missing = []
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.FunctionDef):
+            continue
+        for call in ast.walk(node):
+            if (isinstance(call, ast.Call)
+                    and getattr(call.func, "attr", None) == "append_decision"):
+                if not any(k.arg == "actor" for k in call.keywords):
+                    missing.append(f"{node.name}:{call.lineno}")
+    assert not missing, (
+        "these ledger writes record no actor, so they fall back to the literal "
+        "'local' regardless of who is reviewing: " + ", ".join(missing))

@@ -1429,6 +1429,30 @@ def api_page(page_num):
     return out
 
 
+def _actor():
+    """WHO IS RECORDING THIS, resolved per request.
+
+    $SEFER_REVIEWER, against the roster in reviewers.json. Unset gives the same
+    unidentified `local` human the ledger has always recorded, so nothing about
+    an existing setup changes and no identity is invented for a reviewer who
+    asserted none.
+
+    WIRED 2026-09-06, AND IT HAD NOT BEEN. identity.resolve_actor() and the
+    roster were built on 2026-09-04 with the env var documented in
+    reviewers.json - "Set $SEFER_REVIEWER to the id of whoever is reviewing" -
+    and resolve_actor() had no production caller at all. All seven write
+    handlers here passed neither `actor` nor `reviewer`, so append_decision's
+    default wrote the literal "local" for every one of the 902 rulings recorded
+    since. Setting the variable did nothing, silently, while the docs said it
+    worked - which is worse than not offering it.
+
+    Read per request, not at import: the process env cannot change under a
+    running server, but binding it at import would make this untestable without
+    a restart and hide the dependency.
+    """
+    return identity.resolve_actor()
+
+
 def api_post_disputed_decision(body):
     klal_id = int(body["klal_id"])
     word_index = int(body["word_index"])
@@ -1457,6 +1481,7 @@ def api_post_disputed_decision(body):
         chosen_text=body.get("chosen_text"),
         candidate_snapshot=snapshot,
         note=body.get("note"),
+        actor=_actor(),
     )
     return record
 
@@ -1484,6 +1509,7 @@ def api_post_punctuation_decision(body):
         chosen_text="[.]" if accepted else None,
         candidate_snapshot=snapshot,
         note=body.get("note"),
+        actor=_actor(),
     )
     return record
 
@@ -1521,6 +1547,7 @@ def api_post_witness_decision(body):
         chosen_text=body.get("chosen_text"),
         candidate_snapshot=snapshot,
         note=body.get("note"),
+        actor=_actor(),
     )
 
 
@@ -1595,6 +1622,7 @@ def api_post_klal_flag(body):
         word_index=int(word_index) if word_index is not None else None,
         needs_revisit=bool(body.get("needs_revisit")),
         note=body.get("note"),
+        actor=_actor(),
     )
     return record
 
@@ -1635,6 +1663,7 @@ def api_post_manual_correction(body):
         chosen_text=chosen_text,
         candidate_snapshot=_manual_snapshot(klal_id, word_index, body.get("original_word")),
         note=body.get("note"),
+        actor=_actor(),
     )
     return record
 
@@ -1807,6 +1836,7 @@ def api_post_title_correction(body):
             },
             note=body.get("note"),
             supersedes=_shadowed_title_ruling_id(klal_id, 0),
+            actor=_actor(),
         )
 
     words = cio.title_words_of(klal)
@@ -1837,6 +1867,7 @@ def api_post_title_correction(body):
         candidate_snapshot=snapshot,
         note=body.get("note"),
         supersedes=_shadowed_title_ruling_id(klal_id, word_index),
+        actor=_actor(),
     )
 
 
@@ -2223,6 +2254,18 @@ def main():
 
     print(f"Yad Malachi review server: http://{args.host}:{args.port}/")
     print(f"Decisions log: {rd.DECISIONS_PATH}")
+    # WHO THIS SESSION WILL RECORD AS, said out loud at startup. An asserted
+    # identity that is wrong is only discoverable in the ledger afterwards, and
+    # the log is append-only - so the one moment it costs nothing to notice is
+    # here. Unset is not an error: it is the default this project has always run
+    # under, and it says so rather than passing in silence.
+    _who = _actor()
+    if _who.get("id") == "local":
+        print(f"Recording as: {_who['display']} - set ${identity.ACTIVE_REVIEWER_ENV} "
+              f"to an id in {os.path.basename(identity.ROSTER_PATH)} to sign your rulings")
+    else:
+        print(f"Recording as: {_who['display']} ({_who['id']})"
+              + ("  [NOT IN THE ROSTER]" if _who.get("unregistered") else ""))
     try:
         server.serve_forever()
     except KeyboardInterrupt:
