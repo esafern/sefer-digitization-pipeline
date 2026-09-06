@@ -20,9 +20,12 @@ evidence for each is in `PROJECT-STATUS-HISTORY.md`._
 >    `cio.defects()`, never read its expectation from the file it guards.
 > 3. `0BX` — the reindex collision guard. Needs a POLICY decision, not a fix:
 >    refuse a re-point onto an occupied key, or record it and move anyway.
-> 4. The scroll flake, `test_a_word_click_survives_the_scroll_that_follows_it`.
->    Re-measured 2026-09-06 at **3 failures in 6 runs**, not the "1 in 8" the
->    older entries say; it is now the likeliest cause of a red ungated run.
+> 4. `0CA` — **a word click's page navigation is undone ~50% of the time.** Not a
+>    flaky test, a flaky FEATURE: a reviewer clicking a word on a continuation
+>    page is shown the wrong page. Two fixes were tried and reverted; the entry
+>    carries the reproduction, what is ruled out and by what measurement, and the
+>    live hypothesis (an ordering race between two `showPage()` calls, not a
+>    timing window). Start there, not from scratch.
 > 5. `16`, `20`, `0N`, `3`, `4` — the standing corpus and witness-queue items.
 >
 > **Done 2026-09-06 and archived:** stable word ids (`word_identity.py`) wired
@@ -71,72 +74,76 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
-0CA. **[2026-09-06] THE SCROLL FLAKE IS THE DEFECT, NOT THE TEST. (The "11
-    unreachable disputes" in this entry's first version were a false alarm -
-    retracted below.)**
+0CA. **[2026-09-06] A WORD CLICK'S PAGE NAVIGATION IS UNDONE ~50% OF THE TIME.
+    OPEN, WITH THE MECHANISM NARROWED BUT NOT FOUND. (This entry's first version
+    also claimed 11 unreachable disputes - a false alarm, retracted below.)**
 
-    ### The scroll "flake" is a live defect, and the obvious fix makes it worse
+    ### The symptom
 
-    `test_a_word_click_survives_the_scroll_that_follows_it` does not fail on a
-    timing artifact. Reproduced: **clicked klal 2 w411, which is on page 15, and
-    two seconds later the scan pane was showing page 14 - klal 2's START page.**
-    The click had been silently undone, which is exactly the defect the test was
-    written to catch. A reviewer clicking a word on a continuation page gets the
-    wrong page about half the time.
+    Clicking a word that sits on a klal's CONTINUATION page shows that page, and
+    then the scan pane silently reverts to the klal's START page. A reviewer
+    checking a word against the ink is shown the wrong ink, about half the time,
+    with nothing on screen saying why.
 
-    MECHANISM. The guard sets `suppressObserverScroll` and clears it on a fixed
-    **900ms timer** (`app.js:1988`). The scroll a click starts does not finish on
-    a schedule: lazy mounting resizes blocks and the browser's scroll anchoring
-    moves `scrollTop` to compensate, so events keep arriving. Whenever they
-    outlast 900ms the suppression has lapsed, `updateActiveFromScroll()` resolves
-    the klal and `setActiveKlal()` shows its start page. Lesson 40's fix made it
-    WORSE, not better: blocks can now SHRINK by up to 2,000px, so a long jump
-    overshoots and takes longer to settle - which is why the rate moved from the
-    recorded ~1-in-8 to ~50%.
+    `test_a_word_click_survives_the_scroll_that_follows_it` catches it. **It is
+    not a flaky test - it is a flaky FEATURE**, and it has been recorded as a
+    known flake ("roughly 1 run in 8") since 2026-09-05, which undersells it.
 
-    Lesson 41 exactly: a condition written as a time budget rather than as the
-    thing itself.
+    ### How to reproduce, in one command
 
-    **THE OBVIOUS FIX IS WRONG AND WAS REVERTED.** Swapping the timer for
-    `releaseObserverWhenScrollSettles()` - the existing settle-detector, which
-    the nav-panel jump uses - took the failure from ~50% to **10 runs out of 10**.
-    That helper does not merely release suppression: it **re-seats the block for
-    `lastActiveKlalId` before releasing**, which is right for a klal jump and
-    precisely wrong for a word click, because re-seating to the klal is what
-    shows the klal's start page. Reverted; 8 runs afterwards gave 5 passed /
-    3 failed, matching the control, so nothing was left damaged. Lesson 31 -
-    handed back rather than tuned a second time.
+        ./venv/bin/python -m pytest tests/test_review_server.py -q \
+            -k word_click_survives_the_scroll
 
-    **THAT FIX WAS TRIED ON 2026-09-06 AND DOES NOT WORK EITHER, AND THE REASON
-    RETIRES THE WHOLE TIMING DIAGNOSIS ABOVE.** The settle detector was extracted
-    (`whenScrollSettles`) and the word click held suppression until `scrollTop`
-    stopped moving. Result over 12 runs: 7 passed, 5 failed - unchanged from the
-    ~50% baseline. Reverted.
+    Run it 8-12 times. Measured 2026-09-06 across four separate batches:
+    5/8, 3/6, 5/12 and 2/8 failures - call it **40-50%**. A single green run means
+    nothing here; anything under ~10 runs cannot tell a fix from luck. Measured as
+    a control in a clean worktree at `5fc3077`, so it is not caused by any of that
+    day's work.
 
-    **What the instrumented run actually shows.** A `MutationObserver` on
-    `#page-img` records the src changing to the correct `page_15.png` and then to
-    `page_14.png` **14 MILLISECONDS LATER**. Not after 900ms, not after the
-    scroll settles - immediately. So the guard's window was never the mechanism,
-    and neither attempt could have worked: nothing about how long suppression is
-    held matters when the override lands 14ms in.
+    ### What the evidence says
 
-    That points instead at TWO `showPage()` CALLS IN FLIGHT - one for the klal
-    (page 14) started by the navigation, one for the word (page 15) from the
-    click - with the klal's resolving last and winning. `showPage` is async and
-    already carries a `_showPageGen` generation guard for exactly this
-    ("superseded while awaiting /api/page/"), so the next step is to find which
-    path sets the src without checking it, NOT to adjust any timing.
+    A `MutationObserver` on `#page-img` during a failing run:
 
-    HANDED BACK rather than attempted a third time (Lesson 31). Two fixes built
-    on a wrong mechanism is the signal the lesson describes; the diagnosis is now
-    evidence-based and the next attempt should start from the 14ms, not from the
-    suppression window.
+        t=1541  src=page_15.png     <- the click's correct navigation
+        t=1555  src=page_14.png     <- undone, FOURTEEN MILLISECONDS LATER
 
-    Also swept: four sites suppress the observer. The nav-panel jump
-    (`app.js:4222`) correctly pairs `behavior:'smooth'` with the settle-detector;
-    `revealWordInText` (~693), `applyHashRoute` (~800) and the word click (1987)
-    all use the 900ms timer. Only the word click is demonstrated to fail, but the
-    other two are the same proxy-for-condition shape.
+    That single number rules out the entire timing story this entry used to
+    carry. The override is effectively immediate, so **nothing about how long the
+    observer is suppressed can be the mechanism.**
+
+    ### Ruled out, each by a measurement rather than an argument
+
+    | hypothesis | verdict |
+    |---|---|
+    | CPU load / a slow machine | NO - 3/3 passed under four busy cores |
+    | the shared module-scoped server, state from earlier tests | NO - fails in isolation too |
+    | the 900ms suppression window lapsing mid-scroll | **NO - the override lands at 14ms** |
+    | reuse `releaseObserverWhenScrollSettles()` | MADE IT WORSE, 10 failures in 10: it re-seats the block for `lastActiveKlalId` before releasing, which is right for a klal jump and is exactly "show the klal's page" |
+    | hold suppression until `scrollTop` stops (`whenScrollSettles`) | NO EFFECT - 7 passed / 5 failed, same as baseline |
+
+    Both attempted fixes are REVERTED. `app.js` is unchanged from `5fc3077` on
+    this path; do not go looking for a half-applied fix.
+
+    ### The live hypothesis, and where to look
+
+    14ms says two `showPage()` calls are in flight and the wrong one resolves
+    last: one for the KLAL (page 14) from the navigation, one for the WORD
+    (page 15) from the click. `showPage` is async and already carries a
+    `_showPageGen` generation guard for precisely this - grep for "superseded
+    while awaiting" - so the question is **which path writes `#page-img.src`
+    without consulting that guard**, or which one bumps the generation and then
+    writes anyway.
+
+    Start by logging `_showPageGen` at entry and at the write in `showPage`,
+    along with the caller, and run the reproduction until it fails. This is an
+    ORDERING bug; do not adjust any timing.
+
+    ### Why it is handed over rather than attempted again
+
+    Two fixes built on a mechanism that turned out to be wrong. Lesson 31: a
+    heuristic retuned twice is asking to be handed back, and the third attempt
+    should start from the 14ms and the generation guard, not from another guess
+    about scrolling.
 
     ### RETRACTED: the 11 "unreachable" disputes are all reachable
 
