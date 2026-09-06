@@ -97,7 +97,7 @@ def text_signal(words, rec):
     return []
 
 
-def classify(klal_id, words, rec, regions, cache):
+def classify(klal_id, words, rec, regions, cache, backfilled=None):
     """(verdict, new_index, why) for one ruling."""
     wi = rec["word_index"]
     if not (0 <= wi < len(words)):
@@ -121,7 +121,10 @@ def classify(klal_id, words, rec, regions, cache):
     # Prospective today: ids began 2026-09-06 and 0 of the 594 rulings then on
     # record carry one, so this branch does not fire on the current ledger. It
     # fires on everything ruled from now on.
-    word_id = (rec.get("candidate_snapshot") or {}).get("word_id")
+    # Recorded in the snapshot, else in a backfill annotation - see
+    # review_decisions.word_id_of. Reading the snapshot alone here made this
+    # tool blind to all 601 backfilled addresses.
+    word_id = rd.word_id_of(rec, backfilled)
     if word_id is not None:
         found, status = widentity.locate(widentity.load(), klal_id, word_id)
         if status == "live":
@@ -163,6 +166,9 @@ def main():
     args = ap.parse_args()
 
     part1 = {k["klal_id"]: cio.words_of(k) for k in cio.load_part1()}
+    # Read ONCE: classify() consults it per ruling and building it is a full
+    # pass over the log.
+    backfilled = rd.backfilled_word_ids()
     regions = sa.load_regions()
     cache = {}
 
@@ -182,7 +188,8 @@ def main():
             if rec["id"] in seen or rec["id"] in already:
                 continue
             seen[rec["id"]] = True
-            verdict, new_wi, why = classify(kid, part1[kid], rec, regions, cache)
+            verdict, new_wi, why = classify(kid, part1[kid], rec, regions, cache,
+                                            backfilled)
             if verdict == "ok":
                 continue
             rows.append({

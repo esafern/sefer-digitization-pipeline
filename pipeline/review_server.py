@@ -1429,6 +1429,48 @@ def api_page(page_num):
     return out
 
 
+def _with_word_id(snapshot, klal_id, word_index):
+    """Merge the stable id of the corpus word at `word_index` into a snapshot.
+
+    NARROWER THAN _with_stable_anchor ON PURPOSE. That one also records
+    `word_occurrence` and `original_word`, which name the word a ruling is ABOUT.
+    The two callers here do not rule on a word's text - a word-level flag says
+    "look at this again" and a punctuation ruling says "a mark belongs before
+    this word" - so recording the word as if it were the subject of the ruling
+    would assert more than the reviewer did. The id alone says WHERE, which is
+    the whole of what these two need.
+
+    THE SIBLINGS OF THE 2026-09-06 ID WORK, swept the day after (Lesson 34).
+    Three write paths took an id and four did not, and the four were the ones
+    nobody had listed. Two of them were real gaps and are fixed here; the other
+    two are addressed below and must stay out:
+
+      klal_flag (word-level) - 1,367 rows, and the type that needs it MOST.
+        reindex_flags_after_shift() exists only because a flag's index rots when
+        an earlier edit changes the klal's word count; it was written after a
+        deleted `!` in klal 66 moved a flag from `ע"ס` onto `שהניח`. Every flag
+        written without an id is a future re-point done by inference.
+      punctuation_choice - 21 rows, and tools/apply_punctuation_decisions.py
+        CHANGES WORD COUNTS, so these addresses rot by their own doing.
+
+      witness_choice is NOT wired: its `word_index` is a docai_token_index, an
+        index into verify_reconstruction_witness.py's filtered `dtoks` list, not
+        into the klal's words. An id from here would name a real word and the
+        wrong one - confidently.
+      title_correction is NOT wired, for the same reason the applier's title
+        loop is not converted: title indices are into title.split(' '), and the
+        sidecar numbers body words.
+
+    A klal with no ids merges nothing rather than writing a null, and so does a
+    position past the end of the klal - which punctuation legitimately reaches,
+    since a mark can be asked for after the last word.
+    """
+    fields = widentity.snapshot_fields(widentity.load(), klal_id, word_index)
+    if not fields:
+        return snapshot
+    return dict(snapshot or {}, **fields)
+
+
 def _actor():
     """WHO IS RECORDING THIS, resolved per request.
 
@@ -1501,6 +1543,10 @@ def api_post_punctuation_decision(body):
     part_num = _get_part_num_for_klal(klal_id)
     candidates = _load_punctuation_candidates(part_num=part_num).get(str(klal_id), [])
     snapshot = next((p for p in candidates if p["before_word_index"] == word_index), None)
+    # The mark goes BEFORE this word, so the word is what the ruling is anchored
+    # to - and apply_punctuation_decisions.py changes word counts, which is
+    # exactly what rots a bare index.
+    snapshot = _with_word_id(snapshot, klal_id, word_index)
     record = rd.append_decision(
         "punctuation_choice",
         klal_id=klal_id,
@@ -1616,10 +1662,16 @@ def api_post_klal_flag(body):
     behaviour exactly for every existing caller."""
     klal_id = int(body["klal_id"])
     word_index = body.get("word_index")
+    word_index = int(word_index) if word_index is not None else None
+    # A KLAL-level flag names no word and gets no id; a word-level one does, and
+    # is the record type that needs it most - see _with_word_id.
+    snapshot = (_with_word_id(None, klal_id, word_index)
+                if word_index is not None else None)
     record = rd.append_decision(
         "klal_flag",
         klal_id=klal_id,
-        word_index=int(word_index) if word_index is not None else None,
+        word_index=word_index,
+        candidate_snapshot=snapshot,
         needs_revisit=bool(body.get("needs_revisit")),
         note=body.get("note"),
         actor=_actor(),

@@ -8193,3 +8193,84 @@ def test_every_dashboard_write_path_records_an_actor():
     assert not missing, (
         "these ledger writes record no actor, so they fall back to the literal "
         "'local' regardless of who is reviewing: " + ", ".join(missing))
+
+
+def test_a_word_level_flag_records_the_word_it_names(decisions_path, monkeypatch):
+    """THE SIBLING SWEEP (Lesson 34). Three dashboard write paths took a stable
+    id on 2026-09-06 and four did not, and the four were simply the ones nobody
+    listed. klal_flag is the type that needs one MOST: reindex_flags_after_shift
+    exists only because a flag's index rots when an earlier edit changes its
+    klal's word count - written after a deleted `!` in klal 66 carried a flag off
+    `ע"ס` and onto `שהניח`. 1,367 word-level flags carry no id, and every new one
+    written without one is another future re-point done by inference.
+    """
+    import review_server as srv, word_identity as wid
+    monkeypatch.setattr(rd, "append_decision",
+                        lambda *a, **kw: dict(kw, decision_type=a[0] if a else None))
+    monkeypatch.setattr(wid, "load", lambda: {7: wid.seed_klal("אלף בית גימל".split())})
+    monkeypatch.setattr(srv.widentity, "load", wid.load)
+
+    rec = srv.api_post_klal_flag({"klal_id": 7, "word_index": 1, "needs_revisit": True})
+    assert rec["candidate_snapshot"]["word_id"] is not None, (
+        "a word-level flag records no stable id, so the only thing saying which "
+        "word it means is an index that the next word-count change invalidates")
+
+    klal_level = srv.api_post_klal_flag({"klal_id": 7, "needs_revisit": True})
+    assert klal_level["candidate_snapshot"] is None, (
+        "a klal-level flag names no word and must not be given one")
+
+
+def test_a_punctuation_ruling_is_anchored_to_the_word_the_mark_precedes(
+        decisions_path, monkeypatch):
+    """21 rows, and tools/apply_punctuation_decisions.py CHANGES WORD COUNTS - so
+    these addresses rot by the action of the very script that consumes them."""
+    import review_server as srv, word_identity as wid
+    monkeypatch.setattr(rd, "append_decision",
+                        lambda *a, **kw: dict(kw, decision_type=a[0] if a else None))
+    monkeypatch.setattr(wid, "load", lambda: {7: wid.seed_klal("אלף בית גימל".split())})
+    monkeypatch.setattr(srv.widentity, "load", wid.load)
+    monkeypatch.setattr(srv, "_get_part_num_for_klal", lambda kid: 1)
+    monkeypatch.setattr(srv, "_load_punctuation_candidates",
+                        lambda part_num=1: {"7": [{"before_word_index": 2}]})
+
+    rec = srv.api_post_punctuation_decision({"klal_id": 7, "before_word_index": 2,
+                                             "accepted": True})
+    assert rec["candidate_snapshot"]["word_id"] is not None
+
+    # A mark asked for after the last word names no word, and must record no id
+    # rather than a null that later reads as "recorded, and empty".
+    monkeypatch.setattr(srv, "_load_punctuation_candidates",
+                        lambda part_num=1: {"7": [{"before_word_index": 3}]})
+    tail = srv.api_post_punctuation_decision({"klal_id": 7, "before_word_index": 3,
+                                              "accepted": True})
+    assert "word_id" not in (tail["candidate_snapshot"] or {})
+
+
+def test_only_the_write_paths_that_address_corpus_words_attach_an_id():
+    """The other half of the sweep, and the half that is easy to get wrong by
+    being thorough. Two of the four unwired paths must STAY unwired because their
+    word_index is not a corpus word index at all:
+
+      witness_choice   - a docai_token_index into verify_reconstruction_witness's
+                         filtered `dtoks` list.
+      title_correction - an index into title.split(' ').
+
+    An id taken from the body-word sidecar would name a real word and the wrong
+    one, which is worse than no id: it is a confident answer. Pinned as a test
+    because "attach it everywhere" is the natural next edit for anyone reading
+    the two paths above.
+    """
+    import ast
+    src = open(os.path.join(REPO, "pipeline", "review_server.py"), encoding="utf-8").read()
+    tree = ast.parse(src)
+    for name, allowed in (("api_post_witness_decision", False),
+                          ("api_post_title_correction", False),
+                          ("api_post_klal_flag", True),
+                          ("api_post_punctuation_decision", True)):
+        fn = next(n for n in ast.walk(tree)
+                  if isinstance(n, ast.FunctionDef) and n.name == name)
+        body = ast.get_source_segment(src, fn) or ""
+        has = "_with_word_id" in body or "snapshot_fields" in body
+        assert has == allowed, (
+            f"{name} {'must' if allowed else 'must NOT'} take a word id from the "
+            f"body-word sidecar")

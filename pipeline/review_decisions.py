@@ -377,10 +377,7 @@ def resolve_word_index(rec, words, id_state=None, backfilled=None):
     # either owns both. Passing None still loads, for the ordinary caller - and
     # a batch caller should load ONCE rather than per ruling, since this is a
     # full pass over the log.
-    word_id = snap.get("word_id")
-    if word_id is None and rec.get("id"):
-        table = backfilled_word_ids() if backfilled is None else backfilled
-        word_id = table.get(rec["id"])
+    word_id = word_id_of(rec, backfilled)
     if word_id is not None and rec.get("klal_id") is not None:
         state = _wid().load() if id_state is None else id_state
         found, status = _wid().locate(state, rec["klal_id"], word_id)
@@ -652,6 +649,36 @@ def backfilled_word_ids(path=None):
             if target and wid_val is not None:
                 out[target] = wid_val
     return out
+
+
+def word_id_of(rec, backfilled=None, path=None):
+    """The stable id of the word this ruling names, or None.
+
+    THE ONE PLACE THAT KNOWS AN ID CAN LIVE IN TWO SHAPES. A ruling recorded on
+    or after 2026-09-06 carries its own in `candidate_snapshot.word_id`; one
+    recorded before then has it in a `word_id_backfill` annotation instead,
+    because backfilling by superseding the ruling would re-open 582 applied
+    rulings (see the type's own comment). The snapshot wins where both exist: it
+    was recorded with a human looking at the word, and the annotation was
+    inferred afterwards.
+
+    EXTRACTED 2026-09-07 after the same two lines were found open-coded in three
+    places. resolve_word_index consulted the annotations; tools/repoint_stale_
+    decisions.py and tools/close_satisfied_rulings.py read only the snapshot and
+    were therefore blind to all 601 backfills - so the two tools whose whole job
+    is clearing stuck rulings could not see the addresses that had just been
+    recovered for them. Lesson 13: one question, one answer.
+
+    `backfilled` is injectable, and a batch caller should pass it - building it
+    is a full pass over the log.
+    """
+    got = (rec.get("candidate_snapshot") or {}).get("word_id")
+    if got is not None:
+        return got
+    if not rec.get("id"):
+        return None
+    table = backfilled_word_ids(path) if backfilled is None else backfilled
+    return table.get(rec["id"])
 
 
 def all_current_live(decision_type, path=None):

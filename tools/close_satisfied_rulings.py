@@ -88,7 +88,7 @@ def current_rulings(rows):
     return cur
 
 
-def classify(rec, words, regions, cache):
+def classify(rec, words, regions, cache, backfilled=None):
     """(verdict, why) - 'confirmation' / 'unique' / 'bbox' close it; others do not."""
     wi, chosen = rec["word_index"], rec.get("chosen_text")
     if not chosen:
@@ -101,7 +101,9 @@ def classify(rec, words, regions, cache):
     # forces. An id does not have that question: it names the word, and the
     # sidecar was updated by the run that moved it. Prospective today (0 of the
     # 594 rulings on record when ids began carry one).
-    word_id = (rec.get("candidate_snapshot") or {}).get("word_id")
+    # Recorded in the snapshot, else in a backfill annotation - see
+    # review_decisions.word_id_of.
+    word_id = rd.word_id_of(rec, backfilled)
     if word_id is not None:
         at, status = widentity.locate(widentity.load(), rec["klal_id"], word_id)
         if status == "retired":
@@ -143,6 +145,9 @@ def main():
     rows = rd.all_records()
     applied = rd.applied_decision_ids()
     part1 = {k["klal_id"]: k for k in cio.load_part1_sorted()}
+    # Read ONCE: classify() consults it per ruling and building it is a full
+    # pass over the log.
+    backfilled = rd.backfilled_word_ids()
     regions = sa.load_regions()
     cache = {}
 
@@ -151,7 +156,7 @@ def main():
         if rec["id"] in applied or rec["klal_id"] not in part1:
             continue
         words = cio.words_of(part1[rec["klal_id"]])
-        verdict, why = classify(rec, words, regions, cache)
+        verdict, why = classify(rec, words, regions, cache, backfilled)
         if verdict:
             closable.append((rec, verdict, why))
         elif why != "the corpus does not hold this text here" and why != "no chosen text":
