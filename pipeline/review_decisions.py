@@ -112,6 +112,15 @@ VALID_DECISION_TYPES = {
     # promote a correction to it, so five were HAND-EDITED into part1.json on
     # 2026-08-31 as a recorded exception. This is the path they should have had.
     "title_correction",
+    # An id attached to an EXISTING ruling after the fact. Its own type, and not
+    # a superseding copy: a copy takes a new decision id, drops out of
+    # applied_decision_ids(), and re-opens every APPLIED ruling it annotates -
+    # measured at 582 of 601, turning "4 to apply" into 226 and a 22-row drift
+    # worklist into 380. An annotation carries no chosen_text and no opcode, so
+    # no apply path can ever pick it up; it says only "ruling X names word id N",
+    # with the evidence that established it.
+    # ADDED 2026-09-06. See tools/backfill_word_ids.py.
+    "word_id_backfill",
 }
 
 
@@ -279,7 +288,7 @@ def history_for_word_id(klal_id, word_id, decision_type=None, path=None,
     return rows, ("word_id" if rows else "empty")
 
 
-def resolve_word_index(rec, words, id_state=None):
+def resolve_word_index(rec, words, id_state=None, backfilled=None):
     """Where does this ruling's word sit in `words` TODAY? -> (index, how).
 
     `how` is one of:
@@ -329,7 +338,23 @@ def resolve_word_index(rec, words, id_state=None):
     # be on disk. Caught immediately - a test with a local state and a ruling
     # carrying id 3 resolved against the REAL klal 7's id 3 and returned a
     # confident, wrong index. Passing None still loads, for the ordinary caller.
+    # RECORDED AT RULING TIME, else BACKFILLED. The snapshot is authoritative
+    # when it has one; an annotation is the fallback and is deliberately second,
+    # so a ruling that recorded its own id is never overridden by an inference
+    # about it.
+    #
+    # `backfilled` is INJECTABLE for the same reason `id_state` is, and it was
+    # not at first: this reached for the default ledger while its caller worked
+    # on another, so a test that wrote a backfill to its own log watched this
+    # function ignore it and answer from production. The two together are the
+    # whole of the ambient state this function consults, and a caller that owns
+    # either owns both. Passing None still loads, for the ordinary caller - and
+    # a batch caller should load ONCE rather than per ruling, since this is a
+    # full pass over the log.
     word_id = snap.get("word_id")
+    if word_id is None and rec.get("id"):
+        table = backfilled_word_ids() if backfilled is None else backfilled
+        word_id = table.get(rec["id"])
     if word_id is not None and rec.get("klal_id") is not None:
         state = _wid().load() if id_state is None else id_state
         found, status = _wid().locate(state, rec["klal_id"], word_id)
@@ -580,6 +605,27 @@ def all_current(decision_type, path=None):
         key = (r["klal_id"], r.get("word_index"))
         current[key] = r  # later (later-appended) records win for the same key
     return current
+
+
+def backfilled_word_ids(path=None):
+    """{ruling id: word_id} from every `word_id_backfill` annotation.
+
+    Ids began 2026-09-06; every ruling recorded before then carries none, and an
+    address that resolves TODAY stops resolving after the next word-count change
+    in its klal. This is how that identity gets frozen while it is still
+    derivable - see tools/backfill_word_ids.py for what counts as derivable.
+
+    Later annotations win, so a correction to a backfill is another annotation
+    rather than an edit; the log stays append-only.
+    """
+    out = {}
+    for r in _read_all(path):
+        if r["decision_type"] == "word_id_backfill":
+            target = r.get("applied_decision_id")
+            wid_val = (r.get("candidate_snapshot") or {}).get("word_id")
+            if target and wid_val is not None:
+                out[target] = wid_val
+    return out
 
 
 def all_current_live(decision_type, path=None):

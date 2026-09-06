@@ -2813,3 +2813,40 @@ def test_the_word_id_invariant_can_actually_fail():
     assert wid.verify(klalim, {1: wid.seed_klal(["אלף", "בית", "גימל"])}) == []
     assert wid.verify(klalim, {1: {"ids": [1, 2], "next": 3}}), (
         "an id array shorter than its klal must be reported")
+
+
+def test_every_word_id_backfill_is_inert_and_names_a_real_ruling():
+    """601 rows written by tools/backfill_word_ids.py on 2026-09-06, and their
+    whole safety argument is STRUCTURAL: an annotation carries no chosen_text and
+    no opcode, so no apply path has anything to promote.
+
+    That argument is worth a check because the alternative was measured and is
+    severe. Written instead as superseding COPIES of the rulings they annotate,
+    the same 601 rows take a new decision id each - which drops them out of
+    applied_decision_ids() - and the applier stops seeing 582 settled rulings as
+    settled. Run against such a ledger it reports **226 to apply** (47 manual
+    re-writes, 179 no-op re-confirmations) where today it reports 4, and the
+    drift worklist goes 22 -> 380. The annotation is what keeps a backfill from
+    re-opening the entire applied history of the book.
+
+    Also asserts each one names a ruling that exists: an annotation pointing at
+    nothing is an id attached to no one, and resolve_word_index would never find
+    it.
+    """
+    rows = rd.all_records()
+    ids = {r["id"] for r in rows}
+    backfills = [r for r in rows if r["decision_type"] == "word_id_backfill"]
+    if not backfills:
+        pytest.skip("no word_id_backfill annotations in this ledger")
+    for r in backfills:
+        snap = r.get("candidate_snapshot") or {}
+        assert r.get("chosen_text") is None, (
+            f"backfill {r['id']} carries chosen_text {r['chosen_text']!r} - it is a "
+            f"correction wearing an annotation's type, and an apply path can promote it")
+        assert snap.get("opcode") is None, (
+            f"backfill {r['id']} carries an opcode; see this test's docstring")
+        assert snap.get("word_id") is not None, (
+            f"backfill {r['id']} records no word_id, which is the only thing it exists to say")
+        assert r.get("applied_decision_id") in ids, (
+            f"backfill {r['id']} names ruling {r.get('applied_decision_id')!r}, which is "
+            f"not in the log - nothing will ever read this id")

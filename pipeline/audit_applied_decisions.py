@@ -449,6 +449,9 @@ def report_stale_addresses():
     """
     klalim = cio.load_part1_by_id()
     applied = rd.applied_decision_ids()
+    # Read ONCE: resolve_word_index() consults it per ruling, and it is a full
+    # pass over the log.
+    backfilled = rd.backfilled_word_ids()
     buckets = {}
     for dtype in ("candidate_choice", "disputed_choice", "manual_correction", "title_correction"):
         for (kid, widx), rec in rd.all_current(dtype).items():
@@ -460,7 +463,7 @@ def report_stale_addresses():
             snap = rec.get("candidate_snapshot") or {}
             if snap.get("original_word") is None:
                 continue
-            idx, how = rd.resolve_word_index(rec, words)
+            idx, how = rd.resolve_word_index(rec, words, backfilled=backfilled)
             if how in ("index", "word_id"):
                 # "word_id" joined "index" as a clean address 2026-09-06: the
                 # ruling carries a stable id and the sidecar still knows where

@@ -952,8 +952,14 @@ def apply_harness(tmp_path, monkeypatch, decisions_path):
         # reads the REAL review_decisions.jsonl while every other call in the
         # same run reads the temp one, so the applier under test would decide
         # what to skip from production data (Lesson 36's shape, one layer in).
+        # `backfilled_word_ids` joined 2026-09-06: resolve_word_index() consults
+        # it for a ruling whose snapshot carries no id, which is EVERY ruling a
+        # test builds - so without it the applier under test reads its ids from
+        # the real ledger. It resolves through this module's globals at call
+        # time, so rebinding the name here does intercept it.
         for name in ("all_current", "applied_decision_ids", "append_decision",
-                     "history_for", "superseded_by_an_applied_decision"):
+                     "history_for", "superseded_by_an_applied_decision",
+                     "backfilled_word_ids"):
             real = getattr(rd, name)
             monkeypatch.setattr(ard.rd, name,
                                 lambda *a, _f=real, **kw: _f(*a, **{**kw, "path": decisions_path}))
@@ -6317,7 +6323,7 @@ def test_the_baselines_ascii_header_is_invisible_to_every_consumer():
 
 
 def test_no_chunk_seam_fuses_a_word_to_the_next_pages_marker():
-    """Dicta's per-chunk outputs do not end with a newline, so a bare
+    r"""Dicta's per-chunk outputs do not end with a newline, so a bare
     concatenation produces `תורה=== עמוד 1 ===` at every seam. That defeats the
     line-anchored `^===\s*עמוד.*$` strip every consumer uses and leaks a phantom
     `עמוד` token into the witness stream, at the chunk boundary - which is
@@ -7867,3 +7873,80 @@ def test_the_audit_counts_a_word_id_address_as_clean_not_as_drift():
         "the audit still treats a stable-id address as a stale one")
     assert '"retired":' in src, (
         "the audit has no wording for a word its id says was deleted")
+def test_a_backfilled_id_resolves_a_ruling_that_recorded_none(decisions_path, tmp_path,
+                                                              monkeypatch):
+    """Ids began 2026-09-06; every ruling before then names its word by index
+    only. `word_id_backfill` attaches one after the fact, and resolve_word_index
+    has to read it - a backfill nothing consults is 601 rows of decoration.
+
+    ORDER MATTERS AND IS ASSERTED: a snapshot's own id was recorded when a human
+    was looking at the word, a backfill was inferred afterwards, so the snapshot
+    wins. Later annotations supersede earlier ones, since an append-only log
+    corrects a backfill only by writing another.
+    """
+    import word_identity as wid
+    monkeypatch.setattr(wid, "path", lambda: str(tmp_path / "word_identity.json"))
+    wid.save({1: wid.seed_klal("אלף בית גימל".split())})
+    state = wid.load()
+    bet, gimel = wid.id_at(state, 1, 1), wid.id_at(state, 1, 2)
+
+    rd.append_decision("manual_correction", klal_id=1, word_index=0,
+                       chosen_text="בות", candidate_snapshot={"original_word": "בית"},
+                       path=decisions_path)
+    ruling = rd.all_records(path=decisions_path)[-1]
+    words = "אלף בית גימל".split()
+    # w0 holds אלף, not בית, and בית is unique - the weak "hint" answer.
+    assert rd.resolve_word_index(ruling, words, id_state=state) == (1, "unique")
+
+    rd.append_decision("word_id_backfill", klal_id=1, word_index=0,
+                       applied_decision_id=ruling["id"],
+                       candidate_snapshot={"word_id": bet, "word_id_source": "backfill"},
+                       path=decisions_path)
+    table = rd.backfilled_word_ids(path=decisions_path)
+    assert table == {ruling["id"]: bet}
+    assert rd.resolve_word_index(ruling, words, id_state=state,
+                                 backfilled=table) == (1, "word_id"), (
+        "the backfilled id is not consulted, so the ruling still resolves only by "
+        "the weaker text-derived route it had before")
+
+    rd.append_decision("word_id_backfill", klal_id=1, word_index=0,
+                       applied_decision_id=ruling["id"],
+                       candidate_snapshot={"word_id": gimel, "word_id_source": "backfill"},
+                       path=decisions_path)
+    later = rd.backfilled_word_ids(path=decisions_path)
+    assert later == {ruling["id"]: gimel}, (
+        "an append-only log corrects a backfill with a later one; the first must "
+        "not win")
+
+    recorded = dict(ruling, candidate_snapshot={"original_word": "בית", "word_id": bet})
+    assert rd.resolve_word_index(recorded, words, id_state=state,
+                                 backfilled=later) == (1, "word_id"), (
+        "a ruling that recorded its own id must not be overridden by a backfill "
+        "inferred about it afterwards")
+
+
+def test_a_word_id_backfill_can_never_be_applied_as_a_correction(
+        apply_harness, decisions_path, tmp_path, monkeypatch):
+    """WHY THE BACKFILL ANNOTATES INSTEAD OF SUPERSEDING, as a check rather than
+    a paragraph. A superseding copy takes a NEW decision id, so it drops out of
+    applied_decision_ids() and re-opens the applied ruling it was only meant to
+    address - measured at 582 of 601 rulings, "4 to apply" becoming 226. See
+    test_every_word_id_backfill_is_inert_and_names_a_real_ruling.
+
+    An annotation cannot do that: it carries no chosen_text and no opcode, so no
+    apply path has anything to promote. Asserted against the applier itself, not
+    against the shape of the row.
+    """
+    import word_identity as wid
+    monkeypatch.setattr(wid, "path", lambda: str(tmp_path / "word_identity.json"))
+    wid.save({1: wid.seed_klal("אלף בית גימל".split())})
+
+    apply_harness([{"klal_id": 1, "clean_text": "אלף בית גימל"}], {"1": []})
+    rd.append_decision("word_id_backfill", klal_id=1, word_index=1,
+                       applied_decision_id="some-earlier-ruling",
+                       candidate_snapshot={"word_id": wid.id_at(wid.load(), 1, 1),
+                                           "word_id_source": "backfill"},
+                       path=decisions_path)
+
+    assert apply_harness.run()[1] == "אלף בית גימל", (
+        "an annotation reached an apply path and changed corpus text")
