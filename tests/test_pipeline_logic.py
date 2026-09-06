@@ -6820,3 +6820,133 @@ def test_the_applier_skips_a_ruling_its_replacement_already_settled():
     assert not unswept, (
         f"{len(unswept)} of {len(checks)} already-applied checks do not also skip a "
         f"ruling its replacement settled, so that branch retries it forever: {unswept}")
+
+
+# --- drift_recovery: recovering a rotted address with no scan position --------
+#
+# The whole point of this module is that the two-signal bar the other repointing
+# tools hold (snapshot bbox + text) is UNREACHABLE for the largest block of
+# unreviewed machine corrections in the corpus, because 0 of 108 carry a bbox.
+# These tests pin the substitute signal and, more importantly, pin the cases it
+# must REFUSE - a recovery that cannot say no is a guess (Lesson 25).
+
+import drift_recovery as drec  # noqa: E402
+
+
+# NOT `_ruling`: this module already defines one for the close_satisfied_rulings
+# tests, and a second `def _ruling` rebinds the name for the WHOLE module at
+# import, so every earlier test silently starts calling this one instead. That
+# is Lesson 37's mechanism (a name defined twice, the first body discarded with
+# no error) applied to a helper rather than a test, and it took out three tests
+# the moment it was written.
+def _drift_ruling(rid, klal_id, word_index, chosen=None, original=None):
+    return {"id": rid, "klal_id": klal_id, "word_index": word_index,
+            "decision_type": "manual_correction", "chosen_text": chosen,
+            "candidate_snapshot": {"word_index": word_index,
+                                   "original_word": original}}
+
+
+def test_two_rulings_moving_by_the_same_amount_recover_each_other():
+    """The corroboration that replaces the missing bbox: two rulings written
+    about different words agreeing on one shift."""
+    words = "אלף בית גימל דלת הא וו זין".split()
+    # Both named a word that now sits one place LATER than recorded.
+    recs = [_drift_ruling("a", 1, 1, chosen="גימל"), _drift_ruling("b", 1, 4, chosen="וו")]
+    recovered, refused = drec.recover_klal(words, recs, applied=True)
+    assert not refused
+    assert recovered["a"][0] == 2 and recovered["b"][0] == 5
+    assert recovered["a"][1] == 1 and "attested by 1 other" in recovered["a"][2]
+
+
+def test_a_lone_ruling_recovers_only_when_its_word_is_unique_in_the_klal():
+    """One ruling cannot corroborate itself, so the word has to carry the
+    position on its own - and there are two different ways it can fail to."""
+    words = "אלף בית גימל בית הא".split()
+    # `גימל` occurs once: a single in-window fit IS a position.
+    ok, _ = drec.recover_klal(words, [_drift_ruling("a", 1, 1, chosen="גימל")], applied=True)
+    assert ok["a"][0] == 2 and "occurs exactly once" in ok["a"][2]
+
+    # Two occurrences BOTH inside the window: the position is not determined.
+    ok2, refused2 = drec.recover_klal(words, [_drift_ruling("b", 1, 0, chosen="בית")],
+                                      applied=True)
+    assert not ok2 and "ambiguous" in refused2["b"]
+
+    # One occurrence inside the window and another far outside it. Bar (1)
+    # passes and means nothing - the window is the only reason it looked
+    # unique - so bar (2) has to refuse it. This is the aliasing case, and it
+    # is the one a naive "nearest match" recovery gets wrong.
+    far = ["אלף", "בית", "גימל"] + ["דלת"] * 30 + ["בית"]
+    ok3, refused3 = drec.recover_klal(far, [_drift_ruling("c", 1, 0, chosen="בית")],
+                                      applied=True, window=3)
+    assert not ok3 and "repeats in this klal" in refused3["c"]
+
+
+def test_an_anchor_disambiguates_a_ruling_that_alone_is_ambiguous():
+    """Klal 74's real shape: a repeated word with two in-window fits, settled by
+    four other rulings in the same klal that each have only one.
+
+    This is the case the first version of this module got wrong in BOTH
+    directions - a klal-wide "one offset for everything" rule solved it but
+    refused any klal with two shift regions; per-ruling offsets alone refused
+    it. Neither is enough on its own, so both are pinned here."""
+    words = "אלף בית גימל בית הא וו".split()
+    recs = [
+        _drift_ruling("amb", 1, 4, chosen="בית"),   # fits at -1 (w3) and -4 (w0)
+        _drift_ruling("s1", 1, 1, chosen="גימל"),   # single fit: +1
+        _drift_ruling("s2", 1, 4, chosen="וו"),     # single fit: +1
+    ]
+    recovered, refused = drec.recover_klal(words, recs, applied=True)
+    assert "amb" not in recovered and "amb" in refused, (
+        "no anchor at -1 or -4 exists here, so the ambiguous ruling must refuse")
+
+    # Now give it an anchor at -1 that two unambiguous rulings attest.
+    words2 = "אלף בית גימל בית הא וו".split()
+    recs2 = [
+        _drift_ruling("amb", 1, 4, chosen="בית"),   # candidates -1 (w3), -4 (w0)
+        _drift_ruling("p1", 1, 3, chosen="גימל"),   # single fit: -1
+        _drift_ruling("p2", 1, 6, chosen="וו"),     # single fit: -1
+    ]
+    recovered2, refused2 = drec.recover_klal(words2, recs2, applied=True)
+    assert recovered2["amb"][0] == 3 and recovered2["amb"][1] == -1, (
+        "two rulings pinning -1 is what tells the ambiguous one which of its two "
+        "candidate positions is the real one")
+
+
+def test_a_deletion_is_never_recovered_because_its_word_is_gone():
+    """An applied deletion carries an empty chosen_text and its word is no
+    longer in the klal, so there is no offset to find. Guessing one would put a
+    flag on an unrelated word - item 0AB's failure."""
+    words = "אלף בית גימל".split()
+    rec = _drift_ruling("d", 1, 1, chosen="", original="דלת")
+    assert drec.word_identities_of(rec, applied=True) == []
+    recovered, refused = drec.recover_klal(words, [rec], applied=True)
+    assert not recovered and "names no single word" in refused["d"]
+
+
+def test_offset_zero_is_not_a_recovery():
+    """A ruling already sitting on its own word is not stale, and reporting
+    'shift of 0' would dress that up as a repair."""
+    words = "אלף בית גימל".split()
+    rec = _drift_ruling("z", 1, 1, chosen="בית")
+    assert drec.stale_against(words, rec, applied=True) is False
+    assert drec.candidate_offsets(words, 1, ["בית"]) == []
+
+
+def test_a_word_outside_the_window_is_refused_not_hunted_down():
+    words = ["אלף"] * 30 + ["ייחודי"] + ["בית"] * 30
+    rec = _drift_ruling("far", 1, 0, chosen="ייחודי")
+    recovered, refused = drec.recover_klal(words, [rec], applied=True, window=5)
+    assert not recovered and "nowhere within 5 words" in refused["far"]
+
+
+def test_every_refused_ruling_carries_a_reason():
+    """Lesson 26: a filter is validated by what it SUPPRESSES. Every id that
+    goes in comes out in exactly one of the two maps, with text a human can
+    read - never dropped silently."""
+    words = "אלף בית גימל בית".split()
+    recs = [_drift_ruling("a", 1, 0, chosen="בית"), _drift_ruling("b", 1, 9, chosen="לא-קיים"),
+            _drift_ruling("c", 1, 0, chosen="", original="x")]
+    recovered, refused = drec.recover_klal(words, recs, applied=True)
+    assert set(recovered) | set(refused) == {"a", "b", "c"}
+    assert not (set(recovered) & set(refused))
+    assert all(isinstance(v, str) and v for v in refused.values())

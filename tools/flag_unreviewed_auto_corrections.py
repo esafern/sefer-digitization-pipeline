@@ -25,8 +25,23 @@
 # POSITIONS ARE RE-DERIVED, NOT TRUSTED. Later applies shifted indices in these
 # klalim, so a flag written at the recorded word_index would land on an unrelated
 # word - the very failure item 0AB is about. A position is used only when the
-# corpus still holds the corrected word there; the rest are reported and skipped
-# rather than guessed at.
+# corpus still holds the corrected word there, or when pipeline/drift_recovery.py
+# can say where it moved to; the rest are reported and skipped, never guessed at.
+#
+# RECOVERY, ADDED 2026-09-06, and why it is not the bbox method the other
+# repointing tools use. It cannot be: **0 of these 131 records carry a
+# candidate_snapshot bbox** - the pass that wrote them never generated a
+# candidate, so it never had a scan position to record - and both
+# repoint_stale_decisions.py and close_satisfied_rulings.py return None on their
+# first line without one. Item 0BO's plan said to extend those tools and would
+# have produced nothing.
+#
+# drift_recovery.py supplies the substitute signal: within one klal an apply run
+# shifts every later index by the same amount, so rulings corroborate each
+# other's shift. All 26 that this tool used to skip are recovered by it, each at
+# a position that holds exactly the word its ruling chose - verified in context,
+# not merely by the match (e.g. klal 69 w31 -> w30, `אי אתה מוצא >>אלא<< י"א
+# הויות`). The bar and every refusal path are documented in that module.
 #
 # Dry run by default. `--apply` writes.
 import argparse
@@ -37,6 +52,7 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "pipeline"))
 
 import corpus_io as cio  # noqa: E402
+import drift_recovery as dr  # noqa: E402
 import review_decisions as rd  # noqa: E402
 import scan_alignment as sa  # noqa: E402
 
@@ -60,47 +76,131 @@ def main():
 
     corrections = [r for r in rows if r.get("reviewer") == args.reviewer
                    and r.get("decision_type") == "manual_correction"]
-    flagged = {(r["klal_id"], r["word_index"]) for r in rows
-               if r.get("decision_type") == "klal_flag" and r.get("word_index") is not None}
+    # HAS ANYONE ALREADY ENGAGED WITH THIS POSITION - which is the real question,
+    # and it is NOT "is a flag open here now".
+    #
+    # This tool skips a correction that has ever been flagged. That looks like a
+    # bug (a flag cleared by an unattended bulk pass would hide a correction
+    # nobody reviewed) and switching it to "currently open" was tried on
+    # 2026-09-06 and REVERTED, because the ledger says otherwise: 39 of these
+    # positions carry a flag that was raised and later cleared, and every one was
+    # closed deliberately - 36 by a person (`CLOSED BY APPLY ... a human having
+    # ruled here`, and a user-authorised 2026-08-26 clearing) and 3 by this
+    # tool's own withdrawal of flags on words with no DocAI alignment. Re-raising
+    # them would undo 36 human decisions and reproduce the exact complaint that
+    # started this - "i cleared the flag but it still shows".
+    #
+    # So the skip stands, and the assumption under it is CHECKED rather than
+    # trusted: any flag here closed by neither a human nor an explicit withdrawal
+    # is reported, because that is the case where this skip would hide something.
+    ever_flagged, closed_by = {}, {}
+    for r in rows:
+        if r.get("decision_type") == "klal_flag" and r.get("word_index") is not None:
+            key = (r["klal_id"], r["word_index"])
+            ever_flagged[key] = True
+            closed_by[key] = None if r.get("needs_revisit") else r
     part1 = {k["klal_id"]: cio.words_of(k) for k in cio.load_part1()}
 
     regions = sa.load_regions()
-    todo, skipped, unlocatable = [], [], []
-    for r in corrections:
-        kid, wi, chosen = r["klal_id"], r["word_index"], r.get("chosen_text")
-        if (kid, wi) in flagged:
-            continue
-        words = part1.get(kid) or []
-        if 0 <= wi < len(words) and words[wi] == chosen:
-            # A flag whose word cannot be put on the scan is a dead end: clicking
-            # it highlights nothing and the focus-zoom has nothing to zoom to,
-            # which tests/test_corpus_invariants.py forbids outright. It is also
-            # self-defeating here - the flag exists to say "check this against
-            # the scan". Reported, not raised.
-            bbox, _page = sa.word_scan_position(kid, words, wi, regions)
-            (todo if bbox is not None else unlocatable).append(r)
-        else:
-            skipped.append((kid, wi, chosen,
-                            words[wi] if 0 <= wi < len(words) else "(out of range)"))
+    todo, skipped, unlocatable, already_at_resolved = [], [], [], []
+    # The RECORDED position, as a first pass. A drifted ruling is filtered again
+    # below against the position its flag would actually land on - see the note
+    # on `at`.
+    unflagged = [r for r in corrections
+                 if (r["klal_id"], r["word_index"]) not in ever_flagged]
 
+    unattended = []
+    for r in corrections:
+        closer = closed_by.get((r["klal_id"], r["word_index"]))
+        if closer is None:
+            continue
+        if not (rd.ruled_by_human(closer)
+                or "Withdrawing a flag" in (closer.get("note") or "")):
+            unattended.append((r, closer))
+
+    # Where the word still sits, for every one of them at once: drift_recovery
+    # needs the whole klal's rulings together, because a shift is corroborated by
+    # its neighbours (see that module's bar (2b)).
+    at = {}
+    for kid, rs in dr.group_by_klal(unflagged).items():
+        words = part1.get(kid) or []
+        settled = [r for r in rs if not dr.stale_against(words, r, True)]
+        for r in settled:
+            at[r["id"]] = (r["word_index"], "the recorded position still holds it")
+        stale = [r for r in rs if dr.stale_against(words, r, True)]
+        recovered, refused = dr.recover_klal(words, stale, True)
+        for rid, (new_wi, _off, why) in recovered.items():
+            at[rid] = (new_wi, why)
+        for rid, why in refused.items():
+            rec = next(x for x in stale if x["id"] == rid)
+            here = (words[rec["word_index"]] if 0 <= rec["word_index"] < len(words)
+                    else "(out of range)")
+            skipped.append((kid, rec["word_index"], rec.get("chosen_text"), here, why))
+
+    # IDEMPOTENCE, and it is not free once positions are re-derived. The skip
+    # above keys on the RECORDED index, but a recovered flag is written at the
+    # RESOLVED one - so on a second run the recorded index is still unflagged and
+    # all 26 would be raised again, as duplicates on words that already carry
+    # them. Caught by re-running the tool after its own --apply, which is the
+    # only thing that shows it. A position already flagged is dropped here.
+    for r in unflagged:
+        if r["id"] not in at:
+            continue
+        wi, why = at[r["id"]]
+        if (r["klal_id"], wi) in ever_flagged:
+            already_at_resolved.append((r, wi))
+            continue
+        words = part1.get(r["klal_id"]) or []
+        # A flag whose word cannot be put on the scan is a dead end: clicking
+        # it highlights nothing and the focus-zoom has nothing to zoom to,
+        # which tests/test_corpus_invariants.py forbids outright. It is also
+        # self-defeating here - the flag exists to say "check this against
+        # the scan". Reported, not raised.
+        bbox, _page = sa.word_scan_position(r["klal_id"], words, wi, regions)
+        (todo if bbox is not None else unlocatable).append((r, wi, why))
+
+    # EVERY correction lands in exactly one bucket and the buckets are printed as
+    # a partition. The old summary computed "already flagged" as
+    # `total - todo - skipped` and never subtracted `unlocatable`, so that line
+    # over-reported by however many were unlocatable; it read correctly only
+    # because that count happened to be 0.
+    already = len(corrections) - len(unflagged) + len(already_at_resolved)
+    assert already + len(todo) + len(skipped) + len(unlocatable) == len(corrections), (
+        "the buckets below must partition the corrections - a count that does not "
+        "add up is the summary describing something other than what ran")
     print(f"{args.reviewer}: {len(corrections)} correction(s) applied to the corpus")
-    print(f"  {len(corrections) - len(todo) - len(skipped):4d} already carry a review flag")
-    print(f"  {len(todo):4d} unflagged, and the recorded position still holds the corrected word")
-    print(f"  {len(skipped):4d} unflagged, but the position has DRIFTED - skipped, not guessed at")
+    print(f"  {already:4d} already flagged (open, or deliberately closed - see above)")
+    print(f"  {len(todo):4d} unflagged, and locatable - a flag will be raised")
+    print(f"  {len(skipped):4d} unflagged, and the position could not be established - "
+          f"skipped, not guessed at")
     print(f"  {len(unlocatable):4d} unflagged, but the word has NO scan position - a flag there "
           f"could not be acted on")
-    for r in unlocatable[:8]:
-        print(f"        klal {r['klal_id']} w{r['word_index']}: {r.get('chosen_text')!r}")
-    for kid, wi, chosen, now in skipped[:8]:
-        print(f"        klal {kid} w{wi}: expected {chosen!r}, found {now!r}")
+    moved = [(r, wi, why) for r, wi, why in todo if wi != r["word_index"]]
+    if moved:
+        print(f"\n  {len(moved)} of those had DRIFTED and were re-derived "
+              f"(pipeline/drift_recovery.py):")
+        for r, wi, why in moved[:10]:
+            print(f"        klal {r['klal_id']} w{r['word_index']} -> w{wi}  "
+                  f"{r.get('chosen_text')!r}  ({why})")
+    for r, wi, why in unlocatable[:8]:
+        print(f"        klal {r['klal_id']} w{wi}: {r.get('chosen_text')!r}")
+    for kid, wi, chosen, now, why in skipped[:8]:
+        print(f"        klal {kid} w{wi}: chose {chosen!r}, found {now!r} - {why}")
+    if unattended:
+        print(f"\n  WARNING: {len(unattended)} correction(s) are skipped because a flag "
+              f"here was cleared by NEITHER a human NOR an explicit withdrawal, so this "
+              f"tool may be hiding a correction nobody reviewed:")
+        for r, closer in unattended[:10]:
+            print(f"        klal {r['klal_id']} w{r['word_index']} - cleared by "
+                  f"{closer.get('reviewer')!r} on {(closer.get('ts') or '')[:10]}")
 
     if not args.apply:
         print("\nDRY RUN - nothing written. Re-run with --apply.")
         return
 
-    for r in todo:
+    for r, wi, why in todo:
         rd.append_decision(
-            "klal_flag", klal_id=r["klal_id"], word_index=r["word_index"],
+            "klal_flag", klal_id=r["klal_id"], word_index=wi,
             needs_revisit=True, reviewer=FLAG_REVIEWER,
             note=(f"UNREVIEWED AUTOMATED CORRECTION. {args.reviewer} changed this word "
                   f"to {r.get('chosen_text')!r} on {(r.get('ts') or '')[:10]} and applied it "
@@ -109,7 +209,9 @@ def main():
                   f"Its own note said a human should still check it against the scan and "
                   f"that every one would be flagged; 114 of its 131 never were. This flag "
                   f"is that promise, kept late. The correction itself has NOT been reversed. "
-                  f"Original ruling {r['id']}."),
+                  f"Original ruling {r['id']}"
+                  + (f", recorded at w{r['word_index']} and re-derived to this position: "
+                     f"{why}." if wi != r["word_index"] else ".")),
         )
     print(f"\nRaised {len(todo)} review flag(s). No corpus text was changed.")
 

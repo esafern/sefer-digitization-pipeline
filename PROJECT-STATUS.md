@@ -5,11 +5,13 @@
 _Current state only. Every claim here is measured, not remembered; the dated
 evidence for each is in `PROJECT-STATUS-HISTORY.md`._
 
-> **Picking up where the last session stopped? Read item `0BO` first** (top of
-> Open items). It is the 2026-09-05 handoff: what changed, what the ledger
-> measurements say, and a numbered plan for the next session, highest-value
-> first. Written because the alternative is re-deriving it from commit
-> messages.
+> **Picking up where the last session stopped? Read `0BP` then `0BO`** (top of
+> Open items). `0BO` is the 2026-09-05 handoff — what changed, what the ledger
+> measurements say, and a numbered plan for the next session. `0BP` is the code
+> review of that same week's work, and it **blocks `0BO`'s plan item 1**: the
+> corrections that item is about carry no snapshot bbox (measured: 0 of 108), so
+> the tool it says to extend has no input. `0BP` gives the signal that does work,
+> and reads plan items 2-5 critically.
 
 **What the corpus is.** The 667 klalim are ***Klalei HaGemara* in its entirety** —
 the work's part one, scan pages 14–247, closing with `סליקו כללי הגמרא` on page
@@ -50,6 +52,513 @@ applying it to the corpus remain two separate, deliberate steps.
 
 
 ## Open items
+
+0BQ. **[2026-09-06] ITEM 0BO's PLAN ITEMS 1 AND 3, DONE - AND THE ADDRESSING
+    PROBLEM HAS A CHEAP SOLVENT THE BBOX WAS HIDING.**
+
+    Gate 444 passed. Corpus text unchanged (`git diff part1.json` empty); every
+    write below is to `review_decisions.jsonl`.
+
+    ### The new module: `pipeline/drift_recovery.py`
+
+    One home for "where did this ruling's word go" when no scan position was
+    recorded - the case `repoint_stale_decisions.py` and
+    `close_satisfied_rulings.py` structurally cannot answer (item `0BP`: 0 of 108
+    of the relevant rulings carry a bbox).
+
+    THE SIGNAL: an apply run shifts every later index in a klal by one amount, so
+    the klal's other rulings pin the shift. THE BAR, both halves required:
+    (1) exactly one offset in a +/-10 window puts the ruling's own word at its own
+    index, and (2) that offset is corroborated - either the word occurs exactly
+    once in the klal, or at least one OTHER unambiguous ruling there moved by the
+    identical amount. Refusals are returned, never dropped, with a reason string.
+
+    **Three design errors were made and caught, and they are why the bar reads
+    the way it does.** (i) The first version demanded ONE offset for the whole
+    klal; that is false for a klal edited twice - each edit starts a new constant
+    region - and it recovered 3 of the 39 drifted rulings while refusing 17 that
+    were merely on opposite sides of a shift point. (ii) The replacement, pure
+    per-ruling offsets, then lost klal 74's repeated `אליעזר` that the klal-wide
+    rule had settled. Neither dominates, so the final design is per-ruling with
+    ANCHOR offsets - a shift attested by an unambiguous ruling elsewhere in the
+    klal disambiguates a ruling that has two candidate positions of its own.
+    (iii) `expected_word_of` keyed on `chosen_text`, which is right for an
+    APPLIED ruling and wrong for an unapplied one, where the corpus still holds
+    the ORIGINAL; and an unapplied deletion's word is still present while an
+    applied one's is gone. It takes `applied` as a required argument now and
+    returns a LIST of identities, because an unapplied ruling's position may hold
+    either word (a later ruling may have carried the change in - klal 210's eight
+    `כקמייתא` rulings are exactly that). Extra identities can only ADD candidate
+    offsets, so they widen what can be found and never what can be believed.
+
+    ### Plan item 1: the unreviewed corrections are findable - 26 flags raised
+
+    `tools/flag_unreviewed_auto_corrections.py` now re-derives a drifted position
+    through that module. **26 raised**, every one at a position holding exactly
+    the word its ruling chose, spot-checked in context rather than by the match
+    alone (`אי אתה מוצא >>אלא<< י"א הויות`). Shifts: klal 69 -1 (10 rulings),
+    74 -3 (7), 159 +1 (7), and 83/103/163 +1 each on a word unique in its klal.
+
+    **The reviewer's "26" was right and `0BP`'s "27" was wrong.** The 27th, klal
+    69 w338, has no DocAI alignment, so a flag there could not be clicked or
+    zoomed to - it is reported, not raised. Its position turns out already to
+    carry a flag closed by an apply.
+
+    Three defects found in that tool while wiring it:
+    * **It was not idempotent once positions move.** The skip keyed on the
+      RECORDED index while a recovered flag is written at the RESOLVED one, so a
+      second run would have raised all 26 again as duplicates. Only re-running
+      the tool after its own `--apply` shows this; it now converges at 0.
+    * The summary's "already carry a review flag" was `total - todo - skipped`
+      and never subtracted `unlocatable`. The buckets are asserted to partition
+      the input now, so a count that does not add up fails instead of printing.
+    * **A change I made and reverted, because the ledger contradicted it.**
+      `0BP` called the "skip anything ever flagged" test a latent bug, since a
+      bulk pass could have cleared a flag nobody reviewed. Switching it to
+      "currently open" moved the count 26 -> 59, and all 39 extra positions turn
+      out to have been closed deliberately: 36 by a person (`CLOSED BY APPLY ...
+      a human having ruled here`, plus a user-authorised 2026-08-26 clearing) and
+      3 by this tool's own withdrawal of flags on unlocatable words. Re-raising
+      them would have undone 36 human decisions and reproduced the complaint that
+      started the whole flag-state thread. The skip stands; what changed is that
+      the assumption is now CHECKED - any flag closed by neither a human nor an
+      explicit withdrawal is reported as a position this tool may be hiding.
+
+    ### Plan item 3: 39 hand judgements -> 15, and every row now carries evidence
+
+    **A defect, not a worklist problem: `apply_reviewer_decisions.py` was
+    refusing 16 rulings that require no write at all.** The confirmed-no-op check
+    tested `chosen_text == final_text` for `replace` and `insert`. A `delete`
+    opcode proposes ADDING a word DocAI read that the corpus lacks, so its
+    snapshot has **no `final_text` by construction** and that equality can never
+    fire for it; `apply_delete_insertion` then returns None on an empty
+    chosen_text and the ruling lands in `skipped_drift`. So every reviewer who
+    DECLINED an insertion had that decision reported back to them as outstanding
+    work, on every run, forever. This is Lesson 34 with the third costume on:
+    finding ★1 fixed this branch for `replace`, klal 66 w0 for `insert`, and
+    `delete` was the path nobody read. Unambiguous in the ledger - all 16 carry
+    `chosen_source: final_text` ("keep the current text", which for this opcode
+    means do not insert) or `custom` with an empty string, while the 6 that
+    ACCEPTED an insertion all name the word and 4 are applied. Fixed, with tests
+    in both directions (a declined insertion writes nothing but records an
+    apply_event; an accepted one still inserts) and both mutations checked -
+    disabling the branch and making it swallow every delete each fail.
+    **13 applied as no-ops; refusals 39 -> 26.**
+
+    `tools/list_drifted_rulings.py` rebuilt around three changes:
+    * **The shift signal**, as a new top bucket: 11 rulings are settled
+      arithmetically and need no reading.
+    * **`describe()`.** `0BP` reported that 16 rows read `ruled on None -> chose
+      ''` and were unactionable. The cause was not missing evidence: every one is
+      a `delete` opcode, whose `final_text`/`original_word` are null BY DESIGN,
+      and the reading the proposal is about was sitting one field over in
+      `docai_reading` and was never rendered (Lesson 29). A row now reads
+      "insertion proposal - DocAI reads `ג` here and the corpus does not have it;
+      the reviewer REJECTED it."
+    * **One row per QUESTION.** Rulings landing on the same word with the same
+      answer are grouped: klal 210's w66/w67/w68 were three rows resolving to w65
+      with identical text, and w132/w133 two rows resolving to w108.
+
+    Now: 11 settled by shift, 15 genuine judgements (1 ink/text conflict, 2 ink
+    only, 4 text only, 5 no evidence, 3 candidate-drift where the ADDRESS is
+    fine).
+
+    ### On adding a VLM witness to item 3 (reviewer's question)
+
+    **It cannot help the stuck rows, for the same structural reason the bbox path
+    failed.** Of the rulings that resist recovery, **every one carries no bbox**
+    - there is no crop to show a model. The 19 rows whose address is fine and
+    whose CANDIDATE drifted all do have a bbox, but those are not an addressing
+    question at all: their index still names their word, and asking a VLM to read
+    the crop is a re-adjudication of the reading, not a re-point. That is a
+    legitimate but different job, and the measured track record argues against
+    leading with it - this file's own ledger analysis has the vision arbiter
+    right 6 times in 50 when it PROPOSES A CHANGE, and its confidence carrying no
+    signal at all. Recommendation: not now, and never as an addressing tool.
+
+    ### Bugs from `0BP` fixed here
+
+    * **(a) The corpus-root seam now survives `set_corpus_root()`.**
+      `apply_punctuation_decisions.py` and `patch_witness_word_indices.py`
+      resolve their paths through a module `__getattr__` (corpus_io's own
+      pattern) instead of freezing them at import. A test moves the root at
+      runtime and asserts the paths follow. **That test was itself blind at
+      first** - it imported the modules INSIDE the override, so a frozen path
+      would freeze at the new root and pass; restoring the freeze left it green.
+      It imports first and moves the root second now, and the mutation fails.
+    * **A live test-isolation bug found by that test**, and it is the more
+      important half. `monkeypatch.setattr(cio, "DOCAI_DIR", ...)` creates a real
+      module attribute, and monkeypatch's teardown restores by SETTING the old
+      value back - there is no delattr in its undo. So one such patch permanently
+      materialises a name that corpus_io resolves lazily on purpose, and from
+      that test onward `set_corpus_root()` moves everything EXCEPT the patched
+      name, silently. The symptom was an ordering dependency: the new seam test
+      passed alone and failed in the full suite. One occurrence today
+      (`test_corpus_bbox_cache_key_covers_docai_reextraction`), swept for the
+      class; an autouse fixture in `tests/conftest.py` restores laziness after
+      every test.
+    * **(b) `superseded_by_an_applied_decision()` is transitive**, walking
+      backward from each applied ruling. A twice-re-pointed ruling would
+      otherwise stay live at its first rotted key. No chain exists today; two
+      runs of `repoint_stale_decisions.py` over one ruling creates the first.
+    * **(c) `rd.all_current_live()`** is the one home for "current, minus what a
+      later record replaced", and every DISPLAY call site in `review_server.py`
+      now uses it (13 sites; the filter previously lived in one closure while
+      three endpoints and the whole count path read the unfiltered map). The
+      APPLIER deliberately does NOT use it - a ruling replaced by an unapplied
+      one is still live work, which is the narrower
+      `superseded_by_an_applied_decision` bar. Both are documented against each
+      other so the next reader cannot take the wrong one.
+    * **(d) TEI**, see the correction in `0BP` above.
+    * **(f)** `docai_page_stamp`'s docstring claimed a cache hit touches no
+      filesystem; it always stats, because the key must be built before it can be
+      tested. Sentence corrected rather than the code - the stamps ARE the
+      invalidation. `bbox_cache` is now bounded (`BBOX_CACHE_MAX`), since a
+      rebuild changes the stamp and strands the entire previous generation in a
+      dashboard that runs for days.
+
+    ### HOW TO DO PLAN ITEM 2 (Phase 3), concretely
+
+    **The one thing that decides whether this is worth doing: Phase 2 already
+    solved the hard part, and the hard part is NOT the config shape.** Read
+    `corpus_io.py`'s `parts()` note - it declares the chunking in `book.json`
+    with `_PARTS_DEFAULT` as the fallback, and then says: *"STILL ASSERTED
+    AGAINST THE DATA. Deriving from a manifest just moves where the number is
+    written - a manifest that disagrees with the corpus is the same silent
+    misclassification..."*, so `test_corpus_invariants.py` keeps asserting
+    manifest == live corpus. **Copy that discipline, not just the dict.**
+
+    **Step 1 - move the RICHER copy, and only it.** The "two copies of the 24
+    forms" in `0BO` are not actually the same datum:
+    `test_corpus_invariants.py`'s `DROPPED_LAMED_CORRUPT_FORMS` is a SET, and
+    `tools/validate_lexicon_independent.py`'s `CORRUPT_TO_CORRECT` is a
+    corrupt->correct MAPPING whose key set is that set. Extract the mapping;
+    derive the set from it. That is one fact in one place instead of two.
+
+    **Step 2 - the seam, in the shape Phase 2 already uses.** In `corpus_io.py`,
+    beside `_PARTS_DEFAULT`:
+
+        _DEFECTS_DEFAULT = {
+            "ligatures": [ ... today's pipeline/typography.py catalogue ... ],
+            # MEASURED FROM THIS CORPUS, not declared about the printing - see
+            # the caution below. 7 of the 24 are attested Hebrew words.
+            "known_corrupt_forms": {"אא": "אלא", "אגאזי": "אלגאזי", ...},
+        }
+
+        def defects():
+            """This book's print-run defect knowledge, resolved at call time."""
+            declared = (load_json(repo_path("book.json"), None) or {}).get("defects")
+            return copy.deepcopy(declared or _DEFECTS_DEFAULT)
+
+    `typography.py` then reads `cio.defects()["ligatures"]` instead of holding
+    the literal, and `dropped_lamed_explains()` stays exactly as it is - it is an
+    ALGORITHM about one sort, not data, and moving it into JSON would be
+    encoding code as config.
+
+    **Step 3 - THE GUARD, and this is the step that makes or breaks it.**
+    Extraction as described puts the test's expected value and the code's input
+    in the SAME file, so the invariant would read its expectation from the thing
+    it is guarding and could no longer fail for the reason it exists (Lesson 25).
+    Two rules keep that from happening:
+
+      (a) **The invariant keeps its own literal.** `test_corpus_invariants.py`
+          keeps `DROPPED_LAMED_CORRUPT_FORMS` written out in the test file and
+          adds ONE new assertion - that it equals `set(cio.defects()
+          ["known_corrupt_forms"])`. Then a divergence between the catalogue and
+          the corpus is a loud test failure naming both sides, and the test still
+          fails if `book.json` is edited to excuse a real defect. Never
+          `EXPECTED = cio.defects()[...]`.
+      (b) **Assert the catalogue against the CORPUS, the way `parts()` is.** Add
+          an invariant that every form in `known_corrupt_forms` is absent from
+          the live corpus, and a companion proving the check can fire (inject one
+          form into a fixture klal and watch it fail). A catalogue nothing tests
+          against the text is a list, not a guard.
+
+    **Step 4 - do not extract these.** `ABBREV_MARKS` is universal Hebrew
+    typography, not this press. `dropped_lamed_explains()` is an algorithm.
+    "Berlin" in 15 Python files is mostly explanatory PROSE - extracting only
+    what is behaviour (paths, labels, the edition string) and leaving the
+    commentary is the difference between 15 files improved and 15 files made
+    worse.
+
+    **Step 5 - and this is the slice worth doing FIRST.** `tools/export_corpus.py`
+    still hardcodes the book in the output that actually ships: `:512`
+    `title.text = "יד מלאכי - Yad Malachi (Berlin 1851/2, Part 1)"`, `:518` the
+    Berlin `sourceDesc`, and `:634` `SEFARIA_TITLE` / `SEFARIA_HE_TITLE` /
+    `SEFARIA_NODE_EN` / `SEFARIA_NODE_HE` / `SEFARIA_VERSION_TITLE` /
+    `SEFARIA_VERSION_SOURCE`. `cio.WORK_*` and `book_identity()` already exist
+    from Phase 2 and have exactly two production readers
+    (`review_server.py:819-823`, `build_collation_report.py:257`), so a second
+    book exported today carries Yad Malachi's name into its TEI header and its
+    Sefaria index - a wrong edition attribution in a public library, which
+    `export_corpus.py`'s own comment already warns about for a different reason.
+    This is smaller than the ligature work, is on the deliverable path
+    (success criterion 3), and needs no new mechanism.
+
+    **Sequencing.** Step 5, then 1-3, then 4 as a review pass. And note what
+    Phase 3 cannot do: `book.json` does not exist on disk, so after all of this
+    the seam is still exercised only by `tmp_path` tests. Phase 5 (a real second
+    book) is the only thing that validates any of it - which is what `0BO` item 5
+    already says.
+
+    ### One more, self-inflicted and fixed: the witness-queue footgun is closed
+
+    `tools/patch_witness_word_indices.py` rewrote a TRACKED file on any
+    invocation - recorded as a footgun 2026-09-01 and never acted on. It fired
+    today on a `--help` run made to smoke-test the seam change: it re-derived
+    every index against the CURRENT corpus and nulled 6 of them (klal 88 w310 and
+    w327 among them), because the corpus has shifted since the queue was built.
+    Reverted from git, which is the only reason it cost nothing.
+    `corpus_io.detector_args`'s docstring names THIS script as the reason the six
+    detectors got argument parsing - the lesson was written down and never
+    applied in the file it was about. It now has argparse (`--help` exits before
+    reading anything) and needs `--apply` to write; a bare run reports and exits.
+
+    Also: the lazy-path conversion in (a) initially broke both converted scripts
+    outright. A module `__getattr__` serves ATTRIBUTE access from outside; it is
+    NOT consulted for a bare global lookup inside the module's own functions,
+    which raises NameError. pyflakes caught it ("undefined name 'OUT_PATH'")
+    before either script ran. Internal call sites go through `cio` directly now;
+    the lazy names exist for external readers and monkeypatching.
+
+    ### Still open from `0BP`
+
+    Plan item 2 (Phase 3) is NOT done; the how-to above is the design to follow,
+    and its step 3 is the part not to skip. The `export_corpus.py` book-identity hardcoding (TEI title,
+    sourceDesc, `SEFARIA_TITLE` and friends) is untouched and remains the
+    cheapest Phase 3 slice on the deliverable path. `START_HERE.md`'s test counts
+    are still stale (it says gate 369 / repo 459; today gate **444**, repo
+    **555**).
+
+0BP. **[2026-09-05] CODE REVIEW OF THE WEEK'S CHANGES (`4ec7dc8`..`137988f`),
+    AND A BLOCKING CORRECTION TO ITEM `0BO`'s PLAN ITEM 1.**
+
+    Requested review of ~23,000 inserted lines across 68 files over seven days,
+    plus a critical read of `0BO`'s next-session plan. Suite state at review
+    time: **550 passed, 1 skipped** (433 gated + 117 ungated), declared `def
+    test_` count equals the collected count in all five files (Lesson 37's
+    invariant holds). Every finding below was measured, not read off a diff.
+
+    ### BLOCKING: plan item 1 cannot work as written
+
+    `0BO` item 1 says to make the 32 unfindable corrections findable by
+    "re-derive the position from the snapshot bbox with two-signal
+    corroboration, as `repoint_stale_decisions.py` and `close_satisfied_
+    rulings.py` do. EXTEND THAT TOOL."
+
+    **Not one of those corrections carries a snapshot bbox.** (Read this as a
+    statement about the SCRIPT that wrote them in 2026-08-15, not about the
+    dashboard: `review_server._manual_snapshot` has recorded `bbox`/`page` since
+    2026-09-02 and does so on 37 of the 40 rulings written since. See `0BR`.) Measured on the
+    live ledger: of the 131 `ai-dropped-lamed-correction` records,
+    `candidate_snapshot` holds exactly two keys — `word_index` and
+    `original_word` — and **0 have `bbox`/`page`**. Filtered to the applied,
+    still-current, machine-written `manual_correction` rulings the item is
+    about: **108 records, 0 with a bbox.** Both tools it names return `None`
+    from their very first lines (`bbox_signal`, `_bbox_index`) when `bbox` or
+    `page` is missing, so extending them produces zero additional flags. The
+    class is structural, not incidental: across the whole ledger,
+    `disputed_choice` carries a bbox 353/357 times and `candidate_choice`
+    46/51, but `manual_correction` only **37/369** — the ink signal is a
+    property of machine-generated candidates, and these were written by a
+    script that never had one.
+
+    **There is a better signal, and it is already sufficient.** The 27 drifted
+    positions are not scattered: within each klal the shift is a single
+    constant, and the same constant fits every stale ruling in that klal.
+    Measured over the exact set the tool skips:
+
+    | klal | stale rulings | offsets that fit ALL of them |
+    |---:|---:|---|
+    | 69 | 10 | **-1** (unique) |
+    | 74 | 7 | **-3** (unique) |
+    | 159 | 7 | **+1** (unique) |
+    | 83 | 1 | +1 (and its word is unique in the klal) |
+    | 103 | 1 | +1 (and its word is unique in the klal) |
+    | 163 | 1 | +1 (and its word is unique in the klal) |
+
+    Searched -10..+10; in every klal exactly ONE offset satisfies every ruling
+    simultaneously. For 69/74/159 that is 10, 7 and 7 mutually-corroborating
+    independent rulings agreeing on one number — a stronger constraint than a
+    single bbox, and immune to the repeated-word aliasing
+    `close_satisfied_rulings.py` was built to refuse (klal 159's `אליבא`
+    occurs 6 times and the uniform offset still resolves it; a per-word text
+    search cannot). The three singletons already clear the existing `unique`
+    tier. **All 27 are resolvable with no bbox at all.** Whoever picks this up
+    should implement the uniform-per-klal-offset signal and require that the
+    offset be unique in the search window, not extend a bbox path that has no
+    input.
+
+    ### Bugs found
+
+    (a) **The corpus-root seam does not survive `set_corpus_root()` in the
+    scripts item `0BI` just converted.** `corpus_io`'s own header says "CALL
+    TIME IS THE WHOLE POINT ... a caller that set the root afterwards changed
+    nothing and got no error - silently the old path." The four scripts
+    converted in `29ff776` then freeze the result at module level:
+    `tools/patch_witness_word_indices.py:42` `OUT_PATH = cio.repo_path(...)`,
+    `:43` `DOCAI_DIR = cio.DOCAI_DIR`, `tools/apply_punctuation_decisions.py:66`
+    `CANDIDATES_PATH = cio.repo_path(...)`. Reproduced:
+
+        import patch_witness_word_indices as p     # OUT_PATH -> this repo
+        cio.set_corpus_root('/tmp/otherbook')
+        cio.repo_path('reconstruction_witness_queue.json')  -> /tmp/otherbook/...
+        p.OUT_PATH                                          -> THIS REPO
+
+    `$SEFER_CORPUS_ROOT` still works (it is read before import), which is why
+    the commit's verification passed — it tested the env var, not the seam.
+    **44 module-level frozen constants exist across `pipeline/` and `tools/`**
+    (`grep -E "^[A-Z_]+ *= *cio\.(repo_path|PART1_PATH|DOCAI_DIR|...)"`). No
+    live bug today: the only six scripts that accept `--corpus`
+    (the `detect_*` sweeps, via `detector_args`) are not among them. It becomes
+    live the moment `--corpus` is added to any converted script, or in Phase 5.
+    Note also that `test_the_corpus_root_bypass_count_has_not_grown` cannot see
+    this: its regex matches `^REPO = os.path.dirname(...)` only, so a script
+    that names the same expression `INSTALL_DIR` and then joins corpus paths
+    onto it passes the guard (Lesson 41 — the guard tests a proxy). Today no
+    file does that; four now define `INSTALL_DIR` and all four use it only for
+    `sys.path`, verified.
+
+    (b) **`superseded_by_an_applied_decision()` follows one hop only.** If A is
+    superseded by B and B by C, and C is applied, A is not returned and the
+    applier retries it forever — the exact defect `844d3f8` fixed for the
+    one-hop case. No chains exist today (43 `supersedes` edges, 0 where a
+    superseder is itself superseded), so this is latent; two more
+    `repoint_stale_decisions.py` runs over the same ruling create one.
+
+    (c) **The server filters `supersedes` in exactly one of its two consumers.**
+    `review_server.py:539` builds `_superseded` and `_remember()` drops those
+    records from `recorded_by_klal` — but the same unfiltered `decided` /
+    `_manual_for_flags` maps are passed straight to `rcount.word_states(...,
+    decided=decided)` at `:627` and to `flag_still_open`. **39 superseded
+    rulings currently win their `all_current` key.** Measured: 0 of them sits
+    at an index that also carries a machine candidate, so nothing renders wrong
+    today — but a stale ruling that lands on a candidate would colour that word
+    human-decided in the tri-state while the senior-review pane correctly hides
+    it, and a stale ruling can silently answer a word flag through
+    `flag_answered_by_a_later_decision`. This is Lesson 39's shape: one payload,
+    two views, one of them refreshed.
+
+    (d) **TEI export builds a tree with a missing word separator. CORRECTED
+    2026-09-06 - the shipped file was never affected, and the first version of
+    this entry said it was.** `tools/export_corpus.py`'s emit loop set
+    `tail = " "` on the CURRENT element rather than the previous one, so
+    `ET.tostring` of klal 1 read `אלףבית גימל ` - words 0 and 1 glued, plus a
+    stray trailing space. What this entry originally claimed, that the exported
+    corpus therefore holds glued words, is **wrong**: `_write_pretty_xml` runs
+    the tree through `minidom.toprettyxml`, which puts every element on its own
+    indented line, so the indentation supplied whitespace exactly where the tail
+    was missing and any consumer normalising whitespace read the right text. The
+    serializer was covering for the builder. Measured both ways before and after
+    the fix. Pre-existing since `8f442ba`; `29ff776` edited the same function.
+    Fixed anyway - the tree is now correct independently of how it is
+    serialized - and `corrections_raw` (`:528`), which loaded and parsed
+    `corrections_part1.json` on every TEI export and was read by nothing, is
+    gone. **The test could not have caught it either way**:
+    `test_export_tei_generates_valid_tei_p5_xml` asserted only
+    `"TEI" in root.tag` and its own fixture exhibited the defect while passing.
+    It now asserts the round-trip on the TREE (where the property lives) and on
+    the written file with indentation normalised, plus a second test for a
+    `<choice>` subtree's boundaries; both fail against the old loop, checked by
+    restoring it.
+
+    (e) **`flag_unreviewed_auto_corrections.py`'s summary line double-counts.**
+    `len(corrections) - len(todo) - len(skipped)` is printed as "already carry a
+    review flag" but never subtracts `unlocatable`, so that line over-reports by
+    the unlocatable count. Currently 0, so the printed figures are right today.
+    Its `flagged` set is also built from ANY historical `klal_flag` row rather
+    than the current one, so a flag raised and later cleared reads as "already
+    flagged" — defensible for a human clearing it, wrong if a bulk tool did.
+
+    (f) **`scan_alignment.corpus_bbox_cache_key`'s own docstring is wrong about
+    its cost, and the cache is unbounded.** `docai_page_stamp` says stat'ing is
+    "paid only on a miss - a hit still returns without touching the filesystem",
+    but `corpus_word_bboxes` computes the key (3 stats for `corpus_stamp()` + 1
+    for the page) BEFORE testing membership, so every hit pays 4 stats. Separately,
+    `bbox_cache` is never evicted and the corpus stamp is part of the key, so
+    every apply+rebuild cycle in a long-lived dashboard starts a fresh keyspace
+    and the old one is retained for the life of the process. Lesson 42: a comment
+    asserting an effect nobody measured.
+
+    (g) **`DRIFTED-RULINGS-WORKLIST.md` gives a reviewer nothing to act on for
+    16 of its 39 rows.** They read `ruled on `None` → chose ``` — no original
+    word (the snapshot has none) and an empty chosen text (a deletion). The
+    document's framing is "every row left is a judgement call, and the row says
+    which kind", but for these there is neither what the word was nor what was
+    decided. Two more shapes worth handling before item 3 is worked: klal 210's
+    w66/w67/w68 are three rows that all resolve to the same text index (w65)
+    with the identical `כקמייתא → כקמייתא`, and w132/w133 both to w108 — one
+    question presented as five. And **klal 4 w32 and w35 carry a byte-identical
+    bbox** (`x1 0.68362969…` on both) measuring ~17×17px on a 3440×5312 page,
+    far too small to be a word; both are listed under "Only the ink has an
+    answer" pointing at w19, where at most one can be right. Swept the whole
+    ledger for the class: 40 bbox groups are shared by more than one current
+    ruling (80 rulings), and **39 of the 40 are legitimate** — a
+    `repoint_stale_decisions.py` successor inheriting its predecessor's box.
+    Klal 4 is the only genuine collision.
+
+    ### Plan items 2-5, read critically
+
+    **Item 2 (Phase 3, extract the print-run defect knowledge) carries a real
+    risk the plan does not name.** The 24 corrupt ligature forms live in
+    `tests/test_corpus_invariants.py:697` AND
+    `tools/validate_lexicon_independent.py:77`, and the plan is right that this
+    is a live Lesson 13. But the first of those two copies is a **test's
+    expected value**. Moving it into `book.json` and having both the code and
+    the test read it from there makes the guard read its expectation from the
+    same source as the thing it guards — a check that can no longer fail for the
+    reason it exists (Lesson 25), which is a worse defect than the duplication
+    it removes. If the forms are extracted, the invariant must keep an
+    independent, in-test literal, or the extraction has traded a Lesson 13 for a
+    Lesson 25.
+
+    Second: `book.json` **does not exist on disk**, so Phase 2's seam has only
+    ever been exercised by three `tmp_path` tests. And the deliverable that most
+    needs it does not use it: `tools/export_corpus.py` hardcodes the book in
+    three places the reviewer would ship — `:512` `title.text = "יד מלאכי —
+    Yad Malachi (Berlin 1851/2, Part 1)"`, `:518` the Berlin sourceDesc string,
+    and `:634` `SEFARIA_TITLE = "Yad Malachi"` with `SEFARIA_HE_TITLE`,
+    `SEFARIA_NODE_EN/HE`, `SEFARIA_VERSION_TITLE`, `SEFARIA_VERSION_SOURCE`
+    beside it. `cio.WORK_*` is read by exactly two production call sites
+    (`review_server.py:819-823`, `build_collation_report.py:257`). A second book
+    exported today would carry Yad Malachi's name in its TEI header and its
+    Sefaria index. **That is a cheaper and more load-bearing Phase 3 slice than
+    the ligature catalogue**, and it is on the deliverable path.
+
+    **Item 3 (the 39 drifted rulings) depends on artifact (g) above.** Fix the
+    16 empty rows and collapse the five klal-210 duplicates before handing the
+    list to a person; as it stands it asks for judgement on rows that carry no
+    evidence to judge with.
+
+    **Item 4 (the flaky UI test) did not reproduce this run** — 117 passed,
+    1 skipped, `test_a_word_click_survives_the_scroll_that_follows_it` green.
+    Consistent with the recorded ~1-in-8 rate; not evidence it is fixed.
+
+    **A queue-economics question the plan does not raise.** Wiring Dicta in as a
+    voting engine took stage 4a from 283 to 506 disputes, and the current
+    `consensus_disputes_part1.json` holds **453 disputes of which 362 (80%) are
+    `cross_edition`**, with 197 at `same_edition_agreeing == 1`. By engine set:
+    `dicta+vlm` 102 and `dicta+surya` 94 — 196 disputes whose entire Berlin-side
+    evidence is one engine, in a witness whose solo differences this file
+    measured at roughly 6:1 misread-not-variant. Meanwhile `abbreviation_shape`,
+    the thing Dicta demonstrably earned, currently marks **7** positions
+    (5 `consensus_abbreviates`, 2 `consensus_expands`). The reviewer's queue
+    grew ~80% for a witness whose actionable yield is a handful of positions.
+    Nothing here is a bug — the marking and the collation gate all work as
+    documented — but "should the 196 single-Berlin-dissenter cross-edition
+    disputes be triaged out of the review queue by default, rather than marked
+    inside it?" is a question worth putting to the reviewer before item 3's 39
+    hand-judgements are scheduled.
+
+    ### Doc drift
+
+    `START_HERE.md`'s test counts are two measurements stale: it says the gate
+    runs 50 + 319 = 369 and the repo has 459, "re-measured 2026-09-03". Collected
+    today: `test_corpus_invariants.py` 56, `test_pipeline_logic.py` 377 (gate
+    **433**), `test_review_server.py` 99, `test_fixture_corpus.py` 14,
+    `test_witness_engine.py` 5 — **551** total. `rebuild_all.sh` also still
+    labels its stages "N/6" while running ten of them (1, 2, 3, 4a, 4b, 4c, 4d,
+    4, 5, 5b, 6).
 
 0BO. **[2026-09-05] SESSION LOG AND THE NEXT SESSION'S PLAN. Read this first;
     it is the handoff.**

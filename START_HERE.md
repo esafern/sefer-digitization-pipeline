@@ -311,19 +311,22 @@ For exactly what each data file contains, see `PIPELINE-DATA-REFERENCE.md`.
     `archive/scripts/extend_docai_ocr.py`), `fix_transposed_leaf.py` (the
     leaf-order fix, see the scan section above), `verify_local_setup.py`
     (proves a fresh migration actually landed — see `SETUP.md`).
-- **`tests/`** — the pytest suite. Counts re-measured 2026-08-31 by collecting
+- **`tests/`** — the pytest suite. Counts re-measured 2026-09-06 by collecting
   each file, not by grepping `def test_` — see Lesson 37 for why those two
   numbers are not the same thing. `rebuild_all.sh`'s step 6/6 runs
-  `test_corpus_invariants.py` (50 tests — checks the DATA a pipeline run
-  produced) and `test_pipeline_logic.py` (319 tests — checks the pure decision
-  LOGIC on synthetic inputs) as a hard gate, 369 together.
-  `test_review_server.py` (85 Playwright tests, live server) and
-  `test_witness_engine.py` (5 tests) stay outside the gate, run manually.
-  459 in total (re-measured 2026-09-03 from `pytest --collect-only -q`; the
-  previous figures — 46/274/320 gated, 44 UI, 369 total — were the 2026-08-31
-  measurement and had been overtaken by five sessions of new tests). One of the gated invariants,
-  `test_no_test_file_defines_the_same_test_name_twice`, exists to keep the
-  declared and collected counts equal — see Lesson 37.
+  `test_corpus_invariants.py` (56 tests — checks the DATA a pipeline run
+  produced) and `test_pipeline_logic.py` (388 tests — checks the pure decision
+  LOGIC on synthetic inputs) as a hard gate, **444** together.
+  `test_review_server.py` (99 Playwright tests, live server),
+  `test_fixture_corpus.py` (14) and `test_witness_engine.py` (5) stay outside
+  the gate, run manually. **562 in total.** Declared equals collected in all
+  five files, checked the same day.
+  **These numbers go stale fast — three separate measurements have now been
+  overtaken between sessions (46/274/320 on 2026-08-31, 50/319/369 and "459 in
+  total" on 2026-09-03, both quoted here as current long after they were not).
+  Re-measure before citing; do not quote this line.** One of the gated
+  invariants, `test_no_test_file_defines_the_same_test_name_twice`, exists to
+  keep the declared and collected counts equal — see Lesson 37.
 - Data files, caches, `rebuild_all.sh`, `review_frontend/`, and every
   `.md`/`.html` doc live at root.
 - **This repo has no `archive/` directory.** The original local
