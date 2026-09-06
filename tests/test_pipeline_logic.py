@@ -8053,3 +8053,64 @@ def test_a_word_id_backfill_can_never_be_applied_as_a_correction(
 
     assert apply_harness.run()[1] == "אלף בית גימל", (
         "an annotation reached an apply path and changed corpus text")
+
+
+def test_a_backfill_annotation_does_not_replace_the_ruling_it_annotates(
+        decisions_path, tmp_path, monkeypatch):
+    """THE HISTORY PANEL REGRESSION, kept. Measured on the live ledger the day
+    the backfill ran: 299 words came back with basis "word_id" and a single
+    `word_id_backfill` row, so api_decision_history served that INSTEAD of the
+    rulings the index path had been showing. Every one of the 299 was a word a
+    human had ruled on, and the panel showed bookkeeping in place of the ruling.
+
+    Two failures in one, and the test holds both. An annotation carries a word_id
+    exactly like a ruling, so a reader that selects rows by id picks it up as
+    though it were one; and the ruling it annotates carries NO id of its own, so
+    the same reader misses it. Selecting on the snapshot alone therefore returns
+    the wrong row and omits the right one at the same time.
+    """
+    import word_identity as wid
+    monkeypatch.setattr(wid, "path", lambda: str(tmp_path / "word_identity.json"))
+    wid.save({1: wid.seed_klal("אלף בית גימל".split())})
+    state = wid.load()
+    bet = wid.id_at(state, 1, 1)
+
+    rd.append_decision("manual_correction", klal_id=1, word_index=1,
+                       chosen_text="בות", candidate_snapshot={"original_word": "בית"},
+                       path=decisions_path)
+    ruling = rd.all_records(path=decisions_path)[-1]
+    rd.append_decision("word_id_backfill", klal_id=1, word_index=1,
+                       applied_decision_id=ruling["id"],
+                       candidate_snapshot={"word_id": bet, "word_id_source": "backfill"},
+                       path=decisions_path)
+
+    table = rd.backfilled_word_ids(path=decisions_path)
+    rows, basis = rd.history_for_word_id(1, bet, path=decisions_path, id_state=state,
+                                         backfilled=table)
+    assert basis == "word_id"
+    assert [r["decision_type"] for r in rows] == ["manual_correction"], (
+        "the history panel is serving the backfill annotation in place of the "
+        "ruling it annotates")
+    assert rows[0]["word_id_source"] == "backfill", (
+        "an id inferred after the fact must not be presented as one a human "
+        "recorded while looking at the word")
+
+
+def test_a_recorded_word_id_is_marked_apart_from_a_backfilled_one(
+        decisions_path, tmp_path, monkeypatch):
+    """The other half of the same distinction: a ruling that recorded its own id
+    says so, and does not silently borrow the backfill's provenance."""
+    import word_identity as wid
+    monkeypatch.setattr(wid, "path", lambda: str(tmp_path / "word_identity.json"))
+    wid.save({1: wid.seed_klal("אלף בית גימל".split())})
+    state = wid.load()
+    bet = wid.id_at(state, 1, 1)
+
+    rd.append_decision("manual_correction", klal_id=1, word_index=1,
+                       chosen_text="בות",
+                       candidate_snapshot={"original_word": "בית", "word_id": bet},
+                       path=decisions_path)
+    rows, basis = rd.history_for_word_id(1, bet, path=decisions_path, id_state=state,
+                                         backfilled={})
+    assert basis == "word_id"
+    assert [r["word_id_source"] for r in rows] == ["recorded"]

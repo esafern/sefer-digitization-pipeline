@@ -1277,7 +1277,8 @@ def api_decision_history(klal_id, word_index):
     state = widentity.load()
     word_id = widentity.id_at(state, klal_id, word_index)
     if word_id is not None:
-        id_rows, found = rd.history_for_word_id(klal_id, word_id, id_state=state)
+        id_rows, found = rd.history_for_word_id(klal_id, word_id, id_state=state,
+                                                backfilled=rd.backfilled_word_ids())
         if found == "word_id":
             basis = "word_id"
 

@@ -124,6 +124,13 @@ VALID_DECISION_TYPES = {
 }
 
 
+# Types that RECORD SOMETHING ABOUT a ruling rather than rule on the text. They
+# carry a word_id like a ruling does, so every reader that selects rows by id has
+# to exclude them or it will serve bookkeeping where a decision belongs - see
+# history_for_word_id, where exactly that happened to 299 words.
+ANNOTATION_TYPES = frozenset({"word_id_backfill"})
+
+
 def _match_decision_types(decision_type):
     if decision_type is None:
         return None
@@ -242,7 +249,7 @@ def _wid():
 
 
 def history_for_word_id(klal_id, word_id, decision_type=None, path=None,
-                        id_state=None, include_ancestors=True):
+                        id_state=None, include_ancestors=True, backfilled=None):
     """Every ruling recorded about THIS WORD, oldest first. -> (rows, basis).
 
     WHY THIS IS NOT history_for(). That one keys on the WORD INDEX, and an index
@@ -271,16 +278,35 @@ def history_for_word_id(klal_id, word_id, decision_type=None, path=None,
     if include_ancestors:
         wanted |= set(_wid().ancestors(state, klal_id, word_id))
     allowed = _match_decision_types(decision_type)
+    # A ruling's id is in its snapshot if it recorded one, and in a backfill
+    # annotation if it did not - the same order resolve_word_index uses, and for
+    # the same reason. Reading only the snapshot here was a MEASURED regression,
+    # not a theoretical one: the 2026-09-06 backfill wrote 601 annotations that
+    # each carry a word_id, so this matched the ANNOTATION and missed the ruling
+    # it annotates. 299 words came back with basis "word_id" and a single
+    # `word_id_backfill` row, and api_decision_history duly served that instead of
+    # the rulings the index path had been showing. A panel that hides a human's
+    # ruling behind a bookkeeping row is worse than the slot history it replaced.
+    table = backfilled_word_ids(path) if backfilled is None else backfilled
     rows = []
     for r in _read_all(path):
         if r.get("klal_id") != klal_id:
             continue
+        if r["decision_type"] in ANNOTATION_TYPES:
+            continue
         if allowed is not None and r["decision_type"] not in allowed:
             continue
         got = (r.get("candidate_snapshot") or {}).get("word_id")
+        source = "recorded"
+        if got is None and r.get("id"):
+            got, source = table.get(r["id"]), "backfill"
         if got is None or got not in wanted:
             continue
         row = dict(r)
+        # WHERE THE ADDRESS CAME FROM, on the row a reviewer reads. An id
+        # recorded at ruling time had a human looking at the word; one inferred
+        # afterwards did not, and the panel should not present them identically.
+        row["word_id_source"] = source
         if got != word_id:
             row["via_ancestor"] = got
         rows.append(row)
