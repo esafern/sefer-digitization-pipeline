@@ -48,6 +48,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(
 
 import corpus_io as cio  # noqa: E402
 import review_decisions as rd  # noqa: E402
+import word_identity as widentity  # noqa: E402
 import scan_alignment as sa  # noqa: E402
 
 # Types whose word_index addresses a corpus word. witness_choice keys on a
@@ -105,6 +106,33 @@ def classify(klal_id, words, rec, regions, cache):
         current = words[wi]
     if current is not None and current in (original_word(rec), rec.get("chosen_text")):
         return "ok", None, "the recorded index still describes its word"
+
+    # THE STABLE ID FIRST, when the ruling carries one. Everything below infers a
+    # position from evidence and demands two signals agree because inference can
+    # be wrong; an id is not inference - the sidecar was updated by the same run
+    # that moved the word. So it needs no corroboration and outranks both.
+    #
+    # `retired` is a real answer and NOT a re-point: the word this ruling names
+    # was deliberately removed, so there is no position to move it to and moving
+    # it anywhere would attach a human's ruling to a word they never saw. That is
+    # exactly the failure the two-signal bar exists to prevent, so it is refused
+    # here as loudly as a conflict.
+    #
+    # Prospective today: ids began 2026-09-06 and 0 of the 594 rulings then on
+    # record carry one, so this branch does not fire on the current ledger. It
+    # fires on everything ruled from now on.
+    word_id = (rec.get("candidate_snapshot") or {}).get("word_id")
+    if word_id is not None:
+        found, status = widentity.locate(widentity.load(), klal_id, word_id)
+        if status == "live":
+            return ("id", found,
+                    f"stable word id {word_id} names w{found} (shift {found - wi:+d}) - "
+                    f"exact, not inferred")
+        if status == "retired":
+            dead = widentity.retirement_of(widentity.load(), klal_id, word_id) or {}
+            return ("id-retired", None,
+                    f"the word this ruling names (id {word_id}, {dead.get('word')!r}) was "
+                    f"{dead.get('reason', 'removed')} - there is no position to re-point to")
 
     by_bbox = bbox_signal(klal_id, words, rec, regions, cache)
     by_text = text_signal(words, rec)
@@ -165,7 +193,8 @@ def main():
                 "word_at_recorded_index": (part1[kid][wi] if 0 <= wi < len(part1[kid]) else None),
             })
 
-    order = ["recoverable", "bbox-only", "text-only", "conflict", "ambiguous", "no-evidence"]
+    order = ["id", "recoverable", "bbox-only", "text-only", "conflict",
+             "ambiguous", "id-retired", "no-evidence"]
     rows.sort(key=lambda r: (order.index(r["verdict"]), r["klal_id"], r["recorded_word_index"]))
     counts = {v: sum(1 for r in rows if r["verdict"] == v) for v in order}
 
@@ -173,8 +202,14 @@ def main():
     for v in order:
         if counts[v]:
             print(f"  {counts[v]:4d}  {v}")
-    fixable = [r for r in rows if r["verdict"] == "recoverable"]
-    print(f"\n{len(fixable)} can be re-pointed with two agreeing signals; "
+    # An `id` verdict is re-pointable on its own; `recoverable` still needs its
+    # two agreeing signals. They are counted apart so the report never implies
+    # the id was corroborated by anything - it does not need to be, and saying it
+    # was would be a claim about evidence that was never gathered.
+    fixable = [r for r in rows if r["verdict"] in ("id", "recoverable")]
+    by_id = sum(1 for r in rows if r["verdict"] == "id")
+    print(f"\n{len(fixable)} can be re-pointed ({by_id} by stable word id, "
+          f"{len(fixable) - by_id} by two agreeing signals); "
           f"{len(rows) - len(fixable)} cannot and are left alone.")
 
     with open(args.out, "w", encoding="utf-8") as f:

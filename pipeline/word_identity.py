@@ -155,13 +155,10 @@ def seed_klal(words, start=1):
             "next": start + len(words)}
 
 
-def seed(klalim):
-    """A whole corpus's worth, from scratch. Ids are only meaningful WITHIN a
-    klal, so each starts at 1 - there is no global namespace to collide in and
-    a per-klal counter keeps the numbers small and readable in a ledger."""
-    return {k["klal_id"]: seed_klal(cio.words_of(k)) for k in klalim}
-
-
+# `seed(klalim)` REMOVED 2026-09-06, unused since it was written. It seeded a
+# whole corpus in one call, but tools/seed_word_identity.py needs per-klal
+# control (fresh klalim get ids, existing ones are left alone unless --reseed),
+# so it calls seed_klal directly and this was a second way to do one thing.
 def ids_for(state, klal_id):
     return (state.get(klal_id) or {}).get("ids") or []
 

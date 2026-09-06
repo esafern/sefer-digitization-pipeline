@@ -1,11 +1,13 @@
 {
-  "total": 108,
+  "total": 109,
   "counts": {
+    "id": 0,
     "recoverable": 0,
-    "bbox-only": 25,
+    "bbox-only": 26,
     "text-only": 28,
     "conflict": 4,
     "ambiguous": 32,
+    "id-retired": 0,
     "no-evidence": 19
   },
   "rulings": [
@@ -272,6 +274,18 @@
       "ruled_on": "חדא דבפ'",
       "chose": "חדא דבפ'",
       "word_at_recorded_index": "חדא"
+    },
+    {
+      "decision_id": "7a6f2c06d038",
+      "decision_type": "disputed_choice",
+      "klal_id": 176,
+      "recorded_word_index": 475,
+      "new_word_index": 475,
+      "verdict": "bbox-only",
+      "why": "the scan position points at w475, but there is no text to check it against",
+      "ruled_on": null,
+      "chose": "",
+      "word_at_recorded_index": "זה"
     },
     {
       "decision_id": "35d5a424ca7b",

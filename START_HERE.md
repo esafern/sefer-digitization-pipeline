@@ -213,8 +213,14 @@ these three before anything else (speed, script cleanliness, cost).
 ## Current status
 
 See `PROJECT-STATUS.md` — the detailed, dated log of open items, confirmed
-bugs, fixes applied, and in-progress investigations. `PROJECT-STATUS-HISTORY.md`
-holds the older, closed-out history. This file (`START_HERE.md`) holds
+bugs, fixes applied, and in-progress investigations. **Since 2026-09-06 it holds
+the OPEN items only** — it had reached 7,646 lines, past what one `Read` can
+load, so every other item's body moved to `PROJECT-STATUS-HISTORY.md` and is
+indexed by id at the bottom of the status file. Ids did not change and nothing
+was reworded, so a reference from code or from another entry still resolves; the
+same split was done for the same reason on 2026-08-12.
+`PROJECT-STATUS-HISTORY.md` holds that archive and the older, closed-out
+history. This file (`START_HERE.md`) holds
 durable rules and architecture; `PROJECT-STATUS.md` holds the current,
 specific, dated truth. Neither substitutes for the other.
 
@@ -418,7 +424,8 @@ python3 tools/verify_local_setup.py                # after migrating to a new ma
 - `SETUP.md` — environment setup, and which files aren't in the public
   repo and how to get them.
 - `PROJECT-STATUS.md` — current, dated state.
-- `PROJECT-STATUS-HISTORY.md` — older, closed-out history.
+- `PROJECT-STATUS-HISTORY.md` — older, closed-out history, and since 2026-09-06
+  the full body of every closed item indexed in `PROJECT-STATUS.md`.
 - `PIPELINE-DATA-REFERENCE.md` — what each data file contains, field by
   field.
 - `CASE-YAD-MALACHI.md` — the case for the project (short; the argument only).

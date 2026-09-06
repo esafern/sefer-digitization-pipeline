@@ -312,7 +312,6 @@ def group_by_klal(records):
     return out
 
 
-def load_corpus_words(part_klalim=None):
-    """{klal_id: [words]} for the corpus, split the way an index addresses it."""
-    klalim = part_klalim if part_klalim is not None else cio.load_part1()
-    return {k["klal_id"]: cio.words_of(k) for k in klalim}
+# `load_corpus_words()` REMOVED 2026-09-06, unused since it was written - a
+# wrapper for `{k["klal_id"]: cio.words_of(k)}` that every caller writes inline
+# anyway.

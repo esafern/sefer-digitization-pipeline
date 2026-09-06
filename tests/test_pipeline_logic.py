@@ -7795,3 +7795,75 @@ def test_a_restored_words_history_reaches_back_past_the_deletion(decisions_path)
     assert rows[0]["via_ancestor"] == ayin, (
         "the deletion is part of this word's story and must be marked as "
         "borrowed from the id it had before")
+
+
+# --- the id reaches the tools that resolve a position -------------------------
+#
+# These paths are PROSPECTIVE: ids began 2026-09-06 and 0 of the 594 rulings then
+# on record carry one, so none of them fires on today's ledger. Untested they
+# would be exactly the "built and never exercised" shape this session keeps
+# finding, so each is driven with a synthetic ruling that does carry an id.
+
+import repoint_stale_decisions as rsd  # noqa: E402
+import close_satisfied_rulings as csr  # noqa: E402
+
+
+def test_repoint_takes_a_stable_id_over_its_two_signal_search(monkeypatch):
+    """The id is exact where both other signals are inferred, so it outranks them
+    and needs no corroboration - the sidecar was updated by the run that moved
+    the word."""
+    words = "אלף חדש בית גימל".split()
+    state = {1: {"ids": [10, 11, 12, 13], "next": 14}}
+    monkeypatch.setattr(rsd.widentity, "load", lambda *a, **kw: state)
+    rec = {"klal_id": 1, "word_index": 1, "chosen_text": "בית",
+           "candidate_snapshot": {"original_word": "בית", "word_id": 12}}
+    verdict, at, why = rsd.classify(1, words, rec, {}, {})
+    assert (verdict, at) == ("id", 2), (verdict, at, why)
+    assert "exact, not inferred" in why
+
+
+def test_repoint_refuses_to_move_a_ruling_whose_word_was_deleted(monkeypatch):
+    """`retired` is not a re-point. The word was deliberately removed, so there
+    is nowhere to move the ruling to, and moving it anywhere would attach a
+    human's decision to a word they never saw - the exact failure the two-signal
+    bar exists to prevent."""
+    words = "אלף גימל".split()
+    state = {1: {"ids": [10, 13], "next": 14,
+                 "retired": {"12": {"word": "בית", "index": 1, "reason": "deleted"}}}}
+    monkeypatch.setattr(rsd.widentity, "load", lambda *a, **kw: state)
+    rec = {"klal_id": 1, "word_index": 1, "chosen_text": "בית",
+           "candidate_snapshot": {"original_word": "בית", "word_id": 12}}
+    verdict, at, why = rsd.classify(1, words, rec, {}, {})
+    assert verdict == "id-retired" and at is None
+    assert "no position to re-point to" in why
+
+
+def test_close_satisfied_uses_the_id_instead_of_the_aliasing_tiers(monkeypatch):
+    """Every tier in that tool answers "is the text at wi really THIS ruling's
+    word, or another instance of the same word" - the question `אליבא` x11 in
+    klal 91 forces. An id does not have that question."""
+    words = "אליבא אלף אליבא בית אליבא".split()
+    state = {9: {"ids": [1, 2, 3, 4, 5], "next": 6}}
+    monkeypatch.setattr(csr.widentity, "load", lambda *a, **kw: state)
+    rec = {"klal_id": 9, "word_index": 0, "chosen_text": "אליבא",
+           "candidate_snapshot": {"original_word": "אליבא", "word_id": 5}}
+    verdict, why = csr.classify(rec, words, {}, {})
+    assert verdict == "word_id" and "names w4" in why, (verdict, why)
+
+    # ...and it refuses when the id points somewhere the text is not.
+    rec2 = dict(rec, chosen_text="בית",
+                candidate_snapshot={"original_word": "בית", "word_id": 5})
+    verdict2, why2 = csr.classify(rec2, words, {}, {})
+    assert verdict2 is None and "does not hold this ruling's text" in why2
+
+
+def test_the_audit_counts_a_word_id_address_as_clean_not_as_drift():
+    """The audit buckets anything resolve_word_index does not call "index" as a
+    stale address. `word_id` is a BETTER answer than the recorded index, not a
+    worse one, and without this it would be reported as a problem."""
+    src = open(os.path.join(REPO, "pipeline", "audit_applied_decisions.py"),
+               encoding="utf-8").read()
+    assert 'if how in ("index", "word_id")' in src, (
+        "the audit still treats a stable-id address as a stale one")
+    assert '"retired":' in src, (
+        "the audit has no wording for a word its id says was deleted")

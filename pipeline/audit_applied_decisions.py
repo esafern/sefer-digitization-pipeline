@@ -461,8 +461,13 @@ def report_stale_addresses():
             if snap.get("original_word") is None:
                 continue
             idx, how = rd.resolve_word_index(rec, words)
-            if how == "index":
-                continue  # the address is fine
+            if how in ("index", "word_id"):
+                # "word_id" joined "index" as a clean address 2026-09-06: the
+                # ruling carries a stable id and the sidecar still knows where
+                # that word is, which is a BETTER answer than the recorded index
+                # rather than a worse one. Without this it would have been
+                # bucketed as a stale address and reported as a problem.
+                continue
             was_applied = rec["id"] in applied
             key = ("applied" if was_applied else "UNAPPLIED", how or "unresolvable")
             buckets.setdefault(key, []).append((dtype, kid, widx, snap["original_word"]))
@@ -474,6 +479,8 @@ def report_stale_addresses():
     for (state, how) in sorted(buckets):
         rows = buckets[(state, how)]
         note = {
+            "retired": "the stable id says this word was DELETED from the corpus by a "
+                       "later ruling - a definite answer, not a lost address",
             "unresolvable": "word is gone - for an APPLIED ruling this is the normal, "
                             "correct outcome; for an unapplied one it needs a human",
             "occurrence": "recovered from the recorded occurrence ordinal (item 0BB)",

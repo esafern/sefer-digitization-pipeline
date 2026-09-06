@@ -55,6 +55,7 @@ import corpus_io as cio  # noqa: E402
 import identity as idn  # noqa: E402
 import review_decisions as rd  # noqa: E402
 import scan_alignment as sa  # noqa: E402
+import word_identity as widentity  # noqa: E402
 
 RULING_TYPES = ("disputed_choice", "candidate_choice", "manual_correction",
                 "witness_choice")
@@ -93,6 +94,26 @@ def classify(rec, words, regions, cache):
     if not chosen:
         return None, "no chosen text"
     parts = chosen.split()
+
+    # A STABLE ID SETTLES THE POSITION OUTRIGHT, so it is asked first. Every tier
+    # below exists to answer "is the text at wi really THIS ruling's word, or
+    # another instance of the same word" - the aliasing `אליבא` x11 in klal 91
+    # forces. An id does not have that question: it names the word, and the
+    # sidecar was updated by the run that moved it. Prospective today (0 of the
+    # 594 rulings on record when ids began carry one).
+    word_id = (rec.get("candidate_snapshot") or {}).get("word_id")
+    if word_id is not None:
+        at, status = widentity.locate(widentity.load(), rec["klal_id"], word_id)
+        if status == "retired":
+            return None, (f"stable id {word_id} says this word was removed from the "
+                          f"corpus - the ruling is not satisfied, it is obsolete")
+        if at is not None:
+            if words[at:at + len(parts)] == parts:
+                return "word_id", (f"stable word id {word_id} names w{at}, and the "
+                                   f"corpus holds this ruling's text there")
+            return None, (f"stable id {word_id} names w{at}, which does not hold "
+                          f"this ruling's text")
+
     if words[wi:wi + len(parts)] != parts:
         return None, "the corpus does not hold this text here"
 
@@ -138,7 +159,7 @@ def main():
 
     by = collections.Counter(v for _, v, _ in closable)
     print(f"{len(closable)} ruling(s) the corpus has already satisfied:")
-    for k in ("confirmation", "unique", "bbox"):
+    for k in ("word_id", "confirmation", "unique", "bbox"):
         if by[k]:
             print(f"  {by[k]:>4}  {k}")
     if refused:
