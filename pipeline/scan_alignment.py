@@ -142,7 +142,18 @@ def klals_on_page(page_num, alignment, regions=None):
                 klals.add(kid)
     return klals
 
-bbox_cache = {}  # (corpus_stamp, klal_id, page) -> {word_index -> bbox_dict}
+bbox_cache = {}  # (corpus_stamp, docai_stamp, klal_id, page, exact_only) -> {wi: bbox}
+
+# Entries whose stamps no longer match are dead the moment the corpus is
+# rebuilt: the stamp is part of the key, so a rebuild starts an entirely fresh
+# keyspace and every previous entry is unreachable but still held. The dashboard
+# runs for days across many apply+rebuild cycles, which is precisely the process
+# that strands them. Capped rather than swept: the key carries no cheap "is this
+# generation current" test that does not re-stat, and a bounded dict is the
+# smaller mechanism. The bound is per-lookup and generous - Part 1 is 222 klalim
+# over ~230 pages in two exact_only modes, so one full generation is well under
+# this and never self-evicts.
+BBOX_CACHE_MAX = 4096
 
 def corpus_stamp():
     """A cheap fingerprint of the corpus files, for cache keys.
@@ -177,8 +188,14 @@ def docai_page_stamp(page):
     tell. The original S3 finding named `docai_word_boxes/*.json` explicitly;
     only the part*.json half got stamped.
 
-    Stat'ing one small file per cache miss is the whole cost, and it is paid
-    only on a miss - a hit still returns without touching the filesystem.
+    Stat'ing one small file is the whole cost, and it is paid on EVERY lookup,
+    not only on a miss. This docstring said "a hit still returns without
+    touching the filesystem" until 2026-09-06; that was never true, because
+    corpus_word_bboxes() must BUILD the key before it can test membership, and
+    the stamps are what the key is made of - 3 stats for corpus_stamp() plus 1
+    here. Correcting the sentence rather than the code: the stamps are the whole
+    invalidation mechanism, so they cannot move behind the lookup, and 4 stats is
+    the price of not serving an alignment computed from files that have changed.
     """
     try:
         st = os.stat(cio.docai_page_path(page, cio.DOCAI_DIR))
@@ -279,6 +296,11 @@ def corpus_word_bboxes(klal_id, words, page, exact_only=False):
         elif tag == "replace" and not exact_only and (i2 - i1) == (j2 - j1):
             for offset in range(i2 - i1):
                 _place(i1 + offset, dtoks[j1 + offset])
+    if len(bbox_cache) >= BBOX_CACHE_MAX:
+        # Oldest first: dicts preserve insertion order, and the oldest entries
+        # are the ones from superseded corpus generations.
+        for stale_key in list(bbox_cache)[:BBOX_CACHE_MAX // 4]:
+            del bbox_cache[stale_key]
     bbox_cache[key] = result
     return result
 

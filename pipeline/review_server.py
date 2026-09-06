@@ -328,8 +328,8 @@ def _word_level_ai_flags(klal_id, words):
     # See _word_bboxes_resolved().
     bboxes = _word_bboxes_resolved(klal_id, words)  # word_index -> (bbox, page)
 
-    candidate_decisions = rd.all_current("candidate_choice")
-    manual_decisions = rd.all_current("manual_correction")
+    candidate_decisions = rd.all_current_live("candidate_choice")
+    manual_decisions = rd.all_current_live("manual_correction")
     out = []
     for word_index, rec in sorted(by_word.items()):
         if not rec.get("needs_revisit"):
@@ -419,8 +419,26 @@ def api_klalim(part_num=1, on_klal_states=None):
     # extra reads per request. Loading all_current("klal_flag") here once
     # covers both the 'flagged' set and the per-klal ai_flag counts below.
     all_klal_flags = rd.all_current("klal_flag")  # {(klal_id, word_index): record}
-    decided = rd.all_current("candidate_choice")  # {(klal_id, word_index): record}
-    _manual_for_flags = rd.all_current("manual_correction")
+    # SUPERSEDED RULINGS ARE DROPPED HERE, at the source, not at one consumer.
+    #
+    # `all_current()` deliberately does not honour `supersedes` (see
+    # append_decision), so a ruling repoint_stale_decisions.py re-pointed is
+    # still the newest record at its OLD, rotted key and comes back in both maps
+    # below. Until 2026-09-06 the filter lived in ONE place - `_remember()`, the
+    # senior-review view - while the same unfiltered maps were handed to
+    # rcount.word_states() and flag_still_open(). That is Lesson 39's shape: one
+    # payload, two views, one of them refreshed. Measured then: 39 superseded
+    # rulings won their key, and none happened to sit where a machine candidate
+    # was, so nothing rendered wrong - the tri-state would have coloured a word
+    # human-decided on a ruling that no longer names it, and a stale ruling could
+    # silently answer a word flag through flag_answered_by_a_later_decision, the
+    # moment one landed on a candidate.
+    #
+    # Filtering once, where the maps are built, is what makes the two views agree
+    # by construction instead of by both remembering.
+    _superseded = rd.superseded_ids()
+    decided = rd.all_current_live("candidate_choice")  # {(klal_id, word_index): record}
+    _manual_for_flags = rd.all_current_live("manual_correction")
 
     def _flag_still_open(kid, widx, rec):
         # rcount.flag_still_open() with this request's two decision maps bound.
@@ -481,7 +499,7 @@ def api_klalim(part_num=1, on_klal_states=None):
     witness_by_klal = {}
     for w in witness_queue:
         witness_by_klal.setdefault(w["klal_id"], []).append(w)
-    witness_decided = rd.all_current("witness_choice")
+    witness_decided = rd.all_current_live("witness_choice")
 
     # RECORDED word-level decisions, per klal - deliberately NOT drift-checked
     # and deliberately NOT limited to what still renders.
@@ -531,13 +549,12 @@ def api_klalim(part_num=1, on_klal_states=None):
     # re-deriving "what counts as recorded" a second time. Newest ruling wins
     # where a word carries more than one.
     recorded_by_klal = {}
-    # Rulings a later record explicitly replaces (review_decisions.append_decision's
-    # `supersedes`). A re-pointed ruling lands at the CORRECT word_index, but the
-    # log is append-only so the stale original still sits at the old one and is
-    # still the newest record THERE - so without this the reviewer sees both, and
-    # the stale-address count barely moves.
-    _superseded = rd.superseded_ids()
-
+    # `decided` and `_manual_for_flags` are already filtered (see _live above),
+    # so this check now only catches the witness rows fed in below, which come
+    # from a different map. Kept rather than trimmed to the witness loop: the
+    # rule is "this view never shows a superseded ruling", and a guard on the
+    # function that builds the view states it once for every source that reaches
+    # it, including any added later.
     def _remember(kid, wi, rec):
         if rec.get("id") in _superseded:
             return
@@ -852,7 +869,7 @@ def api_word_states(part_num=1):
     # the whole append-only log on every call, and this callback fires 222 times
     # - the same shape as the per-entry current_for() that merge_decision()'s
     # docstring records having to undo.
-    decided = rd.all_current("candidate_choice")
+    decided = rd.all_current_live("candidate_choice")
     # Read once, like `decided` above - applied_decision_ids() walks the whole
     # append-only log, and the callback below fires 222 times.
     applied_ids = rd.applied_decision_ids()
@@ -925,7 +942,7 @@ def api_klal(klal_id):
         return None
     alignment = _load_alignment(part_num=part_num)
     corrections = _load_corrections(part_num=part_num).get(str(klal_id), [])
-    decided = rd.all_current("candidate_choice")
+    decided = rd.all_current_live("candidate_choice")
     corrections = [_merge_decision(c, klal_id, decided) for c in corrections]
     # Manual corrections (2026-08-13) as SYNTHETIC entries in the same
     # `corrections` list the frontend already knows how to render - they
@@ -954,7 +971,7 @@ def api_klal(klal_id):
     # position now; only a still-valid decision renders.
     words = cio.words_of(k)
     manual_word_indices = set()
-    for (kid, word_index), rec in rd.all_current("manual_correction").items():
+    for (kid, word_index), rec in rd.all_current_live("manual_correction").items():
         if kid != klal_id:
             continue
         original_word = rec.get("candidate_snapshot", {}).get("original_word")
@@ -1063,7 +1080,7 @@ def api_klal(klal_id):
     # tools/patch_witness_word_indices.py) are added as 'witness' entries so
     # the text pane can highlight them alongside other flagged words.
     # word_index=None items (9/419 unmapped) are scan-only and stay that way.
-    witness_decided = rd.all_current("witness_choice")
+    witness_decided = rd.all_current_live("witness_choice")
     klal_witness = []
     for w in _load_witness_queue():
         if w["klal_id"] != klal_id:
@@ -1256,7 +1273,7 @@ def api_page(page_num):
     alignment = _load_alignment()
     regions = _load_regions()
     corrections = _load_corrections()
-    decided = rd.all_current("candidate_choice")
+    decided = rd.all_current_live("candidate_choice")
     # All klals whose scan content (start or continuation) touches this page.
     page_klals = _klals_on_page(page_num, alignment, regions)
     out = []
@@ -1278,7 +1295,7 @@ def api_page(page_num):
     # Resolved from one map rather than a per-item current_for(), the same
     # fix _merge_decision() already carries: a witness page carries ~140
     # items, and each current_for() re-parsed the whole decisions log.
-    witness_decided = rd.all_current("witness_choice")
+    witness_decided = rd.all_current_live("witness_choice")
     # Same last-write-wins hazard as api_klal()'s corrections list, on the scan
     # side: a witness item whose (klal_id, word_index) already has a correction
     # box would draw a SECOND box at the same coordinates, and the pane's click
@@ -1321,7 +1338,7 @@ def api_page(page_num):
     # mirrors api_klal()'s exactly.
     correction_keys |= {(x["klal_id"], x["word_index"]) for x in out
                         if x.get("word_index") is not None}
-    manual_current = rd.all_current("manual_correction")
+    manual_current = rd.all_current_live("manual_correction")
     for kid in page_klals:
         k = klalim_by_id.get(kid)
         if not k:
@@ -1449,7 +1466,7 @@ def api_witness_summary():
     straight over them - the reviewer could not reach the very pages the queue
     is about."""
     q = _load_witness_queue()
-    decided = rd.all_current("witness_choice")
+    decided = rd.all_current_live("witness_choice")
     pages, tiers = {}, {}
     for w in q:
         pg = w.get("page")
@@ -1857,8 +1874,6 @@ def _with_stable_anchor(snapshot, klal_id, word_index):
     """
     if snapshot is None:
         return None
-    if snapshot.get("word_occurrence") is not None:
-        return snapshot
     klalim_by_id, _ = _load_klalim(part_num=_get_part_num_for_klal(klal_id))
     klal = klalim_by_id.get(klal_id)
     if not klal:

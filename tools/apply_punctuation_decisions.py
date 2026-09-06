@@ -62,8 +62,38 @@ sys.path.insert(0, os.path.join(INSTALL_DIR, "pipeline"))
 import corpus_io as cio  # noqa: E402
 import review_decisions as rd  # noqa: E402
 
-PART1_PATH = cio.PART1_PATH
-CANDIDATES_PATH = cio.repo_path("punctuation_candidates_part1.json")
+_LAZY = {
+    "PART1_PATH": lambda: cio.PART1_PATH,
+    "CANDIDATES_PATH": lambda: cio.repo_path("punctuation_candidates_part1.json"),
+}
+
+# RESOLVED AT CALL TIME, not frozen at import - the other half of item 0BI's
+# seam, and without it the conversion above is cosmetic. `cio.repo_path(...)`
+# evaluated at module scope answers "where is the corpus" ONCE, at import, so a
+# caller that sets the root afterwards (cio.set_corpus_root, which is what
+# `--corpus` uses) changes nothing and gets no error - silently the old path.
+# That is the exact defect corpus_io's own header warns about and the reason its
+# constants became lazy; a module-level copy here reintroduces it one file over.
+# Reading $SEFER_CORPUS_ROOT still worked, because the environment is read before
+# import, which is why converting these scripts and testing them only that way
+# looked like it had closed the seam.
+#
+# Same mechanism as corpus_io's: PEP 562 module __getattr__, so the NAMES stay
+# exactly what they were for every reader and stay monkeypatchable (a
+# setattr creates a real attribute, which shadows this hook).
+def __getattr__(name):
+    if name in _LAZY:
+        return _LAZY[name]()
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+# INTERNAL CALLERS GO THROUGH cio DIRECTLY, not through the names below. A
+# module-level `__getattr__` serves ATTRIBUTE access from outside
+# (`mod.OUT_PATH`); it is NOT consulted for a bare global lookup inside this
+# module's own functions, which raises NameError instead. Caught by pyflakes
+# ("undefined name 'OUT_PATH'") immediately after the lazy conversion - the
+# scripts would have died on their first run. So the lazy names exist for
+# EXTERNAL readers and for monkeypatching, and everything in here resolves at
+# the point of use.
 
 
 # Thin wrappers so this module's own PART1_PATH stays what they read (and
@@ -73,15 +103,15 @@ CANDIDATES_PATH = cio.repo_path("punctuation_candidates_part1.json")
 # truth, so two independent copies of how it gets serialized was the least
 # acceptable place for a silent divergence.
 def load_part1():
-    return cio.load_part1(PART1_PATH)
+    return cio.load_part1(cio.PART1_PATH)
 
 
 def save_part1(data):
-    cio.save_part1(data, PART1_PATH)
+    cio.save_part1(data, cio.PART1_PATH)
 
 
 def load_candidates():
-    return cio.load_json(CANDIDATES_PATH, {})
+    return cio.load_json(cio.repo_path("punctuation_candidates_part1.json"), {})
 
 
 def snapshot_matches(snapshot, live_entry):

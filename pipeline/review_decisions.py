@@ -495,6 +495,35 @@ def all_current(decision_type, path=None):
     return current
 
 
+def all_current_live(decision_type, path=None):
+    """all_current(), minus every ruling a later record replaced. FOR DISPLAY.
+
+    THE SPLIT, and it is deliberate on both sides.
+
+    A DISPLAY must not show a superseded ruling: repoint_stale_decisions.py
+    appends a corrected copy at the right word_index and leaves the original as
+    the newest record at its old, rotted key, so both come back from
+    all_current() and the reviewer sees one ruling twice - once on the word it
+    means and once on a word it does not.
+
+    An APPLIER must not use this. A ruling replaced by one that is NOT yet
+    applied is still live work: the replacement has to be promoted, and dropping
+    the pair loses both. That narrower bar is
+    superseded_by_an_applied_decision(), which is what the applier calls, and the
+    two must not be collapsed into one function - they answer different
+    questions and a caller that took the wrong one would either lose a ruling or
+    show a dead one.
+
+    ADDED 2026-09-06. The filter previously existed as a closure inside ONE of
+    review_server.py's consumers while three other endpoints and the count path
+    read the unfiltered map - Lesson 39's shape, one payload and two views with
+    only one of them refreshed.
+    """
+    superseded = superseded_ids(path)
+    return {key: rec for key, rec in all_current(decision_type, path).items()
+            if rec.get("id") not in superseded}
+
+
 def flagged_klalim(path=None):
     """klal_ids whose current klal_flag decision has needs_revisit=True."""
     current = all_current("klal_flag", path)
@@ -528,11 +557,33 @@ def superseded_by_an_applied_decision(path=None):
     # keyword and raises "multiple values for argument 'path'" - which is what
     # 31 tests did the moment this function was added.
     applied = applied_decision_ids(path=path)
-    out = set()
+
+    # TRANSITIVE, since 2026-09-06. The first version followed exactly one hop,
+    # so a ruling re-pointed TWICE - A superseded by B, B superseded by C, C
+    # applied - left A live at its rotted key and the applier retried it every
+    # run, which is precisely the defect this function was written to fix, one
+    # link further along. No chain exists in the ledger today (43 `supersedes`
+    # edges, 0 whose superseder is itself superseded), so this is closing it
+    # before it opens: two runs of repoint_stale_decisions.py over one ruling
+    # create the first, and the symptom would be identical and just as silent.
+    #
+    # Walking BACKWARD from each applied ruling rather than forward from each
+    # superseded one is what makes the whole chain fall out: every predecessor
+    # of an applied ruling is settled, however many links away.
+    predecessors = {}
     for r in records.values():
         old = r.get("supersedes")
-        if old and r["id"] in applied:
-            out.add(old)
+        if old:
+            predecessors.setdefault(r["id"], []).append(old)
+
+    out = set()
+    stack = [rid for rid in records if rid in applied]
+    while stack:
+        rid = stack.pop()
+        for old in predecessors.get(rid, ()):
+            if old not in out:
+                out.add(old)
+                stack.append(old)     # and whatever THAT one replaced
     return out
 
 

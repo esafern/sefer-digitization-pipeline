@@ -523,9 +523,10 @@ def _build_tei(klalim, word_bboxes, all_corrections, all_manual):
 
     already_applied = rd.applied_decision_ids()
 
-    # Build per-klal word-level correction maps (word_index -> (orig, reg))
-    # for decisions NOT yet in part1.json (still pending)
-    corrections_raw = cio.load_json(cio.repo_path("corrections_part1.json")) or {}
+    # `corrections_raw` used to be loaded here and read by nothing - a full parse
+    # of corrections_part1.json on every TEI export, feeding no code path. The
+    # per-klal choice maps below are built from `all_corrections`/`all_manual`,
+    # which the caller passes in. Removed 2026-09-06.
 
     for klal in klalim:
         kid = klal["klal_id"]
@@ -569,31 +570,37 @@ def _build_tei(klalim, word_bboxes, all_corrections, all_manual):
             if orig != reg:
                 choice_map[d_wi] = (orig, reg)
 
-        # Emit words
-        first = True
+        # Emit words.
+        #
+        # THE SEPARATOR GOES AFTER THE PREVIOUS ELEMENT, NOT AFTER THIS ONE.
+        # This loop used to set `tail = " "` on the CURRENT element whenever it
+        # was not the first, which puts the space on the wrong side of the gap:
+        # word 0 got no tail, so words 0 and 1 ran together with nothing between
+        # them, and the last word carried a trailing space. Every klal in every
+        # TEI export lost exactly one word boundary - klal 1 serialised
+        # `<w>א</w><w>אי</w>` for a text that reads `א אי`, so a consumer joining
+        # on element text got `אאי`. Found 2026-09-06; it had been there since
+        # this file was written.
+        #
+        # `tail` is the text that follows an element's close tag, so the space
+        # separating word N-1 from word N belongs to N-1. Setting it when the
+        # NEXT word arrives is the only ordering that gets both ends right: no
+        # leading space before the first word, no trailing space after the last.
+        previous = None
         for wi, word in enumerate(words):
-            if not first:
-                p_el.text = (p_el.text or "") if p_el.text else ""
-                # Append a space before each word (after the first) using tail
-                # on the previous element — handled below via tail assignment.
             if wi in choice_map:
                 orig, reg = choice_map[wi]
-                choice_el = ET.SubElement(p_el, f"{{{TEI_NS}}}choice")
-                orig_el = ET.SubElement(choice_el, f"{{{TEI_NS}}}orig")
+                el = ET.SubElement(p_el, f"{{{TEI_NS}}}choice")
+                orig_el = ET.SubElement(el, f"{{{TEI_NS}}}orig")
                 orig_el.text = orig
-                reg_el = ET.SubElement(choice_el, f"{{{TEI_NS}}}reg")
+                reg_el = ET.SubElement(el, f"{{{TEI_NS}}}reg")
                 reg_el.text = reg
-                if not first:
-                    choice_el.tail = " "
-                # Set tail for space after this element
-                last_child = choice_el
             else:
-                w_el = ET.SubElement(p_el, f"{{{TEI_NS}}}w")
-                w_el.text = word
-                if not first:
-                    w_el.tail = " "
-                last_child = w_el
-            first = False
+                el = ET.SubElement(p_el, f"{{{TEI_NS}}}w")
+                el.text = word
+            if previous is not None:
+                previous.tail = " "
+            previous = el
 
     return ET.ElementTree(root)
 

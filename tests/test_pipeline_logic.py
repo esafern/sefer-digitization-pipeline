@@ -2300,10 +2300,13 @@ def test_word_level_ai_flag_yields_to_a_manual_correction_on_the_same_word(monke
     monkeypatch.setattr(rs, "_load_corrections", lambda *a, **kw: {})
     monkeypatch.setattr(rs, "_load_regions", lambda *a, **kw: {})
     monkeypatch.setattr(rs, "_load_punctuation_candidates", lambda *a, **kw: {})
+    # `path=None` matches the real signature - rd.all_current_live() passes it
+    # through when filtering superseded rulings out of the display maps.
     monkeypatch.setattr(rdata.rd, "all_current",
-                        lambda dtype: ({(1, 1): {"candidate_snapshot": {"original_word": "בית"},
+                        lambda dtype, path=None: ({(1, 1): {"candidate_snapshot": {"original_word": "בית"},
                                                   "chosen_text": "בין", "word_index": 1}}
                                        if dtype == "manual_correction" else {}))
+    monkeypatch.setattr(rdata.rd, "superseded_ids", lambda path=None: set())
     monkeypatch.setattr(rs, "_word_level_ai_flags",
                         lambda klal_id, words: [{"word_index": 1, "opcode": "ai_flag",
                                                   "reasoning": "should not appear"}])
@@ -3929,13 +3932,23 @@ def _patch_klalim_deps(monkeypatch, klalim_by_id, ai_flags_by_klal=None,
                 # `ts` on the flag explicitly.
                 "ts": f.get("ts", "1970-01-01T00:00:00+00:00"),
             }
-    def _mock_all_current(dtype):
+    # `path=None` matches the real signature, and it is load-bearing rather than
+    # decorative: rd.all_current_live() calls all_current(dtype, path) to filter
+    # superseded rulings out of every DISPLAY map, so a one-argument mock raises
+    # TypeError from inside the server. Keeping the mock behind the real filter
+    # (rather than patching all_current_live away) means these tests exercise it.
+    def _mock_all_current(dtype, path=None):
         if dtype == "manual_correction":
             return manual_decided
         if dtype == "klal_flag":
             return klal_flag_decided
         return {}
     monkeypatch.setattr(rdata.rd, "all_current", _mock_all_current)
+    # The fixture rows are synthetic and supersede nothing; without this the
+    # filter would read the REAL review_decisions.jsonl for its id set, which is
+    # the "one call in the harness reads production" defect the applier harness
+    # already carries a note about.
+    monkeypatch.setattr(rdata.rd, "superseded_ids", lambda path=None: set())
     monkeypatch.setattr(rs, "_word_level_ai_flags",
                         lambda kid, words: ai_flags_by_klal.get(kid, []))
 
@@ -5059,6 +5072,68 @@ def test_export_tei_generates_valid_tei_p5_xml(tmp_path):
     tree = ET.parse(tei_file)
     root = tree.getroot()
     assert "TEI" in root.tag
+
+    # AND THE TEXT MUST COME BACK OUT OF THE TREE. `assert "TEI" in root.tag` was
+    # the whole of this test, and it passes against a tree that has lost a word
+    # boundary - which is what the emit loop had: it hung the separating space on
+    # the CURRENT element instead of the previous one, so `ET.tostring` of klal 1
+    # read `אלףבית גימל ` - words 0 and 1 glued, and a stray trailing space.
+    #
+    # WHY THE WRITTEN FILE NEVER SHOWED IT, which is the part worth knowing:
+    # _write_pretty_xml runs the tree through minidom.toprettyxml, which puts
+    # every element on its own indented line, so the indentation supplied
+    # whitespace where the tail was missing and any consumer normalizing
+    # whitespace read the right words. The corpus was never corrupted; the
+    # serializer was covering for the builder. So this asserts on the TREE, where
+    # the property actually lives and where a different serializer - or a
+    # consumer using ElementTree directly - would have been bitten.
+    ns = {"t": "http://www.tei-c.org/ns/1.0"}
+    built = exp._build_tei(sample_klalim, word_bboxes, corrections, manual).getroot()
+    for klal, div in zip(sample_klalim, built.findall(".//t:body/t:div", ns)):
+        para = div.find("t:p", ns)
+        assert "".join(para.itertext()) == klal["clean_text"], (
+            "the serialized klal must read back as its own text with no "
+            "serializer doing the separating for it"
+        )
+    # And the file on disk still says the same thing once its indentation is
+    # normalized away, which is what an actual consumer sees.
+    for klal, div in zip(sample_klalim, root.findall(".//t:body/t:div", ns)):
+        para = div.find("t:p", ns)
+        assert " ".join("".join(para.itertext()).split()) == klal["clean_text"]
+
+
+def test_export_tei_puts_a_pending_correction_inline_without_losing_a_boundary(tmp_path):
+    """The same round-trip with a <choice> in the middle, which is the element
+    the separator logic is easiest to get wrong on: it is a subtree, so its tail
+    is the only thing that can carry the space after it."""
+    import xml.etree.ElementTree as ET
+    klalim = [{"klal_id": 1, "gematria": "א", "title": "כלל ראשון",
+               "clean_text": "אלף בית גימל", "page": 14}]
+    root = exp._build_tei(klalim, {},
+                          {(1, 1): {"id": "d1", "chosen_text": "בות",
+                                    "candidate_snapshot": {"final_text": "בית"}}},
+                          {}).getroot()
+    ns = {"t": "http://www.tei-c.org/ns/1.0"}
+    para = root.find(".//t:body/t:div/t:p", ns)
+    choice = para.find("t:choice", ns)
+    assert choice is not None, "the pending correction should render as <choice>"
+    assert choice.find("t:orig", ns).text == "בית"
+    assert choice.find("t:reg", ns).text == "בות"
+    # NOT an itertext comparison: <choice> holds two ALTERNATIVE readings, so
+    # concatenating its subtree is meaningless by design (it yields `ביתבות`) and
+    # a consumer picks one branch. What has to hold is that the subtree is
+    # separated from its neighbours, so assert the boundaries directly.
+    kids = list(para)
+    assert kids[0].tail == " ", "the word before a <choice> must be separated from it"
+    assert choice.tail == " ", "a <choice> must be separated from the word after it"
+    assert kids[-1].tail is None, "the last word must not carry a trailing space"
+    # And with the choice resolved to either branch, the line reads correctly.
+    for branch, expected in (("orig", "אלף בית גימל"), ("reg", "אלף בות גימל")):
+        read = []
+        for el in kids:
+            picked = el.find(f"t:{branch}", ns)
+            read.append(picked.text if picked is not None else el.text)
+        assert " ".join(read) == expected
 
 
 
@@ -6950,3 +7025,95 @@ def test_every_refused_ruling_carries_a_reason():
     assert set(recovered) | set(refused) == {"a", "b", "c"}
     assert not (set(recovered) & set(refused))
     assert all(isinstance(v, str) and v for v in refused.values())
+
+
+def test_the_corpus_root_seam_reaches_the_scripts_that_write_corpus_data(tmp_path):
+    """$SEFER_CORPUS_ROOT working is NOT the same as the seam working.
+
+    Item 0BI converted four scripts to `cio.repo_path(...)` and verified them by
+    pointing the ENVIRONMENT VARIABLE at a temp directory - which passes even
+    when the path is frozen at import, because the environment is read before
+    the module loads. Two of the four then assigned the result to a module-level
+    constant, so `cio.set_corpus_root()` - the call `--corpus` makes, and the one
+    a second book would go through - changed nothing and raised nothing. They
+    kept writing into this repository.
+
+    test_the_corpus_root_bypass_count_has_not_grown cannot catch this: it matches
+    `^REPO = os.path.dirname(...)` in the source, and these files have no such
+    line. That guard tests a PROXY for the rule (Lesson 41); this tests the rule,
+    by moving the root at runtime and asserting the paths move with it.
+    """
+    import importlib
+    targets = (
+        ("apply_punctuation_decisions", ("PART1_PATH", "CANDIDATES_PATH")),
+        ("patch_witness_word_indices", ("OUT_PATH", "DOCAI_DIR")),
+    )
+    # IMPORT FIRST, THEN MOVE THE ROOT. Importing inside the override makes this
+    # test blind: a module that freezes its paths at import would freeze them at
+    # the NEW root and pass, which is exactly what happened - restoring the
+    # frozen constants left this test green (Lesson 42: a surviving mutation is
+    # an unanswered question, not a pass). The defect is that the value does not
+    # FOLLOW a later change, so the module has to already be loaded.
+    modules = {name: importlib.import_module(name) for name, _ in targets}
+    previous = cio.set_corpus_root(str(tmp_path))
+    try:
+        for module_name, attrs in targets:
+            mod = modules[module_name]
+            for attr in attrs:
+                value = getattr(mod, attr)
+                assert value.startswith(str(tmp_path)), (
+                    f"{module_name}.{attr} resolves to {value!r}, outside the corpus "
+                    f"root just set - it was frozen at import, so this script writes "
+                    f"into the checkout no matter which corpus it was told to target"
+                )
+    finally:
+        cio.set_corpus_root(previous)
+
+
+def test_declining_a_proposed_insertion_is_a_no_op_not_a_drift_refusal(
+        apply_harness, decisions_path):
+    """A `delete`-opcode ruling the reviewer REJECTED needs no corpus write, and
+    must be recorded as settled rather than refused forever.
+
+    THE BRANCH THAT WAS NEVER SWEPT. The confirmed-no-op check tested
+    `chosen_text == final_text` for `replace` and `insert`. A `delete` opcode
+    proposes ADDING a word DocAI read that the corpus lacks, so its snapshot has
+    no `final_text` at all and that equality cannot fire for it - and
+    apply_delete_insertion then returns None on an empty chosen_text, dropping
+    the ruling into skipped_drift. Measured 2026-09-06: 16 such rulings, and 15
+    of them made up the whole "Only the ink has an answer" section of
+    DRIFTED-RULINGS-WORKLIST.md - a reviewer asked, on every run, to
+    re-adjudicate a decision they had already made that changes nothing.
+
+    Lesson 34 exactly: ★1 fixed this for `replace`, klal 66 w0 for `insert`, and
+    `delete` was the third path nobody read.
+    """
+    entry = _correction(1, "delete", "גימל", None)
+    apply_harness([{"klal_id": 1, "clean_text": "אלף בית"}], {"1": [entry]})
+    rd.append_decision("candidate_choice", klal_id=1, word_index=1,
+                       chosen_source="final_text", chosen_text="",
+                       candidate_snapshot=entry, path=decisions_path)
+
+    assert apply_harness.run()[1] == "אלף בית", "declining an insertion must not write"
+    events = rd.history_for(1, 1, "apply_event", path=decisions_path)
+    assert len(events) == 1, (
+        "a declined insertion must be recorded as settled - without the event the "
+        "applier retries it on every run and reports it as outstanding review work"
+    )
+    assert "declined" in (events[0]["note"] or "")
+
+
+def test_accepting_a_proposed_insertion_still_inserts(apply_harness, decisions_path):
+    """The other direction, so the no-op branch above cannot swallow a real
+    insertion: the same opcode with an actual word chosen must still write it.
+
+    Without this the fix above would be indistinguishable from "never apply a
+    delete opcode", which would silently drop the 4 accepted insertions already
+    in the ledger (klalim 219, 177, 194, 171)."""
+    entry = _correction(1, "delete", "גימל", None)
+    apply_harness([{"klal_id": 1, "clean_text": "אלף בית"}], {"1": [entry]})
+    rd.append_decision("candidate_choice", klal_id=1, word_index=1,
+                       chosen_source="docai_reading", chosen_text="גימל",
+                       candidate_snapshot=entry, path=decisions_path)
+
+    assert apply_harness.run()[1] == "אלף גימל בית"

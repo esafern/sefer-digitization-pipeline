@@ -217,3 +217,33 @@ def pytest_collection_modifyitems(config, items):
 # itself - kept there rather than here so it participates in the SAME suite
 # 0AR measured (test_pipeline_logic.py, not this file, which no CI stage
 # collects on its own).
+
+
+@pytest.fixture(autouse=True)
+def _keep_corpus_io_paths_lazy():
+    """Undo the one thing that silently un-seams corpus_io for a whole session.
+
+    corpus_io resolves REPO / PART1_PATH / DOCAI_DIR / the WORK_* identity names
+    through PEP 562 `__getattr__`, on purpose and at CALL time, so pointing the
+    corpus root somewhere else moves them (see that module's header - "CALL TIME
+    IS THE WHOLE POINT"). The hook only runs while the name is ABSENT from the
+    module dict.
+
+    `monkeypatch.setattr(cio, "DOCAI_DIR", ...)` creates a real attribute, and
+    monkeypatch's teardown restores by SETTING the old value back, not by
+    deleting it - there is no delattr path in its undo. So one such patch
+    permanently materialises the name, and from that test onward
+    `cio.set_corpus_root()` changes everything except the name that was patched,
+    with no error. Found 2026-09-06 by
+    test_the_corpus_root_seam_reaches_the_scripts_that_write_corpus_data, which
+    passed alone and failed in the full suite - the ordering dependency is the
+    whole symptom, and it would have silently weakened any later test that
+    relies on the seam (the fixture-corpus tests do).
+
+    Autouse and cheap: it deletes only names that are supposed to be lazy, and
+    only if something materialised one.
+    """
+    yield
+    for name in list(getattr(cio, "_LAZY_PATHS", {})) + list(getattr(cio, "_WORK_ATTRS", {})):
+        if name in cio.__dict__:
+            delattr(cio, name)

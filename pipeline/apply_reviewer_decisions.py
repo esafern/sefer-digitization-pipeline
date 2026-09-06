@@ -563,7 +563,28 @@ def main():
 
         opcode = snapshot["opcode"]
 
-        if opcode in ("replace", "insert") and decision["chosen_text"] == snapshot.get("final_text"):
+        # A REJECTED INSERTION IS A NO-OP TOO, and it is the branch this check
+        # was never swept into (Lesson 34: when a mutator has three paths and one
+        # is wrong, read the other two). A `delete` opcode proposes ADDING a word
+        # DocAI read that the corpus lacks, so its snapshot has no `final_text`
+        # by construction and the equality above can never fire for it. Declining
+        # the insertion records an empty chosen_text - and `apply_delete_
+        # insertion` then returns None on `not chosen_text`, so every one of them
+        # fell into skipped_drift and was reported as "candidate data has drifted,
+        # needs a human look" on every run, forever. Measured 2026-09-06: 16 such
+        # rulings, 15 of them the entire "Only the ink has an answer" section of
+        # DRIFTED-RULINGS-WORKLIST.md - a reviewer being asked to re-adjudicate
+        # decisions they had already made, that require no write at all.
+        #
+        # Unambiguous in the ledger: all 16 carry chosen_source `final_text`
+        # ("keep the current text", which for this opcode means "do not insert")
+        # or `custom` with an empty string. The 6 delete-opcode rulings that DID
+        # accept an insertion all carry the word to insert, and 4 are applied.
+        rejected_insertion = (opcode == "delete"
+                              and not (decision["chosen_text"] or "").strip())
+        if rejected_insertion or (
+                opcode in ("replace", "insert")
+                and decision["chosen_text"] == snapshot.get("final_text")):
             # Reviewer confirmed the currently-stored text is correct - for
             # 'replace' that means "don't change this word"; for 'insert' it
             # means "don't remove this word" (final_text IS the extra span
@@ -578,7 +599,9 @@ def main():
             if not args.dry_run:
                 rd.append_decision("apply_event", klal_id=klal_id, word_index=word_index,
                                     applied_decision_id=decision["id"],
-                                    note="confirmed current text, no change made")
+                                    note=("declined the proposed insertion, no change made"
+                                          if rejected_insertion else
+                                          "confirmed current text, no change made"))
             continue
 
         if opcode == "replace":

@@ -41,6 +41,7 @@ INSTALL_DIR = os.path.dirname(HERE)
 sys.path.insert(0, os.path.join(INSTALL_DIR, "pipeline"))
 
 import corpus_io as cio  # noqa: E402
+import drift_recovery as drec  # noqa: E402
 import review_decisions as rd  # noqa: E402
 import scan_alignment as sa  # noqa: E402
 
@@ -72,6 +73,40 @@ def refused_positions():
         elif pos and line.strip() and not line.startswith(" "):
             break
     return pos
+
+
+def describe(rec):
+    """What this ruling was ABOUT, in words a reviewer can act on.
+
+    WHY THIS IS NOT JUST `original_word`. 16 of the 39 rows read
+    `ruled on None -> chose ''` and were unactionable - no word, no choice, so
+    nothing to judge. Every one turned out to be a `delete` OPCODE: DocAI read a
+    word the corpus does not have and the candidate proposed INSERTING it, so
+    `final_text` and `original_word` are null BY DEFINITION - there is no stored
+    span, which is the entire point of that opcode. The evidence was in the
+    record the whole time, one field over, in `docai_reading`; the worklist
+    simply never rendered it. Lesson 29: a field nothing displays is not a field
+    the reviewer has.
+
+    So: name the opcode, and quote the reading the proposal is about.
+    """
+    snap = rec.get("candidate_snapshot") or {}
+    opcode = snap.get("opcode")
+    chosen = rec.get("chosen_text")
+    if opcode == "delete":
+        seen = snap.get("docai_reading")
+        answer = ("REJECTED it" if chosen in ("", None)
+                  else f"accepted it as `{chosen}`")
+        return (f"insertion proposal - DocAI reads `{seen}` here and the corpus "
+                f"does not have it; the reviewer {answer}")
+    was = rd.original_word(rec)
+    if opcode == "insert":
+        return (f"removal proposal - the corpus has `{was}` and DocAI does not; "
+                + ("the reviewer REJECTED the removal" if chosen == was
+                   else f"the reviewer chose `{chosen}`"))
+    if was is None and chosen is None:
+        return f"{rec['decision_type']} recording no original and no choice"
+    return f"ruled on `{was}` -> chose `{chosen}`"
 
 
 def _distance(a, b):
@@ -117,6 +152,29 @@ def main():
     regions = sa.load_regions()
     cache = {}
 
+    # THE SHIFT SIGNAL, added 2026-09-06. Both existing signals are per-ruling:
+    # the ink reads one recorded bbox, the text searches for one word. Neither
+    # can use the fact that the OTHER rulings in the same klal moved by a known
+    # amount, which is the cheapest evidence available here and needs no bbox at
+    # all - see pipeline/drift_recovery.py. It settles 11 of these outright, so
+    # they stop being hand judgements.
+    applied_ids = rd.applied_decision_ids()
+    recovered = {}
+    by_klal = collections.defaultdict(list)
+    for kid, wi in positions:
+        rec = rows_by_key.get((kid, wi))
+        if rec:
+            by_klal[kid].append(rec)
+    for kid, recs in by_klal.items():
+        klal = part1.get(kid)
+        if not klal:
+            continue
+        words = cio.words_of(klal)
+        stale = [r for r in recs if drec.stale_against(words, r, r["id"] in applied_ids)]
+        got, _refused = drec.recover_klal(words, stale, applied_ids)
+        for rid, (new_wi, off, why) in got.items():
+            recovered[rid] = (new_wi, off, why)
+
     buckets = collections.defaultdict(list)
     for kid, wi in positions:
         rec = rows_by_key.get((kid, wi))
@@ -126,12 +184,14 @@ def main():
         words = cio.words_of(klal)
         ink, text = signals(rec, kid, words, regions, cache)
         live = words[wi] if wi < len(words) else "(past the end of the klal)"
+        shift = recovered.get(rec["id"])
         row = {"klal_id": kid, "word_index": wi, "rec": rec, "live": live,
-               "ink": ink, "text": text,
-               "ruled_on": (rec.get("candidate_snapshot") or {}).get("original_word")
-                           or (rec.get("candidate_snapshot") or {}).get("final_text"),
+               "ink": ink, "text": text, "shift": shift,
+               "what": describe(rec),
                "chose": rec.get("chosen_text")}
-        if ink is not None and text and ink in text:
+        if shift is not None:
+            buckets["shift"].append(row)
+        elif ink is not None and text and ink in text:
             buckets["agree"].append(row)      # should not happen - repoint takes these
         elif ink is not None and text:
             buckets["conflict"].append(row)
@@ -155,7 +215,15 @@ def main():
          "highlights with. Where a link is given it opens the word the ink "
          "points at, which is the one to look at - not the rotted index.", ""]
 
-    order = [("conflict", "The ink and the text point at DIFFERENT words",
+    order = [("shift", "SETTLED by the shift the rest of the klal moved by - no judgement needed",
+              "These need no reading. Every other ruling in the same klal moved "
+              "by one known amount, or the word is unique in the klal, so the "
+              "position is determined arithmetically (pipeline/drift_recovery.py, "
+              "which states its bar and refuses everything that does not meet "
+              "it). Re-point them with `tools/repoint_stale_decisions.py` or "
+              "confirm them in the dashboard; they are listed so the move is "
+              "visible, not because they need a decision."),
+             ("conflict", "The ink and the text point at DIFFERENT words",
               "Read the scan at the ink's word. If the ruling belongs there, "
               "re-rule at that index; if it belongs at the text's word, the bbox "
               "is stale and the text wins."),
@@ -186,16 +254,32 @@ def main():
         if not rows:
             continue
         L += [f"## {title} ({len(rows)})", "", guidance, ""]
+        # ONE ROW PER QUESTION, not per ruling. klal 210 filed w66, w67 and w68
+        # as three separate judgement calls that all resolve to w65 with the
+        # identical `כקמייתא -> כקמייתא`, and w132/w133 both to w108 - five rows
+        # for two questions. Rulings that land on the same word with the same
+        # answer are one question, and are shown as one.
+        groups = collections.OrderedDict()
         for r in sorted(rows, key=lambda x: (x["klal_id"], x["word_index"])):
-            at = r["ink"] if r["ink"] is not None else (r["text"][0] if r["text"] else r["word_index"])
+            at = (r["shift"][0] if r["shift"] is not None
+                  else r["ink"] if r["ink"] is not None
+                  else (r["text"][0] if r["text"] else r["word_index"]))
+            groups.setdefault((r["klal_id"], at, r["what"]), []).append(r)
+        for (kid, at, what), members in groups.items():
+            first = members[0]
+            where = ", ".join(f"w{m['word_index']}" for m in members)
             L.append(
-                f"- [klal {r['klal_id']} · w{r['word_index']}]"
-                f"({base}/klal/{r['klal_id']}/word/{at}) — ruled on "
-                f"`{r['ruled_on']}` → chose `{r['chose']}`; that index now holds "
-                f"`{r['live']}`"
-                + (f"; ink says **w{r['ink']}**" if r["ink"] is not None else "")
-                + (f"; text finds it at {', '.join('w'+str(i) for i in r['text'][:4])}"
-                   if r["text"] else ""))
+                f"- [klal {kid} · {where}]"
+                f"({base}/klal/{kid}/word/{at}) — {what}; that index now holds "
+                f"`{first['live']}`"
+                + (f"; **the klal shifted {first['shift'][1]:+d}** here "
+                   f"({first['shift'][2]}) → **w{first['shift'][0]}**"
+                   if first["shift"] is not None else "")
+                + (f"; ink says **w{first['ink']}**" if first["ink"] is not None else "")
+                + (f"; text finds it at {', '.join('w'+str(i) for i in first['text'][:4])}"
+                   if first["text"] else "")
+                + (f"  _({len(members)} rulings, same word, same answer)_"
+                   if len(members) > 1 else ""))
         L.append("")
 
     with open(args.out, "w", encoding="utf-8") as f:

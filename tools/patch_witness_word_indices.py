@@ -20,6 +20,7 @@ Any previously-computed word_index values are replaced with the freshly computed
 ones (the computation is deterministic given the same corpus + DocAI pages).
 """
 import difflib
+import argparse
 import json
 import os
 import sys
@@ -39,17 +40,52 @@ sys.path.insert(0, os.path.join(INSTALL_DIR, "tools"))
 import corpus_io as cio  # noqa: E402
 import review_data as rdata  # noqa: E402
 
-OUT_PATH = cio.repo_path("reconstruction_witness_queue.json")
-DOCAI_DIR = cio.DOCAI_DIR
+_LAZY = {
+    "OUT_PATH": lambda: cio.repo_path("reconstruction_witness_queue.json"),
+    "DOCAI_DIR": lambda: cio.DOCAI_DIR,
+}
+
+# INTERNAL CALLERS GO THROUGH cio DIRECTLY, not through the names below. A
+# module-level `__getattr__` serves ATTRIBUTE access from outside
+# (`mod.OUT_PATH`); it is NOT consulted for a bare global lookup inside this
+# module's own functions, which raises NameError instead. Caught by pyflakes
+# ("undefined name 'OUT_PATH'") immediately after the lazy conversion - the
+# scripts would have died on their first run. So the lazy names exist for
+# EXTERNAL readers and for monkeypatching, and everything in here resolves at
+# the point of use.
+
+
+def _out_path():
+    return cio.repo_path("reconstruction_witness_queue.json")
+
+
+# RESOLVED AT CALL TIME, not frozen at import - the other half of item 0BI's
+# seam, and without it the conversion above is cosmetic. `cio.repo_path(...)`
+# evaluated at module scope answers "where is the corpus" ONCE, at import, so a
+# caller that sets the root afterwards (cio.set_corpus_root, which is what
+# `--corpus` uses) changes nothing and gets no error - silently the old path.
+# That is the exact defect corpus_io's own header warns about and the reason its
+# constants became lazy; a module-level copy here reintroduces it one file over.
+# Reading $SEFER_CORPUS_ROOT still worked, because the environment is read before
+# import, which is why converting these scripts and testing them only that way
+# looked like it had closed the seam.
+#
+# Same mechanism as corpus_io's: PEP 562 module __getattr__, so the NAMES stay
+# exactly what they were for every reader and stay monkeypatchable (a
+# setattr creates a real attribute, which shadows this hook).
+def __getattr__(name):
+    if name in _LAZY:
+        return _LAZY[name]()
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 norm = cio.hebrew_letters_only
 FURNITURE = {"יד", "יר", "יך", "מלאכי", "כללי", "האלף", "הבית",
              "הגימל", "הדלת", "ההא", "Digitized", "by", "Google"}
 
 
 def docai_tokens_for_page(page):
-    toks = cio.load_docai_page(page, DOCAI_DIR)
+    toks = cio.load_docai_page(page, cio.DOCAI_DIR)
     if toks is None:
-        raise FileNotFoundError(cio.docai_page_path(page, DOCAI_DIR))
+        raise FileNotFoundError(cio.docai_page_path(page, cio.DOCAI_DIR))
     return [t for t in toks if norm(t["text"])]
 
 
@@ -73,8 +109,28 @@ def build_mapping(klal_id, page):
     return mapping
 
 
-def main():
-    with open(OUT_PATH, encoding="utf-8") as f:
+def main(argv=None):
+    # THIS SCRIPT REWRITES A TRACKED FILE, AND USED TO DO IT ON ANY INVOCATION.
+    # Recorded as a footgun 2026-09-01 and demonstrated twice on 2026-09-06, both
+    # times by a `--help` run made to smoke-test an unrelated change: it
+    # re-derived every index against the CURRENT corpus and nulled 6 of them
+    # (klal 88 w310, w327 among them) because the corpus has shifted since the
+    # queue was built. Both writes were reverted from git, which is the only
+    # reason they cost nothing.
+    #
+    # corpus_io.detector_args' docstring already names this exact script as the
+    # reason the six detectors got argument parsing ("had no argument parsing at
+    # all and rewrote the witness queue when it was invoked with --help") - the
+    # lesson was written down and never applied HERE, in the file it was about.
+    # Now it is: --help exits before reading anything, and a write needs --apply.
+    ap = argparse.ArgumentParser(
+        description="Re-derive word_index for every row in the witness queue.")
+    ap.add_argument("--apply", action="store_true",
+                    help="write the re-derived indices back to "
+                         "reconstruction_witness_queue.json (default: report only)")
+    args = ap.parse_args(argv)
+
+    with open(_out_path(), encoding="utf-8") as f:
         data = json.load(f)
 
     queue = data.get("queue", data) if isinstance(data, dict) else data
@@ -112,12 +168,19 @@ def main():
     print(f"\nword_index set on {updated}/{len(queue)} items "
           f"({len(queue) - updated} unmapped → null)")
 
-    with open(OUT_PATH, "w", encoding="utf-8") as f:
+    if not args.apply:
+        print("\nDRY RUN - nothing written. Re-run with --apply.\n"
+              "(This tool rewrites a TRACKED file by re-deriving every index "
+              "against the CURRENT corpus, so a run made for any other reason - "
+              "including --help, before 2026-09-06 - silently degraded it.)")
+        return
+
+    with open(_out_path(), "w", encoding="utf-8") as f:
         if is_wrapped:
             json.dump(data, f, ensure_ascii=False, indent=2)
         else:
             json.dump(queue, f, ensure_ascii=False, indent=2)
-    print(f"Wrote {OUT_PATH}")
+    print(f"Wrote {_out_path()}")
 
 
 if __name__ == "__main__":
