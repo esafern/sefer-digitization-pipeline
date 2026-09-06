@@ -1515,6 +1515,33 @@ function renderKlalBody(block, k) {
     body.appendChild(banner);
   }
 
+  // STRANDED RULINGS. A recorded ruling whose word is no longer at the index it
+  // names is suppressed from the text - correctly, since drawing it on whatever
+  // word slid into that slot is the 2026-08-13 geresh incident - and until now
+  // that suppression was silent. The klal page said nothing at all about work a
+  // human had recorded. Not drawn ON a word for the same reason it is
+  // suppressed: the position is exactly what is not trustworthy here.
+  const stranded = k.stranded_rulings || [];
+  if (stranded.length) {
+    const banner = document.createElement('div');
+    banner.className = 'stranded-banner';
+    const items = stranded.map(r => {
+      const chose = r.chosen_text === '' ? 'delete it'
+                  : `\u2192 <bdi>${escapeHtml(String(r.chosen_text))}</bdi>`;
+      const now = r.word_at_recorded_index == null
+        ? 'that position is past the end of the klal now'
+        : `w${r.word_index} now holds <bdi>${escapeHtml(r.word_at_recorded_index)}</bdi>`;
+      return `<li>recorded on <bdi>${escapeHtml(String(r.original_word))}</bdi> ${chose}`
+           + ` \u2014 ${now}</li>`;
+    }).join('');
+    banner.innerHTML =
+      `<b>${stranded.length}</b> recorded ruling${stranded.length === 1 ? '' : 's'} in this klal `
+      + `cannot be placed on a word, so ${stranded.length === 1 ? 'it is' : 'they are'} not `
+      + `highlighted below. ${stranded.length === 1 ? 'It has' : 'They have'} not been applied `
+      + `to the corpus either \u2014 this is open work.<ul>${items}</ul>`;
+    body.appendChild(banner);
+  }
+
   const words = (k.clean_text || '').split(' ');
   const byIndex = {};
   k.queue.forEach(c => { if (c.opcode !== 'delete') byIndex[c.word_index] = c; });

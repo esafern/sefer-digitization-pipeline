@@ -8412,3 +8412,52 @@ def test_repoint_leaves_a_ruling_the_corpus_already_holds_alone():
     assert 'if rec["id"] in applied:' in body, (
         "repoint will re-point rulings the corpus already holds, writing unapplied "
         "copies of finished work")
+
+
+def test_a_ruling_the_text_pane_cannot_place_is_still_announced(monkeypatch):
+    """SURFACE ALL THE WORK - the reviewer's standing rule, applied to the last
+    place it was not.
+
+    api_klal suppresses a manual_correction whose recorded index no longer holds
+    the word it names. That is right: drawing it on whatever word slid into the
+    slot is the 2026-08-13 geresh incident. But the suppression was a bare
+    `continue`, so the klal page said NOTHING about a ruling a human recorded.
+
+    Measured 2026-09-07: 239 of 283 manual corrections are suppressed. 220 are
+    already applied and are right to be silent - applying a ruling replaces the
+    word it named, so `original_word` is gone by construction. The remaining 7
+    (after settled copies are excluded) are unapplied, absent from the queue, and
+    were therefore invisible everywhere a reviewer actually reads.
+    """
+    import review_server as srv
+    kid = 74
+    data = srv.api_klal(kid)
+    stranded = data["stranded_rulings"]
+    assert stranded, "klal 74's three unplaceable rulings are not announced"
+    at = {r["word_index"] for r in stranded}
+    assert {417, 442, 443} <= at, f"expected the known stranded trio, got {sorted(at)}"
+    for r in stranded:
+        assert r["original_word"], "a marker that cannot say what was ruled on says nothing"
+        assert "word_at_recorded_index" in r, (
+            "the reviewer needs to see what is at that position NOW to judge it")
+    # And it is NOT drawn on a word: the position is precisely what is untrusted.
+    assert not any(e.get("opcode") == "stranded" for e in data["queue"]), (
+        "a stranded ruling was given a queue entry, which asserts the position "
+        "the drift check just refused to trust")
+
+
+def test_a_settled_ruling_is_never_announced_as_stranded(monkeypatch):
+    """The list must be work, not noise.
+
+    A copy that only moved an applied ruling's address is settled - by
+    restates_an_applied_ruling, one indirection out from applied_decision_ids.
+    Checking only the direct set listed klal 1 w85, 39 w13, 146 w43 and both klal
+    210 rulings as stuck while the corpus visibly held their chosen text: a
+    worklist of finished jobs, which is the defect this banner exists to end.
+    """
+    import review_server as srv
+    for kid, wi in ((1, 85), (39, 13), (146, 43), (210, 130), (210, 138)):
+        stranded = {r["word_index"] for r in srv.api_klal(kid)["stranded_rulings"]}
+        assert wi not in stranded, (
+            f"klal {kid} w{wi} is settled - the corpus holds its chosen text - and "
+            f"is being reported as open work")

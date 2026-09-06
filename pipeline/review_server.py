@@ -1018,11 +1018,48 @@ def api_klal(klal_id):
     # position now; only a still-valid decision renders.
     words = cio.words_of(k)
     manual_word_indices = set()
+    # Rulings this klal holds that cannot be placed on a word - see the block
+    # below. Read once; the loop fires per ruling.
+    # SETTLED IS SETTLED, by either route. applied_decision_ids covers a ruling
+    # promoted directly; restates_an_applied_ruling covers a copy that only moved
+    # an applied ruling's address, which is the same thing one indirection out.
+    # Without the second, this listed klal 1 w85, 39 w13, 146 w43 and both klal
+    # 210 rulings as stuck work while the corpus visibly held their chosen text -
+    # a worklist of finished jobs, which is the defect this panel exists to end.
+    _applied_ids = rd.applied_decision_ids() | rd.restates_an_applied_ruling()
+    stranded = []
     for (kid, word_index), rec in rd.all_current_live("manual_correction").items():
         if kid != klal_id:
             continue
         original_word = (rec.get("candidate_snapshot") or {}).get("original_word")
         if not _word_matches(words, word_index, original_word):
+            # SUPPRESSED, AND NOW SAID OUT LOUD. Skipping is right - the word this
+            # ruling names is not at this index any more, and drawing it here is
+            # the 2026-08-13 geresh incident - but a silent `continue` was the
+            # whole of the previous behaviour, so the klal page said nothing at
+            # all about a ruling a human recorded.
+            #
+            # 220 of the 239 suppressed rulings are APPLIED, and those are right
+            # to be silent: applying a ruling replaces the word it named, so
+            # `original_word` is gone by construction and there is nothing owed.
+            # The other 19 are unapplied - stuck work, invisible in the klal body
+            # AND absent from the queue, so the only place they surfaced was a
+            # panel nobody reads while working through a klal.
+            #
+            # NOT pinned to a word. The reason this ruling is suppressed is that
+            # its position is not trustworthy; drawing a marker at the recorded
+            # index would assert the very thing the check just refused.
+            if rec.get("id") not in _applied_ids:
+                stranded.append({
+                    "word_index": word_index,
+                    "original_word": original_word,
+                    "chosen_text": rec.get("chosen_text"),
+                    "decision_id": rec.get("id"),
+                    "ts": rec.get("ts"),
+                    "actor": identity.actor_of(rec),
+                    "word_at_recorded_index": (words[word_index]
+                                               if 0 <= word_index < len(words) else None),
+                })
             continue
         manual_word_indices.add(word_index)
         # FIXED 2026-08-24 (found by live review of klal 91, and by
@@ -1265,6 +1302,10 @@ def api_klal(klal_id):
         # record of any correction anyone made. app.js reads `queue`.
         "queue": queue,
         "punctuation": punctuation,
+        # Recorded rulings this klal cannot place on a word, and which no apply
+        # event has settled. The reviewer asked for markers rather than judgement
+        # calls about what to surface: "we have to surface all the work".
+        "stranded_rulings": stranded,
         "needs_revisit": bool(flag_state and flag_state.get("needs_revisit")),
         "flag_note": flag_state.get("note") if flag_state else None,
         # Witness disagreements have no corpus word_index - they live on the
