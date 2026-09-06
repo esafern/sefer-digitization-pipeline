@@ -3933,3 +3933,51 @@ def test_every_copy_button_carries_what_the_clipboard_handler_reads(server, page
     assert not bad["bad"], (
         f"copy buttons missing attributes the clipboard handler reads: {bad['bad']}")
     assert page.test_errors == []
+
+
+def test_the_history_panel_says_whether_it_is_showing_a_word_or_a_position(server, page):
+    """Lesson 29 applied to the field this endpoint gained: `history_basis` is
+    computed and served, and if the panel does not RENDER it the reviewer is
+    still reading a slot's history under a word's name.
+
+    `history_for` keys on the word INDEX, and an index is a slot: klal 10 w1
+    carries 16 rulings spanning THIRTEEN distinct original words, because a run
+    of deletions pulled each successive word into position 1 and every one was
+    ruled on there. Every row is real. Presenting them unlabelled as one word's
+    history is the defect, and ids began 2026-09-06 so this index-based case is
+    what almost every word shows today - which makes the warning the important
+    half, not the decorative one.
+    """
+    klal_id, word_index = 1, 5
+    status, _ = _post_json(server, "/api/decisions/manual", {
+        "klal_id": klal_id, "word_index": word_index,
+        "original_word": _get_json(server, f"/api/klal/{klal_id}")
+            ["clean_text"].split(" ")[word_index],
+        "chosen_text": "בדיקה", "note": "history-basis probe",
+    })
+    assert status == 201
+
+    _open_dashboard(page, server, klal_id=klal_id)
+    page.evaluate(
+        """async ([kid, widx]) => {
+            const list = document.getElementById('history-list')
+                      || document.createElement('div');
+            const history = await fetch(`/api/decisions/${kid}/${widx}`).then(r => r.json());
+            window.__rendered = renderDecisionHistory(history);
+            window.__basis = history.length ? history[0].history_basis : null;
+        }""",
+        [klal_id, word_index],
+    )
+    rendered = page.evaluate("() => window.__rendered")
+    basis = page.evaluate("() => window.__basis")
+    assert basis in ("word_id", "word_index"), basis
+    assert "h-basis" in rendered, (
+        "the panel renders no provenance caption, so a reviewer cannot tell a "
+        "word's history from a position's")
+    if basis == "word_index":
+        assert "by POSITION" in rendered and "h-basis-weak" in rendered, (
+            "an index-based history must SAY it may include rulings that belong "
+            "to whatever else sat at this index")
+    else:
+        assert "stable word id" in rendered
+    assert page.test_errors == []

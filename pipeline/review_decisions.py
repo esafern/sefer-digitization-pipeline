@@ -232,6 +232,53 @@ def _wid():
     return word_identity
 
 
+def history_for_word_id(klal_id, word_id, decision_type=None, path=None,
+                        id_state=None, include_ancestors=True):
+    """Every ruling recorded about THIS WORD, oldest first. -> (rows, basis).
+
+    WHY THIS IS NOT history_for(). That one keys on the WORD INDEX, and an index
+    is a slot, not a word: klal 10 w1 returns 12 rulings about ELEVEN DIFFERENT
+    WORDS, because a run of deletions pulled each successive word into position 1
+    and every one was ruled on there. A history panel built on the index shows a
+    slot's story and calls it a word's.
+
+    `basis` is returned rather than assumed, and a caller must render it:
+
+      "word_id"  - rows matched the stable id. Exact.
+      "empty"    - the word HAS an id and no ruling ever recorded one, which is
+                   the ordinary case today: ids began on 2026-09-06 and 0 of the
+                   594 rulings then on record carry one. NOT the same as "this
+                   word was never ruled on", and a UI that renders it as "no
+                   history" is lying about a corpus whose history predates the
+                   feature.
+
+    `include_ancestors` follows word_identity.ancestors() so a word that came out
+    of a rewrite carries what was ruled about the words it replaced. Those rows
+    are about a DIFFERENT word and are marked `via_ancestor` for the caller to
+    label; the pointer is lineage, not identity.
+    """
+    state = _wid().load() if id_state is None else id_state
+    wanted = {word_id}
+    if include_ancestors:
+        wanted |= set(_wid().ancestors(state, klal_id, word_id))
+    allowed = _match_decision_types(decision_type)
+    rows = []
+    for r in _read_all(path):
+        if r.get("klal_id") != klal_id:
+            continue
+        if allowed is not None and r["decision_type"] not in allowed:
+            continue
+        got = (r.get("candidate_snapshot") or {}).get("word_id")
+        if got is None or got not in wanted:
+            continue
+        row = dict(r)
+        if got != word_id:
+            row["via_ancestor"] = got
+        rows.append(row)
+    rows.sort(key=lambda r: r.get("ts") or "")
+    return rows, ("word_id" if rows else "empty")
+
+
 def resolve_word_index(rec, words, id_state=None):
     """Where does this ruling's word sit in `words` TODAY? -> (index, how).
 

@@ -1261,11 +1261,38 @@ def api_decision_history(klal_id, word_index):
     # absent from this merge. history_for()'s own word_index filter (None
     # never matches a specific index) keeps this from ever leaking a
     # klal's GENERAL note in here, so no separate exclusion is needed.
-    history = rd.history_for(klal_id, word_index, "candidate_choice") + \
-        rd.history_for(klal_id, word_index, "manual_correction") + \
-        rd.history_for(klal_id, word_index, "klal_flag")
-    history.sort(key=lambda r: r["ts"])
-    return history
+    # BY WORD ID WHERE THERE IS ONE, because history_for keys on the INDEX and an
+    # index is a slot rather than a word. Klal 10 w1 is the demonstration: it
+    # returns 12 rulings about ELEVEN DIFFERENT WORDS, because a run of deletions
+    # pulled each successive word into position 1 and each was ruled on there.
+    # Every one of those rows is real; presenting them as one word's history is
+    # what is wrong.
+    #
+    # The id path is used only when it actually finds something. Ids began
+    # 2026-09-06 and no earlier ruling carries one, so for most words today it
+    # finds nothing and the index history is all there is - served, with `basis`
+    # saying which it is, because a panel that silently shows a slot's history
+    # under a word's name is the defect this replaces.
+    id_rows, basis = [], "word_index"
+    state = widentity.load()
+    word_id = widentity.id_at(state, klal_id, word_index)
+    if word_id is not None:
+        id_rows, found = rd.history_for_word_id(klal_id, word_id, id_state=state)
+        if found == "word_id":
+            basis = "word_id"
+
+    if basis == "word_id":
+        history = id_rows
+    else:
+        history = rd.history_for(klal_id, word_index, "candidate_choice") + \
+            rd.history_for(klal_id, word_index, "manual_correction") + \
+            rd.history_for(klal_id, word_index, "klal_flag")
+        history.sort(key=lambda r: r["ts"])
+    # The basis travels WITH the rows rather than as a sibling field, because
+    # this endpoint's contract is a bare list and every caller iterates it. A
+    # second return value would have to be threaded through them all; a marker on
+    # each row cannot be dropped by a caller that only reads rows.
+    return [dict(r, history_basis=basis, word_id=word_id) for r in history]
 
 
 def api_page(page_num):

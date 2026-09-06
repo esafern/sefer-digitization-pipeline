@@ -1511,3 +1511,10 @@ textarea.custom-text, input.custom-text {
   font-size: 11px; color: var(--ink-faint); margin-top: var(--sp-2);
   font-family: 'Inter', sans-serif;
 }
+
+/* The history panel's provenance caption - see renderDecisionHistory in app.js.
+   `h-basis-weak` is the index-based case, which is the one a reviewer must not
+   read as authoritative: those rows name a position, and a word that has moved
+   may show rulings belonging to whatever else passed through it. */
+.h-basis { font-size: 11px; color: var(--ink-faint); margin: 0 0 6px; }
+.h-basis-weak { color: var(--pending); }

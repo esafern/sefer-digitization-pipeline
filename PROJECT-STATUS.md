@@ -53,6 +53,86 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0BW. **[2026-09-06] HISTORY IS KEPT - BUT `history_for` RETURNS A SLOT'S HISTORY,
+    NOT A WORD'S. Now it says which.**
+
+    Reviewer: "if i change a word twice, the orig word remains intact? and
+    history is kept?" Three separate answers, and only two were yes.
+
+    ### What was already true
+
+    **The original survives, in the LEDGER and not the corpus.** `part1.json`
+    holds current text only; `review_decisions.jsonl` is append-only and every
+    ruling snapshots what it ruled on, so a chain reconstructs. Measured: **116
+    genuine change-twice chains** where a later ruling's `original_word` equals
+    an earlier one's `chosen_text`. Klal 57 w0 is a real four-step one -
+    `נז אין` -> `נז` -> `נז` -> `נז אין` - and the first `נז אין` is still
+    recoverable.
+
+    **The id survives a re-edit, but only a same-count one.** `בית` -> `בות` ->
+    `בית` keeps id 2 throughout. Klal 57 w0's own shape does not: `נז אין` ->
+    `נז` is a word-count change, so the `אין` id is tombstoned. The id is stable
+    across CORRECTIONS, not across RESTRUCTURING, and that is by design - an
+    uneven rewrite establishes no correspondence to carry an identity along.
+
+    ### What was NOT true
+
+    **You could not ask for the history of a word.** `history_for(klal_id,
+    word_index, ...)` keys on the INDEX, and an index is a slot. Measured on the
+    live corpus: **klal 10 w1 returns 16 rulings spanning THIRTEEN distinct
+    original words**, because a run of deletions pulled each successive word into
+    position 1 and every one was ruled on there. Every row is real; presenting
+    them under one word's name is not. The dashboard's "Show decision history"
+    has been doing exactly that.
+
+    ### What was built
+
+    `review_decisions.history_for_word_id(klal_id, word_id, ...)` returns
+    `(rows, basis)` - rulings that recorded that exact id. `basis` is RETURNED
+    rather than assumed, with two values that must not be conflated:
+    `word_id` (exact) and `empty`, which means the word has an id and no ruling
+    ever recorded one. That is the ordinary case today - ids began 2026-09-06 and
+    0 of the 594 rulings then on record carry one - and it is **not** "never
+    ruled on". A UI rendering it as "no history" would lie about a corpus whose
+    history predates the feature.
+
+    `word_identity.ancestors()` walks `replaced_by` backwards, so a word that
+    came out of an uneven rewrite carries what was ruled about the words it
+    replaced. Those rows are marked `via_ancestor` because they are about a
+    DIFFERENT word: the pointer is lineage, not identity, and the caller has to
+    be able to say so.
+
+    `/api/decisions/<klal>/<word>` uses the id path only when it finds something
+    and stamps `history_basis` on every row. The basis travels ON the rows rather
+    than as a sibling field, because the endpoint's contract is a bare list and
+    every caller iterates it - a second return value would have to be threaded
+    through them all, a per-row marker cannot be dropped by a caller that only
+    reads rows.
+
+    **And the frontend RENDERS it**, which is the only part that reaches a human
+    (Lesson 29 - this endpoint's whole change would otherwise be a served field
+    nobody sees). One `renderDecisionHistory()` replaces the two inline templates
+    the two history panels each carried, because a caption added to one of two
+    copies is exactly how the copies diverge (Lesson 13). The index-based caption
+    is deliberately the loud one, since it is what almost every word shows today:
+    *"Listed by POSITION ... a word that has moved may show rulings that belong
+    to whatever else sat here."* A mutation removing the caption fails the UI
+    test.
+
+    One self-inflicted catch: the caption's CSS used `var(--warn, ...)`, a token
+    `:root` does not define, and
+    `test_the_heading_panel_uses_theme_tokens_rather_than_its_own_colours` caught
+    it - a variable silently falling through to its fallback is how that block
+    once rendered black on black. Uses `--pending`, which exists.
+
+    Gate 472 passed. No corpus text changed.
+
+    ### Still open
+
+    A backfill would give existing rulings ids and make their history
+    id-addressable; it remains the judgement call from `0BV`, since it assigns
+    ids on inferred evidence rather than on record.
+
 0BV. **[2026-09-06] THE WORD ID NOW ACTUALLY RESOLVES SOMETHING, ALL THREE
     WRITERS KEEP IT IN STEP, AND A DELETED ID IS A TOMBSTONE RATHER THAN A
     SILENCE.**

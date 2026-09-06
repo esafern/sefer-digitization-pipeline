@@ -211,6 +211,33 @@ def locate(state, klal_id, word_id):
     return None, "unknown"
 
 
+def ancestors(state, klal_id, word_id):
+    """Ids this word was rewritten FROM, oldest first.
+
+    An uneven rewrite retires the n old words and mints m new ones, recording
+    `replaced_by` on each tombstone (reconcile refuses to pair them off, because
+    no correspondence is establishable - see its docstring). That forward
+    pointer, read backwards, is the only lineage this module can honestly
+    offer: "the word here came out of a rewrite of these".
+
+    It is a POINTER, not a claim of sameness, and callers presenting it must say
+    so. Walked transitively, so a word rewritten twice reports both generations.
+    """
+    dead = (state.get(klal_id) or {}).get("retired") or {}
+    out, frontier = [], [word_id]
+    seen = set()
+    while frontier:
+        current = frontier.pop()
+        for raw_id, stone in dead.items():
+            if current in (stone.get("replaced_by") or []):
+                got = int(raw_id)
+                if got not in seen:
+                    seen.add(got)
+                    out.append(got)
+                    frontier.append(got)
+    return sorted(out)
+
+
 def reconcile(state, klal_id, old_words, new_words):
     """Carry ids across one klal's edit. Returns (kept, retired, minted).
 

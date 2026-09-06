@@ -7611,3 +7611,78 @@ def test_follow_corpus_does_not_seed_a_klal_it_was_never_given():
         after = wid.load_for_update(state_path)
         assert 900 not in after, "an unseeded klal must not be invented on a write"
         assert len(wid.ids_for(after, 1)) == 3
+
+
+def test_history_by_index_returns_a_slots_story_and_by_id_returns_a_words(decisions_path):
+    """The defect this closes, with the corpus's own worst case as the shape.
+
+    klal 10 w1 carries 12 rulings about ELEVEN DIFFERENT WORDS: a run of
+    deletions pulled each successive word into position 1 and each was ruled on
+    there. Every row is real; presenting them as one word's history is not.
+    """
+    state = {1: wid.seed_klal("אלף בית גימל".split())}
+    bet, gimel = wid.id_at(state, 1, 1), wid.id_at(state, 1, 2)
+
+    # Two rulings at the SAME INDEX about two different words - the shape a run
+    # of deletions produces.
+    rd.append_decision("manual_correction", klal_id=1, word_index=1,
+                       chosen_source="custom", chosen_text="",
+                       candidate_snapshot={"original_word": "בית", "word_id": bet},
+                       path=decisions_path)
+    rd.append_decision("manual_correction", klal_id=1, word_index=1,
+                       chosen_source="custom", chosen_text="גמל",
+                       candidate_snapshot={"original_word": "גימל", "word_id": gimel},
+                       path=decisions_path)
+
+    by_index = rd.history_for(1, 1, "manual_correction", path=decisions_path)
+    assert len(by_index) == 2, "the index sees both, because it is a slot"
+
+    rows, basis = rd.history_for_word_id(1, gimel, path=decisions_path,
+                                         id_state=state)
+    assert basis == "word_id"
+    assert [r["chosen_text"] for r in rows] == ["גמל"], (
+        "the id must return this word's story, not the slot's")
+
+
+def test_history_by_id_says_empty_rather_than_pretending_there_is_none(decisions_path):
+    """Ids began 2026-09-06 and no earlier ruling carries one, so for most words
+    the id path finds nothing. "empty" is not "never ruled on", and a caller that
+    renders it as "no history" lies about a corpus whose history predates the
+    feature - which is why the basis is returned rather than inferred."""
+    state = {1: wid.seed_klal("אלף בית".split())}
+    rd.append_decision("manual_correction", klal_id=1, word_index=1,
+                       chosen_source="custom", chosen_text="בות",
+                       candidate_snapshot={"original_word": "בית"},   # no word_id
+                       path=decisions_path)
+    rows, basis = rd.history_for_word_id(1, wid.id_at(state, 1, 1),
+                                         path=decisions_path, id_state=state)
+    assert (rows, basis) == ([], "empty")
+    assert len(rd.history_for(1, 1, "manual_correction", path=decisions_path)) == 1, (
+        "the ruling exists - the id simply cannot see it, and must not deny it")
+
+
+def test_history_by_id_follows_a_rewrite_and_marks_the_borrowed_rows(decisions_path):
+    """A word that came out of an uneven rewrite carries what was ruled about the
+    words it replaced - marked, because that is lineage and not identity."""
+    state = {1: wid.seed_klal("אלף בית גימל".split())}
+    old_bet = wid.id_at(state, 1, 1)
+    rd.append_decision("manual_correction", klal_id=1, word_index=1,
+                       chosen_source="custom", chosen_text="x",
+                       candidate_snapshot={"original_word": "בית", "word_id": old_bet},
+                       path=decisions_path)
+    wid.reconcile(state, 1, "אלף בית גימל".split(), "אלף מאוחד".split())
+    merged = wid.id_at(state, 1, 1)
+
+    assert wid.ancestors(state, 1, merged) == sorted([old_bet,
+                                                      wid.id_at({1: wid.seed_klal(
+                                                          "אלף בית גימל".split())}, 1, 2)])
+    rows, basis = rd.history_for_word_id(1, merged, path=decisions_path,
+                                         id_state=state)
+    assert basis == "word_id" and len(rows) == 1
+    assert rows[0]["via_ancestor"] == old_bet, (
+        "a row borrowed from a predecessor must say so - the caller has to be "
+        "able to label it as lineage rather than as this word's own ruling")
+
+    bare, _ = rd.history_for_word_id(1, merged, path=decisions_path,
+                                     id_state=state, include_ancestors=False)
+    assert bare == []

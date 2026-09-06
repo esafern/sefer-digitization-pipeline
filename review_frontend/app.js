@@ -48,6 +48,38 @@ const tooltip = document.getElementById('tooltip');
 // clean_text carries 3 bare `&` tokens (klal 69/77/167), which the context
 // panes render raw. `& ` happens to survive today because it is not a valid
 // entity reference - `&amp` or `&lt` in a future correction would not.
+
+// WHOSE history is this - the WORD's or the SLOT's? The server answers on every
+// row (`history_basis`), and rendering it is the whole point of the endpoint
+// change: `history_for` keys on the word INDEX, and klal 10 w1 returns 12
+// rulings about ELEVEN DIFFERENT WORDS because a run of deletions pulled each
+// successive word into position 1. Every row is real; presenting them under one
+// word's name is not, and a panel that shows them unlabelled is the defect.
+//
+// Two panels render history and both called the same fetch with the same inline
+// template, so this is one function rather than a second copy of the rule
+// (Lesson 13) - the caption is exactly the kind of thing that would have been
+// added to one of them.
+function renderDecisionHistory(history) {
+  if (!history.length) {
+    return '<p style="color:var(--ink-faint);font-size:12px;">No decisions recorded yet.</p>';
+  }
+  const basis = history[0].history_basis;
+  // "by position" is not a footnote. Ids began 2026-09-06 and no earlier ruling
+  // carries one, so this is what most words show today, and it is the case where
+  // the rows may belong to words that merely passed through this index.
+  const caption = basis === 'word_id'
+    ? `<p class="h-basis">Tracked by stable word id ${history[0].word_id} — this word's own history, across any moves.</p>`
+    : '<p class="h-basis h-basis-weak">Listed by POSITION. Rulings recorded before word ids existed name an index, not a word, so a word that has moved may show rulings that belong to whatever else sat here.</p>';
+  return caption + history.slice().reverse().map(h => `
+        <div class="history-item">
+          <div class="h-ts">${new Date(h.ts).toLocaleString()}</div>
+          <div class="h-text">${escapeHtml(h.chosen_text)}</div>
+          ${h.via_ancestor ? `<div class="h-note">— ruled about the earlier word this one was rewritten from (id ${h.via_ancestor}), not about this word itself.</div>` : ''}
+          ${h.note ? `<div class="h-note">${escapeHtml(h.note)}</div>` : ''}
+        </div>`).join('');
+}
+
 function escapeHtml(s) {
   return String(s == null ? '' : s)
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -3058,14 +3090,7 @@ async function toggleHistory(klalId, wordIndex) {
   const toggle = document.getElementById('history-toggle');
   if (list.style.display === 'block') { list.style.display = 'none'; toggle.textContent = 'Show decision history'; return; }
   const history = await fetch(`/api/decisions/${klalId}/${wordIndex}`).then(r => r.json());
-  list.innerHTML = history.length
-    ? history.slice().reverse().map(h => `
-        <div class="history-item">
-          <div class="h-ts">${new Date(h.ts).toLocaleString()}</div>
-          <div class="h-text">${escapeHtml(h.chosen_text)}</div>
-          ${h.note ? `<div class="h-note">${escapeHtml(h.note)}</div>` : ''}
-        </div>`).join('')
-    : '<p style="color:var(--ink-faint);font-size:12px;">No decisions recorded yet.</p>';
+  list.innerHTML = renderDecisionHistory(history);
   list.style.display = 'block';
   toggle.textContent = 'Hide decision history';
 }
@@ -3382,14 +3407,7 @@ async function openManualCorrectionPanel(klalId, wordIndex, word, existing) {
       const toggle = document.getElementById('manual-correction-history-toggle');
       if (list.style.display === 'block') { list.style.display = 'none'; toggle.textContent = 'Show decision history'; return; }
       const history = await fetch(`/api/decisions/${klalId}/${wordIndex}`).then(r => r.json());
-      list.innerHTML = history.length
-        ? history.slice().reverse().map(h => `
-            <div class="history-item">
-              <div class="h-ts">${new Date(h.ts).toLocaleString()}</div>
-              <div class="h-text">${escapeHtml(h.chosen_text)}</div>
-              ${h.note ? `<div class="h-note">${escapeHtml(h.note)}</div>` : ''}
-            </div>`).join('')
-        : '<p style="color:var(--ink-faint);font-size:12px;">No decisions recorded yet.</p>';
+      list.innerHTML = renderDecisionHistory(history);
       list.style.display = 'block';
       toggle.textContent = 'Hide decision history';
     };
