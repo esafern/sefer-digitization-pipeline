@@ -53,6 +53,102 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0BX. **[2026-09-06] ARCHITECTURAL SWEEP FOR THE FAILURE CLASSES THIS WEEK KEPT
+    PRODUCING. Four classes checked clean, one real finding, two stranded
+    features.**
+
+    Asked to review the architecture for "similar missed functionality - edge
+    cases", meaning the shapes just found: built-but-not-connected, connected-
+    but-never-run, and keyed-on-the-wrong-thing. Everything below is measured.
+
+    ### THE REAL FINDING: the ledger's current-state map is keyed on a SLOT, and
+    the reindexer moves rulings between slots with no collision check
+
+    `all_current()` keys on `(klal_id, word_index)` and takes the last row per
+    key. `reindex_pending_decisions_after_shift()` appends a re-pointed copy at
+    `wi + delta` **without checking whether that key is already occupied**, so a
+    shift can move one ruling on top of another and the older one becomes
+    invisible to every consumer of `all_current` - the applier, the dashboard's
+    display maps, and the tri-state counts - with nothing recording that it was
+    displaced.
+
+    Measured on the live ledger: **94 `(klal, word_index)` keys carry rulings
+    about MORE THAN ONE WORD, hiding 115 rulings.** The split is the part that
+    matters, and it is better than the raw number suggests:
+
+    | | |
+    |---|---:|
+    | applied - already in the corpus, harmless | 105 |
+    | superseded - deliberately replaced | 2 |
+    | **unapplied and not superseded - invisible** | **8** |
+
+    **None of the 8 is a cleanly lost decision**, checked one by one: klal 2 w30
+    is two exact duplicates of a ruling that WAS applied (`בססחים`->`בפסחים`);
+    klal 35 w44 is the two span-wide deletions a later ruling explicitly retires
+    by note, one of which carries `supersedes` and the other does not; klal 210
+    w65/w66/w131 are reindexing collisions where a re-point moved a ruling onto a
+    slot another already held. So nothing is currently lost - but the mechanism
+    is silent, and the only reason it has not lost something is that the
+    collisions happened to land on duplicates and retirements.
+
+    The fix is small and belongs with the reindexer: refuse (or record) a
+    re-point onto an occupied key, the same way `close_satisfied_rulings.py`
+    refuses a position the ink does not corroborate. NOT DONE - flagged for a
+    decision, because "refuse" and "record and move anyway" are different
+    policies and the second needs somewhere to put the displaced ruling.
+
+    ### Two features whose work is stranded, both deliberately
+
+    **47 punctuation proposals have no way to be reviewed.**
+    `punctuation_candidates_part1.json` holds 67 across 3 klalim, 20 carry a
+    `punctuation_choice` decision, and the affordance that opens them was removed
+    from the UI on 2026-08-11 - documented in `app.js` as "dormant, not dead,
+    kept reversible". The server still computes and serves
+    `punctuation_count` / `_decided_count` / `_open_count` on every klal row and
+    the frontend references none of them. So the removal is intentional and the
+    counts are consistent with it; what is worth knowing is the number sitting
+    behind the dormant door.
+
+    **`flag_note` is served and never rendered** (`review_server.py:1220`). It
+    carries the reason a word was flagged. Currently null on every correction in
+    the first 60 klalim, so nothing is being lost today - it is a latent Lesson 29
+    rather than a live one, and it will start hiding information the first time a
+    detector writes a note through that path.
+
+    ### Four classes checked and CLEAN, which is most of the value here
+
+    1. **The null-default class beyond `candidate_snapshot`.** The remaining
+       `.get(key, {})` sites (`build_part1_freq`, `propose_abbreviation_
+       expansions`) read dicts those files build themselves, where the key cannot
+       be present-and-null. `chosen_text` is null 2,682 times in the ledger and
+       reaches `export_corpus`'s TEI writer, but `ET` serializes `text=None` as
+       an empty element rather than raising, and **0 unapplied rulings currently
+       carry a null `chosen_text`**.
+    2. **Empty `<reg/>` in the TEI export - 8 of them, and NOT a bug.** All eight
+       come from rulings with `chosen_text: ""`, which is a real DELETION, and
+       `<choice><orig>מקומו</orig><reg/></choice>` is a correct encoding of "this
+       word is deleted". Investigated as a suspected sibling of the `<orig/>`
+       defect fixed in `dcc7841` and it is not one.
+    3. **Ungated writers of tracked, non-regenerated files: none left.** The
+       sweep's two hits were false positives (both read `corrections_part1.json`
+       through `repo_path`, neither writes it). `patch_witness_word_indices.py`
+       was the one real member and is gated now.
+    4. **API fields served but never rendered: 8 of 11 candidates are false
+       positives.** `current_text_may_be_wrong`, `unverified_insertion` and
+       `stale_candidate` are KEYS of `FLAG_LABELS`, which the frontend fetches
+       wholesale into `FLAGS` and reads as `FLAGS[corr.flag]`;
+       `applied_decision_id`, `candidate_snapshot` and `lexical_source` are
+       ledger fields riding along in history rows, not display fields. The three
+       genuine ones are `flag_note` and the punctuation counts, above.
+
+    ### Method note
+
+    The field sweep walked API responses collecting dict keys and hit a trap
+    worth recording: several endpoints key their payloads BY WORD INDEX, so the
+    walk collected 900+ numeric "field names" and buried the 11 real ones. A
+    sweep over a structure that mixes data-keyed and schema-keyed dicts has to
+    filter for identifier-shaped keys or it reports its own input back.
+
 0BW. **[2026-09-06] HISTORY IS KEPT - BUT `history_for` RETURNS A SLOT'S HISTORY,
     NOT A WORD'S. Now it says which.**
 
