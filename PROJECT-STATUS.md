@@ -71,8 +71,9 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
-0CA. **[2026-09-06] THE SCROLL FLAKE IS THE DEFECT, NOT THE TEST - AND 11
-    DISPUTES NEVER REACH THE DASHBOARD AT ALL.**
+0CA. **[2026-09-06] THE SCROLL FLAKE IS THE DEFECT, NOT THE TEST. (The "11
+    unreachable disputes" in this entry's first version were a false alarm -
+    retracted below.)**
 
     ### The scroll "flake" is a live defect, and the obvious fix makes it worse
 
@@ -119,37 +120,47 @@ applying it to the corpus remain two separate, deliberate steps.
     all use the 900ms timer. Only the word click is demonstrated to fail, but the
     other two are the same proxy-for-condition shape.
 
-    ### 11 disputes that no reviewer can reach
+    ### RETRACTED: the 11 "unreachable" disputes are all reachable
 
-    Measured end to end: all **453** stage-4a consensus disputes do reach
-    `corrections_part1.json`, and the API serves **929** items against **928**
-    distinct word slots the frontend draws. The loss is small and entirely one
-    shape - a `delete` opcode has no word of its own, because it proposes
-    inserting BEFORE an index, so it has no anchor to render on.
+    **This entry originally reported 11 disputes no reviewer could get to. That
+    was wrong, and both halves of it were wrong.** Corrected the same day, before
+    anything was built on it.
 
-    **10 append-position proposals**, every one `delete`-opcode at
-    `word_index == len(words)` - "DocAI read a word after this klal's last one".
-    The API serves them; there is no `[data-word-index=N]` span to attach to, so
-    nothing is drawn. Several are substantive: klal 211 `בשם התוספות`, klal 175
-    `הלכה 7`, klal 88 `בעיא 4`, klal 84 `4 בעיא`, and 6 more in klalim 106, 114,
-    138, 159, 164, 193.
+    What is still true and was worth measuring: all **453** stage-4a consensus
+    disputes reach `corrections_part1.json`, and the API serves **929** items.
+    Nothing is lost between synthesis and the server.
 
-    **AND THE NAV COUNTS THEM.** Klal 211 reports `correction_count` 4 and
-    `open_count` 4, one of which is this unreachable, undecided
-    `possible_omission`. The reviewer is told there are four things to do and can
-    reach three. Klal 88 the same, inside its 11 open.
+    What was wrong is the rendering claim, and the error was method, not
+    arithmetic. **I reimplemented the frontend's merge rule in Python instead of
+    reading it** - `byIndex[c.word_index] = c` over every entry, plus the
+    assumption that an index with no word span cannot be drawn. `renderKlalBody`
+    does neither of those things:
 
-    **1 collision**: klal 68 w29 holds a `delete`-opcode proposal and a
-    `manual_correction` at one index. `claim_word_index` exempts `delete` from
-    collision detection on purpose - it has no slot of its own - and app.js's
-    `byIndex[c.word_index] = c` then keeps the last, so the insertion proposal is
-    invisible. The exemption is right server-side and leaves the frontend with
-    two entries and one slot.
+    * it EXCLUDES `delete` opcodes from `byIndex` (`app.js:1520`), so an
+      insertion proposal never competes with a word entry for a slot. The klal 68
+      w29 "collision" does not exist - both render, one as a word and one as a
+      gap marker.
+    * it has a dedicated block AFTER the word loop (`app.js:1778`) that draws
+      every `gapsBefore[idx]` with `idx >= words.length`. It was added 2026-08-25
+      for exactly this reviewer report (klal 219) and its own comment names the
+      same klalim I "found": 84, 88, 106, 114, 138, 159, 164, 175, 193, 211.
 
-    NOT FIXED - both need a UI decision rather than a code change: an insertion
-    proposal needs somewhere to be drawn that is not a word (a gap marker between
-    words, which `.punct-marker` already demonstrates the shape of), and the nav
-    counts must either exclude what cannot be reached or the marker must exist.
+    Verified in a browser rather than by reading, since reading is what produced
+    the error: `test_an_append_position_insertion_proposal_is_reachable` opens
+    each of the ten klalim and asserts a `.flag-gap` marker exists for every
+    append-position proposal. It passes. The test is KEPT - the property was
+    never pinned, which is why a wrong claim about it survived long enough to be
+    written down.
+
+    The nav counts are therefore right too: klal 211's four corrections are four
+    reachable corrections.
+
+    THE LESSON, which is the only thing here worth carrying forward: this is
+    Lesson 33's shape one level over. That lesson says check a tool's STATE, not
+    its printout; this was checking a MODEL of the renderer rather than the
+    renderer. A reimplementation of someone else's rule agrees with it right up
+    until the case you were investigating, which is the case it was written for.
+
 
 0BZ. **[2026-09-06] THE ID REACHES EVERY POSITION-RESOLVING TOOL; TWO DEAD
     FUNCTIONS OF MY OWN REMOVED; THIS FILE SPLIT SO THE PRIME DOCS LOAD IN ONE

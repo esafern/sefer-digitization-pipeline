@@ -3981,3 +3981,27 @@ def test_the_history_panel_says_whether_it_is_showing_a_word_or_a_position(serve
     else:
         assert "stable word id" in rendered
     assert page.test_errors == []
+
+
+def test_an_append_position_insertion_proposal_is_reachable(server, page):
+    """PROBE, 2026-09-06. A `possible_omission` at `word_index == len(words)` is
+    text the scan has AFTER the klal's last stored word. Ten of them exist. This
+    asserts the reviewer can actually reach each one - the marker exists, it is
+    clickable, and it is not silently absent."""
+    unreachable = []
+    for klal_id in (84, 88, 106, 114, 138, 159, 164, 175, 193, 211):
+        data = _get_json(server, f"/api/klal/{klal_id}")
+        n = len(data["clean_text"].split(" "))
+        want = [c for c in data["corrections"]
+                if c.get("word_index") is not None and c["word_index"] >= n]
+        if not want:
+            continue
+        _open_dashboard(page, server, klal_id=klal_id)
+        page.wait_for_timeout(800)
+        gaps = page.evaluate(
+            "(k) => document.querySelectorAll('#klal-block-'+k+' .flag-gap').length",
+            klal_id)
+        if gaps < len(want):
+            unreachable.append((klal_id, len(want), gaps))
+    assert not unreachable, (
+        f"append-position proposals with no marker to click: {unreachable}")
