@@ -2773,3 +2773,43 @@ def test_every_part1_title_ends_with_exactly_one_period(part1_by_id):
         elif re.search(r"[:,;•\[\]…]", title):
             offenders.append((klal_id, "punctuation other than the terminal period", title))
     assert not offenders, f"{len(offenders)} title(s) break the punctuation rule: {offenders[:6]}"
+
+
+# --- word_identity: the sidecar must never disagree with the corpus -----------
+
+def test_the_word_id_sidecar_agrees_with_the_corpus(part_klalim):
+    """`word_identity.json` is a SECOND COPY OF THE CORPUS'S STRUCTURE, which is
+    Lesson 13's shape, and the whole reason it is tolerable is that this test
+    makes a divergence loud.
+
+    A silently misaligned id array is strictly worse than no sidecar at all: it
+    ANSWERS, and from the first divergence onward every answer names the wrong
+    word - the exact failure that would make an id worse than the index it
+    replaces. Three writers touch part1.json (apply_reviewer_decisions,
+    apply_punctuation_decisions, and reconstruct_placeholder_klalim for Parts
+    2-3), and only the first reconciles ids today, so this firing after a
+    punctuation pass is expected and is the point.
+
+    SKIPPED, not failed, when the sidecar does not exist: it is opt-in and a
+    fresh clone has none. What must never pass silently is a sidecar that exists
+    and lies.
+    """
+    import word_identity as wid
+    state = wid.load()
+    if not state:
+        pytest.skip("no word_identity.json - run tools/seed_word_identity.py --apply")
+    problems = wid.verify(part_klalim["part1.json"], state)
+    assert not problems, (
+        "word_identity.json disagrees with part1.json:\n  " + "\n  ".join(problems) +
+        "\n\nRe-seed with tools/seed_word_identity.py --apply (new klalim only) or "
+        "--reseed (destroys id continuity for the klalim it renumbers)."
+    )
+
+
+def test_the_word_id_invariant_can_actually_fail():
+    """Lesson 25: prove the check fires before trusting that it passed."""
+    import word_identity as wid
+    klalim = [{"klal_id": 1, "clean_text": "אלף בית גימל"}]
+    assert wid.verify(klalim, {1: wid.seed_klal(["אלף", "בית", "גימל"])}) == []
+    assert wid.verify(klalim, {1: {"ids": [1, 2], "next": 3}}), (
+        "an id array shorter than its klal must be reported")

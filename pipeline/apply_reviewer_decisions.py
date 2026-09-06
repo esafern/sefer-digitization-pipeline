@@ -56,6 +56,7 @@ import os
 
 import corpus_io as cio
 import review_decisions as rd
+import word_identity as widentity
 
 # Moved one level deeper (pipeline/ or tools/) 2026-08-16 - REPO now goes up
 # two levels, not one, to keep resolving to the actual repo root where
@@ -914,6 +915,46 @@ def main():
 
     if not args.dry_run and (n_replace or n_insert_delete or n_manual or n_title):
         save_part1(part1)
+        # STABLE WORD IDS FOLLOW THE CORPUS, in the same step that writes it.
+        #
+        # Lesson 35 is that promoting a decision has side effects on everything
+        # describing the corpus, and every one has to happen in the same breath
+        # or the description rots against the thing it describes. The id sidecar
+        # is one more such description - and the one that exists precisely so a
+        # ruling survives this edit, so leaving it a step behind would defeat it.
+        #
+        # DIFF-DRIVEN off `words_before`, which this function already captures
+        # for flag reindexing: one code path covers replace, insert, delete,
+        # manual and title, including branches added later. Instrumenting each
+        # mutation site instead is how Lesson 34's defect got fixed three times
+        # in three branches of one function.
+        #
+        # Best-effort by design: an unseeded corpus (no sidecar yet) must not
+        # stop a correction from being applied. What it must not do is fail
+        # SILENTLY, so a klal whose sidecar is out of step is named.
+        try:
+            id_state = widentity.load()
+            if id_state:
+                touched, id_problems = 0, []
+                for klal in part1:
+                    kid = klal["klal_id"]
+                    before = words_before.get(kid)
+                    after = cio.words_of(klal)
+                    if before is None or before == after:
+                        continue
+                    try:
+                        widentity.reconcile(id_state, kid, before, after)
+                        touched += 1
+                    except ValueError as e:
+                        id_problems.append(str(e))
+                if touched:
+                    widentity.save(id_state)
+                    print(f"  word ids reconciled for {touched} klal(im)")
+                for problem in id_problems:
+                    print(f"  WARNING: {problem}")
+        except Exception as e:  # noqa: BLE001
+            print(f"  WARNING: word ids not updated ({type(e).__name__}: {e}) - "
+                  f"run tools/seed_word_identity.py --verify before trusting them")
 
     # The review state that has to follow the corpus. Deliberately AFTER the
     # corpus is written: a flag closed against an edit that never landed would be

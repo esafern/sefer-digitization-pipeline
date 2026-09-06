@@ -168,6 +168,20 @@ echo "== 5b/6 standalone corpus reports (ligature + lexicon-only) =="
 ./venv/bin/python tools/list_ligature_words.py
 ./venv/bin/python tools/review_lexicon_only_words.py
 
+# 5c: the dispute queue, ordered by how often a reviewer has adopted a consensus
+# of that shape. Pure local computation, 0.4s, no API calls - and it reads BOTH
+# the freshly-rebuilt queue (stage 4a) and the ledger, so it is stale the moment
+# either moves. That is exactly the "report nobody re-runs" shape 5b was added
+# for (Lesson 32): the numbers it prints get quoted, so it must be regenerated
+# rather than remembered.
+#
+# It writes a triage ORDER and never a flag, a decision, or corpus text. Nothing
+# downstream reads it - the ranking exists to tell a human what to open first,
+# and consensus still may not auto-approve at any threshold this data supports
+# (tools/estimate_consensus_posterior.py, ~31%).
+echo "== 5c/6 rank_dispute_queue.py =="
+./venv/bin/python tools/rank_dispute_queue.py
+
 echo "== 6/6 tests/ (corpus + pipeline-logic regression suites) =="
 ./venv/bin/python -m pytest tests/test_corpus_invariants.py tests/test_pipeline_logic.py -q
 

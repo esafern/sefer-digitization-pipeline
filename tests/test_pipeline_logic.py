@@ -7179,3 +7179,230 @@ def test_the_restart_rule_names_every_module_the_server_actually_imports():
         f"a rule that lists files it does not need is how the list stops being "
         f"read at all"
     )
+
+
+# --- word_identity: an address that survives the word's own text changing -----
+
+import word_identity as wid  # noqa: E402
+
+
+def test_a_corrected_word_keeps_its_id():
+    """THE point of the module. `(word, occurrence)` names the word a ruling was
+    ruling ON, so applying the ruling destroys the anchor - measured on the live
+    ledger, 517 of 543 unresolvable rulings are unresolvable for exactly this
+    reason. An id must not care what the word says."""
+    state = {1: wid.seed_klal("אלף בית גימל".split())}
+    before = wid.id_at(state, 1, 1)
+    kept, retired, minted = wid.reconcile(
+        state, 1, "אלף בית גימל".split(), "אלף בות גימל".split())
+    assert (kept, retired, minted) == (3, [], [])
+    assert wid.id_at(state, 1, 1) == before, "correcting the text changed the id"
+    assert wid.index_of(state, 1, before) == 1
+
+
+def test_an_insertion_earlier_moves_a_word_without_changing_its_id():
+    state = {1: wid.seed_klal("אלף בית גימל".split())}
+    gimel = wid.id_at(state, 1, 2)
+    _kept, retired, minted = wid.reconcile(
+        state, 1, "אלף בית גימל".split(), "אלף חדש בית גימל".split())
+    assert retired == [] and len(minted) == 1
+    assert wid.index_of(state, 1, gimel) == 3, "the id must follow the word"
+    assert minted[0] not in (wid.id_at(state, 1, 0), gimel)
+
+
+def test_a_deleted_words_id_retires_and_is_never_reissued():
+    """The failure that would make an id WORSE than an index: recycling an id
+    onto whatever slides into the deleted word's place resolves confidently to
+    the wrong word."""
+    state = {1: wid.seed_klal("אלף בית גימל".split())}
+    doomed = wid.id_at(state, 1, 1)
+    _k, retired, _m = wid.reconcile(
+        state, 1, "אלף בית גימל".split(), "אלף גימל".split())
+    assert retired == [doomed]
+    assert wid.index_of(state, 1, doomed) is None, "a retired id must not resolve"
+
+    _k2, _r2, minted = wid.reconcile(
+        state, 1, "אלף גימל".split(), "אלף חדש גימל".split())
+    assert doomed not in minted, "a retired id was handed out again"
+    assert wid.index_of(state, 1, doomed) is None
+
+
+def test_an_uneven_replacement_refuses_to_claim_the_words_are_the_same():
+    """Two words becoming one: nothing establishes which of the two the survivor
+    IS, so both retire and the survivor is new. An id that claimed continuity
+    here would be asserting a fact nobody checked."""
+    state = {1: wid.seed_klal("אלף בית גימל".split())}
+    old_ids = list(wid.ids_for(state, 1))
+    _k, retired, minted = wid.reconcile(
+        state, 1, "אלף בית גימל".split(), "אלף מאוחד".split())
+    assert set(retired) == {old_ids[1], old_ids[2]}
+    assert len(minted) == 1 and minted[0] not in old_ids
+
+
+def test_reconcile_refuses_a_sidecar_that_is_out_of_step():
+    """A silently misaligned id array is worse than none - it answers, and the
+    answer is wrong from the first divergence onward."""
+    state = {1: {"ids": [1, 2], "next": 3}}
+    try:
+        wid.reconcile(state, 1, "אלף בית גימל".split(), "אלף בית".split())
+    except ValueError as e:
+        assert "out of step" in str(e)
+    else:
+        raise AssertionError("reconcile accepted a sidecar with the wrong length")
+
+
+def test_verify_names_every_way_the_sidecar_can_lie():
+    klalim = [{"klal_id": 1, "clean_text": "אלף בית גימל"},
+              {"klal_id": 2, "clean_text": "אלף בית"},
+              {"klal_id": 3, "clean_text": "אלף בית"},
+              {"klal_id": 4, "clean_text": "אלף בית"}]
+    state = {
+        1: {"ids": [1, 2], "next": 3},          # too few ids
+        2: {"ids": [1, 1], "next": 2},          # duplicate
+        3: {"ids": [1, 5], "next": 3},          # high-water below a live id
+        # klal 4 missing entirely
+    }
+    problems = "\n".join(wid.verify(klalim, state))
+    assert "klal 1" in problems and "2 ids for 3 words" in problems
+    assert "klal 2" in problems and "duplicate" in problems
+    assert "klal 3" in problems and "high-water" in problems
+    assert "klal 4" in problems and "no ids at all" in problems
+    assert wid.verify(klalim, {k["klal_id"]: wid.seed_klal(cio.words_of(k))
+                               for k in klalim}) == []
+
+
+def test_resolve_finds_a_ruling_whose_word_was_replaced_out_from_under_it():
+    """The end-to-end property, against the exact shape that defeats
+    review_decisions.resolve_word_index: the ruling is APPLIED, so the word it
+    named is gone, and an earlier insert has moved everything besides."""
+    words = "אלף בית גימל דלת".split()
+    state = {7: wid.seed_klal(words)}
+    ruling = {"klal_id": 7, "word_index": 2,
+              "candidate_snapshot": dict(wid.snapshot_fields(state, 7, 2),
+                                         original_word="גימל"),
+              "chosen_text": "גמל"}
+    after = "אלף חדש בית גמל דלת".split()
+    wid.reconcile(state, 7, words, after)
+
+    assert rd.resolve_word_index(ruling, after) == (None, None), (
+        "the text-derived address is expected to fail here - that is the premise")
+    assert wid.resolve(state, ruling) == 3, (
+        "the id must still name the word, which now sits at w3 reading 'גמל'")
+    assert after[wid.resolve(state, ruling)] == "גמל"
+
+
+def test_the_applier_carries_word_ids_across_an_edit_it_makes(
+        apply_harness, decisions_path, tmp_path, monkeypatch):
+    """The WIRING, not the module. word_identity.reconcile being correct is
+    tested above; what this asserts is that a real apply calls it, so the
+    sidecar cannot silently fall a step behind the corpus it describes
+    (Lesson 35: everything describing the corpus updates in the same breath).
+
+    The edit is a one-word INSERT, which is the case that shifts everything
+    after it - a same-count replace moves no index and would pass even if
+    nothing were wired at all.
+    """
+    import word_identity as wid
+    state_path = tmp_path / "word_identity.json"
+    monkeypatch.setattr(wid, "path", lambda: str(state_path))
+
+    words = "אלף בית גימל".split()
+    wid.save({1: wid.seed_klal(words)})
+    before = wid.load()
+    gimel_id = wid.id_at(before, 1, 2)
+
+    entry = _correction(1, "delete", "חדש", None)
+    apply_harness([{"klal_id": 1, "clean_text": "אלף בית גימל"}], {"1": [entry]})
+    rd.append_decision("candidate_choice", klal_id=1, word_index=1,
+                       chosen_source="docai_reading", chosen_text="חדש",
+                       candidate_snapshot=entry, path=decisions_path)
+
+    assert apply_harness.run()[1] == "אלף חדש בית גימל"
+
+    after = wid.load()
+    assert wid.verify([{"klal_id": 1, "clean_text": "אלף חדש בית גימל"}], after) == [], (
+        "the sidecar did not follow the corpus through an applied insert - it "
+        "now describes a klal that no longer exists")
+    assert wid.index_of(after, 1, gimel_id) == 3, (
+        f"`גימל` moved from w2 to w3 and its id must move with it, not stay at "
+        f"w2 naming `בית`")
+    assert wid.id_at(after, 1, 1) not in wid.ids_for(before, 1), (
+        "the inserted word must get a FRESH id, not inherit the one at its index")
+
+
+# --- rank_dispute_queue: ordering the queue by a calibrated posterior ---------
+
+sys.path.insert(0, os.path.join(REPO, "tools"))
+import rank_dispute_queue as rank  # noqa: E402
+
+
+def test_the_posterior_is_not_the_raw_rate_at_small_n():
+    """A 1-of-1 stratum is not a certainty, and a table that prints 100% for it
+    is how a triage order becomes a decision. Beta(1,1) is what makes the
+    difference visible."""
+    assert rank._beta_mean(1, 1) == pytest.approx(2 / 3)
+    assert rank._beta_mean(0, 1) == pytest.approx(1 / 3)
+    assert rank._beta_mean(16, 16) == pytest.approx(17 / 18)
+    # ...and the interval says how little one observation licenses.
+    lo, hi = rank._beta_interval(1, 1)
+    assert lo < 0.3 and hi > 0.95, (lo, hi)
+
+
+def test_the_beta_interval_matches_the_analytic_answer():
+    """The interval is hand-rolled (no scipy in this repo's dependency set), so
+    it is checked against cases with a closed form: Beta(2,1) has CDF x^2 and
+    Beta(1,2) has 1-(1-x)^2."""
+    lo, hi = rank._beta_interval(1, 1)          # Beta(2,1)
+    assert lo == pytest.approx(0.05 ** 0.5, abs=2e-3)
+    assert hi == pytest.approx(0.95 ** 0.5, abs=2e-3)
+    lo, hi = rank._beta_interval(0, 1)          # Beta(1,2)
+    assert lo == pytest.approx(1 - 0.95 ** 0.5, abs=2e-3)
+    assert hi == pytest.approx(1 - 0.05 ** 0.5, abs=2e-3)
+    lo, hi = rank._beta_interval(0, 0)          # uniform
+    assert (lo, hi) == pytest.approx((0.05, 0.95), abs=2e-3)
+
+
+def test_a_thin_stratum_falls_back_instead_of_being_trusted():
+    """MIN_STRATUM_N exists so a two-example engine set cannot outrank a
+    hundred-example one on the strength of its two examples."""
+    sample = ([({"consensus_engines": ["surya", "vlm"],
+                 "consensus_reading": "x"}, True)] * 40 +
+              [({"consensus_engines": ["surya", "vlm"],
+                 "consensus_reading": "x"}, False)] * 60 +
+              [({"consensus_engines": ["docai", "dicta"],
+                 "consensus_reading": "x"}, True)] * 2)
+    model = rank.build_model(sample)
+    thin, _lo, _hi, basis = rank.score(model, {"agreeing_engines": ["docai", "dicta"]})
+    assert "too few examples" in basis, basis
+    fat, _lo2, _hi2, basis2 = rank.score(model, {"agreeing_engines": ["surya", "vlm"]})
+    assert "engine set" in basis2 and fat == pytest.approx(41 / 102)
+    assert thin != pytest.approx(3 / 4), (
+        "the thin stratum was scored on its own two examples")
+
+
+def test_an_unseen_engine_set_falls_all_the_way_back_to_the_sample():
+    """A dispute whose engine set never appears in the ledger must still get a
+    score, and must say that is what happened - silently scoring it as if its
+    stratum were measured is the failure mode."""
+    sample = [({"consensus_engines": ["surya", "vlm"], "consensus_reading": "x"},
+               True)] * 10
+    model = rank.build_model(sample)
+    _p, _lo, _hi, basis = rank.score(model, {"agreeing_engines": ["dicta", "docai", "surya"]})
+    assert "whole calibration sample" in basis, basis
+
+
+def test_adoption_is_measured_against_what_the_consensus_ACTUALLY_proposed():
+    """`adopted` must compare the reviewer's text to `consensus_reading`, not to
+    "did they change anything" - a reviewer who typed their own third reading
+    did NOT adopt the consensus, and counting them as agreement would inflate
+    every stratum."""
+    rows = [{"decision_type": "disputed_choice", "chosen_text": "בות",
+             "candidate_snapshot": {"consensus_reading": "בות",
+                                    "consensus_engines": ["surya", "vlm"]}},
+            {"decision_type": "disputed_choice", "chosen_text": "שלישי",
+             "candidate_snapshot": {"consensus_reading": "בות",
+                                    "consensus_engines": ["surya", "vlm"]}}]
+    import unittest.mock as mock
+    with mock.patch.object(rank.rd, "all_records", lambda: rows):
+        sample = rank.calibration_sample()
+    assert [a for _s, a in sample] == [True, False]

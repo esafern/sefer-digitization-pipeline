@@ -275,6 +275,10 @@ For exactly what each data file contains, see `PIPELINE-DATA-REFERENCE.md`.
   imported, never run directly, by scripts in both `pipeline/` and
   `tools/`: `vision_adjudication_common.py` (crop/cache/JSON-recovery/
   retry/client machinery for every Gemini-calling script) and
+  `word_identity.py` (the stable word-id sidecar: an address that survives both
+  the index moving and the word's own text being corrected — the case
+  `(word, occurrence)` cannot cover, because applying a ruling destroys the word
+  that anchor names), and
   `corpus_io.py` (repo paths, corpus/derived-artifact loading, DocAI
   page-token loading, alignment/gematria-trace readers, Hebrew-text
   helpers). Both are imported via
@@ -301,6 +305,12 @@ For exactly what each data file contains, see `PIPELINE-DATA-REFERENCE.md`.
     page-crossing klalim): `verify_reconstruction_witness.py`,
     `verify_witness_vision.py`, `verify_flagged_candidates_vision.py`,
     `patch_witness_word_indices.py`.
+  - **Queue triage**: `rank_dispute_queue.py` — orders the open dispute queue by
+    P(a reviewer adopts the consensus), calibrated from the ledger's own rulings;
+    writes `DISPUTE-QUEUE-BY-POSTERIOR.md`. Stage 5c of `rebuild_all.sh`.
+    `seed_word_identity.py` — creates/checks `word_identity.json`, the stable
+    word-id sidecar (see `pipeline/word_identity.py`); `--reseed` destroys id
+    continuity and says so.
   - **Export**: `export_corpus.py` — writes the reviewed corpus as plain
     text, ALTO XML v4, PAGE XML 2019, or TEI P5, applying all current human
     decisions in memory exactly as `apply_reviewer_decisions.py` would,
@@ -442,7 +452,7 @@ this repo as an LLM agent, follow them exactly.
   IMPORTS.** Whenever modifying `pipeline/review_server.py`, any file in
   `review_frontend/`, or any of the six pipeline modules the server imports —
   `corpus_io.py`, `identity.py`, `review_counts.py`, `review_data.py`,
-  `review_decisions.py`, `scan_alignment.py` (derived from
+  `review_decisions.py`, `scan_alignment.py`, `word_identity.py` (derived from
   its import graph 2026-09-06, not guessed, and pinned by
   `test_the_restart_rule_names_every_module_the_server_actually_imports`) — immediately restart the background server process
   (`kill <PID>` + restart `python3 pipeline/review_server.py`) without asking.

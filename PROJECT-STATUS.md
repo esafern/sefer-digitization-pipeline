@@ -53,6 +53,134 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0BS. **[2026-09-06] A STABLE WORD ID, AND THE DISPUTE QUEUE ORDERED BY A
+    CALIBRATED POSTERIOR.**
+
+    ### Why the addresses this repo already had could not be fixed
+
+    Measured over the 594 current word-level rulings, resolved through
+    `review_decisions.resolve_word_index`:
+
+    | resolves by | n |
+    |---|---:|
+    | `word_index` | 42 |
+    | `(word, occurrence)` | 1 |
+    | word is unique in the klal | 8 |
+    | **does not resolve** | **543** (517 applied, 26 unapplied) |
+
+    **517 of the 543 fail BY CONSTRUCTION, and no better text anchor can fix
+    them.** `occurrence_of` was added as "the stable half of a word's address"
+    and its arithmetic is right - `word_index` loses 50% of a klal's addresses
+    per edit and `(word, occurrence)` loses 0.18%. But the anchor names
+    `original_word`, the word the ruling was ruling ON, and applying the ruling
+    is precisely what replaces that word. klal 4 w0 anchors on `ד` while the
+    corpus now holds `ד`; klal 57 w0 anchors on `נז` and holds `נז אין`. The
+    anchor is a name for text the successful operation destroyed. Any address
+    DERIVED FROM THE TEXT has this property, however clever the derivation.
+
+    ### `pipeline/word_identity.py`
+
+    An id assigned to the POSITION and carried across edits. Contract: a word
+    whose TEXT is corrected keeps its id; a word other edits shift keeps its id;
+    a deleted word's id RETIRES and is never reissued; an inserted word gets a
+    fresh one. An uneven replacement (n words become m) retires all n and mints
+    m - the correspondence is genuinely unknown there, and an id that claimed
+    continuity would assert a fact nobody checked.
+
+    **Reconciliation is DIFF-DRIVEN, not instrumented per opcode.** The applier
+    has three mutation branches plus manual and title paths, and Lesson 34 is the
+    record of what per-branch implementation costs: diffing `words_before`
+    against the written text covers every branch through one path, including ones
+    added later. It hooks the `words_before` map the applier already captures for
+    flag reindexing.
+
+    **It is a SIDECAR (`word_identity.json`), not a column in part*.json**, so
+    structural bookkeeping stays out of the one file a human edits and the Parts
+    2-3 gate protects. The cost is stated rather than hidden: a second copy of
+    the corpus's structure is Lesson 13's shape, and one that drifts silently is
+    worse than none - so `verify()` exists, a GATED invariant calls it, and
+    every mismatch is loud. Three writers touch part1.json
+    (`apply_reviewer_decisions`, `apply_punctuation_decisions`,
+    `reconstruct_placeholder_klalim`) and only the first reconciles today, so the
+    invariant firing after a punctuation pass is expected and is the point.
+
+    Seeded for Part 1: **222 klalim, 52,629 words addressed**, verify clean. New
+    rulings carry `word_id` from both the manual and the disputed path.
+
+    **A guard bug caught while wiring the disputed path**:
+    `_with_stable_anchor` opened with "if `word_occurrence` is already set,
+    return unchanged" - correct while the occurrence was the only field it
+    added, and it would have silently skipped `word_id` on every snapshot that
+    already carried an anchor. Lesson 34 once more, a second field added inside a
+    guard written for the first. Each field is now added independently.
+
+    Seven module tests plus an end-to-end one asserting the APPLIER calls it
+    (unwiring the call fails it). The end-to-end case uses an INSERT, because a
+    same-count replace shifts nothing and would pass against no wiring at all.
+
+    ### `tools/rank_dispute_queue.py` - the queue, ordered
+
+    `estimate_consensus_posterior.py` answers a different question (may consensus
+    EVER auto-approve: no, ~31%) and gives one number for the corpus, which
+    cannot order anything. This scores each dispute from the stratum it falls in.
+
+    **The calibration sample had to come from the ledger**, because
+    `consensus_disputes_part1.json` holds only UNDECIDED positions - stage 4a
+    drops a dispute the moment a human rules on it - so the live file contains
+    zero examples of what reviewers do. 168 `disputed_choice` rulings recorded a
+    `consensus_reading`; "adopted" means the reviewer's text equals it.
+
+    **The engine SET is far more predictive than the engine COUNT:**
+
+    | engines | n | adopted | posterior |
+    |---|---:|---:|---:|
+    | `dicta,surya,vlm` | 16 | 16 | 94% |
+    | `dicta,surya` | 15 | 13 | 82% |
+    | `surya,vlm` | 100 | 79 | 78% |
+    | `dicta,vlm` | 12 | 8 | 64% |
+    | `docai,surya,vlm` | 8 | 2 | 30% |
+    | `docai,vlm` | 7 | 1 | 22% |
+    | `docai,surya` | 9 | 1 | 18% |
+
+    Count says 2 engines 71% and 3 engines 75% - nearly flat. The SET spans 18%
+    to 94%. **Every set containing DocAI is low, and that is mostly SELECTION,
+    not accuracy**: candidates are GENERATED from DocAI's disagreements with the
+    corpus, so a DocAI-involved consensus is disproportionately re-proposing a
+    word vision adjudication or a human has already settled. It means "this has
+    probably been looked at", not "DocAI is unreliable" - the report says so
+    where the number appears.
+
+    Scores are Beta(1,1) posteriors, not raw rates, so a 1-of-1 stratum reads 67%
+    and not 100%, with a 90% credible interval beside it; a stratum under 8
+    observations falls back to the engine count and the table says so in the row.
+    The interval is hand-rolled (no scipy in this repo) and **verified against
+    the analytic Beta(2,1)/Beta(1,2) forms and against scipy to 3-4 decimals**.
+
+    Current queue: **298 disputes at >=75%, 120 at >=50%, 2 at >=25%, 33 below**.
+    Output `DISPUTE-QUEUE-BY-POSTERIOR.md` + `dispute_queue_ranked.json`, wired
+    into `rebuild_all.sh` as stage 5c (Lesson 32 - it reads both the queue and
+    the ledger, so it is stale the moment either moves). Memoized after
+    measuring: 8 distinct strata were being integrated 453 times, **15.3s ->
+    0.38s**, which is the difference between belonging in the chain and not.
+
+    **What the ordering surfaced.** The top band is thick with abbreviation-mark
+    repairs - `לייה`->`ל"ה`, `מהרי"י`->`מהר"י`, `וצייד`->`וצ"ד`, `הגמי`->`הגמ'` -
+    the same family as item `0AQ`'s geresh-read-as-yod, one mark over. A STRICT
+    test (single substitution only) finds 9 across the queue and **undercounts**:
+    it does not catch transpositions like `מהרי"י`->`מהר"י`. Not reported as a
+    swept class - the real extent is unmeasured, and `abbreviation_shape` already
+    marks 7 by a different and narrower test.
+
+    ### Limits, stated where they are load-bearing
+
+    The calibration is positions a human RULED ON. That is a weaker selection
+    effect than `estimate_consensus_posterior`'s 39-of-40 case (there the
+    reviewer had confirmed the word BEFORE consensus proposed anything, so
+    consensus lost by construction), but not zero: if the easy disputes were
+    worked first, the untouched queue is harder than the sample says (Lesson 27).
+    The ranking orders attention and decides nothing; consensus still may not
+    auto-approve at any threshold this data supports.
+
 0BR. **[2026-09-06] THE MANUAL WRITE PATH ALREADY RECORDS THE SCAN POSITION -
     WHAT WAS MISSING WAS THE GUARD. AND THE RESTART RULE NOW COVERS WHAT THE
     SERVER IMPORTS.**

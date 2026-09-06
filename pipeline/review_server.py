@@ -38,6 +38,7 @@ import review_counts as rcount
 import review_data as rdata
 import identity
 import review_decisions as rd
+import word_identity as widentity
 
 # Moved one level deeper (pipeline/ or tools/) 2026-08-16 - REPO now goes up
 # two levels, not one, to keep resolving to the actual repo root where
@@ -1882,7 +1883,16 @@ def _with_stable_anchor(snapshot, klal_id, word_index):
     if not (0 <= word_index < len(words)):
         return snapshot          # an append-position `delete` names no word
     snapshot = dict(snapshot)
-    snapshot["word_occurrence"] = cio.occurrence_of(words, word_index)
+    # THE ID IS NOT GATED ON THE OCCURRENCE, and the early return that used to
+    # sit above this is why that has to be said. It read "if word_occurrence is
+    # already set, return unchanged" - correct while the occurrence was the only
+    # thing this function added, and it would have silently skipped the word_id
+    # on every snapshot that already carried an anchor. That is Lesson 34's
+    # shape once more: a second field added inside a guard written for the
+    # first. Each field is added only if absent, independently.
+    snapshot.update(widentity.snapshot_fields(widentity.load(), klal_id, word_index))
+    if snapshot.get("word_occurrence") is None:
+        snapshot["word_occurrence"] = cio.occurrence_of(words, word_index)
     snapshot.setdefault("original_word", words[word_index])
     return snapshot
 
@@ -1923,6 +1933,15 @@ def _manual_snapshot(klal_id, word_index, original_word):
             # (Lesson 9), and unlike a text search it records what was ruled on
             # rather than asking where the word happens to be now.
             snapshot["word_occurrence"] = cio.occurrence_of(cio.words_of(klal), word_index)
+            # THE STABLE ID, since 2026-09-06. The occurrence anchor above names
+            # `original_word`, so applying this very ruling destroys it - 517 of
+            # the ledger's 543 unresolvable rulings are unresolvable for exactly
+            # that reason. A word_id names the POSITION and survives its own text
+            # being corrected. Merged rather than assigned, so a corpus with no
+            # sidecar records nothing instead of a null that later reads as
+            # "recorded, and empty".
+            snapshot.update(widentity.snapshot_fields(widentity.load(), klal_id,
+                                                      word_index))
             bbox, page = _word_scan_position(klal_id, cio.words_of(klal), word_index)
             if bbox is not None:
                 snapshot["bbox"] = bbox
