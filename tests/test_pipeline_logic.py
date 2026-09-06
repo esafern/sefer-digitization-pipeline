@@ -7284,11 +7284,18 @@ def test_resolve_finds_a_ruling_whose_word_was_replaced_out_from_under_it():
     after = "אלף חדש בית גמל דלת".split()
     wid.reconcile(state, 7, words, after)
 
-    assert rd.resolve_word_index(ruling, after) == (None, None), (
-        "the text-derived address is expected to fail here - that is the premise")
+    # The TEXT-derived paths fail here - that is the premise. Checked with the
+    # id withheld, so this asserts what it says it asserts.
+    text_only = dict(ruling, candidate_snapshot={
+        k: v for k, v in ruling["candidate_snapshot"].items() if k != "word_id"})
+    assert rd.resolve_word_index(text_only, after, id_state={}) == (None, None)
+
+    # The id finds it, both through the module and through the resolver - and the
+    # resolver is handed THIS state, never the one on disk.
     assert wid.resolve(state, ruling) == 3, (
         "the id must still name the word, which now sits at w3 reading 'גמל'")
     assert after[wid.resolve(state, ruling)] == "גמל"
+    assert rd.resolve_word_index(ruling, after, id_state=state) == (3, "word_id")
 
 
 def test_the_applier_carries_word_ids_across_an_edit_it_makes(
@@ -7308,7 +7315,7 @@ def test_the_applier_carries_word_ids_across_an_edit_it_makes(
 
     words = "אלף בית גימל".split()
     wid.save({1: wid.seed_klal(words)})
-    before = wid.load()
+    before = wid.load_for_update()   # a PRIVATE copy - load() hands back the cache
     gimel_id = wid.id_at(before, 1, 2)
 
     entry = _correction(1, "delete", "חדש", None)
@@ -7319,7 +7326,7 @@ def test_the_applier_carries_word_ids_across_an_edit_it_makes(
 
     assert apply_harness.run()[1] == "אלף חדש בית גימל"
 
-    after = wid.load()
+    after = wid.load_for_update()
     assert wid.verify([{"klal_id": 1, "clean_text": "אלף חדש בית גימל"}], after) == [], (
         "the sidecar did not follow the corpus through an applied insert - it "
         "now describes a klal that no longer exists")
@@ -7517,3 +7524,90 @@ def test_the_full_tei_export_survives_a_ruling_with_a_null_snapshot(tmp_path):
     read = [(el.find("t:orig", ns).text if el.find("t:orig", ns) is not None
              else el.text) for el in para]
     assert " ".join(read) == "אלף בית גימל", read
+
+
+def test_a_deleted_words_id_is_a_tombstone_not_an_erasure():
+    """Reviewer, 2026-09-06: "why does deleting a word retire its id? keep it and
+    flag it as deleted."
+
+    Right, and the first version was wrong. It dropped the id and leaned on the
+    high-water mark never falling, which stopped the id being REISSUED but threw
+    away the fact that it had existed - so index_of said None for "deleted" and
+    None for "never existed". Those are different answers and only one is
+    actionable: a reviewer whose ruling names a tombstoned id can be told the
+    word was deliberately removed, and what it said.
+    """
+    state = {1: wid.seed_klal("אלף בית גימל".split())}
+    doomed = wid.id_at(state, 1, 1)
+    wid.reconcile(state, 1, "אלף בית גימל".split(), "אלף גימל".split())
+
+    assert wid.index_of(state, 1, doomed) is None, "it has no position any more"
+    assert wid.locate(state, 1, doomed) == (None, "retired")
+    assert wid.locate(state, 1, 9999) == (None, "unknown"), (
+        "an id that never existed must not read as a deletion")
+    stone = wid.retirement_of(state, 1, doomed)
+    assert stone["word"] == "בית" and stone["index"] == 1
+    assert stone["reason"] == "deleted"
+
+    # ...and it is still never reissued.
+    _k, _r, minted = wid.reconcile(
+        state, 1, "אלף גימל".split(), "אלף חדש גימל".split())
+    assert doomed not in minted
+
+
+def test_an_uneven_rewrite_tombstones_both_words_and_names_what_replaced_them():
+    """The other way an id dies. `replaced_by` is a POINTER, not a claim that the
+    new word is the same word - the whole reason an uneven replacement mints
+    fresh ids is that no correspondence was establishable."""
+    state = {1: wid.seed_klal("אלף בית גימל".split())}
+    old = list(wid.ids_for(state, 1))
+    wid.reconcile(state, 1, "אלף בית גימל".split(), "אלף מאוחד".split())
+    for dead in old[1:]:
+        stone = wid.retirement_of(state, 1, dead)
+        assert stone["reason"] == "replaced"
+        assert stone["replaced_by"] == [wid.id_at(state, 1, 1)]
+
+
+def test_verify_refuses_an_id_that_is_both_live_and_tombstoned():
+    klalim = [{"klal_id": 1, "clean_text": "אלף בית"}]
+    both = {1: {"ids": [1, 2], "next": 3, "retired": {"2": {"word": "x"}}}}
+    assert any("live and tombstoned" in p for p in wid.verify(klalim, both))
+    reissuable = {1: {"ids": [1, 2], "next": 3, "retired": {"7": {"word": "x"}}}}
+    assert any("REISSUE" in p for p in wid.verify(klalim, reissuable))
+
+
+def test_the_resolver_prefers_the_id_and_reports_a_deletion_as_such():
+    """The id must be consulted BEFORE every text-matching branch, because those
+    branches match on text and applying a ruling replaces the text they match."""
+    words = "אלף בית גימל".split()
+    state = {4: wid.seed_klal(words)}
+    ruling = {"klal_id": 4, "word_index": 1,
+              "candidate_snapshot": {"original_word": "בית",
+                                     "word_id": wid.id_at(state, 4, 1)}}
+    assert rd.resolve_word_index(ruling, words, id_state=state) == (1, "word_id")
+
+    after = "אלף גימל".split()
+    wid.reconcile(state, 4, words, after)
+    assert rd.resolve_word_index(ruling, after, id_state=state) == (None, "retired"), (
+        "a deleted word is a REPORTABLE outcome, not an unresolvable address")
+
+
+def test_follow_corpus_does_not_seed_a_klal_it_was_never_given():
+    """reconcile() seeds an unknown klal, which is right when called directly and
+    wrong from a writer: reconstruct_placeholder_klalim writes part2/part3 and
+    the sidecar is Part 1 only, so seeding on first edit would silently take on
+    445 klalim that seed_word_identity.py makes opt-in. Scope is a decision."""
+    state_path = None
+    import tempfile, os as _os
+    with tempfile.TemporaryDirectory() as d:
+        state_path = _os.path.join(d, "w.json")
+        wid.save({1: wid.seed_klal("אלף בית".split())}, state_path)
+        klalim = [{"klal_id": 1, "clean_text": "אלף בית גימל"},
+                  {"klal_id": 900, "clean_text": "חדש טקסט"}]
+        before = {1: ["אלף", "בית"], 900: ["טקסט"]}
+        touched, problems = wid.follow_corpus(before, klalim, state_path)
+        assert problems == []
+        assert touched == 1, "only the seeded klal should have been reconciled"
+        after = wid.load_for_update(state_path)
+        assert 900 not in after, "an unseeded klal must not be invented on a write"
+        assert len(wid.ids_for(after, 1)) == 3

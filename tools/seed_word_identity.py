@@ -58,7 +58,7 @@ def main():
     args = ap.parse_args()
 
     klalim = corpus_klalim(args.all_parts)
-    state = wid.load()
+    state = wid.load_for_update()
 
     if args.verify:
         problems = wid.verify(klalim, state)

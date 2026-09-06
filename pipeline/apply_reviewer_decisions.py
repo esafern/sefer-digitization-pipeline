@@ -933,25 +933,11 @@ def main():
         # stop a correction from being applied. What it must not do is fail
         # SILENTLY, so a klal whose sidecar is out of step is named.
         try:
-            id_state = widentity.load()
-            if id_state:
-                touched, id_problems = 0, []
-                for klal in part1:
-                    kid = klal["klal_id"]
-                    before = words_before.get(kid)
-                    after = cio.words_of(klal)
-                    if before is None or before == after:
-                        continue
-                    try:
-                        widentity.reconcile(id_state, kid, before, after)
-                        touched += 1
-                    except ValueError as e:
-                        id_problems.append(str(e))
-                if touched:
-                    widentity.save(id_state)
-                    print(f"  word ids reconciled for {touched} klal(im)")
-                for problem in id_problems:
-                    print(f"  WARNING: {problem}")
+            touched, id_problems = widentity.follow_corpus(words_before, part1)
+            if touched:
+                print(f"  word ids reconciled for {touched} klal(im)")
+            for problem in id_problems:
+                print(f"  WARNING: {problem}")
         except Exception as e:  # noqa: BLE001
             print(f"  WARNING: word ids not updated ({type(e).__name__}: {e}) - "
                   f"run tools/seed_word_identity.py --verify before trusting them")

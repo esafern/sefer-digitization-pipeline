@@ -51,6 +51,7 @@
 # fixed in the one that fired and the siblings keep the bug. Diffing old words
 # against new words handles every branch through one code path, including ones
 # added later.
+import copy
 import difflib
 import json
 import os
@@ -68,15 +69,43 @@ def path():
     return cio.repo_path(FILENAME)
 
 
+_LOAD_CACHE = {}   # path -> ((mtime_ns, size), state)
+
+
 def load(state_path=None):
     """The sidecar, or an empty map when it does not exist yet.
 
     Absent is a legitimate state - a fresh clone, or a corpus this has never
     been seeded for - and must not stop anything from running. Callers that
     need it to be present say so themselves.
+
+    MEMOIZED on (mtime_ns, size), the same shape review_decisions._read_all and
+    scan_alignment.load_regions use and for the same reason: resolve_word_index
+    consults this per RULING, so a bare re-parse would read and rebuild the file
+    once for each of 594 rulings in a loop. Any write invalidates it, including
+    this module's own save(), so it cannot go stale across an apply.
+
+    **DO NOT MUTATE WHAT THIS RETURNS.** It is the cached object itself, shared
+    with every other caller. `reconcile()` writes into the dict it is given, so
+    handing it this one poisons the cache for everything that reads afterwards -
+    which is exactly what happened the moment the memo landed: the applier's
+    `before = load()` and the state it then reconciled were the same object, and
+    a test comparing before against after compared the after-state with itself.
+    Use load_for_update() when you intend to change it.
     """
-    raw = cio.load_json(state_path or path(), None) or {}
-    return {int(k): v for k, v in raw.items()}
+    target = state_path or path()
+    try:
+        st = os.stat(target)
+        stamp = (st.st_mtime_ns, st.st_size)
+    except OSError:
+        return {}
+    cached = _LOAD_CACHE.get(target)
+    if cached and cached[0] == stamp:
+        return cached[1]
+    raw = cio.load_json(target, None) or {}
+    state = {int(k): v for k, v in raw.items()}
+    _LOAD_CACHE[target] = (stamp, state)
+    return state
 
 
 def save(state, state_path=None):
@@ -108,6 +137,16 @@ def save(state, state_path=None):
         f.flush()
         os.fsync(f.fileno())
     os.replace(tmp, target)
+
+
+def load_for_update(state_path=None):
+    """A private copy of the sidecar, safe to mutate and hand to reconcile().
+
+    Deep-copied off the shared cache rather than re-parsed - 2.1ms against a
+    file parse, and it is the correctness half of load()'s memo. Every writer
+    goes through this; every reader should use load().
+    """
+    return copy.deepcopy(load(state_path))
 
 
 def seed_klal(words, start=1):
@@ -147,6 +186,31 @@ def index_of(state, klal_id, word_id):
         return None
 
 
+def retirement_of(state, klal_id, word_id):
+    """Why this id is gone, or None if it is not - {word, index, reason,
+    replaced_by?}.
+
+    The half of the answer `index_of` cannot give: it returns None both for an id
+    that was deleted and for one that never existed, and a reviewer needs those
+    told apart.
+    """
+    return ((state.get(klal_id) or {}).get("retired") or {}).get(str(word_id))
+
+
+def locate(state, klal_id, word_id):
+    """(index, status) for an id. status is "live", "retired" or "unknown".
+
+    The accessor callers should prefer over index_of, because it distinguishes
+    the three outcomes rather than collapsing two of them into None.
+    """
+    idx = index_of(state, klal_id, word_id)
+    if idx is not None:
+        return idx, "live"
+    if retirement_of(state, klal_id, word_id) is not None:
+        return None, "retired"
+    return None, "unknown"
+
+
 def reconcile(state, klal_id, old_words, new_words):
     """Carry ids across one klal's edit. Returns (kept, retired, minted).
 
@@ -178,19 +242,82 @@ def reconcile(state, klal_id, old_words, new_words):
         )
 
     out, retired, minted = [], [], []
+    tombstones = dict(entry.get("retired") or {})
     sm = difflib.SequenceMatcher(None, old_words, new_words, autojunk=False)
     for tag, i1, i2, j1, j2 in sm.get_opcodes():
         if tag == "equal" or (tag == "replace" and (i2 - i1) == (j2 - j1)):
             out.extend(old_ids[i1:i2])
         else:
-            retired.extend(old_ids[i1:i2])
+            fresh = []
             for _ in range(j2 - j1):
                 out.append(nxt)
                 minted.append(nxt)
+                fresh.append(nxt)
                 nxt += 1
-    state[klal_id] = {"ids": out, "next": nxt}
+            for offset, dead in enumerate(old_ids[i1:i2]):
+                retired.append(dead)
+                # WHAT it said and WHERE it was, so a ruling naming this id gets
+                # an answer rather than a silence. `reason` distinguishes the two
+                # ways an id dies: the word was removed outright, or it was one
+                # of n words rewritten into m and no correspondence was
+                # establishable (see this function's docstring on why inventing
+                # one is refused). `replaced_by` names the ids that took its
+                # place, which is as close to continuity as the evidence allows -
+                # a pointer, not a claim that they are the same word.
+                tombstones[str(dead)] = {
+                    "word": old_words[i1 + offset],
+                    "index": i1 + offset,
+                    "reason": "deleted" if not fresh else "replaced",
+                    **({"replaced_by": fresh} if fresh else {}),
+                }
+    state[klal_id] = {"ids": out, "next": nxt, "retired": tombstones}
     kept = len(out) - len(minted)
     return kept, retired, minted
+
+
+def follow_corpus(words_before, klalim, state_path=None):
+    """Carry every id across whatever a writer just did. -> (touched, problems).
+
+    THE ONE PLACE ALL THREE CORPUS WRITERS CALL. apply_reviewer_decisions,
+    apply_punctuation_decisions and reconstruct_placeholder_klalim each write
+    part*.json, and each needs the identical follow-up: diff what they changed,
+    reconcile the ids, save. Written out three times it would be Lesson 13 in the
+    module whose own header invokes it - and worse, the two that were NOT wired
+    were how the sidecar could silently fall behind the corpus in the first
+    place.
+
+    `words_before` is {klal_id: [words]} captured BEFORE the write. Best-effort
+    by contract: an unseeded corpus (no sidecar) reconciles nothing and reports
+    nothing, so a writer is never blocked by an optional artifact. What it does
+    not do is fail silently - a klal whose ids are out of step comes back in
+    `problems` for the caller to print.
+
+    A klal NOT ALREADY IN THE SIDECAR IS SKIPPED, not seeded. reconcile() falls
+    back to seed_klal for an unknown klal, which is right when it is called
+    directly but wrong here: tools/reconstruct_placeholder_klalim.py writes
+    part2/part3.json, the sidecar is seeded for Part 1 only, and seeding on
+    first edit would silently take on 445 klalim that
+    tools/seed_word_identity.py deliberately makes opt-in behind --all-parts.
+    Scope is a decision, not a side effect of an edit.
+    """
+    state = load_for_update(state_path)
+    if not state:
+        return 0, []
+    touched, problems = 0, []
+    for klal in klalim:
+        kid = klal["klal_id"]
+        before = words_before.get(kid)
+        after = cio.words_of(klal)
+        if before is None or before == after or kid not in state:
+            continue
+        try:
+            reconcile(state, kid, before, after)
+            touched += 1
+        except ValueError as e:
+            problems.append(str(e))
+    if touched:
+        save(state, state_path)
+    return touched, problems
 
 
 def verify(klalim, state):
@@ -218,6 +345,18 @@ def verify(klalim, state):
             problems.append(
                 f"klal {kid}: duplicate ids {dupes[:5]} - an id that names two "
                 f"positions is not an identity")
+        dead = entry.get("retired") or {}
+        overlap = sorted(set(ids) & {int(k) for k in dead})
+        if overlap:
+            problems.append(
+                f"klal {kid}: id(s) {overlap[:5]} are both live and tombstoned - "
+                f"an id cannot name a word and record its removal at once")
+        beyond = sorted(i for i in (int(k) for k in dead) if i >= entry.get("next", 0))
+        if beyond:
+            problems.append(
+                f"klal {kid}: tombstoned id(s) {beyond[:5]} are at or above the "
+                f"high-water mark {entry.get('next')}, so a future insert would "
+                f"REISSUE an id this klal has already used and retired")
         if ids and entry.get("next", 0) <= max(ids):
             problems.append(
                 f"klal {kid}: high-water mark {entry.get('next')} is not above "

@@ -61,6 +61,7 @@ INSTALL_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(INSTALL_DIR, "pipeline"))
 import corpus_io as cio  # noqa: E402
 import review_decisions as rd  # noqa: E402
+import word_identity as widentity  # noqa: E402
 
 _LAZY = {
     "PART1_PATH": lambda: cio.PART1_PATH,
@@ -152,6 +153,9 @@ def main():
     candidates = load_candidates()
     part1 = load_part1()
     by_klal = {k["klal_id"]: k for k in part1}
+    # The text BEFORE this run, for word_identity.follow_corpus below. Captured
+    # here because the klal dicts are mutated in place further down.
+    words_before = {k["klal_id"]: cio.words_of(k) for k in part1}
 
     # only accepted decisions insert anything; group by klal, descending
     # word_index within each klal so an earlier insertion never shifts the
@@ -205,6 +209,18 @@ def main():
 
     if not args.dry_run and applied:
         save_part1(part1)
+        # STABLE WORD IDS FOLLOW THIS WRITE TOO. This script inserts `[.]`
+        # tokens, which is a word-count change like any other - and it was one of
+        # the two corpus writers that did NOT reconcile, so a punctuation pass
+        # left the sidecar describing a corpus that no longer existed and the
+        # gated invariant went red with re-seeding (which destroys id continuity)
+        # as the only remedy. Same helper the applier uses; see
+        # word_identity.follow_corpus on why it is not written out per writer.
+        touched, id_problems = widentity.follow_corpus(words_before, part1)
+        if touched:
+            print(f"  word ids reconciled for {touched} klal(im)")
+        for problem in id_problems:
+            print(f"  WARNING: {problem}")
 
     tag = "[DRY RUN] " if args.dry_run else ""
     print(f"\n{tag}Applied: {len(applied)} punctuation insertion(s) across {len(touched_klalim)} klal(im)")

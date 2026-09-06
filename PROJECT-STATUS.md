@@ -53,6 +53,91 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0BV. **[2026-09-06] THE WORD ID NOW ACTUALLY RESOLVES SOMETHING, ALL THREE
+    WRITERS KEEP IT IN STEP, AND A DELETED ID IS A TOMBSTONE RATHER THAN A
+    SILENCE.**
+
+    Reviewer: "you implemented the id? will this completely stop the drifting?"
+    No, and three of the measurements were worse than item `0BS` implied. Stated
+    plainly because `0BS` read as "done and wired":
+
+    * **0 of the 594 current rulings carried an id.** Only new rulings get one;
+      the sidecar is prospective and fixes none of the existing 543 failures.
+    * **Nothing consumed it.** `word_identity.resolve()` existed and was tested,
+      and no production path called it - `resolve_word_index` did not consult
+      `word_id`, nor did `drift_recovery`. A field written and never read is
+      Lesson 29, committed while citing Lesson 29 elsewhere in the same session.
+    * **1 of 3 corpus writers reconciled.** `apply_punctuation_decisions` and
+      `reconstruct_placeholder_klalim` did not, so a punctuation pass left the
+      sidecar describing a corpus that no longer existed, with re-seeding - which
+      destroys id continuity - as the only remedy.
+
+    The first two are now closed. The third (a backfill for existing rulings) is
+    not, and is a judgement call: it would assign ids on evidence rather than on
+    record, and can only be as good as `drift_recovery` can re-point them.
+
+    ### A deleted id is kept and marked
+
+    Reviewer: "why does deleting a word retire its id? keep it and flag it as
+    deleted." Right, and the first version was wrong. It dropped the id and
+    leaned on the high-water mark never falling, which stopped REISSUE but threw
+    away that the id had ever existed - so `index_of` returned None for "deleted"
+    and None for "never existed". Those are different answers and only one is
+    actionable.
+
+    `retired` now holds a tombstone per dead id: the WORD it held, the INDEX it
+    held, and WHY - `deleted` when the word was removed outright, `replaced` with
+    `replaced_by` naming the ids that took its place when it was one of n words
+    rewritten into m. `locate()` returns `(index, "live"|"retired"|"unknown")`,
+    which is the accessor callers should prefer. Tombstones live outside `ids`
+    because that list is positional and parallel to the klal's words; a dead
+    entry in it would break the length invariant this module rests on. `verify()`
+    gained two checks: an id may not be both live and tombstoned, and a
+    tombstoned id at or above the high-water mark would let a future insert
+    reissue an id this klal has already used.
+
+    ### The consumer
+
+    `review_decisions.resolve_word_index` consults the id FIRST, before every
+    text-matching branch, and reports two new outcomes: `word_id` (the sidecar
+    knows where the word is) and `retired` (it was deliberately removed - a
+    reportable answer, not a failure). `drift_recovery.recover_klal` does the
+    same and skips its shift arithmetic entirely for a ruling that has an id.
+
+    **Two design defects caught by the tests while wiring this.**
+    * `load()` was memoized on (mtime, size) - and `reconcile()` writes into the
+      dict it is given, so the applier's `before = load()` and the state it
+      reconciled were THE SAME OBJECT and the cache was poisoned for every later
+      reader. Split into `load()` (the shared cache, documented do-not-mutate)
+      and `load_for_update()` (a 2.1ms deep copy). Every writer uses the latter.
+    * `resolve_word_index` read the sidecar from disk, making it depend on
+      ambient global state a caller cannot control. A test with its own ids and a
+      ruling carrying id 3 resolved against the REAL klal 7's id 3 and returned a
+      confident, wrong index. `id_state` is injectable now; None still loads.
+
+    ### All three writers
+
+    `word_identity.follow_corpus(words_before, klalim)` is the one place the
+    reconciliation lives, and all three writers call it - written out per writer
+    it would be Lesson 13 in the module whose own header invokes it. It SKIPS a
+    klal not already in the sidecar rather than seeding it: `reconcile()` falls
+    back to `seed_klal` for an unknown klal, which is right when called directly
+    and wrong from a writer, because `reconstruct_placeholder_klalim` writes
+    part2/part3 and seeding on first edit would silently take on 445 klalim that
+    `seed_word_identity.py` makes opt-in behind `--all-parts`. Scope is a
+    decision, not a side effect of an edit.
+
+    Gate 469 passed. Sidecar verifies clean against the live corpus. No corpus
+    text changed.
+
+    ### What an id still cannot do
+
+    A deleted word has no position - the tombstone says so instead of guessing.
+    An uneven rewrite retires all n and mints m, because no correspondence was
+    establishable. And an edit made outside the three writers still desynchronises
+    the sidecar; the gated invariant catches it, and re-seeding is still the only
+    repair, still at the cost of continuity for the klalim it renumbers.
+
 0BU. **[2026-09-06] PHASE 3, THE SLICE ON THE DELIVERABLE PATH - AND THE TEI
     EXPORT WAS CRASHING ON THE REAL CORPUS THE WHOLE TIME.**
 

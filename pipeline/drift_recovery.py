@@ -79,6 +79,12 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import corpus_io as cio  # noqa: E402
 
 
+def _wid():
+    """word_identity, imported lazily for the same cycle reason as _rd."""
+    import word_identity
+    return word_identity
+
+
 def _rd():
     """review_decisions, imported lazily.
 
@@ -185,7 +191,36 @@ def recover_klal(words, records, applied, window=DEFAULT_WINDOW):
 
     by_id = {r["id"]: r for r in records}
     fits_by_id, refused = {}, {}
+
+    # A RECORDED STABLE ID BEATS EVERYTHING BELOW, so it is consulted first and
+    # the shift arithmetic never runs for a ruling that has one. This module
+    # exists because most rulings have no scan position; the id, where present,
+    # is a better answer than either - it is exact rather than inferred, and it
+    # is the only address that survives the word's own text changing. The shift
+    # search stays for the 594 rulings recorded before ids existed, and for any
+    # klal whose sidecar is absent.
+    id_state = _wid().load()
+    settled_by_id = {}
+    if id_state:
+        for r in records:
+            wid_val = ((r.get("candidate_snapshot") or {}).get("word_id"))
+            if wid_val is None:
+                continue
+            found, status = _wid().locate(id_state, r["klal_id"], wid_val)
+            if status == "live":
+                settled_by_id[r["id"]] = (found, 0,
+                                          f"stable word id {wid_val}, which names "
+                                          f"the word itself rather than its text")
+            elif status == "retired":
+                dead = _wid().retirement_of(id_state, r["klal_id"], wid_val) or {}
+                refused[r["id"]] = (
+                    f"the word this ruling names (stable id {wid_val}, "
+                    f"{dead.get('word')!r}) was {dead.get('reason', 'removed')} "
+                    f"from the corpus - it has no position to recover")
+
     for r in records:
+        if r["id"] in settled_by_id or r["id"] in refused:
+            continue
         names = word_identities_of(r, _applied(r))
         if not names:
             refused[r["id"]] = ("names no single word - an applied deletion, a "
@@ -225,7 +260,7 @@ def recover_klal(words, records, applied, window=DEFAULT_WINDOW):
         elif _occurrences(words, by_id[ids[0]], _applied(by_id[ids[0]])) == 1:
             anchors.add(off)
 
-    recovered = {}
+    recovered = dict(settled_by_id)
     for rid, fits in fits_by_id.items():
         rec = by_id[rid]
         names = word_identities_of(rec, _applied(rec))

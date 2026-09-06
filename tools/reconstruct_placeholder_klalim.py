@@ -47,6 +47,7 @@ INSTALL_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(INSTALL_DIR, "pipeline"))
 
 import corpus_io as cio  # noqa: E402
+import word_identity as widentity  # noqa: E402
 from repair_filters import docai_filter  # noqa: E402
 
 sys.path.insert(0, os.path.join(INSTALL_DIR, "tools"))
@@ -442,6 +443,11 @@ def main():
     files = {2: cio.repo_path("part2.json"), 3: cio.repo_path("part3.json")}
     loaded = {n: cio.load_klalim(p) for n, p in files.items()}
     by_id = {k["klal_id"]: k for ks in loaded.values() for k in ks}
+    # The text BEFORE this run, for word_identity.follow_corpus after the write.
+    # Parts 2-3 are not seeded today, so that call is a no-op here until someone
+    # runs `seed_word_identity.py --all-parts`; wiring it now means this writer
+    # does not become the one that silently falls behind on the day they are.
+    words_before = {k["klal_id"]: cio.words_of(k) for k in by_id.values()}
 
     frequencies = load_reference_frequencies()
     if args.apply and not frequencies:
@@ -528,6 +534,12 @@ def main():
             # match today, which is exactly how the two earlier copies looked
             # right up until they diverged.
             cio.save_part1(loaded[part], path=path)
+        touched, id_problems = widentity.follow_corpus(
+            words_before, list(by_id.values()))
+        if touched:
+            print(f"  word ids reconciled for {touched} klal(im)")
+        for problem in id_problems:
+            print(f"  WARNING: {problem}")
         print("WROTE part2.json and part3.json - run ./rebuild_all.sh next")
         if not args.no_flag:
             # Every reconstructed klal is flagged for revisit, because that is

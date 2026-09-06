@@ -225,10 +225,28 @@ def original_word(rec):
     return snap.get("final_text") if got is None else got
 
 
-def resolve_word_index(rec, words):
+def _wid():
+    """word_identity, imported lazily - it imports this module back (for
+    original_word), so a module-scope import here would be a cycle."""
+    import word_identity
+    return word_identity
+
+
+def resolve_word_index(rec, words, id_state=None):
     """Where does this ruling's word sit in `words` TODAY? -> (index, how).
 
     `how` is one of:
+      "word_id"    - the ruling recorded a STABLE ID and the sidecar still knows
+                     where that word is. The strongest answer available and so
+                     the first one tried: it is the only one that survives the
+                     word's own text being corrected, which is what applying a
+                     ruling does to it.
+      "retired"    - the id is known and the word was deliberately REMOVED. Not
+                     a failure to resolve: it is a different, actionable answer
+                     ("your ruling's word was deleted") that the text-derived
+                     paths below cannot distinguish from "not found", and
+                     returning None for both is what made every applied deletion
+                     look identical to a lost address. `index` is None here.
       "index"      - the recorded word_index still holds the recorded word.
       "occurrence" - it does not, but the ruling recorded WHICH occurrence of
                      that word it was, and that occurrence exists. This is a
@@ -251,6 +269,28 @@ def resolve_word_index(rec, words):
     to an automatic re-point is a separate decision that has not been taken.
     """
     snap = rec.get("candidate_snapshot") or {}
+
+    # THE STABLE ID FIRST, because it is the only address here that does not
+    # ask what the word says. Every branch below matches on TEXT, and applying a
+    # ruling replaces the text it matched on - which is why 517 of 543
+    # unresolvable rulings were unresolvable (see pipeline/word_identity.py).
+    # Rulings recorded before 2026-09-06 carry no id and fall through untouched.
+    # `id_state` is INJECTABLE and that is not a convenience. Reading the sidecar
+    # from disk here makes this function depend on ambient global state a caller
+    # cannot control: a test that builds its own ids, or a caller pointed at
+    # another corpus root, silently gets answers from whichever file happens to
+    # be on disk. Caught immediately - a test with a local state and a ruling
+    # carrying id 3 resolved against the REAL klal 7's id 3 and returned a
+    # confident, wrong index. Passing None still loads, for the ordinary caller.
+    word_id = snap.get("word_id")
+    if word_id is not None and rec.get("klal_id") is not None:
+        state = _wid().load() if id_state is None else id_state
+        found, status = _wid().locate(state, rec["klal_id"], word_id)
+        if status == "live":
+            return found, "word_id"
+        if status == "retired":
+            return None, "retired"
+
     word = snap.get("original_word")
     idx = rec.get("word_index")
     if word is None or idx is None:
