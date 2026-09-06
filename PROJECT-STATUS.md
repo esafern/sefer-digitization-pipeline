@@ -74,6 +74,107 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0CB. **[2026-09-06] THE APPLIER NOW ADDRESSES WORDS BY ID, AND 601 EXISTING
+    RULINGS WERE GIVEN ONE. DRIFT IS PREVENTED NOW, NOT JUST RECOVERABLE.**
+
+    Reviewer: "i thought we modified the way indexing works to avoid drift going
+    forward". It had not been. **What existed was a RECOVERY layer, not an
+    ADDRESSING one**, and the earlier entries oversold it. `all_current()` keyed
+    on `(klal_id, word_index)`; all three apply loops took the position off that
+    KEY; and the applier's only use of `word_identity` was to reconcile ids AFTER
+    it wrote. It never read an id to decide WHERE to write. So the old sequence
+    was intact: apply a word-count change, every later index shifts, rulings
+    drift, the reindexer moves them, collisions become possible.
+
+    ### One seam, not twenty-six edits
+
+    `word_index` is a single local rebound through each apply loop, so the
+    position is now resolved ONCE per loop by `resolved_position()` and every one
+    of the 26 downstream uses - the live-entry lookup, the text mutation, the
+    apply_event, the reporting - follows automatically.
+
+    It is deliberately STRICTER than `review_decisions.resolve_word_index`: it
+    takes only `word_id` (the sidecar knows where the word is) and `index` (the
+    recorded index still holds its word). It refuses `retired` outright, and it
+    does NOT act on `unique` or `occurrence` - that function's own docstring
+    calls those a hint for a human re-point and never an authority, and this is
+    the corpus mutator.
+
+    **Inert until ids exist, which is what made it landable mid-flight.** With no
+    ruling carrying an id the dry run was byte-identical: 0 applied, 26 skipped,
+    gate green. A mutation disabling the id branch fails the two new tests.
+
+    Two drift checks had to move with it, and this was the subtle part: both
+    compared against the RECORDED index, which is exactly what an id-resolved
+    ruling has moved away from. `snapshot_still_matches_corpus` takes the
+    resolved position, and `snapshot_matches` drops `word_index` from its key
+    tuple when the id resolved it - narrower than it sounds, since the
+    identity-bearing fields are still compared. What is dropped is the address,
+    not the evidence.
+
+    The title loop is deliberately NOT converted: title indices are a different
+    address space (`title.split(' ')`), and the sidecar indexes body words.
+
+    **One ordering bug in the first version, found by writing the test for it.**
+    The body loop fetched its `corrections_part1.json` entry BEFORE resolving the
+    position - so for exactly the rulings the id rescues, it drift-checked against
+    the entry belonging to whatever word now sits at the stale index and refused a
+    correct ruling as drift. The lookup moved below the resolution. The comment
+    claiming "everything below reads this local" had been false when written,
+    which is the tell (Lesson 29's shape: a claim nobody checked).
+
+    `resolve_word_index`'s backfill lookup is INJECTABLE for the same reason
+    `id_state` is, and was not at first: it reached for the default ledger while
+    its caller worked on another, so a test that wrote a backfill to its own log
+    watched the function answer from production. Batch callers now read it once
+    per run rather than once per ruling.
+
+    ### The backfill: 601 of 667
+
+    `tools/backfill_word_ids.py`. Time-sensitive, which is the argument for
+    running it now rather than later: most pre-id rulings still resolve today,
+    and each apply makes a few more unresolvable. Backfilling freezes an identity
+    while it is still derivable.
+
+    | resolves as | before | after |
+    |---|---:|---:|
+    | `word_id` | 0 | **601** |
+    | index / occurrence / unique | 52 | 3 |
+    | unresolvable | 543 | **63** |
+
+    **It writes an ANNOTATION, not a superseding copy, and the difference was
+    MEASURED.** 582 of the 601 are already APPLIED. A superseding copy takes a new
+    decision id, so it falls out of `applied_decision_ids()` and those 582 stop
+    reading as settled. Built that ledger and ran the applier against it: it
+    reports **226 to apply** - 47 manual re-writes, 179 no-op re-confirmations -
+    where today it reports 4, and the drift worklist goes **22 -> 380**. A
+    `word_id_backfill` row carries no `chosen_text` and no opcode, so no apply
+    path can pick it up, and a corpus invariant now holds that shape for all 601.
+
+    Evidence per annotation, and three sources only - the resolvers that already
+    exist, never a private copy: the ruling's own address still resolving; for an
+    APPLIED ruling, the text it CHOSE still sitting at its recorded index (which
+    is why `drift_recovery.word_identities_of(applied=True)` exists); or
+    `drift_recovery.recover_klal`'s shift, which must be unambiguous AND
+    corroborated. **66 refused** - reported, never guessed at. Every row records
+    `word_id_source: "backfill"` and its basis, so an inferred id can always be
+    told from one recorded at ruling time.
+
+    ### What it unblocked, NOT APPLIED
+
+    The applier's refusals drop 26 -> 22, and it would now apply 4: klal 63 w40
+    (a real deletion of `סד`, which reads as a folio marker in
+    `י"ד רסי' כ"א סד`) and three identical no-op confirmations at klal 210 w65.
+    **Left for the reviewer** - promoting a ruling into the corpus is a separate
+    deliberate step and always has been.
+
+    Worth noting from that list: three rulings now resolve to ONE word (klal 210
+    w66/w67/w68 -> w65). The id does not stop several rulings naming the same
+    word; it makes them all name it CORRECTLY, which is the right outcome and
+    also why `0BX`'s collision guard is still worth having.
+
+    Gate 484. No corpus text changed.
+
 0CA. **[2026-09-06] A WORD CLICK'S PAGE NAVIGATION IS UNDONE ~50% OF THE TIME.
     OPEN, WITH THE MECHANISM NARROWED BUT NOT FOUND. (This entry's first version
     also claimed 11 unreachable disputes - a false alarm, retracted below.)**
