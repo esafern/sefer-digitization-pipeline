@@ -74,6 +74,105 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0CC. **[2026-09-07] A SWEEP FOR HALF-FINISHED FEATURES. FOUND A REGRESSION I
+    HAD JUST SHIPPED, AN ENV VAR THAT DID NOTHING, AND THE ID MISSING FROM
+    FOUR OF SEVEN WRITE PATHS.**
+
+    Reviewer: "you implemented the id? will this completely stop the drifting?"
+    then, after `0CB`, "I asked you earlier for unimplemented features. look for
+    more." The earlier sweep had reported none. It was wrong, and the reason it
+    was wrong is worth more than the findings: it looked for functions NOTHING
+    calls. Every gap below is a function something calls - a test, or one caller
+    of three. **An orphan sweep cannot see a feature that is fully built, fully
+    tested, and wired to nothing.**
+
+    ### 1. The history panel, broken by my own backfill the day before
+
+    `history_for_word_id` selects rows on `candidate_snapshot.word_id`. The 601
+    annotations each carry one; the rulings they annotate carry none, by design.
+    So it matched the ANNOTATION and missed the ruling - **wrong row returned and
+    right row omitted, from one line**. Measured on the live ledger: **299 words**
+    whose panel returned basis `word_id` and a single `word_id_backfill` row,
+    which `api_decision_history` duly served in place of the rulings the index
+    path had been showing. Every one was a word a human had ruled on.
+
+    Fixed with the order `resolve_word_index` already used, and annotations
+    excluded as a CLASS (`ANNOTATION_TYPES`) rather than by name, since any future
+    type that records something ABOUT a ruling will carry an id the same way. Each
+    row now says `word_id_source: recorded|backfill` - which also gives the
+    annotations' `basis` evidence its first reader.
+
+    ### 2. `$SEFER_REVIEWER` was decorative
+
+    `reviewers.json` has said "set $SEFER_REVIEWER to the id of whoever is
+    reviewing" since 2026-09-04. `identity.resolve_actor()`, the only thing that
+    reads it, had **no production caller**. All seven write handlers passed
+    neither `actor` nor `reviewer`, so `append_decision`'s default stamped the
+    literal `"local"` on every one of the 902 rulings recorded since. Setting the
+    variable did nothing, silently, while the docs said it worked.
+
+    The whole layer was built and unreachable: roster, the id/email split that
+    keeps a permanent id in an append-only log while emails change, the write-time
+    snapshot, the `unregistered` marking. One call site was missing. Unset still
+    writes plain `local`, so nothing about an existing setup changes and no
+    identity is invented for a reviewer who asserted none. Announced at startup,
+    because an asserted identity that is wrong is only discoverable afterwards in
+    a log that cannot be edited.
+
+    ### 3. The id was in three write paths of seven
+
+    | path | id? | why |
+    |---|---|---|
+    | `disputed_choice`, `manual_correction`, `candidate_choice` | yes | already |
+    | `klal_flag` (word-level) | **added** | 1,367 rows; `reindex_flags_after_shift` exists BECAUSE these rot |
+    | `punctuation_choice` | **added** | 21 rows; `apply_punctuation_decisions` changes word counts |
+    | `witness_choice` | no, correctly | `word_index` is a `docai_token_index` |
+    | `title_correction` | no, correctly | index into `title.split(' ')` |
+
+    All 26 records written since ids began were flags, none carrying an id - **new
+    drift being created after the fix that was supposed to have ended it**. `0CB`'s
+    "drift is prevented going forward" was true for rulings and false for flags.
+    The two exclusions are pinned by a test, because "attach it everywhere" is the
+    natural next edit and would name a real word and the wrong one.
+
+    ### 4. The clearing tools could not see the backfill
+
+    `repoint_stale_decisions.py` and `close_satisfied_rulings.py` both read
+    `candidate_snapshot.word_id` directly - so the two tools whose whole job is
+    unsticking rulings were blind to all 601 addresses that had just been
+    recovered for them. `review_decisions.word_id_of()` is now the one place that
+    knows an id lives in two shapes, and all three readers use it.
+
+        repoint_stale_decisions   0 -> 53 re-pointable (all by stable id)
+        close_satisfied_rulings   0 -> 18 already satisfied by the corpus
+
+    Neither applied - promoting is a separate deliberate step.
+
+    ### Smaller, not acted on
+
+    - `tools/close_satisfied_rulings.py` and `tools/repoint_stale_decisions.py`
+      each declare `--part N` and then hardcode `load_part1*()`. **`--part 2`
+      silently operates on Part 1.**
+    - `review_decisions.flagged_klalim()` - a naive `needs_revisit` filter with no
+      caller, while the dashboard uses `rcount.flag_still_open`, which accounts for
+      decisions that answered the flag. Two answers to one question, and the
+      unused one is the wrong one (Lesson 13).
+    - `docai_filter.repair_stream()` unused, so the audit trail it exists to
+      return - "a filter that changes what a reviewer sees must be able to say
+      exactly what it changed" (§3.5) - is never produced. Production calls
+      `repair_word` per word and discards what changed.
+    - Dead one-line accessors: `typography.get_ligatures()`,
+      `build_part1_freq.load_or_build()`. Alias route `POST
+      /api/decisions/candidate` that nothing calls.
+
+    ### What to sweep with next time
+
+    Orphan-hunting is the weakest of these. What actually found things: functions
+    referenced ONLY by tests; env vars documented but read nowhere; declared CLI
+    flags never read; ledger fields written but never consumed; and comparing each
+    writer of a record type against its siblings. Scripts for all five are
+    disposable, but the axes are not.
+
 0CB. **[2026-09-06] THE APPLIER NOW ADDRESSES WORDS BY ID, AND 601 EXISTING
     RULINGS WERE GIVEN ONE. DRIFT IS PREVENTED NOW, NOT JUST RECOVERABLE.**
 
