@@ -3244,30 +3244,6 @@
       "flag": "current_text_may_be_wrong"
     }
   ],
-  "66": [
-    {
-      "word_index": 17,
-      "opcode": "delete",
-      "docai_reading": "סו אין",
-      "docai_repaired": null,
-      "final_text": null,
-      "page": 34,
-      "bbox": {
-        "x1": 0.811062753200531,
-        "y1": 0.15573440492153168,
-        "x2": 0.8993163704872131,
-        "y2": 0.18229375779628754
-      },
-      "vision_selected": "A",
-      "vision_transcription": "סו אין",
-      "confidence": 0.98,
-      "reasoning": "The top line of the raster crop clearly shows the Hebrew words 'סו אין' matching the opening words of the provided Rabbinic context ('סו אין ב\"ד...'). Option A correctly captures this visible text.",
-      "vlm_reading": "ביטול",
-      "surya_reading": "ביטול",
-      "dicta_reading": "ביטול",
-      "flag": "possible_omission"
-    }
-  ],
   "67": [
     {
       "word_index": 0,
