@@ -107,12 +107,30 @@ applying it to the corpus remain two separate, deliberate steps.
     3 failed, matching the control, so nothing was left damaged. Lesson 31 -
     handed back rather than tuned a second time.
 
-    WHAT THE FIX ACTUALLY NEEDS: the wait-until-`scrollTop`-is-stable loop
-    extracted from `releaseObserverWhenScrollSettles()` and used WITHOUT the
-    klal re-seat. Two things to verify rather than assume - that the 3s ceiling
-    covers the longest jump in this corpus, and that holding suppression longer
-    does not strand `lastActiveScanPage` so a later genuine scroll stops updating
-    the pane.
+    **THAT FIX WAS TRIED ON 2026-09-06 AND DOES NOT WORK EITHER, AND THE REASON
+    RETIRES THE WHOLE TIMING DIAGNOSIS ABOVE.** The settle detector was extracted
+    (`whenScrollSettles`) and the word click held suppression until `scrollTop`
+    stopped moving. Result over 12 runs: 7 passed, 5 failed - unchanged from the
+    ~50% baseline. Reverted.
+
+    **What the instrumented run actually shows.** A `MutationObserver` on
+    `#page-img` records the src changing to the correct `page_15.png` and then to
+    `page_14.png` **14 MILLISECONDS LATER**. Not after 900ms, not after the
+    scroll settles - immediately. So the guard's window was never the mechanism,
+    and neither attempt could have worked: nothing about how long suppression is
+    held matters when the override lands 14ms in.
+
+    That points instead at TWO `showPage()` CALLS IN FLIGHT - one for the klal
+    (page 14) started by the navigation, one for the word (page 15) from the
+    click - with the klal's resolving last and winning. `showPage` is async and
+    already carries a `_showPageGen` generation guard for exactly this
+    ("superseded while awaiting /api/page/"), so the next step is to find which
+    path sets the src without checking it, NOT to adjust any timing.
+
+    HANDED BACK rather than attempted a third time (Lesson 31). Two fixes built
+    on a wrong mechanism is the signal the lesson describes; the diagnosis is now
+    evidence-based and the next attempt should start from the 14ms, not from the
+    suppression window.
 
     Also swept: four sites suppress the observer. The nav-panel jump
     (`app.js:4222`) correctly pairs `behavior:'smooth'` with the settle-detector;
