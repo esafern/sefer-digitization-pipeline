@@ -784,7 +784,10 @@ def _decision_status(rec, words, word_index, applied_ids=()):
                   this, and only this, is the promote-to-corpus backlog
       drifted   - the word is neither the one ruled on nor the one chosen: a later
                   apply shifted this klal and nothing re-pointed the decision
-      unplaced  - word_index is outside the klal entirely
+      unplaced  - word_index is outside the klal entirely and no stable id
+                  places it either
+      retired   - the word this ruling names was deleted from the corpus by a
+                  later ruling. An answer, not a failure to find one
       unknown   - no original word was snapshotted (witness_choice), so there is
                   nothing to compare against
 
@@ -874,6 +877,10 @@ def api_word_states(part_num=1):
     # Read once, like `decided` above - applied_decision_ids() walks the whole
     # append-only log, and the callback below fires 222 times.
     applied_ids = rd.applied_decision_ids()
+    # Same reason again: resolve_word_index consults both per ruling, and each is
+    # a full read of its file.
+    id_state = widentity.load()
+    backfilled = rd.backfilled_word_ids()
 
     def collect(ctx):
         k, words = ctx["klal"], ctx["words"]
@@ -918,10 +925,49 @@ def api_word_states(part_num=1):
                 # legacy row renders as "local" rather than blank.
                 "actor": identity.actor_of(rec),
                 "original_word": _decision_original_word(rec),
-                "status": _decision_status(rec, words, wi, applied_ids),
                 "index_stale": _decision_index_is_stale(rec, words, wi),
                 "rendered": wi in decided_indices,
             })
+            # WHERE THIS RULING'S WORD IS NOW, which is not always where the
+            # ruling says. Both the status and the link were computed from the
+            # RECORDED index, and that produced a panel a reviewer could not act
+            # on: of 26 rows shown as drifted/unplaced on 2026-09-07, 8 were
+            # actually `applied` - the corpus holds the change and only the
+            # address had rotted - and the `unplaced` ones linked to an index
+            # outside the klal, so clicking them opened nothing. The row that
+            # most needed an action offered a dead link.
+            at, how = rd.resolve_word_index(rec, words, id_state=id_state,
+                                            backfilled=backfilled)
+            # THE STATUS MOVES ONLY ON AN EXACT ANSWER. `word_id` means the
+            # sidecar knows where the word went and `index` means it never left;
+            # `occurrence` and `unique` are what resolve_word_index's own
+            # docstring calls hints for a human re-point, and restating a ruling
+            # as `applied` on the strength of a unique text match asserts more
+            # than a text match can carry. Caught the first time this was
+            # written: klal 36 #107 relabelled itself `applied` by matching one
+            # occurrence of a word ten positions away.
+            # The recorded-index answer is the FLOOR, always set, so no branch
+            # below can leave the row without a status - the first version of
+            # this only assigned inside the branches and served rows with no
+            # `status` key at all.
+            item["status"] = _decision_status(rec, words, wi, applied_ids)
+            if how in ("word_id", "index"):
+                item["status"] = _decision_status(rec, words, at, applied_ids)
+            elif how == "retired":
+                # Not a lost address: the word this ruling names was DELETED from
+                # the corpus by a later ruling, which is an answer rather than a
+                # failure to find one.
+                item["status"] = "retired"
+            # The recorded index stays in `word_index` - it is what the ledger
+            # says and what a re-decision would key on. This is where to LOOK,
+            # and a weak answer is still worth linking to even though it is not
+            # worth restating the status on: it is the difference between a
+            # reviewer landing near the word and landing nowhere. `resolved_by`
+            # travels with it so the panel can say how much to trust it.
+            item["resolved_word_index"] = at
+            item["resolved_by"] = how
+            if at is not None and 0 <= at < len(words):
+                item["resolved_word"] = words[at]
             recorded.append(item)
 
     api_klalim(part_num=part_num, on_klal_states=collect)

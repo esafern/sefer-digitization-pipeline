@@ -2170,7 +2170,8 @@ let flagListStatus = 'all';
 const RECORDED_STATUS_META = {
   pending:   ['pending',   'The ruling CHANGES the text and the corpus does not have the change yet. This, and only this, is the promote-to-corpus backlog: run apply_reviewer_decisions.py.'],
   drifted:   ['drifted',   'The word at this position is neither the one ruled on nor the one chosen, and no apply_event claims the ruling was promoted - so what became of it cannot be told from here.'],
-  unplaced:  ['unplaced',  'The recorded word_index is outside this klal entirely.'],
+  unplaced:  ['unplaced',  'The recorded word_index is outside this klal entirely, and no stable id places it either. Nothing here can say where this ruling belongs - it needs a human against the scan.'],
+  retired:   ['retired',   'The word this ruling names was DELETED from the corpus by a later ruling. That is an answer, not a lost address: there is nothing to re-point and nothing to apply.'],
   unknown:   ['unknown',   'No original word was snapshotted - witness rulings record docai vs tesseract and never the stored word - so there is nothing to compare against.'],
   applied:   ['applied',   'The ruling changed the text and the change is in the corpus.'],
   confirmed: ['confirmed', 'The ruling KEPT the stored reading. There was never anything to promote - this is the commonest decision in the corpus, and counting it as "applied" is what made 27 of 54 drawn-green words look promoted when only 1 was.'],
@@ -2260,7 +2261,12 @@ function actorName(r) {
 
 
 function flagListItemHtml(r, recorded) {
-  const href = `#klal=${r.klal_id}&word=${r.word_index}`;
+  // LINK TO WHERE THE WORD IS, not to where the ruling was recorded. These are
+  // the same for almost every row, and differ exactly for the rows a reviewer
+  // most needs to open: an `unplaced` ruling's recorded index is outside the
+  // klal by definition, so linking to it opened nothing at all.
+  const goTo = (r.resolved_word_index != null) ? r.resolved_word_index : r.word_index;
+  const href = `#klal=${r.klal_id}&word=${goTo}`;
   const name = `Klal ${r.klal_id}` + (r.gematria ? ` (${r.gematria})` : '');
   // A null word is a possible_omission sitting at len(words) - text the scan
   // has and the corpus does not - so there is nothing to print, and saying
@@ -2292,9 +2298,19 @@ function flagListItemHtml(r, recorded) {
             (r.note ? ` \u2014 ${r.note}` : '') +
             `\n${(RECORDED_STATUS_META[r.status] || ['', ''])[1]}`;
   }
+  // `#recorded -> #now` when a stable id moved the ruling, so the reference a
+  // reviewer copies still matches the ledger while the link opens the word.
+  // A weak resolution still gets a link - landing near the word beats landing
+  // nowhere - but it is marked, because `unique` and `occurrence` are hints for
+  // a human and not authority. An exact answer carries no qualifier.
+  const moved = r.resolved_word_index != null && r.resolved_word_index !== r.word_index;
+  const exact = r.resolved_by === 'word_id' || r.resolved_by === 'index';
+  const ref = moved
+    ? `#${r.word_index} &rarr; #${r.resolved_word_index}${exact ? '' : '?'}`
+    : `#${r.word_index}`;
   return `<a class="${cls}" href="${href}" title="${escapeAttr(title)}"` +
-           ` data-klal="${r.klal_id}" data-word="${r.word_index}">` +
-           `<span class="flag-list-ref">${escapeHtml(name)} &middot; #${r.word_index}</span>` +
+           ` data-klal="${r.klal_id}" data-word="${goTo}">` +
+           `<span class="flag-list-ref">${escapeHtml(name)} &middot; ${ref}</span>` +
            middle +
            copyRefButton(r.klal_id, r.word_index, r.word,
                          { cls: 'flag-list-copy', tabindex: -1 }) +

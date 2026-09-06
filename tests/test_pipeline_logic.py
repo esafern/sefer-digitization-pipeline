@@ -8274,3 +8274,60 @@ def test_only_the_write_paths_that_address_corpus_words_attach_an_id():
         assert has == allowed, (
             f"{name} {'must' if allowed else 'must NOT'} take a word id from the "
             f"body-word sidecar")
+
+
+def test_the_recorded_panel_resolves_a_ruling_to_where_its_word_is_now(monkeypatch):
+    """WHAT THE REVIEWER COULD NOT ACT ON. The recorded-decisions panel computed
+    both the status and the link from the RECORDED index. Measured on the live
+    corpus 2026-09-07: of 26 rows shown as drifted/unplaced, 8 were actually
+    `applied` - the corpus holds the change and only the address rotted - and
+    every `unplaced` row linked to an index outside its klal by definition, so
+    clicking it opened nothing. The rows with the strongest claim on a reviewer's
+    attention were the ones the panel gave no way to reach.
+    """
+    import review_server as srv, word_identity as wid
+    # A word INSERTED BEFORE the ruled one - appending at the end shifts nothing
+    # and would not exercise this at all.
+    words = "אלף חדש בית גימל".split()
+    state = {1: wid.seed_klal("אלף בית גימל".split())}
+    wid.reconcile(state, 1, "אלף בית גימל".split(), words)
+    gimel = wid.id_at(state, 1, 3)
+    assert words[3] == "גימל" and words[2] == "בית"
+
+    # A ruling that CHANGES the text, deliberately: _decision_status answers
+    # "confirmed" for a ruling whose chosen text equals its original WITHOUT
+    # consulting the corpus at all, so a confirmation cannot exercise a position
+    # bug. The first draft of this test used one and passed at both indices.
+    rec = {"id": "r1", "klal_id": 1, "word_index": 2, "chosen_text": "גמל",
+           "decision_type": "manual_correction",
+           "candidate_snapshot": {"original_word": "גימל", "word_id": gimel}}
+    at, how = rd.resolve_word_index(rec, words, id_state=state, backfilled={})
+    assert (at, how) == (3, "word_id")
+    assert srv._decision_status(rec, words, rec["word_index"], ()) == "drifted", (
+        "the recorded index must be the thing that looks broken, or this test is "
+        "not exercising the defect")
+    assert srv._decision_status(rec, words, at, ()) == "pending", (
+        "resolved to its word, this is ordinary promote-to-corpus work - which is "
+        "what the panel was hiding behind a red `drifted` a reviewer could not act on")
+
+
+def test_the_panel_does_not_restate_a_status_on_a_text_match(monkeypatch):
+    """A weak resolution is worth a LINK and not a relabel.
+
+    resolve_word_index's own docstring calls `unique` a hint for a human
+    re-point and never an authority. The first version of the panel fix ignored
+    that and let a unique text match rewrite the status: klal 36 #107 declared
+    itself `applied` by matching one occurrence of its word ten positions away.
+    Landing a reviewer near the word is a service; telling them it is settled on
+    the same evidence is a claim the evidence cannot carry.
+    """
+    import review_server as srv
+    src = open(os.path.join(REPO, "pipeline", "review_server.py"), encoding="utf-8").read()
+    body = src[src.index("def api_word_states"):src.index("def api_klal(")]
+    assert 'if how in ("word_id", "index"):' in body, (
+        "the panel restates a ruling's status on something weaker than an exact "
+        "address")
+    # And the floor is unconditional, so no branch can serve a row with no status.
+    assert body.index('item["status"] = _decision_status(rec, words, wi, applied_ids)')         < body.index('if how in ("word_id", "index"):'), (
+        "the recorded-index status must be assigned before the branches, or a "
+        "row can be served with no status at all")

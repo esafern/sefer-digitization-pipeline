@@ -912,6 +912,10 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
 .recorded-item.rec-drifted  .rec-status { color: var(--danger); }
 .recorded-item.rec-unplaced .rec-status { color: var(--danger); }
 .recorded-item.rec-unknown  .rec-status { color: #718096; }
+/* `retired` is grey, not red: the word this ruling names was deleted from the
+   corpus by a later ruling, which is a settled answer and not a lost address.
+   Colouring it as danger would put 0 actionable rows in a reviewer's red count. */
+.recorded-item.rec-retired  .rec-status { color: var(--ink-faint); }
 .recorded-item.rec-drifted, .recorded-item.rec-unplaced { background: rgba(229,62,62,0.05); }
 /* The stale-address marker. Deliberately NOT a status colour: it is a second,
    independent fact about the row (see RECORDED_STALE_LABEL) and a ruling can be
