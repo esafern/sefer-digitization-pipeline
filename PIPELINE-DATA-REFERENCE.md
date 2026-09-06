@@ -21,16 +21,20 @@ alignment file — see `PROJECT-STATUS.md` for the live state.
 
 **Three things in this data that will mislead you:**
 
-1. **`corrections_candidates_part1.json`'s field names are inverted from what
-   they suggest.** `original_word` is Document AI's *fresh OCR reading*;
-   `corrected_word` is the corpus's *currently stored* text — not a proposed
-   fix. Downstream stages rename these to the honest `docai_reading` /
-   `final_text`. Verified against `build_corrections_dataset.py`'s actual
-   `SequenceMatcher` call, not inferred from the names.
-2. **The corrections chain is three files, and only the last one is real.**
-   `candidates` → `verified` → `corrections_part1.json`. The dashboard shows
-   the third. The first two are intermediates and will disagree with the corpus
-   if you read them directly.
+1. **FIXED 2026-09-07 — the candidate field names used to be inverted.**
+   They were `original_word` (which was actually Document AI's *fresh OCR
+   reading*) and `corrected_word` (which was the corpus's *currently stored*
+   text — not a proposed fix). They are now `docai_reading` and `stored_text`,
+   named for what they hold. Anything written before that date, and any entry
+   in `PROJECT-STATUS-HISTORY.md`, uses the old names.
+2. **The candidate chain is three files, and only the last one is real.**
+   `candidates_part1.json` → `candidates_verified_part1.json` →
+   `review_queue_part1.json`. The dashboard shows the third. The first two are
+   intermediates and will disagree with the corpus if you read them directly.
+   All three were called `corrections_*` until 2026-09-07, which is why so much
+   of this repo's prose has to explain that they are not corrections: they are
+   the machine's proposals, rewritten from scratch by every rebuild. See
+   `START_HERE.md`'s "The three authored files".
 3. **`review_decisions.jsonl` is append-only and lives outside the rebuild.**
    Nothing in `rebuild_all.sh` reads or writes it. A later row supersedes an
    earlier one for the same `(klal_id, word_index)`; there is no update or
@@ -61,17 +65,17 @@ part1.json / part2.json / part3.json  ← THE CORPUS. Hand-edited only through
   ├──► build_corrections_dataset.py: diff DocAI's fresh OCR against this
   │     klal's CURRENTLY STORED text
   │       ▼
-  │     corrections_candidates_part1.json     (stage 1: raw disagreements)
+  │     candidates_part1.json     (stage 1: raw disagreements)
   │       │
   │       │  verify_corrections_vision.py: crop the scan, ask a vision
   │       │  model to pick between the two readings
   │       ▼
-  │     corrections_verified_part1.json       (stage 2: + vision verdict)
+  │     candidates_verified_part1.json       (stage 2: + vision verdict)
   │       │
   │       │  assemble_corrections_dataset.py: classify each verdict into a
   │       │  flag, drop/relabel anything that's drifted since verification
   │       ▼
-  │     corrections_part1.json                (stage 3: final — this is
+  │     review_queue_part1.json                (stage 3: final — this is
   │                                              what the dashboard shows)
   │
   ├──► build_klal_page_regions.py ──► klal_page_regions.json  (scan bbox
@@ -176,7 +180,7 @@ so that mistake can't recur).
 
 ---
 
-## `corrections_candidates_part1.json` — stage 1
+## `candidates_part1.json` — stage 1
 
 **Every place Document AI's fresh OCR reading disagrees with what's
 currently stored in `part1.json`**, for one klal at a time. This is a raw
@@ -190,8 +194,8 @@ diff — nothing here has been checked against the actual scan image yet.
       "page": 14,
       "opcode": "replace",
       "word_index_in_final_text": 85,
-      "original_word": "לכן",
-      "corrected_word": "לכו",
+      "docai_reading": "לכן",
+      "stored_text": "לכו",
       "bbox": { "x1": 0.300, "y1": 0.360, "x2": 0.327, "y2": 0.373 }
     }
   ],
@@ -210,8 +214,8 @@ diff — nothing here has been checked against the actual scan image yet.
 | `klal_id`, `page` | Which klal this disagreement belongs to, and which scan page it sits on. |
 | `opcode` | `replace` (DocAI read a different word than what's stored), `insert` (the stored text has a word DocAI's reading doesn't), or `delete` (DocAI saw a word the stored text is missing). |
 | `word_index_in_final_text` | The position (0-indexed into `clean_text.split(" ")`) in the klal's **currently stored** text this disagreement is anchored to. |
-| `original_word` | **Confusingly named — this is Document AI's own fresh OCR reading**, not the corpus's original text. |
-| `corrected_word` | **Also confusingly named — this is what's CURRENTLY STORED** in `part1.json` right now, not a proposed fix. Downstream stages rename these two fields to `docai_reading` and `final_text`, which say what they actually are; this stage still uses the names the diff script happened to give them. |
+| `docai_reading` | Document AI's own fresh OCR reading of the scan at this position. Called `original_word` before 2026-09-07, which read as the corpus's old text and meant the opposite. |
+| `stored_text` | What `part1.json` holds at this position RIGHT NOW — not a proposed fix. Called `corrected_word` before 2026-09-07. The final stage still renames this one again, to `final_text`, which is the name the dashboard and the ledger snapshots use. |
 | `bbox` | The union of the disagreeing tokens' bounding boxes on the scan page — what the vision-adjudication step crops. |
 | `meta.total_candidates` / `klalim_covered` | How many disagreements were found, and across how many distinct klalim. |
 | `meta.skipped_no_docai_page_klalim` | Klalim this pass couldn't compare at all — no DocAI extraction available for their page. |
@@ -223,7 +227,7 @@ Written by `pipeline/build_corrections_dataset.py`, the second of
 
 ---
 
-## `corrections_verified_part1.json` — stage 2
+## `candidates_verified_part1.json` — stage 2
 
 **Every candidate from stage 1, with a vision model's verdict added.** For
 each one, the pipeline crops the exact bounding box from the scan PDF and
@@ -236,8 +240,8 @@ third — naming which one the pixels actually support.
   "page": 14,
   "opcode": "replace",
   "word_index_in_final_text": 85,
-  "original_word": "לכן",
-  "corrected_word": "לכו",
+  "docai_reading": "לכן",
+  "stored_text": "לכו",
   "bbox": { "x1": 0.300, "y1": 0.360, "x2": 0.327, "y2": 0.373 },
   "vision_selected": "B",
   "vision_transcription": "לכו",
@@ -250,7 +254,7 @@ Same fields as stage 1, plus:
 
 | Field | Meaning |
 |---|---|
-| `vision_selected` | `"A"` = the model picked Document AI's reading (`original_word`); `"B"` = the model picked the currently-stored text (`corrected_word`); `"UNCERTAIN"` = the crop was too ambiguous to call — an honest non-answer, not a guess; `"ERROR"` on an API failure. |
+| `vision_selected` | `"A"` = the model picked Document AI's reading (`docai_reading`); `"B"` = the model picked the currently-stored text (`stored_text`); `"UNCERTAIN"` = the crop was too ambiguous to call — an honest non-answer, not a guess; `"ERROR"` on an API failure. |
 | `vision_transcription` | What the model itself transcribed from the crop, independent of which of the two labeled options it picked — a second, freer signal alongside the forced choice. |
 | `vision_confidence` | The model's own stated confidence, 0–1, in its selection. |
 | `vision_reasoning` | The model's full explanation — always paleographic (letter-shape) and/or semantic (does the resulting phrase make sense), always citing the actual crop, never "it looks right." |
@@ -269,7 +273,7 @@ stale verdict from an earlier comparison silently answer a different one).
 
 ---
 
-## `corrections_part1.json` — stage 3 (final)
+## `review_queue_part1.json` — stage 3 (final)
 
 **What the review dashboard actually reads.** Every verified candidate,
 classified into a flag and checked for drift, grouped by klal_id. Field
@@ -299,7 +303,7 @@ that built it.
 
 Top level is an object keyed by `klal_id` (as a string), each value the
 list of that klal's correction entries. `docai_reading` / `final_text` are
-the renamed, clear versions of stage 1's `original_word` / `corrected_word`
+the renamed versions of stage 1's `docai_reading` / `stored_text`
 — same values, better names. `confidence` / `reasoning` are the renamed
 `vision_confidence` / `vision_reasoning`. New field:
 
@@ -459,7 +463,7 @@ text.
 | `reasoning` | Why: what shifts at this point (end of a quotation, start of the author's own inference, a new citation, etc). |
 | `word_before`, `word_after` | The two words the proposed break falls between — enough context to judge the proposal without reopening the full klal text. |
 
-Keyed by `klal_id` like `corrections_part1.json`. Reviewed the same way as
+Keyed by `klal_id` like `review_queue_part1.json`. Reviewed the same way as
 a correction — the dashboard shows each as a clickable marker in the text
 pane — but accepted/rejected through `punctuation_choice` decisions (below)
 rather than `candidate_choice`, and promoted into the corpus by a separate
@@ -486,7 +490,7 @@ edit to the old one. Six decision types share the same envelope:
   "word_index": 175,
   "chosen_source": "final_text",
   "chosen_text": "מלמד",
-  "candidate_snapshot": { "...": "the full corrections_part1.json entry this decision was made against" },
+  "candidate_snapshot": { "...": "the full review_queue_part1.json entry this decision was made against" },
   "needs_revisit": null,
   "note": "...",
   "reviewer": "local",
@@ -510,9 +514,9 @@ edit to the old one. Six decision types share the same envelope:
 `chosen_text` / `candidate_snapshot` / `needs_revisit` fields mean for each:
 
 - **`candidate_choice`** — a reviewer's ruling on a machine-flagged
-  correction from `corrections_part1.json`. `chosen_source` is `"docai_reading"`, `"final_text"`, or `"custom"` (the reviewer typed something neither option offered); `chosen_text` is the resulting word; `candidate_snapshot` is the full correction entry this was decided against, kept so a later corpus edit can be checked for drift (see `apply_reviewer_decisions.py`'s own drift guard).
+  correction from `review_queue_part1.json`. `chosen_source` is `"docai_reading"`, `"final_text"`, or `"custom"` (the reviewer typed something neither option offered); `chosen_text` is the resulting word; `candidate_snapshot` is the full correction entry this was decided against, kept so a later corpus edit can be checked for drift (see `apply_reviewer_decisions.py`'s own drift guard).
 - **`manual_correction`** — a reviewer flagging and fixing a word the
-  machine pipeline never flagged at all (no `corrections_part1.json` entry
+  machine pipeline never flagged at all (no `review_queue_part1.json` entry
   behind it). `candidate_snapshot` here is just `{"word_index": ..., "original_word": ...}` — there was no machine candidate to snapshot. `chosen_text: ""` means marked for deletion, not replacement.
 - **`klal_flag`** — a klal (or, if `word_index` is set, one specific word
   within it) flagged as needing a closer look, with `needs_revisit`

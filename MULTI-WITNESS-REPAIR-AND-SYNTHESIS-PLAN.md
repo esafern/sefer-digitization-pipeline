@@ -40,7 +40,7 @@ engine-specific blind spots:
 
 | Engine | Role | Measured performance | Source |
 | :--- | :--- | :--- | :--- |
-| **Google Document AI** | Primary extraction | Disagrees with stored text on **1.02%** of Part-1 words (538 of 52,630) | `corrections_verified_part1.json` |
+| **Google Document AI** | Primary extraction | Disagrees with stored text on **1.02%** of Part-1 words (538 of 52,630) | `candidates_verified_part1.json` |
 | **Gemini 3.6 Flash (VLM)** | Witness 2 + adjudicator | **93.34%** token accuracy; **87.43%** Pass-A/Pass-B self-consistency | `tools/second_witness_eval/part1_full_baseline_accuracy_report.txt` |
 | **Surya OCR (local)** | Witness 3 | **~70%** mean token agreement vs. stored text across 219 covered klalim | measured 2026-08-23, `surya_part1_full_baseline.txt` |
 
@@ -316,7 +316,7 @@ arbiter exists (§8 item 4).
 ## 5. How this plugs into the existing pipeline — **BUILT**
 
 The original document did not say where any of this ran, which is why the first
-implementation wrote its results directly into `corrections_part1.json` — a
+implementation wrote its results directly into `review_queue_part1.json` — a
 **derived** file that `./rebuild_all.sh` regenerates from scratch. 1,108 items
 and any review time spent on them were one rebuild away from deletion.
 
@@ -329,7 +329,7 @@ rebuild_all.sh
   2/6  build_corrections_dataset.py     DocAI vs stored text -> candidates
   3/6  verify_corrections_vision.py     vision adjudication (the only paid stage)
   4a/6 synthesize_multi_witness.py      <- witnesses in, consensus_disputes_part1.json out
-  4/6  assemble_corrections_dataset.py  <- merges 4a's output; writes corrections_part1.json
+  4/6  assemble_corrections_dataset.py  <- merges 4a's output; writes review_queue_part1.json
   5/6  build_klal_page_regions.py
   6/6  pytest (hard gate)
 ```
@@ -339,7 +339,7 @@ are inputs produced by separate, manually-run scripts — Surya is local and fre
 the VLM passes are paid. Stage 4a is pure local computation and therefore lives
 inside the gated chain.
 
-Two corpus invariants enforce this: every item in `corrections_part1.json` must
+Two corpus invariants enforce this: every item in `review_queue_part1.json` must
 trace to stage 3 or stage 4a, and no item may report an engine reading identical
 to the stored text.
 
@@ -360,8 +360,8 @@ to the stored text.
 
 ## 7. Parts 2–3 — **GATED, NOT SCHEDULED**
 
-**There is currently no witness set for Parts 2–3 at all.** `corrections_part2.json`
-and `corrections_part3.json` are both empty `{}` (emptied 2026-08-20 when 312
+**There is currently no witness set for Parts 2–3 at all.** `review_queue_part2.json`
+and `review_queue_part3.json` are both empty `{}` (emptied 2026-08-20 when 312
 fabricated "VLM Verified" candidates were pulled). The 419-item
 `reconstruction_witness_queue.json` is DocAI-vs-Tesseract and covers klalim 30,
 75 and 88 — **all Part 1**. So Parts 2–3 work does not mean "run the existing

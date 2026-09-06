@@ -11,9 +11,9 @@
 # Pipeline, each stage's output feeding the next:
 #   part1/2/3.json
 #     -> build_klalim_demo_dataset.py  -> klalim_demo_dataset.json
-#     -> build_corrections_dataset.py  -> corrections_candidates_part1.json
-#     -> verify_corrections_vision.py  -> corrections_verified_part1.json   (Gemini calls, cached)
-#     -> assemble_corrections_dataset.py -> corrections_part1.json
+#     -> build_corrections_dataset.py  -> candidates_part1.json
+#     -> verify_corrections_vision.py  -> candidates_verified_part1.json   (Gemini calls, cached)
+#     -> assemble_corrections_dataset.py -> review_queue_part1.json
 #     -> build_klal_page_regions.py    -> klal_page_regions.json
 #     -> pytest tests/test_corpus_invariants.py + tests/test_pipeline_logic.py
 #        -> pass/fail gate (regression suites: the derived DATA, and the
@@ -58,7 +58,7 @@
 #
 # Usage: ./rebuild_all.sh [--skip-vision]
 #   --skip-vision   skip the Gemini re-verification step (fast, free) and
-#                    reuse whatever corrections_verified_part1.json already
+#                    reuse whatever candidates_verified_part1.json already
 #                    has on disk. Use this for quick iteration on text fixes
 #                    when you don't need fresh flag classifications yet.
 

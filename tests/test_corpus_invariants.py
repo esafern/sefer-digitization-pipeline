@@ -33,7 +33,7 @@ count/sequence, derived-file drift, page-header contamination, debug-print
 leaks, the no-text-available placeholder set, non-empty title/clean_text,
 clean_text whitespace, and - added 2026-08-14 - the shape of the two derived
 files the review dashboard serves to a human reviewer
-(corrections_part1.json, klal_page_regions.json) plus the integrity of the
+(review_queue_part1.json, klal_page_regions.json) plus the integrity of the
 append-only decision log). These have no known legitimate exception anywhere
 in the corpus, per the PROJECT-STATUS.md section cited in each test.
 
@@ -497,12 +497,12 @@ def part1_by_id(part_klalim):
 
 @pytest.fixture(scope="session")
 def corrections():
-    """corrections_part1.json - the per-klal flag overlay review_server.py
+    """review_queue_part1.json - the per-klal flag overlay review_server.py
     serves to the reviewer. Tracked in git (not a gitignored cache), so it is
     always present and always expected to be current with part1.json: this
     suite is rebuild_all.sh's LAST step, after the stage that regenerates it.
     """
-    with open(os.path.join(REPO, "corrections_part1.json"), encoding="utf-8") as f:
+    with open(os.path.join(REPO, "review_queue_part1.json"), encoding="utf-8") as f:
         return json.load(f)
 
 
@@ -1142,7 +1142,7 @@ def test_title_and_clean_text_are_never_empty(all_klalim):
 
 def test_no_stale_candidate_flags_are_being_served(corrections):
     """assemble_corrections_dataset.py's drift check force-flags any
-    candidate whose word_index/corrected_word no longer matches live
+    candidate whose word_index/stored_text no longer matches live
     part1.json. Since this suite is rebuild_all.sh's last step, every
     candidate has just been regenerated against the current corpus - a
     stale flag surviving to here means a stage of the rebuild did not
@@ -1161,7 +1161,7 @@ def test_no_stale_candidate_flags_are_being_served(corrections):
 
 def test_no_rendered_manual_correction_hides_a_machine_candidate(corrections, part1_by_id):
     """review_frontend/app.js builds its word map as
-    `k.corrections.forEach(c => { if (c.opcode !== 'delete') byIndex[c.word_index] = c })`
+    `k.queue.forEach(c => { if (c.opcode !== 'delete') byIndex[c.word_index] = c })`
     - a last-write-wins dict. review_server.api_klal() appends synthetic
     manual_correction entries AFTER the machine candidates, so a manual entry
     at the same word_index silently replaces the machine candidate: the
@@ -1220,7 +1220,7 @@ def test_no_rendered_manual_correction_hides_a_machine_candidate(corrections, pa
 
     offenders = []
     for klal_id, word_index in collisions:
-        served = [c for c in review_server.api_klal(klal_id)["corrections"]
+        served = [c for c in review_server.api_klal(klal_id)["queue"]
                   if c.get("word_index") == word_index and c.get("opcode") != "delete"]
         if len(served) != 1:
             offenders.append((klal_id, word_index, f"{len(served)} entries served, expected 1"))
@@ -1250,7 +1250,7 @@ def test_every_served_flag_has_a_dashboard_label(corrections):
     served = {c.get("flag") for entries in corrections.values() for c in entries}
     unlabelled = sorted(f for f in served if f not in review_server.FLAG_LABELS)
     assert not unlabelled, (
-        f"flag value(s) {unlabelled} appear in corrections_part1.json with no "
+        f"flag value(s) {unlabelled} appear in review_queue_part1.json with no "
         "review_server.FLAG_LABELS entry - the dashboard renders them as an unnamed, "
         "uncoloured 'Flagged' word."
     )
@@ -1781,7 +1781,7 @@ def test_no_new_span_coverage_flags(part1_by_id):
 
 
 def test_every_corrections_item_is_traceable_to_a_pipeline_source(corrections):
-    """REGRESSION 2026-08-23 (code review, finding C1). corrections_part1.json
+    """REGRESSION 2026-08-23 (code review, finding C1). review_queue_part1.json
     is DERIVED - assemble_corrections_dataset.py truncates and rewrites it on
     every ./rebuild_all.sh. Two tools/ scripts appended 1,108 items into it
     directly; the file grew from 539 items to 1,647 and the whole suite stayed
@@ -1796,7 +1796,7 @@ def test_every_corrections_item_is_traceable_to_a_pipeline_source(corrections):
     pipeline reads and regenerates, never an append into this stage's own output.
     If you find yourself wanting to extend it to cover rows someone wrote by hand,
     that is the bug this test exists to catch."""
-    verified_path = os.path.join(REPO, "corrections_verified_part1.json")
+    verified_path = os.path.join(REPO, "candidates_verified_part1.json")
     consensus_path = os.path.join(REPO, "consensus_disputes_part1.json")
     lexical_path = os.path.join(REPO, "lexical_defect_report.json")
 
@@ -1826,8 +1826,8 @@ def test_every_corrections_item_is_traceable_to_a_pipeline_source(corrections):
         and (int(kid_str), item["word_index"]) not in from_lexical
     ]
     assert not orphans, (
-        f"{len(orphans)} item(s) in corrections_part1.json trace to neither "
-        f"corrections_verified_part1.json, consensus_disputes_part1.json nor "
+        f"{len(orphans)} item(s) in review_queue_part1.json trace to neither "
+        f"candidates_verified_part1.json, consensus_disputes_part1.json nor "
         f"lexical_defect_report.json - "
         f"they were written into a derived file by hand and the next "
         f"./rebuild_all.sh will delete them. First few: {orphans[:5]}"
@@ -1884,7 +1884,7 @@ def test_no_word_index_is_served_twice_in_either_pane(part1_by_id):
     text_dupes = []
     for klal_id in part1_by_id:
         counts = collections.Counter(
-            c["word_index"] for c in review_server.api_klal(klal_id)["corrections"]
+            c["word_index"] for c in review_server.api_klal(klal_id)["queue"]
             if c.get("opcode") != "delete")
         text_dupes += [(klal_id, wi, n) for wi, n in counts.items() if n > 1]
     assert not text_dupes, (
@@ -1967,7 +1967,7 @@ def test_every_open_word_level_flag_has_a_control_that_can_clear_it(part1_by_id)
         # 325 open flags had no reachable control. Testing the served field
         # rather than the reachable control is exactly the mistake this file
         # exists to catch.
-        clearable = {c["word_index"] for c in review_server.api_klal(klal_id)["corrections"]
+        clearable = {c["word_index"] for c in review_server.api_klal(klal_id)["queue"]
                      if c.get("word_flag") or c.get("opcode") == "ai_flag"}
         unreachable += [(klal_id, wi) for wi in indices if wi not in clearable]
 
@@ -2026,7 +2026,7 @@ def test_nav_tristate_matches_what_each_word_actually_renders_as(part1_by_id):
     rows = listing if isinstance(listing, list) else listing.get("klalim", [])
     offenders, negative, unbalanced, miscounted = [], [], [], []
     for row in rows:
-        corrections = review_server.api_klal(row["klal_id"])["corrections"]
+        corrections = review_server.api_klal(row["klal_id"])["queue"]
         # The TOTAL check (2026-08-24's finding F1) folded in here 2026-08-25:
         # it walked the same 222 klalim in its own loop, and two full passes over
         # api_klal() in one pytest process was enough to starve the Playwright
@@ -2222,7 +2222,7 @@ def test_witness_rows_served_without_a_word_index_are_never_counted(part1_by_id)
     for w in unmapped:
         by_klal.setdefault(w["klal_id"], []).append(w)
     for kid, rows in by_klal.items():
-        served = review_server.api_klal(kid)["corrections"]
+        served = review_server.api_klal(kid)["queue"]
         token_indexes = {c.get("docai_token_index") for c in served}
         for w in rows:
             assert w["docai_token_index"] not in token_indexes or any(
@@ -2253,7 +2253,7 @@ def test_every_flagged_word_in_the_text_pane_has_a_flagged_box_on_the_scan(part1
     offenders = []
     for row in rows[:60]:   # 60 klalim is ~20 pages, enough to cover every entry kind
         klal_id = row["klal_id"]
-        for c in review_server.api_klal(klal_id)["corrections"]:
+        for c in review_server.api_klal(klal_id)["queue"]:
             page, wi = c.get("page"), c.get("word_index")
             if page is None or wi is None or not c.get("bbox") or c.get("opcode") == "delete":
                 continue
@@ -2522,7 +2522,7 @@ def test_every_flagged_word_can_be_located_on_the_scan(part1_by_id):
     for klal_id in sorted(part1_by_id):
         served = review_server.api_klal(klal_id)
         words = (served.get("clean_text") or "").split(" ")
-        for c in served.get("corrections", []):
+        for c in served.get("queue", []):
             if c.get("opcode") in ("delete", "ai_flag", "manual"):
                 continue        # gaps and reviewer-raised entries have their own paths
             if c.get("page") is not None and c.get("bbox"):
@@ -2697,7 +2697,7 @@ def test_no_candidate_re_raises_a_word_an_applied_decision_already_settled(part1
         if chosen and words[d["word_index"]:d["word_index"] + len(chosen)] == chosen:
             settled[(d["klal_id"], d["word_index"])] = d.get("chosen_text")
 
-    corrections = review_server.cio.load_json(os.path.join(REPO, "corrections_part1.json")) or {}
+    corrections = review_server.cio.load_json(os.path.join(REPO, "review_queue_part1.json")) or {}
     offenders = []
     for klal_id, entries in corrections.items():
         for e in entries:
@@ -2850,3 +2850,37 @@ def test_every_word_id_backfill_is_inert_and_names_a_real_ruling():
         assert r.get("applied_decision_id") in ids, (
             f"backfill {r['id']} names ruling {r.get('applied_decision_id')!r}, which is "
             f"not in the log - nothing will ever read this id")
+
+
+def test_the_ledger_keeps_its_own_vocabulary():
+    """THE LINE THE 2026-09-07 RENAME PASS STOPPED AT, pinned.
+
+    The derived files were renamed freely - `corrections_*` became
+    `candidates_*` / `review_queue_*`, and the inverted `original_word` /
+    `corrected_word` became `docai_reading` / `stored_text` - because a rebuild
+    regenerates every one of them, so a rename costs nothing and is verified by
+    the next run.
+
+    review_decisions.jsonl is the opposite case and must not follow. It is
+    append-only: 4,000+ rows carry these strings as DATA, and renaming any of
+    them means either rewriting history, which the log exists to prevent, or
+    carrying an alias map in every reader forever. Its `original_word` also
+    keeps the OTHER sense - the corpus word the reviewer was looking at - so a
+    well-meaning sweep that "finished the job" would silently redefine it.
+
+    This test is the reason a future rename pass stops here.
+    """
+    rows = rd.all_records()
+    types = {r["decision_type"] for r in rows}
+    assert "manual_correction" in types, (
+        "the ledger's decision_type vocabulary changed; these strings are data in "
+        "an append-only log, not identifiers")
+    assert types <= rd.VALID_DECISION_TYPES, f"undeclared types in the log: {types - rd.VALID_DECISION_TYPES}"
+
+    snapshots = [r.get("candidate_snapshot") or {} for r in rows]
+    assert any("original_word" in s for s in snapshots), (
+        "no snapshot carries `original_word` any more - if a rename pass took it, "
+        "every drift check that reads it is now reading a field that is not there")
+    assert not any("stored_text" in s for s in snapshots), (
+        "a candidate-file field name has leaked into the ledger; the two layers "
+        "name things differently on purpose")

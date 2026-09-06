@@ -202,7 +202,7 @@ def classify(readings, stored_norm, label, decided_choice=None):
 
 
 def collect(part1, klal_lo, klal_hi, witness, label):
-    verified = cio.load_json(os.path.join(REPO, "corrections_verified_part1.json"), []) or []
+    verified = cio.load_json(os.path.join(REPO, "candidates_verified_part1.json"), []) or []
     vlm_a = smw.load_baseline(smw.VLM_A_PATH)
     vlm_b = smw.load_baseline(smw.VLM_B_PATH)
     surya = smw.load_baseline(smw.SURYA_PATH)

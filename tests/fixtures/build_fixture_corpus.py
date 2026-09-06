@@ -2,7 +2,7 @@
 # [PRODUCTION] Turns fixture_book.py's data into a real, on-disk corpus
 # directory - by RUNNING the real pipeline stages against it, not by writing
 # their output by hand. Item 0AR: "the fixture corpus must be GENERATED, not
-# written" (Lesson 13) - a hand-typed corrections_part1.json would be a second
+# written" (Lesson 13) - a hand-typed review_queue_part1.json would be a second
 # copy of something the real code derives, and would drift from what the real
 # code actually does the day either one changes without the other.
 #
@@ -17,14 +17,14 @@
 #
 # WHAT IS INJECTED INSTEAD, and why each one specifically is not run for real:
 #   - verify_corrections_vision.py is SKIPPED (costs a real Gemini call) -
-#     `corrections_verified_part1.json` is built directly from the real
+#     `candidates_verified_part1.json` is built directly from the real
 #     candidates, each annotated with a canned vision verdict in the exact
 #     schema that stage produces. This is the same skip rebuild_all.sh's own
 #     --skip-vision flag makes; the fixture just makes the substitution
 #     explicit rather than optional.
 #   - The two MACHINE-RESOLVED flags (`current_text_confirmed`,
 #     `docai_ligature_artifact`) are injected into the assembled
-#     corrections_part1.json. Assigning them for real requires this book's
+#     review_queue_part1.json. Assigning them for real requires this book's
 #     OWN defect-classification heuristics (ligature-artifact detection is
 #     Yad Malachi's Berlin-print-specific knowledge - see the generalization
 #     plan's Phase 3) - reproducing that heuristic here would make the fixture
@@ -204,7 +204,7 @@ def _write_pdf_and_page_images(root):
 
 
 def _fabricate_verified_from_candidates(root):
-    """corrections_verified_part1.json - the ONE stage in this generator that
+    """candidates_verified_part1.json - the ONE stage in this generator that
     stands in for a real, paid API call (verify_corrections_vision.py). Every
     candidate is carried through unchanged (`**c`) and given a canned,
     deterministic vision verdict under the exact field names that stage
@@ -214,17 +214,17 @@ def _fabricate_verified_from_candidates(root):
     wraps its list in `{"corrections": [...], "meta": {...}}`, the verified
     file does not.
     """
-    candidates = cio.load_json(os.path.join(root, "corrections_candidates_part1.json"), {})
+    candidates = cio.load_json(os.path.join(root, "candidates_part1.json"), {})
     verified = []
     for c in candidates.get("corrections", []):
         verified.append({
             **c,
             "vision_selected": "A",  # "the docai/final_text reading is correct"
-            "vision_transcription": c.get("corrected_word") or c.get("original_word") or "",
+            "vision_transcription": c.get("stored_text") or c.get("docai_reading") or "",
             "vision_confidence": 0.99,
             "vision_reasoning": "fixture: canned verdict, no vision call made",
         })
-    _write_json(os.path.join(root, "corrections_verified_part1.json"), verified)
+    _write_json(os.path.join(root, "candidates_verified_part1.json"), verified)
 
 
 def _inject_special_corrections(root):
@@ -235,7 +235,7 @@ def _inject_special_corrections(root):
     one entry the real pipeline DID produce (klal 2's manual-decision replace)
     is exactly what it produced.
     """
-    path = os.path.join(root, "corrections_part1.json")
+    path = os.path.join(root, "review_queue_part1.json")
     corrections = cio.load_json(path, {})
 
     # Klal 1: the continuation-page correction, REPLACING whatever the real

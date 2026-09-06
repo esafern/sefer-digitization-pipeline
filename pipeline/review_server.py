@@ -8,7 +8,7 @@
 # sluggish feel and of the Chrome extension never successfully loading it
 # all session.
 #
-# This server reads corrections_part1.json / klalim_demo_dataset.json /
+# This server reads review_queue_part1.json / klalim_demo_dataset.json /
 # part1_header_anchored_alignment.json / klal_page_regions.json fresh off
 # disk on every request and merges in review_decisions.jsonl's current
 # human-decision state at serve time - it never needs restarting after
@@ -99,7 +99,7 @@ _normalize_part = rdata.normalize_part
 _parts_for = rdata.parts_for
 _load_klalim = rdata.load_klalim
 _load_alignment = rdata.load_alignment
-_load_corrections = rdata.load_corrections
+_load_review_queue = rdata.load_review_queue
 _load_punctuation_candidates = rdata.load_punctuation_candidates
 _load_witness_queue = rdata.load_witness_queue
 WITNESS_PRIORITY_VERDICTS = rdata.WITNESS_PRIORITY_VERDICTS
@@ -412,7 +412,7 @@ def api_klalim(part_num=1, on_klal_states=None):
     klalim_by_id, klalim = _load_klalim(part_num=part_num)
     alignment = _load_alignment(part_num=part_num)
     regions = _load_regions()
-    corrections = _load_corrections(part_num=part_num)
+    queue = _load_review_queue(part_num=part_num)
     punct_candidates = _load_punctuation_candidates(part_num=part_num)
     # Pre-load klal_flag decisions once for all 222 klalim. The old code
     # called _word_level_ai_flags() per klal inside the loop; that function
@@ -586,7 +586,7 @@ def api_klalim(part_num=1, on_klal_states=None):
     out = []
     for k in klalim:
         kid = k["klal_id"]
-        entries = corrections.get(str(kid), [])
+        entries = queue.get(str(kid), [])
         w_entries = witness_by_klal.get(kid, [])
 
         # Word-level ai_flag corrections (bug #1 fix, earlier today) were
@@ -988,12 +988,12 @@ def api_klal(klal_id):
     if not k:
         return None
     alignment = _load_alignment(part_num=part_num)
-    corrections = _load_corrections(part_num=part_num).get(str(klal_id), [])
+    queue = _load_review_queue(part_num=part_num).get(str(klal_id), [])
     decided = rd.all_current_live("candidate_choice")
-    corrections = [_merge_decision(c, klal_id, decided) for c in corrections]
+    queue = [_merge_decision(c, klal_id, decided) for c in queue]
     # Manual corrections (2026-08-13) as SYNTHETIC entries in the same
     # `corrections` list the frontend already knows how to render - they
-    # carry no corrections_part1.json entry of their own (there was never a
+    # carry no review_queue_part1.json entry of their own (there was never a
     # machine-detected candidate here), so build one shaped like a
     # 'replace' opcode with docai_reading=null and final_text=the word the
     # reviewer originally saw, and attach `current_decision` directly
@@ -1050,7 +1050,7 @@ def api_klal(klal_id):
         # wrong yet - but the next re-decision from the disputed panel would be
         # recorded and then not displayed, with the panel still showing the
         # stale choice.
-        _existing = _claim_word_index(corrections, word_index)
+        _existing = _claim_word_index(queue, word_index)
         if _existing is not None:
             _prior = _existing.get("current_decision")
             if not _prior or (rec.get("ts") or "") >= (_prior.get("ts") or ""):
@@ -1064,7 +1064,7 @@ def api_klal(klal_id):
         # geometry was always available: _word_level_ai_flags() has looked the
         # same words up from the DocAI alignment since ai_flags were added.
         _bbox, _page = _word_scan_position(klal_id, words, word_index)
-        corrections.append({
+        queue.append({
             "word_index": word_index,
             "opcode": "manual",
             "docai_reading": None,
@@ -1107,7 +1107,7 @@ def api_klal(klal_id):
         # already ruled on (reviewer report on klal 163, 2026-08-25).
         _flag_overlay = dict(f.get("current_decision") or {})
         _flag_overlay["answered"] = bool(f.get("flag_answered"))
-        if _claim_word_index(corrections, f["word_index"], "word_flag",
+        if _claim_word_index(queue, f["word_index"], "word_flag",
                              _flag_overlay) is not None:
             continue
         if f["word_index"] in manual_word_indices:
@@ -1121,7 +1121,7 @@ def api_klal(klal_id):
         # path the overlay does not cover.
         f["word_flag"] = dict(f.get("current_decision") or {},
                               answered=bool(f.get("flag_answered")))
-        corrections.append(f)
+        queue.append(f)
 
     # Witness disagreements that have a corpus word_index (patched in by
     # tools/patch_witness_word_indices.py) are added as 'witness' entries so
@@ -1150,7 +1150,7 @@ def api_klal(klal_id):
         # onto the existing entry rather than replacing it, and keep the item in
         # klal_witness either way so the witness count and the scan pane are
         # unaffected.
-        if _claim_word_index(corrections, wi, "witness_overlay", {
+        if _claim_word_index(queue, wi, "witness_overlay", {
                 "docai_token_index": w["docai_token_index"],
                 "tier": w.get("tier"),
                 "docai_reading": w.get("docai_reading"),
@@ -1158,7 +1158,7 @@ def api_klal(klal_id):
                 "current_decision": witness_decided.get((klal_id, w["docai_token_index"])),
         }) is not None:
             continue
-        corrections.append({
+        queue.append({
             "word_index": wi,
             "opcode": "witness",
             "klal_id": klal_id,
@@ -1260,7 +1260,10 @@ def api_klal(klal_id):
         # the klal when the reviewer manually flips pages.
         "continuations": region_entry.get("continuations", []),
         "word_pages": word_pages,
-        "corrections": corrections,
+        # RENAMED 2026-09-07 with the file behind it: these are the machine's
+        # candidate entries for this klal - proposals awaiting review - and not a
+        # record of any correction anyone made. app.js reads `queue`.
+        "queue": queue,
         "punctuation": punctuation,
         "needs_revisit": bool(flag_state and flag_state.get("needs_revisit")),
         "flag_note": flag_state.get("note") if flag_state else None,
@@ -1347,7 +1350,7 @@ def api_page(page_num):
     klalim_by_id = {k["klal_id"]: k for k in klalim}
     alignment = _load_alignment()
     regions = _load_regions()
-    corrections = _load_corrections()
+    queue = _load_review_queue()
     decided = rd.all_current_live("candidate_choice")
     # All klals whose scan content (start or continuation) touches this page.
     page_klals = _klals_on_page(page_num, alignment, regions)
@@ -1356,7 +1359,7 @@ def api_page(page_num):
         # Filter corrections by their own page field - a klal spanning pages
         # 15-16 has corrections with page=15 and page=16; only serve the ones
         # belonging to the requested page.
-        for c in corrections.get(str(kid), []):
+        for c in queue.get(str(kid), []):
             if not c.get("bbox") or c.get("page") != page_num:
                 continue
             entry = _merge_decision(c, kid, decided)
@@ -1398,7 +1401,7 @@ def api_page(page_num):
         out.append(entry)
 
     # Word-level AI flags and manual corrections, which have no entry in
-    # corrections_part1.json and so never reached this endpoint.
+    # review_queue_part1.json and so never reached this endpoint.
     #
     # FIXED 2026-08-25 (reviewer, klal 218: "has only one red item in the right
     # pane" while the text pane shows two flagged words). api_klal() synthesizes
@@ -1558,8 +1561,8 @@ def api_post_disputed_decision(body):
         # the write site as well as in the client, because the client is not the
         # only thing that can POST here.
         raise ValueError("chosen_text is required (pass '' explicitly to reject)")
-    corrections = _load_corrections().get(str(klal_id), [])
-    snapshot = next((c for c in corrections if c["word_index"] == word_index), None)
+    queue = _load_review_queue().get(str(klal_id), [])
+    snapshot = next((c for c in queue if c["word_index"] == word_index), None)
     snapshot = _with_stable_anchor(snapshot, klal_id, word_index)
     record = rd.append_decision(
         "disputed_choice",
@@ -1729,7 +1732,7 @@ def api_post_manual_correction(body):
     """A reviewer flagging/replacing ANY word, not just one the machine
     pipeline already flagged (2026-08-13). candidate_snapshot captures the
     word actually seen at word_index at flagging time, since there's no
-    corrections_part1.json entry to snapshot instead - apply_reviewer_
+    review_queue_part1.json entry to snapshot instead - apply_reviewer_
     decisions.py's manual-correction pass drift-checks against this
     directly against the live part1.json text.
 
@@ -2004,7 +2007,7 @@ def _with_stable_anchor(snapshot, klal_id, word_index):
     added 2026-09-03 as the stable half of a ruling's address, and it went into
     the two snapshot builders that are written by hand here - the title path and
     _manual_snapshot - but NOT into the dispute path, which does not build a
-    snapshot at all: it stores the candidate entry from corrections_part1.json
+    snapshot at all: it stores the candidate entry from review_queue_part1.json
     verbatim, and that file has no such field. Measured 2026-09-04: 14 of 765
     rulings carry the anchor, and the 751 without it are every dispute ever
     ruled. Lesson 34 - the siblings of a fix are where the fix is missing.
@@ -2313,7 +2316,7 @@ def _preflight_check():
     required = [
         (rd.DECISIONS_PATH, "review_decisions.jsonl (append-only audit log)"),
         (cio.repo_path("klalim_demo_dataset.json"), "klalim_demo_dataset.json (corpus text)"),
-        (cio.repo_path("corrections_part1.json"), "corrections_part1.json (machine candidates)"),
+        (cio.repo_path("review_queue_part1.json"), "review_queue_part1.json (machine candidates)"),
         (cio.repo_path("part1_header_anchored_alignment.json"), "page alignment"),
         (cio.repo_path("klal_page_regions.json"), "klal page regions"),
     ]

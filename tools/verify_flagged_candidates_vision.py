@@ -8,8 +8,8 @@
 # stored DISAGREEMENTS, and both of these detectors exist specifically
 # because docai and clean_text AGREE on the same wrong reading at these
 # positions - see PROJECT-STATUS.md's "SECOND FINDING" on lexicon-invisible
-# corruption), and neither is in the structured `corrections_candidates_
-# part1.json` schema the dashboard's candidate panel reads.
+# corruption), and neither is in the structured `candidates_part1.json`
+# schema the dashboard's candidate panel reads.
 #
 # Reuses `pipeline/verify_corrections_vision.py`'s crop/adjudicate/cache
 # machinery directly (crop_pdf_bounding_box, adjudicate, get_cached_decision/

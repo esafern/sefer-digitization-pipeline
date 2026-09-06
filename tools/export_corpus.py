@@ -75,7 +75,7 @@ def _apply_decisions_to_klalim(klalim):
         k["clean_text"] = " ".join(k["clean_text"].split())
 
     by_klal = {k["klal_id"]: k for k in klalim}
-    corrections = cio.load_json(cio.repo_path("corrections_part1.json")) or {}
+    corrections = cio.load_json(cio.repo_path("review_queue_part1.json")) or {}
     decisions = rd.all_current("candidate_choice")
     manual_decisions = rd.all_current("manual_correction")
     already_applied = rd.applied_decision_ids()
@@ -202,11 +202,11 @@ _apply_delete_insertion = ard.apply_delete_insertion
 # ---------------------------------------------------------------------------
 
 def _load_word_bboxes():
-    """Return {klal_id: {word_index: bbox_dict}} from corrections_part1.json.
+    """Return {klal_id: {word_index: bbox_dict}} from review_queue_part1.json.
 
     Only flagged (candidate) words have individual bboxes in this pipeline.
     """
-    raw = cio.load_json(cio.repo_path("corrections_part1.json")) or {}
+    raw = cio.load_json(cio.repo_path("review_queue_part1.json")) or {}
     out = {}
     for klal_id_str, entries in raw.items():
         klal_id = int(klal_id_str)
@@ -539,7 +539,7 @@ def _build_tei(klalim, word_bboxes, all_corrections, all_manual):
     already_applied = rd.applied_decision_ids()
 
     # `corrections_raw` used to be loaded here and read by nothing - a full parse
-    # of corrections_part1.json on every TEI export, feeding no code path. The
+    # of review_queue_part1.json on every TEI export, feeding no code path. The
     # per-klal choice maps below are built from `all_corrections`/`all_manual`,
     # which the caller passes in. Removed 2026-09-06.
 

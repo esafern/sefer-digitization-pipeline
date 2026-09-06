@@ -24,7 +24,7 @@
 #     order, so inserting one doesn't shift the position of another one
 #     still to be applied in the same pass.
 #   - Applying still changes word count for the klal, which DOES
-#     invalidate that klal's corrections_part1.json word_index entries
+#     invalidate that klal's review_queue_part1.json word_index entries
 #     (a completely different candidate system) until ./rebuild_all.sh
 #     regenerates them fresh - printed as an explicit next step, and any
 #     klal touched here is worth a second look in the corrections queue
@@ -246,7 +246,7 @@ def main():
         print("\nNEXT STEPS:")
         print("  1. Review the diff: git diff part1.json")
         print("  2. Run ./rebuild_all.sh to regenerate derived files - this also refreshes "
-              "corrections_part1.json's word indices for every touched klal, since inserting "
+              "review_queue_part1.json's word indices for every touched klal, since inserting "
               "\"[.]\" tokens shifted them.")
         print("  3. Log applied changes to PROJECT-STATUS.md.")
     elif not args.dry_run:

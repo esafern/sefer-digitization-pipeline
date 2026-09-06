@@ -2,7 +2,7 @@
 
 2026-08-21. `VlmWitnessEngine` (blind, single-word-crop, independent
 transcription — no A/B framing, no context) run against 497 of Part 1's 539
-`corrections_part1.json` candidates (42 skipped: no bbox). Compared against
+`review_queue_part1.json` candidates (42 skipped: no bbox). Compared against
 `docai_reading` (option A), `final_text` (the corpus's current/adjudicated
 reading, option B), and the existing single-witness `vision_selected` pick
 from `verify_corrections_vision.py`'s own A/B forced-choice adjudication.
@@ -55,7 +55,7 @@ matching alone. Full per-candidate report:
 
 ## What changes in confidence
 
-Nothing was changed in `corrections_part1.json` or `part1.json` — this is an
+Nothing was changed in `review_queue_part1.json` or `part1.json` — this is an
 investigative comparison, not a pipeline stage; it does not touch the
 corpus, following the same principle as `evaluate_ocr_alignment.py` and the
 rest of `second_witness_eval/`. What this *would* mean if incorporated as a

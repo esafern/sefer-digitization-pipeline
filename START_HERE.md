@@ -242,7 +242,7 @@ unaffected by it.
 2. **Correction-candidate generation** — `pipeline/build_corrections_dataset.py`
    diffs DocAI's fresh OCR tokens against whatever is CURRENTLY STORED in
    `part1.json` (via `klalim_demo_dataset.json`), producing
-   `corrections_candidates_part1.json`.
+   `candidates_part1.json`.
 3. **Vision adjudication** — `pipeline/verify_corrections_vision.py` crops
    each disputed token's bounding box from the PDF, sends it to Gemini
    (`google.genai`) for a vision-based OCR disagreement call, and caches
@@ -629,6 +629,61 @@ find-replace across the corpus) for something that needs scan verification
 instead. Use the precise term in findings, commit messages, and
 `PROJECT-STATUS.md` entries.
 
+## The three authored files — everything else is derived and disposable
+
+This is the distinction the old file names hid, and it is the one to hold
+onto: **three files are authored and permanent; every other data file in
+this repo is regenerated and may be deleted at any time.**
+
+| file | the question it answers | who may write it |
+|---|---|---|
+| `part1/2/3.json` | **what the book says** | `apply_reviewer_decisions.py`, `apply_punctuation_decisions.py`, `reconstruct_placeholder_klalim.py`, and hand edits |
+| `review_decisions.jsonl` | **what a human decided** | `review_decisions.append_decision`, append-only, never rewritten |
+| `word_identity.json` | **which word is which** | `seed_word_identity.py`, and `follow_corpus()` from the three corpus writers |
+
+`rebuild_all.sh` writes **none of them**. No rebuild stage opens a
+`part*.json` for writing, calls `append_decision`, or touches the id
+sidecar — `build_corrections_dataset.py` opens the ledger read-only, and
+only so it can avoid re-asking a question you have already settled.
+
+**The candidate queue is not a record of anything.**
+`review_queue_part1.json` holds what Document AI *proposes* — "the scan
+seems to say X here, the corpus says Y, someone should look." It is
+rewritten from scratch by every rebuild: all of its entries are deleted
+and re-derived. They come back because their INPUTS come back, not
+because the file survived.
+
+The single exception is the one filter worth knowing:
+`build_corrections_dataset.settled_by_an_applied_decision` drops a
+candidate whose position a human ruling has already promoted into the
+corpus. Without it every applied correction would regenerate as a fresh
+candidate asking you to re-rule your own fix.
+
+So a rebuild can destroy any amount of machine opinion and cannot touch
+corpus text, human decisions, or word identity. A green word in the
+dashboard survives too: most green words are `manual_correction` rulings
+that `review_server.py` synthesises from the ledger on every request and
+that never had a queue entry to lose.
+
+**These files were renamed on 2026-09-07** because their old names said the
+opposite of this. `corrections_part1.json` was the queue, not your
+corrections; `original_word` in the candidate files was Document AI's
+FRESH reading and `corrected_word` was the corpus's STORED text. Entries in
+`PROJECT-STATUS-HISTORY.md` and dated audit documents predate the rename
+and use the old names:
+
+    corrections_candidates_part1.json -> candidates_part1.json
+    corrections_verified_part1.json   -> candidates_verified_part1.json
+    corrections_part{1,2,3}.json      -> review_queue_part{1,2,3}.json
+    original_word  (candidate files)  -> docai_reading
+    corrected_word (candidate files)  -> stored_text
+
+`review_decisions.jsonl` was deliberately NOT renamed — not its filename,
+not its `decision_type` values, not its snapshot fields. It is append-only,
+so a rename there means either rewriting history or carrying an alias map
+forever. Note that its `original_word` keeps the OTHER sense: the corpus
+word the reviewer was looking at when they ruled.
+
 ## Single source of truth for corpus text — read before editing any text file
 
 **`part1.json` / `part2.json` / `part3.json` are the only hand-edited
@@ -638,8 +693,8 @@ hand-edited in parallel:
 
 - `klalim_demo_dataset.json` = `part1.json` + `part2.json` + `part3.json`
   concatenated, nothing else. Regenerate with `build_klalim_demo_dataset.py`.
-- `corrections_candidates_part1.json` → `corrections_verified_part1.json`
-  → `corrections_part1.json` → `review_server.py`'s flag overlay is a
+- `candidates_part1.json` → `candidates_verified_part1.json`
+  → `review_queue_part1.json` → `review_server.py`'s flag overlay is a
   pipeline, each stage derived from the one before it and from
   `klalim_demo_dataset.json`.
 - `klal_page_regions.json` (per-klal scan bounding box) also derives from

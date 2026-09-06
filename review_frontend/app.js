@@ -1505,7 +1505,7 @@ function renderKlalBody(block, k) {
   // only for those, so the reviewer knows there are a few items they must
   // find in the scan pane manually. k.witness_count is the TOTAL; the text
   // highlights cover the mapped ones; the difference is scan-only.
-  const mappedWitnessCount = k.corrections.filter(c => c.opcode === 'witness').length;
+  const mappedWitnessCount = k.queue.filter(c => c.opcode === 'witness').length;
   const unmappedWitness = (k.witness_count || 0) - mappedWitnessCount;
   if (unmappedWitness > 0) {
     const pages = (k.witness_pages || []).join(', ');
@@ -1517,9 +1517,9 @@ function renderKlalBody(block, k) {
 
   const words = (k.clean_text || '').split(' ');
   const byIndex = {};
-  k.corrections.forEach(c => { if (c.opcode !== 'delete') byIndex[c.word_index] = c; });
+  k.queue.forEach(c => { if (c.opcode !== 'delete') byIndex[c.word_index] = c; });
   const gapsBefore = {};
-  k.corrections.forEach(c => {
+  k.queue.forEach(c => {
     if (c.opcode === 'delete') {
       gapsBefore[c.word_index] = gapsBefore[c.word_index] || [];
       gapsBefore[c.word_index].push(c);
@@ -3252,7 +3252,7 @@ async function saveManualDecision(klalId, wordIndex, word, chosenText, note) {
   // pane) - without this, a successful delete left the "Click again to
   // confirm delete" button text sitting there as if nothing had happened,
   // and a second click would silently record a redundant decision.
-  return freshK.corrections.find(c => c.word_index === wordIndex && c.opcode === 'manual') || null;
+  return freshK.queue.find(c => c.word_index === wordIndex && c.opcode === 'manual') || null;
 }
 
 async function openManualCorrectionPanel(klalId, wordIndex, word, existing) {

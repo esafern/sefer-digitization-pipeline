@@ -370,21 +370,21 @@ def main():
 
             orig_tokens = docai_tokens[i1:i2]
             orig_word = " ".join(t["text"] for t in orig_tokens) or None
-            corrected_word = " ".join(page_words_raw[j1:j2]) or None
+            stored_text = " ".join(page_words_raw[j1:j2]) or None
 
             # See is_running_header()'s docstring above for why this is an exact-token
             # test, not the substring test it used to be. Verified empirically that
             # this diff-span-level header IS always its own standalone DocAI token on
-            # real data - byte-identical corrections_candidates_part1.json before and
+            # real data - byte-identical candidates_part1.json before and
             # after this change - so the fix is a no-op today, defence-in-depth against
             # the next scan/print where it might not be.
             if orig_tokens and is_running_header(orig_tokens):
                 continue
 
-            if tag == "replace" and orig_word and corrected_word:
+            if tag == "replace" and orig_word and stored_text:
                 if (i2 - i1) != (j2 - j1):
                     continue  # word-count mismatch on a replace -> likely drift
-                if sim(orig_word, corrected_word) < MIN_REPLACE_SIMILARITY:
+                if sim(orig_word, stored_text) < MIN_REPLACE_SIMILARITY:
                     continue  # too dissimilar to be a genuine OCR misread
 
             # Attribution. For `replace`/`insert` the diff span j1:j2 is real
@@ -452,8 +452,14 @@ def main():
                 "page": page_id,
                 "opcode": tag,
                 "word_index_in_final_text": word_idx,
-                "original_word": orig_word,
-                "corrected_word": corrected_word,
+                # NAMED FOR WHAT THEY HOLD since 2026-09-07. These were
+                # `original_word` / `corrected_word`, which read as "the old
+                # text" and "the fix" and are the exact opposite: the first is
+                # Document AI's FRESH reading of the scan and the second is what
+                # the corpus already stores. PIPELINE-DATA-REFERENCE.md opened
+                # with that inversion as trap #1 for a month.
+                "docai_reading": orig_word,
+                "stored_text": stored_text,
                 "bbox": bbox,
                 "bbox_estimated": bbox_estimated,
             })
@@ -469,7 +475,7 @@ def main():
             "untrusted_klalim_excluded": sorted(untrusted_ids),
         },
     }
-    out_path = os.path.join(REPO, "corrections_candidates_part1.json")
+    out_path = os.path.join(REPO, "candidates_part1.json")
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(out, f, ensure_ascii=False, indent=2)
 

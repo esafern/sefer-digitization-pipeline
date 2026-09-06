@@ -4,7 +4,7 @@ tools/second_witness_eval/run_part1_vlm_second_witness.py
 
 Runs VlmWitnessEngine - a BLIND, independent, single-word-crop transcription
 (no A/B framing, no context, just "what does this crop say") - against every
-Part 1 correction candidate in corrections_part1.json that has a bbox, and
+Part 1 correction candidate in review_queue_part1.json that has a bbox, and
 compares it against:
   - docai_reading   (option A - DocAI's original OCR reading)
   - final_text      (option B - what part1.json currently stores)
@@ -21,7 +21,7 @@ real corroboration; a confident-sounding single signal alone is not.
 
 Outputs a per-candidate JSONL report (append+flush per item, per the standing
 incremental-disk-flushing rule) plus a summary table printed at the end.
-Does NOT modify corrections_part1.json or part1.json - this is an
+Does NOT modify review_queue_part1.json or part1.json - this is an
 investigative comparison, not a pipeline stage.
 """
 import json
@@ -83,7 +83,7 @@ def main():
         sys.exit(1)
 
     pdf_path = os.path.join(REPO, "berlin_square_corrected.pdf")
-    corrections = cio.load_json(os.path.join(REPO, "corrections_part1.json"))
+    corrections = cio.load_json(os.path.join(REPO, "review_queue_part1.json"))
 
     items = []
     for klal_id_str, candidates in corrections.items():

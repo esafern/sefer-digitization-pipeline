@@ -58,7 +58,7 @@ def load_regions():
     of this section is about not going stale across a rebuild, and this does not.
     Verified before landing: replaying api_page/api_klal/api_klalim over a shared
     regions dict mutated none of its 623 entries. This is deliberately NOT
-    applied to _load_corrections(), whose entries api_page() and api_klal() DO
+    applied to _load_review_queue(), whose entries api_page() and api_klal() DO
     mutate in place (`entry["klal_id"] = kid`, `entry["current_decision"] = ...`);
     caching that would leak one request's overlays into the next.
     """

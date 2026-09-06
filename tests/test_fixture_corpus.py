@@ -79,7 +79,7 @@ def test_a_punctuation_candidate(use_fixture_corpus):
 
 
 def test_both_machine_resolved_flags(use_fixture_corpus):
-    corrections = cio.load_json(cio.repo_path("corrections_part1.json"))
+    corrections = cio.load_json(cio.repo_path("review_queue_part1.json"))
     flags = {row["flag"] for row in corrections["2"]}
     assert "current_text_confirmed" in flags
     assert "docai_ligature_artifact" in flags
@@ -119,7 +119,7 @@ def test_an_answered_flag_standing_alone(use_fixture_corpus, fixture_decisions_p
 def test_a_possible_omission_at_len_words(use_fixture_corpus):
     klal3 = cio.load_part1_by_id()[3]
     n = len(cio.words_of(klal3))
-    corrections = cio.load_json(cio.repo_path("corrections_part1.json"))
+    corrections = cio.load_json(cio.repo_path("review_queue_part1.json"))
     row = next(r for r in corrections["3"] if r["flag"] == "possible_omission")
     assert row["word_index"] == n, "the omission must sit exactly at the end of the klal"
     assert row["opcode"] == "delete"
@@ -129,7 +129,7 @@ def test_two_candidates_collide_at_one_index(use_fixture_corpus):
     """See build_fixture_corpus.py's own comment on this pair: ONE delete, one
     replace, not two deletes - a gated invariant (item 0AU) forbids two GAPS
     ever sharing a key, and tripping it was how this shape got corrected."""
-    corrections = cio.load_json(cio.repo_path("corrections_part1.json"))
+    corrections = cio.load_json(cio.repo_path("review_queue_part1.json"))
     at_index_1 = [r for r in corrections["3"] if r["word_index"] == 1]
     assert len(at_index_1) == 2
     assert {r["opcode"] for r in at_index_1} == {"delete", "replace"}

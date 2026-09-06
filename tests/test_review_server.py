@@ -235,7 +235,7 @@ def _find_klal_with_a_flag_word():
     those klalim no longer needed. The corpus getting BETTER must not fail the
     suite - a test that depends on a specific defect surviving is testing the
     defect, not the behaviour."""
-    with open(os.path.join(REPO, "corrections_part1.json"), encoding="utf-8") as f:
+    with open(os.path.join(REPO, "review_queue_part1.json"), encoding="utf-8") as f:
         data = json.load(f)
     for kid in sorted(data.keys(), key=int):
         # A `delete` entry marks a GAP where the corpus has no word at all, so it
@@ -253,7 +253,7 @@ def _find_candidate_position():
     klal 1 word 85, and klal 1 has no candidates at all once its corrections are
     applied and the settled-position filter drops them. The panel they open needs
     a real entry behind it; which one is not the point of any of them."""
-    with open(os.path.join(REPO, "corrections_part1.json"), encoding="utf-8") as f:
+    with open(os.path.join(REPO, "review_queue_part1.json"), encoding="utf-8") as f:
         data = json.load(f)
     for kid in sorted(data.keys(), key=int):
         for c in data[kid]:
@@ -279,7 +279,7 @@ def _find_disputed_klal():
     # ".flag-word.state-open".first (which only searches whatever happens
     # to be lazy-mounted within the initial viewport) is brittle. Look the
     # current one up directly instead.
-    with open(os.path.join(REPO, "corrections_part1.json"), encoding="utf-8") as f:
+    with open(os.path.join(REPO, "review_queue_part1.json"), encoding="utf-8") as f:
         data = json.load(f)
     for kid in sorted(data.keys(), key=int):
         if any(c.get("flag") == "current_text_may_be_wrong" for c in data[kid]):
@@ -789,7 +789,7 @@ def test_a_multi_page_klal_is_outlined_on_its_continuation_pages_too(server, pag
     assert page.locator("#hl-container .hl-current-klal").count() == 1
 
 
-def test_clicking_a_manually_corrected_word_focuses_it_on_the_scan(server, page):
+def test_clicking_a_manually_stored_text_focuses_it_on_the_scan(server, page):
     """REGRESSION 2026-08-25 (reviewer, klal 4: "clicking on word 95 does not
     highlight that word"). Every other flagged-word branch in renderKlalBody
     calls showPage() before opening its panel; the `manual` branch opened the
@@ -823,7 +823,7 @@ def test_an_accepted_omission_shows_the_text_it_will_insert(server, page):
     REPLACEMENT has shown its incoming text inline since 2026-08-17."""
     klal_id, gap = None, None
     for kid in (219, 4, 30, 88, 91):
-        for c in _get_json(server, f"/api/klal/{kid}")["corrections"]:
+        for c in _get_json(server, f"/api/klal/{kid}")["queue"]:
             if c.get("opcode") == "delete":
                 klal_id, gap = kid, c
                 break
@@ -911,7 +911,7 @@ def test_a_manual_correction_whose_word_has_moved_is_not_rendered(server):
         "chosen_text": "תחליף", "note": "drifted decision",
     })
     assert status == 201, "the server records the decision either way - rendering is what's gated"
-    entries = [c for c in _get_json(server, "/api/klal/1")["corrections"] if c["opcode"] == "manual"]
+    entries = [c for c in _get_json(server, "/api/klal/1")["queue"] if c["opcode"] == "manual"]
     assert not [c for c in entries if c["word_index"] == 4], (
         "a manual correction whose snapshotted original_word no longer matches the live text at "
         "that index must not be rendered"
@@ -921,7 +921,7 @@ def test_a_manual_correction_whose_word_has_moved_is_not_rendered(server):
         "klal_id": 1, "word_index": 4, "original_word": real_word,
         "chosen_text": "תחליף", "note": "current decision",
     })
-    entries = [c for c in _get_json(server, "/api/klal/1")["corrections"] if c["opcode"] == "manual"]
+    entries = [c for c in _get_json(server, "/api/klal/1")["queue"] if c["opcode"] == "manual"]
     assert [c for c in entries if c["word_index"] == 4], (
         "a manual correction that still matches the live word must be rendered"
     )
@@ -945,7 +945,7 @@ def test_every_flag_the_api_serves_has_a_label(server):
     labels = _get_json(server, "/api/flags")
     served = set()
     for klal_id in (1, 4, 30, 88, 168, 222):
-        served |= {c["flag"] for c in _get_json(server, f"/api/klal/{klal_id}")["corrections"]}
+        served |= {c["flag"] for c in _get_json(server, f"/api/klal/{klal_id}")["queue"]}
     # 'manual_correction' is deliberately not in FLAG_LABELS: manual entries
     # have their own render path in app.js (renderKlalBody's opcode === 'manual'
     # branch) and never look a flag up.
@@ -1078,7 +1078,7 @@ def test_a_recorded_custom_reading_containing_gershayim_survives_a_panel_reopen(
     page.evaluate(
         """async ([kid, widx]) => {
             const k = await fetch('/api/klal/' + kid).then(r => r.json());
-            openCandidatePanel(kid, k.corrections.find(c => c.word_index === widx));
+            openCandidatePanel(kid, k.queue.find(c => c.word_index === widx));
         }""",
         [klal_id, word_index],
     )
@@ -1120,7 +1120,7 @@ def test_a_note_with_html_special_characters_renders_verbatim_in_the_history_pan
     page.evaluate(
         """async ([kid, widx]) => {
             const k = await fetch('/api/klal/' + kid).then(r => r.json());
-            openCandidatePanel(kid, k.corrections.find(c => c.word_index === widx));
+            openCandidatePanel(kid, k.queue.find(c => c.word_index === widx));
         }""",
         [klal_id, word_index],
     )
@@ -1188,7 +1188,7 @@ def test_focus_box_transparent_and_zoom_preserves_focus(server, page):
 
     page.evaluate("""async ([kid, widx]) => {
         const k = await fetch('/api/klal/' + kid).then(r => r.json());
-        const corr = k.corrections.find(c => c.word_index === widx);
+        const corr = k.queue.find(c => c.word_index === widx);
         showPage(corr.page || k.page, kid, corr);
     }""", [klal_id, word_index])
     page.wait_for_selector(".hl-box.focused", timeout=5000)
@@ -1877,12 +1877,12 @@ def _find_disputed_word():
     """(klal_id, word_index) of a live machine-disputed word.
 
     _find_disputed_klal() answers only the klal half, and these tests need the
-    exact word. Derived from corrections_part1.json for the same reason that one
+    exact word. Derived from review_queue_part1.json for the same reason that one
     gives: which klal and word carry an open dispute shrinks as corrections get
     applied, so a hardcoded pair is a test that fails when the corpus IMPROVES
     (Lesson 36).
     """
-    with open(os.path.join(REPO, "corrections_part1.json"), encoding="utf-8") as f:
+    with open(os.path.join(REPO, "review_queue_part1.json"), encoding="utf-8") as f:
         data = json.load(f)
     for kid in sorted(data.keys(), key=int):
         for c in data[kid]:
@@ -2939,7 +2939,7 @@ def test_a_gap_does_not_steal_the_focus_from_the_word_at_its_index(server, page)
     word_index alone so the gap took it. 40 gap entries across 35 klalim share an
     index with a real word.
     """
-    corr = json.load(open(os.path.join(REPO, "corrections_part1.json"), encoding="utf-8"))
+    corr = json.load(open(os.path.join(REPO, "review_queue_part1.json"), encoding="utf-8"))
     target = None
     for kid, items in sorted(corr.items(), key=lambda kv: int(kv[0])):
         for c in items:
@@ -3166,7 +3166,7 @@ def _find_disputed_klal_with_most_options():
     Derived from the data rather than pinned to a klal id, for the same reason
     _find_disputed_klal() is.
     """
-    with open(os.path.join(REPO, "corrections_part1.json"), encoding="utf-8") as f:
+    with open(os.path.join(REPO, "review_queue_part1.json"), encoding="utf-8") as f:
         data = json.load(f)
     best, best_n = None, -1
     reading_fields = ("final_text", "docai_reading", "docai_repaired",
@@ -3655,7 +3655,7 @@ def test_every_ruling_path_records_the_stable_half_of_its_address(server, page):
     2026-09-03. It went into the two snapshot builders written by hand here -
     the title path and _manual_snapshot - and NOT into the dispute path, which
     builds no snapshot at all: it stores the candidate entry from
-    corrections_part1.json verbatim, and that file has no such field. Measured
+    review_queue_part1.json verbatim, and that file has no such field. Measured
     when this was written: 14 of 765 rulings carried the anchor, and the 751
     without it were every dispute ever ruled. Lesson 34 exactly - the siblings
     of a fix are where the fix is missing.
@@ -3670,7 +3670,7 @@ def test_every_ruling_path_records_the_stable_half_of_its_address(server, page):
     """
     klal_id = _find_disputed_klal()
     assert klal_id is not None, "no disputed candidate exists to rule on"
-    corr = _get_json(server, f"/api/klal/{klal_id}")["corrections"]
+    corr = _get_json(server, f"/api/klal/{klal_id}")["queue"]
     target = next((c for c in corr
                    if c.get("word_index") is not None and c.get("final_text")), None)
     assert target, f"klal {klal_id} has no addressable candidate"
@@ -3728,7 +3728,7 @@ def test_every_ruling_path_records_the_scan_position_of_the_word_it_names(server
     """
     klal_id = _find_disputed_klal()
     assert klal_id is not None, "no disputed candidate exists to rule on"
-    corr = _get_json(server, f"/api/klal/{klal_id}")["corrections"]
+    corr = _get_json(server, f"/api/klal/{klal_id}")["queue"]
     target = next((c for c in corr
                    if c.get("word_index") is not None and c.get("final_text")), None)
     assert target, f"klal {klal_id} has no addressable candidate"
@@ -3799,7 +3799,7 @@ def test_one_word_of_a_multi_word_span_can_be_deleted_on_its_own(server, page):
     multi = page.evaluate("""async () => {
         for (const k of KLALIM.slice(0, 90)) {
             const d = await fetch('/api/klal/' + k.klal_id).then(r => r.json());
-            const c = (d.corrections || []).find(x => x.final_text
+            const c = (d.queue || []).find(x => x.final_text
                 && String(x.final_text).split(' ').filter(Boolean).length > 1
                 && x.word_index != null);
             if (c) return { klal_id: k.klal_id, word_index: c.word_index,
@@ -3813,7 +3813,7 @@ def test_one_word_of_a_multi_word_span_can_be_deleted_on_its_own(server, page):
 
     page.evaluate("""async (m) => {
         const d = await fetch('/api/klal/' + m.klal_id).then(r => r.json());
-        openDisputedPanel(m.klal_id, d.corrections.find(c => c.word_index === m.word_index));
+        openDisputedPanel(m.klal_id, d.queue.find(c => c.word_index === m.word_index));
     }""", multi)
     page.wait_for_timeout(400)
 
@@ -3833,7 +3833,7 @@ def test_one_word_of_a_multi_word_span_can_be_deleted_on_its_own(server, page):
     single = page.evaluate("""async () => {
         for (const k of KLALIM.slice(0, 60)) {
             const d = await fetch('/api/klal/' + k.klal_id).then(r => r.json());
-            const c = (d.corrections || []).find(x => x.final_text
+            const c = (d.queue || []).find(x => x.final_text
                 && String(x.final_text).split(' ').filter(Boolean).length === 1
                 && x.word_index != null);
             if (c) { openDisputedPanel(k.klal_id, c); return true; }
@@ -3992,7 +3992,7 @@ def test_an_append_position_insertion_proposal_is_reachable(server, page):
     for klal_id in (84, 88, 106, 114, 138, 159, 164, 175, 193, 211):
         data = _get_json(server, f"/api/klal/{klal_id}")
         n = len(data["clean_text"].split(" "))
-        want = [c for c in data["corrections"]
+        want = [c for c in data["queue"]
                 if c.get("word_index") is not None and c["word_index"] >= n]
         if not want:
             continue

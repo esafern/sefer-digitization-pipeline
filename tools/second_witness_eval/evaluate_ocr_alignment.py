@@ -104,7 +104,7 @@ def parse_candidate_ocr(ocr_text):
 
 
 def load_candidates():
-    candidates_path = os.path.join(REPO, "corrections_verified_part1.json")
+    candidates_path = os.path.join(REPO, "candidates_verified_part1.json")
     if not os.path.exists(candidates_path):
         return []
     with open(candidates_path, "r", encoding="utf-8") as f:
@@ -213,7 +213,7 @@ def evaluate_ocr(ocr_filepath, use_part1=False, normalize_punct=False):
             klal_id = c.get("klal_id")
             pos = c.get("word_index_in_final_text", -1)
             orig = c.get("original_word") or "None"
-            corr = c.get("corrected_word") or "None"
+            corr = c.get("stored_text") or "None"
             v_sel = c.get("vision_selected") or "N/A"
 
             gt_map = aligned_tokens.get(klal_id, {})

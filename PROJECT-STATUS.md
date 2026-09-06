@@ -215,7 +215,7 @@ applying it to the corpus remain two separate, deliberate steps.
     address space (`title.split(' ')`), and the sidecar indexes body words.
 
     **One ordering bug in the first version, found by writing the test for it.**
-    The body loop fetched its `corrections_part1.json` entry BEFORE resolving the
+    The body loop fetched its `review_queue_part1.json` entry BEFORE resolving the
     position - so for exactly the rulings the id rescues, it drift-checked against
     the entry belonging to whatever word now sits at the stale index and refused a
     correct ruling as drift. The lookup moved below the resolution. The comment
@@ -352,7 +352,7 @@ applying it to the corpus remain two separate, deliberate steps.
     anything was built on it.
 
     What is still true and was worth measuring: all **453** stage-4a consensus
-    disputes reach `corrections_part1.json`, and the API serves **929** items.
+    disputes reach `review_queue_part1.json`, and the API serves **929** items.
     Nothing is lost between synthesis and the server.
 
     What was wrong is the rendering claim, and the error was method, not
@@ -890,7 +890,7 @@ reliability check, and every dispute still needs the ink or a different engine.
        word is deleted". Investigated as a suspected sibling of the `<orig/>`
        defect fixed in `dcc7841` and it is not one.
     3. **Ungated writers of tracked, non-regenerated files: none left.** The
-       sweep's two hits were false positives (both read `corrections_part1.json`
+       sweep's two hits were false positives (both read `review_queue_part1.json`
        through `repo_path`, neither writes it). `patch_witness_word_indices.py`
        was the one real member and is gated now.
     4. **API fields served but never rendered: 8 of 11 candidates are false

@@ -72,42 +72,42 @@ import export_corpus as exp  # noqa: E402
 # --- assemble_corrections_dataset: candidate drift detection -----------------
 # Added 2026-08-14 after the reindexing incident (PROJECT-STATUS.md): a
 # candidate is generated against a snapshot of part1.json, and if the corpus
-# moves under it, its word_index/corrected_word start describing a different
+# moves under it, its word_index/stored_text start describing a different
 # word than the one the reviewer is looking at. Currently 0 candidates drift,
 # so nothing on real data exercises any of this.
 
 def test_check_drift_accepts_a_candidate_still_matching_live_text():
     words = "אלף בית גימל דלת".split()
-    c = {"opcode": "replace", "word_index_in_final_text": 2, "corrected_word": "גימל"}
+    c = {"opcode": "replace", "word_index_in_final_text": 2, "stored_text": "גימל"}
     assert acd.check_drift(c, words) is False
 
 
 def test_check_drift_flags_a_replace_candidate_whose_word_changed():
     words = "אלף בית גימל דלת".split()
-    c = {"opcode": "replace", "word_index_in_final_text": 2, "corrected_word": "הא"}
+    c = {"opcode": "replace", "word_index_in_final_text": 2, "stored_text": "הא"}
     assert acd.check_drift(c, words) is True
 
 
 def test_check_drift_flags_a_candidate_whose_index_shifted():
     """The exact shape of the 2026-08-13 reindexing incident: the candidate's
     own word is still in the klal, one position off from where it points."""
-    c = {"opcode": "replace", "word_index_in_final_text": 2, "corrected_word": "גימל"}
+    c = {"opcode": "replace", "word_index_in_final_text": 2, "stored_text": "גימל"}
     assert acd.check_drift(c, "אלף חדש בית גימל דלת".split()) is True
 
 
 def test_check_drift_handles_multi_word_spans_on_both_sides():
     words = "אלף בית גימל דלת".split()
-    ok = {"opcode": "replace", "word_index_in_final_text": 1, "corrected_word": "בית גימל"}
-    moved = {"opcode": "replace", "word_index_in_final_text": 1, "corrected_word": "גימל דלת"}
+    ok = {"opcode": "replace", "word_index_in_final_text": 1, "stored_text": "בית גימל"}
+    moved = {"opcode": "replace", "word_index_in_final_text": 1, "stored_text": "גימל דלת"}
     assert acd.check_drift(ok, words) is False
     assert acd.check_drift(moved, words) is True
 
 
 def test_check_drift_flags_out_of_range_and_negative_indices():
     words = "אלף בית".split()
-    past_end = {"opcode": "replace", "word_index_in_final_text": 5, "corrected_word": "אלף"}
-    span_past_end = {"opcode": "insert", "word_index_in_final_text": 1, "corrected_word": "בית גימל"}
-    negative = {"opcode": "replace", "word_index_in_final_text": -1, "corrected_word": "בית"}
+    past_end = {"opcode": "replace", "word_index_in_final_text": 5, "stored_text": "אלף"}
+    span_past_end = {"opcode": "insert", "word_index_in_final_text": 1, "stored_text": "בית גימל"}
+    negative = {"opcode": "replace", "word_index_in_final_text": -1, "stored_text": "בית"}
     assert acd.check_drift(past_end, words) is True
     assert acd.check_drift(span_past_end, words) is True
     # A negative index would otherwise read backwards from the end in Python
@@ -117,20 +117,20 @@ def test_check_drift_flags_out_of_range_and_negative_indices():
 
 
 def test_check_drift_bounds_checks_delete_candidates_only():
-    """A delete candidate's corrected_word is null by definition (the corpus
+    """A delete candidate's stored_text is null by definition (the corpus
     has no text there), so there is nothing at word_index to compare - but
     its append position may legitimately be one past the last word."""
     words = "אלף בית".split()
-    at_end = {"opcode": "delete", "word_index_in_final_text": 2, "corrected_word": None}
-    past_end = {"opcode": "delete", "word_index_in_final_text": 3, "corrected_word": None}
-    negative = {"opcode": "delete", "word_index_in_final_text": -1, "corrected_word": None}
+    at_end = {"opcode": "delete", "word_index_in_final_text": 2, "stored_text": None}
+    past_end = {"opcode": "delete", "word_index_in_final_text": 3, "stored_text": None}
+    negative = {"opcode": "delete", "word_index_in_final_text": -1, "stored_text": None}
     assert acd.check_drift(at_end, words) is False
     assert acd.check_drift(past_end, words) is True
     assert acd.check_drift(negative, words) is True
 
 
 def test_check_drift_flags_a_candidate_for_a_klal_that_no_longer_exists():
-    c = {"opcode": "replace", "word_index_in_final_text": 0, "corrected_word": "אלף"}
+    c = {"opcode": "replace", "word_index_in_final_text": 0, "stored_text": "אלף"}
     assert acd.check_drift(c, None) is True
 
 
@@ -600,11 +600,11 @@ def test_every_corpus_reading_invariant_is_marked():
     # back, not by reasoning: listing only the loaders returned just ONE of the
     # two known cases (the lexicon test reads `os.path.join(REPO, "lexicon.txt")`
     # directly), and the broad REPO-join form returned six false positives.
-    READS = ("_load_klalim", "_load_regions", "_load_alignment", "_load_corrections",
+    READS = ("_load_klalim", "_load_regions", "_load_alignment", "_load_review_queue",
              "load_part1", "load_klalim", "load_demo_dataset", "LEXICON_PATH",
              "load_klal_words", "PART1_PATH",
              '"lexicon.txt"', '"part1.json"', '"klalim_demo_dataset.json"',
-             '"corrections_part1.json"', '"corrections_verified_part1.json"',
+             '"review_queue_part1.json"', '"candidates_verified_part1.json"',
              '"klal_page_regions.json"', '"part1_header_anchored_alignment.json"',
              '"gematria_trace_part1.json"', '"consensus_disputes_part1.json"',
              '"lexical_defect_report.json"', '"docai_word_boxes"')
@@ -621,7 +621,7 @@ def test_every_corpus_reading_invariant_is_marked():
         # DOCSTRING EXCLUDED. Matching the whole unparsed function flagged six
         # tests whose prose merely NAMES a corpus file while their code reads
         # review_frontend/app.js or the test files - a docstring mentioning
-        # corrections_part1.json is not a read of it.
+        # review_queue_part1.json is not a read of it.
         body = node.body[1:] if (node.body and isinstance(node.body[0], ast.Expr)
                                  and isinstance(node.body[0].value, ast.Constant)
                                  and isinstance(node.body[0].value.value, str)) else node.body
@@ -2309,7 +2309,7 @@ def test_word_level_ai_flag_yields_to_a_manual_correction_on_the_same_word(monke
     monkeypatch.setattr(rs, "_load_klalim",
                         lambda *a, **kw: ({1: {"klal_id": 1, "clean_text": "אלף בית גימל", "page": 1}}, [{"klal_id": 1, "clean_text": "אלף בית גימל", "page": 1}]))
     monkeypatch.setattr(rs, "_load_alignment", lambda *a, **kw: {})
-    monkeypatch.setattr(rs, "_load_corrections", lambda *a, **kw: {})
+    monkeypatch.setattr(rs, "_load_review_queue", lambda *a, **kw: {})
     monkeypatch.setattr(rs, "_load_regions", lambda *a, **kw: {})
     monkeypatch.setattr(rs, "_load_punctuation_candidates", lambda *a, **kw: {})
     # `path=None` matches the real signature - rd.all_current_live() passes it
@@ -2324,7 +2324,7 @@ def test_word_level_ai_flag_yields_to_a_manual_correction_on_the_same_word(monke
                                                   "reasoning": "should not appear"}])
     monkeypatch.setattr(rs, "_general_klal_flag_current", lambda klal_id: None)
     result = rs.api_klal(1)
-    opcodes_at_1 = [c["opcode"] for c in result["corrections"] if c["word_index"] == 1]
+    opcodes_at_1 = [c["opcode"] for c in result["queue"] if c["word_index"] == 1]
     assert opcodes_at_1 == ["manual"], "manual_correction must win over a redundant AI flag on the same word"
 
 
@@ -3917,7 +3917,7 @@ def _patch_klalim_deps(monkeypatch, klalim_by_id, ai_flags_by_klal=None,
     monkeypatch.setattr(rs, "_load_klalim",
                         lambda *a, **kw: (klalim_by_id, list(klalim_by_id.values())))
     monkeypatch.setattr(rs, "_load_alignment", lambda *a, **kw: {})
-    monkeypatch.setattr(rs, "_load_corrections", lambda *a, **kw: {})
+    monkeypatch.setattr(rs, "_load_review_queue", lambda *a, **kw: {})
     monkeypatch.setattr(rs, "_load_punctuation_candidates", lambda *a, **kw: {})
     monkeypatch.setattr(rs, "_load_witness_queue", lambda: [])
     monkeypatch.setattr(rs.rd, "flagged_klalim", lambda: [])
@@ -5251,7 +5251,7 @@ def test_an_empty_witness_body_is_no_coverage_not_agreement():
 
 def test_merge_consensus_disputes_enriches_an_existing_candidate_instead_of_duplicating():
     """REGRESSION (finding C1): the superseded extractors appended into
-    corrections_part1.json, this stage's own output, which a rebuild rewrites.
+    review_queue_part1.json, this stage's own output, which a rebuild rewrites.
     The merge runs inside the stage instead - and a position that already has a
     candidate must gain attribution, not a second row for the same word."""
     by_klal = {"1": [{"word_index": 5, "final_text": "בית", "docai_reading": "בות"}]}
@@ -5607,13 +5607,13 @@ def test_ligature_artifact_flag_only_fires_on_an_exact_match_to_stored_text():
     it EXACTLY the stored text. Validated against 106 independent human
     decisions - the reviewer kept the stored text in 106/106."""
     assert acd._ligature_artifact_flag(
-        {"original_word": "איבא", "corrected_word": "אליבא"}) == "docai_ligature_artifact"
+        {"docai_reading": "איבא", "stored_text": "אליבא"}) == "docai_ligature_artifact"
     # repair lands somewhere else -> a real dispute, still the reviewer's call
     assert acd._ligature_artifact_flag(
-        {"original_word": "איבא", "corrected_word": "איכא"}) is None
+        {"docai_reading": "איבא", "stored_text": "איכא"}) is None
     # nothing to repair
     assert acd._ligature_artifact_flag(
-        {"original_word": "כתבו", "corrected_word": "כתב"}) is None
+        {"docai_reading": "כתבו", "stored_text": "כתב"}) is None
 
 
 def test_docai_verdicts_skips_a_drifted_candidate(monkeypatch):
@@ -5626,9 +5626,9 @@ def test_docai_verdicts_skips_a_drifted_candidate(monkeypatch):
     like a real one and carry the primary engine's authority."""
     words = {1: ["אלף", "בית", "גימל"]}
     live = {"klal_id": 1, "opcode": "replace", "word_index_in_final_text": 1,
-            "original_word": "בות", "corrected_word": "בית"}
+            "docai_reading": "בות", "stored_text": "בית"}
     drifted = {"klal_id": 1, "opcode": "replace", "word_index_in_final_text": 1,
-               "original_word": "בות", "corrected_word": "דלת"}   # not what's there now
+               "docai_reading": "בות", "stored_text": "דלת"}   # not what's there now
     assert smw.docai_verdicts([live], words) == {(1, 1): "בות"}
     assert smw.docai_verdicts([drifted], words) == {}
     # CHANGED 2026-08-26 (code review). The default used to be words_by_klal=None
@@ -7198,7 +7198,7 @@ def test_the_restart_rule_names_every_module_the_server_actually_imports():
 import word_identity as wid  # noqa: E402
 
 
-def test_a_corrected_word_keeps_its_id():
+def test_a_stored_text_keeps_its_id():
     """THE point of the module. `(word, occurrence)` names the word a ruling was
     ruling ON, so applying the ruling destroys the anchor - measured on the live
     ledger, 517 of 543 unresolvable rulings are unresolvable for exactly this
@@ -7945,7 +7945,7 @@ def test_the_applier_drift_checks_the_correction_entry_at_the_resolved_index(
         apply_harness, decisions_path, tmp_path, monkeypatch):
     """The live entry has to be fetched AFTER the position is resolved, not before.
 
-    corrections_part1.json is regenerated against the current corpus by
+    review_queue_part1.json is regenerated against the current corpus by
     rebuild_all.sh, so its entries sit at TODAY's indices - while the ruling's own
     `word_index` is the one it was recorded at. Look the entry up by the recorded
     index and, for exactly the rulings a stable id just rescued, you fetch the

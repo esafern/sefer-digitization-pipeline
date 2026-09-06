@@ -144,7 +144,7 @@ def claim_word_index(corrections, word_index, overlay_key=None, overlay=None):
 
 def merge_decision(entry, klal_id, decided):
     """Overlay the current human decision (if any) on top of a raw
-    corrections_part1.json entry - never mutates the source data, this is
+    review_queue_part1.json entry - never mutates the source data, this is
     a display-time merge only.
 
     `decided` is one all_current("candidate_choice") map, built once by the

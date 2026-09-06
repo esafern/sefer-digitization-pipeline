@@ -25,8 +25,8 @@ import synthesize_multi_witness as smw
 # two levels, not one, to keep resolving to the actual repo root where
 # part1.json/docai_word_boxes/etc. live.
 REPO = cio.REPO
-IN_PATH = os.path.join(REPO, "corrections_verified_part1.json")
-OUT_PATH = os.path.join(REPO, "corrections_part1.json")
+IN_PATH = os.path.join(REPO, "candidates_verified_part1.json")
+OUT_PATH = os.path.join(REPO, "review_queue_part1.json")
 PART1_PATH = cio.PART1_PATH
 # ADDED 2026-08-21 (PROJECT-STATUS.md, "surface the VLM baseline into the
 # dashboard for review" - user-requested, "just enrich"): a THIRD,
@@ -146,10 +146,10 @@ def _ligature_artifact_flag(c, repaired="__derive__"):
     # 2026-08-26, H16). Defaulted rather than made required so the tests, which
     # call this with a bare candidate dict, keep working.
     if repaired == "__derive__":
-        repaired = docai_filter.repair_word(c.get("original_word"))
+        repaired = docai_filter.repair_word(c.get("docai_reading"))
     if not repaired:
         return None
-    stored = c.get("corrected_word")
+    stored = c.get("stored_text")
     if stored and cio.hebrew_letters_only(repaired) == cio.hebrew_letters_only(stored):
         return "docai_ligature_artifact"
     return None
@@ -162,7 +162,7 @@ def merge_consensus_disputes(by_klal, path=CONSENSUS_PATH):
 
     ADDED 2026-08-23 (code review, finding C1). The two scripts this replaces
     (tools/extract_{vlm,surya}_consensus_disputes.py) delivered the same kind
-    of finding by opening corrections_part1.json - this stage's OUTPUT - and
+    of finding by opening review_queue_part1.json - this stage's OUTPUT - and
     appending to it. 1,108 items lived there, and every one of them, plus any
     human review time spent on them, was destroyed by the next ./rebuild_all.sh
     run. A witness contributes a source file the pipeline reads; it never
@@ -414,7 +414,7 @@ def check_drift(c, klal_words):
     time. If part1.json has since changed at this position (another fix,
     a punctuation pass, a reindexing bug - see PROJECT-STATUS.md's
     reindexing incident) the candidate's word_index/corrected_word can go
-    stale while corrections_verified_part1.json still serves the old
+    stale while candidates_verified_part1.json still serves the old
     values as if current. Only 'replace' and 'insert' have a non-null
     corrected_word to check against live text; 'delete' proposes a word
     that by definition isn't in final_text, so there's nothing at
@@ -424,7 +424,7 @@ def check_drift(c, klal_words):
     if klal_words is None:
         return True  # klal_id not in current part1.json at all
     if op in ("replace", "insert"):
-        expected = c["corrected_word"]
+        expected = c["stored_text"]
         live = live_word_span(klal_words, idx, expected)
         if live is None:
             return True
@@ -449,7 +449,7 @@ def classify(c):
     # Measured when added: 7 candidates carried such a reading, 6 after the
     # abbreviation exemption, and klal 74 w966 was still OPEN - asking a reviewer
     # to weigh `בארוכ` against the correct `בארוכה`.
-    if op in ("replace", "delete") and cio.impossible_final_form(c.get("original_word")):
+    if op in ("replace", "delete") and cio.impossible_final_form(c.get("docai_reading")):
         return "current_text_confirmed" if op == "replace" else "ambiguous"
 
     if op == "replace":
@@ -534,7 +534,7 @@ def main():
     n_drifted = 0
     # A position a human has already ruled on and had APPLIED must not come back
     # as a candidate. build_corrections_dataset.py drops those when it GENERATES,
-    # but corrections_verified_part1.json is cumulative - it keeps every entry the
+    # but candidates_verified_part1.json is cumulative - it keeps every entry the
     # vision stage ever verified - so an entry generated before the decision was
     # applied survives in it and gets re-assembled here.
     #
@@ -551,7 +551,7 @@ def main():
             n_settled_dropped += 1
             continue
         # A CANDIDATE OUTSIDE ITS OWN KLAL IS NOT SERVEABLE, whatever else is
-        # true of it. corrections_verified_part1.json is cumulative, so an entry
+        # true of it. candidates_verified_part1.json is cumulative, so an entry
         # whose word was later DELETED keeps pointing at an index the klal no
         # longer has - there is no word to crop, no word to highlight, and
         # test_correction_word_index_points_inside_its_own_klal rejects it. The
@@ -569,11 +569,11 @@ def main():
         # Derived once and used twice - for the entry's own "docai_repaired" and
         # by _ligature_artifact_flag() below, which used to re-derive it from the
         # same input (~498 redundant repairs per rebuild; code review 2026-08-26).
-        _repaired = docai_filter.repair_word(c["original_word"])
+        _repaired = docai_filter.repair_word(c["docai_reading"])
         entry = {
             "word_index": c["word_index_in_final_text"],
             "opcode": c["opcode"],
-            "docai_reading": c["original_word"],
+            "docai_reading": c["docai_reading"],
             # ADDED 2026-08-24 (plan §3.2, built after being specified since the
             # first draft). The RAW DocAI reading above is never overwritten -
             # success criterion #1 forbids silent normalisation, and the reviewer
@@ -583,7 +583,7 @@ def main():
             # 22-decision review of klal 91: DocAI 0/18 raw, 17/18 (94%) repaired,
             # zero words made worse.
             "docai_repaired": _repaired,
-            "final_text": c["corrected_word"],
+            "final_text": c["stored_text"],
             "page": c["page"],
             "bbox": c["bbox"],
             "vision_selected": c.get("vision_selected"),

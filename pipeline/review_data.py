@@ -126,7 +126,7 @@ def parts_for(part_num):
     # Same string-normalization convention as load_klalim above (part_num
     # arrives as either an int, from a Python call site that already knows
     # the part, or a raw query-string value like "2"/"3"/"all"). FIXED
-    # 2026-08-20 (code review): load_alignment/load_corrections used to
+    # 2026-08-20 (code review): load_alignment/load_review_queue used to
     # accept part_num and silently ignore it, always merging all three
     # parts - correct but wasteful (3x the JSON parses this request
     # actually needs). load_punctuation_candidates separately compared
@@ -148,8 +148,18 @@ def load_alignment(part_num=None):
         align += _load_json(fnames[p], [])
     return {r["klal_id"]: r for r in align}
 
-def load_corrections(part_num=None):
-    fnames = {1: "corrections_part1.json", 2: "corrections_part2.json", 3: "corrections_part3.json"}
+def load_review_queue(part_num=None):
+    """The machine's CANDIDATE QUEUE for these parts - proposals awaiting review.
+
+    RENAMED 2026-09-07, with the files it reads. It was `load_review_queue`
+    reading `corrections_part1.json`, and that name is the single most misleading
+    thing in this repo's data layer: the file holds what Document AI PROPOSES,
+    it is rewritten from scratch by every rebuild, and it is not a record of any
+    correction anybody made. The record of decisions is review_decisions.jsonl,
+    which no rebuild touches; the corrected text is part*.json. Three layers,
+    and two of them were called "corrections".
+    """
+    fnames = {1: "review_queue_part1.json", 2: "review_queue_part2.json", 3: "review_queue_part3.json"}
     combined = {}
     for p in parts_for(part_num):
         c = _load_json(fnames[p], {})

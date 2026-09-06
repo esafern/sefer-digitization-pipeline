@@ -82,8 +82,8 @@ def extract_json_fields(text):
 # part1.json/docai_word_boxes/etc. live.
 REPO = cio.REPO
 PDF_PATH = os.path.join(REPO, "berlin_square_corrected.pdf")
-CANDIDATES_PATH = os.path.join(REPO, "corrections_candidates_part1.json")
-OUT_PATH = os.path.join(REPO, "corrections_verified_part1.json")
+CANDIDATES_PATH = os.path.join(REPO, "candidates_part1.json")
+OUT_PATH = os.path.join(REPO, "candidates_verified_part1.json")
 CACHE_DB = os.path.join(REPO, "adjudication_cache.db")
 DEMO_DATASET = cio.DEMO_DATASET_PATH
 
@@ -350,8 +350,8 @@ def main():
 
         try:
             crop_bytes = crop_pdf_bounding_box(doc, c["page"], c["bbox"])
-            print(f"Klal {c['klal_id']} page {c['page']}: {c['original_word']!r} vs {c['corrected_word']!r}", flush=True)
-            decision_text = adjudicate(client, crop_bytes, c["original_word"], c["corrected_word"], context)
+            print(f"Klal {c['klal_id']} page {c['page']}: {c['docai_reading']!r} vs {c['stored_text']!r}", flush=True)
+            decision_text = adjudicate(client, crop_bytes, c["docai_reading"], c["stored_text"], context)
             decision = parse_decision_text(decision_text)
         except Exception as e:
             print(f"  !! failed: {e}", flush=True)

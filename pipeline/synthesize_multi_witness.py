@@ -6,7 +6,7 @@
 #
 # Built 2026-08-23 to replace tools/extract_vlm_consensus_disputes.py and
 # tools/extract_surya_consensus_disputes.py, which produced the same KIND of
-# finding but delivered it by writing directly into corrections_part1.json -
+# finding but delivered it by writing directly into review_queue_part1.json -
 # a DERIVED file that assemble_corrections_dataset.py truncates and rewrites
 # on every ./rebuild_all.sh. 1,108 items and every human review minute spent
 # on them were one rebuild away from being destroyed (code review 2026-08-23,
@@ -76,7 +76,7 @@ import typography
 sys.path.insert(0, os.path.join(INSTALL_DIR, "tools", "second_witness_eval"))
 import evaluate_ocr_alignment as eval_script
 
-VERIFIED_PATH = cio.repo_path("corrections_verified_part1.json")
+VERIFIED_PATH = cio.repo_path("candidates_verified_part1.json")
 VLM_A_PATH = cio.repo_path("tools", "second_witness_eval", "vlm_part1_full_baseline.txt")
 VLM_B_PATH = cio.repo_path("tools", "second_witness_eval", "vlm_part1_full_baseline_passB.txt")
 SURYA_PATH = cio.repo_path("tools", "second_witness_eval", "surya_part1_full_baseline.txt")
@@ -187,7 +187,7 @@ def docai_verdicts(verified, words_by_klal=_DERIVE_WORDS):
             # insert/delete are word-count changes, not a substitution this
             # position-keyed consensus can compare against another engine.
             continue
-        reading = c.get("original_word")
+        reading = c.get("docai_reading")
         if not reading:
             continue
         if words_by_klal is not None and acd.check_drift(c, words_by_klal.get(c["klal_id"])):

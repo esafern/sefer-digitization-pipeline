@@ -8,7 +8,7 @@
 # vision pass - it does NOT record witness_choice decisions itself. A human
 # still makes the final call via the dashboard; this just makes that call
 # fast by front-loading the crop-reading work, the same relationship
-# corrections_part1.json's vision flags already have to actual
+# review_queue_part1.json's vision flags already have to actual
 # candidate_choice decisions.
 #
 # Output: reconstruction_witness_queue.json gains vision_selected/

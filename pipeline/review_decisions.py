@@ -8,7 +8,7 @@
 # was dead code: review.html's tooltip JS read a `human_correction_note`
 # field that nothing ever wrote, and the one real manual JSON edit that
 # ever set it (klal 1/word 468, 2026-08-05) was silently destroyed the next
-# time the pipeline regenerated corrections_part1.json from scratch - see
+# time the pipeline regenerated review_queue_part1.json from scratch - see
 # PROJECT-STATUS.md. A decision recorded here lives in its own file the
 # corpus-build pipeline never touches, so a rebuild can never clobber it.
 #
@@ -28,7 +28,7 @@
 #                       already flagged - added 2026-08-13 per direct user
 #                       request ("add feature for reviewer to flag any word
 #                       and replace it"). Unlike candidate_choice, there is
-#                       no corrections_part1.json entry behind it; the
+#                       no review_queue_part1.json entry behind it; the
 #                       decision itself is the only record of what was
 #                       proposed, at what index, against what original word.
 #   klal_id             int
@@ -60,7 +60,7 @@
 #   chosen_text         the literal chosen string (candidate_choice); "[.]"
 #                       or null (punctuation_choice, accept/reject); the
 #                       proposed replacement text (manual_correction)
-#   candidate_snapshot  full corrections_part1.json entry at decision time
+#   candidate_snapshot  full review_queue_part1.json entry at decision time
 #                       (candidate_choice) or the proposed insertion's
 #                       {before_word_index, reasoning} (punctuation_choice)
 #                       or {word_index, original_word} (manual_correction -
