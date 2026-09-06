@@ -1263,3 +1263,73 @@ next incident.
     screenshot resolved both, and they turned out to be a single bug (Lesson 39).
     Cursors, RTL reordering, `::before` content, a font's fallback glyph and a
     native `title` tooltip are all things a reviewer can see and `grep` cannot.
+
+46. **A row that supersedes an ALREADY-APPLIED ruling manufactures work. Annotate
+    the ruling instead of replacing it.** A superseding copy takes a new decision
+    id, so it drops out of `applied_decision_ids()` and re-enters every queue
+    keyed on "not applied" — while carrying a `chosen_text` the corpus already
+    holds. It is then drift-checked against a corpus that has moved past its
+    `original_word`, fails, and is reported as work a human still owes.
+
+    This fired twice on 2026-09-06/07, once avoided and once not. The word-id
+    backfill was designed as an ANNOTATION (`word_id_backfill`, no `chosen_text`,
+    no opcode) after building the counterfactual and measuring it: written as
+    superseding copies, the same 601 rows turned "4 to apply" into **226** — 47
+    manual re-writes and 179 no-op re-confirmations — and the drift worklist from
+    22 into **380**. `tools/repoint_stale_decisions.py` then did the very thing,
+    because it guarded idempotence (`superseded_ids`) and not "already in the
+    corpus": 24 copies written, **23** of them superseding applied rulings, 13
+    landing straight in the drift bucket. Its own sibling,
+    `reindex_pending_decisions_after_shift`, has had that guard from the start,
+    with the comment "already in the corpus, not pending".
+
+    Two rules follow. Any writer that appends a superseding row must skip
+    `applied_decision_ids()` or say why it does not. And **recommending that the
+    reviewer run a mutating tool is itself an action** — check it carries the
+    guards its siblings carry before saying "run this", because a
+    recommendation that corrupts a worklist is not cheaper than doing it
+    yourself. `review_decisions.restates_an_applied_ruling()` is the cleanup for
+    copies that already exist, and is deliberately narrow: the `supersedes` chain
+    settles a row only while `chosen_text` is IDENTICAL, so a reviewer who
+    changed their mind is still real work.
+
+47. **An orphan sweep cannot see a feature that is fully built, fully tested, and
+    wired to nothing.** Asked on 2026-09-06 for "any other half-finished
+    features", a sweep for functions NOTHING calls returned two dead one-line
+    accessors and the answer "nothing outstanding". That was wrong.
+    `identity.resolve_actor()` — the whole reviewer-identity layer, with a roster,
+    an id/email split, a write-time snapshot and an `unregistered` marker — had no
+    production caller at all, while `reviewers.json` instructed the reader to set
+    `$SEFER_REVIEWER` and every one of the seven dashboard write handlers ignored
+    it. The variable did nothing, silently, for 902 rulings. An orphan hunt misses
+    this by construction: the tests ARE references.
+
+    The axes that actually found things, in the order they paid off: functions
+    referenced ONLY by `tests/`; env vars documented but read nowhere; `argparse`
+    flags declared and never read (`--part` on two tools, which accept a value and
+    operate on Part 1 regardless); record fields written to a file and never
+    consumed by any reader; and each writer of a record type compared against its
+    siblings. The scripts are disposable — the axes are not.
+
+48. **Derived files can be renamed; an append-only log cannot — and rename by
+    TOKEN, never by regex.** Three different things in this repo were called
+    "corrections": the machine's proposals, a human's ruling, and the corrected
+    text. The queue file's `original_word` held Document AI's FRESH reading and
+    `corrected_word` held what the corpus ALREADY stores, while `original_word` in
+    `review_decisions.jsonl` means the opposite thing — the corpus word the
+    reviewer was looking at. One name, two opposed senses, two files, documented
+    as a known trap for a month rather than fixed.
+
+    The fault line is the rebuild. `candidates_*` and `review_queue_*` are
+    regenerated from scratch every run, so a rename there costs nothing and the
+    next rebuild verifies it. `review_decisions.jsonl` is the opposite: 4,000+
+    rows carry `decision_type` values and snapshot field names as DATA, so
+    renaming means rewriting history or carrying an alias map in every reader
+    forever. `test_the_ledger_keeps_its_own_vocabulary` pins that boundary so the
+    next sweep that tries to "finish the job" fails loudly.
+
+    And use `tokenize`, not a word-boundary regex. A regex pass over
+    `review_server.py` turned the prose "Manual corrections (2026-08-13)" into
+    "Manual queue" and "not corrections anybody made" into "not queue anybody
+    made" — renaming English inside comments while doing the identifiers
+    correctly. Walking NAME tokens renames identifiers and leaves prose alone.

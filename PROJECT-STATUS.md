@@ -74,6 +74,148 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0CE. **[2026-09-07] LOOSE ENDS AS OF THE SESSION CLOSE — what a cold session
+    should pick up, in order.**
+
+    **1. Seven stranded rulings, and they need a human against the scan.** klal
+    36 w108, 39 w251, 74 w417/442/443, 209 w16/w17. No stable id, no bbox
+    corroboration, no text match; the words they name are gone from the corpus
+    (klal 39 w251 named `דבכולהן`, that position now reads `היכי`). They are the
+    applier's whole drift list, they now show as a red banner on their klal, and
+    **no tool should re-point them** — every automatic route has already declined.
+
+    **2. One ruling the applier would promote, not yet applied.** klal 63 w40,
+    a manual delete of `סד`, which reads as a folio marker in `י"ד רסי' כ"א סד`.
+    `apply_reviewer_decisions.py --dry-run` shows it; promoting is a deliberate
+    step and has been left to the reviewer.
+
+    **3. Two clearing runs still available.** `close_satisfied_rulings.py` has
+    11 more it can close and `repoint_stale_decisions.py` now reports 0
+    re-pointable with 581 left alone as already-in-corpus. Re-run the dry runs
+    first — both change what the other sees.
+
+    **4. `--part N` is a lie on two tools.** `close_satisfied_rulings.py:140` and
+    `repoint_stale_decisions.py:161` declare it and then hardcode
+    `load_part1*()`, so `--part 2` silently operates on Part 1. Either thread it
+    or delete the flag; a flag that accepts a value and ignores it is worse than
+    no flag.
+
+    **5. `flagged_klalim()` is a wrong answer with no caller.** It filters on
+    `needs_revisit` alone while the dashboard uses `rcount.flag_still_open`,
+    which accounts for decisions that answered the flag. Two answers to one
+    question and the unused one is the wrong one (Lesson 13). Delete it.
+
+    **6. `docai_filter.repair_stream()` unused**, so the audit trail it exists to
+    return — "a filter that changes what a reviewer sees must be able to say
+    exactly what it changed" (§3.5) — is never produced. Production calls
+    `repair_word` per word and discards what changed. Either wire it or drop the
+    §3.5 claim.
+
+    **7. The synthetic-render path still addresses by INDEX.** `review_server.py`
+    renders a `manual_correction` only when `_word_matches(words, word_index,
+    original_word)` at the RECORDED index. The stable id rescues 0 of the 239
+    suppressed today, and that is not an id failure — applying a ruling replaces
+    the word it named, so `original_word` is gone at the correct address too.
+    Worth a deliberate decision about what "still valid" should mean here now
+    that ids exist; do not assume the id fixes it.
+
+    **8. Dead accessors and a dead route.** `typography.get_ligatures()`,
+    `build_part1_freq.load_or_build()`, and the `POST /api/decisions/candidate`
+    alias nothing calls.
+
+    **Still open from before today:** `0CA` the scroll defect (word click undone
+    ~50%, page override lands at 14ms, `_showPageGen` hypothesis, two attempted
+    fixes both reverted); `0BX` the reindex collision guard (klal 210 has three
+    rulings resolving to one word — the id made them all name it correctly, which
+    is why the guard is still wanted); Phase 3 steps 1–3; standing corpus items
+    16, 20, 0N, 3, 4.
+
+0CD. **[2026-09-07] RENAME PASS, THE REBUILD, AND THE MARKERS. ALSO: A TOOL I
+    RECOMMENDED MANUFACTURED 13 FALSE DRIFT ROWS.**
+
+    ### The one that went wrong
+
+    I told the reviewer to run `tools/repoint_stale_decisions.py --apply` without
+    checking it for the guard its own sibling has. It re-points ALREADY-APPLIED
+    rulings, and a re-pointed copy of an applied ruling is an unapplied row
+    carrying a `chosen_text` the corpus already holds. **24 copies written, 23 of
+    them superseding applied rulings, 13 straight into the applier's drift
+    bucket** - which grew 22 -> 24 while the 11 genuine refusals sat unchanged.
+    Fixed at the cause (the tool now skips `applied_decision_ids()`, reporting
+    581 left alone) and at the effect (`restates_an_applied_ruling()` settles the
+    23 already written). Applier drift 24 -> 11, already-applied 650 -> 667. See
+    Lesson 46.
+
+    ### The regression I shipped the day before and found today
+
+    The 601-row backfill broke the decision-history panel for **299 words**.
+    `history_for_word_id` selected on `candidate_snapshot.word_id`; annotations
+    carry one and the rulings they annotate do not, so it matched the ANNOTATION
+    and missed the RULING - wrong row returned and right row omitted, from one
+    line. Every one of the 299 was a word a human had ruled on, and the panel
+    showed bookkeeping in its place. Annotations are now excluded as a CLASS
+    (`ANNOTATION_TYPES`), and each row reports `word_id_source: recorded|backfill`.
+
+    ### The rename pass
+
+    Three things were called "corrections": the machine's proposals, a human's
+    ruling, and the corrected text. Full mapping and the reasoning are in
+    `START_HERE.md`'s new "The three authored files" section and Lesson 48.
+
+        corrections_candidates_part1.json -> candidates_part1.json
+        corrections_verified_part1.json   -> candidates_verified_part1.json
+        corrections_part{1,2,3}.json      -> review_queue_part{1,2,3}.json
+        original_word   (candidate files) -> docai_reading
+        corrected_word  (candidate files) -> stored_text
+        load_corrections()                -> load_review_queue()
+        api_klal()'s "corrections" key    -> "queue"
+
+    **The ledger was deliberately not touched** - filename, `decision_type`
+    values, snapshot fields - and a new invariant pins that line. Archives
+    (`PROJECT-STATUS-HISTORY.md`, dated audits) keep the old names on purpose:
+    rewriting a filename inside a dated entry makes it claim something that was
+    not true then.
+
+    ### The rebuild, dry-run first
+
+    `./rebuild_all.sh --skip-vision` into an isolated `$SEFER_CORPUS_ROOT` before
+    touching the real tree. It predicted the outcome exactly: two files, one
+    record - `candidates_part1.json` 287 -> 286, `review_queue_part1.json` 708 ->
+    707, removing klal 66 w17 (`delete`, `'סו אין'`). Everything else identical,
+    `part*.json` and the ledger and the sidecar included. The real run matched.
+
+    **Three false alarms in the dry run, all missing inputs rather than
+    predictions** - consensus disputes collapsing to 2 bytes (no witness
+    baselines), the ranked queue to 4 bytes, and all 75 collation rows differing
+    (no `sefaria_reference_corpus/word_freq.json`, so `expansion_attested` went
+    null, which that code returns deliberately rather than a false zero). Worth
+    keeping as method: an isolated-root dry run needs `tools/` and the reference
+    corpora symlinked in, or it lies in the alarming direction.
+
+    ### Markers for the work that was invisible
+
+    `api_klal` suppresses a `manual_correction` whose recorded index no longer
+    holds its word - correct, and a bare `continue`, so the klal page said nothing
+    at all. These rulings have no queue entry either, by construction. Now a
+    klal-level banner names what was ruled, what was chosen, and what sits at that
+    index now. NOT drawn on a word: the position is precisely what is untrusted.
+
+    239 of 283 manual corrections are suppressed; 220 are applied and right to be
+    silent. **7 remain across Part 1** - klal 36 w108, 39 w251, 74 w417/442/443,
+    209 w16/w17 - and they are exactly the applier's drift list. My first version
+    said 19, because it excluded only `applied_decision_ids` and listed 12 settled
+    copies as stuck work while the corpus visibly held their text.
+
+    ### Also landed
+
+    `$SEFER_REVIEWER` wired into all seven write handlers (Lesson 47); stable ids
+    swept into `klal_flag` and `punctuation_choice` writes, and deliberately NOT
+    into `witness_choice`/`title_correction`, which address different spaces;
+    `word_id_of()` extracted so the two clearing tools stopped being blind to the
+    601 backfills (`repoint` 0 -> 53 re-pointable, `close_satisfied` 0 -> 18).
+
+    Gate 625. 17 commits, pushed.
+
 0CC. **[2026-09-07] A SWEEP FOR HALF-FINISHED FEATURES. FOUND A REGRESSION I
     HAD JUST SHIPPED, AN ENV VAR THAT DID NOTHING, AND THE ID MISSING FROM
     FOUR OF SEVEN WRITE PATHS.**
