@@ -71,6 +71,86 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0CA. **[2026-09-06] THE SCROLL FLAKE IS THE DEFECT, NOT THE TEST - AND 11
+    DISPUTES NEVER REACH THE DASHBOARD AT ALL.**
+
+    ### The scroll "flake" is a live defect, and the obvious fix makes it worse
+
+    `test_a_word_click_survives_the_scroll_that_follows_it` does not fail on a
+    timing artifact. Reproduced: **clicked klal 2 w411, which is on page 15, and
+    two seconds later the scan pane was showing page 14 - klal 2's START page.**
+    The click had been silently undone, which is exactly the defect the test was
+    written to catch. A reviewer clicking a word on a continuation page gets the
+    wrong page about half the time.
+
+    MECHANISM. The guard sets `suppressObserverScroll` and clears it on a fixed
+    **900ms timer** (`app.js:1988`). The scroll a click starts does not finish on
+    a schedule: lazy mounting resizes blocks and the browser's scroll anchoring
+    moves `scrollTop` to compensate, so events keep arriving. Whenever they
+    outlast 900ms the suppression has lapsed, `updateActiveFromScroll()` resolves
+    the klal and `setActiveKlal()` shows its start page. Lesson 40's fix made it
+    WORSE, not better: blocks can now SHRINK by up to 2,000px, so a long jump
+    overshoots and takes longer to settle - which is why the rate moved from the
+    recorded ~1-in-8 to ~50%.
+
+    Lesson 41 exactly: a condition written as a time budget rather than as the
+    thing itself.
+
+    **THE OBVIOUS FIX IS WRONG AND WAS REVERTED.** Swapping the timer for
+    `releaseObserverWhenScrollSettles()` - the existing settle-detector, which
+    the nav-panel jump uses - took the failure from ~50% to **10 runs out of 10**.
+    That helper does not merely release suppression: it **re-seats the block for
+    `lastActiveKlalId` before releasing**, which is right for a klal jump and
+    precisely wrong for a word click, because re-seating to the klal is what
+    shows the klal's start page. Reverted; 8 runs afterwards gave 5 passed /
+    3 failed, matching the control, so nothing was left damaged. Lesson 31 -
+    handed back rather than tuned a second time.
+
+    WHAT THE FIX ACTUALLY NEEDS: the wait-until-`scrollTop`-is-stable loop
+    extracted from `releaseObserverWhenScrollSettles()` and used WITHOUT the
+    klal re-seat. Two things to verify rather than assume - that the 3s ceiling
+    covers the longest jump in this corpus, and that holding suppression longer
+    does not strand `lastActiveScanPage` so a later genuine scroll stops updating
+    the pane.
+
+    Also swept: four sites suppress the observer. The nav-panel jump
+    (`app.js:4222`) correctly pairs `behavior:'smooth'` with the settle-detector;
+    `revealWordInText` (~693), `applyHashRoute` (~800) and the word click (1987)
+    all use the 900ms timer. Only the word click is demonstrated to fail, but the
+    other two are the same proxy-for-condition shape.
+
+    ### 11 disputes that no reviewer can reach
+
+    Measured end to end: all **453** stage-4a consensus disputes do reach
+    `corrections_part1.json`, and the API serves **929** items against **928**
+    distinct word slots the frontend draws. The loss is small and entirely one
+    shape - a `delete` opcode has no word of its own, because it proposes
+    inserting BEFORE an index, so it has no anchor to render on.
+
+    **10 append-position proposals**, every one `delete`-opcode at
+    `word_index == len(words)` - "DocAI read a word after this klal's last one".
+    The API serves them; there is no `[data-word-index=N]` span to attach to, so
+    nothing is drawn. Several are substantive: klal 211 `בשם התוספות`, klal 175
+    `הלכה 7`, klal 88 `בעיא 4`, klal 84 `4 בעיא`, and 6 more in klalim 106, 114,
+    138, 159, 164, 193.
+
+    **AND THE NAV COUNTS THEM.** Klal 211 reports `correction_count` 4 and
+    `open_count` 4, one of which is this unreachable, undecided
+    `possible_omission`. The reviewer is told there are four things to do and can
+    reach three. Klal 88 the same, inside its 11 open.
+
+    **1 collision**: klal 68 w29 holds a `delete`-opcode proposal and a
+    `manual_correction` at one index. `claim_word_index` exempts `delete` from
+    collision detection on purpose - it has no slot of its own - and app.js's
+    `byIndex[c.word_index] = c` then keeps the last, so the insertion proposal is
+    invisible. The exemption is right server-side and leaves the frontend with
+    two entries and one slot.
+
+    NOT FIXED - both need a UI decision rather than a code change: an insertion
+    proposal needs somewhere to be drawn that is not a word (a gap marker between
+    words, which `.punct-marker` already demonstrates the shape of), and the nav
+    counts must either exclude what cannot be reached or the marker must exist.
+
 0BZ. **[2026-09-06] THE ID REACHES EVERY POSITION-RESOLVING TOOL; TWO DEAD
     FUNCTIONS OF MY OWN REMOVED; THIS FILE SPLIT SO THE PRIME DOCS LOAD IN ONE
     READ.**
