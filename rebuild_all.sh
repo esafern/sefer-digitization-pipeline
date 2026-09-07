@@ -137,6 +137,13 @@ echo "== 4c/6 build_title_report.py =="
 echo "== 4d/6 build_collation_report.py =="
 ./venv/bin/python pipeline/build_collation_report.py
 
+# Stage 4e. The three STRUCTURAL detectors, which were in no chain and wrote no
+# artifact until 2026-09-07 - so 18 flagged positions existed only while somebody
+# watched a terminal (item 0CV). Writes a triage report and NEVER a flag, the
+# same boundary 4b holds: these carry real false positives.
+echo "== 4e/6 build_structural_defect_report.py =="
+./venv/bin/python pipeline/build_structural_defect_report.py
+
 echo "== 4/6 assemble_corrections_dataset.py =="
 ./venv/bin/python pipeline/assemble_corrections_dataset.py
 

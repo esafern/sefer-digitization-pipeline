@@ -1,5 +1,5 @@
 {
-  "total": 11,
+  "total": 12,
   "counts": {
     "id": 0,
     "recoverable": 0,
@@ -8,7 +8,7 @@
     "conflict": 0,
     "ambiguous": 3,
     "id-retired": 0,
-    "no-evidence": 5
+    "no-evidence": 6
   },
   "rulings": [
     {
@@ -118,6 +118,18 @@
       "ruled_on": "!",
       "chose": "",
       "word_at_recorded_index": "לה"
+    },
+    {
+      "decision_id": "9ce01e02b1f6",
+      "decision_type": "disputed_choice",
+      "klal_id": 161,
+      "recorded_word_index": 289,
+      "new_word_index": null,
+      "verdict": "no-evidence",
+      "why": "no scan position recorded and the word is nowhere in the klal",
+      "ruled_on": null,
+      "chose": "נתנאל",
+      "word_at_recorded_index": "נתנן"
     },
     {
       "decision_id": "10fc03bfc0e3",

@@ -27,6 +27,7 @@
 # actually_renders_as, which transcribes it and asserts the three counts this
 # module produces match what the screen shows, klal by klal. That test is the
 # safety net for this extraction; if the move changed behaviour, it fires.
+import functools
 import os
 import sys
 
@@ -77,7 +78,7 @@ def word_matches(words, word_index, expected_word):
 
 def flag_answered_by_a_later_decision(klal_id, word_index, flag_rec,
                                        candidate_decisions=None,
-                                       manual_decisions=None):
+                                       manual_decisions=None, path=None):
     """True when a human recorded a decision at this exact word AFTER the flag
     was raised.
 
@@ -107,12 +108,87 @@ def flag_answered_by_a_later_decision(klal_id, word_index, flag_rec,
         candidate_decisions = rd.all_current("candidate_choice")
     if manual_decisions is None:
         manual_decisions = rd.all_current("manual_correction")
-    flag_ts = flag_rec.get("ts") or ""
+    flag_ts = _raised_at(flag_rec, path)
     for source in (candidate_decisions, manual_decisions):
         decision = source.get((klal_id, word_index))
         if decision and (decision.get("ts") or "") > flag_ts:
             return True
+
+    # THEN BY STABLE WORD ID, because an index match is not the same question.
+    #
+    # FOUND 2026-09-07 (item 0CS), by a worklist count going UP after an apply.
+    # Applying a word-count change fires reindex_flags_after_shift(), which moves
+    # the FLAG onto the word it names - correctly. It does NOT move the ruling
+    # that ANSWERED that flag, and must not: reindex_pending_decisions_after_
+    # shift() deliberately skips anything already in the corpus ("already in the
+    # corpus, not pending"). So the flag lands at w787 while the ruling that
+    # answered it stays recorded at w786, the index test above misses, and a
+    # flag the reviewer had already dealt with RE-OPENS.
+    #
+    # Measured on klal 54 the day this was written: three flags reindexed +1 by
+    # one two-word split, all three re-opening, all three with ids that match
+    # exactly (flag word_id 787 == ruling word_id 787). The id is the address
+    # that survives the shift - which is the whole reason it exists - so ask it.
+    #
+    # Deliberately AFTER the index test and not instead of it: the index test is
+    # exact and cheap, most flags and rulings still carry no id at all, and a
+    # ruling recorded at the same index is the same word by definition.
+    flag_id = rd.word_id_of(flag_rec, _backfilled(path))
+    if flag_id is not None:
+        for source in (candidate_decisions, manual_decisions):
+            for (kid, _wi), decision in source.items():
+                if kid != klal_id or (decision.get("ts") or "") <= flag_ts:
+                    continue
+                if rd.word_id_of(decision, _backfilled(path)) == flag_id:
+                    return True
     return False
+
+
+def _raised_at(flag_rec, path=None):
+    """When this flag was ORIGINALLY raised, following `supersedes` to the root.
+
+    A reindexed flag is the same concern at a new address, not a new one, but it
+    is a new RECORD with today's timestamp. Using that timestamp makes an
+    already-answered flag re-open the moment an unrelated edit shifts its klal,
+    because the answer then looks older than the flag (item 0CS, measured on klal
+    54: three flags, +1 shift, all three re-opened). Walk back to the first
+    record in the chain and ask when THAT was written.
+
+    Bounded, and deliberately: a corrupt or self-referential chain must not spin
+    a request forever, so it gives up and uses the record it has.
+    """
+    rec, seen = flag_rec, set()
+    for _ in range(32):
+        prev_id = rec.get("supersedes")
+        if not prev_id or prev_id in seen:
+            break
+        seen.add(prev_id)
+        prev = rd.find_by_id(prev_id, path=path)
+        if not prev or prev.get("decision_type") != "klal_flag":
+            break
+        rec = prev
+    return rec.get("ts") or ""
+
+
+@functools.lru_cache(maxsize=4)
+def _backfilled(path=None):
+    """The 619 pre-id rulings' word ids, read ONCE.
+
+    rd.backfilled_word_ids() is a full pass over the append-only log, and
+    flag_answered_by_a_later_decision runs per flag per request - 290 open flags
+    would otherwise re-parse a 4,400-line log 290 times. Cached for the life of
+    the process, which is correct for every consumer here: the tools are
+    short-lived, and review_server.py re-execs on restart (the restart rule in
+    START_HERE.md), so a newly-written annotation is picked up the same way a
+    code change is.
+    """
+    # KEYWORD, not positional - the trap review_decisions.superseded_by_an_
+    # applied_decision has its own comment about. The applier test harness
+    # redirects the ledger by wrapping these readers and injecting
+    # `path=<tmpdir>`, so a positional `path` arrives alongside that keyword and
+    # raises "multiple values for argument 'path'". Walked into it 2026-09-07
+    # despite the comment existing.
+    return rd.backfilled_word_ids(path=path)
 
 def claim_word_index(corrections, word_index, overlay_key=None, overlay=None):
     """Return the entry already serving `word_index`, after optionally
@@ -159,7 +235,7 @@ def merge_decision(entry, klal_id, decided):
     return entry
 
 
-def flag_still_open(klal_id, word_index, rec, decided, manual_decisions):
+def flag_still_open(klal_id, word_index, rec, decided, manual_decisions, path=None):
     """Is this klal_flag record still asking for a human?
 
     A klal-level flag (word_index None) is open until someone clears it. A
@@ -178,7 +254,7 @@ def flag_still_open(klal_id, word_index, rec, decided, manual_decisions):
     if word_index is None:
         return True
     return not flag_answered_by_a_later_decision(klal_id, word_index, rec,
-                                                 decided, manual_decisions)
+                                                 decided, manual_decisions, path=path)
 
 
 def machine_state(klal_id, entry, decided):

@@ -138,6 +138,11 @@ def signals(rec, klal_id, words, regions, cache):
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--hebrew", choices=("visual", "logical"), default="visual",
+                    help="visual (default): reorder Hebrew so it reads correctly in a "
+                         "viewer that runs no bidi algorithm, at the cost of being "
+                         "copy-unsafe. logical: storage order, copy-safe, correct only "
+                         "in a bidi-aware renderer. Matches tools/preview_dicta_disputes.py.")
     ap.add_argument("--out", default=OUT_PATH)
     ap.add_argument("--base-url", default=DEFAULT_BASE)
     args = ap.parse_args()
@@ -282,8 +287,10 @@ def main():
                    if len(members) > 1 else ""))
         L.append("")
 
+    if args.hebrew == "visual":
+        L = [L[0], "", cio.VISUAL_WARNING] + L[1:]
     with open(args.out, "w", encoding="utf-8") as f:
-        f.write("\n".join(L) + "\n")
+        f.write("\n".join(cio.render_hebrew(L, args.hebrew)) + "\n")
         f.flush()
     print(f"Wrote {args.out}: {len(positions)} ruling(s)")
     for key, title, _ in order:

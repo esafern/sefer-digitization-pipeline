@@ -1,5 +1,17 @@
 # Project Status — Dated Investigation History
 
+> **Dated one-off reports were removed from the repo root on 2026-09-08.**
+> Entries below reference `code-review-2026-08-25.md`, `CODE-REVIEW-2026-08-26.md`,
+> `CODE-REVIEW-2026-08-27.md`, `LEXICAL-DEFECT-AND-FLAG-AUDIT-2026-08-27.md`,
+> `cleared_flags_2026-08-26.*` and `open_items_2026-08-3*.*` by name. Those files
+> were snapshots of a moment, every finding in them was either acted on or logged
+> here, and they were carrying absolute paths from a machine that no longer has
+> that directory. They are not lost — `git log --all -- <name>` finds the commit
+> and `git show <rev>:<name>` prints the file. The references are left as written
+> rather than rewritten, for the same reason the rest of this archive keeps old
+> filenames: a dated entry that is edited stops being a record of what was true
+> then.
+
 Full dated log of findings, fixes, and investigations for the Yad Malachi
 pipeline, newest entries first. This file was split off **2026-08-12** from
 `PROJECT-STATUS.md` once that file exceeded 6,000 lines / 372KB — past the

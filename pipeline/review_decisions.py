@@ -757,10 +757,15 @@ def all_current_live(decision_type, path=None):
             if rec.get("id") not in superseded}
 
 
-def flagged_klalim(path=None):
-    """klal_ids whose current klal_flag decision has needs_revisit=True."""
-    current = all_current("klal_flag", path)
-    return sorted(kid for (kid, _), r in current.items() if r.get("needs_revisit"))
+# NO flagged_klalim(). REMOVED 2026-09-07: it answered "which klalim are
+# flagged" by testing needs_revisit alone, while the dashboard answers it with
+# review_counts.flag_still_open(), which also accounts for the decisions that
+# ANSWERED a flag. Two answers to one question, and the unused one was the
+# wrong one (Lesson 13). Measured before removing: 153 klalim against the
+# server's 102 - a 50% over-report, including klalim above 222, which are not
+# even Part 1. It had no production caller; api_klalim builds its own `flagged`
+# set at review_server.py:448. Ask review_counts.flag_still_open(), or read
+# needs_revisit off /api/klalim.
 
 
 def superseded_by_an_applied_decision(path=None):

@@ -1,0 +1,240 @@
+[
+  {
+    "klal_id": 2,
+    "word_index": 292,
+    "stored": "לשוא",
+    "proposal": null,
+    "detector": "repeated_word",
+    "evidence": "this word and the next are identical",
+    "acknowledged": true,
+    "acknowledged_on": "2026-09-07T19:56:00.560801+00:00",
+    "acknowledged_note": "reviewer checked all 18 against the scan 2026-09-07 and confirmed them correct as printed; klal 167 w68 was the one real defect and was fixed"
+  },
+  {
+    "klal_id": 16,
+    "word_index": 38,
+    "stored": "ע\"ב",
+    "proposal": null,
+    "detector": "repeated_word",
+    "evidence": "this word and the next are identical",
+    "acknowledged": true,
+    "acknowledged_on": "2026-09-07T19:56:00.560801+00:00",
+    "acknowledged_note": "reviewer checked all 18 against the scan 2026-09-07 and confirmed them correct as printed; klal 167 w68 was the one real defect and was fixed"
+  },
+  {
+    "klal_id": 29,
+    "word_index": 99,
+    "stored": "צדה",
+    "proposal": null,
+    "detector": "repeated_word",
+    "evidence": "this word and the next are identical",
+    "acknowledged": true,
+    "acknowledged_on": "2026-09-07T19:56:00.560801+00:00",
+    "acknowledged_note": "reviewer checked all 18 against the scan 2026-09-07 and confirmed them correct as printed; klal 167 w68 was the one real defect and was fixed"
+  },
+  {
+    "klal_id": 30,
+    "word_index": 196,
+    "stored": "ב",
+    "proposal": null,
+    "detector": "repeated_word",
+    "evidence": "this word and the next are identical",
+    "acknowledged": true,
+    "acknowledged_on": "2026-09-07T19:56:00.560801+00:00",
+    "acknowledged_note": "reviewer checked all 18 against the scan 2026-09-07 and confirmed them correct as printed; klal 167 w68 was the one real defect and was fixed"
+  },
+  {
+    "klal_id": 39,
+    "word_index": 258,
+    "stored": "מרבייהו",
+    "proposal": "מרבי יהו",
+    "detector": "merge",
+    "evidence": "splits into two independently common words (305x / 483x)",
+    "acknowledged": true,
+    "acknowledged_on": "2026-09-07T19:56:00.560801+00:00",
+    "acknowledged_note": "reviewer checked all 18 against the scan 2026-09-07 and confirmed them correct as printed; klal 167 w68 was the one real defect and was fixed"
+  },
+  {
+    "klal_id": 41,
+    "word_index": 10,
+    "stored": "אלא",
+    "proposal": null,
+    "detector": "repeated_word",
+    "evidence": "this word and the next are identical",
+    "acknowledged": true,
+    "acknowledged_on": "2026-09-07T19:56:00.560801+00:00",
+    "acknowledged_note": "reviewer checked all 18 against the scan 2026-09-07 and confirmed them correct as printed; klal 167 w68 was the one real defect and was fixed"
+  },
+  {
+    "klal_id": 42,
+    "word_index": 30,
+    "stored": "ב'",
+    "proposal": null,
+    "detector": "repeated_word",
+    "evidence": "this word and the next are identical",
+    "acknowledged": true,
+    "acknowledged_on": "2026-09-07T19:56:00.560801+00:00",
+    "acknowledged_note": "reviewer checked all 18 against the scan 2026-09-07 and confirmed them correct as printed; klal 167 w68 was the one real defect and was fixed"
+  },
+  {
+    "klal_id": 86,
+    "word_index": 69,
+    "stored": "הוא",
+    "proposal": null,
+    "detector": "repeated_word",
+    "evidence": "this word and the next are identical",
+    "acknowledged": true,
+    "acknowledged_on": "2026-09-07T19:56:00.560801+00:00",
+    "acknowledged_note": "reviewer checked all 18 against the scan 2026-09-07 and confirmed them correct as printed; klal 167 w68 was the one real defect and was fixed"
+  },
+  {
+    "klal_id": 87,
+    "word_index": 91,
+    "stored": "לעירובין",
+    "proposal": "לעיר ובין",
+    "detector": "merge",
+    "evidence": "splits into two independently common words (491x / 1512x)",
+    "acknowledged": true,
+    "acknowledged_on": "2026-09-07T19:56:00.560801+00:00",
+    "acknowledged_note": "reviewer checked all 18 against the scan 2026-09-07 and confirmed them correct as printed; klal 167 w68 was the one real defect and was fixed"
+  },
+  {
+    "klal_id": 103,
+    "word_index": 110,
+    "stored": "ע\"ד",
+    "proposal": null,
+    "detector": "repeated_word",
+    "evidence": "this word and the next are identical",
+    "acknowledged": true,
+    "acknowledged_on": "2026-09-07T19:56:00.560801+00:00",
+    "acknowledged_note": "reviewer checked all 18 against the scan 2026-09-07 and confirmed them correct as printed; klal 167 w68 was the one real defect and was fixed"
+  },
+  {
+    "klal_id": 112,
+    "word_index": 199,
+    "stored": "פסקא",
+    "proposal": null,
+    "detector": "repeated_word",
+    "evidence": "this word and the next are identical",
+    "acknowledged": true,
+    "acknowledged_on": "2026-09-07T19:56:00.560801+00:00",
+    "acknowledged_note": "reviewer checked all 18 against the scan 2026-09-07 and confirmed them correct as printed; klal 167 w68 was the one real defect and was fixed"
+  },
+  {
+    "klal_id": 130,
+    "word_index": 11,
+    "stored": "אאמוראי",
+    "proposal": "אלא אמוראי",
+    "detector": "ligature_compound",
+    "evidence": "an `אלא` ligature fused with the following word; `אמוראי` occurs 20x independently",
+    "acknowledged": true,
+    "acknowledged_on": "2026-09-07T19:56:00.560801+00:00",
+    "acknowledged_note": "reviewer checked all 18 against the scan 2026-09-07 and confirmed them correct as printed; klal 167 w68 was the one real defect and was fixed"
+  },
+  {
+    "klal_id": 144,
+    "word_index": 836,
+    "stored": "ז ה",
+    "proposal": "זה",
+    "detector": "split",
+    "evidence": "joins with the next token into `זה`, 26586x independently",
+    "acknowledged": true,
+    "acknowledged_on": "2026-09-07T19:56:00.560801+00:00",
+    "acknowledged_note": "reviewer checked all 18 against the scan 2026-09-07 and confirmed them correct as printed; klal 167 w68 was the one real defect and was fixed"
+  },
+  {
+    "klal_id": 144,
+    "word_index": 837,
+    "stored": "ה",
+    "proposal": "ח",
+    "detector": "enumeration_break",
+    "evidence": "item 8 of a 10-item enumeration starting at w830: the sequence reads אבגדהוזהטו where an א-ב-ג list requires אבגדהוזחטי",
+    "acknowledged": false
+  },
+  {
+    "klal_id": 144,
+    "word_index": 838,
+    "stored": "ט ו",
+    "proposal": "טו",
+    "detector": "split",
+    "evidence": "joins with the next token into `טו`, 848x independently",
+    "acknowledged": true,
+    "acknowledged_on": "2026-09-07T19:56:00.560801+00:00",
+    "acknowledged_note": "reviewer checked all 18 against the scan 2026-09-07 and confirmed them correct as printed; klal 167 w68 was the one real defect and was fixed"
+  },
+  {
+    "klal_id": 144,
+    "word_index": 839,
+    "stored": "ו",
+    "proposal": "י",
+    "detector": "enumeration_break",
+    "evidence": "item 10 of a 10-item enumeration starting at w830: the sequence reads אבגדהוזהטו where an א-ב-ג list requires אבגדהוזחטי",
+    "acknowledged": false
+  },
+  {
+    "klal_id": 150,
+    "word_index": 167,
+    "stored": "אאיזה",
+    "proposal": "אלא איזה",
+    "detector": "ligature_compound",
+    "evidence": "an `אלא` ligature fused with the following word; `איזה` occurs 8x independently",
+    "acknowledged": true,
+    "acknowledged_on": "2026-09-07T19:56:00.560801+00:00",
+    "acknowledged_note": "reviewer checked all 18 against the scan 2026-09-07 and confirmed them correct as printed; klal 167 w68 was the one real defect and was fixed"
+  },
+  {
+    "klal_id": 168,
+    "word_index": 11,
+    "stored": "אאמוראי",
+    "proposal": "אלא אמוראי",
+    "detector": "ligature_compound",
+    "evidence": "an `אלא` ligature fused with the following word; `אמוראי` occurs 20x independently",
+    "acknowledged": true,
+    "acknowledged_on": "2026-09-07T19:56:00.560801+00:00",
+    "acknowledged_note": "reviewer checked all 18 against the scan 2026-09-07 and confirmed them correct as printed; klal 167 w68 was the one real defect and was fixed"
+  },
+  {
+    "klal_id": 168,
+    "word_index": 162,
+    "stored": "אאביי",
+    "proposal": "אלא אביי",
+    "detector": "ligature_compound",
+    "evidence": "an `אלא` ligature fused with the following word; `אביי` occurs 63x independently",
+    "acknowledged": true,
+    "acknowledged_on": "2026-09-07T19:56:00.560801+00:00",
+    "acknowledged_note": "reviewer checked all 18 against the scan 2026-09-07 and confirmed them correct as printed; klal 167 w68 was the one real defect and was fixed"
+  },
+  {
+    "klal_id": 177,
+    "word_index": 84,
+    "stored": "ב'",
+    "proposal": null,
+    "detector": "repeated_word",
+    "evidence": "this word and the next are identical",
+    "acknowledged": true,
+    "acknowledged_on": "2026-09-07T19:56:00.560801+00:00",
+    "acknowledged_note": "reviewer checked all 18 against the scan 2026-09-07 and confirmed them correct as printed; klal 167 w68 was the one real defect and was fixed"
+  },
+  {
+    "klal_id": 177,
+    "word_index": 320,
+    "stored": "אאידך",
+    "proposal": "אלא אידך",
+    "detector": "ligature_compound",
+    "evidence": "an `אלא` ligature fused with the following word; `אידך` occurs 4x independently",
+    "acknowledged": true,
+    "acknowledged_on": "2026-09-07T19:56:00.560801+00:00",
+    "acknowledged_note": "reviewer checked all 18 against the scan 2026-09-07 and confirmed them correct as printed; klal 167 w68 was the one real defect and was fixed"
+  },
+  {
+    "klal_id": 217,
+    "word_index": 510,
+    "stored": "המלך",
+    "proposal": null,
+    "detector": "repeated_word",
+    "evidence": "this word and the next are identical",
+    "acknowledged": true,
+    "acknowledged_on": "2026-09-07T19:56:00.560801+00:00",
+    "acknowledged_note": "reviewer checked all 18 against the scan 2026-09-07 and confirmed them correct as printed; klal 167 w68 was the one real defect and was fixed"
+  }
+]

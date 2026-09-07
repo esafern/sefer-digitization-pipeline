@@ -46,6 +46,7 @@ sys.path.insert(0, os.path.join(INSTALL_DIR, "pipeline"))
 import apply_reviewer_decisions as ard
 import corpus_io as cio
 import review_decisions as rd
+import word_identity as widentity
 
 
 # ---------------------------------------------------------------------------
@@ -200,6 +201,146 @@ _apply_delete_insertion = ard.apply_delete_insertion
 # ---------------------------------------------------------------------------
 # Bbox helpers
 # ---------------------------------------------------------------------------
+
+def _write_manifest(output_dir, edition, reverts, refused):
+    """INTERVENTIONS.json - every difference between the two editions, with its
+    evidence, written beside BOTH.
+
+    This is the provenance artifact. An archive asking for "a baseline text with
+    little intervention" is asking to be able to AUDIT the intervention, not
+    merely to be told there was little of it - so the honest deliverable is the
+    baseline, the corrected text, and an enumeration of every step between them.
+
+    `chosen_source` is the field that matters most to a reader here, and it is
+    carried per row rather than summarised: a reading taken from another ENGINE
+    (vlm/surya/dicta/docai) means a machine reading the same ink got it right and
+    our transcription was wrong - a transcription fix. `custom` means a human
+    overrode every engine, which is the editorial category. Measured 2026-09-07
+    across 482 applied changes: 176 (37%) came from an engine. The distinction
+    cannot be drawn from the text alone, only from this log, which is the whole
+    argument for shipping it.
+    """
+    path = os.path.join(output_dir, "INTERVENTIONS.json")
+    by_source = {}
+    for r in reverts:
+        by_source[r.get("chosen_source") or "unrecorded"] = \
+            by_source.get(r.get("chosen_source") or "unrecorded", 0) + 1
+    payload = {
+        "edition": edition,
+        "what_this_is": ("Every difference between the as-printed (diplomatic) text and the "
+                         "corrected text. In the diplomatic edition these have been REVERTED; "
+                         "in the corrected edition they are APPLIED."),
+        "intervention_count": len(reverts),
+        "by_chosen_source": by_source,
+        "source_note": ("A reading from vlm_reading/surya_reading/dicta_reading/docai_reading "
+                        "came from a machine reading the same ink, i.e. it corrects this "
+                        "project's transcription rather than the printed edition. `custom` is a "
+                        "human overriding every engine."),
+        "not_recoverable": [{"klal_id": k, "word_index": w, "as_printed": a, "why": why}
+                            for k, w, a, why in refused],
+        "limits": ("Reconstruction is exact for every change made through the decision pipeline. "
+                   "A direct hand edit to part*.json leaves no ledger row and is invisible here."),
+        "interventions": reverts,
+    }
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(payload, f, ensure_ascii=False, indent=2)
+        f.flush()
+    return path
+
+
+def _revert_to_as_printed(klalim):
+    """Undo every applied ruling, returning the text AS THE PRINTER SET IT.
+
+    THE DIPLOMATIC EDITION. Sefaria's acquisition standard asks for fidelity to
+    the specific edition, and for a baseline text with little intervention so that
+    a *source edition* can be referred to for provenance. This produces exactly that, from the same
+    ledger that produced the corrected text - so the two are not a choice, and
+    the difference between them is enumerable rather than asserted.
+
+    IT WORKS BECAUSE THE LEDGER IS APPEND-ONLY. Every applied ruling still
+    carries the reading it replaced (`original_word`, or the snapshot's
+    `original_word`/`final_text`), measured 2026-09-07 at **524 of 524**. That is
+    not a lucky property, it is the reason review_decisions.jsonl is never
+    rewritten.
+
+    ADDRESSED BY STABLE WORD ID FIRST, index second - the same order
+    apply_reviewer_decisions.resolved_position() uses, and for the same reason:
+    applying a ruling replaces the word it named, so the recorded index is
+    exactly what has moved on.
+
+    WHAT THIS CANNOT UNDO, and the manifest says so per klal rather than
+    silently: a hand edit to part*.json. START_HERE.md lists hand edits as a
+    permitted writer of the corpus, and one leaves no ledger row, so it is
+    invisible here. Reconstruction is exact for everything that went through the
+    decision pipeline and cannot speak for anything that did not.
+    """
+    import copy
+    klalim = copy.deepcopy(klalim)
+    by_klal = {k["klal_id"]: k for k in klalim}
+    applied = rd.applied_decision_ids()
+    backfilled = rd.backfilled_word_ids()
+    id_state = widentity.load()
+
+    # RESOLVE EVERY POSITION FIRST, AGAINST THE UNMODIFIED TEXT, THEN APPLY IN
+    # DESCENDING INDEX ORDER. The first version resolved and applied in one
+    # ascending pass, so each revert shifted the positions of every ruling after
+    # it in the same klal and 266 of 607 then failed their own text check - a 44%
+    # loss that looked like missing data and was purely iteration order. Reverting
+    # right-to-left means an earlier revert never moves a later one.
+    pending = []
+    for dtype in ("candidate_choice", "disputed_choice", "manual_correction"):
+        for (kid, wi), dec in rd.all_current(dtype).items():
+            if dec["id"] not in applied or wi is None or kid not in by_klal:
+                continue
+            snap = dec.get("candidate_snapshot") or {}
+            as_printed = (dec.get("original_word") or snap.get("original_word")
+                          or snap.get("final_text"))
+            chosen = dec.get("chosen_text")
+            if as_printed is None or chosen is None or as_printed == chosen:
+                continue
+            words = by_klal[kid]["clean_text"].split()
+            at, how = rd.resolve_word_index(dec, words, id_state=id_state,
+                                            backfilled=backfilled)
+            if at is None:
+                # An applied deletion's word is GONE, so no index names it; the
+                # ledger still knows what it was and where it sat.
+                at, how = (wi, "recorded") if wi <= len(words) else (None, how)
+            pending.append((kid, at, how, as_printed, chosen, dec, dtype))
+
+    reverts, refused = [], []
+    for kid, at, how, as_printed, chosen, dec, dtype in sorted(
+            pending, key=lambda r: (r[0], -(r[1] if r[1] is not None else -1))):
+        if at is None:
+            refused.append((kid, dec.get("word_index"), as_printed, how or "no address"))
+            continue
+        words = by_klal[kid]["clean_text"].split()
+        span = chosen.split()
+        if span and words[at:at + len(span)] == span:
+            words[at:at + len(span)] = as_printed.split()
+        elif not span:                          # an applied deletion: put it back
+            words[at:at] = as_printed.split()
+        elif words[at:at + len(as_printed.split())] == as_printed.split():
+            # ALREADY AS-PRINTED. Two rulings can name one word - a
+            # disputed_choice and a manual_correction at the same position, or an
+            # exact duplicate - and once the first has reverted it, the second
+            # finds its own answer already undone. That is success, not refusal:
+            # counting it as a failure reported 237 unrecoverable positions where
+            # the text was in fact correct, which would have understated the
+            # reconstruction and invited the wrong conclusion about the ledger.
+            continue
+        else:
+            refused.append((kid, at, as_printed,
+                            f"position holds {' '.join(words[at:at+len(span)])!r}, "
+                            f"not the {chosen!r} this ruling wrote"))
+            continue
+        by_klal[kid]["clean_text"] = " ".join(words)
+        reverts.append({"klal_id": kid, "word_index": at, "as_printed": as_printed,
+                        "corrected_to": chosen, "decision_id": dec["id"],
+                        "decision_type": dtype, "resolved_by": how,
+                        "chosen_source": dec.get("chosen_source"),
+                        "reviewer": dec.get("reviewer"), "ts": dec.get("ts")})
+    return klalim, reverts, refused
+
 
 def _load_word_bboxes():
     """Return {klal_id: {word_index: bbox_dict}} from review_queue_part1.json.
@@ -901,6 +1042,11 @@ def main():
                         help="Output format")
     parser.add_argument("--output-dir", required=True,
                         help="Directory to write output files into")
+    parser.add_argument("--edition", choices=("corrected", "diplomatic"), default="corrected",
+                        help="corrected (default): the text as reviewed, every accepted ruling "
+                             "applied. diplomatic: the text AS PRINTED, every applied ruling "
+                             "reverted from the ledger - the baseline edition an archive asks "
+                             "for. Writes INTERVENTIONS.json beside the output either way.")
     parser.add_argument("--by-klal", action="store_true",
                         help="Write one file per klal (plain and tei only)")
     parser.add_argument("--klal-id", type=int, default=None,
@@ -957,6 +1103,24 @@ def main():
     # Apply review decisions (in-memory only, no file writes)
     klalim = _apply_decisions_to_klalim(klalim)
 
+    # THE EDITION SWITCH. `diplomatic` walks the ledger backwards from the
+    # corrected text rather than reading some other file: there is only ever one
+    # corpus, and the as-printed edition is derived from it exactly the way the
+    # corrected one is. Both write the same manifest, so a recipient of either
+    # can see every difference between them.
+    reverts, refused = [], []
+    if args.edition == "diplomatic":
+        klalim, reverts, refused = _revert_to_as_printed(klalim)
+        print(f"Diplomatic edition: reverted {len(reverts)} intervention(s) to the "
+              f"reading the printer set")
+        if refused:
+            print(f"  {len(refused)} could NOT be reverted and are listed in the "
+                  f"manifest - the text is NOT fully as-printed for those positions:")
+            for kid, wi, was, why in refused[:10]:
+                print(f"    klal {kid} w{wi} ({was!r}): {why}")
+    else:
+        _, reverts, refused = _revert_to_as_printed(klalim)
+
     # Load ancillary data for layout formats
     word_bboxes = _load_word_bboxes()
     klal_regions = _load_klal_regions()
@@ -989,6 +1153,9 @@ def main():
         label = "file(s)" if n > 1 else "file"
         print(f"tei: wrote {n} {label} to {out}")
 
+    manifest = _write_manifest(out, args.edition, reverts, refused)
+    print(f"provenance: wrote {os.path.basename(manifest)} - {len(reverts)} intervention(s)"
+          + (f", {len(refused)} NOT recoverable" if refused else ""))
     print("Done.")
 
 

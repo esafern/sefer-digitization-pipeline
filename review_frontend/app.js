@@ -3197,8 +3197,9 @@ async function openKlalFlagPanel(klalId) {
     // FIXED 2026-08-17 (code review): this used to set the button from the
     // local `needsRevisit` checkbox value directly - correct only for the
     // GENERAL note this panel edits, not for the klal's overall flagged
-    // state. rd.flagged_klalim() (which drives the nav badge and this
-    // button's state everywhere else, via klalById[].needs_revisit) also
+    // state. The server's `flagged` set (review_server.py:448, built from
+    // review_counts.flag_still_open) drives the nav badge and this button's
+    // state everywhere else, via klalById[].needs_revisit, and it also
     // lights up on an open WORD-LEVEL ai_flag - so saving this panel with
     // the checkbox left unchecked, on a klal that still had an open
     // word-level flag, silently un-flagged the button while the word

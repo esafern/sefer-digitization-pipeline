@@ -70,7 +70,12 @@ def _line(c, base):
            else f"{n} engines read this ink" if n is not None else "")
     return (f"- [klal {c['klal_id']} · word {c['word_index']}]"
             f"({base}/klal/{c['klal_id']}/word/{c['word_index']}) — "
-            f"corpus `{c.get('final_text')}` → `{c.get('consensus_reading')}` "
+            # ISOLATED, and with a Latin anchor between the two readings. Bare
+            # Hebrew either side of an arrow in an LTR .md swaps and mirrors the
+            # arrow, so `X` → `Y` displays as `Y` ← `X` and the row reads as the
+            # opposite claim. 403 rows here were affected. See corpus_io.rtl.
+            f"corpus `{cio.rtl(c.get('final_text'))}`, consensus "
+            f"`{cio.rtl(c.get('consensus_reading'))}` "
             f"({engines}{', ' + ink if ink else ''})")
 
 
@@ -148,6 +153,11 @@ def build(base=DEFAULT_BASE, limit=None):
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--hebrew", choices=("visual", "logical"), default="visual",
+                    help="visual (default): reorder Hebrew so it reads correctly in a "
+                         "viewer that runs no bidi algorithm, at the cost of being "
+                         "copy-unsafe. logical: storage order, copy-safe, correct only "
+                         "in a bidi-aware renderer. Matches tools/preview_dicta_disputes.py.")
     ap.add_argument("--out", default=OUT_PATH)
     ap.add_argument("--base-url", default=DEFAULT_BASE)
     ap.add_argument("--limit", type=int, default=None,
@@ -155,6 +165,10 @@ def main():
     args = ap.parse_args()
 
     md = build(args.base_url.rstrip("/"), args.limit)
+    if args.hebrew == "visual":
+        first, _, rest = md.partition("\n")
+        md = first + "\n\n" + cio.VISUAL_WARNING + rest
+    md = "\n".join(cio.render_hebrew(md.split("\n"), args.hebrew))
     with open(args.out, "w", encoding="utf-8") as f:
         f.write(md)
         f.flush()

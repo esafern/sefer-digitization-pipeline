@@ -1390,7 +1390,8 @@ def test_klal_flag_and_applied_ids_resolve_independently_of_word_index(decisions
     rd.append_decision("klal_flag", klal_id=7, needs_revisit=True, note="look again", path=decisions_path)
     rd.append_decision("klal_flag", klal_id=8, needs_revisit=True, path=decisions_path)
     rd.append_decision("klal_flag", klal_id=8, needs_revisit=False, path=decisions_path)
-    assert rd.flagged_klalim(path=decisions_path) == [7], (
+    _flagged = rd.all_current("klal_flag", path=decisions_path)
+    assert sorted(kid for (kid, _), r in _flagged.items() if r.get("needs_revisit")) == [7], (
         "a klal un-flagged by a later decision must drop out of the flagged set"
     )
 
@@ -1485,7 +1486,7 @@ def test_reassigning_DECISIONS_PATH_redirects_calls_that_pass_no_explicit_path(
 
     # The readers must follow the same reassignment, or a redirected write
     # becomes invisible to the very code meant to read it back.
-    assert rd.flagged_klalim() == [424242]
+    assert list(rd.all_current("klal_flag")) == [(424242, None)]
     assert rd.find_by_id(record["id"])["note"] == "round-2 redirection probe"
     assert rd.current_for(424242, decision_type="klal_flag")["id"] == record["id"]
     assert list(rd.all_current("klal_flag")) == [(424242, None)]
@@ -3920,7 +3921,6 @@ def _patch_klalim_deps(monkeypatch, klalim_by_id, ai_flags_by_klal=None,
     monkeypatch.setattr(rs, "_load_review_queue", lambda *a, **kw: {})
     monkeypatch.setattr(rs, "_load_punctuation_candidates", lambda *a, **kw: {})
     monkeypatch.setattr(rs, "_load_witness_queue", lambda: [])
-    monkeypatch.setattr(rs.rd, "flagged_klalim", lambda: [])
     manual_decided = manual_decided or {}
     ai_flags_by_klal = ai_flags_by_klal or {}
     # api_klalim counts ai_flags by iterating all_current("klal_flag")
@@ -4279,7 +4279,7 @@ def test_sanitize_json_strips_invalid_escapes_only():
     assert vac.sanitize_json("no escapes here") == "no escapes here"
 
 
-# --- review_decisions: all_current supersession + flagged_klalim edge cases ---
+# --- review_decisions: all_current supersession + klal_flag edge cases -------
 
 def test_all_current_later_record_supersedes_earlier_for_same_key(decisions_path):
     """A later record for the same (klal_id, word_index) must supersede an
@@ -4296,27 +4296,23 @@ def test_all_current_later_record_supersedes_earlier_for_same_key(decisions_path
     assert len(current) == 2
 
 
-def test_flagged_klalim_returns_only_klalim_whose_latest_flag_is_needs_revisit(decisions_path):
-    """A klal flagged then un-flagged must not appear; a klal flagged,
-    un-flagged, then re-flagged must appear."""
+def test_the_latest_klal_flag_wins_for_a_klal(decisions_path):
+    """A klal flagged then un-flagged must not read as flagged; flagged,
+    un-flagged, then re-flagged must.
+
+    REWRITTEN 2026-09-07. This asserted rd.flagged_klalim(), which was removed
+    for giving a different answer from the dashboard's (see the note where it
+    used to live). The supersession behaviour it was really testing lives in
+    all_current(), so it is asserted there - and the flag-is-still-open question
+    belongs to review_counts.flag_still_open(), which has its own tests."""
     rd.append_decision("klal_flag", klal_id=10, needs_revisit=True, path=decisions_path)
     rd.append_decision("klal_flag", klal_id=20, needs_revisit=True, path=decisions_path)
     rd.append_decision("klal_flag", klal_id=20, needs_revisit=False, path=decisions_path)
     rd.append_decision("klal_flag", klal_id=30, needs_revisit=True, path=decisions_path)
     rd.append_decision("klal_flag", klal_id=30, needs_revisit=False, path=decisions_path)
     rd.append_decision("klal_flag", klal_id=30, needs_revisit=True, path=decisions_path)
-    assert rd.flagged_klalim(path=decisions_path) == [10, 30]
-
-
-def test_flagged_klalim_includes_word_level_flags(decisions_path):
-    """A word-level klal_flag (word_index != None) with needs_revisit=True
-    should cause the klal to appear in flagged_klalim, since all_current
-    keys by (klal_id, word_index) and the function checks needs_revisit
-    on every entry. This documents the actual behavior, which the nav
-    sidebar relies on."""
-    rd.append_decision("klal_flag", klal_id=42, word_index=5, needs_revisit=True,
-                       note="word-level flag", path=decisions_path)
-    assert 42 in rd.flagged_klalim(path=decisions_path)
+    current = rd.all_current("klal_flag", path=decisions_path)
+    assert sorted(kid for (kid, _), r in current.items() if r.get("needs_revisit")) == [10, 30]
 
 
 # --- apply_reviewer_decisions: confirmed-no-op for replace opcode ------------
@@ -5592,15 +5588,6 @@ def test_ligature_repair_leaves_a_collapsed_form_that_is_itself_common():
     assert dlf.repair_word("אא", _freqs(**{"אא": 1145, "אלא": 47534})) == "אלא"
 
 
-def test_ligature_repair_stream_reports_what_it_changed():
-    """A filter that changes what a reviewer sees must be able to say exactly
-    what it changed (plan §3.5)."""
-    f = _freqs(**{"אלא": 47534})
-    out, repairs = dlf.repair_stream(["אמר", "אא", "רב"], f)
-    assert out == ["אמר", "אלא", "רב"]
-    assert repairs == [(1, "אא", "אלא")]
-
-
 def test_ligature_artifact_flag_only_fires_on_an_exact_match_to_stored_text():
     """The flag removes an item from the reviewer's open queue, so its criterion
     is an identity rather than a judgement: repairing DocAI's reading must make
@@ -5978,6 +5965,171 @@ def test_a_pending_decision_past_a_word_count_change_is_moved_too(apply_harness,
     assert moved is not None, "the pending decision was left at w4, where its word no longer is"
     assert moved["chosen_text"] == "דלית" and moved["candidate_snapshot"]["original_word"] == "דלת"
     assert "reindexed from w4" in moved["note"]
+
+
+def test_a_pending_decision_addressed_by_a_stable_id_is_not_reindexed(apply_harness, decisions_path):
+    """ADDED 2026-09-07 (item 0CJ). The reindexer exists to keep an INDEX-shaped
+    address pointing at its word. A ruling that names its word by stable id does
+    not have that problem, and moving it appends a superseding copy that changes
+    only a number the applier no longer reads - resolved_position() asks the
+    sidecar first.
+
+    This is the twin of test_a_pending_decision_past_a_word_count_change_is_
+    moved_too, and deliberately identical to it except for the `word_id` in the
+    snapshot: that test proves the move still happens without an id, this one
+    proves it stops with one. Neither means anything without the other - a skip
+    that fires unconditionally would pass this test alone (Lesson 25)."""
+    entry = _correction(1, "insert", None, "זרא")          # applying REMOVES it
+    apply_harness([{"klal_id": 1, "clean_text": "אלף זרא בית גימל דלת"}], {"1": [entry]})
+    rd.append_decision("disputed_choice", klal_id=1, word_index=1, chosen_source="docai_reading",
+                       chosen_text="", candidate_snapshot=entry, path=decisions_path)
+    rd.append_decision("manual_correction", klal_id=1, word_index=4, chosen_source="custom",
+                       chosen_text="דלית",
+                       candidate_snapshot={"word_index": 4, "original_word": "דלת",
+                                           "word_id": "w-dalet-0001"},
+                       path=decisions_path)
+
+    assert apply_harness.run()[1] == "אלף בית גימל דלת"
+    assert rd.all_current("manual_correction").get((1, 3)) is None, \
+        "a ruling addressed by a stable id must not be re-pointed by index"
+    still = rd.all_current("manual_correction").get((1, 4))
+    assert still is not None and still["chosen_text"] == "דלית", \
+        "and it must be left exactly where it was, not dropped"
+    assert "reindexed" not in (still.get("note") or "")
+
+
+def test_an_open_flag_addressed_by_a_stable_id_is_not_reindexed(apply_harness, decisions_path):
+    """The same skip on the flag reindexer, which is its sibling and was written
+    with it. INERT against today's ledger - 0 of 1,367 word-level flags carry an
+    id - so it is driven by a synthetic flag here, exactly as item 0BZ's
+    prospective id tests are, because untested it would be the built-and-never-
+    exercised shape this repo keeps finding (Lesson 47)."""
+    entry = _correction(1, "insert", None, "זרא")
+    apply_harness([{"klal_id": 1, "clean_text": "אלף זרא בית גימל דלת"}], {"1": [entry]})
+    rd.append_decision("disputed_choice", klal_id=1, word_index=1, chosen_source="docai_reading",
+                       chosen_text="", candidate_snapshot=entry, path=decisions_path)
+    rd.append_decision("klal_flag", klal_id=1, word_index=4, needs_revisit=True,
+                       note="flag that names its word by id",
+                       candidate_snapshot={"word_index": 4, "word_id": "w-dalet-0001"},
+                       path=decisions_path)
+
+    apply_harness.run()
+    assert rd.all_current("klal_flag").get((1, 3)) is None, \
+        "a flag addressed by a stable id must not be re-pointed by index"
+    kept = rd.all_current("klal_flag").get((1, 4))
+    assert kept is not None and kept["needs_revisit"], \
+        "and it must stay open where it is, not be closed as superseded"
+
+
+def test_a_reindexed_flag_carries_the_id_of_the_word_it_landed_on(apply_harness, decisions_path,
+                                                                  monkeypatch):
+    """ADDED 2026-09-07 (item 0CK). A flag with no id is still moved by index -
+    that is what the reindexer is for - but the flag it writes at the new
+    position must carry the id of the word it landed on, so the move is the LAST
+    one it needs: the skip added the same day passes over it on every future
+    shift.
+
+    This closes the loop rather than only the tap. flag_unreviewed_auto_
+    corrections.py attaches an id to flags it writes from now on; this attaches
+    one to flags that already exist, at the moment the reindexer has verified
+    exactly which word they sit on (old_words[wi] == new_words[new_wi]) - which
+    is the only moment that address is corroborated rather than inferred."""
+    monkeypatch.setattr(ard.widentity, "load", lambda *a, **kw: {"stub": True})
+    monkeypatch.setattr(ard.widentity, "snapshot_fields",
+                        lambda state, kid, wi: {"word_id": f"w-{kid}-{wi}"})
+
+    entry = _correction(1, "insert", None, "זרא")          # applying REMOVES it
+    apply_harness([{"klal_id": 1, "clean_text": "אלף זרא בית גימל דלת"}], {"1": [entry]})
+    rd.append_decision("disputed_choice", klal_id=1, word_index=1, chosen_source="docai_reading",
+                       chosen_text="", candidate_snapshot=entry, path=decisions_path)
+    # an OPEN flag with no id, three words along - the pre-2026-09-07 shape
+    rd.append_decision("klal_flag", klal_id=1, word_index=4, needs_revisit=True,
+                       note="check this word", path=decisions_path)
+
+    apply_harness.run()
+    moved = rd.all_current("klal_flag").get((1, 3))
+    assert moved is not None and moved["needs_revisit"], \
+        "a flag with no id must still be moved by index - that is what the reindexer is for"
+    assert (moved.get("candidate_snapshot") or {}).get("word_id") == "w-1-3", \
+        "and the moved flag must carry the id of the word it landed on, so it never moves again"
+
+
+def test_a_reindexed_flag_does_not_reopen_the_ruling_that_answered_it(apply_harness, decisions_path,
+                                                                     monkeypatch):
+    """ADDED 2026-09-07 (item 0CS). Found by a worklist count going UP after an
+    apply, which is the only symptom this had.
+
+    Applying a word-count change moves an open flag onto the word it names. The
+    ruling that ANSWERED that flag is not moved and must not be - the reindexer
+    deliberately skips anything already in the corpus. So the flag lands at a new
+    index with today's timestamp while its answer sits at the old index with an
+    older one, and BOTH halves of flag_answered_by_a_later_decision fail: the
+    index lookup misses, and the answer looks older than the flag.
+
+    Measured on klal 54 before the fix: three flags reindexed +1 by one two-word
+    split, all three re-opening work the reviewer had finished."""
+    monkeypatch.setattr(ard.widentity, "load", lambda *a, **kw: {"stub": True})
+    monkeypatch.setattr(ard.widentity, "snapshot_fields",
+                        lambda state, kid, wi: {"word_id": f"wid-{kid}-{wi}"})
+
+    entry = _correction(1, "insert", None, "זרא")          # applying REMOVES it
+    apply_harness([{"klal_id": 1, "clean_text": "אלף זרא בית גימל דלת"}], {"1": [entry]})
+
+    # a flag at w4, and a human ruling at w4 that ANSWERS it - both before the edit
+    rd.append_decision("klal_flag", klal_id=1, word_index=4, needs_revisit=True,
+                       note="look at this", path=decisions_path)
+    rd.append_decision("manual_correction", klal_id=1, word_index=4, chosen_source="custom",
+                       chosen_text="דלת",
+                       candidate_snapshot={"word_index": 4, "original_word": "דלת",
+                                           "word_id": "wid-1-3"},
+                       path=decisions_path)
+    before = rcount.flag_still_open(1, 4, rd.all_current("klal_flag", path=decisions_path)[(1, 4)],
+                                    rd.all_current("candidate_choice", path=decisions_path),
+                                    rd.all_current("manual_correction", path=decisions_path),
+                                    path=decisions_path)
+    assert not before, "precondition: the ruling answers the flag while both sit at w4"
+
+    rd.append_decision("disputed_choice", klal_id=1, word_index=1, chosen_source="docai_reading",
+                       chosen_text="", candidate_snapshot=entry, path=decisions_path)
+    apply_harness.run()
+
+    moved = rd.all_current("klal_flag", path=decisions_path).get((1, 3))
+    assert moved is not None, "precondition: the deletion shifted the flag from w4 to w3"
+    rcount._backfilled.cache_clear()
+    still = rcount.flag_still_open(1, 3, moved,
+                                  rd.all_current("candidate_choice", path=decisions_path),
+                                  rd.all_current("manual_correction", path=decisions_path),
+                                  path=decisions_path)
+    assert not still, (
+        "a flag that was already answered must not re-open just because an edit "
+        "moved it - the answer is the same word, at the address the id names"
+    )
+
+
+def test_an_unverifiable_flag_shift_is_recorded_to_a_file_not_only_printed(tmp_path):
+    """ADDED 2026-09-07 (item 0CU). The reviewer asked WHERE one of these was and
+    the answer no longer existed: the applier printed it and wrote it nowhere, so
+    a piped or scrolled terminal loses the only actionable output of the run.
+    Lesson 32 - a finding that only prints has not been delivered.
+
+    APPEND, not overwrite, and that is the assertion that matters: the next run
+    that verifies everything cleanly must not erase a finding nobody has acted on
+    yet. Every other per-run report in this repo is safe to overwrite because it
+    is re-derived from current state; this one describes a shift that has already
+    happened and cannot be re-derived afterwards."""
+    path = str(tmp_path / "unverified.jsonl")
+    ard._record_unverified_shifts([(36, 14, 13)], path)
+    ard._record_unverified_shifts([(71, 62, 61), (106, 46, 45)], path)
+
+    rows = [json.loads(l) for l in open(path, encoding="utf-8") if l.strip()]
+    assert len(rows) == 3, "the second call must APPEND, not replace the first finding"
+    assert [r["klal_id"] for r in rows] == [36, 71, 106]
+    first = rows[0]
+    for field in ("ts", "klal_id", "still_recorded_at_word_index",
+                  "shift_would_have_moved_it_to", "note"):
+        assert field in first, f"a row must carry {field} to be actionable later"
+    assert first["still_recorded_at_word_index"] == 14
+    assert first["shift_would_have_moved_it_to"] == 13
 
 
 def test_a_pending_decision_whose_word_did_not_follow_is_left_alone(apply_harness, decisions_path):
@@ -8461,3 +8613,143 @@ def test_a_settled_ruling_is_never_announced_as_stranded(monkeypatch):
         assert wi not in stranded, (
             f"klal {kid} w{wi} is settled - the corpus holds its chosen text - and "
             f"is being reported as open work")
+
+
+# --- structural defect report: the acknowledgement baseline --------------------
+
+def test_acknowledging_a_structural_finding_silences_it_but_not_a_new_one(tmp_path, monkeypatch):
+    """ADDED 2026-09-07 (item 0CX). The reviewer checked all 18 structural
+    findings, fixed the one real defect and dismissed the rest - so without a
+    baseline the report would announce the same 20 dismissed rows on every
+    rebuild forever, and the next real defect would arrive inside that noise.
+    A report its reader learns to skip delivers nothing (Lesson 32, one level on
+    from "a tool that prints is not a tool that runs").
+
+    Three properties, and the last two are what make silencing SAFE:
+      1. an acknowledged finding stops being announced;
+      2. a genuinely new finding is still announced;
+      3. the SAME position with DIFFERENT text is announced again - the
+         acknowledgement said "this text here is correct as printed", so it
+         cannot outlive the text it was about.
+    """
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "bsdr", os.path.join(REPO, "pipeline", "build_structural_defect_report.py"))
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+
+    ack_path = str(tmp_path / "ack.json")
+    monkeypatch.setattr(m, "ACK_PATH", ack_path)
+
+    row = {"klal_id": 5, "word_index": 20, "stored": "לו",
+           "detector": "repeated_word", "evidence": "x"}
+    other = {"klal_id": 9, "word_index": 3, "stored": "בית",
+             "detector": "repeated_word", "evidence": "x"}
+    changed = dict(row, stored="אחרת")
+
+    with open(ack_path, "w", encoding="utf-8") as f:
+        json.dump([{"key": m._key(row), "ts": "2026-09-07", "note": "checked",
+                    "klal_id": 5, "detector": "repeated_word", "stored": "לו"}], f)
+    ack = m.load_acknowledged()
+
+    assert m._key(row) in ack, "the acknowledged finding must be recognised"
+    assert m._key(other) not in ack, "a different finding must NOT be silenced by it"
+    assert m._key(changed) not in ack, (
+        "the same position with different text must come back - the "
+        "acknowledgement was about the TEXT, and it changed"
+    )
+    # and the key must not depend on word_index, which moves on every earlier edit
+    assert m._key(row) == m._key(dict(row, word_index=999)), (
+        "an acknowledgement keyed on word_index would evaporate whenever an "
+        "unrelated edit shifted the klal, and the finding would return looking new"
+    )
+
+
+def test_an_enumeration_break_is_detected_and_a_clean_enumeration_is_not(tmp_path, monkeypatch):
+    """ADDED 2026-09-07 (item 0CY). The sharpest check in the structural report,
+    because it argues from SEQUENCE rather than frequency: the eighth item of a
+    list opening `א ב ג ד ה ו ז` can only be `ח`.
+
+    Found by the reviewer on klal 144 and confirmed against the ink - page 52's
+    right margin carries ten markers and DocAI read the 8th `ח` as `ה` and the
+    10th `י` as `ו`. Both are letter pairs a reader confuses (`ה`/`ח` differ only
+    in whether the left leg meets the roof) and both were already determined by
+    the sequence.
+
+    The negative case is the half that keeps this honest: a CLEAN enumeration
+    must produce nothing, or the detector is just reporting every list it sees."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "bsdr2", os.path.join(REPO, "pipeline", "build_structural_defect_report.py"))
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    monkeypatch.setattr(m, "ACK_PATH", str(tmp_path / "none.json"))
+
+    part = tmp_path / "part.json"
+    part.write_text(json.dumps([
+        {"klal_id": 1, "clean_text": "פתיחה א ב ג ד ה ו ז ה ט ו סיום"},   # broken at 8 and 10
+        {"klal_id": 2, "clean_text": "פתיחה א ב ג ד ה ו ז ח ט י סיום"},   # clean
+    ], ensure_ascii=False), encoding="utf-8")
+
+    rows = [r for r in m.build(str(part)) if r["detector"] == "enumeration_break"]
+    by_klal = {}
+    for r in rows:
+        by_klal.setdefault(r["klal_id"], []).append((r["stored"], r["proposal"]))
+
+    assert by_klal.get(1) == [("ה", "ח"), ("ו", "י")], (
+        f"both breaks in the enumeration must be reported with the letter the "
+        f"sequence requires; got {by_klal.get(1)}"
+    )
+    assert 2 not in by_klal, (
+        "a CLEAN א-ב-ג enumeration must report nothing - otherwise this detector "
+        "fires on every list in the book and carries no information (Lesson 25)"
+    )
+
+
+def test_the_diplomatic_edition_reverts_an_intervention_and_the_manifest_names_it(tmp_path, monkeypatch):
+    """ADDED 2026-09-07 (item 0DA). Sefaria's acquisition standard asks for "a
+    baseline text with little intervention, so we can refer to a source edition
+    for provenance". This is that baseline, derived from the same ledger as the
+    corrected text, so the two are not a choice and their difference is
+    enumerable rather than asserted.
+
+    The assertion is the ROUND TRIP: a word the ledger says was changed must read
+    as-printed in the diplomatic text and as-corrected in the corrected text, and
+    the manifest must carry the pair. A reverter that silently no-ops would pass
+    a "did it run" check and fail this one."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "expc", os.path.join(REPO, "tools", "export_corpus.py"))
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+
+    dec = rd.append_decision(
+        "manual_correction", klal_id=1, word_index=2, chosen_source="custom",
+        chosen_text="עליו",
+        candidate_snapshot={"word_index": 2, "original_word": "עלוי"},
+        path=str(tmp_path / "d.jsonl"))
+    monkeypatch.setattr(m.rd, "all_current",
+                        lambda t, *a, **kw: ({(1, 2): dec} if t == "manual_correction" else {}))
+    monkeypatch.setattr(m.rd, "applied_decision_ids", lambda *a, **kw: {dec["id"]})
+    monkeypatch.setattr(m.rd, "backfilled_word_ids", lambda *a, **kw: {})
+    monkeypatch.setattr(m.widentity, "load", lambda *a, **kw: {})
+
+    corrected = [{"klal_id": 1, "clean_text": "אלף בית עליו גימל"}]
+    diplomatic, reverts, refused = m._revert_to_as_printed(corrected)
+
+    assert diplomatic[0]["clean_text"] == "אלף בית עלוי גימל", (
+        "the diplomatic edition must read what the PRINTER set at that word"
+    )
+    assert corrected[0]["clean_text"] == "אלף בית עליו גימל", (
+        "and the corrected text passed in must not be mutated - these are two "
+        "editions of one corpus, not one edition edited twice"
+    )
+    assert not refused
+    assert len(reverts) == 1
+    row = reverts[0]
+    assert (row["as_printed"], row["corrected_to"]) == ("עלוי", "עליו")
+    assert row["chosen_source"] == "custom", (
+        "chosen_source travels with every row: an engine-sourced reading corrects "
+        "our transcription, `custom` is a human overriding the ink, and only this "
+        "log can tell a reader which a given change was"
+    )

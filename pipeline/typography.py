@@ -29,7 +29,26 @@ constant that "usually agrees" is Lesson 13 exactly, and this one did not even
 usually agree. It is gone; use whichever of the two above matches your scope.
 """
 
-# Known combined printer glyphs and ligatures used by the Berlin 1852 typesetter
+# Known combined printer glyphs and ligatures used by the Berlin 1852 typesetter.
+#
+# THIS IS DOCUMENTATION, NOT CONFIGURATION - measured 2026-09-07, and it matters
+# for Phase 3. Nothing reads this list. Not one caller, in `pipeline/`, `tools/`
+# or `tests/`; the `get_ligatures()` accessor over it was removed the same day
+# for having none either. The five modules that import `typography` all want the
+# PREDICATES below (`dropped_lamed_explains` and friends), which hardcode the
+# alef-lamed rule in code rather than reading it from here.
+#
+# So the knowledge in this file exists twice more, both times in live code: the
+# predicates below, and the 24 corrupt forms duplicated across
+# tests/test_corpus_invariants.py and tools/validate_lexicon_independent.py.
+# This copy is the prose one and is the only one nothing executes.
+#
+# CONSEQUENCE FOR PHASE 3 (item 0BU step 1), which is scoped as "extract the
+# ligature catalogue into book.json": extracting THIS list moves dead data into
+# a config file and changes no behaviour, because no behaviour depends on it.
+# The thing that is genuinely this-book-specific and genuinely load-bearing is
+# the predicates and the 24 forms. Decide which of the two Phase 3 means before
+# doing it; do not assume this list is the seam just because it looks like one.
 PRINTER_LIGATURES_AND_GLYPHS = [
     {
         "id": "alef_lamed",
@@ -75,10 +94,6 @@ PRINTER_LIGATURES_AND_GLYPHS = [
         "detector_script": None,
     },
 ]
-
-
-def get_ligatures():
-    return PRINTER_LIGATURES_AND_GLYPHS
 
 
 def dropped_lamed_explains(stored, reading):

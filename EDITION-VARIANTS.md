@@ -93,7 +93,7 @@ Only positions where **every Berlin-reading engine agrees with the corpus** are 
 ### klal 54
 
 - word 392: Berlin תובשומד' - Jerusalem םתובשומד (**attested 0 times**)
-- word 974: Berlin יפא' - Jerusalem וליפא (attested 10,660 times)
+- word 975: Berlin יפא' - Jerusalem וליפא (attested 10,660 times)
 
 ### klal 62
 
@@ -184,8 +184,8 @@ Only positions where **every Berlin-reading engine agrees with the corpus** are 
 
 ### klal 167
 
-- word 431: Berlin הירבד' - Jerusalem םהירבד (attested 310 times)
-- word 795: Berlin כיאו' - Jerusalem אכיאו (attested 1,005 times)
+- word 430: Berlin הירבד' - Jerusalem םהירבד (attested 310 times)
+- word 794: Berlin כיאו' - Jerusalem אכיאו (attested 1,005 times)
 
 ### klal 168
 

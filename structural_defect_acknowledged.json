@@ -1,0 +1,162 @@
+[
+  {
+    "key": "2|repeated_word|לשוא",
+    "ts": "2026-09-07T19:56:00.560801+00:00",
+    "note": "reviewer checked all 18 against the scan 2026-09-07 and confirmed them correct as printed; klal 167 w68 was the one real defect and was fixed",
+    "klal_id": 2,
+    "detector": "repeated_word",
+    "stored": "לשוא"
+  },
+  {
+    "key": "16|repeated_word|ע\"ב",
+    "ts": "2026-09-07T19:56:00.560801+00:00",
+    "note": "reviewer checked all 18 against the scan 2026-09-07 and confirmed them correct as printed; klal 167 w68 was the one real defect and was fixed",
+    "klal_id": 16,
+    "detector": "repeated_word",
+    "stored": "ע\"ב"
+  },
+  {
+    "key": "29|repeated_word|צדה",
+    "ts": "2026-09-07T19:56:00.560801+00:00",
+    "note": "reviewer checked all 18 against the scan 2026-09-07 and confirmed them correct as printed; klal 167 w68 was the one real defect and was fixed",
+    "klal_id": 29,
+    "detector": "repeated_word",
+    "stored": "צדה"
+  },
+  {
+    "key": "30|repeated_word|ב",
+    "ts": "2026-09-07T19:56:00.560801+00:00",
+    "note": "reviewer checked all 18 against the scan 2026-09-07 and confirmed them correct as printed; klal 167 w68 was the one real defect and was fixed",
+    "klal_id": 30,
+    "detector": "repeated_word",
+    "stored": "ב"
+  },
+  {
+    "key": "39|merge|מרבייהו",
+    "ts": "2026-09-07T19:56:00.560801+00:00",
+    "note": "reviewer checked all 18 against the scan 2026-09-07 and confirmed them correct as printed; klal 167 w68 was the one real defect and was fixed",
+    "klal_id": 39,
+    "detector": "merge",
+    "stored": "מרבייהו"
+  },
+  {
+    "key": "41|repeated_word|אלא",
+    "ts": "2026-09-07T19:56:00.560801+00:00",
+    "note": "reviewer checked all 18 against the scan 2026-09-07 and confirmed them correct as printed; klal 167 w68 was the one real defect and was fixed",
+    "klal_id": 41,
+    "detector": "repeated_word",
+    "stored": "אלא"
+  },
+  {
+    "key": "42|repeated_word|ב'",
+    "ts": "2026-09-07T19:56:00.560801+00:00",
+    "note": "reviewer checked all 18 against the scan 2026-09-07 and confirmed them correct as printed; klal 167 w68 was the one real defect and was fixed",
+    "klal_id": 42,
+    "detector": "repeated_word",
+    "stored": "ב'"
+  },
+  {
+    "key": "86|repeated_word|הוא",
+    "ts": "2026-09-07T19:56:00.560801+00:00",
+    "note": "reviewer checked all 18 against the scan 2026-09-07 and confirmed them correct as printed; klal 167 w68 was the one real defect and was fixed",
+    "klal_id": 86,
+    "detector": "repeated_word",
+    "stored": "הוא"
+  },
+  {
+    "key": "87|merge|לעירובין",
+    "ts": "2026-09-07T19:56:00.560801+00:00",
+    "note": "reviewer checked all 18 against the scan 2026-09-07 and confirmed them correct as printed; klal 167 w68 was the one real defect and was fixed",
+    "klal_id": 87,
+    "detector": "merge",
+    "stored": "לעירובין"
+  },
+  {
+    "key": "103|repeated_word|ע\"ד",
+    "ts": "2026-09-07T19:56:00.560801+00:00",
+    "note": "reviewer checked all 18 against the scan 2026-09-07 and confirmed them correct as printed; klal 167 w68 was the one real defect and was fixed",
+    "klal_id": 103,
+    "detector": "repeated_word",
+    "stored": "ע\"ד"
+  },
+  {
+    "key": "112|repeated_word|פסקא",
+    "ts": "2026-09-07T19:56:00.560801+00:00",
+    "note": "reviewer checked all 18 against the scan 2026-09-07 and confirmed them correct as printed; klal 167 w68 was the one real defect and was fixed",
+    "klal_id": 112,
+    "detector": "repeated_word",
+    "stored": "פסקא"
+  },
+  {
+    "key": "130|ligature_compound|אאמוראי",
+    "ts": "2026-09-07T19:56:00.560801+00:00",
+    "note": "reviewer checked all 18 against the scan 2026-09-07 and confirmed them correct as printed; klal 167 w68 was the one real defect and was fixed",
+    "klal_id": 130,
+    "detector": "ligature_compound",
+    "stored": "אאמוראי"
+  },
+  {
+    "key": "144|split|ז ה",
+    "ts": "2026-09-07T19:56:00.560801+00:00",
+    "note": "reviewer checked all 18 against the scan 2026-09-07 and confirmed them correct as printed; klal 167 w68 was the one real defect and was fixed",
+    "klal_id": 144,
+    "detector": "split",
+    "stored": "ז ה"
+  },
+  {
+    "key": "144|split|ט ו",
+    "ts": "2026-09-07T19:56:00.560801+00:00",
+    "note": "reviewer checked all 18 against the scan 2026-09-07 and confirmed them correct as printed; klal 167 w68 was the one real defect and was fixed",
+    "klal_id": 144,
+    "detector": "split",
+    "stored": "ט ו"
+  },
+  {
+    "key": "150|ligature_compound|אאיזה",
+    "ts": "2026-09-07T19:56:00.560801+00:00",
+    "note": "reviewer checked all 18 against the scan 2026-09-07 and confirmed them correct as printed; klal 167 w68 was the one real defect and was fixed",
+    "klal_id": 150,
+    "detector": "ligature_compound",
+    "stored": "אאיזה"
+  },
+  {
+    "key": "168|ligature_compound|אאמוראי",
+    "ts": "2026-09-07T19:56:00.560801+00:00",
+    "note": "reviewer checked all 18 against the scan 2026-09-07 and confirmed them correct as printed; klal 167 w68 was the one real defect and was fixed",
+    "klal_id": 168,
+    "detector": "ligature_compound",
+    "stored": "אאמוראי"
+  },
+  {
+    "key": "168|ligature_compound|אאביי",
+    "ts": "2026-09-07T19:56:00.560801+00:00",
+    "note": "reviewer checked all 18 against the scan 2026-09-07 and confirmed them correct as printed; klal 167 w68 was the one real defect and was fixed",
+    "klal_id": 168,
+    "detector": "ligature_compound",
+    "stored": "אאביי"
+  },
+  {
+    "key": "177|ligature_compound|אאידך",
+    "ts": "2026-09-07T19:56:00.560801+00:00",
+    "note": "reviewer checked all 18 against the scan 2026-09-07 and confirmed them correct as printed; klal 167 w68 was the one real defect and was fixed",
+    "klal_id": 177,
+    "detector": "ligature_compound",
+    "stored": "אאידך"
+  },
+  {
+    "key": "177|repeated_word|ב'",
+    "ts": "2026-09-07T19:56:00.560801+00:00",
+    "note": "reviewer checked all 18 against the scan 2026-09-07 and confirmed them correct as printed; klal 167 w68 was the one real defect and was fixed",
+    "klal_id": 177,
+    "detector": "repeated_word",
+    "stored": "ב'"
+  },
+  {
+    "key": "217|repeated_word|המלך",
+    "ts": "2026-09-07T19:56:00.560801+00:00",
+    "note": "reviewer checked all 18 against the scan 2026-09-07 and confirmed them correct as printed; klal 167 w68 was the one real defect and was fixed",
+    "klal_id": 217,
+    "detector": "repeated_word",
+    "stored": "המלך"
+  }
+]

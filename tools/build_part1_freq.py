@@ -31,10 +31,6 @@ Usage
   # Force rebuild even if current:
   python3 tools/build_part1_freq.py --force
 
-  # As a library — returns the freq dict, rebuilding only if stale:
-  from tools.build_part1_freq import load_or_build
-  freq = load_or_build()          # {normalized_form: count}
-  hapax = {w for w, n in freq.items() if n == 1}
 """
 import argparse
 import json
@@ -97,12 +93,12 @@ def _build():
     return data
 
 
-def load_or_build(force=False):
-    """Return the freq dict {normalized_form: count}, rebuilding if stale."""
-    if not force and _is_current():
-        with open(OUT_PATH, encoding="utf-8") as f:
-            return json.load(f)["freq"]
-    return _build()["freq"]
+# NO load_or_build(). REMOVED 2026-09-07 together with the "As a library" usage
+# block that documented it: nothing imported this module, so the library half of
+# its contract had never been exercised. _build() and _is_current() are still
+# here and main() still uses both, so re-adding the wrapper is three lines if a
+# caller ever appears - which is cheaper than carrying an unexercised API that
+# reads as delivered.
 
 
 def main():

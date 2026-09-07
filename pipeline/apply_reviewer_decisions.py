@@ -52,6 +52,7 @@
 #   - Never invokes rebuild_all.sh itself.
 import argparse
 import datetime
+import json
 import os
 
 import corpus_io as cio
@@ -205,6 +206,32 @@ def close_flag_satisfied_by(klal_id, word_index, decision, kind, applied_ts=None
     return True
 
 
+UNVERIFIED_SHIFTS_PATH = os.path.join(REPO, "unverified_flag_shifts.jsonl")
+
+
+def _record_unverified_shifts(rows, path=None):
+    """Append the flags a shift could not be verified for, so they survive the run.
+
+    One JSON object per line, flushed per row (the standing incremental-flush
+    rule in START_HERE.md), carrying enough to act on it later: which klal, the
+    index the flag is still recorded at, the index the shift would have moved it
+    to, and when. Read it with `cat`; nothing consumes it automatically, because
+    what to do about a flag that may name the wrong word is a human judgement.
+    """
+    path = path or UNVERIFIED_SHIFTS_PATH
+    stamp = datetime.datetime.now(datetime.timezone.utc).isoformat()
+    with open(path, "a", encoding="utf-8") as f:
+        for kid, recorded_at, would_have_been in rows:
+            f.write(json.dumps({
+                "ts": stamp, "klal_id": kid,
+                "still_recorded_at_word_index": recorded_at,
+                "shift_would_have_moved_it_to": would_have_been,
+                "note": ("the word at the old index is not the word at the shifted index, "
+                         "so the flag was left alone rather than moved onto a guess"),
+            }, ensure_ascii=False) + "\n")
+            f.flush()
+
+
 def reindex_pending_decisions_after_shift(klal_id, position, delta, old_words, new_words):
     """Move UNAPPLIED decisions past a word-count change onto the words they name.
 
@@ -225,6 +252,7 @@ def reindex_pending_decisions_after_shift(klal_id, position, delta, old_words, n
     edited - a superseding decision is appended, carrying the original's own
     chosen_text and snapshot rewritten to the new index."""
     already = rd.applied_decision_ids()
+    backfilled = rd.backfilled_word_ids()
     moved, unverified = [], []
     # `disputed_choice` added 2026-08-31. It was missing, and it is the type that
     # needs this MOST: a decided dispute is dropped from the candidate queue
@@ -239,6 +267,23 @@ def reindex_pending_decisions_after_shift(klal_id, position, delta, old_words, n
                 continue
             if decision["id"] in already:
                 continue                       # already in the corpus, not pending
+            if rd.word_id_of(decision, backfilled):
+                # ADDRESSED BY ID, so there is nothing here to reindex. Moving it
+                # would append a superseding copy that changes only a number the
+                # applier no longer reads: resolved_position() asks the sidecar
+                # first, and the sidecar was updated by whichever writer moved
+                # the word. This is how the reindexer RETIRES - one ruling at a
+                # time, as ids reach them - rather than by being switched off
+                # while rulings that still need it exist (item 0CI measured that
+                # population: 9 of 24 pending rulings carry an id today, and 0 of
+                # 290 open word-level flags do).
+                #
+                # A RETIRED id is skipped here too, and deliberately. The word was
+                # removed, so no index describes it and moving the ruling onto
+                # whatever now sits at wi + delta would attach a human's decision
+                # to a word they never saw - the same refusal
+                # repoint_stale_decisions.py makes for a retired id.
+                continue
             snapshot = decision.get("candidate_snapshot") or {}
             named = snapshot.get("final_text") or snapshot.get("original_word")
             if not named:
@@ -282,8 +327,20 @@ def reindex_flags_after_shift(klal_id, position, delta, old_words, new_words, sk
 
     Returns (moved, unverified) as lists of (old_index, new_index)."""
     moved, unverified = [], []
+    backfilled = rd.backfilled_word_ids()
     for wi, rec in sorted(open_word_flags(klal_id).items()):
         if wi <= position or wi in skip:
+            continue
+        if rd.word_id_of(rec, backfilled):
+            # Same skip as the decision reindexer above, and here for the same
+            # reason rather than by copying: a flag that names its word by id
+            # does not need its index moved. INERT TODAY - 0 of 1,367 word-level
+            # flags carry an id, because backfill_word_ids.py cannot derive one
+            # for a record that names no word (item 0CI/0CK). It goes live for
+            # flags written from now on, which DO carry an id since 3f623f9, and
+            # keeping the two reindexers in step is the point: they were written
+            # as siblings and the id has to reach both or the next reader has to
+            # work out why only one has it (Lesson 34).
             continue
         new_wi = wi + delta
         if not (0 <= wi < len(old_words) and 0 <= new_wi < len(new_words)):
@@ -296,8 +353,32 @@ def reindex_flags_after_shift(klal_id, position, delta, old_words, new_words, sk
                   f"word-count change at w{position} in this klal shifted every later index by "
                   f"{delta:+d}; the word this flag names, {old_words[wi]!r}, now sits at w{new_wi}. "
                   f"Superseded by a new flag there with the original note."))
+        # THE MOVED FLAG CARRIES THE ID OF THE WORD IT LANDED ON, so this move is
+        # the LAST one it needs: the skip at the top of this loop will pass over
+        # it on every future shift. Added 2026-09-07 (item 0CK) with the same
+        # change to flag_unreviewed_auto_corrections.py.
+        #
+        # SAFE ONLY BECAUSE OF THE ORDER HERE, which is worth naming. The corpus
+        # is written at save_part1(), widentity.follow_corpus() reconciles the
+        # sidecar to it, and only THEN is this function called - so `id_state`
+        # describes the post-shift corpus and id_at(new_wi) is the word this flag
+        # was just verified onto (old_words[wi] == new_words[new_wi], checked
+        # above). Read before follow_corpus ran, the same call would return the
+        # id of whatever used to sit at new_wi, which is a different word.
         rd.append_decision(
             "klal_flag", klal_id=klal_id, word_index=new_wi, needs_revisit=True,
+            candidate_snapshot=(widentity.snapshot_fields(
+                widentity.load(), klal_id, new_wi) or None),
+            # LINKED TO THE FLAG IT MOVES, added 2026-09-07 (item 0CS). Without
+            # it the moved flag is a BRAND NEW record with today's timestamp, and
+            # review_counts.flag_answered_by_a_later_decision only counts a
+            # ruling NEWER than the flag - correctly, since a flag raised after a
+            # decision is a fresh concern. So a flag the reviewer had already
+            # answered came back OPEN the moment an unrelated edit shifted its
+            # klal: the flag looked newer than the answer. `supersedes` says what
+            # is actually true - this is the same flag, moved - and lets the
+            # answered test ask when it was originally RAISED.
+            supersedes=rec.get("id"),
             reviewer=rec.get("reviewer") or "local",
             note=(f"[reindexed from w{wi} on {datetime.date.today().isoformat()} after a "
                   f"word-count change at w{position}] " + (rec.get("note") or "")))
@@ -1126,6 +1207,18 @@ def main():
               f"the wrong word - check these by hand:")
         for kid, a, b in unverified_shifts:
             print(f"  klal {kid} word {a} (would have been word {b})")
+        # AND TO A FILE, APPEND-ONLY. Added 2026-09-07 (item 0CU) after the
+        # reviewer asked "where??" about one of these and the answer was gone:
+        # this was the only actionable output of the whole run that existed
+        # NOWHERE but stdout, so a piped or scrolled terminal loses it silently.
+        # Lesson 32 exactly - a finding that only prints has not been delivered.
+        #
+        # APPEND, not overwrite, and that is the point: the next apply run that
+        # verifies everything cleanly would otherwise erase a finding nobody had
+        # acted on yet. Every other per-run report here is safe to overwrite
+        # because it is re-derived from current state; this one is not derivable
+        # after the fact at all - the shift it describes has already happened.
+        _record_unverified_shifts(unverified_shifts)
 
     if refused_partial_span:
         print(f"\n{len(refused_partial_span)} decision(s) REFUSED - the chosen text does not "

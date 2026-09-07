@@ -605,6 +605,100 @@ def hebrew_letters_only(s):
     return "".join(c for c in s if c in HEBREW_LETTERS)
 
 
+# BIDI ISOLATES, for any tool that writes Hebrew into a Markdown/text report.
+#
+# A .md file is an LTR-base document. A bare Hebrew run in it is reordered
+# against the Latin, digits, URLs and punctuation around it, and the failure is
+# not subtle: measured 2026-09-07 with python-bidi, the line
+#
+#     - `אא` -> **`אלא`**
+#
+# DISPLAYS as  - `אלא`** <- `אא`**  - the two readings swap AND the arrow
+# mirrors, so a "before -> after" row reads as "after <- before". A reviewer
+# reading it sees the repair running the wrong way. The corpus is not affected
+# in any way: this is a rendering property of the report, and part*.json stores
+# correct logical order (verified the same day, letter by letter and against
+# DocAI token x-coordinates).
+#
+# The fix is the repo's own answer everywhere it renders Hebrew beside Latin -
+# `direction: rtl; unicode-bidi: isolate` in review_frontend/app.css and
+# tools/render_report.py. Markdown has no stylesheet, so use the CHARACTER form
+# of exactly that. Isolate rather than embed (RLE/PDF): an isolate also stops
+# the Hebrew from reordering a URL or the digits sharing its line.
+#
+# MOVED HERE 2026-09-07 from tools/preview_dicta_disputes.py, which had the only
+# copy and therefore the only correct reports. Three other generators wrote bare
+# Hebrew beside an arrow, which is the standing rule's whole point: the fix
+# existed in a sibling file and never reached the others (Lesson 13).
+RLI, PDI = "\u2067", "\u2069"
+
+
+def rtl(text, isolate=True):
+    """Wrap a Hebrew run so a BIDI-AWARE renderer sets it right-to-left and it
+    cannot disturb its neighbours. Empty stays empty.
+
+    `isolate=False` for VISUAL-mode output, where the reordering has already
+    been baked into the characters and an isolate would only confuse a renderer
+    that DOES implement bidi.
+    """
+    text = (text or "").strip()
+    return f"{RLI}{text}{PDI}" if (text and isolate) else text
+
+
+HEBREW_RE = re.compile(r"[\u0590-\u05ff]")
+# RLI, LRI, FSI, PDI - the isolate controls rtl() emits.
+_ISOLATES = re.compile("[\u2066-\u2069]")
+
+
+def to_visual(lines):
+    """Bake the bidi reordering into the bytes, for a renderer that does none.
+
+    THE OTHER HALF OF rtl(). An isolate tells a BIDI-AWARE renderer what to do;
+    a renderer that implements no bidi at all ignores it and shows the codepoints
+    left to right, so logical-order Hebrew reads backwards on screen. Measured
+    2026-08-31 against `glow`, which emits Hebrew byte-for-byte as it reads it.
+    There the only remaining lever is to reorder the characters themselves.
+
+    Uses python-bidi's implementation of the real algorithm rather than a
+    hand-rolled reverse: naive reversal gets gershayim, mixed digits and embedded
+    Latin wrong, and this text is full of `דף ג' ב'`. Base direction stays L, so
+    URLs and ASCII are untouched.
+
+    THE COST, and why any file written this way must say so in its own header:
+    text copied OUT of a visual file is reversed if pasted anywhere that expects
+    logical order - including back into this pipeline.
+
+    MOVED HERE 2026-09-07 from tools/preview_dicta_disputes.py, with rtl(). That
+    file had both halves and was the only worklist that rendered correctly; the
+    others had neither and the reviewer read reversed Hebrew in three of them.
+    """
+    from bidi.algorithm import get_display
+    # STRIP THE ISOLATES FIRST. rtl() wraps Hebrew in RLI/PDI for a bidi-aware
+    # renderer; here we are producing output for one that does no bidi at all, so
+    # they are inert - and python-bidi predates UBA 6.3 and raises "RLI not
+    # allowed here" on them outright. The two halves of this fix are mutually
+    # exclusive by nature, which is why they are one function and one flag rather
+    # than two independent decisions a caller could get both of.
+    return [get_display(_ISOLATES.sub("", l), base_dir="L") if HEBREW_RE.search(l)
+            else _ISOLATES.sub("", l)
+            for l in lines]
+
+
+VISUAL_WARNING = (
+    "> **Hebrew in this file is in VISUAL order** so it reads correctly in a viewer "
+    "that runs no bidi algorithm. **Do not copy Hebrew out of it** - it will paste "
+    "reversed. Regenerate with `--hebrew logical` for a copy-safe version.\n")
+
+
+def render_hebrew(lines, mode):
+    """Apply the chosen Hebrew rendering to a list of output lines.
+
+    `visual` reorders the characters; `logical` leaves them in storage order,
+    where a bidi-aware renderer does the work and the text stays copy-safe.
+    """
+    return to_visual(lines) if mode == "visual" else list(lines)
+
+
 # Gershayim/geresh characters (real Unicode forms + ASCII surrogates this
 # pipeline's OCR sometimes normalises them to). Consolidated here 2026-08-18:
 # detect_ligature_corruption.py, detect_real_word_substitution.py,

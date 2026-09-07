@@ -161,7 +161,12 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--apply", action="store_true",
                     help="append the corrected rulings (default: report only)")
-    ap.add_argument("--part", type=int, default=1)
+    # NO --part. Both of these read load_part1*() and write rulings keyed to
+    # Part 1 word indices; the flag used to be declared here, accept a value and
+    # be ignored, so `--part 2` silently operated on Part 1. Threading it is not
+    # the fix either - Parts 2-3 corrections may not be applied at all until the
+    # gate in START_HERE.md lifts, so a Part 2 run has nowhere to land. Removed
+    # 2026-09-07 rather than wired.
     ap.add_argument("--out", default="stale_decision_repoint_report.json")
     args = ap.parse_args()
 

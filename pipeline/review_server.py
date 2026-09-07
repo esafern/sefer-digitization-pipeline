@@ -2330,7 +2330,12 @@ class Handler(BaseHTTPRequestHandler):
             raw = self.rfile.read(length) if length else b"{}"
             body = json.loads(raw.decode("utf-8"))
 
-            if path in ("/api/decisions/disputed", "/api/decisions/candidate"):
+            # "/api/decisions/candidate" was an alias for this route and was
+            # removed 2026-09-07: app.js posts a candidate ruling to
+            # /api/decisions/disputed like every other one, so the alias had no
+            # client. Two UI tests used it, for its name rather than its
+            # behaviour, and now post to the real route.
+            if path == "/api/decisions/disputed":
                 return self._send_json(api_post_disputed_decision(body), status=201)
             if path == "/api/decisions/punctuation":
                 return self._send_json(api_post_punctuation_decision(body), status=201)

@@ -88,3 +88,4 @@ ocr_engine_comparison*.json
 /yad-malachi-berlin-sample_ocr.txt
 /yad-malachi-rashi-sample_ocr.txt
 tools/second_witness_eval/vlm_klal_8_22_ocr.txt
+unverified_flag_shifts.jsonl

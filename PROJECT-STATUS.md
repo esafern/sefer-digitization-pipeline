@@ -67,12 +67,1436 @@ Tesseract 3.8% on disagreements — the last is why it is being retired (item 3a
 engines agree) is 26–41%**, so agreement routes attention and the ink decides;
 auto-approval on consensus is indefensible at any threshold this data supports.
 
+**THE DELIVERABLE IS PART 1, AND ONLY PART 1.** Reviewer directive 2026-09-07:
+*"parts 2 and 3 do not exist, any previous work on those will be discarded and we
+will start fresh - the tool has changed dozens of times since then, and I don't
+trust any work performed with early iterations. I'm only vouching for part 1 -
+and even that is subject to hiring someone to close all disputes."* So the
+placeholder counts, the reconstructed klalim and every Parts 2-3 figure in this
+file describe work that is to be REDONE, not work in progress. Do not cite them
+as corpus state and do not repair them; they are superseded by construction.
+
+**AND PART 1 IS NOT SIGNED OFF EITHER.** It is vouched for only as far as the
+open disputes, which need a qualified reviewer to close. Two things must be true
+before that person can start, and both are engineering work: **every open dispute
+has to be reachable in the dashboard and nowhere else** (item `0CO` - the ranked
+queue currently orders 389 of 535, and `0CV` found 136 detector positions
+reachable by no route at all), and **every correction already made has to be easy
+for them to review and approve** (item `0DA` gives them
+`INTERVENTIONS.json` - every change with its as-printed reading, its source and
+its evidence).
+
 **The binding constraints.** The Parts 2-3 gate (`START_HERE.md`) still holds:
 no `part2.json`/`part3.json` correction may be applied. Recording a decision and
 applying it to the corpus remain two separate, deliberate steps.
 
 
 ## Open items
+
+0DA. **[2026-09-07] THE DIPLOMATIC EDITION SHIPS. `--edition diplomatic`
+    RECONSTRUCTS THE TEXT AS PRINTED, 370 OF 374 INTERVENTIONS, WITH A
+    PROVENANCE MANIFEST BESIDE BOTH EDITIONS.**
+
+    Built for `0CZ` - Sefaria asks for "a baseline text with little intervention,
+    so we can refer to a source edition for provenance". The answer is not to
+    intervene less; it is to ship BOTH editions and enumerate the difference.
+
+    `tools/export_corpus.py --edition corrected|diplomatic` (default
+    `corrected`, so nothing changes for existing callers). Diplomatic walks the
+    ledger BACKWARDS from the corrected text rather than reading some other file:
+    there is one corpus, and both editions derive from it the same way.
+
+    **370 interventions reverted, 4 not recoverable.** Verified end to end on the
+    case that prompted it: the diplomatic text reads `עלוי` where the printer set
+    it and the corrected text reads `עליו`, resolved by stable `word_id`.
+
+    `INTERVENTIONS.json` is written beside BOTH editions, carrying every
+    difference with `chosen_source`, `reviewer`, `ts`, `decision_id` and how the
+    position was resolved. Of the 370: **158 (43%) came from another ENGINE**
+    (vlm 126, surya 24, docai 5, dicta 3) - a machine reading the same ink got it
+    right, so those correct this project's TRANSCRIPTION rather than the printed
+    edition - against 156 `custom`. Only this log can tell a reader which a given
+    change was; the text cannot.
+
+    ### Two bugs found by measuring instead of declaring success
+
+    The first version reported **266 of 607 unrecoverable**, a number that came
+    within one step of being written down as a property of the ledger. It was iteration order: reverts
+    were applied in ASCENDING index order, so each one shifted every later ruling
+    in the same klal out from under its own text check. Resolving all positions
+    first and reverting RIGHT TO LEFT took it to 370/4.
+
+    The second was hiding behind the first. Two rulings can name one word - a
+    `disputed_choice` and a `manual_correction` at the same position - so once
+    the first reverts, the second finds its answer already undone. The first cut
+    counted that as a refusal, which is how 237 correct positions were reported
+    as failures. **Both bugs would have understated the reconstruction and
+    invited exactly the wrong conclusion about what the ledger can support.**
+
+    ### Limits, stated in the artifact rather than only here
+
+    Reconstruction is exact for every change made through the decision pipeline.
+    **A direct hand edit to `part*.json` leaves no ledger row and is invisible**
+    - `START_HERE.md` lists hand edits as a permitted writer, and whether any
+    exist has NOT been measured. The manifest says so in its own `limits` field,
+    so a recipient reads the caveat with the data rather than from a covering
+    note. The 4 unrecoverable positions are listed individually.
+
+0CZ. **[2026-09-07] THE SEFARIA THREAD: WHAT THE LEDGER CAN ACTUALLY SAY ABOUT
+    OUR INTERVENTIONS. MEASURED, BECAUSE THE DRAFT REPLY'S CHARACTERISATION IS
+    WRONG.**
+
+    Sefaria's stated acquisition standard, communicated to this project 2026-09: **fidelity to the specific edition, no added
+    punctuation, no opened abbreviations, "a baseline text with little
+    intervention, so we can refer to a source edition for provenance"** - plus
+    **demarcation around special formatting (`@01headers`, `@02bold@03`,
+    footnotes)**. Sefaria is not currently working on Yad Malachi.
+
+    ### The draft reply says "rampant samach/peh and heh/chet substitutions". It
+    ### is not what the corpus shows
+
+    250 applied single-letter substitutions, by pair:
+
+        כ -> ב  53      ד -> ה  20      ח -> ה   9
+        ן -> ו  28      ס -> פ  19      ס -> ם   7
+        י -> '  22      ר -> ה  15      י -> "   5
+        ר -> ד  21      ט -> מ  12      ס -> מ   5
+
+    **`ס->פ` is 19 (8%) and `ח->ה` is 9 (4%)** - together 11%. The dominant class
+    is **`כ->ב` at 53**, nearly triple samekh/pe. Naming the two smallest of the
+    top six to a professional who may ask for the data is a weak position when
+    the real answer - a spread of visually-confusable sorts, led by kaf/bet - is
+    better and is measured.
+
+    Note also `י->'` (22) and `י->"` (5): those are not letter confusions at all
+    but an abbreviation MARK the OCR read as a yod. Fixing them is transcription
+    accuracy, not editing the edition.
+
+    ### THE DISTINCTION THAT ANSWERS HIS QUESTION
+
+    482 applied changes, by where the chosen reading came from:
+
+    | source | n | what it means |
+    |---|---:|---|
+    | another ENGINE (vlm 144, surya 24, docai 5, dicta 3) | **176 (37%)** | a machine reading the SAME INK got it right and the corpus was wrong - a TRANSCRIPTION fix, not an edit |
+    | `custom` (a human typed it) | 259 (53%) | upper bound on editorial intervention - a reviewer may type what an engine also said |
+    | other / unrecorded | 47 | |
+
+    So a large share of what the draft calls "correcting printer's errors" is
+    correcting OUR OWN transcription, which is squarely inside his standard and
+    needs no permission at all. `custom` is an UPPER bound and not a count of
+    editorial changes; separating it properly means checking each against the
+    engine readings in its snapshot, which has not been done.
+
+    ### The flagship example CHECKS OUT, verified against the ink
+
+    klal 38 w103. Rendered `images/pdf_pages/page_27.png` at 7x: the printer
+    genuinely set **עלוי** (ayin-lamed-vav-yod) and DocAI transcribed it
+    faithfully. So it is a true printer's error - a vav/yod metathesis - and not
+    an OCR misread. The example is sound. It is worth noting it is neither of the
+    two classes the draft names.
+
+    ### A DIPLOMATIC EDITION IS RECONSTRUCTIBLE - this is the strong card
+
+    **524 applied rulings changed a reading, and 100% still carry the as-printed
+    text in the ledger.** So this project can hand Sefaria the baseline edition
+    they ask for AND the corrected one AND a machine-readable list of every
+    intervention with its evidence - which is MORE provenance than the standard
+    asks for, rather than a request to be excused from it.
+
+    Caveat, unmeasured: this holds for changes recorded through the decision
+    pipeline. `START_HERE.md` lists hand edits as a permitted writer of
+    `part*.json`, and any of those would not be recoverable. **`export_corpus.py`
+    has no diplomatic/as-printed mode today** - the DATA supports it, the
+    exporter needs the switch. Do not promise the artifact before building it.
+
+    ### Item `0CY` is now a DELIVERABLE requirement, not just a defect
+
+    His "demarcation around special formatting (@01headers...)" is exactly klal
+    144's ten marginal item markers. As things stand they would ship as an
+    inline blob of ten letters mid-sentence - the opposite of demarcated.
+
+0DB-TODO. **HIGH PRIORITY — FOOTNOTES ARE FOLDED INTO THE BODY TEXT AND MUST
+    BE ISOLATED AND DEMARCATED. 14 markers across 11 klalim in Part 1, scoped.**
+
+    Reviewer, 2026-09-07: "we have folded a few footnotes into the body. i've
+    focused on making sure the text is correct and simply added at the place in
+    the text where the printer reached the end of the page - but now it seems they
+    should be isolated and demarcated."
+
+    **Priority is set by the customer, not by severity.** Sefaria asks
+    contractors for "demarcation around special formatting (@01headers,
+    @02bold@03, footnotes)" - footnotes are named explicitly (`0CZ`). Today they
+    are indistinguishable from the author's running text, which is the one thing
+    the acquisition standard asks not to happen.
+
+    ### Scope, measured
+
+    The edition marks a footnote with `*)`, `**)` or `")` - a convention already
+    documented and crop-confirmed in
+    `tools/validate_part1_corpus_integrity.py:131`, where it exists only to stop
+    the paren-balance check from firing on it. **14 markers, 11 klalim:**
+
+        klal   6 w197    klal  30 w726    klal  64 w172    klal  98 w44
+        klal   7 w140    klal  30 w843    klal  71 w59     klal 106 w34
+        klal   7 w467    klal  51 w58     klal  74 w407
+        klal   7 w507    klal  53 w18     klal  59 w142
+
+    **Five open a gloss**: klal 7 w467, 7 w507, 30 w843, 53 w18 and 106 w34 are
+    each followed immediately by `הג"ה`, so their opening is machine-findable.
+    The others are bare references or run straight on into prose.
+
+    ### The hard part is the END, not the start
+
+    A marker's position is unambiguous; where the note STOPS is not. `הג"ה` gives
+    an opening but no closing, and the folded text was inserted at the page seam,
+    so a note's last word is wherever the printer's note ended - which is a
+    LAYOUT fact, recoverable from the scan and not from the text. Two signals are
+    available and neither has been tested:
+
+    - **Type size.** Footnotes are set smaller. First look was inconclusive: on
+      pages 27/51/52/64 the tokens under 78% of median height are scattered
+      rather than clustered at the page foot, so either the threshold is wrong or
+      DocAI's boxes do not preserve the distinction. Worth a direct crop before
+      relying on it.
+    - **Position.** A note sits below the body block at the page foot. This is the
+      stronger signal and is the same geometric argument that works for the
+      marginal markers in `0CY-TODO`.
+
+    ### Do not "fix" this by deleting
+
+    The note text is the author's or the editor's and belongs in the deliverable -
+    what is wrong is that it is INDISTINGUISHABLE from the body, not that it is
+    present. The output is a demarcated note attached to its anchor, and the
+    corpus keeps every word it has.
+
+    Not started. Blocked on nothing.
+
+0CY-TODO. **NEXT ENGINEERING TASK, agreed with the reviewer 2026-09-07:
+    extract marginal item markers as structure.** The signature is measured and
+    clean (see `0CY` below): a marker is a SINGLE Hebrew letter, the RIGHTMOST
+    token on its line, separated from the next token by a gap of 0.029-0.045
+    against a page median of 0.0075 and a 90th percentile of 0.0124 - a 2.3x
+    separation with no overlap. `x` alone does NOT work: 13 body tokens on page
+    52 also sit above 0.85, one at 0.884. Each marker's `y` identifies the
+    paragraph it heads, so marker-to-item attachment falls out of the same
+    geometry.
+
+    **This is now a DELIVERABLE requirement, not only a defect**: Sefaria asks
+    contractors for "demarcation around special formatting (@01headers,
+    @02bold@03, footnotes)" (`0CZ`), and these markers are exactly that. As
+    things stand they would ship as an inline blob of ten letters mid-sentence.
+    Not started.
+
+0CY. **[2026-09-07] OPEN — klal 144's `א ב ג ד ה ו ז ה ט ו` IS TEN MARGINAL
+    ITEM MARKERS FLATTENED INTO THE TEXT. READ OFF THE INK. TWO OF THEM ARE ALSO
+    MISREAD.**
+
+    Reviewer: "unusual typography here is unexpected and not handled correctly.
+    those are item headers they should have been embedded in the text. can you
+    see the ink directly?" Yes - `images/pdf_pages/page_52.png`, which is the
+    correctly-indexed render (Lesson 30).
+
+    ### What the ink shows
+
+    The ten letters are **not inline text**. Every one sits at **x 0.87-0.89 -
+    the far right margin** - at ten DIFFERENT y positions from 0.26 to 0.77:
+
+        א  y 0.261     ו  y 0.580
+        ב  y 0.336     ז  y 0.625
+        ג  y 0.367     ח  y 0.687
+        ד  y 0.443     ט  y 0.716
+        ה  y 0.503     י  y 0.762
+
+    A COLUMN down the margin, one marker per item, heading ten separate list
+    items - the `ואלו הן` ("and these are they") immediately after them is the
+    list's own introduction. The extraction flattened the column into one
+    contiguous inline blob dropped mid-sentence between `הדפוס` and `כיון`.
+
+    **This is an extraction defect, not a text ruling.** No word is misspelled;
+    the reading ORDER is wrong, and the markers have lost the items they head.
+    Fixing it means teaching the extractor that a column of single glyphs in the
+    margin is structure, not running text - and that is a change to how a page is
+    read, so it wants its own design and its own before/after measurement.
+
+    **Extent: 1 run corpus-wide** (4+ consecutive single-letter tokens), swept
+    over all three part files. That is a FLOOR, not a ceiling - Parts 2-3 are
+    largely unextracted, and this is a typographic convention a book uses
+    repeatedly wherever it lists things.
+
+    ### Two of the ten are also plain misreads, and the sequence proves it
+
+    Confirmed at 6x against the ink: the 8th marker is **`ח`** (two legs joined
+    by a full roof) and DocAI read `ה` (whose left leg is detached); the 10th is
+    **`י`** (a short high mark) and DocAI read `ו` (which descends to the
+    baseline). Two independent signals agree (Lesson 9): the render, and the
+    sequence itself - the 8th and 10th items of a list opening `א ב ג ד ה ו ז`
+    can only be `ח` and `י`.
+
+        klal 144 w837   ה -> ח    http://127.0.0.1:8420/klal/144/word/837
+        klal 144 w839   ו -> י    http://127.0.0.1:8420/klal/144/word/839
+
+    NOT APPLIED - corpus text goes through the decision pipeline.
+
+    ### The check that would have caught it, now in stage 4e
+
+    `enumeration_break`: a run of 4+ single letters that is not a contiguous
+    א-ב-ג sequence. **The sharpest detector in that file**, because every other
+    one argues from FREQUENCY, which is evidence, while an enumeration argues
+    from SEQUENCE, which is nearly proof. It costs milliseconds and it reports
+    exactly the two positions above and nothing else.
+
+    Pinned in both directions - a clean `א ב ג ד ה ו ז ח ט י` must report
+    NOTHING, or the detector fires on every list in the book and carries no
+    information (Lesson 25). Gate 511 -> 512.
+
+0CX. **[2026-09-07] THE REVIEWER CHECKED ALL 18 STRUCTURAL FINDINGS. ONE WAS
+    REAL. THE OTHER 20 ARE NOW ACKNOWLEDGED SO THE REPORT CAN GO QUIET.**
+
+    Reviewer: "those 18 are fine i checked them except 167 w 68 which i fixed.
+    ignore them all." **The detector stage was worth building for exactly one
+    defect** - klal 167 w68, a duplicated `קי"ל` - and against 20 false
+    positives, which is the precision this class was always expected to have.
+
+    ### The problem "ignore them" creates, and the fix
+
+    Without a baseline the stage would announce the same 20 dismissed rows on
+    every rebuild forever. **A report its reader learns to skip delivers
+    nothing** - Lesson 32 one level on from "a tool that prints is not a tool
+    that runs" - and the next real defect would arrive inside that noise, exactly
+    the way the one real defect here arrived inside 20.
+
+    `structural_defect_acknowledged.json` records a dismissal; the stage now
+    reports **NEW vs previously-acknowledged** and prints `0 NEW` when there is
+    nothing unchecked. Acknowledged rows stay IN the report file, so nothing is
+    hidden - they just stop being announced.
+
+    ### The key is what makes silencing safe
+
+    `(klal_id, detector, stored)`. **NOT `word_index`**: an index moves whenever
+    an earlier edit changes the klal's word count, and an acknowledgement that
+    evaporates on an unrelated edit is worse than none - the finding returns
+    looking new and the reviewer re-checks work they already did.
+
+    **`stored` IS in the key**, and that is the other half. The dismissal says
+    "this text, here, is correct as printed", so it cannot outlive the text.
+    Verified by mutation, both directions: injecting a fresh duplicate at klal 5
+    reports `1 NEW`; changing the TEXT at acknowledged klal 86 w69 makes that
+    row report as NEW again. Pinned by
+    `test_acknowledging_a_structural_finding_silences_it_but_not_a_new_one`,
+    including that the key is independent of `word_index`.
+
+    ### Also this pass
+
+    The reviewer's 3 rulings unblocked 35 more. 6 closed without a write, **29
+    promoted** - klal 154 alone took 20 (`מאיזן`->`מאיזו`, `כרכא`->`כרבא`,
+    `דמשכשתא`->`דמשבשתא`, ...), plus klal 167 w68's duplicate `קי"ל` deleted.
+    12 open flags closed automatically, 11 reindexed. Applier converged at 0.
+    Full vision rebuild: 265 cache hits, **5 live calls**. Gate 511.
+
+0CW. **[2026-09-07] THE THREE ORPHAN DETECTORS ARE IN THE CHAIN, AND ITEM 20 IS
+    CLOSED WITH A GUARD RATHER THAN A MEMORY.**
+
+    Both of `0CV`'s actionable findings, done.
+
+    ### Stage 4e: `pipeline/build_structural_defect_report.py`
+
+    Runs `detect_repeated_words`, `detect_ligature_corruption` (compound form
+    only) and `detect_split_merge` on every rebuild, writing
+    `structural_defect_report.json`. **21 candidates today**: 12 repeated words,
+    5 ligature compounds, 2 merges, 2 splits.
+
+    Only the COMPOUND ligature form is taken. The plain dropped-lamed sweep
+    already reaches a reviewer through the queue; the compound case is the one
+    nothing else looks for, because the ligature swallowed the SPACE, so the
+    corrupt token is not a word the lexicon or the vision adjudicator can be
+    asked about - `אאמוראי` in klalim 130 and 168 is not a misread letter, it is
+    two words with the boundary gone.
+
+    **It writes a report and never a flag**, the same boundary
+    `build_lexical_defect_report.py` holds, for the same measured reason: these
+    carry real false positives. klal 144's `ז`+`ה` -> `זה` is a list of Hebrew
+    NUMERALS being read as a word, and the repeated-word detector cannot
+    distinguish a scribal repetition from an OCR one. Folding a tier into the
+    review queue the way `merge_lexical_defects()` does is available at any time
+    and fully reversible - it is a derived source with no ledger residue - and is
+    not done here because nobody has measured a precision tier for these three.
+    `test_the_structural_defect_report_is_built_and_stays_a_triage_queue` pins
+    both halves: the file must exist, and no row may grow a decision-shaped
+    field.
+
+    Each detector's tuple is unpacked at its declared arity rather than with a
+    positional guess - they return four different shapes, and guessing is how the
+    sibling report ended up scanning its own fields with `isinstance(x, str)`.
+    The new file routes every data path through `cio.repo_path()`; the
+    corpus-root bypass guard caught the first version and was right to.
+
+    ### Item 20 CLOSED, and replaced by a check
+
+    Zero `Digitized`/`Google` tokens in the corpus, and **no Latin word of 3+
+    characters anywhere in `part1/2/3.json`**. All 12 named klalim carry
+    normal-length Hebrew, so it is a repair rather than a revert to placeholder.
+    The original entry is kept, collapsed, because its MECHANISM is the
+    instructive part.
+
+    `test_no_latin_text_survives_anywhere_in_the_corpus` now holds the line, and
+    is deliberately wider than the defect: any Latin run of 3+ letters, in
+    `clean_text` or `title`, in any of the three files. This book is Hebrew and
+    Aramaic - Latin in it is scanner furniture or an OCR artifact, never text -
+    and the count is zero, so the bar costs nothing. Verified by mutation: it
+    fails when `Digitized by Google` is appended to a klal.
+
+    Gate 508 -> 510.
+
+0CV. **[2026-09-07] SWEEP: WHAT PRINTS BUT DOES NOT DELIVER, WHAT THE DASHBOARD
+    CANNOT SHOW, AND WHICH OPEN ITEMS ARE ENGINEERING. ALSO: ITEM 20 IS STALE.**
+
+    Reviewer: "are there open eng. issues? are there data issues unsurfaced in
+    the dashboard? ... I am here to fix bugs not adj. disputes."
+
+    ### 1. Findings that only print
+
+    Swept every module for a `print` reporting a FINDING in a file with no write
+    path at all. 17 modules hit, but most are validators whose delivery is an
+    EXIT CODE, which is a real channel. After discounting those, one genuine case
+    remained and is fixed in `0CU` (`unverified_shifts`).
+
+    ### 2. THE DETECTORS: 136 positions no reviewer can see
+
+    All six corpus detectors and all thirteen validators are OUTSIDE
+    `rebuild_all.sh`. That is only half a problem, and the halves differ:
+
+    | detector | findings | invisible | routed? |
+    |---|---:|---:|---|
+    | `detect_insertion_deletion` | 144 | 75 | in-chain via `build_lexical_defect_report.py` |
+    | `detect_real_word_substitution` | 109 | 43 | same |
+    | `detect_repeated_words` | 12 | 10 | **NO CHAIN, NO ARTIFACT** |
+    | `detect_ligature_corruption` | 5 | 4 | **NO CHAIN, NO ARTIFACT** |
+    | `detect_split_merge` | 4 | 4 | **NO CHAIN, NO ARTIFACT** |
+
+    **The 118 from the first two are a deliberate scope decision, not a bug.**
+    `assemble_corrections_dataset.merge_lexical_defects()` folds only "the
+    sharpest tier" into the review queue, on the explicit reasoning that these
+    detectors carry heavy false positives (149 of 262 contradicted by independent
+    witnesses) and that 563 permanent flags on unread material is how the
+    1,496-flag queue happened. The whole set stays in `lexical_defect_report.json`
+    (253 entries, 220 positions). Widening the tier is a decision available at
+    any time and costs nothing - it is a derived source, not a flag.
+
+    **The 18 from the other three are a real gap.** Nothing runs them, nothing
+    stores them, and their output exists only while someone is looking at a
+    terminal - which is the exact shape Lesson 32 was written about, still open
+    for three detectors after that lesson was recorded. Sample, all invisible:
+    klal 130 w11 / 168 w11 `אאמוראי` -> `אלא`+`אמוראי`, klal 150 w167
+    `אאיזה`, klal 177 w320 `אאידך` (the alef-lamed ligature fused with the
+    FOLLOWING word); five repeated-word pairs; klal 39 w258 `מרבייהו`.
+
+    ### 3. ITEM 20 IS STALE - the damage is gone
+
+    Item 20 records `Digitized by Google` embedded in 12 klalim. **Measured
+    today: zero.** Not one watermark token, and **no Latin word of 3+ characters
+    anywhere in `part1/2/3.json`.** All 12 klalim carry real Hebrew text of
+    normal length (250: 238 words, 616: 991), so this is a repair, not a revert
+    to placeholder. The item should be closed; it has been reading as an open
+    corpus defect while the corpus has been clean.
+
+    ### 4. The open items that are ENGINEERING, not review work
+
+    - **`0CA`** - a word click's page navigation is undone 40-50% of the time.
+      The one open defect a reviewer hits directly. Reproduction, five ruled-out
+      hypotheses and the live `_showPageGen` ordering theory are in the entry.
+    - **`0CO`** - `DISPUTE-QUEUE-BY-POSTERIOR.md` calls itself "the open dispute
+      queue" and orders 389 of 535. Needs a decision: widen the ranker to every
+      open red position, or rename the file and state the remainder.
+    - **`0BX`** - the reindex collision guard. Policy, not code; and `0CI`
+      measured its population shrinking.
+    - **`0CE` item 7** - the synthetic-render path still addresses by INDEX, and
+      the stable id rescues 0 of the suppressed rulings. Wants a deliberate
+      decision about what "still valid" means now that ids exist.
+    - **`0BU` Phase 3 steps 1-3** - and `0CH` found step 1's premise wrong: the
+      ligature catalogue it is scoped to extract is read by nothing.
+    - **`0N`** - `pipeline/second_witness_eval/` is off the rebuild path
+      entirely, with two accessors referenced only by tests.
+
+0CU. **[2026-09-07] "WHERE??" — AND THE ANSWER WAS GONE. THE APPLIER'S ONLY
+    UNRECOVERABLE FINDING EXISTED NOWHERE BUT STDOUT.**
+
+    An apply run was reported as having left one open flag past an unverifiable
+    word-count shift. Asked which one, **nothing could answer.**
+    `apply_reviewer_decisions.py:1181` prints `unverified_shifts` and writes them
+    to no file, no ledger row, nothing - and that run's output had been piped
+    through `grep`, so the klal and word were gone the moment the command
+    returned.
+
+    Two failures, and the tool's is the worse one. The first was filtering output
+    that had not been read. The tool's is that **this is the only output of an apply run
+    that cannot be re-derived afterwards**: every other report describes current
+    state and can be recomputed, while this one describes a shift that has
+    already happened, against text that has already changed. Lesson 32 in its
+    purest form - a finding that only prints has not been delivered.
+
+    ### What could still be established
+
+    The run's word-count changes were klal 36 w14, 71 w62 and 106 w46, so it was
+    one of those three. **All word-level flags in all three are now closed** (0
+    open of 3 on record), so nothing is currently at risk from it - but that is
+    luck, not the process working.
+
+    ### Fixed
+
+    `_record_unverified_shifts()` appends one JSON object per finding to
+    `unverified_flag_shifts.jsonl` - klal, the index the flag is still recorded
+    at, the index the shift would have moved it to, a timestamp, and why it was
+    refused. Flushed per row, per the standing incremental-flush rule.
+
+    **APPEND, not overwrite, and that is the assertion the test makes.** Every
+    other per-run report here is safe to overwrite because it is re-derived from
+    current state; this one is not, so the next clean run must not erase a
+    finding nobody has acted on. `test_an_unverifiable_flag_shift_is_recorded_to_
+    a_file_not_only_printed` fails when the mode is changed to `w`.
+
+    Nothing consumes the file automatically: what to do about a flag that may
+    name the wrong word is a human judgement, and inventing a re-point here is
+    exactly what the applier refuses to do in the first place. Gate 507 -> 508.
+
+0CT. **[2026-09-07] THE WORKLISTS NEEDED THE *OTHER* HALF OF THE BIDI FIX. AND
+    THE AUTO-CORRECTION BATCH IS CLOSED: 109 OF 109.**
+
+    Reviewer: "drift doc still reversed heb". Correct, and `0CR` fixed the wrong
+    half for their viewer.
+
+    ### Two halves, mutually exclusive, and the repo already had both
+
+    `rtl()` wraps Hebrew in RLI/PDI so a **bidi-aware** renderer sets it
+    right-to-left. `to_visual()` reorders the CHARACTERS for a renderer that runs
+    **no bidi at all**, where isolates are inert and logical order therefore
+    displays backwards. `0CR` shipped only the first, so a viewer doing no bidi
+    still showed `רבא` as `אבר`.
+
+    Both halves lived in `tools/preview_dicta_disputes.py`, which is why that
+    file's output was the only one that read correctly - and its convention is
+    `--hebrew visual` BY DEFAULT with a warning in the file header. `to_visual`,
+    `render_hebrew()` and `VISUAL_WARNING` are now in `corpus_io` beside `rtl`,
+    and the three worklist generators take the same `--hebrew visual|logical`
+    flag with the same default and the same header warning.
+
+    **They are mutually exclusive by nature**, which is why they are one function
+    and one flag rather than two independent choices: `python-bidi` predates UBA
+    6.3 and raises "RLI not allowed here" on the isolates outright, so visual
+    mode strips them first. Discovered by both tools crashing the moment the two
+    fixes met.
+
+    **The cost is real and every such file now says so in its own first lines:**
+    Hebrew copied OUT of a visual file pastes reversed, including back into this
+    pipeline. `--hebrew logical` produces the copy-safe version.
+
+    ### THE AUTO-CORRECTION BATCH IS CLOSED
+
+    **109 of 109 answered, 0 open.** The class that stood at 109 open this
+    morning - `ai-dropped-lamed-correction` words applied to the corpus in August
+    and never checked by a human - is done.
+
+    ### Also this pass
+
+    13 more rulings closed by `close_satisfied` without a write; 6 promoted:
+    klal 36 w14 `[.]` deleted, 70 w32 `סרק`->`פרק`, 71 w5 `היינן`->`היינו`,
+    71 w62 `עב` deleted, 73 w87 `עלי`->`על`, 106 w46 `:` deleted. Applier
+    converged at 0. Gate 507.
+
+    **One flag needs a human:** a word-count change moved past an open flag that
+    could NOT be verified at the shifted index, so it was left where it is and
+    may now name the wrong word. The applier reports these by design rather than
+    guessing.
+
+0CS. **[2026-09-07] APPLYING AN EDIT WAS RE-OPENING FLAGS THE REVIEWER HAD
+    ALREADY ANSWERED. FOUND BECAUSE A WORKLIST COUNT WENT UP.**
+
+    The only symptom: `UNREVIEWED-AUTO-CORRECTIONS-WORKLIST.md` went **1 -> 4**
+    across an apply. Nothing else reported anything.
+
+    ### The mechanism, both halves
+
+    Applying a word-count change fires `reindex_flags_after_shift()`, which moves
+    an open flag onto the word it names — correct. It does NOT move the ruling
+    that ANSWERED that flag, and must not: the decision reindexer deliberately
+    skips anything already in the corpus. So after klal 54's two-word split, the
+    flag sat at w787 while its answer stayed recorded at w786, and
+    `flag_answered_by_a_later_decision` failed **twice over**:
+
+    1. **The index lookup missed** - it asks `source.get((klal_id, word_index))`,
+       and the two are no longer at the same index.
+    2. **The timestamp test rejected it.** The moved flag is a NEW record with
+       today's ts, so the ruling that answered it looked OLDER than the flag -
+       and "only a decision newer than the flag answers it" is a deliberate rule
+       (a flag raised after a decision is a fresh concern).
+
+    Three klal 54 flags re-opened this way, all three with word ids that match
+    exactly across the shift (flag `word_id` 787 == ruling `word_id` 787). This
+    is Lesson 35's shape - applying a correction has side effects on review state
+    and every one must be carried out in the same step - in the one place that
+    entry did not reach.
+
+    ### The fix, both halves
+
+    **`reindex_flags_after_shift` now passes `supersedes=<old flag id>`** on the
+    flag it writes. The field already existed and this is exactly what it means:
+    the moved flag is the same flag, not a new one. `review_counts._raised_at()`
+    follows that chain to the root and asks when the flag was ORIGINALLY raised.
+
+    **`flag_answered_by_a_later_decision` now also matches by stable word id**,
+    after the index test and not instead of it: the index test is exact and
+    cheap, and most records still carry no id.
+
+    Both are needed - either alone leaves the flag open. Pinned by
+    `test_a_reindexed_flag_does_not_reopen_the_ruling_that_answered_it`, which
+    fails when the `_raised_at` half is reverted. Gate 506 -> 507.
+
+    **FORWARD-ONLY.** The three klal 54 flags already written carry no
+    `supersedes`, so nothing can recover their original raised-time without
+    parsing the "[reindexed from wN" note as prose - refused, on the same grounds
+    as `0CK`. They are three clicks. Any flag reindexed from now on is correct.
+
+    ### Two traps walked into while fixing it, both already documented here
+
+    `_backfilled()` called `rd.backfilled_word_ids(path)` POSITIONALLY, and the
+    applier test harness redirects the ledger by injecting `path=<tmpdir>` as a
+    KEYWORD - "multiple values for argument 'path'". `review_decisions.
+    superseded_by_an_applied_decision` carries a comment about this exact trap.
+    And the first version read the default ledger regardless of what the caller
+    passed, which is the ambient-state problem `resolve_word_index`'s `id_state`
+    comment already calls out. `path` is threaded through both functions now.
+
+    ### `RED-WITHOUT-A-CANDIDATE.md` DELETED
+
+    It was a one-off written inline to answer "where are the 76", never a tool,
+    so nothing regenerated it and it was stale within the hour - the exact
+    anti-pattern Lesson 32 names. Its question is answered and recorded in `0CO`;
+    re-measured today the numbers are 535 red, 59 with no candidate entry, 58 of
+    those carrying an open flag and **1** unexplained (was 76/68/8 - the apply
+    passes closed most of them). Re-derive from
+    `/api/word-states?bucket=machine_disputed` if it is wanted again, or promote
+    it to `tools/` properly.
+
+0CR. **[2026-09-07] THE WORKLISTS RENDERED HEBREW BACKWARDS AROUND AN ARROW.
+    A REPORT BUG ONLY — THE CORPUS IS IN CORRECT LOGICAL ORDER, VERIFIED TWO
+    WAYS. AND THE FIX ALREADY EXISTED IN ONE FILE.**
+
+    Reviewer: "you are rendering the hebrew backwards. fix and confirm this is
+    just an issue in the gen .md - not an issue with the tooling or the data."
+
+    ### The data is CORRECT, checked independently of the reports
+
+    1. **Letter order.** klal 38 w148 stores `אליעזר` as ALEF, LAMED, YOD, AYIN,
+       ZAYIN, RESH — logical order. Equal to the logical string, not to its
+       reverse.
+    2. **Word order, against the scan's own geometry.** DocAI tokens for a line
+       have strictly DECREASING x across their stored order, which is right-to-
+       left — so stored order IS reading order. This is independent of any
+       report and of the corpus itself.
+    3. `part1/2/3.json`, `review_decisions.jsonl` and `word_identity.json`
+       contain **zero** bidi control characters. Nothing leaked into the data.
+
+    ### The report bug, measured with python-bidi rather than argued
+
+    A `.md` is an LTR-base document. Two Hebrew runs separated only by neutral
+    characters resolve into ONE right-to-left run, so they swap and a mirrored
+    arrow comes with them:
+
+        logical:  - `אא` -> **`אלא`**
+        DISPLAYS: - `אלא`** <- `אא`**
+
+    A "before -> after" row therefore reads as "after <- before" — the repair
+    running the wrong way. The CONTEXT lines were never wrong: a Hebrew phrase
+    is one run and reversing it IS correct RTL.
+
+    ### The fix existed, in exactly one file
+
+    `tools/preview_dicta_disputes.py` already had `RLI`/`PDI` isolates and an
+    `rtl()` helper, with a comment naming the repo's own `direction: rtl;
+    unicode-bidi: isolate` as the model. **It was the only copy, so it produced
+    the only correctly-rendered reports.** Moved to `corpus_io` as `rtl()` and
+    `RLI`/`PDI`; that file now re-exports the shared names, and the two broken
+    generators import them. This is the standing rule's exact case — the fix
+    already existed in a sibling and never reached the others (Lesson 13), which
+    is now three times in one day for me.
+
+    | file | unanchored Hebrew-arrow-Hebrew pairs |
+    |---|---:|
+    | `CROSS-EDITION-WORKLIST.md` | 403 -> **0** |
+    | `UNREVIEWED-AUTO-CORRECTIONS-WORKLIST.md` | 1 -> **0** |
+    | `DRIFTED-RULINGS-WORKLIST.md`, `DISPUTE-QUEUE-BY-POSTERIOR.md` | 0 already — they put a Latin word (`chose`, `consensus`) between the two readings, which anchors them |
+
+    Belt and braces on both: a Latin anchor word (`was` / `now`, `corpus` /
+    `consensus`) AND the isolates, so the rows read correctly in a renderer that
+    implements bidi and in one that does not.
+
+    ### Also this pass
+
+    The reviewer deleted the duplicate `משמע` from `0CQ` — recorded, and it
+    needed APPLYING, which is the two-step working as designed. Applied; klal 198
+    now reads `ובמנחות פרק שתי הלחם משמע דס"ל`, zero duplicates.
+
+    **Full vision rebuild run with the reviewer's authorisation** (they asked
+    about klal 198 w576 still showing confused). 249 cache hits, **14 live
+    `gemini-3.6-flash` calls** — the cache did nearly all of it. All 7
+    `stale_candidate` flags cleared, w576 included; both failing invariants now
+    pass. Gate 506.
+
+0CQ. **[2026-09-07] SECOND APPLY PASS — AND THE GATE CAUGHT A RULING THAT PUT
+    A DUPLICATE WORD IN THE CORPUS. THE REVIEWER'S RULING, NOT A BUG.**
+
+    27 more rulings (15 `manual_correction`, 8 `witness_choice`, 4
+    `disputed_choice`). `close_satisfied` closed 12 without a write; the applier
+    promoted **7**, verified by diff:
+
+        klal  25 w364  דברין -> דבריו       klal  30 w853  אב"ר -> אב"ד
+        klal  37 w344  גכ    -> גב          klal  37 w352  ורוק -> ודוק
+        klal  38 w103  עלוי  -> עליו        klal 198 w809  שרוא -> שהוא
+        klal 198 w570  שתישההולאחם -> שתי הלחם משמע   (1 word -> 3)
+
+    ### THE GATE CAUGHT A REAL DATA ISSUE, which is what it is for
+
+    `test_no_new_duplicate_consecutive_words` failed on **(198, `משמע`)**. klal
+    198 now reads:
+
+        ... ובמנחות פרק שתי הלחם משמע משמע דס"ל שהוא רק לאו ...
+
+    The garbled OCR word `שתישההולאחם` was ruled to be `שתי הלחם משמע` — but
+    `משמע` ALREADY followed it. Before: `פרק שתישההולאחם משמע דס"ל`. After: two
+    `משמע` in a row. The repair looks right as far as `שתי הלחם` (the Menachot
+    chapter name); the third word duplicates what was already there.
+
+    **This is a data issue, not a bug** — the pipeline did exactly what it was
+    told. It is the same failure mode as klal 128's `לאוקומי לאוקומי`
+    (2026-08-06), and it is caught by a cheap mechanical sweep that costs
+    milliseconds, which is Lesson 18 paying for itself: no vision pass and no
+    semantic review would have found this, because both words are correct
+    Hebrew and correct in context individually.
+
+    NEEDS A HUMAN: delete one `משמע` (now at klal 198 w572/w573) against the
+    scan. Not fixed here - corpus text goes through the decision pipeline.
+
+    ### The other failure is benign and self-describing
+
+    `test_no_stale_candidate_flags_are_being_served`: 7 candidates in klal 198
+    flagged `stale_candidate`, because the +2 word-count change shifted every
+    later index and `--skip-vision` does not re-derive them. The test's own
+    message names the remedy - a full `./rebuild_all.sh` WITH vision. Not run
+    here: it spends live Gemini calls and that is the reviewer's budget.
+
+    ### The id work paid off on its first live run
+
+    klal 198 w570 changed the word count, which fired
+    `reindex_flags_after_shift` for the first time since `0CL`. Both moved flags
+    came out carrying the id of the word they landed on - klal 198 w894
+    `word_id` 893, w969 `word_id` 968 - while the two closures at the old
+    indices correctly carry none. Those two flags will never need reindexing
+    again.
+
+    ### Trajectory, measured, because the reviewer asked whether this is closing
+
+    | | |
+    |---|---:|
+    | rulings on record | 971 |
+    | recorded 2026-09-07 alone | 145 |
+    | red (`machine_disputed`) remaining | 539 |
+    | purple (`ai_flag`) remaining | 169 |
+    | open word positions | 714 across 136 klalim |
+
+    Red and purple OVERLAP by ~68 (item `0CO`), so the union is roughly 640
+    positions, not 708. At today's rate that is several more sessions of review,
+    not a session. **The special cases ARE closing** - the auto-correction batch
+    went 109 -> 1, the applier converges to 0 after every pass, both clearing
+    tools are at their floor - but the DISPUTE queue is the bulk of the work and
+    it is barely dented: 971 rulings have retired roughly 183 red words, because
+    most rulings confirm rather than change.
+
+0CP. **[2026-09-07] APPLIED THE REVIEW PASS: 93 CLOSED WITHOUT A WRITE, 17
+    PROMOTED INTO THE CORPUS. THE GATE WENT RED ON A STATUS THAT HAD NEVER
+    EXISTED BEFORE.**
+
+    `0CG`'s order, run on the reviewer's own pass. `close_satisfied_rulings.py
+    --apply` closed **93** (92 by stable word id) without touching `part1.json`,
+    which took the applier from **82 to 17** - the confirmations were rulings the
+    corpus already held. The 17 that remained are the genuine changes.
+
+    **The corpus diff, verified word by word against the intent: 17 changes
+    across 10 klalim, nothing collateral.** 16 replaces and one delete:
+
+        klal  63 w40   סד -> (deleted, a folio marker in י"ד רסי' כ"א סד)
+        klal  69 w173/181, 75 w745, 165 w17, 208 w11, 216 w37   לא -> אלא
+        klal  74 w110  נופי -> גופי      klal 74 w309  בס"ד -> בפ"ד
+        klal  74 w319  דגם  -> הגם       klal 74 w332/366  ארת -> את
+        klal  75 w942  משוס -> משום      klal 91 w136  שואים -> שואלים
+        klal  91 w406  והא  -> דהא       klal 200 w54  אפאנדרי -> אלפאנדרי
+        klal 214 w150  ישמע -> ישמעאל
+
+    Applier converged at 0 after the rebuild. 3 open flags closed automatically
+    by `close_flag_satisfied_by`. Drifted rulings 13 -> 15.
+
+    ### THE GATE FAILED, and the test was wrong rather than the code
+
+    `test_the_word_list_behind_a_legend_count_is_exactly_what_that_count_counts`
+    asserts every recorded row carries a status from an enumerated set, and klal
+    63 w40 came back **`retired`**, which was not in it.
+
+    `retired` is not new and not an error: `review_server.py:960` has set it
+    since the id work landed, for a ruling whose word a later ruling DELETED -
+    "an answer rather than a failure to find one" - and it is the same status
+    `rd.resolve_word_index` documents and `repoint_stale_decisions.py` refuses a
+    re-point on. **It had simply never been PRODUCED.** Reaching it needs an
+    applied deletion at a word carrying a stable word id, and the first one in
+    this project's history was klal 63 w40, today. The set was written from the
+    statuses that existed when the test was written, which is the failure mode an
+    enumeration has: it is correct until the system produces one more.
+
+    Fixed by completing the set, not by loosening the assertion. Gate 506.
+
+0CO. **[2026-09-07] OPEN: THE RANKED DISPUTE QUEUE COVERS 394 OF THE 558 RED
+    WORDS ON SCREEN. WORKING IT TO ZERO WOULD LEAVE 164 RED, WITH NO WORKLIST
+    POINTING AT THEM.**
+
+    Found answering the reviewer's "what's left". `DISPUTE-QUEUE-BY-POSTERIOR.md`
+    calls itself "the open dispute queue" and is the tool built to order exactly
+    that question. Measured against `/api/word-states?bucket=machine_disputed`,
+    which is what the text pane actually draws red:
+
+    | | |
+    |---|---:|
+    | red (`machine_disputed`) positions on screen | **558** |
+    | rows in the ranked queue | 436 |
+    | in both | 394 |
+    | **red but NOT in the ranked queue** | **164** |
+    | ranked but not currently red | 42 |
+
+    **The 164, by what backs them:** 76 have **no entry in
+    `review_queue_part1.json` at all**, scattered across 45 klalim (not the
+    witness-queue klalim 30/75/88, so not item `3`); the other 88 have queue
+    entries whose flag is not a consensus dispute — `current_text_may_be_wrong`
+    49, `possible_omission` 17, `unverified_insertion` 16, `ambiguous` 5.
+    `rank_dispute_queue.py` scores by consensus stratum (which engines agree), so
+    a candidate with no consensus behind it has nothing to score and drops out
+    silently.
+
+    **The 42 going the other way** are rows the ranked queue lists that the text
+    pane draws GOLD, not red: 33 `current_text_confirmed`, 6
+    `docai_ligature_artifact` — both members of
+    `review_counts.MACHINE_RESOLVED_FLAGS`.
+
+    So the file's own header count is not the number of open red words, in either
+    direction. This is the shape `0CH` deleted `flagged_klalim` for and `0CN`
+    caught in a tool written hours earlier: two answers to one question, and the
+    reviewer has no way to see which one they are looking at. It is worse here
+    because the ranked queue is the DOCUMENT a reviewer works from — a worklist
+    that silently covers 71% of its own subject.
+
+    NOT FIXED, and the fix is a decision rather than a patch. Either
+    `rank_dispute_queue.py` widens to every open red position and says
+    "unscoreable" for the ones with no stratum (honest, and the file stops
+    claiming completeness it does not have), or it keeps its scope and is
+    RENAMED to what it actually is — the scoreable consensus disputes — with the
+    remaining count stated beside it. **What must not stand is a file called "the
+    open dispute queue" that is missing 164 of them.**
+
+    ### RESOLVED same day: what the 76 are
+
+    **68 carry an open word-level `klal_flag`.** `review_counts.word_states()`
+    marks an open flag as `DISPUTED`, so these render RED in the text pane and
+    are ALSO counted as purple `ai_flag`. **The two legend buckets are not
+    disjoint**, which is the thing to know before reading red + purple as a
+    total, and it is not stated anywhere the reviewer can see.
+
+    **The other 8 are in klalim 30 and 75 only** - two of the three
+    witness-queue klalim (30/75/88, open item `3`, 419 rows). The witness queue
+    addresses words by `docai_token_index`, NOT by corpus `word_index`, so it
+    cannot be matched against corpus positions by number and its items cannot
+    appear in `review_queue_part1.json` by construction. Listed in
+    `RED-WITHOUT-A-CANDIDATE.md` with context.
+
+    So nothing here is unaccounted for. What remains is the presentation defect:
+    a legend whose two largest buckets overlap by 68 words without saying so, and
+    a "dispute queue" that orders 394 of 558. Both are still open.
+
+0CN. **[2026-09-07] THE REVIEWER WORKED THE WORKLIST — 94 OF 109 ANSWERED. THE
+    TOOL SHIPPED THAT MORNING HAD THE EXACT BUG `flagged_klalim` WAS DELETED
+    FOR, AND THE NEW STALENESS CHECK HAS A RACE.**
+
+    84 rulings recorded in the dashboard: 56 `manual_correction`, 28
+    `disputed_choice`, append-only verified against the pre-session ledger.
+    Mostly CONFIRMATIONS (`אלא` -> `אלא`) — which is what
+    accepting one of these looks like — with real changes among them
+    (`לא` -> `אלא` off `vlm_reading`).
+
+    ### A bug shipped that morning, caught on the first re-run
+
+    `list_unreviewed_auto_corrections.py` selected open flags with
+    `flag.get("needs_revisit")` — **the naive filter, hand-rolled, two commits
+    after `0CH` deleted `flagged_klalim()` for being exactly that.** A word-level
+    flag is ALSO answered by a human ruling recorded at that word, so a reviewer
+    who confirms the machine's text has answered the flag without ever clicking
+    "clear revisit flag". Regenerating would have listed 90 of their finished
+    rows back to them as outstanding.
+
+    Fixed by importing the predicate instead of re-deriving it
+    (`review_counts.flag_still_open`, which is what the dashboard asks). **90 ->
+    14 open, 95 answered.** The lesson is not "check needs_revisit properly", it
+    is Lesson 13's: a second answer was written to a question that already had one,
+    in a file whose whole purpose was to agree with the dashboard. Deleting the
+    old copy did not stop me making a new one.
+
+    ### The staleness check has a race, and it fired the first time it mattered
+
+    `START_HERE.md`'s snapshot-and-diff reported `review_decisions.jsonl`
+    **CHANGED** across a rebuild — which is precisely the bug that invariant
+    exists to catch, and was not one. Two rows had been appended by the reviewer,
+    in the dashboard, during the ~40 seconds the rebuild took. The diff cannot
+    distinguish "a rebuild stage wrote this" from "a human wrote this during the
+    rebuild"; only the rows can, and they were `reviewer: local`, timestamped
+    inside the window. Caveat now in `START_HERE.md`: **read the added rows before
+    filing a rebuild stage as a ledger writer**, and take the snapshot when the
+    dashboard is idle. Lesson 44 with the roles swapped — there a background job
+    mutated a tree someone was editing, here a foreground job measured one.
+
+    ### Where the pipeline stands after the pass
+
+    | | |
+    |---|---:|
+    | applier would promote | **82** (12 replace, 58 manual, 12 confirmed-no-op) |
+    | `close_satisfied` would close without touching the corpus | **74** (73 by stable word id) |
+    | `repoint` re-pointable / stale | 0 / 12 |
+    | auto-correction flags still open | **14 of 109** |
+    | drifted rulings | 11 -> **13** |
+
+    The applier's 82 and close_satisfied's 74 **overlap heavily** — a confirmation
+    is a ruling the corpus already holds, so the applier would write it and
+    `close_satisfied` would settle it without a write. `0CG` established the
+    order: close first, then apply what genuinely changes. NOT RUN — promoting is
+    the reviewer's deliberate step.
+
+    Rebuild ran: `review_queue_part1.json` 703 -> 691 (12 decided disputes drop
+    out), ranked queue 453 -> 436, consensus disputes 107 -> 105, `part*.json`
+    and the sidecar untouched.
+
+0CM. **[2026-09-07] THE 90 UNREVIEWED AUTO-CORRECTIONS AS ONE WORKLIST, WITH
+    THE TWO INDEPENDENT SIGNALS ON EVERY ROW. 82 TRIAGE CLEAN, 8 WANT A LOOK.**
+
+    `tools/list_unreviewed_auto_corrections.py` ->
+    `UNREVIEWED-AUTO-CORRECTIONS-WORKLIST.md`, built at the reviewer's request
+    after they opened two of these flags and asked what the issue was. Ordered by
+    klal then word index, which is reading order, so it works top to bottom.
+
+    **What they are.** `ai-dropped-lamed-correction` restored the lamed the
+    19th-century `ﭏ` sort drops when it wears (`אלא` prints as
+    `אא`), applied it to the corpus in Aug 2026, and recorded it as a
+    `manual_correction` - the type the dashboard draws as human-decided - so it
+    never reached a review queue. **Verified while building this: all 90 sit on
+    the word their own correction produced.** None has drifted, nothing is
+    misplaced. The only question is whether the machine restored the right
+    letter.
+
+    **Two signals per row, chosen because they fail differently (Lesson 9).**
+    STRUCTURE, `typography.dropped_lamed_explains()`: is the stored word exactly
+    the corrupt form with one lamed restored after an alef? FREQUENCY,
+    `sefaria_reference_corpus`: 6.18M words with no lineage to this scan - the
+    only independent arbiter available here, because `lexicon.txt` was built from
+    this corpus's own OCR and absorbed this very corruption, and vision is a
+    fourth reader of ink a defect in the SORT is upstream of (Lesson 24).
+
+    | triage | count |
+    |---|---:|
+    | clean - corrupt form unattested | 50 |
+    | clean - repair far commoner | 32 |
+    | LOOK - both forms attested | 5 |
+    | neither form in the reference corpus | 3 |
+
+    The 8 that are not "clean" are the interesting ones and they are named: klal
+    69 w112, 138 w47, 144 w619, 158 w176, **200 w58** (the standing
+    counter-example - `איהו` is itself a common Aramaic word,
+    so frequency cannot arbitrate it), and the three `אלגאזי`
+    rows, a proper name the reference books had no occasion to use.
+
+    **A label bug found and fixed while building it.** The first version printed
+    an absent form as a measured `0x` and called it "no reference data". Absent
+    and counted-zero are the same NUMBER and not the same STATEMENT: printing
+    `אלגאזי` as `0x` reads as evidence against a correct
+    repair, when the truth is that Talmud/Rashi/Rambam/Tur/Shulchan Arukh simply
+    never name this rabbi. Rows now say "not in it", and the triage label
+    distinguishes "neither form in the reference corpus" from "repair
+    unattested" and from "reference corpus unavailable" - three different
+    situations the first cut collapsed into one.
+
+    **The triage is a place to start, never a verdict** (Lesson 2). Clearing
+    these is also the cheapest route to the addressing problem `0CK`/`0CL`
+    describe: a flag a reviewer closes needs no stable id at all.
+
+0CL. **[2026-09-07] THE MACHINE FLAG WRITERS NOW ATTACH THE ID AT WRITE TIME —
+    THE TAP AND THE LOOP. AND THE 284 OPEN FLAGS SPLIT INTO FOUR GROUPS, ONE OF
+    WHICH IS A DEAD END NOBODY HAD LOOKED AT.**
+
+    `0CK` step 1, done. Two sites, and they are the complete set — every other
+    `klal_flag` writer either already has the id (`review_server.py:1761`, since
+    `3f623f9`), writes a klal-LEVEL flag that correctly gets none
+    (`reconstruct_placeholder_klalim.py`), or writes a CLOSURE, which is not
+    reindexed (`apply_reviewer_decisions.py:199` and `:324`).
+
+    **The tap:** `flag_unreviewed_auto_corrections.py` now merges
+    `word_identity.snapshot_fields()` into the flag it writes — the same seam
+    `review_server._with_word_id` uses, not a private copy. It already had the
+    position in hand; it was writing the ruling id into the note as ENGLISH and
+    the word id nowhere.
+
+    **The loop:** when `reindex_flags_after_shift` DOES move a flag, the flag it
+    writes at the new index now carries the id of the word it landed on, so **that
+    move is the last one it needs** — the skip added in `0CK` passes over it
+    forever after. This is safe only because of the ordering, which is now named
+    in the code: `save_part1()` -> `widentity.follow_corpus()` -> the reindexers,
+    so `id_at(new_wi)` describes the post-shift corpus. Read before
+    `follow_corpus`, the same call returns the id of whatever USED to sit there.
+
+    Three tests, each mutation-checked. Gate 505 -> 506.
+
+    ### The 284 open Part 1 flags, grouped by what a migration could do
+
+    | group | flags | live URL of one |
+    |---|---:|---|
+    | **A** template `Original ruling <id>`, ruling HAS a word id — **inheritable** | **85** | `/klal/38/word/148` (`אליעזר`) |
+    | **B** same template, ruling has NO word id — gains nothing | 5 | `/klal/169/word/22` (`ושמואל`) |
+    | **C** different template `decision <id>` — **DEAD END** | 40 | `/klal/24/word/247` (`הכמים`) |
+    | **D** no ruling id in the note at all | 154 | `/klal/14/word/158` (`דמגילח`) |
+
+    **Group C is the finding.** It reads like a second template worth a second
+    pass, and it is not: **all 40 name a `klal_flag` whose own `word_index` is
+    None** — a klal-LEVEL flag, which names no word by construction, so there is
+    no word id to inherit and never will be. `local-backfill-2026-08-17` linked
+    each word-level flag to the klal-level finding it came from, which is the
+    right provenance and the wrong direction for this. Checked on all 40, not on
+    the sample: 40 of 40 are `('klal_flag', 'klal-level/none')`.
+
+    So the migration's real ceiling is **85 of 284**, and groups B, C and D — 199
+    flags — stay on `reindex_flags_after_shift` permanently unless a reviewer
+    re-writes them. That is the honest number to weigh against the risk, which
+    `0CK` states: after this session's skip, a wrong id makes a flag sit
+    permanently on a wrong word with nothing left to move it.
+
+    ### CORRECTION, same day, and the framing above is what needed it
+
+    The reviewer opened the first two group-A URLs and asked what the issue was:
+    "they point to the correct word. what's the issue?" **There is none, and the
+    grouping above should not be read as defect triage.** Every one of these 284
+    flags names the right word today. Nothing here is misplaced, and the four
+    groups sort them by whether a hypothetical FUTURE migration could give them a
+    stable id — which only ever matters for a flag still open when a later
+    correction changes its klal's word count.
+
+    **All 90 of groups A+B are one class**: `ai-dropped-lamed-correction`
+    restored the lamed the `ﭏ` sort drops (`איעזר`->`אליעזר`, `אא`->`אלא`),
+    applied it to the corpus in Aug 2026, and recorded it as a
+    `manual_correction` — the type the dashboard draws as human-decided — so no
+    human ever checked it. The flag is that check, owed. The reviewer's read on
+    the first two ("I would accept the text in both cases") is the correct
+    outcome for that class, and **a flag a reviewer clears needs no id at all**:
+    reviewing them dissolves the addressing question rather than solving it.
+
+    The open flags are REVIEW WORK, not addressing work, and the id migration is
+    a hedge against them staying open, not a repair. Full breakdown of the 284:
+
+        134  ai-semantic-spotcheck-round4
+         90  unreviewed auto-correction by ai-dropped-lamed-correction  <- groups A+B
+         40  local-backfill-2026-08-17                                  <- group C
+         20  seven other writers
+
+0CK. **[2026-09-07] THE REINDEXERS NOW SKIP A RULING ADDRESSED BY ID. STEP 2 IS
+    BLOCKED, MEASURED THREE WAYS — AND THE LINKAGE THAT WOULD UNBLOCK IT EXISTS,
+    IN PROSE, IN 130 FLAG NOTES.**
+
+    ### Step 1, done: the id skip, on BOTH reindexers
+
+    `reindex_pending_decisions_after_shift` and `reindex_flags_after_shift` now
+    skip a record for which `rd.word_id_of()` returns an id. The reindexer exists
+    to keep an INDEX-shaped address pointing at its word; a ruling addressed by
+    id does not have that problem, and moving it appends a superseding copy that
+    changes only a number `resolved_position()` no longer reads. **This is how
+    the reindexer retires — one ruling at a time as ids reach them** — rather
+    than by being switched off while rulings that still need it exist.
+
+    A RETIRED id is skipped too, deliberately: the word was removed, so no index
+    describes it, and moving the ruling onto whatever now sits at `wi + delta`
+    would attach a human's decision to a word they never saw. Same refusal
+    `repoint_stale_decisions.py` already makes.
+
+    Both reindexers got it, not just the one that fires today (Lesson 34). The
+    flag version is INERT — 0 of 1,367 flags carry an id — and goes live for
+    flags written from now on, which do carry one since `3f623f9`.
+
+    **Two paired tests, and both mutations fail.** `..._is_not_reindexed` for
+    each reindexer, deliberately identical to the existing "is moved too" tests
+    except for the `word_id` in the snapshot. Mutated to skip unconditionally,
+    the two OLD tests fail; mutated to never skip, the two NEW ones fail. A skip
+    that could not distinguish would pass its own test alone (Lesson 25). Gate
+    503 -> 505.
+
+    ### Step 2 is BLOCKED. Adding `klal_flag` to `RULING_TYPES` backfills ZERO
+
+    Run as an experiment before being believed: `RULING_TYPES` extended,
+    dry run, reverted. 1,111 more records enter and **every one is refused** —
+    592 "klal is not in part1.json" (Parts 2-3 are not seeded), 584 "no exact,
+    corroborated address". Not a tuning problem. **A `klal_flag` names a POSITION,
+    not a WORD**: `candidate_snapshot` is null, there is no `chosen_text` and no
+    `original_word`, so `word_identities_of()` returns nothing and every
+    text-matching branch of `resolve_word_index` falls through. The backfill's
+    whole safety property is corroborating an address against the word it names,
+    and a flag offers nothing to corroborate against. This is the honest reason
+    `klal_flag` was left out of `RULING_TYPES`, and it is a better reason than
+    the omission looked.
+
+    Three routes, all measuring 0 against today's ledger:
+
+    | route | ceiling |
+    |---|---:|
+    | extend `RULING_TYPES` | **0** — measured, above |
+    | inherit from the ruling a flag names via `applied_decision_id` | **0** — no open Part 1 flag sets that field |
+    | parse the note prose | refused as a method |
+
+    ### THE FINDING: the linkage exists, in the wrong place
+
+    **130 of the 284 open Part 1 flags name a 12-hex ruling id inside their note
+    text**, and all 130 resolve to real ledger rows — `flag_unreviewed_auto_
+    corrections.py` writes "Original ruling 689c22c0d7db, recorded at w113 and
+    re-derived to this position" as PROSE. **85 of those rulings carry a stable
+    word id**, which the flag could inherit on a genuinely corroborated basis:
+    the flag was written ABOUT that ruling's word.
+
+    So the ceiling is not really 0 — it is **85 of 284**, gated behind a field
+    that the writers fill in with English instead of data. Two consequences, and
+    neither is a tidy-up:
+
+    1. **Fix the writers** — DONE, see `0CL`. **And not the way this entry first
+       said.** It proposed setting `applied_decision_id`, which already means
+       something else on a flag: all 129 rows that carry it are `needs_revisit:
+       false` closures written by `close_flag_satisfied_by`, where it means "the
+       ruling that ANSWERED this flag", not "the ruling this flag is ABOUT". One
+       field, two opposed senses, in an append-only log — Lesson 48's exact trap.
+       The right fix needs no linkage field at all: attach the word id at write
+       time, the way the dashboard already does.
+    2. **The existing flags need a decision.** Recovering them means reading an
+       id out of prose, once, in a labelled migration — the class of move this
+       repo distrusts. Reviewer's call. Grouped, with live URLs, in `0CL`.
+
+0CJ. **[2026-09-07] RAN THE BACKFILL. THE DECISION-REINDEXER'S POPULATION IS
+    NOW 38% ID-ADDRESSED, THE FLAG ONE IS STILL 0% — AND THE REINDEXER DOES NOT
+    YET LOOK AT IDS, WHICH IS THE STEP THAT ACTUALLY RETIRES IT.**
+
+    `0CI` step 1, applied. `tools/backfill_word_ids.py --apply` wrote **18
+    annotations**; ledger 4,164 -> 4,182, first 4,164 rows byte-identical, all 18
+    `word_id_backfill` with no `chosen_text` and no opcode, each naming the ruling
+    it annotates — annotations, not superseding copies (Lesson 46).
+
+    | | before | after |
+    |---|---:|---:|
+    | pending rulings carrying a stable id | 0 / 24 | **9 / 24** |
+    | open word-level flags carrying one | 0 / 290 | 0 / 290 |
+    | backfill annotations on record | 601 | 619 |
+
+    The 9 sit at 6 positions — klal 35 w54 carries three ruling types at one
+    index, 69 w187 two — plus 39 w13, 63 w40, 69 w337, 210 w130. Predicted 7 from
+    the gainers list; the measured 9 is higher because `all_current` keys per
+    type and several positions carry more than one.
+
+    ### The regression that fired last time did NOT fire this time
+
+    The 601-row backfill broke the decision-history panel for 299 words
+    (`0CC`): `history_for_word_id` matched the ANNOTATION and missed the RULING.
+    Checked all 6 newly-annotated positions through `/api/decisions/<k>/<w>`:
+    every one returns its rulings, tagged `word_id_source: backfill`, and no
+    `word_id_backfill` row appears in any panel. The `ANNOTATION_TYPES` class
+    exclusion holds under new annotations, which is what it was written for.
+
+    ### The rebuild moved NOTHING, and that is the rule's other half
+
+    Ran the snapshot-and-diff check `START_HERE.md` now prescribes. All 15 files
+    identical — three authored, ten derived. So an `apply_event` moves the queue
+    (`0CG`: 707 -> 703) and a `word_id_backfill` annotation does not. Both halves
+    of "a write to an authored file" are now measured rather than assumed, and
+    they differ.
+
+    ### WHAT THIS DOES NOT DO, and it is the next step
+
+    `reindex_pending_decisions_after_shift` **does not check for a word id**
+    (`apply_reviewer_decisions.py:236-241`: it filters on applied-ness and on the
+    snapshot naming a text, nothing else). So all 9 id-carrying rulings would
+    still get an index-shaped superseding copy on the next word-count shift. The
+    id helps them at APPLY time, through `resolved_position()`; it does not yet
+    keep them out of the reindexer.
+
+    **Making the reindexer skip a ruling that carries a stable id is what
+    actually retires it, incrementally, ruling by ruling** — and it shrinks
+    `0BX`'s collision surface directly, since a ruling that is never moved cannot
+    collide. Small and testable. NOT DONE: it changes the applier's write
+    behaviour, so it wants its own deliberate step and a synthetic test for the
+    skip, in the shape `0BZ`'s prospective id tests already use.
+
+0CI. **[2026-09-07] "IS REINDEXING STILL NECESSARY NOW THAT IDS EXIST?" YES —
+    AND THE MEASUREMENT IS THE FINDING. THE ID LAYER COVERS 0% OF WHAT EITHER
+    REINDEXER ACTUALLY MOVES.**
+
+    Reviewer, asked before agreeing to build `0BX`'s collision guard: "why do we
+    need to worry about reindex - will it still be necessary?" The premise is
+    sound — `resolved_position()`'s own docstring says the reindexer is what ids
+    "paper over", and a ruling that carries an id "does not need any of that".
+    Measured against the live ledger, the id layer is not there yet.
+
+    | population the reindexer moves | count | carry a stable id |
+    |---|---:|---:|
+    | pending rulings (`candidate_choice`/`manual_correction`/`disputed_choice`) | 24 | **0** |
+    | open word-level `klal_flag`s | 290 | **0** |
+    | all word-level `klal_flag` rows ever | 1,367 | **0** |
+
+    ### Why, and it is not a bug — it is where the backfill aimed
+
+    **600 of the 601 backfill annotations went to APPLIED rulings**: 306
+    `disputed_choice`, 267 `manual_correction`, 27 `candidate_choice`, and
+    exactly **1** pending. Applied rulings are the ones that never need moving.
+    The pending set — the reindexer's entire population — got one row.
+
+    And the forward path has barely run: **3 rulings have ever been recorded
+    natively with a snapshot `word_id`** (2 `manual_correction`, 1
+    `disputed_choice`) since ids began on 2026-09-06. `0CB`'s "drift is prevented
+    now, not just recoverable" is true of the code path and not yet true of the
+    data: almost nothing has flowed through it.
+
+    ### Two different answers for the two reindexers
+
+    **`reindex_pending_decisions_after_shift` (24 rulings) is retirable, mostly,
+    and cheaply.** `tools/backfill_word_ids.py` re-run today reports **18 rulings
+    that can be given an id on an exact, corroborated address** — 7 of them
+    pending (klal 35 w54 x2, 39 w13, 63 w40, 69 w187, 69 w337, 210 w130). It has
+    not been re-run since 2026-09-06 and the ledger has moved twice since. That
+    is free coverage sitting on the floor. The other 17 pending cannot be
+    addressed at all — 11 are the drifted set no automatic route will touch.
+
+    **`reindex_flags_after_shift` (290 open, 1,367 total) is NOT retirable, and
+    cannot become so as the tools stand.** `backfill_word_ids.RULING_TYPES` is
+    `("candidate_choice", "disputed_choice", "manual_correction")` — `klal_flag`
+    is not in it, so **no flag has any route to an id except being re-written by
+    a reviewer**. `0CC` added ids to the `klal_flag` write path on 2026-09-06 at
+    `3f623f9`; no flag has been written since, so coverage is still 0 of 1,367.
+
+    ### What this does to `0BX`
+
+    `0BX`'s collision risk lives in the DECISION reindexer, whose population is
+    24 and shrinking, and 7 of those can stop being index-addressed this week.
+    So the guard is worth less than it looked, and the larger win is closing the
+    coverage hole instead:
+
+    1. **Re-run `backfill_word_ids.py --apply`** — 18 gain ids, 7 pending. Free,
+       the tool exists, and it is an annotation writer (Lesson 46-safe).
+    2. **Extend `RULING_TYPES` to `klal_flag`** — the only thing that could
+       retire `reindex_flags_after_shift` for most of 1,367 rows. Needs care:
+       a flag's `word_index` is a body-word index like a ruling's, unlike
+       `witness_choice` (a docai token index) and `title_correction` (an index
+       into `title.split(' ')`), which are correctly excluded from ids and must
+       stay excluded.
+    3. Only then decide `0BX`'s refuse-vs-record policy, against whatever
+       population is actually left.
+
+    NOT DONE — this is the measurement, and step 2 changes what a tool writes to
+    an append-only log, which is a decision, not a tidy-up.
+
+0CH. **[2026-09-07] CLEARED `0CE`'s LOOSE ENDS 4-8. THE DEAD ACCESSOR OVER THE
+    LIGATURE CATALOGUE WAS THE SMALL HALF - THE CATALOGUE ITSELF HAS NO READER,
+    WHICH CHANGES WHAT PHASE 3 STEP 1 IS.**
+
+    Swept the CLASS before touching the instances, on Lesson 47's axes rather
+    than by orphan-hunting. Two axes, both cheap, and the scripts are in the
+    scratch dir because the axes are the durable part:
+
+    | axis | found |
+    |---|---|
+    | argparse flags declared, `args.<dest>` never read | **exactly 2**, both known — no third instance across 103 files |
+    | module-level functions referenced only from `tests/` | `flagged_klalim`, `repair_stream`, **and 2 new**: `get_witness_engine` / `set_default_witness_engine` |
+    | functions referenced nowhere at all | `typography.get_ligatures`, `build_part1_freq.load_or_build` |
+
+    The two new ones are in `pipeline/second_witness_eval/registry.py` — inside
+    the subsystem item `0N` already establishes is off the rebuild path
+    entirely. Left alone deliberately: deleting them is part of the decision `0N`
+    holds open, not a tidy-up.
+
+    ### THE FINDING: `PRINTER_LIGATURES_AND_GLYPHS` is read by nothing
+
+    `get_ligatures()` was flagged as a dead one-line accessor. It is — but the
+    list underneath it has no reader either, in `pipeline/`, `tools/` or
+    `tests/`. The five modules that import `typography` all want the PREDICATES
+    (`dropped_lamed_explains` and friends), which hardcode the alef-lamed rule in
+    code instead of reading it from the catalogue.
+
+    **This changes item `0BU` Phase 3 step 1**, scoped as "extract the ligature
+    catalogue (`alef_lamed` ﭏ, `chet_zayin`) from `pipeline/typography.py` into
+    `book.json`". Extracting that list moves DEAD DATA into a config file and
+    changes no behaviour, because no behaviour depends on it. What is genuinely
+    this-book-specific AND load-bearing is the predicates and the 24 corrupt
+    forms (still duplicated across `tests/test_corpus_invariants.py` and
+    `tools/validate_lexicon_independent.py`). Decide which of the two Phase 3
+    means before doing it — the list looks like the seam and is not one. The
+    catalogue is kept and re-labelled in place as documentation rather than
+    configuration, with that consequence written where the next reader will hit
+    it.
+
+    ### `flagged_klalim` was wrong by 50%, measured before deleting
+
+    It filtered on `needs_revisit` alone; the dashboard uses
+    `rcount.flag_still_open`, which also accounts for the decisions that ANSWERED
+    a flag. Against the live ledger: **153 klalim against the server's 102**, a
+    strict over-report (0 klalim in the live answer only) — and its extras
+    include klalim above 222, which are not Part 1 at all. Removed.
+
+    `app.js` carried the same wrong belief in a comment that named
+    `rd.flagged_klalim()` as what "drives the nav badge and this button's state
+    everywhere else". It never did; `api_klalim` builds its own `flagged` set at
+    `review_server.py:448`. Corrected — a wrong comment about which function is
+    authoritative is how the next reader picks the wrong one.
+
+    ### `repair_stream` — the §3.5 obligation is discharged, just not there
+
+    Removed. The audit trail it existed to return ("a filter that changes what a
+    reviewer sees must be able to say exactly what it changed") is produced
+    per-RECORD instead: every pipeline candidate carries `docai_reading` and
+    `docai_repaired` side by side — measured **282 of 282** such records in
+    `review_queue_part1.json`, 35 where the repair changed the reading — so the
+    reviewer sees before and after at the position they are ruling on. A
+    per-stream trail would still have needed routing somewhere to mean anything
+    (Lesson 29). The principle is kept and re-sited, not dropped.
+
+    ### The rest
+
+    `--part` deleted from both tools rather than threaded: they write rulings
+    keyed to Part 1 indices, and Parts 2-3 corrections may not be applied at all
+    while the gate holds, so a `--part 2` run has nowhere to land.
+    `load_or_build` deleted with the "As a library" usage block that documented
+    it. `POST /api/decisions/candidate` removed — `app.js` posts every ruling to
+    `/api/decisions/disputed`, and the two UI tests that used the alias used it
+    for its name; repointed, and the dead route verified 404 against the
+    restarted server.
+
+    **Gate 505 -> 503**, the two removals being the tests whose subjects are
+    gone; the third was rewritten onto `all_current()`. UI suite: 100 passed,
+    1 skipped, 1 failed — the failure is `0CA`, the known 40-50% flake, and it
+    reproduced on klal 2 w411 (wanted page 15, got 14).
+
+0CG. **[2026-09-07] RAN THE CLEARING SEQUENCE. 14 RULINGS CLOSED, THE APPLIER
+    CONVERGED FROM 4 TO 1, AND THE REBUILD DROPPED EXACTLY THE 4 QUEUE ENTRIES
+    IT WAS PREDICTED TO.**
+
+    The sequence `0CF` argued for, run in order, with the ledger snapshotted
+    first so every step was diffable.
+
+    ### `close_satisfied_rulings.py --apply` — 14 closed
+
+        klal   1 w85   -> לכו        [unique]        klal  98 w24   -> ע"ד     [unique]
+        klal  23 w190  -> משום       [word_id]       klal  98 w61   -> ב"מ     [unique]
+        klal  69 w38   -> ואלהיכם    [unique]        klal 146 w43   -> ובאדם   [unique]
+        klal  69 w338  -> אלהים      [confirmation]  klal 163 w239  -> למד     [unique]
+        klal  88 w149  -> אלעזר      [word_id]       klal 163 w430  -> שכתבו   [unique]
+        klal  88 w383  -> אלא        [word_id]       klal 210 w65   -> כקמייתא [confirmation]
+        klal  97 w106  -> טהורים     [unique]        klal 210 w138  -> נכתבו   [unique]
+
+    Append-only verified rather than assumed: the first 4,150 rows are
+    byte-identical to the pre-run snapshot and the 14 new rows are all
+    `apply_event`, actor `pipeline-script via close_satisfied_rulings`.
+    `part1.json` untouched. The 4 refusals stand (klal 39 w13, 69 w187, 69 w337,
+    210 w130 — a repeated word with no corroborating ink).
+
+    ### The coupling `0CF` predicted, measured
+
+    | | before | after |
+    |---|---:|---:|
+    | `close_satisfied` closable | 14 | **0 — converged** |
+    | applier would promote | 4 | **1** (klal 63 w40) |
+    | applier already-promoted | 665 | 668 |
+    | applier drift refusals | 11 | 11 — unchanged |
+    | `repoint` already-in-corpus | 579 | 593 |
+    | `repoint` re-pointable / stale | 0 / 11 | 0 / 11 — unchanged |
+
+    Three of the 14 (klal 23 w190, 88 w149, 88 w383) were the applier's own
+    queue: it would have written text the corpus already held. The other 11 were
+    never in the applier's set at all — its total stayed 680 across the run —
+    which is worth knowing, because the two tools work on different sets and only
+    their overlap looks like double work.
+
+    ### The rebuild was REQUIRED, and by a rule the docs do not currently state
+
+    4 queue entries sat at just-closed positions (`current_text_confirmed` at
+    klal 23 w190, 97 w106, 98 w24, 98 w61), so the derived queue was stale against
+    the ledger with **no `part*.json` edit having happened**. The standing rule is
+    "after any edit to a `part*.json` file, run `./rebuild_all.sh`", which does
+    not cover this: `settled_by_an_applied_decision` reads the LEDGER, so
+    appending an `apply_event` changes the queue's inputs by itself.
+
+    `./rebuild_all.sh --skip-vision`, diffed against a snapshot of all 15 files:
+
+        part1/2/3.json, word_identity.json, review_decisions.jsonl   byte-identical
+        candidates_part1.json      286 -> 282   dropped klal 97, 98
+        review_queue_part1.json    707 -> 703   dropped (23,190) (97,106) (98,24) (98,61)
+        everything else derived                 unchanged
+
+    Removed set == predicted set exactly, nothing added. Gate 505 passed inside
+    the rebuild. Dashboard totals moved 930/850 open -> 926/847 across 144 klalim.
+
+    ### What is left, and it is human work
+
+    `DRIFTED-RULINGS-WORKLIST.md` regenerated: **11 rulings**, 2 ink-only /
+    4 text-only / 5 neither. Plus klal 63 w40, which the applier will promote on
+    a deliberate run. No machine route remains open on any of them.
+
+0CF. **[2026-09-07] COLD-SESSION RE-MEASUREMENT OF `0CE`'s HANDOFF. THREE OF
+    ITS NUMBERS DO NOT REPRODUCE, AND ONE OF THEM IS A CLAIM, NOT STALENESS.**
+
+    Nothing in the tree changed between `743f8a6` and this measurement (`git
+    status` clean, no apply run), so these are not drift — they are what the
+    tools say when run.
+
+    | `0CE` says | measured today | |
+    |---|---|---|
+    | 7 stranded rulings, "the applier's whole drift list" | the drift list is **11** | the 7 are its `manual_correction` rows; the other 4 are 1 `candidate_choice` (klal 4 w35) and 3 `disputed_choice` (106 w46, 174 w116, 206 w2) |
+    | 1 ruling the applier would promote (klal 63 w40) | **4** | klal 23 w190 confirmed-no-op, 63 w40 manual-delete, 88 w149 and 88 w383 manual. Only one word-count-changing decision applies per klal per run, so 63 w40 still needs its own rebuild-then-rerun cycle |
+    | `close_satisfied_rulings.py` has 11 more to close | **14** (3 by `word_id`, 2 by confirmation, 9 unique), 4 refused for want of ink corroboration | |
+
+    `repoint_stale_decisions.py` reproduces exactly: **0 re-pointable, 11 stale
+    and left alone, 579 already-in-corpus untouched** (`0CE` said 581 — the
+    difference is the two rows `close_satisfied` has since settled, not a
+    disagreement).
+
+    **`DRIFTED-RULINGS-WORKLIST.md` was 17 hours stale** — generated 14:23 on
+    2026-09-06, before the 43 rows the 00:13 commit recorded, so it listed 26
+    rulings including 11 in a "SETTLED, no judgement needed" section that the
+    clearing tools have since taken. Regenerated: 11 rulings, bucketed 2 ink-only
+    / 4 text-only / 5 neither. The file carries its own "regenerate after any
+    apply" instruction and the ledger moved without an apply, which is the case
+    that instruction does not cover.
+
+    **Gate re-measured, `pytest --collect-only`:** `test_corpus_invariants.py`
+    60 + `test_pipeline_logic.py` 445 = **505 gated, all passing**;
+    `test_review_server.py` 102, `test_fixture_corpus.py` 14,
+    `test_witness_engine.py` 5 — **626 total**. `START_HERE.md` still says
+    56/388/444 and 562, which is the staleness that file warns about in its own
+    text (Lesson 37).
+
+    **`0CE` item 3's "both change what the other sees" is wrong of DRY RUNS, and
+    right only of `--apply`.** `close_satisfied_rulings.py` returns before its
+    `append_decision` loop (`:177`) and writes nothing whatever on a dry run;
+    `repoint_stale_decisions.py` writes `stale_decision_repoint_report.json`
+    (`:245`, before the `--apply` guard at `:251`), and the only reference to that
+    file anywhere in the repo is its own `--out` default, so no tool reads it.
+    Two dry runs in a row, in either order, return identical answers. The real
+    coupling is one-directional and goes through the ledger: `close_satisfied
+    --apply` appends `apply_event` rows, `repoint` skips `rd.applied_decision_ids()`
+    at `:196` (the Lesson 46 guard), so closing a ruling shrinks repoint's input
+    set. Re-measure after an `--apply`, not after a dry run.
+
+    Loose ends 4–8 of `0CE` all reproduce as written: `--part` is declared and
+    `args.part` is never read in either `close_satisfied_rulings.py:142` or
+    `repoint_stale_decisions.py:164`; `flagged_klalim`, `repair_stream`,
+    `typography.get_ligatures`, `build_part1_freq.load_or_build` and
+    `POST /api/decisions/candidate` are each referenced only from `tests/`.
 
 0CE. **[2026-09-07] LOOSE ENDS AS OF THE SESSION CLOSE — what a cold session
     should pick up, in order.**
@@ -130,13 +1554,13 @@ applying it to the corpus remain two separate, deliberate steps.
     is why the guard is still wanted); Phase 3 steps 1–3; standing corpus items
     16, 20, 0N, 3, 4.
 
-0CD. **[2026-09-07] RENAME PASS, THE REBUILD, AND THE MARKERS. ALSO: A TOOL I
-    RECOMMENDED MANUFACTURED 13 FALSE DRIFT ROWS.**
+0CD. **[2026-09-07] RENAME PASS, THE REBUILD, AND THE MARKERS. ALSO: A
+    RECOMMENDED TOOL MANUFACTURED 13 FALSE DRIFT ROWS.**
 
     ### The one that went wrong
 
-    I told the reviewer to run `tools/repoint_stale_decisions.py --apply` without
-    checking it for the guard its own sibling has. It re-points ALREADY-APPLIED
+    `tools/repoint_stale_decisions.py --apply` was recommended to the reviewer
+    without first checking it for the guard its own sibling has. It re-points ALREADY-APPLIED
     rulings, and a re-pointed copy of an applied ruling is an unapplied row
     carrying a `chosen_text` the corpus already holds. **24 copies written, 23 of
     them superseding applied rulings, 13 straight into the applier's drift
@@ -146,7 +1570,7 @@ applying it to the corpus remain two separate, deliberate steps.
     23 already written). Applier drift 24 -> 11, already-applied 650 -> 667. See
     Lesson 46.
 
-    ### The regression I shipped the day before and found today
+    ### A regression shipped the day before, found today
 
     The 601-row backfill broke the decision-history panel for **299 words**.
     `history_for_word_id` selected on `candidate_snapshot.word_id`; annotations
@@ -216,8 +1640,8 @@ applying it to the corpus remain two separate, deliberate steps.
 
     Gate 625. 17 commits, pushed.
 
-0CC. **[2026-09-07] A SWEEP FOR HALF-FINISHED FEATURES. FOUND A REGRESSION I
-    HAD JUST SHIPPED, AN ENV VAR THAT DID NOTHING, AND THE ID MISSING FROM
+0CC. **[2026-09-07] A SWEEP FOR HALF-FINISHED FEATURES. FOUND A REGRESSION
+    SHIPPED HOURS EARLIER, AN ENV VAR THAT DID NOTHING, AND THE ID MISSING FROM
     FOUR OF SEVEN WRITE PATHS.**
 
     Reviewer: "you implemented the id? will this completely stop the drifting?"
@@ -228,7 +1652,7 @@ applying it to the corpus remain two separate, deliberate steps.
     of three. **An orphan sweep cannot see a feature that is fully built, fully
     tested, and wired to nothing.**
 
-    ### 1. The history panel, broken by my own backfill the day before
+    ### 1. The history panel, broken by the previous day's backfill
 
     `history_for_word_id` selects rows on `candidate_snapshot.word_id`. The 601
     annotations each carry one; the rulings they annotate carry none, by design.
@@ -498,7 +1922,7 @@ applying it to the corpus remain two separate, deliberate steps.
     Nothing is lost between synthesis and the server.
 
     What was wrong is the rendering claim, and the error was method, not
-    arithmetic. **I reimplemented the frontend's merge rule in Python instead of
+    arithmetic. **The frontend's merge rule was reimplemented in Python instead of
     reading it** - `byIndex[c.word_index] = c` over every entry, plus the
     assumption that an index with no word span cannot be drawn. `renderKlalBody`
     does neither of those things:
@@ -510,7 +1934,7 @@ applying it to the corpus remain two separate, deliberate steps.
     * it has a dedicated block AFTER the word loop (`app.js:1778`) that draws
       every `gapsBefore[idx]` with `idx >= words.length`. It was added 2026-08-25
       for exactly this reviewer report (klal 219) and its own comment names the
-      same klalim I "found": 84, 88, 106, 114, 138, 159, 164, 175, 193, 211.
+      same klalim it "found": 84, 88, 106, 114, 138, 159, 164, 175, 193, 211.
 
     Verified in a browser rather than by reading, since reading is what produced
     the error: `test_an_append_position_insertion_proposal_is_reachable` opens
@@ -561,7 +1985,7 @@ applying it to the corpus remain two separate, deliberate steps.
     `cio.align_witness(` did not count. Corrected, it reports 16, of which 14 are
     aliased (`_load_alignment = rdata.load_alignment`) or dispatched from a
     registry or an argparse `type=`. **The only genuinely dead code was two
-    functions I added this session** - `word_identity.seed()` and
+    functions added that session** - `word_identity.seed()` and
     `drift_recovery.load_corpus_words()` - both unused since written. Removed.
 
     ### The document split
@@ -933,7 +2357,7 @@ reliability check, and every dispute still needs the ink or a different engine.
     module's own functions - the trap two `tools/` scripts fell into earlier the
     same day.
 
-    ### A precedence bug I introduced, and the tests caught
+    ### A precedence bug introduced here, and caught by the tests
 
     Sweeping `.get("candidate_snapshot", {})` -> `.get("candidate_snapshot") or
     {}` with a blind `str.replace` turned six CHAINED sites into
@@ -1063,7 +2487,21 @@ reliability check, and every dispute still needs the ink or a different engine.
     never read by a human: the gates reject a broadly-wrong span but cannot see a
     scramble buried inside an otherwise good klal.
 
-20. **CONFIRMED 2026-08-26 — the page-seam cleaner in
+20. **CLOSED 2026-09-07 — THE DAMAGE IS GONE. Re-measured before closing:
+    **zero** occurrences of `Digitized`/`Google` in `part1/2/3.json`, and **no
+    Latin word of 3 or more characters anywhere in the corpus at all**. All 12
+    named klalim carry normal-length Hebrew (250: 238 words, 290: 316, 616: 991,
+    665: 440), so this is a repair rather than a revert to placeholder. The item
+    had been reading as an open corpus defect while the corpus was clean; found
+    while sweeping for unsurfaced data issues (item `0CV`). The original entry
+    is preserved below because the MECHANISM it documents is still the
+    instructive part - `strip_page_furniture()` keys on `hebrew_letters_only()`,
+    which maps every Latin token to `""`, so a Latin watermark is invisible to
+    the cleaner that is supposed to remove it, and the gated test missed it
+    because its regex only matches the HEBREW running header.**
+
+    <details><summary>Original entry, 2026-08-26</summary>
+
     `reconstruct_placeholder_klalim.py` writes the SCANNER WATERMARK into corpus
     text: `Digitized by Google` is embedded in 12 klalim** (250, 290, 333, 357,
     380, 385, 414, 442, 553, 580, 616, 665), every one of them exactly
@@ -1156,6 +2594,9 @@ reliability check, and every dispute still needs the ink or a different engine.
     may contain a Latin-script token. Verified it can actually fail, per Lesson 25 -
     run against the pre-fix backup it reports all 12 offenders, against the live
     corpus 0. 319 tests pass.
+
+
+    </details>
 
 0N. **[2026-08-31] DICTA-AS-WITNESS DRY RUN — measured before building
     anything, and it moved the design. Also: `AbstractWitnessEngine` IS DEAD

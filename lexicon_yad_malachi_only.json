@@ -1,42 +1,5 @@
 [
  {
-  "word": "משוס",
-  "count": 1,
-  "occurrences": [
-   [
-    75,
-    942
-   ]
-  ],
-  "nearest_attested": [
-   {
-    "form": "משום",
-    "ref_count": 15727,
-    "edit": "substitution"
-   },
-   {
-    "form": "משוי",
-    "ref_count": 264,
-    "edit": "substitution"
-   },
-   {
-    "form": "משוה",
-    "ref_count": 151,
-    "edit": "substitution"
-   },
-   {
-    "form": "משוך",
-    "ref_count": 148,
-    "edit": "substitution"
-   },
-   {
-    "form": "משוח",
-    "ref_count": 119,
-    "edit": "substitution"
-   }
-  ]
- },
- {
   "word": "דהלא",
   "count": 1,
   "occurrences": [
@@ -443,33 +406,6 @@
    {
     "form": "ימין",
     "ref_count": 326,
-    "edit": "substitution"
-   }
-  ]
- },
- {
-  "word": "היינן",
-  "count": 1,
-  "occurrences": [
-   [
-    71,
-    5
-   ]
-  ],
-  "nearest_attested": [
-   {
-    "form": "היינו",
-    "ref_count": 3141,
-    "edit": "substitution"
-   },
-   {
-    "form": "היין",
-    "ref_count": 1022,
-    "edit": "deletion"
-   },
-   {
-    "form": "הוינן",
-    "ref_count": 51,
     "edit": "substitution"
    }
   ]
@@ -992,7 +928,7 @@
   "occurrences": [
    [
     198,
-    830
+    831
    ]
   ],
   "nearest_attested": [
@@ -1529,7 +1465,7 @@
   "occurrences": [
    [
     198,
-    583
+    584
    ]
   ],
   "nearest_attested": [
@@ -1541,43 +1477,6 @@
    {
     "form": "עקומה",
     "ref_count": 53,
-    "edit": "substitution"
-   }
-  ]
- },
- {
-  "word": "דככל",
-  "count": 1,
-  "occurrences": [
-   [
-    154,
-    462
-   ]
-  ],
-  "nearest_attested": [
-   {
-    "form": "דכל",
-    "ref_count": 1423,
-    "edit": "deletion"
-   },
-   {
-    "form": "ככל",
-    "ref_count": 316,
-    "edit": "deletion"
-   },
-   {
-    "form": "דבכל",
-    "ref_count": 100,
-    "edit": "substitution"
-   },
-   {
-    "form": "דאכל",
-    "ref_count": 74,
-    "edit": "substitution"
-   },
-   {
-    "form": "דהכל",
-    "ref_count": 41,
     "edit": "substitution"
    }
   ]
@@ -1723,7 +1622,7 @@
   "occurrences": [
    [
     36,
-    57
+    56
    ]
   ],
   "nearest_attested": [
@@ -2725,7 +2624,7 @@
   "occurrences": [
    [
     167,
-    1206
+    1205
    ]
   ],
   "nearest_attested": [
@@ -2764,7 +2663,7 @@
   "occurrences": [
    [
     167,
-    377
+    376
    ]
   ],
   "nearest_attested": [
@@ -3379,7 +3278,7 @@
   "occurrences": [
    [
     198,
-    1016
+    1017
    ]
   ],
   "nearest_attested": [
@@ -3708,7 +3607,7 @@
   "occurrences": [
    [
     54,
-    509
+    510
    ]
   ],
   "nearest_attested": [
@@ -3853,7 +3752,7 @@
   "occurrences": [
    [
     198,
-    1035
+    1036
    ]
   ],
   "nearest_attested": [
@@ -4904,43 +4803,6 @@
   ]
  },
  {
-  "word": "נופי",
-  "count": 1,
-  "occurrences": [
-   [
-    74,
-    110
-   ]
-  ],
-  "nearest_attested": [
-   {
-    "form": "נורי",
-    "ref_count": 193,
-    "edit": "substitution"
-   },
-   {
-    "form": "נופל",
-    "ref_count": 177,
-    "edit": "substitution"
-   },
-   {
-    "form": "ופי",
-    "ref_count": 137,
-    "edit": "deletion"
-   },
-   {
-    "form": "נוי",
-    "ref_count": 85,
-    "edit": "deletion"
-   },
-   {
-    "form": "גופי",
-    "ref_count": 46,
-    "edit": "substitution"
-   }
-  ]
- },
- {
   "word": "דהרוצה",
   "count": 1,
   "occurrences": [
@@ -4995,7 +4857,7 @@
   "occurrences": [
    [
     198,
-    642
+    643
    ]
   ],
   "nearest_attested": [
@@ -5533,28 +5395,6 @@
   ]
  },
  {
-  "word": "שואים",
-  "count": 1,
-  "occurrences": [
-   [
-    91,
-    136
-   ]
-  ],
-  "nearest_attested": [
-   {
-    "form": "שוים",
-    "ref_count": 153,
-    "edit": "deletion"
-   },
-   {
-    "form": "רואים",
-    "ref_count": 120,
-    "edit": "substitution"
-   }
-  ]
- },
- {
   "word": "מהראם",
   "count": 1,
   "occurrences": [
@@ -5582,7 +5422,7 @@
   "occurrences": [
    [
     167,
-    523
+    522
    ]
   ],
   "nearest_attested": [
@@ -5927,7 +5767,7 @@
   "occurrences": [
    [
     198,
-    952
+    953
    ]
   ],
   "nearest_attested": [
@@ -6152,28 +5992,6 @@
   ]
  },
  {
-  "word": "מאיזן",
-  "count": 1,
-  "occurrences": [
-   [
-    154,
-    21
-   ]
-  ],
-  "nearest_attested": [
-   {
-    "form": "מאיזה",
-    "ref_count": 122,
-    "edit": "substitution"
-   },
-   {
-    "form": "מאין",
-    "ref_count": 58,
-    "edit": "deletion"
-   }
-  ]
- },
- {
   "word": "דאיתמרן",
   "count": 1,
   "occurrences": [
@@ -6247,28 +6065,6 @@
    {
     "form": "המיוחד",
     "ref_count": 115,
-    "edit": "substitution"
-   }
-  ]
- },
- {
-  "word": "ויעע",
-  "count": 1,
-  "occurrences": [
-   [
-    154,
-    477
-   ]
-  ],
-  "nearest_attested": [
-   {
-    "form": "וידע",
-    "ref_count": 114,
-    "edit": "substitution"
-   },
-   {
-    "form": "ויעש",
-    "ref_count": 68,
     "edit": "substitution"
    }
   ]
@@ -6528,7 +6324,7 @@
   "occurrences": [
    [
     54,
-    773
+    774
    ]
   ],
   "nearest_attested": [
@@ -7888,7 +7684,7 @@
   "occurrences": [
    [
     198,
-    967
+    968
    ]
   ],
   "nearest_attested": [
@@ -8904,23 +8700,23 @@
   "nearest_attested": []
  },
  {
+  "word": "אלפאנדרי",
+  "count": 1,
+  "occurrences": [
+   [
+    200,
+    54
+   ]
+  ],
+  "nearest_attested": []
+ },
+ {
   "word": "אנושית",
   "count": 1,
   "occurrences": [
    [
     31,
     27
-   ]
-  ],
-  "nearest_attested": []
- },
- {
-  "word": "אפאנדרי",
-  "count": 1,
-  "occurrences": [
-   [
-    200,
-    54
    ]
   ],
   "nearest_attested": []
@@ -8964,7 +8760,7 @@
   "occurrences": [
    [
     54,
-    713
+    714
    ]
   ],
   "nearest_attested": []
@@ -9470,7 +9266,7 @@
   "occurrences": [
    [
     167,
-    162
+    161
    ]
   ],
   "nearest_attested": []
@@ -9943,7 +9739,7 @@
   "occurrences": [
    [
     54,
-    673
+    674
    ]
   ],
   "nearest_attested": []
@@ -9976,7 +9772,7 @@
   "occurrences": [
    [
     198,
-    829
+    830
    ]
   ],
   "nearest_attested": []
@@ -10031,7 +9827,7 @@
   "occurrences": [
    [
     54,
-    737
+    738
    ]
   ],
   "nearest_attested": []
@@ -10076,6 +9872,17 @@
    [
     7,
     292
+   ]
+  ],
+  "nearest_attested": []
+ },
+ {
+  "word": "דמשבשתא",
+  "count": 1,
+  "occurrences": [
+   [
+    154,
+    187
    ]
   ],
   "nearest_attested": []
@@ -10603,7 +10410,7 @@
   "occurrences": [
    [
     198,
-    923
+    924
    ]
   ],
   "nearest_attested": []
@@ -11307,7 +11114,7 @@
   "occurrences": [
    [
     167,
-    257
+    256
    ]
   ],
   "nearest_attested": []
@@ -11461,7 +11268,7 @@
   "occurrences": [
    [
     167,
-    628
+    627
    ]
   ],
   "nearest_attested": []
@@ -11582,7 +11389,7 @@
   "occurrences": [
    [
     198,
-    940
+    941
    ]
   ],
   "nearest_attested": []
@@ -11780,7 +11587,7 @@
   "occurrences": [
    [
     198,
-    937
+    938
    ]
   ],
   "nearest_attested": []
@@ -11813,7 +11620,7 @@
   "occurrences": [
    [
     167,
-    93
+    92
    ]
   ],
   "nearest_attested": []
@@ -11901,7 +11708,7 @@
   "occurrences": [
    [
     167,
-    1353
+    1352
    ]
   ],
   "nearest_attested": []
@@ -11967,7 +11774,7 @@
   "occurrences": [
    [
     36,
-    77
+    76
    ]
   ],
   "nearest_attested": []
@@ -12110,7 +11917,7 @@
   "occurrences": [
    [
     167,
-    330
+    329
    ]
   ],
   "nearest_attested": []
@@ -12303,6 +12110,17 @@
   "nearest_attested": []
  },
  {
+  "word": "למוהריקא",
+  "count": 1,
+  "occurrences": [
+   [
+    130,
+    58
+   ]
+  ],
+  "nearest_attested": []
+ },
+ {
   "word": "למעניתם",
   "count": 1,
   "occurrences": [
@@ -12429,7 +12247,7 @@
   "occurrences": [
    [
     36,
-    20
+    19
    ]
   ],
   "nearest_attested": []
@@ -12660,7 +12478,7 @@
   "occurrences": [
    [
     167,
-    396
+    395
    ]
   ],
   "nearest_attested": []
@@ -13023,7 +12841,7 @@
   "occurrences": [
    [
     54,
-    717
+    718
    ]
   ],
   "nearest_attested": []
@@ -13304,17 +13122,6 @@
   "nearest_attested": []
  },
  {
-  "word": "שבתנוסד",
-  "count": 1,
-  "occurrences": [
-   [
-    54,
-    401
-   ]
-  ],
-  "nearest_attested": []
- },
- {
   "word": "שגירסת",
   "count": 1,
   "occurrences": [
@@ -13474,7 +13281,7 @@
   "occurrences": [
    [
     198,
-    995
+    996
    ]
   ],
   "nearest_attested": []
@@ -13761,17 +13568,6 @@
    [
     194,
     382
-   ]
-  ],
-  "nearest_attested": []
- },
- {
-  "word": "שתישההולאחם",
-  "count": 1,
-  "occurrences": [
-   [
-    198,
-    570
    ]
   ],
   "nearest_attested": []
@@ -14132,6 +13928,47 @@
    {
     "form": "ואוה",
     "ref_count": 44,
+    "edit": "substitution"
+   }
+  ]
+ },
+ {
+  "word": "מכללי",
+  "count": 2,
+  "occurrences": [
+   [
+    38,
+    88
+   ],
+   [
+    149,
+    203
+   ]
+  ],
+  "nearest_attested": [
+   {
+    "form": "מכלל",
+    "ref_count": 1651,
+    "edit": "deletion"
+   },
+   {
+    "form": "מכלי",
+    "ref_count": 162,
+    "edit": "deletion"
+   },
+   {
+    "form": "כללי",
+    "ref_count": 87,
+    "edit": "deletion"
+   },
+   {
+    "form": "מכללו",
+    "ref_count": 77,
+    "edit": "substitution"
+   },
+   {
+    "form": "מכללא",
+    "ref_count": 66,
     "edit": "substitution"
    }
   ]
@@ -14523,7 +14360,7 @@
   "occurrences": [
    [
     167,
-    567
+    566
    ],
    [
     216,
@@ -15098,7 +14935,7 @@
    ],
    [
     198,
-    1052
+    1053
    ]
   ],
   "nearest_attested": [
@@ -15316,7 +15153,7 @@
    ],
    [
     167,
-    408
+    407
    ]
   ],
   "nearest_attested": [
@@ -15741,7 +15578,7 @@
   "occurrences": [
    [
     54,
-    528
+    529
    ],
    [
     59,
@@ -15850,7 +15687,7 @@
    ],
    [
     36,
-    100
+    99
    ]
   ],
   "nearest_attested": [
@@ -15909,11 +15746,11 @@
   "occurrences": [
    [
     198,
-    704
+    705
    ],
    [
     198,
-    739
+    740
    ]
   ],
   "nearest_attested": [
@@ -16309,7 +16146,7 @@
    ],
    [
     167,
-    1194
+    1193
    ]
   ],
   "nearest_attested": []
@@ -16579,7 +16416,7 @@
    ],
    [
     167,
-    448
+    447
    ]
   ],
   "nearest_attested": []
@@ -16729,7 +16566,7 @@
    ],
    [
     167,
-    688
+    687
    ]
   ],
   "nearest_attested": []
@@ -16789,7 +16626,7 @@
    ],
    [
     54,
-    798
+    799
    ]
   ],
   "nearest_attested": []
@@ -16860,7 +16697,7 @@
   "occurrences": [
    [
     54,
-    542
+    543
    ],
    [
     128,
@@ -16875,11 +16712,11 @@
   "occurrences": [
    [
     167,
-    324
+    323
    ],
    [
     167,
-    734
+    733
    ]
   ],
   "nearest_attested": []
@@ -17385,51 +17222,6 @@
   ]
  },
  {
-  "word": "מכללי",
-  "count": 3,
-  "occurrences": [
-   [
-    38,
-    88
-   ],
-   [
-    149,
-    203
-   ],
-   [
-    154,
-    184
-   ]
-  ],
-  "nearest_attested": [
-   {
-    "form": "מכלל",
-    "ref_count": 1651,
-    "edit": "deletion"
-   },
-   {
-    "form": "מכלי",
-    "ref_count": 162,
-    "edit": "deletion"
-   },
-   {
-    "form": "כללי",
-    "ref_count": 87,
-    "edit": "deletion"
-   },
-   {
-    "form": "מכללו",
-    "ref_count": 77,
-    "edit": "substitution"
-   },
-   {
-    "form": "מכללא",
-    "ref_count": 66,
-    "edit": "substitution"
-   }
-  ]
- },
- {
   "word": "ומרן",
   "count": 3,
   "occurrences": [
@@ -17443,7 +17235,7 @@
    ],
    [
     167,
-    442
+    441
    ]
   ],
   "nearest_attested": [
@@ -17608,7 +17400,7 @@
    ],
    [
     167,
-    197
+    196
    ]
   ],
   "nearest_attested": [
@@ -18108,7 +17900,7 @@
    ],
    [
     167,
-    1285
+    1284
    ]
   ],
   "nearest_attested": [
@@ -18778,11 +18570,11 @@
    ],
    [
     167,
-    380
+    379
    ],
    [
     167,
-    788
+    787
    ]
   ],
   "nearest_attested": []
@@ -18797,7 +18589,7 @@
    ],
    [
     167,
-    992
+    991
    ],
    [
     174,
@@ -18875,7 +18667,7 @@
   "occurrences": [
    [
     167,
-    134
+    133
    ],
    [
     169,
@@ -19059,7 +18851,7 @@
   "occurrences": [
    [
     54,
-    685
+    686
    ],
    [
     88,
@@ -19253,7 +19045,7 @@
    ],
    [
     54,
-    959
+    960
    ],
    [
     147,
@@ -19373,7 +19165,7 @@
    ],
    [
     167,
-    678
+    677
    ],
    [
     176,
@@ -19732,7 +19524,7 @@
    ],
    [
     198,
-    870
+    871
    ]
   ],
   "nearest_attested": [
@@ -20110,7 +19902,7 @@
    ],
    [
     167,
-    988
+    987
    ]
   ],
   "nearest_attested": []
@@ -20168,7 +19960,7 @@
    ],
    [
     167,
-    953
+    952
    ],
    [
     176,
@@ -20320,7 +20112,7 @@
    ],
    [
     167,
-    288
+    287
    ]
   ],
   "nearest_attested": [
@@ -20884,7 +20676,7 @@
    ],
    [
     54,
-    746
+    747
    ],
    [
     91,
@@ -20951,7 +20743,7 @@
    ],
    [
     167,
-    397
+    396
    ]
   ],
   "nearest_attested": []
@@ -21377,7 +21169,7 @@
    ],
    [
     54,
-    553
+    554
    ],
    [
     91,
@@ -21401,7 +21193,7 @@
    ],
    [
     167,
-    1072
+    1071
    ]
   ],
   "nearest_attested": [
@@ -21615,7 +21407,7 @@
    ],
    [
     54,
-    927
+    928
    ],
    [
     59,
@@ -21689,7 +21481,7 @@
    ],
    [
     54,
-    813
+    814
    ],
    [
     73,
@@ -21797,7 +21589,7 @@
    ],
    [
     36,
-    54
+    53
    ],
    [
     65,

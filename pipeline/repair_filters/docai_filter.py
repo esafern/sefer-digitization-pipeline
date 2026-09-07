@@ -217,19 +217,16 @@ def _reinsert_nonletters(raw, letters, expanded):
     return "".join(out)
 
 
-def repair_stream(words, freqs=None):
-    """Apply repair_word across a witness's word list.
-
-    Returns (repaired_words, repairs) where `repairs` is
-    [(index, original, repaired), ...] - the audit trail. A filter that changes
-    what a reviewer sees must be able to say exactly what it changed (§3.5)."""
-    freqs = reference_frequencies() if freqs is None else freqs
-    out, repairs = [], []
-    for i, w in enumerate(words):
-        fixed = repair_word(w, freqs)
-        if fixed and fixed != w:
-            repairs.append((i, w, fixed))
-            out.append(fixed)
-        else:
-            out.append(w)
-    return out, repairs
+# NO repair_stream(). REMOVED 2026-09-07. It applied repair_word across a word
+# list and returned an [(index, original, repaired), ...] audit trail, on the
+# §3.5 principle that a filter changing what a reviewer sees must be able to say
+# exactly what it changed. Nothing ever called it - production calls repair_word
+# per candidate at assemble_corrections_dataset.py:149 and :572.
+#
+# The principle is not dropped with the function: it is discharged per-RECORD
+# instead, and better. Every pipeline candidate carries `docai_reading` and
+# `docai_repaired` side by side (measured 2026-09-07: 282 of 282 such records in
+# review_queue_part1.json, 35 of them where the repair changed the reading), so
+# the reviewer sees the before and the after at the position they are ruling on,
+# rather than a run-level list nobody displays. A per-stream trail would have had
+# to be routed somewhere to mean anything - Lesson 29.

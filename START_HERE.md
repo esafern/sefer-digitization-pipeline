@@ -189,6 +189,36 @@ need the manual remap described above. This is a generic leaf-reordering tool,
 not Yad-Malachi-specific, in keeping with this project's generalization goal.
 
 
+## Who this is for — Sefaria is the customer
+
+**Sefaria is the customer for this work, and their requirements outrank this
+project's own preferences.** Where the two disagree, theirs win; where they have
+stated a standard, it is a requirement and not an input.
+
+The standard, as communicated to this project in 2026-09:
+
+- **Fidelity to the specific edition.** No added punctuation, no opened
+  abbreviations. The aim is a baseline text with little intervention, so that a
+  *source edition* can be cited for provenance. Later improvement is Sefaria's
+  call to make, not the contributor's to pre-empt.
+- **Demarcation around special formatting** — `@01headers`, `@02bold@03`,
+  footnotes. Named explicitly. This is why `0CY-TODO` (marginal item markers) and
+  `0DB-TODO` (footnotes folded into the body) are priorities: both are cases
+  where structure is currently indistinguishable from running text.
+- Sefaria is **not** working on Yad Malachi and would welcome it.
+
+The consequence for this pipeline is already built: `tools/export_corpus.py
+--edition diplomatic` reconstructs the text as printed and writes
+`INTERVENTIONS.json` beside either edition, so the baseline he asks for and the
+corrected text come from one source and every difference between them is
+enumerable (item `0DA`). **The answer to "little intervention" is not to
+intervene less than the text needs — it is to make every intervention auditable
+and separable.**
+
+A second consequence, and it governs scope: **the deliverable is Part 1 only.**
+Parts 2 and 3 have not been extracted, and any earlier work on them is to be
+discarded and redone rather than trusted — see `PROJECT-STATUS.md`'s TL;DR.
+
 ## Success criteria (in priority order)
 
 1. **Absolute fidelity to the author's words.** The transcript must match
@@ -345,13 +375,15 @@ For exactly what each data file contains, see `PIPELINE-DATA-REFERENCE.md`.
   keep the declared and collected counts equal — see Lesson 37.
 - Data files, caches, `rebuild_all.sh`, `review_frontend/`, and every
   `.md`/`.html` doc live at root.
-- **This repo has no `archive/` directory.** The original local
-  development copy keeps one (`archive/scripts/`, `archive/data/`,
-  `archive/docs/` — one-time, already-applied patch/find/debug scripts and
-  superseded planning/report docs), but it's deliberately excluded from
-  this public repo — not pushed, not tracked here. `DOCS-HISTORY.md` at
-  root is the one piece of that archival material kept public: this
-  document's own reorganization/correction history.
+- **This repo has no `archive/` directory, and does not need one: git is the
+  archive.** A one-time patch script or a superseded report is not lost when it
+  is deleted — `git log --all -- <path>` and `git show <rev>:<path>` bring any of
+  it back, with the commit that explains why it existed. A checked-in `archive/`
+  is a second, worse copy of that with no provenance attached, and it puts
+  material a reader will never need in the first directory they see.
+  `DOCS-HISTORY.md` and `PROJECT-STATUS-HISTORY.md` are the exceptions, kept
+  public because they are read: the first for this document's own corrections,
+  the second because open items reference closed ones by id.
 - `docai_word_boxes/`, `document_jsons_berlin/`, `klalim_docai/`,
   `llm_klal_starts/`, `sefaria_export/`, `vlm_extractions/`,
   `images/pdf_pages/`, `scratch/`, `sefaria_reference_corpus/` — gitignored
@@ -706,6 +738,48 @@ source files fresh off disk on every request (no embedded/cached data, no
 restart needed), but it still needs those files to actually be current —
 running the rebuild is what keeps them that way. Don't hand-run individual
 stages and try to remember which ones are now stale.
+
+**The corpus is not the queue's only input — an `apply_event` appended to
+`review_decisions.jsonl` makes the queue stale by itself, with no `part*.json`
+edit anywhere.** `build_corrections_dataset.settled_by_an_applied_decision`
+reads the LEDGER to drop a candidate whose position a human ruling has already
+promoted, so any tool that appends an `apply_event` changes what the next
+rebuild produces. Measured 2026-09-07 (item `0CG`):
+`close_satisfied_rulings.py --apply` closed 14 rulings, touched no corpus file,
+and left 4 queue entries standing at positions the ledger now called settled —
+`review_queue_part1.json` 707 -> 703 and `candidates_part1.json` 286 -> 282 on
+the rebuild that followed. **So the trigger is "after any write to an authored
+file", all three of them, not just the corpus.** The other two authored files
+are the same shape: `word_identity.json` addresses the words the queue is keyed
+to, and the ledger decides which of them are still open questions.
+
+The cheap check, when you are unsure whether a ledger write mattered: snapshot
+the derived files, run `./rebuild_all.sh --skip-vision`, and diff. The three
+authored files must come back byte-identical — `rebuild_all.sh` writes none of
+them — so anything else that moved is the answer, and anything that moved in
+THEM is a bug.
+
+**That check is only valid while nobody is reviewing.** It ran on 2026-09-07
+during a live review session and reported `review_decisions.jsonl` CHANGED —
+which reads as exactly the bug the invariant exists to catch, and was not one:
+two rows had been appended by the reviewer, in the dashboard, in the ~40 seconds
+the rebuild took. The diff cannot tell "a rebuild stage wrote this" from "a human
+wrote this during the rebuild"; only the rows themselves can, and there they were
+`reviewer: local` with timestamps inside the window. **Before filing a rebuild
+stage as a ledger writer, read the added rows.** If a reviewer is working, either
+say so in the finding or take the snapshot when the dashboard is idle. Same shape
+as Lesson 44 with the roles swapped: there a background job mutated a tree
+someone was editing, here a foreground job measured one.
+
+**Not every ledger write is equivalent, so do not reach for the rebuild on all
+of them.** Measured 2026-09-07, one each way: an `apply_event` moved the queue
+(`review_queue_part1.json` 707 → 703, item `0CG`), a `word_id_backfill`
+annotation moved nothing at all (all 15 files identical, item `0CJ`), and
+**clearing a `klal_flag` from the dashboard needs no rebuild either** — no
+rebuild stage reads `klal_flag` (checked across all six), and no derived file
+carries `needs_revisit`. The server computes flag state live from the ledger on
+every request, which is why the dashboard updates the moment you click. The rule
+is "check after a write to an authored file", not "always rebuild".
 
 `./rebuild_all.sh --skip-vision` skips only the Gemini re-verification
 step, for fast iteration when you don't need fresh flag classifications

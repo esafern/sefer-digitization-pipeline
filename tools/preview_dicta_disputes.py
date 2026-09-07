@@ -72,19 +72,13 @@ DEFAULT_BASE = "http://127.0.0.1:8420"
 # form of exactly that: RIGHT-TO-LEFT ISOLATE ... POP DIRECTIONAL ISOLATE.
 # Isolate rather than embed (RLE/PDF): an isolate also stops the Hebrew from
 # reordering the URL and the digits sharing its table row.
-RLI, PDI = "\u2067", "\u2069"
+# MOVED TO corpus_io 2026-09-07. This file had the only copy, and so produced
+# the only correctly-rendered reports; three other generators wrote bare Hebrew
+# beside an arrow and read backwards. Re-exported under the old names so
+# to_visual() and the callers below are untouched.
+RLI, PDI = cio.RLI, cio.PDI
+rtl = cio.rtl
 HEBREW_RE = re.compile(r"[\u0590-\u05ff]")
-
-
-def rtl(text, isolate=True):
-    """Wrap a Hebrew run so a BIDI-AWARE renderer sets it right-to-left and it
-    cannot disturb its neighbours. Empty stays empty.
-
-    `isolate=False` in visual mode: there, the reordering has already been
-    baked into the characters and an isolate would only confuse a reader that
-    DOES implement bidi."""
-    text = (text or "").strip()
-    return f"{RLI}{text}{PDI}" if (text and isolate) else text
 
 
 def to_visual(lines):

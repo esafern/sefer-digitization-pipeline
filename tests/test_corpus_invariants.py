@@ -2110,7 +2110,17 @@ def test_the_word_list_behind_a_legend_count_is_exactly_what_that_count_counts()
     # `rendered` must agree with the decided list rather than being a third
     # opinion about the same word - it was computed from the wrong structure
     # first and reported 39 against a legend showing 51.
-    statuses = {"confirmed", "applied", "pending", "drifted", "unplaced", "unknown"}
+    # "retired" ADDED 2026-09-07, and it is a gap in this enumeration rather
+    # than a new state: review_server.py:960 has set it since the id work
+    # landed, for a ruling whose word a LATER ruling deleted - "an answer
+    # rather than a failure to find one", the same status rd.resolve_word_index
+    # documents and repoint_stale_decisions.py refuses a re-point on. It had
+    # simply never been PRODUCED: it needs an applied deletion at a word
+    # carrying a stable id, and the first one was klal 63 w40 (a folio marker
+    # `סד`) applied today. The set was written from the statuses that existed
+    # when the test was, which is the failure mode an enumeration has.
+    statuses = {"confirmed", "applied", "pending", "drifted", "unplaced",
+                "unknown", "retired"}
     unknown_status = [r for r in lists["recorded"] if r.get("status") not in statuses]
     assert not unknown_status, f"recorded rows with an unrecognised status: {unknown_status[:5]}"
 
@@ -2884,3 +2894,69 @@ def test_the_ledger_keeps_its_own_vocabulary():
     assert not any("stored_text" in s for s in snapshots), (
         "a candidate-file field name has leaked into the ledger; the two layers "
         "name things differently on purpose")
+
+
+def test_the_structural_defect_report_is_built_and_stays_a_triage_queue():
+    """ADDED 2026-09-07 (item 0CV/0CW). detect_repeated_words,
+    detect_ligature_corruption and detect_split_merge were in no chain and wrote
+    no artifact, so 18 flagged positions existed only while somebody watched a
+    terminal - Lesson 32, still open for three detectors after that lesson was
+    written.
+
+    Two assertions, and the second is the one that matters. The report must
+    EXIST, so the stage is actually in the chain. And it must remain a REPORT:
+    no row may carry a decision-shaped field, because the moment this becomes a
+    flag writer it puts permanent rows in an append-only ledger for material
+    that carries real false positives - klal 144's `ז`+`ה` -> `זה` is a list of
+    Hebrew numerals being read as a word. Promoting a tier of this into the
+    queue is available and reversible (it is a derived source, like
+    merge_lexical_defects); writing flags is not.
+    """
+    path = os.path.join(REPO, "structural_defect_report.json")
+    assert os.path.exists(path), (
+        "structural_defect_report.json is missing - run ./rebuild_all.sh. The "
+        "three structural detectors deliver nothing without it."
+    )
+    with open(path, encoding="utf-8") as f:
+        rows = json.load(f)
+    assert isinstance(rows, list)
+    for r in rows:
+        for field in ("klal_id", "word_index", "stored", "detector", "evidence"):
+            assert field in r, f"a triage row must carry {field}: {r}"
+        for forbidden in ("needs_revisit", "chosen_text", "decision_type", "applied"):
+            assert forbidden not in r, (
+                f"{forbidden!r} in a structural triage row - this report must not "
+                f"grow decision semantics; promoting an entry stays a separate act"
+            )
+
+
+def test_no_latin_text_survives_anywhere_in_the_corpus():
+    """ADDED 2026-09-07, closing item 20 with a guard instead of a memory.
+
+    Item 20 recorded the Google Books watermark `Digitized by Google` embedded in
+    12 klalim by `strip_page_furniture()`, which keys on `hebrew_letters_only()`
+    - so it maps every LATIN token to `""` and the watermark is invisible to the
+    cleaner meant to remove it. `test_no_page_header_contamination` did not catch
+    it either: its regex matches the HEBREW running header only.
+
+    The damage is gone, measured before the item was closed. This is the guard
+    that keeps it gone, and it is deliberately WIDER than the defect: any Latin
+    run of three or more letters, in any of the three corpus files. This book is
+    Hebrew and Aramaic; a Latin word in it is scanner furniture or an OCR
+    artifact, never text. Currently zero, so the bar costs nothing to hold.
+    """
+    offenders = []
+    for name in ("part1.json", "part2.json", "part3.json"):
+        path = os.path.join(REPO, name)
+        if not os.path.exists(path):
+            continue
+        with open(path, encoding="utf-8") as f:
+            for k in json.load(f):
+                for field in ("clean_text", "title"):
+                    found = re.findall(r"[A-Za-z]{3,}", k.get(field) or "")
+                    if found:
+                        offenders.append((name, k["klal_id"], field, sorted(set(found))[:5]))
+    assert not offenders, (
+        f"Latin text in the corpus - scanner furniture or an OCR artifact, never "
+        f"this book's text (item 20): {offenders[:8]}"
+    )

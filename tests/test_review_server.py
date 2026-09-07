@@ -1067,7 +1067,7 @@ def test_a_recorded_custom_reading_containing_gershayim_survives_a_panel_reopen(
     klal_id, word_index = _find_candidate_position()
     assert klal_id is not None, "no live candidate to record a decision against"
 
-    status, _ = _post_json(server, "/api/decisions/candidate", {
+    status, _ = _post_json(server, "/api/decisions/disputed", {
         "klal_id": klal_id, "word_index": word_index,
         "chosen_source": "custom", "chosen_text": GERSHAYIM_READING,
         "note": ADVERSARIAL_NOTE,
@@ -1109,7 +1109,7 @@ def test_a_note_with_html_special_characters_renders_verbatim_in_the_history_pan
     from what the reviewer reads back."""
     klal_id, word_index = _find_candidate_position()
     assert klal_id is not None, "no live candidate to record a decision against"
-    status, _ = _post_json(server, "/api/decisions/candidate", {
+    status, _ = _post_json(server, "/api/decisions/disputed", {
         "klal_id": klal_id, "word_index": word_index,
         "chosen_source": "custom", "chosen_text": GERSHAYIM_READING,
         "note": ADVERSARIAL_NOTE,

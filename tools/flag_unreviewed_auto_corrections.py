@@ -55,6 +55,7 @@ import corpus_io as cio  # noqa: E402
 import drift_recovery as dr  # noqa: E402
 import review_decisions as rd  # noqa: E402
 import scan_alignment as sa  # noqa: E402
+import word_identity as widentity  # noqa: E402
 
 PASS_REVIEWER = "ai-dropped-lamed-correction"
 FLAG_REVIEWER = "tools/flag_unreviewed_auto_corrections.py"
@@ -198,9 +199,25 @@ def main():
         print("\nDRY RUN - nothing written. Re-run with --apply.")
         return
 
+    # THE ID, ATTACHED AT WRITE TIME. Added 2026-09-07 (item 0CK). Every flag
+    # this tool wrote before now names its word by INDEX alone, and an index rots
+    # the moment an earlier edit changes the klal's word count - which is the
+    # entire reason reindex_flags_after_shift() exists. The id cannot be
+    # recovered for those afterwards: a flag records no word, so there is nothing
+    # to corroborate a derived address against (measured: extending
+    # backfill_word_ids.RULING_TYPES to klal_flag backfills exactly ZERO). Here,
+    # at write time, the answer is free - `wi` is the position this tool just
+    # derived and checked, so the word is right there.
+    #
+    # Same seam the dashboard uses (review_server._with_word_id), not a private
+    # copy: word_identity.snapshot_fields() returns {} when no sidecar or no id
+    # exists, so a flag simply carries no id rather than a null that later reads
+    # as "recorded and empty".
+    id_state = widentity.load()
     for r, wi, why in todo:
         rd.append_decision(
             "klal_flag", klal_id=r["klal_id"], word_index=wi,
+            candidate_snapshot=(widentity.snapshot_fields(id_state, r["klal_id"], wi) or None),
             needs_revisit=True, reviewer=FLAG_REVIEWER,
             note=(f"UNREVIEWED AUTOMATED CORRECTION. {args.reviewer} changed this word "
                   f"to {r.get('chosen_text')!r} on {(r.get('ts') or '')[:10]} and applied it "
