@@ -1,23 +1,23 @@
 # The open dispute queue, ordered by posterior
 
-388 open dispute(s), scored by `tools/rank_dispute_queue.py`. **Regenerate after any apply** - the queue and the calibration both move.
+383 open dispute(s), scored by `tools/rank_dispute_queue.py`. **Regenerate after any apply** - the queue and the calibration both move.
 
 `posterior` is P(a reviewer adopts the consensus reading), estimated from the stratum this dispute falls in, under a Beta(1,1) posterior so a thin stratum cannot read as a certainty. The interval is 90% credible. **This orders attention; it decides nothing** - every row still needs the ink.
 
-Calibrated on **240 ledger rulings** that recorded a consensus reading; 180 of them adopted it, a base rate of 75%. That base rate is the FALLBACK only - the strata below differ from it by more than 60 points, which is the whole reason this file exists.
+Calibrated on **245 ledger rulings** that recorded a consensus reading; 181 of them adopted it, a base rate of 74%. That base rate is the FALLBACK only - the strata below differ from it by more than 60 points, which is the whole reason this file exists.
 
 ## What each stratum is worth
 
 | engines agreeing | n | adopted | posterior | 90% CI |
 |---|---:|---:|---:|---|
 | `dicta,surya,vlm` | 35 | 35 | 97% | 92%–100% |
-| `dicta,surya` | 29 | 25 | 84% | 72%–93% |
 | `dicta,vlm` | 40 | 34 | 83% | 73%–92% |
+| `dicta,surya` | 32 | 26 | 79% | 67%–90% |
 | `surya,vlm` | 106 | 81 | 76% | 69%–82% |
 | `dicta,docai,surya,vlm` | 1 | 1 | 67% | 22%–97% ⚠ thin (n<8); ranking falls back to the engine count |
 | `docai,surya,vlm` | 9 | 2 | 27% | 9%–51% |
 | `docai,vlm` | 7 | 1 | 22% | 5%–47% ⚠ thin (n<8); ranking falls back to the engine count |
-| `docai,surya` | 13 | 1 | 13% | 3%–30% |
+| `docai,surya` | 15 | 1 | 12% | 2%–26% |
 
 **Every set containing DocAI scores low and that is mostly SELECTION.** Candidates are generated from DocAI's disagreements with the corpus, so a DocAI-involved consensus is disproportionately re-proposing a word that vision adjudication or a human has already settled. Read it as "this position has probably been looked at already", not as "DocAI is unreliable".
 
@@ -25,10 +25,10 @@ Calibrated on **240 ledger rulings** that recorded a consensus reading; 180 of t
 
 | posterior | disputes |
 |---|---:|
-| >=0.75 | 342 |
+| >=0.75 | 339 |
 | >=0.50 | 12 |
 | >=0.25 | 3 |
-| <0.25 | 31 |
+| <0.25 | 29 |
 
 ## The top 40
 

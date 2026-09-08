@@ -101,6 +101,79 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0DN. **[2026-09-08, reviewer] "WHERE ARE THESE STORED ANYWAY?" IN FOUR PLACES,
+    ONE OF THEM HARDCODED IN A SCRIPT AND KEYED ON A DRIFTING INDEX. NOW ONE
+    MECHANISM.**
+
+    The reviewer asked to clear two findings in two different reports and then
+    asked where such things are kept. The answer was worse than the question
+    implied:
+
+    | report | where a "checked, it is fine" lived | keyed on |
+    |---|---|---|
+    | `structural_defect_report.json` | `structural_defect_acknowledged.json` | content - correct |
+    | `ligature_words.json` | **`KNOWN_FALSE_POSITIVES`, a dict in `tools/list_ligature_words.py:52`** | **`(klal_id, word_index)`** |
+    | `title_defect_report.json` | **nothing** | - |
+    | `lexical_defect_report.json` | **nothing** | - |
+
+    **The hardcoded dict is the finding.** Clearing a ligature false positive
+    meant editing a script, so the reviewer could not do it and it did not look
+    like data to anyone reading the report. And its key DRIFTS: an insertion
+    anywhere earlier in the klal moves every later index, so the resolution
+    silently lands on a different word - the exact failure
+    `build_structural_defect_report._key`'s own comment explains it is avoiding,
+    in a sibling file, in the opposite direction. Two files, one question, and
+    the one that got it wrong was the one nobody had reason to open.
+
+    The two reports with NO mechanism are the other half: a title or lexical
+    finding a human had checked came back on every rebuild forever, which is how
+    the reviewer arrived at the question.
+
+    ### `pipeline/triage_ack.py`
+
+    One module: `key` / `keys_for` / `load` / `annotate` / `record`. Content key
+    `klal | detector | text | occurrence`, never an index. `text_field` is a
+    parameter because the reports genuinely disagree on the field name
+    (`stored`, `title_word`, `word`) and that name is part of each report's
+    published schema - a rename would break readers for cosmetics.
+
+    Each report keeps its OWN store file, so nothing already recorded moves:
+    structural still reads `structural_defect_acknowledged.json` and its **20
+    acknowledgements survive untouched** (verified by rebuilding: 22 rows, 20
+    acknowledged, before and after).
+
+    `--acknowledge KLAL:WORD --note "..."` on `build_title_report.py` and
+    `tools/list_ligature_words.py`. It refuses a klal:word that is not in the
+    report rather than writing an entry that matches nothing.
+
+    ### Cleared this session, at the reviewer's instruction
+
+    **klal 144 title w4** `מעצמנו` -> `מעצמו`: a false positive. `מעצמנו` is
+    first-person plural and agrees with `לנו` in the same title; `מעצמו` is third
+    person singular. The detector is frequency-only (`ref_count` 365, and 7 vs 2
+    in this corpus) and cannot see agreement. Note recorded with the entry.
+
+    **klal 7 w677** `ויגל`: migrated, not newly cleared - it had been resolved
+    since 2026-08-26 (Psalms 16:9) and the reviewer's "clear it" was already
+    true. Reported to them as already-marked rather than acted on twice.
+
+    **klal 150 w443 `אוף` was NOT migrated, deliberately.** Its old marker said
+    "אוף is real Aramaic ('also'), not a collapsed אלוף" - and on 2026-09-08 the
+    reviewer ruled the opposite, `אוף` -> `אף`, noting a printer's error against
+    the M.Y. critical edition. Carrying the old resolution forward would have
+    re-asserted a judgement the reviewer has since reversed. The ledger ruling
+    stands; the marker is gone.
+
+    ### Not done
+
+    `lexical_defect_report.json` still has no store. It is the largest triage
+    surface (213 rows, 118 unsurfaced) and wiring it is the same three lines, but
+    its rows are the ones a widened `merge_lexical_defects()` would push into the
+    review queue - so what "acknowledged" should mean there depends on a decision
+    the reviewer has not made yet (`0DF`). Flagged rather than guessed.
+
+    Gate 520 -> 522.
+
 0DM. **[2026-09-08] `0BX`'s COLLISION GUARD AND `0DE` FINDINGS 6, 7, 8 - ALL
     FIXED, EACH MUTATION-CHECKED. AND A CORRECTION TO `0DF`.**
 

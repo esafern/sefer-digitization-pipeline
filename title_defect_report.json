@@ -27,7 +27,10 @@
    "ref_count": 365,
    "detector": "insertion_deletion",
    "ambiguous": false,
-   "klass": "detector_candidate"
+   "klass": "detector_candidate",
+   "acknowledged": true,
+   "acknowledged_on": "2026-09-08T18:45:07.202514+00:00",
+   "acknowledged_note": "false positive: מעצמנו is 1st person plural and agrees with לנו in the same title; מעצמו is 3rd person singular. The detector is frequency-only and cannot see agreement. Reviewer confirmed 2026-09-08."
   },
   {
    "klal_id": 212,
@@ -37,7 +40,8 @@
    "ref_count": 2052,
    "detector": "insertion_deletion",
    "ambiguous": false,
-   "klass": "detector_candidate"
+   "klass": "detector_candidate",
+   "acknowledged": false
   }
  ],
  "extent_queue": [

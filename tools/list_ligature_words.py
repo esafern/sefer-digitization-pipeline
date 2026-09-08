@@ -41,6 +41,7 @@ REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(REPO, "pipeline"))
 
 import corpus_io as cio  # noqa: E402
+import triage_ack as ack  # noqa: E402
 from repair_filters import docai_filter as df  # noqa: E402
 
 OUT_PATH = cio.repo_path("ligature_words.json")
@@ -49,15 +50,26 @@ OUT_PATH = cio.repo_path("ligature_words.json")
 # position so a DIFFERENT word in the same klal is never silently suppressed -
 # the same convention check_klal_token_orphans.py uses for its own allowlist.
 # Listing them here stops each new run re-proposing a settled question.
-KNOWN_FALSE_POSITIVES = {
-    # Psalms 16:9, `לכן שמח לבי ויגל` - `ויגל` (and rejoiced) is correct;
-    # `ויגאל` (and redeemed) would be a different verse. Checked 2026-08-26.
-    (7, 677): "ויגל is correct - Psalms 16:9, not ויגאל",
-    # `אוף` is ordinary Aramaic for 'also' and has its own Jastrow entries
-    # (אוֹף I, אוֹף II); the corpus uses it twice. `אלוף` (chief) is a different
-    # word entirely. Confirmed against the dictionary 2026-08-26.
-    (150, 443): "אוף is real Aramaic ('also'), not a collapsed אלוף",
-}
+# NO KNOWN_FALSE_POSITIVES DICT. It lived here, hardcoded in source, keyed on
+# `(klal_id, word_index)`:
+#
+#     (7, 677): "ויגל is correct - Psalms 16:9, not ויגאל",
+#     (150, 443): "אוף is real Aramaic ('also'), not a collapsed אלוף",
+#
+# Two things were wrong with that, found 2026-09-08 when the reviewer asked to
+# clear a finding and then asked where these are kept (item 0DN). Clearing one
+# meant editing a script - so the reviewer could not do it, and it did not look
+# like data to anyone reading the report. And THE KEY DRIFTS: an insertion
+# anywhere earlier in the klal moves every later index, so the resolution
+# silently lands on a DIFFERENT word - the exact failure
+# build_structural_defect_report's own key comment explains it is avoiding, in a
+# sibling file, in the opposite direction.
+#
+# Both entries were migrated to ligature_acknowledged.json, keyed on content
+# (klal | detector | word) through pipeline/triage_ack.py, which is now the one
+# mechanism for every triage report. Clearing one is
+# `tools/list_ligature_words.py --acknowledge KLAL:WORD`.
+ACK_PATH = cio.repo_path("ligature_acknowledged.json")
 LIGATURE_CODEPOINT = "ﭏ"
 
 
@@ -92,9 +104,7 @@ def scan(part_paths):
                 j = next((x for x in range(min(len(n), len(rn))) if n[x] != rn[x]), len(n))
                 row = {"klal_id": kid, "word_index": i, "word": raw,
                        "repaired": repaired, "repaired_ref_count": ref.get(rn, 0)}
-                fp = KNOWN_FALSE_POSITIVES.get((kid, i))
-                if fp:
-                    row["resolved_false_positive"] = fp
+                row["detector"] = ("dropped_lamed" if rn[j] == "ל" else "dropped_alef")
                 (dropped_lamed if rn[j] == "ל" else dropped_alef).append(row)
     return {
         "intact": [{"word": w, "count": c, "occurrences": intact_where[w]}
@@ -111,10 +121,38 @@ def main():
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--part", action="append",
                     help="a part*.json to scan (repeatable; default: all three)")
+    ap.add_argument("--acknowledge", metavar="KLAL:WORD", action="append", default=[],
+                    help="record one candidate as a checked false positive so it stops "
+                         "being reported, e.g. --acknowledge 7:677. Repeatable. It lapses "
+                         "on its own if the word's text changes.")
+    ap.add_argument("--note", default="checked and correct as printed",
+                    help="why it is being dismissed - stored with the acknowledgement")
     args = ap.parse_args()
     paths = ([cio.repo_path(p) for p in args.part] if args.part
              else [cio.repo_path(f"part{n}.json") for n in (1, 2, 3)])
     out = scan(paths)
+    # ONE MECHANISM, shared with the structural and title reports (item 0DN).
+    # `word` is this report's text field; the key is content, so an edit earlier
+    # in the klal cannot move an acknowledgement onto a different word.
+    for bucket in ("dropped_lamed", "dropped_alef"):
+        ack.annotate(out[bucket], ACK_PATH, text_field="word")
+
+    if args.acknowledge:
+        want = set()
+        for spec in args.acknowledge:
+            kid, _, wi = spec.partition(":")
+            want.add((int(kid), int(wi)))
+        rows = out["dropped_lamed"] + out["dropped_alef"]
+        n = ack.record(rows, ACK_PATH, args.note, text_field="word",
+                       only=lambda r: (r["klal_id"], r["word_index"]) in want)
+        missed = want - {(r["klal_id"], r["word_index"]) for r in rows}
+        if missed:
+            raise SystemExit(f"no ligature candidate at {sorted(missed)} - nothing written.")
+        print(f"Acknowledged {n} ligature candidate(s) into {ACK_PATH}")
+        out = scan(paths)
+        for bucket in ("dropped_lamed", "dropped_alef"):
+            ack.annotate(out[bucket], ACK_PATH, text_field="word")
+
     with open(OUT_PATH, "w", encoding="utf-8") as f:
         json.dump(out, f, ensure_ascii=False, indent=1)
         f.flush()
@@ -127,9 +165,9 @@ def main():
     print(f"      dropped alef   {len(out['dropped_alef']):>4}   (שמואל -> שמול)")
     print(f"      both lost      {len(out['both_lost']):>4}   (אל -> &)")
     fps = sum(1 for key in ("dropped_lamed", "dropped_alef")
-              for r in out[key] if r.get("resolved_false_positive"))
+              for r in out[key] if r.get("acknowledged"))
     print(f"  literal U+FB4F in the corpus: {len(out['literal_ligature_codepoint'])}")
-    print(f"  of the candidates, {fps} are already-resolved false positives, marked as such")
+    print(f"  of the candidates, {fps} are acknowledged false positives (ligature_acknowledged.json)")
     print("  The failure lists are CANDIDATES - read the context. `both_lost` is exhaustive.")
 
 

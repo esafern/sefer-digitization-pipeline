@@ -51,6 +51,7 @@ sys.path.insert(0, _HERE)
 sys.path.insert(0, os.path.join(os.path.dirname(_HERE), "tools"))
 
 import corpus_io as cio  # noqa: E402
+import triage_ack as ack  # noqa: E402
 import detect_repeated_words as rep  # noqa: E402
 import detect_ligature_corruption as lig  # noqa: E402
 import detect_split_merge as sm  # noqa: E402
@@ -61,57 +62,18 @@ OUT_PATH = cio.repo_path("structural_defect_report.json")
 ACK_PATH = cio.repo_path("structural_defect_acknowledged.json")
 
 
-def _key(row, occurrence=0):
-    """The identity an acknowledgement is recorded against.
-
-    (klal, detector, stored) - deliberately NOT word_index. An index moves every
-    time an earlier edit changes the klal's word count, and an acknowledgement
-    that evaporates on an unrelated edit is worse than none: the finding returns
-    looking new, and the reviewer re-checks work they already did.
-
-    `stored` IS in the key, and that is the other half. Acknowledging says "this
-    text, here, is correct as printed" - so if the text changes, the
-    acknowledgement no longer applies and the finding correctly comes back.
-
-    PLUS AN OCCURRENCE ORDINAL - item 0DE finding 7, added 2026-09-08. Those
-    three fields are not unique WITHIN a klal: two `repeated_word` findings on
-    the same word, or a second wrong `ה` in one enumeration, collapse to one key,
-    so acknowledging the first silently suppresses the second - unreviewed, and
-    with nothing on screen saying a second existed. This is the same address
-    shape item 0BB settled on for rulings: the bare word names one of several,
-    `(word, occurrence)` names one.
-
-    The ordinal is assigned by word_index order within its (klal, detector,
-    stored) group, so it survives a uniform index shift - every index in the klal
-    moves together and the order is preserved. It changes only when a finding is
-    inserted or removed between two others, which is exactly when the later ones
-    deserve another look.
-
-    OCCURRENCE 0 CARRIES NO SUFFIX, deliberately: every key in
-    `structural_defect_acknowledged.json` today is a first occurrence (22 rows,
-    22 distinct keys, checked), so this change invalidates none of the 20
-    acknowledgements already recorded. A migration that quietly re-opened work
-    the reviewer had finished would be a worse bug than the one being fixed.
-    """
-    base = f"{row['klal_id']}|{row['detector']}|{row['stored']}"
-    return base if not occurrence else f"{base}|#{occurrence + 1}"
-
-
-def _keys_for(rows):
-    """{id(row): key} with each row's occurrence ordinal resolved. See _key()."""
-    seen = {}
-    out = {}
-    for r in sorted(rows, key=lambda r: (r["klal_id"], r["detector"],
-                                         r["stored"], r["word_index"])):
-        base = (r["klal_id"], r["detector"], r["stored"])
-        n = seen.get(base, 0)
-        seen[base] = n + 1
-        out[id(r)] = _key(r, n)
-    return out
+# THE KEY AND THE STORE MOVED to pipeline/triage_ack.py 2026-09-08, unchanged in
+# shape and unchanged in behaviour - this file's own store keeps its own path, so
+# every acknowledgement already recorded still resolves. The move is because two
+# more reports needed the same thing and a third copy of it was the alternative
+# (item 0DN). `_key` stays as a thin alias: the tests and this module's own
+# history refer to it by that name.
+_key = ack.key
+_keys_for = ack.keys_for
 
 
 def load_acknowledged():
-    return {e["key"]: e for e in (cio.load_json(ACK_PATH, default=[]) or [])}
+    return ack.load(ACK_PATH)
 
 
 def build(part_path=None):

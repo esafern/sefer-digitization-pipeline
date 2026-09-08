@@ -9078,3 +9078,61 @@ def test_two_findings_alike_in_one_klal_get_distinct_acknowledgement_keys(tmp_pa
     assert keys[id(elsewhere)] == m._key(elsewhere), "a different klal is unaffected"
     # The ordinal follows word_index, not the order rows happen to be listed in.
     assert keys[id(second)].endswith("|#2")
+
+
+def test_an_acknowledgement_key_is_content_not_an_index(tmp_path):
+    """ITEM 0DN. `tools/list_ligature_words.py` kept its resolutions in a dict
+    HARDCODED IN SOURCE, keyed `(klal_id, word_index)`. Both halves were wrong:
+    clearing a finding meant editing a script, and the key DRIFTS - an insertion
+    anywhere earlier in the klal moves every later index, so the resolution
+    silently lands on a different word.
+
+    The shared store keys on content. This asserts the property that matters:
+    the SAME word at a DIFFERENT index keeps its acknowledgement, and a DIFFERENT
+    word at the SAME index does not inherit it.
+    """
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "tack", os.path.join(REPO, "pipeline", "triage_ack.py"))
+    ack = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(ack)
+
+    path = str(tmp_path / "ack.json")
+    row = {"klal_id": 7, "word_index": 677, "word": "ויגל", "detector": "dropped_alef"}
+    assert ack.record([row], path, "Psalms 16:9", text_field="word") == 1
+
+    shifted = dict(row, word_index=681)          # an earlier insertion moved it
+    other = {"klal_id": 7, "word_index": 677, "word": "אחרת", "detector": "dropped_alef"}
+    ack.annotate([shifted, other], path, text_field="word")
+    assert shifted["acknowledged"] is True, (
+        "the acknowledgement did not follow its word across a shift - it was keyed "
+        "on an index, so an unrelated edit re-opens settled work")
+    assert other["acknowledged"] is False, (
+        "a different word inherited the acknowledgement because they share an index")
+
+
+def test_every_triage_report_can_have_a_finding_cleared(tmp_path):
+    """ITEM 0DN, the gap that prompted it. The reviewer asked to clear a title
+    finding and there was nowhere to put it: `title_defect_report.json` and
+    `lexical_defect_report.json` had no acknowledgement mechanism at all, so a
+    finding a human had checked came back on every rebuild forever.
+
+    Pins that each report that HAS a store uses the one shared mechanism, so the
+    next report added does not grow a fourth. Deliberately checks the module the
+    builders import rather than re-deriving the key here (Lesson 33: a test of a
+    copy is a test of the copy).
+    """
+    import importlib.util
+    for mod, attr in (("build_structural_defect_report", "ACK_PATH"),
+                      ("build_title_report", "ACK_PATH")):
+        spec = importlib.util.spec_from_file_location(
+            f"m_{mod}", os.path.join(REPO, "pipeline", mod + ".py"))
+        m = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(m)
+        assert hasattr(m, attr), f"{mod} has no acknowledgement store"
+        assert m.ack.key is not None, f"{mod} does not use the shared mechanism"
+    src = open(os.path.join(REPO, "tools", "list_ligature_words.py"), encoding="utf-8").read()
+    assert "KNOWN_FALSE_POSITIVES = {" not in src, (
+        "the hardcoded false-positive dict is back - resolutions belong in a data "
+        "file keyed on content, not in source keyed on a drifting index")
+    assert "triage_ack" in src, "the ligature tool must use the shared store"

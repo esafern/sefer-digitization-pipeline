@@ -1,0 +1,11 @@
+[
+  {
+    "key": "144|insertion_deletion|מעצמנו",
+    "ts": "2026-09-08T18:45:07.202514+00:00",
+    "note": "false positive: מעצמנו is 1st person plural and agrees with לנו in the same title; מעצמו is 3rd person singular. The detector is frequency-only and cannot see agreement. Reviewer confirmed 2026-09-08.",
+    "klal_id": 144,
+    "detector": "insertion_deletion",
+    "stored": "מעצמנו",
+    "word_index_when_recorded": 4
+  }
+]

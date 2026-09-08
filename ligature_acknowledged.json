@@ -1,0 +1,11 @@
+[
+  {
+    "key": "7|dropped_alef|ויגל",
+    "ts": "2026-09-08T18:45:46.131520+00:00",
+    "note": "ויגל is correct - Psalms 16:9 (לכן שמח לבי ויגל); ויגאל would be a different verse. Checked 2026-08-26, migrated from the hardcoded dict 2026-09-08.",
+    "klal_id": 7,
+    "detector": "dropped_alef",
+    "stored": "ויגל",
+    "word_index_when_recorded": 677
+  }
+]

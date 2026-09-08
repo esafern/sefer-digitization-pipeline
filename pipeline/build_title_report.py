@@ -33,6 +33,7 @@
 # see it; only the printed type size says where a heading stops (item 39 (iv)).
 # The report says so in its own header rather than letting a clean run read as
 # "titles are fine".
+import argparse
 import json
 import os
 import sys
@@ -42,10 +43,15 @@ sys.path.insert(0, os.path.join(REPO, "pipeline"))
 sys.path.insert(0, os.path.join(REPO, "tools"))
 
 import corpus_io as cio  # noqa: E402
+import triage_ack as ack  # noqa: E402
 import detect_real_word_substitution as sub  # noqa: E402
 import detect_insertion_deletion as ins  # noqa: E402
 
 OUT_PATH = cio.repo_path("title_defect_report.json")
+# Its own store, same mechanism - see pipeline/triage_ack.py (item 0DN). Title
+# findings had NO way to be cleared before 2026-09-08, so one returned on every
+# rebuild forever no matter how many times a human had looked at it.
+ACK_PATH = cio.repo_path("title_defect_acknowledged.json")
 
 # The pipeline inserts these into a body and never into a title, so they are
 # skipped on both sides of the prefix comparison - it is about WORDS.
@@ -168,7 +174,9 @@ def build(part_path=None):
         "prefix_divergences": prefix_divergences(klalim),
         # None (not []) when the gitignored reference cache is absent, so an
         # unrunnable detector never reads as "no defects found" (Lesson 26).
-        "detector_candidates": candidates,
+        "detector_candidates": (candidates if candidates is None
+                                else ack.annotate(candidates, ACK_PATH,
+                                                  text_field="title_word")),
         # A QUEUE, not findings - see extent_queue's docstring. Nothing here is
         # a claim that a heading is wrong.
         "extent_queue": extent_queue(klalim),
@@ -182,7 +190,31 @@ def build(part_path=None):
 
 
 def main():
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--acknowledge", metavar="KLAL:WORD", action="append", default=[],
+                    help="record one detector candidate as checked-and-correct so it "
+                         "stops being reported, e.g. --acknowledge 144:4. Repeatable. "
+                         "The acknowledgement lapses on its own if the title text changes.")
+    ap.add_argument("--note", default="checked and correct as printed",
+                    help="why it is being dismissed - stored with the acknowledgement")
+    args = ap.parse_args()
+
     report = build()
+    if args.acknowledge:
+        want = set()
+        for spec in args.acknowledge:
+            kid, _, wi = spec.partition(":")
+            want.add((int(kid), int(wi)))
+        cands = report["detector_candidates"] or []
+        n = ack.record(cands, ACK_PATH, args.note, text_field="title_word",
+                       only=lambda r: (r["klal_id"], r["word_index"]) in want)
+        missed = want - {(r["klal_id"], r["word_index"]) for r in cands}
+        if missed:
+            raise SystemExit(f"no title detector candidate at {sorted(missed)} - nothing "
+                             f"was written. Check the klal:word against the report.")
+        print(f"Acknowledged {n} title candidate(s) into {ACK_PATH}")
+        report = build()          # re-read so the file written below reflects it
+
     with open(OUT_PATH, "w", encoding="utf-8") as f:
         json.dump(report, f, ensure_ascii=False, indent=1)
         f.flush()

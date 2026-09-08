@@ -6228,17 +6228,7 @@
       "vlm_reading": "מחכמי",
       "surya_reading": "מהכמי",
       "dicta_reading": "מחכמי",
-      "flag": "current_text_may_be_wrong",
-      "consensus_engines": [
-        "docai",
-        "surya"
-      ],
-      "consensus_reading": "מהכמי",
-      "ligature_artifact": null,
-      "cross_edition": false,
-      "cross_edition_engines": [],
-      "same_edition_agreeing": 2,
-      "abbreviation_shape": null
+      "flag": "current_text_may_be_wrong"
     },
     {
       "word_index": 443,
@@ -11378,17 +11368,7 @@
       "vlm_reading": null,
       "surya_reading": "קפו",
       "dicta_reading": null,
-      "flag": "current_text_confirmed",
-      "consensus_engines": [
-        "docai",
-        "surya"
-      ],
-      "consensus_reading": "קפו",
-      "ligature_artifact": null,
-      "cross_edition": false,
-      "cross_edition_engines": [],
-      "same_edition_agreeing": 2,
-      "abbreviation_shape": null
+      "flag": "current_text_confirmed"
     },
     {
       "word_index": 18,
@@ -11410,39 +11390,6 @@
       "vlm_reading": "האבלות",
       "surya_reading": "האבלות",
       "dicta_reading": "האבלות",
-      "flag": "current_text_may_be_wrong"
-    },
-    {
-      "word_index": 25,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "הרמב\"ן",
-      "page": 68,
-      "bbox": {
-        "x1": 0.3349814713001251,
-        "y1": 0.43342775106430054,
-        "x2": 0.38998764753341675,
-        "y2": 0.4516390264034271
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: dicta + surya agree on 'הרמבין' against stored 'הרמב\"ן'. NOTE: this is a CROSS-EDITION consensus - dicta read the Jerusalem 1975/6 printing, not this Berlin scan. Only ONE engine that read THIS scan differs from the corpus here, so a difference between the two printings is a live explanation - check the ink.",
-      "vlm_reading": "הרמב\"ן",
-      "surya_reading": "הרמבין",
-      "dicta_reading": "הרמבין",
-      "consensus_engines": [
-        "dicta",
-        "surya"
-      ],
-      "consensus_reading": "הרמבין",
-      "ligature_artifact": null,
-      "cross_edition": true,
-      "cross_edition_engines": [
-        "dicta"
-      ],
-      "same_edition_agreeing": 1,
-      "abbreviation_shape": null,
       "flag": "current_text_may_be_wrong"
     },
     {
@@ -11468,39 +11415,6 @@
       "flag": "current_text_confirmed"
     },
     {
-      "word_index": 120,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "רבואתה",
-      "page": 68,
-      "bbox": {
-        "x1": 0.515451192855835,
-        "y1": 0.5228652358055115,
-        "x2": 0.5772558450698853,
-        "y2": 0.5406717658042908
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: dicta + surya agree on 'רבוואתה' against stored 'רבואתה'. NOTE: this is a CROSS-EDITION consensus - dicta read the Jerusalem 1975/6 printing, not this Berlin scan. Only ONE engine that read THIS scan differs from the corpus here, so a difference between the two printings is a live explanation - check the ink.",
-      "vlm_reading": null,
-      "surya_reading": "רבוואתה",
-      "dicta_reading": "רבוואתה",
-      "consensus_engines": [
-        "dicta",
-        "surya"
-      ],
-      "consensus_reading": "רבוואתה",
-      "ligature_artifact": null,
-      "cross_edition": true,
-      "cross_edition_engines": [
-        "dicta"
-      ],
-      "same_edition_agreeing": 1,
-      "abbreviation_shape": null,
-      "flag": "current_text_may_be_wrong"
-    },
-    {
       "word_index": 186,
       "opcode": "replace",
       "docai_reading": "דוא",
@@ -11521,39 +11435,6 @@
       "surya_reading": "הוא",
       "dicta_reading": "הוא",
       "flag": "current_text_confirmed"
-    },
-    {
-      "word_index": 213,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "ד'",
-      "page": 68,
-      "bbox": {
-        "x1": 0.6124845743179321,
-        "y1": 0.6147308945655823,
-        "x2": 0.6223732829093933,
-        "y2": 0.6321327686309814
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: dicta + surya agree on 'ך'' against stored 'ד''. NOTE: this is a CROSS-EDITION consensus - dicta read the Jerusalem 1975/6 printing, not this Berlin scan. Only ONE engine that read THIS scan differs from the corpus here, so a difference between the two printings is a live explanation - check the ink.",
-      "vlm_reading": "ד'",
-      "surya_reading": "ך'",
-      "dicta_reading": "ך'",
-      "consensus_engines": [
-        "dicta",
-        "surya"
-      ],
-      "consensus_reading": "ך'",
-      "ligature_artifact": null,
-      "cross_edition": true,
-      "cross_edition_engines": [
-        "dicta"
-      ],
-      "same_edition_agreeing": 1,
-      "abbreviation_shape": null,
-      "flag": "current_text_may_be_wrong"
     }
   ],
   "188": [
