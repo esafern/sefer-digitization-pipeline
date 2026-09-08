@@ -57,14 +57,28 @@ def key(row, occurrence=0, text_field="stored"):
 
 
 def keys_for(rows, text_field="stored"):
-    """{id(row): key} with each row's occurrence ordinal resolved."""
-    seen, out = {}, {}
-    for r in sorted(rows, key=lambda r: (r["klal_id"], r["detector"],
-                                         _text(r, text_field), r["word_index"])):
+    """Keys for `rows`, IN THE SAME ORDER as rows.
+
+    A LIST, not a dict keyed on id(row) - which is what this returned first.
+    `id()` is only unique among objects that are simultaneously ALIVE, so a
+    caller who built its rows inline and let them go could have two rows share a
+    key, silently. Nothing did that, and nothing should have to know not to.
+    Position is what the caller already has.
+
+    The ORDINAL is still assigned in (klal, detector, text, word_index) order,
+    which is the part that has to be stable across a shift; only the return
+    shape changed.
+    """
+    order = sorted(range(len(rows)),
+                   key=lambda i: (rows[i]["klal_id"], rows[i]["detector"],
+                                  _text(rows[i], text_field), rows[i]["word_index"]))
+    seen, out = {}, [None] * len(rows)
+    for i in order:
+        r = rows[i]
         base = (r["klal_id"], r["detector"], _text(r, text_field))
         n = seen.get(base, 0)
         seen[base] = n + 1
-        out[id(r)] = key(r, n, text_field)
+        out[i] = key(r, n, text_field)
     return out
 
 
@@ -79,9 +93,8 @@ def annotate(rows, path, text_field="stored"):
     Returns the rows, so a builder can `return ack.annotate(rows, ACK_PATH)`.
     """
     store = load(path)
-    keys = keys_for(rows, text_field)
-    for r in rows:
-        hit = store.get(keys[id(r)])
+    for r, k in zip(rows, keys_for(rows, text_field)):
+        hit = store.get(k)
         r["acknowledged"] = bool(hit)
         if hit:
             r["acknowledged_on"] = hit.get("ts")
@@ -98,13 +111,11 @@ def record(rows, path, note, only=None, text_field="stored"):
     timestamp and note, because re-stamping would erase when a thing was checked.
     """
     store = load(path)
-    keys = keys_for(rows, text_field)
     stamp = datetime.datetime.now(datetime.timezone.utc).isoformat()
     added = 0
-    for r in rows:
+    for r, k in zip(rows, keys_for(rows, text_field)):
         if only is not None and not only(r):
             continue
-        k = keys[id(r)]
         if k in store:
             continue
         store[k] = {"key": k, "ts": stamp, "note": note, "klal_id": r["klal_id"],

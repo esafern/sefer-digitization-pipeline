@@ -201,15 +201,12 @@ def build(part_path=None):
               "detector was SKIPPED, not clean. See SETUP.md.")
 
     rows.sort(key=lambda r: (r["klal_id"], r["word_index"], r["detector"]))
-    ack = load_acknowledged()
-    keys = _keys_for(rows)
-    for r in rows:
-        hit = ack.get(keys[id(r)])
-        r["acknowledged"] = bool(hit)
-        if hit:
-            r["acknowledged_on"] = hit.get("ts")
-            r["acknowledged_note"] = hit.get("note")
-    return rows
+    # ack.annotate(), not a hand-rolled copy of it. This was seven lines
+    # reimplementing the shared module it had just been pointed at - and it bound
+    # `ack = load_acknowledged()`, SHADOWING the imported `triage_ack` module
+    # inside this function. Nothing after it called the module, so it worked;
+    # a line that did would have failed on a dict. Removed 2026-09-08.
+    return ack.annotate(rows, ACK_PATH)
 
 
 def main():

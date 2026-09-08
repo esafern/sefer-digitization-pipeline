@@ -9078,16 +9078,17 @@ def test_two_findings_alike_in_one_klal_get_distinct_acknowledgement_keys(tmp_pa
     second = {"klal_id": 5, "word_index": 91, "stored": "לו", "detector": "repeated_word"}
     elsewhere = {"klal_id": 9, "word_index": 3, "stored": "לו", "detector": "repeated_word"}
 
-    keys = m._keys_for([second, first, elsewhere])      # deliberately out of order
-    assert keys[id(first)] != keys[id(second)], (
+    rows = [second, first, elsewhere]                  # deliberately out of order
+    k_second, k_first, k_elsewhere = m._keys_for(rows)  # returned in ROW order
+    assert k_first != k_second, (
         "two repeated-word findings on לו in klal 5 share one key, so acknowledging "
         "the first suppresses the second unreviewed")
-    assert keys[id(first)] == m._key(first), (
+    assert k_first == m._key(first), (
         "the FIRST occurrence must keep the legacy key or every existing "
         "acknowledgement is invalidated")
-    assert keys[id(elsewhere)] == m._key(elsewhere), "a different klal is unaffected"
+    assert k_elsewhere == m._key(elsewhere), "a different klal is unaffected"
     # The ordinal follows word_index, not the order rows happen to be listed in.
-    assert keys[id(second)].endswith("|#2")
+    assert k_second.endswith("|#2")
 
 
 def test_an_acknowledgement_key_is_content_not_an_index(tmp_path):
