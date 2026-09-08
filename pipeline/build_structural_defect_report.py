@@ -61,7 +61,7 @@ OUT_PATH = cio.repo_path("structural_defect_report.json")
 ACK_PATH = cio.repo_path("structural_defect_acknowledged.json")
 
 
-def _key(row):
+def _key(row, occurrence=0):
     """The identity an acknowledgement is recorded against.
 
     (klal, detector, stored) - deliberately NOT word_index. An index moves every
@@ -72,8 +72,42 @@ def _key(row):
     `stored` IS in the key, and that is the other half. Acknowledging says "this
     text, here, is correct as printed" - so if the text changes, the
     acknowledgement no longer applies and the finding correctly comes back.
+
+    PLUS AN OCCURRENCE ORDINAL - item 0DE finding 7, added 2026-09-08. Those
+    three fields are not unique WITHIN a klal: two `repeated_word` findings on
+    the same word, or a second wrong `ה` in one enumeration, collapse to one key,
+    so acknowledging the first silently suppresses the second - unreviewed, and
+    with nothing on screen saying a second existed. This is the same address
+    shape item 0BB settled on for rulings: the bare word names one of several,
+    `(word, occurrence)` names one.
+
+    The ordinal is assigned by word_index order within its (klal, detector,
+    stored) group, so it survives a uniform index shift - every index in the klal
+    moves together and the order is preserved. It changes only when a finding is
+    inserted or removed between two others, which is exactly when the later ones
+    deserve another look.
+
+    OCCURRENCE 0 CARRIES NO SUFFIX, deliberately: every key in
+    `structural_defect_acknowledged.json` today is a first occurrence (22 rows,
+    22 distinct keys, checked), so this change invalidates none of the 20
+    acknowledgements already recorded. A migration that quietly re-opened work
+    the reviewer had finished would be a worse bug than the one being fixed.
     """
-    return f"{row['klal_id']}|{row['detector']}|{row['stored']}"
+    base = f"{row['klal_id']}|{row['detector']}|{row['stored']}"
+    return base if not occurrence else f"{base}|#{occurrence + 1}"
+
+
+def _keys_for(rows):
+    """{id(row): key} with each row's occurrence ordinal resolved. See _key()."""
+    seen = {}
+    out = {}
+    for r in sorted(rows, key=lambda r: (r["klal_id"], r["detector"],
+                                         r["stored"], r["word_index"])):
+        base = (r["klal_id"], r["detector"], r["stored"])
+        n = seen.get(base, 0)
+        seen[base] = n + 1
+        out[id(r)] = _key(r, n)
+    return out
 
 
 def load_acknowledged():
@@ -133,7 +167,36 @@ def build(part_path=None):
                 continue
             if len(run) >= 4:
                 seq = "".join(c for _, c in run)
-                ideal = ALEPH_BET[:len(seq)]
+                # ANCHOR ON THE RUN'S OWN FIRST LETTER, NOT ON א - item 0DE
+                # finding 6, fixed 2026-09-08.
+                #
+                # `ideal = ALEPH_BET[:len(seq)]` asserted that every run of four
+                # or more single letters is a list STARTING at א. A list that
+                # continues from an earlier klal or an earlier column - `ד ה ו ז`
+                # - then mismatches at every position and is reported as four
+                # separate breaks, each with a confident single-letter proposal.
+                # Anchoring on the first letter scores the sequence that is
+                # actually there. A run that does start at א is unchanged, which
+                # is why klal 144's two findings survive this: they are TRUE
+                # positives, confirmed against page 52 in this function's own
+                # header comment.
+                #
+                # The tradeoff, stated rather than hidden: if the FIRST letter is
+                # itself a misread, the anchor is wrong and everything after it
+                # scores against the wrong ideal. That is strictly better than
+                # today's behaviour, which is that same failure for every run not
+                # starting at א, but it is not free - which is why this detector
+                # writes a triage report and never a flag.
+                #
+                # AND IT IS BOUNDS-CHECKED. `ALEPH_BET` is 22 letters and
+                # `range(len(seq))` was not capped, so a run of 23+ single-letter
+                # tokens raised IndexError and aborted stage 4e of the rebuild -
+                # on text that changes every time a correction lands.
+                start = ALEPH_BET.find(run[0][1])
+                if start == -1 or start + len(seq) > len(ALEPH_BET):
+                    run = []
+                    continue
+                ideal = ALEPH_BET[start:start + len(seq)]
                 if seq != ideal:
                     bad = [(run[j][0], run[j][1], ideal[j])
                            for j in range(len(seq)) if seq[j] != ideal[j]]
@@ -142,8 +205,9 @@ def build(part_path=None):
                             "klal_id": kid, "word_index": wi, "stored": got,
                             "proposal": want, "detector": "enumeration_break",
                             "evidence": f"item {wi - run[0][0] + 1} of a {len(seq)}-item "
-                                        f"enumeration starting at w{run[0][0]}: the sequence "
-                                        f"reads {seq} where an א-ב-ג list requires {ideal}"})
+                                        f"enumeration starting at w{run[0][0]} with "
+                                        f"{run[0][1]}: the sequence reads {seq} where a "
+                                        f"consecutive list from {run[0][1]} requires {ideal}"})
             run = []
 
     indep = sm.load_independent_frequency()
@@ -153,7 +217,9 @@ def build(part_path=None):
         # explains why - counting inside a narrower field makes every word a
         # hapax and the rare-form gate stops gating).
         own = collections.Counter()
-        for words in cio.load_klal_words(part_path).values():
+        # `klal_words`, not a second cio.load_klal_words(part_path) - same file,
+        # same call, already loaded at the top of this function (0DE finding 8).
+        for words in klal_words.values():
             for w in words:
                 if not cio.has_gershayim(w):
                     own[w] += 1
@@ -174,8 +240,9 @@ def build(part_path=None):
 
     rows.sort(key=lambda r: (r["klal_id"], r["word_index"], r["detector"]))
     ack = load_acknowledged()
+    keys = _keys_for(rows)
     for r in rows:
-        hit = ack.get(_key(r))
+        hit = ack.get(keys[id(r)])
         r["acknowledged"] = bool(hit)
         if hit:
             r["acknowledged_on"] = hit.get("ts")
@@ -198,8 +265,9 @@ def main():
         ack = load_acknowledged()
         stamp = datetime.datetime.now(datetime.timezone.utc).isoformat()
         added = 0
+        keys = _keys_for(rows)
         for r in rows:
-            k = _key(r)
+            k = keys[id(r)]
             if k in ack:
                 continue
             ack[k] = {"key": k, "ts": stamp, "note": args.note,

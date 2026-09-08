@@ -101,6 +101,108 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0DM. **[2026-09-08] `0BX`'s COLLISION GUARD AND `0DE` FINDINGS 6, 7, 8 - ALL
+    FIXED, EACH MUTATION-CHECKED. AND A CORRECTION TO `0DF`.**
+
+    ### `0BX` - the reindex collision guard. POLICY: REFUSE AND REPORT
+
+    The item flagged this as needing a policy decision, "refuse" vs "record and
+    move anyway". **Refuse**, because it is the choice both reindexers already
+    make one line earlier for a move they cannot verify against the text, and
+    because "record and move anyway" needs somewhere to put the displaced ruling
+    and a reader that looks there. Refusing needs neither and cannot lose
+    anything.
+
+    Both reindexers now seed an `occupied` set and refuse a move onto it:
+
+        occupied = {wi for (kid, wi) in current
+                    if kid == klal_id and wi is not None and wi <= position}
+        ...
+        if new_wi in occupied:
+            unverified.append((wi, new_wi, "collision")); continue
+        occupied.add(new_wi)
+
+    **Only slots at or before `position` are seeded, and that is the whole
+    reachability argument.** Everything after `position` moves by the same delta,
+    so movers keep their relative order and cannot collide with each other; the
+    real case is `delta < 0` landing on a record that is not moving. Targets are
+    added as they are written, so two movers cannot be sent to one slot either.
+
+    **The flag side was swept too (Lesson 34), and it had never been measured.**
+    Identical shape: `review_server._word_level_ai_flags()` builds
+    `by_word[widx]` and the last row per index wins, so two flags on one index
+    means one renders nowhere.
+
+    `unverified` rows are now `(old, new, reason)` and
+    `unverified_flag_shifts.jsonl` carries `reason` plus a per-reason note, because
+    "the word moved somewhere I could not verify" and "the target slot is taken"
+    need different actions and the file was making the reviewer infer which from
+    two indices.
+
+    ### A finding from writing the flag test, worth more than the test
+
+    The flag collision **could not be reproduced through `apply_harness.run()`**.
+    A shift originates at an applied decision's `word_index`, and `main()` runs
+    `close_flag_satisfied_by()` for every applied position BEFORE the reindex - so
+    the flag sitting in the target slot is normally CLOSED first, and a closed
+    flag's slot is genuinely free. The collision needs that closure not to happen,
+    which is reachable (`close_flag_satisfied_by` has conditions) but not
+    constructible in one line. The test drives `reindex_flags_after_shift()`
+    directly and says so, rather than dressing a unit test as an end-to-end one.
+
+    ### `0DE` finding 6 - the enumeration detector, both halves
+
+    `ideal = ALEPH_BET[:len(seq)]` now anchors on the run's OWN first letter and
+    is bounds-checked:
+
+        start = ALEPH_BET.find(run[0][1])
+        if start == -1 or start + len(seq) > len(ALEPH_BET):
+            run = []
+            continue
+        ideal = ALEPH_BET[start:start + len(seq)]
+
+    That fixes the `IndexError` on a 23+ run (which would abort stage 4e) and the
+    assumption that every run starts at `א`. A list continuing from an earlier
+    column - `ד ה ו ז` - now produces nothing, while `ד ה ז ח` is still caught,
+    which is the assertion that stops the fix from buying silence (Lesson 26).
+
+    The tradeoff is stated in the code rather than hidden: if the FIRST letter is
+    itself a misread the anchor is wrong. That is strictly better than the old
+    behaviour, which was that same failure for every run not starting at `א`.
+
+    ### `0DE` finding 7 - the acknowledgement key, with a migration that costs nothing
+
+    `_key` gains an occurrence ordinal in `word_index` order, so two findings
+    alike in one klal no longer collapse. It survives a uniform shift because
+    every index in a klal moves together and the ORDER does not.
+
+    **Occurrence 0 keeps the legacy key**, deliberately: all 22 rows in the live
+    report are first occurrences, so none of the 20 existing acknowledgements is
+    invalidated. Verified by rebuilding: 22 rows -> 22, 20 acknowledged -> 20, no
+    row added or removed, no acknowledgement flipped. A migration that quietly
+    re-opened finished work would have been worse than the bug.
+
+    ### `0DE` finding 8
+
+    `cio.load_klal_words(part_path)` at `:156` reuses `klal_words` from `:92`.
+
+    ### CORRECTION TO `0DF`, and it was told to the reviewer twice first
+
+    `0DF` called klal 144 w837/w839 "exactly the false positive `0DE` finding 6
+    predicts". **They are TRUE positives.** Item `0CY` in this same file already
+    had them confirmed at 6x against the ink, with URLs, and this module's own
+    header names them: DocAI read the 8th `ח` as `ה` and the 10th `י` as `ו`.
+    klal 144's run starts at `א`, so finding 6's assumption never applied to it.
+
+    Lesson 19's shape applied to a write-up: a plausible connection between two
+    things in the same paragraph, asserted without opening the file that refutes
+    it in one line - and repeated to the reviewer before being checked. Finding 6
+    was a real latent defect; it was never the explanation for these two.
+
+    Gate 515 -> 520. Rebuild clean, exit 0; the only diff in
+    `structural_defect_report.json` is the evidence WORDING - same 22 findings,
+    same 20 acknowledgements, same proposals.
+
 0DL. **[2026-09-08, reviewer] "CLICKING ON ANY WORD THEN CLICKING AWAY LEAVES A
     GOLD BOX AROUND THE WORD." THE CURSOR WAS WEARING THE DEEP-LINK RING. IT HAS
     ITS OWN, QUIET MARKER NOW.**
@@ -541,10 +643,22 @@ applying it to the corpus remain two separate, deliberate steps.
 
     15 of its 17 invisible rows carry `acknowledged: true` - the reviewer checked
     them in `0CX`. The 2 that do not are klal 144 w837 (`ה` -> `ח`) and w839
-    (`ו` -> `י`), both `enumeration_break`, and both are **exactly the false
-    positive `0DE` finding 6 predicts**: the detector assumes any run of >=4
-    single letters is an א-ב-ג enumeration STARTING at א, so a run continuing
-    from earlier reads as a break. Nothing to review; something to fix.
+    (`ו` -> `י`), both `enumeration_break`.
+
+    **CORRECTED 2026-09-08: this entry first called those two "exactly the false
+    positive `0DE` finding 6 predicts". THAT WAS WRONG, and it was repeated to
+    the reviewer twice before being checked.** They are TRUE positives, and this
+    file already said so - `build_structural_defect_report.py`'s own header
+    records them as confirmed against the scan: "page 52's right margin carries
+    ten markers, and DocAI read the 8th `ח` as `ה` and the 10th `י` as `ו`, both
+    plain misreads of letters the sequence already determined." klal 144's run
+    DOES start at א (`אבגדהוזהטו`), so finding 6's start-at-א assumption never
+    applied to it. They are unacknowledged because they are real open findings.
+
+    The error is Lesson 19's shape applied to a write-up: a plausible connection
+    between two things in the same paragraph, asserted without opening the file
+    that would have refuted it in one line. Finding 6 is still a real latent
+    defect; it is simply not the explanation for these two.
 
     ### The 118 lexical are the real population, and they are not weak
 

@@ -6255,18 +6255,28 @@ def test_an_unverifiable_flag_shift_is_recorded_to_a_file_not_only_printed(tmp_p
     is re-derived from current state; this one describes a shift that has already
     happened and cannot be re-derived afterwards."""
     path = str(tmp_path / "unverified.jsonl")
-    ard._record_unverified_shifts([(36, 14, 13)], path)
-    ard._record_unverified_shifts([(71, 62, 61), (106, 46, 45)], path)
+    ard._record_unverified_shifts([(36, 14, 13, "text")], path)
+    ard._record_unverified_shifts([(71, 62, 61, "collision"), (106, 46, 45, "text")], path)
 
     rows = [json.loads(l) for l in open(path, encoding="utf-8") if l.strip()]
     assert len(rows) == 3, "the second call must APPEND, not replace the first finding"
     assert [r["klal_id"] for r in rows] == [36, 71, 106]
     first = rows[0]
     for field in ("ts", "klal_id", "still_recorded_at_word_index",
-                  "shift_would_have_moved_it_to", "note"):
+                  "shift_would_have_moved_it_to", "reason", "note"):
         assert field in first, f"a row must carry {field} to be actionable later"
     assert first["still_recorded_at_word_index"] == 14
     assert first["shift_would_have_moved_it_to"] == 13
+
+    # THE REASON IS RECORDED, added 2026-09-08 with item 0BX. Two refusals now
+    # reach this file and they need different actions from the reviewer: "text"
+    # means the word moved somewhere this could not verify, "collision" means the
+    # shifted index is already taken and moving onto it would hide one of the two
+    # records from every consumer of all_current(). A row that does not say which
+    # leaves them to infer it from two indices.
+    assert [r["reason"] for r in rows] == ["text", "collision", "text"]
+    assert rows[0]["note"] != rows[1]["note"], "each reason must explain itself"
+    assert "already occupied" in rows[1]["note"]
 
 
 def test_a_pending_decision_whose_word_did_not_follow_is_left_alone(apply_harness, decisions_path):
@@ -8890,3 +8900,181 @@ def test_the_diplomatic_edition_reverts_an_intervention_and_the_manifest_names_i
         "our transcription, `custom` is a human overriding the ink, and only this "
         "log can tell a reader which a given change was"
     )
+
+
+def test_a_reindex_refuses_to_move_a_ruling_onto_an_occupied_slot(apply_harness, decisions_path):
+    """ITEM 0BX. rd.all_current() keys on (klal_id, word_index) and keeps the LAST
+    row per key, so re-pointing a ruling onto an index another ruling already
+    holds makes one of the two invisible to the applier, the dashboard's display
+    maps and the tri-state counts - with nothing recording that it happened.
+
+    Measured 2026-09-06: 94 keys carried rulings about more than one word, hiding
+    115. Most were harmless (105 applied, 2 deliberately superseded), but three
+    were exactly this - reindexing collisions in klal 210 - and nothing was lost
+    only because they landed on duplicates.
+
+    POLICY, and it is the one this function already applies to a move it cannot
+    verify against the text: REFUSE AND REPORT. "Record it and move anyway" needs
+    somewhere to put the displaced ruling and a reader that looks there.
+
+    A deletion at w1 shifts later words by -1, so the ruling at w4 would land on
+    w3 - where another ruling already sits and is NOT moving.
+    """
+    entry = _correction(1, "insert", None, "זרא")          # applying REMOVES it
+    apply_harness([{"klal_id": 1, "clean_text": "אלף זרא בית גימל דלת"}], {"1": [entry]})
+    rd.append_decision("disputed_choice", klal_id=1, word_index=1, chosen_source="docai_reading",
+                       chosen_text="", candidate_snapshot=entry, path=decisions_path)
+    # THE SITTING TENANT, at w1 - at the shift position, so it does NOT move. Its
+    # snapshot names a word the corpus does not hold, so the applier's drift guard
+    # leaves it pending; it stays in all_current() at (1, 1) either way, which is
+    # what makes the slot occupied.
+    rd.append_decision("manual_correction", klal_id=1, word_index=1, chosen_source="custom",
+                       chosen_text="tenant",
+                       candidate_snapshot={"word_index": 1, "original_word": "NOTINCORPUS"},
+                       path=decisions_path)
+    # THE MOVER, at w2 - the -1 shift would re-point it onto w1.
+    rd.append_decision("manual_correction", klal_id=1, word_index=2, chosen_source="custom",
+                       chosen_text="ביתx",
+                       candidate_snapshot={"word_index": 2, "original_word": "בית"},
+                       path=decisions_path)
+
+    apply_harness.run()
+
+    tenant = rd.all_current("manual_correction").get((1, 1))
+    assert tenant is not None and tenant["chosen_text"] == "tenant", (
+        "the ruling already at w1 was overwritten by a re-pointed one - it is now "
+        f"invisible to every consumer of all_current(); found {tenant and tenant['chosen_text']!r}")
+    still = rd.all_current("manual_correction").get((1, 2))
+    assert still is not None and still["chosen_text"] == "ביתx", (
+        "the mover must be left where it is and reported, not dropped")
+
+
+def test_a_reindex_refuses_to_move_a_FLAG_onto_an_occupied_slot(apply_harness, decisions_path):
+    """The sibling branch of the same defect, swept rather than waited for
+    (Lesson 34). Item 0BX measured the ruling side; the flag side had never been
+    measured and the shape is identical - review_server._word_level_ai_flags()
+    builds `by_word[widx]` and the LAST row per index wins, so two flags on one
+    index means one of them stops rendering at all, and
+    review_counts.flag_still_open() never sees it.
+
+    DRIVEN AT THE FUNCTION, not through a full apply, and the reason is a finding
+    in itself: routing this through apply_harness.run() could not reach the
+    collision. The shift originates AT an applied decision's word_index, and
+    main() runs close_flag_satisfied_by() for every applied position before the
+    reindex - so the flag sitting in the target slot is normally CLOSED first,
+    and a closed flag's slot is genuinely free. The collision needs that closure
+    not to happen, which is reachable in production (close_flag_satisfied_by has
+    conditions and returns False for some) but not constructible in one line
+    here. Testing the unit says what the guard does without pretending to
+    reproduce a rarer path.
+    """
+    old_words = "אלף זרא בית גימל דלת".split()
+    new_words = "אלף בית גימל דלת".split()          # `זרא` deleted at w1: delta -1
+    apply_harness([{"klal_id": 1, "clean_text": " ".join(old_words)}], {"1": []})
+
+    # Tenant AT the shift position, so it does not move; mover one past it.
+    rd.append_decision("klal_flag", klal_id=1, word_index=1, needs_revisit=True,
+                       note="the sitting tenant", path=decisions_path)
+    rd.append_decision("klal_flag", klal_id=1, word_index=2, needs_revisit=True,
+                       note="the mover", path=decisions_path)
+
+    moved, unverified = ard.reindex_flags_after_shift(
+        1, position=1, delta=-1, old_words=old_words, new_words=new_words, skip=set())
+
+    assert moved == [], (
+        "the flag at w2 was moved onto w1, where an open flag already sits - one "
+        "of the two now renders nowhere")
+    assert unverified == [(2, 1, "collision")], (
+        f"the refusal must be recorded with its reason so the worklist can say "
+        f"what to do about it, got {unverified!r}")
+    tenant = rd.all_current("klal_flag").get((1, 1))
+    assert "sitting tenant" in (tenant.get("note") or ""), "the tenant must be untouched"
+
+
+def _bsdr():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "bsdr_x", os.path.join(REPO, "pipeline", "build_structural_defect_report.py"))
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    return m
+
+
+def test_a_long_single_letter_run_does_not_abort_the_stage(tmp_path):
+    """ITEM 0DE FINDING 6, first half. `ideal = ALEPH_BET[:len(seq)]` capped at
+    22 letters while `range(len(seq))` did not, so a run of 23+ consecutive
+    single-Hebrew-letter tokens raised IndexError - aborting stage 4e of
+    rebuild_all.sh, on text that changes every time a correction lands.
+
+    Nothing in the corpus reaches 23 today (the longest is klal 144's 10), which
+    is why this never fired. That is a statement about the current text, not
+    about the code.
+    """
+    m = _bsdr()
+    part = tmp_path / "part.json"
+    run = " ".join("אבגדהוזחטיכלמנסעפצקרשת")          # all 22, in order
+    part.write_text(json.dumps(
+        [{"klal_id": 1, "clean_text": f"פתיחה {run} א ב סיום"}], ensure_ascii=False),
+        encoding="utf-8")
+
+    rows = m.build(str(part))          # must not raise
+    assert isinstance(rows, list)
+
+
+def test_an_enumeration_that_does_not_start_at_alef_is_scored_from_its_own_first_letter(tmp_path):
+    """ITEM 0DE FINDING 6, second half. The detector assumed every run of four or
+    more single letters is a list STARTING at א, so a list continuing from an
+    earlier column - `ד ה ו ז` - mismatched at every position and was reported as
+    four separate breaks, each with a confident single-letter proposal.
+
+    `ד ה ו ז` is consecutive from ד and must produce NOTHING. `ד ה ז ח` has one
+    real break in it (ו missing) and must still be caught, or the fix would have
+    bought silence rather than accuracy (Lesson 26).
+    """
+    m = _bsdr()
+
+    def breaks(text):
+        part = tmp_path / f"p{abs(hash(text))}.json"
+        part.write_text(json.dumps([{"klal_id": 1, "clean_text": text}], ensure_ascii=False),
+                        encoding="utf-8")
+        return [r for r in m.build(str(part)) if r["detector"] == "enumeration_break"]
+
+    assert breaks("פתיחה ד ה ו ז סיום") == [], (
+        "a consecutive list starting at ד was reported as four breaks against an "
+        "א-ב-ג ideal it never claimed to be")
+    caught = breaks("פתיחה ד ה ז ח סיום")
+    assert [r["stored"] for r in caught] == ["ז", "ח"], (
+        f"a real break inside a ד-anchored list must still be caught, got {caught!r}")
+
+
+def test_two_findings_alike_in_one_klal_get_distinct_acknowledgement_keys(tmp_path, monkeypatch):
+    """ITEM 0DE FINDING 7. `_key` was (klal, detector, stored) with word_index
+    deliberately excluded - right, because an index moves on every earlier edit
+    and an acknowledgement that evaporates is worse than none. But those three
+    are not unique WITHIN a klal, so two same-detector findings on the same text
+    collapsed to one key and acknowledging the first silently suppressed the
+    second, unreviewed, with nothing saying a second existed.
+
+    An occurrence ordinal in word_index order fixes it and survives a uniform
+    shift - every index in the klal moves together, so the ORDER does not.
+
+    AND OCCURRENCE 0 KEEPS THE OLD KEY, which is the assertion that matters most:
+    all 22 rows in the live report today are first occurrences, so this change
+    must invalidate none of the 20 acknowledgements already recorded. A migration
+    that quietly re-opened finished work would be worse than the bug.
+    """
+    m = _bsdr()
+    first = {"klal_id": 5, "word_index": 20, "stored": "לו", "detector": "repeated_word"}
+    second = {"klal_id": 5, "word_index": 91, "stored": "לו", "detector": "repeated_word"}
+    elsewhere = {"klal_id": 9, "word_index": 3, "stored": "לו", "detector": "repeated_word"}
+
+    keys = m._keys_for([second, first, elsewhere])      # deliberately out of order
+    assert keys[id(first)] != keys[id(second)], (
+        "two repeated-word findings on לו in klal 5 share one key, so acknowledging "
+        "the first suppresses the second unreviewed")
+    assert keys[id(first)] == m._key(first), (
+        "the FIRST occurrence must keep the legacy key or every existing "
+        "acknowledgement is invalidated")
+    assert keys[id(elsewhere)] == m._key(elsewhere), "a different klal is unaffected"
+    # The ordinal follows word_index, not the order rows happen to be listed in.
+    assert keys[id(second)].endswith("|#2")

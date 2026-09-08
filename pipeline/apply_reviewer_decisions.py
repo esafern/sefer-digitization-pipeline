@@ -209,6 +209,19 @@ def close_flag_satisfied_by(klal_id, word_index, decision, kind, applied_ts=None
 UNVERIFIED_SHIFTS_PATH = os.path.join(REPO, "unverified_flag_shifts.jsonl")
 
 
+# WHY A MOVE WAS REFUSED. Two reasons now, and they need different actions from
+# the reviewer, so the file says which rather than making them guess from the
+# indices (item 0BX, 2026-09-08).
+REFUSAL_NOTES = {
+    "text": ("the word at the old index is not the word at the shifted index, "
+             "so the record was left alone rather than moved onto a guess"),
+    "collision": ("the shifted index is already occupied by another ruling or flag "
+                  "in this klal, and all_current() keys on (klal_id, word_index) - "
+                  "moving onto it would make one of the two invisible to the applier, "
+                  "the dashboard and the counts, with nothing recording the loss"),
+}
+
+
 def _record_unverified_shifts(rows, path=None):
     """Append the flags a shift could not be verified for, so they survive the run.
 
@@ -221,13 +234,13 @@ def _record_unverified_shifts(rows, path=None):
     path = path or UNVERIFIED_SHIFTS_PATH
     stamp = datetime.datetime.now(datetime.timezone.utc).isoformat()
     with open(path, "a", encoding="utf-8") as f:
-        for kid, recorded_at, would_have_been in rows:
+        for kid, recorded_at, would_have_been, reason in rows:
             f.write(json.dumps({
                 "ts": stamp, "klal_id": kid,
                 "still_recorded_at_word_index": recorded_at,
                 "shift_would_have_moved_it_to": would_have_been,
-                "note": ("the word at the old index is not the word at the shifted index, "
-                         "so the flag was left alone rather than moved onto a guess"),
+                "reason": reason,
+                "note": REFUSAL_NOTES[reason],
             }, ensure_ascii=False) + "\n")
             f.flush()
 
@@ -253,6 +266,28 @@ def reindex_pending_decisions_after_shift(klal_id, position, delta, old_words, n
     chosen_text and snapshot rewritten to the new index."""
     already = rd.applied_decision_ids()
     moved, unverified = [], []
+    # SLOTS THAT WILL STILL BE OCCUPIED AFTER THE SHIFT - item 0BX.
+    #
+    # rd.all_current() keys on (klal_id, word_index) and takes the LAST row per
+    # key, so appending a re-pointed ruling at an index another ruling already
+    # holds makes one of the two invisible to every consumer of that map: the
+    # applier, the dashboard's display maps, and the tri-state counts. Nothing
+    # records the displacement. Measured 2026-09-06: 94 keys already carry
+    # rulings about more than one word, hiding 115 - 105 of them harmless
+    # (applied) and 2 deliberately superseded, but 3 of the remaining 8 are
+    # exactly this, reindexing collisions in klal 210 (w65, w66, w131). Nothing
+    # is lost today only because the collisions happened to land on duplicates.
+    #
+    # POLICY: REFUSE AND REPORT, which is the choice this function already makes
+    # for a move it cannot verify against the text one line below. "Record it and
+    # move anyway" needs somewhere to put the displaced ruling and a reader that
+    # looks there; refusing needs neither and cannot lose anything.
+    #
+    # Only rulings at or before `position` are seeded: everything after it moves
+    # by the same delta, so movers keep their relative order and cannot collide
+    # with each other. The real case is delta < 0 landing on a ruling that is not
+    # moving. Targets are added as they are written, so two movers cannot be sent
+    # to one slot either.
     # `disputed_choice` added 2026-08-31. It was missing, and it is the type that
     # needs this MOST: a decided dispute is dropped from the candidate queue
     # (synthesize_multi_witness.active_human_decisions), so it is drift-checked
@@ -261,7 +296,10 @@ def reindex_pending_decisions_after_shift(klal_id, position, delta, old_words, n
     # inserting the heading separators, which shifted 4 pending decisions by +1
     # and only one of them was a type this function moved.
     for d_type in ("candidate_choice", "manual_correction", "disputed_choice"):
-        for (kid, wi), decision in sorted(rd.all_current(d_type).items()):
+        current = rd.all_current(d_type)
+        occupied = {wi for (kid, wi) in current
+                    if kid == klal_id and wi is not None and wi <= position}
+        for (kid, wi), decision in sorted(current.items()):
             if kid != klal_id or wi is None or wi <= position:
                 continue
             if decision["id"] in already:
@@ -308,9 +346,12 @@ def reindex_pending_decisions_after_shift(klal_id, position, delta, old_words, n
             span = named.split()
             new_wi = wi + delta
             if not (0 <= wi < len(old_words) and 0 <= new_wi <= len(new_words) - len(span)):
-                unverified.append((wi, new_wi)); continue
+                unverified.append((wi, new_wi, "text")); continue
             if old_words[wi:wi + len(span)] != span or new_words[new_wi:new_wi + len(span)] != span:
-                unverified.append((wi, new_wi)); continue
+                unverified.append((wi, new_wi, "text")); continue
+            if new_wi in occupied:
+                unverified.append((wi, new_wi, "collision")); continue
+            occupied.add(new_wi)
             moved_snapshot = dict(snapshot, word_index=new_wi)
             rd.append_decision(
                 d_type, klal_id=klal_id, word_index=new_wi,
@@ -342,8 +383,21 @@ def reindex_flags_after_shift(klal_id, position, delta, old_words, new_words, sk
     than moved onto a guess - a flag on the wrong word is worse than one a human
     is told to check.
 
-    Returns (moved, unverified) as lists of (old_index, new_index)."""
+    Returns (moved, unverified); unverified rows are
+    (old_index, new_index, reason) where reason is "text" or "collision"."""
     moved, unverified = [], []
+    open_flags = open_word_flags(klal_id)
+    # SAME COLLISION GUARD AS THE DECISION REINDEXER, and here because of Lesson
+    # 34 rather than because a case was reported: the sibling branch of the same
+    # defect is the cheapest place to look, and two flags on one word_index is
+    # the same silent loss - review_server._word_level_ai_flags() builds
+    # `by_word[widx]` and the LAST row per index wins, so one flag stops being
+    # rendered at all. Item 0BX measured the ruling side; this side had never
+    # been measured, and the shape is identical.
+    #
+    # Reachable the same way: with delta < 0 a moving flag can land on one at an
+    # index at or before `position`, which does not move.
+    occupied = {wi for wi in open_flags if wi <= position}
     # NO ID SKIP HERE, and the asymmetry with the decision reindexer above is
     # deliberate - see item 0DE. That one may skip an id-carrying ruling because
     # its consumer RESOLVES by id: resolved_position() asks the sidecar first.
@@ -400,14 +454,17 @@ def reindex_flags_after_shift(klal_id, position, delta, old_words, new_words, sk
               f"{len(new_words)} words) - reindexed flags will be written WITHOUT a "
               f"word id rather than with a wrong one. Run "
               f"tools/seed_word_identity.py --verify")
-    for wi, rec in sorted(open_word_flags(klal_id).items()):
+    for wi, rec in sorted(open_flags.items()):
         if wi <= position or wi in skip:
             continue
         new_wi = wi + delta
         if not (0 <= wi < len(old_words) and 0 <= new_wi < len(new_words)):
-            unverified.append((wi, new_wi)); continue
+            unverified.append((wi, new_wi, "text")); continue
         if old_words[wi] != new_words[new_wi]:
-            unverified.append((wi, new_wi)); continue
+            unverified.append((wi, new_wi, "text")); continue
+        if new_wi in occupied:
+            unverified.append((wi, new_wi, "collision")); continue
+        occupied.add(new_wi)
         rd.append_decision(
             "klal_flag", klal_id=klal_id, word_index=wi, needs_revisit=False,
             note=(f"REINDEXED {datetime.date.today().isoformat()} to w{new_wi}, NOT resolved. A "
@@ -1221,12 +1278,12 @@ def main():
                 cio.words_of(by_klal[klal_id]),
                 {w for k, w in closed_flags if k == klal_id})
             moved_flags += [(klal_id, a, b) for a, b in moved]
-            unverified_shifts += [(klal_id, a, b) for a, b in unverified]
+            unverified_shifts += [(klal_id, a, b, why) for a, b, why in unverified]
             d_moved, d_unverified = reindex_pending_decisions_after_shift(
                 klal_id, position, delta, words_before.get(klal_id, []),
                 cio.words_of(by_klal[klal_id]))
             moved_decisions += [(klal_id, a, b) for a, b in d_moved]
-            unverified_shifts += [(klal_id, a, b) for a, b in d_unverified]
+            unverified_shifts += [(klal_id, a, b, why) for a, b, why in d_unverified]
 
     tag = "[DRY RUN] " if args.dry_run else ""
     print(f"\n{tag}Applied: {len(applied)} ({n_replace} replace, {n_insert_delete} insert/delete, "
@@ -1276,11 +1333,13 @@ def main():
             print(f"  klal {kid} word {a} -> word {b}")
 
     if unverified_shifts:
-        print(f"\n{len(unverified_shifts)} open flag(s) sit past a word-count change but could NOT "
-              f"be verified at the shifted index, so they were LEFT WHERE THEY ARE and may now name "
-              f"the wrong word - check these by hand:")
-        for kid, a, b in unverified_shifts:
-            print(f"  klal {kid} word {a} (would have been word {b})")
+        print(f"\n{len(unverified_shifts)} record(s) sit past a word-count change and were NOT "
+              f"moved, so they were LEFT WHERE THEY ARE and may now name the wrong word - check "
+              f"these by hand:")
+        for kid, a, b, reason in unverified_shifts:
+            why = ("the shifted index is already taken" if reason == "collision"
+                   else "the word there is not the word it names")
+            print(f"  klal {kid} word {a} (would have been word {b}) - {why}")
         # AND TO A FILE, APPEND-ONLY. Added 2026-09-07 (item 0CU) after the
         # reviewer asked "where??" about one of these and the answer was gone:
         # this was the only actionable output of the whole run that existed

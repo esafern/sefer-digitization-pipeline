@@ -148,7 +148,7 @@
     "stored": "ה",
     "proposal": "ח",
     "detector": "enumeration_break",
-    "evidence": "item 8 of a 10-item enumeration starting at w830: the sequence reads אבגדהוזהטו where an א-ב-ג list requires אבגדהוזחטי",
+    "evidence": "item 8 of a 10-item enumeration starting at w830 with א: the sequence reads אבגדהוזהטו where a consecutive list from א requires אבגדהוזחטי",
     "acknowledged": false
   },
   {
@@ -168,7 +168,7 @@
     "stored": "ו",
     "proposal": "י",
     "detector": "enumeration_break",
-    "evidence": "item 10 of a 10-item enumeration starting at w830: the sequence reads אבגדהוזהטו where an א-ב-ג list requires אבגדהוזחטי",
+    "evidence": "item 10 of a 10-item enumeration starting at w830 with א: the sequence reads אבגדהוזהטו where a consecutive list from א requires אבגדהוזחטי",
     "acknowledged": false
   },
   {
