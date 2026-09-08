@@ -2144,7 +2144,13 @@ function setupPanels() {
     dismissPanels();
   });
   window.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') dismissPanels();
+    // SAME GUARD THE CLICK HANDLER ABOVE HAS. Escape had none, which was
+    // harmless while dismissing only closed things; since the cursor snap (0DH)
+    // a dismissal SCROLLS, so a stray Escape with nothing open would yank the
+    // text pane back to the last visited word. Item 0DS.
+    if (e.key !== 'Escape') return;
+    if (!document.querySelector('.side-panel.open')) return;
+    dismissPanels();
   });
 }
 function closePanels() {
@@ -2159,7 +2165,8 @@ function closePanels() {
 // Dismiss panels AND clear scan focus — only for explicit user dismissals
 // (Escape, backdrop click), NOT for openPanel()'s internal closePanels() call
 // which fires before every panel switch.
-function dismissPanels() {
+// `snap: false` for a dismissal that is really a NAVIGATION - see jumpTo().
+function dismissPanels({ snap = true } = {}) {
   closePanels();
   // THE SCAN KEEPS THE WORD. Reviewer directive 2026-09-08, reversing the
   // 2026-08-26 one below it - and the reversal is the whole fix for "when I
@@ -2196,7 +2203,15 @@ function dismissPanels() {
   settleScanAfterDismiss();
   // Not awaited: dismissal must feel instant, and the snap is a scroll rather
   // than a state change anything else reads.
-  snapToLastVisitedWord();
+  //
+  // AND NOT AT ALL WHEN THE CALLER IS NAVIGATING (item 0DS). jumpTo() closes an
+  // open panel before moving to another klal, and `_lastVisitedWord` still names
+  // a word in the OLD one - so the snap ran revealWordInText() on it, whose
+  // instant `scrollIntoView` overrode the jump's in-flight smooth scroll and
+  // re-armed suppressTimer at 900ms inside a settle loop allowed 3000ms. That is
+  // precisely the drift releaseObserverWhenScrollSettles() exists to prevent,
+  // reintroduced by a helper that had no idea who was calling it.
+  if (snap) snapToLastVisitedWord();
 }
 // ADDED 2026-08-21 (user-requested): a save used to just flash a small
 // "Saved ✓" label and leave the panel open indefinitely - the reviewer had
@@ -4387,8 +4402,12 @@ function jumpTo(klalId) {
   // for the current one) is not moving on, and closing the panel there would
   // undo the reviewer's own click.
   if (openPanelKlalId != null && openPanelKlalId !== Number(klalId)) {
-    dismissPanels();
+    // NO SNAP: this is a navigation, not a dismissal - see dismissPanels().
+    dismissPanels({ snap: false });
   }
+  // The cursor marks where you left off IN THE KLAL YOU WERE READING; carrying
+  // it to another klal's screen marks nothing. Same reasoning as the word click.
+  document.querySelectorAll('.cursor-word').forEach(el => el.classList.remove('cursor-word'));
   hideWordCard(true);
   suppressObserverScroll = true;
   manualPageLock = false; // nav-panel click = explicit klal intent; let setActiveKlal show its page

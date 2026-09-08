@@ -276,40 +276,6 @@
   ],
   "19": [
     {
-      "word_index": 26,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "לייב",
-      "page": 20,
-      "bbox": {
-        "x1": 0.24797508120536804,
-        "y1": 0.5232931971549988,
-        "x2": 0.2797507643699646,
-        "y2": 0.5397590398788452
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: dicta + surya + vlm agree on 'ל\"ב' against stored 'לייב'. NOTE: this is a CROSS-EDITION consensus - dicta read the Jerusalem 1975/6 printing, not this Berlin scan.",
-      "vlm_reading": "ל\"ב",
-      "surya_reading": "ל\"ב",
-      "dicta_reading": "ל\"ב",
-      "consensus_engines": [
-        "dicta",
-        "surya",
-        "vlm"
-      ],
-      "consensus_reading": "ל\"ב",
-      "ligature_artifact": null,
-      "cross_edition": true,
-      "cross_edition_engines": [
-        "dicta"
-      ],
-      "same_edition_agreeing": 2,
-      "abbreviation_shape": null,
-      "flag": "current_text_may_be_wrong"
-    },
-    {
       "word_index": 34,
       "opcode": "replace",
       "docai_reading": null,
@@ -334,40 +300,6 @@
         "vlm"
       ],
       "consensus_reading": "הר\"ש",
-      "ligature_artifact": null,
-      "cross_edition": true,
-      "cross_edition_engines": [
-        "dicta"
-      ],
-      "same_edition_agreeing": 2,
-      "abbreviation_shape": null,
-      "flag": "current_text_may_be_wrong"
-    },
-    {
-      "word_index": 38,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "בט\"ש",
-      "page": 20,
-      "bbox": {
-        "x1": 0.4149532616138458,
-        "y1": 0.5381526350975037,
-        "x2": 0.4616822302341461,
-        "y2": 0.5550200939178467
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: dicta + surya + vlm agree on 'במ\"ש' against stored 'בט\"ש'. NOTE: this is a CROSS-EDITION consensus - dicta read the Jerusalem 1975/6 printing, not this Berlin scan.",
-      "vlm_reading": "במ\"ש",
-      "surya_reading": "במ\"ש",
-      "dicta_reading": "במ\"ש",
-      "consensus_engines": [
-        "dicta",
-        "surya",
-        "vlm"
-      ],
-      "consensus_reading": "במ\"ש",
       "ligature_artifact": null,
       "cross_edition": true,
       "cross_edition_engines": [

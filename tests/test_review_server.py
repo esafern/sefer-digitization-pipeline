@@ -4144,12 +4144,19 @@ def test_resizing_the_pane_does_not_chase_the_focused_word(server, page):
     roughly the view they keep", because the exact pixels legitimately change
     when the image is refitted to a new width.
     """
-    klal_id = _find_open_disputed_klal(server)
-    assert klal_id is not None, "no disputed candidate exists to test against"
-
-    _open_dashboard(page, server, klal_id)
-    page.locator(f"#klal-block-{klal_id} .flag-word.state-open").first.click()
+    # PINNED GEOMETRY, not _find_open_disputed_klal(). That helper answers with
+    # whatever is open NOW, so the full suite handed this a different klal than an
+    # isolated run - and on one of them the image stopped overflowing after the
+    # resize, which CLAMPS scrollTop to 0 and moves the centre ratio legitimately.
+    # The test then failed for a reason that had nothing to do with the rule.
+    # klal 66 w200 is the same position test_clicking_away_restores_the_zoom uses
+    # and is stable: it has a scan box and zooms to FOCUS_ZOOM.
+    page.goto(server + "/klal/66", wait_until="domcontentloaded", timeout=15000)
+    page.wait_for_selector(".nav-item", timeout=15000)
+    page.wait_for_timeout(2200)
+    page.eval_on_selector('#klal-block-66 [data-word-index="200"]', "el => el.click()")
     page.wait_for_selector("#hl-container .hl-box.focused", timeout=5000)
+    page.wait_for_timeout(1200)
     page.keyboard.press("Escape")
     page.wait_for_timeout(1200)
     assert page.locator("#hl-container .hl-box.focused").count() == 1, (
@@ -4170,33 +4177,100 @@ def test_resizing_the_pane_does_not_chase_the_focused_word(server, page):
 
     # Park the view somewhere the focused word is NOT, so "kept still" and
     # "chased the word" cannot give the same answer (Lesson 25).
-    # Whichever END is farther from where the zoom left us - the zoom centred the
-    # focused box, so the bottom may already be where we are.
-    moved = page.evaluate("""() => {
+    # ASSERTS applyZoom's CONTRACT, in the real page, rather than the
+    # ResizeObserver plumbing behind it - and that limit is deliberate.
+    #
+    # Three earlier cuts drove this through set_viewport_size(). The pane does
+    # resize (scanViewer.clientWidth 547 -> 475) and refitScanToPane does fire
+    # (twice, measured), but the resulting smooth scrollIntoView is not
+    # observable from the harness inside any wait I could justify - so all three
+    # PASSED under a mutation that restored the chasing. A test that cannot fail
+    # carries no information (Lesson 25), and three attempts at one measurement
+    # is the point to stop and test the rule instead (Lesson 31).
+    #
+    # The rule is: `centreFocused: false` must leave the view where it is, and
+    # the default must still centre the word. refitScanToPane passes false; that
+    # single call site is one line and is what the item's own comment pins.
+    park = """() => {
         const sv = document.getElementById('scan-viewer');
-        const was = sv.scrollTop;
+        const box = document.querySelector('#hl-container .hl-box.focused');
         const max = Math.max(0, sv.scrollHeight - sv.clientHeight);
-        sv.scrollTop = (was > max / 2) ? 0 : max;
-        return sv.scrollTop - was;
-    }""")
-    assert abs(moved) > 100, f"precondition: parking the view must actually move it, moved {moved}px"
-    page.wait_for_timeout(400)
-    before = page.evaluate("""() => {
+        sv.scrollTop = 0;
+        const b = box.getBoundingClientRect(), p = sv.getBoundingClientRect();
+        if (b.bottom > p.top && b.top < p.bottom) sv.scrollTop = max;
+        return sv.scrollTop;
+    }"""
+    visible = """() => {
         const sv = document.getElementById('scan-viewer');
-        const img = document.getElementById('page-img');
-        return (sv.scrollTop + sv.clientHeight / 2) / (img.offsetHeight || 1);
-    }""")
+        const box = document.querySelector('#hl-container .hl-box.focused');
+        const b = box.getBoundingClientRect(), p = sv.getBoundingClientRect();
+        return b.bottom > p.top && b.top < p.bottom;
+    }"""
 
-    page.set_viewport_size({"width": 1400, "height": 1000})   # fires the ResizeObserver
-    page.wait_for_timeout(1200)
+    parked = page.evaluate(park)
+    page.wait_for_timeout(300)
+    assert page.evaluate(visible) is False, (
+        "precondition: the focused word must be OFF-SCREEN, or holding the view "
+        "and chasing the word give the same answer")
 
-    after = page.evaluate("""() => {
-        const sv = document.getElementById('scan-viewer');
-        const img = document.getElementById('page-img');
-        return (sv.scrollTop + sv.clientHeight / 2) / (img.offsetHeight || 1);
-    }""")
-    assert abs(after - before) < 0.15, (
-        f"the resize moved the view from {before:.3f} to {after:.3f} of the page - "
-        f"it chased the focused word instead of holding the view, which is the "
-        f"scroll that re-enters the refit loop and reads as stutter")
+    page.evaluate("() => applyZoom(null, null, { centreFocused: false })")
+    page.wait_for_timeout(600)
+    assert page.evaluate(visible) is False, (
+        "centreFocused:false still scrolled the focused word into view - this is "
+        "the call refitScanToPane makes on every pane resize, and that scroll is "
+        "what re-enters the refit loop and reads as stutter")
+    assert abs(page.evaluate("document.getElementById('scan-viewer').scrollTop") - parked) < 40, (
+        "the view moved even though the caller asked for its anchors to be honoured")
+
+    # AND THE DEFAULT STILL CENTRES, or the parameter would be a way to break the
+    # focus paths rather than to spare the resize path.
+    page.evaluate("() => applyZoom(null, null)")
+    page.wait_for_timeout(900)
+    assert page.evaluate(visible) is True, (
+        "the default no longer centres the focused word - zoomToFocus and the "
+        "image-load handler depend on it")
+
+    assert page.test_errors == []
+
+
+def test_jumping_to_another_klal_does_not_snap_back_to_the_old_one(server, page):
+    """ITEM 0DS. jumpTo() closes an open panel before moving to another klal, and
+    it closed it with dismissPanels() - which since 0DH also SNAPS the cursor
+    back to `_lastVisitedWord`, a word in the klal being left.
+
+    The snap's revealWordInText() does an instant scrollIntoView, so it overrode
+    the jump's in-flight smooth scroll, and re-armed suppressTimer at 900ms
+    inside a settle loop allowed up to 3000ms - the drift
+    releaseObserverWhenScrollSettles() exists to prevent, reintroduced by a
+    helper that had no idea who was calling it.
+
+    Asserts where the reviewer ENDS UP, which is the only thing they care about,
+    plus that no cursor is left marking a klal they navigated away from.
+    """
+    klal_id = _find_open_disputed_klal(server)
+    assert klal_id is not None, "no disputed candidate exists to test against"
+    other = 1 if klal_id != 1 else 2
+
+    _open_dashboard(page, server, klal_id)
+    page.locator(f"#klal-block-{klal_id} .flag-word.state-open").first.click()
+    page.wait_for_selector("#disputed-panel.open, #candidate-panel.open", timeout=5000)
+
+    page.click(f"#nav-{other}")
+    page.wait_for_timeout(2500)          # past the 3000ms settle ceiling's useful window
+
+    assert page.evaluate("() => window.lastActiveKlalId ?? null") in (other, None)
+    landed = page.evaluate(
+        """(other) => {
+             const b = document.getElementById('klal-block-' + other);
+             if (!b) return null;
+             const r = b.getBoundingClientRect();
+             const p = document.getElementById('text-scroll').getBoundingClientRect();
+             return r.top - p.top;
+           }""", other)
+    assert landed is not None and abs(landed) < 400, (
+        f"the jump was undone: klal {other}'s block sits {landed}px from the top of "
+        f"the pane, because dismissing the panel snapped the scroll back to klal "
+        f"{klal_id}'s last visited word")
+    assert page.locator(f"#klal-block-{klal_id} .cursor-word").count() == 0, (
+        "a cursor was left marking a word in the klal the reviewer navigated away from")
     assert page.test_errors == []

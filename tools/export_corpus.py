@@ -308,6 +308,8 @@ def _revert_to_as_printed(klalim):
             pending.append((kid, at, how, as_printed, chosen, dec, dtype))
 
     reverts, refused = [], []
+    # Positions this run has already restored - see the `not span` branch.
+    reverted_here = set()
     for kid, at, how, as_printed, chosen, dec, dtype in sorted(
             pending, key=lambda r: (r[0], -(r[1] if r[1] is not None else -1))):
         if at is None:
@@ -318,6 +320,26 @@ def _revert_to_as_printed(klalim):
         if span and words[at:at + len(span)] == span:
             words[at:at + len(span)] = as_printed.split()
         elif not span:                          # an applied deletion: put it back
+            # ONCE PER POSITION. An insert is not idempotent and this branch had
+            # no guard at all - item 0DR, 2026-09-08. Two applied rulings can name
+            # one deleted word (a disputed_choice and a manual_correction at one
+            # position, or an exact duplicate), and both fired: the word went in
+            # twice. Measured on the live ledger - 44 rulings reach this branch, 7
+            # positions are named twice, and klal 209's is a three-word phrase, so
+            # **9 spurious words** in the edition whose whole purpose is fidelity
+            # to the printed page. klal 13 ended `... תיובתיה • יד יד`, and the
+            # manifest reported 0 refusals for any of it.
+            #
+            # KEYED ON THE POSITION, NOT ON THE TEXT. Testing "is the word already
+            # there" - which is what the `replace` branch below does - reads the
+            # right answer for a klal marker and the WRONG one for punctuation: a
+            # comma at the resolved index is not evidence that it is THIS ruling's
+            # comma, so a text test would silently decline legitimate restores.
+            # Measured both ways: the text test drops 14 words, this drops the 9
+            # that are actually duplicated.
+            if (kid, at, as_printed) in reverted_here:
+                continue
+            reverted_here.add((kid, at, as_printed))
             words[at:at] = as_printed.split()
         elif words[at:at + len(as_printed.split())] == as_printed.split():
             # ALREADY AS-PRINTED. Two rulings can name one word - a

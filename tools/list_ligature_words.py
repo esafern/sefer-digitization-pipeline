@@ -65,9 +65,21 @@ OUT_PATH = cio.repo_path("ligature_words.json")
 # build_structural_defect_report's own key comment explains it is avoiding, in a
 # sibling file, in the opposite direction.
 #
-# Both entries were migrated to ligature_acknowledged.json, keyed on content
+# ONE of the two was migrated to ligature_acknowledged.json, keyed on content
 # (klal | detector | word) through pipeline/triage_ack.py, which is now the one
-# mechanism for every triage report. Clearing one is
+# mechanism for every triage report: `(7, 677)` ויגל, still a false positive.
+#
+# `(150, 443)` אוף was NOT carried over, deliberately. Its note asserted the word
+# is real Aramaic; on 2026-09-08 the reviewer ruled the opposite - `אוף` -> `אף`,
+# a printer's error against the M.Y. critical edition - and that ruling is
+# applied. Migrating the old resolution would have re-asserted a judgement the
+# reviewer had reversed. This comment is now the only record of it, which is why
+# it says so rather than saying "both".
+#
+# NOTE, and it is the reason this paragraph got corrected at all: the first
+# version of it claimed both were migrated, which the store contradicted in one
+# line. A migration note is exactly the kind of prose a later reader trusts
+# instead of checking (Lesson 42). Clearing one is
 # `tools/list_ligature_words.py --acknowledge KLAL:WORD`.
 ACK_PATH = cio.repo_path("ligature_acknowledged.json")
 LIGATURE_CODEPOINT = "ﭏ"

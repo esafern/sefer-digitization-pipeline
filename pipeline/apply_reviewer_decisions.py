@@ -297,9 +297,28 @@ def reindex_pending_decisions_after_shift(klal_id, position, delta, old_words, n
     # and only one of them was a type this function moved.
     for d_type in ("candidate_choice", "manual_correction", "disputed_choice"):
         current = rd.all_current(d_type)
-        occupied = {wi for (kid, wi) in current
-                    if kid == klal_id and wi is not None and wi <= position}
-        for (kid, wi), decision in sorted(current.items()):
+        # EVERY OCCUPIED SLOT, and a slot is freed only when its occupant
+        # ACTUALLY MOVES. Corrected 2026-09-08 (item 0DS) - the first cut seeded
+        # only `wi <= position`, on the stated premise that "everything after it
+        # moves by the same delta". THAT PREMISE IS FALSE: this loop declines to
+        # move three sets of rulings that sit PAST `position`, and none of them
+        # was in the set -
+        #   * already applied (`decision["id"] in already`),
+        #   * no text to verify a move against (`not named`),
+        #   * refused by the text check (appended to `unverified`).
+        # So a mover could land on an applied ruling and win the key, and
+        # rd.all_current() takes the LAST row per (klal_id, word_index) - the
+        # applied one goes invisible to the applier, the display maps and the
+        # counts. That is the exact loss this guard was added to prevent, left
+        # reachable by the guard itself.
+        occupied = {wi for (kid, wi) in current if kid == klal_id and wi is not None}
+        # DIRECTION MATTERS once vacating is modelled: with delta > 0 a mover's
+        # target may be held by a HIGHER mover that has not moved yet, so walk
+        # descending; with delta < 0, ascending. Same ordering problem item 0DA
+        # hit reverting the diplomatic edition.
+        for (kid, wi), decision in sorted(current.items(),
+                                          key=lambda kv: kv[0][1] if kv[0][1] is not None else -1,
+                                          reverse=delta > 0):
             if kid != klal_id or wi is None or wi <= position:
                 continue
             if decision["id"] in already:
@@ -351,7 +370,8 @@ def reindex_pending_decisions_after_shift(klal_id, position, delta, old_words, n
                 unverified.append((wi, new_wi, "text")); continue
             if new_wi in occupied:
                 unverified.append((wi, new_wi, "collision")); continue
-            occupied.add(new_wi)
+            occupied.discard(wi)          # this ruling vacates its old slot...
+            occupied.add(new_wi)          # ...and takes the new one
             moved_snapshot = dict(snapshot, word_index=new_wi)
             rd.append_decision(
                 d_type, klal_id=klal_id, word_index=new_wi,
@@ -397,7 +417,12 @@ def reindex_flags_after_shift(klal_id, position, delta, old_words, new_words, sk
     #
     # Reachable the same way: with delta < 0 a moving flag can land on one at an
     # index at or before `position`, which does not move.
-    occupied = {wi for wi in open_flags if wi <= position}
+    # Same correction as the decision reindexer above (item 0DS): every open
+    # flag's slot, freed only when that flag actually moves. `skip` is in it too -
+    # those flags were closed earlier in this run and do not move, and appending
+    # an OPEN flag onto a closed one's index masks the closure behind it in
+    # all_current(). Refusing costs a reported line; the alternative is silent.
+    occupied = {wi for wi in open_flags} | set(skip)
     # NO ID SKIP HERE, and the asymmetry with the decision reindexer above is
     # deliberate - see item 0DE. That one may skip an id-carrying ruling because
     # its consumer RESOLVES by id: resolved_position() asks the sidecar first.
@@ -454,7 +479,7 @@ def reindex_flags_after_shift(klal_id, position, delta, old_words, new_words, sk
               f"{len(new_words)} words) - reindexed flags will be written WITHOUT a "
               f"word id rather than with a wrong one. Run "
               f"tools/seed_word_identity.py --verify")
-    for wi, rec in sorted(open_flags.items()):
+    for wi, rec in sorted(open_flags.items(), reverse=delta > 0):
         if wi <= position or wi in skip:
             continue
         new_wi = wi + delta
@@ -464,6 +489,7 @@ def reindex_flags_after_shift(klal_id, position, delta, old_words, new_words, sk
             unverified.append((wi, new_wi, "text")); continue
         if new_wi in occupied:
             unverified.append((wi, new_wi, "collision")); continue
+        occupied.discard(wi)
         occupied.add(new_wi)
         rd.append_decision(
             "klal_flag", klal_id=klal_id, word_index=wi, needs_revisit=False,

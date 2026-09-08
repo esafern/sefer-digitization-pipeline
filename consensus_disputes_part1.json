@@ -258,38 +258,6 @@
   "19": [
     {
       "klal_id": 19,
-      "word_index": 26,
-      "opcode": "replace",
-      "final_text": "לייב",
-      "consensus_reading": "ל\"ב",
-      "agreeing_engines": [
-        "dicta",
-        "surya",
-        "vlm"
-      ],
-      "ligature_artifact": null,
-      "cross_edition": true,
-      "cross_edition_engines": [
-        "dicta"
-      ],
-      "same_edition_agreeing": 2,
-      "abbreviation_shape": null,
-      "witnesses": {
-        "docai": null,
-        "vlm": "ל\"ב",
-        "surya": "ל\"ב",
-        "dicta": "ל\"ב"
-      },
-      "page": 20,
-      "bbox": {
-        "x1": 0.24797508120536804,
-        "y1": 0.5232931971549988,
-        "x2": 0.2797507643699646,
-        "y2": 0.5397590398788452
-      }
-    },
-    {
-      "klal_id": 19,
       "word_index": 34,
       "opcode": "replace",
       "final_text": "הר\"יש",
@@ -317,38 +285,6 @@
         "x1": 0.6286604404449463,
         "y1": 0.5381526350975037,
         "x2": 0.672897219657898,
-        "y2": 0.5550200939178467
-      }
-    },
-    {
-      "klal_id": 19,
-      "word_index": 38,
-      "opcode": "replace",
-      "final_text": "בט\"ש",
-      "consensus_reading": "במ\"ש",
-      "agreeing_engines": [
-        "dicta",
-        "surya",
-        "vlm"
-      ],
-      "ligature_artifact": null,
-      "cross_edition": true,
-      "cross_edition_engines": [
-        "dicta"
-      ],
-      "same_edition_agreeing": 2,
-      "abbreviation_shape": null,
-      "witnesses": {
-        "docai": null,
-        "vlm": "במ\"ש",
-        "surya": "במ\"ש",
-        "dicta": "במ\"ש"
-      },
-      "page": 20,
-      "bbox": {
-        "x1": 0.4149532616138458,
-        "y1": 0.5381526350975037,
-        "x2": 0.4616822302341461,
         "y2": 0.5550200939178467
       }
     },

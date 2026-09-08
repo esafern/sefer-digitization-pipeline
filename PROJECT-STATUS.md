@@ -101,6 +101,112 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0DS. **[2026-09-09] HEAVY REVIEW OF TWO DAYS' WORK. FOUR REAL DEFECTS, THREE OF
+    THEM IN CODE WRITTEN THE SAME DAY - INCLUDING A CORRECTION TO `0BX`'s OWN
+    COLLISION GUARD.**
+
+    Fresh-eyes review of `743f8a6..HEAD` at max effort, plus a self-pass. The
+    review dropped two findings mid-flight because the self-pass had already
+    fixed them (`0DQ`'s partial write, the `id(row)` keying), which is the split
+    working as intended.
+
+    ### 1. HIGH - the diplomatic edition restored 9 words that were never there
+
+    `tools/export_corpus.py`'s deletion-revert branch, `elif not span:`, inserted
+    unconditionally. The `replace` branch beside it carries an already-as-printed
+    check whose comment explains the exact hazard - "two rulings can name one
+    word... once the first has reverted it, the second finds its own answer
+    already undone" - and the deletion branch never got it. An insert is not
+    idempotent, so both fired.
+
+    Measured: 44 applied rulings reach that branch, **7 positions are named
+    twice**, and klal 209's is a three-word phrase - **9 spurious words**. klal 13
+    ended `... תיובתיה • יד יד`. The manifest reported 0 refusals for any of it,
+    so nothing on the artifact said so, in the edition whose entire purpose is
+    fidelity to the printed page.
+
+    **Keyed on the POSITION, not the text**, and the difference was measured:
+    testing "is the word already there" reads correctly for a klal marker and
+    WRONG for punctuation, where a comma at the resolved index is no evidence
+    that it is THIS ruling's comma. The text test drops 14 words; position-keying
+    drops the 9 that are actually duplicated. The first fix written here was the
+    text test, and it was replaced before commit.
+
+    ### 2/3. MEDIUM - `0BX`'s guard could not see the rulings it most needed to
+
+    Written yesterday, wrong yesterday. `occupied` was seeded from `wi <=
+    position`, on the stated premise that "everything after it moves by the same
+    delta". **The premise is false**: the loop declines to move three sets of
+    rulings that sit PAST position - already applied, no text to verify against,
+    refused by the text check - and none was in the set. A mover could land on an
+    APPLIED ruling and win the `(klal_id, word_index)` key, which
+    `rd.all_current()` resolves last-row-wins: the applied one goes invisible to
+    the applier, the display maps and the counts. The exact loss the guard exists
+    to prevent, left reachable by the guard itself.
+
+    Now: every occupied slot is seeded, and a slot is freed only when its
+    occupant ACTUALLY moves (`occupied.discard(wi)` on a committed move). That
+    makes iteration order matter - descending for `delta > 0`, ascending for
+    `delta < 0` - the same ordering problem `0DA` hit reverting the diplomatic
+    edition. Same correction on the flag side, where `skip` (flags closed earlier
+    in the run) is now held occupied too.
+
+    ### 4. MEDIUM - a nav jump scrolled back to the klal it was leaving
+
+    `jumpTo()` closes an open panel before moving to another klal, and it closed
+    it with `dismissPanels()` - which since `0DH` also SNAPS the cursor to
+    `_lastVisitedWord`, a word in the klal being left. The snap's instant
+    `scrollIntoView` overrode the jump's in-flight smooth scroll and re-armed
+    `suppressTimer` at 900ms inside a settle loop allowed 3000ms: the drift
+    `releaseObserverWhenScrollSettles()` exists to prevent, reintroduced by a
+    helper with no idea who was calling it. `dismissPanels({snap: false})` for a
+    navigation, and the cursor is dropped on the way out.
+
+    Same finding's tail: the Escape handler had no "is a panel open" test, which
+    the click handler beside it has. Harmless while dismissing only closed
+    things; since the snap, a stray Escape scrolled the pane. Guarded.
+
+    ### 7. LOW - a migration note that the store contradicted in one line
+
+    `list_ligature_words.py` said "Both entries were migrated"; one was. The
+    other (`אוף`) was deliberately not, because the reviewer had reversed that
+    judgement - correct decision, wrong sentence. Corrected, with a note saying
+    why it is worth correcting: a migration note is exactly the prose a later
+    reader trusts instead of checking.
+
+    ### THE TEST FOR FINDING 3's SIBLING WENT BLIND THREE TIMES
+
+    `test_resizing_the_pane_does_not_chase_the_focused_word` passed under
+    mutation in three successive shapes: parked at an end the zoom had already
+    centred; pinned to a klal whose box is never far from either end (gap 0.111
+    of the page); and driven through `set_viewport_size`, where the pane really
+    does resize (clientWidth 547 -> 475) and `refitScanToPane` really does fire
+    (twice, measured) but the resulting smooth `scrollIntoView` is not observable
+    inside any wait worth defending.
+
+    It now asserts `applyZoom`'s CONTRACT in the real page - `centreFocused:
+    false` holds the view, the default still centres - and says in its own
+    docstring that this is narrower than the resize path it stands for. Three
+    attempts at one measurement is the point to stop and test the rule (Lesson
+    31); shipping the third green one would have been a test that cannot fail
+    (Lesson 25).
+
+    ### Still open from the review
+
+    - **5 (LOW)** `_raised_at()` calls `rd.find_by_id()` per `supersedes` hop and
+      that is an unindexed linear scan, running per flag per request. Not a
+      re-parse (the list is cached) but the walk is new and grows with the ledger.
+      NOT fixed - measured instead: `/api/klalim` A/B'd against the old
+      process-lifetime cache came out 27.2 / 25.4 / 25.7ms min across three server
+      starts, inside run-to-run variance. The documented 20.4ms baseline is from
+      2026-08-26 and the ledger has grown ~1,000 rows since.
+    - **6 (LOW)** `list_unreviewed_auto_corrections.evidence()` returning
+      `(None, None, None)` is triaged as "neither form in the reference corpus",
+      a frequency claim it never made; the honest label is "no ruling recorded".
+      Latent - the worklist has 0 open rows.
+
+    Gate 526, UI 104 passed / 1 skipped, rebuild clean.
+
 0DP. **[2026-09-08, reviewer] CLEARING ONE STRUCTURAL FINDING CLEARED ALL OF
     THEM. `--acknowledge KLAL:WORD` ADDED, AND klal 187 w120 IS CLEARED.**
 

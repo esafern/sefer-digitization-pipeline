@@ -9229,3 +9229,93 @@ def test_acknowledging_an_unmatched_finding_writes_nothing_at_all(tmp_path):
 
     with pytest.raises(SystemExit):
         ack.record_selected(rows, path, "note", ["5-20"])      # malformed spec
+
+
+def test_two_rulings_on_one_deleted_word_restore_it_once(tmp_path, monkeypatch):
+    """ITEM 0DR. An applied DELETION is reverted by inserting the word back, and
+    an insert is not idempotent. The `replace` branch has an already-as-printed
+    check; the deletion branch had none, so when two applied rulings named one
+    deleted word - a disputed_choice and a manual_correction at one position, or
+    an exact duplicate - both fired and the word went in twice.
+
+    Measured on the live ledger before the fix: 44 rulings reach that branch, 7
+    positions are named twice, and klal 209's is a three-word phrase - 9 spurious
+    words in the edition whose whole purpose is fidelity to the printed page.
+    klal 13 ended `... תיובתיה • יד יד`, and the manifest reported 0 refusals.
+
+    Keyed on the POSITION, not on the text: "is the word already there" reads
+    right for a klal marker and wrong for punctuation, where a comma at the
+    resolved index is no evidence that it is THIS ruling's comma. Measured both
+    ways on the real ledger - the text test drops 14 words, position-keying drops
+    the 9 that are actually duplicated.
+    """
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "expc2", os.path.join(REPO, "tools", "export_corpus.py"))
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+
+    path = str(tmp_path / "d.jsonl")
+    snap = {"word_index": 2, "original_word": "יד"}
+    a = rd.append_decision("disputed_choice", klal_id=1, word_index=2,
+                           chosen_source="docai_reading", chosen_text="",
+                           candidate_snapshot=snap, path=path)
+    b = rd.append_decision("manual_correction", klal_id=1, word_index=2,
+                           chosen_source="custom", chosen_text="",
+                           candidate_snapshot=snap, path=path)
+    monkeypatch.setattr(m.rd, "all_current", lambda t, *ar, **kw: (
+        {(1, 2): a} if t in ("disputed_choice", "candidate_choice")
+        else {(1, 2): b} if t == "manual_correction" else {}))
+    monkeypatch.setattr(m.rd, "applied_decision_ids", lambda *ar, **kw: {a["id"], b["id"]})
+    monkeypatch.setattr(m.rd, "backfilled_word_ids", lambda *ar, **kw: {})
+    monkeypatch.setattr(m.widentity, "load", lambda *ar, **kw: {})
+
+    corrected = [{"klal_id": 1, "clean_text": "אלף בית גימל"}]
+    diplomatic, reverts, refused = m._revert_to_as_printed(corrected)
+
+    assert diplomatic[0]["clean_text"] == "אלף בית יד גימל", (
+        f"the deleted word was restored more than once: "
+        f"{diplomatic[0]['clean_text']!r}")
+    assert len(reverts) == 1, "the second ruling must not be recorded as a second revert"
+    assert not refused, "and it is success, not a refusal - the word IS back as printed"
+
+
+def test_a_reindex_refuses_to_move_a_ruling_onto_an_APPLIED_one(apply_harness, decisions_path):
+    """ITEM 0DS, and it is a correction to 0BX's own guard.
+
+    That guard seeded `occupied` from rulings at `wi <= position`, reasoning that
+    "everything after it moves by the same delta". The loop declines to move
+    three sets of rulings that sit PAST position - already applied, no text to
+    verify against, refused by the text check - and none was in the set. So a
+    mover could land on an APPLIED ruling and win the (klal_id, word_index) key,
+    which rd.all_current() resolves last-row-wins: the applied one goes invisible
+    to the applier, the dashboard's display maps and the tri-state counts. The
+    exact loss the guard exists to prevent, left reachable by the guard.
+
+    Here: the deletion at w1 shifts by -1; an APPLIED ruling sits at w2 and does
+    not move; the pending ruling at w3 would land on it.
+    """
+    entry = _correction(1, "insert", None, "זרא")          # applying REMOVES it
+    apply_harness([{"klal_id": 1, "clean_text": "אלף זרא בית גימל דלת"}], {"1": [entry]})
+    rd.append_decision("disputed_choice", klal_id=1, word_index=1, chosen_source="docai_reading",
+                       chosen_text="", candidate_snapshot=entry, path=decisions_path)
+    settled = rd.append_decision("manual_correction", klal_id=1, word_index=2,
+                                 chosen_source="custom", chosen_text="APPLIED",
+                                 candidate_snapshot={"word_index": 2, "original_word": "בית"},
+                                 path=decisions_path)
+    rd.append_decision("apply_event", klal_id=1, word_index=2,
+                       applied_decision_id=settled["id"], path=decisions_path)
+    rd.append_decision("manual_correction", klal_id=1, word_index=3, chosen_source="custom",
+                       chosen_text="MOVER",
+                       candidate_snapshot={"word_index": 3, "original_word": "גימל"},
+                       path=decisions_path)
+
+    apply_harness.run()
+
+    held = rd.all_current("manual_correction").get((1, 2))
+    assert held is not None and held["chosen_text"] == "APPLIED", (
+        "a pending ruling was re-pointed onto an APPLIED one's slot and won the key - "
+        f"(1,2) now holds {held and held['chosen_text']!r}, and the applied ruling is "
+        f"invisible to every consumer of all_current()")
+    assert rd.all_current("manual_correction").get((1, 3))["chosen_text"] == "MOVER", (
+        "and the mover must be left where it is and reported")
