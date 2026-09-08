@@ -266,42 +266,42 @@
     "vision_reasoning": "The image clearly shows the word 'כתבו' in the center line. The second letter has a distinct roof and left leg characteristic of a Tav ('ת'), not a Resh ('ר'). This matches the context 'וכו' כתבו הם ז\"ל'."
   },
   {
-    "klal_id": 28,
+    "klal_id": 27,
     "page": 23,
     "opcode": "insert",
-    "word_index_in_final_text": 0,
+    "word_index_in_final_text": 49,
     "docai_reading": null,
     "stored_text": "כח",
     "bbox": {
-      "x1": 0.7761467695236206,
+      "x1": 0.853210985660553,
       "y1": 0.35173824429512024,
-      "x2": 0.853210985660553,
+      "x2": 0.883210985660553,
       "y2": 0.37096115946769714
     },
     "bbox_estimated": true,
     "vision_selected": "B",
     "vision_transcription": "כח",
-    "vision_confidence": 0.98,
-    "vision_reasoning": "The Hebrew letters 'כח' (khaf-chet) are clearly visible and legible in the middle right section of the cropped image, matching Option B and the surrounding text context ('כח אין סדר...')."
+    "vision_confidence": 0.95,
+    "vision_reasoning": "The crop clearly shows the section mark/heading 'כח' alongside context characters (the upper 'י' apostrophe and lower line start). In Rabbinic text layout, 'כח' serves as the section header corresponding to the cited 'שער יוסף' passage."
   },
   {
-    "klal_id": 28,
+    "klal_id": 29,
     "page": 23,
-    "opcode": "insert",
-    "word_index_in_final_text": 47,
-    "docai_reading": null,
-    "stored_text": "כט",
+    "opcode": "replace",
+    "word_index_in_final_text": 221,
+    "docai_reading": "ואחר",
+    "stored_text": "ואחד",
     "bbox": {
-      "x1": 0.8568807244300842,
-      "y1": 0.4110429584980011,
-      "x2": 0.8868807244300843,
-      "y2": 0.4323108494281769
+      "x1": 0.12110091745853424,
+      "y1": 0.606952965259552,
+      "x2": 0.15718653798103333,
+      "y2": 0.6233128905296326
     },
-    "bbox_estimated": true,
+    "bbox_estimated": false,
     "vision_selected": "B",
-    "vision_transcription": "כט",
+    "vision_transcription": "ואחד",
     "vision_confidence": 0.95,
-    "vision_reasoning": "The center of the crop clearly displays the Hebrew characters 'כט', serving as a section or paragraph marker matching the end of the provided Rabbinic context."
+    "vision_reasoning": "The context discusses the count of people required ('ט' ישראל ואחד כהן' - nine Israelites and one priest). 'ואחד' ('and one') is the correct semantic and textual reading. Option A ('ואחר') represents a standard OCR misinterpretation of the Hebrew letter Dalet (ד) as Resh (ר)."
   },
   {
     "klal_id": 30,
@@ -320,26 +320,7 @@
     "vision_selected": "B",
     "vision_transcription": "כתוס'",
     "vision_confidence": 0.98,
-    "vision_reasoning": "The visible text in the middle line clearly shows 'כתוס'' (abbreviation for כדברי התוספות / כתוספות) starting with a rounded 'כ' (Khaf) rather than a squared 'ב' (Bet), and ending with an apostrophe (geresh) after the 'ס'."
-  },
-  {
-    "klal_id": 33,
-    "page": 26,
-    "opcode": "insert",
-    "word_index_in_final_text": 0,
-    "docai_reading": null,
-    "stored_text": "לג",
-    "bbox": {
-      "x1": 0.8095830678939819,
-      "y1": 0.3005222976207733,
-      "x2": 0.8967019319534302,
-      "y2": 0.3210124671459198
-    },
-    "bbox_estimated": true,
-    "vision_selected": "B",
-    "vision_transcription": "לג",
-    "vision_confidence": 1.0,
-    "vision_reasoning": "The Hebrew letters 'לג' are clearly printed and legible on the right side of the crop, matching Option B perfectly within the surrounding text context ('לג אין')."
+    "vision_reasoning": "The visible text in the middle line clearly shows the kaf 'כ', followed by 'תוס' and an apostrophe/gersh ''', forming the common Rabbinic abbreviation 'כתוס'' (כתוספות / as in Tosafot). This perfectly aligns with Option B and the surrounding Talmudic commentary context ('וכן בנזיר מ\"ח כתוס' ד\"ה')."
   },
   {
     "klal_id": 34,
@@ -2017,25 +1998,6 @@
     "klal_id": 144,
     "page": 51,
     "opcode": "replace",
-    "word_index_in_final_text": 185,
-    "docai_reading": "מהכמי",
-    "stored_text": "מחכמי",
-    "bbox": {
-      "x1": 0.7515489459037781,
-      "y1": 0.45902299880981445,
-      "x2": 0.8004956841468811,
-      "y2": 0.4751715660095215
-    },
-    "bbox_estimated": false,
-    "vision_selected": "A",
-    "vision_transcription": "מהכמי",
-    "vision_confidence": 0.95,
-    "vision_reasoning": "Paleographic inspection of the visual raster shows the word 'מהכמי' (a typographical error in the print for 'מחכמי'). The second letter clearly exhibits the structure of a Hei (ה), featuring the characteristic top-left overhang and a gap above the left vertical stroke, distinguishing it from a Chet (ח)."
-  },
-  {
-    "klal_id": 144,
-    "page": 51,
-    "opcode": "replace",
     "word_index_in_final_text": 528,
     "docai_reading": "מחזהרת",
     "stored_text": "מחוזרת",
@@ -3646,82 +3608,6 @@
     "vision_transcription": "ע\"ד וכ\"ד",
     "vision_confidence": 0.98,
     "vision_reasoning": "The visible characters in the second line clearly show Dalet (ד) with its characteristic right-angled top-right corner and slight overhang, rather than a rounded Resh (ר). Contextually, this represents standard Rabbinic pagination/column abbreviations ('ע\"ד וכ\"ד' for עמוד ד' and page 24)."
-  },
-  {
-    "klal_id": 187,
-    "page": 68,
-    "opcode": "replace",
-    "word_index_in_final_text": 0,
-    "docai_reading": "קפו",
-    "stored_text": "קפז",
-    "bbox": {
-      "x1": 0.8640296459197998,
-      "y1": 0.41643059253692627,
-      "x2": 0.8955500721931458,
-      "y2": 0.4366653263568878
-    },
-    "bbox_estimated": false,
-    "vision_selected": "B",
-    "vision_transcription": "קפז",
-    "vision_confidence": 0.95,
-    "vision_reasoning": "The leftmost letter in both visible lines exhibits the characteristic horizontal head/roof of a Zayin (ז) rather than a simple vertical Vav (ו). Furthermore, the surrounding Rabbinic context explicitly matches the entry/siman header 'קפז'."
-  },
-  {
-    "klal_id": 187,
-    "page": 68,
-    "opcode": "replace",
-    "word_index_in_final_text": 18,
-    "docai_reading": "האכלות",
-    "stored_text": "האבלות",
-    "bbox": {
-      "x1": 0.6378244757652283,
-      "y1": 0.4326183795928955,
-      "x2": 0.6959208846092224,
-      "y2": 0.4512343108654022
-    },
-    "bbox_estimated": false,
-    "vision_selected": "A",
-    "vision_transcription": "האכלות",
-    "vision_confidence": 0.95,
-    "vision_reasoning": "The visual crop clearly shows a rounded 'כ' rather than a square 'ב' (compare with the sharp-cornered 'ב's in 'באבל' directly above it), yielding the literal misprinted textual form 'האכלות' (Option A), though contextually it represents 'האבלות' (Option B)."
-  },
-  {
-    "klal_id": 187,
-    "page": 68,
-    "opcode": "replace",
-    "word_index_in_final_text": 57,
-    "docai_reading": "והלכה",
-    "stored_text": "דהלכה",
-    "bbox": {
-      "x1": 0.42521631717681885,
-      "y1": 0.46337515115737915,
-      "x2": 0.47404202818870544,
-      "y2": 0.4828004837036133
-    },
-    "bbox_estimated": false,
-    "vision_selected": "B",
-    "vision_transcription": "דהלכה",
-    "vision_confidence": 0.98,
-    "vision_reasoning": "The image clearly displays the word 'דהלכה', starting with a distinct dalet ('ד') featuring a flat top bar and sharp corner, rather than a vav ('ו'). This matches Option B and fits the surrounding sentence context ('כתב הוא ז\"ל דהלכה')."
-  },
-  {
-    "klal_id": 187,
-    "page": 68,
-    "opcode": "replace",
-    "word_index_in_final_text": 186,
-    "docai_reading": "דוא",
-    "stored_text": "הוא",
-    "bbox": {
-      "x1": 0.41470950841903687,
-      "y1": 0.5843787789344788,
-      "x2": 0.44375771284103394,
-      "y2": 0.602590024471283
-    },
-    "bbox_estimated": false,
-    "vision_selected": "B",
-    "vision_transcription": "הוא",
-    "vision_confidence": 0.98,
-    "vision_reasoning": "The visible word in the center line reads 'הוא' (Hey-Vav-Alef), matching the standard Hebrew pronoun in the context 'הוא דפסקו כן'. Paleographically, the first letter displays the distinct top horizontal bar and left vertical leg of a Hey (ה), ruling out Dalet (ד)."
   },
   {
     "klal_id": 188,

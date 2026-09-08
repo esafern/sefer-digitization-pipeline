@@ -721,7 +721,12 @@ DROPPED_LAMED_CORRUPT_FORMS = {
 #
 # The baseline is a set of klal_ids, not a count: a NEW divergence must fail
 # even while these stand, which a count would not catch.
-TITLE_NOT_PREFIX_OF_BODY_BASELINE = {9, 186}
+# klal 186 REMOVED 2026-09-08: the divergence is gone. Its body w3 read
+# `המקיל'` against the title's `המקיל`, and the reviewer ruled the stray geresh
+# off the body word; applying it made the two agree. The guard demanded this
+# removal by name rather than passing quietly on a shrunken set, which is the
+# whole reason it is a set of ids and not a count.
+TITLE_NOT_PREFIX_OF_BODY_BASELINE = {9}
 
 # Editorial marks the pipeline inserts into the body but never into a title -
 # the punctuation pass's `[.]`, the seam bullet, bare stops. They are skipped on

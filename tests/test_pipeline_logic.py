@@ -946,6 +946,16 @@ def apply_harness(tmp_path, monkeypatch, decisions_path):
     def setup(klalim, corrections):
         part1_path.write_text(json.dumps(klalim, ensure_ascii=False), encoding="utf-8")
         monkeypatch.setattr(ard, "PART1_PATH", str(part1_path))
+        # AND THE WRITE SIDE, added 2026-09-08 (item 0DO). Every reader below is
+        # redirected and this WRITER was not, so any test whose run produced an
+        # unverified shift appended to the REAL, git-tracked
+        # unverified_flag_shifts.jsonl. Measured when it was found: 86 of 86 rows
+        # in that file were synthetic klal 1 rows from this fixture, going back
+        # to the day item 0CU created it - a file that exists to preserve a real
+        # finding had never held one, and a real finding would have arrived into
+        # 86 rows of test noise.
+        monkeypatch.setattr(ard, "UNVERIFIED_SHIFTS_PATH",
+                            str(tmp_path / "unverified_flag_shifts.jsonl"))
         monkeypatch.setattr(ard, "load_current_corrections", lambda: corrections)
         # `superseded_by_an_applied_decision` joined this list 2026-09-05 with
         # the applier's ghost-skip. A ledger reader missing from here silently
@@ -9136,3 +9146,52 @@ def test_every_triage_report_can_have_a_finding_cleared(tmp_path):
         "the hardcoded false-positive dict is back - resolutions belong in a data "
         "file keyed on content, not in source keyed on a drifting index")
     assert "triage_ack" in src, "the ligature tool must use the shared store"
+
+
+def test_the_applier_never_writes_its_findings_file_during_a_test(apply_harness, decisions_path,
+                                                                 tmp_path):
+    """ITEM 0DO. `unverified_flag_shifts.jsonl` is tracked in git and exists so a
+    real unverified shift survives the run that found it (item 0CU, after the
+    reviewer asked "where??" and the answer was gone).
+
+    apply_harness redirected every ledger READER and not this WRITER, so any test
+    that produced an unverified shift appended to the production file. Found
+    2026-09-08: **86 of 86 rows were synthetic klal 1 rows from this fixture** -
+    the file had never held a real finding, and a real one would have landed in
+    86 rows of noise.
+
+    Drives a run that DOES produce refusals, then asserts the real file did not
+    move. Asserting on the tmp file instead would pass even if the redirect were
+    removed, since the production file would simply also be written (Lesson 25).
+    """
+    real = os.path.join(REPO, "unverified_flag_shifts.jsonl")
+    before = os.path.getsize(real) if os.path.exists(real) else None
+
+    entry = _correction(1, "insert", None, "זרא")
+    apply_harness([{"klal_id": 1, "clean_text": "אלף זרא בית גימל דלת"}], {"1": [entry]})
+    rd.append_decision("disputed_choice", klal_id=1, word_index=1, chosen_source="docai_reading",
+                       chosen_text="", candidate_snapshot=entry, path=decisions_path)
+    # A FLAG PAST THE END OF THE KLAL, which the bounds check refuses outright.
+    # Written this way after the first cut chose w4 and the mutation passed: with
+    # a uniform deletion every surviving word still matches at its shifted index,
+    # so w4 MOVED cleanly, no refusal was produced, and the test could not tell
+    # the redirect from its absence (Lesson 42).
+    rd.append_decision("klal_flag", klal_id=1, word_index=5, needs_revisit=True,
+                       note="past the end - cannot be verified at any index",
+                       path=decisions_path)
+    apply_harness.run()
+
+    # THE PRODUCTION FILE FIRST, so removing the redirect fails on the assertion
+    # that explains itself rather than on a FileNotFoundError from the check
+    # below - a mutation should say what broke, not merely break.
+    after = os.path.getsize(real) if os.path.exists(real) else None
+    assert after == before, (
+        "a test run appended to the production unverified_flag_shifts.jsonl - the "
+        "file that exists to preserve a real finding is being filled with synthetic ones")
+
+    redirected = str(tmp_path / "unverified_flag_shifts.jsonl")
+    rows = ([json.loads(l) for l in open(redirected, encoding="utf-8") if l.strip()]
+            if os.path.exists(redirected) else [])
+    assert any(r["klal_id"] == 1 for r in rows), (
+        "precondition: this run must actually produce a refusal, or the assertion "
+        "above passes whether the redirect is there or not")

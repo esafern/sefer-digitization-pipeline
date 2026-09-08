@@ -22,17 +22,6 @@
     "acknowledged_note": "reviewer checked all 18 against the scan 2026-09-07 and confirmed them correct as printed; klal 167 w68 was the one real defect and was fixed"
   },
   {
-    "klal_id": 29,
-    "word_index": 99,
-    "stored": "צדה",
-    "proposal": null,
-    "detector": "repeated_word",
-    "evidence": "this word and the next are identical",
-    "acknowledged": true,
-    "acknowledged_on": "2026-09-07T19:56:00.560801+00:00",
-    "acknowledged_note": "reviewer checked all 18 against the scan 2026-09-07 and confirmed them correct as printed; klal 167 w68 was the one real defect and was fixed"
-  },
-  {
     "klal_id": 30,
     "word_index": 196,
     "stored": "ב",
@@ -132,46 +121,6 @@
     "acknowledged_note": "reviewer checked all 18 against the scan 2026-09-07 and confirmed them correct as printed; klal 167 w68 was the one real defect and was fixed"
   },
   {
-    "klal_id": 144,
-    "word_index": 836,
-    "stored": "ז ה",
-    "proposal": "זה",
-    "detector": "split",
-    "evidence": "joins with the next token into `זה`, 26586x independently",
-    "acknowledged": true,
-    "acknowledged_on": "2026-09-07T19:56:00.560801+00:00",
-    "acknowledged_note": "reviewer checked all 18 against the scan 2026-09-07 and confirmed them correct as printed; klal 167 w68 was the one real defect and was fixed"
-  },
-  {
-    "klal_id": 144,
-    "word_index": 837,
-    "stored": "ה",
-    "proposal": "ח",
-    "detector": "enumeration_break",
-    "evidence": "item 8 of a 10-item enumeration starting at w830 with א: the sequence reads אבגדהוזהטו where a consecutive list from א requires אבגדהוזחטי",
-    "acknowledged": false
-  },
-  {
-    "klal_id": 144,
-    "word_index": 838,
-    "stored": "ט ו",
-    "proposal": "טו",
-    "detector": "split",
-    "evidence": "joins with the next token into `טו`, 848x independently",
-    "acknowledged": true,
-    "acknowledged_on": "2026-09-07T19:56:00.560801+00:00",
-    "acknowledged_note": "reviewer checked all 18 against the scan 2026-09-07 and confirmed them correct as printed; klal 167 w68 was the one real defect and was fixed"
-  },
-  {
-    "klal_id": 144,
-    "word_index": 839,
-    "stored": "ו",
-    "proposal": "י",
-    "detector": "enumeration_break",
-    "evidence": "item 10 of a 10-item enumeration starting at w830 with א: the sequence reads אבגדהוזהטו where a consecutive list from א requires אבגדהוזחטי",
-    "acknowledged": false
-  },
-  {
     "klal_id": 150,
     "word_index": 167,
     "stored": "אאיזה",
@@ -225,6 +174,15 @@
     "acknowledged": true,
     "acknowledged_on": "2026-09-07T19:56:00.560801+00:00",
     "acknowledged_note": "reviewer checked all 18 against the scan 2026-09-07 and confirmed them correct as printed; klal 167 w68 was the one real defect and was fixed"
+  },
+  {
+    "klal_id": 187,
+    "word_index": 120,
+    "stored": "רבוואתה",
+    "proposal": "רבו ואתה",
+    "detector": "merge",
+    "evidence": "splits into two independently common words (1168x / 364x)",
+    "acknowledged": false
   },
   {
     "klal_id": 217,

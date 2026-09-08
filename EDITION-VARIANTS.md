@@ -68,7 +68,7 @@ Only positions where **every Berlin-reading engine agrees with the corpus** are 
 
 ### klal 29
 
-- word 279: Berlin יללכב' - Jerusalem םיללכב (**attested 0 times**)
+- word 278: Berlin יללכב' - Jerusalem םיללכב (**attested 0 times**)
 
 ### klal 30
 

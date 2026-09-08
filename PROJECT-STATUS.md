@@ -101,6 +101,68 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0DO. **[2026-09-08] THE APPLIER'S FINDINGS FILE HAD NEVER HELD A REAL FINDING.
+    86 OF 86 ROWS WERE TEST POLLUTION, AND THE FIX FOR IT WAS ONE LINE MISSING
+    FROM A FIXTURE.**
+
+    `unverified_flag_shifts.jsonl` exists because of item `0CU`: the reviewer
+    asked "where??" about an unverified shift and the answer was gone, so the
+    applier started writing its refusals to a tracked, append-only file instead
+    of only printing them.
+
+    **Found while applying 31 decisions: every row in it is synthetic.**
+    `tests/test_pipeline_logic.py`'s `apply_harness` redirects every ledger
+    READER - the fixture's own comment is a list of them, each added after it
+    bit - and never redirected this WRITER. So any test whose run produced a
+    refusal appended to the production file.
+
+        86 rows total
+        86 with klal_id == 1     <- the fixture's synthetic klal
+         0 from any real klal
+
+    Dated from 2026-09-07T19:27, which is the day `0CU` created the file. **It
+    has never contained a finding**, and a real one would have arrived into 86
+    rows of noise - the exact defeat of the purpose the file was built for.
+
+    Fixed: `apply_harness` now patches `UNVERIFIED_SHIFTS_PATH` to `tmp_path`,
+    and the file is truncated (all 86 rows were synthetic; git holds the history
+    if anyone wants it). Verified after: a full gated run and a full
+    `rebuild_all.sh` both leave it at 0 rows.
+
+    ### The test for it was blind first, and the second cut says why in the code
+
+    `test_the_applier_never_writes_its_findings_file_during_a_test` compares the
+    production file's size across a run. First cut used a flag at w4: with a
+    uniform deletion every surviving word still matches at its shifted index, so
+    w4 MOVED cleanly, **no refusal was produced at all**, and the test passed
+    whether the redirect was there or not. Second cut uses a flag PAST THE END of
+    the klal, which the bounds check refuses outright, and asserts that a refusal
+    actually happened.
+
+    The assertions are ordered production-file-first on purpose: with the
+    precondition first, removing the redirect failed on a `FileNotFoundError`
+    from the tmp file rather than on the assertion that explains what broke. A
+    mutation should say what it broke.
+
+    ### Also this run
+
+    **31 decisions applied**, verified word by word against a before-copy: klal
+    144 w837/w839 (`ה`->`ח`, `ו`->`י`, the reviewer's own corrections to the
+    marginal markers), klal 30 w1521 `תשל`->`תשקצו`, klal 150 w443 `אוף`->`אף`,
+    klal 92 w416 `אפים`->`אלפים`, plus 26 more from the reviewer's session. Two
+    were word-count changes (klal 28 w47, klal 29 w99 deletions), which exercised
+    `0DM`'s new reindex collision guard in production - it refused nothing, and
+    the two shifts it did make were both verified.
+
+    **`TITLE_NOT_PREFIX_OF_BODY_BASELINE` is down to `{9}`.** klal 186's body w3
+    read `המקיל'` against the title's `המקיל`; the reviewer ruled the stray
+    geresh off and applying it made the two agree. The gate failed the rebuild
+    demanding the id be struck from the baseline BY NAME rather than passing
+    quietly on a shrunken set - which is the whole reason that baseline is a set
+    of ids and not a count.
+
+    Gate 522 -> 523.
+
 0DN. **[2026-09-08, reviewer] "WHERE ARE THESE STORED ANYWAY?" IN FOUR PLACES,
     ONE OF THEM HARDCODED IN A SCRIPT AND KEYED ON A DRIFTING INDEX. NOW ONE
     MECHANISM.**

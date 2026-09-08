@@ -490,48 +490,6 @@
  },
  {
   "klal_id": 25,
-  "word_index": 137,
-  "stored": "וכין",
-  "proposals": [
-   {
-    "form": "ובין",
-    "ref_count": 1512,
-    "edit": null
-   }
-  ],
-  "detector": "substitution",
-  "ambiguous": false,
-  "rank": 1512,
-  "corpus_count": 1
- },
- {
-  "klal_id": 25,
-  "word_index": 137,
-  "stored": "וכין",
-  "proposals": [
-   {
-    "form": "וכן",
-    "ref_count": 12292,
-    "edit": "extra_char"
-   },
-   {
-    "form": "וכי",
-    "ref_count": 3588,
-    "edit": "extra_char"
-   },
-   {
-    "form": "וכיון",
-    "ref_count": 1688,
-    "edit": "deleted_char"
-   }
-  ],
-  "detector": "insertion_deletion",
-  "ambiguous": true,
-  "rank": 12292,
-  "corpus_count": 1
- },
- {
-  "klal_id": 25,
   "word_index": 423,
   "stored": "הזוו",
   "proposals": [
@@ -561,22 +519,6 @@
   "ambiguous": false,
   "rank": 255,
   "corpus_count": 1
- },
- {
-  "klal_id": 30,
-  "word_index": 250,
-  "stored": "גכי",
-  "proposals": [
-   {
-    "form": "גבי",
-    "ref_count": 4780,
-    "edit": null
-   }
-  ],
-  "detector": "substitution",
-  "ambiguous": false,
-  "rank": 4780,
-  "corpus_count": 3
  },
  {
   "klal_id": 30,
@@ -676,43 +618,6 @@
  },
  {
   "klal_id": 30,
-  "word_index": 1206,
-  "stored": "וטכל",
-  "proposals": [
-   {
-    "form": "ומכל",
-    "ref_count": 188,
-    "edit": null
-   },
-   {
-    "form": "וטבל",
-    "ref_count": 168,
-    "edit": null
-   }
-  ],
-  "detector": "substitution",
-  "ambiguous": true,
-  "rank": 188,
-  "corpus_count": 1
- },
- {
-  "klal_id": 30,
-  "word_index": 1206,
-  "stored": "וטכל",
-  "proposals": [
-   {
-    "form": "וכל",
-    "ref_count": 6348,
-    "edit": "extra_char"
-   }
-  ],
-  "detector": "insertion_deletion",
-  "ambiguous": false,
-  "rank": 6348,
-  "corpus_count": 1
- },
- {
-  "klal_id": 30,
   "word_index": 1263,
   "stored": "גכי",
   "proposals": [
@@ -725,27 +630,6 @@
   "detector": "substitution",
   "ambiguous": false,
   "rank": 4780,
-  "corpus_count": 3
- },
- {
-  "klal_id": 30,
-  "word_index": 1376,
-  "stored": "ראמו",
-  "proposals": [
-   {
-    "form": "אמו",
-    "ref_count": 1506,
-    "edit": "extra_char"
-   },
-   {
-    "form": "ראו",
-    "ref_count": 333,
-    "edit": "extra_char"
-   }
-  ],
-  "detector": "insertion_deletion",
-  "ambiguous": true,
-  "rank": 1506,
   "corpus_count": 1
  },
  {
@@ -896,22 +780,6 @@
   "ambiguous": false,
   "rank": 1651,
   "corpus_count": 2
- },
- {
-  "klal_id": 38,
-  "word_index": 208,
-  "stored": "גכי",
-  "proposals": [
-   {
-    "form": "גבי",
-    "ref_count": 4780,
-    "edit": null
-   }
-  ],
-  "detector": "substitution",
-  "ambiguous": false,
-  "rank": 4780,
-  "corpus_count": 3
  },
  {
   "klal_id": 38,

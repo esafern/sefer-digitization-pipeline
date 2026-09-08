@@ -130,15 +130,15 @@
     ],
     [
      29,
-     201
+     200
     ],
     [
      29,
-     346
+     345
     ],
     [
      29,
-     382
+     381
     ],
     [
      36,
@@ -708,7 +708,7 @@
    "occurrences": [
     [
      29,
-     221
+     220
     ],
     [
      30,
@@ -3225,6 +3225,16 @@
    ]
   },
   {
+   "word": "אלפים",
+   "count": 1,
+   "occurrences": [
+    [
+     92,
+     416
+    ]
+   ]
+  },
+  {
    "word": "נשאלתי",
    "count": 1,
    "occurrences": [
@@ -3881,15 +3891,6 @@
    "word": "ומאו",
    "repaired": "ומאלו",
    "repaired_ref_count": 24,
-   "detector": "dropped_lamed",
-   "acknowledged": false
-  },
-  {
-   "klal_id": 150,
-   "word_index": 443,
-   "word": "אוף",
-   "repaired": "אלוף",
-   "repaired_ref_count": 5,
    "detector": "dropped_lamed",
    "acknowledged": false
   },
@@ -6749,15 +6750,6 @@
    "acknowledged": true,
    "acknowledged_on": "2026-09-08T18:45:46.131520+00:00",
    "acknowledged_note": "ויגל is correct - Psalms 16:9 (לכן שמח לבי ויגל); ויגאל would be a different verse. Checked 2026-08-26, migrated from the hardcoded dict 2026-09-08."
-  },
-  {
-   "klal_id": 30,
-   "word_index": 1521,
-   "word": "תשל",
-   "repaired": "תשאל",
-   "repaired_ref_count": 28,
-   "detector": "dropped_alef",
-   "acknowledged": false
   },
   {
    "klal_id": 296,
