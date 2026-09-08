@@ -12733,30 +12733,6 @@
       "flag": "current_text_confirmed"
     }
   ],
-  "211": [
-    {
-      "word_index": 77,
-      "opcode": "delete",
-      "docai_reading": "בשם התוספות",
-      "docai_repaired": null,
-      "final_text": null,
-      "page": 74,
-      "bbox": {
-        "x1": 0.4634900987148285,
-        "y1": 0.2628386616706848,
-        "x2": 0.5761138796806335,
-        "y2": 0.2713303565979004
-      },
-      "vision_selected": "A",
-      "vision_transcription": "בשם התוספות :",
-      "confidence": 0.99,
-      "reasoning": "The middle line of the image crop clearly and unambiguously displays the Hebrew words 'בשם התוספות' followed by a colon. Option A accurately transcribes this visible text.",
-      "vlm_reading": null,
-      "surya_reading": null,
-      "dicta_reading": null,
-      "flag": "possible_omission"
-    }
-  ],
   "215": [
     {
       "word_index": 68,

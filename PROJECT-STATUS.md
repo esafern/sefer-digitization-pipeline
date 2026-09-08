@@ -101,6 +101,78 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0DT. **[2026-09-09] WHY klal 211 w73 DRIFTED: AN INSERTION RULING NAMES NO WORD,
+    SO THE REINDEXER CAN NEVER MOVE IT. THAT IS 9 OF THE 16 ROWS IN THE DRIFT
+    WORKLIST.**
+
+    ### The mechanism, and it is structural rather than an accident
+
+    `reindex_pending_decisions_after_shift()` verifies a move the only way it
+    safely can - the word the ruling named must be the word at the shifted index:
+
+        snapshot = decision.get("candidate_snapshot") or {}
+        named = snapshot.get("final_text") or snapshot.get("original_word")
+        if not named:
+            continue                       # nothing to verify a move against
+
+    **An insertion proposal has no such word by construction.** A `delete`-opcode
+    candidate is text the SCAN has and the corpus lacks, addressed by the index it
+    would be inserted BEFORE, so its snapshot carries `final_text: null` and no
+    `original_word`. It can never satisfy that test, so it is never moved, and the
+    first word-count change earlier in its klal strands it permanently.
+
+    klal 211, exactly: at 20:17:24 the reviewer ruled an insertion at w67; at
+    20:17:50 another at w73. The 21:10 apply run landed w67 - **+4 words** - and
+    everything past it moved. w73's ruling stayed at w73, where the corpus now
+    reads `יבין`, and the applier's drift guard correctly refused it.
+
+    ### Extent: 9 of 25 pending rulings, and they are 9 of the 16 drifted
+
+        klal   4 w35    delete   ''
+        klal 106 w46    delete   ''
+        klal 159 w10    -        'אליבא'
+        klal 161 w289   -        'נתנאל'
+        klal 174 w116   -        'אלא'
+        klal 200 w145   -        'אלו'
+        klal 206 w2     -        'אלו'
+        klal 211 w73    delete   'בשם התוספות :'
+        klal 216 w123   -        'אלא'
+
+    **56% of the drift worklist is this one gap**, not anything a human did or
+    got wrong. A reviewer working that list is being asked to re-adjudicate
+    positions a script could have re-pointed.
+
+    ### The reviewer had already fixed klal 211 themselves, which is the tell
+
+    At **21:23:12**, thirteen minutes after the apply that shifted the klal, they
+    ruled the same insertion again at **w77** - the new append position - with
+    `בשם התוספות` (the earlier one read `בשם התוספות :`, from a vision
+    transcription that saw a colon). Applied 2026-09-09 at their instruction
+    ("yes at the end"); klal 211 is 77 -> 79 words and now ends `... תע"א בשם
+    התוספות`.
+
+    So the pipeline's answer to a stranded insertion is currently "the reviewer
+    notices and re-does it by hand." That works and should not have to.
+
+    **The stale w73 ruling is still in the drift list** and will stay there: its
+    `chosen_text` differs from w77's by the colon, so
+    `restates_an_applied_ruling()` - which settles a row only while `chosen_text`
+    is IDENTICAL - cannot retire it. NOT retired here, because choosing between
+    two of the reviewer's own rulings is not a script's call.
+
+    ### The fix that is available, NOT taken
+
+    These snapshots carry a `bbox` and the ledger carries `word_id`, and
+    `resolved_position()` already resolves a ruling by both. The reindexer uses
+    neither - it only knows the text test. Teaching it to fall back to the bbox
+    for a ruling that names no word would move all nine, and it is the same
+    two-signal bar `close_satisfied_rulings.py` already holds itself to.
+
+    Not built here: it changes what gets re-pointed automatically, which is a
+    scope decision, and item `0DD` is still open on exactly which bbox metric to
+    trust - two tools currently disagree on 20 of 663 positions. Building this on
+    top of an unsettled metric would be the wrong order.
+
 0DS. **[2026-09-09] HEAVY REVIEW OF TWO DAYS' WORK. FOUR REAL DEFECTS, THREE OF
     THEM IN CODE WRITTEN THE SAME DAY - INCLUDING A CORRECTION TO `0BX`'s OWN
     COLLISION GUARD.**

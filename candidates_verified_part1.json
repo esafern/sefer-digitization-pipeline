@@ -4560,25 +4560,6 @@
     "vision_reasoning": "The crop shows line 2 containing the final 'ת' of 'טומאת' followed by the word 'מת' ('איסור טומאת מת'). Option A ('מתת') is a raw OCR artifact that misreads and merges the preceding letter 'ת' into 'מת'. Option B ('מת') accurately represents the target word in this context."
   },
   {
-    "klal_id": 211,
-    "page": 74,
-    "opcode": "delete",
-    "word_index_in_final_text": 77,
-    "docai_reading": "בשם התוספות",
-    "stored_text": null,
-    "bbox": {
-      "x1": 0.4634900987148285,
-      "y1": 0.2628386616706848,
-      "x2": 0.5761138796806335,
-      "y2": 0.2713303565979004
-    },
-    "bbox_estimated": false,
-    "vision_selected": "A",
-    "vision_transcription": "בשם התוספות :",
-    "vision_confidence": 0.99,
-    "vision_reasoning": "The middle line of the image crop clearly and unambiguously displays the Hebrew words 'בשם התוספות' followed by a colon. Option A accurately transcribes this visible text."
-  },
-  {
     "klal_id": 215,
     "page": 74,
     "opcode": "replace",
