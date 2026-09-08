@@ -102,6 +102,97 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0DF. **[2026-09-08] RE-MEASURED: WHAT IS A DATA ISSUE THE DASHBOARD CANNOT SHOW.
+    125 POSITIONS ARE GENUINELY UNSEEN, NOT 580 - AND THE STRUCTURAL REPORT IS
+    ALREADY FULLY TRIAGED.**
+
+    Reviewer asked the same question `0CV` asked. Re-measured rather than quoted,
+    per this file's own rule, and the answer has moved in both directions.
+
+    ### Method, and the two errors caught inside it
+
+    Every derived report's `(klal_id, word_index)` positions diffed against what
+    the dashboard ACTUALLY renders - `GET /api/klal/N` for all 222 klalim, the
+    `queue` array, which is api_klal()'s merged view of machine candidates,
+    manual rulings, word-level flags and witness rows after claim_word_index().
+    866 positions across 160 klalim; `open_count` sums to 684.
+
+    **First cut said 0 rendered and therefore 100% invisible.** It read a
+    `corrections` key that does not exist; the array is `queue`. A measurement
+    that reports every input as defective is reporting on itself (Lesson 33).
+    **Second cut called the witness queue and the title rows invisible** - wrong
+    both times: witness rows DO come through `queue` (klal 30/75/88 carry
+    witness_count 23/11/10, exactly the 44 counted visible), and title positions
+    are indices into the TITLE, a different address space from body word
+    indices, so diffing them against body indices compares nothing.
+
+    ### The answer, by population
+
+    | source | positions | not in the dashboard | what that is |
+    |---|---:|---:|---|
+    | `collation_report.json` | 75 | 74 | **correct by design** - Lesson 38, a cross-edition collation is never a correction queue |
+    | `reconstruction_witness_queue.json` | 410 | 366 | **a FILTER**, items 3/4 - Lesson 26 territory |
+    | `lexical_defect_report.json` | 213 | 118 | **a deliberate tier decision** (`merge_lexical_defects` takes the sharpest tier only) |
+    | `structural_defect_report.json` | 22 | 17 | report-only by design (`0CW`) - **but 15 of the 17 are already `acknowledged`** |
+    | `ligature_words.json` | 7 | 3 | unrouted |
+    | `title_defect_report.json` | 4 | 4 | different address space; reachable via the Heading panel, but nothing points at them |
+
+    **So the genuinely unseen-and-unreviewed set is 125 positions**: 118 lexical
+    + 3 ligature + 4 title. Not 580, and not `0CV`'s 136.
+
+    ### THE STRUCTURAL REPORT IS DONE, which `0CV` could not have known
+
+    15 of its 17 invisible rows carry `acknowledged: true` - the reviewer checked
+    them in `0CX`. The 2 that do not are klal 144 w837 (`ה` -> `ח`) and w839
+    (`ו` -> `י`), both `enumeration_break`, and both are **exactly the false
+    positive `0DE` finding 6 predicts**: the detector assumes any run of >=4
+    single letters is an א-ב-ג enumeration STARTING at א, so a run continuing
+    from earlier reads as a break. Nothing to review; something to fix.
+
+    ### The 118 lexical are the real population, and they are not weak
+
+    85 `insertion_deletion` + 33 `substitution`; 98 of 118 unambiguous; 101 carry
+    a proposal attested >=100x in the independent reference corpus and 21 of
+    those >=1,000x. The top of the list, all invisible today:
+
+        http://127.0.0.1:8420/klal/92/word/346    'דהלא'  -> 'דלא'   (12,899x)
+        http://127.0.0.1:8420/klal/24/word/166    'ואידן' -> 'ואין'  (12,846x)
+        http://127.0.0.1:8420/klal/24/word/230    'ואידן' -> 'ואין'  (12,846x)
+        http://127.0.0.1:8420/klal/176/word/555   'ואיין' -> 'ואין'  (12,846x)
+        http://127.0.0.1:8420/klal/177/word/550   'מתניי' -> 'מתני'  (5,096x)
+        http://127.0.0.1:8420/klal/2/word/188     'בשרש'  -> 'בשר'   (3,530x)
+        http://127.0.0.1:8420/klal/11/word/81     'בשרש'  -> 'בשר'   (3,530x)
+        http://127.0.0.1:8420/klal/31/word/64     'השיתא' -> 'השתא'  (1,946x)
+        http://127.0.0.1:8420/klal/37/word/272    'השיתא' -> 'השתא'  (1,946x)
+        http://127.0.0.1:8420/klal/169/word/529   'ואוף'  -> 'ואף'   (1,891x)
+
+    The 3 ligature and 4 title positions, in full:
+
+        http://127.0.0.1:8420/klal/7/word/677     'ויגל' -> 'ויגאל'
+        http://127.0.0.1:8420/klal/30/word/1521   'תשל'  -> 'תשאל'
+        http://127.0.0.1:8420/klal/150/word/443   'אוף'  -> 'אלוף'
+        http://127.0.0.1:8420/klal/9    title w0   (prefix divergence)
+        http://127.0.0.1:8420/klal/144  title w4   (detector candidate)
+        http://127.0.0.1:8420/klal/186  title w2   (prefix divergence)
+        http://127.0.0.1:8420/klal/212  title w0   (detector candidate)
+
+    ### NOT ACTED ON, and the reason is the reason the tier exists
+
+    Widening `merge_lexical_defects()` is a one-line scope change on a DERIVED
+    source with no ledger residue, fully reversible. It is not done here because
+    the argument against it is measured and still stands: these detectors carry
+    real false positives (149 of 262 contradicted by independent witnesses), and
+    563 permanent flags on unread material is how the 1,496-flag queue happened.
+    **The decision is the reviewer's**, and it is now costed: +118 positions on
+    top of 684 open, of which ~101 carry a strongly-attested proposal.
+
+    ### `0CO` re-measured
+
+    `dispute_queue_ranked.json` holds **399 rows against 684 open positions** -
+    58%. `0CO` recorded 389 of 535 and the TL;DR 389 of 535; both are stale. The
+    item's question is unchanged: widen the ranker to every open position, or
+    rename the file and state the remainder in it.
+
 0DE. **[2026-09-08, code review] REVIEW OF `f2daf3b` (`pipeline/`, +559/-30). THE
     ID-SKIP IN BOTH REINDEXERS IS LIVE AND ITS "INERT TODAY" COMMENT IS STALE:
     17 OPEN WORD-LEVEL FLAGS NOW CARRY AN ID AND NO FLAG CONSUMER RESOLVES BY
