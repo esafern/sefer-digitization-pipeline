@@ -343,28 +343,6 @@
       ],
       "same_edition_agreeing": 2,
       "abbreviation_shape": null
-    },
-    {
-      "word_index": 170,
-      "opcode": "replace",
-      "docai_reading": "חמתחיל",
-      "docai_repaired": null,
-      "final_text": "המתחיל",
-      "page": 20,
-      "bbox": {
-        "x1": 0.34953272342681885,
-        "y1": 0.6586345434188843,
-        "x2": 0.420560747385025,
-        "y2": 0.6759036183357239
-      },
-      "vision_selected": "A",
-      "vision_transcription": "חמתחיל",
-      "confidence": 0.95,
-      "reasoning": "Paleographically, the first letter of the word shows a fully connected top-left corner without the gap characteristic of a 'ה' in this typeface, matching the letter 'ח' identical to the 'ח' later in the same word ('חמתחיל'). Although contextually intended as 'המתחיל' (part of the standard Rabbinic citation formula 'דיבור המתחיל'), the printed raster visually displays a classic typesetter misprint/substitution reading 'חמתחיל'.",
-      "vlm_reading": "המתחיל",
-      "surya_reading": "המתחיל",
-      "dicta_reading": "המתחיל",
-      "flag": "current_text_may_be_wrong"
     }
   ],
   "20": [
@@ -12757,51 +12735,7 @@
   ],
   "211": [
     {
-      "word_index": 20,
-      "opcode": "replace",
-      "docai_reading": "בסתס",
-      "docai_repaired": null,
-      "final_text": "בסתם",
-      "page": 74,
-      "bbox": {
-        "x1": 0.49566832184791565,
-        "y1": 0.19773554801940918,
-        "x2": 0.5377475023269653,
-        "y2": 0.2126971334218979
-      },
-      "vision_selected": "B",
-      "vision_transcription": "בסתם",
-      "confidence": 0.98,
-      "reasoning": "The image clearly shows the word 'בסתם' (b'stam). The final letter has the characteristic square, closed shape of a final mem (ם) rather than a samekh (ס). Contextually, 'בסתם' (in general/unspecified) is the correct word in this Rabbinic passage.",
-      "vlm_reading": "בסתם",
-      "surya_reading": "בסתם",
-      "dicta_reading": "בסתם",
-      "flag": "current_text_confirmed"
-    },
-    {
-      "word_index": 67,
-      "opcode": "delete",
-      "docai_reading": "פ\"א דף קע\"א ע\"ד",
-      "docai_repaired": null,
-      "final_text": null,
-      "page": 74,
-      "bbox": {
-        "x1": 0.4393564462661743,
-        "y1": 0.24302466213703156,
-        "x2": 0.583539605140686,
-        "y2": 0.26041245460510254
-      },
-      "vision_selected": "A",
-      "vision_transcription": "פ\"א דף קע\"א ע\"ד",
-      "confidence": 0.95,
-      "reasoning": "The visible characters on the third line of the image clearly spell out 'פ\"א דף קע\"א ע\"ד', matching Option A.",
-      "vlm_reading": "וכ\"כ",
-      "surya_reading": null,
-      "dicta_reading": "וכ\"כ",
-      "flag": "possible_omission"
-    },
-    {
-      "word_index": 73,
+      "word_index": 77,
       "opcode": "delete",
       "docai_reading": "בשם התוספות",
       "docai_repaired": null,
@@ -12815,83 +12749,15 @@
       },
       "vision_selected": "A",
       "vision_transcription": "בשם התוספות :",
-      "confidence": 0.98,
-      "reasoning": "The image clearly shows the second line of text containing the words 'בשם התוספות' followed by a colon, matching Option A.",
+      "confidence": 0.99,
+      "reasoning": "The middle line of the image crop clearly and unambiguously displays the Hebrew words 'בשם התוספות' followed by a colon. Option A accurately transcribes this visible text.",
       "vlm_reading": null,
       "surya_reading": null,
       "dicta_reading": null,
       "flag": "possible_omission"
     }
   ],
-  "212": [
-    {
-      "word_index": 30,
-      "opcode": "replace",
-      "docai_reading": "ה\"נ",
-      "docai_repaired": null,
-      "final_text": "ה\"ג",
-      "page": 74,
-      "bbox": {
-        "x1": 0.8131188154220581,
-        "y1": 0.3065102994441986,
-        "x2": 0.8372524976730347,
-        "y2": 0.32106754183769226
-      },
-      "vision_selected": "A",
-      "vision_transcription": "ה\"נ",
-      "confidence": 0.95,
-      "reasoning": "The image clearly shows the abbreviation ה\"נ. The letter following the gershayim (\") has a distinct flat base resting on the baseline and a vertical stem, matching the character form of a Nun (נ), distinct from the Gimel (ג) seen in line 3 ('ג'').",
-      "vlm_reading": "ה\"נ",
-      "surya_reading": "הינ",
-      "dicta_reading": "ה\"נ",
-      "flag": "current_text_may_be_wrong"
-    }
-  ],
   "215": [
-    {
-      "word_index": 19,
-      "opcode": "replace",
-      "docai_reading": "חזה",
-      "docai_repaired": null,
-      "final_text": "וזה",
-      "page": 74,
-      "bbox": {
-        "x1": 0.6268564462661743,
-        "y1": 0.6061463952064514,
-        "x2": 0.6596534848213196,
-        "y2": 0.6235341429710388
-      },
-      "vision_selected": "B",
-      "vision_transcription": "וזה",
-      "confidence": 0.95,
-      "reasoning": "The context reads 'וד' וזה הוא', where the word following 'וד'' is 'וזה'. In traditional Hebrew typography, the closely set ligated pair of 'ו' (vav) and 'ז' (zayin) frequently gets misread by raw OCR engines as 'ח' (chet), leading to OCR hallucination 'חזה'. Contextually and paleographically, the correct reading is 'וזה' (Option B).",
-      "vlm_reading": "חדה",
-      "surya_reading": "חדה",
-      "dicta_reading": "חה",
-      "flag": "current_text_confirmed"
-    },
-    {
-      "word_index": 63,
-      "opcode": "replace",
-      "docai_reading": "טבעייא",
-      "docai_repaired": null,
-      "final_text": "מבעייא",
-      "page": 74,
-      "bbox": {
-        "x1": 0.8428217768669128,
-        "y1": 0.6514354944229126,
-        "x2": 0.8978960514068604,
-        "y2": 0.6676101684570312
-      },
-      "vision_selected": "A",
-      "vision_transcription": "טבעייא",
-      "confidence": 0.98,
-      "reasoning": "The raster crop clearly shows the word printed as 'טבעייא' with an initial letter Tet (ט), which is a common printer's error/typo for 'מבעייא' (Mem replaced with Tet) in the printed text.",
-      "vlm_reading": "טבעייא",
-      "surya_reading": "טבעייא",
-      "dicta_reading": "מבעייא",
-      "flag": "current_text_may_be_wrong"
-    },
     {
       "word_index": 68,
       "opcode": "replace",
@@ -12906,56 +12772,12 @@
         "y2": 0.6676101684570312
       },
       "vision_selected": "B",
-      "vision_transcription": "דדבר",
+      "vision_transcription": "דדבר זה",
       "confidence": 0.98,
-      "reasoning": "The raster crop clearly shows two consecutive letters with distinct horizontal top roofs and sharp right corners ('דד'), followed by 'ב' and 'ר', forming 'דדבר'. A 'ו' (vav) would lack the wide horizontal top bar seen on the first character. This aligns with Option B and the Rabbinic context 'דדבר זה פשוט הוא'.",
+      "reasoning": "The middle line of the crop clearly displays two consecutive 'dalet' (ד) characters followed by 'bet' (ב) and 'resh' (ר), forming 'דדבר' ('that a thing/matter...'). Paleographically, both letters have the distinct horizontal roof bar characteristic of a dalet in this Rabbinic typeface, rather than a straight vertical line of a vav. This matches the contextual reading 'דדבר זה' ('שדבר זה פשוט הוא').",
       "vlm_reading": "דדבר",
       "surya_reading": "דדבר",
       "dicta_reading": "דדבר",
-      "flag": "current_text_confirmed"
-    },
-    {
-      "word_index": 72,
-      "opcode": "replace",
-      "docai_reading": "מצר",
-      "docai_repaired": null,
-      "final_text": "מצד",
-      "page": 74,
-      "bbox": {
-        "x1": 0.4275990128517151,
-        "y1": 0.6514354944229126,
-        "x2": 0.46101483702659607,
-        "y2": 0.6676101684570312
-      },
-      "vision_selected": "A",
-      "vision_transcription": "מצר",
-      "confidence": 0.95,
-      "reasoning": "Paleographically, the image clearly shows the word 'מצר' with a rounded top-right corner on the final letter (a Resh 'ר'), lacking the characteristic rightward overhang of a Dalet ('ד') seen in 'נלמוד' in the line above. While contextually 'מצד' ('מצד עצמו') is the intended semantic meaning, the physical printed text contains this misprint/variant.",
-      "vlm_reading": "מצד",
-      "surya_reading": "מצד",
-      "dicta_reading": "מצד",
-      "flag": "current_text_may_be_wrong"
-    },
-    {
-      "word_index": 130,
-      "opcode": "replace",
-      "docai_reading": "ס\"ט",
-      "docai_repaired": null,
-      "final_text": "פ\"ט",
-      "page": 74,
-      "bbox": {
-        "x1": 0.20915842056274414,
-        "y1": 0.6971290111541748,
-        "x2": 0.2413366287946701,
-        "y2": 0.7137080430984497
-      },
-      "vision_selected": "B",
-      "vision_transcription": "פ\"ט",
-      "confidence": 0.98,
-      "reasoning": "The visible characters in the crop show the abbreviation 'פ\"ט' (corresponding to page 89 in Rabbinic leaf citation 'דף פ\"ט ע\"א' from the context). Paleographically, the letter is clearly a Peh (פ) with its distinctive top loop/inner overhang, rather than a closed Samekh (ס).",
-      "vlm_reading": "ס'ט",
-      "surya_reading": null,
-      "dicta_reading": "פ\"ט",
       "flag": "current_text_confirmed"
     }
   ],
@@ -12983,29 +12805,7 @@
       "flag": "current_text_confirmed"
     },
     {
-      "word_index": 97,
-      "opcode": "replace",
-      "docai_reading": "וכר",
-      "docai_repaired": null,
-      "final_text": "וכו'",
-      "page": 74,
-      "bbox": {
-        "x1": 0.6930692791938782,
-        "y1": 0.8180347681045532,
-        "x2": 0.7178217768669128,
-        "y2": 0.8362312912940979
-      },
-      "vision_selected": "B",
-      "vision_transcription": "וכו'",
-      "confidence": 0.98,
-      "reasoning": "The crop shows the standard Rabbinic abbreviation 'וכו'' (et cetera) following 'מהכי' and preceding 'ע\"ש'. OCR commonly misreads the final character of 'וכו'' as a 'resh' ('וכר'), but textual context and paleography confirm 'וכו''.",
-      "vlm_reading": "וכ\"ר",
-      "surya_reading": "וכו'",
-      "dicta_reading": "וכו'",
-      "flag": "current_text_confirmed"
-    },
-    {
-      "word_index": 162,
+      "word_index": 163,
       "opcode": "replace",
       "docai_reading": null,
       "final_text": "כפרק",
@@ -13028,7 +12828,29 @@
       "flag": "current_text_may_be_wrong"
     },
     {
-      "word_index": 196,
+      "word_index": 184,
+      "opcode": "replace",
+      "docai_reading": "ישרא",
+      "docai_repaired": "ישראל",
+      "final_text": "ישראל",
+      "page": 75,
+      "bbox": {
+        "x1": 0.39119651913642883,
+        "y1": 0.09116579592227936,
+        "x2": 0.4314941167831421,
+        "y2": 0.10851150006055832
+      },
+      "vision_selected": "A",
+      "vision_transcription": "ישרא",
+      "confidence": 0.98,
+      "reasoning": "The image crop clearly displays the word abbreviated as 'ישרא' (with a trailing abbreviation mark/geresh). The letter Lamed ('ל') is absent, as evidenced by the lack of any upper ascender stroke (which can be clearly seen in the word 'למד' on the line below). Therefore, Option A accurately reflects the literal raster text.",
+      "vlm_reading": "ישראל",
+      "surya_reading": "ישראל",
+      "dicta_reading": "ישראל",
+      "flag": "docai_ligature_artifact"
+    },
+    {
+      "word_index": 197,
       "opcode": "replace",
       "docai_reading": null,
       "final_text": "עכ\"ר",
@@ -13061,7 +12883,7 @@
       "flag": "current_text_may_be_wrong"
     },
     {
-      "word_index": 276,
+      "word_index": 277,
       "opcode": "replace",
       "docai_reading": null,
       "final_text": "אתרבאי",
@@ -13092,7 +12914,7 @@
       "flag": "current_text_may_be_wrong"
     },
     {
-      "word_index": 281,
+      "word_index": 282,
       "opcode": "replace",
       "docai_reading": null,
       "final_text": "לא",
@@ -13125,7 +12947,7 @@
       "flag": "current_text_may_be_wrong"
     },
     {
-      "word_index": 320,
+      "word_index": 321,
       "opcode": "replace",
       "docai_reading": null,
       "final_text": "לא",
@@ -13158,7 +12980,7 @@
       "flag": "current_text_may_be_wrong"
     },
     {
-      "word_index": 337,
+      "word_index": 338,
       "opcode": "replace",
       "docai_reading": "עוד",
       "docai_repaired": null,
@@ -13193,7 +13015,7 @@
       "abbreviation_shape": null
     },
     {
-      "word_index": 377,
+      "word_index": 378,
       "opcode": "replace",
       "docai_reading": "כתוכים",
       "docai_repaired": null,
@@ -13215,7 +13037,7 @@
       "flag": "current_text_confirmed"
     },
     {
-      "word_index": 425,
+      "word_index": 426,
       "opcode": "replace",
       "docai_reading": "כתוכים",
       "docai_repaired": null,

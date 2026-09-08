@@ -101,43 +101,6 @@
   ]
  },
  {
-  "word": "לייב",
-  "count": 1,
-  "occurrences": [
-   [
-    19,
-    26
-   ]
-  ],
-  "nearest_attested": [
-   {
-    "form": "חייב",
-    "ref_count": 8347,
-    "edit": "substitution"
-   },
-   {
-    "form": "לישב",
-    "ref_count": 383,
-    "edit": "substitution"
-   },
-   {
-    "form": "לחייב",
-    "ref_count": 169,
-    "edit": "insertion"
-   },
-   {
-    "form": "לייבם",
-    "ref_count": 158,
-    "edit": "insertion"
-   },
-   {
-    "form": "ליין",
-    "ref_count": 70,
-    "edit": "substitution"
-   }
-  ]
- },
- {
   "word": "דכתיבנ",
   "count": 1,
   "occurrences": [
@@ -1305,7 +1268,7 @@
   "occurrences": [
    [
     216,
-    162
+    163
    ]
   ],
   "nearest_attested": [
@@ -1877,7 +1840,7 @@
   "occurrences": [
    [
     216,
-    318
+    319
    ]
   ],
   "nearest_attested": [
@@ -6483,7 +6446,7 @@
   "occurrences": [
    [
     216,
-    496
+    497
    ]
   ],
   "nearest_attested": [
@@ -7350,33 +7313,6 @@
   ]
  },
  {
-  "word": "לייג",
-  "count": 1,
-  "occurrences": [
-   [
-    13,
-    175
-   ]
-  ],
-  "nearest_attested": [
-   {
-    "form": "ליין",
-    "ref_count": 70,
-    "edit": "substitution"
-   },
-   {
-    "form": "סייג",
-    "ref_count": 44,
-    "edit": "substitution"
-   },
-   {
-    "form": "לייט",
-    "ref_count": 42,
-    "edit": "substitution"
-   }
-  ]
- },
- {
   "word": "דבספרי",
   "count": 1,
   "occurrences": [
@@ -8035,7 +7971,7 @@
   "occurrences": [
    [
     216,
-    531
+    532
    ]
   ],
   "nearest_attested": [
@@ -8324,7 +8260,7 @@
   "occurrences": [
    [
     216,
-    188
+    189
    ]
   ],
   "nearest_attested": [
@@ -9425,7 +9361,7 @@
   "occurrences": [
    [
     216,
-    391
+    392
    ]
   ],
   "nearest_attested": []
@@ -11295,7 +11231,7 @@
   "occurrences": [
    [
     216,
-    547
+    548
    ]
   ],
   "nearest_attested": []
@@ -11416,7 +11352,7 @@
   "occurrences": [
    [
     216,
-    236
+    237
    ]
   ],
   "nearest_attested": []
@@ -12984,17 +12920,6 @@
   "nearest_attested": []
  },
  {
-  "word": "ראיתילהתוס",
-  "count": 1,
-  "occurrences": [
-   [
-    216,
-    136
-   ]
-  ],
-  "nearest_attested": []
- },
- {
   "word": "רבבח",
   "count": 1,
   "occurrences": [
@@ -13286,7 +13211,7 @@
   "occurrences": [
    [
     216,
-    445
+    446
    ]
   ],
   "nearest_attested": []
@@ -13517,7 +13442,7 @@
   "occurrences": [
    [
     216,
-    477
+    478
    ]
   ],
   "nearest_attested": []
@@ -14079,7 +14004,7 @@
    ],
    [
     216,
-    262
+    263
    ]
   ],
   "nearest_attested": [
@@ -14120,7 +14045,7 @@
    ],
    [
     216,
-    554
+    555
    ]
   ],
   "nearest_attested": [
@@ -14161,7 +14086,7 @@
    ],
    [
     216,
-    352
+    353
    ]
   ],
   "nearest_attested": [
@@ -14347,7 +14272,7 @@
    ],
    [
     216,
-    525
+    526
    ]
   ],
   "nearest_attested": [
@@ -15934,7 +15859,7 @@
    ],
    [
     216,
-    449
+    450
    ]
   ],
   "nearest_attested": []
@@ -16560,7 +16485,7 @@
   "occurrences": [
    [
     216,
-    481
+    482
    ],
    [
     217,
@@ -20411,7 +20336,7 @@
    ],
    [
     216,
-    308
+    309
    ]
   ],
   "nearest_attested": [
@@ -21127,8 +21052,63 @@
   ]
  },
  {
-  "word": "להתוס",
+  "word": "בחדושי",
   "count": 13,
+  "occurrences": [
+   [
+    23,
+    159
+   ],
+   [
+    23,
+    735
+   ],
+   [
+    23,
+    754
+   ],
+   [
+    24,
+    66
+   ],
+   [
+    29,
+    48
+   ],
+   [
+    29,
+    79
+   ],
+   [
+    30,
+    263
+   ],
+   [
+    87,
+    89
+   ],
+   [
+    107,
+    84
+   ],
+   [
+    144,
+    15
+   ],
+   [
+    162,
+    18
+   ],
+   [
+    189,
+    464
+   ]
+  ],
+  "nearest_attested": []
+ },
+ {
+  "word": "להתוס",
+  "count": 14,
   "occurrences": [
    [
     7,
@@ -21186,61 +21166,6 @@
     "edit": "deletion"
    }
   ]
- },
- {
-  "word": "בחדושי",
-  "count": 13,
-  "occurrences": [
-   [
-    23,
-    159
-   ],
-   [
-    23,
-    735
-   ],
-   [
-    23,
-    754
-   ],
-   [
-    24,
-    66
-   ],
-   [
-    29,
-    48
-   ],
-   [
-    29,
-    79
-   ],
-   [
-    30,
-    263
-   ],
-   [
-    87,
-    89
-   ],
-   [
-    107,
-    84
-   ],
-   [
-    144,
-    15
-   ],
-   [
-    162,
-    18
-   ],
-   [
-    189,
-    464
-   ]
-  ],
-  "nearest_attested": []
  },
  {
   "word": "מוהריקא",

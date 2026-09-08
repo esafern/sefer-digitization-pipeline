@@ -91,21 +91,6 @@
       "bbox_estimated": false
     },
     {
-      "klal_id": 19,
-      "page": 20,
-      "opcode": "replace",
-      "word_index_in_final_text": 170,
-      "docai_reading": "חמתחיל",
-      "stored_text": "המתחיל",
-      "bbox": {
-        "x1": 0.34953272342681885,
-        "y1": 0.6586345434188843,
-        "x2": 0.420560747385025,
-        "y2": 0.6759036183357239
-      },
-      "bbox_estimated": false
-    },
-    {
       "klal_id": 20,
       "page": 20,
       "opcode": "insert",
@@ -3618,38 +3603,8 @@
     {
       "klal_id": 211,
       "page": 74,
-      "opcode": "replace",
-      "word_index_in_final_text": 20,
-      "docai_reading": "בסתס",
-      "stored_text": "בסתם",
-      "bbox": {
-        "x1": 0.49566832184791565,
-        "y1": 0.19773554801940918,
-        "x2": 0.5377475023269653,
-        "y2": 0.2126971334218979
-      },
-      "bbox_estimated": false
-    },
-    {
-      "klal_id": 211,
-      "page": 74,
       "opcode": "delete",
-      "word_index_in_final_text": 67,
-      "docai_reading": "פ\"א דף קע\"א ע\"ד",
-      "stored_text": null,
-      "bbox": {
-        "x1": 0.4393564462661743,
-        "y1": 0.24302466213703156,
-        "x2": 0.583539605140686,
-        "y2": 0.26041245460510254
-      },
-      "bbox_estimated": false
-    },
-    {
-      "klal_id": 211,
-      "page": 74,
-      "opcode": "delete",
-      "word_index_in_final_text": 73,
+      "word_index_in_final_text": 77,
       "docai_reading": "בשם התוספות",
       "stored_text": null,
       "bbox": {
@@ -3657,51 +3612,6 @@
         "y1": 0.2628386616706848,
         "x2": 0.5761138796806335,
         "y2": 0.2713303565979004
-      },
-      "bbox_estimated": false
-    },
-    {
-      "klal_id": 212,
-      "page": 74,
-      "opcode": "replace",
-      "word_index_in_final_text": 30,
-      "docai_reading": "ה\"נ",
-      "stored_text": "ה\"ג",
-      "bbox": {
-        "x1": 0.8131188154220581,
-        "y1": 0.3065102994441986,
-        "x2": 0.8372524976730347,
-        "y2": 0.32106754183769226
-      },
-      "bbox_estimated": false
-    },
-    {
-      "klal_id": 215,
-      "page": 74,
-      "opcode": "replace",
-      "word_index_in_final_text": 19,
-      "docai_reading": "חזה",
-      "stored_text": "וזה",
-      "bbox": {
-        "x1": 0.6268564462661743,
-        "y1": 0.6061463952064514,
-        "x2": 0.6596534848213196,
-        "y2": 0.6235341429710388
-      },
-      "bbox_estimated": false
-    },
-    {
-      "klal_id": 215,
-      "page": 74,
-      "opcode": "replace",
-      "word_index_in_final_text": 63,
-      "docai_reading": "טבעייא",
-      "stored_text": "מבעייא",
-      "bbox": {
-        "x1": 0.8428217768669128,
-        "y1": 0.6514354944229126,
-        "x2": 0.8978960514068604,
-        "y2": 0.6676101684570312
       },
       "bbox_estimated": false
     },
@@ -3717,36 +3627,6 @@
         "y1": 0.6514354944229126,
         "x2": 0.6113861203193665,
         "y2": 0.6676101684570312
-      },
-      "bbox_estimated": false
-    },
-    {
-      "klal_id": 215,
-      "page": 74,
-      "opcode": "replace",
-      "word_index_in_final_text": 72,
-      "docai_reading": "מצר",
-      "stored_text": "מצד",
-      "bbox": {
-        "x1": 0.4275990128517151,
-        "y1": 0.6514354944229126,
-        "x2": 0.46101483702659607,
-        "y2": 0.6676101684570312
-      },
-      "bbox_estimated": false
-    },
-    {
-      "klal_id": 215,
-      "page": 74,
-      "opcode": "replace",
-      "word_index_in_final_text": 130,
-      "docai_reading": "ס\"ט",
-      "stored_text": "פ\"ט",
-      "bbox": {
-        "x1": 0.20915842056274414,
-        "y1": 0.6971290111541748,
-        "x2": 0.2413366287946701,
-        "y2": 0.7137080430984497
       },
       "bbox_estimated": false
     },
@@ -3767,16 +3647,16 @@
     },
     {
       "klal_id": 216,
-      "page": 74,
+      "page": 75,
       "opcode": "replace",
-      "word_index_in_final_text": 97,
-      "docai_reading": "וכר",
-      "stored_text": "וכו'",
+      "word_index_in_final_text": 184,
+      "docai_reading": "ישרא",
+      "stored_text": "ישראל",
       "bbox": {
-        "x1": 0.6930692791938782,
-        "y1": 0.8180347681045532,
-        "x2": 0.7178217768669128,
-        "y2": 0.8362312912940979
+        "x1": 0.39119651913642883,
+        "y1": 0.09116579592227936,
+        "x2": 0.4314941167831421,
+        "y2": 0.10851150006055832
       },
       "bbox_estimated": false
     },
@@ -3784,7 +3664,7 @@
       "klal_id": 216,
       "page": 75,
       "opcode": "replace",
-      "word_index_in_final_text": 337,
+      "word_index_in_final_text": 338,
       "docai_reading": "עוד",
       "stored_text": "עור",
       "bbox": {
@@ -3799,7 +3679,7 @@
       "klal_id": 216,
       "page": 75,
       "opcode": "replace",
-      "word_index_in_final_text": 377,
+      "word_index_in_final_text": 378,
       "docai_reading": "כתוכים",
       "stored_text": "כתובים",
       "bbox": {
@@ -3814,7 +3694,7 @@
       "klal_id": 216,
       "page": 75,
       "opcode": "replace",
-      "word_index_in_final_text": 425,
+      "word_index_in_final_text": 426,
       "docai_reading": "כתוכים",
       "stored_text": "כתובים",
       "bbox": {
@@ -3962,9 +3842,9 @@
     }
   ],
   "meta": {
-    "total_candidates": 264,
-    "skipped_settled_by_applied_decision": 474,
-    "klalim_covered": 97,
+    "total_candidates": 256,
+    "skipped_settled_by_applied_decision": 485,
+    "klalim_covered": 96,
     "skipped_no_docai_page_klalim": [],
     "unattributable_deletes": [],
     "untrusted_klalim_excluded": []

@@ -11311,7 +11311,7 @@
   "216": [
     {
       "klal_id": 216,
-      "word_index": 196,
+      "word_index": 197,
       "opcode": "replace",
       "final_text": "עכ\"ר",
       "consensus_reading": "עכ\"ד",
@@ -11342,7 +11342,7 @@
     },
     {
       "klal_id": 216,
-      "word_index": 276,
+      "word_index": 277,
       "opcode": "replace",
       "final_text": "אתרבאי",
       "consensus_reading": "אתרכאי",
@@ -11371,7 +11371,7 @@
     },
     {
       "klal_id": 216,
-      "word_index": 281,
+      "word_index": 282,
       "opcode": "replace",
       "final_text": "לא",
       "consensus_reading": "אלא",
@@ -11402,7 +11402,7 @@
     },
     {
       "klal_id": 216,
-      "word_index": 320,
+      "word_index": 321,
       "opcode": "replace",
       "final_text": "לא",
       "consensus_reading": "אלא",
@@ -11433,7 +11433,7 @@
     },
     {
       "klal_id": 216,
-      "word_index": 337,
+      "word_index": 338,
       "opcode": "replace",
       "final_text": "עור",
       "consensus_reading": "עוד",
