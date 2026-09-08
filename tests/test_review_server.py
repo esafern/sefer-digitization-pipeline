@@ -287,9 +287,37 @@ def _find_disputed_klal():
     return None
 
 
+def _find_open_disputed_klal(server):
+    """A klal whose disputed word is STILL OPEN, asked of the live server.
+
+    ADDED 2026-09-08. _find_disputed_klal() reads review_queue_part1.json off
+    disk, so it returns the same klal (7) on every call for the whole run - and
+    the ledger this module's server writes to is SHARED across its tests. The
+    moment one test records an override on that klal's word, the word stops
+    rendering as `.flag-word.state-open`, and every later test that clicks that
+    selector waits 5s for an element that will never appear again.
+
+    That is why the failure was full-suite-only and looked like flakiness:
+    pytest-randomly shuffles, so whether the recording test runs before or after
+    the clicking ones changes per run. Lesson 36's shape, with the shared ledger
+    in the corpus's role - a test pinned to state another test mutates.
+
+    Asks the server what is open NOW instead. Falls back to the static helper so
+    a run with nothing open still fails on the explicit assert rather than here.
+    """
+    for row in _get_json(server, "/api/klalim?part=1"):
+        if not row.get("open_count"):
+            continue
+        klal = _get_json(server, f"/api/klal/{row['klal_id']}")
+        for c in (klal.get("queue") or []):
+            if c.get("flag") == "current_text_may_be_wrong" and not c.get("current_decision"):
+                return row["klal_id"]
+    return _find_disputed_klal()
+
+
 def test_candidate_override_flow_persists_and_does_not_touch_part1json(server, page):
     before_hash = _file_sha256(PART1_PATH)
-    klal_id = _find_disputed_klal()
+    klal_id = _find_open_disputed_klal(server)
     assert klal_id is not None, "no current_text_may_be_wrong candidate exists to test against"
 
     _open_dashboard(page, server, klal_id)
@@ -3422,7 +3450,7 @@ def test_navigating_to_another_klal_closes_the_open_word_panel(server, page):
     Three cases, because the interesting content of this rule is what it must
     NOT close.
     """
-    klal_id = _find_disputed_klal()
+    klal_id = _find_open_disputed_klal(server)
     assert klal_id is not None, "no disputed candidate exists to test against"
     other = 1 if klal_id != 1 else 2
 
@@ -3668,7 +3696,7 @@ def test_every_ruling_path_records_the_stable_half_of_its_address(server, page):
     Driven through the HTTP endpoint, not the helper, because the defect was
     never in the helper - it was that this path never called one.
     """
-    klal_id = _find_disputed_klal()
+    klal_id = _find_open_disputed_klal(server)
     assert klal_id is not None, "no disputed candidate exists to rule on"
     corr = _get_json(server, f"/api/klal/{klal_id}")["queue"]
     target = next((c for c in corr
@@ -3726,7 +3754,7 @@ def test_every_ruling_path_records_the_scan_position_of_the_word_it_names(server
     aligned DocAI token, and saying "never had one" is a real answer - what is
     forbidden is a snapshot that is silent on the question.
     """
-    klal_id = _find_disputed_klal()
+    klal_id = _find_open_disputed_klal(server)
     assert klal_id is not None, "no disputed candidate exists to rule on"
     corr = _get_json(server, f"/api/klal/{klal_id}")["queue"]
     target = next((c for c in corr
@@ -4005,3 +4033,51 @@ def test_an_append_position_insertion_proposal_is_reachable(server, page):
             unreachable.append((klal_id, len(want), gaps))
     assert not unreachable, (
         f"append-position proposals with no marker to click: {unreachable}")
+
+
+def test_dismissing_a_word_panel_snaps_the_cursor_back_to_that_word(server, page):
+    """Reviewer, 2026-09-08: "when i have a word pop-up and i click away, cursor
+    should snap to last-visited word in the middle pane."
+
+    Dismissing a panel runs clearScanFocus(), which runs clearRoutedWord() - so
+    closing a word left NOTHING marking where the reviewer had been, in a pane
+    where a klal can run 1,300 words and the panel's own navigation may have
+    scrolled somewhere else entirely. The word they were just working on is the
+    obvious place to put them back.
+
+    Asserts all three halves of "snap", because the ring alone is what already
+    existed elsewhere and would pass a weaker test: the word is RINGED, it is
+    IN VIEW, and it holds DOM focus so the keyboard continues from there.
+    """
+    klal_id = _find_open_disputed_klal(server)
+    assert klal_id is not None, "no disputed candidate exists to test against"
+
+    _open_dashboard(page, server, klal_id)
+    word = page.locator(f"#klal-block-{klal_id} .flag-word.state-open").first
+    word.click()
+    page.wait_for_selector("#disputed-panel.open, #candidate-panel.open", timeout=5000)
+    idx = word.get_attribute("data-word-index")
+
+    # Scroll far away first, so "in view" cannot pass by accident - the word must
+    # be brought back, not merely left where it already was.
+    page.evaluate("document.getElementById('text-scroll').scrollTop += 4000")
+    page.wait_for_timeout(200)
+
+    page.keyboard.press("Escape")           # the dismissal gesture
+    page.wait_for_timeout(900)
+
+    target = page.locator(f"#klal-block-{klal_id} [data-word-index='{idx}']").first
+    assert target.evaluate("el => el.classList.contains('routed-word')"), (
+        "the word the reviewer was on carries no ring after the panel closed - "
+        "nothing on screen says where they were")
+    assert target.evaluate(
+        """el => {
+             const p = document.getElementById('text-scroll').getBoundingClientRect();
+             const r = el.getBoundingClientRect();
+             return r.top >= p.top && r.bottom <= p.bottom;
+           }"""), "the word is ringed but off-screen - the pane never scrolled back to it"
+    assert page.evaluate(
+        "idx => document.activeElement && document.activeElement.dataset.wordIndex === idx", idx), (
+        "the word is not the keyboard cursor, so typing continues from wherever "
+        "the panel left focus")
+    assert page.test_errors == []

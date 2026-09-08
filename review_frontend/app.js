@@ -671,6 +671,43 @@ function updateHash(klalId, wordIndex) {
 
 // Clear the ring wherever it is. Exported as a function rather than inlined
 // because three call sites need it and a missed one leaves two rings up.
+// THE LAST WORD THE REVIEWER ACTUALLY VISITED, {klalId, wordIndex}.
+//
+// Reviewer-requested 2026-09-08: "when i have a word pop-up and i click away,
+// cursor should snap to last-visited word in the middle pane." Dismissing a
+// panel used to clear the ring (clearScanFocus -> clearRoutedWord) and leave
+// nothing behind, so a reviewer who opened a word, read the scan and closed the
+// panel lost the marker for where they were - in a klal that can run 1,300 words
+// with the pane scrolled somewhere else entirely by the panel's own navigation.
+//
+// Recorded in the two FUNNELS rather than at each click site: focusWordOnScan()
+// is the one path every text-pane word click goes through (its own comment says
+// so, and all five handlers were routed into it on 2026-08-26), and
+// revealWordInText() is the same for the scan->text direction. A third copy at
+// the call sites is exactly what those two funnels exist to prevent.
+let _lastVisitedWord = null;
+
+function rememberVisitedWord(klalId, wordIndex) {
+  if (klalId == null || wordIndex == null) return;
+  _lastVisitedWord = { klalId: Number(klalId), wordIndex: Number(wordIndex) };
+}
+
+// Put the reviewer back where they were. Called on an explicit panel dismissal.
+async function snapToLastVisitedWord() {
+  if (!_lastVisitedWord) return;            // nothing visited yet - nothing to snap to
+  const { klalId, wordIndex } = _lastVisitedWord;
+  const span = await revealWordInText(klalId, wordIndex);
+  if (!span) return;                        // klal gone or index out of range
+  // AND MAKE IT THE KEYBOARD CURSOR, not just a ring. A word span is not
+  // focusable on its own; tabindex -1 makes it programmatically focusable
+  // WITHOUT putting it in the tab order, so nothing about tabbing through the
+  // pane changes. preventScroll because revealWordInText() has already done the
+  // scrolling, with the observer suppression that scroll needs - letting focus()
+  // scroll again would move the pane a second time, unsuppressed.
+  span.setAttribute('tabindex', '-1');
+  try { span.focus({ preventScroll: true }); } catch (e) { /* older engines */ }
+}
+
 function clearRoutedWord(except) {
   document.querySelectorAll('.routed-word').forEach(el => {
     if (el !== except) el.classList.remove('routed-word');
@@ -708,6 +745,7 @@ async function revealWordInText(klalId, wordIndex) {
   // the reviewer actually goes somewhere else.
   clearRoutedWord(span);
   span.classList.add('routed-word');
+  rememberVisitedWord(klalId, wordIndex);   // see _lastVisitedWord
   return span;
 }
 
@@ -1987,6 +2025,7 @@ function focusWordOnScan(targetPage, klalId, corr, opts) {
   // know the address bar exists. replaceState, not pushState: a reviewer moving
   // through a klal should not have to press Back forty times to leave.
   if (corr && corr.word_index != null) {
+    rememberVisitedWord(klalId, corr.word_index);   // see _lastVisitedWord
     updateHash(klalId, corr.word_index);
     // ...and the one place that copies that address, for the same reason - see
     // copyWordLink(). `viaClick: false` is passed by the ONLY non-click caller,
@@ -2011,6 +2050,14 @@ function focusWordOnScan(targetPage, klalId, corr, opts) {
   //
   // lastActiveScanPage is moved with it so the observer's own page branch does
   // not treat the new page as a change and re-show the old one.
+  // AND CANCEL ANY SETTLE LOOP STILL RUNNING (item 0CA, 2026-09-08). The two
+  // lines below guard the OBSERVER; they did nothing about the rAF loop
+  // releaseObserverWhenScrollSettles() leaves behind after a nav jump, which
+  // re-seats that jump's klal and shows its START page ~17ms after this click's
+  // own showPage. clearTimeout does not stop a requestAnimationFrame loop.
+  // A word click is a newer and more specific intent than the jump that started
+  // it, so the jump's pending re-seat is no longer the answer to anything.
+  cancelPendingScrollSettle();
   suppressObserverScroll = true;
   clearTimeout(suppressTimer);
   lastActiveScanPage = targetPage;
@@ -2100,6 +2147,11 @@ function closePanels() {
 function dismissPanels() {
   closePanels();
   clearScanFocus();
+  // AFTER clearScanFocus, never before: that call runs clearRoutedWord(), so
+  // snapping first would have the ring removed again a line later. Reviewer
+  // request 2026-09-08 - see _lastVisitedWord. Not awaited: dismissal must feel
+  // instant and the snap is a scroll, not a state change anything else reads.
+  snapToLastVisitedWord();
 }
 // ADDED 2026-08-21 (user-requested): a save used to just flash a small
 // "Saved ✓" label and leave the panel open indefinitely - the reviewer had
@@ -4310,11 +4362,42 @@ function readingLine() {
   return textScroll.getBoundingClientRect().top + READING_LINE_OFFSET;
 }
 
+// GENERATION FOR THE SETTLE LOOP BELOW, so a newer navigation can cancel an
+// older one's pending re-seat. See cancelPendingScrollSettle() and item 0CA.
+let _settleGen = 0;
+
+// Abandon any settle loop still in flight. Called by every navigation that
+// expresses a NEWER intent than the jump that started one.
+function cancelPendingScrollSettle() {
+  _settleGen++;
+}
+
 function releaseObserverWhenScrollSettles(maxMs = 3000) {
   clearTimeout(suppressTimer);
+  const myGen = ++_settleGen;
   const started = performance.now();
   let last = null, stable = 0;
   const tick = () => {
+    // SUPERSEDED - a newer navigation ran while this loop was waiting for the
+    // scroll to stop, so the destination this loop is holding is no longer the
+    // one the reviewer asked for. Abandon without re-seating and without
+    // touching suppressObserverScroll: whoever superseded us owns both now.
+    //
+    // THIS IS ITEM 0CA, and it is a cancellation bug rather than a timing one.
+    // A jump starts this loop; ~1500ms later it re-asserts its destination. The
+    // reviewer clicking a word in the middle of that window set
+    // suppressObserverScroll and cleared suppressTimer - but a requestAnimation
+    // Frame loop is not a timeout, so nothing stopped it. Measured at a 1600x1000
+    // viewport: the click's showPage(page 15) at t=1462, then this tick's
+    // setActiveKlal -> showPage(page 14) at t=1479. SEVENTEEN MILLISECONDS,
+    // which is why every timing-shaped fix failed - there is no window to widen.
+    // showPage's own _showPageGen cannot catch it either: that guard protects
+    // the box drawing after its awaits, while `pageImg.src` is written
+    // synchronously at the top, so the last caller to ENTER wins the image.
+    //
+    // Lesson 40 - a scaffold's teardown is a separate step from putting it up,
+    // and it is the one that gets forgotten.
+    if (myGen !== _settleGen) return;
     const now = Math.round(textScroll.scrollTop);
     stable = (now === last) ? stable + 1 : 0;
     last = now;

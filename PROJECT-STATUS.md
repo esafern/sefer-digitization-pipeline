@@ -20,12 +20,11 @@ evidence for each is in `PROJECT-STATUS-HISTORY.md`._
 >    `cio.defects()`, never read its expectation from the file it guards.
 > 3. `0BX` — the reindex collision guard. Needs a POLICY decision, not a fix:
 >    refuse a re-point onto an occupied key, or record it and move anyway.
-> 4. `0CA` — **a word click's page navigation is undone ~50% of the time.** Not a
->    flaky test, a flaky FEATURE: a reviewer clicking a word on a continuation
->    page is shown the wrong page. Two fixes were tried and reverted; the entry
->    carries the reproduction, what is ruled out and by what measurement, and the
->    live hypothesis (an ordering race between two `showPage()` calls, not a
->    timing window). Start there, not from scratch.
+> 4. ~~`0CA`~~ — **FIXED 2026-09-08, see `0DG`.** A nav jump left a
+>    requestAnimationFrame loop running that re-seated its own klal 17ms after a
+>    word click. 0 failures in 28 runs against a 5-in-10 baseline. The same work
+>    found and fixed a second, pre-existing full-suite failure caused by shared
+>    ledger state between tests.
 > 5. `16`, `20`, `0N`, `3`, `4` — the standing corpus and witness-queue items.
 >
 > **Added 2026-09-08 by a code review:** `0DE` (the word-id skip in the FLAG
@@ -101,6 +100,124 @@ applying it to the corpus remain two separate, deliberate steps.
 
 
 ## Open items
+
+0DG. **[2026-09-08] `0CA` IS FIXED. IT WAS A CANCELLATION BUG, NOT A TIMING ONE:
+    A NAV JUMP LEAVES AN rAF LOOP RUNNING THAT RE-SEATS ITS OWN KLAL 17ms AFTER
+    THE REVIEWER CLICKS A WORD. 0/28 FAILURES AGAINST A 5-IN-10 BASELINE.**
+
+    `0CA` handed over a reproduction, a 14ms measurement and an instruction: this
+    is an ORDERING bug, start from `_showPageGen`, do not adjust any timing. All
+    three were right, and the guard it pointed at turned out to be innocent.
+
+    ### Reproducing it needed the viewport, which is why it hid
+
+    A hand-driven probe against the live server passed 8/8, then 8/8 again with
+    the test's nav-click navigation, then 8/8 with the test's own empty-ledger
+    server. The variable that mattered was `browser.new_page(viewport={"width":
+    1600, "height": 1000})`. Geometry decides which klal the reading line
+    resolves to, so a default-viewport probe is a different experiment. Baseline
+    re-measured at the real viewport: **5 failed of 10**.
+
+    ### The mechanism, from the instrumented run
+
+        t=1462 enter page=15 gen=4 focusWord=411   at focusWordOnScan (app.js:2018)
+        t=1462 >>> WRITE src page=15 gen=4
+        t=1479 enter page=14 gen=5 focusWord=None  at setActiveKlal (app.js:4440)
+                                                   at tick (app.js:4379)
+        t=1479 >>> WRITE src page=14 gen=5
+
+    `jumpTo()` starts `releaseObserverWhenScrollSettles()`, a requestAnimation
+    Frame loop that waits for the smooth scroll to stop and then re-asserts the
+    jump's destination - `setActiveKlal(lastActiveKlalId)`, which calls
+    `showPage(k.page)`, the klal's START page. **Nothing could cancel that loop.**
+    A word click sets `suppressObserverScroll` and calls
+    `clearTimeout(suppressTimer)`, but a rAF loop is not a timeout, so the jump's
+    pending re-seat fires anyway - 17ms after the click's own `showPage` - and
+    then clears the suppression the click had just set.
+
+    **`_showPageGen` cannot catch this and is not at fault.** That guard protects
+    the box drawing after `showPage`'s awaits; `pageImg.src` is written
+    SYNCHRONOUSLY at the top, before any await, so the last caller to ENTER
+    showPage wins the image no matter which generation it holds.
+
+    This also explains `0CA`'s strangest datum - that reusing
+    `releaseObserverWhenScrollSettles()` as a fix made it fail 10 times in 10.
+    That was not a near miss. It was calling the defect.
+
+    ### The fix
+
+    A generation on the settle loop (`_settleGen`) plus
+    `cancelPendingScrollSettle()`, called by `focusWordOnScan()`. A superseded
+    tick returns without re-seating and without touching
+    `suppressObserverScroll` - whoever superseded it owns both. No constant was
+    added, changed or removed.
+
+    Lesson 40: a scaffold's teardown is a separate step from putting it up, and
+    it is the one that gets forgotten.
+
+    ### Measured, because a single green run means nothing here
+
+    | | result |
+    |---|---|
+    | baseline, real viewport | **5 failed / 10** |
+    | after the fix, batch 1 | 0 failed / 12 |
+    | after the fix, batch 2 | 0 failed / 16 |
+    | mutation (drop the cancel call) | **2 failed / 10** - the flake returns |
+
+    The mutation is weaker than the baseline because it removes only ONE of the
+    fix's two halves: the `myGen` check stays, so a second jump still cancels the
+    first. Stated rather than rounded up.
+
+    ### AND A SECOND, PRE-EXISTING FAILURE - found by running the whole suite
+
+    `test_navigating_to_another_klal_closes_the_open_word_panel` also failed, and
+    a CONTROL run on the pre-fix `app.js` failed both, so it was not caused by
+    this work. It passed 6/6 in isolation and failed only in the full suite.
+
+    **The cause is shared state, and it is a class, not a case.**
+    `_find_disputed_klal()` reads `review_queue_part1.json` off disk and so
+    returns klal 7 for the whole run, while this module's server writes to ONE
+    shared ledger. `test_candidate_override_flow_persists_and_does_not_touch_
+    part1json` records an override on klal 7's word; from that moment the word
+    stops rendering as `.flag-word.state-open`, and every later test clicking
+    that selector waits 5s for an element that will never come back.
+    pytest-randomly shuffles, so whether the recorder runs before or after the
+    clickers changes per run - which is what made it read as flakiness.
+
+    That is Lesson 36's shape with the shared LEDGER in the corpus's role. Fixed
+    with `_find_open_disputed_klal(server)`, which asks the live server what is
+    open NOW; all five call sites moved to it. **Full UI suite: 102 passed / 1
+    skipped, three consecutive shuffled runs**, from 100 passed / 2 failed.
+
+0DH. **[2026-09-08, reviewer request] DISMISSING A WORD PANEL NOW SNAPS THE
+    CURSOR BACK TO THE WORD YOU WERE ON.**
+
+    Reviewer: "when i have a word pop-up and i click away, cursor should snap to
+    last-visited word in the middle pane."
+
+    `dismissPanels()` ran `clearScanFocus()`, which runs `clearRoutedWord()` - so
+    closing a panel removed the ring and left nothing marking where the reviewer
+    had been, in a pane where a klal runs to 1,300 words and the panel's own
+    navigation may have scrolled elsewhere.
+
+    `_lastVisitedWord` is recorded in the two FUNNELS rather than at each click
+    site: `focusWordOnScan()` (every text-pane word click routes through it) and
+    `revealWordInText()` (the scan->text direction). A third copy at the call
+    sites is what those funnels exist to prevent.
+
+    `snapToLastVisitedWord()` reuses `revealWordInText()` for the scroll and the
+    ring rather than writing a second copy of either, then adds `tabindex="-1"`
+    and `focus({preventScroll: true})` so the word is the KEYBOARD cursor too -
+    tab order is unchanged, and preventScroll because revealWordInText has
+    already scrolled with the observer suppression that scroll requires. Called
+    from `dismissPanels()` AFTER `clearScanFocus()`, or the ring would be removed
+    a line later.
+
+    `test_dismissing_a_word_panel_snaps_the_cursor_back_to_that_word` asserts all
+    three halves - ringed, in view, and holding focus - and scrolls 4,000px away
+    first so "in view" cannot pass by accident. Mutation-checked both ways:
+    removing the snap call fails it, and keeping the snap but dropping the
+    `focus()` fails it on the cursor assertion alone.
 
 0DF. **[2026-09-08] RE-MEASURED: WHAT IS A DATA ISSUE THE DASHBOARD CANNOT SHOW.
     125 POSITIONS ARE GENUINELY UNSEEN, NOT 580 - AND THE STRUCTURAL REPORT IS
