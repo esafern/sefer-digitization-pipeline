@@ -2173,12 +2173,11 @@ function dismissPanels() {
   // replaces it. What no longer clears it is dismissing the panel for the word
   // you are still looking at.
   //
-  // THE ZOOM STILL GOES BACK, which is the half of the 2026-08-26 directive that
-  // is NOT in conflict ("should also zoom back out to 100"). It no longer fights
-  // anything: applyZoom() centres `.hl-box.focused` when one exists and only
-  // falls back to its anchor ratios when there is none, so leaving the word
-  // focused turns restoreZoomAfterFocus()'s "show the page top" into "keep the
-  // word centred" by itself. One operation, one target.
+  // AND THE ZOOM STAYS PUT TOO, 2026-09-08 (item 0DK). Keeping it was the last
+  // thing on this path that moved anything: a 220% -> 100% resize of the page
+  // image in one frame, which is what the reviewer was still reporting as a
+  // blink after two fixes that did not touch it. The whole of the 2026-08-26
+  // directive is now superseded, not half of it.
   settleScanAfterDismiss();
   // Not awaited: dismissal must feel instant, and the snap is a scroll rather
   // than a state change anything else reads.
@@ -3850,16 +3849,15 @@ let zoomLevel = 1;
 // zoom alone - only an explicit click re-triggers it.
 const FOCUS_ZOOM = 2.2;
 let _zoomOnFocus = false;
-// The zoom in effect before a click zoomed in on a word, so clicking away can
-// put it back (2026-08-26, reviewer: "clicking away ... should also zoom back
-// out to 100"). null means the current zoom was NOT set by a focus, so there is
-// nothing to undo and clearing focus leaves it alone - a reviewer who zoomed to
-// 300% by hand to study a page keeps it when they dismiss a word.
-let _zoomBeforeFocus = null;
+// NO _zoomBeforeFocus. It held "the zoom in effect before a click zoomed in on a
+// word, so clicking away can put it back" (2026-08-26). Removed 2026-09-08 with
+// item 0DK: a dismissal no longer restores the zoom, which left this WRITTEN by
+// zoomToFocus, cleared in three places, and read for its value by nothing -
+// Lesson 29's shape, and it would have read as a live feature to the next
+// reader. The zoom a click sets now simply stays until the reviewer changes it.
 
 function zoomToFocus(box) {
   if (zoomLevel < FOCUS_ZOOM) {
-    if (_zoomBeforeFocus === null) _zoomBeforeFocus = zoomLevel;
     zoomLevel = FOCUS_ZOOM;
     applyZoom();          // applyZoom centres .hl-box.focused itself
   } else {
@@ -3867,45 +3865,13 @@ function zoomToFocus(box) {
   }
 }
 
-function restoreZoomAfterFocus() {
-  if (_zoomBeforeFocus === null) return;
-  zoomLevel = _zoomBeforeFocus;
-  _zoomBeforeFocus = null;
-  // The anchor is the FALLBACK, not the plan: applyZoom() centres
-  // `.hl-box.focused` whenever one exists and only uses these ratios when none
-  // does. Since 2026-09-08 a dismissal leaves the word focused, so this now
-  // means "keep the word centred", and still means "show the page top" on the
-  // paths that really did clear the focus first.
-  //
-  // behavior:'auto' - a settle lands in one frame. Animating it for ~300ms is
-  // what let a refit fire mid-scroll and restart the whole thing (item 0DJ).
-  applyZoom(0.5, 0, { behavior: 'auto' });
-}
-// CENTRING ON THE FOCUSED WORD IS OPT-IN, and that is the whole of item 0DJ.
-//
-// This used to prefer `.hl-box.focused` unconditionally, which silently DISCARDED
-// the anchors its caller passed. That was harmless only because a focus box was
-// short-lived: it existed while a word was open and was destroyed the moment the
-// reviewer dismissed the panel. Item 0DI made the focus survive a dismissal - to
-// stop a different flicker - and the box became permanent, so every later
-// applyZoom() started animating a smooth scroll to it whether the caller wanted
-// one or not.
-//
-// refitScanToPane() is the caller that matters: its own comment says "null
-// anchors: keep whatever the reviewer is currently looking at centred", and it
-// runs from a ResizeObserver. Resizing the image toggles a scrollbar, which
-// changes clientWidth, which fires the observer again - the loop its
-// `_lastFitWidth` guard exists to damp. That guard assumes each pass CONVERGES,
-// and a smooth scrollIntoView on every pass is a moving target instead: the
-// reviewer sees the pane "zoom in and out a bit a few times per second",
-// reported 2026-09-08, and ONLY after dismissing a word - which is exactly when
-// the box started outliving the panel.
-//
-// So: honour the anchors unless the caller explicitly asks for the word.
-// `behavior` is a parameter for the same reason - a settle after a dismissal
-// should land in one frame rather than animate for ~300ms where it can overlap
-// the next refit. Both defaults preserve the old behaviour, so the genuine
-// focus paths (zoomToFocus, the image-load handler) are untouched.
+// NO restoreZoomAfterFocus(). REMOVED 2026-09-08 with item 0DK - the dismissal
+// was its only caller, and a dismissal no longer touches the zoom. Kept as a
+// note rather than silence because its absence is the 2026-08-26 directive
+// ("clicking away ... should also zoom back out to 100") no longer holding: the
+// zoom now stays where the reviewer's own click put it, and clicking another
+// word re-zooms to FOCUS_ZOOM exactly as before. See settleScanAfterDismiss().
+
 function applyZoom(anchorRatioX, anchorRatioY,
                    { centreFocused = true, behavior = 'smooth' } = {}) {
   const rX = anchorRatioX != null ? anchorRatioX
@@ -3999,9 +3965,6 @@ function zoomStep(direction) {
     ? ZOOM_STOPS.find(z => z > zoomLevel + eps)
     : ZOOM_STOPS.slice().reverse().find(z => z < zoomLevel - eps);
   if (next === undefined) return;          // already at an end of the ladder
-  // Touching the zoom by hand hands ownership back to the reviewer: whatever the
-  // focus had stored is no longer theirs to restore.
-  _zoomBeforeFocus = null;
   zoomLevel = next;
   applyZoom();
 }
@@ -4013,7 +3976,6 @@ function setupZoomPan() {
     if (e.ctrlKey || e.metaKey) {
       e.preventDefault();
       const delta = e.deltaY < 0 ? 0.15 : -0.15;
-      _zoomBeforeFocus = null;   // same as the buttons: manual zoom wins
       zoomLevel = Math.max(0.3, Math.min(3, zoomLevel + delta));
       applyZoom();
     }
@@ -4086,7 +4048,24 @@ function applyFocusStyle(box) {
 // carries a comment about further down.
 function settleScanAfterDismiss() {
   _zoomOnFocus = false;
-  restoreZoomAfterFocus();
+  // AND NOTHING ELSE. A dismissal now changes the scan pane not at all - item
+  // 0DK, and it is the third and last attempt at this gesture.
+  //
+  // The zoom used to be restored here (restoreZoomAfterFocus), which is the
+  // 2026-08-26 directive "clicking away ... should also zoom back out to 100".
+  // That restore is a 220% -> 100% resize of the page image in a single frame,
+  // and after 0DI removed the highlight-layer rebuild it was the ONLY thing left
+  // that moved on dismissal - which is why the reviewer still reported "blinks
+  // when I click away, no issue when I click on a specific word" after two fixes
+  // that did not touch it.
+  //
+  // Lesson 31 applies to the fixing as much as to the code: 0DI and 0DJ were two
+  // attempts built on inference, and the reviewer had ALREADY chosen this
+  // behaviour explicitly ("keep the word's yellow focus box and current zoom").
+  // The zoom stays where the reviewer's own click put it.
+  //
+  // Clicking another word re-zooms to FOCUS_ZOOM as it always did, and the zoom
+  // buttons are unchanged.
 }
 
 async function showPage(page, focusKlalId, focusCorr = undefined) {

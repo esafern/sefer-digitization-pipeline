@@ -101,6 +101,79 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0DK. **[2026-09-08, reviewer] "BLINKS WHEN I CLICK AWAY, NO ISSUE WHEN I CLICK ON
+    A SPECIFIC WORD" - STILL, AFTER `0DI` AND `0DJ`. IT WAS THE ZOOM RESTORE,
+    WHICH BOTH FIXES HAD DELIBERATELY PRESERVED. A DISMISSAL NOW CHANGES NOTHING
+    IN THE SCAN PANE.**
+
+    ### THE REAL FINDING IS WHY TWO FIXES MISSED IT
+
+    Every probe written for `0DI` and `0DJ` drove a word whose click did NOT
+    zoom - the sampled zoom read "100%" before and after in all of them, which
+    means `_zoomBeforeFocus` was null and `restoreZoomAfterFocus()` returned on
+    its first line. **Three rounds of instrumentation measured a dismissal path
+    that was doing almost nothing**, and reported it as quiet.
+
+    `FOCUS_ZOOM = 2.2`. A real word click zooms to 220%; dismissal put it back to
+    100%, resizing the page image **1133px -> 515px in a single frame**. That is
+    the blink, it was there before this session, and it survived both fixes
+    because both were built to preserve the 2026-08-26 directive that asked for
+    it.
+
+    The reviewer had already chosen otherwise, in as many words - "keep the
+    word's yellow focus box AND CURRENT ZOOM" - and `0DI` kept the focus but not
+    the zoom, on the reasoning that dropping the restore would strand the pane at
+    220%. That reasoning was wrong on the facts (clicking any word re-zooms; the
+    buttons work) and it is what cost two more rounds. **When a reviewer picks an
+    option, the deviation is the thing to justify, not the compliance.**
+
+    Lesson 31 names the number: this is the third attempt at one gesture. The
+    first two were inference; this one started from a probe that finally
+    reproduced the reviewer's conditions.
+
+    ### Measured, same probe both ways
+
+    | | image width after dismiss | zoom | state changes |
+    |---|---|---|---|
+    | before | 515px (was 1133) | 220% -> 100% | 1 |
+    | after | **1133px, unchanged** | **220%, unchanged** | **0** |
+
+    ### What changed
+
+    `settleScanAfterDismiss()` now only disarms `_zoomOnFocus`. The dismissal
+    touches nothing else on the scan.
+
+    `restoreZoomAfterFocus()` REMOVED - the dismissal was its only caller.
+    `_zoomBeforeFocus` REMOVED with it: once nothing restores, it was written by
+    `zoomToFocus()`, cleared in three places, and read for its value by nothing -
+    Lesson 29's shape exactly, and it would have read as a live feature to the
+    next person. Both removals leave a note saying what stood there, because
+    their ABSENCE is now the behaviour.
+
+    ### The 2026-08-26 directive is fully superseded, on purpose
+
+    "Clicking away returns the highlight to the entire klal correctly and should
+    also zoom back out to 100." `0DI` reversed the outline half; this reverses
+    the zoom half. `test_clicking_away_restores_the_zoom_and_the_klal_outline` is
+    now `test_clicking_away_changes_nothing_in_the_scan_pane` and asserts the
+    inverse of what it originally did. All three dated directives are written
+    into its docstring rather than one silently replacing another - the reviewer
+    asked for the zoom-out before they had seen it next to a focus that survives.
+
+    Mutation-checked: restoring the zoom fails it with "the zoom moved on
+    dismissal (220% -> 100%) - that resize is the blink". UI suite 103 passed /
+    1 skipped.
+
+    ### The lesson, and it is about the instrument
+
+    `0DJ` already recorded that an unwritten LIFETIME assumption caused the
+    cascade. This adds the sharper one: **a probe that does not reproduce the
+    reviewer's conditions reports quiet and is believed.** Three separate
+    instrumented runs said "no oscillation, no width change" while the actual
+    gesture resized the image by 618px, because the sampled word never zoomed.
+    Before trusting an instrument that finds nothing, check that it can see the
+    thing it is looking for - Lesson 25 pointed at one's own measurements.
+
 0DJ. **[2026-09-08, reviewer] "THE PANE STUTTERS - IT KIND OF ZOOMS IN AND OUT A
     BIT A FEW TIMES PER SECOND." SELF-INFLICTED BY `0DI`, AND THE MECHANISM IS
     THAT `applyZoom()` THREW AWAY THE ANCHORS ITS CALLER PASSED.**
