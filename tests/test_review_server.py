@@ -4099,3 +4099,80 @@ def test_dismissing_a_word_panel_snaps_the_cursor_back_to_that_word(server, page
         "the word is not the keyboard cursor, so typing continues from wherever "
         "the panel left focus")
     assert page.test_errors == []
+
+
+def test_resizing_the_pane_does_not_chase_the_focused_word(server, page):
+    """Item 0DJ. Reviewer 2026-09-08: "the pane stutters - it kind of zooms in and
+    out a bit a few times per second", and only after dismissing a word.
+
+    applyZoom() preferred `.hl-box.focused` unconditionally, discarding the
+    anchors its caller passed. Harmless while a focus box died with its panel;
+    item 0DI made the focus survive a dismissal, so the box became permanent and
+    every later applyZoom() animated a smooth scroll to it.
+
+    refitScanToPane() is the caller that repeats - it runs from a ResizeObserver,
+    and resizing the image toggles a scrollbar, which changes clientWidth, which
+    fires the observer again. Its `_lastFitWidth` guard damps that only if each
+    pass CONVERGES; a smooth scrollIntoView every pass is a moving target.
+
+    The rule, and what this pins: a RESIZE is a request to keep the view still,
+    not to travel to the focused word. Asserted as "the view the reviewer had is
+    roughly the view they keep", because the exact pixels legitimately change
+    when the image is refitted to a new width.
+    """
+    klal_id = _find_open_disputed_klal(server)
+    assert klal_id is not None, "no disputed candidate exists to test against"
+
+    _open_dashboard(page, server, klal_id)
+    page.locator(f"#klal-block-{klal_id} .flag-word.state-open").first.click()
+    page.wait_for_selector("#hl-container .hl-box.focused", timeout=5000)
+    page.keyboard.press("Escape")
+    page.wait_for_timeout(1200)
+    assert page.locator("#hl-container .hl-box.focused").count() == 1, (
+        "precondition: item 0DI keeps the word focused through a dismissal")
+
+    # ZOOM IN UNTIL THE PANE ACTUALLY OVERFLOWS. Without this the test is blind
+    # and says so: at 100% the page fits its pane vertically (measured - no
+    # scrollbar), so "park the view away from the word" is a no-op, before and
+    # after are identical, and the assertion passes whether the code chases the
+    # word or not. Caught by the mutation failing to fail (Lesson 42).
+    for _ in range(3):
+        page.click("#zoom-in")
+        page.wait_for_timeout(250)
+    overflow = page.evaluate(
+        "() => { const sv = document.getElementById('scan-viewer');"
+        "        return sv.scrollHeight - sv.clientHeight; }")
+    assert overflow > 200, f"precondition: the pane must overflow to be scrollable, got {overflow}px"
+
+    # Park the view somewhere the focused word is NOT, so "kept still" and
+    # "chased the word" cannot give the same answer (Lesson 25).
+    # Whichever END is farther from where the zoom left us - the zoom centred the
+    # focused box, so the bottom may already be where we are.
+    moved = page.evaluate("""() => {
+        const sv = document.getElementById('scan-viewer');
+        const was = sv.scrollTop;
+        const max = Math.max(0, sv.scrollHeight - sv.clientHeight);
+        sv.scrollTop = (was > max / 2) ? 0 : max;
+        return sv.scrollTop - was;
+    }""")
+    assert abs(moved) > 100, f"precondition: parking the view must actually move it, moved {moved}px"
+    page.wait_for_timeout(400)
+    before = page.evaluate("""() => {
+        const sv = document.getElementById('scan-viewer');
+        const img = document.getElementById('page-img');
+        return (sv.scrollTop + sv.clientHeight / 2) / (img.offsetHeight || 1);
+    }""")
+
+    page.set_viewport_size({"width": 1400, "height": 1000})   # fires the ResizeObserver
+    page.wait_for_timeout(1200)
+
+    after = page.evaluate("""() => {
+        const sv = document.getElementById('scan-viewer');
+        const img = document.getElementById('page-img');
+        return (sv.scrollTop + sv.clientHeight / 2) / (img.offsetHeight || 1);
+    }""")
+    assert abs(after - before) < 0.15, (
+        f"the resize moved the view from {before:.3f} to {after:.3f} of the page - "
+        f"it chased the focused word instead of holding the view, which is the "
+        f"scroll that re-enters the refit loop and reads as stutter")
+    assert page.test_errors == []

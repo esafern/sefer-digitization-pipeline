@@ -3876,9 +3876,38 @@ function restoreZoomAfterFocus() {
   // does. Since 2026-09-08 a dismissal leaves the word focused, so this now
   // means "keep the word centred", and still means "show the page top" on the
   // paths that really did clear the focus first.
-  applyZoom(0.5, 0);
+  //
+  // behavior:'auto' - a settle lands in one frame. Animating it for ~300ms is
+  // what let a refit fire mid-scroll and restart the whole thing (item 0DJ).
+  applyZoom(0.5, 0, { behavior: 'auto' });
 }
-function applyZoom(anchorRatioX, anchorRatioY) {
+// CENTRING ON THE FOCUSED WORD IS OPT-IN, and that is the whole of item 0DJ.
+//
+// This used to prefer `.hl-box.focused` unconditionally, which silently DISCARDED
+// the anchors its caller passed. That was harmless only because a focus box was
+// short-lived: it existed while a word was open and was destroyed the moment the
+// reviewer dismissed the panel. Item 0DI made the focus survive a dismissal - to
+// stop a different flicker - and the box became permanent, so every later
+// applyZoom() started animating a smooth scroll to it whether the caller wanted
+// one or not.
+//
+// refitScanToPane() is the caller that matters: its own comment says "null
+// anchors: keep whatever the reviewer is currently looking at centred", and it
+// runs from a ResizeObserver. Resizing the image toggles a scrollbar, which
+// changes clientWidth, which fires the observer again - the loop its
+// `_lastFitWidth` guard exists to damp. That guard assumes each pass CONVERGES,
+// and a smooth scrollIntoView on every pass is a moving target instead: the
+// reviewer sees the pane "zoom in and out a bit a few times per second",
+// reported 2026-09-08, and ONLY after dismissing a word - which is exactly when
+// the box started outliving the panel.
+//
+// So: honour the anchors unless the caller explicitly asks for the word.
+// `behavior` is a parameter for the same reason - a settle after a dismissal
+// should land in one frame rather than animate for ~300ms where it can overlap
+// the next refit. Both defaults preserve the old behaviour, so the genuine
+// focus paths (zoomToFocus, the image-load handler) are untouched.
+function applyZoom(anchorRatioX, anchorRatioY,
+                   { centreFocused = true, behavior = 'smooth' } = {}) {
   const rX = anchorRatioX != null ? anchorRatioX
     : (scanViewer.scrollLeft + scanViewer.clientWidth / 2) / (pageImg.offsetWidth || 1);
   const rY = anchorRatioY != null ? anchorRatioY
@@ -3887,9 +3916,9 @@ function applyZoom(anchorRatioX, anchorRatioY) {
   pageImg.style.width = Math.round(fitWidth * zoomLevel) + 'px';
   document.getElementById('zoom-level').textContent = Math.round(zoomLevel * 100) + '%';
   requestAnimationFrame(() => {
-    const focusedBox = hlContainer.querySelector('.hl-box.focused');
+    const focusedBox = centreFocused && hlContainer.querySelector('.hl-box.focused');
     if (focusedBox) {
-      focusedBox.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+      focusedBox.scrollIntoView({ behavior, block: 'center', inline: 'center' });
     } else {
       scanViewer.scrollLeft = rX * pageImg.offsetWidth - scanViewer.clientWidth / 2;
       scanViewer.scrollTop = rY * pageImg.offsetHeight - scanViewer.clientHeight / 2;
@@ -3931,7 +3960,12 @@ function refitScanToPane() {
   _lastFitWidth = w;
   // null anchors: keep whatever the reviewer is currently looking at centred,
   // rather than jumping them back to the top of the page on every resize.
-  applyZoom(null, null);
+  //
+  // centreFocused:false is what makes that sentence true (item 0DJ). A resize is
+  // not a request to go to the focused word, it is a request to keep the view
+  // still - and this is the call that REPEATS, so it is the one that must never
+  // animate.
+  applyZoom(null, null, { centreFocused: false });
 }
 
 if (typeof ResizeObserver !== 'undefined') {

@@ -101,6 +101,84 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0DJ. **[2026-09-08, reviewer] "THE PANE STUTTERS - IT KIND OF ZOOMS IN AND OUT A
+    BIT A FEW TIMES PER SECOND." SELF-INFLICTED BY `0DI`, AND THE MECHANISM IS
+    THAT `applyZoom()` THREW AWAY THE ANCHORS ITS CALLER PASSED.**
+
+    ### Could not reproduce it, and the questions found it instead
+
+    Three probes failed to reproduce: no image-width oscillation after a
+    dismissal, none at any zoom stop from 100% to 300%, with and without both
+    scrollbars. Headless Chromium uses OVERLAY scrollbars, which do not consume
+    `clientWidth` - and consuming `clientWidth` is the entire mechanism, so the
+    environment could not exhibit it.
+
+    Two questions did what the probes could not. **"Only after dismissing a
+    word"** and **"clicking another word stops it"** together name the cause
+    exactly: the focus box, whose lifetime `0DI` had just changed.
+
+    ### The mechanism
+
+    `applyZoom(anchorRatioX, anchorRatioY)` computed anchors, then in its rAF did:
+
+        const focusedBox = hlContainer.querySelector('.hl-box.focused');
+        if (focusedBox) focusedBox.scrollIntoView({behavior:'smooth', ...});
+        else            /* use the anchors */
+
+    **The anchors were silently discarded whenever a focus box existed.** That
+    was harmless for as long as a focus box was short-lived - it existed while a
+    word's panel was open and was destroyed on dismissal. `0DI` made the focus
+    SURVIVE a dismissal, on purpose, to stop a different flicker. The box became
+    permanent, and every later `applyZoom()` began animating a smooth scroll to
+    it whether or not its caller wanted one.
+
+    `refitScanToPane()` is the caller that repeats. It runs from a
+    ResizeObserver, and its own comment says "null anchors: keep whatever the
+    reviewer is currently looking at centred" - a sentence the code had not been
+    honouring. Re-fitting the image toggles a scrollbar, which changes
+    `clientWidth`, which fires the observer again; the `_lastFitWidth` guard damps
+    that only if each pass CONVERGES, and a smooth scrollIntoView on every pass is
+    a moving target instead. Hence a few oscillations per second, and hence
+    "clicking another word stops it" - a new focus re-anchors the loop.
+
+    ### The fix
+
+    Centring on the focused word is **opt-in**: `applyZoom(rX, rY, {centreFocused
+    = true, behavior = 'smooth'})`. Both defaults preserve the old behaviour, so
+    `zoomToFocus()` and the image-load handler are untouched. Two callers change:
+
+    - `refitScanToPane()` passes `centreFocused: false` - a resize is a request to
+      keep the view STILL, not to travel to the focused word, and it is the call
+      that repeats.
+    - `restoreZoomAfterFocus()` passes `behavior: 'auto'` - a settle lands in one
+      frame instead of animating for ~300ms where a refit can fire mid-scroll.
+
+    ### THE TEST WAS BLIND FIRST, AND THE MUTATION IS WHAT SAID SO
+
+    `test_resizing_the_pane_does_not_chase_the_focused_word` passed against BOTH
+    the fix and the mutation on its first cut. The reason is worth keeping: at
+    100% the page fits its pane vertically, so "park the view away from the word"
+    moved nothing, and before/after were identical no matter what the code did.
+    Second cut zooms in until the pane genuinely overflows and asserts the
+    precondition (`overflow > 200px`), then parks at whichever END is farther
+    from where the zoom left the view - the first attempt parked at the bottom,
+    which the zoom had already centred on, and moved 11px.
+
+    Now fails under both mutations with the same message - "the resize moved the
+    view from 0.310 to 0.665 of the page". Lesson 42, twice in one item: a
+    mutation that does not fail is a finding about the test.
+
+    UI suite 103 passed / 1 skipped.
+
+    ### What this cost, and the pattern across 0DH/0DI/0DJ
+
+    Three reviewer reports in a row on one gesture, each fixing the last one's
+    side effect: the cursor snap (`0DH`), the flicker it made visible (`0DI`),
+    and the stutter `0DI` caused (`0DJ`). The through-line is a LIFETIME
+    assumption nobody had written down - "a focus box is short-lived" - which two
+    separate pieces of code depended on without saying so. Changing the lifetime
+    was correct; what was missing was asking who else read that state.
+
 0DI. **[2026-09-08, reviewer] "WHEN I CLICK AWAY THE SCAN PANE FLICKERS." IT WAS
     THE PANE BEING SENT TO TWO PLACES ON ONE FRAME. FIXED BY NOT CLEARING THE
     SCAN FOCUS - WHICH REVERSES HALF OF A 2026-08-26 DIRECTIVE, SAID PLAINLY.**
