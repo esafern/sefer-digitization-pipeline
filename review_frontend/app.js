@@ -2146,11 +2146,42 @@ function closePanels() {
 // which fires before every panel switch.
 function dismissPanels() {
   closePanels();
-  clearScanFocus();
-  // AFTER clearScanFocus, never before: that call runs clearRoutedWord(), so
-  // snapping first would have the ring removed again a line later. Reviewer
-  // request 2026-09-08 - see _lastVisitedWord. Not awaited: dismissal must feel
-  // instant and the snap is a scroll, not a state change anything else reads.
+  // THE SCAN KEEPS THE WORD. Reviewer directive 2026-09-08, reversing the
+  // 2026-08-26 one below it - and the reversal is the whole fix for "when I
+  // click away the scan pane flickers".
+  //
+  // This used to call clearScanFocus(), which did two things in the same tick,
+  // each with its own scroll target:
+  //   showPage(currentPage, scanFocusKlalId, null) - drops the word's yellow
+  //     box, draws the whole-klal gold outline instead, and rAFs
+  //     `box.scrollIntoView({block:'nearest'})` to bring THAT into view;
+  //   restoreZoomAfterFocus() - `applyZoom(0.5, 0)`, whose own comment reads
+  //     "no focused box left to centre on: show the page top".
+  // One scrolls to the klal region, the other to the top of the page, both on
+  // the same frame. Measured on dismissal: the highlight layer is emptied and
+  // rebuilt inside 33ms (focused box -> gold outline -> boxes). That is a
+  // flicker by construction, and no amount of tuning either half fixes a pane
+  // being sent to two places at once.
+  //
+  // Not clearing the focus removes both at their source rather than sequencing
+  // them, and it makes the two panes agree: the text pane snaps the cursor back
+  // to the last visited word (below), and the scan stays on that same word.
+  //
+  // THE FOCUS STILL CLEARS, just not here. setActiveKlal() passes an explicit
+  // `null` on every scroll-driven or nav-driven klal change - see its own note
+  // about why - so moving to another klal drops it, and the next word click
+  // replaces it. What no longer clears it is dismissing the panel for the word
+  // you are still looking at.
+  //
+  // THE ZOOM STILL GOES BACK, which is the half of the 2026-08-26 directive that
+  // is NOT in conflict ("should also zoom back out to 100"). It no longer fights
+  // anything: applyZoom() centres `.hl-box.focused` when one exists and only
+  // falls back to its anchor ratios when there is none, so leaving the word
+  // focused turns restoreZoomAfterFocus()'s "show the page top" into "keep the
+  // word centred" by itself. One operation, one target.
+  settleScanAfterDismiss();
+  // Not awaited: dismissal must feel instant, and the snap is a scroll rather
+  // than a state change anything else reads.
   snapToLastVisitedWord();
 }
 // ADDED 2026-08-21 (user-requested): a save used to just flash a small
@@ -3840,7 +3871,12 @@ function restoreZoomAfterFocus() {
   if (_zoomBeforeFocus === null) return;
   zoomLevel = _zoomBeforeFocus;
   _zoomBeforeFocus = null;
-  applyZoom(0.5, 0);      // no focused box left to centre on: show the page top
+  // The anchor is the FALLBACK, not the plan: applyZoom() centres
+  // `.hl-box.focused` whenever one exists and only uses these ratios when none
+  // does. Since 2026-09-08 a dismissal leaves the word focused, so this now
+  // means "keep the word centred", and still means "show the page top" on the
+  // paths that really did clear the focus first.
+  applyZoom(0.5, 0);
 }
 function applyZoom(anchorRatioX, anchorRatioY) {
   const rX = anchorRatioX != null ? anchorRatioX
@@ -4000,11 +4036,22 @@ function applyFocusStyle(box) {
 // Redraw the current scan page without any focused word, restoring all boxes
 // to their normal opacity/style. Called when the reviewer clicks away from a
 // focused word (plain word click, panel close, etc.).
-function clearScanFocus() {
-  clearRoutedWord();          // the ring is half of the same gesture
-  scanFocusCorr = null;
-  _zoomOnFocus = false;   // a pending focus-zoom must not fire into a cleared view
-  if (currentPage != null) showPage(currentPage, scanFocusKlalId, null);
+// WAS clearScanFocus(), narrowed 2026-09-08 to what a dismissal still owes the
+// scan pane - see dismissPanels() for the flicker this removes.
+//
+// Three things went with it, deliberately:
+//   clearRoutedWord()  - snapToLastVisitedWord() re-rings the same word a line
+//                        later, so clearing it here only made it blink.
+//   scanFocusCorr=null - the word stays focused. setActiveKlal() still passes an
+//                        explicit null on any klal change, so it clears there.
+//   showPage(...)      - the redraw that emptied and rebuilt the highlight layer.
+//
+// `_zoomOnFocus` still has to be disarmed: it is set by every word click and
+// consumed by showPage, and we no longer call showPage here - a pending one
+// would be picked up by the NEXT render, which is the trap the same flag already
+// carries a comment about further down.
+function settleScanAfterDismiss() {
+  _zoomOnFocus = false;
   restoreZoomAfterFocus();
 }
 

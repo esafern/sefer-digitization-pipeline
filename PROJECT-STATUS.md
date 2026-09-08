@@ -101,6 +101,81 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0DI. **[2026-09-08, reviewer] "WHEN I CLICK AWAY THE SCAN PANE FLICKERS." IT WAS
+    THE PANE BEING SENT TO TWO PLACES ON ONE FRAME. FIXED BY NOT CLEARING THE
+    SCAN FOCUS - WHICH REVERSES HALF OF A 2026-08-26 DIRECTIVE, SAID PLAINLY.**
+
+    ### Not caused by the day's work, and that was checked first
+
+    The report landed right after `0DG`/`0DH` touched this exact gesture, so the
+    first question was whether it was a regression. Instrumented the dismissal on
+    the current code and on `HEAD~1` (before both changes): **identical** - two
+    distinct scan-pane states inside 36ms, either way. Pre-existing.
+
+    ### What it actually was
+
+    `dismissPanels()` called `clearScanFocus()`, which did two things in the same
+    tick, each with its own scroll target:
+
+        showPage(currentPage, scanFocusKlalId, null)
+            -> empties hlContainer, drops the word's yellow box, draws the
+               whole-klal gold outline, and rAFs box.scrollIntoView({block:
+               'nearest'}) to bring THAT into view
+        restoreZoomAfterFocus()
+            -> applyZoom(0.5, 0), whose own comment reads
+               "no focused box left to centre on: show the page top"
+
+    One aims at the klal region, the other at the top of the page, on the same
+    frame - with the highlight layer emptied and rebuilt in between. Measured
+    through the dismissal, sampling every 8ms:
+
+    | | distinct scan-pane states |
+    |---|---|
+    | before | **2** (focused box -> gold outline -> boxes rebuilt, t=21 then t=36) |
+    | after | **1** (nothing changes; the word stays focused) |
+
+    ### THE PIXEL PROBE WAS BLIND, AND IS RECORDED AS SUCH
+
+    A screenshot-per-40ms capture of the scan pane reported **0 visual changes**
+    - because each screenshot costs about 40ms and the whole transient is over in
+    36. It "passed" against the defect it was written for, which is Lesson 43
+    exactly. The DOM sampler at 8ms is what saw it. A slow probe is not evidence
+    of absence.
+
+    ### The fix, and the directive it reverses
+
+    `dismissPanels()` no longer clears the scan focus. `clearScanFocus()` is
+    narrowed to `settleScanAfterDismiss()`, which keeps only what a dismissal
+    still owes: disarm `_zoomOnFocus` (set by every word click, normally consumed
+    by the showPage we no longer call) and restore the zoom.
+
+    **`test_clicking_away_restores_the_zoom_and_the_klal_outline` was pinning the
+    OLD behaviour, from an explicit 2026-08-26 request by the same reviewer:**
+    "clicking away returns the highlight to the entire klal correctly and should
+    also zoom back out to 100". Its two halves are now split:
+
+    - **The zoom half stands, unchanged.** Both zoom assertions still pass
+      untouched, including "a manual zoom survives a focus/dismiss cycle".
+    - **The outline half is reversed.** Returning the highlight to the whole klal
+      IS the rebuild, so it cannot be kept and the flicker removed.
+
+    The test is renamed `..._and_keeps_the_word_focused`, carries both dated
+    directives in its docstring rather than letting one quietly replace the
+    other, and now asserts the opposite of what it did: the focus box survives
+    and `.hl-current-klal` does NOT come back.
+
+    **The zoom still lands correctly because the focus stays.** `applyZoom()`
+    centres `.hl-box.focused` whenever one exists and only falls back to its
+    anchor ratios when none does - so leaving the word focused turns
+    `restoreZoomAfterFocus()`'s "show the page top" into "keep the word centred"
+    with no code change to either. One operation, one target.
+
+    Consistent with `0DH` by construction: the text pane snaps the cursor back to
+    the last visited word and the scan pane stays on that same word, instead of
+    the two disagreeing.
+
+    UI suite 102 passed / 1 skipped.
+
 0DG. **[2026-09-08] `0CA` IS FIXED. IT WAS A CANCELLATION BUG, NOT A TIMING ONE:
     A NAV JUMP LEAVES AN rAF LOOP RUNNING THAT RE-SEATS ITS OWN KLAL 17ms AFTER
     THE REVIEWER CLICKS A WORD. 0/28 FAILURES AGAINST A 5-IN-10 BASELINE.**

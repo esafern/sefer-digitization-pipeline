@@ -636,16 +636,30 @@ def test_clicking_a_word_zooms_and_centres_the_scan_on_it(server, page):
     assert page.test_errors == []
 
 
-def test_clicking_away_restores_the_zoom_and_the_klal_outline(server, page):
+def test_clicking_away_restores_the_zoom_and_keeps_the_word_focused(server, page):
     """ADDED 2026-08-26 (reviewer: "clicking away returns the highlight to the
     entire klal correctly and should also zoom back out to 100").
 
-    The zoom is the other half of the click-to-focus gesture and has to undo with
-    it, or the reviewer is left at 220% looking at a page they have stopped
-    inspecting. It restores what was there BEFORE the focus rather than a hard
-    100%: a reviewer who had zoomed to 200% by hand to study the page keeps it
-    when they dismiss a word - the normal flow starts at 100% and so returns
-    there, which is the requested behaviour without stepping on a manual zoom."""
+    HALF OF THAT WAS REVERSED 2026-09-08 by the same reviewer - "when I click
+    away the scan pane flickers" - and the two directives are recorded together
+    here rather than one quietly replacing the other.
+
+    THE ZOOM HALF STANDS and is unchanged: the zoom is the other half of the
+    click-to-focus gesture and has to undo with it, or the reviewer is left at
+    220% looking at a page they have stopped inspecting. It restores what was
+    there BEFORE the focus rather than a hard 100%, so a manual zoom survives.
+
+    THE OUTLINE HALF IS GONE. Returning the highlight to the whole klal meant
+    emptying and rebuilding the highlight layer on every dismissal - measured at
+    two distinct scan-pane states inside 36ms - while restoreZoomAfterFocus()
+    simultaneously aimed at the page top and showPage() aimed at the klal
+    region. Two scroll targets on one frame is a flicker by construction. The
+    word now stays focused, which removes both at their source and makes the
+    scan agree with the text pane's cursor snap (0DH).
+
+    The zoom still lands correctly BECAUSE the focus stays: applyZoom() centres
+    `.hl-box.focused` when one exists and only falls back to its anchor ratios
+    when none does."""
     page.goto(server + "/klal/66", wait_until="domcontentloaded", timeout=15000)
     page.wait_for_selector(".nav-item", timeout=15000)
     page.wait_for_timeout(2200)
@@ -658,8 +672,12 @@ def test_clicking_away_restores_the_zoom_and_the_klal_outline(server, page):
     page.keyboard.press("Escape")
     page.wait_for_timeout(1800)
     assert page.inner_text("#zoom-level") == "100%", page.inner_text("#zoom-level")
-    assert page.eval_on_selector_all(".hl-current-klal", "e => e.length") > 0, (
-        "the whole-klal outline did not come back")
+    assert page.locator("#hl-container .hl-box.focused").count() == 1, (
+        "the word lost its focus box on dismissal - the scan pane no longer agrees "
+        "with the cursor the text pane just snapped back to")
+    assert page.eval_on_selector_all(".hl-current-klal", "e => e.length") == 0, (
+        "the whole-klal outline came back, which means the highlight layer was "
+        "rebuilt - that rebuild is the flicker this reversed (2026-09-08)")
 
     # a zoom the reviewer set themselves survives a focus/dismiss cycle
     for _ in range(4):
