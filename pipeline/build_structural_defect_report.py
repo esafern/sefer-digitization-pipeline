@@ -226,18 +226,10 @@ def main():
 
     rows = build()
     if args.acknowledge or args.acknowledge_all:
-        only = None
         if args.acknowledge:
-            want = set()
-            for spec in args.acknowledge:
-                kid, _, wi = spec.partition(":")
-                want.add((int(kid), int(wi)))
-            missing = want - {(r["klal_id"], r["word_index"]) for r in rows}
-            if missing:
-                raise SystemExit(f"no structural finding at {sorted(missing)} - nothing was "
-                                 f"written. Check the klal:word against the report.")
-            only = lambda r: (r["klal_id"], r["word_index"]) in want  # noqa: E731
-        added = ack.record(rows, ACK_PATH, args.note, only=only)
+            added = ack.record_selected(rows, ACK_PATH, args.note, args.acknowledge)
+        else:
+            added = ack.record(rows, ACK_PATH, args.note)
         print(f"Acknowledged {added} finding(s); "
               f"{len(ack.load(ACK_PATH))} on record in {ACK_PATH}")
         rows = build()

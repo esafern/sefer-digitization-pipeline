@@ -9196,3 +9196,36 @@ def test_the_applier_never_writes_its_findings_file_during_a_test(apply_harness,
     assert any(r["klal_id"] == 1 for r in rows), (
         "precondition: this run must actually produce a refusal, or the assertion "
         "above passes whether the redirect is there or not")
+
+
+def test_acknowledging_an_unmatched_finding_writes_nothing_at_all(tmp_path):
+    """ITEM 0DQ. The `--acknowledge KLAL:WORD` block was written out three times
+    on 2026-09-08 and the copies had already diverged: two called record() FIRST
+    and raised on an unmatched spec afterwards, so `--acknowledge 144:4
+    --acknowledge 999:0` wrote the first, failed, and left the reviewer with an
+    error and no way to know half of it had landed. The third validated first.
+
+    Atomic: an unmatched spec is a typo or a stale report, and a partial
+    acknowledgement is worse than none.
+    """
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "tack2", os.path.join(REPO, "pipeline", "triage_ack.py"))
+    ack = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(ack)
+
+    path = str(tmp_path / "ack.json")
+    rows = [{"klal_id": 5, "word_index": 20, "stored": "לו", "detector": "repeated_word"}]
+
+    with pytest.raises(SystemExit) as e:
+        ack.record_selected(rows, path, "note", ["5:20", "999:0"])
+    assert "999" in str(e.value) and "NOTHING was written" in str(e.value)
+    assert not os.path.exists(path), (
+        "the good spec was recorded before the bad one was rejected - a partial "
+        "write the reviewer is never told about")
+
+    assert ack.record_selected(rows, path, "note", ["5:20"]) == 1
+    assert len(ack.load(path)) == 1
+
+    with pytest.raises(SystemExit):
+        ack.record_selected(rows, path, "note", ["5-20"])      # malformed spec

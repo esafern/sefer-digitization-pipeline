@@ -128,3 +128,36 @@ def record(rows, path, note, only=None, text_field="stored"):
         f.write("\n")
         f.flush()
     return added
+
+
+def record_selected(rows, path, note, specs, text_field="stored"):
+    """Acknowledge exactly the `KLAL:WORD` specs given, or write nothing.
+
+    THE ONE COPY. This block was written out three times on 2026-09-08 - in
+    build_title_report, build_structural_defect_report and list_ligature_words -
+    and the copies had ALREADY diverged by the time anyone looked: two of them
+    called record() first and raised on an unmatched spec afterwards, so
+    `--acknowledge 144:4 --acknowledge 999:0` wrote the first, failed, and left
+    the reviewer with an error and no idea that half of it had landed. The third
+    validated first. Same defect class the shared-module rule exists for, in code
+    written the same afternoon (Lesson 34: sweep the siblings).
+
+    VALIDATE EVERYTHING, THEN WRITE. An unmatched spec is a typo or a stale
+    report, and a partial acknowledgement is worse than none: the reviewer cannot
+    tell from the error what was recorded.
+    """
+    want = set()
+    for spec in specs:
+        kid, sep, wi = spec.partition(":")
+        if not sep or not kid.strip().isdigit() or not wi.strip().isdigit():
+            raise SystemExit(f"--acknowledge takes KLAL:WORD, got {spec!r}")
+        want.add((int(kid), int(wi)))
+    have = {(r["klal_id"], r["word_index"]) for r in rows}
+    missing = want - have
+    if missing:
+        raise SystemExit(
+            f"no finding at {sorted(missing)} in this report - NOTHING was written. "
+            f"Check the klal:word against it; an acknowledgement that matches no row "
+            f"would sit in the store forever explaining nothing.")
+    return record(rows, path, note, text_field=text_field,
+                  only=lambda r: (r["klal_id"], r["word_index"]) in want)

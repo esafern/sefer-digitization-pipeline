@@ -201,17 +201,9 @@ def main():
 
     report = build()
     if args.acknowledge:
-        want = set()
-        for spec in args.acknowledge:
-            kid, _, wi = spec.partition(":")
-            want.add((int(kid), int(wi)))
         cands = report["detector_candidates"] or []
-        n = ack.record(cands, ACK_PATH, args.note, text_field="title_word",
-                       only=lambda r: (r["klal_id"], r["word_index"]) in want)
-        missed = want - {(r["klal_id"], r["word_index"]) for r in cands}
-        if missed:
-            raise SystemExit(f"no title detector candidate at {sorted(missed)} - nothing "
-                             f"was written. Check the klal:word against the report.")
+        n = ack.record_selected(cands, ACK_PATH, args.note, args.acknowledge,
+                                text_field="title_word")
         print(f"Acknowledged {n} title candidate(s) into {ACK_PATH}")
         report = build()          # re-read so the file written below reflects it
 

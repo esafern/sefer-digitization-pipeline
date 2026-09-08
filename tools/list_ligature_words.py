@@ -138,16 +138,9 @@ def main():
         ack.annotate(out[bucket], ACK_PATH, text_field="word")
 
     if args.acknowledge:
-        want = set()
-        for spec in args.acknowledge:
-            kid, _, wi = spec.partition(":")
-            want.add((int(kid), int(wi)))
         rows = out["dropped_lamed"] + out["dropped_alef"]
-        n = ack.record(rows, ACK_PATH, args.note, text_field="word",
-                       only=lambda r: (r["klal_id"], r["word_index"]) in want)
-        missed = want - {(r["klal_id"], r["word_index"]) for r in rows}
-        if missed:
-            raise SystemExit(f"no ligature candidate at {sorted(missed)} - nothing written.")
+        n = ack.record_selected(rows, ACK_PATH, args.note, args.acknowledge,
+                                text_field="word")
         print(f"Acknowledged {n} ligature candidate(s) into {ACK_PATH}")
         out = scan(paths)
         for bucket in ("dropped_lamed", "dropped_alef"):
