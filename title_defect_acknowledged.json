@@ -7,5 +7,14 @@
     "detector": "insertion_deletion",
     "stored": "מעצמנו",
     "word_index_when_recorded": 4
+  },
+  {
+    "key": "212|insertion_deletion|הוון",
+    "ts": "2026-09-08T20:27:25.808105+00:00",
+    "note": "false positive: הוון is ordinary Aramaic ('they were') and is what the heading sets; הוו is simply the commoner short form. The detector is frequency-only and cannot tell a shorter variant from a defect. Reviewer confirmed the titles are fine, 2026-09-08.",
+    "klal_id": 212,
+    "detector": "insertion_deletion",
+    "stored": "הוון",
+    "word_index_when_recorded": 0
   }
 ]

@@ -1,10 +1,10 @@
 # The open dispute queue, ordered by posterior
 
-383 open dispute(s), scored by `tools/rank_dispute_queue.py`. **Regenerate after any apply** - the queue and the calibration both move.
+377 open dispute(s), scored by `tools/rank_dispute_queue.py`. **Regenerate after any apply** - the queue and the calibration both move.
 
 `posterior` is P(a reviewer adopts the consensus reading), estimated from the stratum this dispute falls in, under a Beta(1,1) posterior so a thin stratum cannot read as a certainty. The interval is 90% credible. **This orders attention; it decides nothing** - every row still needs the ink.
 
-Calibrated on **245 ledger rulings** that recorded a consensus reading; 181 of them adopted it, a base rate of 74%. That base rate is the FALLBACK only - the strata below differ from it by more than 60 points, which is the whole reason this file exists.
+Calibrated on **251 ledger rulings** that recorded a consensus reading; 183 of them adopted it, a base rate of 73%. That base rate is the FALLBACK only - the strata below differ from it by more than 60 points, which is the whole reason this file exists.
 
 ## What each stratum is worth
 
@@ -12,11 +12,12 @@ Calibrated on **245 ledger rulings** that recorded a consensus reading; 181 of t
 |---|---:|---:|---:|---|
 | `dicta,surya,vlm` | 35 | 35 | 97% | 92%–100% |
 | `dicta,vlm` | 40 | 34 | 83% | 73%–92% |
-| `dicta,surya` | 32 | 26 | 79% | 67%–90% |
-| `surya,vlm` | 106 | 81 | 76% | 69%–82% |
+| `dicta,surya` | 33 | 27 | 80% | 68%–90% |
+| `surya,vlm` | 108 | 81 | 75% | 67%–81% |
 | `dicta,docai,surya,vlm` | 1 | 1 | 67% | 22%–97% ⚠ thin (n<8); ranking falls back to the engine count |
-| `docai,surya,vlm` | 9 | 2 | 27% | 9%–51% |
-| `docai,vlm` | 7 | 1 | 22% | 5%–47% ⚠ thin (n<8); ranking falls back to the engine count |
+| `dicta,docai,vlm` | 1 | 1 | 67% | 22%–97% ⚠ thin (n<8); ranking falls back to the engine count |
+| `docai,surya,vlm` | 10 | 2 | 25% | 8%–47% |
+| `docai,vlm` | 8 | 1 | 20% | 4%–43% |
 | `docai,surya` | 15 | 1 | 12% | 2%–26% |
 
 **Every set containing DocAI scores low and that is mostly SELECTION.** Candidates are generated from DocAI's disagreements with the corpus, so a DocAI-involved consensus is disproportionately re-proposing a word that vision adjudication or a human has already settled. Read it as "this position has probably been looked at already", not as "DocAI is unreliable".
@@ -25,10 +26,10 @@ Calibrated on **245 ledger rulings** that recorded a consensus reading; 181 of t
 
 | posterior | disputes |
 |---|---:|
-| >=0.75 | 339 |
-| >=0.50 | 12 |
-| >=0.25 | 3 |
-| <0.25 | 29 |
+| >=0.75 | 293 |
+| >=0.50 | 46 |
+| >=0.25 | 2 |
+| <0.25 | 36 |
 
 ## The top 40
 

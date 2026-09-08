@@ -12881,37 +12881,6 @@
       "flag": "current_text_confirmed"
     },
     {
-      "word_index": 26,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "א\"נ",
-      "page": 74,
-      "bbox": {
-        "x1": 0.23948019742965698,
-        "y1": 0.19773554801940918,
-        "x2": 0.26485148072242737,
-        "y2": 0.2126971334218979
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: surya + vlm agree on 'אינ' against stored 'א\"נ'.",
-      "vlm_reading": "אינ",
-      "surya_reading": "אינ",
-      "dicta_reading": "א\"נ",
-      "consensus_engines": [
-        "surya",
-        "vlm"
-      ],
-      "consensus_reading": "אינ",
-      "ligature_artifact": null,
-      "cross_edition": false,
-      "cross_edition_engines": [],
-      "same_edition_agreeing": 2,
-      "abbreviation_shape": null,
-      "flag": "current_text_may_be_wrong"
-    },
-    {
       "word_index": 67,
       "opcode": "delete",
       "docai_reading": "פ\"א דף קע\"א ע\"ד",
@@ -12973,24 +12942,11 @@
       "vision_selected": "A",
       "vision_transcription": "ה\"נ",
       "confidence": 0.95,
-      "reasoning": "The image clearly shows the abbreviation ה\"נ. The letter following the gershayim (\") has a distinct flat base resting on the baseline and a vertical stem, matching the character form of a Nun (נ), distinct from the Gimel (ג) seen in line 3 ('ג''). NOTE: this is a CROSS-EDITION consensus - dicta read the Jerusalem 1975/6 printing, not this Berlin scan.",
+      "reasoning": "The image clearly shows the abbreviation ה\"נ. The letter following the gershayim (\") has a distinct flat base resting on the baseline and a vertical stem, matching the character form of a Nun (נ), distinct from the Gimel (ג) seen in line 3 ('ג'').",
       "vlm_reading": "ה\"נ",
       "surya_reading": "הינ",
       "dicta_reading": "ה\"נ",
-      "flag": "current_text_may_be_wrong",
-      "consensus_engines": [
-        "dicta",
-        "docai",
-        "vlm"
-      ],
-      "consensus_reading": "ה\"נ",
-      "ligature_artifact": null,
-      "cross_edition": true,
-      "cross_edition_engines": [
-        "dicta"
-      ],
-      "same_edition_agreeing": 2,
-      "abbreviation_shape": null
+      "flag": "current_text_may_be_wrong"
     }
   ],
   "215": [
@@ -13014,50 +12970,7 @@
       "vlm_reading": "חדה",
       "surya_reading": "חדה",
       "dicta_reading": "חה",
-      "flag": "current_text_confirmed",
-      "consensus_engines": [
-        "surya",
-        "vlm"
-      ],
-      "consensus_reading": "חדה",
-      "ligature_artifact": null,
-      "cross_edition": false,
-      "cross_edition_engines": [],
-      "same_edition_agreeing": 2,
-      "abbreviation_shape": null
-    },
-    {
-      "word_index": 33,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "וכך",
-      "page": 74,
-      "bbox": {
-        "x1": 0.7623762488365173,
-        "y1": 0.6211079955101013,
-        "x2": 0.7852723002433777,
-        "y2": 0.6384957432746887
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: dicta + surya agree on 'וכו'' against stored 'וכך'. NOTE: this is a CROSS-EDITION consensus - dicta read the Jerusalem 1975/6 printing, not this Berlin scan. Only ONE engine that read THIS scan differs from the corpus here, so a difference between the two printings is a live explanation - check the ink.",
-      "vlm_reading": null,
-      "surya_reading": "וכו'",
-      "dicta_reading": "וכו'",
-      "consensus_engines": [
-        "dicta",
-        "surya"
-      ],
-      "consensus_reading": "וכו'",
-      "ligature_artifact": null,
-      "cross_edition": true,
-      "cross_edition_engines": [
-        "dicta"
-      ],
-      "same_edition_agreeing": 1,
-      "abbreviation_shape": null,
-      "flag": "current_text_may_be_wrong"
+      "flag": "current_text_confirmed"
     },
     {
       "word_index": 63,
@@ -13079,18 +12992,7 @@
       "vlm_reading": "טבעייא",
       "surya_reading": "טבעייא",
       "dicta_reading": "מבעייא",
-      "flag": "current_text_may_be_wrong",
-      "consensus_engines": [
-        "docai",
-        "surya",
-        "vlm"
-      ],
-      "consensus_reading": "טבעייא",
-      "ligature_artifact": null,
-      "cross_edition": false,
-      "cross_edition_engines": [],
-      "same_edition_agreeing": 3,
-      "abbreviation_shape": null
+      "flag": "current_text_may_be_wrong"
     },
     {
       "word_index": 68,
@@ -13202,17 +13104,7 @@
       "vlm_reading": "וכ\"ר",
       "surya_reading": "וכו'",
       "dicta_reading": "וכו'",
-      "flag": "current_text_confirmed",
-      "consensus_engines": [
-        "docai",
-        "vlm"
-      ],
-      "consensus_reading": "וכר",
-      "ligature_artifact": null,
-      "cross_edition": false,
-      "cross_edition_engines": [],
-      "same_edition_agreeing": 2,
-      "abbreviation_shape": null
+      "flag": "current_text_confirmed"
     },
     {
       "word_index": 162,
