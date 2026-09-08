@@ -163,6 +163,10 @@ def main():
     ap.add_argument("--limit", type=int, default=None,
                     help="cap each section (default: list everything)")
     args = ap.parse_args()
+    # FAIL BEFORE THE WORK, not at the write. `--hebrew visual` is the default
+    # and needs python-bidi; without this the run does its whole corpus pass and
+    # only then dies. Item 0DE, 2026-09-08.
+    cio.check_hebrew_mode(args.hebrew)
 
     md = build(args.base_url.rstrip("/"), args.limit)
     if args.hebrew == "visual":

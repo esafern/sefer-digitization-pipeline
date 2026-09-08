@@ -646,6 +646,41 @@ asked to "update the status file." This applies to your own tooling/script
 fixes too (cache bugs, dead models, UI fixes), not just corpus-content
 findings.
 
+## How to surface a finding — show the thing, not a description of it
+
+Reviewer directive, 2026-09-08. These are binding on every finding you
+report, in chat and in `PROJECT-STATUS.md` alike. They exist because a
+finding the reviewer cannot get to is a finding they have to go and find
+again, and because a prose summary of code is not evidence about the code
+(Lesson 19, Lesson 42).
+
+**1. A DATA issue is surfaced with the dashboard URL for the exact klal and
+word.** Not "klal 198 has a problem", not "two words in klal 198" — the
+link, per position:
+
+    http://127.0.0.1:8420/klal/198/word/893
+
+That is `ROUTE_SHARE` (`review_server.py`), the PATH form, which the server
+302s to the hash route. Use the path form and not `#klal=198&word=893`:
+app.js already prefers it for anything copied out, because `&` gets
+truncated when a link is pasted into a terminal or a chat window. Give the
+stored word beside the link so the reviewer knows what they are going to
+see. If a position has no URL — a klal above 222, a word with no alignment
+— say so explicitly rather than omitting the line.
+
+**2. A CODE issue is surfaced with the actual code that has the problem.**
+Paste the lines, with `file.py:line` above them, and let them show the
+defect; do not paraphrase what the code does. The paraphrase is where a
+review goes wrong — it reports the intent the comment states rather than
+the behaviour the code has, and those are exactly the cases worth
+reporting. Quote the surrounding comment too when the comment is part of
+the finding (a stale measurement, an ordering the code does not enforce, a
+claim about a sibling module).
+
+Both rules apply to the terminology split above: a data issue gets a URL, a
+bug gets code. If a finding has both halves — a bug that produced bad data —
+give both, and say which is which.
+
 ## Terminology
 
 **An issue with the DATA is a "data issue," not a "bug." An issue with the
@@ -1407,3 +1442,35 @@ next incident.
     "Manual queue" and "not corrections anybody made" into "not queue anybody
     made" — renaming English inside comments while doing the identifiers
     correctly. Walking NAME tokens renames identifiers and leaves prose alone.
+
+---
+
+# Every session, and every new day — before anything else
+
+Reviewer directive, 2026-09-08. This is deliberately the last thing in this
+document, because it is the first thing you do.
+
+**At the start of every new session, and the first time we speak on any new
+calendar day within a session:**
+
+1. **Re-read this file.** Not skim, not "I read it earlier in the session" —
+   a new day is a new read. Then `PROJECT-STATUS.md`, per the session-start
+   checklist in Part 2.
+2. **Open with the parashat hashavua.** Name it, then give **two sentences**
+   carrying one interesting idea from it.
+
+Draw the idea from one of these, and **say which one you used**: Rashi, Ibn
+Ezra, the Talmud, R. Joseph B. Soloveitchik, R. Jonathan Sacks, R. Shlomo
+Riskin, or R. Abraham Isaac Kook.
+
+Two sentences means two sentences. This opens the day's work; it is not the
+work, and it is not a place to be comprehensive.
+
+**Get the parasha right or say you are unsure.** The reading depends on the
+Hebrew calendar, on whether the diaspora and Israel cycles have diverged that
+year, and on which festival readings displace the weekly portion — none of
+which is safely guessed from a Gregorian date. Check rather than infer, and if
+you cannot check, say so and ask, rather than naming a portion that is wrong.
+An invented parasha or a source that did not say the thing attributed to it is
+worse than an honest "I need to look this up" — the same rule this whole
+project runs on.

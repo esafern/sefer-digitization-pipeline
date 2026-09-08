@@ -28,6 +28,15 @@ evidence for each is in `PROJECT-STATUS-HISTORY.md`._
 >    timing window). Start there, not from scratch.
 > 5. `16`, `20`, `0N`, `3`, `4` — the standing corpus and witness-queue items.
 >
+> **Added 2026-09-08 by a code review:** `0DE` (the word-id skip in the FLAG
+> reindexer was live and stranding flags — 17 open flags carry an id and nothing
+> resolves a flag's position by one; **findings 1-5 fixed**, 6-8 open (LOW, latent),
+> and klal 198's two already-diverged flags need a ruling against the ink), `0DD`
+> (two ledger tools resolve a bbox to a word with two different distance
+> metrics and disagree on 20 of 663 positions), `0DC` (item `0BI`'s
+> corpus-root fix was applied to two modules and never swept — 26 more
+> freeze their paths at import, four of them `rebuild_all.sh` stages).
+>
 > **Done 2026-09-06 and archived:** stable word ids (`word_identity.py`) wired
 > into every corpus writer and every position-resolving tool, with tombstones and
 > restoration links; history addressable by word rather than by slot; the TEI
@@ -92,6 +101,462 @@ applying it to the corpus remain two separate, deliberate steps.
 
 
 ## Open items
+
+0DE. **[2026-09-08, code review] REVIEW OF `f2daf3b` (`pipeline/`, +559/-30). THE
+    ID-SKIP IN BOTH REINDEXERS IS LIVE AND ITS "INERT TODAY" COMMENT IS STALE:
+    17 OPEN WORD-LEVEL FLAGS NOW CARRY AN ID AND NO FLAG CONSUMER RESOLVES BY
+    ONE.**
+
+    Eight findings. The three marked VERIFIED below were re-checked here against
+    the code and the live ledger, not taken from the review's write-up
+    (Lesson 19); the rest are reported as found and are NOT independently
+    confirmed.
+
+    ### 1. HIGH - `apply_reviewer_decisions.py:334`, the flag reindexer's id skip. VERIFIED. **FIXED 2026-09-08**
+
+    `if rd.word_id_of(rec, backfilled): continue` skips moving any flag that
+    names its word by id, on the premise that an id-addressed flag needs no
+    reindex. **No flag consumer resolves by id.**
+    `review_server._word_level_ai_flags()` builds `by_word[r.get("word_index")]`
+    (`review_server.py:308`) and highlights on that raw index;
+    `review_counts.flag_still_open` takes `word_index` and is index-keyed
+    throughout. Only `resolved_position()` and the senior-review decisions panel
+    (`review_server.py:939`) id-resolve, and neither touches flags.
+
+    **The comment says "INERT TODAY - 0 of 1,367 word-level flags carry an id".
+    Re-measured 2026-09-08: 1,424 word-level `klal_flag` rows, 17 carry an id,
+    and all 17 are OPEN** - klal 54 (w415, 787, 877, 907), klal 167 (w422, 459,
+    644, 664, 738, 812, 827, 990, 1037, 1092, 1234), klal 198 (w894, 969).
+    Counted through `apply_reviewer_decisions.open_word_flags()` itself, so this
+    is the same set the skip will see.
+
+    It compounds: line 370 stamps a `word_id` on every flag the reindexer DOES
+    move, so a flag's first reindex is its last. The next word-count change in
+    that klal leaves it highlighting the wrong word with nothing left to move
+    it - the klal 66 `ע"ס` -> `שהניח` defect this function exists to prevent.
+
+    ### 2. MEDIUM - `apply_reviewer_decisions.py:270`, the same skip on decisions
+
+    Justified by "resolved_position() asks the sidecar first", which is true of
+    the applier and the senior-review panel and not of the main text pane:
+    `rd.all_current_live("candidate_choice")` is keyed `(klal_id, word_index)`
+    and consumed index-wise by `review_counts.merge_decision` and
+    `word_states`. `review_queue_part1.json` is rebuilt against fresh indices,
+    so an id-carrying pending ruling that was not reindexed stops matching its
+    candidate entry: the ruling disappears from the word it was made on and can
+    colour a different word decided. Per the comment's own measurement, 9 of 24
+    pending rulings. NOT independently verified here.
+
+    ### 3. MEDIUM - `review_counts.py:173`, the one cache with no invalidation. VERIFIED
+
+    `@functools.lru_cache(maxsize=4)` on `_backfilled(path)` is keyed on `path`
+    alone and lives for the process. `rd._read_all` is keyed on
+    `(st_mtime_ns, st_size)` precisely to honour "a decision recorded in one tab
+    is visible to the next request". `review_server` calls `flag_still_open`
+    with `path=None` (`review_server.py:446`), so a `word_id_backfill` appended
+    while the server is up - `tools/backfill_word_ids.py` in another terminal,
+    an apply run - is invisible until restart, and flags stay wrongly open or
+    wrongly closed until then.
+
+    Its docstring argues this is fine because the server re-execs under the
+    restart rule. **The restart rule covers CODE, not the ledger** - and the
+    ledger is the DATA the "reads its source files fresh off disk every request"
+    contract is about. This is Lesson 39 (a value cached at load time behind a
+    live view) in the counts layer. `(path, mtime_ns, size)` keeps the measured
+    win without the staleness. It is also a cross-test hazard: the new test has
+    to call `rcount._backfilled.cache_clear()` by hand
+    (`tests/test_pipeline_logic.py:6098`), and every test that redirects
+    `rd.DECISIONS_PATH` and calls `flag_still_open` without an explicit `path`
+    shares the `None` key with every earlier test.
+
+    ### 4. MEDIUM - `apply_reviewer_decisions.py:370`, an ordering the code does not enforce
+
+    The id stamp is correct only under the order the comment names (corpus
+    written -> `follow_corpus()` reconciles the sidecar -> this runs).
+    `follow_corpus` at `:1123` is wrapped in a bare `except Exception` that
+    prints a WARNING and continues, skips klalim not already in the sidecar, and
+    returns `reconcile()` `ValueError`s in `problems` that are only printed. In
+    all three cases the sidecar is still pre-shift, `id_at(new_wi)` returns the
+    id of the word that USED to sit there, and the moved flag is stamped with a
+    wrong id - permanently, because finding 1's skip then excludes it from every
+    future reindex. Gate the stamp on `touched` / no problem for this klal.
+    NOT independently verified here.
+
+    ### 5. MEDIUM - `corpus_io.py:675`, a documented fail-fast lost in a move. VERIFIED. **FIXED 2026-09-08**
+
+    `from bidi.algorithm import get_display` is function-local inside
+    `to_visual()`. `tools/preview_dicta_disputes.py:59` still carries the same
+    import at module scope with the comment saying why: "burying it inside
+    write_md() meant a fresh clone ran the whole corpus-wide alignment and only
+    then died with ModuleNotFoundError, having written nothing." The rationale
+    did not come along in the 2026-09-07 move. The three generators newly routed
+    through `cio.render_hebrew` all default to `--hebrew visual` and call it
+    after all the work; `list_drifted_rulings.py:292` calls it INSIDE
+    `open(args.out, "w")`, so without python-bidi the existing report is
+    truncated to zero bytes and then the run dies. Restore the module-scope
+    import.
+
+    ### 6-8. LOW - `build_structural_defect_report.py`, all latent today
+
+    - `:138` `ideal = ALEPH_BET[:len(seq)]` caps at 22 but `ideal[j]` indexes
+      `range(len(seq))` - a run of 23+ consecutive single-letter tokens raises
+      `IndexError` and aborts stage 4e of `rebuild_all.sh`. The same block also
+      assumes any run of >=4 single-letter tokens is an א-ב-ג enumeration
+      STARTING at א, so an enumeration continuing from an earlier klal
+      (`ד ה ו ז`) reads as four breaks with confident proposals. One qualifying
+      run in the corpus today (klal 144 w830, length 10) - but this runs on every
+      rebuild against text that changes.
+    - `:76` `_key` is `klal_id|detector|stored` with `word_index` deliberately
+      excluded for drift-immunity, which also makes it non-unique within a klal:
+      two same-detector findings with the same stored text collapse, so
+      acknowledging the first silently suppresses the second, unreviewed. 22
+      rows / 22 distinct keys today. Needs a stable non-index discriminator.
+    - `:156` `cio.load_klal_words(part_path)` is called a second time to build
+      `own` when line 92 already holds the identical map. Reuse `klal_words`.
+
+    ### Checked and clean
+
+    Detector tuple arities match their unpacking; `_raised_at`'s `supersedes`
+    walk is bounded, cycle-guarded and correctly gated on `klal_flag` (the other
+    `supersedes` writers never write that type); `_record_unverified_shifts`'
+    row shape matches `main`'s unpacking and only runs off the non-dry-run path;
+    the four dead-code removals (`flagged_klalim`, `repair_stream`,
+    `get_ligatures`, `POST /api/decisions/candidate`) have no remaining callers
+    in `pipeline/`, `tools/`, `tests/`, `rebuild_all.sh` or `review_frontend/`.
+    `word_id_of` truthiness vs `is not None` differs between the two reindexers
+    and `flag_answered_by_a_later_decision`, but word ids are per-klal and
+    1-based, so id 0 cannot occur - latent only.
+
+    ### FIXED 2026-09-08, at the reviewer's instruction: findings 1 and 5
+
+    **Finding 1.** The skip is removed from `reindex_flags_after_shift()` and
+    NOT from the decision reindexer beside it - the asymmetry is the fix, and it
+    is written into the code as a comment saying what would have to become true
+    for the skip to come back (a flag consumer that resolves a POSITION by id).
+    The id stamp on a moved flag stays, redescribed as provenance rather than as
+    an address: it is what makes a future divergence visible.
+
+    Precision the first write-up of this item got slightly wrong, corrected here
+    rather than left standing: **one flag reader does consult the id** -
+    `review_counts.flag_answered_by_a_later_decision()` at `:136` matches flag id
+    to ruling id, deliberately after the index test. That answers WHETHER a flag
+    is answered, never WHERE it sits. The positional path
+    (`review_server._word_level_ai_flags()`, the nav/count sets,
+    `flag_still_open()`) is index-only, which is what makes the skip wrong.
+
+    `tests/test_pipeline_logic.py::test_an_open_flag_addressed_by_a_stable_id_is_
+    not_reindexed` **asserted the defect** and is inverted, renamed
+    `..._carrying_a_stable_id_is_STILL_reindexed`. Mutation-checked both ways
+    (Lesson 42): re-adding the skip fails it, removing the skip passes it, so the
+    test is not blind. Its sibling on the ruling side is untouched and still
+    asserts the skip, which is what keeps the pair meaningful (Lesson 25). Suite
+    green at 513.
+
+    **NOT repaired, and deliberately: klal 198's two already-diverged flags**
+    (w894 carrying id 893, w969 carrying id 968). The fix stops new ones; which
+    address is right for these two is a call against the ink, not a guess a
+    script should make. They are the only two of the 17 in that state - the other
+    15 have index and id naming the same word.
+
+    **Finding 5.** `corpus_io` now resolves python-bidi at import and captures
+    the failure instead of raising it, and `check_hebrew_mode(mode)` raises early
+    with an actionable message; all three generators call it straight after
+    `parse_args()`, and `list_drifted_rulings.py` renders BEFORE it opens its
+    output file.
+
+    **Not the bare module-scope import the review recommended, and the reason
+    is a measurement:** 87 modules import `corpus_io` and 6 ever render Hebrew,
+    so a plain top-level `from bidi.algorithm import get_display` converts a
+    missing optional package into a total pipeline outage - every validator,
+    detector and the review server - in order to fail fast for six callers. The
+    guarded form gives the same fail-fast to those six and leaves the other 81
+    working.
+
+    Verified by simulating a machine without python-bidi (import hook): the
+    corpus still loads (222 klalim), `--hebrew logical` still works, `--hebrew
+    visual` exits immediately with the install instruction, and **an existing
+    worklist survives at full size instead of being truncated to 0 bytes** - the
+    old shape, reproduced standalone, leaves 0.
+
+    ### The two klal 198 flags, resolved 2026-09-08 - and the causal chain
+
+    Reported above as "needs a call against the ink". The ledger answered it
+    instead, and the answer is that the reviewer had already ruled:
+
+    1. **2026-09-07 18:05:38** - `שתישההולאחם` at w570 replaced with
+       `שתי הלחם משמע`. One word became three: **+2**.
+    2. **18:29:53** - applied. `reindex_flags_after_shift()` worked CORRECTLY,
+       moving the flag on `זלזה` w892 -> w894 and the flag on `שכתכתי`
+       w967 -> w969, and (new that day) stamping word ids 893 and 968 on the two
+       rows it wrote.
+    3. **18:45:10** - a `manual_correction` at w573 with `chosen_text=""`, i.e.
+       a deletion, applied 18:47:49: **-1**. `זלזה` moved to w893 and `שכתכתי`
+       to w968.
+    4. **The reindexer did not move the flags this time**, because step 2 had
+       just given them ids and the skip passed over them. Flags at 894/969,
+       words at 893/968.
+    5. **2026-09-08 07:36/07:38** - the reviewer ruled at 893/968, the correct
+       current positions.
+
+    **The id stamp cut both ways, which is the useful part of this case.** It is
+    what made the skip fire in step 4 (the defect), and it is what let
+    `flag_answered_by_a_later_decision()` match ruling to flag across the
+    one-word gap in step 5 (the feature): both `still_open=False` before anything
+    was touched today, so neither had ever been counted as outstanding. One field,
+    opposite consequences, because one path treats the id as an ADDRESS and the
+    other only as an IDENTITY.
+
+    **The rulings were recorded and never applied.** Checked before acting: the
+    corpus still held `זלזה` and `שכתכתי`, `applied=False` on both. Clearing the
+    flags at that point would have removed the last marker on two words that were
+    still wrong. Applied instead, this run, with the reviewer's go-ahead - 6
+    decisions, 0 insert/delete, so no index moved:
+
+        klal 144 w821  'בכתיכת'  -> 'בכתיבת'
+        klal 144 w873  'מהלוקת'  -> 'מחלוקת'
+        klal 144 w907  'בישרץ'   -> 'בישראל'
+        klal 198 w893  'זלזה'    -> 'ולזה'
+        klal 198 w968  'שכתכתי'  -> 'שכתבתי'
+
+    Verified word-by-word against a before/after copy of `part1.json`, not
+    against the script's own report (Lesson 19); both klalim unchanged in length
+    (1292 and 1095). `./rebuild_all.sh` clean, exit 0, 513 tests.
+
+    **Then the two flag rows were cleared**, superseding the originals with the
+    chain above in the note. THE APPLY PATH COULD NOT DO THIS ITSELF and that is
+    worth recording: it closes a flag at the applied decision's EXACT index, and
+    these sat one to the right, so the same index-vs-id gap that stranded them
+    also hid them from the closer. Corpus-wide, open flags carrying a word id go
+    17 -> 15; the remaining 15 (klal 54 x4, klal 167 x11) all have index and id
+    naming the same word, so none is in this state.
+
+    ### FIXED 2026-09-08, second pass: findings 2, 3 and 4
+
+    All three mutation-checked (Lesson 42): the fix reverted, the test observed
+    to fail, the fix restored. Gated suite 513 -> 515.
+
+    **Finding 2 - the decision reindexer's id skip, REMOVED, and by the narrow
+    route.** The review's remedy was to teach the queue side to id-resolve. That
+    is a change to what the reviewer sees across four endpoints; keeping the
+    recorded index correct costs one superseding row per shift and touches no
+    rendering, so that is what was done. Both reindexers now maintain the index
+    and treat the id as provenance plus the applier's fallback - which is the
+    same conclusion finding 1 reached, applied consistently instead of split.
+
+    **Measured before fixing, and it is LATENT: 39 pending rulings, 4 carry an
+    id, 0 of the 4 resolve to a different index than the one recorded.** Nothing
+    is wrong on screen today. Recorded that way rather than as a live defect.
+
+    The retirement refusal the old skip also carried survives structurally: the
+    span check refuses to move a ruling whose word is gone
+    (`new_words[new_wi:...] != span`), reporting it as unverified. And Lesson 46
+    is satisfied by the line above the removed skip - an applied ruling is
+    skipped before the move, so no superseding copy is written over one.
+
+    `test_a_pending_decision_addressed_by_a_stable_id_is_not_reindexed` asserted
+    the skip and is inverted, renamed `..._carrying_a_stable_id_is_STILL_
+    reindexed`.
+
+    **Finding 3 - `_backfilled()` re-keyed on (mtime_ns, size).** Was
+    `lru_cache(maxsize=4)` on `path` alone; the server calls it with `path=None`,
+    so one entry served the process. Now the same shape as
+    `rd._read_all`/`widentity.load`/`sa.load_regions`, one stat() per call.
+
+    **THE MUTATION DID NOT FAIL, AND THAT WAS THE REAL FINDING.** Restoring the
+    lru_cache left the suite green. The test that used to call
+    `rcount._backfilled.cache_clear()` by hand never exercised the staleness
+    either - its first call answers through the INDEX branch of
+    `flag_answered_by_a_later_decision()` and returns before reaching
+    `_backfilled()`, so the cache was cold on the second call. So the code was
+    right and untested, and the hand-written `cache_clear()` was the only thing
+    that looked like coverage. `test_the_backfill_table_re_reads_when_the_ledger_
+    grows` now asserts the property directly - read, append an annotation, read
+    again - and fails under the mutation. The `cache_clear()` line is deleted,
+    and its absence is a second assertion.
+
+    **Finding 4 - the id stamp is gated on `sidecar_in_step`.** A reconciled
+    sidecar has exactly one id per word in the klal just written; an
+    unreconciled one still holds the pre-shift count and differs by `delta`, so
+    length is the whole test. Checked directly rather than plumbed through
+    `follow_corpus()`, which returns a COUNT and is called by three corpus
+    writers. Out of step: the flag is still MOVED (a stale sidecar is no reason
+    to strand it) but carries NO id, and a WARNING names the klal. A missing id
+    is recoverable; a wrong one is indistinguishable from a right one forever
+    after, and it is what `flag_answered_by_a_later_decision()` matches on.
+
+    Two existing tests stubbed `widentity.load` as `{"stub": True}` - a sidecar
+    claiming to exist while carrying no ids, which no real run produces and which
+    the new check correctly rejects. Both now stub the real shape.
+    `test_a_reindexed_flag_gets_no_id_when_the_sidecar_is_out_of_step` is its
+    twin, identical but for a pre-shift id count.
+
+    Findings 6-8 (`build_structural_defect_report.py`, all LOW and latent) are
+    NOT fixed and remain as written above.
+
+0DD. **[2026-09-08, code review] TWO LEDGER TOOLS RESOLVE "WHICH WORD IS AT THIS
+    BBOX" WITH TWO DIFFERENT METRICS, AND DISAGREE ON 20 OF 663 POSITIONS. One
+    of them says in its own docstring that it holds the other's bar.**
+
+    `tools/repoint_stale_decisions.py:76 bbox_signal()` and
+    `tools/close_satisfied_rulings.py:69 _bbox_index()` have byte-identical
+    bodies - same `word_bboxes_resolved` call, same page filter, same
+    `min(here, key=lambda kv: _distance(bbox, kv[1]))`. Their `_distance` is
+    not the same function:
+
+    | file | line | metric |
+    |---|---|---|
+    | `repoint_stale_decisions.py` | 60-67 | Euclidean distance between box **centres** (`_centre` collapses each box to a point) |
+    | `close_satisfied_rulings.py` | 63-66 | **L1 over all four corners** (`|x1-x1| + |y1-y1| + |x2-x2| + |y2-y2|`) |
+
+    So the two tools answer the same question - which corpus word a ruling's
+    recorded scan position names NOW - and can name different words.
+
+    ### Measured, on the live ledger
+
+    663 rulings (`disputed_choice`, `candidate_choice`, `manual_correction`,
+    `witness_choice`) carry a `candidate_snapshot` bbox that resolves against
+    `klal_page_regions.json`. **The two metrics pick a different word index on
+    20 of them, 3.0%.** Three fall in the tier where the bbox is the SOLE
+    deciding signal for `close_satisfied_rulings.py` - its tier-3 REPEATED
+    branch, the one that writes an `apply_event`:
+
+        id 4c1f9e85cf6a  klal 8   w1    chosen איידי  (7x)  centre->w29   L1->w0
+        id 9ea37a28c374  klal 69  w339  chosen אלהים  (6x)  centre->w321  L1->w339
+        id ade4c2678ea6  klal 69  w338  chosen אלהים  (6x)  centre->w321  L1->w339
+
+    klal 69 / `אלהים` is the same klal and the same word Lesson 34 records as
+    having been silently deleted once by a mis-scoped mutator. This is a
+    position with a history.
+
+    ### NEITHER METRIC IS DEMONSTRABLY THE RIGHT ONE - do not "fix" this by
+    ### picking the one that looks better
+
+    Scored against each ruling's own recorded `word_index` (a proxy, and one
+    that drifts - it is not ground truth), they are within noise of each other
+    over all 663:
+
+    | | centre-Euclidean | corner-L1 |
+    |---|---:|---:|
+    | lands exactly on the recorded index | 494 (74.5%) | 497 (75.0%) |
+    | within 1 word | 564 (85.1%) | 575 (86.7%) |
+    | mean `|resolved - recorded|` | 10.6 | 10.4 |
+
+    L1 is better on every line and by almost nothing. **The finding is the
+    divergence, not a winner.** Deciding which metric is correct needs the ink
+    (render the crop, read which word the box actually covers) on a sample of
+    the 20 - Lesson 9's two-signal bar - not a rerun of this table.
+
+    ### Why this is a bug and not a style note
+
+    `close_satisfied_rulings.py`'s module docstring says its tier-3 bar is
+    "the ink agreeing with the letters, which is the standing two-signal bar
+    (Lesson 9) and **the same one `repoint_stale_decisions.py` holds itself
+    to**". It is not the same one. A prose claim about a sibling's behaviour is
+    exactly what Lesson 42 says not to ship unmeasured, and this is the pair
+    Lesson 46 already caught diverging on a guard - the second divergence in
+    the same two files.
+
+    **The remedy is a shared primitive, not a matched pair.** Both files already
+    `import scan_alignment as sa` and the function is entirely about scan
+    geometry; one `sa.word_index_at_bbox(...)` deletes both copies and makes the
+    metric a single decision with one place to record why. Same rule as
+    `union_bbox` (finding H3) and `PLACEHOLDER_RE`.
+
+    NOT FIXED. Needs the ink-check above first, because consolidating on the
+    wrong metric silently moves 20 rulings.
+
+0DC. **[2026-09-08, code review] THE `0BI` CORPUS-ROOT FIX WAS APPLIED TO TWO
+    MODULES AND NEVER SWEPT. 26 MORE FREEZE THEIR PATHS AT IMPORT, 62 CONSTANTS
+    IN ALL - INCLUDING FOUR OF THE FIVE `rebuild_all.sh` STAGES AND THE REVIEW
+    SERVER.**
+
+    `test_the_corpus_root_seam_reaches_the_scripts_that_write_corpus_data`
+    (`tests/test_pipeline_logic.py:7194`) is the right test and its docstring
+    states the defect exactly: `$SEFER_CORPUS_ROOT` working is not the same as
+    the seam working, because the environment is read before the module loads,
+    and a module that copies `cio.PART1_PATH` into a module-level constant
+    freezes it where `cio.set_corpus_root()` - what `--corpus` calls, and what a
+    second book goes through - can no longer move it. **It checks two modules,
+    named as literals: `apply_punctuation_decisions` and
+    `patch_witness_word_indices`.** The class was never swept.
+
+    ### The sweep, run the same way the test runs - import, THEN move the root
+
+    Not the grep proxy. `test_the_corpus_root_bypass_count_has_not_grown`
+    matches `^REPO = os.path.dirname(...)` in the source and says in its own
+    docstring that it cannot see this class; 25 of the 26 below have no such
+    line. Each module was imported, `cio.set_corpus_root(tmp)` called after, and
+    every module-level string constant asked whether it had moved:
+
+        pipeline/apply_reviewer_decisions.py    PART1_PATH REPO UNVERIFIED_SHIFTS_PATH
+        pipeline/assemble_corrections_dataset.py CONSENSUS_PATH IN_PATH LEXICAL_PATH OUT_PATH
+                                                 PART1_PATH REPO SURYA_BASELINE_PATH VLM_BASELINE_PATH
+        pipeline/audit_applied_decisions.py     PART1_PATH REPO
+        pipeline/build_corrections_dataset.py   ALIGNMENT_PATH DEMO_DATASET DOCAI_DIR REPO
+        pipeline/build_gematria_trace.py        CACHE_DB
+        pipeline/build_klal_page_regions.py     ALIGNMENT_PATH DEMO_DATASET DOCAI_DIR OUT_PATH
+                                                 PART2_ALIGNMENT_PATH PART2_TRACE_PATH
+                                                 PART3_ALIGNMENT_PATH PART3_TRACE_PATH REPO TRACE_PATH
+        pipeline/build_klalim_demo_dataset.py   OUT_PATH REPO
+        pipeline/repair_filters/docai_filter.py REFERENCE_FREQ_PATH
+        pipeline/review_server.py               FRONTEND_DIR IMAGES_DIR REPO
+        pipeline/verify_corrections_vision.py   CACHE_DB CANDIDATES_PATH DEMO_DATASET OUT_PATH PDF_PATH REPO
+        tools/build_dicta_baseline.py           DEFAULT_OUT
+        tools/build_part1_freq.py               OUT_PATH
+        tools/check_klal_token_orphans.py       DOCAI_DIR
+        tools/check_next_marker_and_title.py    PART1_PATH
+        tools/fetch_sefaria_reference_corpus.py OUT_DIR
+        tools/list_unreviewed_auto_corrections.py OUT_PATH
+        tools/propose_abbreviation_expansions.py SEFARIA_FREQ_CACHE
+        tools/propose_punctuation_part1.py      CACHE_DB OUT_PATH PART1_PATH
+        tools/review_lexicon_gaps.py            PART1_PATH
+        tools/validate_catchword_continuity.py  DOCAI_DIR
+        tools/validate_klal_span_coverage.py    DOCAI_DIR
+        tools/validate_lexicon_independent.py   FREQ_CACHE FREQ_META LEXICON_PATH RAW_DIR
+        tools/validate_part1_corpus_integrity.py LEXICON_PATH PART1_PATH
+        tools/verify_flagged_candidates_vision.py DECISIONS_PATH DOCAI_DIR PART1_PATH
+                                                 REGIONS_PATH REPO REPORT_PATH
+        tools/verify_reconstruction_witness.py  DOCAI_DIR IMAGES_DIR LEXICON_PATH OUT_PATH
+        tools/verify_witness_vision.py          CACHE_DB DOCAI_DIR PDF_PATH QUEUE_PATH REPO
+
+    **Stages 1, 2, 3, 4 and 5 of `rebuild_all.sh` are all in that list**, as is
+    `apply_reviewer_decisions.py` - a writer of an authored file - and
+    `review_server.py`, whose `IMAGES_DIR` freeze means a server pointed at
+    another book would serve THIS book's scan pages beside that book's text.
+
+    `REPO = cio.REPO` is the commonest spelling and it is the trap `corpus_io`'s
+    own header warns about in as many words: "a from-import would bind the value
+    once and reintroduce the defect, so don't add one." A module-level
+    `REPO = cio.REPO` is a from-import wearing attribute-access clothes - it
+    fires the PEP 562 hook exactly once. `pipeline/review_data.py:35` already
+    writes the same warning for the shape constants and does the right thing.
+
+    ### WHAT THIS DOES AND DOES NOT BREAK TODAY
+
+    Stated plainly so nobody reads it as bigger than it is. **No current run is
+    wrong.** `$SEFER_CORPUS_ROOT` is read before import and still works for all
+    26; none of the 26 parses `--corpus` itself; and the test suite passes
+    (513/513 on `test_corpus_invariants.py` + `test_pipeline_logic.py`,
+    2026-09-08 - `START_HERE.md`'s "444" is stale again). What is broken is the
+    SEAM: `cio.set_corpus_root()` is the documented way to point this pipeline
+    at a second book, item `0AR`/`0AZ` built it for exactly that, and for these
+    26 it silently does nothing. A second book's rebuild would write into this
+    checkout, which is what `0BI` found the first time.
+
+    ### The fix, and the test that should replace the literal pair
+
+    Mechanical: drop the module-level copy and call `cio.PART1_PATH` /
+    `cio.repo_path(...)` at use site. The part worth doing carefully is the
+    test - generalize
+    `test_the_corpus_root_seam_reaches_the_scripts_that_write_corpus_data` from
+    its two hand-listed modules to the ENUMERATED set (walk `pipeline/` and
+    `tools/`, find every module-level assignment of a `cio` lazy name or an
+    `os.path.join(REPO, ...)`, import it, move the root, assert it followed).
+    Two literals cannot ratchet a class; that is the whole reason this sat for
+    five days.
+
+    NOT FIXED - 26 modules is a scope decision, and four of them are rebuild
+    stages that should not be edited between a review session and a rebuild.
 
 0DA. **[2026-09-07] THE DIPLOMATIC EDITION SHIPS. `--edition diplomatic`
     RECONSTRUCTS THE TEXT AS PRINTED, 370 OF 374 INTERVENTIONS, WITH A

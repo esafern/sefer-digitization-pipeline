@@ -146,6 +146,10 @@ def main():
     ap.add_argument("--out", default=OUT_PATH)
     ap.add_argument("--base-url", default=DEFAULT_BASE)
     args = ap.parse_args()
+    # FAIL BEFORE THE WORK, not at the write. `--hebrew visual` is the default
+    # and needs python-bidi; without this the run does its whole corpus pass and
+    # only then dies. Item 0DE, 2026-09-08.
+    cio.check_hebrew_mode(args.hebrew)
     base = args.base_url.rstrip("/")
 
     positions = refused_positions()
@@ -289,8 +293,14 @@ def main():
 
     if args.hebrew == "visual":
         L = [L[0], "", cio.VISUAL_WARNING] + L[1:]
+    # RENDER FIRST, THEN OPEN. `open(..., "w")` truncates on entry, so rendering
+    # inside the block meant any failure in render_hebrew destroyed the existing
+    # report before it could fail - a 0-byte worklist plus a traceback. The two
+    # siblings already build their text before opening; this one did not.
+    # Item 0DE, 2026-09-08.
+    rendered = "\n".join(cio.render_hebrew(L, args.hebrew)) + "\n"
     with open(args.out, "w", encoding="utf-8") as f:
-        f.write("\n".join(cio.render_hebrew(L, args.hebrew)) + "\n")
+        f.write(rendered)
         f.flush()
     print(f"Wrote {args.out}: {len(positions)} ruling(s)")
     for key, title, _ in order:

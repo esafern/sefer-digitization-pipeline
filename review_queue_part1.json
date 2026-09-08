@@ -6654,86 +6654,24 @@
       "abbreviation_shape": null
     },
     {
-      "word_index": 821,
+      "word_index": 908,
       "opcode": "replace",
       "docai_reading": null,
-      "final_text": "בכתיכת",
-      "page": 52,
-      "bbox": {
-        "x1": 0.49254658818244934,
-        "y1": 0.22392266988754272,
-        "x2": 0.552173912525177,
-        "y2": 0.24124044179916382
-      },
+      "final_text": ":",
+      "page": null,
+      "bbox": null,
       "vision_selected": null,
       "vision_transcription": null,
       "confidence": null,
-      "reasoning": "Multi-witness consensus: dicta + surya + vlm agree on 'בכתיבת' against stored 'בכתיכת'. NOTE: this is a CROSS-EDITION consensus - dicta read the Jerusalem 1975/6 printing, not this Berlin scan.",
-      "vlm_reading": "בכתיבת",
-      "surya_reading": "בכתיבת",
-      "dicta_reading": "בכתיבת",
+      "reasoning": "Multi-witness consensus: dicta + surya agree on 'ב' against stored ':'. NOTE: this is a CROSS-EDITION consensus - dicta read the Jerusalem 1975/6 printing, not this Berlin scan. Only ONE engine that read THIS scan differs from the corpus here, so a difference between the two printings is a live explanation - check the ink.",
+      "vlm_reading": ":",
+      "surya_reading": "ב",
+      "dicta_reading": "ב",
       "consensus_engines": [
         "dicta",
-        "surya",
-        "vlm"
+        "surya"
       ],
-      "consensus_reading": "בכתיבת",
-      "ligature_artifact": null,
-      "cross_edition": true,
-      "cross_edition_engines": [
-        "dicta"
-      ],
-      "same_edition_agreeing": 2,
-      "abbreviation_shape": null,
-      "flag": "current_text_may_be_wrong"
-    },
-    {
-      "word_index": 824,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "שלעת",
-      "page": 52,
-      "bbox": {
-        "x1": 0.38260868191719055,
-        "y1": 0.22392266988754272,
-        "x2": 0.4285714328289032,
-        "y2": 0.24124044179916382
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Lexical defect: stored 'שלעת' has NO attestation in the independent reference corpus and occurs 1x here, while 'שעת' is attested 535x and is one extra_char away. Found by tools/detect_insertion_deletion.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
-      "vlm_reading": null,
-      "dicta_reading": null,
-      "surya_reading": null,
-      "lexical_proposal": "שעת",
-      "lexical_source": "detect_insertion_deletion.py",
-      "flag": "current_text_may_be_wrong"
-    },
-    {
-      "word_index": 873,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "מהלוקת",
-      "page": 52,
-      "bbox": {
-        "x1": 0.7757763862609863,
-        "y1": 0.2847362160682678,
-        "x2": 0.8366459608078003,
-        "y2": 0.30245670676231384
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: dicta + vlm agree on 'מחלוקת' against stored 'מהלוקת'. NOTE: this is a CROSS-EDITION consensus - dicta read the Jerusalem 1975/6 printing, not this Berlin scan. Only ONE engine that read THIS scan differs from the corpus here, so a difference between the two printings is a live explanation - check the ink.",
-      "vlm_reading": "מחלוקת",
-      "surya_reading": "מהלוקת",
-      "dicta_reading": "מחלוקת",
-      "consensus_engines": [
-        "dicta",
-        "vlm"
-      ],
-      "consensus_reading": "מחלוקת",
+      "consensus_reading": "ב",
       "ligature_artifact": null,
       "cross_edition": true,
       "cross_edition_engines": [
@@ -13247,45 +13185,12 @@
       },
       "vision_selected": "B",
       "vision_transcription": "יצחק",
-      "confidence": 0.98,
-      "reasoning": "The image clearly shows the standard name 'יצחק' (as in 'רב נחמן בר יצחק'). The third letter is a 'ח' (het) with a solid upper bridge connecting both legs, not a 'ה' (he). Option A is a typical OCR misreading of het as he.",
+      "confidence": 0.99,
+      "reasoning": "The image clearly shows the word 'יצחק' (Yitzchak) as part of the common Amoraic name 'רב נחמן בר יצחק'. The third letter is a 'ח' (Chet) with a fully connected top-left roof, distinct from 'ה' (Hei) which has a left-leg break (visible in 'זה' on the line below). Option A is a misocr of Chet as Hei.",
       "vlm_reading": "יצחק",
       "surya_reading": "יצחק",
       "dicta_reading": "יצחק",
       "flag": "current_text_confirmed"
-    },
-    {
-      "word_index": 893,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "זלזה",
-      "page": 72,
-      "bbox": {
-        "x1": 0.40869563817977905,
-        "y1": 0.36085379123687744,
-        "x2": 0.4409937858581543,
-        "y2": 0.376963347196579
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: dicta + vlm agree on 'ולזה' against stored 'זלזה'. NOTE: this is a CROSS-EDITION consensus - dicta read the Jerusalem 1975/6 printing, not this Berlin scan. Only ONE engine that read THIS scan differs from the corpus here, so a difference between the two printings is a live explanation - check the ink.",
-      "vlm_reading": "ולזה",
-      "surya_reading": "זלזה",
-      "dicta_reading": "ולזה",
-      "consensus_engines": [
-        "dicta",
-        "vlm"
-      ],
-      "consensus_reading": "ולזה",
-      "ligature_artifact": null,
-      "cross_edition": true,
-      "cross_edition_engines": [
-        "dicta"
-      ],
-      "same_edition_agreeing": 1,
-      "abbreviation_shape": null,
-      "flag": "current_text_may_be_wrong"
     },
     {
       "word_index": 908,
@@ -13303,7 +13208,7 @@
       "vision_selected": "B",
       "vision_transcription": "הביא",
       "confidence": 0.98,
-      "reasoning": "The middle word on the third line clearly shows the letters ה-ב-י-א ('הביא'). The second letter features a flat base with a distinct right heel characteristic of a Bet (ב) rather than a rounded Kaf (כ). Furthermore, the context 'וכבר הביא הרמב\"ם' (and the Maimonides has already brought/cited) confirms Option B.",
+      "reasoning": "The visual crop clearly shows the word 'הביא' (He-Bet-Yod-Alef). Contextually, the phrase 'וכבר הביא הרמב\"ם' ('And Maimonides has already brought/cited') is a standard Rabbinic expression, where 'הביא' is grammatically and semantically required. Option A ('הכיא') is a clear OCR error confusing Bet with Kaf.",
       "vlm_reading": "הביא",
       "surya_reading": "הכיא",
       "dicta_reading": "הביא",
@@ -13333,44 +13238,13 @@
         "y2": 0.4687877595424652
       },
       "vision_selected": "B",
-      "vision_transcription": "א'",
+      "vision_transcription": "אל",
       "confidence": 0.95,
-      "reasoning": "The crop clearly displays the line 'לאוי א' תאמר ב' where the single letter aleph with an abbreviation mark (א') stands for 'אל' in the context 'לתרי לאוי אל תאמר בלבבך'. Thus Option B ('אל') is fully verified by the pixel ink.",
+      "reasoning": "The image clearly shows the line containing 'לאוי א׳ תאמר' (where 'א׳' is the Rabbinic abbreviation for 'אל', matching the context 'לתרי לאוי אל תאמר'). Option B correctly captures this textual unit.",
       "vlm_reading": "א",
       "surya_reading": "א'",
       "dicta_reading": "אל",
       "flag": "unverified_insertion"
-    },
-    {
-      "word_index": 968,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "שכתכתי",
-      "page": 72,
-      "bbox": {
-        "x1": 0.7385092973709106,
-        "y1": 0.4659685790538788,
-        "x2": 0.800000011920929,
-        "y2": 0.4832863509654999
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: surya + vlm agree on 'שכתבתי' against stored 'שכתכתי'.",
-      "vlm_reading": "שכתבתי",
-      "surya_reading": "שכתבתי",
-      "dicta_reading": null,
-      "consensus_engines": [
-        "surya",
-        "vlm"
-      ],
-      "consensus_reading": "שכתבתי",
-      "ligature_artifact": null,
-      "cross_edition": false,
-      "cross_edition_engines": [],
-      "same_edition_agreeing": 2,
-      "abbreviation_shape": null,
-      "flag": "current_text_may_be_wrong"
     },
     {
       "word_index": 1038,

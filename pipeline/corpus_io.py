@@ -649,6 +649,46 @@ HEBREW_RE = re.compile(r"[\u0590-\u05ff]")
 # RLI, LRI, FSI, PDI - the isolate controls rtl() emits.
 _ISOLATES = re.compile("[\u2066-\u2069]")
 
+# RESOLVED AT IMPORT, NOT INSIDE to_visual() - item 0DE, 2026-09-08.
+#
+# tools/preview_dicta_disputes.py has carried this import at module scope since
+# it was written, with the reason in its own comment: "burying it inside
+# write_md() meant a fresh clone ran the whole corpus-wide alignment and only
+# then died with ModuleNotFoundError, having written nothing." to_visual() moved
+# here 2026-09-07 and the rationale did not come with it, so all three worklist
+# generators newly routed through render_hebrew went back to failing late - and
+# list_drifted_rulings.py called render_hebrew INSIDE `open(out, "w")`, which
+# truncates on entry, so a missing python-bidi destroyed the existing report and
+# then aborted.
+#
+# GUARDED, and that is the difference from preview_dicta_disputes.py's bare
+# import. 87 modules import corpus_io and 6 of them ever render Hebrew; a bare
+# top-level import would turn a missing optional package into a total pipeline
+# outage - every validator, detector and the review server - to fail-fast for
+# six callers. So the failure is CAPTURED here and raised by the two functions
+# that actually need it. python-bidi is in requirements.txt either way.
+try:
+    from bidi.algorithm import get_display as _get_display
+    _BIDI_ERROR = None
+except ImportError as _exc:  # pragma: no cover - exercised on a fresh clone
+    _get_display, _BIDI_ERROR = None, _exc
+
+
+def check_hebrew_mode(mode):
+    """Fail NOW if `mode` needs python-bidi and it is missing.
+
+    Call it straight after parse_args(), before any work. That is the whole
+    point: `--hebrew visual` is the DEFAULT on every worklist generator, so
+    without this the run does its full corpus pass and dies at the write.
+    """
+    if mode == "visual" and _get_display is None:
+        raise SystemExit(
+            "--hebrew visual needs python-bidi, which is not installed: "
+            f"{_BIDI_ERROR}.\nInstall it (`pip install -r requirements.txt`) or "
+            "pass --hebrew logical for a copy-safe file a bidi-aware viewer "
+            "renders correctly."
+        )
+
 
 def to_visual(lines):
     """Bake the bidi reordering into the bytes, for a renderer that does none.
@@ -672,14 +712,14 @@ def to_visual(lines):
     file had both halves and was the only worklist that rendered correctly; the
     others had neither and the reviewer read reversed Hebrew in three of them.
     """
-    from bidi.algorithm import get_display
+    check_hebrew_mode("visual")
     # STRIP THE ISOLATES FIRST. rtl() wraps Hebrew in RLI/PDI for a bidi-aware
     # renderer; here we are producing output for one that does no bidi at all, so
     # they are inert - and python-bidi predates UBA 6.3 and raises "RLI not
     # allowed here" on them outright. The two halves of this fix are mutually
     # exclusive by nature, which is why they are one function and one flag rather
     # than two independent decisions a caller could get both of.
-    return [get_display(_ISOLATES.sub("", l), base_dir="L") if HEBREW_RE.search(l)
+    return [_get_display(_ISOLATES.sub("", l), base_dir="L") if HEBREW_RE.search(l)
             else _ISOLATES.sub("", l)
             for l in lines]
 

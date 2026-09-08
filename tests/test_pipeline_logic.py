@@ -5967,18 +5967,28 @@ def test_a_pending_decision_past_a_word_count_change_is_moved_too(apply_harness,
     assert "reindexed from w4" in moved["note"]
 
 
-def test_a_pending_decision_addressed_by_a_stable_id_is_not_reindexed(apply_harness, decisions_path):
-    """ADDED 2026-09-07 (item 0CJ). The reindexer exists to keep an INDEX-shaped
-    address pointing at its word. A ruling that names its word by stable id does
-    not have that problem, and moving it appends a superseding copy that changes
-    only a number the applier no longer reads - resolved_position() asks the
-    sidecar first.
+def test_a_pending_decision_carrying_a_stable_id_is_STILL_reindexed(apply_harness, decisions_path):
+    """INVERTED 2026-09-08 (item 0DE finding 2), for the same reason as its flag
+    sibling and one step behind it.
 
-    This is the twin of test_a_pending_decision_past_a_word_count_change_is_
-    moved_too, and deliberately identical to it except for the `word_id` in the
-    snapshot: that test proves the move still happens without an id, this one
-    proves it stops with one. Neither means anything without the other - a skip
-    that fires unconditionally would pass this test alone (Lesson 25)."""
+    It used to assert the skip, on the reasoning that "resolved_position() asks
+    the sidecar first". That is true of the APPLIER and false of the reviewer's
+    SCREEN: review_counts.merge_decision() sets `current_decision` from a map
+    keyed `(klal_id, word_index)`, machine_state()/word_states() test the same
+    key, and review_queue_part1.json is rebuilt against FRESH indices every
+    rebuild. A ruling left at a stale index stops matching its own candidate
+    entry - it disappears from the word it was made on and can colour a
+    different word decided.
+
+    Latent when fixed: 39 pending rulings, 4 with an id, 0 resolving to a
+    different index. Fixed anyway, because the alternative was teaching four
+    display endpoints to id-resolve.
+
+    Still the twin of test_a_pending_decision_past_a_word_count_change_is_moved_
+    too - identical except for the `word_id` in the snapshot. That one proves the
+    move happens without an id; this proves the id does not stop it. The
+    retirement refusal the old skip also carried is now structural: the span
+    check below refuses to move a ruling whose word is gone."""
     entry = _correction(1, "insert", None, "זרא")          # applying REMOVES it
     apply_harness([{"klal_id": 1, "clean_text": "אלף זרא בית גימל דלת"}], {"1": [entry]})
     rd.append_decision("disputed_choice", klal_id=1, word_index=1, chosen_source="docai_reading",
@@ -5990,20 +6000,41 @@ def test_a_pending_decision_addressed_by_a_stable_id_is_not_reindexed(apply_harn
                        path=decisions_path)
 
     assert apply_harness.run()[1] == "אלף בית גימל דלת"
-    assert rd.all_current("manual_correction").get((1, 3)) is None, \
-        "a ruling addressed by a stable id must not be re-pointed by index"
-    still = rd.all_current("manual_correction").get((1, 4))
-    assert still is not None and still["chosen_text"] == "דלית", \
-        "and it must be left exactly where it was, not dropped"
-    assert "reindexed" not in (still.get("note") or "")
+    moved = rd.all_current("manual_correction").get((1, 3))
+    assert moved is not None, (
+        "the ruling was left at w4 because it carried an id - but the queue is "
+        "rebuilt against fresh indices and matches on word_index, so it no longer "
+        "lines up with its own candidate entry")
+    assert moved["chosen_text"] == "דלית", "the move must carry the original's own choice"
+    assert moved["candidate_snapshot"]["original_word"] == "דלת"
+    assert moved["candidate_snapshot"].get("word_id") == "w-dalet-0001", \
+        "and it must keep its id, so resolved_position() still resolves it the same way"
+    assert "reindexed from w4" in moved["note"]
 
 
-def test_an_open_flag_addressed_by_a_stable_id_is_not_reindexed(apply_harness, decisions_path):
-    """The same skip on the flag reindexer, which is its sibling and was written
-    with it. INERT against today's ledger - 0 of 1,367 word-level flags carry an
-    id - so it is driven by a synthetic flag here, exactly as item 0BZ's
-    prospective id tests are, because untested it would be the built-and-never-
-    exercised shape this repo keeps finding (Lesson 47)."""
+def test_an_open_flag_carrying_a_stable_id_is_STILL_reindexed(apply_harness, decisions_path):
+    """INVERTED 2026-09-08 (item 0DE). This test used to assert the opposite -
+    that the flag reindexer skips a flag carrying a word id, the way its sibling
+    skips a RULING carrying one - and it pinned a real defect in place.
+
+    The two are not symmetric, and the asymmetry is the point. A ruling may be
+    skipped because its consumer resolves by id: resolved_position() asks the
+    sidecar before it trusts the index. A FLAG'S POSITION HAS NO SUCH CONSUMER -
+    review_server._word_level_ai_flags() builds `by_word[r.get("word_index")]`
+    and bounds-checks that index, the nav/count sets filter on `fwidx`, and
+    review_counts.flag_still_open() takes an index. (One flag reader does consult
+    the id: flag_answered_by_a_later_decision(), for WHETHER it is answered, not
+    for where it sits.) So a skipped flag is not addressed-by-id, it is simply
+    not moved - left highlighting whatever word slid into its slot.
+
+    The skip's comment called itself inert at "0 of 1,367" word-level flags with
+    an id. Re-measured 2026-09-08: 1,424 rows, 17 with an id, all 17 open, in
+    klalim 54/167/198 - and two of klal 198's already had index and id naming
+    different words. Restore the skip only when a flag's POSITION resolves by id.
+
+    The twin of test_a_pending_decision_addressed_by_a_stable_id_is_not_reindexed,
+    which still asserts the skip on the ruling side; neither means anything
+    without the other (Lesson 25)."""
     entry = _correction(1, "insert", None, "זרא")
     apply_harness([{"klal_id": 1, "clean_text": "אלף זרא בית גימל דלת"}], {"1": [entry]})
     rd.append_decision("disputed_choice", klal_id=1, word_index=1, chosen_source="docai_reading",
@@ -6014,27 +6045,41 @@ def test_an_open_flag_addressed_by_a_stable_id_is_not_reindexed(apply_harness, d
                        path=decisions_path)
 
     apply_harness.run()
-    assert rd.all_current("klal_flag").get((1, 3)) is None, \
-        "a flag addressed by a stable id must not be re-pointed by index"
-    kept = rd.all_current("klal_flag").get((1, 4))
-    assert kept is not None and kept["needs_revisit"], \
-        "and it must stay open where it is, not be closed as superseded"
+    moved = rd.all_current("klal_flag").get((1, 3))
+    assert moved is not None and moved["needs_revisit"], (
+        "the flag was left at w4 because it carried an id - but nothing resolves "
+        "a flag's position by id, so it is now highlighting the wrong word")
+    stale = rd.all_current("klal_flag").get((1, 4))
+    assert stale is not None and not stale["needs_revisit"], \
+        "and the flag at the old index must be closed as superseded, not left open too"
 
 
 def test_a_reindexed_flag_carries_the_id_of_the_word_it_landed_on(apply_harness, decisions_path,
                                                                   monkeypatch):
-    """ADDED 2026-09-07 (item 0CK). A flag with no id is still moved by index -
-    that is what the reindexer is for - but the flag it writes at the new
-    position must carry the id of the word it landed on, so the move is the LAST
-    one it needs: the skip added the same day passes over it on every future
-    shift.
+    """ADDED 2026-09-07 (item 0CK). A flag is moved by index - that is what the
+    reindexer is for - but the flag it writes at the new position must carry the
+    id of the word it landed on.
+
+    THE REASON CHANGED 2026-09-08 (item 0DE), the assertion did not. This was
+    written to make the move "the LAST one it needs", because a same-day skip
+    passed over id-carrying flags on every future shift. That skip is gone: it
+    was stranding flags, since nothing resolves a flag's POSITION by id. The
+    stamp stays because it is provenance - if the sidecar and the index ever name
+    different words, something failed to reindex, which is how 0DE found klal
+    198's two.
 
     This closes the loop rather than only the tap. flag_unreviewed_auto_
     corrections.py attaches an id to flags it writes from now on; this attaches
     one to flags that already exist, at the moment the reindexer has verified
     exactly which word they sit on (old_words[wi] == new_words[new_wi]) - which
     is the only moment that address is corroborated rather than inferred."""
-    monkeypatch.setattr(ard.widentity, "load", lambda *a, **kw: {"stub": True})
+    # A REALISTIC STUB: four ids for the four words klal 1 has AFTER the
+    # deletion below. It used to be `{"stub": True}` - a sidecar claiming to
+    # exist while carrying no ids at all, which no real run can produce and
+    # which item 0DE finding 4's in-step check correctly rejects. Stubbing the
+    # shape the code actually depends on is the point of the check.
+    monkeypatch.setattr(ard.widentity, "load",
+                        lambda *a, **kw: {1: {"ids": [101, 102, 103, 104]}})
     monkeypatch.setattr(ard.widentity, "snapshot_fields",
                         lambda state, kid, wi: {"word_id": f"w-{kid}-{wi}"})
 
@@ -6054,6 +6099,87 @@ def test_a_reindexed_flag_carries_the_id_of_the_word_it_landed_on(apply_harness,
         "and the moved flag must carry the id of the word it landed on, so it never moves again"
 
 
+def test_the_backfill_table_re_reads_when_the_ledger_grows(decisions_path):
+    """ADDED 2026-09-08 (item 0DE finding 3). review_counts._backfilled() was an
+    `lru_cache` keyed on `path` alone, so one entry served the life of the
+    process - and review_server.py calls flag_still_open() with path=None, which
+    means every request in a server's lifetime shared one snapshot. A
+    `word_id_backfill` appended while the dashboard was up stayed invisible until
+    restart.
+
+    WRITTEN BECAUSE THE MUTATION DID NOT FAIL (Lesson 42). Restoring the
+    lru_cache left the whole suite green, so the fix was real and untested. The
+    test that USED to call `rcount._backfilled.cache_clear()` by hand never
+    exercised the staleness either: its first call answers through the INDEX
+    branch of flag_answered_by_a_later_decision() and returns before reaching
+    _backfilled(), so the cache was still cold on the second call. A cache is
+    only stale if something populated it first, which is what this does
+    explicitly.
+
+    Asserts the property directly rather than through a flag: read the table,
+    append an annotation, read again."""
+    ruling = rd.append_decision("manual_correction", klal_id=1, word_index=7,
+                                chosen_source="custom", chosen_text="אלף",
+                                path=decisions_path)
+
+    first = rcount._backfilled(path=decisions_path)
+    assert ruling["id"] not in first, "precondition: no annotation for this ruling yet"
+
+    rd.append_decision("word_id_backfill", klal_id=1, word_index=7,
+                       applied_decision_id=ruling["id"],
+                       candidate_snapshot={"word_id": 4242},
+                       note="attached after the first read", path=decisions_path)
+
+    second = rcount._backfilled(path=decisions_path)
+    assert second.get(ruling["id"]) == 4242, (
+        "the table was memoized for the life of the process, so an annotation "
+        "written while a server is up stays invisible until it restarts - the "
+        "ledger is DATA, and the restart rule is about CODE"
+    )
+
+
+def test_a_reindexed_flag_gets_no_id_when_the_sidecar_is_out_of_step(apply_harness,
+                                                                    decisions_path, monkeypatch):
+    """ADDED 2026-09-08 (item 0DE finding 4). The id stamp is correct only if the
+    sidecar was reconciled to the corpus BEFORE this ran, and the code used to
+    depend on that order without checking it.
+
+    Three live routes reach the stamp with a pre-shift sidecar, none of which
+    raises: follow_corpus() is wrapped in a bare `except Exception` that prints
+    and continues; it SKIPS a klal not already in the sidecar; and reconcile()'s
+    ValueErrors come back in `problems` and are only printed. In each, id_at()
+    answers about the word that USED to sit at the new index.
+
+    The twin of test_a_reindexed_flag_carries_the_id_of_the_word_it_landed_on,
+    identical except that the stubbed sidecar still holds the PRE-shift count (5
+    ids for what is now 4 words). That test proves the stamp happens when the
+    sidecar is in step; this proves it is withheld when it is not. Neither means
+    anything alone (Lesson 25).
+
+    A MISSING id is recoverable and a WRONG one is not - it is indistinguishable
+    from a right one forever after, and it is what
+    review_counts.flag_answered_by_a_later_decision() matches on."""
+    monkeypatch.setattr(ard.widentity, "load",
+                        lambda *a, **kw: {1: {"ids": [101, 102, 103, 104, 105]}})
+    monkeypatch.setattr(ard.widentity, "snapshot_fields",
+                        lambda state, kid, wi: {"word_id": f"w-{kid}-{wi}"})
+
+    entry = _correction(1, "insert", None, "זרא")          # applying REMOVES it
+    apply_harness([{"klal_id": 1, "clean_text": "אלף זרא בית גימל דלת"}], {"1": [entry]})
+    rd.append_decision("disputed_choice", klal_id=1, word_index=1, chosen_source="docai_reading",
+                       chosen_text="", candidate_snapshot=entry, path=decisions_path)
+    rd.append_decision("klal_flag", klal_id=1, word_index=4, needs_revisit=True,
+                       note="check this word", path=decisions_path)
+
+    apply_harness.run()
+    moved = rd.all_current("klal_flag").get((1, 3))
+    assert moved is not None and moved["needs_revisit"], \
+        "the flag must still be MOVED - a stale sidecar is no reason to strand it"
+    assert (moved.get("candidate_snapshot") or {}).get("word_id") is None, (
+        "the sidecar still held the pre-shift count, so id_at() would have named the "
+        "word that used to sit here - the flag must carry no id rather than a wrong one")
+
+
 def test_a_reindexed_flag_does_not_reopen_the_ruling_that_answered_it(apply_harness, decisions_path,
                                                                      monkeypatch):
     """ADDED 2026-09-07 (item 0CS). Found by a worklist count going UP after an
@@ -6068,7 +6194,13 @@ def test_a_reindexed_flag_does_not_reopen_the_ruling_that_answered_it(apply_harn
 
     Measured on klal 54 before the fix: three flags reindexed +1 by one two-word
     split, all three re-opening work the reviewer had finished."""
-    monkeypatch.setattr(ard.widentity, "load", lambda *a, **kw: {"stub": True})
+    # A REALISTIC STUB: four ids for the four words klal 1 has AFTER the
+    # deletion below. It used to be `{"stub": True}` - a sidecar claiming to
+    # exist while carrying no ids at all, which no real run can produce and
+    # which item 0DE finding 4's in-step check correctly rejects. Stubbing the
+    # shape the code actually depends on is the point of the check.
+    monkeypatch.setattr(ard.widentity, "load",
+                        lambda *a, **kw: {1: {"ids": [101, 102, 103, 104]}})
     monkeypatch.setattr(ard.widentity, "snapshot_fields",
                         lambda state, kid, wi: {"word_id": f"wid-{kid}-{wi}"})
 
@@ -6095,7 +6227,12 @@ def test_a_reindexed_flag_does_not_reopen_the_ruling_that_answered_it(apply_harn
 
     moved = rd.all_current("klal_flag", path=decisions_path).get((1, 3))
     assert moved is not None, "precondition: the deletion shifted the flag from w4 to w3"
-    rcount._backfilled.cache_clear()
+    # NO cache_clear() HERE ANY MORE, and its absence is a second assertion.
+    # apply_harness.run() just appended to the ledger; _backfilled() is keyed on
+    # (mtime_ns, size) since item 0DE finding 3, so it re-reads on its own. While
+    # it was an lru_cache this line was load-bearing - having to clear a cache by
+    # hand in a test is what a cache with no invalidation looks like from the
+    # outside.
     still = rcount.flag_still_open(1, 3, moved,
                                   rd.all_current("candidate_choice", path=decisions_path),
                                   rd.all_current("manual_correction", path=decisions_path),

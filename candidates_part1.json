@@ -4053,7 +4053,7 @@
   ],
   "meta": {
     "total_candidates": 270,
-    "skipped_settled_by_applied_decision": 449,
+    "skipped_settled_by_applied_decision": 454,
     "klalim_covered": 98,
     "skipped_no_docai_page_klalim": [],
     "unattributable_deletes": [],

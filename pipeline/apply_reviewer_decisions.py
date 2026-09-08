@@ -252,7 +252,6 @@ def reindex_pending_decisions_after_shift(klal_id, position, delta, old_words, n
     edited - a superseding decision is appended, carrying the original's own
     chosen_text and snapshot rewritten to the new index."""
     already = rd.applied_decision_ids()
-    backfilled = rd.backfilled_word_ids()
     moved, unverified = [], []
     # `disputed_choice` added 2026-08-31. It was missing, and it is the type that
     # needs this MOST: a decided dispute is dropped from the candidate queue
@@ -267,23 +266,41 @@ def reindex_pending_decisions_after_shift(klal_id, position, delta, old_words, n
                 continue
             if decision["id"] in already:
                 continue                       # already in the corpus, not pending
-            if rd.word_id_of(decision, backfilled):
-                # ADDRESSED BY ID, so there is nothing here to reindex. Moving it
-                # would append a superseding copy that changes only a number the
-                # applier no longer reads: resolved_position() asks the sidecar
-                # first, and the sidecar was updated by whichever writer moved
-                # the word. This is how the reindexer RETIRES - one ruling at a
-                # time, as ids reach them - rather than by being switched off
-                # while rulings that still need it exist (item 0CI measured that
-                # population: 9 of 24 pending rulings carry an id today, and 0 of
-                # 290 open word-level flags do).
-                #
-                # A RETIRED id is skipped here too, and deliberately. The word was
-                # removed, so no index describes it and moving the ruling onto
-                # whatever now sits at wi + delta would attach a human's decision
-                # to a word they never saw - the same refusal
-                # repoint_stale_decisions.py makes for a retired id.
-                continue
+            # NO ID SKIP HERE EITHER, removed 2026-09-08 with the flag
+            # reindexer's (item 0DE findings 1 and 2). It read: "ADDRESSED BY ID,
+            # so there is nothing here to reindex... resolved_position() asks the
+            # sidecar first."
+            #
+            # TRUE OF THE APPLIER, NOT OF THE QUEUE. resolved_position() does
+            # id-resolve, so an unmoved ruling still applies to the right word.
+            # But the reviewer's SCREEN never asks the sidecar:
+            # review_counts.merge_decision() sets
+            # `entry["current_decision"] = decided.get((klal_id,
+            # entry["word_index"]))` and machine_state()/word_states() test
+            # `(klal_id, entry["word_index"]) in decided`, all against a map keyed
+            # on the RECORDED index - while review_queue_part1.json is rebuilt
+            # from scratch each rebuild against FRESH indices. So a ruling left at
+            # a stale index stops matching its own candidate entry: it vanishes
+            # from the word it was made on, and can colour a different word
+            # decided.
+            #
+            # LATENT, MEASURED, AND FIXED ANYWAY. 2026-09-08: 39 pending rulings,
+            # 4 carry an id, 0 of the 4 resolve to a different index than the one
+            # recorded - so nothing is wrong on screen today. The alternative fix
+            # was to teach the display to id-resolve, which is a change to what
+            # the reviewer sees across four endpoints; keeping the index correct
+            # costs one superseding row per shift and touches no rendering.
+            #
+            # THE RETIREMENT REFUSAL SURVIVES, structurally rather than by this
+            # skip. The old comment kept it to avoid moving a ruling whose word
+            # was REMOVED onto whatever slid into its slot. The text check below
+            # already refuses exactly that: `new_words[new_wi:...] != span` fails
+            # when the word is gone, and the ruling is reported as unverified
+            # instead of moved.
+            #
+            # SAFE UNDER LESSON 46 because of the line above this one - a ruling
+            # already in `already` (applied) is skipped before we get here, so no
+            # superseding copy is ever written over an applied ruling.
             snapshot = decision.get("candidate_snapshot") or {}
             named = snapshot.get("final_text") or snapshot.get("original_word")
             if not named:
@@ -327,20 +344,64 @@ def reindex_flags_after_shift(klal_id, position, delta, old_words, new_words, sk
 
     Returns (moved, unverified) as lists of (old_index, new_index)."""
     moved, unverified = [], []
-    backfilled = rd.backfilled_word_ids()
+    # NO ID SKIP HERE, and the asymmetry with the decision reindexer above is
+    # deliberate - see item 0DE. That one may skip an id-carrying ruling because
+    # its consumer RESOLVES by id: resolved_position() asks the sidecar first.
+    # NO FLAG CONSUMER RESOLVES A POSITION BY ID. Be precise about which half of
+    # the flag machinery this is, because one half does read the id:
+    #   - WHERE THE FLAG SITS is index-only. review_server._word_level_ai_flags()
+    #     builds `by_word[r.get("word_index")]` and bounds-checks that index
+    #     against the word list; the nav and count sets filter on `fwidx`;
+    #     review_counts.flag_still_open() takes an index. Nothing here consults
+    #     the sidecar, so nothing can recover a flag whose index went stale.
+    #   - WHETHER IT IS ANSWERED does consult the id -
+    #     review_counts.flag_answered_by_a_later_decision() matches flag id to
+    #     ruling id at :136, deliberately after the index test.
+    # An unmoved flag is therefore still rendered, still counted, and still
+    # highlighting whatever word slid into its old slot - the klal 66
+    # `ע"ס` -> `שהניח` defect this function exists to prevent.
+    #
+    # THE SKIP WAS HERE AND WAS NOT INERT. Its comment said "0 of 1,367
+    # word-level flags carry an id"; re-measured 2026-09-08 the ledger holds
+    # 1,424 such rows, 17 carry an id, and all 17 are open (klal 54, 167, 198).
+    # Two of klal 198's had already diverged - index and id naming different
+    # words - which is the ambiguity the skip creates, not one it resolves.
+    #
+    # PUT IT BACK ONLY WITH ITS PREMISE: when a flag consumer resolves by id the
+    # way resolved_position() does, this skip becomes correct and should return.
+    # Until then the index is the only address a flag has, so it gets maintained.
+    # IS THE SIDECAR ACTUALLY IN STEP WITH THE CORPUS WE JUST WROTE? Asked once,
+    # here, because the id stamp below is only meaningful if it is - item 0DE
+    # finding 4.
+    #
+    # The stamp's own comment names the order it depends on: save_part1(), then
+    # widentity.follow_corpus() reconciles the sidecar, and only THEN this runs.
+    # THE CODE DID NOT ENFORCE THAT ORDER, and there are three live ways to reach
+    # here with a pre-shift sidecar, none of which raises: follow_corpus() is
+    # wrapped in a bare `except Exception` that prints a WARNING and continues;
+    # it SKIPS a klal not already in the sidecar (deliberately - it must not
+    # silently seed Parts 2-3); and reconcile()'s ValueErrors come back in
+    # `problems`, which are only printed. In any of the three, id_at(new_wi)
+    # returns the id of the word that USED to sit at new_wi - a different word -
+    # and the flag is stamped with a wrong identity.
+    #
+    # TESTED DIRECTLY RATHER THAN PLUMBED. follow_corpus() returns a COUNT, not
+    # the set of klalim it reconciled, and it is called by three corpus writers,
+    # so widening its contract to answer this is a bigger change than the
+    # question needs. A reconciled sidecar has exactly one id per word in the
+    # klal we just wrote; an unreconciled one still has the pre-shift count and
+    # differs by `delta`, which is precisely the failure mode. Length is the
+    # whole test.
+    id_state = widentity.load()
+    sidecar_in_step = len(widentity.ids_for(id_state, klal_id)) == len(new_words)
+    if not sidecar_in_step:
+        print(f"  WARNING: klal {klal_id}'s word-id sidecar is out of step with the "
+              f"corpus ({len(widentity.ids_for(id_state, klal_id))} ids for "
+              f"{len(new_words)} words) - reindexed flags will be written WITHOUT a "
+              f"word id rather than with a wrong one. Run "
+              f"tools/seed_word_identity.py --verify")
     for wi, rec in sorted(open_word_flags(klal_id).items()):
         if wi <= position or wi in skip:
-            continue
-        if rd.word_id_of(rec, backfilled):
-            # Same skip as the decision reindexer above, and here for the same
-            # reason rather than by copying: a flag that names its word by id
-            # does not need its index moved. INERT TODAY - 0 of 1,367 word-level
-            # flags carry an id, because backfill_word_ids.py cannot derive one
-            # for a record that names no word (item 0CI/0CK). It goes live for
-            # flags written from now on, which DO carry an id since 3f623f9, and
-            # keeping the two reindexers in step is the point: they were written
-            # as siblings and the id has to reach both or the next reader has to
-            # work out why only one has it (Lesson 34).
             continue
         new_wi = wi + delta
         if not (0 <= wi < len(old_words) and 0 <= new_wi < len(new_words)):
@@ -353,10 +414,18 @@ def reindex_flags_after_shift(klal_id, position, delta, old_words, new_words, sk
                   f"word-count change at w{position} in this klal shifted every later index by "
                   f"{delta:+d}; the word this flag names, {old_words[wi]!r}, now sits at w{new_wi}. "
                   f"Superseded by a new flag there with the original note."))
-        # THE MOVED FLAG CARRIES THE ID OF THE WORD IT LANDED ON, so this move is
-        # the LAST one it needs: the skip at the top of this loop will pass over
-        # it on every future shift. Added 2026-09-07 (item 0CK) with the same
-        # change to flag_unreviewed_auto_corrections.py.
+        # THE MOVED FLAG CARRIES THE ID OF THE WORD IT LANDED ON. Added
+        # 2026-09-07 (item 0CK) with the same change to
+        # flag_unreviewed_auto_corrections.py.
+        #
+        # IT IS PROVENANCE, NOT AN ADDRESS - corrected 2026-09-08 (item 0DE).
+        # This stamp was written on the premise that it made the move "the LAST
+        # one it needs", because the skip at the top of this loop would pass over
+        # the flag on every future shift. That skip is gone: no flag consumer
+        # resolves by id, so the index is still the address and still gets
+        # maintained on each shift. What the id buys is the ability to SEE a
+        # divergence - if the sidecar and the index ever name different words,
+        # something did not reindex - which is how item 0DE found klal 198's two.
         #
         # SAFE ONLY BECAUSE OF THE ORDER HERE, which is worth naming. The corpus
         # is written at save_part1(), widentity.follow_corpus() reconciles the
@@ -365,10 +434,15 @@ def reindex_flags_after_shift(klal_id, position, delta, old_words, new_words, sk
         # was just verified onto (old_words[wi] == new_words[new_wi], checked
         # above). Read before follow_corpus ran, the same call would return the
         # id of whatever used to sit at new_wi, which is a different word.
+        #
+        # AND NOW IT IS CHECKED, not merely depended on - `sidecar_in_step`,
+        # computed once at the top of this function (item 0DE finding 4). No
+        # stamp when the sidecar is behind: NO id is recoverable, a WRONG id is
+        # not, and it would be indistinguishable from a right one forever after.
         rd.append_decision(
             "klal_flag", klal_id=klal_id, word_index=new_wi, needs_revisit=True,
-            candidate_snapshot=(widentity.snapshot_fields(
-                widentity.load(), klal_id, new_wi) or None),
+            candidate_snapshot=((widentity.snapshot_fields(
+                id_state, klal_id, new_wi) or None) if sidecar_in_step else None),
             # LINKED TO THE FLAG IT MOVES, added 2026-09-07 (item 0CS). Without
             # it the moved flag is a BRAND NEW record with today's timestamp, and
             # review_counts.flag_answered_by_a_later_decision only counts a

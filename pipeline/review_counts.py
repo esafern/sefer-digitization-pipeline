@@ -27,7 +27,6 @@
 # actually_renders_as, which transcribes it and asserts the three counts this
 # module produces match what the screen shows, klal by klal. That test is the
 # safety net for this extraction; if the move changed behaviour, it fires.
-import functools
 import os
 import sys
 
@@ -170,17 +169,40 @@ def _raised_at(flag_rec, path=None):
     return rec.get("ts") or ""
 
 
-@functools.lru_cache(maxsize=4)
+# (resolved path -> ((mtime_ns, size), table)). Mirrors review_decisions._READ_
+# CACHE deliberately - see _backfilled().
+_BACKFILL_CACHE = {}
+
+
 def _backfilled(path=None):
-    """The 619 pre-id rulings' word ids, read ONCE.
+    """The pre-id rulings' word ids, re-read whenever the ledger changes.
 
     rd.backfilled_word_ids() is a full pass over the append-only log, and
     flag_answered_by_a_later_decision runs per flag per request - 290 open flags
-    would otherwise re-parse a 4,400-line log 290 times. Cached for the life of
-    the process, which is correct for every consumer here: the tools are
-    short-lived, and review_server.py re-execs on restart (the restart rule in
-    START_HERE.md), so a newly-written annotation is picked up the same way a
-    code change is.
+    would otherwise re-parse a 4,400-line log 290 times.
+
+    KEYED ON (mtime_ns, size), NOT ON PATH ALONE - corrected 2026-09-08, item
+    0DE finding 3. This was an `lru_cache(maxsize=4)` on `path`, so one entry
+    served the life of the process. review_server.py calls flag_still_open()
+    with path=None, which meant EVERY request in a server's lifetime shared one
+    snapshot: a `word_id_backfill` appended while the dashboard was up - by
+    tools/backfill_word_ids.py in another terminal, or by an apply run - stayed
+    invisible until restart, and flags stayed wrongly open or wrongly closed
+    until then.
+
+    Its previous docstring argued that was fine because the server re-execs
+    under START_HERE.md's restart rule. THAT RULE IS ABOUT CODE. The ledger is
+    DATA, and the server's standing contract is that it reads its source files
+    fresh off disk on every request - which is exactly what rd._read_all()
+    keys on (st_mtime_ns, st_size) to honour, in the module right next door.
+    Caching the VALUE behind a live view is Lesson 39, one layer in from the two
+    panes that lesson was written about.
+
+    The log is append-only, so any write grows it and the stamp always moves.
+    Same performance as before on a quiet ledger - one stat() per call - and it
+    also removes a cross-test hazard: with an lru_cache, every test that
+    redirected rd.DECISIONS_PATH and called flag_still_open() without an
+    explicit `path` shared the `None` key with every earlier test.
     """
     # KEYWORD, not positional - the trap review_decisions.superseded_by_an_
     # applied_decision has its own comment about. The applier test harness
@@ -188,7 +210,19 @@ def _backfilled(path=None):
     # `path=<tmpdir>`, so a positional `path` arrives alongside that keyword and
     # raises "multiple values for argument 'path'". Walked into it 2026-09-07
     # despite the comment existing.
-    return rd.backfilled_word_ids(path=path)
+    resolved = rd._resolve(path)
+    try:
+        st = os.stat(resolved)
+    except OSError:
+        # No ledger yet: nothing to memoize, and nothing to serve stale either.
+        return rd.backfilled_word_ids(path=path)
+    stamp = (st.st_mtime_ns, st.st_size)
+    cached = _BACKFILL_CACHE.get(resolved)
+    if cached is not None and cached[0] == stamp:
+        return cached[1]
+    table = rd.backfilled_word_ids(path=path)
+    _BACKFILL_CACHE[resolved] = (stamp, table)
+    return table
 
 def claim_word_index(corrections, word_index, overlay_key=None, overlay=None):
     """Return the entry already serving `word_index`, after optionally

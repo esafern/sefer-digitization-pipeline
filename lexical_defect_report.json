@@ -2447,22 +2447,6 @@
  },
  {
   "klal_id": 144,
-  "word_index": 873,
-  "stored": "מהלוקת",
-  "proposals": [
-   {
-    "form": "מחלוקת",
-    "ref_count": 636,
-    "edit": null
-   }
-  ],
-  "detector": "substitution",
-  "ambiguous": false,
-  "rank": 636,
-  "corpus_count": 1
- },
- {
-  "klal_id": 144,
   "word_index": 1040,
   "stored": "ומאו",
   "proposals": [
@@ -3784,54 +3768,6 @@
   "detector": "insertion_deletion",
   "ambiguous": false,
   "rank": 290,
-  "corpus_count": 1
- },
- {
-  "klal_id": 198,
-  "word_index": 893,
-  "stored": "זלזה",
-  "proposals": [
-   {
-    "form": "ולזה",
-    "ref_count": 448,
-    "edit": null
-   }
-  ],
-  "detector": "substitution",
-  "ambiguous": false,
-  "rank": 448,
-  "corpus_count": 1
- },
- {
-  "klal_id": 198,
-  "word_index": 893,
-  "stored": "זלזה",
-  "proposals": [
-   {
-    "form": "לזה",
-    "ref_count": 2092,
-    "edit": "extra_char"
-   }
-  ],
-  "detector": "insertion_deletion",
-  "ambiguous": false,
-  "rank": 2092,
-  "corpus_count": 1
- },
- {
-  "klal_id": 198,
-  "word_index": 968,
-  "stored": "שכתכתי",
-  "proposals": [
-   {
-    "form": "שכתבתי",
-    "ref_count": 61,
-    "edit": null
-   }
-  ],
-  "detector": "substitution",
-  "ambiguous": false,
-  "rank": 61,
   "corpus_count": 1
  },
  {

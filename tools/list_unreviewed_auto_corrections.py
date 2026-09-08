@@ -182,6 +182,10 @@ def main():
     ap.add_argument("--out", default=OUT_PATH)
     ap.add_argument("--base-url", default=DEFAULT_BASE)
     args = ap.parse_args()
+    # FAIL BEFORE THE WORK, not at the write. `--hebrew visual` is the default
+    # and needs python-bidi; without this the run does its whole corpus pass and
+    # only then dies. Item 0DE, 2026-09-08.
+    cio.check_hebrew_mode(args.hebrew)
     base = args.base_url.rstrip("/")
 
     freqs = reference_frequencies()

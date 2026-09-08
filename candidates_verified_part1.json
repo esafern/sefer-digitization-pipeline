@@ -4442,8 +4442,8 @@
     "bbox_estimated": false,
     "vision_selected": "B",
     "vision_transcription": "יצחק",
-    "vision_confidence": 0.98,
-    "vision_reasoning": "The image clearly shows the standard name 'יצחק' (as in 'רב נחמן בר יצחק'). The third letter is a 'ח' (het) with a solid upper bridge connecting both legs, not a 'ה' (he). Option A is a typical OCR misreading of het as he."
+    "vision_confidence": 0.99,
+    "vision_reasoning": "The image clearly shows the word 'יצחק' (Yitzchak) as part of the common Amoraic name 'רב נחמן בר יצחק'. The third letter is a 'ח' (Chet) with a fully connected top-left roof, distinct from 'ה' (Hei) which has a left-leg break (visible in 'זה' on the line below). Option A is a misocr of Chet as Hei."
   },
   {
     "klal_id": 198,
@@ -4462,7 +4462,7 @@
     "vision_selected": "B",
     "vision_transcription": "הביא",
     "vision_confidence": 0.98,
-    "vision_reasoning": "The middle word on the third line clearly shows the letters ה-ב-י-א ('הביא'). The second letter features a flat base with a distinct right heel characteristic of a Bet (ב) rather than a rounded Kaf (כ). Furthermore, the context 'וכבר הביא הרמב\"ם' (and the Maimonides has already brought/cited) confirms Option B."
+    "vision_reasoning": "The visual crop clearly shows the word 'הביא' (He-Bet-Yod-Alef). Contextually, the phrase 'וכבר הביא הרמב\"ם' ('And Maimonides has already brought/cited') is a standard Rabbinic expression, where 'הביא' is grammatically and semantically required. Option A ('הכיא') is a clear OCR error confusing Bet with Kaf."
   },
   {
     "klal_id": 198,
@@ -4479,9 +4479,9 @@
     },
     "bbox_estimated": true,
     "vision_selected": "B",
-    "vision_transcription": "א'",
+    "vision_transcription": "אל",
     "vision_confidence": 0.95,
-    "vision_reasoning": "The crop clearly displays the line 'לאוי א' תאמר ב' where the single letter aleph with an abbreviation mark (א') stands for 'אל' in the context 'לתרי לאוי אל תאמר בלבבך'. Thus Option B ('אל') is fully verified by the pixel ink."
+    "vision_reasoning": "The image clearly shows the line containing 'לאוי א׳ תאמר' (where 'א׳' is the Rabbinic abbreviation for 'אל', matching the context 'לתרי לאוי אל תאמר'). Option B correctly captures this textual unit."
   },
   {
     "klal_id": 198,

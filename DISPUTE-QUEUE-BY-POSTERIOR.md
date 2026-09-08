@@ -1,19 +1,19 @@
 # The open dispute queue, ordered by posterior
 
-402 open dispute(s), scored by `tools/rank_dispute_queue.py`. **Regenerate after any apply** - the queue and the calibration both move.
+399 open dispute(s), scored by `tools/rank_dispute_queue.py`. **Regenerate after any apply** - the queue and the calibration both move.
 
 `posterior` is P(a reviewer adopts the consensus reading), estimated from the stratum this dispute falls in, under a Beta(1,1) posterior so a thin stratum cannot read as a certainty. The interval is 90% credible. **This orders attention; it decides nothing** - every row still needs the ink.
 
-Calibrated on **225 ledger rulings** that recorded a consensus reading; 166 of them adopted it, a base rate of 74%. That base rate is the FALLBACK only - the strata below differ from it by more than 60 points, which is the whole reason this file exists.
+Calibrated on **229 ledger rulings** that recorded a consensus reading; 170 of them adopted it, a base rate of 74%. That base rate is the FALLBACK only - the strata below differ from it by more than 60 points, which is the whole reason this file exists.
 
 ## What each stratum is worth
 
 | engines agreeing | n | adopted | posterior | 90% CI |
 |---|---:|---:|---:|---|
-| `dicta,surya,vlm` | 27 | 27 | 97% | 90%–100% |
+| `dicta,surya,vlm` | 28 | 28 | 97% | 90%–100% |
 | `dicta,surya` | 28 | 24 | 83% | 71%–93% |
-| `dicta,vlm` | 36 | 30 | 82% | 70%–91% |
-| `surya,vlm` | 104 | 80 | 76% | 69%–83% |
+| `dicta,vlm` | 38 | 32 | 82% | 72%–91% |
+| `surya,vlm` | 105 | 81 | 77% | 70%–83% |
 | `dicta,docai,surya,vlm` | 1 | 1 | 67% | 22%–97% ⚠ thin (n<8); ranking falls back to the engine count |
 | `docai,surya,vlm` | 9 | 2 | 27% | 9%–51% |
 | `docai,vlm` | 7 | 1 | 22% | 5%–47% ⚠ thin (n<8); ranking falls back to the engine count |
@@ -25,7 +25,7 @@ Calibrated on **225 ledger rulings** that recorded a consensus reading; 166 of t
 
 | posterior | disputes |
 |---|---:|
-| >=0.75 | 356 |
+| >=0.75 | 353 |
 | >=0.50 | 12 |
 | >=0.25 | 3 |
 | <0.25 | 31 |
