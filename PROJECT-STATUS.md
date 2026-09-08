@@ -633,11 +633,28 @@ applying it to the corpus remain two separate, deliberate steps.
     | `reconstruction_witness_queue.json` | 410 | 366 | **a FILTER**, items 3/4 - Lesson 26 territory |
     | `lexical_defect_report.json` | 213 | 118 | **a deliberate tier decision** (`merge_lexical_defects` takes the sharpest tier only) |
     | `structural_defect_report.json` | 22 | 17 | report-only by design (`0CW`) - **but 15 of the 17 are already `acknowledged`** |
-    | `ligature_words.json` | 7 | 3 | unrouted |
+    | `ligature_words.json` | 7 | 3 (**really 1** - see below) | unrouted |
     | `title_defect_report.json` | 4 | 4 | different address space; reachable via the Heading panel, but nothing points at them |
 
-    **So the genuinely unseen-and-unreviewed set is 125 positions**: 118 lexical
-    + 3 ligature + 4 title. Not 580, and not `0CV`'s 136.
+    **So the genuinely unseen-and-unreviewed set is 123 positions**: 118 lexical
+    + 1 ligature + 4 title. Not 580, and not `0CV`'s 136.
+
+    **CORRECTED 2026-09-08, second error in this item's arithmetic.** It first
+    said 125, counting 3 ligature positions. **Two of the three were already
+    marked resolved in the file I was reading**, and I did not look at the field:
+
+        klal 7   w677  ויגל -> ויגאל   resolved_false_positive:
+                                       "ויגל is correct - Psalms 16:9, not ויגאל"
+        klal 150 w443  אוף  -> אלוף    resolved_false_positive:
+                                       "אוף is real Aramaic ('also'), not a collapsed אלוף"
+
+    `positions()` in the measuring script keyed on `(klal_id, word_index)` and
+    never read `resolved_false_positive`, so a finding somebody had already
+    settled counted as one nobody had seen. The rebuild's own stage-5b output
+    prints "of the candidates, N are already-resolved false positives, marked as
+    such" - the information was on screen during the run that produced the wrong
+    number. Same shape as this item's other correction: a measurement believed
+    because it was mine.
 
     ### THE STRUCTURAL REPORT IS DONE, which `0CV` could not have known
 
