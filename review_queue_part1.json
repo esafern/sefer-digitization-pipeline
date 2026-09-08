@@ -12958,29 +12958,6 @@
   ],
   "212": [
     {
-      "word_index": 1,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "הוון",
-      "page": 74,
-      "bbox": {
-        "x1": 0.7995049357414246,
-        "y1": 0.27294784784317017,
-        "x2": 0.8422029614448547,
-        "y2": 0.29478365182876587
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Lexical defect: stored 'הוון' has NO attestation in the independent reference corpus and occurs 1x here, while 'הוו' is attested 2052x and is one extra_char away. Found by tools/detect_insertion_deletion.py. FREQUENCY EVIDENCE ONLY - not scan-verified and not corroborated by another engine; read the context before acting.",
-      "vlm_reading": null,
-      "dicta_reading": null,
-      "surya_reading": null,
-      "lexical_proposal": "הוו",
-      "lexical_source": "detect_insertion_deletion.py",
-      "flag": "current_text_may_be_wrong"
-    },
-    {
       "word_index": 30,
       "opcode": "replace",
       "docai_reading": "ה\"נ",

@@ -215,6 +215,11 @@ def build(part_path=None):
 def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[1],
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--acknowledge", metavar="KLAL:WORD", action="append", default=[],
+                    help="record ONE finding as checked-and-correct, e.g. --acknowledge "
+                         "187:120. Repeatable. Added 2026-09-08 (item 0DP): until then the "
+                         "only option was --acknowledge-all, so clearing one finding "
+                         "silently cleared every other open one with it.")
     ap.add_argument("--acknowledge-all", action="store_true",
                     help="record every CURRENT finding as checked-and-correct, so it stops "
                          "being reported. A finding comes back if its text changes.")
@@ -223,23 +228,21 @@ def main():
     args = ap.parse_args()
 
     rows = build()
-    if args.acknowledge_all:
-        ack = load_acknowledged()
-        stamp = datetime.datetime.now(datetime.timezone.utc).isoformat()
-        added = 0
-        keys = _keys_for(rows)
-        for r in rows:
-            k = keys[id(r)]
-            if k in ack:
-                continue
-            ack[k] = {"key": k, "ts": stamp, "note": args.note,
-                      "klal_id": r["klal_id"], "detector": r["detector"], "stored": r["stored"]}
-            added += 1
-        with open(ACK_PATH, "w", encoding="utf-8") as f:
-            json.dump(sorted(ack.values(), key=lambda e: (e["klal_id"], e["detector"])),
-                      f, ensure_ascii=False, indent=2)
-            f.flush()
-        print(f"Acknowledged {added} finding(s); {len(ack)} on record in {ACK_PATH}")
+    if args.acknowledge or args.acknowledge_all:
+        only = None
+        if args.acknowledge:
+            want = set()
+            for spec in args.acknowledge:
+                kid, _, wi = spec.partition(":")
+                want.add((int(kid), int(wi)))
+            missing = want - {(r["klal_id"], r["word_index"]) for r in rows}
+            if missing:
+                raise SystemExit(f"no structural finding at {sorted(missing)} - nothing was "
+                                 f"written. Check the klal:word against the report.")
+            only = lambda r: (r["klal_id"], r["word_index"]) in want  # noqa: E731
+        added = ack.record(rows, ACK_PATH, args.note, only=only)
+        print(f"Acknowledged {added} finding(s); "
+              f"{len(ack.load(ACK_PATH))} on record in {ACK_PATH}")
         rows = build()
 
     with open(OUT_PATH, "w", encoding="utf-8") as f:

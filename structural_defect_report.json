@@ -182,7 +182,9 @@
     "proposal": "רבו ואתה",
     "detector": "merge",
     "evidence": "splits into two independently common words (1168x / 364x)",
-    "acknowledged": false
+    "acknowledged": true,
+    "acknowledged_on": "2026-09-08T20:13:58.852723+00:00",
+    "acknowledged_note": "false positive: רבוואתה is the Aramaic plural (their teachers/the great ones), not רבו + ואתה. The finding arose from the reviewer's own 2026-09-08 correction רבואתה -> רבוואתה; the merge detector argues from the independent frequency of the two halves and cannot see that the whole is a word. Reviewer confirmed."
   },
   {
     "klal_id": 217,

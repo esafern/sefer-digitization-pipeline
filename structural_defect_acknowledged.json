@@ -152,6 +152,15 @@
     "stored": "ב'"
   },
   {
+    "key": "187|merge|רבוואתה",
+    "ts": "2026-09-08T20:13:58.852723+00:00",
+    "note": "false positive: רבוואתה is the Aramaic plural (their teachers/the great ones), not רבו + ואתה. The finding arose from the reviewer's own 2026-09-08 correction רבואתה -> רבוואתה; the merge detector argues from the independent frequency of the two halves and cannot see that the whole is a word. Reviewer confirmed.",
+    "klal_id": 187,
+    "detector": "merge",
+    "stored": "רבוואתה",
+    "word_index_when_recorded": 120
+  },
+  {
     "key": "217|repeated_word|המלך",
     "ts": "2026-09-07T19:56:00.560801+00:00",
     "note": "reviewer checked all 18 against the scan 2026-09-07 and confirmed them correct as printed; klal 167 w68 was the one real defect and was fixed",

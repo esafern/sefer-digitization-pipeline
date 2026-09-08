@@ -101,6 +101,55 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0DP. **[2026-09-08, reviewer] CLEARING ONE STRUCTURAL FINDING CLEARED ALL OF
+    THEM. `--acknowledge KLAL:WORD` ADDED, AND klal 187 w120 IS CLEARED.**
+
+    The reviewer said klal 187 w120 is fine and asked how to clear it. The only
+    option `build_structural_defect_report.py` had was **`--acknowledge-all`**,
+    which records every current finding - so clearing the one they had checked
+    would silently have dismissed every other open one with it. Today that was
+    harmless (it was the only open row); it would not have been on any other day,
+    and the reviewer would have had no way to know.
+
+    `--acknowledge KLAL:WORD` now matches the two flags added with `0DN`, and all
+    three go through `triage_ack.record(..., only=...)` - one mechanism, one
+    predicate, no third copy. It refuses a klal:word that is not in the report
+    rather than writing an entry that matches nothing.
+
+    **Cleared: klal 187 w120** `רבוואתה` -> `רבו ואתה`. `רבוואתה` is the Aramaic
+    plural, not `רבו` + `ואתה`. The merge detector argues from the independent
+    frequency of the two halves (1168x / 364x) and cannot see that the whole is a
+    word.
+
+    **THE FINDING WAS CREATED BY THE REVIEWER'S OWN CORRECTION**, applied hours
+    earlier the same day: `רבואתה` -> `רבוואתה` (klal 187 w120, in the batch of
+    31). The detector then fired on the corrected text. That is the detector
+    working, not failing - and it is the argument for why stage 4e writes a
+    report and never a flag: a correction can manufacture a candidate, and a
+    queue that auto-flagged them would hand the reviewer their own work back.
+
+    ### The state of stage 4e, since it was asked
+
+    Runs on **every rebuild**, stage 4e of `rebuild_all.sh`, writing
+    `structural_defect_report.json`. Three detectors, four row types:
+
+        repeated_word       10
+        ligature_compound    5
+        merge                3
+        split                0   (none currently)
+
+    **18 findings, 18 acknowledged, 0 open.** Every structural candidate in the
+    corpus has now been checked and dismissed by the reviewer. All three merge
+    findings are false positives of the same shape - a real word whose halves are
+    independently common: `מרבייהו` (305x/483x), `לעירובין` (491x/1512x),
+    `רבוואתה` (1168x/364x).
+
+    That 3-for-3 rate is worth recording against any future proposal to route
+    merge findings into the review queue: on this corpus the detector's precision
+    for `merge` is currently **0 of 3**.
+
+    Gate 523. Rebuild clean.
+
 0DO. **[2026-09-08] THE APPLIER'S FINDINGS FILE HAD NEVER HELD A REAL FINDING.
     86 OF 86 ROWS WERE TEST POLLUTION, AND THE FIX FOR IT WAS ONE LINE MISSING
     FROM A FIXTURE.**
