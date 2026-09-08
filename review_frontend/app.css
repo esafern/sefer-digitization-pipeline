@@ -1245,6 +1245,23 @@ textarea.custom-text, input.custom-text {
 /* A word arrived at by deep link (#klal=N&word=M). Transient and additive: the
    word's own state class keeps owning its colour, this only says "here it is"
    for a few seconds. ADDED 2026-08-26 with the deep-link feature. */
+/* THE CURSOR MARKER - "where you left off", not "here it is".
+   ADDED 2026-09-08 (item 0DL). snapToLastVisitedWord() first reused
+   .routed-word below, which is the DEEP-LINK ring: 3px solid gold plus a gold
+   background wash and a pulse, designed to shout at someone who has just
+   arrived from a pasted URL and does not know where to look. Left on the word
+   after every dismissal it reads as a state - the reviewer reported "clicking
+   on any word then clicking away leaves a gold box around the word" - and gold
+   already means `--pending` everywhere else on this screen.
+   A cursor should be findable and otherwise silent: one thin neutral outline,
+   no fill, no animation, nothing that competes with a word's real state
+   colour. */
+.cursor-word {
+  outline: 2px solid var(--ink-faint);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
 .routed-word {
   outline: 3px solid #d69e2e;
   outline-offset: 2px;

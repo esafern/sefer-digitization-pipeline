@@ -101,6 +101,60 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0DL. **[2026-09-08, reviewer] "CLICKING ON ANY WORD THEN CLICKING AWAY LEAVES A
+    GOLD BOX AROUND THE WORD." THE CURSOR WAS WEARING THE DEEP-LINK RING. IT HAS
+    ITS OWN, QUIET MARKER NOW.**
+
+    `0DH`'s `snapToLastVisitedWord()` reused `revealWordInText()` for the scroll
+    AND for its marker - deliberately, to avoid a second copy of the same four
+    lines. The scroll was the right thing to share. The marker was not.
+
+    `.routed-word` is the DEEP-LINK ring: `outline: 3px solid #d69e2e`, a gold
+    background wash, and a two-cycle pulse. It is built to shout at someone who
+    has just arrived from a pasted URL and does not know where to look. Left on
+    the word after every dismissal it reads as a word STATE instead - and gold is
+    `--pending` everywhere else on this screen, so it reads as a state the word
+    does not have.
+
+    It also never went away. Before `0DI`, dismissing ran `clearScanFocus()` ->
+    `clearRoutedWord()`, which removed it. `0DI` stopped calling that, so the
+    only remaining caller is `revealWordInText()` clearing everything EXCEPT the
+    word it is about to mark. Dismissing went from removing the ring to adding
+    one that nothing removes.
+
+    ### The fix
+
+    `.cursor-word`: one 2px `--ink-faint` outline, no fill, no animation. A
+    cursor should be findable and otherwise silent, and must not compete with a
+    word's real state colour.
+
+    `revealWordInText(klalId, wordIndex, { marker })` takes which one to apply -
+    `routed-word` by default so every existing caller is unchanged, `cursor-word`
+    from the snap. `clearRoutedWord()` clears both (`WORD_MARKERS`), so the two
+    can never be on screen at once.
+
+    And a fresh word click removes the cursor: it marks where you LEFT OFF, so it
+    has no business being visible while you are actively on a word. Dismissing
+    puts it back, on that word.
+
+    ### Test
+
+    `test_dismissing_a_word_panel_snaps_the_cursor_back_to_that_word` now asserts
+    both halves - the word carries `cursor-word` and does NOT carry
+    `routed-word`. Mutation-checked: pointing the snap back at `routed-word`
+    fails it. UI suite 103 passed / 1 skipped.
+
+    ### Fourth report on one gesture, and the pattern is now clear
+
+    `0DH` (snap) -> `0DI` (flicker) -> `0DJ` (stutter) -> `0DK` (blink) -> `0DL`
+    (this). Every one is a consequence of `0DH` reusing existing machinery
+    without asking what else that machinery carried: `revealWordInText` carried a
+    marker meant for a different situation, and `clearScanFocus` carried four
+    behaviours of which only one was wanted. Reuse is right in this repo and the
+    shared-module rule says so - but reusing a function means inheriting
+    everything it does, and the thing to check before reusing is what ELSE it
+    does and who else was relying on that.
+
 0DK. **[2026-09-08, reviewer] "BLINKS WHEN I CLICK AWAY, NO ISSUE WHEN I CLICK ON
     A SPECIFIC WORD" - STILL, AFTER `0DI` AND `0DJ`. IT WAS THE ZOOM RESTORE,
     WHICH BOTH FIXES HAD DELIBERATELY PRESERVED. A DISMISSAL NOW CHANGES NOTHING

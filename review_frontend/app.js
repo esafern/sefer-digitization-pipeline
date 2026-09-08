@@ -696,7 +696,7 @@ function rememberVisitedWord(klalId, wordIndex) {
 async function snapToLastVisitedWord() {
   if (!_lastVisitedWord) return;            // nothing visited yet - nothing to snap to
   const { klalId, wordIndex } = _lastVisitedWord;
-  const span = await revealWordInText(klalId, wordIndex);
+  const span = await revealWordInText(klalId, wordIndex, { marker: 'cursor-word' });
   if (!span) return;                        // klal gone or index out of range
   // AND MAKE IT THE KEYBOARD CURSOR, not just a ring. A word span is not
   // focusable on its own; tabindex -1 makes it programmatically focusable
@@ -708,9 +708,18 @@ async function snapToLastVisitedWord() {
   try { span.focus({ preventScroll: true }); } catch (e) { /* older engines */ }
 }
 
+// The two markers this pane can put on a word, and they mean different things:
+//   routed-word - "you were sent here" (a deep link, a scan-box click). Loud on
+//                 purpose: gold, filled, pulsing.
+//   cursor-word - "this is where you left off" (item 0DL). Quiet on purpose.
+// Only ever one of either, so clearing takes both.
+const WORD_MARKERS = ['routed-word', 'cursor-word'];
+
 function clearRoutedWord(except) {
-  document.querySelectorAll('.routed-word').forEach(el => {
-    if (el !== except) el.classList.remove('routed-word');
+  WORD_MARKERS.forEach(cls => {
+    document.querySelectorAll('.' + cls).forEach(el => {
+      if (el !== except) el.classList.remove(cls);
+    });
   });
 }
 
@@ -721,7 +730,7 @@ function clearRoutedWord(except) {
 // click opened the decision panel and moved the scan, and the middle pane was
 // never told. This is that missing funnel, and the deep-link router now shares
 // it rather than keeping a second copy of the same four lines.
-async function revealWordInText(klalId, wordIndex) {
+async function revealWordInText(klalId, wordIndex, { marker = 'routed-word' } = {}) {
   await mountKlal(klalId);
   const block = document.getElementById('klal-block-' + klalId);
   if (!block) return null;
@@ -744,7 +753,9 @@ async function revealWordInText(klalId, wordIndex) {
   // at 900ms and is gone by 4s with the pointer untouched. It now persists until
   // the reviewer actually goes somewhere else.
   clearRoutedWord(span);
-  span.classList.add('routed-word');
+  // The caller says WHICH marker - a routed arrival shouts, a cursor does not.
+  WORD_MARKERS.forEach(cls => { if (cls !== marker) span.classList.remove(cls); });
+  span.classList.add(marker);
   rememberVisitedWord(klalId, wordIndex);   // see _lastVisitedWord
   return span;
 }
@@ -2025,6 +2036,10 @@ function focusWordOnScan(targetPage, klalId, corr, opts) {
   // know the address bar exists. replaceState, not pushState: a reviewer moving
   // through a klal should not have to press Back forty times to leave.
   if (corr && corr.word_index != null) {
+    // The cursor marks where you LEFT OFF, so it has no business being on screen
+    // while you are actively on a word. Dismissing the panel puts it back, on
+    // this word (item 0DL).
+    document.querySelectorAll('.cursor-word').forEach(el => el.classList.remove('cursor-word'));
     rememberVisitedWord(klalId, corr.word_index);   // see _lastVisitedWord
     updateHash(klalId, corr.word_index);
     // ...and the one place that copies that address, for the same reason - see

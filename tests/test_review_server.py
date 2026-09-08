@@ -4101,9 +4101,17 @@ def test_dismissing_a_word_panel_snaps_the_cursor_back_to_that_word(server, page
     page.wait_for_timeout(900)
 
     target = page.locator(f"#klal-block-{klal_id} [data-word-index='{idx}']").first
-    assert target.evaluate("el => el.classList.contains('routed-word')"), (
-        "the word the reviewer was on carries no ring after the panel closed - "
+    assert target.evaluate("el => el.classList.contains('cursor-word')"), (
+        "the word the reviewer was on carries no cursor after the panel closed - "
         "nothing on screen says where they were")
+    # AND NOT THE DEEP-LINK RING (item 0DL). The snap first reused .routed-word,
+    # which is 3px solid gold with a fill and a pulse - built to shout at someone
+    # arriving from a pasted URL. Left behind after every dismissal it reads as a
+    # word STATE, and gold already means --pending everywhere else on this screen:
+    # "clicking on any word then clicking away leaves a gold box around the word".
+    assert not target.evaluate("el => el.classList.contains('routed-word')"), (
+        "the cursor is wearing the deep-link ring - it must be the quiet marker, "
+        "not the loud one")
     assert target.evaluate(
         """el => {
              const p = document.getElementById('text-scroll').getBoundingClientRect();
