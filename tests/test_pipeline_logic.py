@@ -8807,7 +8807,7 @@ def test_acknowledging_a_structural_finding_silences_it_but_not_a_new_one(tmp_pa
     with open(ack_path, "w", encoding="utf-8") as f:
         json.dump([{"key": m._key(row), "ts": "2026-09-07", "note": "checked",
                     "klal_id": 5, "detector": "repeated_word", "stored": "לו"}], f)
-    ack = m.load_acknowledged()
+    ack = m.ack.load(m.ACK_PATH)      # the shared store, asked directly
 
     assert m._key(row) in ack, "the acknowledged finding must be recognised"
     assert m._key(other) not in ack, "a different finding must NOT be silenced by it"

@@ -72,10 +72,12 @@ _key = ack.key
 _keys_for = ack.keys_for
 
 
-def load_acknowledged():
-    return ack.load(ACK_PATH)
-
-
+# NO load_acknowledged(). It was a one-line wrapper over ack.load(ACK_PATH), and
+# once build() moved to ack.annotate() nothing in production called it - it
+# survived referenced ONLY by a test, which is the axis Lesson 47 names as the
+# one that actually finds things (an orphan hunt misses it by construction,
+# because the tests ARE references). Removed 2026-09-08; the test asks the shared
+# module directly.
 def build(part_path=None):
     """[{klal_id, word_index, stored, proposal, detector, evidence}], sorted.
 
