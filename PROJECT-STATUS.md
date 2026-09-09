@@ -101,6 +101,77 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0DY. **[2026-09-09, reviewer] "WHY DOES klal 159 w10 SHOW GREEN?" BECAUSE GREEN
+    MEANS *A HUMAN RULED HERE*, NOT *THE CORPUS HOLDS IT* - AND FOR 8 WORDS
+    THOSE HAVE COME APART. SIX OF THEM PERMANENTLY.**
+
+    ### The mechanism
+
+    The entry at klal 159 w10 is an `ai_flag`, and `app.js:222` colours it:
+
+        if (corr.opcode === 'ai_flag') return corr.flag_answered ? 'human' : 'open';
+
+    `flag_answered` is true because `_flag_answered_by_a_later_decision()` found a
+    `disputed_choice` at that word dated 2026-09-07, later than the flag itself
+    (2026-08-31). That is correct and is the klal 163 fix working: a flag a human
+    has since ruled on must stop showing as open work.
+
+    **But the ruling is unapplied and permanently undappliable.** Its
+    `candidate_snapshot` is `null` (item `0DX`, cause B), so nothing can
+    drift-check it and nothing can re-point it. The corpus still reads `איכא`
+    where the reviewer chose `אליבא`, and the screen says done.
+
+    Note what green does NOT come from here: `current_decision` on an `ai_flag`
+    entry is the FLAG'S OWN `klal_flag` row (`chosen_text: null`), not the human
+    ruling - `wordState()` carries a comment saying exactly that. A first attempt
+    to measure this compared `current_decision.chosen_text` and found 8 mismatches
+    that did not include klal 159 w10 itself. The right comparison is against the
+    ruling that ANSWERED the flag, which is a different row.
+
+    ### Extent, measured against what the reviewer actually sees
+
+    **198 words render green. 8 of them are green on an unapplied ruling whose
+    text the corpus does not hold:**
+
+        http://127.0.0.1:8420/klal/23/word/599    chose 'בעי'         corpus 'ביעי'
+        http://127.0.0.1:8420/klal/69/word/188    chose 'אל ואלהים'   corpus 'ואלהים דליתא'
+        http://127.0.0.1:8420/klal/159/word/10    chose 'אליבא'       corpus 'איכא'
+        http://127.0.0.1:8420/klal/161/word/289   chose 'נתנאל'       corpus 'נתנן'
+        http://127.0.0.1:8420/klal/174/word/116   chose 'אלא'         corpus 'לא'
+        http://127.0.0.1:8420/klal/200/word/145   chose 'אלו'         corpus 'או'
+        http://127.0.0.1:8420/klal/206/word/2     chose 'אלו'         corpus 'או'
+        http://127.0.0.1:8420/klal/216/word/123   chose 'אלא'         corpus 'לא'
+
+    **Six of the eight are the null-snapshot ligature rulings of `0DX` cause B** -
+    so they are not merely unapplied, they are unappliable by any code path, and
+    they will show green until someone re-rules them. The other two are worth a
+    look on their own: klal 23 w599, and klal 69 w188, which is the same klal and
+    the same `ואלהים` that Lesson 34 records as having been silently deleted once
+    by a mis-scoped mutator.
+
+    The other 190 green words are honest: their ruling is applied, or its text is
+    what the corpus holds.
+
+    ### NOT FIXED, and this one is deliberate
+
+    The obvious repair is a fourth word state - "ruled, but not in the corpus" -
+    or making `flag_answered` require an APPLIED ruling. Both change the
+    tri-state, which `review_counts.word_states()` and `app.js`'s `wordState()`
+    encode twice and `test_nav_tristate_matches_what_each_word_actually_renders_as`
+    pins across both.
+
+    An hour before this was found, three attempts at a smaller change to the same
+    function (`api_klal`'s stranded panel, item `0DX`) each regressed a different
+    invariant, and were reverted under Lesson 31. Attempting a tri-state change on
+    the same afternoon, in the same function, without first establishing how the
+    four merged sources interact, is the same mistake with a bigger blast radius.
+    The measurement above is what the fix should be built on, and the fix wants
+    its own session.
+
+    **The cheap mitigation, if the eight matter before then:** they are all in
+    `0DX`'s list and all reachable in the dashboard queue except klal 211 w73.
+    Re-ruling one clears both the drift and the false green in a single click.
+
 0DX. **[2026-09-09] A DECLINED INSERTION NOW SETTLES BEFORE THE DRIFT GATE - TWO
     RULINGS UNSTUCK SINCE 2026-08-11. THE STRANDED-PANEL WIDENING WAS ATTEMPTED
     THREE TIMES, REGRESSED EVERY TIME, AND IS REVERTED AND HANDED BACK.**
