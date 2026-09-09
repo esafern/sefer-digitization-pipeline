@@ -204,6 +204,81 @@ applying it to the corpus remain two separate, deliberate steps.
     report instead of its fields). All four were read at the start of that
     session and several were cited by me inside it.
 
+    ### LESSON 0 SERVED, ON THIS SESSION, WITH THE CODE
+
+    Recorded here because the ten lines go in the reply where the reviewer sees
+    them, but the EVIDENCE has to survive the conversation - and because Lesson
+    0's stated purpose is a line that can be grepped for to see which rules keep
+    failing to bind. The reviewer had to ask twice for this: the first
+    acknowledgement was prose, and Lesson 0 says *with the code*.
+
+    **13 THE SECOND COPY OF THE TRUTH.** The same `--acknowledge` block written
+    three times in one afternoon, two already diverged by the time anyone looked.
+    `build_title_report.py:204` and `list_ligature_words.py:141` both did:
+
+        n = ack.record(cands, ACK_PATH, args.note, text_field="title_word",
+                       only=lambda r: (r["klal_id"], r["word_index"]) in want)
+        missed = want - {(r["klal_id"], r["word_index"]) for r in cands}
+        if missed:
+            raise SystemExit(...)
+
+    - record, THEN validate. `build_structural_defect_report.py:231` validated
+    first. So `--acknowledge 144:4 --acknowledge 999:0` wrote the first and
+    raised on the second in two tools of three, leaving a partial write nobody is
+    told about. Fixed as `triage_ack.record_selected()` (item `0DQ`).
+    *I will not write the same logic a second time instead of extracting it.*
+
+    **19 WRITTEN IS NOT APPLIED.** `0DF` as committed at `c69234e` said klal 144
+    w837/w839 "are **exactly the false positive `0DE` finding 6 predicts**". The
+    header of `build_structural_defect_report.py:114`, in a file read that same
+    session, already said the opposite:
+
+        # `א ב ג ד ה ו ז` can only be `ח`. Confirmed against the scan on the case
+        # that prompted it - page 52's right margin carries ten markers, and DocAI
+        # read the 8th `ח` as `ה` and the 10th `י` as `ו`, both plain misreads of
+
+    Finding 6 is about runs that do NOT start at `א`; klal 144's run starts at
+    `א`, so it never applied. Told to the reviewer twice before the file was
+    opened. *I will not assert a connection I have not opened the file to check.*
+
+    **33 STATE, NOT PRINTOUT.** The function that produced `0DF`'s counts:
+
+        def positions(rows, kid_key="klal_id", wi_key="word_index"):
+            out=set()
+            for r in rows:
+                k,w=r.get(kid_key), r.get(wi_key)
+                if k is not None and w is not None and k<=222: out.add((k,w))
+            return out
+
+    It reads two fields. The rows it read carry a third that settles them -
+    `"resolved_false_positive": "ויגל is correct - Psalms 16:9, not ויגאל"` - and
+    stage 5b prints `of the candidates, 2 are already-resolved false positives`
+    on every rebuild, so the number was on screen during the run that produced
+    the wrong one. *I will not measure a record without reading every field that
+    settles it.*
+
+    **42 THE MUTATION THAT DID NOT FAIL**, five times across three tests, the
+    worst of them three successive shapes of one test. Shape two pinned the klal
+    to stop it flaking:
+
+        page.eval_on_selector('#klal-block-66 [data-word-index="200"]', "el => el.click()")
+        ...
+        assert abs(after - before) < 0.15
+
+    - and klal 66 w200's focus box is never far from either end of the page (gap
+    measured at 0.111), so "hold the view" and "chase the word" return the same
+    number and the assertion passes either way. *I will not ship a test I have
+    not watched fail.*
+
+    ### The pattern, which is the part worth keeping
+
+    **Three of the four were trusting my own output** - my test, my claim, my
+    measurement. Other people's artifacts get checked here by default; mine got
+    checked only when something forced it. That is the workflow gap Lesson 0
+    exists to surface, and it is a better finding than any of the four
+    individually.
+
+
 0DV. **[2026-09-09, reviewer directive] THE LEXICAL DETECTORS ARE DOCUMENTED AS
     WEAK AND GATED ON VISION, AND THEIR 126 ADJUDICATED POSITIONS ARE CLEARED.
     UNSURFACED LEXICAL FINDINGS: 126 -> 0.**
