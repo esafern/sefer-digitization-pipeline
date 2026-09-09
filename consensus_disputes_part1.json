@@ -3365,37 +3365,6 @@
     },
     {
       "klal_id": 88,
-      "word_index": 518,
-      "opcode": "replace",
-      "final_text": "בס'",
-      "consensus_reading": "בפ'",
-      "agreeing_engines": [
-        "dicta",
-        "surya"
-      ],
-      "ligature_artifact": null,
-      "cross_edition": true,
-      "cross_edition_engines": [
-        "dicta"
-      ],
-      "same_edition_agreeing": 1,
-      "abbreviation_shape": null,
-      "witnesses": {
-        "docai": null,
-        "vlm": null,
-        "surya": "בפ'",
-        "dicta": "בפ'"
-      },
-      "page": 40,
-      "bbox": {
-        "x1": 0.453192800283432,
-        "y1": 0.2839854657649994,
-        "x2": 0.4748915135860443,
-        "y2": 0.300121009349823
-      }
-    },
-    {
-      "klal_id": 88,
       "word_index": 817,
       "opcode": "replace",
       "final_text": "כ\"ו",

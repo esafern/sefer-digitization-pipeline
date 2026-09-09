@@ -2959,39 +2959,6 @@
       "flag": "current_text_may_be_wrong"
     },
     {
-      "word_index": 518,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "בס'",
-      "page": 40,
-      "bbox": {
-        "x1": 0.453192800283432,
-        "y1": 0.2839854657649994,
-        "x2": 0.4748915135860443,
-        "y2": 0.300121009349823
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: dicta + surya agree on 'בפ'' against stored 'בס''. NOTE: this is a CROSS-EDITION consensus - dicta read the Jerusalem 1975/6 printing, not this Berlin scan. Only ONE engine that read THIS scan differs from the corpus here, so a difference between the two printings is a live explanation - check the ink.",
-      "vlm_reading": null,
-      "surya_reading": "בפ'",
-      "dicta_reading": "בפ'",
-      "consensus_engines": [
-        "dicta",
-        "surya"
-      ],
-      "consensus_reading": "בפ'",
-      "ligature_artifact": null,
-      "cross_edition": true,
-      "cross_edition_engines": [
-        "dicta"
-      ],
-      "same_edition_agreeing": 1,
-      "abbreviation_shape": null,
-      "flag": "current_text_may_be_wrong"
-    },
-    {
       "word_index": 817,
       "opcode": "replace",
       "docai_reading": null,

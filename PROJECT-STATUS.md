@@ -159,6 +159,12 @@ applying it to the corpus remain two separate, deliberate steps.
     from Tesseract. The witness engine's own contribution to the corpus over 419
     items is nil.
 
+    **FIXED the same day.** The reviewer ruled it in the dashboard at 16:29 as a
+    `disputed_choice` (`chosen_source: surya_reading`), and it applied: klal 88
+    w518 `בס'` -> `בפ'`, word count unchanged at 1149, now reading
+    `על ברייתא דמתנייא בפ' אלו מגלחין`. So the layer's lifetime yield is one
+    corrected word, and it needed a route the layer itself does not have.
+
     ### Verdict, and it is a scope decision, not a code change
 
     Do not rebuild or extend this layer. Its queue is already restricted to 3

@@ -1,10 +1,10 @@
 # The open dispute queue, ordered by posterior
 
-362 open dispute(s), scored by `tools/rank_dispute_queue.py`. **Regenerate after any apply** - the queue and the calibration both move.
+361 open dispute(s), scored by `tools/rank_dispute_queue.py`. **Regenerate after any apply** - the queue and the calibration both move.
 
 `posterior` is P(a reviewer adopts the consensus reading), estimated from the stratum this dispute falls in, under a Beta(1,1) posterior so a thin stratum cannot read as a certainty. The interval is 90% credible. **This orders attention; it decides nothing** - every row still needs the ink.
 
-Calibrated on **266 ledger rulings** that recorded a consensus reading; 196 of them adopted it, a base rate of 74%. That base rate is the FALLBACK only - the strata below differ from it by more than 60 points, which is the whole reason this file exists.
+Calibrated on **267 ledger rulings** that recorded a consensus reading; 197 of them adopted it, a base rate of 74%. That base rate is the FALLBACK only - the strata below differ from it by more than 60 points, which is the whole reason this file exists.
 
 ## What each stratum is worth
 
@@ -12,7 +12,7 @@ Calibrated on **266 ledger rulings** that recorded a consensus reading; 196 of t
 |---|---:|---:|---:|---|
 | `dicta,surya,vlm` | 43 | 43 | 98% | 93%–100% |
 | `dicta,vlm` | 41 | 35 | 84% | 74%–92% |
-| `dicta,surya` | 37 | 30 | 79% | 68%–89% |
+| `dicta,surya` | 38 | 31 | 80% | 69%–89% |
 | `surya,vlm` | 109 | 82 | 75% | 68%–81% |
 | `dicta,docai,surya,vlm` | 1 | 1 | 67% | 22%–97% ⚠ thin (n<8); ranking falls back to the engine count |
 | `dicta,docai,vlm` | 1 | 1 | 67% | 22%–97% ⚠ thin (n<8); ranking falls back to the engine count |
@@ -26,7 +26,7 @@ Calibrated on **266 ledger rulings** that recorded a consensus reading; 196 of t
 
 | posterior | disputes |
 |---|---:|
-| >=0.75 | 280 |
+| >=0.75 | 279 |
 | >=0.50 | 45 |
 | >=0.25 | 2 |
 | <0.25 | 35 |
