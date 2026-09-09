@@ -3879,6 +3879,29 @@ let zoomLevel = 1;
 // zoom alone - only an explicit click re-triggers it.
 const FOCUS_ZOOM = 2.2;
 let _zoomOnFocus = false;
+// A FOCUS SCROLL IS IN FLIGHT UNTIL THIS TIMESTAMP. Item 0DZ, reviewer
+// 2026-09-09 on the eight false-green links: "using that url does *not* zoom in
+// the scan panel on the selected word".
+//
+// Centring on a word is a SMOOTH scroll, so it takes ~400ms to land - and
+// opening the word's decision panel narrows #scan-viewer, which fires the
+// ResizeObserver DURING those 400ms. refitScanToPane() then read the scroll
+// position mid-animation (still at the top of the page), called applyZoom with
+// centreFocused:false to "keep the view still", and pinned the pane there: an
+// instant scroll cancels a running smooth scroll, so the word never arrived.
+// Measured headed, 1600x1000: 7 of the reviewer's 8 links landed with the box
+// off screen - klal 23 w599 at y=1101 in a viewer 954px tall - while the zoom
+// readout said 220% the whole time. Only klal 206 w2 looked right, because it is
+// the second word on the page and needs no scroll at all.
+//
+// A DEADLINE rather than a boolean: the flag has to survive the smooth scroll
+// itself, which nothing fires an event at the end of, and self-clear if the
+// render that set it never scrolls.
+let _focusScrollUntil = 0;
+const FOCUS_SCROLL_MS = 1000;                       // > the ~400ms smooth scroll
+function markFocusScrollInFlight() { _focusScrollUntil = performance.now() + FOCUS_SCROLL_MS; }
+function focusScrollInFlight() { return performance.now() < _focusScrollUntil; }
+
 // NO _zoomBeforeFocus. It held "the zoom in effect before a click zoomed in on a
 // word, so clicking away can put it back" (2026-08-26). Removed 2026-09-08 with
 // item 0DK: a dismissal no longer restores the zoom, which left this WRITTEN by
@@ -3961,6 +3984,20 @@ function refitScanToPane() {
   // not a request to go to the focused word, it is a request to keep the view
   // still - and this is the call that REPEATS, so it is the one that must never
   // animate.
+  //
+  // UNLESS A FOCUS SCROLL IS IN FLIGHT (item 0DZ). This width change is then not
+  // a reviewer dragging the window, it is the decision panel opening in response
+  // to the very click that asked for the word - and "keep the view still" means
+  // keeping it at the top of the page the word is not on. Re-centre instead,
+  // instantly: the smooth scroll's target is a scroll offset computed against
+  // the OLD image width, so it must be replaced rather than allowed to finish.
+  //
+  // Lesson 41 is what was wrong before: the guard asked "is this a resize?" when
+  // the condition that matters is "is the reviewer mid-arrival at a word?".
+  if (focusScrollInFlight() && hlContainer.querySelector('.hl-box.focused')) {
+    applyZoom(null, null, { behavior: 'auto' });
+    return;
+  }
   applyZoom(null, null, { centreFocused: false });
 }
 
@@ -4021,6 +4058,7 @@ function setupZoomPan() {
       _pendingScrollToBox = null;
       const zoomThis = _zoomOnFocus;
       _zoomOnFocus = false;
+      markFocusScrollInFlight();          // item 0DZ - hold off refitScanToPane
       requestAnimationFrame(() => {
         if (zoomThis) zoomToFocus(box);
         else box.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
@@ -4317,6 +4355,7 @@ async function showPage(page, focusKlalId, focusCorr = undefined) {
       _pendingScrollToBox = null;
       const zoomThis = _zoomOnFocus;
       _zoomOnFocus = false;
+      markFocusScrollInFlight();          // item 0DZ - hold off refitScanToPane
       requestAnimationFrame(() => {
         if (zoomThis) zoomToFocus(focusedBox);
         else focusedBox.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });

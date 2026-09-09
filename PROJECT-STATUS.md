@@ -101,6 +101,101 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0DZ. **[2026-09-09, reviewer] "USING THAT URL DOES *NOT* ZOOM IN THE SCAN PANEL
+    ON THE SELECTED WORD" - IT DID ZOOM. IT ZOOMED SOMEWHERE THE WORD IS NOT.
+    FIXED.**
+
+    Reported on the eight `0DY` links, and true of every share URL that names a
+    word far enough down its page to need a scroll.
+
+    ### What the reviewer saw, measured
+
+    Headed Chromium, 1600x1000, following each of the eight links cold:
+
+        klal  word   zoom     focused box, relative to a 954px-tall viewer
+        23    599    220%     578px below its centre - off screen
+        69    188    220%     686px below - off screen
+        159   10     220%     741px below - off screen
+        161   289    220%     187px below - off screen
+        174   116    220%     677px below - off screen
+        200   145    220%     862px below - off screen
+        216   123    220%     932px below - off screen
+        206   2      220%     on screen
+
+    Seven of eight. Only klal 206 w2 looked right, and only because it is the
+    second word on the page: it needs no scroll, so nothing could go wrong.
+
+    Note `zoom: 220%` in all eight rows. THE ZOOM WAS NEVER THE PROBLEM - the
+    pane magnified to reading level every time, at the top-left of a page whose
+    word is 700px further down. A check on `#zoom-level` sees a healthy system
+    (Lesson 41: THE GUARD THAT TESTS A PROXY).
+
+    ### Cause
+
+    Centring on a word is a smooth scroll, ~400ms. The routed click also OPENS
+    THE WORD'S DECISION PANEL, which narrows `#scan-viewer`, which fires the
+    ResizeObserver inside those 400ms - and `refitScanToPane()` did this:
+
+        applyZoom(null, null, { centreFocused: false });
+
+    Its comment says why: "A resize is not a request to go to the focused word,
+    it is a request to keep the view still" (item `0DJ`). But `applyZoom` reads
+    the anchors off the CURRENT scroll - mid-animation, still at the top of the
+    page - and then sets `scrollLeft`/`scrollTop` directly, which in Chrome
+    CANCELS a running smooth scroll. So the refit pinned the pane to where the
+    animation happened to be and killed the animation that was leaving.
+
+    Lesson 41 again, on the fixing side: the guard asked "is this a resize?"
+    when the condition that matters is "is the reviewer mid-arrival at a word?"
+
+    ### Fix
+
+    `review_frontend/app.js`, a deadline set wherever a centring scroll is
+    issued and read by the one call site that repeats:
+
+        let _focusScrollUntil = 0;
+        const FOCUS_SCROLL_MS = 1000;               // > the ~400ms smooth scroll
+        function markFocusScrollInFlight() { _focusScrollUntil = performance.now() + FOCUS_SCROLL_MS; }
+        function focusScrollInFlight() { return performance.now() < _focusScrollUntil; }
+
+        // in refitScanToPane(), before the 0DJ line:
+        if (focusScrollInFlight() && hlContainer.querySelector('.hl-box.focused')) {
+          applyZoom(null, null, { behavior: 'auto' });
+          return;
+        }
+
+    `behavior: 'auto'` deliberately: the smooth scroll still in flight is aimed
+    at an offset computed against the OLD image width, so it must be REPLACED,
+    not allowed to finish. An instant scroll does both.
+
+    After: 0 of 8 off screen, headed, at 1600x1000 and 1280x800.
+
+    ### Why this survived until a reviewer hit it
+
+    THE SUITE COULD NOT SEE IT. Headless Chromium has no real smooth-scroll
+    animation, so there is nothing for the refit to interrupt: 0 of 8 links fail
+    headless, 7 of 8 fail headed. Every frontend test in this project runs
+    headless.
+
+    So `test_a_share_url_lands_the_word_on_screen_in_the_scan` launches its own
+    HEADED browser, off the module's playwright instance (a second
+    `sync_playwright()` in the same thread raises "Sync API inside the asyncio
+    loop"), and skips if no display is available. It asserts the box is on
+    screen, not that the readout says 220%.
+
+    A second test, `test_a_resize_long_after_arriving_still_does_not_chase_the_word`,
+    pins the BOUNDARY - a resize outside the window must still hold the view
+    still, which is 0DJ. That gap was real: 0DJ's own test records three
+    attempts to drive it through a real `set_viewport_size()` that all passed
+    under a mutation restoring the chase, so it tests `applyZoom`'s contract and
+    leaves `refitScanToPane`'s call site - the line this item edits - uncovered.
+    Measured: replacing the new gate with `true` left all 105 existing tests
+    green. The real resize IS observable here because 0DZ's re-centre is an
+    INSTANT scroll, landing in one frame rather than animating past any wait.
+
+    Mutation-checked both ways: gate forced on, the boundary test fails; gate
+    forced off, the share-URL test fails. 652 passed, 1 skipped.
+
 0DY. **[2026-09-09, reviewer] "WHY DOES klal 159 w10 SHOW GREEN?" BECAUSE GREEN
     MEANS *A HUMAN RULED HERE*, NOT *THE CORPUS HOLDS IT* - AND FOR 8 WORDS
     THOSE HAVE COME APART. SIX OF THEM PERMANENTLY.**

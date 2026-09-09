@@ -4274,3 +4274,151 @@ def test_jumping_to_another_klal_does_not_snap_back_to_the_old_one(server, page)
     assert page.locator(f"#klal-block-{klal_id} .cursor-word").count() == 0, (
         "a cursor was left marking a word in the klal the reviewer navigated away from")
     assert page.test_errors == []
+
+
+# The eight positions of item 0DY, which is how this defect was reported - but
+# any word far enough down its page to need a scroll exercises it.
+_SHARE_LINK_WORDS = [(23, 599), (69, 188), (159, 10), (161, 289),
+                     (174, 116), (200, 145), (206, 2), (216, 123)]
+
+
+@pytest.fixture(scope="module")
+def headed_browser(browser):
+    """A REAL, VISIBLE browser, launched off the same playwright instance as the
+    module's headless one - a second sync_playwright() context in this thread
+    raises "Sync API inside the asyncio loop".
+
+    Only for defects that headless cannot show. Item 0DZ is one: it lives in the
+    interruption of a smooth scroll, and headless has no scroll animation to
+    interrupt."""
+    try:
+        b = browser.browser_type.launch(headless=False)
+    except Exception as exc:                        # no display, e.g. headless CI
+        pytest.skip(f"headed chromium unavailable: {exc}")
+    yield b
+    b.close()
+
+
+def test_a_share_url_lands_the_word_on_screen_in_the_scan(server, headed_browser):
+    """ADDED 2026-09-09, item 0DZ (reviewer, on the eight false-green links:
+    "for all of them - using that url does *not* zoom in the scan panel on the
+    selected word").
+
+    HEADED ON PURPOSE. Under the suite's headless browser this defect does not
+    exist: measured, 0 of 8 links failed headless and 7 of 8 failed headed,
+    because headless has no real smooth-scroll animation for the ResizeObserver
+    refit to interrupt. A headless version of this test could not fail, which by
+    Lesson 42 makes it not a test.
+
+    ASSERT THE WORD IS ON SCREEN, not the zoom readout. `#zoom-level` read
+    "220%" in every one of the seven failures - the pane HAD zoomed, it had
+    simply zoomed somewhere the word is not. Checking the number checks a proxy
+    (Lesson 41); the property the reviewer has is "I can see the word"."""
+    probe = """() => {
+      const v = document.getElementById('scan-viewer');
+      const b = document.querySelector('.hl-box.focused');
+      const vr = v.getBoundingClientRect();
+      const r = b ? b.getBoundingClientRect() : null;
+      return {
+        zoom: document.getElementById('zoom-level').textContent,
+        focused: !!b,
+        onScreen: r ? (r.right > vr.left && r.left < vr.right
+                       && r.bottom > vr.top && r.top < vr.bottom) : false,
+        offCentreY: r ? Math.round(r.top - (vr.top + vr.height / 2)) : null,
+      };
+    }"""
+    page = headed_browser.new_page(viewport={"width": 1600, "height": 1000})
+    try:
+        offscreen = []
+        for klal_id, word_index in _SHARE_LINK_WORDS:
+            page.goto(f"{server}/klal/{klal_id}/word/{word_index}",
+                      wait_until="domcontentloaded", timeout=20000)
+            page.wait_for_selector(".nav-item", timeout=20000)
+            page.wait_for_timeout(3500)
+            state = page.evaluate(probe)
+            assert state["focused"], (
+                f"klal {klal_id} w{word_index}: the deep link drew no focused box")
+            if not state["onScreen"]:
+                offscreen.append((klal_id, word_index, state))
+        assert not offscreen, (
+            "a share URL zoomed the scan somewhere the word is not:\n"
+            + "\n".join(f"  http://127.0.0.1:8420/klal/{k}/word/{w} -> zoom "
+                         f"{st['zoom']}, box {st['offCentreY']}px from the centre "
+                         f"of a 954px viewer" for k, w, st in offscreen))
+    finally:
+        page.close()
+
+
+def test_a_resize_long_after_arriving_still_does_not_chase_the_word(server, page):
+    """THE OTHER HALF OF ITEM 0DZ, and the half that can regress silently.
+
+    0DZ let refitScanToPane() re-centre the focused word - but only inside
+    FOCUS_SCROLL_MS of a focus scroll, because that width change is the decision
+    panel opening under the reviewer's own click. A resize AFTER that window is
+    item 0DJ's case again ("keep the view still"), and the gate is the only thing
+    separating them.
+
+    test_resizing_the_pane_does_not_chase_the_focused_word cannot see that gate:
+    its own comment records three attempts to drive 0DJ through a real
+    set_viewport_size() that all passed under a mutation restoring the chase, so
+    it tests applyZoom's contract instead and leaves refitScanToPane's call site
+    - the line 0DZ edits - uncovered. Measured 2026-09-09: replacing the gate
+    with `true` leaves all 105 existing tests green.
+
+    A real resize IS observable here, where it was not for 0DJ, and for a
+    concrete reason: 0DZ's re-centre is `behavior: 'auto'`, an instant scroll,
+    precisely so it can replace a smooth scroll aimed at a stale offset. The
+    chase it would restore therefore lands inside one frame instead of animating
+    for 400ms into a harness wait nobody could justify."""
+    page.goto(server + "/klal/66", wait_until="domcontentloaded", timeout=15000)
+    page.wait_for_selector(".nav-item", timeout=15000)
+    page.wait_for_timeout(2200)
+    page.eval_on_selector('#klal-block-66 [data-word-index="200"]', "el => el.click()")
+    page.wait_for_selector("#hl-container .hl-box.focused", timeout=5000)
+    # PAST THE DEADLINE. FOCUS_SCROLL_MS is 1000; anything less and this test
+    # would be asserting the 0DZ branch rather than its boundary.
+    page.wait_for_timeout(2000)
+
+    for _ in range(3):
+        page.click("#zoom-in")
+        page.wait_for_timeout(250)
+
+    park = """() => {
+        const sv = document.getElementById('scan-viewer');
+        const box = document.querySelector('#hl-container .hl-box.focused');
+        const max = Math.max(0, sv.scrollHeight - sv.clientHeight);
+        sv.scrollTop = 0;
+        const b = box.getBoundingClientRect(), p = sv.getBoundingClientRect();
+        if (b.bottom > p.top && b.top < p.bottom) sv.scrollTop = max;
+        return {parked: sv.scrollTop, overflow: sv.scrollHeight - sv.clientHeight};
+    }"""
+    visible = """() => {
+        const sv = document.getElementById('scan-viewer');
+        const box = document.querySelector('#hl-container .hl-box.focused');
+        const b = box.getBoundingClientRect(), p = sv.getBoundingClientRect();
+        return b.bottom > p.top && b.top < p.bottom;
+    }"""
+
+    state = page.evaluate(park)
+    assert state["overflow"] > 200, (
+        f"precondition: the pane must overflow to be scrollable, got {state['overflow']}px")
+    page.wait_for_timeout(300)
+    assert page.evaluate(visible) is False, (
+        "precondition: the focused word must be OFF-SCREEN, or holding the view "
+        "and chasing the word give the same answer")
+
+    # A REAL RESIZE, through the ResizeObserver, which is what a reviewer dragging
+    # their window does.
+    page.set_viewport_size({"width": 1360, "height": 1000})
+    page.wait_for_timeout(900)
+
+    assert page.evaluate("""() => { const sv = document.getElementById('scan-viewer');
+                                    return sv.scrollHeight - sv.clientHeight; }""") > 200, (
+        "precondition: the narrower pane must still overflow - if the image now "
+        "fits, scrollTop is clamped to 0 and the word arrives on screen for a "
+        "reason that has nothing to do with the gate")
+    assert page.evaluate(visible) is False, (
+        "resizing the pane scrolled the focused word into view - refitScanToPane "
+        "is re-centring outside the focus-arrival window, which is item 0DJ's "
+        "stutter restored")
+    assert page.test_errors == []
