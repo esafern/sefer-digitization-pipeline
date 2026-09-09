@@ -181,6 +181,63 @@ def load_flagged_candidates(decisions_path=None):
     return out
 
 
+def load_lexical_defect_candidates(unsurfaced_only=True, report_path=None):
+    """The lexical detectors' findings, as (position, hypothesis) pairs.
+
+    ADDED 2026-09-09 at the reviewer's instruction, after klal 92 w346 - the
+    highest-ranked finding in the whole set - turned out to be a false positive
+    on the ink: `דהלא` is what the printer set, and the proposed `דלא` is simply
+    the commoner word. Both lexical detectors argue from FREQUENCY, which is
+    evidence about the language and not about this page, so the only thing that
+    can sort them is the ink.
+
+    A SOURCE, not a second script. Everything below this - locate_word(), the
+    band fallback, context_for(), adjudicate_one() and the whole crop/cache/retry
+    chain - is already generic over {klal_id, word_index, original, candidate};
+    only where the candidates COME FROM was hardcoded to the 2026-08-16 batches.
+    This adds a second origin and touches nothing else, which is the same reason
+    that batch reused verify_corrections_vision rather than reimplementing it.
+
+    `unsurfaced_only` is the default because those are the ones with no other
+    route to a human: merge_lexical_defects() folds only the sharpest tier into
+    the review queue (REVIEW_MIN_REF 500, corpus_count 1, unambiguous), and the
+    rest are reported and never seen. The surfaced ones already reach a reviewer
+    with a crop and their own candidate panel.
+    """
+    report = cio.load_json(report_path or cio.repo_path("lexical_defect_report.json"),
+                           default=[]) or []
+    queue = cio.load_json(cio.repo_path("review_queue_part1.json"), default={}) or {}
+    surfaced = {(int(kid), e["word_index"]) for kid, entries in queue.items()
+                for e in entries if e.get("word_index") is not None}
+    out, seen = [], set()
+    for r in report:
+        kid, wi = r.get("klal_id"), r.get("word_index")
+        if kid is None or wi is None or kid > cio.PART1_MAX_KLAL:
+            continue
+        if unsurfaced_only and (kid, wi) in surfaced:
+            continue
+        proposals = r.get("proposals") or []
+        if not proposals:
+            continue
+        # EVERY proposal, not just the top one: an `ambiguous` row is precisely a
+        # position where frequency cannot choose, and asking the ink about only
+        # the commonest guess would inherit the bias the ink is being asked to
+        # settle (Lesson 10).
+        for p in proposals:
+            form = p.get("form")
+            if not form or form == r.get("stored"):
+                continue
+            key = (kid, wi, r["stored"], form)
+            if key in seen:
+                continue
+            seen.add(key)
+            out.append({"klal_id": kid, "word_index": wi, "original": r["stored"],
+                        "candidate": form, "reviewer": f"lexical-{r.get('detector')}",
+                        "decision_id": None, "ref_count": p.get("ref_count"),
+                        "ambiguous": bool(r.get("ambiguous"))})
+    return out
+
+
 # --- 2. Word locator: (klal_id, word_index, original text) -> (page, bbox) --
 
 
@@ -386,6 +443,12 @@ def main():
     ap.add_argument("--dry-run", action="store_true",
                      help="locate + crop only, no Gemini calls, no cache writes")
     ap.add_argument("--limit", type=int, default=None, help="process only the first N candidates")
+    ap.add_argument("--source", choices=("flagged", "lexical"), default="flagged",
+                    help="which candidate set to adjudicate: the 2026-08-16 flag batches "
+                         "(default) or the lexical defect report (item 0DU)")
+    ap.add_argument("--all-tiers", action="store_true",
+                    help="--source lexical: include findings the review queue already "
+                         "surfaces, not only the ones with no other route to a human")
     args = ap.parse_args()
 
     klalim = cio.load_part1(PART1_PATH)
@@ -393,9 +456,15 @@ def main():
     word_counts = {kid: len(k["clean_text"].split()) for kid, k in klalim_by_id.items()}
     regions = load_regions()
 
-    candidates = load_flagged_candidates()
-    print(f"Parsed {len(candidates)} candidate (position, hypothesis) pairs "
-          f"from {len(TARGET_REVIEWERS)} reviewer batches.")
+    if args.source == "lexical":
+        candidates = load_lexical_defect_candidates(unsurfaced_only=not args.all_tiers)
+        print(f"Loaded {len(candidates)} candidate (position, hypothesis) pairs from "
+              f"lexical_defect_report.json"
+              f"{'' if args.all_tiers else ' (only those the review queue does not surface)'}.")
+    else:
+        candidates = load_flagged_candidates()
+        print(f"Parsed {len(candidates)} candidate (position, hypothesis) pairs "
+              f"from {len(TARGET_REVIEWERS)} reviewer batches.")
     if args.limit:
         candidates = candidates[:args.limit]
 
@@ -459,18 +528,37 @@ def main():
     vcv.init_cache()
     doc = fitz.open(vcv.PDF_PATH)
 
+    # SOURCE-SPECIFIC OUTPUT. REPORT_PATH names the 2026-08-16 flag batches'
+    # report; a lexical run writing there would silently replace a different
+    # investigation's findings with its own.
+    report_path = (REPORT_PATH if args.source == "flagged"
+                   else cio.repo_path("lexical_vision_report.json"))
+    stream_path = report_path[:-len(".json")] + ".jsonl"
+
     results = []
-    for i, c in enumerate(located):
-        print(f"[{i+1}/{len(located)}] klal {c['klal_id']} w{c['word_index']} "
-              f"{c['original']!r} vs {c['candidate']!r}")
-        results.append(adjudicate_one(client, doc, klalim_by_id, c))
+    # APPEND-AND-FLUSH PER ITEM, which START_HERE.md requires of every API
+    # script and this one did not do: it accumulated all results and wrote once
+    # at the end, so a 429 or a 503 partway through a PAID run lost everything
+    # already paid for. The adjudication cache would have made a re-run cheap,
+    # but the report itself was gone. Added 2026-09-09 before the lexical pass
+    # (item 0DU) rather than after losing a run to it.
+    with open(stream_path, "a", encoding="utf-8") as stream:
+        for i, c in enumerate(located):
+            print(f"[{i+1}/{len(located)}] klal {c['klal_id']} w{c['word_index']} "
+                  f"{c['original']!r} vs {c['candidate']!r}")
+            r = adjudicate_one(client, doc, klalim_by_id, c)
+            results.append(r)
+            stream.write(json.dumps(r, ensure_ascii=False) + "\n")
+            stream.flush()
 
     for c in unlocated:
         results.append({**c, "vision_raw": None, "vision_fields": None, "error": "not located"})
 
-    with open(REPORT_PATH, "w", encoding="utf-8") as f:
+    with open(report_path, "w", encoding="utf-8") as f:
         json.dump(results, f, ensure_ascii=False, indent=2)
-    print(f"\nWrote {len(results)} results to {REPORT_PATH}")
+        f.flush()
+    print(f"\nWrote {len(results)} results to {report_path}")
+    print(f"  each was appended to {stream_path} as it completed")
 
 
 if __name__ == "__main__":

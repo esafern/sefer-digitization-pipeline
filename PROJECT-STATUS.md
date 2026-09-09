@@ -101,6 +101,85 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0DU. **[2026-09-09] VISION PASS OVER THE UNSURFACED LEXICAL FINDINGS. THE INK
+    AGREES WITH THE CORPUS ON ALL 126 POSITIONS - 166 OF 166 HYPOTHESES. THE TIER
+    THRESHOLD IS DOING ITS JOB AND SHOULD NOT BE WIDENED.**
+
+    Reviewer, on the highest-ranked finding of the whole set: "klal 92 w346 -
+    the ink shows the heh. so not a helpful thing. do a vision pass against them
+    all."
+
+    ### Result
+
+    **166 of 166 hypotheses selected the STORED text.** 126 positions, every
+    proposal for each one (not just the top-ranked - an `ambiguous` row is
+    precisely where frequency cannot choose, so asking the ink about only the
+    commonest guess would inherit the bias the ink is being asked to settle,
+    Lesson 10). Confidence 0.95-1.00, median 0.98, none below 0.9. 0 errors.
+
+    **Including all 28 whose proposal is attested >=1,000x in the reference
+    corpus** - the tier that looks most convincing on paper. `דהלא` -> `דלא` at
+    12,899x is a false positive, and so is every one of its neighbours.
+
+    ### THE SIGNAL WAS CHECKED FOR ITS ABILITY TO DISAGREE (Lesson 25)
+
+    166/166 in one direction is exactly the shape of a measurement that cannot
+    fail. Two checks before believing it:
+
+    1. **A positive control.** Fed the adjudicator positions where the ink is
+       KNOWN to disagree - corrections the reviewer already applied and verified
+       - with the wrong pre-correction text as option A. Of the six tried, five
+       no longer locate (the applied correction changed the token the locator
+       matches on), and **the one that did chose B**, transcribing `גבי` against
+       a stored `גכי`. The instrument can say B.
+    2. **The transcription field.** 165 of 166 `transcription_found` values equal
+       the stored word exactly; the one exception, klal 74 w671, read `שרבא שה`
+       - more than the word, a crop carrying its neighbour - and still matched on
+       the word itself.
+
+    A second, independent signal agrees: the reviewer read klal 92 w346 off the
+    scan themselves and reached the same answer before this ran (Lesson 9).
+
+    ### What it settles
+
+    `merge_lexical_defects()`'s tier - `REVIEW_MIN_REF = 500`, `corpus_count <=
+    1`, unambiguous - has been an open question all session: widening it is one
+    line and would surface these. **The answer is no.** On this evidence the unsurfaced
+    tier is entirely false positives, and widening would put 126 positions of
+    them in front of a reviewer - 563 permanent flags on unread material is how
+    the 1,496-flag queue happened (item 1).
+
+    The number to hold onto: **both lexical detectors argue from FREQUENCY**,
+    which is evidence about the LANGUAGE and not about this page. A rarer word
+    one edit from a commoner one is a hypothesis, and on this corpus, below the
+    current threshold, it is a hypothesis that is wrong every time it was
+    checked.
+
+    ### The tool, and one thing fixed before it ran
+
+    A SOURCE on `tools/verify_flagged_candidates_vision.py`, not a new script:
+    `--source lexical`. Everything from the word locator through the
+    crop/cache/retry chain was already generic over `{klal_id, word_index,
+    original, candidate}`; only where candidates came from was hardcoded to the
+    2026-08-16 flag batches. Located 166/166, none needing manual handling.
+
+    **It buffered every result for a single write at the end** - so a 429 or a
+    503 partway through a paid run lost everything already paid for, which
+    START_HERE.md's incremental-flush rule exists to prevent and which this
+    production script had never honoured. Fixed BEFORE the run, not after losing
+    one: each result is appended to `lexical_vision_report.jsonl` and flushed as
+    it completes. Its report path is now source-specific too - a lexical run was
+    about to overwrite `flagged_candidates_vision_report.json`, a different
+    investigation's findings.
+
+    ### Not done
+
+    `lexical_defect_report.json` still has no acknowledgement store (`0DN`), so
+    these 126 cannot be marked checked and will be re-reported by every rebuild.
+    Now that they have a vision verdict, wiring it is worth doing - the store
+    exists and takes three lines - but what "acknowledged" should mean for a row
+    that a widened tier might later promote is still the reviewer's call.
+
 0DT. **[2026-09-09] WHY klal 211 w73 DRIFTED: AN INSERTION RULING NAMES NO WORD,
     SO THE REINDEXER CAN NEVER MOVE IT. THAT IS 9 OF THE 16 ROWS IN THE DRIFT
     WORKLIST.**
