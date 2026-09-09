@@ -112,6 +112,7 @@
 # module-level globals, so a caller's own PART1_PATH/DOCAI_DIR attribute
 # stays that script's single source of truth and stays monkeypatchable in
 # tests exactly as before.
+import copy
 import difflib
 import json
 import os
@@ -187,6 +188,9 @@ _LAZY_PATHS = {
     "ALIGNMENT_PATH": lambda: repo_path("part1_header_anchored_alignment.json"),
     "TRACE_PATH": lambda: repo_path("gematria_trace_part1.json"),
     "LEXICON_PATH": lambda: repo_path("lexicon.txt"),
+    # Resolved at call time like every other path, so a caller that changes
+    # the corpus root gets the new book's scan and not a stale literal.
+    "SCAN_PDF_PATH": lambda: repo_path(book_field("scan_pdf")),
 }
 
 
@@ -200,7 +204,7 @@ def __getattr__(name):
     if name in _LAZY_PATHS:
         return _LAZY_PATHS[name]()
     if name in _WORK_ATTRS:
-        return book_identity()[_WORK_ATTRS[name]]
+        return book_field(_WORK_ATTRS[name])
     if name in _SHAPE_ATTRS:
         return _SHAPE_ATTRS[name]()
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
@@ -246,16 +250,70 @@ _PARTS_DEFAULT = [
 ]
 
 
+def _declared_book():
+    """`book.json` as stored, or None when this corpus root has no book.json.
+
+    None and {} are DIFFERENT answers and the difference is the whole point of
+    this function - see `_require_declared` below.
+    """
+    return load_json(repo_path("book.json"), None)
+
+
+def _require_declared(stored, key):
+    """Read `key` from a book.json that EXISTS, raising if it does not declare it.
+
+    ABSENT AND BLANK ARE NOT THE SAME ANSWER (item 0EC, 2026-09-09, found while
+    standing up the second book). Both this and book_identity() used to merge
+    per-key against the Yad Malachi defaults with `stored.get(key) or default`,
+    so a book.json that declared a DIFFERENT book inherited Yad Malachi's value
+    for every key it omitted and for every key it set to "" or []. Measured with
+    the `Sefer Bedikah` payload tests/test_pipeline_logic.py already uses, which
+    omits `edition`:
+
+        edition = 'Berlin, 1851/2 - the second printing, not the Livorno 1766-7 original'
+        parts() = ['part1.json','part2.json','part3.json']   PART1_MAX_KLAL = 222
+
+    i.e. a second book got Yad Malachi's edition statement on the dashboard
+    (review_server.py:842) and its 667-klal three-chunk shape at ~40 call sites.
+    That is the "wrong edition attribution in a public library" that
+    tools/export_corpus.py's own comment warns about, arriving through the seam
+    built to prevent it.
+
+    The rule now:
+      * no book.json at all  -> the defaults, unchanged. This repo does not move.
+      * book.json exists     -> it IS the declaration. A key it sets is used as
+                                set ("section": "" means this book has no
+                                section, not "Klalei HaGemara"); a key it omits
+                                raises, naming the key and the file.
+
+    Raising rather than returning None is Lesson 21 (FLAT COORDINATE KEYS):
+    prefer a loader that raises on an unexpected shape over one that shrugs and
+    returns nothing, because absence is the failure mode this repo is worst at
+    seeing.
+    """
+    if key not in stored:
+        raise KeyError(
+            f"{repo_path('book.json')} does not declare {key!r}. A corpus root "
+            f"with a book.json must declare every field; omitting one used to "
+            f"inherit Yad Malachi's value silently (item 0EC). Set it "
+            f"explicitly - an empty value is a valid declaration, an absent one "
+            f"is not."
+        )
+    return stored[key]
+
+
 def parts():
     """The book's file chunks, in order: [{file, first_klal, last_klal}, ...].
 
     Resolved at call time against the current corpus root, like everything else
-    here. Any number of entries; a one-file book is a list of one.
+    here. Any number of entries; a one-file book is a list of one, and a book
+    whose chunking is not settled yet declares `[]` rather than omitting the key
+    (which raises) or inheriting Yad Malachi's three - see _require_declared.
     """
-    declared = (load_json(repo_path("book.json"), None) or {}).get("parts")
-    if not declared:
+    stored = _declared_book()
+    if stored is None:
         return [dict(p) for p in _PARTS_DEFAULT]
-    return [dict(p) for p in declared]
+    return [dict(p) for p in _require_declared(stored, "parts")]
 
 
 def scope_label(first_klal, last_klal):
@@ -525,6 +583,14 @@ _WORK_DEFAULTS = {
     # Sefaria's own taxonomy, which is a property of the WORK and not of this
     # pipeline - a second book is unlikely to be Rabbinic Thought / Methodology.
     "categories": ["Rabbinic Thought", "Methodology"],
+    # THE SCAN ITSELF. Added 2026-09-09 while standing up the second book, because
+    # it was the one per-book fact the seam did NOT carry: the filename was a
+    # LITERAL in six live files, including verify_corrections_vision.py (rebuild
+    # stage 3), which crops every disputed word out of it. `cio.REPO` made the
+    # DIRECTORY follow the corpus root, so a second book got a path pointing at
+    # its own root with the first book's filename on the end - a missing file
+    # rather than a wrong crop, which is the lucky failure, not a safe design.
+    "scan_pdf": "berlin_square_corrected.pdf",
 }
 
 
@@ -535,8 +601,28 @@ def book_identity():
     changes the corpus root gets the new book's identity, which is the entire
     point (see the note above).
     """
-    stored = load_json(repo_path("book.json"), None) or {}
-    return {key: stored.get(key) or default for key, default in _WORK_DEFAULTS.items()}
+    return {key: book_field(key) for key in _WORK_DEFAULTS}
+
+
+def book_field(key):
+    """One identity field, held to exactly what THIS caller reads.
+
+    Granularity matters and it is not a style choice: `cio.WORK_TITLE` needs
+    `title` declared and nothing else, while `book_identity()` builds the whole
+    dict because its consumers - the TEI header, the Sefaria index - genuinely
+    consume the whole dict. Requiring all ten fields for a single-attribute read
+    would make a book.json that legitimately declares only its chunking unusable
+    (tests/test_pipeline_logic.py::test_a_one_chunk_book_declares_its_own_shape
+    is exactly that case). Per-field strictness leaves no silent inheritance
+    anywhere and still asks each reader only for what it uses.
+
+    Deep-copied on the way out: `categories` is a list, and the pre-0EC code
+    handed back the module default's own object for any book that omitted it.
+    """
+    stored = _declared_book()
+    if stored is None:
+        return copy.deepcopy(_WORK_DEFAULTS[key])
+    return copy.deepcopy(_require_declared(stored, key))
 
 
 # The five names kept as module attributes for the existing call sites, resolved

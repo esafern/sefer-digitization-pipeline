@@ -81,7 +81,15 @@ def extract_json_fields(text):
 # two levels, not one, to keep resolving to the actual repo root where
 # part1.json/docai_word_boxes/etc. live.
 REPO = cio.REPO
-PDF_PATH = os.path.join(REPO, "berlin_square_corrected.pdf")
+# NOT a module-level literal any more (2026-09-09, item 0DC's class). The
+# filename was hardcoded here and in five other live files, so the one artifact
+# every crop in this file is taken from was the single per-book fact book.json
+# did not carry. It is also resolved through a FUNCTION rather than assigned at
+# import, because an assignment here re-freezes the path the moment this module
+# loads - which is precisely the defect corpus_io's PEP 562 __getattr__ exists
+# to prevent, reintroduced one level up.
+def pdf_path():
+    return cio.SCAN_PDF_PATH
 CANDIDATES_PATH = os.path.join(REPO, "candidates_part1.json")
 OUT_PATH = os.path.join(REPO, "candidates_verified_part1.json")
 CACHE_DB = os.path.join(REPO, "adjudication_cache.db")
@@ -295,7 +303,7 @@ def main():
     out_path = sys.argv[2] if len(sys.argv) > 2 else OUT_PATH
     candidates = cio.load_json(candidates_path)["corrections"]
     final_by_id = {k["klal_id"]: k for k in cio.load_demo_dataset(DEMO_DATASET)}
-    doc = fitz.open(PDF_PATH)
+    doc = fitz.open(pdf_path())
 
     # FIXED 2026-08-21 (found while re-running this script for the insert-
     # bbox feature, PROJECT-STATUS.md open item 8): results used to be

@@ -558,6 +558,13 @@ def main():
     n_settled_dropped = 0
     n_unaddressable = 0
     settled = bcd.settled_by_an_applied_decision({k["klal_id"]: k for k in part1})
+    if verified is None:
+        # Same defect as build_klal_page_regions': a missing stage-3 output was
+        # iterated as None and reported as a TypeError naming no file.
+        raise SystemExit(
+            "no verified candidates found - stage 3 has not run.\n"
+            "  Run pipeline/verify_corrections_vision.py first (it calls the "
+            "Gemini vision adjudicator), or ./rebuild_all.sh which sequences it.")
     for c in verified:
         if (c["klal_id"], c.get("word_index_in_final_text")) in settled:
             n_settled_dropped += 1

@@ -7755,12 +7755,22 @@ def test_the_export_names_the_book_from_book_identity_not_from_a_literal(tmp_pat
     """
     previous = cio.set_corpus_root(str(tmp_path))
     try:
+        # `edition` and `parts` ADDED 2026-09-09 (item 0EC). This payload used to
+        # omit both, and the per-key `or default` merge behind book_identity()
+        # then handed them back as Yad Malachi's - measured, with this exact
+        # dict: edition 'Berlin, 1851/2 - the second printing...' and parts
+        # ['part1.json','part2.json','part3.json'], PART1_MAX_KLAL 222. The test
+        # passed anyway, because it asserted only on the nine keys it set. The
+        # assertion on `edition` below is the half that was missing.
         (tmp_path / "book.json").write_text(json.dumps({
             "title": "Sefer Bedikah", "title_he": "ספר הבדיקה",
             "section": "Shaar Rishon", "section_he": "שער ראשון",
+            "edition": "Vilna 1899, the Romm printing",
             "edition_label": "Vilna 1899", "publisher": "Romm",
             "scan_source": "NLI", "version_source": "https://example.org/x",
             "categories": ["Halakhah"],
+            "scan_pdf": "vilna1899.pdf",
+            "parts": [{"file": "part1.json", "first_klal": 1, "last_klal": 50}],
         }, ensure_ascii=False), encoding="utf-8")
         klalim = [{"klal_id": 1, "gematria": "א", "title": "כלל ראשון",
                    "clean_text": "אלף בית", "page": 14}]
@@ -7781,6 +7791,100 @@ def test_the_export_names_the_book_from_book_identity_not_from_a_literal(tmp_pat
         assert index["schema"]["nodes"][0]["key"] == "Shaar Rishon"
         assert exp._sefaria_version_source() == "https://example.org/x"
         assert "Vilna 1899 (Romm)" in exp._sefaria_version_title()
+
+        # The key this test used to leave unasserted, which is the key that
+        # stayed wrong. `edition` reaches a reviewer through review_server.py's
+        # /api/corpus, so a second book showed Yad Malachi's edition statement
+        # in the dashboard header while every field this test checked was right.
+        ident = cio.book_identity()
+        assert ident["edition"] == "Vilna 1899, the Romm printing", ident["edition"]
+        assert "Livorno" not in ident["edition"] and "1851" not in ident["edition"], (
+            f"the identity still carries Yad Malachi's edition: {ident['edition']!r}")
+        assert [p["last_klal"] for p in cio.parts()] == [50], cio.parts()
+        assert cio.PART1_MAX_KLAL == 50 and cio.PART2_MAX_KLAL is None
+    finally:
+        cio.set_corpus_root(previous)
+
+
+def test_a_book_json_that_omits_a_field_raises_instead_of_borrowing_yad_malachis(tmp_path):
+    """Item 0EC: ABSENT and BLANK are different answers, and neither is "the
+    other book's value".
+
+    book_identity() merged per KEY against the Yad Malachi defaults on
+    FALSINESS, so a corpus root that declared a different book inherited this
+    one's for anything it omitted or left blank. Two consequences, both measured
+    before the fix: `"section": ""` came back "Klalei HaGemara", and `"parts":
+    []` came back as three chunks with PART1_MAX_KLAL 222.
+
+    Both directions are asserted here because a guard is only worth what its
+    failing case proves (Lesson 25): the omission must RAISE, and the blank must
+    SURVIVE. A test that only checked the blank would pass against a loader that
+    raised on everything.
+    """
+    previous = cio.set_corpus_root(str(tmp_path))
+    try:
+        complete = {"title": "T", "title_he": "ת", "section": "", "section_he": "",
+                    "edition": "E", "edition_label": "EL", "publisher": "P",
+                    "scan_source": "S", "version_source": "V", "categories": [],
+                    "scan_pdf": "x.pdf", "parts": []}
+        write = lambda d: (tmp_path / "book.json").write_text(
+            json.dumps(d, ensure_ascii=False), encoding="utf-8")
+
+        # blank SURVIVES - it is a declaration, not an omission
+        write(complete)
+        ident = cio.book_identity()
+        assert ident["section"] == "" and ident["section_he"] == "", ident
+        assert ident["categories"] == [] and cio.parts() == []
+        assert cio.PART1_MAX_KLAL is None
+
+        # a returned mutable must not be the module default's own object
+        ident["categories"].append("mutated")
+        assert cio.book_identity()["categories"] == [], "book_identity leaks its default"
+
+        # absent RAISES, and names the key
+        for key in ("edition", "title", "categories"):
+            partial = {k: v for k, v in complete.items() if k != key}
+            write(partial)
+            try:
+                cio.book_identity()
+            except KeyError as exc:
+                assert repr(key) in str(exc), (key, str(exc))
+            else:
+                raise AssertionError(f"omitting {key!r} did not raise")
+
+        write({k: v for k, v in complete.items() if k != "parts"})
+        try:
+            cio.parts()
+        except KeyError as exc:
+            assert "'parts'" in str(exc), str(exc)
+        else:
+            raise AssertionError("omitting 'parts' did not raise")
+
+        # The SINGLE-ATTRIBUTE path is strict too. It resolves per field rather
+        # than through the whole dict (so a book.json declaring only its chunking
+        # stays usable), which is exactly the shape that could quietly reacquire
+        # the fallback while book_identity() stayed honest.
+        write({k: v for k, v in complete.items() if k != "title"})
+        try:
+            cio.WORK_TITLE
+        except KeyError as exc:
+            assert "'title'" in str(exc), str(exc)
+        else:
+            raise AssertionError("cio.WORK_TITLE did not raise on an undeclared title")
+        assert cio.WORK_EDITION == "E", "a declared field must still resolve"
+    finally:
+        cio.set_corpus_root(previous)
+
+
+def test_a_corpus_root_with_no_book_json_still_gets_this_books_defaults(tmp_path):
+    """The other half of 0EC's rule, and the reason it is safe: NO book.json at
+    all keeps the defaults, so this repo's own corpus does not move. Only a root
+    that HAS one is held to declaring everything."""
+    previous = cio.set_corpus_root(str(tmp_path))
+    try:
+        assert not (tmp_path / "book.json").exists()
+        assert cio.book_identity()["title"] == "Yad Malachi"
+        assert cio.PART1_MAX_KLAL == 222 and cio.PART3_MAX_KLAL == 667
     finally:
         cio.set_corpus_root(previous)
 

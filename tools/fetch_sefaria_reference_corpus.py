@@ -131,7 +131,32 @@ TUR = ["Tur"]
 # Excludes Tamid (no Rashi commentary exists for it) and every "Rashi on X"
 # outside Talmud (Tanakh, Bereshit Rabbah) - see module docstring.
 RASHI_ON_TALMUD = [f"Rashi on {t}" for t in TRACTATES if t != "Tamid"]
-TARGETS = set(TRACTATES) | set(SHULCHAN_ARUKH) | set(MISHNEH_TORAH) | set(TUR) | set(RASHI_ON_TALMUD)
+RABBINIC = set(TRACTATES) | set(SHULCHAN_ARUKH) | set(MISHNEH_TORAH) | set(TUR) | set(RASHI_ON_TALMUD)
+
+# TANAKH, added 2026-09-10. The register above is Yad Malachi's - halachic codes
+# and Talmud, the works that book is ABOUT. Sefer HaShorashim is a dictionary OF
+# THE BIBLE and quotes it on nearly every line, and the existing corpus contains
+# **zero of the 39 biblical books** (checked, not assumed). That is why every
+# engine scored 60-67% lexicon hit on HaShorashim against 97-99% on Yad Malachi:
+# the instrument was measuring the wrong language, equally wrongly for every
+# engine, so the comparison BETWEEN engines survived and no absolute number did.
+#
+# A register is a property of the BOOK being digitized, not of this script, so it
+# is selectable rather than hardcoded - the same reasoning that moved book
+# identity into book.json (item 0EC).
+TANAKH = [
+    "Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy",
+    "Joshua", "Judges", "I Samuel", "II Samuel", "I Kings", "II Kings",
+    "Isaiah", "Jeremiah", "Ezekiel",
+    "Hosea", "Joel", "Amos", "Obadiah", "Jonah", "Micah", "Nahum",
+    "Habakkuk", "Zephaniah", "Haggai", "Zechariah", "Malachi",
+    "Psalms", "Proverbs", "Job", "Song of Songs", "Ruth", "Lamentations",
+    "Ecclesiastes", "Esther", "Daniel", "Ezra", "Nehemiah",
+    "I Chronicles", "II Chronicles",
+]
+
+REGISTERS = {"rabbinic": RABBINIC, "tanakh": set(TANAKH), "all": RABBINIC | set(TANAKH)}
+TARGETS = RABBINIC   # default unchanged, so existing callers do not move
 
 
 def out_path(title):
@@ -153,11 +178,22 @@ def find_urls():
 
 
 def download(title, url):
-    # The bucket has literal spaces in paths (e.g. ".../Seder Zeraim/...");
-    # curl needs them percent-encoded or the request silently fails (exit
-    # code 0, empty file) rather than erroring.
+    # The bucket has spaces in paths (e.g. ".../Seder Zeraim/..."); curl needs
+    # them percent-encoded or the request silently fails (exit code 0, empty
+    # file) rather than erroring.
+    #
+    # UNQUOTE FIRST, 2026-09-10. books.json now serves URLs ALREADY encoded
+    # (`.../I%20Samuel/...`), where it once served literal spaces. Quoting those
+    # again turns `%20` into `%2520` and the bucket returns 404. The failure is
+    # invisible on this repo's existing corpus because all 166 rabbinic files
+    # were fetched before the change and main() skips what is already on disk -
+    # so the bug only appears on a FRESH CLONE, or on a new register, which is
+    # how it surfaced: 7 of 39 Tanakh titles failed and every one of them had a
+    # space in its name. quote(unquote(x)) is idempotent and correct for both
+    # the old and the new form.
     scheme_host, path = url.split("storage.googleapis.com", 1)
-    enc_path = "/".join(urllib.parse.quote(seg) for seg in path.split("/"))
+    enc_path = "/".join(urllib.parse.quote(urllib.parse.unquote(seg))
+                        for seg in path.split("/"))
     enc_url = scheme_host + "storage.googleapis.com" + enc_path
     dest = out_path(title)
     r = subprocess.run(["curl", "-s", "-o", dest, "-w", "%{http_code}", enc_url],
@@ -178,6 +214,15 @@ def download(title, url):
 
 
 def main():
+    import argparse
+    ap = argparse.ArgumentParser(description="Fetch a Sefaria reference corpus.")
+    ap.add_argument("--register", choices=sorted(REGISTERS), default="rabbinic",
+                    help="which body of text to fetch (default rabbinic, "
+                         "Yad Malachi's register; tanakh is Sefer HaShorashim's)")
+    args = ap.parse_args()
+    global TARGETS
+    TARGETS = REGISTERS[args.register]
+    print(f"register: {args.register} ({len(TARGETS)} titles)")
     os.makedirs(OUT_DIR, exist_ok=True)
     urls = find_urls()
     ok, failed = 0, []

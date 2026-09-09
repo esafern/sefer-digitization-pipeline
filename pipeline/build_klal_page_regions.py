@@ -94,6 +94,18 @@ def load_markers(trace_path=TRACE_PATH):
     fixes klal 167 and, consistently, klal 1/18/86/172 (the same five
     entries load_end_boundary_positions() already trusted)."""
     trace = cio.load_gematria_trace(trace_path)
+    if trace is None:
+        # A MISSING INPUT MUST NAME ITSELF. Iterating the None this used to
+        # return produced `TypeError: 'NoneType' object is not iterable` with no
+        # mention of the file - the first thing a second book hits, and it says
+        # nothing about what to do. Sefer HaShorashim legitimately has no
+        # gematria trace at all: it has no gematria markers, its entries are
+        # anchored by spelled-out letter names instead (item 0EJ).
+        raise SystemExit(
+            f"no gematria trace at {trace_path}\n"
+            f"  This book may not have gematria markers. build_gematria_trace.py "
+            f"produces it for a marker-numbered work; a root-dictionary needs a "
+            f"different region source (item 0EQ).")
     return {
         e["klal_id"]: (e["page"], e["marker_position"])
         for e in trace
@@ -126,6 +138,18 @@ def load_end_boundary_positions(trace_path=TRACE_PATH):
     code stopped there instead of continuing the search to klal 48, which
     does have one on the same page."""
     trace = cio.load_gematria_trace(trace_path)
+    if trace is None:
+        # A MISSING INPUT MUST NAME ITSELF. Iterating the None this used to
+        # return produced `TypeError: 'NoneType' object is not iterable` with no
+        # mention of the file - the first thing a second book hits, and it says
+        # nothing about what to do. Sefer HaShorashim legitimately has no
+        # gematria trace at all: it has no gematria markers, its entries are
+        # anchored by spelled-out letter names instead (item 0EJ).
+        raise SystemExit(
+            f"no gematria trace at {trace_path}\n"
+            f"  This book may not have gematria markers. build_gematria_trace.py "
+            f"produces it for a marker-numbered work; a root-dictionary needs a "
+            f"different region source (item 0EQ).")
     return {
         e["klal_id"]: (e["page"], e["marker_position"])
         for e in trace

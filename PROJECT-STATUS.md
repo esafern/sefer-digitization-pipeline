@@ -101,6 +101,1607 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0ES. **[2026-09-10] A REVIEW QUEUE THAT CAN ACTUALLY DISAGREE: 3,373 DISPUTES
+    FROM SEFARIA'S DIGITIZATION, AND A 246-CASE DEFECT CLASS IN OUR OWN TEXT.**
+
+    `tools/build_witness_disputes.py` (new) answers item `0ER`: the built-in
+    generator cannot check a corpus built from the same engine, so the queue
+    comes from an INDEPENDENT witness. Sefaria's dataset is the strongest one
+    available - it is the only witness in this project with a human in its
+    history rather than an OCR engine.
+
+        306 shared entries, 37,538 corpus words
+        3,373 disputes                    (70 are the witness's own editorial brackets)
+
+        one_letter          1,116   33.8%
+        other               1,101   33.3%
+        join_split            708   21.4%   same letters, different word division
+        footnote_numeral      246    7.4%
+        one_side_empty        132    4.0%
+
+    ### The footnote numerals are OUR defect and the witness found them
+
+    246 rows where our reading is the witness's plus a trailing `י`, `יי` or
+    `"י`. This edition prints reference numerals as superscripts INSIDE the line
+    (`בצקו 16`), and DocAI reads them as yods glued to the preceding word:
+
+        הנחלי  | הנחל          שרידי  | שריד
+        ועוגבי | ועוגב         אבויין | אבוי
+
+    Item `0EJ` deferred separating the footnote APPARATUS pending the Sefaria editor's files.
+    This is the same problem's other half, inside the running line, and it was
+    invisible to every measure taken so far - the words are plausible Hebrew, the
+    lexicon accepts most of them, and no OCR witness disagrees because they all
+    read the same superscript. **It took a human-supervised transcription to see
+    it.** That is the concrete argument for the collaboration, and it is a
+    tractable defect class rather than a scatter.
+
+    ### What the tool deliberately does not do
+
+    It proposes nothing and applies nothing; every row says only that two
+    readings differ. Agreement is not recorded, because two sources agreeing
+    tells you they agree (Lesson 25). `join_split` rows are classified and
+    excluded from the reviewer-facing list - a different word division is not a
+    disputed reading - and editorial insertions in the witness's brackets are
+    flagged as the witness's EDITOR speaking rather than as OCR.
+
+    **Next, not done:** route these through the vision adjudicator before any
+    reach a human. Lesson 49 FREQUENCY IS NOT THIS PAGE applies with full force -
+    a witness disagreeing is evidence that the position is worth looking at, not
+    evidence about which reading is right, and item `0DU` measured 166 of 166
+    lexically-derived hypotheses coming back as the stored text once cropped.
+
+0ER. **[2026-09-10] THE CANDIDATE GENERATOR CANNOT DISAGREE WITH ITSELF. FOR
+    THIS BOOK IT IS LESSON 25, AND THE REVIEW QUEUE HAS TO COME FROM SOMEWHERE
+    ELSE.**
+
+    `build_corrections_dataset.py` diffs **DocAI's fresh OCR against whatever the
+    corpus currently stores**. For Yad Malachi that is a real comparison: the
+    corpus came from an earlier extraction and has had 1,100+ human rulings
+    applied, so the two genuinely differ.
+
+    **For Sefer HaShorashim the corpus IS DocAI's output** - `build_root_corpus.py`
+    builds it from the same token stream. Measured on all 346 candidates it
+    produces:
+
+        docai None (deletion)      227
+        stored None (insertion)    119
+        real reading difference      0
+
+    Not one substitution, because there cannot be one. Every candidate is a
+    tokenisation or line-joining artifact of the furniture filtering, not a
+    disagreement about what the ink says. This is Lesson 25 A SIGNAL THAT CANNOT
+    DISAGREE exactly - the check ran, produced 346 rows, and carries no
+    information about the text. A reviewer worked through this queue would be
+    ruling on 346 questions with no right answer in them.
+
+    ### What the queue must be built from instead
+
+    Three genuinely independent signals exist for this book and none is wired in:
+
+    * **The Sefaria editor's dataset** (item `0EM`) - an independent, human-supervised
+      digitization. 76.4% token agreement over 306 shared entries, so roughly
+      8,700 token-level disagreements in א-ב-ג alone. This is the richest source
+      and the only one with a human in its history.
+    * **Cloud Vision** (item `0EH`) - measurably NOT DocAI's twin: its dominant
+      error is `ו->ן` x16, which DocAI does not make, against a Books-layer
+      profile that is DocAI's error-for-error.
+    * **The Google Books text layer** - DocAI's twin, so a reliability gate only,
+      never a vote (item `0ED`).
+
+    **Do not fix this by loosening the existing generator.** It is doing its job
+    correctly; its job is simply vacuous when the corpus and the engine are the
+    same artifact. The fix is a second queue source, and it should carry which
+    witness raised each dispute so a reviewer can weigh a human-supervised
+    disagreement differently from an OCR one.
+
+    Corollary worth stating for any future book: **a corpus built from engine X
+    can never be checked by engine X.** The first witness a newly-ingested book
+    needs is not a better version of its own extractor.
+
+0EQ. **[2026-09-10] THE PIPELINE RUNS ON THE SECOND BOOK. 493 CANDIDATES, AND
+    THREE THINGS THAT ONLY BREAK FOR A BOOK THAT ISN'T YAD MALACHI.**
+
+    End-to-end against `~/work/hashorashim`, stage by stage:
+
+        build_klalim_demo_dataset   307 klalim                        OK
+        seed_word_identity          307 seeded, 42,646 words          OK
+        build_corrections_dataset   493 candidates, 244/307 covered   OK
+        build_klal_page_regions     no gematria trace                 N/A
+        verify_corrections_vision   running, live Gemini calls        OK
+        assemble_corrections        needs stage 3                     pending
+
+    **39 klalim excluded as untrusted by the alignment** built in `0EP` - the
+    mechanism working exactly as designed, refusing to compare OCR against a page
+    whose printed root range does not bracket the entry.
+
+    ### A MISSING INPUT REPORTED ITSELF AS A TypeError
+
+    Two stages failed with `TypeError: 'NoneType' object is not iterable` and no
+    mention of any file: `build_klal_page_regions.py` on a missing gematria trace
+    and `assemble_corrections_dataset.py` on a missing stage-3 output. Both
+    loaders return None for an absent file and both callers iterate it. **That is
+    the first thing anyone ingesting a new book hits**, and it names nothing.
+    Lesson 21's own advice - prefer a loader that raises on an unexpected shape
+    over one that shrugs - applied to absence rather than shape. Both now exit
+    naming the file and what produces it.
+
+    ### Regions without a gematria marker
+
+    `build_klal_page_regions.py` derives a klal's scan box from its marker
+    position, and this book has no markers at all. But the segmentation already
+    knows every line of every entry and each line carries DocAI's boxes, so the
+    region is just their union per page - strictly better than deriving it from a
+    single marker. `tools/build_root_corpus.py --regions` now writes
+    `klal_page_regions.json` in the existing format, continuations included:
+    **307 regions, 73 spanning a page break.**
+
+    Verified against the ink rather than the count: klal 198 (root בצר, page 121)
+    was drawn onto its own page image and the box lands exactly on that entry -
+    from `הבית והצדי והריש. ויבצרו את כרמיהם` to the end of its text, excluding
+    the catchword and the whole footnote apparatus below it.
+
+    ### The manifest went stale the moment the corpus changed
+
+    Rebuilding to 307 entries left `book.json` declaring `last_klal: 299`, so
+    `get_part_num_for_klal(300)` returned None - which reads downstream as "that
+    klal does not exist" rather than as a stale manifest. `build_root_corpus.py`
+    now updates the declaration when it writes the corpus, because a number
+    computable from the data should not be maintained by hand (Lesson 13).
+
+    **Watch item, not yet run down:** the vision stage is adjudicating entry
+    HEADINGS as candidate corrections - `Klal 8 page 60: 'האלף והבית והסמך' vs
+    None`. A heading is corpus text here (it is the entry's `title`), so this may
+    be correct, but a candidate whose stored side is None deserves a look before
+    any of it reaches a reviewer.
+
+0EP. **[2026-09-10] THE ALIGNMENT HAS A PRODUCER AT LAST. AND IT TRIED TO ROLL
+    BACK THE TRANSPOSED-LEAF FIX ON YAD MALACHI.**
+
+    `tools/build_header_alignment.py` (new) closes the second half of item
+    `0EI`'s gap: `part1_header_anchored_alignment.json` had **no producer at
+    all**. That is not cosmetic - `build_corrections_dataset.py` SKIPS any klal
+    whose alignment is untrusted rather than compare against an unreliable page,
+    so a book without this file generates no correction candidates and looks
+    exactly like a clean one (Lesson 26 THE FILTER THAT HIDES).
+
+    ### HaShorashim: 268 of 307 trusted, on a stronger anchor than Yad Malachi's
+
+    The recto running head prints the range of roots on the spread
+    (`אבח - אגד`), so the test is CONTAINMENT rather than string similarity: does
+    this entry's root sort between the two bounds? That brackets the entry
+    instead of naming its chapter.
+
+    Three things were measured rather than assumed, and I got two of them wrong
+    first:
+
+    * **Which pages a range governs.** Ranges on {P} alone contain 43.3% of
+      entries, {P, P-1} 43.6%, **{P, P+1} 85.3%** - a range printed on a recto
+      governs that page and the verso before it. I coded `P-1` first and shipped
+      a 43.6% trusted rate that looked like a data problem and was a sign error.
+    * **The bounds arrive reversed.** The head is RTL and DocAI sometimes emits
+      the two sides in reading order: p79 comes out `('אלל', 'אלה')`, whose end
+      sorts before its start, which is impossible in print. Sorting the pair is
+      safe because ascending order is a fact about the book, not a guess about
+      the OCR. 85.3% -> **87.3%**.
+    * **The residue is mostly garbled heads, not misplaced entries.** Of 39
+      untrusted: 4 sit on chapter-opening pages that print no range at all, and
+      the rest have a bound the OCR truncated (`('נה', 'בעט')` for בנה) or a root
+      genuinely past the range. None of them is repaired here - untrusted means
+      "do not compare against this page", which is the conservative direction.
+
+    ### AND IT WOULD HAVE REGRESSED YAD MALACHI. CAUGHT BY --dry-run.
+
+    The `section-header` strategy reproduces Yad Malachi's trust levels exactly -
+    222 of 222, matching the migrated file - and that agreement is worthless,
+    because the two files disagree about WHERE 11 klalim are:
+
+        klalim 76-84   corpus page 37   migrated alignment page 38
+
+    That is precisely the transposed-leaf remap. START_HERE records it: the
+    alignment and the gematria trace were moved 37 -> 38, and **`part1.json`'s
+    own `page` field was deliberately left untouched** because it is "already
+    stale/dead metadata for most of Part 1". This tool takes `matched_page` from
+    that field, so writing it would have rolled the fix back while printing
+    "trusted 222 (100.0%)".
+
+    A count that matches is not a file that matches (Lesson 33 STATE, NOT
+    PRINTOUT). The tool now **refuses to write** when its pages disagree with an
+    existing alignment, names the first klal that would move, and exits non-zero.
+    Yad Malachi's file is untouched.
+
+    **Open:** the `page` field is authoritative for a corpus this pipeline
+    segmented - HaShorashim's page is where the heading line was actually found -
+    and not for Yad Malachi. Reproducing the original forward search, which
+    derived the page rather than trusting the record, is the proper fix and is
+    NOT done. Until it is, Yad Malachi's alignment remains a migrated cache with
+    no regenerator, and `0EI` is closed for one book of the two.
+
+0EO. **[2026-09-10] ALL 7 MERGED ENTRIES REPAIRED. AND I ALMOST TOLD SEFARIA
+    THEIR DATA HAD A HOLE IN IT THAT WAS ENTIRELY MY PARSER.**
+
+    ### The near-miss, first, because it is the important part
+
+    Their aleph chapter appeared to be missing its whole shin section - `אש`,
+    `אשה`, `אשר`, `אשש` and the rest, ~10 roots - and I had the finding written
+    up as a gap in their dataset to report back. It is not a gap.
+
+    **They encode shin as `U+FB2A HEBREW LETTER SHIN WITH SHIN DOT`**, the
+    precomposed Alphabetic-Presentation-Forms character, not `ש` plus a combining
+    point. `U+FB2A` sits outside `[א-ת]` (U+05D0-U+05EA), so my headword pattern
+    rejected every root containing a shin, silently, in a book where shin-final
+    roots are common. `unicodedata.normalize("NFKC", ...)` decomposes it and the
+    roots reappear.
+
+        their entries   1,698  ->  1,974      (+276, all shin-bearing)
+        starred         1,220  ->  1,345
+
+    Two lessons already in the file, both mine: this was silence, not an error
+    (Lesson 26 THE FILTER THAT HIDES), and I was one step from surfacing a
+    "finding" about a collaborator's work that was a defect in my own reader.
+    **Check your own instrument before reporting a gap in someone else's data.**
+
+    ### And it inverted the headline comparison, which was already in a draft email
+
+    Because their shin entries were missing, the running-text comparison was
+    scoring a mutilated subset of their data. Corrected, with NFKC applied to
+    both sides and - separately - the root-identifier normalisation (folding
+    final letters) NO LONGER applied to running text, where it turns `אלהים`
+    into `אלהימ` and costs 16 points to both sides equally:
+
+                            first reported     corrected
+        ours                    90.1%            90.3%
+        theirs                  85.2%            92.0%
+        token agreement         57.2%            76.4%
+
+    **Their text is slightly BETTER than ours, not 5 points worse.** The draft to
+    the Sefaria editor said the opposite and cited his own pessimism back at him as
+    corroboration. Fixed before sending. The corrected figure is also the more
+    useful one: two independent readings agreeing on 76% leaves a 24%
+    disagreement surface, which is a review queue, not a verdict.
+
+    ### Boundary recovery: 7 of 7, and one false positive caught by reading it
+
+    DocAI substitutes letters INSIDE the letter name - `נון`->`גון`,
+    `טית`->`מית`, `יוד`->`יור`, `למד`->`למו` - so the garbled heading is not in
+    the closed vocabulary and is invisible to the matcher. Rather than add each
+    garble as a variant (whack-a-mole that erodes the anchor), the boundary is
+    taken from the PDF text layer, which read the same heading correctly and
+    knows its page. Fuzzy selection among one page's lines is what Lesson 5
+    explicitly permits; it is not a position claim.
+
+    Three guards were each added because the version without them was wrong:
+
+    1. **Length-matched scoring.** Comparing a 17-char heading against 40 chars
+       of line diluted the ratio with body text and buried four correct
+       top-ranked matches at 0.54-0.72 under a 0.75 bar. The ranking had been
+       right all along; only the number was unfair.
+    2. **Global assignment, not per-entry greedy.** `בהל` and `בהט` sit on p107
+       with headings differing in one letter, so scoring them independently made
+       them compete for each other's line and a margin test rejected both.
+    3. **A line that already parses as a heading is not available.** Without it,
+       `גד` was handed `הגימל והדלת הכפולה . יגדו על נפש צדיק` at 0.846 - that is
+       `גדד`, a different root DocAI read correctly - which would have split
+       `גדד`'s entry at the wrong place under the wrong name. **That fired, and
+       was caught by reading the recovery log rather than the count.**
+
+    Result: 307 entries, 0 flagged, 0 empty, and 306 of their 312 א-ב-ג roots
+    matched - 98% boundary agreement between two independent digitizations. The
+    residue is 6 roots only they have (אוי אלה בוצ בלה גבה גרב) and 1 only I have
+    (אג): a short, checkable list where one side is wrong.
+
+    A fourth defect, same class as `0EL`'s: the forced-boundary path split title
+    from body at the first period, and p133's garbled heading
+    (`הנימל , והדלת כזרע גר`) has its only period at the line's end - one more
+    empty entry. It now uses the layer heading's own length, rounded to a word
+    boundary.
+
+0EN. **[2026-09-10] EVERY LEXICON NUMBER THIS PROJECT PRODUCED FOR HASHORASHIM
+    WAS 23-26 POINTS TOO LOW. THE REFERENCE CORPUS HAS NO BIBLE IN IT.**
+
+    `sefaria_reference_corpus/` held 166 books - Talmud, Rambam, Tur, Shulchan
+    Arukh, Rashi on the Talmud - and **zero of the 39 biblical books**. Checked,
+    not assumed. Sefer HaShorashim is a dictionary OF THE BIBLE and quotes it on
+    nearly every line, so the instrument was measuring the wrong language.
+
+        engine / scan        old lexicon    new lexicon    change
+        CloudVision  gb          67.5%         93.3%       +25.8
+        CloudVision  nli         67.5%         93.6%       +26.1
+        DocAI        gb          66.7%         92.2%       +25.5
+        DocAI        nli         67.5%         93.5%       +26.1
+        DocAI        hb          65.7%         90.9%       +25.2
+        Tesseract    gb          64.6%         89.0%       +24.4
+        Tesseract    nli         60.0%         83.5%       +23.5
+        Dicta(Rashi) gb          62.5%         85.4%       +22.9
+
+    Because the error was uniform across engines the COMPARISON survived - the
+    ordering is unchanged - but **no absolute figure from items `0EC`, `0EG` or
+    `0EH` means anything**, and anything gated on a lexicon threshold would have
+    been wrong outright. That is Lesson 2 A SCORE IS NOT A CHECK arriving through
+    the instrument rather than the threshold.
+
+    ### What changed in the conclusions
+
+    * **Cloud Vision now edges DocAI on both scans** (93.3/93.6 vs 92.2/93.5).
+    * **NLI is the best input for both Google cloud engines** despite having a
+      third of Google Books' pixels - 93.6 and 93.5 against 93.3 and 92.2. That
+      strengthens item `0EK`'s case for asking NLI for masters: the tonal scan
+      already wins at 5.8 MP.
+    * Tesseract and Dicta still clearly prefer the high-resolution bitonal scan
+      (89.0 vs 83.5, 85.4 vs 84.0). The split is cloud-vs-local, as `0EH` said.
+    * **Ours vs the Sefaria editor's dataset moves from a 1.8-point gap to 4.9**: 90.1%
+      against 85.2% over 275 shared roots, which is consistent with his own
+      report that the running-text OCR fared poorly. Token agreement between the
+      two is unchanged at 57.2% - a 43% disagreement surface that only the ink
+      can settle.
+
+    ### Two tools, and a latent bug in a third
+
+    `tools/build_book_lexicon.py` (new) builds `lexicon.txt` for the CURRENT
+    corpus root, reusing `validate_lexicon_independent`'s extractor rather than
+    reimplementing it. Register `all` (Tanakh + rabbinic/medieval, 205 books,
+    6.45M tokens, 217,841 types) is the default for this book: Tanakh alone would
+    cover the quotations and mark Ibn Tibbon's own prose as errors.
+    `tools/fetch_sefaria_reference_corpus.py` gained `--register`, since a
+    register is a property of the BOOK, not of the script.
+
+    **And fetching Tanakh exposed a bug that would break a fresh clone.**
+    `books.json` now serves URLs ALREADY percent-encoded (`.../I%20Samuel/...`)
+    where it once served literal spaces; `download()` quoted each path segment
+    again, producing `%2520` and a 404. Every one of the 7 failures had a space
+    in its title. **This is invisible on this machine** because all 166 rabbinic
+    files were fetched before the change and `main()` skips what is on disk - so
+    the corpus that half this project's validity signals rest on could not be
+    rebuilt from scratch, and nothing said so. Fixed with `quote(unquote(x))`,
+    idempotent for both forms; 39/39 Tanakh titles now fetch.
+
+    **Not yet done: Yad Malachi's own lexicon is unaffected and unexamined.**
+    Its register genuinely is rabbinic, so its 97-99% figures are measured with
+    the right instrument. But `lexicon.txt` there is derived from the corpus
+    itself and PROJECT-STATUS already records that it "cannot catch the ligature
+    corruption - it contains it". Building an independent one for Yad Malachi
+    with this tool is now a one-line run and has not been done.
+
+0EM. **[2026-09-10] THE SEFARIA EDITOR'S DATASET ARRIVED. 1,698 ROOT ENTRIES WITH EXPLICIT
+    MARKERS - AND IT INDEPENDENTLY CONFIRMS ALL 7 OF MY `suspect_merge` FLAGS.**
+
+    `~/work/hashorashim/IbnJanachShorashim/` - 22 `.docx` (one per מאמר, numbered
+    01-22, matching the book's 22 letter chapters exactly) plus `20a.pdf` and
+    `22a.pdf`. 8.5 MB.
+
+    ### What it is
+
+        root entries          1,698   marked explicitly as `[אב]`, not inferred
+        of those, starred     1,220   trailing `*` - meaning UNKNOWN, ask the Sefaria editor
+        running text          246,348 chars (nikkud stripped)
+        vocalisation          24% of Hebrew letters carry nikkud or te'amim
+        per chapter           an index table of that chapter's roots (28x5 in ch.1)
+
+    The vocalisation is the citation work he described: biblical quotations are
+    pointed (`לִרְאוֹת בְּאִבֵּי הַנָּחַל`) while Ibn Janah's own prose is not, so the
+    quotations are machine-separable from the commentary **by nikkud density
+    alone** - no judgement, no layout heuristic. That is a better handle on the
+    citation apparatus than anything this pipeline could have derived, and it is
+    the reason `0EE` said to ask for it before duplicating the work.
+
+    Their entry markers are also structurally better than mine: `[אב]` is
+    explicit and not OCR-derived, where my `tools/detect_root_entries.py` infers
+    the root from spelled-out letter names in an OCR stream and can lose one when
+    the OCR garbles it (item `0EJ`).
+
+    Two format details cost me a wrong first count of 424: entries can carry a
+    trailing `*`, and shin is written with its dot INSIDE the brackets
+    (`[אישׁ]`), so a naive `\[([א-ת]+)\]$` misses 1,274 of 1,698. Also **they
+    write roots with FINAL letter forms** (`אבך`, `אבן`) where this pipeline uses
+    non-final (`אבכ`, `אבנ`); comparing without normalising makes 78 of 275
+    genuine matches look like disagreements.
+
+    ### 7 OF 7. THE CROSS-CHECK FLAGS WERE REAL.
+
+    Item `0EJ` flagged 8 headings the PDF text layer found and DocAI missed, and
+    warned they were a MERGE defect rather than an absence - the next root's text
+    running on into the previous entry with no boundary. Their dataset, built
+    independently of both of my OCR sources, lists every one of the 7 that fall
+    in א-ב-ג as a real entry:
+
+        אינ אמצ בהט בהל גד גדפ גמצ
+
+    That is third-party confirmation that the flags were not false alarms, and it
+    means 7 entries in `part1.json` are currently merged and need splitting.
+
+    ### The running text: a 43% adjudication surface, and NO verdict yet
+
+        275 shared roots        mine 33,645 tokens   theirs 32,420 tokens
+        lexicon hit             mine 62.0%           theirs 60.2%
+        token-sequence agreement between the two:    57.2%
+
+    **Do not read the 1.8-point gap as "ours is better".** The lexicon is Yad
+    Malachi's rabbinic vocabulary and this is biblical lexicography, so it is the
+    wrong instrument for both sides equally (Lesson 49's shape - a frequency
+    argument is evidence about the language, not about this page). Their text
+    also carries editorial insertions in brackets (`ומקום [י]צמח`) that count as
+    divergences without being errors.
+
+    What IS established is the size of the disagreement: the two readings differ
+    on ~43% of tokens across 275 entries. That is a large, real adjudication
+    surface and it is exactly what this pipeline exists to resolve - which is the
+    concrete form of the division of labour `0EE` proposed. Settling who is right
+    needs the ink, not either lexicon.
+
+    **Open:** what does the trailing `*` mark on 1,220 of 1,698 entries? Ask
+    before assuming; it is on 72% of entries, so guessing wrong would be costly.
+
+0EL. **[2026-09-09] THE PAGE RENDERER EXISTS AT LAST - AND BUILDING IT FOUND
+    THREE DEFECTS IN WORK I HAD JUST SHIPPED.**
+
+    `tools/render_pdf_pages.py` (new) closes half of item `0EI`'s gap:
+    `images/pdf_pages/` had **no generator at all** since the project began
+    (START_HERE: "has no live rendering script at all... must be migrated as a
+    pre-built cache"), which is survivable for one book and blocking for a
+    second. 94 HaShorashim pages rendered and verified.
+
+    **It reproduces Yad Malachi's migrated cache byte-for-byte** - pages 99, 100
+    and 101 at pixel correlation r=1.0000 - so the gap is closed for both books,
+    not just the new one. That was NOT true of the first version, and the
+    difference is the finding: the migrated cache renders at a constant zoom of
+    **2.0833 = exactly 150 DPI**, while I had written a fixed 864px WIDTH. Those
+    agree only where the mediabox happens to match; Yad Malachi's varies page to
+    page (856/860/864 px at 150 DPI), so page 100 matched exactly and 99 and 101
+    silently rescaled. Measured, not assumed - and it is Lesson 30's shape again,
+    since a rescaled page is still legible Hebrew.
+
+    ### The verifier had to be fixed twice before it could be believed
+
+    1. It compared the PDF text layer against DocAI tokens WITHOUT accounting for
+       reading order, so a visual-order layer failed on every page: **94 of 94
+       "wrong page" against a correct render.** It now scores both orders and
+       keeps the better, because the question is page IDENTITY and reading order
+       is irrelevant to it.
+    2. It then reported `0.0%` for Yad Malachi, whose layer holds no Hebrew at
+       all (item `0ED`'s Quartz-stripped skeleton). That is **cannot verify**,
+       not failure, and reporting it as failure would flag every correct page of
+       the deliverable book. It now returns None and says so.
+
+    Both were caught only because the check fired on data I knew was right.
+
+    ### AND THE CORPUS I SHIPPED AN HOUR AGO HAD PAGE FURNITURE IN IT
+
+    Item `0EJ` claimed the page separates cleanly by line height. That is true of
+    the FOOTNOTE APPARATUS and false of the RUNNING HEADS. This book sets two
+    kinds: the verso `73 ספר השרשים` in small type, which the height rule caught,
+    and the recto root-range `בצק - בקר 73` **in full-size type**, measured at
+    0.90-1.08x the page median - indistinguishable from body by height.
+
+        running-head lines wrongly kept as body:   32
+        entries contaminated:                      30 of 299   (10%)
+
+    That is Yad Malachi's item 20 page-furniture class, reproduced on day one of
+    a new book, by me, in the same session that wrote the tool. Running heads are
+    now matched by CONTENT at the top of the page rather than by size: 95 head
+    lines dropped, contamination re-measured at **0 of 299**.
+
+    ### And a second defect in the same build: comma-terminated headings
+
+    `segment()` split title from body at `text.find(".")`, but headings terminate
+    with a period OR a comma. A comma-terminated heading therefore swallowed its
+    entire entry into the title, leaving the text empty - `האלף והנימל , אבל זה
+    הוא...` kept everything. **8 entries were empty and 14 were under 20
+    characters.** `detect_root_entries.match_heading()` now returns the match
+    SPAN and the split uses the heading's own terminator.
+
+        before   14 entries < 20 chars, 8 of them empty, 196,213 chars total
+        after     5 entries < 20 chars, none empty,      199,145 chars total
+
+    The surviving 5 were checked individually and are genuine one-line entries
+    (`בהק הוא פרח בעור .`, `גרן ויקב .`), not defects.
+
+    ### State
+
+    299 entries, 199,145 characters, no furniture, no empty entries. 543 tests
+    pass. Still open from `0EI`: `part1_header_anchored_alignment.json`, which
+    has no producer. The running heads are the natural anchor for it and the
+    recto ones carry ROOT RANGES (`ברא - ברה`), which bracket the entries on the
+    page - a stronger signal than Yad Malachi's single section letter, and now
+    reliably extracted as a side effect of the furniture fix.
+
+0EK. **[2026-09-09] EVERY SCAN THIS PROJECT HAS EVER USED IS 1-BIT. INCLUDING
+    YAD MALACHI'S. THE NLI REJECTION WAS DECIDED ON AN AXIS THAT OMITTED IT.**
+
+    Reviewer is in contact with someone at the NLI and asked whether to request
+    their highest-resolution scans of both books. Measured first.
+
+        berlin_square_corrected.pdf   3448 x 5312   18.3 MP   1 bpc PNG
+        HaShorashim Google Books      3522 x 5278   18.6 MP   1 bpc PNG
+        HaShorashim HebrewBooks       2163 x 3351    7.3 MP   1 bpc PNG
+        HaShorashim NLI (anonymous)   2004 x 2892    5.8 MP   24-bit RGB
+
+    **Yad Malachi's scan is bitonal too.** START_HERE's resolution figure for it
+    is correct - 3440x5312, confirmed over 30 sampled body pages - but the file
+    is 1 bit per pixel and nothing in this repo says so. Its NLI comparison table
+    ranks the two sources on pixel count and lossy-vs-lossless and **never on bit
+    depth**, so the 2026-08-18 decision to reject NLI was made without the axis
+    on which NLI actually wins.
+
+    (My own first measurement of this said 2213x2750 / 9.1 MP. That was wrong: I
+    averaged the page image together with the 1034x204 "Digitized by Google"
+    watermark strip, which is also >500px wide. Taking the LARGEST image per page
+    gives 18.3 MP. Recorded because the wrong number would have argued for
+    exactly the same conclusion by a false route.)
+
+    ### Why this matters more than resolution
+
+    Thresholding is irreversible and it happens upstream of every engine. So no
+    measurement this project has ever made could distinguish a WORN sort from a
+    faint one - the evidence was destroyed at capture, before DocAI, Surya, the
+    VLM or Dicta ever saw it.
+
+    That is Lesson 24 SHARED INK, SHARED ERROR's actual mechanism, and item `24`
+    records the measured dead end: enumerating and excluding the known artifact
+    barely improved the ensemble (41% -> 39%), so "a bigger artifact catalogue is
+    not the repair". **Continuous tone is a different lever, and it is the only
+    one not yet tried.** 37 identical wrong readings across three engines came
+    from one alef-lamed sort; a grey image is what tells a vision adjudicator
+    whether the ל is absent or merely light.
+
+    Corroborating, measured today on HaShorashim: the two bitonal copies fail in
+    OPPOSITE directions - Google merges adjacent letters, HebrewBooks breaks
+    strokes within them - and the continuous-tone copy is what adjudicates
+    between them. But at 5.8 MP that arbiter is resolution-limited. A master file
+    would be the first source that is both high-resolution AND continuous tone.
+
+    ### What to ask for, and the one that decides it
+
+    NLI system numbers: Yad Malachi `990011859020205171`, HaShorashim
+    `990010892830205171`. Ask for the **preservation masters**, not the web
+    derivatives, and ask for the SPEC BEFORE the files - DPI, bit depth, colour
+    space. If the masters are also bitonal there is nothing to gain and the
+    logistics stop there. Also ask the redistribution terms: START_HERE already
+    notes NLI sourcing sidesteps Google Books' terms of use, and Sefaria is the
+    destination.
+
+    ### It does NOT have to become the primary, and that is the cheap path
+
+    Every page-indexed cache is keyed to one PDF's numbering - `docai_word_boxes/`,
+    `images/pdf_pages/`, the alignments, and Yad Malachi's own `page` fields.
+    Switching primary means rebuilding all of them, and the NLI copies do not
+    even share page ORDER (HaShorashim's roman introduction is bound at the back;
+    NLI's Yad Malachi PDF is 336 pages against Google's 337).
+
+    So use it as the **adjudication source only** - the image the vision
+    adjudicator crops from - while OCR continues on the existing scan. That
+    captures the entire benefit, which is a tonal image at the moment of human or
+    model judgement, and costs no cache migration. Mapping between them is by
+    PRINTED PAGE NUMBER, never image index (item `0EC`).
+
+0EJ. **[2026-09-09] THE א-ב-ג CORPUS EXISTS: 299 ENTRIES, 196,213 CHARACTERS,
+    LOADING THROUGH THE SEAM. AND THE TWO OCRs DISAGREE ABOUT 8 HEADINGS, WHICH
+    IS A MERGE DEFECT, NOT A MISSING ONE.**
+
+    `tools/build_root_corpus.py` (new). DocAI token stream -> lines -> classified
+    -> split at headings -> `part1.json`. Built over PDF pages 58-151.
+
+        lines kept      3,119 body
+        lines dropped   62 running head, 633 apparatus, 108 watermark
+        entries         299
+        characters      196,213
+        median entry    358 chars
+
+    ### The footnote apparatus separates GEOMETRICALLY, so deferring it cost nothing
+
+    Sefaria named footnotes explicitly and item `0EE` defers the editorial work
+    pending the Sefaria editor's dataset - but FINDING the apparatus needs no judgement, only
+    the bounding boxes DocAI already returns. Measured on PDF page 121:
+
+        line 0      y 0.072  h 0.0127   `72 ספר השרשים`        running head
+        lines 1-32  y 0.105  h 0.0176-0.0213                    BODY
+        line 33     y 0.790  h 0.0123   `לב וישטפני .`          catchword
+        lines 34-39 y 0.813  h 0.0102-0.0127                    APPARATUS
+        line 40     y 0.959  h 0.0237   `Google by Digitized`   watermark
+
+    Body type ~0.019, apparatus type ~0.011 - a 1.7x gap. **Token height alone
+    does not work and was tried first:** a short word like `מה` has a smaller box
+    for want of ascenders whatever its type size, so 29-31% of tokens read as
+    "small" scattered through the body. The signal is only clean once tokens are
+    clustered into LINES. The threshold is the PER-PAGE median, not a constant,
+    because page images vary 10-20% in size.
+
+    ### The heading anchor was too strict, and the DocAI stream proved it
+
+    First build found 287 headings against the text layer's 308. Diagnosed rather
+    than patched: the headings ARE present and ARE line-initial, but the line
+    opens with a footnote numeral or a bracket that the two OCRs place
+    differently -
+
+        p59    17 האלף והבית והכף . ויתאבכו גאות עשן
+        p109   88 הבית והזין הכפולה , בחזו להם ישראל
+        p146   [ הנימל והעין וההא , יגעה שור
+
+    `^\s*ה` rejected all of them. Widened to "the first HEBREW letter on the line
+    must open the heading", which keeps the anchor's strength - terminator still
+    required, letter-name vocabulary still closed - and recovered 12. Full-book
+    count moved 1,873 -> 1,876.
+
+    ### THE REMAINING 8 ARE A MERGE DEFECT AND ARE FLAGGED IN THE CORPUS
+
+        only in the text layer:  אינ איש אמצ בהט בהל גד גדפ גמצ
+        only in DocAI:           none
+
+    Seven of them DocAI simply does not contain (`והיוד והנון`, `והמם והצרי`,
+    `וההא והטית`... all absent from its token stream), so DocAI misread those
+    heading lines - the reverse of the general pattern. `בכה` is the other
+    direction: the text layer detected it TWICE on p112, a false positive of its
+    own.
+
+    **A missed heading does not produce a missing entry - it produces a silently
+    MERGED one**, where the next root's text runs on with no boundary. That is
+    worse than an absence and nothing else in this pipeline would surface it, so
+    `--cross-check` writes `suspect_merge` onto the affected records: **20 entries
+    flagged** (the flag is per-PAGE, so it is a deliberate superset of the 8 -
+    safe, not precise). These are the first real disputes this book has, and they
+    are structural rather than lexical, which is a good thing to have in front of
+    a reviewer at a demo.
+
+    ### State
+
+    `~/work/hashorashim/` is now a git repo (scans, caches, dicta samples and the
+    email draft gitignored; `book.json`, `README.md`, `part1.json`,
+    `root_entries.json` and the engine comparison tracked). `book.json` declares
+    `parts` 1-299 and `scan_pdf`. Verified through the seam:
+    `SEFER_CORPUS_ROOT=~/work/hashorashim` loads 299 klalim, resolves the right
+    scan, and reports `PART1_MAX_KLAL 299`.
+
+    **Still needed before the dashboard can open it:** `images/pdf_pages/` (no
+    renderer exists) and `part1_header_anchored_alignment.json` (no producer
+    exists) - both from item `0EI`.
+
+0EI. **[2026-09-09] THE SEAM DID NOT CARRY THE SCAN. AND THE BYPASS GUARD
+    CAUGHT MY OWN THREE NEW TOOLS.**
+
+    Reviewer: "is there also code work needed on the seam to injest a new text?"
+    Audited rather than estimated. Yes, and it was the one artifact that matters
+    most on the vision path.
+
+    ### The scan filename was a literal in six live files
+
+    `pipeline/verify_corrections_vision.py:83-84`, `rebuild_all.sh` stage 3, the
+    stage that crops every disputed word out of the scan:
+
+        REPO = cio.REPO
+        PDF_PATH = os.path.join(REPO, "berlin_square_corrected.pdf")
+
+    `cio.REPO` IS the seam, so the DIRECTORY followed the corpus root and the
+    FILENAME did not. A second book therefore got a path pointing at its own root
+    with the first book's filename on the end - a missing file rather than a
+    crop of the wrong book, which is luck, not design. Same literal in
+    `build_gematria_trace.py` (there at least behind an overridable `--pdf`),
+    `verify_witness_vision.py`, `verify_witness_green_vision.py`,
+    `run_surya_part1_full_baseline.py`, `verify_local_setup.py`.
+
+    Compounding it, `PDF_PATH` was a module-level assignment, so it froze at
+    import - item `0DC`'s class ("26 more freeze their paths at import, four of
+    them rebuild stages"), and precisely the defect corpus_io's PEP 562
+    `__getattr__` exists to prevent, reintroduced one level up.
+
+    **Fixed:** `scan_pdf` is now a `book.json` identity field with
+    `cio.SCAN_PDF_PATH` resolving it at call time, and the adjudicator reads it
+    through a function (`pdf_path()`), never a module constant. Under the strict
+    rule from `0EC`, a corpus root with a book.json must now DECLARE its scan or
+    raise - a second book cannot silently inherit this one's. The other five
+    files still carry the literal and are not yet swept.
+
+    ### THE BYPASS GUARD CAUGHT ME
+
+    `test_the_corpus_root_bypass_count_has_not_grown` failed on my own three new
+    tools - `extract_pdf_text_layer.py`, `gate_docai_against_layer.py`,
+    `detect_root_entries.py` - all three of which had copy-pasted
+    `REPO = os.path.dirname(HERE)`, which is exactly what that guard's docstring
+    predicts ("the single easiest thing to paste from a sibling file"). The
+    correct response was to route them through corpus_io, not to bump
+    `KNOWN_BYPASS_COUNT`; done, and 543 tests pass. Worth recording that the
+    guard works and that it caught the person who had just been writing about
+    seams.
+
+    ### What ELSE a second book needs that no code can produce
+
+    Checked by grepping for WRITERS, not readers:
+
+    * **`part1_header_anchored_alignment.json` has no producer at all.** Nothing
+      in `pipeline/` or `tools/` writes it; it is a migrated cache. It is what
+      maps a klal to its scan page, and `build_corrections_dataset.py` skips any
+      klal whose alignment is untrusted - so without it a second book generates
+      no candidates. For HaShorashim the mechanism is actually EASIER: odd pages
+      carry root-range running heads (`אבה - אגד`) which bracket the entries on
+      the page, a stronger anchor than Yad Malachi's single section letter.
+    * **`images/pdf_pages/page_N.png` has no renderer** - START_HERE already says
+      so. Small job, genuinely absent.
+
+    ### א ב ג slice, scoped and extracted
+
+    Reviewer chose the first three מאמרים for the demo. **308 entries** (א 132,
+    ב 90, ג 86), PDF pages 58-151, printed 10-103. DocAI extracted over all 94
+    pages into `~/work/hashorashim/docai_word_boxes/`; `page_121.json` opens
+    `72 / ספר / השרשים`, confirming the +48 offset against the token stream
+    rather than against the rendered header alone.
+
+    Footnote work is deliberately DEFERRED pending the Sefaria editor's dataset (item `0EE`).
+
+0EH. **[2026-09-09] CLOUD VISION IS *NOT* DOCAI'S TWIN - THE BOOKS LAYER IS.
+    97.4% ON YAD MALACHI, AND ITS DOMINANT ERROR IS ITS OWN. DRIVE HEADLESS
+    CONVERSION IS BLOCKED.**
+
+    Reviewer directive: try Cloud Vision and the Drive headless conversion on
+    both books. `google-cloud-vision` installed;
+    `document_text_detection` with `language_hints=["he"]`.
+
+    ### Yad Malachi, klalim 13-23, scored against the corpus
+
+        Cloud Vision (DOC_TEXT)   4180 tok   97.4%   lex 97.8%
+        Google Books layer        4159 tok   97.2%   lex 97.6%
+        DocAI (primary)           2489 tok   98.6%   lex 99.1%
+        Dicta (square)            2491 tok   78.1%   lex 83.4%
+        corpus (ceiling)          2253 tok  100.0%   lex 99.7%
+
+    (Vision and the Books layer are flagged non-comparable on CER: both were
+    extracted over whole pages against an 11-klal window, so the overhang counts
+    as insertions. Word accuracy divides by the reference and is unaffected.)
+
+    ### THE SUBSTITUTION PROFILES SPLIT THE THREE GOOGLE ENGINES IN TWO
+
+        Cloud Vision   ו->ן x16,  ∅->י x5,  ב->כ x4,  ה->ח x3,  ∅->יי x3,  ד->ו x3
+        Books layer    ה->ח x6,   ∅->י x4,  ∅->יי x4, כ->ב x3,  ם->ס x2,   ן->ו x2
+        DocAI          ה->ח x6,   ∅->יי x4, ∅->י x4,  ב->כ x3,  מ->ט x2,   ת->ר x2
+
+    **This refines item `0ED`, which assumed the Google engines were one family.**
+    The Books layer IS DocAI's twin - same error, same count, on the top four.
+    Cloud Vision is not: its dominant failure is **ו->ן, sixteen times**, more
+    than double any error it shares with DocAI, and the Books layer shows the
+    OPPOSITE substitution (ן->ו x2). The letter-frequency signature agrees -
+    Cloud Vision over-produces nun at 1.11x where the Books layer over-produces
+    shin at 1.10x.
+
+    So Cloud Vision carries genuinely independent signal on its dominant error
+    class while sharing the secondary ones. It is a better witness candidate than
+    the Books layer, and **ו->ן at word-final position is a systematic,
+    lexicon-checkable error class** - cheap to post-correct, which would raise it
+    further. Neither is yet wired to anything.
+
+    ### HaShorashim, printed pages 71-76, reference-free
+
+        engine                 GB      NLI     agrees w/ DocAI (GB / NLI)
+        Cloud Vision         67.5%   67.5%        90.4%  /  94.0%
+        DocAI                66.7%   67.5%          -    /    -
+        Tesseract            64.6%   60.0%        86.7%  /  72.6%
+        Dicta (Rashi model)  62.5%   61.3%        82.3%  /  72.2%
+
+    **Corrects `0EG`'s "DocAI is the only engine indifferent to the
+    continuous-tone scan":** Cloud Vision is equally indifferent (67.5% on both).
+    The split is not DocAI-vs-rest, it is **cloud-vs-local** - both Google cloud
+    engines read the 5.8 MP colour scan as well as the 19 MP bitonal one, while
+    Tesseract and Dicta both drop sharply on it. The argument for Google Books as
+    primary now rests on the two engines that are NOT scan-indifferent.
+
+    ### Drive headless conversion: blocked, and the fallback is not worth it
+
+        HttpError 403: "Google Drive API has not been used in project
+        1045375753125 before or it is disabled."
+
+    Enabling it is a console action only the reviewer can take. Even then a
+    service account typically has no Drive storage quota outside a Workspace
+    domain, so a second failure is likely - worth one retry, not a plan.
+
+    The claude.ai Drive connector WOULD work (`create_file` accepts
+    `base64Content` and converts image uploads to a Google Doc by default), but
+    the image has to pass through the conversation as base64: **~170k tokens for
+    a single page**, and it lands scans in the reviewer's personal Drive. Not a
+    viable comparison harness. Expected value is low regardless - the Drive
+    converter is very likely the same Google OCR family the Books layer already
+    represents, and that one is already measured as DocAI's twin.
+
+0EG. **[2026-09-09] THE HEBREWBOOKS TITLE PAGE SETTLES PROVENANCE AND
+    CORRECTS MY PUBLISHER CALL. AND DICTA'S *RASHI* READER DOES FAR BETTER ON
+    SQUARE TYPE THAN I PREDICTED.**
+
+    ### Provenance, read off the ink
+
+    The HebrewBooks copy carries an oval ownership stamp on its first page:
+    `ספרית אגודת חסידי חב"ד / אהל [יוסף] יצחק / ליובאוויטש / ארה"ב` - the
+    Chabad-Lubavitch library. Reviewer had said "Chabad"; it is now verified from
+    the image rather than taken on report. So the three exemplars are Ohio State
+    (Google Books, bookplate at 0-idx 1), Chabad-Lubavitch (HebrewBooks), and
+    NLI's own copy (accession stamp `26 AUG 1927`).
+
+    ### I WAS WRONG TO DISMISS GOOGLE'S "A. BERLINER"
+
+    Item `0EC` recorded `publisher: "Itzkowski, for Mekize Nirdamim"` and said
+    Google Books "lists A. Berliner, who was one of the Mekize Nirdamim heads,
+    not the press" - i.e. that Google had it wrong. The German title page, which
+    the HebrewBooks copy reproduces and which I had not read, says:
+
+        BERLIN 1896.
+        Herausgegeben im Selbstverlage des Vereins M'KIZE NIRDAMIM.
+        (Dr. A. Berliner.)
+        In Commission bei J. Kauffmann, Frankfurt a. M.
+
+    So the volume is the society's OWN imprint with Berliner named as the
+    responsible editor, Kauffmann the commission agent, and Itzkowski only the
+    printer (from the Hebrew title page). Google's attribution is defensible and
+    mine was the narrower reading. `book.json` now says
+    `"Mekize Nirdamim (Selbstverlag), printed by Itzkowski, Berlin"`, which is
+    what ships in the TEI sourceDesc.
+
+    ### Dicta, measured instead of predicted
+
+    Item `0EC` said Dicta "does not earn its place here on the evidence this
+    project already has" - reasoning from Yad Malachi, where Dicta's SQUARE model
+    scored 77.6% against DocAI's 99.0%. **The reviewer pushed back ("it can't
+    hurt to try"), and was right to.** Dicta square access is not available to
+    this project (support has been asked); the RASHI reader was run instead, on
+    the same six pages (printed 71-76) already carrying DocAI and Tesseract
+    baselines:
+
+                              tokens   types   lex hit   agrees with DocAI
+        DocAI          GB       2966    1493     66.7%          -
+        DocAI          NLI      2972    1466     67.5%          -
+        Dicta(Rashi)   GB       2983    1587     62.5%        82.3%
+        Dicta(Rashi)   NLI      3078    1709     61.3%        72.2%
+
+    A model for the WRONG SCRIPT lands 4.2 points behind DocAI on this book,
+    where the right-script model landed 15.7 points behind on Yad Malachi. Its
+    output is fluent and it reads the structural headings correctly, including
+    the `רש` spelling that broke my own detector: `הבית והעין והרש.` = בער,
+    followed by `כי בערה בם אש י"י`. **The square model is now worth chasing
+    rather than written off**, and the ask to Dicta support is the right move.
+
+    Two caveats. Lexicon hit rate is a weak proxy and cannot say who is RIGHT
+    where they differ - 82.3% agreement with DocAI leaves ~18% needing
+    adjudication. And the rates are not comparable across books: 62.5% here
+    against 83.4% on Yad Malachi reflects different vocabulary, not a worse read.
+
+    ### A pattern across three engines now
+
+    **DocAI is the only engine tested that reads the continuous-tone NLI scan as
+    well as the 19 MP bitonal one.** Tesseract strongly prefers Google Books
+    (11.1% vs 24.5% idiosyncratic-reading rate) and so does Dicta (82.3% vs 72.2%
+    agreement, 62.5% vs 61.3% lexicon hit). Two independent engines both prefer
+    the high-resolution bitonal input; only DocAI is indifferent. That is an
+    argument for Google Books as primary that does not depend on DocAI's own
+    preference, and it strengthens `0EC`'s conclusion by a route `0EC` did not
+    have.
+
+0EF. **[2026-09-09] ENTRY SEGMENTATION FOR HASHORASHIM: 1,873 ROOT ENTRIES,
+    VALIDATED BY THE BOOK'S OWN ALPHABET TO 2 UNEXPLAINED PAIRS IN 1,872. AND A
+    HAND-WRITTEN LETTER LIST THAT SILENTLY LOST A WHOLE מאמר.**
+
+    `tools/detect_root_entries.py` (new). This book has no gematria marker, so
+    `build_gematria_trace.py` has no analogue; what it has instead is every entry
+    headed by its root SPELLED OUT AS LETTER NAMES and closed by a period or
+    comma - `הבית והצדי והקוף.` = ב-צ-ק. Run over the recovered Google Books
+    layer (`tools/extract_pdf_text_layer.py`, 1,094,298 Hebrew chars over 636
+    pages, no API cost).
+
+        entry headings          1,873
+        root lengths            2 letters 125, 3 letters 1,748
+        initials covered        21 of 22
+
+    ### THE FIRST VERSION FOUND 840 AND THE GUARD DID NOT NOTICE
+
+    I wrote the 22 letter names from knowledge of the alphabet. The edition
+    prints resh as **`רש`**, not `ריש`, so **the entire ר מאמר - 30 pages, PDF
+    509-538 - came back empty**, and the same list missed `חת`, `טת`, `ואו` and
+    the geminate formula `כפולה` ("the doubled one", 152 occurrences, repeating
+    the preceding letter: `הרש וההא הכפולה` = ר-ה-ה). 1,033 entries missing, 55%
+    of the true total.
+
+    **The alphabetical-order check reported 1 violation in 839 and was clean.**
+    It could not see this: a whole missing section produces no local inversion,
+    because ק -> ש is still forward. Lesson 26 THE FILTER THAT HIDES, in the
+    guard rather than in the data - the failure was silence, and I was reading a
+    99.9% pass as coverage when it was only monotonicity. What caught it was a
+    coverage check the tool did not have: **entries per initial letter, where
+    ר:0 and ו:0 are impossible on their face.** That check is in it now and runs
+    by default.
+
+    The vocabulary is no longer hand-written. It was rediscovered by clustering
+    every line-initial heading-SHAPED line in the layer and reading off the words
+    that actually occupy the slots - 1,987 such lines, head-words ranked, so a
+    spelling the edition uses cannot be missed by my not knowing it.
+
+    ### The order check, once geminate collation is accounted for
+
+        adjacent pairs                          1,872
+        order violations                          119   6.4%
+          explained by geminate / 2-letter collation 117   98% of violations
+          UNEXPLAINED                                 2   0.11% of all pairs
+
+    The edition does not collate geminate roots where naive alphabetical order
+    puts them (`בב` precedes `באר`, `ארר` precedes `ארב`), so 117 of the 119 are
+    my sorting model being wrong, not the detector. **The 2 that remain are real
+    and need a human against the ink:**
+
+        p237  יגר -> יגע    היוד והנימל והעין.
+        p591  תחש -> תחר    התו והחת והרש.
+
+    ### ו:0 is CORRECT, and was checked rather than assumed
+
+    Hebrew roots essentially do not begin with vav, so a missing ו מאמר is
+    expected - but "expected" is not measured. Confirmed structurally: **2 pages
+    separate the last ה entry (p173) from the first ז entry (p176)**, so the book
+    has no ו section to miss.
+
+    Artifact: `~/work/hashorashim/root_entries.json`. **Not yet a corpus** - these
+    are headings with page and line, not segmented entry TEXT, and they are
+    derived from Google OCR, so every heading is as good as that OCR. Building
+    `part*.json` from them, and declaring the 22 מאמרים in `book.json`'s `parts`,
+    is the next step.
+
+0EE. **[2026-09-09, reviewer] THIS IS NOT A SECOND BOOK WE CHOSE. SEFARIA IS
+    ALREADY WORKING ON IT, THEY HAVE A DATASET WE DO NOT HAVE, AND THERE IS A
+    MEETING NEXT WEEK.**
+
+    From the Sefaria editor, forwarded by the reviewer 2026-09-09, in summary:
+    he agreed to both requests; his current project is Sefer HaShorashim of Ibn
+    Janah; **Sefaria received a digitized dataset with careful attention to
+    citations but weak OCR of the running text**; and he wants to try the model,
+    test its fidelity, and compare its review dashboard with traditional OCR
+    software, meeting the following week.
+
+    ### What this changes
+
+    START_HERE's Part 1 says Sefaria is the customer and their requirements
+    outrank this project's preferences. Items `0EC`/`0ED` were written as though
+    HaShorashim were a second book this project picked up. It is not. It is **the
+    customer's live project**, and the ask is explicitly to test this pipeline's
+    FIDELITY and its REVIEW DASHBOARD against it.
+
+    * **Their dataset is the thing to get, and we do not have it.** Careful
+      citations, poor running-text OCR is the exact complement of what this
+      pipeline produces. Bacher's `מראה מקומות` apparatus is the hard part of
+      this book structurally - it is `0DB-TODO`'s footnote class arriving much
+      larger (item `0EC`) - and someone has already done it carefully. Asking for
+      it is the highest-value action available and costs one email.
+    * **The deliverable is a demonstration, not just a text.** "Testing its
+      fidelity" and "experimenting with its review dashboard" means the dashboard
+      has to LOAD this book. That needs real `part*.json` content, which needs
+      entry segmentation on the letter-name formula (`הבית והצדי והריש` = בצר,
+      item `0EC`). That is now the critical path, not the scan question.
+    * **He named the same NLI scan** (`/he/` locale of the record already
+      downloaded), so source selection is aligned - and we have a measurement he
+      probably does not: NLI's Maximal is **5.8 MP against Google Books' 19 MP**
+      (item `0EC`), and DocAI nonetheless reads them equally well. Worth telling
+      him rather than letting him assume the library scan is the best input.
+    * **"Comparing it with traditional OCR software"** is the comparison item
+      `0EC` already ran on three scans and two engines. That artifact
+      (`ocr_engine_comparison_three_scans.json`) was built for us and is directly
+      the thing he says he wants to do.
+
+    ### The Yad Malachi gate is a live demo asset, not just housekeeping
+
+    Item `0ED` recovered a free full-corpus OCR layer nobody had read and turned
+    it into a reliability gate. On a call about "testing fidelity", that is a
+    concrete demonstration of the method: a witness recovered, measured at 97.2%,
+    and then DECLINED as a vote because its errors are DocAI's. The declining is
+    the part worth showing.
+
+    **Open, in priority order:** (1) ask the Sefaria editor for the digitized dataset and its
+    provenance/licence; (2) entry segmentation so the dashboard can load the
+    book; (3) tell him the scan measurements before he commits to NLI as primary.
+
+0ED. **[2026-09-09, reviewer question] "WAS THERE A SECOND GOOGLE OCR WE USED
+    FOR YAD MALACHI?" NO - AND THE ONE THAT EXISTED WAS STRIPPED OUT BY A PDF
+    RE-SAVE. IT SCORES 97.2%, AND IT IS DOCAI'S TWIN.**
+
+    ### It was never used, and it could not have been
+
+    Nothing in this repo has ever read a PDF text layer: `get_text(` appears
+    **zero times** across `pipeline/`, `tools/` and `tests/`. The only "text
+    layer" mentions in the status files are item `0EC`'s, written today about
+    Sefer HaShorashim.
+
+    Nor could it be, from the files the pipeline uses. Measured across all 337
+    pages:
+
+        berlin_square_corrected.pdf              pages WITH HEBREW   0   chars        0
+        berlin_square_original_transposed.pdf    pages WITH HEBREW   0   chars        0
+        ~/Downloads/ספר_יד_מלאכי Berlin.pdf       pages WITH HEBREW 332   chars  1,005,824
+
+    Both repo PDFs report 334 of 337 pages as having "text", which is what a
+    naive check sees - and every one of those pages holds **only whitespace**
+    plus the English "Digitized by Google" disclaimer. Their producer string is
+    `macOS Version 26.6 Quartz`; the original download's is `Google Books PDF
+    Converter`. **A re-save through Quartz kept the layer's whitespace skeleton
+    and threw away every Hebrew character** - about a million of them, covering
+    essentially the whole book - and nothing noticed, because nothing reads it.
+    The original is still on disk and the loss is fully recoverable.
+
+    ### What it is worth: 97.2%, second only to DocAI
+
+    Extracted from the original download for 0-idx pages 17-21 (whole-line
+    reversal - the layer is in VISUAL order, same as HaShorashim's) and scored
+    with `tools/compare_ocr_engines.py --klalim 13-23`, which works here because
+    Yad Malachi HAS a reference corpus:
+
+        Google Books text layer   4159 tok   97.2%   lex 97.6%
+        DocAI (primary)           2489 tok   98.6%   lex 99.1%
+        Dicta (square)            2491 tok   78.1%   lex 83.4%
+        corpus (ceiling)          2253 tok  100.0%   lex 99.7%
+
+    Its CER is flagged and NOT comparable - I extracted five whole pages against
+    an 11-klal window, so 85% of its tokens are overhang the CER counts as
+    insertions. Word accuracy divides by the reference and is unaffected.
+
+    ### AND IT IS NOT AN INDEPENDENT WITNESS. Read the substitutions.
+
+        Google Books layer:  ה->ח x6,  ∅->י x4,  ∅->יי x4,  כ->ב x3,  ם->ס x2
+        DocAI (primary):     ה->ח x6,  ∅->יי x4, ∅->י x4,   ב->כ x3,  מ->ט x2
+
+    Same error, same count, on the top four. Two Google OCR systems reading the
+    same ink fail the same way - Lesson 24 SHARED INK, SHARED ERROR compounded by
+    Lesson 23 AN ENGINE, NOT A SAMPLE. **Do not count it as a vote.** Its correct
+    use is Lesson 23's own prescription for a repeat run: a RELIABILITY GATE on
+    DocAI - where the two Google readings diverge, DocAI is less certain and the
+    position deserves a look; where they agree, that agreement carries almost no
+    information beyond DocAI's own confidence.
+
+    That is a genuinely useful thing to have for free on a book whose open work
+    is closing disputes, and it is cheap: no API, no key, no cost, full corpus.
+    But it must be wired in as a gate, not as a third engine in a consensus vote,
+    or it will manufacture false 2-of-3 agreement on exactly the glyphs DocAI
+    already gets wrong.
+
+    ### Transfers to HaShorashim
+
+    Its Google Books PDF carries 636 Hebrew pages / 1,094,298 characters
+    (item `0EC`). Same relationship must be assumed there: that layer is DocAI's
+    sibling, not a second opinion, until measured otherwise - and it cannot be
+    measured there yet, because that book has no reference corpus.
+
+    ### DONE, same turn - and the remap I prescribed turned out to be WRONG
+
+    `tools/extract_pdf_text_layer.py` (new, generic, both books) recovers a
+    scanned PDF's embedded layer one file per page. `--report` counts HEBREW
+    characters rather than non-blank text, because that is exactly the check that
+    would have caught this years earlier: the stripped PDFs report 334 of 337
+    pages as "having text" and hold only whitespace. It exits non-zero on them.
+
+    **Reading order is DETECTED, not assumed** - `--order detect` scores both
+    readings against the lexicon and says which it chose. On this file: as-is
+    18.6% vs reversed 93.3%, so VISUAL. HaShorashim's HebrewBooks PDF is the
+    opposite convention, so guessing would silently mirror one of them.
+
+    **The transposed-leaf remap is NOT needed and my instruction to apply it was
+    wrong.** `~/Downloads/ספר_יד_מלאכי Berlin.pdf` is already in the CORRECTED
+    page order: its 0-idx pages 36 and 37 are pixel-identical (r=1.000) to
+    `berlin_square_corrected.pdf`'s 36 and 37, and to
+    `berlin_square_original_transposed.pdf`'s 37 and 36. Independently confirmed
+    by content: extracted page N overlaps `docai_word_boxes/page_N.json` at
+    96-98% across pages 20/36/37/38/39/100/200, and **the check discriminates** -
+    neighbouring cache pages score 20-36%, so it can fail and does not (Lesson
+    25). How a pre-fix-dated download is already in post-fix order is unexplained
+    and worth a look before anyone rebuilds a page-indexed cache from it.
+
+    Result: `google_books_layer/` - 337 files, 2.6 MB, gitignored, aligned to the
+    pipeline's own page numbering.
+
+    ### The gate: 4,747 divergent spans over 190,915 tokens
+
+    `tools/gate_docai_against_layer.py` aligns the two Google readings per page
+    and reports only where they SPLIT. It deliberately reports no agreement
+    score, because agreement between two Google systems on one sheet of ink
+    carries no information. Over Part 1's pages 14-247, 234 pages compared:
+
+        divergent spans   4,747   2.49% of DocAI tokens
+        worst pages       148 (4.40%), 238 (4.33%), 195 (4.23%), 170 (4.02%)
+
+    Triaged by the cheap lexicon test:
+
+        spacing only          554   11.7%   tokenisation, not a reading difference
+        LAYER valid, DocAI not 1434   30.2%
+        DocAI valid, layer not  646   13.6%
+        both valid             1953   41.1%   needs the ink
+        neither valid           160    3.4%
+
+    The layer beats DocAI better than 2:1 on that test, and the examples are the
+    classic sorts: `בססחים`->`בפסחים`, `אטינא`->`אמינא`, `לדערת`->`לדעת`,
+    `מלמר`->`מלמד`, `מוער`->`מועד` - ס/פ, ט/מ and ר/ד confusions where DocAI
+    produced a non-word and the layer produced the right one.
+
+    **TWO THINGS THAT ARE NOT ESTABLISHED, and both matter more than the 1,434.**
+
+    First, **this is a lexicon argument, which is Lesson 49 FREQUENCY IS NOT THIS
+    PAGE** - measured TODAY in item `0DU`, where 166 of 166 lexically-derived
+    hypotheses came back as the STORED text once cropped and put to the vision
+    adjudicator. This detector is somewhat better founded than those, because a
+    second reading of the same pixels is proposing the alternative rather than a
+    frequency table - but it is still the same engine family and it still has to
+    go through vision before any of it reaches a reviewer.
+
+    Second, **these are DocAI-vs-layer, NOT corpus-vs-layer.** The corpus is not
+    DocAI's raw output; it has had a review pass. An unknown fraction of the
+    1,434 are positions the corpus already holds correctly. Nobody may quote
+    1,434 as a count of corpus errors. The actionable set is the subset where the
+    CORPUS still carries DocAI's reading, and computing it is the next step.
+
+    Artifact: `docai_layer_gate.json`. Nothing is applied and no caller consumes
+    it, by design.
+
+0EC. **[2026-09-09, reviewer directive] A SECOND BOOK: SEFER HASHORASHIM OF
+    IBN JANAH. AND THE IDENTITY SEAM SILENTLY LENDS IT YAD MALACHI'S EDITION,
+    ITS PUBLISHER AND ITS 667-KLAL SHAPE.**
+
+    Reviewer, 2026-09-09: "we have a new book to injest - Sefer HaShorashim of
+    Ibn Janah", corpus root `~/work/hashorashim`, decisions taken the same turn:
+    the Hebrew (Ibn Tibbon's translation, ed. Bacher) first with the Arabic
+    original (ed. Neubauer, Oxford 1875) later as a cross-edition witness; a
+    sibling corpus root driving ONE shared codebase, not a second clone.
+
+    ### The scan, measured
+
+    `~/work/hashorashim/Sefer_ha_shorashim_berlin_1896.pdf`, 17.5 MB, **651
+    pages**, a Google Books digitization of the Ohio State University copy.
+
+        page images      3494x5270 .. 3638x5388 PNG   (18.4 - 19.2 MP)
+        Yad Malachi      3440x5312                    (18.3 MP)
+        text layer       645 / 651 pages (Google's own OCR)
+        0-idx page 0     the "Digitized by Google" disclaimer, same as YM
+        every page       a 1034x204 "Digitized by Google" footer strip
+
+    So it clears the resolution bar this project set when it rejected NLI at
+    1745x2658, and it is the same SHAPE of artifact as the Yad Malachi PDF -
+    including the page-0 disclaimer that gives that file its +1 offset against
+    NLI numbering.
+
+    Edition confirmed **from the book's own title page, rendered and read**, not
+    from a catalogue: `ברלין. תרנ"ו.` (5656 = 1895/6 CE), printer `בדפוס של צבי
+    הירש ב"ר יצחק איטצקאווסקי`, editor `בנימין זאב באכער` (Wilhelm Bacher,
+    Rabbinical Seminary of Budapest), from the Vatican and Escorial manuscripts
+    (`על פי שני כתבי יד אשר ברומי ובעסקוריאל`). The book names itself `החלק השני
+    ממחברת הדקדוק` - the second part of Kitab al-Tanqih, Sefer HaRikmah being the
+    first. Page 5 carries the Mekize Nirdamim series page (`הוקמה מחדש בשנת
+    תרמ"ה`), so Mekize Nirdamim is the SOCIETY and Itzkowski the PRINTER; do not
+    collapse the two into one `publisher` field without saying which it holds.
+
+    **Sefaria does not have this book.** Their `Sefer HaShorashim` is RADAK's
+    (`authors: [{'en': 'Radak'}]`, Naples 1490, `categories: ['Reference',
+    'Dictionary']`), and its own `enDesc` says it "draws heavily on earlier works
+    of Rabbi Judah ben David Hayyuj and Rabbi Jonah ibn Janah". The source Radak
+    drew on is absent from the library. Same shape as the Yad Malachi case.
+
+    ### The text layer is stored in VISUAL order, and mirrored Hebrew reads as Hebrew
+
+    Google's embedded OCR extracts each line reversed - characters AND word
+    order. Raw `PyMuPDF` `get_text()` on 0-idx 120:
+
+        RAW  : ורמאןינע ןכו ןוהה ץובקמ ותוא ודמחו והובהאש המ רמא ולאכ םעצב י"יל יתמרחהו
+        s[::-1]: והחרמתי לי"י בצעם כאלו אמר מה שאהבוהו וחמדו אותו מקבוץ ההון וכן עניןאמרו
+
+    Whole-line reversal is correct; per-WORD reversal is not, and produces
+    fluent-looking Hebrew in the wrong order. This is a free same-ink witness
+    (like DocAI and Surya, NOT a cross-edition one - Lesson 38 does not apply to
+    it, Lesson 24 SHARED INK, SHARED ERROR does), but only after reversal.
+
+    **The page numbers are NOT reversed and I nearly recorded a wrong offset.**
+    They extract as separate runs: raw `72` on 0-idx 120 is printed page 72, and
+    reversing it to 27 gave three mutually contradictory page offsets that I was
+    one step from writing down as fact. The rendered page says 72. Printed page N
+    = 0-indexed PDF page N + 48, consistent across 0-idx 60/120/300; front matter
+    0-47. Lesson 30 THE WRONG PAGE LOOKS RIGHT, caught by rendering.
+
+    ### The structural unit is not a klal, and the marker is better than a gematria
+
+    Read off the rendered page rather than guessed: entries are headed by the
+    root SPELLED OUT AS LETTER NAMES - `הבית והצדי והריש` is the root בצר,
+    `הבית והצרי והקוף` is בצק (and the `הצרי`/`הצדי` split in those two is a
+    ר/ד misread of the same word, this pipeline's bread and butter). The chapters
+    are `מאמרים`, one per letter: 0-idx 300 reads `המאמר השלשה עשר מספר השרשים`.
+
+    Consequences, none of them speculative:
+
+    * `book.json`'s `parts` array takes any number of entries, so 22 letter
+      chapters declare cleanly where 3 file chunks do now.
+    * `build_gematria_trace.py` has NO analogue here and needs a replacement
+      keyed on the letter-name formula - a closed 22-word vocabulary, so it is
+      cheaper to detect than a gematria marker AND self-checking, because the
+      names spell the root and the roots run alphabetically.
+    * `tools/validate_title_alphabetical_order.py` stops being a weak check and
+      becomes a real structural invariant.
+    * `tools/validate_catchword_continuity.py` applies unchanged - 0-idx 120
+      carries the catchword `ב וישמפני.`
+    * Bacher's footnote apparatus is dense, numbered, and structurally separate
+      from the body. That is `0DB-TODO`'s problem class arriving much larger, and
+      it is one of the three things Sefaria named explicitly (`@01headers`,
+      `@02bold@03`, footnotes).
+    * `pipeline/typography.py`'s alef-lamed predicates are calibrated to Berlin
+      1851/2 Zittenfeld type. This is Berlin 1895/6 Itzkowski type - a different
+      printing house and different sorts - so those predicates are per-book
+      knowledge hardcoded in code with no seam, which is item `0BU` step 1
+      arriving as a live problem rather than a cleanup.
+
+    ### THE BUG, and it is on the deliverable path
+
+    `pipeline/corpus_io.py:539`:
+
+        return {key: stored.get(key) or default for key, default in _WORK_DEFAULTS.items()}
+
+    `pipeline/corpus_io.py:255-256`:
+
+        declared = (load_json(repo_path("book.json"), None) or {}).get("parts")
+        if not declared:
+            return [dict(p) for p in _PARTS_DEFAULT]
+
+    The merge is PER KEY and the guard is FALSINESS, so a `book.json` that
+    declares a different book inherits Yad Malachi's value for every key it
+    omits, and for every key it sets to `""` or `[]`. Measured with the payload
+    `tests/test_pipeline_logic.py:7760` already uses (`Sefer Bedikah`, which
+    omits `edition`):
+
+        edition  = 'Berlin, 1851/2 - the second printing, not the Livorno 1766-7 original'
+        parts()  = ['part1.json', 'part2.json', 'part3.json']   PART1_MAX_KLAL = 222
+
+    So a second book gets a Berlin 1851/2 edition statement and a 667-klal
+    three-chunk shape it does not have. `edition` reaches the dashboard through
+    `review_server.py:842`; `parts()` reaches `PART*_MAX_KLAL` and ~40 call
+    sites.
+
+    **The test written to prevent exactly this cannot fail on it.**
+    `test_the_export_names_the_book_from_book_identity_not_from_a_literal`
+    exists because "a second corpus exported through this pipeline would have
+    carried Yad Malachi's title into its TEI header and its Sefaria index - a
+    wrong edition attribution in a public library". Its payload sets nine keys
+    and asserts on those nine. It omits `edition` and asserts nothing about it,
+    so the one key that still comes back wrong is the one key outside the
+    assertion. Lesson 25 A SIGNAL THAT CANNOT DISAGREE, in the guard rather than
+    in the pipeline.
+
+    **Extent, swept rather than assumed:** two sites, both in `corpus_io.py`,
+    both on the identity seam. The other `or`-fallbacks the sweep turned up
+    (`corpus_root()`'s env var, `_resolve_part_path`'s path default, dict
+    lookups over genuinely-optional buckets in `list_drifted_rulings.py` and
+    `rank_dispute_queue.py`) are a different pattern and are correct as written.
+
+    **Fix shape, not yet applied:** distinguish ABSENT from BLANK. No
+    `book.json` at all keeps the defaults, so this repo's own corpus does not
+    move. A `book.json` that EXISTS is the book's declaration: a key it sets is
+    used as declared (`"section": ""` means this book has no section, not
+    "Klalei HaGemara"), and a key it omits raises naming the key rather than
+    borrowing another book's. Per Lesson 21, prefer the loader that raises over
+    the one that shrugs.
+
+    ### UPDATE, same turn: a SECOND COPY of the same setting, and a third to come
+
+    Reviewer supplied the HebrewBooks scan too (`req=36864`): **same edition,
+    different exemplar** - Google Books digitized the Ohio State copy,
+    HebrewBooks the Chabad copy. And: **"a much higher res scan exists from NLI.
+    I have not yet received that scan."**
+
+                            Google Books (OSU)        HebrewBooks (Chabad)
+        pages               651                       639
+        page image          3494x5270..3638x5388      2088x3344..2266x3468
+        megapixels          18.4 - 19.2               6.9 - 8.3  (median 7.25)
+        bit depth           full-tone PNG             1 bpc BITONAL DeviceGray
+        text layer          645/651, VISUAL order     639/639, LOGICAL order
+        printed page N      0-idx N + 48              0-idx N + 39
+
+    **The two text layers use opposite conventions.** Google's needs whole-line
+    reversal; HebrewBooks' raw `ספר השרשים` extracts correctly as written. Two
+    PDFs of one book disagreeing about this is a trap for anything reading both -
+    detect per file, never assume.
+
+    **CORRECTION, and it is my own unmeasured claim.** The table above first
+    read "full-tone PNG" for Google Books against "1 bpc BITONAL" for
+    HebrewBooks, and I built an argument on it - that HebrewBooks was already
+    thresholded and so had lost the grey a vision adjudicator uses to tell a
+    broken sort from a full one. **I never measured the Google file's bit
+    depth.** I had printed `bpc` for HebrewBooks and not for Google, then
+    asserted the difference. Measured since, across 17 sampled body pages in
+    each: `(1, 'DeviceGray', 'png')` for BOTH. Lesson 1, THE UNRUN CHECK.
+
+    So neither file preserves ink tone, and every claim in this entry about
+    bleed or ink weight - mine or anyone's - is a claim about two THRESHOLDING
+    PIPELINES, not about two sheets of paper. That is the strongest argument yet
+    for waiting on the NLI scan: if it is greyscale or colour it is the only
+    source here that can answer an ink question at all.
+
+    ### The ink comparison, measured independently
+
+    Reviewer read the pages up close and reported the Google copy as having ink
+    bleed and the HebrewBooks copy as lighter with more whitespace inside the
+    letters. **That observation was written into this entry as a quoted premise
+    and elaborated into an argument about closed counters before anyone had
+    measured it, which is not evidence and should not have been recorded as
+    though it were.** Measured now, on printed page 72 in both (GB 0-idx 120, HB
+    0-idx 111 - same setting, same words), with the Google image downsampled to
+    the HebrewBooks glyph height so the comparison is not merely a resolution
+    difference:
+
+        RESOLUTION-NORMALISED, both at 28px glyph height
+                                  Google (downsampled)   HebrewBooks
+          ink coverage                  17.16 %             15.20 %
+          stroke width                  0.258 x H           0.298 x H
+          enclosed counters/glyph       0.118               0.021
+          connected components          1267                1564
+
+    **CORRECTION, from a reviewer screenshot: I read a two-sided metric in one
+    direction.** I wrote that Google was "the cleaner and more discriminable of
+    the two". It is not cleaner - it fails DIFFERENTLY, and my own component
+    count said so. Shown on the same words in both copies (`שם אבי ר` /
+    `הוא בעצמו`, GB p.13, HB p.5):
+
+        Google      merges ADJACENT LETTERS - in הוא the ה and ו are squeezed
+                    into one blob. Over-inking closes the space BETWEEN letters.
+        HebrewBooks breaks strokes WITHIN a letter - in שם the final mem has a
+                    gap in its right leg, a closed box rendered open.
+
+    The numbers carry both halves. Google has more ink and **fewer** connected
+    components (1267 vs 1564) because its letters run together; HebrewBooks has
+    less ink, more components and a fifth as many surviving counters because its
+    strokes come apart. A low component count is MERGING and a high one is
+    FRAGMENTATION; I reported only the HebrewBooks side and turned a symmetric
+    measurement into a ranking.
+
+    **Opposite failure modes are the good outcome**, and better than one copy
+    winning: they are real independence at the glyph level. Where Google fuses
+    ה+ו, HebrewBooks probably does not; where HebrewBooks splits a ם, Google
+    probably does not. That is the escape from Lesson 24 that no additional OCR
+    ENGINE can provide, because every engine reads one image and inherits its
+    defects. The operational rule: never settle a disputed glyph by whichever
+    file looks like better ink - ask which failure mode the glyph is a case of,
+    and consult the copy that does not have that one.
+
+    Not a verdict, and the limits are load bearing: one region of one page;
+    enclosed counters are rare in Hebrew square script, so 0.118 vs 0.021 is
+    ~150 holes against ~33 and is threshold-sensitive; and the downsample
+    applies MY binarization to an image HebrewBooks' scanner had already
+    binarized its own way. The usable conclusion is narrower and firmer: the two
+    files differ in ways dominated by capture and thresholding, so a disputed
+    glyph must not be settled by whichever file "looks like better ink".
+
+    **The second copy is still worth having**, for the reason that has nothing
+    to do with ink tone: it is the one witness class that can break Lesson 24,
+    SHARED INK, SHARED ERROR. Every engine this project runs reads the same ink,
+    which is why 37 identical wrong readings survived to 2-of-3 and 3-of-3
+    consensus on Yad Malachi. Two copies of the SAME SETTING are different
+    impressions from the same type, so a sort that failed on one sheet can print
+    cleanly on the other. Lesson 38 does not apply - the type is identical, so
+    "the two printings genuinely differ" cannot explain a disagreement.
+
+    ### DICTA IS NOT A STRONG WITNESS FOR THIS BOOK, and this repo already knew
+
+    The reviewer expected Dicta to do poorly on square script. Checked rather
+    than accepted, and it is measured in this repo already - `ocr_engine_comparison_square_13_23.json`
+    and `ocr_engine_comparison_rashi_13_22.json`:
+
+        Dicta (square, Berlin)      acc 77.6%   cer 8.49%
+        Dicta (RASHI ed.)           acc 94.8%   cer 3.25%
+        DocAI (primary, square)     acc 99.0%   cer 0.77%
+        Surya (square)              acc 94.7%   cer 1.87%
+        Gemini VLM pass A (square)  acc 96.1%
+
+    **This file's own TL;DR is misleading about that and should be read with
+    care.** "Dicta 95.6% word accuracy over klalim 2-221 - the strongest witness
+    here" is Dicta reading the Jerusalem RASHI printing. On square type the same
+    engine scores 77.6%. Nothing in the TL;DR says which script the 95.6% was
+    measured on, so the natural reading of it is wrong for any square-script
+    book. Sefer HaShorashim is square throughout: DocAI carries it, Surya and the
+    VLM corroborate, Dicta does not earn its seat on the evidence already in the
+    repo.
+
+    ### SEQUENCING CONSTRAINT, because a third scan is coming
+
+    **Do not build any page-indexed cache for this book until the NLI scan
+    arrives** - `docai_word_boxes/`, `images/pdf_pages/`, alignments, marker
+    traces. Each is keyed to one PDF's page numbering, none re-derives the
+    mapping on its own, and START_HERE's transposed-leaf section records what
+    re-pointing them by hand costs. Structural work (chapter and entry
+    boundaries, the letter-name formula) is content, not pixels, and can proceed
+    now. This is also why the DocAI extraction has NOT been started.
+
+    ### THE NLI RECORD WORKS. Reviewer could not see or download it; I could.
+
+    <https://www.nli.org.il/en/books/NNL_ALEPH990010892830205171/NLI>, driven in
+    a real browser 2026-09-09 because a plain fetch cannot see this site (curl
+    returns a **Cloudflare challenge**, 6,846 bytes, no record content - the same
+    trap START_HERE records for the Yad Malachi Google Books check).
+
+    * The record and the page-turner **load and render**. First hit showed
+      Cloudflare's "Just a moment..." interstitial and cleared on its own after a
+      wait; that is the likeliest thing the reviewer hit.
+    * **657 images** - a THIRD distinct count, against Google Books' 651 and
+      HebrewBooks' 639. Image 1 is the physical binding, so NLI is shooting cover
+      and boards that the other two omit. This is NOT the simple one-page
+      disclaimer offset START_HERE documents for Yad Malachi's NLI copy; do not
+      assume any fixed offset between the three without checking content.
+    * The **Downloading** dialog offers complete document / current page only,
+      PDF or JPEG\ZIP, and Maximal (100%) / Medium (50%) / Small (25%).
+      **Maximal is greyed out under PDF and ENABLED under JPEG\ZIP** - checked by
+      selecting it, not assumed - anonymously, with no account. Identical to the
+      behaviour START_HERE records for Yad Malachi.
+
+    **WHAT IS STILL UNMEASURED, and it is the whole question: NLI's actual
+    "Maximal" pixel dimensions.** The browser extension kept dropping the tab out
+    of its group before the IIIF/delivery URLs could be read, and curl is
+    Cloudflare-blocked, so the reviewer's "a much higher res scan exists from
+    NLI" is UNTESTED here. It should not be repeated as fact until it is, and the
+    only precedent in this repo points the other way: for Yad Malachi, NLI's best
+    anonymous tier was 1745x2658 (4.6 MP) against Google Books' 3440x5312
+    (18.3 MP), four times fewer pixels, and that is why NLI was rejected there.
+    Google Books here is 18.4-19.2 MP, so NLI has a high bar to clear.
+
+    **The cheap decisive test, not run because downloading needs the reviewer's
+    go-ahead:** in that same dialog choose *current page only* + *JPEG\ZIP* +
+    *Maximal (100%)*. That is one image, a few hundred KB, and it settles the
+    resolution question for the whole book. Nothing was downloaded and the
+    terms-of-use box was not ticked.
+
+    ### THE NLI SCAN ARRIVED. IT IS THE LOWEST RESOLUTION OF THE THREE AND THE
+    ONLY ONE THAT SHOWS THE INK.
+
+    Downloaded by the reviewer at *complete document + JPEG\ZIP + Maximal
+    (100%)* - the highest tier NLI offers anonymously. Rosetta PID `IE36945577`,
+    656 JPEGs, 405 MB.
+
+                        Google Books (OSU)   HebrewBooks (Chabad)   NLI (own copy)
+        images                 651                  639                 656
+        megapixels        18.4 - 19.2            6.9 - 8.3        5.2 - 6.6 (med 5.8)
+        bit depth        1 bpc bitonal        1 bpc bitonal       24-bit RGB, TONE
+        printed page N    0-idx N + 48         0-idx N + 39        image N + 10
+
+    **The "much higher res scan exists from NLI" expectation is not borne out** -
+    NLI is about a third of Google Books' pixels and slightly fewer than even
+    HebrewBooks. This is the Yad Malachi precedent repeating exactly: NLI's best
+    anonymous tier there was 4.6 MP against Google's 18.3 MP, and that is why it
+    was rejected. Flagged as untested in the previous entry; now tested, and it
+    went the way the precedent predicted rather than the way it was expected to.
+
+    **But it is genuine continuous tone, and that changes its role rather than
+    disqualifying it.** Verified rather than inferred from the RGB mode: 219 of
+    256 grey levels carry pixels, **45.7% of pixels are midtones** (40-215), mean
+    channel spread 20-32. Both other copies are 1-bit - they discarded the tone
+    at capture, irreversibly. So the previous entry's line "neither file shows
+    you the ink" is now answered: NLI does.
+
+    ### The three copies are one page pushed three ways
+
+    Same words, printed page 72, cropped from all three
+    (`השלמת מלכותך ואין אחרי התכלית`):
+
+        Google Books   DILATED - very black, strokes bulked, adjacent letters running together
+        NLI            THE REFERENCE - soft and grey, every letterform complete and separated
+        HebrewBooks    ERODED - thin, ragged, strokes breaking
+
+    This confirms the merge/break characterisation above from a third direction,
+    and it settles the operational question: **when Google says two letters are
+    merged and HebrewBooks says a stroke is broken, NLI is what decides which is
+    the artifact.** Lower resolution shows up in NLI as softness, never as loss
+    of letter identity.
+
+    ### THREE EXEMPLARS, THREE BINDING ORDERS. Map by PRINTED PAGE, never by image index.
+
+    Ohio State (Google), Chabad (HebrewBooks), and NLI's own copy (accession
+    stamp `26 AUG 1927`, pencil shelfmark 492.439.27) - three distinct physical
+    books, which strengthens the Lesson 24 escape further.
+
+    **Bacher's roman-numbered editor's introduction is bound at the FRONT in the
+    Google copy and at the BACK in the NLI copy** - NLI image #640 is page XXXII
+    and #650 is page XLII, after the body ends near #600 (page 590). Ordinary for
+    a Mekize Nirdamim volume issued in fascicles and bound to the owner's taste,
+    and it is why the front-matter offsets differ so wildly (48 vs 10). Verified
+    at printed pages 2, 3, 72 and 590 in NLI against 12, 72 and 252 in Google.
+
+    This is START_HERE's transposed-leaf problem at VOLUME scale. Every
+    page-indexed cache must record which scan it was built from, and nothing may
+    map between copies by image index.
+
+    **Still open: which scan is primary for OCR.** Google Books has 3x the pixels
+    but has been thresholded toward ink; NLI has the true letterforms at a third
+    the resolution. DocAI scored 99.0% on Yad Malachi's comparable bitonal square
+    scan, so the bitonal path is not disqualified - but this is now a measurable
+    question and `tools/compare_ocr_engines.py` is the tool for it. Do not pick on
+    the pixel count. `book.json`'s `scan_source` still names the Google copy and
+    must be revisited once the primary is chosen, because it ships in the TEI
+    sourceDesc.
+
+    ### THE ENGINE COMPARISON ACROSS ALL THREE SCANS. TWO ENGINES DISAGREE ABOUT
+    NLI, AND THAT DISAGREEMENT IS THE RESULT.
+
+    Reviewer directive, 2026-09-09: "run the engine comparison across all three
+    scans." `tools/compare_ocr_engines.py` could not be used as-is - its primary
+    signal is word accuracy against `part*.json` and **this book has no corpus
+    yet**, so there is nothing to score against. Built reference-free instead, on
+    the SAME six printed body pages (71-76) pulled from each scan by its own
+    verified offset. Artifact:
+    `~/work/hashorashim/ocr_engine_comparison_three_scans.json`.
+
+    Metrics, none of which need a reference: **unique-type rate** (types this
+    scan produced that neither other scan did - idiosyncratic readings, lower is
+    better), **lexicon hit rate** (against `lexicon.txt`, comparative only - it
+    is Yad Malachi rabbinic vocabulary and this book is biblical lexicography),
+    and **cross-scan agreement** of one engine reading all three.
+
+    ### DocAI - the production engine, 99.0% on Yad Malachi square type
+
+                 tokens   types   uniq rate   lex hit
+        GB         2966    2041       2.5%      66.7%
+        HB         2982    2076       8.2%      65.7%
+        NLI        2972    2018       2.7%      67.5%   <- highest lexicon hit
+
+        cross-scan agreement:  GB vs NLI 94.7%   GB vs HB 90.8%   HB vs NLI 90.0%
+
+    **NLI reads as well as Google Books despite having a third of the pixels**,
+    and slightly better on lexicon hit. GB and NLI agree with each other at
+    94.7%, the highest pairwise figure in the experiment; HB is the outlier on
+    every pairing and has 3x the idiosyncratic-reading rate of either.
+
+    ### Tesseract 5.5.3 - and it says the opposite about NLI
+
+                 uniq rate   lex hit
+        GB           11.1%     64.6%
+        HB           20.4%     60.3%
+        NLI          24.5%     60.0%
+
+    Two confounds were tested and BOTH are dead:
+
+    * **Resolution.** GB downsampled to NLI's height stays good (12.7% / 64.1%);
+      NLI upsampled to GB's height stays bad (24.6% / 61.1%). Not a pixel-count
+      effect.
+    * **Internal binarisation.** Tesseract thresholds colour input itself, so NLI
+      was pre-binarised two ways. Both made it WORSE: Otsu 54.1% / 48.6%,
+      Sauvola 28.4% / 57.1%, against 24.5% / 60.0% native.
+
+    So Tesseract genuinely reads the continuous-tone scan poorly, and DocAI
+    genuinely does not. **Had this been run with one engine it would have
+    produced a confident and wrong conclusion** - Tesseract alone says NLI is a
+    markedly inferior scan; DocAI says it is the equal of Google Books. Lesson 9
+    (TWO SIGNALS OR NONE) and Lesson 23 (AN ENGINE, NOT A SAMPLE) earning their
+    place on the first real question this book asked.
+
+    **A cross-engine agreement figure per scan was computed (GB 86.7%, HB 74.2%,
+    NLI 72.6%) and should NOT be read as scan quality.** It is confounded by
+    exactly the above: Tesseract is poor on NLI, so DocAI-vs-Tesseract on NLI
+    measures Tesseract. Recorded in the artifact with that caveat attached.
+
+    ### What this settles, and what it does not
+
+    * **Primary for OCR: Google Books.** It wins or ties on every metric under
+      both engines, and its 3x resolution is a real advantage for the crop-based
+      vision adjudicator, which shows a bbox crop to a VLM.
+    * **NLI is not a fallback, it is a full second witness AND the tone arbiter.**
+      The prediction that 5.8 MP would cost it accuracy is refuted for DocAI.
+    * **HebrewBooks is the weakest OCR input of the three** - 8.2% unique-type
+      rate against 2.5/2.7, lowest agreement with both others. Its value is as a
+      third exemplar for the merge/break arbitration, not as an OCR source.
+    * **NOT settled: absolute accuracy.** Every number here is comparative. No
+      word-accuracy figure exists or can exist for this book until there is a
+      reference text, and the lexicon hit rates are depressed for all three
+      because the lexicon is the wrong book's. Do not quote 66.7% as an accuracy.
+
+    Cost: 18 DocAI pages. Nothing was written into `docai_word_boxes/` - that is
+    Yad Malachi's page-indexed cache and writing this book's pages into it would
+    have been a real contamination bug; the dumps live in the session scratchpad
+    and the summary in the corpus root.
+
+    ### Landed this turn
+
+    * `~/work/hashorashim/` is a corpus root: `book.json` (every field declared;
+      `parts: []` and `version_source: ""` are deliberate empty DECLARATIONS,
+      valid under the new rule) and a `README.md` carrying the measurements
+      above. No corpus files yet.
+    * `version_source` is
+      <https://www.google.com/books/edition/_/m58-AQAAMAAJ>, supplied by the
+      reviewer. **I had rejected that id as the Harvard copy and was wrong to.**
+      That came from a small-model summary of the Google about page naming an
+      identifier `HARVARD32044019925452`; the PDF ITSELF carries an Ohio State
+      University book-depository plate at 0-idx 1, which is primary evidence
+      about this file and outranks a secondhand read of a web page. I let the
+      summary override the artifact. The Harvard string is still unexplained -
+      Google about pages list related copies - so if provenance ever matters for
+      redistribution, check it in a browser rather than by text fetch, exactly as
+      START_HERE records for the Yad Malachi edition.
+    * The `corpus_io.py` fix above is applied, with per-FIELD strictness rather
+      than all-or-nothing: `cio.WORK_TITLE` needs `title` declared and nothing
+      else, while `book_identity()` requires the whole dict its consumers use.
+      543 tests pass; the review server was restarted (corpus_io is one of the
+      six modules it imports) and `/api/corpus` still answers Yad Malachi.
+
 0EB. **[2026-09-09, reviewer] THE TESSERACT WITNESS LAYER: 419 ADJUDICATIONS,
     2 TIMES THE REVIEWER PICKED TESSERACT, 0 CORPUS CHANGES. THE REVIEWER
     CALLED IT AND THE LEDGER AGREES.**
