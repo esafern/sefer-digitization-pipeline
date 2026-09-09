@@ -9319,3 +9319,42 @@ def test_a_reindex_refuses_to_move_a_ruling_onto_an_APPLIED_one(apply_harness, d
         f"invisible to every consumer of all_current()")
     assert rd.all_current("manual_correction").get((1, 3))["chosen_text"] == "MOVER", (
         "and the mover must be left where it is and reported")
+
+
+def test_a_declined_insertion_settles_without_facing_the_drift_gate(apply_harness, decisions_path):
+    """ITEM 0DX. `chosen_text: ""` on a `delete` opcode means "do not insert
+    here". It writes NOTHING, so there is no position to verify and nothing for
+    drift to invalidate - but the drift gate ran first, and a delete-opcode
+    snapshot carries no `final_text`, which snapshot_still_matches_corpus()
+    explicitly refuses ("names no such span - there is nothing in the corpus to
+    check it against").
+
+    So a ruling that needed no write could never reach the branch written to
+    handle it, and sat in the drift worklist asking a human to re-adjudicate a
+    decision they had already made. Measured: klal 4 w35 and klal 106 w46, both
+    stuck since 2026-08-11; klal 106 w46 doubly, its index being the append
+    position and out of range for any corpus check that could pass.
+
+    Driven with NO live queue entry, which is the state that made it unreachable.
+    """
+    apply_harness([{"klal_id": 1, "clean_text": "אלף בית גימל"}], {"1": []})
+    rd.append_decision("disputed_choice", klal_id=1, word_index=99,
+                       chosen_source="custom", chosen_text="",
+                       candidate_snapshot={"word_index": 99, "opcode": "delete",
+                                           "docai_reading": "זרא", "final_text": None},
+                       path=decisions_path)
+    before = json.load(open(ard.PART1_PATH, encoding="utf-8"))[0]["clean_text"]
+    out = apply_harness.run()
+
+    assert out[1] == before == "אלף בית גימל", (
+        "a declined insertion must write nothing to the corpus")
+    events = rd.history_for(1, 99, "apply_event", path=decisions_path)
+    assert len(events) == 1, (
+        "the declined insertion was not settled - it is still pending, and with a "
+        "word_index past the end of the klal no drift check can ever pass, so it "
+        "would sit in the worklist forever")
+    # Same wording the pre-0DX branch used, deliberately: the note is what
+    # test_declining_a_proposed_insertion_is_a_no_op_not_a_drift_refusal reads,
+    # and two spellings of one outcome is how a reader starts believing there
+    # are two outcomes.
+    assert "declined" in (events[0].get("note") or "")

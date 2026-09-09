@@ -101,6 +101,96 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0DX. **[2026-09-09] A DECLINED INSERTION NOW SETTLES BEFORE THE DRIFT GATE - TWO
+    RULINGS UNSTUCK SINCE 2026-08-11. THE STRANDED-PANEL WIDENING WAS ATTEMPTED
+    THREE TIMES, REGRESSED EVERY TIME, AND IS REVERTED AND HANDED BACK.**
+
+    ### Fixed: a ruling that needs no write could never reach the branch for it
+
+    `chosen_text: ""` on a `delete` opcode means "do not insert here". It writes
+    NOTHING, so there is no position to verify and nothing drift can invalidate.
+    But the drift gate ran first:
+
+        if not snapshot_matches(snapshot, live_entry, ignore_index=by_id):
+            if live_entry is not None or not snapshot_still_matches_corpus(
+                    snapshot, klal, at=word_index):
+                skipped_drift.append((klal_id, word_index))
+                continue
+        ...
+        rejected_insertion = (opcode == "delete"
+                              and not (decision["chosen_text"] or "").strip())
+
+    and `snapshot_still_matches_corpus()` refuses a delete-opcode snapshot in its
+    own docstring - "names no such span - there is nothing in the corpus to check
+    it against". So the rejection branch was unreachable for exactly the rulings
+    it was written for. **klal 4 w35 and klal 106 w46, both stuck since
+    2026-08-11**; klal 106 w46 doubly, that klal having exactly 46 words so w46
+    is the append position and out of range for any corpus check that could pass.
+
+    Declined insertions are now settled ABOVE the gate. An ACCEPTED insertion
+    still faces it in full, because that one writes. Drift worklist 16 -> 14, and
+    the later branch's `rejected_insertion` is removed as dead code with the
+    reason recorded rather than silently dropped - its note wording was carried
+    forward so the two spellings of one outcome do not diverge.
+
+    ### NOT fixed: the stranded panel still shows only `manual_correction`
+
+    `api_klal`'s stranded loop iterates `all_current_live("manual_correction")`
+    alone, so a `disputed_choice` or `candidate_choice` that lost its queue entry
+    is reachable by NO route: not the text pane, not the queue, not the panel -
+    only the drift worklist, which cannot clear anything. Measured: **3 rulings**
+    (klal 4 w35, 106 w46, 211 w73 - all `delete`-opcode). Two of the three are
+    now settled by the fix above, so the live extent is **1**: klal 211 w73.
+
+    **Three attempts, three regressions, so it is reverted under Lesson 31.**
+
+      1. Widened the loop's input to both ruling types. That loop has TWO jobs -
+         collect stranded rulings AND build `manual_word_indices`, which marks a
+         word human-decided - so it widened both, and 6 words began rendering as
+         `manual` with no box on the scan.
+      2. Narrowed `manual_word_indices.add()` to `manual_correction`. Did not
+         help; klal 17 w242 still gained a queue entry it never had, and I could
+         not explain why from reading.
+      3. Left the original loop untouched and added a separate pass. That worked
+         for the three target klalim and left klal 17 alone - and broke four
+         other tests, including `test_word_level_ai_flag_yields_to_a_manual_
+         correction_on_the_same_word`.
+
+    Each attempt was built on a mechanism I had not established, which is what
+    Lesson 31 is about: "further attempts are guesses wearing fixes' clothes, and
+    the correct move is to document the issue with its measured extent and hand
+    it to the user". The measured extent is above. `api_klal` merges four sources
+    through `claim_word_index()` under a last-write-wins map, and anything added
+    to that merge has to be reasoned about against all four - which is the work
+    this needs and did not get.
+
+    ### Corrections to two counts I reported before measuring properly
+
+    I told the reviewer "25 pending" and "10 reachable by no route". Both came
+    from `rd.all_current`, which returns superseded rows; `rd.all_current_live`
+    exists for exactly this and says so ("A DISPLAY must not show a superseded
+    ruling"). The real numbers: **16 pending** (now 14), and **3** with no route
+    (now 1). Seven of the "10" were superseded rows that are not pending at all,
+    and five of the rest DO reach the reviewer through the panel. Lesson 33
+    (STATE, NOT PRINTOUT) for the second time in two days - the wrong accessor
+    reporting on itself.
+
+    ### Why the other pending rulings are stuck, since it was asked
+
+    Of the 9 the reindexer cannot move, two causes:
+
+      * **3 name no word** (`opcode: delete`) - an insertion is addressed by the
+        index it goes BEFORE, so its snapshot carries `final_text: null` by
+        construction. This is `0DT`, and it turns out to bite in two places: the
+        reindexer AND the drift gate.
+      * **6 have `candidate_snapshot: null`** - no snapshot at all. klal 159 w10,
+        161 w289, 174 w116, 200 w145, 206 w2, 216 w123, every one a dropped-alef
+        ligature repair recorded from the worklist on 2026-09-04. With no
+        snapshot there is nothing to drift-check and nothing to verify a move
+        against, so they are permanently drifted by construction. No code fix
+        reaches these: they need re-ruling in the dashboard, where they ARE
+        reachable through the queue.
+
 0DW. **[2026-09-09] TECH-DEBT SWEEP OF THE WHOLE PROJECT, AND THE 49 LESSONS
     REWORKED: EVERY LESSON NOW HAS A NAME, AN ORDER BY MEASURED BITE, AND A
     FAMILY MAP. PLUS LESSON 0.**

@@ -1,24 +1,24 @@
 # The open dispute queue, ordered by posterior
 
-372 open dispute(s), scored by `tools/rank_dispute_queue.py`. **Regenerate after any apply** - the queue and the calibration both move.
+366 open dispute(s), scored by `tools/rank_dispute_queue.py`. **Regenerate after any apply** - the queue and the calibration both move.
 
 `posterior` is P(a reviewer adopts the consensus reading), estimated from the stratum this dispute falls in, under a Beta(1,1) posterior so a thin stratum cannot read as a certainty. The interval is 90% credible. **This orders attention; it decides nothing** - every row still needs the ink.
 
-Calibrated on **256 ledger rulings** that recorded a consensus reading; 188 of them adopted it, a base rate of 73%. That base rate is the FALLBACK only - the strata below differ from it by more than 60 points, which is the whole reason this file exists.
+Calibrated on **262 ledger rulings** that recorded a consensus reading; 192 of them adopted it, a base rate of 73%. That base rate is the FALLBACK only - the strata below differ from it by more than 60 points, which is the whole reason this file exists.
 
 ## What each stratum is worth
 
 | engines agreeing | n | adopted | posterior | 90% CI |
 |---|---:|---:|---:|---|
-| `dicta,surya,vlm` | 39 | 39 | 98% | 93%–100% |
+| `dicta,surya,vlm` | 43 | 43 | 98% | 93%–100% |
 | `dicta,vlm` | 40 | 34 | 83% | 73%–92% |
-| `dicta,surya` | 33 | 27 | 80% | 68%–90% |
+| `dicta,surya` | 34 | 27 | 78% | 66%–88% |
 | `surya,vlm` | 109 | 82 | 75% | 68%–81% |
 | `dicta,docai,surya,vlm` | 1 | 1 | 67% | 22%–97% ⚠ thin (n<8); ranking falls back to the engine count |
 | `dicta,docai,vlm` | 1 | 1 | 67% | 22%–97% ⚠ thin (n<8); ranking falls back to the engine count |
 | `docai,surya,vlm` | 10 | 2 | 25% | 8%–47% |
 | `docai,vlm` | 8 | 1 | 20% | 4%–43% |
-| `docai,surya` | 15 | 1 | 12% | 2%–26% |
+| `docai,surya` | 16 | 1 | 11% | 2%–25% |
 
 **Every set containing DocAI scores low and that is mostly SELECTION.** Candidates are generated from DocAI's disagreements with the corpus, so a DocAI-involved consensus is disproportionately re-proposing a word that vision adjudication or a human has already settled. Read it as "this position has probably been looked at already", not as "DocAI is unreliable".
 
@@ -26,20 +26,16 @@ Calibrated on **256 ledger rulings** that recorded a consensus reading; 188 of t
 
 | posterior | disputes |
 |---|---:|
-| >=0.75 | 289 |
+| >=0.75 | 284 |
 | >=0.50 | 45 |
 | >=0.25 | 2 |
-| <0.25 | 36 |
+| <0.25 | 35 |
 
 ## The top 40
 
 Highest posterior first - the disputes most likely to be genuine corpus errors, and so the cheapest place for a reviewer to start.
 
 - **98%** [klal 12 · w271](http://127.0.0.1:8420/klal/12/word/271) — corpus `לייה` → consensus `ל"ה` (dicta, surya, vlm); cross-edition (**2** Berlin engine(s) dissent)
-- **98%** [klal 17 · w51](http://127.0.0.1:8420/klal/17/word/51) — corpus `דב"ט` → consensus `דב"מ` (dicta, surya, vlm); cross-edition (**2** Berlin engine(s) dissent)
-- **98%** [klal 17 · w79](http://127.0.0.1:8420/klal/17/word/79) — corpus `וצייד` → consensus `וצ"ד` (dicta, surya, vlm); cross-edition (**2** Berlin engine(s) dissent)
-- **98%** [klal 18 · w58](http://127.0.0.1:8420/klal/18/word/58) — corpus `דאיתמרן` → consensus `דאיתמרו` (dicta, surya, vlm); cross-edition (**2** Berlin engine(s) dissent)
-- **98%** [klal 19 · w34](http://127.0.0.1:8420/klal/19/word/34) — corpus `הר"יש` → consensus `הר"ש` (dicta, surya, vlm); cross-edition (**2** Berlin engine(s) dissent)
 - **98%** [klal 23 · w653](http://127.0.0.1:8420/klal/23/word/653) — corpus `ואיהן` → consensus `ואיהו` (dicta, surya, vlm); cross-edition (**2** Berlin engine(s) dissent)
 - **98%** [klal 23 · w710](http://127.0.0.1:8420/klal/23/word/710) — corpus `ע"ר` → consensus `ע"ד` (dicta, surya, vlm); cross-edition (**2** Berlin engine(s) dissent)
 - **98%** [klal 25 · w20](http://127.0.0.1:8420/klal/25/word/20) — corpus `אשנח` → consensus `אשגח` (dicta, surya, vlm); cross-edition (**2** Berlin engine(s) dissent)
@@ -75,6 +71,10 @@ Highest posterior first - the disputes most likely to be genuine corpus errors, 
 - **98%** [klal 74 · w879](http://127.0.0.1:8420/klal/74/word/879) — corpus `ל"ר` → consensus `ל"ד` (dicta, surya, vlm); cross-edition (**2** Berlin engine(s) dissent)
 - **98%** [klal 75 · w5](http://127.0.0.1:8420/klal/75/word/5) — corpus `ר"ס` → consensus `ר"פ` (dicta, surya, vlm); cross-edition (**2** Berlin engine(s) dissent)
 - **98%** [klal 75 · w156](http://127.0.0.1:8420/klal/75/word/156) — corpus `משים` → consensus `משום` (dicta, surya, vlm); cross-edition (**2** Berlin engine(s) dissent)
+- **98%** [klal 75 · w203](http://127.0.0.1:8420/klal/75/word/203) — corpus `ר"ס` → consensus `ר"מ` (dicta, surya, vlm); cross-edition (**2** Berlin engine(s) dissent)
+- **98%** [klal 75 · w222](http://127.0.0.1:8420/klal/75/word/222) — corpus `בס'` → consensus `בפ'` (dicta, surya, vlm); cross-edition (**2** Berlin engine(s) dissent)
+- **98%** [klal 75 · w853](http://127.0.0.1:8420/klal/75/word/853) — corpus `משכו` → consensus `משמו` (dicta, surya, vlm); cross-edition (**2** Berlin engine(s) dissent)
+- **98%** [klal 75 · w1058](http://127.0.0.1:8420/klal/75/word/1058) — corpus `נהמן` → consensus `נחמן` (dicta, surya, vlm); cross-edition (**2** Berlin engine(s) dissent)
 
 ## Limits
 

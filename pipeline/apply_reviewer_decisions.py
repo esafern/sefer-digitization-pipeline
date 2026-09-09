@@ -887,6 +887,39 @@ def main():
         # A live entry that is simply absent falls back to the corpus itself -
         # see snapshot_still_matches_corpus() for why the queue legitimately
         # loses the entry the moment the decision is recorded.
+        # A DECLINED INSERTION IS SETTLED BEFORE THE DRIFT GATE, and this ordering
+        # is the fix - item 0DX, 2026-09-09.
+        #
+        # `chosen_text: ""` on a `delete` opcode means "do not insert here". It
+        # writes NOTHING to the corpus, so there is no position to verify and
+        # nothing drift can invalidate. But the gate below runs first, and a
+        # delete-opcode snapshot carries no `final_text` - which
+        # snapshot_still_matches_corpus() explicitly refuses ("names no such span
+        # - there is nothing in the corpus to check it against"). So a ruling that
+        # needs no write could never reach the branch written to handle it, and
+        # sat in the drift worklist asking a human to re-adjudicate a decision
+        # they had already made and that required no action.
+        #
+        # Measured when found: klal 4 w35 and klal 106 w46, both `chosen_text ""`,
+        # both stuck since 2026-08-11. klal 106 w46 doubly so - that klal has
+        # exactly 46 words, so w46 is the append position and out of range for any
+        # corpus check that could ever pass.
+        #
+        # ONLY the declined case moves. An ACCEPTED insertion still faces the full
+        # gate below, because that one does write to the corpus.
+        _snap = snapshot or {}
+        if (_snap.get("opcode") == "delete"
+                and not (decision["chosen_text"] or "").strip()):
+            n_noop += 1
+            applied.append((klal_id, word_index, "confirmed-no-op"))
+            if not args.dry_run:
+                rd.append_decision("apply_event", klal_id=klal_id, word_index=word_index,
+                                   applied_decision_id=decision["id"],
+                                   note="declined the proposed insertion, no change made "
+                                        "(settled before the drift gate: it names no span for "
+                                        "drift to invalidate - item 0DX)")
+            continue
+
         by_id = (_how == "word_id")
         if not snapshot_matches(snapshot, live_entry, ignore_index=by_id):
             if live_entry is not None or not snapshot_still_matches_corpus(
@@ -914,10 +947,13 @@ def main():
         # ("keep the current text", which for this opcode means "do not insert")
         # or `custom` with an empty string. The 6 delete-opcode rulings that DID
         # accept an insertion all carry the word to insert, and 4 are applied.
-        rejected_insertion = (opcode == "delete"
-                              and not (decision["chosen_text"] or "").strip())
-        if rejected_insertion or (
-                opcode in ("replace", "insert")
+        # NO `rejected_insertion` HERE ANY MORE. It used to share this branch, and
+        # since 0DX a declined insertion is settled ABOVE the drift gate - so the
+        # test here could only ever be False by the time control reaches it. Left
+        # as a comment rather than silently dropped, because the condition it
+        # encoded is still true and still documented above: for a `delete` opcode,
+        # an empty chosen_text means "do not insert".
+        if (opcode in ("replace", "insert")
                 and decision["chosen_text"] == snapshot.get("final_text")):
             # Reviewer confirmed the currently-stored text is correct - for
             # 'replace' that means "don't change this word"; for 'insert' it
@@ -933,9 +969,7 @@ def main():
             if not args.dry_run:
                 rd.append_decision("apply_event", klal_id=klal_id, word_index=word_index,
                                     applied_decision_id=decision["id"],
-                                    note=("declined the proposed insertion, no change made"
-                                          if rejected_insertion else
-                                          "confirmed current text, no change made"))
+                                    note="confirmed current text, no change made")
             continue
 
         if opcode == "replace":
