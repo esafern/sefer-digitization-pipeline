@@ -101,6 +101,38 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0EW. **[2026-09-10] WHOLE-BOOK HEADING DETECTION MEASURED AGAINST AN
+    INDEPENDENT SOURCE: 94.2% RECALL, AND THE MISSES ARE SCATTERED.**
+
+    `tools/detect_root_entries.py` over all 651 pages of the recovered text layer,
+    against Sefaria's 22 files:
+
+        ours (PDF text layer)   1,871 distinct roots
+        theirs                  1,974
+        in both                 1,860   = 94.2% of theirs
+        only theirs               114
+        only ours                  11
+
+    **The misses are spread, not clustered** - צ 12, ר 12, י 11, ש 10, מ 9, נ 8
+    and a long tail. That matters: the earlier `רש` bug (item `0EJ`) took out an
+    entire 30-page מאמר and showed up as one letter at zero, which the
+    alphabetical-order check could not see. A flat distribution across 20 letters
+    is the signature of individual headings garbled by OCR, not of a rule that is
+    wrong.
+
+    The 11 we have and they do not are the more interesting direction and have
+    not been looked at - each is either a real entry their transcription missed or
+    a false positive of ours, and both are worth knowing.
+
+    **The obvious next step, not done:** the recovery mechanism built in `0EO`
+    already takes a boundary from one source when the other garbles it. Pointing
+    it at Sefaria's root list instead of the text layer would recover most of the
+    114 the same way, since their list is independent of both our OCR sources.
+    That would put whole-book heading recall close to 100% before any human looks
+    at it - but it makes the corpus structurally dependent on their data, which is
+    a decision about the collaboration rather than a technical one, and it should
+    be made with the reviewer awake.
+
 0EV. **[2026-09-10] THE REMAINING GAP FOR THE DEMO: THE DASHBOARD CANNOT SHOW
     THE ONLY QUEUE WORTH SHOWING. NOT STARTED, DELIBERATELY.**
 
