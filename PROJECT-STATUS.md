@@ -101,6 +101,109 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0DW. **[2026-09-09] TECH-DEBT SWEEP OF THE WHOLE PROJECT, AND THE 49 LESSONS
+    REWORKED: EVERY LESSON NOW HAS A NAME, AN ORDER BY MEASURED BITE, AND A
+    FAMILY MAP. PLUS LESSON 0.**
+
+    Reviewer: "find tech debt across the whole project... review all 49 lessons.
+    surely some are duplicate. order by frequency of bite. reword as needed.
+    reference across lessons." Then: "give each lesson a short descriptive name.
+    useless to say lesson 5 bit me again." Then: Lesson 0.
+
+    ### The debt sweep - most axes came back CLEAN, which is the finding
+
+    52,947 lines across 109 files. Run: orphan functions, functions referenced
+    only by tests, modules nothing imports and nothing runs, one-off scripts
+    named in no doc/test/chain, record fields written and never read, duplicated
+    function bodies, TODO/FIXME markers, unreferenced root data files.
+
+    | axis | result |
+    |---|---|
+    | orphaned functions | **0** |
+    | referenced only by `tests/` | **0** |
+    | TODO / FIXME / XXX / HACK | **0** |
+    | duplicated function bodies across files | 2, both already filed (`0DD`, `0N`) |
+    | record fields written and never read | 1: `ci_low`/`ci_high` per dispute in `dispute_queue_ranked.json` |
+    | modules nothing imports and nothing runs | 1: `pipeline/second_witness_eval/__init__.py` |
+    | scripts in no doc, no test, no chain | 3: `test_kraken_local.py`, `test_kraken_square_script.py`, `test_trocr_benchmark.py` |
+    | root data files nothing reads | 6 |
+
+    **The three dead engine scripts are the only real code debt.** kraken and
+    trocr were evaluated and not adopted; neither is in `requirements.txt`
+    (though both are installed in this venv, which is its own small lie). The
+    repo's own rule is that git is the archive - "a one-time script is not lost
+    when it is deleted" - so these are exactly what that rule is for. NOT
+    deleted here: three docs still discuss the engines, and removing the scripts
+    without checking what those docs promise is how a reference goes stale.
+
+    ### THE DOCUMENTED TEST COUNTS WERE WRONG FOR THE FOURTH TIME
+
+    `START_HERE.md` said 56/388/444 gated and "562 in total". Measured
+    2026-09-09: **62/464/526 gated, 650 total.** The three previous values were
+    also wrong when quoted. All four sat in a paragraph whose own last sentence
+    read "Re-measure before citing; do not quote this line."
+
+    **The numbers are removed rather than corrected.** A number nobody can keep
+    true does not belong in prose; the paragraph now names the command
+    (`pytest tests/ --collect-only -q`) and points at Lesson 37, which is the
+    only count that means anything. Correcting them a fifth time would have been
+    the same defect with a fresh date on it.
+
+    ### The lessons: no duplicates, but nine FAMILIES
+
+    Reviewed all 49 for duplication. **There is none.** What reads as repetition
+    is one failure shape at different LEVELS, and the level is the useful part -
+    e.g. BUILT AND DELIVERS NOTHING runs 1 (never run) -> 32 (runs, writes
+    nowhere) -> 29 (written, never displayed) -> 47 (complete, tested, no
+    caller), in ascending order of how finished the thing looks. Nine such
+    families are now mapped at the top of the section.
+
+    Three entries were NOT rules at all and are rewritten as rules: 20, 21 and
+    22 were implementation notes in a different register (22 still carried LaTeX
+    from wherever it was imported from, and described an architecture item `0N`
+    says nothing on the rebuild path uses - it is now kept explicitly as a
+    standing example of Lesson 47).
+
+    ### Named, and ordered by MEASURED bite
+
+    Every lesson has a short name, because "Lesson 5 bit me again" carries
+    nothing and *FUZZY IS NOT A POSITION* carries the whole finding.
+
+    **The numbers stay as stable ids and nothing was renumbered: 723 citations
+    of "Lesson N" exist** (334 in code, 389 in the status files). Renumbering to
+    put the sharpest first would have broken every one - which is Lesson 48
+    (RENAME BY TOKEN, NOT REGEX) applied to this document: the names are the
+    derived, renameable half, the numbers are the append-only log. So the
+    ordering is an INDEX, not a reordering.
+
+    Ranked by citations per day since introduction, not raw count - a raw count
+    ranks by age. Top five: **34 SWEEP THE SIBLINGS** (4.1/day), **13 THE SECOND
+    COPY OF THE TRUTH** (3.6), **25 A SIGNAL THAT CANNOT DISAGREE** (3.1), **46
+    ANNOTATE, DO NOT SUPERSEDE** (3.0), **9 TWO SIGNALS OR NONE** (2.6). The
+    index says in its own header that a low rate is not permission to skip one:
+    45 PIXELS, NOT THE DOM has never been cited and was used twice on the day it
+    was measured.
+
+    ### Lesson 0
+
+    Reviewer's own words: "Don't Forget My Lessons. If you are bitten by one of
+    these - acknowledge it in detail with code - then write ten times I Will Not
+    (do x)."
+
+    Being bitten by a rule already written down is a different failure from
+    finding a new one, and it now gets a different response: name the lesson,
+    paste the code that did it, state what the lesson said that you did anyway -
+    then ten literal lines of `I will not <the specific thing>`.
+
+    Its justification is measured on this session and counted rather than
+    remembered: **42 THE MUTATION THAT DID NOT FAIL bit five times across three
+    tests** (one test went blind in three successive shapes), **13** once (the
+    same `--acknowledge` block written three times, two already diverged), **19**
+    once (asserting klal 144's findings were false positives, contradicted by an
+    item in the same file), **33** once (a measurement that read my model of a
+    report instead of its fields). All four were read at the start of that
+    session and several were cited by me inside it.
+
 0DV. **[2026-09-09, reviewer directive] THE LEXICAL DETECTORS ARE DOCUMENTED AS
     WEAK AND GATED ON VISION, AND THEIR 126 ADJUDICATED POSITIONS ARE CLEARED.
     UNSURFACED LEXICAL FINDINGS: 126 -> 0.**

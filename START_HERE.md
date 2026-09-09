@@ -357,22 +357,22 @@ For exactly what each data file contains, see `PIPELINE-DATA-REFERENCE.md`.
     `archive/scripts/extend_docai_ocr.py`), `fix_transposed_leaf.py` (the
     leaf-order fix, see the scan section above), `verify_local_setup.py`
     (proves a fresh migration actually landed — see `SETUP.md`).
-- **`tests/`** — the pytest suite. Counts re-measured 2026-09-06 by collecting
-  each file, not by grepping `def test_` — see Lesson 37 for why those two
-  numbers are not the same thing. `rebuild_all.sh`'s step 6/6 runs
-  `test_corpus_invariants.py` (56 tests — checks the DATA a pipeline run
-  produced) and `test_pipeline_logic.py` (388 tests — checks the pure decision
-  LOGIC on synthetic inputs) as a hard gate, **444** together.
-  `test_review_server.py` (99 Playwright tests, live server),
-  `test_fixture_corpus.py` (14) and `test_witness_engine.py` (5) stay outside
-  the gate, run manually. **562 in total.** Declared equals collected in all
-  five files, checked the same day.
-  **These numbers go stale fast — three separate measurements have now been
-  overtaken between sessions (46/274/320 on 2026-08-31, 50/319/369 and "459 in
-  total" on 2026-09-03, both quoted here as current long after they were not).
-  Re-measure before citing; do not quote this line.** One of the gated
-  invariants, `test_no_test_file_defines_the_same_test_name_twice`, exists to
-  keep the declared and collected counts equal — see Lesson 37.
+- **`tests/`** — the pytest suite. `rebuild_all.sh`'s step 6/6 runs
+  `test_corpus_invariants.py` (the DATA a pipeline run produced) and
+  `test_pipeline_logic.py` (the pure decision LOGIC on synthetic inputs) as a
+  hard gate. `test_review_server.py` (Playwright, live server),
+  `test_fixture_corpus.py` and `test_witness_engine.py` stay outside the gate
+  and are run manually.
+  **THE COUNTS ARE NOT WRITTEN HERE ANY MORE, on purpose.** They were, and they
+  were stale every single time: 46/274/320 (2026-08-31), 50/319/369
+  (2026-09-03), 56/388/444 and "562 in total" (2026-09-06) — the last of those
+  measured 62/464/526 and 650 when it was checked on 2026-09-09. Four wrong
+  numbers in a paragraph whose own last sentence told the reader not to quote
+  it. A number nobody can keep true does not belong in prose; get it from the
+  runner, `pytest tests/ --collect-only -q | tail -1`, or per file, which is the
+  count Lesson 37 (DEFINED IS NOT COLLECTED) says to cite and the only one that
+  means anything. `test_no_test_file_defines_the_same_test_name_twice` is the
+  gated invariant that keeps declared and collected equal.
 - Data files, caches, `rebuild_all.sh`, `review_frontend/`, and every
   `.md`/`.html` doc live at root.
 - **This repo has no `archive/` directory, and does not need one: git is the
@@ -898,75 +898,224 @@ them, see `PROJECT-STATUS.md` / `PROJECT-STATUS-HISTORY.md`. Do not delete
 a lesson because its incident got fixed — the rule still applies to the
 next incident.
 
-1. **A verification tool that exists but isn't run on everything it
+**EACH LESSON HAS A NAME, AND THE NAME IS WHAT YOU CITE.** Added 2026-09-09,
+reviewer: "useless to say lesson 5 bit me again". Say *FUZZY IS NOT A POSITION*
+and the next reader knows what happened without opening this file. The NUMBER
+stays as the stable id — **723 citations of "Lesson N" exist** (334 in code, 389
+in the status files), so the numbering is an append-only namespace and
+renumbering it would break every one. That is Lesson 48 (RENAME BY TOKEN, NOT
+REGEX) applied to this document itself: the names are the derived, renameable
+half; the numbers are the log.
+
+### Ordered by how often each has actually bitten
+
+Measured 2026-09-09, not guessed: citations across the status files and the code,
+divided by days since the lesson was introduced (a raw count would rank a lesson
+by its age). **A low rate is not permission to skip one** — 45 (PIXELS, NOT THE
+DOM) has never been cited and was used twice on the day it was measured.
+
+| rate | # | name |
+|---:|---:|---|
+| — | **0** | **DON'T FORGET MY LESSONS** (the meta-rule: what to do when one of the others bites) |
+| 4.1 | 34 | SWEEP THE SIBLINGS |
+| 3.6 | 13 | THE SECOND COPY OF THE TRUTH |
+| 3.1 | 25 | A SIGNAL THAT CANNOT DISAGREE |
+| 3.0 | 46 | ANNOTATE, DO NOT SUPERSEDE |
+| 2.6 | 9 | TWO SIGNALS OR NONE |
+| 2.4 | 42 | THE MUTATION THAT DID NOT FAIL |
+| 2.1 | 32 | PRINTING IS NOT RUNNING |
+| 2.1 | 29 | THE FIELD NOBODY RENDERS |
+| 2.0 | 35 | APPLYING HAS SIDE EFFECTS |
+| 2.0 | 49 | FREQUENCY IS NOT THIS PAGE |
+| 1.8 | 26 | THE FILTER THAT HIDES |
+| 1.6 | 2 | A SCORE IS NOT A CHECK |
+| 1.5 | 19 | WRITTEN IS NOT APPLIED |
+| 1.5 | 47 | WIRED TO NOTHING |
+| 1.4 | 36 | THE TEST PINNED TO THE DEFECT |
+| 1.3 | 1 | THE UNRUN CHECK |
+| 1.2 | 15 | SILENCE WHERE IT CANNOT ALIGN |
+| 1.2 | 14 | RTL ORDER NEEDS AN ANCHOR |
+| 1.2 | 39 | THE VALUE CACHED AT LOAD |
+| 1.2 | 31 | RETUNED TWICE, HAND IT BACK |
+| 1.1 | 5 | FUZZY IS NOT A POSITION |
+| 1.1 | 37 | DEFINED IS NOT COLLECTED |
+| 1.1 | 12 | THE KEY MUST HOLD THE QUESTION |
+| 1.0 | 24 | SHARED INK, SHARED ERROR |
+| 1.0 | 48 | RENAME BY TOKEN, NOT REGEX |
+| 0.9 | 6 | EVERY ANCHOR HAS A BLIND SPOT |
+| 0.6 | 30 | THE WRONG PAGE LOOKS RIGHT |
+| 0.5 | 8 | CHEAP CHECKS CATCH OTHER THINGS |
+| 0.5 | 16 | THE INTERIOR IS NOT THE BOUNDARY |
+| 0.5 | 3 | NO DERIVED GROUND TRUTH |
+| 0.4 | 44 | DO NOT MUTATE A TREE YOU ARE EDITING |
+| 0.4 | 41 | THE GUARD THAT TESTS A PROXY |
+| 0.4 | 40 | THE SCAFFOLD NOBODY TOOK DOWN |
+| 0.4 | 28 | WHERE YOU LOOKED, NOT WHERE IT IS |
+| 0.3 | 4 | RAW IS NOT RIGHT EITHER |
+| 0.3 | 27 | THE SAMPLE THAT SELECTED ITSELF |
+| 0.3 | 17 | HEIGHT IS A FILTER, NOT A VERDICT |
+| 0.2 | 33 | STATE, NOT PRINTOUT |
+| 0.2 | 43 | THE PROBE THAT CANNOT SEE |
+| 0.2 | 38 | ANOTHER BOOK IS NOT A SECOND OPINION |
+| 0.2 | 23 | AN ENGINE, NOT A SAMPLE |
+| 0.2 | 18 | THE GREP THAT BEATS THE REVIEW |
+| 0.2 | 10 | THE PROMPT'S OWN BIAS |
+| 0.2 | 7 | ONE CAUSE IS NOT EVERY SYMPTOM |
+| 0.1 | 21 | FLAT COORDINATE KEYS |
+| 0.1 | 20 | EVERY PART, NOT PART ONE |
+| 0.0 | 11 | LOCALLY CLEAN, STILL BROKEN |
+| 0.0 | 22 | THE WITNESS ENGINE SEAM |
+| 0.0 | 45 | PIXELS, NOT THE DOM |
+
+### They come in families — none of these is a duplicate, and knowing which is which is the point
+
+Reviewed 2026-09-09 for genuine duplication. There is none: what looks like
+repetition is one failure shape seen at different LEVELS, and the level is what
+tells you where to look.
+
+* **Built, and delivers nothing.** 1 THE UNRUN CHECK (never run) → 32 PRINTING IS
+  NOT RUNNING (runs, writes nowhere) → 29 THE FIELD NOBODY RENDERS (written,
+  never displayed) → 47 WIRED TO NOTHING (complete, tested, no caller). Ascending
+  order of how finished the thing looks. 47 is also the only one that says how to
+  FIND the others.
+* **A check that cannot fail.** 2 A SCORE IS NOT A CHECK (a number is not a
+  verdict) → 25 A SIGNAL THAT CANNOT DISAGREE (the check is structurally
+  incapable) → 42 THE MUTATION THAT DID NOT FAIL (how to test for it) → 43 THE
+  PROBE THAT CANNOT SEE (the browser instance).
+* **Verify against the thing, not the description.** 19 WRITTEN IS NOT APPLIED
+  (prose vs the diff) → 33 STATE, NOT PRINTOUT (a summary vs the data) → 30 THE
+  WRONG PAGE LOOKS RIGHT (plausibility vs content).
+* **One instance is not the extent.** 28 WHERE YOU LOOKED, NOT WHERE IT IS (sweep
+  the corpus) → 34 SWEEP THE SIBLINGS (sweep the other branches of the same
+  function). 28's operational form is Part 2's "Never fix one instance" section.
+* **Every match has a blind spot.** 6 EVERY ANCHOR HAS A BLIND SPOT is the
+  general rule; 5 FUZZY IS NOT A POSITION and 17 HEIGHT IS A FILTER are
+  instances; 15 SILENCE WHERE IT CANNOT ALIGN is what the blind spot looks like
+  from outside — nothing.
+* **Trust no layer by default.** 3 NO DERIVED GROUND TRUTH and 4 RAW IS NOT RIGHT
+  EITHER are the same rule pointed in opposite directions; read them together or
+  you will simply move your credulity one layer down.
+* **Caching.** 12 THE KEY MUST HOLD THE QUESTION (the key is too narrow) vs 39
+  THE VALUE CACHED AT LOAD (caching at all was wrong). Different defects — 39's
+  own text says so.
+* **What independence actually costs.** 9 TWO SIGNALS OR NONE → 23 AN ENGINE, NOT
+  A SAMPLE (two runs of one model is one signal) → 24 SHARED INK, SHARED ERROR
+  (independent engines still share the page) → 38 ANOTHER BOOK IS NOT A SECOND
+  OPINION (a different source adds a failure mode rather than removing one).
+* **Silence is the hardest failure to see.** 26 THE FILTER THAT HIDES is the
+  general rule; 15, 20 and 21 are three ways to arrive at it — a filter, a
+  default that narrows scope, and a schema mismatch that returns `None`.
+* **Put it up, take it down.** 40 THE SCAFFOLD NOBODY TOOK DOWN (teardown
+  forgotten) and 41 THE GUARD THAT TESTS A PROXY (the condition was never the
+  real one) are the two halves of the same 2026-09-04 afternoon.
+
+0. **DON'T FORGET MY LESSONS — being bitten by a lesson that is already written
+    down is a different and worse failure than finding a new one, and it gets a
+    different response.** Reviewer directive, 2026-09-09.
+
+    **The response, and it is not optional:**
+
+    1. **Acknowledge it in detail, WITH THE CODE.** Not "I hit Lesson 42." Name
+       the lesson, paste the lines that did it, and state what the lesson said
+       that you did anyway. A finding about your own process is subject to the
+       same rule as any other finding here — show the thing, not a description
+       of it (Part 2's "How to surface a finding").
+    2. **Then write, ten times: `I will not <the specific thing>`.** Not "I will
+       be more careful." The specific act: *I will not ship a test I have not
+       seen fail.* *I will not fix one branch of a function without reading its
+       siblings.* Ten lines, in the reply, where the reviewer can see them.
+
+    **Why the ten times is not theatre.** The lessons in this file are read at
+    the start of every session and then violated inside it — measured, on the
+    day this was written, and counted rather than remembered: this session was
+    bitten by **42 THE MUTATION THAT DID NOT FAIL five times across three
+    tests** (one test went blind in three successive shapes), by **13 THE SECOND
+    COPY OF THE TRUTH** once (the same `--acknowledge` block written out three
+    times, two of which had already diverged), by **19 WRITTEN IS NOT APPLIED**
+    once (asserting klal 144's two findings were false positives, contradicted
+    by an item in the same file I had already read), and by **33 STATE, NOT
+    PRINTOUT** once (a measurement that counted `resolved_false_positive` rows
+    as unresolved because it read my model of the report instead of its
+    fields). Every one of those was already in this file, already read at the
+    start of that session, and several were cited BY ME earlier in it. Reading a
+    rule and obeying it are different acts. The repetition exists to make the
+    second one cost something.
+
+    **What it is not.** It is not self-flagellation and it is not an apology —
+    Part 1's own guidance says corrections should be plain and brief. It is a
+    forcing function, and its output is a line the reviewer can grep for to see
+    which rules keep failing to bind. If the same sentence appears ten times a
+    week, the lesson is not the problem: the workflow around it is, and that is
+    the finding to raise.
+
+1. **THE UNRUN CHECK — A verification tool that exists but isn't run on everything it
    applies to has not verified anything.** Running it on a sample, or only
    on items a different/narrower check already flagged, is not the same as
    running it. If full coverage is too expensive, say so explicitly and
    get a scope decision — never quietly narrow coverage and report the
    narrower result as if it were complete.
-2. **A passing score is not the same as a checked result.** A numeric
+2. **A SCORE IS NOT A CHECK — a threshold is a triage tool, not a certificate.** A numeric
    agreement/confidence threshold is a triage tool for where to look
    first, not a certificate of correctness. A high score can still hide a
    single wrong word. Look at what a "passing" result actually contains
    before moving on, especially anywhere close to the threshold.
-3. **Never trust a derived/aggregate artifact as ground truth, no matter
+3. **NO DERIVED GROUND TRUTH — Never trust a derived/aggregate artifact as ground truth, no matter
    how long it's been treated as authoritative.** Re-derive from primary
    sources (the scan image, raw OCR, a validated lexicon) rather than
    trusting anything built by an earlier, unaudited pipeline stage —
    including this project's own prior outputs.
-4. **Raw/source-adjacent data is not automatically correct just because
+4. **RAW IS NOT RIGHT EITHER — Raw/source-adjacent data is not automatically correct just because
    it's closer to the scan than derived data.** OCR extraction itself can
    have real bugs (mislabeled files, swapped pages, wrong content). Verify
    with the most direct method available — e.g. rendering the exact source
    region a claim is based on and reading it directly — not just by
    checking that matching content exists somewhere.
-5. **Fuzzy/subsequence text matching is not precise enough for
+5. **FUZZY IS NOT A POSITION — Fuzzy/subsequence text matching is not precise enough for
    exact-position claims.** It tolerates small shifts and will report a
    high similarity score for content that's merely nearby, not exactly
    there. Fine for coarse attribution or cropping with margin; wrong for
    "is this the exact right token/position." For exact-position questions,
    anchor on an exact match first and use fuzzy similarity only to
    disambiguate among exact candidates.
-6. **Every matching/anchoring strategy has its own blind spot — know it
+6. **EVERY ANCHOR HAS A BLIND SPOT — Every matching/anchoring strategy has its own blind spot — know it
    before trusting silence as proof of correctness.** Exact-match anchors
    can collide with short/common values that recur for unrelated reasons.
    Fuzzy matches can lock onto coincidentally-similar content elsewhere.
    Cursor/position-based search can cascade failures if one bad match
    corrupts the position everything after it searches from. Understand the
    specific failure mode of a check before trusting what it doesn't flag.
-7. **Fixing one root cause does not mean the symptoms it produced are now
-   explained.** Multiple independent bugs can produce similar-looking
+7. **ONE CAUSE IS NOT EVERY SYMPTOM — fixing one does not explain the rest.** Multiple independent bugs can produce similar-looking
    symptoms. After a fix, re-verify the original finding against corrected
    data before assuming it's resolved — don't assume one explanation
    covers every instance that looked the same.
-8. **A cheap, mechanical, no-LLM check can catch what expensive LLM-based
+8. **CHEAP CHECKS CATCH OTHER THINGS — A cheap, mechanical, no-LLM check can catch what expensive LLM-based
    checks miss entirely, and vice versa — run every independent check you
    have, don't rely on the most sophisticated one alone.**
    Structural/consistency rules (format, sequence, grouping invariants)
    are nearly free and catch a different class of error than semantic or
    visual review.
-9. **Independent verification signals must agree before a fix is
+9. **TWO SIGNALS OR NONE — Independent verification signals must agree before a fix is
    trusted.** Pixel-reading (vision) and linguistic-plausibility (semantic)
    checks fail in different ways — a misread crop can look pixel-plausible
    but be meaningless, and vice versa. Require at least two independent
    signals to agree, not just one confident-sounding one.
-10. **Prompts bias results in specific, predictable directions — watch for
+10. **THE PROMPT'S OWN BIAS — Prompts bias results in specific, predictable directions — watch for
     the bias itself, not just its symptoms.** E.g. asking for "the
     shortest valid answer" systematically produces truncation, which then
     shows up as many false "disagreements." Fix the instruction, don't
     just tune a threshold around its side effect.
-11. **A locally clean fix can still be a symptom of a larger unresolved
-    problem.** If a broader/structural check flagged something upstream,
+11. **LOCALLY CLEAN, STILL BROKEN — a fix that resolves cleanly can still be one
+    face of a larger unresolved problem.** If a broader/structural check flagged something upstream,
     don't stop investigating just because the first specific instance you
     looked at resolved cleanly.
-12. **A cache key must cover everything that changes the correct answer,
+12. **THE KEY MUST HOLD THE QUESTION — A cache key must cover everything that changes the correct answer,
     not just the expensive part.** Keying a decision cache on the crop
     image alone (not also the two readings being compared) meant a stale
     decision from an earlier comparison got silently reused for a
     different, current comparison on the same crop. If a cache can be
     asked two different questions about the same cached object, the cache
     key must include which question was asked.
-13. **A hand-maintained "derived" file is not actually derived — it's a
+13. **THE SECOND COPY OF THE TRUTH — A hand-maintained "derived" file is not actually derived — it's a
     second copy of the truth that happens to usually agree.** Any file
     whose content is fully computable from another file (e.g. a
     concatenation, a join, a filter) should be built by a script and
@@ -974,7 +1123,7 @@ next incident.
     hand-edits agree until the day someone forgets one of the two places —
     the failure is silent, not loud, so you won't notice until something
     downstream looks stale.
-14. **Judging word ORDER in a cropped RTL image is a distinct failure mode
+14. **RTL ORDER NEEDS AN ANCHOR — Judging word ORDER in a cropped RTL image is a distinct failure mode
     from misreading a letter, and needs its own safeguard.** A tight crop
     around a disputed word pair can clip the anchor word that establishes
     which side is "first," and reading right-to-left off a clipped image
@@ -986,7 +1135,7 @@ next incident.
     closer — cross-check with a differently-sourced signal (raw token
     x-coordinates, a fresh independently-prompted model read) per lesson
     9.
-15. **A comparison pipeline that requires aligning two OCR sources
+15. **SILENCE WHERE IT CANNOT ALIGN — A comparison pipeline that requires aligning two OCR sources
     produces silence, not a low score, exactly where the source OCR is too
     garbled to align — and silence is not evidence of correctness there.**
     Treat a low/untrusted alignment `match_ratio` as its own
@@ -995,7 +1144,7 @@ next incident.
     blind spot than lesson 1 (coverage gap) — the tool nominally ran, but
     structurally cannot produce output on the cases that need checking
     most.
-16. **Checking only the boundary between two "trusted" neighbors cannot
+16. **THE INTERIOR IS NOT THE BOUNDARY — Checking only the boundary between two "trusted" neighbors cannot
     detect content merged inside one of them.** A "trusted" flag on a klal
     says its *boundaries* were validated, not that its *interior* was
     searched for a second klal hiding inside it. Before concluding a
@@ -1003,38 +1152,65 @@ next incident.
     neighbors for an embedded second marker and topic shift — do not infer
     absence from edge-adjacency alone. The direct-visual-page-render check
     (Lesson 14) is the reliable method here too.
-17. **A token-height threshold for detecting catchwords is a useful
+17. **HEIGHT IS A FILTER, NOT A VERDICT — A token-height threshold for detecting catchwords is a useful
     first-pass filter, not a sufficient check on its own.** A direct
     render of the actual page can contradict a height measurement. On any
     page-crossing reconstruction, treat a borderline or unexpected height
     reading as a reason to render and look, not as settled by the number
     alone.
-18. **A cheap, corpus-wide text-pattern sweep (grep a literal string, a
+18. **THE GREP THAT BEATS THE REVIEW — A cheap, corpus-wide text-pattern sweep (grep a literal string, a
     regex, a duplicate-word scan) can find in minutes what extensive
     klal-by-klal manual review missed for an entire project's history.**
     Run this class of check routinely (after any batch of edits, not just
     when asked) — per Lesson 8, it catches a different class of error than
     vision/semantic review and costs almost nothing to run.
-19. **Diagnosing a fix and describing it in writing is not the same as
+19. **WRITTEN IS NOT APPLIED — Diagnosing a fix and describing it in writing is not the same as
     applying it — verify every "fixed"/"split"/"applied" claim against a
     diff of the actual data, not against how carefully it was written
     up.** This is Lesson 1 ("a check that isn't run has not verified
     anything") applied to one's own output: a prose claim of "fixed" is
     itself unverified until checked against a real before/after diff.
-20. **Multi-volume/multi-part works must map page alignment across the full physical scan range.**
-    When serving page-level bounding boxes and UI rendering for secondary parts (Parts 2 & 3),
-    loader functions (`_load_alignment`, `_load_corrections`) must read combined datasets across all parts
-    (`part1`, `part2`, `part3`) rather than defaulting to Part 1.
-21. **Flattened Bounding Box Schema Discipline.**
-    `_corpus_word_bboxes()` and `load_docai_page()` expect flat coordinate keys (`"x1"`, `"y1"`, `"x2"`, `"y2"`)
-    on token objects. Nested `bbox: {x1: ...}` dictionary structures fail silently with `None` lookups,
-    returning 0 bounding boxes to the UI. Always enforce flat coordinate keys in token serialization.
-22. **Pluggable VLM Witness Engine Architecture.**
-    Secondary witness evaluation must inherit from `AbstractWitnessEngine` ABC with image-grounded VLM adjudication
-    ($\ge 0.90$ confidence) and disk caching in `adjudication_cache.db` to eliminate Tesseract OCR noise while
-    preserving engine swappability.
-23. **A witness is an ENGINE, not a SAMPLE. Running one model twice buys no
-    independence.** Two passes of the same model agreeing is a *stability*
+20. **EVERY PART, NOT PART ONE — a loader that defaults to the first file is a
+    silent scope bug.** When a work is split across files, anything serving
+    page alignment, bounding boxes or corrections must read the COMBINED set
+    (`part1` + `part2` + `part3`) rather than defaulting to Part 1.
+    `_load_alignment` and `_load_corrections` both did, and the symptom is not
+    an error - it is a klal in a later part rendering with no boxes at all,
+    which reads as "nothing found here" (Lesson 26, THE FILTER THAT HIDES).
+
+    Generalised 2026-09-09 from a note that described only the two functions.
+    The rule is about DEFAULTS: a default that silently narrows scope produces
+    silence, and silence is the failure mode this repo is worst at seeing.
+
+21. **FLAT COORDINATE KEYS — a schema mismatch between two structures that both
+    "have a bbox" fails silently and returns nothing.** `_corpus_word_bboxes()`
+    and `load_docai_page()` expect flat `x1`/`y1`/`x2`/`y2` on a token; a nested
+    `bbox: {x1: ...}` looks equally reasonable, raises nothing, and yields zero
+    boxes to the UI.
+
+    Generalised 2026-09-09. The specific convention matters here and the RULE is
+    wider: when two producers of "the same" record disagree about its shape, the
+    consumer gets `None` rather than an exception, so the failure arrives as
+    absence. Pin the shape at the seam, and prefer a loader that raises on an
+    unexpected shape over one that shrugs and returns nothing (Lesson 26 again).
+
+22. **THE WITNESS ENGINE SEAM — a swappable-engine abstraction earns its keep
+    only if something on the delivery path actually calls it.** The witness
+    layer was built as an `AbstractWitnessEngine` ABC with image-grounded VLM
+    adjudication and disk caching in `adjudication_cache.db`, specifically so an
+    engine could be swapped without touching its callers.
+
+    **AND NOTHING ON THE REBUILD PATH IMPORTS IT** - item `0N`, still open.
+    `pipeline/second_witness_eval/`'s `VlmWitnessEngine` is reached only by
+    `tools/second_witness_eval/run_part1_vlm_second_witness.py` and its own
+    tests. So this entry is kept as a STANDING EXAMPLE of Lesson 47 (WIRED TO
+    NOTHING) rather than as architecture in force: the seam is real, the
+    swappability is real, and neither has been exercised by the pipeline that
+    was supposed to benefit. Reworded 2026-09-09 - it had been written as an
+    architectural instruction, which read as though it described the running
+    system.
+
+23. **AN ENGINE, NOT A SAMPLE — running one model twice buys no independence.** Two passes of the same model agreeing is a *stability*
     measurement of that one witness, not corroboration by two. Treating VLM
     Pass A == Pass B as two-of-three consensus produced 1,051 disputes
     (2026-08-23); when a genuinely different engine was consulted on the same
@@ -1044,7 +1220,7 @@ next incident.
     is "nothing — it's the same model", it is one witness. Use a repeat run as a
     reliability gate on that single witness instead: where the two passes
     disagree, it abstains.
-24. **Architectural independence is defeated by a defect in the shared input.**
+24. **SHARED INK, SHARED ERROR — Architectural independence is defeated by a defect in the shared input.**
     Different OCR architectures fail differently on *ambiguous* glyphs, and
     identically on a *defective* one — every engine is reading the same ink, so
     a worn or ligatured printer's sort is upstream of all of them. Measured
@@ -1056,7 +1232,7 @@ next incident.
     they are drawn from what the glyph plausibly looks like. Corollary, also
     measured: enumerating and excluding the known defect barely improved the
     ensemble (41% → 39%), so a bigger artifact catalogue is not the repair.
-25. **A signal that CANNOT disagree carries no information — verify a check can
+25. **A SIGNAL THAT CANNOT DISAGREE — it carries no information; verify a check CAN
     fail before trusting that it passed.** `build_vlm_alignment()` mapped only
     `SequenceMatcher.get_matching_blocks()`, where the two sequences are equal
     *by definition*, so the `vlm_reading`/`surya_reading` fields it fed could
@@ -1066,9 +1242,8 @@ next incident.
     any new comparison, agreement metric, or validator, construct one input that
     MUST make it report a difference. If you cannot, it is not measuring
     anything.
-26. **A filter that HIDES is at least as dangerous as one that rewrites, and is
-    harder to catch — validate it by what it suppresses, not by what it
-    emits.** A wrong rewrite produces visible wrong text; a wrong suppression
+26. **THE FILTER THAT HIDES — at least as dangerous as one that rewrites and harder
+    to catch; validate it by what it suppresses, not by what it emits.** A wrong rewrite produces visible wrong text; a wrong suppression
     produces *silence*, and silence where a check cannot operate is not evidence
     of correctness (Lesson 15). This matters in proportion: measured 2026-08-24,
     the live filters suppress **12,444** items (VLM stability abstentions 1,577;
@@ -1078,7 +1253,7 @@ next incident.
     the corpus and a reviewer needs a measured false-negative rate against a
     hand-checked sample before it is trusted, and "it only tags, it doesn't
     rewrite" is not an exemption.
-27. **An adversarially-selected sample cannot estimate a rate.** 40 consensus
+27. **THE SAMPLE THAT SELECTED ITSELF — An adversarially-selected sample cannot estimate a rate.** 40 consensus
     positions carried a human decision and in 39 the reviewer kept the stored
     text — which looks like "consensus is 2.5% accurate" and is not: a reviewer
     had already examined those exact words and confirmed the corpus, so a
@@ -1086,7 +1261,7 @@ next incident.
     come from *undecided* positions. Before turning a labelled subset into a
     rate, ask why those particular items got labelled; if the labelling process
     selected on the outcome, the rate measures the selection, not the thing.
-28. **A bug found in one place is a statement about where you looked, not about
+28. **WHERE YOU LOOKED, NOT WHERE IT IS — A bug found in one place is a statement about where you looked, not about
     where it is — sweep the corpus before calling it fixed.** Every instance of
     this class in this project's history was reported as a single case and
     turned out to be many: a klal 9/10 box overlap that was 316 klalim; two
@@ -1099,7 +1274,7 @@ next incident.
     real extent, because an open item that says "klal 91" when the answer is
     "104 klalim" reads as handled and is worse than silence. See Part 2's
     "Never fix one instance" section for the operational rule.
-29. **A field nothing reads is not a feature — a serialized JSON key looks
+29. **THE FIELD NOBODY RENDERS — A field nothing reads is not a feature — a serialized JSON key looks
     exactly like a delivered one.** Twice in one session (2026-08-24) a signal
     was computed, written into the API response, and never shown to a human, so
     it looked finished at every layer except the only one that matters.
@@ -1114,7 +1289,7 @@ next incident.
     of it?** If neither has an answer, nothing was delivered. Sibling of Lesson
     25: that one is about a signal that cannot disagree, this one about a signal
     nobody sees.
-30. **A wrong render looks exactly like a right one — verify indexing against
+30. **THE WRONG PAGE LOOKS RIGHT — A wrong render looks exactly like a right one — verify indexing against
     CONTENT, never against plausibility.** `fitz.open(pdf)[N]` is page N+1 in
     this repo (`page N == doc[N-1]`, confirmed by pixel correlation:
     `page_30.png` vs `doc[29]` = 0.995, vs `doc[30]` = 0.038). Every ad-hoc crop
@@ -1127,7 +1302,7 @@ next incident.
     a uniform +1 offset across three independent cases is a bug in the reader,
     not the data. Prefer `images/pdf_pages/page_N.png`, which is correctly
     indexed; when you must render, prove the mapping on a known page first.
-31. **When your own fix regresses on measurement, revert AND STOP — a heuristic
+31. **RETUNED TWICE, HAND IT BACK — When your own fix regresses on measurement, revert AND STOP — a heuristic
     you have retuned twice is asking to be handed back, not tuned a third
     time.** `split_block_across_klalim()` was adjusted three times in one day to
     fix 4 mis-assigned klalim. Attempt two fixed nothing and cost 0.05pt;
@@ -1141,7 +1316,7 @@ next incident.
     extent and hand it to the user. Never let a fix for N instances put the
     other 200 at risk.
 
-32. **A tool that prints is not a tool that runs. Put a cheap check in the
+32. **PRINTING IS NOT RUNNING — A tool that prints is not a tool that runs. Put a cheap check in the
     chain, or accept that its findings do not exist.** `detect_real_word_
     substitution.py` was finding `בחרא`->`בחדא` in klal 84 correctly, in its
     normal output, for as long as it had existed - and on 2026-08-26 the reviewer
@@ -1157,7 +1332,7 @@ next incident.
     detectors carry real false positives (the independent witnesses contradict
     149 of 262 findings), so the stage writes a triage report and never a flag.
 
-33. **Check a tool's STATE, not its printout.** After purging 79 rows from
+33. **STATE, NOT PRINTOUT — Check a tool's STATE, not its printout.** After purging 79 rows from
     `lexicon.txt`, the effect was checked by grepping the corpus-integrity
     validator's output for the purged forms - 1 of 13 appeared, which read as
     "the purge did not work". It had worked perfectly; the validator truncates
@@ -1166,7 +1341,8 @@ next incident.
     This is Lesson 19's shape ("verify against the data, not against the
     write-up") applied to tooling output, and it costs a false alarm every time.
 
-34. **Sweep the SIBLINGS of a bug, not just its class of input.** One defect -
+34. **SWEEP THE SIBLINGS — the other branches of the same function, not just the
+    same class of input.** One defect -
     a decision naming a different span than the one it answers - was fixed three
     separate times in three branches of the same function: the confirmed-no-op
     (finding ★1), then the `insert` opcode (klal 66 w0, which deleted the `אין`
@@ -1178,8 +1354,8 @@ next incident.
     caught only by reading an applied diff word by word. When a mutator has three
     paths and one is wrong, read the other two before writing the test.
 
-35. **Applying a correction has side effects on the review state, and every one
-    of them must be carried out in the same step.** Promoting a decision into the
+35. **APPLYING HAS SIDE EFFECTS — on the review state, and every one of them must be
+    carried out in the same step.** Promoting a decision into the
     corpus is not the end of the operation. It closes the flag that raised it; it
     shifts every later index in that klal, so both the open flags AND the pending
     decisions past that point must be re-pointed; and it makes the corpus disagree
@@ -1193,7 +1369,7 @@ next incident.
     describes that truth and update it in the same breath, or the description
     rots against the thing it describes.
 
-36. **A test pinned to real corpus content is testing the defect, not the
+36. **THE TEST PINNED TO THE DEFECT — A test pinned to real corpus content is testing the defect, not the
     behaviour - and it fails when the corpus IMPROVES.** All 38 UI tests boot
     against the shipped corpus and 23 pin a coordinate in executable code, so
     repairing the text broke seven of them at once: one asserted a literal `&`
@@ -1208,7 +1384,7 @@ next incident.
     real corpus by design: a baseline keyed `(klal_id, word_index)` shifts on
     every insertion, and nothing can reindex a literal in a test file.
 
-37. **A test that is DEFINED is not a test that RUNS — count what the runner
+37. **DEFINED IS NOT COLLECTED — A test that is DEFINED is not a test that RUNS — count what the runner
     collects, never what the file declares.** `tests/test_review_server.py`
     declares 38 `def test_` statements and pytest collects **36**: two names are
     defined twice, and Python rebinds a name on the second `def`, so the first
@@ -1226,7 +1402,7 @@ next incident.
     disagreement IS the finding. A `def test_` count equal to the collected count
     is one cheap assertion; nothing in this repo's gate makes it yet.
 
-38. **A witness reading a DIFFERENT SOURCE is not a second opinion about this
+38. **ANOTHER BOOK IS NOT A SECOND OPINION — A witness reading a DIFFERENT SOURCE is not a second opinion about this
     one — its disagreement has an explanation the others cannot have.** DocAI,
     Surya and the VLM all read the Berlin 1851 scan, so when one differs from the
     corpus exactly one party misread that ink and the remedy is a correction.
@@ -1256,7 +1432,7 @@ next incident.
     the corpus's 4. A plausible sentence written into a tool's OUTPUT is read by
     everyone downstream as a finding; if it is a guess, it has to say so.
 
-39. **State that changes while a page is open must not be read from a cache
+39. **THE VALUE CACHED AT LOAD — State that changes while a page is open must not be read from a cache
     populated when the page loaded.** Hit twice in two days, in two different
     panes, with the same shape. The heading panel read `title_decision` from
     `mountedKlal` — the frontend's `/api/klal` cache, filled once when a klal
@@ -1275,7 +1451,7 @@ next incident.
     correct one until the two views are on screen together and disagree, which is
     why both of these were found by a reviewer and not by a test.
 
-40. **Tearing a scaffold down is a SEPARATE step from putting it up, and it is
+40. **THE SCAFFOLD NOBODY TOOK DOWN — Tearing a scaffold down is a SEPARATE step from putting it up, and it is
     the one that gets forgotten.** `buildPlaceholders()` gives every klal block a
     `min-height` estimated from `text_length` so that lazy-mounting real content
     does not jerk the scroll. Nothing ever took it down, so it stayed a FLOOR for
@@ -1291,8 +1467,8 @@ next incident.
     sync, test the transition in both directions — the true→false leg is the one
     that ships broken.
 
-41. **A guard that tests a PROXY for its real condition breaks silently the day a
-    new cause produces the same proxy value.**
+41. **THE GUARD THAT TESTS A PROXY — it breaks silently the day a new cause produces
+    the same proxy value.**
     `releaseObserverWhenScrollSettles()` re-seats a klal that a smooth jump
     landed on imprecisely, and it fired only when the target sat BELOW the
     reading line — on the reasoning that above the line means "arrived". That
@@ -1309,9 +1485,9 @@ next incident.
     produce that symptom inherits the guard's behaviour without inheriting its
     intent.**
 
-42. **A mutation that does NOT fail the test is a finding, not a pass — resolve
-    whether the TEST is blind or the CODE is inert before you write a comment
-    claiming the code does something.** Both outcomes occurred in one session.
+42. **THE MUTATION THAT DID NOT FAIL — a finding, not a pass. Resolve whether the
+    TEST is blind or the CODE is inert before writing a comment claiming the code
+    does something.** Both outcomes occurred in one session.
     `flex-shrink: 0` on `#scan-pane` survived its mutation because it does
     nothing: measured across 1700→800px with and without it, the geometry is
     identical at every width, because `#text-pane` is `flex: 1; min-width: 0` and
@@ -1327,7 +1503,7 @@ next incident.
     is how Lesson 19's failure mode gets written into the source where the next
     reader will believe it.
 
-43. **A browser test that measures a transient or off-screen element can pass
+43. **THE PROBE THAT CANNOT SEE — A browser test that measures a transient or off-screen element can pass
     against the very defect it was written for.** Two in one session, both caught
     only because a mutation failed to fail. The first regression test for the
     side-panel dock read `getBoundingClientRect()` immediately after adding
@@ -1344,7 +1520,7 @@ next incident.
     element it is measuring is outside the frame.** This is Lesson 25 in a
     browser: a probe that cannot see the difference carries no information.
 
-44. **Do not mutate the working tree from a background job while you are editing
+44. **DO NOT MUTATE A TREE YOU ARE EDITING — Do not mutate the working tree from a background job while you are editing
     it, and kill process TREES, not parents.** Three self-inflicted incidents in
     one session, none of which lost work only because they were noticed. A
     `git stash` run to get a baseline fired while two background pytest runs were
@@ -1360,7 +1536,7 @@ next incident.
     a foreground step you watch; and after killing a test runner, check for
     survivors before assuming the tree is quiet.
 
-45. **A reviewer reporting a UI symptom is describing PIXELS, not the DOM — when
+45. **PIXELS, NOT THE DOM — A reviewer reporting a UI symptom is describing PIXELS, not the DOM — when
     a text search for what they said finds nothing, ask for a screenshot instead
     of searching harder.** Two turns were spent hunting a reported "hovering
     gives me a ?" on klal 53: the server said the klal was clean
@@ -1373,7 +1549,7 @@ next incident.
     Cursors, RTL reordering, `::before` content, a font's fallback glyph and a
     native `title` tooltip are all things a reviewer can see and `grep` cannot.
 
-46. **A row that supersedes an ALREADY-APPLIED ruling manufactures work. Annotate
+46. **ANNOTATE, DO NOT SUPERSEDE — A row that supersedes an ALREADY-APPLIED ruling manufactures work. Annotate
     the ruling instead of replacing it.** A superseding copy takes a new decision
     id, so it drops out of `applied_decision_ids()` and re-enters every queue
     keyed on "not applied" — while carrying a `chosen_text` the corpus already
@@ -1402,7 +1578,7 @@ next incident.
     settles a row only while `chosen_text` is IDENTICAL, so a reviewer who
     changed their mind is still real work.
 
-47. **An orphan sweep cannot see a feature that is fully built, fully tested, and
+47. **WIRED TO NOTHING — An orphan sweep cannot see a feature that is fully built, fully tested, and
     wired to nothing.** Asked on 2026-09-06 for "any other half-finished
     features", a sweep for functions NOTHING calls returned two dead one-line
     accessors and the answer "nothing outstanding". That was wrong.
@@ -1420,7 +1596,7 @@ next incident.
     consumed by any reader; and each writer of a record type compared against its
     siblings. The scripts are disposable — the axes are not.
 
-48. **Derived files can be renamed; an append-only log cannot — and rename by
+48. **RENAME BY TOKEN, NOT REGEX — Derived files can be renamed; an append-only log cannot — and rename by
     TOKEN, never by regex.** Three different things in this repo were called
     "corrections": the machine's proposals, a human's ruling, and the corrected
     text. The queue file's `original_word` held Document AI's FRESH reading and
@@ -1443,7 +1619,7 @@ next incident.
     made" — renaming English inside comments while doing the identifiers
     correctly. Walking NAME tokens renames identifiers and leaves prose alone.
 
-49. **A FREQUENCY ARGUMENT IS EVIDENCE ABOUT THE LANGUAGE, NOT ABOUT THIS PAGE
+49. **FREQUENCY IS NOT THIS PAGE — A FREQUENCY ARGUMENT IS EVIDENCE ABOUT THE LANGUAGE, NOT ABOUT THIS PAGE
     — so a detector built on one must be adjudicated against the ink before its
     output is shown to a human.** Reviewer directive, 2026-09-09, measured twice
     over. Both lexical detectors reason "this word is rare here and one edit from
