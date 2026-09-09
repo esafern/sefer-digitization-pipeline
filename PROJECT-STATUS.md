@@ -124,30 +124,82 @@ applying it to the corpus remain two separate, deliberate steps.
     CORPUS HOLDS IT - at a door `0DY`'s re-ruling mitigation does not reach,
     because re-ruling in the witness panel produces another `witness_choice`.
 
-    ### AND THE OBVIOUS CHECK CANNOT BE RUN ON THEM
+    ### CORRECTION TO THIS ITEM, SAME DAY
 
-    A first pass compared each green word's chosen text against `part1.json` at
-    the ruling's `word_index` and reported 7 mismatches. All 7 were
-    `witness_choice`, and `review_server.py:1546` says why that comparison is
-    meaningless:
+    As first written, this item said a check of these words against `part1.json`
+    was "an artifact of indexing the corpus with a token index, not findings",
+    citing `review_server.py:1546`. THAT IS WRONG, and the mistake was reading a
+    docstring instead of the data (Lesson 33 STATE, NOT PRINTOUT).
 
-        witness_choice is NOT wired: its `word_index` is a docai_token_index, an
-          index into verify_reconstruction_witness.py's filtered `dtoks` list, not
-          into the klal's words. An id from here would name a real word and the
-          wrong one - confidently.
+    The LEDGER stores the docai_token_index - verified, klal 30's witness rows
+    are at 4, 12, 22, 29, 36... which is exactly the queue's
+    `docai_token_index` list. But `/api/word-states`, which is what the check
+    read, serves them ALREADY MAPPED through
+    `reconstruction_witness_queue.json`'s own `word_index` (klal 30 token 4 ->
+    word 120), exactly as the comment two lines above 1546 says it does. So the
+    comparison was against the right index all along.
 
-    So those 7 rows are an artifact of indexing the corpus with a token index,
-    not findings, and are NOT listed here as positions. Five of the seven
-    differed only by a geresh/apostrophe glyph, which is itself a hint that the
-    two indexings often coincide - close enough to look right, which is the
-    dangerous kind.
+    ### ADJUDICATED AGAINST THE INK, and now it is a real answer
 
-    Open, and NOT a one-line fix: answering "does the corpus hold this witness
-    ruling?" needs the docai token -> word mapping first, and deciding whether a
-    witness ruling is even MEANT to change the base text (it offers
-    `docai_reading` against `tesseract_reading`, and `_decision_original_word`
-    records that it snapshots neither) is a reviewer question, not a code one.
-    Both belong with the deferred tri-state work in `0DY`.
+    `tools/verify_witness_green_vision.py` (new). It asks a different question
+    from `verify_witness_vision.py`: that one triages the queue by choosing
+    between two OCR ENGINES before a human rules; this one runs after the human
+    has ruled and asks THE CORPUS READS X HERE - IS THAT WHAT IS PRINTED? One
+    question rather than two options, because on 21 of 28 the corpus and the
+    ruling agree and a two-option prompt would be asking the model to choose
+    between a string and itself - `verify_corrections_vision.py` finding 7's
+    shape, which always resolves to UNCERTAIN.
+
+    28 adjudicated (3 more are unmappable, below):
+
+        17  the ink shows what the corpus holds        - settled
+         8  vision returned NEITHER and transcribed a NON-WORD
+         2  vision picked the ruling, on a geresh vs apostrophe only
+         1  genuinely open
+
+    THE 8 ARE VISION FAILURES, NOT CORPUS FINDINGS, and saying so is the point
+    of running this before surfacing anything. Every one transcribed something
+    that occurs ZERO times in 9,926 distinct corpus words - `אכ"ר` for `אב"ד`,
+    `דהייט` for `דהיינו`, `כשם` for `בשם`, `חה` for `וזה`, `למתי` for `לכותי`,
+    `שורה` for `שוה`. Those are the model reading letterforms literally through
+    the same ב/כ, נו/ט, ו/ח confusions the OCR makes. Attestation is the filter:
+    a NEITHER whose transcription is not a word anywhere in the corpus is
+    evidence about the model, not about the page.
+
+    The 2 geresh rows are the prompt's own constraint 4 being ignored - it says
+    to treat `׳` and `'` as the same mark - so they are cosmetic, not findings.
+
+    ### WHAT IS ACTUALLY OPEN
+
+    Two positions for a human, and three rulings that sit on no word at all:
+
+        http://127.0.0.1:8420/klal/30/word/166    corpus חז"ל,      ruling וז״ל,       ink ח"ל
+        http://127.0.0.1:8420/klal/75/word/1174   corpus ביואין זה, ruling ברואין זה,  ink בוזאין זה
+
+    klal 30 w166 is a choice between two standard abbreviations - `חז"ל`
+    (חכמינו זכרונם לברכה) and `וז״ל` (וזה לשונו) - and the ink's `ח"ל` supports
+    the corpus's first letter, not the ruling's. klal 75 w1174 is the one place
+    all three readings are unattested: `ביואין` occurs once in the corpus (here,
+    so it is its own only witness), `ברואין` and `בוזאין` never. `רואין` occurs
+    twice, which makes the ruling's ב-prefix plausible - it needs the crop.
+
+    UNMAPPED - a live witness ruling whose queue row carries `word_index: null`,
+    so it colours nothing and can be reached from nowhere:
+
+        klal 30, docai token 379, page 24: chose `ידו`
+        klal 88, docai token 552, page 40: chose `וכוותייהו`
+        klal 88, docai token 861, page 40: chose `` (empty)
+
+    ### STILL OPEN, and unchanged by the above
+
+    No script promotes a `witness_choice` into `part1.json`. The 17 confirmed
+    rows are right by luck of the reconstruction, not because anything applied
+    them, and the two open positions cannot be fixed by re-ruling in the witness
+    panel - that produces another `witness_choice`. Whether a witness ruling is
+    even MEANT to change the base text (it offers `docai_reading` against
+    `tesseract_reading`, and `_decision_original_word` records that it snapshots
+    neither) is a reviewer question. It belongs with the deferred tri-state work
+    in `0DY`.
 
 0DZ. **[2026-09-09, reviewer] "USING THAT URL DOES *NOT* ZOOM IN THE SCAN PANEL
     ON THE SELECTED WORD" - IT DID ZOOM. IT ZOOMED SOMEWHERE THE WORD IS NOT.
