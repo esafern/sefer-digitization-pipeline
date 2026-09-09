@@ -8411,37 +8411,6 @@
     },
     {
       "klal_id": 163,
-      "word_index": 133,
-      "opcode": "replace",
-      "final_text": "דוה",
-      "consensus_reading": "הוה",
-      "agreeing_engines": [
-        "dicta",
-        "vlm"
-      ],
-      "ligature_artifact": null,
-      "cross_edition": true,
-      "cross_edition_engines": [
-        "dicta"
-      ],
-      "same_edition_agreeing": 1,
-      "abbreviation_shape": null,
-      "witnesses": {
-        "docai": null,
-        "vlm": "הוה",
-        "surya": null,
-        "dicta": "הוה"
-      },
-      "page": 59,
-      "bbox": {
-        "x1": 0.7353485226631165,
-        "y1": 0.6938361525535583,
-        "x2": 0.7600246667861938,
-        "y2": 0.7100567817687988
-      }
-    },
-    {
-      "klal_id": 163,
       "word_index": 461,
       "opcode": "replace",
       "final_text": "דוה",

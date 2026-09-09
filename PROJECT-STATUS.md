@@ -101,6 +101,76 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0EB. **[2026-09-09, reviewer] THE TESSERACT WITNESS LAYER: 419 ADJUDICATIONS,
+    2 TIMES THE REVIEWER PICKED TESSERACT, 0 CORPUS CHANGES. THE REVIEWER
+    CALLED IT AND THE LEDGER AGREES.**
+
+    Reviewer, 2026-09-09: "the tesserect layer was mostly noise very few
+    disputes resulted in a change but it wasted reviewer time." Measured against
+    `reconstruction_witness_queue.json` and the ledger rather than recalled:
+
+    ### What it cost
+
+        419  items built, all on the 3 reconstructed pages (24, 37, 40)
+        419  Gemini vision adjudications to triage them
+         44  survived WITNESS_PRIORITY_VERDICTS = ("B", "NEITHER") and were served
+         32  a human actually ruled on
+
+    ### What it returned
+
+    Vision over the whole built queue:
+
+        382  A - DocAI, which is what the corpus was already built from   91.2%
+         16  B - Tesseract, the witness                                    3.8%
+         21  NEITHER                                                       5.0%
+
+    The 32 human rulings, by what the reviewer picked:
+
+         18  docai_reading      - kept what the corpus already had. No change.
+         11  custom             - typed something themselves
+          2  tesseract_reading  - THE WITNESS WON
+          1  unreadable
+
+    **BOTH Tesseract wins are unmapped.** klal 30 docai token 379 (`ידו`) and
+    klal 88 token 552 (`וכוותייהו`) have `word_index: null` in the queue, so
+    they sit on no word, have no dashboard URL, and cannot be applied by
+    anything. In the entire history of this layer the Tesseract reading was
+    chosen twice and reached the corpus zero times.
+
+    Nor did anything else. No script promotes a `witness_choice` (item `0EA`),
+    so the 11 custom rulings did not land either - 6 of them the corpus already
+    held, which is to say they were confirmations, and the other 5 are still
+    outstanding as of today.
+
+    ### The one thing the layer actually found
+
+    One real defect, and it took today's `verify_witness_green_vision.py` pass to
+    surface it - it was never green, so `0EA`'s green-filtered first pass missed
+    it:
+
+        http://127.0.0.1:8420/klal/88/word/518    corpus בס'    ruling בפ'
+
+    The context is `על ברייתא דמתנייא ___ אלו מגלחין`, and `אלו מגלחין` is a
+    PEREK of Moed Katan, so the word is `בפ'` (בפרק), not `בס'` (בספר). Both
+    forms are common in this book - `בפ'` 103x, `בס'` 62x - so frequency does not
+    decide it; the referent does. The ink agrees at 0.98.
+
+    Note where that finding came from: a `custom` reading the reviewer TYPED, not
+    from Tesseract. The witness engine's own contribution to the corpus over 419
+    items is nil.
+
+    ### Verdict, and it is a scope decision, not a code change
+
+    Do not rebuild or extend this layer. Its queue is already restricted to 3
+    reconstructed pages, and even there the second engine agreed with the first
+    91% of the time and beat it 3.8% - a rate the vision pass alone matches at a
+    fraction of the reviewer attention. Lesson 24 SHARED INK, SHARED ERROR
+    predicted exactly this: a second OCR engine on the same scan is not a second
+    opinion, it is the same page read twice.
+
+    What is worth keeping is the FINDING above and the 5 outstanding customs -
+    those came from a human reading the crop, which is the part that worked.
+
 0EA. **[2026-09-09] 27 GREEN WORDS ARE GREEN ON A `witness_choice`, AND NO
     SCRIPT IN THIS REPO CAN PUT A `witness_choice` INTO THE CORPUS.**
 

@@ -3723,7 +3723,7 @@
   ],
   "meta": {
     "total_candidates": 248,
-    "skipped_settled_by_applied_decision": 505,
+    "skipped_settled_by_applied_decision": 508,
     "klalim_covered": 92,
     "skipped_no_docai_page_klalim": [],
     "unattributable_deletes": [],
