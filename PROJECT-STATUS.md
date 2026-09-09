@@ -190,11 +190,30 @@ applying it to the corpus remain two separate, deliberate steps.
 
     ### What this rate is NOT
 
-    **The sample selected itself** (Lesson 27). It is the first 12 rows per class
-    in klal order, so it is concentrated in the opening entries of aleph and is
-    not a random draw from 3,373. The 36% is indicative of the queue's shape, not
-    a population estimate, and the per-class figures rest on 12 rows each. A
-    randomised pass is the way to turn it into a number worth quoting - not done.
+    **The sample selected itself** (Lesson 27) - first 12 rows per class in klal
+    order, concentrated in the opening entries of aleph.
+
+    **CORRECTED THE SAME DAY BY A RANDOMISED PASS, AND IT WAS OVERSTATED.** A
+    seeded shuffle before capping (`--seed 17`, 40 per class) gives, on the first
+    43 adjudicated:
+
+                            first-N        randomised
+        overall              36.1%           23.3%
+        footnote_numeral       67%             40%
+        one_letter             25%           21.4%
+        other                  17%           20.8%
+
+    So the headline yield is roughly **23%, not 36%**, and the footnote class is
+    40% rather than two thirds. The self-selected sample inflated the very number
+    I flagged it might inflate - Lesson 27 paying for itself twice in one entry,
+    once as a caveat and once as a measurement. The randomised run is still
+    completing; these are interim figures on 43 of 120 and the per-class ones rest
+    on 5-24 rows each.
+
+    **The comparison that matters survives intact**: 23% against the lexical
+    detectors' 0% is still the whole argument, and it is a floor rather than a
+    ceiling, because a dispute the adjudicator resolves for the corpus is not
+    wasted - it is a position confirmed against the ink.
 
     Nothing was applied. The verdicts sit in
     `~/work/hashorashim/lexical_vision_report.json`; promoting any of them into
