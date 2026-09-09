@@ -1,4 +1,26 @@
 #!/usr/bin/env python3
+# ============================================================================
+# THIS DETECTOR ARGUES FROM FREQUENCY, AND FREQUENCY IS EVIDENCE ABOUT THE
+# LANGUAGE, NOT ABOUT THIS PAGE. **ITS OUTPUT MUST BE VISION-ADJUDICATED
+# AGAINST THE INK BEFORE IT IS SURFACED TO A HUMAN.** Reviewer directive,
+# 2026-09-09.
+#
+# Measured on this corpus, twice: of 262 merged positions the independent
+# witnesses contradict 149 (2026-08-26), and every candidate below the review
+# tier - 166 hypotheses across 126 positions - came back from the vision
+# adjudicator as the STORED text, confidence median 0.98, including all 28 whose
+# proposal is attested >=1,000x (item 0DU, 2026-09-09). The single
+# highest-ranked finding in the whole report was a false positive.
+#
+# A rare word one edit from a common one is a HYPOTHESIS. This book is a
+# 19th-century printing of a halachic reference and is full of forms that are
+# rare in a modern reference corpus and perfectly correct on the sheet. Use
+# tools/verify_flagged_candidates_vision.py --source lexical to put a candidate
+# to the ink; use pipeline/build_lexical_defect_report.py --acknowledge-from-
+# vision to record the verdict. Do NOT widen
+# assemble_corrections_dataset.merge_lexical_defects()'s tier to surface more of
+# this unadjudicated.
+# ============================================================================
 # [STANDALONE] Detects candidate insertion/deletion OCR errors: a rare word
 # that is one letter shorter or longer than a common word in the independent
 # reference corpus.

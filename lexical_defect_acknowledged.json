@@ -1,0 +1,1262 @@
+[
+  {
+    "key": "1|insertion_deletion|דקאמרא",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 1,
+    "detector": "insertion_deletion",
+    "stored": "דקאמרא",
+    "word_index_when_recorded": 23
+  },
+  {
+    "key": "1|substitution|לתרוויהו",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 1,
+    "detector": "substitution",
+    "stored": "לתרוויהו",
+    "word_index_when_recorded": 280
+  },
+  {
+    "key": "2|insertion_deletion|קדשם",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 2,
+    "detector": "insertion_deletion",
+    "stored": "קדשם",
+    "word_index_when_recorded": 23
+  },
+  {
+    "key": "2|insertion_deletion|בשרש",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 2,
+    "detector": "insertion_deletion",
+    "stored": "בשרש",
+    "word_index_when_recorded": 188
+  },
+  {
+    "key": "2|insertion_deletion|חזות",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 2,
+    "detector": "insertion_deletion",
+    "stored": "חזות",
+    "word_index_when_recorded": 590
+  },
+  {
+    "key": "2|substitution|מיתור",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 2,
+    "detector": "substitution",
+    "stored": "מיתור",
+    "word_index_when_recorded": 256
+  },
+  {
+    "key": "2|substitution|חזות",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 2,
+    "detector": "substitution",
+    "stored": "חזות",
+    "word_index_when_recorded": 590
+  },
+  {
+    "key": "4|insertion_deletion|בבריתא",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 4,
+    "detector": "insertion_deletion",
+    "stored": "בבריתא",
+    "word_index_when_recorded": 71
+  },
+  {
+    "key": "4|substitution|חוות",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 4,
+    "detector": "substitution",
+    "stored": "חוות",
+    "word_index_when_recorded": 17
+  },
+  {
+    "key": "4|substitution|בדוקא",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 4,
+    "detector": "substitution",
+    "stored": "בדוקא",
+    "word_index_when_recorded": 225
+  },
+  {
+    "key": "6|insertion_deletion|ילפין",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 6,
+    "detector": "insertion_deletion",
+    "stored": "ילפין",
+    "word_index_when_recorded": 43
+  },
+  {
+    "key": "6|insertion_deletion|ילפין|#2",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 6,
+    "detector": "insertion_deletion",
+    "stored": "ילפין",
+    "word_index_when_recorded": 46
+  },
+  {
+    "key": "7|insertion_deletion|בבות",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 7,
+    "detector": "insertion_deletion",
+    "stored": "בבות",
+    "word_index_when_recorded": 115
+  },
+  {
+    "key": "7|insertion_deletion|העיון",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 7,
+    "detector": "insertion_deletion",
+    "stored": "העיון",
+    "word_index_when_recorded": 241
+  },
+  {
+    "key": "7|substitution|בבות",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 7,
+    "detector": "substitution",
+    "stored": "בבות",
+    "word_index_when_recorded": 115
+  },
+  {
+    "key": "7|substitution|תקשו",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 7,
+    "detector": "substitution",
+    "stored": "תקשו",
+    "word_index_when_recorded": 264
+  },
+  {
+    "key": "11|insertion_deletion|בשרש",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 11,
+    "detector": "insertion_deletion",
+    "stored": "בשרש",
+    "word_index_when_recorded": 81
+  },
+  {
+    "key": "11|substitution|בגזירות",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 11,
+    "detector": "substitution",
+    "stored": "בגזירות",
+    "word_index_when_recorded": 40
+  },
+  {
+    "key": "12|insertion_deletion|נעמוד",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 12,
+    "detector": "insertion_deletion",
+    "stored": "נעמוד",
+    "word_index_when_recorded": 318
+  },
+  {
+    "key": "19|insertion_deletion|להפרי",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 19,
+    "detector": "insertion_deletion",
+    "stored": "להפרי",
+    "word_index_when_recorded": 200
+  },
+  {
+    "key": "21|insertion_deletion|ירפד",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 21,
+    "detector": "insertion_deletion",
+    "stored": "ירפד",
+    "word_index_when_recorded": 42
+  },
+  {
+    "key": "21|insertion_deletion|ירפד|#2",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 21,
+    "detector": "insertion_deletion",
+    "stored": "ירפד",
+    "word_index_when_recorded": 57
+  },
+  {
+    "key": "23|insertion_deletion|דמשמא",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 23,
+    "detector": "insertion_deletion",
+    "stored": "דמשמא",
+    "word_index_when_recorded": 549
+  },
+  {
+    "key": "23|substitution|בדוקא",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 23,
+    "detector": "substitution",
+    "stored": "בדוקא",
+    "word_index_when_recorded": 23
+  },
+  {
+    "key": "24|insertion_deletion|ואידן",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 24,
+    "detector": "insertion_deletion",
+    "stored": "ואידן",
+    "word_index_when_recorded": 166
+  },
+  {
+    "key": "24|insertion_deletion|ואידן|#2",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 24,
+    "detector": "insertion_deletion",
+    "stored": "ואידן",
+    "word_index_when_recorded": 230
+  },
+  {
+    "key": "25|insertion_deletion|לטעו",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 25,
+    "detector": "insertion_deletion",
+    "stored": "לטעו",
+    "word_index_when_recorded": 663
+  },
+  {
+    "key": "30|insertion_deletion|לנדון",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 30,
+    "detector": "insertion_deletion",
+    "stored": "לנדון",
+    "word_index_when_recorded": 1124
+  },
+  {
+    "key": "30|insertion_deletion|דמלה",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 30,
+    "detector": "insertion_deletion",
+    "stored": "דמלה",
+    "word_index_when_recorded": 1151
+  },
+  {
+    "key": "30|insertion_deletion|עיונו",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 30,
+    "detector": "insertion_deletion",
+    "stored": "עיונו",
+    "word_index_when_recorded": 1714
+  },
+  {
+    "key": "31|insertion_deletion|השיתא",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 31,
+    "detector": "insertion_deletion",
+    "stored": "השיתא",
+    "word_index_when_recorded": 64
+  },
+  {
+    "key": "34|insertion_deletion|מעצמנו",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 34,
+    "detector": "insertion_deletion",
+    "stored": "מעצמנו",
+    "word_index_when_recorded": 116
+  },
+  {
+    "key": "37|insertion_deletion|השיתא",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 37,
+    "detector": "insertion_deletion",
+    "stored": "השיתא",
+    "word_index_when_recorded": 272
+  },
+  {
+    "key": "37|insertion_deletion|ולאיכא",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 37,
+    "detector": "insertion_deletion",
+    "stored": "ולאיכא",
+    "word_index_when_recorded": 335
+  },
+  {
+    "key": "38|insertion_deletion|מכללי",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 38,
+    "detector": "insertion_deletion",
+    "stored": "מכללי",
+    "word_index_when_recorded": 88
+  },
+  {
+    "key": "38|insertion_deletion|מהרב",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 38,
+    "detector": "insertion_deletion",
+    "stored": "מהרב",
+    "word_index_when_recorded": 331
+  },
+  {
+    "key": "38|substitution|מכללי",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 38,
+    "detector": "substitution",
+    "stored": "מכללי",
+    "word_index_when_recorded": 88
+  },
+  {
+    "key": "38|substitution|מהרב",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 38,
+    "detector": "substitution",
+    "stored": "מהרב",
+    "word_index_when_recorded": 331
+  },
+  {
+    "key": "39|insertion_deletion|כרבם",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 39,
+    "detector": "insertion_deletion",
+    "stored": "כרבם",
+    "word_index_when_recorded": 71
+  },
+  {
+    "key": "41|insertion_deletion|דמלת",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 41,
+    "detector": "insertion_deletion",
+    "stored": "דמלת",
+    "word_index_when_recorded": 441
+  },
+  {
+    "key": "41|insertion_deletion|משיירי",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 41,
+    "detector": "insertion_deletion",
+    "stored": "משיירי",
+    "word_index_when_recorded": 602
+  },
+  {
+    "key": "43|substitution|דשכיחו",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 43,
+    "detector": "substitution",
+    "stored": "דשכיחו",
+    "word_index_when_recorded": 64
+  },
+  {
+    "key": "44|insertion_deletion|משיירי",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 44,
+    "detector": "insertion_deletion",
+    "stored": "משיירי",
+    "word_index_when_recorded": 204
+  },
+  {
+    "key": "46|insertion_deletion|גמורא",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 46,
+    "detector": "insertion_deletion",
+    "stored": "גמורא",
+    "word_index_when_recorded": 8
+  },
+  {
+    "key": "51|insertion_deletion|מובן",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 51,
+    "detector": "insertion_deletion",
+    "stored": "מובן",
+    "word_index_when_recorded": 93
+  },
+  {
+    "key": "51|substitution|מובן",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 51,
+    "detector": "substitution",
+    "stored": "מובן",
+    "word_index_when_recorded": 93
+  },
+  {
+    "key": "53|insertion_deletion|דמלת",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 53,
+    "detector": "insertion_deletion",
+    "stored": "דמלת",
+    "word_index_when_recorded": 25
+  },
+  {
+    "key": "54|insertion_deletion|אתאכל",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 54,
+    "detector": "insertion_deletion",
+    "stored": "אתאכל",
+    "word_index_when_recorded": 65
+  },
+  {
+    "key": "54|insertion_deletion|אתאכל|#2",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 54,
+    "detector": "insertion_deletion",
+    "stored": "אתאכל",
+    "word_index_when_recorded": 232
+  },
+  {
+    "key": "54|insertion_deletion|יחזו",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 54,
+    "detector": "insertion_deletion",
+    "stored": "יחזו",
+    "word_index_when_recorded": 510
+  },
+  {
+    "key": "54|insertion_deletion|ושפתים",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 54,
+    "detector": "insertion_deletion",
+    "stored": "ושפתים",
+    "word_index_when_recorded": 985
+  },
+  {
+    "key": "59|insertion_deletion|כוותה",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 59,
+    "detector": "insertion_deletion",
+    "stored": "כוותה",
+    "word_index_when_recorded": 47
+  },
+  {
+    "key": "62|substitution|קדימת",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 62,
+    "detector": "substitution",
+    "stored": "קדימת",
+    "word_index_when_recorded": 99
+  },
+  {
+    "key": "62|substitution|קדימת|#2",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 62,
+    "detector": "substitution",
+    "stored": "קדימת",
+    "word_index_when_recorded": 123
+  },
+  {
+    "key": "62|substitution|קדימת|#3",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 62,
+    "detector": "substitution",
+    "stored": "קדימת",
+    "word_index_when_recorded": 202
+  },
+  {
+    "key": "64|insertion_deletion|ארחין",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 64,
+    "detector": "insertion_deletion",
+    "stored": "ארחין",
+    "word_index_when_recorded": 71
+  },
+  {
+    "key": "64|insertion_deletion|היבין",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 64,
+    "detector": "insertion_deletion",
+    "stored": "היבין",
+    "word_index_when_recorded": 153
+  },
+  {
+    "key": "64|substitution|היבין",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 64,
+    "detector": "substitution",
+    "stored": "היבין",
+    "word_index_when_recorded": 153
+  },
+  {
+    "key": "69|substitution|ומרן",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 69,
+    "detector": "substitution",
+    "stored": "ומרן",
+    "word_index_when_recorded": 396
+  },
+  {
+    "key": "71|substitution|דעים",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 71,
+    "detector": "substitution",
+    "stored": "דעים",
+    "word_index_when_recorded": 55
+  },
+  {
+    "key": "74|insertion_deletion|שלהי",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 74,
+    "detector": "insertion_deletion",
+    "stored": "שלהי",
+    "word_index_when_recorded": 150
+  },
+  {
+    "key": "74|insertion_deletion|שרבא",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 74,
+    "detector": "insertion_deletion",
+    "stored": "שרבא",
+    "word_index_when_recorded": 671
+  },
+  {
+    "key": "74|substitution|שרבא",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 74,
+    "detector": "substitution",
+    "stored": "שרבא",
+    "word_index_when_recorded": 671
+  },
+  {
+    "key": "76|substitution|תמהים",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 76,
+    "detector": "substitution",
+    "stored": "תמהים",
+    "word_index_when_recorded": 7
+  },
+  {
+    "key": "79|substitution|בדוקא",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 79,
+    "detector": "substitution",
+    "stored": "בדוקא",
+    "word_index_when_recorded": 37
+  },
+  {
+    "key": "88|insertion_deletion|דאמתניתין",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 88,
+    "detector": "insertion_deletion",
+    "stored": "דאמתניתין",
+    "word_index_when_recorded": 140
+  },
+  {
+    "key": "88|substitution|דאומנין",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 88,
+    "detector": "substitution",
+    "stored": "דאומנין",
+    "word_index_when_recorded": 1133
+  },
+  {
+    "key": "92|insertion_deletion|דהלא",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 92,
+    "detector": "insertion_deletion",
+    "stored": "דהלא",
+    "word_index_when_recorded": 346
+  },
+  {
+    "key": "92|insertion_deletion|לרבנו",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 92,
+    "detector": "insertion_deletion",
+    "stored": "לרבנו",
+    "word_index_when_recorded": 468
+  },
+  {
+    "key": "94|substitution|דתלמוד",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 94,
+    "detector": "substitution",
+    "stored": "דתלמוד",
+    "word_index_when_recorded": 697
+  },
+  {
+    "key": "97|substitution|ומרן",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 97,
+    "detector": "substitution",
+    "stored": "ומרן",
+    "word_index_when_recorded": 390
+  },
+  {
+    "key": "103|insertion_deletion|בעשין",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 103,
+    "detector": "insertion_deletion",
+    "stored": "בעשין",
+    "word_index_when_recorded": 108
+  },
+  {
+    "key": "103|substitution|דעים",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 103,
+    "detector": "substitution",
+    "stored": "דעים",
+    "word_index_when_recorded": 54
+  },
+  {
+    "key": "128|insertion_deletion|שישית",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 128,
+    "detector": "insertion_deletion",
+    "stored": "שישית",
+    "word_index_when_recorded": 102
+  },
+  {
+    "key": "131|substitution|דתבריה",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 131,
+    "detector": "substitution",
+    "stored": "דתבריה",
+    "word_index_when_recorded": 58
+  },
+  {
+    "key": "138|insertion_deletion|ארינן",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 138,
+    "detector": "insertion_deletion",
+    "stored": "ארינן",
+    "word_index_when_recorded": 104
+  },
+  {
+    "key": "138|insertion_deletion|ויתכן",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 138,
+    "detector": "insertion_deletion",
+    "stored": "ויתכן",
+    "word_index_when_recorded": 173
+  },
+  {
+    "key": "143|substitution|דגולה",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 143,
+    "detector": "substitution",
+    "stored": "דגולה",
+    "word_index_when_recorded": 545
+  },
+  {
+    "key": "143|substitution|דגולה|#2",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 143,
+    "detector": "substitution",
+    "stored": "דגולה",
+    "word_index_when_recorded": 650
+  },
+  {
+    "key": "144|insertion_deletion|מעצמנו",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 144,
+    "detector": "insertion_deletion",
+    "stored": "מעצמנו",
+    "word_index_when_recorded": 5
+  },
+  {
+    "key": "144|insertion_deletion|מיקח",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 144,
+    "detector": "insertion_deletion",
+    "stored": "מיקח",
+    "word_index_when_recorded": 531
+  },
+  {
+    "key": "144|insertion_deletion|יקיח",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 144,
+    "detector": "insertion_deletion",
+    "stored": "יקיח",
+    "word_index_when_recorded": 534
+  },
+  {
+    "key": "144|insertion_deletion|שלעת",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 144,
+    "detector": "insertion_deletion",
+    "stored": "שלעת",
+    "word_index_when_recorded": 824
+  },
+  {
+    "key": "144|insertion_deletion|העיון",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 144,
+    "detector": "insertion_deletion",
+    "stored": "העיון",
+    "word_index_when_recorded": 1095
+  },
+  {
+    "key": "144|substitution|וסרה",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 144,
+    "detector": "substitution",
+    "stored": "וסרה",
+    "word_index_when_recorded": 592
+  },
+  {
+    "key": "144|substitution|התלמודים",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 144,
+    "detector": "substitution",
+    "stored": "התלמודים",
+    "word_index_when_recorded": 714
+  },
+  {
+    "key": "148|insertion_deletion|בעשין",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 148,
+    "detector": "insertion_deletion",
+    "stored": "בעשין",
+    "word_index_when_recorded": 127
+  },
+  {
+    "key": "148|substitution|כאיסורי",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 148,
+    "detector": "substitution",
+    "stored": "כאיסורי",
+    "word_index_when_recorded": 139
+  },
+  {
+    "key": "149|insertion_deletion|מכללי",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 149,
+    "detector": "insertion_deletion",
+    "stored": "מכללי",
+    "word_index_when_recorded": 203
+  },
+  {
+    "key": "149|substitution|מכללי",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 149,
+    "detector": "substitution",
+    "stored": "מכללי",
+    "word_index_when_recorded": 203
+  },
+  {
+    "key": "150|insertion_deletion|ואיתה",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 150,
+    "detector": "insertion_deletion",
+    "stored": "ואיתה",
+    "word_index_when_recorded": 328
+  },
+  {
+    "key": "150|substitution|ואיתה",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 150,
+    "detector": "substitution",
+    "stored": "ואיתה",
+    "word_index_when_recorded": 328
+  },
+  {
+    "key": "150|substitution|מקטי",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 150,
+    "detector": "substitution",
+    "stored": "מקטי",
+    "word_index_when_recorded": 684
+  },
+  {
+    "key": "150|substitution|דאידו",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 150,
+    "detector": "substitution",
+    "stored": "דאידו",
+    "word_index_when_recorded": 758
+  },
+  {
+    "key": "153|insertion_deletion|דבטעמא",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 153,
+    "detector": "insertion_deletion",
+    "stored": "דבטעמא",
+    "word_index_when_recorded": 42
+  },
+  {
+    "key": "154|insertion_deletion|אכללין",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 154,
+    "detector": "insertion_deletion",
+    "stored": "אכללין",
+    "word_index_when_recorded": 80
+  },
+  {
+    "key": "162|insertion_deletion|בהרב",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 162,
+    "detector": "insertion_deletion",
+    "stored": "בהרב",
+    "word_index_when_recorded": 112
+  },
+  {
+    "key": "162|insertion_deletion|וקושיא",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 162,
+    "detector": "insertion_deletion",
+    "stored": "וקושיא",
+    "word_index_when_recorded": 166
+  },
+  {
+    "key": "162|substitution|בהרב",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 162,
+    "detector": "substitution",
+    "stored": "בהרב",
+    "word_index_when_recorded": 112
+  },
+  {
+    "key": "163|insertion_deletion|לישבש",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 163,
+    "detector": "insertion_deletion",
+    "stored": "לישבש",
+    "word_index_when_recorded": 329
+  },
+  {
+    "key": "163|insertion_deletion|ושגם",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 163,
+    "detector": "insertion_deletion",
+    "stored": "ושגם",
+    "word_index_when_recorded": 354
+  },
+  {
+    "key": "166|insertion_deletion|דפליגו",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 166,
+    "detector": "insertion_deletion",
+    "stored": "דפליגו",
+    "word_index_when_recorded": 31
+  },
+  {
+    "key": "166|substitution|דפליגו",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 166,
+    "detector": "substitution",
+    "stored": "דפליגו",
+    "word_index_when_recorded": 31
+  },
+  {
+    "key": "167|insertion_deletion|תלתי",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 167,
+    "detector": "insertion_deletion",
+    "stored": "תלתי",
+    "word_index_when_recorded": 827
+  },
+  {
+    "key": "167|substitution|ומרן",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 167,
+    "detector": "substitution",
+    "stored": "ומרן",
+    "word_index_when_recorded": 441
+  },
+  {
+    "key": "169|insertion_deletion|שרבא",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 169,
+    "detector": "insertion_deletion",
+    "stored": "שרבא",
+    "word_index_when_recorded": 446
+  },
+  {
+    "key": "169|insertion_deletion|ואוף",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 169,
+    "detector": "insertion_deletion",
+    "stored": "ואוף",
+    "word_index_when_recorded": 529
+  },
+  {
+    "key": "169|substitution|שרבא",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 169,
+    "detector": "substitution",
+    "stored": "שרבא",
+    "word_index_when_recorded": 446
+  },
+  {
+    "key": "176|insertion_deletion|בבריתא",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 176,
+    "detector": "insertion_deletion",
+    "stored": "בבריתא",
+    "word_index_when_recorded": 198
+  },
+  {
+    "key": "176|insertion_deletion|ואיין",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 176,
+    "detector": "insertion_deletion",
+    "stored": "ואיין",
+    "word_index_when_recorded": 555
+  },
+  {
+    "key": "177|insertion_deletion|ושלהכי",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 177,
+    "detector": "insertion_deletion",
+    "stored": "ושלהכי",
+    "word_index_when_recorded": 161
+  },
+  {
+    "key": "177|insertion_deletion|למיפך",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 177,
+    "detector": "insertion_deletion",
+    "stored": "למיפך",
+    "word_index_when_recorded": 342
+  },
+  {
+    "key": "177|insertion_deletion|דמתניין",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 177,
+    "detector": "insertion_deletion",
+    "stored": "דמתניין",
+    "word_index_when_recorded": 482
+  },
+  {
+    "key": "177|insertion_deletion|מתניי",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 177,
+    "detector": "insertion_deletion",
+    "stored": "מתניי",
+    "word_index_when_recorded": 550
+  },
+  {
+    "key": "177|substitution|שטתה",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 177,
+    "detector": "substitution",
+    "stored": "שטתה",
+    "word_index_when_recorded": 310
+  },
+  {
+    "key": "177|substitution|מתניי",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 177,
+    "detector": "substitution",
+    "stored": "מתניי",
+    "word_index_when_recorded": 550
+  },
+  {
+    "key": "179|insertion_deletion|שתרץ",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 179,
+    "detector": "insertion_deletion",
+    "stored": "שתרץ",
+    "word_index_when_recorded": 267
+  },
+  {
+    "key": "183|insertion_deletion|שישרים",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 183,
+    "detector": "insertion_deletion",
+    "stored": "שישרים",
+    "word_index_when_recorded": 352
+  },
+  {
+    "key": "183|substitution|חוות",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 183,
+    "detector": "substitution",
+    "stored": "חוות",
+    "word_index_when_recorded": 199
+  },
+  {
+    "key": "191|insertion_deletion|ואוף",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 191,
+    "detector": "insertion_deletion",
+    "stored": "ואוף",
+    "word_index_when_recorded": 137
+  },
+  {
+    "key": "197|insertion_deletion|וכנראה",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 197,
+    "detector": "insertion_deletion",
+    "stored": "וכנראה",
+    "word_index_when_recorded": 319
+  },
+  {
+    "key": "198|insertion_deletion|דאלאו",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 198,
+    "detector": "insertion_deletion",
+    "stored": "דאלאו",
+    "word_index_when_recorded": 40
+  },
+  {
+    "key": "198|insertion_deletion|דאלאו|#2",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 198,
+    "detector": "insertion_deletion",
+    "stored": "דאלאו",
+    "word_index_when_recorded": 318
+  },
+  {
+    "key": "198|insertion_deletion|ממלתא",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 198,
+    "detector": "insertion_deletion",
+    "stored": "ממלתא",
+    "word_index_when_recorded": 831
+  },
+  {
+    "key": "198|insertion_deletion|שתמנה",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 198,
+    "detector": "insertion_deletion",
+    "stored": "שתמנה",
+    "word_index_when_recorded": 1036
+  },
+  {
+    "key": "200|insertion_deletion|עיונו",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 200,
+    "detector": "insertion_deletion",
+    "stored": "עיונו",
+    "word_index_when_recorded": 65
+  },
+  {
+    "key": "200|substitution|חוות",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 200,
+    "detector": "substitution",
+    "stored": "חוות",
+    "word_index_when_recorded": 323
+  },
+  {
+    "key": "210|substitution|כקמייתא",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 210,
+    "detector": "substitution",
+    "stored": "כקמייתא",
+    "word_index_when_recorded": 65
+  },
+  {
+    "key": "212|insertion_deletion|הוון",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 212,
+    "detector": "insertion_deletion",
+    "stored": "הוון",
+    "word_index_when_recorded": 1
+  },
+  {
+    "key": "212|insertion_deletion|דהוון",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 212,
+    "detector": "insertion_deletion",
+    "stored": "דהוון",
+    "word_index_when_recorded": 32
+  },
+  {
+    "key": "213|substitution|כהדא",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 213,
+    "detector": "substitution",
+    "stored": "כהדא",
+    "word_index_when_recorded": 41
+  },
+  {
+    "key": "216|insertion_deletion|לרבנו",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 216,
+    "detector": "insertion_deletion",
+    "stored": "לרבנו",
+    "word_index_when_recorded": 263
+  },
+  {
+    "key": "216|insertion_deletion|פרטה",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 216,
+    "detector": "insertion_deletion",
+    "stored": "פרטה",
+    "word_index_when_recorded": 319
+  },
+  {
+    "key": "216|insertion_deletion|מהרב",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 216,
+    "detector": "insertion_deletion",
+    "stored": "מהרב",
+    "word_index_when_recorded": 353
+  },
+  {
+    "key": "216|insertion_deletion|ושגם",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 216,
+    "detector": "insertion_deletion",
+    "stored": "ושגם",
+    "word_index_when_recorded": 555
+  },
+  {
+    "key": "216|substitution|מהרב",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 216,
+    "detector": "substitution",
+    "stored": "מהרב",
+    "word_index_when_recorded": 353
+  },
+  {
+    "key": "216|substitution|שיישב",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 216,
+    "detector": "substitution",
+    "stored": "שיישב",
+    "word_index_when_recorded": 497
+  },
+  {
+    "key": "217|insertion_deletion|שיבאר",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 217,
+    "detector": "insertion_deletion",
+    "stored": "שיבאר",
+    "word_index_when_recorded": 246
+  },
+  {
+    "key": "217|substitution|המאן",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 217,
+    "detector": "substitution",
+    "stored": "המאן",
+    "word_index_when_recorded": 213
+  },
+  {
+    "key": "221|insertion_deletion|דהבו",
+    "ts": "2026-09-09T05:43:52.198488+00:00",
+    "note": "vision-adjudicated 2026-09-09 (item 0DU): the ink reads the stored text. These detectors argue from frequency; 166 of 166 hypotheses below the review tier came back as the stored word.",
+    "klal_id": 221,
+    "detector": "insertion_deletion",
+    "stored": "דהבו",
+    "word_index_when_recorded": 71
+  }
+]

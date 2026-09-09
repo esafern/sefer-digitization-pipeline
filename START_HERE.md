@@ -39,7 +39,7 @@ loaders, Hebrew helpers) and `pipeline/vision_adjudication_common.py`
 (crop/cache/retry/client). A hand-maintained parallel copy has produced the
 same bug class here more than once.
 
-**Then read Part 2's 37 numbered lessons.** They are rules, not history. The
+**Then read Part 2's 49 numbered lessons.** They are rules, not history. The
 short version of most of them: a check that wasn't run has verified nothing, a
 passing score is not a checked result, and no single confident signal is
 enough.
@@ -1442,6 +1442,37 @@ next incident.
     "Manual queue" and "not corrections anybody made" into "not queue anybody
     made" — renaming English inside comments while doing the identifiers
     correctly. Walking NAME tokens renames identifiers and leaves prose alone.
+
+49. **A FREQUENCY ARGUMENT IS EVIDENCE ABOUT THE LANGUAGE, NOT ABOUT THIS PAGE
+    — so a detector built on one must be adjudicated against the ink before its
+    output is shown to a human.** Reviewer directive, 2026-09-09, measured twice
+    over. Both lexical detectors reason "this word is rare here and one edit from
+    a word that is common in an independent corpus". On 2026-08-26 the
+    independent witnesses contradicted **149 of 262** merged positions. On
+    2026-09-09 every candidate below the review tier was cropped and put to the
+    vision adjudicator: **166 of 166 hypotheses across 126 positions came back as
+    the STORED text**, median confidence 0.98, including all 28 whose proposal is
+    attested ≥1,000× — and including the single highest-ranked finding in the
+    entire report, `דהלא`→`דלא` at 12,899×, which the reviewer had already read
+    off the scan as correct.
+
+    No threshold fixes this, because it is not a tuning problem. This book is a
+    19th-century printing of a halachic reference and is FULL of forms that are
+    rare in a modern reference corpus and perfectly correct on the sheet — so the
+    rarity that makes a candidate look sharp is the same property that makes the
+    book what it is.
+
+    Two consequences, both binding. **Do not widen a frequency-derived tier to
+    surface more material**: `merge_lexical_defects()`'s `REVIEW_MIN_REF` is not
+    a dial to open up, and 563 permanent flags on unread material is how the
+    1,496-flag queue happened. And **route the candidates through vision first**,
+    surfacing only what the ink supports —
+    `verify_flagged_candidates_vision.py --source lexical` adjudicates them and
+    `build_lexical_defect_report.py --acknowledge-from-vision` records the
+    verdict, so a settled position stops coming back. This is Lesson 2 with an
+    instrument named (a passing score is not a checked result) and Lesson 9's
+    two-signal bar applied to a DETECTOR rather than to a fix.
+
 
 ---
 

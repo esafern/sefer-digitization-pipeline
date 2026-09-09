@@ -56,6 +56,18 @@ LEXICAL_PATH = os.path.join(REPO, "lexical_defect_report.json")
 # floor at all gives all 563 - a 53% larger queue of material nobody has read.
 # The whole set stays in lexical_defect_report.json either way; this governs what
 # is put in front of a human, not what is found.
+# AND THE ANSWER TO "SHOULD WE WIDEN IT" IS NO, MEASURED 2026-09-09 (item 0DU).
+# Every candidate this threshold currently EXCLUDES was cropped and put to the
+# vision adjudicator: 166 hypotheses across 126 positions, and **all 166 came
+# back as the STORED text** - including all 28 whose proposal is attested
+# >=1,000x, and including the highest-ranked finding in the whole report
+# (`דהלא`->`דלא` at 12,899x), which the reviewer had already spotted by eye. The
+# adjudicator was checked for its ability to disagree first (Lesson 25).
+#
+# So lowering this number does not surface more real defects; it surfaces more
+# noise, and 563 permanent flags on unread material is how the 1,496-flag queue
+# happened (item 1). If more of this report should reach a reviewer, adjudicate
+# it by vision FIRST and surface only what the ink supports.
 REVIEW_MIN_REF = 500
 REVIEW_MAX_CORPUS_COUNT = 1
 

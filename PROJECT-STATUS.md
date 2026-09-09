@@ -101,6 +101,72 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0DV. **[2026-09-09, reviewer directive] THE LEXICAL DETECTORS ARE DOCUMENTED AS
+    WEAK AND GATED ON VISION, AND THEIR 126 ADJUDICATED POSITIONS ARE CLEARED.
+    UNSURFACED LEXICAL FINDINGS: 126 -> 0.**
+
+    Reviewer: "wire it and document that the tool is nearly useless and must be
+    adj. by vision b4 surfacing to a human."
+
+    ### Wired
+
+    `lexical_defect_report.json` was the last triage report with no
+    acknowledgement store (`0DN` left it, deliberately, pending the tier
+    decision `0DU` has now made). It uses the same `pipeline/triage_ack.py` as
+    the structural, title and ligature reports, with its own store
+    `lexical_defect_acknowledged.json`, keyed on content and never an index.
+
+    `--acknowledge-from-vision REPORT` is the intended route and the reason this
+    was worth wiring: it reads a `lexical_vision_report.json` and acknowledges
+    every position the ink read as the STORED text. Two guards, both of which
+    matter more than the convenience:
+
+      * a row carrying an `error` was never adjudicated, so it is NOT
+        acknowledged - recording a check nobody made is the one thing an
+        acknowledgement store must never do;
+      * a position where ANY hypothesis went the other way is excluded and
+        printed, so a single `B` cannot be buried under its own position's other
+        proposals.
+
+    **140 rows acknowledged, covering the 126 positions of `0DU`.** Verified
+    across a full rebuild: 238 candidates, 140 acknowledged, 98 not - and the 98
+    are exactly the ones the review queue already surfaces, so **unsurfaced
+    lexical positions are 126 -> 0**. That was the whole of the remaining
+    unsurfaced set.
+
+    ### Documented, in the four places someone would actually look
+
+    Not one note in a status file. The verdict now sits where a reader arrives:
+
+      * **`tools/detect_insertion_deletion.py` and
+        `tools/detect_real_word_substitution.py`** - a banner at the top of each,
+        before the code, saying the output must be vision-adjudicated before it
+        is surfaced, with both measurements.
+      * **`pipeline/build_lexical_defect_report.py`** - the same, plus the two
+        commands that adjudicate and record.
+      * **`pipeline/assemble_corrections_dataset.py`, on `REVIEW_MIN_REF`
+        itself** - the constant somebody would reach for to widen the tier, now
+        carrying the measurement that says not to.
+      * **`START_HERE.md` Lesson 49** - because it is a rule, not history.
+
+    ### Lesson 49, and it generalises past this book
+
+    "A frequency argument is evidence about the LANGUAGE, not about THIS PAGE."
+    No threshold fixes it, because it is not a tuning problem: this book is a
+    19th-century printing of a halachic reference and is full of forms that are
+    rare in a modern reference corpus and correct on the sheet - so the rarity
+    that makes a candidate look sharp is the same property that makes the book
+    what it is. For a pipeline meant to generalise to other historical texts,
+    that is the part worth carrying.
+
+    ### Corrected on the way
+
+    `START_HERE.md`'s TL;DR said "Part 2's 37 numbered lessons"; there are 49. A
+    first attempt at fixing it wrote **63** - a regex counting every `^N. **` in
+    the file, which swept up the TL;DR's own numbered lists. Caught by reading
+    the number back instead of trusting the edit, which is the same discipline
+    this item is about.
+
 0DU. **[2026-09-09] VISION PASS OVER THE UNSURFACED LEXICAL FINDINGS. THE INK
     AGREES WITH THE CORPUS ON ALL 126 POSITIONS - 166 OF 166 HYPOTHESES. THE TIER
     THRESHOLD IS DOING ITS JOB AND SHOULD NOT BE WIDENED.**
