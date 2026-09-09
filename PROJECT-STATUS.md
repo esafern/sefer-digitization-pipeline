@@ -101,6 +101,48 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0EU. **[2026-09-10] FETCHING TANAKH INVALIDATED THE SHARED REFERENCE CACHE FOR
+    YAD MALACHI'S DETECTORS. NOT REBUILT - THAT IS THE REVIEWER'S CALL.**
+
+    `sefaria_reference_corpus/` is SHARED between books: it sits beside the code,
+    not in a corpus root, and `word_freq.json` is the attestation table several
+    Yad Malachi detectors reason against. Item `0EN` added 39 Tanakh books to it
+    for HaShorashim, so:
+
+        books cached in word_freq.json   166
+        books on disk now                205
+        on disk but not in the cache      39
+
+    `tools/detect_split_merge.py` noticed by itself and refused to run -
+    "built by a different extractor version or from a different set of books ...
+    Skipping truncated-word completion rather than scoring against a corpus of
+    unknown shape". That is the right behaviour and it is why this is a flagged
+    item rather than a silent corruption.
+
+    **Rebuilding it is NOT a neutral refresh and I have not done it.** The table
+    decides what counts as attested Hebrew, so adding the Bible makes forms
+    attested that were not, and every lexical measurement Yad Malachi has on
+    record - including item `0DU`'s "166 of 166 came back as the stored text" and
+    the 6.18M-word figures cited in Lesson 38 - was computed against the 166-book
+    table. Rebuilding changes the basis of those numbers without changing the
+    text they describe.
+
+    Two defensible options, and the choice is a judgement about the deliverable
+    book rather than a technical one:
+
+    1. **Rebuild to 205 books.** Yad Malachi quotes Tanakh constantly too, so the
+       larger table is arguably the better instrument - but every recorded
+       lexical figure becomes non-comparable and should be re-measured.
+    2. **Keep the reference corpus per-register**, as
+       `fetch_sefaria_reference_corpus.py --register` now allows, with a separate
+       frequency table per book. More faithful to each book's language, and it
+       leaves Yad Malachi's recorded measurements standing.
+
+    I would take (2) - a register is a property of the book, which is the same
+    reasoning that moved book identity into `book.json` - but it is not my call
+    to make on the deliverable, and until it is made `detect_split_merge.py` is
+    inert for BOTH books.
+
 0ET. **[2026-09-10] A HUMAN-SUPERVISED WITNESS YIELDS 36% REAL CORPUS ERRORS
     WHERE THE LEXICAL DETECTORS YIELDED 0%. THAT IS THE ARGUMENT FOR THE
     COLLABORATION, MEASURED.**

@@ -182,7 +182,7 @@ def load_flagged_candidates(decisions_path=None):
     return out
 
 
-def load_witness_disputes(path=None, classes=None, limit_per_class=None):
+def load_witness_disputes(path=None, classes=None, limit_per_class=None, seed=None):
     """Disputes raised by an INDEPENDENT witness, as (position, hypothesis) pairs.
 
     Added 2026-09-10 for Sefer HaShorashim, whose own extractor cannot check it
@@ -206,6 +206,13 @@ def load_witness_disputes(path=None, classes=None, limit_per_class=None):
     with open(path, encoding="utf-8") as fh:
         rows = json.load(fh)["disputes"]
     classes = classes or ("one_letter", "footnote_numeral", "other")
+    if seed is not None:
+        # RANDOMISE BEFORE CAPPING. Taking the first N per class walks the corpus
+        # in klal order, so the sample concentrates in the opening entries of one
+        # letter - that is a sample that selected itself (Lesson 27) and its rate
+        # describes the selection, not the queue.
+        import random
+        random.Random(seed).shuffle(rows)
     out, per = [], collections.Counter()
     for r in rows:
         if r.get("editorial") or r.get("class") not in classes:
@@ -484,6 +491,9 @@ def main():
     ap.add_argument("--dry-run", action="store_true",
                      help="locate + crop only, no Gemini calls, no cache writes")
     ap.add_argument("--limit", type=int, default=None, help="process only the first N candidates")
+    ap.add_argument("--seed", type=int, default=None,
+                    help="--source witness: shuffle with this seed before capping, "
+                         "so the sample is random rather than the first N in klal order")
     ap.add_argument("--per-class", type=int, default=None,
                     help="--source witness: cap candidates per dispute class, for "
                          "a bounded measurement rather than a full pass")
@@ -501,7 +511,8 @@ def main():
     regions = load_regions()
 
     if args.source == "witness":
-        candidates = load_witness_disputes(limit_per_class=args.per_class)
+        candidates = load_witness_disputes(limit_per_class=args.per_class,
+                                           seed=args.seed)
         print(f"Loaded {len(candidates)} witness disputes "
               f"(replace-opcode, non-editorial, excluding join/split).")
     elif args.source == "lexical":

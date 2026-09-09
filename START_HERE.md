@@ -64,7 +64,7 @@ specific shape where that can reasonably be avoided. Prefer parameterized,
 documented, reusable scripts (the `pipeline/`+`tools/` shared-library
 pattern below) over quick one-off scripts.
 
-Its first, and so far only fully-built-out, application is **Yad Malachi**
+Its first and still only *deliverable* application is **Yad Malachi**
 (R. Malachi ben Jacob HaKohen, Livorno 1766–7), a foundational
 halachic-methodology reference in three parts. **The digitized corpus is its
 part one, *Klalei HaGemara*, complete: 667 *klalim*, scan pages 14-247.** The
@@ -214,6 +214,17 @@ corrected text come from one source and every difference between them is
 enumerable (item `0DA`). **The answer to "little intervention" is not to
 intervene less than the text needs — it is to make every intervention auditable
 and separable.**
+
+**A second book is now in the pipeline: Sefer HaShorashim of Ibn Janah** (Ibn
+Tibbon's Hebrew, ed. Bacher, Berlin 1896), in its own corpus root at
+`~/work/hashorashim`, driven by this same code through `$SEFER_CORPUS_ROOT`. It
+is **Sefaria's own live project, not one this repo chose** — see
+`PROJECT-STATUS.md` item `0EE`. It does not displace Yad Malachi as the
+deliverable. The thing to know before touching either book: several artifacts
+this pipeline treated as universal turned out to be per-BOOK — `book.json`'s
+identity AND its `scan_pdf`, `lexicon.txt`'s register, the entry anchor (a
+gematria marker in one book, spelled-out letter names in the other), and the
+page furniture. Items `0EC`-`0EU` record which, and what each one broke.
 
 A second consequence, and it governs scope: **the deliverable is Part 1 only.**
 Parts 2 and 3 have not been extracted, and any earlier work on them is to be
@@ -388,11 +399,19 @@ For exactly what each data file contains, see `PIPELINE-DATA-REFERENCE.md`.
   `llm_klal_starts/`, `sefaria_export/`, `vlm_extractions/`,
   `images/pdf_pages/`, `scratch/`, `sefaria_reference_corpus/` — gitignored
   caches/intermediates, not present on a fresh clone. "Regenerable" is
-  aspirational for some of these, not a guarantee — `images/pdf_pages/`
-  (the review dashboard's scan-page images) has no live rendering script at
-  all (confirmed 2026-08-18, after its absence broke the dashboard's scan
-  pane on a fresh migration); it must be migrated as a pre-built cache, the
-  same as the others with no generator. See `SETUP.md` for how to get them,
+  aspirational for some of these, not a guarantee — but two of the worst cases
+  were closed on 2026-09-10. `images/pdf_pages/` (the review dashboard's
+  scan-page images) had NO rendering script at all until then, and its absence
+  broke the dashboard's scan pane on a fresh migration (2026-08-18);
+  `tools/render_pdf_pages.py` is one now, rendering at the migrated cache's own
+  150 DPI (verified to reproduce a migrated page at pixel correlation 1.0000)
+  with `--verify` checking each page against `docai_word_boxes/` by content.
+  `part1_header_anchored_alignment.json` had no producer either;
+  `tools/build_header_alignment.py` is one — **but it refuses to write Yad
+  Malachi's**, because it takes the page from `part1.json`'s `page` field, which
+  is stale there, and writing it would roll back the transposed-leaf fix (item
+  `0EP`). So Yad Malachi's alignment remains a migrated cache with no
+  regenerator, and that is the honest state. See `SETUP.md` for how to get them,
   and `tools/verify_local_setup.py` to confirm they actually landed.
 - `.gemini/rules/` — Gemini CLI's equivalent of Part 2 below; this project
   has been worked on from both Claude Code and Gemini CLI, so check both

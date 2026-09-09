@@ -68,7 +68,17 @@ ALEPHBET = "אבגדהוזחטיכלמנסעפצקרשת"
 FINALS = str.maketrans("ךםןףץ", "כמנפצ")
 POINTS = re.compile(r"[֑-ׇ]")
 RANGE = re.compile(r"([א-ת]{2,5})\s*[-–]\s*([א-ת]{2,5})")
-MIN_LEX = 0.55        # a page below this is gibberish OCR, whatever its head says
+# A page below this is gibberish OCR whatever its head says - a floor against a
+# damaged or badly-scanned page, not a quality dial.
+#
+# IT HAS NEVER FIRED AND IS UNTESTED ON REAL DATA. Measured over the א-ב-ג slice
+# (94 pages): min 0.844, 5th percentile 0.864, median 0.912, max 0.965. Nothing
+# comes within 0.29 of the threshold, so every `trusted: false` in this book's
+# alignment is the root-range test, never this one. Recorded rather than removed
+# or retuned: a guard that has not fired is an unanswered question (Lesson 42),
+# and the honest answer here is that this slice contains no page it was meant to
+# catch - not that the guard works. Do not cite it as a passing check.
+MIN_LEX = 0.55
 
 
 def root_key(text):

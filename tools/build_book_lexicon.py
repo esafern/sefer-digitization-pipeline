@@ -145,6 +145,8 @@ def main():
                            "lexicon built from the corpus contains the corruptions "
                            "it is meant to detect."},
                   fh, ensure_ascii=False, indent=1)
+        fh.flush()
+        os.fsync(fh.fileno())
     print(f"  wrote        {meta}")
     return 0
 
