@@ -81,6 +81,27 @@ RANGE = re.compile(r"([א-ת]{2,5})\s*[-–]\s*([א-ת]{2,5})")
 MIN_LEX = 0.55
 
 
+def load_lexicon_or_explain():
+    """The corpus root's lexicon, or a message naming what builds it.
+
+    A bare FileNotFoundError on a fresh corpus root is the same defect this
+    session fixed in build_klal_page_regions.py and assemble_corrections_dataset.py
+    (item 0EQ) - and then reproduced here, in a tool written after that fix. The
+    class is: a missing per-book artifact reported as a stack trace rather than as
+    an instruction (Lesson 34 SWEEP THE SIBLINGS, where the sibling was my own
+    next file).
+    """
+    path = cio.LEXICON_PATH
+    if not os.path.exists(path):
+        raise SystemExit(
+            f"no lexicon at {path}\n"
+            f"  Build one for this book:  python3 tools/build_book_lexicon.py\n"
+            f"  (the register matters - a dictionary of the Bible needs Tanakh, "
+            f"item 0EN)")
+    with open(path, encoding="utf-8") as fh:
+        return {l.strip() for l in fh if l.strip()}
+
+
 def root_key(text):
     """Sort position of a root, folding finals - a root is written non-final."""
     r = POINTS.sub("", unicodedata.normalize("NFKC", text)).translate(FINALS)
@@ -141,8 +162,7 @@ def main():
     args = ap.parse_args()
 
     klalim = cio.load_klalim(cio.PART1_PATH)
-    with open(cio.LEXICON_PATH, encoding="utf-8") as fh:
-        lexicon = {l.strip() for l in fh if l.strip()}
+    lexicon = load_lexicon_or_explain()
 
     pages = sorted({k.get("page") for k in klalim if k.get("page")})
     if args.pages:

@@ -101,6 +101,48 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0EV. **[2026-09-10] THE REMAINING GAP FOR THE DEMO: THE DASHBOARD CANNOT SHOW
+    THE ONLY QUEUE WORTH SHOWING. NOT STARTED, DELIBERATELY.**
+
+    The Sefaria editor asked to try the review dashboard. Everything the
+    dashboard needs for HaShorashim now exists - corpus, regions, alignment, page
+    images, word ids, lexicon - with one exception, and it is the important one.
+
+    `review_server.py` builds its flag overlay from `review_queue_part1.json`,
+    which comes from `assemble_corrections_dataset.py`, which comes from the
+    DocAI-vs-corpus diff. **For this book that diff is vacuous** (item `0ER`):
+    346 candidates, zero reading differences. So the dashboard would open, render
+    the scan, highlight nothing worth ruling on, and look like a clean book.
+
+    The queue with real content is `witness_disputes.json` - 3,373 rows, ~23% of
+    which the vision adjudicator confirms as genuine corpus errors - and the
+    server has no route to it.
+
+    **Why I did not build it tonight.** It means changing `review_server.py` or
+    its data layer, and this repo's standing rule is to restart the dashboard on
+    any change to the server OR anything it imports. The reviewer's Yad Malachi
+    dashboard is running on :8420 and is the live review tool; a second book
+    cannot bind that port and a half-finished server change made unattended could
+    take the deliverable book's review offline. That is not a risk worth taking
+    without someone awake.
+
+    ### The shape it should take
+
+    Not a new pane. `review_queue_part1.json` is a rebuild-owned derived file, so
+    the cheapest correct route is a SECOND queue source that the assembler merges,
+    with each entry carrying which witness raised it - the dashboard already
+    distinguishes `cross_edition` and `same_edition_agreeing` for Dicta (Lesson
+    38), and a human-supervised witness deserves at least that much labelling. A
+    reviewer should be able to see "Sefaria's transcription reads X here" as a
+    different kind of claim from "Surya reads X here".
+
+    Two things to settle before writing it: whether a witness dispute enters the
+    same queue as a candidate correction or a parallel one, and whether the
+    vision verdict is shown as a pre-filter (only surfacing the ~23% the ink
+    supports) or as an annotation on all of them. Lesson 49 argues for the first;
+    item `0DV`'s "563 permanent flags on unread material" argues loudly for not
+    surfacing 3,373 rows to a human at all.
+
 0EU. **[2026-09-10] FETCHING TANAKH INVALIDATED THE SHARED REFERENCE CACHE FOR
     YAD MALACHI'S DETECTORS. NOT REBUILT - THAT IS THE REVIEWER'S CALL.**
 
