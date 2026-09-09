@@ -36,6 +36,7 @@
 # parsing/locating/cropping with zero API calls; drop --dry-run to actually
 # call Gemini (costs real API budget - the whole point of the flag).
 import argparse
+import collections
 import json
 import os
 import re
@@ -178,6 +179,46 @@ def load_flagged_candidates(decisions_path=None):
         seen.add(key)
         out.append({"klal_id": klal_id, "word_index": word_index, "original": original,
                     "candidate": candidate, "reviewer": "manual-override", "decision_id": None})
+    return out
+
+
+def load_witness_disputes(path=None, classes=None, limit_per_class=None):
+    """Disputes raised by an INDEPENDENT witness, as (position, hypothesis) pairs.
+
+    Added 2026-09-10 for Sefer HaShorashim, whose own extractor cannot check it
+    (item 0ER): the corpus IS DocAI's output, so `build_corrections_dataset.py`
+    produced 346 candidates with zero reading differences in them. The disputes
+    come from `tools/build_witness_disputes.py` instead.
+
+    Routing them through vision BEFORE a reviewer sees them is Lesson 49
+    (FREQUENCY IS NOT THIS PAGE) applied to a witness rather than a frequency
+    table: a second source disagreeing says the position is worth looking at, not
+    which reading is right. Item 0DU measured 166 of 166 lexically-derived
+    hypotheses coming back as the STORED text once cropped; a human-supervised
+    witness should do better than that, and the point of this pass is to find out
+    by how much rather than to assume.
+
+    `join_split` is excluded by default: a different word division is not a
+    disputed reading and cropping one would ask the model a question the crop
+    cannot answer.
+    """
+    path = path or cio.repo_path("witness_disputes.json")
+    with open(path, encoding="utf-8") as fh:
+        rows = json.load(fh)["disputes"]
+    classes = classes or ("one_letter", "footnote_numeral", "other")
+    out, per = [], collections.Counter()
+    for r in rows:
+        if r.get("editorial") or r.get("class") not in classes:
+            continue
+        if r["opcode"] != "replace" or not r["corpus"] or not r["witness_reading"]:
+            continue
+        if limit_per_class and per[r["class"]] >= limit_per_class:
+            continue
+        per[r["class"]] += 1
+        out.append({"klal_id": r["klal_id"], "word_index": r["word_index"],
+                    "original": r["corpus"], "candidate": r["witness_reading"],
+                    "reviewer": "witness:" + r["witness"], "decision_id": None,
+                    "dispute_class": r["class"]})
     return out
 
 
@@ -443,7 +484,10 @@ def main():
     ap.add_argument("--dry-run", action="store_true",
                      help="locate + crop only, no Gemini calls, no cache writes")
     ap.add_argument("--limit", type=int, default=None, help="process only the first N candidates")
-    ap.add_argument("--source", choices=("flagged", "lexical"), default="flagged",
+    ap.add_argument("--per-class", type=int, default=None,
+                    help="--source witness: cap candidates per dispute class, for "
+                         "a bounded measurement rather than a full pass")
+    ap.add_argument("--source", choices=("flagged", "lexical", "witness"), default="flagged",
                     help="which candidate set to adjudicate: the 2026-08-16 flag batches "
                          "(default) or the lexical defect report (item 0DU)")
     ap.add_argument("--all-tiers", action="store_true",
@@ -456,7 +500,11 @@ def main():
     word_counts = {kid: len(k["clean_text"].split()) for kid, k in klalim_by_id.items()}
     regions = load_regions()
 
-    if args.source == "lexical":
+    if args.source == "witness":
+        candidates = load_witness_disputes(limit_per_class=args.per_class)
+        print(f"Loaded {len(candidates)} witness disputes "
+              f"(replace-opcode, non-editorial, excluding join/split).")
+    elif args.source == "lexical":
         candidates = load_lexical_defect_candidates(unsurfaced_only=not args.all_tiers)
         print(f"Loaded {len(candidates)} candidate (position, hypothesis) pairs from "
               f"lexical_defect_report.json"
@@ -507,7 +555,7 @@ def main():
 
     if args.dry_run:
         import fitz
-        doc = fitz.open(vcv.PDF_PATH)
+        doc = fitz.open(vcv.pdf_path())
         crop_dir = os.path.join(REPO, "scratch", "flagged_candidate_crops_dryrun")
         os.makedirs(crop_dir, exist_ok=True)
         for i, c in enumerate(located[:5]):
@@ -526,7 +574,7 @@ def main():
         raise SystemExit("GEMINI_API_KEY not set")
     client = build_client(api_key)
     vcv.init_cache()
-    doc = fitz.open(vcv.PDF_PATH)
+    doc = fitz.open(vcv.pdf_path())
 
     # SOURCE-SPECIFIC OUTPUT. REPORT_PATH names the 2026-08-16 flag batches'
     # report; a lexical run writing there would silently replace a different

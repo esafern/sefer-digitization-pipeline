@@ -7806,6 +7806,29 @@ def test_the_export_names_the_book_from_book_identity_not_from_a_literal(tmp_pat
         cio.set_corpus_root(previous)
 
 
+def test_the_scan_path_is_reached_through_a_function_not_a_module_constant():
+    """Item 0EI moved the scan filename into book.json and turned
+    verify_corrections_vision.PDF_PATH into pdf_path(). Two call sites in
+    tools/verify_flagged_candidates_vision.py still read the constant and died
+    with AttributeError at run time - Lesson 34 SWEEP THE SIBLINGS, one module
+    fixed and its importers not checked.
+
+    Pins both halves: the function exists and resolves through the seam, and no
+    module-level PDF_PATH remains for a caller to pick up again.
+    """
+    sys.path.insert(0, os.path.join(REPO, "pipeline"))
+    import verify_corrections_vision as vcv
+    assert callable(getattr(vcv, "pdf_path", None)), (
+        "verify_corrections_vision.pdf_path() is the seam-resolving accessor")
+    assert not hasattr(vcv, "PDF_PATH"), (
+        "a module-level PDF_PATH is back; it freezes at import and bypasses "
+        "book.json's scan_pdf")
+    src = open(os.path.join(REPO, "tools", "verify_flagged_candidates_vision.py"),
+               encoding="utf-8").read()
+    assert "vcv.PDF_PATH" not in src, "a caller still reads the removed constant"
+    assert vcv.pdf_path().endswith(".pdf")
+
+
 def test_a_book_json_that_omits_a_field_raises_instead_of_borrowing_yad_malachis(tmp_path):
     """Item 0EC: ABSENT and BLANK are different answers, and neither is "the
     other book's value".

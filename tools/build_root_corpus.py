@@ -69,8 +69,36 @@ from detect_root_entries import match_heading, ALEPHBET  # noqa: E402
 LINE_TOL = 0.006          # y distance within which tokens share a line
 SMALL_RATIO = 0.75        # a line is "small type" below this fraction of the page median
 HEAD_MAX_Y = 0.10         # running head sits above this
-FOOT_MIN_Y = 0.75         # catchword + apparatus sit below this
+FOOT_MIN_Y = 0.60         # nothing above this is ever apparatus
+# The apparatus is found as the BOTTOM-UP RUN of small-type lines, not by a fixed
+# y cutoff. A cutoff of 0.75 looked right on p121, where the block starts at
+# 0.790 - and on p139 the apparatus begins at y=0.727 with the numbered
+# references at 0.748, so two lines of scripture citations were classified as
+# body and landed inside klal 262's text:
+#   `תהלים עב ו . 2 עמוס ז א . 3 יחזקאל יח יח . 4 ויקרא ה כג`
+# Their HEIGHT said apparatus all along (ratio 0.59 and 0.67 against a body
+# range of 0.90-1.08); only the y test failed. Found by
+# tools/detect_repeated_words.py flagging `יח יח` and `כח כח` - a cheap
+# mechanical sweep catching what the geometric filter missed (Lesson 8).
 WATERMARK = re.compile(r"Google|Digitized", re.I)
+
+# TWO SIGNALS FOR THE APPARATUS, because neither works alone (Lesson 9).
+# HEIGHT alone fails at the block's top edge: apparatus lines run 0.52-0.80 of
+# the page median and short BODY lines dip to 0.76-0.80 too, because a line's
+# median token height depends on which letters it happens to contain. A 0.75 cut
+# therefore stopped the bottom-up scan early and left two lines of scripture
+# citations inside klal 237 and klal 272.
+# PERIOD DENSITY separates what height cannot: every citation ends in one, so
+# apparatus lines measure 0.20-0.24 periods per token against body's 0.00-0.17.
+# Requiring both keeps a short body line out of the block and pulls the block's
+# top edge in.
+APPARATUS_MAX_RATIO = 0.85
+APPARATUS_MIN_PERIOD_FRAC = 0.19
+
+
+def _period_frac(text):
+    toks = text.split()
+    return (text.count(".") / len(toks)) if toks else 0.0
 
 # A RUNNING HEAD IS IDENTIFIED BY CONTENT, NOT BY TYPE SIZE. This book sets two
 # kinds: the verso `73 ספר השרשים`, which IS small type, and the recto root-range
@@ -113,20 +141,35 @@ def classify(lines):
     heights = [statistics.median([t["y2"] - t["y1"] for t in ln])
                for ln in lines if len(ln) >= 6]
     page_median = statistics.median(heights) if heights else 0.019
-    out = []
+    rows = []
     for ln in lines:
         h = statistics.median([t["y2"] - t["y1"] for t in ln])
         y = ln[0]["y1"]
         text = " ".join(t["text"] for t in ln)
-        small = h < SMALL_RATIO * page_median
+        rows.append([None, y, h, text, ln, h < SMALL_RATIO * page_median])
+
+    # Bottom-up: the trailing run of small-type lines is the apparatus (plus the
+    # catchword, which is also small and sits immediately above it). Stops at the
+    # first full-size line, and never climbs above FOOT_MIN_Y.
+    for r in reversed(rows):
+        label, y, _h, text, _ln, small = r
         if WATERMARK.search(text) or y > 0.94:
-            label = "watermark"
-        elif y < HEAD_MAX_Y and (small or RUNNING_HEAD.match(text)):
-            label = "head"
-        elif small and y > FOOT_MIN_Y:
-            label = "apparatus"
-        else:
-            label = "body"
+            r[0] = "watermark"
+            continue
+        if y > FOOT_MIN_Y and (
+                small or (_h < APPARATUS_MAX_RATIO * page_median
+                          and _period_frac(text) >= APPARATUS_MIN_PERIOD_FRAC)):
+            r[0] = "apparatus"
+            continue
+        break
+
+    out = []
+    for label, y, h, text, ln, small in rows:
+        if label is None:
+            if y < HEAD_MAX_Y and (small or RUNNING_HEAD.match(text)):
+                label = "head"
+            else:
+                label = "body"
         out.append((label, y, h, text, ln))
     return out
 

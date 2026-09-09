@@ -101,6 +101,64 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0ET. **[2026-09-10] A HUMAN-SUPERVISED WITNESS YIELDS 36% REAL CORPUS ERRORS
+    WHERE THE LEXICAL DETECTORS YIELDED 0%. THAT IS THE ARGUMENT FOR THE
+    COLLABORATION, MEASURED.**
+
+    36 disputes from Sefaria's dataset (first 12 of each class) cropped and put
+    to the vision adjudicator via `verify_flagged_candidates_vision.py --source
+    witness`, a new source added to the existing tool rather than a parallel
+    caller:
+
+        A = corpus (ours) correct      23   63.9%
+        B = witness correct, WE ARE WRONG   13   36.1%
+        median confidence               0.98
+
+    By dispute class, which is where it gets useful:
+
+        footnote_numeral    8 B / 4 A     67% real corpus errors
+        one_letter          3 B / 9 A     25%
+        other               2 B / 10 A    17%
+
+    ### Set that against item `0DU`
+
+    On 2026-09-09 the lexical detectors' candidates were cropped and put to the
+    same adjudicator: **166 of 166 came back as the STORED text.** Zero yield,
+    median confidence 0.98, including every candidate whose proposal was attested
+    over a thousand times in an independent corpus. Lesson 49 was written from
+    that result.
+
+    A frequency argument is evidence about the language. **A human-supervised
+    transcription is evidence about this page**, and it is worth 36% against 0%.
+    That is the concrete, measured case for working from Sefaria's dataset rather
+    than around it, and it is worth showing the Sefaria editor: his files are not a
+    convenience, they are the only witness this project has ever had that finds
+    real errors at a usable rate.
+
+    ### The adjudicator's own reasoning names the defect class
+
+    Unprompted, on the first row:
+
+    > "The visible text is 'הנחל' followed by a superscript footnote index number
+    > '1', which raw OCR misidentified as a letter 'י' ('הנחלי')."
+
+    That is item `0ES`'s footnote-numeral class confirmed from the ink rather
+    than from a pattern in the diff, and it is 67% real - by far the highest-yield
+    bucket. 246 such rows exist in א-ב-ג alone.
+
+    ### What this rate is NOT
+
+    **The sample selected itself** (Lesson 27). It is the first 12 rows per class
+    in klal order, so it is concentrated in the opening entries of aleph and is
+    not a random draw from 3,373. The 36% is indicative of the queue's shape, not
+    a population estimate, and the per-class figures rest on 12 rows each. A
+    randomised pass is the way to turn it into a number worth quoting - not done.
+
+    Nothing was applied. The verdicts sit in
+    `~/work/hashorashim/lexical_vision_report.json`; promoting any of them into
+    the corpus is a separate, deliberate step, and for this book it should wait
+    for a reviewer who reads Hebrew.
+
 0ES. **[2026-09-10] A REVIEW QUEUE THAT CAN ACTUALLY DISAGREE: 3,373 DISPUTES
     FROM SEFARIA'S DIGITIZATION, AND A 246-CASE DEFECT CLASS IN OUR OWN TEXT.**
 
