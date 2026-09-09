@@ -61,21 +61,6 @@
       "bbox_estimated": false
     },
     {
-      "klal_id": 18,
-      "page": 20,
-      "opcode": "insert",
-      "word_index_in_final_text": 0,
-      "docai_reading": null,
-      "stored_text": "יח",
-      "bbox": {
-        "x1": 0.8342679142951965,
-        "y1": 0.41807228326797485,
-        "x2": 0.949532687664032,
-        "y2": 0.43493977189064026
-      },
-      "bbox_estimated": true
-    },
-    {
       "klal_id": 19,
       "page": 20,
       "opcode": "replace",
@@ -91,47 +76,17 @@
       "bbox_estimated": false
     },
     {
-      "klal_id": 20,
+      "klal_id": 19,
       "page": 20,
       "opcode": "insert",
-      "word_index_in_final_text": 0,
+      "word_index_in_final_text": 216,
       "docai_reading": null,
       "stored_text": "כ",
       "bbox": {
-        "x1": 0.7919003367424011,
+        "x1": 0.886604368686676,
         "y1": 0.718875527381897,
-        "x2": 0.886604368686676,
+        "x2": 0.916604368686676,
         "y2": 0.7361446022987366
-      },
-      "bbox_estimated": true
-    },
-    {
-      "klal_id": 20,
-      "page": 20,
-      "opcode": "insert",
-      "word_index_in_final_text": 40,
-      "docai_reading": null,
-      "stored_text": "כא",
-      "bbox": {
-        "x1": 0.8878504633903503,
-        "y1": 0.7638553977012634,
-        "x2": 0.9178504633903504,
-        "y2": 0.781124472618103
-      },
-      "bbox_estimated": true
-    },
-    {
-      "klal_id": 22,
-      "page": 20,
-      "opcode": "insert",
-      "word_index_in_final_text": 0,
-      "docai_reading": null,
-      "stored_text": "כב",
-      "bbox": {
-        "x1": 0.8093457818031311,
-        "y1": 0.8397590517997742,
-        "x2": 0.8890965580940247,
-        "y2": 0.8598393797874451
       },
       "bbox_estimated": true
     },
@@ -147,51 +102,6 @@
         "y1": 0.8839357495307922,
         "x2": 0.8909657597541809,
         "y2": 0.9008032083511353
-      },
-      "bbox_estimated": false
-    },
-    {
-      "klal_id": 23,
-      "page": 21,
-      "opcode": "replace",
-      "word_index_in_final_text": 331,
-      "docai_reading": "גכי",
-      "stored_text": "גבי",
-      "bbox": {
-        "x1": 0.3666462302207947,
-        "y1": 0.39208486676216125,
-        "x2": 0.38994482159614563,
-        "y2": 0.4096287190914154
-      },
-      "bbox_estimated": false
-    },
-    {
-      "klal_id": 23,
-      "page": 21,
-      "opcode": "replace",
-      "word_index_in_final_text": 455,
-      "docai_reading": "וחנמוקי",
-      "stored_text": "והנמוקי",
-      "bbox": {
-        "x1": 0.1655426174402237,
-        "y1": 0.49734801054000854,
-        "x2": 0.21888412535190582,
-        "y2": 0.5144838690757751
-      },
-      "bbox_estimated": false
-    },
-    {
-      "klal_id": 23,
-      "page": 21,
-      "opcode": "replace",
-      "word_index_in_final_text": 524,
-      "docai_reading": "כרבו",
-      "stored_text": "כתבו",
-      "bbox": {
-        "x1": 0.2293071746826172,
-        "y1": 0.5577315092086792,
-        "x2": 0.2771306037902832,
-        "y2": 0.5748674273490906
       },
       "bbox_estimated": false
     },
@@ -3634,21 +3544,6 @@
       "klal_id": 216,
       "page": 75,
       "opcode": "replace",
-      "word_index_in_final_text": 184,
-      "docai_reading": "ישרא",
-      "stored_text": "ישראל",
-      "bbox": {
-        "x1": 0.39119651913642883,
-        "y1": 0.09116579592227936,
-        "x2": 0.4314941167831421,
-        "y2": 0.10851150006055832
-      },
-      "bbox_estimated": false
-    },
-    {
-      "klal_id": 216,
-      "page": 75,
-      "opcode": "replace",
       "word_index_in_final_text": 338,
       "docai_reading": "עוד",
       "stored_text": "עור",
@@ -3827,9 +3722,9 @@
     }
   ],
   "meta": {
-    "total_candidates": 255,
-    "skipped_settled_by_applied_decision": 485,
-    "klalim_covered": 95,
+    "total_candidates": 248,
+    "skipped_settled_by_applied_decision": 505,
+    "klalim_covered": 92,
     "skipped_no_docai_page_klalim": [],
     "unattributable_deletes": [],
     "untrusted_klalim_excluded": []

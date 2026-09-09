@@ -101,6 +101,54 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0EA. **[2026-09-09] 27 GREEN WORDS ARE GREEN ON A `witness_choice`, AND NO
+    SCRIPT IN THIS REPO CAN PUT A `witness_choice` INTO THE CORPUS.**
+
+    Found while confirming `0DY`'s eight were gone. Of the 184 words that render
+    green in Part 1:
+
+        128  manual_correction
+         27  witness_choice          <- these
+         23  disputed_choice
+          4  no live ruling carrying text
+          2  candidate_choice
+
+    `apply_reviewer_decisions.py` promotes exactly three types -
+    `all_current("candidate_choice")`, `all_current("manual_correction")`,
+    `all_current("title_correction")` - and `audit_applied_decisions.py` checks
+    four. `witness_choice` is in neither list, and a grep across `pipeline/` and
+    `tools/` finds no writer for it. So a witness ruling colours a word as
+    settled and there is no code path by which the corpus can ever hold it.
+
+    That is `0DY`'s defect exactly - green means A HUMAN RULED HERE, not THE
+    CORPUS HOLDS IT - at a door `0DY`'s re-ruling mitigation does not reach,
+    because re-ruling in the witness panel produces another `witness_choice`.
+
+    ### AND THE OBVIOUS CHECK CANNOT BE RUN ON THEM
+
+    A first pass compared each green word's chosen text against `part1.json` at
+    the ruling's `word_index` and reported 7 mismatches. All 7 were
+    `witness_choice`, and `review_server.py:1546` says why that comparison is
+    meaningless:
+
+        witness_choice is NOT wired: its `word_index` is a docai_token_index, an
+          index into verify_reconstruction_witness.py's filtered `dtoks` list, not
+          into the klal's words. An id from here would name a real word and the
+          wrong one - confidently.
+
+    So those 7 rows are an artifact of indexing the corpus with a token index,
+    not findings, and are NOT listed here as positions. Five of the seven
+    differed only by a geresh/apostrophe glyph, which is itself a hint that the
+    two indexings often coincide - close enough to look right, which is the
+    dangerous kind.
+
+    Open, and NOT a one-line fix: answering "does the corpus hold this witness
+    ruling?" needs the docai token -> word mapping first, and deciding whether a
+    witness ruling is even MEANT to change the base text (it offers
+    `docai_reading` against `tesseract_reading`, and `_decision_original_word`
+    records that it snapshots neither) is a reviewer question, not a code one.
+    Both belong with the deferred tri-state work in `0DY`.
+
 0DZ. **[2026-09-09, reviewer] "USING THAT URL DOES *NOT* ZOOM IN THE SCAN PANEL
     ON THE SELECTED WORD" - IT DID ZOOM. IT ZOOMED SOMEWHERE THE WORD IS NOT.
     FIXED.**
@@ -266,6 +314,45 @@ applying it to the corpus remain two separate, deliberate steps.
     **The cheap mitigation, if the eight matter before then:** they are all in
     `0DX`'s list and all reachable in the dashboard queue except klal 211 w73.
     Re-ruling one clears both the drift and the false green in a single click.
+
+    ### UPDATE 2026-09-09, later the same day: THE EIGHT ARE GONE
+
+    The reviewer took the cheap mitigation and re-ruled klal 159 w10 and 161
+    w289 in the dashboard. Those re-rulings carry a `candidate_snapshot`, unlike
+    the 2026-09-07 pair, so they are appliable - and applying them also closed
+    the four ligature siblings. Verified word by word against a before-copy of
+    `part1.json`:
+
+        klal  23 w599    ביעי  ->   בעי     ruling: בעי
+        klal  69 w188  ואלהים  ->  ואלהים   ruling: ואלהים  (already correct - see below)
+        klal 159 w10     איכא  ->  אליבא    ruling: אליבא
+        klal 161 w289    נתנן  ->  נתנאל    ruling: נתנאל
+        klal 174 w116      לא  ->    אלא    ruling: אלא
+        klal 200 w145      או  ->    אלו    ruling: אלו
+        klal 206 w2        או  ->    אלו    ruling: אלו
+        klal 216 w123      לא  ->    אלא    ruling: אלא
+
+    Eight for eight. Re-measured against the live `/api/word-states`: **184
+    words render green, and 0 of them sit on a promotable ruling whose text the
+    corpus does not hold** (was 8).
+
+    **klal 69 w188 was never actually wrong**, and that is a correction to the
+    list as first surfaced. Its newest live ruling is a 2026-09-07
+    `disputed_choice` for `ואלהים`, which the corpus already held; the
+    `אל ואלהים` this item first reported is a 2026-08-30 row that ruling
+    supersedes. The measurement took the ruling that ANSWERED the flag rather
+    than the NEWEST live ruling at the word, and for this one word those are
+    different rows.
+
+    **The applier reports the six as skipped-for-drift on every run, and will
+    forever.** The ledger is append-only, so the superseded 2026-09-07
+    null-snapshot rows are still in it and still fail the drift gate - they
+    appear in the same run's "7 open flags closed" list and its "14 skipped"
+    list, which reads like a contradiction and is not. Nothing to fix in the
+    corpus; a reader of that output needs to know it.
+
+    The tri-state repair is still deferred, and still wants its own session -
+    see `0EA`, which is the same defect at a door the fix above does not reach.
 
 0DX. **[2026-09-09] A DECLINED INSERTION NOW SETTLES BEFORE THE DRIFT GATE - TWO
     RULINGS UNSTUCK SINCE 2026-08-11. THE STRANDED-PANEL WIDENING WAS ATTEMPTED

@@ -163,37 +163,6 @@
   "23": [
     {
       "klal_id": 23,
-      "word_index": 599,
-      "opcode": "replace",
-      "final_text": "ביעי",
-      "consensus_reading": "בעי",
-      "agreeing_engines": [
-        "dicta",
-        "surya"
-      ],
-      "ligature_artifact": null,
-      "cross_edition": true,
-      "cross_edition_engines": [
-        "dicta"
-      ],
-      "same_edition_agreeing": 1,
-      "abbreviation_shape": null,
-      "witnesses": {
-        "docai": null,
-        "vlm": null,
-        "surya": "בעי",
-        "dicta": "בעי"
-      },
-      "page": 21,
-      "bbox": {
-        "x1": 0.7204169034957886,
-        "y1": 0.633618950843811,
-        "x2": 0.7437155246734619,
-        "y2": 0.6503468155860901
-      }
-    },
-    {
-      "klal_id": 23,
       "word_index": 653,
       "opcode": "replace",
       "final_text": "ואיהן",
@@ -11177,68 +11146,6 @@
         "y1": 0.18273498117923737,
         "x2": 0.44265344738960266,
         "y2": 0.20048406720161438
-      }
-    },
-    {
-      "klal_id": 216,
-      "word_index": 282,
-      "opcode": "replace",
-      "final_text": "לא",
-      "consensus_reading": "אלא",
-      "agreeing_engines": [
-        "dicta",
-        "surya"
-      ],
-      "ligature_artifact": null,
-      "cross_edition": true,
-      "cross_edition_engines": [
-        "dicta"
-      ],
-      "same_edition_agreeing": 1,
-      "abbreviation_shape": null,
-      "witnesses": {
-        "docai": null,
-        "vlm": "לא",
-        "surya": "אלא",
-        "dicta": "אלא"
-      },
-      "page": 75,
-      "bbox": {
-        "x1": 0.17668940126895905,
-        "y1": 0.18273498117923737,
-        "x2": 0.20024798810482025,
-        "y2": 0.20048406720161438
-      }
-    },
-    {
-      "klal_id": 216,
-      "word_index": 321,
-      "opcode": "replace",
-      "final_text": "לא",
-      "consensus_reading": "אלא",
-      "agreeing_engines": [
-        "dicta",
-        "surya"
-      ],
-      "ligature_artifact": null,
-      "cross_edition": true,
-      "cross_edition_engines": [
-        "dicta"
-      ],
-      "same_edition_agreeing": 1,
-      "abbreviation_shape": null,
-      "witnesses": {
-        "docai": null,
-        "vlm": "לא",
-        "surya": "אלא",
-        "dicta": "אלא"
-      },
-      "page": 75,
-      "bbox": {
-        "x1": 0.7284563183784485,
-        "y1": 0.22831787168979645,
-        "x2": 0.7520148754119873,
-        "y2": 0.2456635683774948
       }
     },
     {
