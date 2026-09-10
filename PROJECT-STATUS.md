@@ -264,30 +264,37 @@ applying it to the corpus remain two separate, deliberate steps.
 
     ### What this rate is NOT
 
-    **The sample selected itself** (Lesson 27) - first 12 rows per class in klal
-    order, concentrated in the opening entries of aleph.
+    ### THE RATE, MEASURED THREE WAYS, AND THE FIRST TWO WERE BOTH WRONG
 
-    **CORRECTED THE SAME DAY BY A RANDOMISED PASS, AND IT WAS OVERSTATED.** A
-    seeded shuffle before capping (`--seed 17`, 40 per class) gives, on the first
-    43 adjudicated:
+        first 12 per class, klal order      36.1%
+        randomised, 43 of 120 (interim)     23.3%
+        randomised, all 120 complete        33.3%
+        POPULATION-WEIGHTED                 25.7%   <- the one to quote
 
-                            first-N        randomised
-        overall              36.1%           23.3%
-        footnote_numeral       67%             40%
-        one_letter             25%           21.4%
-        other                  17%           20.8%
+    The first was a self-selected sample (Lesson 27), concentrated in the opening
+    entries of aleph. The second was an interim read on a third of the run. The
+    third is complete and randomised - **and still wrong as a population figure**,
+    because it is STRATIFIED: 40 rows from each of three classes, when the classes
+    are not equally common and the yields differ sharply.
 
-    So the headline yield is roughly **23%, not 36%**, and the footnote class is
-    40% rather than two thirds. The self-selected sample inflated the very number
-    I flagged it might inflate - Lesson 27 paying for itself twice in one entry,
-    once as a caveat and once as a measurement. The randomised run is still
-    completing; these are interim figures on 43 of 120 and the per-class ones rest
-    on 5-24 rows each.
+        class              population   share    sample share   yield
+        one_letter              1,116   45.3%        33.3%      22.5%
+        other                   1,101   44.7%        33.3%      22.5%
+        footnote_numeral          246   10.0%        33.3%      55.0%
 
-    **The comparison that matters survives intact**: 23% against the lexical
-    detectors' 0% is still the whole argument, and it is a floor rather than a
-    ceiling, because a dispute the adjudicator resolves for the corpus is not
-    wasted - it is a position confirmed against the ink.
+    Equal sampling over-weighted `footnote_numeral` by 3.3x its true share, and
+    it is the highest-yield class by a factor of 2.4. Weighting each class by its
+    real frequency gives **25.7%**, and that projects to roughly **634 real errors
+    in the 2,463-row adjudicable queue** for א-ב-ג alone.
+
+    A stratified sample is the right way to measure the CLASSES - 40 rows each is
+    what makes the per-class figures usable at all - and the wrong number to
+    report as a whole. Both halves of that are the finding.
+
+    **The comparison that matters is unchanged and is not sensitive to any of
+    this**: 25.7% against the lexical detectors' 0% in item `0DU`. Every version
+    of this measurement, from 23% to 36%, says the same thing about the
+    difference between a human-supervised witness and a frequency argument.
 
     Nothing was applied. The verdicts sit in
     `~/work/hashorashim/lexical_vision_report.json`; promoting any of them into
