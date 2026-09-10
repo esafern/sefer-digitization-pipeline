@@ -101,6 +101,65 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0EY. **[2026-09-10] SEFARIA'S FILES CARRY THE ENTIRE APPARATUS AS 20,449
+    ANCHORED WORD FOOTNOTES. WE DETECT 66% OF IT AND SHOULD NOT TRY FOR MORE.**
+
+    The `.docx` files are not plain text with citations typed inline. Each one
+    carries `word/footnotes.xml` - 2 MB in chapter 01 alone - and every footnote
+    is ANCHORED to a position in the running text:
+
+        footnote bodies              20,449
+        in-text anchor markers       20,450
+        look like `(book ch, v)`     20,092   98%
+
+    The rest are Bacher's own editorial cross-references, e.g.
+    `(עיין מה שכתבתי בספרי על חיי ר' יונה דף 201)` and `(למע 852 רקמה 551)`,
+    pointing into Sefer HaRikmah. So this is the complete apparatus of the Bacher
+    edition, transcribed, normalised to `(שה"ש ו, יא)` form, and positioned.
+
+    **This is far more than "attention to citations" and I had underrated it.**
+    Items `0EM` and `0EE` described the dataset's value from its bracketed root
+    headwords and its nikkud; the apparatus is the larger part and it is
+    structured, not prose.
+
+    ### What our own detection is worth against it
+
+    Item `0EX` recorded 2,085 inline reference numerals for א-ב-ג. Against their
+    anchors on the same 306 entries:
+
+        our inline reference numerals    2,085
+        their anchored footnotes         3,159
+        recall                              66%
+        entries where we find fewer        226
+        equal                               59
+        more                                21
+
+    So roughly **1,074 references in א-ב-ג alone are invisible to us** - the ones
+    DocAI fused into the preceding word as Hebrew letters (`החכסייג`) or dropped
+    outright. The 246 `footnote_numeral` disputes in item `0ES` are the visible
+    tip of that, not the whole of it.
+
+    ### The consequence, and it is now overdetermined
+
+    Item `0EX` measured that the apparatus BLOCK cannot be paired to the body by
+    number (0 of 94 pages). This measures the other end: even the body-side
+    markers are only 66% recoverable. **Two independent measurements now say the
+    same thing** - the citation apparatus is not reconstructible from this OCR at
+    usable quality, and Sefaria's version of it is the one to use.
+
+    That makes the division of labour concrete in both directions: their
+    apparatus and their citations, our running text (where their own transcription
+    scores 92.0% to our 90.3%, item `0EO`, i.e. we are comparable and both need
+    the ink). The remaining engineering question is how to MERGE them, which is
+    not a question this pipeline has ever had to answer before.
+
+    **Open, and it is the right next conversation with the Sefaria editor:** their footnote
+    anchors are positions in THEIR text, and our text is a different token
+    stream. Transferring the apparatus onto our corpus means aligning the two at
+    word level - which is exactly what `tools/build_witness_disputes.py` already
+    does to find disagreements, so the alignment exists and the anchors could ride
+    on it. Not built.
+
 0EX. **[2026-09-10] 2,085 INLINE FOOTNOTE REFERENCES RECORDED. AND A MEASURED
     REASON NOT TO REBUILD SEFARIA'S CITATION WORK: 0 OF 94 PAGES PAIR.**
 
