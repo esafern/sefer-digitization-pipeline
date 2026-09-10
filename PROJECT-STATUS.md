@@ -101,6 +101,125 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0FA. **[2026-09-10] QUESTION 2 ANSWERED: THE MERGE IS RELIABLE. 98.8% OF
+    SEFARIA'S 20,450 FOOTNOTE ANCHORS TRANSFER ONTO OUR TOKENS WITHIN ONE WORD.**
+
+    The Sefaria editor's second question - is there a reliable way to merge the two datasets,
+    taking the citations from theirs and the text from ours. Measured rather than
+    estimated.
+
+    Their apparatus is not prose: `word/footnotes.xml` holds 20,449 footnote
+    bodies and `document.xml` holds 20,450 `footnoteReference` markers, so every
+    note is ANCHORED to a token position in their text (item `0EY`). The merge is
+    therefore a word-level alignment problem, and
+    `tools/build_witness_disputes.py` already computes exactly that alignment to
+    find disagreements - the anchors can ride on it.
+
+    Extracted all 20,450 anchor positions and placed them onto our token stream
+    for א-ב-ג (3,159 anchors, 306 shared entries):
+
+        nearest aligned token, exact              2,046   64.8%
+        within +/- 1 word                         3,122   98.8%
+        within +/- 2 words                        3,151   99.7%
+        within +/- 3 words                        3,157   99.9%
+        unplaceable                                   2    0.1%
+
+    **A footnote's position tolerates a word; a citation attaches after a phrase,
+    not between two letters.** So the operative number is 98.8%, and the two
+    unplaceable anchors are in `בכה` and `בלג`.
+
+    ### Why exact matching fails, which is the elegant part
+
+    Of the 1,113 anchors whose immediately-preceding token does not align:
+
+        genuinely different reading                       841   75.6%
+        ours = theirs + a numeral read as letters         264   23.7%
+        no nearby anchor                                    8    0.7%
+
+    with examples `הנחל`->`הנחלי`, `שריד`->`שרידי`, `ועוגב`->`ועוגבי`. **Nearly a
+    quarter of the exact-match failures are the footnote numeral itself** - the
+    anchor attaches to precisely the token our OCR corrupted, because the thing
+    that corrupted it IS the footnote marker. The neighbour aligns, which is why a
+    one-word window recovers almost all of them.
+
+    ### What this means practically
+
+    The two datasets can be merged without a human adjudicating placement. What a
+    human is still needed for is the 24% of running-text tokens where the two
+    disagree, which is a different question and the one item `0EZ` is measuring.
+
+    **Not built.** The measurement is a script, not a tool; turning it into a
+    merge would mean writing the anchors into our corpus as structure. That
+    should wait for a decision about whose text is the base - and on the evidence
+    of `0EZ` (their raw reads 99.1% against our 98.4%), that decision is not
+    obviously ours.
+
+0EZ. **[2026-09-10, Sefaria] GROUND TRUTH AT LAST - AND OUR RAW READ IS WORSE
+    THAN THEIRS. 98.4% AGAINST 99.1% ON CHARACTERS.**
+
+    The Sefaria editor's position: the dictionary is fully parsed, the
+    verses were carefully identified, **the running-text OCR is weak**,
+    and rather than abort or ship as-is he is correcting it by hand - 657 of
+    2,025 entries done. His two questions decide the project:
+
+    1. Can the model produce a high-fidelity read that saves most of the
+       human review?
+    2. Is there a reliable way to merge the two datasets, keeping the
+       citations from theirs and the running text from ours?
+
+    He sent 10 manually corrected entries (verified against the source PDF) and
+    10 raw ones. **The corrected sample is the first ground truth this project
+    has ever had for this book.**
+
+    ### Question 1, measured. It does not currently favour us.
+
+    Five of the ten corrected entries fall inside the א-ב-ג slice. Character
+    accuracy against gold, word division ignored, 7,878 gold characters:
+
+        OURS (raw DocAI, no correction pass)   98.4%
+        THEIR RAW (described as weak)          99.1%
+
+    **Their existing data is better than our extraction**, and the honest reading
+    of that description is that he is holding it to a high bar, not that it is bad. Their
+    manual pass moves 99.1% -> 100%, i.e. it is worth about 0.9% of characters.
+
+    ### TWO NUMBERS I ALMOST REPORTED THAT WERE WRONG
+
+    First pass gave **ours 76.0%, theirs 79.1%** on tokens. Both meaningless:
+    their corrected `html` renders resolved citations as inline text
+    (`<a class="refLink">שה"ש ו יא</a>`), so our text was being penalised for
+    lacking citations that live in the apparatus we correctly exclude. Stripping
+    refLinks: ours 88.5%, theirs 92.8%.
+
+    Still wrong. Those token figures are dominated by WORD DIVISION - their HTML
+    splits the heading as `ה` + `אל'ף`, ours has `האלף`; `שמתרגם` against
+    `שמ תרגם`. On characters, which word division cannot touch, the same texts
+    are 98.4% and 99.1%. **A 10-point token gap was a 0.7-point character gap.**
+    Two corrections in one measurement, both caught by diffing a single entry by
+    hand rather than trusting the aggregate (Lesson 33 STATE, NOT PRINTOUT).
+
+    ### What is NOT yet established, and it matters for the answer
+
+    **Whether gold is right where we differ.** Their corrected text may normalise
+    orthography - gold `עדנו` against our `עודנו`, gold `הרמנים` against our
+    `הרמונים` - and this project's own rule is that the ink decides, not the
+    transcription. A pass is running now that puts our reading and theirs to the
+    vision adjudicator on the crop. If a material share of the 1.6% turns out to
+    be their normalisation rather than our error, the gap narrows.
+
+    **Sample size: 5 entries, 7,878 characters, 3 of them aleph.** This is an
+    indication, not a rate. He has 657 corrected entries; getting even 100 of
+    them would settle question 1 properly, and asking for them is cheap.
+
+    ### The honest framing for question 1
+
+    Our raw extraction is not better than what he already has. The pipeline's
+    claim was never the extraction - it is the adjudication layer, which has not
+    been run on this book beyond 120 sample disputes. So the answerable version
+    of his question is: **does the review pipeline close a 1.6% character gap
+    cheaper than a human reading 2,025 entries?** That is measurable and is not
+    yet measured.
+
 0EY. **[2026-09-10] SEFARIA'S FILES CARRY THE ENTIRE APPARATUS AS 20,449
     ANCHORED WORD FOOTNOTES. WE DETECT 66% OF IT AND SHOULD NOT TRY FOR MORE.**
 

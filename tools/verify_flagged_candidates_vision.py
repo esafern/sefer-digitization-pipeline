@@ -202,7 +202,7 @@ def load_witness_disputes(path=None, classes=None, limit_per_class=None, seed=No
     disputed reading and cropping one would ask the model a question the crop
     cannot answer.
     """
-    path = path or cio.repo_path("witness_disputes.json")
+    path = path or os.environ.get("WITNESS_DISPUTES_PATH") or cio.repo_path("witness_disputes.json")
     with open(path, encoding="utf-8") as fh:
         rows = json.load(fh)["disputes"]
     classes = classes or ("one_letter", "footnote_numeral", "other")
