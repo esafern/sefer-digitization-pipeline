@@ -267,6 +267,56 @@ applying it to the corpus remain two separate, deliberate steps.
     cheaper than a human reading 2,025 entries?** That is measurable and is not
     yet measured.
 
+0FO. **[2026-09-10] SCAN INVENTORY: THE HIGH-RESOLUTION COPIES ARE BITONAL AND
+    THE FULL-TONE COPY IS THE LOW-RESOLUTION ONE. PRE-PROCESSING IS ONLY LIVE ON
+    THE WORST SCAN.**
+
+    Measured, not assumed, on the same printed page:
+
+    | scan | pixels | bit depth | implied dpi |
+    |---|---|---|---|
+    | Google Books | 3528x5278 (18.6 MP) | **1 bpc, bitonal** | ~600 |
+    | HebrewBooks | 2266x3444 (7.8 MP) | **1 bpc, bitonal** | ~385 |
+    | NLI online | ~1842x2891 (5.3 MP) | **RGB, 24 bpp** | ~313 |
+
+    This settles what pre-processing can and cannot do here. Binarization is the
+    step most often recommended before OCR, and on the two high-resolution copies
+    it has ALREADY BEEN DONE, destructively, at the source: a 1-bit image has no
+    tone left to threshold better. Deskew and denoise remain available on all
+    three. Adaptive binarization, contrast work and upscaling are available only
+    on NLI - which is the lowest-resolution copy we hold.
+
+    So pre-processing and the request to NLI are not alternatives. The request is
+    what would make pre-processing worth doing: a master that is full-tone AND
+    high-resolution is the only input on which the usual pipeline has anything to
+    work with. The NLI contact confirms the online copy is 300 dpi and is asking what
+    the printed-books masters are held at.
+
+0FP. **[2026-09-10] WE CROP AT 300 DPI FROM A 600 DPI SCAN BEFORE ASKING THE
+    MODEL TO JUDGE A FINE STROKE.**
+
+    `pipeline/vision_adjudication_common.crop_pdf_bounding_box` takes `dpi=300`
+    as its default and every caller uses it. The Google Books scan renders its
+    native 3528 px at exactly 600 dpi, so every vision adjudication this project
+    has run - including the one that got p138 `ונוש`/`וגוש` wrong at 0.95
+    confidence - has been looking at a half-resolution crop, a quarter of the
+    available pixels, of exactly the kind of distinction (a gimel's leg) that
+    lives in fine strokes.
+
+    Raising it is free and needs no new scan. It is NOT yet demonstrated to help:
+    rendered side by side at 300 and 600, the gimel in `לגדלתם` (p60) is legible
+    in both, so resolution may not be the binding constraint on the adjudicator.
+    That makes it a cheap experiment with a real ground truth to score against -
+    77 positions in the reviewed 100 where we read nun and the reviewed text
+    reads gimel - not a fix to apply blind.
+
+    **What could NOT be determined**: the raster DocAI itself worked from. I
+    tried to infer it from coordinate quantization in the stored word boxes; the
+    best integer-grid fit is 1637 px against a stored 3528 px, but the residual
+    is 0.165 px where a real grid would be near zero and random would be 0.25.
+    That is not evidence, and no claim is made from it. Answering it needs the
+    submission path, not the stored output.
+
 0FN. **[2026-09-10] MAJORITY VOTING ACROSS OUR ENGINES MAKES THE TEXT WORSE BY
     452 WORDS. INDEPENDENCE IS THE ASSET, NOT ENGINE COUNT.**
 
