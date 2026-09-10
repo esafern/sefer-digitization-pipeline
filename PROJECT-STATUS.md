@@ -267,6 +267,45 @@ applying it to the corpus remain two separate, deliberate steps.
     cheaper than a human reading 2,025 entries?** That is measurable and is not
     yet measured.
 
+0FW. **[2026-09-11] CONTROLLED AT LAST: SAME ENGINE, TWO SCANS. FULL TONE WINS
+    ON BOTH AXES - AND THE ENGINE MATTERS MORE THAN THE SCAN FOR RUNNING TEXT.**
+
+    `0FU` could not separate scan from engine because both changed at once. Cloud
+    Vision needs no processor to be provisioned and can be pointed at either
+    scan, so it supplies the missing control: same engine, same 35 pages, same
+    segmentation, same ground truth, only the pixels differ.
+
+    | source | word | chars | nun/gimel errors |
+    |---|---|---|---|
+    | Cloud Vision on BITONAL | 0.7908 | 0.8588 | 39 |
+    | Cloud Vision on FULL TONE | **0.8208** | **0.8788** | **8** |
+    | DocAI on BITONAL (what the corpus is) | 0.8879 | 0.9499 | 72 |
+
+    11,705 words of ground truth over 81 entries present in all three.
+
+    **The scan result, now controlled**: holding the engine fixed, full tone
+    gains +3.0 points of words and +2.0 of characters, and cuts nun/gimel errors
+    by 79% (39 -> 8). So the full-tone scan is better on running text too, not
+    only on the one class it was chosen to test. That is the clean version of
+    `0FS` and it survives.
+
+    **The engine result, which is larger and cuts the other way**: DocAI on the
+    WORSE scan still beats Cloud Vision on the BETTER one by 7 points of
+    characters. For this material the engine is worth more than the pixels.
+
+    So neither of the two things we can run today is the right combination. The
+    experiment that matters is the one we cannot run: **DocAI on the full-tone
+    images**, which should carry DocAI's running-text quality and the full-tone
+    scan's nun/gimel fix at once. It is blocked on nothing technical - the
+    service-account credentials work and `google-cloud-documentai` is installed -
+    only on a Document AI processor being provisioned in the project, which is a
+    console and billing decision and therefore the reviewer's.
+
+    Expected value if it lands, extrapolating from the two controlled deltas:
+    DocAI's 0.9499 characters plus roughly the scan's nun/gimel reduction, i.e.
+    the corpus's largest error class mostly gone without giving up read quality.
+    That is worth a rebuild of the slice to verify before any rebuild of the book.
+
 0FV. **[2026-09-11] SEFER HaShorashim IS UP IN THE DASHBOARD ON :8421, WITH
     1,362 REAL ROWS. YAD MALACHI IS UNCHANGED ON :8420.**
 
