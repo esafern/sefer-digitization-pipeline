@@ -267,6 +267,108 @@ applying it to the corpus remain two separate, deliberate steps.
     cheaper than a human reading 2,025 entries?** That is measurable and is not
     yet measured.
 
+0FK. **[2026-09-10] THE .docx IS SEFARIA'S UNREVIEWED LAYER EXACTLY - 1.0000
+    CHARACTER AGREEMENT - SO THE 100 REVIEWED ENTRIES GIVE A COMPLETE CORRECTION
+    LEDGER.**
+
+    Checked on the 10 unreviewed sample entries, citations stripped from both:
+    character agreement is 1.0000 on every one. `0FD`'s figure of 0.899 was my
+    own normalization noise, not a difference in the data. So .docx vs corrected
+    on the 100 reviewed entries is precisely the list of corrections a human made.
+
+    **Two tokenization artifacts had to come out first, and both were mine.**
+    Stripping `<span>` to a SPACE split `האלף והבית` into four tokens: measured
+    against the .docx, tags-to-space gives 0.9418 word agreement and tags-to-
+    nothing 0.9988. And `&nbsp;` (13 of them) is not whitespace to `str.split()`,
+    so `הרקמה&nbsp;הרבה` survived as one glued token. Both were invisible at
+    character level, because joining words for a character comparison discards
+    spaces anyway - which is exactly why the earlier character figures looked
+    fine while the word figures did not.
+
+    The ledger, after both fixes: **118 edits, of which 107 are OCR corrections
+    and 11 are citations he added.** 107 corrections in 13,573 words is a word
+    error rate of 0.79% in his raw extraction.
+
+0FL. **[2026-09-10] OF HIS 107 CORRECTIONS WE INDEPENDENTLY HAD 82 RIGHT, AND WE
+    SHARED HIS ERROR EXACTLY ONCE.**
+
+    | | | |
+    |---|---|---|
+    | we already had his correction | 82 | 76.6% |
+    | we had a third reading | 22 | 20.6% |
+    | we shared his error exactly | 3 | 2.8% |
+
+    Two of those three are not OCR errors at all - a citation typo he introduced
+    (`שמית` for `שמות`) and an editorial note he added. **One genuine shared
+    error**: `במינוי` for `במינו`.
+
+    What an automated pass could have done with his raw text plus ours:
+
+    | rule | flags | catches | precision |
+    |---|---|---|---|
+    | our reading disagrees with his | 1,054 (7.7% of text) | 87.3% | 9.8% |
+    | + his word not in the lexicon | 195 (1.4%) | 49.2% | 29.7% |
+    | + his word not a word AND ours is | 92 (0.7%) | 28.0% | 35.9% |
+    | + single token, ours a word, his not | 40 (0.3%) | 19.5% | 57.5% |
+
+    **82 of the 107 we could have FIXED outright**, not merely flagged, because
+    our reading already IS his correction. The value here is not our extraction
+    quality - it is worse than his - it is that the two engines fail
+    differently, which is Lesson 24 pointed at someone else's corpus.
+
+0FM. **[2026-09-10] THE VERSE CHECK CANNOT FIND SEFARIA'S OCR ERRORS - THEIR
+    QUOTATIONS WERE ALREADY MACHINE-VERIFIED. IT FINDS THEIR CITATION ERRORS
+    INSTEAD.**
+
+    Of his 118 edits, **exactly ONE falls inside a verified biblical quotation**.
+    The rest are in Ibn Janah's own prose, which has no source. The reason is in
+    his own export note: the raw layer already has "automated citation
+    resolution/linking applied (refLinks verified against Tanakh text)". The
+    quotations were cleaned against Tanakh before any human saw them.
+
+    This corrects the framing in `0FF`. The verse check is powerful against OUR
+    text - it settles 673 of our 2,793 disputes - and near-useless for finding
+    OCR errors in theirs. Do not tell Sefaria it will clean their running text.
+
+    **What it does find in their data is misplaced references**, and those were
+    never machine-checked, because resolving a citation as written cannot notice
+    that the numeral itself was misread. `tools/validate_quotations.py` grows the
+    quotation backwards from each marker, and where it fails to corroborate,
+    searches the cited book for the verse the quotation actually reproduces:
+
+    * 20,450 citations, 66.1% of quotations verified against the cited verse
+    * **158 citations whose quotation reproduces a different verse of the same book**
+    * 52 of those are off by one verse and are flagged separately as a possible
+      edition-numbering difference (17 in Jeremiah alone, a chapter with known
+      variant numbering) - NOT presented as errors
+    * of the remaining 106, **72 (68%) are explained by a single Hebrew-letter
+      substitution in the numeral**, and the substitutions are the same OCR
+      confusion classes as the body text: `ה`/`ח` 31, `ב`/`כ` 16, `ו`/`ז`,
+      `כ`/`נ`, `ט`/`מ`
+
+    Examples: `(ישעיה נט, יד)` for Isaiah 29:14 (`נט`/`כט`), `(בראשית מא, כז)`
+    for Genesis 41:57 (`כז`/`נז`), `(אסתר ח, יב)` for Esther 5:12 (`ח`/`ה`).
+
+    **22 of these are inside the 100 entries a human already reviewed**, along
+    with 28 suspect words in verified quotations - so this finds things that
+    survived manual review. Delivered as `citation_corrections.csv` (headword,
+    note as printed, cited ref, proposed ref, matching words, the single-letter
+    confusion, the quotation, and a Sefaria URL).
+
+    **Four positions where the verse backs OUR reading over his CORRECTED text**,
+    each verified against the verse data directly rather than from memory:
+    `ואונו`/`ואנו` <https://www.sefaria.org/Job.40.16>, `בין`/`בן`
+    <https://www.sefaria.org/Hosea.13.15>, `ובנותיך`/`ובנתיך`
+    <https://www.sefaria.org/Isaiah.60.4>, `במו`/`כמו`
+    <https://www.sefaria.org/Isaiah.44.19>.
+
+    Three defects of mine had to be fixed before any of this was deliverable, all
+    found by disbelieving a result rather than by a test: anchors emitted in WORD
+    units by one producer and TOKEN units by the other (which made the verse check
+    appear to catch zero); the search window straddling the previous quotation;
+    and verse RANGES (`ח—י`, 11 of them) collapsed to a single gematria. Together
+    they turned 448 false candidates into 158.
+
 0FH. **[2026-09-10] THE 100 REVIEWED ENTRIES ARRIVED. OUR READ IS 95.6% OF
     CHARACTERS AGAINST THEM, AND THE SHORTFALL IS MOSTLY STRUCTURAL.**
 

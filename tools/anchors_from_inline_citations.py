@@ -32,6 +32,7 @@ Usage:
 """
 
 import argparse
+import html
 import json
 import os
 import re
@@ -45,6 +46,14 @@ sys.path.insert(0, _HERE)
 import corpus_io as cio  # noqa: E402
 from adjudicate_against_verse import parse_citation  # noqa: E402
 
+# STRIPPED TO NOTHING, NOT TO A SPACE. Every tag in this export is inline -
+# `<span class="info-text">`, `<b>`, `<span class="refLink">` - and they fall
+# INSIDE words: the heading is `ה<span>אל'ף</span> וה<span>בי'ת</span>`, so
+# substituting a space turns `האלף והבית` into the four tokens `ה אלף וה בית`.
+# Measured against the .docx, whose tokenization is known to be exact: tags to a
+# space gives 0.9418 word agreement, tags to nothing gives 0.9988. The 6-point
+# gap was pure markup, and it was invisible at character level because joining
+# words for a character comparison discards spaces anyway.
 TAG = re.compile(r"<[^>]+>")
 PAREN = re.compile(r"\([^)]*\)")
 
@@ -52,8 +61,10 @@ PAREN = re.compile(r"\([^)]*\)")
 def split_citations(text):
     """(text without citations, [(word position, citation)]).
 
-    The position is counted in WORDS of the emitted text, so it means the same
-    thing as a footnote anchor: the citation belongs to what precedes it.
+    The position is counted in whitespace TOKENS of the emitted text, which is
+    what a Word footnote anchor indexes and what the adjudicator expects. It
+    means the same thing either way - the citation belongs to what precedes it -
+    but the UNIT has to match the other producer or the anchors slide.
     """
     body, notes, last, running = [], [], 0, None
     kept = 0
@@ -64,7 +75,12 @@ def split_citations(text):
             continue
         body.append(text[last:m.start()])
         last = m.end()
-        notes.append((len(cio.hebrew_words(" ".join(body))), m.group(0)))
+        # TOKEN position, not word position. `extract_witness_footnotes.py`
+        # anchors index the whitespace-token stream, and the adjudicator converts
+        # token -> word itself; emitting word positions here made that conversion
+        # run twice and silently slid every anchor. It cost a whole result: the
+        # verse check appeared to catch ZERO of the witness's own OCR errors.
+        notes.append((len(" ".join(body).split()), m.group(0)))
     body.append(text[last:])
     return re.sub(r"\s+", " ", " ".join(body)).strip(), notes, kept
 
@@ -85,7 +101,12 @@ def main():
     anchored, plain, kept_total = {}, {}, 0
     for e in entries:
         head = unicodedata.normalize("NFKC", e["headword"])
-        raw = re.sub(r"\s+", " ", TAG.sub(" ", unicodedata.normalize("NFKC", e["html"])))
+        # Entities BEFORE tokenising: `&nbsp;` is not whitespace to str.split(),
+        # so `הרקמה&nbsp;הרבה` survives as one token and strips to the glued
+        # `הרקמההרבה` - which then looks like a word the witness joined and ours
+        # split. Decode first and it is an ordinary space.
+        raw = html.unescape(TAG.sub("", unicodedata.normalize("NFKC", e["html"])))
+        raw = re.sub(r"\s+", " ", raw.replace("\u00a0", " "))
         body, notes, kept = split_citations(raw)
         kept_total += kept
         plain[head] = body

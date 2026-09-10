@@ -76,39 +76,138 @@ def ordered_notes(docx_dir):
     return notes
 
 
+PARA = re.compile(r"<w:p[ >].*?</w:p>", re.S)
+RUN = re.compile(r"<w:t(?:\s[^>]*)?>(.*?)</w:t>|<w:footnoteReference w:id=\"(-?\d+)\"\s*/>",
+                 re.S)
+
+
+def token_stream(docx_dir):
+    """The whole witness as (tokens, [(token index, note text)]).
+
+    EXTRACTED HERE RATHER THAN INHERITED. The first pass at this lived in a
+    scratch script that deleted the whole U+0591-U+05C7 block while tokenising,
+    which takes the MAQAF with it - so `כל־תפש` arrived as the single token
+    `כלתפש`. That is invisible until something checks the text against a verse:
+    `tools/validate_quotations.py` then reports the glued form as a word absent
+    from the verse, and hundreds of correct quotations look like OCR errors.
+    Splitting is left to corpus_io.hebrew_words downstream; what matters here is
+    that the maqaf SURVIVES into the token, so the information still exists.
+    """
+    tokens, notes = [], []
+    for path in sorted(glob.glob(os.path.join(docx_dir, "*.docx"))):
+        zf = zipfile.ZipFile(path)
+        by_id = footnote_texts(zf)
+        body = zf.read("word/document.xml").decode("utf-8")
+        for para in PARA.findall(body):
+            # Build the paragraph text first and remember each marker's CHARACTER
+            # offset. Flushing the buffer at the marker instead would split the
+            # token the marker sits inside - `אֶגְלֵי־טָל` + marker + `.` becomes
+            # two tokens where the text has one - and every downstream count then
+            # disagrees with the entry texts by an amount that varies per entry.
+            buf, marks = "", []
+            for m in RUN.finditer(para):
+                if m.group(1) is not None:
+                    buf += html.unescape(m.group(1))
+                else:
+                    marks.append((len(buf), by_id.get(m.group(2), "")))
+            base = len(tokens)
+            for off, text in marks:
+                notes.append((base + len(buf[:off].split()), text))
+            tokens.extend(buf.split())
+    return tokens, notes
+
+
+def segment(tokens, notes, entry_texts):
+    """Cut the global stream into entries, using the known entry texts in order.
+
+    MATCHED AS A SUBSEQUENCE, not as a contiguous block. The .docx carries
+    material the entry list does not: a table of contents, section heads, and a
+    bracketed headword marker before each entry (`[שׁום]`), 2,021 of them. A
+    contiguous match aborts on the first one; a subsequence walk steps over them
+    and counts them, so "text belonging to no entry" stays a reported number.
+
+    An anchor landing on a skipped token belongs to the entry token that follows
+    it - a footnote on the headword marker annotates the entry it opens.
+
+    Order is still enforced: each entry is found after the previous one ends, so
+    the anchors cannot be assigned to the wrong entry however much is skipped.
+    """
+    out, cursor, note_i, skipped = {}, 0, 0, 0
+    for root, text in entry_texts.items():
+        want = text.split()
+        if not want:
+            continue
+        lo = None
+        for i in range(cursor, len(tokens)):
+            if tokens[i] == want[0]:
+                lo = i
+                break
+        if lo is None:
+            raise SystemExit(
+                f"  ABORT: entry {root!r} was not found after offset {cursor}. "
+                f"Expected to start {want[:6]}. The entry list and the .docx set "
+                f"must be the same export.")
+        skipped += lo - cursor      # material BETWEEN entries counts too
+        # walk both, letting the stream carry extras
+        pos = {}          # entry-token index -> stream index
+        i, k = lo, 0
+        while i < len(tokens) and k < len(want):
+            if tokens[i] == want[k]:
+                pos[k] = i
+                k += 1
+            else:
+                skipped += 1
+            i += 1
+        if k < len(want):
+            raise SystemExit(
+                f"  ABORT: entry {root!r} ran off the end of the stream with "
+                f"{len(want) - k} tokens unmatched.")
+        hi = i
+        anchors, texts = [], []
+        stream_to_entry = {v: kk for kk, v in pos.items()}
+        while note_i < len(notes) and notes[note_i][0] <= hi:
+            si = notes[note_i][0]
+            if si >= lo:
+                e = stream_to_entry.get(si)
+                if e is None:            # landed on a skipped token
+                    e = next((stream_to_entry[x] for x in sorted(stream_to_entry)
+                              if x >= si), len(want))
+                anchors.append(e)
+                texts.append(notes[note_i][1])
+            note_i += 1
+        out[root] = {"tokens": want, "anchors": anchors, "notes": texts}
+        cursor = hi
+    print(f"  tokens outside any entry {skipped:,}  (front matter, section heads, "
+          f"headword markers)")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--docx-dir", required=True)
-    ap.add_argument("--anchors", required=True,
-                    help="{root: {tokens, anchors}} from the anchor pass")
+    ap.add_argument("--entries", required=True,
+                    help="{root: text} for the witness, in document order")
     ap.add_argument("--out", required=True)
     ap.add_argument("--show", type=int, default=6)
     args = ap.parse_args()
 
-    notes = ordered_notes(os.path.expanduser(args.docx_dir))
-    with open(os.path.expanduser(args.anchors), encoding="utf-8") as fh:
-        anchored = json.load(fh)
-    total_anchors = sum(len(v["anchors"]) for v in anchored.values())
+    tokens, notes = token_stream(os.path.expanduser(args.docx_dir))
+    with open(os.path.expanduser(args.entries), encoding="utf-8") as fh:
+        entry_texts = json.load(fh)
 
-    print(f"  footnotes in docx set   {len(notes):,}")
-    print(f"  anchors in anchor file  {total_anchors:,}")
-    if len(notes) != total_anchors:
-        raise SystemExit("  ABORT: counts differ, so a positional zip would be "
-                         "silently off-by-N. Re-run the anchor pass over the "
-                         "same file set before merging.")
-
-    leaked = [n for n in notes if "<" in n["text"]]
-    empty = [n for n in notes if not n["text"]]
+    print(f"  tokens in the .docx set {len(tokens):,}")
+    print(f"  footnotes               {len(notes):,}")
+    leaked = [n for _p, n in notes if "<" in n]
     print(f"  notes containing markup {len(leaked):,}   (must be 0; see the <w:tab/> trap)")
-    print(f"  empty notes             {len(empty):,}")
+    print(f"  maqaf preserved         {sum(t.count(chr(0x5be)) for t in tokens):,}")
 
-    merged, i = {}, 0
-    for root, v in anchored.items():
-        n = len(v["anchors"])
-        merged[root] = {"tokens": v["tokens"], "anchors": v["anchors"],
-                        "notes": [notes[j]["text"] for j in range(i, i + n)]}
-        i += n
+    merged = segment(tokens, notes, entry_texts)
+    placed = sum(len(v["anchors"]) for v in merged.values())
+    print(f"  entries                 {len(merged):,}")
+    print(f"  anchors placed          {placed:,}")
+    if placed != len(notes):
+        print(f"  footnotes outside every entry span: {len(notes) - placed}")
 
     out = os.path.expanduser(args.out)
     with open(out, "w", encoding="utf-8") as fh:

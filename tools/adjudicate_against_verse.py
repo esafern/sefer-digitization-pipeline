@@ -100,6 +100,8 @@ ABBREV = {
 }
 # Books with exactly one chapter, where a citation names only a verse.
 SINGLE_CHAPTER = {"Obadiah"}
+# (book, chapter, first verse) -> last verse, for citations written as a range.
+VERSE_SPAN = {}
 # Matched words needed before calling a citation transposed. See the
 # transposition branch in main() for why 2 is not enough.
 MIN_TRANSPOSE = 4
@@ -239,7 +241,16 @@ def parse_citation(note, last_book):
         book = book[0]
     if not book or not ch:
         return None, last_book
-    v = None if verse.startswith("שם") else gematria(verse)
+    # A RANGE is one citation over several verses - `(תהלים מ, ח—י)` is
+    # Psalms 40:8-10, eleven of them in this apparatus. Collapsing `ח—י` to a
+    # single gematria yields verse 18, a real verse that has nothing to do with
+    # the quotation, so the citation then looks misplaced when it is exact.
+    # Take the first verse; VERSE_SPAN records how far the range runs so a
+    # checker can accept a match anywhere inside it.
+    rng = re.split(r"[-\u2013\u2014]", verse)
+    v = None if verse.startswith("שם") else gematria(rng[0])
+    if len(rng) > 1 and v:
+        VERSE_SPAN[(book, ch, v)] = gematria(rng[-1]) or v
     if v is None and verse.startswith("שם") and isinstance(last_book, tuple):
         v = last_book[2]
     return (book, ch, v), (book, ch, v)
