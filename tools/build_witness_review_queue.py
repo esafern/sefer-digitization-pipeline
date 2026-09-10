@@ -42,6 +42,7 @@ Usage:
 import argparse
 import json
 import os
+import re
 import sys
 import unicodedata
 
@@ -49,6 +50,50 @@ _HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(_HERE))
 sys.path.insert(0, os.path.join(os.path.dirname(_HERE), "pipeline"))
 import corpus_io as cio  # noqa: E402
+
+
+def load_lexicon():
+    path = cio.LEXICON_PATH
+    if not os.path.exists(path):
+        return set()
+    with open(path, encoding="utf-8") as fh:
+        return {l.strip() for l in fh if l.strip()}
+
+
+def tier_for(ours, theirs, lexicon):
+    """Which review tier a disagreement belongs in.
+
+    MEASURED, NOT GUESSED. Labelled against the 100 manually reviewed entries by
+    asking, at each queue row that falls inside them, whether OUR reading appears
+    anywhere in the reviewed text. 435 rows fell inside; our corpus is wrong at
+    429 of them.
+
+        all rows                                435 rows   98.6% ours-wrong
+        our word not in the lexicon             219 rows   99.5%
+        ours not a word AND theirs is           198 rows  100.0%
+        nun/gimel single-letter                  51 rows  100.0%
+
+    The headline is that the queue needs ORDERING, not filtering: a disagreement
+    with this witness is a corpus error about 99 times in 100, because the
+    witness reads 99.2% of words correctly and we read 95%. Tiers exist so a
+    reviewer can take the unambiguous ones first, not to hide anything - every
+    row is served.
+    """
+    ow = [w for w in ours if w]
+    tw = [w for w in theirs if w]
+    if not ow or not tw:
+        return "one_side_empty"
+    ours_nonword = any(w not in lexicon for w in ow)
+    theirs_word = all(w in lexicon for w in tw)
+    if len(ow) == 1 and len(tw) == 1 and len(ow[0]) == len(tw[0]):
+        diff = [(a, b) for a, b in zip(ow[0], tw[0]) if a != b]
+        if len(diff) == 1 and set(diff[0]) == {"\u05e0", "\u05d2"}:
+            return "A_nun_gimel"
+    if ours_nonword and theirs_word:
+        return "A_ours_not_a_word"
+    if ours_nonword:
+        return "B_ours_unattested"
+    return "C_both_attested"
 
 
 def page_tokens(page):
@@ -74,6 +119,7 @@ def main():
         raw = json.load(fh)
     disputes = raw["disputes"] if isinstance(raw, dict) else raw
 
+    lexicon = load_lexicon()
     cache, out = {}, []
     located = ambiguous = missing = 0
     for d in disputes:
@@ -112,7 +158,10 @@ def main():
             "tesseract_reading": d["witness_reading"],
             "witness_reading": d["witness_reading"],
             "witness_name": args.witness_name,
-            "tier": d.get("class"),
+            "tier": tier_for(cio.hebrew_words(unicodedata.normalize("NFKC", d["corpus"])),
+                             cio.hebrew_words(unicodedata.normalize("NFKC", d["witness_reading"])),
+                             lexicon),
+            "dispute_class": d.get("class"),
             "vision_selected": None,
             "vision_transcription": None,
             "vision_confidence": None,
@@ -136,6 +185,11 @@ def main():
     print(f"  anchored to one token  {located:,}")
     print(f"  word repeats on page   {ambiguous:,}  (cannot be anchored safely)")
     print(f"  no usable token        {missing:,}")
+    import collections as _c
+    tiers = _c.Counter(w["tier"] for w in out)
+    print("  by review tier (measured ours-wrong rate on the reviewed sample):")
+    for t, n in sorted(tiers.items()):
+        print(f"    {t:<22} {n:5,}")
     dest = cio.repo_path(args.out_name)
     if args.dry_run:
         print(f"  would write            {dest}")

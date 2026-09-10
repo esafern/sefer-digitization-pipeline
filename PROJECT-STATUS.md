@@ -267,6 +267,52 @@ applying it to the corpus remain two separate, deliberate steps.
     cheaper than a human reading 2,025 entries?** That is measurable and is not
     yet measured.
 
+0FX. **[2026-09-11] THE WITNESS QUEUE DOES NOT NEED FILTERING. IT IS 98.6%
+    REAL CORPUS ERRORS. IT NEEDS ORDERING, AND NOW HAS IT.**
+
+    Before shipping a ranking, it was labelled: of the 1,362 queue rows, 435 fall
+    inside the 100 manually reviewed entries, where the truth is known. At 429 of
+    those 435 - **98.6%** - our corpus is wrong.
+
+    That is not a surprise once stated: the witness reads 99.2% of words
+    correctly and we read 95%, so a position where the two disagree is
+    overwhelmingly a position where we are wrong. It does mean the instinct from
+    `0DV` ("563 permanent flags on unread material") does not apply here. That
+    queue was full of noise; this one is not.
+
+    | rule | rows | ours wrong | precision |
+    |---|---|---|---|
+    | all rows | 435 | 429 | **98.6%** |
+    | our word not in the lexicon | 219 | 218 | 99.5% |
+    | ours not a word AND theirs is | 198 | 198 | **100.0%** |
+    | nun/gimel single letter | 51 | 51 | **100.0%** |
+
+    So tiers are for taking the unambiguous ones first, not for hiding anything -
+    every row is still served. `tools/build_witness_review_queue.py` now labels
+    each row, and the whole 1,362 break down as:
+
+    | tier | rows |
+    |---|---|
+    | `A_nun_gimel` | 203 |
+    | `A_ours_not_a_word` | 463 |
+    | `B_ours_unattested` | 70 |
+    | `C_both_attested` | 583 |
+    | `one_side_empty` | 43 |
+
+    666 rows are tier A, and tier A measured 100% ours-wrong on the labelled
+    sample. **That is the case for applying tier A mechanically rather than
+    asking a human to click 666 times** - but applying corpus changes runs
+    through the decisions/apply pipeline and is a reviewer's call, so it is
+    stated here and not done.
+
+    Verified live on :8421 across klalim 1-59: 193 witness rows served, tiers
+    present, `witness_name` and `witness_accuracy` reaching the client. 656
+    passed, 1 skipped.
+
+    A note on my own verification: the first check of this reported ZERO rows and
+    I nearly recorded a regression. The API returns them under `queue`; my script
+    read `corrections`. The server was correct the whole time.
+
 0FW. **[2026-09-11] CONTROLLED AT LAST: SAME ENGINE, TWO SCANS. FULL TONE WINS
     ON BOTH AXES - AND THE ENGINE MATTERS MORE THAN THE SCAN FOR RUNNING TEXT.**
 
