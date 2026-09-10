@@ -71,6 +71,13 @@ def main():
     ap.add_argument("--nli-glob", default="~/work/hashorashim/dedupmrg*/*.jpg")
     ap.add_argument("--out-dir", required=True)
     ap.add_argument("--min-corr", type=float, default=0.80)
+    ap.add_argument("--offset", type=int, default=None,
+                    help="force NLI index = page + offset instead of searching. "
+                         "Once the offset is established over several pages it is "
+                         "STRONGER than a per-page profile correlation: facing "
+                         "pages of solid text correlate well with each other, so "
+                         "the search can pick a neighbour and the correlation "
+                         "will look respectable while the text is a page off.")
     ap.add_argument("--dpi", type=int, default=400, help="pdf source only")
     args = ap.parse_args()
 
@@ -98,7 +105,12 @@ def main():
             pix = doc.load_page(page - 1).get_pixmap(dpi=110)
             gb = Image.frombytes("RGB" if pix.n >= 3 else "L",
                                  (pix.width, pix.height), pix.samples)
-            path, corr = find_nli_page(gb, nli_files, page)
+            if args.offset is not None:
+                idx = page + args.offset
+                path = nli_files[idx] if 0 <= idx < len(nli_files) else None
+                corr = 1.0
+            else:
+                path, corr = find_nli_page(gb, nli_files, page)
             if path is None or corr < args.min_corr:
                 skipped.append((page, round(corr, 3)))
                 print(f"  p{page}: SKIPPED, best page match {corr:.2f}")

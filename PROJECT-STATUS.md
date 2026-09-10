@@ -267,6 +267,57 @@ applying it to the corpus remain two separate, deliberate steps.
     cheaper than a human reading 2,025 entries?** That is measurable and is not
     yet measured.
 
+0FU. **[2026-09-11] RE-READ THE SLICE FROM THE FULL-TONE SCAN: NUN/GIMEL DROPS
+    83 -> 16, BUT THE VLM LOSES MORE ON RUNNING TEXT THAN THE SCAN GAINS.**
+
+    `tools/ocr_pages_vlm.py` transcribed all 35 pages of the reviewed slice from
+    NLI's full-tone images, un-thresholded, and the result was segmented into 91
+    entries and scored against the same 100 reviewed entries used throughout.
+
+    | source | word | chars | nun/gimel errors |
+    |---|---|---|---|
+    | DocAI on the bitonal scan | 0.8953 | **0.9573** | **83** |
+    | Gemini VLM on the full-tone scan | 0.7870 | 0.8486 | **16** |
+
+    **Two changes were made at once and they must be attributed separately.**
+
+    The nun/gimel collapse - 83 errors down to 16, an 81% reduction - belongs to
+    the SCAN, and that attribution is clean because `0FS` ran the controlled
+    version: same engine, same prompt, same words, only the pixels changed, 18%
+    -> 90%.
+
+    The overall loss belongs to the ENGINE, and it is not truncation. On the 62
+    entries the VLM transcribed completely (9,207 words) it scores 0.9127 against
+    DocAI's 0.9704, so it is worse at running text across the board, not just
+    dropping tails. This is the "stochastic generation risk" the reviewer's own
+    engine matrix names for generative extraction, measured: a VLM asked to read
+    a whole page paraphrases and drifts in a way a dedicated OCR engine does not.
+
+    **So the next step is not more VLM.** It is a real OCR engine on the
+    full-tone images - DocAI or Cloud Vision on the NLI JPEGs rather than on the
+    bitonal PDF. That would take the scan's nun/gimel gain without paying the
+    VLM's running-text penalty, and it is the experiment that decides whether the
+    corpus should be rebuilt from NLI. `google-cloud-documentai` is already a
+    declared dependency (`tools/verify_local_setup.py`), but no submission path
+    for loose page images exists in this repo yet.
+
+    **A page-alignment near-miss worth recording.** NLI's images do not
+    correspond to PDF pages by any fixed rule the file numbering exposes, so the
+    tool matches pages by ink-profile correlation and refuses below a threshold.
+    Lowering that threshold to recover 7 skipped pages produced two transcripts
+    OF THE WRONG PAGE - p59 and p66 both matched the same NLI file, which is what
+    exposed it. Facing pages of solid text correlate well with each other, so a
+    respectable correlation is not evidence of the right page. The fix was a
+    CONTENT check: the running head prints the root range (`אבח-אגד`) on rectos
+    and the page number on versos, and comparing those against the Google Books
+    layer caught p59, p80 and p84. All 35 pages now verify. The tool gained an
+    explicit `--offset`, which once established over several pages is stronger
+    than any per-page correlation.
+
+    Incidentally: the Google Books text layer REVERSES the digits of the printed
+    page number (`21` for 12, `92` for 29) - an RTL bug in that layer, not in the
+    print. The NLI transcription reads them correctly.
+
 0FT. **[2026-09-10] DASHBOARD AUDIT FOR HaShorashim: THE STALE-ARTIFACT HALF IS
     NOW FIXED; THE QUEUE HALF NEEDS A PER-WITNESS LABEL AND A PER-WITNESS CUT.**
 
