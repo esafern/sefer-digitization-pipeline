@@ -58,20 +58,29 @@ sys.path.insert(0, os.path.dirname(_HERE))
 sys.path.insert(0, os.path.join(os.path.dirname(_HERE), "pipeline"))
 import corpus_io as cio  # noqa: E402
 
-POINTS = re.compile(r"[֑-ׇ]")
 FINALS = str.maketrans("ךםןףץ", "כמנפצ")
 EDITORIAL = re.compile(r"[\[\]]")
 
 
 def root_key(text):
     """Root identifier: NFKC, strip points, fold finals."""
-    return POINTS.sub("", unicodedata.normalize("NFKC", text)).translate(FINALS)
+    t = cio.HEBREW_PUNCT.sub("", cio.strip_points(unicodedata.normalize("NFKC", text)))
+    return t.translate(FINALS)
 
 
 def text_words(text):
-    """Running text: NFKC and strip points ONLY - never fold finals."""
+    """Running text: NFKC, points deleted, PUNCTUATION SEPARATES, finals kept.
+
+    The maqaf is the reason this goes through corpus_io rather than a local
+    regex. The witness is a POINTED text and writes `אֶת־כָּל־הָעַמִּים`; our
+    corpus is unpointed and writes the same phrase with spaces. Deleting the
+    maqaf instead of splitting on it produced the single token `אתכלהעמים`,
+    which then aligned against three of ours and was emitted as a dispute - a
+    typography difference presented to a human as a disagreement about letters.
+    """
     out = []
-    for raw in POINTS.sub("", unicodedata.normalize("NFKC", text)).split():
+    normed = unicodedata.normalize("NFKC", text)
+    for raw in cio.HEBREW_PUNCT.sub(" ", cio.strip_points(normed)).split():
         w = cio.hebrew_letters_only(raw)
         if len(w) >= 2:
             out.append((w, raw))

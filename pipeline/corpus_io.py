@@ -691,6 +691,52 @@ def hebrew_letters_only(s):
     return "".join(c for c in s if c in HEBREW_LETTERS)
 
 
+# HEBREW POINTS vs HEBREW PUNCTUATION. These are two different things and the
+# block U+0591-U+05C7 mixes them together.
+#
+# Points and accents attach to a letter and carry no word boundary, so they are
+# DELETED. Maqaf, paseq, sof pasuq and gereshayim are punctuation and DO carry a
+# boundary, so they must SEPARATE.
+#
+# THE BUG THIS EXISTS TO PREVENT, found 2026-09-10. Three tools each wrote
+# `re.compile(r"[֑-ׇ]")` and deleted the whole block. U+05BE MAQAF is what joins
+# `אֶת־כָּל־הָעַמִּים` in a pointed text, so deleting it produced the single token
+# `אתכלהעמים`. Measured over Sefaria's 39 books of Tanakh: the deleting rule
+# yields 267,787 tokens and 56,157 types, the separating rule 310,095 tokens and
+# 40,138 types. 18,627 of the "types" in the shipped lexicon were glued forms
+# that can never match anything, and 1,169 real Tanakh words were absent from it
+# altogether - in a lexicon whose whole job is validating a DICTIONARY OF THE
+# BIBLE. It also manufactured disputes: our unpointed corpus writes the phrase
+# with spaces, so a pure typography difference scored as a disagreement about
+# letters and went into a human review queue.
+#
+# Kept here as one implementation because the same rule was independently
+# written three times and all three were wrong the same way (Lesson 34).
+HEBREW_POINTS = re.compile(r"[\u0591-\u05BD\u05BF\u05C1\u05C2\u05C4\u05C5\u05C7]")
+HEBREW_PUNCT = re.compile(r"[\u05BE\u05C0\u05C3\u05C6\u05F3\u05F4]")
+
+
+def strip_points(text):
+    """Remove points and accents; leave punctuation and spacing alone."""
+    return HEBREW_POINTS.sub("", text)
+
+
+def hebrew_words(text, min_len=1):
+    """Pointed or unpointed Hebrew -> its words, in order, letters only.
+
+    Points vanish, punctuation separates. This is the running-text
+    normalization: final forms are NOT folded, because folding them turns
+    `אלהים` into `אלהימ`. Root identifiers fold finals and must not use this.
+    """
+    stripped = HEBREW_PUNCT.sub(" ", HEBREW_POINTS.sub("", text))
+    out = []
+    for tok in stripped.split():
+        w = hebrew_letters_only(tok)
+        if len(w) >= min_len:
+            out.append(w)
+    return out
+
+
 # BIDI ISOLATES, for any tool that writes Hebrew into a Markdown/text report.
 #
 # A .md file is an LTR-base document. A bare Hebrew run in it is reordered

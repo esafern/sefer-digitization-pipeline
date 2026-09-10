@@ -71,7 +71,12 @@ LEXICON_PATH = cio.LEXICON_PATH
 # normalization mismatch into what looked like a vocabulary finding.
 HEB = cio.HEBREW_LETTERS
 HEB_SET = set(HEB)
-NIQQUD_RE = re.compile(r"[֑-ׇ]")  # cantillation + vowel points
+# Points and accents only. Maqaf and the other Hebrew punctuation are NOT here:
+# they separate words and are handled by cio.hebrew_words(). Deleting the whole
+# U+0591-U+05C7 block glued `אֶת־כָּל־הָעַמִּים` into one token and put 18,627
+# such forms into the shipped lexicon while leaving 1,169 real Tanakh words out
+# of it - see corpus_io.HEBREW_POINTS.
+NIQQUD_RE = cio.HEBREW_POINTS
 TAG_RE = re.compile(r"<[^>]+>")
 
 # Same 24 forms as tests/test_corpus_invariants.py::DROPPED_LAMED_CORRUPT_FORMS
@@ -119,14 +124,8 @@ def flatten_strings(node, out):
 
 
 def clean_words(raw_html_string):
-    no_tags = TAG_RE.sub(" ", raw_html_string)
-    no_niqqud = NIQQUD_RE.sub("", no_tags)
-    words = []
-    for tok in no_niqqud.split():
-        w = "".join(c for c in tok if c in HEB_SET)
-        if w:
-            words.append(w)
-    return words
+    """Sefaria markup -> words. Points deleted, punctuation separates."""
+    return cio.hebrew_words(TAG_RE.sub(" ", raw_html_string))
 
 
 def cache_is_current(meta_path=None):

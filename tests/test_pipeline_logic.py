@@ -9485,3 +9485,34 @@ def test_a_declined_insertion_settles_without_facing_the_drift_gate(apply_harnes
     # and two spellings of one outcome is how a reader starts believing there
     # are two outcomes.
     assert "declined" in (events[0].get("note") or "")
+
+def test_a_maqaf_separates_words_instead_of_vanishing():
+    """`אֶת־כָּל־הָעַמִּים` is three words, not one.
+
+    The Hebrew block U+0591-U+05C7 mixes marks that sit ON a letter with
+    punctuation that sits BETWEEN words, and three tools each deleted the whole
+    block. U+05BE MAQAF is the joiner in a pointed text, so deleting it produced
+    the single token `אתכלהעמים`. Two things followed, both silent:
+
+      * the shipped lexicon gained 18,627 forms that can never match anything
+        and lost 1,169 real Tanakh words - in a lexicon whose job is validating
+        a DICTIONARY OF THE BIBLE;
+      * 580 rows entered the human dispute queue because the witness is pointed
+        and writes the phrase with maqaf while our corpus is unpointed and
+        writes it with spaces. A typography difference was being presented to a
+        reviewer as a disagreement about letters.
+
+    Both halves are asserted here: points must still vanish, punctuation must
+    still separate.
+    """
+    import corpus_io as cio_local
+
+    assert cio_local.hebrew_words("אֶת־כָּל־הָעַמִּים") == ["את", "כל", "העמים"], (
+        "maqaf was deleted instead of separating - the glued-token defect is back")
+    assert cio_local.hebrew_words("וְלֹא־יִתֹּם") == ["ולא", "יתם"]
+    # points and accents still go, and a word without punctuation is untouched
+    assert cio_local.hebrew_words("בְּרֵאשִׁ֖ית") == ["בראשית"]
+    # sof pasuq and paseq separate too, and final forms are NOT folded
+    assert cio_local.hebrew_words("אֱלֹהִים׃ וַיֹּאמֶר") == ["אלהים", "ויאמר"]
+    assert cio_local.strip_points("אֶת־כָּל") == "את־כל", (
+        "strip_points must leave punctuation alone; only hebrew_words() splits")

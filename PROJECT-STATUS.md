@@ -155,7 +155,7 @@ applying it to the corpus remain two separate, deliberate steps.
     taking the citations from theirs and the text from ours. Measured rather than
     estimated.
 
-    Their apparatus is not prose: `word/footnotes.xml` holds 20,449 footnote
+    Their apparatus is not prose: `word/footnotes.xml` holds 20,450 footnote
     bodies and `document.xml` holds 20,450 `footnoteReference` markers, so every
     note is ANCHORED to a token position in their text (item `0EY`). The merge is
     therefore a word-level alignment problem, and
@@ -267,14 +267,132 @@ applying it to the corpus remain two separate, deliberate steps.
     cheaper than a human reading 2,025 entries?** That is measurable and is not
     yet measured.
 
-0EY. **[2026-09-10] SEFARIA'S FILES CARRY THE ENTIRE APPARATUS AS 20,449
+0FC. **[2026-09-10] A MAQAF WAS BEING DELETED INSTEAD OF SPLITTING. IT PUT
+    18,627 IMPOSSIBLE WORDS INTO THE LEXICON AND 580 PHANTOM ROWS INTO THE
+    HUMAN QUEUE.**
+
+    Three tools each wrote `re.compile(r"[֑-ׇ]")` and deleted the whole block.
+    That block mixes two different things: marks that sit ON a letter (vowels,
+    cantillation), which carry no boundary, and punctuation that sits BETWEEN
+    words, which does. U+05BE MAQAF is the second kind - it is what joins
+    `אֶת־כָּל־הָעַמִּים` in a pointed text - so deleting it yields the single
+    token `אתכלהעמים`.
+
+    Measured over Sefaria's 39 books of Tanakh, not estimated:
+
+    | rule | tokens | word types |
+    |---|---|---|
+    | deleting (shipped) | 267,787 | 56,157 |
+    | separating (fixed) | 310,095 | 40,138 |
+
+    So 42,308 tokens - 13.6% - were being welded to a neighbour. Consequences,
+    both silent:
+
+    * **`lexicon.txt` for this book was 8.6% fiction.** 18,627 of its 217,841
+      types were glued forms that can never match anything, and 1,169 real
+      Tanakh word types were absent from it altogether - `ומן`, `נבט`,
+      `מגרשיה`, `טבחים`. This is the lexicon used as a validity signal by
+      `compare_ocr_engines.py`, by the lexical detectors and by
+      `extract_pdf_text_layer.py --order detect`, in a book that is a
+      **dictionary of the Bible**. Rebuilt: 199,890 types.
+    * **580 of 3,373 witness disputes - 17.2% - were not disputes.** The witness
+      is pointed and writes the phrase with maqaf; our corpus is unpointed and
+      writes it with spaces. A typography difference was queued for a human as a
+      disagreement about letters. Queue is now 2,793.
+
+    Yad Malachi is NOT affected: its `lexicon.txt` is derived from its own
+    unpointed OCR and contains no maqaf (checked, not assumed).
+
+    Fixed at the seam rather than in three places - `corpus_io.HEBREW_POINTS`,
+    `HEBREW_PUNCT`, `strip_points()`, `hebrew_words()` - because the same rule
+    was independently written three times and all three were wrong the same way
+    (Lesson 34 SWEEP THE SIBLINGS). Regression test:
+    `test_a_maqaf_separates_words_instead_of_vanishing`. Full suite green.
+
+0FD. **[2026-09-10] THE `.docx` SET IS SEFARIA'S *UNCORRECTED* TEXT. A CLAIM
+    THAT IT WAS THE CORRECTED LAYER WAS VERIFIED BY A TEST THAT COULD NOT FAIL.**
+
+    Asked directly whether the comparison used the corrected layer, this project
+    answered yes and offered as evidence that `פרי` (corrected) was present in
+    the witness while `נורי` (raw) was not. The test was substring membership
+    over a whole entry, and `פרי` occurs elsewhere in that entry - in
+    `בפרי הנחל` - so it passed without touching the disputed position at all.
+
+    At the disputed position the three layers read:
+
+    | layer | reading |
+    |---|---|
+    | Sefaria, manually corrected | `שהוא פרי` |
+    | the `.docx` set | `שהוא נורי` |
+
+    `נורי` is the OCR error; the corrected layer fixed it. Aggregate agreement
+    with the corrected text, citations removed, over the 20 sample entries:
+    `.docx` 0.899 against RAW, 0.798 against CORRECTED. The `.docx` is the
+    pre-review source.
+
+    **What this does and does not invalidate.** `gold_disputes.json` - the 156
+    rows behind the review panels - is built from `corrected_sample` and IS the
+    corrected layer, so the panels were right. `witness_disputes.json` (2,793)
+    is built from the `.docx` and compares our OCR against THEIR UNCORRECTED
+    OCR. That is still a useful independent witness (Lesson 24: different ink,
+    different engine) but it is **not ground truth**, and nothing may be scored
+    against it as if it were.
+
+0FE. **[2026-09-10] MEASURED AGAINST THE CORRECTED TEXT ON ONE BASIS: OURS
+    96.4% OF CHARACTERS, THEIRS 99.6%.**
+
+    Earlier figures (98.4% / 99.1%) were taken on inconsistent bases - the maqaf
+    defect was in one side, and inline citations were counted against the text
+    that keeps them as footnotes. Recomputed with citations and editorial
+    brackets removed from both sides, weighted by entry length, over the 5
+    corrected entries inside the א-ב-ג slice - 1,946 words of ground truth:
+
+    | | words | characters |
+    |---|---|---|
+    | our OCR vs corrected | 0.8977 | 0.9643 |
+    | their `.docx` vs corrected | 0.9639 | 0.9960 |
+
+    The gap is wider than previously stated and runs against us. Five entries is
+    still five entries; this is why the ask to the Sefaria editor is 100 reviewed entries.
+    **Do not quote these to him as a rate.**
+
+0FF. **[2026-09-10] DISPUTES CAN BE SETTLED AGAINST THE VERSE THE APPARATUS
+    CITES. IT OVERTURNED A VISION VERDICT AT 0.95 CONFIDENCE.**
+
+    `tools/extract_witness_footnotes.py` recovers all 20,450 footnote TEXTS
+    (the earlier pass kept only their positions), and
+    `tools/adjudicate_against_verse.py` settles a disputed word by looking up
+    the verse its quotation comes from.
+
+    On p138 our text reads `ונוש` and the corrected text reads `וגוש`. The
+    vision adjudicator ruled OURS at 0.95, reading the glyph as a nun. The
+    entry's footnote 1 cites <https://www.sefaria.org/Job.7.5>, which reads
+    `רִמָּה (וגיש) [וְג֣וּשׁ] עָפָר` - **gimel in both ketiv and qere** - and the
+    entry's own headword is `גוש`. Ours is a nun/gimel confusion. The verse
+    settled in one lookup what the crop could not.
+
+    The citation must be checked before it is trusted: this apparatus contains
+    transposed references (`ויתאבכו גאות עשן` is
+    <https://www.sefaria.org/Isaiah.9.17>, its note reads `(ישעיה יז, ט)` =
+    17:9). Isaiah 17:9 is a real verse, so a naive lookup returns a real text
+    that has nothing to do with the quotation and BOTH readings come back
+    absent - a silent wrong answer. Every verdict is therefore gated on the
+    surrounding quotation actually corroborating the citation.
+
+    On the 156 gold disputes: 114 reach a cited verse, of which 24 are decided
+    (10 ours, 14 theirs), 2 both, and 88 uncorroborated. **77% uncorroborated is
+    the open question**, not a result - it means the quotation span is being cut
+    at the wrong boundary, or the citation resolves elsewhere. Not yet run on
+    the 2,793-row queue.
+
+0EY. **[2026-09-10] SEFARIA'S FILES CARRY THE ENTIRE APPARATUS AS 20,450
     ANCHORED WORD FOOTNOTES. WE DETECT 66% OF IT AND SHOULD NOT TRY FOR MORE.**
 
     The `.docx` files are not plain text with citations typed inline. Each one
     carries `word/footnotes.xml` - 2 MB in chapter 01 alone - and every footnote
     is ANCHORED to a position in the running text:
 
-        footnote bodies              20,449
+        footnote bodies              20,450
         in-text anchor markers       20,450
         look like `(book ch, v)`     20,092   98%
 

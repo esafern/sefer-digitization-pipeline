@@ -66,7 +66,6 @@ from build_root_corpus import page_lines, classify  # noqa: E402
 
 ALEPHBET = "אבגדהוזחטיכלמנסעפצקרשת"
 FINALS = str.maketrans("ךםןףץ", "כמנפצ")
-POINTS = re.compile(r"[֑-ׇ]")
 RANGE = re.compile(r"([א-ת]{2,5})\s*[-–]\s*([א-ת]{2,5})")
 # A page below this is gibberish OCR whatever its head says - a floor against a
 # damaged or badly-scanned page, not a quality dial.
@@ -104,7 +103,8 @@ def load_lexicon_or_explain():
 
 def root_key(text):
     """Sort position of a root, folding finals - a root is written non-final."""
-    r = POINTS.sub("", unicodedata.normalize("NFKC", text)).translate(FINALS)
+    r = cio.HEBREW_PUNCT.sub("", cio.strip_points(
+        unicodedata.normalize("NFKC", text))).translate(FINALS)
     return tuple(ALEPHBET.index(c) if c in ALEPHBET else 99 for c in r)
 
 
