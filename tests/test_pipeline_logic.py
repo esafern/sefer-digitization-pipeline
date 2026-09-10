@@ -9516,3 +9516,11 @@ def test_a_maqaf_separates_words_instead_of_vanishing():
     assert cio_local.hebrew_words("אֱלֹהִים׃ וַיֹּאמֶר") == ["אלהים", "ויאמר"]
     assert cio_local.strip_points("אֶת־כָּל") == "את־כל", (
         "strip_points must leave punctuation alone; only hebrew_words() splits")
+
+    # An INVISIBLE joiner is not punctuation and must not split a word either.
+    # Sefaria writes Jerusalem with U+034F COMBINING GRAPHEME JOINER between the
+    # two vowel signs, and a "split on non-Hebrew" rule tore `ירושלם` into the
+    # fragments `ירושל` and `ם` - so a verse lookup reported the word missing
+    # from the verse it is in. 652 U+034F and 769 U+200E in the reference corpus.
+    assert cio_local.hebrew_words("לְיוֹשֵׁ֥ב יְרוּשָׁלַ֖͏ִם") == ["ליושב", "ירושלם"], (
+        "an invisible joiner split a word - the U+034F fragmentation is back")

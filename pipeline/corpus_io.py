@@ -714,11 +714,21 @@ def hebrew_letters_only(s):
 # written three times and all three were wrong the same way (Lesson 34).
 HEBREW_POINTS = re.compile(r"[\u0591-\u05BD\u05BF\u05C1\u05C2\u05C4\u05C5\u05C7]")
 HEBREW_PUNCT = re.compile(r"[\u05BE\u05C0\u05C3\u05C6\u05F3\u05F4]")
+# INVISIBLE JOINERS AND MARKS, deleted before anything else looks at the text.
+#
+# These are not punctuation and carry no boundary, but they are also not Hebrew
+# letters, so any "split on non-Hebrew" rule tears a word in half at one. The
+# case that found this: Sefaria writes Jerusalem as `יְרוּשָׁלַ֖͏ִם` with U+034F
+# COMBINING GRAPHEME JOINER between the two vowel signs, and `ירושלם` was coming
+# out as the two fragments `ירושל` and `ם` - so a verse lookup reported the word
+# absent from the verse it is in. Counted across the reference corpus: 652
+# U+034F, 769 U+200E LEFT-TO-RIGHT MARK, 2 U+200D.
+INVISIBLE = re.compile(r"[\u034F\u00AD\u200B-\u200F\u2060\uFEFF]")
 
 
 def strip_points(text):
-    """Remove points and accents; leave punctuation and spacing alone."""
-    return HEBREW_POINTS.sub("", text)
+    """Remove points, accents and invisible marks; leave punctuation alone."""
+    return HEBREW_POINTS.sub("", INVISIBLE.sub("", text))
 
 
 def hebrew_words(text, min_len=1):

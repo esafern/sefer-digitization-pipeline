@@ -357,33 +357,97 @@ applying it to the corpus remain two separate, deliberate steps.
     **Do not quote these to him as a rate.**
 
 0FF. **[2026-09-10] DISPUTES CAN BE SETTLED AGAINST THE VERSE THE APPARATUS
-    CITES. IT OVERTURNED A VISION VERDICT AT 0.95 CONFIDENCE.**
+    CITES. 610 OF 2,793 SETTLED WITH NO HUMAN AND NO VISION CALL.**
 
-    `tools/extract_witness_footnotes.py` recovers all 20,450 footnote TEXTS
-    (the earlier pass kept only their positions), and
-    `tools/adjudicate_against_verse.py` settles a disputed word by looking up
-    the verse its quotation comes from.
+    `tools/extract_witness_footnotes.py` recovers all 20,450 footnote TEXTS (the
+    earlier pass kept only their positions); `tools/anchors_from_inline_citations.py`
+    does the same for the corrected export, whose citations are already inline;
+    `tools/adjudicate_against_verse.py` settles a disputed word by looking up the
+    verse its quotation comes from.
 
-    On p138 our text reads `ונוש` and the corrected text reads `וגוש`. The
-    vision adjudicator ruled OURS at 0.95, reading the glyph as a nun. The
-    entry's footnote 1 cites <https://www.sefaria.org/Job.7.5>, which reads
-    `רִמָּה (וגיש) [וְג֣וּשׁ] עָפָר` - **gimel in both ketiv and qere** - and the
-    entry's own headword is `גוש`. Ours is a nun/gimel confusion. The verse
-    settled in one lookup what the crop could not.
+    It overturned a vision verdict held at 0.95. On p138 our text reads `ונוש`
+    and the corrected text reads `וגוש`; the adjudicator ruled OURS, reading the
+    glyph as a nun. The entry's footnote 1 cites <https://www.sefaria.org/Job.7.5>,
+    which reads `רִמָּה (וגיש) [וְג֣וּשׁ] עָפָר` - **gimel in both ketiv and qere**
+    - and the entry's own headword is `גוש`. The verse settled in one lookup what
+    the crop could not.
 
-    The citation must be checked before it is trusted: this apparatus contains
-    transposed references (`ויתאבכו גאות עשן` is
-    <https://www.sefaria.org/Isaiah.9.17>, its note reads `(ישעיה יז, ט)` =
-    17:9). Isaiah 17:9 is a real verse, so a naive lookup returns a real text
-    that has nothing to do with the quotation and BOTH readings come back
-    absent - a silent wrong answer. Every verdict is therefore gated on the
-    surrounding quotation actually corroborating the citation.
+    ### Three things had to be right before any verdict meant anything
 
-    On the 156 gold disputes: 114 reach a cited verse, of which 24 are decided
-    (10 ours, 14 theirs), 2 both, and 88 uncorroborated. **77% uncorroborated is
-    the open question**, not a result - it means the quotation span is being cut
-    at the wrong boundary, or the citation resolves elsewhere. Not yet run on
-    the 2,793-row queue.
+    **The span cannot be "everything since the last footnote."** Between two
+    markers sits Ibn Janah's own argument, which has no source; a 19-word stretch
+    containing a 4-word quotation scores 0.17 however right the citation is. That
+    first attempt left 77% uncorroborated. The run is now grown BACKWARDS from
+    the marker while the words keep appearing in the verse, with the disputed
+    position itself exempt - if our reading is the wrong one it will not be in
+    the verse, and it must not be allowed to truncate the quotation that proves
+    it wrong.
+
+    **The citation must be checked before it is trusted.** This apparatus
+    contains transposed references: `ויתאבכו גאות עשן` is
+    <https://www.sefaria.org/Isaiah.9.17>, its note reads `(ישעיה יז, ט)` = 17:9.
+    Isaiah 17:9 is a real verse, so a naive lookup returns a real text with
+    nothing to do with the quotation and BOTH readings come back absent - a
+    silent wrong answer. Transposition is tested explicitly and named.
+
+    **The anchors and the readings must come from the SAME text.** The .docx
+    anchors index Sefaria's uncorrected stream; the gold disputes carry their
+    corrected readings. Locating a corrected reading in an uncorrected stream
+    picked wrong quotations and produced 30 spurious "ours" wins. The corrected
+    export carries its citations inline at the marker's position, so it anchors
+    itself - hence the second tool.
+
+    ### Results
+
+    Gold (122 disputes against the 5 corrected entries in the slice): 82 reach a
+    cited verse, **13 decided, every one of them for the corrected text and none
+    for us** - which is what a hand-corrected witness should look like. 67
+    uncorroborated, of which 40 match zero words: the disputed word sits in Ibn
+    Janah's own prose and has no source to check. That is a real limit, not a
+    failure.
+
+    Full queue (2,793 disputes against their uncorrected text): 1,952 reach a
+    cited verse, **662 for them, 11 for us, 9 both, 131 neither, 1,139
+    uncorroborated**. So 673 positions - 24.1% of the whole queue - are settled
+    at zero marginal cost, and the 662/11 split is consistent with the character
+    measurement in `0FE`.
+
+    Citation parsing is at 96.2% of 20,450 (was 85.5%). Bacher abbreviates book
+    names by TRUNCATION with a geresh - `ישע'`, `ברא'`, `שופ'` - which an
+    exact-match table misses, so a truncation now resolves as a UNIQUE prefix of
+    a real book name and resolves to nothing when ambiguous (`מ` prefixes
+    מלכים, מיכה and מלאכי alike). `(שם, שם)` - a second note on the same verse,
+    98 of them - now inherits the whole previous reference rather than being read
+    as a gematria.
+
+    The 11 are worth their own look: they are positions where THEIR text is
+    wrong and ours is right, verified against the verse. Examples -
+    `וצפיר`/`משיר` at <https://www.sefaria.org/Daniel.8.8>, `במו`/`כמו` at
+    <https://www.sefaria.org/Isaiah.44.19>, `באנק`/`נאנק` at
+    <https://www.sefaria.org/Ezekiel.26.15>, `דגן`/`מן` at
+    <https://www.sefaria.org/Hosea.7.14>. Written to
+    `verse_adjudication_witness.json`.
+
+    The 131 `neither` are apparatus QC candidates: both readings absent from the
+    cited verse means the citation is wrong, the quotation is abbreviated, or the
+    printing follows a variant. Worth showing the Sefaria editor.
+
+0FG. **[2026-09-10] AN INVISIBLE JOINER WAS TEARING WORDS IN HALF.**
+
+    Found while auditing a verdict that looked wrong: `ירושלים` vs `ירושלם` came
+    back as `neither`, though <https://www.sefaria.org/Isaiah.22.21> plainly has
+    the word. Sefaria writes Jerusalem as `יְרוּשָׁלַ֖͏ִם` with U+034F COMBINING
+    GRAPHEME JOINER between the two vowel signs. U+034F is not a Hebrew letter,
+    so a "split on non-Hebrew" rule cut the word into `ירושל` and `ם`, and the
+    lookup reported the word absent from the verse it is in.
+
+    Counted across the reference corpus: 652 U+034F, 769 U+200E, 2 U+200D. Now
+    deleted in `corpus_io.INVISIBLE` before anything splits. Moved 25 rows out
+    of `both` and into a decision. Same regression test as `0FC`.
+
+    Same family as the maqaf defect and found the same way - by disbelieving a
+    verdict and checking it against the source rather than accepting the
+    aggregate.
 
 0EY. **[2026-09-10] SEFARIA'S FILES CARRY THE ENTIRE APPARATUS AS 20,450
     ANCHORED WORD FOOTNOTES. WE DETECT 66% OF IT AND SHOULD NOT TRY FOR MORE.**

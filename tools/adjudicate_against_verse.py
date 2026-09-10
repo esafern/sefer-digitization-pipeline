@@ -67,8 +67,7 @@ import corpus_io as cio  # noqa: E402
 # verse it is quoting. It also manufactures disputes: our unpointed text writes
 # the same phrase with spaces, so a pure typography difference was being scored
 # as a disagreement about letters. Maqaf must SEPARATE, never vanish.
-POINTS = re.compile(r"[\u0591-\u05BD\u05BF\u05C1\u05C2\u05C4\u05C5\u05C7]")
-PUNCT = re.compile(r"[\u05BE\u05C0\u05C3\u05C6\u05F3\u05F4]")
+POINTS = cio.HEBREW_POINTS
 TAGS = re.compile(r"<[^>]+>")
 ENTITY = re.compile(r"&[a-zA-Z]+;|&#\d+;")
 NON_HEB = re.compile(r"[^א-ת]+")
@@ -118,18 +117,16 @@ def gematria(s):
 def words(text):
     """Any Hebrew text -> its comparable words, in order.
 
-    Points and accents are deleted, punctuation SEPARATES (see POINTS above),
-    markup and HTML entities go, and ketiv/qere both survive - a printing may
-    legitimately follow either, so both are readings worth matching.
+    Markup and HTML entities go; the rest is corpus_io.hebrew_words(), which is
+    where the points-vs-punctuation rule lives. Ketiv AND qere both survive,
+    deliberately: a printing may legitimately follow either.
 
     Final forms are NOT folded. This is running text, and folding finals turns
     `אלהים` into `אלהימ` - the per-purpose normalization rule that cost 16 points
     on both sides of a measurement once already.
     """
     t = ENTITY.sub(" ", TAGS.sub(" ", text))
-    t = unicodedata.normalize("NFKC", t)
-    t = POINTS.sub("", PUNCT.sub(" ", t))
-    return [w for w in NON_HEB.split(t) if w]
+    return cio.hebrew_words(unicodedata.normalize("NFKC", t))
 
 
 def bare(word):
@@ -169,6 +166,27 @@ class Tanakh:
         return chap[v - 1] if 0 < v <= len(chap) and isinstance(chap[v - 1], str) else None
 
 
+def resolve_book(name):
+    """A printed book name -> Sefaria's title, or None.
+
+    Bacher abbreviates by TRUNCATION with a geresh - `ישע'` for ישעיה, `ברא'`
+    for בראשית, `שופ'` for שופטים - so an exact-match table misses most of them.
+    A truncation is resolved as a unique prefix of a real book name, and only a
+    UNIQUE one: `מ` prefixes both מלכים and מיכה and מלאכי, so it resolves to
+    nothing rather than to whichever happened to be first. The gershayim
+    abbreviations (`שה"ש`, `דה"ב`) are not truncations and stay in their table.
+    """
+    clean = re.sub(r"[\"'\u05f3\u05f4]", "", name).strip()
+    if clean in BOOKS:
+        return BOOKS[clean]
+    if clean in ABBREV:
+        return ABBREV[clean]
+    if name in BOOKS:
+        return BOOKS[name]
+    hits = {v for k, v in BOOKS.items() if k.startswith(clean)} if clean else set()
+    return hits.pop() if len(hits) == 1 else None
+
+
 def parse_citation(note, last_book):
     """`(book chapter, verse)` -> ((book, ch, verse), last_book).
 
@@ -187,22 +205,36 @@ def parse_citation(note, last_book):
     if not parts:
         return None, last_book
     if parts[0].startswith("שם"):
-        book = last_book
-        ch = gematria(parts[1]) if len(parts) > 1 else None
+        # `שם` inherits the book; `(שם, שם)` inherits the whole reference, which
+        # is how the apparatus writes a second note on the same verse - 98 of
+        # them, all lost while `שם` in the verse slot was read as a gematria.
+        book, ch = last_book, gematria(parts[1]) if len(parts) > 1 else None
+        if isinstance(last_book, tuple):
+            book, prev_ch, prev_v = last_book
+            if len(parts) == 1:
+                ch = prev_ch
+                if verse.startswith("שם"):
+                    return (book, prev_ch, prev_v), last_book
     else:
         name = " ".join(parts[:-1]) if len(parts) > 1 else parts[0]
-        clean = re.sub(r"[\"'׳״]", "", name).strip()
-        book = BOOKS.get(clean) or ABBREV.get(clean) or BOOKS.get(name)
+        book = resolve_book(name)
         ch = gematria(parts[-1]) if len(parts) > 1 else None
-        if book:
-            last_book = book
+    if isinstance(book, tuple):
+        book = book[0]
     if not book or not ch:
         return None, last_book
-    return (book, ch, gematria(verse)), last_book
+    v = None if verse.startswith("שם") else gematria(verse)
+    if v is None and verse.startswith("שם") and isinstance(last_book, tuple):
+        v = last_book[2]
+    return (book, ch, v), (book, ch, v)
 
 
 def entry_refs(info):
-    """[(anchor position, ref or None)] for one entry, ibid resolved in order."""
+    """[(anchor position, ref or None)] for one entry, ibid resolved in order.
+
+    The running state is the whole previous REFERENCE, not just its book, so
+    `(שם, שם)` - same chapter and same verse - can be resolved too.
+    """
     out, last = [], None
     for pos, note in zip(info["anchors"], info.get("notes", [])):
         ref, last = parse_citation(note, last)
@@ -210,24 +242,74 @@ def entry_refs(info):
     return out
 
 
-def find_span(tokens, needle_words, hint):
-    """Where does the witness's own reading sit in its own token stream?
+def flatten(tokens):
+    """[(word, originating token index)] for an entry.
 
-    Disputes carry an index into OUR text, and the anchors index THEIRS, so the
+    A witness token can be more than one word - the text is pointed, so
+    `וְלֹא־יִתֹּם` is a single whitespace token holding two. Anchors index the
+    TOKEN stream, comparisons need the WORD stream, and this keeps the map
+    between them rather than letting the two drift.
+    """
+    flat = []
+    for i, tok in enumerate(tokens):
+        for w in words(tok):
+            flat.append((w, i))
+    return flat
+
+
+def find_span(flat, needle_words, hint):
+    """Where does the witness's own reading sit in its own word stream?
+
+    Disputes carry an index into OUR text and the anchors index THEIRS, so the
     two cannot be compared directly. Locating the witness reading inside the
-    witness tokens puts the dispute into anchor space without needing the
-    alignment - and when the phrase occurs more than once, the occurrence nearest
-    the proportional hint wins rather than the first, which would silently pick
-    the wrong quotation in a long entry.
+    witness words puts the dispute into anchor space without needing the
+    alignment - and when the phrase occurs more than once, the occurrence
+    nearest the proportional hint wins rather than the first, which would
+    silently pick the wrong quotation in a long entry.
     """
     n = len(needle_words)
-    if not n:
+    if not n or n > len(flat):
         return None
-    hits = [i for i in range(len(tokens) - n + 1)
-            if all(bare(tokens[i + k]) == needle_words[k] for k in range(n))]
+    hits = [i for i in range(len(flat) - n + 1)
+            if all(flat[i + k][0] == needle_words[k] for k in range(n))]
     if not hits:
         return None
     return min(hits, key=lambda i: abs(i - hint))
+
+
+def quotation_run(flat, end, vwords, skip, miss_budget=1, floor=0):
+    """The quoted run immediately before a footnote marker: (start, matched).
+
+    THE SPAN CANNOT BE "EVERYTHING SINCE THE LAST FOOTNOTE". That was the first
+    attempt and it left 77% of cases uncorroborated: between two markers sits
+    Ibn Janah's own argument, and a 19-word stretch containing a 4-word
+    quotation scores 0.17 against the verse however right the citation is. The
+    prose has no source; only the run touching the marker does.
+
+    So the run is grown BACKWARDS from the marker while the words keep appearing
+    in the cited verse, with a small miss budget for a printing that abbreviates
+    or inflects. The disputed position itself is exempt from the budget - it is
+    the thing in question, and if our reading is the wrong one it will not be in
+    the verse, which must not be allowed to truncate the very quotation that
+    proves it wrong.
+    """
+    i, misses, matched = end - 1, 0, 0
+    start = end
+    while i >= floor:
+        if i == skip:
+            start = i
+            i -= 1
+            continue
+        if flat[i][0] in vwords:
+            matched += 1
+            start = i
+        else:
+            misses += 1
+            if misses > miss_budget:
+                break
+            start = i
+        i -= 1
+    return start, matched
 
 
 def main():
@@ -237,9 +319,9 @@ def main():
     ap.add_argument("--footnotes", required=True)
     ap.add_argument("--tanakh", default=os.path.join(os.path.dirname(_HERE),
                                                      "sefaria_reference_corpus", "raw"))
-    ap.add_argument("--min-corroboration", type=float, default=0.5,
-                    help="fraction of the quotation's words that must appear in "
-                         "the cited verse before the verse may rule")
+    ap.add_argument("--min-matched", type=int, default=2,
+                    help="how many words of the quoted run must appear in the "
+                         "cited verse before the verse may rule on the dispute")
     ap.add_argument("--out")
     ap.add_argument("--show", type=int, default=25)
     args = ap.parse_args()
@@ -277,54 +359,59 @@ def main():
             artifacts.append(dict(d))
             continue
 
-        pos = find_span(info["tokens"], theirs, d.get("word_index", 0))
+        key = id(info)
+        if key not in refs_cache:
+            refs_cache[key] = (flatten(info["tokens"]), entry_refs(info))
+        flat, marks = refs_cache[key]
+
+        pos = find_span(flat, theirs, d.get("word_index", 0))
         if pos is None:
             skipped["witness reading not located"] += 1
             continue
 
-        key = id(info)
-        if key not in refs_cache:
-            refs_cache[key] = entry_refs(info)
-        marks = refs_cache[key]
-
-        after = [(p, r, n) for p, r, n in marks if p > pos]
+        # Anchors index TOKENS; the run is grown over WORDS. Convert once.
+        at = lambda tok_i: next((k for k, (_w, t) in enumerate(flat) if t >= tok_i),
+                                len(flat))
+        after = [(p, r, n) for p, r, n in marks if at(p) > pos]
         if not after:
             skipped["no footnote after the word"] += 1
             continue
-        anchor, ref, note = after[0]
-        before = [p for p, _, _ in marks if p <= pos]
-        start = max(before) if before else 0
+        anchor_tok, ref, note = after[0]
+        anchor = at(anchor_tok)
+        prev = [at(p) for p, _, _ in marks if at(p) <= pos]
+        floor = max(prev) if prev else 0
         if not ref:
             skipped["citation unparsed"] += 1
             continue
 
         book, ch, v = ref
         text = tanakh.verse(book, ch, v)
-        transposed = False
-        if text is None and v:
+        if text is None:
             skipped["verse not in reference corpus"] += 1
             continue
 
-        quote = words(" ".join(info["tokens"][start:anchor]))
-        def corroboration(txt):
-            if not txt or not quote:
-                return 0.0
+        def run_for(txt):
             vw = verse_words(txt)
-            return sum(1 for w in quote if w in vw) / len(quote)
+            start, matched = quotation_run(flat, anchor, vw, pos, floor=floor)
+            return start, matched, vw
 
-        score = corroboration(text)
+        start, matched, vw = run_for(text)
+        transposed = False
         # The transposed-citation case: try chapter and verse the other way round
-        # and take it only if it corroborates decisively better.
-        if score < args.min_corroboration and v:
+        # and take it only if the quotation corroborates it decisively better.
+        if matched < args.min_matched and v:
             alt = tanakh.verse(book, v, ch)
-            if alt and corroboration(alt) >= max(args.min_corroboration, score + 0.25):
-                text, score, transposed = alt, corroboration(alt), True
-                ch, v = v, ch
+            if alt:
+                a_start, a_matched, a_vw = run_for(alt)
+                if a_matched >= max(args.min_matched, matched + 2):
+                    text, start, matched, vw = alt, a_start, a_matched, a_vw
+                    ch, v, transposed = v, ch, True
 
-        vw = verse_words(text) if text else set()
+        span = anchor - start
+        score = matched / span if span else 0.0
         in_ours = any(w in vw for w in ours)
         in_theirs = any(w in vw for w in theirs)
-        if score < args.min_corroboration:
+        if matched < args.min_matched or not (start <= pos < anchor):
             verdict = "uncorroborated"
         elif in_ours and in_theirs:
             verdict = "both"
@@ -339,7 +426,8 @@ def main():
             "root": d.get("root"), "page": d.get("page"),
             "word_index": d.get("word_index"), "klal_id": d.get("klal_id"),
             "ours": d["corpus"], "theirs": d["witness_reading"],
-            "quotation": " ".join(info["tokens"][start:anchor])[-90:],
+            "quotation": " ".join(w for w, _t in flat[start:anchor]),
+            "matched": matched,
             "note": note, "book": book, "chapter": ch, "verse": v,
             "transposed_citation": transposed,
             "corroboration": round(score, 3),
@@ -386,7 +474,7 @@ def main():
                        "Disputes settled against the verse the witness apparatus "
                        "cites. A verdict is issued only when the surrounding "
                        "quotation actually corroborates the citation.",
-                       "min_corroboration": args.min_corroboration,
+                       "min_matched": args.min_matched,
                        "counts": dict(tally), "rows": rows,
                        "maqaf_artifacts": artifacts}, fh,
                       ensure_ascii=False, indent=1)
