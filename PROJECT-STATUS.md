@@ -267,6 +267,68 @@ applying it to the corpus remain two separate, deliberate steps.
     cheaper than a human reading 2,025 entries?** That is measurable and is not
     yet measured.
 
+0FQ. **[2026-09-10] RESOLUTION IS NOT THE CONSTRAINT ON THE VISION
+    ADJUDICATOR. THE ADJUDICATOR IS 82-85% WRONG ON NUN/GIMEL AT 0.95
+    CONFIDENCE, AND THE CONFIDENCE CARRIES NO SIGNAL AT ALL.**
+
+    Paired experiment, `tools/experiment_crop_resolution.py`: 66 positions where
+    our OCR read nun and Sefaria's reviewed text reads gimel, each put to
+    gemini-3.6-flash twice - at 300 dpi (the current default) and at 600 (the
+    scan's native) - with the same randomized A/B assignment both times, so the
+    crop is the only variable.
+
+    | | correct |
+    |---|---|
+    | 300 dpi | 12/66 (18.2%) |
+    | 600 dpi | 10/65 (15.4%) |
+
+    Paired: 3 wrong->right, 4 right->wrong, **net -1**. Doubling the resolution
+    changes nothing.
+
+    **The number that matters is not the difference, it is the level.** A
+    two-alternative forced choice should score 50% by guessing. At 18% the model
+    is not guessing - it systematically chooses the nun. Mean confidence 0.95,
+    and mean confidence WHEN WRONG also 0.95, with fluent shape-based reasoning
+    every time ("a flat horizontal base extending to the left, characteristic of
+    a nun rather than a gimel"). There is no threshold that filters these out.
+
+    The ground truth is not in doubt: the correct readings are `גבורים`, `גשר`,
+    `תרגם`, `ואביגיל` - Abigail - against our `נבורים`, `נשר`, `תרנם`,
+    `ואביניל`, which are not words.
+
+    **This invalidates vision adjudication as a check on this error class**, and
+    the class is a third of all our single-letter errors. It also explains p138
+    (`ונוש`/`וגוש`, ruled OURS at 0.95, wrong): that was not an unlucky call, it
+    was the modal behaviour.
+
+0FR. **[2026-09-10] THE BITONAL SCAN FUSED THE GIMEL'S LEG. THE FULL-TONE SCAN
+    KEEPS IT - AT HALF THE RESOLUTION. WE MAY BE OCR-ING THE WRONG SCAN.**
+
+    Cropped the SAME gimel (in `לגדלתם`, p60, verified aligned) from both scans:
+
+    * **Google Books, 1 bpc, ~600 dpi**: the gimel's descending left leg is
+      present but WELDED to the adjacent stroke. The 1-bit threshold fused
+      neighbouring ink, and the fused form is exactly a heavy nun.
+    * **NLI, RGB, ~313 dpi**: the leg is a separate stroke with white space
+      around it, and the gimel/dalet pair is plainly distinct.
+
+    So the information the model needs is not missing from the PRINTING, and it
+    is not missing because of resolution. It was destroyed by binarization,
+    before we ever saw the file - which is precisely the step `0FO` records as
+    already done, destructively, on both of our high-resolution copies.
+
+    This reverses the working assumption. The pipeline runs on the Google Books
+    scan because it has the most pixels; on this error class the lower-resolution
+    full-tone scan appears to carry MORE usable information. It also sharpens the
+    ask to NLI: a full-tone master at higher resolution would beat everything we
+    hold, and full tone matters more than dpi.
+
+    **STATED AS A HYPOTHESIS, NOT A RESULT.** It rests on one letter examined
+    closely plus a mechanism that explains it. The test that would settle it is
+    to OCR a sample of NLI pages - with and without adaptive binarization - and
+    score the nun/gimel class against the 100 reviewed entries, the same ground
+    truth used above. Not yet run.
+
 0FO. **[2026-09-10] SCAN INVENTORY: THE HIGH-RESOLUTION COPIES ARE BITONAL AND
     THE FULL-TONE COPY IS THE LOW-RESOLUTION ONE. PRE-PROCESSING IS ONLY LIVE ON
     THE WORST SCAN.**
