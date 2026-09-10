@@ -3314,7 +3314,7 @@ applying it to the corpus remain two separate, deliberate steps.
     in this corpus) and cannot see agreement. Note recorded with the entry.
 
     **klal 7 w677** `ויגל`: migrated, not newly cleared - it had been resolved
-    since 2026-08-26 (Psalms 16:9) and the reviewer's "clear it" was already
+    since 2026-08-26 (Psalms 16:9, <https://www.sefaria.org/Psalms.16.9>) and the reviewer's "clear it" was already
     true. Reported to them as already-marked rather than acted on twice.
 
     **klal 150 w443 `אוף` was NOT migrated, deliberately.** Its old marker said
