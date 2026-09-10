@@ -101,6 +101,53 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0FB. **[2026-09-10] OUR TEXT vs SEFARIA'S *MANUALLY CORRECTED* TEXT, PUT TO THE
+    INK: 56/44 ON 34 REAL READING DIFFERENCES. TOO CLOSE AND TOO SMALL TO CLAIM
+    ANYTHING.**
+
+    Item `0EZ` measured our text against their corrected entries and could not
+    assume gold was right - their pass may normalise orthography rather than
+    correct it (`עדנו` for our `עודנו`). So the disagreements were cropped and
+    put to the vision adjudicator, using the same `--source witness` route with
+    their corrected text as the witness. 42 disputes, all adjudicated.
+
+        real reading difference                    37   A 19 / B 15 / UNCERTAIN 3
+        heading markup (their span splits the ה)    3   A  3
+        word division / &nbsp; only                 2   A  2
+
+        ON THE 34 DECIDABLE READING DIFFERENCES
+           ink backs OUR reading         19   56%
+           ink backs THEIR correction    15   44%
+
+    ### The number moved twice and the classification is why
+
+    The interim read on 30 unclassified rows said **66.7% for us**. Five of those
+    "wins" were not readings at all - `הבית` against their `בי'ת`, which is their
+    HTML splitting the `ה` into a span, and two `&nbsp;` word-division artifacts.
+    Removing what was never a reading disagreement takes it to **56%**. That is
+    the third figure today that changed materially once someone looked at what
+    was inside it (`0EZ`'s 76% -> 88.5% -> 98.4%, `0ET`'s 36% -> 25.7%).
+
+    **Do not report 56% as a result either.** n=34, one adjudicator, and this
+    project's own record (`0EA`, `0EB`) is that vision is a signal and not a
+    verdict. The defensible statement is that at the point where the two texts
+    disagree on a reading, the scan supports each side about equally - which is
+    itself informative, because one side is raw OCR and the other is a human's
+    deliberate correction.
+
+    ### Why that is worth telling the Sefaria editor, carefully
+
+    If it holds at larger n, **some of his manual corrections are not
+    improvements** - 19 of 34 places where he changed the text away from what the
+    page appears to show. At 657 entries reviewed and 1,368 to go, that is worth
+    knowing before more hours go in. It is also exactly the claim that needs the
+    most evidence before it is made, which is the argument for asking for 100
+    corrected entries rather than 10 (draft sent for the reviewer's approval).
+
+    Examples where the ink backs us: `ונוש` against their `וגוש`, `ויעשה` against
+    `ויעשו`. Where it backs them: `ועגינה` -> `וענינה`, `מתלעותיופי` ->
+    `מתלעתיו`.
+
 0FA. **[2026-09-10] QUESTION 2 ANSWERED: THE MERGE IS RELIABLE. 98.8% OF
     SEFARIA'S 20,450 FOOTNOTE ANCHORS TRANSFER ONTO OUR TOKENS WITHIN ONE WORD.**
 
