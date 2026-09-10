@@ -267,6 +267,45 @@ applying it to the corpus remain two separate, deliberate steps.
     cheaper than a human reading 2,025 entries?** That is measurable and is not
     yet measured.
 
+0FN. **[2026-09-10] MAJORITY VOTING ACROSS OUR ENGINES MAKES THE TEXT WORSE BY
+    452 WORDS. INDEPENDENCE IS THE ASSET, NOT ENGINE COUNT.**
+
+    Measured on the 100 reviewed entries (13,735 words of ground truth), three
+    witnesses: Sefaria's OCR, our DocAI, and the Google Books text layer.
+
+    | engine | word error rate |
+    |---|---|
+    | Sefaria's OCR | 1.35% |
+    | ours (DocAI) | 8.59% |
+    | Google Books layer | 10.48% |
+
+    The error-set overlaps are the finding:
+
+    | pair | Jaccard | share |
+    |---|---|---|
+    | DocAI & Google Books layer | **0.429** | 66.6% of our errors are also the layer's |
+    | Sefaria & DocAI | 0.071 | 48.4% |
+    | Sefaria & Google layer | 0.045 | 37.6% |
+
+    Two Google engines on the same scan are ONE witness with a 0.43 Jaccard, not
+    two. Lesson 24 (SAME INK, SAME FAILURE) now has a number attached to it.
+
+    A 2-of-3 majority vote therefore **fixes 78 of Sefaria's errors and breaks
+    530 that Sefaria had right - net -452 words**. All 530 breaks are positions
+    where our two correlated engines agree on the SAME wrong reading and outvote
+    the accurate witness. Naive adjudication across correlated engines is not
+    neutral, it is harmful.
+
+    **The rule this sets for adding any future engine**: evaluate it by the
+    Jaccard of its error set against the engines already present, not by its
+    standalone accuracy. A 10% engine that fails independently is worth more here
+    than a 5% engine that fails the way we already do.
+
+    Where the value actually is, on the same data: our disagreement with
+    Sefaria's OCR is 1,054 positions (7.7% of the text) and contains 87.3% of the
+    107 corrections a human made, with the right reading present in our column in
+    82 of them. A detector, not a corrector-by-vote.
+
 0FK. **[2026-09-10] THE .docx IS SEFARIA'S UNREVIEWED LAYER EXACTLY - 1.0000
     CHARACTER AGREEMENT - SO THE 100 REVIEWED ENTRIES GIVE A COMPLETE CORRECTION
     LEDGER.**
