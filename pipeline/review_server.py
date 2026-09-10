@@ -1192,6 +1192,10 @@ def api_klal(klal_id):
                 "tier": w.get("tier"),
                 "docai_reading": w.get("docai_reading"),
                 "tesseract_reading": w.get("tesseract_reading"),
+                # The witness is not always Tesseract - see witnessLabel() in
+                # app.js. Absent, the frontend keeps the historical name.
+                "witness_name": w.get("witness_name"),
+                "witness_accuracy": w.get("witness_accuracy"),
                 "current_decision": witness_decided.get((klal_id, w["docai_token_index"])),
         }) is not None:
             continue
@@ -1203,6 +1207,8 @@ def api_klal(klal_id):
             "tier": w.get("tier"),
             "docai_reading": w.get("docai_reading"),
             "tesseract_reading": w.get("tesseract_reading"),
+            "witness_name": w.get("witness_name"),
+            "witness_accuracy": w.get("witness_accuracy"),
             "vision_selected": w.get("vision_selected"),
             "vision_transcription": w.get("vision_transcription"),
             "final_text": None,

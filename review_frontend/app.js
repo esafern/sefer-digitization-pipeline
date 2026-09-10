@@ -1684,7 +1684,7 @@ function renderKlalBody(block, k) {
       span.dataset.wordIndex = i;
       span.textContent = w;
       span.title = corr.docai_reading
-        ? `DocAI: ${corr.docai_reading} | Tesseract: ${corr.tesseract_reading || '—'}`
+        ? `DocAI: ${corr.docai_reading} | ${witnessLabel(corr)}: ${corr.tesseract_reading || '—'}`
         : '';
       span.onclick = () => {
         focusWordOnScan(pageForWord(k, i, corr), k.klal_id, corr);
@@ -3054,17 +3054,16 @@ async function openDisputedPanel(klalId, corr) {
     </div>
     ${corr.witness_overlay ? `
     <div class="panel-section">
-      <div class="panel-label">Second-witness disagreement (DocAI vs Tesseract)</div>
+      <div class="panel-label">Second-witness disagreement (DocAI vs ${escapeHtml(witnessLabel(corr.witness_overlay))})</div>
       <div style="font-size:12px;color:var(--ink-faint);">
         DocAI: ${escapeHtml(corr.witness_overlay.docai_reading || '—')} ·
-        Tesseract: ${escapeHtml(corr.witness_overlay.tesseract_reading || '—')}
+        ${escapeHtml(witnessLabel(corr.witness_overlay))}: ${escapeHtml(corr.witness_overlay.tesseract_reading || '—')}
         ${corr.witness_overlay.tier ? ' · tier ' + escapeHtml(corr.witness_overlay.tier) : ''}
         ${corr.witness_overlay.current_decision ? ' · already decided' : ''}
       </div>
       <div style="font-size:11px;color:var(--ink-faint);margin-top:4px;">
-        This word also carries a witness-queue disagreement. Tesseract was measured
-        correct in 16 of 419 such cases (3.8%), so it is shown for context, not as a
-        competing reading.</div>
+        This word also carries a witness-queue disagreement.
+        ${escapeHtml(witnessReliabilityNote(corr.witness_overlay))}</div>
     </div>` : ''}
     ${(corr.word_flag || corr.flag === 'ai_flag') ? `
     <div class="panel-section">
@@ -3657,6 +3656,27 @@ async function openPunctuationPanel(klalId, p) {
 // 2026-08-11). Indexed by docai_token_index, a different space from
 // corrections' word_index - the two never collide since the server keys
 // decisions by decision_type ("witness_choice" vs "candidate_choice"). ----------
+// The witness is not always Tesseract. Yad Malachi's witness queue is
+// Tesseract-vs-DocAI; Sefer HaShorashim's is Sefaria's own transcription, which
+// is correct in 99.2% of words where Tesseract was correct in 3.8%. Showing the
+// second under the first's name - and under the first's "shown for context, not
+// as a competing reading" warning - would push a reviewer to dismiss
+// corrections that are almost always right. Default to 'Tesseract' so a queue
+// file without the field behaves exactly as before.
+function witnessLabel(w) {
+  return (w && w.witness_name) || 'Tesseract';
+}
+
+function witnessReliabilityNote(w) {
+  const name = witnessLabel(w);
+  const acc = w && w.witness_accuracy;
+  if (typeof acc === 'number') {
+    return `${name} was measured correct in ${(acc * 100).toFixed(1)}% of words on this book.`;
+  }
+  return `${name} was measured correct in 16 of 419 such cases (3.8%), so it is ` +
+         `shown for context, not as a competing reading.`;
+}
+
 async function openWitnessPanel(w) {
   openPanel(witnessPanel, w.klal_id);
   witnessPanelBody.innerHTML = '<p>Loading…</p>';
@@ -3666,7 +3686,7 @@ async function openWitnessPanel(w) {
 
   const options = [
     { source: 'docai_reading', label: 'DocAI OCR reading', text: w.docai_reading },
-    { source: 'tesseract_reading', label: 'Tesseract OCR reading', text: w.tesseract_reading },
+    { source: 'tesseract_reading', label: witnessLabel(w) + ' reading', text: w.tesseract_reading },
     { source: 'unreadable', label: 'Unreadable / neither is right', text: '(mark as unreadable)' },
   ].filter(opt => opt.text);
 

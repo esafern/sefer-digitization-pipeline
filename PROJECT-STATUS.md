@@ -267,6 +267,54 @@ applying it to the corpus remain two separate, deliberate steps.
     cheaper than a human reading 2,025 entries?** That is measurable and is not
     yet measured.
 
+0FV. **[2026-09-11] SEFER HaShorashim IS UP IN THE DASHBOARD ON :8421, WITH
+    1,362 REAL ROWS. YAD MALACHI IS UNCHANGED ON :8420.**
+
+    Both blockers from `0FT` are fixed, each in the smallest way that keeps the
+    other book's behaviour provably identical.
+
+    **The cut is now per-witness.** `review_data.load_witness_queue` returns the
+    queue whole when the file carries NO vision verdicts, and otherwise behaves
+    exactly as before. Yad Malachi's file HAS verdicts, so its filter path is
+    untouched by construction - measured before and after, it serves the same 44
+    rows. HaShorashim went from 0 to 1,362.
+
+    **The witness has a name.** `review_frontend/app.js` gained `witnessLabel()`
+    and `witnessReliabilityNote()`, both defaulting to the historical Tesseract
+    text when a row carries no `witness_name`, and the five hardcoded sites now
+    read through them. `review_server.py` passes `witness_name` and
+    `witness_accuracy` through on both the overlay and the standalone entry.
+    Verified live: Yad Malachi's witness rows carry `witness_name=None` and still
+    render "Tesseract"; HaShorashim's carry "Sefaria (Ibn Janah digitization)"
+    and 0.992, so the panel now states that witness's own measured accuracy
+    instead of Tesseract's 3.8%.
+
+    `review_queue_part1.json` was created EMPTY (`{}`) for this book, which the
+    server requires to exist. Empty is the honest value: the machine-candidate
+    diff is DocAI against a corpus built from DocAI (item `0ER`).
+
+    Live check, both servers running at once:
+
+    | | :8420 Yad Malachi | :8421 HaShorashim |
+    |---|---|---|
+    | HTTP | 200 | 200 |
+    | klalim listed | 222 | 314 |
+    | witness rows served | 44 (unchanged) | 1,362 |
+
+    54 of the first 59 HaShorashim klalim carry witness rows. Klal 1's first is
+    `הנחלי` (ours) against `הנחל` (Sefaria) on p58 - the position the verse check
+    already settled for Sefaria at <https://www.sefaria.org/Song_of_Songs.6.11>.
+
+    Full suite green (656 passed, 1 skipped) before the restart.
+
+    **What the reviewer should know before working this queue.** It is NOT
+    ranked. 1,362 rows is far too many to work through, and item `0DV`'s "563
+    permanent flags on unread material" is the warning. The ranking signal that
+    exists and is measured is in `0FL`: our-reading-disagrees plus his-word-not-
+    in-lexicon cuts 1,054 flags to 195 while still catching half his corrections,
+    and adding "and ours IS a word" gets 57.5% precision on 40 rows. Wiring that
+    as a tier is the obvious next step and is not done.
+
 0FU. **[2026-09-11] RE-READ THE SLICE FROM THE FULL-TONE SCAN: NUN/GIMEL DROPS
     83 -> 16, BUT THE VLM LOSES MORE ON RUNNING TEXT THAN THE SCAN GAINS.**
 

@@ -256,6 +256,21 @@ def load_witness_queue():
     # the 37 are a PRIORITY QUEUE, not proof the other 382 are clean.
     if not WITNESS_QUEUE_FILTERED:
         return items
+    # THE CUT IS PER-WITNESS, NOT GLOBAL. Everything above is calibrated on ONE
+    # witness: Tesseract, right in 3.8% of disagreements, adjudicated by a vision
+    # pass that was reliable on that book. Neither half transfers.
+    #
+    # Sefer HaShorashim's witness is Sefaria's own transcription, correct in
+    # 99.2% of words (item 0FK), and item 0FQ measured the vision pass at 18% on
+    # that book's dominant error class - worse than guessing between two options.
+    # Filtering that queue by vision verdict would hide most of the real
+    # corrections behind a signal we have measured as broken.
+    #
+    # So a queue file that carries NO vision verdicts is served whole. It is not
+    # a priority queue and does not pretend to be one; the alternative is showing
+    # a reviewer nothing at all, which is what this book got before.
+    if not any(w.get("vision_selected") for w in items):
+        return items
     decided = {k for k in rd.all_current("witness_choice")}
     return [w for w in items
             if w.get("vision_selected") in WITNESS_PRIORITY_VERDICTS
