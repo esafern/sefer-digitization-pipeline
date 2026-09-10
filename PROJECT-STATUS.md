@@ -267,6 +267,101 @@ applying it to the corpus remain two separate, deliberate steps.
     cheaper than a human reading 2,025 entries?** That is measurable and is not
     yet measured.
 
+0FH. **[2026-09-10] THE 100 REVIEWED ENTRIES ARRIVED. OUR READ IS 95.6% OF
+    CHARACTERS AGAINST THEM, AND THE SHORTFALL IS MOSTLY STRUCTURAL.**
+
+    The Sefaria editor sent `ibn_janah_corrected_100.json` - the first 100 manually reviewed
+    entries in dictionary order, all in א, reviewed 2026-08-22/23. All 100 fall
+    inside the א-ב-ג slice. Ground truth went from 1,946 words to 14,295.
+
+    | | words | characters |
+    |---|---|---|
+    | our OCR vs his corrected, all 100 | 0.8402 | **0.9562** |
+    | the 85 structurally sound entries | - | **0.9685** |
+
+    Median entry is 0.980; the mean is dragged by a tail of entries with a
+    STRUCTURAL fault, not a reading fault. That distinction is the finding. The
+    worst offenders were an entry boundary we missed (so two entries merged), the
+    footnote apparatus leaking into the body, and running-head debris - none of
+    them letters misread.
+
+    `0FE`'s five-entry figures (0.8977 / 0.9643) were optimistic on both axes.
+    Five entries is five entries.
+
+    Caveats he stated and they are real: stray citations or verse words may still
+    need correction, he re-cut Mishnah citations to Sefaria ref syntax, and he
+    removed internal cross-references from the inline citations (they work better
+    as footnotes). So the corrected layer is a strong baseline, not a gold
+    standard, and `0FD`'s rule still holds - nothing is scored against a witness
+    as though it were error-free.
+
+0FI. **[2026-09-10] TWO HEADING FORMS THE DETECTOR COULD NOT SEE. A MISSED
+    HEADING DOES NOT LOSE TEXT, IT MERGES IT.**
+
+    Chasing the worst entry in the `0FH` comparison - our `אלל` at 987 words
+    against his 62 - found the detector blind to two real heading forms:
+
+    * **A QUALIFIER after the letter names.** The edition distinguishes two
+      entries that spell the same root with a following word: `האלף והלמד וההא
+      הרפה` and `... הנראת` are the two `אלה` entries (his data splits them as
+      `אלה a` / `אלה b`). The pattern required the terminator directly after the
+      last letter name, so both were invisible. Discovered from the data by
+      clustering every line whose letter-name run is complete but unterminated:
+      `עוד` 35, `הנראית`/`הנראה`/`הנראת` 8, `הרפה`/`הרפא` 3, `הצירי` 1 - 46
+      book-wide, 7 in the slice. `הכפול` (3) is NOT a qualifier: it is the
+      masculine of `הכפולה` and doubles the letter, and skipping it would
+      mis-key the entry.
+    * **A geresh INSIDE a letter name.** p65 prints `האלף והואו והיו"ד`, and
+      Sefaria's own transcription writes `אל'ף`, `בי'ת` throughout. One line in
+      this scan; it is what merged our `אוח` with `אוי`.
+
+    Effect on the corpus: 307 -> 314 entries, nothing lost, `אלל` from 5,245
+    chars to 335, and all 100 of the witness's entries now align (was 97).
+    Character agreement 0.9497 -> 0.9562, structurally sound entries 81 -> 85.
+
+    A near-miss worth recording: the first rebuild appeared to LOSE 7 entries and
+    I began attributing it to the qualifier change. It was my own invocation -
+    `--cross-check` omitted, so the text-layer recovery never ran. Check the
+    command before blaming the diff.
+
+0FJ. **[2026-09-10] NUN/GIMEL IS THE DOMINANT ERROR CLASS AND THE BIAS IS OURS.
+    WHERE ANY SOURCE CAN CHECK IT, HIS CORRECTION WINS.**
+
+    The Sefaria editor flagged this himself: nun/gimel interchanges were frequent in
+    Arabic words, and some of his corrections may be wrong. Measured across single-letter
+    substitutions:
+
+    | | vs his corrected | vs his uncorrected |
+    |---|---|---|
+    | nun/gimel share of all substitutions | 33.6% (73/217) | 42.9% (378/882) |
+    | ours-nun / his-gimel | 66 | 339 |
+    | ours-gimel / his-nun | 7 | 39 |
+
+    The asymmetry is the point: our engine reads gimel as nun about nine times
+    more often than the reverse. This is our systematic defect in this typeface,
+    not a symmetric confusion.
+
+    His worry does not survive contact with the evidence, as far as any external
+    source can reach:
+
+    * **The verse decides 11 of them. All 11 go to him, none to us.** (60 of 61
+      against his uncorrected text.)
+    * Of the 48 the verse cannot reach, **his reading is a real Hebrew word in
+      40** - `תרגום`, `וגאון`, `ודגן`, `וגם` - while ours are nonwords
+      (`תרנום`, `ונאון`, `ודנן`, `ונם`).
+    * Of the remaining 8, six have his stem in the lexicon and ours absent.
+
+    **Exactly one position is genuinely open**: p78 `אל`, ours `ההגעה` against
+    his `ההנעה`. Both are real grammatical terms with both stems in the lexicon,
+    the word is not in a quotation, and no source available to either of us
+    settles it.
+
+    The honest limit: 75% of nun/gimel disputes are uncorroborated by the verse,
+    and those are precisely the Arabic-in-Hebrew-letters cases he is worried
+    about - the check is blind exactly where his concern lives. What can be said
+    is that no miscorrection was found, and that the lexicon reaches most of what
+    the verse cannot.
+
 0FC. **[2026-09-10] A MAQAF WAS BEING DELETED INSTEAD OF SPLITTING. IT PUT
     18,627 IMPOSSIBLE WORDS INTO THE LEXICON AND 580 PHANTOM ROWS INTO THE
     HUMAN QUEUE.**

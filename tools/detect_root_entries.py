@@ -84,21 +84,60 @@ LETTER_NAMES = {
 }
 # "the doubled one" - a geminate root, repeating the letter before it:
 # `הרש וההא הכפולה` is ר-ה-ה. 152 occurrences; without it those entries are lost.
+# `הכפול` is the same word in the masculine and does the same job (3 lines,
+# e.g. p181 `הזין והלמד הכפול`); it is a spelling of DOUBLED, not a qualifier,
+# and treating it as one would drop the repeated letter and mis-key the entry.
 DOUBLED = "כפולה"
+DOUBLED_FORMS = (DOUBLED, "כפול")
+
+# QUALIFIERS - a word the edition puts AFTER the letter names to distinguish two
+# entries that spell the same root.
+#
+# WHY THE DETECTOR MISSED THEM ENTIRELY. The heading pattern required the
+# terminator to follow the last letter name directly, so a qualifier between the
+# two made the line invisible. Measured cost: 46 headings book-wide, 7 inside the
+# a-b-g slice - and because a missed heading does not end the previous entry, the
+# text does not vanish, it MERGES. Our `אלל` (p79) ran to 987 words against the
+# witness's 62, having swallowed both `אלה` entries whole. That is Lesson 26 THE
+# FILTER THAT HIDES: the loss shows up as one fat entry, not as a gap.
+#
+# DISCOVERED FROM THE DATA by clustering every line whose letter-name run is
+# complete but unterminated, then reading what follows. Counts across 651 pages:
+#   עוד      35   "further" - a second entry for a root already given
+#   הנראית    5   \ "the visible/pronounced one", three spellings of one word
+#   הנראה     2   /  (`הנראת` is the OCR of `הנראית` with the yod lost)
+#   הנראת     1   /
+#   הרפה      2   \ "the soft one" - the unpointed/spirantized reading
+#   הרפא      1   /
+#   הצירי     1   the vowel tsere
+# Listed explicitly, never fuzzy-matched: a heading is a structural anchor and
+# Lesson 5 FUZZY IS NOT A POSITION applies to it.
+QUALIFIERS = ("עוד", "הנראית", "הנראת", "הנראה", "הרפה", "הרפא", "הצירי")
 
 ALEPHBET = "אבגדהוזחטיכלמנסעפצקרשת"
 
 def _spaced(name):
-    r"""`פא` -> `פ\s*א`. DocAI sometimes splits a letter-name across a space
-    (`והפ א` for `והפא` on p135), which is tokenizer noise, not a different
-    reading - the ink says `והפא`. Tolerating an internal space recovers those
-    without loosening the three guards that actually carry the anchor: the match
-    is still line-initial, still terminated, and still drawn from a closed
+    r"""`פא` -> `פ[\s"'׳״]*א`. Two kinds of noise sit INSIDE a letter name.
+
+    DocAI sometimes splits one across a space (`והפ א` for `והפא` on p135), which
+    is tokenizer noise rather than a different reading - the ink says `והפא`.
+
+    And the edition itself sets some names with an internal geresh or gershayim:
+    p65 prints `האלף והואו והיו"ד`, and Sefaria's own transcription writes
+    `אל'ף` and `בי'ת` throughout. One such line in this scan (p65, root אוי) was
+    invisible to the detector, and a missed heading does not lose text - it
+    MERGES it, so our `אוח` ran to 33 words against the witness's 12 by
+    swallowing `אוי` whole.
+
+    Neither widening loosens the three guards that actually carry the anchor: the
+    match is still line-initial, still terminated, and still drawn from a closed
     22-word vocabulary."""
-    return r"\s*".join(name)
+    return r"[\s\"'\u05f3\u05f4]*".join(name)
 
 
 _NAME_ALT = "|".join(_spaced(n) for n in sorted(LETTER_NAMES, key=len, reverse=True))
+_DOUBLED_ALT = "|".join(_spaced(n) for n in sorted(DOUBLED_FORMS, key=len, reverse=True))
+_QUAL_ALT = "|".join(_spaced(q) for q in sorted(QUALIFIERS, key=len, reverse=True))
 # A heading is LINE-INITIAL and ends with a period or comma. Both halves matter:
 # the same letter-name words appear constantly inside running prose (the book is
 # about letters), and only the line-initial + terminator shape is the heading.
@@ -115,9 +154,11 @@ _NAME_ALT = "|".join(_spaced(n) for n in sorted(LETTER_NAMES, key=len, reverse=T
 # heading, the terminator is still required, and the letter-name vocabulary is
 # still closed.
 HEADING = re.compile(
-    rf"^[^\u05d0-\u05ea]*ה(?P<first>{_NAME_ALT})(?P<rest>(?:\s+ו?ה(?:{_NAME_ALT}|{DOUBLED})){{1,4}})\s*[.,]"
+    rf"^[^\u05d0-\u05ea]*ה(?P<first>{_NAME_ALT})"
+    rf"(?P<rest>(?:\s+ו?ה(?:{_NAME_ALT}|{_DOUBLED_ALT})){{1,4}})"
+    rf"(?P<qual>\s+(?:{_QUAL_ALT}))?\s*[.,]"
 )
-NAME_IN_REST = re.compile(rf"ו?ה({_NAME_ALT}|{DOUBLED})")
+NAME_IN_REST = re.compile(rf"ו?ה({_NAME_ALT}|{_DOUBLED_ALT})")
 
 
 def match_heading(line):
@@ -143,10 +184,14 @@ def parse_heading(line):
 
 
 def _letters_from(m):
-    squash = lambda x: re.sub(r"\s+", "", x)
+    # Strip whatever _spaced() was widened to tolerate, so the squashed form is
+    # a key in the closed vocabulary. Keeping these two in step matters: widening
+    # the pattern without widening this raises KeyError on the very lines the
+    # widening was meant to recover.
+    squash = lambda x: re.sub(r"[\s\"'\u05f3\u05f4]+", "", x)
     letters = [LETTER_NAMES[squash(m.group("first"))]]
     for n in NAME_IN_REST.findall(m.group("rest")):
-        if squash(n) == DOUBLED:
+        if squash(n) in DOUBLED_FORMS:
             if not letters:
                 return None
             letters.append(letters[-1])   # geminate: repeat the preceding letter

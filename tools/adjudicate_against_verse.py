@@ -98,6 +98,11 @@ ABBREV = {
     "יחזק": "Ezekiel", "ירמי": "Jeremiah", "ישעי": "Isaiah", "בראש": "Genesis",
     "תהל": "Psalms", "דבר": "Deuteronomy",
 }
+# Books with exactly one chapter, where a citation names only a verse.
+SINGLE_CHAPTER = {"Obadiah"}
+# Matched words needed before calling a citation transposed. See the
+# transposition branch in main() for why 2 is not enough.
+MIN_TRANSPOSE = 4
 GEM = dict(zip("אבגדהוזחטיכלמנסעפצקרשת",
                [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 30, 40, 50, 60,
                 70, 80, 90, 100, 200, 300, 400]))
@@ -197,8 +202,19 @@ def parse_citation(note, last_book):
     `שם` is ibid and inherits the running book, which is why this takes and
     returns `last_book` rather than being a pure function of the note.
     """
-    m = re.match(r"^\(([^,)]+),\s*([^)]+)\)", note.strip())
+    body = note.strip()
+    m = re.match(r"^\(([^,)]+),\s*([^)]+)\)", body)
     if not m:
+        # A SINGLE-CHAPTER BOOK HAS NO COMMA. `(עובדיה ד)` is Obadiah 1:4 - the
+        # one number is the verse, because there is only one chapter to name.
+        # Parsed as `book chapter` it would be chapter 4 of a book that has one.
+        one = re.match(r"^\(([^\d,)]+?)\s+([^,)]+)\)$", body)
+        if one:
+            bk = resolve_book(one.group(1).strip())
+            if bk in SINGLE_CHAPTER:
+                v = gematria(one.group(2))
+                if v:
+                    return (bk, 1, v), (bk, 1, v)
         return None, last_book
     head, verse = m.group(1).strip(), m.group(2).strip()
     parts = head.split()
@@ -403,7 +419,14 @@ def main():
             alt = tanakh.verse(book, v, ch)
             if alt:
                 a_start, a_matched, a_vw = run_for(alt)
-                if a_matched >= max(args.min_matched, matched + 2):
+                # A HIGH BAR, because the output of this branch is "your citation
+                # is wrong" said to the person who made it. Two matched words is
+                # not evidence: `(במדבר ה, כב)` on the root אמן is Numbers 5:22,
+                # `אָמֵן אָמֵן`, and exactly right - but Numbers 22:5 happens to
+                # share two common words with the surrounding run, so a two-word
+                # bar reported a correct citation as transposed. Require a run
+                # long enough not to happen by chance AND a clear margin.
+                if a_matched >= max(MIN_TRANSPOSE, matched + 2):
                     text, start, matched, vw = alt, a_start, a_matched, a_vw
                     ch, v, transposed = v, ch, True
 
