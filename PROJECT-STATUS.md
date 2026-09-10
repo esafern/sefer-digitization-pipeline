@@ -267,6 +267,54 @@ applying it to the corpus remain two separate, deliberate steps.
     cheaper than a human reading 2,025 entries?** That is measurable and is not
     yet measured.
 
+0FS. **[2026-09-10] CONFIRMED, AND LARGER THAN EXPECTED: THE FULL-TONE SCAN
+    TAKES NUN/GIMEL FROM 18% TO 90%. AND BINARIZING IT OURSELVES THROWS AWAY A
+    THIRD OF THAT.**
+
+    `tools/experiment_scan_source.py`, same protocol as `0FQ` - same 66
+    positions, same prompt, same model, same fixed-seed A/B assignment. Only the
+    pixels change.
+
+    | source | correct | rate |
+    |---|---|---|
+    | Google Books, 1 bpc, 300 dpi | 12/66 | 18.2% |
+    | Google Books, 1 bpc, 600 dpi | 10/65 | 15.4% |
+    | **NLI, full tone, ~313 dpi, as scanned** | **47/52** | **90.4%** |
+    | NLI, binarized by us with Otsu | 31/51 | 60.8% |
+
+    The hypothesis in `0FR` is confirmed and the effect is not marginal. A scan
+    with **half the linear resolution and a fifth of the pixels** takes this
+    error class from worse-than-chance to 90%. The information was never missing
+    from the printing; it was destroyed by somebody else's thresholding before
+    the file reached us.
+
+    **DO NOT BINARIZE.** Paired over 50 cases, our own Otsu pass BREAKS 15 that
+    the raw tone gets right and fixes 1 - net -14. Binarization is not a
+    preparation step for a modern vision model, it is a lossy decision that
+    happens to be baked into most of the scans in circulation. The usual advice
+    to "binarize and deskew before OCR" is advice for Tesseract-era engines and
+    is actively wrong here.
+
+    **THE SELECTION EFFECT, STATED PLAINLY.** These 66 positions were chosen
+    because our DocAI pass - reading the bitonal scan - got them wrong. So the
+    bitonal arms are being scored on their own known failures and 18% is not
+    their general accuracy. What the experiment establishes is the actionable
+    claim: **on the positions where the bitonal scan misleads our OCR, the
+    full-tone scan recovers 90% of them**, and the NLI arm was not part of that
+    selection. A general accuracy comparison needs an unbiased page sample and
+    has not been run.
+
+    Five full-tone failures remain (`ודגן`, `לאגם`, `אגפיו`, `ישגא`, `הדאגה`),
+    all at 0.95-1.0 confidence. Confidence remains uninformative on this class in
+    every arm - it is 0.95 whether right or wrong - so it must not be used as a
+    filter anywhere.
+
+    **What this changes.** The pipeline reads the Google Books scan because it
+    has the most pixels; on the evidence it should read NLI's full-tone images
+    and never threshold them. That is a re-OCR of the book from a different
+    source, which is a substantial job and is NOT yet done - `part1.json` and
+    every measurement in `0FH`-`0FN` still come from the bitonal scan.
+
 0FQ. **[2026-09-10] RESOLUTION IS NOT THE CONSTRAINT ON THE VISION
     ADJUDICATOR. THE ADJUDICATOR IS 82-85% WRONG ON NUN/GIMEL AT 0.95
     CONFIDENCE, AND THE CONFIDENCE CARRIES NO SIGNAL AT ALL.**
