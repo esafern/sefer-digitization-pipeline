@@ -101,6 +101,57 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0EX. **[2026-09-10] 2,085 INLINE FOOTNOTE REFERENCES RECORDED. AND A MEASURED
+    REASON NOT TO REBUILD SEFARIA'S CITATION WORK: 0 OF 94 PAGES PAIR.**
+
+    ### The easy half: standalone reference numerals
+
+    `build_root_corpus.py` now records the word positions of Bacher's inline
+    reference numerals as a `footnote_refs` field. **2,085 of them across 273 of
+    307 entries, and `clean_text` is unchanged** - recorded as structure, not
+    removed, because Sefaria named footnote demarcation as a requirement and this
+    project's fidelity rule forbids silently deleting from the text. What
+    representation they finally take is the reviewer's decision.
+
+    The rule is safe for a reason specific to the book: **19th-century Hebrew
+    numbers with letters** (`יח יז`), so a standalone Arabic numeral cannot be
+    part of the text. Every context confirms it -
+
+        ולא אבה י"י אלהיך 11 כבר נזכר
+        בשאול ואבדו לא תשבענה 10
+
+    a biblical quotation, the reference, then the commentary. Values run 1..~50
+    per page, matching the printed apparatus, with a few OCR outliers (624).
+
+    ### The hard half stays with Sefaria, and now there is a number for why
+
+    The apparatus lines this pipeline drops CONTAIN the citations those
+    references point to, so pairing reference N with citation N would reconstruct
+    the whole apparatus independently. It does not work:
+
+        pages with body references                                    94
+        body reference numerals                                    2,086
+        apparatus numerals legible                                 2,457   (118%)
+        pages where EVERY body ref has a matching apparatus numeral     0   (0%)
+
+    The apparatus numerals are printed small and DocAI mangles them - on p121 the
+    run reads `1 ... : ... 8 ... י ... •` where the print has 1,2,3,4,6,7 - while
+    chapter and verse numbers INSIDE citations come out as digits and inflate the
+    count to 118% of the body's. So the two sides cannot be aligned by number,
+    and aligning by position would compound both error rates.
+
+    **This is the measured form of item `0EE`'s reasoning.** Sefaria's dataset has
+    the citations done carefully by a human; rebuilding them from this OCR would
+    produce a worse apparatus and cost the time item `0EE` said to save. The
+    division of labour is now a finding rather than a courtesy: their citations,
+    our running text.
+
+    **Still not solved: the fused half.** A numeral DocAI absorbed into the
+    preceding word as Hebrew letters (`החכם` + superscript 29 + `ג` ->
+    `החכסייג`) leaves no numeric token to detect. Those are the 246 witness
+    disputes in item `0ES`, 55% of which vision confirms as real errors, and they
+    need the ink one at a time.
+
 0EW. **[2026-09-10] WHOLE-BOOK HEADING DETECTION MEASURED AGAINST AN
     INDEPENDENT SOURCE: 94.2% RECALL, AND THE MISSES ARE SCATTERED.**
 

@@ -96,6 +96,35 @@ APPARATUS_MAX_RATIO = 0.85
 APPARATUS_MIN_PERIOD_FRAC = 0.19
 
 
+FOOTNOTE_REF = re.compile(r"^[0-9]{1,3}$")
+
+
+def footnote_refs(text):
+    """Word positions of Bacher's inline reference numerals.
+
+    RECORDED, NOT REMOVED. Sefaria named footnotes explicitly as a demarcation
+    requirement, and this pipeline's fidelity rule is that nothing is silently
+    deleted from the text - so these are reported as structure and `clean_text`
+    is left exactly as it is. What representation they should finally take is a
+    decision for the reviewer and for Sefaria, not for the extractor.
+
+    The rule is safe because this book cannot contain a legitimate Arabic
+    numeral: 19th-century Hebrew numbers with letters (`יח יז`), and every one
+    of the 2,085 standalone numeric tokens in the corpus sits exactly where a
+    reference sits - after a biblical quotation, before the commentary on it:
+
+        ולא אבה י"י אלהיך 11 כבר נזכר
+        בשאול ואבדו לא תשבענה 10
+
+    They range 1..~50 per page, matching the printed apparatus, with a handful of
+    OCR-garbled outliers (624). This does NOT catch the harder half of the same
+    problem - a numeral DocAI fused into the preceding word as Hebrew letters
+    (`החכם` + superscript 29 + `ג` -> `החכסייג`), which needs the ink; those are
+    246 known cases in the witness queue (item 0ES).
+    """
+    return [i for i, w in enumerate(text.split()) if FOOTNOTE_REF.match(w)]
+
+
 def _period_frac(text):
     toks = text.split()
     return (text.count(".") / len(toks)) if toks else 0.0
@@ -358,6 +387,7 @@ def main():
             "title": e["title"],
             "clean_text": text,
             "page": e["page"],
+            "footnote_refs": footnote_refs(text),
             **({"boundary_source": "text_layer"} if e["root"] in recovered_roots else {}),
         })
 
@@ -391,6 +421,11 @@ def main():
               f"(their text may run past a boundary)")
         if missed:
             print("                  " + " ".join(sorted({e["root"] for e in missed})))
+
+    nrefs = sum(len(r["footnote_refs"]) for r in records)
+    with_refs = sum(1 for r in records if r["footnote_refs"])
+    print(f"  footnote refs   {nrefs} inline reference numerals recorded across "
+          f"{with_refs} entries (text unchanged)")
 
     lens = [len(r["clean_text"]) for r in records]
     if lens:
