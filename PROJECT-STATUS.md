@@ -267,6 +267,63 @@ applying it to the corpus remain two separate, deliberate steps.
     cheaper than a human reading 2,025 entries?** That is measurable and is not
     yet measured.
 
+0FT. **[2026-09-10] DASHBOARD AUDIT FOR HaShorashim: THE STALE-ARTIFACT HALF IS
+    NOW FIXED; THE QUEUE HALF NEEDS A PER-WITNESS LABEL AND A PER-WITNESS CUT.**
+
+    `review_server.py` resolves everything through `corpus_io`, and `cio.REPO`
+    correctly follows `$SEFER_CORPUS_ROOT`, so a second book needs no code change
+    to be SERVED - only `--port 8421`, leaving Yad Malachi's :8420 untouched.
+
+    ### Fixed in this pass
+
+    The corpus rebuild (`0FI`, 307 -> 314 entries) had silently orphaned every
+    derived artifact. All four were still at 307 while `part1.json` was at 314,
+    so klal ids had shifted underneath them:
+
+    | artifact | was | now |
+    |---|---|---|
+    | `klal_page_regions.json` | 307 | 314 |
+    | `klalim_demo_dataset.json` | 307 | 314 |
+    | `part1_header_anchored_alignment.json` | 307 | 314 |
+    | `word_identity.json` | 307 | 314 |
+
+    `word_identity.json` was the dangerous one: re-seeding reported **280 of 314
+    klalim where "every id after the first divergence names the wrong word"**. It
+    was regenerated from scratch rather than patched, which is safe here only
+    because no reviewer decision exists for this book yet - the ids carried no
+    human investment. Had they, this would have been a recovery job.
+    `build_header_alignment.py`'s guard refused to overwrite (223 klalim would
+    change page) and was right to: the fresh build was inspected first and holds
+    the same trust rate, 86.9% against 87.3%.
+
+    ### Still needed, and none of it is data
+
+    `review_queue_part1.json` is absent and its producer is vacuous for this book
+    (`0ER`). The server's OTHER route - `reconstruction_witness_queue.json`,
+    served as `opcode: "witness"` - now has a producer,
+    `tools/build_witness_review_queue.py`, which anchors 1,362 of 2,793 disputes
+    to a unique DocAI token (422 are words that repeat on their page and cannot
+    be anchored safely; 942 have no matching token). The file is written. **The
+    dashboard would still serve zero rows from it**, for two reasons that are
+    both calibrations belonging to the OTHER witness:
+
+    1. **`review_data.load_witness_queue` filters by vision verdict.** It keeps
+       only rows where the vision pass sided against the corpus - a cut chosen
+       when the witness was Tesseract at 3.8% accuracy. This witness is at 99.2%
+       (`0FK`), and `0FQ` measured the vision pass at 18% on this book's dominant
+       error class. Serving through that filter hides the real corrections behind
+       a signal we have measured as broken.
+    2. **`review_frontend/app.js` hardcodes the witness's name in four places**
+       and displays "Tesseract was measured correct in only 3.8%". Putting
+       Sefaria's transcription behind that label and that warning would actively
+       push a reviewer to dismiss corrections that are right nine times in ten.
+
+    So the remaining work is: carry `witness_name` and the witness's measured
+    accuracy through to the UI (the queue file already records both), and make
+    the priority cut per-witness instead of global. Both touch shared code and
+    therefore oblige restarting the live :8420 dashboard, which is the reviewer's
+    call and is why they are not done here.
+
 0FS. **[2026-09-10] CONFIRMED, AND LARGER THAN EXPECTED: THE FULL-TONE SCAN
     TAKES NUN/GIMEL FROM 18% TO 90%. AND BINARIZING IT OURSELVES THROWS AWAY A
     THIRD OF THAT.**
