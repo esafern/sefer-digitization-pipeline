@@ -21,19 +21,26 @@ This tool is that run, waiting for a processor id.
 
 CONFIGURATION. Three values, by environment variable or flag:
     DOCAI_PROJECT     the project id, e.g. gen-lang-client-0289907848
-    DOCAI_LOCATION    the processor's region: "us" or "eu" (NOT a zone)
+    DOCAI_LOCATION    the processor's region: "eu" (this project's choice) or
+                      "us". These are multi-regions, NOT zones.
     DOCAI_PROCESSOR   the processor id - the last path segment of
                       projects/<n>/locations/<loc>/processors/<ID>
 
+**This project uses `eu`**, chosen 2026-09-11 - the work is done in Israel and
+the correspondents are Sefaria and the National Library of Israel, so EU-region
+processing is the sensible default. The default here is `eu` for that reason.
+
 The endpoint is derived from the location and must match it; a processor created
-in `eu` is invisible to the `us` endpoint and returns a bare permission error
-rather than "not found", which is a confusing hour if you have not seen it.
+in `eu` is invisible to the `us` endpoint and returns a bare PERMISSION error
+rather than "not found", which is a confusing hour if you have not seen it. That
+is also why the probe run on 2026-09-11 could not tell whether a processor
+already existed: it asked `us`.
 
 NO BINARIZATION on the full-tone side, per `0FS`: thresholding it ourselves cost
 30 points on the class this exists to fix.
 
 Usage:
-  DOCAI_PROJECT=... DOCAI_LOCATION=us DOCAI_PROCESSOR=... \
+  DOCAI_PROJECT=... DOCAI_LOCATION=eu DOCAI_PROCESSOR=... \
   SEFER_CORPUS_ROOT=~/work/hashorashim \
     python3 tools/ocr_pages_docai.py --pages 58-92 --source nli \
       --out-dir ~/work/hashorashim/nli_docai_layer
@@ -132,7 +139,7 @@ def main():
     ap.add_argument("--offset", type=int, default=-40)
     ap.add_argument("--dpi", type=int, default=400)
     ap.add_argument("--project", default=os.environ.get("DOCAI_PROJECT"))
-    ap.add_argument("--location", default=os.environ.get("DOCAI_LOCATION", "us"))
+    ap.add_argument("--location", default=os.environ.get("DOCAI_LOCATION", "eu"))
     ap.add_argument("--processor", default=os.environ.get("DOCAI_PROCESSOR"))
     ap.add_argument("--check", action="store_true", help="verify configuration and stop")
     args = ap.parse_args()

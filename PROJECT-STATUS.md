@@ -267,6 +267,52 @@ applying it to the corpus remain two separate, deliberate steps.
     cheaper than a human reading 2,025 entries?** That is measurable and is not
     yet measured.
 
+0FY. **[2026-09-11] DOCUMENT AI SETUP: THE API IS ALREADY ENABLED AND THE
+    SERVICE ACCOUNT ALREADY EXISTS. WHAT IS MISSING IS A PROCESSOR AND ONE ROLE.
+    REGION IS `eu`.**
+
+    Probed rather than assumed. Listing processors as the existing service
+    account fails with **`IAM_PERMISSION_DENIED`, not `SERVICE_DISABLED`** - so
+    `documentai.googleapis.com` is enabled on `gen-lang-client-0289907848`. The
+    credentials in `$GOOGLE_APPLICATION_CREDENTIALS` are a service account
+    already named `doc-ai-worker@gen-lang-client-0289907848.iam.gserviceaccount.com`,
+    and `gcloud` 578.0.0 is installed but authenticated AS that service account,
+    which is why it cannot create anything.
+
+    **The region is `eu`** (reviewer's choice, 2026-09-11): the work is done in
+    Israel and the correspondents are Sefaria and the NLI.
+    `tools/ocr_pages_docai.py` defaults to it. The endpoint is derived from the
+    location, and a processor created in `eu` returns a bare PERMISSION error
+    from the `us` endpoint rather than "not found" - which is also why the probe
+    above could not rule out an existing processor: it asked `us`.
+
+    Remaining steps, all needing the reviewer's own credentials:
+
+        gcloud auth login
+        gcloud config set project gen-lang-client-0289907848
+        gcloud documentai processors create --location=eu \
+            --display-name="shorashim-ocr" --type=OCR_PROCESSOR
+        gcloud projects add-iam-policy-binding gen-lang-client-0289907848 \
+            --member="serviceAccount:doc-ai-worker@gen-lang-client-0289907848.iam.gserviceaccount.com" \
+            --role="roles/documentai.apiUser"
+
+    `roles/documentai.apiUser` grants processing but NOT `processors.list`, which
+    is fine: the tool addresses the processor by id. Then
+    `DOCAI_PROJECT` / `DOCAI_LOCATION=eu` / `DOCAI_PROCESSOR`, and
+    `python3 tools/ocr_pages_docai.py --check` proves the config before a run
+    spends anything.
+
+    Scope the spend by running the 35-page slice first, not the 651-page book:
+    the slice is what decides whether a rebuild is worth it, and it is the
+    cheapest item on the list. Pricing not quoted here - I could not retrieve a
+    current figure I would stand behind, so read
+    <https://cloud.google.com/document-ai/pricing> rather than a number from me.
+
+    `OCR_PROCESSOR` (standard Document OCR) is the type to start with, because it
+    is what produced the 0.9499-character baseline in `0FW` that this run is
+    trying to beat. Enterprise Document OCR is a separate, dearer type and
+    changing two things at once would repeat `0FU`'s mistake.
+
 0FX. **[2026-09-11] THE WITNESS QUEUE DOES NOT NEED FILTERING. IT IS 98.6%
     REAL CORPUS ERRORS. IT NEEDS ORDERING, AND NOW HAS IT.**
 
