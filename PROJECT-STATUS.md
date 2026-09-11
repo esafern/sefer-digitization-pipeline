@@ -290,11 +290,27 @@ applying it to the corpus remain two separate, deliberate steps.
 
         gcloud auth login
         gcloud config set project gen-lang-client-0289907848
-        gcloud documentai processors create --location=eu \
-            --display-name="shorashim-ocr" --type=OCR_PROCESSOR
+        curl -X POST \
+          -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+          -H "Content-Type: application/json" \
+          -d '{"type": "OCR_PROCESSOR", "displayName": "shorashim-ocr"}' \
+          "https://eu-documentai.googleapis.com/v1/projects/gen-lang-client-0289907848/locations/eu/processors"
         gcloud projects add-iam-policy-binding gen-lang-client-0289907848 \
             --member="serviceAccount:doc-ai-worker@gen-lang-client-0289907848.iam.gserviceaccount.com" \
             --role="roles/documentai.apiUser"
+
+    **CORRECTED 2026-09-11: there is no `gcloud documentai` command group.** The
+    first version of these steps said `gcloud documentai processors create`;
+    checked against gcloud 584.0.0 it is `Invalid choice: 'documentai'` in GA,
+    and the alpha component is not installed. Processor creation goes through
+    the REST API (above) or the console. The IAM step is an ordinary GA command
+    and was right. The `print-access-token` must be taken AFTER logging in as a
+    human account - taken as the service account, the create is denied.
+
+    The processor's returned `name` uses the project NUMBER, not the id
+    (`projects/<NUMBER>/locations/eu/processors/<ID>`). gcloud's configured
+    project was `1045375753125`; if that is the number shown, it is the same
+    project and that open question is closed.
 
     `roles/documentai.apiUser` grants processing but NOT `processors.list`, which
     is fine: the tool addresses the processor by id. Then
