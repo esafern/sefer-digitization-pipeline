@@ -136,6 +136,17 @@ def main():
         if not ours:
             missing += 1
             continue
+        # INDEX IN THE SERVER'S TOKEN SPACE, NOT THE RAW PAGE. The dashboard's
+        # context endpoint (review_server.api_witness_context) and every
+        # witness-decision lookup index `docai_token_index` into the page's
+        # LETTER-BEARING tokens only - punctuation-only tokens such as the
+        # heading's `.` are dropped first. The first version of this file
+        # indexed the raw page, so on p58 two periods shifted the bracket from
+        # `הנחלי` to `[דשא]`, two words later: the reviewer saw the wrong word
+        # highlighted in the context text while the scan box, drawn from the
+        # raw token's bbox, was correct - the worst kind of mismatch, because
+        # each half looks right on its own.
+        toks = [t for t in toks if cio.hebrew_letters_only(t["text"])]
         hits = [i for i, t in enumerate(toks)
                 if cio.hebrew_letters_only(t["text"]) == ours]
         if len(hits) != 1:

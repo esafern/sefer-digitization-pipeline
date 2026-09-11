@@ -420,7 +420,7 @@ def test_detector_args_accepts_a_corpus_directory():
 # silent case: a 52nd script added tomorrow with the same copy-pasted REPO
 # line, which is exactly how the first 51 accumulated - one script at a time,
 # each one plausible in isolation, never counted.
-KNOWN_BYPASS_COUNT = 47
+KNOWN_BYPASS_COUNT = 46
 
 
 def _files_with_hardcoded_repo(repo):
@@ -513,7 +513,6 @@ _KNOWN_BYPASS_FILES = [
     "pipeline/build_gematria_trace.py",
     "pipeline/build_lexical_defect_report.py",
     "pipeline/build_title_report.py",
-    "pipeline/review_decisions.py",
     "tools/build_dicta_baseline.py",
     "tools/build_open_items_report.py",
     "tools/build_part1_freq.py",

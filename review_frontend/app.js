@@ -3663,6 +3663,23 @@ async function openPunctuationPanel(klalId, p) {
 // as a competing reading" warning - would push a reviewer to dismiss
 // corrections that are almost always right. Default to 'Tesseract' so a queue
 // file without the field behaves exactly as before.
+// What each tier MEANS, so the panel explains the row in front of the reviewer.
+// The single sentence this replaced ("both readings are real Hebrew words") is
+// the definition of Yad Malachi's lexicon-tie tier and was shown on EVERY row -
+// including Sefer HaShorashim rows tagged A_ours_not_a_word, where it says the
+// opposite of the truth. Unknown tiers fall back to that original sentence, so
+// Yad Malachi's rows read exactly as before.
+function witnessTierNote(tier) {
+  const notes = {
+    A_nun_gimel: 'The two readings differ only by nun/gimel. On the reviewed sample the corpus was wrong at every such row (51 of 51); the full-tone scan settles it.',
+    A_ours_not_a_word: 'The corpus reading is not a Hebrew word and the witness reading is. On the reviewed sample the corpus was wrong at every such row (198 of 198).',
+    B_ours_unattested: 'The corpus reading is not in the lexicon, but neither side is clearly a word. Check the ink.',
+    C_both_attested: "Both readings are real Hebrew words, so a lexicon check can't tell them apart - this needs the ink.",
+    one_side_empty: 'One source has text here and the other has none - a dropped or inserted word. Check the ink.',
+  };
+  return notes[tier] || "Two OCR engines disagree here and both readings are real Hebrew words, so a word-lexicon check can't tell them apart - this needs the ink.";
+}
+
 function witnessLabel(w) {
   return (w && w.witness_name) || 'Tesseract';
 }
@@ -3722,8 +3739,7 @@ async function openWitnessPanel(w) {
   witnessPanelBody.innerHTML = `
     <div class="panel-section">
       <div class="panel-label">Klal ${w.klal_id} · Token #${w.docai_token_index} · tier ${w.tier} · page ${w.page}</div>
-      <div style="font-size:12px;color:var(--ink-faint);">Two OCR engines disagree here and both readings are real Hebrew
-      words, so a word-lexicon check can't tell them apart - this needs the ink.</div>
+      <div style="font-size:12px;color:var(--ink-faint);">${escapeHtml(witnessTierNote(w.tier))}</div>
     </div>
     ${decision ? `<div class="panel-section">
       <div class="panel-label">Current decision</div>

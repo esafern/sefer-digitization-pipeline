@@ -88,11 +88,21 @@ from datetime import datetime, timezone
 # Moved one level deeper (pipeline/ or tools/) 2026-08-16 - REPO now goes up
 # two levels, not one, to keep resolving to the actual repo root where
 # part1.json/docai_word_boxes/etc. live.
-REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+import corpus_io as cio  # noqa: E402
+# The ledger belongs to the BOOK, so it lives in the corpus root. This used
+# to be `os.path.dirname(os.path.dirname(os.path.abspath(__file__)))` - the
+# CODE folder - which is the same place for Yad Malachi and therefore looked
+# fine for a year. Found 2026-09-11 when a second book came up in the
+# dashboard: :8421 (Sefer HaShorashim) was reading Yad Malachi's 4,846-line
+# ledger, showing "recorded 748" on a book with no rulings, and a ruling saved
+# there would have been appended to Yad Malachi's ledger under a colliding
+# klal number. Nothing leaked - the ledger was untouched since 2026-09-09 -
+# but only because no one had clicked Save yet.
+REPO = cio.REPO
 # Overridable via env var so tests/test_review_server.py can point a live
 # review_server.py subprocess at a throwaway file instead of the real,
 # git-tracked decisions log.
-DECISIONS_PATH = os.environ.get("REVIEW_DECISIONS_PATH") or os.path.join(REPO, "review_decisions.jsonl")
+DECISIONS_PATH = os.environ.get("REVIEW_DECISIONS_PATH") or cio.repo_path("review_decisions.jsonl")
 
 VALID_DECISION_TYPES = {
     "disputed_choice",
