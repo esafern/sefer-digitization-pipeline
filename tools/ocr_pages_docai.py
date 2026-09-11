@@ -86,12 +86,33 @@ def check(project, location, processor):
     print(f"  project   {project}")
     print(f"  location  {location}")
     print(f"  processor {processor}")
+    client, name = client_and_name(project, location, processor)
     try:
-        client, name = client_and_name(project, location, processor)
         p = client.get_processor(name=name)
         print(f"  OK: {p.display_name}  type={p.type_}  state={p.state.name}")
         return True
     except Exception as exc:                                  # noqa: BLE001
+        # `roles/documentai.apiUser` grants PROCESSING but not
+        # `documentai.processors.get`. Treating a denied `get` as fatal made this
+        # check refuse a correctly configured processor on 2026-09-11 - the
+        # service account could process pages and the tool would not let it.
+        # So on a denied get, test the operation that actually matters: process
+        # one tiny blank image. That proves auth, endpoint, region and processor
+        # id together, at the cost of one page.
+        if "processors.get" in str(exc):
+            from google.cloud import documentai_v1 as documentai
+            import io as _io
+            buf = _io.BytesIO()
+            Image.new("RGB", (200, 100), "white").save(buf, format="PNG")
+            try:
+                client.process_document(request=documentai.ProcessRequest(
+                    name=name, raw_document=documentai.RawDocument(
+                        content=buf.getvalue(), mime_type="image/png")))
+                print("  OK: processing works (this role cannot read processor "
+                      "metadata, which is expected for roles/documentai.apiUser)")
+                return True
+            except Exception as exc2:                         # noqa: BLE001
+                exc = exc2
         msg = str(exc)
         print(f"  FAILED: {type(exc).__name__}: {msg[:220]}")
         if "IAM_PERMISSION_DENIED" in msg or "denied" in msg:
