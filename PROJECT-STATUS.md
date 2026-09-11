@@ -267,6 +267,72 @@ applying it to the corpus remain two separate, deliberate steps.
     cheaper than a human reading 2,025 entries?** That is measurable and is not
     yet measured.
 
+0FZ. **[2026-09-11] DOCUMENT AI ON THE FULL-TONE SCAN BEATS EVERYTHING WE HAVE,
+    ON EVERY MEASURE. AND 0FW'S "ENGINE MATTERS MORE THAN SCAN" WAS AN ARTIFACT.**
+
+    Processor `bc652834c231f24e` (Document OCR, `eu`) was run over pages 58-92 on
+    BOTH scans, and both outputs were put through the corpus's own pipeline
+    (`build_root_corpus.py`, which removes running heads and apparatus by page
+    geometry) in isolated scratch corpus roots. Scored with
+    `tools/measure_against_reviewed.py` on the 99 reviewed entries present in
+    every source, 13,619 words:
+
+    | source | words | chars | coverage | precision | nun/gimel |
+    |---|---|---|---|---|---|
+    | corpus (original `us` processor, bitonal) | 0.8956 | 0.9576 | 0.9840 | 0.9256 | 87 |
+    | new processor, bitonal | 0.9002 | 0.9610 | 0.9843 | 0.9340 | 85 |
+    | **new processor, FULL TONE** | **0.9287** | **0.9663** | **0.9887** | **0.9353** | **6** |
+
+    Holding processor AND pipeline fixed, full tone gains **+2.9 points of
+    words** and cuts nun/gimel errors **85 -> 6 (-93%)**. Against the corpus as it
+    stands: +3.3 words, 87 -> 6. The character gain is small (+0.5) because a
+    nun/gimel error is one letter inside a word - it barely moves a character
+    score and costs a whole word, so words is the metric that sees this class.
+
+    **The control that makes this trustworthy.** Rebuilding the corpus from the
+    ORIGINAL tokens in a scratch root over the same pages reproduced the real
+    corpus to four decimal places on all 100 entries (0.8939 / 0.9561 / 88), and
+    the real `book.json` was untouched. So the scratch-root builds are the same
+    pipeline, not an approximation of it.
+
+    **Why 0FW was wrong.** It compared the processed corpus (0.95) against RAW OCR
+    text with a crude cleanup (~0.87) and called the 7-8 point gap "engine".
+    Split into coverage and precision, every source reproduced 95-98% of the
+    reviewed text; the gap was EXTRA text - apparatus whose citation numerals
+    are Hebrew letters (`שם ה יא`), which a trailing-Arabic-digits rule cannot
+    see. The new processor on the same bitonal scan, through the same pipeline,
+    matches the original (0.9595 vs 0.9561 chars). The engine was never the
+    difference; the pipeline was. Raw against raw, the scan effect is the larger.
+
+    **Two things that bias AGAINST full tone, so the advantage is conservative:**
+    * One heading (`אמר`, p87) was not recognised on the full-tone build, so its
+      text merged into the preceding reviewed entry `אמץ`, inflating it. `אמר`
+      itself drops out of the comparison (99 entries, not 100).
+    * 70 apparatus lines were dropped under the label "watermark" - the NLI
+      apparatus sits where the Google watermark sits on the other scan, and that
+      rule is positional. They are apparatus and should go, so no body text was
+      lost (full tone has the HIGHEST coverage), but the label is wrong and the
+      rule is scan-specific.
+
+    **Two defects of mine along the way.** The comparison script merged
+    homographs (`אלה a` + `אלה b` under one key, 991 spurious words in one
+    entry); `measure_against_reviewed.py` pairs occurrences in order. And the
+    first DocAI pass saved `document.text` only, discarding the layout the
+    pipeline needs, so the slice had to be processed twice: about 145 pages in
+    all, roughly half of it that redo. The tool now saves text, tokens and the
+    full Document on every run.
+
+    **What this recommends, and what it does not do.** Rebuilding the book from
+    NLI's full-tone images through this processor is the evidenced next step.
+    It is NOT done, for three reasons that are the reviewer's to weigh:
+    * spend - 651 pages, against 35 measured here;
+    * the NLI<->PDF page mapping (offset -40) is content-verified over 58-92
+      only, NLI has 656 images to the PDF's 651, and a drifting offset silently
+      pairs text with the wrong page (`0FU` caught exactly that);
+    * a corpus rebuild changes the text under the dashboard's 1,362-row queue.
+      No reviewer decision exists for this book yet, which makes NOW the cheap
+      moment - but it is a decision, not a cleanup.
+
 0FY. **[2026-09-11] DOCUMENT AI SETUP: THE API IS ALREADY ENABLED AND THE
     SERVICE ACCOUNT ALREADY EXISTS. WHAT IS MISSING IS A PROCESSOR AND ONE ROLE.
     REGION IS `eu`.**

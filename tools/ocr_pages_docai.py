@@ -51,6 +51,7 @@ Usage:
 import argparse
 import glob
 import io
+import json
 import os
 import sys
 
@@ -63,6 +64,9 @@ sys.path.insert(0, _HERE)
 import fitz  # noqa: E402
 import corpus_io as cio  # noqa: E402
 from experiment_scan_source import inkbox  # noqa: E402
+# The converter that produced docai_word_boxes/ for the corpus - reused so the new
+# token pages are in EXACTLY the format build_root_corpus.py reads.
+from extract_docai_pages import document_to_tokens  # noqa: E402
 
 MAX_BYTES = 19_000_000     # Document AI online processing caps a request at 20 MB
 
@@ -185,7 +189,16 @@ def main():
     done = 0
     for page in range(lo, hi + 1):
         dest = os.path.join(out_dir, f"page_{page}.txt")
-        if os.path.exists(dest):
+        tok_dest = os.path.join(out_dir, f"page_{page}.json")
+        # SKIP ONLY WHEN THE TOKENS EXIST. The first run of this tool saved
+        # `document.text` alone and threw away the layout - so its output could
+        # not go through build_root_corpus.py, which separates running heads and
+        # apparatus by PAGE GEOMETRY. Measured against a corpus that had that
+        # cleanup, the raw text looked 8 points worse for reasons that were
+        # mostly leftover furniture (item 0FZ). Everything is saved now: text,
+        # tokens in the docai_word_boxes format, and the full Document, so no
+        # later question needs another paid run.
+        if os.path.exists(tok_dest):
             done += 1
             continue
         im, png = page_png(doc, nli_files, page, args.source, args.offset, args.dpi)
@@ -197,6 +210,16 @@ def main():
                 name=name,
                 raw_document=documentai.RawDocument(content=png, mime_type="image/png")))
             text = result.document.text or ""
+            tokens = document_to_tokens(result.document)
+            with open(tok_dest, "w", encoding="utf-8") as fh:
+                json.dump(tokens, fh, ensure_ascii=False)
+                fh.flush()
+                os.fsync(fh.fileno())
+            with open(os.path.join(out_dir, f"page_{page}.document.json"), "w",
+                      encoding="utf-8") as fh:
+                fh.write(documentai.Document.to_json(result.document))
+                fh.flush()
+                os.fsync(fh.fileno())
         except Exception as exc:                              # noqa: BLE001
             print(f"  p{page}: FAILED {type(exc).__name__}: {str(exc)[:160]}")
             continue
