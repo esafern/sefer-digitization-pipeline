@@ -340,9 +340,13 @@ applying it to the corpus remain two separate, deliberate steps.
     * the NLI<->PDF page mapping (offset -40) is content-verified over 58-92
       only, NLI has 656 images to the PDF's 651, and a drifting offset silently
       pairs text with the wrong page (`0FU` caught exactly that);
-    * a corpus rebuild changes the text under the dashboard's 1,362-row queue.
-      No reviewer decision exists for this book yet, which makes NOW the cheap
-      moment - but it is a decision, not a cleanup.
+    * ~~a corpus rebuild changes the text under the dashboard's 1,362-row
+      queue.~~ **LIFTED 2026-09-11 by the reviewer:** "going forward we can throw
+      away the rows in the queue. no one has looked at them yet." The HaShorashim
+      witness queue is DISPOSABLE - regenerate it after any rebuild, preserve
+      nothing from it. This holds only while no ruling exists on this book; the
+      first recorded decision ends it, and after that a rebuild needs the
+      drift/repoint machinery like Yad Malachi does.
 
 0FY. **[2026-09-11] DOCUMENT AI SETUP: THE API IS ALREADY ENABLED AND THE
     SERVICE ACCOUNT ALREADY EXISTS. WHAT IS MISSING IS A PROCESSOR AND ONE ROLE.
