@@ -308,6 +308,17 @@ applying it to the corpus remain two separate, deliberate steps.
     * One heading (`אמר`, p87) was not recognised on the full-tone build, so its
       text merged into the preceding reviewed entry `אמץ`, inflating it. `אמר`
       itself drops out of the comparison (99 entries, not 100).
+      The cause is a LINE MERGE, not a detector gap: on full-tone p87 the heading
+      and the line below it came out as one line with their words interleaved
+      (`ונשלם האלף בספר והמם ההמם והריש והורים , . אמר ...`). It is NOT skew -
+      measured, p87's line angle is 0.000 deg. Skew does exist on the
+      photographed full-tone pages (median |angle| 0.074 deg, worst p70 at
+      0.83 deg, against 0.006 / 0.014 deg on the flat bitonal scan), but the one
+      merge traced here is on a page with none, and merging is rare overall:
+      1,156 body lines on full tone against 1,161 on bitonal over 35 pages, 22
+      pages identical. **Deskew is therefore NOT indicated by this evidence** -
+      recorded so it is not chased on the strength of one merged heading. The
+      exact cause of the p87 merge is undetermined.
     * 70 apparatus lines were dropped under the label "watermark" - the NLI
       apparatus sits where the Google watermark sits on the other scan, and that
       rule is positional. They are apparatus and should go, so no body text was
