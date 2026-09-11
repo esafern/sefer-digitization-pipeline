@@ -401,6 +401,16 @@ applying it to the corpus remain two separate, deliberate steps.
     WORSE scan still beats Cloud Vision on the BETTER one by 7 points of
     characters. For this material the engine is worth more than the pixels.
 
+    > **CONFOUNDED - see `0FZ` (2026-09-11).** The 7 points compared the
+    > PROCESSED corpus (`build_root_corpus.py`: running heads and apparatus
+    > removed by page geometry) against RAW Cloud Vision text with only a crude
+    > first-line/trailing-digits cleanup. Split into coverage and precision, all
+    > five sources reproduce 95-98% of the reviewed text; the gap is EXTRA text
+    > in the raw layers (precision 0.67-0.77 against the corpus's 0.87). A fresh
+    > DocAI processor on the same bitonal scan scores 0.8704 raw - one point over
+    > Cloud Vision, not seven. Raw against raw, the scan effect (~2 points) is
+    > larger than the engine effect (~1). Do not cite the 7-point figure.
+
     So neither of the two things we can run today is the right combination. The
     experiment that matters is the one we cannot run: **DocAI on the full-tone
     images**, which should carry DocAI's running-text quality and the full-tone
