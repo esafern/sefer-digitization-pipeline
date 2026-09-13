@@ -9523,3 +9523,30 @@ def test_a_maqaf_separates_words_instead_of_vanishing():
     # from the verse it is in. 652 U+034F and 769 U+200E in the reference corpus.
     assert cio_local.hebrew_words("לְיוֹשֵׁ֥ב יְרוּשָׁלַ֖͏ִם") == ["ליושב", "ירושלם"], (
         "an invisible joiner split a word - the U+034F fragmentation is back")
+
+
+def test_a_witness_dispute_word_index_is_a_position_in_clean_text_split():
+    """`word_index` means an index into `clean_text.split(' ')` - the space the
+    dashboard's click handler, the decision ledger and corpus_io.words_of() use.
+
+    build_witness_disputes aligned over a FILTERED word list (punctuation-only
+    tokens and one-letter words dropped) and emitted that list's index. Every
+    dropped token before a dispute shifted it by one: on HaShorashim klal 1 the
+    dashboard sent the reviewer to `הפרחה` while the scan box sat on `הרמונים`,
+    three words later. Measured before the fix, 1,357 of the queue's 1,362 rows
+    pointed the text pane at the wrong word.
+
+    The fixture carries both kinds of dropped token - a period and the one-letter
+    word `ל` - ahead of the disputed word.
+    """
+    import build_witness_disputes as bwd
+
+    corpus = "האלף והבית . לראות ל באבי הנחלי פירושו"
+    witness = "האלף והבית . לראות ל באבי הנחל פירושו"
+    rows = bwd.disputes_for(bwd.text_words(corpus), bwd.text_words(witness))
+    assert len(rows) == 1, rows
+    _tag, pos, corpus_span, _wit_span = rows[0]
+    assert corpus_span == ["הנחלי"]
+    assert corpus.split(" ")[pos] == "הנחלי", (
+        f"word_index {pos} names {corpus.split(' ')[pos]!r} in clean_text.split(' ') - "
+        "the index is being taken from the filtered alignment list again")

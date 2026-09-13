@@ -28,7 +28,7 @@ book's own heading detector) or a corpus JSON (a part1.json).
 
 Usage:
   SEFER_CORPUS_ROOT=~/work/hashorashim python3 tools/measure_against_reviewed.py \\
-      --gold /tmp/ibnj_gold100.json \\
+      --gold ~/work/hashorashim/gold100_text.json \\
       --source "corpus=~/work/hashorashim/part1.json" \\
       --source "cv_full=~/work/hashorashim/nli_cv_layer"
 """

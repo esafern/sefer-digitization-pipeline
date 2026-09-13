@@ -267,6 +267,55 @@ applying it to the corpus remain two separate, deliberate steps.
     cheaper than a human reading 2,025 entries?** That is measurable and is not
     yet measured.
 
+0GA. **[2026-09-13] HANDOFF - STATE OF SEFER HaShorashim AT THE END OF THE
+    LONG SESSION. READ THIS FIRST.**
+
+    **Dashboards.** Yad Malachi on :8420, Sefer HaShorashim on :8421
+    (`SEFER_CORPUS_ROOT=~/work/hashorashim python3 pipeline/review_server.py
+    --port 8421`). Two stale Yad Malachi servers from 2026-09-06 were seen on
+    ephemeral ports (64210, 65163) running old code; not started by this work.
+
+    **Fixed 2026-09-11/13, all found by looking at the running dashboard:**
+    * Each book now has its OWN decision ledger (`review_decisions.py` used the
+      code folder; HaShorashim was reading and would have written Yad Malachi's
+      4,846-line ledger). Nothing leaked. HaShorashim's ledger is
+      `~/work/hashorashim/review_decisions.jsonl` and is empty.
+    * Witness context bracket indexed raw tokens; now letter-bearing tokens.
+    * Witness `word_index` was an index into a filtered list; now a position
+      in `clean_text.split(' ')`. Before: 1,357 of 1,362 rows put the text-pane
+      highlight on the wrong word. After: 1,362 right. Regression test
+      `test_a_witness_dispute_word_index_is_a_position_in_clean_text_split`.
+    * Per-tier panel text instead of one sentence that contradicted tier A.
+
+    **Files that lived only in `/tmp` and were LOST** when it was cleared:
+    `ibnj_entries.json`, `ibnj_gold100.json`, `ibnj_anchored.json`,
+    `ng_located.json`, `correction_ledger.json`. The two that matter are now
+    persisted in the corpus root and the tools' usage lines point at them:
+    * `witness_entries.json` / `witness_entries_flat.json` - Sefaria's
+      unreviewed text per entry, recovered from `witness_footnotes.json`
+      (which stores each entry's tokens verbatim).
+    * `gold100_text.json` - the 100 reviewed entries, citation-free, rebuilt by
+      `tools/anchors_from_inline_citations.py --text-out`.
+    Recovered disputes differ trivially from the lost-file build (2,795 vs
+    2,793 rows; 310 vs 306 shared entries), because the corpus has since gained
+    the 0FI headings.
+
+    **Document AI.** Processor `bc652834c231f24e`, Document OCR, region `eu`,
+    project `gen-lang-client-0289907848`; service account `doc-ai-worker` holds
+    `roles/documentai.apiUser` (processes; cannot `get`/`list` - expected). The
+    corpus was built by an older processor `4d3d4f204562f1d6` in `us`, fed whole
+    PDF pages. Run: `DOCAI_PROJECT=... DOCAI_LOCATION=eu DOCAI_PROCESSOR=...
+    python3 tools/ocr_pages_docai.py --check`.
+
+    **The decision in front of the reviewer** (`0FZ`): rebuild the book from
+    NLI's full-tone images through that processor. On the 35-page slice it wins
+    on every measure (words 0.9287 vs 0.9002, nun/gimel 6 vs 85). Blockers
+    left: spend (651 pages) and verifying the NLI<->PDF page offset (-40,
+    checked on 58-92 only; NLI has 656 images to 651 pages) across the book,
+    which costs nothing and should come first. The dashboard queue is
+    disposable until the first ruling - so do not rule on HaShorashim rows
+    until that decision is made.
+
 0FZ. **[2026-09-11] DOCUMENT AI ON THE FULL-TONE SCAN BEATS EVERYTHING WE HAVE,
     ON EVERY MEASURE. AND 0FW'S "ENGINE MATTERS MORE THAN SCAN" WAS AN ARTIFACT.**
 

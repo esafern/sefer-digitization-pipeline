@@ -39,7 +39,7 @@ writes shin as U+FB2A, the precomposed presentation form, which sits outside
 
 Usage:
   SEFER_CORPUS_ROOT=~/work/hashorashim python3 tools/build_witness_disputes.py \
-      --witness sefaria=/tmp/ibnj_entries.json --out witness_disputes.json
+      --witness sefaria=~/work/hashorashim/witness_entries_flat.json --out witness_disputes.json
 """
 
 import argparse
@@ -79,24 +79,43 @@ def text_words(text):
     typography difference presented to a human as a disagreement about letters.
     """
     out = []
-    normed = unicodedata.normalize("NFKC", text)
-    for raw in cio.HEBREW_PUNCT.sub(" ", cio.strip_points(normed)).split():
-        w = cio.hebrew_letters_only(raw)
-        if len(w) >= 2:
-            out.append((w, raw))
+    # SPLIT ON SPACES FIRST - through corpus_io.words_of(), the one
+    # sanctioned space split - so every kept word carries its index in
+    # `clean_text.split(' ')` - the one index space the dashboard, the decision
+    # ledger and corpus_io.words_of() all use. Splitting the whole text on
+    # punctuation first (as this did until 2026-09-13) made `word_index` an
+    # index into THIS function's filtered list instead, which drops
+    # punctuation-only tokens and one-letter words. Every such token before a
+    # dispute shifted it: on klal 1 the queue sent the reviewer to word 74,
+    # `הפרחה`, while the scan box sat on `הרמונים` - three places later, one per
+    # period. The scan and the text each looked plausible alone.
+    for pos, tok in enumerate(cio.words_of(text)):
+        normed = unicodedata.normalize("NFKC", tok)
+        for raw in cio.HEBREW_PUNCT.sub(" ", cio.strip_points(normed)).split():
+            w = cio.hebrew_letters_only(raw)
+            if len(w) >= 2:
+                out.append((w, raw, pos))
     return out
 
 
 def disputes_for(entry_words, witness_words):
-    """Aligned differences as (opcode, corpus_index, corpus_span, witness_span)."""
-    a = [w for w, _raw in entry_words]
-    b = [w for w, _raw in witness_words]
+    """Aligned differences as (opcode, corpus_index, corpus_span, witness_span).
+
+    `corpus_index` is a position in `clean_text.split(' ')` (see text_words),
+    not in the filtered word list the alignment runs over.
+    """
+    a = [w[0] for w in entry_words]
+    b = [w[0] for w in witness_words]
     sm = difflib.SequenceMatcher(None, a, b, autojunk=False)
     rows = []
     for tag, i1, i2, j1, j2 in sm.get_opcodes():
         if tag == "equal":
             continue
-        rows.append((tag, i1,
+        if i1 < len(entry_words):
+            pos = entry_words[i1][2]
+        else:                                   # insertion after the last word
+            pos = entry_words[-1][2] + 1 if entry_words else 0
+        rows.append((tag, pos,
                      [entry_words[i][1] for i in range(i1, i2)],
                      [witness_words[j][1] for j in range(j1, j2)]))
     return rows

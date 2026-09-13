@@ -30,7 +30,7 @@ rather than assumed: the run aborts unless the two counts match exactly.
 Usage:
   python3 tools/extract_witness_footnotes.py \
       --docx-dir ~/work/hashorashim/IbnJanachShorashim \
-      --anchors /tmp/ibnj_anchored.json --out ~/work/hashorashim/witness_footnotes.json
+      --entries ~/work/hashorashim/witness_entries_flat.json --out ~/work/hashorashim/witness_footnotes.json
 """
 
 import argparse

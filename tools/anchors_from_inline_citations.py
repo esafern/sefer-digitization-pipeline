@@ -28,7 +28,7 @@ were kept so the split is visible rather than assumed.
 Usage:
   python3 tools/anchors_from_inline_citations.py \
       --sample ~/work/hashorashim/ibn_janah_sample.json --which corrected_sample \
-      --out ~/work/hashorashim/gold_footnotes.json --text-out /tmp/ibnj_gold.json
+      --out ~/work/hashorashim/gold_footnotes.json --text-out ~/work/hashorashim/gold100_text.json
 """
 
 import argparse
