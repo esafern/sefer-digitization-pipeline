@@ -307,6 +307,18 @@ applying it to the corpus remain two separate, deliberate steps.
     PDF pages. Run: `DOCAI_PROJECT=... DOCAI_LOCATION=eu DOCAI_PROCESSOR=...
     python3 tools/ocr_pages_docai.py --check`.
 
+    **Repositories (2026-09-13).** This pipeline repo is PUBLIC
+    (`esafern/sefer-digitization-pipeline`) and was pushed after rewriting the
+    35 unpushed commits so that correspondents appear by ROLE only - "the
+    Sefaria editor", "the NLI contact" - with their emails paraphrased, not
+    quoted. **Keep it that way in every status item, commit message and
+    docstring.** The pre-rewrite history survives LOCALLY ONLY, in branch
+    `backup/pre-anonymize-2026-09-13` and in
+    `~/sefer-pipeline-pre-anonymize-2026-09-13.bundle`: never `git push --all`,
+    never push that branch. The corpus root now has a PRIVATE remote,
+    `esafern/hashorashim`; it holds Sefaria's unreleased dataset and must never
+    be made public.
+
     **The decision in front of the reviewer** (`0FZ`): rebuild the book from
     NLI's full-tone images through that processor. On the 35-page slice it wins
     on every measure (words 0.9287 vs 0.9002, nun/gimel 6 vs 85). Blockers
