@@ -198,6 +198,23 @@ def load_witness_queue_meta():
     return {k: v for k, v in q.items() if k != "queue"} if isinstance(q, dict) else {}
 
 
+def load_heading_concerns():
+    """{klal_id: row} from heading_concerns.json, which
+    tools/check_letter_headings.py writes for a book whose entries open with the
+    root spelled out as letter names (item 0GJ). No file, no concerns."""
+    d = _load_json("heading_concerns.json", {})
+    rows = d.get("rows", []) if isinstance(d, dict) else []
+    return {r["klal_id"]: r for r in rows}
+
+
+def heading_concerns_for(report, klal_id, title):
+    """The concerns recorded for this klal - but only while its title is still
+    the one that was checked. A heading corrected since then reads as unchecked
+    until the report is rebuilt, never as still wrong."""
+    r = report.get(klal_id)
+    return list(r.get("concerns") or []) if r and r.get("title") == title else []
+
+
 WITNESS_QUEUE_FILTERED = True
 
 def load_witness_queue():

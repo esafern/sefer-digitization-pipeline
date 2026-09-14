@@ -101,6 +101,108 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0GK. **[2026-09-14, reviewer on <http://127.0.0.1:8421/entry/1/word/81>: "the
+    text is clearly maleh - with the vav. so our reading matches the text.
+    explain your note about the pasuk - i see the pasuk is written chaser but
+    the discussion repeats the word maleh"] THE VAV/YOD TIER NOTE TALKS ABOUT
+    QUOTATIONS ON EVERY ROW - 258 OF 684 ARE NOT KNOWN TO BE IN ONE. Not fixed;
+    put to the reviewer.**
+
+    Entry 1: w64-67 is the quotation of <https://www.sefaria.org/Song_of_Songs.6.11>,
+    `הפרחה הגפן הנצו הרמנים` (chaser, as the verse), footnote 4; w78-81 is Ibn
+    Janah repeating the phrase in his own argument, and there the page prints
+    `הרמונים` maleh (the reviewer, from the ink). Ours reads `הרמונים`; Sefaria's
+    OCR and corrected text both read `הרמנים.` - the Bible's spelling carried into
+    the author's repetition, `unchanged` by their corrector. So at w81 OUR reading
+    is the page's and theirs is not. The row has no verse record at all: their
+    last footnote is at the quotation, so nothing follows the word.
+
+    The popup nonetheless says, from `witnessTierNote()`:
+
+        C_spelling_vav_yod: 'The same word spelled with or without a vav/yod. Their verse quotations come from a pointed Tanakh, so inside a quotation their spelling may be the Bible’s rather than this page’s.'
+
+    - true of a word inside a quotation, and beside the point here. Measured on
+    the 684 `C_spelling_vav_yod` rows: 426 have the word inside a matched
+    quotation (THEIRS 330, neither 83, OURS 9, both 4); 258 do not, or it is not
+    known - `not_in_quotation` 90, `uncorroborated` 130, no citation after the
+    word 38. Proposed: the note says which of the three the row is, and for a
+    word outside a quotation says the Bible's spelling is no reason for theirs.
+
+0GJ. **[2026-09-14, reviewer: "you have the titles as the first word - but should
+    be the first three - the shoresh. and test - any time those three words are
+    not the name of three letters, we have a concern"] THE WHOLE ROOT IS THE
+    HEADING NOW, AND A HEADING WORD THAT IS NOT A LETTER'S NAME IS A CONCERN ON
+    SCREEN. THREE ENTRIES CARRY ONE; THE INK SPLITS THEM TWO TO ONE.**
+
+    **Why the page styled one word.** `corpus_io.title_word_span()` skipped
+    `words[0]` as "the gematria marker". Yad Malachi has one; Sefer HaShorashim's
+    entries open with the heading itself, so the span matched nothing on all 318
+    and the page styled word 0 alone - as a marker - and the rest of the root as
+    body text:
+
+        pipeline/corpus_io.py (before)
+        for raw in words[1:]:                     # words[0] is the gematria marker
+
+    **Fixed:** `title_word_run()` returns where the heading starts - after a
+    marker, tried first, or at word 0 - and the heading's own punctuation is
+    skipped as the body's always was (a `[` before it, entry 103; a period inside
+    it, `הגימל . והרש והבית .`, entry 304), without swallowing an opening bracket
+    that begins the text after it (entries 134, 225, 230). The server serves
+    `title_word_start`; `markTitleRun()` styles a marker only when there is one.
+    Measured: Yad Malachi's 667 klalim across all three part files give exactly
+    the committed spans; HaShorashim's 318 all find the whole heading at word 0
+    (0 before).
+
+    **The concern.** `detect_root_entries.heading_concerns()` - beside the
+    vocabulary it checks - requires every heading word to be a letter name in
+    the edition's spelling, the doubling word, or a homograph qualifier; a
+    spelling the matcher tolerates that is not a letter's name (`OCR_VARIANTS`:
+    `צרי` for `צדי`, `נימל` for `גימל`) is a concern, and so is a root the names
+    do not spell. `tools/check_letter_headings.py` writes
+    `heading_concerns.json`; the server attaches a row only while the entry's
+    title is still the one checked, and the `✎ Heading` control shows
+    "⚠ concern" with the reasons in its tooltip. The 7 headings carrying a
+    qualifier (`עוד`, `הרפה`, `הנראית`...) are not concerns.
+
+    **Three concerns, and what the page prints** (NLI photograph and the Google
+    copy at 500 dpi, which agree):
+    * <http://127.0.0.1:8421/entry/84> `האלף והמם והצרי .` - the page PRINTS
+      `והצרי`, with a resh (p87). Our heading is the page; Sefaria writes `צד'י`.
+    * <http://127.0.0.1:8421/entry/176> `הבית והיוד והצרי .` - also printed
+      `והצרי` (p112).
+    * <http://127.0.0.1:8421/entry/204> `הבית והצרי והעין .` - the page prints
+      `והצדי` (p120, like every other heading there): DocAI read the dalet as a
+      resh. **A data issue in our stored heading**, for the reviewer through
+      `✎ Heading`.
+    So `צרי` is not only an OCR confusion, as `LETTER_NAMES`' comment said -
+    corrected there. The concern text says the ink decides and does not say
+    which way.
+
+    Tests: `test_the_heading_is_found_after_a_marker_or_at_word_0`,
+    `test_a_heading_word_that_is_not_a_letter_name_is_a_concern`.
+
+    **FOUND WHILE VERIFYING - EVERY HASHORASHIM LINK ABOVE ENTRY 222 BLANKED THE
+    PAGE.** A fresh browser on `/entry/304` built 0 blocks: `routeToKlal()` asked
+    `partForKlal()`, which was Yad Malachi's chunking written into the page -
+
+        review_frontend/app.js (before)
+        function partForKlal(klalId) {
+          if (klalId <= 222) return '1';
+          if (klalId <= 444) return '2';
+          return '3';
+        }
+
+    - so it switched to "part 2", which Sefer HaShorashim (one part, 1-318) does
+    not have, and the pane emptied. Links below 223 worked, which is why every
+    check until now passed; links given in this file and in chat to entries 248,
+    254, 270, 280 and 304 did not. The server had replaced the same ladder with
+    `corpus_io.part_number_for_klal()` long ago; the page kept its copy (Lesson
+    13). Fixed: `/api/corpus` serves `parts` from book.json and `partForKlal()`
+    reads them, the ladder remaining only for a server too old to send them.
+    Still latent, not fixed: the part selector offers Parts 2 and 3 on a
+    one-part book, and picking one shows an empty list (UI tests select Parts 2
+    and 3 on the one-part fixture on purpose, so trimming it is its own change).
+
 0GI. **[2026-09-14, reviewer, on <http://127.0.0.1:8421/entry/58/word/11>]
     TWO POPUP DEFECTS: A TOKEN NUMBER NOBODY CAN USE, AND A VERSE SHOWN FOR A
     WORD THAT IS IN NO QUOTATION - 492 ROWS, WITH A FALSE EXPLANATION.** Plus a

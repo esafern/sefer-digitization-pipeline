@@ -662,13 +662,22 @@ document.addEventListener('click', (e) => {
 //
 // The part is derived from the klal id rather than being part of the URL: a
 // link to klal 400 must work whether or not the reviewer happens to be looking
-// at Part 2 (the nav only holds one part at a time). Same boundaries as
-// review_server._get_part_num_for_klal.
+// at Part 2 (the nav only holds one part at a time). The boundaries are the
+// BOOK's, from /api/corpus (corpus_io.parts(), book.json's `parts`): they were
+// Yad Malachi's 222/444 written in here, so a link to Sefer HaShorashim entry
+// 304 - a one-part book, 1-318 - switched to an empty "part 2" and blanked the
+// whole page (item 0GJ). The old ladder stays only as the fallback for a server
+// too old to send `parts`.
 //
 // The hash is also kept up to date as the reviewer navigates, via
 // history.replaceState so scrolling does not fill the back button with
 // hundreds of entries - the address bar is then always copyable as-is.
 function partForKlal(klalId) {
+  const parts = CORPUS && Array.isArray(CORPUS.parts) ? CORPUS.parts : null;
+  if (parts && parts.length) {
+    const hit = parts.find(p => p.first_klal <= klalId && klalId <= p.last_klal);
+    return String((hit || parts[parts.length - 1]).part);
+  }
   if (klalId <= 222) return '1';
   if (klalId <= 444) return '2';
   return '3';
@@ -1343,7 +1352,21 @@ function syncKlalHead(head, k) {
   const titleBtn = head.querySelector('.klal-title-btn');
   if (titleBtn) {
     titleBtn.classList.toggle('pending', !!k.title_pending);
-    titleBtn.textContent = k.title_pending ? '✎ Heading · pending' : '✎ Heading';
+    // A HEADING CONCERN (item 0GJ; reviewer 2026-09-14: "any time those three
+    // words are not the name of three letters, we have a concern"), shown on the
+    // control that corrects the heading, with its reasons in the tooltip. Label
+    // and tooltip are set only here, so the first paint and every refresh agree.
+    const concerns = k.heading_concerns || [];
+    titleBtn.classList.toggle('concern', concerns.length > 0);
+    titleBtn.textContent = (k.title_pending ? '✎ Heading · pending' : '✎ Heading')
+      + (concerns.length ? ' · ⚠ concern' : '');
+    titleBtn.title = concerns.length
+      ? `Heading concern: ${concerns.join(' ')} Click to correct the heading.`
+      : k.title_pending
+        ? `A heading correction is recorded for this ${unitWord()} and NOT yet applied to `
+          + 'part1.json. Click to see it.'
+        : `Correct this ${unitWord()}’s heading (the \`title\` field), which is stored `
+          + 'separately from the body text';
   }
 
   // ...and the word-level flags the INDEX pennant counts, which the klal button
@@ -1444,12 +1467,9 @@ function buildPlaceholders() {
     // for every decision here - so without this the button looked identical before
     // and after a save, and the reviewer recorded klal 89 TWICE because nothing on
     // screen said the first one had landed.
+    // Base class only - its label, tooltip, `pending` and `concern` marks belong
+    // to syncKlalHead().
     titleBtn.className = 'klal-title-btn';
-    titleBtn.title = k.title_pending
-      ? `A heading correction is recorded for this ${unitWord()} and NOT yet applied to `
-        + 'part1.json. Click to see it.'
-      : `Correct this ${unitWord()}\u2019s heading (the \`title\` field), which is stored `
-        + 'separately from the body text';
     titleBtn.onclick = (e) => { e.stopPropagation(); openTitlePanel(k.klal_id); };
     head.appendChild(titleBtn);
     // ...and the word-level flags the INDEX pennant is counting, which the klal
@@ -1566,10 +1586,17 @@ function markTitleRun(body, k) {
   const spans = body.querySelectorAll('[data-word-index]');
   if (!spans.length) return;
   const n = k.title_word_count || 0;
+  // WHERE the heading starts (item 0GJ): after a gematria marker at word 0 (Yad
+  // Malachi), or AT word 0 in a book whose entries open with the heading itself
+  // (Sefer HaShorashim's `האלף והגימל והפא .`). It was always taken to follow a
+  // marker, so there word 0 was styled as a marker and the rest of the root as
+  // body text (reviewer 2026-09-14: "the titles as the first word - but should be
+  // the first three"). null - the title matched nowhere - keeps the old shape.
+  const start = k.title_word_start ?? 1;
   spans.forEach(el => {
     const i = parseInt(el.dataset.wordIndex, 10);
-    if (i === 0) el.classList.add('klal-marker-word');
-    else if (n && i <= n) el.classList.add('klal-title-word');
+    if (start === 1 && i === 0) el.classList.add('klal-marker-word');
+    else if (n && i >= start && i < start + n) el.classList.add('klal-title-word');
   });
   // The LAST heading word carries the gap that separates the heading from the
   // text, and the marker carries the gap before it (reviewer: "one more space
@@ -1577,7 +1604,7 @@ function markTitleRun(body, k) {
   // matched with :last-of-type, which would pick the last span in the body
   // whether or not it belongs to the heading.
   if (n) {
-    const last = body.querySelector(`[data-word-index="${n}"]`);
+    const last = body.querySelector(`[data-word-index="${start + n - 1}"]`);
     if (last) last.classList.add('klal-title-end');
   }
 }

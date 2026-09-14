@@ -1268,22 +1268,60 @@ def title_word_span(title, clean_text):
     Returns a count of RAW body words (punctuation included), so the caller can
     index `words_of(klal)` with it directly.
     """
-    tw = (title or "").split()
+    return _title_span_from(title, clean_text, 1)   # words[0] is the gematria marker
+
+
+def title_word_run(title, clean_text):
+    """(first word index, word count) of the printed heading at the start of the
+    body; (None, 0) when the title matches neither way.
+
+    ADDED 2026-09-14 (item 0GJ). title_word_span() assumes a gematria marker at
+    word 0, which Yad Malachi has and Sefer HaShorashim does not - there every
+    entry opens with the heading itself (`האלף והגימל והפא .`), the span matched
+    nothing, and the dashboard styled word 0 alone, as a marker (reviewer: "you
+    have the titles as the first word - but should be the first three"). After a
+    marker is tried FIRST, so a book with one reads exactly as before.
+    """
+    words = words_of(clean_text)
+    # A marker is a WORD - a gematria numeral. When word 0 is bare punctuation
+    # (entry 103 opens `[ האלף והפא וההא .`) the heading cannot follow a marker.
+    for start in ((1, 0) if words and _is_word(words[0]) else (0,)):
+        n = _title_span_from(title, clean_text, start)
+        if n:
+            return start, n
+    return None, 0
+
+
+def _is_word(tok):
+    return bool(hebrew_letters_only(tok) or any(c.isalnum() for c in tok))
+
+
+def _title_span_from(title, clean_text, start):
+    raw_tw = (title or "").split()
+    # The heading's OWN punctuation is skipped as the body's always was: a
+    # bracket before it (`[ האלף ...`) or a period inside it (`הגימל . והרש
+    # והבית .`, p148) made the match stop there (item 0GJ). A closing mark the
+    # heading ends with is still counted in, as it always was.
+    tw = [t for t in raw_tw if _is_word(t)]
     words = words_of(clean_text)
     if not tw or not words:
         return 0
+    closes = not _is_word(raw_tw[-1])
     matched, consumed = 0, 0
-    for raw in words[1:]:                     # words[0] is the gematria marker
-        consumed += 1
-        if not (hebrew_letters_only(raw) or any(c.isalnum() for c in raw)):
-            continue                          # editorial punctuation - skip, don't fail
-        if matched >= len(tw):
+    for raw in words[start:]:
+        if matched == len(tw):
+            # The heading's closing punctuation - but not an OPENING bracket,
+            # which begins the text after it (entries 134 `(`, 225 and 230 `[`).
+            if closes and not _is_word(raw) and not raw.startswith(("(", "[")):
+                consumed += 1
+                continue
             break
+        consumed += 1
+        if not _is_word(raw):
+            continue                          # editorial punctuation - skip, don't fail
         if hebrew_letters_only(raw) != hebrew_letters_only(tw[matched]):
             return 0 if matched == 0 else consumed - 1
         matched += 1
-        if matched == len(tw):
-            return consumed
     return consumed if matched == len(tw) else 0
 
 

@@ -9841,3 +9841,38 @@ def test_a_word_outside_the_quotation_is_not_judged_by_its_verse():
     assert aav.verdict_for(4, 2, 3, 5, 9, False, True) == "THEIRS"
     assert aav.verdict_for(4, 2, 3, 5, 9, True, True) == "both"
     assert aav.verdict_for(4, 2, 3, 5, 9, False, False) == "neither"
+
+
+def test_the_heading_is_found_after_a_marker_or_at_word_0():
+    """Item 0GJ, reviewer 2026-09-14: "you have the titles as the first word - but
+    should be the first three - the shoresh". title_word_span assumed a gematria
+    marker at word 0, which Yad Malachi has and Sefer HaShorashim does not, so
+    there it matched nothing and the page styled word 0 alone, as a marker."""
+    import corpus_io as cio
+    assert cio.title_word_run("כל דבר .", "א כל דבר . והנה") == (1, 3)
+    assert cio.title_word_run("האלף והגימל והפא .", "האלף והגימל והפא . וכל אגפיו") == (0, 4)
+    assert cio.title_word_run("שונה לגמרי", "א כל דבר .") == (None, 0)
+    # the heading's own punctuation: a bracket before it (entry 103) and a
+    # period inside it (entry 304, p148) stopped the match
+    assert cio.title_word_run("[ האלף והפא וההא .", "[ האלף והפא וההא . ומצות אפה") == (0, 5)
+    assert cio.title_word_run("הגימל . והרש והבית .", "הגימל . והרש והבית . ובגרב") == (0, 5)
+    assert cio.title_word_span("כל דבר .", "א כל דבר . והנה") == 3      # the old contract
+
+
+def test_a_heading_word_that_is_not_a_letter_name_is_a_concern():
+    """Item 0GJ, reviewer 2026-09-14: "any time those three words are not the
+    name of three letters, we have a concern". The edition's own spellings, the
+    doubling word and the homograph qualifiers are names or parts of the formula;
+    an OCR misreading the matcher tolerates is not, and neither is a root the
+    names do not spell."""
+    from detect_root_entries import heading_concerns
+    assert heading_concerns("האלף והגימל והפא .", "אגפ") == []
+    assert heading_concerns("האלף והבית הכפולה .", "אבב") == []
+    assert heading_concerns("האלף והלמד וההא הרפה .", "אלה") == []
+    assert heading_concerns("הבית והואו והצירי .", "בוצ") == []           # p108's own spelling
+    c = heading_concerns("האלף והמם והצרי .", "אמצ")
+    assert len(c) == 1 and "צרי" in c[0] and "צדי" in c[0], c
+    c = heading_concerns("הנימל והעין .", "גע")
+    assert len(c) == 1 and "גימל" in c[0], c
+    assert heading_concerns("האלף והמם והכלב .", "אמ")                  # not names at all
+    assert any("root" in x for x in heading_concerns("האלף והגימל והפא .", "אגד"))

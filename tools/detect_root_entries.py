@@ -84,7 +84,9 @@ LETTER_NAMES = {
     # to be (item 0GF)
     "צירי": "צ",
     # OCR variants, each with the sort that produced it
-    "צרי": "צ",    # ד -> ר, this printing's commonest sort-level confusion
+    "צרי": "צ",    # ד -> ר, this printing's commonest sort-level confusion - but
+                   # also PRINTED so on p87 and p112 (both copies; item 0GJ), so
+                   # a heading carrying it is a question for the ink, not an error
     "נימל": "ג",   # ג -> נ
 }
 # "the doubled one" - a geminate root, repeating the letter before it:
@@ -215,6 +217,48 @@ def _letters_from(m):
         else:
             letters.append(LETTER_NAMES[squash(n)])
     return "".join(letters)
+
+
+# SPELLINGS THE MATCHER TOLERATES that are NOT the names of letters, with the name
+# each stands for (item 0GJ). Kept in LETTER_NAMES so an entry boundary is not
+# lost; flagged by heading_concerns() because the stored heading needs the ink.
+# NOT always an OCR error: `צרי` is PRINTED on p87 (`האלף והמם והצרי.`) and p112
+# (`הבית והיוד והצרי.`) - resh in both the NLI photograph and the Google copy -
+# while p120 prints `הבית והצדי והעין.` and DocAI read `צרי` there too. The
+# concern says the ink decides; it does not say which way.
+OCR_VARIANTS = {"צרי": "צדי", "נימל": "גימל"}
+
+
+def heading_concerns(title, root=None):
+    """Why this heading is not simply the root's letters spelled out; [] if it is.
+
+    Reviewer 2026-09-14: "any time those three words are not the name of three
+    letters, we have a concern". Every word of the heading must be a letter name
+    in the edition's own spellings, the doubling word (`הכפולה`), or a qualifier
+    the edition uses to part homographs (`עוד`, `הנראית`...). An OCR misreading
+    the matcher tolerates (`צרי` for `צדי`) is a concern: it is not a letter's
+    name. `root`, when given, must be what the names spell.
+    """
+    hit = match_heading(title or "")
+    if not hit:
+        return ["The heading does not read as the names of letters."]
+    out = []
+    words = [cio.hebrew_letters_only(w) for w in title[:hit[1]].split()]
+    for i, w in enumerate(x for x in words if x):
+        if w in QUALIFIERS:
+            continue
+        core = re.sub(r"^ו?ה", "", w) if i else re.sub(r"^ה", "", w)
+        if core in DOUBLED_FORMS:
+            continue
+        if core in OCR_VARIANTS:
+            out.append(f"`{w}` is not the name of a letter (the name is "
+                       f"`{OCR_VARIANTS[core]}`): the OCR may have misread it, or the page "
+                       f"may print it so - the ink decides.")
+        elif core not in LETTER_NAMES:
+            out.append(f"`{w}` is not the name of a letter.")
+    if root and cio.root_key(hit[0]) != cio.root_key(root):
+        out.append(f"The names spell `{hit[0]}`, not this entry's root `{root}`.")
+    return out
 
 
 def scan(layer_dir):

@@ -1424,6 +1424,14 @@ textarea.custom-text, input.custom-text {
   color: var(--pending);
   font-weight: 600;
 }
+/* A HEADING CONCERN (item 0GJ): a heading word that is not the name of a letter.
+   The danger colour, because it is a question about the entry's anchor, and
+   the reasons are in the button's tooltip. */
+.klal-title-btn.concern {
+  border-color: var(--danger);
+  color: var(--danger);
+  font-weight: 600;
+}
 
 .title-word-row { display: flex; flex-wrap: wrap; gap: 6px; }
 .title-word-chip {

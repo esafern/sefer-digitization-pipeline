@@ -414,6 +414,7 @@ def api_klalim(part_num=1, on_klal_states=None):
     regions = _load_regions()
     queue = _load_review_queue(part_num=part_num)
     punct_candidates = _load_punctuation_candidates(part_num=part_num)
+    heading_concerns = rdata.load_heading_concerns()
     # Pre-load klal_flag decisions once for all 222 klalim. The old code
     # called _word_level_ai_flags() per klal inside the loop; that function
     # calls rd.history_for() which re-reads the full log each time - 222
@@ -668,6 +669,11 @@ def api_klalim(part_num=1, on_klal_states=None):
             # where an ai_flag count was added to /api/klal and never rendered
             # because the header never sees that response. Item 0BE.
             "title_pending": kid in _pending_title_klalim,
+            # A HEADING CONCERN (item 0GJ): a heading word that is not the name
+            # of a letter, from tools/check_letter_headings.py - served here
+            # because the `✎ Heading` control is built from this payload.
+            "heading_concerns": rdata.heading_concerns_for(heading_concerns, kid,
+                                                           k.get("title", "")),
             # The klal's own gematria marker, e.g. `סו` for 66. ADDED 2026-08-26
             # (reviewer: "add the gematria form of the klal to the context
             # header") - api_klal has always carried it, but the nav//api/klalim
@@ -853,6 +859,12 @@ def api_corpus():
                               and os.path.exists(_comparison["their_ocr"])),
         "has_their_corrected": bool(_comparison["their_corrected"]
                                     and os.path.exists(_comparison["their_corrected"])),
+        # The book's declared file chunks, so the page can tell which part holds
+        # an entry. It hardcoded Yad Malachi's 222/444 cutoffs, and a link to
+        # Sefer HaShorashim entry 304 - a book of ONE part, 1-318 - switched to
+        # an empty "part 2" and blanked the page (item 0GJ).
+        "parts": [{"part": i, "first_klal": p["first_klal"], "last_klal": p["last_klal"]}
+                  for i, p in enumerate(cio.parts(), start=1)],
     }
 
 
@@ -1312,7 +1324,11 @@ def api_klal(klal_id):
         # larger type - so the UI renders it by styling a prefix of the body
         # rather than by showing `title` as a second copy above it. Computed in
         # corpus_io so the audit tool and the UI cannot drift apart.
-        "title_word_count": cio.title_word_span(k.get("title", ""), k.get("clean_text", "")),
+        # ...and WHERE it starts: after a gematria marker (Yad Malachi) or at
+        # word 0, where the entry opens with the heading itself (Sefer
+        # HaShorashim) - item 0GJ.
+        "title_word_start": cio.title_word_run(k.get("title", ""), k.get("clean_text", ""))[0],
+        "title_word_count": cio.title_word_run(k.get("title", ""), k.get("clean_text", ""))[1],
         # A HEADING RULING ON RECORD, if there is one, and whether it has been
         # promoted into part1.json yet.
         #
