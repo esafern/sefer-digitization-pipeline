@@ -407,6 +407,17 @@ def _write_witness_queue(root):
              "docai_token_index": 15, "vision_selected": "B",
              "vision_transcription": "", "vision_confidence": 0.9,
              "vision_reasoning": "fixture: their side empty", "word_index": 1},
+            # OUR side empty - they have a word we do not (item 0GP: 48 such on
+            # HaShorashim, served by word position because no token of ours
+            # holds them). A GAP before word 3, keyed by a synthetic negative
+            # index; it must not take word 3's place.
+            {"klal_id": 4, "page": 2, "docai_reading": "", "master_reading": "",
+             "tesseract_reading": "נוסף", "witness_reading": "נוסף",
+             "opcode": "delete", "tier": "one_side_empty", "gap": True, "anchored": False,
+             "bbox": {"x1": 0.085, "y1": 0.42, "x2": 0.095, "y2": 0.45},
+             "docai_token_index": -4, "page_token_index": None, "vision_selected": "B",
+             "vision_transcription": "", "vision_confidence": 0.9,
+             "vision_reasoning": "fixture: our side empty", "word_index": 3},
         ],
     }
     _write_json(os.path.join(root, "reconstruction_witness_queue.json"), queue)

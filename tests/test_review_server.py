@@ -603,6 +603,40 @@ def test_a_witness_row_with_nothing_on_their_side_offers_to_remove_our_word(
     assert page.test_errors == []
 
 
+def test_a_gap_where_only_the_witness_has_words_is_shown_and_can_be_ruled(
+        fixture_server, fixture_decisions_path, page):
+    """Item 0GP (reviewer 2026-09-14: "any unsurfaced disputes", then "yes" to
+    showing them). 48 disputes on HaShorashim are words the witness has where
+    ours has none; with no token of ours to hold them they reached no screen.
+    Served by word position now: a caret BEFORE the word, which is still its own
+    plain word; the panel offers to add their words or keep our text, and a
+    "keep" is recorded as an empty reading on the gap's own synthetic index."""
+    page.goto(f"{fixture_server}/#entry=4", wait_until="domcontentloaded", timeout=15000)
+    page.wait_for_selector("#klal-block-4 .witness-gap", state="attached", timeout=15000)
+    page.wait_for_timeout(1200)
+    where = page.evaluate("""() => {
+        const gap = document.querySelector('#klal-block-4 .witness-gap');
+        const next = gap.nextElementSibling;
+        return [gap.dataset.gapBefore, next && next.dataset.wordIndex,
+                !!document.querySelector('#klal-block-4 [data-word-index="3"].flag-word')];
+    }""")
+    assert where == ["3", "3", False], where
+    page.eval_on_selector("#klal-block-4 .witness-gap", "el => el.click()")
+    page.wait_for_selector("#witness-options .candidate-option", timeout=10000)
+    labels = page.eval_on_selector_all("#witness-options .co-label", "els => els.map(e => e.textContent)")
+    assert any("Keep our text" in x for x in labels) and any("words here" in x for x in labels), labels
+    assert "before word 3" in page.inner_text("#witness-panel-body").lower()   # the label is set in capitals
+    page.click('#witness-options .candidate-option:has-text("Keep our text")')
+    page.click("#save-witness-decision-btn")
+    page.wait_for_timeout(1500)
+    rows = [json.loads(line) for line in open(fixture_decisions_path, encoding="utf-8") if line.strip()]
+    last = [r for r in rows if r.get("decision_type") == "witness_choice"][-1]
+    assert (last["klal_id"], last["word_index"], last["chosen_source"], last["chosen_text"]) == (
+        4, -4, "docai_reading", ""), last
+    assert (last.get("candidate_snapshot") or {}).get("gap") is True, last.get("candidate_snapshot")
+    assert page.test_errors == []
+
+
 def test_correction_panel_header_copies_the_reference_and_link(fixture_server, page):
     """ADDED 2026-08-26 (reviewer request). The klal/word header in a correction
     panel is also a copy control: it yields the readable reference AND the deep

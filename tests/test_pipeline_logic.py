@@ -9829,6 +9829,49 @@ def test_a_reference_numeral_is_a_standalone_arabic_number():
     assert brc.FOOTNOTE_REF is cio.FOOTNOTE_REF
 
 
+def test_a_gap_is_boxed_where_the_missing_words_would_stand():
+    """Item 0GP. A dispute where only the witness has words has no token of
+    ours, so its scan box is made from the words either side - in right-to-left
+    print the word BEFORE the gap is the one on the right."""
+    from build_witness_review_queue import gap_box
+
+    before = ({"x1": 0.50, "y1": 0.10, "x2": 0.60, "y2": 0.13}, 7)   # right-hand word
+    after = ({"x1": 0.30, "y1": 0.10, "x2": 0.45, "y2": 0.13}, 7)    # left-hand word
+    box, page = gap_box(before, after)
+    assert page == 7 and (box["x1"], box["x2"]) == (0.45, 0.50), box
+    # words on different lines: the box sits at the start (right edge) of the next
+    next_line = ({"x1": 0.70, "y1": 0.20, "x2": 0.80, "y2": 0.23}, 7)
+    box, _ = gap_box(before, next_line)
+    assert box["x1"] == 0.80 and box["y1"] == 0.20, box
+    assert gap_box(None, None) == (None, None)
+
+
+def test_a_gap_is_never_claimed_as_the_word_it_stands_before():
+    """Item 0GP. A witness gap and the word after it share a word_index. The
+    server merges later entries onto whatever already holds an index, so a gap
+    that could be claimed would swallow the word's own dispute - or be taken for
+    it - exactly as a `delete` gap once was."""
+    from review_counts import claim_word_index
+
+    gap = {"word_index": 3, "opcode": "witness", "gap": True}
+    assert claim_word_index([gap], 3) is None
+    word = {"word_index": 3, "opcode": "witness"}
+    assert claim_word_index([gap, word], 3, "witness_overlay", {"x": 1}) is word
+    assert "witness_overlay" not in gap and word["witness_overlay"] == {"x": 1}
+
+
+def test_a_gap_ruling_is_recorded_but_never_applied_as_a_replacement():
+    """Item 0GP. Accepting the witness's words at a gap means INSERTING them
+    before `word_index`; the witness applier replaces spans, so it must refuse a
+    gap ruling rather than overwrite the word the gap stands in front of."""
+    from apply_reviewer_decisions import witness_choice_edit
+
+    decision = {"chosen_source": "tesseract_reading", "chosen_text": "נוסף",
+                "candidate_snapshot": {"word_index": 3, "gap": True, "master_reading": ""}}
+    kind, why = witness_choice_edit(decision, ["א", "ב", "ג", "ד"])
+    assert kind is None and "insertion" in why, (kind, why)
+
+
 def test_a_citation_is_right_when_the_words_before_it_end_in_its_verse():
     """Item 0FM, read by eye 2026-09-14. `(שם נז, ה)` follows `ותחפרו מהגנות אשר
     בחרתם וכמהו אצלי הנחמים באלים`: the run matches Isaiah 1:29 best, but the two

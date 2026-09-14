@@ -1222,7 +1222,21 @@ def api_klal(klal_id):
             continue
         klal_witness.append(w)
         wi = w.get("word_index")
-        if wi is None or not (0 <= wi < len(words)):
+        if wi is None or not (0 <= wi <= len(words)):
+            continue
+        # A GAP (item 0GP): words the witness has where ours has none, served by
+        # word position with no token. It stands BEFORE word `wi` and is not that
+        # word, so it is never merged onto the word's own entry - the separation a
+        # `delete` gap already has from the word at its index. `wi` may be the
+        # word COUNT: words missing after the last one (2 of 53 on HaShorashim),
+        # which the text pane draws at the end of the entry.
+        if w.get("gap"):
+            queue.append(dict(w, opcode="witness", flag="witness", final_text=None,
+                              reasoning=None, confidence=w.get("vision_confidence"),
+                              current_decision=witness_decided.get(
+                                  (klal_id, w["docai_token_index"]))))
+            continue
+        if wi == len(words):
             continue
         if wi in manual_word_indices:
             continue
@@ -1519,7 +1533,7 @@ def api_page(page_num):
         if w.get("page") != page_num or not w.get("bbox"):
             continue
         wi = w.get("word_index")
-        if wi is not None and (w["klal_id"], wi) in correction_keys:
+        if wi is not None and not w.get("gap") and (w["klal_id"], wi) in correction_keys:
             continue
         entry = dict(w)
         entry["kind"] = "witness"
@@ -1542,7 +1556,7 @@ def api_page(page_num):
     # defect shape as the 2026-08-24 collision sweep; the precedence below
     # mirrors api_klal()'s exactly.
     correction_keys |= {(x["klal_id"], x["word_index"]) for x in out
-                        if x.get("word_index") is not None}
+                        if x.get("word_index") is not None and not x.get("gap")}
     manual_current = rd.all_current_live("manual_correction")
     for kid in page_klals:
         k = klalim_by_id.get(kid)
@@ -1585,7 +1599,7 @@ def api_page(page_num):
     # different objects; both need serving, and app.js tells them apart by
     # opcode when it decides which one a click focused.
     served_keys = {(x["klal_id"], x["word_index"]) for x in out
-                   if "word_index" in x and x.get("opcode") != "delete"}
+                   if "word_index" in x and x.get("opcode") != "delete" and not x.get("gap")}
     for kid in page_klals:
         k = klalim_by_id.get(kid)
         if not k:

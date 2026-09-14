@@ -1724,10 +1724,12 @@ function renderKlalBody(block, k) {
 
   const words = (k.clean_text || '').split(' ');
   const byIndex = {};
-  k.queue.forEach(c => { if (c.opcode !== 'delete') byIndex[c.word_index] = c; });
+  // A witness GAP (item 0GP) - words the witness has where ours has none - stands
+  // before its word like a `delete` gap does, and must not take the word's slot.
+  k.queue.forEach(c => { if (c.opcode !== 'delete' && !c.gap) byIndex[c.word_index] = c; });
   const gapsBefore = {};
   k.queue.forEach(c => {
-    if (c.opcode === 'delete') {
+    if (c.opcode === 'delete' || c.gap) {
       gapsBefore[c.word_index] = gapsBefore[c.word_index] || [];
       gapsBefore[c.word_index].push(c);
     }
@@ -1743,7 +1745,7 @@ function renderKlalBody(block, k) {
       body.appendChild(marker);
     }
     if (gapsBefore[i]) gapsBefore[i].forEach(c => {
-      body.appendChild(makeGapMarker(k.klal_id, c));
+      body.appendChild(c.gap ? makeWitnessGapMarker(k, i, c) : makeGapMarker(k.klal_id, c));
       const accepted = c.current_decision && c.current_decision.chosen_text;
       if (accepted) {
         body.appendChild(makePendingInsertText(accepted));
@@ -1992,7 +1994,7 @@ function renderKlalBody(block, k) {
     .filter(idx => idx >= words.length)
     .sort((a, b) => a - b)
     .forEach(idx => gapsBefore[idx].forEach(c => {
-      body.appendChild(makeGapMarker(k.klal_id, c));
+      body.appendChild(c.gap ? makeWitnessGapMarker(k, idx, c) : makeGapMarker(k.klal_id, c));
       const accepted = c.current_decision && c.current_decision.chosen_text;
       if (accepted) {
         body.appendChild(makePendingInsertText(accepted));
@@ -2020,6 +2022,22 @@ function makePunctuationMarker(klalId, p) {
     ? 'Proposed punctuation - click to review'
     : (state === 'accepted' ? 'Accepted - will become "[.]"' : 'Rejected - click to reconsider');
   span.onclick = () => openPunctuationPanel(klalId, p);
+  return span;
+}
+
+// A WITNESS GAP (item 0GP): the witness has words here and our text has none.
+// Drawn where they would stand, before word `i`; it opens the witness panel,
+// which offers to add their words or to keep our text as it is.
+function makeWitnessGapMarker(k, i, corr) {
+  const span = document.createElement('span');
+  span.className = 'flag-gap witness-gap';
+  span.style.background = STATE_META[wordState(corr)].color;
+  span.dataset.gapBefore = i;
+  span.title = `${witnessLabel(corr)} has "${corr.tesseract_reading || ''}" here; our text has nothing`;
+  span.onclick = () => {
+    focusWordOnScan(pageForWord(k, i, corr), k.klal_id, corr);
+    openWitnessPanel(corr);
+  };
   return span;
 }
 
@@ -3913,7 +3931,11 @@ async function openWitnessPanel(w) {
   // differs. The witness's corrected reading appears for an entry it reviewed.
   const options = [
     { source: 'docai_reading', label: 'Our OCR (DocAI)', text: w.docai_reading },
-    { source: 'tesseract_reading', label: w.corrected_name ? `${witnessLabel(w)} OCR (unreviewed)` : witnessLabel(w) + ' reading', text: w.tesseract_reading },
+    // A GAP (item 0GP): ours has nothing here, so "our reading" is to add
+    // nothing - an empty reading the filter below would otherwise drop.
+    ...(w.gap ? [{ source: 'docai_reading', label: 'Keep our text - nothing belongs here', text: '(add nothing)' }] : []),
+    { source: 'tesseract_reading', label: w.gap ? `Add ${witnessLabel(w)}'s words here`
+        : w.corrected_name ? `${witnessLabel(w)} OCR (unreviewed)` : witnessLabel(w) + ' reading', text: w.tesseract_reading },
     // "(unchanged)" when their corrector left their OCR as it was - that is not
     // a decision about the word, only the absence of one (reviewer 2026-09-13).
     ...(w.entry_reviewed ? [{ source: 'corrected_reading', label: `${w.corrected_name} corrected text` + ({
@@ -3938,8 +3960,11 @@ async function openWitnessPanel(w) {
   // api_witness_context()'s docstring for why.
   // The context endpoint indexes the PAGE's tokens; docai_token_index may be
   // entry-relative, so the page-relative index is used when the row has one.
-  const ctxRaw = await fetch(`/api/witness/context/${w.page}/${w.page_token_index ?? w.docai_token_index}`)
-    .then(r => r.ok ? r.json() : null).catch(() => null);
+  // A row served by word position (item 0GP) has no OCR token, and its synthetic
+  // negative index names none, so there is no raw context to fetch.
+  const ctxRaw = (w.page_token_index == null && w.docai_token_index < 0) ? null
+    : await fetch(`/api/witness/context/${w.page}/${w.page_token_index ?? w.docai_token_index}`)
+      .then(r => r.ok ? r.json() : null).catch(() => null);
   const ctx = (ctxRaw && Array.isArray(ctxRaw.words)) ? ctxRaw : { words: [], target_index: null };
   // FIXED 2026-08-14 (user report: clicked a witness box on the scan pane,
   // saw "...וזו היא [שיטת] התוס ג"כ..." - only the FIRST word of a
@@ -3967,12 +3992,14 @@ async function openWitnessPanel(w) {
   // endpoint slices: right token, a number that matched nothing the reviewer can
   // see (item 0GI, entry 58 w11 read "Token #167"). A row with no word position
   // (Yad Malachi's unmapped witness rows, 0EA) still shows the token, labelled.
-  const where = w.word_index != null ? `word ${w.word_index}`
+  const where = w.gap ? `before word ${w.word_index}`
+    : w.word_index != null ? `word ${w.word_index}`
     : `OCR token #${w.page_token_index ?? w.docai_token_index}`;
   witnessPanelBody.innerHTML = `
     <div class="panel-section">
       <div class="panel-label">${entryRefName(w.klal_id)} · ${where} · tier ${w.tier} · page ${w.page}</div>
       <div style="font-size:12px;color:var(--ink-faint);">${escapeHtml(witnessTierNote(w))}</div>
+      ${w.gap ? `<div style="font-size:12px;margin-top:4px;">Our text has nothing here; ${escapeHtml(witnessLabel(w))} has &ldquo;${escapeHtml(w.tesseract_reading || '')}&rdquo;. Look on the scan between the neighbouring words.</div>` : ''}
       ${w.corrected_name && !w.entry_reviewed ? `<div style="font-size:12px;color:var(--ink-faint);margin-top:4px;">${escapeHtml(w.corrected_name)} has not sent a corrected version of this entry.</div>` : ''}
       ${w.master_reading && w.master_reading !== w.docai_reading ? `<div style="font-size:12px;margin-top:4px;">Master text now reads &ldquo;${escapeHtml(w.master_reading)}&rdquo;.</div>` : ''}
     </div>
@@ -3980,7 +4007,8 @@ async function openWitnessPanel(w) {
     ${decision ? `<div class="panel-section">
       <div class="panel-label">Current decision</div>
       <div style="color:${STATE_META.human.color};font-weight:600;">${STATE_META.human.label}: &ldquo;${escapeHtml(decision.chosen_source === 'remove' ? '(remove this word)'
-        : decision.chosen_text !== '' ? decision.chosen_text : '(unreadable)')}&rdquo;</div>
+        : decision.chosen_text !== '' ? decision.chosen_text
+        : decision.chosen_source === 'docai_reading' ? '(keep our text - nothing added)' : '(unreadable)')}&rdquo;</div>
       ${decision.note ? `<div style="font-size:12px;color:var(--ink-faint);margin-top:2px;">${escapeHtml(decision.note)}</div>` : ''}
     </div>` : ''}
     <div class="panel-section">

@@ -245,8 +245,11 @@ def claim_word_index(corrections, word_index, overlay_key=None, overlay=None):
     `manual_word_indices` but not machine candidates), which is exactly the
     shape that leaves one combination uncovered.
     """
+    # A `delete` entry and a witness GAP (item 0GP) both stand BEFORE the word at
+    # their index and are not that word, so neither may be claimed as it.
     existing = next((c for c in corrections
-                     if c.get("word_index") == word_index and c.get("opcode") != "delete"),
+                     if c.get("word_index") == word_index and c.get("opcode") != "delete"
+                     and not c.get("gap")),
                     None)
     if existing is not None and overlay_key is not None:
         existing[overlay_key] = overlay

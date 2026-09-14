@@ -101,6 +101,85 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0GP. **[2026-09-14, reviewer: "any unsurfaced disputes or corrections"] YES:
+    61 ONE-SIDED DISPUTES AND 7 LONG RUNS REACH NO SCREEN. SHARED ERRORS ARE
+    RARE.** Measured on the 317-entry build.
+    * **61 of the 2,064 disputes are never served.** None is bracket-only;
+      all are `one_side_empty`. The queue builder places a row on one of our
+      tokens, and 55 have none; 6 more sit on a word that repeats on its page.
+      They break down:
+      - 48 words Sefaria has and we lack, 50 of the 61 being a single word.
+        They include 5 bracketed insertions and 2 divine names; e.g.
+        <http://127.0.0.1:8421/entry/59/word/131> `כבשים`,
+        <http://127.0.0.1:8421/entry/79/word/920> `כנפו`.
+      - 5 MOVED words: the same words at another place in each text, so the
+        texts disagree on word order. Entry 17 `הזאת`, 46 `כמו דוה`, 55
+        `אוי`, 132 `מפניהם`, 292 `יהודה`, e.g.
+        <http://127.0.0.1:8421/entry/17/word/49>.
+      - 3 words we have and they lack: 41 w31 `בכלל`, 65 w106
+        `וכמהו אך יקם`, 277 w430 `אדמים`.
+    * **7 runs longer than `--max-span 4` are dropped.** 4 matter:
+      - <http://127.0.0.1:8421/entry/130/word/35>: we have 1 word, they have 16;
+      - <http://127.0.0.1:8421/entry/203/word/60>: 16 words only they have,
+        `מה בצע בדמי...`;
+      - <http://127.0.0.1:8421/entry/245/word/82>: `בע יש הערה על המלה
+        הערבית`, a variant note leaked from the apparatus (the p134 line);
+      - <http://127.0.0.1:8421/entry/317/word/180>: the next chapter's
+        heading, `המאמר הרביעי...`, which only they have.
+      The other 3: 84 w22 (ours garbled), and 4 w62 and 136 w10 (6 words
+      each that only we have).
+    * **Sefaria corrections where our text shares their original error:
+      1** (`measure_correction_overlap.py`: of their 90 reading edits in 99
+      reviewed roots, ours HAD 78, SHARED 1, THIRD 11). It is served, as the
+      one `their_correction_only` row.
+    * **Suspect words inside verified quotations, with both texts reading
+      the same word:** 20 of the 52 suspects that fall in our slice. The
+      other 247 of the 299 are outside it. Read against the verse, about 17
+      are not errors: Ibn Janah's own words inside the quotation (`באמרו`,
+      `וכמהו`, `כמו`, `ר"ל`), one ketiv/qere (`מברחיו`), one plene spelling
+      (`ירושלים`). Three are worth the ink:
+      <http://127.0.0.1:8421/entry/20/word/150> `בכמו`,
+      <http://127.0.0.1:8421/entry/98/word/69> `עמ` (the verse has `ועמק`),
+      <http://127.0.0.1:8421/entry/135/word/17> `ואגרטלי`.
+    **THE 61 ARE SERVED NOW (reviewer: "yes", 2026-09-14).**
+    * `build_witness_review_queue.py` no longer drops a dispute that has no
+      token of ours. It serves it by word position, keyed by a synthetic
+      NEGATIVE `docai_token_index` that no real token can take, with
+      `anchored: false`, and with `gap: true` where our side is empty.
+      `gap_box()` draws its scan box between the neighbouring words; in
+      right-to-left print the word before the gap is the one on the right.
+    * The server appends a gap as its own entry and never merges it onto
+      the word after it: `claim_word_index` skips gaps as it skips `delete`
+      entries. On the scan, a gap's box neither hides nor replaces that
+      word's own box.
+    * The text pane draws a caret before the word, and it opens the witness
+      panel. The panel reads "before word N" and offers "Keep our text -
+      nothing belongs here" or "Add their words here"; it fetches no raw
+      context, since a gap has no token. The applier refuses a gap ruling
+      explicitly: accepting their words means an insertion, which is not
+      built.
+    * Rebuilt: 61 served by word position (53 gaps, 8 of our words with no
+      token), and the queue goes from 1,996 to 2,057 rows, with 0 duplicate
+      keys and every row boxed. Live :8421: 317 entries load and the witness
+      total is 2,057. Entry 59 shows carets before words 23 and 131; the one
+      before 131 sits between `כ'` and `בני שנה` where Sefaria has
+      `כבשים`, and its panel offers both options.
+    * 51 of the 53 gaps showed at first. The other 2 are words missing after
+      an entry's LAST word, and the server's range check dropped them. Both
+      the server and the text pane's end-of-entry block are fixed. Live
+      after a PID restart: all 53 gaps and all 8 unpinned words of ours are
+      served; entries 111 and 171 draw their gap after the last word;
+      entry 17 w49 shows as an open dispute; no page errors.
+    * `claim_word_index` skipping a gap is tested on its own
+      (`test_a_gap_is_never_claimed_as_the_word_it_stands_before`), because
+      the fixture has no witness row on a gap's word and could not notice the
+      guard missing; with the guard removed the test fails. Full suite: 693
+      passed, 1 skipped.
+    * Tests: `test_a_gap_is_boxed_where_the_missing_words_would_stand`,
+      `test_a_gap_ruling_is_recorded_but_never_applied_as_a_replacement`,
+      `test_a_gap_where_only_the_witness_has_words_is_shown_and_can_be_ruled`.
+      The last runs on a new fixture row: klal 4, a gap before word 3.
+
 0GO. **[2026-09-14, reviewer: "we can afford some whitespace after the shoresh
     in the index pane so the titles are all left justified. what are we doing
     with the footnotes? right now I see bare numbers in the text"]**

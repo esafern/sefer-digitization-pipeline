@@ -752,6 +752,11 @@ def witness_choice_edit(decision, words):
     source = decision.get("chosen_source")
     if source == "unreadable":
         return None, "marked unreadable - there is no reading to apply"
+    if snap.get("gap"):
+        # Words the witness has where ours has none (item 0GP). Applying one is an
+        # INSERTION before `word_index`, which this function does not do; the
+        # ruling is recorded and reported, never applied as a replacement.
+        return None, "a gap ruling (the witness's words where ours has none) - insertion is not built"
     wi = snap.get("word_index")
     seen = (snap.get("master_reading") or snap.get("docai_reading") or "").split()
     if wi is None or not seen:

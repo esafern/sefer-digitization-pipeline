@@ -154,6 +154,34 @@ def tier_for(ours, theirs, lexicon, dispute_class=None, ours_raw="", theirs_raw=
     return "C_both_attested"
 
 
+def gap_box(before, after, width=0.006):
+    """Where missing words would stand, as a thin box (item 0GP): (bbox, page).
+
+    `before` and `after` are the (bbox, page) of the words either side of the
+    gap. When they share a line the box is the space between them - in
+    right-to-left print the word BEFORE the gap is the one to the right - and
+    otherwise it sits at the start of the word after (its right edge), or the
+    end of the word before (its left edge). (None, None) with no neighbour."""
+    b = before or (None, None)
+    a = after or (None, None)
+    if a[0] and b[0] and a[1] == b[1]:
+        ab, bb = a[0], b[0]
+        if min(ab["y2"], bb["y2"]) > max(ab["y1"], bb["y1"]):
+            x1, x2 = ab["x2"], bb["x1"]
+            if x2 - x1 < width:
+                mid = (x1 + x2) / 2
+                x1, x2 = mid - width / 2, mid + width / 2
+            return {"x1": x1, "y1": min(ab["y1"], bb["y1"]),
+                    "x2": x2, "y2": max(ab["y2"], bb["y2"])}, a[1]
+    if a[0]:
+        return {"x1": a[0]["x2"], "y1": a[0]["y1"],
+                "x2": a[0]["x2"] + width, "y2": a[0]["y2"]}, a[1]
+    if b[0]:
+        return {"x1": b[0]["x1"] - width, "y1": b[0]["y1"],
+                "x2": b[0]["x1"], "y2": b[0]["y2"]}, b[1]
+    return None, None
+
+
 def page_tokens(page):
     path = os.path.join(cio.DOCAI_DIR, f"page_{page}.json")
     if not os.path.exists(path):
@@ -375,6 +403,7 @@ def main():
     cache, out = {}, []
     located = ambiguous = missing = by_alignment = 0
     seen, served_correction_only, correction_only_collided = set(), 0, 0
+    unplaced = []   # disputes with no token of ours to anchor to (item 0GP)
     for d in list(disputes) + correction_only:
         if d.get("bracket_only"):
             continue
@@ -394,12 +423,11 @@ def main():
         if page not in cache:
             cache[page] = page_tokens(page)
         toks = cache[page]
-        if not toks:
-            missing += 1
-            continue
         ours = cio.hebrew_letters_only(unicodedata.normalize("NFKC", d["corpus"]))
-        if not ours:
+        if not toks or not ours:
             missing += 1
+            if d.get("class") != CORRECTION_ONLY:
+                unplaced.append(d)
             continue
         # INDEX IN THE SERVER'S TOKEN SPACE, NOT THE RAW PAGE. The dashboard's
         # context endpoint (review_server.api_witness_context) and every
@@ -440,6 +468,8 @@ def main():
             # would attach a reviewer's ruling to the wrong occurrence.
             ambiguous += 1 if hits else 0
             missing += 0 if hits else 1
+            if d.get("class") != CORRECTION_ONLY:
+                unplaced.append(d)
             continue
         i = hits[0]
         t = toks[i]
@@ -503,6 +533,78 @@ def main():
             "vision_confidence": None,
         })
 
+    # SERVED BY WORD POSITION (item 0GP). A dispute with no token of ours - words
+    # the witness has where we have none (48 on the 317-entry build), or a word
+    # of ours that repeats on its page (6) - was skipped here, so 61 of 2,064
+    # disputes reached no screen. The text pane only needs the word position;
+    # the scan gets a thin box at the neighbouring words. The row has no token,
+    # so it is keyed by a synthetic NEGATIVE index that no real token can take,
+    # and `gap` marks the ones where ours has nothing: they stand BEFORE word
+    # `word_index` and are not that word.
+    served_by_position = gaps = 0
+    for d in unplaced:
+        kid, wi = int(d["klal_id"]), d.get("word_index")
+        k = entries_by_id.get(kid)
+        if wi is None or k is None:
+            continue
+        if kid not in resolved:
+            resolved[kid] = sa.word_bboxes_resolved(kid, cio.words_of(k), regions)
+        pos = resolved[kid]
+        n = len(d["corpus"].split())
+        own = [pos[j] for j in range(wi, wi + n) if j in pos and pos[j][0]]
+        if own:
+            page = own[0][1]
+            boxes = [b for b, p in own if p == page]
+            bbox = {"x1": min(b["x1"] for b in boxes), "y1": min(b["y1"] for b in boxes),
+                    "x2": max(b["x2"] for b in boxes), "y2": max(b["y2"] for b in boxes)}
+        else:
+            bbox, page = gap_box(pos.get(wi - 1), pos.get(wi + n))
+        if bbox is None:
+            continue
+        dti = -(wi + 1)
+        while (kid, dti) in seen:
+            dti -= 100000
+        seen.add((kid, dti))
+        gap = not d["corpus"].strip()
+        mw = master_words.get(kid)
+        master = "" if gap else (" ".join(mw[wi:wi + n]) if mw is not None else d["corpus"])
+        ocr = "" if gap else ocr_reading(baseline, state, kid, wi, n)
+        entry_reviewed = kid in reviewed
+        corrected = ((d.get("their_corrected") or corr.get(kid, {}).get(wi, d["corpus"]))
+                     if entry_reviewed else None)
+        out.append({
+            "klal_id": kid,
+            "docai_token_index": dti,
+            "page_token_index": None,
+            "anchored": False,
+            "gap": gap,
+            "word_index": wi,
+            "page": int(page),
+            "bbox": bbox,
+            "docai_reading": ocr if ocr is not None else master,
+            "docai_reading_source": "ocr_baseline" if ocr is not None else "master",
+            "master_reading": master,
+            "tesseract_reading": d["witness_reading"],
+            "witness_reading": d["witness_reading"],
+            "witness_name": args.witness_name,
+            "witness_accuracy": args.witness_accuracy,
+            "corrected_name": corrected_name,
+            "entry_reviewed": entry_reviewed,
+            "corrected_reading": corrected,
+            "corrected_status": (corrected_status(d["corpus"], d["witness_reading"], corrected)
+                                 if entry_reviewed else None),
+            "verse": verse_record(verses.get((kid, wi)), d["corpus"], d["witness_reading"]),
+            "tier": tier_for(cio.hebrew_words(unicodedata.normalize("NFKC", d["corpus"])),
+                             cio.hebrew_words(unicodedata.normalize("NFKC", d["witness_reading"])),
+                             lexicon, d.get("class"), d["corpus"], d["witness_reading"]),
+            "dispute_class": d.get("class"),
+            "vision_selected": None,
+            "vision_transcription": None,
+            "vision_confidence": None,
+        })
+        served_by_position += 1
+        gaps += gap
+
     # MEASURED per tier, on the rows that fall in entries the witness reviewed.
     tier_stats = collections.defaultdict(collections.Counter)
     for w in out:
@@ -538,6 +640,8 @@ def main():
     print(f"  anchored to one token  {located:,}  ({by_alignment:,} by the word alignment)")
     print(f"  word repeats on page   {ambiguous:,}  (cannot be anchored safely)")
     print(f"  no usable token        {missing:,}")
+    print(f"  served by word position {served_by_position:,}  ({gaps:,} of them gaps, where only "
+          f"the witness has words; item 0GP)")
     if args.corrected and args.witness_text:
         print(f"  their corrections where both OCRs read alike: {len(correction_only) + unanchorable} "
               f"({served_correction_only} served, {correction_only_collided} on a token a dispute "
