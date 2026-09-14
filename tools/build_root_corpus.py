@@ -53,6 +53,7 @@ import argparse
 import json
 import os
 import re
+import collections
 import difflib
 import statistics
 import sys
@@ -220,11 +221,85 @@ RUNNING_HEAD = re.compile(
     r"^\s*(?:\d+\s*)?(?:ספר\s+השרשים|הקדמה|[א-ת]{2,5}\s*[-\u2013]\s*[א-ת]{2,5})\s*(?:\d+)?\s*$")
 
 
+# MERGED ROWS. page_lines() chains a token onto the current line while its top
+# is within LINE_TOL of the previous token's, and on pages 58-151 that chain ran
+# two printed lines together and interleaved their words (item 0GF):
+#   p116, a photograph tilted ~0.75 deg - one line's tops climb 0.012 across the
+#     width, and the chain walked off the end of the heading line `הבית והמם .`
+#     into the line below, so the root במ merged into its neighbour;
+#   p87, where DocAI returned the printed second line with every box starting
+#     inside the first and half again as tall (tops 0.6485 against 0.6425,
+#     heights 0.0345 against 0.0230) - the heading `האלף והמם והריש ,` never
+#     reached the matcher and אמר merged into אמצ.
+# Two DIFFERENT words cannot occupy the same stretch of one printed line, so a
+# line whose words overlap horizontally is two rows. It is cut at the largest gap
+# between its words' centres, measured on the page's deskewed level so a tilted
+# pair separates, and the cut stands only if at least STACK_MIN_WORDS clashing
+# words sit on EACH side. That guard keeps a printed line whole when DocAI emits
+# two readings of one stretch of ink (p74 `אי`/`אין`, p92 `באפיו`/`באפין`, p103
+# `חבורותי`/`תי`) or one over-wide token (p72): a clash or two, never a row of
+# them. A word emitted twice with the SAME text (p121 `אם`/`אם`) is no clash.
+#
+# DESKEW IS USED ONLY FOR THAT CUT. Grouping every line on the deskewed level was
+# tried first and measured: it fixed p116 and split six lines that had been
+# right - a raised numeral (p68 `31`), a line-end word (p95 `והם`), the first
+# word of a heading (p103 `הבית`, which loses the root באש). p103's slope is
+# only -0.001: the chain's hard threshold turns ANY shift in a token's level
+# into a split, so moving every line's level moves some line across it. Cutting
+# only lines that are demonstrably two rows leaves every other line as it was.
+SKEW_MAX = 0.03           # steepest slope searched, dy per unit x (~1.7 deg)
+SKEW_STEP = 0.001
+SKEW_BIN = 0.003          # row-sharpness histogram bin, in page heights
+STACK_MIN_WORDS = 3
+
+
+def page_slope(tokens):
+    """The page's skew as dy per unit x; 0 for a level page."""
+    n = int(round(SKEW_MAX / SKEW_STEP))
+    best, best_score = 0.0, -1
+    # Ties go to the smaller tilt, so a level page reads as level.
+    for s in sorted((k * SKEW_STEP for k in range(-n, n + 1)), key=abs):
+        rows = collections.Counter(
+            round(((t["y1"] + t["y2"]) / 2 - s * ((t["x1"] + t["x2"]) / 2 - 0.5)) / SKEW_BIN)
+            for t in tokens)
+        score = sum(v * v for v in rows.values())
+        if score > best_score:
+            best, best_score = s, score
+    return best
+
+
+def _overlap(a, b):
+    return (min(a["x2"], b["x2"]) - max(a["x1"], b["x1"])
+            > 0.5 * min(a["x2"] - a["x1"], b["x2"] - b["x1"]))
+
+
+def _split_merged_rows(line, slope):
+    """[line] unchanged, or the printed rows it holds - see MERGED ROWS."""
+    words = [t for t in line if len(cio.hebrew_letters_only(t["text"])) >= 2]
+    clashes = [(a, b) for i, a in enumerate(words) for b in words[i + 1:]
+               if a["text"] != b["text"] and _overlap(a, b)]
+    if len(clashes) < STACK_MIN_WORDS:
+        return [line]
+    mid = lambda t: (t["y1"] + t["y2"]) / 2 - slope * ((t["x1"] + t["x2"]) / 2 - 0.5)
+    centres = sorted(mid(t) for t in words)
+    _gap, i = max((centres[j + 1] - centres[j], j) for j in range(len(centres) - 1))
+    cut = (centres[i] + centres[i + 1]) / 2
+    across = [(a, b) for a, b in clashes if (mid(a) < cut) != (mid(b) < cut)]
+    upper = {id(t) for pair in across for t in pair if mid(t) < cut}
+    lower = {id(t) for pair in across for t in pair if mid(t) >= cut}
+    if min(len(upper), len(lower)) < STACK_MIN_WORDS:
+        return [line]
+    return (_split_merged_rows([t for t in line if mid(t) < cut], slope)
+            + _split_merged_rows([t for t in line if mid(t) >= cut], slope))
+
+
 def page_lines(tokens):
     """Tokens -> lines, each ordered RIGHT TO LEFT.
 
     Order is rebuilt rather than trusted: this sorts by y then by descending x,
-    so the result does not depend on the order DocAI happened to serialise.
+    so the result does not depend on the order DocAI happened to serialise. A
+    chained line that holds two printed rows is cut apart (_split_merged_rows).
+    Tokens are returned unmodified.
     """
     toks = sorted(tokens, key=lambda t: t["y1"])
     lines, cur = [], [toks[0]]
@@ -235,6 +310,8 @@ def page_lines(tokens):
             lines.append(cur)
             cur = [t]
     lines.append(cur)
+    slope = page_slope(tokens)
+    lines = [row for ln in lines for row in _split_merged_rows(ln, slope)]
     for ln in lines:
         ln.sort(key=lambda t: -t["x1"])
     return lines

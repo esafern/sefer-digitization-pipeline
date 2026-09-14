@@ -101,6 +101,113 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0GG. **[2026-09-14, reviewer: "go" on the heading problems] THE FOUR LOST
+    HEADINGS ARE BACK - `אמר`, `בוצ`, `במ`, `גרב`. TWO WERE LINE MERGES AND TWO
+    WERE THE HEADING PATTERN, AND EVERY CAUSE WAS READ OFF THE INK FIRST.**
+
+    Swept first: 4 of Sefaria's roots had no entry of ours; the text layer knew
+    2 of them (p87, p116) and neither of the other two.
+
+    * **p116, `במ` - skew.** The photograph is tilted ~0.75 deg (page slope
+      -0.013); the heading line's tops climb 0.7807 -> 0.7931 and
+      `page_lines()`' chain (consecutive tops within `LINE_TOL`) walked into the
+      next line, interleaving `הבית והמם .` with `הבמות לא סרו`.
+    * **p87, `אמר` - DocAI's boxes, not skew** (slope 0.000). The printed second
+      line (`ונשלם בספר התוספת...`) has no row of its own: DocAI returned it with
+      every box starting inside line 1 and half again as tall (tops 0.6485 vs
+      0.6425, heights 0.0345 vs 0.0230), plus a copy of line 1's last word
+      (`הרפיון`, same x). This settles what `0FZ` left undetermined. My first
+      account to the reviewer - "a second reading of line 1" - was wrong, said
+      before I had looked for line 2 anywhere on the page.
+    * **p148, `גרב` - the pattern.** The page prints `הגימל. והרש והבית.`, a
+      period after the first letter name, in the NLI photograph and the Google
+      copy alike; p585 prints `השין. והרש והפא.` the same way. The matcher
+      demanded the second name straight after the first.
+    * **p108, `בוץ` - the pattern.** The page prints `הבית והואו והצירי.` -
+      `צירי` for tsadi, the same four letters in the Google copy at 450 dpi, and
+      the only heading-shaped `צירי` in either text layer. `0FI` had filed
+      `הצירי` as a vowel-name QUALIFIER from this very line; after the list's
+      vav the qualifier could never match, so בוץ merged into בוס.
+
+    **Fixed.** `tools/detect_root_entries.py`: `צירי` is a letter name, `הצירי`
+    is no longer a qualifier, and an optional period may follow the first name.
+    Swept old against new over both text layers (651 pages) and the DocAI
+    stream: +`בוצ` p108, +`גרב` p148, +`שרפ` p585 (Google layer only, outside
+    the corpus); no other line changes. `tools/build_root_corpus.py`:
+    `_split_merged_rows()` cuts a chained line whose words clash horizontally -
+    two different words on one stretch of a printed line - at its largest
+    centre gap on the page's deskewed level, only when >=3 clashing words sit on
+    EACH side, recursively.
+
+    **The first version regressed and was replaced before it reached the corpus**
+    (one retune, per Lesson 31 - a third would have been handed back). Grouping
+    EVERY line on the deskewed level fixed p116 and split six lines that had been
+    right: p68 a raised `31`, p78 a page number, p88 `שהיא שרש`, p95 `והם`, p115
+    `י"י באפו`, and p103 the heading word `הבית` - which loses the root באש -
+    under a slope of only -0.001: the chain's hard threshold turns any shift into
+    a split. Its row split also fired on single pairs of alternate readings (p74
+    `אי`/`אין`, p92 `באפיו`/`באפין`, p103 `חבורותי`/`תי`). The final version
+    leaves every line without a row of clashes exactly as it was. Line diff over
+    94 pages: 7 change - p87 and p116's headings, and p70, p95, p112, p128 and
+    p144, whose interleaved APPARATUS lines now read in order.
+
+    **Rebuilt** (HaShorashim ledger empty, checked before writing): root
+    entries 1,927 -> 1,930; corpus 314 -> 318 - exactly the four gained,
+    <http://127.0.0.1:8421/entry/85> `אמר` (p87, 129 words),
+    <http://127.0.0.1:8421/entry/159> `בוץ` (p108, 55),
+    <http://127.0.0.1:8421/entry/193> `במ` (p116, 57),
+    <http://127.0.0.1:8421/entry/304> `גרב` (p148, 8), and their four neighbours
+    shortened at exactly the absorbed heading (`אמצ` 249 -> 120, `בוס` 122 ->
+    67, `בלת` 264 -> 207, `גרר` 223 -> 215); the other 310 byte-identical.
+    `suspect_merge` 3 -> 0. Against the reviewed entries (99 in every source,
+    13,619 words): words 0.9491 -> **0.9514**, chars 0.9852 -> **0.9877**,
+    precision 0.9786 -> **0.9869**, coverage 0.9887 unchanged; 100 of 100
+    reviewed entries now match. Alignment by root: 0 page moves, 0 trust
+    changes, the four new entries trusted (271/314 -> 275/318). Word ids
+    reseeded - `--verify` first showed the old sidecar naming the wrong words
+    from entry 85 on, as a renumbering must - and the OCR baseline replaced.
+    Disputes 2,062 -> 2,078 (the new roots 9/3/2/2; Sefaria compared on 317
+    entries); queue 1,967 anchored, 1,616 with a cited verse. Live :8421: 318
+    entries, all 200, 0 duplicate queue keys, the four new headings render;
+    0 of the 1,963 rows whose word aligns sit on another page (4 words do not
+    align). Gate 542 passed; UI + fixture + witness-engine 126 passed, 1
+    skipped. Tests, each seen to fail on the old code first:
+    `test_a_skewed_page_does_not_chain_two_printed_lines_into_one`,
+    `test_a_row_boxed_up_into_the_line_above_is_split_off_not_interleaved`,
+    `test_a_heading_may_print_a_period_after_its_first_letter_name`.
+
+    **FOUND ON THE WAY, NOT FIXED - DocAI emits one word twice at one spot.**
+    19 same-text token pairs with boxes overlapping >=0.87 on pages 58-151
+    (outside p87's row case), and 18 of them put a doubled word into the corpus
+    text - matched by word and page to the pairs; the ink is not checked one by
+    one: <http://127.0.0.1:8421/entry/40/word/6> `אזוב`,
+    <http://127.0.0.1:8421/entry/45/word/24> `האח` (three in a row where the
+    Psalms phrase, e.g. <https://www.sefaria.org/Psalms.35.21>, has two),
+    <http://127.0.0.1:8421/entry/47/word/407> `יפריא`,
+    <http://127.0.0.1:8421/entry/50/word/225> `אבד`,
+    <http://127.0.0.1:8421/entry/59/word/57> `זה`,
+    <http://127.0.0.1:8421/entry/100/word/265> `וישתחו`,
+    <http://127.0.0.1:8421/entry/115/word/121> `נפתחו`,
+    <http://127.0.0.1:8421/entry/133/word/217> `ושתי`,
+    <http://127.0.0.1:8421/entry/133/word/1182> `אשורים`,
+    <http://127.0.0.1:8421/entry/134/word/430> `את`,
+    <http://127.0.0.1:8421/entry/139/word/6> `היאר`,
+    <http://127.0.0.1:8421/entry/141/word/132> `הנדה`,
+    <http://127.0.0.1:8421/entry/206/word/55> `אם` and w57 `במבצרים`,
+    <http://127.0.0.1:8421/entry/248/word/163> `החצר`,
+    <http://127.0.0.1:8421/entry/254/word/10> `גובי`,
+    <http://127.0.0.1:8421/entry/270/word/52> `כחשים`,
+    <http://127.0.0.1:8421/entry/280/word/17> `במשנה`. The corpus holds 43
+    consecutive doubled words in all; the other 25 are not claimed either way
+    (many are real biblical doublings - `איש איש`, `מאד מאד`, `גבוהה גבוהה`).
+    16 of the 18 already sit within one word of a Sefaria queue row; entry 59
+    w57 and entry 206 w57 do not.
+    Five more pairs overlap with DIFFERENT text - two readings of one stretch
+    of ink (p74 `אי`/`אין`, p92, p103, p123 `בשרש`/`ובשרש`, p135) - and both
+    readings are in the text. The fix is in `build_root_corpus.py`, not the
+    ledger: one token per stretch of ink. Not done here, so this change
+    measures one thing.
+
 0GF. **[2026-09-14, reviewer: "are there still unsurfaced corrections or
     disputes?"] YES - INVENTORIED BY CLASS. THE BIGGEST IS ~1,370 WORDS OF
     APPARATUS-LIKE TEXT IN THE BODY THAT NO DISPUTE EVER SHOWS.** HaShorashim,
@@ -136,7 +243,8 @@ applying it to the corpus remain two separate, deliberate steps.
       plus 9 citations they added. (A first count said 25; it included the
       dropped long spans above - corrected.)
     * **The two lost headings** (`0GC`): `suspect_merge` on entries 84, 189, 190
-      is still rendered nowhere.
+      is still rendered nowhere. **Headings recovered 2026-09-14 (`0GG`)**; no
+      entry carries the flag now, and it is still rendered nowhere.
     * **THE APPARATUS LEAK - FIXED 2026-09-14 (reviewer: "yes").** Cause, from
       the line dump: on the full-tone crops the variant apparatus is set at
       0.80-1.08 of body size, and `classify()`'s bottom-up small-type scan
@@ -157,7 +265,8 @@ applying it to the corpus remain two separate, deliberate steps.
       words. Left: one variant-note line on p134 (no gap above it; entry 243
       w82), and runs that are HEADING problems, not apparatus - the two known
       merges (84, 190) and what look like absorbed headings in 157
-      (`הבית והואו והצירי`) and 300 (`הגימל והרש והבית`). Rebuilt downstream:
+      (`הבית והואו והצירי`) and 300 (`הגימל והרש והבית`) - all four fixed
+      2026-09-14, `0GG`. Rebuilt downstream:
       alignment (0 moves by root), word ids reseeded (no rulings exist), OCR
       baseline replaced, disputes 2,062, queue 1,952 - 0 duplicate keys,
       314/314 entries 200, 0 wrong-page rows, 0 context mismatches. Test:
@@ -394,7 +503,9 @@ applying it to the corpus remain two separate, deliberate steps.
     **DATA ISSUE, two headings lost and two gained**, all four confirmed as real
     headings by `root_entries.json`:
     * LOST: `אמר` (p87, the line merge `0FZ` recorded) and `במ` (p116) - their
-      text now sits inside the preceding entry.
+      text now sits inside the preceding entry. **RECOVERED 2026-09-14
+      (`0GG`)**, with `בוצ` and `גרב`; the entry numbers in the URLs below are
+      pre-`0GG` and have since shifted.
     * GAINED: `בכה` (p112) and `בלה` (p115), which the bitonal build had merged.
 
     **The alignment guard tests a proxy (Lesson 41).** `build_header_alignment.py`
@@ -424,7 +535,9 @@ applying it to the corpus remain two separate, deliberate steps.
     and finds exactly these two, so it is the sweep for this class.
     **`suspect_merge` (klalim 84, 189, 190) is read by nothing** in `pipeline/`
     or `review_frontend/` - the only field pointing at these is shown to no one
-    (Lesson 29 THE FIELD NOBODY RENDERS). Not fixed.
+    (Lesson 29 THE FIELD NOBODY RENDERS). Not fixed. (2026-09-14: no entry
+    carries it after `0GG` - but it is still rendered nowhere, so the next merge
+    would be exactly as silent.)
 
     **A regression my rebuild caused, and fixed.** The rebuilt queue served
     `witness_accuracy: None`, and the panel's fallback (`app.js:3693`) then told
@@ -902,6 +1015,13 @@ applying it to the corpus remain two separate, deliberate steps.
       pages identical. **Deskew is therefore NOT indicated by this evidence** -
       recorded so it is not chased on the strength of one merged heading. The
       exact cause of the p87 merge is undetermined.
+      **ANNOTATED 2026-09-14 (`0GG`): now determined** - DocAI boxed the
+      printed second line up into the first (tops 0.6485 vs 0.6425, heights
+      0.0345 vs 0.0230); not skew, as measured here. But p116's merge, outside
+      these 35 pages, IS skew (slope -0.013). Grouping every line on a deskewed
+      level was then tried and split six lines that had been right, so this
+      paragraph's conclusion holds for OCR and for grouping alike; the fix is
+      local to lines that are demonstrably two rows.
     * 70 apparatus lines were dropped under the label "watermark" - the NLI
       apparatus sits where the Google watermark sits on the other scan, and that
       rule is positional. They are apparatus and should go, so no body text was
@@ -1589,6 +1709,11 @@ applying it to the corpus remain two separate, deliberate steps.
       book-wide, 7 in the slice. `הכפול` (3) is NOT a qualifier: it is the
       masculine of `הכפולה` and doubles the letter, and skipping it would
       mis-key the entry.
+      **CORRECTED 2026-09-14 (`0GG`): `הצירי` was never a qualifier.** Its one
+      occurrence is p108 `הבית והואו והצירי.`, where `צירי` is the third LETTER
+      NAME of `בוץ` - the list's vav in front, the same four letters in the NLI
+      photograph and the Google copy. The qualifier pattern could not match it
+      and בוץ merged into בוס. It is a letter name now.
     * **A geresh INSIDE a letter name.** p65 prints `האלף והואו והיו"ד`, and
       Sefaria's own transcription writes `אל'ף`, `בי'ת` throughout. One line in
       this scan; it is what merged our `אוח` with `אוי`.
@@ -2420,6 +2545,8 @@ applying it to the corpus remain two separate, deliberate steps.
     matched - 98% boundary agreement between two independent digitizations. The
     residue is 6 roots only they have (אוי אלה בוצ בלה גבה גרב) and 1 only I have
     (אג): a short, checkable list where one side is wrong.
+    **ANNOTATED 2026-09-14:** `בוצ` and `גרב` were OURS being wrong - two heading
+    forms the matcher could not read (`0GG`); both are entries now.
 
     A fourth defect, same class as `0EL`'s: the forced-boundary path split title
     from body at the first period, and p133's garbled heading

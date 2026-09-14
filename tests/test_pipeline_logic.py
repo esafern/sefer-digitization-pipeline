@@ -9687,3 +9687,91 @@ def test_the_apparatus_is_cut_by_layout_not_type_size():
     heading = [line(0.75, ["האלף", "והפא", ".", "אף", "אני", "בכור"])]
     assert brc.classify(body + heading)[-1][0] == "body"       # a heading after a gap stays
     assert brc.classify(body + heading, rule_y=0.72)[-1][0] == "apparatus"   # the rule rules
+
+
+def test_a_skewed_page_does_not_chain_two_printed_lines_into_one():
+    """Item 0GF. The NLI pages are photographs and p116 is tilted ~0.75 deg: one
+    printed line's tops climb 0.012 across the width, so page_lines()' chain
+    (consecutive tops within LINE_TOL) walked off the end of the heading line into
+    the next one - `הבית והמם .` came out interleaved with `הבמות לא סרו` and the
+    root במ vanished into its neighbour. A chained line whose words clash is now
+    cut at its largest centre gap on the page's deskewed level; a line with no
+    clash is grouped exactly as before, and tokens keep their coordinates."""
+    import build_root_corpus as brc
+    from detect_root_entries import match_heading
+
+    def line(y, words, slope=-0.02):
+        out = []
+        for i, w in enumerate(words):
+            x1 = 0.86 - i * 0.08
+            yy = y + slope * (x1 + 0.03 - 0.5)
+            out.append({"text": w, "x1": x1, "x2": x1 + 0.06, "y1": yy, "y2": yy + 0.018})
+        return out
+    a = line(0.500, ["הבית", "והמם", ".", "ויקרא", "שמה", "במה", "רק", "בבמות", "הוא",
+                     "מזבח", "ומקטיר"])
+    b = line(0.520, ["הבמות", "לא", "סרו", "על", "במותיך", "חלל", "אפשר", "שיהיה", "כמו",
+                     "רעה", "ורעות"])
+    lines = brc.page_lines(b + a)
+    assert [[t["text"] for t in ln] for ln in lines] == [
+        [t["text"] for t in a], [t["text"] for t in b]], lines
+    assert match_heading(" ".join(t["text"] for t in lines[0]))[0] == "במ"
+    assert lines[0][-1]["y1"] == a[-1]["y1"]                  # coordinates untouched
+    flat = line(0.30, ["מלה", "אחת", "שתים"], slope=0) + line(0.324, ["ארבע", "חמש"], slope=0)
+    assert [len(ln) for ln in brc.page_lines(flat)] == [3, 2]
+
+
+def test_a_row_boxed_up_into_the_line_above_is_split_off_not_interleaved():
+    """Item 0GF, p87. DocAI returned the printed SECOND line with every box starting
+    inside the first line and half again as tall, so the two rows chained into one
+    and interleaved word by word; the heading `האלף והמם והריש ,` never reached the
+    matcher and the root אמר merged into אמצ. Two different words cannot occupy the
+    same stretch of one printed line, so a line with a ROW of clashing words on each
+    side of a cut is two lines. A word DocAI emitted twice at one spot (p121
+    `אם`/`אם`), or two readings of one stretch of ink (p74 `אי`/`אין`), is not a
+    second row, and stays - the first version of this split cut p74, p92 and p103
+    on exactly that."""
+    import build_root_corpus as brc
+    from detect_root_entries import match_heading
+
+    def row(y1, y2, words, x0):
+        return [{"text": t, "x1": x0 - i * 0.08, "x2": x0 - i * 0.08 + 0.07,
+                 "y1": y1, "y2": y2} for i, t in enumerate(words)]
+    first = row(0.6425, 0.6655, ["האלף", "והמם", "והריש", ",", "אמר", 'י"י', "41", "כבר",
+                                 "זכר", "זה"], 0.82)
+    second = row(0.6480, 0.6830, ["ונשלם", "בספר", "התוספת", "ולחם", "אמר", "לו", "צוה",
+                                  "לו", "בו", "ויאמר"], 0.90)
+    lines = brc.page_lines(first + second)
+    assert [[t["text"] for t in ln] for ln in lines] == [
+        [t["text"] for t in first], [t["text"] for t in second]], lines
+    assert match_heading(" ".join(t["text"] for t in lines[0]))[0] == "אמר"
+
+    plain = row(0.30, 0.32, ["והפועל", "העתיד", "וכי", "תבצר", "מרום", "אם", "במבצרים",
+                             "ערי"], 0.9)
+    doubled = plain + [dict(plain[5], y1=0.3025, y2=0.3225),
+                       dict(plain[6], y1=0.3025, y2=0.3225)]
+    assert len(brc.page_lines(doubled)) == 1
+    alternate = plain + [dict(plain[5], text="אין", y1=0.301, y2=0.321)]
+    assert len(brc.page_lines(alternate)) == 1
+    marked = plain + [{"text": "23", "x1": 0.55, "x2": 0.565, "y1": 0.297, "y2": 0.307}]
+    assert len(brc.page_lines(marked)) == 1
+
+
+def test_a_heading_may_print_a_period_after_its_first_letter_name():
+    """Item 0GF. p148 prints `הגימל. והרש והבית.` and p585 `השין. והרש והפא.` - a
+    period after the first letter name, in the ink (checked on the NLI photo and
+    the Google copy). The matcher required the next name straight after the first,
+    so גרב merged into גרר and שרפ was never listed. And `צירי` is how p108 spells
+    tsadi (`הבית והואו והצירי.`, root בוץ, the same in both copies); it had been
+    filed as a vowel-name QUALIFIER that could not match the line, so בוץ merged
+    into בוס."""
+    from detect_root_entries import match_heading
+
+    line = "הגימל . והרש והבית . ובגרב ובחרסי ."
+    hit = match_heading(line)
+    assert hit and hit[0] == "גרב", hit
+    assert line[:hit[1]].rstrip().endswith("והבית ."), line[:hit[1]]
+    assert match_heading("השין. והרש והפא, אשר שרף")[0] == "שרפ"
+    assert match_heading("הבית והואו והצירי. ארגמן ורקמה ובוץ")[0] == "בוצ"
+    # the widening does not make prose a heading: names must follow, and end
+    assert match_heading("האלף. ואחר כך אמר") is None
+    assert match_heading("הגימל. והרש והבית ובגרב ובחרסי") is None

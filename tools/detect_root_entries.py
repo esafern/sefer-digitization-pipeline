@@ -78,6 +78,11 @@ LETTER_NAMES = {
     "שין": "ש", "תו": "ת",
     # further spellings the edition itself uses, both attested in the layer
     "ריש": "ר", "תיו": "ת", "ויו": "ו", "וו": "ו", "חת": "ח", "טת": "ט",
+    # printed once, p108 `הבית והואו והצירי.` (root בוץ): the same four letters
+    # in the NLI photograph and in the Google copy, so it is the ink's spelling,
+    # not an OCR variant - and not the vowel tsere, which QUALIFIERS once held it
+    # to be (item 0GF)
+    "צירי": "צ",
     # OCR variants, each with the sort that produced it
     "צרי": "צ",    # ד -> ר, this printing's commonest sort-level confusion
     "נימל": "ג",   # ג -> נ
@@ -109,10 +114,15 @@ DOUBLED_FORMS = (DOUBLED, "כפול")
 #   הנראת     1   /
 #   הרפה      2   \ "the soft one" - the unpointed/spirantized reading
 #   הרפא      1   /
-#   הצירי     1   the vowel tsere
 # Listed explicitly, never fuzzy-matched: a heading is a structural anchor and
 # Lesson 5 FUZZY IS NOT A POSITION applies to it.
-QUALIFIERS = ("עוד", "הנראית", "הנראת", "הנראה", "הרפה", "הרפא", "הצירי")
+#
+# `הצירי`, "the vowel tsere", was listed here with 1 occurrence until
+# 2026-09-14. That occurrence is p108 `הבית והואו והצירי.` - the only
+# heading-shaped `צירי` in either text layer - where it is the THIRD LETTER NAME
+# of בוץ, with the list's vav in front of it, so the qualifier pattern could
+# never match it and בוץ merged into בוס. It is a letter name now (item 0GF).
+QUALIFIERS = ("עוד", "הנראית", "הנראת", "הנראה", "הרפה", "הרפא")
 
 ALEPHBET = "אבגדהוזחטיכלמנסעפצקרשת"
 
@@ -153,9 +163,16 @@ _QUAL_ALT = "|".join(_spaced(q) for q in sorted(QUALIFIERS, key=len, reverse=Tru
 # The anchor is not weakened by this: the first Hebrew letter must still open the
 # heading, the terminator is still required, and the letter-name vocabulary is
 # still closed.
+#
+# A PERIOD MAY FOLLOW THE FIRST NAME. p148 prints `הגימל. והרש והבית.` and p585
+# `השין. והרש והפא.` - read off the ink of the NLI photograph and the Google
+# copy, not inferred from the OCR. Requiring the second name straight after the
+# first made both invisible (גרב merged into גרר; שרפ was never listed). Swept
+# over both text layers and the DocAI stream: the widening adds exactly those
+# two headings and changes no existing match (item 0GF).
 HEADING = re.compile(
     rf"^[^\u05d0-\u05ea]*ה(?P<first>{_NAME_ALT})"
-    rf"(?P<rest>(?:\s+ו?ה(?:{_NAME_ALT}|{_DOUBLED_ALT})){{1,4}})"
+    rf"\s*\.?(?P<rest>(?:\s+ו?ה(?:{_NAME_ALT}|{_DOUBLED_ALT})){{1,4}})"
     rf"(?P<qual>\s+(?:{_QUAL_ALT}))?\s*[.,]"
 )
 NAME_IN_REST = re.compile(rf"ו?ה({_NAME_ALT}|{_DOUBLED_ALT})")
