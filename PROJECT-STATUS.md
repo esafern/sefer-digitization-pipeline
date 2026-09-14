@@ -128,6 +128,31 @@ applying it to the corpus remain two separate, deliberate steps.
     word 38. Proposed: the note says which of the three the row is, and for a
     word outside a quotation says the Bible's spelling is no reason for theirs.
 
+    **FIXED 2026-09-14 (reviewer: "yes do both").** `vavYodNote()` in app.js
+    reads the row's verse verdict: inside a matched quotation it keeps the
+    Tanakh-spelling caution; `not_in_quotation`, `uncorroborated` and no
+    citation each say so, and that the page decides. Checked in a browser on
+    w81 (no citation follows), entry 1 w20 (inside a quotation) and entry 21
+    w61 (not in the quotation).
+
+    **AND THE DOUBLED-TOKEN FIX `0GG` RECORDED, FIXED THE SAME TURN.**
+    `build_root_corpus.drop_doubled_tokens()` keeps one token where DocAI
+    returned the same text twice over the same ink (overlap >= 0.8 of the
+    smaller box; the 18 real doubles overlap 0.87-1.0, p87's second-row words
+    0.72-0.74 and survive; two different words are never touched). 25 tokens
+    dropped: the 18 doubled words and six doubled numerals and marks (`23 23`,
+    `18 18`, `26 26`, `27 27`, `37 37`, `" "`), each checked adjacent to its twin
+    in the old text. 20 entries changed and nothing else; consecutive doubled
+    words 43 -> 25. Rebuilt downstream (ledger empty): alignment 0 page or trust
+    changes, word ids reseeded and verified, baseline 41,873 words, disputes
+    2,078 -> 2,064, queue 1,954 anchored (0 duplicate keys, 0 wrong-page rows,
+    318/318 entries 200), heading concerns still 3. Against the reviewed
+    entries: words 0.9507 -> 0.9509, precision 0.9864 -> 0.9868, coverage
+    unchanged. The five different-text pairs (two readings of one stretch of
+    ink) are still both in the text. Test:
+    `test_a_word_docai_returned_twice_over_the_same_ink_is_kept_once`, failing
+    with the bar lowered to 0.7.
+
 0GJ. **[2026-09-14, reviewer: "you have the titles as the first word - but should
     be the first three - the shoresh. and test - any time those three words are
     not the name of three letters, we have a concern"] THE WHOLE ROOT IS THE

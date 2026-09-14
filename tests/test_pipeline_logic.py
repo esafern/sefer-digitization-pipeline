@@ -9876,3 +9876,23 @@ def test_a_heading_word_that_is_not_a_letter_name_is_a_concern():
     assert len(c) == 1 and "גימל" in c[0], c
     assert heading_concerns("האלף והמם והכלב .", "אמ")                  # not names at all
     assert any("root" in x for x in heading_concerns("האלף והגימל והפא .", "אגד"))
+
+
+def test_a_word_docai_returned_twice_over_the_same_ink_is_kept_once():
+    """Item 0GG/0GK. DocAI sometimes returns one word twice over one piece of ink,
+    and both copies went into the text (`אזוב אזוב`, p68). Kept once - but only
+    that: p87's second-row tokens are real words boxed onto the line above
+    (overlap 0.74 with their namesakes) and must survive, and two DIFFERENT words
+    over one stretch of ink are two readings, not a duplicate."""
+    import build_root_corpus as brc
+
+    def tok(text, x1, y1, w=0.05, h=0.02):
+        return {"text": text, "x1": x1, "y1": y1, "x2": x1 + w, "y2": y1 + h}
+    kept, dropped = brc.drop_doubled_tokens([
+        tok("אגדת", 0.60, 0.64), tok("אזוב", 0.505, 0.6441), tok("אזוב", 0.506, 0.6429),
+        tok("בלשון", 0.40, 0.64)])
+    assert [t["text"] for t in kept] == ["אגדת", "אזוב", "בלשון"] and len(dropped) == 1
+    row_one, row_two = tok("אמר", 0.561, 0.6425, 0.047, 0.023), tok("אמר", 0.561, 0.6485, 0.054, 0.0345)
+    assert brc._overlap_frac(row_one, row_two) < brc.DUP_OVERLAP
+    assert len(brc.drop_doubled_tokens([row_one, row_two])[0]) == 2
+    assert len(brc.drop_doubled_tokens([tok("אי", 0.5, 0.57), tok("אין", 0.5, 0.57)])[0]) == 2

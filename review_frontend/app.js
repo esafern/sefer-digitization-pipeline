@@ -3754,13 +3754,37 @@ async function openPunctuationPanel(klalId, p) {
 // cannot go stale the way the hardcoded 51/51 and 198/198 did (item 0GC:
 // "just about every note says both readings are real Hebrew words - but that
 // is not always true").
+// THE VAV/YOD NOTE SAYS WHETHER THE WORD IS QUOTED (item 0GK; reviewer on entry 1
+// w81: "the pasuk is written chaser but the discussion repeats the word maleh").
+// The Tanakh-spelling caution holds only inside a quotation; it was shown on all
+// 684 such rows, 258 of them not known to be in one - w81 is the author's own
+// repetition of the phrase, printed maleh, where the Bible's spelling is no
+// reason for theirs. From the row's verse verdict (adjudicate_against_verse).
+function vavYodNote(w) {
+  const lead = 'The same word spelled with or without a vav/yod.';
+  const v = w && w.verse ? w.verse.verdict : null;
+  if (['OURS', 'THEIRS', 'both', 'neither'].includes(v)) {
+    return `${lead} The word is inside a quotation of the cited verse, and their quotations come from a pointed Tanakh, so their spelling here may be the Bible's rather than this page's.`;
+  }
+  if (v === 'not_in_quotation') {
+    return `${lead} The word is not inside the cited verse's quotation - most likely it is the author's own text - so the Bible's spelling is no reason for either reading. The page decides.`;
+  }
+  if (v === 'uncorroborated') {
+    return `${lead} Whether the word is quoted is not established: the quotation near it could not be matched to its cited verse. The page decides.`;
+  }
+  if (w) {
+    return `${lead} No citation follows this word, so nothing marks it as quoted, and the Bible's spelling is no reason for either reading. The page decides.`;
+  }
+  return `${lead} Inside a quotation their spelling may be the Bible's rather than this page's.`;
+}
+
 function witnessTierNote(wOrTier) {
   const tier = typeof wOrTier === 'string' ? wOrTier : (wOrTier && wOrTier.tier);
   const notes = {
     A_nun_gimel: 'The two readings differ only by nun/gimel.',
     A_ours_not_a_word: 'Our reading is not in the lexicon; theirs is.',
     B_ours_unattested: 'Our reading is not in the lexicon, and theirs is not clearly a word either.',
-    C_spelling_vav_yod: 'The same word spelled with or without a vav/yod. Their verse quotations come from a pointed Tanakh, so inside a quotation their spelling may be the Bible\u2019s rather than this page\u2019s.',
+    C_spelling_vav_yod: vavYodNote(typeof wOrTier === 'string' ? null : wOrTier),
     C_footnote_marker: 'Our word is theirs plus one or two trailing letters - usually a superscript footnote marker (a numeral, or a small raised mark) printed against the word and read by DocAI as part of it. Checked by eye on 2026-09-13: about 59 of 73 such rows show the marker; the rest are real readings. Look for the raised mark after the word.',
     C_markup: 'Same letters - the difference is their punctuation or apostrophe markup, not a reading.',
     C_theirs_unattested: 'Our reading is in the lexicon; theirs is not.',

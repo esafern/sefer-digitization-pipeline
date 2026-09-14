@@ -371,6 +371,40 @@ def classify(lines, rule_y=None, stats=None):
     return out
 
 
+# DOUBLED TOKENS. DocAI sometimes returns one word twice over the same ink - two
+# tokens, same text, boxes overlapping 0.87-1.0 of the smaller - and both went
+# into the text: `אזוב אזוב` (p68), `היאר היאר` (p103), `אם` and `במבצרים`
+# (p121), and on p69 a third `האח` beside the page's own `האח האח`. 18 such
+# pairs sat in the corpus on pages 58-151 (item 0GG). One is kept. The bar is
+# what separates them from p87's second row, whose tokens are REAL words boxed
+# onto the line above and overlap their namesakes at 0.72-0.74 (the merged-row
+# cut handles those); two DIFFERENT words over one stretch of ink - two readings
+# (`אי`/`אין`, p74) - are never touched here, because choosing between them is
+# a reading, not a duplicate.
+DUP_OVERLAP = 0.8
+
+
+def _overlap_frac(a, b):
+    w = min(a["x2"], b["x2"]) - max(a["x1"], b["x1"])
+    h = min(a["y2"], b["y2"]) - max(a["y1"], b["y1"])
+    if w <= 0 or h <= 0:
+        return 0.0
+    area = lambda t: (t["x2"] - t["x1"]) * (t["y2"] - t["y1"])
+    return w * h / min(area(a), area(b))
+
+
+def drop_doubled_tokens(tokens):
+    """(kept, dropped): a token is dropped when an earlier one has the same text
+    and a box overlapping it by DUP_OVERLAP or more of the smaller."""
+    kept, dropped = [], []
+    for t in tokens:
+        if any(k["text"] == t["text"] and _overlap_frac(k, t) >= DUP_OVERLAP for k in kept):
+            dropped.append(t)
+        else:
+            kept.append(t)
+    return kept, dropped
+
+
 def build(pages):
     """Body lines of every page in order, as (page, line_text, tokens) triples.
 
@@ -380,7 +414,7 @@ def build(pages):
     regions from marker positions) has nothing to work from here (item 0EQ).""" 
     stream = []
     stats = {"body": 0, "head": 0, "apparatus": 0, "watermark": 0,
-             "cut_rule": 0, "cut_gap": 0, "cut_none": 0}
+             "cut_rule": 0, "cut_gap": 0, "cut_none": 0, "doubled": 0}
     # The page IMAGE, for the printed rule: book.json's scan_pdf, the PDF the
     # tokens' coordinates belong to.
     doc = fitz.open(cio.SCAN_PDF_PATH) if os.path.exists(cio.SCAN_PDF_PATH) else None
@@ -392,6 +426,8 @@ def build(pages):
             tokens = json.load(fh)
         if not tokens:
             continue
+        tokens, doubled = drop_doubled_tokens(tokens)
+        stats["doubled"] += len(doubled)
         rule_y = find_rule_y(doc, p)
         for label, _y, _h, text, ln in classify(page_lines(tokens), rule_y=rule_y,
                                                 stats=stats):
@@ -532,6 +568,8 @@ def main():
           f"{stats['apparatus']} apparatus, {stats['watermark']} watermark")
     print(f"  apparatus cut   {stats['cut_rule']} pages by printed rule, "
           f"{stats['cut_gap']} by gap + marker, {stats['cut_none']} none")
+    print(f"  doubled tokens  {stats['doubled']} dropped (DocAI returned one word twice "
+          f"over the same ink)")
     print(f"  entries         {len(entries)}")
 
     if rec_log:
