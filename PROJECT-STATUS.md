@@ -156,7 +156,11 @@ applying it to the corpus remain two separate, deliberate steps.
     * **The page backs OUR reading against their correction - 3 (data issues in
       THEIR text, for the Sefaria editor):**
       <http://127.0.0.1:8421/entry/58/word/11> prints `הוא`, their correction
-      `והוא` adds a vav; <http://127.0.0.1:8421/entry/69/word/23> prints `גמרה`
+      `והוא` adds a vav (their raw OCR there is `וצא` - 2 of 3 letters wrong -
+      and their footnote anchor for <https://www.sefaria.org/Proverbs.1.26>
+      sits on that very token, where the page has its superscript 19; it looks
+      as if the corrector fixed `צא` and kept the OCR's leading vav - inferred,
+      not shown); <http://127.0.0.1:8421/entry/69/word/23> prints `גמרה`
       (both OCRs agree), their `גרמה` reorders the printed letters - an
       emendation, against their own fidelity standard;
       <http://127.0.0.1:8421/entry/80/word/389> prints `וזה`, their `ווזה` has an
