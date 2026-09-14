@@ -30,9 +30,12 @@ errors: a printing may legitimately differ from the Masoretic text, and a word
 absent from the verse may be Ibn Janah's own comment inside the quotation. Every
 row carries the verse link so a human decides in one glance.
 
-Usage:
+Usage (the command that writes the files sent to Sefaria, item 0FM):
   SEFER_CORPUS_ROOT=~/work/hashorashim python3 tools/validate_quotations.py \
-      --footnotes ~/work/hashorashim/witness_footnotes.json --out /tmp/suspects.json
+      --footnotes ~/work/hashorashim/witness_footnotes.json --find-better \
+      --review ~/work/hashorashim/citation_review.json \
+      --csv ~/work/hashorashim/citation_corrections.csv \
+      --out ~/work/hashorashim/quotation_suspects.json
 """
 
 import argparse
@@ -57,6 +60,40 @@ DIVINE = {"ה", "יי", "ייי", "יהוה", "אדני"}
 
 def matches(word, vwords):
     return word in vwords or (word in DIVINE and vwords & DIVINE)
+
+
+def ends_in_cited(flat, floor, end, vwords, other=None):
+    """Do the two words right before the marker belong to the cited verse, and
+    not also to `other` - the verse the run was found to match instead?
+
+    Then the note is right however little of the run matched: the window grew
+    back into an EARLIER quotation and found that one's verse. Read by eye on
+    2026-09-14 (item 0FM), 9 of the 158 "misplaced" citations were this -
+    `הנחמים באלים` (Isaiah 57:5) behind `ותחפרו מהגנות אשר בחרתם` (Isaiah 1:29),
+    `אחזה בסנסניו` (Song of Songs 7:9) behind 2:13. The words must single the
+    cited verse out: a formula such as `נאם ה'` stands in Jeremiah 31:31 and
+    31:32 alike, and without `other` it passed the note for 31:31 as right when
+    the quotation is 31:32's."""
+    tail = [w for w, _t in flat[max(floor, end - 2):end]]
+    if len(tail) != 2 or not all(matches(w, vwords) for w in tail):
+        return False
+    return other is None or not all(matches(w, other) for w in tail)
+
+
+def citation_kind(cited, proposed, same_shift):
+    """What a misplaced citation IS, for the CSV's `kind` column.
+
+    `same_shift` is how many misplaced citations share this one's book, chapter
+    and verse offset. A reference one verse off in a chapter where that happens
+    repeatedly is the EDITION'S numbering, not a misprint: 17 in Jeremiah 31,
+    8 in I Samuel 24, 7 in Exodus 20, 4 in I Chronicles 12. The printed note is
+    right by its own numbering; the proposed ref is still the one a Sefaria link
+    needs. Read by eye on 2026-09-14 (item 0FM): the CSV had labelled 37 such
+    rows as a one-letter confusion (`א->ב`), which adjacent numerals are not."""
+    (cb, c1, v1), (_pb, c2, v2) = cited, proposed
+    if c1 == c2 and abs(v2 - v1) == 1:
+        return "edition numbering" if same_shift > 1 else "off by one"
+    return "misprint"
 
 
 def suspects_in_run(flat, start, end, vwords):
@@ -100,6 +137,8 @@ def main():
     ap.add_argument("--csv", help="write the misplaced citations as CSV, the form "
                                   "a maintainer can triage in a spreadsheet and "
                                   "join back to their own records")
+    ap.add_argument("--review", help="citation_review.json: a verdict per CSV row read by "
+                                     "eye, applied when the CSV is written (item 0FM)")
     ap.add_argument("--out")
     ap.add_argument("--show", type=int, default=15)
     args = ap.parse_args()
@@ -182,7 +221,10 @@ def main():
                                 best = (hitn, ci, vi)
                     span_end = VERSE_SPAN.get((book, ch, v), v)
                     in_range = best and best[1] == ch and v <= best[2] <= (span_end or v)
-                    if (best and best[0] >= args.min_anchor + 1
+                    if best and ends_in_cited(flat, floor, end, vw,
+                                              verse_words(chapters[best[1] - 1][best[2] - 1])):
+                        stat["quotation ends in the cited verse"] += 1
+                    elif (best and best[0] >= args.min_anchor + 1
                             and (best[1], best[2]) != (ch, v) and not in_range):
                         stat["citation points elsewhere"] += 1
                         misplaced.append({
@@ -238,21 +280,49 @@ def main():
             d = [(x, y) for x, y in zip(a, b) if x != y]
             return f"{d[0][0]}->{d[0][1]}" if len(d) == 1 else ""
         import csv as _csv
+        ref3 = lambda s: (s.rsplit(" ", 1)[0], *(int(x) for x in s.rsplit(" ", 1)[1].split(":")))
+        shifts = collections.Counter()
+        for r in misplaced:
+            (b, c1, v1), (_b, c2, v2) = ref3(r["cited"]), ref3(r["actually"])
+            if c1 == c2:
+                shifts[(b, c1, v2 - v1)] += 1
+        review = {}
+        if args.review:
+            with open(os.path.expanduser(args.review), encoding="utf-8") as fh:
+                for v in json.load(fh)["rows"]:
+                    review[(v["headword"], v["note_as_printed"], v["cited_ref"], v["quotation"])] = v
+        kinds, dropped = collections.Counter(), 0
         with open(os.path.expanduser(args.csv), "w", encoding="utf-8", newline="") as fh:
             w = _csv.writer(fh)
             w.writerow(["headword", "note_as_printed", "cited_ref", "proposed_ref",
-                        "matching_words", "verse_delta", "single_letter_confusion",
-                        "quotation", "sefaria_url"])
+                        "matching_words", "verse_delta", "kind", "single_letter_confusion",
+                        "checked_by_eye", "why", "quotation", "sefaria_url"])
             for r in sorted(misplaced, key=lambda x: -x["matches"]):
-                cb, ccv = r["cited"].rsplit(" ", 1)
-                ab, acv = r["actually"].rsplit(" ", 1)
-                c1, v1 = (int(x) for x in ccv.split(":"))
-                c2, v2 = (int(x) for x in acv.split(":"))
+                (cb, c1, v1), (ab, c2, v2) = ref3(r["cited"]), ref3(r["actually"])
                 delta = (v2 - v1) if c1 == c2 else ""
-                conf = one_letter(heb(v1), heb(v2)) if c1 == c2 else one_letter(heb(c1), heb(c2))
-                w.writerow([r["root"], r["note"], r["cited"], r["actually"],
-                            r["matches"], delta, conf, r["quotation"], r["sefaria"]])
-        print(f"  wrote {args.csv}")
+                kind = citation_kind((cb, c1, v1), (ab, c2, v2),
+                                     shifts[(cb, c1, v2 - v1)] if c1 == c2 else 0)
+                conf = "" if kind == "edition numbering" else (
+                    one_letter(heb(v1), heb(v2)) if c1 == c2 else one_letter(heb(c1), heb(c2)))
+                proposed, url = r["actually"], r["sefaria"]
+                v = review.get((r["root"], r["note"], r["cited"], r["quotation"]))
+                if v and v["verdict"] == "not an error":
+                    dropped += 1
+                    continue
+                if v:
+                    kind = v["verdict"]
+                    if v.get("proposed_ref"):
+                        proposed = v["proposed_ref"]
+                        pb, pcv = proposed.rsplit(" ", 1)
+                        url = "https://www.sefaria.org/{}.{}".format(
+                            pb.replace(" ", "_"), pcv.replace(":", "."))
+                        conf = ""
+                kinds[kind] += 1
+                w.writerow([r["root"], r["note"], r["cited"], proposed, r["matches"], delta,
+                            kind, conf, "yes" if v else "no", (v or {}).get("why", ""),
+                            r["quotation"], url])
+        print(f"  wrote {args.csv}: {sum(kinds.values())} rows {dict(kinds)}; "
+              f"{dropped} left out as read by eye to be no error")
 
     if args.out:
         out = os.path.expanduser(args.out)

@@ -2347,7 +2347,11 @@ applying it to the corpus remain two separate, deliberate steps.
     (Isaiah 1:29) and proposed 1:29. So the straddle fix above is not
     complete, and `citation_corrections.csv` (158 rows) needs an eye pass
     before it is relied on. Whether the draft to the Sefaria editor that
-    attaches the file was sent is not recorded here.
+    attaches the file was sent is not recorded here. (Reviewer, the same day:
+    it was not.) The first version of this annotation named that draft by its
+    FILE NAME, and the corpus-root drafts are named after their recipients, so
+    the editor's name was in this public file. The commit was amended before
+    any push. Refer to the drafts by recipient role, never by file name.
     **CORRECTION, same day (reviewer: "cit corr - you checked the first 6
     rows?").** In chat I called those six "the first six rows" of
     `citation_corrections.csv`. They are not. They are the first six of the
@@ -2368,6 +2372,36 @@ applying it to the corpus remain two separate, deliberate steps.
       `א->ב` or `ב->ג`. Adjacent numerals are not a visual OCR confusion. The
       label is filled in whenever the two numerals differ by one letter, and
       it presents a numbering difference as a misprint. Not fixed.
+    **FIXED 2026-09-14 (reviewer: "not sent. do 1").** Every one of the 158
+    rows was read against Sefaria's verse text. Verdicts:
+    * 92 misprints;
+    * 36 edition numbering (Jeremiah 31 ×17, I Samuel 24 ×8, Exodus 20 ×7,
+      I Chronicles 12 ×4);
+    * 16 off by one in a single case, where the data cannot tell a misprint
+      from a numbering difference;
+    * 12 not an error. Nine are windows that reached an earlier quotation.
+      The other three: #97, where the note is for `וישגם` (Genesis 44:6);
+      #140, for `פי ה'` (Exodus 17:1); #152, where Ibn Janah says "about
+      Babylon", which is Jeremiah 50:44;
+    * 1 wrong proposal: `(משלי טו, ג)` is Proverbs 16:3, not 3:7;
+    * 1 unclear.
+    They are recorded in `citation_review.json` in the corpus root.
+    `validate_quotations.py` now:
+    * drops a candidate whose last two quoted words belong to the cited
+      verse and not to the verse the run matched (`ends_in_cited`);
+    * labels a one-verse offset "edition numbering" when its chapter has it
+      repeatedly (`citation_kind`), and clears the letter label for those;
+    * applies the verdicts with `--review`, adding `kind`,
+      `checked_by_eye` and `why`.
+    **Its first version dropped a real row.** The last two words of the
+    Jeremiah 31:31 note, `נאם ה'`, are a formula that stands in 31:31 and
+    31:32 alike, so the words must single out the cited verse. Before any
+    change, the regenerated file was compared with the committed one: the
+    same 158 rows in the same order. The new CSV has 146 rows: 92 misprint,
+    36 edition numbering, 16 off by one, 1 wrong proposal (corrected to
+    Proverbs 16:3), 1 unclear. Every row reads `checked_by_eye = yes`.
+    Exactly the 12 "not an error" rows are gone: 8 by the rule, 4 by
+    verdict. Test: `test_a_citation_is_right_when_the_words_before_it_end_in_its_verse`.
 
 0FH. **[2026-09-10] THE 100 REVIEWED ENTRIES ARRIVED. OUR READ IS 95.6% OF
     CHARACTERS AGAINST THEM, AND THE SHORTFALL IS MOSTLY STRUCTURAL.**

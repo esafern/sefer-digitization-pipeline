@@ -9829,6 +9829,33 @@ def test_a_reference_numeral_is_a_standalone_arabic_number():
     assert brc.FOOTNOTE_REF is cio.FOOTNOTE_REF
 
 
+def test_a_citation_is_right_when_the_words_before_it_end_in_its_verse():
+    """Item 0FM, read by eye 2026-09-14. `(שם נז, ה)` follows `ותחפרו מהגנות אשר
+    בחרתם וכמהו אצלי הנחמים באלים`: the run matches Isaiah 1:29 best, but the two
+    words before the note are Isaiah 57:5's, and that is the verse cited. And a
+    reference one verse off is the edition's numbering where its chapter does it
+    repeatedly, not a one-letter misprint."""
+    from validate_quotations import ends_in_cited, citation_kind
+
+    flat = [(w, i) for i, w in enumerate("ותחפרו מהגנות אשר בחרתם וכמהו אצלי הנחמים באלים".split())]
+    isaiah_57_5 = {"הנחמים", "באלים", "תחת", "כל", "עצ", "רענן"}
+    isaiah_1_29 = {"כי", "יבשו", "מאילים", "ותחפרו", "מהגנות", "אשר", "בחרתם"}
+    assert ends_in_cited(flat, 0, len(flat), isaiah_57_5)
+    assert not ends_in_cited(flat, 0, len(flat), isaiah_1_29)
+    assert not ends_in_cited(flat, 0, len(flat), {"באלים"})      # one word is not enough
+    assert ends_in_cited(flat, 0, len(flat), isaiah_57_5, isaiah_1_29)
+    # a formula in both verses singles neither out: `נאם ה'` is in Jeremiah
+    # 31:31 and 31:32, and the quotation before it is 31:32's
+    jer = [(w, i) for i, w in enumerate("הפרו את בריתי ואנכי בעלתי בם נאם ה".split())]
+    jer_31_31 = {"הנה", "ימים", "באים", "נאם", "יהוה", "וכרתי", "ברית", "חדשה"}
+    jer_31_32 = {"לא", "כברית", "הפרו", "את", "בריתי", "ואנכי", "בעלתי", "בם", "נאם", "יהוה"}
+    assert not ends_in_cited(jer, 0, len(jer), jer_31_31, jer_31_32)
+    assert citation_kind(("Jeremiah", 31, 31), ("Jeremiah", 31, 32), 17) == "edition numbering"
+    assert citation_kind(("Job", 5, 7), ("Job", 5, 6), 1) == "off by one"
+    assert citation_kind(("Leviticus", 18, 2), ("Leviticus", 18, 20), 1) == "misprint"
+    assert citation_kind(("Leviticus", 20, 5), ("Leviticus", 2, 5), 0) == "misprint"
+
+
 def test_a_stray_mark_is_numbered_only_where_the_image_and_the_sequence_allow():
     """Item 0GO. On 40 marks read by eye, accepting where the vision model and
     the page's numbering agree, or where the numbering has no number and the
