@@ -101,6 +101,78 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0GH. **[2026-09-14, reviewer: "how many corrections did Sefaria make, how many
+    where our OCR differs from theirs, all the ones where we argue with their
+    correction, the value we add, and how much the better scan helped"]
+    MEASURED ON THEIR 100 REVIEWED ENTRIES: THEY MADE 90 LETTER CORRECTIONS;
+    OUR DISAGREEMENT WITH THEIR OCR SITS ON 89 OF THEM, AND OUR TEXT ALREADY
+    HOLDS 78. THREE OF THEIR CORRECTIONS DEPART FROM THE PRINTED PAGE.**
+
+    `tools/measure_correction_overlap.py` (new): their raw OCR (T), their
+    reviewed text (C), ours (O); every T->C difference classified, and located
+    in O through the words where O and T agree. Letters only (points deleted,
+    punctuation separating - the review queue's normalisation); a
+    punctuation-only change is not counted. The `אלה a`/`אלה b` halves are
+    joined, so 99 roots = the 100 entries. Test:
+    `test_the_correction_overlap_tells_had_shared_and_third_apart`.
+
+    **Their edits: 114** - 90 letter corrections, 15 citations added inline, 7
+    word-division changes, 2 bracketed insertions. (`0FK` counted 107
+    corrections on a different tokenization; this is the count on the queue's.)
+
+    Three corpora, the SCAN the only difference between the last two -
+    `bitonal` is the Google scan's tokens through today's pipeline, built in a
+    scratch corpus root:
+
+                                       pre-NLI   bitonal    NLI
+                                      (1caef3f)   today    today
+        words vs their corrected        0.8939   0.9170   0.9507
+        chars                           0.9561   0.9774   0.9871
+        precision                       0.9225   0.9703   0.9864
+        nun/gimel errors                    88       88        6
+        of their 90 corrections, ours:
+          already reads the correction      72       72       78
+          reads their original error         1        1        1
+          reads a third thing               16       17       11
+        ours differs from their OCR,
+          reviewed entries (positions)    1139     1123      703
+          whole slice (<=4-word, queue)   3180     3198     2078
+        ours differs from their corrected 1069     1053      628
+
+    **The value, stated as what it is.** A reviewer who looked only at the 703
+    places our OCR disagrees with theirs - 5% of the 13,735 words - would reach
+    89 of the 90 corrections their reviewer found by reading everything, and
+    for 78 of them our reading IS the fix. 13% of those 703 are their errors;
+    the rest are ours or spelling/markup. The better scan kept that recall and
+    cut the places to look from 1,123 to 703 (-37%), and our pre-filled fixes
+    from 72 to 78. It does NOT make our text the better base: ours still differs
+    from their corrected text at 628 positions, their raw OCR at 114 edits
+    (`0EZ`'s conclusion stands). Extrapolation, labelled as one: the 214
+    unreviewed roots of the slice carry 1,432 such positions; at the reviewed
+    rate, ~180 would be their errors. The reviewed entries are all in א.
+
+    **All 12 places our text disagrees with their correction, read off the NLI
+    scan** (300 dpi crops of the native 150; the letters at issue are clear):
+    * **The page backs OUR reading against their correction - 3 (data issues in
+      THEIR text, for the Sefaria editor):**
+      <http://127.0.0.1:8421/entry/58/word/11> prints `הוא`, their correction
+      `והוא` adds a vav; <http://127.0.0.1:8421/entry/69/word/23> prints `גמרה`
+      (both OCRs agree), their `גרמה` reorders the printed letters - an
+      emendation, against their own fidelity standard;
+      <http://127.0.0.1:8421/entry/80/word/389> prints `וזה`, their `ווזה` has an
+      extra vav.
+    * **Our footnote marker glued to the right word - 5**, their correction
+      right: entry 39 w120, 42 w36, 83 w267, 88 w58, 90 w53.
+    * **Our misreads - 4**, their correction right: 39 w250 `אד'`, 39 w305
+      `מנד'`, 56 w209 `ג'זאיר`, 88 w51 `כל'` (the geresh read as a yod by both
+      OCRs).
+    `0FB`'s 19-of-34 "ink backs OUR reading" came from the vision adjudicator on
+    the old corpus and a different sample; this is a direct read of every row.
+
+    **Paused for this:** the doubled-token fix `0GG` records. Its sweep of Yad
+    Malachi's DocAI pages found 60 same-text and 241 different-text overlapping
+    token pairs; whether any reached that book's reviewed corpus is NOT measured.
+
 0GG. **[2026-09-14, reviewer: "go" on the heading problems] THE FOUR LOST
     HEADINGS ARE BACK - `אמר`, `בוצ`, `במ`, `גרב`. TWO WERE LINE MERGES AND TWO
     WERE THE HEADING PATTERN, AND EVERY CAUSE WAS READ OFF THE INK FIRST.**

@@ -9775,3 +9775,25 @@ def test_a_heading_may_print_a_period_after_its_first_letter_name():
     # the widening does not make prose a heading: names must follow, and end
     assert match_heading("האלף. ואחר כך אמר") is None
     assert match_heading("הגימל. והרש והבית ובגרב ובחרסי") is None
+
+
+def test_the_correction_overlap_tells_had_shared_and_third_apart():
+    """Item 0GH. At each place a human corrected the witness, what does OUR text
+    read? HAD (their correction), SHARED (their original error) and THIRD
+    (neither) are three different claims about us, and a citation they added is
+    not a correction at all. One of each, so a classifier that collapses any two
+    fails here (Lesson 25)."""
+    import corpus_io as cio
+    import measure_correction_overlap as mco
+    ours = [{"klal_id": 1, "gematria": "אב",
+             "clean_text": "האלף והבית . כמו שנאמר פרי הנחל ובלשון נזאיר ועוד סדה"}]
+    their_ocr = "האלף והבית . כמו שנאמר נורי הנחל ובלשון נזאיר ועוד שרה"
+    corrected = 'האלף והבית . כמו שנאמר פרי הנחל (שה"ש ו, יא) ובלשון גזאיר ועוד שדה'
+    rows, _st = mco.compare(mco.bwd.root_groups(ours), {"אב": corrected},
+                            {cio.root_key("אב"): their_ocr})
+    got = {(r["kind"], r["status"], r["their_corrected"]) for r in rows}
+    assert ("reading", "HAD", "פרי") in got, got
+    assert ("reading", "SHARED", "גזאיר") in got, got
+    assert ("reading", "THIRD", "שדה") in got, got
+    assert any(r["kind"] == "citation" for r in rows), got
+    assert mco.join_homograph_halves({"אלה a": "א ב", "אלה b": "ג ד"}) == {"אלה": "א ב ג ד"}
