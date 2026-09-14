@@ -681,6 +681,18 @@ def root_key(text):
     return t.translate(FINALS)
 
 
+# A BOOK'S REFERENCE NUMERALS. Sefer HaShorashim numbers with Hebrew letters,
+# so a standalone Arabic numeral in its text is a footnote reference printed
+# small and raised (tools/build_root_corpus.py footnote_refs, item 0EX). One copy,
+# here, since the server marks them too (item 0GO).
+FOOTNOTE_REF = re.compile(r"^[0-9]{1,3}$")
+
+
+def footnote_ref_positions(words):
+    """Word indices of the reference numerals in a word list."""
+    return [i for i, w in enumerate(words) if FOOTNOTE_REF.match(w)]
+
+
 # The five names kept as module attributes for the existing call sites, resolved
 # through __getattr__ below so they follow the corpus root rather than freezing
 # at import (the same reason PART1_PATH and friends are lazy).

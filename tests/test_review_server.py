@@ -472,6 +472,54 @@ def test_a_root_is_shown_letter_period_letter_ending_in_its_final_form(fixture_s
     assert page.test_errors == []
 
 
+def test_every_index_title_starts_in_the_same_place_however_wide_its_markers(fixture_server, page):
+    """Item 0GO (reviewer 2026-09-14: "some whitespace after the shoresh in the
+    index pane so the titles are all ... right justified"). A title starts where
+    its row's number and root end. A root with periods and a three-digit number
+    are wider than the columns' fixed minimums were, so titles started wherever
+    their own markers ended. One row is made wider than the rest here; after the
+    columns are measured again, every title's start (its right edge) must line
+    up with the others."""
+    _open_dashboard(page, fixture_server, klal_id=3)
+    got = page.evaluate("""() => {
+        const rows = [...document.querySelectorAll('.nav-item')]
+            .filter(el => el.offsetParent !== null && el.querySelector('.nheb'));
+        rows[0].querySelector('.nid').textContent = '999';
+        rows[0].querySelector('.nheb').textContent = 'א.ב.ג.ד';
+        sizeMarkerColumn();
+        const rights = rows.map(el => el.querySelector('.ntitle').getBoundingClientRect().right);
+        return [Math.max(...rights) - Math.min(...rights), rows.length];
+    }""")
+    spread, n = got
+    assert n > 1 and spread <= 1, got
+    assert page.test_errors == []
+
+
+def test_a_reference_numeral_is_drawn_raised_and_stays_a_word(fixture_server, page):
+    """Item 0GO (reviewer 2026-09-14: "I see bare numbers in the text"). The
+    served positions get the raised style and an explanation; the word itself,
+    and its index, are untouched. A book whose build records none gets none."""
+    _open_dashboard(page, fixture_server, klal_id=3)
+    got = page.evaluate("""() => {
+        const make = () => {
+            const body = document.createElement('div');
+            body.className = 'klal-body';
+            ['שנאמר', '11', 'כבר', '[', '3', 'א'].forEach((w, i) => {
+                const s = document.createElement('span');
+                s.dataset.wordIndex = i; s.textContent = w; body.appendChild(s);
+            });
+            return body;
+        };
+        const a = make(); markFootnoteRefs(a, {footnote_refs: [1, 4]});
+        const b = make(); markFootnoteRefs(b, {});
+        return [[...a.children].map(s => s.classList.contains('fn-ref')),
+                a.children[1].textContent, a.children[1].title.includes('11'),
+                b.querySelectorAll('.fn-ref').length];
+    }""")
+    assert got == [[False, True, False, False, True, False], "11", True, 0], got
+    assert page.test_errors == []
+
+
 def test_clicking_a_word_puts_it_in_the_address_bar(fixture_server, page):
     """The address bar has to be copyable as-is, or the deep links are write-only.
     replaceState, not pushState: a reviewer moving through a klal must not have to

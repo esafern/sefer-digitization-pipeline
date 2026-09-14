@@ -177,7 +177,7 @@ def gap_cut_index(rows):
     return None
 
 
-FOOTNOTE_REF = re.compile(r"^[0-9]{1,3}$")
+FOOTNOTE_REF = cio.FOOTNOTE_REF    # one copy, in corpus_io (item 0GO)
 
 
 def footnote_refs(text):

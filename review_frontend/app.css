@@ -694,7 +694,8 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
    reviewer scans this column for, and it should read as the same object in both
    places. */
 .nav-item .nid {
-  color: var(--accent); font-weight: 700; min-width: 24px;
+  color: var(--accent); font-weight: 700;
+  min-width: var(--nid-w, 24px);   /* the widest number, see sizeMarkerColumn() */
   font-family: var(--font-marker); font-size: var(--nav-id-size);
   font-variant-numeric: tabular-nums;
 }
@@ -708,7 +709,9 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
 .nav-item .nid { flex-shrink: 0; }
 .nav-item .nheb {
   flex-shrink: 0;
-  min-width: 30px;
+  /* The widest marker in the list, so every title starts in the same place
+     (item 0GO); see sizeMarkerColumn() in app.js. */
+  min-width: var(--nheb-w, 30px);
   /* The one line this element was missing. Without it the Hebrew marker
      inherited the body serif while its twin in the text pane took
      --font-marker - the same numeral in two faces, one pane apart. */
@@ -722,7 +725,9 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
 }
 /* colour stays softer than the text pane's (this is a list, not a heading in
    its own right) but the FONT is the shared one - see .klal-title. */
-.nav-item .ntitle { flex: 1; min-width: 3.5em; color: var(--ink-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nav-item .ntitle { flex: 1; min-width: 3.5em; color: var(--ink-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }/* REFERENCE NUMERALS (item 0GO): drawn small and raised, as the page prints
+   them. They stay words in the text; see markFootnoteRefs() in app.js. */
+.klal-body .fn-ref { vertical-align: super; font-size: .62em; line-height: 0; color: var(--ink-soft); }
 .nav-item .nflag { color: var(--pending); font-size: 12px; flex-shrink: 0; }
 /* The badge group is `direction: ltr` inside an RTL row, so DOM order is
    left-to-right here: red is written first and therefore sits leftmost, on every

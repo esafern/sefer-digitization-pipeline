@@ -1329,6 +1329,11 @@ def api_klal(klal_id):
         # HaShorashim) - item 0GJ.
         "title_word_start": cio.title_word_run(k.get("title", ""), k.get("clean_text", ""))[0],
         "title_word_count": cio.title_word_run(k.get("title", ""), k.get("clean_text", ""))[1],
+        # Where the book's reference numerals stand, so the text pane can draw
+        # them raised as the page prints them. Recomputed from the words as they
+        # are now, so a ruling that moves words cannot leave them stale; only for
+        # a book whose build records them (item 0GO).
+        "footnote_refs": cio.footnote_ref_positions(words) if "footnote_refs" in k else [],
         # A HEADING RULING ON RECORD, if there is one, and whether it has been
         # promoted into part1.json yet.
         #

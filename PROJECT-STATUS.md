@@ -101,6 +101,85 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0GO. **[2026-09-14, reviewer: "we can afford some whitespace after the shoresh
+    in the index pane so the titles are all left justified. what are we doing
+    with the footnotes? right now I see bare numbers in the text"]**
+    * **Index pane.** A book referred to by root sets its titles flush left, so
+      the column lines up however wide the root is. `body.by-root` is set from
+      `/api/corpus`, and `.by-root .nav-item .ntitle` is aligned left. Yad
+      Malachi is unchanged.
+    * **What happens to the footnotes, as of today.**
+      - The reference numerals stay in `clean_text` as words. Nothing is
+        deleted (`0EX`).
+      - The build records their positions as `footnote_refs`: 2,772 across 307
+        entries in the current build. Until today nothing served that field,
+        so the text pane showed them as full-size numbers.
+      - The notes themselves are mostly citations of the verse a quotation
+        comes from. They are cut out with the apparatus and kept nowhere in
+        our corpus. `0EX` measured that our OCR of the small apparatus type
+        cannot be paired with the references: 0 of 94 pages pair. The agreed
+        split is "their citations, our running text"; Sefaria's 20,450 notes
+        (`witness_footnotes.json`) are used only for the verse checks.
+      - A numeral that DocAI fused into the preceding word as letters leaves
+        no number to find. Those rows are the `C_footnote_marker` tier.
+    * **Now:** the text pane draws the numerals small and raised, as the page
+      prints them, with a tooltip saying what they are. `/api/klal` serves
+      `footnote_refs`, recomputed from the current words so a ruling cannot
+      leave the positions stale, and only for a book whose build records them.
+      The pattern has one copy, `corpus_io.FOOTNOTE_REF`, which the build now
+      uses too.
+    * **Open, for the reviewer and Sefaria:** how the notes appear in the
+      final text. Sefaria's citations could be shown on hover by pairing each
+      entry's numerals with their notes in order; that pairing has not been
+      measured.
+    * **Index, corrected the same day** (reviewer: "I meant right justified").
+      Flush-left titles were the wrong reading and are reverted. A title
+      starts where its row's markers end. A root with periods (`א.ב.ד`) is
+      wider than `.nheb`'s 30px minimum, and a three-digit number is wider
+      than `.nid`'s 24px, so each title started wherever its own markers
+      ended. `sizeMarkerColumn()` now measures the widest number and root in
+      the list and sets both columns to them, as `--nid-w` and `--nheb-w`. It
+      runs again once the marker font has loaded, and applies to both books.
+      Test:
+      `test_every_index_title_starts_in_the_same_place_however_wide_its_markers`.
+    * **Reviewer: "footnotes are integers monotonically increasing so we
+      should auto-identify the ones that scanned as gershayim."** Measured on
+      the build's line stream, pages 58-151:
+      - Numbering restarts at 1 on each page and climbs. Our OCR damages it
+        three ways. A raised numeral is read as a mark: p61 reads `6 ·" 8`
+        where the page has 7. A digit is misread: `8 20 10`, and `32 88 34`.
+        Or the numeral is dropped, or fused into its word.
+      - Prototype: the longest rising run of numerals per page gives the
+        anchors (2,408). A gap is filled only when the count of stray tokens
+        in it equals the count of missing numbers. This identified 187 marks
+        and 84 misread numerals. 654 gap tokens stayed unresolved, 381 of them
+        marks, and 960 missing numbers have no token at all. Of 577
+        standalone marks, 187 were identified.
+      - **On the ink, 16 identified marks sampled across the book: 10 right.**
+        Two had the right spot but the wrong number, because an anchor
+        numeral was itself misread (p73: 5 assigned 4; p89: 17 assigned 16).
+        Two were real abbreviation marks (`אח׳` p98, `ה׳` p128). Two were a
+        second printed sign, a small raised circle that is not a numbered
+        note (p105, p118); it is the mark behind Sefaria's `[ה]רקח`. **Not
+        good enough to label automatically.** A refinement was measured: skip a
+        mark after a word of one or two letters, and fill a gap only between
+        anchors confirmed by a neighbour one away.
+      - **Refined, on a fresh ink sample of 20 from other pages: 15 right.**
+        It identifies 52 marks instead of 187 and skips 5 abbreviation marks.
+        Three misses are numbers off by one (p72: 31 assigned 30; p87: 5
+        assigned 4; p100: 21 or 31). Two are abbreviation marks after
+        three-letter words (`ונו׳` p99, `אומ׳` p100). Across both samples the
+        POSITION is nearly always a raised note; the NUMBER is what fails,
+        because an anchor numeral was itself misread. OCR text alone does not
+        carry enough to number these. Reading each raised mark from the image
+        would be a second signal, and that is put to the reviewer. Nothing
+        identified is written to the corpus.
+    * **Checked live after a PID restart of :8421.** Entry 15 serves
+      `footnote_refs` [16, 28, 53, 57, 93], the page draws 36 raised numerals
+      with no page errors, and the index titles line up flush left. The bare
+      `"` in entry 15 (`אגם מים " מקום`) is footnote 7, read as a gershayim:
+      exactly the case the reviewer raised.
+
 0GN. **[2026-09-14, reviewer: "yes" to checking whether Sefaria's bracketed
     insertions are printed] 34 OF THE 55 "EDITORIAL" ROWS ARE ORDINARY LETTER
     DISPUTES, HIDDEN BECAUSE THEIR TOKEN CARRIES A BRACKET.**

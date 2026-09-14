@@ -1308,6 +1308,25 @@ function buildNav() {
     item.innerHTML = navItemInnerHtml(k);
     navList.appendChild(item);
   });
+  sizeMarkerColumn();
+  document.fonts?.ready.then(sizeMarkerColumn);
+}
+
+// THE MARKER COLUMNS ARE AS WIDE AS THEIR WIDEST ENTRY (item 0GO; reviewer
+// 2026-09-14: "we can afford some whitespace after the shoresh in the index
+// pane so the titles are all ... right justified"). A title starts where the
+// markers before it end, and a root with periods (א.ב.ד) is wider than the old
+// 30px minimum, as a three-digit number is wider than the 24px one - so each
+// title started wherever its own row's markers happened to end. Measured, not
+// fixed, so one rule fits Yad Malachi's numerals and Sefer HaShorashim's roots;
+// measured again once the marker font has loaded, since the fallback face is
+// a different width.
+function sizeMarkerColumn() {
+  for (const [sel, prop] of [['.nav-item .nid', '--nid-w'], ['.nav-item .nheb', '--nheb-w']]) {
+    navList.style.removeProperty(prop);
+    const w = Math.max(0, ...[...navList.querySelectorAll(sel)].map(e => e.getBoundingClientRect().width));
+    if (w > 0) navList.style.setProperty(prop, Math.ceil(w) + 'px');
+  }
 }
 
 function applyFlaggedFilter() {
@@ -1621,6 +1640,22 @@ function markTitleRun(body, k) {
   }
 }
 
+// REFERENCE NUMERALS (item 0GO; reviewer 2026-09-14: "what are we doing with the
+// footnotes? right now I see bare numbers in the text"). The book prints its
+// footnote references small and raised; the text keeps them as words, because
+// nothing is deleted from it (build_root_corpus.footnote_refs). So they are drawn
+// the way the page draws them. The notes themselves are citations, and they are
+// not in this text: the build cuts the apparatus, and the citations are
+// Sefaria's work (item 0EX).
+function markFootnoteRefs(body, k) {
+  (k.footnote_refs || []).forEach(i => {
+    const el = body.querySelector(`[data-word-index="${i}"]`);
+    if (!el) return;
+    el.classList.add('fn-ref');
+    if (!el.title) el.title = `Footnote reference ${el.textContent.trim()} - the note, a citation, is printed at the foot of the page`;
+  });
+}
+
 function renderKlalBody(block, k) {
   const body = block.querySelector('.klal-body');
   body.className = 'klal-body';
@@ -1923,6 +1958,7 @@ function renderKlalBody(block, k) {
   });
 
   markTitleRun(body, k);
+  markFootnoteRefs(body, k);
 
   // FIXED 2026-08-25 (reviewer, klal 219). A `possible_omission` whose
   // word_index equals the klal's word count is text the scan has AFTER the last

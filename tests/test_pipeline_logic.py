@@ -9818,6 +9818,17 @@ def test_only_a_difference_in_brackets_alone_is_kept_out_of_the_queue():
     assert not bracket_only("צמח", "צמח")           # no bracket: not this rule's case
 
 
+def test_a_reference_numeral_is_a_standalone_arabic_number():
+    """Item 0GO. The server marks these for the text pane, recomputed from the
+    current words; one pattern, in corpus_io, shared with the build."""
+    import build_root_corpus as brc
+    import corpus_io as cio
+
+    words = "ולא אבה י\"י אלהיך 11 כבר נזכר 624 יח 1234 ג3".split()
+    assert cio.footnote_ref_positions(words) == [4, 7]
+    assert brc.FOOTNOTE_REF is cio.FOOTNOTE_REF
+
+
 def _stream_line(page, text, right, y):
     """One stream row as build() makes it: tokens rightmost first, one per word."""
     toks, x = [], right
