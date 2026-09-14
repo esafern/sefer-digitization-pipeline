@@ -3800,6 +3800,7 @@ function witnessTierNote(wOrTier) {
     A_nun_gimel: 'The two readings differ only by nun/gimel.',
     A_ours_not_a_word: 'Our reading is not in the lexicon; theirs is.',
     B_ours_unattested: 'Our reading is not in the lexicon, and theirs is not clearly a word either.',
+    B_bracketed_letters: 'Theirs has letters ours lacks, set in square brackets. This edition prints its own brackets, so look for the letters on the page: if they are printed, our OCR dropped them; if not, they are their editor\'s addition. Checked by eye on 2026-09-14: in 9 of 15 such rows the letters are printed, in 5 they are not, and 1 was unreadable.',
     C_spelling_vav_yod: vavYodNote(typeof wOrTier === 'string' ? null : wOrTier),
     C_footnote_marker: 'Our word is theirs plus one or two trailing letters - usually a superscript footnote marker (a numeral, or a small raised mark) printed against the word and read by DocAI as part of it. Checked by eye on 2026-09-13: about 59 of 73 such rows show the marker; the rest are real readings. Look for the raised mark after the word.',
     C_markup: 'Same letters - the difference is their punctuation or apostrophe markup, not a reading.',

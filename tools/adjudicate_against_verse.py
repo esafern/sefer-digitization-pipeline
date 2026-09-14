@@ -393,8 +393,8 @@ def main():
     rows, artifacts = [], []
     skipped = collections.Counter()
     for d in disputes:
-        if d.get("editorial"):
-            skipped["editorial"] += 1
+        if d.get("bracket_only"):
+            skipped["bracket_only"] += 1
             continue
         info = by_root.get(fold(d.get("root", "")))
         if not info or not info.get("notes"):

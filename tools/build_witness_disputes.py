@@ -58,7 +58,27 @@ sys.path.insert(0, os.path.dirname(_HERE))
 sys.path.insert(0, os.path.join(os.path.dirname(_HERE), "pipeline"))
 import corpus_io as cio  # noqa: E402
 
-EDITORIAL = re.compile(r"[\[\]]")
+# BRACKETS ARE PRINTED (item 0GN). This edition sets its own emendations in
+# square brackets. A difference used to be called "editorial", and never
+# served, whenever the witness's reading held any bracket at all. Checked on
+# the ink, that hid 45 of 55 rows:
+# * printed bracketed letters our OCR dropped (`[ו]יש`);
+# * our own misreadings (`הן` for `חן]`);
+# * their misreadings beside a printed bracket (`ירנע].`).
+# Only a difference in the brackets alone, the same letters once they are
+# removed, is not a word dispute.
+BRACKET = re.compile(r"[\[\]]")
+
+
+def bracket_only(corpus, witness):
+    """True when the two spans differ only in brackets and word division:
+    `פלו ני` / `פלו[ני`, `ב [ א ]` / `ב[א]`. A bracketed letter that one side
+    lacks is a real difference, and so is an insertion by their editor; the
+    ink rules on both."""
+    if not (BRACKET.search(corpus) or BRACKET.search(witness)):
+        return False
+    letters = lambda s: re.sub(r"[^א-ת]", "", s)
+    return letters(corpus) == letters(witness)
 
 # One copy, in corpus_io, since 2026-09-13: the server now matches entries to
 # another digitization's texts with it too (item 0GC).
@@ -238,9 +258,10 @@ def main():
                     "opcode": tag,
                     "corpus": " ".join(corpus_span),
                     "witness_reading": " ".join(wit_span),
-                    # An editorial insertion is the witness's EDITOR speaking, not
-                    # a reading of the ink, and must not be shown as an OCR dispute.
-                    "editorial": bool(EDITORIAL.search(" ".join(wit_span))),
+                    # A difference in brackets alone is not a word dispute; every
+                    # other row with a bracket in it is served (item 0GN).
+                    "bracket_only": bracket_only(" ".join(corpus_span),
+                                                 " ".join(wit_span)),
                     "class": classify_dispute(" ".join(corpus_span),
                                               " ".join(wit_span)),
                 })
@@ -248,21 +269,21 @@ def main():
                        "corpus_words": n_words,
                        "disputes": n_disp}
 
-    ed = sum(1 for r in all_rows if r["editorial"])
+    ed = sum(1 for r in all_rows if r["bracket_only"])
     print(f"  witnesses       {', '.join(stats)}")
     for name, st in stats.items():
         print(f"    {name:<10} {st['shared_entries']} shared entries, "
               f"{st['corpus_words']:,} corpus words, {st['disputes']:,} disputes")
-    print(f"  editorial       {ed} rows are the witness's own bracketed insertions")
+    print(f"  bracket-only    {ed} rows differ in brackets alone, not served (item 0GN)")
     by_op = collections.Counter(r["opcode"] for r in all_rows)
     print(f"  by opcode       {dict(by_op)}")
-    by_cls = collections.Counter(r["class"] for r in all_rows if not r["editorial"])
-    print("  by class (non-editorial):")
+    by_cls = collections.Counter(r["class"] for r in all_rows if not r["bracket_only"])
+    print("  by class (served):")
     for c, n in by_cls.most_common():
         print(f"    {c:<20} {n:>5}   {100.0 * n / max(sum(by_cls.values()), 1):4.1f}%")
 
     live = [r for r in all_rows
-            if not r["editorial"] and r["class"] not in ("join_split",)]
+            if not r["bracket_only"] and r["class"] not in ("join_split",)]
     print(f"\n  first {min(args.show, len(live))} disputes (corpus | witness)")
     for r in live[:args.show]:
         print(f"    klal {r['klal_id']:<4} {r['root']:<5} w{r['word_index']:<4} "

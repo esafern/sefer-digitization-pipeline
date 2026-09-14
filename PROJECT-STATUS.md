@@ -101,6 +101,80 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0GN. **[2026-09-14, reviewer: "yes" to checking whether Sefaria's bracketed
+    insertions are printed] 34 OF THE 55 "EDITORIAL" ROWS ARE ORDINARY LETTER
+    DISPUTES, HIDDEN BECAUSE THEIR TOKEN CARRIES A BRACKET.**
+    `build_witness_disputes.py` marks a row editorial with
+    `EDITORIAL = re.compile(r"[\[\]]")`, which matches any bracket character
+    in their reading, and the queue never serves those rows. Classified
+    mechanically on the 317-entry build (2,064 disputes, 55 editorial):
+    * **B, 34 rows: letters differ once the brackets are removed.** These are
+      real disputes. Examples: `ירגע` vs `ירנע].` (nun/gimel, entry 170),
+      `ען` vs `עז].` (211), `הן` vs `חן]` (32), `ממון` vs `[מטון]` (129),
+      `המחבר` vs `הסתבר]` (212).
+    * **A, 13 rows: their bracketed text, which we lack.** Examples: `צמח` vs
+      `[י]צמח` (1), an inserted `[או]` (12), `ארבעה` vs `[ל]ארבעה` (36).
+    * **A', 8 rows: only the brackets differ.**
+    The book does print brackets: our OCR reads 276 `[`, while their text has
+    1,218.
+    **ON THE INK, ALL 55 ROWS.** Each word was cropped with its neighbours
+    from the word's own page and read by eye. The mechanical classes above do
+    not survive; the ink sorts the rows like this:
+    * **10 rows: a bracketed letter is PRINTED and our OCR dropped it.** Rows
+      3, 5, 6, 7, 16, 21, 27, 32, 37, 46, e.g. `[ו]יש`, `[ל]ארבעה`,
+      `האמת[י]`, `[כ]מפגיע`, `[ל]מצוא`, `על[ת]`.
+    * **4 rows: our letters are wrong and theirs match the ink.** `הן` for
+      `חן]`, `כה` for `כח`, `ען` for `עז]`, `כו` for `בו]`.
+    * **2 rows: our text has a stray letter where a small printed mark sits.**
+      `הבשםל`, `הסדורג`.
+    * **19 rows: their OCR's letters are wrong and ours match the ink.** The
+      bracket is printed in each case, e.g. `ירגע` (their `ירנע].`),
+      `ממון`, `כשמטה`, `ידעם`, `המחבר`, `בוגדה`.
+    * **9 rows: only the brackets or the word division differ**, e.g.
+      `פלו[ני`, `ופירש[נו]`, `[סי]מן`, `ב [ א ]` against `ב[א]`.
+    * **9 rows: their editor's own additions, with nothing printed.** `[או]`,
+      `[מאני]`, `[לו]`, `[פארתיו]`, `[ארבע אותיות]`; `[במלבן]`, which is the
+      qere where the page prints the ketiv `במלכן`; and `[י]צמח` and
+      `[ה]רקח`, where the page has only a small raised mark.
+    * **2 rows I could not read from the crop:** `מנד`/`מנדי]` in entry 38,
+      and one in entry 193.
+    So the filter hides 45 rows that are not editorial: 16 of them are places
+    where our text is wrong or missing printed letters, and 19 would confirm
+    our reading. These readings are mine, from crops of the 313 dpi images,
+    and each row goes to the reviewer on the dashboard once it is served.
+    **FIX, 2026-09-14.** `build_witness_disputes.bracket_only()` replaces the
+    any-bracket pattern. A row stays out only when both sides have the same
+    letters once brackets are removed. The queue builder and the verse tool
+    skip on `bracket_only`. Test:
+    `test_only_a_difference_in_brackets_alone_is_kept_out_of_the_queue`, which
+    fails under each of three mutations: no bracket precondition, the old
+    any-bracket rule, and never bracket-only. After the rebuild: 8 rows are
+    bracket-only, and the queue has 1,954 -> 1,996 rows.
+    **One labelling defect, found in the rebuilt queue.** A printed bracketed
+    vav or yod that we dropped (`[ו]יש`, `האמת[י]`, `[ו]איננו`) differs from
+    ours by one vav or yod, so the queue files it as `C_spelling_vav_yod`.
+    That calls it a spelling variant, when the question is whether the letter
+    is printed.
+    **FIXED 2026-09-14: a new tier, `B_bracketed_letters`.** A row gets it
+    when their reading has a bracket and every letter of ours plus more;
+    that includes their misplaced `[ויש` for the printed `[ו]יש`. It is
+    tested before the nun/gimel, lexicon and vav/yod tiers. Test: new
+    assertions in `test_a_witness_tier_says_what_the_disagreement_is_not_a_fallback`,
+    including a vav/yod row without a bracket and one where ours is longer.
+    Mutations: dropping the check, the bracket condition or the subsequence
+    condition each fails the test. A "theirs is longer" condition survived
+    mutation because it is implied (equal letters are `C_markup` first), so
+    it was removed rather than tested. The panel explains the tier.
+    In the rebuilt queue it holds 15 rows. Against the ink table above:
+    * 9 have the letters printed, dropped by our OCR (entries 15, 36 twice,
+      93, 132, 141, 200, 212, 257);
+    * 5 do not have them on the page (1, 59, 193, 271, 302);
+    * 1 was unreadable (38).
+    Queue: 1,996 rows. `C_spelling_vav_yod` 687.
+    A side finding: a dispute row's `page` is the page where its ENTRY starts,
+    not its word's page. Cropping by it found no box for 25 of the 55 rows.
+    The queue sets its own page and bbox, so the dashboard is unaffected.
+
 0GM. **[2026-09-14, reviewer: "yes" to "entry 16 has never been compared"]
     ENTRY 16 (`אג`) IS NOT AN ENTRY. IT IS A FALSE HEADING, AND `0GF` HAD THE
     CAUSE BACKWARDS.** `0GF` said Sefaria's data "has no `אג` key and runs it

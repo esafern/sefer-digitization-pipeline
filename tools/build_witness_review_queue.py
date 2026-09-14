@@ -61,7 +61,7 @@ import corpus_io as cio  # noqa: E402
 import word_identity as wid  # noqa: E402
 # The ONE alignment, shared with the disputes builder - a second copy of it here
 # would drift from the positions the queue is keyed on (Lesson 13).
-from build_witness_disputes import group_disputes, root_groups  # noqa: E402
+from build_witness_disputes import BRACKET, group_disputes, root_groups  # noqa: E402
 import scan_alignment as sa  # noqa: E402
 
 HEB = re.compile(r"[א-ת]")
@@ -95,6 +95,12 @@ def only_vav_yod(a, b):
     return i == len(short) and all(c in "וי" for c in extra)
 
 
+def _subsequence(short, long_):
+    """Is `short` what is left of `long_` after deleting some of its letters?"""
+    it = iter(long_)
+    return all(c in it for c in short)
+
+
 def tier_for(ours, theirs, lexicon, dispute_class=None, ours_raw="", theirs_raw=""):
     """Which review tier a disagreement belongs in - named for what it IS.
 
@@ -122,6 +128,15 @@ def tier_for(ours, theirs, lexicon, dispute_class=None, ours_raw="", theirs_raw=
         return "C_footnote_marker"
     if letters(ours_raw) == letters(theirs_raw):
         return "C_markup"
+    # THEIR BRACKETED LETTERS (item 0GN). This edition prints its own
+    # emendations in square brackets. Here their reading carries a bracket and
+    # has every letter of ours plus more. The question is whether those letters
+    # are printed, not how the word is spelled: `[ו]יש` read as `יש` is a
+    # printed vav our OCR dropped, and the vav/yod test below would file it as
+    # a spelling variant. (Theirs is the longer one because equal letters
+    # returned C_markup above.)
+    if BRACKET.search(theirs_raw) and _subsequence(ol, tl):
+        return "B_bracketed_letters"
     if len(ow) == 1 and len(tw) == 1 and len(ow[0]) == len(tw[0]):
         diff = [(a, b) for a, b in zip(ow[0], tw[0]) if a != b]
         if len(diff) == 1 and set(diff[0]) == {"נ", "ג"}:
@@ -361,7 +376,7 @@ def main():
     located = ambiguous = missing = by_alignment = 0
     seen, served_correction_only, correction_only_collided = set(), 0, 0
     for d in list(disputes) + correction_only:
-        if d.get("editorial"):
+        if d.get("bracket_only"):
             continue
         kid = int(d["klal_id"])
         wi = d.get("word_index")

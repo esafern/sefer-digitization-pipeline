@@ -9573,6 +9573,15 @@ def test_a_witness_tier_says_what_the_disagreement_is_not_a_fallback():
     assert tier("אבן", "אב") == "C_footnote_marker"
     assert tier("והרש", "והרש.") == "C_markup"
     assert tier("", "אבן") == "one_side_empty"
+    # Item 0GN: letters of theirs in brackets that ours lacks. On the ink these
+    # were mostly printed letters our OCR dropped, so they are not spelling
+    # variants. Their bracket misplaced (`[ויש` for the printed `[ו]יש`) counts.
+    assert tier("יש", "[ויש") == "B_bracketed_letters"
+    assert tier("האמת", "האמת[י]") == "B_bracketed_letters"
+    assert tier("תוספת", "ו[ב]תוספת") == "B_bracketed_letters"
+    assert tier("ואמיץ", "ואמץ]") == "C_spelling_vav_yod"      # ours has more
+    assert tier("לבש", "לבוש") == "C_spelling_vav_yod"         # no bracket
+    assert tier("מפגיע", "[כ]מסניע") != "B_bracketed_letters"   # their letters differ
     # the negative control for the spelling test: a real letter change is NOT
     # a vav/yod spelling difference
     assert not bwq.only_vav_yod("פרט", "סרט")
@@ -9791,6 +9800,22 @@ def test_the_book_order_puts_chapter_section_and_doubled_roots_first():
     assert order_violations([{"root": r} for r in book]) == []
     assert root_order_key("אג") < root_order_key("אגד") < root_order_key("אגמ")
     assert len(order_violations([{"root": r} for r in ("אגד", "אגמ", "אג", "אגנ")])) == 1
+
+
+def test_only_a_difference_in_brackets_alone_is_kept_out_of_the_queue():
+    """Item 0GN. Any bracket in the witness's reading used to hide the row as
+    "editorial". On the ink that hid printed letters we dropped, our own
+    misreadings and theirs. Only the same letters with different brackets or
+    word division stay out; everything else is served for the ink to rule."""
+    from build_witness_disputes import bracket_only
+
+    assert bracket_only("פלו ני", "פלו[ני]).")
+    assert bracket_only("ב [ א ]", "ב[א]")
+    assert not bracket_only("יש", "[ו]יש")          # a printed letter we dropped
+    assert not bracket_only("הן", "חן]")            # our misreading beside a bracket
+    assert not bracket_only("ירגע", "ירנע].")       # theirs
+    assert not bracket_only("", "[או]")             # their editor's insertion
+    assert not bracket_only("צמח", "צמח")           # no bracket: not this rule's case
 
 
 def _stream_line(page, text, right, y):
