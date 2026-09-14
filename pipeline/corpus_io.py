@@ -117,6 +117,7 @@ import difflib
 import json
 import os
 import re
+import unicodedata
 import sys
 
 
@@ -623,6 +624,61 @@ def book_field(key):
     if stored is None:
         return copy.deepcopy(_WORK_DEFAULTS[key])
     return copy.deepcopy(_require_declared(stored, key))
+
+
+# ---------- per-book VOCABULARY and COMPARISON TEXTS (item 0GC, 2026-09-13) ----------
+#
+# What one entry of this book is CALLED. Yad Malachi's unit is a klal and the
+# dashboard said "Klal" in about thirty places; Sefer HaShorashim's is a shorash,
+# named by its ROOT rather than by a number (reviewer: "don't call them klalim -
+# that is leftover from yad"). OPTIONAL in book.json, unlike the identity fields
+# above: a book that omits the `ui` block is labelled exactly as the dashboard
+# always labelled things, so no existing corpus root changes.
+_UI_DEFAULTS = {"unit": "Klal", "unit_plural": "Klalim", "unit_he": "כלל",
+                "entry_ref": "number"}
+
+
+def ui_vocabulary():
+    """{"unit", "unit_plural", "unit_he", "entry_ref"} for the current book.
+
+    `entry_ref` is "number" (Klal 66) or "root" (Shorash אבב)."""
+    ui = (_declared_book() or {}).get("ui") or {}
+    return {k: ui.get(k, v) for k, v in _UI_DEFAULTS.items()}
+
+
+def comparison_texts():
+    """Another digitization's texts of this book, per entry, from book.json.
+
+    {"name", "their_ocr", "their_corrected"} - the two paths resolved in the
+    corpus root, or None. Both files map an entry's ROOT to its text and are
+    matched through root_key(). Optional; a book without them has none."""
+    c = (_declared_book() or {}).get("comparison_texts") or {}
+    out = {"name": c.get("name")}
+    for key in ("their_ocr", "their_corrected"):
+        out[key] = repo_path(c[key]) if c.get(key) else None
+    return out
+
+
+# THE OCR BASELINE: the corpus exactly as the OCR build produced it, each word
+# with its stable id, frozen before any ruling is applied
+# (tools/snapshot_ocr_baseline.py). "Our OCR" is read from here and never from
+# part1.json, because part1.json becomes the MASTER text as rulings are applied
+# (reviewer: "that should continue to show the docai version - corrected master
+# text should live elsewhere").
+OCR_BASELINE_NAME = "ocr_baseline_part1.json"
+
+FINALS = str.maketrans("ךםןףץ", "כמנפצ")
+
+
+def root_key(text):
+    """Root identifier: NFKC, strip points and Hebrew punctuation, fold finals.
+
+    Moved here from tools/build_witness_disputes.py on 2026-09-13 so the server
+    can match an entry to another digitization's text without importing a tool.
+    Three more private copies of FINALS remain (measure_against_reviewed,
+    build_header_alignment, adjudicate_against_verse) - item 0GC."""
+    t = HEBREW_PUNCT.sub("", strip_points(unicodedata.normalize("NFKC", text)))
+    return t.translate(FINALS)
 
 
 # The five names kept as module attributes for the existing call sites, resolved

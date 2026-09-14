@@ -215,7 +215,9 @@ def main():
             continue
         if not item.get("bbox"):
             continue
-        context = build_context(item["page"], item["docai_token_index"])
+        # page_token_index when present: docai_token_index may be entry-relative
+        # (build_witness_review_queue, item 0GD); build_context indexes the page.
+        context = build_context(item["page"], item.get("page_token_index", item["docai_token_index"]))
         try:
             crop_bytes = crop_pdf_bounding_box(doc, item["page"], item["bbox"])
             print(f"[{i+1}/{len(queue)}] klal {item['klal_id']} page {item['page']} "

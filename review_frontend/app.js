@@ -349,7 +349,28 @@ function klalRefName(klalId) {
   // prints, which is what they are actually looking at on the scan. ADDED
   // 2026-08-26 at the reviewer's request.
   const g = (klalById[klalId] || {}).gematria;
-  return `Klal ${klalId}` + (g ? ` (${g})` : '');
+  return entryRefName(klalId);
+}
+
+// WHAT AN ENTRY IS CALLED, per book (item 0GC; reviewer 2026-09-13: "don't call
+// them klalim - that is leftover from yad"). Yad Malachi: "Klal 66 (סו)". Sefer
+// HaShorashim: "Shorash אבב" - named by the root the book prints, since its
+// ordinal means nothing to a reader. From /api/corpus, defaulting to Klal.
+function unitName() { return (CORPUS && CORPUS.unit) || 'Klal'; }
+function unitWord() { return unitName().toLowerCase(); }
+function unitNameHe() { return (CORPUS && CORPUS.unit_he) || 'כלל'; }
+function byRoot() { return !!(CORPUS && CORPUS.entry_ref === 'root'); }
+function entryRefName(klalId) {
+  const g = (klalById[klalId] || {}).gematria;
+  // The root AND the position: the root is what the book prints, the number is
+  // what the header, the index and the links use (reviewer 2026-09-13).
+  if (byRoot() && g) return `${unitName()} ${g} (#${klalId})`;
+  return `${unitName()} ${klalId}` + (g ? ` (${g})` : '');
+}
+function entryRefHe(klalId) {
+  const g = (klalById[klalId] || {}).gematria;
+  if (byRoot() && g) return `${unitNameHe()} ${g}`;
+  return `${unitNameHe()} ${hebNum(klalId)}`;
 }
 
 // ONE COPY BUTTON, THREE CALLERS. Written out by hand in three places until
@@ -376,7 +397,7 @@ function wordRefLabel(klalId, wordIndex, word, prefix) {
 function wordRefPayload(klalId, wordIndex, word) {
   // The PATH form, not the hash form: it survives being pasted into a terminal
   // or a chat window, where `&` is routinely truncated. The server 302s it.
-  const url = `${location.origin}/klal/${klalId}/word/${wordIndex}`;
+  const url = `${location.origin}/entry/${klalId}/word/${wordIndex}`;
   const head = `${klalRefName(klalId)} · Word #${wordIndex}` + (word ? ` — ${word}` : '');
   return `${head}\n${url}`;
 }
@@ -657,7 +678,8 @@ function parseHashRoute() {
   const h = (location.hash || '').replace(/^#/, '');
   if (!h) return null;
   const p = new URLSearchParams(h);
-  const klal = parseInt(p.get('klal'), 10);
+  // `entry` since 2026-09-13 (item 0GC); `klal` kept so every old link resolves.
+  const klal = parseInt(p.get('entry') || p.get('klal'), 10);
   if (!Number.isInteger(klal)) return null;
   const word = parseInt(p.get('word'), 10);
   return { klal, word: Number.isInteger(word) ? word : null };
@@ -665,7 +687,7 @@ function parseHashRoute() {
 
 function updateHash(klalId, wordIndex) {
   if (!klalId) return;
-  const h = wordIndex == null ? `#klal=${klalId}` : `#klal=${klalId}&word=${wordIndex}`;
+  const h = wordIndex == null ? `#entry=${klalId}` : `#entry=${klalId}&word=${wordIndex}`;
   if (location.hash !== h) history.replaceState(null, '', h);
 }
 
@@ -886,6 +908,10 @@ async function applyHashRoute() {
 // already applies to klal markers - the reviewer is matching what they see
 // against the printed page, and the page says `יד מלאכי`, not "Yad Malachi".
 let CORPUS = null;
+// Measured per-tier agreement with the witness's corrected text, and whose it
+// is - from /api/witness, so the panel states a rate rather than a claim (0GC).
+let WITNESS_TIER_STATS = {};
+let WITNESS_CORRECTED_NAME = null;
 
 // Fill the title slots in EVERY pane header at once.
 //
@@ -916,6 +942,10 @@ function renderBookTitle() {
   const navEn = document.getElementById('nav-ref-en');
   if (navHe) navHe.textContent = CORPUS.section_he || '';
   if (navEn) navEn.textContent = CORPUS.section || '';
+  const fp = document.querySelector('#klal-flag-panel .panel-title');
+  if (fp) fp.textContent = `Flag ${unitWord()} for revisit`;
+  const ff = document.getElementById('filter-flagged');
+  if (ff && ff.parentElement) ff.parentElement.title = `Show only ${(CORPUS.unit_plural || 'klalim').toLowerCase()} flagged for revisit`;
 }
 
 // The text pane's reference: the klal being read, in both scripts, exactly as
@@ -928,8 +958,10 @@ function updateTextHeader() {
   if (!he || !en) return;
   const kid = _headerKlalId;
   if (kid == null) { he.textContent = ''; en.textContent = ''; return; }
-  he.textContent = 'כלל ' + hebNum(kid);
-  en.textContent = 'Klal ' + kid;
+  he.textContent = entryRefHe(kid);
+  // By root the Hebrew side already names the entry; the English side gives
+  // its position rather than the same root twice (item 0GC).
+  en.textContent = byRoot() ? `${unitName()} #${kid}` : `${unitName()} ${kid}`;
 }
 
 async function init() {
@@ -973,9 +1005,12 @@ async function init() {
   NUMERALS = numerals || {};
   CORPUS = corpus;
   renderBookTitle();
+  setupTextView();
   KLALIM = klalim;
   klalById = Object.fromEntries(klalim.map(k => [k.klal_id, k]));
   WITNESS_PAGES = witness.pages || [];
+  WITNESS_TIER_STATS = witness.tier_stats || {};
+  WITNESS_CORRECTED_NAME = witness.corrected_name || null;
 
   setupPartSelect();
   buildLegend();
@@ -1300,10 +1335,10 @@ function syncKlalHead(head, k) {
     // hit on klal 117, whose klal-level flag is clear and whose one word flag is
     // answered: nothing is flagged, and the button still said "flag". The verb
     // is explicit now, and only the active state says "Flagged".
-    flagBtn.textContent = k.needs_revisit ? '⚑ Flagged' : '⚑ Flag klal';
+    flagBtn.textContent = k.needs_revisit ? '⚑ Flagged' : `⚑ Flag ${unitWord()}`;
     flagBtn.title = k.needs_revisit
-      ? 'This klal is flagged for revisit - click to review or clear'
-      : 'Flag this klal for revisit';
+      ? `This ${unitWord()} is flagged for revisit - click to review or clear`
+      : `Flag this ${unitWord()} for revisit`;
   }
   const titleBtn = head.querySelector('.klal-title-btn');
   if (titleBtn) {
@@ -1334,7 +1369,7 @@ function syncKlalHead(head, k) {
     head.appendChild(wf);
   }
   wf.textContent = `⚑ ${n} word${n === 1 ? '' : 's'}`;
-  wf.title = `${n} word-level revisit flag(s) still open in this klal. `
+  wf.title = `${n} word-level revisit flag(s) still open in this ${unitWord()}. `
            + 'This is what the index pennant is showing; clear them from each word\u2019s own panel.';
 }
 
@@ -1374,9 +1409,12 @@ function buildPlaceholders() {
     // information. The two numerals are one size now ("make both numbers the
     // same size") - they are the same fact in two scripts, and sizing one above
     // the other implied a hierarchy that is not there.
-    const kmark = k.gematria
-      ? `כלל <span class="kid-n">${k.klal_id}</span> · <span class="kid-n">${escapeHtml(k.gematria)}</span>`
-      : `כלל <span class="kid-n">${k.klal_id}</span>`;
+    // By root (item 0GC) the root IS the entry's name, so the ordinal is not shown.
+    const kmark = byRoot() && k.gematria
+      ? `${unitNameHe()} <span class="kid-n">${escapeHtml(k.gematria)}</span>`
+      : k.gematria
+        ? `${unitNameHe()} <span class="kid-n">${k.klal_id}</span> · <span class="kid-n">${escapeHtml(k.gematria)}</span>`
+        : `${unitNameHe()} <span class="kid-n">${k.klal_id}</span>`;
     head.innerHTML = `<span class="kid">${kmark}</span>`;
     const flagBtn = document.createElement('button');
     // Base class only - the `active` modifier and the label belong to
@@ -1408,9 +1446,9 @@ function buildPlaceholders() {
     // screen said the first one had landed.
     titleBtn.className = 'klal-title-btn';
     titleBtn.title = k.title_pending
-      ? 'A heading correction is recorded for this klal and NOT yet applied to '
+      ? `A heading correction is recorded for this ${unitWord()} and NOT yet applied to `
         + 'part1.json. Click to see it.'
-      : 'Correct this klal\u2019s heading (the `title` field), which is stored '
+      : `Correct this ${unitWord()}\u2019s heading (the \`title\` field), which is stored `
         + 'separately from the body text';
     titleBtn.onclick = (e) => { e.stopPropagation(); openTitlePanel(k.klal_id); };
     head.appendChild(titleBtn);
@@ -1467,7 +1505,8 @@ async function mountKlal(klalId) {
   if (!block || block.dataset.mounted === 'true') return;
   block.dataset.mounted = 'true'; // set immediately, avoid re-entrant double mount
   const data = await fetchKlal(klalId);
-  renderKlalBody(block, data);
+  if (TEXT_VIEW === 'master') renderKlalBody(block, data);
+  else await renderAltBody(block, klalId);
   // RELEASE THE PLACEHOLDER FLOOR. Reviewer, 2026-09-04: "too much whitespace
   // btw klals in the middle pane."
   //
@@ -1578,13 +1617,13 @@ function renderKlalBody(block, k) {
       const chose = r.chosen_text === '' ? 'delete it'
                   : `\u2192 <bdi>${escapeHtml(String(r.chosen_text))}</bdi>`;
       const now = r.word_at_recorded_index == null
-        ? 'that position is past the end of the klal now'
+        ? `that position is past the end of the ${unitWord()} now`
         : `w${r.word_index} now holds <bdi>${escapeHtml(r.word_at_recorded_index)}</bdi>`;
       return `<li>recorded on <bdi>${escapeHtml(String(r.original_word))}</bdi> ${chose}`
            + ` \u2014 ${now}</li>`;
     }).join('');
     banner.innerHTML =
-      `<b>${stranded.length}</b> recorded ruling${stranded.length === 1 ? '' : 's'} in this klal `
+      `<b>${stranded.length}</b> recorded ruling${stranded.length === 1 ? '' : 's'} in this ${unitWord()} `
       + `cannot be placed on a word, so ${stranded.length === 1 ? 'it is' : 'they are'} not `
       + `highlighted below. ${stranded.length === 1 ? 'It has' : 'They have'} not been applied `
       + `to the corpus either \u2014 this is open work.<ul>${items}</ul>`;
@@ -2077,6 +2116,19 @@ function focusWordOnScan(targetPage, klalId, corr, opts) {
   clearTimeout(suppressTimer);
   lastActiveScanPage = targetPage;
   suppressTimer = setTimeout(() => { suppressObserverScroll = false; }, 900);
+  // THE CLICKED WORD'S KLAL BECOMES THE ACTIVE ONE - labels only (reviewer
+  // 2026-09-13: "the popup and scan jump there, but the index stays where it
+  // was and the scan header doesn't change"). The index and both headers read
+  // _headerKlalId, which only the reading-line observer set, so a click in the
+  // next klal down left them naming the klal above. markActiveKlal(), not
+  // setActiveKlal(): the latter also shows the klal's START page, which would
+  // undo the word's page shown below (the 0CA shape). Recording it in
+  // lastActiveKlalId means the next scroll re-syncs everything to the reading
+  // line - exactly as a scroll already re-syncs the scan page.
+  if (klalId != null && klalId !== lastActiveKlalId && klalById[klalId]) {
+    lastActiveKlalId = klalId;
+    markActiveKlal(klalId);
+  }
   showPage(targetPage, klalId, corr);
 }
 
@@ -2269,7 +2321,7 @@ async function clearWordFlag(klalId, wordIndex) {
   delete fetchInFlight[klalId];
   const fresh = await fetchKlal(klalId);
   const block = document.getElementById('klal-block-' + klalId);
-  if (block) renderKlalBody(block, fresh);
+  if (block) redrawKlalBody(block, fresh);
   refreshKlalimList();
   dismissPanels();
   return true;
@@ -2405,8 +2457,8 @@ function flagListItemHtml(r, recorded) {
   // most needs to open: an `unplaced` ruling's recorded index is outside the
   // klal by definition, so linking to it opened nothing at all.
   const goTo = (r.resolved_word_index != null) ? r.resolved_word_index : r.word_index;
-  const href = `#klal=${r.klal_id}&word=${goTo}`;
-  const name = `Klal ${r.klal_id}` + (r.gematria ? ` (${r.gematria})` : '');
+  const href = `#entry=${r.klal_id}&word=${goTo}`;
+  const name = entryRefName(r.klal_id);
   // A null word is a possible_omission sitting at len(words) - text the scan
   // has and the corpus does not - so there is nothing to print, and saying
   // "(not in text)" is the whole content of that row.
@@ -2631,7 +2683,7 @@ async function refreshTitlePending(klalId) {
   if (btn) {
     btn.classList.add('pending');
     btn.textContent = '\u270e Heading \u00b7 pending';
-    btn.title = 'A heading correction is recorded for this klal and NOT yet '
+    btn.title = `A heading correction is recorded for this ${unitWord()} and NOT yet `
               + 'applied to part1.json. Click to see it.';
   }
 }
@@ -2657,7 +2709,7 @@ async function openTitlePanel(klalId) {
   // server will resolve. Display and addressing disagreeing is the whole bug.
   const words = (k.title || '').split(' ');
   if (!words.some(w => w.length)) {
-    titlePanelBody.innerHTML = '<div class="panel-section">This klal has no stored heading.</div>';
+    titlePanelBody.innerHTML = `<div class="panel-section">This ${unitWord()} has no stored heading.</div>`;
     return;
   }
   const chips = words.map((w, i) => !w.length ? '' :
@@ -2713,7 +2765,7 @@ async function openTitlePanel(klalId) {
   titlePanelBody.innerHTML = `
     ${pendingHtml}
     <div class="panel-section">
-      <div class="panel-label">Klal ${klalId} \u2014 heading (the <code>title</code> field)</div>
+      <div class="panel-label">${entryRefName(klalId)} \u2014 heading (the <code>title</code> field)</div>
       <div style="font-size:12px;color:var(--ink-faint);margin-bottom:8px;">
         Stored separately from the body text, and addressed by its own word numbers \u2014
         heading word 2 is not body word 2.
@@ -3212,7 +3264,7 @@ async function saveDisputedDecision(klalId, corr) {
   delete fetchInFlight[klalId];
   const k = await fetchKlal(klalId);
   const block = document.getElementById('klal-block-' + klalId);
-  if (block) renderKlalBody(block, k);
+  if (block) redrawKlalBody(block, k);
 
   // Also refresh the scan pane's highlighted boxes the same way, if it's
   // currently on screen - otherwise a save only fixes the text pane and
@@ -3265,7 +3317,7 @@ async function openKlalFlagPanel(klalId) {
 
   klalFlagPanelBody.innerHTML = `
     <div class="panel-section">
-      <div class="panel-label">Klal ${klalId}</div>
+      <div class="panel-label">${entryRefName(klalId)}</div>
       <div class="checkbox-row">
         <input type="checkbox" id="needs-revisit-checkbox" ${state.needs_revisit ? 'checked' : ''}>
         <label for="needs-revisit-checkbox">Needs revisit</label>
@@ -3372,7 +3424,7 @@ async function saveManualDecision(klalId, wordIndex, word, chosenText, note) {
   delete fetchInFlight[klalId];
   const freshK = await fetchKlal(klalId);
   const block = document.getElementById('klal-block-' + klalId);
-  if (block) renderKlalBody(block, freshK);
+  if (block) redrawKlalBody(block, freshK);
   if (currentPage != null) await showPage(currentPage, klalId);
 
   // FIXED 2026-08-14 (code review, session audit item 5): this used to
@@ -3639,7 +3691,7 @@ async function openPunctuationPanel(klalId, p) {
     delete fetchInFlight[klalId];
     const freshK = await fetchKlal(klalId);
     const block = document.getElementById('klal-block-' + klalId);
-    if (block) renderKlalBody(block, freshK);
+    if (block) redrawKlalBody(block, freshK);
 
     // FIXED 2026-08-14 (code review, session audit item 5): same race as
     // saveCandidateDecision's badge arithmetic above - refreshKlalimList()
@@ -3669,15 +3721,42 @@ async function openPunctuationPanel(klalId, p) {
 // including Sefer HaShorashim rows tagged A_ours_not_a_word, where it says the
 // opposite of the truth. Unknown tiers fall back to that original sentence, so
 // Yad Malachi's rows read exactly as before.
-function witnessTierNote(tier) {
+// Accepts a row or a bare tier. The DESCRIPTION says what kind of disagreement
+// this is; the RATE is measured - on the rows in entries the witness has
+// reviewed, against its corrected text - and comes from the queue file, so it
+// cannot go stale the way the hardcoded 51/51 and 198/198 did (item 0GC:
+// "just about every note says both readings are real Hebrew words - but that
+// is not always true").
+function witnessTierNote(wOrTier) {
+  const tier = typeof wOrTier === 'string' ? wOrTier : (wOrTier && wOrTier.tier);
   const notes = {
-    A_nun_gimel: 'The two readings differ only by nun/gimel. On the reviewed sample the corpus was wrong at every such row (51 of 51); the full-tone scan settles it.',
-    A_ours_not_a_word: 'The corpus reading is not a Hebrew word and the witness reading is. On the reviewed sample the corpus was wrong at every such row (198 of 198).',
-    B_ours_unattested: 'The corpus reading is not in the lexicon, but neither side is clearly a word. Check the ink.',
-    C_both_attested: "Both readings are real Hebrew words, so a lexicon check can't tell them apart - this needs the ink.",
-    one_side_empty: 'One source has text here and the other has none - a dropped or inserted word. Check the ink.',
+    A_nun_gimel: 'The two readings differ only by nun/gimel.',
+    A_ours_not_a_word: 'Our reading is not in the lexicon; theirs is.',
+    B_ours_unattested: 'Our reading is not in the lexicon, and theirs is not clearly a word either.',
+    C_spelling_vav_yod: 'The same word spelled with or without a vav/yod. Their verse quotations come from a pointed Tanakh, so inside a quotation their spelling may be the Bible\u2019s rather than this page\u2019s.',
+    C_footnote_marker: 'Our word is theirs plus one or two trailing letters - usually a superscript footnote marker (a numeral, or a small raised mark) printed against the word and read by DocAI as part of it. Checked by eye on 2026-09-13: about 59 of 73 such rows show the marker; the rest are real readings. Look for the raised mark after the word.',
+    C_markup: 'Same letters - the difference is their punctuation or apostrophe markup, not a reading.',
+    C_theirs_unattested: 'Our reading is in the lexicon; theirs is not.',
+    C_both_attested: 'Both readings are in the lexicon, so a lexicon check cannot tell them apart - this needs the ink.',
+    one_side_empty: 'One source has text here and the other has none - a dropped or inserted word.',
   };
-  return notes[tier] || "Two OCR engines disagree here and both readings are real Hebrew words, so a word-lexicon check can't tell them apart - this needs the ink.";
+  const base = notes[tier] || "Two OCR engines disagree here and both readings are real Hebrew words, so a word-lexicon check can't tell them apart - this needs the ink.";
+  if (!notes[tier] || !WITNESS_CORRECTED_NAME) return base;
+  const s = WITNESS_TIER_STATS[tier];
+  if (!s || !s.reviewed) return `${base} No row of this kind falls in an entry ${WITNESS_CORRECTED_NAME} has reviewed.`;
+  // "Unchanged" is not agreement: a word their corrector never touched reads the
+  // same in both of their layers whether or not anyone checked it. Only a change
+  // is evidence, so the sentence counts changes (reviewer 2026-09-13).
+  const who = WITNESS_CORRECTED_NAME;
+  const toOurs = s.changed_to_ours || 0, toOther = s.changed_to_other || 0;
+  const changed = toOurs + toOther;
+  // Every status corrected_status() returns is counted, so the parts sum to the
+  // total (code review 2026-09-13, finding 5: same_letters was left out).
+  const extra = [s.punctuation_only ? `changed only punctuation at ${s.punctuation_only}` : '',
+                 s.same_letters ? `differ from ours only in markup at ${s.same_letters}` : ''].filter(Boolean);
+  return `${base} Of the ${s.reviewed} such rows in entries ${who} has reviewed, they left their OCR unchanged at ${s.unchanged || 0}, which says nothing either way` +
+    (changed ? `; they changed the reading at ${changed}: to ours in ${toOurs}` + (toOther ? `, to something else in ${toOther}` : '') : '; they changed the reading at none') +
+    (extra.length ? `; ${extra.join('; ')}` : '') + '.';
 }
 
 function witnessLabel(w) {
@@ -3701,9 +3780,19 @@ async function openWitnessPanel(w) {
   const decision = w.current_decision;
   const activeSource = decision ? decision.chosen_source : null;
 
+  // EACH READING LABELLED FOR WHAT IT IS (item 0GC, reviewer 2026-09-13). Our
+  // OCR comes from the frozen baseline, so it stays DocAI's after rulings change
+  // the master; the master's current word is shown separately, only when it
+  // differs. The witness's corrected reading appears for an entry it reviewed.
   const options = [
-    { source: 'docai_reading', label: 'DocAI OCR reading', text: w.docai_reading },
-    { source: 'tesseract_reading', label: witnessLabel(w) + ' reading', text: w.tesseract_reading },
+    { source: 'docai_reading', label: 'Our OCR (DocAI)', text: w.docai_reading },
+    { source: 'tesseract_reading', label: w.corrected_name ? `${witnessLabel(w)} OCR (unreviewed)` : witnessLabel(w) + ' reading', text: w.tesseract_reading },
+    // "(unchanged)" when their corrector left their OCR as it was - that is not
+    // a decision about the word, only the absence of one (reviewer 2026-09-13).
+    ...(w.entry_reviewed ? [{ source: 'corrected_reading', label: `${w.corrected_name} corrected text` + ({
+        unchanged: ' (unchanged)', changed_to_ours: ' (changed - to our reading)', changed_to_other: ' (changed)',
+        punctuation_only: ' (only punctuation changed)',
+      }[w.corrected_status] || ''), text: w.corrected_reading }] : []),
     { source: 'unreadable', label: 'Unreadable / neither is right', text: '(mark as unreadable)' },
   ].filter(opt => opt.text);
 
@@ -3712,7 +3801,9 @@ async function openWitnessPanel(w) {
   // hard to place in context. Deliberately labeled as raw/unverified OCR,
   // not the not-yet-applied reconstruction draft - see review_server.py
   // api_witness_context()'s docstring for why.
-  const ctxRaw = await fetch(`/api/witness/context/${w.page}/${w.docai_token_index}`)
+  // The context endpoint indexes the PAGE's tokens; docai_token_index may be
+  // entry-relative, so the page-relative index is used when the row has one.
+  const ctxRaw = await fetch(`/api/witness/context/${w.page}/${w.page_token_index ?? w.docai_token_index}`)
     .then(r => r.ok ? r.json() : null).catch(() => null);
   const ctx = (ctxRaw && Array.isArray(ctxRaw.words)) ? ctxRaw : { words: [], target_index: null };
   // FIXED 2026-08-14 (user report: clicked a witness box on the scan pane,
@@ -3738,9 +3829,12 @@ async function openWitnessPanel(w) {
 
   witnessPanelBody.innerHTML = `
     <div class="panel-section">
-      <div class="panel-label">Klal ${w.klal_id} · Token #${w.docai_token_index} · tier ${w.tier} · page ${w.page}</div>
-      <div style="font-size:12px;color:var(--ink-faint);">${escapeHtml(witnessTierNote(w.tier))}</div>
+      <div class="panel-label">${entryRefName(w.klal_id)} · Token #${w.page_token_index ?? w.docai_token_index} · tier ${w.tier} · page ${w.page}</div>
+      <div style="font-size:12px;color:var(--ink-faint);">${escapeHtml(witnessTierNote(w))}</div>
+      ${w.corrected_name && !w.entry_reviewed ? `<div style="font-size:12px;color:var(--ink-faint);margin-top:4px;">${escapeHtml(w.corrected_name)} has not sent a corrected version of this entry.</div>` : ''}
+      ${w.master_reading && w.master_reading !== w.docai_reading ? `<div style="font-size:12px;margin-top:4px;">Master text now reads &ldquo;${escapeHtml(w.master_reading)}&rdquo;.</div>` : ''}
     </div>
+    ${verseHtml(w)}
     ${decision ? `<div class="panel-section">
       <div class="panel-label">Current decision</div>
       <div style="color:${STATE_META.human.color};font-weight:600;">${STATE_META.human.label}: &ldquo;${escapeHtml(decision.chosen_text !== '' ? decision.chosen_text : '(unreadable)')}&rdquo;</div>
@@ -3828,7 +3922,7 @@ async function saveWitnessDecision(w) {
   delete fetchInFlight[w.klal_id];
   const freshK = await fetchKlal(w.klal_id);
   const block = document.getElementById('klal-block-' + w.klal_id);
-  if (block) renderKlalBody(block, freshK);
+  if (block) redrawKlalBody(block, freshK);
 
   // Refresh the witness page summary (decided counts) and redraw this
   // page's boxes so the saved item's box state updates immediately.
@@ -3897,8 +3991,8 @@ function updateScanHeader() {
     klalIndicator.textContent = '';
     return;
   }
-  const en = 'Page ' + page + (kid != null ? ' · Klal ' + kid : '');
-  const he = 'דף ' + hebNum(page) + (kid != null ? ' · כלל ' + hebNum(kid) : '');
+  const en = 'Page ' + page + (kid != null ? ' · ' + (byRoot() ? `${unitName()} #${kid}` : `${unitName()} ${kid}`) : '');
+  const he = 'דף ' + hebNum(page) + (kid != null ? ' · ' + entryRefHe(kid) : '');
   pageIndicator.textContent = en;
   klalIndicator.textContent = he;
 }
@@ -4633,6 +4727,30 @@ function releaseObserverWhenScrollSettles(maxMs = 3000) {
 }
 
 function setActiveKlal(klalId, navBlock) {
+  const k = markActiveKlal(klalId, navBlock);
+  if (!k) return;
+  // manualPageLock: reviewer navigated the scan manually via prev/next -
+  // don't snap back to this klal's start page just because the text pane
+  // scrolled to it.  The lock is cleared when a word is clicked in the
+  // text pane or a nav item is jumped to.
+  //
+  // Explicit `null` here, not the default `undefined` "keep scanFocusCorr"
+  // sentinel - this call fires on every scroll-driven klal change
+  // (updateActiveFromScroll) and every nav-panel jump, neither of which is
+  // the reviewer clicking a specific word. scanFocusCorr from whichever
+  // klal was last focused would otherwise carry into this new klal's page,
+  // and isFocused's match is by word_index alone (not scoped to the klal
+  // the click actually happened in) - a coincidental same word_index in
+  // the new klal then renders a focus ring on the wrong word. FIXED
+  // 2026-08-20 (dashboard regression: misplaced/erratic highlight boxes).
+  if (!manualPageLock) showPage(k.page, klalId, null);
+}
+
+// THE LABEL HALF of setActiveKlal - index row, both headers, the tab title -
+// without moving the scan. Split out 2026-09-13 so a word click can name its
+// own klal without showPage() replacing the word's page with the klal's start
+// page (see focusWordOnScan). Returns the klal record, or undefined.
+function markActiveKlal(klalId, navBlock) {
   document.querySelectorAll('.nav-item.active').forEach(el => el.classList.remove('active'));
   const navEl = document.getElementById('nav-' + klalId);
   if (navEl) {
@@ -4668,23 +4786,11 @@ function setActiveKlal(klalId, navBlock) {
     // The work's name comes from /api/corpus like every other surface that
     // shows it (2026-09-01) - this was the last hardcoded "Yad Malachi" left in
     // the frontend, and a second book would have renamed every tab but this one.
-    document.title = `Klal ${klalId} (כלל ${hebNum(klalId)}) · ${(CORPUS && CORPUS.title) || 'Review'}`;
-    // manualPageLock: reviewer navigated the scan manually via prev/next -
-    // don't snap back to this klal's start page just because the text pane
-    // scrolled to it.  The lock is cleared when a word is clicked in the
-    // text pane or a nav item is jumped to.
-    //
-    // Explicit `null` here, not the default `undefined` "keep scanFocusCorr"
-    // sentinel - this call fires on every scroll-driven klal change
-    // (updateActiveFromScroll) and every nav-panel jump, neither of which is
-    // the reviewer clicking a specific word. scanFocusCorr from whichever
-    // klal was last focused would otherwise carry into this new klal's page,
-    // and isFocused's match is by word_index alone (not scoped to the klal
-    // the click actually happened in) - a coincidental same word_index in
-    // the new klal then renders a focus ring on the wrong word. FIXED
-    // 2026-08-20 (dashboard regression: misplaced/erratic highlight boxes).
-    if (!manualPageLock) showPage(k.page, klalId, null);
+    document.title = byRoot()
+      ? `${entryRefHe(klalId)} · ${(CORPUS && CORPUS.title) || 'Review'}`
+      : `${unitName()} ${klalId} (${unitNameHe()} ${hebNum(klalId)}) · ${(CORPUS && CORPUS.title) || 'Review'}`;
   }
+  return k;
 }
 
 // THE KLAL A JUMP ASKED FOR, WHEN THE PANE CANNOT PUT IT AT THE READING LINE.
@@ -4773,3 +4879,116 @@ textScroll.addEventListener('scroll', () => {
 });
 
 init();
+
+
+// ---------------------------------------------------------------------------
+// WHICH TEXT THE MIDDLE PANE SHOWS (item 0GC, reviewer 2026-09-13: "can we offer
+// a toggle to switch between: their ocr; our ocr; their corrected text; the
+// master corrected text"). MASTER is part1.json - our OCR plus every applied
+// ruling - and is the only view a ruling can be recorded in: flags, word links
+// and the scan highlight are all master word indices, which the other three
+// texts do not share. Those three are read-only references.
+let TEXT_VIEW = 'master';
+const VERSIONS = {};
+
+function setupTextView() {
+  const sel = document.getElementById('text-view');
+  if (!sel || !CORPUS) return;
+  const avail = { master: true, ours_ocr: !!CORPUS.has_ocr_baseline,
+                  theirs_ocr: !!CORPUS.has_their_ocr,
+                  theirs_corrected: !!CORPUS.has_their_corrected };
+  if (!avail.ours_ocr && !avail.theirs_ocr && !avail.theirs_corrected) return;
+  const who = CORPUS.comparison_name || 'Their';
+  [...sel.options].forEach(o => {
+    o.hidden = !avail[o.value];
+    if (o.value === 'theirs_ocr') o.textContent = `${who} OCR`;
+    if (o.value === 'theirs_corrected') o.textContent = `${who} corrected`;
+  });
+  sel.hidden = false;
+  sel.onchange = () => { TEXT_VIEW = sel.value; rerenderMountedBlocks(); };
+}
+
+function rerenderMountedBlocks() {
+  document.querySelectorAll('.klal-block[data-mounted="true"]').forEach(block => {
+    const kid = parseInt(block.dataset.klalId, 10);
+    if (TEXT_VIEW === 'master') {
+      if (mountedKlal[kid]) renderKlalBody(block, mountedKlal[kid]);
+    } else {
+      renderAltBody(block, kid);
+    }
+  });
+}
+
+function fetchVersions(kid) {
+  if (!VERSIONS[kid]) {
+    VERSIONS[kid] = fetch(`/api/klal/${kid}/versions`)
+      .then(r => (r.ok ? r.json() : null)).catch(() => null);
+  }
+  return VERSIONS[kid];
+}
+
+async function renderAltBody(block, kid) {
+  const view = TEXT_VIEW;
+  const v = await fetchVersions(kid);
+  if (TEXT_VIEW !== view) return;   // switched again while this was loading
+  const body = block.querySelector('.klal-body');
+  body.className = 'klal-body alt-view';
+  const who = (CORPUS && CORPUS.comparison_name) || 'Their';
+  const label = {
+    ours_ocr: 'Our OCR (DocAI) as built, before any correction',
+    theirs_ocr: `${who} OCR, unreviewed`,
+    theirs_corrected: `${who} corrected text`,
+  }[view];
+  const text = v && v[view];
+  const covers = (view !== 'ours_ocr' && v && v.theirs_covers) ? v.theirs_covers.filter(x => x !== kid) : [];
+  const shared = covers.length ? ` — their entry for this root also covers ${unitWord()} #${covers.join(', #')}` : '';
+  if (!text) {
+    const why = view === 'theirs_corrected'
+      ? `${who} has not sent a corrected version of this ${unitWord()}.`
+      : view === 'theirs_ocr' ? `${who} has no entry with this root.`
+      : 'No OCR baseline has been frozen for this book.';
+    body.innerHTML = `<div class="alt-banner">${escapeHtml(label)} &mdash; ${escapeHtml(why)}</div>`;
+    return;
+  }
+  // Their citations are editorial insertions, not text this edition prints -
+  // marked, not merged (reviewer 2026-09-13: citations as separate markup).
+  const marked = escapeHtml(text)
+    .replace(/\(([^()]{1,80})\)/g, '<span class="alt-citation">($1)</span>');
+  body.innerHTML = `<div class="alt-banner">${escapeHtml(label + shared)} &mdash; read-only. `
+    + `Flags, rulings and word links are on Master.</div><div class="alt-text">${marked}</div>`;
+}
+
+// A REDRAW AFTER A SAVE honours the text view (code review 2026-09-13, finding 4).
+// The five save/refresh paths called renderKlalBody(), which always draws
+// Master, so a ruling saved while the pane showed another text flipped that
+// entry to Master under a selector still naming the other view.
+function redrawKlalBody(block, k) {
+  if (TEXT_VIEW === 'master') renderKlalBody(block, k);
+  else renderAltBody(block, parseInt(block.dataset.klalId, 10));
+}
+
+// THE CITED VERSE, as evidence and never as a choice (item 0GE; reviewer
+// 2026-09-14: "this is a direct quote from the Torah - are we not checking
+// that?"). What a verse can settle is a LETTER. It cannot settle how this edition
+// SPELLS a word: the Masoretic text is another book (Lesson 38), and Sefaria asked
+// for fidelity to the edition. Klal 21: the verse was right about `באדם` (w127)
+// and wrong about this page's plene `לעולם` (w128).
+function verseHtml(w) {
+  const v = w && w.verse;
+  if (!v) return '';
+  const said = {
+    THEIRS: 'The verse has their reading, not ours.',
+    OURS: 'The verse has our reading, not theirs.',
+    both: 'Both readings occur in the verse.',
+    neither: 'Neither reading is in the verse - the print may depart from the Masoretic text here, or this word is not part of the quotation.',
+    uncorroborated: 'The quotation could not be matched to the cited verse, so the verse cannot rule here.',
+  }[v.verdict] || '';
+  const caveat = (v.spelling_only && v.verdict !== 'uncorroborated')
+    ? ' <b>Spelling difference only (vav/yod):</b> the verse shows the Bible’s spelling, not this edition’s, so it cannot settle how the page spells the word - the ink decides.'
+    : '';
+  const link = v.url ? `<a href="${escapeAttr(v.url)}" target="_blank" rel="noopener">${escapeHtml(v.ref)}</a>` : escapeHtml(v.ref || '');
+  return `<div class="panel-section"><div class="panel-label">Cited verse &middot; ${link}`
+    + (v.note ? ` &middot; printed ${escapeHtml(v.note)}` : '') + `</div>`
+    + (v.text ? `<div class="verse-text" dir="rtl">${escapeHtml(v.text)}</div>` : '')
+    + `<div style="font-size:12px;color:var(--ink-faint);">${escapeHtml(said)}${caveat}</div></div>`;
+}

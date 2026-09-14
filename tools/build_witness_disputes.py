@@ -58,14 +58,11 @@ sys.path.insert(0, os.path.dirname(_HERE))
 sys.path.insert(0, os.path.join(os.path.dirname(_HERE), "pipeline"))
 import corpus_io as cio  # noqa: E402
 
-FINALS = str.maketrans("ךםןףץ", "כמנפצ")
 EDITORIAL = re.compile(r"[\[\]]")
 
-
-def root_key(text):
-    """Root identifier: NFKC, strip points, fold finals."""
-    t = cio.HEBREW_PUNCT.sub("", cio.strip_points(unicodedata.normalize("NFKC", text)))
-    return t.translate(FINALS)
+# One copy, in corpus_io, since 2026-09-13: the server now matches entries to
+# another digitization's texts with it too (item 0GC).
+root_key = cio.root_key
 
 
 def text_words(text):
@@ -99,7 +96,8 @@ def text_words(text):
 
 
 def disputes_for(entry_words, witness_words):
-    """Aligned differences as (opcode, corpus_index, corpus_span, witness_span).
+    """Aligned differences as (opcode, corpus_index, corpus_span, witness_span),
+    an equal-length replace split into one row per differing word.
 
     `corpus_index` is a position in `clean_text.split(' ')` (see text_words),
     not in the filtered word list the alignment runs over.
@@ -110,6 +108,25 @@ def disputes_for(entry_words, witness_words):
     rows = []
     for tag, i1, i2, j1, j2 in sm.get_opcodes():
         if tag == "equal":
+            continue
+        # ONE ROW PER WORD when both sides have the same number of words
+        # (item 0GE, reviewer 2026-09-14). A two-word replace bundled two
+        # independent differences: klal 21 w127 `בארם לעולם` / `באדם לעלם` is a
+        # misread dalet AND a plene/defective spelling, the page prints `באדם
+        # לעולם`, and no offered reading could be right - 51 queue rows were
+        # that shape. Pieces sharing one corpus position (a maqaf-joined word)
+        # stay together: two rows at one word would claim one token.
+        if tag == "replace" and i2 - i1 == j2 - j1 and i2 - i1 > 1:
+            pieces = {}
+            for k in range(i2 - i1):
+                ci, wj = entry_words[i1 + k], witness_words[j1 + k]
+                if ci[0] == wj[0]:
+                    continue
+                cs, ws = pieces.setdefault(ci[2], ([], []))
+                cs.append(ci[1])
+                ws.append(wj[1])
+            for pos in sorted(pieces):
+                rows.append(("replace", pos, pieces[pos][0], pieces[pos][1]))
             continue
         if i1 < len(entry_words):
             pos = entry_words[i1][2]
@@ -147,6 +164,39 @@ def classify_dispute(corpus, witness):
     return "other"
 
 
+def root_groups(klalim):
+    """{root_key: [entries sharing that root, in corpus order]}.
+
+    Sefer HaShorashim has HOMOGRAPH entries - two headings on one root (`אלה`,
+    `ארש`, `בכה`, `בלה`, `גרש`; root_entries.json confirms each pair) - and the
+    witness keys its texts by root, so it holds ONE text for both, running the
+    two headings together. A {root: entry} dict kept only the last of each pair,
+    so 5 entries were never compared (code review 2026-09-13, finding 3).
+    """
+    groups = {}
+    for k in klalim:
+        groups.setdefault(root_key(k.get("gematria") or ""), []).append(k)
+    return groups
+
+
+def group_disputes(entries, witness_text):
+    """disputes_for() over a root's entries JOINED IN ORDER against the
+    witness's one text, each difference mapped back to (entry, word_index in
+    that entry, opcode, corpus_span, witness_span).
+
+    For a single-entry root this is exactly disputes_for(). A difference that
+    straddles two entries is attributed to the entry where it starts.
+    """
+    ew, bases, base = [], [], 0
+    for k in entries:
+        bases.append((base, k))
+        ew.extend((w, raw, base + pos) for w, raw, pos in text_words(k["clean_text"]))
+        base += len(cio.words_of(k))
+    for tag, g, corpus_span, wit_span in disputes_for(ew, text_words(witness_text)):
+        b, k = next((b, k) for b, k in reversed(bases) if b <= g)
+        yield k, g - b, tag, corpus_span, wit_span
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -160,7 +210,7 @@ def main():
     args = ap.parse_args()
 
     klalim = cio.load_klalim(cio.PART1_PATH)
-    by_root = {root_key(k.get("gematria", "")): k for k in klalim}
+    groups = root_groups(klalim)
 
     all_rows = []
     stats = {}
@@ -168,16 +218,14 @@ def main():
         name, path = spec.split("=", 1)
         with open(os.path.expanduser(path), encoding="utf-8") as fh:
             witness = json.load(fh)
-        shared = [r for r in by_root if root_key(r) in
-                  {root_key(x) for x in witness}]
-        wit_by_key = {root_key(x): v for x, v in witness.items()}
-        n_disp = n_words = 0
-        for root in shared:
-            k = by_root[root]
-            ew = text_words(k["clean_text"])
-            ww = text_words(wit_by_key[root])
-            n_words += len(ew)
-            for tag, idx, corpus_span, wit_span in disputes_for(ew, ww):
+        wit_by_key = {root_key(x): (v if isinstance(v, str) else " ".join(v))
+                      for x, v in witness.items()}
+        shared = [key for key in groups if key in wit_by_key]
+        n_disp = n_words = n_entries = 0
+        for key in shared:
+            n_entries += len(groups[key])
+            n_words += sum(len(text_words(k["clean_text"])) for k in groups[key])
+            for k, idx, tag, corpus_span, wit_span in group_disputes(groups[key], wit_by_key[key]):
                 if max(len(corpus_span), len(wit_span)) > args.max_span:
                     continue
                 n_disp += 1
@@ -196,7 +244,8 @@ def main():
                     "class": classify_dispute(" ".join(corpus_span),
                                               " ".join(wit_span)),
                 })
-        stats[name] = {"shared_entries": len(shared), "corpus_words": n_words,
+        stats[name] = {"shared_entries": n_entries, "shared_roots": len(shared),
+                       "corpus_words": n_words,
                        "disputes": n_disp}
 
     ed = sum(1 for r in all_rows if r["editorial"])

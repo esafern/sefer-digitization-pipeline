@@ -188,6 +188,16 @@ def load_punctuation_candidates(part_num=1):
 # (DocAI 91.2% vs Tesseract 3.8% across the 419 items).
 WITNESS_PRIORITY_VERDICTS = ("B", "NEITHER")
 
+def load_witness_queue_meta():
+    """The witness queue file's top-level facts - everything except the rows.
+
+    tools/build_witness_review_queue.py records there what the dashboard needs to
+    describe a row honestly: the witness's name, its measured accuracy, and each
+    tier's measured agreement with the witness's own corrected text (item 0GC)."""
+    q = _load_json("reconstruction_witness_queue.json", {})
+    return {k: v for k, v in q.items() if k != "queue"} if isinstance(q, dict) else {}
+
+
 WITNESS_QUEUE_FILTERED = True
 
 def load_witness_queue():

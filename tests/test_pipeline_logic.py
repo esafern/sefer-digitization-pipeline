@@ -9550,3 +9550,117 @@ def test_a_witness_dispute_word_index_is_a_position_in_clean_text_split():
     assert corpus.split(" ")[pos] == "הנחלי", (
         f"word_index {pos} names {corpus.split(' ')[pos]!r} in clean_text.split(' ') - "
         "the index is being taken from the filtered alignment list again")
+
+
+def test_a_witness_tier_says_what_the_disagreement_is_not_a_fallback():
+    """Item 0GC. `C_both_attested` was the FALLBACK for every row whose OUR word
+    was in the lexicon, so its note - "both readings are real Hebrew words" - was
+    shown for `מתאוה`/`טתאוה`, where theirs is not a word at all. Each shape of
+    disagreement has its own tier now; the first assertion below fails on the
+    old tier_for, which returned C_both_attested for it.
+    """
+    import build_witness_review_queue as bwq
+
+    lex = {"מתאוה", "סדום", "סדם", "אבן", "אבני", "גמליהם", "גדוליהם", "מצות"}
+    tier = lambda o, t, cls=None: bwq.tier_for(
+        o.split(), t.split(), lex, cls, o, t)
+    assert tier("מתאוה", "טתאוה") == "C_theirs_unattested"
+    assert tier("סדום", "סדם") == "C_spelling_vav_yod"
+    assert tier("גדוליהם", "גמליהם") == "C_both_attested"
+    assert tier("מצותי", "מצות", "footnote_numeral") == "C_footnote_marker"
+    # klal 1 w37: `אַבִּ` + superscript 3, read as a final nun. Both are words,
+    # so it landed in C_both_attested before (reviewer, 2026-09-13).
+    assert tier("אבן", "אב") == "C_footnote_marker"
+    assert tier("והרש", "והרש.") == "C_markup"
+    assert tier("", "אבן") == "one_side_empty"
+    # the negative control for the spelling test: a real letter change is NOT
+    # a vav/yod spelling difference
+    assert not bwq.only_vav_yod("פרט", "סרט")
+    assert bwq.only_vav_yod("לבוש", "לבש")
+
+
+def test_book_vocabulary_defaults_to_klal_when_the_book_declares_none():
+    """Item 0GC. A book.json without a `ui` block keeps every label the dashboard
+    always had, so Yad Malachi's screens do not change; the root key the server
+    and the disputes builder share is ONE function."""
+    import build_witness_disputes as bwd
+    saved = cio._CORPUS_ROOT_OVERRIDE
+    with tempfile.TemporaryDirectory() as root:
+        cio.set_corpus_root(root)
+        try:
+            v = cio.ui_vocabulary()
+            assert v == {"unit": "Klal", "unit_plural": "Klalim", "unit_he": "כלל",
+                         "entry_ref": "number"}, v
+            assert cio.comparison_texts() == {"name": None, "their_ocr": None,
+                                              "their_corrected": None}
+        finally:
+            cio.set_corpus_root(saved)
+    assert bwd.root_key is cio.root_key
+    assert cio.root_key("אֵבֶן") == cio.root_key("אבנ") == "אבנ"
+
+
+def test_an_unchanged_word_in_the_corrected_text_is_not_agreement():
+    """Item 0GC, reviewer 2026-09-13: "I suspect those are words they did *not*
+    correct". A word the witness's corrector never touched reads the same in both
+    of their layers whether or not anyone checked it, so it must be reported as
+    UNCHANGED - never as the corrector siding with their OCR. The old verdict()
+    returned "theirs" for the first case below."""
+    import build_witness_review_queue as bwq
+    assert bwq.corrected_status("עודנו", "עדנו", "עדנו") == "unchanged"
+    assert bwq.corrected_status("פרי", "נורי", "פרי") == "changed_to_ours"
+    assert bwq.corrected_status("גמרה", "גמרה ", "גרמה") == "same_letters"
+    assert bwq.corrected_status("אבן", "אב", "אבי") == "changed_to_other"
+    # klal 18 w8 (reviewer): their OCR `רוח,`, corrected `רוח ,` - the corrector
+    # moved a comma. Same letters, different strings: not "unchanged".
+    assert bwq.corrected_status("רוה", "רוח,", "רוח ,") == "punctuation_only"
+
+
+def test_a_homograph_pair_is_compared_against_the_one_text_that_covers_both():
+    """Code review 2026-09-13, finding 3. The witness keys its texts by root, so a
+    homograph pair (`אלה`, `ארש`, `בכה`, `בלה`, `גרש`) has ONE text running both
+    headings together. A {root: entry} dict kept only the last entry of each pair,
+    so the other was never compared. Both entries are aligned jointly now and a
+    difference lands on its own entry at its own word."""
+    import build_witness_disputes as bwd
+    e1 = {"klal_id": 7, "gematria": "אלה", "clean_text": "האלף והלמד וההא הרפה . ואת אלית"}
+    e2 = {"klal_id": 8, "gematria": "אלה", "clean_text": "האלף והלמד וההא הנראת . אלוה מתימן יבא"}
+    theirs = "האלף והלמד וההא הרפה . ואת אלית האלף והלמד וההא הנראת . אלוה מתימן יבוא"
+    groups = bwd.root_groups([e1, e2])
+    assert list(groups.values()) == [[e1, e2]]
+    rows = list(bwd.group_disputes(groups[bwd.root_key("אלה")], theirs))
+    assert [(k["klal_id"], idx, span) for k, idx, _t, span, _w in rows] == [(8, 7, ["יבא"])], rows
+
+
+def test_an_nli_page_that_reads_as_its_neighbour_is_a_failure_not_inconclusive():
+    """Code review 2026-09-13, finding 1. A drifted page scores its OWN page low,
+    and the old rule tested "own page below the bar" first - filing the one
+    failure the offset check exists for as INCONCLUSIVE, exit 0. p48 was exactly
+    this: its image read as p49 at 0.594."""
+    import verify_nli_page_offset as vnp
+    drift = {"page": 48, "nli_index": 8, "ink_index": 9,
+             "text_scores": {"45": 0.0, "46": 0.01, "47": 0.02, "48": 0.05,
+                             "49": 0.594, "50": 0.1, "51": 0.0}}
+    assert vnp.classify(drift, 0.20) == "FAIL"
+    blank = {"page": 650, "nli_index": 610,
+             "text_scores": {"647": 0.0, "648": 0.0, "649": 0.0, "650": 0.0, "651": 0.0}}
+    assert vnp.classify(blank, 0.20) == "INCONCLUSIVE"
+    good = {"page": 58, "nli_index": 18, "ink_index": 18,
+            "text_scores": {"57": 0.18, "58": 0.85, "59": 0.2}}
+    assert vnp.classify(good, 0.20) == "PASS"
+    assert vnp.classify(dict(good, ink_index=26), 0.20) == "TEXT_ONLY"
+
+
+def test_a_multi_word_difference_becomes_one_row_per_word():
+    """Item 0GE (reviewer, klal 21 w127). `בארם לעולם` / `באדם לעלם` was ONE row
+    bundling a misread dalet and a plene/defective spelling; the page prints
+    `באדם לעולם`, so no offered reading could be right. Equal-length spans now
+    split per word. Maqaf-joined pieces share a corpus position and must stay ONE
+    row, or two rows would claim one word's token."""
+    import build_witness_disputes as bwd
+    rows = bwd.disputes_for(bwd.text_words("כמו לא ידון רוחי בארם לעולם ויש"),
+                            bwd.text_words("כמו לא ידון רוחי באדם לעלם ויש"))
+    assert [(pos, c, w) for _t, pos, c, w in rows] == [
+        (4, ["בארם"], ["באדם"]), (5, ["לעולם"], ["לעלם"])], rows
+    rows = bwd.disputes_for(bwd.text_words("ראה את־כל הארץ"),
+                            bwd.text_words("ראה אות־כול הארץ"))
+    assert [(pos, c, w) for _t, pos, c, w in rows] == [(1, ["את", "כל"], ["אות", "כול"])], rows

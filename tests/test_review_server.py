@@ -460,7 +460,7 @@ def test_clicking_a_word_puts_it_in_the_address_bar(fixture_server, page):
     page.wait_for_timeout(800)      # let the mount settle before clicking into it
     page.eval_on_selector('#klal-block-3 [data-word-index="2"]', "el => el.click()")
     page.wait_for_timeout(800)
-    assert page.evaluate("location.hash") == "#klal=3&word=2"
+    assert page.evaluate("location.hash") == "#entry=3&word=2"
     assert page.test_errors == []
 
 
@@ -490,7 +490,7 @@ def test_correction_panel_header_copies_the_reference_and_link(fixture_server, p
     assert "Klal 2" in copied and "Word #3" in copied, copied
     # the PASTE-SAFE path form, not the hash form: `&` is routinely truncated
     # when a URL is pasted into a terminal or a chat window
-    assert "/klal/2/word/3" in copied, copied
+    assert "/entry/2/word/3" in copied, copied
     assert page.test_errors == []
 
 
@@ -507,7 +507,7 @@ def test_shareable_path_link_redirects_to_the_deep_link(fixture_server, page):
     page.goto(fixture_server + "/klal/2/word/3", wait_until="domcontentloaded", timeout=15000)
     page.wait_for_selector(".nav-item", timeout=15000)
     page.wait_for_timeout(2500)
-    assert page.url.endswith("/#klal=2&word=3"), page.url
+    assert page.url.endswith("/#entry=2&word=3"), page.url
     assert page.eval_on_selector(".nav-item.active", "el => el.dataset.klalId") == "2"
     assert page.eval_on_selector_all(".routed-word", "els => els.length") >= 1
     assert page.test_errors == []
@@ -547,7 +547,7 @@ def test_hovering_any_word_offers_its_reference_and_a_copy_control(server, page)
     page.wait_for_timeout(500)
     copied = page.evaluate("navigator.clipboard.readText()")
     assert "Klal 66" in copied and "Word #10" in copied and "סו" in copied, copied
-    assert "/klal/66/word/10" in copied, copied   # the paste-safe path form
+    assert "/entry/66/word/10" in copied, copied   # the paste-safe path form
     assert page.test_errors == []
 
 
@@ -1824,7 +1824,7 @@ def test_a_row_in_the_word_list_navigates_to_its_word(server, page):
     }""")
     page.eval_on_selector("#flag-list-panel .flag-list-item", "el => el.click()")
     page.wait_for_timeout(1200)
-    assert page.evaluate("() => location.hash") == f"#klal={target['klal']}&word={target['word']}"
+    assert page.evaluate("() => location.hash") == f"#entry={target['klal']}&word={target['word']}"
     ringed = page.locator(
         f"#klal-block-{target['klal']} [data-word-index='{target['word']}'].routed-word")
     assert ringed.count() >= 1, (
@@ -1880,7 +1880,7 @@ def test_clicking_a_word_copies_its_link_and_says_so(server, page):
     assert "Link copied" in toast and f"#{index}" in toast, toast
 
     copied = page.evaluate("() => navigator.clipboard.readText()")
-    assert copied.endswith(f"/klal/1/word/{index}"), (
+    assert copied.endswith(f"/entry/1/word/{index}"), (
         f"the clipboard does not hold this word's link: {copied!r}")
     # The SAME payload the hover card's own copy button produces - two copy
     # affordances yielding different text for one word would be worse than one.
@@ -4421,4 +4421,37 @@ def test_a_resize_long_after_arriving_still_does_not_chase_the_word(server, page
         "resizing the pane scrolled the focused word into view - refitScanToPane "
         "is re-centring outside the focus-arrival window, which is item 0DJ's "
         "stutter restored")
+    assert page.test_errors == []
+
+
+def test_clicking_a_word_in_another_klal_makes_that_klal_the_active_one(fixture_server, page):
+    """Reviewer, 2026-09-13: "when i click on a word in a diff klal - the popup and
+    scan jump there, but the index stays where it was and the scan header doesn't
+    change". focusWordOnScan() moved the scan to the word's page and never told
+    the index or either header, which all read `_headerKlalId` - set only by the
+    reading-line observer. So the scan showed klal 2's word under a header naming
+    klal 1.
+
+    The target is a klal-2 word ALREADY ON SCREEN, and the test asserts the click
+    scrolled nothing: otherwise the reading-line observer could move the label on
+    its own and the test would pass against the very defect (Lesson 43).
+    """
+    page.goto(fixture_server + "/#entry=1", wait_until="domcontentloaded", timeout=15000)
+    page.wait_for_selector(".nav-item", timeout=15000)
+    page.wait_for_timeout(2200)
+    assert page.eval_on_selector(".nav-item.active", "el => el.dataset.klalId") == "1"
+    target = page.evaluate("""() => {
+      const pane = document.getElementById('text-scroll').getBoundingClientRect();
+      const w = [...document.querySelectorAll('#klal-block-2 [data-word-index]')].find(el => {
+        const r = el.getBoundingClientRect(); return r.top > pane.top && r.bottom < pane.bottom; });
+      return w ? w.dataset.wordIndex : null; }""")
+    assert target is not None, "no klal-2 word is on screen with klal 1 active - the precondition"
+    before = page.evaluate("document.getElementById('text-scroll').scrollTop")
+    page.eval_on_selector(f'#klal-block-2 [data-word-index="{target}"]', "el => el.click()")
+    page.wait_for_timeout(1200)
+    assert page.evaluate("document.getElementById('text-scroll').scrollTop") == before, (
+        "the click scrolled the text pane, so the observer - not the click - may have moved the label")
+    assert page.eval_on_selector(".nav-item.active", "el => el.dataset.klalId") == "2", "the index stayed on the old klal"
+    assert page.inner_text("#text-ref-en").strip() == "Klal 2", page.inner_text("#text-ref-en")
+    assert "Klal 2" in page.inner_text("#page-indicator"), page.inner_text("#page-indicator")
     assert page.test_errors == []

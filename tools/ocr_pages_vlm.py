@@ -48,7 +48,7 @@ sys.path.insert(0, _HERE)
 import fitz  # noqa: E402
 import corpus_io as cio  # noqa: E402
 import vision_adjudication_common as vac  # noqa: E402
-from experiment_scan_source import inkbox, profile, find_nli_page  # noqa: E402
+from experiment_scan_source import nli_text_crop, find_nli_page  # noqa: E402
 
 PROMPT = (
     "You are a literal OCR reader for 19th-century Hebrew typography. This is a "
@@ -115,12 +115,7 @@ def main():
                 skipped.append((page, round(corr, 3)))
                 print(f"  p{page}: SKIPPED, best page match {corr:.2f}")
                 continue
-            im = Image.open(path)
-            box = inkbox(im, 150, 0.02, inset=0.06)
-            if box:
-                pad = 40
-                im = im.crop((max(0, box[0] - pad), max(0, box[1] - pad),
-                              min(im.width, box[2] + pad), min(im.height, box[3] + pad)))
+            im = nli_text_crop(Image.open(path))
             label = f"nli {os.path.basename(path)} (corr {corr:.2f})"
 
         buf = io.BytesIO()

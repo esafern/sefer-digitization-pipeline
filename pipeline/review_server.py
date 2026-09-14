@@ -836,12 +836,23 @@ def api_corpus():
     index.html is one more place a second book would have to be edited. The
     values live in corpus_io, with every other fact about the corpus.
     """
+    _comparison = cio.comparison_texts()
     return {
         "title": cio.WORK_TITLE,
         "title_he": cio.WORK_TITLE_HE,
         "section": cio.WORK_SECTION,
         "section_he": cio.WORK_SECTION_HE,
         "edition": cio.WORK_EDITION,
+        # What an entry is called (Klal / Shorash) and how it is referred to -
+        # by number or by root. Item 0GC.
+        **cio.ui_vocabulary(),
+        # Whether the text-view toggle has anything to switch to, and whose.
+        "comparison_name": _comparison["name"],
+        "has_ocr_baseline": os.path.exists(cio.repo_path(cio.OCR_BASELINE_NAME)),
+        "has_their_ocr": bool(_comparison["their_ocr"]
+                              and os.path.exists(_comparison["their_ocr"])),
+        "has_their_corrected": bool(_comparison["their_corrected"]
+                                    and os.path.exists(_comparison["their_corrected"])),
     }
 
 
@@ -1189,6 +1200,9 @@ def api_klal(klal_id):
         # unaffected.
         if _claim_word_index(queue, wi, "witness_overlay", {
                 "docai_token_index": w["docai_token_index"],
+                # The index ON THE PAGE, for the context endpoint; docai_token_index
+                # may be entry-relative (build_witness_review_queue, item 0GD).
+                "page_token_index": w.get("page_token_index"),
                 "tier": w.get("tier"),
                 "docai_reading": w.get("docai_reading"),
                 "tesseract_reading": w.get("tesseract_reading"),
@@ -1196,6 +1210,15 @@ def api_klal(klal_id):
                 # app.js. Absent, the frontend keeps the historical name.
                 "witness_name": w.get("witness_name"),
                 "witness_accuracy": w.get("witness_accuracy"),
+                # Item 0GC: the master's word now, and the witness's own
+                # corrected reading where it has reviewed the entry.
+                "master_reading": w.get("master_reading"),
+                "corrected_reading": w.get("corrected_reading"),
+                "corrected_name": w.get("corrected_name"),
+                "entry_reviewed": w.get("entry_reviewed"),
+                "corrected_status": w.get("corrected_status"),
+                # The cited verse, as evidence for the panel (item 0GE).
+                "verse": w.get("verse"),
                 "current_decision": witness_decided.get((klal_id, w["docai_token_index"])),
         }) is not None:
             continue
@@ -1204,11 +1227,18 @@ def api_klal(klal_id):
             "opcode": "witness",
             "klal_id": klal_id,
             "docai_token_index": w["docai_token_index"],
+            "page_token_index": w.get("page_token_index"),
             "tier": w.get("tier"),
             "docai_reading": w.get("docai_reading"),
             "tesseract_reading": w.get("tesseract_reading"),
             "witness_name": w.get("witness_name"),
             "witness_accuracy": w.get("witness_accuracy"),
+            "master_reading": w.get("master_reading"),
+            "corrected_reading": w.get("corrected_reading"),
+            "corrected_name": w.get("corrected_name"),
+            "entry_reviewed": w.get("entry_reviewed"),
+            "corrected_status": w.get("corrected_status"),
+            "verse": w.get("verse"),
             "vision_selected": w.get("vision_selected"),
             "vision_transcription": w.get("vision_transcription"),
             "final_text": None,
@@ -1656,6 +1686,53 @@ def api_post_punctuation_decision(body):
     return record
 
 
+def api_klal_versions(klal_id):
+    """The four texts of one entry, for the text pane's view toggle (item 0GC).
+
+        master            part1.json now - our OCR plus every applied ruling
+        ours_ocr          the frozen OCR baseline (tools/snapshot_ocr_baseline.py)
+        theirs_ocr        the comparison digitization's unreviewed text
+        theirs_corrected  its corrected text, where it has sent one
+
+    Each is None when its source has nothing for this entry. Matched to the
+    other digitization by ROOT (cio.root_key); two entries sharing a root - a
+    homograph - get the same text there, which the reviewer should know. Read
+    fresh off disk on every request, like every other endpoint here.
+    """
+    part_num = _get_part_num_for_klal(klal_id)
+    klalim_by_id, _ = _load_klalim(part_num=part_num)
+    k = klalim_by_id.get(klal_id)
+    if not k:
+        return None
+    out = {"master": k.get("clean_text", ""), "ours_ocr": None,
+           "theirs_ocr": None, "theirs_corrected": None}
+    base_path = cio.repo_path(cio.OCR_BASELINE_NAME)
+    if os.path.exists(base_path):
+        with open(base_path, encoding="utf-8") as fh:
+            e = (json.load(fh).get("entries") or {}).get(str(klal_id))
+        if e:
+            out["ours_ocr"] = " ".join(e["words"])
+    comp = cio.comparison_texts()
+    key = cio.root_key(k.get("gematria") or "")
+    for view, src in (("theirs_ocr", "their_ocr"), ("theirs_corrected", "their_corrected")):
+        p = comp.get(src)
+        if not (p and key and os.path.exists(p)):
+            continue
+        with open(p, encoding="utf-8") as fh:
+            texts = {cio.root_key(r): v for r, v in json.load(fh).items()}
+        v = texts.get(key)
+        if v is not None:
+            out[view] = v if isinstance(v, str) else " ".join(v)
+    out["comparison_name"] = comp.get("name")
+    # Their one text per root runs a homograph pair together, so it covers
+    # more than this entry; say which, rather than show it as this entry's
+    # (code review 2026-09-13, finding 3).
+    covers = [kk["klal_id"] for kk in klalim_by_id.values()
+              if cio.root_key(kk.get("gematria") or "") == key]
+    out["theirs_covers"] = sorted(covers) if len(covers) > 1 else None
+    return out
+
+
 def api_witness_summary():
     """Pages carrying witness items + tier counts. Needed because these are
     CONTINUATION-ONLY pages (no klal marker of their own), so they are absent
@@ -1672,7 +1749,12 @@ def api_witness_summary():
         e["total"] += 1
         e["decided"] += 1 if d else 0
         tiers[w.get("tier")] = tiers.get(w.get("tier"), 0) + 1
-    return {"pages": [pages[k] for k in sorted(pages)], "by_tier": tiers, "total": len(q)}
+    meta = rdata.load_witness_queue_meta()
+    return {"pages": [pages[k] for k in sorted(pages)], "by_tier": tiers, "total": len(q),
+            # Measured per-tier agreement with the witness's corrected text, so
+            # the panel states a rate instead of a blanket claim (item 0GC).
+            **{k: meta.get(k) for k in ("tier_stats", "corrected_name",
+                                        "reviewed_entries", "witness_name")}}
 
 
 def api_post_witness_decision(body):
@@ -2173,15 +2255,22 @@ def _manual_snapshot(klal_id, word_index, original_word):
 # ---------- HTTP plumbing ----------
 
 ROUTE_KLAL = re.compile(r"^/api/klal/(\d+)$")
-# Shareable, terminal-safe deep links. `/#klal=66&word=135` is the form the
+# Shareable, terminal-safe deep links. `/#entry=66&word=135` is the form the
 # frontend actually routes on, but it travels badly: a terminal will not
 # hyperlink Markdown link syntax at all, and many that DO linkify a bare URL
 # stop at the `&` - producing a link that opens the right klal at the wrong
 # word, which is worse than one that plainly fails. A path has no `#` and no
 # `&`, so it survives being pasted anywhere. ADDED 2026-08-26 (reviewer: "sadly
 # those links you shared here in the chat are not clickable").
-ROUTE_SHARE = re.compile(r"^/klal/(\d+)(?:/word/(\d+))?/?$")
+#
+# BOOK-NEUTRAL since 2026-09-13 (item 0GC; reviewer: "the url is user-facing").
+# `/entry/<n>/word/<m>` is what the dashboard hands out, for every book - one
+# scheme, not a per-book word in the address. `/klal/...` and `#klal=` still
+# resolve, permanently: the status files and the ledger's notes carry hundreds
+# of them, and a link that stops working is worse than an old-fashioned one.
+ROUTE_SHARE = re.compile(r"^/(?:entry|klal)/(\d+)(?:/word/(\d+))?/?$")
 ROUTE_KLAL_FLAG = re.compile(r"^/api/klal/(\d+)/flag$")
+ROUTE_KLAL_VERSIONS = re.compile(r"^/api/klal/(\d+)/versions$")
 ROUTE_TITLE_HISTORY = re.compile(r"^/api/klal/(\d+)/title-history$")
 ROUTE_DECISIONS = re.compile(r"^/api/decisions/(\d+)/(\d+)$")
 ROUTE_PAGE = re.compile(r"^/api/page/(\d+)$")
@@ -2283,7 +2372,7 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send_json(api_word_states(part_num=part_val))
             m = ROUTE_SHARE.match(path)
             if m:
-                target = "/#klal=" + m.group(1)
+                target = "/#entry=" + m.group(1)
                 if m.group(2) is not None:
                     target += "&word=" + m.group(2)
                 self.send_response(302)
@@ -2291,6 +2380,12 @@ class Handler(BaseHTTPRequestHandler):
                 self.send_header("Content-Length", "0")
                 self.end_headers()
                 return
+            m = ROUTE_KLAL_VERSIONS.match(path)
+            if m:
+                payload = api_klal_versions(int(m.group(1)))
+                if payload is None:
+                    return self._send_error_json(404, "entry not found")
+                return self._send_json(payload)
             m = ROUTE_KLAL_FLAG.match(path)
             if m:
                 return self._send_json(api_klal_flag(int(m.group(1))))

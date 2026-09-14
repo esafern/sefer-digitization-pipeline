@@ -468,6 +468,9 @@ def main():
             "sefaria": "https://www.sefaria.org/{}.{}{}".format(
                 book.replace(" ", "_"), ch, f".{v}" if v else ""),
             "verdict": verdict,
+            # The verse itself, pointed, so a reviewer can read it beside the
+            # readings (item 0GE); markup and entities stripped for display.
+            "verse_text": " ".join(TAGS.sub("", ENTITY.sub(" ", text)).split()),
         })
 
     tally = collections.Counter(r["verdict"] for r in rows)

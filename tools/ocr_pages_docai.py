@@ -63,7 +63,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(_HERE), "pipeline"))
 sys.path.insert(0, _HERE)
 import fitz  # noqa: E402
 import corpus_io as cio  # noqa: E402
-from experiment_scan_source import inkbox  # noqa: E402
+from experiment_scan_source import nli_text_crop  # noqa: E402
 # The converter that produced docai_word_boxes/ for the corpus - reused so the new
 # token pages are in EXACTLY the format build_root_corpus.py reads.
 from extract_docai_pages import document_to_tokens  # noqa: E402
@@ -137,12 +137,7 @@ def page_png(doc, nli_files, page, source, offset, dpi):
         idx = page + offset
         if not (0 <= idx < len(nli_files)):
             return None, None
-        im = Image.open(nli_files[idx])
-        box = inkbox(im, 150, 0.02, inset=0.06)
-        if box:
-            pad = 40
-            im = im.crop((max(0, box[0] - pad), max(0, box[1] - pad),
-                          min(im.width, box[2] + pad), min(im.height, box[3] + pad)))
+        im = nli_text_crop(Image.open(nli_files[idx]))
     buf = io.BytesIO()
     im.convert("RGB").save(buf, format="PNG", optimize=True)
     png = buf.getvalue()

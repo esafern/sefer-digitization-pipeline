@@ -74,6 +74,23 @@ def inkbox(im, thr, frac, inset=0.0):
     return (ox + int(cols[0]), oy + int(rows[0]), ox + int(cols[-1]), oy + int(rows[-1]))
 
 
+def nli_text_crop(im, pad=40):
+    """The NLI photograph cropped to its text block - THE page image for NLI.
+
+    Every OCR tool sends this crop, so every token they return is normalised to
+    it, and `tools/build_nli_page_pdf.py` embeds exactly this crop as the book's
+    page so the dashboard and the vision crops share the tokens' coordinate
+    space (item 0GC). It was three hand-copied blocks until 2026-09-13; a fourth
+    copy that differed by one pixel of padding would misplace every box on the
+    page with no error anywhere (Lesson 13 THE SECOND COPY OF THE TRUTH).
+    """
+    box = inkbox(im, 150, 0.02, inset=0.06)
+    if not box:
+        return im
+    return im.crop((max(0, box[0] - pad), max(0, box[1] - pad),
+                    min(im.width, box[2] + pad), min(im.height, box[3] + pad)))
+
+
 def profile(im, box, n=200):
     a = np.asarray(im.crop(box).convert("L").resize((140, n)), dtype=float)
     r = (a < ((a.min() + a.max()) / 2)).astype(float).mean(axis=1)

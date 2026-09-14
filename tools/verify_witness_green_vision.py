@@ -127,6 +127,7 @@ def collect():
         chosen = (dec.get("chosen_text") or "").strip()
         if q is None or q.get("word_index") is None:
             rows.append({"klal_id": kid, "docai_token_index": tok, "word_index": None,
+                         "page_token_index": (q.get("page_token_index", tok) if q else tok),
                          "chosen_text": chosen, "corpus_span": None, "page": q["page"] if q else None,
                          "bbox": q.get("bbox") if q else None, "status": "unmapped"})
             continue
@@ -134,6 +135,7 @@ def collect():
         words = corpus.get(kid, [])
         span = " ".join(words[wi:wi + max(1, len(chosen.split()))])
         rows.append({"klal_id": kid, "docai_token_index": tok, "word_index": wi,
+                     "page_token_index": q.get("page_token_index", tok),
                      "chosen_text": chosen, "corpus_span": span, "page": q["page"],
                      "bbox": q.get("bbox"),
                      "status": "agree" if span == chosen else "disagree"})
@@ -171,7 +173,9 @@ def main():
 
     doc = fitz.open(PDF_PATH)
     for i, r in enumerate(todo, 1):
-        context = vwv.build_context(r["page"], r["docai_token_index"])
+        # page_token_index: build_context indexes the PAGE, and docai_token_index
+        # may be entry-relative (build_witness_review_queue, item 0GD).
+        context = vwv.build_context(r["page"], r["page_token_index"])
         crop = vac.crop_pdf_bounding_box(doc, r["page"], r["bbox"], padding=0.02, dpi=300)
         print(f"[{i}/{len(todo)}] klal {r['klal_id']} w{r['word_index']} p{r['page']}: "
               f"corpus {r['corpus_span']!r} / ruling {r['chosen_text']!r}")

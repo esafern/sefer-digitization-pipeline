@@ -43,7 +43,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(_HERE), "pipeline"))
 sys.path.insert(0, _HERE)
 import fitz  # noqa: E402
 import corpus_io as cio  # noqa: E402
-from experiment_scan_source import inkbox  # noqa: E402
+from experiment_scan_source import nli_text_crop  # noqa: E402
 
 
 def vision_text(client, png, hints=("he",)):
@@ -92,12 +92,7 @@ def main():
             if not (0 <= idx < len(nli_files)):
                 print(f"  p{page}: no NLI image at index {idx}")
                 continue
-            im = Image.open(nli_files[idx])
-            box = inkbox(im, 150, 0.02, inset=0.06)
-            if box:
-                pad = 40
-                im = im.crop((max(0, box[0] - pad), max(0, box[1] - pad),
-                              min(im.width, box[2] + pad), min(im.height, box[3] + pad)))
+            im = nli_text_crop(Image.open(nli_files[idx]))
         buf = io.BytesIO()
         im.convert("RGB").save(buf, format="PNG", optimize=True)
         png = buf.getvalue()

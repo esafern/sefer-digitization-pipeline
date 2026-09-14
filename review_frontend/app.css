@@ -1555,3 +1555,13 @@ textarea.custom-text, input.custom-text {
    may show rulings belonging to whatever else passed through it. */
 .h-basis { font-size: 11px; color: var(--ink-faint); margin: 0 0 6px; }
 .h-basis-weak { color: var(--pending); }
+
+/* Text-view toggle and the read-only views (item 0GC). */
+#text-header { position: relative; }
+#text-view { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: 12px; }
+.klal-body.alt-view .alt-banner { font-size: 12px; color: var(--ink-faint); margin: 4px 0 8px; direction: ltr; text-align: left; }
+.klal-body.alt-view .alt-text { white-space: pre-wrap; line-height: 1.9; }
+.alt-citation { color: var(--accent); font-size: 0.85em; }
+
+/* The cited verse in the witness panel (item 0GE). */
+.verse-text { font-size: 16px; line-height: 1.9; color: var(--ink); margin: 2px 0 4px; }

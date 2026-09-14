@@ -101,6 +101,503 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0GF. **[2026-09-14, reviewer: "are there still unsurfaced corrections or
+    disputes?"] YES - INVENTORIED BY CLASS. THE BIGGEST IS ~1,370 WORDS OF
+    APPARATUS-LIKE TEXT IN THE BODY THAT NO DISPUTE EVER SHOWS.** HaShorashim,
+    measured on the 2026-09-14 build (2,054 disputes, 1,945 served).
+
+    * **Served and drawn: all of it.** 0 queue rows share a word; the server
+      holds no witness row the text pane cannot draw.
+    * **109 disputes not served.** 54 are Sefaria's bracketed `[...]` insertions,
+      skipped as editorial by design (`[י]צמח`, `[או]`) - a filter that hides
+      (Lesson 26); whether the brackets are PRINTED is unchecked. 55 cannot be
+      anchored - mostly one-sided insert/delete, including moved words (klal 18:
+      `הזאת` at w37 on one side, w49 on the other).
+    * **52 differences longer than 4 words are DROPPED** by
+      `build_witness_disputes.py --max-span 4` as "an alignment failure" - and
+      they are the most serious rows (Lesson 26). 41 are runs only OUR text has,
+      **1,368 words, 35 of them carrying apparatus vocabulary** (`מוסיף`, `חסר`,
+      `בע`, `עיין`...) - Bacher's footnote apparatus left in the body text, e.g.
+      <http://127.0.0.1:8421/entry/4/word/135> (a 72-word run beginning
+      `לא יצמח נער מוסיף`). Mostly INHERITED: the pre-rebuild corpus had 42
+      such runs, 1,207 words (885 apparatus-like); today's has 1,112
+      apparatus-like - about 160 words worse. 3 are runs only THEY have: entry
+      15 w140 is really our entry 16 (`אג`) - their data has no `אג` key and
+      runs it into the previous entry, so entry 16 is never compared at all;
+      <http://127.0.0.1:8421/entry/201/word/77> (13 words from `מה בצע בדמי`)
+      and <http://127.0.0.1:8421/entry/314/word/180> (the section heading
+      `המאמר הרביעי...`) are unchecked. 8 are long replacements, some of them
+      their writing out an abbreviated quotation.
+    * **3 Sefaria corrections where our OCR equals theirs**, so no dispute exists
+      and nothing shows them:
+      <http://127.0.0.1:8421/entry/56/word/209> (`נזאיר ולרזנים` -> `ג'זאיר.
+      ולרוזנים או`), <http://127.0.0.1:8421/entry/69/word/23> (`גמרה` ->
+      `גרמה`), <http://127.0.0.1:8421/entry/87/word/53> (`כלי` -> `כל'`);
+      plus 9 citations they added. (A first count said 25; it included the
+      dropped long spans above - corrected.)
+    * **The two lost headings** (`0GC`): `suspect_merge` on entries 84, 189, 190
+      is still rendered nowhere.
+    * **Yad Malachi, not re-measured today:** `0CO` (164 red words outside the
+      ranked queue, 2026-09-07) and `0CV` (136 detector positions no route
+      reaches) are still open as recorded.
+
+0GE. **[2026-09-14, reviewer: "this is a direct quote from the Torah - are we
+    not checking that?"] THE VERSE CHECK EXISTS, RUNS, AND REACHES NO SCREEN - AND
+    SHOWN AS A VERDICT IT WOULD IMPOSE THE BIBLE'S SPELLING ON THIS EDITION.**
+
+    The case: <http://127.0.0.1:8421/entry/21/word/127>, stored `בארם לעולם`,
+    quoting [Genesis 6:3](https://www.sefaria.org/Genesis.6.3) (footnote 20,
+    `(בראשית ו, ג)`). The PAGE prints `באדם לעולם` - and the dalet cannot be
+    read by eye: at this scan's resolution it is shape-identical to a resh (a 5x
+    crop first looked like `בארם`). It was settled by a CONTROL: the certain
+    dalet of `האדמה` (`הנלקח מן האדמה`) on the line above has the same glyph,
+    and the word is the entry's own root, `אדם`. DocAI read that one glyph shape
+    as dalet in `האדמה` and as resh here. (This line was first written as
+    "crop read at 5x" before the 5x crop had been looked at - corrected.) The verse
+    reads `בָֽאָדָם֙ לְעֹלָ֔ם` - letters `באדם לעלם`. So: our OCR `בארם לעולם`
+    misreads the dalet; Sefaria's `באדם לעלם` (OCR and corrected alike) carries
+    the Bible's defective `לעלם` where this printing has the plene `לעולם`. NO
+    candidate is what the page prints, and the verse is right about the dalet
+    and not about the vav.
+
+    `tools/adjudicate_against_verse.py` (`0FF`) reaches this row and rules
+    THEIRS - both of their words are in the verse. Rerun 2026-09-14 on today's
+    1,905 disputes: 1,477 reach a cited verse; THEIRS 547, OURS 18, both 11,
+    neither 195, uncorroborated 706. It writes a file nothing in `pipeline/` or
+    `review_frontend/` reads (Lesson 32 PRINTING IS NOT RUNNING).
+
+    **Of the 547 THEIRS verdicts, 379 differ only by a vav/yod** - where the
+    Masoretic text is evidence about the Bible's spelling, not this compositor's
+    (Lesson 38 ANOTHER BOOK IS NOT A SECOND OPINION; Sefaria's own standard is
+    fidelity to the edition). 133 are real letter differences, where the verse
+    IS strong evidence; 20 mix both; 15 are unequal spans.
+
+    **Spans bundle independent differences.** 125 queue rows are multi-word
+    spans of equal length on both sides; 51 of them mix a letter difference with
+    a vav/yod one (w127 among them), so no offered reading can be right and the
+    reviewer must type a custom one.
+
+    **BUILT 2026-09-14 (reviewer: "go").** (i) `disputes_for()` splits an
+    equal-length replace into one row per differing word; maqaf pieces sharing a
+    corpus position stay one row, so no two rows claim one token. Disputes
+    1,905 -> 2,054; anchored 1,945; klal 21 is now w127 `בארם`/`באדם` (tier
+    C_both_attested) and w128 `לעולם`/`לעלם` (C_spelling_vav_yod). (ii) The verse
+    tool writes the pointed `verse_text`; `build_witness_review_queue.py
+    --verse-verdicts` attaches a `verse` record to each row - ref, Sefaria link,
+    the note as printed, the verse, the verdict and `spelling_only`; the server
+    passes it; the panel shows "Cited verse" as EVIDENCE, never a selectable
+    reading, and for a spelling-only difference says the verse cannot settle
+    this edition's spelling. Of 1,597 rows with a cited verse: THEIRS 159 +
+    417 spelling-only, OURS 12 + 9 spelling-only, both 6 + 4, neither 117 + 91,
+    uncorroborated 480 + 302. Verified: 0 duplicate keys, 314/314 entries 200,
+    0 wrong-page rows, 0 context mismatches. Test:
+    `test_a_multi_word_difference_becomes_one_row_per_word`.
+
+0GD. **[2026-09-13] CODE REVIEW (high) OF `3006efe..HEAD` PLUS THE UNCOMMITTED
+    TREE: 7 FINDINGS, ALL VERIFIED, NONE TOUCHES THE LEDGER OR `part1.json`.**
+    Counts below are measured, not the reviewer-agent's estimates.
+
+    **ALL SEVEN FIXED 2026-09-13/14 (reviewer: "go ahead fix"):**
+    * 1: `classify()` tests a drift FIRST and `summarize()` re-judges every stored
+      record: p48 is now FAIL and the tool exits 1 (272 PASS / 323 TEXT_ONLY /
+      16 INCONCLUSIVE / 1 FAIL). Test: `..._reads_as_its_neighbour_is_a_failure_...`.
+    * 2: rows are anchored to the WORD ALIGNMENT's own token
+      (`scan_alignment.word_bboxes_resolved`, the server's own resolver), with a
+      letters fallback that must be unique across ALL the entry's pages. Rows on
+      a page other than their word's: 31 -> **0**. And it fixed most of `0GC`'s
+      unreachable disputes: **anchored 826 of 1,847 -> 1,798 of 1,905** (1,794
+      by the alignment); "word repeats on page" 329 -> 6; "no usable token"
+      643 -> 49.
+    * 3: `root_groups()`/`group_disputes()` align a homograph pair JOINTLY
+      against the witness's one text and map each difference back to its entry
+      - Sefaria keys by root and runs both headings together (`ארש`'s text holds
+      `האל'ף והרי'ש והשי'ן` twice). 308 -> 313 entries compared; disputes 1,847
+      -> 1,905. The queue's corrected-text step uses the same pairing; the
+      versions endpoint returns `theirs_covers` and the read-only view says
+      "their entry for this root also covers shoresh #N". `בכה`/`בלה` are real
+      second entries (root_entries.json has both), not duplicates.
+      Test: `test_a_homograph_pair_is_compared_against_the_one_text_...`.
+    * 4: the five save/refresh redraws go through `redrawKlalBody()`, which
+      honours the text view. No test (the fixture has no comparison texts).
+    * 5: fixed with the reviewer's `punctuation_only` report (below).
+    * 6: the PDF builder compares the recorded `nli_file`, not only the index.
+    * 7: the ink search is centred on the offset under test (±`INK_WINDOW`), and
+      the check renders the base PDF `page_image_sources.json` records, never
+      the assembled full-tone PDF.
+
+    **A REGRESSION THE FIX FOR 2 CAUSED, AND ITS FIX.** With rows on their words'
+    own pages, (132, 138) existed on both p99 and p100; review_data's guard - which
+    documents exactly this risk: "(klal_id, docai_token_index) alone - NOT page" -
+    raised, and **every HaShorashim entry returned HTTP 500** until fixed. The
+    guard did its job. `docai_token_index` is now ENTRY-relative (offset of the
+    entry's earlier pages + index on the page), so the ledger key stays unique
+    without adding a page to it; the page-relative index travels as
+    `page_token_index` for the context endpoint, `verify_witness_vision` and
+    `verify_witness_green_vision`. Yad Malachi's queue (another producer, one
+    page per klal) is untouched. Verified: 0 duplicate keys, 314/314 entries 200,
+    0 wrong-page rows, and the popup's context bracket lands on the row's own
+    word for all 1,798 rows. Gate 537 passed.
+
+    **UI suite: 107 passed, 1 skipped on an undisturbed run.** An earlier run
+    showed 16 failed - self-inflicted, Lesson 44 DO NOT MUTATE A TREE YOU ARE
+    EDITING: while it ran I restarted the dashboards twice with
+    `pkill -f 'pipeline/review_server.py'`, which also matches the fixture
+    servers the suite spawns, and edited served files under it. Restart the
+    dashboards by the PID on :8420/:8421 (`lsof -ti tcp:8420`), never by pattern,
+    while any test run is live.
+
+    1. MEDIUM `tools/verify_nli_page_offset.py` - an offset drift is reported
+       INCONCLUSIVE, not FAIL: a shifted page scores the right page below
+       `MIN_TEXT_SCORE`, which is tested FIRST, and `summarize()` exits 0 unless
+       FAIL. It already happened: **p48 is INCONCLUSIVE while p49's text scores
+       0.594 against its image** - a real off-by-one, outside 58-151. The PDF
+       builder refuses INCONCLUSIVE pages, so no wrong image was embedded.
+    2. MEDIUM `tools/build_witness_review_queue.py` - each dispute is anchored on
+       `d["page"]`, the entry's START page (`build_witness_disputes.py`), so a
+       word on a continuation page is searched on the wrong page. **31 of 823
+       served rows sit on a page other than their word's**, e.g.
+       <http://127.0.0.1:8421/entry/23/word/93> (`אדירים`, anchored p62, word on
+       p63) - a unique same-letter token on the start page takes the box. The
+       rest land in "no usable token" (part of the 1,021 unreachable, `0GC`).
+    3. MEDIUM `tools/build_witness_disputes.py` - `by_root` keeps the LAST entry
+       per root; **5 roots have two entries** (`אלה`, `ארש`, `בכה`, `בלה`, `גרש`),
+       so 5 entries are never compared and get no rows. The mirror in
+       `corrected_positions()` compares both of a pair against one corrected text.
+       Note `בכה`/`בלה` are the two headings `0GC` recorded as "gained".
+    4. LOW `review_frontend/app.js` `saveWitnessDecision` - redraws with
+       `renderKlalBody` regardless of the text-view toggle, so a save while on a
+       non-master view flips that entry to Master under an unchanged selector.
+    5. LOW `app.js` `witnessTierNote` - omits `same_letters`, so a `C_markup`
+       note's counts do not sum to its total.
+    6. LOW `tools/build_nli_page_pdf.py` - checks the NLI INDEX against the
+       offset check but never the recorded `nli_file`, so a different glob or
+       folder embeds a different photo while the check passes.
+    **Reviewer report, same day (<http://127.0.0.1:8421/entry/18/word/8>,
+    stored `רוה`):** (a) the popup said Sefaria's corrected reading was
+    "(unchanged)" while showing `רוח` against their OCR `רוח,` - the corrector
+    moved the comma, and `corrected_status()` compared letters only. A
+    `punctuation_only` status now covers "same letters, different visible
+    string" (12 of 245 reviewed rows). (b) The popup named the shoresh but not
+    its number; the label is now "Shoresh אגפ (#18)". (c) Finding 5 below is
+    fixed with (a): the tier note counts every status. (d) "Header says entry 17,
+    index points to 17" did NOT reproduce: 10 attempts - 1100x800 to 1920x1080,
+    cold load and hash change, long jumps from entries 120/200/300, header
+    sampled at 0.3/0.7/1.5/3/6 s - all showed 18 in header, index and scan pane.
+    **RESOLVED by the reviewer's next report:** "when i click on a word in a diff
+    klal - the popup and scan jump there, but the index stays where it was and
+    the scan header doesn't change." Every attempt above ARRIVED by link; the
+    defect needs a CLICK. `focusWordOnScan()` (the funnel every word click goes
+    through) moved the scan to the word's page and never told the index or the
+    two headers, which read `_headerKlalId` - set only by `setActiveKlal()`, i.e.
+    by the reading-line observer. Clicking a word in the klal below the reading
+    line left all three naming the klal above. Pre-existing, both books.
+    FIXED: `setActiveKlal()` split into `markActiveKlal()` (labels only) plus the
+    start-page `showPage()`; `focusWordOnScan()` calls `markActiveKlal()` and
+    records `lastActiveKlalId`, so the next scroll re-syncs to the reading line
+    as the scan page already did. Not `setActiveKlal()`, whose start-page
+    `showPage()` would undo the word's page (the `0CA` shape).
+    `test_clicking_a_word_in_another_klal_makes_that_klal_the_active_one` failed
+    on the defect first ('1' == '2'), passes now; it asserts the click scrolled
+    nothing, so the observer cannot pass it by accident (Lesson 43). Siblings:
+    the scan-box click and every list/deep link route through `focusWordOnScan`
+    or `applyHashRoute`/`setActiveKlal`, and their tests pass.
+
+    7. LOW `tools/verify_nli_page_offset.py` - the "ink" signal is not
+       independent: `find_nli_page` searches offsets -45..-33 only, and now that
+       `scan_pdf` names the full-tone PDF, a rerun compares the NLI crop with
+       itself on 58-151.
+
+0GC. **[2026-09-13, reviewer: "rebuild after confirming the offset"] THE NLI
+    REBUILD HAS A BLOCKER 0FZ NEVER EXERCISED: NLI TOKENS ARE IN A DIFFERENT
+    COORDINATE SPACE FROM EVERY IMAGE THE DASHBOARD AND THE VISION CROPS USE.**
+
+    **The offset check is built:** `tools/verify_nli_page_offset.py`, two signals
+    per page - Tesseract `heb` on the NLI image against the Google Books layer of
+    pages p-3..p+3 (the neighbours are the negative control), and
+    `find_nli_page`'s ink-profile search. Prototype on 58/75/92/400/640: right
+    page 0.72-0.85, every neighbour 0.04-0.21, so -40 already holds at 400 and
+    640. Trial: p59 is `TEXT_ONLY` - the ink search picked index 26, not 19 -
+    which is `0FU`'s warning reproduced, and why ink is the second signal. Full
+    sweep writing to `~/work/hashorashim/nli_page_offset_check.jsonl`.
+
+    **The corpus pages are confirmed, on ONE signal.** Pages 58-151: 94 of 94
+    have the right page best on text, smallest margin over any neighbour 0.311.
+    The ink search agrees on 69 and picks a different image on 25, so this is
+    the text signal alone - the fixed offset holding contiguously is what makes
+    it acceptable, not a second independent agreement.
+
+    **Option (a) chosen by the reviewer and in progress** (pages 58-151 only; the
+    other 557 pages stay Google-sourced):
+    * `experiment_scan_source.nli_text_crop()` is now the one crop; the three
+      hand copies in `ocr_pages_docai/cloud_vision/vlm.py` call it. Pixel-identical
+      to the old inline code on 35/35 pages, and equal to the image DocAI records
+      having received (p58: DocAI `dimension` 1344x1917, crop 1344x1917; aspect
+      error 0.00000 on all 35).
+    * `tools/build_nli_page_pdf.py` (new) embeds that crop as the page, refusing
+      any page not verified at the offset; writes `page_image_sources.json`.
+    * `render_pdf_pages.py --verify` falls back, on a page with no text layer, to
+      a box-on-ink contrast check. Calibrated on p58 with the crossed pairings as
+      the negative control: same-source 5.34 / 6.90, crossed 1.10 / 0.86; bar 2.5.
+    * DocAI on NLI pages 93-151 running (59 pages; 58-92 existed). Pre-rebuild
+      tokens and page images kept as `docai_word_boxes_gb_bitonal/` and
+      `images/pdf_pages_gb_bitonal/`, both gitignored.
+    * `test_pipeline_logic.py` 470 passed after the refactor.
+
+    **Rebuilt 2026-09-13.** Offset sweep over all 651 pages: 0 FAIL; -40 holds
+    from p50 to p646. The INCONCLUSIVE pages (40-49, 601, 610, 647-651) are pages
+    whose Google layer holds no Hebrew - every candidate scores 0 - not drift.
+    DocAI read NLI pp93-151 with 0 failures. `book.json` `scan_pdf` ->
+    `Sefer_hashorashim_nli_fulltone.pdf` (111 MB; 94 NLI pages, 557 Google);
+    `scan_source` says which. `build_root_corpus.py` -> 314 entries; renders
+    94/94 pass the box-on-ink check.
+
+    Against the 100 reviewed entries (99 scorable, 13,619 words), the REAL build
+    reproduces `0FZ`'s slice figures exactly:
+
+        before   words 0.8956  chars 0.9576  nun/gimel 87
+        after    words 0.9287  chars 0.9663  nun/gimel  6
+
+    Witness queue 1,362 -> 826 anchored rows (disputes 2,793 -> 1,847); tier
+    `A_nun_gimel` 203 -> 24, `A_ours_not_a_word` 463 -> 200. Word ids reseeded
+    (43,821 words; the ledger is empty, so nothing pointed at the old ids).
+
+    Keyed by ROOT (not klal id), 312 roots are common: 0 page changes in the
+    corpus, 0 in the alignment; titles 210 identical, 46 spacing/punctuation, 56
+    letters - the sampled letter changes are all OCR fixes (`הנימל`->`הגימל`,
+    `הגון`->`הנון`, `היור`->`היוד`, `המס`->`המם`).
+
+    **DATA ISSUE, two headings lost and two gained**, all four confirmed as real
+    headings by `root_entries.json`:
+    * LOST: `אמר` (p87, the line merge `0FZ` recorded) and `במ` (p116) - their
+      text now sits inside the preceding entry.
+    * GAINED: `בכה` (p112) and `בלה` (p115), which the bitonal build had merged.
+
+    **The alignment guard tests a proxy (Lesson 41).** `build_header_alignment.py`
+    refused to write because 24 klalim "would change page" - klal 85 through 188,
+    exactly the ids between the lost `אמר` and the gained `בכה`. Keyed by root
+    there are 0 moves. The guard compares by `klal_id`, which aliases "this entry
+    moved page" and "entries were renumbered". Not fixed.
+
+    **My own defect, caught before it was used:** the first alignment comparison
+    reported "0 moves" because it read `page` from rows whose field is
+    `matched_page` - `None` vs `None` - Lesson 21, FLAT COORDINATE KEYS. The
+    first title/page comparisons also zipped entries by POSITION across the
+    renumbering; both redone keyed by root, which is where the figures above
+    come from.
+
+    **Verified end to end through the live :8421 server:** 314 klalim, 826 open;
+    the seven witness boxes `/api/page/58` serves were drawn on the image the
+    server serves (1344x1917, the crop) and every one sits on its word.
+
+    **The two lost headings, where their text sits now** (data issue):
+    * `אמר` - <http://127.0.0.1:8421/klal/84/word/126>, stored `והריש`, inside
+      `אמצ`: "...בספר והמם ההמם **והריש** והורים , . אמר..." (heading line
+      interleaved with the line below it).
+    * `במ` - <http://127.0.0.1:8421/klal/190/word/209>, stored `הבית`, inside
+      `בלת`: "...הבמות לא **הבית** סרו 24 והמם . על ויקרא..." (same shape).
+    The cross-check against `root_entries.json` covers every heading on 58-151
+    and finds exactly these two, so it is the sweep for this class.
+    **`suspect_merge` (klalim 84, 189, 190) is read by nothing** in `pipeline/`
+    or `review_frontend/` - the only field pointing at these is shown to no one
+    (Lesson 29 THE FIELD NOBODY RENDERS). Not fixed.
+
+    **A regression my rebuild caused, and fixed.** The rebuilt queue served
+    `witness_accuracy: None`, and the panel's fallback (`app.js:3693`) then told
+    the reviewer the 99.2% Sefaria witness "was measured correct in 16 of 419
+    such cases (3.8%), so it is shown for context, not as a competing reading".
+    The committed queue files carried 0.992 per row, but `git log -S` shows the
+    builder NEVER wrote it per row - it wrote only the top-level
+    `witness_word_accuracy`, which nothing that renders reads. So the value came
+    from a step outside the builder, and any rebuild would lose it.
+    `build_witness_review_queue.py` now writes it per row; served value 0.992 on
+    every row sampled. No test covers the builder, `verify_nli_page_offset.py`
+    or `build_nli_page_pdf.py`.
+
+    **2026-09-13, reviewer requests, built.** (i) "don't call them klalim": a
+    `ui` block in book.json (`cio.ui_vocabulary()`, defaults Klal) - HaShorashim
+    now reads "שורש אב" / "Shorash #1" in the headers, block heads, panels and
+    page title; Yad Malachi is unchanged. (ii) "once corrections are applied, why
+    would that change what is seen under docai ocr reading?": it would have -
+    `docai_reading` WAS the master word. `tools/snapshot_ocr_baseline.py` (new)
+    froze `ocr_baseline_part1.json` (314 entries, 43,821 words, each with its
+    word id; refuses once any apply_event exists) and the queue reads our OCR
+    from it through the stable id. (iii) Sefaria's corrected reading is on every
+    row in an entry they reviewed (97 entries). (iv) A text-pane toggle: Master /
+    Our OCR / Sefaria OCR / Sefaria corrected, via `/api/klal/<id>/versions`;
+    the three non-master views are read-only, and their inserted citations are
+    marked, not merged (reviewer's choice: separate markup).
+
+    **The tier note was false, and the tier behind it was a fallback.**
+    `tier_for()` returned `C_both_attested` for every row whose OUR word was in
+    the lexicon, whatever theirs was (`טתאוה` is not in it). Split by what the
+    disagreement is, measured against the corrected text on reviewed entries:
+
+        tier                  rows reviewed theirs ours neither
+        A_nun_gimel             24     5      3     2     0
+        A_ours_not_a_word      186    53     47     4     2
+        B_ours_unattested       55    11      4     7     0
+        C_both_attested        175    48     40     7     1
+        C_footnote_numeral      25     6      6     0     0
+        C_markup                 2     0      -     -     -
+        C_spelling_vav_yod     285   103    101     1     1
+        C_theirs_unattested     43     8      1     7     0
+        one_side_empty          31    11     11     0     0
+
+    **CAUTION on `C_spelling_vav_yod`'s 101/103:** their verse quotations are a
+    pointed Tanakh's text, and the corrector left most of them alone, so their
+    OCR and their corrected text agree there by construction - it is not
+    evidence about this page (e.g. klal 1 w20 `עודנו`/`עדנו`, Job 8:12). And
+    the old notes' "51 of 51" / "198 of 198" are gone: on the full-tone build
+    nun/gimel is 3/5 and ours-not-a-word 47/53.
+
+    **CORRECTION, same day - "unchanged" is not agreement (reviewer: "I suspect
+    those are words they did *not* correct").** The table above counted a row as
+    "theirs" whenever Sefaria's corrected text equals their OCR there. But a word
+    their corrector never touched reads the same in both layers whether or not
+    anyone checked it - it cannot disagree (Lesson 25). Split by what the
+    corrector actually DID, on the 245 reviewed rows:
+
+        left their OCR unchanged        213   no evidence either way
+        changed it TO OUR reading        28
+        changed it to something else      4
+
+    **Where they changed a disputed word, it was to our reading 28 times in 32.**
+    Every "theirs" figure above - and the auto-adopt argument built on them - was
+    counting untouched words. The queue now carries `corrected_status` per row,
+    the popup labels the corrected reading "(unchanged)" / "(changed - to our
+    reading)", and the tier note counts only changes.
+
+    **UI vocabulary, re-checked in pixels:** a rendered-DOM sweep of :8421 (text
+    nodes, title/placeholder/aria attributes, document.title; index, headers,
+    hover card, witness/flag/heading panels, settings) finds 0 strings with
+    klal/כלל; the same sweep on :8420 finds 876, so it can see them. The unit is
+    now spelled "Shoresh" (it was "Shorash", which is wrong). Still "klal": the
+    share URL (`/klal/<n>/word/<m>`, `#klal=`) and every internal identifier
+    (`klal_id` in the ledger, the API, the code) - a neutral name is a decision
+    put to the reviewer, not made here.
+
+    **DATA ISSUE CLASS: FOOTNOTE MARKERS READ INTO OUR WORDS** (reviewer found
+    one: <http://127.0.0.1:8421/entry/1/word/37>, stored `אַבְּן` - the page
+    prints `אַבִּ` with a superscript 3, and DocAI read the 3 as a final nun).
+    Swept: 135 of the 1,847 disputes have the shape "ours = theirs + 1-2 trailing
+    characters" (tails י 52, ל 25, ס 10, ן 9, ג 9, ו 7, ד 6, ם 5). 73 are in the
+    dashboard queue; **62 are not reachable in the dashboard at all** (see the
+    next paragraph). All 73 queue rows were cropped from the full-tone page
+    images and read BY EYE: about 59 show a superscript marker right after the
+    word - a numeral (3, 4, 5, 7, 9, 15, 16, 17, 19, 31) or a small raised mark
+    that is not a digit and that DocAI mostly reads as `ל`/`ס`; about 11 are
+    genuine readings with no marker (`החרבן`, `בחסרונו`, `הנערה`, `גויי`,
+    `שמספיק`, `כולהו`, `בכורתי`, `בעבועי`, `בערבי`, `אפ[ילו]`) and one is a
+    geresh read as yod (`נאי`); ~3 unclear. The old `footnote_numeral` rule saw
+    only a trailing yod/vav/quote and ALSO misfired on `כולהו`, which the page
+    prints. Code: a `C_footnote_marker` tier now covers the whole shape, with a
+    note that says it is a triage label checked by eye, not a verdict; the
+    footnote-numbering-gap signal was tried and is NOT used - its first form
+    counted 11,804 "missing" numerals, and restricted to small gaps it flags 23
+    of the 73 and misses most of the markers. The data fix is the reviewer's:
+    each row needs a ruling, and the marker itself belongs in the text as
+    demarcated footnote structure (`0CY`/`0DB` class), not deleted.
+
+    **A false line of mine, fixed:** the popup said "Master text now reads
+    `אבן`" on w37 when nothing had been applied - `master_reading` came from the
+    disputes file, which stores spans with points deleted, and our OCR keeps
+    them (`אַבְּן`). It now comes from part1.json's own words; 0 rows differ.
+
+    **1,021 OF 1,847 SEFARIA DISPUTES ARE NOT IN THE DASHBOARD.** The queue can
+    anchor a dispute only to a page token that matches our word exactly once:
+    329 fail because the word repeats on its page, 643 because no letter-bearing
+    token matches (a footnote marker glued into the word is one cause). They are
+    in `witness_disputes.json` and reachable by no route - Lesson 26, THE FILTER
+    THAT HIDES. Not fixed; the anchor could use the word index plus the
+    alignment, which every row already carries.
+
+    **Share links are book-neutral:** `/entry/<n>/word/<m>` and `#entry=`, with
+    `/klal/` and `#klal=` resolving permanently (START_HERE's reporting rule
+    updated). Internal identifiers stay `klal_id`/`klalId` - 7,635 occurrences in
+    code and tests, `klal_id` stored in 4,846 ledger rows and every API payload;
+    a rename is put to the reviewer as its own decision.
+
+    **Auto-adopt (reviewer chose "our OCR, auto-adopt evidence") is NOT done.**
+    No tier above is clean enough to adopt on one signal: ours-not-a-word would
+    import ~6 wrong words per 57. The next step is a second, independent signal -
+    the vision adjudicator on the FULL-TONE crops (`0FS`: 90% vs 18% on
+    nun/gimel) - measured on these reviewed rows before any rule is proposed.
+    Also: no code can apply a `witness_choice`; adoption needs that path.
+
+    **Still to do:** the corpus root's README "How to rebuild" does not yet list
+    the NLI steps or `--witness-accuracy`; `candidates_part1.json`,
+    `candidates_verified_part1.json`, `lexical_vision_report.json` and the gold
+    dispute files there predate the rebuild (none is read by the server). Nothing
+    is committed in either repo.
+
+    **The blocker.** Same word, same page, two token sets:
+
+        docai_word_boxes/page_58.json  'המאמר'  y1 0.2180   (Google PDF page)
+        nli_docai_layer/page_58.json   'המאמר'  y1 0.0193   (NLI photo, cropped)
+
+    `tools/ocr_pages_docai.py:141-145` crops each NLI image to its ink box before
+    sending it, so the returned boxes are normalised to that crop. But the scan
+    pane serves `images/pdf_pages/` rendered from `book.json`'s `scan_pdf`
+    (`review_server.py:72`), and the vision crops open the PDF
+    (`verify_corrections_vision.py:306`, `verify_flagged_candidates_vision.py:569`).
+    A corpus rebuilt from NLI tokens would put every word box and every vision
+    crop in the wrong place. `0FZ` measured text only, so it could not see this.
+    Options, the reviewer's call: (a) make the NLI crop the book's page image -
+    render `images/pdf_pages/` and the vision crops from it, which also gives the
+    reviewer and the adjudicator the full-tone scan `0FS` measured at 90% vs 18%
+    on nun/gimel; (b) register NLI coordinates onto the PDF page per page.
+
+    **Scope.** The corpus spans PDF pages 58-150 (314 entries, א-ב-ג). `0FZ`'s
+    "651 pages" is the whole dictionary, which the corpus does not cover yet.
+
+    **Tier A (`0FX`) should wait for the rebuild:** 203 of its 666 rows are
+    nun/gimel, the class full tone cuts 85 -> 6, and no code can apply a
+    `witness_choice` to the corpus (`0EA`, still true - the applier promotes
+    `candidate_choice`, `manual_correction`, `title_correction`).
+
+    **Correction to the TL;DR and to my own status report today:** `0BX` does not
+    need a policy decision. It was decided 2026-09-08 ("refuse and report", see
+    `0DM`) and implemented in `a03c313`.
+
+0GB. **[2026-09-13] STATUS SWEEP: THE TL;DR IS A WEEK STALE, AND THE AUDIO
+    WORKTREE HOLDS TWO UNCOMMITTED LEDGER ROWS.**
+
+    * **The TL;DR's "What is open, 2026-09-06" block and its "Eight items are
+      live" claim are stale.** The Open items section now holds item bodies from
+      `0BZ` through `0GA` plus `0BO` — dozens, not eight — and the whole of the
+      HaShorashim work (`0EC`-`0GA`) is absent from the TL;DR. Not rewritten here;
+      the TL;DR needs a deliberate pass, not a patch.
+    * **Live counts, Yad Malachi :8420, measured 2026-09-13 from `/api/klalim`:**
+      222 klalim, all `page_trusted`; `open_count` 619, `decided_count` 185,
+      `machine_resolved_count` 176, `machine_disputed_count` 443; 88 klalim
+      `needs_revisit`; punctuation 66 open / 1 decided; `title_pending` 0. Ledger
+      4,846 lines. Tests: 658 collected.
+    * **HaShorashim :8421:** 314 entries, 1,362 open, 0 decided, ledger empty — so
+      `0FZ`'s "queue is disposable" condition still holds.
+    * **`0GA`'s two stale servers (ports 64210, 65163) are no longer running.**
+    * **`../sefer-digitization-pipeline-audio`** (`feature/audio-transcript-review`,
+      9 commits ahead of `master`, last commit 2026-08-29) has uncommitted edits:
+      two appended `review_decisions.jsonl` rows, both `decision_type:
+      audio_transcript_edit` with `klal_id: 0` (not corpus rulings), and a
+      21,588-line diff to `transcript/rav_kook_lecture.json`. If that branch is
+      ever merged, those rows enter Yad Malachi's ledger under a klal id that does
+      not exist. Needs the reviewer's call: commit, discard, or give the audio
+      feature its own ledger (as `0GA` did for HaShorashim).
+
+      **Checked 2026-09-13: the rows cannot corrupt corpus data.** The branch
+      adds `audio_transcript_edit` to `VALID_DECISION_TYPES`, so the gated
+      type invariant would pass after a merge. Of the ten tools that read every
+      ledger row unfiltered, nine filter by `decision_type` or by klal
+      membership before using a row, and `backfill_word_ids.py:131-133` refuses a
+      ruling whose klal is not in `part1.json`. HaShorashim cannot see them at
+      all - its ledger is `~/work/hashorashim/review_decisions.jsonl`. The real
+      costs of a merge are elsewhere: the branch forked at `b7f2025`
+      (2026-08-27), so its +413-line `review_server.py` and +771-line `app.js`
+      conflict with two weeks of master; the append-only ledger conflicts at
+      its tail, where a careless resolution drops rows; and it commits an 18 MB
+      lecture recording (`audio/a-detailed-overview-of-rav-kook-...mp3`) and its
+      transcript into a PUBLIC repo. Not pushed anywhere as of today.
+
 0FB. **[2026-09-10] OUR TEXT vs SEFARIA'S *MANUALLY CORRECTED* TEXT, PUT TO THE
     INK: 56/44 ON 34 REAL READING DIFFERENCES. TOO CLOSE AND TOO SMALL TO CLAIM
     ANYTHING.**

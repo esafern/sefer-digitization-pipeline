@@ -93,6 +93,64 @@ def verify_page(out_dir, page_num, doc):
     return best >= 50.0, best
 
 
+# A token box that sits on its own word is several times inkier than the thin
+# bands just above and below it (the interline gaps). A box shifted onto another
+# line of text still sits on ink, which is why the measure is contrast, not ink.
+# Measured 2026-09-13 on HaShorashim pp58-151, 94 pages, with the crossed
+# pairing (NLI tokens on the Google image) as the negative control (Lesson 25):
+#     same source, NLI     min 2.07  median 4.35  max 7.54
+#     same source, Google  min 2.79  median 4.23  max 5.45
+#     crossed              min 0.81  median 0.99  max 1.21
+# The bar sits in that gap. It was first set at 2.5 from p58 alone and failed 10
+# correctly registered pages - p68, the lowest at 2.07, was drawn and every box
+# is on its word; tight leading puts the next line's ascenders in the bands.
+INK_CONTRAST_MIN = 1.6
+
+
+def ink_contrast(png_path, tokens):
+    """Mean ink inside the token boxes over mean ink in the bands around them."""
+    import numpy as np
+    from PIL import Image
+    a = np.asarray(Image.open(png_path).convert("L"), dtype=np.uint8)
+    h_img, w_img = a.shape
+    ink = a < (int(a.min()) + int(np.percentile(a, 95))) / 2
+    inside, bands = [], []
+    for t in tokens:
+        if len(t.get("text", "")) < 2:
+            continue
+        x1, x2 = int(t["x1"] * w_img), int(t["x2"] * w_img)
+        y1, y2 = int(t["y1"] * h_img), int(t["y2"] * h_img)
+        h = y2 - y1
+        g = max(1, int(0.35 * h))
+        if x2 <= x1 or h <= 2 or y1 - g < 0 or y2 + g > h_img:
+            continue
+        inside.append(ink[y1:y2, x1:x2].mean())
+        bands.append((ink[y1 - g:y1, x1:x2].mean() + ink[y2:y2 + g, x1:x2].mean()) / 2)
+    if len(inside) < 20:
+        return None
+    return float(np.mean(inside)) / max(1e-6, float(np.mean(bands)))
+
+
+def verify_tokens_on_ink(out_dir, page_num):
+    """Do docai_word_boxes/'s boxes land on their words in page_N.png?
+
+    The fallback for a page with no text layer - an NLI photograph assembled by
+    tools/build_nli_page_pdf.py has none. It checks REGISTRATION, not page
+    identity: a box set drawn in another image's coordinate space fails it
+    (item 0GC), but identity has to come from the page-offset check
+    (tools/verify_nli_page_offset.py). Returns (ok, ratio) or (None, None).
+    """
+    cache = os.path.join(cio.DOCAI_DIR, f"page_{page_num}.json")
+    png = os.path.join(out_dir, f"page_{page_num}.png")
+    if not (os.path.exists(cache) and os.path.exists(png)):
+        return None, None
+    with open(cache, encoding="utf-8") as fh:
+        ratio = ink_contrast(png, json.load(fh))
+    if ratio is None:
+        return None, None
+    return ratio >= INK_CONTRAST_MIN, ratio
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -150,21 +208,33 @@ def main():
     if args.verify:
         checked = bad = 0
         worst = []
+        by_how = {}
         for n in pages:
             if n < 1 or n > doc.page_count:
                 continue
             ok, pct = verify_page(out_dir, n, doc)
+            how = "text"
+            if ok is None:
+                ok, pct = verify_tokens_on_ink(out_dir, n)
+                how = "ink"
             if ok is None:
                 continue
             checked += 1
+            by_how[how] = by_how.get(how, 0) + 1
             if not ok:
                 bad += 1
-                worst.append((n, pct))
+                worst.append((n, how, pct))
         if checked:
-            print(f"  verified   {checked} pages against docai_word_boxes/, "
-                  f"{bad} below the 50% overlap bar")
-            for n, pct in worst[:8]:
-                print(f"     page {n}: {pct:.1f}%  <-- wrong page, or bad OCR on it")
+            print(f"  verified   {checked} pages against docai_word_boxes/ "
+                  f"({by_how.get('text', 0)} by text layer, {by_how.get('ink', 0)} "
+                  f"by box-on-ink contrast), {bad} failed")
+            for n, how, pct in worst[:8]:
+                if how == "text":
+                    print(f"     page {n}: {pct:.1f}% text overlap  <-- wrong page, "
+                          f"or bad OCR on it")
+                else:
+                    print(f"     page {n}: ink contrast {pct:.2f} < {INK_CONTRAST_MIN}"
+                          f"  <-- boxes not on their words")
         else:
             print("  verified   nothing - this PDF has no text layer to check "
                   "against, so page identity cannot be confirmed here. Use "

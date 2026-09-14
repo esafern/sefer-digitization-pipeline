@@ -677,10 +677,12 @@ again, and because a prose summary of code is not evidence about the code
 word.** Not "klal 198 has a problem", not "two words in klal 198" — the
 link, per position:
 
-    http://127.0.0.1:8420/klal/198/word/893
+    http://127.0.0.1:8420/entry/198/word/893
 
 That is `ROUTE_SHARE` (`review_server.py`), the PATH form, which the server
-302s to the hash route. Use the path form and not `#klal=198&word=893`:
+302s to the hash route. **`/entry/` since 2026-09-13** - one book-neutral word
+in the address for every book; `/klal/...` links written before then still
+resolve and need not be rewritten. Use the path form and not `#entry=198&word=893`:
 app.js already prefers it for anything copied out, because `&` gets
 truncated when a link is pasted into a terminal or a chat window. Give the
 stored word beside the link so the reviewer knows what they are going to

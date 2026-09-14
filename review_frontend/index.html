@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Yad Malachi — Correction Review</title>
-<link rel="stylesheet" href="/app.css?v=20">
+<link rel="stylesheet" href="/app.css?v=22">
 </head>
 <body>
 
@@ -80,6 +80,16 @@
         <span class="ph-ref ph-en" id="text-ref-en"></span>
         <span class="ph-title ph-en" data-slot="title-en"></span>
       </span>
+      <!-- WHICH TEXT (item 0GC, reviewer 2026-09-13): our OCR, another
+           digitization's OCR, their corrected text, or the master. Hidden unless
+           the book declares comparison texts; pinned out of the flow like the
+           index pane's settings button, so the centred group stays centred. -->
+      <select id="text-view" title="Which text this pane shows" hidden>
+        <option value="master">Master text</option>
+        <option value="ours_ocr">Our OCR</option>
+        <option value="theirs_ocr">Their OCR</option>
+        <option value="theirs_corrected">Their corrected</option>
+      </select>
     </div>
     <div id="text-scroll"></div>
   </div>
@@ -186,6 +196,6 @@
     <div class="panel-body" id="title-panel-body"></div>
   </div>
 
-  <script src="/app.js?v=15"></script>
+  <script src="/app.js?v=17"></script>
 </body>
 </html>
