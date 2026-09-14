@@ -448,6 +448,30 @@ def test_deep_link_lands_on_the_klal_and_rings_the_word(fixture_server, page):
     assert page.test_errors == []
 
 
+def test_a_root_is_shown_letter_period_letter_ending_in_its_final_form(fixture_server, page):
+    """Item 0GM (reviewer 2026-09-14: "shorashim should have periods"). A book
+    referred to by root shows `א.ג.ם`, not `אגמ`. The stored root is untouched
+    because it keys the comparison texts, and a book referred to by number gets
+    its numeral back unchanged. The fixture book is referred to by number, so
+    the root case is exercised by switching the served vocabulary in the page."""
+    _open_dashboard(page, fixture_server, klal_id=3)
+    got = page.evaluate("""() => {
+        const saved = CORPUS.entry_ref, savedG = klalById[3].gematria;
+        CORPUS.entry_ref = 'root';
+        klalById[3].gematria = 'אגמ';
+        const out = [rootDisplay('אגמ'), rootDisplay('בב'), rootDisplay('גרצ'),
+                     rootDisplay('אב'), entryRefName(3).includes('א.ג.ם'),
+                     entryRefHe(3).endsWith('א.ג.ם')];
+        CORPUS.entry_ref = 'number';
+        out.push(rootDisplay('סו'));
+        CORPUS.entry_ref = saved;
+        klalById[3].gematria = savedG;
+        return out;
+    }""")
+    assert got == ["א.ג.ם", "ב.ב", "ג.ר.ץ", "א.ב", True, True, "סו"], got
+    assert page.test_errors == []
+
+
 def test_clicking_a_word_puts_it_in_the_address_bar(fixture_server, page):
     """The address bar has to be copyable as-is, or the deep links are write-only.
     replaceState, not pushState: a reviewer moving through a klal must not have to

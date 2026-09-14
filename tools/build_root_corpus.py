@@ -66,7 +66,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(_HERE), "pipeline"))
 sys.path.insert(0, _HERE)
 import corpus_io as cio  # noqa: E402
 import fitz  # noqa: E402
-from detect_root_entries import match_heading, ALEPHBET  # noqa: E402
+from detect_root_entries import match_heading, root_order_key, ALEPHBET  # noqa: E402
 
 LINE_TOL = 0.006          # y distance within which tokens share a line
 SMALL_RATIO = 0.75        # a line is "small type" below this fraction of the page median
@@ -504,12 +504,51 @@ def recover_missed(stream, other_entries, threshold=0.75):
     return placed, log
 
 
-def segment(stream, forced=None):
-    """Split the body stream into entries at each heading line."""
+# FALSE HEADINGS (item 0GM). A line can parse as a heading and still be prose:
+# PDF p61 wraps `...ואחד מהם אגם בקבוץ / האלף והגימל. אבל זה הוא`, a vowel
+# description, and the wrapped half became entry 16 (`אג`). A parsed heading is
+# refused only when two signals agree (Lesson 9): its root breaks the book's
+# order (root_order_key), AND the line is flush where a heading is indented.
+# Measured over the 318 headings of pages 58-151: heading indent median 0.082
+# of the page width, body lines 0.002, this line 0.0007. The indent is taken
+# from the first word with a Hebrew letter, because a footnote numeral set out
+# in the margin (p109 `88 הבית והזין הכפולה`) makes a real heading look flush.
+HEADING_INDENT_MIN = 0.02
+COLUMN_EDGE_PCTL = 0.9    # the body column's right edge: most lines reach it
+
+
+def _column_right(stream):
+    """{page: right edge of the body column}, from its lines' right edges."""
+    edges = {}
+    for page, _text, toks in stream:
+        if toks:
+            edges.setdefault(page, []).append(max(t["x2"] for t in toks))
+    return {p: sorted(v)[int(COLUMN_EDGE_PCTL * (len(v) - 1))] for p, v in edges.items()}
+
+
+def _indent(toks, col_right):
+    """How far the line's first Hebrew word stands in from the column edge."""
+    first = next((t for t in toks if cio.hebrew_letters_only(t["text"])), None)
+    return col_right - first["x2"] if first else 0.0
+
+
+def segment(stream, forced=None, rejected=None):
+    """Split the body stream into entries at each heading line.
+
+    A parsed heading whose root breaks the book's order on a flush line is kept
+    as text and, when `rejected` is a list, recorded there as (page, root, text).
+    """
     forced = forced or {}
+    col = _column_right(stream)
     entries, cur = [], None
     for idx, (page, text, toks) in enumerate(stream):
         hit = match_heading(text)
+        if (hit and cur and idx not in forced
+                and root_order_key(hit[0]) < root_order_key(cur["root"])
+                and _indent(toks, col.get(page, 1.0)) < HEADING_INDENT_MIN):
+            if rejected is not None:
+                rejected.append((page, hit[0], text[:44]))
+            hit = None
         if not hit and idx in forced:
             # boundary supplied by the other OCR source; the heading text itself
             # is DocAI's garbled reading, kept as-is so the record shows what the
@@ -560,7 +599,8 @@ def main():
                 provisional.add(hit[0])
         forced, rec_log = recover_missed(stream, [e for e in other
                                                   if e["root"] not in provisional])
-    entries = segment(stream, forced)
+    false_heads = []
+    entries = segment(stream, forced, rejected=false_heads)
 
     print(f"  pages           {lo}-{hi}")
     print(f"  lines kept      {stats['body']} body")
@@ -571,6 +611,10 @@ def main():
     print(f"  doubled tokens  {stats['doubled']} dropped (DocAI returned one word twice "
           f"over the same ink)")
     print(f"  entries         {len(entries)}")
+    print(f"  false headings  {len(false_heads)} kept as text (root out of the book's "
+          f"order, on a flush line - item 0GM)")
+    for page, root, text in false_heads:
+        print(f"     {root:<5} p{page:<4} {text}")
 
     if rec_log:
         print(f"  recovered       {len(rec_log)} boundaries from the text layer "
@@ -617,8 +661,13 @@ def main():
             other = json.load(fh)["entries"]
         mine = {r["gematria"] for r in records}
         pages = {r["klal_id"]: r["page"] for r in records}
+        # A heading refused above as prose was refused on two signals, and the
+        # text layer parsing the same wrapped line is the same prose, not a third
+        # opinion: counting it as missed flagged all 7 entries on p61 (item 0GM).
+        refused = {(page, root) for page, root, _text in false_heads}
         missed = [e for e in other
-                  if lo <= e["page"] <= hi and e["root"] not in mine]
+                  if lo <= e["page"] <= hi and e["root"] not in mine
+                  and (e["page"], e["root"]) not in refused]
         by_page = {}
         for e in missed:
             by_page.setdefault(e["page"], []).append(e["root"])

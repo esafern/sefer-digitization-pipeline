@@ -101,6 +101,95 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0GM. **[2026-09-14, reviewer: "yes" to "entry 16 has never been compared"]
+    ENTRY 16 (`אג`) IS NOT AN ENTRY. IT IS A FALSE HEADING, AND `0GF` HAD THE
+    CAUSE BACKWARDS.** `0GF` said Sefaria's data "has no `אג` key and runs it
+    into the previous entry". Their data is right and our split is wrong. On
+    the ink (PDF p61) the words are running text:
+    `...ואחד מהם אגם בקבוץ / האלף והגימל. אבל זה הוא שדעתי נוטה אליו...`, which
+    says "אגם, with qibbutz under the aleph and the gimel". It is a vowel
+    description inside `אגמ` that wraps to the start of a line. That line is
+    flush, while every real heading is indented; the next line,
+    `האלף והגימל והנון.`, is. `build_root_corpus.segment()` splits at any line
+    that parses as a heading, so this one became an entry.
+    Four signals agree:
+    * the sense of the sentence;
+    * the layout: the line's indent is 0.0007 of the page width, against a
+      median of 0.082 for the 318 headings and 0.002 for body lines;
+    * the root order: `אג` follows `אגמ`, but a section heading opens its group;
+    * their text, which keeps these words inside `אגמ`.
+    **The order check.** `detect_root_entries.order_violations()` flags 17 of
+    317 adjacent pairs on this corpus. 16 of them are the book's own
+    arrangement, measured:
+    * each chapter opens with `X הכפולה` (`בב`, `גג`);
+    * the doubled root heads its two-letter group (`אלל` before `אלה`, `ברר`
+      before `ברא`).
+    With a key that encodes that arrangement, there is 1 violation in 318
+    headings, and it is this one. Lesson 0 was served in session: I had put the
+    fix to the reviewer as "split their entry 15 at `אג`", from one signal
+    (Lesson 9).
+    **FIXED 2026-09-14.**
+    * `detect_root_entries.root_order_key()` encodes the book's order.
+      `order_violations()` uses it, so the detector's `--check-order` stops
+      reporting the book's own arrangement.
+    * `build_root_corpus.segment()` refuses a parsed heading only when BOTH
+      signals hold: its root sorts before the current entry's, and its first
+      Hebrew word stands less than `HEADING_INDENT_MIN` = 0.02 in from the
+      column edge. The column edge is the 90th percentile of the page's line
+      ends. Either signal alone keeps the heading. The indent skips a leading
+      numeral, because p109's `88 הבית והזין הכפולה` sets its numeral out in the
+      margin.
+    * The refused line stays in `אגמ`'s text, and the build prints it.
+    * The cross-check no longer counts the Google layer's reading of the same
+      prose as a heading DocAI missed. Before this change it put
+      `suspect_merge` on all 7 entries starting on p61; now there are 0.
+    * Dry run: 317 entries, 1 heading refused, 0 missed.
+    * Tests: `test_the_book_order_puts_chapter_section_and_doubled_roots_first`
+      and `test_a_flush_line_that_breaks_the_root_order_is_text_not_a_heading`.
+      Each fails under all four mutations: without the order signal, without
+      the indent signal, counting a numeral as the indent, and without the
+      doubled-root rank. The first version of the second test survived two of
+      them, and it was widened until it did not.
+    **Roots now display with periods** (reviewer, same message: "shorashim
+    should have periods"). A book referred to by root shows `א.ג.ם` for `אגמ`
+    in the index row, the text-pane header and every "Shoresh ..." label, with
+    the last letter in final form. This is display only: `app.js` has
+    `rootDisplay()`, and the stored root still keys the comparison texts. Test:
+    `test_a_root_is_shown_letter_period_letter_ending_in_its_final_form`.
+    **REBUILT 2026-09-14. The corpus now has 317 entries.**
+    * Compared by root, one text changed and one root is gone. `אגמ` went from
+      140 to 155 words and now ends `...ואת האגמים שרפו באש.`; `אג` no longer
+      exists. Every other entry's text is identical, renumbered one lower
+      from 16 up.
+    * Alignment by root: 0 page moves, 0 trust changes.
+    * Word ids reseeded. The ledger is still 0 bytes, so no ruling held an id.
+    * OCR baseline replaced: 317 entries, 41,873 words.
+    * Disputes (2,064) and queue rows (1,954) are unchanged in count.
+      `אגמ`'s extra 15 words were a run longer than `--max-span 4`: dropped
+      before, matched now.
+    * Against the 100 reviewed entries (13,735 words): words 0.9509 -> 0.9514,
+      chars 0.9873 -> 0.9878, coverage 0.9881 -> 0.9891; nun/gimel stays at 6.
+    * Live :8421: 317 entries, every one loads, 0 duplicate queue keys.
+      1,954 witness rows, 0 on another page than their word, and the same 4
+      words unaligned as before. All 94 witness pages load. The three `צרי`
+      heading concerns are now 83, 175 and 203.
+    **Two gaps in the rebuild itself, found while running it.**
+    * The corpus README's chain never regenerated `klalim_demo_dataset.json`,
+      which is the dashboard's entry list. After the whole chain, and a
+      restart, :8421 still served 318 entries and the old 16.
+      `pipeline/build_klalim_demo_dataset.py` is now in the chain, right after
+      `build_root_corpus`.
+    * A renumbering trips three guards in turn:
+      - `build_header_alignment.py` refuses on 83 "page moves" that are all
+        the same entries one id lower;
+      - `seed_word_identity.py --apply` will not reseed without `--reseed`;
+      - `snapshot_ocr_baseline.py --replace` then refuses too.
+      My first run piped every step through `tail` under `set -e`, which hid
+      all three refusals. The witness steps then ran on the new text with the
+      old ids. I re-ran it step by step, checking each exit code. As `0GG`
+      did, the alignment was written to scratch and compared BY ROOT before it
+      was installed. The corpus README now says so.
+
 0GL. **[2026-09-14, reviewer: "where do I look?" - for the two-readings spots]
     THE FIVE SPOTS ARE REACHABLE, BUT THE POPUP CANNOT RECORD THE FIX THREE OF
     THEM NEED: "REMOVE THIS WORD". THAT IS ALL 116 `one_side_empty` ROWS.** Not
@@ -612,6 +701,15 @@ applying it to the corpus remain two separate, deliberate steps.
     * **Yad Malachi, not re-measured today:** `0CO` (164 red words outside the
       ranked queue, 2026-09-07) and `0CV` (136 detector positions no route
       reaches) are still open as recorded.
+    * **RE-CHECKED 2026-09-14, after `0GG` renumbered every entry from 85 up.**
+      The links above for entries 85 and later point at the wrong entry now.
+      The 13-word run `מה בצע בדמי` is at
+      <http://127.0.0.1:8421/entry/204/word/21> (it was 201 w77). The
+      section-heading run `המאמר הרביעי` no longer occurs verbatim in any
+      entry, and whether it was cut or only re-tokenized is unchecked. The p134
+      variant line is in one of entries 238-246 (pages 133-134); its current id
+      is not pinned. Entry 16 (`אג`) still has **0 witness rows**
+      (<http://127.0.0.1:8421/entry/16>), so it is still never compared.
 
 0GE. **[2026-09-14, reviewer: "this is a direct quote from the Torah - are we
     not checking that?"] THE VERSE CHECK EXISTS, RUNS, AND REACHES NO SCREEN - AND

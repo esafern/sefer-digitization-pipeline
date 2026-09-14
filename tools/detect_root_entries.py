@@ -276,18 +276,36 @@ def scan(layer_dir):
     return entries, len(pages)
 
 
-def order_violations(entries):
-    """Where does the root sequence go backwards?
+def root_order_key(root):
+    """Where a root falls in the book's own order.
 
     Compared on alphabet POSITION, not on Python string order, because Hebrew
     final forms sort wrongly by codepoint and a root's letters are always
     non-final here.
-    """
-    def key(root):
-        return tuple(ALEPHBET.index(c) if c in ALEPHBET else 99 for c in root)
+
+    Plain alphabetical order is not the book's order. Measured on Sefer
+    HaShorashim 2026-09-14 (pipeline item 0GM), 16 of the 17 "violations" plain
+    order found were the arrangement itself:
+    * a chapter opens with `X הכפולה` (`בב`, `גג`), ahead of `באר`;
+    * a two-letter section heading (`אג`, `בד`) opens its group;
+    * within a group the doubled root comes first (`אלל` before `אלה`, `ברר`
+      before `ברא`).
+    With that encoded, 1 of 318 headings was out of order, and it was a false
+    heading (entry 16, `אג`, running text after `אגמ`)."""
+    pos = lambda c: ALEPHBET.index(c) if c in ALEPHBET else 99
+    if len(root) < 2:
+        return tuple(pos(c) for c in root)
+    if len(root) == 2 and root[1] == root[0]:
+        return (pos(root[0]), -1)
+    rank = 0 if len(root) == 2 else (1 if root[2] == root[1] else 2)
+    return (pos(root[0]), pos(root[1]), rank) + tuple(pos(c) for c in root[2:])
+
+
+def order_violations(entries):
+    """Where does the root sequence go backwards, in the book's own order?"""
     bad = []
     for prev, cur in zip(entries, entries[1:]):
-        if key(cur["root"]) < key(prev["root"]):
+        if root_order_key(cur["root"]) < root_order_key(prev["root"]):
             bad.append((prev, cur))
     return bad
 

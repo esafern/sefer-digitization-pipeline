@@ -360,16 +360,28 @@ function unitName() { return (CORPUS && CORPUS.unit) || 'Klal'; }
 function unitWord() { return unitName().toLowerCase(); }
 function unitNameHe() { return (CORPUS && CORPUS.unit_he) || 'כלל'; }
 function byRoot() { return !!(CORPUS && CORPUS.entry_ref === 'root'); }
+// A root is written letter-period-letter, its last letter in final form: אגמ ->
+// א.ג.ם (reviewer 2026-09-14: "shorashim should have periods"). Display only -
+// the stored root keys the comparison texts and stays as it is. A book referred
+// to by number gets its numeral back unchanged.
+const FINAL_FORM = { 'כ': 'ך', 'מ': 'ם', 'נ': 'ן', 'פ': 'ף', 'צ': 'ץ' };
+function rootDisplay(g) {
+  if (!byRoot() || !g) return g;
+  const letters = [...g];
+  const last = letters.length - 1;
+  letters[last] = FINAL_FORM[letters[last]] || letters[last];
+  return letters.join('.');
+}
 function entryRefName(klalId) {
   const g = (klalById[klalId] || {}).gematria;
   // The root AND the position: the root is what the book prints, the number is
   // what the header, the index and the links use (reviewer 2026-09-13).
-  if (byRoot() && g) return `${unitName()} ${g} (#${klalId})`;
+  if (byRoot() && g) return `${unitName()} ${rootDisplay(g)} (#${klalId})`;
   return `${unitName()} ${klalId}` + (g ? ` (${g})` : '');
 }
 function entryRefHe(klalId) {
   const g = (klalById[klalId] || {}).gematria;
-  if (byRoot() && g) return `${unitNameHe()} ${g}`;
+  if (byRoot() && g) return `${unitNameHe()} ${rootDisplay(g)}`;
   return `${unitNameHe()} ${hebNum(klalId)}`;
 }
 
@@ -1274,7 +1286,7 @@ function navItemInnerHtml(k) {
     + badge('ncount-machine', k.machine_resolved_count)
     + badge('ncount-decided', k.decided_count)
     + '</span>';
-  const heb = k.gematria ? `<span class="nheb">${escapeHtml(k.gematria)}</span>` : '';
+  const heb = k.gematria ? `<span class="nheb">${escapeHtml(rootDisplay(k.gematria))}</span>` : '';
   // The terminal period is NOT shown here (reviewer 2026-08-31: "no period in
   // the index pane - it is needed in the text pane to sep the title from the
   // text"). It stays on the stored field, where the gated invariant requires it;
@@ -1434,7 +1446,7 @@ function buildPlaceholders() {
     // the other implied a hierarchy that is not there.
     // By root (item 0GC) the root IS the entry's name, so the ordinal is not shown.
     const kmark = byRoot() && k.gematria
-      ? `${unitNameHe()} <span class="kid-n">${escapeHtml(k.gematria)}</span>`
+      ? `${unitNameHe()} <span class="kid-n">${escapeHtml(rootDisplay(k.gematria))}</span>`
       : k.gematria
         ? `${unitNameHe()} <span class="kid-n">${k.klal_id}</span> · <span class="kid-n">${escapeHtml(k.gematria)}</span>`
         : `${unitNameHe()} <span class="kid-n">${k.klal_id}</span>`;

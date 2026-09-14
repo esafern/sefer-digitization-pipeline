@@ -9781,6 +9781,61 @@ def test_a_heading_may_print_a_period_after_its_first_letter_name():
     assert match_heading("הגימל. והרש והבית ובגרב ובחרסי") is None
 
 
+def test_the_book_order_puts_chapter_section_and_doubled_roots_first():
+    """Item 0GM. Plain alphabetical order called 16 of the book's own
+    arrangements violations; the key must accept all three and still see a
+    section heading that comes after its group has started."""
+    from detect_root_entries import root_order_key, order_violations
+
+    book = ["בב", "באר", "בג", "בגד", "בדד", "בדא", "בדל", "גג", "גאה"]
+    assert order_violations([{"root": r} for r in book]) == []
+    assert root_order_key("אג") < root_order_key("אגד") < root_order_key("אגמ")
+    assert len(order_violations([{"root": r} for r in ("אגד", "אגמ", "אג", "אגנ")])) == 1
+
+
+def _stream_line(page, text, right, y):
+    """One stream row as build() makes it: tokens rightmost first, one per word."""
+    toks, x = [], right
+    for w in text.split(" "):
+        toks.append({"text": w, "x1": x - 0.05, "x2": x, "y1": y, "y2": y + 0.01})
+        x -= 0.06
+    return (page, text, toks)
+
+
+def test_a_flush_line_that_breaks_the_root_order_is_text_not_a_heading():
+    """Item 0GM. PDF p61 wraps `...ואחד מהם אגם בקבוץ / האלף והגימל. אבל זה הוא`
+    so a vowel description starts a line and parses as the heading `אג`, which
+    made entry 16. It is rejected only when BOTH signals say so (Lesson 9): its
+    root breaks the book's order AND the line is flush where headings are
+    indented. Either signal alone keeps the heading. A leading footnote numeral
+    must not count as indentation lost (p109 `88 הבית והזין הכפולה`)."""
+    import build_root_corpus as brc
+
+    flush, indented = 0.96, 0.88
+    rows = [("האלף והגימל והמם , אגם", indented),
+            ("ושם אחד מהם אגם בקבוץ", flush),
+            ("האלף והגימל . אבל זה הוא שדעתי", flush),          # false: both signals
+            ("נוטה אליו בפירוש ואת האגמים", flush),
+            ("שרפו באש . והוא", flush),
+            ("האלף והגימל והנון . ויש באננות", indented),
+            ("המה המזרקים מזורקי כסף", flush),
+            ("האלף והבית והבית . בדרך", indented),               # out of order, indented
+            ("ועוד שורה של טקסט", flush),
+            ("88 האלף והבית . אף", flush),                        # out of order, numeral first
+            ("האלף והגימל והריש . ויאגר", flush)]                 # in order, flush
+    stream = [_stream_line(61, t, r, 0.1 + 0.02 * i) for i, (t, r) in enumerate(rows)]
+    # the p109 shape: the numeral sits OUT in the margin, the words indented
+    num, *words = stream[-2][2]
+    stream[-2][2][:] = [dict(num, x1=0.97, x2=0.99)] + [
+        dict(t, x1=t["x1"] - 0.08, x2=t["x2"] - 0.08) for t in words]
+
+    rejected = []
+    entries = brc.segment(stream, rejected=rejected)
+    assert [e["root"] for e in entries] == ["אגמ", "אגנ", "אבב", "אב", "אגר"], [e["root"] for e in entries]
+    assert [r[1] for r in rejected] == ["אג"], rejected
+    assert any("שדעתי" in line for line in entries[0]["body"]), entries[0]["body"]
+
+
 def test_the_correction_overlap_tells_had_shared_and_third_apart():
     """Item 0GH. At each place a human corrected the witness, what does OUR text
     read? HAD (their correction), SHARED (their original error) and THIRD
