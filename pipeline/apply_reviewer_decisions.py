@@ -735,6 +735,37 @@ def apply_delete_insertion(clean_text, word_index, chosen_text):
     return " ".join(words)
 
 
+def witness_choice_edit(decision, words):
+    """What one recorded witness_choice does to its entry's words:
+    (kind, new_words) with kind "replace" | "remove" | "confirmed", or
+    (None, reason) when it cannot apply. Item 0GL.
+
+    A witness ruling is KEYED by the OCR token (`docai_token_index`), not by a
+    word (item 0CC), so where it applies comes from its snapshot - the queue row
+    it was made on, which carries the corpus `word_index` and the master text
+    there when the ruling was made (`master_reading`). That text must still sit
+    at that position, the same drift guard `original_word` gives a manual
+    correction, or nothing is written. `unreadable` records no reading and
+    applies nothing; `remove` (the witness had nothing there) deletes the span.
+    """
+    snap = decision.get("candidate_snapshot") or {}
+    source = decision.get("chosen_source")
+    if source == "unreadable":
+        return None, "marked unreadable - there is no reading to apply"
+    wi = snap.get("word_index")
+    seen = (snap.get("master_reading") or snap.get("docai_reading") or "").split()
+    if wi is None or not seen:
+        return None, "the ruling's row names no corpus word"
+    if words[wi:wi + len(seen)] != seen:
+        return None, "drift - the entry no longer reads what the ruling saw there"
+    chosen = (decision.get("chosen_text") or "").split()
+    if source == "remove" or not chosen:
+        return "remove", words[:wi] + words[wi + len(seen):]
+    if chosen == seen:
+        return "confirmed", list(words)
+    return "replace", words[:wi] + chosen + words[wi + len(seen):]
+
+
 def resolved_position(decision, klal, recorded_index, id_state, backfilled):
     """Where this ruling applies NOW -> (index, how) or (None, "retired").
 
@@ -795,6 +826,11 @@ def resolved_position(decision, klal, recorded_index, id_state, backfilled):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--dry-run", action="store_true", help="report what would happen, change nothing")
+    # OFF unless named (item 0GL; reviewer 2026-09-14: "do 2. but don't turn it
+    # on - we need to retain the option to wipe the corpus"). A promoted witness
+    # ruling makes part1.json more than a rebuild of the OCR can reproduce.
+    parser.add_argument("--apply-witness-choices", action="store_true",
+                        help="also promote witness-panel rulings (off by default)")
     args = parser.parse_args()
 
     decisions = rd.all_current("candidate_choice")
@@ -1206,6 +1242,61 @@ def main():
             rd.append_decision("apply_event", klal_id=klal_id, word_index=word_index,
                                 applied_decision_id=decision["id"])
 
+    # ---- witness_choice: the rulings made in the witness panel (item 0GL) ---
+    #
+    # `0EA`: a witness ruling coloured its word as decided while no code could
+    # put it into the corpus. This is that path - BUILT AND OFF. Without
+    # --apply-witness-choices the run only REPORTS how many it would apply, so
+    # the corpus stays a rebuild of the OCR and can still be wiped (reviewer
+    # 2026-09-14). With it, each ruling goes through witness_choice_edit() and the
+    # same per-klal-per-run word-count gate as every other path here.
+    witness_decisions = rd.all_current("witness_choice")
+    pending_witness = [(key, d) for key, d in sorted(witness_decisions.items())
+                       if d["id"] not in already_applied and d["id"] not in settled_by_successor]
+    n_witness = 0
+    if not args.apply_witness_choices:
+        if pending_witness:
+            print(f"  witness rulings recorded and NOT applied: {len(pending_witness)} "
+                  f"(applying them is off - pass --apply-witness-choices; item 0GL)")
+    else:
+        for (klal_id, token_index), decision in pending_witness:
+            klal = by_klal.get(klal_id)
+            wi = (decision.get("candidate_snapshot") or {}).get("word_index")
+            if klal is None:
+                skipped_drift.append((klal_id, wi))
+                continue
+            if klal_id in word_count_changed_klalim:
+                # This klal's indices may already have moved this run.
+                print(f"  SKIP witness ruling klal {klal_id} word {wi}: a word-count-changing "
+                      f"decision already applied for this klal this run - run ./rebuild_all.sh, "
+                      f"then this script again.")
+                continue
+            words = cio.words_of(klal)
+            kind, result = witness_choice_edit(decision, words)
+            if kind is None:
+                skipped_drift.append((klal_id, wi))
+                print(f"  SKIP witness ruling klal {klal_id} word {wi}: {result}")
+                continue
+            if kind != "confirmed":
+                seen = ((decision.get("candidate_snapshot") or {}).get("master_reading") or "").split()
+                if len(result) != len(words):
+                    word_count_shifts[klal_id] = (wi, len(result) - len(words))
+                    word_count_changed_klalim.add(klal_id)
+                    if wi <= len(cio.title_words_of(klal)):
+                        heading_desync.append((klal_id, wi, "witness-" + kind))
+                klal["clean_text"] = " ".join(result)
+                if (kind == "replace" and len(seen) == 1 and len(result) == len(words)
+                        and sync_heading_word(klal, wi, seen[0], result[wi])):
+                    applied.append((klal_id, wi, "heading-sync"))
+                    n_heading_sync += 1
+            n_witness += 1
+            applied.append((klal_id, wi, "witness-" + kind))
+            if not args.dry_run:
+                rd.append_decision("apply_event", klal_id=klal_id, word_index=wi,
+                                   applied_decision_id=decision["id"],
+                                   note=f"witness ruling applied ({kind}), recorded at OCR "
+                                        f"token {token_index}")
+
     # ---- title_correction: item 39's missing apply path -------------------
     #
     # `title` is corpus text under the single-source-of-truth rule, but every
@@ -1291,7 +1382,9 @@ def main():
             rd.append_decision("apply_event", klal_id=klal_id, word_index=word_index,
                                 applied_decision_id=decision["id"])
 
-    if not args.dry_run and (n_replace or n_insert_delete or n_manual or n_title):
+    # n_witness counts too: without it a run that promoted only witness rulings
+    # would write their apply_events and never save the text they changed.
+    if not args.dry_run and (n_replace or n_insert_delete or n_manual or n_title or n_witness):
         save_part1(part1)
         # STABLE WORD IDS FOLLOW THE CORPUS, in the same step that writes it.
         #
@@ -1347,7 +1440,7 @@ def main():
 
     tag = "[DRY RUN] " if args.dry_run else ""
     print(f"\n{tag}Applied: {len(applied)} ({n_replace} replace, {n_insert_delete} insert/delete, "
-          f"{n_manual} manual, {n_title} title, {n_noop} confirmed-no-op, "
+          f"{n_manual} manual, {n_title} title, {n_witness} witness, {n_noop} confirmed-no-op, "
           f"{n_heading_sync} heading-sync)")
     for kid, widx, kind in applied:
         print(f"  klal {kid} word {widx}: {kind}")
@@ -1429,7 +1522,7 @@ def main():
         for kid, widx in skipped_drift:
             print(f"  klal {kid} word {widx}")
 
-    if n_replace or n_insert_delete or n_manual:
+    if n_replace or n_insert_delete or n_manual or n_witness:
         print("\nNEXT STEPS:")
         print("  1. Review the diff: git diff part1.json")
         print("  2. Run ./rebuild_all.sh to regenerate derived files and fresh word indices.")

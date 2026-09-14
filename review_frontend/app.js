@@ -1746,7 +1746,11 @@ function renderKlalBody(block, k) {
       // tools/patch_witness_word_indices.py. Same tri-state coloring as any
       // other flagged word; opens the witness panel (not the candidate panel).
       const span = document.createElement('span');
-      span.className = 'flag-word state-' + wordState(corr);
+      // A recorded REMOVE is shown struck through, as a pending manual deletion
+      // is: the word stays in the text until the ruling is applied (item 0GL).
+      span.className = 'flag-word state-' + wordState(corr)
+        + (corr.current_decision && corr.current_decision.chosen_source === 'remove'
+          ? ' pending-delete' : '');
       span.dataset.wordIndex = i;
       span.textContent = w;
       span.title = corr.docai_reading
@@ -3850,6 +3854,13 @@ async function openWitnessPanel(w) {
         punctuation_only: ' (only punctuation changed)',
         changed_from_both: ' (changed - both OCRs read otherwise)',
       }[w.corrected_status] || ''), text: w.corrected_reading }] : []),
+    // REMOVE, when the witness has nothing here and we have a word (item 0GL:
+    // all 116 `one_side_empty` rows). The fix such a row usually needs is to
+    // delete our word, and Custom refuses an empty reading, so until this it
+    // could not be recorded at all.
+    ...(!(w.tesseract_reading || '').trim() && (w.docai_reading || '').trim()
+      ? [{ source: 'remove', label: `Remove this word - ${witnessLabel(w)} has nothing here`,
+           text: '(delete our word)' }] : []),
     { source: 'unreadable', label: 'Unreadable / neither is right', text: '(mark as unreadable)' },
   ].filter(opt => opt.text);
 
@@ -3901,7 +3912,8 @@ async function openWitnessPanel(w) {
     ${verseHtml(w)}
     ${decision ? `<div class="panel-section">
       <div class="panel-label">Current decision</div>
-      <div style="color:${STATE_META.human.color};font-weight:600;">${STATE_META.human.label}: &ldquo;${escapeHtml(decision.chosen_text !== '' ? decision.chosen_text : '(unreadable)')}&rdquo;</div>
+      <div style="color:${STATE_META.human.color};font-weight:600;">${STATE_META.human.label}: &ldquo;${escapeHtml(decision.chosen_source === 'remove' ? '(remove this word)'
+        : decision.chosen_text !== '' ? decision.chosen_text : '(unreadable)')}&rdquo;</div>
       ${decision.note ? `<div style="font-size:12px;color:var(--ink-faint);margin-top:2px;">${escapeHtml(decision.note)}</div>` : ''}
     </div>` : ''}
     <div class="panel-section">
@@ -3963,7 +3975,9 @@ async function saveWitnessDecision(w) {
   if (source === 'custom') {
     text = document.getElementById('witness-custom-text').value.trim();
     if (!text) { alert('Enter the custom reading first.'); return; }
-  } else if (source === 'unreadable') {
+  } else if (source === 'unreadable' || source === 'remove') {
+    // Both record an empty reading; `chosen_source` is what tells them apart -
+    // `remove` deletes our word when applied, `unreadable` changes nothing.
     text = '';
   } else {
     text = w[source];

@@ -464,6 +464,39 @@ def test_clicking_a_word_puts_it_in_the_address_bar(fixture_server, page):
     assert page.test_errors == []
 
 
+def _open_witness_panel_on(page, base, klal_id, word_index):
+    page.goto(f"{base}/#entry={klal_id}&word={word_index}", wait_until="domcontentloaded",
+              timeout=15000)
+    sel = f'#klal-block-{klal_id} [data-word-index="{word_index}"]'
+    page.wait_for_selector(sel, state="attached", timeout=15000)
+    page.wait_for_timeout(1200)
+    if "open" not in (page.get_attribute("#witness-panel", "class") or ""):
+        page.eval_on_selector(sel, "el => el.click()")
+    page.wait_for_selector("#witness-options .candidate-option", timeout=10000)
+    return page.eval_on_selector_all("#witness-options .candidate-option",
+                                     "els => els.map(e => e.dataset.source)")
+
+
+def test_a_witness_row_with_nothing_on_their_side_offers_to_remove_our_word(
+        fixture_server, fixture_decisions_path, page):
+    """Item 0GL, reviewer 2026-09-14 ("where do I look?"): on a row where the
+    witness has NOTHING and we have a word - all 116 of HaShorashim's
+    `one_side_empty` rows - the fix is usually to delete our word, and the popup
+    could not record it: it offered our word, "unreadable" and a Custom box that
+    refuses an empty reading. It offers Remove now, only there, and the ruling
+    is recorded as a deletion and shown struck through until applied."""
+    assert "remove" not in _open_witness_panel_on(page, fixture_server, 4, 2)   # they read `עיו`
+    sources = _open_witness_panel_on(page, fixture_server, 4, 1)                # they have nothing
+    assert "remove" in sources, sources
+    page.click('#witness-options .candidate-option[data-source="remove"]')
+    page.click("#save-witness-decision-btn")
+    page.wait_for_selector('#klal-block-4 [data-word-index="1"].pending-delete', timeout=10000)
+    rows = [json.loads(line) for line in open(fixture_decisions_path, encoding="utf-8") if line.strip()]
+    last = [r for r in rows if r.get("decision_type") == "witness_choice"][-1]
+    assert (last["klal_id"], last["chosen_source"], last["chosen_text"]) == (4, "remove", "")
+    assert page.test_errors == []
+
+
 def test_correction_panel_header_copies_the_reference_and_link(fixture_server, page):
     """ADDED 2026-08-26 (reviewer request). The klal/word header in a correction
     panel is also a copy control: it yields the readable reference AND the deep

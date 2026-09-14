@@ -101,6 +101,67 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0GL. **[2026-09-14, reviewer: "where do I look?" - for the two-readings spots]
+    THE FIVE SPOTS ARE REACHABLE, BUT THE POPUP CANNOT RECORD THE FIX THREE OF
+    THEM NEED: "REMOVE THIS WORD". THAT IS ALL 116 `one_side_empty` ROWS.** Not
+    fixed; put to the reviewer.
+
+    Where DocAI returned two different readings of one printed word, both are
+    in the text, and each has a witness row on or next to it:
+    <http://127.0.0.1:8421/entry/62/word/24> `אי אין` (their `איןפירושו`),
+    <http://127.0.0.1:8421/entry/100/word/330> `באפין באפיו`,
+    <http://127.0.0.1:8421/entry/139/word/117> `תי חבורותי` (their `חבורתי.`),
+    <http://127.0.0.1:8421/entry/212/word/90> `ובשרש בשרש`,
+    <http://127.0.0.1:8421/entry/248/word/75> `ות בגדרות`.
+    At 100, 212 and 248 the row is `one_side_empty` - their text has nothing
+    where we have the extra word - so the popup offers only our word,
+    "Unreadable" and Custom, and Custom refuses an empty reading:
+
+        review_frontend/app.js:3965 (witness panel save)
+        if (!text) { alert('Enter the custom reading first.'); return; }
+
+    The manual panel has a Remove option, but a word carrying a witness row
+    opens the witness panel instead. Extent: all 116 `one_side_empty` rows are
+    this shape (their side empty; none the other way - a word only they have
+    has no token of ours to anchor to, `0GF`'s unanchorable 55); 38 are in
+    reviewed entries, every one `unchanged` by their corrector. And a witness
+    ruling, once recorded, still reaches the corpus by no code path (`0EA`).
+    Proposed: a "Remove this word" option on a witness row whose other side is
+    empty, recorded as a deletion; the `witness_choice` apply path is the
+    auto-adopt work already queued.
+
+    **BOTH DONE 2026-09-14 (reviewer: "do 1. do 2. but don't turn it on - we
+    need to retain the option to wipe the corpus").**
+    1. The witness popup offers "Remove this word - <witness> has nothing here"
+       on a row whose witness side is empty and ours is not, recorded as
+       `chosen_source: remove`, `chosen_text: ""`; the word shows struck
+       through, and "Current decision" reads "(remove this word)". Checked live
+       on entry 100 w330 (offered) and 139 w117 (not offered - they have a
+       reading) WITHOUT saving: HaShorashim's ledger is still 0 bytes, so the
+       corpus is still a rebuild of the OCR. Test
+       `test_a_witness_row_with_nothing_on_their_side_offers_to_remove_our_word`
+       on a new fixture row (klal 4 w1, their side empty), failing when the
+       option is disabled.
+    2. **The apply path is BUILT AND OFF.** `apply_reviewer_decisions.py
+       --apply-witness-choices` promotes witness rulings through
+       `witness_choice_edit()`: the position is the ruling's snapshot
+       `word_index`, and the snapshot's `master_reading` must still be there
+       (drift otherwise); `remove` deletes, `unreadable` applies nothing, the
+       rest replace, and a word-count change takes the same one-per-klal-per-run
+       gate as every other path. WITHOUT the flag a run applies none of them
+       and prints how many are waiting. It has not been run on either corpus.
+       The applier writes part1.json only when a counter moved, and a
+       witness-only run must count - that line was missing from the first
+       version and is what the gating test caught under mutation. Tests
+       `test_a_witness_ruling_says_exactly_what_it_does_to_the_words`,
+       `test_witness_rulings_reach_the_corpus_only_when_asked_for_by_name`.
+    **Before turning it on**, one caveat the reviewer should hold: a witness
+    ruling is keyed by entry and OCR token, and a corpus rebuild renumbers
+    entries (`0GG` shifted every id from 85 up), so rulings recorded now and
+    then followed by a wipe would need re-pointing - each carries its row
+    (page, bbox, readings) to do it with. `audit_applied_decisions.py` does not
+    yet check witness rulings either.
+
 0GK. **[2026-09-14, reviewer on <http://127.0.0.1:8421/entry/1/word/81>: "the
     text is clearly maleh - with the vav. so our reading matches the text.
     explain your note about the pasuk - i see the pasuk is written chaser but
@@ -4215,6 +4276,11 @@ applying it to the corpus remain two separate, deliberate steps.
 
 0EA. **[2026-09-09] 27 GREEN WORDS ARE GREEN ON A `witness_choice`, AND NO
     SCRIPT IN THIS REPO CAN PUT A `witness_choice` INTO THE CORPUS.**
+
+    **ANNOTATED 2026-09-14 (`0GL`):** a path exists now -
+    `apply_reviewer_decisions.py --apply-witness-choices` - built and OFF by the
+    reviewer's instruction, so a plain apply run still promotes none. Nothing
+    has been applied through it on either book.
 
     Found while confirming `0DY`'s eight were gone. Of the 184 words that render
     green in Part 1:

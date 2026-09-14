@@ -9896,3 +9896,46 @@ def test_a_word_docai_returned_twice_over_the_same_ink_is_kept_once():
     assert brc._overlap_frac(row_one, row_two) < brc.DUP_OVERLAP
     assert len(brc.drop_doubled_tokens([row_one, row_two])[0]) == 2
     assert len(brc.drop_doubled_tokens([tok("אי", 0.5, 0.57), tok("אין", 0.5, 0.57)])[0]) == 2
+
+
+def test_a_witness_ruling_says_exactly_what_it_does_to_the_words():
+    """Item 0GL: the witness_choice apply path, as a pure function. The position
+    comes from the ruling's snapshot, and the text there must still be what the
+    reviewer saw; `remove` deletes, `unreadable` applies nothing, the reviewer's
+    own reading confirms."""
+    edit = ard.witness_choice_edit
+    words = "אלף בית גימל".split()
+    snap = {"word_index": 1, "master_reading": "בית", "docai_reading": "בית"}
+    rule = lambda source, text: {"chosen_source": source, "chosen_text": text,
+                                 "candidate_snapshot": snap}
+    assert edit(rule("tesseract_reading", "בות"), words) == ("replace", ["אלף", "בות", "גימל"])
+    assert edit(rule("remove", ""), words) == ("remove", ["אלף", "גימל"])
+    assert edit(rule("docai_reading", "בית"), words) == ("confirmed", words)
+    assert edit(rule("unreadable", ""), words)[0] is None
+    assert edit(rule("custom", "בית ישראל"), words) == ("replace", ["אלף", "בית", "ישראל", "גימל"])
+    kind, why = edit(rule("tesseract_reading", "בות"), "אלף דלת גימל".split())
+    assert kind is None and "drift" in why
+
+
+def test_witness_rulings_reach_the_corpus_only_when_asked_for_by_name(
+        apply_harness, decisions_path, monkeypatch, capsys):
+    """Item 0GL, reviewer 2026-09-14: "do 2. but don't turn it on - we need to
+    retain the option to wipe the corpus". A plain run leaves witness rulings
+    unapplied and says so; --apply-witness-choices promotes them, and the text is
+    SAVED - the applier writes part1.json only when one of its counters moved,
+    and a witness-only run must count."""
+    apply_harness([{"klal_id": 1, "clean_text": "אלף בית גימל"}], {})
+    ruling = rd.append_decision(
+        "witness_choice", klal_id=1, word_index=7, chosen_source="remove", chosen_text="",
+        candidate_snapshot={"word_index": 1, "master_reading": "בית", "docai_reading": "בית",
+                            "witness_reading": ""},
+        path=decisions_path)
+    assert apply_harness.run()[1] == "אלף בית גימל"
+    assert "NOT applied: 1" in capsys.readouterr().out
+    assert not rd.history_for(1, 1, "apply_event", path=decisions_path)
+
+    monkeypatch.setattr(sys, "argv", ["apply_reviewer_decisions.py", "--apply-witness-choices"])
+    assert apply_harness.run()[1] == "אלף גימל"
+    events = rd.history_for(1, 1, "apply_event", path=decisions_path)
+    assert [e["applied_decision_id"] for e in events] == [ruling["id"]]
+    assert apply_harness.run()[1] == "אלף גימל"          # applied once, never twice

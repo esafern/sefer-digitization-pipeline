@@ -398,6 +398,15 @@ def _write_witness_queue(root):
              "docai_token_index": 17, "vision_selected": "NEITHER",
              "vision_transcription": "פ", "vision_confidence": 0.6,
              "vision_reasoning": "fixture: no word_index - never aligned to a corpus word"},
+            # Their side EMPTY - we have a word they do not (item 0GL, the
+            # `one_side_empty` shape: 116 such rows on HaShorashim). The popup
+            # must offer to REMOVE our word, which Custom cannot record.
+            {"klal_id": 4, "page": 2, "docai_reading": "סמך",
+             "tesseract_reading": "", "opcode": "insert", "tier": "one_side_empty",
+             "bbox": {"x1": 0.22, "y1": 0.42, "x2": 0.28, "y2": 0.45},
+             "docai_token_index": 15, "vision_selected": "B",
+             "vision_transcription": "", "vision_confidence": 0.9,
+             "vision_reasoning": "fixture: their side empty", "word_index": 1},
         ],
     }
     _write_json(os.path.join(root, "reconstruction_witness_queue.json"), queue)
