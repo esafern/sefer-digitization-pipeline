@@ -137,6 +137,31 @@ applying it to the corpus remain two separate, deliberate steps.
       dropped long spans above - corrected.)
     * **The two lost headings** (`0GC`): `suspect_merge` on entries 84, 189, 190
       is still rendered nowhere.
+    * **THE APPARATUS LEAK - FIXED 2026-09-14 (reviewer: "yes").** Cause, from
+      the line dump: on the full-tone crops the variant apparatus is set at
+      0.80-1.08 of body size, and `classify()`'s bottom-up small-type scan
+      stopped at the first larger line - on p99 its LAST line (0.77) abandoned
+      the whole citation list. `build_root_corpus.py` now cuts by LAYOUT: a
+      printed rule (`find_rule_y`: one concentrated, isolated long run of ink -
+      49 pages), else a gap >= 1.35 pitches whose next line STARTS as apparatus
+      starts (`gap_cut_index`: note letter read as `ל`/`לא`/`לב`..., or a
+      numeral - 43 pages); type size is consulted by neither. The first rule
+      detector saw nothing (its threshold was text-dark; the hairline is grey);
+      the second fired on Hebrew baselines and was fixed by concentration and
+      isolation; not loosened further (Lesson 31), though it misses rules the eye
+      sees on p69/p95/p104 - the gap signal covers them. Measured against the
+      100 reviewed entries, words 0.9287 -> **0.9491**, chars 0.9663 ->
+      **0.9852**, precision 0.9353 -> **0.9786**, coverage **0.9887 unchanged**
+      (nothing reviewed was removed). Ours-only runs >4 words: 41 runs / 1,368
+      words -> **7 / 223**, apparatus-like 1,112 -> 12. Body 43,821 -> 41,897
+      words. Left: one variant-note line on p134 (no gap above it; entry 243
+      w82), and runs that are HEADING problems, not apparatus - the two known
+      merges (84, 190) and what look like absorbed headings in 157
+      (`הבית והואו והצירי`) and 300 (`הגימל והרש והבית`). Rebuilt downstream:
+      alignment (0 moves by root), word ids reseeded (no rulings exist), OCR
+      baseline replaced, disputes 2,062, queue 1,952 - 0 duplicate keys,
+      314/314 entries 200, 0 wrong-page rows, 0 context mismatches. Test:
+      `test_the_apparatus_is_cut_by_layout_not_type_size`; gate 539 passed.
     * **Yad Malachi, not re-measured today:** `0CO` (164 red words outside the
       ranked queue, 2026-09-07) and `0CV` (136 detector positions no route
       reaches) are still open as recorded.

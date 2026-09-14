@@ -9664,3 +9664,26 @@ def test_a_multi_word_difference_becomes_one_row_per_word():
     rows = bwd.disputes_for(bwd.text_words("ראה את־כל הארץ"),
                             bwd.text_words("ראה אות־כול הארץ"))
     assert [(pos, c, w) for _t, pos, c, w in rows] == [(1, ["את", "כל"], ["אות", "כול"])], rows
+
+
+def test_the_apparatus_is_cut_by_layout_not_type_size():
+    """Item 0GF. On the full-tone scan Bacher's apparatus is set at 0.80-1.08 of
+    body size, so a small-type test kept ~1,370 words of it in the body. The cut
+    is now a printed rule, else a gap followed by a line that STARTS as apparatus
+    starts (a note letter read as `ל`, or a citation numeral) - and a heading after
+    a gap is not apparatus, whatever its position."""
+    import build_root_corpus as brc
+
+    def line(y, words, h=0.02):
+        return [{"text": w, "x1": 0.9 - i * 0.08, "y1": y, "x2": 0.95 - i * 0.08,
+                 "y2": y + h} for i, w in enumerate(words)]
+    body = [line(0.10 + 0.03 * i, ["מלה", "אחת", "שתים", "שלש", "ארבע", "חמש"])
+            for i in range(20)]                                   # last line y=0.67
+    notes = [line(0.75, ["לא", "חסר", ".", "נבע", "מוסיף", ":"], h=0.019),
+             line(0.78, ["1", "תהלים", "א", "א", ".", "2"], h=0.012)]
+    labels = [r[0] for r in brc.classify(body + notes)]
+    assert labels[:20] == ["body"] * 20, labels
+    assert labels[20:] == ["apparatus", "apparatus"], labels   # full-size note line included
+    heading = [line(0.75, ["האלף", "והפא", ".", "אף", "אני", "בכור"])]
+    assert brc.classify(body + heading)[-1][0] == "body"       # a heading after a gap stays
+    assert brc.classify(body + heading, rule_y=0.72)[-1][0] == "apparatus"   # the rule rules

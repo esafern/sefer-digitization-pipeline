@@ -64,6 +64,7 @@ sys.path.insert(0, os.path.dirname(_HERE))
 sys.path.insert(0, os.path.join(os.path.dirname(_HERE), "pipeline"))
 sys.path.insert(0, _HERE)
 import corpus_io as cio  # noqa: E402
+import fitz  # noqa: E402
 from detect_root_entries import match_heading, ALEPHBET  # noqa: E402
 
 LINE_TOL = 0.006          # y distance within which tokens share a line
@@ -94,6 +95,85 @@ WATERMARK = re.compile(r"Google|Digitized", re.I)
 # top edge in.
 APPARATUS_MAX_RATIO = 0.85
 APPARATUS_MIN_PERIOD_FRAC = 0.19
+
+# THE APPARATUS CUT, FROM LAYOUT RATHER THAN TYPE SIZE (item 0GF, 2026-09-14).
+# On NLI's full-tone crops apparatus type measures 0.80-1.08 of the body median,
+# not 0.52-0.80 as on the bitonal scan, so the bottom-up small-type scan below
+# stopped at the first larger line and left ~1,370 words of Bacher's apparatus
+# in the body - the variant notes (`לא יצמח . נער מוסיף : ...`) always, and on
+# p99 the whole citation list, abandoned because its LAST line measured 0.77.
+# Two signals, tried in order; type size is consulted by neither:
+#   1. A PRINTED RULE - the hairline Bacher sets above the apparatus: a pixel
+#      row whose ink is ONE long run (>= RULE_MIN_WIDTH of the page and >=
+#      RULE_CONCENTRATION of the row's dark pixels) with paper just above and
+#      below. A text baseline also forms long runs, but spread over many
+#      letters and never isolated. Found on 49 of 94 pages; every one of seven
+#      known body lines kept. It misses rules the eye sees (p69, p95, p104) and
+#      is deliberately NOT loosened further (Lesson 31: retuned once already).
+#   2. A GAP AND A MARKER - a gap >= GAP_PITCH_RATIO line pitches below
+#      FOOT_MIN_Y whose next line STARTS as apparatus starts: a note letter
+#      (DocAI reads the superscript alef as `ל`: `ל`, `לא`, `לב`, `לע`, `לבע`,
+#      `לעק`) or a citation numeral. A heading after a gap (p91 `האלף והפא`,
+#      p102 `והפעולה החמשית`) does not start that way and is passed over; the
+#      scan goes on to the next gap. On the 44 pages with no detected rule the
+#      first marked gap was apparatus on every one checked.
+RULE_MIN_WIDTH = 0.10
+RULE_CONCENTRATION = 0.7
+GAP_PITCH_RATIO = 1.35
+APPARATUS_START = re.compile(r"^\s*(?:\d|ל[א-ת]{0,3}(?:\s|$)|ל\s+b\b)")
+
+
+def _longest_run(row, gap=2):
+    """Longest run of True in a pixel row, bridging holes of up to `gap`."""
+    best = cur = holes = 0
+    for v in row:
+        if v:
+            cur += 1 + holes
+            holes = 0
+        elif cur and holes < gap:
+            holes += 1
+        else:
+            best = max(best, cur)
+            cur = holes = 0
+    return max(best, cur)
+
+
+def find_rule_y(doc, page):
+    """y (0-1) of the printed rule above the apparatus, or None (APPARATUS CUT)."""
+    import numpy as np
+    from PIL import Image
+    if doc is None or not 0 < page <= doc.page_count:
+        return None
+    pix = doc.load_page(page - 1).get_pixmap(dpi=150)
+    a = np.asarray(Image.frombytes("RGB" if pix.n >= 3 else "L", (pix.width, pix.height),
+                                   pix.samples).convert("L"), dtype=np.int16)
+    height, width = a.shape
+    mask = a < np.percentile(a, 95) - 25       # slightly darker than paper: a hairline is grey
+    frac = mask.mean(axis=1)
+    for yy in range(int(FOOT_MIN_Y * height), height - 8):
+        dark = int(mask[yy].sum())
+        if dark < 0.08 * width:
+            continue
+        run = _longest_run(mask[yy])
+        if run < RULE_MIN_WIDTH * width or run < RULE_CONCENTRATION * dark:
+            continue
+        if frac[yy - 7:yy - 3].max() < 0.03 and frac[yy + 4:yy + 8].max() < 0.03:
+            return yy / height
+    return None
+
+
+def gap_cut_index(rows):
+    """Index of the first apparatus line by gap + marker, or None (APPARATUS CUT)."""
+    ys = [r[1] for r in rows]
+    upper = [ys[i] - ys[i - 1] for i in range(1, len(ys)) if ys[i] < FOOT_MIN_Y]
+    if not upper:
+        return None
+    pitch = statistics.median(upper)
+    for i in range(1, len(rows)):
+        if (ys[i] > FOOT_MIN_Y and ys[i] - ys[i - 1] >= GAP_PITCH_RATIO * pitch
+                and APPARATUS_START.match(rows[i][3])):
+            return i
+    return None
 
 
 FOOTNOTE_REF = re.compile(r"^[0-9]{1,3}$")
@@ -160,7 +240,7 @@ def page_lines(tokens):
     return lines
 
 
-def classify(lines):
+def classify(lines, rule_y=None, stats=None):
     """Label each line body / head / apparatus / watermark.
 
     Returns [(label, y, height, text, tokens)]. The per-page median is taken over
@@ -177,10 +257,21 @@ def classify(lines):
         text = " ".join(t["text"] for t in ln)
         rows.append([None, y, h, text, ln, h < SMALL_RATIO * page_median])
 
-    # Bottom-up: the trailing run of small-type lines is the apparatus (plus the
-    # catchword, which is also small and sits immediately above it). Stops at the
-    # first full-size line, and never climbs above FOOT_MIN_Y.
-    for r in reversed(rows):
+    # THE LAYOUT CUT FIRST - a printed rule, else a gap plus an apparatus marker
+    # (see APPARATUS CUT). Everything from the cut down is apparatus.
+    cut = (next((i for i, r in enumerate(rows) if r[1] > rule_y), None)
+           if rule_y is not None else gap_cut_index(rows))
+    if stats is not None:
+        src = "none" if cut is None else ("rule" if rule_y is not None else "gap")
+        stats["cut_" + src] = stats.get("cut_" + src, 0) + 1
+    head_rows = rows if cut is None else rows[:cut]
+    for r in ([] if cut is None else rows[cut:]):
+        r[0] = "watermark" if WATERMARK.search(r[3]) else "apparatus"
+    # Bottom-up over what is ABOVE the cut: the trailing run of small-type lines is
+    # the apparatus (plus the catchword, which is also small and sits immediately
+    # above it). Stops at the first full-size line, and never climbs above
+    # FOOT_MIN_Y. On a page with no cut this is the whole page, as before.
+    for r in reversed(head_rows):
         label, y, _h, text, _ln, small = r
         if WATERMARK.search(text) or y > 0.94:
             r[0] = "watermark"
@@ -211,7 +302,11 @@ def build(pages):
     gematria marker, so pipeline/build_klal_page_regions.py (which derives
     regions from marker positions) has nothing to work from here (item 0EQ).""" 
     stream = []
-    stats = {"body": 0, "head": 0, "apparatus": 0, "watermark": 0}
+    stats = {"body": 0, "head": 0, "apparatus": 0, "watermark": 0,
+             "cut_rule": 0, "cut_gap": 0, "cut_none": 0}
+    # The page IMAGE, for the printed rule: book.json's scan_pdf, the PDF the
+    # tokens' coordinates belong to.
+    doc = fitz.open(cio.SCAN_PDF_PATH) if os.path.exists(cio.SCAN_PDF_PATH) else None
     for p in pages:
         path = os.path.join(cio.DOCAI_DIR, f"page_{p}.json")
         if not os.path.exists(path):
@@ -220,7 +315,9 @@ def build(pages):
             tokens = json.load(fh)
         if not tokens:
             continue
-        for label, _y, _h, text, ln in classify(page_lines(tokens)):
+        rule_y = find_rule_y(doc, p)
+        for label, _y, _h, text, ln in classify(page_lines(tokens), rule_y=rule_y,
+                                                stats=stats):
             stats[label] += 1
             if label == "body":
                 stream.append((p, text, ln))
@@ -356,6 +453,8 @@ def main():
     print(f"  lines kept      {stats['body']} body")
     print(f"  lines dropped   {stats['head']} running head, "
           f"{stats['apparatus']} apparatus, {stats['watermark']} watermark")
+    print(f"  apparatus cut   {stats['cut_rule']} pages by printed rule, "
+          f"{stats['cut_gap']} by gap + marker, {stats['cut_none']} none")
     print(f"  entries         {len(entries)}")
 
     if rec_log:
