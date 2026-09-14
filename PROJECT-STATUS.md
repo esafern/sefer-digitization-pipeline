@@ -174,6 +174,90 @@ applying it to the corpus remain two separate, deliberate steps.
         carry enough to number these. Reading each raised mark from the image
         would be a second signal, and that is put to the reviewer. Nothing
         identified is written to the corpus.
+    * **Reviewer: "do 1 - size it on a sample first"** (read each raised
+      mark from the image). `tools/experiment_footnote_marks.py` samples 40
+      stray marks, seed 17: 20 the sequence numbers and 20 it cannot place.
+      Each is cropped from the full-tone page with a red box and put to
+      `gemini-3.6-flash` through the shared, cached adjudication helper.
+      Results are in `footnote_marks_sample.json` in the corpus root, with the
+      truth read by eye from the crops BEFORE the answers were opened.
+      - Truth: 36 real numerals, 2 abbreviation marks (`וגו׳`), 1 small
+        raised circle, 1 stroke I could not call. **17 of the 20 marks the
+        sequence cannot place are real numerals.**
+      - Model, numeral or not: 37/39 right. It caught both abbreviation marks
+        and the circle, and missed two `36`s, calling them "other".
+      - Model, exact number: 23/36. 11 of the misses are ONE DIGIT of a
+        two-digit numeral (7 for 17). The red box covered only the OCR's mark,
+        often one digit, and the prompt asked what is inside the box. This is
+        a flaw of the experiment's design, not of the model.
+      - Sequence alone: 16/19. Accepting only where the model and the
+        sequence agree: 11 accepted, all 11 right.
+      - Each side corrects the other. The model fixed the sequence's
+        off-by-ones (8→9, 5→6), and the sequence fixed the model's one-digit
+        reads. Next: ask for the whole raised number, box widened, and rerun
+        the same 40.
+      - **Rerun with the whole-number prompt and a wider box, the same 40
+        marks, scored against the same truth** (`footnote_marks_sample_v2.json`):
+        * numeral or not: 38/39;
+        * exact number: 33/36. The misses: one `36` called "other", 31 read
+          as 21, and 4 read as 1.
+        * Where the model and the sequence agree: 14 of 19 accepted, **all 14
+          right**.
+        * Where they disagree (5): the model was right three times (9, 6,
+          17) and the sequence twice (31, 4). So a disagreement goes to a
+          person; neither side wins by rule.
+        * Marks the sequence cannot place: the model numbered 16 of 20, **all
+          16 right**. The other 4 are the two `וגו׳`, the circle and the
+          missed `36`.
+        * The uncertain stroke (row 20) the model calls a geresh.
+      - **Sizing a full run:** 577 stray marks, one call each (about 14 times
+        this sample). A rule that fits these numbers:
+        * accept where model and sequence agree;
+        * accept the model's number where the sequence has none;
+        * send disagreements to review;
+        * record the model's geresh and circle as NOT footnotes.
+        On this sample that accepts 30 of 40 with 0 wrong, and sends 5 to
+        review. Caveats: 40 is a small sample; the truth is one reader's view
+        of 313 dpi crops; two of 36 numerals were missed. Put to the reviewer
+        before any full run.
+    * **FULL RUN, 2026-09-14 (reviewer: "yes run all 577").** All 577 stray
+      marks were read: one live call each, then every rerun from the cache.
+      `footnote_marks.json` is in the corpus root. The rule was refined twice
+      on what the run showed, both times scored against the 52 marks read by
+      eye (the 40-mark sample plus 12 more):
+      - **Placement.** The first pass placed 0 of 577 at an entry word. It
+        went through the server's word boxes, and a punctuation-only word has
+        none: entry 15 word 6, the `"` on p61, has no box. Now each mark is
+        placed by aligning the build's token stream with the corpus words:
+        577 of 577 placed, and every stored word equals its mark.
+      - **"Out of order" was mostly "already there".** Requiring a
+        model-alone number to fit between the page's numerals either side
+        sent 107 to review. On 12 of them read by eye the model was right 12
+        times, and 8 were the same printed numeral read twice: once as a
+        number token, once as a stray mark. A page numbers each footnote
+        once, so a mark whose number is already on the page is a DUPLICATE,
+        and nothing is drawn. When the digit beside a mark is PART of its
+        number (`5` beside a mark read as 50), it is a SPLIT: the mark shows
+        the whole number, and that digit is folded into it on display.
+      - **Two ordering flaws, caught by the eye check.** First, a
+        disagreement with the sequence must go to review before the duplicate
+        test: at p100 the sequence said 31 and the model misread 21, and 21
+        was on the page. Second, two marks on one page given the same number
+        are one numeral when adjacent: entry 93 words 67 and 69 are `"`
+        either side of a `4`, and both were read as 14 (`one_number_each`).
+      - **Final: 285 accepted, 22 split, 111 duplicate, 34 review, 115 not a
+        footnote (101 geresh, 14 circle), 10 unread.** 307 marks are drawn,
+        with no page number given twice and no digit folded in twice. **All 52
+        eye-checked marks are right under the final rule.** That is 52 marks,
+        read by one reader from 313 dpi crops.
+      - The dashboard serves an entry's accepted and split rows, only while
+        the stored word is still the mark; a split is served only while its
+        digit is still a numeral. It draws the number raised, dotted, in
+        place of the mark. The text is unchanged.
+      - Tests cover the rule, one number per page, the server rule and the
+        drawing. Mutations tried: the rule (disagreement accepted, geresh as a
+        numeral, no model-alone branch) and the server (no still-the-mark
+        check, not accepted-only). Each fails.
     * **Checked live after a PID restart of :8421.** Entry 15 serves
       `footnote_refs` [16, 28, 53, 57, 93], the page draws 36 raised numerals
       with no page errors, and the index titles line up flush left. The bare
@@ -2253,6 +2337,37 @@ applying it to the corpus remain two separate, deliberate steps.
     appear to catch zero); the search window straddling the previous quotation;
     and verse RANGES (`ח—י`, 11 of them) collapsed to a single gematria. Together
     they turned 448 false candidates into 158.
+    **ANNOTATED 2026-09-14 (reviewer: "did we / can we do this?" about the
+    Sefaria editor's shelved request).** A spot-check of the first six
+    `misplaced_citations` rows in `quotation_suspects.json` found five real
+    errors (Job 5:6, Genesis 35:18, Proverbs 29:20, Jeremiah 36:22,
+    Genesis 9:5) and ONE row where the window still straddles the previous
+    quotation. For `איל` the note `(שם נז, ה)` is right for `הנחמים באלים`
+    (Isaiah 57:5), but the window ran back into `ותחפרו מהגנות אשר בחרתם`
+    (Isaiah 1:29) and proposed 1:29. So the straddle fix above is not
+    complete, and `citation_corrections.csv` (158 rows) needs an eye pass
+    before it is relied on. Whether the draft to the Sefaria editor that
+    attaches the file was sent is not recorded here.
+    **CORRECTION, same day (reviewer: "cit corr - you checked the first 6
+    rows?").** In chat I called those six "the first six rows" of
+    `citation_corrections.csv`. They are not. They are the first six of the
+    same 158 citations in `quotation_suspects.json`, in a different order. All
+    six are in the CSV, the Isaiah 57:5 false alarm included. The CSV's own
+    first six rows, checked against Sefaria's verse text in
+    `sefaria_reference_corpus/raw`:
+    * **4 are real misprinted numerals:** `(ויקרא יח, ב)` for Leviticus 18:20
+      (ב/כ); `(ויקרא כ, ה)` for Leviticus 2:5 (כ/ב); `(אסתר ח, יב)` for
+      Esther 5:12 (ח/ה); `(משלי לא, כ)` for Proverbs 31:2 (כ/ב).
+    * **2 are a numbering difference, not an error:** `(שם לא, לא)` and
+      `(שם לא, לב)` quote what Sefaria numbers Jeremiah 31:32 and 31:33.
+      Both are one lower in the same chapter, so the edition numbers
+      Jeremiah 31 one verse off Sefaria. The printed note is right by its own
+      numbering; the proposed ref is still the one a Sefaria link needs.
+    * **A labelling defect across the file.** 45 rows are off by exactly one
+      verse, and 37 of them carry a `single_letter_confusion` label such as
+      `א->ב` or `ב->ג`. Adjacent numerals are not a visual OCR confusion. The
+      label is filled in whenever the two numerals differ by one letter, and
+      it presents a numbering difference as a misprint. Not fixed.
 
 0FH. **[2026-09-10] THE 100 REVIEWED ENTRIES ARRIVED. OUR READ IS 95.6% OF
     CHARACTERS AGAINST THEM, AND THE SHORTFALL IS MOSTLY STRUCTURAL.**

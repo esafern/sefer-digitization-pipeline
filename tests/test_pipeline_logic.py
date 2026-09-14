@@ -9829,6 +9829,81 @@ def test_a_reference_numeral_is_a_standalone_arabic_number():
     assert brc.FOOTNOTE_REF is cio.FOOTNOTE_REF
 
 
+def test_a_stray_mark_is_numbered_only_where_the_image_and_the_sequence_allow():
+    """Item 0GO. On 40 marks read by eye, accepting where the vision model and
+    the page's numbering agree, or where the numbering has no number and the
+    model has one, took 30 with none wrong. Where they disagree each was right
+    some of the time, so that goes to a person. A geresh or circle is not a
+    footnote at all."""
+    from experiment_footnote_marks import decide
+
+    assert decide(7, "numeral", 7) == ("accepted", 7, None)
+    assert decide(None, "numeral", 15) == ("accepted", 15, None)
+    assert decide(8, "numeral", 9) == ("review", None, None)
+    assert decide(5, "geresh", None) == ("not_a_footnote", None, None)
+    assert decide(None, "circle", None) == ("not_a_footnote", None, None)
+    assert decide(3, "other", None) == ("unread", None, None)
+    assert decide(3, "numeral", None) == ("unread", None, None)
+    # the model alone must fit between the page's numerals either side
+    assert decide(None, "numeral", 5, 3, 6) == ("accepted", 5, None)
+    assert decide(None, "numeral", 15, 3, 6) == ("review", None, None)
+    assert decide(None, "numeral", 40, 39, None) == ("accepted", 40, None)
+    # a number the page already has as a numeral is the same footnote read twice
+    assert decide(None, "numeral", 17, 16, 17, {16, 17}, ["17"]) == ("duplicate", 17, None)
+    assert decide(None, "numeral", 6, 4, 6, {4, 6}, []) == ("duplicate", 6, None)
+    # ...but a disagreement with the sequence goes to a person first: p100, the
+    # sequence said 31, the model misread 21, and 21 was already on the page
+    assert decide(31, "numeral", 21, 30, 32, {21, 30, 32}, []) == ("review", None, None)
+    # one printed numeral read as a digit and a mark: the mark takes the whole
+    assert decide(None, "numeral", 50, 49, None, {49}, ["49", "5"]) == ("split", 50, "5")
+    assert decide(None, "numeral", 37, 36, None, {36}, ["7"]) == ("split", 37, "7")
+
+
+def test_a_page_gives_each_footnote_number_to_one_mark():
+    """Item 0GO. Entry 93 words 67 and 69: a `"` either side of a `4`, both read
+    as the split 14 absorbing that `4` - the same printed numeral, which would
+    have been drawn twice. Next to each other the later is a duplicate; far
+    apart, the two contradict and go to a person."""
+    from experiment_footnote_marks import one_number_each
+
+    row = lambda k, d, n, page=93, ab=None: {"page": page, "index_on_page": k,
+                                             "decision": d, "number": n, "absorbs": ab}
+    rows = [row(10, "split", 14, ab=68), row(12, "split", 14, ab=68),
+            row(20, "accepted", 20), row(30, "accepted", 20),
+            row(31, "accepted", 20, page=94), row(40, "duplicate", 21)]
+    one_number_each(rows)
+    assert [(r["decision"], r["number"], r["absorbs"]) for r in rows] == [
+        ("split", 14, 68), ("duplicate", 14, None),
+        ("accepted", 20, None), ("review", None, None),
+        ("accepted", 20, None), ("duplicate", 21, None)]
+
+
+def test_an_identified_mark_is_served_only_while_the_word_is_still_the_mark(tmp_path, monkeypatch):
+    """Item 0GO. The dashboard gets an entry's ACCEPTED marks only, and a row
+    whose word has since changed (a ruling replaced the `"`) drops out rather
+    than put a number on the wrong word."""
+    import review_server as rs
+
+    (tmp_path / "footnote_marks.json").write_text(json.dumps({"rows": [
+        {"klal_id": 5, "word_index": 1, "mark": '"', "number": 7, "decision": "accepted"},
+        {"klal_id": 5, "word_index": 2, "mark": '"', "number": 8, "decision": "review"},
+        {"klal_id": 5, "word_index": 3, "mark": "'", "number": 9, "decision": "accepted"},
+        {"klal_id": 6, "word_index": 1, "mark": '"', "number": 2, "decision": "accepted"},
+        {"klal_id": 5, "word_index": 2, "mark": '"', "number": 8, "decision": "duplicate"},
+        {"klal_id": 7, "word_index": 2, "mark": '"', "number": 50, "decision": "split", "absorbs": 1},
+        {"klal_id": 7, "word_index": 0, "mark": "*", "number": 51, "decision": "split", "absorbs": 3},
+    ]}), encoding="utf-8")
+    monkeypatch.setattr(rs.cio, "repo_path", lambda name: str(tmp_path / name))
+    words = ["מים", '"', '"', "מקום"]
+    assert rs._footnote_marks_for(5, words) == [
+        {"word_index": 1, "number": 7, "read_as": '"', "absorbs": None}]
+    assert rs._footnote_marks_for(9, words) == []
+    # a split is drawn only while its folded-in digit is still a numeral
+    split_words = ["*", "5", '"', "מקום"]
+    assert rs._footnote_marks_for(7, split_words) == [
+        {"word_index": 2, "number": 50, "read_as": '"', "absorbs": 1}]
+
+
 def _stream_line(page, text, right, y):
     """One stream row as build() makes it: tokens rightmost first, one per word."""
     toks, x = [], right

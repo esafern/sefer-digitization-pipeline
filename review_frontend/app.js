@@ -1654,6 +1654,24 @@ function markFootnoteRefs(body, k) {
     el.classList.add('fn-ref');
     if (!el.title) el.title = `Footnote reference ${el.textContent.trim()} - the note, a citation, is printed at the foot of the page`;
   });
+  // A stray mark our OCR made of a raised numeral (`"` for 7), identified from
+  // the page image and the page's own numbering (item 0GO). The stored word is
+  // still the mark, so the number is drawn in its place and the text is left
+  // alone; the tooltip says so.
+  (k.footnote_marks || []).forEach(m => {
+    const el = body.querySelector(`[data-word-index="${m.word_index}"]`);
+    if (!el) return;
+    el.classList.add('fn-ref', 'fn-mark');
+    el.dataset.fn = m.number;
+    if (!el.title) el.title = `Footnote reference ${m.number}, printed raised; our OCR read it as ${m.read_as}. Identified from the page image and the page's numbering - the text still holds the mark.`;
+    // A split: the same printed numeral also left a digit beside the mark (the
+    // `5` of 50). It is drawn as part of this number, not as a second footnote.
+    const part = m.absorbs != null && body.querySelector(`[data-word-index="${m.absorbs}"]`);
+    if (part) {
+      part.classList.add('fn-absorbed');
+      part.title = `Part of footnote reference ${m.number}: our OCR read the one printed numeral as ${part.textContent.trim()} and ${m.read_as}.`;
+    }
+  });
 }
 
 function renderKlalBody(block, k) {

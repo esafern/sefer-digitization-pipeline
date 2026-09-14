@@ -728,6 +728,17 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
 .nav-item .ntitle { flex: 1; min-width: 3.5em; color: var(--ink-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }/* REFERENCE NUMERALS (item 0GO): drawn small and raised, as the page prints
    them. They stay words in the text; see markFootnoteRefs() in app.js. */
 .klal-body .fn-ref { vertical-align: super; font-size: .62em; line-height: 0; color: var(--ink-soft); }
+/* A stray OCR mark identified as a footnote numeral (item 0GO): the stored word
+   is still the mark, so the number is drawn in its place, dotted to show it was
+   inferred rather than read. */
+.klal-body .fn-mark { font-size: 0; }
+/* The other half of a split numeral (item 0GO): the mark beside it already
+   shows the whole number. */
+.klal-body .fn-absorbed { font-size: 0; }
+.klal-body .fn-mark::after {
+  content: attr(data-fn); font-size: 11px; vertical-align: super;
+  color: var(--ink-soft); text-decoration: underline dotted;
+}
 .nav-item .nflag { color: var(--pending); font-size: 12px; flex-shrink: 0; }
 /* The badge group is `direction: ltr` inside an RTL row, so DOM order is
    left-to-right here: red is written first and therefore sits leftmost, on every

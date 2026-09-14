@@ -520,6 +520,40 @@ def test_a_reference_numeral_is_drawn_raised_and_stays_a_word(fixture_server, pa
     assert page.test_errors == []
 
 
+def test_a_mark_identified_as_a_footnote_shows_its_number_and_keeps_its_text(fixture_server, page):
+    """Item 0GO. A stray `"` that the page image shows is footnote 7 is drawn as
+    a raised 7; the stored word, and so the text and its word indices, stay `"`."""
+    _open_dashboard(page, fixture_server, klal_id=3)
+    got = page.evaluate("""() => {
+        const body = document.createElement('div');
+        body.className = 'klal-body';
+        document.body.appendChild(body);
+        ['מים', '"', 'מקום'].forEach((w, i) => {
+            const s = document.createElement('span');
+            s.dataset.wordIndex = i; s.textContent = w; body.appendChild(s);
+        });
+        markFootnoteRefs(body, {footnote_marks: [{word_index: 1, number: 7, read_as: '"', absorbs: null}]});
+        const el = body.children[1];
+        const shown = getComputedStyle(el, '::after').content;
+        // a split: the `5` beside the mark is folded into its 50
+        const b2 = document.createElement('div');
+        b2.className = 'klal-body';
+        document.body.appendChild(b2);
+        ['5', '"', 'מקום'].forEach((w, i) => {
+            const s = document.createElement('span');
+            s.dataset.wordIndex = i; s.textContent = w; b2.appendChild(s);
+        });
+        markFootnoteRefs(b2, {footnote_refs: [0], footnote_marks: [{word_index: 1, number: 50, read_as: '"', absorbs: 0}]});
+        const five = b2.children[0];
+        const split = [five.classList.contains('fn-absorbed'), getComputedStyle(five).fontSize,
+                       five.textContent, getComputedStyle(b2.children[1], '::after').content];
+        body.remove(); b2.remove();
+        return [el.classList.contains('fn-mark'), el.dataset.fn, el.textContent, shown, el.title.includes('7'), split];
+    }""")
+    assert got == [True, "7", '"', '"7"', True, [True, "0px", "5", '"50"']], got
+    assert page.test_errors == []
+
+
 def test_clicking_a_word_puts_it_in_the_address_bar(fixture_server, page):
     """The address bar has to be copyable as-is, or the deep links are write-only.
     replaceState, not pushState: a reviewer moving through a klal must not have to

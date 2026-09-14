@@ -1004,6 +1004,34 @@ def api_word_states(part_num=1):
     }
 
 
+def _footnote_marks_for(klal_id, words):
+    """Accepted rows of footnote_marks.json for one entry (item 0GO): a stray
+    mark in our text (`"`, `'`, `*`) that the page image shows is a raised
+    footnote numeral, numbered by the image and the page's own sequence.
+    Served only where the stored word is still the mark that was read, so a
+    ruling that changes the word retires the row."""
+    path = cio.repo_path("footnote_marks.json")
+    if not os.path.exists(path):
+        return []
+    with open(path, encoding="utf-8") as fh:
+        rows = json.load(fh).get("rows", [])
+    # A SPLIT is one printed numeral our OCR read as a mark plus a digit beside
+    # it (`5` and `"` for 50); `absorbs` names that digit's word, which is drawn
+    # as part of the mark's number rather than as a second footnote.
+    out = []
+    for r in rows:
+        wi, ab = r.get("word_index"), r.get("absorbs")
+        if not (r.get("decision") in ("accepted", "split") and r.get("klal_id") == klal_id
+                and wi is not None and 0 <= wi < len(words) and words[wi] == r["mark"]):
+            continue
+        if r["decision"] == "split" and not (ab is not None and 0 <= ab < len(words)
+                                             and cio.FOOTNOTE_REF.match(words[ab])):
+            continue
+        out.append({"word_index": wi, "number": r["number"], "read_as": r["mark"],
+                    "absorbs": ab if r["decision"] == "split" else None})
+    return out
+
+
 def api_klal(klal_id):
     part_num = _get_part_num_for_klal(klal_id)
     klalim_by_id, _ = _load_klalim(part_num=part_num)
@@ -1334,6 +1362,7 @@ def api_klal(klal_id):
         # are now, so a ruling that moves words cannot leave them stale; only for
         # a book whose build records them (item 0GO).
         "footnote_refs": cio.footnote_ref_positions(words) if "footnote_refs" in k else [],
+        "footnote_marks": _footnote_marks_for(k["klal_id"], words),
         # A HEADING RULING ON RECORD, if there is one, and whether it has been
         # promoted into part1.json yet.
         #
