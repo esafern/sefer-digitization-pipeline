@@ -339,6 +339,32 @@ def quotation_run(flat, end, vwords, skip, miss_budget=1, floor=0):
     return start, matched
 
 
+def verdict_for(matched, min_matched, start, pos, anchor, in_ours, in_theirs):
+    """The verse's verdict on one disputed word.
+
+    TWO DIFFERENT "CANNOT RULE" CASES, kept apart since 2026-09-14 (item 0GI):
+    `uncorroborated` - the quotation grown back from the citation matched fewer
+    than `min_matched` words of the verse, so the citation cannot be trusted;
+    `not_in_quotation` - it matched, but the disputed word lies outside it, so
+    the citation belongs to other words (entry 58 w11: a gloss right after
+    Proverbs 1:26, whose marker sits at the word, judged against the NEXT
+    citation, Genesis 2:6). Both used to be `uncorroborated`, and the popup told
+    the reviewer, of all 787, that the quotation "could not be matched" - false
+    for 492 of them.
+    """
+    if matched < min_matched:
+        return "uncorroborated"
+    if not (start <= pos < anchor):
+        return "not_in_quotation"
+    if in_ours and in_theirs:
+        return "both"
+    if in_ours:
+        return "OURS"
+    if in_theirs:
+        return "THEIRS"
+    return "neither"
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -443,18 +469,8 @@ def main():
 
         span = anchor - start
         score = matched / span if span else 0.0
-        in_ours = any(w in vw for w in ours)
-        in_theirs = any(w in vw for w in theirs)
-        if matched < args.min_matched or not (start <= pos < anchor):
-            verdict = "uncorroborated"
-        elif in_ours and in_theirs:
-            verdict = "both"
-        elif in_ours:
-            verdict = "OURS"
-        elif in_theirs:
-            verdict = "THEIRS"
-        else:
-            verdict = "neither"
+        verdict = verdict_for(matched, args.min_matched, start, pos, anchor,
+                              any(w in vw for w in ours), any(w in vw for w in theirs))
 
         rows.append({
             "root": d.get("root"), "page": d.get("page"),
@@ -479,7 +495,7 @@ def main():
         print(f"    skipped: {reason:<28} {n:,}")
     print(f"  reached a cited verse        {len(rows):,}")
     if rows:
-        for k in ("OURS", "THEIRS", "both", "neither", "uncorroborated"):
+        for k in ("OURS", "THEIRS", "both", "neither", "not_in_quotation", "uncorroborated"):
             if tally[k]:
                 print(f"     {k:<15} {tally[k]:4d}   {100.0 * tally[k] / len(rows):5.1f}%")
         nt = sum(1 for r in rows if r["transposed_citation"])

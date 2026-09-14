@@ -101,6 +101,80 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0GI. **[2026-09-14, reviewer, on <http://127.0.0.1:8421/entry/58/word/11>]
+    TWO POPUP DEFECTS: A TOKEN NUMBER NOBODY CAN USE, AND A VERSE SHOWN FOR A
+    WORD THAT IS IN NO QUOTATION - 492 ROWS, WITH A FALSE EXPLANATION.** Plus a
+    third, reported the same turn on <http://127.0.0.1:8421/entry/69/word/23>:
+    "i don't see sef. correction".
+
+    **ALL THREE FIXED 2026-09-14 (reviewer: "do that").**
+    * The label reads `word N` (the URL's number); rows with no word position
+      keep `OCR token #N`, labelled.
+    * `adjudicate_against_verse.verdict_for()` (extracted from `main()`) writes
+      `not_in_quotation` for a matched quotation the word lies outside - 492 -
+      and keeps `uncorroborated` for the 295 that matched under 2 words. The
+      popup shows no verse for `not_in_quotation`, one line saying no cited
+      verse covers the word.
+    * **Entry 69 w23 had no row at all.** Rows came only from disputes, and both
+      OCRs read `גמרה` there, so their correction `גרמה` had nothing to hang on -
+      `0GF` had counted it among the unsurfaced. `build_witness_review_queue.py
+      --witness-text` now adds a `their_correction_only` row for every reading
+      correction at a word both OCRs read alike (the SHARED rows of `0GH`'s
+      tool): 1 today, served, 0 colliding with a dispute's token. And
+      `corrected_status()` called that case `same_letters` - markup - which
+      `test_an_unchanged_word_in_the_corrected_text_is_not_agreement` ASSERTED,
+      on these very letters: a test pinned to the defect (Lesson 36). It is
+      `changed_from_both` now, and the line is inverted with a comment saying so.
+    Verified live on :8421: both popups rendered in a browser - 58 w11 reads
+    "word 11", no Genesis 2:6, "No cited verse covers this word"; 69 w23 shows
+    both OCRs' `גמרה` and "Sefaria corrected text (changed - both OCRs read
+    otherwise): `גרמה`". Queue 1,968 rows, 0 duplicate keys, 0 wrong-page rows,
+    318/318 entries 200. Tests `test_a_word_outside_the_quotation_is_not_judged_
+    by_its_verse` and `test_a_correction_at_a_word_both_ocrs_read_alike_becomes_
+    a_row`, each failing under a mutation that undoes its fix.
+
+    The original report, as written before the fix:
+
+    **1. "Token #167" names the right word in an index space nobody sees.** The
+    box is on `הוא` (raw OCR token 210 on p73). `page_token_index` 167 counts
+    only letter-bearing tokens - the space `api_witness_context` slices
+    (`review_server.py:1820`, `dtoks`) - and is neither the raw token (210) nor
+    the word's place in the entry (11, the number in the URL):
+
+        review_frontend/app.js:3832
+        <div class="panel-label">${entryRefName(w.klal_id)} · Token #${w.page_token_index ?? w.docai_token_index} · tier ${w.tier} · page ${w.page}</div>
+
+    Proposed: show `word N` when the row has a `word_index` (every HaShorashim
+    row), the token index only as a labelled fallback (Yad Malachi rows with
+    `word_index: null`, `0EA`).
+
+    **2. The verse belongs to the NEXT quotation.** The word is Ibn Janah's own
+    gloss right after <https://www.sefaria.org/Proverbs.1.26>'s quotation (`...
+    באידכם אשחק ¹⁹ הוא הצער`); that marker is at the word, so the tool took the
+    next one, <https://www.sefaria.org/Genesis.2.6>, whose quotation `ואד יעלה מן
+    הארץ` matched 4 words (corroboration 0.8) and stops well after the word. The
+    tool's verdict merges two different situations:
+
+        tools/adjudicate_against_verse.py:448
+        if matched < args.min_matched or not (start <= pos < anchor):
+            verdict = "uncorroborated"
+
+    and the popup explains all of them with the first one's sentence:
+
+        review_frontend/app.js:4984
+        uncorroborated: 'The quotation could not be matched to the cited verse, so the verse cannot rule here.',
+
+    Measured on the 787 `uncorroborated` rows: **295** matched fewer than 2
+    words (the sentence is true); **492** matched 2+ and the disputed word is
+    simply outside the quotation - the sentence is false, and the verse shown is
+    not evidence about the word at all. So the 1,616 rows "with a cited verse"
+    (`0GE`, `0GG`) are really 1,124 where a verse is at least near, and 829
+    where a verse bears on the word (THEIRS 586, neither 212, OURS 21, both 10).
+
+    Proposed: the tool writes `not_in_quotation` for the second case, and the
+    popup shows NO verse for it - at most one line saying the word is in Ibn
+    Janah's own words - keeping "could not be matched" for the 295.
+
 0GH. **[2026-09-14, reviewer: "how many corrections did Sefaria make, how many
     where our OCR differs from theirs, all the ones where we argue with their
     correction, the value we add, and how much the better scan helped"]

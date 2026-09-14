@@ -195,6 +195,42 @@ def corrected_positions(klalim, corrected_path):
     return reviewed, spans
 
 
+CORRECTION_ONLY = "their_correction_only"
+
+
+def correction_only_disputes(klalim, corrected_path, witness_path):
+    """(rows shaped as disputes, count with no word of ours to anchor to).
+
+    Their corrections at words where our OCR reads what THEIR OCR read, so no
+    dispute exists there and, until this, no row: the reviewer could not see the
+    correction at all (item 0GI; reviewer 2026-09-14 on entry 69 w23, "i don't
+    see sef. correction"). Taken from measure_correction_overlap.compare(), the
+    three-way alignment item 0GH measured with - a reading correction whose
+    status is SHARED - and shaped as disputes so the main loop anchors them like
+    any other row. A correction that inserts a word both OCRs lack has no word
+    of ours to anchor to; it is counted, not served.
+    """
+    import measure_correction_overlap as mco
+    with open(os.path.expanduser(corrected_path), encoding="utf-8") as fh:
+        corrected = mco.join_homograph_halves(json.load(fh))
+    with open(os.path.expanduser(witness_path), encoding="utf-8") as fh:
+        witness = {cio.root_key(k): v for k, v in json.load(fh).items()}
+    rows, _stats = mco.compare(root_groups(klalim), corrected, witness)
+    pages = {k["klal_id"]: k.get("page") for k in klalim}
+    out, unanchorable = [], 0
+    for r in rows:
+        if r["kind"] != "reading" or r["status"] != "SHARED":
+            continue
+        if not r["ours"]:
+            unanchorable += 1
+            continue
+        out.append({"klal_id": r["klal_id"], "word_index": r["word_index"],
+                    "page": pages.get(r["klal_id"]), "root": r["root"],
+                    "corpus": r["ours"], "witness_reading": r["their_ocr"],
+                    "their_corrected": r["their_corrected"], "class": CORRECTION_ONLY})
+    return out, unanchorable
+
+
 def verse_record(v, ours, theirs):
     """The cited verse for one row, shaped for the panel - or None.
 
@@ -247,7 +283,12 @@ def corrected_status(ours, theirs, corrected):
     """
     o, t, c = letters(ours), letters(theirs), letters(corrected)
     if o == t:
-        return "same_letters"
+        # Both OCRs read the same letters. If their corrector then changed them,
+        # that is not markup: both engines misread one piece of ink, or the
+        # correction departs from the page (item 0GI - entry 69 w23: both read
+        # `גמרה`, the page prints `גמרה`, the correction says `גרמה`). It was
+        # reported as "same_letters", and a test pinned it that way.
+        return "changed_from_both" if c != t else "same_letters"
     if c == t:
         # Same LETTERS as their OCR - but a corrector who moved a comma or a
         # space did touch the word, and the reviewer sees two different strings.
@@ -277,6 +318,9 @@ def main():
     ap.add_argument("--verse-verdicts", default=None,
                     help="tools/adjudicate_against_verse.py output, to show each "
                          "row's cited verse in the panel (item 0GE)")
+    ap.add_argument("--witness-text", default=None,
+                    help="the witness's raw OCR, {root: text}; with --corrected, also "
+                         "serve their corrections at words both OCRs read alike (item 0GI)")
     ap.add_argument("--out-name", default="reconstruction_witness_queue.json")
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
@@ -299,6 +343,10 @@ def main():
     if args.corrected:
         corrected_name, corrected_path = args.corrected.split("=", 1)
         reviewed, corr = corrected_positions(klalim, corrected_path)
+    correction_only, unanchorable = [], 0
+    if args.corrected and args.witness_text:
+        correction_only, unanchorable = correction_only_disputes(
+            klalim, corrected_path, args.witness_text)
     baseline = load_baseline()
     # THE CITED VERSE per row, as EVIDENCE (item 0GE). Keyed on the disputes
     # file's own (klal_id, word_index), which the verse tool read too.
@@ -311,7 +359,8 @@ def main():
     lexicon = load_lexicon()
     cache, out = {}, []
     located = ambiguous = missing = by_alignment = 0
-    for d in disputes:
+    seen, served_correction_only, correction_only_collided = set(), 0, 0
+    for d in list(disputes) + correction_only:
         if d.get("editorial"):
             continue
         kid = int(d["klal_id"])
@@ -396,7 +445,16 @@ def main():
         entry_reviewed = kid in reviewed
         corrected = None
         if entry_reviewed:
-            corrected = corr.get(kid, {}).get(wi, d["corpus"])
+            corrected = d.get("their_corrected") or corr.get(kid, {}).get(wi, d["corpus"])
+        key = (kid, offsets[kid][page] + i)
+        if d.get("class") == CORRECTION_ONLY:
+            # A dispute already on this token wins; a second row on one token
+            # would make the server's key guard refuse the whole entry.
+            if key in seen:
+                correction_only_collided += 1
+                continue
+            served_correction_only += 1
+        seen.add(key)
         out.append({
             "klal_id": kid,
             "docai_token_index": offsets[kid][page] + i,   # entry-relative, unique per entry
@@ -420,9 +478,10 @@ def main():
             "corrected_status": (corrected_status(d["corpus"], d["witness_reading"], corrected)
                                  if entry_reviewed else None),
             "verse": verse_record(verses.get((kid, wi)), d["corpus"], d["witness_reading"]),
-            "tier": tier_for(cio.hebrew_words(unicodedata.normalize("NFKC", d["corpus"])),
-                             cio.hebrew_words(unicodedata.normalize("NFKC", d["witness_reading"])),
-                             lexicon, d.get("class"), d["corpus"], d["witness_reading"]),
+            "tier": (CORRECTION_ONLY if d.get("class") == CORRECTION_ONLY else
+                     tier_for(cio.hebrew_words(unicodedata.normalize("NFKC", d["corpus"])),
+                              cio.hebrew_words(unicodedata.normalize("NFKC", d["witness_reading"])),
+                              lexicon, d.get("class"), d["corpus"], d["witness_reading"])),
             "dispute_class": d.get("class"),
             "vision_selected": None,
             "vision_transcription": None,
@@ -464,6 +523,10 @@ def main():
     print(f"  anchored to one token  {located:,}  ({by_alignment:,} by the word alignment)")
     print(f"  word repeats on page   {ambiguous:,}  (cannot be anchored safely)")
     print(f"  no usable token        {missing:,}")
+    if args.corrected and args.witness_text:
+        print(f"  their corrections where both OCRs read alike: {len(correction_only) + unanchorable} "
+              f"({served_correction_only} served, {correction_only_collided} on a token a dispute "
+              f"already holds, {unanchorable} with no word of ours)")
     print(f"  our OCR from           {'the frozen baseline' if baseline is not None else 'the MASTER (no baseline)'}")
     if verses:
         vv = collections.Counter((w["verse"]["verdict"], w["verse"]["spelling_only"])
@@ -473,11 +536,11 @@ def main():
     if corrected_name:
         print(f"  {corrected_name} reviewed {len(reviewed)} of these entries")
     print(f"  {'tier':<22} {'rows':>5} {'reviewed':>8} {'unchanged':>9} "
-          f"{'->ours':>6} {'->other':>7}")
+          f"{'->ours':>6} {'->other':>7} {'<-both':>6}")
     for tier in sorted(tier_stats):
         s = tier_stats[tier]
         print(f"  {tier:<22} {s['rows']:5,} {s['reviewed']:8} {s['unchanged']:9} "
-              f"{s['changed_to_ours']:6} {s['changed_to_other']:7}")
+              f"{s['changed_to_ours']:6} {s['changed_to_other']:7} {s['changed_from_both']:6}")
     dest = cio.repo_path(args.out_name)
     if args.dry_run:
         print(f"  would write            {dest}")

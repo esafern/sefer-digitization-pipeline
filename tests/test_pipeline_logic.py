@@ -9608,7 +9608,11 @@ def test_an_unchanged_word_in_the_corrected_text_is_not_agreement():
     import build_witness_review_queue as bwq
     assert bwq.corrected_status("עודנו", "עדנו", "עדנו") == "unchanged"
     assert bwq.corrected_status("פרי", "נורי", "פרי") == "changed_to_ours"
-    assert bwq.corrected_status("גמרה", "גמרה ", "גרמה") == "same_letters"
+    # Both OCRs read `גמרה` and their corrector changed it - not markup. This line
+    # asserted "same_letters" until 2026-09-14: it pinned the defect that hid
+    # entry 69 w23's correction (item 0GI; Lesson 36).
+    assert bwq.corrected_status("גמרה", "גמרה ", "גרמה") == "changed_from_both"
+    assert bwq.corrected_status("בי'ת", "בית", "בית") == "same_letters"
     assert bwq.corrected_status("אבן", "אב", "אבי") == "changed_to_other"
     # klal 18 w8 (reviewer): their OCR `רוח,`, corrected `רוח ,` - the corrector
     # moved a comma. Same letters, different strings: not "unchanged".
@@ -9797,3 +9801,43 @@ def test_the_correction_overlap_tells_had_shared_and_third_apart():
     assert ("reading", "THIRD", "שדה") in got, got
     assert any(r["kind"] == "citation" for r in rows), got
     assert mco.join_homograph_halves({"אלה a": "א ב", "אלה b": "ג ד"}) == {"אלה": "א ב ג ד"}
+
+
+def test_a_correction_at_a_word_both_ocrs_read_alike_becomes_a_row(tmp_path):
+    """Item 0GI, reviewer 2026-09-14 on entry 69 w23: "i don't see sef.
+    correction". Rows came only from disputes - places our OCR and theirs differ -
+    so a correction where both OCRs read alike had no row, and the reviewer could
+    not see it. Only that case is added: a correction our text already holds (HAD)
+    or reads a third way (THIRD) is a dispute and has its row already."""
+    import build_witness_review_queue as bwq
+    ours = [{"klal_id": 1, "gematria": "אב", "page": 58,
+             "clean_text": "האלף והבית . כמו שנאמר פרי הנחל ובלשון נזאיר ועוד סדה"}]
+    corrected, witness = tmp_path / "c.json", tmp_path / "w.json"
+    corrected.write_text(json.dumps(
+        {"אב": 'האלף והבית . כמו שנאמר פרי הנחל (שה"ש ו, יא) ובלשון גזאיר ועוד שדה'},
+        ensure_ascii=False), encoding="utf-8")
+    witness.write_text(json.dumps(
+        {"אב": "האלף והבית . כמו שנאמר נורי הנחל ובלשון נזאיר ועוד שרה"},
+        ensure_ascii=False), encoding="utf-8")
+    rows, unanchorable = bwq.correction_only_disputes(ours, str(corrected), str(witness))
+    assert unanchorable == 0
+    assert [(r["word_index"], r["corpus"], r["witness_reading"], r["their_corrected"], r["class"])
+            for r in rows] == [(8, "נזאיר", "נזאיר", "גזאיר", bwq.CORRECTION_ONLY)], rows
+    assert bwq.corrected_status(rows[0]["corpus"], rows[0]["witness_reading"],
+                                rows[0]["their_corrected"]) == "changed_from_both"
+
+
+def test_a_word_outside_the_quotation_is_not_judged_by_its_verse():
+    """Item 0GI, reviewer on entry 58 w11: a gloss right after a Proverbs
+    quotation was shown the NEXT citation's verse, Genesis 2:6, under "the
+    quotation could not be matched" - which had matched 4 words, just not this
+    one. A quotation that fails to match and a word outside a matched quotation
+    are different facts, and the second must not show a verse at all."""
+    import adjudicate_against_verse as aav
+    assert aav.verdict_for(1, 2, 3, 5, 9, True, False) == "uncorroborated"
+    assert aav.verdict_for(4, 2, 12, 5, 16, True, True) == "not_in_quotation"   # 58 w11's shape
+    assert aav.verdict_for(4, 2, 3, 9, 9, True, False) == "not_in_quotation"    # the marker's own slot
+    assert aav.verdict_for(4, 2, 3, 5, 9, True, False) == "OURS"
+    assert aav.verdict_for(4, 2, 3, 5, 9, False, True) == "THEIRS"
+    assert aav.verdict_for(4, 2, 3, 5, 9, True, True) == "both"
+    assert aav.verdict_for(4, 2, 3, 5, 9, False, False) == "neither"

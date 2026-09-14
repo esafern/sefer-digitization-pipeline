@@ -3739,6 +3739,7 @@ function witnessTierNote(wOrTier) {
     C_theirs_unattested: 'Our reading is in the lexicon; theirs is not.',
     C_both_attested: 'Both readings are in the lexicon, so a lexicon check cannot tell them apart - this needs the ink.',
     one_side_empty: 'One source has text here and the other has none - a dropped or inserted word.',
+    their_correction_only: 'Both OCRs read this word the same way, and their corrector changed it: either both engines misread the same ink, or the correction departs from the printed page. The ink decides.',
   };
   const base = notes[tier] || "Two OCR engines disagree here and both readings are real Hebrew words, so a word-lexicon check can't tell them apart - this needs the ink.";
   if (!notes[tier] || !WITNESS_CORRECTED_NAME) return base;
@@ -3749,13 +3750,17 @@ function witnessTierNote(wOrTier) {
   // is evidence, so the sentence counts changes (reviewer 2026-09-13).
   const who = WITNESS_CORRECTED_NAME;
   const toOurs = s.changed_to_ours || 0, toOther = s.changed_to_other || 0;
-  const changed = toOurs + toOther;
+  const fromBoth = s.changed_from_both || 0;
+  const changed = toOurs + toOther + fromBoth;
   // Every status corrected_status() returns is counted, so the parts sum to the
   // total (code review 2026-09-13, finding 5: same_letters was left out).
   const extra = [s.punctuation_only ? `changed only punctuation at ${s.punctuation_only}` : '',
                  s.same_letters ? `differ from ours only in markup at ${s.same_letters}` : ''].filter(Boolean);
   return `${base} Of the ${s.reviewed} such rows in entries ${who} has reviewed, they left their OCR unchanged at ${s.unchanged || 0}, which says nothing either way` +
-    (changed ? `; they changed the reading at ${changed}: to ours in ${toOurs}` + (toOther ? `, to something else in ${toOther}` : '') : '; they changed the reading at none') +
+    (changed ? `; they changed the reading at ${changed}: ` + [
+        toOurs ? `to ours in ${toOurs}` : '', toOther ? `to something else in ${toOther}` : '',
+        fromBoth ? `away from a reading both OCRs share in ${fromBoth}` : ''].filter(Boolean).join(', ')
+      : '; they changed the reading at none') +
     (extra.length ? `; ${extra.join('; ')}` : '') + '.';
 }
 
@@ -3792,6 +3797,7 @@ async function openWitnessPanel(w) {
     ...(w.entry_reviewed ? [{ source: 'corrected_reading', label: `${w.corrected_name} corrected text` + ({
         unchanged: ' (unchanged)', changed_to_ours: ' (changed - to our reading)', changed_to_other: ' (changed)',
         punctuation_only: ' (only punctuation changed)',
+        changed_from_both: ' (changed - both OCRs read otherwise)',
       }[w.corrected_status] || ''), text: w.corrected_reading }] : []),
     { source: 'unreadable', label: 'Unreadable / neither is right', text: '(mark as unreadable)' },
   ].filter(opt => opt.text);
@@ -3827,9 +3833,16 @@ async function openWitnessPanel(w) {
     ctxHtml = '<span style="color:var(--ink-faint);">no context available</span>';
   }
 
+  // The WORD's number in the entry - the one in the share URL and the text pane.
+  // It showed the OCR token index, in the letter-bearing token space the context
+  // endpoint slices: right token, a number that matched nothing the reviewer can
+  // see (item 0GI, entry 58 w11 read "Token #167"). A row with no word position
+  // (Yad Malachi's unmapped witness rows, 0EA) still shows the token, labelled.
+  const where = w.word_index != null ? `word ${w.word_index}`
+    : `OCR token #${w.page_token_index ?? w.docai_token_index}`;
   witnessPanelBody.innerHTML = `
     <div class="panel-section">
-      <div class="panel-label">${entryRefName(w.klal_id)} · Token #${w.page_token_index ?? w.docai_token_index} · tier ${w.tier} · page ${w.page}</div>
+      <div class="panel-label">${entryRefName(w.klal_id)} · ${where} · tier ${w.tier} · page ${w.page}</div>
       <div style="font-size:12px;color:var(--ink-faint);">${escapeHtml(witnessTierNote(w))}</div>
       ${w.corrected_name && !w.entry_reviewed ? `<div style="font-size:12px;color:var(--ink-faint);margin-top:4px;">${escapeHtml(w.corrected_name)} has not sent a corrected version of this entry.</div>` : ''}
       ${w.master_reading && w.master_reading !== w.docai_reading ? `<div style="font-size:12px;margin-top:4px;">Master text now reads &ldquo;${escapeHtml(w.master_reading)}&rdquo;.</div>` : ''}
@@ -4976,6 +4989,13 @@ function redrawKlalBody(block, k) {
 function verseHtml(w) {
   const v = w && w.verse;
   if (!v) return '';
+  // THE NEXT CITATION'S QUOTATION DOES NOT REACH THIS WORD (item 0GI; reviewer
+  // on entry 58 w11, shown Genesis 2:6 for a gloss after Proverbs 1:26). That
+  // verse belongs to other words, so it is not shown. It was, on 492 rows, under
+  // "could not be matched" - false: the quotation matched, just not here.
+  if (v.verdict === 'not_in_quotation') {
+    return `<div class="panel-section"><div style="font-size:12px;color:var(--ink-faint);">No cited verse covers this word: the nearest citation's quotation does not reach it, so it is most likely the author's own text, and a verse cannot rule here.</div></div>`;
+  }
   const said = {
     THEIRS: 'The verse has their reading, not ours.',
     OURS: 'The verse has our reading, not theirs.',
