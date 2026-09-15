@@ -9860,16 +9860,54 @@ def test_a_gap_is_never_claimed_as_the_word_it_stands_before():
     assert "witness_overlay" not in gap and word["witness_overlay"] == {"x": 1}
 
 
-def test_a_gap_ruling_is_recorded_but_never_applied_as_a_replacement():
-    """Item 0GP. Accepting the witness's words at a gap means INSERTING them
-    before `word_index`; the witness applier replaces spans, so it must refuse a
-    gap ruling rather than overwrite the word the gap stands in front of."""
+def test_a_gap_ruling_inserts_their_words_only_while_its_neighbours_stand():
+    """Item 0GP, reviewer 2026-09-15: "build add their words". Accepting the
+    witness's words at a gap INSERTS them before `word_index` - never replaces
+    the word the gap stands in front of. A gap has no word of its own, so the
+    drift guard is the words either side; keeping our text changes nothing."""
     from apply_reviewer_decisions import witness_choice_edit
 
-    decision = {"chosen_source": "tesseract_reading", "chosen_text": "נוסף",
-                "candidate_snapshot": {"word_index": 3, "gap": True, "master_reading": ""}}
-    kind, why = witness_choice_edit(decision, ["א", "ב", "ג", "ד"])
-    assert kind is None and "insertion" in why, (kind, why)
+    words = ["א", "ב", "ג", "ד"]
+    snap = {"word_index": 3, "gap": True, "master_reading": "",
+            "gap_context": {"before": "ג", "after": "ד"}}
+    rule = lambda source, text, s=snap: {"chosen_source": source, "chosen_text": text,
+                                         "candidate_snapshot": s}
+    assert witness_choice_edit(rule("tesseract_reading", "נוסף"), words) == (
+        "insert", ["א", "ב", "ג", "נוסף", "ד"])
+    assert witness_choice_edit(rule("custom", "שני מלים"), words) == (
+        "insert", ["א", "ב", "ג", "שני", "מלים", "ד"])
+    assert witness_choice_edit(rule("docai_reading", ""), words) == ("confirmed", words)
+    kind, why = witness_choice_edit(rule("tesseract_reading", "נוסף"), ["א", "ב", "ה", "ד"])
+    assert kind is None and "drift" in why, why
+    kind, why = witness_choice_edit(
+        rule("tesseract_reading", "נוסף", dict(snap, gap_context=None)), words)
+    assert kind is None and "neighbouring" in why, why
+    # words missing after the LAST word: the gap's position is the word count
+    end = {"word_index": 4, "gap": True, "gap_context": {"before": "ד", "after": None}}
+    assert witness_choice_edit(rule("tesseract_reading", "סוף", end), words) == (
+        "insert", ["א", "ב", "ג", "ד", "סוף"])
+
+
+def test_an_inserted_witness_reading_reaches_the_corpus_only_when_asked_for(
+        apply_harness, decisions_path, monkeypatch, capsys):
+    """Item 0GP. The insertion goes through the same switched-off path as every
+    witness ruling (item 0GL): a plain run reports it and changes nothing, the
+    named flag inserts it once, and never twice."""
+    apply_harness([{"klal_id": 1, "clean_text": "אלף בית גימל"}], {})
+    ruling = rd.append_decision(
+        "witness_choice", klal_id=1, word_index=-3, chosen_source="tesseract_reading",
+        chosen_text="דלת",
+        candidate_snapshot={"word_index": 2, "gap": True, "master_reading": "",
+                            "gap_context": {"before": "בית", "after": "גימל"},
+                            "witness_reading": "דלת"},
+        path=decisions_path)
+    assert apply_harness.run()[1] == "אלף בית גימל"
+    assert "NOT applied: 1" in capsys.readouterr().out
+    monkeypatch.setattr(sys, "argv", ["apply_reviewer_decisions.py", "--apply-witness-choices"])
+    assert apply_harness.run()[1] == "אלף בית דלת גימל"
+    events = rd.history_for(1, 2, "apply_event", path=decisions_path)
+    assert [e["applied_decision_id"] for e in events] == [ruling["id"]]
+    assert apply_harness.run()[1] == "אלף בית דלת גימל"
 
 
 def test_a_citation_is_right_when_the_words_before_it_end_in_its_verse():

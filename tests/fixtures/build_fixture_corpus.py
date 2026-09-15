@@ -414,6 +414,7 @@ def _write_witness_queue(root):
             {"klal_id": 4, "page": 2, "docai_reading": "", "master_reading": "",
              "tesseract_reading": "נוסף", "witness_reading": "נוסף",
              "opcode": "delete", "tier": "one_side_empty", "gap": True, "anchored": False,
+             "gap_context": {"before": "עין", "after": "פא"},
              "bbox": {"x1": 0.085, "y1": 0.42, "x2": 0.095, "y2": 0.45},
              "docai_token_index": -4, "page_token_index": None, "vision_selected": "B",
              "vision_transcription": "", "vision_confidence": 0.9,

@@ -578,6 +578,11 @@ def main():
             "page_token_index": None,
             "anchored": False,
             "gap": gap,
+            # THE DRIFT GUARD FOR AN INSERTION: a gap has no word of its own, so
+            # the applier checks the master words either side are still these.
+            **({"gap_context": {"before": mw[wi - 1] if mw and 0 < wi <= len(mw) else None,
+                                "after": mw[wi] if mw and wi < len(mw) else None}}
+               if gap else {}),
             "word_index": wi,
             "page": int(page),
             "bbox": bbox,

@@ -634,6 +634,18 @@ def test_a_gap_where_only_the_witness_has_words_is_shown_and_can_be_ruled(
     assert (last["klal_id"], last["word_index"], last["chosen_source"], last["chosen_text"]) == (
         4, -4, "docai_reading", ""), last
     assert (last.get("candidate_snapshot") or {}).get("gap") is True, last.get("candidate_snapshot")
+    # ...and "add their words" shows them, pending, where they would go (item 0GP,
+    # reviewer 2026-09-15: "build add their words")
+    page.eval_on_selector("#klal-block-4 .witness-gap", "el => el.click()")
+    page.wait_for_selector("#witness-options .candidate-option", timeout=10000)
+    page.click('#witness-options .candidate-option:has-text("words here")')
+    page.click("#save-witness-decision-btn")
+    page.wait_for_selector("#klal-block-4 .witness-gap + .pending-replace-text", timeout=10000)
+    assert page.inner_text("#klal-block-4 .witness-gap + .pending-replace-text") == "נוסף"
+    rows = [json.loads(line) for line in open(fixture_decisions_path, encoding="utf-8") if line.strip()]
+    last = [r for r in rows if r.get("decision_type") == "witness_choice"][-1]
+    assert (last["word_index"], last["chosen_source"], last["chosen_text"]) == (-4, "tesseract_reading", "נוסף")
+    assert (last["candidate_snapshot"] or {}).get("gap_context") == {"before": "עין", "after": "פא"}
     assert page.test_errors == []
 
 

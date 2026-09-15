@@ -5,6 +5,10 @@
 _Current state only. Every claim here is measured, not remembered; the dated
 evidence for each is in `PROJECT-STATUS-HISTORY.md`._
 
+> **Picking up after 2026-09-15? Read item `0GQ` first** - the handoff for
+> Sefer HaShorashim: its state (the ledger is empty, so the corpus can still be
+> wiped; the witness apply path is built and off) and the open work in order.
+>
 > **Picking up where the last session stopped? This file is now the OPEN work
 > only.** Eight items are live below; every other item ever written is indexed by
 > id at the bottom with its body in `PROJECT-STATUS-HISTORY.md`. A reference from
@@ -101,6 +105,79 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0GQ. **[2026-09-15] HANDOFF - SEFER HaSHORASHIM, WHERE IT STANDS AND WHAT IS
+    OPEN.** Read this first after a clear; the items below it (`0GB`-`0GP`)
+    hold the evidence.
+    **State, checked 2026-09-15.**
+    * The corpus is PDF pages 58-151 (the א-ב-ג slice), read by DocAI from the
+      NLI full-tone photographs: 317 entries.
+    * `review_decisions.jsonl` is **0 bytes**, so the corpus is still a pure
+      rebuild of the OCR and can be wiped (reviewer: "retain the option to
+      wipe the corpus").
+    * The witness apply path is built and OFF: `--apply-witness-choices`,
+      including gap insertion (`0GL`, `0GP`).
+    * Dashboards: :8421 serves HaShorashim, :8420 Yad Malachi.
+    * The witness queue has 2,057 rows. 61 are served by word position; 53
+      of those are gaps where only Sefaria has words.
+    * 15 pipeline commits are unpushed. Scanned: no correspondent is named
+      in any of them. Pushing is the reviewer's decision; never
+      `git push --all`, never the `backup/pre-anonymize-2026-09-13` branch.
+    **Open, in the order I would take it.**
+    1. **Reviewing on :8421.**
+       - Start with the 4 rows where our reading is wrong (`0GN`: 32/194,
+         83/91, 211/186, 212/1355), then the `B_bracketed_letters` tier (15
+         rows).
+       - The 34 footnote marks whose image and page numbering disagree
+         (`0GO`): `footnote_marks.json` rows with `decision == "review"`.
+         Pages with several, such as p73 and p105, are probably one missed
+         footnote shifting the rest.
+    2. **Ink checks nobody has made.**
+       - The long runs `--max-span 4` drops (`0GP`): 130/35 (we have 1 word,
+         they have 16), 203/60, 245/82 (a leaked variant note), 317/180 (the
+         next chapter's heading), and 84/22, 4/62, 136/10.
+       - Three words both OCRs read alike inside a quotation: 20/150, 98/69
+         and 135/17.
+       - The three `צרי` heading concerns: 83, 175 and 203.
+       - Two footnote marks I could not read: entry 38 `מנד`, and one in
+         entry 193.
+    3. **The citation deliverable (`0FM`).** `citation_corrections.csv` has
+       146 rows, every one checked by eye. The draft to the Sefaria editor
+       carries these numbers and is NOT sent. Still open: 1 row unclear
+       (#147), and 16 off-by-one rows that could be a misprint or numbering.
+    4. **Before `--apply-witness-choices` is ever turned on** (`0GL`):
+       - a tool that re-points recorded rulings after a rebuild renumbers
+         entries (each ruling carries its row to do it with);
+       - witness rulings in `audit_applied_decisions.py`;
+       - the reviewer's go-ahead, since turning it on ends the option to wipe.
+    5. **Footnotes (`0GO`).**
+       - How the notes appear in the final text is for the reviewer and
+         Sefaria to decide.
+       - 960 numerals have no token of their own (DocAI fused them into a
+         word); they are the `C_footnote_marker` tier.
+       - 10 marks are unread.
+       - `experiment_footnote_marks.py` writes its JSON only at the END.
+         Every paid answer is cached as it arrives, but the session-start
+         rule wants item-by-item output: fix that before the next paid run.
+    6. **Printed brackets our OCR dropped** (`0GN`, the bracket-only rows): a
+       representation question, not yet decided.
+    7. **UI.** The part selector offers Parts 2 and 3 on a one-part book.
+    8. **Yad Malachi and the older items.** `0CO` and `0CV` need
+       re-measuring. The TL;DR's `0BO`, `0BU`, `0BX` and `0DC`-`0DE` were not
+       touched this session.
+    **Lessons from this session.**
+    * A new Lesson 50: say exactly which object you checked. Six rows of one
+      file were reported as the first six of another.
+    * Lesson 33 gained the false all-clear: a `| tail` chain hid three
+      refusals, and a rebuild left the dashboard on the old entry list.
+    * The public-repo naming rule is now in START_HERE's session-start list,
+      file names included.
+    * Three mutation checks this session survived at first. Each was a hole
+      in a TEST, not the code, and each was closed (Lesson 42 doing its job).
+    **How to rebuild.** The corpus-root `README.md` has the full chain:
+    renumbering (alignment compared by root, word ids reseeded with an empty
+    ledger), the dashboard's entry list, the witness queue, the citation
+    check and the footnote-mark run.
+
 0GP. **[2026-09-14, reviewer: "any unsurfaced disputes or corrections"] YES:
     61 ONE-SIDED DISPUTES AND 7 LONG RUNS REACH NO SCREEN. SHARED ERRORS ARE
     RARE.** Measured on the 317-entry build.
@@ -170,6 +247,24 @@ applying it to the corpus remain two separate, deliberate steps.
       after a PID restart: all 53 gaps and all 8 unpinned words of ours are
       served; entries 111 and 171 draw their gap after the last word;
       entry 17 w49 shows as an open dispute; no page errors.
+    * **"ADD THEIR WORDS" BUILT AND OFF, 2026-09-15 (reviewer: "build add
+      their words").** `witness_choice_edit` turns a gap ruling into an
+      INSERTION before `word_index`; keeping our text is a no-op. A gap has
+      no word of its own to check, so the drift guard is its neighbours: the
+      queue row now records `gap_context` (the master words before and
+      after), and the applier refuses when either has changed or when none
+      was recorded. It runs only under `--apply-witness-choices`, the same
+      switch as every witness ruling (`0GL`), so the corpus can still be
+      wiped. Word ids follow through the applier's generic
+      `widentity.follow_corpus()` after the save, and a shifted flag through
+      `word_count_shifts`, which the witness path already sets. Rebuilt: all
+      53 gap rows carry `gap_context`, and all 53 agree with the corpus.
+      Tests: `test_a_gap_ruling_inserts_their_words_only_while_its_neighbours_stand`,
+      which fails under each of three mutations (no neighbour check, missing
+      context allowed, the next word overwritten); and
+      `test_an_inserted_witness_reading_reaches_the_corpus_only_when_asked_for`.
+      The browser test now also chooses "Add their words" and sees them
+      pending after the caret.
     * `claim_word_index` skipping a gap is tested on its own
       (`test_a_gap_is_never_claimed_as_the_word_it_stands_before`), because
       the fixture has no witness row on a gap's word and could not notice the

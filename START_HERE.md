@@ -39,7 +39,7 @@ loaders, Hebrew helpers) and `pipeline/vision_adjudication_common.py`
 (crop/cache/retry/client). A hand-maintained parallel copy has produced the
 same bug class here more than once.
 
-**Then read Part 2's 49 numbered lessons.** They are rules, not history. The
+**Then read Part 2's 50 numbered lessons.** They are rules, not history. The
 short version of most of them: a check that wasn't run has verified nothing, a
 passing score is not a checked result, and no single confident signal is
 enough.
@@ -531,6 +531,15 @@ this repo as an LLM agent, follow them exactly.
 - **Mandatory incremental disk flushing on all scripts.** All batch-processing, VLM, OCR, and API scripts
   MUST flush their output to disk item-by-item (`open(..., "a")`, `f.flush()`, `conn.commit()`). Never buffer
   results in memory to write at the end — cloud API failures, 429 quota exhaustion, and 503 errors will cause data loss.
+- **This repo is PUBLIC: private correspondents by ROLE, never by name.** "The
+  Sefaria editor", "the NLI contact" - in PROJECT-STATUS, commit messages,
+  docstrings and comments alike, and paraphrase their emails rather than
+  quoting them. **File names count.** The drafts in the corpus root are named
+  after their recipients, so citing one by file name leaks the name; on
+  2026-09-14 that happened in a PROJECT-STATUS annotation and an unpushed
+  commit had to be amended. Say "the draft to the Sefaria editor". Before any
+  push, scan every unpushed commit, not just HEAD. The corpus root is a
+  PRIVATE repo holding Sefaria's unreleased data and must never be made public.
 - **Close open items before proposing new ones.** If `PROJECT-STATUS.md`'s
   Open Items section lists unresolved blockers, do not end a turn by
   offering to expand scope ("want me to also check X," "should I dig into
@@ -1361,6 +1370,17 @@ tells you where to look.
     directly showed all 13. A grep against a summary is a check on the summary.
     This is Lesson 19's shape ("verify against the data, not against the
     write-up") applied to tooling output, and it costs a false alarm every time.
+    **It cuts the other way too - a false all-clear (item 0GM, 2026-09-14).** A
+    rebuild chain ran each step as `step | tail` under `set -e` and ended by
+    printing `REBUILD DONE`. A pipe's status is its LAST command's, so three
+    tools that REFUSED to write - the alignment, the word ids, the OCR baseline -
+    were invisible, and the witness steps then ran on the new text with the old
+    ids. The files said otherwise: `git status` in the corpus root listed what
+    had actually changed. Run each step alone and test its exit code. The same
+    rebuild then left the dashboard on 318 entries after a restart, because
+    the page reads `klalim_demo_dataset.json` and no step of the chain
+    regenerated it. A rebuild is done when the screen the reviewer uses shows
+    it, not when the last step prints.
 
 34. **SWEEP THE SIBLINGS — the other branches of the same function, not just the
     same class of input.** One defect -
@@ -1669,6 +1689,18 @@ tells you where to look.
     verdict, so a settled position stops coming back. This is Lesson 2 with an
     instrument named (a passing score is not a checked result) and Lesson 9's
     two-signal bar applied to a DETECTOR rather than to a fix.
+
+50. **SAY WHICH ONE YOU CHECKED — a check is a statement about the object you
+    looked at. Name that object, not its twin.** Item 0FM, 2026-09-14. Six rows
+    of `quotation_suspects.json` were read against the verse text and reported
+    in chat as "the first six rows" of `citation_corrections.csv`: the same 158
+    citations, in a different order. The reviewer pasted the CSV's real first
+    six and asked. Two of them were a numbering difference that the CSV labelled
+    a misprint, which a check on the other file could never have shown. When two
+    files carry the same records, name the file, the order and the rows ("rows
+    1-6 of X"). When the question is about the deliverable, check the
+    deliverable. This is Lesson 28 ("where you looked, not where it is") turned
+    on the report rather than on the search.
 
 
 ---

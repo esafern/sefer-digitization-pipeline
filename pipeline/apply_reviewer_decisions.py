@@ -737,8 +737,8 @@ def apply_delete_insertion(clean_text, word_index, chosen_text):
 
 def witness_choice_edit(decision, words):
     """What one recorded witness_choice does to its entry's words:
-    (kind, new_words) with kind "replace" | "remove" | "confirmed", or
-    (None, reason) when it cannot apply. Item 0GL.
+    (kind, new_words) with kind "replace" | "remove" | "insert" | "confirmed",
+    or (None, reason) when it cannot apply. Item 0GL; "insert" item 0GP.
 
     A witness ruling is KEYED by the OCR token (`docai_token_index`), not by a
     word (item 0CC), so where it applies comes from its snapshot - the queue row
@@ -753,10 +753,26 @@ def witness_choice_edit(decision, words):
     if source == "unreadable":
         return None, "marked unreadable - there is no reading to apply"
     if snap.get("gap"):
-        # Words the witness has where ours has none (item 0GP). Applying one is an
-        # INSERTION before `word_index`, which this function does not do; the
-        # ruling is recorded and reported, never applied as a replacement.
-        return None, "a gap ruling (the witness's words where ours has none) - insertion is not built"
+        # Words the witness has where ours has none (item 0GP): applying one is an
+        # INSERTION before `word_index`. A gap has no word of its own to check, so
+        # the drift guard is its NEIGHBOURS - the words either side must still be
+        # the ones the ruling saw (`gap_context`, from the queue row), or nothing
+        # is written. Keeping our text (an empty reading) confirms. Reviewer
+        # 2026-09-15: "build add their words".
+        wi = snap.get("word_index")
+        if wi is None or not (0 <= wi <= len(words)):
+            return None, "the gap's position is not in the entry"
+        ctx = snap.get("gap_context")
+        if not ctx:
+            return None, "the gap's row records no neighbouring words to check against"
+        now = {"before": words[wi - 1] if wi > 0 else None,
+               "after": words[wi] if wi < len(words) else None}
+        if any(ctx.get(side) != now[side] for side in ("before", "after")):
+            return None, "drift - the words around the gap are not the ones the ruling saw"
+        chosen = (decision.get("chosen_text") or "").split()
+        if not chosen:
+            return "confirmed", list(words)
+        return "insert", words[:wi] + chosen + words[wi:]
     wi = snap.get("word_index")
     seen = (snap.get("master_reading") or snap.get("docai_reading") or "").split()
     if wi is None or not seen:
