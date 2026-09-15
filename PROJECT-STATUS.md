@@ -9,6 +9,21 @@ evidence for each is in `PROJECT-STATUS-HISTORY.md`._
 > Sefer HaShorashim: its state (the ledger is empty, so the corpus can still be
 > wiped; the witness apply path is built and off) and the open work in order.
 >
+> **Then read `0GV`-`0GZ`, from the evening of 2026-09-15, before the Sefaria
+> meeting of 2026-09-16.**
+> * A demo copy of the corpus root runs on :8422: `~/work/hashorashim-demo`,
+>   an APFS clone with no `.git` and its own ledger, holding 4 applied witness
+>   rulings in entry 1. The real root on :8421 still has no rulings.
+> * Demo rulings are applied with `apply_reviewer_decisions.py
+>   --apply-witness-choices`, then `build_klalim_demo_dataset.py`. NEVER the
+>   full rebuild, which re-derives the rows the green boxes hang on (`0GW`).
+> * Scheduled for after the meeting: the verse-check fix (`0GZ`).
+> * Still open from that evening:
+>   - the fused-footnote vision pass, sample first (`0GZ`);
+>   - witness rulings in `audit_applied_decisions.py` (`0GL`, `0GW`);
+>   - footnote and heading demarcation in the export, which waits on Sefaria
+>     naming its footnote tag (`0GV`).
+>
 > **Picking up where the last session stopped? This file is now the OPEN work
 > only.** Eight items are live below; every other item ever written is indexed by
 > id at the bottom with its body in `PROJECT-STATUS-HISTORY.md`. A reference from
