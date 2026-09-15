@@ -38,3 +38,16 @@ google-cloud-documentai==3.15.0
 # the characters. python-bidi rather than a hand-rolled reverse, which gets
 # gershayim, embedded digits and Latin wrong.
 python-bidi
+
+# Images - ADDED 2026-09-15 (item 0HC). A collaborator's fresh install failed on
+# numpy, and the gate suite could not even be collected: tests/test_pipeline_logic.py
+# imports tools that import PIL at module level. Neither package was ever listed,
+# because the owner's venv had both from OCR experiments, so nothing here broke.
+# Pillow: tools/render_pdf_pages.py, build_root_corpus.py, experiment_footnote_marks.py,
+#   build_nli_page_pdf.py, verify_nli_page_offset.py, ocr_pages_*.py and more (13).
+# numpy: tools/render_pdf_pages.py, build_root_corpus.py, experiment_scan_source.py,
+#   ocr_pages_vlm.py.
+# FLOORS, not pins: an exact old Pillow can mean building it from source on a new
+# Python. The owner's venv runs Pillow 10.4.0 and numpy 2.5.2 on Python 3.14.7.
+Pillow>=10.4
+numpy>=2.0

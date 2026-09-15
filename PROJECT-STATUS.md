@@ -206,6 +206,41 @@ applying it to the corpus remain two separate, deliberate steps.
         short). Its precondition was blind once too (Lesson 42): it first
         asked whether the title shrank, which is the thing under test.
 
+0HC. **[2026-09-15, reviewer: "his python complained about numpy"] requirements.txt
+    NEVER LISTED PILLOW OR NUMPY; A FRESH INSTALL COULD NOT EVEN COLLECT THE GATE
+    SUITE. FIXED.**
+    * **Measured, by a real fresh install.** A Python 3.14 venv in the session
+      scratchpad, built from `requirements.txt` and `requirements-dev.txt`
+      only, stopped at `ImportError while importing test module
+      tests/test_pipeline_logic.py ... No module named 'PIL'`: the gate suite
+      imports tools that import PIL at module level.
+      - An import sweep of `pipeline/`, `tools/` and `tests/` found Pillow
+        used by 13 tools and numpy by 4 (`render_pdf_pages.py`,
+        `build_root_corpus.py`, `experiment_scan_source.py`,
+        `ocr_pages_vlm.py`), neither listed.
+      - The owner's venv had both from OCR experiments, so nothing here broke
+        (Lesson 26's shape: a gap only visible from outside).
+    * **Fixed** with `Pillow>=10.4` and `numpy>=2.0` as FLOORS, not pins: an
+      exact old Pillow can mean compiling it from source on a new Python. The
+      owner's venv runs Pillow 10.4.0 and numpy 2.5.2. A fresh install
+      resolves Pillow 12.3.0 and numpy 2.5.3 from ready-built packages, then
+      collects 706 tests, and all five numpy/Pillow tools import.
+    * **Left unlisted by design** (experiment and benchmark scripts, SETUP.md
+      step 6): `cv2`, `kraken`, `surya`, `torch`, `transformers`. The sweep's
+      `docai_filter`, `evaluate_ocr_alignment` and `repair_filters` are the
+      project's own modules in subfolders, not missing packages.
+    * **The one gate failure in that run was NOT the packages.**
+      `test_ligature_artifact_flag_only_fires_on_an_exact_match_to_stored_text`
+      failed in the fresh venv AND the owner's, because
+      `docai_filter.reference_frequencies()` read an empty table: the whole
+      `sefaria_reference_corpus/` had been MOVED out of the repo, to
+      `~/Downloads/sefaria_reference_corpus`, between 23:44:55 and 23:47:29
+      (the repo root's own timestamp), just after `0HB`'s restore was
+      committed. It was not moved by any command of this session. The fresh
+      venv was built at 23:48:38, so every run after that lacked the folder.
+      The reviewer had moved it there by accident and moved it back; it is
+      identical to the 23:20 snapshot. The re-run in the fresh venv: 566 passed in 19.48s.
+
 0HB. **[2026-09-15, 23:29] I REBUILT `sefaria_reference_corpus/word_freq.json`
     BY ACCIDENT - THE REBUILD `0EU` SAYS IS THE REVIEWER'S CALL. RESTORED
     EXACTLY THE SAME NIGHT, FROM THE MAC'S LOCAL TIME MACHINE SNAPSHOT.**
