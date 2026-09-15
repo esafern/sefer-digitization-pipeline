@@ -1865,10 +1865,11 @@ def test_the_scan_header_actually_separates_its_two_scripts(server, page):
       // The clear space between them, whichever sits on the left.
       return Math.max(a.left, b.left) - Math.min(a.right, b.right);
     }""")
-    # 10px, and the number is derived rather than picked. The designed
-    # separation is `.ph-mid { gap: var(--sp-3) }` = 12px, so 10 leaves two
-    # pixels for subpixel and font rounding and still fails the 3px collapse
-    # this test was written for.
+    # 14px, and the number is derived rather than picked. The designed
+    # separation is `.ph-mid { gap: var(--sp-4) }` = 16px (was --sp-3 = 12px
+    # and a threshold of 10, until the reviewer asked for more room on
+    # 2026-09-15), so 14 leaves two pixels for subpixel and font rounding and
+    # still fails the 3px collapse this test was written for.
     #
     # TIGHTENED BACK 2026-09-05 (code-review finding). It read `>= 16`, which
     # the layout never achieved - nothing in the CSS ever produced 16px - and
@@ -1876,9 +1877,9 @@ def test_the_scan_header_actually_separates_its_two_scripts(server, page):
     # layout that had lost most of its separation would still have scored a
     # pass, which is a check that cannot fail for the reason it exists
     # (Lesson 25). Measured today: 12px.
-    assert gap >= 10, (
+    assert gap >= 14, (
         f"english and hebrew halves are {gap:.0f}px apart; .ph-mid's own "
-        f"`gap: var(--sp-3)` is 12px, so anything under 10 means the separation "
+        f"`gap: var(--sp-4)` is 16px, so anything under 14 means the separation "
         f"is coming from somewhere other than the rule that is supposed to "
         f"provide it")
     assert page.test_errors == []
@@ -2854,6 +2855,43 @@ def test_the_pane_headers_are_centred_and_their_slots_are_peers(server, page):
         assert abs(row["off"]) <= 1, f"{row['id']} content is {row['off']}px off centre"
     assert len(set(data["he"])) == 1, f"the Hebrew slots do not match each other: {set(data['he'])}"
     assert len(set(data["en"])) == 1, f"the Latin slots do not match each other: {set(data['en'])}"
+    assert page.test_errors == []
+
+
+def test_the_text_view_box_never_runs_into_the_centred_header(server, page):
+    """Reviewer, 2026-09-15: "master text selection box needs whitespace
+    separation." `#text-view` was pinned out of the flow at left: 8px while the
+    header group centred on the pane without regard to it: on HaShorashim it was
+    14px clear at a 1700px window and OVERLAPPED the Hebrew title by 41px at 1440
+    and 75px at 1280.
+
+    The shipped corpus declares no comparison texts, so the box is shown here by
+    hand - the question is the bar's geometry, not which book fills it. Asserts
+    the clear space at every width, and that the group still centres on the pane
+    whenever the box's column has room for it."""
+    _open_dashboard(page, server)
+    page.evaluate("() => { document.getElementById('text-view').hidden = false; }")
+    for width in (1700, 1600, 1440, 1280, 1100):
+        page.set_viewport_size({"width": width, "height": 1000})
+        page.wait_for_timeout(300)
+        g = page.evaluate("""() => {
+            const h = document.getElementById('text-header').getBoundingClientRect();
+            const s = document.getElementById('text-view').getBoundingClientRect();
+            const m = document.querySelector('#text-header .ph-mid').getBoundingClientRect();
+            // The side column a centred group leaves: the bar's inner width
+            // (16px padding each side) less the group and the two 24px gaps.
+            const side = (h.width - 32 - m.width - 48) / 2;
+            return { sep: m.left - s.right, sw: s.width, room: side - s.width,
+                     off: (m.left + m.right) / 2 - (h.left + h.right) / 2 };
+        }""")
+        assert g["sw"] > 0, f"at {width}px the box is not on screen: {g}"
+        # 24px is the grid's column-gap (--sp-5); 22 leaves two for rounding.
+        assert g["sep"] >= 22, (
+            f"at {width}px the header text is {g['sep']:.0f}px from the box: {g}")
+        if g["room"] >= 2:
+            assert abs(g["off"]) <= 1, (
+                f"at {width}px there is room to centre, and the group is "
+                f"{g['off']:.0f}px off centre: {g}")
     assert page.test_errors == []
 
 

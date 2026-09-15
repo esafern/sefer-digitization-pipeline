@@ -105,6 +105,51 @@ applying it to the corpus remain two separate, deliberate steps.
 
 ## Open items
 
+0GR. **[2026-09-15, reviewer: "the headers in heb and eng - font can be a bit
+    bigger, and more white space between words - there is space to grow a
+    bit"] DONE, uncommitted.** The three pane-header bars, both books.
+    * Hebrew slots 13.5 -> 16px, Latin slots 11.5 -> 13.5px, `word-spacing:
+      0.2em` inside a slot, and the gap between slots 12 -> 16px
+      (`.ph-mid`, `review_frontend/app.css`).
+    * **Found on the way: a second copy of the Hebrew size (Lesson 13, THE
+      SECOND COPY OF THE TRUTH).** `#klal-indicator` carried its own
+      `font-size: 13.5px`, and an id rule outranks the slot rule, so the scan
+      pane's Hebrew stayed small while the other two bars grew.
+      `test_the_pane_headers_are_centred_and_their_slots_are_peers` caught it
+      before it shipped. The line is removed. A sweep of `app.css` and
+      `app.js` found no other rule or script setting a header slot's size.
+    * `test_the_scan_header_actually_separates_its_two_scripts` now asks for
+      at least 14px, derived from the new 16px gap as its old 10 was from 12.
+    * Measured live, after a restart of both dashboards: nothing clips at 1700
+      or 1280px on either book. **At a 1000px window, HaShorashim's text bar
+      shortens `Shoresh #1` with an ellipsis** (it needs 443px and has 388).
+      That is the designed yield (the English reference gives way first),
+      but it did not happen before this change. 1280px is the narrowest
+      width the layout test targets. Full browser suite: 113 passed,
+      1 skipped.
+    * **The "Master text" box (reviewer: "master text selection box needs
+      whitespace separation").** `#text-view` was pinned out of the flow at
+      `left: 8px`, and the centred group ignored it. Measured on :8421 it was
+      14px clear at a 1700px window and overlapped the Hebrew title by 41px at
+      1440 and 75px at 1280. **That overlap is older than today:** at 1280 it
+      was about 30px before the type grew. No test could see it, because the
+      shipped corpus declares no comparison texts and the box stays hidden
+      (Lesson 25, A SIGNAL THAT CANNOT DISAGREE).
+    * Now `#text-header` is a `1fr auto 1fr` grid with a 24px column gap. The
+      group centres on the pane while the box's column has room, and moves
+      right instead of under the box when it has not. Measured live: 24px
+      clear at 1700, 1440, 1280 and 1100.
+      `test_the_text_view_box_never_runs_into_the_centred_header` shows the
+      box by hand and fails under the old rule (header text 1px from the box
+      at 1280). Full browser suite: 114 passed, 1 skipped.
+    * **OPEN, a UI defect this leaves.** At 1440px and below on
+      HaShorashim the text bar is 75px short. The English reference yields
+      first by design, and at 1280 it shrinks to nothing: `Shoresh #1`
+      disappears and leaves an empty slot between two dividers. Yad Malachi's
+      shorter titles fit. The proposed fix is to let the English book title
+      yield before the reference, since the Hebrew title already names the
+      book. Not done: that is for the reviewer.
+
 0GQ. **[2026-09-15] HANDOFF - SEFER HaSHORASHIM, WHERE IT STANDS AND WHAT IS
     OPEN.** Read this first after a clear; the items below it (`0GB`-`0GP`)
     hold the evidence.
