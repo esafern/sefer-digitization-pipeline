@@ -9132,6 +9132,77 @@ def test_the_diplomatic_edition_reverts_an_intervention_and_the_manifest_names_i
     )
 
 
+def test_the_versions_endpoint_places_each_texts_heading_and_numerals(tmp_path):
+    """Item 0GX, 2026-09-15 (reviewer: "hard to compare the texts b/c only the
+    master text has the title in bold. try to line the diff texts up as much as
+    possible so the eye can spot the differences when we toggle between").
+
+    The toggle drew master word by word, heading bold and numerals raised, and
+    every other text as one plain block. /api/klal/<id>/versions now says, per
+    text, where its heading and footnote numerals sit - found by the two helpers
+    master uses - with whitespace collapsed first, so the page's split(' ')
+    names the same words as these indices.
+
+    Whitespace is collapsed in THEIR texts only. Ours are numbered in the
+    word_index space every ruling uses, where collapsing renumbers everything
+    after a double space. The OCR baseline below carries an empty word (a double
+    space once joined) after the heading: its numeral is word 5 in that space,
+    and the stray-mark row addressed to word 6 no longer finds its mark there, so
+    it is not served. (Not beside the heading: title_word_run counts an empty
+    word there as part of it, which is a separate question.)
+    Their text carries a double space, which must come back collapsed."""
+    previous = cio.set_corpus_root(str(tmp_path))
+    try:
+        (tmp_path / "book.json").write_text(json.dumps({
+            "title": "Sefer Bedikah", "title_he": "ספר הבדיקה",
+            "section": "Shaar Rishon", "section_he": "שער ראשון",
+            "edition": "Vilna 1899", "edition_label": "Vilna 1899", "publisher": "Romm",
+            "scan_source": "NLI", "version_source": "https://example.org/x",
+            "categories": ["Reference"], "scan_pdf": "x.pdf",
+            "ui": {"unit": "Shoresh", "unit_plural": "Shorashim", "unit_he": "שורש",
+                   "entry_ref": "root"},
+            "comparison_texts": {"name": "Sefaria", "their_ocr": "their_ocr.json",
+                                 "their_corrected": "their_corrected.json"},
+            "parts": [{"file": "part1.json", "first_klal": 1, "last_klal": 1}],
+        }, ensure_ascii=False), encoding="utf-8")
+        entry = {"klal_id": 1, "gematria": "אב", "title": "האלף והבית .",
+                 "clean_text": "האלף והבית . לראות 1 באבי \" סוף", "page": 58}
+        for name in ("part1.json", "klalim_demo_dataset.json"):
+            (tmp_path / name).write_text(json.dumps([entry], ensure_ascii=False), encoding="utf-8")
+        (tmp_path / cio.OCR_BASELINE_NAME).write_text(json.dumps(
+            {"entries": {"1": {"words": ["האלף", "והבית", ".", "לראות", "", "1", "באבי", '"', "סוף"]}}},
+            ensure_ascii=False), encoding="utf-8")
+        (tmp_path / "their_ocr.json").write_text(json.dumps(
+            {"אב": "האל'ף והבי'ת  לראות (איוב ח, יב) \" באבי"}, ensure_ascii=False), encoding="utf-8")
+        (tmp_path / "their_corrected.json").write_text("{}", encoding="utf-8")
+        # A stray mark our OCR read for footnote 7, at word 6 of OUR text - and,
+        # by coincidence, a `"` at word 6 of theirs too, which is not a footnote.
+        (tmp_path / "footnote_marks.json").write_text(json.dumps({"rows": [
+            {"klal_id": 1, "word_index": 6, "mark": '"', "number": 7, "decision": "accepted"}]}),
+            encoding="utf-8")
+
+        v = rs.api_klal_versions(1)
+        lay = v["layout"]
+        want = {"title_word_start": 0, "title_word_count": 3, "footnote_refs": [4],
+                "footnote_marks": [{"word_index": 6, "number": 7, "read_as": '"', "absorbs": None}]}
+        assert lay["master"] == want, lay["master"]
+        assert lay["ours_ocr"] == {"title_word_start": 0, "title_word_count": 3,
+                                   "footnote_refs": [5], "footnote_marks": []}, (
+            f"our OCR was renumbered, or served a mark its word no longer holds: "
+            f"{lay['ours_ocr']} / {v['ours_ocr']!r}")
+        assert cio.words_of(v["ours_ocr"])[5] == "1" and "  " in v["ours_ocr"], (
+            "our OCR's word_index space was collapsed")
+        assert "  " not in v["theirs_ocr"], "their text's double space was not collapsed"
+        assert (lay["theirs_ocr"]["title_word_start"], lay["theirs_ocr"]["title_word_count"]) == (0, 2), (
+            f"their heading, spelled with gershayim, was not found: {lay['theirs_ocr']}")
+        assert v["theirs_ocr"].split(" ")[6] == '"' and "footnote_marks" not in lay["theirs_ocr"], (
+            f"a mark addressed by OUR word position was applied to another digitization's "
+            f"text: {lay['theirs_ocr']}")
+        assert v["theirs_corrected"] is None and "theirs_corrected" not in lay
+    finally:
+        cio.set_corpus_root(previous)
+
+
 def test_the_diplomatic_edition_reverts_witness_rulings_by_their_snapshot_position(tmp_path, monkeypatch):
     """Item 0GW, 2026-09-15 (reviewer: "fix it tonight"). _revert_to_as_printed()
     read three decision types and Sefer HaShorashim can only have the fourth: the

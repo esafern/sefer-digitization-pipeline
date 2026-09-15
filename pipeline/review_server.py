@@ -1794,6 +1794,35 @@ def api_klal_versions(klal_id):
     covers = [kk["klal_id"] for kk in klalim_by_id.values()
               if cio.root_key(kk.get("gematria") or "") == key]
     out["theirs_covers"] = sorted(covers) if len(covers) > 1 else None
+    # WHERE EACH TEXT'S HEADING AND FOOTNOTE NUMERALS SIT (item 0GX, 2026-09-15;
+    # reviewer: "hard to compare the texts b/c only the master text has the
+    # title in bold. try to line the diff texts up as much as possible so the eye
+    # can spot the differences when we toggle between"). Found by the SAME two
+    # helpers api_klal() uses for master - one copy each - so the page can draw
+    # every text the way it draws master. Indices are cio.words_of()'s, the
+    # page's own `text.split(' ')`.
+    #
+    # WHITESPACE IS COLLAPSED IN THEIR TEXTS ONLY. Theirs are numbered in their
+    # own space, so a double space there is noise. OURS are numbered in the
+    # word_index space every ruling is recorded in, and collapsing would renumber
+    # every word after a double space (words_of's own docstring) - putting a
+    # footnote mark or a page-break marker on the wrong word.
+    out["layout"] = {}
+    for view in ("master", "ours_ocr", "theirs_ocr", "theirs_corrected"):
+        if not out.get(view):
+            continue
+        if view in ("theirs_ocr", "theirs_corrected"):
+            out[view] = " ".join(out[view].split())
+        start, count = cio.title_word_run(k.get("title", ""), out[view])
+        words = cio.words_of(out[view])
+        out["layout"][view] = {"title_word_start": start, "title_word_count": count,
+                               "footnote_refs": cio.footnote_ref_positions(words)}
+        # Stray marks read as numerals, on OUR two texts only: the rows are
+        # addressed by OUR word positions, and _footnote_marks_for() checks the
+        # word there is still the mark. In another digitization's text a `"` at
+        # the same index is a coincidence, and would be drawn as a footnote.
+        if view in ("master", "ours_ocr"):
+            out["layout"][view]["footnote_marks"] = _footnote_marks_for(klal_id, words)
     return out
 
 

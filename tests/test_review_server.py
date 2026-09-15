@@ -2745,6 +2745,123 @@ def test_the_scan_controls_are_not_inside_the_header(server, page):
     assert page.test_errors == []
 
 
+def test_every_text_view_is_set_like_master_so_a_toggle_moves_only_the_differences(server, page):
+    """Reviewer 2026-09-15 (item 0GX): "hard to compare the texts b/c only the
+    master text has the title in bold. try to line the diff texts up as much as
+    possible so the eye can spot the differences when we toggle between".
+
+    The shipped corpus declares no comparison texts, so the corpus flags and one
+    entry's versions are fed through the network layer; the server's half has
+    its own test (test_the_versions_endpoint_places_each_texts_heading_and_numerals).
+
+    The check that needs no judgement: a text IDENTICAL to master must start at
+    the same height and break its lines at the same words. The banner that sat
+    above the other texts, their 1.9 line height and their pre-wrap whitespace
+    each fail it. Klal 10 is one page with no editorial mark, and the test says
+    so first - master drawing anything the other views cannot would make the
+    comparison unfair, not the code wrong."""
+    kid = 10
+    k = _get_json(server, f"/api/klal/{kid}")
+    text = " ".join(k["clean_text"].split())
+    lay = {"title_word_start": k["title_word_start"], "title_word_count": k["title_word_count"],
+           "footnote_refs": k.get("footnote_refs") or [], "footnote_marks": k.get("footnote_marks") or []}
+    words = text.split(" ")
+    # A POINTED word in their text, or the no-vowel-points view below could
+    # strip nothing and still pass (Lesson 25).
+    # ...and one written in PRESENTATION FORMS, as their OCR does: `בּ` is the
+    # single character U+FB31 there, which a point regex cannot see.
+    theirs = " ".join(words[:6] + ["(איוב ח, יב)", "לִרְאוֹת", "\uFB31א\uFB31י"] + words[6:])
+    payload = {"master": text, "ours_ocr": text, "theirs_ocr": theirs, "theirs_corrected": None,
+               "comparison_name": "Sefaria", "theirs_covers": None,
+               "layout": {"master": lay, "ours_ocr": lay,
+                          "theirs_ocr": {"title_word_start": k["title_word_start"],
+                                         "title_word_count": k["title_word_count"],
+                                         "footnote_refs": []}}}
+
+    def corpus_route(route):
+        resp = route.fetch()
+        body = resp.json()
+        body.update(has_ocr_baseline=True, has_their_ocr=True, has_their_corrected=False,
+                    comparison_name="Sefaria")
+        route.fulfill(response=resp, json=body)
+    page.route("**/api/corpus", corpus_route)
+    page.route(f"**/api/klal/{kid}/versions", lambda route: route.fulfill(json=payload))
+    _open_dashboard(page, server, klal_id=kid)
+    page.wait_for_timeout(900)
+    assert page.locator("#text-view").is_visible(), "precondition: the toggle is shown"
+    only_master_draws = ", ".join(
+        f"#klal-block-{kid} .klal-body .{c}" for c in (
+            "continuation-marker", "flag-gap", "editorial-mark", "cross-edition-mark",
+            "pending-replace-text", "witness-banner", "stranded-banner"))
+    extra = page.evaluate("(sel) => [...document.querySelectorAll(sel)].map(e => e.className)",
+                          only_master_draws)
+    assert extra == [], f"precondition: master draws {extra} here, which no other view can - pick another klal"
+
+    geom = f"""() => {{
+        const b = document.querySelector('#klal-block-{kid} .klal-body');
+        const ws = [...b.querySelectorAll('[data-word-index], [data-alt-index]')];
+        const tops = ws.map(w => Math.round(w.getBoundingClientRect().top));
+        const breaks = [];
+        for (let i = 1; i < tops.length; i++) if (tops[i] > tops[i - 1] + 4) breaks.push(i);
+        // EVERY LINE'S HEIGHT, not only where it breaks. Line breaks alone could
+        // not see a 1.9 line height - the same words wrap at the same places -
+        // and it sets line 5 about 7px off master's: exactly the jump a toggle
+        // shows. A mutation to 1.9 passed the first cut of this test (Lesson 42).
+        const top0 = b.getBoundingClientRect().top;
+        const lineTops = [0, ...breaks].map(i => Math.round(ws[i].getBoundingClientRect().top - top0));
+        return {{ first: tops[0], breaks, lineTops, n: ws.length,
+                  heading: ws.map((w, i) => w.classList.contains('klal-title-word') || w.classList.contains('klal-marker-word') ? i : -1).filter(i => i >= 0),
+                  banner: b.querySelectorAll('.alt-banner').length, alt: b.classList.contains('alt-view') }};
+    }}"""
+    page.select_option("#text-view", "master")
+    page.wait_for_timeout(500)
+    master = page.evaluate(geom)
+    page.select_option("#text-view", "ours_ocr")
+    page.wait_for_timeout(900)
+    ours = page.evaluate(geom)
+    assert ours["alt"] and ours["n"] == master["n"], (master["n"], ours["n"])
+    assert ours["banner"] == 0, "a banner still sits above the other text"
+    assert ours["heading"] == master["heading"] and master["heading"], (
+        f"the heading is not set as master sets it: {ours['heading']} vs {master['heading']}")
+    assert abs(ours["first"] - master["first"]) <= 1, (
+        f"the other text starts {ours['first'] - master['first']}px lower than master")
+    assert ours["breaks"] == master["breaks"], (
+        f"identical text breaks its lines at different words: {ours['breaks']} vs {master['breaks']}")
+    assert len(ours["lineTops"]) == len(master["lineTops"]) and all(
+        abs(a - b) <= 1 for a, b in zip(ours["lineTops"], master["lineTops"])), (
+        f"the lines of identical text sit at different heights: {ours['lineTops']} vs {master['lineTops']}")
+
+    page.select_option("#text-view", "theirs_ocr")
+    page.wait_for_timeout(900)
+    cite = page.evaluate(f"""() => {{ const c = document.querySelector('#klal-block-{kid} .alt-citation');
+        return c && [c.textContent, getComputedStyle(c).verticalAlign]; }}""")
+    assert cite == ["(איוב ח, יב)", "super"], f"their citation is not one raised unit: {cite}"
+
+    # THE SAME TEXT WITHOUT VOWEL POINTS (item 0GY, reviewer: "do option 2").
+    # Display only: same words, same heading, every point gone - and nothing else.
+    points = r"/[\u0591-\u05BD\u05BF\u05C1\u05C2\u05C4\u05C5\u05C7]/"
+    read = f"""() => {{ const ws = [...document.querySelectorAll('#klal-block-{kid} .alt-word')];
+        return {{ texts: ws.map(w => w.textContent),
+                  pointed: ws.filter(w => {points}.test(w.textContent.normalize('NFKD'))).length,
+                  heading: ws.map((w, i) => w.classList.contains('klal-title-word') ? i : -1).filter(i => i >= 0) }}; }}"""
+    pointed = page.evaluate(read)
+    assert pointed["pointed"] >= 1 and "לִרְאוֹת" in pointed["texts"], (
+        "precondition: their text shows its vowel points in the ordinary view")
+    page.select_option("#text-view", "theirs_ocr_plain")
+    page.wait_for_timeout(900)
+    plain = page.evaluate(read)
+    assert plain["pointed"] == 0, f"{plain['pointed']} words still carry points"
+    assert "לראות" in plain["texts"] and "באבי" in plain["texts"], (
+        f"a pointed word, or one in presentation forms, kept its points: {plain['texts'][:12]}")
+    assert len(plain["texts"]) == len(pointed["texts"]), "stripping points changed the word count"
+    assert plain["heading"] == pointed["heading"], "the heading was set differently without points"
+
+    page.select_option("#text-view", "master")
+    page.wait_for_timeout(700)
+    assert page.evaluate(geom) == master, "switching back to master left the other text's setting behind"
+    assert page.test_errors == []
+
+
 def test_the_part_selector_shows_only_for_a_book_of_several_parts(server, fixture_server, page):
     """Item 0GQ.7, fixed 2026-09-15 for the Sefaria demo. index.html offers
     Part 1, 2, 3 and "All parts" to every book, so Sefer HaShorashim - one part

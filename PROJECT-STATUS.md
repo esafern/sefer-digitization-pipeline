@@ -191,6 +191,145 @@ applying it to the corpus remain two separate, deliberate steps.
         short). Its precondition was blind once too (Lesson 42): it first
         asked whether the title shrank, which is the thing under test.
 
+0GY. **[2026-09-15, reviewer: "the master should include all the nikkud from the
+    sefaria version. if that is difficult or problematic perhaps we should start
+    fresh for the demo with the sefaria as the base for the master text"] NOT
+    DONE, PUT BACK TO THE REVIEWER: THE PRINT DOES NOT CARRY SEFARIA'S NIQQUD.**
+    * **Two independent signals agree (Lesson 9):**
+      - **Counts over the slice:** Sefaria's OCR points 62,531 of 187,028
+        words (33.4%), with 4 cantillation marks; their corrected text points
+        4,142 of 13,232 (31.3%). Our OCR baseline points **20 of 41,873**. DocAI
+        does read niqqud where it is printed (`אַבְּ`, `בַּלוּקָה`, `אַבְלַקת`:
+        Arabic transliterations), so a print that pointed a third of its
+        words would not come back with 20.
+      - **The ink, entry 1, page 58** (crops from the dashboard's page
+        image):
+        * the quotations are UNPOINTED, `לראות באבי הנחל¹` and
+          `שנאמר עודנו באבו לא יקטף²`, where Sefaria has `לִרְאוֹת בְּאִבֵּי
+          הַנָּחַל` and `עֹדֶנּוּ בְּאִבּוֹ`;
+        * the Arabic word IS pointed, `אַבְּ ... אַבְּ³`;
+        * the print spells `עודנו` plene, as we read it, not `עדנו`.
+    * **So Sefaria's niqqud is theirs, not the printer's**, most likely
+      carried in from the Masoretic text with their verse identification
+      (their own export note says the quotations were checked against Tanakh
+      by refLink). Lesson 38 and `0GE` record the trap: the Masoretic text is
+      another book.
+    * **Why neither option was taken.** Importing it would put ~62,000
+      pointed words into the text that are not in this edition. That is
+      against the Sefaria editor's own standard (fidelity to the specific
+      edition, little intervention, a baseline a source edition can be cited
+      for) and against success criterion #1. Rebuilding master from Sefaria's
+      text for the demo does the same, and more: their Masoretic spellings
+      (`עדנו` for the printed `עודנו`) and their inline citations would become
+      the text. It would also invert what the demo shows, our independent
+      read of the ink catching their errors, and it is a rebuild of the
+      corpus, the scan alignment and the witness queue the night before the
+      meeting.
+    * **Offered instead:** leave master as the print, and address the reason
+      for the request (the toggle comparison) in the DISPLAY. For example, an
+      option to draw their texts without points while comparing letters. Or,
+      if Sefaria wants a vocalized version, a separate layer whose
+      interventions are listed with their source, never mixed into master.
+    * **Option 2 DONE (reviewer: "do option 2 tonight").** The text-view
+      selector offers "Sefaria OCR, no vowel points" and "Sefaria corrected,
+      no vowel points".
+      - Display only: `withoutPoints()` in `app.js` (`HEBREW_POINTS`, the
+        only copy) sets their words without niqqud or cantillation. It keeps
+        maqaf, paseq, sof pasuq and nun hafukha. Nothing served, stored or
+        exported changes.
+      - **Its first cut left points on screen, and my probe said it had not.**
+        Their OCR writes pointed letters as ONE precomposed character in 44,214
+        words: Alphabetic Presentation Forms, most often `וּ` U+FB35 (10,095),
+        `שׁ` U+FB2A (9,750), `וֹ` U+FB4B (8,537) and `בּ` U+FB31 (6,878). A
+        point regex cannot see them. The view showed `לראוֹת בּאבּי`, while
+        the check, using the same regex, reported 0 pointed words (Lesson 43).
+        It is fixed by NFKD before stripping, which also takes the ligature ﭏ
+        to `אל`. Their corrected text uses no presentation forms.
+      - **The counts above, corrected.** Measured after NFKD, their OCR points
+        **63,453** of 187,028 words (33.9%), not the 62,531 first written here
+        by the raw regex. Their corrected text: 4,141. The conclusion is the
+        same.
+      - Live on :8422, entries 1, 59 and 130: 0 pointed words and 0
+        presentation forms in the new view, the heading still bold, and no
+        page errors. A screenshot shows `לראות באבי הנחל`. At 1280px the
+        wider selector (203px) keeps its 24px gap, and no title is cut.
+      - The browser test now carries a pointed word AND a presentation-form
+        word. It fails with stripping disabled, and with NFKD removed. Full
+        browser suite: 120 passed, 1 skipped.
+    * **A report that was the wrong dashboard.** "The master text now has my
+      corrections in red" was :8421, the real root, where nothing is applied
+      and entry 1's four words are open disputes. :8422 had them green
+      (`rgb(56, 161, 105)`). Settled by colours read on both ports and by the
+      :8421 request log (a scroll through `/api/klal/23-30/versions` that no
+      probe made); the reviewer confirmed it. No code change.
+
+0GX. **[2026-09-15, reviewer: "hard to compare the texts b/c only the master text
+    has the title in bold. try to line the diff texts up as much as possible so
+    the eye can spot the differences when we toggle between"] DONE.
+    THE OTHER THREE TEXTS ARE NOW SET THE WAY MASTER IS.**
+    * **What differed.**
+      - Master is drawn word by word, with the heading bold and the footnote
+        numerals raised.
+      - The other three were one plain block, under a one-line banner that
+        pushed every line down, at line height 1.9 against master's 2, with
+        `pre-wrap` whitespace, full-size numerals and full-size citations.
+      - Screenshots of entry 1 showed the first line already in a different
+        place.
+    * **Server** (`api_klal_versions`): each text now carries a `layout`.
+      - Its heading run comes from `cio.title_word_run` and its numerals from
+        `cio.footnote_ref_positions`, the two helpers master uses, with words
+        from `cio.words_of`.
+      - Stray marks read as numerals (`_footnote_marks_for`) are served for
+        OUR two texts only, because they are addressed by our word positions.
+      - Whitespace is collapsed in THEIR texts only. Collapsing ours would
+        renumber the `word_index` space every ruling uses.
+    * **Frontend** (`renderAltBody`):
+      - One `.alt-word` span per word, with master's 1px padding, drawn with
+        master's own `markTitleRun` / `markFootnoteRefs`. Both now take the
+        index attribute, and alt words carry `data-alt-index`, so no word
+        lookup on the page can mistake them for master's.
+      - Master's line height, and no banner in the flow: the read-only notice
+        is the selector's tooltip. A homograph note stays in the flow.
+      - Their citations are one small raised unit each, where the page prints
+        the note's numeral.
+      - Master's page-break markers appear in our OCR while it has master's
+        word count.
+    * **Measured live on :8422:**
+      - Entry 1: master and our OCR have 83 words each, heading words 0-2
+        styled in both, 4 raised numerals in both, and line tops within 1px.
+        They visibly diverge at exactly the applied ruling, w37 `אַבְּ`
+        against `אַבְּן`, whose extra letter wraps `ולא` to the next line.
+      - Entry 59 matches over all 25 lines.
+      - Their two texts show their heading `האל'ף והבי'ת` bold in the same
+        place. No banners, no page errors.
+    * **Tests:**
+      - `test_the_versions_endpoint_places_each_texts_heading_and_numerals`
+        (server) fails when our texts are collapsed and when theirs are not.
+      - `test_every_text_view_is_set_like_master_so_a_toggle_moves_only_the_differences`
+        (browser, versions fed through the network layer, since the shipped
+        corpus has no comparison texts) checks that a text identical to
+        master starts at the same height, has the same heading, breaks at the
+        same words and sets every line within 1px, that a citation is raised,
+        and that switching back leaves nothing behind. It fails with the
+        banner restored, with the heading unstyled, and with the citation at
+        full size.
+      - **Its first cut was blind to line height (Lesson 42):** a 1.9 mutation
+        passed, because the same words still wrap in the same places. It now
+        compares every line's top, and the mutation fails.
+      - Logic suite 504 passed; browser suite 120 passed, 1 skipped.
+    * **What still differs by design, not by setting:**
+      - Master alone draws witness gap carets and pending-replacement text,
+        and, where they apply, the unmapped-witness and stranded-ruling
+        banners. Each of these moves master's lines.
+      - Their texts carry vowel points and gershayim, so their lines run
+        longer.
+      - `title_word_run` counts an empty word beside the heading as part of it;
+        noticed while testing and not changed.
+    * **The repo's raw-split guard caught me.** The first cut split with
+      `.split(" ")` in `review_server.py`, where the rule is `cio.words_of`.
+      `test_no_new_raw_space_split_sites_appear_outside_corpus_io` failed on
+      it, and it is fixed.
+
 0GW. **[2026-09-15, reviewer: "I made a few changes in the demo dashboard. how
     do we push them so the text is updated to reflect the change but the green
     boxes are still there?"] APPLIED ON THE DEMO COPY. AND A BUG: THE EXPORT

@@ -1611,8 +1611,10 @@ function continuationBoundaries(k) {
 // The span comes from the server (corpus_io.title_word_span), not from comparing
 // strings here: the comparison has to skip editorial punctuation and normalise
 // Hebrew, and a second copy of that in JS would drift.
-function markTitleRun(body, k) {
-  const spans = body.querySelectorAll('[data-word-index]');
+// `attr` names the index attribute: master's words carry data-word-index, the
+// other texts' words data-alt-index (item 0GX) - one styling rule for both.
+function markTitleRun(body, k, attr = 'data-word-index') {
+  const spans = body.querySelectorAll(`[${attr}]`);
   if (!spans.length) return;
   const n = k.title_word_count || 0;
   // WHERE the heading starts (item 0GJ): after a gematria marker at word 0 (Yad
@@ -1623,7 +1625,7 @@ function markTitleRun(body, k) {
   // the first three"). null - the title matched nowhere - keeps the old shape.
   const start = k.title_word_start ?? 1;
   spans.forEach(el => {
-    const i = parseInt(el.dataset.wordIndex, 10);
+    const i = parseInt(el.getAttribute(attr), 10);
     if (start === 1 && i === 0) el.classList.add('klal-marker-word');
     else if (n && i >= start && i < start + n) el.classList.add('klal-title-word');
   });
@@ -1633,7 +1635,7 @@ function markTitleRun(body, k) {
   // matched with :last-of-type, which would pick the last span in the body
   // whether or not it belongs to the heading.
   if (n) {
-    const last = body.querySelector(`[data-word-index="${start + n - 1}"]`);
+    const last = body.querySelector(`[${attr}="${start + n - 1}"]`);
     if (last) last.classList.add('klal-title-end');
   }
 }
@@ -1645,9 +1647,9 @@ function markTitleRun(body, k) {
 // the way the page draws them. The notes themselves are citations, and they are
 // not in this text: the build cuts the apparatus, and the citations are
 // Sefaria's work (item 0EX).
-function markFootnoteRefs(body, k) {
+function markFootnoteRefs(body, k, attr = 'data-word-index') {
   (k.footnote_refs || []).forEach(i => {
-    const el = body.querySelector(`[data-word-index="${i}"]`);
+    const el = body.querySelector(`[${attr}="${i}"]`);
     if (!el) return;
     el.classList.add('fn-ref');
     if (!el.title) el.title = `Footnote reference ${el.textContent.trim()} - the note, a citation, is printed at the foot of the page`;
@@ -1657,14 +1659,14 @@ function markFootnoteRefs(body, k) {
   // still the mark, so the number is drawn in its place and the text is left
   // alone; the tooltip says so.
   (k.footnote_marks || []).forEach(m => {
-    const el = body.querySelector(`[data-word-index="${m.word_index}"]`);
+    const el = body.querySelector(`[${attr}="${m.word_index}"]`);
     if (!el) return;
     el.classList.add('fn-ref', 'fn-mark');
     el.dataset.fn = m.number;
     if (!el.title) el.title = `Footnote reference ${m.number}, printed raised; our OCR read it as ${m.read_as}. Identified from the page image and the page's numbering - the text still holds the mark.`;
     // A split: the same printed numeral also left a digit beside the mark (the
     // `5` of 50). It is drawn as part of this number, not as a second footnote.
-    const part = m.absorbs != null && body.querySelector(`[data-word-index="${m.absorbs}"]`);
+    const part = m.absorbs != null && body.querySelector(`[${attr}="${m.absorbs}"]`);
     if (part) {
       part.classList.add('fn-absorbed');
       part.title = `Part of footnote reference ${m.number}: our OCR read the one printed numeral as ${part.textContent.trim()} and ${m.read_as}.`;
@@ -5156,12 +5158,17 @@ function setupTextView() {
   const avail = { master: true, ours_ocr: !!CORPUS.has_ocr_baseline,
                   theirs_ocr: !!CORPUS.has_their_ocr,
                   theirs_corrected: !!CORPUS.has_their_corrected };
+  // The no-vowel-points views exist wherever their text does (item 0GY).
+  avail.theirs_ocr_plain = avail.theirs_ocr;
+  avail.theirs_corrected_plain = avail.theirs_corrected;
   if (!avail.ours_ocr && !avail.theirs_ocr && !avail.theirs_corrected) return;
   const who = CORPUS.comparison_name || 'Their';
   [...sel.options].forEach(o => {
     o.hidden = !avail[o.value];
     if (o.value === 'theirs_ocr') o.textContent = `${who} OCR`;
     if (o.value === 'theirs_corrected') o.textContent = `${who} corrected`;
+    if (o.value === 'theirs_ocr_plain') o.textContent = `${who} OCR, no vowel points`;
+    if (o.value === 'theirs_corrected_plain') o.textContent = `${who} corrected, no vowel points`;
   });
   sel.hidden = false;
   sel.onchange = () => { TEXT_VIEW = sel.value; rerenderMountedBlocks(); };
@@ -5186,10 +5193,31 @@ function fetchVersions(kid) {
   return VERSIONS[kid];
 }
 
+// VOWEL POINTS AND CANTILLATION, for the no-vowel-points views (item 0GY;
+// reviewer 2026-09-15: "do option 2"). Sefaria's text points about a third of
+// its words, carried in from the Masoretic text, and this printing does not
+// (measured on the ink, entry 1) - so the two cannot be compared letter for
+// letter until they are set alike. DISPLAY ONLY: the text served, stored and
+// exported is untouched. Keeps maqaf, paseq, sof pasuq and nun hafukha, which
+// are characters of the text rather than marks on a letter.
+const HEBREW_POINTS = /[\u0591-\u05BD\u05BF\u05C1\u05C2\u05C4\u05C5\u05C7]/g;
+// NFKD FIRST. Their OCR writes some pointed letters as ONE precomposed
+// character from the Alphabetic Presentation Forms block (U+FB1D-FB4F): `\u05D1\u05BC` is
+// U+FB31, not bet plus dagesh, so a point regex alone left `\u05DC\u05E8\u05D0\u05D5\u05B9\u05EA` and `\u05D1\u05BC\u05D0\u05D1\u05BC\u05D9`
+// pointed - and the probe that checked it used the same regex and reported 0
+// (Lesson 43). NFKD splits those into letter + point, and also takes the
+// alef-lamed ligature \uFB4F to `\u05D0\u05DC` and the wide letters to their plain forms,
+// which is what a letter-for-letter comparison wants.
+function withoutPoints(w) { return w.normalize('NFKD').replace(HEBREW_POINTS, ''); }
+
 async function renderAltBody(block, kid) {
-  const view = TEXT_VIEW;
+  // `_plain` is the same text set without vowel points (item 0GY): one text,
+  // two settings, so everything below keys on the BASE view.
+  const shown = TEXT_VIEW;
+  const view = shown.replace(/_plain$/, '');
+  const plain = view !== shown;
   const v = await fetchVersions(kid);
-  if (TEXT_VIEW !== view) return;   // switched again while this was loading
+  if (TEXT_VIEW !== shown) return;   // switched again while this was loading
   const body = block.querySelector('.klal-body');
   body.className = 'klal-body alt-view';
   const who = (CORPUS && CORPUS.comparison_name) || 'Their';
@@ -5209,12 +5237,72 @@ async function renderAltBody(block, kid) {
     body.innerHTML = `<div class="alt-banner">${escapeHtml(label)} &mdash; ${escapeHtml(why)}</div>`;
     return;
   }
-  // Their citations are editorial insertions, not text this edition prints -
-  // marked, not merged (reviewer 2026-09-13: citations as separate markup).
-  const marked = escapeHtml(text)
-    .replace(/\(([^()]{1,80})\)/g, '<span class="alt-citation">($1)</span>');
-  body.innerHTML = `<div class="alt-banner">${escapeHtml(label + shared)} &mdash; read-only. `
-    + `Flags, rulings and word links are on Master.</div><div class="alt-text">${marked}</div>`;
+  // DRAWN THE WAY MASTER IS DRAWN (item 0GX; reviewer 2026-09-15: "hard to
+  // compare the texts b/c only the master text has the title in bold. try to
+  // line the diff texts up as much as possible so the eye can spot the
+  // differences when we toggle between"). One span per word with master's word
+  // metrics, the heading and the footnote numerals placed by the server's
+  // `layout` (the helpers master uses) and styled by master's own two functions,
+  // master's line height, and NO banner above the text: that line of notice
+  // pushed every line down, so nothing sat where it sits on Master. The notice
+  // is on the selector's tooltip now. A homograph note stays in the flow,
+  // because it changes what the text IS, not how it is set.
+  body.innerHTML = '';
+  if (shared) {
+    const note = document.createElement('div');
+    note.className = 'alt-banner';
+    note.textContent = label + shared;
+    body.appendChild(note);
+  }
+  const lay = (v.layout && v.layout[view]) || {};
+  const words = text.split(' ');
+  // Master's page-break markers, in OUR OCR only and only while it has master's
+  // word count: then every position names the same word in both, and the break
+  // sits where it sits on Master. A ruling that changed the count shifts them,
+  // and a marker one word off would be worse than none.
+  const k = mountedKlal[kid];
+  const contBoundaries = {};
+  if (view === 'ours_ocr' && k && k.clean_text && k.clean_text.split(' ').length === words.length) {
+    continuationBoundaries(k).forEach(b => { contBoundaries[b.wordIndex] = b.page; });
+  }
+  for (let i = 0; i < words.length; i++) {
+    if (contBoundaries[i] != null) {
+      const marker = document.createElement('span');
+      marker.className = 'continuation-marker';
+      marker.dataset.page = contBoundaries[i];
+      body.appendChild(marker);
+    }
+    // Their citations are editorial insertions, not text this edition prints -
+    // marked, not merged (reviewer 2026-09-13: citations as separate markup).
+    // One unit, drawn small and raised: it stands where the page prints the
+    // note's reference numeral, and set full size it lengthened every line.
+    if (words[i].startsWith('(')) {
+      let j = i;
+      while (j < words.length - 1 && j < i + 8 && !words[j].endsWith(')')) j++;
+      if (words[j].endsWith(')')) {
+        const cite = document.createElement('span');
+        cite.className = 'alt-citation';
+        cite.textContent = words.slice(i, j + 1).map(w => (plain ? withoutPoints(w) : w)).join(' ');
+        body.appendChild(cite);
+        body.appendChild(document.createTextNode(' '));
+        i = j;
+        continue;
+      }
+    }
+    const span = document.createElement('span');
+    span.className = 'alt-word';
+    // NOT data-word-index: every word lookup on the page selects by that, and
+    // these are not master's words.
+    span.dataset.altIndex = i;
+    span.textContent = plain ? withoutPoints(words[i]) : words[i];
+    body.appendChild(span);
+    body.appendChild(document.createTextNode(' '));
+  }
+  // A heading the helper could not find is left unstyled, rather than taking
+  // markTitleRun's default and dressing word 0 as a Yad Malachi marker.
+  markTitleRun(body, lay.title_word_start == null ? { title_word_start: -1, title_word_count: 0 } : lay,
+               'data-alt-index');
+  markFootnoteRefs(body, lay, 'data-alt-index');
 }
 
 // A REDRAW AFTER A SAVE honours the text view (code review 2026-09-13, finding 4).

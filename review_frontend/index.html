@@ -86,11 +86,17 @@
            digitization's OCR, their corrected text, or the master. Hidden unless
            the book declares comparison texts; pinned out of the flow like the
            index pane's settings button, so the centred group stays centred. -->
-      <select id="text-view" title="Which text this pane shows" hidden>
+      <select id="text-view" title="Which text this pane shows. Only Master takes flags, rulings and word links; the other texts are read-only." hidden>
         <option value="master">Master text</option>
         <option value="ours_ocr">Our OCR</option>
         <option value="theirs_ocr">Their OCR</option>
         <option value="theirs_corrected">Their corrected</option>
+        <!-- The same two texts WITHOUT VOWEL POINTS (item 0GY): theirs points a
+             third of its words, carried in from the Masoretic text, and this
+             printing does not - so letters cannot be compared until both are set
+             alike. Display only; what is stored and exported is unchanged. -->
+        <option value="theirs_ocr_plain">Their OCR, no vowel points</option>
+        <option value="theirs_corrected_plain">Their corrected, no vowel points</option>
       </select>
     </div>
     <div id="text-scroll"></div>
