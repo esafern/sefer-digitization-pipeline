@@ -103,10 +103,33 @@ required, for that reason.
 python3 tools/fix_transposed_leaf.py --pdf berlin_square_original_transposed.pdf \
     --from-index 37 --to-index 36 --output berlin_square_corrected.pdf
 
-python3 tools/render_pdf_pages.py --all --verify              # images/pdf_pages/
-python3 tools/fetch_sefaria_reference_corpus.py --register all  # sefaria_reference_corpus/ (network)
-./rebuild_all.sh --skip-vision                                # every derived data file, no Gemini calls
+python3 tools/render_pdf_pages.py --all              # images/pdf_pages/ - 150 dpi, pixel-identical to the owner's
+python3 tools/fetch_sefaria_reference_corpus.py      # sefaria_reference_corpus/raw/ - the RABBINIC register (network)
+./rebuild_all.sh --skip-vision                       # every derived data file, no Gemini calls
 ```
+
+Three traps in those lines, each found the hard way on 2026-09-15 (item `0HB`):
+* **Leave `--verify` off `render_pdf_pages.py` for now.** It reported pages 14
+  and 15 as failed ("boxes not on their words") on renders pixel-identical to
+  the owner's working images. The check is wrong, not the render.
+* **Fetch the DEFAULT register only.** `--register tanakh` and `--register all`
+  add the Bible books Sefer HaShorashim uses, and the folder is shared. The
+  next run of `tools/validate_lexicon_independent.py` then REBUILDS
+  `sefaria_reference_corpus/word_freq.json` from every book on disk. That is
+  the attestation table Yad Malachi's detectors score against, and changing
+  its book set changes the basis of every recorded lexical number (`0EU`).
+* **`validate_lexicon_independent.py` has no `--help`.** Any run of it,
+  including one meant only to read its usage, rebuilds that table when it
+  looks stale.
+
+For lexical numbers comparable with the ones on record, ask the owner for the
+`sefaria_reference_corpus/` in the 2026-08-18 migration tarball rather than
+fetching it: exactly the 166 rabbinic books and the `word_freq.json` built from
+them (6,180,337 words). Two reasons. Sefaria's texts change, so a fresh fetch
+is not the corpus those numbers were measured on. And the counting has changed
+since the table was built (`0HB`), so even the same 166 files now count to
+6,187,331. The owner's live folder is NOT the one to copy: it also holds the 39
+Bible books, which would trigger the rebuild described above.
 
 `docai_word_boxes/` cannot be rebuilt without Document AI and the key above. It
 is the one directory a collaborator must be sent.

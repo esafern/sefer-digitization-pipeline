@@ -206,6 +206,72 @@ applying it to the corpus remain two separate, deliberate steps.
         short). Its precondition was blind once too (Lesson 42): it first
         asked whether the title shrank, which is the thing under test.
 
+0HB. **[2026-09-15, 23:29] I REBUILT `sefaria_reference_corpus/word_freq.json`
+    BY ACCIDENT - THE REBUILD `0EU` SAYS IS THE REVIEWER'S CALL. RESTORED
+    EXACTLY THE SAME NIGHT, FROM THE MAC'S LOCAL TIME MACHINE SNAPSHOT.**
+    * **RESTORED, and exact.** The local APFS snapshot
+      `com.apple.TimeMachine.2026-09-15-232045.local` was taken nine minutes
+      before the run, and macOS mounted it read-only while the reviewer
+      browsed Time Machine. It held `word_freq.json` dated 2026-08-17 23:59:06:
+      3,484,257 bytes, sha `da96e80dc4`, 166 books, 6,180,337 words, extractor
+      2, byte-identical to the 2026-08-18 migration tarball. Both files were
+      copied back from it with dates preserved, and are identical to the
+      snapshot. The rebuilt 205-book pair survives only in the session
+      scratchpad.
+    * **What that settles.** The table had not changed since 2026-08-17, and
+      the 166 rabbinic book files are byte-identical to the tarball's. So the
+      85 per-book differences below come from the COUNTING having changed
+      since, with `EXTRACTOR_VERSION` still 2.
+      - It is not the maqaf split of `0FC`: Arakhin contains no maqaf.
+      - That same commit began treating geresh and gershayim as punctuation,
+        which is the next suspect, untested.
+      - **OPEN (Lesson 12, THE KEY MUST HOLD THE QUESTION):** the next
+        legitimate rebuild will change every count without anything saying
+        so. Bump the version when the counting changes, and re-measure the
+        recorded figures when that rebuild is chosen.
+    * **The trap is still armed on this machine.** The folder holds 205 books
+      and a 166-book table, so any run of `validate_lexicon_independent.py`
+      rebuilds the table again, until `0EU` is decided.
+    * The reviewer's first restore landed in the OLD checkout
+      (`~/work/yad-malachi/yad-malachi-pipeline/sefaria_reference_corpus/`,
+      `word_freq copy.json` and `word_freq.meta copy.json`). Those files are
+      theirs to remove.
+    * **Not reconciled:** `0ES`/`0ET` report "Rebuilt: 199,890 types" on
+      2026-09-10, the same count this run produced. The snapshot shows the
+      Aug-17 table was on disk tonight regardless, so whatever that rebuild
+      was, it was not left in place.
+    * **What happened.** While checking SETUP.md's reference-corpus steps
+      (reviewer: "steps to rebuild images/pdf and ref corpus"), I ran
+      `venv/bin/python tools/validate_lexicon_independent.py --help` to read
+      its usage. It has no argument parser, so it RAN. Its first line was
+      `Rebuilding word_freq.json: it was built by a different extractor
+      version or from a different set of books.` It rebuilt the attestation
+      table from every book on disk: 205, the 39 Tanakh books `0EN` added
+      for HaShorashim included.
+    * **Scope, measured.** Exactly two files changed, `word_freq.json` and
+      `word_freq.meta.json`. Nothing else in the repo changed in that window,
+      and the script writes nothing else. The folder is gitignored, so git
+      cannot restore it. Time Machine's destination (a NAS) would not mount,
+      and the audio worktree has no copy.
+    * **Before and after:** the rebuild holds 205 books, 6,497,426 words,
+      199,890 forms. The 2026-08-18 migration tarball holds 166 books,
+      6,180,337 words, 185,593 forms, extractor version 2 - the 166 `0EU`
+      describes as the table in use.
+    * **The rebuilt version is saved** in the session scratchpad
+      (`rebuilt_205/`), so a restore can be undone.
+    * **NOT a proven-exact restore, yet.** Rebuilt from the same 166 files at
+      the same extractor version, 85 of those books now count differently
+      (Arakhin 24,929 -> 24,960; the 166 sum to 6,187,331, not 6,180,337).
+      So either the book files changed after 2026-08-18, or the counting
+      changed without `EXTRACTOR_VERSION` moving. The second would mean the
+      cache's validity key misses a real change (Lesson 12, THE KEY MUST
+      HOLD THE QUESTION).
+    * **Also found:** `render_pdf_pages.py --verify` reported pages 14 and 15
+      as failed ("boxes not on their words", ink contrast 1.28 and 1.24 < 1.6)
+      on renders pixel-identical to the working images (max difference 0).
+      The verifier is wrong, not the render. SETUP.md's step 2 also had
+      `--register all` and `--verify`, both corrected in the working tree.
+
 0HA. **[2026-09-15, reviewer: "i have a collab who wants to create a branch on
     his local mac. he cloned the repo but needs to rebuild stuff that isn't in
     the repo and use brew to install apps"] SETUP.md GAINS A COLLABORATOR PATH;
