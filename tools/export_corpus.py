@@ -235,7 +235,15 @@ def _write_manifest(output_dir, edition, reverts, refused):
         "source_note": ("A reading from vlm_reading/surya_reading/dicta_reading/docai_reading "
                         "came from a machine reading the same ink, i.e. it corrects this "
                         "project's transcription rather than the printed edition. `custom` is a "
-                        "human overriding every engine."),
+                        "human overriding every engine."
+                        # Only when a witness row is present, so a book without
+                        # them keeps this file byte for byte (item 0GW).
+                        + (" A `witness_choice` row was ruled against another digitization of "
+                           "this edition: `witness_reading` is its OCR and `corrected_reading` "
+                           "its corrected text; `remove`, or an empty `as_printed`, means the "
+                           "two texts disagreed on whether a word is there at all."
+                           if any(r.get("decision_type") == "witness_choice" for r in reverts)
+                           else "")),
         "not_recoverable": [{"klal_id": k, "word_index": w, "as_printed": a, "why": why}
                             for k, w, a, why in refused],
         "limits": ("Reconstruction is exact for every change made through the decision pipeline. "
@@ -288,14 +296,38 @@ def _revert_to_as_printed(klalim):
     # loss that looked like missing data and was purely iteration order. Reverting
     # right-to-left means an earlier revert never moves a later one.
     pending = []
-    for dtype in ("candidate_choice", "disputed_choice", "manual_correction"):
+    # WITNESS RULINGS ARE INTERVENTIONS TOO. FIXED 2026-09-15 (item 0GW, reviewer:
+    # "fix it tonight"). This tuple named three decision types, and Sefer
+    # HaShorashim can only have the fourth: the demo copy applied `אַבְּן` ->
+    # `אַבְּ` at entry 1 w37 and exported 0 interventions, with the DIPLOMATIC
+    # edition reading the corrected `אַבְּ` - a change neither listed nor undone.
+    #
+    # Read exactly as apply_reviewer_decisions.witness_choice_edit() reads one:
+    # the words it replaced are the snapshot's `master_reading` (else
+    # `docai_reading`), they sit at the SNAPSHOT's `word_index`, `remove` wrote an
+    # empty reading, a gap row inserted words where the page had none, and
+    # `unreadable` wrote nothing. NEVER the key's index: a witness ruling is keyed
+    # by its OCR TOKEN, so `wi` below is a token number (24, 40 at entry 1), and
+    # resolving by it looks for the word four places away.
+    for dtype in ("candidate_choice", "disputed_choice", "manual_correction", "witness_choice"):
         for (kid, wi), dec in rd.all_current(dtype).items():
             if dec["id"] not in applied or wi is None or kid not in by_klal:
                 continue
             snap = dec.get("candidate_snapshot") or {}
-            as_printed = (dec.get("original_word") or snap.get("original_word")
-                          or snap.get("final_text"))
-            chosen = dec.get("chosen_text")
+            if dtype == "witness_choice":
+                if dec.get("chosen_source") == "unreadable" or snap.get("word_index") is None:
+                    continue
+                wi = snap["word_index"]
+                dec = dict(dec, word_index=wi)
+                seen = "" if snap.get("gap") else (snap.get("master_reading")
+                                                   or snap.get("docai_reading") or "")
+                as_printed = " ".join(seen.split())
+                chosen = ("" if dec.get("chosen_source") == "remove"
+                          else " ".join((dec.get("chosen_text") or "").split()))
+            else:
+                as_printed = (dec.get("original_word") or snap.get("original_word")
+                              or snap.get("final_text"))
+                chosen = dec.get("chosen_text")
             if as_printed is None or chosen is None or as_printed == chosen:
                 continue
             words = by_klal[kid]["clean_text"].split()
@@ -341,7 +373,11 @@ def _revert_to_as_printed(klalim):
                 continue
             reverted_here.add((kid, at, as_printed))
             words[at:at] = as_printed.split()
-        elif words[at:at + len(as_printed.split())] == as_printed.split():
+        # `as_printed.split()` must be non-empty for this to mean anything: an
+        # INSERTION (a witness gap row, 0GW) was printed as nothing, `[]` equals
+        # every empty slice, and an insertion whose words had since gone missing
+        # was skipped as "already as-printed" instead of being refused.
+        elif as_printed.split() and words[at:at + len(as_printed.split())] == as_printed.split():
             # ALREADY AS-PRINTED. Two rulings can name one word - a
             # disputed_choice and a manual_correction at the same position, or an
             # exact duplicate - and once the first has reverted it, the second

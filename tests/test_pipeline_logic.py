@@ -9132,6 +9132,75 @@ def test_the_diplomatic_edition_reverts_an_intervention_and_the_manifest_names_i
     )
 
 
+def test_the_diplomatic_edition_reverts_witness_rulings_by_their_snapshot_position(tmp_path, monkeypatch):
+    """Item 0GW, 2026-09-15 (reviewer: "fix it tonight"). _revert_to_as_printed()
+    read three decision types and Sefer HaShorashim can only have the fourth: the
+    demo copy applied a witness ruling (`אַבְּן` -> `אַבְּ`) and exported 0
+    interventions, with the DIPLOMATIC edition reading the corrected word.
+
+    One entry per kind the applier's witness_choice_edit() can write, so no two
+    interact. Every key's index is a TOKEN number that differs from the word's
+    position - the field that looks like a position on a witness row and is not
+    one - so a reverter that addresses by the key fails here, not in a demo."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "expw", os.path.join(REPO, "tools", "export_corpus.py"))
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    path = str(tmp_path / "d.jsonl")
+
+    def ruling(kid, token, snap, source, text):
+        return rd.append_decision("witness_choice", klal_id=kid, word_index=token,
+                                  chosen_source=source, chosen_text=text,
+                                  candidate_snapshot=dict(snap, klal_id=kid,
+                                                          docai_token_index=token),
+                                  path=path)
+
+    replace = ruling(1, 99, {"word_index": 2, "master_reading": "עלוי"}, "custom", "עליו")
+    remove = ruling(2, 50, {"word_index": 1, "master_reading": "דלת"}, "remove", "")
+    insert = ruling(3, -7, {"word_index": 1, "gap": True,
+                            "gap_context": {"before": "אלף", "after": "בית"}},
+                    "corrected_reading", "נוסף")
+    confirmed = ruling(4, 60, {"word_index": 1, "master_reading": "בית"}, "docai_reading", "בית")
+    pending = ruling(5, 70, {"word_index": 1, "master_reading": "בית"}, "custom", "ביתה")
+    lost = ruling(6, -8, {"word_index": 1, "gap": True,
+                          "gap_context": {"before": "אלף", "after": "בית"}},
+                  "corrected_reading", "נעלם")
+    rulings = {(r["klal_id"], r["word_index"]): r
+               for r in (replace, remove, insert, confirmed, pending, lost)}
+    monkeypatch.setattr(m.rd, "all_current",
+                        lambda t, *a, **kw: (rulings if t == "witness_choice" else {}))
+    monkeypatch.setattr(m.rd, "applied_decision_ids",
+                        lambda *a, **kw: {r["id"] for r in (replace, remove, insert, confirmed, lost)})
+    monkeypatch.setattr(m.rd, "backfilled_word_ids", lambda *a, **kw: {})
+    monkeypatch.setattr(m.widentity, "load", lambda *a, **kw: {})
+
+    corrected = [
+        {"klal_id": 1, "clean_text": "אלף בית עליו גימל"},     # printed עלוי
+        {"klal_id": 2, "clean_text": "אלף גימל"},              # printed אלף דלת גימל
+        {"klal_id": 3, "clean_text": "אלף נוסף בית"},          # printed אלף בית
+        {"klal_id": 4, "clean_text": "אלף בית"},               # confirmed: nothing to undo
+        {"klal_id": 5, "clean_text": "אלף בית"},               # never applied
+        {"klal_id": 6, "clean_text": "אלף בית"},               # its insertion is GONE
+    ]
+    diplomatic, reverts, refused = m._revert_to_as_printed(corrected)
+    text = {k["klal_id"]: k["clean_text"] for k in diplomatic}
+
+    assert text[1] == "אלף בית עלוי גימל", "a witness replacement was not reverted"
+    assert text[2] == "אלף דלת גימל", "a witness removal did not put the word back"
+    assert text[3] == "אלף בית", "a witness insertion was left in the as-printed text"
+    assert text[4] == text[5] == "אלף בית"
+    pairs = sorted((r["klal_id"], r["word_index"], r["as_printed"], r["corrected_to"],
+                    r["decision_type"]) for r in reverts)
+    assert pairs == [(1, 2, "עלוי", "עליו", "witness_choice"),
+                     (2, 1, "דלת", "", "witness_choice"),
+                     (3, 1, "", "נוסף", "witness_choice")], pairs
+    assert [r[0] for r in refused] == [6], (
+        f"an insertion whose words are gone must be REFUSED and listed, not skipped "
+        f"as already as-printed: {refused}")
+    assert corrected[0]["clean_text"] == "אלף בית עליו גימל", "the corrected text was mutated"
+
+
 def test_a_reindex_refuses_to_move_a_ruling_onto_an_occupied_slot(apply_harness, decisions_path):
     """ITEM 0BX. rd.all_current() keys on (klal_id, word_index) and keeps the LAST
     row per key, so re-pointing a ruling onto an index another ruling already

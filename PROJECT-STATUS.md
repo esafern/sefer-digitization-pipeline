@@ -191,6 +191,102 @@ applying it to the corpus remain two separate, deliberate steps.
         short). Its precondition was blind once too (Lesson 42): it first
         asked whether the title shrank, which is the thing under test.
 
+0GW. **[2026-09-15, reviewer: "I made a few changes in the demo dashboard. how
+    do we push them so the text is updated to reflect the change but the green
+    boxes are still there?"] APPLIED ON THE DEMO COPY. AND A BUG: THE EXPORT
+    CANNOT SEE A WITNESS RULING.**
+    * **What was applied.** 4 `witness_choice` rulings in entry 1 of
+      `~/work/hashorashim-demo`:
+      - word 20 `עודנו`, word 74 `פרי` and word 81 `הרמונים` are confirmed:
+        each ruling equals the stored text;
+      - word 37 `אַבְּן` -> `אַבְּ` is the one text change. It removes a
+        footnote mark that DocAI had fused onto the word as a final nun; their
+        text has `אב`.
+      The real root is untouched, and its ledger is still 0 bytes.
+    * **The method, proven on a throwaway clone first:**
+      ```
+      SEFER_CORPUS_ROOT=~/work/hashorashim-demo python3 pipeline/apply_reviewer_decisions.py --apply-witness-choices
+      SEFER_CORPUS_ROOT=~/work/hashorashim-demo python3 pipeline/build_klalim_demo_dataset.py
+      ```
+      - The SECOND step is not optional. `review_data.load_klalim()` serves
+        entry text from `klalim_demo_dataset.json`, so after the apply alone
+        `part1.json` held `אַבְּ` while `/api/klal/1` and the page still
+        showed `אַבְּן`.
+      - NOT the full rebuild. It also rebuilds the witness queue, and the
+        green boxes hang on its rows.
+      - After both steps, on :8422: word 37 reads `אַבְּ`, all 4 words are
+        still `state-human` in the text, 4 `hl-state-human` boxes are on the
+        scan, and there are no page errors.
+    * **A field trap, recorded because it cost a false alarm.** A
+      `witness_choice` row's TOP-LEVEL `word_index` holds the DocAI token
+      index (24, 40), because witness rulings are keyed by token. The word's
+      position in `clean_text` is `candidate_snapshot.word_index` (20, 37).
+      Reading the top-level field made the applier look as if it were
+      targeting the wrong words; it was not. This is Lesson 48's shape (one
+      name, two meanings), in the append-only file where it cannot be
+      renamed.
+    * ~~BUG, OPEN~~ **BUG, FIXED THE SAME NIGHT (reviewer: "fix it tonight"):
+      `INTERVENTIONS.json` and the diplomatic edition ignored witness
+      rulings.**
+      ```python
+      # tools/export_corpus.py:291
+          for dtype in ("candidate_choice", "disputed_choice", "manual_correction"):
+              for (kid, wi), dec in rd.all_current(dtype).items():
+      ```
+      After the apply, the demo copy's export lists **0 interventions**, and
+      its diplomatic ("as printed") edition reads `אַבְּ` at word 37, the
+      CORRECTED reading. Nothing reverted it, and nothing lists it. For
+      Sefer HaShorashim every ruling is a witness ruling, so the "every
+      intervention auditable and separable" answer to Sefaria's standard
+      (`0DA`) does not hold for this book today. This is `0GL`'s open item
+      ("witness rulings in `audit_applied_decisions.py`") found in a second
+      place: a sibling not swept (Lesson 34).
+      - A fix would read a witness ruling's as-printed word from its snapshot
+        (`docai_reading`, at `candidate_snapshot.word_index`) and its
+        correction from `chosen_text`.
+      - **The fix.** `_revert_to_as_printed()` now reads `witness_choice`
+        exactly as `apply_reviewer_decisions.witness_choice_edit()` writes
+        one:
+        * the replaced words are the snapshot's `master_reading` (else
+          `docai_reading`), at the SNAPSHOT's `word_index`, never the key's
+          token number;
+        * `remove` is put back;
+        * a gap insertion is taken out;
+        * `unreadable` and confirmed rulings are skipped.
+      - A second defect found while fixing it: the "already as-printed" test
+        matched `[]` for an insertion, so a witness insertion whose words had
+        gone missing would have been skipped silently. It now needs a
+        non-empty reading, and such a row is REFUSED and listed.
+      - The manifest's `source_note` gains a sentence explaining witness
+        sources, only when a witness row is present.
+      - `test_the_diplomatic_edition_reverts_witness_rulings_by_their_snapshot_position`
+        has one entry per kind (replace, remove, insert, confirmed,
+        unapplied, lost insertion), each keyed by a token number that differs
+        from its position. It fails under all three mutations: the type left
+        out, addressed by the key, the guard removed. Logic suite: 503
+        passed.
+      - Yad Malachi's sefaria, plain, diplomatic and TEI exports, manifest
+        included, are byte-identical to `HEAD`'s, so no ruling of that book
+        reaches the narrowed guard.
+      - **The demo copy now exports 1 intervention**: entry 1 w37, as printed
+        `אַבְּן`, corrected to `אַבְּ`, `witness_choice`, `custom`, 0 not
+        recoverable. The diplomatic edition reads `אַבְּן` there and the
+        corrected edition `אַבְּ`. `~/work/hashorashim-demo/export/` is
+        regenerated.
+      - **Siblings NOT changed, recorded so they are not mistaken for
+        covered:**
+        * `audit_applied_decisions.py` still checks no witness ruling. That is
+          `0GL`'s open prerequisite for turning `--apply-witness-choices` on
+          in the real corpus.
+        * The corrected edition applies PENDING candidate and manual rulings
+          in memory, but not pending witness rulings. That matches the
+          applier's default (witness rulings are off unless asked for), so an
+          export does not promote what the applier would not.
+        * ALTO/PAGE/TEI read only `candidate_choice` and `manual_correction`
+          for their layout annotations (`export_corpus.py`, the
+          `all_corrections` / `all_manual` pair), so a witness ruling
+          carries no annotation there.
+
 0GV. **[2026-09-15, reviewer: "what needs to be done to be ready to show to
     Sefaria?" A Meet screen-share with the Sefaria editor is on 2026-09-16.
     No rulings until the NLI contact answers on scan sources.] DEMO READINESS,
