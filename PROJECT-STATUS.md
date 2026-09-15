@@ -107,7 +107,7 @@ applying it to the corpus remain two separate, deliberate steps.
 
 0GR. **[2026-09-15, reviewer: "the headers in heb and eng - font can be a bit
     bigger, and more white space between words - there is space to grow a
-    bit"] DONE, uncommitted.** The three pane-header bars, both books.
+    bit"] DONE.** The three pane-header bars, both books.
     * Hebrew slots 13.5 -> 16px, Latin slots 11.5 -> 13.5px, `word-spacing:
       0.2em` inside a slot, and the gap between slots 12 -> 16px
       (`.ph-mid`, `review_frontend/app.css`).
@@ -142,13 +142,145 @@ applying it to the corpus remain two separate, deliberate steps.
       `test_the_text_view_box_never_runs_into_the_centred_header` shows the
       box by hand and fails under the old rule (header text 1px from the box
       at 1280). Full browser suite: 114 passed, 1 skipped.
-    * **OPEN, a UI defect this leaves.** At 1440px and below on
-      HaShorashim the text bar is 75px short. The English reference yields
-      first by design, and at 1280 it shrinks to nothing: `Shoresh #1`
-      disappears and leaves an empty slot between two dividers. Yad Malachi's
-      shorter titles fit. The proposed fix is to let the English book title
-      yield before the reference, since the Hebrew title already names the
-      book. Not done: that is for the reviewer.
+    * ~~OPEN~~ **FIXED 2026-09-15 (reviewer: "yes eng title give way").** At
+      1440px and below on HaShorashim the text bar was 75px short, and the
+      English reference, which yielded first, shrank to nothing at 1280: an
+      empty slot between two dividers. **The English book title now gives
+      way, and the reference does not shrink while a title shares its bar**
+      (`.ph-ref.ph-en:has(~ .ph-title.ph-en:not(:empty)) { flex-shrink: 0 }`).
+      Read off the pixels on :8421, `/entry/32`:
+      - at 1440, `Sefer Ha...` with `Shoresh #32` whole;
+      - at 1280, the title is down to `S` and the reference is whole;
+      - at 1100, the title is gone and the reference is whole at the edge.
+      `test_the_english_title_gives_way_before_the_reference` puts
+      HaShorashim's strings into the slots by hand, because Yad Malachi's
+      names fit and would pass whatever the rule said.
+      - ~~OPEN~~ **MOOT THE SAME DAY: the reference left this bar (`0GT`).**
+        What remains is guarded by
+        `test_the_text_bar_fits_a_long_title_beside_the_which_text_box`
+        (HaShorashim's titles beside the box at 1280, no slot losing letters).
+        Narrower widths were not re-measured. The entry as written: Below
+        about 1090px on HaShorashim, with the which-text box shown, the
+        reference runs past the bar's edge and is clipped with no ellipsis:
+        2px at 1080, 36px at 1000 (`#32` gone). Before today the box covered
+        the Hebrew title at those widths instead. 1280px is the narrowest
+        width the layout test targets. A fix would hide the English title
+        outright below some bar width (a container query), so the reference
+        could shrink with an ellipsis again. That threshold is per book, and
+        it is the reviewer's call.
+      - **Three probes in a row reported this bar wrong, and the pixels
+        caught each one (Lessons 43, THE PROBE THAT CANNOT SEE, and 45,
+        PIXELS, NOT THE DOM).**
+        1. The first rule was `flex-shrink: 1000` against 1. Its test compared
+           integer `clientWidth` and `scrollWidth` with 1px of slack, and
+           passed. The screen read `Shoresh #...`: the reference was about
+           0.08px short, and an ellipsis fires on any overflow. This file said
+           "`Shoresh #32` is whole (102 of 102px)" until the screenshot was
+           read.
+        2. After the fix, a probe on the `.ph-mid` box said everything fit at
+           1000px. The slots that cannot shrink spill out of that box, so it
+           never saw them.
+        3. A text-Range sweep then said 78px past the edge at 1280, where the
+           screenshot shows all of it. A Range covers text that the slot's own
+           `overflow: hidden` clips.
+        The numbers above come from a fourth probe (the reference's text
+        Range against the bar's edge). It was accepted only because it agrees
+        with the screenshots at 1280, 1100 and 1000.
+      - The test now measures fractional overflow from the text itself. On
+        the old rule it fails its real assertion (the reference 0.05px
+        short). Its precondition was blind once too (Lesson 42): it first
+        asked whether the title shrank, which is the thing under test.
+
+0GT. **[2026-09-15, reviewer: "remove the shoresh from the middle pane header -
+    just the book title. also add light yellow box around selected shoresh in
+    text pane - same as scan pane"] DONE.** Both books; `review_frontend/`.
+    * **The text bar shows the book title only.** `#text-ref-he` and
+      `#text-ref-en` are gone from `index.html`, and so is their only writer,
+      `updateTextHeader()`. The CSS rule that held the reference at full width
+      (`0GR`) matched nothing afterwards and is removed. The scan bar still
+      names the entry and page.
+    * **The entry being read is boxed in the text.** `.klal-block.current-entry`
+      shares one rule with the scan's `.hl-current-klal`: the gold 3px ring,
+      the pale fill and the 4px radius. `markActiveKlal()` sets it on each
+      move and takes it off the previous block, so a scroll, a jump and a word
+      click all move it. Every block gets the padding, with a matching negative
+      margin, so no text reflows when the box moves. The box shows whether or
+      not a word is selected. On the scan it hides while a word is focused;
+      the text pane has its own word marker, so it was not copied there.
+    * **Tests:**
+      - `test_the_text_pane_header_carries_only_the_book_title` replaces the
+        2026-09-01 test that pinned the reference, with both directives
+        written into it.
+      - `test_the_entry_being_read_is_boxed_in_the_text_as_on_the_scan`
+        checks the computed look against a probe `.hl-current-klal`, that
+        exactly one block wears the box, and that it moves.
+      - The word-click test now asserts the box, not the removed reference.
+      - The one-bar test asserts that the text bar carries titles and no
+        reference.
+      - `test_the_english_title_gives_way_before_the_reference` became
+        `test_the_text_bar_fits_a_long_title_beside_the_which_text_box`.
+      - Mutations, each failing its own assertion: the box never taken off
+        the old entry (entries 1 and 2 both boxed); the box never put on; the
+        text box outside the shared rule; the title too big to fit (loses
+        135px).
+    * Live, both dashboards restarted: :8421 entry 32 and :8420 entry 12 at
+      1440, and :8421 at 1280. The bar shows only the title, one block is
+      boxed, the screenshots match the scan's look, and there are no page
+      errors. Full browser suite: 118 passed, 1 skipped.
+
+0GS. **[2026-09-15, reviewer: "clicking away keeps the focus on the dispute prev
+    seen in the popup - correctly. after that escape should return to the
+    default mode where all disputes are highlighted and no word is selected.
+    this should return to 100% zoom. same for selecting a diff. entry"] DONE,
+    uncommitted.** `review_frontend/app.js`.
+    * **Escape now has two steps.**
+      - With a panel open, it is the dismissal, unchanged: identical to
+        clicking away, so the word stays focused and the zoom stays put
+        (`0DI`, `0DK`).
+      - With nothing open, `returnToDefaultView()` clears the selection. No
+        focused box and no dimming on the scan. No routed or cursor marker in
+        the text. The remembered word is dropped and keyboard focus leaves
+        the word. The zoom goes to 100%, and the address names the entry
+        without a word.
+      - The reset stays on the page being shown, not the entry's start page,
+        and it never scrolls the text pane. That was `0DS`'s reason for
+        guarding Escape. An Escape with nothing to reset does nothing, not
+        even a redraw.
+    * **Choosing a different entry resets the same way** (`jumpTo()`, and a
+      `routeToKlal()` address naming only an entry). Choosing the entry you
+      are already in is not moving on: it keeps its zoom, as it keeps its
+      panel. Scrolling across an entry boundary is not choosing one, and
+      does not reset.
+    * **This brings back the 2026-08-26 "zoom back out to 100", on a
+      different gesture.** `0DK` removed it from clicking away because it
+      blinked there, and clicking away still changes nothing on the scan.
+      `test_clicking_away_changes_nothing_in_the_scan_pane` is untouched and
+      passes.
+    * **Found by a mutation run: an older address-bar bug.** Choosing entry 12
+      from the index after a word in entry 66 left `#entry=66&word=200` in
+      the address bar: nothing on the jump path wrote the hash. A link copied
+      from there led back to the word just left. Swept: `updateHash` has
+      three callers (word click, routed link, and now the reset), and
+      scrolling never writes it. `jumpTo()` now does, when the entry changes.
+    * **Tests:**
+      - `test_escape_after_clicking_away_returns_to_the_default_view` covers
+        the two steps, no scroll of the text pane, and a third Escape that
+        must not rebuild the highlight layer.
+      - `test_choosing_another_entry_returns_to_the_default_view` covers the
+        same entry keeping 220% and another entry going to 100% with no
+        focus, no marker and `#entry=12`.
+      - Each fails under its mutation, on its own assertion. The mutations:
+        the Escape reset removed; the reset run with nothing to reset; the
+        jumpTo reset removed; the reset on the same entry too; the address
+        update removed.
+    * **Live on :8421 (HaShorashim)**, `/entry/32/word/194`: arriving gives
+      220%, one focused box and the panel open. The first Escape closes the
+      panel and keeps everything. The second gives 100%, no focus, no
+      marker, `#entry=32` and the same text scroll. From the same word,
+      choosing entry 40 in the index gives 100%, no focus and `#entry=40`.
+      No page errors. Full browser suite: 117 passed, 1 skipped. That run
+      came before the last header-rule change in `0GR`; the 12 header and
+      navigation tests pass after it.
 
 0GQ. **[2026-09-15] HANDOFF - SEFER HaSHORASHIM, WHERE IT STANDS AND WHAT IS
     OPEN.** Read this first after a clear; the items below it (`0GB`-`0GP`)

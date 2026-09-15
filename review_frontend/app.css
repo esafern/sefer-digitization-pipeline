@@ -234,8 +234,32 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
 }
 /* Peer of the English reference, for the same reason as the Hebrew pair above.
    The uppercase + letter-spacing treatment went with it: small caps read as a
-   LABEL, which is the opposite of the "one line of peers" this bar is now. */
-.ph-title.ph-en { flex-shrink: 0; }
+   LABEL, which is the opposite of the "one line of peers" this bar is now.
+
+   AND IT GIVES WAY BEFORE THE REFERENCE (reviewer 2026-09-15: "yes eng title
+   give way"). Where the title shares a bar with the reference - the text pane's
+   - the reference yielding first meant `Shoresh #1` shrank to NOTHING at a
+   1280px window on HaShorashim, an empty slot between two rules, while the
+   static book name beside it stayed whole. The title is the slot a reviewer
+   needs least: the Hebrew title already names the book.
+
+   BY TURN, NOT BY WEIGHT. The first cut gave the title `flex-shrink: 1000`
+   against the reference's 1, so the title would take all but a thousandth of
+   the squeeze. It did, and a thousandth was enough: at 1280px the reference
+   lost about 0.08px, `text-overflow: ellipsis` fires on ANY overflow, and the
+   screen read `Shoresh #...` while clientWidth and scrollWidth both rounded
+   to 102. So the reference does not shrink at all while a title shares its
+   bar, and the title alone gives way. Once the title has nothing left, the
+   reference overflows instead, into the bar's 16px padding first and then
+   clipped at its edge, without an ellipsis. The index and scan bars have no
+   title, and their reference still yields as it did. */
+/* SUPERSEDED THE SAME DAY (reviewer 2026-09-15: "remove the shoresh from the
+   middle pane header - just the book title"). The text bar no longer carries a
+   reference, so nothing is left for the title to give way to, and the rule
+   that held the reference at full width is gone with it. The title still
+   yields, with an ellipsis, if its bar is short. The paragraphs above are the
+   history of why it yields at all. */
+.ph-title.ph-en { flex-shrink: 1; }
 /* An empty slot must take no room, or the gaps double up before /api/corpus
    lands and on the panes whose reference is not set yet. */
 .ph-title:empty, .ph-ref:empty { display: none; }
@@ -343,11 +367,17 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
   z-index: 5;
   opacity: 1 !important;
 }
-.hl-current-klal {
-  position: absolute;
+/* THE ENTRY BEING READ, one look on both panes: its region on the scan and its
+   block in the text (reviewer 2026-09-15: "add light yellow box around selected
+   shoresh in text pane - same as scan pane"). One rule for both, so the two
+   boxes cannot drift apart. */
+.hl-current-klal, .klal-block.current-entry {
   border-radius: 4px;
   box-shadow: 0 0 0 3px var(--pending);
   background: rgba(214, 158, 46, 0.14);
+}
+.hl-current-klal {
+  position: absolute;
   pointer-events: none;
   transition: top .15s ease, left .15s ease, width .15s ease, height .15s ease, opacity .15s ease;
 }
@@ -411,7 +441,15 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
   line-height: 2;
   font-size: 17px;
 }
-.klal-block { margin-bottom: var(--sp-6); scroll-margin-top: 12px; min-height: 40px; }
+/* Room for the current-entry box on EVERY block, not only the boxed one:
+   padding on the current block alone would re-flow its text each time the
+   reading line crossed into the next entry. The negative inline margin gives
+   the width back, so the text sits exactly where it always did. */
+.klal-block {
+  margin-bottom: var(--sp-6); scroll-margin-top: 12px; min-height: 40px;
+  padding: var(--sp-2) var(--sp-3);
+  margin-inline: calc(-1 * var(--sp-3));
+}
 .klal-block .klal-head {
   font-weight: 700;
   color: var(--accent);

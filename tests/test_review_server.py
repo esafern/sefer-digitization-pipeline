@@ -894,6 +894,97 @@ def test_clicking_away_changes_nothing_in_the_scan_pane(server, page):
         "clicking a word still zooms to FOCUS_ZOOM and dismissing still leaves it there")
     assert page.test_errors == []
 
+def _selection_state(page):
+    return page.evaluate("""() => ({
+        zoom: document.getElementById('zoom-level').textContent,
+        focused: document.querySelectorAll('#hl-container .hl-box.focused').length,
+        dimmed: document.getElementById('hl-container').classList.contains('has-focus'),
+        marked: document.querySelectorAll('#text-scroll .routed-word, #text-scroll .cursor-word').length,
+        panel: !!document.querySelector('.side-panel.open'),
+        textTop: Math.round(document.getElementById('text-scroll').scrollTop),
+        hash: location.hash,
+    })""")
+
+
+def test_escape_after_clicking_away_returns_to_the_default_view(server, page):
+    """Reviewer, 2026-09-15: "clicking away keeps the focus on the dispute prev
+    seen in the popup - correctly. after that escape should return to the
+    default mode where all disputes are highlighted and no word is selected.
+    this should return to 100% zoom."
+
+    So Escape is two steps. The first, with a panel open, is the dismissal that
+    test_clicking_away_changes_nothing_in_the_scan_pane pins: nothing moves.
+    The second, with nothing open, undoes the selection: no focused box and no
+    dimming on the scan, no word marked in the text, 100%, and an address that
+    names the entry without a word. It must not scroll the text pane - the
+    reason item 0DS gave Escape a guard - and an Escape with nothing left to
+    reset must do nothing at all."""
+    page.goto(server + "/klal/66", wait_until="domcontentloaded", timeout=15000)
+    page.wait_for_selector(".nav-item", timeout=15000)
+    page.wait_for_timeout(2200)
+    page.eval_on_selector('#klal-block-66 [data-word-index="200"]', "el => el.click()")
+    page.wait_for_timeout(2200)
+    assert page.inner_text("#zoom-level") == "220%", "precondition: a word click zooms in"
+
+    page.keyboard.press("Escape")            # 1: the dismissal
+    page.wait_for_timeout(1200)
+    first = _selection_state(page)
+    assert not first["panel"], f"precondition: the first Escape closes the panel: {first}"
+    assert first["zoom"] == "220%" and first["focused"] == 1 and first["marked"] == 1, (
+        f"the first Escape must leave the selection alone, as clicking away does: {first}")
+
+    page.keyboard.press("Escape")            # 2: back to the default view
+    page.wait_for_timeout(1500)
+    second = _selection_state(page)
+    assert second["zoom"] == "100%", f"the zoom did not return to 100%: {second}"
+    assert second["focused"] == 0 and not second["dimmed"], (
+        f"a word is still focused on the scan, or the other boxes still dimmed: {second}")
+    assert second["marked"] == 0, f"a word is still marked in the text pane: {second}"
+    assert "word=" not in second["hash"], f"the address still names a word: {second['hash']}"
+    assert abs(second["textTop"] - first["textTop"]) < 8, (
+        f"Escape scrolled the text pane ({first['textTop']} -> {second['textTop']}px)")
+
+    # 3: nothing left to reset, so nothing happens - not even a redraw.
+    page.evaluate("() => { window.__hlFirst = document.querySelector('#hl-container > *'); }")
+    page.keyboard.press("Escape")
+    page.wait_for_timeout(800)
+    assert page.evaluate("() => !!(window.__hlFirst && window.__hlFirst.isConnected)"), (
+        "an Escape with nothing to reset rebuilt the scan's highlight layer")
+    assert _selection_state(page)["textTop"] == second["textTop"]
+    assert page.test_errors == []
+
+
+def test_choosing_another_entry_returns_to_the_default_view(server, page):
+    """Reviewer, 2026-09-15, of the default view Escape returns to: "same for
+    selecting a diff. entry."
+
+    Moving on already dropped the scan focus (setActiveKlal passes an explicit
+    null) and the quiet cursor (0DS). It kept the zoom a word click had set, and
+    the loud routed-word ring. Choosing the entry you are already in is not
+    moving on - jumpTo() says so for the open panel - and keeps its zoom."""
+    page.goto(server + "/klal/66", wait_until="domcontentloaded", timeout=15000)
+    page.wait_for_selector(".nav-item", timeout=15000)
+    page.wait_for_timeout(2200)
+    page.eval_on_selector('#klal-block-66 [data-word-index="200"]', "el => el.click()")
+    page.wait_for_timeout(2200)
+    assert page.inner_text("#zoom-level") == "220%", "precondition: a word click zooms in"
+
+    page.click("#nav-66")
+    page.wait_for_timeout(2500)
+    assert page.inner_text("#zoom-level") == "220%", (
+        "choosing the entry already being read reset the zoom - that is not moving on")
+
+    page.click("#nav-12")
+    page.wait_for_timeout(2500)
+    s = _selection_state(page)
+    assert s["zoom"] == "100%", f"another entry kept the old word's zoom: {s}"
+    assert s["focused"] == 0 and not s["dimmed"], f"the scan still focuses a word: {s}"
+    assert s["marked"] == 0, f"a word is still marked in the text pane: {s}"
+    assert s["hash"] == "#entry=12", (
+        f"the address still names where the reviewer was, not where they are: {s['hash']}")
+    assert page.test_errors == []
+
+
 def test_index_stamps_asset_versions_from_the_files_themselves(server):
     """ADDED 2026-08-25. index.html shipped a hand-maintained `?v=6` that was last
     bumped in 1e59522 and never again, through every app.js change since. The
@@ -2495,7 +2586,7 @@ def test_the_three_pane_headers_are_one_bar_in_the_same_order(server, page):
           bg: cs.backgroundColor,
           slots: [...h.querySelectorAll('.ph-title, .ph-ref')]
                    .map(e => e.className.replace(/\s+/g, ' ').trim()),
-          fg: getComputedStyle(h.querySelector('.ph-ref.ph-he')).color,
+          fg: getComputedStyle(h.querySelector('.ph-he')).color,
         };
     })""", list(PANE_HEADERS))
 
@@ -2503,17 +2594,19 @@ def test_the_three_pane_headers_are_one_bar_in_the_same_order(server, page):
     assert len(heights) == 1, f"the three bars are different heights: {geom}"
     assert {g["top"] for g in geom} == {0}, f"the bars do not start at the top: {geom}"
     assert len({g["bg"] for g in geom}) == 1, f"the bars are different colours: {geom}"
-    # The two REFERENCE slots, Hebrew then English, are what every bar shares.
     # The titles are the centre pane's alone - see
-    # test_every_pane_header_carries_the_book_title_from_the_server.
-    want = ["ph-ref ph-he", "ph-ref ph-en"]
+    # test_every_pane_header_carries_the_book_title_from_the_server - and since
+    # 2026-09-15 they are ALL it carries (reviewer: "remove the shoresh from the
+    # middle pane header - just the book title"). The other two bars carry the
+    # two REFERENCE slots, Hebrew then English, and no title.
     for g in geom:
         refs = [c for c in g["slots"] if c.startswith("ph-ref")]
-        assert refs == want, f"{g['id']} reference slots are {refs}, expected {want}"
         titles = [c for c in g["slots"] if c.startswith("ph-title")]
         if g["id"] == "text-header":
             assert titles == ["ph-title ph-he", "ph-title ph-en"], g["slots"]
+            assert refs == [], f"the text bar still names the entry: {g['slots']}"
         else:
+            assert refs == ["ph-ref ph-he", "ph-ref ph-en"], f"{g['id']} reference slots are {refs}"
             assert titles == [], f"{g['id']} still carries a title: {g['slots']}"
         assert g["fg"] != g["bg"], f"{g['id']}: its text is the colour of its own bar"
 
@@ -2652,24 +2745,64 @@ def test_the_scan_controls_are_not_inside_the_header(server, page):
     assert page.test_errors == []
 
 
-def test_the_text_pane_header_names_the_klal_being_read(server, page):
-    """"maybe sacrifice a line at top to add header that just says something like
-    page text." The middle pane was the only one of the three without a bar, and
-    the pane a reviewer spends the most time in was the one that never said where
-    they were. Its reference is the klal, in both scripts, exactly as the scan
-    pane names the page it is showing - and it has to FOLLOW the reviewer, not
-    just render once."""
+def test_the_text_pane_header_carries_only_the_book_title(server, page):
+    """HISTORY, kept because the second directive reverses the first.
+
+    2026-09-01: "maybe sacrifice a line at top to add header that just says
+    something like page text." The bar was added with the klal being read as its
+    reference, in both scripts, following the reviewer.
+
+    2026-09-15: "remove the shoresh from the middle pane header - just the book
+    title." The entry is named by the scan bar and boxed in the text itself -
+    see test_the_entry_being_read_is_boxed_in_the_text_as_on_the_scan.
+
+    Checked AFTER a move, because the reference used to be rewritten on every
+    move, so a writer left behind would show up there and not on first load."""
     _open_dashboard(page, server, klal_id=2)
     page.wait_for_timeout(600)
-    assert page.inner_text("#text-ref-en").strip() == "Klal 2"
-    assert "כלל" in page.inner_text("#text-ref-he")
     page.click("#nav-8")
     page.wait_for_timeout(900)
-    assert page.inner_text("#text-ref-en").strip() == "Klal 8", (
-        "the text pane's header did not follow the reviewer to another klal")
-    # The Hebrew numeral comes from /api/numerals, the same table the scan header
-    # uses - not a second gematria implementation (Lesson 13).
-    assert _get_json(server, "/api/numerals")["8"] in page.inner_text("#text-ref-he")
+    shown = page.evaluate("""() => [...document.querySelectorAll('#text-header .ph-title, #text-header .ph-ref')]
+        .filter(e => e.getBoundingClientRect().width > 0).map(e => e.textContent)""")
+    corpus = _get_json(server, "/api/corpus")
+    assert shown == [corpus["title_he"], corpus["title"]], (
+        f"the text bar shows {shown}; it should be the book title and nothing else")
+    assert page.test_errors == []
+
+
+def test_the_entry_being_read_is_boxed_in_the_text_as_on_the_scan(server, page):
+    """Reviewer, 2026-09-15: "add light yellow box around selected shoresh in
+    text pane - same as scan pane." The scan outlines the entry being read with
+    .hl-current-klal; the text pane now boxes its block with .current-entry, in
+    the same look from the same rule.
+
+    Asserts the look matches, that exactly ONE block wears it, and that it
+    moves - the false leg included, because a class added on every move and
+    removed on none would leave every entry visited boxed (Lesson 40)."""
+    _open_dashboard(page, server, klal_id=2)
+    page.wait_for_timeout(600)
+
+    def boxed():
+        return page.evaluate(
+            "() => [...document.querySelectorAll('.klal-block.current-entry')].map(e => e.id)")
+
+    assert boxed() == ["klal-block-2"], boxed()
+    look = page.evaluate("""() => {
+        const probe = document.createElement('div');
+        probe.className = 'hl-current-klal';
+        document.getElementById('hl-container').appendChild(probe);
+        const s = getComputedStyle(probe);
+        const b = getComputedStyle(document.querySelector('.klal-block.current-entry'));
+        const out = { scan: [s.boxShadow, s.backgroundColor, s.borderRadius],
+                      text: [b.boxShadow, b.backgroundColor, b.borderRadius] };
+        probe.remove();
+        return out;
+    }""")
+    assert look["text"] == look["scan"], f"the text pane's box does not look like the scan's: {look}"
+    page.click("#nav-8")
+    page.wait_for_timeout(1500)
+    assert boxed() == ["klal-block-8"], (
+        f"the box did not follow the reviewer to entry 8, or stayed behind on 2: {boxed()}")
     assert page.test_errors == []
 
 
@@ -2892,6 +3025,43 @@ def test_the_text_view_box_never_runs_into_the_centred_header(server, page):
             assert abs(g["off"]) <= 1, (
                 f"at {width}px there is room to centre, and the group is "
                 f"{g['off']:.0f}px off centre: {g}")
+    assert page.test_errors == []
+
+
+def test_the_text_bar_fits_a_long_title_beside_the_which_text_box(server, page):
+    """HISTORY: this was test_the_english_title_gives_way_before_the_reference
+    (reviewer 2026-09-15: "yes eng title give way"), which pinned the title
+    yielding before the entry reference in this bar. The reference left the bar
+    the same day ("remove the shoresh from the middle pane header - just the
+    book title"), so nothing is left to give way to.
+
+    What is left to guard is that the bar FITS: HaShorashim's titles beside the
+    which-text box at the narrowest width the layout targets, with no slot
+    losing letters. Yad Malachi's shorter title fits with room to spare, so the
+    strings are put in by hand. Measured from the text itself, fractionally:
+    comparing integer widths with a pixel of slack passed while the screen
+    showed an ellipsis (Lessons 43 and 45)."""
+    _open_dashboard(page, server)
+    page.set_viewport_size({"width": 1280, "height": 1000})
+    page.wait_for_timeout(300)
+    slots = page.evaluate("""() => {
+        document.getElementById('text-view').hidden = false;
+        document.querySelector('#text-header [data-slot="title-he"]').textContent = 'ספר השרשים';
+        document.querySelector('#text-header [data-slot="title-en"]').textContent = 'Sefer HaShorashim';
+        const over = e => {
+            const cs = getComputedStyle(e);
+            const box = e.getBoundingClientRect().width
+                - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight)
+                - parseFloat(cs.borderLeftWidth) - parseFloat(cs.borderRightWidth);
+            const rg = document.createRange();
+            rg.selectNodeContents(e);
+            return rg.getBoundingClientRect().width - box;
+        };
+        return [...document.querySelectorAll('#text-header .ph-title, #text-header .ph-ref')]
+            .map(e => [e.textContent, Math.round(over(e) * 100) / 100]);
+    }""")
+    assert [t for t, _ in slots] == ["ספר השרשים", "Sefer HaShorashim"], slots
+    assert all(o <= 0.01 for _, o in slots), f"a slot in the text bar loses letters at 1280px: {slots}"
     assert page.test_errors == []
 
 
@@ -4675,6 +4845,9 @@ def test_clicking_a_word_in_another_klal_makes_that_klal_the_active_one(fixture_
     assert page.evaluate("document.getElementById('text-scroll').scrollTop") == before, (
         "the click scrolled the text pane, so the observer - not the click - may have moved the label")
     assert page.eval_on_selector(".nav-item.active", "el => el.dataset.klalId") == "2", "the index stayed on the old klal"
-    assert page.inner_text("#text-ref-en").strip() == "Klal 2", page.inner_text("#text-ref-en")
+    # The text pane names its entry with a box now, not a header (2026-09-15).
+    assert page.evaluate(
+        "() => [...document.querySelectorAll('.klal-block.current-entry')].map(e => e.id)"
+    ) == ["klal-block-2"], "the text pane's current-entry box stayed on the old entry"
     assert "Klal 2" in page.inner_text("#page-indicator"), page.inner_text("#page-indicator")
     assert page.test_errors == []

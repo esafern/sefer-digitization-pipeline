@@ -889,6 +889,10 @@ async function routeToKlal(klalId, wordIndex, opts) {
       await switchPart(want);
     }
     if (!klalById[route.klal]) return;     // not in this corpus
+    // An address naming only an entry is choosing that entry - see jumpTo().
+    if (route.word == null && route.klal !== lastActiveKlalId) {
+      leaveWordSelection({ anchorTop: true });
+    }
     // The scroll observer calls setActiveKlal on whatever drifts into view, so a
     // SMOOTH scroll lets it overwrite the destination before the animation ends
     // - measured: routing to klal 66 landed on 61. Mount first, jump instantly,
@@ -969,21 +973,10 @@ function renderBookTitle() {
   if (ff && ff.parentElement) ff.parentElement.title = `Show only ${(CORPUS.unit_plural || 'klalim').toLowerCase()} flagged for revisit`;
 }
 
-// The text pane's reference: the klal being read, in both scripts, exactly as
-// the scan pane names the page it is showing. ADDED 2026-09-01 with that pane's
-// first header - it was the only one of the three without a bar, and the pane a
-// reviewer spends the most time in was the one that never said where they were.
-function updateTextHeader() {
-  const he = document.getElementById('text-ref-he');
-  const en = document.getElementById('text-ref-en');
-  if (!he || !en) return;
-  const kid = _headerKlalId;
-  if (kid == null) { he.textContent = ''; en.textContent = ''; return; }
-  he.textContent = entryRefHe(kid);
-  // By root the Hebrew side already names the entry; the English side gives
-  // its position rather than the same root twice (item 0GC).
-  en.textContent = byRoot() ? `${unitName()} #${kid}` : `${unitName()} ${kid}`;
-}
+// NO updateTextHeader(). It wrote the klal being read into the text pane's bar
+// (added 2026-09-01), and that reference was removed on 2026-09-15 (reviewer:
+// "remove the shoresh from the middle pane header - just the book title"). The
+// entry being read is boxed in the text instead - see markActiveKlal().
 
 async function init() {
   const [flags, klalim, witness, numerals, corpus] = await Promise.all([
@@ -2311,13 +2304,23 @@ function setupPanels() {
     dismissPanels();
   });
   window.addEventListener('keydown', (e) => {
-    // SAME GUARD THE CLICK HANDLER ABOVE HAS. Escape had none, which was
-    // harmless while dismissing only closed things; since the cursor snap (0DH)
-    // a dismissal SCROLLS, so a stray Escape with nothing open would yank the
-    // text pane back to the last visited word. Item 0DS.
     if (e.key !== 'Escape') return;
-    if (!document.querySelector('.side-panel.open')) return;
-    dismissPanels();
+    // TWO STEPS (reviewer 2026-09-15: "clicking away keeps the focus on the
+    // dispute prev seen in the popup - correctly. after that escape should
+    // return to the default mode where all disputes are highlighted and no word
+    // is selected. this should return to 100% zoom").
+    //
+    // With a panel open, Escape is the dismissal, identical to clicking away:
+    // the panel closes and the word keeps its focus. With nothing open it
+    // returns to the default view - see returnToDefaultView().
+    //
+    // Item 0DS gave this handler a guard, because a dismissal SCROLLS (the
+    // cursor snap, 0DH), and a stray Escape with nothing open yanked the text
+    // pane back to the last visited word. Only the dismissal takes that path
+    // now; the reset never scrolls the text pane, and it does nothing when
+    // nothing is selected.
+    if (document.querySelector('.side-panel.open')) { dismissPanels(); return; }
+    returnToDefaultView();
   });
 }
 function closePanels() {
@@ -4439,6 +4442,58 @@ function settleScanAfterDismiss() {
   // buttons are unchanged.
 }
 
+// THE DEFAULT VIEW: every dispute on the page highlighted, no word selected,
+// the scan at 100%. Reviewer 2026-09-15: after clicking away, "escape should
+// return to the default mode where all disputes are highlighted and no word is
+// selected. this should return to 100% zoom. same for selecting a diff. entry."
+//
+// This is the 2026-08-26 "zoom back out to 100" coming back, but on a
+// DIFFERENT gesture. 0DK took it off clicking away because it blinked there, on
+// a gesture that says "close this", and that still holds: clicking away changes
+// nothing on the scan. Escape with nothing open, and choosing another entry,
+// both say "I am done with this word", so the resize is the thing asked for.
+//
+// Everything a word selection leaves behind apart from the scan focus itself:
+// the zoom the click set, both word markers, the remembered word (so a later
+// dismissal cannot snap back to a word the reviewer deselected), and the
+// keyboard focus snapToLastVisitedWord() put on it. The scan focus is the
+// caller's: returnToDefaultView() redraws the page without it, and jumpTo()
+// leaves it to setActiveKlal(), which already passes an explicit null.
+function leaveWordSelection({ anchorTop = false } = {}) {
+  clearRoutedWord();
+  _lastVisitedWord = null;
+  const a = document.activeElement;
+  if (a && a.dataset && a.dataset.wordIndex != null) a.blur();
+  _zoomOnFocus = false;
+  _pendingScrollToBox = null;
+  if (zoomLevel !== 1) {
+    zoomLevel = 1;
+    // centreFocused:false - the focused box is on its way out, and the one
+    // thing this must not do is scroll to it.
+    applyZoom(anchorTop ? 0.5 : null, anchorTop ? 0 : null,
+              { centreFocused: false, behavior: 'auto' });
+  }
+}
+
+function hasWordSelection() {
+  return !!(scanFocusCorr || zoomLevel !== 1
+            || document.querySelector('.routed-word, .cursor-word'));
+}
+
+// Escape with nothing open. NOTHING TO RESET, NOTHING HAPPENS - not even a
+// redraw of the highlight layer, which is exactly the blink 0DI removed.
+function returnToDefaultView() {
+  if (!hasWordSelection()) return;
+  hideWordCard(true);
+  // Zoom first, THEN the redraw: applyZoom's scroll is queued ahead of
+  // showPage's region scroll, so the entry's outline is what ends up in view.
+  leaveWordSelection();
+  // The page being shown, not the entry's start page: the reviewer stays on the
+  // page they were reading, now with the whole entry's outline and every box.
+  if (currentPage) showPage(currentPage, scanFocusKlalId, null);
+  if (lastActiveKlalId != null) updateHash(lastActiveKlalId, null);
+}
+
 async function showPage(page, focusKlalId, focusCorr = undefined) {
   if (focusCorr !== undefined) {
     scanFocusCorr = focusCorr;
@@ -4751,6 +4806,22 @@ function jumpTo(klalId) {
   // it to another klal's screen marks nothing. Same reasoning as the word click.
   document.querySelectorAll('.cursor-word').forEach(el => el.classList.remove('cursor-word'));
   hideWordCard(true);
+  // A DIFFERENT ENTRY STARTS IN THE DEFAULT VIEW (reviewer 2026-09-15, of the
+  // view Escape returns to: "same for selecting a diff. entry"). setActiveKlal()
+  // below already drops the scan focus; this adds the rest - 100%, and no word
+  // marked or remembered. Called BEFORE setActiveKlal so applyZoom's scroll is
+  // queued ahead of showPage's region scroll, and the entry's outline wins the
+  // frame. The entry you are already in is not moving on (see above), and keeps
+  // its zoom.
+  //
+  // AND THE ADDRESS MOVES WITH IT. Nothing on this path wrote the hash: choosing
+  // entry 12 after a word in entry 66 left `#entry=66&word=200` in the address
+  // bar, so a link copied from there led back to the word just left. Found
+  // 2026-09-15 by a mutation run of the test below.
+  if (Number(klalId) !== Number(lastActiveKlalId)) {
+    leaveWordSelection({ anchorTop: true });
+    updateHash(klalId, null);
+  }
   suppressObserverScroll = true;
   manualPageLock = false; // nav-panel click = explicit klal intent; let setActiveKlal show its page
   lastActiveKlalId = klalId;
@@ -4955,7 +5026,17 @@ function markActiveKlal(klalId, navBlock) {
   if (k) {
     _headerKlalId = klalId;
     updateScanHeader();
-    updateTextHeader();
+    // THE TEXT PANE NAMES ITS ENTRY WITH A BOX (reviewer 2026-09-15: "add light
+    // yellow box around selected shoresh in text pane - same as scan pane"), in
+    // place of the header reference removed the same day. The same funnel as
+    // the index row and the scan bar, so a scroll, a jump and a word click all
+    // move it. Both directions every time: set on the new block and left on the
+    // old one, it would box every entry ever visited (Lesson 40).
+    document.querySelectorAll('.klal-block.current-entry').forEach(el => {
+      if (el.id !== 'klal-block-' + klalId) el.classList.remove('current-entry');
+    });
+    const entryBlock = document.getElementById('klal-block-' + klalId);
+    if (entryBlock) entryBlock.classList.add('current-entry');
     // The work's name comes from /api/corpus like every other surface that
     // shows it (2026-09-01) - this was the last hardcoded "Yad Malachi" left in
     // the frontend, and a second book would have renamed every tab but this one.
