@@ -646,6 +646,41 @@ def ui_vocabulary():
     return {k: ui.get(k, v) for k, v in _UI_DEFAULTS.items()}
 
 
+# ---------- what a published version says about ITSELF (item 0GV, 2026-09-15) ----------
+#
+# Two sentences of the Sefaria version notes were Yad Malachi's, written into
+# tools/export_corpus.py: "OCR of the Berlin 1851/2 printing (Google Books scan)",
+# and "klalim 1-N have been through word-level review" with N the first file
+# chunk's last entry. A trial export of Sefer HaShorashim carried both - the
+# wrong printing, and a review claim for all 317 entries over an EMPTY ledger.
+#
+# Optional in book.json, and each has a SAFE default for a declared book that
+# omits it: its own edition label, and no review claimed at all. Only a corpus
+# root with no book.json keeps Yad Malachi's sentences, byte for byte - the same
+# "no book.json -> the defaults, unchanged" rule as book_field().
+_YM_VERSION_PROVENANCE = "OCR of the Berlin 1851/2 printing (Google Books scan)"
+
+
+def version_provenance():
+    """The version notes' opening clause: what was read, from which printing."""
+    stored = _declared_book()
+    if stored is None:
+        return _YM_VERSION_PROVENANCE
+    return stored.get("version_provenance") or f"OCR of the {book_field('edition_label')} printing"
+
+
+def reviewed_through():
+    """The last entry id a person has reviewed word by word, or None for none.
+
+    A CLAIM ABOUT HUMAN WORK, so it is declared and never inferred: no count of
+    ledger rows says that every word of an entry was read. A declared book that
+    omits it has claimed no review - the direction that cannot overstate."""
+    stored = _declared_book()
+    if stored is None:
+        return _part_bound(1, 'last_klal')
+    return stored.get("reviewed_through")
+
+
 def comparison_texts():
     """Another digitization's texts of this book, per entry, from book.json.
 

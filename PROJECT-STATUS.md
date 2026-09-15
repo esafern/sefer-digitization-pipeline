@@ -191,6 +191,92 @@ applying it to the corpus remain two separate, deliberate steps.
         short). Its precondition was blind once too (Lesson 42): it first
         asked whether the title shrank, which is the thing under test.
 
+0GV. **[2026-09-15, reviewer: "what needs to be done to be ready to show to
+    Sefaria?" A Meet screen-share with the Sefaria editor is on 2026-09-16.
+    No rulings until the NLI contact answers on scan sources.] DEMO READINESS,
+    MEASURED. THE DASHBOARD IS READY; THE EXPORT IS NOT.**
+    * **Dashboard, :8421.** Checked on entries 1, 17, 32, 59, 130, 203, 245
+      and 317: no page or console errors, the witness panel opens, and all
+      four text views switch (master, our OCR, their OCR, their corrected).
+      Past the 100 entries they reviewed, "their corrected" shows "Sefaria
+      has not sent a corrected version of this shoresh", which is correct.
+    * **Sefaria export, first run ever on this book**, to the scratchpad; the
+      corpus root was left untouched. It runs and writes `index.json`
+      (Reference/Dictionary, one section) and `version_hebrew.json` (317
+      entries), with 0 interventions because the ledger is empty. Three BUGS:
+      - The version notes are Yad Malachi's. `tools/export_corpus.py:996`
+        writes "OCR of the Berlin 1851/2 printing (Google Books scan)", and
+        `:999` "... klalim carry extracted text". HaShorashim's `book.json`
+        carries `edition` and `scan_source`, and the export does not read
+        them.
+      - The plain export labels every entry `כלל` (`:419`, `:427`), where
+        `book.json`'s `ui.unit_he` is `שורש`.
+      - No demarcation. The 2,772 footnote numerals are bare numbers in the
+        text, and no format writes `@01` headings. That is the standard the
+        Sefaria editor named ("demarcation around special formatting").
+    * **A demo sandbox is possible and not built.** Rulings and word ids are
+      written only under the corpus root, or to `$REVIEW_DECISIONS_PATH`. An
+      APFS clone of the 1.6 GB root on its own port would take live rulings
+      while the real ledger stays empty.
+    * The part selector still offers Parts 2, 3 and "All parts" on this
+      one-part book (`0GQ` item 7), and it is on screen at every load.
+    **DONE THE SAME DAY (reviewer: "go" on items 1-3):**
+    * **The export speaks for the book it holds.** Two optional `book.json`
+      fields are read by `corpus_io`: `version_provenance()` and
+      `reviewed_through()`. A declared book that omits them gets its own
+      edition label and no review claim. With no `book.json`, Yad Malachi
+      keeps its old sentences. `sectionNames` and the plain-text label come
+      from the book's unit.
+      - HaShorashim's `book.json` now declares its provenance, in the real
+        root and in the demo copy. That change is uncommitted in the corpus
+        root's private repo.
+      - HaShorashim's export now reads "OCR of the Berlin 1896 printing
+        (National Library of Israel full-tone photographs) ... none of the
+        317 shorashim has yet been through word-level review", with
+        `["Shoresh", "Segment"]` and `[שורש אב]`.
+      - Yad Malachi's sefaria, plain, plain `--by-klal` and TEI exports are
+        byte-identical to `HEAD`'s export script, run side by side.
+      - `test_a_declared_book_exports_its_own_provenance_unit_and_review_claim`
+        fails under four mutations: YM provenance inherited, review claimed by
+        default, `Klal` hardcoded, `כלל` hardcoded. The existing export test
+        now pins Yad Malachi's two sentences word for word.
+    * **The part selector hides on a one-part book** (`CORPUS.parts`, which
+      `/api/corpus` already served).
+      `test_the_part_selector_shows_only_for_a_book_of_several_parts` checks
+      the fixture (one part) and Yad Malachi (three), and fails under "never
+      hidden" and under "always hidden".
+    * **Demo sandbox: `~/work/hashorashim-demo` on :8422.** An APFS clone of
+      the corpus root without `.git`. Its process has no
+      `REVIEW_DECISIONS_PATH`, and its ledger and word ids resolve inside the
+      clone. **Proven by a real write:**
+      - a klal flag recorded through the page on :8422 put a 481-byte row in
+        the clone's ledger;
+      - the real ledger stayed at 0 bytes, and the real root's `git status`
+        showed only the intended `book.json` change;
+      - the clone's ledger was then reset from the real, empty one. :8422
+        shows entry 1 unflagged, and `diff -rq -x .git` finds the clone
+        identical to the real root.
+    * Suites after all of it: logic 502 passed; browser 119 passed, 1 skipped.
+    * **Item 4 (demarcation) NOT built, on purpose.** The only convention on
+      record is `@01headers` and `@02bold@03`. Nothing in the repo says which
+      tag Sefaria uses for a footnote reference, and inventing one in a file
+      meant for the customer is the wrong risk. It is a question for the
+      meeting. Heading runs and the 2,772 `footnote_refs` positions are
+      already recorded, so the answer turns into a small change.
+    * ~~Open~~ **DONE (reviewer: "change versionSource"):** `versionSource`
+      named the Google Books copy (`m58-AQAAMAAJ`) while the text was read
+      from NLI photographs. `book.json` now declares the NLI record,
+      <https://www.nli.org.il/en/books/NNL_ALEPH990010892830205171/NLI>, in
+      the real root and the demo copy. The record is identified in `0EC` with
+      Rosetta PID `IE36945577`, the folder the full-tone photographs came
+      from. Revisit it if the NLI contact's answer on scan sources changes
+      the source.
+    * **A probe of mine was wrong again, caught before any claim.** A "files
+      changed in the clone" check used `find -newer part1.json`, and plain
+      `cp -R` stamps each copy with the time it was copied. So it listed every
+      file copied after `part1.json`, including the draft email, which no
+      server writes. It was replaced by the content diff above.
+
 0GU. **[2026-09-15, reviewer: "clicking on a non-dispute word gives me a popup
     but does not highlight the word in the scan pane"] A BUG, FIXED; one class
     left OPEN by design.**

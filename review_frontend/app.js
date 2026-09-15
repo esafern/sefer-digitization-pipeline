@@ -293,6 +293,11 @@ let currentPart = '1';
 function setupPartSelect() {
   const select = document.getElementById('part-select');
   if (!select) return;
+  // A BOOK OF ONE PART HAS NOTHING TO SELECT (item 0GQ.7, fixed 2026-09-15 for
+  // the Sefaria demo). index.html offers Part 1, 2, 3 and "All parts" to every
+  // book, so Sefer HaShorashim - one part, 1-317 - showed three choices that
+  // lead nowhere on every load. /api/corpus serves the book's declared parts.
+  select.hidden = !(CORPUS && Array.isArray(CORPUS.parts) && CORPUS.parts.length > 1);
   select.onchange = async () => {
     await switchPart(select.value);
   };

@@ -2745,6 +2745,25 @@ def test_the_scan_controls_are_not_inside_the_header(server, page):
     assert page.test_errors == []
 
 
+def test_the_part_selector_shows_only_for_a_book_of_several_parts(server, fixture_server, page):
+    """Item 0GQ.7, fixed 2026-09-15 for the Sefaria demo. index.html offers
+    Part 1, 2, 3 and "All parts" to every book, so Sefer HaShorashim - one part
+    - showed three choices that lead nowhere, on every load. The fixture corpus
+    is a one-chunk book; the shipped Yad Malachi corpus has three. Both
+    directions are asserted, because hiding it everywhere would pass the first
+    half alone."""
+    page.goto(fixture_server + "/", wait_until="domcontentloaded", timeout=15000)
+    page.wait_for_selector(".nav-item", timeout=15000)
+    page.wait_for_timeout(800)
+    assert page.locator("#part-select").is_hidden(), (
+        "a one-part book still offers a part selector")
+    _open_dashboard(page, server)
+    page.wait_for_timeout(600)
+    assert page.locator("#part-select").is_visible(), (
+        "a three-part book lost its part selector")
+    assert page.test_errors == []
+
+
 def test_the_text_pane_header_carries_only_the_book_title(server, page):
     """HISTORY, kept because the second directive reverses the first.
 

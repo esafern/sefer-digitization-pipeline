@@ -5716,11 +5716,72 @@ def test_sefaria_export_empties_placeholders_and_keeps_real_text(tmp_path):
     assert version["versionSource"].startswith("https://www.google.com/books/")
     assert "Berlin 1851/2" in version["versionTitle"]
     assert "1 are not yet extracted" in version["versionNotes"]
+    # This book's two sentences, pinned WORD FOR WORD (2026-09-15, item 0GV):
+    # both now come from corpus_io, and a corpus root with no book.json must
+    # keep exactly what it always said.
+    assert version["versionNotes"].startswith(
+        "OCR of the Berlin 1851/2 printing (Google Books scan), corrected through "), version["versionNotes"]
+    assert "klalim 1-3 have been through word-level review." in version["versionNotes"], version["versionNotes"]
 
     index = json.load(open(tmp_path / "index.json", encoding="utf-8"))
     node = index["schema"]["nodes"][0]
     assert [n["key"] for n in index["schema"]["nodes"]] == ["Klalei HaGemara"]
     assert node["depth"] == 2 and node["sectionNames"] == ["Klal", "Segment"]
+
+
+def test_a_declared_book_exports_its_own_provenance_unit_and_review_claim(tmp_path):
+    """Item 0GV, 2026-09-15. Sefer HaShorashim's first trial export carried Yad
+    Malachi's words into a file meant for Sefaria's library: "OCR of the Berlin
+    1851/2 printing (Google Books scan)", sectionNames ["Klal", "Segment"],
+    every root labelled `כלל`, and "klalim 1-317 have been through word-level
+    review" over an EMPTY ledger - a false claim about human work.
+
+    Each now comes from the book. A declared book that omits the two new
+    optional fields gets the SAFE answer - its own edition label, and no
+    review claimed - and declaring them is what lets it say more."""
+    previous = cio.set_corpus_root(str(tmp_path))
+    try:
+        declared = {
+            "title": "Sefer Bedikah", "title_he": "ספר הבדיקה",
+            "section": "Shaar Rishon", "section_he": "שער ראשון",
+            "edition": "Vilna 1899, the Romm printing",
+            "edition_label": "Vilna 1899", "publisher": "Romm",
+            "scan_source": "NLI", "version_source": "https://example.org/x",
+            "categories": ["Reference"], "scan_pdf": "vilna1899.pdf",
+            "ui": {"unit": "Shoresh", "unit_plural": "Shorashim", "unit_he": "שורש",
+                   "entry_ref": "root"},
+            "parts": [{"file": "part1.json", "first_klal": 1, "last_klal": 2}],
+        }
+        (tmp_path / "book.json").write_text(json.dumps(declared, ensure_ascii=False), encoding="utf-8")
+        klalim = [
+            {"klal_id": 1, "gematria": "אב", "title": "האלף והבית", "clean_text": "האלף והבית אבב"},
+            {"klal_id": 2, "gematria": "אבד", "title": "האלף והבית והדלת",
+             "clean_text": "האלף והבית והדלת אבד"},
+        ]
+        out = tmp_path / "sef"
+        exp.export_sefaria(klalim, str(out))
+        notes = json.load(open(out / "version_hebrew.json", encoding="utf-8"))["versionNotes"]
+        assert notes.startswith("OCR of the Vilna 1899 printing, corrected through"), notes
+        assert "1851" not in notes and "Google Books" not in notes, (
+            f"a declared book inherited Yad Malachi's provenance: {notes}")
+        assert "none of the 2 shorashim has yet been through word-level review" in notes, notes
+        assert "have been through" not in notes and "klalim" not in notes, notes
+        index = json.load(open(out / "index.json", encoding="utf-8"))
+        assert index["schema"]["nodes"][0]["sectionNames"] == ["Shoresh", "Segment"]
+        exp.export_plain(klalim, str(tmp_path / "plain"))
+        plain = (tmp_path / "plain" / "corpus.txt").read_text(encoding="utf-8")
+        assert plain.startswith("[שורש אב]") and "כלל" not in plain, plain[:80]
+
+        declared.update(version_provenance="OCR of the Vilna 1899 printing (NLI photographs)",
+                        reviewed_through=1)
+        (tmp_path / "book.json").write_text(json.dumps(declared, ensure_ascii=False), encoding="utf-8")
+        exp.export_sefaria(klalim, str(out))
+        notes = json.load(open(out / "version_hebrew.json", encoding="utf-8"))["versionNotes"]
+        assert notes.startswith("OCR of the Vilna 1899 printing (NLI photographs), corrected"), notes
+        assert ("shorashim 1-1 have been through word-level review; "
+                "shorashim 2-2 have not.") in notes, notes
+    finally:
+        cio.set_corpus_root(previous)
 
 
 def test_sefaria_export_refuses_a_gap_rather_than_shifting_every_citation(tmp_path):

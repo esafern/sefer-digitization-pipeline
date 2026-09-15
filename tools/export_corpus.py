@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Export the reviewed Yad Malachi corpus in multiple archival formats.
+"""Export the reviewed corpus - the book the corpus root holds - in multiple archival formats.
 
 Reads part1.json (the hand-edited source of truth), applies all current human
 review decisions (candidate_choice + manual_correction) from review_decisions.jsonl
@@ -412,11 +412,15 @@ def _bbox_pixels(bbox, img_w=1.0, img_h=1.0):
 
 def export_plain(klalim, output_dir, by_klal=False):
     os.makedirs(output_dir, exist_ok=True)
+    # The book's own unit (item 0GV, 2026-09-15): `כלל` was hardcoded, so every
+    # root of Sefer HaShorashim came out labelled as a klal.
+    ui = cio.ui_vocabulary()
+    unit_he, unit_file = ui["unit_he"], ui["unit"].lower()
     if by_klal:
         for k in klalim:
-            path = os.path.join(output_dir, f"klal_{k['klal_id']:03d}.txt")
+            path = os.path.join(output_dir, f"{unit_file}_{k['klal_id']:03d}.txt")
             with open(path, "w", encoding="utf-8") as f:
-                f.write(f"[כלל {k['gematria']}] {k.get('title', '')}\n\n")
+                f.write(f"[{unit_he} {k['gematria']}] {k.get('title', '')}\n\n")
                 f.write(k["clean_text"])
                 f.write("\n")
         return len(klalim)
@@ -424,7 +428,7 @@ def export_plain(klalim, output_dir, by_klal=False):
         path = os.path.join(output_dir, "corpus.txt")
         with open(path, "w", encoding="utf-8") as f:
             for k in klalim:
-                f.write(f"[כלל {k['gematria']}] {k.get('title', '')}\n\n")
+                f.write(f"[{unit_he} {k['gematria']}] {k.get('title', '')}\n\n")
                 f.write(k["clean_text"])
                 f.write("\n\n")
         return 1
@@ -894,7 +898,9 @@ def _sefaria_index():
                 "nodeType": "JaggedArrayNode",
                 "depth": 2,
                 "addressTypes": ["Integer", "Integer"],
-                "sectionNames": ["Klal", "Segment"],
+                # The book's own unit (item 0GV): "Klal" was hardcoded, and Sefer
+                # HaShorashim's index called its roots klalim.
+                "sectionNames": [cio.ui_vocabulary()["unit"], "Segment"],
             }],
         },
     }
@@ -978,25 +984,36 @@ def export_sefaria(klalim, output_dir, version_title=None, version_source=None):
     # never read by a human. For a public version file under a real citation
     # address that is the most load-bearing caveat there is. Both are now derived
     # from what the export actually contains.
-    reviewed_here = sorted(i for i in expected if i <= cio.PART1_MAX_KLAL)
-    unreviewed_here = sorted(i for i in expected if i > cio.PART1_MAX_KLAL)
+    #
+    # AND THE BOOK'S OWN WORDS, 2026-09-15 (item 0GV). The provenance clause, the
+    # review claim and the word "klalim" were Yad Malachi's, so Sefer
+    # HaShorashim's trial export named the Berlin 1851/2 printing and claimed
+    # "klalim 1-317 have been through word-level review" over an empty ledger.
+    # All three now come from corpus_io, which keeps this book's bytes unchanged.
+    units = cio.ui_vocabulary()["unit_plural"].lower()
+    last_reviewed = cio.reviewed_through()
+    reviewed_here = sorted(i for i in expected if last_reviewed and i <= last_reviewed)
+    unreviewed_here = sorted(i for i in expected if not last_reviewed or i > last_reviewed)
     scope = []
     if reviewed_here:
-        scope.append(f"klalim {reviewed_here[0]}-{reviewed_here[-1]} have been "
+        scope.append(f"{units} {reviewed_here[0]}-{reviewed_here[-1]} have been "
                      f"through word-level review")
-    if unreviewed_here:
-        scope.append(f"klalim {unreviewed_here[0]}-{unreviewed_here[-1]} have not")
+        if unreviewed_here:
+            scope.append(f"{units} {unreviewed_here[0]}-{unreviewed_here[-1]} have not")
+    else:
+        scope.append(f"none of the {len(expected)} {units} has yet been through "
+                     f"word-level review")
     machine = sorted(set(_reconstructed_klal_ids()) & set(expected) - set(placeholders))
     machine_note = (
-        f" {len(machine)} klalim ({machine[0]}-{machine[-1]}) carry text reconstructed "
+        f" {len(machine)} {units} ({machine[0]}-{machine[-1]}) carry text reconstructed "
         f"mechanically from the OCR token stream between two located markers; that text "
         f"has never been read by a human or checked against the scan."
     ) if machine else ""
     notes = (
-        "OCR of the Berlin 1851/2 printing (Google Books scan), corrected through "
+        cio.version_provenance() + ", corrected through "
         "an image-grounded review pipeline: every change is adjudicated against the "
         "scan crop and recorded in an append-only decision ledger. "
-        f"{len(text) - len(placeholders)} of {len(text)} klalim carry extracted text; "
+        f"{len(text) - len(placeholders)} of {len(text)} {units} carry extracted text; "
         f"{len(placeholders)} are not yet extracted and are empty here. "
         + "; ".join(scope) + "." + machine_note
     )
@@ -1057,7 +1074,7 @@ def _write_pretty_xml(tree, path):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Export the reviewed Yad Malachi corpus in multiple archival formats."
+        description="Export the reviewed corpus - the book the corpus root holds - in multiple archival formats."
     )
     parser.add_argument("--format", required=True,
                         choices=["plain", "alto", "page", "tei", "sefaria"],
