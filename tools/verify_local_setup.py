@@ -117,7 +117,6 @@ def check_gemini_key():
 
 
 REQUIRED = [
-    ("credentials.json", check_credentials),
     ("berlin_square_corrected.pdf", lambda: check_pdf("berlin_square_corrected.pdf")),
     ("berlin_square_original_transposed.pdf", lambda: check_pdf("berlin_square_original_transposed.pdf")),
     ("venv packages (pymupdf/google-genai/google-cloud-documentai)", check_venv_packages),
@@ -133,6 +132,12 @@ REQUIRED = [
 ]
 
 RECOMMENDED = [
+    # MOVED FROM REQUIRED 2026-09-15. Only tools/extract_docai_pages.py reads
+    # it - Document AI OCR over scan pages, a paid job run once per book - so a
+    # collaborator who reviews, tests or rebuilds does not need it, and was told
+    # a correct setup had FAILED. It is also a service-account key, which a
+    # collaborator's copy of the data should not carry (SETUP.md, step 2).
+    ("credentials.json", check_credentials),
     ("docai_word_boxes/", check_docai_word_boxes),
     ("document_jsons_berlin/", lambda: check_dir("document_jsons_berlin", required=False)),
     ("sefaria_reference_corpus/", lambda: check_dir("sefaria_reference_corpus", required=False)),

@@ -2,19 +2,24 @@
 
 ## TL;DR
 
-Seven steps, and **two of them are the ones that actually bite**:
+A handful of steps, and **two of them are the ones that actually bite**:
 
 ```bash
+brew install python@3.14 direnv          # step 0 - Homebrew prerequisites
 git clone https://github.com/esafern/sefer-digitization-pipeline.git
 cd sefer-digitization-pipeline
-git config user.email "109570+esafern@users.noreply.github.com"
-tar -xf yad-malachi-migration.tar        # ← obtained out-of-band, ~467 MB
-python3 -m venv venv && source venv/bin/activate
+git config user.email "<YOUR GitHub noreply address>"   # yours, not the owner's - step 1
+tar -xf <the data tarball>               # ← obtained out-of-band - step 2
+python3.14 -m venv venv && source venv/bin/activate
 pip install -r requirements.txt -r requirements-dev.txt
 playwright install chromium              # ← separate from pip; easy to skip
-export GEMINI_API_KEY="..."              # put it in ~/.zshrc
+export GEMINI_API_KEY="..."              # your own key; put it in ~/.zshrc
 python3 tools/verify_local_setup.py && pytest tests/ -q
 ```
+
+**Setting up as a collaborator rather than on the owner's own machine?** Read
+"Working on this repo as a collaborator" below before you branch: the
+default branch is not the current one, and some data is not yours to be sent.
 
 **The tarball is not optional and not in git.** The source PDFs, credentials,
 and every large cache directory travel out-of-band. Without it the review
@@ -30,6 +35,20 @@ through the real loader, rather than just checking that filenames exist.
 
 ## New machine, step by step
 
+### 0 — Homebrew prerequisites
+
+```bash
+brew install python@3.14     # the version the working venv runs (3.14.7 as of 2026-09-15)
+brew install direnv          # optional, recommended - step 7
+brew install gh              # optional - pull requests from the terminal
+```
+
+`git` comes with the Xcode command-line tools (`xcode-select --install`) if it
+is not already there. Nothing in the live pipeline needs `tesseract`: three
+scripts still shell out to it for the retired Tesseract witness, so install it
+(`brew install tesseract tesseract-lang`) only if you are running those. Surya
+and the other ML engines are pip packages, not Homebrew ones - see step 6.
+
 ### 1 — Clone the repo
 
 ```bash
@@ -37,12 +56,16 @@ git clone https://github.com/esafern/sefer-digitization-pipeline.git
 cd sefer-digitization-pipeline
 ```
 
-Configure git to use GitHub's noreply email (required — GitHub blocks pushes
-that expose a private email address):
+Configure git with **your own** GitHub noreply address (required - GitHub
+blocks pushes that expose a private email address). It is on
+<https://github.com/settings/emails>, shaped `ID+login@users.noreply.github.com`:
 
 ```bash
-git config user.email "109570+esafern@users.noreply.github.com"
+git config user.email "<ID>+<your-login>@users.noreply.github.com"
 ```
+
+The owner's machines use `109570+esafern@users.noreply.github.com`. Do not copy
+that onto yours, or your commits are attributed to the owner.
 
 ### 2 — Restore gitignored data files
 
@@ -61,6 +84,32 @@ This restores `credentials.json`, the two source PDFs, `docai_word_boxes/`,
 and the other cache dirs listed in "Files not in the public repo" below. The
 tarball entries are relative paths, so extracting from the repo root puts
 everything in the right place.
+
+**The owner's tarball carries `credentials.json`, a Google Cloud
+service-account key. A collaborator's copy should not.** Only
+`tools/extract_docai_pages.py` reads it, to run Document AI OCR over scan pages
+(a paid job, done once per book), and nothing a collaborator reviews, tests or
+rebuilds needs it. `verify_local_setup.py` lists it as recommended, not
+required, for that reason.
+
+**Some of it can be rebuilt instead of copied:**
+
+```bash
+# The source PDF: download the Berlin scan yourself from Google Books
+# (START_HERE.md, "The scan") and apply the leaf-order fix, rather than being
+# sent a copy - the Google Books terms govern redistribution. Save the download
+# as berlin_square_original_transposed.pdf: the checker expects both files, and
+# the original stays as the diffable reference.
+python3 tools/fix_transposed_leaf.py --pdf berlin_square_original_transposed.pdf \
+    --from-index 37 --to-index 36 --output berlin_square_corrected.pdf
+
+python3 tools/render_pdf_pages.py --all --verify              # images/pdf_pages/
+python3 tools/fetch_sefaria_reference_corpus.py --register all  # sefaria_reference_corpus/ (network)
+./rebuild_all.sh --skip-vision                                # every derived data file, no Gemini calls
+```
+
+`docai_word_boxes/` cannot be rebuilt without Document AI and the key above. It
+is the one directory a collaborator must be sent.
 
 ### 3 — Python environment
 
@@ -126,24 +175,57 @@ deactivates it.
 ### 8 — Verify
 
 ```bash
-python3 tools/verify_local_setup.py   # checks files, PDFs, credentials, GEMINI_API_KEY
-pytest tests/ -q                       # 241 tests as of 2026-08-20; all should pass
+python3 tools/verify_local_setup.py   # checks files, PDFs, the venv; key and credentials are warnings
+pytest tests/ -q                       # all should pass
 ```
 
-That 241 splits as 227 gate tests (`test_corpus_invariants.py` 25 +
-`test_pipeline_logic.py` 202, both run by `rebuild_all.sh`'s step 6/6) and 14
-Playwright browser tests (`test_review_server.py`, outside the gate). The
-count grows as tests are added — treat a *higher* number as normal and any
-failure as real.
+No test count is written here, on purpose: every one this file and
+START_HERE.md ever carried went stale. Get it from the runner,
+`pytest tests/ --collect-only -q | tail -1`. `test_corpus_invariants.py` and
+`test_pipeline_logic.py` are the gate `rebuild_all.sh` runs; the Playwright
+browser tests (`test_review_server.py`) sit outside it. Any failure is real.
+
+---
+
+## Working on this repo as a collaborator
+
+**Branch from the current branch, not from `master`.** The clone checks out
+`master`, which lags the working branch - on 2026-09-15 it was 24 commits
+behind `hashorashim-nli-rebuild-and-review`. Ask the owner which branch is
+current, then:
+
+```bash
+git fetch origin
+git switch -c <your-branch> origin/<current-branch>
+```
+
+**Pushing needs write access.** The repo is `esafern/sefer-digitization-pipeline`:
+either the owner adds you as a collaborator on GitHub, or you fork it and open
+pull requests from the fork.
+
+**This repository is PUBLIC.** START_HERE.md's rules bind every contributor,
+and three matter on day one:
+* private correspondents are named by ROLE, never by name - in commits, code,
+  comments and file names alike;
+* never commit `credentials.json` or any key (`.gitignore` covers the known
+  ones);
+* read START_HERE.md, then PROJECT-STATUS.md, before changing anything. If you
+  work with Claude Code, `CLAUDE.md` routes it there.
+
+**The second book, Sefer HaShorashim, is not in this repo.** Its corpus lives
+in a separate PRIVATE repository holding data Sefaria has not released, and
+the pipeline reaches it through `SEFER_CORPUS_ROOT`. Access is the owner's
+decision, and its large files are not in that repo either. Without it,
+everything here runs on Yad Malachi.
 
 ---
 
 ## Files not in the public repo
 
-`credentials.json`, `berlin_square_corrected.pdf`,
-`berlin_square_original_transposed.pdf`, and the following cache directories
-are gitignored and must be migrated separately (step 2 above handles all of
-them if the tarball is complete):
+`credentials.json` (Document AI extraction only - see step 2),
+`berlin_square_corrected.pdf`, `berlin_square_original_transposed.pdf`, and
+the following cache directories are gitignored and must be migrated separately
+(step 2 above handles all of them if the tarball is complete):
 
 - `docai_word_boxes/` — DocAI per-page word-box JSON
 - `document_jsons_berlin/` — raw Document AI output

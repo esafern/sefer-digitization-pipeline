@@ -206,6 +206,36 @@ applying it to the corpus remain two separate, deliberate steps.
         short). Its precondition was blind once too (Lesson 42): it first
         asked whether the title shrank, which is the thing under test.
 
+0HA. **[2026-09-15, reviewer: "i have a collab who wants to create a branch on
+    his local mac. he cloned the repo but needs to rebuild stuff that isn't in
+    the repo and use brew to install apps"] SETUP.md GAINS A COLLABORATOR PATH;
+    THE SETUP CHECKER REQUIRED A KEY ONLY ONE SCRIPT READS.**
+    * **BUG, fixed:** `tools/verify_local_setup.py` listed `credentials.json`
+      as REQUIRED, but only `tools/extract_docai_pages.py` reads it (Document
+      AI OCR, a paid job run once per book). A collaborator who reviews,
+      tests or rebuilds was told a correct setup had FAILED. It is
+      RECOMMENDED now. Checked with the file made to look absent: a warning,
+      exit 0. It is also a Google Cloud service-account key, and the owner's
+      migration tarball (2026-08-18, 490 MB) carries it, so a collaborator's
+      copy of the data should be built without it.
+    * **SETUP.md, for a collaborator:**
+      - Homebrew step 0 (`python@3.14`, optional `direnv` and `gh`; tesseract
+        only for the retired witness);
+      - their OWN GitHub noreply email, where step 1 had the owner's;
+      - what can be rebuilt rather than sent: the page images
+        (`render_pdf_pages.py --all --verify`), the reference corpus
+        (`fetch_sefaria_reference_corpus.py --register all`), every derived
+        file (`rebuild_all.sh --skip-vision`), and the PDF, downloaded from
+        Google Books and fixed with `fix_transposed_leaf.py` rather than
+        redistributed;
+      - `docai_word_boxes/` (42 MB) as the one directory that must be sent;
+      - a collaborator section: branch from the current branch (on
+        2026-09-15 `master` was 24 commits behind
+        `hashorashim-nli-rebuild-and-review`), write access or a fork, the
+        public-repo rules, and the private second book (`SEFER_CORPUS_ROOT`,
+        the owner's decision);
+      - the stale "241 tests" count removed.
+
 0GZ. **[2026-09-15, reviewer, on <http://127.0.0.1:8421/entry/9/word/22>
     `בעליוי`: "the word is in the torah quote but the note says otherwise. we
     are wrong, we picked up the footnote. any way we can catch this class of
