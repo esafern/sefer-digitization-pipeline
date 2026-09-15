@@ -191,6 +191,72 @@ applying it to the corpus remain two separate, deliberate steps.
         short). Its precondition was blind once too (Lesson 42): it first
         asked whether the title shrank, which is the thing under test.
 
+0GZ. **[2026-09-15, reviewer, on <http://127.0.0.1:8421/entry/9/word/22>
+    `בעליוי`: "the word is in the torah quote but the note says otherwise. we
+    are wrong, we picked up the footnote. any way we can catch this class of
+    errors?"] A DATA ISSUE, A CLASS, AND A VERSE-CHECK BUG. NOTHING CHANGED YET.**
+    * **The instance (data).** On page 60 the print reads
+      `מפטמין. אבוס בעליו⁷ אם ילין`, and DocAI read the raised 7 as a final
+      yod. The page's own numbering shows it: entry 9 has footnote 6 at w17
+      and 8 at w27, and no 7. The queue already serves the row, tier
+      `C_footnote_marker`, class `footnote_numeral`, theirs `בעליו`. Its fix
+      is a ruling, and no ruling goes into the real corpus until the scan
+      source is settled.
+    * **The class.** 163 witness rows sit in tier `C_footnote_marker` (96
+      `one_letter`, 63 `footnote_numeral`, 4 other). The letters DocAI fused
+      on: `י` 48, `ל` 20, `ס` 12, `ג` 12, `ן` 8, `ד` 8, `ם` 7, `ו` 7, `"י` 6.
+      `0GO` measured 960 page numerals with no token of their own, and this
+      is where many of them went.
+    * **BUG: the verse note cannot rule on a short quotation that contains
+      the dispute.** `tools/adjudicate_against_verse.py`, `quotation_run()`:
+      the disputed position is exempt from the miss budget and is also NOT
+      COUNTED as matched. So a two-word quotation, one word of it disputed,
+      can match at most 1 word and never reach `--min-matched 2`:
+      ```python
+              if i == skip:
+                  start = i
+                  i -= 1
+                  continue
+      ```
+      Entry 9 w22: quotation `מפטמין אבוס בעליו`, matched 1, `uncorroborated`.
+      - Measured: 224 of the 300 `uncorroborated` rows have exactly 1
+        matched word. Counting the disputed word when one reading is in the
+        verse would rule 185 THEIRS, 6 OURS, 2 both and 31 neither; 21 THEIRS
+        and 3 neither are in `C_footnote_marker`. Checked against the known
+        case: entry 9 w22 comes out THEIRS.
+      - It is not a one-line fix. Some of the 185 are spelling variants
+        (entry 8 w74 `העפרת`/`העופרת`, entry 9 w9 `וברבורים`/`וברברים`) that
+        must keep the `spelling_only` caveat, because the verse does not
+        decide this edition's spelling (`0GE`). And `spelling_only` MISFIRES
+        on fused numerals: entry 9 w22 is tagged a vav/yod spelling difference
+        when the extra yod is footnote 7.
+    * **A hypothesis of mine, disproved by the code.** I guessed "not in the
+      quotation" came from the disputed word sitting at the anchor. It
+      cannot: the anchor is the first mark strictly AFTER the word
+      (`at(p) > pos`, line 428). `not_in_quotation` means the run stopped
+      short of the word.
+    * **A detector that does NOT work, so it is not to be built.** "In a gap
+      in the page's footnote numbering, a word ending in a digit-lookalike
+      letter whose remainder is in the lexicon" found 19 single candidates
+      in 227 single gaps. It MISSED entry 9 w22, because `אבוס` (`אבו` + `ס`)
+      also qualifies in that span. Most of its 17 "new" catches are ordinary
+      words (`כמו`, `אני`, `אבל`, `בחורים`, `בענין`), and it confirmed 1 of
+      the 163 tier rows. A lexicon says a remainder is a word, not that this
+      page printed a numeral there (Lesson 49).
+    * **What would catch the class, for the reviewer to choose:**
+      1. Fix the verse check: count the disputed word when one reading is in
+         the verse and at least one other quoted word matched, and stop
+         `spelling_only` firing when ours = theirs + trailing letters. It
+         takes effect only through a rebuild of `verse_verdicts.json` and the
+         witness queue, which also re-derives the rows the demo's green boxes
+         hang on. So: after the demo. **Reviewer 2026-09-15: "fix the verse
+         check after the demo" - decided, scheduled for after the Sefaria
+         meeting of 2026-09-16.**
+      2. Fusions that Sefaria's text does not reveal: take the page-numbering
+         gap as the locator and read each candidate word's last character
+         from the image, the `0GO` method (38 of 39 right on numeral-or-not).
+         It is a paid run, so a 40-item sample and an explicit go come first.
+
 0GY. **[2026-09-15, reviewer: "the master should include all the nikkud from the
     sefaria version. if that is difficult or problematic perhaps we should start
     fresh for the demo with the sefaria as the base for the master text"] NOT
