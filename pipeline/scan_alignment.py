@@ -126,14 +126,28 @@ def klal_all_pages(klal_id, regions=None):
 def klals_on_page(page_num, alignment, regions=None):
     """All klal_ids whose scan content (start or continuation) is on page_num.
 
-    Combines the alignment's start-page mapping with klal_page_regions.json's
-    continuation data so api_page() can serve corrections for klals that
-    continue onto this page, not just klals that start here."""
+    Combines each klal's start page with klal_page_regions.json's continuation
+    data so api_page() can serve corrections for klals that continue onto this
+    page, not just klals that start here."""
     if regions is None:
         regions = load_regions()
     klals = set()
-    for kid, r in alignment.items():
-        if r.get("trusted") and r.get("matched_page") == page_num:
+    # THE START PAGE COMES FROM resolve_klal_page(), the one definition, not from
+    # the alignment file's own `trusted` / `matched_page` pair. FIXED 2026-09-15
+    # (reviewer: "clicking on a non-dispute word gives me a popup but does not
+    # highlight the word in the scan pane").
+    #
+    # resolve_klal_page() stopped trusting that pair on 2026-08-21 and prefers
+    # the region's page; this sibling never got the same fix (Lesson 13, THE
+    # SECOND COPY OF THE TRUTH). So an entry whose alignment said `trusted: false`
+    # was missing from its own start page HERE, while /api/klal, word_pages and
+    # the scan header all put it there: api_page() served no plain-word boxes
+    # for it, and a click on any undisputed word opened the panel with nothing
+    # on the scan. Measured on Sefer HaShorashim: 42 of 317 entries untrusted,
+    # 30 of them with no plain box at all, 3,405 aligned Hebrew words unboxed.
+    # Yad Malachi's Part 1 was untouched only because both sources agree there.
+    for kid in {int(k) for k in alignment} | {int(k) for k in regions}:
+        if resolve_klal_page(alignment, regions, kid)[0] == page_num:
             klals.add(kid)
     for kid_str, region in regions.items():
         kid = int(kid_str)

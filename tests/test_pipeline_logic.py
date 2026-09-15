@@ -2313,6 +2313,39 @@ def test_resolve_klal_page_untrusted_and_no_region_returns_none():
     assert trusted is False
 
 
+def test_klals_on_page_takes_each_start_page_from_resolve_klal_page():
+    """FIXED 2026-09-15 (reviewer: "clicking on a non-dispute word gives me a
+    popup but does not highlight the word in the scan pane"). klals_on_page()
+    read the alignment file's own `trusted`/`matched_page` pair for a start page
+    - the pair resolve_klal_page() stopped trusting on 2026-08-21 - so an entry
+    marked untrusted was missing from its own start page, api_page() served no
+    plain-word boxes for it, and a click on an undisputed word drew nothing on
+    the scan. 42 of Sefer HaShorashim's 317 entries, 30 of them wholly unboxed.
+
+    Three cases, each one a way the two sources can disagree."""
+    alignment = {
+        5: {"matched_page": 58, "trusted": False},   # untrusted, region says 58
+        6: {"matched_page": 90, "trusted": True},    # trusted, region says 91
+        8: {"matched_page": 42, "trusted": True},    # no region at all
+    }
+    regions = {
+        "5": {"page": 58},
+        "6": {"page": 91},
+        "7": {"page": 10, "continuations": [{"page": 11}]},
+    }
+    assert 5 in rs._klals_on_page(58, alignment, regions), (
+        "an entry the alignment calls untrusted is missing from its region's start page")
+    assert 6 in rs._klals_on_page(91, alignment, regions)
+    assert 6 not in rs._klals_on_page(90, alignment, regions), (
+        "the alignment's page won over the region's - resolve_klal_page says the region wins")
+    assert 8 in rs._klals_on_page(42, alignment, regions), "the no-region fallback was lost"
+    assert {7} <= rs._klals_on_page(11, alignment, regions), "a continuation page stopped listing its klal"
+    # Agreement with the one definition, for every klal in the fixture.
+    for kid in (5, 6, 7, 8):
+        page = rs._resolve_klal_page(alignment, regions, kid)[0]
+        assert kid in rs._klals_on_page(page, alignment, regions), kid
+
+
 def test_word_level_ai_flag_yields_to_a_manual_correction_on_the_same_word(monkeypatch):
     """A human already acting on this exact word (manual_correction) makes
     the AI's earlier flag redundant - api_klal must not show both."""

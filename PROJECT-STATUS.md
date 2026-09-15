@@ -191,6 +191,71 @@ applying it to the corpus remain two separate, deliberate steps.
         short). Its precondition was blind once too (Lesson 42): it first
         asked whether the title shrank, which is the thing under test.
 
+0GU. **[2026-09-15, reviewer: "clicking on a non-dispute word gives me a popup
+    but does not highlight the word in the scan pane"] A BUG, FIXED; one class
+    left OPEN by design.**
+    * **The bug.** `scan_alignment.klals_on_page()` took an entry's START page
+      from the alignment file's own pair, and only when that file said
+      trusted:
+      ```python
+          for kid, r in alignment.items():
+              if r.get("trusted") and r.get("matched_page") == page_num:
+                  klals.add(kid)
+      ```
+      The function above it, `resolve_klal_page()`, stopped trusting that pair
+      on 2026-08-21 and prefers the page in `klal_page_regions.json`.
+      `/api/klal`, `word_pages` and the scan header all use it. This sibling
+      never got the fix (Lesson 13, THE SECOND COPY OF THE TRUTH). So an
+      entry marked `trusted: false` was missing from its own start page in
+      `/api/page`, which then served no plain-word boxes for it. A click on an
+      undisputed word opened the panel, showed the "no OCR alignment" toast,
+      and drew nothing on the scan.
+    * **The fix.** `klals_on_page()` asks `resolve_klal_page()` for each start
+      page, so there is one definition. Continuations are unchanged.
+      `test_klals_on_page_takes_each_start_page_from_resolve_klal_page`
+      covers three cases: untrusted, a trusted alignment that disagrees with
+      the region, and no region at all. It fails under the old loop.
+    * **Measured through the live API, before and after, both books:**
+      - HaShorashim: 32,688 of 41,873 words boxed (78.1%) before, 36,093
+        (86.2%) after. That is exactly +3,405, the aligned Hebrew words of
+        the 42 untrusted entries.
+      - Entries with no box at all went from 4 (entries 2, 100, 194 and 315)
+        to 0. Untrusted entries now sit at 85.6%, trusted at 86.3%.
+      - Aligned words still unboxed: 0 in either book.
+      - Yad Malachi: 98.0% before and after, since its two page sources agree
+        on all 222 klalim.
+    * **Clicked in the browser on :8421**, across entries 2, 32, 59, 100, 150,
+      211, 290, 194 and 315: 58 of 58 sampled Hebrew plain words now draw
+      their box; before, entries 2, 100 and 211 failed on every word
+      sampled. No page errors. Gated logic suite 501 passed; browser suite
+      118 passed, 1 skipped.
+    * **OPEN, a decision for the reviewer: words with no Hebrew letters are
+      never boxed.** On HaShorashim that is 2,984 punctuation tokens (`.`,
+      `,`, `"`, `[`) and 2,763 footnote numerals. Yad Malachi has 949. They
+      normalize to "" and are dropped from the alignment on purpose
+      (`corpus_word_bboxes`, 2026-08-30). Matching them by raw text was tried
+      and reverted, because it moved 41 correct boxes on Yad Malachi. Clicking
+      one opens the panel with the "no OCR alignment" toast. HaShorashim
+      separates its punctuation into words, so this class is about 14% of
+      the book, not 2%. A placement that does not touch the SequenceMatcher
+      is possible: box a non-letter word only when both neighbours are boxed
+      and exactly one non-letter token lies between them. It is not built.
+      Also unboxed: 35 Hebrew words on HaShorashim and 128 on Yad Malachi
+      that DocAI never aligned.
+    * **Sibling, left as is:** `corpus_io.trusted_klal_pages()`, which feeds
+      the rebuild's candidate stage, also reads `trusted` / `matched_page`.
+      There, dropping an untrusted entry is deliberate (Lesson 15, SILENCE
+      WHERE IT CANNOT ALIGN: no candidates rather than candidates from the
+      wrong page), and it reports the dropped ids. It changes nothing on
+      HaShorashim today, whose corpus IS the DocAI reading. Whether it should
+      take the region's page is a rebuild-stage change, for the reviewer.
+    * **My own probe was wrong once on the way (Lesson 43, THE PROBE THAT
+      CANNOT SEE).** A sweep filtered with
+      `(x.get("word_index") or -1) >= 0`, and `0 or -1` is `-1`, so word 0 of
+      every entry read as unboxed. That invented a "leftover" of about 300
+      aligned-but-unboxed words per book. It was caught before it reached
+      this file. Every number above comes from the corrected sweep.
+
 0GT. **[2026-09-15, reviewer: "remove the shoresh from the middle pane header -
     just the book title. also add light yellow box around selected shoresh in
     text pane - same as scan pane"] DONE.** Both books; `review_frontend/`.
