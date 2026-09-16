@@ -240,6 +240,62 @@ applying it to the corpus remain two separate, deliberate steps.
       be reported as inconclusive rather than as a lean.
     * **Reproducible without the scratchpad:** `build_ink_sample.py` beside the
       key regenerates the same 40 from the two gitignored layers and the seed.
+    * **SCORED 2026-09-16, after the reviewer read all 40. FULL TONE, AND IT IS
+      NOT CLOSE.** Answers read back from the sheet's store, then unblinded
+      against the key, by the rule written above before any answer existed:
+
+      | the ink agreed with | items |
+      |---|---|
+      | DocAI on FULL TONE | **30** |
+      | DocAI on BITONAL | 5 |
+      | neither | 5 |
+      | can't tell | 0 |
+
+      **Full tone 30 of 35 settled = 85.7%, 95% Wilson interval 70.6-93.7%.**
+      The lower bound is far from an even split, so by the pre-stated rule this
+      is conclusive: where DocAI reads the two scans differently, the full-tone
+      reading is the right one about six times in seven. This also confirms
+      `0HM`'s diagnosis - DocAI-bitonal won the whole-text score only because the
+      reference is its own unreviewed output.
+      - **All 5 "neither" are ONE error, and neither scan fixes it**: the
+        alef-lamed ligature losing its `ל` - the page prints `ישראל`, `אליבא`
+        (twice), `ולשמואל`, `אלא`. Lesson 24, SHARED INK, SHARED ERROR, exactly:
+        the defect is in the sort, upstream of the scan.
+      - The 5 bitonal wins: `ובירושלמי`, `כיס`, `הוי`, `ממיפך`, `בב"י`.
+      - **Extrapolation, labelled as one:** at these rates, of the 292
+        disagreements on these 20 pages full tone is right at ~219 and bitonal
+        at ~37 - a net ~180 words, about 1.2 points of the 14,866. Not measured.
+    * **AND THE SAMPLE FOUND LIVE DATA ISSUES IN THE REVIEWED THIRD.** Each of the
+      40 positions was mapped onto `part1.json` (40 of 40 mapped; every served
+      word matched the bitonal reading string-for-string, e.g. `שארירת`, `כסר`,
+      `שרוא`, which does not happen by accident) and compared with the reviewer's
+      ink reading. **The corpus disagrees with the ink at 17 of 40.**
+      - **10 are already open** in the queue as `current_text_may_be_wrong`,
+        awaiting a ruling:
+        <http://127.0.0.1:8420/entry/94/word/374> `לכו` (ink `לבו`),
+        <http://127.0.0.1:8420/entry/97/word/353> `שארירת` (`שארית`),
+        <http://127.0.0.1:8420/entry/133/word/30> `ומ"ס` (`ומ"מ`),
+        <http://127.0.0.1:8420/entry/147/word/288> `ותקשי` (`דתקשי`),
+        <http://127.0.0.1:8420/entry/147/word/423> `כסר` (`כמר`),
+        <http://127.0.0.1:8420/entry/150/word/344> `שמיען` (`שמיע`),
+        <http://127.0.0.1:8420/entry/150/word/797> `שרוא` (`שהוא`),
+        <http://127.0.0.1:8420/entry/152/word/115> `וכי` (`הכי`),
+        <http://127.0.0.1:8420/entry/159/word/117> `בר"ס` (`בר"פ`),
+        <http://127.0.0.1:8420/entry/159/word/721> `הל"ם` (`הל"מ`).
+      - **7 are surfaced NOWHERE** - no queue row, no flag:
+        <http://127.0.0.1:8420/entry/128/word/949> `רב"ט` (ink `דב"מ`),
+        <http://127.0.0.1:8420/entry/150/word/293> `בס"ק` (`בפ"ק`),
+        <http://127.0.0.1:8420/entry/150/word/533> `בס"ס` (`בס"פ`),
+        <http://127.0.0.1:8420/entry/154/word/506> `ט"ו` (`מ"ו`),
+        <http://127.0.0.1:8420/entry/159/word/57> `איכא` (`אליבא`),
+        <http://127.0.0.1:8420/entry/159/word/808> `לא` (`אלא`),
+        <http://127.0.0.1:8420/entry/159/word/879> `בס'` (`בפ`).
+        Four are abbreviations (`ס`/`פ`, `ט`/`מ`, `ר`/`ד` inside a gershayim
+        form) and two are the alef-lamed ligature. **Not swept to the class yet**:
+        the 7-in-40 rate is a sample from DISAGREEMENT positions only, so it
+        cannot be scaled to the corpus; the sweep is the full 292 compared against
+        `part1.json`, and beyond these pages, a full-tone DocAI pass.
+      - These are the reviewer's readings off the crops; nothing was applied.
 
 0HM. **[2026-09-16, reviewer: "yes" to running the controlled comparison] FULL
     TONE WINS ON YAD MALACHI TOO - BY A TENTH OF WHAT IT WON ON HaSHORASHIM.
