@@ -259,6 +259,36 @@ applying it to the corpus remain two separate, deliberate steps.
     * **Cheap parallel ask, if the reviewer wants it:** the uncompressed master
       for the 94 pages of the slice only, not the 656-page book. It costs nothing
       to request and nothing to wait for, since it changes no decision above.
+    * **ADDED THE SAME DAY. The reviewer drafted a reply - "it's not a question
+      of dpi, I'm looking for a full tone scan instead of a bi-tone scan" - and
+      the instinct is right but the book is wrong.** Measured now, from the two
+      PDFs in this repo, rather than from `0EK`'s note:
+      ```
+      berlin_square_corrected.pdf              3456 x 5312   colorspace 1, bpc 1   PNG   (Google Books)
+      nli_verification/berlin_square_corrected.pdf   873 x 1329   colorspace 1, bpc 8   JPEG  (NLI)
+      ```
+      - **Sefer HaShorashim already HAS NLI's full tone**: the Rosetta images are
+        24-bit RGB at 300 dpi and all 94 pages of the slice are read from them.
+        Asking NLI for a full-tone scan of that book would be asking for what
+        they have already supplied.
+      - **Yad Malachi is the book with no tone at all.** Its only scan is 1 bit
+        per pixel, and NLI's own derivative of it **is 8-bit greyscale** - so the
+        continuous-tone source exists and was rejected on 2026-08-18 purely on
+        pixel count, which is the decision `0EK` already recorded as made "on an
+        axis that omitted" bit depth.
+      - **The trade is now fully quantified, because the DPI answer supplies the
+        missing half.** 300 dpi on this page is roughly 1800x2900 (~5.2 MP, 8
+        bpc) against our 3456x5312 (18.3 MP, 1 bpc): about 3.5x fewer pixels for
+        8 bits of tone instead of 1. That is the SAME trade already made on
+        HaShorashim, where `0FW` measured it controlled - same engine, same 35
+        pages, only the pixels differ - at **+3.0 points of word accuracy, +2.0
+        of characters, and nun/gimel errors 39 -> 8, a 79% cut**.
+      - So the reply to send asks for the **Yad Malachi** (NLI
+        `990011859020205171`) full-tone master at 300 dpi, says explicitly that
+        lower resolution than what we hold is acceptable because the tone is
+        worth more than the pixels, and carries `0EK`'s other two asks that are
+        still unanswered: the redistribution terms, since Sefaria is the
+        destination, and the spec before the files.
 
 0HI. **[2026-09-16, reviewer: "I need a list of the ways our scan differs from
     sef... need a complete list so i can discuss if the diffs are intentional
