@@ -206,6 +206,43 @@ applying it to the corpus remain two separate, deliberate steps.
         short). Its precondition was blind once too (Lesson 42): it first
         asked whether the title shrank, which is the thing under test.
 
+0HD. **[2026-09-16, reviewer: "he's a UI guy, he will play around with different
+    ui on macOS than our simple html dashboard", then "write the api doc"]
+    `REVIEW-API.md`: THE REVIEW SERVER'S HTTP API, FOR A CLIENT OTHER THAN THE
+    HTML DASHBOARD. DONE.**
+    * **What it covers.**
+      - The 13 GET and 6 POST API routes, plus the scan images and share
+        links. Each has a response recorded from the fixture corpus
+        (`tests/fixtures/build_fixture_corpus.py`) on a throwaway server.
+      - How to develop against that sandbox.
+      - The rules a client has to keep: single-space word numbering, bboxes
+        as fractions from the top-left, and witness rulings keyed by token
+        index.
+      - Linked from README.md's documentation map and from SETUP.md's
+        collaborator section.
+    * **Measured while writing it, with every write on the fixture only.** The
+      repo's `review_decisions.jsonl` was untouched throughout, and
+      `git status` stayed clean.
+      - `REVIEW_DECISIONS_PATH` redirects the ledger. Two rulings went to the
+        override file and none to the corpus root's own.
+      - A manual ruling posted without `original_word` is not drawn on its
+        word. It comes back in `stranded_rulings` instead, so the doc tells a
+        client always to send it.
+      - `OPTIONS` answers 501, and no response carries CORS headers, so a web
+        page on another origin cannot use the API. Not changed, because a
+        native client does not need them.
+      - `/api/decisions/witness` accepts a `null` `chosen_text`, which the
+        disputed, manual and title routes refuse. Recorded, not changed.
+    * **A claim of mine, corrected.** I told the reviewer the server requires a
+      note on every ruling. It does not: `note` is optional on all six routes.
+    * **Guard.** `test_review_api_doc_names_every_route_and_only_real_ones`
+      compares the doc's `/api/` routes with the server's own routes, in both
+      directions. It was mutation-checked both ways:
+      - dropping the witness-context route from the doc fails it, naming
+        `/api/witness/context/<n>/<n>`;
+      - naming the removed `/api/decisions/candidate` alias fails it too.
+      The response samples are not checked.
+
 0HC. **[2026-09-15, reviewer: "his python complained about numpy"] requirements.txt
     NEVER LISTED PILLOW OR NUMPY; A FRESH INSTALL COULD NOT EVEN COLLECT THE GATE
     SUITE. FIXED.**

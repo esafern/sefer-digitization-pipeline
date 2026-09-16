@@ -235,6 +235,10 @@ and three matter on day one:
 * read START_HERE.md, then PROJECT-STATUS.md, before changing anything. If you
   work with Claude Code, `CLAUDE.md` routes it there.
 
+**Building a different interface?** `REVIEW-API.md` documents the review
+server's HTTP API. It also shows how to run the server on a sandbox corpus, so
+that test clicks never reach the owner's `review_decisions.jsonl`.
+
 **The second book, Sefer HaShorashim, is not in this repo.** Its corpus lives
 in a separate PRIVATE repository holding data Sefaria has not released, and
 the pipeline reaches it through `SEFER_CORPUS_ROOT`. Access is the owner's

@@ -10447,3 +10447,26 @@ def test_witness_rulings_reach_the_corpus_only_when_asked_for_by_name(
     events = rd.history_for(1, 1, "apply_event", path=decisions_path)
     assert [e["applied_decision_id"] for e in events] == [ruling["id"]]
     assert apply_harness.run()[1] == "אלף גימל"          # applied once, never twice
+
+
+def test_review_api_doc_names_every_route_and_only_real_ones():
+    """REVIEW-API.md is the contract a second client is built against (item
+    0HD, reviewer 2026-09-16: "write the api doc"), so its routes have to move
+    when the server's do. Both directions: a route the server serves and the doc
+    omits is invisible to that client, and a route the doc names that the
+    server does not serve is a 404 the client was told would work.
+
+    Read from the Handler's own source and the module's ROUTE_ patterns, not
+    from a list kept here - that would be a third copy to forget."""
+    import inspect
+    served = set(re.findall(r'path == "(/api/[^"]+)"', inspect.getsource(rs.Handler)))
+    served |= {v.pattern.strip("^$").replace(r"(\d+)", "<n>")
+               for k, v in vars(rs).items()
+               if k.startswith("ROUTE_") and isinstance(v, re.Pattern)
+               and v.pattern.startswith("^/api/")}
+    with open(os.path.join(REPO, "REVIEW-API.md"), encoding="utf-8") as fh:
+        named = {re.sub(r"<[^>]+>", "<n>", m)
+                 for m in re.findall(r"`(/api/[^`?\s]+)", fh.read())}
+    assert len(served) >= 19, f"the route pattern found only {sorted(served)}"
+    assert not served - named, f"served, missing from REVIEW-API.md: {sorted(served - named)}"
+    assert not named - served, f"in REVIEW-API.md, not served: {sorted(named - served)}"
