@@ -94,3 +94,5 @@ google_books_layer/
 # Scan-source control run, item 0HM (2026-09-16): one engine, two scans.
 cv_bitonal_layer/
 cv_fulltone_layer/
+docai_bitonal_layer/
+docai_fulltone_layer/

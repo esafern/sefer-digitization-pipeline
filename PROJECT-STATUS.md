@@ -259,6 +259,61 @@ applying it to the corpus remain two separate, deliberate steps.
       N = NLI image N-1, checked by reading the running head, folio and opening
       words at Google 36, 37, 38, 40, 59 and 100 - six points, including both
       ends of the sample window and both sides of the transposed leaf.
+    * **ADDED THE SAME EVENING: THE DocAI RUN, AND IT DOES NOT HAVE ONE ANSWER.**
+      **The processor id** was not the number first supplied -
+      `112964197445881461354` is the `doc-ai-worker` service account's
+      `client_id` in `credentials.json`, a 21-digit number the console shows
+      prominently. The real ids were listed through the reviewer's own gcloud
+      login (the service account cannot list):
+      **`eu` `bc652834c231f24e` `shorashim-ocr`** and **`us` `4d3d4f204562f1d6`
+      `hebrew-ocr`**, both `OCR_PROCESSOR`, both enabled. The `us` one is almost
+      certainly the original corpus processor. Recorded HERE so the next run
+      does not re-derive them. Run on `eu` for both scans, per the region choice.
+      Also: `gcloud documentai` does not exist in this installation - the command
+      I suggested for listing processors was wrong; the REST endpoint is the
+      route.
+
+      | source, pages 40-59, klalim 90-162 | words | CER | lexicon |
+      |---|---|---|---|
+      | Cloud Vision, bitonal | 0.9680 | 0.01556 | 0.9612 |
+      | Cloud Vision, full tone | 0.9713 | 0.01462 | 0.9633 |
+      | DocAI, bitonal | **0.9810** | **0.01199** | 0.9627 |
+      | DocAI, full tone | 0.9783 | 0.01214 | **0.9649** |
+
+      **On the whole text, DocAI reads the BITONAL scan better, by 0.27.** And
+      that number cannot be taken at face value, because `part1.json` IS
+      DocAI-on-bitonal wherever no human intervened: every error it made that
+      review did not catch now scores as correct.
+
+      **So the same four runs were scored only at the 79 words a human
+      corrected** in klalim 90-162 (text-changing, one word for one word,
+      verified still in place) - the places where the ink was checked:
+
+      | engine / scan | reads the ruling | repeats the corrected error | other |
+      |---|---|---|---|
+      | Cloud Vision, bitonal | 24 (30%) | 32 (41%) | 23 |
+      | Cloud Vision, full tone | **33 (42%)** | **26 (33%)** | 20 |
+      | DocAI, bitonal | 17 (22%) | 53 (67%) | 9 |
+      | DocAI, full tone | **31 (39%)** | **36 (46%)** | 12 |
+
+      **With DocAI, full tone reads the human's correction 31 times to
+      bitonal's 17, and repeats the error 36 times to 53.**
+
+      **THAT SUBSET IS BIASED TOO, THE OTHER WAY** (Lesson 27, THE SAMPLE THAT
+      SELECTED ITSELF): these rulings exist because DocAI-on-bitonal got these
+      words wrong, so it is disadvantaged on them by construction. The two DocAI
+      measurements therefore point in opposite directions and **each is biased
+      in exactly the direction it points** - neither settles DocAI.
+      **Cloud Vision is the fair witness**, because it had no hand in building
+      the corpus or choosing the rulings, and on BOTH measures it prefers full
+      tone: +0.33 on the whole text, 33 vs 24 at the corrected words.
+
+      **What would settle DocAI:** a reference that neither scan produced. The
+      cheapest one is already enumerated - DocAI reads the two scans identically
+      on 98.0% of tokens and **disagrees at 312 places, 290 of them one word for
+      one word**, over these 20 pages. Reading a sample of those 290 off the ink
+      is the unbiased answer, and it is also exactly the worklist `0EK` proposed
+      full tone for: the adjudication image, not the primary.
 
 0HL. **[2026-09-16, reviewer: "dropped the better scan into yad mal"] THE
     FULL-TONE YAD MALACHI IS HERE AND MEASURED. AND THE LEAF-FIX RECIPE
