@@ -206,6 +206,196 @@ applying it to the corpus remain two separate, deliberate steps.
         short). Its precondition was blind once too (Lesson 42): it first
         asked whether the title shrank, which is the thing under test.
 
+0HF. **[2026-09-16, reviewer: "surface the items to review"] `0GQ`'s REVIEW
+    WORKLIST, EVERY ROW WITH ITS DASHBOARD ADDRESS, EACH ONE CHECKED AGAINST
+    THE LIVE SERVER. 53 POSITIONS. ONE OF THE THREE GROUPS IS NOT SERVED AS A
+    DISPUTE.**
+    Each position below was fetched from :8421 and its word read out of the
+    served `clean_text`, not taken from the queue file (Lesson 50, SAY WHICH ONE
+    YOU CHECKED). No write of any kind was made; the real ledger is still 0
+    bytes.
+    * **Group 1 - the 4 rows where OUR reading is wrong** (`0GN`, read off the
+      ink). All four are served as witness disputes.
+      - <http://127.0.0.1:8421/entry/32/word/194> `הן` -> theirs `חן]`, p65, tier `C_both_attested` (witness row)
+      - <http://127.0.0.1:8421/entry/83/word/91> `כה` -> theirs `כח].`, p87, tier `C_both_attested` (witness row)
+      - <http://127.0.0.1:8421/entry/211/word/186> `ען` -> theirs `עז].`, p123, tier `A_ours_not_a_word` (witness row)
+      - <http://127.0.0.1:8421/entry/212/word/1355> `כו` -> theirs `בו]`, p126, tier `C_both_attested` (witness row)
+    * **Group 2 - the `B_bracketed_letters` tier, 15 rows.** All 15 are served
+      as witness disputes. The verdict beside each is `0GN`'s reading of the
+      crop, not a fresh one:
+      - <http://127.0.0.1:8421/entry/1/word/11> `צמח` -> theirs `[י]צמח`, p58 - not on the page (witness row)
+      - <http://127.0.0.1:8421/entry/15/word/72> `יש` -> theirs `[ויש`, p61 - printed, our OCR dropped it (witness row)
+      - <http://127.0.0.1:8421/entry/36/word/172> `ארבעה` -> theirs `[ל]ארבעה`, p67 - printed, our OCR dropped it (witness row)
+      - <http://127.0.0.1:8421/entry/36/word/341> `האמת` -> theirs `האמת[י]`, p67 - printed, our OCR dropped it (witness row)
+      - <http://127.0.0.1:8421/entry/38/word/288> `מנד` -> theirs `מנדי]`, p68 - unreadable from the crop (witness row)
+      - <http://127.0.0.1:8421/entry/59/word/285> `משחתא` -> theirs `[ומשחתא`, p74 - not on the page (witness row)
+      - <http://127.0.0.1:8421/entry/93/word/199> `ענינים` -> theirs `[ה]ענינים`, p89 - printed, our OCR dropped it (witness row)
+      - <http://127.0.0.1:8421/entry/132/word/348> `תוספת` -> theirs `ו[ב]תוספת`, p98 - printed, our OCR dropped it (witness row)
+      - <http://127.0.0.1:8421/entry/141/word/451> `מצוא` -> theirs `[ל]מצוא`, p105 - printed, our OCR dropped it (witness row)
+      - <http://127.0.0.1:8421/entry/193/word/461> `פארותיו` -> theirs `פארתו [פארתיו]`, p118 - not on the page (witness row)
+      - <http://127.0.0.1:8421/entry/200/word/27> `על` -> theirs `על[ת]`, p120 - printed, our OCR dropped it (witness row)
+      - <http://127.0.0.1:8421/entry/212/word/455> `האדם` -> theirs `[ל]האדם`, p124 - printed, our OCR dropped it (witness row)
+      - <http://127.0.0.1:8421/entry/257/word/66> `איננו` -> theirs `[ו]איננו`, p137 - printed, our OCR dropped it (witness row)
+      - <http://127.0.0.1:8421/entry/271/word/232> `רקח` -> theirs `[ה]רקח`, p140 - not on the page (witness row)
+      - <http://127.0.0.1:8421/entry/302/word/58> `יגרם` -> theirs `יגורם]`, p148 - not on the page (witness row)
+    * **Group 3 - the 34 footnote marks whose image and page numbering
+      disagree** (`0GO`, `footnote_marks.json` rows with `decision == "review"`).
+      **NONE of the 34 carries a witness row** - every one is an ordinary word in
+      the text, so clicking it opens the MANUAL panel, not the witness panel, and
+      there is no "theirs" to choose. Say so before handing these to anyone. The
+      stored word at each is the bare mark itself (`"`, `'` or `*`); the number
+      beside it is what the vision pass read from the image.
+      - p58: <http://127.0.0.1:8421/entry/4/word/113> `"` after `ועוגב`, read as 17 (gap 15-18)
+      - p67: <http://127.0.0.1:8421/entry/36/word/255> `"` after `אור`, read as 10 (gap 8-11)
+      - p68: <http://127.0.0.1:8421/entry/38/word/355> `"` after `אביריו`, read as 5 (gap 9-10), <http://127.0.0.1:8421/entry/38/word/387> `'` after `אחיו`, read as 7 (gap 9-10)
+      - p70: <http://127.0.0.1:8421/entry/45/word/28> `*` after `אחדים`, read as 4 (gap 2-3)
+      - p71: <http://127.0.0.1:8421/entry/49/word/28> `"` after `מאחריו`, read as 17 (gap 14-17)
+      - p72: <http://127.0.0.1:8421/entry/55/word/93> `'` after `הלילה`, read as 31 (gap 29-32)
+      - p73: <http://127.0.0.1:8421/entry/55/word/164> `"` after `בתבור`, read as 3 (gap 1-5), <http://127.0.0.1:8421/entry/55/word/180> `'` after `המלך`, read as 4 (gap 1-5), <http://127.0.0.1:8421/entry/55/word/185> `"` after `הזה`, read as 5 (gap 1-5), <http://127.0.0.1:8421/entry/58/word/85> `"` after `בצהרים`, read as 32 (gap 30-33)
+      - p87: <http://127.0.0.1:8421/entry/82/word/218> `*` after `וממלכתך`, read as 5 (gap 3-5)
+      - p89: <http://127.0.0.1:8421/entry/93/word/150> `"` after `ואנקה`, read as 17 (gap 15-18)
+      - p91: <http://127.0.0.1:8421/entry/97/word/374> `"` after `י"י`, read as 7 (gap 4-6)
+      - p92: <http://127.0.0.1:8421/entry/99/word/114> `'` after `משפט`, read as 1 (gap 2-3)
+      - p97: <http://127.0.0.1:8421/entry/127/word/53> `'` after `יסודו`, read as 9 (gap 7-11), <http://127.0.0.1:8421/entry/127/word/60> `"` after `יסודותיה`, read as 10 (gap 7-11)
+      - p98: <http://127.0.0.1:8421/entry/132/word/35> `'` after `ה`, read as 9 (gap 4-9)
+      - p99: <http://127.0.0.1:8421/entry/132/word/835> `'` after `וגו`, read as 29 (gap 26-29)
+      - p100: <http://127.0.0.1:8421/entry/133/word/107> `'` after `אתהם`, read as 21 (gap 30-32)
+      - p103: <http://127.0.0.1:8421/entry/135/word/107> `"` after `ילבש`, read as 2 (gap 0-0)
+      - p105: <http://127.0.0.1:8421/entry/140/word/187> `"` after `בגדותיך`, read as 1 (gap 0-10), <http://127.0.0.1:8421/entry/141/word/7> `"` after `הבדים`, read as 6 (gap 0-10), <http://127.0.0.1:8421/entry/141/word/21> `"` after `מתניהם`, read as 7 (gap 0-10), <http://127.0.0.1:8421/entry/141/word/32> `"` after `ערוה`, read as 8 (gap 0-10), <http://127.0.0.1:8421/entry/141/word/37> `"` after `הבדים`, read as 9 (gap 0-10)
+      - p117: <http://127.0.0.1:8421/entry/193/word/9> `"` after `לך`, read as 6 (gap 4-6)
+      - p124: <http://127.0.0.1:8421/entry/212/word/152> `"` after `האלהים`, read as 2 (gap 19-21)
+      - p126: <http://127.0.0.1:8421/entry/212/word/1242> `"` after `בחרבותם`, read as 4 (gap 9-10)
+      - p127: <http://127.0.0.1:8421/entry/215/word/227> `'` after `במרום`, read as 31 (gap 29-33)
+      - p131: <http://127.0.0.1:8421/entry/229/word/13> `"` after `הגג`, read as 2 (gap 0-1), <http://127.0.0.1:8421/entry/230/word/7> `"` after `גאה`, read as 4 (gap 0-1)
+      - p140: <http://127.0.0.1:8421/entry/271/word/175> `"` after `וגיאותיך`, read as 15 (gap 13-15)
+      - p151: <http://127.0.0.1:8421/entry/317/word/102> `"` after `וגלמודה`, read as 6 (gap 6-8)
+    * **What the two crowded pages actually show**, read off the page's full
+      mark list rather than the review rows alone:
+      - **p73** has anchors at 1 and 5 and three marks between them, read as 3,
+        4 and 5. Three marks for four missing numbers, so the fill rule
+        (`0GO`: fill only when stray tokens equal missing numbers) declines -
+        and the arithmetic says **one footnote on that page has no token at
+        all**, which is `0GQ`'s "one missed footnote shifting the rest",
+        confirmed. Its idx33 row is the same shape: one mark, gap 30-33.
+      - **p105 is NOT a shift.** Its nine marks read, in page order, 1, 2, 3,
+        **1**, 6, 7, 8, 9, circle. The first three were accepted; the fourth
+        came back as `1` a second time where the sequence wants 4, and 5 has no
+        token. So it is one misread numeral plus one missing one, and the 6-9
+        that follow are correct and were held back only because the duplicate
+        broke the run.
+
+0HE. **[2026-09-16, reviewer: "investigate 0gl / w"] `0GL`'s OPEN PREREQUISITE
+    IS FOUR SITES, NOT ONE. THE AUDIT PRINTS AN ALL-CLEAR OVER A BOOK WHOSE
+    EVERY RULING IT SKIPS, AND ONE PATH CRASHES ON A WITNESS OR TITLE RULING.
+    NOTHING CHANGED; ALL FOUR ARE HANDED BACK.**
+    Swept every hard-coded decision-type list in `pipeline/` and `tools/`
+    (Lesson 34, SWEEP THE SIBLINGS). Six tools already name `witness_choice`
+    (`analyze_decision_ledger`, `close_satisfied_rulings`,
+    `build_open_items_report`, `verify_witness_green_vision`, `export_corpus`
+    since `0GW`, and `repoint_stale_decisions`, which EXCLUDES it in a comment
+    that says why). These four do not.
+    * **1. `audit_applied_decisions.py` checks no witness ruling, in BOTH of
+      its passes, and nothing in its output says so.**
+      ```python
+      # pipeline/audit_applied_decisions.py:349
+              checker = CHECKERS.get(decision_type)
+              if checker is None:
+                  continue  # not one of the 3 checkable decision types
+      ```
+      A skipped ruling is never added to `total`, so the count it prints cannot
+      reveal the omission. The stale-address pass carries its own second copy of
+      the list:
+      ```python
+      # pipeline/audit_applied_decisions.py:456
+          for dtype in ("candidate_choice", "disputed_choice", "manual_correction", "title_correction"):
+      ```
+      **Measured**, `SEFER_CORPUS_ROOT=~/work/hashorashim-demo`, a corpus whose
+      ledger holds 4 APPLIED witness rulings in entry 1 including one real text
+      change (`0GW`: w37 `אַבְּן` -> `אַבְּ`):
+      ```
+      Checked 0 applied decisions across candidate_choice/disputed_choice/manual_correction/punctuation_choice:
+        0 confirmed still reflected in part1.json
+        ...
+        0 MISMATCH - applied decision no longer reflected in the corpus
+
+        no ruling carries a stale address.
+      ```
+      So the one read-only check that exists to catch a correction that stopped
+      being true gives a clean bill to a book where 100% of the rulings are
+      invisible to it. Lesson 33's false all-clear. It is also the SAME defect
+      the file's own comment at `:154` records for `disputed_choice` after the
+      2026-08-23 rename - "CHECKERS.get() returning None hits a bare `continue`
+      below, so every decision recorded after the rename was silently skipped" -
+      hit a second time by a type added later.
+    * **2. `reindex_pending_decisions_after_shift` does not move a pending
+      witness ruling, though the witness apply path feeds it shifts.**
+      ```python
+      # pipeline/apply_reviewer_decisions.py:298
+          for d_type in ("candidate_choice", "manual_correction", "disputed_choice"):
+      ```
+      The witness block records `word_count_shifts[klal_id]` on a `remove` or a
+      gap `insert` (`:1305`), and `:1456` hands those shifts to this function.
+      Every later pending witness ruling in that entry therefore keeps a snapshot
+      `word_index` that is now one too high. **It fails SAFE, not silently**:
+      `witness_choice_edit` refuses a drifted ruling rather than misapplying it -
+      ```python
+      # pipeline/apply_reviewer_decisions.py:781
+          if words[wi:wi + len(seen)] != seen:
+              return None, "drift - the entry no longer reads what the ruling saw there"
+      ```
+      - so the cost is recorded review work turning into `SKIP ... drift` rows,
+      not a corrupted corpus. Lesson 35 (APPLYING HAS SIDE EFFECTS). For Yad
+      Malachi this never fires; for HaShorashim every ruling is a witness ruling.
+    * **3. A witness ruling never goes through `resolved_position()`**, the
+      "THE ONE PLACE THE APPLIER ASKS WHERE" resolver (`:790`) that lets a
+      stable word id find a ruling's word after an index moves. The two
+      `resolved_position()` callers are `:928` and `:1153`; the witness block
+      reads `snap["word_index"]` raw (`:1285`, `:777`). So the sidecar built
+      exactly to survive shifts does not help the one book that needs it.
+    * **4. A CRASH, latent today, in the flag-closing step - and it is not
+      witness-only.**
+      ```python
+      # pipeline/apply_reviewer_decisions.py:1441
+          for klal_id, word_index, kind in applied:
+              if close_flag_satisfied_by(klal_id, word_index,
+                                         decisions.get((klal_id, word_index))
+                                         or manual_decisions.get((klal_id, word_index)), kind):
+      ```
+      `decisions` is `all_current("candidate_choice")` (`:857`) and
+      `manual_decisions` is `all_current("manual_correction")` (`:858`), so a
+      `witness-*` apply (`:1314`) and a `title-whole`/title apply (`:1375`,
+      `:1401`) both resolve to `None` there. `close_flag_satisfied_by` returns
+      early when no flag is open at that word, which is why it has never fired -
+      but with one open it does `decision["id"]`:
+      ```
+      TypeError: 'NoneType' object is not subscriptable
+      ```
+      (probed directly against `close_flag_satisfied_by(1, 37, None,
+      "witness-replace")` with one open flag stubbed at w37; with no open flag
+      the same call returns `False`.) The step runs deliberately AFTER the corpus
+      is written (`:1437`), so the crash would leave `part1.json` edited and word
+      ids reconciled while the flag re-point, the pending-decision re-point and
+      the summary never happen.
+      **Reachability, measured on the real Yad Malachi ledger:** 7 applied
+      `title_correction` rulings (klalim 89, 90, 91, 92, 94, 96, 168), every one
+      at word 0, and none has an open word-flag at index 0 - so the coincidence
+      has not occurred. It becomes live the day a reviewer flags a word and then
+      rules on that same word through the heading or witness panel.
+      A second, smaller thing in the same call: a title ruling's `word_index` is
+      a `title.split(' ')` position while `open_word_flags` is keyed on body
+      positions. They coincide only while the heading run starts at body word 0,
+      which is why the wrong-flag reading has not shown up either.
+    * **Not changed, on purpose.** Turning `--apply-witness-choices` on needs
+      the reviewer's go-ahead and ends the option to wipe (`0GQ` item 4), and 2
+      and 3 only matter on that path. 1 and 4 are independent of it: the audit is
+      read-only and the crash is reachable through the heading panel today.
+    * **State of the demo ledger while measuring**, recorded because `0GW`
+      records four: `~/work/hashorashim-demo` now holds **8** witness rulings.
+      The 4 in entry 1 are applied (16:56-16:57 UTC 2026-09-15); 4 more in entry
+      8 were recorded at 18:51-18:52 UTC and are NOT applied, one of them a real
+      text change (`נאמרל` -> `נאמר`, from the Tesseract reading). The real root
+      on :8421 is still 0 bytes.
+
 0HD. **[2026-09-16, reviewer: "he's a UI guy, he will play around with different
     ui on macOS than our simple html dashboard", then "write the api doc"]
     `REVIEW-API.md`: THE REVIEW SERVER'S HTTP API, FOR A CLIENT OTHER THAN THE
