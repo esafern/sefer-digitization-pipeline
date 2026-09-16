@@ -43,6 +43,22 @@ short `CLAUDE.md` stub remains, redirecting any LLM instance to
 
 ## Pipeline shape — correction history
 
+**The NLI leaf-fix command, removed 2026-09-16 as wrong.** From 2026-08-18
+`START_HERE.md` gave two forms of the transposed-leaf fix, one for a
+Google-sourced PDF (`--from-index 37 --to-index 36`) and one "for an
+NLI-sourced PDF, one page earlier throughout" (`--from-index 36 --to-index
+35`), and called both "verified 2026-08-18 ... by direct content inspection
+against a fresh NLI download". The second was derived from the 1-page count
+difference between the two sources, not read off the leaves: **the binding
+defect is the Google copy's alone.** Two independent NLI acquisitions - the
+August PDF download and a JPEG\ZIP set pulled 2026-09-16 - both read folio
+`יב` `אמר רבא`, folio `יב` `פתחון פה`, folio `יג` `דמדקאמר` in that order,
+which is correct. Running the command swaps the last two. It is what produced
+`nli_verification/berlin_square_corrected.pdf`, whose name therefore means the
+opposite of its content; the file is kept because it is the evidence. See
+`PROJECT-STATUS.md` item `0HL`.
+
+
 **Printing/edition identification, corrected 2026-08-15.** The original
 `CLAUDE.md` marked this detail "CORRECTED 2026-08-15 — verified against the
 actual scan and code, not assumed" — flagging that the Livorno-original vs.

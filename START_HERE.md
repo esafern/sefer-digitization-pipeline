@@ -151,9 +151,12 @@ catchword should match the next page's opening word) and confirmed by
 rendering both pages directly.
 
 On the Google-sourced 337-page numbering (this repo's local PDFs) that's
-0-indexed leaf 37 moving to position 36; on an NLI-sourced 336-page PDF, the
-same physical leaves are at 0-indexed 36 moving to position 35. Fixed with
-`fitz.move_page` (page count unchanged either way).
+0-indexed leaf 37 moving to position 36. Fixed with `fitz.move_page` (page
+count unchanged). **THE DEFECT IS THE GOOGLE COPY'S ALONE - an NLI-sourced
+scan does NOT have it and must NOT be "fixed"** (item `0HL`, 2026-09-16; this
+paragraph said the opposite until then). Two independent NLI acquisitions of
+this book read `אמר רבא` / `פתחון פה` / `דמדקאמר` in that order, which is the
+correct one; running the fix on either puts the last two the wrong way round.
 **`berlin_square_corrected.pdf` is the only PDF that should ever be used as
 the pipeline's source**; `berlin_square_original_transposed.pdf` (pre-fix) is
 kept only as a diffable reference, never fed to the pipeline. Every
@@ -173,14 +176,19 @@ download. **Use the indices matching whichever source you actually pulled
 from** — they differ by 1:
 
 ```bash
-# Google-sourced PDF (this repo's local files use this numbering):
+# Google-sourced PDF ONLY - this repo's local files use this numbering:
 python3 tools/fix_transposed_leaf.py --pdf berlin_square_original_transposed.pdf \
     --from-index 37 --to-index 36 --output berlin_square_corrected.pdf
-
-# NLI-sourced PDF (one page earlier throughout - verified 2026-08-18):
-python3 tools/fix_transposed_leaf.py --pdf berlin_square_original_transposed.pdf \
-    --from-index 36 --to-index 35 --output berlin_square_corrected.pdf
 ```
+
+**There is no NLI variant of that command, and the one this file used to give
+(`--from-index 36 --to-index 35`) was wrong.** It was derived from the 1-page
+count difference rather than read off the leaves, and applying it is what made
+`nli_verification/berlin_square_corrected.pdf` - which is mis-ordered, and is
+the one file in this repo whose name means the opposite of its content. Before
+reordering any fresh download, READ the three pages: the correct sequence is
+folio `יב` opening `אמר רבא`, folio `יב` opening `פתחון פה`, folio `יג` opening
+`דמדקאמר`.
 
 It only fixes the PDF's own physical page order — it does not know about
 `docai_word_boxes/`, `images/pdf_pages/`, or the alignment/trace files, so any

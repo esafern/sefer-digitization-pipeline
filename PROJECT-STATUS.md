@@ -206,6 +206,61 @@ applying it to the corpus remain two separate, deliberate steps.
         short). Its precondition was blind once too (Lesson 42): it first
         asked whether the title shrank, which is the thing under test.
 
+0HL. **[2026-09-16, reviewer: "dropped the better scan into yad mal"] THE
+    FULL-TONE YAD MALACHI IS HERE AND MEASURED. AND THE LEAF-FIX RECIPE
+    `START_HERE.md` GIVES FOR AN NLI SOURCE IS WRONG - RUNNING IT WOULD BREAK
+    THIS DOWNLOAD.**
+    * **What arrived**, `~/work/yad-malachi/yad-malachi-pipeline/scans/dedupmrg1254702642_IE85912636/`
+      (note the location: that is the OLD pre-migration clone, not the live
+      tree this pipeline runs from):
+      - **336 JPEGs, 332 greyscale and 4 RGB** (images 1, 284, 335, 336 - boards
+        and a colour target). Median **4.6 MP**, range 4.4-5.4, ~1755x2655.
+      - That is the `JPEG\ZIP + Maximal (100%)` tier `0HJ` predicted at
+        1745x2658 / 4.6 MP, and **four times** the 1.16 MP copy already in
+        `nli_verification/`. The EXIF dpi tag reads 72, which is a JPEG default
+        and not a measurement; ~2655 px over a ~9-inch leaf is ~295 dpi,
+        consistent with the 300 dpi NLI confirmed this week.
+      - **Genuine continuous tone**: 256 grey levels in use on a body page.
+        Midtones are 7.2% of pixels against HaShorashim's 45.7% (`0EC`) - a
+        cleaner, higher-contrast scan, not a thresholded one. Whether that is
+        enough to help is `0FW`'s experiment, not a claim to make here.
+    * **The page mapping, verified against CONTENT at four points** (Lesson 30),
+      not against plausibility: **Google page N = NLI image N-1.** Checked at
+      Google 36, 37, 38 and 100 by reading the running head, the folio and the
+      opening words off the crop - e.g. Google 100 opens `ע"ח ב' ד"ה והתנן
+      ובסוכה` and so does NLI image 99. A whole-page pixel correlation was tried
+      first and is USELESS here (0.14-0.44, offsets inconsistent): one source is
+      1-bit and the other greyscale, with different margins.
+    * **THE FINDING: the transposed leaf is the GOOGLE copy's defect alone, and
+      `START_HERE.md` told you to "fix" the NLI copy too.** The correct sequence,
+      read off the ink, is folio `יב` opening `אמר רבא`, folio `יב` opening
+      `פתחון פה`, folio `יג` opening `דמדקאמר` - a recto/verso pair sharing a
+      folio number, then the next leaf.
+      - **The new JPEG\ZIP set reads exactly that**, at images 35, 36, 37.
+      - **So does the August NLI PDF**, at 0-indexed 34, 35, 36 - read directly,
+        not inferred. Two independent NLI acquisitions agreeing (Lesson 9).
+      - `nli_verification/berlin_square_corrected.pdf` differs from the raw
+        download at **exactly two pages, 0-indexed 35 and 36, which are
+        swapped** (rendered-page hashes over 33-40: identical everywhere else).
+        That swap is the documented NLI command, and it turns the correct order
+        into the wrong one. **The file whose name says `corrected` is the
+        mis-ordered one.** Kept, because it is the evidence.
+      - The wrong command came from the 1-page count difference between the two
+        sources rather than from the leaves, while the doc described it as
+        "verified ... by direct content inspection against a fresh NLI
+        download". `START_HERE.md` is corrected and `DOCS-HISTORY.md` records
+        the removal.
+    * **Not wired into anything, deliberately.** `0EK`'s conclusion still
+      governs: use a tonal scan as the ADJUDICATION source - the image the
+      vision adjudicator crops from - while OCR continues on the existing scan,
+      because every page-indexed cache in this repo is keyed to the Google
+      337-page numbering and switching primary means rebuilding all of them.
+      With the mapping above that is a one-line lookup, not a migration.
+    * **The experiment this unblocks** is `0FW`'s, run on Yad Malachi: one
+      engine, one set of pages, only the pixels differ. On HaShorashim it gave
+      +3.0 points of word accuracy, +2.0 of characters and nun/gimel errors
+      39 -> 8. Nothing has been run here yet.
+
 0HK. **[2026-09-16, reviewer: "fix the root split now"] EACH HOMOGRAPH ENTRY IS
     SERVED ITS OWN HALF OF THE SHARED TEXT. THE BOOK'S PHANTOM "WORDS ONLY THEY
     HAVE" GOES 1,136 -> 108.**
