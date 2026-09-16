@@ -206,6 +206,49 @@ applying it to the corpus remain two separate, deliberate steps.
         short). Its precondition was blind once too (Lesson 42): it first
         asked whether the title shrank, which is the thing under test.
 
+0HV. **[2026-09-16, reviewer: "review the data and code for hashorashim. surface any issues likely
+    to come up during the demo"] PRE-DEMO REVIEW. NO SHOW-STOPPERS IN THE SOFTWARE; THREE ERRORS
+    IN MY OWN DEMO MATERIAL, CORRECTED; FOUR THINGS HE MAY SEE ON SCREEN.**
+    * **Swept, all 317 entries on the demo copy (:8422):** every `/api/klal` and `/versions`
+      responds, none over 2s; every heading run found; every entry has Sefaria's text; all 5
+      homographs split; 2,057 queue rows, none misplaced except two gap rows at the END of their
+      entries (111/15 `בספר התוספת.`, 171/27 `עבידת בית אלהא.` - valid, `word_index == len(words)`)
+      and entry 1 w37, whose row still names the pre-ruling `אַבְּן` (the panel shows it as "Our OCR",
+      which is right).
+    * **Walked in a browser, every demo link:** 26 dashboard addresses loaded with 0 page errors and
+      0 console errors, the scan image present on each, the dispute panel opening on all but
+      55/209 (row at 211, noted in the links file). The text-view selector switched all six views
+      on entries 1, 59 and 73 with no errors. On the three pages whose image offset was checked by
+      text only (70, 84, 85), the scan boxes sit on the right words.
+    * **Errors in the demo material, found by reading the panels, corrected:**
+      1. **The nun/gimel answer described the wrong seven words.** None of the 7 remaining nun/gimel
+         differences is one of his corrections - the panel shows every one "(UNCHANGED)". Measured
+         instead: **his review made 7 nun/gimel corrections in the hundred, and our independent
+         read already holds 6** (`אגודה` 12/72, `גדרים` 59/244, `גופו` 63/45, `גופם` 63/47, `וגזרה`
+         79/688, `בגבהי` 79/748); the 7th, the Arabic `ג'זאיר` (55/209), we misread too. The draft,
+         the script and the links file now say that, and list the 7 unchanged differences separately.
+      2. **Three of the four "verse questions" were spelling-only** (`ואונו`, `בין`, `ובנותיך`), and
+         the panel he would see says the verse "cannot settle how the page spells the word" (`0GE`,
+         Lesson 38). Dropped; `במו`/`כמו` (99/48, a letter difference the verse supports) kept.
+      3. **Beat 4's example showed the verse-check gap on screen.** Entry 9 `בעליוי` prints Isaiah 1:3
+         containing `בעליו` and says "could not be matched to the cited verse" - `0GZ`'s open bug,
+         scheduled after the demo. Replaced with 25/4 `ויאהלז` (footnote marker, Genesis 13:12,
+         "The verse has their reading, not ours").
+    * **On screen, not errors, but he may ask** (added to the script as "Careful"):
+      - the index footer reads **2,047 open** - all 317 entries; the script's 697 is the reviewed 100;
+      - **entry 1, the first screen, shows a stray `ל`** in `צמח ל הדשא` (w12): the small raised mark
+        `0GN` noted where Sefaria has `[י]צמח`, read as a letter. **No row flags it** - a data issue,
+        unsurfaced, and a sibling of the footnote-marker class;
+      - panels show internal tier codes raw (`TIER C_FOOTNOTE_MARKER`, `THEIR_CORRECTION_ONLY`,
+        `A_NUN_GIMEL`);
+      - the demo copy's entry 8 carries 4 recorded, unapplied rulings.
+    * **Checked and NOT an issue for the demo:** `witnessReliabilityNote()` prints "measured correct
+      in 99.2% of words" (`app.js:3921`), the hand-typed figure `0HU` showed is not an accuracy - but
+      it renders only on the machine-candidate panel with a witness overlay, and HaShorashim's
+      `review_queue_part1.json` is `{}`, so it never appears. Still a false sentence in the code.
+    * All three dashboards restarted on the current code; `review_server.py`'s newer mtime was a
+      byte-identical restore from a mutation test.
+
 0HU. **[2026-09-16, reviewer: "script out (big picture) the demo - show where we add value and
     make his life easier"] DEMO SCRIPT PUBLISHED; EVERY SCREEN CHECKED ON :8422. AND A
     MISLEADING FIELD NAME IN THE EXPORT.**
