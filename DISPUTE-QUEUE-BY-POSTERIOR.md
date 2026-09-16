@@ -1,6 +1,6 @@
 # The open dispute queue, ordered by posterior
 
-344 open dispute(s), scored by `tools/rank_dispute_queue.py`. **Regenerate after any apply** - the queue and the calibration both move.
+343 open dispute(s), scored by `tools/rank_dispute_queue.py`. **Regenerate after any apply** - the queue and the calibration both move.
 
 `posterior` is P(a reviewer adopts the consensus reading), estimated from the stratum this dispute falls in, under a Beta(1,1) posterior so a thin stratum cannot read as a certainty. The interval is 90% credible. **This orders attention; it decides nothing** - every row still needs the ink.
 
@@ -26,7 +26,7 @@ Calibrated on **286 ledger rulings** that recorded a consensus reading; 214 of t
 
 | posterior | disputes |
 |---|---:|
-| >=0.75 | 264 |
+| >=0.75 | 263 |
 | >=0.50 | 44 |
 | >=0.25 | 2 |
 | <0.25 | 34 |

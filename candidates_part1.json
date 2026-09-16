@@ -91,19 +91,19 @@
       "bbox_estimated": true
     },
     {
-      "klal_id": 22,
-      "page": 20,
-      "opcode": "replace",
-      "word_index_in_final_text": 48,
-      "docai_reading": "סיי כייה",
-      "stored_text": "סי' כ\"ה",
+      "klal_id": 26,
+      "page": 23,
+      "opcode": "insert",
+      "word_index_in_final_text": 24,
+      "docai_reading": null,
+      "stored_text": "כז",
       "bbox": {
-        "x1": 0.827414333820343,
-        "y1": 0.8839357495307922,
-        "x2": 0.8909657597541809,
-        "y2": 0.9008032083511353
+        "x1": 0.8544342517852783,
+        "y1": 0.3104294538497925,
+        "x2": 0.8844342517852783,
+        "y2": 0.3271983563899994
       },
-      "bbox_estimated": false
+      "bbox_estimated": true
     },
     {
       "klal_id": 27,
@@ -3693,7 +3693,7 @@
   ],
   "meta": {
     "total_candidates": 246,
-    "skipped_settled_by_applied_decision": 533,
+    "skipped_settled_by_applied_decision": 545,
     "klalim_covered": 92,
     "skipped_no_docai_page_klalim": [],
     "unattributable_deletes": [],

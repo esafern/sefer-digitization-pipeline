@@ -7530,38 +7530,6 @@
     },
     {
       "klal_id": 159,
-      "word_index": 721,
-      "opcode": "replace",
-      "final_text": "הל\"ם",
-      "consensus_reading": "הל\"מ",
-      "agreeing_engines": [
-        "dicta",
-        "surya",
-        "vlm"
-      ],
-      "ligature_artifact": null,
-      "cross_edition": true,
-      "cross_edition_engines": [
-        "dicta"
-      ],
-      "same_edition_agreeing": 2,
-      "abbreviation_shape": null,
-      "witnesses": {
-        "docai": null,
-        "vlm": "הל\"מ",
-        "surya": "הל\"מ",
-        "dicta": "הל\"מ"
-      },
-      "page": 58,
-      "bbox": {
-        "x1": 0.27626699209213257,
-        "y1": 0.5924726724624634,
-        "x2": 0.31334981322288513,
-        "y2": 0.6094698309898376
-      }
-    },
-    {
-      "klal_id": 159,
       "word_index": 753,
       "opcode": "replace",
       "final_text": "הכנ\"רג",

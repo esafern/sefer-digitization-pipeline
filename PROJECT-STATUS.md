@@ -206,6 +206,73 @@ applying it to the corpus remain two separate, deliberate steps.
         short). Its precondition was blind once too (Lesson 42): it first
         asked whether the title shrank, which is the thing under test.
 
+0HS. **[2026-09-16, reviewer: "show me all these can't leave loose ends. i want to
+    apply those 40 times 2 decisions I made ... if I decided on a change we need to
+    apply it"] EVERY RULING NOW ACCOUNTED FOR: THE APPLIER, THE PUNCTUATION APPLIER
+    AND THE WITNESS PATH REPORT NOTHING PENDING, AND THE AUDIT REPORTS 0
+    MISMATCHES (IT WAS 2).**
+    * **The 80 ink readings (`0HN`, `0HP`).** Each mapped to its corpus word and
+      compared with the text as it stood: 65 already agreed, 3 were can't-tell,
+      **12 still differed and are now applied** - `וכר`->`ובר` (23/304),
+      `ברק`->`בדק` (26/15), `רס"יז`->`רמ"ז` (30/307), `סע"כ`->`מע"ב` (30/317),
+      `התכוננות`->`התבוננות` (30/802), `חזה`->`וזה` (31/69), `היה`->`הוה` (66/176),
+      `והלכתי`->`והלכת'` (153/111), `הל"ם`->`הל"מ` (159/721), `שהגיהן`->`שהגיהו`
+      (163/348), `וכפלוגתא`->`ובפלוגתא` (167/511), `רעדיות`->`דעדיות` (167/1208).
+      Recorded as the reviewer's rulings relayed from this session, each note
+      naming its sheet and item; the corpus's own marks kept where the letter
+      count agrees.
+    * **Klal 211's terminal colon.** The reviewer ruled `בשם התוספות :` and an hour
+      later `בשם התוספות`; the later one was applied. **Page 74 prints the colon** -
+      read on the ink and present in Document AI's own tokens (`בשם`, `התוספות`,
+      `:`) - so the first ruling was carried: klal 211 now ends `בשם התוספות :`.
+    * **The 15 the applier had been holding (14 "drifted", 1 refused) were ALL
+      copies of rulings already applied** - the same decision recorded at an index
+      a later edit then moved, with only one copy landing. **Applying any of the 8
+      deletions among them would have deleted a correct word** (`היכי` 39/251, `רב`
+      74/417, `נקט`/`לה` 74/442-443, `לעונשין`/`שהם` 209/16-17, the tail of klal
+      36, `כ"ה` 22/48), so the guards were right. Closed with `apply_event`s that
+      each name the applied twin, after a code check - same text at the same word,
+      or the identical ruling within 4 words with its word gone, or one word of an
+      applied span deletion: 2 by `tools/close_satisfied_rulings.py`, 13 by
+      `scratch/ink_check_0HN/settle_twins.py` (gitignored; every row's note says
+      what was verified).
+    * **Loose ends the question did not name, found on the way and closed:**
+      - **17 accepted punctuation rulings** were already in the text - the `[.]`
+        after each heading, inserted with the heading separators - verified by the
+        words either side; **3 rejects at klal 1** reverted a 2026-08-10 "e2e test
+        accept", and the corpus has no `[.]` there.
+      - **32 witness rulings on Yad Malachi** (August's DocAI/Tesseract
+        reconstruction queue): every one already reflected - confirmations, and
+        changes carried in by later manual rulings at the same words; 1 was
+        "unreadable". Closed after the audit's own checker agreed.
+      - **Klal 35 w54**: two rulings the re-point tool copied on 2026-09-06 from
+        rulings at w44 that had ALREADY been applied (`בספר` removed from `בספר
+        שמות`). Lesson 46 exactly. Applying them would delete the `בספר` of `בספר
+        ראשון לציון`. The applier already treats them as settled
+        (`restates_an_applied_ruling`); nothing to do, and they must never apply.
+    * **The audit, taught four shapes it could not see, each tested and
+      mutation-checked** (`audit_applied_decisions.py`):
+      1. an explicit `supersedes` link from a later APPLIED ruling - a re-point is a
+         new row at a new index, and klal 1 w95 `לכו` had been a MISMATCH since
+         2026-09-06 though its re-point at w85 holds (this also moved 42 rows from
+         "shifted" to "superseded", 88 -> 46);
+      2. a witness row older than word positions resolves through its scan box,
+         and is UNVERIFIABLE rather than a mismatch when that cannot find it;
+      3. a CONFIRMATION of an OCR reading is honoured when the corpus has the same
+         letters plus a mark the token could not carry (`וכו`/`וכו'`); changes
+         still compare exactly;
+      4. rulings are compared in the ASCII mark convention (`0HR`).
+    * **A test pinned to the defect, moved to synthetic data** (Lesson 36):
+      `test_a_ruling_the_text_pane_cannot_place_is_still_announced` asserted klal
+      74's three real stranded rulings were announced, and failed the moment they
+      were verified as applied copies and closed. Same behaviour, own corpus; fails
+      if the banner is emptied.
+    * **Final state, measured:** `apply_reviewer_decisions.py --dry-run` - 0 to
+      apply, 0 refused, 0 drifted, 0 witness pending; `apply_punctuation_decisions.py
+      --dry-run` - 0; audit - **1,121 checked, 709 confirmed, 0 MISMATCH**;
+      `./rebuild_all.sh --skip-vision` with authored files byte-identical; the
+      dashboard serves the corrected text in all 10 changed klalim; gate 584 passed.
+
 0HR. **[2026-09-16, reviewer: "change to ascii everywhere"] DONE FOR PART 1,
     AND FOR EVERY RULING FROM NOW ON. PART 3'S ONE WORD LEFT, BY THE GATE.**
     * **Swept first.** Non-ASCII quote-like characters (gershayim, geresh,

@@ -9205,7 +9205,7 @@ def test_repoint_leaves_a_ruling_the_corpus_already_holds_alone():
         "copies of finished work")
 
 
-def test_a_ruling_the_text_pane_cannot_place_is_still_announced(monkeypatch):
+def test_a_ruling_the_text_pane_cannot_place_is_still_announced(tmp_path, monkeypatch):
     """SURFACE ALL THE WORK - the reviewer's standing rule, applied to the last
     place it was not.
 
@@ -9219,22 +9219,45 @@ def test_a_ruling_the_text_pane_cannot_place_is_still_announced(monkeypatch):
     word it named, so `original_word` is gone by construction. The remaining 7
     (after settled copies are excluded) are unapplied, absent from the queue, and
     were therefore invisible everywhere a reviewer actually reads.
+
+    SYNTHETIC SINCE 2026-09-16 (item 0HS; Lesson 36, THE TEST PINNED TO THE
+    DEFECT). This asserted that klal 74's three real stranded rulings (w417, w442,
+    w443) were announced - and failed the day they were verified as copies of
+    applied rulings and closed, i.e. the day the ledger got better. The behaviour
+    is pinned here on a corpus of its own instead.
     """
     import review_server as srv
-    kid = 74
-    data = srv.api_klal(kid)
-    stranded = data["stranded_rulings"]
-    assert stranded, "klal 74's three unplaceable rulings are not announced"
-    at = {r["word_index"] for r in stranded}
-    assert {417, 442, 443} <= at, f"expected the known stranded trio, got {sorted(at)}"
-    for r in stranded:
-        assert r["original_word"], "a marker that cannot say what was ruled on says nothing"
-        assert "word_at_recorded_index" in r, (
-            "the reviewer needs to see what is at that position NOW to judge it")
-    # And it is NOT drawn on a word: the position is precisely what is untrusted.
-    assert not any(e.get("opcode") == "stranded" for e in data["queue"]), (
-        "a stranded ruling was given a queue entry, which asserts the position "
-        "the drift check just refused to trust")
+    previous = cio.set_corpus_root(str(tmp_path))
+    ledger = tmp_path / "review_decisions.jsonl"
+    monkeypatch.setattr(rd, "DECISIONS_PATH", str(ledger))
+    try:
+        (tmp_path / "book.json").write_text(json.dumps({
+            "title": "Sefer Bedikah", "title_he": "ספר הבדיקה", "section": "Shaar", "section_he": "שער",
+            "categories": ["Reference"], "scan_pdf": "x.pdf",
+            "parts": [{"file": "part1.json", "first_klal": 1, "last_klal": 1}],
+        }, ensure_ascii=False), encoding="utf-8")
+        entry = {"klal_id": 1, "gematria": "א", "title": "אלף .", "clean_text": "א אלף בית גימל דלת", "page": 14}
+        for name in ("part1.json", "klalim_demo_dataset.json"):
+            (tmp_path / name).write_text(json.dumps([entry], ensure_ascii=False), encoding="utf-8")
+        ledger.write_text("", encoding="utf-8")
+        # recorded against a word that is no longer at its index
+        rd.append_decision("manual_correction", klal_id=1, word_index=3, chosen_source="custom",
+                           chosen_text="", candidate_snapshot={"word_index": 3, "original_word": "רבא"},
+                           reviewer="local", path=str(ledger))
+        data = srv.api_klal(1)
+        stranded = data["stranded_rulings"]
+        assert stranded, "an unplaceable ruling is not announced"
+        assert {r["word_index"] for r in stranded} == {3}
+        for r in stranded:
+            assert r["original_word"] == "רבא", "a marker that cannot say what was ruled on says nothing"
+            assert r.get("word_at_recorded_index") == "גימל", (
+                "the reviewer needs to see what is at that position NOW to judge it")
+        # And it is NOT drawn on a word: the position is precisely what is untrusted.
+        assert not any(e.get("opcode") == "stranded" for e in data["queue"]), (
+            "a stranded ruling was given a queue entry, which asserts the position "
+            "the drift check just refused to trust")
+    finally:
+        cio.set_corpus_root(previous)
 
 
 def test_a_settled_ruling_is_never_announced_as_stranded(monkeypatch):
@@ -10867,3 +10890,68 @@ def test_the_audit_sees_a_later_ruling_inside_an_earlier_multi_word_span(monkeyp
     # the FIRST word differs too, with nothing to explain it
     klal_lost = {"klal_id": 216, "clean_text": " ".join(["x"] * 136 + ["ראית", "להתוס'", "ג"])}
     assert not aad.overtaken_inside_span(old, klal_lost, {"old", "new"})
+
+
+def test_check_witness_choice_on_rows_older_than_word_positions(monkeypatch):
+    """Item 0HS. Yad Malachi's witness rulings of August predate witness rows
+    carrying a corpus `word_index`, and an OCR reading carries no abbreviation
+    mark. Closing 32 of them - every one already reflected in the corpus - would
+    otherwise have put false MISMATCHes into the one audit whose job is to catch
+    a real one:
+      * no recorded position: resolved through the snapshot's scan box; if that
+        finds the ruled text it is ok, and if it cannot, the position is
+        UNVERIFIABLE, never a mismatch against a position never recorded;
+      * a CONFIRMATION of an OCR reading (`chosen_text` == the reading) is ok
+        when the corpus has the same letters and adds only a mark (`וכו` /
+        `וכו'`), because the token could not carry one. A text-CHANGING ruling
+        still compares exactly."""
+    klal = {"klal_id": 30, "clean_text": "אלף וכו' למותר"}
+    base = {"decision_type": "witness_choice", "klal_id": 30, "word_index": 22}
+    confirm = {**base, "chosen_source": "docai_reading", "chosen_text": "וכו",
+               "candidate_snapshot": {"word_index": 1, "docai_reading": "וכו"}}
+    assert aad.check_witness_choice(confirm, klal) == "ok"
+    change = {**base, "chosen_source": "custom", "chosen_text": "וכו",
+              "candidate_snapshot": {"word_index": 1, "docai_reading": "ובו"}}
+    assert aad.check_witness_choice(change, klal).startswith("MISMATCH"), "a change must still match exactly"
+    no_pos = {**base, "chosen_source": "docai_reading", "chosen_text": "למותר",
+              "candidate_snapshot": {"docai_reading": "למותר", "bbox": {"x1": 0}, "page": 27}}
+    monkeypatch.setattr(aad, "_bbox_word_index", lambda d, k: 2)
+    assert aad.check_witness_choice(no_pos, klal) == "ok"
+    monkeypatch.setattr(aad, "_bbox_word_index", lambda d, k: 0)
+    assert aad.check_witness_choice(no_pos, klal) == "unverifiable_word_count_change"
+    monkeypatch.setattr(aad, "_bbox_word_index", lambda d, k: None)
+    assert aad.check_witness_choice(no_pos, klal) == "unverifiable_word_count_change"
+
+
+def test_the_audit_compares_rulings_in_the_ascii_mark_convention():
+    """Item 0HS, after 0HR made ASCII the corpus's convention for abbreviation
+    marks. A ruling typed with U+05F3/U+05F4 before rulings were normalised at the
+    write is honoured when its ASCII form stands - otherwise every such ruling
+    reads as a MISMATCH once the corpus is correct."""
+    klal = {"klal_id": 75, "clean_text": "אלף בפ' וז\"ל"}
+    w = {"decision_type": "witness_choice", "klal_id": 75, "word_index": 627, "chosen_source": "custom",
+         "chosen_text": "בפ׳", "candidate_snapshot": {"word_index": 1, "docai_reading": "בפ"}}
+    assert aad.check_witness_choice(w, klal) == "ok"
+    m = {"decision_type": "manual_correction", "klal_id": 75, "word_index": 2, "chosen_text": "וז״ל"}
+    assert aad.check_manual_correction(m, klal) == "ok"
+    c = {"decision_type": "disputed_choice", "klal_id": 75, "word_index": 2, "chosen_text": "וז״ל",
+         "candidate_snapshot": {"opcode": "replace"}}
+    assert aad.check_candidate_choice(c, klal) == "ok"
+    assert aad.check_manual_correction({**m, "chosen_text": "חז״ל"}, klal).startswith("MISMATCH")
+
+
+def test_the_audit_follows_an_explicit_supersedes_link(monkeypatch):
+    """Item 0HS. A ruling re-pointed to a new index (tools/repoint_stale_decisions.py)
+    is a NEW row carrying `supersedes: <old id>`; supersession was looked up only at
+    the old ruling's own index, so klal 1 w95 `לכו` stayed a MISMATCH for weeks
+    though its re-pointed copy at w85 was applied and the corpus reads `לכו`
+    there. An explicit link from an APPLIED ruling is the answer; an unapplied one
+    is not."""
+    old = {"id": "29f6", "ts": "2026-08-13T20:10", "decision_type": "manual_correction",
+           "klal_id": 1, "word_index": 95, "chosen_text": "לכו"}
+    new = {"id": "4809", "ts": "2026-09-06T18:40", "decision_type": "manual_correction",
+           "klal_id": 1, "word_index": 85, "chosen_text": "לכו", "supersedes": "29f6"}
+    monkeypatch.setattr(aad.rd, "history_for", lambda k, w=None, t=None, **kw: [old] if w == 95 else [new] if w == 85 else [])
+    monkeypatch.setattr(aad, "_superseding_links", lambda: {"29f6": ["4809"]})
+    assert aad.is_superseded_by_later_applied(old, {"29f6", "4809"})
+    assert not aad.is_superseded_by_later_applied(old, {"29f6"}), "an unapplied re-point settles nothing"

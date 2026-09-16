@@ -13052,17 +13052,6 @@
   "nearest_attested": []
  },
  {
-  "word": "שהגיהן",
-  "count": 1,
-  "occurrences": [
-   [
-    163,
-    348
-   ]
-  ],
-  "nearest_attested": []
- },
- {
   "word": "שהגש",
   "count": 1,
   "occurrences": [
@@ -16173,21 +16162,6 @@
   "nearest_attested": []
  },
  {
-  "word": "התבוננות",
-  "count": 2,
-  "occurrences": [
-   [
-    88,
-    55
-   ],
-   [
-    194,
-    410
-   ]
-  ],
-  "nearest_attested": []
- },
- {
   "word": "ואוסיפה",
   "count": 2,
   "occurrences": [
@@ -18119,6 +18093,25 @@
    [
     200,
     294
+   ]
+  ],
+  "nearest_attested": []
+ },
+ {
+  "word": "התבוננות",
+  "count": 3,
+  "occurrences": [
+   [
+    30,
+    802
+   ],
+   [
+    88,
+    55
+   ],
+   [
+    194,
+    410
    ]
   ],
   "nearest_attested": []

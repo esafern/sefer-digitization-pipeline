@@ -90,7 +90,7 @@ def check_candidate_choice(decision, klal):
     reads backwards from the end in Python rather than raising.)"""
     snapshot = decision.get("candidate_snapshot") or {}
     opcode = snapshot.get("opcode")
-    chosen = decision["chosen_text"]
+    chosen = cio.ascii_marks(decision["chosen_text"])   # the corpus convention, item 0HS
     if opcode != "replace" or not chosen:
         return "unverifiable_word_count_change"
     words = klal["clean_text"].split()
@@ -109,7 +109,7 @@ def check_manual_correction(decision, klal):
         return "unverifiable_word_count_change"
     words = cio.words_of(klal)
     word_index = decision["word_index"]
-    chosen = decision["chosen_text"]
+    chosen = cio.ascii_marks(decision["chosen_text"])   # the corpus convention, item 0HS
     # `word_index < 0` matters as much as the upper bound: Python indexes
     # backwards from the end rather than raising, so a negative index would
     # silently compare against the klal's LAST word and could report a
@@ -196,19 +196,35 @@ def check_witness_choice(decision, klal):
     is still standing.
     """
     snap = decision.get("candidate_snapshot") or {}
-    chosen = (decision.get("chosen_text") or "").split()
-    seen = (snap.get("master_reading") or snap.get("docai_reading") or "").split()
+    chosen = cio.ascii_marks(decision.get("chosen_text") or "").split()   # item 0HS
+    seen = cio.ascii_marks(snap.get("master_reading") or snap.get("docai_reading") or "").split()
     if (decision.get("chosen_source") in ("unreadable", "remove") or snap.get("gap")
             or not chosen or len(chosen) != len(seen)):
         return "unverifiable_word_count_change"
     words = cio.words_of(klal)
     word_index = snap.get("word_index")
-    if word_index is None or word_index < 0 or word_index + len(chosen) > len(words):
+    # ROWS OLDER THAN WORD POSITIONS (item 0HS). August's witness rows recorded a
+    # page and a scan box but no corpus word_index. Resolve through the box; a
+    # position that was never recorded and cannot be resolved to the ruled text is
+    # UNVERIFIABLE, not a mismatch against a place nobody ever named.
+    by_box = word_index is None
+    if by_box:
+        word_index = _bbox_word_index(decision, klal)
+        if word_index is None:
+            return "unverifiable_word_count_change"
+    if word_index < 0 or word_index + len(chosen) > len(words):
         return (f"MISMATCH: the ruling's snapshot names word_index {word_index} "
                 f"(klal now has {len(words)} words)")
     live = words[word_index:word_index + len(chosen)]
     if live == chosen:
         return "ok"
+    # A CONFIRMATION of an OCR reading asserts the letters stand. The token cannot
+    # carry an abbreviation mark, so the corpus adding one (`וכו` / `וכו'`) is not
+    # a departure from the ruling. Text-changing rulings still compare exactly.
+    if chosen == seen and [cio.hebrew_letters_only(w) for w in live] == [cio.hebrew_letters_only(w) for w in chosen]:
+        return "ok"
+    if by_box:
+        return "unverifiable_word_count_change"
     return f"MISMATCH: expected {chosen!r} at word_index {word_index}, found {live!r}"
 
 
@@ -268,6 +284,20 @@ def reported_position(decision):
     return decision["word_index"]
 
 
+_LINKS = None
+
+
+def _superseding_links():
+    """{superseded id: [ids of rulings that name it in `supersedes`]}, read once."""
+    global _LINKS
+    if _LINKS is None:
+        _LINKS = {}
+        for r in rd.all_records():
+            if r.get("supersedes"):
+                _LINKS.setdefault(r["supersedes"], []).append(r["id"])
+    return _LINKS
+
+
 def is_superseded_by_later_applied(decision, already_applied):
     """True if some decision recorded AFTER `decision` at the same
     (klal_id, word_index, decision_type) key has itself been applied -
@@ -288,6 +318,11 @@ def is_superseded_by_later_applied(decision, already_applied):
     # change whether the corpus has legitimately moved on. Widened across the
     # REPLACEMENT types only - see REPLACEMENT_TYPES for why punctuation_choice
     # must keep being checked against its own type alone.
+    # AN EXPLICIT LINK COUNTS (item 0HS). A re-pointed ruling is a new row at a new
+    # index carrying `supersedes: <this id>`; the index lookup below cannot see it,
+    # which left klal 1 w95 a MISMATCH though its applied re-point at w85 holds.
+    if any(later in already_applied for later in _superseding_links().get(decision["id"], ())):
+        return True
     kind = decision["decision_type"]
     group = REPLACEMENT_TYPES if kind in REPLACEMENT_TYPES else {kind}
     history = [r for r in rd.history_for(decision["klal_id"], decision["word_index"])
@@ -340,7 +375,7 @@ def expected_span(decision):
     """The word(s) an applied decision claims it wrote, as a list."""
     if decision["decision_type"] == "punctuation_choice":
         return ["[.]"]
-    return (decision.get("chosen_text") or "").split()
+    return cio.ascii_marks(decision.get("chosen_text") or "").split()
 
 
 # How far a legitimately-shifted decision can have moved before its relocation
