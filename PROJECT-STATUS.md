@@ -206,6 +206,41 @@ applying it to the corpus remain two separate, deliberate steps.
         short). Its precondition was blind once too (Lesson 42): it first
         asked whether the title shrank, which is the thing under test.
 
+0HN. **[2026-09-16, reviewer: "yes" to a 40-word ink sample] THE BLINDED
+    READING SHEET IS PUBLISHED. SCORING WAITS ON THE REVIEWER'S 40 PICKS.**
+    `0HM` left DocAI's scan question unsettled because both available
+    references are biased, in opposite directions. The unbiased reference is
+    the ink, read by a person, at places where the two readings differ.
+    * **Population: 292** one-word-for-one-word places, over pages 40-59, where
+      DocAI (`eu` `bc652834c231f24e`) reads the bitonal Google scan and the
+      full-tone NLI scan differently - aligned on the two layers' own tokens,
+      so every item carries a box in each image (`0HM` counted 290 from plain
+      text; the token route finds 292). **Sample: 40**, `random.sample` with
+      seed `20260916`, shown in page order.
+    * **Blinded.** Each item shows the word cropped from BOTH scans, boxed, and
+      two readings labelled A and B **in a per-item random order**. The page
+      never carries which reading came from which scan; that key is held back
+      in `scratch/ink_check_0HN/ink_key.json` (gitignored). **Do not open it
+      before the sheet is read.** Differing letters are highlighted, which
+      directs attention without revealing the source.
+    * **Crops checked before publishing**, on three items: the box sits on the
+      same word in both images, and context was widened after the first look
+      because a short word at a line's end left too little of its neighbours
+      (Lesson 14).
+    * **The sheet:** <https://claude.ai/artifact/MZhyUVSikmgKVuEQM5oC3d>. Answers
+      save per item to the artifact's own store (`answers/<item id>`), so they
+      are read back without being transcribed; if a view cannot save, the page
+      shows a one-line summary to paste instead. Choices: A, B, Neither (with an
+      optional "what the page prints"), Can't tell.
+    * **What it will measure**, stated before the answers exist so the reading
+      cannot be fitted to them: of the items the reviewer settles as A or B,
+      the share where the FULL-TONE reading matches the ink, with a 95%
+      interval. Neither and Can't-tell are reported, not dropped. At n=40 an
+      even split and a 70/30 split are distinguishable; 55/45 is not, and will
+      be reported as inconclusive rather than as a lean.
+    * **Reproducible without the scratchpad:** `build_ink_sample.py` beside the
+      key regenerates the same 40 from the two gitignored layers and the seed.
+
 0HM. **[2026-09-16, reviewer: "yes" to running the controlled comparison] FULL
     TONE WINS ON YAD MALACHI TOO - BY A TENTH OF WHAT IT WON ON HaSHORASHIM.
     +0.33 POINTS OF WORDS, NOT +3.0.**
