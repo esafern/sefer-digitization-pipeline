@@ -206,6 +206,39 @@ applying it to the corpus remain two separate, deliberate steps.
         short). Its precondition was blind once too (Lesson 42): it first
         asked whether the title shrank, which is the thing under test.
 
+0HT. **[2026-09-16, reviewer: review the draft to the Sefaria editor, "update facts, remove the
+    defensive and negative language"] REVISED, AS A NEW DRAFT BESIDE THE OLD ONE IN THE
+    PRIVATE CORPUS ROOT. SIX CLAIMS WERE STALE; ALL RE-MEASURED TODAY.** Not sent.
+    * **Why they were stale.** The 2026-09-14 draft carried the BITONAL-era figures
+      (`0FH`, `0FJ`, `0FL`), though `0GH` had re-measured on the NLI build the same day.
+      Re-run today on the corpus as it stands, `measure_against_reviewed.py` and
+      `measure_correction_overlap.py` over the 100 reviewed entries (13,735 words):
+      | claim | draft | today |
+      |---|---|---|
+      | our read vs their corrected text | 84.0% words, 95.6% chars | **95.1% words, 98.8% chars** |
+      | their edits | 118: 107 corrections, 11 citations | **114: 90 letter corrections, 15 citations, 7 division, 2 bracketed** |
+      | corrections our text already holds | 82 of 107 | **78 of 90** |
+      | our shared error | `במינוי` | **`גרמה` (root `אכף`) - and the page prints the shared reading `גמרה`** |
+      | disagreement surface | 1,054 positions, 7.7%, 87% of errors | **697 positions, 5%, 89 of 90 corrections** |
+      | nun/gimel | "gimel read as nun ~9x more often" | **88 -> 6 errors, from the scan change** |
+    * **Kept and re-verified:** all citation figures against `citation_corrections.csv` -
+      146 rows (92 misprint, 73 of them single-letter; ה/ח 31, ב/כ 16, כ/נ 4, ב/ג 4, ו/ז 3;
+      36 edition numbering: Jeremiah 31 x17, I Samuel 24 x8, Exodus 20 x7, I Chronicles 12
+      x4; 16 off-by-one; 1 wrong proposal; 1 unclear), every row checked by eye; `ההגעה` is
+      still in root `אל`. **Kept NOT re-run:** 20,450 citations, 66% confirmed, 158 flagged,
+      18 inside the hundred with 27 suspect words, and the four verse questions (`0FM`,
+      about their data, which no corpus change touches); the majority-vote finding (`0FN`)
+      is kept as a principle with its old-engine numbers removed.
+    * **Added:** the two other places `0GH` read on the ink where the page matches our
+      reading against their correction (`הוא` under `איד`, `וזה` under `אם`), a Sefaria link
+      on every biblical reference, the greeting for the days between Rosh Hashanah and Yom
+      Kippur, and a line about tomorrow's call.
+    * **Removed:** "not in my favour", "I am not going to dress that up", "the honest
+      answer ... is no", "Not that my read is good - it isn't", "I should warn you ... it
+      fails", "the bias is mine", "I owe you an accurate account", "If I had told you ... I
+      would have been wrong", "this is not a distraction" - each replaced by the fact it was
+      guarding, stated plainly.
+
 0HS. **[2026-09-16, reviewer: "show me all these can't leave loose ends. i want to
     apply those 40 times 2 decisions I made ... if I decided on a change we need to
     apply it"] EVERY RULING NOW ACCOUNTED FOR: THE APPLIER, THE PUNCTUATION APPLIER
