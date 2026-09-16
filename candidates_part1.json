@@ -1636,36 +1636,6 @@
       "bbox_estimated": false
     },
     {
-      "klal_id": 151,
-      "page": 55,
-      "opcode": "replace",
-      "word_index_in_final_text": 69,
-      "docai_reading": "ואיבא",
-      "stored_text": "ואיכא",
-      "bbox": {
-        "x1": 0.501236081123352,
-        "y1": 0.6649129986763,
-        "x2": 0.5451174378395081,
-        "y2": 0.6811007857322693
-      },
-      "bbox_estimated": false
-    },
-    {
-      "klal_id": 151,
-      "page": 55,
-      "opcode": "replace",
-      "word_index_in_final_text": 92,
-      "docai_reading": "רמכריע",
-      "stored_text": "המכריע",
-      "bbox": {
-        "x1": 0.3312731683254242,
-        "y1": 0.6815054416656494,
-        "x2": 0.38689741492271423,
-        "y2": 0.6968838572502136
-      },
-      "bbox_estimated": false
-    },
-    {
       "klal_id": 156,
       "page": 57,
       "opcode": "replace",
@@ -3722,8 +3692,8 @@
     }
   ],
   "meta": {
-    "total_candidates": 248,
-    "skipped_settled_by_applied_decision": 508,
+    "total_candidates": 246,
+    "skipped_settled_by_applied_decision": 531,
     "klalim_covered": 92,
     "skipped_no_docai_page_klalim": [],
     "unattributable_deletes": [],

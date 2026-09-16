@@ -206,6 +206,66 @@ applying it to the corpus remain two separate, deliberate steps.
         short). Its precondition was blind once too (Lesson 42): it first
         asked whether the title shrank, which is the thing under test.
 
+0HQ. **[2026-09-16, reviewer: "apply my decisions to the corpus"] 26 RULINGS
+    APPLIED, 25 WORDS CHANGED IN PART 1, VERIFIED ON THE DASHBOARD. AND A MARK
+    CONVENTION QUESTION FOR THE REVIEWER.**
+    * **What was applied.** The reviewer's own dashboard rulings of 15:07-15:26
+      UTC today - 18 disputed choices (one a confirmation) and 8 manual
+      corrections - covering all 7 of `0HN`'s unsurfaced errors, most of its 10
+      queued ones, and nearby words. `apply_reviewer_decisions.py`, dry run
+      first: it would apply exactly those 26 and nothing older.
+    * **The corpus diff, word by word:** 25 words, no word-count change, no
+      heading touched: `לכו`->`לבו` (94/374), `שארירת`->`שארית` (97/353),
+      `רב"ט`->`דב״מ` (128/949), `ומ"ס`->`ומ"מ` (133/30), `ותקשי`->`דתקשי`
+      (147/288), `כסר`->`כמר` (147/423), `בס"ק`->`בפ״ק` (150/293), `שמיען`->`שמיע`
+      (150/344), `בס"ס`->`בס״פ` (150/533), `מקטי`->`מקמי` (150/684), `שרוא`->`שהוא`
+      (150/797), `בתלמור`->`בתלמוד` (150/802), `לא`->`אלא` (151/7),
+      `ואיכא`->`ואליבא` (151/69), `דרא`->`דהא` (152/47), `שכרתבו`->`שכתבו`
+      (152/58), `בסרק`->`בפרק` (152/98), `וכי`->`הכי` (152/115), `ט"ו`->`מ״ו`
+      (154/506), `היכאת`->`היכא` (159/29), `איכא`->`אליבא` (159/57), `בר"ס`->`בר"פ`
+      (159/117), `ראשה`->`האשה` (159/163), `לא`->`אלא` (159/808), `בס'`->`בפ׳`
+      (159/879). 8 open flags closed by the applies; word ids reconciled in 10
+      klalim.
+    * **Checked, not assumed:**
+      - `audit_applied_decisions.py`: 1,031 checked (was 1,005), 648 confirmed
+        (was 622) - +26 each, exactly these. MISMATCH unchanged at the 2 known.
+      - `./rebuild_all.sh --skip-vision` (the Gemini re-verification step
+        skipped), gate 579 passed. `part1-3.json`, `word_identity.json` and
+        `review_decisions.jsonl` byte-identical before and after the rebuild.
+      - The dashboard serves the corrected word at **25 of 25**, with 0 open
+        machine rows left on them (Lesson 33: done when the screen shows it).
+    * **Left as they were, by the applier's own guards** (older rulings, not
+      today's): 14 drifted (36/108, 39/251, 74/417, 74/442, 74/443, 159/10,
+      161/289, 174/116, 200/145, 206/2, 209/16, 209/17, 211/73, 216/123) and 1
+      refused for a word-count mismatch (22/48). 20 `punctuation_choice` rulings
+      are pending too; they go through `tools/apply_punctuation_decisions.py`,
+      which was not asked for and not run.
+    * **THE MARK CONVENTION - A QUESTION, NOT A FIX.** Five of the manual
+      corrections were typed with the Hebrew gershayim/geresh characters (`״`
+      U+05F4, `׳` U+05F3) where the corpus writes ASCII `"` and `'`: across all
+      three files, **22,946 `"` and 10,386 `'` against 1 `״` and 5 `׳`** before
+      today. They were applied exactly as ruled: `manual_correction` means a
+      person ruled (`review_decisions.append_decision` refuses it from anything
+      else), so rewriting the reviewer's text is not a tool's call.
+      **Swept:** 10 words in Part 1 now carry a Unicode mark -
+      <http://127.0.0.1:8420/entry/2/word/316> `נ״ד`,
+      <http://127.0.0.1:8420/entry/4/word/131> `הנז׳`,
+      <http://127.0.0.1:8420/entry/88/word/622> `מה׳`,
+      <http://127.0.0.1:8420/entry/128/word/949> `דב״מ`,
+      <http://127.0.0.1:8420/entry/150/word/293> `בפ״ק`,
+      <http://127.0.0.1:8420/entry/150/word/533> `בס״פ`,
+      <http://127.0.0.1:8420/entry/154/word/506> `מ״ו`,
+      <http://127.0.0.1:8420/entry/159/word/879> `בפ׳`,
+      <http://127.0.0.1:8420/entry/187/word/213> `כ׳`,
+      <http://127.0.0.1:8420/entry/216/word/137> `להתוס׳` - and one in part3.json
+      (klal 575 w118 `ס׳`, gated, untouched). Letter-level tools strip marks, so
+      alignment and the detectors are unaffected; the deliverable text is what
+      carries two spellings of one printed mark. The Unicode characters are the
+      typographically correct ones, so the choice is real: re-rule these 10 to
+      ASCII, or adopt Unicode as the convention (33,000 existing marks to
+      convert, through the pipeline). Either way the dashboard's input will keep
+      producing whichever the reviewer's keyboard types until one is chosen.
+
 0HP. **[2026-09-16, reviewer: "ok" to a second blinded sheet] SHEET 2 PUBLISHED:
     THE 189 UNSURFACED FULL-TONE CANDIDATES, STRATIFIED. SCORING WAITS ON THE
     REVIEWER.**

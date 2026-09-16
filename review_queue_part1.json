@@ -4826,39 +4826,6 @@
       "surya_reading": "דיעבד",
       "dicta_reading": "דיעבד",
       "flag": "current_text_confirmed"
-    },
-    {
-      "word_index": 30,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "ומ\"ס",
-      "page": 49,
-      "bbox": {
-        "x1": 0.18029740452766418,
-        "y1": 0.2870407700538635,
-        "x2": 0.21685254573822021,
-        "y2": 0.3039967715740204
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: dicta + vlm agree on 'ומ\"מ' against stored 'ומ\"ס'. NOTE: this is a CROSS-EDITION consensus - dicta read the Jerusalem 1975/6 printing, not this Berlin scan. Only ONE engine that read THIS scan differs from the corpus here, so a difference between the two printings is a live explanation - check the ink.",
-      "vlm_reading": "ומ\"מ",
-      "surya_reading": null,
-      "dicta_reading": "ומ\"מ",
-      "consensus_engines": [
-        "dicta",
-        "vlm"
-      ],
-      "consensus_reading": "ומ\"מ",
-      "ligature_artifact": null,
-      "cross_edition": true,
-      "cross_edition_engines": [
-        "dicta"
-      ],
-      "same_edition_agreeing": 1,
-      "abbreviation_shape": null,
-      "flag": "current_text_may_be_wrong"
     }
   ],
   "134": [
@@ -6208,39 +6175,6 @@
       "flag": "current_text_may_be_wrong"
     },
     {
-      "word_index": 288,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "ותקשי",
-      "page": 53,
-      "bbox": {
-        "x1": 0.22146402299404144,
-        "y1": 0.5139057040214539,
-        "x2": 0.2710918188095093,
-        "y2": 0.5304312705993652
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: dicta + vlm agree on 'דתקשי' against stored 'ותקשי'. NOTE: this is a CROSS-EDITION consensus - dicta read the Jerusalem 1975/6 printing, not this Berlin scan. Only ONE engine that read THIS scan differs from the corpus here, so a difference between the two printings is a live explanation - check the ink.",
-      "vlm_reading": "דתקשי",
-      "surya_reading": null,
-      "dicta_reading": "דתקשי",
-      "consensus_engines": [
-        "dicta",
-        "vlm"
-      ],
-      "consensus_reading": "דתקשי",
-      "ligature_artifact": null,
-      "cross_edition": true,
-      "cross_edition_engines": [
-        "dicta"
-      ],
-      "same_edition_agreeing": 1,
-      "abbreviation_shape": null,
-      "flag": "current_text_may_be_wrong"
-    },
-    {
       "word_index": 335,
       "opcode": "delete",
       "docai_reading": "הפו",
@@ -6292,40 +6226,6 @@
         "dicta"
       ],
       "same_edition_agreeing": 1,
-      "abbreviation_shape": null,
-      "flag": "current_text_may_be_wrong"
-    },
-    {
-      "word_index": 423,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "כסר",
-      "page": 53,
-      "bbox": {
-        "x1": 0.5905707478523254,
-        "y1": 0.6489318609237671,
-        "x2": 0.6222084164619446,
-        "y2": 0.6658605337142944
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: dicta + surya + vlm agree on 'כמר' against stored 'כסר'. NOTE: this is a CROSS-EDITION consensus - dicta read the Jerusalem 1975/6 printing, not this Berlin scan.",
-      "vlm_reading": "כמר",
-      "surya_reading": "כמר",
-      "dicta_reading": "כמר",
-      "consensus_engines": [
-        "dicta",
-        "surya",
-        "vlm"
-      ],
-      "consensus_reading": "כמר",
-      "ligature_artifact": null,
-      "cross_edition": true,
-      "cross_edition_engines": [
-        "dicta"
-      ],
-      "same_edition_agreeing": 2,
       "abbreviation_shape": null,
       "flag": "current_text_may_be_wrong"
     },
@@ -6466,39 +6366,6 @@
   ],
   "151": [
     {
-      "word_index": 7,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "לא",
-      "page": 55,
-      "bbox": {
-        "x1": 0.47651422023773193,
-        "y1": 0.6033994555473328,
-        "x2": 0.511124849319458,
-        "y2": 0.6212059855461121
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: dicta + vlm agree on 'אלא' against stored 'לא'. NOTE: this is a CROSS-EDITION consensus - dicta read the Jerusalem 1975/6 printing, not this Berlin scan. Only ONE engine that read THIS scan differs from the corpus here, so a difference between the two printings is a live explanation - check the ink.",
-      "vlm_reading": "אלא",
-      "surya_reading": "א'",
-      "dicta_reading": "אלא",
-      "consensus_engines": [
-        "dicta",
-        "vlm"
-      ],
-      "consensus_reading": "אלא",
-      "ligature_artifact": null,
-      "cross_edition": true,
-      "cross_edition_engines": [
-        "dicta"
-      ],
-      "same_edition_agreeing": 1,
-      "abbreviation_shape": null,
-      "flag": "current_text_may_be_wrong"
-    },
-    {
       "word_index": 46,
       "opcode": "replace",
       "docai_reading": null,
@@ -6576,38 +6443,6 @@
       "flag": "docai_ligature_artifact"
     },
     {
-      "word_index": 69,
-      "opcode": "replace",
-      "docai_reading": "ואיבא",
-      "docai_repaired": "ואליבא",
-      "final_text": "ואיכא",
-      "page": 55,
-      "bbox": {
-        "x1": 0.501236081123352,
-        "y1": 0.6649129986763,
-        "x2": 0.5451174378395081,
-        "y2": 0.6811007857322693
-      },
-      "vision_selected": "B",
-      "vision_transcription": "ואיכא",
-      "confidence": 1.0,
-      "reasoning": "The middle line of the image clearly shows the word 'ואיכא' followed by a 'ד'. The fourth letter is paleographically a 'כ' (kaf) with its characteristic rounded top-right shoulder, not a 'ב' (bet). This perfectly matches the Talmudic textual context 'ואיכא דרב'.",
-      "vlm_reading": "ואיבא",
-      "surya_reading": "ואיבא",
-      "dicta_reading": "ואליבא",
-      "flag": "current_text_confirmed",
-      "consensus_engines": [
-        "docai",
-        "surya"
-      ],
-      "consensus_reading": "ואיבא",
-      "ligature_artifact": null,
-      "cross_edition": false,
-      "cross_edition_engines": [],
-      "same_edition_agreeing": 2,
-      "abbreviation_shape": null
-    },
-    {
       "word_index": 78,
       "opcode": "replace",
       "docai_reading": null,
@@ -6639,28 +6474,6 @@
       "same_edition_agreeing": 1,
       "abbreviation_shape": null,
       "flag": "current_text_may_be_wrong"
-    },
-    {
-      "word_index": 92,
-      "opcode": "replace",
-      "docai_reading": "רמכריע",
-      "docai_repaired": null,
-      "final_text": "המכריע",
-      "page": 55,
-      "bbox": {
-        "x1": 0.3312731683254242,
-        "y1": 0.6815054416656494,
-        "x2": 0.38689741492271423,
-        "y2": 0.6968838572502136
-      },
-      "vision_selected": "B",
-      "vision_transcription": "ס' המכריע ל",
-      "confidence": 0.98,
-      "reasoning": "The context refers to the well-known Rabbinic work 'Sefer HaMachri'a' ('ס' המכריע') by R. Isaiah the Elder (ר' ישעיה הזקן). Paleographically, the letter preceding 'מכריע' is a 'ה' with a clear top bar and left leg, matching Option B ('המכריע'). Option A ('רמכריע') is an OCR misreading.",
-      "vlm_reading": "דמכריע",
-      "surya_reading": "דמכריע",
-      "dicta_reading": "המכריע",
-      "flag": "current_text_confirmed"
     },
     {
       "word_index": 100,
@@ -6755,108 +6568,6 @@
     }
   ],
   "159": [
-    {
-      "word_index": 29,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "היכאת",
-      "page": 57,
-      "bbox": {
-        "x1": 0.7180752754211426,
-        "y1": 0.7550689578056335,
-        "x2": 0.7643430233001709,
-        "y2": 0.7712895274162292
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: dicta + surya + vlm agree on 'היכא' against stored 'היכאת'. NOTE: this is a CROSS-EDITION consensus - dicta read the Jerusalem 1975/6 printing, not this Berlin scan.",
-      "vlm_reading": "היכא",
-      "surya_reading": "היכא",
-      "dicta_reading": "היכא",
-      "consensus_engines": [
-        "dicta",
-        "surya",
-        "vlm"
-      ],
-      "consensus_reading": "היכא",
-      "ligature_artifact": null,
-      "cross_edition": true,
-      "cross_edition_engines": [
-        "dicta"
-      ],
-      "same_edition_agreeing": 2,
-      "abbreviation_shape": null,
-      "flag": "current_text_may_be_wrong"
-    },
-    {
-      "word_index": 117,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "בר\"ס",
-      "page": 57,
-      "bbox": {
-        "x1": 0.3701418936252594,
-        "y1": 0.830900251865387,
-        "x2": 0.4077729880809784,
-        "y2": 0.8475263714790344
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: dicta + surya + vlm agree on 'בר\"פ' against stored 'בר\"ס'. NOTE: this is a CROSS-EDITION consensus - dicta read the Jerusalem 1975/6 printing, not this Berlin scan.",
-      "vlm_reading": "בר\"פ",
-      "surya_reading": "בר\"פ",
-      "dicta_reading": "בר\"פ",
-      "consensus_engines": [
-        "dicta",
-        "surya",
-        "vlm"
-      ],
-      "consensus_reading": "בר\"פ",
-      "ligature_artifact": null,
-      "cross_edition": true,
-      "cross_edition_engines": [
-        "dicta"
-      ],
-      "same_edition_agreeing": 2,
-      "abbreviation_shape": null,
-      "flag": "current_text_may_be_wrong"
-    },
-    {
-      "word_index": 163,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "ראשה",
-      "page": 57,
-      "bbox": {
-        "x1": 0.48858729004859924,
-        "y1": 0.8755068778991699,
-        "x2": 0.5336211919784546,
-        "y2": 0.8933495283126831
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: dicta + surya + vlm agree on 'האשה' against stored 'ראשה'. NOTE: this is a CROSS-EDITION consensus - dicta read the Jerusalem 1975/6 printing, not this Berlin scan.",
-      "vlm_reading": "האשה",
-      "surya_reading": "האשה",
-      "dicta_reading": "האשה",
-      "consensus_engines": [
-        "dicta",
-        "surya",
-        "vlm"
-      ],
-      "consensus_reading": "האשה",
-      "ligature_artifact": null,
-      "cross_edition": true,
-      "cross_edition_engines": [
-        "dicta"
-      ],
-      "same_edition_agreeing": 2,
-      "abbreviation_shape": null,
-      "flag": "current_text_may_be_wrong"
-    },
     {
       "word_index": 226,
       "opcode": "replace",
@@ -15105,39 +14816,6 @@
       "flag": "current_text_may_be_wrong"
     },
     {
-      "word_index": 374,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "לכו",
-      "page": 43,
-      "bbox": {
-        "x1": 0.11063040792942047,
-        "y1": 0.24281667172908783,
-        "x2": 0.13782447576522827,
-        "y2": 0.2598138451576233
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: dicta + surya agree on 'לבו' against stored 'לכו'. NOTE: this is a CROSS-EDITION consensus - dicta read the Jerusalem 1975/6 printing, not this Berlin scan. Only ONE engine that read THIS scan differs from the corpus here, so a difference between the two printings is a live explanation - check the ink.",
-      "vlm_reading": null,
-      "surya_reading": "לבו",
-      "dicta_reading": "לבו",
-      "consensus_engines": [
-        "dicta",
-        "surya"
-      ],
-      "consensus_reading": "לבו",
-      "ligature_artifact": null,
-      "cross_edition": true,
-      "cross_edition_engines": [
-        "dicta"
-      ],
-      "same_edition_agreeing": 1,
-      "abbreviation_shape": null,
-      "flag": "current_text_may_be_wrong"
-    },
-    {
       "word_index": 383,
       "opcode": "replace",
       "docai_reading": null,
@@ -15404,39 +15082,6 @@
         "dicta"
       ],
       "same_edition_agreeing": 2,
-      "abbreviation_shape": null,
-      "flag": "current_text_may_be_wrong"
-    },
-    {
-      "word_index": 353,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "שארירת",
-      "page": 44,
-      "bbox": {
-        "x1": 0.5762289762496948,
-        "y1": 0.2547207772731781,
-        "x2": 0.6390790343284607,
-        "y2": 0.2707914710044861
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: dicta + vlm agree on 'שארית' against stored 'שארירת'. NOTE: this is a CROSS-EDITION consensus - dicta read the Jerusalem 1975/6 printing, not this Berlin scan. Only ONE engine that read THIS scan differs from the corpus here, so a difference between the two printings is a live explanation - check the ink.",
-      "vlm_reading": "שארית",
-      "surya_reading": null,
-      "dicta_reading": "שארית",
-      "consensus_engines": [
-        "dicta",
-        "vlm"
-      ],
-      "consensus_reading": "שארית",
-      "ligature_artifact": null,
-      "cross_edition": true,
-      "cross_edition_engines": [
-        "dicta"
-      ],
-      "same_edition_agreeing": 1,
       "abbreviation_shape": null,
       "flag": "current_text_may_be_wrong"
     },
@@ -16320,40 +15965,6 @@
       "flag": "current_text_may_be_wrong"
     },
     {
-      "word_index": 344,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "שמיען",
-      "page": 55,
-      "bbox": {
-        "x1": 0.6019777655601501,
-        "y1": 0.13395386934280396,
-        "x2": 0.6427688598632812,
-        "y2": 0.15216511487960815
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: dicta + surya + vlm agree on 'שמיע' against stored 'שמיען'. NOTE: this is a CROSS-EDITION consensus - dicta read the Jerusalem 1975/6 printing, not this Berlin scan.",
-      "vlm_reading": "שמיע",
-      "surya_reading": "שמיע",
-      "dicta_reading": "שמיע",
-      "consensus_engines": [
-        "dicta",
-        "surya",
-        "vlm"
-      ],
-      "consensus_reading": "שמיע",
-      "ligature_artifact": null,
-      "cross_edition": true,
-      "cross_edition_engines": [
-        "dicta"
-      ],
-      "same_edition_agreeing": 2,
-      "abbreviation_shape": null,
-      "flag": "current_text_may_be_wrong"
-    },
-    {
       "word_index": 578,
       "opcode": "replace",
       "docai_reading": null,
@@ -16451,208 +16062,9 @@
       "same_edition_agreeing": 2,
       "abbreviation_shape": null,
       "flag": "current_text_may_be_wrong"
-    },
-    {
-      "word_index": 797,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "שרוא",
-      "page": 55,
-      "bbox": {
-        "x1": 0.8182941675186157,
-        "y1": 0.5439093708992004,
-        "x2": 0.8578491806983948,
-        "y2": 0.5605018138885498
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: dicta + surya + vlm agree on 'שהוא' against stored 'שרוא'. NOTE: this is a CROSS-EDITION consensus - dicta read the Jerusalem 1975/6 printing, not this Berlin scan.",
-      "vlm_reading": "שהוא",
-      "surya_reading": "שהוא",
-      "dicta_reading": "שהוא",
-      "consensus_engines": [
-        "dicta",
-        "surya",
-        "vlm"
-      ],
-      "consensus_reading": "שהוא",
-      "ligature_artifact": null,
-      "cross_edition": true,
-      "cross_edition_engines": [
-        "dicta"
-      ],
-      "same_edition_agreeing": 2,
-      "abbreviation_shape": null,
-      "flag": "current_text_may_be_wrong"
-    },
-    {
-      "word_index": 802,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "בתלמור",
-      "page": 55,
-      "bbox": {
-        "x1": 0.5852904915809631,
-        "y1": 0.5439093708992004,
-        "x2": 0.6433869004249573,
-        "y2": 0.5605018138885498
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: dicta + surya + vlm agree on 'בתלמוד' against stored 'בתלמור'. NOTE: this is a CROSS-EDITION consensus - dicta read the Jerusalem 1975/6 printing, not this Berlin scan.",
-      "vlm_reading": "בתלמוד",
-      "surya_reading": "בתלמוד",
-      "dicta_reading": "בתלמוד",
-      "consensus_engines": [
-        "dicta",
-        "surya",
-        "vlm"
-      ],
-      "consensus_reading": "בתלמוד",
-      "ligature_artifact": null,
-      "cross_edition": true,
-      "cross_edition_engines": [
-        "dicta"
-      ],
-      "same_edition_agreeing": 2,
-      "abbreviation_shape": null,
-      "flag": "current_text_may_be_wrong"
     }
   ],
   "152": [
-    {
-      "word_index": 47,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "דרא",
-      "page": 55,
-      "bbox": {
-        "x1": 0.10259579867124557,
-        "y1": 0.7401861548423767,
-        "x2": 0.14215080440044403,
-        "y2": 0.7575880289077759
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: dicta + surya + vlm agree on 'דהא' against stored 'דרא'. NOTE: this is a CROSS-EDITION consensus - dicta read the Jerusalem 1975/6 printing, not this Berlin scan.",
-      "vlm_reading": "דהא",
-      "surya_reading": "דהא",
-      "dicta_reading": "דהא",
-      "consensus_engines": [
-        "dicta",
-        "surya",
-        "vlm"
-      ],
-      "consensus_reading": "דהא",
-      "ligature_artifact": null,
-      "cross_edition": true,
-      "cross_edition_engines": [
-        "dicta"
-      ],
-      "same_edition_agreeing": 2,
-      "abbreviation_shape": null,
-      "flag": "current_text_may_be_wrong"
-    },
-    {
-      "word_index": 58,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "שכרתבו",
-      "page": 55,
-      "bbox": {
-        "x1": 0.3368355929851532,
-        "y1": 0.755969226360321,
-        "x2": 0.39740419387817383,
-        "y2": 0.7729663848876953
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: dicta + vlm agree on 'שכתבו' against stored 'שכרתבו'. NOTE: this is a CROSS-EDITION consensus - dicta read the Jerusalem 1975/6 printing, not this Berlin scan. Only ONE engine that read THIS scan differs from the corpus here, so a difference between the two printings is a live explanation - check the ink.",
-      "vlm_reading": "שכתבו",
-      "surya_reading": "שכרתבו",
-      "dicta_reading": "שכתבו",
-      "consensus_engines": [
-        "dicta",
-        "vlm"
-      ],
-      "consensus_reading": "שכתבו",
-      "ligature_artifact": null,
-      "cross_edition": true,
-      "cross_edition_engines": [
-        "dicta"
-      ],
-      "same_edition_agreeing": 1,
-      "abbreviation_shape": null,
-      "flag": "current_text_may_be_wrong"
-    },
-    {
-      "word_index": 98,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "בסרק",
-      "page": 55,
-      "bbox": {
-        "x1": 0.2472187876701355,
-        "y1": 0.7883448004722595,
-        "x2": 0.2904820740222931,
-        "y2": 0.8033185005187988
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: dicta + surya agree on 'בפרק' against stored 'בסרק'. NOTE: this is a CROSS-EDITION consensus - dicta read the Jerusalem 1975/6 printing, not this Berlin scan. Only ONE engine that read THIS scan differs from the corpus here, so a difference between the two printings is a live explanation - check the ink.",
-      "vlm_reading": null,
-      "surya_reading": "בפרק",
-      "dicta_reading": "בפרק",
-      "consensus_engines": [
-        "dicta",
-        "surya"
-      ],
-      "consensus_reading": "בפרק",
-      "ligature_artifact": null,
-      "cross_edition": true,
-      "cross_edition_engines": [
-        "dicta"
-      ],
-      "same_edition_agreeing": 1,
-      "abbreviation_shape": null,
-      "flag": "current_text_may_be_wrong"
-    },
-    {
-      "word_index": 115,
-      "opcode": "replace",
-      "docai_reading": null,
-      "final_text": "וכי",
-      "page": 55,
-      "bbox": {
-        "x1": 0.3825710713863373,
-        "y1": 0.8021044135093689,
-        "x2": 0.40914708375930786,
-        "y2": 0.8174828290939331
-      },
-      "vision_selected": null,
-      "vision_transcription": null,
-      "confidence": null,
-      "reasoning": "Multi-witness consensus: surya + vlm agree on 'דכי' against stored 'וכי'.",
-      "vlm_reading": "דכי",
-      "surya_reading": "דכי",
-      "dicta_reading": "הכי",
-      "consensus_engines": [
-        "surya",
-        "vlm"
-      ],
-      "consensus_reading": "דכי",
-      "ligature_artifact": null,
-      "cross_edition": false,
-      "cross_edition_engines": [],
-      "same_edition_agreeing": 2,
-      "abbreviation_shape": null,
-      "flag": "current_text_may_be_wrong"
-    },
     {
       "word_index": 127,
       "opcode": "replace",

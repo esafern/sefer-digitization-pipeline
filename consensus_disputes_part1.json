@@ -3936,37 +3936,6 @@
     },
     {
       "klal_id": 94,
-      "word_index": 374,
-      "opcode": "replace",
-      "final_text": "לכו",
-      "consensus_reading": "לבו",
-      "agreeing_engines": [
-        "dicta",
-        "surya"
-      ],
-      "ligature_artifact": null,
-      "cross_edition": true,
-      "cross_edition_engines": [
-        "dicta"
-      ],
-      "same_edition_agreeing": 1,
-      "abbreviation_shape": null,
-      "witnesses": {
-        "docai": null,
-        "vlm": null,
-        "surya": "לבו",
-        "dicta": "לבו"
-      },
-      "page": 43,
-      "bbox": {
-        "x1": 0.11063040792942047,
-        "y1": 0.24281667172908783,
-        "x2": 0.13782447576522827,
-        "y2": 0.2598138451576233
-      }
-    },
-    {
-      "klal_id": 94,
       "word_index": 383,
       "opcode": "replace",
       "final_text": "בלבכו",
@@ -4217,37 +4186,6 @@
         "y1": 0.23945359885692596,
         "x2": 0.5525824427604675,
         "y2": 0.25311368703842163
-      }
-    },
-    {
-      "klal_id": 97,
-      "word_index": 353,
-      "opcode": "replace",
-      "final_text": "שארירת",
-      "consensus_reading": "שארית",
-      "agreeing_engines": [
-        "dicta",
-        "vlm"
-      ],
-      "ligature_artifact": null,
-      "cross_edition": true,
-      "cross_edition_engines": [
-        "dicta"
-      ],
-      "same_edition_agreeing": 1,
-      "abbreviation_shape": null,
-      "witnesses": {
-        "docai": null,
-        "vlm": "שארית",
-        "surya": null,
-        "dicta": "שארית"
-      },
-      "page": 44,
-      "bbox": {
-        "x1": 0.5762289762496948,
-        "y1": 0.2547207772731781,
-        "x2": 0.6390790343284607,
-        "y2": 0.2707914710044861
       }
     },
     {
@@ -5457,39 +5395,6 @@
       }
     }
   ],
-  "133": [
-    {
-      "klal_id": 133,
-      "word_index": 30,
-      "opcode": "replace",
-      "final_text": "ומ\"ס",
-      "consensus_reading": "ומ\"מ",
-      "agreeing_engines": [
-        "dicta",
-        "vlm"
-      ],
-      "ligature_artifact": null,
-      "cross_edition": true,
-      "cross_edition_engines": [
-        "dicta"
-      ],
-      "same_edition_agreeing": 1,
-      "abbreviation_shape": null,
-      "witnesses": {
-        "docai": null,
-        "vlm": "ומ\"מ",
-        "surya": null,
-        "dicta": "ומ\"מ"
-      },
-      "page": 49,
-      "bbox": {
-        "x1": 0.18029740452766418,
-        "y1": 0.2870407700538635,
-        "x2": 0.21685254573822021,
-        "y2": 0.3039967715740204
-      }
-    }
-  ],
   "137": [
     {
       "klal_id": 137,
@@ -6552,37 +6457,6 @@
     },
     {
       "klal_id": 147,
-      "word_index": 288,
-      "opcode": "replace",
-      "final_text": "ותקשי",
-      "consensus_reading": "דתקשי",
-      "agreeing_engines": [
-        "dicta",
-        "vlm"
-      ],
-      "ligature_artifact": null,
-      "cross_edition": true,
-      "cross_edition_engines": [
-        "dicta"
-      ],
-      "same_edition_agreeing": 1,
-      "abbreviation_shape": null,
-      "witnesses": {
-        "docai": null,
-        "vlm": "דתקשי",
-        "surya": null,
-        "dicta": "דתקשי"
-      },
-      "page": 53,
-      "bbox": {
-        "x1": 0.22146402299404144,
-        "y1": 0.5139057040214539,
-        "x2": 0.2710918188095093,
-        "y2": 0.5304312705993652
-      }
-    },
-    {
-      "klal_id": 147,
       "word_index": 376,
       "opcode": "replace",
       "final_text": "תמירתו",
@@ -6610,38 +6484,6 @@
         "y1": 0.6041918396949768,
         "x2": 0.5130273103713989,
         "y2": 0.6199113130569458
-      }
-    },
-    {
-      "klal_id": 147,
-      "word_index": 423,
-      "opcode": "replace",
-      "final_text": "כסר",
-      "consensus_reading": "כמר",
-      "agreeing_engines": [
-        "dicta",
-        "surya",
-        "vlm"
-      ],
-      "ligature_artifact": null,
-      "cross_edition": true,
-      "cross_edition_engines": [
-        "dicta"
-      ],
-      "same_edition_agreeing": 2,
-      "abbreviation_shape": null,
-      "witnesses": {
-        "docai": null,
-        "vlm": "כמר",
-        "surya": "כמר",
-        "dicta": "כמר"
-      },
-      "page": 53,
-      "bbox": {
-        "x1": 0.5905707478523254,
-        "y1": 0.6489318609237671,
-        "x2": 0.6222084164619446,
-        "y2": 0.6658605337142944
       }
     },
     {
@@ -7123,38 +6965,6 @@
     },
     {
       "klal_id": 150,
-      "word_index": 344,
-      "opcode": "replace",
-      "final_text": "שמיען",
-      "consensus_reading": "שמיע",
-      "agreeing_engines": [
-        "dicta",
-        "surya",
-        "vlm"
-      ],
-      "ligature_artifact": null,
-      "cross_edition": true,
-      "cross_edition_engines": [
-        "dicta"
-      ],
-      "same_edition_agreeing": 2,
-      "abbreviation_shape": null,
-      "witnesses": {
-        "docai": null,
-        "vlm": "שמיע",
-        "surya": "שמיע",
-        "dicta": "שמיע"
-      },
-      "page": 55,
-      "bbox": {
-        "x1": 0.6019777655601501,
-        "y1": 0.13395386934280396,
-        "x2": 0.6427688598632812,
-        "y2": 0.15216511487960815
-      }
-    },
-    {
-      "klal_id": 150,
       "word_index": 578,
       "opcode": "replace",
       "final_text": "דוה",
@@ -7245,104 +7055,9 @@
         "x2": 0.561186671257019,
         "y2": 0.4690408706665039
       }
-    },
-    {
-      "klal_id": 150,
-      "word_index": 797,
-      "opcode": "replace",
-      "final_text": "שרוא",
-      "consensus_reading": "שהוא",
-      "agreeing_engines": [
-        "dicta",
-        "surya",
-        "vlm"
-      ],
-      "ligature_artifact": null,
-      "cross_edition": true,
-      "cross_edition_engines": [
-        "dicta"
-      ],
-      "same_edition_agreeing": 2,
-      "abbreviation_shape": null,
-      "witnesses": {
-        "docai": null,
-        "vlm": "שהוא",
-        "surya": "שהוא",
-        "dicta": "שהוא"
-      },
-      "page": 55,
-      "bbox": {
-        "x1": 0.8182941675186157,
-        "y1": 0.5439093708992004,
-        "x2": 0.8578491806983948,
-        "y2": 0.5605018138885498
-      }
-    },
-    {
-      "klal_id": 150,
-      "word_index": 802,
-      "opcode": "replace",
-      "final_text": "בתלמור",
-      "consensus_reading": "בתלמוד",
-      "agreeing_engines": [
-        "dicta",
-        "surya",
-        "vlm"
-      ],
-      "ligature_artifact": null,
-      "cross_edition": true,
-      "cross_edition_engines": [
-        "dicta"
-      ],
-      "same_edition_agreeing": 2,
-      "abbreviation_shape": null,
-      "witnesses": {
-        "docai": null,
-        "vlm": "בתלמוד",
-        "surya": "בתלמוד",
-        "dicta": "בתלמוד"
-      },
-      "page": 55,
-      "bbox": {
-        "x1": 0.5852904915809631,
-        "y1": 0.5439093708992004,
-        "x2": 0.6433869004249573,
-        "y2": 0.5605018138885498
-      }
     }
   ],
   "151": [
-    {
-      "klal_id": 151,
-      "word_index": 7,
-      "opcode": "replace",
-      "final_text": "לא",
-      "consensus_reading": "אלא",
-      "agreeing_engines": [
-        "dicta",
-        "vlm"
-      ],
-      "ligature_artifact": null,
-      "cross_edition": true,
-      "cross_edition_engines": [
-        "dicta"
-      ],
-      "same_edition_agreeing": 1,
-      "abbreviation_shape": null,
-      "witnesses": {
-        "docai": null,
-        "vlm": "אלא",
-        "surya": "א'",
-        "dicta": "אלא"
-      },
-      "page": 55,
-      "bbox": {
-        "x1": 0.47651422023773193,
-        "y1": 0.6033994555473328,
-        "x2": 0.511124849319458,
-        "y2": 0.6212059855461121
-      }
-    },
     {
       "klal_id": 151,
       "word_index": 49,
@@ -7370,35 +7085,6 @@
         "y1": 0.6487252116203308,
         "x2": 0.8584672212600708,
         "y2": 0.665317714214325
-      }
-    },
-    {
-      "klal_id": 151,
-      "word_index": 69,
-      "opcode": "replace",
-      "final_text": "ואיכא",
-      "consensus_reading": "ואיבא",
-      "agreeing_engines": [
-        "docai",
-        "surya"
-      ],
-      "ligature_artifact": null,
-      "cross_edition": false,
-      "cross_edition_engines": [],
-      "same_edition_agreeing": 2,
-      "abbreviation_shape": null,
-      "witnesses": {
-        "docai": "ואיבא",
-        "vlm": null,
-        "surya": "ואיבא",
-        "dicta": "ואליבא"
-      },
-      "page": 55,
-      "bbox": {
-        "x1": 0.501236081123352,
-        "y1": 0.6649129986763,
-        "x2": 0.5451174378395081,
-        "y2": 0.6811007857322693
       }
     },
     {
@@ -7465,129 +7151,6 @@
     }
   ],
   "152": [
-    {
-      "klal_id": 152,
-      "word_index": 47,
-      "opcode": "replace",
-      "final_text": "דרא",
-      "consensus_reading": "דהא",
-      "agreeing_engines": [
-        "dicta",
-        "surya",
-        "vlm"
-      ],
-      "ligature_artifact": null,
-      "cross_edition": true,
-      "cross_edition_engines": [
-        "dicta"
-      ],
-      "same_edition_agreeing": 2,
-      "abbreviation_shape": null,
-      "witnesses": {
-        "docai": null,
-        "vlm": "דהא",
-        "surya": "דהא",
-        "dicta": "דהא"
-      },
-      "page": 55,
-      "bbox": {
-        "x1": 0.10259579867124557,
-        "y1": 0.7401861548423767,
-        "x2": 0.14215080440044403,
-        "y2": 0.7575880289077759
-      }
-    },
-    {
-      "klal_id": 152,
-      "word_index": 58,
-      "opcode": "replace",
-      "final_text": "שכרתבו",
-      "consensus_reading": "שכתבו",
-      "agreeing_engines": [
-        "dicta",
-        "vlm"
-      ],
-      "ligature_artifact": null,
-      "cross_edition": true,
-      "cross_edition_engines": [
-        "dicta"
-      ],
-      "same_edition_agreeing": 1,
-      "abbreviation_shape": null,
-      "witnesses": {
-        "docai": null,
-        "vlm": "שכתבו",
-        "surya": "שכרתבו",
-        "dicta": "שכתבו"
-      },
-      "page": 55,
-      "bbox": {
-        "x1": 0.3368355929851532,
-        "y1": 0.755969226360321,
-        "x2": 0.39740419387817383,
-        "y2": 0.7729663848876953
-      }
-    },
-    {
-      "klal_id": 152,
-      "word_index": 98,
-      "opcode": "replace",
-      "final_text": "בסרק",
-      "consensus_reading": "בפרק",
-      "agreeing_engines": [
-        "dicta",
-        "surya"
-      ],
-      "ligature_artifact": null,
-      "cross_edition": true,
-      "cross_edition_engines": [
-        "dicta"
-      ],
-      "same_edition_agreeing": 1,
-      "abbreviation_shape": null,
-      "witnesses": {
-        "docai": null,
-        "vlm": null,
-        "surya": "בפרק",
-        "dicta": "בפרק"
-      },
-      "page": 55,
-      "bbox": {
-        "x1": 0.2472187876701355,
-        "y1": 0.7883448004722595,
-        "x2": 0.2904820740222931,
-        "y2": 0.8033185005187988
-      }
-    },
-    {
-      "klal_id": 152,
-      "word_index": 115,
-      "opcode": "replace",
-      "final_text": "וכי",
-      "consensus_reading": "דכי",
-      "agreeing_engines": [
-        "surya",
-        "vlm"
-      ],
-      "ligature_artifact": null,
-      "cross_edition": false,
-      "cross_edition_engines": [],
-      "same_edition_agreeing": 2,
-      "abbreviation_shape": null,
-      "witnesses": {
-        "docai": null,
-        "vlm": "דכי",
-        "surya": "דכי",
-        "dicta": "הכי"
-      },
-      "page": 55,
-      "bbox": {
-        "x1": 0.3825710713863373,
-        "y1": 0.8021044135093689,
-        "x2": 0.40914708375930786,
-        "y2": 0.8174828290939331
-      }
-    },
     {
       "klal_id": 152,
       "word_index": 127,
@@ -7748,102 +7311,6 @@
     }
   ],
   "159": [
-    {
-      "klal_id": 159,
-      "word_index": 29,
-      "opcode": "replace",
-      "final_text": "היכאת",
-      "consensus_reading": "היכא",
-      "agreeing_engines": [
-        "dicta",
-        "surya",
-        "vlm"
-      ],
-      "ligature_artifact": null,
-      "cross_edition": true,
-      "cross_edition_engines": [
-        "dicta"
-      ],
-      "same_edition_agreeing": 2,
-      "abbreviation_shape": null,
-      "witnesses": {
-        "docai": null,
-        "vlm": "היכא",
-        "surya": "היכא",
-        "dicta": "היכא"
-      },
-      "page": 57,
-      "bbox": {
-        "x1": 0.7180752754211426,
-        "y1": 0.7550689578056335,
-        "x2": 0.7643430233001709,
-        "y2": 0.7712895274162292
-      }
-    },
-    {
-      "klal_id": 159,
-      "word_index": 117,
-      "opcode": "replace",
-      "final_text": "בר\"ס",
-      "consensus_reading": "בר\"פ",
-      "agreeing_engines": [
-        "dicta",
-        "surya",
-        "vlm"
-      ],
-      "ligature_artifact": null,
-      "cross_edition": true,
-      "cross_edition_engines": [
-        "dicta"
-      ],
-      "same_edition_agreeing": 2,
-      "abbreviation_shape": null,
-      "witnesses": {
-        "docai": null,
-        "vlm": "בר\"פ",
-        "surya": "בר\"פ",
-        "dicta": "בר\"פ"
-      },
-      "page": 57,
-      "bbox": {
-        "x1": 0.3701418936252594,
-        "y1": 0.830900251865387,
-        "x2": 0.4077729880809784,
-        "y2": 0.8475263714790344
-      }
-    },
-    {
-      "klal_id": 159,
-      "word_index": 163,
-      "opcode": "replace",
-      "final_text": "ראשה",
-      "consensus_reading": "האשה",
-      "agreeing_engines": [
-        "dicta",
-        "surya",
-        "vlm"
-      ],
-      "ligature_artifact": null,
-      "cross_edition": true,
-      "cross_edition_engines": [
-        "dicta"
-      ],
-      "same_edition_agreeing": 2,
-      "abbreviation_shape": null,
-      "witnesses": {
-        "docai": null,
-        "vlm": "האשה",
-        "surya": "האשה",
-        "dicta": "האשה"
-      },
-      "page": 57,
-      "bbox": {
-        "x1": 0.48858729004859924,
-        "y1": 0.8755068778991699,
-        "x2": 0.5336211919784546,
-        "y2": 0.8933495283126831
-      }
-    },
     {
       "klal_id": 159,
       "word_index": 226,
