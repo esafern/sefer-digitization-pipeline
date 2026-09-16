@@ -249,6 +249,15 @@ applying it to the corpus remain two separate, deliberate steps.
         stacked on top of itself. Rendered and looked at before republishing this time - the
         step the page-design guidance asks for and the first publish skipped (Lesson 45, PIXELS,
         NOT THE DOM).
+      - **The nun/gimel point was about us, not him.** "88 -> 6" is this project's history. What
+        the Sefaria editor actually raised (`0FJ`) was that nun/gimel interchanges were frequent
+        in Arabic words and some of HIS corrections might be wrong. Re-measured to answer that:
+        over the hundred, our independent read agrees with his nun/gimel readings everywhere
+        except **7** places (`text_words` basis; the scoring tool's own basis counts 6) - 3 plain
+        misreadings of ours (`ינח` 26/93, `והתרנום` 55/262, `מננד` 79/1118) and 4 open: `נאוה`
+        (ours `גאוה`, 46/104), `ההנעה` (`ההגעה`, 70/299), `בבנא` (`בבגא`, 92/26), `ישגה`
+        (`ישנה`, 79/407). The draft paragraph and script beat 1 now say that; neither asserts
+        which way the four go - that is an ink question, not yet read.
 
 
 0HT. **[2026-09-16, reviewer: review the draft to the Sefaria editor, "update facts, remove the
