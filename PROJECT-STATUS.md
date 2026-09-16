@@ -289,6 +289,32 @@ applying it to the corpus remain two separate, deliberate steps.
         worth more than the pixels, and carries `0EK`'s other two asks that are
         still unanswered: the redistribution terms, since Sefaria is the
         destination, and the spec before the files.
+    * **CORRECTED, same day, on the reviewer's question "so we have it
+      already?" - YES, AND THAT CHANGES THE PLAN: the NLI contact is NOT on the
+      critical path for Yad Malachi.**
+      - `nli_verification/berlin_square_corrected.pdf` **is** an NLI full-tone
+        copy of Yad Malachi, already in this repo - but it is the **lowest**
+        tier, `PDF + Medium`, 873x1329 = **1.16 MP**, against Google's 18.3 MP.
+      - **Looked at, not assumed.** The same printed page rendered from both to
+        the same physical size: the 1-bit Google crop resolves the strokes
+        cleanly and the 8-bit NLI crop is visibly soft, letters greyed and
+        smeared together. Tone at 1.16 MP does not recover what 18.3 MP bitonal
+        resolves. **The copy we hold is not a usable substitute and no
+        experiment should be run on it.**
+      - **The tier that matters was never downloaded for this book.**
+        `JPEG\ZIP + Maximal (100%)` is 1745x2658 = **4.6 MP** and is available
+        ANONYMOUSLY - four times the pixels of what we hold. That is the exact
+        route that produced HaShorashim's full-tone corpus: the reviewer
+        downloaded 656 JPEGs, 405 MB, at *complete document + JPEG\ZIP +
+        Maximal*, no account and no correspondence.
+      - **And it is within a whisker of the master.** 300 dpi on this page is
+        ~5.2 MP; the free anonymous tier is 4.6 MP. The only thing the contact
+        can add is the absence of JPEG compression.
+      - **So the decisive move costs one download and no waiting**: pull Yad
+        Malachi at `JPEG\ZIP + Maximal`, then run `0FW`'s controlled comparison -
+        one engine, one set of pages, only the pixels differ. The email is worth
+        sending for the redistribution terms and the uncompressed master, but
+        nothing needs to wait for it.
 
 0HI. **[2026-09-16, reviewer: "I need a list of the ways our scan differs from
     sef... need a complete list so i can discuss if the diffs are intentional
