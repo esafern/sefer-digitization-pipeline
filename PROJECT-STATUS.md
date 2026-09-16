@@ -206,6 +206,30 @@ applying it to the corpus remain two separate, deliberate steps.
         short). Its precondition was blind once too (Lesson 42): it first
         asked whether the title shrank, which is the thing under test.
 
+0HU. **[2026-09-16, reviewer: "script out (big picture) the demo - show where we add value and
+    make his life easier"] DEMO SCRIPT PUBLISHED; EVERY SCREEN CHECKED ON :8422. AND A
+    MISLEADING FIELD NAME IN THE EXPORT.**
+    * **The script:** <https://claude.ai/artifact/XYo4R5BxhqWboBZUtVFMpm> - eight beats, ~25
+      minutes, each with the screen to open, the line to say, the measured number and what it
+      saves Sefaria's reviewers: the hundred as yardstick (95.1% words, nun/gimel 88 -> 6); 5% of
+      words holding 89 of 90 corrections; the scan one click away and the text views; the tier
+      naming the kind of difference (entry 9 w22); rulings recorded, applied and listed; the
+      citation check (146); three ink questions on reviewed text; next steps, handing off to the
+      seven questions.
+    * **Checked before publishing, on the demo copy:** entry 1's four rulings (w37 `אַבְּ`); 57/11
+      `הוא`, 68/23 `גמרה`, 79/389 `וזה`; 9/22 `בעליוי` served as tier `C_footnote_marker` with
+      Isaiah 1:3; entry 73's homograph split (109 words of theirs); entry 59's four views.
+    * **Two claims caught and softened before publishing:** the text views do NOT line their
+      texts up with ours line for line (`0HH`: punctuation tokens and inline numerals), so the
+      script says to toggle for the reading, not the layout; and the 18-in-reviewed-entries
+      citation figure is from 2026-09-14, not re-run.
+    * **FOUND: `INTERVENTIONS.json` calls the pre-correction OCR reading `as_printed`.** The demo
+      export lists entry 1 w37 as `as_printed: אַבְּן` - but the page does not print that nun; it
+      is a footnote mark the OCR fused into the word, and removing it is the correction. For an
+      OCR-artifact correction the field states something false about the page. The script says to
+      describe the list rather than open the JSON. Not changed: renaming a field in an export
+      Sefaria consumes is their format question as much as ours (`tools/export_corpus.py`).
+
 0HT. **[2026-09-16, reviewer: review the draft to the Sefaria editor, "update facts, remove the
     defensive and negative language"] REVISED, AS A NEW DRAFT BESIDE THE OLD ONE IN THE
     PRIVATE CORPUS ROOT. SIX CLAIMS WERE STALE; ALL RE-MEASURED TODAY.** Not sent.
