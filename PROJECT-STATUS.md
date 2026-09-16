@@ -206,6 +206,60 @@ applying it to the corpus remain two separate, deliberate steps.
         short). Its precondition was blind once too (Lesson 42): it first
         asked whether the title shrank, which is the thing under test.
 
+0HJ. **[2026-09-16] THE NLI CONTACT'S ANSWER ON SCAN SOURCES: 300 DPI IS THE
+    CEILING, MASTER INCLUDED. `0FO`'s OPEN REQUEST IS CLOSED, AS UNAVAILABLE -
+    AND THE RULING FREEZE IT WAS BLOCKING CAN LIFT.**
+    * **The answer, paraphrased** (the repo names correspondents by role):
+      printed books are scanned at 300 DPI; the MASTER file is at that same
+      quality; the access copy is compressed and loses some detail but is also
+      300 DPI.
+    * **What it closes.** `0FO` ended "the NLI contact confirms the online copy is
+      300 dpi and is asking what the printed-books masters are held at", and
+      framed the whole request as the thing that would make pre-processing worth
+      doing: "a master that is full-tone AND high-resolution is the only input on
+      which the usual pipeline has anything to work with". **That input does not
+      exist.** The three sources this project holds are now known to be the whole
+      field:
+
+      | scan | pixels | depth | dpi |
+      |---|---|---|---|
+      | Google Books | 3528x5278 | 1 bpc, bitonal | ~600 |
+      | HebrewBooks | 2266x3444 | 1 bpc, bitonal | ~385 |
+      | NLI full-tone | ~1843x2890 | RGB | **300, and that is NLI's ceiling** |
+
+      Nothing combines full tone with more than 300 dpi, and nothing will.
+    * **We already hold the 300 dpi full tone, at native resolution, for the
+      whole slice.** Measured: `page_image_sources.json` records all **94** pages
+      58-151 as `nli_fulltone` (69 `PASS`, 25 `TEXT_ONLY` on the offset check),
+      and the dashboard images are CROPS of the Rosetta JPEGs, not downsamples -
+      page 58 is 1344x1917 cut from an 1843x2890 original whose EXIF declares
+      300x300 dpi. The `nominal_dpi: 150.0` in that file describes the base
+      HebrewBooks PDF the substitution replaced, not what we read.
+    * **The one thing still on the table is compression, and it is small.** Our
+      copies are JPEG at **0.81 bits per pixel**, quantization table
+      `[6, 4, 4, 6, 10, 16, 20, 24]` - the standard IJG luminance table at
+      roughly quality 81. The master would be the same pixel count without that.
+      Whether it buys a reading is not measurable without it, and the best
+      evidence available says no: `0FQ`'s paired experiment DOUBLED the
+      resolution on 66 nun/gimel positions and moved the adjudicator by **net
+      -1** (3 wrong->right, 4 right->wrong), at 18% correct on a two-way choice
+      either way. Removing JPEG artifacts is a far smaller change than 2x
+      resolution.
+    * **The consequence for the corpus, and it is the reviewer's call.**
+      `0GV` set "no rulings until the NLI contact answers on scan sources" and
+      `0GZ` repeated it ("no ruling goes into the real corpus until the scan
+      source is settled"). The answer is in and it is a ceiling, so the source we
+      are reading is the best full-tone source that exists for this book. The
+      freeze has nothing left to wait for. The real ledger is still 0 bytes and
+      `--apply-witness-choices` is still off; turning it on remains a separate,
+      explicit decision (`0GQ` item 4), and `0HE` findings 2 and 3 are still open
+      on that path.
+    * **`book.json`'s `versionSource` needs no change.** It already names the NLI
+      record (`0GV`), which is the source we are in fact reading.
+    * **Cheap parallel ask, if the reviewer wants it:** the uncompressed master
+      for the 94 pages of the slice only, not the 656-page book. It costs nothing
+      to request and nothing to wait for, since it changes no decision above.
+
 0HI. **[2026-09-16, reviewer: "I need a list of the ways our scan differs from
     sef... need a complete list so i can discuss if the diffs are intentional
     b/c of policy"] EVERY CLASS, COUNTED, ON TWO BASES. TWO OF THE REVIEWER'S
