@@ -302,6 +302,40 @@ def is_superseded_by_later_applied(decision, already_applied):
     return False
 
 
+def overtaken_inside_span(decision, klal, already_applied):
+    """True when a multi-word ruling's span no longer reads as written ONLY
+    because later applied rulings replaced words inside it.
+
+    ADDED 2026-09-16 (item 0HR). is_superseded_by_later_applied() looks at the
+    ruling's own start index, so a two-word ruling at w136 overtaken at w137 by a
+    later ruling on the second word alone (a mark written as ASCII) was reported
+    as a MISMATCH though the corpus was right. Every differing word must be
+    explained by a later APPLIED replacement ruling at exactly that word whose
+    text is what the corpus now holds; anything else stays a mismatch.
+    """
+    if decision["decision_type"] not in REPLACEMENT_TYPES:
+        return False
+    span = (decision.get("chosen_text") or "").split()
+    if len(span) < 2:
+        return False
+    words = cio.words_of(klal)
+    start = decision["word_index"]
+    live = words[start:start + len(span)]
+    if len(live) != len(span):
+        return False
+    differing = [start + i for i, (want, got) in enumerate(zip(span, live)) if want != got]
+    if not differing:
+        return False
+    for wi in differing:
+        later = [r for r in rd.history_for(decision["klal_id"], wi)
+                 if r.get("decision_type") in REPLACEMENT_TYPES
+                 and r["id"] in already_applied and r.get("ts", "") > decision.get("ts", "")
+                 and (r.get("chosen_text") or "").split() == [words[wi]]]
+        if not later:
+            return False
+    return True
+
+
 def expected_span(decision):
     """The word(s) an applied decision claims it wrote, as a list."""
     if decision["decision_type"] == "punctuation_choice":
@@ -458,6 +492,10 @@ def main():
                                f"klal_id not found in part1.json at all")
             continue
         result = checker(decision, klal)
+        if result not in ("ok", "unverifiable_word_count_change") and \
+                overtaken_inside_span(decision, klal, already_applied):
+            n_superseded += 1
+            continue
         if result == "ok":
             n_ok += 1
         elif result == "unverifiable_word_count_change":

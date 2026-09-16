@@ -871,6 +871,19 @@ def is_watermark(tok_text):
     return clean_word(tok_text).lower() in WATERMARK_WORDS
 
 
+# THE CORPUS'S ABBREVIATION MARKS ARE ASCII. Reviewer 2026-09-16 (item 0HR):
+# "change to ascii everywhere". A printed gershayim is written `"` and a geresh
+# `'` - 22,946 and 10,386 of them against 1 and 5 Hebrew characters when this
+# was decided - and a Hebrew keyboard types U+05F4/U+05F3 into the dashboard.
+# One copy, used where rulings are written.
+_ASCII_MARKS = str.maketrans({"\u05F4": '"', "\u05F3": "'"})
+
+
+def ascii_marks(text):
+    """`text` with Hebrew gershayim/geresh written as ASCII `"`/`'`; None stays None."""
+    return text.translate(_ASCII_MARKS) if isinstance(text, str) else text
+
+
 def hebrew_letters_only(s):
     """Drop everything that is not a Hebrew letter - the normalization used
     when comparing two OCR engines' readings, or a reading against the

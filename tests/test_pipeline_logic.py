@@ -10815,3 +10815,55 @@ def test_review_api_doc_names_every_route_and_only_real_ones():
     assert len(served) >= 19, f"the route pattern found only {sorted(served)}"
     assert not served - named, f"served, missing from REVIEW-API.md: {sorted(served - named)}"
     assert not named - served, f"in REVIEW-API.md, not served: {sorted(named - served)}"
+
+
+def test_a_ruling_is_recorded_with_ascii_abbreviation_marks(decisions_path):
+    """Item 0HR, reviewer 2026-09-16: "change to ascii everywhere". The corpus
+    writes a printed gershayim/geresh as ASCII `"` and `'` (22,946 and 10,386
+    against 1 and 5 Hebrew characters), and a Hebrew keyboard types U+05F4 and
+    U+05F3 into the dashboard - five of one afternoon's manual corrections
+    arrived that way and put two spellings of one printed mark into the text.
+
+    Normalised at the ONE place every ruling writer passes through, and only in
+    `chosen_text`: a snapshot's `original_word` must keep matching the corpus
+    as it stands, or the applier's drift guard refuses the ruling."""
+    rec = rd.append_decision("manual_correction", klal_id=1, word_index=2,
+                             chosen_source="custom", chosen_text="דב״מ בפ׳",
+                             candidate_snapshot={"word_index": 2, "original_word": "רב״ט"},
+                             reviewer="local", path=decisions_path)
+    assert rec["chosen_text"] == 'דב"מ בפ\''
+    assert rec["candidate_snapshot"]["original_word"] == "רב״ט", "the drift anchor was rewritten"
+    stored = rd.all_current("manual_correction", path=decisions_path)[(1, 2)]
+    assert stored["chosen_text"] == 'דב"מ בפ\''
+    assert cio.ascii_marks("ע״ב ס׳") == 'ע"ב ס\''
+    assert cio.ascii_marks(None) is None
+
+
+def test_the_audit_sees_a_later_ruling_inside_an_earlier_multi_word_span(monkeypatch):
+    """Item 0HR. An applied ruling that wrote a TWO-word span at w136 was
+    overtaken at w137 by a later applied ruling on the second word alone (a
+    mark written as ASCII). The corpus is right, but supersession was looked up
+    only at the ruling's own start index, so the audit reported a MISMATCH - the
+    false alarm a reviewer learns to scroll past.
+
+    Narrow on purpose: every word of the span that differs must be explained by a
+    later APPLIED replacement ruling at that exact word whose text is what the
+    corpus now holds. A span word that differs for any other reason - a revert,
+    a lost edit - is still a mismatch."""
+    old = {"id": "old", "ts": "2026-09-01T00:00:00", "decision_type": "manual_correction",
+           "klal_id": 216, "word_index": 136, "chosen_text": "ראיתי להתוס׳"}
+    new = {"id": "new", "ts": "2026-09-16T00:00:00", "decision_type": "manual_correction",
+           "klal_id": 216, "word_index": 137, "chosen_text": "להתוס'"}
+    ledger = {(216, 136): [old], (216, 137): [new]}
+    monkeypatch.setattr(aad.rd, "history_for", lambda k, w=None, t=None, **kw: ledger.get((k, w), []))
+    klal = {"klal_id": 216, "clean_text": "א ב ראיתי להתוס' ג"}
+    klal["clean_text"] = " ".join(["x"] * 136 + ["ראיתי", "להתוס'", "ג"])
+    assert aad.overtaken_inside_span(old, klal, {"old", "new"})
+    # the later ruling was never applied: the old claim still stands, and fails
+    assert not aad.overtaken_inside_span(old, klal, {"old"})
+    # the later ruling's text is not what the corpus holds: a real mismatch
+    klal_reverted = {"klal_id": 216, "clean_text": " ".join(["x"] * 136 + ["ראיתי", "להתוס", "ג"])}
+    assert not aad.overtaken_inside_span(old, klal_reverted, {"old", "new"})
+    # the FIRST word differs too, with nothing to explain it
+    klal_lost = {"klal_id": 216, "clean_text": " ".join(["x"] * 136 + ["ראית", "להתוס'", "ג"])}
+    assert not aad.overtaken_inside_span(old, klal_lost, {"old", "new"})

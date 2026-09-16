@@ -501,6 +501,12 @@ def append_decision(decision_type, klal_id, word_index=None, chosen_source=None,
             f"reviewer {reviewer!r} may not write a manual_correction: that type means "
             "A PERSON RULED, and the dashboard renders it as settled. An automated "
             "pass records a klal_flag (needs_revisit=True) so a human still sees it.")
+    # ASCII MARKS IN EVERY RULING'S TEXT (item 0HR, reviewer 2026-09-16: "change to
+    # ascii everywhere"). This is the one place every writer passes through - the
+    # six dashboard routes and every tool - so a Hebrew keyboard's U+05F4/U+05F3
+    # cannot reach the corpus by any of them. `chosen_text` ONLY: a snapshot's
+    # `original_word` is the drift anchor and has to match the corpus as it is.
+    chosen_text = cio.ascii_marks(chosen_text)
     record = {
         "id": uuid.uuid4().hex[:12],
         "ts": _now_iso(),

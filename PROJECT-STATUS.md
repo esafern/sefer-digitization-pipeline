@@ -206,6 +206,50 @@ applying it to the corpus remain two separate, deliberate steps.
         short). Its precondition was blind once too (Lesson 42): it first
         asked whether the title shrank, which is the thing under test.
 
+0HR. **[2026-09-16, reviewer: "change to ascii everywhere"] DONE FOR PART 1,
+    AND FOR EVERY RULING FROM NOW ON. PART 3'S ONE WORD LEFT, BY THE GATE.**
+    * **Swept first.** Non-ASCII quote-like characters (gershayim, geresh,
+      curly quotes, modifier/prime marks) in `clean_text` and `title` of every
+      corpus: **Part 1: 5 `״` + 5 `׳`, in 10 words. Part 2: none. Part 3: one
+      `׳`** (klal 575 w118 `ס׳`). **Sefer HaShorashim: none.** No title carried
+      one.
+    * **The 10 Part 1 words, through the decision pipeline** - one
+      `manual_correction` each, letters unchanged, recorded as the reviewer's
+      ruling relayed from this session (`actor` `r-eric`, `via`
+      `claude-code-session`, the instruction quoted in the note), dry run, apply,
+      audit, `./rebuild_all.sh --skip-vision`: `נ״ד` (2/316), `הנז׳` (4/131),
+      `מה׳` (88/622), `דב״מ` (128/949), `בפ״ק` (150/293), `בס״פ` (150/533), `מ״ו`
+      (154/506), `בפ׳` (159/879), `כ׳` (187/213), `להתוס׳` (216/137) - each now
+      ASCII. Diffed: 10 words changed, every one only in its mark. **0 Hebrew
+      marks left in `part1.json`; the dashboard serves the ASCII form at 10 of
+      10 and 0 Hebrew marks across klalim 1-222.** Authored files byte-identical
+      across the rebuild; gate 581 passed; all three dashboards restarted
+      (`corpus_io.py` and `review_decisions.py` changed).
+    * **From now on, at the write.** `cio.ascii_marks()` is applied to
+      `chosen_text` inside `review_decisions.append_decision` - the one place the
+      six dashboard routes and every tool pass through - so a Hebrew keyboard
+      cannot put `״`/`׳` into the corpus by any route. `original_word` in the
+      snapshot is NOT touched: it is the drift anchor and must match the corpus
+      as it stands. Test
+      `test_a_ruling_is_recorded_with_ascii_abbreviation_marks`, which fails with
+      the normalisation removed. The existing ledger is append-only and was not
+      rewritten; old rows keep what was typed.
+    * **Part 3's `ס׳` was NOT changed.** Applying any `part2.json`/`part3.json`
+      edit needs its own explicit go-ahead under the Parts 2-3 gate, and that
+      text is slated to be discarded and redone. Say the word and it is one
+      ruling.
+    * **An audit false alarm this exposed, fixed.** Normalising `להתוס׳` at
+      216/137 made `audit_applied_decisions.py` report a new MISMATCH (2 -> 3) on
+      an OLDER applied ruling that wrote the two-word span `ראיתי להתוס׳` at
+      216/136: supersession was looked up only at a ruling's own start index. The
+      corpus was right. `overtaken_inside_span()` now treats such a ruling as
+      superseded ONLY when every differing word in its span carries a later,
+      APPLIED replacement ruling at exactly that word whose text the corpus now
+      holds. Test `test_the_audit_sees_a_later_ruling_inside_an_earlier_multi_word_span`
+      fails under three mutations (an unapplied later ruling counting, the later
+      text not checked against the corpus, one explained word being enough).
+      Audit back to the 2 known mismatches.
+
 0HQ. **[2026-09-16, reviewer: "apply my decisions to the corpus"] 26 RULINGS
     APPLIED, 25 WORDS CHANGED IN PART 1, VERIFIED ON THE DASHBOARD. AND A MARK
     CONVENTION QUESTION FOR THE REVIEWER.**
@@ -265,6 +309,8 @@ applying it to the corpus remain two separate, deliberate steps.
       ASCII, or adopt Unicode as the convention (33,000 existing marks to
       convert, through the pipeline). Either way the dashboard's input will keep
       producing whichever the reviewer's keyboard types until one is chosen.
+      **DECIDED THE SAME DAY: ASCII. Done for Part 1 and enforced at the write -
+      see `0HR`.**
 
 0HP. **[2026-09-16, reviewer: "ok" to a second blinded sheet] SHEET 2 PUBLISHED:
     THE 189 UNSURFACED FULL-TONE CANDIDATES, STRATIFIED. SCORING WAITS ON THE
