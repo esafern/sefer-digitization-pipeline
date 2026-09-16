@@ -206,6 +206,25 @@ applying it to the corpus remain two separate, deliberate steps.
         short). Its precondition was blind once too (Lesson 42): it first
         asked whether the title shrank, which is the thing under test.
 
+0HP. **[2026-09-16, reviewer: "ok" to a second blinded sheet] SHEET 2 PUBLISHED:
+    THE 189 UNSURFACED FULL-TONE CANDIDATES, STRATIFIED. SCORING WAITS ON THE
+    REVIEWER.**
+    * **Design, fixed before any answer.** From `0HO`'s 189: **all 13** whose
+      corpus reading is not a lexicon word (a census, not a sample) plus a
+      **random 27 of the other 176** (seed `20260917`). Page order; strata not
+      shown. Each item: the word cropped from both scans, the corpus reading and
+      the full-tone reading as A and B in a per-item random order. Key held back
+      in `scratch/ink_check_0HN/sheet2/key.json` (gitignored); builder beside it.
+      Every row was asserted against the candidate file before cropping (corpus
+      reading = bitonal token text, full-tone reading = full-tone token text).
+    * **The sheet:** <https://claude.ai/artifact/6VPXzpZFdpb8N9yX3uuGSD>, answers
+      saved to its own store as sheet 1 did.
+    * **What it will measure.** Two numbers, never pooled: (1) the 13 as plain
+      counts - how many are real errors; (2) on the 27, the share where the ink
+      agrees with FULL TONE among A/B picks, with a 95% interval, as the estimate
+      for the 176 - reported inconclusive if the interval straddles an even split.
+      Neither and can't-tell reported, not dropped.
+
 0HO. **[2026-09-16, reviewer: "then do the full docai"] ALL OF PART 1 READ BY
     DocAI FROM BOTH SCANS. 367 PLACES THE CORPUS HOLDS THE BITONAL READING AND
     FULL TONE READS OTHERWISE; 189 SURFACED NOWHERE. AND `0HN`'S 86% DOES NOT
