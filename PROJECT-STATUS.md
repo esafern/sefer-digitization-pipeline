@@ -206,6 +206,116 @@ applying it to the corpus remain two separate, deliberate steps.
         short). Its precondition was blind once too (Lesson 42): it first
         asked whether the title shrank, which is the thing under test.
 
+0HH. **[2026-09-16, reviewer on <http://127.0.0.1:8421/entry/32/word/194>: "we
+    chunk the word and the following bracket into two tokens - sef has one.
+    similarly for the period after each sentence... throws off alignment when
+    switching. also - why do we surface this word as a dispute but not the
+    opening bracket word `[ כמו` vs `[כמו`"] ALL THREE CONFIRMED, MEASURED, AND
+    THE THIRD HAS A CAUSE NOBODY HAD LOOKED AT. NOTHING CHANGED.**
+    * **1. The separate tokens are DOCUMENT AI's, not this build's.** Page 65's
+      token stream reads
+      `['אולי', '21', 'שם', 'מקום', '[', 'בבבל', ']', '.', 'כי', 'אויל', ...]` -
+      64 standalone bracket/period/quote tokens on that page alone, each with
+      its own bbox. `build_root_corpus.py:639` joins the stream with
+      `" ".join(...)`, faithfully, so `clean_text` inherits the tokenization.
+      Entry 32 w191-195 is `[ כמו אשת הן ]`.
+      **Extent, the whole slice: 2,791 punctuation-only word positions, 6.67% of
+      our 41,873, and they are in all 317 entries.** `.` 1,385, `"` 330, `]`
+      278, `[` 276, `'` 209, `,` 149, `()` 94, the rest singletons. Yad Malachi
+      has the same shape at a third the rate (4,563 of 188,740, 2.42%), mostly
+      the geresh and the `•` separator.
+    * **2. The toggle cannot line up anywhere, and the arithmetic says why.**
+      Our 41,873 words against Sefaria's 35,628 - a gap of **6,245, of which
+      5,566 (89%) is these 2,791 punctuation tokens plus our 2,775 bare footnote
+      numerals**. 679 is everything else. Entry 32: 214 words against their 187.
+      **Not one of the 317 entries has the same word count as theirs**, so
+      `0GX`'s line-for-line match (verified against our OCR, which shares our
+      tokenization) can never hold against THEIR two texts.
+      The renderer adds to it: `renderAltBody` appends a text node after every
+      word span -
+      ```js
+      // review_frontend/app.js:5296
+          span.textContent = plain ? withoutPoints(words[i]) : words[i];
+          body.appendChild(span);
+          body.appendChild(document.createTextNode(' '));
+      ```
+      - so our standalone period draws as ` . ` where theirs draws `המה.`: a
+      space before every sentence end that their text does not have, 1,385 times.
+    * **3. The queue cannot see a bracket AT ALL. It is not `bracket_only()` -
+      it is one level earlier, in the tokenizer, and `bracket_only` never runs.**
+      ```python
+      # tools/build_witness_disputes.py, text_words()
+          for raw in cio.HEBREW_PUNCT.sub(" ", cio.strip_points(normed)).split():
+              w = cio.hebrew_letters_only(raw)
+              if len(w) >= 2:
+                  out.append((w, raw, pos))
+      ```
+      Run on the reviewer's own phrase:
+      ```
+      ours   -> [('ואשת',…,0), ('אולת',…,1), ('כמו','כמו',3), ('אשת',…,4), ('הן','הן',5), ('או',…,7)]
+      theirs -> [('ואשת',…,0), ('אולת',…,1), ('כמו','[כמו',2), ('אשת',…,3), ('חן','חן]',4), ('או',…,5)]
+      ```
+      Our `[` at position 2 and `]` at position 6 are not in the list at all,
+      and `כמו` / `[כמו` are EQUAL, so `SequenceMatcher` reports no difference
+      and no row is ever built for `bracket_only` to judge. `הן` / `חן` differ in
+      a letter, so that one becomes a row - and it carries the RAW tokens, which
+      is why the reviewer is shown `חן]` with a bracket the panel gives them no
+      way to act on.
+      **What the comparison never sees: 5,910 of our 41,873 word positions,
+      14.1%** - 2,791 punctuation-only, 2,775 bare numerals (correctly, they are
+      footnote marks), 147 one-letter Hebrew words, 197 other.
+      **And of the 33,856 pairs it aligns as EQUAL, 3,099 have different raw
+      tokens** - 2,704 other punctuation, **395 a bracket**.
+    * **The 395, split, because only one half is work.** For **355** our text HAS
+      the bracket, as its own token beside the word: nothing to rule on, it is
+      the same difference as 1 and 2. For the rest our text has no bracket
+      anywhere near - **18 positions at a generous +/-3-word window** (40 at
+      +/-1, 19 at +/-2; the wider windows are absorbing a footnote numeral
+      sitting between the word and the bracket). These are the ones that could be
+      `0GN`'s class - a printed bracket our OCR dropped - or their editor's own
+      insertion, which only the ink decides. **None of the 18 is surfaced
+      anywhere**, and 276/118-119 are one bracketed span, so it is ~17 spans:
+      - <http://127.0.0.1:8421/entry/55/word/212> `אי` against their `[אי]`
+      - <http://127.0.0.1:8421/entry/65/word/363> `תקוה` against their `תקוה].`
+      - <http://127.0.0.1:8421/entry/79/word/920> `כנפיו` against their `[כנפיו]`
+      - <http://127.0.0.1:8421/entry/79/word/1033> `ודור` against their `[ודור]`
+      - <http://127.0.0.1:8421/entry/82/word/19> `בשוא` against their `[בשוא]`
+      - <http://127.0.0.1:8421/entry/90/word/40> `למשקלת` against their `למשקלת]`
+      - <http://127.0.0.1:8421/entry/132/word/893> `ענוים` against their `[ענוים]`
+      - <http://127.0.0.1:8421/entry/132/word/944> `ואשר` against their `[ואשר]`
+      - <http://127.0.0.1:8421/entry/132/word/1109> `סבבונו` against their `[סבבונו]`
+      - <http://127.0.0.1:8421/entry/133/word/692> `המלך` against their `[המלך]`
+      - <http://127.0.0.1:8421/entry/133/word/870> `יצחק` against their `יצחק].`
+      - <http://127.0.0.1:8421/entry/183/word/254> `וצורם` against their `[וצורם]`
+      - <http://127.0.0.1:8421/entry/196/word/244> `כי` against their `[כי`
+      - <http://127.0.0.1:8421/entry/216/word/337> `ברכיו` against their `[ברכיו]`
+      - <http://127.0.0.1:8421/entry/276/word/118> `והנה` against their `[והנה`
+      - <http://127.0.0.1:8421/entry/276/word/119> `הוא` against their `הוא]`
+      - <http://127.0.0.1:8421/entry/288/word/23> `תריב` against their `[תריב]`
+      - <http://127.0.0.1:8421/entry/313/word/140> `ונשקעה` against their `[ונשקעה]`
+      This is Lesson 26 (THE FILTER THAT HIDES) at the tokenizer: `0GN` measured
+      55 editorial rows and 8 bracket-only ones and read every one on the ink,
+      but that count was of rows the builder EMITTED. The rows it never built
+      were not counted until now.
+    * **Nothing is fixed, because the first two are one decision and it is the
+      reviewer's**, and this is the cheapest moment it will ever be: the real
+      ledger is 0 bytes, so re-tokenizing renumbers nothing that exists. Three
+      ways, and they are not exclusive:
+      1. **Leave `clean_text` as the DocAI token stream.** Every token keeps its
+         own bbox, which is what the scan highlighting hangs on, and `word_index`
+         stays as recorded. The toggle stays misaligned.
+      2. **Glue punctuation to its neighbour at build time.** Fixes all three at
+         once and is free TODAY on the real corpus. It renumbers the demo copy's
+         8 rulings, and it would have to merge two bboxes into one or drop one.
+         Yad Malachi's 1,005 applied rulings mean this cannot be a shared default
+         without a per-book switch.
+      3. **Join them for DISPLAY only**, the shape the reviewer already accepted
+         for niqqud (`0GY` option 2): nothing stored, served or exported changes,
+         `word_index` is untouched, and the toggle lines up. It does not help 3 -
+         the queue still cannot see a bracket.
+      The 18 above are separate from all of that and can be surfaced without
+      touching the tokenization.
+
 0HG. **[2026-09-16, reviewer: "fix 4 then 1"] `0HE` FINDINGS 4 AND 1 FIXED, PLUS
     THE SIBLING NEITHER OF THEM WAS IN. THE AUDIT WENT FROM 998 TO 1,005 AND
     FROM 0 TO 4 ON THE DEMO.**
