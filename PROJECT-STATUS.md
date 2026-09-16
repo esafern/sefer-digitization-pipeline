@@ -206,6 +206,97 @@ applying it to the corpus remain two separate, deliberate steps.
         short). Its precondition was blind once too (Lesson 42): it first
         asked whether the title shrank, which is the thing under test.
 
+0HI. **[2026-09-16, reviewer: "I need a list of the ways our scan differs from
+    sef... need a complete list so i can discuss if the diffs are intentional
+    b/c of policy"] EVERY CLASS, COUNTED, ON TWO BASES. TWO OF THE REVIEWER'S
+    OWN TWO EXAMPLES COME OUT DIFFERENTLY THAN EXPECTED.**
+    **Method, and the one thing that decides how to read the numbers.** Every
+    token-level difference between `master` and Sefaria, classified by a
+    normalization ladder (NFKD -> points -> geresh -> brackets -> all
+    punctuation -> letters) so each difference is attributed to the layer at
+    which it disappears. Run twice: against their **corrected** text (98
+    entries - the policy-bearing basis, because their raw OCR carries their own
+    errors, `0FD`) and against their **raw OCR** (all 317 - scale, but it mixes
+    policy with their mistakes). Our punctuation-only tokens and bare numerals
+    are set aside before aligning, or each one turns into a fake word division
+    (`0HH`). Maqaf-joined tokens of theirs are split, as our text writes them.
+
+    | class | vs corrected (98) | vs raw OCR (317) | whose choice |
+    |---|---:|---:|---|
+    | niqqud / cantillation | 3,976 | 10,691 | **theirs** |
+    | maqaf-joined tokens | 1,136 | 3,284 | **theirs** |
+    | our punctuation as its own token | 937 | 2,790 | ours (DocAI), `0HH` |
+    | our footnote numerals inline | 952 | 2,776 | ours, by design |
+    | their sentence punctuation glued | 563 | 1,680 | tokenization, `0HH` |
+    | geresh inside a letter name | 384 | 1,096 | **theirs - VERIFIED ON THE INK** |
+    | plene / defective | 300 | 913 | **not a policy - see below** |
+    | letters differ, other | 166 | 797 | real disagreements |
+    | brackets | 119 | 395 | mixed, `0GN` / `0HH` |
+    | word division | 79 | 472 | mixed |
+    | divine name | 35 | 87 | **theirs** |
+    | inline source citations | 21 | 3 | **theirs**, corrected layer only |
+    | nun / gimel | 8 | 55 | OCR, both sides |
+    | a word only we have | 52 | 288 | to check |
+    | a word only they have | 54 | 1,136 | see the segmentation note |
+    | unicode presentation forms | 0 | 1 | theirs, `0GY` |
+
+    * **Niqqud, sized.** Our 41,873 words carry points on **20**; their 37,293
+      carry them on **12,759 (34.2%)**. `0GY` already settled where those come
+      from - the Masoretic text, carried in with their verse identification,
+      not this printing - and read the ink to prove it. Confirmed policy.
+    * **The geresh in letter names is THEIRS, and this is new.** They write
+      `האל'ף`, `הבי'ת`, `הגימ'ל`; we write `האלף`, `הבית`, `הגימל`.
+      **Read directly off the scan, two headings on two different pages**
+      (Lesson 9): page 58 prints `האלף והבית.` and page 147 prints `הגימל והפא
+      והנון.` - letterspaced for emphasis, **no geresh in either**. So the mark
+      is their editorial addition and our OCR is not dropping anything. Ordinary
+      abbreviations agree, which is what makes the class specific rather than
+      general: `ר"ל` 110 ours / 107 theirs, `ע"מ` 58 / 61. The whole gap is
+      letter names - ours 417 tokens with an internal mark against their 1,768.
+      Their convention also SPELLS THE NAME OUT: our `והרש` is their `והרי'ש`,
+      our `התו` their `התי'ו`, our `הוו` their `הוי'ו`.
+    * **Plene / defective: there is NO normalization policy. The reviewer's
+      guess does not survive the measurement, and neither does the example.**
+      - `ואיפשר` occurs 12 times in our text. **Sefaria writes `ואיפשר` in 9 of
+        them**, `ואפשר` in 2 (entries 32 and 79) and `ואיפשׁר` in 1. The
+        reviewer was looking at one of the two exceptions, which is exactly why
+        it is in the queue as `C_spelling_vav_yod`.
+      - Of the 300 plene differences against their corrected text, **266 (89%)
+        are inside a word THEY VOCALIZED** - i.e. inside an imported Masoretic
+        quotation, which is `0GY`'s finding again and the same mechanism that
+        makes the printed plene `עודנו` come back as `עֹדֶנּוּ`. 22 more are the
+        letter-name convention above.
+      - **That leaves 12 genuine running-text differences in 98 entries**, and
+        several are not spelling at all: `והוא`/`והיא`, `הפסקו`/`הפסוק`,
+        `נותנת`/`ניתנת`, `אחית`/`אחות`, `נוספת`/`נוספות`, their `ווזה` for our
+        `וזה`. The direction does lean our way (233 plene to their 67), which is
+        what an imported Masoretic text would produce on its own.
+    * **Divine name.** We write `י"י` 93 times; they write `ה'` 114 times and
+      `י"י` 6. A representation choice on their side, not a reading of the ink.
+    * **Structural, and it is showing the wrong text in the dashboard today.**
+      **We split 5 roots into two entries each where Sefaria has one**:
+      `אלה` (72/73), `ארש` (122/123), `בכה` (178/179), `בלה` (185/186), `גרש`
+      (313/314). Every one of our 312 distinct roots exists in their 1,974, so
+      nothing is unmatched - but both of our halves pair to the SAME Sefaria
+      entry, so one of the two comparison panes shows text that does not belong
+      to it. **This is 927 of the 1,136 "a word only they have"**: entry 73
+      alone accounts for 811 and entry 72 for 116. Entry 73 is ours 138 words
+      against the 853 it is being shown.
+      - <http://127.0.0.1:8421/entry/73/word/0> ours `האלף והלמד וההא הנראת`,
+        shown Sefaria's `האל'ף והלמ'ד והה'א הרפה` - the text of our entry 72.
+      - The others to check the same way: <http://127.0.0.1:8421/entry/123/word/0>,
+        <http://127.0.0.1:8421/entry/179/word/0>,
+        <http://127.0.0.1:8421/entry/186/word/0>,
+        <http://127.0.0.1:8421/entry/314/word/0>.
+    * **What is actually in dispute, once policy is set aside**: 166 letters-differ
+      rows, 12 spelling differences, 8 nun/gimel, 79 word divisions and ~106
+      words one side has and the other lacks, over the 98 entries they have
+      corrected. Everything else in the table above is a difference in how the
+      same text is written down.
+    * Nothing was changed. The classifier is a session script, not a tool in the
+      repo - if this list is going to be re-run after a rebuild it should become
+      one, and that is not built.
+
 0HH. **[2026-09-16, reviewer on <http://127.0.0.1:8421/entry/32/word/194>: "we
     chunk the word and the following bracket into two tokens - sef has one.
     similarly for the period after each sentence... throws off alignment when
