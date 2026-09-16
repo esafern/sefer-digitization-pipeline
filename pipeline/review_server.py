@@ -1791,9 +1791,29 @@ def api_klal_versions(klal_id):
     # Their one text per root runs a homograph pair together, so it covers
     # more than this entry; say which, rather than show it as this entry's
     # (code review 2026-09-13, finding 3).
-    covers = [kk["klal_id"] for kk in klalim_by_id.values()
-              if cio.root_key(kk.get("gematria") or "") == key]
-    out["theirs_covers"] = sorted(covers) if len(covers) > 1 else None
+    covers = sorted(kk["klal_id"] for kk in klalim_by_id.values()
+                    if cio.root_key(kk.get("gematria") or "") == key)
+    out["theirs_covers"] = covers if len(covers) > 1 else None
+    # AND CUT IT WHERE OUR ENTRIES DIVIDE (item 0HI, 2026-09-16). Naming the
+    # sibling was only half of that review finding: the other half kept serving
+    # the WHOLE shared text to each side, so the shorter entry was compared
+    # against a text several times its length - on the real corpus, our entry
+    # 73's 138 words against 853 of theirs, which is 811 of the 1,136 words the
+    # book appeared to have that we lack. `split_shared_comparison` aligns our
+    # entries JOINED, the way build_witness_disputes.group_disputes does, and
+    # REFUSES rather than guessing at a seam it cannot map - so `theirs_split`
+    # says which the reviewer is looking at and the note can too.
+    out["theirs_split"] = False
+    if len(covers) > 1:
+        texts_of = [klalim_by_id[i].get("clean_text", "") for i in covers]
+        here = covers.index(klal_id)
+        for view in ("theirs_ocr", "theirs_corrected"):
+            if not out.get(view):
+                continue
+            parts = cio.split_shared_comparison(texts_of, out[view])
+            if parts:
+                out[view] = parts[here]
+                out["theirs_split"] = True
     # WHERE EACH TEXT'S HEADING AND FOOTNOTE NUMERALS SIT (item 0GX, 2026-09-15;
     # reviewer: "hard to compare the texts b/c only the master text has the
     # title in bold. try to line the diff texts up as much as possible so the eye

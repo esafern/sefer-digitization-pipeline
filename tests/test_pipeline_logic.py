@@ -1501,6 +1501,72 @@ def test_reassigning_DECISIONS_PATH_redirects_calls_that_pass_no_explicit_path(
     assert list(rd.all_current("klal_flag")) == [(424242, None)]
 
 
+def test_a_comparison_text_shared_by_two_entries_is_cut_between_them():
+    """Item 0HI / the other half of the 2026-09-13 code review's finding 3.
+    Sefer HaShorashim has five HOMOGRAPH roots - two of our entries under one
+    heading root - and the comparison digitization keys its texts by root, so it
+    holds ONE text running both together. build_witness_disputes.group_disputes
+    was fixed to align the entries JOINED, but api_klal_versions still served the
+    whole shared text to each half, so the shorter one was compared against a
+    text several times its length.
+
+    Cut it where our own entries divide: align the joined entries against their
+    one text and slice at the boundary."""
+    ours = ["אלף בית גימל דלת", "הא ואו זין חית"]
+    theirs = "אלף בית גימל דלת . הא ואו זין חית"
+    got = cio.split_shared_comparison(ours, theirs)
+    assert got == ["אלף בית גימל דלת .", "הא ואו זין חית"], got
+    # every word of their text is in exactly one slice, in order
+    assert " ".join(got).split() == theirs.split()
+
+
+def test_the_split_refuses_rather_than_guessing_when_it_cannot_find_the_seam():
+    """A wrong cut is worse than no cut: it would hide the half it dropped, and
+    silence is the failure mode this repo is worst at seeing (Lesson 26). The
+    caller keeps the whole text and its "also covers" note when this returns
+    None.
+
+    EACH GUARD GETS ITS OWN CASE. The first cut of this test asserted only the
+    outcome, and three of its four cases were all caught by the SAME early
+    return - so removing the ordering guard and the quality floor both left it
+    green (Lesson 42, the mutation that did not fail)."""
+    # a single entry is not a shared text
+    assert cio.split_shared_comparison(["אלף בית"], "אלף בית") is None
+    # NOTHING MAPS: no word of ours is in their text, so no boundary exists
+    assert cio.split_shared_comparison(["אלף בית", "גימל דלת"], "קוף ריש שין תיו") is None
+    # THE FLOOR: two of eight words match, which is enough to place a cut and
+    # not enough to believe it
+    assert cio.split_shared_comparison(
+        ["אלף בית גימל דלת", "הא ואו זין חית"], "אלף הא קוף ריש שין תיו") is None
+    # THE FIRST CUT AT 0: nothing of the FIRST entry is in their text and the
+    # second's opens it, so the cut lands at 0 and would leave the first entry
+    # nothing. (Words merely out of ORDER do not reach this guard - difflib's
+    # blocks rise in both sequences, so a reversed pair comes back unmapped.)
+    assert cio.split_shared_comparison(["קוף ריש", "אלף בית"], "אלף בית") is None
+    # THE ORDERING GUARD needs THREE entries: with two there is one cut and
+    # nothing for it to be out of order with. Cuts can never DECREASE, for the
+    # same reason as above, so what it catches is two cuts on ONE word - here
+    # the middle entry matches nothing, so both boundaries resolve forward to
+    # their `גימל` and the middle entry would be served an empty slice.
+    assert cio.split_shared_comparison(
+        ["אלף בית", "קוף ריש", "גימל דלת"], "אלף בית גימל דלת") is None
+
+
+def test_the_split_drops_our_letterless_tokens_but_keeps_a_one_letter_word():
+    """Our text carries DocAI's punctuation tokens and inline footnote numerals
+    (item 0HH) and theirs carries neither, so those must not enter the
+    alignment. A one-letter WORD must, though - it is an anchor, and this is
+    where the key deliberately differs from build_witness_disputes.text_words,
+    which drops it. With the two-letter rule the seam below lands one word
+    early, putting their `ו` in the first slice when it opens the second
+    entry."""
+    assert cio.split_shared_comparison(
+        ["אלף . בית 12 גימל", "דלת הא ואו"], "אלף בית גימל דלת הא ואו") == \
+        ["אלף בית גימל", "דלת הא ואו"]
+    assert cio.split_shared_comparison(
+        ["אלף 12 בית", "ו גימל"], "אלף בית ו גימל") == ["אלף בית", "ו גימל"]
+
+
 # --- audit_applied_decisions: the check on "applied" claims staying true -----
 
 def _klal(text):
@@ -9326,6 +9392,89 @@ def test_the_diplomatic_edition_reverts_an_intervention_and_the_manifest_names_i
         "our transcription, `custom` is a human overriding the ink, and only this "
         "log can tell a reader which a given change was"
     )
+
+
+def test_the_versions_endpoint_gives_each_homograph_entry_only_its_own_half(tmp_path):
+    """Item 0HI, and the other half of the 2026-09-13 code review's finding 3.
+    Five roots in Sefer HaShorashim carry TWO of our entries, and the comparison
+    digitization keys its texts by root, so it holds one text running both
+    together. group_disputes was fixed then to align the entries joined; this
+    endpoint kept serving the WHOLE shared text to each half, so on the real
+    corpus our entry 73's 138 words were shown against 853 of theirs - 811 of
+    the 1,136 words the whole book appeared to have that we lack.
+
+    Each entry gets its own slice now, and `theirs_covers` still names the
+    sibling, because the reviewer has to know the seam was drawn by us."""
+    previous = cio.set_corpus_root(str(tmp_path))
+    try:
+        (tmp_path / "book.json").write_text(json.dumps({
+            "title": "Sefer Bedikah", "title_he": "ספר הבדיקה",
+            "section": "Shaar Rishon", "section_he": "שער ראשון",
+            "categories": ["Reference"], "scan_pdf": "x.pdf",
+            "ui": {"unit": "Shoresh", "unit_plural": "Shorashim", "unit_he": "שורש",
+                   "entry_ref": "root"},
+            "comparison_texts": {"name": "Sefaria", "their_ocr": "their_ocr.json"},
+            "parts": [{"file": "part1.json", "first_klal": 1, "last_klal": 2}],
+        }, ensure_ascii=False), encoding="utf-8")
+        entries = [
+            {"klal_id": 1, "gematria": "אלה", "title": "האלף .",
+             "clean_text": "האלף . אלף בית גימל דלת", "page": 58},
+            {"klal_id": 2, "gematria": "אלה", "title": "האלף .",
+             "clean_text": "האלף . הא ואו זין חית", "page": 59},
+        ]
+        for name in ("part1.json", "klalim_demo_dataset.json"):
+            (tmp_path / name).write_text(json.dumps(entries, ensure_ascii=False), encoding="utf-8")
+        (tmp_path / "their_ocr.json").write_text(json.dumps(
+            {"אלה": "האלף . אלף בית גימל דלת . האלף . הא ואו זין חית"},
+            ensure_ascii=False), encoding="utf-8")
+
+        first, second = rs.api_klal_versions(1), rs.api_klal_versions(2)
+        assert first["theirs_covers"] == [1, 2] and second["theirs_covers"] == [1, 2]
+        assert "חית" not in first["theirs_ocr"], (
+            f"entry 1 was shown its sibling's half too: {first['theirs_ocr']!r}")
+        assert "גימל" not in second["theirs_ocr"], (
+            f"entry 2 was shown its sibling's half too: {second['theirs_ocr']!r}")
+        assert first["theirs_ocr"].split() + second["theirs_ocr"].split() == \
+            "האלף . אלף בית גימל דלת . האלף . הא ואו זין חית".split(), (
+            "the two slices must partition their text - nothing dropped, nothing doubled")
+        assert first["theirs_split"] is True and second["theirs_split"] is True
+    finally:
+        cio.set_corpus_root(previous)
+
+
+def test_a_shared_comparison_text_the_seam_cannot_be_found_in_is_served_whole(tmp_path):
+    """The refusal path, reachable through the endpoint. A wrong cut would hide
+    the half it dropped, so when split_shared_comparison declines the reviewer
+    gets the whole text and the "also covers" note, exactly as before - and
+    `theirs_split` says which of the two they are looking at."""
+    previous = cio.set_corpus_root(str(tmp_path))
+    try:
+        (tmp_path / "book.json").write_text(json.dumps({
+            "title": "Sefer Bedikah", "title_he": "ספר הבדיקה",
+            "section": "Shaar Rishon", "section_he": "שער ראשון",
+            "categories": ["Reference"], "scan_pdf": "x.pdf",
+            "ui": {"unit": "Shoresh", "unit_plural": "Shorashim", "unit_he": "שורש",
+                   "entry_ref": "root"},
+            "comparison_texts": {"name": "Sefaria", "their_ocr": "their_ocr.json"},
+            "parts": [{"file": "part1.json", "first_klal": 1, "last_klal": 2}],
+        }, ensure_ascii=False), encoding="utf-8")
+        entries = [
+            {"klal_id": 1, "gematria": "אלה", "title": "האלף .",
+             "clean_text": "אלף בית גימל", "page": 58},
+            {"klal_id": 2, "gematria": "אלה", "title": "האלף .",
+             "clean_text": "דלת הא ואו", "page": 59},
+        ]
+        for name in ("part1.json", "klalim_demo_dataset.json"):
+            (tmp_path / name).write_text(json.dumps(entries, ensure_ascii=False), encoding="utf-8")
+        (tmp_path / "their_ocr.json").write_text(json.dumps(
+            {"אלה": "קוף ריש שין תיו"}, ensure_ascii=False), encoding="utf-8")
+
+        v = rs.api_klal_versions(2)
+        assert v["theirs_ocr"] == "קוף ריש שין תיו", v["theirs_ocr"]
+        assert v["theirs_covers"] == [1, 2]
+        assert v["theirs_split"] is False
+    finally:
+        cio.set_corpus_root(previous)
 
 
 def test_the_versions_endpoint_places_each_texts_heading_and_numerals(tmp_path):

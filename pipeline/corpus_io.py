@@ -716,6 +716,91 @@ def root_key(text):
     return t.translate(FINALS)
 
 
+def split_shared_comparison(entry_texts, witness_text, min_match=0.5):
+    """One comparison text cut into one slice per entry that shares its root,
+    or None when the seam cannot be found. `entry_texts` are OUR entries, in
+    corpus order.
+
+    ADDED 2026-09-16 (item 0HI, and the other half of the 2026-09-13 code
+    review's finding 3). Sefer HaShorashim has five HOMOGRAPH roots - `אלה`,
+    `ארש`, `בכה`, `בלה`, `גרש`, two of our entries under one heading root - and
+    the comparison digitization keys its texts BY ROOT, so it holds one text
+    running both together. `build_witness_disputes.group_disputes` was fixed
+    then to align the entries JOINED and map each difference back; the versions
+    endpoint was given a note saying the text "also covers" the sibling and kept
+    serving the whole thing to both halves. Measured on entry 73: 138 words of
+    ours shown against 853 of theirs, which is 811 of the 1,136 words the whole
+    book appears to have that we lack.
+
+    The seam is found the way the dispute builder finds its rows - the entries
+    JOINED, aligned once against their one text - because aligning each half
+    separately lets the two answers overlap (measured: our 178 mapped to their
+    0-11 and our 179 to their 0-40, the same words twice).
+
+    The key here is depointed letters, and it differs from
+    build_witness_disputes.text_words ON PURPOSE. That one drops words of fewer
+    than two letters, because a one-letter dispute is not worth a reviewer's
+    time; this one KEEPS them, because a seam wants every anchor it can get.
+    Measured: with the two-letter rule, `["אלף 12 בית", "ו גימל"]` against
+    `"אלף בית ו גימל"` puts their `ו` in the FIRST slice when it opens the
+    second entry. Only letterless tokens are dropped - our punctuation-only
+    tokens and inline footnote numerals (item 0HH), which their text does not
+    carry at all. On the five real roots the two rules give the same answer, so
+    this is a difference of principle today, not of output.
+
+    It REFUSES rather than guesses. A wrong cut hides the half it drops, and
+    silence is the failure mode this repo is worst at seeing (Lesson 26), so a
+    seam that is unmapped, out of order, or at either end returns None and the
+    caller keeps the whole text and its note.
+    """
+    wit = words_of(witness_text)
+    if len(entry_texts) < 2 or not wit:
+        return None
+
+    def key(w):
+        return hebrew_letters_only(strip_points(unicodedata.normalize("NFKD", w)))
+
+    # Both sides drop a token with no letters at all. On OUR side that is
+    # currently REDUNDANT and is kept for symmetry rather than effect: a
+    # letterless key cannot match anything on theirs, because `keep` has already
+    # removed every letterless word there. Measured across five constructed
+    # cases and the five real roots, keeping them changes no seam. Said plainly
+    # rather than commented as though it did something (Lesson 42).
+    ours, ends = [], []
+    for text in entry_texts:
+        ours.extend(k for k in (key(w) for w in words_of(text)) if k)
+        ends.append(len(ours))
+    keep = [i for i, w in enumerate(wit) if key(w)]
+    theirs = [key(wit[i]) for i in keep]
+    if not ours or not theirs:
+        return None
+
+    blocks = difflib.SequenceMatcher(None, ours, theirs, autojunk=False).get_matching_blocks()
+    if sum(n for _, _, n in blocks) < min_match * len(ours):
+        return None
+    at = {a + j: b + j for a, b, n in blocks for j in range(n)}
+
+    cuts = []
+    for end in ends[:-1]:
+        # The next word of OURS that their text also has, at or after this
+        # entry's end: their slice for the next entry starts where it does.
+        nxt = next((at[p] for p in range(end, len(ours)) if p in at), None)
+        if nxt is None or nxt >= len(keep):
+            return None
+        cuts.append(keep[nxt])
+    # A first cut at 0 leaves the first entry nothing. There is no matching
+    # guard at the other end and there must not be a decorative one: every cut
+    # is `keep[...]`, an index INTO `wit`, so the last slice always holds at
+    # least one word and a `cuts[-1] >= len(wit)` check could never fire
+    # (Lesson 25 - it was written, then removed for that reason).
+    if cuts[0] <= 0:
+        return None
+    if any(b <= a for a, b in zip(cuts, cuts[1:])):
+        return None
+    bounds = [0] + cuts + [len(wit)]
+    return [" ".join(wit[a:b]) for a, b in zip(bounds, bounds[1:])]
+
+
 # A BOOK'S REFERENCE NUMERALS. Sefer HaShorashim numbers with Hebrew letters,
 # so a standalone Arabic numeral in its text is a footnote reference printed
 # small and raised (tools/build_root_corpus.py footnote_refs, item 0EX). One copy,

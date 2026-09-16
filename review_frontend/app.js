@@ -5228,7 +5228,14 @@ async function renderAltBody(block, kid) {
   }[view];
   const text = v && v[view];
   const covers = (view !== 'ours_ocr' && v && v.theirs_covers) ? v.theirs_covers.filter(x => x !== kid) : [];
-  const shared = covers.length ? ` — their entry for this root also covers ${unitWord()} #${covers.join(', #')}` : '';
+  // Two notes, not one (item 0HI). Their text is keyed by ROOT and runs a
+  // homograph pair together; since 2026-09-16 the server CUTS it where our own
+  // entries divide, and the reviewer has to know which they have - a slice we
+  // drew, or the whole thing because the seam could not be mapped.
+  const shared = !covers.length ? ''
+    : (v.theirs_split
+        ? ` — their entry for this root runs ${unitWord()} #${covers.join(', #')} together; this is the part that matches this one`
+        : ` — their entry for this root also covers ${unitWord()} #${covers.join(', #')}, and is shown whole: the seam between them could not be found`);
   if (!text) {
     const why = view === 'theirs_corrected'
       ? `${who} has not sent a corrected version of this ${unitWord()}.`

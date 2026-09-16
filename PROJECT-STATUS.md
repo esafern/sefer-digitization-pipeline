@@ -206,6 +206,63 @@ applying it to the corpus remain two separate, deliberate steps.
         short). Its precondition was blind once too (Lesson 42): it first
         asked whether the title shrank, which is the thing under test.
 
+0HK. **[2026-09-16, reviewer: "fix the root split now"] EACH HOMOGRAPH ENTRY IS
+    SERVED ITS OWN HALF OF THE SHARED TEXT. THE BOOK'S PHANTOM "WORDS ONLY THEY
+    HAVE" GOES 1,136 -> 108.**
+    This was the other half of the 2026-09-13 code review's finding 3. That
+    review fixed `build_witness_disputes.group_disputes` - the entries JOINED,
+    aligned once against their one text, each difference mapped back - and gave
+    `api_klal_versions` a NOTE instead of a fix, so the endpoint kept serving the
+    whole shared text to both halves.
+    * **`cio.split_shared_comparison(entry_texts, witness_text)`** aligns our
+      entries joined, the same way the dispute builder does, and cuts their text
+      at each seam. **It refuses rather than guesses**: unmapped, a first cut at
+      0, or two cuts on one word all return None and the caller keeps today's
+      behaviour.
+      - Aligning each half SEPARATELY is what it must not do, measured: our 178
+        mapped to their 0-11 and our 179 to their 0-40, the same words twice.
+      - Its key deliberately differs from `build_witness_disputes.text_words`,
+        which drops words under two letters. A seam wants every anchor, and with
+        the two-letter rule `["אלף 12 בית", "ו גימל"]` against `"אלף בית ו
+        גימל"` puts their `ו` in the FIRST slice when it opens the second entry.
+        On the five real roots both rules give the same answer, so it is a
+        difference of principle today.
+    * **`api_klal_versions`** serves the slice and a new `theirs_split`;
+      `theirs_covers` still names the sibling, because the reviewer has to know
+      the seam was drawn by us. The frontend note now says which they have - a
+      slice, or the whole text because the seam could not be found.
+    * **Live on :8421, all five roots and a control:**
+
+      | entries | ours | their slices |
+      |---|---|---|
+      | 72 / 73 | 902 / 138 | 744 / 109 |
+      | 122 / 123 | 10 / 19 | 7 / 13 |
+      | 178 / 179 | 17 / 35 | 14 / 26 |
+      | 185 / 186 | 25 / 20 | 21 / 15 |
+      | 313 / 314 | 197 / 34 | 164 / 24 |
+
+      Entry 32, a unique root, is untouched: `theirs_split` false, 187 words as
+      before. **The book-wide "a word only they have" falls from 1,136 to 108**,
+      and the largest remaining entry holds 16 rather than 811.
+    * **FOUR OF FIVE MUTATIONS SURVIVED THE FIRST CUT OF THE TESTS** (Lesson 42),
+      and resolving them changed the code twice:
+      - Three refusal cases were all caught by the SAME early return
+        (`nxt is None`), so the ordering guard and the first-cut guard were
+        untested. Both are reachable and now have a case each - and the ordering
+        guard needs THREE entries to fire at all, because with two there is one
+        cut and nothing for it to be out of order with. What it catches is not a
+        DECREASE, which difflib's rising blocks make impossible, but two cuts on
+        one word when a middle entry matches nothing.
+      - A `cuts[-1] >= len(wit)` guard **could never fire** - every cut is an
+        index into `wit`, so the last slice always holds a word. Written, then
+        removed (Lesson 25).
+      - Dropping our letterless tokens is **inert**, because their side already
+        drops them and a letterless key can match nothing. Kept for symmetry and
+        SAID to be inert, rather than commented as though it did something.
+    * Suites: gate 579 passed; browser 120 passed, 1 skipped. All three
+      dashboards restarted (`corpus_io.py`, `review_server.py` and `app.js` all
+      changed); no test server survived the browser run.
+
 0HJ. **[2026-09-16] THE NLI CONTACT'S ANSWER ON SCAN SOURCES: 300 DPI IS THE
     CEILING, MASTER INCLUDED. `0FO`'s OPEN REQUEST IS CLOSED, AS UNAVAILABLE -
     AND THE RULING FREEZE IT WAS BLOCKING CAN LIFT.**
