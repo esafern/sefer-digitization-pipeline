@@ -229,6 +229,27 @@ applying it to the corpus remain two separate, deliberate steps.
       OCR-artifact correction the field states something false about the page. The script says to
       describe the list rather than open the JSON. Not changed: renaming a field in an export
       Sefaria consumes is their format question as much as ours (`tools/export_corpus.py`).
+    * **CORRECTED THE SAME EVENING, on the reviewer's questions.**
+      - **The "99.2%" was never a measurement of accuracy, and no committed tool produces it.**
+        It reaches the witness queue as a hand-typed CLI argument
+        (`build_witness_review_queue.py --witness-accuracy`). Re-measured on one basis today -
+        `build_witness_disputes.text_words` tokens, 12,732 reviewed words, their corrected text
+        as reference: **their raw OCR 98.7%, our text 95.4%.** But their corrected text was made
+        BY EDITING their raw OCR, so their figure mostly says how little the review changed
+        (about 1 word in 80), and any error it left is inside the reference. The two figures
+        are not comparable; the sentence is removed from the draft to the Sefaria editor. Same
+        shape as `0HM`: a reference built from one source scores that source.
+      - **"His reviewers read every word" was an assumption.** Nothing on record says how the
+        Sefaria editor reviews, whether against the scan, or alone. The script's thesis and two
+        beats now state only what is measured (89 of 90 of his review's corrections sit in the
+        5% of disagreement), and beat 2 carries a question to ASK him instead. The draft's "a
+        full read" wording is gone for the same reason.
+      - **The page itself was broken on screen:** `.check li` was a grid, so every inline child
+        of a checklist line (a bold, a link, a code span) became its own grid cell, and the text
+        stacked on top of itself. Rendered and looked at before republishing this time - the
+        step the page-design guidance asks for and the first publish skipped (Lesson 45, PIXELS,
+        NOT THE DOM).
+
 
 0HT. **[2026-09-16, reviewer: review the draft to the Sefaria editor, "update facts, remove the
     defensive and negative language"] REVISED, AS A NEW DRAFT BESIDE THE OLD ONE IN THE
