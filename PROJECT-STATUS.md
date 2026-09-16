@@ -206,6 +206,60 @@ applying it to the corpus remain two separate, deliberate steps.
         short). Its precondition was blind once too (Lesson 42): it first
         asked whether the title shrank, which is the thing under test.
 
+0HM. **[2026-09-16, reviewer: "yes" to running the controlled comparison] FULL
+    TONE WINS ON YAD MALACHI TOO - BY A TENTH OF WHAT IT WON ON HaSHORASHIM.
+    +0.33 POINTS OF WORDS, NOT +3.0.**
+    `0FW`'s protocol, on this book: one engine, one set of pages, only the
+    pixels differ. Cloud Vision (no processor to provision, can be pointed at
+    either scan), pages **40-59**, scored against `part1.json` klalim **90-162**,
+    **14,866 reference words**. 40 API calls, about six cents.
+
+    | source | words | CER | lexicon hit |
+    |---|---|---|---|
+    | Cloud Vision, BITONAL (Google, rendered 400 dpi, 2304x3552) | 0.9680 | 0.01556 | 0.9612 |
+    | Cloud Vision, FULL TONE (NLI text crop, 1400x2325) | **0.9713** | **0.01462** | **0.9633** |
+
+    **+0.33 points of words** - 49 more of 14,866 - and 6% relatively less
+    character error. Compare HaShorashim, same protocol: **+3.0** with Cloud
+    Vision (`0FW`) and +2.9 with DocAI (`0FZ`).
+    * **Where the gain is, and where it is not.** Stroke-shape confusions, the
+      class thresholding destroys, improve: `ד->ר` 52 -> 38 (-27%), `ב->כ`
+      27 -> 17 (-37%), `ו->ן` 65 -> 56 (-14%). Dropped and unrelated letters do
+      not: `ל->∅` 49 -> 53, `ס->פ` 15 -> 25. **The `ד->ו` 24 -> 0 and `ר->ד`
+      0 -> 22 rows are NOT real zeroes** - each engine's list is its own top 8,
+      so absence there means "outside its top 8", not "never happened".
+    * **Why the gain is so much smaller here, most likely.** On this book the
+      bitonal copy is far better than HaShorashim's: 2304x3552 rendered against
+      the full-tone crop's 1400x2325, about 1.6x the linear resolution. Yad
+      Malachi's thresholded scan is simply a good one, so there is less for tone
+      to recover.
+    * **The bias runs AGAINST full tone, so +0.33 is a floor, not a point
+      estimate.** `part1.json` was built from the bitonal scan and reviewed
+      against it, so the ground truth agrees with that source by construction.
+      HaShorashim's measurement used Sefaria's independently reviewed text and
+      had no such tilt. This is the one asymmetry that would make the true gain
+      larger than measured, and there is no way to remove it without an
+      independent transcription of these pages.
+    * **This is not yet the run that decides anything.** `0FZ` established that
+      the combination that matters is **DocAI** on the full-tone images - DocAI
+      is the corpus engine and beats Cloud Vision by several points on running
+      text. `tools/ocr_pages_docai.py` is written and waiting.
+      **BLOCKED ON A VALUE NOBODY WROTE DOWN**: `DOCAI_PROCESSOR`. The service
+      account holds `roles/documentai.apiUser`, which grants processing but not
+      `processors.list` (`0FY`), so the id cannot be recovered by asking the API
+      - and it appears in no file in this repo, either corpus root, `.envrc`, or
+      the shell history. The processor that produced HaShorashim's
+      `nli_docai_layer` exists; only its id is missing. That is Lesson 32's
+      shape applied to configuration: a paid, reproducible run whose settings
+      live in one person's shell has to be re-derived to repeat.
+    * **Artifacts.** `ocr_scan_source_comparison_yad.json` (tracked). The two
+      page layers are gitignored: `cv_bitonal_layer/`, `cv_fulltone_layer/`,
+      20 pages each, written page by page as they arrived.
+    * **The page mapping was verified before spending** (Lesson 30): Google page
+      N = NLI image N-1, checked by reading the running head, folio and opening
+      words at Google 36, 37, 38, 40, 59 and 100 - six points, including both
+      ends of the sample window and both sides of the transposed leaf.
+
 0HL. **[2026-09-16, reviewer: "dropped the better scan into yad mal"] THE
     FULL-TONE YAD MALACHI IS HERE AND MEASURED. AND THE LEAF-FIX RECIPE
     `START_HERE.md` GIVES FOR AN NLI SOURCE IS WRONG - RUNNING IT WOULD BREAK

@@ -1,0 +1,1184 @@
+{
+  "reference": "part1.json",
+  "klal_range": [
+    90,
+    162
+  ],
+  "window_auto_detected_from": null,
+  "reference_tokens": 14866,
+  "corpus_lexicon_hit_rate": 0.9722184851338626,
+  "engines": [
+    {
+      "label": "Cloud Vision, BITONAL (Google 400dpi)",
+      "file": "../../../../private/tmp/claude-501/-Users-ericsafern-work-sefer-digitization-pipeline/1c89a202-c6d2-4e40-a636-7ef8e4040d7e/scratchpad/cv_bitonal_layer.txt",
+      "sliced_by_klal_headers": false,
+      "candidate_tokens": 16228,
+      "reference_tokens": 14866,
+      "matched_tokens": 14390,
+      "word_accuracy": 0.9679806269339433,
+      "cer": 0.01555860059320417,
+      "cer_scope": "candidate trimmed to the reference window's anchors",
+      "lexicon_hit_rate": 0.9611782105003698,
+      "lexicon_scored_tokens": 16228,
+      "per_klal": {
+        "90": {
+          "matched": 23,
+          "reference": 23,
+          "accuracy": 1.0
+        },
+        "91": {
+          "matched": 703,
+          "reference": 745,
+          "accuracy": 0.9436241610738255
+        },
+        "92": {
+          "matched": 515,
+          "reference": 534,
+          "accuracy": 0.9644194756554307
+        },
+        "93": {
+          "matched": 160,
+          "reference": 167,
+          "accuracy": 0.9580838323353293
+        },
+        "94": {
+          "matched": 671,
+          "reference": 690,
+          "accuracy": 0.972463768115942
+        },
+        "95": {
+          "matched": 36,
+          "reference": 40,
+          "accuracy": 0.9
+        },
+        "96": {
+          "matched": 117,
+          "reference": 119,
+          "accuracy": 0.9831932773109243
+        },
+        "97": {
+          "matched": 379,
+          "reference": 391,
+          "accuracy": 0.969309462915601
+        },
+        "98": {
+          "matched": 82,
+          "reference": 84,
+          "accuracy": 0.9761904761904762
+        },
+        "99": {
+          "matched": 40,
+          "reference": 40,
+          "accuracy": 1.0
+        },
+        "100": {
+          "matched": 34,
+          "reference": 34,
+          "accuracy": 1.0
+        },
+        "101": {
+          "matched": 21,
+          "reference": 23,
+          "accuracy": 0.9130434782608695
+        },
+        "102": {
+          "matched": 111,
+          "reference": 115,
+          "accuracy": 0.9652173913043478
+        },
+        "103": {
+          "matched": 106,
+          "reference": 110,
+          "accuracy": 0.9636363636363636
+        },
+        "104": {
+          "matched": 30,
+          "reference": 32,
+          "accuracy": 0.9375
+        },
+        "105": {
+          "matched": 16,
+          "reference": 19,
+          "accuracy": 0.8421052631578947
+        },
+        "106": {
+          "matched": 40,
+          "reference": 40,
+          "accuracy": 1.0
+        },
+        "107": {
+          "matched": 84,
+          "reference": 87,
+          "accuracy": 0.9655172413793104
+        },
+        "108": {
+          "matched": 66,
+          "reference": 66,
+          "accuracy": 1.0
+        },
+        "109": {
+          "matched": 31,
+          "reference": 33,
+          "accuracy": 0.9393939393939394
+        },
+        "110": {
+          "matched": 101,
+          "reference": 102,
+          "accuracy": 0.9901960784313726
+        },
+        "111": {
+          "matched": 30,
+          "reference": 31,
+          "accuracy": 0.967741935483871
+        },
+        "112": {
+          "matched": 204,
+          "reference": 208,
+          "accuracy": 0.9807692307692307
+        },
+        "113": {
+          "matched": 146,
+          "reference": 151,
+          "accuracy": 0.9668874172185431
+        },
+        "114": {
+          "matched": 74,
+          "reference": 75,
+          "accuracy": 0.9866666666666667
+        },
+        "115": {
+          "matched": 25,
+          "reference": 26,
+          "accuracy": 0.9615384615384616
+        },
+        "116": {
+          "matched": 192,
+          "reference": 196,
+          "accuracy": 0.9795918367346939
+        },
+        "117": {
+          "matched": 47,
+          "reference": 49,
+          "accuracy": 0.9591836734693877
+        },
+        "118": {
+          "matched": 39,
+          "reference": 40,
+          "accuracy": 0.975
+        },
+        "119": {
+          "matched": 36,
+          "reference": 37,
+          "accuracy": 0.972972972972973
+        },
+        "120": {
+          "matched": 117,
+          "reference": 121,
+          "accuracy": 0.9669421487603306
+        },
+        "121": {
+          "matched": 63,
+          "reference": 67,
+          "accuracy": 0.9402985074626866
+        },
+        "122": {
+          "matched": 142,
+          "reference": 143,
+          "accuracy": 0.993006993006993
+        },
+        "123": {
+          "matched": 48,
+          "reference": 50,
+          "accuracy": 0.96
+        },
+        "124": {
+          "matched": 61,
+          "reference": 63,
+          "accuracy": 0.9682539682539683
+        },
+        "125": {
+          "matched": 92,
+          "reference": 96,
+          "accuracy": 0.9583333333333334
+        },
+        "126": {
+          "matched": 60,
+          "reference": 62,
+          "accuracy": 0.967741935483871
+        },
+        "127": {
+          "matched": 45,
+          "reference": 47,
+          "accuracy": 0.9574468085106383
+        },
+        "128": {
+          "matched": 1176,
+          "reference": 1217,
+          "accuracy": 0.9663105998356615
+        },
+        "129": {
+          "matched": 40,
+          "reference": 42,
+          "accuracy": 0.9523809523809523
+        },
+        "130": {
+          "matched": 61,
+          "reference": 61,
+          "accuracy": 1.0
+        },
+        "131": {
+          "matched": 82,
+          "reference": 84,
+          "accuracy": 0.9761904761904762
+        },
+        "132": {
+          "matched": 49,
+          "reference": 50,
+          "accuracy": 0.98
+        },
+        "133": {
+          "matched": 35,
+          "reference": 36,
+          "accuracy": 0.9722222222222222
+        },
+        "134": {
+          "matched": 64,
+          "reference": 66,
+          "accuracy": 0.9696969696969697
+        },
+        "135": {
+          "matched": 47,
+          "reference": 52,
+          "accuracy": 0.9038461538461539
+        },
+        "136": {
+          "matched": 42,
+          "reference": 43,
+          "accuracy": 0.9767441860465116
+        },
+        "137": {
+          "matched": 147,
+          "reference": 150,
+          "accuracy": 0.98
+        },
+        "138": {
+          "matched": 256,
+          "reference": 263,
+          "accuracy": 0.973384030418251
+        },
+        "139": {
+          "matched": 67,
+          "reference": 67,
+          "accuracy": 1.0
+        },
+        "140": {
+          "matched": 200,
+          "reference": 205,
+          "accuracy": 0.975609756097561
+        },
+        "141": {
+          "matched": 57,
+          "reference": 57,
+          "accuracy": 1.0
+        },
+        "142": {
+          "matched": 22,
+          "reference": 23,
+          "accuracy": 0.9565217391304348
+        },
+        "143": {
+          "matched": 670,
+          "reference": 688,
+          "accuracy": 0.9738372093023255
+        },
+        "144": {
+          "matched": 1225,
+          "reference": 1268,
+          "accuracy": 0.9660883280757098
+        },
+        "145": {
+          "matched": 59,
+          "reference": 62,
+          "accuracy": 0.9516129032258065
+        },
+        "146": {
+          "matched": 98,
+          "reference": 103,
+          "accuracy": 0.9514563106796117
+        },
+        "147": {
+          "matched": 460,
+          "reference": 478,
+          "accuracy": 0.9623430962343096
+        },
+        "148": {
+          "matched": 544,
+          "reference": 554,
+          "accuracy": 0.9819494584837545
+        },
+        "149": {
+          "matched": 195,
+          "reference": 203,
+          "accuracy": 0.9605911330049262
+        },
+        "150": {
+          "matched": 817,
+          "reference": 841,
+          "accuracy": 0.9714625445897741
+        },
+        "151": {
+          "matched": 96,
+          "reference": 102,
+          "accuracy": 0.9411764705882353
+        },
+        "152": {
+          "matched": 249,
+          "reference": 258,
+          "accuracy": 0.9651162790697675
+        },
+        "153": {
+          "matched": 188,
+          "reference": 191,
+          "accuracy": 0.9842931937172775
+        },
+        "154": {
+          "matched": 740,
+          "reference": 758,
+          "accuracy": 0.9762532981530343
+        },
+        "155": {
+          "matched": 132,
+          "reference": 133,
+          "accuracy": 0.9924812030075187
+        },
+        "156": {
+          "matched": 31,
+          "reference": 31,
+          "accuracy": 1.0
+        },
+        "157": {
+          "matched": 108,
+          "reference": 111,
+          "accuracy": 0.972972972972973
+        },
+        "158": {
+          "matched": 167,
+          "reference": 177,
+          "accuracy": 0.943502824858757
+        },
+        "159": {
+          "matched": 981,
+          "reference": 1029,
+          "accuracy": 0.9533527696793003
+        },
+        "160": {
+          "matched": 40,
+          "reference": 40,
+          "accuracy": 1.0
+        },
+        "161": {
+          "matched": 285,
+          "reference": 289,
+          "accuracy": 0.986159169550173
+        },
+        "162": {
+          "matched": 173,
+          "reference": 178,
+          "accuracy": 0.9719101123595506
+        }
+      },
+      "letter_ratios": {
+        "כ": {
+          "ratio": 1.0200138613511174,
+          "invented": false,
+          "candidate": 0.04279766067001462,
+          "reference": 0.04195792066327858
+        },
+        "פ": {
+          "ratio": 0.9825889356023776,
+          "invented": false,
+          "candidate": 0.018355476447778272,
+          "reference": 0.0186807278025428
+        },
+        "ח": {
+          "ratio": 0.9938605521621037,
+          "invented": false,
+          "candidate": 0.01444599834721251,
+          "reference": 0.014535236674587618
+        },
+        "צ": {
+          "ratio": 0.9734967977242388,
+          "invented": false,
+          "candidate": 0.0064840124594749225,
+          "reference": 0.006660538046589076
+        },
+        "א": {
+          "ratio": 0.9998798132239466,
+          "invented": false,
+          "candidate": 0.08168584323946348,
+          "reference": 0.08169566197769414
+        },
+        "ת": {
+          "ratio": 1.003628948065425,
+          "invented": false,
+          "candidate": 0.04452990909668807,
+          "reference": 0.04436889667493452
+        },
+        "ך": {
+          "ratio": 1.0806842279412363,
+          "invented": false,
+          "candidate": 0.004386243722585977,
+          "reference": 0.004058765372140219
+        },
+        "ו": {
+          "ratio": 0.9905712729094904,
+          "invented": false,
+          "candidate": 0.09381158222617761,
+          "reference": 0.09470452534993842
+        },
+        "ל": {
+          "ratio": 0.9970060180074317,
+          "invented": false,
+          "candidate": 0.06630220583561121,
+          "reference": 0.0665013095589128
+        },
+        "ס": {
+          "ratio": 1.0080595688736254,
+          "invented": false,
+          "candidate": 0.015701481151865742,
+          "reference": 0.015575945744367162
+        },
+        "ב": {
+          "ratio": 0.9968865302296264,
+          "invented": false,
+          "candidate": 0.06383891678850677,
+          "reference": 0.06403829809376789
+        },
+        "ץ": {
+          "ratio": 0.9588477351045853,
+          "invented": false,
+          "candidate": 0.0007151484330303223,
+          "reference": 0.0007458415000086726
+        },
+        "ז": {
+          "ratio": 1.008514668145974,
+          "invented": false,
+          "candidate": 0.009726018689212383,
+          "reference": 0.009643904046623766
+        },
+        "ט": {
+          "ratio": 0.9503246441258779,
+          "invented": false,
+          "candidate": 0.007087915580700528,
+          "reference": 0.007458415000086726
+        },
+        "ם": {
+          "ratio": 0.9821482715931379,
+          "invented": false,
+          "candidate": 0.016575551458902802,
+          "reference": 0.016876832081591592
+        },
+        "ק": {
+          "ratio": 0.9793473521450909,
+          "invented": false,
+          "candidate": 0.021947110800330558,
+          "reference": 0.022409935302586163
+        },
+        "ר": {
+          "ratio": 1.0138921777210983,
+          "invented": false,
+          "candidate": 0.060056576187146396,
+          "reference": 0.059233691221619
+        },
+        "מ": {
+          "ratio": 0.9958674223228496,
+          "invented": false,
+          "candidate": 0.05544784184095099,
+          "reference": 0.05567793523320556
+        },
+        "ג": {
+          "ratio": 1.0041364842165361,
+          "invented": false,
+          "candidate": 0.01415993897400038,
+          "reference": 0.01410160789551281
+        },
+        "נ": {
+          "ratio": 1.0001966006266738,
+          "invented": false,
+          "candidate": 0.02801792638738796,
+          "reference": 0.028012419128232702
+        },
+        "ן": {
+          "ratio": 1.0619798611558913,
+          "invented": false,
+          "candidate": 0.02304367173097705,
+          "reference": 0.021698784104903474
+        },
+        "י": {
+          "ratio": 1.0153822189068726,
+          "invented": false,
+          "candidate": 0.11148369461572691,
+          "reference": 0.1097948068617418
+        },
+        "ה": {
+          "ratio": 1.0094310105788469,
+          "invented": false,
+          "candidate": 0.07229356048566525,
+          "reference": 0.07161812915199556
+        },
+        "ד": {
+          "ratio": 0.9680206312449952,
+          "invented": false,
+          "candidate": 0.05109338249316636,
+          "reference": 0.05278129498898583
+        },
+        "ש": {
+          "ratio": 0.9905910269376982,
+          "invented": false,
+          "candidate": 0.04276587629521327,
+          "reference": 0.04317208124468805
+        },
+        "ף": {
+          "ratio": 0.9917270748351796,
+          "invented": false,
+          "candidate": 0.004592842158794737,
+          "reference": 0.004631155360518967
+        },
+        "ע": {
+          "ratio": 0.975763024938287,
+          "invented": false,
+          "candidate": 0.028653613883414912,
+          "reference": 0.029365340918946107
+        }
+      },
+      "confusions": [
+        {
+          "corpus": "ו",
+          "engine": "ן",
+          "count": 65
+        },
+        {
+          "corpus": "ד",
+          "engine": "ר",
+          "count": 52
+        },
+        {
+          "corpus": "ל",
+          "engine": "∅",
+          "count": 49
+        },
+        {
+          "corpus": "ב",
+          "engine": "כ",
+          "count": 27
+        },
+        {
+          "corpus": "ד",
+          "engine": "ו",
+          "count": 24
+        },
+        {
+          "corpus": "כ",
+          "engine": "ב",
+          "count": 17
+        },
+        {
+          "corpus": "ס",
+          "engine": "פ",
+          "count": 15
+        },
+        {
+          "corpus": "ד",
+          "engine": "ה",
+          "count": 13
+        }
+      ]
+    },
+    {
+      "label": "Cloud Vision, FULL TONE (NLI)",
+      "file": "../../../../private/tmp/claude-501/-Users-ericsafern-work-sefer-digitization-pipeline/1c89a202-c6d2-4e40-a636-7ef8e4040d7e/scratchpad/cv_fulltone_layer.txt",
+      "sliced_by_klal_headers": false,
+      "candidate_tokens": 16227,
+      "reference_tokens": 14866,
+      "matched_tokens": 14439,
+      "word_accuracy": 0.9712767388672138,
+      "cer": 0.01462196243040258,
+      "cer_scope": "candidate trimmed to the reference window's anchors",
+      "lexicon_hit_rate": 0.9632710913908917,
+      "lexicon_scored_tokens": 16227,
+      "per_klal": {
+        "90": {
+          "matched": 23,
+          "reference": 23,
+          "accuracy": 1.0
+        },
+        "91": {
+          "matched": 710,
+          "reference": 745,
+          "accuracy": 0.9530201342281879
+        },
+        "92": {
+          "matched": 517,
+          "reference": 534,
+          "accuracy": 0.9681647940074907
+        },
+        "93": {
+          "matched": 158,
+          "reference": 167,
+          "accuracy": 0.9461077844311377
+        },
+        "94": {
+          "matched": 668,
+          "reference": 690,
+          "accuracy": 0.9681159420289855
+        },
+        "95": {
+          "matched": 39,
+          "reference": 40,
+          "accuracy": 0.975
+        },
+        "96": {
+          "matched": 118,
+          "reference": 119,
+          "accuracy": 0.9915966386554622
+        },
+        "97": {
+          "matched": 379,
+          "reference": 391,
+          "accuracy": 0.969309462915601
+        },
+        "98": {
+          "matched": 82,
+          "reference": 84,
+          "accuracy": 0.9761904761904762
+        },
+        "99": {
+          "matched": 40,
+          "reference": 40,
+          "accuracy": 1.0
+        },
+        "100": {
+          "matched": 33,
+          "reference": 34,
+          "accuracy": 0.9705882352941176
+        },
+        "101": {
+          "matched": 21,
+          "reference": 23,
+          "accuracy": 0.9130434782608695
+        },
+        "102": {
+          "matched": 113,
+          "reference": 115,
+          "accuracy": 0.9826086956521739
+        },
+        "103": {
+          "matched": 104,
+          "reference": 110,
+          "accuracy": 0.9454545454545454
+        },
+        "104": {
+          "matched": 28,
+          "reference": 32,
+          "accuracy": 0.875
+        },
+        "105": {
+          "matched": 17,
+          "reference": 19,
+          "accuracy": 0.8947368421052632
+        },
+        "106": {
+          "matched": 40,
+          "reference": 40,
+          "accuracy": 1.0
+        },
+        "107": {
+          "matched": 84,
+          "reference": 87,
+          "accuracy": 0.9655172413793104
+        },
+        "108": {
+          "matched": 66,
+          "reference": 66,
+          "accuracy": 1.0
+        },
+        "109": {
+          "matched": 32,
+          "reference": 33,
+          "accuracy": 0.9696969696969697
+        },
+        "110": {
+          "matched": 101,
+          "reference": 102,
+          "accuracy": 0.9901960784313726
+        },
+        "111": {
+          "matched": 30,
+          "reference": 31,
+          "accuracy": 0.967741935483871
+        },
+        "112": {
+          "matched": 205,
+          "reference": 208,
+          "accuracy": 0.9855769230769231
+        },
+        "113": {
+          "matched": 146,
+          "reference": 151,
+          "accuracy": 0.9668874172185431
+        },
+        "114": {
+          "matched": 74,
+          "reference": 75,
+          "accuracy": 0.9866666666666667
+        },
+        "115": {
+          "matched": 25,
+          "reference": 26,
+          "accuracy": 0.9615384615384616
+        },
+        "116": {
+          "matched": 190,
+          "reference": 196,
+          "accuracy": 0.9693877551020408
+        },
+        "117": {
+          "matched": 46,
+          "reference": 49,
+          "accuracy": 0.9387755102040817
+        },
+        "118": {
+          "matched": 39,
+          "reference": 40,
+          "accuracy": 0.975
+        },
+        "119": {
+          "matched": 37,
+          "reference": 37,
+          "accuracy": 1.0
+        },
+        "120": {
+          "matched": 117,
+          "reference": 121,
+          "accuracy": 0.9669421487603306
+        },
+        "121": {
+          "matched": 64,
+          "reference": 67,
+          "accuracy": 0.9552238805970149
+        },
+        "122": {
+          "matched": 141,
+          "reference": 143,
+          "accuracy": 0.986013986013986
+        },
+        "123": {
+          "matched": 47,
+          "reference": 50,
+          "accuracy": 0.94
+        },
+        "124": {
+          "matched": 61,
+          "reference": 63,
+          "accuracy": 0.9682539682539683
+        },
+        "125": {
+          "matched": 94,
+          "reference": 96,
+          "accuracy": 0.9791666666666666
+        },
+        "126": {
+          "matched": 61,
+          "reference": 62,
+          "accuracy": 0.9838709677419355
+        },
+        "127": {
+          "matched": 45,
+          "reference": 47,
+          "accuracy": 0.9574468085106383
+        },
+        "128": {
+          "matched": 1187,
+          "reference": 1217,
+          "accuracy": 0.9753492193919474
+        },
+        "129": {
+          "matched": 39,
+          "reference": 42,
+          "accuracy": 0.9285714285714286
+        },
+        "130": {
+          "matched": 60,
+          "reference": 61,
+          "accuracy": 0.9836065573770492
+        },
+        "131": {
+          "matched": 82,
+          "reference": 84,
+          "accuracy": 0.9761904761904762
+        },
+        "132": {
+          "matched": 49,
+          "reference": 50,
+          "accuracy": 0.98
+        },
+        "133": {
+          "matched": 35,
+          "reference": 36,
+          "accuracy": 0.9722222222222222
+        },
+        "134": {
+          "matched": 65,
+          "reference": 66,
+          "accuracy": 0.9848484848484849
+        },
+        "135": {
+          "matched": 51,
+          "reference": 52,
+          "accuracy": 0.9807692307692307
+        },
+        "136": {
+          "matched": 42,
+          "reference": 43,
+          "accuracy": 0.9767441860465116
+        },
+        "137": {
+          "matched": 145,
+          "reference": 150,
+          "accuracy": 0.9666666666666667
+        },
+        "138": {
+          "matched": 257,
+          "reference": 263,
+          "accuracy": 0.9771863117870723
+        },
+        "139": {
+          "matched": 67,
+          "reference": 67,
+          "accuracy": 1.0
+        },
+        "140": {
+          "matched": 196,
+          "reference": 205,
+          "accuracy": 0.9560975609756097
+        },
+        "141": {
+          "matched": 57,
+          "reference": 57,
+          "accuracy": 1.0
+        },
+        "142": {
+          "matched": 21,
+          "reference": 23,
+          "accuracy": 0.9130434782608695
+        },
+        "143": {
+          "matched": 672,
+          "reference": 688,
+          "accuracy": 0.9767441860465116
+        },
+        "144": {
+          "matched": 1241,
+          "reference": 1268,
+          "accuracy": 0.9787066246056783
+        },
+        "145": {
+          "matched": 61,
+          "reference": 62,
+          "accuracy": 0.9838709677419355
+        },
+        "146": {
+          "matched": 102,
+          "reference": 103,
+          "accuracy": 0.9902912621359223
+        },
+        "147": {
+          "matched": 461,
+          "reference": 478,
+          "accuracy": 0.9644351464435147
+        },
+        "148": {
+          "matched": 547,
+          "reference": 554,
+          "accuracy": 0.9873646209386282
+        },
+        "149": {
+          "matched": 197,
+          "reference": 203,
+          "accuracy": 0.9704433497536946
+        },
+        "150": {
+          "matched": 811,
+          "reference": 841,
+          "accuracy": 0.9643281807372176
+        },
+        "151": {
+          "matched": 93,
+          "reference": 102,
+          "accuracy": 0.9117647058823529
+        },
+        "152": {
+          "matched": 252,
+          "reference": 258,
+          "accuracy": 0.9767441860465116
+        },
+        "153": {
+          "matched": 188,
+          "reference": 191,
+          "accuracy": 0.9842931937172775
+        },
+        "154": {
+          "matched": 745,
+          "reference": 758,
+          "accuracy": 0.9828496042216359
+        },
+        "155": {
+          "matched": 132,
+          "reference": 133,
+          "accuracy": 0.9924812030075187
+        },
+        "156": {
+          "matched": 31,
+          "reference": 31,
+          "accuracy": 1.0
+        },
+        "157": {
+          "matched": 108,
+          "reference": 111,
+          "accuracy": 0.972972972972973
+        },
+        "158": {
+          "matched": 171,
+          "reference": 177,
+          "accuracy": 0.9661016949152542
+        },
+        "159": {
+          "matched": 983,
+          "reference": 1029,
+          "accuracy": 0.9552964042759962
+        },
+        "160": {
+          "matched": 40,
+          "reference": 40,
+          "accuracy": 1.0
+        },
+        "161": {
+          "matched": 281,
+          "reference": 289,
+          "accuracy": 0.972318339100346
+        },
+        "162": {
+          "matched": 175,
+          "reference": 178,
+          "accuracy": 0.9831460674157303
+        }
+      },
+      "letter_ratios": {
+        "כ": {
+          "ratio": 1.015581661313632,
+          "invented": false,
+          "candidate": 0.042611694772478025,
+          "reference": 0.04195792066327858
+        },
+        "פ": {
+          "ratio": 0.9895048241844433,
+          "invented": false,
+          "candidate": 0.018484670279892555,
+          "reference": 0.0186807278025428
+        },
+        "ח": {
+          "ratio": 0.9961580819644839,
+          "invented": false,
+          "candidate": 0.014479393486657024,
+          "reference": 0.014535236674587618
+        },
+        "צ": {
+          "ratio": 0.9759913937542053,
+          "invented": false,
+          "candidate": 0.006500627811243384,
+          "reference": 0.006660538046589076
+        },
+        "א": {
+          "ratio": 1.0007692606985639,
+          "invented": false,
+          "candidate": 0.08175850723969674,
+          "reference": 0.08169566197769414
+        },
+        "ת": {
+          "ratio": 1.0037406095025,
+          "invented": false,
+          "candidate": 0.04453486339145223,
+          "reference": 0.04436889667493452
+        },
+        "ך": {
+          "ratio": 1.096468295158633,
+          "invented": false,
+          "candidate": 0.004450307548039481,
+          "reference": 0.004058765372140219
+        },
+        "ו": {
+          "ratio": 0.9888353870012245,
+          "invented": false,
+          "candidate": 0.09364718597517364,
+          "reference": 0.09470452534993842
+        },
+        "ל": {
+          "ratio": 0.9959219318752235,
+          "invented": false,
+          "candidate": 0.0662301126881447,
+          "reference": 0.0665013095589128
+        },
+        "ס": {
+          "ratio": 0.9816408884289277,
+          "invented": false,
+          "candidate": 0.015289985218621358,
+          "reference": 0.015575945744367162
+        },
+        "ב": {
+          "ratio": 0.9999757759242254,
+          "invented": false,
+          "candidate": 0.06403674682518239,
+          "reference": 0.06403829809376789
+        },
+        "ץ": {
+          "ratio": 0.9376443161921334,
+          "invented": false,
+          "candidate": 0.0006993340432633469,
+          "reference": 0.0007458415000086726
+        },
+        "ז": {
+          "ratio": 1.0086268731569732,
+          "invented": false,
+          "candidate": 0.009727100783572008,
+          "reference": 0.009643904046623766
+        },
+        "ט": {
+          "ratio": 0.9525613848588265,
+          "invented": false,
+          "candidate": 0.0071045981213344565,
+          "reference": 0.007458415000086726
+        },
+        "ם": {
+          "ratio": 0.9907333992167464,
+          "invented": false,
+          "candidate": 0.016720441216205476,
+          "reference": 0.016876832081591592
+        },
+        "ק": {
+          "ratio": 0.979456312067926,
+          "invented": false,
+          "candidate": 0.021949552585151865,
+          "reference": 0.022409935302586163
+        },
+        "ר": {
+          "ratio": 1.0000520148893086,
+          "invented": false,
+          "candidate": 0.05923677225551123,
+          "reference": 0.059233691221619
+        },
+        "מ": {
+          "ratio": 0.9991183063361377,
+          "invented": false,
+          "candidate": 0.055628844350493506,
+          "reference": 0.05567793523320556
+        },
+        "ג": {
+          "ratio": 1.0053753044801932,
+          "invented": false,
+          "candidate": 0.014177408331611489,
+          "reference": 0.01410160789551281
+        },
+        "נ": {
+          "ratio": 1.000307880188706,
+          "invented": false,
+          "candidate": 0.028021043597120016,
+          "reference": 0.028012419128232702
+        },
+        "ן": {
+          "ratio": 1.0489133495721026,
+          "invented": false,
+          "candidate": 0.0227601443171162,
+          "reference": 0.021698784104903474
+        },
+        "י": {
+          "ratio": 1.0141923431258428,
+          "invented": false,
+          "candidate": 0.11135305243415929,
+          "reference": 0.1097948068617418
+        },
+        "ה": {
+          "ratio": 1.01486955179388,
+          "invented": false,
+          "candidate": 0.07268305863280194,
+          "reference": 0.07161812915199556
+        },
+        "ד": {
+          "ratio": 0.9834858877109226,
+          "invented": false,
+          "candidate": 0.0519096587567748,
+          "reference": 0.05278129498898583
+        },
+        "ש": {
+          "ratio": 0.9907012378058032,
+          "invented": false,
+          "candidate": 0.04277063432776515,
+          "reference": 0.04317208124468805
+        },
+        "ף": {
+          "ratio": 0.991837412097348,
+          "invented": false,
+          "candidate": 0.0045933531477978925,
+          "reference": 0.004631155360518967
+        },
+        "ע": {
+          "ratio": 0.9753303372773406,
+          "invented": false,
+          "candidate": 0.0286409078627398,
+          "reference": 0.029365340918946107
+        }
+      },
+      "confusions": [
+        {
+          "corpus": "ו",
+          "engine": "ן",
+          "count": 56
+        },
+        {
+          "corpus": "ל",
+          "engine": "∅",
+          "count": 53
+        },
+        {
+          "corpus": "ד",
+          "engine": "ר",
+          "count": 38
+        },
+        {
+          "corpus": "ס",
+          "engine": "פ",
+          "count": 25
+        },
+        {
+          "corpus": "ר",
+          "engine": "ד",
+          "count": 22
+        },
+        {
+          "corpus": "כ",
+          "engine": "ב",
+          "count": 19
+        },
+        {
+          "corpus": "ב",
+          "engine": "כ",
+          "count": 17
+        },
+        {
+          "corpus": "ד",
+          "engine": "ה",
+          "count": 12
+        }
+      ]
+    }
+  ]
+}
