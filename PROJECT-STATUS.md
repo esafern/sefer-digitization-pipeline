@@ -224,6 +224,51 @@ applying it to the corpus remain two separate, deliberate steps.
       agrees with FULL TONE among A/B picks, with a 95% interval, as the estimate
       for the 176 - reported inconclusive if the interval straddles an even split.
       Neither and can't-tell reported, not dropped.
+    * **SCORED 2026-09-16. THE SELECTION EFFECT `0HO` PREDICTED IS REAL, AND
+      LARGE: ON THE UNFLAGGED REMAINDER THE CORPUS IS USUALLY RIGHT.**
+
+      | | full tone right | corpus right | neither | can't tell |
+      |---|---|---|---|---|
+      | census, 13 (corpus reading not a word) | 4 | 6 | 2 | 1 |
+      | random 27 of the other 176 | 4 | 19 | 2 | 2 |
+
+      **On the 27: full tone 4 of 23 settled = 17.4%, 95% Wilson 7.0-37.1%** -
+      the whole interval is below an even split, so by the stated rule this is
+      conclusive, and the OPPOSITE of sheet 1's 85.7% at all disagreements. Review
+      and the existing detectors had already caught most of what full tone would
+      fix; what they left behind is mostly full tone misreading a good word
+      (`באבל`->`באכל`, `עד`->`ער`, `לקדמון`->`לקרמון`, `ושמרת`->`זשמרת`). Even
+      the "corpus reading is not a word" census is only 4 of 13 for full tone -
+      the lexicon lacks forms such as `אהדורי` and `דמפומייהו`, which is Lesson 49
+      on the other side of the ledger.
+    * **11 real corpus errors found, none in the queue, none applied:**
+      - full tone reads the ink:
+        <http://127.0.0.1:8420/entry/23/word/304> `וכר` -> `ובר`,
+        <http://127.0.0.1:8420/entry/26/word/15> `ברק` -> `בדק`,
+        <http://127.0.0.1:8420/entry/30/word/802> `התכוננות` -> `התבוננות`,
+        <http://127.0.0.1:8420/entry/31/word/69> `חזה` -> `וזה`,
+        <http://127.0.0.1:8420/entry/66/word/176> `היה` -> `הוה`,
+        <http://127.0.0.1:8420/entry/163/word/348> `שהגיהן` -> `שהגיהו`,
+        <http://127.0.0.1:8420/entry/167/word/511> `וכפלוגתא` -> `ובפלוגתא`,
+        <http://127.0.0.1:8420/entry/167/word/1208> `רעדיות` -> `דעדיות`;
+      - neither reading, the page prints the reviewer's:
+        <http://127.0.0.1:8420/entry/30/word/307> `רס"יז` -> `רמ״ז`,
+        <http://127.0.0.1:8420/entry/30/word/317> `סע"כ` -> `מע״ב`,
+        <http://127.0.0.1:8420/entry/153/word/111> `והלכתי` -> `והלכת׳`.
+      Entry 30 holds three of them. Can't tell: 30/1009, 118/41, 150/260.
+      <http://127.0.0.1:8420/entry/194/word/189> `הל'` against printed `הל׳` is an
+      apostrophe for a geresh, a representation question rather than a misread.
+    * **Totals for the day, unsurfaced corpus errors confirmed on the ink: 18** -
+      sheet 1's 7 and these 11.
+    * **Do not queue the remaining 149 untested rows.** At a 7-37% yield they
+      would put roughly 110-140 correct words in front of a reviewer to find
+      perhaps 25-35 errors, which is how the 1,496-flag queue happened (Lesson
+      49). They stay in `fulltone_candidates_part1.json` as a record.
+    * **What this says about full tone for Part 1.** It is the better image to
+      ADJUDICATE with (sheet 1), and its whole-Part-1 pass has now been mined:
+      review had already absorbed most of its value. The case for it is
+      strongest on text that has NOT been reviewed - which is Parts 2-3, still
+      gated.
 
 0HO. **[2026-09-16, reviewer: "then do the full docai"] ALL OF PART 1 READ BY
     DocAI FROM BOTH SCANS. 367 PLACES THE CORPUS HOLDS THE BITONAL READING AND
