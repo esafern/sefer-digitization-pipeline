@@ -206,6 +206,59 @@ applying it to the corpus remain two separate, deliberate steps.
         short). Its precondition was blind once too (Lesson 42): it first
         asked whether the title shrank, which is the thing under test.
 
+0HO. **[2026-09-16, reviewer: "then do the full docai"] ALL OF PART 1 READ BY
+    DocAI FROM BOTH SCANS. 367 PLACES THE CORPUS HOLDS THE BITONAL READING AND
+    FULL TONE READS OTHERWISE; 189 SURFACED NOWHERE. AND `0HN`'S 86% DOES NOT
+    TRANSFER TO THEM.**
+    * **The run.** Pages 14-76 (klalim 1-222), DocAI `eu` `bc652834c231f24e`, on
+      the bitonal scan and on the full-tone NLI scan; 40-59 reused from `0HM`,
+      the other 43 pages per scan new, no failures. Page mapping re-verified
+      before spending at 14, 25 and 76 (nine points in all, end to end).
+      Layers gitignored: `docai_bitonal_layer/`, `docai_fulltone_layer/`.
+    * **The sweep** (`scratch/ink_check_0HN/part1_sweep.py`): the two layers
+      aligned to each other and the bitonal layer to `part1.json` (99.2% of its
+      tokens aligned). **889** one-word-for-one-word disagreements:
+      - **412** - the corpus already holds the full-tone reading;
+      - **367** - the corpus still holds the BITONAL reading;
+      - 74 - the corpus holds a third reading; 36 - not on a corpus word
+        (running heads, apparatus).
+      **All 367 are in `fulltone_candidates_part1.json`** with dashboard URL,
+      page, both readings and the full-tone box. Every one was checked against
+      the word the dashboard serves at that address: 0 mismatches.
+    * **Surfaced or not, from the LIVE dashboard** - not the queue file, which
+      my first count read and got wrong: it showed 0 queued where the
+      dashboard serves 163 (Lesson 33, state not printout; caught before
+      reporting):
+
+      | state | rows |
+      |---|---|
+      | **surfaced nowhere** | **189**, across 84 klalim |
+      | already queued | 163 (143 `current_text_may_be_wrong`, 9 `ai_flag`, 7 `manual_correction`, 4 `current_text_confirmed`) |
+      | a human already ruled - and kept the bitonal reading | 15 |
+
+      The 15 are a useful check on full tone: `בל'`/`בלי`, `להו`/`להן`,
+      `אבל`/`אכל`, `נזכר`/`נוכר` - several full-tone readings there are plainly
+      wrong, which is the ~14% `0HN` measured.
+    * **DO NOT APPLY `0HN`'S 85.7% TO THE 189** (Lesson 27, THE SAMPLE THAT
+      SELECTED ITSELF). That sample was drawn from ALL disagreements. The 189
+      are what is LEFT after human review and every detector has had its pass,
+      and those passes catch the obvious case - a bitonal reading that is not a
+      word. So the remainder is enriched for the opposite. Measured with
+      `lexicon.txt`, a triage signal and not a verdict (Lesson 49):
+
+      | | corpus reading only is a word | full-tone reading only is a word | both | neither |
+      |---|---|---|---|---|
+      | 189 surfaced nowhere | **81** | **6** | 95 | 7 |
+      | 163 already queued | 14 | 34 | 108 | 7 |
+
+      A random 8 of the 189 looks the same way: `דהוי`/`דחוי`, `הרי`/`חרי`,
+      `אהדורי`/`אהרורי` read as the corpus being right; `ארבא`/`ארכא` and
+      `בחד`/`בחר` are open. **The yield on the 189 is unknown and very likely
+      well under 86%.** It needs its own blinded ink read before it is a
+      worklist. The highest-yield slice is the 13 where the corpus reading is
+      not a word (6 full-tone-word-only, 7 neither).
+    * Nothing applied, nothing added to the queue. Cost: 86 new pages, cents.
+
 0HN. **[2026-09-16, reviewer: "yes" to a 40-word ink sample] THE BLINDED
     READING SHEET IS PUBLISHED. SCORING WAITS ON THE REVIEWER'S 40 PICKS.**
     `0HM` left DocAI's scan question unsettled because both available

@@ -1,0 +1,6054 @@
+{
+ "what_this_is": "Part 1 positions where DocAI on the full-tone NLI scan reads a word differently from DocAI on the bitonal scan AND the corpus still holds the bitonal reading. Item 0HO. A blinded ink sample (0HN) found full tone right 30 of 35 at such disagreements - a candidate list for review, never an apply list.",
+ "processor": "eu bc652834c231f24e",
+ "pages": "14-76",
+ "counts": {
+  "corpus already holds the full-tone reading": 412,
+  "corpus holds the bitonal reading - unsurfaced": 350,
+  "corpus holds a third reading": 74,
+  "corpus holds the bitonal reading - ruled": 17,
+  "bitonal word not on the corpus (running head, apparatus, unaligned)": 36,
+  "by_state_live": {
+   "unsurfaced": 189,
+   "ruled": 15,
+   "queued": 163
+  }
+ },
+ "rows": [
+  {
+   "klal_id": 1,
+   "word_index": 261,
+   "page": 14,
+   "corpus": "א\"נ",
+   "bitonal": "א\"נ",
+   "fulltone": "א\"ן",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/1/word/261",
+   "bbox_fulltone": {
+    "x1": 0.7071428298950195,
+    "y1": 0.48430711030960083,
+    "x2": 0.7378571629524231,
+    "y2": 0.5055528879165649
+   }
+  },
+  {
+   "klal_id": 1,
+   "word_index": 429,
+   "page": 14,
+   "corpus": "והרשב\"א",
+   "bitonal": "והרשב\"א",
+   "fulltone": "וחרשב\"א",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/1/word/429",
+   "bbox_fulltone": {
+    "x1": 0.029285714030265808,
+    "y1": 0.6595847606658936,
+    "x2": 0.11142857372760773,
+    "y2": 0.6813133955001831
+   }
+  },
+  {
+   "klal_id": 2,
+   "word_index": 443,
+   "page": 15,
+   "corpus": "עכ\"ד",
+   "bitonal": "עכ\"ד",
+   "fulltone": "עכ\"ר",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/2/word/443",
+   "bbox_fulltone": {
+    "x1": 0.12535612285137177,
+    "y1": 0.30410608649253845,
+    "x2": 0.1716524213552475,
+    "y2": 0.32463642954826355
+   }
+  },
+  {
+   "klal_id": 3,
+   "word_index": 173,
+   "page": 15,
+   "corpus": "הדיוט",
+   "bitonal": "הדיוט",
+   "fulltone": "הריוט",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/3/word/173",
+   "bbox_fulltone": {
+    "x1": 0.7970085740089417,
+    "y1": 0.699743390083313,
+    "x2": 0.8532763719558716,
+    "y2": 0.7181351780891418
+   }
+  },
+  {
+   "klal_id": 3,
+   "word_index": 196,
+   "page": 15,
+   "corpus": "וי\"ו",
+   "bitonal": "וי\"ו",
+   "fulltone": "וייו",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/3/word/196",
+   "bbox_fulltone": {
+    "x1": 0.31339031457901,
+    "y1": 0.7172797322273254,
+    "x2": 0.343304842710495,
+    "y2": 0.7365269660949707
+   }
+  },
+  {
+   "klal_id": 4,
+   "word_index": 181,
+   "page": 16,
+   "corpus": "שב\"ג",
+   "bitonal": "שב\"ג",
+   "fulltone": "שב\"יג",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/4/word/181",
+   "bbox_fulltone": {
+    "x1": 0.9183965921401978,
+    "y1": 0.20050868391990662,
+    "x2": 0.9720830321311951,
+    "y2": 0.2178889364004135
+   }
+  },
+  {
+   "klal_id": 4,
+   "word_index": 217,
+   "page": 16,
+   "corpus": "באבל",
+   "bitonal": "באבל",
+   "fulltone": "באכל",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/4/word/217",
+   "bbox_fulltone": {
+    "x1": 0.7838224768638611,
+    "y1": 0.23442137241363525,
+    "x2": 0.8367931246757507,
+    "y2": 0.2543450593948364
+   }
+  },
+  {
+   "klal_id": 4,
+   "word_index": 249,
+   "page": 16,
+   "corpus": "פ\"ו",
+   "bitonal": "פ\"ו",
+   "fulltone": "פ\"ץו",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/4/word/249",
+   "bbox_fulltone": {
+    "x1": 0.9398711323738098,
+    "y1": 0.2687579393386841,
+    "x2": 0.9727988839149475,
+    "y2": 0.2891055643558502
+   }
+  },
+  {
+   "klal_id": 5,
+   "word_index": 117,
+   "page": 16,
+   "corpus": "מ\"ו",
+   "bitonal": "מ\"ו",
+   "fulltone": "ט\"ו",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/5/word/117",
+   "bbox_fulltone": {
+    "x1": 0.8153185248374939,
+    "y1": 0.6112759709358215,
+    "x2": 0.8475304245948792,
+    "y2": 0.6307757496833801
+   }
+  },
+  {
+   "klal_id": 5,
+   "word_index": 163,
+   "page": 16,
+   "corpus": "מש\"ה",
+   "bitonal": "מש\"ה",
+   "fulltone": "משייה",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/5/word/163",
+   "bbox_fulltone": {
+    "x1": 0.028632784262299538,
+    "y1": 0.6451886296272278,
+    "x2": 0.08446671068668365,
+    "y2": 0.6638405919075012
+   }
+  },
+  {
+   "klal_id": 5,
+   "word_index": 275,
+   "page": 16,
+   "corpus": "ב'",
+   "bitonal": "ב",
+   "fulltone": "כ",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/5/word/275",
+   "bbox_fulltone": {
+    "x1": 0.5110952258110046,
+    "y1": 0.7651547193527222,
+    "x2": 0.5239799618721008,
+    "y2": 0.7829588651657104
+   }
+  },
+  {
+   "klal_id": 5,
+   "word_index": 396,
+   "page": 16,
+   "corpus": "בל'",
+   "bitonal": "בל",
+   "fulltone": "בלי",
+   "state": "ruled",
+   "url": "http://127.0.0.1:8420/entry/5/word/396",
+   "bbox_fulltone": {
+    "x1": 0.41947028040885925,
+    "y1": 0.8855447173118591,
+    "x2": 0.4488188922405243,
+    "y2": 0.9054684042930603
+   }
+  },
+  {
+   "klal_id": 5,
+   "word_index": 431,
+   "page": 16,
+   "corpus": "בל'",
+   "bitonal": "בל",
+   "fulltone": "בלי",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/5/word/431",
+   "bbox_fulltone": {
+    "x1": 0.45884037017822266,
+    "y1": 0.9203051924705505,
+    "x2": 0.4881889820098877,
+    "y2": 0.9355658888816833
+   }
+  },
+  {
+   "klal_id": 5,
+   "word_index": 451,
+   "page": 16,
+   "corpus": "מח",
+   "bitonal": "מח",
+   "fulltone": "מה",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/5/word/451",
+   "bbox_fulltone": {
+    "x1": 0.36864709854125977,
+    "y1": 0.937685489654541,
+    "x2": 0.3965640664100647,
+    "y2": 0.9563374519348145
+   }
+  },
+  {
+   "klal_id": 5,
+   "word_index": 484,
+   "page": 17,
+   "corpus": "להכי",
+   "bitonal": "להכי",
+   "fulltone": "לחכי",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/5/word/484",
+   "bbox_fulltone": {
+    "x1": 0.24661439657211304,
+    "y1": 0.04611443355679512,
+    "x2": 0.2922309339046478,
+    "y2": 0.06532877683639526
+   }
+  },
+  {
+   "klal_id": 7,
+   "word_index": 50,
+   "page": 17,
+   "corpus": "ועע\"ש",
+   "bitonal": "ועע\"ש",
+   "fulltone": "ועעייש",
+   "state": "ruled",
+   "url": "http://127.0.0.1:8420/entry/7/word/50",
+   "bbox_fulltone": {
+    "x1": 0.8168210983276367,
+    "y1": 0.40734416246414185,
+    "x2": 0.8766927719116211,
+    "y2": 0.4265584945678711
+   }
+  },
+  {
+   "klal_id": 7,
+   "word_index": 294,
+   "page": 17,
+   "corpus": "הך",
+   "bitonal": "הך",
+   "fulltone": "חך",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/7/word/294",
+   "bbox_fulltone": {
+    "x1": 0.09123307466506958,
+    "y1": 0.6473100185394287,
+    "x2": 0.11617961525917053,
+    "y2": 0.6669512987136841
+   }
+  },
+  {
+   "klal_id": 7,
+   "word_index": 408,
+   "page": 17,
+   "corpus": "משום",
+   "bitonal": "משום",
+   "fulltone": "משוס",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/7/word/408",
+   "bbox_fulltone": {
+    "x1": 0.7084818482398987,
+    "y1": 0.784799337387085,
+    "x2": 0.7598004341125488,
+    "y2": 0.8048676252365112
+   }
+  },
+  {
+   "klal_id": 7,
+   "word_index": 428,
+   "page": 17,
+   "corpus": "דהוי",
+   "bitonal": "דהוי",
+   "fulltone": "דחוי",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/7/word/428",
+   "bbox_fulltone": {
+    "x1": 0.4262295067310333,
+    "y1": 0.8048676252365112,
+    "x2": 0.464005708694458,
+    "y2": 0.8202391266822815
+   }
+  },
+  {
+   "klal_id": 7,
+   "word_index": 534,
+   "page": 18,
+   "corpus": "להו",
+   "bitonal": "להו",
+   "fulltone": "להן",
+   "state": "ruled",
+   "url": "http://127.0.0.1:8420/entry/7/word/534",
+   "bbox_fulltone": {
+    "x1": 0.8472519516944885,
+    "y1": 0.04610829055309296,
+    "x2": 0.8793718814849854,
+    "y2": 0.06472080945968628
+   }
+  },
+  {
+   "klal_id": 7,
+   "word_index": 553,
+   "page": 18,
+   "corpus": "איהו",
+   "bitonal": "איהו",
+   "fulltone": "איהן",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/7/word/553",
+   "bbox_fulltone": {
+    "x1": 0.7166309952735901,
+    "y1": 0.06429780274629593,
+    "x2": 0.7587437629699707,
+    "y2": 0.08206430077552795
+   }
+  },
+  {
+   "klal_id": 7,
+   "word_index": 556,
+   "page": 18,
+   "corpus": "חדש",
+   "bitonal": "חדש",
+   "fulltone": "חרש",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/7/word/556",
+   "bbox_fulltone": {
+    "x1": 0.5660242438316345,
+    "y1": 0.06429780274629593,
+    "x2": 0.6088508367538452,
+    "y2": 0.08206430077552795
+   }
+  },
+  {
+   "klal_id": 12,
+   "word_index": 195,
+   "page": 18,
+   "corpus": "מהלכות",
+   "bitonal": "מהלכות",
+   "fulltone": "מחלכות",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/12/word/195",
+   "bbox_fulltone": {
+    "x1": 0.4218415319919586,
+    "y1": 0.953045666217804,
+    "x2": 0.49607422947883606,
+    "y2": 0.9720812439918518
+   }
+  },
+  {
+   "klal_id": 12,
+   "word_index": 271,
+   "page": 19,
+   "corpus": "לייה",
+   "bitonal": "לייה",
+   "fulltone": "ל\"ה",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/12/word/271",
+   "bbox_fulltone": {
+    "x1": 0.17085427045822144,
+    "y1": 0.10077854990959167,
+    "x2": 0.20961952209472656,
+    "y2": 0.11937716603279114
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 12,
+   "word_index": 273,
+   "page": 19,
+   "corpus": "ובמהר\"י",
+   "bitonal": "ובמהר\"י",
+   "fulltone": "ובמהרייי",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/12/word/273",
+   "bbox_fulltone": {
+    "x1": 0.031586505472660065,
+    "y1": 0.10077854990959167,
+    "x2": 0.10839913785457611,
+    "y2": 0.11937716603279114
+   }
+  },
+  {
+   "klal_id": 12,
+   "word_index": 285,
+   "page": 19,
+   "corpus": "רס\"ז",
+   "bitonal": "רס\"ז",
+   "fulltone": "רס\"יז",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/12/word/285",
+   "bbox_fulltone": {
+    "x1": 0.2756640315055847,
+    "y1": 0.11807958781719208,
+    "x2": 0.31873655319213867,
+    "y2": 0.13840830326080322
+   }
+  },
+  {
+   "klal_id": 13,
+   "word_index": 70,
+   "page": 19,
+   "corpus": "גריס",
+   "bitonal": "גריס",
+   "fulltone": "גרים",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/13/word/70",
+   "bbox_fulltone": {
+    "x1": 0.7875089645385742,
+    "y1": 0.25735294818878174,
+    "x2": 0.8291457295417786,
+    "y2": 0.27681660652160645
+   }
+  },
+  {
+   "klal_id": 14,
+   "word_index": 163,
+   "page": 19,
+   "corpus": "כ\"ז",
+   "bitonal": "כ\"ז",
+   "fulltone": "כייז",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/14/word/163",
+   "bbox_fulltone": {
+    "x1": 0.23330940306186676,
+    "y1": 0.6587370038032532,
+    "x2": 0.26633167266845703,
+    "y2": 0.6786332130432129
+   }
+  },
+  {
+   "klal_id": 14,
+   "word_index": 220,
+   "page": 19,
+   "corpus": "שמעוה",
+   "bitonal": "שמעוה",
+   "fulltone": "שמעוח",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/14/word/220",
+   "bbox_fulltone": {
+    "x1": 0.9088298678398132,
+    "y1": 0.729238748550415,
+    "x2": 0.972720742225647,
+    "y2": 0.7487024068832397
+   }
+  },
+  {
+   "klal_id": 14,
+   "word_index": 236,
+   "page": 19,
+   "corpus": "הידוע",
+   "bitonal": "הידוע",
+   "fulltone": "חידוע",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/14/word/236",
+   "bbox_fulltone": {
+    "x1": 0.7997128367424011,
+    "y1": 0.745674729347229,
+    "x2": 0.8521177172660828,
+    "y2": 0.7655709385871887
+   }
+  },
+  {
+   "klal_id": 16,
+   "word_index": 29,
+   "page": 19,
+   "corpus": "משנה",
+   "bitonal": "משנה",
+   "fulltone": "משנח",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/16/word/29",
+   "bbox_fulltone": {
+    "x1": 0.8700646162033081,
+    "y1": 0.8330450057983398,
+    "x2": 0.9246231317520142,
+    "y2": 0.8529411554336548
+   }
+  },
+  {
+   "klal_id": 16,
+   "word_index": 44,
+   "page": 19,
+   "corpus": "אהא",
+   "bitonal": "אהא",
+   "fulltone": "אחא",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/16/word/44",
+   "bbox_fulltone": {
+    "x1": 0.029432877898216248,
+    "y1": 0.8330450057983398,
+    "x2": 0.0717875063419342,
+    "y2": 0.8533737063407898
+   }
+  },
+  {
+   "klal_id": 16,
+   "word_index": 124,
+   "page": 19,
+   "corpus": "דר\"י",
+   "bitonal": "דר\"י",
+   "fulltone": "דר'יי",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/16/word/124",
+   "bbox_fulltone": {
+    "x1": 0.27925342321395874,
+    "y1": 0.9199826717376709,
+    "x2": 0.3216080367565155,
+    "y2": 0.9390138387680054
+   }
+  },
+  {
+   "klal_id": 16,
+   "word_index": 152,
+   "page": 19,
+   "corpus": "ימים",
+   "bitonal": "ימים",
+   "fulltone": "ימיס",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/16/word/152",
+   "bbox_fulltone": {
+    "x1": 0.5549174547195435,
+    "y1": 0.9541522264480591,
+    "x2": 0.5951184630393982,
+    "y2": 0.9740484356880188
+   }
+  },
+  {
+   "klal_id": 16,
+   "word_index": 154,
+   "page": 19,
+   "corpus": "הרי",
+   "bitonal": "הרי",
+   "fulltone": "חרי",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/16/word/154",
+   "bbox_fulltone": {
+    "x1": 0.4544149339199066,
+    "y1": 0.9541522264480591,
+    "x2": 0.4867193102836609,
+    "y2": 0.9740484356880188
+   }
+  },
+  {
+   "klal_id": 17,
+   "word_index": 38,
+   "page": 20,
+   "corpus": "ימות",
+   "bitonal": "ימות",
+   "fulltone": "ומות",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/17/word/38",
+   "bbox_fulltone": {
+    "x1": 0.40970733761787415,
+    "y1": 0.1156989261507988,
+    "x2": 0.4639543294906616,
+    "y2": 0.13376344740390778
+   }
+  },
+  {
+   "klal_id": 23,
+   "word_index": 9,
+   "page": 21,
+   "corpus": "חוץ",
+   "bitonal": "חוץ",
+   "fulltone": "זזוץ",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/23/word/9",
+   "bbox_fulltone": {
+    "x1": 0.3901216983795166,
+    "y1": 0.046672429889440536,
+    "x2": 0.4216177463531494,
+    "y2": 0.06957649439573288
+   }
+  },
+  {
+   "klal_id": 23,
+   "word_index": 146,
+   "page": 21,
+   "corpus": "שנאמר",
+   "bitonal": "שנאמר",
+   "fulltone": "שנאאמר",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/23/word/146",
+   "bbox_fulltone": {
+    "x1": 0.12598425149917603,
+    "y1": 0.1858254075050354,
+    "x2": 0.2054402232170105,
+    "y2": 0.20570440590381622
+   }
+  },
+  {
+   "klal_id": 23,
+   "word_index": 304,
+   "page": 21,
+   "corpus": "וכר",
+   "bitonal": "וכר",
+   "fulltone": "ובר",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/23/word/304",
+   "bbox_fulltone": {
+    "x1": 0.9420186281204224,
+    "y1": 0.37856525182724,
+    "x2": 0.9727988839149475,
+    "y2": 0.3967156410217285
+   }
+  },
+  {
+   "klal_id": 23,
+   "word_index": 653,
+   "page": 21,
+   "corpus": "ואיהן",
+   "bitonal": "ואיהן",
+   "fulltone": "ואיהו",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/23/word/653",
+   "bbox_fulltone": {
+    "x1": 0.4316392242908478,
+    "y1": 0.7247191071510315,
+    "x2": 0.4803149700164795,
+    "y2": 0.7441659569740295
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 23,
+   "word_index": 710,
+   "page": 21,
+   "corpus": "ע\"ר",
+   "bitonal": "ע\"ר",
+   "fulltone": "ע\"ד",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/23/word/710",
+   "bbox_fulltone": {
+    "x1": 0.8911954164505005,
+    "y1": 0.794295608997345,
+    "x2": 0.9226914644241333,
+    "y2": 0.813742458820343
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 24,
+   "word_index": 263,
+   "page": 22,
+   "corpus": "ל'",
+   "bitonal": "ל",
+   "fulltone": "לי",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/24/word/263",
+   "bbox_fulltone": {
+    "x1": 0.9481165409088135,
+    "y1": 0.22121603786945343,
+    "x2": 0.9715707302093506,
+    "y2": 0.23975852131843567
+   }
+  },
+  {
+   "klal_id": 25,
+   "word_index": 20,
+   "page": 22,
+   "corpus": "אשנח",
+   "bitonal": "אשנח",
+   "fulltone": "אשגח",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/25/word/20",
+   "bbox_fulltone": {
+    "x1": 0.7626155018806458,
+    "y1": 0.3247089385986328,
+    "x2": 0.8194740414619446,
+    "y2": 0.34540751576423645
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 25,
+   "word_index": 92,
+   "page": 22,
+   "corpus": "ט\"ט",
+   "bitonal": "ט\"ט",
+   "fulltone": "מ\"ט",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/25/word/92",
+   "bbox_fulltone": {
+    "x1": 0.5287846326828003,
+    "y1": 0.3945666253566742,
+    "x2": 0.5671641826629639,
+    "y2": 0.4144027531147003
+   }
+  },
+  {
+   "klal_id": 25,
+   "word_index": 400,
+   "page": 22,
+   "corpus": "להן",
+   "bitonal": "להן",
+   "fulltone": "להו",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/25/word/400",
+   "bbox_fulltone": {
+    "x1": 0.371712863445282,
+    "y1": 0.7080638408660889,
+    "x2": 0.39943140745162964,
+    "y2": 0.72962486743927
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 25,
+   "word_index": 423,
+   "page": 22,
+   "corpus": "הזוו",
+   "bitonal": "הזוו",
+   "fulltone": "הון",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/25/word/423",
+   "bbox_fulltone": {
+    "x1": 0.19971570372581482,
+    "y1": 0.7235877513885498,
+    "x2": 0.2238806039094925,
+    "y2": 0.7425614595413208
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 25,
+   "word_index": 474,
+   "page": 22,
+   "corpus": "להשיבו",
+   "bitonal": "להשיבו",
+   "fulltone": "להשיבן",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/25/word/474",
+   "bbox_fulltone": {
+    "x1": 0.28926795721054077,
+    "y1": 0.7770590782165527,
+    "x2": 0.35465529561042786,
+    "y2": 0.7938766479492188
+   }
+  },
+  {
+   "klal_id": 25,
+   "word_index": 635,
+   "page": 22,
+   "corpus": "והחילוק",
+   "bitonal": "והחילוק",
+   "fulltone": "דהחילוק",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/25/word/635",
+   "bbox_fulltone": {
+    "x1": 0.027718549594283104,
+    "y1": 0.9499784111976624,
+    "x2": 0.101634681224823,
+    "y2": 0.9736955761909485
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 26,
+   "word_index": 8,
+   "page": 23,
+   "corpus": "זה",
+   "bitonal": "זה",
+   "fulltone": "זהה",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/26/word/8",
+   "bbox_fulltone": {
+    "x1": 0.4861012101173401,
+    "y1": 0.25538328289985657,
+    "x2": 0.52173912525177,
+    "y2": 0.27519381046295166
+   }
+  },
+  {
+   "klal_id": 26,
+   "word_index": 15,
+   "page": 23,
+   "corpus": "ברק",
+   "bitonal": "ברק",
+   "fulltone": "בדק",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/26/word/15",
+   "bbox_fulltone": {
+    "x1": 0.1033499613404274,
+    "y1": 0.25538328289985657,
+    "x2": 0.1418389230966568,
+    "y2": 0.27519381046295166
+   }
+  },
+  {
+   "klal_id": 29,
+   "word_index": 205,
+   "page": 23,
+   "corpus": "חד",
+   "bitonal": "חד",
+   "fulltone": "חר",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/29/word/205",
+   "bbox_fulltone": {
+    "x1": 0.9444048404693604,
+    "y1": 0.6373815536499023,
+    "x2": 0.971489667892456,
+    "y2": 0.6559000611305237
+   }
+  },
+  {
+   "klal_id": 30,
+   "word_index": 191,
+   "page": 24,
+   "corpus": "ד\"ה",
+   "bitonal": "ד\"ה",
+   "fulltone": "דייה",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/30/word/191",
+   "bbox_fulltone": {
+    "x1": 0.7992831468582153,
+    "y1": 0.11947278678417206,
+    "x2": 0.8358423113822937,
+    "y2": 0.13647958636283875
+   }
+  },
+  {
+   "klal_id": 30,
+   "word_index": 307,
+   "page": 24,
+   "corpus": "רס\"יז",
+   "bitonal": "רס\"יז",
+   "fulltone": "רס''ז",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/30/word/307",
+   "bbox_fulltone": {
+    "x1": 0.07956989109516144,
+    "y1": 0.22236394882202148,
+    "x2": 0.12688171863555908,
+    "y2": 0.24192176759243011
+   }
+  },
+  {
+   "klal_id": 30,
+   "word_index": 317,
+   "page": 24,
+   "corpus": "סע\"כ",
+   "bitonal": "סע\"כ",
+   "fulltone": "סע\"ב",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/30/word/317",
+   "bbox_fulltone": {
+    "x1": 0.5663082599639893,
+    "y1": 0.23937074840068817,
+    "x2": 0.6114695072174072,
+    "y2": 0.2580782175064087
+   }
+  },
+  {
+   "klal_id": 30,
+   "word_index": 368,
+   "page": 24,
+   "corpus": "בש\"ד",
+   "bitonal": "בש\"ד",
+   "fulltone": "בש\"ר",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/30/word/368",
+   "bbox_fulltone": {
+    "x1": 0.4172042906284332,
+    "y1": 0.29039114713668823,
+    "x2": 0.4695340394973755,
+    "y2": 0.3103741407394409
+   }
+  },
+  {
+   "klal_id": 30,
+   "word_index": 802,
+   "page": 24,
+   "corpus": "התכוננות",
+   "bitonal": "התכוננות",
+   "fulltone": "התבוננות",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/30/word/802",
+   "bbox_fulltone": {
+    "x1": 0.30465948581695557,
+    "y1": 0.7193877696990967,
+    "x2": 0.3885304629802704,
+    "y2": 0.7389456033706665
+   }
+  },
+  {
+   "klal_id": 30,
+   "word_index": 828,
+   "page": 24,
+   "corpus": "גטרינן",
+   "bitonal": "גטרינן",
+   "fulltone": "גמרינן",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/30/word/828",
+   "bbox_fulltone": {
+    "x1": 0.7068100571632385,
+    "y1": 0.7525510191917419,
+    "x2": 0.7634408473968506,
+    "y2": 0.7742347121238708
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 30,
+   "word_index": 1009,
+   "page": 24,
+   "corpus": "כמהור\"א",
+   "bitonal": "כמהור\"א",
+   "fulltone": "במהור\"א",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/30/word/1009",
+   "bbox_fulltone": {
+    "x1": 0.07813619822263718,
+    "y1": 0.9268707633018494,
+    "x2": 0.14695340394973755,
+    "y2": 0.9426020383834839
+   }
+  },
+  {
+   "klal_id": 30,
+   "word_index": 1263,
+   "page": 25,
+   "corpus": "גכי",
+   "bitonal": "גכי",
+   "fulltone": "גבי",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/30/word/1263",
+   "bbox_fulltone": {
+    "x1": 0.2993585169315338,
+    "y1": 0.290838360786438,
+    "x2": 0.3285816013813019,
+    "y2": 0.31071737408638
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 30,
+   "word_index": 1301,
+   "page": 25,
+   "corpus": "אבל",
+   "bitonal": "אבל",
+   "fulltone": "אכל",
+   "state": "ruled",
+   "url": "http://127.0.0.1:8420/entry/30/word/1301",
+   "bbox_fulltone": {
+    "x1": 0.03064860962331295,
+    "y1": 0.32497838139533997,
+    "x2": 0.08624376356601715,
+    "y2": 0.34356093406677246
+   }
+  },
+  {
+   "klal_id": 30,
+   "word_index": 1326,
+   "page": 25,
+   "corpus": "לאקושינרו",
+   "bitonal": "לאקושינרו",
+   "fulltone": "לאקושינהו",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/30/word/1326",
+   "bbox_fulltone": {
+    "x1": 0.3178902268409729,
+    "y1": 0.361279159784317,
+    "x2": 0.4141126275062561,
+    "y2": 0.38072600960731506
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 30,
+   "word_index": 1378,
+   "page": 25,
+   "corpus": "כתבו",
+   "bitonal": "כתבו",
+   "fulltone": "כתכו",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/30/word/1378",
+   "bbox_fulltone": {
+    "x1": 0.22665716707706451,
+    "y1": 0.4118409752845764,
+    "x2": 0.271560937166214,
+    "y2": 0.42826274037361145
+   }
+  },
+  {
+   "klal_id": 30,
+   "word_index": 1553,
+   "page": 25,
+   "corpus": "ובריש",
+   "bitonal": "ובריש",
+   "fulltone": "וכריש",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/30/word/1553",
+   "bbox_fulltone": {
+    "x1": 0.21311475336551666,
+    "y1": 0.5859982967376709,
+    "x2": 0.2694226801395416,
+    "y2": 0.6054450869560242
+   }
+  },
+  {
+   "klal_id": 30,
+   "word_index": 1643,
+   "page": 25,
+   "corpus": "שכריש",
+   "bitonal": "שכריש",
+   "fulltone": "שבריש",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/30/word/1643",
+   "bbox_fulltone": {
+    "x1": 0.0249465424567461,
+    "y1": 0.672860860824585,
+    "x2": 0.09693513810634613,
+    "y2": 0.6918755173683167
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 30,
+   "word_index": 1662,
+   "page": 25,
+   "corpus": "ח\"ט",
+   "bitonal": "ח\"ט",
+   "fulltone": "ח\"כ",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/30/word/1662",
+   "bbox_fulltone": {
+    "x1": 0.9287241697311401,
+    "y1": 0.7074330449104309,
+    "x2": 0.9657875895500183,
+    "y2": 0.7268798351287842
+   }
+  },
+  {
+   "klal_id": 30,
+   "word_index": 1691,
+   "page": 25,
+   "corpus": "ככ\"ד",
+   "bitonal": "ככ\"ד",
+   "fulltone": "כמ\"ד",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/30/word/1691",
+   "bbox_fulltone": {
+    "x1": 0.2794012725353241,
+    "y1": 0.7251512408256531,
+    "x2": 0.32786884903907776,
+    "y2": 0.7445980906486511
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 30,
+   "word_index": 1832,
+   "page": 25,
+   "corpus": "ע\"ד",
+   "bitonal": "ע\"ד",
+   "fulltone": "ע\"ר",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/30/word/1832",
+   "bbox_fulltone": {
+    "x1": 0.03920171037316322,
+    "y1": 0.8630077838897705,
+    "x2": 0.0727013573050499,
+    "y2": 0.8828867673873901
+   }
+  },
+  {
+   "klal_id": 31,
+   "word_index": 69,
+   "page": 26,
+   "corpus": "חזה",
+   "bitonal": "חזה",
+   "fulltone": "וזה",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/31/word/69",
+   "bbox_fulltone": {
+    "x1": 0.3700787425041199,
+    "y1": 0.08214440196752548,
+    "x2": 0.3951324224472046,
+    "y2": 0.09857328236103058
+   }
+  },
+  {
+   "klal_id": 33,
+   "word_index": 92,
+   "page": 26,
+   "corpus": "דוא",
+   "bitonal": "דוא",
+   "fulltone": "הוא",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/33/word/92",
+   "bbox_fulltone": {
+    "x1": 0.031496062874794006,
+    "y1": 0.37699955701828003,
+    "x2": 0.0773085206747055,
+    "y2": 0.397319495677948
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 36,
+   "word_index": 72,
+   "page": 26,
+   "corpus": "אינו",
+   "bitonal": "אינו",
+   "fulltone": "אינן",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/36/word/72",
+   "bbox_fulltone": {
+    "x1": 0.5819613337516785,
+    "y1": 0.7942066788673401,
+    "x2": 0.6191839575767517,
+    "y2": 0.8115001916885376
+   },
+   "flag": "current_text_confirmed"
+  },
+  {
+   "klal_id": 36,
+   "word_index": 97,
+   "page": 26,
+   "corpus": "דעביד",
+   "bitonal": "דעביד",
+   "fulltone": "דעכיד",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/36/word/97",
+   "bbox_fulltone": {
+    "x1": 0.026485325768589973,
+    "y1": 0.8123648762702942,
+    "x2": 0.08231925219297409,
+    "y2": 0.8326848149299622
+   }
+  },
+  {
+   "klal_id": 37,
+   "word_index": 51,
+   "page": 26,
+   "corpus": "קט\"ו",
+   "bitonal": "קט\"ו",
+   "fulltone": "קמ\"ו",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/37/word/51",
+   "bbox_fulltone": {
+    "x1": 0.8317824006080627,
+    "y1": 0.900562047958374,
+    "x2": 0.8732999563217163,
+    "y2": 0.920881986618042
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 37,
+   "word_index": 63,
+   "page": 26,
+   "corpus": "הגרות",
+   "bitonal": "הגרות",
+   "fulltone": "הגהות",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/37/word/63",
+   "bbox_fulltone": {
+    "x1": 0.09591982513666153,
+    "y1": 0.9001296758651733,
+    "x2": 0.14889048039913177,
+    "y2": 0.9204496145248413
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 37,
+   "word_index": 129,
+   "page": 27,
+   "corpus": "אכל",
+   "bitonal": "אכל",
+   "fulltone": "אבל",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/37/word/129",
+   "bbox_fulltone": {
+    "x1": 0.030758226290345192,
+    "y1": 0.04659188911318779,
+    "x2": 0.08512160181999207,
+    "y2": 0.06686799228191376
+   },
+   "flag": "manual_correction"
+  },
+  {
+   "klal_id": 37,
+   "word_index": 310,
+   "page": 27,
+   "corpus": "לדו",
+   "bitonal": "לדו",
+   "fulltone": "לרו",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/37/word/310",
+   "bbox_fulltone": {
+    "x1": 0.030042918398976326,
+    "y1": 0.23943054676055908,
+    "x2": 0.06008583679795265,
+    "y2": 0.2592752277851105
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 37,
+   "word_index": 381,
+   "page": 27,
+   "corpus": "סד\"ה",
+   "bitonal": "סד\"ה",
+   "fulltone": "סר\"ה",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/37/word/381",
+   "bbox_fulltone": {
+    "x1": 0.4477825462818146,
+    "y1": 0.33045729994773865,
+    "x2": 0.4942775368690491,
+    "y2": 0.3412424623966217
+   }
+  },
+  {
+   "klal_id": 38,
+   "word_index": 39,
+   "page": 27,
+   "corpus": "ריצב\"א",
+   "bitonal": "ריצב\"א",
+   "fulltone": "ריצכ\"א",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/38/word/39",
+   "bbox_fulltone": {
+    "x1": 0.46566522121429443,
+    "y1": 0.378343403339386,
+    "x2": 0.5321888327598572,
+    "y2": 0.3977566957473755
+   }
+  },
+  {
+   "klal_id": 38,
+   "word_index": 286,
+   "page": 27,
+   "corpus": "דרכה",
+   "bitonal": "דרכה",
+   "fulltone": "דרבה",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/38/word/286",
+   "bbox_fulltone": {
+    "x1": 0.2782546579837799,
+    "y1": 0.6220880150794983,
+    "x2": 0.32832616567611694,
+    "y2": 0.640207052230835
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 40,
+   "word_index": 24,
+   "page": 28,
+   "corpus": "ראוהו",
+   "bitonal": "ראוהו",
+   "fulltone": "ראודו",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/40/word/24",
+   "bbox_fulltone": {
+    "x1": 0.5516499280929565,
+    "y1": 0.48079413175582886,
+    "x2": 0.6018651127815247,
+    "y2": 0.4989210069179535
+   }
+  },
+  {
+   "klal_id": 41,
+   "word_index": 105,
+   "page": 28,
+   "corpus": "יהין",
+   "bitonal": "יהין",
+   "fulltone": "יהיו",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/41/word/105",
+   "bbox_fulltone": {
+    "x1": 0.8299856781959534,
+    "y1": 0.6214933395385742,
+    "x2": 0.8601147532463074,
+    "y2": 0.6409149765968323
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 41,
+   "word_index": 217,
+   "page": 28,
+   "corpus": "הגדות",
+   "bitonal": "הגדות",
+   "fulltone": "הגהות",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/41/word/217",
+   "bbox_fulltone": {
+    "x1": 0.23959827423095703,
+    "y1": 0.7250755429267883,
+    "x2": 0.29483500123023987,
+    "y2": 0.7457919716835022
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 41,
+   "word_index": 254,
+   "page": 28,
+   "corpus": "סס\"ו",
+   "bitonal": "סס\"ו",
+   "fulltone": "ספ\"ו",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/41/word/254",
+   "bbox_fulltone": {
+    "x1": 0.27187949419021606,
+    "y1": 0.7604660987854004,
+    "x2": 0.31276899576187134,
+    "y2": 0.7785930037498474
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 41,
+   "word_index": 282,
+   "page": 28,
+   "corpus": "לדם",
+   "bitonal": "לדם",
+   "fulltone": "להם",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/41/word/282",
+   "bbox_fulltone": {
+    "x1": 0.544476330280304,
+    "y1": 0.7954251170158386,
+    "x2": 0.5817790627479553,
+    "y2": 0.8152783513069153
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 41,
+   "word_index": 366,
+   "page": 28,
+   "corpus": "חכמים",
+   "bitonal": "חכמים",
+   "fulltone": "חכמיס",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/41/word/366",
+   "bbox_fulltone": {
+    "x1": 0.32424676418304443,
+    "y1": 0.8830384016036987,
+    "x2": 0.384505033493042,
+    "y2": 0.9050496220588684
+   },
+   "flag": "current_text_confirmed"
+  },
+  {
+   "klal_id": 41,
+   "word_index": 378,
+   "page": 28,
+   "corpus": "מהדויינן",
+   "bitonal": "מהדויינן",
+   "fulltone": "מהדו־ינן",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/41/word/378",
+   "bbox_fulltone": {
+    "x1": 0.5114777684211731,
+    "y1": 0.8998705148696899,
+    "x2": 0.5868005752563477,
+    "y2": 0.9210185408592224
+   },
+   "flag": "ai_flag"
+  },
+  {
+   "klal_id": 41,
+   "word_index": 398,
+   "page": 28,
+   "corpus": "במילתיהן",
+   "bitonal": "במילתיהן",
+   "fulltone": "במילתיהו",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/41/word/398",
+   "bbox_fulltone": {
+    "x1": 0.16427546739578247,
+    "y1": 0.9167026281356812,
+    "x2": 0.24892395734786987,
+    "y2": 0.9382822513580322
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 41,
+   "word_index": 435,
+   "page": 28,
+   "corpus": "כסי",
+   "bitonal": "כסי",
+   "fulltone": "כפי",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/41/word/435",
+   "bbox_fulltone": {
+    "x1": 0.09469153732061386,
+    "y1": 0.9542511701583862,
+    "x2": 0.1269727349281311,
+    "y2": 0.9749676585197449
+   },
+   "flag": "ai_flag"
+  },
+  {
+   "klal_id": 41,
+   "word_index": 523,
+   "page": 29,
+   "corpus": "טילת",
+   "bitonal": "טילת",
+   "fulltone": "מילת",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/41/word/523",
+   "bbox_fulltone": {
+    "x1": 0.9228020310401917,
+    "y1": 0.13310284912586212,
+    "x2": 0.9728377461433411,
+    "y2": 0.15341399610042572
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 41,
+   "word_index": 748,
+   "page": 29,
+   "corpus": "רס\"ו",
+   "bitonal": "רס\"ו",
+   "fulltone": "רפ\"ו",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/41/word/748",
+   "bbox_fulltone": {
+    "x1": 0.3066475987434387,
+    "y1": 0.35911840200424194,
+    "x2": 0.34596139192581177,
+    "y2": 0.378133088350296
+   }
+  },
+  {
+   "klal_id": 41,
+   "word_index": 750,
+   "page": 29,
+   "corpus": "זרה",
+   "bitonal": "זרה",
+   "fulltone": "זרז",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/41/word/750",
+   "bbox_fulltone": {
+    "x1": 0.18584702908992767,
+    "y1": 0.35911840200424194,
+    "x2": 0.22015725076198578,
+    "y2": 0.378133088350296
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 41,
+   "word_index": 753,
+   "page": 29,
+   "corpus": "דוי",
+   "bitonal": "דוי",
+   "fulltone": "הוי",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/41/word/753",
+   "bbox_fulltone": {
+    "x1": 0.5175125002861023,
+    "y1": 0.3815903067588806,
+    "x2": 0.5432451963424683,
+    "y2": 0.39239412546157837
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 43,
+   "word_index": 0,
+   "page": 29,
+   "corpus": "מג",
+   "bitonal": "מג",
+   "fulltone": "מגן",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/43/word/0",
+   "bbox_fulltone": {
+    "x1": 0.9421014785766602,
+    "y1": 0.463267058134079,
+    "x2": 0.9685489535331726,
+    "y2": 0.4835782051086426
+   }
+  },
+  {
+   "klal_id": 43,
+   "word_index": 17,
+   "page": 29,
+   "corpus": "ממטונא",
+   "bitonal": "ממטונא",
+   "fulltone": "מממונא",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/43/word/17",
+   "bbox_fulltone": {
+    "x1": 0.4917798340320587,
+    "y1": 0.48401036858558655,
+    "x2": 0.5654038786888123,
+    "y2": 0.4982714056968689
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 44,
+   "word_index": 12,
+   "page": 29,
+   "corpus": "בס'",
+   "bitonal": "בס",
+   "fulltone": "בפ",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/44/word/12",
+   "bbox_fulltone": {
+    "x1": 0.21157969534397125,
+    "y1": 0.5855661034584045,
+    "x2": 0.23945675790309906,
+    "y2": 0.6050129532814026
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 44,
+   "word_index": 102,
+   "page": 29,
+   "corpus": "ל\"ר",
+   "bitonal": "ל\"ר",
+   "fulltone": "ל\"ד",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/44/word/102",
+   "bbox_fulltone": {
+    "x1": 0.5368120074272156,
+    "y1": 0.6905790567398071,
+    "x2": 0.5704074501991272,
+    "y2": 0.7087294459342957
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 44,
+   "word_index": 199,
+   "page": 29,
+   "corpus": "דבריו",
+   "bitonal": "דבריו",
+   "fulltone": "דברין",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/44/word/199",
+   "bbox_fulltone": {
+    "x1": 0.4010007083415985,
+    "y1": 0.7938634157180786,
+    "x2": 0.4510364532470703,
+    "y2": 0.8128781318664551
+   }
+  },
+  {
+   "klal_id": 44,
+   "word_index": 242,
+   "page": 29,
+   "corpus": "דמ\"ם",
+   "bitonal": "דמ\"ם",
+   "fulltone": "דמ\"ט",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/44/word/242",
+   "bbox_fulltone": {
+    "x1": 0.7340958118438721,
+    "y1": 0.8465859889984131,
+    "x2": 0.7827019095420837,
+    "y2": 0.8664649724960327
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 44,
+   "word_index": 294,
+   "page": 29,
+   "corpus": "תיובתייהו",
+   "bitonal": "תיובתייהו",
+   "fulltone": "תיוכתייהו",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/44/word/294",
+   "bbox_fulltone": {
+    "x1": 0.6225875616073608,
+    "y1": 0.9001728892326355,
+    "x2": 0.7105075120925903,
+    "y2": 0.9187554121017456
+   }
+  },
+  {
+   "klal_id": 44,
+   "word_index": 350,
+   "page": 29,
+   "corpus": "חז\"ל",
+   "bitonal": "חז\"ל",
+   "fulltone": "וז\"ל",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/44/word/350",
+   "bbox_fulltone": {
+    "x1": 0.3473909795284271,
+    "y1": 0.9511668086051941,
+    "x2": 0.38170120120048523,
+    "y2": 0.968885064125061
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 44,
+   "word_index": 362,
+   "page": 30,
+   "corpus": "לירחית",
+   "bitonal": "לירחית",
+   "fulltone": "לידחית",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/44/word/362",
+   "bbox_fulltone": {
+    "x1": 0.5482269525527954,
+    "y1": 0.04726799577474594,
+    "x2": 0.6106383204460144,
+    "y2": 0.0641803964972496
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 44,
+   "word_index": 385,
+   "page": 30,
+   "corpus": "שכתבתי",
+   "bitonal": "שכתבתי",
+   "fulltone": "שכתבתים",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/44/word/385",
+   "bbox_fulltone": {
+    "x1": 0.14326241612434387,
+    "y1": 0.06591500341892242,
+    "x2": 0.22978723049163818,
+    "y2": 0.08542931824922562
+   }
+  },
+  {
+   "klal_id": 48,
+   "word_index": 7,
+   "page": 30,
+   "corpus": "בדליכאי",
+   "bitonal": "בדליכאי",
+   "fulltone": "בדליכא",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/48/word/7",
+   "bbox_fulltone": {
+    "x1": 0.4964539110660553,
+    "y1": 0.3269731104373932,
+    "x2": 0.5680851340293884,
+    "y2": 0.3460537791252136
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 48,
+   "word_index": 11,
+   "page": 30,
+   "corpus": "אכל",
+   "bitonal": "אכל",
+   "fulltone": "אבל",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/48/word/11",
+   "bbox_fulltone": {
+    "x1": 0.22269503772258759,
+    "y1": 0.3269731104373932,
+    "x2": 0.26241135597229004,
+    "y2": 0.3460537791252136
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 48,
+   "word_index": 63,
+   "page": 30,
+   "corpus": "פ\"ה",
+   "bitonal": "פ\"ה",
+   "fulltone": "ס\"ה",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/48/word/63",
+   "bbox_fulltone": {
+    "x1": 0.24255318939685822,
+    "y1": 0.3785776197910309,
+    "x2": 0.27659574151039124,
+    "y2": 0.3980919420719147
+   }
+  },
+  {
+   "klal_id": 51,
+   "word_index": 78,
+   "page": 30,
+   "corpus": "וככמה",
+   "bitonal": "וככמה",
+   "fulltone": "ובכמה",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/51/word/78",
+   "bbox_fulltone": {
+    "x1": 0.5574468374252319,
+    "y1": 0.676929771900177,
+    "x2": 0.6163120269775391,
+    "y2": 0.6968777179718018
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 52,
+   "word_index": 32,
+   "page": 30,
+   "corpus": "השולח",
+   "bitonal": "השולח",
+   "fulltone": "השולה",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/52/word/32",
+   "bbox_fulltone": {
+    "x1": 0.027659574523568153,
+    "y1": 0.7814397215843201,
+    "x2": 0.08794326335191727,
+    "y2": 0.8018213510513306
+   }
+  },
+  {
+   "klal_id": 53,
+   "word_index": 27,
+   "page": 30,
+   "corpus": "נזכר",
+   "bitonal": "נזכר",
+   "fulltone": "נוכר",
+   "state": "ruled",
+   "url": "http://127.0.0.1:8420/entry/53/word/27",
+   "bbox_fulltone": {
+    "x1": 0.4262411296367645,
+    "y1": 0.908499538898468,
+    "x2": 0.458156019449234,
+    "y2": 0.9232437014579773
+   }
+  },
+  {
+   "klal_id": 54,
+   "word_index": 13,
+   "page": 31,
+   "corpus": "כדאיתא",
+   "bitonal": "כדאיתא",
+   "fulltone": "כראיתא",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/54/word/13",
+   "bbox_fulltone": {
+    "x1": 0.23609130084514618,
+    "y1": 0.415324330329895,
+    "x2": 0.32239657640457153,
+    "y2": 0.4344797432422638
+   }
+  },
+  {
+   "klal_id": 54,
+   "word_index": 266,
+   "page": 31,
+   "corpus": "נ'",
+   "bitonal": "נ",
+   "fulltone": "ג",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/54/word/266",
+   "bbox_fulltone": {
+    "x1": 0.12696148455142975,
+    "y1": 0.6769699454307556,
+    "x2": 0.13694721460342407,
+    "y2": 0.6978667974472046
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 54,
+   "word_index": 359,
+   "page": 31,
+   "corpus": "ליבום",
+   "bitonal": "ליבום",
+   "fulltone": "ליכום",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/54/word/359",
+   "bbox_fulltone": {
+    "x1": 0.6226818561553955,
+    "y1": 0.7827601432800293,
+    "x2": 0.6733238101005554,
+    "y2": 0.8036569356918335
+   }
+  },
+  {
+   "klal_id": 54,
+   "word_index": 415,
+   "page": 31,
+   "corpus": "כין",
+   "bitonal": "כין",
+   "fulltone": "בין",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/54/word/415",
+   "bbox_fulltone": {
+    "x1": 0.26676177978515625,
+    "y1": 0.8350021839141846,
+    "x2": 0.2938659191131592,
+    "y2": 0.8550282716751099
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 54,
+   "word_index": 627,
+   "page": 32,
+   "corpus": "אהדורי",
+   "bitonal": "אהדורי",
+   "fulltone": "אהרורי",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/54/word/627",
+   "bbox_fulltone": {
+    "x1": 0.028612302616238594,
+    "y1": 0.11504047363996506,
+    "x2": 0.09585121273994446,
+    "y2": 0.13463996350765228
+   }
+  },
+  {
+   "klal_id": 54,
+   "word_index": 940,
+   "page": 32,
+   "corpus": "עיר",
+   "bitonal": "עיר",
+   "fulltone": "ע\"ד",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/54/word/940",
+   "bbox_fulltone": {
+    "x1": 0.8519313335418701,
+    "y1": 0.44141456484794617,
+    "x2": 0.8841201663017273,
+    "y2": 0.45973584055900574
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 54,
+   "word_index": 953,
+   "page": 32,
+   "corpus": "כרת",
+   "bitonal": "כרת",
+   "fulltone": "כות",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/54/word/953",
+   "bbox_fulltone": {
+    "x1": 0.9191702604293823,
+    "y1": 0.458883672952652,
+    "x2": 0.9706723690032959,
+    "y2": 0.47677886486053467
+   }
+  },
+  {
+   "klal_id": 59,
+   "word_index": 8,
+   "page": 32,
+   "corpus": "כדקיימא",
+   "bitonal": "כדקיימא",
+   "fulltone": "בדקיימא",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/59/word/8",
+   "bbox_fulltone": {
+    "x1": 0.4620887041091919,
+    "y1": 0.8525777459144592,
+    "x2": 0.5429184436798096,
+    "y2": 0.8743076324462891
+   }
+  },
+  {
+   "klal_id": 59,
+   "word_index": 70,
+   "page": 32,
+   "corpus": "ר\"פ",
+   "bitonal": "ר\"פ",
+   "fulltone": "ר\"ס",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/59/word/70",
+   "bbox_fulltone": {
+    "x1": 0.6595135927200317,
+    "y1": 0.9211759567260742,
+    "x2": 0.6931330561637878,
+    "y2": 0.9394972324371338
+   }
+  },
+  {
+   "klal_id": 59,
+   "word_index": 130,
+   "page": 33,
+   "corpus": "ר\"ס",
+   "bitonal": "ר\"ס",
+   "fulltone": "ר\"פ",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/59/word/130",
+   "bbox_fulltone": {
+    "x1": 0.07752489298582077,
+    "y1": 0.06607929617166519,
+    "x2": 0.1116642951965332,
+    "y2": 0.08678413927555084
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 64,
+   "word_index": 67,
+   "page": 33,
+   "corpus": "וכו'",
+   "bitonal": "וכו",
+   "fulltone": "ובו",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/64/word/67",
+   "bbox_fulltone": {
+    "x1": 0.8421052694320679,
+    "y1": 0.8255506753921509,
+    "x2": 0.8684210777282715,
+    "y2": 0.8449339270591736
+   }
+  },
+  {
+   "klal_id": 64,
+   "word_index": 99,
+   "page": 33,
+   "corpus": "תורה",
+   "bitonal": "תורה",
+   "fulltone": "תודה",
+   "state": "ruled",
+   "url": "http://127.0.0.1:8420/entry/64/word/99",
+   "bbox_fulltone": {
+    "x1": 0.9238975644111633,
+    "y1": 0.8612334728240967,
+    "x2": 0.9701279997825623,
+    "y2": 0.8792951703071594
+   }
+  },
+  {
+   "klal_id": 64,
+   "word_index": 123,
+   "page": 33,
+   "corpus": "בו",
+   "bitonal": "בו",
+   "fulltone": "כו",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/64/word/123",
+   "bbox_fulltone": {
+    "x1": 0.4772403836250305,
+    "y1": 0.8779735565185547,
+    "x2": 0.49644380807876587,
+    "y2": 0.8977973461151123
+   }
+  },
+  {
+   "klal_id": 64,
+   "word_index": 151,
+   "page": 33,
+   "corpus": "התוס'",
+   "bitonal": "התוס",
+   "fulltone": "התזס",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/64/word/151",
+   "bbox_fulltone": {
+    "x1": 0.8691322803497314,
+    "y1": 0.9154185056686401,
+    "x2": 0.9132290482521057,
+    "y2": 0.933039665222168
+   }
+  },
+  {
+   "klal_id": 66,
+   "word_index": 19,
+   "page": 34,
+   "corpus": "אבל",
+   "bitonal": "אבל",
+   "fulltone": "אכלי",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/66/word/19",
+   "bbox_fulltone": {
+    "x1": 0.6702432036399841,
+    "y1": 0.12235192209482193,
+    "x2": 0.731044352054596,
+    "y2": 0.15348032116889954
+   }
+  },
+  {
+   "klal_id": 66,
+   "word_index": 29,
+   "page": 34,
+   "corpus": "מההיא",
+   "bitonal": "מההיא",
+   "fulltone": "מהרוא",
+   "state": "ruled",
+   "url": "http://127.0.0.1:8420/entry/66/word/29",
+   "bbox_fulltone": {
+    "x1": 0.15665236115455627,
+    "y1": 0.12235192209482193,
+    "x2": 0.21673819422721863,
+    "y2": 0.15348032116889954
+   }
+  },
+  {
+   "klal_id": 66,
+   "word_index": 176,
+   "page": 34,
+   "corpus": "היה",
+   "bitonal": "היה",
+   "fulltone": "הוה",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/66/word/176",
+   "bbox_fulltone": {
+    "x1": 0.45493561029434204,
+    "y1": 0.2896670997142792,
+    "x2": 0.4849785268306732,
+    "y2": 0.30955469608306885
+   }
+  },
+  {
+   "klal_id": 69,
+   "word_index": 141,
+   "page": 34,
+   "corpus": "אינו",
+   "bitonal": "אינו",
+   "fulltone": "אינן",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/69/word/141",
+   "bbox_fulltone": {
+    "x1": 0.8412017226219177,
+    "y1": 0.6904453039169312,
+    "x2": 0.8798283338546753,
+    "y2": 0.7103329300880432
+   }
+  },
+  {
+   "klal_id": 70,
+   "word_index": 96,
+   "page": 35,
+   "corpus": "ס\"ח",
+   "bitonal": "ס\"ח",
+   "fulltone": "פ\"ח",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/70/word/96",
+   "bbox_fulltone": {
+    "x1": 0.2876614034175873,
+    "y1": 0.18948283791542053,
+    "x2": 0.3228120505809784,
+    "y2": 0.2081703543663025
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 74,
+   "word_index": 25,
+   "page": 35,
+   "corpus": "לדבריו",
+   "bitonal": "לדבריו",
+   "fulltone": "לדברין",
+   "state": "ruled",
+   "url": "http://127.0.0.1:8420/entry/74/word/25",
+   "bbox_fulltone": {
+    "x1": 0.45408895611763,
+    "y1": 0.5549761056900024,
+    "x2": 0.5172166228294373,
+    "y2": 0.5736636519432068
+   }
+  },
+  {
+   "klal_id": 74,
+   "word_index": 87,
+   "page": 35,
+   "corpus": "מדקאמי",
+   "bitonal": "מדקאמי",
+   "fulltone": "מדקאמ",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/74/word/87",
+   "bbox_fulltone": {
+    "x1": 0.03299856558442116,
+    "y1": 0.6066927313804626,
+    "x2": 0.10186513513326645,
+    "y2": 0.6266840696334839
+   }
+  },
+  {
+   "klal_id": 74,
+   "word_index": 121,
+   "page": 35,
+   "corpus": "בחידושיו",
+   "bitonal": "בחידושיו",
+   "fulltone": "בחידושין",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/74/word/121",
+   "bbox_fulltone": {
+    "x1": 0.15136298537254333,
+    "y1": 0.6414602398872375,
+    "x2": 0.23385939002037048,
+    "y2": 0.6623207330703735
+   }
+  },
+  {
+   "klal_id": 74,
+   "word_index": 402,
+   "page": 35,
+   "corpus": "בס'",
+   "bitonal": "בס",
+   "fulltone": "בפ",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/74/word/402",
+   "bbox_fulltone": {
+    "x1": 0.23959827423095703,
+    "y1": 0.9222077131271362,
+    "x2": 0.2654232382774353,
+    "y2": 0.9426336288452148
+   }
+  },
+  {
+   "klal_id": 74,
+   "word_index": 699,
+   "page": 36,
+   "corpus": "פ\"ד",
+   "bitonal": "פ\"ד",
+   "fulltone": "פ\"ר",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/74/word/699",
+   "bbox_fulltone": {
+    "x1": 0.39031338691711426,
+    "y1": 0.3087219297885895,
+    "x2": 0.42592594027519226,
+    "y2": 0.3255613148212433
+   }
+  },
+  {
+   "klal_id": 74,
+   "word_index": 874,
+   "page": 36,
+   "corpus": "שרתוס'",
+   "bitonal": "שרתוס",
+   "fulltone": "שהתוס",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/74/word/874",
+   "bbox_fulltone": {
+    "x1": 0.03917378932237625,
+    "y1": 0.4818652868270874,
+    "x2": 0.10042735189199448,
+    "y2": 0.5025906562805176
+   }
+  },
+  {
+   "klal_id": 74,
+   "word_index": 879,
+   "page": 36,
+   "corpus": "ל\"ר",
+   "bitonal": "ל\"ר",
+   "fulltone": "ל\"ד",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/74/word/879",
+   "bbox_fulltone": {
+    "x1": 0.7051281929016113,
+    "y1": 0.4987046718597412,
+    "x2": 0.7386040091514587,
+    "y2": 0.5198618173599243
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 75,
+   "word_index": 5,
+   "page": 36,
+   "corpus": "ר\"ס",
+   "bitonal": "ר\"ס",
+   "fulltone": "ר\"פ",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/75/word/5",
+   "bbox_fulltone": {
+    "x1": 0.6581196784973145,
+    "y1": 0.6917098164558411,
+    "x2": 0.690883219242096,
+    "y2": 0.7102763652801514
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 75,
+   "word_index": 156,
+   "page": 36,
+   "corpus": "משים",
+   "bitonal": "משים",
+   "fulltone": "משום",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/75/word/156",
+   "bbox_fulltone": {
+    "x1": 0.8326210975646973,
+    "y1": 0.8475820422172546,
+    "x2": 0.8839031457901001,
+    "y2": 0.867443859577179
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 75,
+   "word_index": 203,
+   "page": 36,
+   "corpus": "ר\"ס",
+   "bitonal": "ר\"ס",
+   "fulltone": "ר\"מ",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/75/word/203",
+   "bbox_fulltone": {
+    "x1": 0.10042735189199448,
+    "y1": 0.8834196925163269,
+    "x2": 0.1367521435022354,
+    "y2": 0.8998273015022278
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 75,
+   "word_index": 222,
+   "page": 36,
+   "corpus": "בס'",
+   "bitonal": "בס",
+   "fulltone": "בפ",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/75/word/222",
+   "bbox_fulltone": {
+    "x1": 0.945868968963623,
+    "y1": 0.9170984625816345,
+    "x2": 0.9736467003822327,
+    "y2": 0.9365285038948059
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 75,
+   "word_index": 319,
+   "page": 37,
+   "corpus": "ר\"ס",
+   "bitonal": "ר\"ס",
+   "fulltone": "ר\"פ",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/75/word/319",
+   "bbox_fulltone": {
+    "x1": 0.08745519816875458,
+    "y1": 0.08164146542549133,
+    "x2": 0.12114695459604263,
+    "y2": 0.1015118807554245
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 75,
+   "word_index": 326,
+   "page": 37,
+   "corpus": "קבל",
+   "bitonal": "קבל",
+   "fulltone": "קכל",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/75/word/326",
+   "bbox_fulltone": {
+    "x1": 0.6501792073249817,
+    "y1": 0.09892008453607559,
+    "x2": 0.6888889074325562,
+    "y2": 0.12095032632350922
+   }
+  },
+  {
+   "klal_id": 75,
+   "word_index": 351,
+   "page": 37,
+   "corpus": "לפק\"ר",
+   "bitonal": "לפק\"ר",
+   "fulltone": "לפק\"ד",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/75/word/351",
+   "bbox_fulltone": {
+    "x1": 0.1111111119389534,
+    "y1": 0.115766741335392,
+    "x2": 0.17060932517051697,
+    "y2": 0.13606911897659302
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 75,
+   "word_index": 485,
+   "page": 37,
+   "corpus": "רבם",
+   "bitonal": "רבם",
+   "fulltone": "רבס",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/75/word/485",
+   "bbox_fulltone": {
+    "x1": 0.5706093311309814,
+    "y1": 0.25529158115386963,
+    "x2": 0.6078853011131287,
+    "y2": 0.2751619815826416
+   }
+  },
+  {
+   "klal_id": 75,
+   "word_index": 499,
+   "page": 37,
+   "corpus": "פ\"ד",
+   "bitonal": "פ\"ד",
+   "fulltone": "פ\"ר",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/75/word/499",
+   "bbox_fulltone": {
+    "x1": 0.675268828868866,
+    "y1": 0.27645787596702576,
+    "x2": 0.7111111283302307,
+    "y2": 0.292008638381958
+   }
+  },
+  {
+   "klal_id": 75,
+   "word_index": 1082,
+   "page": 37,
+   "corpus": "חד",
+   "bitonal": "חד",
+   "fulltone": "חר",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/75/word/1082",
+   "bbox_fulltone": {
+    "x1": 0.02939068153500557,
+    "y1": 0.8285097479820251,
+    "x2": 0.055913977324962616,
+    "y2": 0.8475161790847778
+   }
+  },
+  {
+   "klal_id": 76,
+   "word_index": 6,
+   "page": 38,
+   "corpus": "סי'",
+   "bitonal": "סי",
+   "fulltone": "פי",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/76/word/6",
+   "bbox_fulltone": {
+    "x1": 0.6417378783226013,
+    "y1": 0.11686071753501892,
+    "x2": 0.6631054282188416,
+    "y2": 0.13799051940441132
+   },
+   "flag": "ai_flag"
+  },
+  {
+   "klal_id": 77,
+   "word_index": 0,
+   "page": 38,
+   "corpus": "עז",
+   "bitonal": "עז",
+   "fulltone": "עו",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/77/word/0",
+   "bbox_fulltone": {
+    "x1": 0.9494302272796631,
+    "y1": 0.1509271264076233,
+    "x2": 0.9707977175712585,
+    "y2": 0.17076325416564941
+   }
+  },
+  {
+   "klal_id": 79,
+   "word_index": 1,
+   "page": 38,
+   "corpus": "או",
+   "bitonal": "או",
+   "fulltone": "אי",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/79/word/1",
+   "bbox_fulltone": {
+    "x1": 0.8653846383094788,
+    "y1": 0.32557135820388794,
+    "x2": 0.9138176441192627,
+    "y2": 0.3462699353694916
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 82,
+   "word_index": 41,
+   "page": 38,
+   "corpus": "ט\"ו",
+   "bitonal": "ט\"ו",
+   "fulltone": "מ\"ו",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/82/word/41",
+   "bbox_fulltone": {
+    "x1": 0.4594016969203949,
+    "y1": 0.7947391271591187,
+    "x2": 0.4878917336463928,
+    "y2": 0.816731333732605
+   }
+  },
+  {
+   "klal_id": 83,
+   "word_index": 47,
+   "page": 38,
+   "corpus": "כ\"ד",
+   "bitonal": "כ\"ד",
+   "fulltone": "כ\"ר",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/83/word/47",
+   "bbox_fulltone": {
+    "x1": 0.4615384638309479,
+    "y1": 0.888745129108429,
+    "x2": 0.49643874168395996,
+    "y2": 0.8982319831848145
+   }
+  },
+  {
+   "klal_id": 84,
+   "word_index": 1,
+   "page": 38,
+   "corpus": "בהדיא",
+   "bitonal": "בהדיא",
+   "fulltone": "בהריא",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/84/word/1",
+   "bbox_fulltone": {
+    "x1": 0.81695157289505,
+    "y1": 0.8986632227897644,
+    "x2": 0.9109686613082886,
+    "y2": 0.9223803281784058
+   }
+  },
+  {
+   "klal_id": 86,
+   "word_index": 56,
+   "page": 39,
+   "corpus": "בחדושיו",
+   "bitonal": "בחדושיו",
+   "fulltone": "בחרושיו",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/86/word/56",
+   "bbox_fulltone": {
+    "x1": 0.093304842710495,
+    "y1": 0.2201637178659439,
+    "x2": 0.16595441102981567,
+    "y2": 0.23998276889324188
+   }
+  },
+  {
+   "klal_id": 86,
+   "word_index": 183,
+   "page": 39,
+   "corpus": "ס\"ב",
+   "bitonal": "ס\"ב",
+   "fulltone": "מ\"ב",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/86/word/183",
+   "bbox_fulltone": {
+    "x1": 0.2371794879436493,
+    "y1": 0.36320552229881287,
+    "x2": 0.27136752009391785,
+    "y2": 0.3787160813808441
+   }
+  },
+  {
+   "klal_id": 88,
+   "word_index": 150,
+   "page": 39,
+   "corpus": "דא",
+   "bitonal": "דא",
+   "fulltone": "הא",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/88/word/150",
+   "bbox_fulltone": {
+    "x1": 0.466524213552475,
+    "y1": 0.8112882375717163,
+    "x2": 0.50356125831604,
+    "y2": 0.8272296190261841
+   }
+  },
+  {
+   "klal_id": 88,
+   "word_index": 186,
+   "page": 39,
+   "corpus": "לקדמון",
+   "bitonal": "לקדמון",
+   "fulltone": "לקרמון",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/88/word/186",
+   "bbox_fulltone": {
+    "x1": 0.2628205120563507,
+    "y1": 0.8457561135292053,
+    "x2": 0.3262108266353607,
+    "y2": 0.8651443123817444
+   }
+  },
+  {
+   "klal_id": 88,
+   "word_index": 192,
+   "page": 39,
+   "corpus": "אמת",
+   "bitonal": "אמת",
+   "fulltone": "אמר",
+   "state": "ruled",
+   "url": "http://127.0.0.1:8420/entry/88/word/192",
+   "bbox_fulltone": {
+    "x1": 0.8739316463470459,
+    "y1": 0.8621283769607544,
+    "x2": 0.9273504018783569,
+    "y2": 0.8828091621398926
+   }
+  },
+  {
+   "klal_id": 88,
+   "word_index": 236,
+   "page": 39,
+   "corpus": "נמי",
+   "bitonal": "נמי",
+   "fulltone": "נטי",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/88/word/236",
+   "bbox_fulltone": {
+    "x1": 0.23575498163700104,
+    "y1": 0.8987505435943604,
+    "x2": 0.2649572789669037,
+    "y2": 0.9177078604698181
+   }
+  },
+  {
+   "klal_id": 88,
+   "word_index": 306,
+   "page": 40,
+   "corpus": "בספ\"ר",
+   "bitonal": "בספ\"ר",
+   "fulltone": "בספ\"ד",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/88/word/306",
+   "bbox_fulltone": {
+    "x1": 0.024752475321292877,
+    "y1": 0.04683544486761093,
+    "x2": 0.08628005534410477,
+    "y2": 0.06708860397338867
+   }
+  },
+  {
+   "klal_id": 88,
+   "word_index": 355,
+   "page": 40,
+   "corpus": "להא",
+   "bitonal": "להא",
+   "fulltone": "לרא",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/88/word/355",
+   "bbox_fulltone": {
+    "x1": 0.11881188303232193,
+    "y1": 0.09957806020975113,
+    "x2": 0.15558698773384094,
+    "y2": 0.1185654029250145
+   }
+  },
+  {
+   "klal_id": 88,
+   "word_index": 411,
+   "page": 40,
+   "corpus": "ובדמוציא",
+   "bitonal": "ובדמוציא",
+   "fulltone": "ובהמוציא",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/88/word/411",
+   "bbox_fulltone": {
+    "x1": 0.6534653306007385,
+    "y1": 0.1670886129140854,
+    "x2": 0.7362093329429626,
+    "y2": 0.18649789690971375
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 88,
+   "word_index": 514,
+   "page": 40,
+   "corpus": "הוא",
+   "bitonal": "הוא",
+   "fulltone": "היא",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/88/word/514",
+   "bbox_fulltone": {
+    "x1": 0.6669024229049683,
+    "y1": 0.27088606357574463,
+    "x2": 0.700141429901123,
+    "y2": 0.2886075973510742
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 88,
+   "word_index": 706,
+   "page": 40,
+   "corpus": "נגד",
+   "bitonal": "נגד",
+   "fulltone": "נגך",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/88/word/706",
+   "bbox_fulltone": {
+    "x1": 0.8769448399543762,
+    "y1": 0.4767932593822479,
+    "x2": 0.906647801399231,
+    "y2": 0.4962025284767151
+   }
+  },
+  {
+   "klal_id": 88,
+   "word_index": 746,
+   "page": 40,
+   "corpus": "גוסיידו",
+   "bitonal": "גוסיידו",
+   "fulltone": "גופייהו",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/88/word/746",
+   "bbox_fulltone": {
+    "x1": 0.4844413101673126,
+    "y1": 0.5105485320091248,
+    "x2": 0.5459688901901245,
+    "y2": 0.5299578309059143
+   },
+   "flag": "ai_flag"
+  },
+  {
+   "klal_id": 88,
+   "word_index": 801,
+   "page": 40,
+   "corpus": "המתיבות",
+   "bitonal": "המתיבות",
+   "fulltone": "המתיכות",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/88/word/801",
+   "bbox_fulltone": {
+    "x1": 0.03677510470151901,
+    "y1": 0.5616033673286438,
+    "x2": 0.12800565361976624,
+    "y2": 0.5814346075057983
+   }
+  },
+  {
+   "klal_id": 91,
+   "word_index": 57,
+   "page": 41,
+   "corpus": "ור\"ס",
+   "bitonal": "ור\"ס",
+   "fulltone": "ור\"פ",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/91/word/57",
+   "bbox_fulltone": {
+    "x1": 0.7961647510528564,
+    "y1": 0.2104112058877945,
+    "x2": 0.8359375,
+    "y2": 0.22747156023979187
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 91,
+   "word_index": 473,
+   "page": 41,
+   "corpus": "אין",
+   "bitonal": "אין",
+   "fulltone": "איו",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/91/word/473",
+   "bbox_fulltone": {
+    "x1": 0.4900568127632141,
+    "y1": 0.6299212574958801,
+    "x2": 0.5170454382896423,
+    "y2": 0.6496062874794006
+   }
+  },
+  {
+   "klal_id": 91,
+   "word_index": 514,
+   "page": 41,
+   "corpus": "ר\"ס",
+   "bitonal": "ר\"ס",
+   "fulltone": "ר\"פ",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/91/word/514",
+   "bbox_fulltone": {
+    "x1": 0.05823863670229912,
+    "y1": 0.6657917499542236,
+    "x2": 0.09375,
+    "y2": 0.6859142780303955
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 91,
+   "word_index": 702,
+   "page": 41,
+   "corpus": "כוותייהו",
+   "bitonal": "כוותייהו",
+   "fulltone": "כוותיידו",
+   "state": "ruled",
+   "url": "http://127.0.0.1:8420/entry/91/word/702",
+   "bbox_fulltone": {
+    "x1": 0.22798295319080353,
+    "y1": 0.8770778775215149,
+    "x2": 0.2990056872367859,
+    "y2": 0.8963254690170288
+   }
+  },
+  {
+   "klal_id": 92,
+   "word_index": 55,
+   "page": 42,
+   "corpus": "ואע\"פ",
+   "bitonal": "ואע\"פ",
+   "fulltone": "ואע\"ם",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/92/word/55",
+   "bbox_fulltone": {
+    "x1": 0.5225483179092407,
+    "y1": 0.0638757050037384,
+    "x2": 0.5762348175048828,
+    "y2": 0.08416055142879486
+   }
+  },
+  {
+   "klal_id": 92,
+   "word_index": 61,
+   "page": 42,
+   "corpus": "שם",
+   "bitonal": "שם",
+   "fulltone": "שים",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/92/word/61",
+   "bbox_fulltone": {
+    "x1": 0.21045096218585968,
+    "y1": 0.0638757050037384,
+    "x2": 0.2419470250606537,
+    "y2": 0.08416055142879486
+   }
+  },
+  {
+   "klal_id": 92,
+   "word_index": 188,
+   "page": 42,
+   "corpus": "דדוה",
+   "bitonal": "דדוה",
+   "fulltone": "דהוה",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/92/word/188",
+   "bbox_fulltone": {
+    "x1": 0.874015748500824,
+    "y1": 0.20414328575134277,
+    "x2": 0.9155333042144775,
+    "y2": 0.2227017730474472
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 92,
+   "word_index": 231,
+   "page": 42,
+   "corpus": "תלמורא",
+   "bitonal": "תלמורא",
+   "fulltone": "תלמודא",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/92/word/231",
+   "bbox_fulltone": {
+    "x1": 0.3922691345214844,
+    "y1": 0.2386706918478012,
+    "x2": 0.46671438217163086,
+    "y2": 0.25766077637672424
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 92,
+   "word_index": 319,
+   "page": 42,
+   "corpus": "הנלע\"ר",
+   "bitonal": "הנלע\"ר",
+   "fulltone": "הנלע\"ד",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/92/word/319",
+   "bbox_fulltone": {
+    "x1": 0.13242663443088531,
+    "y1": 0.3254207968711853,
+    "x2": 0.1989978551864624,
+    "y2": 0.34527406096458435
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 92,
+   "word_index": 322,
+   "page": 42,
+   "corpus": "ציינו",
+   "bitonal": "ציינו",
+   "fulltone": "ציינן",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/92/word/322",
+   "bbox_fulltone": {
+    "x1": 0.9298496842384338,
+    "y1": 0.3431161046028137,
+    "x2": 0.9727988839149475,
+    "y2": 0.36296936869621277
+   }
+  },
+  {
+   "klal_id": 92,
+   "word_index": 325,
+   "page": 42,
+   "corpus": "פסחים",
+   "bitonal": "פסחים",
+   "fulltone": "ססחים",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/92/word/325",
+   "bbox_fulltone": {
+    "x1": 0.7236936092376709,
+    "y1": 0.3431161046028137,
+    "x2": 0.7845382690429688,
+    "y2": 0.36296936869621277
+   }
+  },
+  {
+   "klal_id": 92,
+   "word_index": 408,
+   "page": 42,
+   "corpus": "שם",
+   "bitonal": "שם",
+   "fulltone": "שס",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/92/word/408",
+   "bbox_fulltone": {
+    "x1": 0.2619899809360504,
+    "y1": 0.4130340814590454,
+    "x2": 0.2920544147491455,
+    "y2": 0.43245574831962585
+   }
+  },
+  {
+   "klal_id": 94,
+   "word_index": 60,
+   "page": 42,
+   "corpus": "עד",
+   "bitonal": "עד",
+   "fulltone": "ער",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/94/word/60",
+   "bbox_fulltone": {
+    "x1": 0.9047960042953491,
+    "y1": 0.8316788673400879,
+    "x2": 0.9319971203804016,
+    "y2": 0.8511005640029907
+   }
+  },
+  {
+   "klal_id": 94,
+   "word_index": 215,
+   "page": 43,
+   "corpus": "ע\"כ",
+   "bitonal": "ע\"כ",
+   "fulltone": "ע\"ל",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/94/word/215",
+   "bbox_fulltone": {
+    "x1": 0.21785713732242584,
+    "y1": 0.048641543835401535,
+    "x2": 0.2514285743236542,
+    "y2": 0.06704644858837128
+   }
+  },
+  {
+   "klal_id": 94,
+   "word_index": 317,
+   "page": 43,
+   "corpus": "דזכרין",
+   "bitonal": "דזכרין",
+   "fulltone": "דזכריו",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/94/word/317",
+   "bbox_fulltone": {
+    "x1": 0.5178571343421936,
+    "y1": 0.17265556752681732,
+    "x2": 0.5778571367263794,
+    "y2": 0.19149868190288544
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 94,
+   "word_index": 374,
+   "page": 43,
+   "corpus": "לכו",
+   "bitonal": "לכו",
+   "fulltone": "לבו",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/94/word/374",
+   "bbox_fulltone": {
+    "x1": 0.027857143431901932,
+    "y1": 0.22567923367023468,
+    "x2": 0.059285715222358704,
+    "y2": 0.2458369880914688
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 94,
+   "word_index": 480,
+   "page": 43,
+   "corpus": "גס",
+   "bitonal": "גס",
+   "fulltone": "גם",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/94/word/480",
+   "bbox_fulltone": {
+    "x1": 0.08857142925262451,
+    "y1": 0.34837862849235535,
+    "x2": 0.1128571406006813,
+    "y2": 0.3685363829135895
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 97,
+   "word_index": 111,
+   "page": 43,
+   "corpus": "ארמימות",
+   "bitonal": "ארמימות",
+   "fulltone": "אדמימות",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/97/word/111",
+   "bbox_fulltone": {
+    "x1": 0.49071428179740906,
+    "y1": 0.9127957820892334,
+    "x2": 0.572857141494751,
+    "y2": 0.9325153231620789
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 97,
+   "word_index": 129,
+   "page": 43,
+   "corpus": "בפ\"ר",
+   "bitonal": "בפ\"ר",
+   "fulltone": "בפ\"ד",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/97/word/129",
+   "bbox_fulltone": {
+    "x1": 0.41285714507102966,
+    "y1": 0.9307624697685242,
+    "x2": 0.459285706281662,
+    "y2": 0.9491673707962036
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 97,
+   "word_index": 156,
+   "page": 43,
+   "corpus": "ס\"ז",
+   "bitonal": "ס\"ז",
+   "fulltone": "פ\"ז",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/97/word/156",
+   "bbox_fulltone": {
+    "x1": 0.720714271068573,
+    "y1": 0.9671341180801392,
+    "x2": 0.7478571534156799,
+    "y2": 0.986415445804596
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 97,
+   "word_index": 353,
+   "page": 44,
+   "corpus": "שארירת",
+   "bitonal": "שארירת",
+   "fulltone": "שארית",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/97/word/353",
+   "bbox_fulltone": {
+    "x1": 0.572857141494751,
+    "y1": 0.24180148541927338,
+    "x2": 0.647857129573822,
+    "y2": 0.26104065775871277
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 97,
+   "word_index": 389,
+   "page": 44,
+   "corpus": "דם",
+   "bitonal": "דם",
+   "fulltone": "הם",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/97/word/389",
+   "bbox_fulltone": {
+    "x1": 0.3449999988079071,
+    "y1": 0.27765631675720215,
+    "x2": 0.3707142770290375,
+    "y2": 0.2960209846496582
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 102,
+   "word_index": 76,
+   "page": 44,
+   "corpus": "דב\"ד",
+   "bitonal": "דב\"ד",
+   "fulltone": "דב\"ר",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/102/word/76",
+   "bbox_fulltone": {
+    "x1": 0.17000000178813934,
+    "y1": 0.613030195236206,
+    "x2": 0.21642857789993286,
+    "y2": 0.6327065825462341
+   }
+  },
+  {
+   "klal_id": 103,
+   "word_index": 37,
+   "page": 44,
+   "corpus": "ו\"ה",
+   "bitonal": "ו\"ה",
+   "fulltone": "ד\"ה",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/103/word/37",
+   "bbox_fulltone": {
+    "x1": 0.9399999976158142,
+    "y1": 0.7205946445465088,
+    "x2": 0.9721428751945496,
+    "y2": 0.7389593124389648
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 104,
+   "word_index": 15,
+   "page": 44,
+   "corpus": "חדא",
+   "bitonal": "חדא",
+   "fulltone": "חרא",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/104/word/15",
+   "bbox_fulltone": {
+    "x1": 0.167142853140831,
+    "y1": 0.8080454468727112,
+    "x2": 0.207857146859169,
+    "y2": 0.8294709324836731
+   }
+  },
+  {
+   "klal_id": 107,
+   "word_index": 26,
+   "page": 45,
+   "corpus": "כל",
+   "bitonal": "כל",
+   "fulltone": "בל",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/107/word/26",
+   "bbox_fulltone": {
+    "x1": 0.29101285338401794,
+    "y1": 0.06483899056911469,
+    "x2": 0.3188302516937256,
+    "y2": 0.08442123234272003
+   },
+   "flag": "ai_flag"
+  },
+  {
+   "klal_id": 111,
+   "word_index": 2,
+   "page": 45,
+   "corpus": "לר\"ס",
+   "bitonal": "לר\"ס",
+   "fulltone": "לר\"פ",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/111/word/2",
+   "bbox_fulltone": {
+    "x1": 0.6961483359336853,
+    "y1": 0.4120974838733673,
+    "x2": 0.7446504831314087,
+    "y2": 0.4347258508205414
+   }
+  },
+  {
+   "klal_id": 113,
+   "word_index": 105,
+   "page": 45,
+   "corpus": "בראי",
+   "bitonal": "בראי",
+   "fulltone": "בדאי",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/113/word/105",
+   "bbox_fulltone": {
+    "x1": 0.6034236550331116,
+    "y1": 0.8002610802650452,
+    "x2": 0.6611982583999634,
+    "y2": 0.8181027173995972
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 115,
+   "word_index": 15,
+   "page": 46,
+   "corpus": "תלמודא",
+   "bitonal": "תלמודא",
+   "fulltone": "תלמורא",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/115/word/15",
+   "bbox_fulltone": {
+    "x1": 0.12134189903736115,
+    "y1": 0.04636048525571823,
+    "x2": 0.1934332549571991,
+    "y2": 0.06802426278591156
+   }
+  },
+  {
+   "klal_id": 115,
+   "word_index": 22,
+   "page": 46,
+   "corpus": "ב\"ט",
+   "bitonal": "ב\"ט",
+   "fulltone": "ב\"מ",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/115/word/22",
+   "bbox_fulltone": {
+    "x1": 0.49536046385765076,
+    "y1": 0.06412478536367416,
+    "x2": 0.5303354859352112,
+    "y2": 0.08448873460292816
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 116,
+   "word_index": 121,
+   "page": 46,
+   "corpus": "כמשנה",
+   "bitonal": "כמשנה",
+   "fulltone": "במשנה",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/116/word/121",
+   "bbox_fulltone": {
+    "x1": 0.6531049013137817,
+    "y1": 0.20320624113082886,
+    "x2": 0.7201998829841614,
+    "y2": 0.22357019782066345
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 116,
+   "word_index": 172,
+   "page": 46,
+   "corpus": "ובירושלמי",
+   "bitonal": "ובירושלמי",
+   "fulltone": "וכירושלמי",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/116/word/172",
+   "bbox_fulltone": {
+    "x1": 0.6017130613327026,
+    "y1": 0.25606584548950195,
+    "x2": 0.694503903388977,
+    "y2": 0.27599653601646423
+   }
+  },
+  {
+   "klal_id": 118,
+   "word_index": 41,
+   "page": 46,
+   "corpus": "ע\"ד",
+   "bitonal": "ע\"ד",
+   "fulltone": "ע\"ר",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/118/word/41",
+   "bbox_fulltone": {
+    "x1": 0.31548893451690674,
+    "y1": 0.3977469801902771,
+    "x2": 0.34760886430740356,
+    "y2": 0.41681107878685
+   }
+  },
+  {
+   "klal_id": 119,
+   "word_index": 8,
+   "page": 46,
+   "corpus": "בקידושין",
+   "bitonal": "בקידושין",
+   "fulltone": "בקירושין",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/119/word/8",
+   "bbox_fulltone": {
+    "x1": 0.4218415319919586,
+    "y1": 0.414644718170166,
+    "x2": 0.5067808628082275,
+    "y2": 0.43630850315093994
+   },
+   "flag": "current_text_confirmed"
+  },
+  {
+   "klal_id": 121,
+   "word_index": 47,
+   "page": 46,
+   "corpus": "כפריע",
+   "bitonal": "כפריע",
+   "fulltone": "בסריע",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/121/word/47",
+   "bbox_fulltone": {
+    "x1": 0.7451820373535156,
+    "y1": 0.6607452630996704,
+    "x2": 0.8022840619087219,
+    "y2": 0.6806759238243103
+   }
+  },
+  {
+   "klal_id": 128,
+   "word_index": 90,
+   "page": 47,
+   "corpus": "בס\"ז",
+   "bitonal": "בס\"ז",
+   "fulltone": "בפ\"ז",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/128/word/90",
+   "bbox_fulltone": {
+    "x1": 0.14306151866912842,
+    "y1": 0.6030107736587524,
+    "x2": 0.18526466190814972,
+    "y2": 0.6223655939102173
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 128,
+   "word_index": 191,
+   "page": 47,
+   "corpus": "ישמע",
+   "bitonal": "ישמע",
+   "fulltone": "ישמש",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/128/word/191",
+   "bbox_fulltone": {
+    "x1": 0.37839770317077637,
+    "y1": 0.7058064341545105,
+    "x2": 0.4327610731124878,
+    "y2": 0.7277419567108154
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 128,
+   "word_index": 276,
+   "page": 47,
+   "corpus": "דטהדרו",
+   "bitonal": "דטהדרו",
+   "fulltone": "דמהדרו",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/128/word/276",
+   "bbox_fulltone": {
+    "x1": 0.24391987919807434,
+    "y1": 0.7939785122871399,
+    "x2": 0.3125894069671631,
+    "y2": 0.8129032254219055
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 128,
+   "word_index": 296,
+   "page": 47,
+   "corpus": "בחד",
+   "bitonal": "בחד",
+   "fulltone": "בחר",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/128/word/296",
+   "bbox_fulltone": {
+    "x1": 0.030042918398976326,
+    "y1": 0.8111827969551086,
+    "x2": 0.07010014355182648,
+    "y2": 0.8322580456733704
+   }
+  },
+  {
+   "klal_id": 128,
+   "word_index": 676,
+   "page": 48,
+   "corpus": "בחד",
+   "bitonal": "בחד",
+   "fulltone": "בחר",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/128/word/676",
+   "bbox_fulltone": {
+    "x1": 0.31422504782676697,
+    "y1": 0.28729280829429626,
+    "x2": 0.35385704040527344,
+    "y2": 0.3068423271179199
+   }
+  },
+  {
+   "klal_id": 128,
+   "word_index": 681,
+   "page": 48,
+   "corpus": "ובתרי",
+   "bitonal": "ובתרי",
+   "fulltone": "וכתרי",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/128/word/681",
+   "bbox_fulltone": {
+    "x1": 0.9150742888450623,
+    "y1": 0.3038673996925354,
+    "x2": 0.9653220176696777,
+    "y2": 0.3238418996334076
+   }
+  },
+  {
+   "klal_id": 128,
+   "word_index": 820,
+   "page": 48,
+   "corpus": "המפקיר",
+   "bitonal": "המפקיר",
+   "fulltone": "המפקיד",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/128/word/820",
+   "bbox_fulltone": {
+    "x1": 0.5555555820465088,
+    "y1": 0.4428389370441437,
+    "x2": 0.6263269782066345,
+    "y2": 0.4615384638309479
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 128,
+   "word_index": 867,
+   "page": 48,
+   "corpus": "בחד",
+   "bitonal": "בחד",
+   "fulltone": "בחר",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/128/word/867",
+   "bbox_fulltone": {
+    "x1": 0.6765746474266052,
+    "y1": 0.49341267347335815,
+    "x2": 0.7140834927558899,
+    "y2": 0.513387143611908
+   }
+  },
+  {
+   "klal_id": 128,
+   "word_index": 949,
+   "page": 48,
+   "corpus": "רב\"ט",
+   "bitonal": "רב\"ט",
+   "fulltone": "דב\"מ",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/128/word/949",
+   "bbox_fulltone": {
+    "x1": 0.6673743724822998,
+    "y1": 0.5796855092048645,
+    "x2": 0.7140834927558899,
+    "y2": 0.5979600548744202
+   },
+   "flag": "manual_correction"
+  },
+  {
+   "klal_id": 128,
+   "word_index": 998,
+   "page": 48,
+   "corpus": "בחד",
+   "bitonal": "בחד",
+   "fulltone": "בחר",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/128/word/998",
+   "bbox_fulltone": {
+    "x1": 0.6334040760993958,
+    "y1": 0.6306842565536499,
+    "x2": 0.6723283529281616,
+    "y2": 0.6515086889266968
+   }
+  },
+  {
+   "klal_id": 133,
+   "word_index": 30,
+   "page": 49,
+   "corpus": "ומ\"ס",
+   "bitonal": "ומ\"ס",
+   "fulltone": "ומ\"מ",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/133/word/30",
+   "bbox_fulltone": {
+    "x1": 0.13077469170093536,
+    "y1": 0.27440860867500305,
+    "x2": 0.1762615442276001,
+    "y2": 0.29290321469306946
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 136,
+   "word_index": 16,
+   "page": 49,
+   "corpus": "דכשהרוחה",
+   "bitonal": "דכשהרוחה",
+   "fulltone": "דכשהדוחה",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/136/word/16",
+   "bbox_fulltone": {
+    "x1": 0.7178393602371216,
+    "y1": 0.48258063197135925,
+    "x2": 0.813077449798584,
+    "y2": 0.5023655891418457
+   },
+   "flag": "ai_flag"
+  },
+  {
+   "klal_id": 137,
+   "word_index": 1,
+   "page": 49,
+   "corpus": "דחיה",
+   "bitonal": "דחיה",
+   "fulltone": "רחיה",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/137/word/1",
+   "bbox_fulltone": {
+    "x1": 0.834399402141571,
+    "y1": 0.5174193382263184,
+    "x2": 0.9026297330856323,
+    "y2": 0.5380645394325256
+   }
+  },
+  {
+   "klal_id": 137,
+   "word_index": 53,
+   "page": 49,
+   "corpus": "דוא",
+   "bitonal": "דוא",
+   "fulltone": "הוא",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/137/word/53",
+   "bbox_fulltone": {
+    "x1": 0.5060412287712097,
+    "y1": 0.5694623589515686,
+    "x2": 0.5380241870880127,
+    "y2": 0.5875268578529358
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 137,
+   "word_index": 71,
+   "page": 49,
+   "corpus": "שברת",
+   "bitonal": "שברת",
+   "fulltone": "שבת",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/137/word/71",
+   "bbox_fulltone": {
+    "x1": 0.40085288882255554,
+    "y1": 0.5866666436195374,
+    "x2": 0.45628997683525085,
+    "y2": 0.6064516305923462
+   }
+  },
+  {
+   "klal_id": 137,
+   "word_index": 124,
+   "page": 49,
+   "corpus": "ר\"ס",
+   "bitonal": "ר\"ס",
+   "fulltone": "ר\"פ",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/137/word/124",
+   "bbox_fulltone": {
+    "x1": 0.14214640855789185,
+    "y1": 0.6378494501113892,
+    "x2": 0.17484009265899658,
+    "y2": 0.657634437084198
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 138,
+   "word_index": 1,
+   "page": 49,
+   "corpus": "דקארו",
+   "bitonal": "דקארו",
+   "fulltone": "דקארי",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/138/word/1",
+   "bbox_fulltone": {
+    "x1": 0.810234546661377,
+    "y1": 0.6903225779533386,
+    "x2": 0.8962331414222717,
+    "y2": 0.7156988978385925
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 138,
+   "word_index": 246,
+   "page": 49,
+   "corpus": "שירוה",
+   "bitonal": "שירוה",
+   "fulltone": "שיהיה",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/138/word/246",
+   "bbox_fulltone": {
+    "x1": 0.3887704312801361,
+    "y1": 0.9329032301902771,
+    "x2": 0.4456290006637573,
+    "y2": 0.9531182646751404
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 138,
+   "word_index": 261,
+   "page": 49,
+   "corpus": "אינן",
+   "bitonal": "אינן",
+   "fulltone": "אינו",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/138/word/261",
+   "bbox_fulltone": {
+    "x1": 0.314143568277359,
+    "y1": 0.954408586025238,
+    "x2": 0.35323384404182434,
+    "y2": 0.9711828231811523
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 140,
+   "word_index": 1,
+   "page": 50,
+   "corpus": "דיעבד",
+   "bitonal": "דיעבד",
+   "fulltone": "דיעבר",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/140/word/1",
+   "bbox_fulltone": {
+    "x1": 0.823782205581665,
+    "y1": 0.13473956286907196,
+    "x2": 0.9104584455490112,
+    "y2": 0.15583297610282898
+   }
+  },
+  {
+   "klal_id": 140,
+   "word_index": 50,
+   "page": 50,
+   "corpus": "ססי'",
+   "bitonal": "ססי",
+   "fulltone": "ספי",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/140/word/50",
+   "bbox_fulltone": {
+    "x1": 0.9383954405784607,
+    "y1": 0.18725785613059998,
+    "x2": 0.972779393196106,
+    "y2": 0.2070598304271698
+   }
+  },
+  {
+   "klal_id": 140,
+   "word_index": 53,
+   "page": 50,
+   "corpus": "בכ\"י",
+   "bitonal": "בכ\"י",
+   "fulltone": "בב\"י",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/140/word/53",
+   "bbox_fulltone": {
+    "x1": 0.7263610363006592,
+    "y1": 0.18725785613059998,
+    "x2": 0.765759289264679,
+    "y2": 0.2070598304271698
+   }
+  },
+  {
+   "klal_id": 140,
+   "word_index": 159,
+   "page": 50,
+   "corpus": "הפרת",
+   "bitonal": "הפרת",
+   "fulltone": "הפת",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/140/word/159",
+   "bbox_fulltone": {
+    "x1": 0.406160444021225,
+    "y1": 0.2914334833621979,
+    "x2": 0.4563037157058716,
+    "y2": 0.31080499291419983
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 142,
+   "word_index": 12,
+   "page": 50,
+   "corpus": "והתוס'",
+   "bitonal": "והתוס",
+   "fulltone": "ודתוס",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/142/word/12",
+   "bbox_fulltone": {
+    "x1": 0.23925501108169556,
+    "y1": 0.43090832233428955,
+    "x2": 0.2901146113872528,
+    "y2": 0.45587602257728577
+   }
+  },
+  {
+   "klal_id": 143,
+   "word_index": 161,
+   "page": 50,
+   "corpus": "בס'",
+   "bitonal": "בס",
+   "fulltone": "בפ",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/143/word/161",
+   "bbox_fulltone": {
+    "x1": 0.4018624722957611,
+    "y1": 0.6211795210838318,
+    "x2": 0.4283667504787445,
+    "y2": 0.6409814953804016
+   }
+  },
+  {
+   "klal_id": 143,
+   "word_index": 291,
+   "page": 50,
+   "corpus": "כיס",
+   "bitonal": "כיס",
+   "fulltone": "כיסם",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/143/word/291",
+   "bbox_fulltone": {
+    "x1": 0.5164756178855896,
+    "y1": 0.7602238655090332,
+    "x2": 0.5508595705032349,
+    "y2": 0.7765820026397705
+   }
+  },
+  {
+   "klal_id": 143,
+   "word_index": 380,
+   "page": 50,
+   "corpus": "וכהוריות",
+   "bitonal": "וכהוריות",
+   "fulltone": "ובהוריות",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/143/word/380",
+   "bbox_fulltone": {
+    "x1": 0.15974211692810059,
+    "y1": 0.8480413556098938,
+    "x2": 0.23638968169689178,
+    "y2": 0.8678433299064636
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 144,
+   "word_index": 443,
+   "page": 51,
+   "corpus": "דוה",
+   "bitonal": "דוה",
+   "fulltone": "הוה",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/144/word/443",
+   "bbox_fulltone": {
+    "x1": 0.7542856931686401,
+    "y1": 0.7260981798171997,
+    "x2": 0.7842857241630554,
+    "y2": 0.744616687297821
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 144,
+   "word_index": 473,
+   "page": 51,
+   "corpus": "תלביש",
+   "bitonal": "תלביש",
+   "fulltone": "תלכיש",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/144/word/473",
+   "bbox_fulltone": {
+    "x1": 0.13214285671710968,
+    "y1": 0.7424634099006653,
+    "x2": 0.19428572058677673,
+    "y2": 0.7618432641029358
+   }
+  },
+  {
+   "klal_id": 144,
+   "word_index": 606,
+   "page": 51,
+   "corpus": "דאטו",
+   "bitonal": "דאטו",
+   "fulltone": "דאטן",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/144/word/606",
+   "bbox_fulltone": {
+    "x1": 0.7678571343421936,
+    "y1": 0.898363471031189,
+    "x2": 0.8149999976158142,
+    "y2": 0.9173126816749573
+   }
+  },
+  {
+   "klal_id": 144,
+   "word_index": 620,
+   "page": 51,
+   "corpus": "גבי",
+   "bitonal": "גבי",
+   "fulltone": "גכי",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/144/word/620",
+   "bbox_fulltone": {
+    "x1": 0.9449999928474426,
+    "y1": 0.9164513349533081,
+    "x2": 0.970714271068573,
+    "y2": 0.9358311891555786
+   }
+  },
+  {
+   "klal_id": 144,
+   "word_index": 914,
+   "page": 52,
+   "corpus": "הין",
+   "bitonal": "הין",
+   "fulltone": "היו",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/144/word/914",
+   "bbox_fulltone": {
+    "x1": 0.5749104022979736,
+    "y1": 0.32826748490333557,
+    "x2": 0.6000000238418579,
+    "y2": 0.3460703492164612
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 144,
+   "word_index": 949,
+   "page": 52,
+   "corpus": "למרן",
+   "bitonal": "למרן",
+   "fulltone": "למדן",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/144/word/949",
+   "bbox_fulltone": {
+    "x1": 0.40430107712745667,
+    "y1": 0.36257055401802063,
+    "x2": 0.44802868366241455,
+    "y2": 0.38254451751708984
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 144,
+   "word_index": 1016,
+   "page": 52,
+   "corpus": "הל\"ם",
+   "bitonal": "הל\"ם",
+   "fulltone": "הל\"מ",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/144/word/1016",
+   "bbox_fulltone": {
+    "x1": 0.08028674125671387,
+    "y1": 0.4502822458744049,
+    "x2": 0.12831541895866394,
+    "y2": 0.4711246192455292
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 144,
+   "word_index": 1086,
+   "page": 52,
+   "corpus": "התלמידים",
+   "bitonal": "התלמידים",
+   "fulltone": "דתלמידים",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/144/word/1086",
+   "bbox_fulltone": {
+    "x1": 0.22078852355480194,
+    "y1": 0.557099461555481,
+    "x2": 0.31182795763015747,
+    "y2": 0.5727311968803406
+   }
+  },
+  {
+   "klal_id": 146,
+   "word_index": 11,
+   "page": 52,
+   "corpus": "רגלו",
+   "bitonal": "רגלו",
+   "fulltone": "רגלך",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/146/word/11",
+   "bbox_fulltone": {
+    "x1": 0.3663082420825958,
+    "y1": 0.9617889523506165,
+    "x2": 0.41290321946144104,
+    "y2": 0.9848024249076843
+   }
+  },
+  {
+   "klal_id": 147,
+   "word_index": 62,
+   "page": 53,
+   "corpus": "די",
+   "bitonal": "די",
+   "fulltone": "הי",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/147/word/62",
+   "bbox_fulltone": {
+    "x1": 0.6304503083229065,
+    "y1": 0.3113248944282532,
+    "x2": 0.6468906402587891,
+    "y2": 0.3314385712146759
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 147,
+   "word_index": 194,
+   "page": 53,
+   "corpus": "דבריו",
+   "bitonal": "דבריו",
+   "fulltone": "דברין",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/147/word/194",
+   "bbox_fulltone": {
+    "x1": 0.590421736240387,
+    "y1": 0.4516834318637848,
+    "x2": 0.6390278935432434,
+    "y2": 0.47267162799835205
+   }
+  },
+  {
+   "klal_id": 147,
+   "word_index": 288,
+   "page": 53,
+   "corpus": "ותקשי",
+   "bitonal": "ותקשי",
+   "fulltone": "דתקשי",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/147/word/288",
+   "bbox_fulltone": {
+    "x1": 0.18084345757961273,
+    "y1": 0.5417577624320984,
+    "x2": 0.2416011393070221,
+    "y2": 0.560996949672699
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 147,
+   "word_index": 376,
+   "page": 53,
+   "corpus": "תמירתו",
+   "bitonal": "תמירתו",
+   "fulltone": "תמיהתו",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/147/word/376",
+   "bbox_fulltone": {
+    "x1": 0.4739099442958832,
+    "y1": 0.6466987133026123,
+    "x2": 0.541100800037384,
+    "y2": 0.6646261215209961
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 147,
+   "word_index": 423,
+   "page": 53,
+   "corpus": "כסר",
+   "bitonal": "כסר",
+   "fulltone": "כמר",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/147/word/423",
+   "bbox_fulltone": {
+    "x1": 0.6375982761383057,
+    "y1": 0.7000437378883362,
+    "x2": 0.6783416867256165,
+    "y2": 0.7192829251289368
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 148,
+   "word_index": 20,
+   "page": 53,
+   "corpus": "ס\"ס",
+   "bitonal": "ס\"ס",
+   "fulltone": "ס\"פ",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/148/word/20",
+   "bbox_fulltone": {
+    "x1": 0.392423152923584,
+    "y1": 0.7905552983283997,
+    "x2": 0.4267333745956421,
+    "y2": 0.809357225894928
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 148,
+   "word_index": 27,
+   "page": 53,
+   "corpus": "פ\"ר",
+   "bitonal": "פ\"ר",
+   "fulltone": "פ\"ד",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/148/word/27",
+   "bbox_fulltone": {
+    "x1": 0.9356683492660522,
+    "y1": 0.8076082468032837,
+    "x2": 0.9706933498382568,
+    "y2": 0.8264101147651672
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 148,
+   "word_index": 224,
+   "page": 54,
+   "corpus": "דמנילה",
+   "bitonal": "דמנילה",
+   "fulltone": "דמגילה",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/148/word/224",
+   "bbox_fulltone": {
+    "x1": 0.18071427941322327,
+    "y1": 0.06322580575942993,
+    "x2": 0.25,
+    "y2": 0.08215054124593735
+   },
+   "flag": "ai_flag"
+  },
+  {
+   "klal_id": 148,
+   "word_index": 546,
+   "page": 54,
+   "corpus": "מדברי",
+   "bitonal": "מדברי",
+   "fulltone": "מדבריי",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/148/word/546",
+   "bbox_fulltone": {
+    "x1": 0.33714285492897034,
+    "y1": 0.4124731123447418,
+    "x2": 0.40214285254478455,
+    "y2": 0.42924731969833374
+   }
+  },
+  {
+   "klal_id": 150,
+   "word_index": 14,
+   "page": 54,
+   "corpus": "דאיפליגו",
+   "bitonal": "דאיפליגו",
+   "fulltone": "דאיפליגן",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/150/word/14",
+   "bbox_fulltone": {
+    "x1": 0.6050000190734863,
+    "y1": 0.6894623637199402,
+    "x2": 0.6871428489685059,
+    "y2": 0.7092472910881042
+   }
+  },
+  {
+   "klal_id": 150,
+   "word_index": 39,
+   "page": 54,
+   "corpus": "בכ\"ט",
+   "bitonal": "בכ\"ט",
+   "fulltone": "בכ\"מ",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/150/word/39",
+   "bbox_fulltone": {
+    "x1": 0.31928572058677673,
+    "y1": 0.7075268626213074,
+    "x2": 0.3692857027053833,
+    "y2": 0.7273118495941162
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 150,
+   "word_index": 87,
+   "page": 54,
+   "corpus": "סרק",
+   "bitonal": "סרק",
+   "fulltone": "פרק",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/150/word/87",
+   "bbox_fulltone": {
+    "x1": 0.7014285922050476,
+    "y1": 0.75827956199646,
+    "x2": 0.7385714054107666,
+    "y2": 0.7802150249481201
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 150,
+   "word_index": 142,
+   "page": 54,
+   "corpus": "הכ\"ט",
+   "bitonal": "הכ\"ט",
+   "fulltone": "הכ\"מ",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/150/word/142",
+   "bbox_fulltone": {
+    "x1": 0.6135714054107666,
+    "y1": 0.8116129040718079,
+    "x2": 0.6621428728103638,
+    "y2": 0.8313978314399719
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 150,
+   "word_index": 186,
+   "page": 54,
+   "corpus": "הכ\"ם",
+   "bitonal": "הכ\"ם",
+   "fulltone": "הכ\"מ",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/150/word/186",
+   "bbox_fulltone": {
+    "x1": 0.025714285671710968,
+    "y1": 0.8468817472457886,
+    "x2": 0.07642856985330582,
+    "y2": 0.8666666746139526
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 150,
+   "word_index": 202,
+   "page": 54,
+   "corpus": "דוה",
+   "bitonal": "דוה",
+   "fulltone": "הוה",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/150/word/202",
+   "bbox_fulltone": {
+    "x1": 0.1607142835855484,
+    "y1": 0.8636559247970581,
+    "x2": 0.19285714626312256,
+    "y2": 0.8834408521652222
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 150,
+   "word_index": 260,
+   "page": 54,
+   "corpus": "ע\"ד",
+   "bitonal": "ע\"ד",
+   "fulltone": "ע\"ר",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/150/word/260",
+   "bbox_fulltone": {
+    "x1": 0.6785714030265808,
+    "y1": 0.9337634444236755,
+    "x2": 0.7128571271896362,
+    "y2": 0.9548386931419373
+   }
+  },
+  {
+   "klal_id": 150,
+   "word_index": 262,
+   "page": 54,
+   "corpus": "הבריתות",
+   "bitonal": "הבריתות",
+   "fulltone": "הכריתות",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/150/word/262",
+   "bbox_fulltone": {
+    "x1": 0.543571412563324,
+    "y1": 0.9337634444236755,
+    "x2": 0.6221428513526917,
+    "y2": 0.954408586025238
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 150,
+   "word_index": 272,
+   "page": 54,
+   "corpus": "מצינו",
+   "bitonal": "מצינו",
+   "fulltone": "מציגו",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/150/word/272",
+   "bbox_fulltone": {
+    "x1": 0.9221428632736206,
+    "y1": 0.9488171935081482,
+    "x2": 0.9728571176528931,
+    "y2": 0.9698925018310547
+   }
+  },
+  {
+   "klal_id": 150,
+   "word_index": 293,
+   "page": 55,
+   "corpus": "בס\"ק",
+   "bitonal": "בס\"ק",
+   "fulltone": "בפ\"ק",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/150/word/293",
+   "bbox_fulltone": {
+    "x1": 0.5758225917816162,
+    "y1": 0.046854663640260696,
+    "x2": 0.6244634985923767,
+    "y2": 0.06724511831998825
+   },
+   "flag": "manual_correction"
+  },
+  {
+   "klal_id": 150,
+   "word_index": 533,
+   "page": 55,
+   "corpus": "בס\"ס",
+   "bitonal": "בס\"ס",
+   "fulltone": "בס\"פ",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/150/word/533",
+   "bbox_fulltone": {
+    "x1": 0.5765379071235657,
+    "y1": 0.29154011607170105,
+    "x2": 0.6251788139343262,
+    "y2": 0.3119305968284607
+   },
+   "flag": "manual_correction"
+  },
+  {
+   "klal_id": 150,
+   "word_index": 578,
+   "page": 55,
+   "corpus": "דוה",
+   "bitonal": "דוה",
+   "fulltone": "הוה",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/150/word/578",
+   "bbox_fulltone": {
+    "x1": 0.735336184501648,
+    "y1": 0.3449023962020874,
+    "x2": 0.766094446182251,
+    "y2": 0.36355748772621155
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 150,
+   "word_index": 704,
+   "page": 55,
+   "corpus": "ברדיא",
+   "bitonal": "ברדיא",
+   "fulltone": "בהדיא",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/150/word/704",
+   "bbox_fulltone": {
+    "x1": 0.545064389705658,
+    "y1": 0.46681126952171326,
+    "x2": 0.6022889614105225,
+    "y2": 0.4854663908481598
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 150,
+   "word_index": 797,
+   "page": 55,
+   "corpus": "שרוא",
+   "bitonal": "שרוא",
+   "fulltone": "שהוא",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/150/word/797",
+   "bbox_fulltone": {
+    "x1": 0.9213161468505859,
+    "y1": 0.5718004107475281,
+    "x2": 0.9699570536613464,
+    "y2": 0.59132319688797
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 150,
+   "word_index": 802,
+   "page": 55,
+   "corpus": "בתלמור",
+   "bitonal": "בתלמור",
+   "fulltone": "בתלמוד",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/150/word/802",
+   "bbox_fulltone": {
+    "x1": 0.6309012770652771,
+    "y1": 0.5718004107475281,
+    "x2": 0.7024320363998413,
+    "y2": 0.59132319688797
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 151,
+   "word_index": 7,
+   "page": 55,
+   "corpus": "לא",
+   "bitonal": "לא",
+   "fulltone": "אא",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/151/word/7",
+   "bbox_fulltone": {
+    "x1": 0.4964234530925751,
+    "y1": 0.6420824527740479,
+    "x2": 0.5357653498649597,
+    "y2": 0.6629067063331604
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 151,
+   "word_index": 82,
+   "page": 55,
+   "corpus": "דמועד",
+   "bitonal": "דמועד",
+   "fulltone": "דמוער",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/151/word/82",
+   "bbox_fulltone": {
+    "x1": 0.7989985942840576,
+    "y1": 0.7310194969177246,
+    "x2": 0.8555078506469727,
+    "y2": 0.7492407560348511
+   }
+  },
+  {
+   "klal_id": 151,
+   "word_index": 100,
+   "page": 55,
+   "corpus": "כרתב",
+   "bitonal": "כרתב",
+   "fulltone": "כתב",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/151/word/100",
+   "bbox_fulltone": {
+    "x1": 0.5,
+    "y1": 0.7514100074768066,
+    "x2": 0.552217423915863,
+    "y2": 0.7648590207099915
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 152,
+   "word_index": 47,
+   "page": 55,
+   "corpus": "דרא",
+   "bitonal": "דרא",
+   "fulltone": "דהא",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/152/word/47",
+   "bbox_fulltone": {
+    "x1": 0.027896996587514877,
+    "y1": 0.7995661497116089,
+    "x2": 0.07868383079767227,
+    "y2": 0.8190889358520508
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 152,
+   "word_index": 98,
+   "page": 55,
+   "corpus": "בסרק",
+   "bitonal": "בסרק",
+   "fulltone": "בפרק",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/152/word/98",
+   "bbox_fulltone": {
+    "x1": 0.20958511531352997,
+    "y1": 0.8542299270629883,
+    "x2": 0.2632331848144531,
+    "y2": 0.8715835213661194
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 152,
+   "word_index": 115,
+   "page": 55,
+   "corpus": "וכי",
+   "bitonal": "וכי",
+   "fulltone": "הכי",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/152/word/115",
+   "bbox_fulltone": {
+    "x1": 0.37911301851272583,
+    "y1": 0.870281994342804,
+    "x2": 0.411301851272583,
+    "y2": 0.8893709182739258
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 152,
+   "word_index": 127,
+   "page": 55,
+   "corpus": "ראוטר",
+   "bitonal": "ראוטר",
+   "fulltone": "האומר",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/152/word/127",
+   "bbox_fulltone": {
+    "x1": 0.5443490743637085,
+    "y1": 0.887201726436615,
+    "x2": 0.6030042767524719,
+    "y2": 0.907158374786377
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 152,
+   "word_index": 167,
+   "page": 55,
+   "corpus": "חי\"ר",
+   "bitonal": "חי\"ר",
+   "fulltone": "חי\"ד",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/152/word/167",
+   "bbox_fulltone": {
+    "x1": 0.10801144689321518,
+    "y1": 0.9214750528335571,
+    "x2": 0.14949928224086761,
+    "y2": 0.940997838973999
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 153,
+   "word_index": 111,
+   "page": 56,
+   "corpus": "והלכתי",
+   "bitonal": "והלכתי",
+   "fulltone": "והלכת",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/153/word/111",
+   "bbox_fulltone": {
+    "x1": 0.03207412734627724,
+    "y1": 0.21779660880565643,
+    "x2": 0.08909479528665543,
+    "y2": 0.23644067347049713
+   }
+  },
+  {
+   "klal_id": 154,
+   "word_index": 23,
+   "page": 56,
+   "corpus": "אס\"ה",
+   "bitonal": "אס\"ה",
+   "fulltone": "אפ\"ה",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/154/word/23",
+   "bbox_fulltone": {
+    "x1": 0.3022095561027527,
+    "y1": 0.33898305892944336,
+    "x2": 0.3492515981197357,
+    "y2": 0.3538135588169098
+   }
+  },
+  {
+   "klal_id": 154,
+   "word_index": 137,
+   "page": 56,
+   "corpus": "אדחייא",
+   "bitonal": "אדחייא",
+   "fulltone": "ארחייא",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/154/word/137",
+   "bbox_fulltone": {
+    "x1": 0.31503918766975403,
+    "y1": 0.45805084705352783,
+    "x2": 0.38132572174072266,
+    "y2": 0.4771186411380768
+   }
+  },
+  {
+   "klal_id": 154,
+   "word_index": 143,
+   "page": 56,
+   "corpus": "בתיובתא",
+   "bitonal": "בתיובתא",
+   "fulltone": "בתיוכתא",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/154/word/143",
+   "bbox_fulltone": {
+    "x1": 0.891660749912262,
+    "y1": 0.4754237234592438,
+    "x2": 0.9707769155502319,
+    "y2": 0.4936440587043762
+   }
+  },
+  {
+   "klal_id": 154,
+   "word_index": 188,
+   "page": 56,
+   "corpus": "דיא",
+   "bitonal": "דיא",
+   "fulltone": "היא",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/154/word/188",
+   "bbox_fulltone": {
+    "x1": 0.9379900097846985,
+    "y1": 0.5262711644172668,
+    "x2": 0.9700641632080078,
+    "y2": 0.5449152588844299
+   }
+  },
+  {
+   "klal_id": 154,
+   "word_index": 209,
+   "page": 56,
+   "corpus": "גבי",
+   "bitonal": "גבי",
+   "fulltone": "גכי",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/154/word/209",
+   "bbox_fulltone": {
+    "x1": 0.8075552582740784,
+    "y1": 0.5436440706253052,
+    "x2": 0.8382038474082947,
+    "y2": 0.5627118349075317
+   }
+  },
+  {
+   "klal_id": 154,
+   "word_index": 459,
+   "page": 56,
+   "corpus": "הוי",
+   "bitonal": "הוי",
+   "fulltone": "דוי",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/154/word/459",
+   "bbox_fulltone": {
+    "x1": 0.46115466952323914,
+    "y1": 0.8004237413406372,
+    "x2": 0.48538845777511597,
+    "y2": 0.8194915056228638
+   }
+  },
+  {
+   "klal_id": 154,
+   "word_index": 506,
+   "page": 56,
+   "corpus": "ט\"ו",
+   "bitonal": "ט\"ו",
+   "fulltone": "מ\"ו",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/154/word/506",
+   "bbox_fulltone": {
+    "x1": 0.7747683525085449,
+    "y1": 0.8512712121009827,
+    "x2": 0.8061296939849854,
+    "y2": 0.8711864352226257
+   },
+   "flag": "manual_correction"
+  },
+  {
+   "klal_id": 154,
+   "word_index": 520,
+   "page": 56,
+   "corpus": "ממיפך",
+   "bitonal": "ממיפך",
+   "fulltone": "ממיסך",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/154/word/520",
+   "bbox_fulltone": {
+    "x1": 0.87740558385849,
+    "y1": 0.8694915175437927,
+    "x2": 0.9408410787582397,
+    "y2": 0.8885593414306641
+   }
+  },
+  {
+   "klal_id": 154,
+   "word_index": 750,
+   "page": 57,
+   "corpus": "בב\"י",
+   "bitonal": "בב\"י",
+   "fulltone": "בכ\"י",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/154/word/750",
+   "bbox_fulltone": {
+    "x1": 0.09415121376514435,
+    "y1": 0.18795698881149292,
+    "x2": 0.13480742275714874,
+    "y2": 0.20559139549732208
+   }
+  },
+  {
+   "klal_id": 155,
+   "word_index": 48,
+   "page": 57,
+   "corpus": "ארבא",
+   "bitonal": "ארבא",
+   "fulltone": "ארכא",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/155/word/48",
+   "bbox_fulltone": {
+    "x1": 0.8288159966468811,
+    "y1": 0.2726881802082062,
+    "x2": 0.8815976977348328,
+    "y2": 0.2898924648761749
+   }
+  },
+  {
+   "klal_id": 155,
+   "word_index": 76,
+   "page": 57,
+   "corpus": "מע\"רק",
+   "bitonal": "מע\"רק",
+   "fulltone": "מע\"הק",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/155/word/76",
+   "bbox_fulltone": {
+    "x1": 0.09486448019742966,
+    "y1": 0.29075267910957336,
+    "x2": 0.15263909101486206,
+    "y2": 0.3101075291633606
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 158,
+   "word_index": 27,
+   "page": 57,
+   "corpus": "כאכיי",
+   "bitonal": "כאכיי",
+   "fulltone": "כאביי",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/158/word/27",
+   "bbox_fulltone": {
+    "x1": 0.10485021770000458,
+    "y1": 0.5853763222694397,
+    "x2": 0.15905848145484924,
+    "y2": 0.6038709878921509
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 159,
+   "word_index": 29,
+   "page": 57,
+   "corpus": "היכאת",
+   "bitonal": "היכאת",
+   "fulltone": "היכא",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/159/word/29",
+   "bbox_fulltone": {
+    "x1": 0.788873016834259,
+    "y1": 0.8103225827217102,
+    "x2": 0.8452211022377014,
+    "y2": 0.8292472958564758
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 159,
+   "word_index": 57,
+   "page": 57,
+   "corpus": "איכא",
+   "bitonal": "איכא",
+   "fulltone": "ליבא",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/159/word/57",
+   "bbox_fulltone": {
+    "x1": 0.9058488011360168,
+    "y1": 0.8447312116622925,
+    "x2": 0.9671897292137146,
+    "y2": 0.865376353263855
+   },
+   "flag": "manual_correction"
+  },
+  {
+   "klal_id": 159,
+   "word_index": 117,
+   "page": 57,
+   "corpus": "בר\"ס",
+   "bitonal": "בר\"ס",
+   "fulltone": "בר\"פ",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/159/word/117",
+   "bbox_fulltone": {
+    "x1": 0.3537802994251251,
+    "y1": 0.8984946012496948,
+    "x2": 0.4008559286594391,
+    "y2": 0.916989266872406
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 159,
+   "word_index": 163,
+   "page": 57,
+   "corpus": "ראשה",
+   "bitonal": "ראשה",
+   "fulltone": "האשה",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/159/word/163",
+   "bbox_fulltone": {
+    "x1": 0.5021398067474365,
+    "y1": 0.9496774077415466,
+    "x2": 0.5592011213302612,
+    "y2": 0.9698925018310547
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 159,
+   "word_index": 240,
+   "page": 58,
+   "corpus": "עכ\"ר",
+   "bitonal": "עכ\"ר",
+   "fulltone": "עכ\"ד",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/159/word/240",
+   "bbox_fulltone": {
+    "x1": 0.618843674659729,
+    "y1": 0.11660929769277573,
+    "x2": 0.6645253300666809,
+    "y2": 0.13640275597572327
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 159,
+   "word_index": 311,
+   "page": 58,
+   "corpus": "איכא",
+   "bitonal": "איכא",
+   "fulltone": "איבא",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/159/word/311",
+   "bbox_fulltone": {
+    "x1": 0.12134189903736115,
+    "y1": 0.18631669878959656,
+    "x2": 0.16916488111019135,
+    "y2": 0.20481927692890167
+   }
+  },
+  {
+   "klal_id": 159,
+   "word_index": 360,
+   "page": 58,
+   "corpus": "דאיסליגו",
+   "bitonal": "דאיסליגו",
+   "fulltone": "דאיפליגו",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/159/word/360",
+   "bbox_fulltone": {
+    "x1": 0.031406138092279434,
+    "y1": 0.23795180022716522,
+    "x2": 0.11277658492326736,
+    "y2": 0.2590361535549164
+   },
+   "flag": "ai_flag"
+  },
+  {
+   "klal_id": 159,
+   "word_index": 439,
+   "page": 58,
+   "corpus": "בש\"ם",
+   "bitonal": "בש\"ם",
+   "fulltone": "בש\"מ",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/159/word/439",
+   "bbox_fulltone": {
+    "x1": 0.17487509548664093,
+    "y1": 0.3253012001514435,
+    "x2": 0.22912205755710602,
+    "y2": 0.3446643650531769
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 159,
+   "word_index": 562,
+   "page": 58,
+   "corpus": "ער",
+   "bitonal": "ער",
+   "fulltone": "עד",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/159/word/562",
+   "bbox_fulltone": {
+    "x1": 0.9079229235649109,
+    "y1": 0.4651463031768799,
+    "x2": 0.9343326091766357,
+    "y2": 0.48407918214797974
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 159,
+   "word_index": 579,
+   "page": 58,
+   "corpus": "י\"ך",
+   "bitonal": "י\"ך",
+   "fulltone": "י\"ד",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/159/word/579",
+   "bbox_fulltone": {
+    "x1": 0.8865096569061279,
+    "y1": 0.48235800862312317,
+    "x2": 0.9136331081390381,
+    "y2": 0.498709112405777
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 159,
+   "word_index": 587,
+   "page": 58,
+   "corpus": "לא",
+   "bitonal": "לא",
+   "fulltone": "אא",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/159/word/587",
+   "bbox_fulltone": {
+    "x1": 0.45182013511657715,
+    "y1": 0.48235800862312317,
+    "x2": 0.479657381772995,
+    "y2": 0.498709112405777
+   }
+  },
+  {
+   "klal_id": 159,
+   "word_index": 721,
+   "page": 58,
+   "corpus": "הל\"ם",
+   "bitonal": "הל\"ם",
+   "fulltone": "הל\"מ",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/159/word/721",
+   "bbox_fulltone": {
+    "x1": 0.20199857652187347,
+    "y1": 0.6222031116485596,
+    "x2": 0.24910777807235718,
+    "y2": 0.641566276550293
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 159,
+   "word_index": 794,
+   "page": 58,
+   "corpus": "ובקוכץ",
+   "bitonal": "ובקוכץ",
+   "fulltone": "ובקובץ",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/159/word/794",
+   "bbox_fulltone": {
+    "x1": 0.8700928092002869,
+    "y1": 0.7091221809387207,
+    "x2": 0.9321913123130798,
+    "y2": 0.7284853458404541
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 159,
+   "word_index": 841,
+   "page": 58,
+   "corpus": "שכפרק",
+   "bitonal": "שכפרק",
+   "fulltone": "שבפרק",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/159/word/841",
+   "bbox_fulltone": {
+    "x1": 0.902926504611969,
+    "y1": 0.7611876130104065,
+    "x2": 0.9707351922988892,
+    "y2": 0.7818416357040405
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 159,
+   "word_index": 876,
+   "page": 58,
+   "corpus": "דאיסליגו",
+   "bitonal": "דאיסליגו",
+   "fulltone": "דאיפליגו",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/159/word/876",
+   "bbox_fulltone": {
+    "x1": 0.724482536315918,
+    "y1": 0.7964715957641602,
+    "x2": 0.8087080717086792,
+    "y2": 0.81540447473526
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 159,
+   "word_index": 879,
+   "page": 58,
+   "corpus": "בס'",
+   "bitonal": "בס",
+   "fulltone": "בפ",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/159/word/879",
+   "bbox_fulltone": {
+    "x1": 0.5867237448692322,
+    "y1": 0.7964715957641602,
+    "x2": 0.6131334900856018,
+    "y2": 0.81540447473526
+   },
+   "flag": "manual_correction"
+  },
+  {
+   "klal_id": 159,
+   "word_index": 910,
+   "page": 58,
+   "corpus": "איכא",
+   "bitonal": "איכא",
+   "fulltone": "איבא",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/159/word/910",
+   "bbox_fulltone": {
+    "x1": 0.7423269152641296,
+    "y1": 0.8308950066566467,
+    "x2": 0.7922912240028381,
+    "y2": 0.8515490293502808
+   }
+  },
+  {
+   "klal_id": 159,
+   "word_index": 932,
+   "page": 58,
+   "corpus": "ומירו",
+   "bitonal": "ומירו",
+   "fulltone": "ומיהו",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/159/word/932",
+   "bbox_fulltone": {
+    "x1": 0.3847251832485199,
+    "y1": 0.848537027835846,
+    "x2": 0.4296930730342865,
+    "y2": 0.86919105052948
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 159,
+   "word_index": 954,
+   "page": 58,
+   "corpus": "וכה\"ג",
+   "bitonal": "וכה\"ג",
+   "fulltone": "ובה\"ג",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/159/word/954",
+   "bbox_fulltone": {
+    "x1": 0.02783725969493389,
+    "y1": 0.8661789894104004,
+    "x2": 0.07494646310806274,
+    "y2": 0.8859724402427673
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 161,
+   "word_index": 83,
+   "page": 59,
+   "corpus": "אע\"ס",
+   "bitonal": "אע\"ס",
+   "fulltone": "אע\"פ",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/161/word/83",
+   "bbox_fulltone": {
+    "x1": 0.8767024874687195,
+    "y1": 0.1862068921327591,
+    "x2": 0.9247311949729919,
+    "y2": 0.20646551251411438
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 161,
+   "word_index": 105,
+   "page": 59,
+   "corpus": "בס'",
+   "bitonal": "בס",
+   "fulltone": "בפ",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/161/word/105",
+   "bbox_fulltone": {
+    "x1": 0.6250895857810974,
+    "y1": 0.20387931168079376,
+    "x2": 0.6530466079711914,
+    "y2": 0.22327585518360138
+   },
+   "flag": "ai_flag"
+  },
+  {
+   "klal_id": 163,
+   "word_index": 100,
+   "page": 59,
+   "corpus": "כוותייכו",
+   "bitonal": "כוותייכו",
+   "fulltone": "כוותייכן",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/163/word/100",
+   "bbox_fulltone": {
+    "x1": 0.7978494763374329,
+    "y1": 0.7064655423164368,
+    "x2": 0.8702508807182312,
+    "y2": 0.7262930870056152
+   }
+  },
+  {
+   "klal_id": 163,
+   "word_index": 348,
+   "page": 59,
+   "corpus": "שהגיהן",
+   "bitonal": "שהגיהן",
+   "fulltone": "שהגיהו",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/163/word/348",
+   "bbox_fulltone": {
+    "x1": 0.21146953105926514,
+    "y1": 0.954741358757019,
+    "x2": 0.2774193584918976,
+    "y2": 0.9706896543502808
+   }
+  },
+  {
+   "klal_id": 163,
+   "word_index": 351,
+   "page": 59,
+   "corpus": "הגיהן",
+   "bitonal": "הגיהן",
+   "fulltone": "הניהן",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/163/word/351",
+   "bbox_fulltone": {
+    "x1": 0.02939068153500557,
+    "y1": 0.954741358757019,
+    "x2": 0.0788530483841896,
+    "y2": 0.9711207151412964
+   }
+  },
+  {
+   "klal_id": 163,
+   "word_index": 353,
+   "page": 60,
+   "corpus": "הרי\"ף",
+   "bitonal": "הרי\"ף",
+   "fulltone": "הרייף",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/163/word/353",
+   "bbox_fulltone": {
+    "x1": 0.8349999785423279,
+    "y1": 0.04610081762075424,
+    "x2": 0.8885714411735535,
+    "y2": 0.06635071337223053
+   }
+  },
+  {
+   "klal_id": 163,
+   "word_index": 445,
+   "page": 60,
+   "corpus": "דמפומייהו",
+   "bitonal": "דמפומייהו",
+   "fulltone": "דמפומיידו",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/163/word/445",
+   "bbox_fulltone": {
+    "x1": 0.09428571164608002,
+    "y1": 0.1335631161928177,
+    "x2": 0.18571428954601288,
+    "y2": 0.15252046287059784
+   }
+  },
+  {
+   "klal_id": 163,
+   "word_index": 463,
+   "page": 60,
+   "corpus": "להו",
+   "bitonal": "להו",
+   "fulltone": "להן",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/163/word/463",
+   "bbox_fulltone": {
+    "x1": 0.9371428489685059,
+    "y1": 0.1680310219526291,
+    "x2": 0.9700000286102295,
+    "y2": 0.18698836863040924
+   }
+  },
+  {
+   "klal_id": 163,
+   "word_index": 489,
+   "page": 60,
+   "corpus": "שם",
+   "bitonal": "שם",
+   "fulltone": "ששם",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/163/word/489",
+   "bbox_fulltone": {
+    "x1": 0.41428571939468384,
+    "y1": 0.1852649748325348,
+    "x2": 0.44928571581840515,
+    "y2": 0.20422232151031494
+   }
+  },
+  {
+   "klal_id": 163,
+   "word_index": 512,
+   "page": 60,
+   "corpus": "דס'",
+   "bitonal": "דס",
+   "fulltone": "דפי",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/163/word/512",
+   "bbox_fulltone": {
+    "x1": 0.868571400642395,
+    "y1": 0.2201637178659439,
+    "x2": 0.9021428823471069,
+    "y2": 0.23955191671848297
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 164,
+   "word_index": 36,
+   "page": 60,
+   "corpus": "דאיהו",
+   "bitonal": "דאיהו",
+   "fulltone": "דאיהן",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/164/word/36",
+   "bbox_fulltone": {
+    "x1": 0.508571445941925,
+    "y1": 0.37656182050704956,
+    "x2": 0.558571457862854,
+    "y2": 0.3959500193595886
+   }
+  },
+  {
+   "klal_id": 167,
+   "word_index": 329,
+   "page": 60,
+   "corpus": "לדתוס'",
+   "bitonal": "לדתוס",
+   "fulltone": "להתוס",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/167/word/329",
+   "bbox_fulltone": {
+    "x1": 0.6421428322792053,
+    "y1": 0.9358035326004028,
+    "x2": 0.6985714435577393,
+    "y2": 0.9564842581748962
+   }
+  },
+  {
+   "klal_id": 167,
+   "word_index": 347,
+   "page": 60,
+   "corpus": "בס'",
+   "bitonal": "בס",
+   "fulltone": "בפ",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/167/word/347",
+   "bbox_fulltone": {
+    "x1": 0.5535714030265808,
+    "y1": 0.9543300271034241,
+    "x2": 0.5799999833106995,
+    "y2": 0.9711331129074097
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 167,
+   "word_index": 426,
+   "page": 61,
+   "corpus": "ואפ\"ה",
+   "bitonal": "ואפ\"ה",
+   "fulltone": "ואס\"ה",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/167/word/426",
+   "bbox_fulltone": {
+    "x1": 0.8433048725128174,
+    "y1": 0.11723534762859344,
+    "x2": 0.8960114121437073,
+    "y2": 0.13779526948928833
+   }
+  },
+  {
+   "klal_id": 167,
+   "word_index": 442,
+   "page": 61,
+   "corpus": "בכ\"ס",
+   "bitonal": "בכ\"ס",
+   "fulltone": "בכ\"מ",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/167/word/442",
+   "bbox_fulltone": {
+    "x1": 0.029914529994130135,
+    "y1": 0.11723534762859344,
+    "x2": 0.0833333358168602,
+    "y2": 0.13779526948928833
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 167,
+   "word_index": 511,
+   "page": 61,
+   "corpus": "וכפלוגתא",
+   "bitonal": "וכפלוגתא",
+   "fulltone": "ובפלוגתא",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/167/word/511",
+   "bbox_fulltone": {
+    "x1": 0.07692307978868484,
+    "y1": 0.18810148537158966,
+    "x2": 0.1666666716337204,
+    "y2": 0.20909886062145233
+   }
+  },
+  {
+   "klal_id": 167,
+   "word_index": 522,
+   "page": 61,
+   "corpus": "בסס\"י",
+   "bitonal": "בסס\"י",
+   "fulltone": "בספ\"י",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/167/word/522",
+   "bbox_fulltone": {
+    "x1": 0.4572649598121643,
+    "y1": 0.20691163837909698,
+    "x2": 0.5092592835426331,
+    "y2": 0.22528433799743652
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 167,
+   "word_index": 558,
+   "page": 61,
+   "corpus": "הכ\"ם",
+   "bitonal": "הכ\"ם",
+   "fulltone": "הכ\"מ",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/167/word/558",
+   "bbox_fulltone": {
+    "x1": 0.4650997221469879,
+    "y1": 0.24146981537342072,
+    "x2": 0.5135327577590942,
+    "y2": 0.2607174217700958
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 167,
+   "word_index": 632,
+   "page": 61,
+   "corpus": "כבתראי",
+   "bitonal": "כבתראי",
+   "fulltone": "ככתראי",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/167/word/632",
+   "bbox_fulltone": {
+    "x1": 0.5455840229988098,
+    "y1": 0.3289588689804077,
+    "x2": 0.6182336211204529,
+    "y2": 0.35083115100860596
+   }
+  },
+  {
+   "klal_id": 167,
+   "word_index": 664,
+   "page": 61,
+   "corpus": "וסליג",
+   "bitonal": "וסליג",
+   "fulltone": "ופליג",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/167/word/664",
+   "bbox_fulltone": {
+    "x1": 0.565527081489563,
+    "y1": 0.3652668297290802,
+    "x2": 0.6146723628044128,
+    "y2": 0.38626420497894287
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 167,
+   "word_index": 715,
+   "page": 61,
+   "corpus": "והרא\"ש",
+   "bitonal": "והרא\"ש",
+   "fulltone": "דהרא\"ש",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/167/word/715",
+   "bbox_fulltone": {
+    "x1": 0.1894586831331253,
+    "y1": 0.41776028275489807,
+    "x2": 0.26424500346183777,
+    "y2": 0.437007874250412
+   }
+  },
+  {
+   "klal_id": 167,
+   "word_index": 733,
+   "page": 61,
+   "corpus": "ככתראי",
+   "bitonal": "ככתראי",
+   "fulltone": "כבתראי",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/167/word/733",
+   "bbox_fulltone": {
+    "x1": 0.08618233352899551,
+    "y1": 0.43525809049606323,
+    "x2": 0.17094017565250397,
+    "y2": 0.45494312047958374
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 167,
+   "word_index": 738,
+   "page": 61,
+   "corpus": "מקטי",
+   "bitonal": "מקטי",
+   "fulltone": "מקמי",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/167/word/738",
+   "bbox_fulltone": {
+    "x1": 0.7321937084197998,
+    "y1": 0.45363080501556396,
+    "x2": 0.7806267738342285,
+    "y2": 0.47375327348709106
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 167,
+   "word_index": 886,
+   "page": 61,
+   "corpus": "טי",
+   "bitonal": "טי",
+   "fulltone": "מי",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/167/word/886",
+   "bbox_fulltone": {
+    "x1": 0.3361823260784149,
+    "y1": 0.5953630805015564,
+    "x2": 0.35968661308288574,
+    "y2": 0.6137357950210571
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 167,
+   "word_index": 897,
+   "page": 61,
+   "corpus": "מקטי",
+   "bitonal": "מקטי",
+   "fulltone": "מקמי",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/167/word/897",
+   "bbox_fulltone": {
+    "x1": 0.6666666865348816,
+    "y1": 0.6111111044883728,
+    "x2": 0.7122507095336914,
+    "y2": 0.6321085095405579
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 167,
+   "word_index": 1035,
+   "page": 61,
+   "corpus": "אין",
+   "bitonal": "אין",
+   "fulltone": "איו",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/167/word/1035",
+   "bbox_fulltone": {
+    "x1": 0.875356137752533,
+    "y1": 0.7515310645103455,
+    "x2": 0.9038461446762085,
+    "y2": 0.7738407850265503
+   }
+  },
+  {
+   "klal_id": 167,
+   "word_index": 1130,
+   "page": 61,
+   "corpus": "לא",
+   "bitonal": "לא",
+   "fulltone": "אא",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/167/word/1130",
+   "bbox_fulltone": {
+    "x1": 0.17378917336463928,
+    "y1": 0.8403324484825134,
+    "x2": 0.20156694948673248,
+    "y2": 0.8608924150466919
+   }
+  },
+  {
+   "klal_id": 167,
+   "word_index": 1174,
+   "page": 61,
+   "corpus": "מ\"ו",
+   "bitonal": "מ\"ו",
+   "fulltone": "מ\"ז",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/167/word/1174",
+   "bbox_fulltone": {
+    "x1": 0.33760684728622437,
+    "y1": 0.8932633399963379,
+    "x2": 0.3668091297149658,
+    "y2": 0.9125109314918518
+   }
+  },
+  {
+   "klal_id": 167,
+   "word_index": 1208,
+   "page": 61,
+   "corpus": "רעדיות",
+   "bitonal": "רעדיות",
+   "fulltone": "דעדיות",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/167/word/1208",
+   "bbox_fulltone": {
+    "x1": 0.2699430286884308,
+    "y1": 0.9286963939666748,
+    "x2": 0.3311965763568878,
+    "y2": 0.9501312375068665
+   }
+  },
+  {
+   "klal_id": 168,
+   "word_index": 27,
+   "page": 62,
+   "corpus": "המפקיד",
+   "bitonal": "המפקיד",
+   "fulltone": "המפקיר",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/168/word/27",
+   "bbox_fulltone": {
+    "x1": 0.07439199090003967,
+    "y1": 0.20362381637096405,
+    "x2": 0.14806866645812988,
+    "y2": 0.22303709387779236
+   }
+  },
+  {
+   "klal_id": 168,
+   "word_index": 117,
+   "page": 62,
+   "corpus": "לכותבם",
+   "bitonal": "לכותבם",
+   "fulltone": "לכותכם",
+   "state": "ruled",
+   "url": "http://127.0.0.1:8420/entry/168/word/117",
+   "bbox_fulltone": {
+    "x1": 0.13805435597896576,
+    "y1": 0.2899051010608673,
+    "x2": 0.20958511531352997,
+    "y2": 0.30845555663108826
+   }
+  },
+  {
+   "klal_id": 168,
+   "word_index": 169,
+   "page": 62,
+   "corpus": "פ\"ק",
+   "bitonal": "פ\"ק",
+   "fulltone": "ס\"ק",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/168/word/169",
+   "bbox_fulltone": {
+    "x1": 0.9320457577705383,
+    "y1": 0.3584986925125122,
+    "x2": 0.9692417979240417,
+    "y2": 0.3779119849205017
+   }
+  },
+  {
+   "klal_id": 168,
+   "word_index": 198,
+   "page": 62,
+   "corpus": "הכי",
+   "bitonal": "הכי",
+   "fulltone": "דכי",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/168/word/198",
+   "bbox_fulltone": {
+    "x1": 0.22460657358169556,
+    "y1": 0.37661775946617126,
+    "x2": 0.25464949011802673,
+    "y2": 0.3955996632575989
+   }
+  },
+  {
+   "klal_id": 168,
+   "word_index": 501,
+   "page": 62,
+   "corpus": "כשמואל",
+   "bitonal": "כשמואל",
+   "fulltone": "כשמול",
+   "state": "ruled",
+   "url": "http://127.0.0.1:8420/entry/168/word/501",
+   "bbox_fulltone": {
+    "x1": 0.853361964225769,
+    "y1": 0.7070750594139099,
+    "x2": 0.9184549450874329,
+    "y2": 0.727351188659668
+   }
+  },
+  {
+   "klal_id": 169,
+   "word_index": 76,
+   "page": 62,
+   "corpus": "מזה",
+   "bitonal": "מזה",
+   "fulltone": "כזה",
+   "state": "ruled",
+   "url": "http://127.0.0.1:8420/entry/169/word/76",
+   "bbox_fulltone": {
+    "x1": 0.08941344916820526,
+    "y1": 0.8295944929122925,
+    "x2": 0.12732474505901337,
+    "y2": 0.8498705625534058
+   }
+  },
+  {
+   "klal_id": 169,
+   "word_index": 444,
+   "page": 63,
+   "corpus": "דוי.",
+   "bitonal": "דוי",
+   "fulltone": "הוי",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/169/word/444",
+   "bbox_fulltone": {
+    "x1": 0.028632784262299538,
+    "y1": 0.2897800803184509,
+    "x2": 0.054402291774749756,
+    "y2": 0.308322548866272
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 169,
+   "word_index": 523,
+   "page": 63,
+   "corpus": "ס\"ס",
+   "bitonal": "ס\"ס",
+   "fulltone": "ס\"פ",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/169/word/523",
+   "bbox_fulltone": {
+    "x1": 0.34645670652389526,
+    "y1": 0.3768865764141083,
+    "x2": 0.3808160424232483,
+    "y2": 0.3958602845668793
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 169,
+   "word_index": 597,
+   "page": 63,
+   "corpus": "מדברין",
+   "bitonal": "מדברין",
+   "fulltone": "מדבריו",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/169/word/597",
+   "bbox_fulltone": {
+    "x1": 0.8375089764595032,
+    "y1": 0.46571797132492065,
+    "x2": 0.9026485085487366,
+    "y2": 0.481241911649704
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 172,
+   "word_index": 0,
+   "page": 64,
+   "corpus": "קעב",
+   "bitonal": "קעב",
+   "fulltone": "קער",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/172/word/0",
+   "bbox_fulltone": {
+    "x1": 0.9228571653366089,
+    "y1": 0.39457830786705017,
+    "x2": 0.9671428799629211,
+    "y2": 0.4165232479572296
+   }
+  },
+  {
+   "klal_id": 175,
+   "word_index": 20,
+   "page": 64,
+   "corpus": "ע\"ר",
+   "bitonal": "ע\"ר",
+   "fulltone": "ע\"ד",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/175/word/20",
+   "bbox_fulltone": {
+    "x1": 0.647857129573822,
+    "y1": 0.8007745146751404,
+    "x2": 0.6807143092155457,
+    "y2": 0.8162650465965271
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 176,
+   "word_index": 234,
+   "page": 65,
+   "corpus": "בכ\"ם",
+   "bitonal": "בכ\"ם",
+   "fulltone": "בכ\"מ",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/176/word/234",
+   "bbox_fulltone": {
+    "x1": 0.8780313730239868,
+    "y1": 0.29212015867233276,
+    "x2": 0.9272468090057373,
+    "y2": 0.31214627623558044
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 176,
+   "word_index": 480,
+   "page": 65,
+   "corpus": "מייתכא",
+   "bitonal": "מייתכא",
+   "fulltone": "מייתבא",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/176/word/480",
+   "bbox_fulltone": {
+    "x1": 0.8316690325737,
+    "y1": 0.53635174036026,
+    "x2": 0.9001426696777344,
+    "y2": 0.5559425354003906
+   },
+   "flag": "current_text_confirmed"
+  },
+  {
+   "klal_id": 177,
+   "word_index": 31,
+   "page": 65,
+   "corpus": "שכתבו",
+   "bitonal": "שכתבו",
+   "fulltone": "שכתכו",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/177/word/31",
+   "bbox_fulltone": {
+    "x1": 0.0734664797782898,
+    "y1": 0.7979974150657654,
+    "x2": 0.13480742275714874,
+    "y2": 0.8184588551521301
+   }
+  },
+  {
+   "klal_id": 177,
+   "word_index": 409,
+   "page": 66,
+   "corpus": "התוס'",
+   "bitonal": "התוס",
+   "fulltone": "התום",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/177/word/409",
+   "bbox_fulltone": {
+    "x1": 0.9241231083869934,
+    "y1": 0.2956140339374542,
+    "x2": 0.9699355959892273,
+    "y2": 0.3144736886024475
+   }
+  },
+  {
+   "klal_id": 178,
+   "word_index": 279,
+   "page": 66,
+   "corpus": "לא",
+   "bitonal": "לא",
+   "fulltone": "אא",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/178/word/279",
+   "bbox_fulltone": {
+    "x1": 0.14889048039913177,
+    "y1": 0.7701754570007324,
+    "x2": 0.17895489931106567,
+    "y2": 0.7912280559539795
+   }
+  },
+  {
+   "klal_id": 183,
+   "word_index": 240,
+   "page": 68,
+   "corpus": "לא",
+   "bitonal": "לא",
+   "fulltone": "אא",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/183/word/240",
+   "bbox_fulltone": {
+    "x1": 0.025843502953648567,
+    "y1": 0.04570935666561127,
+    "x2": 0.06748025864362717,
+    "y2": 0.06597671657800674
+   }
+  },
+  {
+   "klal_id": 184,
+   "word_index": 30,
+   "page": 68,
+   "corpus": "בהן",
+   "bitonal": "בהן",
+   "fulltone": "בהון",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/184/word/30",
+   "bbox_fulltone": {
+    "x1": 0.827709972858429,
+    "y1": 0.27253127098083496,
+    "x2": 0.8600143790245056,
+    "y2": 0.2923673987388611
+   }
+  },
+  {
+   "klal_id": 185,
+   "word_index": 16,
+   "page": 68,
+   "corpus": "שצ\"ח",
+   "bitonal": "שצ\"ח",
+   "fulltone": "שיצ\"ח",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/185/word/16",
+   "bbox_fulltone": {
+    "x1": 0.026561377570033073,
+    "y1": 0.3061664402484894,
+    "x2": 0.07824838161468506,
+    "y2": 0.3298835754394531
+   }
+  },
+  {
+   "klal_id": 187,
+   "word_index": 271,
+   "page": 68,
+   "corpus": "רבוואתא",
+   "bitonal": "רבוואתא",
+   "fulltone": "רכוואתא",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/187/word/271",
+   "bbox_fulltone": {
+    "x1": 0.03086862899363041,
+    "y1": 0.7080638408660889,
+    "x2": 0.11988513916730881,
+    "y2": 0.727468729019165
+   }
+  },
+  {
+   "klal_id": 189,
+   "word_index": 111,
+   "page": 68,
+   "corpus": "המקיל",
+   "bitonal": "המקיל",
+   "fulltone": "הטקיל",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/189/word/111",
+   "bbox_fulltone": {
+    "x1": 0.7760229706764221,
+    "y1": 0.9344545006752014,
+    "x2": 0.835606575012207,
+    "y2": 0.9542906284332275
+   }
+  },
+  {
+   "klal_id": 189,
+   "word_index": 125,
+   "page": 68,
+   "corpus": "הנה",
+   "bitonal": "הנה",
+   "fulltone": "הגה",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/189/word/125",
+   "bbox_fulltone": {
+    "x1": 0.9375448822975159,
+    "y1": 0.9517033100128174,
+    "x2": 0.972720742225647,
+    "y2": 0.9724019169807434
+   }
+  },
+  {
+   "klal_id": 190,
+   "word_index": 25,
+   "page": 69,
+   "corpus": "בכיסוי",
+   "bitonal": "בכיסוי",
+   "fulltone": "בכיפוי",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/190/word/25",
+   "bbox_fulltone": {
+    "x1": 0.2433786690235138,
+    "y1": 0.42955920100212097,
+    "x2": 0.30279168486595154,
+    "y2": 0.44857388734817505
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 193,
+   "word_index": 112,
+   "page": 69,
+   "corpus": "איהן",
+   "bitonal": "איהן",
+   "fulltone": "איהו",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/193/word/112",
+   "bbox_fulltone": {
+    "x1": 0.0916249081492424,
+    "y1": 0.8124459981918335,
+    "x2": 0.1309949904680252,
+    "y2": 0.8323249816894531
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 194,
+   "word_index": 186,
+   "page": 70,
+   "corpus": "כ\"ד",
+   "bitonal": "כ\"ד",
+   "fulltone": "כ\"ר",
+   "state": "ruled",
+   "url": "http://127.0.0.1:8420/entry/194/word/186",
+   "bbox_fulltone": {
+    "x1": 0.6945636868476868,
+    "y1": 0.24092698097229004,
+    "x2": 0.7274678349494934,
+    "y2": 0.2575426399707794
+   }
+  },
+  {
+   "klal_id": 194,
+   "word_index": 189,
+   "page": 70,
+   "corpus": "הל'",
+   "bitonal": "הל",
+   "fulltone": "הלי",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/194/word/189",
+   "bbox_fulltone": {
+    "x1": 0.5486409068107605,
+    "y1": 0.24092698097229004,
+    "x2": 0.5765379071235657,
+    "y2": 0.2575426399707794
+   }
+  },
+  {
+   "klal_id": 194,
+   "word_index": 293,
+   "page": 70,
+   "corpus": "איהו",
+   "bitonal": "איהו",
+   "fulltone": "איהן",
+   "state": "ruled",
+   "url": "http://127.0.0.1:8420/entry/194/word/293",
+   "bbox_fulltone": {
+    "x1": 0.2153075784444809,
+    "y1": 0.3467424511909485,
+    "x2": 0.25464949011802673,
+    "y2": 0.36510711908340454
+   }
+  },
+  {
+   "klal_id": 196,
+   "word_index": 38,
+   "page": 70,
+   "corpus": "לדם",
+   "bitonal": "לדם",
+   "fulltone": "להם",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/196/word/38",
+   "bbox_fulltone": {
+    "x1": 0.49213162064552307,
+    "y1": 0.7350240349769592,
+    "x2": 0.5300429463386536,
+    "y2": 0.7520769834518433
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 196,
+   "word_index": 76,
+   "page": 70,
+   "corpus": "הקוטץ",
+   "bitonal": "הקוטץ",
+   "fulltone": "הקומץ",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/196/word/76",
+   "bbox_fulltone": {
+    "x1": 0.34692418575286865,
+    "y1": 0.7691298723220825,
+    "x2": 0.407010018825531,
+    "y2": 0.7918670773506165
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 197,
+   "word_index": 109,
+   "page": 70,
+   "corpus": "ושמרת",
+   "bitonal": "ושמרת",
+   "fulltone": "זשמרת",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/197/word/109",
+   "bbox_fulltone": {
+    "x1": 0.6623747944831848,
+    "y1": 0.9112374186515808,
+    "x2": 0.7288984060287476,
+    "y2": 0.9322256445884705
+   }
+  },
+  {
+   "klal_id": 197,
+   "word_index": 151,
+   "page": 70,
+   "corpus": "אטרי'",
+   "bitonal": "אטרי",
+   "fulltone": "אמרי",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/197/word/151",
+   "bbox_fulltone": {
+    "x1": 0.48640915751457214,
+    "y1": 0.9462177753448486,
+    "x2": 0.5343347787857056,
+    "y2": 0.9654569029808044
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 198,
+   "word_index": 30,
+   "page": 71,
+   "corpus": "אחד",
+   "bitonal": "אחד",
+   "fulltone": "אחר",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/198/word/30",
+   "bbox_fulltone": {
+    "x1": 0.02857142873108387,
+    "y1": 0.324849009513855,
+    "x2": 0.07071428745985031,
+    "y2": 0.3442623019218445
+   }
+  },
+  {
+   "klal_id": 198,
+   "word_index": 473,
+   "page": 71,
+   "corpus": "שם",
+   "bitonal": "שם",
+   "fulltone": "שים",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/198/word/473",
+   "bbox_fulltone": {
+    "x1": 0.29499998688697815,
+    "y1": 0.7937877774238586,
+    "x2": 0.32499998807907104,
+    "y2": 0.8140638470649719
+   }
+  },
+  {
+   "klal_id": 198,
+   "word_index": 637,
+   "page": 72,
+   "corpus": "מ\"מ",
+   "bitonal": "מ\"מ",
+   "fulltone": "מ\"כ",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/198/word/637",
+   "bbox_fulltone": {
+    "x1": 0.43133047223091125,
+    "y1": 0.09808917343616486,
+    "x2": 0.46924176812171936,
+    "y2": 0.11804670840501785
+   }
+  },
+  {
+   "klal_id": 198,
+   "word_index": 939,
+   "page": 72,
+   "corpus": "נפשו",
+   "bitonal": "נפשו",
+   "fulltone": "נסשו",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/198/word/939",
+   "bbox_fulltone": {
+    "x1": 0.3755364716053009,
+    "y1": 0.40764331817626953,
+    "x2": 0.4234620928764343,
+    "y2": 0.42675158381462097
+   }
+  },
+  {
+   "klal_id": 207,
+   "word_index": 0,
+   "page": 73,
+   "corpus": "רז",
+   "bitonal": "רז",
+   "fulltone": "רו",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/207/word/0",
+   "bbox_fulltone": {
+    "x1": 0.9445629119873047,
+    "y1": 0.6896103620529175,
+    "x2": 0.9658848643302917,
+    "y2": 0.7095237970352173
+   }
+  },
+  {
+   "klal_id": 214,
+   "word_index": 80,
+   "page": 74,
+   "corpus": "ועוד",
+   "bitonal": "ועוד",
+   "fulltone": "ועור",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/214/word/80",
+   "bbox_fulltone": {
+    "x1": 0.7583988308906555,
+    "y1": 0.5173010230064392,
+    "x2": 0.7934238910675049,
+    "y2": 0.5371972322463989
+   }
+  },
+  {
+   "klal_id": 217,
+   "word_index": 371,
+   "page": 75,
+   "corpus": "משום",
+   "bitonal": "משום",
+   "fulltone": "משוס",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/217/word/371",
+   "bbox_fulltone": {
+    "x1": 0.34953537583351135,
+    "y1": 0.8811924457550049,
+    "x2": 0.40243029594421387,
+    "y2": 0.89829021692276
+   }
+  },
+  {
+   "klal_id": 217,
+   "word_index": 776,
+   "page": 76,
+   "corpus": "ובב\"ט",
+   "bitonal": "ובב\"ט",
+   "fulltone": "ובב\"ם",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/217/word/776",
+   "bbox_fulltone": {
+    "x1": 0.0683760717511177,
+    "y1": 0.3614095449447632,
+    "x2": 0.12250712513923645,
+    "y2": 0.3743016719818115
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 217,
+   "word_index": 893,
+   "page": 76,
+   "corpus": "להן",
+   "bitonal": "להן",
+   "fulltone": "להו",
+   "state": "queued",
+   "url": "http://127.0.0.1:8420/entry/217/word/893",
+   "bbox_fulltone": {
+    "x1": 0.1111111119389534,
+    "y1": 0.47958746552467346,
+    "x2": 0.14102564752101898,
+    "y2": 0.49892565608024597
+   },
+   "flag": "current_text_may_be_wrong"
+  },
+  {
+   "klal_id": 218,
+   "word_index": 61,
+   "page": 76,
+   "corpus": "שגם",
+   "bitonal": "שגם",
+   "fulltone": "שגס",
+   "state": "unsurfaced",
+   "url": "http://127.0.0.1:8420/entry/218/word/61",
+   "bbox_fulltone": {
+    "x1": 0.09259258955717087,
+    "y1": 0.6196820139884949,
+    "x2": 0.13532763719558716,
+    "y2": 0.6398796439170837
+   }
+  }
+ ]
+}
