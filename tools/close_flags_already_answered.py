@@ -43,14 +43,25 @@ import apply_reviewer_decisions as ard  # noqa: E402
 
 
 def applied_positions():
-    """(klal_id, word_index) -> (apply_event ts, the decision it promoted)."""
+    """(klal_id, word_index) -> (apply_event ts, the decision it promoted).
+
+    HEADING RULINGS ARE EXCLUDED, added 2026-09-16 with item 0HE's finding 4.
+    An apply_event for a `title_correction` carries a position in
+    `title.split(' ')`, and open_word_flags() below is keyed on BODY positions -
+    two address spaces that differ by the heading run's start and coincide only
+    by accident. Matching one against the other would close a body flag because
+    a heading word with the same integer was ruled on. The same ruling also
+    leaves `clean_text` untouched, so the flagged body word still reads what the
+    flag was raised about: there is nothing here to close either way.
+    """
     out = {}
     records = {}
     for r in rd.all_records() if hasattr(rd, "all_records") else _read_ledger():
         records[r["id"]] = r
         if r["decision_type"] == "apply_event" and r.get("word_index") is not None:
             out[(r["klal_id"], r["word_index"])] = (r["ts"], r.get("applied_decision_id"))
-    return {k: (ts, records.get(did)) for k, (ts, did) in out.items() if records.get(did)}
+    return {k: (ts, records[did]) for k, (ts, did) in out.items()
+            if records.get(did) and records[did]["decision_type"] not in ard.HEADING_DECISION_TYPES}
 
 
 def _read_ledger():

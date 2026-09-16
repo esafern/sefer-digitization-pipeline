@@ -206,6 +206,55 @@ def close_flag_satisfied_by(klal_id, word_index, decision, kind, applied_ts=None
     return True
 
 
+# The kinds whose `word_index` is a position in `title.split(' ')`, not in the
+# body. ADDED 2026-09-16 (item 0HE finding 4). Everything else main() records in
+# `applied` is at a BODY position, which is the space open_word_flags() is keyed
+# in - including every `witness-*` kind, because the witness block appends the
+# ruling's SNAPSHOT word_index and not the OCR token its key carries (item 0GW).
+HEADING_KINDS = frozenset({"title", "title-whole", "title-delete"})
+
+# The same set seen from the LEDGER rather than from a run: `HEADING_KINDS` is
+# what main() labels an applied heading ruling, `HEADING_DECISION_TYPES` is
+# what the record itself says, which is all a ledger reader has to go on.
+# tools/close_flags_already_answered.py matches apply_events against open word
+# flags and needs the second one to keep the two address spaces apart.
+HEADING_DECISION_TYPES = frozenset({"title_correction"})
+
+
+def heading_flag_still_open(klal_id, kind, title_index, klal, title_before):
+    """The BODY word index of an open flag a just-applied HEADING ruling does
+    NOT answer, or None.
+
+    A heading ruling rewrites `title`, a second copy of the entry's opening
+    words, and leaves `clean_text` untouched - so the body word a flag was
+    raised on still reads exactly what the flag was raised about, and closing it
+    would erase a live request. This function only locates such a flag so the
+    run can name it; nothing here closes one.
+
+    The two address spaces are NOT interchangeable: `title_word_run` puts the
+    heading at body word 1 wherever a gematria numeral opens the entry (Yad
+    Malachi) and at word 0 where none does (Sefer HaShorashim), so title index i
+    is body index start+i. Before this existed, main() passed the TITLE index
+    straight to a body-keyed lookup, which is the second half of item 0HE's
+    finding 4 - the first half being that it passed `None` for the decision and
+    raised TypeError on the way."""
+    if klal is None:
+        return None
+    start, count = cio.title_word_run(title_before, klal.get("clean_text") or "")
+    if start is None:
+        return None
+    # A whole-heading ruling names no single word - it replaces the field - so
+    # the run itself is what it answers; the other two name one heading word.
+    if kind == "title-whole":
+        candidates = range(start, start + count)
+    elif title_index is None:
+        return None
+    else:
+        candidates = [start + title_index]
+    flags = open_word_flags(klal_id)
+    return next((b for b in candidates if b in flags), None)
+
+
 UNVERIFIED_SHIFTS_PATH = os.path.join(REPO, "unverified_flag_shifts.jsonl")
 
 
@@ -882,6 +931,12 @@ def main():
     # verify a moved flag lands on the same word it named - captured here rather
     # than re-read later, because by_klal is mutated in place below.
     words_before = {k["klal_id"]: cio.words_of(k) for k in part1}
+    # And the HEADINGS as they stood, for the same reason (item 0HE finding 4).
+    # heading_flag_still_open() locates the heading's run inside the body by
+    # matching the two, and a title ruling has already rewritten `title` by the
+    # time that runs - so the corrected heading no longer matches the body it
+    # came from and the run cannot be found at all. Pass it the one that does.
+    titles_before = {k["klal_id"]: (k.get("title") or "") for k in part1}
     # Read ONCE for the whole run: resolved_position() consults both per ruling,
     # and each is a full read of its file.
     id_state = widentity.load()
@@ -968,7 +1023,7 @@ def main():
         if (_snap.get("opcode") == "delete"
                 and not (decision["chosen_text"] or "").strip()):
             n_noop += 1
-            applied.append((klal_id, word_index, "confirmed-no-op"))
+            applied.append((klal_id, word_index, "confirmed-no-op", decision))
             if not args.dry_run:
                 rd.append_decision("apply_event", klal_id=klal_id, word_index=word_index,
                                    applied_decision_id=decision["id"],
@@ -1022,7 +1077,7 @@ def main():
             # two real pending decisions (klal 4 word 0 'ד', klal 57 word 0
             # 'נז אין'), see PROJECT-STATUS.md finding ★1.
             n_noop += 1
-            applied.append((klal_id, word_index, "confirmed-no-op"))
+            applied.append((klal_id, word_index, "confirmed-no-op", decision))
             if not args.dry_run:
                 rd.append_decision("apply_event", klal_id=klal_id, word_index=word_index,
                                     applied_decision_id=decision["id"],
@@ -1065,10 +1120,10 @@ def main():
             # reported case below, not the synced one.
             _orig = (snapshot.get("final_text") or "").split()
             if len(_orig) == 1 and sync_heading_word(klal, word_index, _orig[0], decision["chosen_text"]):
-                applied.append((klal_id, word_index, "heading-sync"))
+                applied.append((klal_id, word_index, "heading-sync", decision))
                 n_heading_sync += 1
             n_replace += 1
-            applied.append((klal_id, word_index, "replace"))
+            applied.append((klal_id, word_index, "replace", decision))
             if not args.dry_run:
                 rd.append_decision("apply_event", klal_id=klal_id, word_index=word_index,
                                     applied_decision_id=decision["id"])
@@ -1124,7 +1179,7 @@ def main():
             heading_desync.append((klal_id, word_index, opcode))
         word_count_changed_klalim.add(klal_id)
         n_insert_delete += 1
-        applied.append((klal_id, word_index, opcode))
+        applied.append((klal_id, word_index, opcode, decision))
         if not args.dry_run:
             rd.append_decision("apply_event", klal_id=klal_id, word_index=word_index,
                                 applied_decision_id=decision["id"])
@@ -1251,14 +1306,14 @@ def main():
                 word_index, cio.word_count_of(new_text) - cio.word_count_of(klal))
         klal["clean_text"] = new_text
         if kind == "manual" and sync_heading_word(klal, word_index, original_word, chosen_text):
-            applied.append((klal_id, word_index, "heading-sync"))
+            applied.append((klal_id, word_index, "heading-sync", decision))
             n_heading_sync += 1
         elif kind in ("manual-delete", "manual-insert") and word_index <= len(cio.title_words_of(klal)):
             heading_desync.append((klal_id, word_index, kind))
         if kind in ("manual-delete", "manual-insert"):
             word_count_changed_klalim.add(klal_id)
         n_manual += 1
-        applied.append((klal_id, word_index, kind))
+        applied.append((klal_id, word_index, kind, decision))
         if not args.dry_run:
             rd.append_decision("apply_event", klal_id=klal_id, word_index=word_index,
                                 applied_decision_id=decision["id"])
@@ -1308,10 +1363,10 @@ def main():
                 klal["clean_text"] = " ".join(result)
                 if (kind == "replace" and len(seen) == 1 and len(result) == len(words)
                         and sync_heading_word(klal, wi, seen[0], result[wi])):
-                    applied.append((klal_id, wi, "heading-sync"))
+                    applied.append((klal_id, wi, "heading-sync", decision))
                     n_heading_sync += 1
             n_witness += 1
-            applied.append((klal_id, wi, "witness-" + kind))
+            applied.append((klal_id, wi, "witness-" + kind, decision))
             if not args.dry_run:
                 rd.append_decision("apply_event", klal_id=klal_id, word_index=wi,
                                    applied_decision_id=decision["id"],
@@ -1372,7 +1427,7 @@ def main():
             title_count_changed_klalim.add(klal_id)
             klal["title"] = chosen_text
             n_title += 1
-            applied.append((klal_id, word_index, "title-whole"))
+            applied.append((klal_id, word_index, "title-whole", decision))
             if not args.dry_run:
                 rd.append_decision("apply_event", klal_id=klal_id, word_index=word_index,
                                     applied_decision_id=decision["id"])
@@ -1398,7 +1453,7 @@ def main():
             title_count_changed_klalim.add(klal_id)
         klal["title"] = new_title
         n_title += 1
-        applied.append((klal_id, word_index, kind))
+        applied.append((klal_id, word_index, kind, decision))
         if not args.dry_run:
             rd.append_decision("apply_event", klal_id=klal_id, word_index=word_index,
                                 applied_decision_id=decision["id"])
@@ -1438,11 +1493,18 @@ def main():
     # corpus is written: a flag closed against an edit that never landed would be
     # worse than one left open.
     closed_flags, moved_flags, unverified_shifts, moved_decisions = [], [], [], []
+    heading_flags_left_open = []
     if not args.dry_run:
-        for klal_id, word_index, kind in applied:
-            if close_flag_satisfied_by(klal_id, word_index,
-                                       decisions.get((klal_id, word_index))
-                                       or manual_decisions.get((klal_id, word_index)), kind):
+        for klal_id, word_index, kind, decision in applied:
+            # HEADING RULINGS CLOSE NOTHING - see heading_flag_still_open().
+            if kind in HEADING_KINDS:
+                still_open = heading_flag_still_open(
+                    klal_id, kind, word_index, by_klal.get(klal_id),
+                    titles_before.get(klal_id, ""))
+                if still_open is not None:
+                    heading_flags_left_open.append((klal_id, still_open, word_index))
+                continue
+            if close_flag_satisfied_by(klal_id, word_index, decision, kind):
                 closed_flags.append((klal_id, word_index))
         for klal_id, (position, delta) in sorted(word_count_shifts.items()):
             if not delta:
@@ -1463,8 +1525,16 @@ def main():
     print(f"\n{tag}Applied: {len(applied)} ({n_replace} replace, {n_insert_delete} insert/delete, "
           f"{n_manual} manual, {n_title} title, {n_witness} witness, {n_noop} confirmed-no-op, "
           f"{n_heading_sync} heading-sync)")
-    for kid, widx, kind in applied:
+    for kid, widx, kind, _decision in applied:
         print(f"  klal {kid} word {widx}: {kind}")
+
+    if heading_flags_left_open:
+        print(f"\n{len(heading_flags_left_open)} word flag(s) LEFT OPEN on a body word whose "
+              f"HEADING copy was just ruled on. A heading ruling rewrites `title` and leaves "
+              f"`clean_text` alone, so the body word still reads what the flag was raised about "
+              f"- rule on the body word too, or clear the flag:")
+        for kid, body_index, title_index in heading_flags_left_open:
+            print(f"  klal {kid} word {body_index} (heading word {title_index})")
 
     if heading_desync:
         print(f"\n{len(heading_desync)} edit(s) changed the word count INSIDE a klal's heading run. "

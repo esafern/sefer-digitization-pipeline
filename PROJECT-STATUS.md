@@ -206,6 +206,92 @@ applying it to the corpus remain two separate, deliberate steps.
         short). Its precondition was blind once too (Lesson 42): it first
         asked whether the title shrank, which is the thing under test.
 
+0HG. **[2026-09-16, reviewer: "fix 4 then 1"] `0HE` FINDINGS 4 AND 1 FIXED, PLUS
+    THE SIBLING NEITHER OF THEM WAS IN. THE AUDIT WENT FROM 998 TO 1,005 AND
+    FROM 0 TO 4 ON THE DEMO.**
+    * **Finding 4 - the flag-closing crash, and the address space under it.**
+      `applied` now carries the decision that produced each entry, so nothing
+      guesses it from two maps it may not be in:
+      ```python
+      # pipeline/apply_reviewer_decisions.py, was
+              decisions.get((klal_id, word_index))
+              or manual_decisions.get((klal_id, word_index))
+      # now
+          for klal_id, word_index, kind, decision in applied:
+      ```
+      All 11 `applied.append` sites carry it; `decision` was already in scope at
+      every one.
+      - **A heading ruling now closes NOTHING, deliberately.** Passing the right
+        decision alone would have turned the crash into a silently WRONG close:
+        a title ruling's index is a `title.split(' ')` position, `open_word_flags`
+        is keyed on the body, and `cio.title_word_run` puts the heading at body
+        word 1 wherever a gematria numeral opens the entry and at 0 where none
+        does. And the ruling rewrites `title` while leaving `clean_text` alone,
+        so the flagged body word still reads exactly what the flag was raised
+        about - closing it would erase a live request. `heading_flag_still_open()`
+        locates it and the run NAMES it instead, under "word flag(s) LEFT OPEN".
+      - **It locates the run from the heading as it stood BEFORE the run**
+        (`titles_before`). The first cut used the klal's current `title`, which
+        the ruling has already rewritten, so the heading no longer matched the
+        body and the run could not be found at all - caught by the test, not by
+        reading.
+      - Witness kinds need no mapping: the witness block appends the ruling's
+        SNAPSHOT `word_index`, which is a body position (`0GW`).
+    * **Finding 1 - the audit, and a THIRD type nobody had noticed.** `CHECKERS`
+      was missing `title_correction` as well as `witness_choice`. The arithmetic
+      said so and nobody had done it: 1,005 applied rulings on the live ledger,
+      **998** reported as checked.
+      - `check_witness_choice` reads a ruling exactly as `witness_choice_edit()`
+        writes one - the SNAPSHOT's `word_index`, the snapshot's `master_reading`
+        else `docai_reading` - and calls `unreadable`, `remove`, a gap insertion
+        and a length-changing replace unverifiable by position, as the other
+        checkers do for the same shapes. A confirmation IS verifiable.
+      - `check_title_correction` reads `cio.title_words_of`, never `clean_text`,
+        and a `whole` ruling against the entire stored heading.
+      - `RELOCATABLE_TYPES` keeps the find_span/bbox relocation machinery off
+        heading rulings: the heading is a PREFIX of the body, so searching the
+        body for its words would find them and file a real mismatch as a benign
+        shift.
+      - **The skip is no longer silent.** An unregistered type is counted and
+        named - `N NOT CHECKED - no checker is registered for their decision
+        type` - because the bare `continue` never reached `total` either, which
+        is why two omissions in a row were invisible.
+      - `report_stale_addresses()` gets its own witness pass. It cannot go
+        through the existing loop: the ruling's key is an OCR token, and its
+        snapshot has no `original_word`, so `resolve_word_index` would read a
+        token number as a word position. And every UNAPPLIED bucket is now
+        LISTED, `unresolvable` included - its own note said that one "needs a
+        human" and the report then named no row (Lesson 32).
+    * **The sibling, swept and fixed** (Lesson 34).
+      `tools/close_flags_already_answered.py` matches apply_events against open
+      word flags by raw integer, so a `title_correction` apply_event would close
+      a BODY flag carrying the same number. It resolves its decision by
+      `applied_decision_id` and so never had the None crash - only the address
+      bug. `applied_positions()` now drops the heading types
+      (`ard.HEADING_DECISION_TYPES`). **Measured on the live ledger: 783 ->
+      776 positions, the 7 excluded are exactly klalim 89/90/91/92/94/96/168 at
+      word 0, and NONE carries an open flag today** - so the tool's dry run
+      reports the same 96 flags before and after. A latent bug closed with no
+      effect on current data.
+    * **Measured after, all three corpora:**
+      - Yad Malachi: `Checked 1005` (was 998), 622 confirmed (was 615) - the 7
+        heading rulings, every one still reflected. MISMATCH unchanged at 2
+        (klal 1 w95 and the klal 1 w97 precedent the script was written for).
+      - `~/work/hashorashim-demo`: `Checked 4` (was 0), 4 confirmed, and the one
+        applied ruling that actually changed text is reported in the
+        stale-address pass as `applied unresolvable`, which is the correct
+        outcome - applying it is what replaced the word it names.
+      - `~/work/hashorashim`: 0 applied and it says so; the ledger is still 0
+        bytes.
+    * **Seven tests, each seen failing first, each mutation-checked.** Two
+      mutations on the applier (heading rulings falling through to the closer;
+      locating the run from the corrected title), one on the reported index, one
+      restoring the two-map guess, and four on the audit (dropping the two new
+      checkers, reading the ruling key instead of the snapshot, dropping the
+      witness pass, restoring the bare `continue`). Gate suite: 574 passed.
+    * **NOT fixed, still handed back:** `0HE` findings 2 and 3, which only bite
+      on the `--apply-witness-choices` path that is off.
+
 0HF. **[2026-09-16, reviewer: "surface the items to review"] `0GQ`'s REVIEW
     WORKLIST, EVERY ROW WITH ITS DASHBOARD ADDRESS, EACH ONE CHECKED AGAINST
     THE LIVE SERVER. 53 POSITIONS. ONE OF THE THREE GROUPS IS NOT SERVED AS A
@@ -294,8 +380,9 @@ applying it to the corpus remain two separate, deliberate steps.
     `build_open_items_report`, `verify_witness_green_vision`, `export_corpus`
     since `0GW`, and `repoint_stale_decisions`, which EXCLUDES it in a comment
     that says why). These four do not.
-    * **1. `audit_applied_decisions.py` checks no witness ruling, in BOTH of
-      its passes, and nothing in its output says so.**
+    * ~~**1.**~~ **FIXED 2026-09-16, see `0HG`.** `audit_applied_decisions.py`
+      checked no witness ruling, in BOTH of its passes, and nothing in its
+      output said so.
       ```python
       # pipeline/audit_applied_decisions.py:349
               checker = CHECKERS.get(decision_type)
@@ -352,8 +439,8 @@ applying it to the corpus remain two separate, deliberate steps.
       `resolved_position()` callers are `:928` and `:1153`; the witness block
       reads `snap["word_index"]` raw (`:1285`, `:777`). So the sidecar built
       exactly to survive shifts does not help the one book that needs it.
-    * **4. A CRASH, latent today, in the flag-closing step - and it is not
-      witness-only.**
+    * ~~**4.**~~ **FIXED 2026-09-16, see `0HG`.** A CRASH, latent, in the
+      flag-closing step - and not witness-only.
       ```python
       # pipeline/apply_reviewer_decisions.py:1441
           for klal_id, word_index, kind in applied:

@@ -172,12 +172,100 @@ def check_punctuation_choice(decision, klal):
 # and that is the one case this script exists to catch (klal 1 w97).
 REPLACEMENT_TYPES = frozenset({"candidate_choice", "disputed_choice", "manual_correction"})
 
+
+def check_witness_choice(decision, klal):
+    """ADDED 2026-09-16 (item 0HE finding 1). `witness_choice` was not in
+    CHECKERS, so every witness ruling fell through the bare `continue` below and
+    was not counted either - and on the second book EVERY ruling is a witness
+    ruling, so this script printed "Checked 0 applied decisions ... no ruling
+    carries a stale address" over a corpus holding four applied ones. That is
+    the same shape as the `disputed_choice` omission recorded above, a type
+    later.
+
+    Read exactly as apply_reviewer_decisions.witness_choice_edit() writes one:
+    * the position is the SNAPSHOT's `word_index`, never the ruling's key, which
+      holds the OCR token index (item 0GW's field trap, which already cost one
+      false alarm);
+    * the words it replaced are the snapshot's `master_reading`, else its
+      `docai_reading`;
+    * `unreadable` writes nothing, `remove` and a gap insertion change the word
+      count, and so does a replace whose chosen text is a different length -
+      none of those is verifiable by position afterwards, which is the same
+      answer the checkers beside this one give for the same shapes.
+    A confirmation (chosen == what was there) IS verifiable: it claims that text
+    is still standing.
+    """
+    snap = decision.get("candidate_snapshot") or {}
+    chosen = (decision.get("chosen_text") or "").split()
+    seen = (snap.get("master_reading") or snap.get("docai_reading") or "").split()
+    if (decision.get("chosen_source") in ("unreadable", "remove") or snap.get("gap")
+            or not chosen or len(chosen) != len(seen)):
+        return "unverifiable_word_count_change"
+    words = cio.words_of(klal)
+    word_index = snap.get("word_index")
+    if word_index is None or word_index < 0 or word_index + len(chosen) > len(words):
+        return (f"MISMATCH: the ruling's snapshot names word_index {word_index} "
+                f"(klal now has {len(words)} words)")
+    live = words[word_index:word_index + len(chosen)]
+    if live == chosen:
+        return "ok"
+    return f"MISMATCH: expected {chosen!r} at word_index {word_index}, found {live!r}"
+
+
+def check_title_correction(decision, klal):
+    """ADDED 2026-09-16 with the above, and for the same reason: `title_correction`
+    was not in CHECKERS either, so the 7 applied heading rulings on the live
+    ledger were 7 of 1,005 applied and the script reported 998 checked.
+
+    `title` is its own address space - `title.split(' ')`, not the body's - so
+    this reads cio.title_words_of() and nothing here may be compared against
+    clean_text. A whole-heading ruling (`whole`) replaces the field outright, so
+    the whole string is what it claims.
+    """
+    snap = decision.get("candidate_snapshot") or {}
+    chosen = decision.get("chosen_text") or ""
+    if snap.get("whole"):
+        live = klal.get("title") or ""
+        return "ok" if live == chosen else f"MISMATCH: expected heading {chosen!r}, found {live!r}"
+    if chosen == "":
+        return "unverifiable_word_count_change"
+    words = cio.title_words_of(klal)
+    word_index = decision["word_index"]
+    if word_index is None or word_index < 0 or word_index >= len(words):
+        return (f"MISMATCH: title word_index {word_index} out of range "
+                f"(heading now has {len(words)} words)")
+    span = chosen.split()
+    live = words[word_index:word_index + len(span)]
+    if live == span:
+        return "ok"
+    return f"MISMATCH: expected {chosen!r} at title word_index {word_index}, found {' '.join(live)!r}"
+
+
 CHECKERS = {
     "disputed_choice": check_candidate_choice,
     "candidate_choice": check_candidate_choice,
     "manual_correction": check_manual_correction,
     "punctuation_choice": check_punctuation_choice,
+    "witness_choice": check_witness_choice,
+    "title_correction": check_title_correction,
 }
+
+# The types whose position is a BODY word index, which is the only space the
+# relocation machinery below (find_span / _bbox_word_index, both reading
+# clean_text) can speak about. A heading ruling's index is a position in
+# `title.split(' ')`, and the heading is a PREFIX of the body - so searching the
+# body for its words finds them and would report a real mismatch as a benign
+# shift. It is reported as a mismatch instead.
+RELOCATABLE_TYPES = frozenset(set(CHECKERS) - {"title_correction"})
+
+
+def reported_position(decision):
+    """The word index to REPORT a ruling at. For `witness_choice` the ruling's
+    own `word_index` is an OCR token number and naming it would send the reader
+    to the wrong word (item 0GW); the corpus position is in the snapshot."""
+    if decision["decision_type"] == "witness_choice":
+        return (decision.get("candidate_snapshot") or {}).get("word_index")
+    return decision["word_index"]
 
 
 def is_superseded_by_later_applied(decision, already_applied):
@@ -340,6 +428,13 @@ def main():
     n_ok = n_mismatch = n_unverifiable = n_missing_klal = n_superseded = 0
     n_drifted = 0
     mismatches, drifted = [], []
+    # WHAT THIS RUN DID NOT LOOK AT. Item 0HE finding 1: the `continue` below
+    # was bare and the skipped ruling never reached `total`, so a type missing
+    # from CHECKERS was invisible in the output as well as unchecked - twice,
+    # `disputed_choice` after the rename and then `witness_choice` and
+    # `title_correction`. An unchecked type is now named in the summary, so the
+    # next one announces itself instead of being found by arithmetic.
+    unchecked = {}
 
     for decision_id in sorted(already_applied):
         decision = rd.find_by_id(decision_id)
@@ -348,8 +443,9 @@ def main():
         decision_type = decision["decision_type"]
         checker = CHECKERS.get(decision_type)
         if checker is None:
-            continue  # not one of the 3 checkable decision types
-        klal_id, word_index = decision["klal_id"], decision["word_index"]
+            unchecked[decision_type] = unchecked.get(decision_type, 0) + 1
+            continue
+        klal_id, word_index = decision["klal_id"], reported_position(decision)
 
         if is_superseded_by_later_applied(decision, already_applied):
             n_superseded += 1
@@ -373,8 +469,11 @@ def main():
             # reflected - the stale number is the decision's word_index, not
             # the corpus. Counting those as "no longer reflected in the corpus"
             # is what made this script report 75 and be scrolled past.
-            hits = find_span(klal, expected_span(decision))
-            nearest = min(hits, key=lambda i: abs(i - word_index)) if hits else None
+            # Only for a ruling addressed in the BODY - see RELOCATABLE_TYPES.
+            hits = (find_span(klal, expected_span(decision))
+                    if decision_type in RELOCATABLE_TYPES else [])
+            nearest = (min(hits, key=lambda i: abs(i - word_index))
+                       if hits and word_index is not None else None)
             # The ink outranks the magnitude: where the decision recorded a scan
             # position AND the word now standing there is one of the hits, the
             # relocation is corroborated by two independent signals and the
@@ -412,6 +511,10 @@ def main():
     print(f"  {n_drifted} reflected, but at a SHIFTED index - a later apply in the "
           f"same klal moved them (the decision's word_index is stale, not the corpus)")
     print(f"  {n_mismatch + n_missing_klal} MISMATCH - applied decision no longer reflected in the corpus")
+    if unchecked:
+        print(f"  {sum(unchecked.values())} NOT CHECKED - no checker is registered for their "
+              f"decision type, so this run says nothing about them: "
+              f"{', '.join(f'{t} {n}' for t, n in sorted(unchecked.items()))}")
     if mismatches:
         print()
         for m in mismatches:
@@ -475,6 +578,33 @@ def report_stale_addresses():
             key = ("applied" if was_applied else "UNAPPLIED", how or "unresolvable")
             buckets.setdefault(key, []).append((dtype, kid, widx, snap["original_word"]))
 
+    # witness_choice, ADDED 2026-09-16 (item 0HE finding 1). It cannot go through
+    # the loop above: its KEY is an OCR token index, not a word, and its snapshot
+    # carries no `original_word` - so `resolve_word_index` would read a token
+    # number as a word position and `snap["original_word"] is None` would drop
+    # every row before that even mattered. Its address is the snapshot's
+    # `word_index` holding the snapshot's `master_reading` (item 0GW), and that
+    # is what is checked here.
+    #
+    # An APPLIED one normally cannot find its own word, for the reason the
+    # docstring gives: applying it is what replaced that word. The row that
+    # matters is an UNAPPLIED one whose word has moved - which is exactly what
+    # an applied witness `remove` or gap insertion does to every later ruling in
+    # its entry, because reindex_pending_decisions_after_shift does not move
+    # them (item 0HE finding 2). Nothing else in the repo would say so.
+    for (kid, token), rec in rd.all_current("witness_choice").items():
+        klal = klalim.get(kid)
+        snap = rec.get("candidate_snapshot") or {}
+        widx, seen = snap.get("word_index"), (snap.get("master_reading")
+                                              or snap.get("docai_reading") or "")
+        if klal is None or widx is None or not seen:
+            continue
+        words = cio.words_of(klal)
+        if words[widx:widx + len(seen.split())] == seen.split():
+            continue
+        key = ("applied" if rec["id"] in applied else "UNAPPLIED", "unresolvable")
+        buckets.setdefault(key, []).append(("witness_choice", kid, widx, seen))
+
     if not buckets:
         print("\n  no ruling carries a stale address.")
         return
@@ -491,7 +621,12 @@ def report_stale_addresses():
                       "mean - a HINT for a human re-point, never an automatic move",
         }[how]
         print(f"    {state:<10} {how:<13} {len(rows):>4}  - {note}")
-        if state == "UNAPPLIED" and how != "unresolvable":
+        # EVERY unapplied bucket is listed since 2026-09-16, `unresolvable`
+        # included. Its own note says that one "needs a human", and the report
+        # then named no row, so the thing needing a human reached nobody
+        # (Lesson 32). Applied rows stay counted-only: for them a word that
+        # cannot be found is the normal outcome of having been applied.
+        if state == "UNAPPLIED":
             for dtype, kid, widx, word in rows[:10]:
                 print(f"        {dtype} klal {kid} w{widx} {word!r}")
 

@@ -1545,6 +1545,143 @@ def test_check_manual_correction_and_punctuation_bounds_check_both_ends():
                                         _klal("אלף בית")) == "unverifiable_word_count_change"
 
 
+def test_check_witness_choice_reads_the_snapshot_position_not_the_token_key():
+    """Item 0HE finding 1. A witness ruling is KEYED by the OCR token, and the
+    corpus position it edits is `candidate_snapshot.word_index` (item 0GW's
+    field trap). A checker that trusted the key would report every witness
+    ruling at the wrong word - the false alarm that trap already cost once.
+
+    The taxonomy matches apply_reviewer_decisions.witness_choice_edit(): a
+    same-count replace and a confirmation are verifiable in place; `remove`, a
+    gap insertion and `unreadable` change or write nothing and are not."""
+    def w(**kw):
+        snap = {"word_index": 1, "master_reading": "בית", "docai_reading": "בית",
+                **kw.pop("snap", {})}
+        return {"decision_type": "witness_choice", "klal_id": 1, "word_index": 407,
+                "candidate_snapshot": snap, "chosen_source": "custom",
+                "chosen_text": "בות", **kw}
+
+    assert aad.check_witness_choice(w(), _klal("אלף בות גימל")) == "ok"
+    assert aad.check_witness_choice(w(), _klal("אלף בית גימל")).startswith("MISMATCH")
+    # the token key is 407 and must never be read as a word index
+    assert "407" not in aad.check_witness_choice(w(), _klal("אלף בית גימל"))
+    # a confirmation claims the master reading is still standing there
+    assert aad.check_witness_choice(w(chosen_text="בית"), _klal("אלף בית גימל")) == "ok"
+    assert aad.check_witness_choice(w(chosen_text="בית"), _klal("אלף בות גימל")).startswith("MISMATCH")
+    # word-count changes and non-writes are not verifiable by position
+    for not_checkable in (w(chosen_source="remove", chosen_text=""),
+                          w(chosen_source="unreadable"),
+                          w(snap={"gap": True, "gap_context": {"before": "אלף", "after": "בית"}}),
+                          w(chosen_text="בות גימל")):
+        assert aad.check_witness_choice(not_checkable, _klal("אלף בית גימל")) == \
+            "unverifiable_word_count_change"
+    # a snapshot that names no position at all is a MISMATCH, not a quiet pass
+    assert aad.check_witness_choice(w(snap={"word_index": 99}),
+                                    _klal("אלף בית גימל")).startswith("MISMATCH")
+
+
+def test_the_audit_checks_every_ruling_type_an_apply_script_can_promote():
+    """Item 0HE finding 1, and the guard that keeps it from happening a THIRD
+    time. `CHECKERS.get()` returning None hits a bare `continue`, and the
+    skipped ruling was never counted either, so the summary line could not
+    reveal it. It has now cost two types: `disputed_choice` after the 2026-08-23
+    rename (recorded in the module's own comment), then `witness_choice` and
+    `title_correction`, which were 7 of the 1,005 applied rulings on the live
+    ledger and reported as 998 checked.
+
+    Both sides are read from source - the apply scripts' own
+    `rd.all_current("...")` calls against the audit's registry - so neither is a
+    list anyone has to remember to update."""
+    promotable = set()
+    for script in ("pipeline/apply_reviewer_decisions.py", "tools/apply_punctuation_decisions.py"):
+        with open(os.path.join(REPO, script), encoding="utf-8") as fh:
+            promotable |= set(re.findall(r'rd\.all_current\("(\w+)"\)', fh.read()))
+    assert {"witness_choice", "title_correction", "punctuation_choice"} <= promotable, (
+        f"the source scan found only {sorted(promotable)}")
+    assert not promotable - set(aad.CHECKERS), (
+        f"an apply script promotes these and audit_applied_decisions checks none of them: "
+        f"{sorted(promotable - set(aad.CHECKERS))}")
+    assert not set(aad.CHECKERS) - promotable - {"disputed_choice"}, (
+        "CHECKERS names a type no apply script promotes (disputed_choice is the "
+        "pre-rename alias of candidate_choice and is expected)")
+
+
+def test_the_flag_backfill_does_not_match_a_heading_ruling_against_a_body_flag(monkeypatch):
+    """Item 0HE finding 4, swept into the sibling (Lesson 34). The backfill
+    matches apply_events against open word flags by raw integer, and a
+    `title_correction` apply_event carries a position in `title.split(' ')`
+    while the flags are keyed on the BODY - two spaces that coincide only by
+    accident. On the live ledger this is 7 apply_events at word 0, none of which
+    has an open flag there today, so nothing changes and nothing ever showed."""
+    import close_flags_already_answered as cfa
+    ledger = [
+        {"id": "a", "decision_type": "manual_correction", "klal_id": 5, "word_index": 3},
+        {"id": "b", "decision_type": "title_correction", "klal_id": 5, "word_index": 0},
+        {"id": "e1", "decision_type": "apply_event", "klal_id": 5, "word_index": 3,
+         "ts": "2026-09-16T00:00:00", "applied_decision_id": "a"},
+        {"id": "e2", "decision_type": "apply_event", "klal_id": 5, "word_index": 0,
+         "ts": "2026-09-16T00:00:01", "applied_decision_id": "b"},
+    ]
+    monkeypatch.setattr(cfa.rd, "all_records", lambda path=None: ledger)
+
+    assert set(cfa.applied_positions()) == {(5, 3)}, (
+        "the heading ruling's title index must not enter a body-keyed map")
+
+
+def test_the_audit_says_out_loud_what_it_did_not_check(monkeypatch, capsys):
+    """The other half of item 0HE finding 1, and the part that makes the next
+    one cheap to find. A type missing from CHECKERS was skipped by a bare
+    `continue` AND never added to `total`, so the only symptom was arithmetic
+    nobody was doing: 1,005 applied rulings reported as 998 checked. An
+    unchecked type is named now, whatever it is."""
+    future = {"id": "ff", "decision_type": "a_type_from_next_month", "klal_id": 1,
+              "word_index": 0, "chosen_text": "אלף"}
+    monkeypatch.setattr(aad.rd, "applied_decision_ids", lambda path=None: {"ff"})
+    monkeypatch.setattr(aad.rd, "find_by_id", lambda i, path=None: future)
+    monkeypatch.setattr(aad, "load_part1", lambda: {})
+    monkeypatch.setattr(aad, "report_stale_addresses", lambda: None)
+
+    aad.main()
+    out = capsys.readouterr().out
+    assert "Checked 0 applied decisions" in out, out
+    assert "1 NOT CHECKED" in out and "a_type_from_next_month 1" in out, (
+        f"a ruling this run said nothing about must be named, not silently dropped:\n{out}")
+
+
+def test_the_audit_reports_a_stale_witness_address_rather_than_skipping_it(
+        audit_reads_temp_log, monkeypatch, capsys):
+    """Item 0HE finding 1, the second pass. report_stale_addresses() had its own
+    hard-coded type tuple, which is why the demo corpus - 4 APPLIED witness
+    rulings, one of them a real text change - got "no ruling carries a stale
+    address" printed over it.
+
+    An UNAPPLIED witness ruling whose word has moved is the case that matters:
+    that is exactly what finding 2 predicts once --apply-witness-choices is on,
+    and nothing else in the repo would say so."""
+    rd.append_decision("witness_choice", klal_id=1, word_index=407, chosen_source="custom",
+                       chosen_text="בות",
+                       candidate_snapshot={"word_index": 1, "master_reading": "בית",
+                                           "docai_reading": "בית"},
+                       path=audit_reads_temp_log)
+    # Bind the originals first: `aad.rd` IS `rd`, so a lambda that calls
+    # rd.all_current would call its own replacement (the same trap the
+    # audit_reads_temp_log fixture below documents).
+    real_all_current, real_backfilled = rd.all_current, rd.backfilled_word_ids
+    monkeypatch.setattr(aad.rd, "all_current",
+                        lambda t, path=None: real_all_current(t, path=audit_reads_temp_log))
+    monkeypatch.setattr(aad.rd, "backfilled_word_ids",
+                        lambda path=None: real_backfilled(path=audit_reads_temp_log))
+    monkeypatch.setattr(aad.rd, "applied_decision_ids", lambda path=None: set())
+    monkeypatch.setattr(aad.cio, "load_part1_by_id",
+                        lambda *a, **kw: {1: {"klal_id": 1, "clean_text": "אלף גימל בית"}})
+
+    aad.report_stale_addresses()
+    out = capsys.readouterr().out
+    assert "no ruling carries a stale address" not in out, (
+        f"a moved witness ruling must not be reported as clean:\n{out}")
+    assert "witness_choice" in out and "UNAPPLIED" in out, out
+
+
 @pytest.fixture
 def audit_reads_temp_log(decisions_path, monkeypatch):
     """audit_applied_decisions.py calls rd.history_for() with no `path`, so
@@ -5967,6 +6104,65 @@ def test_a_confirmed_no_op_also_closes_the_flag(apply_harness, decisions_path):
 
     assert apply_harness.run()[1] == "אלף בית גימל"
     assert ard.open_word_flags(1) == {}
+
+
+def test_a_witness_ruling_closes_the_flag_on_its_own_word(
+        apply_harness, decisions_path, monkeypatch):
+    """Item 0HE finding 4. main()'s flag-closing loop asked two maps for the
+    decision it had just applied - all_current("candidate_choice") and
+    all_current("manual_correction") - so a witness ruling resolved to None
+    there and `decision["id"]` raised TypeError as soon as a flag was open on
+    that word. The step runs AFTER the corpus is written, so the crash left
+    part1.json edited with the flag re-point, the pending-decision re-point and
+    the summary never run."""
+    apply_harness([{"klal_id": 1, "clean_text": "אלף בית גימל"}], {})
+    rd.append_decision("klal_flag", klal_id=1, word_index=1, needs_revisit=True,
+                       reviewer="ai-pass", note="בית w1 - check this against the scan",
+                       path=decisions_path)
+    rd.append_decision(
+        "witness_choice", klal_id=1, word_index=7, chosen_source="custom", chosen_text="בות",
+        candidate_snapshot={"word_index": 1, "master_reading": "בית", "docai_reading": "בית",
+                            "witness_reading": "בות"},
+        path=decisions_path)
+    monkeypatch.setattr(sys, "argv", ["apply_reviewer_decisions.py", "--apply-witness-choices"])
+
+    assert apply_harness.run()[1] == "אלף בות גימל"
+    assert ard.open_word_flags(1) == {}, "the flag the witness ruling answered is still open"
+
+
+def test_a_heading_ruling_closes_no_body_flag_and_names_the_one_it_leaves(
+        apply_harness, decisions_path, capsys):
+    """Item 0HE finding 4, the half that is NOT witness-only, and the reason the
+    fix is not "close it anyway".
+
+    A title ruling's word_index is a position in `title.split(' ')` while
+    open_word_flags is keyed on BODY positions, and the two differ by the heading
+    run's start - 1 wherever a gematria numeral opens the entry. The old loop
+    passed the title index straight into the body-keyed lookup AND passed None
+    for the decision, so it raised TypeError the moment a flag was open there.
+
+    It must not close one either: a heading ruling rewrites `title` and leaves
+    `clean_text` alone, so the flagged body word still reads exactly what the
+    flag was raised about. Closing it would erase a live request. The run names
+    it instead."""
+    apply_harness([{"klal_id": 1, "clean_text": "סו אלף בית גימל", "title": "אלף בית."}], {})
+    assert cio.title_word_run("אלף בית.", "סו אלף בית גימל") == (1, 2), (
+        "the heading sits at body word 1 here - the offset this test is about")
+    rd.append_decision("klal_flag", klal_id=1, word_index=0, needs_revisit=True,
+                       reviewer="ai-pass", note="סו w0 - the marker, nobody ruled on this",
+                       path=decisions_path)
+    rd.append_decision("klal_flag", klal_id=1, word_index=1, needs_revisit=True,
+                       reviewer="ai-pass", note="אלף w1 - the heading word being ruled",
+                       path=decisions_path)
+    rd.append_decision("title_correction", klal_id=1, word_index=0, chosen_source="custom",
+                       chosen_text="אלצ", candidate_snapshot={"original_word": "אלף"},
+                       path=decisions_path)
+
+    assert apply_harness.run_titles()[1] == "אלצ בית."
+    assert set(ard.open_word_flags(1)) == {0, 1}, "a heading ruling must close no body flag"
+    out = capsys.readouterr().out
+    assert "LEFT OPEN" in out and "klal 1 word 1 (heading word 0)" in out, (
+        f"the run must name the flag it left standing, and at its BODY index:\n{out}")
 
 
 def test_a_flag_past_a_word_count_change_is_moved_onto_its_word(apply_harness, decisions_path):
