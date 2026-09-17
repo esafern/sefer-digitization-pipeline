@@ -400,6 +400,18 @@ applying it to the corpus remain two separate, deliberate steps.
       been read only at the 12 places ours differs from his CORRECTION (3 back ours - wrong
       corrections, not misses), and the 4 unchanged nun/gimel differences have not been read
       against the ink.
+      **An opening added the same day** (the reviewer's own draft, cleaned up): the project needs a
+      name; the dashboard runs on Windows; no AI in reviewing, ruling or applying (`0HX`); several
+      users on one server with per-tab names and the stale-entry notice (`0HZ`), no authentication,
+      one server per copy of the data (`0HY`); the OCR engine is swappable and five engines have
+      already been run (DocAI, Cloud Vision, Surya, Tesseract, a VLM, via `tools/ocr_pages_*.py`
+      and the witness runs); the vision adjudicator is optional (`--skip-vision`).
+      **Found while checking "runs entirely locally": the dashboard is not fully offline.**
+      `review_frontend/app.css:1` is `@import url('https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre...&family=David+Libre...&family=Inter...')`.
+      Not AI and not data - a font request - but a sandbox with no internet access renders in
+      system fonts, and every page view tells Google the dashboard was opened. The email says so in
+      one parenthesis. **Open:** bundling the three fonts (all SIL Open Font License) into
+      `review_frontend/` would make the claim unqualified; not done.
 
 0HV. **[2026-09-16, reviewer: "review the data and code for hashorashim. surface any issues likely
     to come up during the demo"] PRE-DEMO REVIEW. NO SHOW-STOPPERS IN THE SOFTWARE; THREE ERRORS
