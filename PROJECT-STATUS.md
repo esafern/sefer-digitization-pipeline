@@ -206,6 +206,31 @@ applying it to the corpus remain two separate, deliberate steps.
         short). Its precondition was blind once too (Lesson 42): it first
         asked whether the title shrank, which is the thing under test.
 
+0IA. **[2026-09-17, reviewer, reporting the call with the Sefaria editor] TWO TOPICS FROM THE CALL,
+    EACH NOW A DRAFT; ONE OF THEM DESCRIBES A FEATURE THAT DOES NOT EXIST YET.** Neither sent.
+    * **Sefer HaShorashim's spelling differences are editorial, by their contractor** (paraphrased
+      from the reviewer's account): plene/defective, vowel points and other spelling choices were
+      decisions made when the text was prepared, and need to be talked through. This is the
+      question `0HI` was built for. A paragraph citing three of its measured classes - points on
+      34.2% of their words where the printing has almost none (`0GY`); a geresh inside letter names
+      that pages 58 and 147 do not print; 266 of 300 plene/defective differences inside vocalized
+      quotations - went into the second email, with an offer of the full list.
+    * **Which OCR produced their Sefer HaShorashim text is unknown.** The reviewer does not know; the
+      second email now asks, because every comparison against "their OCR" is measured against it.
+    * **Their larger problem: uneven quality across texts, and corrections arriving by email in a
+      steady stream** that has to be processed and put before a human. The reviewer said this
+      project could help, without details. `draft_email_corrections_stream.txt` sets out the shape:
+      a correction as a disputed word beside the scan, a human ruling, a separate apply step;
+      structured submissions (a form or a fixed format) turn into entries mechanically, freeform
+      email needs a model to parse and a human to see the original beside the parse; and only
+      texts with a scan of their edition aligned can be checked against the page - a per-book
+      effort, so it proposes starting with one text, and asks for volume, the texts that draw most,
+      and a few anonymized examples.
+    * **NOTHING INGESTS AN OUTSIDE CORRECTION TODAY.** The closest existing path is the witness /
+      comparison-text mechanism (another text's reading at a position, `build_witness_disputes`),
+      which is the natural seam. The draft says "could" and "would" throughout for that reason.
+      Not scoped, and a scope decision for the reviewer.
+
 0HZ. **[2026-09-17, reviewer: "expose the current username onscreen, and in the db settings allow
     the user to change it there. can we configure so if one server is serving multiple sessions,
     each can have a different user? it should return to the default set by the env value at each
