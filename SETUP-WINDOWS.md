@@ -5,8 +5,8 @@ mostly a much shorter one, because **the review dashboard needs nothing but
 Python and the data.** No API key, no cloud credentials, no GPU, no pip
 install, not one third-party package.
 
-Written 2026-09-17 for a reviewer's Windows box (item `0HX`). **Only step 1 has
-been run on Windows so far** — the rest are the documented Windows
+Written 2026-09-17 for a reviewer's Windows box (item `0HX`). **Run on Windows so
+far: steps 1-3 and 5, with the scan pane empty until step 4's data arrived** — the rest are the documented Windows
 equivalents of what runs on macOS, and the claims about what the code needs
 were measured on macOS (the two answers at the end say how). Treat
 the first run as the test, and correct this file from it.
@@ -55,9 +55,19 @@ This also gives you **Git Bash**, which you need only if you ever run the
 ### 3 — The code
 
 ```powershell
-cd %USERPROFILE%\work
+mkdir $env:USERPROFILE\work -Force; cd $env:USERPROFILE\work
 git clone https://github.com/esafern/sefer-digitization-pipeline.git
+cd sefer-digitization-pipeline
+git checkout hashorashim-nli-rebuild-and-review
 ```
+
+**The checkout is not optional.** The repo's default branch is `master`, and
+the current work - including every Windows fix in this file - is on
+`hashorashim-nli-rebuild-and-review` (as of 2026-09-17). An earlier version of
+this step said `cd %USERPROFILE%\work`, which is `cmd.exe` syntax and does
+nothing useful in PowerShell.
+
+To pick up later changes: `git pull` in the same directory.
 
 Line endings are pinned by `.gitattributes` (`* text=auto eol=lf`), so the
 working tree is LF on Windows too and nothing you save turns a tracked file
@@ -70,8 +80,40 @@ own private git repo, holding `part1.json`, `review_decisions.jsonl`,
 `word_identity.json`, the derived JSON beside them, and an `images\pdf_pages\`
 directory of rendered scan pages.
 
-Get it out-of-band — clone the private corpus repo, or copy the directory. It
-is large, because of the page images (the scan pane is blank without them).
+Git carries the text, the rulings and every derived file. It does **not**
+carry two folders, and the dashboard needs both:
+
+| folder | what it is | without it |
+|---|---|---|
+| `images\pdf_pages\` | one PNG per scan page | the scan pane is empty |
+| `docai_word_boxes\` | where each word sits on the page | the scan shows no boxes on words - **silently**: every request still succeeds |
+
+Measured 2026-09-17 on a fresh clone of the Sefer HaShorashim repo, served by a
+Python with no packages: every route answered, and without `docai_word_boxes`
+a page's payload fell from 51 KB to 8.5 KB - the word boxes simply absent.
+
+They travel as one zip per book, made on the owner's Mac. Put the zip in the
+book's root folder and extract it there, so it creates `images\pdf_pages\`
+and `docai_word_boxes\` beside `part1.json` (Explorer's *Extract All*, or
+`tar -xf <zip>` in PowerShell):
+
+| book | root folder | zip | size |
+|---|---|---|---|
+| Yad Malachi | the code repo itself | `yad-malachi-scan-data.zip` | 155 MB |
+| Sefer HaShorashim | its own clone, below | `hashorashim-scan-data.zip` | 433 MB |
+
+Sefer HaShorashim's corpus root is a **private** repo, and its default branch
+is not the current one either:
+
+```powershell
+cd $env:USERPROFILE\work
+git clone --branch nli-fulltone-rebuild https://github.com/esafern/hashorashim.git
+```
+
+**No rebuild is needed** to review either book: the derived files are
+committed. After rulings are applied, `build_klalim_demo_dataset.py` is the one
+step that refreshes what the dashboard shows (Part 2). Never run
+`rebuild_all.sh` on the Sefer HaShorashim root.
 
 For Yad Malachi the corpus root **is** the code repo; for any other book it is
 a separate directory and you point the server at it.
@@ -93,7 +135,7 @@ py -3 pipeline\review_server.py --port 8420
 ```
 
 Leave that window open — the server runs in the foreground and logs each
-request. Open <http://127.0.0.1:8420/>.
+request. Open <http://127.0.0.1:8420/> or <http://localhost:8420/>.
 
 For Yad Malachi, leave `SEFER_CORPUS_ROOT` unset.
 
@@ -111,7 +153,13 @@ outside the box needs to reach it.
 ### 6 — Check it worked
 
 In the browser: the entry list fills, an entry's text appears beside a scan
-image, and clicking a coloured word opens its panel. If the text is there and
+image, and clicking a coloured word opens its panel.
+
+**Two panes instead of three means the window is narrower than 1200 pixels.**
+The index pane is hidden below that width, by design, and with it the settings
+button and the reviewer name. Widen or maximize the window. Windows display
+scaling counts here: at 150%, a 1920-pixel screen is 1280 pixels to the
+browser. If the text is there and
 the scan pane is empty, `images\pdf_pages\` did not come with the corpus root.
 
 A ruling you record is appended to `review_decisions.jsonl` in the corpus root.
@@ -127,8 +175,11 @@ Recording a ruling and applying it are two deliberate steps, both stdlib-only:
 ```powershell
 py -3 pipeline\apply_reviewer_decisions.py --dry-run
 py -3 pipeline\apply_reviewer_decisions.py
+py -3 pipeline\build_klalim_demo_dataset.py
 py -3 pipeline\audit_applied_decisions.py
 ```
+
+(`$env:SEFER_CORPUS_ROOT` set as in step 5 for any book other than Yad Malachi.)
 
 Always the dry run first. The audit is read-only and answers the opposite
 question: for every decision the log says was applied, does the corpus still
@@ -154,6 +205,12 @@ py -3 -m pytest tests\test_pipeline_logic.py tests\test_corpus_invariants.py -q
 ```
 
 The venv's interpreter is `venv\Scripts\python.exe`, not `venv/bin/python`.
+
+**A rebuild is local except for one step.** Every stage of `rebuild_all.sh`
+runs on this machine; the only one that calls out is
+`verify_corrections_vision.py`, the Gemini vision adjudicator, and
+`--skip-vision` leaves it out. Checked 2026-09-17 by reading each stage's
+imports: nothing else imports a network or cloud library.
 
 **`rebuild_all.sh` is a bash script.** Run it from **Git Bash** or WSL; it now
 finds either venv layout (`venv/bin/python`, else `venv/Scripts/python.exe`)

@@ -206,6 +206,53 @@ applying it to the corpus remain two separate, deliberate steps.
         short). Its precondition was blind once too (Lesson 42): it first
         asked whether the title shrank, which is the thing under test.
 
+0IB. **[2026-09-17, reviewer: "push everything ... server loads with yad malachi in two panes but
+    the scan page is empty. what is a clean way to push that over? what's the cleanest way to get
+    hashorashim on the win box? does the private repo have everything? if rebuild is required, is
+    that proc entirely local?"] BOTH REPOS PUSHED; THE WINDOWS BOX NEEDS THE TWO IGNORED FOLDERS
+    AND NO REBUILD.**
+    * **A NEW RULE FOR THIS FILE, and it cost a pointless scrub to learn: never annotate an
+      example value with a claim about whose it is.** A placeholder username in a test identifies
+      nobody. An entry here that says which real person an example value was taken from IS the
+      identification, and it turns an ordinary token into one - in the same public file the
+      role-not-name rule exists to protect. The value is not the leak; the annotation is. Reviewer,
+      the same day: the earlier version of this item was the botch, not the test data.
+    * The pre-push scan over every unpushed commit ran as the rule requires. What it matched is the
+      book's own text quoting the Amora (`כשמואל`, `ולשמואל`, `ושמואל`, and a lexical-repair test
+      on `שמואל`/`שמול`) and generic first names used as example reviewers in the `0HZ` tests.
+      Nothing was redacted and no history was rewritten.
+    * **Private repo (`esafern/hashorashim`, visibility PRIVATE):** `citation_corrections.csv`'s
+      regenerated headwords committed and pushed to `nli-fulltone-rebuild`. Its default branch is
+      `master`, so a clone needs `--branch nli-fulltone-rebuild`.
+    * **Does it have everything? Measured, not assumed:** a fresh clone from GitHub (45 MB), served
+      by a venv with no packages. Every route answered 200 except the page image (404). But
+      without `docai_word_boxes/` the answers are silently thinner: `/api/page/58` 8.5 KB against
+      51 KB, `/api/klal/1` 6.5 KB against 7.3 KB (Lesson 26). With `images/pdf_pages/` and
+      `docai_word_boxes/` added, everything is whole. No rebuild is needed: the derived files are
+      tracked.
+    * **Yad Malachi's empty scan pane is the same two folders**, gitignored in this repo. Bundles
+      made in `~/work/transfer/` (outside both repos), each extracting in its book's root:
+      `yad-malachi-scan-data.zip` 155 MB (337 page PNGs, 337 word-box pages),
+      `hashorashim-scan-data.zip` 433 MB (94 + 94); both pass `unzip -t`.
+    * **Found making the bundle: `docai_word_boxes/docai_word_boxes` is a symlink** into the
+      pre-migration clone (`~/work/yad-malachi/yad-malachi-pipeline/docai_word_boxes`, dated
+      2026-08-17). Zip followed it and the first bundle was 1.27 GB and 8,676 files. Inert for the
+      dashboard, which reads `page_N.json` only; excluded from the bundle, left in place.
+    * **Is a rebuild local?** Every `rebuild_all.sh` stage's import closure was read: the only
+      network or cloud library is `google` (and `fitz`) in `verify_corrections_vision.py`, which
+      `--skip-vision` leaves out. Everything else is local.
+    * **"Two panes":** the index pane is hidden below 1200 CSS pixels (`app.css` media query),
+      which also hides the settings button and the new reviewer pill. Windows display scaling
+      shrinks the CSS width.
+    * `SETUP-WINDOWS.md` updated with all of it, plus a fix: step 3 said `cd %USERPROFILE%\work`,
+      which is `cmd.exe` syntax, under a PowerShell heading. The reviewer's own edit to that file
+      (localhost works too) is in the same commit.
+    * **The spelling thread is its own draft** (`draft_email_spelling.txt`). Its letter-name example
+      first named the shoresh `גף`; the page-147 heading `הגימל והפא והנון` is the shoresh `גפן`,
+      corrected before handing over. A claim that the page prints `הרש` and `התו` was dropped:
+      those two were never read off the ink. The paragraph still has to come OUT of the second
+      email, which the reviewer had open in an editor, so it was not touched.
+
 0IA. **[2026-09-17, reviewer, reporting the call with the Sefaria editor] TWO TOPICS FROM THE CALL,
     EACH NOW A DRAFT; ONE OF THEM DESCRIBES A FEATURE THAT DOES NOT EXIST YET.** Neither sent.
     * **Sefer HaShorashim's spelling differences are editorial, by their contractor** (paraphrased
