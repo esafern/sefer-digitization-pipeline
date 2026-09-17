@@ -206,6 +206,45 @@ applying it to the corpus remain two separate, deliberate steps.
         short). Its precondition was blind once too (Lesson 42): it first
         asked whether the title shrank, which is the thing under test.
 
+0HY. **[2026-09-17, reviewer, relaying the Sefaria editor's question about running the dashboard
+    in the cloud: "how can he set [the username] on the fly? if multiple people try to use the
+    dashboard at the same time, is there a real risk of corruption?"] READ FROM THE CODE, NOT
+    CHANGED. IDENTITY IS ONE PER PROCESS; THE LEDGER IS SAFE WITHIN ONE PROCESS AND UNGUARDED
+    ACROSS PROCESSES; SIMULTANEOUS RULINGS COLLIDE SILENTLY; APPLYING DURING REVIEW IS THE REAL
+    HAZARD.**
+    * **Identity cannot be set on the fly.** `pipeline/identity.py:157`:
+      `reviewer_id = reviewer_id or os.environ.get(ACTIVE_REVIEWER_ENV)` - `$SEFER_REVIEWER`, read
+      per request from the PROCESS environment, which a running server cannot change. Nothing in a
+      request (header, cookie, form field) carries a name. So changing reviewer means restarting
+      the server, and every person using one server is recorded as the same id. Unset, it records
+      `local` / "Unidentified local reviewer". The seam for real auth exists and is documented in
+      the module header (`verified` flips when an authenticated subject is available); nothing
+      feeds it yet.
+    * **File corruption, one server process: guarded.** `review_decisions.py:149-156`, a
+      `threading.Lock()` around every append, one JSON record per line; readers re-read on
+      `(mtime_ns, size)`. The server writes nothing but the ledger (no `save_part1`, no
+      `word_identity.save`, no `json.dump` in the server or the modules its handlers call).
+    * **Across processes: no guard.** The lock is in-process. Two servers on one corpus root, a
+      cloud service scaled to more than one instance, or a tool appending while the server does,
+      share no lock. Small `O_APPEND` writes on a local Linux disk are very unlikely to interleave;
+      on a network or FUSE mount (e.g. a bucket mounted into a container) that assumption does not
+      hold. Not measured.
+    * **Collisions are silent, not corrupt.** `all_current()`: "later (later-appended) records win
+      for the same key". Two reviewers ruling on one word both land in the ledger, the later wins,
+      no warning is raised, and neither sees the other's ruling until they reload (the panel data
+      is fetched when the entry mounts).
+    * **Applying during review is the real hazard.** `apply_reviewer_decisions.py` rewrites
+      `part1.json` IN PLACE (`corpus_io.save_part1`, `open(path, "w")`, not temp-and-rename as
+      `word_identity.save` does) and shifts word indices. A dashboard request mid-write can read a
+      truncated file (an error, transient); a ruling recorded against pre-apply positions is caught
+      by the applier's drift check rather than misapplied, but it becomes cleanup work.
+    * **Cloud-specific, not code:** a container's local filesystem is typically ephemeral, so a
+      ledger kept there is lost on restart; and with no authentication, anyone who reaches the URL
+      can read the corpus - for Sefer HaShorashim, Sefaria's unreleased data - and write rulings.
+    * **Open, and not started (a scope decision for the reviewer):** a per-request identity from an
+      authenticating proxy's verified header into `resolve_actor`; a cross-process file lock on the
+      append; temp-and-rename in `save_part1`.
+
 0HX. **[2026-09-17, reviewer: "i need new instructions for installing tool on windows box. is any
     ai involved or needed for making decisions and applying them? ... is ai required for ingesting
     a new sefer?"] `SETUP-WINDOWS.md` WRITTEN, AND FOUR WINDOWS-ONLY DEFECTS FIXED ON THE WAY.
