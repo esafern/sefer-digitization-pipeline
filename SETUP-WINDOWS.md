@@ -5,8 +5,8 @@ mostly a much shorter one, because **the review dashboard needs nothing but
 Python and the data.** No API key, no cloud credentials, no GPU, no pip
 install, not one third-party package.
 
-Written 2026-09-17 for a reviewer's Windows box (item `0HX`). **Nothing here
-has been executed on Windows yet** — the commands are the documented Windows
+Written 2026-09-17 for a reviewer's Windows box (item `0HX`). **Only step 1 has
+been run on Windows so far** — the rest are the documented Windows
 equivalents of what runs on macOS, and the claims about what the code needs
 were measured on macOS (the two answers at the end say how). Treat
 the first run as the test, and correct this file from it.
@@ -27,7 +27,14 @@ winget install Python.Python.3.14
 ```
 
 or the installer from <https://www.python.org/downloads/windows/> — tick **"Add
-python.exe to PATH"** on the first screen. Check it:
+python.exe to PATH"** on the first screen.
+
+**Then close the terminal and open a new one — all of Windows Terminal, not a
+new tab.** A shell reads PATH when it starts, and a Windows Terminal tab
+inherits the environment the app started with, so a window opened before the
+install answers `py` with "not recognized" even though Python is installed.
+This was the first thing that happened on the first real install (2026-09-17).
+Check it in the new window:
 
 ```powershell
 py -3 --version

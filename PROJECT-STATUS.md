@@ -241,7 +241,10 @@ applying it to the corpus remain two separate, deliberate steps.
       step 1. It now resolves `$PY` from either layout and exits with a message if neither exists.
     * Gate after all of it: 587 passed. Both dashboards and the demo copy restarted, since
       `corpus_io.py`, `review_decisions.py` and `word_identity.py` are modules the server imports.
-    * **Open:** the Windows box has not been set up yet, and the reviewer install is the first real
+    * **First real install, same day: Python installed, `py` "not found" in PowerShell.** Cause:
+      the terminal predated the install and had the old PATH; a new window fixed it (reviewer
+      confirmed). Step 1 now says to close and reopen the terminal, not open a tab.
+    * **Open:** steps 2 onward are still unrun on Windows; the reviewer install continues to be the
       test of this file. Also unaddressed there: `tools/` scripts that shell out (`tesseract`), and
       anything expecting a POSIX path separator in a CLI argument.
 
@@ -276,7 +279,17 @@ applying it to the corpus remain two separate, deliberate steps.
       read by eye, so they are not a claim to put in a letter. **Open: the 299 need an eye pass
       before any of them is offered to Sefaria.**
     * The draft is `draft_email_citations.txt` in the corpus root - citations only, every specific
-      citation addressed by shoresh, no dashboard links. Not sent.
+      citation addressed by shoresh, no dashboard links. **SENT 2026-09-17 by the reviewer, with
+      their own edits.** One of them corrected an attribution: the draft said "I read all 158
+      against the verse text by hand", and that reading was done by Claude, not the reviewer
+      (reviewer: "I did not manually review the pesukim cited - you did that work"). Recorded as a
+      standing rule in Claude's memory: in a draft written as the reviewer, "I" never claims work
+      Claude or the pipeline did.
+    * **The other half of the old draft is now `draft_email_text_findings.txt`** (the 95.1% measure,
+      the 89 of 90, the three places the page reads against his correction, the nun/gimel caveat,
+      the one verse question), with the same shoresh addressing and every first-person claim
+      checked against who did the work. The verse question was re-read against the reference
+      corpus: Isaiah 44:19 has `בְמוֹ־אֵ֗שׁ`. Not sent.
 
 0HV. **[2026-09-16, reviewer: "review the data and code for hashorashim. surface any issues likely
     to come up during the demo"] PRE-DEMO REVIEW. NO SHOW-STOPPERS IN THE SOFTWARE; THREE ERRORS
