@@ -1590,9 +1590,15 @@ def save_part1(klalim, path=None):
     copies of this existed (apply_reviewer_decisions.py,
     apply_punctuation_decisions.py); the corpus writers are the last place a
     silent divergence should be possible.
+
+    `newline="\\n"` for the same reason, and it is the half a Mac cannot see:
+    Python's text mode writes `os.linesep`, so the first save on a WINDOWS box
+    rewrites every line of the file as CRLF - the whole-file diff this
+    docstring exists to prevent, on a machine nobody here has tested on
+    (item `0HX`).
     """
     path = path or repo_path("part1.json")
-    with open(path, "w", encoding="utf-8") as f:
+    with open(path, "w", encoding="utf-8", newline="\n") as f:
         json.dump(klalim, f, ensure_ascii=False, indent=2)
 
 

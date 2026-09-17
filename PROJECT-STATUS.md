@@ -206,6 +206,45 @@ applying it to the corpus remain two separate, deliberate steps.
         short). Its precondition was blind once too (Lesson 42): it first
         asked whether the title shrank, which is the thing under test.
 
+0HX. **[2026-09-17, reviewer: "i need new instructions for installing tool on windows box. is any
+    ai involved or needed for making decisions and applying them? ... is ai required for ingesting
+    a new sefer?"] `SETUP-WINDOWS.md` WRITTEN, AND FOUR WINDOWS-ONLY DEFECTS FIXED ON THE WAY.
+    THE REVIEW HALF IS STANDARD-LIBRARY PYTHON; A NEW BOOK STILL NEEDS AN OCR MODEL.**
+    * **The two answers, measured rather than recalled.** The import closure of
+      `review_server.py`, `apply_reviewer_decisions.py`, `audit_applied_decisions.py`,
+      `build_klalim_demo_dataset.py` and `tools/export_corpus.py` is 12 files and imports ONE
+      non-stdlib package, `python-bidi`, whose import is caught in a `try` and used only to render
+      Hebrew for a terminal. Proved by running it: a `venv --without-pip` with no `bidi`, `fitz`,
+      `numpy`, `PIL` or `google` served `/`, `/api/corpus`, `/api/klal/1`, `/api/klal/1/versions`,
+      `/api/page/58` and a 3.6 MB scan PNG, all 200. Ingest is the other way round - OCR is a paid
+      cloud model per book, the witnesses are models, and only the vision adjudicator is removable
+      (`--skip-vision`), at the cost of triage, not text.
+    * **Nothing here has been run on Windows. The doc says so in its own header.**
+    * **Defect 1, the authored files would have been rewritten as CRLF.** Python's text mode writes
+      `os.linesep`, and all three authored files are TRACKED, so the first corpus write on a
+      Windows box turns `part1.json`, `word_identity.json` and `review_decisions.jsonl` into
+      whole-file diffs against the Mac. `save_part1`, `word_identity.save` and
+      `review_decisions.append_decision` now pass `newline="\n"`; `.gitattributes`
+      (`* text=auto eol=lf`) covers every derived artifact and script as well. `git ls-files --eol`
+      shows index and working tree already LF, so the attribute renormalises nothing.
+      `test_every_writer_of_an_authored_file_pins_its_line_endings` reads the call sites with `ast`
+      - a written-then-read-back test cannot fail on a Mac (Lesson 25) - and it fails when the
+      keyword is removed, checked both ways.
+    * **Defect 2, three scripts opened a text file with no `encoding=`** and would have read Hebrew
+      through a legacy Windows code page: `validate_suppression_filters.py:205`,
+      `verify_local_setup.py:60` (the script a new machine runs to prove itself) and
+      `verify_witness_green_vision.py:197`, the last of them a WRITE.
+      `test_no_script_opens_a_text_file_without_saying_utf8` sweeps all of `pipeline/` and `tools/`
+      and holds the count at zero.
+    * **Defect 3, `rebuild_all.sh` could not find a Windows venv.** Every stage called
+      `./venv/bin/python`, which on Windows is `venv\Scripts\python.exe`, so a Git Bash run died on
+      step 1. It now resolves `$PY` from either layout and exits with a message if neither exists.
+    * Gate after all of it: 587 passed. Both dashboards and the demo copy restarted, since
+      `corpus_io.py`, `review_decisions.py` and `word_identity.py` are modules the server imports.
+    * **Open:** the Windows box has not been set up yet, and the reviewer install is the first real
+      test of this file. Also unaddressed there: `tools/` scripts that shell out (`tesseract`), and
+      anything expecting a POSIX path separator in a CLI argument.
+
 0HW. **[2026-09-17, reviewer: "let's start with an email just about the citations... when you
     reference a specific citation, you must reference the shoresh where it is found. not my urls
     since he does not yet have the tool"] THE CITATION CSV NOW WRITES THE HEADWORD THE WAY THE BOOK

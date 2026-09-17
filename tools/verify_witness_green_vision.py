@@ -194,7 +194,8 @@ def main():
         print(f"      -> {r['vision_selected']} ({r['vision_confidence']}) {r['vision_transcription']!r}")
 
     if args.json:
-        json.dump(rows, open(args.json, "w"), ensure_ascii=False, indent=1)
+        json.dump(rows, open(args.json, "w", encoding="utf-8", newline="\n"),
+                  ensure_ascii=False, indent=1)
     write_report(rows)
     return rows
 

@@ -482,6 +482,9 @@ python3 tools/verify_local_setup.py                # after migrating to a new ma
 
 - `SETUP.md` — environment setup, and which files aren't in the public
   repo and how to get them.
+- `SETUP-WINDOWS.md` — the Windows path, and the two answers a reviewer's box
+  needs: no AI runs when a human rules or when a ruling is applied; a new book
+  still needs an OCR model to be read at all.
 - `PROJECT-STATUS.md` — current, dated state.
 - `PROJECT-STATUS-HISTORY.md` — older, closed-out history, and since 2026-09-06
   the full body of every closed item indexed in `PROJECT-STATUS.md`.

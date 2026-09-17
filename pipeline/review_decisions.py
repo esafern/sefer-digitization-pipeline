@@ -524,7 +524,10 @@ def append_decision(decision_type, klal_id, word_index=None, chosen_source=None,
         "supersedes": supersedes,
     }
     with _APPEND_LOCK:
-        with open(path, "a", encoding="utf-8") as f:
+        # `newline="\n"`: the ledger is append-only and tracked, so a row
+        # appended on Windows in text mode would carry CRLF into a file whose
+        # every other line is LF (item 0HX).
+        with open(path, "a", encoding="utf-8", newline="\n") as f:
             f.write(json.dumps(record, ensure_ascii=False) + "\n")
     return record
 

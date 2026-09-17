@@ -1,5 +1,10 @@
 # Setup
 
+**On Windows? Read `SETUP-WINDOWS.md` instead.** This file assumes macOS -
+Homebrew, `source venv/bin/activate`, direnv. A REVIEW box needs none of what
+follows: the dashboard and the apply/audit tools are standard-library Python,
+no packages, no key (item `0HX`).
+
 ## TL;DR
 
 A handful of steps, and **two of them are the ones that actually bite**:

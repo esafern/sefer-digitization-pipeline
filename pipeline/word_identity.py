@@ -126,7 +126,10 @@ def save(state, state_path=None):
     # every apply would land an unreadable diff on a file whose whole purpose is
     # to be auditable. Per-klal lines mean an edit shows as one changed line
     # naming the klal it changed.
-    with open(tmp, "w", encoding="utf-8") as f:
+    # `newline="\n"`: text mode writes os.linesep, so on Windows every one of
+    # those per-klal lines would land as CRLF and the first save would rewrite
+    # the whole tracked file (item 0HX).
+    with open(tmp, "w", encoding="utf-8", newline="\n") as f:
         f.write("{\n")
         rows = sorted(state.items())
         for i, (kid, entry) in enumerate(rows):

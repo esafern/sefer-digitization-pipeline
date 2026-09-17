@@ -57,7 +57,7 @@ def check_credentials():
     if not ok:
         return ok, detail
     try:
-        with open(os.path.join(REPO, "credentials.json")) as f:
+        with open(os.path.join(REPO, "credentials.json"), encoding="utf-8") as f:
             data = json.load(f)
     except (json.JSONDecodeError, OSError) as e:
         return False, f"present but not valid JSON ({e})"

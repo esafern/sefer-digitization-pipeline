@@ -1,0 +1,16 @@
+# Line endings, pinned because this repo is about to be checked out on a
+# WINDOWS box for review (item 0HX). Git on Windows defaults to
+# core.autocrlf=true, and Python's text mode writes os.linesep, so without
+# this the first corpus write there turns part1.json, word_identity.json and
+# review_decisions.jsonl - the three authored files - into whole-file diffs
+# against the Mac's copy. The authored writers now pass newline="\n" as well;
+# this is the half that also covers every derived artifact and every script.
+* text=auto eol=lf
+
+# Never touched, whatever their content sniffs like.
+*.pdf binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.db binary
+*.tar binary

@@ -73,17 +73,24 @@ for arg in "$@"; do
   esac
 done
 
+# The venv's interpreter. Windows venvs put it in Scripts/ and name it
+# python.exe, so a Git Bash / WSL run of this script found nothing at
+# ./venv/bin/python and died on step 1 (item 0HX).
+PY=./venv/bin/python
+[ -x "$PY" ] || PY=./venv/Scripts/python.exe
+[ -x "$PY" ] || { echo "No venv interpreter at ./venv/bin/python or ./venv/Scripts/python.exe" >&2; exit 1; }
+
 echo "== 1/6 build_klalim_demo_dataset.py =="
-./venv/bin/python pipeline/build_klalim_demo_dataset.py
+"$PY" pipeline/build_klalim_demo_dataset.py
 
 echo "== 2/6 build_corrections_dataset.py =="
-./venv/bin/python pipeline/build_corrections_dataset.py
+"$PY" pipeline/build_corrections_dataset.py
 
 if [ "$SKIP_VISION" = "1" ]; then
   echo "== 3/6 verify_corrections_vision.py SKIPPED (--skip-vision) =="
 else
   echo "== 3/6 verify_corrections_vision.py (may call the Gemini API for new/changed word pairs) =="
-  ./venv/bin/python pipeline/verify_corrections_vision.py
+  "$PY" pipeline/verify_corrections_vision.py
 fi
 
 # ADDED 2026-08-23 (code review, finding C1). Pure local computation - no API
@@ -93,7 +100,7 @@ fi
 # multi-witness disputes a regenerated pipeline product instead of a hand-append
 # into stage 4's own output that the next rebuild silently destroys.
 echo "== 4a/6 synthesize_multi_witness.py =="
-./venv/bin/python pipeline/synthesize_multi_witness.py
+"$PY" pipeline/synthesize_multi_witness.py
 
 # ADDED 2026-08-26. Same argument that put 4a in this chain: pure local
 # computation, ~0.1s on the full corpus, no API calls. The two lexical detectors
@@ -106,7 +113,7 @@ echo "== 4a/6 synthesize_multi_witness.py =="
 # pipeline reads; it never edits the pipeline's own product - the same rule
 # finding C1 established for the multi-witness synthesizer.
 echo "== 4b/6 build_lexical_defect_report.py =="
-./venv/bin/python pipeline/build_lexical_defect_report.py
+"$PY" pipeline/build_lexical_defect_report.py
 
 # 4c: the TITLE field, which no stage read at all until 2026-09-03.
 #
@@ -122,7 +129,7 @@ echo "== 4b/6 build_lexical_defect_report.py =="
 # three candidates its first run produced are words the body spells identically
 # and spells correctly.
 echo "== 4c/6 build_title_report.py =="
-./venv/bin/python pipeline/build_title_report.py
+"$PY" pipeline/build_title_report.py
 
 # 4d: the ONLY stage whose output is deliberately not actionable.
 #
@@ -135,20 +142,20 @@ echo "== 4c/6 build_title_report.py =="
 # against. It runs before stage 4 only to keep the witness stages together;
 # stage 4 does not read it.
 echo "== 4d/6 build_collation_report.py =="
-./venv/bin/python pipeline/build_collation_report.py
+"$PY" pipeline/build_collation_report.py
 
 # Stage 4e. The three STRUCTURAL detectors, which were in no chain and wrote no
 # artifact until 2026-09-07 - so 18 flagged positions existed only while somebody
 # watched a terminal (item 0CV). Writes a triage report and NEVER a flag, the
 # same boundary 4b holds: these carry real false positives.
 echo "== 4e/6 build_structural_defect_report.py =="
-./venv/bin/python pipeline/build_structural_defect_report.py
+"$PY" pipeline/build_structural_defect_report.py
 
 echo "== 4/6 assemble_corrections_dataset.py =="
-./venv/bin/python pipeline/assemble_corrections_dataset.py
+"$PY" pipeline/assemble_corrections_dataset.py
 
 echo "== 5/6 build_klal_page_regions.py =="
-./venv/bin/python pipeline/build_klal_page_regions.py
+"$PY" pipeline/build_klal_page_regions.py
 
 # 5b: the two STANDALONE corpus reports, folded into the chain 2026-08-31.
 #
@@ -172,8 +179,8 @@ echo "== 5/6 build_klal_page_regions.py =="
 # sefaria_reference_corpus cache and exits 0 with an explicit message when it is
 # absent, so a fresh clone is not broken by this stage.
 echo "== 5b/6 standalone corpus reports (ligature + lexicon-only) =="
-./venv/bin/python tools/list_ligature_words.py
-./venv/bin/python tools/review_lexicon_only_words.py
+"$PY" tools/list_ligature_words.py
+"$PY" tools/review_lexicon_only_words.py
 
 # 5c: the dispute queue, ordered by how often a reviewer has adopted a consensus
 # of that shape. Pure local computation, 0.4s, no API calls - and it reads BOTH
@@ -187,9 +194,9 @@ echo "== 5b/6 standalone corpus reports (ligature + lexicon-only) =="
 # and consensus still may not auto-approve at any threshold this data supports
 # (tools/estimate_consensus_posterior.py, ~31%).
 echo "== 5c/6 rank_dispute_queue.py =="
-./venv/bin/python tools/rank_dispute_queue.py
+"$PY" tools/rank_dispute_queue.py
 
 echo "== 6/6 tests/ (corpus + pipeline-logic regression suites) =="
-./venv/bin/python -m pytest tests/test_corpus_invariants.py tests/test_pipeline_logic.py -q
+"$PY" -m pytest tests/test_corpus_invariants.py tests/test_pipeline_logic.py -q
 
 echo "== done =="

@@ -10977,3 +10977,59 @@ def test_the_audit_follows_an_explicit_supersedes_link(monkeypatch):
     monkeypatch.setattr(aad, "_superseding_links", lambda: {"29f6": ["4809"]})
     assert aad.is_superseded_by_later_applied(old, {"29f6", "4809"})
     assert not aad.is_superseded_by_later_applied(old, {"29f6"}), "an unapplied re-point settles nothing"
+
+
+def test_every_writer_of_an_authored_file_pins_its_line_endings():
+    """Item 0HX. The three authored files are TRACKED, and Python's text mode
+    writes `os.linesep` - so on Windows, where this repo is now being installed
+    for review, the first save rewrites every line as CRLF and lands a
+    whole-file diff against the Mac's copy. Each writer passes `newline="\\n"`.
+
+    A source check on purpose: on macOS the bytes come out LF either way, so a
+    test that wrote a file and read it back could not fail here (Lesson 25, A
+    SIGNAL THAT CANNOT DISAGREE)."""
+    import ast
+    writers = [("pipeline/corpus_io.py", "save_part1"),
+               ("pipeline/word_identity.py", "save"),
+               ("pipeline/review_decisions.py", "append_decision")]
+    for rel, func in writers:
+        path = os.path.join(REPO, rel)
+        tree = ast.parse(open(path, encoding="utf-8").read())
+        fn = next((n for n in ast.walk(tree)
+                   if isinstance(n, ast.FunctionDef) and n.name == func), None)
+        assert fn is not None, f"{rel}: no {func}()"
+        opens = [n for n in ast.walk(fn)
+                 if isinstance(n, ast.Call) and getattr(n.func, "id", "") == "open"]
+        assert opens, f"{rel}:{func} opens nothing - has the writer moved?"
+        for call in opens:
+            mode = next((a.value for a in call.args[1:]
+                         if isinstance(a, ast.Constant)), "r")
+            if "w" not in mode and "a" not in mode:
+                continue
+            nl = next((k.value.value for k in call.keywords
+                       if k.arg == "newline" and isinstance(k.value, ast.Constant)), None)
+            assert nl == "\n", (f"{rel}:{func} line {call.lineno} writes without "
+                                f'newline="\\n" - CRLF on Windows')
+
+
+def test_no_script_opens_a_text_file_without_saying_utf8():
+    """Item 0HX. `open()` with no `encoding=` takes the platform default, which
+    is UTF-8 on this Mac and a legacy code page on Windows - so a Hebrew corpus
+    file read that way raises UnicodeDecodeError there and nowhere here. Three
+    scripts did it (`validate_suppression_filters`, `verify_local_setup`,
+    `verify_witness_green_vision`); this is the sweep that keeps the count at
+    zero."""
+    import ast, glob
+    offenders = []
+    for rel in sorted(glob.glob(os.path.join(REPO, "pipeline", "**", "*.py"), recursive=True)
+                      + glob.glob(os.path.join(REPO, "tools", "**", "*.py"), recursive=True)):
+        tree = ast.parse(open(rel, encoding="utf-8").read())
+        for n in ast.walk(tree):
+            if not (isinstance(n, ast.Call) and getattr(n.func, "id", "") == "open"):
+                continue
+            mode = next((a.value for a in n.args[1:] if isinstance(a, ast.Constant)), "r")
+            if "b" in str(mode):
+                continue
+            if not any(k.arg == "encoding" for k in n.keywords):
+                offenders.append(f"{os.path.relpath(rel, REPO)}:{n.lineno}")
+    assert offenders == [], "text-mode open() with no encoding=: " + ", ".join(offenders)

@@ -202,7 +202,8 @@ def main():
     print("FILTER 3 — witness-queue vision filter")
     print("=" * 74)
     import json
-    full = json.load(open(os.path.join(REPO, "reconstruction_witness_queue.json")))["queue"]
+    full = json.load(open(os.path.join(REPO, "reconstruction_witness_queue.json"),
+                    encoding="utf-8"))["queue"]
     served = rdata.load_witness_queue()
     print(f"  suppressed: {len(full) - len(served)} of {len(full)}")
     print("  EVIDENCE: Tesseract measured right in 16 of 419 disagreements (3.8%)")
