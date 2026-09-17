@@ -318,7 +318,12 @@ def main():
                             pb.replace(" ", "_"), pcv.replace(":", "."))
                         conf = ""
                 kinds[kind] += 1
-                w.writerow([r["root"], r["note"], r["cited"], proposed, r["matches"], delta,
+                # The headword is this file's only ADDRESS for a row - the
+                # maintainer has no dashboard - so write it as their own data
+                # writes it, with the final letter finalized. The lookup key
+                # above stays folded; only what is shown changes.
+                w.writerow([cio.root_display(r["root"]), r["note"], r["cited"], proposed,
+                            r["matches"], delta,
                             kind, conf, "yes" if v else "no", (v or {}).get("why", ""),
                             r["quotation"], url])
         print(f"  wrote {args.csv}: {sum(kinds.values())} rows {dict(kinds)}; "

@@ -10210,6 +10210,28 @@ def test_book_vocabulary_defaults_to_klal_when_the_book_declares_none():
     assert cio.root_key("אֵבֶן") == cio.root_key("אבנ") == "אבנ"
 
 
+def test_a_root_shown_outside_this_pipeline_ends_in_a_final_letter():
+    """Item 0HW. `root_key` folds finals to join two digitizations; the folded
+    form is not how the book, or Sefaria's own data, prints the headword. Every
+    one of the 100 reviewed entries ends its root in a final form where one
+    exists, and `citation_corrections.csv` - which has no dashboard link, only
+    the headword - now writes them that way."""
+    assert cio.root_display("אמ") == "אם"
+    assert cio.root_display("אפ") == "אף"
+    assert cio.root_display("דרכ") == "דרך"
+    assert cio.root_display("אבנ") == "אבן"
+    assert cio.root_display("טפפ") == "טפף"
+    # letters with no final form, and a root already written with one
+    assert cio.root_display("אבד") == "אבד"
+    assert cio.root_display("אלה") == "אלה"
+    assert cio.root_display("אם") == "אם"
+    # a single letter is a letter, not a word ending
+    assert cio.root_display("כ") == "כ"
+    assert cio.root_display("") == ""
+    # it is a DISPLAY form: folding it back must give the key again
+    assert cio.root_key(cio.root_display("אמ")) == "אמ"
+
+
 def test_an_unchanged_word_in_the_corrected_text_is_not_agreement():
     """Item 0GC, reviewer 2026-09-13: "I suspect those are words they did *not*
     correct". A word the witness's corrector never touched reads the same in both

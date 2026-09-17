@@ -716,6 +716,25 @@ def root_key(text):
     return t.translate(FINALS)
 
 
+def root_display(root):
+    """A folded root written the way the BOOK prints it: final letter finalized.
+
+    `root_key` folds finals so two digitizations of one entry match; that folded
+    form is an internal join key, and it is not how the headword appears on the
+    page or in Sefaria's own data (`אמ` vs `אם`, `אפ` vs `אף` - checked against
+    all 100 reviewed entries, every one of which ends its root in a final form
+    where one exists). Use this wherever a root is SHOWN to someone outside this
+    pipeline - a report, a CSV, an email - and never as a lookup key.
+
+    Single-letter roots are left alone, the same rule `klal_id_to_gematria` and
+    `impossible_final_form` use.
+    """
+    letters = list(root or "")
+    if len(letters) > 1 and letters[-1] in FINAL_FORMS_REQUIRED:
+        letters[-1] = FINAL_FORMS_REQUIRED[letters[-1]]
+    return "".join(letters)
+
+
 def split_shared_comparison(entry_texts, witness_text, min_match=0.5):
     """One comparison text cut into one slice per entry that shares its root,
     or None when the seam cannot be found. `entry_texts` are OUR entries, in

@@ -206,6 +206,39 @@ applying it to the corpus remain two separate, deliberate steps.
         short). Its precondition was blind once too (Lesson 42): it first
         asked whether the title shrank, which is the thing under test.
 
+0HW. **[2026-09-17, reviewer: "let's start with an email just about the citations... when you
+    reference a specific citation, you must reference the shoresh where it is found. not my urls
+    since he does not yet have the tool"] THE CITATION CSV NOW WRITES THE HEADWORD THE WAY THE BOOK
+    PRINTS IT, AND TWO FIGURES IN THE OLD DRAFT WERE STALE.**
+    The call with the Sefaria editor happened and went well. He has no dashboard, so a finding's
+    only address is its shoresh - which makes the headword column of
+    `citation_corrections.csv` the deliverable's index, and it was written in the FOLDED form
+    (`אמ`, `אפ`, `אונ`).
+    * `corpus_io.root_display()` finalizes a folded root's last letter, the inverse of the display
+      half of `root_key()`. Checked against all 100 reviewed entries: every one of them ends its
+      root in a final form where one exists, and none ends in a plain one. It is a display
+      function and says so - never a lookup key. `validate_quotations.py` applies it to the CSV's
+      headword column only; the `--review` join still runs on the folded root.
+    * Regenerated with the command in the tool's own docstring and diffed against the committed
+      file: 146 rows, same order, **40 rows differ and all of them in column 1**
+      (`אמ`→`אם`, `דרכ`→`דרך`, `טפפ`→`טפף`).
+    * Test `test_a_root_shown_outside_this_pipeline_ends_in_a_final_letter`; an inert
+      `root_display` fails it (Lesson 42). Gate: 585 passed.
+    * **Two figures in the unsent draft were stale, re-measured against the 146-row CSV:** 21 rows
+      sit inside the reviewed hundred, not 18 (5 under `אם`, 3 each `אלה`/`אמן`, 2 each
+      `און`/`אף`, 1 each `אח`, `אחה`, `אך`, `אוץ`, `אכף`, `אלם`), and the matching had to fold
+      finals to see them at all - a raw headword match finds 2 of the 21. Item `0FM`'s own "22...
+      along with 28 suspect words" predates the eye pass that took the file from 158 rows to 146.
+    * **The suspect-word sentence was dropped from the email rather than restated.** 299 words are
+      flagged as sitting inside an otherwise-matching quotation, 26 of them in the hundred, and
+      reading those 26 shows most are Ibn Janah's own prose inside the window (`וכמהו`, `כאמרו`,
+      `כמו`) - the tool's docstring says it reports suspects, not errors. A few look like real
+      truncations (`רל` under `אן` at `(במדבר יב, יג)`, `עמ` under `אסר`), but they have not been
+      read by eye, so they are not a claim to put in a letter. **Open: the 299 need an eye pass
+      before any of them is offered to Sefaria.**
+    * The draft is `draft_email_citations.txt` in the corpus root - citations only, every specific
+      citation addressed by shoresh, no dashboard links. Not sent.
+
 0HV. **[2026-09-16, reviewer: "review the data and code for hashorashim. surface any issues likely
     to come up during the demo"] PRE-DEMO REVIEW. NO SHOW-STOPPERS IN THE SOFTWARE; THREE ERRORS
     IN MY OWN DEMO MATERIAL, CORRECTED; FOUR THINGS HE MAY SEE ON SCREEN.**
