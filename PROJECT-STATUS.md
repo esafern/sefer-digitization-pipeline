@@ -388,6 +388,18 @@ applying it to the corpus remain two separate, deliberate steps.
       the one verse question), with the same shoresh addressing and every first-person claim
       checked against who did the work. The verse question was re-read against the reference
       corpus: Isaiah 44:19 has `בְמוֹ־אֵ֗שׁ`. Not sent.
+      **REVISED same day (reviewer's edits requested):** the 78 is now explained as what it is -
+      of the 89 corrections that fall on a disagreement, 78 have our reading equal to the
+      correction and 11 have neither reading right (the `0GH` table: 78 / 1 shared / 11 third
+      reading); the three page-against-correction words each carry their shoresh and a phrase from
+      his own corrected text (`אכף` w19 `נֶפֶשׁ עָמֵל גרמה לו`, `איד` w7 after Proverbs 1:26,
+      `אם` w318 `בזולת פועל חולף ווזה`), both verses checked against the reference corpus; the
+      shared-error paragraph opens from the call; every example is labelled "the shoresh X".
+      **Declined as unmeasured:** that working through the disagreements would also have found
+      "quite a few more he missed". Nothing measures errors his review left standing: the page has
+      been read only at the 12 places ours differs from his CORRECTION (3 back ours - wrong
+      corrections, not misses), and the 4 unchanged nun/gimel differences have not been read
+      against the ink.
 
 0HV. **[2026-09-16, reviewer: "review the data and code for hashorashim. surface any issues likely
     to come up during the demo"] PRE-DEMO REVIEW. NO SHOW-STOPPERS IN THE SOFTWARE; THREE ERRORS
