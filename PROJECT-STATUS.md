@@ -241,6 +241,11 @@ applying it to the corpus remain two separate, deliberate steps.
     * **Is a rebuild local?** Every `rebuild_all.sh` stage's import closure was read: the only
       network or cloud library is `google` (and `fitz`) in `verify_corrections_vision.py`, which
       `--skip-vision` leaves out. Everything else is local.
+    * **CONFIRMED THE SAME DAY: the dashboard runs on Windows, serving Sefer HaShorashim from the
+      private repo plus the two folders** (reviewer: "works fine, so windows is now a first-class
+      host for dashboard for hashorashim"). REVIEWING is proven there. Recording and applying
+      rulings on Windows have not been exercised by anyone yet, and `atomic_write`'s retry around
+      `os.replace` under a reader (`0HZ`) is still untested on that platform.
     * **"Two panes":** the index pane is hidden below 1200 CSS pixels (`app.css` media query),
       which also hides the settings button and the new reviewer pill. Windows display scaling
       shrinks the CSS width.
