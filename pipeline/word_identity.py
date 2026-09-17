@@ -119,17 +119,16 @@ def save(state, state_path=None):
     to a single-shot write.
     """
     target = state_path or path()
-    tmp = target + ".tmp"
     # ONE LINE PER KLAL, and that is about the DIFF, not about bytes. Pretty
     # printing put each of Part 1's 52,629 ids on its own line - a 53,741-line
     # tracked file in which inserting one word rewrites every line after it, so
     # every apply would land an unreadable diff on a file whose whole purpose is
     # to be auditable. Per-klal lines mean an edit shows as one changed line
     # naming the klal it changed.
-    # `newline="\n"`: text mode writes os.linesep, so on Windows every one of
-    # those per-klal lines would land as CRLF and the first save would rewrite
-    # the whole tracked file (item 0HX).
-    with open(tmp, "w", encoding="utf-8", newline="\n") as f:
+    # The temp-rename, the fsync and `newline="\n"` (item 0HX: CRLF on Windows
+    # would rewrite every line) now live in cio.atomic_write, which save_part1
+    # shares (item 0HZ) - this was the hand-written original of both.
+    with cio.atomic_write(target) as f:
         f.write("{\n")
         rows = sorted(state.items())
         for i, (kid, entry) in enumerate(rows):
@@ -137,9 +136,6 @@ def save(state, state_path=None):
                                                 separators=(",", ":")))
             f.write(",\n" if i < len(rows) - 1 else "\n")
         f.write("}\n")
-        f.flush()
-        os.fsync(f.fileno())
-    os.replace(tmp, target)
 
 
 def load_for_update(state_path=None):

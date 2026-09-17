@@ -35,7 +35,9 @@ def main():
     if dupes:
         raise SystemExit(f"Duplicate klal_id across parts: {dupes}")
 
-    with open(OUT_PATH, "w", encoding="utf-8") as f:
+    # Atomic (item 0HZ): the dashboard serves the text pane from THIS file, and
+    # the apply step ends by rebuilding it while a reviewer may be reading.
+    with cio.atomic_write(OUT_PATH) as f:
         json.dump(combined, f, ensure_ascii=False, indent=2)
 
     counts = ", ".join(f"{part.removesuffix('.json')}={len(by_part[part])}" for part in PARTS)

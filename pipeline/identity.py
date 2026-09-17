@@ -161,6 +161,57 @@ def resolve_actor(reviewer_id=None, via="review-dashboard"):
     return human_actor(reviewer_id, via=via)
 
 
+# WHAT A PERSON MAY CALL THEMSELVES, when the name arrives with a request rather
+# than from the process environment (item 0HZ). Letters of any script, digits,
+# and the few marks an id or an email-shaped handle needs. Everything else is
+# refused rather than cleaned: this string is written into a permanent,
+# append-only audit log, and "shmuel<script>" silently becoming "shmuelscript"
+# is a different name from the one the person typed.
+REVIEWER_ID_MAX = 64
+
+
+def normalize_reviewer_id(raw):
+    """The reviewer id a session asked to record under, or None for "use the
+    default". Raises ValueError for a name that cannot be recorded as typed.
+
+    ADDED 2026-09-17 (item 0HZ, reviewer: "if one server is serving multiple
+    sessions, each can have a different user"). Until then the only source was
+    $SEFER_REVIEWER, one per PROCESS. The id is still ASSERTED, never proven -
+    `verified` stays False, exactly as for the environment variable.
+    """
+    import unicodedata
+    if raw is None:
+        return None
+    rid = unicodedata.normalize("NFC", str(raw)).strip()
+    if not rid:
+        return None
+    if len(rid) > REVIEWER_ID_MAX:
+        raise ValueError(f"reviewer name longer than {REVIEWER_ID_MAX} characters")
+    for ch in rid:
+        cat = unicodedata.category(ch)
+        if cat[0] in ("L", "N", "M") or ch in " ._@-":
+            continue
+        raise ValueError(f"reviewer name may not contain {ch!r}")
+    return rid
+
+
+def default_reviewer():
+    """Who a session records as when it has not chosen: $SEFER_REVIEWER, else
+    the unidentified local human. The dashboard shows this and returns to it at
+    every new session."""
+    actor = resolve_actor()
+    return {"id": actor["id"], "display": actor.get("display") or actor["id"],
+            "registered": actor["id"] == "local" or not actor.get("unregistered")}
+
+
+def roster_summary():
+    """[{id, display}] for a picker. NO EMAIL: this is served to whoever can reach
+    the dashboard, and the roster's addresses are not theirs to read."""
+    return [{"id": rid, "display": (entry or {}).get("display") or rid}
+            for rid, entry in sorted(_roster().items())
+            if isinstance(entry, dict)]
+
+
 def actor_of(record):
     """WHO ACTED THEN - structured if the record has it, mapped if it does not.
 

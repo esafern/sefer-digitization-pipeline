@@ -10983,33 +10983,52 @@ def test_every_writer_of_an_authored_file_pins_its_line_endings():
     """Item 0HX. The three authored files are TRACKED, and Python's text mode
     writes `os.linesep` - so on Windows, where this repo is now being installed
     for review, the first save rewrites every line as CRLF and lands a
-    whole-file diff against the Mac's copy. Each writer passes `newline="\\n"`.
+    whole-file diff against the Mac's copy. Every write passes `newline="\\n"`.
+
+    Since item 0HZ the corpus and the id sidecar write through
+    `cio.atomic_write`, so the keyword is checked THERE, and the two savers are
+    checked for going through it rather than opening a file themselves.
 
     A source check on purpose: on macOS the bytes come out LF either way, so a
     test that wrote a file and read it back could not fail here (Lesson 25, A
     SIGNAL THAT CANNOT DISAGREE)."""
     import ast
-    writers = [("pipeline/corpus_io.py", "save_part1"),
-               ("pipeline/word_identity.py", "save"),
-               ("pipeline/review_decisions.py", "append_decision")]
-    for rel, func in writers:
-        path = os.path.join(REPO, rel)
-        tree = ast.parse(open(path, encoding="utf-8").read())
-        fn = next((n for n in ast.walk(tree)
-                   if isinstance(n, ast.FunctionDef) and n.name == func), None)
-        assert fn is not None, f"{rel}: no {func}()"
-        opens = [n for n in ast.walk(fn)
-                 if isinstance(n, ast.Call) and getattr(n.func, "id", "") == "open"]
-        assert opens, f"{rel}:{func} opens nothing - has the writer moved?"
+
+    def function(rel, name, cls=None):
+        tree = ast.parse(open(os.path.join(REPO, rel), encoding="utf-8").read())
+        scope = tree
+        if cls:
+            scope = next(n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == cls)
+        fn = next((n for n in ast.walk(scope)
+                   if isinstance(n, ast.FunctionDef) and n.name == name), None)
+        assert fn is not None, f"{rel}: no {cls + '.' if cls else ''}{name}()"
+        return fn
+
+    def calls(fn, callee):
+        return [n for n in ast.walk(fn) if isinstance(n, ast.Call) and (
+            getattr(n.func, "id", "") == callee or getattr(n.func, "attr", "") == callee)]
+
+    def assert_pins_lf(fn, where):
+        opens = calls(fn, "open")
+        assert opens, f"{where} opens nothing - has the writer moved?"
         for call in opens:
-            mode = next((a.value for a in call.args[1:]
-                         if isinstance(a, ast.Constant)), "r")
+            mode = next((a.value for a in call.args[1:] if isinstance(a, ast.Constant)), "r")
             if "w" not in mode and "a" not in mode:
                 continue
             nl = next((k.value.value for k in call.keywords
                        if k.arg == "newline" and isinstance(k.value, ast.Constant)), None)
-            assert nl == "\n", (f"{rel}:{func} line {call.lineno} writes without "
-                                f'newline="\\n" - CRLF on Windows')
+            assert nl == "\n", (f"{where} line {call.lineno} writes without "
+                                 f'newline="\\n" - CRLF on Windows')
+
+    assert_pins_lf(function("pipeline/corpus_io.py", "__enter__", cls="atomic_write"),
+                   "corpus_io.atomic_write")
+    assert_pins_lf(function("pipeline/review_decisions.py", "append_decision"),
+                   "review_decisions.append_decision")
+    for rel, name in (("pipeline/corpus_io.py", "save_part1"),
+                      ("pipeline/word_identity.py", "save")):
+        fn = function(rel, name)
+        assert calls(fn, "atomic_write"), f"{rel}:{name} no longer writes through atomic_write"
+        assert not calls(fn, "open"), f"{rel}:{name} opens a file itself, bypassing atomic_write"
 
 
 def test_no_script_opens_a_text_file_without_saying_utf8():
@@ -11033,3 +11052,146 @@ def test_no_script_opens_a_text_file_without_saying_utf8():
             if not any(k.arg == "encoding" for k in n.keywords):
                 offenders.append(f"{os.path.relpath(rel, REPO)}:{n.lineno}")
     assert offenders == [], "text-mode open() with no encoding=: " + ", ".join(offenders)
+
+
+def test_a_corpus_write_is_never_visible_half_done(tmp_path, monkeypatch):
+    """Item 0HZ, reviewer 2026-09-17: "do the write to temp and rename for the
+    apply step". The dashboard reads part1.json and klalim_demo_dataset.json on
+    every request; an in-place `open(path, "w")` truncates first, so a request
+    landing mid-dump read a prefix of the corpus."""
+    target = tmp_path / "part1.json"
+    cio.save_part1([{"klal_id": 1, "clean_text": "אלף"}], path=str(target))
+    before = target.read_text(encoding="utf-8")
+
+    # A reader DURING the write sees the old file whole - the property itself,
+    # and one an in-place writer fails (it would read "" here).
+    with cio.atomic_write(str(target)) as f:
+        f.write('[{"klal_id": 1, "clean_text": "ב')
+        assert target.read_text(encoding="utf-8") == before
+    assert not (tmp_path / "part1.json.tmp").exists()
+
+    # A failure mid-write leaves the original and no temp file behind.
+    try:
+        with cio.atomic_write(str(target)) as f:
+            f.write("garbage")
+            raise RuntimeError("disk full")
+    except RuntimeError:
+        pass
+    assert target.read_text(encoding="utf-8") == '[{"klal_id": 1, "clean_text": "ב'
+    assert not (tmp_path / "part1.json.tmp").exists()
+
+    # save_part1 goes through it and round-trips.
+    cio.save_part1([{"klal_id": 2, "clean_text": "גימל"}], path=str(target))
+    assert json.loads(target.read_text(encoding="utf-8")) == [{"klal_id": 2, "clean_text": "גימל"}]
+
+    # WINDOWS: os.replace onto a file a reader holds open raises PermissionError
+    # there. It is retried, not surfaced, while the reader lets go.
+    real_replace, failures = os.replace, []
+    def flaky(src, dst):
+        if len(failures) < 2:
+            failures.append(1)
+            raise PermissionError("in use")
+        return real_replace(src, dst)
+    monkeypatch.setattr(os, "replace", flaky)
+    monkeypatch.setattr(cio.atomic_write, "REPLACE_WAIT_S", 0)
+    cio.save_part1([{"klal_id": 3, "clean_text": "דלת"}], path=str(target))
+    assert len(failures) == 2
+    assert json.loads(target.read_text(encoding="utf-8"))[0]["klal_id"] == 3
+
+
+def test_a_session_can_name_its_reviewer_and_an_unnamed_one_gets_the_default(tmp_path, monkeypatch):
+    """Item 0HZ, reviewer 2026-09-17: "if one server is serving multiple
+    sessions, each can have a different user? it should return to the default
+    set by the env value at each new session". The name travels with each
+    request; nothing about it is stored server-side, so a request that does not
+    carry one records the $SEFER_REVIEWER default."""
+    import identity
+    monkeypatch.setattr(identity, "ROSTER_PATH", str(tmp_path / "none.json"))
+    monkeypatch.setenv("SEFER_REVIEWER", "r-default")
+
+    # validation: typed names survive, Hebrew included; anything else is refused
+    assert identity.normalize_reviewer_id("  shmuel ") == "shmuel"
+    assert identity.normalize_reviewer_id("שמואל") == "שמואל"
+    assert identity.normalize_reviewer_id("a.b-c@d e") == "a.b-c@d e"
+    assert identity.normalize_reviewer_id("") is None
+    assert identity.normalize_reviewer_id(None) is None
+    for bad in ("<script>", "a\nb", "x" * 65, "a/b"):
+        with pytest.raises(ValueError):
+            identity.normalize_reviewer_id(bad)
+
+    # the header is percent-encoded UTF-8
+    from urllib.parse import quote
+    assert rs._reviewer_from_header(quote("שמואל")) == "שמואל"
+    assert rs._reviewer_from_header(None) is None
+    with pytest.raises(ValueError):
+        rs._reviewer_from_header(quote("<b>"))
+
+    # per request: a named request records that name, an unnamed one the default
+    try:
+        rs._REQUEST.reviewer = "shmuel"
+        assert rs._actor()["id"] == "shmuel"
+        rs._REQUEST.reviewer = None
+        assert rs._actor()["id"] == "r-default"
+    finally:
+        rs._REQUEST.reviewer = None
+    assert rs._actor()["id"] == "r-default"
+    assert rs._actor()["verified"] is False
+
+    # a named human still passes the "a person ruled" guard on manual_correction
+    ledger = tmp_path / "ledger.jsonl"
+    ledger.write_text("", encoding="utf-8")
+    monkeypatch.setattr(rd, "DECISIONS_PATH", str(ledger))
+    rec = rd.append_decision("manual_correction", 1, word_index=0, chosen_text="א",
+                             actor=identity.resolve_actor("shmuel"))
+    assert rec["reviewer"] == "local:shmuel" and rec["actor"]["id"] == "shmuel"
+
+    # the endpoint shows the default and never the roster's addresses
+    roster = tmp_path / "reviewers.json"
+    roster.write_text(json.dumps({"reviewers": {"r-default": {"display": "Default Person",
+                                                              "email": "x@example.com"}}}),
+                      encoding="utf-8")
+    monkeypatch.setattr(identity, "ROSTER_PATH", str(roster))
+    payload = rs.api_reviewer()
+    assert payload["default"] == {"id": "r-default", "display": "Default Person", "registered": True}
+    assert payload["roster"] == [{"id": "r-default", "display": "Default Person"}]
+    assert "x@example.com" not in json.dumps(payload)
+    monkeypatch.delenv("SEFER_REVIEWER")
+    assert rs.api_reviewer()["default"]["id"] == "local"
+
+
+def test_changes_reports_every_row_appended_since_a_tabs_cursor(tmp_path, monkeypatch):
+    """Item 0HZ, reviewer 2026-09-17: "is there a good way to let the user know
+    the entry is stale b/c another session has unapplied changes?". The ledger
+    is append-only, so a row count is a cursor: a tab asks for what arrived
+    after the count it last saw."""
+    import identity
+    ledger = tmp_path / "ledger.jsonl"
+    ledger.write_text("", encoding="utf-8")
+    monkeypatch.setattr(rd, "DECISIONS_PATH", str(ledger))
+    monkeypatch.setattr(identity, "ROSTER_PATH", str(tmp_path / "none.json"))
+
+    first = rs.api_changes()
+    assert first["count"] == 0 and first["records"] == [] and first["reset"] is False
+
+    a = rd.append_decision("klal_flag", 7, needs_revisit=True, actor=identity.resolve_actor("shmuel"))
+    b = rd.append_decision("manual_correction", 9, word_index=3, chosen_text="ב",
+                           actor=identity.resolve_actor("eric"))
+    got = rs.api_changes(since=first["count"])
+    assert got["count"] == 2
+    assert [(r["id"], r["klal_id"], r["word_index"], r["who"]) for r in got["records"]] == \
+        [(a["id"], 7, None, "shmuel"), (b["id"], 9, 3, "eric")]
+
+    # nothing new since the latest count
+    assert rs.api_changes(since=2)["records"] == []
+    # a cursor past the end means the file was replaced, not that nothing changed
+    assert rs.api_changes(since=5)["reset"] is True
+    # a bad cursor is the client's error
+    with pytest.raises(rs.BadRequest):
+        rs.api_changes(since="abc")
+    with pytest.raises(rs.BadRequest):
+        rs.api_changes(since=-1)
+
+    # a sleeping tab is told it missed too much, rather than handed the whole log
+    monkeypatch.setattr(rs, "CHANGES_MAX_ROWS", 1)
+    capped = rs.api_changes(since=0)
+    assert capped["truncated"] is True and [r["id"] for r in capped["records"]] == [b["id"]]

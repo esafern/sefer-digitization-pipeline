@@ -29,6 +29,7 @@ import json
 import os
 import re
 import sys
+import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse, parse_qs
 
@@ -1681,8 +1682,109 @@ def _actor():
     Read per request, not at import: the process env cannot change under a
     running server, but binding it at import would make this untestable without
     a restart and hide the dependency.
+
+    PER SESSION SINCE 2026-09-17 (item 0HZ, reviewer: "if one server is serving
+    multiple sessions, each can have a different user? it should return to the
+    default set by the env value at each new session"). A session that chose a
+    name sends it as `X-Sefer-Reviewer` with every ruling; do_POST validates it
+    and parks it on this request's thread. A request without it records the
+    $SEFER_REVIEWER default, so a client that never sets one - a script, an old
+    tab, a test - behaves exactly as before. Still ASSERTED, not authenticated.
     """
-    return identity.resolve_actor()
+    return identity.resolve_actor(getattr(_REQUEST, "reviewer", None))
+
+
+# The per-request half of _actor(). ThreadingHTTPServer runs each request on its
+# own thread, so a thread-local is the request's scope; do_POST sets it and
+# clears it in `finally`, so nothing can leak into a later request on a reused
+# thread.
+_REQUEST = threading.local()
+REVIEWER_HEADER = "X-Sefer-Reviewer"
+
+
+def _reviewer_from_header(value):
+    """The header is percent-encoded UTF-8 (HTTP headers are Latin-1, and a
+    reviewer may well type a Hebrew name); decode, then validate."""
+    from urllib.parse import unquote
+    if value is None:
+        return None
+    return identity.normalize_reviewer_id(unquote(value, encoding="utf-8", errors="strict"))
+
+
+def api_reviewer():
+    """GET /api/reviewer - who a session records as by default, and the roster.
+
+    The default is what a NEW session starts at; the name a session has chosen
+    lives in that browser tab (sessionStorage), never on the server, so two tabs
+    on one server can record as two people."""
+    return {"default": identity.default_reviewer(),
+            "roster": identity.roster_summary(),
+            "header": REVIEWER_HEADER,
+            "verified": False}
+
+
+# How many rows /api/changes returns at most. A tab that slept through a large
+# import does not need every row to know it is stale - `truncated` tells it to
+# reload rather than reason about the ones it was not sent.
+CHANGES_MAX_ROWS = 500
+
+
+def _file_stamp(path):
+    try:
+        st = os.stat(path)
+    except OSError:
+        return None
+    return f"{st.st_mtime_ns}:{st.st_size}"
+
+
+def api_changes(since=None):
+    """GET /api/changes?since=N - what other sessions have written since row N.
+
+    ADDED 2026-09-17 (item 0HZ, reviewer: "is there a good way to let the user
+    know the entry is stale b/c another session has unapplied changes?").
+
+    The ledger is APPEND-ONLY, so a row's position is a cursor that never moves:
+    a tab remembers `count`, asks again with `since=count`, and gets exactly the
+    rows appended in between - its own and everyone else's. Which of them are
+    "another session's" is the tab's to decide, because only the tab knows the
+    ids its own saves returned. `count` falling below `since` means the file was
+    replaced (a checkout, a restore), and the answer is `reset`.
+
+    `corpus_stamp` is the text the dashboard serves (klalim_demo_dataset.json).
+    It moves when an apply-and-rebuild lands, which changes words without
+    necessarily changing any row a tab would recognise.
+    """
+    records = rd._read_all()
+    count = len(records)
+    out = {"count": count,
+           "corpus_stamp": _file_stamp(cio.repo_path("klalim_demo_dataset.json")),
+           "reset": False, "truncated": False, "records": []}
+    if since is None:
+        return out
+    try:
+        since = int(since)
+    except (TypeError, ValueError):
+        raise BadRequest(f"since={since!r} is not a row count")
+    if since < 0:
+        raise BadRequest("since must be >= 0")
+    if since > count:
+        out["reset"] = True
+        return out
+    new = records[since:]
+    if len(new) > CHANGES_MAX_ROWS:
+        out["truncated"] = True
+        new = new[-CHANGES_MAX_ROWS:]
+    for r in new:
+        actor = identity.actor_of(r)
+        out["records"].append({
+            "id": r.get("id"),
+            "klal_id": r.get("klal_id"),
+            "word_index": r.get("word_index"),
+            "decision_type": r.get("decision_type"),
+            "ts": r.get("ts"),
+            "who": actor.get("display") or actor.get("id"),
+        })
+    return out
 
 
 def api_post_disputed_decision(body):
@@ -2480,6 +2582,10 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send_json(api_klalim(part_num=part_val))
             if path == "/api/corpus":
                 return self._send_json(api_corpus())
+            if path == "/api/reviewer":
+                return self._send_json(api_reviewer())
+            if path == "/api/changes":
+                return self._send_json(api_changes(query.get("since", [None])[0]))
             if path == "/api/word-states":
                 part_val = query.get("part", ["1"])[0]
                 return self._send_json(api_word_states(part_num=part_val))
@@ -2543,6 +2649,10 @@ class Handler(BaseHTTPRequestHandler):
             length = int(self.headers.get("Content-Length", 0))
             raw = self.rfile.read(length) if length else b"{}"
             body = json.loads(raw.decode("utf-8"))
+            # Who this session records as (item 0HZ). A malformed name is the
+            # client's error and gets a 400 through the ValueError branch below,
+            # BEFORE anything is written.
+            _REQUEST.reviewer = _reviewer_from_header(self.headers.get(REVIEWER_HEADER))
 
             # "/api/decisions/candidate" was an alias for this route and was
             # removed 2026-09-07: app.js posts a candidate ruling to
@@ -2566,6 +2676,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_error_json(400, f"bad request: {e}")
         except Exception as e:  # noqa: BLE001
             self._send_error_json(500, f"{type(e).__name__}: {e}")
+        finally:
+            _REQUEST.reviewer = None
 
 
 def _preflight_check():

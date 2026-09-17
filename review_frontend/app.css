@@ -713,6 +713,34 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
   color: var(--ink-soft);
 }
 #nav-filter label { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+/* ONE ROW, toggles at the start edge and the reviewer's name at the end (item
+   0HZ). The name yields first: it shrinks to an ellipsis, the toggles never
+   wrap under it. */
+#nav-filter { display: flex; align-items: center; gap: var(--sp-3); }
+#nav-filter #nav-toggles { flex: 0 0 auto; }
+#reviewer-pill {
+  margin-inline-start: auto;
+  min-width: 0;
+  max-width: 55%;
+  display: inline-flex; align-items: baseline;
+  overflow: hidden; white-space: nowrap;
+  direction: ltr; unicode-bidi: isolate;
+  font: inherit; font-size: 11px;
+  color: var(--ink-soft);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 2px 8px;
+  cursor: pointer;
+}
+#reviewer-pill:hover { background: var(--accent-wash); }
+#reviewer-pill b { font-weight: 600; color: var(--ink); unicode-bidi: isolate; }
+#reviewer-pill { align-items: center; gap: 4px; }
+#reviewer-pill .rp-icon { flex: 0 0 auto; width: 11px; height: 11px; fill: currentColor; opacity: 0.7; }
+#reviewer-pill .rp-name { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+/* A name this tab CHOSE, as against the server's default, is worth noticing: it
+   is the one that will not be there in a new tab. */
+#reviewer-pill.chosen { border-color: var(--accent); color: var(--accent-dark); }
 /* Bottom padding reserves room so the fixed #legend box (pinned over this
    pane's own bottom-right corner) never hides the last few nav rows behind
    it - scrolling reveals them above the box instead. */
@@ -1056,6 +1084,50 @@ button, input, textarea { font-family: 'Inter', sans-serif; }
 }
 #settings-popover label { display: flex; align-items: center; gap: 6px; cursor: pointer; }
 #settings-popover .settings-hint { margin: 4px 0 0 22px; font-size: 11px; color: var(--ink-faint); }
+#reviewer-settings { margin-top: var(--sp-3); padding-top: var(--sp-3); border-top: 1px solid var(--line); }
+#reviewer-settings .reviewer-label { cursor: default; font-weight: 600; color: var(--ink); }
+#reviewer-settings .reviewer-row { display: flex; gap: 6px; margin-top: 4px; }
+#reviewer-name {
+  flex: 1; min-width: 0;
+  font: inherit; font-size: 12px;
+  padding: 3px 6px;
+  border: 1px solid var(--line); border-radius: var(--radius-sm);
+  background: var(--paper); color: var(--ink);
+}
+#reviewer-name.invalid { border-color: #e53e3e; }
+#reviewer-reset {
+  font: inherit; font-size: 11px; white-space: nowrap;
+  border: 1px solid var(--line); border-radius: var(--radius-sm);
+  background: var(--paper); color: var(--ink-soft); cursor: pointer; padding: 3px 6px;
+}
+#reviewer-reset:disabled { opacity: 0.5; cursor: default; }
+#reviewer-settings .settings-hint { margin-left: 0; }
+
+/* ---------- another session's work (item 0HZ) ---------- */
+.stale-banner, #server-notice {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  direction: ltr;
+  color: #744210;
+  background: #fefcbf;
+  border: 1px solid #d69e2e;
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  line-height: 1.5;
+  display: flex; align-items: center; gap: 10px;
+}
+.stale-banner { margin: 4px 0 10px; }
+#server-notice { margin: 8px 12px 0; }
+/* `display: flex` above outranks the user agent's [hidden] rule, and the hidden
+   notice drew as an empty yellow bar across the top of the text pane. Seen in a
+   screenshot, not in any probe of `hidden` (Lesson 45, PIXELS, NOT THE DOM). */
+#server-notice[hidden] { display: none; }
+.stale-banner .stale-text, #server-notice .stale-text { flex: 1; }
+.stale-banner button, #server-notice button {
+  font: inherit; font-size: 12px; font-weight: 600; white-space: nowrap;
+  border: 1px solid #d69e2e; border-radius: var(--radius-sm);
+  background: #fff; color: #744210; cursor: pointer; padding: 2px 8px;
+}
 
 /* ---------- the word list behind a legend count ---------- */
 #flag-list-panel .flag-list-summary {

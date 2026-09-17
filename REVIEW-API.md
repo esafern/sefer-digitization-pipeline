@@ -29,6 +29,20 @@ shortened where marked `…`.
   runs of whitespace. See "Conventions".
 - **The server has no authentication and no CORS.** A native app is unaffected.
   A web page served from another origin cannot call the server as it stands.
+- **Who a ruling is recorded as.** Send `X-Sefer-Reviewer: <name>` on a POST,
+  percent-encoded UTF-8 (`encodeURIComponent`), and the ruling is recorded
+  under that name. Without the header it is recorded under the server's
+  `$SEFER_REVIEWER`, or `local` if that is unset. Letters of any script,
+  digits, spaces and `._@-`, at most 64 characters; anything else is a `400`
+  and nothing is written. The name is asserted, not proven: every actor
+  carries `verified: false`.
+- **Noticing other sessions.** `GET /api/changes` with no `since` returns
+  `count` and `corpus_stamp` only. Keep `count`; later, `since=<count>` returns
+  every row appended after it (`id`, `klal_id`, `word_index`,
+  `decision_type`, `ts`, `who`), at most 500 with `truncated: true` beyond that.
+  Your own saves are among them: the id each POST returned tells them apart.
+  `reset: true` means the log was replaced; `corpus_stamp` changing means the
+  served text was rebuilt.
 
 | Method | Route | What for |
 |---|---|---|
@@ -45,6 +59,8 @@ shortened where marked `…`.
 | GET | `/api/word-states?part=1` | Every counted word, listed by state |
 | GET | `/api/witness` | The pages carrying witness disagreements, with counts |
 | GET | `/api/witness/context/<page>/<token>` | The OCR words around one witness item |
+| GET | `/api/reviewer` | Who a new session records as, and the roster (no emails) |
+| GET | `/api/changes?since=<n>` | Rulings appended after row `n`, for spotting other sessions' work |
 | GET | `/images/pdf_pages/page_<n>.png` | A scan page image |
 | GET | `/entry/<id>/word/<w>` | A share link that redirects into the HTML dashboard |
 | POST | `/api/decisions/disputed` | Rule on a word the machine flagged |

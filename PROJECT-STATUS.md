@@ -206,6 +206,63 @@ applying it to the corpus remain two separate, deliberate steps.
         short). Its precondition was blind once too (Lesson 42): it first
         asked whether the title shrank, which is the thing under test.
 
+0HZ. **[2026-09-17, reviewer: "expose the current username onscreen, and in the db settings allow
+    the user to change it there. can we configure so if one server is serving multiple sessions,
+    each can have a different user? it should return to the default set by the env value at each
+    new session. do the write to temp and rename for the apply step. is there a good way to let
+    the user know the entry is stale b/c another session has unapplied changes?"] ALL FOUR DONE.**
+    * **A name per session, not per process.** The tab keeps the chosen name in `sessionStorage`:
+      it survives that tab's reloads, ends with the tab, and a new tab starts at the default. The
+      server holds no per-user state - `postDecision()` (app.js) sends `X-Sefer-Reviewer`,
+      percent-encoded, on every ruling; `do_POST` validates it
+      (`identity.normalize_reviewer_id`: letters of any script, digits, space and `._@-`, 64 max;
+      anything else is a 400 and nothing is written) and parks it on a thread-local for `_actor()`.
+      No header means `$SEFER_REVIEWER` exactly as before. Still asserted, `verified: false`.
+      Chrome copies sessionStorage into a DUPLICATED tab, so a duplicate starts with its
+      original's name.
+    * **On screen:** an icon-and-name pill in the index pane's filter row, and a "Recording rulings
+      as" field with the roster as suggestions and a "Use default" button in the settings tray.
+      `GET /api/reviewer` serves the default and the roster WITHOUT emails.
+    * **Three layout defects found only in screenshots, fixed (Lesson 45):** the hidden server
+      notice drew as an empty yellow bar (`display: flex` outranks `[hidden]`); "Recording as
+      <name>" ellipsized to "Recording a..." at 1280px, then, with the label set to shrink first,
+      clipped mid-letter ("Recorc shmuel") - hence the icon; and a long Hebrew name lost its
+      START until the name span got `dir="auto"`.
+    * **The eight save paths now share `postDecision()`.** Each built its own fetch; the header
+      had to reach all eight (Lesson 34), and the helper also records the ids of this tab's own
+      rulings.
+    * **Stale entries.** `GET /api/changes?since=N` returns the rows appended after row N - a
+      stable cursor because the ledger is append-only - plus `corpus_stamp` for
+      `klalim_demo_dataset.json`. The tab polls every 15 s while visible and on becoming visible.
+      A row whose id this tab did not get back from its own save, on a mounted entry, puts a
+      notice on that entry naming who ruled, with "Refresh entry"; any refetch that STARTED after
+      the notice clears it, including the tab's own next save there. A moved `corpus_stamp` (an
+      apply and rebuild) or a replaced log is a page-level "Reload page" notice. While one of the
+      tab's own saves is in flight the poll does not classify rows or advance its cursor, so its
+      own ruling is never reported as another session's. **That race guard has no test.**
+    * **Atomic corpus writes.** `cio.atomic_write` (temp in the same directory, flush, fsync,
+      `os.replace`; the temp removed and the original untouched if the block raises).
+      `save_part1` - the one serializer every corpus writer uses - `word_identity.save`, whose
+      hand-written version it replaces, and `build_klalim_demo_dataset.py`, the file the text pane
+      is served from. On Windows `os.replace` onto a file a reader holds open raises
+      PermissionError; it is retried 20 times at 50 ms. **Untested on Windows.**
+    * **Tests.** Logic: `test_a_corpus_write_is_never_visible_half_done` (a reader mid-write sees
+      the old file - an in-place writer was run and reads `''`), `..._name_its_reviewer_...`,
+      `test_changes_reports_every_row_appended_since_a_tabs_cursor`; the line-endings guard now
+      follows the writers into `atomic_write`. Browser, on the fixture:
+      `test_each_tab_records_rulings_under_its_own_name`,
+      `test_another_sessions_ruling_marks_the_open_entry_stale`,
+      `test_the_hidden_server_notice_takes_no_room`. Four mutations, each caught: the header
+      dropped, sessionStorage swapped for localStorage, the own-id filter removed, the `[hidden]`
+      rule removed. Gate 590 passed; browser and fixture suites 137 passed, 1 skipped. All three
+      dashboards restarted.
+    * **FOUND ON THE WAY, NOT CAUSED BY THIS: `test_a_nav_jump_lands_on_the_klal_it_was_asked_for`
+      is flaky again.** It failed once in the full run; alone it failed 3 in 10 with this change,
+      and 3 in 10 at HEAD `c5cc7c4` in a clean worktree. Item `0DG` recorded 0 in 28 on 2026-09-08,
+      so something since then brought `0CA`'s symptom back. Not investigated.
+    * **Still open from `0HY`:** a cross-process lock on the ledger append (two server processes,
+      or an instance count above one, share no lock), and real authentication.
+
 0HY. **[2026-09-17, reviewer, relaying the Sefaria editor's question about running the dashboard
     in the cloud: "how can he set [the username] on the fly? if multiple people try to use the
     dashboard at the same time, is there a real risk of corruption?"] READ FROM THE CODE, NOT
@@ -244,6 +301,8 @@ applying it to the corpus remain two separate, deliberate steps.
     * **Open, and not started (a scope decision for the reviewer):** a per-request identity from an
       authenticating proxy's verified header into `resolve_actor`; a cross-process file lock on the
       append; temp-and-rename in `save_part1`.
+      **ANNOTATED same day, see `0HZ`:** temp-and-rename DONE; a per-SESSION identity DONE, but
+      asserted by the tab, not taken from an authenticating proxy; the cross-process lock NOT done.
 
 0HX. **[2026-09-17, reviewer: "i need new instructions for installing tool on windows box. is any
     ai involved or needed for making decisions and applying them? ... is ai required for ingesting

@@ -550,6 +550,292 @@ function setupCopyOnClickToggle() {
   };
 }
 
+// ---------- who this tab records rulings as ----------
+//
+// ADDED 2026-09-17 (item 0HZ, reviewer: "expose the current username onscreen,
+// and in the settings allow the user to change it there. can we configure so if
+// one server is serving multiple sessions, each can have a different user? it
+// should return to the default set by the env value at each new session").
+//
+// THE NAME LIVES IN sessionStorage, and that one choice is the whole of "per
+// session, back to the default in a new one": sessionStorage belongs to a single
+// tab, survives that tab's reloads (which every server restart forces), and is
+// gone when the tab closes. The server holds no per-user state at all - it hears
+// the name as the X-Sefer-Reviewer header on each ruling, and a ruling without
+// the header is recorded under $SEFER_REVIEWER, exactly as before. Two tabs on
+// one server can therefore record as two people.
+//
+// It is ASSERTED, not authenticated, and the tray says so. (Chrome copies
+// sessionStorage into a DUPLICATED tab, so a duplicate starts with the name its
+// original had; a new tab or window starts at the default.)
+const REVIEWER_KEY = 'sefer.reviewer';
+const REVIEWER_HEADER = 'X-Sefer-Reviewer';
+// The server's rule (identity.normalize_reviewer_id), so a bad name is caught at
+// the field rather than as a failed save. The server remains the authority.
+const REVIEWER_OK = /^[\p{L}\p{N}\p{M} ._@-]{1,64}$/u;
+let REVIEWER_DEFAULT = { id: 'local', display: 'Unidentified local reviewer' };
+let REVIEWER_ROSTER = [];
+
+function chosenReviewer() {
+  try {
+    const v = sessionStorage.getItem(REVIEWER_KEY);
+    return v && v.trim() ? v.trim() : null;
+  } catch (e) {
+    return null;   // storage blocked: this tab records as the default
+  }
+}
+
+function reviewerDisplay(id) {
+  if (!id) return REVIEWER_DEFAULT.display || REVIEWER_DEFAULT.id;
+  const hit = REVIEWER_ROSTER.find(r => r.id === id);
+  return hit ? hit.display : id;
+}
+
+function syncReviewerUi() {
+  const chosen = chosenReviewer();
+  const pill = document.getElementById('reviewer-pill');
+  if (pill) {
+    // AN ICON, NOT A LABEL. "Recording as <name>" ellipsized to "Recording a..."
+    // at 1280px, hiding the one word the pill exists to show; letting the label
+    // shrink first then clipped it mid-letter ("Recorc shmuel"). The sentence is
+    // in the tooltip and the accessible name instead, and the row shows the name.
+    const name = reviewerDisplay(chosen);
+    pill.innerHTML = `<svg class="rp-icon" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="5" r="3"/><path d="M2 15c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5z"/></svg><b class="rp-name" dir="auto">${escapeHtml(name)}</b>`;
+    pill.setAttribute('aria-label', `Recording rulings as ${name}. Change`);
+    pill.classList.toggle('chosen', !!chosen);
+    pill.title = chosen
+      ? `Rulings from this tab are recorded as "${chosen}". This tab only - a new tab starts as ${reviewerDisplay(null)}. Click to change.`
+      : `Rulings from this tab are recorded as the server's default, ${reviewerDisplay(null)}. Click to change.`;
+  }
+  const input = document.getElementById('reviewer-name');
+  if (input && document.activeElement !== input) {
+    input.value = chosen || '';
+    input.placeholder = reviewerDisplay(null);
+    input.classList.remove('invalid');
+  }
+  const reset = document.getElementById('reviewer-reset');
+  if (reset) {
+    reset.textContent = 'Use default';
+    reset.title = `Record this tab's rulings as the server's default, ${reviewerDisplay(null)}`;
+    reset.disabled = !chosen;
+  }
+}
+
+function setChosenReviewer(name) {
+  const v = (name || '').normalize('NFC').trim();
+  try {
+    if (!v || v === REVIEWER_DEFAULT.id) sessionStorage.removeItem(REVIEWER_KEY);
+    else sessionStorage.setItem(REVIEWER_KEY, v);
+  } catch (e) {
+    showToast('This browser is blocking session storage - rulings stay recorded as the default', false);
+    return false;
+  }
+  syncReviewerUi();
+  showToast(`Recording rulings as ${reviewerDisplay(chosenReviewer())}`);
+  return true;
+}
+
+async function setupReviewer() {
+  try {
+    const info = await fetch('/api/reviewer').then(r => r.json());
+    if (info && info.default) REVIEWER_DEFAULT = info.default;
+    REVIEWER_ROSTER = (info && info.roster) || [];
+  } catch (e) { /* an older server: keep the local default and still show it */ }
+  const list = document.getElementById('reviewer-roster');
+  if (list) {
+    list.innerHTML = REVIEWER_ROSTER
+      .map(r => `<option value="${escapeHtml(r.id)}">${escapeHtml(r.display)}</option>`).join('');
+  }
+  const input = document.getElementById('reviewer-name');
+  if (input) {
+    const commit = () => {
+      const v = input.value.normalize('NFC').trim();
+      if (v && !REVIEWER_OK.test(v)) {
+        input.classList.add('invalid');
+        showToast('A name may use letters, digits, spaces and . _ @ - (64 at most)', false);
+        return;
+      }
+      input.classList.remove('invalid');
+      if (v !== (chosenReviewer() || '')) setChosenReviewer(v);
+    };
+    input.addEventListener('change', commit);
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); commit(); input.blur(); } });
+  }
+  const reset = document.getElementById('reviewer-reset');
+  if (reset) reset.onclick = () => setChosenReviewer('');
+  const pill = document.getElementById('reviewer-pill');
+  if (pill) {
+    pill.onclick = (e) => {
+      e.stopPropagation();
+      const tray = document.getElementById('settings-popover');
+      const btn = document.getElementById('settings-btn');
+      if (tray && tray.hidden && btn) btn.click();
+      if (input) { input.focus(); input.select(); }
+    };
+  }
+  syncReviewerUi();
+}
+
+// EVERY RULING GOES THROUGH HERE. Eight save paths used to build their own
+// fetch; a header added to seven of them is Lesson 34 waiting to happen, so the
+// header, and remembering which rulings are this tab's own, live in one place.
+const OWN_RULING_IDS = new Set();
+// Saves between "sent" and "this tab knows the new ruling's id". While any is
+// open, pollChanges() does not classify rows: one of them may be this tab's own
+// ruling, already in the ledger, whose id has not come back yet.
+let postsInFlight = 0;
+
+async function postDecision(url, payload) {
+  const headers = { 'Content-Type': 'application/json' };
+  const who = chosenReviewer();
+  if (who) headers[REVIEWER_HEADER] = encodeURIComponent(who);
+  postsInFlight++;
+  try {
+    const res = await fetch(url, { method: 'POST', headers, body: JSON.stringify(payload) });
+    if (res.ok) {
+      try {
+        const rec = await res.clone().json();
+        if (rec && rec.id) OWN_RULING_IDS.add(rec.id);
+      } catch (e) { /* no body to read - nothing to remember */ }
+    }
+    return res;
+  } finally {
+    postsInFlight--;
+  }
+}
+
+// ---------- another session's rulings ----------
+//
+// ADDED 2026-09-17 (item 0HZ, reviewer: "is there a good way to let the user
+// now the entry is stale b/c another session has unapplied changes?").
+//
+// An entry's text, disputes and rulings are fetched when it mounts and then held
+// (mountedKlal). Another tab's ruling lands in the ledger and this tab goes on
+// showing the entry without it - and a reviewer who then rules on the same word
+// records a second ruling that silently wins. So this tab asks the server, every
+// CHANGE_POLL_MS and whenever it becomes visible again, what has been appended
+// since the last row it saw (/api/changes). Rows whose ids this tab's own saves
+// returned are ignored; any other row on a MOUNTED entry puts a notice on that
+// entry with a button that refetches it. Unmounted entries are simply dropped
+// from the cache, so they mount fresh.
+//
+// A rebuilt text (an apply, then build_klalim_demo_dataset) moves corpus_stamp,
+// and that is a whole-page notice: word positions may have shifted under every
+// entry at once, which is not something to patch entry by entry.
+const CHANGE_POLL_MS = 15000;
+let changeCursor = null;
+let corpusStamp = null;
+let changePollInFlight = null;
+
+async function pollChanges() {
+  if (changePollInFlight) return changePollInFlight;
+  changePollInFlight = (async () => {
+    try {
+      const q = changeCursor === null ? '' : `?since=${changeCursor}`;
+      const res = await fetch('/api/changes' + q);
+      if (!res.ok) return;
+      const data = await res.json();
+      if (corpusStamp !== null && data.corpus_stamp !== corpusStamp) {
+        showServerNotice('The text on the server has been rebuilt since this page loaded (rulings were applied). Word positions may have moved.');
+      }
+      corpusStamp = data.corpus_stamp;
+      if (data.reset || data.truncated) {
+        showServerNotice('The ruling log on the server changed more than this page can follow.');
+      }
+      // A save of this tab's own is mid-flight: its row may be in `records`
+      // without its id in OWN_RULING_IDS yet. Leave the cursor where it is and
+      // read the same rows again next time.
+      if (postsInFlight > 0) return;
+      if (changeCursor !== null && !data.reset) {
+        const theirs = (data.records || []).filter(r => r.id && !OWN_RULING_IDS.has(r.id) && r.klal_id != null);
+        if (theirs.length) {
+          const byKlal = new Map();
+          theirs.forEach(r => {
+            if (!byKlal.has(r.klal_id)) byKlal.set(r.klal_id, []);
+            byKlal.get(r.klal_id).push(r);
+          });
+          byKlal.forEach((rows, kid) => markEntryStale(kid, rows));
+          refreshKlalimList();
+        }
+      }
+      changeCursor = data.count;
+    } catch (e) {
+      /* the server is restarting or unreachable; the next poll tries again */
+    } finally {
+      changePollInFlight = null;
+    }
+  })();
+  return changePollInFlight;
+}
+
+function markEntryStale(klalId, rows) {
+  const block = document.getElementById('klal-block-' + klalId);
+  if (!block || block.dataset.mounted !== 'true') {
+    // Never shown, or not held: the next mount fetches it fresh.
+    delete mountedKlal[klalId];
+    delete fetchInFlight[klalId];
+    return;
+  }
+  let banner = block.querySelector('.stale-banner');
+  const prior = banner ? JSON.parse(banner.dataset.rows || '[]') : [];
+  const all = prior.concat(rows);
+  if (!banner) {
+    banner = document.createElement('div');
+    banner.className = 'stale-banner';
+    // BESIDE the body, not inside it: renderKlalBody() empties .klal-body, and a
+    // notice that vanished on an unrelated redraw (a text-view switch) would say
+    // the entry was current when it is not.
+    block.insertBefore(banner, block.querySelector('.klal-body'));
+  }
+  banner.dataset.rows = JSON.stringify(all);
+  banner.dataset.gen = String((parseInt(banner.dataset.gen || '0', 10)) + 1);
+  const who = [...new Set(all.map(r => r.who).filter(Boolean))];
+  const n = all.length;
+  banner.innerHTML =
+    `<span class="stale-text">${n} ruling${n === 1 ? '' : 's'} on this entry from another session` +
+    (who.length ? ` (${who.map(escapeHtml).join(', ')})` : '') +
+    ` since you opened it. What you see does not include ${n === 1 ? 'it' : 'them'}.</span>` +
+    `<button type="button">Refresh entry</button>`;
+  banner.querySelector('button').onclick = () => reloadEntry(klalId);
+}
+
+function staleGeneration(klalId) {
+  const b = document.querySelector(`#klal-block-${klalId} .stale-banner`);
+  return b ? b.dataset.gen : null;
+}
+
+function clearStaleIfUnchanged(klalId, gen) {
+  if (gen === null) return;
+  const b = document.querySelector(`#klal-block-${klalId} .stale-banner`);
+  if (b && b.dataset.gen === gen) b.remove();
+}
+
+async function reloadEntry(klalId) {
+  delete mountedKlal[klalId];
+  delete fetchInFlight[klalId];
+  const k = await fetchKlal(klalId);
+  const block = document.getElementById('klal-block-' + klalId);
+  if (block) redrawKlalBody(block, k);
+  if (currentPage != null) await showPage(currentPage, klalId);
+  await refreshKlalimList();
+}
+
+function showServerNotice(text) {
+  const el = document.getElementById('server-notice');
+  if (!el) return;
+  el.innerHTML = `<span class="stale-text">${escapeHtml(text)}</span><button type="button">Reload page</button>`;
+  el.querySelector('button').onclick = () => location.reload();
+  el.hidden = false;
+}
+
+function setupChangeWatch() {
+  pollChanges();
+  setInterval(() => { if (document.visibilityState === 'visible') pollChanges(); }, CHANGE_POLL_MS);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') pollChanges();
+  });
+}
+
 // The word as it is actually rendered. focusWordOnScan() gets a correction, not
 // a span, and a correction does not reliably carry the surface word (a plain
 // word's is synthesized on the spot, and a candidate's `final_text` can be a
@@ -1042,6 +1328,8 @@ async function init() {
   setupZoomPan();
   setupPanels();
   setupNavRefreshOnReturn();
+  setupReviewer();
+  setupChangeWatch();
 
   lastActiveKlalId = KLALIM[0].klal_id;
   setActiveKlal(lastActiveKlalId);
@@ -1543,9 +1831,19 @@ function setupObserver() {
 function fetchKlal(klalId) {
   if (mountedKlal[klalId]) return Promise.resolve(mountedKlal[klalId]);
   if (fetchInFlight[klalId]) return fetchInFlight[klalId];
+  // A fetch that STARTS after another session's rulings were noticed returns
+  // them, so it answers that entry's stale notice (item 0HZ) - whichever path
+  // refetched it: the notice's own button, or this tab's next save on the entry.
+  // Only the notice as it stood when the fetch began: rows noticed while the
+  // fetch was in flight may postdate it and must stay on screen.
+  const staleGen = staleGeneration(klalId);
   fetchInFlight[klalId] = fetch('/api/klal/' + klalId)
     .then(r => r.json())
-    .then(data => { mountedKlal[klalId] = data; return data; });
+    .then(data => {
+      mountedKlal[klalId] = data;
+      clearStaleIfUnchanged(klalId, staleGen);
+      return data;
+    });
   return fetchInFlight[klalId];
 }
 
@@ -2432,13 +2730,9 @@ function flashSavedThenClose(statusElementId) {
 // original unclearable-flag bug reached 325 flags across 104 klalim: a fix
 // applied to one copy leaves the other answering the same click differently.
 async function clearWordFlag(klalId, wordIndex) {
-  const res = await fetch('/api/decisions/klal_flag', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ klal_id: klalId, word_index: wordIndex,
+  const res = await postDecision('/api/decisions/klal_flag', { klal_id: klalId, word_index: wordIndex,
                            needs_revisit: false,
-                           note: 'Word-level revisit flag cleared from the dashboard.' }),
-  });
+                           note: 'Word-level revisit flag cleared from the dashboard.' });
   if (!res.ok) { alert('Could not clear the flag: ' + (await res.text())); return false; }
   // Same refresh path every other save handler uses (there is no
   // refreshKlal(); the pattern is drop the cache, refetch, re-render).
@@ -2940,14 +3234,10 @@ async function openTitlePanel(klalId) {
       alert('That is the heading already \u2014 nothing to record.');
       return;
     }
-    const res = await fetch('/api/decisions/title', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+    const res = await postDecision('/api/decisions/title', {
         klal_id: klalId, word_index: 0, whole: true, chosen_text: text,
         note: document.getElementById('title-correction-note')?.value || null,
-      }),
-    });
+      });
     if (!res.ok) { alert('Could not record the heading: ' + await res.text()); return; }
     await refreshTitlePending(klalId);
     flashSavedThenClose('title-whole-status');
@@ -2991,16 +3281,12 @@ async function openTitlePanel(klalId) {
   });
   const post = async (chosenText) => {
     if (picked === null) return;
-    const res = await fetch('/api/decisions/title', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+    const res = await postDecision('/api/decisions/title', {
         klal_id: klalId,
         word_index: picked,
         chosen_text: chosenText,
         note: document.getElementById('title-correction-note').value || null,
-      }),
-    });
+      });
     if (!res.ok) {
       const detail = await res.text();
       alert('Could not record the heading correction: ' + detail);
@@ -3376,11 +3662,7 @@ async function saveDisputedDecision(klalId, corr) {
   }
   const note = document.getElementById('decision-note').value.trim();
 
-  const res = await fetch('/api/decisions/disputed', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ klal_id: klalId, word_index: corr.word_index, chosen_source: chosenSource, chosen_text: text, note }),
-  });
+  const res = await postDecision('/api/decisions/disputed', { klal_id: klalId, word_index: corr.word_index, chosen_source: chosenSource, chosen_text: text, note });
   if (!res.ok) { alert('Save failed: ' + (await res.text())); return; }
 
   // indefinitely - see PROJECT-STATUS.md "stale client cache after a
@@ -3468,11 +3750,7 @@ async function openKlalFlagPanel(klalId) {
   document.getElementById('save-klal-flag-btn').onclick = async () => {
     const needsRevisit = document.getElementById('needs-revisit-checkbox').checked;
     const note = document.getElementById('klal-flag-note').value.trim();
-    const res = await fetch('/api/decisions/klal_flag', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ klal_id: klalId, needs_revisit: needsRevisit, note }),
-    });
+    const res = await postDecision('/api/decisions/klal_flag', { klal_id: klalId, needs_revisit: needsRevisit, note });
     if (!res.ok) { alert('Save failed: ' + (await res.text())); return; }
     // FIXED 2026-08-14 (code review, session audit item 5): direct
     // assignment here raced against setupNavRefreshOnReturn's
@@ -3532,11 +3810,7 @@ async function openKlalFlagPanel(klalId) {
 // other decision type; see apply_manual_correction() there for how it
 // reaches part1.json. ----------
 async function saveManualDecision(klalId, wordIndex, word, chosenText, note) {
-  const res = await fetch('/api/decisions/manual', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ klal_id: klalId, word_index: wordIndex, original_word: word, chosen_text: chosenText, note }),
-  });
+  const res = await postDecision('/api/decisions/manual', { klal_id: klalId, word_index: wordIndex, original_word: word, chosen_text: chosenText, note });
   // Returns FALSE on failure specifically, so a caller can tell a failed save
   // from a successful one that produced no synthetic entry to return (a delete
   // can legitimately leave nothing at this word_index). Before the panel
@@ -3805,11 +4079,7 @@ async function openPunctuationPanel(klalId, p) {
     const accepted = activeEl.dataset.choice === 'accept';
     const note = document.getElementById('punct-decision-note').value.trim();
 
-    const res = await fetch('/api/decisions/punctuation', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ klal_id: klalId, before_word_index: idx, accepted, note }),
-    });
+    const res = await postDecision('/api/decisions/punctuation', { klal_id: klalId, before_word_index: idx, accepted, note });
     if (!res.ok) { alert('Save failed: ' + (await res.text())); return; }
 
     delete mountedKlal[klalId];
@@ -4089,14 +4359,10 @@ async function saveWitnessDecision(w) {
   }
   const note = document.getElementById('witness-decision-note').value.trim();
 
-  const res = await fetch('/api/decisions/witness', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
+  const res = await postDecision('/api/decisions/witness', {
       klal_id: w.klal_id, docai_token_index: w.docai_token_index,
       chosen_source: source, chosen_text: text, note,
-    }),
-  });
+    });
   if (!res.ok) { alert('Save failed: ' + (await res.text())); return; }
 
   // Re-fetch this klal so text-pane spans get corr.current_decision set,

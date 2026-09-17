@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Yad Malachi — Correction Review</title>
-<link rel="stylesheet" href="/app.css?v=22">
+<link rel="stylesheet" href="/app.css?v=23">
 </head>
 <body>
 
@@ -36,6 +36,22 @@
     <div id="settings-popover" hidden>
       <label><input type="checkbox" id="filter-copy-link" checked> Copy word link on click</label>
       <p class="settings-hint">Clicking a word in the text puts its URL on the clipboard.</p>
+      <!-- WHO THIS TAB RECORDS AS (item 0HZ, reviewer 2026-09-17: "expose the
+           current username onscreen, and in the settings allow the user to
+           change it there ... it should return to the default set by the env
+           value at each new session"). Kept in sessionStorage, so it belongs to
+           this tab and ends with it; the server only ever hears it as a header
+           on a ruling. -->
+      <div id="reviewer-settings">
+        <label for="reviewer-name" class="reviewer-label">Recording rulings as</label>
+        <div class="reviewer-row">
+          <input id="reviewer-name" type="text" list="reviewer-roster" maxlength="64"
+                 autocomplete="off" spellcheck="false" dir="auto">
+          <button id="reviewer-reset" type="button"></button>
+        </div>
+        <datalist id="reviewer-roster"></datalist>
+        <p class="settings-hint" id="reviewer-hint">This tab only; a new tab starts at the server's default. Not a login: the name is recorded as typed.</p>
+      </div>
     </div>
 
     <div id="nav-filter">
@@ -57,6 +73,9 @@
         <label title="Show only klalim flagged for revisit"><input type="checkbox" id="filter-flagged"> Flagged</label>
         <label title="Show only high-value items"><input type="checkbox" id="filter-high-value"> High-value</label>
       </div>
+      <!-- The name this tab's rulings are recorded under, always in view (item
+           0HZ). A button: clicking it opens the settings tray at the field. -->
+      <button id="reviewer-pill" type="button" title="Who rulings from this tab are recorded as. Click to change."></button>
     </div>
     <div id="nav-list"></div>
     <div id="legend"></div>
@@ -99,6 +118,10 @@
         <option value="theirs_corrected_plain">Their corrected, no vowel points</option>
       </select>
     </div>
+    <!-- A notice that the SERVER's text has changed under this tab: rebuilt after
+         an apply, or the ruling log replaced (item 0HZ). Per-entry notices about
+         another session's rulings sit on the entry itself. -->
+    <div id="server-notice" hidden></div>
     <div id="text-scroll"></div>
   </div>
 
@@ -204,6 +227,6 @@
     <div class="panel-body" id="title-panel-body"></div>
   </div>
 
-  <script src="/app.js?v=18"></script>
+  <script src="/app.js?v=19"></script>
 </body>
 </html>

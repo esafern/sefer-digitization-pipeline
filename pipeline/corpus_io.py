@@ -1596,10 +1596,76 @@ def save_part1(klalim, path=None):
     rewrites every line of the file as CRLF - the whole-file diff this
     docstring exists to prevent, on a machine nobody here has tested on
     (item `0HX`).
+
+    WRITTEN TO A TEMP FILE AND RENAMED INTO PLACE (item `0HZ`). An in-place
+    `open(path, "w")` truncates first, so for as long as the dump takes the file
+    on disk is a prefix of the corpus - and the dashboard can be serving while an
+    apply runs. See `atomic_write`.
     """
     path = path or repo_path("part1.json")
-    with open(path, "w", encoding="utf-8", newline="\n") as f:
+    with atomic_write(path) as f:
         json.dump(klalim, f, ensure_ascii=False, indent=2)
+
+
+class atomic_write:
+    """`with atomic_write(path) as f:` - a text file that appears whole or not at
+    all.
+
+    ADDED 2026-09-17 (item `0HZ`, reviewer: "do the write to temp and rename for
+    the apply step"). The dashboard reads the corpus files fresh on every request,
+    and a writer that truncates in place leaves a window in which a reader sees
+    half a JSON document. Here the content goes to `<path>.tmp` in the same
+    directory, is flushed and fsynced, and `os.replace` swaps it in - one rename,
+    which on a local filesystem a reader sees as either the old file or the new
+    one. If the block raises, the temp file is removed and the original is
+    untouched.
+
+    UTF-8 and `newline="\n"` always: these are tracked files, and item `0HX` is
+    what a platform line ending does to them.
+
+    WINDOWS: `os.replace` onto a file another process has open fails there
+    (PermissionError), where POSIX would simply swap the name. The dashboard holds
+    a corpus file open only for the length of a read, so the replace is retried
+    briefly before the error is allowed out. Untested on Windows.
+
+    `word_identity.save` did this by hand before this existed, and now uses it.
+    """
+
+    REPLACE_ATTEMPTS = 20
+    REPLACE_WAIT_S = 0.05
+
+    def __init__(self, path):
+        self.path = path
+        self.tmp = path + ".tmp"
+        self._f = None
+
+    def __enter__(self):
+        self._f = open(self.tmp, "w", encoding="utf-8", newline="\n")
+        return self._f
+
+    def __exit__(self, exc_type, exc, tb):
+        try:
+            if exc_type is None:
+                self._f.flush()
+                os.fsync(self._f.fileno())
+        finally:
+            self._f.close()
+        if exc_type is not None:
+            try:
+                os.remove(self.tmp)
+            except OSError:
+                pass
+            return False
+        import time
+        for attempt in range(self.REPLACE_ATTEMPTS):
+            try:
+                os.replace(self.tmp, self.path)
+                return False
+            except PermissionError:
+                if attempt == self.REPLACE_ATTEMPTS - 1:
+                    raise
+                time.sleep(self.REPLACE_WAIT_S)
+        return False
 
 
 def load_demo_dataset(path=None):

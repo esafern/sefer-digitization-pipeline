@@ -4987,3 +4987,107 @@ def test_clicking_a_word_in_another_klal_makes_that_klal_the_active_one(fixture_
     ) == ["klal-block-2"], "the text pane's current-entry box stayed on the old entry"
     assert "Klal 2" in page.inner_text("#page-indicator"), page.inner_text("#page-indicator")
     assert page.test_errors == []
+
+
+def _open_tab(context, server):
+    pg = context.new_page()
+    pg.test_errors = []
+    pg.on("pageerror", lambda exc: pg.test_errors.append(str(exc)))
+    pg.goto(server + "/", wait_until="domcontentloaded", timeout=15000)
+    pg.wait_for_selector(".nav-item", timeout=15000)
+    pg.wait_for_function("document.querySelector('#reviewer-pill .rp-name')", timeout=5000)
+    pg.wait_for_timeout(300)
+    return pg
+
+
+def test_each_tab_records_rulings_under_its_own_name(fixture_server, browser):
+    """Item 0HZ, reviewer 2026-09-17: "expose the current username onscreen, and
+    in the settings allow the user to change it there ... if one server is
+    serving multiple sessions, each can have a different user? it should return
+    to the default set by the env value at each new session"."""
+    default = _get_json(fixture_server, "/api/reviewer")["default"]["display"]
+    ctx = browser.new_context(viewport={"width": 1600, "height": 1000})
+    try:
+        a, b = _open_tab(ctx, fixture_server), _open_tab(ctx, fixture_server)
+        assert a.inner_text("#reviewer-pill .rp-name") == default
+
+        # the pill opens the tray at the field; the name is set there
+        a.click("#reviewer-pill")
+        assert a.is_visible("#settings-popover")
+        a.fill("#reviewer-name", "שמואל")
+        a.press("#reviewer-name", "Enter")
+        a.wait_for_timeout(200)
+        assert a.inner_text("#reviewer-pill .rp-name") == "שמואל"
+        assert b.inner_text("#reviewer-pill .rp-name") == default, "the name leaked into another tab"
+
+        cursor = _get_json(fixture_server, "/api/changes")["count"]
+        a.evaluate("postDecision('/api/decisions/klal_flag', {klal_id: 2, needs_revisit: true, note: 'a'})")
+        b.evaluate("postDecision('/api/decisions/klal_flag', {klal_id: 2, needs_revisit: false, note: 'b'})")
+        rows = _get_json(fixture_server, f"/api/changes?since={cursor}")["records"]
+        assert [r["who"] for r in rows] == ["שמואל", default]
+
+        # a malformed name never reaches the ledger
+        a.fill("#reviewer-name", "<b>")
+        a.press("#reviewer-name", "Enter")
+        assert a.evaluate("chosenReviewer()") == "שמואל"
+        status = a.evaluate("""fetch('/api/decisions/klal_flag', {method: 'POST',
+            headers: {'Content-Type': 'application/json', 'X-Sefer-Reviewer': encodeURIComponent('<b>')},
+            body: JSON.stringify({klal_id: 2, needs_revisit: true})}).then(r => r.status)""")
+        assert status == 400
+        assert _get_json(fixture_server, "/api/changes")["count"] == cursor + 2
+
+        # survives a reload of the same tab; a NEW tab starts at the default
+        a.reload(wait_until="domcontentloaded")
+        a.wait_for_function("document.querySelector('#reviewer-pill .rp-name')", timeout=5000)
+        assert a.inner_text("#reviewer-pill .rp-name") == "שמואל"
+        c = _open_tab(ctx, fixture_server)
+        assert c.inner_text("#reviewer-pill .rp-name") == default
+        # and "Use default" returns this tab to it
+        a.click("#reviewer-pill")
+        a.click("#reviewer-reset")
+        assert a.inner_text("#reviewer-pill .rp-name") == default
+        assert a.test_errors == b.test_errors == c.test_errors == []
+    finally:
+        ctx.close()
+
+
+def test_another_sessions_ruling_marks_the_open_entry_stale(fixture_server, browser):
+    """Item 0HZ, reviewer 2026-09-17: "is there a good way to let the user know
+    the entry is stale b/c another session has unapplied changes?". A tab's own
+    rulings must NOT raise it, and refreshing the entry clears it."""
+    ctx = browser.new_context(viewport={"width": 1600, "height": 1000})
+    try:
+        a, b = _open_tab(ctx, fixture_server), _open_tab(ctx, fixture_server)
+        for pg in (a, b):
+            pg.wait_for_selector("#klal-block-1[data-mounted='true']", timeout=5000)
+            pg.evaluate("pollChanges()")   # both tabs hold a cursor before anyone rules
+
+        b.evaluate("postDecision('/api/decisions/klal_flag', {klal_id: 1, needs_revisit: true, note: 'from b'})")
+        a.evaluate("postDecision('/api/decisions/klal_flag', {klal_id: 2, needs_revisit: true, note: 'from a'})")
+        a.evaluate("pollChanges()")
+        b.evaluate("pollChanges()")
+
+        assert a.query_selector("#klal-block-1 .stale-banner"), "another tab's ruling on entry 1 went unnoticed"
+        assert "another session" in a.inner_text("#klal-block-1 .stale-banner")
+        assert not a.query_selector("#klal-block-2 .stale-banner"), "a tab's own ruling was reported as another session's"
+        assert not b.query_selector("#klal-block-1 .stale-banner"), "a tab's own ruling was reported as another session's"
+        if b.query_selector("#klal-block-2[data-mounted='true']"):
+            assert b.query_selector("#klal-block-2 .stale-banner")
+
+        a.click("#klal-block-1 .stale-banner button")
+        a.wait_for_function("!document.querySelector('#klal-block-1 .stale-banner')", timeout=5000)
+        assert a.test_errors == b.test_errors == []
+    finally:
+        ctx.close()
+
+
+def test_the_hidden_server_notice_takes_no_room(fixture_server, page):
+    """Item 0HZ. `#server-notice` is styled `display: flex`, which outranks the
+    user agent's `[hidden]` rule - and the hidden notice drew as an empty yellow
+    bar across the top of the text pane. Found in a screenshot; `is_visible` and
+    the `hidden` property both said all was well (Lesson 45)."""
+    _open_dashboard(page, fixture_server)
+    box = page.evaluate("document.getElementById('server-notice').getBoundingClientRect().height")
+    assert box == 0, f"the hidden server notice is {box}px tall"
+    page.evaluate("showServerNotice('rebuilt')")
+    assert page.evaluate("document.getElementById('server-notice').getBoundingClientRect().height") > 0
