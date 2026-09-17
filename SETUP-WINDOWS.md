@@ -5,8 +5,9 @@ mostly a much shorter one, because **the review dashboard needs nothing but
 Python and the data.** No API key, no cloud credentials, no GPU, no pip
 install, not one third-party package.
 
-Written 2026-09-17 for a reviewer's Windows box (item `0HX`). **Run on Windows so
-far: steps 1-3 and 5, with the scan pane empty until step 4's data arrived** — the rest are the documented Windows
+Written 2026-09-17 for a reviewer's Windows box (item `0HX`). **Part 1 has now been
+run on Windows end to end** (2026-09-17): the dashboard serves Sefer HaShorashim
+there, scan pane included. Parts 2 and 3 have not — they are the documented Windows
 equivalents of what runs on macOS, and the claims about what the code needs
 were measured on macOS (the two answers at the end say how). Treat
 the first run as the test, and correct this file from it.
