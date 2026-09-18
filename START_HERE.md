@@ -39,7 +39,7 @@ loaders, Hebrew helpers) and `pipeline/vision_adjudication_common.py`
 (crop/cache/retry/client). A hand-maintained parallel copy has produced the
 same bug class here more than once.
 
-**Then read Part 2's 50 numbered lessons.** They are rules, not history. The
+**Then read Part 2's 54 numbered lessons.** They are rules, not history. The
 short version of most of them: a check that wasn't run has verified nothing, a
 passing score is not a checked result, and no single confident signal is
 enough.
@@ -1092,6 +1092,10 @@ DOM) has never been cited and was used twice on the day it was measured.
 | 0.0 | 11 | LOCALLY CLEAN, STILL BROKEN |
 | 0.0 | 22 | THE WITNESS ENGINE SEAM |
 | 0.0 | 45 | PIXELS, NOT THE DOM |
+| new | 51 | REPRODUCE BEFORE YOU COMPARE |
+| new | 52 | COUNT, DON'T CHOOSE BY EXAMPLE |
+| new | 53 | THE CALLER DECIDES WHAT FAILURE MEANS |
+| new | 54 | EVERY PLATFORM IT WILL RUN ON |
 
 ### They come in families — none of these is a duplicate, and knowing which is which is the point
 
@@ -1134,6 +1138,15 @@ tells you where to look.
 * **Put it up, take it down.** 40 THE SCAFFOLD NOBODY TOOK DOWN (teardown
   forgotten) and 41 THE GUARD THAT TESTS A PROXY (the condition was never the
   real one) are the two halves of the same 2026-09-04 afternoon.
+* **Added 2026-09-18, and where they sit.** 51 REPRODUCE BEFORE YOU COMPARE is
+  the regeneration-time partner of 25 A SIGNAL THAT CANNOT DISAGREE: a baseline
+  that reproduces nothing cannot disagree with anything. 52 COUNT, DON'T CHOOSE
+  BY EXAMPLE belongs with 27 THE SAMPLE THAT SELECTED ITSELF - two vivid cases
+  are a sample of two. 53 THE CALLER DECIDES WHAT FAILURE MEANS is 34 SWEEP THE
+  SIBLINGS turned round: there one function has several branches, here one
+  function has several callers. 54 EVERY PLATFORM IT WILL RUN ON is 26 THE
+  FILTER THAT HIDES at the level of the machine - the platform you did not run
+  on reports nothing.
 
 0. **DON'T FORGET MY LESSONS — being bitten by a lesson that is already written
     down is a different and worse failure than finding a new one, and it gets a
@@ -1797,6 +1810,72 @@ tells you where to look.
     1-6 of X"). When the question is about the deliverable, check the
     deliverable. This is Lesson 28 ("where you looked, not where it is") turned
     on the report rather than on the search.
+
+51. **REPRODUCE BEFORE YOU COMPARE — before crediting a change with the
+    differences in a regenerated file, prove the OLD code reproduces the
+    committed file byte for byte. A baseline that reproduces nothing is not a
+    match.** Item 0IE, 2026-09-18. The citation-parser fix was about to be
+    carried into `verse_verdicts.json`; the first "old parser" run, from a copy
+    of the tool in a scratch folder, returned **0 rows** - it looked for the
+    Tanakh next to itself, found none, and checked nothing - and a diff against
+    it would have credited the fix with every row in the file. Caught because
+    the count was zero, not because anything complained. Pointed at the corpus,
+    the old tool reproduced the committed file exactly, and only then did the
+    new-versus-old diff mean "this fix did that": -1 row, +5, 14 changed. The
+    same day the inline-citation step showed the other outcome - old and new
+    both reproduced the committed files byte-identically, so it needed no
+    regeneration at all. Rehearse on an APFS clone of the corpus root
+    (`cp -c -R`), not on the real one. Partner of Lesson 25: a comparison
+    against nothing cannot disagree.
+
+52. **COUNT, DON'T CHOOSE BY EXAMPLE — when two examples point opposite ways,
+    count the whole class, decide by the count, and write down what the rule
+    costs.** Item 0IE, 2026-09-18. "An ibid after an unreadable note resolves to
+    nothing" was motivated by a typo'd `(תחלים לג, ז)` that sent three Psalms
+    notes to Exodus; the rehearsal then showed it breaking a right answer -
+    `(שם לז, יא)` under `בר`, Job 37:11 behind a Mishnah note. Either example
+    alone decides the rule, in opposite directions. Counted over all 13 such
+    notes: inheriting was right once and wrong or unverifiable nine times, so
+    the rule stayed - with its one known cost written into the test's own
+    docstring, where the next reader will meet it. Sibling of Lesson 27: two
+    vivid cases are a sample of two.
+
+53. **THE CALLER DECIDES WHAT FAILURE MEANS — a shared function should report
+    failure; what failure IMPLIES belongs to each caller.** Item 0IE,
+    2026-09-18. `parse_citation` is called on footnotes, where every note is a
+    reference and an unreadable one leaves the next `שם` unresolvable - and on
+    parentheticals inline in running text, where an unreadable one is usually
+    prose and `שם` after it still means the last real citation. Clearing the
+    running reference INSIDE the shared parser was right for the first caller
+    and would have left real citations in the Sefaria editor's corrected text
+    as words, through the second. Moved into `entry_refs`, the footnote caller;
+    the inline output came out byte-identical. The inverse of Lesson 34: there
+    one function has sibling branches, here one function has several callers,
+    and a fix made for one of them is a change to all of them.
+
+54. **EVERY PLATFORM IT WILL RUN ON — for every change, ask whether it could
+    behave differently on Windows, macOS or Linux; if it could, record the need
+    to test it there as an open item, not an assumption.** Reviewer directive,
+    2026-09-18, after a Windows box became a review host (items 0HX, 0IB, 0IG).
+    This repo was built and tested on one Mac, and the first real Windows run
+    found what no test here could: CRLF written into tracked files, a legacy
+    code page reading Hebrew, `venv/bin/python` absent, a stale terminal
+    PATH - each invisible on the machine that wrote it. **The platform you did
+    not run on reports nothing** (Lesson 26 at the level of the machine), so
+    "the tests pass" means "on macOS". Areas that differ, and so trigger the
+    question: line endings and text encoding defaults; path separators and
+    case-(in)sensitive file names; macOS's Unicode normalization of file names
+    (Hebrew names in `review_examples/`); `os.replace` onto a file another
+    process holds open (fails on Windows - `cio.atomic_write` retries, untested
+    there); file-modification-time resolution, which several caches here key
+    on; shell scripts, signals and process tools (`bash`, `lsof`, `kill`
+    against `netstat`, `taskkill`); the venv layout; fonts and right-to-left
+    rendering in browsers and email clients; display scaling against the
+    dashboard's 1200px breakpoint. When a change touches one of these, say so in
+    its `PROJECT-STATUS.md` entry and name the platforms still untested; the
+    standing list is item `0II`. Where a check can be made platform-neutral - a
+    source-level guard instead of a write-and-read-back that cannot fail on a
+    Mac - prefer it (Lesson 25).
 
 
 ---

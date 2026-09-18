@@ -2715,11 +2715,17 @@ def main():
     try:
         server = ThreadingHTTPServer((args.host, args.port), Handler)
     except OSError as e:
-        if e.errno in (48, 98):  # EADDRINUSE on macOS (48) and Linux (98)
+        # EADDRINUSE is 48 on macOS, 98 on Linux and 10048 (WSAEADDRINUSE) on
+        # Windows, where the tools to find the holder differ too (item 0II).
+        if e.errno in (48, 98, 10048) or getattr(e, "winerror", None) == 10048:
             print(f"ERROR: port {args.port} is already in use.")
             print(f"  Is another instance of review_server.py already running?")
-            print(f"  To find it:  lsof -i :{args.port}")
-            print(f"  To stop it:  kill $(lsof -t -i :{args.port})")
+            if os.name == "nt":
+                print(f"  To find it:  netstat -ano | findstr :{args.port}")
+                print(f"  To stop it:  taskkill /PID <the last column> /F")
+            else:
+                print(f"  To find it:  lsof -i :{args.port}")
+                print(f"  To stop it:  kill $(lsof -t -i :{args.port})")
             print(f"  Or start on a different port:  python3 review_server.py --port 8421")
         else:
             print(f"ERROR: could not bind to {args.host}:{args.port}: {e}")

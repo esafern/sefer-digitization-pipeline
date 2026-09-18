@@ -206,6 +206,30 @@ applying it to the corpus remain two separate, deliberate steps.
         short). Its precondition was blind once too (Lesson 42): it first
         asked whether the title shrank, which is the thing under test.
 
+0II. **[2026-09-18, reviewer: "add 4 lessons ... windows vs. mac and even linux - are new changes
+    likely to bring diff results on other platforms? if so, record a need to test there"] LESSONS
+    51-54 ADDED; THE STANDING LIST OF WHAT IS UNTESTED OFF macOS.** Lesson 54 points here: every
+    change that touches a platform-sensitive area names its untested platforms in its own entry, and
+    this list collects them.
+    * **Nothing here has ever run on Linux** - not the gate, not the dashboard, not a rebuild. The
+      likeliest differences: case-sensitive file names (a path that differs from the file only in
+      case works on macOS and fails there), `/tmp` and process tooling, and fonts. Unmeasured.
+    * **Windows, exercised (2026-09-17/18):** install, the dashboard on Sefer HaShorashim with the
+      scan pane, the per-tab reviewer name (rows recorded as `eric`), ruling rows written with LF
+      and ASCII marks, and one live apply with the server running - which succeeded, but whether
+      `cio.atomic_write`'s PermissionError retry fired is unknown, since it retries silently.
+    * **Windows, NOT exercised:** the retry itself (needs a forced contention to prove); Part 3 of
+      `SETUP-WINDOWS.md` - the full `pip install`, Playwright, the gate; `rebuild_all.sh` under Git
+      Bash with `venv/Scripts/python.exe`; Hebrew console output (`chcp 65001`); the fonts request
+      offline; the dashboard below 1200 CSS px with display scaling.
+    * **Fixed while compiling this:** the server's port-in-use message recognised only macOS's and
+      Linux's EADDRINUSE (48, 98) and told everyone to run `lsof`. Windows raises 10048; it now gets
+      the same message with `netstat` / `taskkill`. Not tested on Windows.
+    * **Recommendation, not done:** a CI run of the gate on GitHub Actions for `ubuntu-latest` and
+      `windows-latest` would turn most of this list from "untested" into a routine check. The gate
+      needs only tracked files plus the fixture corpus; the real-corpus invariants would need the
+      data, which is private.
+
 0IH. **[2026-09-18, reviewer: "add them. other lessons or rules not captured?"] SEVEN STANDING RULES
     MOVED FROM CLAUDE'S MEMORY INTO START_HERE; THREE STALE FACTS CORRECTED; THE HEBREW CHECK MADE
     TRUSTWORTHY.** See `DOCS-HISTORY.md` for the list. Nothing in START_HERE had said any of them,
