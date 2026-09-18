@@ -221,9 +221,12 @@ def parse_citation(note, last_book):
     `שם` is ibid and inherits the running book, which is why this takes and
     returns `last_book` rather than being a pure function of the note.
     """
-    # A stray mark before the parenthesis (`, (ש"א טו, כ)`, item 0IE) hid a
-    # well-formed note, and - worse - left `שם` after it to inherit an older book.
-    body = re.sub(r"^[\s,.;:]+(?=\()", "", note.strip())
+    # ANYTHING before the parenthesis (item 0IE): a stray mark (`, (ש"א טו, כ)`)
+    # or a pointed letter glued on from the text (`וֹ (ש"ב א, ו)`) hid a
+    # well-formed note, and `שם` after it then went astray.
+    body = note.strip()
+    if "(" in body:
+        body = body[body.index("("):]
     m = re.match(r"^\(([^,)]+),\s*([^)]+)\)", body)
     if not m:
         # A SINGLE-CHAPTER BOOK HAS NO COMMA. `(עובדיה ד)` is Obadiah 1:4 - the
@@ -236,9 +239,7 @@ def parse_citation(note, last_book):
                 v = gematria(one.group(2))
                 if v:
                     return (bk, 1, v), (bk, 1, v)
-        # Unreadable here too - a Talmud folio, a cross-reference - so a `שם`
-        # after it refers to IT, not to the last verse (item 0IE).
-        return None, None
+        return None, last_book
     head, verse = m.group(1).strip(), m.group(2).strip()
     # THE VERSE FIELD ENDS AT A COLON OR A BRACKET (item 0IE). What follows is
     # the editor's comment (`כג: קנה במקום כסה`) or a second reference
@@ -249,7 +250,7 @@ def parse_citation(note, last_book):
     items = [x.strip() for x in verse.split(",") if x.strip()]
     parts = head.split()
     if not parts:
-        return None, None
+        return None, last_book
     if parts[0].startswith("שם"):
         # `שם` inherits the book; `(שם, שם)` inherits the whole reference, which
         # is how the apparatus writes a second note on the same verse - 98 of
@@ -274,11 +275,13 @@ def parse_citation(note, last_book):
     if isinstance(book, tuple):
         book = book[0]
     if not book or not ch or not items:
-        # Unreadable. The running reference is CLEARED rather than kept: `שם` means
-        # the note just before, and when that one cannot be read, inheriting an
-        # older book is a guess - a typo'd `(תחלים לג, ז)` sent three Psalms notes
-        # to Exodus that way (item 0IE).
-        return None, None
+        # Unreadable: the running reference is returned UNCHANGED here, and a
+        # caller decides what an unreadable note means for `שם` after it. For a
+        # footnote apparatus every note is a reference, so entry_refs() clears
+        # it; for citations inline in running text a rejected parenthetical is
+        # usually prose, and `שם` after it still means the last citation
+        # (tools/anchors_from_inline_citations.py). Item 0IE.
+        return None, last_book
     verse = items[0]
     # A RANGE is one citation over several verses - `(תהלים מ, ח—י)` is
     # Psalms 40:8-10, eleven of them in this apparatus. Collapsing `ח—י` to a
@@ -307,6 +310,13 @@ def entry_refs(info):
     out, last = [], None
     for pos, note in zip(info["anchors"], info.get("notes", [])):
         ref, last = parse_citation(note, last)
+        if ref is None:
+            # EVERY NOTE HERE IS A REFERENCE, so one that cannot be read leaves
+            # `שם` after it unresolvable too. Inheriting the book from before it
+            # is a guess: a typo'd `(תחלים לג, ז)` sent three Psalms notes to
+            # Exodus 78, 106 and 71 that way (item 0IE). Only this caller clears -
+            # see parse_citation for why the inline one must not.
+            last = None
         out.append((pos, ref, note))
     return out
 
@@ -480,7 +490,12 @@ def main():
             continue
 
         book, ch, v = ref
-        text = tanakh.verse(book, ch, v)
+        # EVERY VERSE THE CITATION NAMES (item 0IE) - the same fix
+        # validate_quotations.py got, in its sibling. A range or a list was read
+        # against its first verse only, so `(ירמיה מח, כט, ל)`'s words from verse
+        # 30 came out "uncorroborated" once the list stopped being summed.
+        texts = [t for t in (tanakh.verse(book, ch, cv) for cv in cited_verses(book, ch, v)) if t]
+        text = " ".join(texts) if texts else None
         if text is None:
             skipped["verse not in reference corpus"] += 1
             continue

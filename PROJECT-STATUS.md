@@ -246,10 +246,38 @@ applying it to the corpus remain two separate, deliberate steps.
       (`ככ` x4). Two of the ten, both under `ספא`, are ibid pointing past the note before it
       (Genesis 43:24/25 behind a Judges note), which no parser reading "the note before" can get.
       None of the 80 read against the text yet.
-    * **NOT RE-RUN, and stale against this fix:** `tools/anchors_from_inline_citations.py` calls
-      `parse_citation` directly, so its ibid handling changed; and the verse check whose output
-      `build_witness_review_queue.py` shows in the dashboard's verse panels. Regenerating either is
-      the HaShorashim chain (`0GW`) and needs the reviewer's go.
+    * **RE-RUN THE SAME DAY (reviewer: "rebuild demo is over"), rehearsed first on an APFS clone
+      of the corpus root, then run on the real one - byte-identical to the rehearsal.** What the
+      rehearsal changed before anything real was touched:
+      - **The ibid clearing moved from `parse_citation` into `entry_refs`.** The inline-citation
+        tool calls `parse_citation` on every parenthetical in running text, prose included, where
+        `שם` after a prose bracket still means the last citation; clearing there would have left
+        real citations in their corrected text as words. With the clearing in the footnote caller
+        only, `gold100_text.json` / `gold100_footnotes.json` come out BYTE-IDENTICAL (old parser
+        reproduces the committed files; new parser changes 0 of 100 entries, 1,177 citations
+        either way) - so they were not regenerated.
+      - **Clearing was re-decided by count, not by example.** It made one right answer
+        unresolvable: `(שם לז, יא)` under `בר` is Job 37:11 behind a Mishnah note, and the old
+        inheritance got it. Counted over all 13 `שם` notes after an unreadable one: inheriting
+        matched the quotation 1 time, was wrong or pointed at no verse 8, and had nothing to inherit
+        2 (e.g. `(מ' פאה ד, ט)` then `(שם ו, א)` is Mishnah Peah 6:1, not Leviticus 6:1). Clearing
+        kept; the cost is that one row, stated in the test's docstring.
+      - **The prefix strip widened**: anything before `(` - `וֹ (ש"ב א, ו)` had a pointed letter
+        glued on, which hid the note and sent the `(שם, שם)` after it to I Samuel 30:16.
+      - **The same first-verse-only bug in the SIBLING (Lesson 34):** `adjudicate_against_verse.py`'s
+        own lookup read a range or list against its first verse. `(תהלים מ, ח—י)` under `אז` had
+        4 rows "uncorroborated, 0 matched" that now match 16 words; 9 verdicts moved in all.
+      - A first "reproduce with the old parser" run returned 0 rows and would have passed as a
+        comparison: the copied tool looked for the Tanakh next to itself, found none, and checked
+        nothing (Lesson 25). Caught because the row count was 0; re-run with the corpus linked, the
+        old tool reproduces the committed `verse_verdicts.json` byte-for-byte.
+    * **Result, all attributable to this fix:** citation buckets 13,532 / 6,066 / 772 / 80 (sum
+      20,450); CSV unchanged at 144 rows; `verse_verdicts.json` -1 row (the Job case), +5 (lists,
+      the colon comment, the comma after the book, the glued prefix), 14 changed; the witness
+      queue keeps all 2,057 rows with the same keys, 20 of them changed in `verse` only, and the
+      two ruled words on entry 1 (w37, w74) byte-identical - `witness_disputes.json` was
+      deliberately NOT rebuilt, which is what keeps the `0GW` hazard away. The live dashboard on
+      :8421 serves the new verdicts without a restart.
 
 0ID. **[2026-09-18, the Sefaria editor's reply to the citation email, relayed by the reviewer: what
     are the other third of the citations, is the remaining manual work 12 cases, and the unplaced

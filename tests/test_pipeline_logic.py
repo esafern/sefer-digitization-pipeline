@@ -11261,7 +11261,11 @@ def test_ibid_follows_the_note_before_it_or_resolves_to_nothing():
     `שם` as a numeral and landed in Isaiah 300:29. And a `שם` after a note that
     did not parse inherited whatever book had parsed before THAT, so a typo'd
     `(תחלים לג, ז)` sent three Psalms notes to Exodus 78, 106 and 71. Ibid means
-    the note immediately before; when that note is unreadable, so is ibid."""
+    the note immediately before; when that note is unreadable, so is ibid.
+    MEASURED, not assumed: of 13 `שם` notes after an unreadable one, inheriting
+    the older book matched the quotation once (Job 37:11 behind a Mishnah note,
+    under בר) and was wrong or unverifiable nine times - `(מ' פאה ד, ט)` then
+    `(שם ו, א)` is Mishnah Peah 6:1, not Leviticus 6:1. Clearing costs that one."""
     import adjudicate_against_verse as aav
     aav.VERSE_SPAN.clear(); aav.VERSE_LIST.clear()
     info = {"anchors": [1, 2, 3, 4, 5, 6],
@@ -11273,3 +11277,13 @@ def test_ibid_follows_the_note_before_it_or_resolves_to_nothing():
     assert refs[3] is None                     # their typo: unreadable
     assert refs[4] is None, "ibid after an unreadable note inherited an older book"
     assert refs[5] == ("I Samuel", 15, 20)     # a stray leading comma no longer hides a note
+    # nor a pointed letter glued on from the text, and ibid after it follows it
+    glued = {"anchors": [1, 2], "notes": ['וֹ (ש"ב א, ו)', "(שם, שם)"]}
+    assert [r for _p, r, _n in aav.entry_refs(glued)] == [("II Samuel", 1, 6), ("II Samuel", 1, 6)]
+    # ...but only the FOOTNOTE caller clears. Citations inline in running text
+    # (tools/anchors_from_inline_citations.py) sit among prose parentheses, and
+    # `שם` after a prose parenthesis still means the last citation - clearing
+    # there would leave real citations in the text as words.
+    ref, running = aav.parse_citation("(ראה לעיל)", ("Psalms", 33, 7))
+    assert ref is None and running == ("Psalms", 33, 7)
+    assert aav.parse_citation("(שם עח, טו)", running)[0] == ("Psalms", 78, 15)
