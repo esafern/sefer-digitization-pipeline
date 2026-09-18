@@ -484,7 +484,11 @@ applying it to the corpus remain two separate, deliberate steps.
       against the verse text by hand", and that reading was done by Claude, not the reviewer
       (reviewer: "I did not manually review the pesukim cited - you did that work"). Recorded as a
       standing rule in Claude's memory: in a draft written as the reviewer, "I" never claims work
-      Claude or the pipeline did.
+      Claude or the pipeline did. **The sent wording settles the form: "The AI read all 158 against
+      the verse text by hand"** - name the tool plainly rather than reaching for the passive. The
+      sent text is kept in the corpus root as `sent_email_citations_2026-09-17.txt` (the portion
+      the reviewer pasted back), and the three unsent drafts were aligned to its two conventions:
+      that attribution, and one short paragraph per cited example, opening "Under shoresh X".
     * **The other half of the old draft is now `draft_email_text_findings.txt`** (the 95.1% measure,
       the 89 of 90, the three places the page reads against his correction, the nun/gimel caveat,
       the one verse question), with the same shoresh addressing and every first-person claim
