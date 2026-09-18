@@ -206,6 +206,45 @@ applying it to the corpus remain two separate, deliberate steps.
         short). Its precondition was blind once too (Lesson 42): it first
         asked whether the title shrank, which is the thing under test.
 
+0ID. **[2026-09-18, the Sefaria editor's reply to the citation email, relayed by the reviewer: what
+    are the other third of the citations, is the remaining manual work 12 cases, and the unplaced
+    `צפת` note] THE FOUR BUCKETS ARE EXCLUSIVE AND SUM TO 20,450; THE 93 OUT-OF-RANGE REFERENCES HOLD
+    ~70 UNREAD ERRORS AND EXPOSE TWO PARSER BUGS.**
+    * **Every citation falls in exactly one of four buckets** (`quotation_suspects.json` counts,
+      summed to confirm they are exclusive): 13,508 (66.1%) quotation corroborated by the cited
+      verse; 6,079 (29.7%) did not corroborate; 770 (3.8%) did not parse; 93 (0.5%) cited verse not
+      in the reference corpus. `suspect words` (299), `quotation ends in the cited verse` (425) and
+      `citation points elsewhere` (150) are overlays on those, not further buckets. The 158 rows read
+      by hand came out of the did-not-corroborate bucket; 8 of them are now dropped automatically by
+      `ends_in_cited` (`0FM`), hence 150 today.
+    * **The 770 are mostly not Tanakh references at all**, by their openings: Mishnah (`מ'` 105,
+      `משנה` 38), Talmud tractates (`שבת` 40, `בבא` 27, `חולין` 23, `ברכות` 21 and more), `בבלי` 25,
+      Ibn Janah's Kitab al-Luma (`למע` 82), cross-references (`עיין` 17, `דף` 20), Tosefta, Sifra -
+      and 77 `שם` notes the parser could not resolve. Out of scope for a verse check, not failures.
+    * **The 93, sorted by cause** (read from `entry_refs`, not re-derived): 57 well-formed numerals
+      past the chapter's end (`(תהלים כג, ח)`, Psalm 23 has 6 verses); 7 chapters that do not exist
+      (`(עמוס י, י)`, `(רות כ, יז)`); 6 numerals that are not numerals, 4 of them `ככ` - `כב` with the
+      ב/כ confusion (`(שופטים ז, ככ)` under `אבל`, `אבן`, `אבר`, `אז`); **16 `שם` references and 7
+      verse lists that are OUR PARSER's misreadings.** So ~70 probable errors in their apparatus -
+      NONE read against the verse text yet; some of the 57 may be chapter-numbering differences
+      (Joel 3 / 4) rather than misprints.
+    * **BUG, `tools/adjudicate_against_verse.py` `entry_refs()`, not fixed:** a note listing several
+      verses is summed into one number - `(מ"א ח, לח, לט, מ)` -> I Kings 8:117,
+      `(ירמיה מח, כט, ל)` -> Jeremiah 48:59; and a `שם` note is misresolved - `(שם שם, כט)` -> Isaiah
+      300:29, `(שם יב, כג: קנה במקום כסה)` -> Proverbs 12:411. 23 instances visible here because they
+      land out of range; the same defects on a note that happens to land IN range would put a
+      quotation against the wrong verse and count it as not corroborated, and that number is
+      unmeasured. Sweep before fixing: every note with more than one comma, and every `שם`.
+    * **`צפת`, the row `citation_corrections.csv` marks "unclear":** Ibn Janah quotes II Chronicles
+      3:15 (`וְהַצֶּפֶת אֲשֶׁר־עַל־רֹאשׁוֹ`) and glosses it `והכותרת אשר על ראשו כאשר הוא מבואר
+      בנוסחא האחרת`, note `(מ"א ז, יט)`. The editor places it at I Kings 7:16, by way of Radak's
+      parallel entry. The verses bear him out on content - 7:16 gives each capital five cubits, as
+      Chronicles gives the `צפת`, where 7:19 says four - while 7:19 is the verse whose WORDING the
+      gloss echoes (`וכתרת אשר על ראש העמודים`). The tool's own proposal for this row, I Kings 5:19,
+      matched nothing but `כאשר` and is wrong. **Pending:** record the editor's reading in
+      `citation_review.json`, credited to him, and regenerate the CSV.
+    * Reply drafted: `draft_email_citation_numbers.txt` in the corpus root. Not sent.
+
 0IC. **[2026-09-18, reviewer, on the Windows box: "why are these wit. choices?" and, of the
     applier's closing advice, "do that"] THE APPLIER TOLD EVERY BOOK TO RUN YAD MALACHI'S REBUILD -
     THE ONE COMMAND SEFER HASHORASHIM MUST NOT RUN.**
