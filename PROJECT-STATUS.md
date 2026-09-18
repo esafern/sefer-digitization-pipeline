@@ -206,6 +206,51 @@ applying it to the corpus remain two separate, deliberate steps.
         short). Its precondition was blind once too (Lesson 42): it first
         asked whether the title shrank, which is the thing under test.
 
+0IE. **[2026-09-18, reviewer: "fix those 2 bugs then regen and add his reading with credit"] BOTH
+    PARSER BUGS FIXED; THE REGENERATION FOUND TWO FLAGS THE EYE PASS HAD WRONGLY PASSED - THE SENT
+    EMAIL'S "146 HOLD UP" IS 144.**
+    * **Fixed in `tools/adjudicate_against_verse.py`**, one test each written first and seen to fail:
+      - a verse field listing several verses is split, not summed (`VERSE_LIST`, `cited_verses()`);
+        a colon or bracket ends the verse field (commentary or a second reference) - only after the
+        first comma, since before it a colon is a Talmud folio side (`שבת קיח:`, 133 notes);
+        `(ברא, מט, כד)`, a comma after the book, reads as chapter and verse;
+      - `(שם שם, כט)` inherits the chapter; a stray mark before the parenthesis no longer hides a
+        note; and an UNREADABLE note now clears the running reference on both failure paths, so
+        `שם` after it resolves to nothing instead of an older book (Lesson 34 - the second path,
+        the no-comma branch, had the same defect and was found by reading the sibling).
+      - `tools/validate_quotations.py` corroborates a quotation against EVERY verse the citation
+        names (range or list), where it had used the first verse only and the span solely to
+        suppress a false "misplaced". Tests `test_a_citation_naming_several_verses_is_not_summed_into_one`,
+        `test_ibid_follows_the_note_before_it_or_resolves_to_nothing`. Gate 593 passed.
+    * **Regenerated, before -> after:** confirmed 13,508 -> 13,530; not corroborated 6,079 -> 6,062;
+      unparsed 770 -> 778 (+8: ibid after an unreadable note, deliberately); nonexistent verse
+      93 -> 80; points elsewhere 150 -> 148. CSV 146 -> 144 rows, every one still
+      `checked_by_eye = yes`.
+    * **THE TWO ROWS THAT LEFT WERE FALSE FLAGS, AND THE 2026-09-14 EYE PASS HAD PASSED BOTH.**
+      `(דברים ב, ט, יג)` under `והב` is Deuteronomy 2:9 and 2:13; the quotation is 2:13, so the note
+      is right - the parser summed it to 2:22 and the row read `misprint`, proposed 2:13, "the
+      quotation is the proposed verse and not the cited one", `checked_by_eye = yes`. Same for
+      `(במדבר טז,ז, כא)` under `בדל`: 16:7 and 16:21, quotation 16:21, parsed as 16:28. The eye
+      pass compared the quotation with the PARSED reference in `cited_ref`, not with the note as
+      printed - Lesson 50, SAY WHICH ONE YOU CHECKED, on the same file that lesson was written
+      about. Consequences: 144 hold up, not 146; 90 misprints, not 92; 72 single-letter, not 73.
+      The letter pairs are unchanged (ה/ח 31, ב/כ 16, כ/נ 4, ב/ג 4, ו/ז 3). **The sent email
+      carries 146 and 92**, and the reply draft corrects them.
+    * **Sefaria editor's reading recorded**, in `citation_review.json`: the `צפת` row is now kind
+      `placed by Sefaria` (not `misprint` - 7:19 may be Bacher's deliberate pointer to the wording),
+      proposed I Kings 7:16, with a `credit` field and the reasoning; the file carries an
+      `annotations` entry recording the change.
+    * **The 80 still out of range, re-sorted:** 57 well-formed numerals past the chapter's end, 10
+      `שם` references that are genuinely out of range (e.g. `(שם מה, לג)` under `הדד` - Jeremiah
+      48:33, where `הידד` stands; מה for מח), 7 chapters that do not exist, 6 malformed numerals
+      (`ככ` x4). Two of the ten, both under `ספא`, are ibid pointing past the note before it
+      (Genesis 43:24/25 behind a Judges note), which no parser reading "the note before" can get.
+      None of the 80 read against the text yet.
+    * **NOT RE-RUN, and stale against this fix:** `tools/anchors_from_inline_citations.py` calls
+      `parse_citation` directly, so its ibid handling changed; and the verse check whose output
+      `build_witness_review_queue.py` shows in the dashboard's verse panels. Regenerating either is
+      the HaShorashim chain (`0GW`) and needs the reviewer's go.
+
 0ID. **[2026-09-18, the Sefaria editor's reply to the citation email, relayed by the reviewer: what
     are the other third of the citations, is the remaining manual work 12 cases, and the unplaced
     `צפת` note] THE FOUR BUCKETS ARE EXCLUSIVE AND SUM TO 20,450; THE 93 OUT-OF-RANGE REFERENCES HOLD
@@ -228,7 +273,7 @@ applying it to the corpus remain two separate, deliberate steps.
       verse lists that are OUR PARSER's misreadings.** So ~70 probable errors in their apparatus -
       NONE read against the verse text yet; some of the 57 may be chapter-numbering differences
       (Joel 3 / 4) rather than misprints.
-    * **BUG, `tools/adjudicate_against_verse.py` `entry_refs()`, not fixed:** a note listing several
+    * **BUG, `tools/adjudicate_against_verse.py` `entry_refs()` - FIXED, `0IE`:** a note listing several
       verses is summed into one number - `(מ"א ח, לח, לט, מ)` -> I Kings 8:117,
       `(ירמיה מח, כט, ל)` -> Jeremiah 48:59; and a `שם` note is misresolved - `(שם שם, כט)` -> Isaiah
       300:29, `(שם יב, כג: קנה במקום כסה)` -> Proverbs 12:411. 23 instances visible here because they
@@ -242,8 +287,9 @@ applying it to the corpus remain two separate, deliberate steps.
       Chronicles gives the `צפת`, where 7:19 says four - while 7:19 is the verse whose WORDING the
       gloss echoes (`וכתרת אשר על ראש העמודים`). The tool's own proposal for this row, I Kings 5:19,
       matched nothing but `כאשר` and is wrong. **Pending:** record the editor's reading in
-      `citation_review.json`, credited to him, and regenerate the CSV.
-    * Reply drafted: `draft_email_citation_numbers.txt` in the corpus root. Not sent.
+      `citation_review.json`, credited to him, and regenerate the CSV. **DONE, `0IE`.**
+    * Reply drafted: `draft_email_citation_numbers.txt` in the corpus root, revised under `0IE` with
+      the regenerated figures. Not sent.
 
 0IC. **[2026-09-18, reviewer, on the Windows box: "why are these wit. choices?" and, of the
     applier's closing advice, "do that"] THE APPLIER TOLD EVERY BOOK TO RUN YAD MALACHI'S REBUILD -

@@ -102,6 +102,23 @@ ABBREV = {
 SINGLE_CHAPTER = {"Obadiah"}
 # (book, chapter, first verse) -> last verse, for citations written as a range.
 VERSE_SPAN = {}
+# (book, chapter, first verse) -> the other verses a LIST citation names -
+# `(ירמיה מח, כט, ל)`, `(במדבר טז,ז, כא)` (item 0IE). Read as one gematria, the
+# list became a verse that does not exist: I Kings 8:117, Jeremiah 48:59.
+VERSE_LIST = {}
+
+
+def cited_verses(book, ch, v):
+    """Every verse one citation covers - a range's span, a list's members, or
+    just `v` - so a quotation may be matched against any of them."""
+    if v is None:
+        return []
+    out = {v}
+    end = VERSE_SPAN.get((book, ch, v))
+    if end and end >= v:
+        out.update(range(v, end + 1))
+    out.update(VERSE_LIST.get((book, ch, v), ()))
+    return sorted(out)
 # Matched words needed before calling a citation transposed. See the
 # transposition branch in main() for why 2 is not enough.
 MIN_TRANSPOSE = 4
@@ -204,7 +221,9 @@ def parse_citation(note, last_book):
     `שם` is ibid and inherits the running book, which is why this takes and
     returns `last_book` rather than being a pure function of the note.
     """
-    body = note.strip()
+    # A stray mark before the parenthesis (`, (ש"א טו, כ)`, item 0IE) hid a
+    # well-formed note, and - worse - left `שם` after it to inherit an older book.
+    body = re.sub(r"^[\s,.;:]+(?=\()", "", note.strip())
     m = re.match(r"^\(([^,)]+),\s*([^)]+)\)", body)
     if not m:
         # A SINGLE-CHAPTER BOOK HAS NO COMMA. `(עובדיה ד)` is Obadiah 1:4 - the
@@ -217,30 +236,50 @@ def parse_citation(note, last_book):
                 v = gematria(one.group(2))
                 if v:
                     return (bk, 1, v), (bk, 1, v)
-        return None, last_book
+        # Unreadable here too - a Talmud folio, a cross-reference - so a `שם`
+        # after it refers to IT, not to the last verse (item 0IE).
+        return None, None
     head, verse = m.group(1).strip(), m.group(2).strip()
+    # THE VERSE FIELD ENDS AT A COLON OR A BRACKET (item 0IE). What follows is
+    # the editor's comment (`כג: קנה במקום כסה`) or a second reference
+    # (`לא: כו, לג`), and read as part of the numeral it made 12:411 and 21:90.
+    # Only here, after the first comma: a colon BEFORE it is a Talmud folio side
+    # (`שבת קיח:`), which is not a verse and must stay unparsed.
+    verse = re.split(r"[:\[]", verse, maxsplit=1)[0]
+    items = [x.strip() for x in verse.split(",") if x.strip()]
     parts = head.split()
     if not parts:
-        return None, last_book
+        return None, None
     if parts[0].startswith("שם"):
         # `שם` inherits the book; `(שם, שם)` inherits the whole reference, which
         # is how the apparatus writes a second note on the same verse - 98 of
         # them, all lost while `שם` in the verse slot was read as a gematria.
+        # `(שם שם, כט)` is the same book AND chapter; the second `שם` was read as
+        # a numeral, chapter 300 (item 0IE).
         book, ch = last_book, gematria(parts[1]) if len(parts) > 1 else None
         if isinstance(last_book, tuple):
             book, prev_ch, prev_v = last_book
-            if len(parts) == 1:
+            if len(parts) == 1 or parts[1].startswith("שם"):
                 ch = prev_ch
-                if verse.startswith("שם"):
+                if len(parts) == 1 and verse.startswith("שם"):
                     return (book, prev_ch, prev_v), last_book
     else:
         name = " ".join(parts[:-1]) if len(parts) > 1 else parts[0]
         book = resolve_book(name)
         ch = gematria(parts[-1]) if len(parts) > 1 else None
+        # `(ברא, מט, כד)`: a comma after the book name, so the chapter is the
+        # first item of what looked like the verse field.
+        if book and ch is None and len(items) >= 2:
+            ch, items = gematria(items[0]), items[1:]
     if isinstance(book, tuple):
         book = book[0]
-    if not book or not ch:
-        return None, last_book
+    if not book or not ch or not items:
+        # Unreadable. The running reference is CLEARED rather than kept: `שם` means
+        # the note just before, and when that one cannot be read, inheriting an
+        # older book is a guess - a typo'd `(תחלים לג, ז)` sent three Psalms notes
+        # to Exodus that way (item 0IE).
+        return None, None
+    verse = items[0]
     # A RANGE is one citation over several verses - `(תהלים מ, ח—י)` is
     # Psalms 40:8-10, eleven of them in this apparatus. Collapsing `ח—י` to a
     # single gematria yields verse 18, a real verse that has nothing to do with
@@ -253,6 +292,9 @@ def parse_citation(note, last_book):
         VERSE_SPAN[(book, ch, v)] = gematria(rng[-1]) or v
     if v is None and verse.startswith("שם") and isinstance(last_book, tuple):
         v = last_book[2]
+    more = [gematria(x) for x in items[1:]]
+    if v and any(more):
+        VERSE_LIST[(book, ch, v)] = sorted({x for x in more if x})
     return (book, ch, v), (book, ch, v)
 
 

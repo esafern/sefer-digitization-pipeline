@@ -11224,3 +11224,52 @@ def test_the_applier_names_the_rebuild_that_belongs_to_the_book(use_fixture_corp
     # to run it. That warning is the point, so the test asks for both halves.
     assert "build_klalim_demo_dataset" in on_another
     assert "do NOT run rebuild_all.sh" in on_another
+
+
+def test_a_citation_naming_several_verses_is_not_summed_into_one():
+    """Item 0ID/0IE. The verse field was read as ONE gematria, so a list of
+    verses became a verse that does not exist: `(מ"א ח, לח, לט, מ)` -> I Kings
+    8:117, `(ירמיה מח, כט, ל)` -> Jeremiah 48:59. Commentary after a colon or a
+    bracket was folded in the same way: `(שם יב, כג: קנה במקום כסה)` -> 12:411.
+    Every verse a citation names is now one the quotation may match."""
+    import adjudicate_against_verse as aav
+    aav.VERSE_SPAN.clear(); aav.VERSE_LIST.clear()
+    p = lambda note, last=None: aav.parse_citation(note, last)[0]
+    assert p('(מ"א ח, לח, לט, מ)') == ("I Kings", 8, 38)
+    assert aav.cited_verses("I Kings", 8, 38) == [38, 39, 40]
+    assert p("(ירמיה מח, כט, ל)") == ("Jeremiah", 48, 29)
+    assert aav.cited_verses("Jeremiah", 48, 29) == [29, 30]
+    assert p("(במדבר טז,ז, כא)") == ("Numbers", 16, 7)                  # a list, not consecutive
+    assert aav.cited_verses("Numbers", 16, 7) == [7, 21]
+    assert p("(ויקרא א,, ב)") == ("Leviticus", 1, 2)                     # a doubled comma stays one verse
+    assert aav.cited_verses("Leviticus", 1, 2) == [2]
+    assert p("(ברא, מט, כד)") == ("Genesis", 49, 24)                     # a comma after the book
+    # a colon or a bracket in the verse field ends it: commentary, or a second reference
+    last = ("Proverbs", 11, 1)
+    assert p("(שם יב, כג: קנה במקום כסה)", last) == ("Proverbs", 12, 23)
+    assert p("(שם כא, לא: כו, לג)", ("Genesis", 11, 28)) == ("Genesis", 21, 31)
+    assert p("(שם מד, א [והכוונה על מב, כה])", ("Genesis", 42, 27)) == ("Genesis", 44, 1)
+    # a range still reads as before
+    assert p("(תהלים מ, ח—י)") == ("Psalms", 40, 8)
+    assert aav.cited_verses("Psalms", 40, 8) == [8, 9, 10]
+    # a Talmud folio keeps its colon and stays unparsed - it is not a verse
+    assert p("(שבת קיח:)") is None
+
+
+def test_ibid_follows_the_note_before_it_or_resolves_to_nothing():
+    """Item 0ID/0IE. `(שם שם, כט)` - same book AND chapter - read the second
+    `שם` as a numeral and landed in Isaiah 300:29. And a `שם` after a note that
+    did not parse inherited whatever book had parsed before THAT, so a typo'd
+    `(תחלים לג, ז)` sent three Psalms notes to Exodus 78, 106 and 71. Ibid means
+    the note immediately before; when that note is unreadable, so is ibid."""
+    import adjudicate_against_verse as aav
+    aav.VERSE_SPAN.clear(); aav.VERSE_LIST.clear()
+    info = {"anchors": [1, 2, 3, 4, 5, 6],
+            "notes": ["(ישעיה מ, כו)", "(שם שם, כט)",
+                      "(שמות טו, ח)", "(תחלים לג, ז)", "(שם עח, טו)",
+                      ", (ש\"א טו, כ)"]}
+    refs = [r for _p, r, _n in aav.entry_refs(info)]
+    assert refs[1] == ("Isaiah", 40, 29)
+    assert refs[3] is None                     # their typo: unreadable
+    assert refs[4] is None, "ibid after an unreadable note inherited an older book"
+    assert refs[5] == ("I Samuel", 15, 20)     # a stray leading comma no longer hides a note

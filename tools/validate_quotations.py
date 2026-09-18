@@ -50,7 +50,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(_HERE), "pipeline"))
 sys.path.insert(0, _HERE)
 import corpus_io as cio  # noqa: E402
 from adjudicate_against_verse import (Tanakh, verse_words, entry_refs,  # noqa: E402
-                                      flatten, iso, VERSE_SPAN)
+                                      flatten, iso, cited_verses)
 
 
 # The divine name is written `ה'` or `י"י` in this edition and `יהוה` in the
@@ -175,7 +175,14 @@ def main():
                 stat["verse not in reference corpus"] += 1
                 prev_end = end
                 continue
-            vw = verse_words(text)
+            # EVERY VERSE THE CITATION NAMES (item 0IE). A range or a list was
+            # corroborated against its FIRST verse alone, so a quotation from the
+            # second verse of `(ירמיה מח, כט, ל)` could never count as confirmed.
+            vw = set()
+            for cv in cited_verses(book, ch, v):
+                vt = tanakh.verse(book, ch, cv)
+                if vt:
+                    vw |= verse_words(vt)
             floor = max(prev_end, end - args.max_window, 0)
             # grow the run backwards while the words keep matching the verse
             i, misses, matched, start = end - 1, 0, 0, end
@@ -219,8 +226,7 @@ def main():
                             hitn = sum(1 for w in run if matches(w, vws))
                             if best is None or hitn > best[0]:
                                 best = (hitn, ci, vi)
-                    span_end = VERSE_SPAN.get((book, ch, v), v)
-                    in_range = best and best[1] == ch and v <= best[2] <= (span_end or v)
+                    in_range = best and best[1] == ch and best[2] in cited_verses(book, ch, v)
                     if best and ends_in_cited(flat, floor, end, vw,
                                               verse_words(chapters[best[1] - 1][best[2] - 1])):
                         stat["quotation ends in the cited verse"] += 1
