@@ -235,8 +235,10 @@ applying it to the corpus remain two separate, deliberate steps.
       224 rows, only reordered (checked). Spreadsheet rows, header = row 1, kind = column G: 2-91
       misprint (90), 92-127 edition numbering (36), 128 wrong proposal, 129 placed by Sefaria
       (`צפת`), 130-145 off by one (16), 146-225 verse does not exist (80, `checked_by_eye` no).
-      **The ranges in the draft are tied to this ordering: any regeneration that changes a count
-      moves them, and the draft must be re-read against the file.**
+      **Row numbers dropped from the draft the same day** (reviewer: "he is sophisticated - he
+      will understand how to bring the csv into excel to sort and filter - he doesn't need row
+      numbers - just name the category and count in order"). It now lists each kind with its count
+      in file order; the grouping stays, as the order the list follows.
     * The draft's closing now says the two uses outright - a verification step before any text
       goes live, and a pass over every text already on the site - with the reviewer's own
       background in content management systems as its first-person basis. Two overstatements
