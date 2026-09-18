@@ -206,6 +206,32 @@ applying it to the corpus remain two separate, deliberate steps.
         short). Its precondition was blind once too (Lesson 42): it first
         asked whether the title shrank, which is the thing under test.
 
+0IF. **[2026-09-18, reviewer: "hold on - we are not recording any decisions for sho. yet - we need
+    to keep opts open. separately: reverse hebrew mixed with english leads to confused sentences
+    ... record this so it doesn't keep happening"] THE TWO TEST RULINGS REVERTED; A CHECK FOR
+    HEBREW THAT RENDERS BACKWARDS.**
+    * **Sefer HaShorashim takes no rulings yet.** The two witness rulings recorded on the Windows
+      box on 2026-09-17 had been committed and pushed to the private corpus repo (`0ac0d57`, 2
+      lines, nothing else). Reverted in `54a5372`: the ledger is 0 bytes again and the rows stay
+      recoverable from history. My own advice was the problem - I had told the reviewer to commit
+      and push both the rulings and the apply, against `0GQ`'s standing state (ledger empty, corpus
+      wipeable). The uncommitted apply on the Windows box is to be discarded there
+      (`git restore .`, then `git pull`). Standing rule recorded in Claude's memory: no HaShorashim
+      rulings recorded or applied until the reviewer says so; rebuilding derived files is fine.
+    * **Hebrew inside English prose rendered backwards.** Two Hebrew pieces separated only by
+      punctuation - `Under shoresh אבל, (שופטים ז, ככ). ככ is not a number` - are one
+      right-to-left run to the Unicode bidi algorithm, so an email client draws the shoresh, the
+      citation and the numeral in reverse order. The fix is in the writing: English between the
+      pieces (`Under shoresh אבל the note reads (שופטים ז, ככ), and the verse number ככ is ...`).
+    * **`tools/check_mixed_direction.py`** finds every such place and exits 1 if any exist; a
+      parenthesised citation counts as one piece (its inner comma is not a boundary), and a Hebrew
+      phrase separated by spaces only is one piece. Test
+      `test_two_pieces_of_hebrew_are_never_divided_by_punctuation_alone` holds a flagged and a
+      clean version of the same sentence, so it can fail both ways. Found 14 places in the two live
+      drafts to the Sefaria editor, all rewritten; the four live drafts now check clean. The
+      already-sent citation email has 15 (e.g. `Under אלה, (בראשית מא, כז) where`). Recorded in
+      Claude's memory with the instruction to run the check on every draft containing Hebrew.
+
 0IE. **[2026-09-18, reviewer: "fix those 2 bugs then regen and add his reading with credit"] BOTH
     PARSER BUGS FIXED; THE REGENERATION FOUND TWO FLAGS THE EYE PASS HAD WRONGLY PASSED - THE SENT
     EMAIL'S "146 HOLD UP" IS 144.**

@@ -11287,3 +11287,21 @@ def test_ibid_follows_the_note_before_it_or_resolves_to_nothing():
     ref, running = aav.parse_citation("(ראה לעיל)", ("Psalms", 33, 7))
     assert ref is None and running == ("Psalms", 33, 7)
     assert aav.parse_citation("(שם עח, טו)", running)[0] == ("Psalms", 78, 15)
+
+
+def test_two_pieces_of_hebrew_are_never_divided_by_punctuation_alone():
+    """Item 0IF, reviewer 2026-09-18: "reverse hebrew mixed with english leads to
+    confused sentences". In a left-to-right email, Hebrew pieces separated only
+    by punctuation are drawn as one right-to-left run - backwards."""
+    sys.path.insert(0, os.path.join(REPO, "tools"))
+    import check_mixed_direction as cmd
+    bad = "Under shoresh אבל, (שופטים ז, ככ). ככ is not a number."
+    assert len(cmd.problems(bad)) == 2          # shoresh|citation and citation|numeral
+    good = ("Under shoresh אבל the note reads (שופטים ז, ככ), and the numeral ככ "
+            "is not a number.")
+    assert cmd.problems(good) == []
+    # a citation's inner comma, and a phrase with spaces, are one piece each
+    assert cmd.problems("The note reads (שופטים ז, ככ) in full.") == []
+    assert cmd.problems('in "נֶפֶשׁ עָמֵל גרמה לו" the page prints') == []
+    # a list of Hebrew words with commas is the same trap
+    assert len(cmd.problems("under shoresh אגד, גדרים under איל")) == 1
