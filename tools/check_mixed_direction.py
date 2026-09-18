@@ -35,17 +35,48 @@ HEB = "֐-׿"
 # A piece of Hebrew: a parenthesised group containing Hebrew is ONE piece (a
 # citation's inner comma is not a boundary), otherwise a run of Hebrew words
 # joined by spaces, maqaf or the marks that live inside words.
-PAREN = re.compile(r"\([^()]*[" + HEB + r"][^()]*\)")
+# A QUOTED span containing Hebrew is one piece too - `בליוורנו... ועתה נדפס`, a
+# title-page quotation with an ellipsis, or `דפוס י. זיטטענפעלד` with an initial,
+# is one phrase and is drawn correctly; its inner punctuation is not a boundary.
+PAREN = re.compile(r"\([^()]*[" + HEB + r"][^()]*\)"
+                   r"|`[^`]*[" + HEB + r"][^`]*`"
+                   # A double quote counts only at a word boundary: inside a
+                   # word it is gershayim (`ר"ל`, `מ"א`), and pairing one
+                   # abbreviation's mark with the next would mask the text
+                   # between them - a silent miss.
+                   r'|(?:^|(?<=[\s(\[]))"[^"\n]*[' + HEB + r'][^"\n]*"(?=[\s,.;:)\]]|$)'
+                   r"|\u201c[^\u201d]*[" + HEB + r"][^\u201d]*\u201d")
 PLACEHOLDER = ""          # private-use: stands for one parenthesised piece
 PIECE = re.compile("(?:[" + HEB + PLACEHOLDER + "][" + HEB + PLACEHOLDER + r"'\"׳״\-]*)"
                    "(?:\\s+[" + HEB + PLACEHOLDER + "][" + HEB + PLACEHOLDER + r"'\"׳״\-]*)*")
 BOUNDARY = re.compile(r"[,.;:()\[\]]")
 
 
-def problems(text):
-    """[(line number, excerpt)] for every pair of Hebrew pieces run together."""
-    out = []
+def paragraphs(text):
+    """[(first line number, paragraph)] - lines joined up to a blank line.
+
+    By PARAGRAPH, not by line: Markdown wraps, and a quotation wrapped across
+    two lines has its opening and closing marks on different lines, so a
+    per-line reading split one quoted phrase in two and flagged it."""
+    out, buf, start = [], [], None
     for n, line in enumerate(text.splitlines(), 1):
+        if line.strip():
+            if start is None:
+                start = n
+            buf.append(line.strip())
+        elif buf:
+            out.append((start, " ".join(buf)))
+            buf, start = [], None
+    if buf:
+        out.append((start, " ".join(buf)))
+    return out
+
+
+def problems(text):
+    """[(line number, excerpt)] for every pair of Hebrew pieces run together.
+    The line number is the first line of the paragraph."""
+    out = []
+    for n, line in paragraphs(text):
         groups = []
         masked = PAREN.sub(lambda m: groups.append(m.group(0)) or PLACEHOLDER, line)
         pieces = list(PIECE.finditer(masked))

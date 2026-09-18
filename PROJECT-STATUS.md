@@ -206,6 +206,22 @@ applying it to the corpus remain two separate, deliberate steps.
         short). Its precondition was blind once too (Lesson 42): it first
         asked whether the title shrank, which is the thing under test.
 
+0IH. **[2026-09-18, reviewer: "add them. other lessons or rules not captured?"] SEVEN STANDING RULES
+    MOVED FROM CLAUDE'S MEMORY INTO START_HERE; THREE STALE FACTS CORRECTED; THE HEBREW CHECK MADE
+    TRUSTWORTHY.** See `DOCS-HISTORY.md` for the list. Nothing in START_HERE had said any of them,
+    so a Gemini session or a fresh clone was bound by none.
+    * `tools/check_mixed_direction.py`, three false positives or misses found by running it on
+      START_HERE itself and fixed, each with a test: a QUOTED span with punctuation inside (a
+      title-page quotation with an ellipsis, an initial in a printer's name) is one piece; a
+      double quote counts only at a word boundary, because inside a word it is gershayim and
+      pairing one abbreviation's mark with the next would silently mask the text between; and the
+      check reads by PARAGRAPH, since Markdown wraps a quotation across lines. START_HERE and the
+      four live drafts check clean; the sent citation email still shows its 15 true positives.
+      `PROJECT-STATUS.md` shows 222 - lists of backticked words in notes read in a terminal, which
+      does no bidi reordering, so not a target.
+    * **Candidate lessons, proposed and NOT added** (numbering is the reviewer's to grant): see the
+      reply of the same day.
+
 0IG. **[2026-09-18, from the reviewer's Windows screenshot] THE "WHOLE-FILE DIFF" AFTER THE WINDOWS
     APPLY WAS NOT LINE ENDINGS: SEFER HASHORASHIM'S part1.json WAS WRITTEN IN A FORMAT NO OTHER CORPUS
     WRITER USES.**

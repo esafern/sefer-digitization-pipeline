@@ -43,6 +43,22 @@ short `CLAUDE.md` stub remains, redirecting any LLM instance to
 
 ## Pipeline shape — correction history
 
+**Rules that lived only in one agent's memory, moved into START_HERE on
+2026-09-18** (reviewer: "add them. other lessons or rules not captured?").
+Standing directives had been saved to Claude's private per-machine memory,
+which binds no other agent and no other clone: biblical references as Sefaria
+links (2026-09-10), a sample and an explicit go before a paid run (2026-09-14),
+an independent read before the reviewer's view (2026-09-09), "I" for the
+reviewer's own work only (2026-09-17), and two from 2026-09-18 - English
+between any two pieces of Hebrew in English prose (with
+`tools/check_mixed_direction.py`), and no Sefer HaShorashim rulings yet. The
+public-repo rule gained its corollary (the annotation, not the placeholder, is
+the leak). Three statements of fact were corrected in the same pass: the
+authored-file table now names `build_root_corpus.py` and the single serializer
+(item `0IG`); the rebuild rule says `rebuild_all.sh` is Yad Malachi's chain and
+must not run on Sefer HaShorashim; and the UTF-8 / LF rules the gate enforces
+since item `0HX` are stated.
+
 **The NLI leaf-fix command, removed 2026-09-16 as wrong.** From 2026-08-18
 `START_HERE.md` gave two forms of the transposed-leaf fix, one for a
 Google-sourced PDF (`--from-index 37 --to-index 36`) and one "for an

@@ -551,6 +551,22 @@ this repo as an LLM agent, follow them exactly.
   commit had to be amended. Say "the draft to the Sefaria editor". Before any
   push, scan every unpushed commit, not just HEAD. The corpus root is a
   PRIVATE repo holding Sefaria's unreleased data and must never be made public.
+  **A placeholder is not the leak; the annotation is.** An ordinary first name
+  used as an example username in a test identifies nobody. A note anywhere in
+  this repo saying WHOSE name an example value is turns it into an
+  identification, and draws attention to it besides (2026-09-17, item `0IB`).
+  Use placeholder names freely; never write down what they resemble.
+- **Size a paid run on a sample, and wait for a go.** Before any paid or
+  book-wide model run - vision calls over hundreds of crops, a DocAI pass -
+  run a seeded sample of about 40, score it against a truth read by eye BEFORE
+  opening the model's answers, and report the accuracy, the cost of the full
+  run and the rule it suggests. Then wait for an explicit go (reviewer
+  directive, 2026-09-14).
+- **Your own read first.** When the reviewer shares an opinion about source
+  material - scan quality, the ink, which engine will do well - give an
+  independent assessment arrived at separately from theirs, not their view
+  quoted back as analysis (reviewer, 2026-09-09: "I would have preferred you to
+  arrive at your own uninfluenced opinion").
 - **Close open items before proposing new ones.** If `PROJECT-STATUS.md`'s
   Open Items section lists unresolved blockers, do not end a turn by
   offering to expand scope ("want me to also check X," "should I dig into
@@ -722,6 +738,56 @@ Both rules apply to the terminology split above: a data issue gets a URL, a
 bug gets code. If a finding has both halves — a bug that produced bad data —
 give both, and say which is which.
 
+## Writing for the reviewer, and to Sefaria
+
+Reviewer directives, 2026-09-10 to 2026-09-18. They bind any text that leaves
+this repo in the reviewer's name - an email draft, a letter, a report - and the
+first two bind everything written here.
+
+* **Every biblical reference is a Sefaria link. Always.** Chat, drafts,
+  `PROJECT-STATUS.md`, code comments, READMEs (2026-09-10: "all biblical refs -
+  always - are sefaria links. always.").
+* **Hebrew inside English prose needs English between any two pieces of it.**
+  Two Hebrew pieces separated only by punctuation are one right-to-left run to
+  the Unicode bidi algorithm, so an email client draws them in reverse order.
+  Wrong, and it reads as nonsense:
+  `Under shoresh אבל, (שופטים ז, ככ). ככ is not a number`
+  Right:
+  `Under shoresh אבל the note reads (שופטים ז, ככ), and the verse number ככ is ...`
+  A citation's inner comma, and a Hebrew phrase with spaces only,
+  are one piece and fine. **Run `python3 tools/check_mixed_direction.py <draft>`
+  on every draft containing Hebrew**; it exits 1 and names each place (item
+  `0IF`).
+* **"I" is the reviewer's own work only.** They decide what to pursue,
+  commission scans, rule on words and score ink sheets. They do not measure,
+  OCR, adjudicate, read verse texts or build checks - and a letter in their
+  name must not say they did. Name the tool plainly: the sent wording is "The AI
+  read all 158 against the verse text by hand" (2026-09-17). "My project" is
+  ownership and fine.
+* **Address a finding the way its reader can find it.** The Sefaria editor has
+  no dashboard, so a word is cited by its shoresh and a phrase of context from
+  his own text, never by a dashboard URL. One example per short paragraph,
+  opening "Under shoresh X", then "Under X".
+* **Check a citation against the note as printed, not the parser's reading of
+  it.** Two flags the Sefaria editor was sent had passed an eye check against
+  the parsed reference; both notes were right (item `0IE`, Lesson 50).
+* Draft files in the corpus root are named by topic, never by recipient (the
+  public-repo rule above: file names count).
+
+## Sefer HaShorashim takes no rulings yet
+
+**Reviewer directive, 2026-09-18: "we are not recording any decisions for sho.
+yet - we need to keep opts open."** Its `review_decisions.jsonl` stays EMPTY and
+nothing is applied to its `part1.json` until the reviewer says otherwise. The
+empty ledger is what keeps the corpus wipeable: a re-OCR or re-segmentation
+renumbers every entry, and `seed_word_identity.py --reseed` is safe only while
+the ledger is empty. Rebuilding its DERIVED files (verse verdicts, the witness
+queue, the citation check) is fine. Two test rulings made on the Windows box on
+2026-09-17 were reverted (corpus commit `54a5372`; the rows survive in
+`0ac0d57`). Never advise committing, pushing or applying rulings there, and flag
+any that appear rather than build on them. Demo rulings belong only in the
+non-git demo copy, `~/work/hashorashim-demo`.
+
 ## Terminology
 
 **An issue with the DATA is a "data issue," not a "bug." An issue with the
@@ -745,9 +811,16 @@ this repo is regenerated and may be deleted at any time.**
 
 | file | the question it answers | who may write it |
 |---|---|---|
-| `part1/2/3.json` | **what the book says** | `apply_reviewer_decisions.py`, `apply_punctuation_decisions.py`, `reconstruct_placeholder_klalim.py`, and hand edits |
+| `part1/2/3.json` | **what the book says** | `apply_reviewer_decisions.py`, `apply_punctuation_decisions.py`, `reconstruct_placeholder_klalim.py`, `build_root_corpus.py` (a new book's first build), and hand edits - every tool through `cio.save_part1`, the one serializer |
 | `review_decisions.jsonl` | **what a human decided** | `review_decisions.append_decision`, append-only, never rewritten |
 | `word_identity.json` | **which word is which** | `seed_word_identity.py`, and `follow_corpus()` from the three corpus writers |
+
+**Every corpus writer goes through `cio.save_part1`, and it through
+`cio.atomic_write`** (temp file, fsync, rename - a reader never sees half a
+corpus). `build_root_corpus.py` dumped its own `indent=1`, so the first apply on
+Sefer HaShorashim re-indented all 5,934 lines: an 11,864-line diff for a
+one-word ruling (item `0IG`). `test_every_tool_that_writes_a_corpus_file_uses_its_one_serializer`
+guards it.
 
 `rebuild_all.sh` writes **none of them**. No rebuild stage opens a
 `part*.json` for writing, calls `append_decision`, or touches the id
@@ -809,7 +882,12 @@ hand-edited in parallel:
   the same docai-token alignment.
 
 **After any edit to a `part*.json` file, run `./rebuild_all.sh`** — this
-regenerates every derived file listed above. `review_server.py` reads its
+regenerates every derived file listed above. **That is Yad Malachi's chain.**
+Another book has its own, in its corpus root's `README.md`, and for Sefer
+HaShorashim `rebuild_all.sh` is the one command NOT to run: it re-derives the
+rows that book's rulings are drawn against (items `0GQ`, `0GW`). There, after an
+apply, `pipeline/build_klalim_demo_dataset.py` is the step; the applier's own
+closing advice now says which (item `0IC`). `review_server.py` reads its
 source files fresh off disk on every request (no embedded/cached data, no
 restart needed), but it still needs those files to actually be current —
 running the rebuild is what keeps them that way. Don't hand-run individual
@@ -924,6 +1002,13 @@ hand-maintained parallel copy is a second copy of the truth that happens to
 usually agree — see Lesson 13 below.
 
 ## Conventions observed
+
+- **Every text `open()` says `encoding="utf-8"`, and every writer of a tracked
+  file says `newline="\n"`.** The platform default is a legacy code page and
+  CRLF on Windows, where this repo is now reviewed; neither shows on a Mac.
+  Both are gated: `test_no_script_opens_a_text_file_without_saying_utf8` and
+  `test_every_writer_of_an_authored_file_pins_its_line_endings` (item `0HX`).
+  `.gitattributes` pins LF in both repos.
 
 - Corrections are driven by direct LLM adjudication with **rendered UI
   verification** (open the review dashboard, visually confirm), not blind

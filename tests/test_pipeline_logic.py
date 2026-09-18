@@ -11305,6 +11305,15 @@ def test_two_pieces_of_hebrew_are_never_divided_by_punctuation_alone():
     assert cmd.problems('in "נֶפֶשׁ עָמֵל גרמה לו" the page prints') == []
     # a list of Hebrew words with commas is the same trap
     assert len(cmd.problems("under shoresh אגד, גדרים under איל")) == 1
+    # a QUOTED phrase with punctuation inside is one piece, drawn correctly
+    assert cmd.problems("its title page reads `נדפס ראשונה בליוורנו... ועתה נדפס` - first") == []
+    assert cmd.problems('the imprint "דפוס י. זיטטענפעלד" names the printer') == []
+    # ...but two quoted pieces with only punctuation between them are not
+    assert len(cmd.problems('reads "אבל", "גדרים" in turn')) == 1
+    # a quotation wrapped across two lines is still one piece
+    assert cmd.problems("its title page reads `נדפס ראשונה\nבליוורנו... ועתה נדפס` - first") == []
+    # gershayim inside words are not quotation marks: this is still two pieces
+    assert len(cmd.problems('under ר"ל, (מ"א ז, יט) and ע"מ the note')) == 1
 
 
 def test_every_tool_that_writes_a_corpus_file_uses_its_one_serializer():
