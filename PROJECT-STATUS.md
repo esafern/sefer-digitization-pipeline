@@ -5,6 +5,24 @@
 _Current state only. Every claim here is measured, not remembered; the dated
 evidence for each is in `PROJECT-STATUS-HISTORY.md`._
 
+> **Picking up after 2026-09-18? Start here, then `0GQ`.** The Sefaria call
+> happened 2026-09-17 and went well; the citation email was sent. Items `0HW`-`0IJ`
+> are the two days since, newest at the top of the open items.
+> * **Four drafts to the Sefaria editor wait in the corpus root, unsent:**
+>   `draft_email_citation_numbers.txt` (the reply on the citation figures - ATTACH
+>   `citation_corrections.csv`), `draft_email_text_findings.txt`,
+>   `draft_email_spelling.txt`, `draft_email_corrections_stream.txt`. Run
+>   `tools/check_draft.py` on any draft before handing it over (START_HERE,
+>   "Writing for the reviewer").
+> * **Sefer HaShorashim takes no rulings yet** (START_HERE section of that name).
+>   Its ledger is empty; its derived files were rebuilt 2026-09-18 (`0IE`).
+> * **Open, roughly in order:** the 80 citations to verses that do not exist,
+>   unread against the text (`0ID`/`0IE`); the platform list, nothing ever run on
+>   Linux (`0II`, with a CI suggestion); the verse-check bug `0GZ`; the witness
+>   gaps in `0HE` (findings 2 and 3); bundling the dashboard's web fonts (`0HW`);
+>   a cross-process lock on the ledger (`0HY`).
+> * A Windows box now runs the review dashboard (`SETUP-WINDOWS.md`, `0HX`-`0IB`).
+>
 > **Picking up after 2026-09-15? Read item `0GQ` first** - the handoff for
 > Sefer HaShorashim: its state (the ledger is empty, so the corpus can still be
 > wiped; the witness apply path is built and off) and the open work in order.
