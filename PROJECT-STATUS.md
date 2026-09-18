@@ -239,10 +239,10 @@ applying it to the corpus remain two separate, deliberate steps.
       placeholder reconstructor) already use it; the other hits for `part1.json` only read it.
       Guard `test_every_tool_that_writes_a_corpus_file_uses_its_one_serializer` fails on the old
       builder, checked.
-    * **Not done, the reviewer's call:** the committed HaShorashim `part1.json` is still `indent=1`,
-      so the first real apply there will still show a whole-file diff. A one-time re-serialization
-      through `save_part1` is content-identical (verifiable by comparing the parsed JSON) and makes
-      every later apply a one-line diff. It records no decision.
+    * **DONE the same day (reviewer: "resave part 1"):** HaShorashim's `part1.json` re-saved through
+      `save_part1` - parsed data identical, 5,934 lines either way, `klalim_demo_dataset.json` still
+      equal to a fresh build, `word_identity.verify()` 0 mismatches, ledger still 0 bytes. The next
+      apply there is a one-line diff.
     * The Windows box is back in step: `git restore .` then `git pull` fast-forwarded
       `0ac0d57..54a5372`, bringing the empty ledger and the `0IE` rebuild.
 
