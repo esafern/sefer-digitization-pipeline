@@ -11305,3 +11305,24 @@ def test_two_pieces_of_hebrew_are_never_divided_by_punctuation_alone():
     assert cmd.problems('in "נֶפֶשׁ עָמֵל גרמה לו" the page prints') == []
     # a list of Hebrew words with commas is the same trap
     assert len(cmd.problems("under shoresh אגד, גדרים under איל")) == 1
+
+
+def test_every_tool_that_writes_a_corpus_file_uses_its_one_serializer():
+    """Item 0IG. `build_root_corpus.py` wrote part1.json with its own
+    `json.dump(..., indent=1)` while every other corpus writer goes through
+    `cio.save_part1` (indent 2), so the first apply on Sefer HaShorashim
+    re-indented all 5,934 lines. The writers named in START_HERE's authored-file
+    table, and the book builder, must all call save_part1 and dump no corpus
+    themselves."""
+    import ast
+    writers = ["pipeline/apply_reviewer_decisions.py", "tools/apply_punctuation_decisions.py",
+               "tools/reconstruct_placeholder_klalim.py", "tools/build_root_corpus.py"]
+    for rel in writers:
+        tree = ast.parse(open(os.path.join(REPO, rel), encoding="utf-8").read())
+        calls = [n for n in ast.walk(tree) if isinstance(n, ast.Call)]
+        assert any(getattr(c.func, "attr", "") == "save_part1" or getattr(c.func, "id", "") == "save_part1"
+                   for c in calls), f"{rel} no longer writes the corpus through save_part1"
+    tree = ast.parse(open(os.path.join(REPO, "tools/build_root_corpus.py"), encoding="utf-8").read())
+    dumped = [ast.unparse(c.args[0]) for c in ast.walk(tree) if isinstance(c, ast.Call)
+              and getattr(c.func, "attr", "") == "dump" and c.args]
+    assert "records" not in dumped, "build_root_corpus dumps the corpus records itself again"

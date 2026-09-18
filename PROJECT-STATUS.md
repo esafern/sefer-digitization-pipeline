@@ -206,6 +206,30 @@ applying it to the corpus remain two separate, deliberate steps.
         short). Its precondition was blind once too (Lesson 42): it first
         asked whether the title shrank, which is the thing under test.
 
+0IG. **[2026-09-18, from the reviewer's Windows screenshot] THE "WHOLE-FILE DIFF" AFTER THE WINDOWS
+    APPLY WAS NOT LINE ENDINGS: SEFER HASHORASHIM'S part1.json WAS WRITTEN IN A FORMAT NO OTHER CORPUS
+    WRITER USES.**
+    * The screenshot's `git diff --stat` before the discard: `part1.json | 11864`, 5,936 insertions
+      and 5,934 deletions - every line changed, line count unchanged. Measured here: the committed
+      file matches `json.dumps(indent=1, ensure_ascii=False)` exactly; `cio.save_part1` writes
+      `indent=2`. So the first apply re-indented all 5,934 lines. `0IB`/`0HX` had me reading it as
+      CRLF; `git ls-files --eol` showing `i/lf w/lf` for part1.json was the clue I did not follow.
+    * **The outlier writer:** `tools/build_root_corpus.py:738`,
+      `json.dump(records, fh, ensure_ascii=False, indent=1)` - the book builder, which is not in
+      START_HERE's authored-file table and so never went through `save_part1`, whose own docstring
+      calls it "the ONE serialization ... a writer that disagreed would rewrite the whole file as a
+      diff on every apply". Lesson 13, THE SECOND COPY OF THE TRUTH. Now `cio.save_part1(records,
+      path=args.out)`. Swept: the other corpus writers (the applier, the punctuation applier, the
+      placeholder reconstructor) already use it; the other hits for `part1.json` only read it.
+      Guard `test_every_tool_that_writes_a_corpus_file_uses_its_one_serializer` fails on the old
+      builder, checked.
+    * **Not done, the reviewer's call:** the committed HaShorashim `part1.json` is still `indent=1`,
+      so the first real apply there will still show a whole-file diff. A one-time re-serialization
+      through `save_part1` is content-identical (verifiable by comparing the parsed JSON) and makes
+      every later apply a one-line diff. It records no decision.
+    * The Windows box is back in step: `git restore .` then `git pull` fast-forwarded
+      `0ac0d57..54a5372`, bringing the empty ledger and the `0IE` rebuild.
+
 0IF. **[2026-09-18, reviewer: "hold on - we are not recording any decisions for sho. yet - we need
     to keep opts open. separately: reverse hebrew mixed with english leads to confused sentences
     ... record this so it doesn't keep happening"] THE TWO TEST RULINGS REVERTED; A CHECK FOR

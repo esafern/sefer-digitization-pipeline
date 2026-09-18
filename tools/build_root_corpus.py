@@ -734,10 +734,12 @@ def main():
               f" -> {args.regions}")
 
     if args.out and not args.dry_run:
-        with open(args.out, "w", encoding="utf-8") as fh:
-            json.dump(records, fh, ensure_ascii=False, indent=1)
-            fh.flush()
-            os.fsync(fh.fileno())
+        # THROUGH save_part1, the corpus's one serializer (item 0IG). This wrote
+        # its own `indent=1`, so Sefer HaShorashim's part1.json was committed in a
+        # format no other corpus writer produces, and the first apply on it
+        # re-indented every one of its 5,934 lines - an 11,864-line diff for a
+        # one-word ruling (Lesson 13, THE SECOND COPY OF THE TRUTH).
+        cio.save_part1(records, path=args.out)
         print(f"\n  wrote {args.out}")
 
         # KEEP book.json's `parts` IN STEP. The manifest declares the klal range
