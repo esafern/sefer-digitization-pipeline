@@ -42,6 +42,7 @@ import argparse
 import collections
 import json
 import os
+import re
 import sys
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
@@ -96,6 +97,37 @@ def citation_kind(cited, proposed, same_shift):
     return "misprint"
 
 
+def nonexistent_reason(tanakh, book, ch, v, note):
+    """Why a cited verse does not exist, in words a maintainer can act on.
+
+    ADDED 2026-09-18 (item 0IK). These citations were counted and never written
+    anywhere a reader could find them, while the email to the Sefaria editor
+    said they remained open. Each now gets a CSV row carrying this reason."""
+    chapters = tanakh._book(book) or []
+    if not chapters:
+        why = f"{book} is not in the reference text"
+    elif ch > len(chapters):
+        why = f"{book} has {len(chapters)} chapters"
+    else:
+        verses = [x for x in chapters[ch - 1] if isinstance(x, str)] if isinstance(chapters[ch - 1], list) else []
+        why = f"{book} {ch} has {len(verses)} verses"
+    inner = note.strip().lstrip(",. ").strip("()")
+    head, _, rest = inner.partition(",")
+    tokens = [t for t in (head.split()[-1:] if head.split() else []) +
+              [re.split(r"[,:\[]", rest.strip())[0].strip()] if t]
+    fold = str.maketrans("ךםןףץ", "כמנפצ")
+    for tok in tokens:
+        letters = re.sub(r"[^\u05d0-\u05ea]", "", tok)
+        if not letters or letters == "שם":
+            continue
+        val = cio.gematria_to_value(letters)
+        if cio.klal_id_to_gematria(val).translate(fold) != letters.translate(fold):
+            why = f"{letters} is not a Hebrew numeral; " + why
+    if head.strip().startswith("שם"):
+        why += "; the book comes from the note before (שם)"
+    return why
+
+
 def suspects_in_run(flat, start, end, vwords):
     """Words with a MATCHING neighbour on both sides that are absent from the verse.
 
@@ -148,7 +180,7 @@ def main():
     tanakh = Tanakh(args.tanakh)
 
     stat = collections.Counter()
-    rows, misplaced = [], []
+    rows, misplaced, nonexistent = [], [], []
     for root, info in data.items():
         if not info.get("notes"):
             continue
@@ -173,6 +205,14 @@ def main():
             text = tanakh.verse(book, ch, v)
             if not text:
                 stat["verse not in reference corpus"] += 1
+                nonexistent.append({
+                    "root": root, "note": note, "cited": f"{book} {ch}:{v}",
+                    "quotation": " ".join(w for w, _t in flat[max(prev_end, end - 8):end]),
+                    "why": nonexistent_reason(tanakh, book, ch, v, note),
+                    "sefaria": "https://www.sefaria.org/{}{}".format(
+                        book.replace(" ", "_"),
+                        f".{ch}" if ch <= len(tanakh._book(book) or []) else ""),
+                })
                 prev_end = end
                 continue
             # EVERY VERSE THE CITATION NAMES (item 0IE). A range or a list was
@@ -268,7 +308,7 @@ def main():
         print(f"  {iso(r['root']):<8} {iso(r['word'])}")
         print(f"      in: {iso(r['quotation'])}")
         print(f"      {iso(r['note'])}  {r['sefaria']}")
-    if args.csv and misplaced:
+    if args.csv and (misplaced or nonexistent):
         V = [(400,"ת"),(300,"ש"),(200,"ר"),(100,"ק"),(90,"צ"),(80,"פ"),(70,"ע"),
              (60,"ס"),(50,"נ"),(40,"מ"),(30,"ל"),(20,"כ"),(10,"י"),(9,"ט"),(8,"ח"),
              (7,"ז"),(6,"ו"),(5,"ה"),(4,"ד"),(3,"ג"),(2,"ב"),(1,"א")]
@@ -332,6 +372,21 @@ def main():
                             r["matches"], delta,
                             kind, conf, "yes" if v else "no", (v or {}).get("why", ""),
                             r["quotation"], url])
+            # THE CITATIONS TO VERSES THAT DO NOT EXIST (item 0IK), after the
+            # misplaced ones, as their own kind and NOT checked by eye - so a
+            # reader can filter to them, and cannot mistake them for the rows
+            # that were read.
+            for r in nonexistent:
+                v = review.get((r["root"], r["note"], r["cited"], r["quotation"]))
+                if v and v["verdict"] == "not an error":
+                    dropped += 1
+                    continue
+                kind = v["verdict"] if v else "verse does not exist"
+                kinds[kind] += 1
+                w.writerow([cio.root_display(r["root"]), r["note"], r["cited"],
+                            (v or {}).get("proposed_ref", ""), "", "", kind, "",
+                            "yes" if v else "no", (v or {}).get("why", r["why"]),
+                            r["quotation"], r["sefaria"]])
         print(f"  wrote {args.csv}: {sum(kinds.values())} rows {dict(kinds)}; "
               f"{dropped} left out as read by eye to be no error")
 
@@ -339,7 +394,8 @@ def main():
         out = os.path.expanduser(args.out)
         with open(out, "w", encoding="utf-8") as fh:
             json.dump({"counts": dict(stat), "suspects": rows,
-                       "misplaced_citations": misplaced}, fh,
+                       "misplaced_citations": misplaced,
+                       "nonexistent_verses": nonexistent}, fh,
                       ensure_ascii=False, indent=1)
             fh.flush()
             os.fsync(fh.fileno())

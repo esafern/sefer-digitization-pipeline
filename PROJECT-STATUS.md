@@ -224,6 +224,27 @@ applying it to the corpus remain two separate, deliberate steps.
         short). Its precondition was blind once too (Lesson 42): it first
         asked whether the title shrank, which is the thing under test.
 
+0IK. **[2026-09-18, reviewer: "how are these flagged in the attached file so he can jump in? also
+    the 30% not confirmed - don't they also need his eyes? or at least ack."] THE 80 WERE IN NO FILE
+    AT ALL; NOW 80 ROWS, MARKED AND UNCHECKED. THE UNCONFIRMED THIRD IS ACKNOWLEDGED, NOT YET
+    MEASURED.**
+    * The reply said "what remains open is ... the 80 above", and the attachment held none of them:
+      they existed only as a count in `quotation_suspects.json`. `tools/validate_quotations.py` now
+      writes each as a CSV row after the 144 - kind `verse does not exist`, `checked_by_eye = no`,
+      a `why` a maintainer can act on (`nonexistent_reason()`: "Psalms 23 has 6 verses", "Amos has
+      9 chapters", "ככ is not a Hebrew numeral; ...", and "the book comes from the note before
+      (שם)" for an inherited ibid), and a link to the chapter or the book. The JSON gains
+      `nonexistent_verses`. Regenerated: 224 rows; the first 144 byte-identical to before; the 80
+      split 57 / 7 / 6 / 10, matching the `0IE` sort. The 16 were always there, as
+      `off by one, single case`. Test `test_a_citation_to_a_verse_that_does_not_exist_says_why`.
+    * The draft now names both labels he can filter on, says the 80 are unchecked, and moves its
+      ATTACH line to 224 rows. **This file no longer matches the first email's "every row has been
+      checked by eye"** - the `checked_by_eye` column is what says which, and the draft says so.
+    * **The 6,066 not-corroborated citations** are unchecked, not cleared, and the draft now says
+      exactly that. Whether they need a human is unmeasured: a sample of about 40 read against the
+      verse text would give the rate of wrong references hiding among paraphrase, and would say
+      whether the whole group is worth the editor's time. Proposed to the reviewer, not run.
+
 0IJ. **[2026-09-18, reviewer, on the reply draft: "what does this 144 num mean? hold up?? ... you
     need to remind me when i need to attach a file b/c the body says I will"] "HOLD UP" REPLACED BY
     WHAT THE 144 ARE; AN ATTACH LINE AND A CHECK FOR IT.**

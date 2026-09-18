@@ -11351,3 +11351,26 @@ def test_a_draft_that_promises_an_attachment_names_it_at_the_top(tmp_path):
     missing = "ATTACH: gone.csv\n\n" + promised
     assert cd.attachment_problems(missing, str(tmp_path)), "an ATTACH for a missing file passed"
     assert cd.attachment_problems("Subject: x\n\nNo files this time.\n", str(tmp_path)) == []
+
+
+def test_a_citation_to_a_verse_that_does_not_exist_says_why():
+    """Item 0IK. The 80 citations to verses that do not exist were counted and
+    written nowhere a reader could find them, while the email to the Sefaria
+    editor listed them as open. Each is now a CSV row with a reason he can act on."""
+    sys.path.insert(0, os.path.join(REPO, "tools"))
+    import validate_quotations as vq
+
+    class FakeTanakh:
+        books = {"Judges": [["v"] * 25] * 7, "Psalms": [["v"] * 6] * 30, "Amos": [["v"] * 10] * 9}
+        def _book(self, b):
+            return self.books.get(b)
+    t = FakeTanakh()
+    assert vq.nonexistent_reason(t, "Psalms", 23, 8, "(תהלים כג, ח)") == "Psalms 23 has 6 verses"
+    assert vq.nonexistent_reason(t, "Amos", 10, 10, "(עמוס י, י)") == "Amos has 9 chapters"
+    # a numeral that is not one - `ככ` for `כב` - is named first
+    why = vq.nonexistent_reason(t, "Judges", 7, 40, "(שופטים ז, ככ)")
+    assert why.startswith("ככ is not a Hebrew numeral") and "Judges 7 has 25 verses" in why
+    # ibid is said to be inherited, since the book may be the thing that is wrong
+    assert vq.nonexistent_reason(t, "Psalms", 23, 30, "(שם כג, ל)").endswith("the book comes from the note before (שם)")
+    # a well-formed numeral is not called malformed
+    assert "not a Hebrew numeral" not in vq.nonexistent_reason(t, "Psalms", 23, 8, "(תהלים כג, ח)")
