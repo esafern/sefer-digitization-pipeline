@@ -227,6 +227,23 @@ applying it to the corpus remain two separate, deliberate steps.
         short). Its precondition was blind once too (Lesson 42): it first
         asked whether the title shrank, which is the thing under test.
 
+0IM. **[2026-09-18, reviewer: "for the 80 - say clearly where they are in the attached file. also
+    16. exactly what *it* is for - be clear"] THE CITATION CSV IS NOW IN BLOCKS BY KIND, SO THE REPLY
+    GIVES ROW RANGES; ITS CLOSING SAYS WHAT THE PIPELINE IS FOR.**
+    * `validate_quotations.py` writes one block per kind (`KIND_ORDER`), strongest evidence first
+      within each - it had sorted by evidence alone, which scattered the 16 through the file. Same
+      224 rows, only reordered (checked). Spreadsheet rows, header = row 1, kind = column G: 2-91
+      misprint (90), 92-127 edition numbering (36), 128 wrong proposal, 129 placed by Sefaria
+      (`צפת`), 130-145 off by one (16), 146-225 verse does not exist (80, `checked_by_eye` no).
+      **The ranges in the draft are tied to this ordering: any regeneration that changes a count
+      moves them, and the draft must be re-read against the file.**
+    * The draft's closing now says the two uses outright - a verification step before any text
+      goes live, and a pass over every text already on the site - with the reviewer's own
+      background in content management systems as its first-person basis. Two overstatements
+      caught before handover: the pipeline's output is a list OR the dashboard, not always a file
+      like the CSV; and the citation check needs no scan but does need a reader for each
+      reference style, as Bacher's footnotes and Sefaria's inline citations each did.
+
 0IL. **[2026-09-18, reviewer: "add the 40 sample to start here, i will make a new session with
     fable. also instruct it to do a full code review, give it guidance what to look for."] BRIEF
     FOR THE NEXT SESSION - TWO TASKS, IN THIS ORDER.** Written for a different model on purpose:

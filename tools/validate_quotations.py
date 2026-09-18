@@ -97,6 +97,12 @@ def citation_kind(cited, proposed, same_shift):
     return "misprint"
 
 
+# The order the CSV's blocks come in (item 0IM): the confirmed errors first, the
+# rows that need a judgement next, and the unchecked rows last.
+KIND_ORDER = ["misprint", "edition numbering", "wrong proposal", "placed by Sefaria",
+              "off by one, single case", "unclear", "verse does not exist"]
+
+
 def nonexistent_reason(tanakh, book, ch, v, note):
     """Why a cited verse does not exist, in words a maintainer can act on.
 
@@ -353,6 +359,11 @@ def main():
             w.writerow(["headword", "note_as_printed", "cited_ref", "proposed_ref",
                         "matching_words", "verse_delta", "kind", "single_letter_confusion",
                         "checked_by_eye", "why", "quotation", "sefaria_url"])
+            # ONE BLOCK PER KIND (item 0IM). Sorted by evidence alone, the 16
+            # "off by one" rows were scattered through the file, and an email could
+            # only say "filter the kind column". Grouped, it can say "rows X to Y".
+            # Within a block the strongest evidence still comes first.
+            out_rows = []
             for r in sorted(misplaced, key=lambda x: -x["matches"]):
                 (cb, c1, v1), (ab, c2, v2) = ref3(r["cited"]), ref3(r["actually"])
                 delta = (v2 - v1) if c1 == c2 else ""
@@ -378,10 +389,14 @@ def main():
                 # maintainer has no dashboard - so write it as their own data
                 # writes it, with the final letter finalized. The lookup key
                 # above stays folded; only what is shown changes.
-                w.writerow([cio.root_display(r["root"]), r["note"], r["cited"], proposed,
-                            r["matches"], delta,
-                            kind, conf, "yes" if v else "no", (v or {}).get("why", ""),
-                            r["quotation"], url])
+                out_rows.append([cio.root_display(r["root"]), r["note"], r["cited"], proposed,
+                                 r["matches"], delta,
+                                 kind, conf, "yes" if v else "no", (v or {}).get("why", ""),
+                                 r["quotation"], url])
+            order = {k: i for i, k in enumerate(KIND_ORDER)}
+            out_rows.sort(key=lambda row: order.get(row[6], len(order)))   # stable: evidence order kept
+            for row in out_rows:
+                w.writerow(row)
             # THE CITATIONS TO VERSES THAT DO NOT EXIST (item 0IK), after the
             # misplaced ones, as their own kind and NOT checked by eye - so a
             # reader can filter to them, and cannot mistake them for the rows
