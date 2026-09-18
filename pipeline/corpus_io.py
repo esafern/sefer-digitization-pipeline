@@ -162,6 +162,17 @@ def corpus_root():
     return os.environ.get(CORPUS_ROOT_ENV) or _DEFAULT_ROOT
 
 
+def corpus_root_is_this_repo():
+    """True when the corpus being worked on is this repo's own (Yad Malachi).
+
+    ADDED 2026-09-18 (item 0IC): the step that follows an apply differs per book -
+    `rebuild_all.sh` is this repo's chain, and on another corpus root it is the
+    one command that must not be run (items 0GQ, 0GW). Callers that print advice
+    have to know which they are on, and nothing said so.
+    """
+    return os.path.abspath(corpus_root()) == os.path.abspath(_DEFAULT_ROOT)
+
+
 def set_corpus_root(root):
     """Point every path in this module at `root` (None restores the default).
 

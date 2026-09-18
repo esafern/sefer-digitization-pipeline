@@ -206,6 +206,31 @@ applying it to the corpus remain two separate, deliberate steps.
         short). Its precondition was blind once too (Lesson 42): it first
         asked whether the title shrank, which is the thing under test.
 
+0IC. **[2026-09-18, reviewer, on the Windows box: "why are these wit. choices?" and, of the
+    applier's closing advice, "do that"] THE APPLIER TOLD EVERY BOOK TO RUN YAD MALACHI'S REBUILD -
+    THE ONE COMMAND SEFER HASHORASHIM MUST NOT RUN.**
+    * `apply_reviewer_decisions.py:1619` ended every successful run with
+      `2. Run ./rebuild_all.sh to regenerate derived files and fresh word indices.`, with no idea
+      which corpus root it had just written to. On the Sefer HaShorashim root that chain re-derives
+      the rows this book's rulings are drawn against (`0GQ`, `0GW`) - the advice pointed straight
+      at the documented mistake. It now asks `cio.corpus_root_is_this_repo()` (new, public: the
+      private `_DEFAULT_ROOT` comparison had no name) and prints
+      `build_klalim_demo_dataset.py` plus the corpus root and an explicit "do NOT run
+      rebuild_all.sh here" for any other book. Test
+      `test_the_applier_names_the_rebuild_that_belongs_to_the_book` reads both branches; its first
+      version asserted the other branch never mentions `rebuild_all.sh` at all and failed on the
+      warning line, which is the half worth keeping.
+    * **Why every HaShorashim ruling is a `witness_choice`, and it is structural:** that corpus has
+      **0** rows in `review_queue_part1.json` and **2,057** in `reconstruction_witness_queue.json`.
+      It has no machine-candidate queue at all - its disputes are our reading against Sefaria's, so
+      the dashboard records `/api/decisions/witness`. Consequence for the reviewer: a plain apply
+      reports "witness rulings recorded and NOT applied" and changes nothing;
+      `--apply-witness-choices` is required for this book, every time.
+    * **The Windows round trip, verified here after the rulings were pushed:** 2 rows, LF line
+      endings (`0HX`'s fix, written on Windows), no Hebrew geresh/gershayim in `chosen_text`
+      (`0HR`), and both recorded under actor `eric` - so `0HZ`'s per-tab reviewer name works on
+      Windows. Dry run with the flag: klal 1 word 37 witness-replace, word 74 witness-confirmed.
+
 0IB. **[2026-09-17, reviewer: "push everything ... server loads with yad malachi in two panes but
     the scan page is empty. what is a clean way to push that over? what's the cleanest way to get
     hashorashim on the win box? does the private repo have everything? if rebuild is required, is

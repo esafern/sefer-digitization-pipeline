@@ -1616,7 +1616,17 @@ def main():
     if n_replace or n_insert_delete or n_manual or n_witness:
         print("\nNEXT STEPS:")
         print("  1. Review the diff: git diff part1.json")
-        print("  2. Run ./rebuild_all.sh to regenerate derived files and fresh word indices.")
+        # WHICH REBUILD DEPENDS ON THE BOOK (item 0IC). `rebuild_all.sh` is Yad
+        # Malachi's chain, and on another corpus root it is the one command that
+        # must NOT be run: it re-derives the candidate rows the dashboard's
+        # rulings are drawn against (items 0GQ, 0GW). The step every book needs
+        # after an apply is the dataset the text pane is served from.
+        if cio.corpus_root_is_this_repo():
+            print("  2. Run ./rebuild_all.sh to regenerate derived files and fresh word indices.")
+        else:
+            print("  2. Run: python3 pipeline/build_klalim_demo_dataset.py")
+            print(f"     (corpus root {cio.corpus_root()} - do NOT run rebuild_all.sh here:")
+            print(f"      it re-derives the rows this book's rulings are drawn against.)")
         print("  3. Log applied changes to PROJECT-STATUS.md.")
         if n_insert_delete:
             print("  4. Any remaining insert/delete decisions in an already-touched klal need "

@@ -11195,3 +11195,32 @@ def test_changes_reports_every_row_appended_since_a_tabs_cursor(tmp_path, monkey
     monkeypatch.setattr(rs, "CHANGES_MAX_ROWS", 1)
     capped = rs.api_changes(since=0)
     assert capped["truncated"] is True and [r["id"] for r in capped["records"]] == [b["id"]]
+
+
+def test_the_applier_names_the_rebuild_that_belongs_to_the_book(use_fixture_corpus, capsys):
+    """Item 0IC. The applier ended by telling every reader to run
+    `./rebuild_all.sh`. That is THIS repo's chain; on another corpus root it is
+    the one command that must not be run, because it re-derives the rows that
+    book's rulings are drawn against (0GQ, 0GW) - and Sefer HaShorashim, whose
+    every dispute is a witness row, is exactly such a root."""
+    assert not cio.corpus_root_is_this_repo(), "the fixture root is not this repo"
+    saved = cio.set_corpus_root(None)
+    try:
+        assert cio.corpus_root_is_this_repo()
+    finally:
+        cio.set_corpus_root(saved)
+
+    import ast
+    src = open(os.path.join(REPO, "pipeline", "apply_reviewer_decisions.py"), encoding="utf-8").read()
+    tree = ast.parse(src)
+    branch = [n for n in ast.walk(tree)
+              if isinstance(n, ast.If) and isinstance(n.test, ast.Call)
+              and getattr(n.test.func, "attr", "") == "corpus_root_is_this_repo"]
+    assert branch, "the NEXT STEPS advice no longer asks which book this is"
+    on_this_repo = ast.dump(ast.Module(body=branch[0].body, type_ignores=[]))
+    on_another = ast.dump(ast.Module(body=branch[0].orelse, type_ignores=[]))
+    assert "rebuild_all.sh" in on_this_repo and "build_klalim_demo_dataset" not in on_this_repo
+    # The other book's branch DOES name rebuild_all.sh - in the line that says not
+    # to run it. That warning is the point, so the test asks for both halves.
+    assert "build_klalim_demo_dataset" in on_another
+    assert "do NOT run rebuild_all.sh" in on_another
