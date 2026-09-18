@@ -5,6 +5,9 @@
 _Current state only. Every claim here is measured, not remembered; the dated
 evidence for each is in `PROJECT-STATUS-HISTORY.md`._
 
+> **NEXT SESSION: read item `0IL` first - a brief with two tasks, the 40-citation sample
+> and a full code review.**
+>
 > **Picking up after 2026-09-18? Start here, then `0GQ`.** The Sefaria call
 > happened 2026-09-17 and went well; the citation email was sent. Items `0HW`-`0IJ`
 > are the two days since, newest at the top of the open items.
@@ -223,6 +226,90 @@ applying it to the corpus remain two separate, deliberate steps.
         the old rule it fails its real assertion (the reference 0.05px
         short). Its precondition was blind once too (Lesson 42): it first
         asked whether the title shrank, which is the thing under test.
+
+0IL. **[2026-09-18, reviewer: "add the 40 sample to start here, i will make a new session with
+    fable. also instruct it to do a full code review, give it guidance what to look for."] BRIEF
+    FOR THE NEXT SESSION - TWO TASKS, IN THIS ORDER.** Written for a different model on purpose:
+    its value is that it fails differently (Lessons 9, 23, 24), so it should form its own view
+    before reading this session's.
+
+    **TASK A - SIZE THE UNCONFIRMED THIRD OF THE CITATIONS ON A SAMPLE OF 40.**
+    * **Why.** 6,066 of Sefer HaShorashim's 20,450 citations (29.7%) are "quotation did not
+      corroborate": the words before the note do not match the cited verse well enough to confirm
+      it. The check is silent on them - unchecked, not cleared. The draft reply to the Sefaria
+      editor (`draft_email_citation_numbers.txt`) says whether they need a human is an open
+      question. A sample answers it with a rate instead of a guess (`0IK`).
+    * **The data.** `~/work/hashorashim/quotation_suspects.json`, key `uncorroborated` - 6,066
+      rows `{root, note, cited, quotation, matched}`, written by `tools/validate_quotations.py`
+      since this item. `matched` is how many words of the run appear in the cited verse(s); the
+      threshold is 3. Distribution: 0 matched 416, 1 matched 454, **2 matched 5,196**.
+    * **The sample.** Seeded (`random.Random(20260918)`), STRATIFIED: 10 from matched=0, 10 from
+      matched=1, 20 from matched=2, then weight each stratum back to its population size when
+      stating a rate. Record the seed and the 40 rows chosen in the entry.
+    * **Read each one blind.** Before looking at anything this session concluded about citations
+      - `citation_review.json`, `citation_corrections.csv`, items `0FM`/`0ID`/`0IE`/`0IK` - read
+      the quotation against the cited verse text (`sefaria_reference_corpus/raw/<Book>.json`, and
+      the verse on Sefaria) and against Ibn Janah's words around it
+      (`~/work/hashorashim/witness_footnotes.json`, the entry's `tokens`). Classify:
+      - **reference right, paraphrase or meaning-citation** (no quotation to match);
+      - **reference right, quotation too short or split** (the check's window, not the text);
+      - **wrong reference** - the quotation is from another verse (name it);
+      - **OCR error in the quoted words** (name the word and the verse's reading);
+      - **the note belongs to a different phrase** than the words before it;
+      - **cannot tell**, with why.
+      Only after all 40 are classified, compare with the existing files and say where you differ.
+    * **Report:** the rate of each class with its stratum weighting and an honest interval (40 is
+      small - say so), the implied number of wrong references among the 6,066, and a
+      recommendation: does this group warrant the editor's time, a full read, or a narrower rule
+      (e.g. only matched=2)? Log it here as a new item. Every biblical reference as a Sefaria link.
+      No paid model calls - this is reading, not an API run.
+    * **Optional, only if the reviewer asks:** the 80 rows of kind `verse does not exist` in
+      `citation_corrections.csv`, unread, the same way.
+
+    **TASK B - A FULL CODE REVIEW OF THIS BRANCH.**
+    * **Scope.** `hashorashim-nli-rebuild-and-review` against `master`, with the most weight on
+      everything since `8383418` (2026-09-16), which this session wrote in two days. Run the gate
+      (`python3 -m pytest tests/test_pipeline_logic.py tests/test_corpus_invariants.py -q`) first
+      and last; the browser suite (`tests/test_review_server.py`) once.
+    * **Highest risk, read first:**
+      - citation parsing - `tools/adjudicate_against_verse.py` (`parse_citation`, `entry_refs`,
+        `cited_verses`, the VERSE_SPAN / VERSE_LIST module-level dicts that persist across calls)
+        and `tools/validate_quotations.py` (`nonexistent_reason`, the new row writers, which
+        index `flat` with `prev_end` or `floor` - one of them was wrong once today);
+      - `pipeline/corpus_io.py` `atomic_write` and `save_part1` (the Windows `os.replace` retry,
+        exceptions inside the block, the `.tmp` name colliding between two writers);
+      - `pipeline/review_server.py` per-request reviewer identity (`_REQUEST` thread-local, set in
+        `do_POST`, cleared in `finally`; `_reviewer_from_header`), `api_changes`, `api_reviewer`;
+      - `review_frontend/app.js` `postDecision`, `pollChanges` (the `postsInFlight` guard has NO
+        test), `markEntryStale` / `clearStaleIfUnchanged` / `fetchKlal` generations;
+      - `pipeline/identity.py` `normalize_reviewer_id`; `pipeline/apply_reviewer_decisions.py`'s
+        book-aware NEXT STEPS; `tools/build_root_corpus.py` now through `save_part1`;
+        `tools/check_draft.py` / `check_mixed_direction.py`; `rebuild_all.sh`'s `$PY`.
+    * **What to look for - this repo's own failure classes, by lesson:**
+      - a second copy of a truth that should have one (13) - another serializer, another loader,
+        another list of routes or writers;
+      - a fix applied to one branch or one caller and not its siblings (34, 53);
+      - a filter or a default that hides rather than fails (26, 20, 21) - especially `None`
+        returns and empty lists treated as "nothing wrong";
+      - a check or test that cannot fail (25, 42): for every test added since `8383418`, would it
+        fail on the code before its fix? Several were checked by mutation; say which were not;
+      - values cached at load behind a live view (39), cache keys missing a component (12);
+      - a field computed and never shown (29);
+      - platform assumptions (54): text `open()` without `encoding`, tracked writes without
+        `newline="\n"`, POSIX-only paths or tools, `mtime_ns` as a cache key;
+      - security of a server with no authentication: path traversal in `_serve_static` (the
+        frontend and `/images/pdf_pages/`), HTML injection through reviewer names, notes and
+        witness text in `app.js` (is every interpolation escaped?), header parsing;
+      - concurrency: the ledger lock is per process; the thread-local's reset; two tabs saving
+        one word.
+    * **How to report** (START_HERE, "How to surface a finding"): each code finding with
+      `file.py:line` and the lines quoted, severity, and the failure it causes; each data finding
+      with its dashboard URL. Sweep every class you find (Part 2, "Never fix one instance").
+      Log findings here as they are found. **Do not fix without the reviewer's go**; when fixing,
+      write the test first and see it fail.
+    * **Standing constraints:** the public-repo rule (correspondents by role; never annotate an
+      example value with whose it is); no Sefer HaShorashim rulings; no paid model runs without a
+      sample and a go; pushing is the reviewer's decision, never `git push --all`.
 
 0IK. **[2026-09-18, reviewer: "how are these flagged in the attached file so he can jump in? also
     the 30% not confirmed - don't they also need his eyes? or at least ack."] THE 80 WERE IN NO FILE

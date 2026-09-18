@@ -180,7 +180,7 @@ def main():
     tanakh = Tanakh(args.tanakh)
 
     stat = collections.Counter()
-    rows, misplaced, nonexistent = [], [], []
+    rows, misplaced, nonexistent, uncorroborated = [], [], [], []
     for root, info in data.items():
         if not info.get("notes"):
             continue
@@ -239,6 +239,16 @@ def main():
             prev_end = end
             if matched < args.min_anchor:
                 stat["quotation did not corroborate"] += 1
+                # WRITTEN OUT, not only counted (item 0IL): a third of all
+                # citations sat here as a number, so nobody could sample them to
+                # learn whether they deserve a human reader.
+                uncorroborated.append({
+                    "root": root, "note": note, "cited": f"{book} {ch}:{v}",
+                    # `floor`, not `prev_end`: by here prev_end has already
+                    # moved to this marker, and the slice would be empty.
+                    "quotation": " ".join(w for w, _t in flat[max(floor, end - 8):end]),
+                    "matched": matched,
+                })
                 if args.find_better:
                     # WHERE ELSE COULD THIS QUOTATION BE? A citation that does not
                     # corroborate is either a note on prose (no quotation to
@@ -395,7 +405,8 @@ def main():
         with open(out, "w", encoding="utf-8") as fh:
             json.dump({"counts": dict(stat), "suspects": rows,
                        "misplaced_citations": misplaced,
-                       "nonexistent_verses": nonexistent}, fh,
+                       "nonexistent_verses": nonexistent,
+                       "uncorroborated": uncorroborated}, fh,
                       ensure_ascii=False, indent=1)
             fh.flush()
             os.fsync(fh.fileno())
