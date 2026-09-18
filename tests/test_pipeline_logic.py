@@ -11335,3 +11335,19 @@ def test_every_tool_that_writes_a_corpus_file_uses_its_one_serializer():
     dumped = [ast.unparse(c.args[0]) for c in ast.walk(tree) if isinstance(c, ast.Call)
               and getattr(c.func, "attr", "") == "dump" and c.args]
     assert "records" not in dumped, "build_root_corpus dumps the corpus records itself again"
+
+
+def test_a_draft_that_promises_an_attachment_names_it_at_the_top(tmp_path):
+    """Item 0IJ, reviewer 2026-09-18: "you need to remind me when i need to
+    attach a file b/c the body says I will". The reminder travels with the
+    draft as an ATTACH line, and the file it names must exist."""
+    sys.path.insert(0, os.path.join(REPO, "tools"))
+    import check_draft as cd
+    (tmp_path / "rows.csv").write_text("a,b\n", encoding="utf-8")
+    promised = "Subject: x\n\nThe attached file has one row for each of the 144.\n"
+    assert cd.attachment_problems(promised, str(tmp_path)), "a promise with no ATTACH line passed"
+    declared = "ATTACH: rows.csv\n\n" + promised
+    assert cd.attachment_problems(declared, str(tmp_path)) == []
+    missing = "ATTACH: gone.csv\n\n" + promised
+    assert cd.attachment_problems(missing, str(tmp_path)), "an ATTACH for a missing file passed"
+    assert cd.attachment_problems("Subject: x\n\nNo files this time.\n", str(tmp_path)) == []

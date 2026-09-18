@@ -206,6 +206,24 @@ applying it to the corpus remain two separate, deliberate steps.
         short). Its precondition was blind once too (Lesson 42): it first
         asked whether the title shrank, which is the thing under test.
 
+0IJ. **[2026-09-18, reviewer, on the reply draft: "what does this 144 num mean? hold up?? ... you
+    need to remind me when i need to attach a file b/c the body says I will"] "HOLD UP" REPLACED BY
+    WHAT THE 144 ARE; AN ATTACH LINE AND A CHECK FOR IT.**
+    * "144 of the flags hold up" hid four different things. Now spelled out in the draft: of 158
+      flagged references, 14 were false alarms (9 windows reaching the previous quotation, 3 notes
+      on another phrase, 2 parser artefacts - `0IE`) and 144 are real: 90 misprinted numerals, 36
+      edition numbering (the note is right by its own count; a Sefaria link needs the other verse),
+      16 off by one in a single place, 1 proposal corrected on review, 1 placed by the Sefaria
+      editor (`צפת`). 90 + 36 + 16 + 1 + 1 = 144.
+    * **`tools/check_draft.py`**: one command per draft, running the backwards-Hebrew check
+      (`0IF`) and a new attachment check - a body that mentions an attachment must carry an
+      `ATTACH:` line at the top, and the file it names must exist; it prints REMEMBER TO ATTACH per
+      file. Test `test_a_draft_that_promises_an_attachment_names_it_at_the_top` (a promise without
+      the line, a missing file, and both clean cases). The live citation reply carries
+      `ATTACH: citation_corrections.csv`; the already-sent citation email, run through it, is
+      flagged for the attachment it promised with no such line - which is the case the reviewer
+      caught by hand. START_HERE's drafting rules now name `check_draft.py`.
+
 0II. **[2026-09-18, reviewer: "add 4 lessons ... windows vs. mac and even linux - are new changes
     likely to bring diff results on other platforms? if so, record a need to test there"] LESSONS
     51-54 ADDED; THE STANDING LIST OF WHAT IS UNTESTED OFF macOS.** Lesson 54 points here: every

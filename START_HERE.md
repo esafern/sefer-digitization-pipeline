@@ -755,9 +755,16 @@ first two bind everything written here.
   Right:
   `Under shoresh אבל the note reads (שופטים ז, ככ), and the verse number ככ is ...`
   A citation's inner comma, and a Hebrew phrase with spaces only,
-  are one piece and fine. **Run `python3 tools/check_mixed_direction.py <draft>`
-  on every draft containing Hebrew**; it exits 1 and names each place (item
-  `0IF`).
+  are one piece and fine (item `0IF`).
+* **A draft that says a file is attached names it on an `ATTACH:` line at the
+  top** - `ATTACH: citation_corrections.csv  (~/work/hashorashim/...)` - so the
+  reminder travels with the draft, not with a chat reply that is gone by the
+  time the email is sent (reviewer, 2026-09-18: "you need to remind me when i
+  need to attach a file b/c the body says I will"; item `0IJ`).
+* **Run `python3 tools/check_draft.py <draft>` on every draft before handing it
+  over.** It checks both of the above - Hebrew that renders backwards, and an
+  attachment promised without an `ATTACH:` line or naming a file that does not
+  exist - exits 1 on either, and prints REMEMBER TO ATTACH for each file.
 * **"I" is the reviewer's own work only.** They decide what to pursue,
   commission scans, rule on words and score ink sheets. They do not measure,
   OCR, adjudicate, read verse texts or build checks - and a letter in their
